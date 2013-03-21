@@ -1,0 +1,65 @@
+diff -uN ./runEvalLoopJE.m /home/mkron/workspace/JE2Base/resources/MatlabInterface/@JEInterface/runEvalLoopJE.m
+--- ./runEvalLoopJE.m	2009-03-10 10:11:34.000000000 +0100
++++ /home/mkron/workspace/JE2Base/resources/MatlabInterface/@JEInterface/runEvalLoopJE.m	2009-03-10 09:52:22.000000000 +0100
+@@ -98,9 +98,9 @@
+                 end
+ % 		disp(sprintf('res is %d',res));
+                 %res
+-            catch
++            catch ME
+                 disp('function evaluation failed:');
+-                disp(lasterror);
++                disp(ME.message);
+                 stopOptimization=1;
+             end
+             int.mediator.setAnswer(res);
+@@ -114,9 +114,9 @@
+         end
+     end
+     clear global JEMediator;
+-catch
++catch ME
+     disp('Error in evaluate!');
+-    disp(lasterror);
++    disp(ME.message);
+     %int.mediator.quit; % just in case
+     %int.mediator='';
+     
+diff -uN ./setOptions.m /home/mkron/workspace/JE2Base/resources/MatlabInterface/@JEInterface/setOptions.m
+--- ./setOptions.m	2009-03-10 10:11:54.000000000 +0100
++++ /home/mkron/workspace/JE2Base/resources/MatlabInterface/@JEInterface/setOptions.m	2009-03-10 09:52:22.000000000 +0100
+@@ -17,9 +17,9 @@
+         makeOptions(int, char(fn(i)), usrOpts.(char(fn(i))));
+         options.(char(fn(i))) = usrOpts.(char(fn(i)));
+     end
+-catch
++catch ME
+     error('invalid option "%s"... check makeOptions to learn about available options', char(fn(i)));
+ 
+ end
+ 
+-int.opts = options;
++int.opts = options;
+\ No newline at end of file
+diff -uN ./testEvalFunc.m /home/mkron/workspace/JE2Base/resources/MatlabInterface/@JEInterface/testEvalFunc.m
+--- ./testEvalFunc.m	2009-03-10 10:12:16.000000000 +0100
++++ /home/mkron/workspace/JE2Base/resources/MatlabInterface/@JEInterface/testEvalFunc.m	2009-03-10 09:52:22.000000000 +0100
+@@ -30,9 +30,9 @@
+     else
+         res = feval(int.f, x, int.args);
+     end
+-catch
++catch ME
+     disp('Function evaluation failed:');
+-    disp(lasterror);
++    disp(ME.message);
+     error('Test failed!');
+ end
+             
+@@ -53,4 +53,4 @@
+     end;
+ end
+ 
+-    
++    
+\ No newline at end of file

@@ -1,0 +1,100 @@
+% Save Data sets
+%
+% arSaveModel(m, d)
+%
+% m         position of model			
+% jplot     position of plot
+
+function arSaveData(m, jplot)
+
+global ar
+
+if(isempty(ar))
+	error('please initialize by arInit')
+end
+
+if(~exist('Data', 'dir'))
+	mkdir('Data')
+end
+
+if(~exist('m','var'))
+    for jm=1:length(ar.model)
+        for jplot=1:length(ar.model(jm).plot)
+            arSaveData(jm, jplot)
+        end
+    end
+    return
+end
+if(~exist('jplot','var'))
+    for jplot = 1:length(ar.model(m).plot)
+        arSaveData(m, jplot)
+    end
+    return
+end
+
+fname = ['./Data/' ar.model(m).plot(jplot).name '.csv'];
+fprintf('saving data from model #%i, plot #%i, %s...', m, jplot, fname);
+
+fid = fopen(fname, 'w');
+
+jd = ar.model(m).plot(jplot).dLink(1);
+
+% save to file
+fprintf(fid, '"%s",', ar.model(m).data(jd).tUnits{3});
+
+% conditions
+if(~isempty(ar.model(m).data(jd).condition))
+    for jp = 1:length(ar.model(m).data(jd).condition)
+        fprintf(fid, '"%s",', ar.model(m).data(jd).condition(jp).parameter);
+    end
+end
+
+% y headers
+fprintf(fid, '"%s",', ar.model(m).data(jd).y{:});
+
+% ystd headers
+if(ar.config.fiterrors == -1)
+	fprintf(fid, '"%s_std",', ar.model(m).data(jd).y);
+end
+fprintf(fid, '\n');
+
+for jd = ar.model(m).plot(jplot).dLink
+    fprintf('%i ', jd);
+    for j=1:length(ar.model(m).data(jd).tExp)
+        fprintnumtab(fid, ar.model(m).data(jd).tExp(j));
+        
+        % conditions
+        if(~isempty(ar.model(m).data(jd).condition))
+            for jp = 1:length(ar.model(m).data(jd).condition)
+                fprintf(fid, '"%s",', ar.model(m).data(jd).condition(jp).value);
+            end
+        end
+        
+        % y data
+        for jj=1:size(ar.model(m).data(jd).yExp,2)
+            if(ar.model(m).data(jd).logfitting(jj))
+                fprintnumtab(fid, 10^ar.model(m).data(jd).yExp(j,jj));
+            else
+                fprintnumtab(fid, ar.model(m).data(jd).yExp(j,jj));
+            end
+        end
+        
+        % ystd data
+        if(ar.config.fiterrors == -1)
+            for jj=1:size(ar.model(m).data(jd).yExp,2)
+                fprintnumtab(fid, ar.model(m).data(jd).yExpStd(j,jj));
+            end
+        end
+        fprintf(fid, '\n');
+    end
+end
+
+fclose(fid);
+fprintf('done\n');
+
+function fprintnumtab(fid, num)
+strtmp = sprintf('%f', num);
+strtmp = strrep(strtmp, '.', ',');
+fprintf(fid, '"%s",', strtrim(strtmp));
+
+

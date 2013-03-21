@@ -1,0 +1,340 @@
+% Link models, inputs and data sets
+%
+% arLink(silent, tExpAdd)
+
+
+function arLink(silent, tExpAdd)
+
+global ar
+
+if(isempty(ar))
+    error('please initialize by arInit')
+end
+
+if(nargin==0)
+    silent = false;
+end
+
+if(~silent)
+    fprintf('linking time points... ');
+end
+
+for m=1:length(ar.model)
+    if(isfield(ar.model(m), 'data'))
+        % clear condition time points
+        for c=1:length(ar.model(m).condition)
+            if(exist('tExpAdd','var'))
+                ar.model(m).condition(c).tExp = tExpAdd;
+            else
+                ar.model(m).condition(c).tExp = [];
+            end
+            ar.model(m).condition(c).tFine = linspace(ar.model(m).tLim(1), ar.model(m).tLim(2), ar.config.nFinePoints)';
+        end
+        
+        % collect time points
+        for d=1:length(ar.model(m).data)
+            if(isfield(ar.model(m).data(d), 'tExp'))
+                ar.model(m).condition(ar.model(m).data(d).cLink).tExp = union( ...
+                    ar.model(m).condition(ar.model(m).data(d).cLink).tExp, ...
+                    ar.model(m).data(d).tExp);
+            end
+            
+            ar.model(m).data(d).tFine = linspace(ar.model(m).data(d).tLim(1), ar.model(m).data(d).tLim(2), ar.config.nFinePoints)';
+            
+            ar.model(m).condition(ar.model(m).data(d).cLink).tFine = union( ...
+                ar.model(m).condition(ar.model(m).data(d).cLink).tFine, ...
+                ar.model(m).data(d).tFine);
+            ar.model(m).condition(ar.model(m).data(d).cLink).tstart = ...
+                min(ar.model(m).condition(ar.model(m).data(d).cLink).tFine);
+        end
+        
+        % collect time points for multiple shooting
+        if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
+            fprintf('\n');
+            for jms=1:ar.model(m).ms_count
+                for c=1:length(ar.model(m).condition)
+                    for c2=1:length(ar.model(m).condition)
+                        if(~isempty(ar.model(m).condition(c).ms_index) && ~isempty(ar.model(m).condition(c2).ms_index))
+                            qc = ar.model(m).condition(c).ms_index == jms;
+                            qc2 = ar.model(m).condition(c2).ms_index == jms;
+                            
+                            if(sum(qc)>1 || sum(qc2)>1)
+                                error('wrong multiple shooting indexing');
+                            end
+                            if(sum(qc)==1 && sum(qc2)==1 && ar.model(m).condition(c).ms_snip_index(qc)+1 == ar.model(m).condition(c2).ms_snip_index(qc2))
+                                
+                                tlink = ar.model(m).condition(c2).ms_snip_start;
+                                fprintf('linking condition %i and %i for multiple shooting at t = %f\n', c, c2, tlink);
+                                
+                                ar.model(m).condition(c).tExp = union(ar.model(m).condition(c).tExp, tlink);
+                                ar.model(m).condition(c2).tExp = union(ar.model(m).condition(c2).tExp, tlink);
+                                
+                                if(~isfield(ar.model(m), 'ms_link'))
+                                    ar.model(m).ms_link = [c c2 tlink];
+                                else
+                                    ar.model(m).ms_link(end+1,1) = c;
+                                    ar.model(m).ms_link(end,2) = c2;
+                                    ar.model(m).ms_link(end,3) = tlink;
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        
+        % link back time points
+        for d=1:length(ar.model(m).data)
+            if(isfield(ar.model(m).data(d), 'tExp'))
+                [qtime, itime] = ismember(ar.model(m).data(d).tExp, ...
+                    ar.model(m).condition(ar.model(m).data(d).cLink).tExp); %#ok<ASGLU>
+                ar.model(m).data(d).tLinkExp = itime;
+            end
+            [qtime, itime] = ismember(ar.model(m).data(d).tFine, ...
+                ar.model(m).condition(ar.model(m).data(d).cLink).tFine); %#ok<ASGLU>
+            ar.model(m).data(d).tLinkFine = itime;
+        end
+        
+        % link back for multiple shooting
+        if(isfield(ar.model(m), 'ms_link') && ~isempty(ar.model(m).ms_link))
+            for jms = 1:size(ar.model(m).ms_link, 1)
+                ar.model(m).ms_link(jms,4) = find(ar.model(m).condition(ar.model(m).ms_link(jms,1)).tExp == ar.model(m).ms_link(jms,3));
+                ar.model(m).ms_link(jms,5) = find(ar.model(m).condition(ar.model(m).ms_link(jms,2)).tExp == ar.model(m).ms_link(jms,3));
+            end
+        end
+        
+        % statistics
+        for d=1:length(ar.model(m).data)
+            ar.model(m).data(d).qFit = true(size(ar.model(m).data(d).y));
+            if(isfield(ar.model(m).data(d), 'tExp') && isfield(ar.model(m).data(d), 'yExp'))
+                ar.model(m).data(d).ndata = sum(~isnan(ar.model(m).data(d).yExp),1);
+            else
+                ar.model(m).data(d).ndata = zeros(size(ar.model(m).data(d).y));
+            end
+            ar.model(m).data(d).chi2 = zeros(size(ar.model(m).data(d).ndata));
+            ar.model(m).data(d).chi2err = zeros(size(ar.model(m).data(d).ndata));
+        end
+    else
+        for c = 1:length(ar.model(m).condition)
+            ar.model(m).condition(c).tFine = linspace(ar.model(m).tLim(1), ar.model(m).tLim(2), ar.config.nFinePoints);
+            ar.model(m).condition(c).tstart = min(ar.model(m).condition(c).tFine);
+        end
+    end
+end
+
+% loading array for x and y
+for m = 1:length(ar.model)
+    if(isfield(ar.model(m), 'data'))
+        for d = 1:length(ar.model(m).data)
+            if(isfield(ar.model(m).data(d), 'tExp') && ~isempty(ar.model(m).data(d).tExp))
+                ar.model(m).data(d).yExpSimu = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y));
+                ar.model(m).data(d).syExpSimu = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+                ar.model(m).data(d).ystdExpSimu = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y));
+                ar.model(m).data(d).systdExpSimu = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+                if(isfield(ar.model(m).data(d), 'yExp') && ~isempty(ar.model(m).data(d).yExp))
+                    ar.model(m).data(d).res = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y));
+                    ar.model(m).data(d).reserr = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y));
+                    ar.model(m).data(d).sres = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+                    ar.model(m).data(d).sreserr = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+                    ar.model(m).data(d).has_yExp = true;
+                else
+                    ar.model(m).data(d).has_yExp = false;
+                end
+                ar.model(m).data(d).has_tExp = true;
+            else
+                ar.model(m).data(d).has_tExp = false;
+                ar.model(m).data(d).has_yExp = false;
+            end
+            
+            ar.model(m).data(d).yFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y));
+            ar.model(m).data(d).syFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+            ar.model(m).data(d).ystdFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y));
+            ar.model(m).data(d).systdFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+        end
+    end
+    for c = 1:length(ar.model(m).condition)
+        ar.model(m).condition(c).uNum = zeros(1, length(ar.model(m).u));
+        ar.model(m).condition(c).vNum = zeros(1, length(ar.model(m).vs));
+        ar.model(m).condition(c).dvdxNum = zeros(length(ar.model(m).vs), length(ar.model(m).x)); 
+        ar.model(m).condition(c).dvduNum = zeros(length(ar.model(m).vs), length(ar.model(m).u)); 
+        ar.model(m).condition(c).dvdpNum = zeros(length(ar.model(m).vs), length(ar.model(m).condition(c).p)); 
+        ar.model(m).condition(c).suNum = zeros(length(ar.model(m).u), length(ar.model(m).condition(c).p));
+        ar.model(m).condition(c).svNum = zeros(1, length(ar.model(m).vs));
+
+        if(isfield(ar.model(m).condition(c), 'tExp'))
+            ar.model(m).condition(c).uExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).u));
+            ar.model(m).condition(c).suExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).u), length(ar.model(m).condition(c).p));
+            ar.model(m).condition(c).vExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).vs));
+            ar.model(m).condition(c).svExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).vs), length(ar.model(m).condition(c).p));
+            ar.model(m).condition(c).xExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).x));
+            ar.model(m).condition(c).sxExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).x), length(ar.model(m).condition(c).p));
+            ar.model(m).condition(c).has_tExp = true;
+        else
+            ar.model(m).condition(c).has_tExp = false;
+        end
+        
+        ar.model(m).condition(c).uFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).u));
+        ar.model(m).condition(c).suFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).u), length(ar.model(m).condition(c).p));
+        ar.model(m).condition(c).vFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).vs));
+        ar.model(m).condition(c).svFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).vs), length(ar.model(m).condition(c).p));
+        ar.model(m).condition(c).xFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).x));
+        ar.model(m).condition(c).sxFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).x), length(ar.model(m).condition(c).p));
+        
+        % steady state sensitivities
+        ar.model(m).condition(c).qSteadyState = false(1,length(ar.model(m).x));
+        ar.model(m).condition(c).dxdt = zeros(1, length(ar.model(m).x));
+        ar.model(m).condition(c).ddxdtdp = zeros(length(ar.model(m).x), length(ar.model(m).condition(c).p));
+        ar.model(m).condition(c).stdSteadyState = zeros(1,length(ar.model(m).x)) + ar.config.steady_state_constraint;
+        
+        ar.model(m).condition(c).start = 0;
+        ar.model(m).condition(c).stop = 0;
+        ar.model(m).condition(c).stop_data = 0;
+    end
+end
+
+if(~silent)
+    fprintf('done\n');
+    fprintf('linking parameters... ');
+end
+
+% remember existing values
+if(isfield(ar, 'pLabel'))
+    plabel = ar.pLabel;
+    p = ar.p;
+    qfit = ar.qFit;
+    qlog10 = ar.qLog10;
+    lb = ar.lb;
+    ub = ar.ub;
+    type = ar.type;
+    meanp = ar.mean;
+    stdp = ar.std;
+end
+
+% collecting parameters
+ar.pLabel = {};
+for m = 1:length(ar.model)
+    if(isfield(ar.model(m), 'data'))
+        for d = 1:length(ar.model(m).data)
+            ar.pLabel = union(ar.pLabel, ar.model(m).data(d).p);
+        end
+    end
+    for c = 1:length(ar.model(m).condition)
+        ar.pLabel = union(ar.pLabel, ar.model(m).condition(c).p);
+    end
+end
+ar.qFit = ones(size(ar.pLabel));
+
+% determine parameters influencing model dynamics
+ar.qDynamic = zeros(size(ar.pLabel));
+for m = 1:length(ar.model)
+    for c = 1:length(ar.model(m).condition)
+        if(~isempty(ar.model(m).condition(c).p))
+            qdyn = ismember(ar.pLabel, ar.model(m).condition(c).p);
+            ar.qDynamic(qdyn) = 1;
+        end
+    end
+end
+
+% determine parameters influencing initial values of model dynamics
+ar.qInitial = zeros(size(ar.pLabel));
+for m = 1:length(ar.model)
+    for c = 1:length(ar.model(m).condition)
+        if(~isempty(ar.model(m).condition(c).p) && ~isempty(ar.model(m).condition(c).px0))
+            qinit = ismember(ar.pLabel, ar.model(m).condition(c).px0);
+            ar.qInitial(qinit) = 1;
+        end
+    end
+end
+
+% determine parameters influencing the error model
+ar.qError = zeros(size(ar.pLabel));
+for m = 1:length(ar.model)
+    if(isfield(ar.model(m),'data'))
+        for d = 1:length(ar.model(m).data)
+            if(~isempty(ar.model(m).data(d).pystd))
+                qerr = ismember(ar.pLabel, ar.model(m).data(d).pystd);
+                ar.qError(qerr) = 1;
+            end
+        end
+    end
+end
+
+% fix volumen parameters
+for m = 1:length(ar.model)
+    qvolpara = ismember(ar.pLabel, ar.model(m).pc);
+    ar.qFit(qvolpara) = 2;
+end
+
+ar.qLog10 = ones(size(ar.pLabel));
+ar.p = ones(size(ar.pLabel)) * -1;
+
+ar.ub = ones(size(ar.pLabel)) * +3;
+ar.lb = ones(size(ar.pLabel)) * -5;
+
+ar.type = zeros(size(ar.pLabel));
+ar.mean = zeros(size(ar.pLabel));
+ar.std = zeros(size(ar.pLabel));
+
+% link back parameters & thread indexing
+thread_count_x = 0;
+for m = 1:length(ar.model)
+    for c = 1:length(ar.model(m).condition)
+        if(~isempty(ar.model(m).condition(c).p))
+            ar.model(m).condition(c).pLink = ismember(ar.pLabel, ar.model(m).condition(c).p);
+        else
+            ar.model(m).condition(c).pLink = [];
+        end
+        ar.model(m).condition(c).pNum = 10.^ar.p(ar.model(m).condition(c).pLink);
+        ar.model(m).condition(c).thread_id = thread_count_x;
+        thread_count_x = thread_count_x + 1;
+    end
+    if(isfield(ar.model(m), 'data'))
+        for d = 1:length(ar.model(m).data)
+            if(~isempty(ar.model(m).data(d).p))
+                ar.model(m).data(d).pLink = ismember(ar.pLabel, ar.model(m).data(d).p);
+            else
+                ar.model(m).data(d).pLink = [];
+            end
+            ar.model(m).data(d).pNum = 10.^ar.p(ar.model(m).data(d).pLink);
+        end
+    end
+end
+ar.config.nthreads_x = thread_count_x;
+
+% reset values
+if(exist('plabel','var'))
+    arSetPars(plabel, p, qfit, qlog10, lb, ub, type, meanp, stdp);
+end
+
+if(~silent)
+    fprintf('done\n');
+end
+
+% plotting
+for jm=1:length(ar.model)
+    if(~isfield(ar.model(jm), 'qPlotYs') || isempty(ar.model(jm).qPlotYs))
+        if(length(ar.model(jm).plot) > 10)
+            if(~silent)
+                fprintf('Automatic plotting disabled for model %i. Please use arPlotter for plotting.\n', jm);
+            end
+            ar.model(jm).qPlotYs = false(1,length(ar.model(jm).plot));
+            ar.model(jm).qPlotXs = false(1,length(ar.model(jm).plot));
+            ar.model(jm).qPlotVs = false(1,length(ar.model(jm).plot));
+        else
+            ar.model(jm).qPlotYs = true(1,length(ar.model(jm).plot));
+            if(isfield(ar.model(jm),'data'))
+                ar.model(jm).qPlotXs = false(1,length(ar.model(jm).plot));
+            else
+                ar.model(jm).qPlotXs = true(1,length(ar.model(jm).plot));
+            end
+            ar.model(jm).qPlotVs = false(1,length(ar.model(jm).plot));
+        end
+    end
+end
+
+% set external parameters
+if(isfield(ar, 'pExternLabels'))
+    arSetPars(ar.pExternLabels, ar.pExtern, ar.qFitExtern, ar.qLog10Extern, ...
+        ar.lbExtern, ar.ubExtern);
+end
+
