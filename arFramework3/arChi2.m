@@ -49,14 +49,14 @@ for jm = 1:nm
     end
 end
 if(ar.ndata>0 && ar.config.fiterrors == 1 && ar.config.useFitErrorCorrection)
-    if(ar.ndata-sum(ar.qError~=1) < sum(ar.qError~=1))
+    if(ar.ndata-sum(ar.qError~=1  & ar.qFit==1) < sum(ar.qError~=1  & ar.qFit==1))
         ar.config.fiterrors_correction = 1;
         if(~ar.config.fiterrors_correction_warning)
             warning('ar.config.fiterrors_correction_warning : turning off bias correction, not enough data'); %#ok<WNTAG>
             ar.config.fiterrors_correction_warning = true;
         end
     else
-        ar.config.fiterrors_correction = ar.ndata/(ar.ndata-sum(ar.qError~=1));
+        ar.config.fiterrors_correction = ar.ndata/(ar.ndata-sum(ar.qError~=1 & ar.qFit==1));
         ar.config.fiterrors_correction_warning = false;
     end
 else
