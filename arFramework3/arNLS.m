@@ -253,7 +253,7 @@ end
 
 % if dp too long cut to bounds
 dptmp = [dp; dp];
-dpredfac = min(distp(exbounds)./dptmp(exbounds));
+dpredfac = abs(min(distp(exbounds)./dptmp(exbounds)));
 if(~isempty(dpredfac))
     if(dpredfac==0)
         error('zero step size');
