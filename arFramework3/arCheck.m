@@ -35,3 +35,25 @@ end
 
 % EvA2 Toolbox
 javaaddpath([ar_path '/EvA2/EvA2Base.jar'])
+
+% check if arInitUser.m exists and create the file if necessary
+if exist('arInitUser.m','file')==0
+	fprintf(1,'\n\n%s\n%s\n\n','WARNING: arInitUser.m does not exist!','Creating the file...');
+	user = '';
+	while isempty(user)
+		user = input('Please enter your full name (e.g. John Doe)\n-> ','s');
+	end
+	fid = fopen( [ar_path '/arInitUser.m'],'w');
+	fprintf(fid,'%s\n','% initialize user settings');
+	fprintf(fid,'\n%s\n','function arInitUser');
+	fprintf(fid,'\n%s\n','global ar');
+	fprintf(fid,'\n%s%s%s','ar.config.username = ''',user,''';');
+	comment_string = input('\nPlease define a comment string (default is ''//'')\n-> ','s');
+	if isempty(comment_string)
+		comment_string = '//';
+	end
+	fprintf(fid,'\n%s%s%s','ar.config.comment_string = ''',comment_string,''';');
+	fclose(fid);
+	fprintf(1,'\n%s\n','arInitUser.m has been successfully created!');
+    rehash path
+end
