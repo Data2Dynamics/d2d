@@ -10,6 +10,9 @@ end
 if(~isfield(pleGlobals, 'showCalculation'))
     pleGlobals.showCalculation = true;
 end
+if(~exist('quick','var'))
+    quick = false;
+end
 if(nargin<1)
     fprintf('PLE smoothing for %i parameters ...\n', sum(pleGlobals.q_fit))
     jindex = find(pleGlobals.q_fit);
