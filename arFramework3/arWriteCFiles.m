@@ -355,7 +355,7 @@ fprintf(fid, '\n  return;\n}\n\n\n');
 % write fsu
 fprintf(fid, ' void fsu_%s(void *user_data, double t)\n{\n', ar.model(m).condition(c).fkt);
 if(ar.config.useSensis)
-    if(sum(ar.model(m).condition(c).sym.dfudp(:)~=0)>0)
+    if(sum(logical(ar.model(m).condition(c).sym.dfudp(:)~=0))>0)
         fprintf(fid, '  UserData data = (UserData) user_data;\n');
         fprintf(fid, '  double *p = data->p;\n');
     

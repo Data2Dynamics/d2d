@@ -243,8 +243,8 @@ else
     ar.model(m).sym.dfvdu = sym(ones(length(ar.model(m).sym.fv), 0));
 end
 
-ar.model(m).qdvdx_nonzero = ar.model(m).sym.dfvdx~=0;
-ar.model(m).qdvdu_nonzero = ar.model(m).sym.dfvdu~=0;
+ar.model(m).qdvdx_nonzero = logical(ar.model(m).sym.dfvdx~=0);
+ar.model(m).qdvdu_nonzero = logical(ar.model(m).sym.dfvdu~=0);
 
 tmpsym = ar.model(m).sym.dfvdx;
 tmpsym = mysubs(tmpsym, ar.model(m).sym.x, ones(size(ar.model(m).sym.x))/2);
@@ -331,7 +331,7 @@ ar.model(m).condition(c).sym.fpx0 = mysubs(ar.model(m).condition(c).sym.fpx0, ar
 ar.model(m).condition(c).sym.fxeq = mysubs(ar.model(m).condition(c).sym.fxeq, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
 
 % remove zero inputs
-ar.model(m).condition(c).qfu_nonzero = ar.model(m).condition(c).sym.fu ~= 0;
+ar.model(m).condition(c).qfu_nonzero = logical(ar.model(m).condition(c).sym.fu ~= 0);
 if(~isempty(ar.model(m).sym.us))
     ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).sym.us(~ar.model(m).condition(c).qfu_nonzero), ...
         sym(zeros(1,sum(~ar.model(m).condition(c).qfu_nonzero))));
@@ -347,9 +347,9 @@ end
 ar.model(m).condition(c).sym.dfvdp = jacobian(ar.model(m).condition(c).sym.fv, ar.model(m).condition(c).sym.ps);
 
 % flux signs
-ar.model(m).condition(c).qdvdx_nonzero = ar.model(m).condition(c).sym.dfvdx~=0;
-ar.model(m).condition(c).qdvdu_nonzero = ar.model(m).condition(c).sym.dfvdu~=0;
-ar.model(m).condition(c).qdvdp_nonzero = ar.model(m).condition(c).sym.dfvdp~=0;
+ar.model(m).condition(c).qdvdx_nonzero = logical(ar.model(m).condition(c).sym.dfvdx~=0);
+ar.model(m).condition(c).qdvdu_nonzero = logical(ar.model(m).condition(c).sym.dfvdu~=0);
+ar.model(m).condition(c).qdvdp_nonzero = logical(ar.model(m).condition(c).sym.dfvdp~=0);
 
 % short terms
 ar.model(m).condition(c).dvdx = cell(length(ar.model(m).vs), length(ar.model(m).xs));
@@ -398,7 +398,7 @@ ar.model(m).condition(c).sym.fx = (ar.model(m).N .* ar.model(m).condition(c).sym
 % Jacobian dfxdx
 if(ar.config.useJacobian)
     ar.model(m).condition(c).sym.dfxdx = (ar.model(m).N .* ar.model(m).condition(c).sym.C) * ar.model(m).condition(c).sym.dvdx;
-    ar.model(m).condition(c).qdfxdx_nonzero = ar.model(m).condition(c).sym.dfxdx~=0;
+    ar.model(m).condition(c).qdfxdx_nonzero = logical(ar.model(m).condition(c).sym.dfxdx~=0);
     for j=1:length(ar.model(m).xs)
         for i=1:length(ar.model(m).xs)
             if(ar.model(m).condition(c).qdfxdx_nonzero(j,i))
@@ -446,7 +446,7 @@ if(ar.config.useSensis)
         ar.model(m).condition(c).sym.dvdu * ar.model(m).condition(c).sym.su + ar.model(m).condition(c).sym.dvdp;
     
 	% sv
-    ar.model(m).condition(c).qfsv_nonzero = ar.model(m).condition(c).sym.fsv ~= 0;
+    ar.model(m).condition(c).qfsv_nonzero = logical(ar.model(m).condition(c).sym.fsv ~= 0);
     ar.model(m).condition(c).sv = cell(length(ar.model(m).vs), length(ar.model(m).condition(c).ps));
     for j=1:length(ar.model(m).vs)
         for i=1:length(ar.model(m).condition(c).ps)
@@ -494,7 +494,7 @@ ar.model(m).data(d).sym.fystd = mysubs(ar.model(m).data(d).sym.fystd, ar.model(m
 
 ar.model(m).data(d).sym.fu = sym(ar.model(m).condition(c).fu);
 ar.model(m).data(d).sym.fu = mysubs(ar.model(m).data(d).sym.fu, ar.model(m).data(d).sym.p, ar.model(m).data(d).sym.fp);
-ar.model(m).data(d).qfu_nonzero = ar.model(m).data(d).sym.fu ~= 0;
+ar.model(m).data(d).qfu_nonzero = logical(ar.model(m).data(d).sym.fu ~= 0);
 
 % predictor
 ar.model(m).data(d).sym.fu = mysubs(ar.model(m).data(d).sym.fu, sym(ar.model(m).t), sym('t'));
@@ -570,8 +570,8 @@ else
 end
 
 % what is measured ?
-ar.model(m).data(d).qu_measured = sum(ar.model(m).data(d).sym.dfydu~=0,1)>0;
-ar.model(m).data(d).qx_measured = sum(ar.model(m).data(d).sym.dfydx~=0,1)>0;
+ar.model(m).data(d).qu_measured = sum(logical(ar.model(m).data(d).sym.dfydu~=0),1)>0;
+ar.model(m).data(d).qx_measured = sum(logical(ar.model(m).data(d).sym.dfydx~=0),1)>0;
 
 % derivatives fystd
 if(~isempty(ar.model(m).data(d).sym.fystd))
@@ -594,7 +594,7 @@ else
 end
 
 % observed directly and exclusively
-ar.model(m).data(d).dfydxnon0 = ar.model(m).data(d).sym.dfydx ~= 0;
+ar.model(m).data(d).dfydxnon0 = logical(ar.model(m).data(d).sym.dfydx ~= 0);
 
 if(ar.config.useSensis)
     % sx sensitivities
@@ -653,7 +653,7 @@ if(ar.config.useSensis)
     else
         ar.model(m).data(d).sym.fsy = [];
     end
-    fprintf('sy=%i, ', sum(ar.model(m).data(d).sym.fsy(:)~=0));
+    fprintf('sy=%i, ', sum(logical(ar.model(m).data(d).sym.fsy(:)~=0)));
     
     % calculate systd
     if(~isempty(ar.model(m).data(d).sym.sy))
@@ -694,7 +694,7 @@ if(ar.config.useSensis)
     else
         ar.model(m).data(d).sym.fsystd = [];
     end
-    fprintf('systd=%i, ', sum(ar.model(m).data(d).sym.fsystd(:)~=0));
+    fprintf('systd=%i, ', sum(logical(ar.model(m).data(d).sym.fsystd(:)~=0)));
 end
 
 fprintf('done\n');

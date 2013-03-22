@@ -365,13 +365,13 @@ void *x_calc(void *threadarg) {
             flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sx, im, ic);
             if(check_flag(&flag, "CVodeSensInit1", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
             
-//             status[0] = 11;
-//             flag = CVodeSensEEtolerances(cvode_mem);
-//             if(check_flag(&flag, "CVodeSensEEtolerances", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
-//             
-//             status[0] = 12;
-//             flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
-//             if (check_flag(&flag, "CVodeSetSensParams", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+/*             status[0] = 11;
+            flag = CVodeSensEEtolerances(cvode_mem);
+            if(check_flag(&flag, "CVodeSensEEtolerances", 1)) {if(parallel==1) {pthread_exit(NULL);} return;} */
+             
+/*             status[0] = 12;
+            flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
+            if (check_flag(&flag, "CVodeSetSensParams", 1)) {if(parallel==1) {pthread_exit(NULL);} return;} */ 
             
             atols_ss = N_VNew_Serial(np);
             if (check_flag((void *)atols_ss, "N_VNew_Serial", 0)) {if(parallel==1) {pthread_exit(NULL);} return;}
