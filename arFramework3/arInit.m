@@ -45,7 +45,8 @@ ar.config.useSensis = true;
 ar.config.useJacobian = true;
 
 ar.config.optimizer = 1;
-ar.config.optimizers = {'lsqnonlin', 'fmincon', 'levenberg-marquardt'};
+ar.config.optimizers = {'lsqnonlin', 'fmincon', 'levenberg-marquardt', ...
+    'STRSCNE', 'arNLS'};
 ar.config.optim = optimset;
 ar.config.optim.Display = 'off';
 ar.config.optim.TolFun = 0;

@@ -38,6 +38,9 @@ else
 end
 
 ar.fit.chi2_hist = nan(1,ar.config.optim.MaxIter);
+ar.fit.p_hist = nan(ar.config.optim.MaxIter,length(ar.p));
+ar.fit.maxstepsize_hist = nan(1,ar.config.optim.MaxIter);
+ar.fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
 ar.config.optim.OutputFcn = @arPlotFast;
 
 arChi2(false);
@@ -68,14 +71,9 @@ elseif(ar.config.optimizer == 2)
 elseif(ar.config.optimizer == 3) 
     arFitLM(silent);
     return;
-    
-% custom trustregion
-elseif(ar.config.optimizer == 4) 
-    arFit2(silent);
-    return;
    
 % STRSCNE
-elseif(ar.config.optimizer == 5)
+elseif(ar.config.optimizer == 4)
     warnreset = warning;
     warning('off','MATLAB:rankDeficientMatrix');
     [pFit, exitflag, output, history] = ...
@@ -91,6 +89,11 @@ elseif(ar.config.optimizer == 5)
         output(1), exitflag, chi2_old - ar.chi2fit);
     
     return;
+
+% arNLS
+elseif(ar.config.optimizer == 5)     
+    [pFit, chi2, resnorm, exitflag, output, lambda, jac] = ...
+        arNLS(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
 end
 
 if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
@@ -105,9 +108,6 @@ ar.fit.output = output;
 ar.fit.iter = output.iterations;
 ar.fit.chi2 = chi2;
 ar.fit.lambda = lambda;
-ar.fit.maxstepsize_hist = [];
-ar.fit.stepsize_hist = [];
-ar.fit.p_hist = [];
 ar.fit.qFit = ar.qFit;
 ar.fit.res = resnorm;
 ar.fit.sres = full(jac);
@@ -116,7 +116,7 @@ if(~silent || exitflag < 1)
     outputstr = '';
     switch exitflag
         case 1
-            outputstr = 'LSQNONLIN converged to a solution';
+            outputstr = 'Converged to a solution';
         case 2  
             outputstr = 'Change in X too small';
         case 3  
@@ -139,7 +139,17 @@ if(~silent || exitflag < 1)
             outputstr = sprintf('Multiple Shooting: mean constraint violation > %e\n', ar.ms_treshold);
     end
     arChi2(false);
-    fprintf('lsqnonlin finished after %i iterations: %s, total chi2 improvement = %g\n', ...
+    
+    switch ar.config.optimizer
+        case 1
+            fprintf('lsqnonlin ');
+        case 2
+            fprintf('fmincon ');
+        case 6
+            fprintf('arNLS ');
+    end
+    
+    fprintf('finished after %i iterations: %s, total chi2 improvement = %g\n', ...
         ar.fit.output.iterations, outputstr, chi2_old - ar.chi2fit);
 end
 
@@ -174,6 +184,12 @@ global ar
 
 if(strcmp(state, 'iter'))
     ar.fit.chi2_hist(optimValues.iteration+1) = ar.chi2fit;
+    ar.fit.p_hist(optimValues.iteration+1,:) = ar.p;
+    
+    if(ar.config.optimizer == 6)
+        ar.fit.maxstepsize_hist(optimValues.iteration+1) = optimValues.mu;
+        ar.fit.stepsize_hist(optimValues.iteration+1) = optimValues.normdp;
+    end
     
     if(ar.config.showFitting)
         arPlot(false, true, false, true, true);
