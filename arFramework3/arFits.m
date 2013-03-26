@@ -106,10 +106,5 @@ if plot_summary
         plotmatrix(ar.ps(:,q_select), 'x');
     end
     
-    arPlotChi2s
+    arPlotFits
 end
-<<<<<<< mine
-
-arPlotFits
-=======
->>>>>>> theirs
