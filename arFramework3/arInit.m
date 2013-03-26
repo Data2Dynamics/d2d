@@ -2,9 +2,6 @@
 %
 % Copyright Andreas Raue 2012 (andreas.raue@fdm.uni-freiburg.de)
 
-clc
-close all
-
 arCheck;
 
 global ar
