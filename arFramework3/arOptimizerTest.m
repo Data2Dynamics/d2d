@@ -90,7 +90,7 @@ arWaitbar(-1);
 ar.p = p;
 for j = 1:N
     arWaitbar(j+2*N,3*N);
-    dptmp = getStepTrust(g, H, xg(j), p, ar.lb, ar.ub);
+    dptmp = getStep(g, H, xg(j), p, ar.lb, ar.ub, 0);
     ar.p = p + dptmp;
     ipp = ar.p<ar.lb | ar.p>ar.ub;
     if(sum(ipp)>0)
@@ -128,8 +128,6 @@ plot(xt,chi2t,'*-b');
 hold off
 
 
-
-function dp = getStepTrust(g, H, mu, p, lb, ub)
 % generate trial steps
 %
 % g:    gradient
@@ -138,37 +136,43 @@ function dp = getStepTrust(g, H, mu, p, lb, ub)
 % p:    current parameters
 % lb:   lower bounds
 % ub:   upper bounds
+function [dp, solver_calls, gred] = getStep(g, H, mu, p, lb, ub, solver_calls)
 
-dp = trust(-g',H,mu)'; % trust region solution
-
-% PROBLEM: ensuring norm(dp)<=mu in trust function
-if(norm(dp)>mu)
-    dp = dp/norm(dp)*mu;
-end
+% solve subproblem
+dp = getDP(g, H, mu);
+solver_calls = solver_calls + 1;
 
 distp = -[p-ub; -(p - lb)]; % distance to bounds (should be always positive)
+onbound = distp==0; % which parameter is exactly on the bound ?
 exbounds = [p+dp-ub; -(p+dp - lb)] > 0; % dp bejond bound ?
 
 % if p on bounds and dp pointing bejond bound, reduce problem
-onbound = distp==0;
+gred = g;
 qred = sum(onbound & exbounds,1)>0;
 if(sum(~qred)==0)
     error('solution outside bounds, no further step possible');
 end
-if(sum(qred)>0)
-    gred = g(~qred);
-    Hred = H(~qred,~qred);
-    dp_red = trust(-gred',Hred,mu)'; % reduced trust region solution
+qred_presist = qred;
+while(sum(qred)>0)
+    gred = g(~qred_presist);
+    Hred = H(~qred_presist,~qred_presist);
     
-    % PROBLEM: ensuring norm(dp)<=mu in trust function
-    if(norm(dp_red)>mu)
-        dp_red = dp_red/norm(dp_red)*mu;
-    end
+    % solve reduced subproblem
+    dp_red = getDP(gred, Hred, mu);
+    solver_calls = solver_calls + 1;
     
     dp(:) = 0;
-    dp(~qred) = dp_red;
+    dp(~qred_presist) = dp_red;
+    
     exbounds = [p+dp-ub; -(p+dp - lb)] > 0; % dp bejond bound ?
+    qred = sum(onbound & exbounds,1)>0;
+    qred_presist = qred | qred_presist;
+    
+    if(sum(~qred_presist)==0)
+        error('solution outside bounds, no further step possible');
+    end
 end
+fprintf('trust: reduce %i\n', sum(qred_presist));
 
 % if dp too long cut to bounds
 dptmp = [dp; dp];
@@ -179,3 +183,20 @@ if(~isempty(dpredfac))
     end
     dp = dp * dpredfac;
 end
+
+
+
+
+% solver function
+function dp = getDP(g, H, mu)
+
+% trust region solution
+dp = trust(-g',H,mu)'; 
+% PROBLEM: ensuring norm(dp)<=mu in trust function
+if(norm(dp)>mu)
+    fprintf('trust function problem !!!\n');
+    dp = dp/norm(dp)*mu;
+end
+
+% % levenberg-marquardt
+% dp = transpose(pinv(H + eye(size(H))/mu)*g');

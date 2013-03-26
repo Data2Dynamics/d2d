@@ -120,7 +120,7 @@ while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
         end
     end
     
-    if(norm(dp) >= options.TolX)
+    if(mu >= options.TolX)
         % adjust mu
         if(dresnorm>=0)
             while(dresnorm>=0)
