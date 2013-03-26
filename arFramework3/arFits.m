@@ -30,19 +30,20 @@ if(append && isfield(ar,'ps') && isfield(ar, 'chi2s') && ...
         isfield(ar, 'exitflag') && isfield(ar, 'timing') && ...
         isfield(ar, 'fun_evals'))
     ar.ps = [nan(n, length(ar.p)); ar.ps];
+    ar.ps_start = [ps; ar.ps_start];
     ar.chi2s = [nan(1,n) ar.chi2s];
     ar.timing = [nan(1,n) ar.timing];
     ar.exitflag = [-ones(1,n) ar.exitflag];
     ar.fun_evals = [nan(1,n) ar.fun_evals];
+    
 else
     ar.ps = nan(n, length(ar.p));
+    ar.ps_start = ps;
     ar.chi2s = nan(1,n);
     ar.timing = nan(1,n);
     ar.fun_evals = nan(1,n);
     ar.exitflag = -ones(1,n);
 end
-
-ar.ps_start = ps;
 
 if(~dynamic_only)
     q_select = ar.qFit==1 & ar.qDynamic==1;
@@ -107,3 +108,8 @@ if plot_summary
     
     arPlotChi2s
 end
+<<<<<<< mine
+
+arPlotFits
+=======
+>>>>>>> theirs
