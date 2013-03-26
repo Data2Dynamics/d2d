@@ -1,0 +1,16 @@
+***************
+*** 1,7 ****
+  % Initialize and clear workspace of framework
+  %
+  % Copyright Andreas Raue 2012 (andreas.raue@fdm.uni-freiburg.de)
+- % test
+  
+  clc
+  close all
+--- 1,6 ----
+  % Initialize and clear workspace of framework
+  %
+  % Copyright Andreas Raue 2012 (andreas.raue@fdm.uni-freiburg.de)
+  
+  clc
+  close all

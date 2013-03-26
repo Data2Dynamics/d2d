@@ -145,7 +145,7 @@ if(~silent || exitflag < 1)
             fprintf('lsqnonlin ');
         case 2
             fprintf('fmincon ');
-        case 6
+        case 5
             fprintf('arNLS ');
     end
     
@@ -186,9 +186,12 @@ if(strcmp(state, 'iter'))
     ar.fit.chi2_hist(optimValues.iteration+1) = ar.chi2fit;
     ar.fit.p_hist(optimValues.iteration+1,:) = ar.p;
     
-    if(ar.config.optimizer == 6)
+    if(ar.config.optimizer == 5)
         ar.fit.maxstepsize_hist(optimValues.iteration+1) = optimValues.mu;
         ar.fit.stepsize_hist(optimValues.iteration+1) = optimValues.normdp;
+    else
+        ar.fit.maxstepsize_hist(optimValues.iteration+1) = nan;
+        ar.fit.stepsize_hist(optimValues.iteration+1) = nan;
     end
     
     if(ar.config.showFitting)
