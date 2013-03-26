@@ -7,7 +7,7 @@
 % randomseed:   rng(randomseed)
 % dynamic_only                  [false]
 
-function arFitLHS(n, append, randomseed, dynamic_only)
+function arFitLHS(n, append, randomseed, dynamic_only, plot_summary)
 
 global ar
 
@@ -29,6 +29,9 @@ end
 if(~exist('dynamic_only','var'))
     dynamic_only = false;
 end
+if(~exist('plot_summary','var'))
+    plot_summary = false;
+end
 
 ps = ones(n,1) * ar.p;
 
@@ -44,4 +47,4 @@ psrand = psrand + (ones(n,1)*ar.lb(q_select));
 
 ps(:,q_select) = psrand;
 
-arFits(ps, append, dynamic_only);
+arFits(ps, append, dynamic_only, plot_summary);

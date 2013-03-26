@@ -6,7 +6,7 @@
 % append:                       [false]
 % dynamic_only                  [true]
 
-function arFits(ps, append, dynamic_only)
+function arFits(ps, append, dynamic_only, plot_summary)
 
 global ar
 
@@ -15,6 +15,9 @@ if(~exist('append','var'))
 end
 if(~exist('dynamic_only','var'))
     dynamic_only = false;
+end
+if(~exist('plot_summary','var'))
+    plot_summary = false;
 end
 
 n = size(ps,1);
@@ -96,9 +99,11 @@ else
 end
 arChi2(false);
 
-if(sum(q_select)<6)
-    figure(2)
-    plotmatrix(ar.ps(:,q_select), 'x');
+if plot_summary
+    if(sum(q_select)<6)
+        figure(2)
+        plotmatrix(ar.ps(:,q_select), 'x');
+    end
+    
+    arPlotChi2s
 end
-
-arPlotChi2s
