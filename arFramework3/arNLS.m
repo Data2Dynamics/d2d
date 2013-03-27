@@ -290,7 +290,7 @@ end
 
 % memory
 if(~isempty(dpmem))
-    dp = mean([dpmem;dp]);
+%     dp = mean([dpmem;dp]);
 end
 dpmem = dp;
 
@@ -299,11 +299,20 @@ dpmem = dp;
 % solver function
 function dp = getDP(g, H, mu)
 
+% % trust region solution
+% dp = trust(-g',H,mu)'; 
+% % PROBLEM: ensuring norm(dp)<=mu in trust function
+% if(norm(dp)>mu)
+%     dp = dp/norm(dp)*mu;
+% end
+
 % trust region solution
-dp = trust(-g',H,mu)'; 
-% PROBLEM: ensuring norm(dp)<=mu in trust function
-if(norm(dp)>mu)
-    dp = dp/norm(dp)*mu;
+dp = trust(-g',H,mu)';
+lambda = 1e-6;
+while(norm(dp)-mu > 1e-6)
+%     fprintf('trust problem %g %g\n', norm(dp)-mu, lambda);
+    lambda = lambda * 10;
+    dp = trust(-g',H+lambda*eye(size(H)),mu)'; 
 end
 
 % % levenberg-marquardt

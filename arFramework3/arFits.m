@@ -35,13 +35,14 @@ if(append && isfield(ar,'ps') && isfield(ar, 'chi2s') && ...
     ar.timing = [nan(1,n) ar.timing];
     ar.exitflag = [-ones(1,n) ar.exitflag];
     ar.fun_evals = [nan(1,n) ar.fun_evals];
-    
+    ar.optim_crit = [nan(1,n) ar.optim_crit];
 else
     ar.ps = nan(n, length(ar.p));
     ar.ps_start = ps;
     ar.chi2s = nan(1,n);
     ar.timing = nan(1,n);
     ar.fun_evals = nan(1,n);
+    ar.optim_crit = nan(1,n);
     ar.exitflag = -ones(1,n);
 end
 
@@ -76,6 +77,7 @@ for j=1:n
         ar.chi2s(j) = ar.chi2fit;
         ar.exitflag(j) = ar.fit.exitflag;
         ar.fun_evals(j) = ar.fevals;
+        ar.optim_crit(j) = ar.fit.output.firstorderopt;
     catch exception
         fprintf('fit #%i: %s\n', j, exception.message);
     end
