@@ -6,7 +6,7 @@
 % append:                       [false]
 % dynamic_only                  [true]
 
-function arFits(ps, append, dynamic_only)
+function arFits(ps, append, dynamic_only, plot_summary)
 
 global ar
 
@@ -15,6 +15,9 @@ if(~exist('append','var'))
 end
 if(~exist('dynamic_only','var'))
     dynamic_only = false;
+end
+if(~exist('plot_summary','var'))
+    plot_summary = false;
 end
 
 n = size(ps,1);
@@ -27,19 +30,21 @@ if(append && isfield(ar,'ps') && isfield(ar, 'chi2s') && ...
         isfield(ar, 'exitflag') && isfield(ar, 'timing') && ...
         isfield(ar, 'fun_evals'))
     ar.ps = [nan(n, length(ar.p)); ar.ps];
+    ar.ps_start = [ps; ar.ps_start];
     ar.chi2s = [nan(1,n) ar.chi2s];
     ar.timing = [nan(1,n) ar.timing];
     ar.exitflag = [-ones(1,n) ar.exitflag];
     ar.fun_evals = [nan(1,n) ar.fun_evals];
+    ar.optim_crit = [nan(1,n) ar.optim_crit];
 else
     ar.ps = nan(n, length(ar.p));
+    ar.ps_start = ps;
     ar.chi2s = nan(1,n);
     ar.timing = nan(1,n);
     ar.fun_evals = nan(1,n);
+    ar.optim_crit = nan(1,n);
     ar.exitflag = -ones(1,n);
 end
-
-ar.ps_start = ps;
 
 if(~dynamic_only)
     q_select = ar.qFit==1 & ar.qDynamic==1;
@@ -72,6 +77,7 @@ for j=1:n
         ar.chi2s(j) = ar.chi2fit;
         ar.exitflag(j) = ar.fit.exitflag;
         ar.fun_evals(j) = ar.fevals;
+        ar.optim_crit(j) = ar.fit.output.firstorderopt;
     catch exception
         fprintf('fit #%i: %s\n', j, exception.message);
     end
@@ -96,9 +102,11 @@ else
 end
 arChi2(false);
 
-if(sum(q_select)<6)
-    figure(2)
-    plotmatrix(ar.ps(:,q_select), 'x');
+if plot_summary
+    if(sum(q_select)<6)
+        figure(2)
+        plotmatrix(ar.ps(:,q_select), 'x');
+    end
+    
+    arPlotFits
 end
-
-arPlotChi2s

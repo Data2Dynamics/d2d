@@ -23,7 +23,8 @@ if(j==0 && nargin==1)
     arWaitbarGlobal.tic = clock;
     arWaitbarGlobal.ticlast = clock;
     arWaitbarGlobal.ticmove = clock;
-    arWaitbarGlobal.hasMonitor = sum(get(0,'MonitorPositions')==[0 0 1 1]) ~= 4;
+    monitorPositions = get(0,'MonitorPositions');
+    arWaitbarGlobal.hasMonitor = sum(sum(repmat([0 0 1 1],size(monitorPositions,1),1) == monitorPositions,2) ~= 4) > 0;
     
     arWaitbarGlobal.timeperstep = [];
     

@@ -2,9 +2,6 @@
 %
 % Copyright Andreas Raue 2012 (andreas.raue@fdm.uni-freiburg.de)
 
-clc
-close all
-
 arCheck;
 
 global ar
@@ -47,7 +44,7 @@ ar.config.useJacobian = true;
 ar.config.optimizer = 1;
 ar.config.optimizers = {'lsqnonlin', 'fmincon', 'levenberg-marquardt', ...
     'STRSCNE', 'arNLS'};
-ar.config.optim = optimset;
+ar.config.optim = optimset('lsqnonlin');
 ar.config.optim.Display = 'off';
 ar.config.optim.TolFun = 0;
 ar.config.optim.TolX = 1e-6;
