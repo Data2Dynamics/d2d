@@ -44,8 +44,7 @@ xlabel('run index (sorted by likelihood)');
 ylabel('likelihood');
 
 figure(2)
-boxplot(fevals, 'orientation', 'horizontal', 'labels', labels, ...
+boxplot(log10(fevals), 'orientation', 'horizontal', 'labels', labels, ...
     'orientation', 'horizontal', ...
     'plotstyle', 'compact', 'colors', colors);
-set(gca, 'XScale', 'log');
-xlabel('number of function evaluations');
+xlabel('log_{10} number of function evaluations');

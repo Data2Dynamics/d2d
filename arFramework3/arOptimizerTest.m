@@ -194,7 +194,6 @@ function dp = getDP(g, H, mu)
 % dp = trust(-g',H,mu)'; 
 % % PROBLEM: ensuring norm(dp)<=mu in trust function
 % if(norm(dp)>mu)
-%     fprintf('trust problem %g %g\n', norm(dp), mu);
 %     dp = dp/norm(dp)*mu;
 % end
 
