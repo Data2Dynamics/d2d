@@ -9,7 +9,7 @@
 %  3  Change in resnorm too small.
 %  4  Computed search direction too small.
 
-function [p,resnorm,res,exitflag,output,lambda,jac] = arNLS(fun,p,lb,ub,options)
+function [p,resnorm,res,exitflag,output,lambda,jac] = arNLS(fun,p,lb,ub,options,useInertia)
 
 % check bounds
 if (sum(ub<=lb)>0)
@@ -44,9 +44,7 @@ switch(options.Display)
 end
 
 % inertia effect using memory
-if(isfield(ar.config, 'options_useInertia'))
-    useInertia = ar.config.options_useInertia;
-else
+if(~exist('useInertia','var'))
     useInertia = false;
 end
 dpmem = [];
@@ -246,7 +244,7 @@ end
 % p:    current parameters
 % lb:   lower bounds
 % ub:   upper bounds
-function [dp, solver_calls, gred, dpmem, imem, dpmemsize] = getStep(g, H, mu, p, lb, ub, solver_calls, dpmem, imem, dpmemsize, useInertia)
+function [dp, solver_calls, gred, dpmem, imem, dpmemsize] = getStep(g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia)
 
 % solve subproblem
 dp = getDP(g, H, mu);
