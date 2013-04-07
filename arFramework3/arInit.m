@@ -49,6 +49,7 @@ ar.config.optim.Display = 'off';
 ar.config.optim.TolFun = 0;
 ar.config.optim.TolX = 1e-6;
 ar.config.optim.MaxIter = 1000;
+ar.config.optim.useInertia = false;
 
 ar.config.showFitting = 0;
 

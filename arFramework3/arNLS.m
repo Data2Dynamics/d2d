@@ -43,6 +43,13 @@ switch(options.Display)
         debug = 3;
 end
 
+% inertia effect using memory
+if(isfield(options, 'useInertia'))
+    useInertia = options.useInertia;
+else
+    useInertia = false;
+end
+
 % initial trust region size
 if(isempty(options.InitTrustRegionRadius))
     mu = 1;         
@@ -94,7 +101,7 @@ while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
     
     % solve subproblem
     [dp, solver_calls, gred, dpmem] = ...
-        getStep(g, H, mu, p, lb, ub, solver_calls, dpmem);
+        getStep(g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia);
     pt = p + dp;
     
     % ensure strict feasibility
@@ -133,7 +140,7 @@ while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
                 
                 % solve subproblem
                 [dp, solver_calls, gred, dpmem] = ...
-                    getStep(g, H, mu, p, lb, ub, solver_calls, dpmem);
+                    getStep(g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia);
                 pt = p + dp;
                 
                 % ensure strict feasibility
@@ -241,7 +248,7 @@ end
 % p:    current parameters
 % lb:   lower bounds
 % ub:   upper bounds
-function [dp, solver_calls, gred, dpmem, imem, dpmemsize] = getStep(g, H, mu, p, lb, ub, solver_calls, dpmem, imem, dpmemsize)
+function [dp, solver_calls, gred, dpmem, imem, dpmemsize] = getStep(g, H, mu, p, lb, ub, solver_calls, dpmem, imem, dpmemsize, useInertia)
 
 % solve subproblem
 dp = getDP(g, H, mu);
@@ -288,9 +295,9 @@ if(~isempty(dpredfac))
     dp = dp * dpredfac;
 end
 
-% memory
-if(~isempty(dpmem))
-%     dp = mean([dpmem;dp]);
+% inertial effect using memory
+if(useInertia && ~isempty(dpmem))
+    dp = mean([dpmem;dp]);
 end
 dpmem = dp;
 
@@ -299,14 +306,9 @@ dpmem = dp;
 % solver function
 function dp = getDP(g, H, mu)
 
-% % trust region solution
-% dp = trust(-g',H,mu)'; 
-% % PROBLEM: ensuring norm(dp)<=mu in trust function
-% if(norm(dp)>mu)
-%     dp = dp/norm(dp)*mu;
-% end
-
 % trust region solution
+% the function trust has a bug, therefore, in some cases
+% the problem has to be regularized
 dp = trust(-g',H,mu)';
 lambda = 1e-6;
 while(norm(dp)-mu > 1e-6)
@@ -314,6 +316,13 @@ while(norm(dp)-mu > 1e-6)
     lambda = lambda * 10;
     dp = trust(-g',H+lambda*eye(size(H)),mu)'; 
 end
+
+% % trust region solution (Attention, this part does not work!)
+% dp = trust(-g',H,mu)'; 
+% % PROBLEM: ensuring norm(dp)<=mu in trust function
+% if(norm(dp)>mu)
+%     dp = dp/norm(dp)*mu;
+% end
 
 % % levenberg-marquardt
 % dp = transpose(pinv(H + eye(size(H))/mu)*g');
