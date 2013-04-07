@@ -30,6 +30,8 @@ arWaitbar(-1);
 
 
 figure(1)
+
+subplot(5,1,1:3);
 h = nan(1,length(chi2s));
 colors = jet(length(chi2s));
 for j=1:length(chi2s)
@@ -43,7 +45,7 @@ legend(h, strrep(labels, '_', '\_'));
 xlabel('run index (sorted by likelihood)');
 ylabel('likelihood');
 
-figure(2)
+subplot(5,1,5);
 boxplot(log10(fevals), 'orientation', 'horizontal', 'labels', labels, ...
     'orientation', 'horizontal', ...
     'plotstyle', 'compact', 'colors', colors);
