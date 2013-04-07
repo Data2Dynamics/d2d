@@ -44,11 +44,12 @@ switch(options.Display)
 end
 
 % inertia effect using memory
-if(isfield(options, 'useInertia'))
-    useInertia = options.useInertia;
+if(isfield(ar.config, 'options_useInertia'))
+    useInertia = ar.config.options_useInertia;
 else
     useInertia = false;
 end
+dpmem = [];
 
 % initial trust region size
 if(isempty(options.InitTrustRegionRadius))
@@ -82,9 +83,6 @@ optimValues = struct([]);
 optimValues(1).iteration = 0;
 optimValues(1).mu = mu;
 optimValues(1).normdp = nan;
-
-% step inertia
-dpmem = [];
 
 dp = nan;
 dresnorm = -1;
