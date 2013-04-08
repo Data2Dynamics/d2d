@@ -21,8 +21,8 @@ end
 rhs = mysubs(rhs, ar.model(m).sym.x, ar.model(m).sym.px0);
 
 qnonzero = rhs~=0;
-fstrings = cell(1, sum(qnonzero));
-dxdt = cell(1, sum(qnonzero));
+fstrings = cell(1, sum(logical(qnonzero)));
+dxdt = cell(1, sum(logical(qnonzero)));
 fcount = 1;
 for j=find(qnonzero)'
     fstrings{fcount} = sprintf('%s = 0', char(rhs(j)));
@@ -35,7 +35,7 @@ for j=1:length(ar.model(m).fxeq)
     fcons{j} = char(mysubs(sym(ar.model(m).fxeq{j}), ar.model(m).sym.x, ar.model(m).sym.px0));
 end
 
-fp = cell(1, sum(qnonzero));
+fp = cell(1, sum(logical(qnonzero)));
 fcount = 1;
 for j=find(qnonzero)'
     fp{fcount} = ar.model(m).px0{j};
