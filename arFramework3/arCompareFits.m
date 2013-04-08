@@ -34,6 +34,7 @@ figure(1)
 subplot(5,1,1:3);
 h = nan(1,length(chi2s));
 colors = jet(length(chi2s));
+colors = bsxfun(@rdivide, colors, sqrt(sum(colors.^2,2)));
 for j=1:length(chi2s)
     h(j) = semilogy(sort(chi2s{j}) + 1 - minchi2, 'o-', 'Color', colors(j,:), ...
         'MarkerFaceColor','w', ...
