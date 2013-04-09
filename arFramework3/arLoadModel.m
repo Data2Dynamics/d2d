@@ -410,7 +410,7 @@ ar.model(m).pxeq = setdiff(vertcat(varlist{:}), union(ar.model(m).x, union(ar.mo
 ar.model(m).p = union(ar.model(m).px, union(ar.model(m).px0, union(ar.model(m).pc, union(ar.model(m).pxeq, ar.model(m).pu))));
 
 % CONDITIONS
-C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
 ar.model(m).fp = transpose(ar.model(m).p);
 while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
     qcondpara = ismember(ar.model(m).p, C{1});
@@ -420,7 +420,7 @@ while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
         warning('unknown parameter in conditions: %s', cell2mat(C{1})); %#ok<WNTAG>
     end
     C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, ...
-        'BufSize', 2^14-1);
+        'BufSize', 2^16-1);
 end
 
 % extra conditional parameters
