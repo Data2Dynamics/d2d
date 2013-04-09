@@ -467,7 +467,9 @@ if(sum(qcond) > 0)
                 for jjj=find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars))
                     remove = 1;
                     for jjjj = find(qhasdata)
-                       remove = sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0;
+                        if sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0
+                            remove = 0;
+                        end
                     end
                     if remove
                         ar.model(m).data(d).fp{jjj} = '0';
@@ -537,7 +539,9 @@ else
             for jjj=find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars))
                 remove = 1;
                 for jjjj = find(qhasdata)
-                   remove = sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0;
+                    if sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0
+                        remove = 0;
+                    end
                 end
                 if remove
                     ar.model(m).data(d).fp{jjj} = '0';
