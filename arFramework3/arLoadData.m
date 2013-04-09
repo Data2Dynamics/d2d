@@ -465,9 +465,9 @@ if(sum(qcond) > 0)
             for jj=find(~qhasdata)
                 fprintf('\t%20s no data, removed\n', ar.model(m).data(d).y{jj});
                 for jjj=find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars))
-                    jremove = [];
+                    jnotremove = [];
                     for jjjj = find(qhasdata)
-                        jnotremove = unique([jremove find(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).py_sep(jj).pars), 1)]);
+                        jnotremove = unique([jnotremove find(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).py_sep(jj).pars), 1)]);
                     end
                     ar.model(m).data(d).fp{setdiff(jjj,jnotremove)} = '0';
                 end
