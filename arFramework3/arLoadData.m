@@ -465,11 +465,13 @@ if(sum(qcond) > 0)
             for jj=find(~qhasdata)
                 fprintf('\t%20s no data, removed\n', ar.model(m).data(d).y{jj});
                 for jjj=find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars))
-                    jnotremove = [];
+                    remove = 1;
                     for jjjj = find(qhasdata)
-                        jnotremove = unique([jnotremove find(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).py_sep(jj).pars), 1)]);
+                       remove = sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0;
                     end
-                    ar.model(m).data(d).fp{setdiff(jjj,jnotremove)} = '0';
+                    if remove
+                        ar.model(m).data(d).fp{jjj} = '0';
+                    end
                 end
             end
             ar.model(m).data(d).y = ar.model(m).data(d).y(qhasdata);
@@ -535,9 +537,7 @@ else
             for jjj=find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars))
                 remove = 1;
                 for jjjj = find(qhasdata)
-                    if ~isempty(find(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).py_sep(jj).pars), 1))
-                        remove = 0;
-                    end
+                   remove = sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0;
                 end
                 if remove
                     ar.model(m).data(d).fp{jjj} = '0';
