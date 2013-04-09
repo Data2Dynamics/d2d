@@ -3,22 +3,33 @@ function arCompareFits(filenames)
 if(nargin==0)
     filenames = fileChooserMulti('./Results', true);
 end
+if(~iscell(filenames))
+    filelist = fileList('./Results');
+    filenames = filelist(filenames);
+end
 
 minchi2 = Inf;
 chi2s = {};
+optim_krit = {};
 labels = {};
 fevals = [];
+timing = [];
 arWaitbar(0);
+jcount = 0;
 for j=1:length(filenames)
     arWaitbar(j,length(filenames));
     fname = ['./Results/' filenames{j} '/workspace.mat'];
     if(exist(fname,'file'))
         tmpple = load(fname);
         if(isfield(tmpple.ar, 'chi2s'))
-            chi2s{end+1} = tmpple.ar.chi2s; %#ok<AGROW>
-            labels{end+1} = filenames{j}; %#ok<AGROW>
-            
-            fevals(1:length(tmpple.ar.fun_evals),end+1) = tmpple.ar.fun_evals; %#ok<AGROW>
+            jcount = jcount + 1;
+            chi2s{jcount} = tmpple.ar.chi2s; %#ok<AGROW>
+            labels{jcount} = filenames{j}; %#ok<AGROW>
+            if(isfield(tmpple.ar, 'optim_crit'))
+                optim_krit{jcount} = tmpple.ar.optim_crit; %#ok<AGROW>
+            end
+            fevals(1:length(tmpple.ar.fun_evals),jcount) = tmpple.ar.fun_evals; %#ok<AGROW>
+            timing(1:length(tmpple.ar.timing),jcount) = tmpple.ar.timing; %#ok<AGROW>
             
             minchi2 = min([minchi2 min(tmpple.ar.chi2s)]);
         end
@@ -30,13 +41,15 @@ arWaitbar(-1);
 
 
 figure(1)
-
-subplot(5,1,1:3);
 h = nan(1,length(chi2s));
 colors = jet(length(chi2s));
 colors = bsxfun(@rdivide, colors, sqrt(sum(colors.^2,2)));
 for j=1:length(chi2s)
-    h(j) = semilogy(sort(chi2s{j}) + 1 - minchi2, 'o-', 'Color', colors(j,:), ...
+    [chi2s_sorted,isort] = sort(chi2s{j});
+    if(~isempty(optim_krit{jcount}))
+        optim_krit{jcount} = optim_krit{jcount}(isort); %#ok<AGROW>
+    end
+    h(j) = semilogy(chi2s_sorted + 1 - minchi2, 'o-', 'Color', colors(j,:), ...
         'MarkerFaceColor','w', ...
         'LineWidth',1, 'MarkerSize',4);
     hold on
@@ -46,8 +59,27 @@ legend(h, strrep(labels, '_', '\_'));
 xlabel('run index (sorted by likelihood)');
 ylabel('likelihood');
 
-subplot(5,1,5);
+figure(2)
+subplot(3,1,1);
 boxplot(log10(fevals), 'orientation', 'horizontal', 'labels', labels, ...
     'orientation', 'horizontal', ...
     'plotstyle', 'compact', 'colors', colors);
 xlabel('log_{10} number of function evaluations');
+
+subplot(3,1,2);
+boxplot(log10(timing), 'orientation', 'horizontal', 'labels', labels, ...
+    'orientation', 'horizontal', ...
+    'plotstyle', 'compact', 'colors', colors);
+xlabel('log_{10} runtime [s]');
+
+subplot(3,1,3);
+for j=1:length(chi2s)
+    h(j) = semilogy(optim_krit{j}, 'o-', 'Color', colors(j,:), ...
+        'MarkerFaceColor','w', ...
+        'LineWidth',1, 'MarkerSize',4);
+    hold on
+end
+hold off
+% legend(h, strrep(labels, '_', '\_'));
+xlabel('run index (sorted by likelihood)');
+ylabel('first order optimality criterion');

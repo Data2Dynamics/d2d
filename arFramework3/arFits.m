@@ -32,6 +32,7 @@ if(append && isfield(ar,'ps') && isfield(ar, 'chi2s') && ...
     ar.ps = [nan(n, length(ar.p)); ar.ps];
     ar.ps_start = [ps; ar.ps_start];
     ar.chi2s = [nan(1,n) ar.chi2s];
+    ar.chi2s_start = [nan(1,n) ar.chi2s_start];
     ar.timing = [nan(1,n) ar.timing];
     ar.exitflag = [-ones(1,n) ar.exitflag];
     ar.fun_evals = [nan(1,n) ar.fun_evals];
@@ -40,6 +41,7 @@ else
     ar.ps = nan(n, length(ar.p));
     ar.ps_start = ps;
     ar.chi2s = nan(1,n);
+    ar.chi2s_start = nan(1,n);
     ar.timing = nan(1,n);
     ar.fun_evals = nan(1,n);
     ar.optim_crit = nan(1,n);
@@ -69,6 +71,8 @@ for j=1:n
     ar.p = ps(j,:);
     tic;
     try
+        arChi2(true);
+        ar.chi2s_start(j) = ar.chi2fit;
         if(dynamic_only)
             arFitObs(true);
         end
@@ -108,5 +112,5 @@ if plot_summary
         plotmatrix(ar.ps(:,q_select), 'x');
     end
     
-    arPlotFits
+    arPlotFits;
 end
