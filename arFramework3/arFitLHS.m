@@ -32,6 +32,9 @@ end
 if(~exist('plot_summary','var'))
     plot_summary = false;
 end
+if(~isfield(ar.config,'useModifiedFits'))
+    ar.config.useModifiedFits = false;
+end
 
 ps = ones(n,1) * ar.p;
 
@@ -47,4 +50,9 @@ psrand = psrand + (ones(n,1)*ar.lb(q_select));
 
 ps(:,q_select) = psrand;
 
-arFits(ps, append, dynamic_only, plot_summary);
+if(ar.config.useModifiedFits)
+	arFits_modified(ps, append, dynamic_only, plot_summary);
+else
+	arFits(ps, append, dynamic_only, plot_summary);
+end
+
