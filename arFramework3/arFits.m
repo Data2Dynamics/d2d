@@ -14,7 +14,7 @@ if(~exist('append','var'))
     append = false;
 end
 if(~exist('dynamic_only','var'))
-    dynamic_only = false;
+    dynamic_only = true;
 end
 if(~exist('plot_summary','var'))
     plot_summary = false;
@@ -48,7 +48,7 @@ else
     ar.exitflag = -ones(1,n);
 end
 
-if(~dynamic_only)
+if(dynamic_only)
     q_select = ar.qFit==1 & ar.qDynamic==1;
 else
     q_select = ar.qFit==1;
@@ -87,7 +87,7 @@ for j=1:n
     end
     ar.timing(j) = toc;
 end
-fprintf('totol fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
+fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
 fprintf('mean fitting time: %fsec\n', 10^mean(log10(ar.timing(~isnan(ar.timing)))));
 arWaitbar(-1);
 

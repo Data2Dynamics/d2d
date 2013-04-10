@@ -5,7 +5,7 @@
 % n:        number of runs      [10]
 % append:                       [false]
 % randomseed:   rng(randomseed)
-% dynamic_only                  [false]
+% dynamic_only                  [true]
 
 function arFitLHS(n, append, randomseed, dynamic_only, plot_summary)
 
@@ -27,7 +27,7 @@ if(exist('rng','file')~=0)
     end
 end
 if(~exist('dynamic_only','var'))
-    dynamic_only = false;
+    dynamic_only = true;
 end
 if(~exist('plot_summary','var'))
     plot_summary = false;
