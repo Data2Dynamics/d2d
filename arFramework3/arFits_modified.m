@@ -102,15 +102,15 @@ for j=1:n
 
             if(i == 1 || i == 2)
                 ar.config.optim.MaxIter = 10;
-                for n = 1:100
-                    if(i==1 && n==1)
+                for nn = 1:100
+                    if(i==1 && nn==1)
                         for l = 1:length(ar.p)
                             if(ar.qDynamic(l) == 0)
                                 ar.qFit(l) = 0;
                             end
                         end
 			fprintf('Run %i, non-dynamic parameters = 0\n',i);
-                    elseif(i==2 && n==1)
+                    elseif(i==2 && nn==1)
                         for l = 1:length(ar.p)
                             if(ar.qDynamic(l) == 0)
                                 ar.qFit(l) = 1;
