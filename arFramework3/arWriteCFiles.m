@@ -39,10 +39,10 @@ fprintf(fid, '\tdouble *u;\n');
 fprintf(fid, '\tdouble *su;\n');
 fprintf(fid, '\tdouble *p;\n');
 fprintf(fid, '\tdouble *v;\n');
+fprintf(fid, '\tdouble *sv;\n');
 fprintf(fid, '\tdouble *dvdx;\n');
 fprintf(fid, '\tdouble *dvdu;\n');
 fprintf(fid, '\tdouble *dvdp;\n');
-fprintf(fid, '\tdouble *sv;\n');
 fprintf(fid, '\t} *UserData;\n');
 fprintf(fid, '#endif /* _MY_UDATA */\n');
 fclose(fid);
@@ -692,12 +692,18 @@ elseif(strcmp(svar,'fx0'))
     cvar =  'x0_tmp';
 elseif(strcmp(svar,'dfxdx'))
     cstr = ccode(ar.model(m).condition(id2).sym.dfxdx(:));
+    for j=find(ar.model(m).condition(id2).sym.dfxdx(:)' == 0)
+        cstr = [cstr sprintf('\n  T[%i][0] = 0;',j-1)]; %#ok<AGROW>
+    end
     cvar =  'J->data';
 elseif(strcmp(svar,'fsv'))
     cstr = ccode(ar.model(m).condition(id2).sym.fsv(:,ip));
     cvar =  'sv';
 elseif(strcmp(svar,'fsx'))
     cstr = ccode(ar.model(m).condition(id2).sym.fsx(:,ip));
+    for j=find(ar.model(m).condition(id2).sym.fsx(:,ip)' == 0)
+        cstr = [cstr sprintf('\n  T[%i][0] = 0;',j-1)]; %#ok<AGROW>
+    end
     cvar =  'sxdot_tmp';
 elseif(strcmp(svar,'fsx0'))
     cstr = ccode(ar.model(m).condition(id2).sym.fsx0(:,ip));

@@ -55,13 +55,13 @@ struct timeval t1;
 void *x_calc(void *threadarg);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition);
 
-static void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2);
-static void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd);
-static void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2);
-static void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *yexp, double *y, double *ystd, double *res, double *reserr);
+void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2);
+void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd);
+void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2);
+void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr);
 
-static int check_flag(void *flagvalue, char *funcname, int opt);
-static int ewt(N_Vector y, N_Vector w, void *user_data);
+int check_flag(void *flagvalue, char *funcname, int opt);
+int ewt(N_Vector y, N_Vector w, void *user_data);
 
 /* user functions */
 #include "arSimuCalcFunctions.c"
@@ -201,15 +201,15 @@ void *x_calc(void *threadarg) {
     int id, nd, has_tExp;
     double *dLinkints;      
     
+    int flag;
+    int is, js, ks, ids;
+    int nout, neq;
+    
     /* printf("computing model #%i, condition #%i\n", im, ic); */
     
     /* begin of CVODES */
     void *cvode_mem;
     UserData data;
-    
-    int flag;
-    int is, js, ks, ids;
-    int nout, neq;
     
     realtype t;
     double tstart;
@@ -230,6 +230,7 @@ void *x_calc(void *threadarg) {
     double *returnddxdtdp;
     
     int sensi_meth = CV_SIMULTANEOUS; /* CV_SIMULTANEOUS or CV_STAGGERED */
+    bool error_corr = TRUE;
     
     /* MATLAB values */
     status = mxGetData(mxGetField(arcondition, ic, "status"));
@@ -308,6 +309,11 @@ void *x_calc(void *threadarg) {
         flag = AR_CVodeInit(cvode_mem, x, tstart, im, ic);
         if (check_flag(&flag, "CVodeInit", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
         
+        /* Number of maximal internal steps */
+        status[0] = 15;
+        flag = CVodeSetMaxNumSteps(cvode_mem, cvodes_maxsteps);
+        if(check_flag(&flag, "CVodeSetMaxNumSteps", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        
         /* Use private function to compute error weights */
         status[0] = 5;
         flag = CVodeSStolerances(cvode_mem, RCONST(cvodes_rtol), RCONST(cvodes_atol));
@@ -365,13 +371,15 @@ void *x_calc(void *threadarg) {
             flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sx, im, ic);
             if(check_flag(&flag, "CVodeSensInit1", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
             
-/*             status[0] = 11;
+            /*
+            status[0] = 11;
             flag = CVodeSensEEtolerances(cvode_mem);
-            if(check_flag(&flag, "CVodeSensEEtolerances", 1)) {if(parallel==1) {pthread_exit(NULL);} return;} */
-             
-/*             status[0] = 12;
+            if(check_flag(&flag, "CVodeSensEEtolerances", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            
+            status[0] = 13;
             flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
-            if (check_flag(&flag, "CVodeSetSensParams", 1)) {if(parallel==1) {pthread_exit(NULL);} return;} */ 
+            if (check_flag(&flag, "CVodeSetSensParams", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            */
             
             atols_ss = N_VNew_Serial(np);
             if (check_flag((void *)atols_ss, "N_VNew_Serial", 0)) {if(parallel==1) {pthread_exit(NULL);} return;}
@@ -382,16 +390,9 @@ void *x_calc(void *threadarg) {
             if(check_flag(&flag, "CVodeSensSStolerances", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
             
             status[0] = 13;
-            flag = CVodeSetSensErrCon(cvode_mem, TRUE);
+            flag = CVodeSetSensErrCon(cvode_mem, error_corr);
             if(check_flag(&flag, "CVodeSetSensErrCon", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
         }
-    }
-    
-    if(neq>0){
-        /* Number of maximal internal steps */
-        status[0] = 15;
-        flag = CVodeSetMaxNumSteps(cvode_mem, cvodes_maxsteps);
-        if(check_flag(&flag, "CVodeSetMaxNumSteps", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
     }
     
     /* loop over output points */
@@ -474,6 +475,7 @@ void *x_calc(void *threadarg) {
     
     /* printf("computing model #%i, condition #%i (done)\n", im, ic); */
     
+    /* call y_calc */
     if(ardata!=NULL){
         dLink = mxGetField(arcondition, ic, "dLink");
         dLinkints = mxGetData(dLink);
@@ -670,7 +672,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
 }
 
 /* standard least squares */
-static void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2) {
+void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2) {
     int iy;
     
     for(iy=0; iy<ny; iy++){
@@ -683,7 +685,7 @@ static void fres(int nt, int ny, int it, double *res, double *y, double *yexp, d
         chi2[iy] += pow(res[it + (iy*nt)], 2);
     }
 }
-static void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd) {
+void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd) {
     int iy, ip;
     
     for(iy=0; iy<ny; iy++){
@@ -697,7 +699,7 @@ static void fsres(int nt, int ny, int np, int it, double *sres, double *sy, doub
 }
 
 /* least squares for error model fitting */
-static void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2err) {
+void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2err) {
     int iy;
     
     double add_c = 50.0;
@@ -710,13 +712,13 @@ static void fres_error(int nt, int ny, int it, double *reserr, double *res, doub
             ystd[it + (iy*nt)] = 0.0/0.0;
         } else {
             reserr[it + (iy*nt)] += add_c;
-            if(reserr[it + (iy*nt)] < 0) mexErrMsgTxt("ERROR error model < 1e-10 not allowed"); /* s*log(ystd) + add_c > 0 */
+            if(reserr[it + (iy*nt)] < 0) mexErrMsgTxt("ERROR error model < 1e-10 not allowed"); /* 2*log(ystd) + add_c > 0 */
             reserr[it + (iy*nt)] = sqrt(reserr[it + (iy*nt)]);
             chi2err[iy] += pow(reserr[it + (iy*nt)], 2) - add_c;
         }
     }
 }
-static void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *yexp, double *y, double *ystd, double *res, double *reserr) {
+void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr) {
     int iy, ip;
     double rtmp;
     
@@ -724,7 +726,6 @@ static void fsres_error(int nt, int ny, int np, int it, double *sres, double *sr
         for(ip=0; ip<np; ip++){
             sres[it + (iy*nt) + (ip*nt*ny)] -= systd[it + (iy*nt) + (ip*nt*ny)] * res[it + (iy*nt)] / ystd[it + (iy*nt)];
             sreserr[it + (iy*nt) + (ip*nt*ny)] = systd[it + (iy*nt) + (ip*nt*ny)] / (reserr[it + (iy*nt)] * ystd[it + (iy*nt)]);
-            
             if(mxIsNaN(yexp[it + (iy*nt)])) {
                 sres[it + (iy*nt) + (ip*nt*ny)] = 0.0;
                 sreserr[it + (iy*nt) + (ip*nt*ny)] = 0.0;
@@ -744,7 +745,7 @@ static void fsres_error(int nt, int ny, int np, int it, double *sres, double *sr
  *             NULL pointer
  */
 
-static int check_flag(void *flagvalue, char *funcname, int opt) {
+int check_flag(void *flagvalue, char *funcname, int opt) {
     int *errflag;
     
     /* Check if SUNDIALS function returned NULL pointer - no memory allocated */
@@ -773,7 +774,7 @@ static int check_flag(void *flagvalue, char *funcname, int opt) {
 
 /* custom error weight function */
 /*
-static int ewt(N_Vector y, N_Vector w, void *user_data)
+int ewt(N_Vector y, N_Vector w, void *user_data)
 {
   int i;
   realtype yy, ww;
