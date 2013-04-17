@@ -1,210 +1,89 @@
 function arOptimizerTest(range)
 
+if(~exist('range','var'))
+    range = -1;
+end
+
 global ar
 
 p = ar.p + 0;
+lb = ar.lb + 0;
+ub = ar.ub + 0;
 
 ar.p = p;
 arChi2(true);
 
-g = -ar.res*ar.sres;
-H = ar.sres'*ar.sres;
+llh = ar.chi2fit;
+g = -2*ar.res*ar.sres(:,ar.qFit==1);
+H = 2*ar.sres(:,ar.qFit==1)'*ar.sres(:,ar.qFit==1);
 
-% gradient direction
-sg = g/norm(g);
-distp = -[p-ar.ub; -(p - ar.lb)]; % distance to bounds (should be always positive)
-exbounds = [p+sg-ar.ub; -(p+sg - ar.lb)] > 0; % dp bejond bound ?
-onbound = distp==0;
-qred = sum(onbound & exbounds,1)>0;
-if(sum(qred)>0)
-    gred = g(~qred);
-    sg(:) = 0;
-    sg(~qred) = gred/norm(gred);
-else
-    gred = g;
-end
+fprintf('norm(g) = %f\n', norm(g));
+fprintf('cond(H) = %f\n', cond(H));
 
-fprintf('norm(g) = %g, reduced by %i\n',norm(gred), sum(qred));
+N = 30;
 
-% newton step
-sn = transpose(pinv(ar.sres)*ar.res');
-% sn = transpose(-inv(H)*g');
-% distp = -[p-ar.ub; -(p - ar.lb)]; % distance to bounds (should be always positive)
-% exbounds = [p+sn-ar.ub; -(p+sn - ar.lb)] > 0; % dp bejond bound ?
-% onbound = distp==0;
-% qred = sum(onbound & exbounds,1)>0;
-% if(sum(qred)>0)
-%     gred = g(~qred);
-%     Hred = H(~qred,~qred);
-%     sn(:) = 0;
-%     sn(~qred) = transpose(-inv(Hred)*gred');
-% end
+mus = linspace(0,10^range,N);
 
-N = 10;
+chi2s = {};
+chi2s_expect = {};
+xs = {};
+labels = {'gradient','newton','levenberg-marquardt','trust region'};
+method = [3 2 1 0];
+styles = {'s-r','o-g','*-b','d-c'};
+styles_expect = {'s--r','o--g','*--b','d--c'};
 
-chi2g = nan(1,N);
-chi2n = nan(1,N);
-chi2t = nan(1,N);
-
-xg = nan(1,N);
-xn = nan(1,N);
-xt = nan(1,N);
-
-% gradient
-xg = linspace(0,10^range,N);
 arWaitbar(0);
-ar.p = p;
-for j = 1:N
-    arWaitbar(j,3*N);
-    ar.p = p + xg(j)*sg;
-    ipp = ar.p<ar.lb | ar.p>ar.ub;
-    if(sum(ipp)>0)
-        break;
+try %#ok<TRYNC>
+    for jm = 1:length(method)
+        ar.p = p;
+        for j = 1:N
+            arWaitbar([jm j],[length(method) N]);
+            [dptmp, solver_calls, qred, ~, grad_dir_frac, llh_expect] = arNLSstep(llh, g, H, mus(j), p(ar.qFit==1), lb(ar.qFit==1), ub(ar.qFit==1), ...
+                0, [], 0, method(jm));
+            fprintf('%s mu=%4.2f solver_calls=%i grad_dir_frac=%4.2f qred=', ...
+                labels{jm}, mus(j), solver_calls, grad_dir_frac);
+            ired = find(qred);
+            for jred = ired
+                fprintf('%i ', jred);
+            end
+            fprintf('\n');
+            
+            try %#ok<TRYNC>
+                ar.p(ar.qFit==1) = p(ar.qFit==1) + dptmp;
+                arChi2(true);
+                
+                chi2s_expect{jm}(j) = llh_expect; %#ok<AGROW>
+                xs{jm}(j) = norm(dptmp); %#ok<AGROW>
+                chi2s{jm}(j) = ar.chi2fit; %#ok<AGROW>
+            end
+        end
     end
-    arChi2(true);
-    
-    chi2g(j) = ar.chi2fit;
-end
-
-% newton
-ar.p = p;
-xnrel = linspace(0,1,N);
-for j = 1:N
-    arWaitbar(j+N,3*N);
-    dptmp = xnrel(j)*sn;
-    ar.p = p + dptmp;
-    ipp = ar.p<ar.lb | ar.p>ar.ub;
-    if(sum(ipp)>0)
-        break;
-    end
-    try
-        arChi2(true);
-        
-        chi2n(j) = ar.chi2fit;
-        xn(j) = norm(dptmp);
-    end
-end
-arWaitbar(-1);
-
-% trust region
-ar.p = p;
-for j = 1:N
-    arWaitbar(j+2*N,3*N);
-    dptmp = getStep(g, H, xg(j), p, ar.lb, ar.ub, 0);
-    ar.p = p + dptmp;
-    ipp = ar.p<ar.lb | ar.p>ar.ub;
-    if(sum(ipp)>0)
-        break;
-    end
-    arChi2(true);
-    
-    chi2t(j) = ar.chi2fit;
-    xt(j) = norm(dptmp);
 end
 arWaitbar(-1);
 
 ar.p = p;
 arChi2(true);
+
+%% plot
 
 figure(1);
 
-subplot(3,3,1);
-plot(xg,chi2g,'s-r');
-title('gradient');
+for jm = 1:length(method)
+    subplot(3,4,jm);
+    plot(xs{jm}, chi2s{jm}, styles{jm});
+    hold on
+    plot(xs{jm}, chi2s_expect{jm}, styles_expect{jm});
+    hold off
+    title(labels{jm});
+end
 
-subplot(3,3,2);
-plot(xn,chi2n,'o-g');
-title('Newton');
-
-subplot(3,3,3);
-plot(xt,chi2t,'*-b');
-title('trust region');
-
-subplot(3,3,[4:9]);
-plot(xg,chi2g,'s-r');
-hold on
-plot(xn,chi2n,'o-g');
-plot(xt,chi2t,'*-b');
+subplot(3,4,5:12);
+for jm = 1:length(method)
+    plot(xs{jm}, chi2s{jm}, styles{jm});
+    hold on
+    plot(xs{jm}, chi2s_expect{jm}, styles_expect{jm});
+end
 hold off
 
 
-% generate trial steps
-%
-% g:    gradient
-% H:    Hessian matrix
-% mu:   trust region size
-% p:    current parameters
-% lb:   lower bounds
-% ub:   upper bounds
-function [dp, solver_calls, gred] = getStep(g, H, mu, p, lb, ub, solver_calls)
 
-% solve subproblem
-dp = getDP(g, H, mu);
-solver_calls = solver_calls + 1;
-
-distp = -[p-ub; -(p - lb)]; % distance to bounds (should be always positive)
-onbound = distp==0; % which parameter is exactly on the bound ?
-exbounds = [p+dp-ub; -(p+dp - lb)] > 0; % dp bejond bound ?
-
-% if p on bounds and dp pointing bejond bound, reduce problem
-gred = g;
-qred = sum(onbound & exbounds,1)>0;
-if(sum(~qred)==0)
-    error('solution outside bounds, no further step possible');
-end
-qred_presist = qred;
-while(sum(qred)>0)
-    gred = g(~qred_presist);
-    Hred = H(~qred_presist,~qred_presist);
-    
-    % solve reduced subproblem
-    dp_red = getDP(gred, Hred, mu);
-    solver_calls = solver_calls + 1;
-    
-    dp(:) = 0;
-    dp(~qred_presist) = dp_red;
-    
-    exbounds = [p+dp-ub; -(p+dp - lb)] > 0; % dp bejond bound ?
-    qred = sum(onbound & exbounds,1)>0;
-    qred_presist = qred | qred_presist;
-    
-    if(sum(~qred_presist)==0)
-        error('solution outside bounds, no further step possible');
-    end
-end
-fprintf('trust: reduce %i\n', sum(qred_presist));
-
-% if dp too long cut to bounds
-dptmp = [dp; dp];
-dpredfac = abs(min(distp(exbounds)./dptmp(exbounds)));
-if(~isempty(dpredfac))
-    if(dpredfac==0)
-        error('zero step size');
-    end
-    dp = dp * dpredfac;
-end
-
-
-
-
-% solver function
-function dp = getDP(g, H, mu)
-
-% % trust region solution
-% dp = trust(-g',H,mu)'; 
-% % PROBLEM: ensuring norm(dp)<=mu in trust function
-% if(norm(dp)>mu)
-%     dp = dp/norm(dp)*mu;
-% end
-
-% trust region solution
-dp = trust(-g',H,mu)';
-lambda = 1e-6;
-while(norm(dp)-mu > 1e-6)
-%     fprintf('trust problem %g %g\n', norm(dp)-mu, lambda);
-    lambda = lambda * 10;
-    dp = trust(-g',H+lambda*eye(size(H)),mu)'; 
-end
-
-% % levenberg-marquardt
-% dp = transpose(pinv(H + eye(size(H))/mu)*g');
