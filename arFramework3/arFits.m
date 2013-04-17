@@ -14,7 +14,7 @@ if(~exist('append','var'))
     append = false;
 end
 if(~exist('dynamic_only','var'))
-    dynamic_only = true;
+    dynamic_only = false;
 end
 if(~exist('plot_summary','var'))
     plot_summary = false;
