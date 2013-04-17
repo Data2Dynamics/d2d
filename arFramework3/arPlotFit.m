@@ -2,9 +2,13 @@
 %
 % arPlotFitLM
 
-function arPlotFit
+function arPlotFit(qp)
 
 global ar
+
+if(~exist('qp','var'))
+    qp = true(size(ar.p));
+end
 
 figure(2)
 
@@ -32,14 +36,14 @@ title('log10 stepsize')
 xlabel('iterations')
 
 subplot(3,2,2)
-plot(xs, ar.fit.p_hist(xs,:))
+plot(xs, ar.fit.p_hist(xs,qp))
 title('parameters')
 
 subplot(3,2,4)
-plot(xs, bsxfun(@minus,ar.fit.p_hist(1,:),ar.fit.p_hist(xs,:)))
+plot(xs, bsxfun(@minus,ar.fit.p_hist(1,qp),ar.fit.p_hist(xs,qp)))
 title('parameter changes relative to start')
 
 subplot(3,2,6)
-plot(xs(1:end-1), diff(ar.fit.p_hist(xs,:))) 
+plot(xs(1:end-1), diff(ar.fit.p_hist(xs,qp))) 
 title('relative parameter changes')
 xlabel('iterations')

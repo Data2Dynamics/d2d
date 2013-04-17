@@ -59,6 +59,9 @@ else
     mu = options.InitTrustRegionRadius;         
 end
 
+% maximum trust region size
+mu_max = 1; Inf;
+
 % trust region size scale factor
 mu_fac = 2;
 
@@ -176,6 +179,9 @@ while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
                 end
             else
                 mu = mu * mu_fac;
+            end
+            if(mu>mu_max)
+                mu = mu_max;
             end
         end
     end
@@ -307,8 +313,14 @@ dpmem = dp;
 grad_dir_frac = dp(~qred_presist)*gred'/norm(dp(~qred_presist))/norm(gred);
 
 
+
 % solver function
 function dp = getDP(g, H, mu, useLevenbergMarquardt)
+
+if(mu==0)
+    dp = zeros(size(g));
+    return;
+end
 
 if(~useLevenbergMarquardt)
     % trust region solution
