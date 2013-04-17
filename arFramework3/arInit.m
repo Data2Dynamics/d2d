@@ -1,6 +1,7 @@
 % Initialize and clear workspace of framework
 %
-% Copyright Andreas Raue 2012 (andreas.raue@fdm.uni-freiburg.de)
+% Copyright D2D Development Team
+% Contact: Andreas Raue (andreas.raue@fdm.uni-freiburg.de)
 
 arCheck;
 
