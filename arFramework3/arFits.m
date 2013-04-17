@@ -74,7 +74,7 @@ for j=1:n
         arChi2(true);
         ar.chi2s_start(j) = ar.chi2fit;
         if(dynamic_only)
-            arFitObs(true);
+            arFitDyn(true);
         end
         arFit(true);
         ar.ps(j,:) = ar.p;
