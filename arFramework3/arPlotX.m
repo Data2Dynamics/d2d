@@ -385,6 +385,8 @@ end
 function [t, u, lb, ub, zero_break] = getDataDoseResponseU(jm, ju, ds, ttime)
 global ar
 
+zero_break = [];
+
 ccount = 1;
 for jd = ds
     jc = ar.model(jm).data(jd).cLink;
@@ -424,6 +426,8 @@ end
 
 function [t, x, lb, ub, zero_break] = getDataDoseResponseX(jm, jx, ds, ttime)
 global ar
+
+zero_break = [];
 
 ccount = 1;
 for jd = ds
