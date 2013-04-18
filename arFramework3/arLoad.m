@@ -10,3 +10,5 @@ end
 
 load(['./Results/' filename '/workspace.mat']);
 fprintf('workspace loaded from file %s\n', filename);
+
+pleLoad;
