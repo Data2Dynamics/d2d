@@ -1,7 +1,8 @@
 % generate trial steps within box bounds
 %
 % [dp, solver_calls, gred, dpmem, grad_dir_frac] = ...
-%       arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, method)
+%       arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, ...
+%       dpmem, useInertia, method, nu)
 %
 % llh:  likelihood
 % g:    gradient
@@ -14,10 +15,12 @@
 % method:   0 = trust region (based on modified trust.m)
 %           1 = Levenberg-Marquardt
 %           2 = Newton (with maximal step length mu)
-%           3 = gradient descent
+%           3 = gradient descent (up to cauchy point)
+%           4 = dogleg
 
-function [dp, solver_calls, qred, dpmem, grad_dir_frac, llh_expect] = arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, method)
-
+function [dp, solver_calls, qred, dpmem, grad_dir_frac, llh_expect] = ...
+    arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, method)
+        
 % solve subproblem
 [dp, solver_calls_tmp] = getDP(g, H, mu, method);
 solver_calls = solver_calls + solver_calls_tmp;
@@ -80,7 +83,8 @@ llh_expect = llh - g*dp' + 0.5*dp*H*dp';
 % method:   0 = trust region (based on modified trust.m)
 %           1 = Levenberg-Marquardt
 %           2 = Newton (with maximal step length mu)
-%           3 = gradient descent
+%           3 = gradient descent (up to cauchy point)
+%           4 = dogleg
 
 function [dp, solver_calls_tmp] = getDP(g, H, mu, method)
 
@@ -98,24 +102,48 @@ switch method
         % the function trust has a bug, therefore, in some cases
         % the problem has to be regularized
         lambda = 1e-6;
-        while(norm(dp)-mu > 1e-6)
-            fprintf('trust.m problem %g, regularizing with new lambda=%g\n', norm(dp)-mu, lambda);
+        while(norm(dp)/mu > 1.01)
+            fprintf('trust.m problem %g, regularizing with new lambda=%g\n', norm(dp)/mu, lambda);
             dp = trust(-g',H+lambda*eye(size(H)),mu)';
             solver_calls_tmp = solver_calls_tmp + 1;
             lambda = lambda * 10;
         end
         
     case 1 % levenberg-marquardt
-        lambda = 1000/mu;
-%         lambda = 1e-9/mu;
+        lambda = 1/mu;
         dp = transpose(pinv(H + lambda*eye(size(H)))*g');
-%         dp = mu*dp/norm(dp);
         
     case 2 % newton
         dp = transpose(pinv(H)*g');
-        dp = mu*dp/norm(dp);
-        
-    case 3 % gradient
-        dp = g;
-        dp = mu*dp/norm(dp);
+        if(norm(dp)>mu)
+            dp = mu*dp/norm(dp);
+        end
+    case 3 % gradient up to cauchy point
+        dp = norm(g)^2/(g*H*g') * g;
+        if(norm(dp)>mu)
+            dp = mu*dp/norm(dp);
+        end
+    case 4
+        dpC = norm(g)^2/(g*H*g') * g;
+        if(norm(dpC)>mu)
+            % truncated gradient
+            dp = mu*g/norm(g);
+%             fprintf('truncated gradient - ');
+        else
+            dpN = transpose(pinv(H)*g');
+            if(norm(dpN)<=mu)
+                % full newton
+                dp = dpN;
+%                 fprintf('full newton - ');
+            else
+                % dogleg
+                a = sum((dpN - dpC).^2);
+                b = 2*sum(dpC.*(dpN - dpC));
+                c = sum(dpC.^2) - mu^2;
+                t = (-b + sqrt(b^2 - 4 * a * c))/(2*a);
+                dp = dpC + t*(dpN - dpC);
+%                 fprintf('dogleg (%4.2f) - ', norm(dpC)/mu);
+            end
+        end
 end
+

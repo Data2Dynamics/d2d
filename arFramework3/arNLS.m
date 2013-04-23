@@ -43,8 +43,12 @@ switch(options.Display)
         debug = 3;
 end
 
-% trust region or levenberg marquardt ?
-useLevenbergMarquardt = false;
+% method:   0 = trust region (based on modified trust.m)
+%           1 = Levenberg-Marquardt
+%           2 = Newton (with maximal step length mu)
+%           3 = gradient descent (up to cauchy point)
+%           4 = dogleg
+method = 2;
 
 % inertia effect using memory
 % 0 = no
@@ -60,7 +64,7 @@ else
 end
 
 % maximum trust region size
-mu_max = 1; Inf;
+mu_max = Inf;
 
 % trust region size scale factor
 mu_fac = 2;
@@ -76,6 +80,7 @@ resnorm = sum(res.^2);
 resnorm_start = resnorm;
 funevals = funevals + 1;
 
+llh = sum(res.^2);      % objective function
 g = -2*res*sres;        % gradient
 H = 2*(sres'*sres);     % Hessian matrix
 
@@ -102,8 +107,8 @@ while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
     end
     
     % solve subproblem
-    [dp, solver_calls, gred, dpmem, grad_dir_frac] = ...
-        getStep(g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, useLevenbergMarquardt);
+    [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect] = ...
+        arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
     pt = p + dp;
     
     % ensure strict feasibility
@@ -117,71 +122,71 @@ while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
     
     % fit improve
     dresnorm = resnormt - resnorm; 
+    dresnorm_expect = resnorm_expect - resnorm;
     
     % output
     if(debug>2)
-        if(dresnorm<0)
-            fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g  norm(dp)=%-8.2g  dresnorm=%-8.2g  norm(g)=%-8.2g  sub-dim=%i  grad_dir=%3.1f', ...
-                iter, options.MaxIter, resnorm, mu, norm(dp), dresnorm, norm(gred), length(gred), grad_dir_frac);
-        else
-            fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g  norm(dp)=%-8.2g  dresnorm=%8s  norm(g)=%-8.2g  sub-dim=%i  grad_dir=%3.1f', ...
-                iter, options.MaxIter, resnorm, mu, norm(dp), '', norm(gred), length(gred), grad_dir_frac);
-        end
+        printiter(iter, options.MaxIter, resnorm, mu, norm(dp), dresnorm, ...
+            0, sum(qred), grad_dir_frac, dresnorm_expect);
     end
     
     if(mu >= options.TolX)
         % adjust mu
-        if(dresnorm>=0)
-            while(dresnorm>=0)
-                % output
-                if(debug>2)
-                    fprintf('  -\n');
-                end
-                
-                mu = mu / mu_fac; % shrinc trust region
-                
-                % solve subproblem
-                [dp, solver_calls, gred, dpmem, grad_dir_frac] = ...
-                    getStep(g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, useLevenbergMarquardt);
-                pt = p + dp;
-                
-                % ensure strict feasibility
-                pt(pt<lb) = lb(pt<lb);
-                pt(pt>ub) = ub(pt>ub);
-                
-                % function evaluation
-                [rest, srest] = feval(fun, pt);
-                resnormt = sum(rest.^2);
-                funevals = funevals + 1;
-                
-                % fit improve
-                dresnorm = resnormt - resnorm;
-                
-                % output
-                if(debug>2)
-                    if(dresnorm<0)
-                        fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g  norm(dp)=%-8.2g  dresnorm=%-8.2g  norm(g)=%-8.2g  sub-dim=%i  grad_dir=%3.1f', ...
-                            iter, options.MaxIter, resnorm, mu, norm(dp), dresnorm, norm(gred), length(gred), grad_dir_frac);
-                    else
-                        fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g  norm(dp)=%-8.2g  dresnorm=%8s  norm(g)=%-8.2g  sub-dim=%i  grad_dir=%3.1f', ...
-                            iter, options.MaxIter, resnorm, mu, norm(dp), '', norm(gred), length(gred), grad_dir_frac);
-                    end
-                end
-                
-                if(mu < options.TolX)
-                    break;
-                end
+        did_shric = false;
+        while(dresnorm>=0)
+            % output
+            if(debug>2)
+                fprintf('  -\n');
             end
-        else
-            if(~useLevenbergMarquardt)
+            
+            mu = mu / mu_fac; % shrinc trust region
+            did_shric = true;
+            
+            % solve subproblem
+            [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect] = ...
+                arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
+            pt = p + dp;
+            
+            % ensure strict feasibility
+            pt(pt<lb) = lb(pt<lb);
+            pt(pt>ub) = ub(pt>ub);
+            
+            % function evaluation
+            [rest, srest] = feval(fun, pt);
+            resnormt = sum(rest.^2);
+            funevals = funevals + 1;
+            
+            % fit improve
+            dresnorm = resnormt - resnorm;
+            dresnorm_expect = resnorm_expect - resnorm;
+            
+            % output
+            if(debug>2)
+                printiter(iter, options.MaxIter, resnorm, mu, norm(dp), dresnorm, ...
+                    0, sum(qred), grad_dir_frac, dresnorm_expect);
+            end
+            
+            if(mu < options.TolX)
+                break;
+            end
+        end
+        
+        if(mu > options.TolX)
+%             %  shrinc trust region if approximation is bad
+%             dresnorm_rel = dresnorm / dresnorm_expect;
+%             if(dresnorm_rel<0 || abs(dresnorm_rel-1)>0.25)
+%                 mu = mu / mu_fac;
+%                 did_shric = true;
+%             end
+            
+            % enlarge mu if not shricted before
+            if(~did_shric)
                 if(norm(dp)>0.5*mu)
                     mu = mu * mu_fac;
                 end
-            else
-                mu = mu * mu_fac;
-            end
-            if(mu>mu_max)
-                mu = mu_max;
+                if(mu>mu_max)
+                    mu = mu_max;
+                end
             end
         end
     end
@@ -194,6 +199,7 @@ while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
         sres = srest;
         resnorm = resnormt;
         
+        llh = sum(res.^2);      % objective function
         g = -2*res*sres;        % gradient
         H = 2*(sres'*sres);     % Hessian matrix
     end
@@ -223,7 +229,7 @@ if (nargout>4)
     output.funcCount = funevals;
     output.solverCount = solver_calls;
     output.algorithm = 'nls_trust';
-    output.firstorderopt = norm(gred);
+    output.firstorderopt = 0;
     switch(exitflag)
         case(0)
             output.message = 'Too many function evaluations or iterations.';
@@ -249,98 +255,15 @@ if(debug>1 || (debug>0 && exitflag==0))
 end
 
 
-% generate trial steps
-%
-% g:    gradient
-% H:    Hessian matrix
-% mu:   trust region size
-% p:    current parameters
-% lb:   lower bounds
-% ub:   upper bounds
-function [dp, solver_calls, gred, dpmem, grad_dir_frac] = getStep(g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, useLevenbergMarquardt)
 
-% solve subproblem
-dp = getDP(g, H, mu, useLevenbergMarquardt);
-solver_calls = solver_calls + 1;
+function printiter(iter, maxIter, resnorm, mu, norm_dp, dresnorm, ...
+    norm_gred, dim_red, grad_dir_frac, dresnorm_expect)
+fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g  norm(dp)=%-8.2g  ', iter, maxIter, resnorm, mu, norm_dp);
 
-distp = -[p-ub; -(p - lb)]; % distance to bounds (should be always positive)
-onbound = distp==0; % which parameter is exactly on the bound ?
-exbounds = [p+dp-ub; -(p+dp - lb)] > 0; % dp bejond bound ?
-
-% if p on bounds and dp pointing bejond bound, reduce problem
-gred = g;
-qred = sum(onbound & exbounds,1)>0;
-if(sum(~qred)==0)
-    error('solution outside bounds, no further step possible');
-end
-qred_presist = qred;
-while(sum(qred)>0)
-    gred = g(~qred_presist);
-    Hred = H(~qred_presist,~qred_presist);
-    
-    % solve reduced subproblem
-    dp_red = getDP(gred, Hred, mu, useLevenbergMarquardt);
-    solver_calls = solver_calls + 1;
-    
-    dp(:) = 0;
-    dp(~qred_presist) = dp_red;
-    
-    exbounds = [p+dp-ub; -(p+dp - lb)] > 0; % dp bejond bound ?
-    qred = sum(onbound & exbounds,1)>0;
-    qred_presist = qred | qred_presist;
-    
-    if(sum(~qred_presist)==0)
-        error('solution outside bounds, no further step possible');
-    end
-end
-
-% if dp too long cut to bounds
-dptmp = [dp; dp];
-dpredfac = abs(min(distp(exbounds)./dptmp(exbounds)));
-if(~isempty(dpredfac))
-    if(dpredfac==0)
-        error('zero step size');
-    end
-    dp = dp * dpredfac;
-end
-
-% inertial effect using memory
-if(useInertia>0 && ~isempty(dpmem))
-    dp = useInertia*dpmem + (1-useInertia)*dp;
-end
-dpmem = dp;
-
-grad_dir_frac = dp(~qred_presist)*gred'/norm(dp(~qred_presist))/norm(gred);
-
-
-
-% solver function
-function dp = getDP(g, H, mu, useLevenbergMarquardt)
-
-if(mu==0)
-    dp = zeros(size(g));
-    return;
-end
-
-if(~useLevenbergMarquardt)
-    % trust region solution
-    % the function trust has a bug, therefore, in some cases
-    % the problem has to be regularized
-    dp = trust(-g',H,mu)';
-    lambda = 1e-6;
-    while(norm(dp)-mu > 1e-6)
-    %     fprintf('trust problem %g %g\n', norm(dp)-mu, lambda);
-        lambda = lambda * 10;
-        dp = trust(-g',H+lambda*eye(size(H)),mu)';
-    end
-    
-%     % trust region solution (Attention, this part does not work!)
-%     dp = trust(-g',H,mu)';
-%     % PROBLEM: ensuring norm(dp)<=mu in trust function
-%     if(norm(dp)>mu)
-%         dp = dp/norm(dp)*mu;
-%     end
+if(dresnorm<0)
+    fprintf('dresnorm=%-8.2g  ', dresnorm);
 else
-    % levenberg-marquardt
-    dp = transpose(pinv(H + eye(size(H))/mu)*g');
+    fprintf('dresnorm=%8s  ', '');
 end
+fprintf('approx_qual=%-5.2f  norm(g)=%-8.2g  dim_red=%i  grad_dir=%3.1f', ...
+    dresnorm/dresnorm_expect, norm_gred, dim_red, grad_dir_frac);
