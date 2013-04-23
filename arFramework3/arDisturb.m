@@ -16,5 +16,7 @@ if(~exist('strength', 'var'))
 end
 
 ar.p(ar.qFit==1) = ar.p(ar.qFit==1) + randn(size(ar.p(ar.qFit==1))) * strength;
+ar.p(ar.p<ar.lb) = ar.lb(ar.p<ar.lb);
+ar.p(ar.p>ar.ub) = ar.ub(ar.p>ar.ub);
 
 arChi2;
