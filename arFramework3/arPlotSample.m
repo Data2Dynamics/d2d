@@ -9,8 +9,6 @@ figure(1)
 clf;
 
 % constants
-labelfontsize = 8;
-labelfonttype = 'TimesNewRoman';
 overplot = 0.1;
 
 if(ar.config.fiterrors == 1)
@@ -38,7 +36,6 @@ if(length(ar.sampling.ps)==1)
         plot(ar.sampling.ps{1}(qerrors), ar.sampling.chi2s_ple(qerrors), 'rs');
     end
     hold off
-    mySubplotStyle(gca, labelfontsize, labelfonttype)
     spacedAxisLimits(gca, overplot)
     ylabel(ylabeltmp);
     xlabel(myNameTrafo(ar.pLabel{ar.sampling.index}));
@@ -103,10 +100,6 @@ end
 
 function str = myNameTrafo(str)
 str = strrep(str, '_', '\_');
-
-function mySubplotStyle(g, labelfontsize, labelfonttype)
-set(g, 'FontSize', labelfontsize);
-set(g, 'FontName', labelfonttype);
 
 function spacedAxisLimits(g, overplot)
 [xmin xmax ymin ymax] = axisLimits(g);
