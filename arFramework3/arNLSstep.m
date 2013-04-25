@@ -119,7 +119,8 @@ switch method
             dp = mu*dp/norm(dp);
         end
     case 3 % gradient up to cauchy point
-        dp = norm(g)^2/(g*H*g') * g;
+%         dp = norm(g)^2/(g*H*g') * g;
+        dp = g;
         if(norm(dp)>mu)
             dp = mu*dp/norm(dp);
         end

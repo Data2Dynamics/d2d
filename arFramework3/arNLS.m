@@ -48,7 +48,7 @@ end
 %           2 = Newton (with maximal step length mu)
 %           3 = gradient descent (up to cauchy point)
 %           4 = dogleg
-method = 2;
+method = 0;
 
 % inertia effect using memory
 % 0 = no

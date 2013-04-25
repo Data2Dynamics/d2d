@@ -111,7 +111,24 @@ figure(2);
 clf
 for jm = 1:length(method)
     subplot(1,length(method),jm);
-    plot(ps{jm});
+    h = plot(ps{jm});
     title(labels{jm});
+    
+    [~, isort] = sort(std(ps{jm}));
+    isort = isort((end-5):end);
+    h = h(isort);
+    hlabels = {};
+    for j=1:length(h)
+        hlabels{j} = sprintf('%i', isort(j)); %#ok<AGROW>
+    end
+    legend(h,hlabels)
 end
+
+figure(3);
+subplot(3,1,1)
+plot(g, '*-')
+subplot(3,1,2:3)
+Hmax = max(abs(H(:)));
+imagesc(H, [-Hmax Hmax])
+colorbar
 
