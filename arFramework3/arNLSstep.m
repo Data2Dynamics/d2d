@@ -18,11 +18,11 @@
 %           3 = gradient descent (up to cauchy point)
 %           4 = dogleg
 
-function [dp, solver_calls, qred, dpmem, grad_dir_frac, llh_expect] = ...
+function [dp, solver_calls, qred, dpmem, grad_dir_frac, llh_expect, mudp] = ...
     arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, method)
         
 % solve subproblem
-[dp, solver_calls_tmp] = getDP(g, H, mu, method);
+[dp, solver_calls_tmp] = getDP(g, H, mu, method, false(size(p)));
 solver_calls = solver_calls + solver_calls_tmp;
 
 distp = -[p-ub; -(p - lb)]; % distance to bounds (should be always positive)
@@ -40,7 +40,7 @@ while(sum(qred_tmp)>0)
     Hred = H(~qred,~qred);
     
     % solve reduced subproblem
-    [dp_red, solver_calls_tmp] = getDP(gred, Hred, mu, method);
+    [dp_red, solver_calls_tmp] = getDP(gred, Hred, mu, method, qred);
     solver_calls = solver_calls + solver_calls_tmp;
     
     dp(:) = 0;
@@ -77,6 +77,9 @@ grad_dir_frac = dp(~qred)*g(~qred)'/norm(dp(~qred))/norm(g(~qred));
 % expected likelihood
 llh_expect = llh - g*dp' + 0.5*dp*H*dp';
 
+% current maximum step size
+mudp = norm(dp) / sqrt((dp/mu)*(dp/mu)');
+
 
 % generate trial steps within ball of size mu (for LM: lambda = 10/mu)
 %
@@ -86,7 +89,7 @@ llh_expect = llh - g*dp' + 0.5*dp*H*dp';
 %           3 = gradient descent (up to cauchy point)
 %           4 = dogleg
 
-function [dp, solver_calls_tmp] = getDP(g, H, mu, method)
+function [dp, solver_calls_tmp] = getDP(g, H, mu, method, qred)
 
 solver_calls_tmp = 1;
 
@@ -146,5 +149,24 @@ switch method
 %                 fprintf('dogleg (%4.2f) - ', norm(dpC)/mu);
             end
         end
+        
+    case 5 % generalized trust region
+        mut = mu(~qred,~qred);
+        gt = g*mut;
+        Ht = mut'*H*mut;
+        Ht = 0.5*(Ht + Ht');
+        
+        dp = trust(-gt',Ht,1)';
+        
+        % the function trust has a bug, therefore, in some cases
+        % the problem has to be regularized
+        lambda = 1e-6;
+        while(norm(dp) > 1.01)
+            fprintf('trust.m problem %g, regularizing with new lambda=%g\n', norm(dp), lambda);
+            dp = trust(-gt',Ht+lambda*eye(size(Ht)),1)';
+            solver_calls_tmp = solver_calls_tmp + 1;
+            lambda = lambda * 10;
+        end
+        dp = dp * mut; 
 end
 

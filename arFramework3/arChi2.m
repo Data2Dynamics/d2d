@@ -330,7 +330,7 @@ if(isfield(ar.model, 'data') && isfield(ar,'res'))
     if(sum(isnan(ar.res))>0)
         error('NaN in residuals: %i', sum(isnan(ar.res)));
     end
-    if(sensi && sum(sum(isnan(ar.sres(:,ar.qFit==1))))>0)
+    if(sensi && isfield(ar,'sres') && sum(sum(isnan(ar.sres(:,ar.qFit==1))))>0)
         for jm = 1:nm
             if(isfield(ar.model(jm), 'data'))
                 nd = length(ar.model(jm).data);

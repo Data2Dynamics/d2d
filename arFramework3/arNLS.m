@@ -48,7 +48,8 @@ end
 %           2 = Newton (with maximal step length mu)
 %           3 = gradient descent (up to cauchy point)
 %           4 = dogleg
-method = 0;
+%           5 = generalized trust region (based on modified trust.m)
+method = 5;
 
 % inertia effect using memory
 % 0 = no
@@ -61,6 +62,9 @@ if(isempty(options.InitTrustRegionRadius))
     mu = 1;         
 else
     mu = options.InitTrustRegionRadius;         
+end
+if(method==5)
+    mu = eye(length(p))*mu;
 end
 
 % maximum trust region size
@@ -89,25 +93,20 @@ if(debug>2)
     fprintf('%3i/%3i  resnorm=%-8.2g\n', iter, options.MaxIter, resnorm);
 end
 optimValues = struct([]);
-optimValues(1).iteration = 0;
-optimValues(1).mu = mu;
-optimValues(1).normdp = nan;
+if(~isempty(options.OutputFcn))
+    optimValues(1).iteration = 0;
+    optimValues(1).mu = nan;
+    optimValues(1).normdp = nan;
+    feval(options.OutputFcn,[],optimValues,'iter');
+end
 
-dp = nan;
+dp = 1;
 dresnorm = -1;
-while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
+while(iter < options.MaxIter && dresnorm < 0 && doContinue(mu, dresnorm, norm(dp), options))
     iter = iter + 1;
     
-    % call output function
-    if(~isempty(options.OutputFcn))
-        feval(options.OutputFcn,[],optimValues,'iter');
-        optimValues(1).iteration = optimValues(1).iteration + 1;
-        optimValues(1).mu = mu;
-        optimValues(1).normdp = norm(dp);
-    end
-    
     % solve subproblem
-    [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect] = ...
+    [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect, mudp] = ...
         arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
     pt = p + dp;
     
@@ -126,24 +125,25 @@ while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
     
     % output
     if(debug>2)
-        printiter(iter, options.MaxIter, resnorm, mu, norm(dp), dresnorm, ...
+        printiter(iter, options.MaxIter, resnorm, mudp, mu, norm(dp), dresnorm, ...
             0, sum(qred), grad_dir_frac, dresnorm_expect);
     end
     
-    if(mu >= options.TolX)
-        % adjust mu
+    if(doContinue(mu, dresnorm, norm(dp), options))
+        % adjust mu - shrinc trust region if approximation is bad
         did_shric = false;
-        while(dresnorm>=0)
+        while(doContinueApprox(dresnorm, dresnorm_expect))
             % output
             if(debug>2)
                 fprintf('  -\n');
             end
             
-            mu = mu / mu_fac; % shrinc trust region
+            % shrinc trust region
+            mu = arNLSTrustTrafo(mu, mu_fac, dp, true);
             did_shric = true;
             
             % solve subproblem
-            [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect] = ...
+            [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect, mudp] = ...
                 arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
             pt = p + dp;
             
@@ -162,31 +162,12 @@ while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
             
             % output
             if(debug>2)
-                printiter(iter, options.MaxIter, resnorm, mu, norm(dp), dresnorm, ...
+                printiter(iter, options.MaxIter, resnorm, mudp, mu, norm(dp), dresnorm, ...
                     0, sum(qred), grad_dir_frac, dresnorm_expect);
             end
             
-            if(mu < options.TolX)
+            if(~doContinue(mu, dresnorm, norm(dp), options))
                 break;
-            end
-        end
-        
-        if(mu > options.TolX)
-%             %  shrinc trust region if approximation is bad
-%             dresnorm_rel = dresnorm / dresnorm_expect;
-%             if(dresnorm_rel<0 || abs(dresnorm_rel-1)>0.25)
-%                 mu = mu / mu_fac;
-%                 did_shric = true;
-%             end
-            
-            % enlarge mu if not shricted before
-            if(~did_shric)
-                if(norm(dp)>0.5*mu)
-                    mu = mu * mu_fac;
-                end
-                if(mu>mu_max)
-                    mu = mu_max;
-                end
             end
         end
     end
@@ -202,6 +183,14 @@ while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
         llh = sum(res.^2);      % objective function
         g = -2*res*sres;        % gradient
         H = 2*(sres'*sres);     % Hessian matrix
+        
+        % call output function
+        if(~isempty(options.OutputFcn))
+            optimValues(1).iteration = optimValues(1).iteration + 1;
+            optimValues(1).mu = mudp;
+            optimValues(1).normdp = norm(dp);
+            feval(options.OutputFcn,[],optimValues,'iter');
+        end
     end
     
     % output
@@ -212,13 +201,29 @@ while(iter < options.MaxIter && dresnorm < 0 && mu >= options.TolX)
             fprintf('  -\n');
         end
     end
+    
+    % adjust mu - enlarge trust region if not shricted before
+    if(doContinue(mu, dresnorm, norm(dp), options) && ~did_shric)
+        if(isscalar(mu))
+            if(norm(dp)>0.5*mu)
+                mu = mu * mu_fac;
+            end
+            if(mu>mu_max)
+                mu = mu_max;
+            end
+        else
+            if(norm(dp)>0.5*mudp)
+                mu = arNLSTrustTrafo(mu, mu_fac, dp, false);
+            end
+        end
+    end
 end
 
 % exit condition
 if(iter==options.MaxIter)
     exitflag = 0;
 end
-if(mu<options.TolX)
+if(~doContinue(mu, dresnorm, norm(dp), options))
     exitflag = 2;
 end
 
@@ -256,9 +261,33 @@ end
 
 
 
-function printiter(iter, maxIter, resnorm, mu, norm_dp, dresnorm, ...
+% check if convergence
+function q = doContinue(mu, dresnorm, dpnorm, options)
+if(isscalar(mu))
+    q = mu >= options.TolX;
+else
+    q = dresnorm<-options.TolFun || dpnorm>=options.TolX;
+end
+
+
+
+% check if trust region shrinking necessary
+function q = doContinueApprox(dresnorm, dresnorm_expect)
+q = dresnorm>=0;
+% q = dresnorm>=0 || abs((dresnorm / dresnorm_expect)-1)>0.25;
+
+
+
+% print interation
+function printiter(iter, maxIter, resnorm, mudp, mu, norm_dp, dresnorm, ...
     norm_gred, dim_red, grad_dir_frac, dresnorm_expect)
-fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g  norm(dp)=%-8.2g  ', iter, maxIter, resnorm, mu, norm_dp);
+if(isscalar(mu))
+    fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g  norm(dp)=%-8.2g  ', iter, maxIter, resnorm, mudp, norm_dp);
+else
+    % plot(eig(real(mu)),'*-'); drawnow;
+    fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g(det=%-8.2g cond=%-8.2g maxeig=%-8.2g)  norm(dp)=%-8.2g  ', ...
+        iter, maxIter, resnorm, mudp, det(mu), cond(mu), max(eig(mu)), norm_dp);
+end
 
 if(dresnorm<0)
     fprintf('dresnorm=%-8.2g  ', dresnorm);
