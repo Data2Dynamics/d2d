@@ -49,7 +49,7 @@ end
 %           3 = gradient descent (up to cauchy point)
 %           4 = dogleg
 %           5 = generalized trust region (based on modified trust.m)
-method = 5;
+method = 0;
 
 % inertia effect using memory
 % 0 = no
@@ -98,6 +98,7 @@ if(~isempty(options.OutputFcn))
     optimValues(1).mu = nan;
     optimValues(1).normdp = nan;
     feval(options.OutputFcn,[],optimValues,'iter');
+    firstorderopt = norm(g);
 end
 
 dp = 1;
@@ -174,6 +175,8 @@ while(iter < options.MaxIter && dresnorm < 0 && doContinue(mu, dresnorm, norm(dp
     
     % update if step lead to reduction
     if(dresnorm<0)
+        firstorderopt = norm(g(~qred));
+        
         p = pt;
         
         res = rest;
@@ -212,9 +215,9 @@ while(iter < options.MaxIter && dresnorm < 0 && doContinue(mu, dresnorm, norm(dp
                 mu = mu_max;
             end
         else
-            if(norm(dp)>0.5*mudp)
+%             if(norm(dp)>0.5*mudp)
                 mu = arNLSTrustTrafo(mu, mu_fac, dp, false);
-            end
+%             end
         end
     end
 end
@@ -234,7 +237,7 @@ if (nargout>4)
     output.funcCount = funevals;
     output.solverCount = solver_calls;
     output.algorithm = 'nls_trust';
-    output.firstorderopt = 0;
+    output.firstorderopt = firstorderopt;
     switch(exitflag)
         case(0)
             output.message = 'Too many function evaluations or iterations.';
@@ -284,7 +287,15 @@ function printiter(iter, maxIter, resnorm, mudp, mu, norm_dp, dresnorm, ...
 if(isscalar(mu))
     fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g  norm(dp)=%-8.2g  ', iter, maxIter, resnorm, mudp, norm_dp);
 else
-    % plot(eig(real(mu)),'*-'); drawnow;
+    
+    figure(1)
+    subplot(3,1,1)
+    plot(log10(real(eig(mu))),'*-');
+    subplot(3,1,2:3)
+    maxmu = max(abs(mu(:)));
+    imagesc(mu, [-maxmu maxmu]);
+    drawnow;
+     
     fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g(det=%-8.2g cond=%-8.2g maxeig=%-8.2g)  norm(dp)=%-8.2g  ', ...
         iter, maxIter, resnorm, mudp, det(mu), cond(mu), max(eig(mu)), norm_dp);
 end

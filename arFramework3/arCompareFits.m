@@ -1,7 +1,10 @@
-function arCompareFits(filenames)
+function arCompareFits(filenames, sortindex)
 
 if(nargin==0)
     filenames = fileChooserMulti('./Results', true);
+end
+if(~exist('sortindex','var'))
+    sortindex = -1;
 end
 if(~iscell(filenames))
     filelist = fileList('./Results');
@@ -39,15 +42,22 @@ for j=1:length(filenames)
 end
 arWaitbar(-1);
 
+if(sortindex~=-1)
+    [~, isort] = sort(chi2s{sortindex});
+end
 
 figure(1)
 h = nan(1,length(chi2s));
 colors = jet(length(chi2s));
 colors = bsxfun(@rdivide, colors, sqrt(sum(colors.^2,2)));
 for j=1:length(chi2s)
-    [chi2s_sorted,isort] = sort(chi2s{j});
-    if(~isempty(optim_krit{jcount}))
-        optim_krit{jcount} = optim_krit{jcount}(isort); %#ok<AGROW>
+    if(sortindex==-1)
+        [chi2s_sorted,isort] = sort(chi2s{j});
+    else
+        chi2s_sorted = chi2s{j}(isort);
+    end
+    if(~isempty(optim_krit{j}))
+        optim_krit{j} = optim_krit{j}(isort); %#ok<AGROW>
     end
     h(j) = semilogy(chi2s_sorted + 1 - minchi2, 'o-', 'Color', colors(j,:), ...
         'MarkerFaceColor','w', ...

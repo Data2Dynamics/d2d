@@ -4,8 +4,8 @@
 
 function mu = arNLSTrustTrafo(mu, factor, v, doShrinc)
 
-% factor2 = 1;
-factor2 = (factor-1)/2 + 1;
+factor2 = 1;
+% factor2 = (factor-1)/2 + 1;
 
 if(doShrinc)
     factor = 1/factor;

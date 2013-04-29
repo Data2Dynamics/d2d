@@ -1,10 +1,14 @@
-% Plot fit of model parameters to data using Levenberg-Marquardt
-%
-% arPlotFitLM
+% Plot fit
 
-function arPlotFit(qp)
+function arPlotFit(index, qp)
 
 global ar
+
+if(~exist('index','var'))
+    fit = ar.fit;
+else
+    fit = ar.fit_hist(index).hist;
+end
 
 if(~exist('qp','var'))
     qp = true(size(ar.p));
@@ -12,18 +16,18 @@ end
 
 figure(2)
 
-chi2s = ar.fit.chi2_hist;
+chi2s = fit.chi2_hist;
 xs = 1:sum(~isnan(chi2s));
 
 subplot(3,2,1)
-plot(xs-1, chi2s(xs), '-')
-title('likelihood improvement')
+plot(xs-1, log10(chi2s(xs) - min(chi2s(xs)) + 1), '-')
+title('log10 likelihood improvement')
 xlim([0 length(xs)-1])
 
 subplot(3,2,3)
-plot(xs-1, log10(ar.fit.stepsize_hist(xs)), '-')
+plot(xs-1, log10(fit.stepsize_hist(xs)), '-')
 hold on
-plot(xs-1, log10(ar.fit.maxstepsize_hist(xs)), 'r--')
+plot(xs-1, log10(fit.maxstepsize_hist(xs)), 'r--')
 plot([0 length(xs)], log10([ar.config.optim.TolX ar.config.optim.TolX]), 'r--');
 hold off
 title('log10 stepsize')
@@ -39,17 +43,17 @@ title('log10 relativ likelihood improvement')
 xlim([0 length(xs)-1])
 
 subplot(3,2,2)
-plot(xs-1, ar.fit.p_hist(xs,qp))
+plot(xs-1, fit.p_hist(xs,qp))
 title('parameters')
 xlim([0 length(xs)-1])
 
 subplot(3,2,4)
-plot(xs-1, bsxfun(@minus,ar.fit.p_hist(1,qp),ar.fit.p_hist(xs,qp)))
+plot(xs-1, bsxfun(@minus,fit.p_hist(1,qp),fit.p_hist(xs,qp)))
 title('parameter changes relative to start')
 xlim([0 length(xs)-1])
 
 subplot(3,2,6)
-plot(xs(2:end)-1, diff(ar.fit.p_hist(xs,qp))) 
+plot(xs(2:end)-1, diff(fit.p_hist(xs,qp))) 
 title('relative parameter changes')
 xlabel('iterations')
 xlim([0 length(xs)-1])
