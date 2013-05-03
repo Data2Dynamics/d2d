@@ -49,7 +49,8 @@ end
 %           3 = gradient descent (up to cauchy point)
 %           4 = dogleg
 %           5 = generalized trust region (based on modified trust.m)
-method = 0;
+%           6 = trdog
+method = 6;
 
 % inertia effect using memory
 % 0 = no
@@ -66,6 +67,7 @@ end
 if(method==5)
     mu = eye(length(p))*mu;
 end
+mu = 10;
 
 % maximum trust region size
 mu_max = Inf;
@@ -108,7 +110,7 @@ while(iter < options.MaxIter && dresnorm < 0 && doContinue(mu, dresnorm, norm(dp
     
     % solve subproblem
     [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect, mudp] = ...
-        arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
+        arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
     pt = p + dp;
     
     % ensure strict feasibility
@@ -145,7 +147,7 @@ while(iter < options.MaxIter && dresnorm < 0 && doContinue(mu, dresnorm, norm(dp
             
             % solve subproblem
             [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect, mudp] = ...
-                arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
+                arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
             pt = p + dp;
             
             % ensure strict feasibility

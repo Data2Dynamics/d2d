@@ -17,12 +17,46 @@
 %           2 = Newton (with maximal step length mu)
 %           3 = gradient descent (up to cauchy point)
 %           4 = dogleg
+%           5 = generalized trust region (based on modified trust.m)
+%           6 = trdog
 
 function [dp, solver_calls, qred, dpmem, grad_dir_frac, llh_expect, mudp] = ...
-    arNLSstep(llh, g, H, mu, p, lb, ub, solver_calls, dpmem, useInertia, method)
-        
+    arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method)
+
+qred = false(size(p));
+
+% snls like scaling
+[v, dv] = definev(g,p,lb,ub);
+D = diag(v);
+
+if(method == 6)
+    g2 = 0.5*g';
+    pcoptions = Inf;
+    pcgtol = 0.1;
+    kmax = max(1,floor(length(p)/2));
+    gopt = v.*g2;
+    optnrm = norm(gopt,inf);
+    theta = max(.95,1-optnrm);  
+    
+    dp = trdog(p',g2,sres,D,mu,dv,@atamult,@aprecon,...
+        pcoptions,pcgtol,kmax,theta,lb',ub',[],[],'jacobprecon')';
+    
+    solver_calls = solver_calls + 1;
+    
+    % proportion of step in direction of gradient
+    grad_dir_frac = dp(~qred)*g(~qred)'/norm(dp(~qred))/norm(g(~qred));
+    
+    % expected likelihood
+    llh_expect = llh - g*dp' + 0.5*dp*H*dp';
+    
+    % current maximum step size
+    mudp = norm(dp) / sqrt((dp/mu)*(dp/mu)');
+    
+    return
+end
+
 % solve subproblem
-[dp, solver_calls_tmp] = getDP(g, H, mu, method, false(size(p)));
+[dp, solver_calls_tmp] = getDP(g, H, mu, method, qred, D);
 solver_calls = solver_calls + solver_calls_tmp;
 
 distp = -[p-ub; -(p - lb)]; % distance to bounds (should be always positive)
@@ -40,7 +74,7 @@ while(sum(qred_tmp)>0)
     Hred = H(~qred,~qred);
     
     % solve reduced subproblem
-    [dp_red, solver_calls_tmp] = getDP(gred, Hred, mu, method, qred);
+    [dp_red, solver_calls_tmp] = getDP(gred, Hred, mu, method, qred, D);
     solver_calls = solver_calls + solver_calls_tmp;
     
     dp(:) = 0;
@@ -89,7 +123,7 @@ mudp = norm(dp) / sqrt((dp/mu)*(dp/mu)');
 %           3 = gradient descent (up to cauchy point)
 %           4 = dogleg
 
-function [dp, solver_calls_tmp] = getDP(g, H, mu, method, qred)
+function [dp, solver_calls_tmp] = getDP(g, H, mu, method, qred, D)
 
 solver_calls_tmp = 1;
 
@@ -97,6 +131,11 @@ if(mu==0)
     dp = zeros(size(g));
     return;
 end
+
+% snls like scaling
+% Dred = D(~qred,~qred);
+% g = g*Dred;
+% H = Dred'*H*Dred;
 
 switch method
     case 0 % trust region solution
@@ -169,4 +208,38 @@ switch method
         end
         dp = dp * mut; 
 end
+
+% snls like scaling
+% dp = dp * Dred; 
+
+
+
+
+function [v,dv]= definev(g,x,l,u)
+%DEFINEV Scaling vector and derivative
+%
+%	[v,dv]= DEFINEV(g,x,l,u) returns v, distances to the
+%   bounds corresponding to the sign of the gradient g, where
+%   l is the vector of lower bounds, u is the vector of upper 
+%   bounds. Vector dv is 0-1 sign vector.
+%
+
+%   Copyright 1990-2008 The MathWorks, Inc.
+%   $Revision: 1.1.6.1 $  $Date: 2009/07/06 20:45:56 $
+
+n = length(x); 
+v = zeros(n,1); 
+dv=zeros(n,1);
+arg1 = (g < 0)  & (u <  inf ); 
+arg2 = (g >= 0) & (l > -inf);
+arg3 = (g < 0)  & (u == inf); 
+arg4 = (g >= 0) & (l == -inf);
+v(arg1)  = (x(arg1) - u(arg1)); 
+dv(arg1) = 1;
+v(arg2)  = (x(arg2) - l(arg2)); 
+dv(arg2) = 1;
+v(arg3)  = -1;
+dv(arg3) = 0;
+v(arg4)  = 1;
+dv(arg4) = 0;
 
