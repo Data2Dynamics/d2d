@@ -50,7 +50,10 @@ end
 %           4 = dogleg
 %           5 = generalized trust region (based on modified trust.m)
 %           6 = trdog
-method = 6;
+%           7 = trdog pcgr
+%           8 = trdog pcgr mod
+%           9 = trdog pcgr mod trust
+method = 8;
 
 % inertia effect using memory
 % 0 = no
@@ -67,7 +70,6 @@ end
 if(method==5)
     mu = eye(length(p))*mu;
 end
-mu = 10;
 
 % maximum trust region size
 mu_max = Inf;
@@ -279,7 +281,7 @@ end
 % check if trust region shrinking necessary
 function q = doContinueApprox(dresnorm, dresnorm_expect)
 q = dresnorm>=0;
-% q = dresnorm>=0 || abs((dresnorm / dresnorm_expect)-1)>0.25;
+% q = dresnorm>=0 || abs((dresnorm - dresnorm_expect)/dresnorm)>0.5;
 
 
 
@@ -296,6 +298,7 @@ else
     subplot(3,1,2:3)
     maxmu = max(abs(mu(:)));
     imagesc(mu, [-maxmu maxmu]);
+    colorbar;
     drawnow;
      
     fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g(det=%-8.2g cond=%-8.2g maxeig=%-8.2g)  norm(dp)=%-8.2g  ', ...
@@ -308,4 +311,4 @@ else
     fprintf('dresnorm=%8s  ', '');
 end
 fprintf('approx_qual=%-5.2f  norm(g)=%-8.2g  dim_red=%i  grad_dir=%3.1f', ...
-    dresnorm/dresnorm_expect, norm_gred, dim_red, grad_dir_frac);
+    abs((dresnorm - dresnorm_expect)/dresnorm), norm_gred, dim_red, grad_dir_frac);
