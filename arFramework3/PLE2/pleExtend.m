@@ -233,9 +233,9 @@ feval(pleGlobals.integrate_fkt, pleGlobals.p);
 chi2 = pleGlobals.chi2s{jk};
 ps = pleGlobals.ps{jk};
 
-pleGlobals.estimatetime(jk) = estimatetime;
-pleGlobals.fittime(jk) = fittime;
-pleGlobals.timing(jk) = fittime+estimatetime;
+pleGlobals.estimatetime(jk) = pleGlobals.estimatetime(jk) + estimatetime;
+pleGlobals.fittime(jk) = pleGlobals.fittime(jk) + fittime;
+pleGlobals.timing(jk) = pleGlobals.timing(jk) + fittime+estimatetime;
 
 q_chi2good = chi2<=min(chi2)+pleGlobals.dchi2 & ~isnan(chi2);
 q_chi2good_point = chi2<=min(chi2)+pleGlobals.dchi2_point & ~isnan(chi2);
