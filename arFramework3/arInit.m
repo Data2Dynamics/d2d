@@ -8,8 +8,19 @@ arCheck;
 global ar
 
 ar = struct([]);
-ar(1).info(1).initTime = now;
-ar.checksum = []; %#ok<*STRNU>
+ar(1).stop = 0;
+ar.fevals = 0; 
+
+arInitUser;
+
+ar.info.initTime = now;
+[ar.info.def_version_code ar.info.c_version_code] = arGetVersion;
+fprintf('Copyright D2D Development Team\n');
+fprintf('arFramework3 (.def version %i, c-code version %s)\n', ...
+    ar.info.def_version_code, ar.info.c_version_code);
+fprintf('Contact: Andreas Raue (andreas.raue@fdm.uni-freiburg.de)\n\n');
+
+ar.checksum = [];
 
 ar.config.useParallel = true;
 ar.config.nParallel = feature('numCores');
@@ -113,8 +124,5 @@ ar.info.cvodes_flags{25} = 'CV_BAD_T';
 ar.info.cvodes_flags{26} = 'CV_BAD_DKY';
 ar.info.cvodes_flags{27} = 'CV_TOO_CLOSE';
 
-ar.stop = 0;
-
-arInitUser;
 
 
