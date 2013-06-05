@@ -1,4 +1,4 @@
-function arSaveFit
+function arSaveFit(name)
 
 global ar
 
@@ -9,15 +9,25 @@ else
     j = length(ar.fit_hist) + 1;
 end
 
-name = input(sprintf('enter name addition [%s_...]: ', ...
-    ar.config.optimizers{ar.config.optimizer}), 's');
-if(~isempty(name))
-    name = sprintf('%s_%s', ar.config.optimizers{ar.config.optimizer}, name);
-else
+if(nargin==0)
     name = ar.config.optimizers{ar.config.optimizer};
+    if(ar.config.optimizer==5)
+        tmpnames = arNLS;
+        name = [name '_' tmpnames{ar.config.optimizerStep+1}];
+    end
+    addname = input(sprintf('enter name addition [%s_...]: ', name), 's');
+    if(~isempty(addname))
+        name = [name '_' addname];
+    end
 end
+
 
 ar.fit_hist(j).hist = ar.fit;
 ar.fit_hist(j).optimizer = ar.config.optimizer;
+if(ar.config.optimizer==5)
+    ar.fit_hist(j).optimizerStep = ar.config.optimizerStep;
+else
+    ar.fit_hist(j).optimizerStep = nan;
+end
 ar.fit_hist(j).config = ar.config.optim;
 ar.fit_hist(j).name = name;

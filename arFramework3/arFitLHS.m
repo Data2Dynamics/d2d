@@ -4,10 +4,12 @@
 %
 % n:        number of runs      [10]
 % append:                       [false]
-% randomseed:   rng(randomseed)
-% dynamic_only                  [true]
+% randomseed:                   rng(randomseed)
+% dynamic_only                  [false]
+% plot_summary                  [false]
+% log_fit_history               [false]
 
-function arFitLHS(n, append, randomseed, dynamic_only, plot_summary)
+function arFitLHS(n, append, randomseed, dynamic_only, plot_summary, log_fit_history)
 
 global ar
 
@@ -32,6 +34,10 @@ end
 if(~exist('plot_summary','var'))
     plot_summary = false;
 end
+if(~exist('log_fit_history','var'))
+    log_fit_history = false;
+end
+
 if(~isfield(ar.config,'useModifiedFits'))
     ar.config.useModifiedFits = false;
 end
@@ -53,6 +59,6 @@ ps(:,q_select) = psrand;
 if(ar.config.useModifiedFits)
 	arFits_modified(ps, append, dynamic_only, plot_summary);
 else
-	arFits(ps, append, dynamic_only, plot_summary);
+	arFits(ps, append, dynamic_only, plot_summary, log_fit_history);
 end
 

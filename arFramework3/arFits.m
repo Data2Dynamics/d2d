@@ -4,9 +4,11 @@
 %
 % ps:                           parameter values      
 % append:                       [false]
-% dynamic_only                  [true]
+% dynamic_only                  [false]
+% plot_summary                  [false]
+% log_fit_history               [false]
 
-function arFits(ps, append, dynamic_only, plot_summary)
+function arFits(ps, append, dynamic_only, plot_summary, log_fit_history)
 
 global ar
 
@@ -18,6 +20,9 @@ if(~exist('dynamic_only','var'))
 end
 if(~exist('plot_summary','var'))
     plot_summary = false;
+end
+if(~exist('log_fit_history','var'))
+    log_fit_history = false;
 end
 
 n = size(ps,1);
@@ -46,6 +51,10 @@ else
     ar.fun_evals = nan(1,n);
     ar.optim_crit = nan(1,n);
     ar.exitflag = -ones(1,n);
+end
+
+if(log_fit_history)
+    ar.fit_hist = [];
 end
 
 if(dynamic_only)
@@ -86,6 +95,9 @@ for j=1:n
         fprintf('fit #%i: %s\n', j, exception.message);
     end
     ar.timing(j) = toc;
+    if(log_fit_history)
+        arSaveFit(sprintf('run%i', j));
+    end
 end
 fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
 fprintf('mean fitting time: %fsec\n', 10^mean(log10(ar.timing(~isnan(ar.timing)))));
