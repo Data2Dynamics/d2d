@@ -4,7 +4,7 @@ if(~exist('range','var'))
     range = -1;
 end
 if(~exist('method','var'))
-    imethod = 0:3;
+    method = [0 6];
 end
 if(~exist('N','var'))
     N = 10;
@@ -24,6 +24,10 @@ sres = ar.sres(:,ar.qFit==1);
 g = -2*ar.res*ar.sres(:,ar.qFit==1);
 H = 2*ar.sres(:,ar.qFit==1)'*ar.sres(:,ar.qFit==1);
 
+% H = hessian(@my_hess_fkt,p(ar.qFit==1));
+% Ht = load('Ht.mat'); 
+% H = Ht.Ht;                                         
+
 fprintf('norm(g) = %f\n', norm(g));
 fprintf('cond(H) = %f\n', cond(H));
 
@@ -33,23 +37,26 @@ chi2s = {};
 chi2s_expect = {};
 xs = {};
 ps = {};
-% method:   0 = trust region (based on modified trust.m)
-%           1 = Levenberg-Marquardt
-%           2 = Newton (with maximal step length mu)
-%           3 = gradient descent (up to cauchy point)
-%           4 = dogleg
-%           5 = generalized trust region (based on modified trust.m)
-%           6 = trdog
-%           7 = trdog pcgr
-%           8 = trdog pcgr mod
-labels = {'trust region','levenberg-marquardt','newton','gradient','dogleg', ...
-    'generalized trust region', 'trdog', 'trdog pcgr', 'trdog pcgr mod', 'trdog pcgr mod trust'};
-styles = {'d-c','*-b','o-g','s-r','x-m', 'x-y', '.-k', '.-r', '.-b', '.-g'};
-styles_expect = {'d--c','*--b','o--g','s--r','x--m', 'x--y', '.--k', '.--r', '.--b', '.--g'};
 
+% method:   
+%  0 = trust region (based on modified trust.m)
+%  1 = Levenberg-Marquardt
+%  2 = Newton (with maximal step length mu)
+%  3 = gradient descent (with steplength mu)
+%  4 = gradient descent (to cauchy point with steplength mu)
+%  5 = dogleg
+%  6 = generalized trust region (based on modified trust.m)
+%  7 = MATLABs trdog
+%  8 = Newton pcgr (with maximal step length mu)
+%  9 = trdog pcgr (with maximal step length mu)
+% 10 = dogleg Newton pcgr
+% 11 = dogleg trdog pcgr
+% 12 = trdog pcgr (no DM)
+% 13 = trdog pcgr (no DG)
+% 14 = trdog pcgr Levenberg-Marquardt
+% 15 = trdog pcgr 2D subspace
+labels = arNLSstep;
 labels = labels(method+1);
-styles = styles(method+1);
-styles_expect = styles_expect(method+1);
 
 minllhs = [];
 arWaitbar(0);
@@ -97,18 +104,20 @@ clf
 dminllh = llh-minllhs;
 dminllh(dminllh<1e-3) = 1e-3;
 if(length(method)==1)
-    plot(xs{1}, chi2s{1}, styles{1});
+    plot(xs{1}, chi2s{1}, 'ko-');
     hold on
-    plot(xs{1}, chi2s_expect{1}, styles_expect{1});
+    plot(xs{1}, chi2s_expect{1}, 'ko--');
     hold off
     title(labels{1});    
     ylim([llh-dminllh*1.1 llh+dminllh*0.1])
 else
     for jm = 1:length(method)
+        C1 = arLineMarkersAndColors(jm,[],'o','-');
+        C2 = arLineMarkersAndColors(jm,[],'o','--');
         subplot(3,length(method),jm);
-        plot(xs{jm}, chi2s{jm}, styles{jm});
+        plot(xs{jm}, chi2s{jm}, C1{:});
         hold on
-        plot(xs{jm}, chi2s_expect{jm}, styles_expect{jm});
+        plot(xs{jm}, chi2s_expect{jm}, C2{:});
         hold off
         title(labels{jm});
         ylim([llh-dminllh(jm)*1.1 llh+dminllh(jm)*0.1])
@@ -116,9 +125,11 @@ else
     
     subplot(3,length(method),(length(method)+1):(3*length(method)));
     for jm = 1:length(method)
-        plot(xs{jm}, chi2s{jm}, styles{jm});
+        C1 = arLineMarkersAndColors(jm,[],'o','-');
+        C2 = arLineMarkersAndColors(jm,[],'o','--');
+        plot(xs{jm}, chi2s{jm}, C1{:});
         hold on
-        plot(xs{jm}, chi2s_expect{jm}, styles_expect{jm});
+        plot(xs{jm}, chi2s_expect{jm}, C2{:});
     end
     plot(xlim, [0 0]+chi2s{1}(1), 'k--');
     hold off
@@ -150,3 +161,16 @@ end
 % imagesc(H, [-Hmax Hmax])
 % colorbar
 
+
+function l = my_hess_fkt(p)
+global ar
+pRes = ar.p;
+try
+    ar.p(ar.qFit==1) = p;
+    arChi2(true);
+    l = ar.chi2fit;
+    ar.p = pRes;
+catch 
+    l = nan;
+    ar.p = pRes;
+end

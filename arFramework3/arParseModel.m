@@ -17,7 +17,7 @@ if(~exist('forceParsing','var'))
     forceParsing = false;
 end
 
-checksum_global = [];
+checksum_global = addToCheckSum(ar.info.c_version_code);
 for m=1:length(ar.model)
     % parse model
     arParseODE(m);

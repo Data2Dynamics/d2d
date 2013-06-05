@@ -21,6 +21,9 @@ global ar
 if(~isfield(ar.config, 'optimizer'))
     ar.config.optimizer = 1;
 end
+if(~isfield(ar.config, 'optimizerStep'))
+    ar.config.optimizerStep = 0;
+end
 if(~isfield(ar.config, 'showFitting'))
     ar.config.showFitting = 0;
 end
@@ -93,7 +96,7 @@ elseif(ar.config.optimizer == 4)
 % arNLS
 elseif(ar.config.optimizer == 5)     
     [pFit, chi2, resnorm, exitflag, output, lambda, jac] = ...
-        arNLS(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
+        arNLS(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim, ar.config.optimizerStep);
 end
 
 if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)

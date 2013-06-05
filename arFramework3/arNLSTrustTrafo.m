@@ -4,18 +4,18 @@
 
 function mu = arNLSTrustTrafo(mu, factor, v, doShrinc)
 
+% if scalar mu or no direction to scale matrix mu
+if(isscalar(mu) || norm(v) == 0)
+    mu = mu * factor;
+    return;
+end
+
 % factor2 = 1;
 factor2 = (factor-1)/2 + 1;
 
 if(doShrinc)
     factor = 1/factor;
     factor2 = 1/factor2;
-end
-
-% if scalar mu or no direction to scale matrix mu
-if(isscalar(mu) || norm(v) == 0)
-    mu = mu * factor;
-    return;
 end
 
 [~, ivmax] = max(v);

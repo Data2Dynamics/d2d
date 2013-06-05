@@ -1,4 +1,4 @@
-% [p,resnorm,res,exitflag,output] = arNLS(fun,p,lb,ub,options,varargin)
+% [p,resnorm,res,exitflag,output] = arNLS(fun,p,lb,ub,options,method)
 %
 % use like LSQNONLIN
 % 
@@ -8,15 +8,34 @@
 %  2  Change in p too small.
 %  3  Change in resnorm too small.
 %  4  Computed search direction too small.
+%
+% method:   
+%  0 = trust region (based on modified trust.m)
+%  1 = Levenberg-Marquardt
+%  2 = Newton (with maximal step length mu)
+%  3 = gradient descent (up to cauchy point)
+%  4 = dogleg
+%  5 = generalized trust region (based on modified trust.m)
+%  6 = trdog
+%  7 = trdog pcgr
 
-function [p,resnorm,res,exitflag,output,lambda,jac] = arNLS(fun,p,lb,ub,options)
+function [p,resnorm,res,exitflag,output,lambda,jac] = arNLS(fun,p,lb,ub,options,method)
+
+if(nargin==0)
+    p = arNLSstep;
+    return;
+end
+
+if(~exist('method','var'))
+    method = 0;
+end
 
 % check bounds
 if (sum(ub<=lb)>0)
-    error('nls_trust: bounds are inconsistent');
+    error('arNLS: bounds are inconsistent');
 end
 if(sum(p>ub | p<lb)>0)
-    error('nls_trust: parameters inconsistent with bounds');
+    error('arNLS: parameters inconsistent with bounds');
 end
 
 % not used
@@ -43,18 +62,6 @@ switch(options.Display)
         debug = 3;
 end
 
-% method:   0 = trust region (based on modified trust.m)
-%           1 = Levenberg-Marquardt
-%           2 = Newton (with maximal step length mu)
-%           3 = gradient descent (up to cauchy point)
-%           4 = dogleg
-%           5 = generalized trust region (based on modified trust.m)
-%           6 = trdog
-%           7 = trdog pcgr
-%           8 = trdog pcgr mod
-%           9 = trdog pcgr mod trust
-method = 8;
-
 % inertia effect using memory
 % 0 = no
 % useInertia has to be < 1
@@ -63,16 +70,13 @@ dpmem = [];
 
 % initial trust region size
 if(isempty(options.InitTrustRegionRadius))
-    mu = 1;         
+    mu = 1;
 else
-    mu = options.InitTrustRegionRadius;         
+    mu = options.InitTrustRegionRadius;
 end
 if(method==5)
     mu = eye(length(p))*mu;
 end
-
-% maximum trust region size
-mu_max = Inf;
 
 % trust region size scale factor
 mu_fac = 2;
@@ -97,88 +101,46 @@ if(debug>2)
     fprintf('%3i/%3i  resnorm=%-8.2g\n', iter, options.MaxIter, resnorm);
 end
 optimValues = struct([]);
+optimValues(1).iteration = 0;
+optimValues(1).mu = mu;
+optimValues(1).normdp = nan;
 if(~isempty(options.OutputFcn))
-    optimValues(1).iteration = 0;
-    optimValues(1).mu = nan;
-    optimValues(1).normdp = nan;
     feval(options.OutputFcn,[],optimValues,'iter');
-    firstorderopt = norm(g);
 end
 
-dp = 1;
-dresnorm = -1;
-while(iter < options.MaxIter && dresnorm < 0 && doContinue(mu, dresnorm, norm(dp), options))
+q_converged = false;
+while(iter < options.MaxIter && ~q_converged)
     iter = iter + 1;
     
-    % solve subproblem
-    [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect, mudp] = ...
+    % solve subproblem - get trial point
+    [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect, normdpmu] = ...
         arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
     pt = p + dp;
     
-    % ensure strict feasibility
+    % ensure strict feasibility - the hard way
     pt(pt<lb) = lb(pt<lb);
     pt(pt>ub) = ub(pt>ub);
     
-    % function evaluation
+    % evaluate trial point
     [rest, srest] = feval(fun, pt);
     resnormt = sum(rest.^2);
     funevals = funevals + 1;
     
-    % fit improve
+    % fit improvement statistics
     dresnorm = resnormt - resnorm; 
     dresnorm_expect = resnorm_expect - resnorm;
     
-    % output
-    if(debug>2)
-        printiter(iter, options.MaxIter, resnorm, mudp, mu, norm(dp), dresnorm, ...
-            0, sum(qred), grad_dir_frac, dresnorm_expect);
-    end
+    % approximation quality
+    approx_qual = dresnorm/dresnorm_expect;
+    q_approx_qual = approx_qual > 0.75;
     
-    if(doContinue(mu, dresnorm, norm(dp), options))
-        % adjust mu - shrinc trust region if approximation is bad
-        did_shric = false;
-        while(doContinueApprox(dresnorm, dresnorm_expect))
-            % output
-            if(debug>2)
-                fprintf('  -\n');
-            end
-            
-            % shrinc trust region
-            mu = arNLSTrustTrafo(mu, mu_fac, dp, true);
-            did_shric = true;
-            
-            % solve subproblem
-            [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect, mudp] = ...
-                arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
-            pt = p + dp;
-            
-            % ensure strict feasibility
-            pt(pt<lb) = lb(pt<lb);
-            pt(pt>ub) = ub(pt>ub);
-            
-            % function evaluation
-            [rest, srest] = feval(fun, pt);
-            resnormt = sum(rest.^2);
-            funevals = funevals + 1;
-            
-            % fit improve
-            dresnorm = resnormt - resnorm;
-            dresnorm_expect = resnorm_expect - resnorm;
-            
-            % output
-            if(debug>2)
-                printiter(iter, options.MaxIter, resnorm, mudp, mu, norm(dp), dresnorm, ...
-                    0, sum(qred), grad_dir_frac, dresnorm_expect);
-            end
-            
-            if(~doContinue(mu, dresnorm, norm(dp), options))
-                break;
-            end
-        end
-    end
+    % reduction achieved ?
+    q_reduction = dresnorm<0;
     
-    % update if step lead to reduction
-    if(dresnorm<0)
+%     q_accept_step = q_reduction;
+    q_accept_step = q_reduction && q_approx_qual;
+    % update if step was accepted
+    if(q_accept_step)
         firstorderopt = norm(g(~qred));
         
         p = pt;
@@ -194,35 +156,43 @@ while(iter < options.MaxIter && dresnorm < 0 && doContinue(mu, dresnorm, norm(dp
         % call output function
         if(~isempty(options.OutputFcn))
             optimValues(1).iteration = optimValues(1).iteration + 1;
-            optimValues(1).mu = mudp;
+            optimValues(1).mu = mu;
             optimValues(1).normdp = norm(dp);
             feval(options.OutputFcn,[],optimValues,'iter');
         end
+    else
+        firstorderopt = nan;
     end
     
+    % update schedule for trust region
+    q_enlarge = q_reduction && q_approx_qual && (normdpmu > 0.9 || isnan(normdpmu));
+    q_shrink = ~q_reduction || ~q_approx_qual;
+    
+    mu_old = mu;
+    dmu = 0;
+    if(q_enlarge) % enlarge trust region
+        mu = arNLSTrustTrafo(mu, mu_fac, dp, false);
+        dmu = 1;
+    elseif(q_shrink) % shrink trust region
+        mu_red_fac = 1/mu_fac;
+        if(isscalar(mu) && ~isnan(normdpmu))
+            mu_red_fac = min([mu_red_fac mu_red_fac*normdpmu]);
+        end
+        mu = arNLSTrustTrafo(mu, mu_red_fac, dp, false);
+        dmu = -1;
+    end
+   
     % output
     if(debug>2)
-        if(dresnorm<0)
-            fprintf('  *\n');
-        else
-            fprintf('  -\n');
-        end
+        printiter(iter, options.MaxIter, resnorm, mu_old, dmu, norm(dp), normdpmu, dresnorm, ...
+            firstorderopt, sum(qred), grad_dir_frac, approx_qual, q_accept_step);
     end
     
-    % adjust mu - enlarge trust region if not shricted before
-    if(doContinue(mu, dresnorm, norm(dp), options) && ~did_shric)
-        if(isscalar(mu))
-            if(norm(dp)>0.5*mu)
-                mu = mu * mu_fac;
-            end
-            if(mu>mu_max)
-                mu = mu_max;
-            end
-        else
-%             if(norm(dp)>0.5*mudp)
-                mu = arNLSTrustTrafo(mu, mu_fac, dp, false);
-%             end
-        end
+    % check convergence
+    if(isscalar(mu))
+        q_converged = mu < options.TolX || firstorderopt < 1e-6;
+    else
+        q_converged = norm(dp) < options.TolX || firstorderopt < 1e-6;
     end
 end
 
@@ -230,8 +200,11 @@ end
 if(iter==options.MaxIter)
     exitflag = 0;
 end
-if(~doContinue(mu, dresnorm, norm(dp), options))
+if(mu < options.TolX || norm(dp) < options.TolX)
     exitflag = 2;
+end
+if(firstorderopt < 1e-6)
+    exitflag = 1;
 end
 
 % assign output structure
@@ -240,7 +213,7 @@ if (nargout>4)
     output(1).iterations = iter;
     output.funcCount = funevals;
     output.solverCount = solver_calls;
-    output.algorithm = 'nls_trust';
+    output.algorithm = 'arNLS';
     output.firstorderopt = firstorderopt;
     switch(exitflag)
         case(0)
@@ -268,30 +241,27 @@ end
 
 
 
-% check if convergence
-function q = doContinue(mu, dresnorm, dpnorm, options)
-if(isscalar(mu))
-    q = mu >= options.TolX;
+
+% print iteration
+function printiter(iter, maxIter, resnorm, mu, dmu, norm_dp, normdpmu, dresnorm, ...
+    norm_gred, dim_red, grad_dir_frac, approx_qual, step_accept)
+
+if(~step_accept)
+    outstream = 2;
 else
-    q = dresnorm<-options.TolFun || dpnorm>=options.TolX;
+    outstream = 1;
 end
 
-
-
-% check if trust region shrinking necessary
-function q = doContinueApprox(dresnorm, dresnorm_expect)
-q = dresnorm>=0;
-% q = dresnorm>=0 || abs((dresnorm - dresnorm_expect)/dresnorm)>0.5;
-
-
-
-% print interation
-function printiter(iter, maxIter, resnorm, mudp, mu, norm_dp, dresnorm, ...
-    norm_gred, dim_red, grad_dir_frac, dresnorm_expect)
-if(isscalar(mu))
-    fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g  norm(dp)=%-8.2g  ', iter, maxIter, resnorm, mudp, norm_dp);
+if(dmu==-1)
+    dmu = '-';
+elseif(dmu==+1)
+    dmu = '+';
 else
-    
+    dmu = '0';
+end
+
+fprintf(outstream, '%3i/%3i  resnorm=%-8.2g  ', iter, maxIter, resnorm);
+if(~isscalar(mu))
     figure(1)
     subplot(3,1,1)
     plot(log10(real(eig(mu))),'*-');
@@ -301,14 +271,10 @@ else
     colorbar;
     drawnow;
      
-    fprintf('%3i/%3i  resnorm=%-8.2g  mu=%-8.2g(det=%-8.2g cond=%-8.2g maxeig=%-8.2g)  norm(dp)=%-8.2g  ', ...
-        iter, maxIter, resnorm, mudp, det(mu), cond(mu), max(eig(mu)), norm_dp);
-end
-
-if(dresnorm<0)
-    fprintf('dresnorm=%-8.2g  ', dresnorm);
+    fprintf(outstream, 'mu=%-8.2g %s (det=%-8.2g cond=%-8.2g maxeig=%-8.2g)  ', normdpmu, dmu, det(mu), cond(mu), max(eig(mu)));
 else
-    fprintf('dresnorm=%8s  ', '');
+    fprintf(outstream, 'mu=%-8.2g %s ', mu, dmu);
 end
-fprintf('approx_qual=%-5.2f  norm(g)=%-8.2g  dim_red=%i  grad_dir=%3.1f', ...
-    abs((dresnorm - dresnorm_expect)/dresnorm), norm_gred, dim_red, grad_dir_frac);
+fprintf(outstream, 'norm(dp)=%-8.2g  dresnorm=%-8.2g  ', norm_dp, dresnorm);
+fprintf(outstream, 'approx_qual=%-5.2f  norm(g)=%-8.2g  dim_red=%i  grad_dir=%3.1f\n', ...
+    approx_qual, norm_gred, dim_red, grad_dir_frac);
