@@ -62,13 +62,6 @@ subplot(3,2,6);
 hist(ar.fun_evals, 50);
 xlabel('number of function evaluations');
 
-
-% T = clusterdata(log10(chi2s(~isnan(chi2s))'), 1)
-% Y = pdist(log10(chi2s(~isnan(chi2s))'));
-% Z = linkage(Y);
-% figure(3)
-% [H,T] = dendrogram(Z,'colorthreshold','default');
-
 %% scatter plots
 
 nji = sum(q_select);
