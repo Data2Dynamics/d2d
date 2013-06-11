@@ -13,11 +13,19 @@
 %  0 = trust region (based on modified trust.m)
 %  1 = Levenberg-Marquardt
 %  2 = Newton (with maximal step length mu)
-%  3 = gradient descent (up to cauchy point)
-%  4 = dogleg
-%  5 = generalized trust region (based on modified trust.m)
-%  6 = trdog
-%  7 = trdog pcgr
+%  3 = gradient descent (with steplength mu)
+%  4 = gradient descent (to cauchy point with steplength mu)
+%  5 = dogleg
+%  6 = generalized trust region (based on modified trust.m)
+%  7 = MATLABs trdog
+%  8 = Newton pcgr (with maximal step length mu)
+%  9 = trdog pcgr (with maximal step length mu)
+% 10 = dogleg Newton pcgr
+% 11 = dogleg trdog pcgr
+% 12 = trdog pcgr (no DM)
+% 13 = trdog pcgr (no DG)
+% 14 = trdog pcgr Levenberg-Marquardt
+% 15 = trdog pcgr 2D subspace (open: how to combine, how to implement updates)
 
 function [p,resnorm,res,exitflag,output,lambda,jac] = arNLS(fun,p,lb,ub,options,method)
 
@@ -105,7 +113,7 @@ optimValues(1).iteration = 0;
 optimValues(1).mu = mu;
 optimValues(1).normdp = nan;
 if(~isempty(options.OutputFcn))
-    feval(options.OutputFcn,[],optimValues,'iter');
+    feval(options.OutputFcn,p,optimValues,'iter');
 end
 
 q_converged = false;
@@ -158,7 +166,7 @@ while(iter < options.MaxIter && ~q_converged)
             optimValues(1).iteration = optimValues(1).iteration + 1;
             optimValues(1).mu = mu;
             optimValues(1).normdp = norm(dp);
-            feval(options.OutputFcn,[],optimValues,'iter');
+            feval(options.OutputFcn,p,optimValues,'iter');
         end
     else
         firstorderopt = nan;
