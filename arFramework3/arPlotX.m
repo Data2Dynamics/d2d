@@ -43,7 +43,7 @@ for jm = 1:length(ar.model)
                 cclegendstyles = zeros(1,length(ar.model(jm).plot(jplot).dLink));
                 
                 for jd = ar.model(jm).plot(jplot).dLink
-                    [t, u, x, ulb, uub, xlb, xub, jc] = getData(jm, jd);
+                    [t, u, x, ulb, uub, xlb, xub, jc, dxdt] = getData(jm, jd);
                     
                     % rows and cols
                     [ncols, nrows, nu, nx, iu, ix] = myColsAndRows(jm, rowstocols);
@@ -129,6 +129,18 @@ for jm = 1:length(ar.model)
                                 ar.model(jm).condition(jc).plot.x(jx,jc) = ltmp;
                             end
                             hold(g, 'on');
+                            
+                            % steady state
+                            xss = x(1,jx) + dxdt(jx)*(t-min(t));
+                            xss(xss<0) = nan;
+                            xss(xss>2*max(x(:,jx))) = nan;
+                            ltmp = plot(g, t, xss, '--', Clines{:});
+                            if(jd~=0)
+                                ar.model(jm).data(jd).plot.xss(jx,jc) = ltmp;
+                            else
+                                ar.model(jm).condition(jc).plot.xss(jx,jc) = ltmp;
+                            end
+                            
                             if(ar.config.ploterrors == -1)
                                 tmpx = [t(:); flipud(t(:))];
                                 tmpy = [xub(:,jx); flipud(xlb(:,jx))];
@@ -138,10 +150,17 @@ for jm = 1:length(ar.model)
                                 set(ltmp2, 'LineStyle', '--', 'FaceColor', 'none', 'EdgeColor', Clines{2}*0.3+0.7);
                             end
                         else
+                            % steady state
+                            xss = x(1,jx) + dxdt(jx)*(t-min(t));
+                            xss(xss<0) = nan;
+                            xss(xss>2*max(x(:,jx))) = nan;
+                            
                             if(jd~=0)
                                 set(ar.model(jm).data(jd).plot.x(jx,jc), 'YData', x(:,jx));
+                                set(ar.model(jm).data(jd).plot.xss(jx,jc), 'YData', xss);
                             else
                                 set(ar.model(jm).condition(jc).plot.x(jx,jc), 'YData', x(:,jx));
+                                set(ar.model(jm).condition(jc).plot.x(jx,jc), 'YData', xss);
                             end
                         end
                     end
@@ -343,42 +362,30 @@ for jm = 1:length(ar.model)
     end
 end
 
-function [t, u, x, ulb, uub, xlb, xub, jc] = getData(jm, jd)
+function [t, u, x, ulb, uub, xlb, xub, jc, dxdt] = getData(jm, jd)
 global ar
 
 if(jd~=0)
     jc = ar.model(jm).data(jd).cLink;
-    t = ar.model(jm).condition(jc).tFine;
-    u = ar.model(jm).condition(jc).uFineSimu;
-    x = ar.model(jm).condition(jc).xFineSimu;
-    if(isfield(ar.model(jm).condition(jc), 'xExpUB'))
-        ulb = ar.model(jm).condition(jc).uFineLB;
-        uub = ar.model(jm).condition(jc).uFineUB;
-        xlb = ar.model(jm).condition(jc).xFineLB;
-        xub = ar.model(jm).condition(jc).xFineUB;
-    else
-        ulb = [];
-        uub = [];
-        xlb = [];
-        xub = [];
-    end
 else
     jc = 1;
-    t = ar.model(jm).condition(jc).tFine;
-    u = ar.model(jm).condition(jc).uFineSimu;
-    x = ar.model(jm).condition(jc).xFineSimu;
-    if(isfield(ar.model(jm).condition(jc), 'xExpUB'))
-        ulb = ar.model(jm).condition(jc).uFineLB;
-        uub = ar.model(jm).condition(jc).uFineUB;
-        xlb = ar.model(jm).condition(jc).xFineLB;
-        xub = ar.model(jm).condition(jc).xFineUB;
-    else
-        ulb = [];
-        uub = [];
-        xlb = [];
-        xub = [];
-    end
 end
+t = ar.model(jm).condition(jc).tFine;
+u = ar.model(jm).condition(jc).uFineSimu;
+x = ar.model(jm).condition(jc).xFineSimu;
+if(isfield(ar.model(jm).condition(jc), 'xExpUB'))
+    ulb = ar.model(jm).condition(jc).uFineLB;
+    uub = ar.model(jm).condition(jc).uFineUB;
+    xlb = ar.model(jm).condition(jc).xFineLB;
+    xub = ar.model(jm).condition(jc).xFineUB;
+else
+    ulb = [];
+    uub = [];
+    xlb = [];
+    xub = [];
+end
+dxdt = ar.model(jm).condition(jc).dxdt;
+dxdt(ar.model(jm).condition(jc).qSteadyState==0) = nan;
 
 
 
