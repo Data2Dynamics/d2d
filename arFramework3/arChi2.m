@@ -127,14 +127,49 @@ for jm = 1:nm
     end
 end
 
-% steady state conditions
+% % steady state conditions
+% for jm = 1:nm
+%     nc = length(ar.model(jm).condition);
+%     for jc = 1:nc
+%         if(isfield(ar.model(jm).condition(jc), 'qSteadyState'))
+%             qss = ar.model(jm).condition(jc).qSteadyState==1;
+%             if(sum(qss)>0)
+%                 tmpres = ar.model(jm).condition(jc).dxdt(qss) ./ ar.model(jm).condition(jc).stdSteadyState(qss);
+%                 ar.res(resindex:(resindex+length(tmpres(:))-1)) = tmpres;
+%                 resindex = resindex+length(tmpres(:));
+%                 ar.ndata = ar.ndata + sum(qss);
+%                 ar.nss = ar.nss + sum(qss);
+%                 ar.chi2 = ar.chi2 + sum(tmpres)^2;
+%                 ar.chi2ss = ar.chi2ss + sum(tmpres)^2;
+%                 
+%                 if(ar.config.useSensis && sensi)
+%                     tmpsres = zeros(length(tmpres(:)), np);
+%                     tmpsres(:,ar.model(jm).condition(jc).pLink) = ar.model(jm).condition(jc).ddxdtdp;
+%                     tmpsres = tmpsres ./ (ar.model(jm).condition(jc).stdSteadyState(qss)'*ones(1,np));
+%                     tmpsres(:,ar.qFit(ar.model(jm).condition(jc).pLink)~=1) = 0;
+%                     
+%                     % log trafo
+%                     tmpsres(:,ar.model(jm).condition(jc).pLink) = tmpsres(:,ar.model(jm).condition(jc).pLink) .* ...
+%                         (ones(length(tmpres),1)*ar.model(jm).condition(jc).pNum) * log(10);
+%                     
+%                     ar.sres(sresindex:(sresindex+length(tmpres(:))-1),:) = tmpsres;
+%                     sresindex = sresindex+length(tmpres(:));
+%                 end
+%             end
+%         end
+%     end
+% end
+
+% steady state conditions (relative to initial value)
 for jm = 1:nm
     nc = length(ar.model(jm).condition);
     for jc = 1:nc
         if(isfield(ar.model(jm).condition(jc), 'qSteadyState'))
             qss = ar.model(jm).condition(jc).qSteadyState==1;
             if(sum(qss)>0)
-                tmpres = ar.model(jm).condition(jc).dxdt(qss) ./ ar.model(jm).condition(jc).stdSteadyState(qss);
+                x = ar.model(jm).condition(jc).xExpSimu(1,qss);
+                dxdt = ar.model(jm).condition(jc).dxdt(qss);
+                tmpres = (dxdt ./ x) ./ ar.model(jm).condition(jc).stdSteadyState(qss);
                 ar.res(resindex:(resindex+length(tmpres(:))-1)) = tmpres;
                 resindex = resindex+length(tmpres(:));
                 ar.ndata = ar.ndata + sum(qss);
@@ -144,7 +179,10 @@ for jm = 1:nm
                 
                 if(ar.config.useSensis && sensi)
                     tmpsres = zeros(length(tmpres(:)), np);
-                    tmpsres(:,ar.model(jm).condition(jc).pLink) = ar.model(jm).condition(jc).ddxdtdp;
+                    dxdp = ar.model(jm).condition(jc).sxExpSimu(1,qss,:);
+                    ddxdtdp = ar.model(jm).condition(jc).ddxdtdp(qss,:);
+                    
+                    tmpsres(:,ar.model(jm).condition(jc).pLink) = bsxfun(@rdivide,ddxdtdp,x') - squeeze(bsxfun(@times,bsxfun(@rdivide,dxdt,x.^2), dxdp));
                     tmpsres = tmpsres ./ (ar.model(jm).condition(jc).stdSteadyState(qss)'*ones(1,np));
                     tmpsres(:,ar.qFit(ar.model(jm).condition(jc).pLink)~=1) = 0;
                     

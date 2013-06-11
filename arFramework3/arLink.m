@@ -34,9 +34,9 @@ for m=1:length(ar.model)
         % collect time points
         for d=1:length(ar.model(m).data)
             if(isfield(ar.model(m).data(d), 'tExp'))
-                ar.model(m).condition(ar.model(m).data(d).cLink).tExp = union( ...
+                ar.model(m).condition(ar.model(m).data(d).cLink).tExp = union(union( ...
                     ar.model(m).condition(ar.model(m).data(d).cLink).tExp, ...
-                    ar.model(m).data(d).tExp);
+                    ar.model(m).data(d).tExp), 0);
             end
             
             ar.model(m).data(d).tFine = linspace(ar.model(m).data(d).tLim(1), ar.model(m).data(d).tLim(2), ar.config.nFinePoints)';

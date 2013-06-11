@@ -76,7 +76,7 @@ ar.config.atol = 1e-6;
 ar.config.rtol = 1e-6;
 ar.config.maxsteps = 1000;
 
-ar.config.steady_state_constraint = 1e-8;
+ar.config.steady_state_constraint = 1;
 
 % CVODES flags
 ar.info.arsimucalc_flags = cell(1,30);
