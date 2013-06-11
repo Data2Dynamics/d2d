@@ -427,10 +427,25 @@ if(ar.config.useSensis)
     ar.model(m).condition(c).sym.su = sym(ar.model(m).condition(c).su);
     fprintf('su=%i, ', length(ar.model(m).condition(c).ps)*sum(ar.model(m).condition(c).qfu_nonzero(:)));
     
+    % input derivatives
     ar.model(m).condition(c).sym.dfudp = [];
     if(~isempty(ar.model(m).condition(c).sym.ps))
         ar.model(m).condition(c).sym.dfudp = ...
             jacobian(ar.model(m).condition(c).sym.fu, ar.model(m).condition(c).sym.ps);
+        
+        % derivatives of step1
+        for j=1:length(ar.model(m).u)
+            if(strfind(ar.model(m).condition(c).fu{j}, 'step1('))
+                ar.model(m).condition(c).sym.dfudp(j,:) = 0;
+            end
+        end
+        
+        % derivatives of step2
+        for j=1:length(ar.model(m).u)
+            if(strfind(ar.model(m).condition(c).fu{j}, 'step2('))
+                ar.model(m).condition(c).sym.dfudp(j,:) = 0;
+            end
+        end
     end
     
 	% sx

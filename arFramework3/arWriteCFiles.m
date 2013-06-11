@@ -8,6 +8,9 @@
 
 function arWriteCFiles(forcedCompile)
 
+warnreset = warning;
+warning('off','symbolic:mupadmex:MuPADTextWarning');
+
 global ar
 
 if(isempty(ar))
@@ -285,6 +288,8 @@ arCompile(forcedCompile);
 % refresh file cache
 rehash
 
+warning(warnreset);
+
 
 
 % write ODE headers
@@ -301,6 +306,7 @@ fprintf(fid, '#include <sundials/sundials_types.h>\n');
 fprintf(fid, '#include <sundials/sundials_math.h>\n');  
 fprintf(fid, '#include <udata.h>\n');
 fprintf(fid, '#include <math.h>\n');
+fprintf(fid, '#include <arInputFunctionsC.h>\n');
 fprintf(fid,'\n\n\n');
 
 fprintf(fid, ' void fu_%s(void *user_data, double t);\n', ar.model(m).condition(c).fkt);
@@ -338,6 +344,7 @@ fprintf(fid, '#include <sundials/sundials_types.h>\n');
 fprintf(fid, '#include <sundials/sundials_math.h>\n');  
 fprintf(fid, '#include <udata.h>\n');
 fprintf(fid, '#include <math.h>\n');
+fprintf(fid, '#include <arInputFunctionsC.h>\n');
 fprintf(fid,'\n\n\n');
 
 % write fu

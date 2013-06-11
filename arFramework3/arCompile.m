@@ -25,6 +25,7 @@ if(exist([ar.fkt '.' mexext],'file') && ~forceFullCompile)
     return
 end
 
+ar_path = strrep(which('arInit.m'),'/arInit.m','');
 sundials_path = [strrep(which('arInit.m'),'/arInit.m','') '/sundials-2.4.0/'];
 
 % include directories
@@ -34,6 +35,7 @@ for j=1:length(includes)
     includesstr = strcat(includesstr, [' -I"' sundials_path includes{j} '"']);
 end
 includesstr = strcat(includesstr, [' -I"' pwd '/Compiled"']);
+includesstr = strcat(includesstr, [' -I"' ar_path '"']);
 
 % source files
 sources = {
@@ -93,6 +95,7 @@ objects = {
     'sundials_sptfqmr.o';
     'sundials_math.o';
     'nvector_serial.o';
+    'arInputFunctionsC.o';
     };
 
 objectsstr = '';
@@ -119,6 +122,9 @@ for j=1:length(sources)
         eval(['mex -c -outdir Compiled/'  mexext '/' includesstr ' ' sundials_path sources{j}]);
     end
 end
+
+% pre-compile input functions
+eval(['mex -c -outdir Compiled/'  mexext '/' includesstr ' ' ar_path '/arInputFunctionsC.c']);
 
 % pre-compile conditions
 sources_con = {};
