@@ -111,6 +111,7 @@ try
         ar.qFit = qFitReset;
     end
     p = ar.p;
+    arPLEIntegrate(ar.p);  % Recalculate objective function, with FitErrorCorrection calculated with qFitReset
 catch exception
     disp(['ERROR FIT: ' exception.message]);
     if(nargin==1)
