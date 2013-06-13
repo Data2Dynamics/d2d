@@ -591,7 +591,9 @@ for jm = 1:length(ar.model)
     end
 end
 
-close(hbar)
+if(exist('hbar','var'))
+	close(hbar)
+end
 ar.p = pReset;
 
 
