@@ -619,7 +619,7 @@ savePath = mypath([savePath '/' name]);
 saveas(h, savePath, 'fig');
 print('-depsc', savePath);
 % print('-dpng', savePath);
-eval(['!ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
 % plot2svg([savePath '.svg'], h);
 
 
