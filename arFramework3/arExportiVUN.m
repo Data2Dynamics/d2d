@@ -81,7 +81,7 @@ for jd=1:length(ar.model(m).data)
         % state in observables
         ftmp = ar.model(m).data(jd).fy{jy};
         vars = symvar(ftmp);
-        for jx = find(ismember(ar.model.x, vars))
+        for jx = find(ismember(ar.model.x, vars)) %R2013a compatible
             fprintf(fid_output, ', %s', ar.model.x{jx});
         end
         fprintf(fid_output, '\n');

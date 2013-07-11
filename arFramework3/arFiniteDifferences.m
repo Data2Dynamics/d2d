@@ -30,7 +30,7 @@ for jp=1:length(ar.pLabel)
                 ar.model(jm).condition(jc).suExpSimuFD = zeros(size(ar.model(jm).condition(jc).suExpSimu));
                 ar.model(jm).condition(jc).sxExpSimuFD = zeros(size(ar.model(jm).condition(jc).sxExpSimu));
             end
-            qp = ismember(ar.model(jm).condition(jc).p, ar.pLabel{jp});
+            qp = ismember(ar.model(jm).condition(jc).p, ar.pLabel{jp}); %R2013a compatible
             if(sum(qp)>0)
                 ar.model(jm).condition(jc).suExpSimuFD(:,:,qp) = ar.model(jm).condition(jc).uExpSimu;
                 ar.model(jm).condition(jc).sxExpSimuFD(:,:,qp) = ar.model(jm).condition(jc).xExpSimu;
@@ -45,7 +45,7 @@ for jp=1:length(ar.pLabel)
                     ar.model(jm).data(jd).sreserrFD = zeros(size(ar.model(jm).data(jd).sres));
                 end
             end
-            qp = ismember(ar.model(jm).data(jd).p, ar.pLabel{jp});
+            qp = ismember(ar.model(jm).data(jd).p, ar.pLabel{jp}); %R2013a compatible
             if(sum(qp)>0)
                 ar.model(jm).data(jd).syExpSimuFD(:,:,qp) = ar.model(jm).data(jd).yExpSimu;
                 ar.model(jm).data(jd).systdExpSimuFD(:,:,qp) = ar.model(jm).data(jd).ystdExpSimu;
@@ -63,7 +63,7 @@ for jp=1:length(ar.pLabel)
     
     for jm=1:length(ar.model)
         for jc=1:length(ar.model(jm).condition)
-            qp = ismember(ar.model(jm).condition(jc).p, ar.pLabel{jp});
+            qp = ismember(ar.model(jm).condition(jc).p, ar.pLabel{jp}); %R2013a compatible
             if(sum(qp)>0)
                 ar.model(jm).condition(jc).suExpSimuFD(:,:,qp) = ...
                     (ar.model(jm).condition(jc).uExpSimu - ar.model(jm).condition(jc).suExpSimuFD(:,:,qp)) / dp;
@@ -72,7 +72,7 @@ for jp=1:length(ar.pLabel)
             end
         end
         for jd=1:length(ar.model(jm).data)
-            qp = ismember(ar.model(jm).data(jd).p, ar.pLabel{jp});
+            qp = ismember(ar.model(jm).data(jd).p, ar.pLabel{jp}); %R2013a compatible
             if(sum(qp)>0)
                 ar.model(jm).data(jd).syExpSimuFD(:,:,qp) = ...
                     (ar.model(jm).data(jd).yExpSimu - ar.model(jm).data(jd).syExpSimuFD(:,:,qp)) / dp;

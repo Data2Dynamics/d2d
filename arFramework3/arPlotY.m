@@ -8,6 +8,8 @@
 
 function arPlotY(saveToFile, fastPlot, doLegends)
 
+matVer = ver('MATLAB');
+
 global ar
 
 if(isempty(ar))
@@ -206,9 +208,9 @@ for jm = 1:length(ar.model)
             else
                 times = [];
                 for jd = ar.model(jm).plot(jplot).dLink
-                    times = union(times, ar.model(jm).data(jd).tExp);
+					times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
                     [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols);
-                    
+
                     for jy = 1:ny
                         % chi^2 & ndata
                         if(ar.model(jm).data(jd).qFit(jy)==1)
@@ -221,7 +223,11 @@ for jm = 1:length(ar.model)
                     end
                 end
                 
-                [conditions, iconditions, jconditions] = unique(ar.model(jm).plot(jplot).condition); %#ok<ASGLU>
+                if(str2double(matVer.Version)>=8.1)
+                    [conditions, iconditions, jconditions] = unique(ar.model(jm).plot(jplot).condition,'legacy'); %#ok<ASGLU>
+                else
+                    [conditions, iconditions, jconditions] = unique(ar.model(jm).plot(jplot).condition); %#ok<ASGLU>
+                end
                 
                 cclegendstyles = zeros(1,length(times)*length(conditions));
                 for jt = 1:length(times)
@@ -503,7 +509,7 @@ for jd = ds
                     doses(end+1) = str2double(ar.model(jm).data(jd2).condition(1).value);
                 end
             end
-            doses = unique(doses);
+			doses = unique(doses); %R2013a compatible
             if(length(doses)>1)
                 t(ccount,1) = doses(1) - (doses(2)-doses(1)); %#ok<AGROW>
                 zero_break = (t(ccount,1)+doses(1))/2;

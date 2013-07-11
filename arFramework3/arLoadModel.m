@@ -102,7 +102,7 @@ while(~strcmp(C{1},'INPUTS'))
     ar.model(m).xUnits(end,2) = C{3};
     ar.model(m).xUnits(end,3) = C{4};
     if(~isempty(ar.model(m).c))
-        qcomp = ismember(ar.model(m).c, C{5});
+        qcomp = ismember(ar.model(m).c, C{5}); %R2013a compatible
         if(sum(qcomp)~=1)
             error('unknown compartement %s', cell2mat(C{5}));
         end
@@ -129,7 +129,7 @@ ar.model(m).fu = {};
 C = textscan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'REACTIONS') && ~strcmp(C{1},'REACTIONS-AMOUNTBASED') && ~strcmp(C{1},'ODES'))
     if(~strcmp(C{1},''))
-        if(sum(ismember(ar.model(m).x, C{1}))>0)
+        if(sum(ismember(ar.model(m).x, C{1}))>0) %R2013a compatible
             error('input %s already defined in STATES', cell2mat(C{1}));
         end
         ar.model(m).u(end+1) = C{1};
@@ -144,7 +144,7 @@ ar.model(m).qPlotU = ones(size(ar.model(m).u));
 
 % input parameters
 varlist = cellfun(@symvar, ar.model(m).fu, 'UniformOutput', false);
-ar.model(m).pu = setdiff(vertcat(varlist{:}), {ar.model(m).t, ''});
+ar.model(m).pu = setdiff(vertcat(varlist{:}), {ar.model(m).t, ''}); %R2013a compatible
 
 % REACTIONS (respectively ODES)
 ar.model(m).N = [];
@@ -169,9 +169,9 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             end
             str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
         end
-        if(sum(~ismember(source, ar.model(m).x)) > 0)
+        if(sum(~ismember(source, ar.model(m).x)) > 0) %R2013a compatible
             error('undefined source species in reaction %i: %s', vcount, ...
-                source{~ismember(source, ar.model(m).x)})
+                source{~ismember(source, ar.model(m).x)}) %R2013a compatible
         end
         
         if(strcmp(str{1},'<->'))
@@ -188,16 +188,16 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             end
             str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
         end
-        if(sum(~ismember(target, ar.model(m).x)) > 0)
+        if(sum(~ismember(target, ar.model(m).x)) > 0) %R2013a compatible
             error('undefined target species in reaction %i: %s', vcount, ...
-                target{~ismember(target, ar.model(m).x)})
+                target{~ismember(target, ar.model(m).x)}) %R2013a compatible
         end
         
         % infer flux units
         if(~isempty(source))
-            ix = find(ismember(ar.model(m).x, source{1}));
+            ix = find(ismember(ar.model(m).x, source{1})); %R2013a compatible
         elseif(~isempty(target))
-            ix = find(ismember(ar.model(m).x, target{1}));
+            ix = find(ismember(ar.model(m).x, target{1})); %R2013a compatible
         else
             error('reaction with empty N');
         end
@@ -241,12 +241,12 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         % setup N
         ar.model(m).N(1:length(ar.model(m).x),vcount) = 0;
         for jj=1:length(source)
-            for j=find(ismember(ar.model(m).x, source{jj}))
+            for j=find(ismember(ar.model(m).x, source{jj})) %R2013a compatible
                 ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) - 1;
             end
         end
         for jj=1:length(target)
-            for j=find(ismember(ar.model(m).x, target{jj}))
+            for j=find(ismember(ar.model(m).x, target{jj})) %R2013a compatible
                 ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) + 1;
             end
         end
@@ -277,9 +277,9 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             
             % infer flux units
             if(~isempty(target))
-                ix = find(ismember(ar.model(m).x, target{1}));
+                ix = find(ismember(ar.model(m).x, target{1})); %R2013a compatible
             elseif(~isempty(source))
-                ix = find(ismember(ar.model(m).x, source{1}));
+                ix = find(ismember(ar.model(m).x, source{1})); %R2013a compatible
             else
                 error('reaction with empty N');
             end
@@ -290,12 +290,12 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             % setup N
             ar.model(m).N(1:length(ar.model(m).x),vcount) = 0;
             for jj=1:length(source)
-                for j=find(ismember(ar.model(m).x, source{jj}))
+                for j=find(ismember(ar.model(m).x, source{jj})) %R2013a compatible
                     ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) + 1;
                 end
             end
             for jj=1:length(target)
-                for j=find(ismember(ar.model(m).x, target{jj}))
+                for j=find(ismember(ar.model(m).x, target{jj})) %R2013a compatible
                     ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) - 1;
                 end
             end
@@ -346,8 +346,11 @@ end
 
 % dynamic parameters
 varlist = cellfun(@symvar, ar.model(m).fv, 'UniformOutput', false);
-ar.model(m).px = union(setdiff(vertcat(varlist{:}), union(ar.model(m).x, ar.model(m).u)), ...
+ar.model(m).px = union(setdiff(vertcat(varlist{:}), union(ar.model(m).x, ar.model(m).u)), ... %R2013a compatible
     ar.model(m).px);
+
+
+
 
 % setup rhs
 C = cell(size(ar.model(m).N));
@@ -357,7 +360,7 @@ if(length(ar.model(m).c)>1)
             qinfluxwitheducts = ar.model(m).N(j,:) > 0 & sum(ar.model(m).N < 0,1) > 0;
             eductcompartment = zeros(size(qinfluxwitheducts));
             for jj=find(qinfluxwitheducts)
-                eductcompartment(jj) = unique(ar.model(m).cLink(ar.model(m).N(:,jj)<0));
+				eductcompartment(jj) = unique(ar.model(m).cLink(ar.model(m).N(:,jj)<0)); %R2013a compatible
             end
             
             cfaktor = cell(size(qinfluxwitheducts));
@@ -403,17 +406,18 @@ end
 
 % extra invariational parameters
 varlist = cellfun(@symvar, ar.model(m).fxeq, 'UniformOutput', false);
-ar.model(m).pxeq = setdiff(vertcat(varlist{:}), union(ar.model(m).x, union(ar.model(m).u, ...
-    ar.model(m).px)));
+ar.model(m).pxeq = setdiff(vertcat(varlist{:}), union(ar.model(m).x, union(ar.model(m).u, ar.model(m).px))); %R2013a compatible
 
 % collect parameters needed for ODE
-ar.model(m).p = union(ar.model(m).px, union(ar.model(m).px0, union(ar.model(m).pc, union(ar.model(m).pxeq, ar.model(m).pu))));
+ar.model(m).p = union(ar.model(m).px, union(ar.model(m).px0, union(ar.model(m).pc, union(ar.model(m).pxeq, ar.model(m).pu)))); %R2013a compatible
+
+
 
 % CONDITIONS
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
 ar.model(m).fp = transpose(ar.model(m).p);
 while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
-    qcondpara = ismember(ar.model(m).p, C{1});
+    qcondpara = ismember(ar.model(m).p, C{1}); %R2013a compatible
     if(sum(qcondpara)>0)
         ar.model(m).fp{qcondpara} = ['(' cell2mat(C{2}) ')'];
     else
@@ -425,7 +429,8 @@ end
 
 % extra conditional parameters
 varlist = cellfun(@symvar, ar.model(m).fp, 'UniformOutput', false);
-ar.model(m).pcond = setdiff(setdiff(setdiff(vertcat(varlist{:}), ar.model(m).p), ar.model(m).x), ar.model(m).u);
+ar.model(m).pcond = setdiff(setdiff(setdiff(vertcat(varlist{:}), ar.model(m).p), ar.model(m).x), ar.model(m).u); %R2013a compatible
+
 
 % PARAMETERS
 if(~isfield(ar, 'pExternLabels'))

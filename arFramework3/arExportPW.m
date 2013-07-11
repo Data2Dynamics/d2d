@@ -29,7 +29,7 @@ fprintf(fid, 'm.type        = ''PW-1-5'';\n\n');
 
 % pwAddX
 for jx = 1:length(ar.model(m).x)
-    qp = ismember(ar.pLabel, ar.model(m).px0{jx});
+    qp = ismember(ar.pLabel, ar.model(m).px0{jx}); %R2013a compatible
     if(sum(qp)==1)
         xvalue = ar.p(qp);
         xlb = ar.lb(qp);
@@ -51,7 +51,7 @@ for jx = 1:length(ar.model(m).x)
             sprintf('''%s''', ar.model(m).x{jx}), sprintf('%g', xvalue), typestr, sprintf('%g', xlb), sprintf('%g', xub), ...
             sprintf('''%s''', ar.model(m).xUnits{jx,2}), sprintf('''%s''', ar.model(m).c{ar.model(m).cLink(jx)}));
     elseif(sum(qp)==0)
-        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx});
+        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx}); %R2013a compatible
         xvalue = char(sym(ar.model(m).condition(c).fp{qp}));
         xlb = 0;
         xub = 1000;
@@ -112,9 +112,9 @@ for jv = 1:length(ar.model(m).fv)
         parameterstr = '';
         for jx = 1:length(vars)
             charvar = char(vars(jx));
-            qx = ismember(ar.model(m).x, charvar);
-            qu = ismember(ar.model(m).u, charvar);
-            qp = ismember(ar.model(m).p, charvar);
+            qx = ismember(ar.model(m).x, charvar); %R2013a compatible
+            qu = ismember(ar.model(m).u, charvar); %R2013a compatible
+            qp = ismember(ar.model(m).p, charvar); %R2013a compatible
             if(sum(qx)==1)
                 if(count>1)
                     modifierstr = [modifierstr ', ']; %#ok<AGROW>
@@ -154,14 +154,14 @@ fprintf(fid, '\n');
 
 % pwAddC
 for jc = 1:length(ar.model(m).c)
-    qp = ismember(ar.pLabel, ar.model(m).pc{jc});
+    qp = ismember(ar.pLabel, ar.model(m).pc{jc}); %R2013a compatible
     if(sum(qp)==1)
         pvalue = ar.p(qp);
         fprintf(fid, 'm = pwAddC(m, %20s, %20s, [], 3, %20s, %20s, 1);\n',  ...
             sprintf('''%s''', ar.model(m).c{jc}), sprintf('%g', 10^pvalue), ...
             sprintf('''%s''', ar.model(m).c{jc}), sprintf('''%s''', ar.model(m).xUnits{jx,2}));
     elseif(sum(qp)==0)
-        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).pc{jc});
+        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).pc{jc}); %R2013a compatible
         if(sum(qp)==1)
             pvalue = ar.model(m).condition(c).fp{qp};
             fprintf(fid, 'm = pwAddC(m, %20s, %20s, [], 3, %20s, %20s, 1);\n',  ...
@@ -180,7 +180,7 @@ fprintf(fid, '\n');
 
 % pwAddK
 for jp = 1:length(ar.model(m).condition(c).p)
-    qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp});
+    qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp}); %R2013a compatible
     
     if(sum(qp)==1)
         pvalue = ar.p(qp);
@@ -215,14 +215,14 @@ fprintf(fid, '\n');
 
 % pwAddU
 for ju = 1:length(ar.model(m).u)
-    qp = ismember(ar.pLabel, ar.model(m).condition(c).fu{ju});
+    qp = ismember(ar.pLabel, ar.model(m).condition(c).fu{ju}); %R2013a compatible
     
     if(sum(qp)==1)
         xvalue = ar.p(qp);
         fprintf(fid, 'm = pwAddU(m, %20s, ''steps'', [-100 0], [0 %s]);\n', ...
             sprintf('''%s''', ar.model(m).u{ju}), sprintf('%g', 10^xvalue));
     elseif(sum(qp)==0)
-        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).condition(c).fu{ju});
+        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).condition(c).fu{ju}); %R2013a compatible
         xvalue = ar.model(m).condition(c).fp{qp};
         fprintf(fid, 'm = pwAddU(m, %20s, ''steps'', [-100 0], [0 %s]);\n', ...
             sprintf('''%s''', ar.model(m).u{ju}), xvalue);

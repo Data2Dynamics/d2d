@@ -50,7 +50,7 @@ for m=1:length(ar.model)
             tmpres = ar.model(m).data(d).res(:,y);
             ttmp = ar.model(m).data(d).tExp(~isnan(tmpres));
             tmpres = tmpres(~isnan(tmpres));
-            tunique = unique(ttmp);
+			tunique = unique(ttmp); %R2013a compatible
             for jt = 2:length(tunique);
                 res1 = tmpres(ttmp==tunique(jt));
                 res2 = tmpres(ttmp==tunique(jt-1));

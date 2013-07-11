@@ -134,7 +134,7 @@ for j=1:length(m.reaction)
         findrule = false;
         vars = symvar(tmpstr);
         for jj=1:length(m.rule)
-            if(sum(ismember(vars, sym(m.rule(jj).variable)))>0)
+            if(sum(ismember(vars, sym(m.rule(jj).variable)))>0) %R2013a compatible
                 findrule = true;
             end
         end

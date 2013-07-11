@@ -11,10 +11,11 @@ function arQuasiSSApproximation2(m, fastreversibleindices, dependentvars)
 global ar
 
 qfastreversible = 1:length(ar.model(m).fv);
-qfastreversible = ismember(qfastreversible, fastreversibleindices);
+qfastreversible = ismember(qfastreversible, fastreversibleindices); %R2013a compatible
 
 qdependentvars = 1:length(ar.model(m).x);
-qdependentvars = ismember(qdependentvars, dependentvars);
+qdependentvars = ismember(qdependentvars, dependentvars); %R2013a compatible
+
 independentvars = find(~qdependentvars);
 
 R1 = ar.model(m).N(~qdependentvars, ~qfastreversible);

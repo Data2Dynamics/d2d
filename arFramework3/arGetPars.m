@@ -17,7 +17,7 @@ if(~iscell(pLabel))
     pLabel = {pLabel};
 end
 
-qp = ismember(ar.pLabel, pLabel);
+qp = ismember(ar.pLabel, pLabel); %R2013a compatible
 
 if(nargin < 2)
     qLog10 = ar.qLog10(qp);
@@ -28,7 +28,7 @@ end
 
 p = zeros(1,length(pLabel));
 for j=1:length(pLabel)
-    q = ismember(ar.pLabel, pLabel(j));
+    q = ismember(ar.pLabel, pLabel(j)); %R2013a compatible
 
     if(sum(q)==0)
         error('parameter %s not found', pLabel{j});

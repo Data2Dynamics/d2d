@@ -9,6 +9,8 @@
 
 function arPlotMulti(ps, ps_weigths, saveToFile, filenameAddition)
 
+matVer = ver('MATLAB');
+
 global ar
 
 if(isempty(ar))
@@ -132,12 +134,16 @@ for jp=1:np
                     else
                         times = [];
                         for jd = ar.model(jm).plot(jplot).dLink
-                            times = union(times, ar.model(jm).data(jd).tExp);
+							times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
                             [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols);
                         end
                         
-                        [conditions, iconditions, jconditions] = unique(ar.model(jm).plot(jplot).condition); %#ok<ASGLU>
-                        
+                        if(str2double(matVer.Version)>=8.1)
+                            [conditions, iconditions, jconditions] = unique(ar.model(jm).plot(jplot).condition,'legacy'); %#ok<ASGLU>
+                        else
+                            [conditions, iconditions, jconditions] = unique(ar.model(jm).plot(jplot).condition); %#ok<ASGLU>
+                        end
+                
                         cclegendstyles = zeros(1,length(times)*length(conditions));
                         for jt = 1:length(times)
                             if(isempty(conditions))
@@ -281,7 +287,7 @@ for jp=1:np
                     else
                         times = [];
                         for jd = ar.model(jm).plot(jplot).dLink
-                            times = union(times, ar.model(jm).data(jd).tExp);
+							times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
                             [ncols, nrows, nu, ~, iu, ix] = myColsAndRowsX(jm, rowstocols);
                         end
                         
@@ -377,8 +383,8 @@ for jp=1:np
                     else
                         times = [];
                         for jd = ar.model(jm).plot(jplot).dLink
-                            times = union(times, ar.model(jm).data(jd).tExp);
-                            [ncols, nrows, iv] = myColsAndRowsV(jm, rowstocols);
+							times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
+							[ncols, nrows, iv] = myColsAndRowsV(jm, rowstocols);
                         end
                         
                         cclegendstyles = zeros(1,length(times));

@@ -50,8 +50,7 @@ if(nargin>8 && ~isempty(stdp) && length(stdp)==1)
 end
 
 for j=1:length(pLabel)
-    q = ismember(ar.pLabel, pLabel(j));
-    
+        q = ismember(ar.pLabel, pLabel(j)); %R2013a compatible
     if(sum(q)==1)
         if(nargin>1 && ~isempty(p))
             ar.p(q) = p(j);

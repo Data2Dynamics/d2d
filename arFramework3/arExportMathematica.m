@@ -104,7 +104,7 @@ end
 fprintf(fid, '\n}\n\n');
 
 fprintf(fid, 'parameters = {\n');
-ip = find(~ismember(ar.model(m).data(d).p, ar.model(m).data(d).pystd));
+ip = find(~ismember(ar.model(m).data(d).p, ar.model(m).data(d).pystd)); %R2013a compatible
 for jp=ip
     fprintf(fid, '\t%s', strrep(ar.model(m).data(d).p{jp}, '_', ''));
     if(jp ~= ip(end))

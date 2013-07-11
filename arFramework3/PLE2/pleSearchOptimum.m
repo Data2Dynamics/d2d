@@ -35,7 +35,7 @@ for jk=jks
             [minchi2, minindex] = min(chi2s(1:j));
             if(minindex ~= j && ~isnan(minchi2) && ...
                     (crumin-minchi2)>dchi2 && abs(currentChi2-minchi2)>dchi2b)
-                candidateindex = union(candidateindex, minindex);
+				candidateindex = union(candidateindex, minindex); %R2013a compatible
             end
         end
         
@@ -45,7 +45,7 @@ for jk=jks
             [minchi2, minindex] = min(chi2s(j:n));
             if((minindex+j-1) ~= j && ~isnan(minchi2) && ...
                     (crumin-minchi2)>dchi2 && abs(currentChi2-minchi2)>dchi2b)
-                candidateindex = union(candidateindex, (minindex+j-1));
+				candidateindex = union(candidateindex, (minindex+j-1)); %R2013a compatible
             end
         end        
         trialP = [trialP; pleGlobals.ps{jk}(candidateindex,:)];

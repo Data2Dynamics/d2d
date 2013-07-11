@@ -28,8 +28,8 @@ for m=1:length(ar.model)
         for d=1:length(ar.model(m).data)
             
             % conditions checksum
-            qdynparas = ismember(ar.model(m).data(d).p, ar.model(m).p) | ...
-                ismember(ar.model(m).data(d).p, ar.model(m).data(d).pu);
+            qdynparas = ismember(ar.model(m).data(d).p, ar.model(m).p) | ... %R2013a compatible
+            	ismember(ar.model(m).data(d).p, ar.model(m).data(d).pu); %R2013a compatible
             
             checksum_cond = addToCheckSum(ar.model(m).data(d).fu);
             checksum_cond = addToCheckSum(ar.model(m).p, checksum_cond);
@@ -216,7 +216,7 @@ if(~isempty(ar.model(m).pc))
             qinfluxwitheducts = ar.model(m).N(j,:) > 0 & sum(ar.model(m).N < 0,1) > 0;
             eductcompartment = zeros(size(qinfluxwitheducts));
             for jj=find(qinfluxwitheducts)
-                eductcompartment(jj) = unique(ar.model(m).cLink(ar.model(m).N(:,jj)<0));
+				eductcompartment(jj) = unique(ar.model(m).cLink(ar.model(m).N(:,jj)<0)); %R2013a compatible
             end
             
             cfaktor = sym(ones(size(qinfluxwitheducts)));
@@ -294,14 +294,15 @@ ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, sym(ar
 ar.model(m).condition(c).sym.fu = mysubs(ar.model(m).condition(c).sym.fu, sym(ar.model(m).t), sym('t'));
 
 % remaining initial conditions
-qinitial = ismember(ar.model(m).condition(c).p, ar.model(m).px0);
+qinitial = ismember(ar.model(m).condition(c).p, ar.model(m).px0); %R2013a compatible
+
 varlist = cellfun(@symvar, ar.model(m).condition(c).fp(qinitial), 'UniformOutput', false);
-ar.model(m).condition(c).px0 = union(vertcat(varlist{:}), [])';
+ar.model(m).condition(c).px0 = union(vertcat(varlist{:}), [])'; %R2013a compatible
 
 % remaining parameters
 varlist = cellfun(@symvar, ar.model(m).condition(c).fp, 'UniformOutput', false);
 ar.model(m).condition(c).pold = ar.model(m).condition(c).p;
-ar.model(m).condition(c).p = union(vertcat(varlist{:}), [])';
+ar.model(m).condition(c).p = union(vertcat(varlist{:}), [],'legacy')'; %R2013a compatible
 
 if(doskip)
     fprintf('skipping\n');
@@ -519,7 +520,9 @@ ar.model(m).data(d).sym.fystd = mysubs(ar.model(m).data(d).sym.fystd, sym(ar.mod
 % remaining parameters
 varlist = cellfun(@symvar, ar.model(m).data(d).fp, 'UniformOutput', false);
 ar.model(m).data(d).pold = ar.model(m).data(d).p;
-ar.model(m).data(d).p = union(vertcat(varlist{:}), [])';
+ar.model(m).data(d).p = union(vertcat(varlist{:}), [])'; %R2013a compatible
+
+
 
 if(doskip)
     fprintf('skipping\n');
@@ -634,7 +637,7 @@ if(ar.config.useSensis)
     if(~isempty(ar.model(m).data(d).sym.sy))
         ar.model(m).data(d).sym.fsy = ar.model(m).data(d).sym.dfydp;
         if(~isempty(ar.model(m).condition(c).p))
-            qdynpara = ismember(ar.model(m).data(d).p, ar.model(m).condition(c).p);
+            qdynpara = ismember(ar.model(m).data(d).p, ar.model(m).condition(c).p); %R2013a compatible
         else
             qdynpara = false(size(ar.model(m).data(d).p));
         end
@@ -675,7 +678,7 @@ if(ar.config.useSensis)
         ar.model(m).data(d).sym.fsystd = ar.model(m).data(d).sym.dfystddp + ...
             ar.model(m).data(d).sym.dfystddy * ar.model(m).data(d).sym.sy;
         if(~isempty(ar.model(m).condition(c).p))
-            qdynpara = ismember(ar.model(m).data(d).p, ar.model(m).condition(c).p);
+            qdynpara = ismember(ar.model(m).data(d).p, ar.model(m).condition(c).p); %R2013a compatible
         else
             qdynpara = false(size(ar.model(m).data(d).p));
         end

@@ -27,8 +27,7 @@ end
 
 t = ar.model(m).data(d).tExp;
 y = ar.model(m).data(d).yExp;
-
-tnew = unique(t);
+tnew = unique(t); %R2013a compatible
 ynew = nan(length(tnew), size(y,2));
 ystdnew = nan(length(tnew), size(y,2));
 

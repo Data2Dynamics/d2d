@@ -25,7 +25,7 @@ end
 
 pLabels = {};
 for j=1:length(ples)
-    pLabels = union(pLabels, ples{j}.p_labels(ples{j}.q_fit==1));
+    pLabels = union(pLabels, ples{j}.p_labels(ples{j}.q_fit==1)); %R2013a compatible
 end
 
 ncols = ceil(length(pLabels)^(0.4))+1;

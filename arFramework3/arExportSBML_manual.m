@@ -27,7 +27,7 @@ fprintf(fid, '\t<model name="%s">\n', ar.model(m).name);
 %% compartements
 fprintf(fid, '\t<listOfCompartments>\n');
 for jc = 1:length(ar.model(m).c)
-    qp = ismember(ar.pLabel, ar.model(m).pc{jc});
+    qp = ismember(ar.pLabel, ar.model(m).pc{jc}); %R2013a compatible
     if(sum(qp)==1)
         pvalue = ar.p(qp);
         if(ar.qLog10(qp))
@@ -35,7 +35,7 @@ for jc = 1:length(ar.model(m).c)
         end
         fprintf(fid, '\t\t<compartment name="%s" volume="%g"/>\n', ar.model(m).c{jc}, pvalue);
     elseif(sum(qp)==0)
-        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).pc{jc});
+        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).pc{jc}); %R2013a compatible
         if(sum(qp)==1)
             pvalue = ar.model(m).condition(c).fp{qp};
             fprintf(fid, '\t\t<compartment name="%s" volume="%s"/>\n', ar.model(m).c{jc}, pvalue);
@@ -53,7 +53,7 @@ fprintf(fid, '\t<listOfSpecies>\n');
 
 Crules = {};
 for jx = 1:length(ar.model(m).x)
-    qp = ismember(ar.pLabel, ar.model(m).px0{jx});
+    qp = ismember(ar.pLabel, ar.model(m).px0{jx}); %R2013a compatible
     if(sum(qp)==1)
         pvalue = ar.p(qp);
         if(ar.qLog10(qp))
@@ -62,7 +62,7 @@ for jx = 1:length(ar.model(m).x)
         fprintf(fid, '\t\t<species name="%s" compartment="%s" initialAmount="%g"/>\n', ar.model(m).x{jx}, ...
             ar.model(m).c{ar.model(m).cLink(jx)}, pvalue); %  units="%s"  , ar.model(m).xUnits{jx,2}
     elseif(sum(qp)==0)
-        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx});
+        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx}); %R2013a compatible
         if(sum(qp)==1)
             pvalue = char(sym(ar.model(m).condition(c).fp{qp}));
             if(~isnan(str2double(pvalue)))
@@ -87,7 +87,7 @@ fprintf(fid, '\t</listOfSpecies>\n');
 %% parameters
 fprintf(fid, '\t<listOfParameters>\n');
 for jp = 1:length(ar.model(m).condition(c).p)
-    qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp});
+    qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp}); %R2013a compatible
     
     if(sum(qp)==1)
         pvalue = ar.p(qp);
@@ -145,9 +145,9 @@ for jv = 1:length(ar.model(m).fv)
         fprintf(fid, '\t\t\t</listOfProducts>\n');
         
 %         vars = symvar(ratetemplate);
-%         vars = setdiff(vars, sym(ar.model(m).x(ar.model(m).N(:,jv)<0)));
-%         vars = setdiff(vars, sym(ar.model(m).condition(c).p));
-%         
+%         vars = setdiff(vars, sym(ar.model(m).x(ar.model(m).N(:,jv)<0))); %R2013a compatible
+%         vars = setdiff(vars, sym(ar.model(m).condition(c).p)); %R2013a compatible
+%   
 %         fprintf(fid, '\t\t\t<listOfModifiers>\n');
 %         for jmod = 1:length(vars);
 %             fprintf(fid, '\t\t\t\t<modifierSpeciesReference species="%s"/>\n', char(vars(jmod)));

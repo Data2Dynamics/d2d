@@ -28,7 +28,7 @@ fprintf(fid, '\t</DimensionList>\n');
 %% parameters
 fprintf(fid, '\t<ParameterList>\n');
 for jp = 1:length(ar.model(m).condition(c).p)
-    qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp});
+    qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp}); %R2013a compatible
     
     if(sum(qp)==1)
         pvalue = ar.p(qp);
@@ -58,7 +58,7 @@ for jc = 1:length(ar.model(m).c)
     %% Volume
     fprintf(fid, '\t\t\t\t<Volume>\n');
     
-    qp = ismember(ar.pLabel, ar.model(m).pc{jc});
+    qp = ismember(ar.pLabel, ar.model(m).pc{jc}); %R2013a compatible
     if(sum(qp)==1)
         pvalue = ar.p(qp);
         if(ar.qLog10(qp))
@@ -66,7 +66,7 @@ for jc = 1:length(ar.model(m).c)
         end
         fprintf(fid, '\t\t\t\t\t<Formula> %s </Formula>\n', pvalue);
     elseif(sum(qp)==0)
-        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).pc{jc});
+        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).pc{jc}); %R2013a compatible
         if(sum(qp)==1)
             pvalue = ar.model(m).condition(c).fp{qp};
             fprintf(fid, '\t\t\t\t\t<Formula> %s </Formula>\n', pvalue);
@@ -86,11 +86,11 @@ for jc = 1:length(ar.model(m).c)
         fprintf(fid, '\t\t\t\t\t<Species Name="%s" Boundary="0">\n', ar.model(m).x{jx});
         fprintf(fid, '\t\t\t\t\t\t<InitialValue>\n');
 
-        qp = ismember(ar.pLabel, ar.model(m).px0{jx});
+        qp = ismember(ar.pLabel, ar.model(m).px0{jx}); %R2013a compatible
         if(sum(qp)==1)
             fprintf(fid, '\t\t\t\t\t\t\t<Formula> %s </Formula>\n', ar.model(m).px0{jx});
         elseif(sum(qp)==0)
-            qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx});
+            qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx}); %R2013a compatible
             if(sum(qp)==1)
                 pvalue = char(sym(ar.model(m).condition(c).fp{qp}));
                 fprintf(fid, '\t\t\t\t\t\t\t<Formula> %s </Formula>\n', pvalue);

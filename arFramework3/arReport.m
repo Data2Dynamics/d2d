@@ -182,7 +182,7 @@ for jm=1:length(ar.model)
                 qinfluxwitheducts = ar.model(jm).N(jx,:) > 0 & sum(ar.model(jm).N < 0,1) > 0;
                 eductcompartment = zeros(size(qinfluxwitheducts));
                 for jj=find(qinfluxwitheducts)
-                    eductcompartment(jj) = unique(ar.model(jm).cLink(ar.model(jm).N(:,jj)<0));
+					eductcompartment(jj) = unique(ar.model(jm).cLink(ar.model(jm).N(:,jj)<0)); %R2013a compatible
                 end
             end
             for jv = find(ar.model(jm).N(jx,:))
@@ -376,7 +376,7 @@ for jm=1:length(ar.model)
                 
                 if(qlocalcondi)
                     % check is already shown in model part
-                    qdyn = ismember(ar.model(jm).p, ar.model(jm).data(jd).pold{jp});
+                        qdyn = ismember(ar.model(jm).p, ar.model(jm).data(jd).pold{jp}); %R2013a compatible
                     if(sum(qdyn)>0)
                         qalreadyset = true;
                         for jd2 = ar.model(jm).plot(jplot).dLink

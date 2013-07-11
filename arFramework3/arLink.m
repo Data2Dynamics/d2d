@@ -5,6 +5,8 @@
 
 function arLink(silent, tExpAdd)
 
+matVer = ver('MATLAB');
+
 global ar
 
 if(isempty(ar))
@@ -34,16 +36,17 @@ for m=1:length(ar.model)
         % collect time points
         for d=1:length(ar.model(m).data)
             if(isfield(ar.model(m).data(d), 'tExp'))
-                ar.model(m).condition(ar.model(m).data(d).cLink).tExp = union(union( ...
-                    ar.model(m).condition(ar.model(m).data(d).cLink).tExp, ...
-                    ar.model(m).data(d).tExp), 0);
+				ar.model(m).condition(ar.model(m).data(d).cLink).tExp = union(union( ... %R2013a compatible
+				ar.model(m).condition(ar.model(m).data(d).cLink).tExp, ...
+				ar.model(m).data(d).tExp), 0);
             end
             
             ar.model(m).data(d).tFine = linspace(ar.model(m).data(d).tLim(1), ar.model(m).data(d).tLim(2), ar.config.nFinePoints)';
             
-            ar.model(m).condition(ar.model(m).data(d).cLink).tFine = union( ...
-                ar.model(m).condition(ar.model(m).data(d).cLink).tFine, ...
-                ar.model(m).data(d).tFine);
+			ar.model(m).condition(ar.model(m).data(d).cLink).tFine = union( ... %R2013a compatible
+			   ar.model(m).condition(ar.model(m).data(d).cLink).tFine, ...
+			   ar.model(m).data(d).tFine);
+            
             ar.model(m).condition(ar.model(m).data(d).cLink).tstart = ...
                 min(ar.model(m).condition(ar.model(m).data(d).cLink).tFine);
         end
@@ -66,8 +69,9 @@ for m=1:length(ar.model)
                                 tlink = ar.model(m).condition(c2).ms_snip_start;
                                 fprintf('linking condition %i and %i for multiple shooting at t = %f\n', c, c2, tlink);
                                 
-                                ar.model(m).condition(c).tExp = union(ar.model(m).condition(c).tExp, tlink);
-                                ar.model(m).condition(c2).tExp = union(ar.model(m).condition(c2).tExp, tlink);
+                                ar.model(m).condition(c).tExp = union(ar.model(m).condition(c).tExp, tlink); %R2013a compatible
+								ar.model(m).condition(c2).tExp = union(ar.model(m).condition(c2).tExp, tlink); %R2013a compatible 
+
                                 
                                 if(~isfield(ar.model(m), 'ms_link'))
                                     ar.model(m).ms_link = [c c2 tlink];
@@ -86,12 +90,22 @@ for m=1:length(ar.model)
         % link back time points
         for d=1:length(ar.model(m).data)
             if(isfield(ar.model(m).data(d), 'tExp'))
-                [qtime, itime] = ismember(ar.model(m).data(d).tExp, ...
-                    ar.model(m).condition(ar.model(m).data(d).cLink).tExp); %#ok<ASGLU>
+                if(str2double(matVer.Version)>=8.1)
+                    [qtime, itime] = ismember(ar.model(m).data(d).tExp, ...
+                        ar.model(m).condition(ar.model(m).data(d).cLink).tExp,'legacy'); %#ok<ASGLU>
+                else
+                    [qtime, itime] = ismember(ar.model(m).data(d).tExp, ...
+                        ar.model(m).condition(ar.model(m).data(d).cLink).tExp); %#ok<ASGLU>
+                end
                 ar.model(m).data(d).tLinkExp = itime;
             end
-            [qtime, itime] = ismember(ar.model(m).data(d).tFine, ...
-                ar.model(m).condition(ar.model(m).data(d).cLink).tFine); %#ok<ASGLU>
+            if(str2double(matVer.Version)>=8.1)
+                [qtime, itime] = ismember(ar.model(m).data(d).tFine, ...
+                    ar.model(m).condition(ar.model(m).data(d).cLink).tFine,'legacy'); %#ok<ASGLU>
+            else
+                [qtime, itime] = ismember(ar.model(m).data(d).tFine, ...
+                    ar.model(m).condition(ar.model(m).data(d).cLink).tFine); %#ok<ASGLU>
+            end
             ar.model(m).data(d).tLinkFine = itime;
         end
         
@@ -215,11 +229,11 @@ ar.pLabel = {};
 for m = 1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d = 1:length(ar.model(m).data)
-            ar.pLabel = union(ar.pLabel, ar.model(m).data(d).p);
+			ar.pLabel = union(ar.pLabel, ar.model(m).data(d).p); %R2013a compatible
         end
     end
     for c = 1:length(ar.model(m).condition)
-        ar.pLabel = union(ar.pLabel, ar.model(m).condition(c).p);
+		ar.pLabel = union(ar.pLabel, ar.model(m).condition(c).p); %R2013a compatible                  
     end
 end
 ar.qFit = ones(size(ar.pLabel));
@@ -229,7 +243,7 @@ ar.qDynamic = zeros(size(ar.pLabel));
 for m = 1:length(ar.model)
     for c = 1:length(ar.model(m).condition)
         if(~isempty(ar.model(m).condition(c).p))
-            qdyn = ismember(ar.pLabel, ar.model(m).condition(c).p);
+            qdyn = ismember(ar.pLabel, ar.model(m).condition(c).p); %R2013a compatible
             ar.qDynamic(qdyn) = 1;
         end
     end
@@ -240,7 +254,7 @@ ar.qInitial = zeros(size(ar.pLabel));
 for m = 1:length(ar.model)
     for c = 1:length(ar.model(m).condition)
         if(~isempty(ar.model(m).condition(c).p) && ~isempty(ar.model(m).condition(c).px0))
-            qinit = ismember(ar.pLabel, ar.model(m).condition(c).px0);
+            qinit = ismember(ar.pLabel, ar.model(m).condition(c).px0); %R2013a compatible
             ar.qInitial(qinit) = 1;
         end
     end
@@ -252,7 +266,7 @@ for m = 1:length(ar.model)
     if(isfield(ar.model(m),'data'))
         for d = 1:length(ar.model(m).data)
             if(~isempty(ar.model(m).data(d).pystd))
-                qerr = ismember(ar.pLabel, ar.model(m).data(d).pystd);
+                qerr = ismember(ar.pLabel, ar.model(m).data(d).pystd); %R2013a compatible
                 ar.qError(qerr) = 1;
             end
         end
@@ -261,7 +275,7 @@ end
 
 % fix volumen parameters
 for m = 1:length(ar.model)
-    qvolpara = ismember(ar.pLabel, ar.model(m).pc);
+    qvolpara = ismember(ar.pLabel, ar.model(m).pc); %R2013a compatible
     ar.qFit(qvolpara) = 2;
 end
 
@@ -280,7 +294,7 @@ thread_count_x = 0;
 for m = 1:length(ar.model)
     for c = 1:length(ar.model(m).condition)
         if(~isempty(ar.model(m).condition(c).p))
-            ar.model(m).condition(c).pLink = ismember(ar.pLabel, ar.model(m).condition(c).p);
+            ar.model(m).condition(c).pLink = ismember(ar.pLabel, ar.model(m).condition(c).p); %R2013a compatible
         else
             ar.model(m).condition(c).pLink = [];
         end
@@ -291,7 +305,7 @@ for m = 1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d = 1:length(ar.model(m).data)
             if(~isempty(ar.model(m).data(d).p))
-                ar.model(m).data(d).pLink = ismember(ar.pLabel, ar.model(m).data(d).p);
+                ar.model(m).data(d).pLink = ismember(ar.pLabel, ar.model(m).data(d).p); %R2013a compatible
             else
                 ar.model(m).data(d).pLink = [];
             end

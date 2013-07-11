@@ -44,7 +44,7 @@ if(~isempty(ar.model(m).c))
         M.compartment(jc).level = 2;
         M.compartment(jc).version = 4;
         
-        qp = ismember(ar.pLabel, ar.model(m).pc{jc});
+        qp = ismember(ar.pLabel, ar.model(m).pc{jc}); %R2013a compatible
         if(sum(qp)==1)
             pvalue = ar.p(qp);
             if(ar.qLog10(qp))
@@ -52,7 +52,7 @@ if(~isempty(ar.model(m).c))
             end
             M.compartment(jc).size = pvalue;
         elseif(sum(qp)==0)
-            qp = ismember(ar.model(m).condition(c).pold, ar.model(m).pc{jc});
+            qp = ismember(ar.model(m).condition(c).pold, ar.model(m).pc{jc}); %R2013a compatible
             if(sum(qp)==1)
                 pvalue = ar.model(m).condition(c).fp{qp};
                 M.compartment(jc).size = str2double(pvalue);
@@ -112,13 +112,13 @@ for jx = 1:length(ar.model(m).x)
     M.species(jx).level = 2;
     M.species(jx).version = 4;
     
-    qp = ismember(ar.pLabel, ar.model(m).px0{jx});
+    qp = ismember(ar.pLabel, ar.model(m).px0{jx}); %R2013a compatible
     if(sum(qp)==1)
         M.species(jx).initialConcentration = 1;
         Crules{end+1,1} = ar.model(m).x{jx}; %#ok<AGROW>
         Crules{end,2} = ar.pLabel{qp}; %#ok<AGROW>
     elseif(sum(qp)==0)
-        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx});
+        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx}); %R2013a compatible
         if(sum(qp)==1)
             pvalue = char(sym(ar.model(m).condition(c).fp{qp}));
             if(~isnan(str2double(pvalue)))
@@ -152,7 +152,7 @@ for jp = 1:length(ar.model(m).condition(c).p)
     M.parameter(jp).level = 2;
     M.parameter(jp).version = 4;
     
-    qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp});
+    qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp}); %R2013a compatible
     if(sum(qp)==1)
         pvalue = ar.p(qp);
         if(ar.qLog10(qp) == 1)
@@ -257,8 +257,8 @@ for jv = 1:length(ar.model(m).fv)
         end
         
         vars = symvar(ratetemplate);
-        vars = setdiff(vars, sym(ar.model(m).x(ar.model(m).N(:,jv)<0)));
-        vars = setdiff(vars, sym(ar.model(m).condition(c).p));
+		vars = setdiff(vars, sym(ar.model(m).x(ar.model(m).N(:,jv)<0))); %R2013a compatible
+		vars = setdiff(vars, sym(ar.model(m).condition(c).p)); %R2013a compatible
         
         if(~isempty(vars))
             for jmod = 1:length(vars);

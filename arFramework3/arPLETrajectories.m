@@ -35,7 +35,7 @@ end
 ps = [];
 chi2s = [];
 
-jks = find(ismember(pleGlobals.p_labels, ar.pLabel(jks)));
+jks = find(ismember(pleGlobals.p_labels, ar.pLabel(jks))); %R2013a compatible
 
 if(length(jks)>2)
     response_str = '_multi';
@@ -106,7 +106,8 @@ weigths = ones(size(chi2s));
 
 % plot
 psnew = ones(size(ps,1),1) * ar.p;
-psnew(:,ismember(ar.pLabel, pleGlobals.p_labels)) = ps(:,ismember(pleGlobals.p_labels, ar.pLabel));
+psnew(:,ismember(ar.pLabel, pleGlobals.p_labels)) = ps(:,ismember(pleGlobals.p_labels, ar.pLabel)); %R2013a compatible
+
 
 ar.ps_trajectories = psnew;
 ar.chi2s_trajectories = chi2s;

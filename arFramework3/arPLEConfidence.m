@@ -31,7 +31,7 @@ if(~exist('do_refit_obs','var'))
 	do_refit_obs = false;
 end
 
-jks = find(ismember(pleGlobals.p_labels, ar.pLabel(jks)));
+jks = find(ismember(pleGlobals.p_labels, ar.pLabel(jks))); %R2013a compatible
 
 for jm=1:length(ar.model)
 	for jc = 1:length(ar.model(jm).condition)
@@ -101,7 +101,7 @@ for j = jks
 
 		for jp = 1:size(pstmp,1)
 			hbar = waitbar(((j-1)*size(pstmp,1) + jp)/(size(pstmp,1)*length(jks)), hbar, 'Please wait...');
-			ar.p(ismember(ar.pLabel, pleGlobals.p_labels)) = pstmp(jp,ismember(pleGlobals.p_labels, ar.pLabel));
+            ar.p(ismember(ar.pLabel, pleGlobals.p_labels)) = pstmp(jp,ismember(pleGlobals.p_labels, ar.pLabel)); %R2013a compatible
 			try
                 if(do_refit_obs)
                     arFitObs(true);

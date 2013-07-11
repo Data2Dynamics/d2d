@@ -28,6 +28,8 @@
 
 function arLoadData(name, m, d, extension, removeEmptyObs, dpPerShoot)
 
+matVer = ver('MATLAB');
+
 global ar
 
 if(isempty(ar))
@@ -131,7 +133,7 @@ end
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).fu = ar.model(m).fu;
 while(~strcmp(C{1},'OBSERVABLES'))
-    qu = ismember(ar.model(m).u, C{1});
+    qu = ismember(ar.model(m).u, C{1}); %R2013a compatible
     if(sum(qu)~=1)
         error('unknown input %s', cell2mat(C{1}));
     end
@@ -142,7 +144,7 @@ end
 
 % input parameters
 varlist = cellfun(@symvar, ar.model(m).data(d).fu, 'UniformOutput', false);
-ar.model(m).data(d).pu = setdiff(vertcat(varlist{:}), {ar.model(m).t, ''});
+ar.model(m).data(d).pu = setdiff(vertcat(varlist{:}), {ar.model(m).t, ''}); %R2013a compatible
 
 % OBSERVABLES
 ar.model(m).data(d).y = {};
@@ -168,17 +170,17 @@ while(~strcmp(C{1},'ERRORS'))
         ar.model(m).data(d).yNames(end+1) = ar.model(m).data(d).y(end);
     end
     C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
-    if(sum(ismember(ar.model(m).x, ar.model(m).data(d).y{end}))>0)
+    if(sum(ismember(ar.model(m).x, ar.model(m).data(d).y{end}))>0) %R2013a compatible
         error('%s already defined in STATES', ar.model(m).data(d).y{end});
     end
 end
 
 % observation parameters
 varlist = cellfun(@symvar, ar.model(m).data(d).fy, 'UniformOutput', false);
-ar.model(m).data(d).py = setdiff(setdiff(vertcat(varlist{:}), union(ar.model(m).x, ar.model(m).u)), {ar.model(m).t, ''});
+ar.model(m).data(d).py = setdiff(setdiff(vertcat(varlist{:}), union(ar.model(m).x, ar.model(m).u)), {ar.model(m).t, ''}); %R2013a compatible
 for j=1:length(ar.model(m).data(d).fy)
     varlist = symvar(ar.model(m).data(d).fy{j});
-    ar.model(m).data(d).py_sep(j).pars = setdiff(setdiff(varlist, union(ar.model(m).x, ar.model(m).u)), {ar.model(m).t, ''});
+    ar.model(m).data(d).py_sep(j).pars = setdiff(setdiff(varlist, union(ar.model(m).x, ar.model(m).u)), {ar.model(m).t, ''}); %R2013a compatible
 end
 
 % ERRORS
@@ -186,7 +188,7 @@ ar.model(m).data(d).fystd = cell(size(ar.model(m).data(d).fy));
 errors_assigned = false(size(ar.model(m).data(d).fy));
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INVARIANTS'))
-    qy = ismember(ar.model(m).data(d).y, C{1});
+    qy = ismember(ar.model(m).data(d).y, C{1}); %R2013a compatible
     if(sum(qy)~=1)
         error('unknown observable %s', cell2mat(C{1}));
     end
@@ -201,12 +203,14 @@ end
 
 % error parameters
 varlist = cellfun(@symvar, ar.model(m).data(d).fystd, 'UniformOutput', false);
-ar.model(m).data(d).pystd = setdiff(vertcat(varlist{:}), union(union(union(ar.model(m).x, ar.model(m).u), ...
+ar.model(m).data(d).pystd = setdiff(vertcat(varlist{:}), union(union(union(ar.model(m).x, ar.model(m).u), ... %R2013a compatible
     ar.model(m).data(d).y), ar.model(m).t));
+    
+    
 for j=1:length(ar.model(m).data(d).fystd)
     varlist = symvar(ar.model(m).data(d).fystd{j});
-    ar.model(m).data(d).py_sep(j).pars = union(ar.model(m).data(d).py_sep(j).pars, ...
-        setdiff(varlist, union(ar.model(m).x, ar.model(m).u)));
+	ar.model(m).data(d).py_sep(j).pars = union(ar.model(m).data(d).py_sep(j).pars, ... %R2013a compatible
+        setdiff(varlist, union(ar.model(m).x, ar.model(m).u))); %R2013a compatible
 end
 
 % INVARIANTS
@@ -221,22 +225,25 @@ end
 
 % extra invariational parameters
 varlist = cellfun(@symvar, ar.model(m).data(d).fxeq, 'UniformOutput', false);
-ar.model(m).data(d).pxeq = setdiff(vertcat(varlist{:}), union(ar.model(m).x, union(ar.model(m).u, ...
-    ar.model(m).px)));
+ar.model(m).data(d).pxeq = setdiff(vertcat(varlist{:}), union(ar.model(m).x, union(ar.model(m).u, ... %R2013a compatible
+	ar.model(m).px)));   
 
 % TODO solve for invariants
 
 % collect parameters needed for OBS
-ar.model(m).data(d).p = union(ar.model(m).p, union(ar.model(m).data(d).pu, ar.model(m).data(d).py));
-ar.model(m).data(d).p = union(ar.model(m).data(d).p, union(ar.model(m).data(d).pystd, ar.model(m).data(d).pxeq));
+
+ar.model(m).data(d).p = union(ar.model(m).p, union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
+ar.model(m).data(d).p = union(ar.model(m).data(d).p, union(ar.model(m).data(d).pystd, ar.model(m).data(d).pxeq)); %R2013a compatible
+
+
 
 % CONDITIONS
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).fp = transpose(ar.model(m).data(d).p);
-qcondparamodel = ismember(ar.model(m).data(d).p, ar.model(m).p);
+qcondparamodel = ismember(ar.model(m).data(d).p, ar.model(m).p); %R2013a compatible
 ar.model(m).data(d).fp(qcondparamodel) = ar.model(m).fp;
 while(~isempty(C{1}) && ~strcmp(C{1},'RANDOM'))
-    qcondpara = ismember(ar.model(m).data(d).p, C{1});
+    qcondpara = ismember(ar.model(m).data(d).p, C{1}); %R2013a compatible
     if(sum(qcondpara)>0)
         ar.model(m).data(d).fp{qcondpara} = ['(' cell2mat(C{2}) ')'];
     else
@@ -247,10 +254,10 @@ end
 
 % extra conditional parameters
 varlist = cellfun(@symvar, ar.model(m).data(d).fp, 'UniformOutput', false);
-ar.model(m).data(d).pcond = setdiff(vertcat(varlist{:}), ar.model(m).data(d).p);
-
+ar.model(m).data(d).pcond = setdiff(vertcat(varlist{:}), ar.model(m).data(d).p); %R2013a compatible
+      
 % collect parameters conditions
-pcond = union(ar.model(m).data(d).p, ar.model(m).data(d).pcond);
+pcond = union(ar.model(m).data(d).p, ar.model(m).data(d).pcond); %R2013a compatible
 
 % RANDOM
 ar.model(m).data(d).prand = {};
@@ -289,8 +296,8 @@ end
 % plot setup
 if(isfield(ar.model(m).data(d), 'response_parameter') && ...
         ~isempty(ar.model(m).data(d).response_parameter))
-    if(sum(ismember(ar.model(m).data(d).p ,ar.model(m).data(d).response_parameter))==0 && ...
-            sum(ismember(ar.model(m).data(d).pcond ,ar.model(m).data(d).response_parameter))==0)
+    if(sum(ismember(ar.model(m).data(d).p ,ar.model(m).data(d).response_parameter))==0 && ... %R2013a compatible
+            sum(ismember(ar.model(m).data(d).pcond ,ar.model(m).data(d).response_parameter))==0) %R2013a compatible
         error('invalid response parameter %s', ar.model(m).data(d).response_parameter);
     end
 end
@@ -354,11 +361,15 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
     end
     
     % random effects
-    qrandis = ismember(header, ar.model(m).data(d).prand);
+    qrandis = ismember(header, ar.model(m).data(d).prand); %R2013a compatible
     if(sum(qrandis) > 0)
-        qobs = ismember(header, ar.model(m).data(d).y);
+        qobs = ismember(header, ar.model(m).data(d).y); %R2013a compatible
         randis_header = header(qrandis);
-        [randis, irandis, jrandis] = unique(data(:,qrandis),'rows');  %#ok<ASGLU>
+        if(str2double(matVer.Version)>=8.1)
+            [randis, irandis, jrandis] = unique(data(:,qrandis),'rows','legacy');  %#ok<ASGLU>
+        else
+            [randis, irandis, jrandis] = unique(data(:,qrandis),'rows');  %#ok<ASGLU>
+        end
         for j=1:size(randis,1)
             qvals = jrandis == j;
             tmpdata = data(qvals,qobs);
@@ -433,16 +444,19 @@ function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, pcond, rem
 % normalization of columns
 nfactor = max(data, [], 1);
 
-qobs = ismember(header, ar.model(m).data(d).y) & sum(~isnan(data),1)>0;
-qhasdata = ismember(ar.model(m).data(d).y, header(qobs));
+qobs = ismember(header, ar.model(m).data(d).y) & sum(~isnan(data),1)>0; %R2013a compatible
+qhasdata = ismember(ar.model(m).data(d).y, header(qobs)); %R2013a compatible
 
 % conditions
-qcond = ismember(header, pcond);
+qcond = ismember(header, pcond); %R2013a compatible
 if(sum(qcond) > 0)
     condi_header = header(qcond);
     qnonnanconds = sum(isnan(data(:,qcond)),2) == 0;
-    [condis, icondis, jcondis] = unique(data(qnonnanconds,qcond),'rows');  %#ok<ASGLU>
-    
+    if(str2double(matVer.Version)>=8.1)
+        [condis, icondis, jcondis] = unique(data(qnonnanconds,qcond),'rows','legacy');  %#ok<ASGLU>
+    else
+        [condis, icondis, jcondis] = unique(data(qnonnanconds,qcond),'rows');  %#ok<ASGLU>
+    end
     active_condi = false(size(condis(1,:)));
     tmpcondi = condis(1,:);
     for j=2:size(condis,1)
@@ -464,10 +478,10 @@ if(sum(qcond) > 0)
         if(removeEmptyObs)
             for jj=find(~qhasdata)
                 fprintf('\t%20s no data, removed\n', ar.model(m).data(d).y{jj});
-                for jjj=find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars))
+                for jjj=find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars)) %R2013a compatible
                     remove = 1;
                     for jjjj = find(qhasdata)
-                        if sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0
+                        if sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0 %R2013a compatible
                             remove = 0;
                         end
                     end
@@ -489,7 +503,7 @@ if(sum(qcond) > 0)
         for jj=1:size(condis,2)
             fprintf('\t%20s = %g\n', condi_header{jj}, condis(j,jj))
             
-            qcondjj = ismember(ar.model(m).data(d).p, condi_header{jj});
+            qcondjj = ismember(ar.model(m).data(d).p, condi_header{jj}); %R2013a compatible
             if(sum(qcondjj)>0)
                 ar.model(m).data(d).fp{qcondjj} = num2str(condis(j,jj));
             end
@@ -536,10 +550,10 @@ else
     if(removeEmptyObs)
         for jj=find(~qhasdata)
             fprintf('\t%20s no data, removed\n', ar.model(m).data(d).y{jj});
-            for jjj=find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars))
+            for jjj=find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars)) %R2013a compatible
                 remove = 1;
                 for jjjj = find(qhasdata)
-                    if sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0
+                    if sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0 %R2013a compatible
                         remove = 0;
                     end
                 end
@@ -574,7 +588,7 @@ if(dpPerShoot ~= 1)
     nints = ceil(length(tExp) / dpPerShoot);
     tboarders = linspace(min(tExp),max(tExp),nints+1);
 else
-    tboarders = union(0,tExp);
+    tboarders = union(0,tExp); %R2013a compatible
     nints = length(tboarders)-1;
 end
 
@@ -596,7 +610,7 @@ for j=1:nints
     
     if(j>1)
         ar.ms_count_snips = ar.ms_count_snips + 1;       
-        qtodo = ismember(ar.model(m).data(d).p, ar.model(m).px0);
+        qtodo = ismember(ar.model(m).data(d).p, ar.model(m).px0); %R2013a compatible
         ar.model(m).data(d).fp(qtodo) = strrep(ar.model(m).data(d).p(qtodo), 'init_', sprintf('init_MS%i_', ar.ms_count_snips));
     end
     
@@ -625,7 +639,7 @@ ar.model(m).data(d).yExp = nan(length(times), length(ar.model(m).data(d).y));
 ar.model(m).data(d).yExpStd = nan(length(times), length(ar.model(m).data(d).y));
 
 for j=1:length(ar.model(m).data(d).y)
-    q = ismember(header, ar.model(m).data(d).y{j});
+    q = ismember(header, ar.model(m).data(d).y{j}); %R2013a compatible
     
     if(sum(q)==1)
         ar.model(m).data(d).yExp(:,j) = data(:,q);
@@ -644,7 +658,7 @@ for j=1:length(ar.model(m).data(d).y)
         end
         
         % empirical stds
-        qstd = ismember(header, [ar.model(m).data(d).y{j} '_std']);
+        qstd = ismember(header, [ar.model(m).data(d).y{j} '_std']); %R2013a compatible
         if(sum(qstd)==1)
             ar.model(m).data(d).yExpStd(:,j) = data(:,qstd);
             fprintf(' with stds');
