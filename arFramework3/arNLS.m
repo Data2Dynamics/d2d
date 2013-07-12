@@ -27,6 +27,7 @@
 % 14 = trdog pcgr Levenberg-Marquardt
 % 15 = trdog pcgr 2D subspace 
 % 16 = trdog pcgr (no DM) 2D subspace 
+% 17 = trdog pcgr (no DM) 3D subspace 
 
 function [p,resnorm,res,exitflag,output,lambda,jac] = arNLS(fun,p,lb,ub,options,method)
 

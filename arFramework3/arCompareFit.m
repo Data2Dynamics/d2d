@@ -15,7 +15,7 @@ figure(1)
 h = nan(1,length(indexes));
 labels = {};
 for j=1:length(indexes)
-    C = arLineMarkersAndColors(j,[],[],'-');
+    C = arLineMarkersAndColors(j,length(indexes),[],[],'-');
     h(j) = semilogy(ar.fit_hist(j).hist.chi2_hist + 1 - minchi2, C{:});
     labels{j} = ar.fit_hist(j).name; %#ok<AGROW>
     hold on
