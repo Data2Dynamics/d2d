@@ -21,8 +21,8 @@ arChi2(true);
 
 llh = ar.chi2fit;
 sres = ar.sres(:,ar.qFit==1); 
-g = -2*ar.res*ar.sres(:,ar.qFit==1);
-H = 2*ar.sres(:,ar.qFit==1)'*ar.sres(:,ar.qFit==1);
+g = -2*ar.res*sres;
+H = 2*(sres'*sres);
 
 % H = hessian(@my_hess_fkt,p(ar.qFit==1));
 % Ht = load('Ht.mat'); 
@@ -54,7 +54,8 @@ ps = {};
 % 12 = trdog pcgr (no DM)
 % 13 = trdog pcgr (no DG)
 % 14 = trdog pcgr Levenberg-Marquardt
-% 15 = trdog pcgr 2D subspace
+% 15 = trdog pcgr 2D subspace 
+% 16 = trdog pcgr (no DM) 2D subspace 
 labels = arNLSstep;
 labels = labels(method+1);
 

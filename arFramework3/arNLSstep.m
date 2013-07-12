@@ -1,6 +1,6 @@
 % generate trial steps within box bounds
 %
-% [dp, solver_calls, qred, dpmem, grad_dir_frac, llh_expect, mudp] = ...
+% [dp, solver_calls, qred, dpmem, grad_dir_frac, llh_expect, normdpmu_type] = ...
 %     arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method)
 %
 % llh:  likelihood
@@ -27,9 +27,10 @@
 % 12 = trdog pcgr (no DM)
 % 13 = trdog pcgr (no DG)
 % 14 = trdog pcgr Levenberg-Marquardt
-% 15 = trdog pcgr 2D subspace (open: how to combine, how to implement updates)
+% 15 = trdog pcgr 2D subspace 
+% 16 = trdog pcgr (no DM) 2D subspace 
 
-function [dp, solver_calls, qred, dpmem, grad_dir_frac, llh_expect, normdpmu] = ...
+function [dp, solver_calls, qred, dpmem, grad_dir_frac, llh_expect, normdpmu_type] = ...
     arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method)
 
 if(nargin==0)
@@ -50,6 +51,7 @@ if(nargin==0)
     dp{14} = 'trdog-pcgr-noDG';
     dp{15} = 'trdog-pcgr-Levenberg-Marquardt';
     dp{16} = 'trdog-pcgr-2D-subspace';
+    dp{17} = 'trdog-pcgr-noDM-2D-subspace';
     return;
 end
 
@@ -59,7 +61,7 @@ if(isscalar(mu) && mu==0)
     dp = zeros(size(g));
     grad_dir_frac = 0;
     llh_expect = llh;
-    normdpmu = 0;
+    normdpmu_type = nan;
     return
 end
 
@@ -79,11 +81,11 @@ if(method==7) % use MATLABs trdog
         pcoptions,pcgtol,kmax,theta,lb',ub',[],[],'jacobprecon')';
     
     solver_calls = solver_calls + 1;
-    normdpmu = nan;
+    normdpmu_type = nan;
     
 else % own step implementation
     % solve subproblem
-    [dp, normdpmu, solver_calls_tmp] = getDP(p, lb, ub, g, H, sres, mu, method, qred);
+    [dp, normdpmu_type, solver_calls_tmp] = getDP(p, lb, ub, g, H, sres, mu, method, qred);
     solver_calls = solver_calls + solver_calls_tmp;
     
     distp = -[p-ub; -(p - lb)]; % distance to bounds (should be always positive)
@@ -102,7 +104,7 @@ else % own step implementation
         sresred = sres(:,~qred);
         
         % solve reduced subproblem
-        [dp_red, normdpmu, solver_calls_tmp] = getDP(p(~qred), lb(~qred), ub(~qred), ...
+        [dp_red, normdpmu_type, solver_calls_tmp] = getDP(p(~qred), lb(~qred), ub(~qred), ...
             gred, Hred, sresred, mu, method, qred);
         solver_calls = solver_calls + solver_calls_tmp;
         
@@ -147,11 +149,11 @@ llh_expect = llh - g*dp' + 0.5*dp*H*dp';
 % normdpmu = 
 %       norm(dp) in units of mu
 %       nan if trust region scaling based on normdpmu not applicable
-function [dp, normdpmu, solver_calls_tmp] = getDP(p, lb, ub, g, H, sres, mu, method, qred)
+function [dp, normdpmu_type, solver_calls_tmp] = getDP(p, lb, ub, g, H, sres, mu, method, qred)
 
 if(mu==0)
     dp = zeros(size(g));
-    normdpmu = 0;
+    normdpmu_type = nan;
     solver_calls_tmp = 0;
     return;
 else
@@ -171,30 +173,30 @@ switch method
             solver_calls_tmp = solver_calls_tmp + 1;
             lambda = lambda * 10;
         end
-        normdpmu = norm(dp)/mu;
+        normdpmu_type = -1;
         
     case 1 % levenberg-marquardt
         lambda = 1/mu;
         dp = transpose(pinv(H + lambda*eye(size(H)))*g');
-        normdpmu = nan;
+        normdpmu_type = nan;
         
     case 2 % newton with maximum steplength mu
         dp = transpose(pinv(H)*g');
         if(norm(dp)>mu)
             dp = mu*dp/norm(dp);
         end
-        normdpmu = norm(dp)/mu;
+        normdpmu_type = -1;
         
     case 3 % gradient with steplength mu
         dp = mu*g/norm(g);
-        normdpmu = 1;
+        normdpmu_type = -1;
        
     case 4 % gradient to cauchy point with steplength mu
         dp = norm(g)^2/(g*H*g') * g;
         if(norm(dp)>mu)
             dp = mu*dp/norm(dp);
         end
-        normdpmu = norm(dp)/mu;
+        normdpmu_type = -1;
         
     case 5 % dogleg
         dpC = norm(g)^2/(g*H*g') * g;
@@ -218,7 +220,7 @@ switch method
 %                 fprintf('dogleg (%4.2f) - ', norm(dpC)/mu);
             end
         end
-        normdpmu = norm(dp)/mu;
+        normdpmu_type = -1;
         
     case 6 % generalized trust region
         mut = mu(~qred,~qred);
@@ -238,7 +240,7 @@ switch method
             lambda = lambda * 10;
         end
         dp = dp * mut;
-        normdpmu = norm(dp) / sqrt((dp/mut)*(dp/mut)');
+        normdpmu_type = norm(dp) / sqrt((dp/mut)*(dp/mut)');
         
     case 8 % Newton pcgr
         g_pcgr = -0.5*g';
@@ -252,7 +254,7 @@ switch method
         if(norm(dp)>mu)
             dp = mu*dp/norm(dp);
         end
-        normdpmu = norm(dp)/mu;
+        normdpmu_type = -1;
         
     case 9 % trdog pcgr
         g_pcgr = -0.5*g';
@@ -271,7 +273,7 @@ switch method
         if(norm(dp)>mu)
             dp = mu*dp/norm(dp);
         end
-        normdpmu = norm(dp)/mu;
+        normdpmu_type = -1;
    
     case 10 % dogleg Newton pcgr
         dpC = norm(g)^2/(g*H*g') * g;
@@ -303,7 +305,7 @@ switch method
                 fprintf('dogleg (%4.2f) - ', norm(dpC)/mu);
             end
         end
-        normdpmu = norm(dp)/mu;
+        normdpmu_type = -1;
         
     case 11 % dogleg trdog pcgr
         dpC = norm(g)^2/(g*H*g') * g;
@@ -340,7 +342,7 @@ switch method
                 fprintf('dogleg (%4.2f) - ', norm(dpC)/mu);
             end
         end
-        normdpmu = norm(dp)/mu;
+        normdpmu_type = -1;
         
     case 12 % trdog pcgr no DM
         g_pcgr = -0.5*g';
@@ -358,7 +360,7 @@ switch method
         if(norm(dp)>mu)
             dp = mu*dp/norm(dp);
         end
-        normdpmu = norm(dp)/mu;
+        normdpmu_type = -1;
         
     case 13 % trdog pcgr no DG
         g_pcgr = -0.5*g';
@@ -375,7 +377,7 @@ switch method
         if(norm(dp)>mu)
             dp = mu*dp/norm(dp);
         end
-        normdpmu = norm(dp)/mu;
+        normdpmu_type = -1;
         
     case 14 % trdog pcgr Levenberg-Marquardt
         lambda = 1/mu;
@@ -395,7 +397,7 @@ switch method
         dp = pcgr(DM,DG,DM*g_pcgr,kmax,pcgtol,@atamult,sresLM,R,permR,'jacobprecon',pcoptions);
         dp = transpose(DM*dp);
         
-        normdpmu = nan;
+        normdpmu_type = nan;
         
     case 15 % trdog pcgr 2D subspace
         g_pcgr = -0.5*g';
@@ -406,6 +408,78 @@ switch method
         dd = sqrt(abs(v));
         DM = sparse(diag(dd));
 %         DM = sparse(eye(size(DM)));
+        DG = sparse(1:length(g),1:length(g),full(abs(g_pcgr).*dv));
+%         DG = sparse(1:length(g),1:length(g),full(ones(size(g_pcgr)).*dv));
+        grad = DM*g_pcgr;
+        [R,permR] = feval(@aprecon,sres,pcoptions,DM,DG);
+        [dp, posdef] = pcgr(DM,DG,grad,kmax,pcgtol,@atamult,sres,R,permR,'jacobprecon',pcoptions);
+        
+        % calculate subspace Z
+        tol2 = sqrt(eps);
+        if norm(dp) > 0
+            v1 = dp/norm(dp);
+        else
+            v1 = dp;
+        end
+        Z(:,1) = v1;
+        if length(p) > 1
+            if (posdef < 1)
+                v2 = D*sign(g_pcgr);
+                if norm(v2) > 0
+                    v2 = v2/norm(v2);
+                end
+            else
+                if norm(g_pcgr) > 0
+                    v2 = g_pcgr/norm(g_pcgr);
+                else
+                    v2 = g_pcgr;
+                end
+                
+            end
+            v2 = v2 - v1*(v1'*v2);
+            nrmv2 = norm(v2);
+            if nrmv2 > tol2
+                v2 = v2/nrmv2;
+                Z(:,2) = v2;
+            end
+        end
+        
+        % reduce to subspace
+        W = DM*Z;        
+        WW = feval(@atamult,sres,W,0);
+        
+        W = DM*WW;
+        MM = full(Z'*W + Z'*DG*Z);
+        rhs = full(Z'*grad);
+        
+        % determine 2D trust solution
+        dp = trust(rhs,MM,mu);
+        normdpmu_type = norm(dp)/mu;
+        
+        % the function trust has a bug, therefore, in some cases
+        % the problem has to be regularized
+        lambda = 1e-6;
+        while(norm(dp)/mu > 1.01)
+%             fprintf('trust.m problem %g, regularizing with new lambda=%g\n', norm(dp)/mu, lambda);
+            dp = trust(rhs,MM+lambda*eye(size(MM)),mu);
+            normdpmu_type = norm(dp)/mu;
+            solver_calls_tmp = solver_calls_tmp + 1;
+            lambda = lambda * 10;
+        end
+        
+        % got back to original space
+        dp = Z*dp;
+        dp = transpose(DM*dp);
+        
+    case 16 % trdog pcgr no DM 2D subspace
+        g_pcgr = -0.5*g';
+        pcoptions = Inf;
+        pcgtol = 0.1;
+        kmax = max(1,floor(length(g)/2));
+        [v, dv] = definev(g_pcgr',p,lb,ub);
+        dd = sqrt(abs(v));
+        DM = sparse(diag(dd));
+        DM = sparse(eye(size(DM)));
         DG = sparse(1:length(g),1:length(g),full(abs(g_pcgr).*dv));
 %         DG = sparse(1:length(g),1:length(g),full(ones(size(g_pcgr)).*dv));
         grad = DM*g_pcgr;
@@ -466,8 +540,7 @@ switch method
         % got back to original space
         dp = Z*dp;
         dp = transpose(DM*dp);
-        
-        normdpmu = norm(dp)/mu;
+        normdpmu_type = -1;
 end
 
 

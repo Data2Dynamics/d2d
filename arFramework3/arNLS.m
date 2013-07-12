@@ -25,7 +25,8 @@
 % 12 = trdog pcgr (no DM)
 % 13 = trdog pcgr (no DG)
 % 14 = trdog pcgr Levenberg-Marquardt
-% 15 = trdog pcgr 2D subspace (open: how to combine, how to implement updates)
+% 15 = trdog pcgr 2D subspace 
+% 16 = trdog pcgr (no DM) 2D subspace 
 
 function [p,resnorm,res,exitflag,output,lambda,jac] = arNLS(fun,p,lb,ub,options,method)
 
@@ -82,7 +83,7 @@ if(isempty(options.InitTrustRegionRadius))
 else
     mu = options.InitTrustRegionRadius;
 end
-if(method==5)
+if(method==6)
     mu = eye(length(p))*mu;
 end
 
@@ -117,12 +118,14 @@ if(~isempty(options.OutputFcn))
 end
 
 q_converged = false;
+firstorderopt = nan;
 while(iter < options.MaxIter && ~q_converged)
     iter = iter + 1;
     
     % solve subproblem - get trial point
-    [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect, normdpmu] = ...
+    [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect, normdpmu_type] = ...
         arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
+    firstorderopt = norm(g(~qred));
     pt = p + dp;
     
     % ensure strict feasibility - the hard way
@@ -149,8 +152,6 @@ while(iter < options.MaxIter && ~q_converged)
     q_accept_step = q_reduction && q_approx_qual;
     % update if step was accepted
     if(q_accept_step)
-        firstorderopt = norm(g(~qred));
-        
         p = pt;
         
         res = rest;
@@ -168,12 +169,16 @@ while(iter < options.MaxIter && ~q_converged)
             optimValues(1).normdp = norm(dp);
             feval(options.OutputFcn,p,optimValues,'iter');
         end
-    else
-        firstorderopt = nan;
     end
     
     % update schedule for trust region
-    q_enlarge = q_reduction && q_approx_qual && (normdpmu > 0.9 || isnan(normdpmu));
+    if(normdpmu_type == -1)
+        q_enlarge = q_reduction && q_approx_qual && (norm(dp)/mu) > 0.9;
+    elseif(normdpmu_type > 0)
+        q_enlarge = q_reduction && q_approx_qual && normdpmu_type > 0.9;
+    else
+        q_enlarge = q_reduction && q_approx_qual;
+    end
     q_shrink = ~q_reduction || ~q_approx_qual;
     
     mu_old = mu;
@@ -183,8 +188,8 @@ while(iter < options.MaxIter && ~q_converged)
         dmu = 1;
     elseif(q_shrink) % shrink trust region
         mu_red_fac = 1/mu_fac;
-        if(isscalar(mu) && ~isnan(normdpmu))
-            mu_red_fac = min([mu_red_fac mu_red_fac*normdpmu]);
+        if(isscalar(mu) && normdpmu_type==-1)
+            mu_red_fac = min([mu_red_fac mu_red_fac*norm(dp)/mu]);
         end
         mu = arNLSTrustTrafo(mu, mu_red_fac, dp, false);
         dmu = -1;
@@ -192,7 +197,7 @@ while(iter < options.MaxIter && ~q_converged)
    
     % output
     if(debug>2)
-        printiter(iter, options.MaxIter, resnorm, mu_old, dmu, norm(dp), normdpmu, dresnorm, ...
+        printiter(iter, options.MaxIter, resnorm, mu_old, dmu, norm(dp), normdpmu_type, dresnorm, ...
             firstorderopt, sum(qred), grad_dir_frac, approx_qual, q_accept_step);
     end
     
@@ -281,7 +286,7 @@ if(~isscalar(mu))
      
     fprintf(outstream, 'mu=%-8.2g %s (det=%-8.2g cond=%-8.2g maxeig=%-8.2g)  ', normdpmu, dmu, det(mu), cond(mu), max(eig(mu)));
 else
-    fprintf(outstream, 'mu=%-8.2g %s ', mu, dmu);
+    fprintf(outstream, 'mu=%-8.2g %s (%-5.2f) ', mu, dmu, normdpmu);
 end
 fprintf(outstream, 'norm(dp)=%-8.2g  dresnorm=%-8.2g  ', norm_dp, dresnorm);
 fprintf(outstream, 'approx_qual=%-5.2f  norm(g)=%-8.2g  dim_red=%i  grad_dir=%3.1f\n', ...
