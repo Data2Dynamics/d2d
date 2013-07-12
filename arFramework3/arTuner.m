@@ -2,7 +2,7 @@ function varargout = arTuner(varargin)
 % ARTUNER M-file for arTuner.fig
 % GUI to assign parameter values
 
-% Last Modified by GUIDE v2.5 02-Aug-2012 19:09:10
+% Last Modified by GUIDE v2.5 25-Jun-2013 11:48:32
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -204,6 +204,14 @@ arPlot(false, true)
 refresh_textbox(handles)
 
 
+% --- Executes on button press in pushbutton10.
+function pushbutton10_Callback(hObject, eventdata, handles)
+global ar;
+arFitInit(true);
+arChi2(false)
+arPlot(false, true)
+refresh_textbox(handles)
+
 % --- Executes on button press in pushbutton6.
 function pushbutton6_Callback(hObject, eventdata, handles)
 global ar;
@@ -300,3 +308,4 @@ elseif(ar.qFit(ar.tuner.index)==0)
 elseif(ar.qFit(ar.tuner.index)==2)
     set(handles.radiobutton6, 'Value', 1);
 end
+
