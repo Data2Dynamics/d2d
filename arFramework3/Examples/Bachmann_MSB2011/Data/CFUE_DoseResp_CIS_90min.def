@@ -1,0 +1,24 @@
+DESCRIPTION
+"Experimenter: Julie Bachmann"
+"Cells: CFU-E"
+"Ligand: Epo dose response at 90 minutes"
+
+PREDICTOR-DOSERESPONSE  epo_level
+t               T   min     time	0	100
+
+INPUTS
+
+OBSERVABLES
+CIS_au1              C   au  conc.   1   1   "scale1_CIS_dr90 / CISEqc / CISRNAEqc / init_STAT5 * CIS"
+CIS_au2              C   au  conc.   1   1   "scale2_CIS_dr90 / CISEqc / CISRNAEqc / init_STAT5 * CIS"
+
+ERRORS
+CIS_au1			"sd_CIS_au"
+CIS_au2			"sd_CIS_au"
+
+INVARIANTS
+
+CONDITIONS
+ActD				"0"
+CISoe               "0"
+SOCS3oe             "0"

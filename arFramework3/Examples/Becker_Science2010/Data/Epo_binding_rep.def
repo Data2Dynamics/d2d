@@ -1,0 +1,21 @@
+DESCRIPTION
+"Experimenter: Verena Becker"
+"Cells: BaF3"
+"Ligand: Epo"
+
+PREDICTOR
+epo_free     C   pM     "log_{10}(conc. free Epo)"   0.5   4
+
+INPUTS
+
+OBSERVABLES
+Epo_bound     C     pM  conc.   0	1   "epo_bound"                       
+
+ERRORS
+Epo_bound       "sd_Epo_bound"
+
+INVARIANTS
+
+CONDITIONS
+kD              "kD"
+init_EpoR       "init_Epo * init_EpoR_rel"

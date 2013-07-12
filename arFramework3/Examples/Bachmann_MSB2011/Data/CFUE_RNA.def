@@ -1,0 +1,34 @@
+DESCRIPTION
+"Experimenter: Julie Bachmann"
+"Cells: CFU-E"
+"Ligand: Epo 5 units/ml (1.25e-7 units/cell)"
+
+PREDICTOR
+t               T   min     time	0	400
+
+INPUTS
+
+OBSERVABLES
+SOCS3RNA_foldA         C   au  "fold change"   0   1   "1 + scale_SOCS3RNA_foldA / SOCS3RNAEqc / init_STAT5 * SOCS3RNA"
+SOCS3RNA_foldB         C   au  "fold change"   0   1   "1 + scale_SOCS3RNA_foldB / SOCS3RNAEqc / init_STAT5 * SOCS3RNA"
+SOCS3RNA_foldC         C   au  "fold change"   0   1   "1 + scale_SOCS3RNA_foldC / SOCS3RNAEqc / init_STAT5 * SOCS3RNA"
+CISRNA_foldA           C   au  "fold change"   0   1   "1 + scale_CISRNA_foldA / CISRNAEqc / init_STAT5 * CISRNA"
+CISRNA_foldB           C   au  "fold change"   0   1   "1 + scale_CISRNA_foldB / CISRNAEqc / init_STAT5 * CISRNA"
+CISRNA_foldC           C   au  "fold change"   0   1   "1 + scale_CISRNA_foldC / CISRNAEqc / init_STAT5 * CISRNA"
+
+ERRORS
+SOCS3RNA_foldA		"sd_RNA_fold"
+SOCS3RNA_foldB		"sd_RNA_fold"
+SOCS3RNA_foldC		"sd_RNA_fold"
+CISRNA_foldA		"sd_RNA_fold"
+CISRNA_foldB		"sd_RNA_fold"
+CISRNA_foldC		"sd_RNA_fold"
+
+INVARIANTS
+
+CONDITIONS
+epo_level			"1.25e-7"
+ActD				"0"
+CISoe               "0"
+SOCS3oe             "0"
+

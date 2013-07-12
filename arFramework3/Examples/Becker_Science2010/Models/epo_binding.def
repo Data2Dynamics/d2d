@@ -1,0 +1,19 @@
+DESCRIPTION
+"Epo binding described by a Michealis-Menten function"
+
+PREDICTOR
+epo_free     C   pM     "log_{10}(conc. free Epo)"     
+
+COMPARTMENTS
+
+STATES
+
+INPUTS
+epo_bound    C   pM     "log_{10}(conc. bound Epo)" 	"init_EpoR * (10^epo_free) / (kD + (10^epo_free))"
+
+REACTIONS
+        
+INVARIANTS
+
+CONDITIONS
+kD          "koff/kon"

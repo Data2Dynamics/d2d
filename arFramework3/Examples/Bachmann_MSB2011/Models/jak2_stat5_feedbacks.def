@@ -1,0 +1,142 @@
+DESCRIPTION
+"Epo induced JAK2-STAT5 signaling"
+"with negative feedback by SOCS3, CIS and SHP1"
+
+PREDICTOR
+t               T   min     time	0	100
+
+COMPARTMENTS
+cyt             V   pl      vol.        0.4
+nuc             V   pl      vol.        0.275
+        
+STATES
+EpoRJAK2        C   nM      conc.       cyt 1
+EpoRpJAK2       C   nM      conc.       cyt 1
+p1EpoRpJAK2     C   nM      conc.       cyt 1
+p2EpoRpJAK2     C   nM      conc.       cyt 1
+p12EpoRpJAK2    C   nM      conc.       cyt 1        
+EpoRJAK2_CIS    X   %       fraction    cyt 0
+SHP1            C   nM      conc.       cyt 1
+SHP1Act         C   nM      conc.       cyt 1
+STAT5           C   nM      conc.       cyt 1
+pSTAT5          C   nM      conc.       cyt 1
+npSTAT5         C   nM      conc.       nuc 1
+CISnRNA1        C   au      conc.       nuc 0
+CISnRNA2        C   au      conc.       nuc 0
+CISnRNA3        C   au      conc.       nuc 0
+CISnRNA4        C   au      conc.       nuc 0
+CISnRNA5        C   au      conc.       nuc 0
+CISRNA          C   au      conc.       cyt 1
+CIS             C   nM      conc.       cyt 1
+SOCS3nRNA1      C   au      conc.       nuc 0
+SOCS3nRNA2      C   au      conc.       nuc 0
+SOCS3nRNA3      C   au      conc.       nuc 0
+SOCS3nRNA4      C   au      conc.       nuc 0
+SOCS3nRNA5      C   au      conc.       nuc 0
+SOCS3RNA        C   au      conc.       cyt 1
+SOCS3           C   nM      conc.       cyt 1
+
+INPUTS
+Epo             C   units/cell   conc.   "epo_level"
+
+REACTIONS
+EpoRJAK2        ->  EpoRpJAK2    CUSTOM "JAK2ActEpo * EpoRJAK2 * Epo / (1 + SOCS3Inh * SOCS3)"
+EpoRpJAK2       ->  EpoRJAK2     CUSTOM "JAK2EpoRDeaSHP1 * EpoRpJAK2 * SHP1Act"
+EpoRpJAK2       ->  p1EpoRpJAK2  CUSTOM "EpoRActJAK2 * EpoRpJAK2 / (1 + SOCS3Inh * SOCS3)"
+EpoRpJAK2       ->  p2EpoRpJAK2  CUSTOM "3*EpoRActJAK2 * EpoRpJAK2 / (1 + SOCS3Inh * SOCS3) / (EpoRCISInh * EpoRJAK2_CIS + 1)"
+p1EpoRpJAK2     ->  p12EpoRpJAK2 CUSTOM "3*EpoRActJAK2 * p1EpoRpJAK2 / (1 + SOCS3Inh * SOCS3) / (EpoRCISInh * EpoRJAK2_CIS + 1)"
+p2EpoRpJAK2     ->  p12EpoRpJAK2 CUSTOM "EpoRActJAK2 * p2EpoRpJAK2 / (1 + SOCS3Inh * SOCS3)"
+
+p1EpoRpJAK2     ->  EpoRJAK2     CUSTOM "JAK2EpoRDeaSHP1 * p1EpoRpJAK2 * SHP1Act"
+p2EpoRpJAK2     ->  EpoRJAK2     CUSTOM "JAK2EpoRDeaSHP1 * p2EpoRpJAK2 * SHP1Act"
+p12EpoRpJAK2    ->  EpoRJAK2     CUSTOM "JAK2EpoRDeaSHP1 * p12EpoRpJAK2 * SHP1Act"
+        
+EpoRJAK2_CIS    ->              CUSTOM "EpoRCISRemove * EpoRJAK2_CIS * (p1EpoRpJAK2 + p12EpoRpJAK2)" 
+        
+SHP1            ->  SHP1Act     CUSTOM "SHP1ActEpoR * SHP1 * (EpoRpJAK2 + p1EpoRpJAK2 + p2EpoRpJAK2 + p12EpoRpJAK2)"
+SHP1Act         ->  SHP1        CUSTOM "SHP1Dea * SHP1Act"
+        
+STAT5           ->  pSTAT5      CUSTOM "STAT5ActJAK2 * STAT5 * (EpoRpJAK2 + p1EpoRpJAK2 + p2EpoRpJAK2 + p12EpoRpJAK2) / (1 + SOCS3Inh * SOCS3)"
+STAT5           ->  pSTAT5      CUSTOM "STAT5ActEpoR * STAT5 * (p1EpoRpJAK2 + p12EpoRpJAK2)^2 / (1 + SOCS3Inh * SOCS3) / (1 + CISInh * CIS)"
+pSTAT5          ->  npSTAT5     CUSTOM "STAT5Imp * pSTAT5"
+npSTAT5         ->  STAT5       CUSTOM "STAT5Exp * npSTAT5"
+        
+                ->  CISnRNA1    CUSTOM "CISRNAEqc * CISRNATurn * npSTAT5 * (1-ActD)"
+CISnRNA1        ->  CISnRNA2    CUSTOM "CISRNADelay * CISnRNA1"
+CISnRNA2        ->  CISnRNA3    CUSTOM "CISRNADelay * CISnRNA2"
+CISnRNA3        ->  CISnRNA4    CUSTOM "CISRNADelay * CISnRNA3"
+CISnRNA4        ->  CISnRNA5    CUSTOM "CISRNADelay * CISnRNA4"
+CISnRNA5        ->  CISRNA      CUSTOM "CISRNADelay * CISnRNA5"
+CISRNA          ->              CUSTOM "CISRNATurn * CISRNA"
+        
+                ->  CIS         CUSTOM "CISEqc * CISTurn * CISRNA"
+CIS             ->              CUSTOM "CISTurn * CIS"
+        
+                ->  CIS         CUSTOM "CISoe * CISEqcOE * CISTurn"
+        
+                ->  SOCS3nRNA1  CUSTOM "SOCS3RNAEqc * SOCS3RNATurn * npSTAT5 * (1-ActD)"
+SOCS3nRNA1      ->  SOCS3nRNA2  CUSTOM "SOCS3RNADelay * SOCS3nRNA1"
+SOCS3nRNA2      ->  SOCS3nRNA3  CUSTOM "SOCS3RNADelay * SOCS3nRNA2"
+SOCS3nRNA3      ->  SOCS3nRNA4  CUSTOM "SOCS3RNADelay * SOCS3nRNA3"
+SOCS3nRNA4      ->  SOCS3nRNA5  CUSTOM "SOCS3RNADelay * SOCS3nRNA4"
+SOCS3nRNA5      ->  SOCS3RNA    CUSTOM "SOCS3RNADelay * SOCS3nRNA5"
+SOCS3RNA        ->              CUSTOM "SOCS3RNATurn * SOCS3RNA"
+        
+                ->  SOCS3       CUSTOM "SOCS3Eqc * SOCS3Turn * SOCS3RNA"
+SOCS3           ->              CUSTOM "SOCS3Turn * SOCS3"
+        
+                ->  SOCS3       CUSTOM "SOCS3oe * SOCS3EqcOE * SOCS3Turn"
+
+INVARIANTS
+
+CONDITIONS
+init_EpoRpJAK2		"0"
+init_p1EpoRpJAK2	"0"
+init_p2EpoRpJAK2	"0"
+init_p12EpoRpJAK2	"0"
+        
+init_EpoRJAK2_CIS   "0"
+
+init_SHP1Act		"0"
+        
+init_pSTAT5			"0"
+init_npSTAT5		"0"
+        
+init_CISnRNA1		"0"
+init_CISnRNA2		"0"
+init_CISnRNA3		"0"
+init_CISnRNA4		"0"
+init_CISnRNA5		"0"
+init_CISRNA			"0"
+        
+init_CIS			"0"
+        
+init_SOCS3nRNA1		"0"
+init_SOCS3nRNA2		"0"
+init_SOCS3nRNA3		"0"
+init_SOCS3nRNA4		"0"
+init_SOCS3nRNA5		"0"
+init_SOCS3RNA		"0"
+        
+init_SOCS3			"0"
+        
+JAK2EpoRDeaSHP1     "JAK2EpoRDeaSHP1 / init_SHP1"
+EpoRCISRemove       "EpoRCISRemove / init_EpoRJAK2"
+
+SHP1ActEpoR         "SHP1ActEpoR / init_EpoRJAK2"
+
+STAT5ActJAK2        "STAT5ActJAK2 / init_EpoRJAK2"
+STAT5ActEpoR        "STAT5ActEpoR / init_EpoRJAK2^2"
+        
+CISInh              "CISInh / CISEqc"
+SOCS3Inh            "SOCS3Inh / SOCS3Eqc"
+        
+CISRNAEqc           "CISRNAEqc / init_STAT5"
+SOCS3RNAEqc         "SOCS3RNAEqc / init_STAT5"
+        
+CISEqc              "CISEqc / CISRNAEqc"
+SOCS3Eqc            "SOCS3Eqc / SOCS3RNAEqc"
+        
+CISEqcOE            "CISEqcOE * CISEqc"
+SOCS3EqcOE          "SOCS3EqcOE * SOCS3Eqc"
+        

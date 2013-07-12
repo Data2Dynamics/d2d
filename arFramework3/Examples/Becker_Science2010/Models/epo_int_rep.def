@@ -1,0 +1,37 @@
+DESCRIPTION
+"Epo receptor internalization"
+
+PREDICTOR
+t               T   min     time	0	100
+
+COMPARTMENTS
+
+STATES
+Epo             C   pM      conc.	1
+EpoR            C   pM      conc.	1
+Epo_EpoR        C   pM      conc.	1
+Epo_EpoR_i      C   pM      conc.	1
+dEpo_i          C   pM      conc.	1
+dEpo_e          C   pM      conc.	1
+
+INPUTS
+
+REACTIONS
+Epo + EpoR      ->  Epo_EpoR        CUSTOM "kon * Epo * EpoR"
+Epo_EpoR        ->  Epo + EpoR      CUSTOM "koff * Epo_EpoR"
+                ->  EpoR            CUSTOM "kt * init_EpoR"
+EpoR            ->                  CUSTOM "kt * EpoR"
+Epo_EpoR        ->  Epo_EpoR_i      CUSTOM "ke * Epo_EpoR"
+Epo_EpoR_i      ->  EpoR Epo        CUSTOM "kex * Epo_EpoR_i"
+Epo_EpoR_i      ->  dEpo_i          CUSTOM "kdi * Epo_EpoR_i"
+Epo_EpoR_i      ->  dEpo_e          CUSTOM "kde * Epo_EpoR_i"
+
+INVARIANTS
+
+CONDITIONS
+init_Epo_EpoR       "0"
+init_Epo_EpoR_i     "0"
+init_dEpo_i         "0"
+init_dEpo_e         "0"
+init_EpoR           "init_Epo * init_EpoR_rel"
+kon                 "kon / init_Epo"
