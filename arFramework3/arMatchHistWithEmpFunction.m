@@ -2,8 +2,6 @@
 
 function scale = arMatchHistWithEmpFunction(xh,nh,xf,yf)
 
-global ar;
-
 xh = xh(:);
 nh = nh(:);
 xf = xf(:);
@@ -18,7 +16,8 @@ ytmp = ytmp(qnonan);
 
 scale = log10(mean(nh./ytmp));
 
-optim = ar.config.optim;
+optim = optimset('lsqnonlin');
+optim.Display = 'off';
 optim.Jacobian = 'off';
 scale_opt = lsqnonlin(@fy, scale, [], [], optim);
 
