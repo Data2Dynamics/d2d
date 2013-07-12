@@ -134,8 +134,6 @@ for jm = 1:length(ar.model)
                             
                             % steady state
                             xss = x(1,jx) + dxdt(jx)*(t-min(t));
-                            xss(xss<0) = nan;
-                            xss(xss>2*max(x(:,jx))) = nan;
                             ltmp = plot(g, t, xss, '--', Clines{:});
                             if(jd~=0)
                                 ar.model(jm).data(jd).plot.xss(jx,jc) = ltmp;
@@ -162,7 +160,7 @@ for jm = 1:length(ar.model)
                                 set(ar.model(jm).data(jd).plot.xss(jx,jc), 'YData', xss);
                             else
                                 set(ar.model(jm).condition(jc).plot.x(jx,jc), 'YData', x(:,jx));
-                                set(ar.model(jm).condition(jc).plot.x(jx,jc), 'YData', xss);
+                                set(ar.model(jm).condition(jc).plot.xss(jx,jc), 'YData', xss);
                             end
                         end
                     end

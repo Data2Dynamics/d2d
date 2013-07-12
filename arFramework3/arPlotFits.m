@@ -17,28 +17,21 @@ end
 exitflag = ar.exitflag(isorted);
 
 ar.chi2s_sorted = chi2s;
+ar.chi2sconstr_sorted = ar.chi2sconstr(isorted);
 ar.ps_sorted = ar.ps(isorted,:);
 
-chi2min = min(chi2s);
-
-if(isfield(ar,'chi2s_start'))
-    ar.chi2s_start_sorted = ar.chi2s_start(isorted);
-end
-if(isfield(ar,'ps_start'))
-    ar.ps_start_sorted = ar.ps_start(isorted,:);
-end
+chi2min = min([chi2s ar.chi2fit]);
+chi2minconstr = min([ar.chi2sconstr_sorted ar.chi2constr]);
+ar.chi2s_start_sorted = ar.chi2s_start(isorted);
+ar.ps_start_sorted = ar.ps_start(isorted,:);
+optim_krit = ar.optim_crit(isorted);
 
 figure(1)
 
-subplot(3,1,[1 2]);
 semilogy(chi2s - chi2min + 1, '--');
 hold on
 h = semilogy(find(exitflag>0), chi2s(exitflag>0) - chi2min + 1, 'o');
-if(isfield(ar,'chi2s_start'))
-    h2 = semilogy(ar.chi2s_start_sorted - chi2min + 1, 'x--','Color', [.6 .6 .6]);
-else
-    h2 = [];
-end
+h2 = semilogy(ar.chi2s_start_sorted - chi2min + 1, 'x--','Color', [.6 .6 .6]);
 plot(xlim, [1 1], 'k--');
 hold off
 if(ar.config.fiterrors == 1)    
@@ -46,27 +39,49 @@ if(ar.config.fiterrors == 1)
 else
     ylabel('\chi^2');
 end
-xlabel('fits sorted');
+xlabel('run index (sorted by likelihood)');
 xlim([0 length(chi2s)+1])
 title(sprintf('%i fits in total, %i without errors, %i converged', ...
     length(exitflag), sum(~isnan(chi2s)) ,sum(exitflag>0)));
 legend([h h2], 'converged fits', 'initial value', 'Location','Best');
 
-subplot(3,2,5);
+figure(2)
+
+subplot(2,2,1);
 hist(ar.timing, 50);
 xlabel('fit time / sec.');
 title(sprintf('total time for %i fits %s', ...
     length(ar.chi2s), secToHMS(sum(ar.timing(~isnan(ar.timing))))));
 
-subplot(3,2,6);
+subplot(2,2,2);
 hist(ar.fun_evals, 50);
 xlabel('number of function evaluations');
+
+subplot(2,2,[3 4]);
+semilogy(optim_krit, 'o--');
+xlabel('run index (sorted by likelihood)');
+ylabel('first order optimality criterion');
+
+if(~isempty(ar.chi2sconstr_sorted))
+    figure(3)
+    
+    semilogy(ar.chi2sconstr_sorted, '--');
+    hold on
+    h = semilogy(find(exitflag>0), ar.chi2sconstr_sorted(exitflag>0), 'o');
+    hold off
+    ylabel('constraint violation');
+    xlabel('run index (sorted by likelihood)');
+    xlim([0 length(chi2s)+1])
+    title(sprintf('%i fits in total, %i without errors, %i converged', ...
+        length(exitflag), sum(~isnan(chi2s)) ,sum(exitflag>0)));
+    legend([h], 'converged fits', 'Location','Best');
+end
 
 %% scatter plots
 
 nji = sum(q_select);
 if(nji < 6)
-    figure(2);
+    figure(3);
     
     ji = find(q_select);
     scount = 1;

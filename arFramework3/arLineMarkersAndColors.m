@@ -1,4 +1,4 @@
-function C = arLineMarkersAndColors(j,color,markerstyle,linestyle)
+function C = arLineMarkersAndColors(j,n,color,markerstyle,linestyle)
 
 % test function
 if(nargin==0 || isempty(j))
@@ -24,10 +24,14 @@ if(nargin==0 || isempty(j))
     return
 end
 
+if(n>7)
+    n=7;
+end
+
 if(~exist('color','var') || isempty(color))
-    colors = lines(7);
-%     colors = jet(7);
-%     colors = bsxfun(@rdivide, colors, sqrt(sum(colors.^2,2)));
+    colors = lines(n);
+    colors = jet(n);
+    colors = bsxfun(@rdivide, colors, sqrt(sum(colors.^2,2)));
     jc = mymod(j,length(colors));
     color = colors(jc,:);
 end

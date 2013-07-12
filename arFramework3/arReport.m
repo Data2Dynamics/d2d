@@ -539,7 +539,7 @@ for jm=1:length(ar.model)
         end
         
         % trajectories
-        if(isfield(ar.model(jm).plot(jplot), 'savePath_FigX'))
+        if(isfield(ar.model(jm).plot(jplot), 'savePath_FigX') && ~isempty(ar.model(jm).plot(jplot).savePath_FigX))
             lp(fid, 'The trajectories of the dynamical variables and external inputs that correspond to the experimental conditions in this experiment are shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_x']);
             copyfile([ar.model(jm).plot(jplot).savePath_FigX '.pdf'], ...
                 [savePath '/' ar.model(jm).plot(jplot).name '_x.pdf'])
@@ -549,7 +549,7 @@ for jm=1:length(ar.model)
             captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
             lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_x.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_x']);
         end
-        if(isfield(ar.model(jm).plot(jplot), 'savePath_FigV'))
+        if(isfield(ar.model(jm).plot(jplot), 'savePath_FigV') && ~isempty(ar.model(jm).plot(jplot).savePath_FigV))
             lp(fid, 'The reaction fluxes that correspond to the experimental conditions in this experiment are shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_v']);
             copyfile([ar.model(jm).plot(jplot).savePath_FigV '.pdf'], ...
                 [savePath '/' ar.model(jm).plot(jplot).name '_v.pdf'])

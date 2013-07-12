@@ -4,16 +4,22 @@ global ar
 
 figure(1)
 
+subplot(3,1,[1 2]);
+
 [chi2s, isorted] = sort(ar.chi2s);
+ar.chi2s_sorted = chi2s;
+ar.chi2sconstr_sorted = ar.chi2sconstr(isorted);
+ar.ps_sorted = ar.ps(isorted,:);
 exitflag = ar.exitflag(isorted);
 
 chi2min = min([chi2s ar.chi2fit]);
-ar.chi2s_sorted = chi2s;
-ar.ps_sorted = ar.ps(isorted,:);
+chi2minconstr = min([ar.chi2sconstr_sorted ar.chi2constr]);
 
+h = [];
 semilogy(chi2s - chi2min + 1, '--');
 hold on
-h = semilogy(find(exitflag>0), chi2s(exitflag>0) - chi2min + 1, 'o');
+h(2) = semilogy(ar.chi2sconstr_sorted - chi2minconstr + 1, 'r--');
+h(1) = semilogy(find(exitflag>0), chi2s(exitflag>0) - chi2min + 1, 'o');
 plot(xlim, [1 1], 'k--');
 hold off
 if(ar.config.fiterrors == 1)
@@ -21,12 +27,12 @@ if(ar.config.fiterrors == 1)
 else
     ylabel('\chi^2');
 end
-xlabel('evaluations sorted');
+xlabel('run index (sorted by likelihood)');
 title(sprintf('%i evaluations in total, %i without errors, %i converged', ...
     length(exitflag), sum(~isnan(chi2s)) ,sum(exitflag>0)));
-legend(h, 'converged evaluations');
+legend(h, {'converged evaluations', 'constraint violation'});
 
-figure(2)
+subplot(3,1,3);
 hist(ar.timing, 50);
 xlabel('time / sec.');
 title(sprintf('total time for %i evaluations %s', ...

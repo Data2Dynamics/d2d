@@ -20,17 +20,17 @@ ar.qCloseToBound(~qLog10 & ~qPos) = ar.p(~qLog10 & ~qPos) - ar.lb(~qLog10 & ~qPo
 ar.qCloseToBound(~qLog10 & qPos) = log10(ar.p(~qLog10 & qPos)) - log10(ar.lb(~qLog10 & qPos)) < ar.config.par_close_to_bound | ...
     log10(ar.ub(~qLog10 & qPos)) - log10(ar.p(~qLog10 & qPos)) < ar.config.par_close_to_bound;
 
-fprintf('Parameters: # = free, C = constant, D = dynamic, E = error model\n\n');
+fprintf('Parameters: # = free, C = constant, D = dynamic, I = initial value, E = error model\n\n');
 printHead;
 for j=1:length(ar.p)
     printPar(j, ar.qCloseToBound(j));
 	if(mod(j,10)==0 && j<length(ar.p))
-		fprintf('     |  |                                |                                |              |         |      \n');
+		fprintf('     |   |                                |                                |              |         |      \n');
 	end
 end
 
     function printHead
-        strhead = '     |  | name                           | lb       value       ub        | 10^value      | fitted | prior\n';
+        strhead = '     |   | name                           | lb       value       ub        | 10^value      | fitted | prior\n';
         strhead = strrep(strhead, '|', ' ');
         fprintf(strhead);
     end
@@ -44,6 +44,10 @@ end
         if(ar.qError(j))
             strerr = 'E';
         end
+        strinit = ' ';
+        if(ar.qInitial(j))
+            strinit = 'I';
+        end
         
         if(qclosetobound)
             outstream = 2;
@@ -55,8 +59,8 @@ end
         else
             fit_flag = '#';
         end
-        fprintf(outstream, '%s%4i|%s%s| %30s | %+8.2g   %+8.2g   %+8.2g | %i   %+8.2g | %7i | %s \n', ...
-            fit_flag, j, strdyn, strerr, ar.pLabel{j}, ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), pTrans(j), ar.qFit(j), priorStr(j));
+        fprintf(outstream, '%s%4i|%s%s%s| %30s | %+8.2g   %+8.2g   %+8.2g | %i   %+8.2g | %7i | %s \n', ...
+            fit_flag, j, strdyn, strinit, strerr, ar.pLabel{j}, ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), pTrans(j), ar.qFit(j), priorStr(j));
         
     end
 

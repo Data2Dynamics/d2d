@@ -76,7 +76,7 @@ end
 
 function chi2 = arPLEMeritViolations
 global ar
-chi2 = ar.chi2ss + ar.chi2prior;
+chi2 = ar.chi2constr + ar.chi2prior;
 if(chi2==0)
     chi2 = 0;
 end

@@ -37,6 +37,7 @@ if(append && isfield(ar,'ps') && isfield(ar, 'chi2s') && ...
     ar.ps = [nan(n, length(ar.p)); ar.ps];
     ar.ps_start = [ps; ar.ps_start];
     ar.chi2s = [nan(1,n) ar.chi2s];
+    ar.chi2sconstr = [nan(1,n) ar.chi2sconstr];
     ar.chi2s_start = [nan(1,n) ar.chi2s_start];
     ar.timing = [nan(1,n) ar.timing];
     ar.exitflag = [-ones(1,n) ar.exitflag];
@@ -46,6 +47,7 @@ else
     ar.ps = nan(n, length(ar.p));
     ar.ps_start = ps;
     ar.chi2s = nan(1,n);
+    ar.chi2sconstr = nan(1,n);
     ar.chi2s_start = nan(1,n);
     ar.timing = nan(1,n);
     ar.fun_evals = nan(1,n);
@@ -88,6 +90,7 @@ for j=1:n
         arFit(true);
         ar.ps(j,:) = ar.p;
         ar.chi2s(j) = ar.chi2fit;
+        ar.chi2sconstr(j) = ar.chi2constr;
         ar.exitflag(j) = ar.fit.exitflag;
         ar.fun_evals(j) = ar.fevals;
         ar.optim_crit(j) = ar.fit.output.firstorderopt;

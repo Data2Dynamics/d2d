@@ -62,25 +62,39 @@ if(ar.config.optimizer == 1)
         lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
     
 % fmincon
-elseif(ar.config.optimizer == 2) 
+elseif(ar.config.optimizer == 2)
+    options = optimset('fmincon');
+    options.GradObj = 'on';
+    options.GradConstr = 'on';
+    options.TolFun = ar.config.optim.TolFun;
+    options.TolX = ar.config.optim.TolX;
+    options.Display = ar.config.optim.Display;
+    options.MaxIter = ar.config.optim.MaxIter;
+    options.OutputFcn = ar.config.optim.OutputFcn;
+    
+    options.Algorithm = 'interior-point';
+    options.SubproblemAlgorithm = 'cg';
+    % options.Hessian = 'fin-diff-grads';
+    options.Hessian = 'user-supplied';
+    options.HessFcn = @fmincon_hessianfcn;
+    % options2.InitBarrierParam = 1e+6;
+    % options2.InitTrustRegionRadius = 1e-1;
+
     [pFit, chi2, exitflag, output, lambda, jac] = ...
         fmincon(@merit_fkt_fmincon, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
-        [],optimset(ar.config.optim,'DerivativeCheck','off', ...
-        'GradObj','on','Hessian','on','Jacobian', ...
-        [],'Display','off'));
+        @confun,options);
     resnorm = merit_fkt(pFit);
     
-% levenberg-marquardt
+% empty
 elseif(ar.config.optimizer == 3) 
-    arFitLM(silent);
-    return;
+    error('unspecified optimizer');
    
 % STRSCNE
 elseif(ar.config.optimizer == 4)
     warnreset = warning;
     warning('off','MATLAB:rankDeficientMatrix');
     [pFit, exitflag, output, history] = ...
-        STRSCNE(ar.p(ar.qFit==1), @merit_fkt2, [-Inf,0], lb, ub, [1000,1000,1,1], @merit_dfkt2);
+        STRSCNE(ar.p(ar.qFit==1), @merit_fkt_STRSCNE, [-Inf,0], lb, ub, [1000,1000,1,1], @merit_dfkt_STRSCNE);
     warning(warnreset);
     ar.p(ar.qFit==1) = pFit;
     ar.fit.exitflag = exitflag;
@@ -97,6 +111,9 @@ elseif(ar.config.optimizer == 4)
 elseif(ar.config.optimizer == 5)     
     [pFit, chi2, resnorm, exitflag, output, lambda, jac] = ...
         arNLS(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim, ar.config.optimizerStep);
+    
+else
+    error('ar.config.optimizer invalid');
 end
 
 if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
@@ -160,25 +177,81 @@ if(~silent)
     arChi2;
 end
 
-function [chi2, schi2,H] = merit_fkt_fmincon(pTrial)
-[res, sres] = merit_fkt(pTrial);
-chi2 = sum(res.^2);
-sresSq = 2*(res'*ones(1,length(pTrial))) .*sres;
-schi2 = sum(sresSq);
 
-H = sresSq'*sresSq;
-
-
+% lsqnonlin and arNLS
 function [res, sres] = merit_fkt(pTrial)
-
 global ar
-
 arChi2(ar.config.useSensis, pTrial)
-
-res = ar.res;
+res = [ar.res ar.constr];
 if(nargout>1 && ar.config.useSensis)
     sres = ar.sres(:, ar.qFit==1);
+    if(~isempty(ar.sconstr))
+        sres = [sres; ar.sconstr(:, ar.qFit==1)];
+    end
 end
+
+% fmincon
+function [l, g, H] = merit_fkt_fmincon(pTrial)
+global ar
+global fmincon_pTrial
+arChi2(ar.config.useSensis, pTrial)
+fmincon_pTrial = pTrial(:);
+l = sum(ar.res.^2);
+if(nargout>1)
+    g = ar.res*ar.sres(:, ar.qFit==1);
+end
+if(nargout>2)
+    H = ar.sres(:, ar.qFit==1)'*ar.sres(:, ar.qFit==1);
+end
+
+function [c, ceq, gc, gceq] = confun(pTrial)
+global ar
+global fmincon_pTrial
+if(sum(pTrial(:)~=fmincon_pTrial)>0)
+    arChi2(ar.config.useSensis, pTrial)
+    fmincon_pTrial = pTrial(:);
+end
+% Nonlinear inequality constraints
+c = [];
+% Nonlinear equality constraints
+ceq = ar.constr;
+if(nargout>2)
+    gc = [];
+    gceq = ar.sconstr(:, ar.qFit==1)';
+end
+
+function hessian = fmincon_hessianfcn(pTrial, lambda)
+global ar
+global fmincon_pTrial
+if(sum(pTrial(:)~=fmincon_pTrial)>0)
+    arChi2(ar.config.useSensis, pTrial)
+    fmincon_pTrial = pTrial(:);
+end
+H = ar.sres(:, ar.qFit==1)'*ar.sres(:, ar.qFit==1);
+Hconstr = zeros(size(H));
+for jc = 1:length(ar.constr)
+    Hconstr = Hconstr + lambda.eqnonlin(jc)*(ar.sconstr(jc, ar.qFit==1)'*ar.sconstr(jc, ar.qFit==1));
+end
+hessian = H + Hconstr;
+
+
+% STRSCNE
+function res = merit_fkt_STRSCNE(pTrial)
+global ar
+arChi2(ar.config.useSensis, pTrial)
+res = [ar.res ar.constr]';
+
+% derivatives for STRSCNE
+function sres = merit_dfkt_STRSCNE(~)
+global ar
+if(ar.config.useSensis)
+    sres = ar.sres(:, ar.qFit==1);
+    if(~isempty(ar.sconstr))
+        sres = [sres; ar.sconstr(:, ar.qFit==1)];
+    end
+end
+
+
 
 
 function stop = arPlotFast(~,optimValues,state)
@@ -190,7 +263,11 @@ if(strcmp(state, 'iter'))
     ar.fit.p_hist(optimValues.iteration+1,:) = ar.p;
     
     if(ar.config.optimizer == 5)
-        ar.fit.maxstepsize_hist(optimValues.iteration+1) = optimValues.mu;
+        if(isscalar(optimValues.mu))
+            ar.fit.maxstepsize_hist(optimValues.iteration+1) = optimValues.mu;
+        else
+            ar.fit.maxstepsize_hist(optimValues.iteration+1) = det(optimValues.mu);
+        end
         ar.fit.stepsize_hist(optimValues.iteration+1) = optimValues.normdp;
     else
         ar.fit.maxstepsize_hist(optimValues.iteration+1) = nan;
@@ -204,16 +281,3 @@ if(strcmp(state, 'iter'))
 end
 
 stop = false;
-
-
-% for STRSCNE
-function res = merit_fkt2(pTrial)
-global ar
-arChi2(ar.config.useSensis, pTrial)
-res = ar.res';
-
-function sres = merit_dfkt2(~)
-global ar
-if(ar.config.useSensis)
-    sres = ar.sres(:, ar.qFit==1);
-end

@@ -34,8 +34,9 @@ for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)       
         ar.model(m).condition(c).status = 0;
         ar.model(m).condition(c).pNum = ar.p(ar.model(m).condition(c).pLink);
-        ar.model(m).condition(c).pNum(ar.qLog10(ar.model(m).condition(c).pLink)==1) = ...
-            10.^ar.model(m).condition(c).pNum(ar.qLog10(ar.model(m).condition(c).pLink)==1);
+        ar.model(m).condition(c).qLog10 = ar.qLog10(ar.model(m).condition(c).pLink);
+        ar.model(m).condition(c).pNum(ar.model(m).condition(c).qLog10 == 1) = ...
+            10.^ar.model(m).condition(c).pNum(ar.model(m).condition(c).qLog10 == 1);
         ar.model(m).condition(c).start = 0;
         ar.model(m).condition(c).stop = 0;
         ar.model(m).condition(c).stop_data = 0;

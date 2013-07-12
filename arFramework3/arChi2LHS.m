@@ -29,6 +29,4 @@ psrand = psrand + (ones(n,1)*ar.lb(ar.qFit==1));
 
 ps(:,ar.qFit==1) = psrand;
 
-ps(1,:) = ar.p;
-
 arChi2s(ps, sensis, silent);

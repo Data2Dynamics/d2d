@@ -146,7 +146,7 @@ ar.model(m).qPlotU = ones(size(ar.model(m).u));
 varlist = cellfun(@symvar, ar.model(m).fu, 'UniformOutput', false);
 ar.model(m).pu = setdiff(vertcat(varlist{:}), {ar.model(m).t, ''}); %R2013a compatible
 
-% REACTIONS (respectively ODES)
+% REACTIONS (or ODES)
 ar.model(m).N = [];
 ar.model(m).v = {};
 ar.model(m).fv = {};

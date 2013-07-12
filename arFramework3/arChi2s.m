@@ -22,6 +22,7 @@ n = size(ps,1);
 ar.ps = ps;
 ar.ps_errors = [];
 ar.chi2s = nan(1,n);
+ar.chi2sconstr = nan(1,n);
 ar.timing = nan(1,n);
 ar.exitflag = nan(1,n);
 ar.fun_evals = [];
@@ -40,6 +41,7 @@ for j=1:n
         arChi2(sensis);
         ar.timing(j) = toc;
         ar.chi2s(j) = ar.chi2fit;
+        ar.chi2sconstr(j) = ar.chi2constr;
         ar.exitflag(j) = 1;
     catch exception
         ar.timing(j) = toc;
