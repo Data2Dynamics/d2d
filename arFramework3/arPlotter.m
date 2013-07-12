@@ -22,7 +22,7 @@ function varargout = arPlotter(varargin)
 
 % Edit the above text to modify the response to help arPlotter
 
-% Last Modified by GUIDE v2.5 12-May-2011 18:00:52
+% Last Modified by GUIDE v2.5 12-Jun-2013 10:06:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -100,19 +100,21 @@ for jm=1:length(ar.model)
         logfitting = 0;
         logplotting = 0;
         qfit = 0;
-        for jd = ar.model(jm).plot(jplot).dLink
-            chi2 = chi2 + sum(ar.model(jm).data(jd).chi2);
-            if(ar.config.fiterrors == 1)
-                chi2 = chi2 + sum(ar.model(jm).data(jd).chi2err);
+        if(isfield(ar.model(jm),'data'))
+            for jd = ar.model(jm).plot(jplot).dLink
+                chi2 = chi2 + sum(ar.model(jm).data(jd).chi2);
+                if(ar.config.fiterrors == 1)
+                    chi2 = chi2 + sum(ar.model(jm).data(jd).chi2err);
+                end
+                ndata = ndata + sum(ar.model(jm).data(jd).ndata);
+                logfitting = logfitting + sum(ar.model(jm).data(jd).logfitting);
+                logplotting = logplotting + sum(ar.model(jm).data(jd).logplotting);
+                qfit = qfit + sum(ar.model(jm).data(jd).qFit==0);
             end
-            ndata = ndata + sum(ar.model(jm).data(jd).ndata);
-            logfitting = logfitting + sum(ar.model(jm).data(jd).logfitting);
-            logplotting = logplotting + sum(ar.model(jm).data(jd).logplotting);
-            qfit = qfit + sum(ar.model(jm).data(jd).qFit==0);
-        end
-        
-        if(ar.config.fiterrors == 1)
-            chi2 = 2*ndata*log(sqrt(2*pi)) + chi2;
+            
+            if(ar.config.fiterrors == 1)
+                chi2 = 2*ndata*log(sqrt(2*pi)) + chi2;
+            end
         end
         llhreltodata(end+1) = chi2/ndata; %#ok<AGROW>
         
@@ -159,18 +161,14 @@ jplot = ar.plotter.jplot(eventdata.Indices(1));
 
 if(eventdata.Indices(2)==5) % PlotY
     ar.model(jm).qPlotYs(jplot) = eventdata.EditData;
-    arPlotY(false, true);
 elseif(eventdata.Indices(2)==6) % PlotX
     ar.model(jm).qPlotXs(jplot) = eventdata.EditData;
-    arPlotX(false, true);
 elseif(eventdata.Indices(2)==7) % PlotV
     ar.model(jm).qPlotVs(jplot) = eventdata.EditData;
-    arPlotV(false, true);
 elseif(eventdata.Indices(2)==8) % PlotLog
     for jd = ar.model(jm).plot(jplot).dLink
         ar.model(jm).data(jd).logplotting(:) = eventdata.EditData;
     end
-    arPlotY(false, false);
 elseif(eventdata.Indices(2)==9) % FitLog
     ar.plotter.C{eventdata.Indices(1), 8} = eventdata.EditData;
     ar.plotter.C{eventdata.Indices(1), 9} = eventdata.EditData;
@@ -185,10 +183,16 @@ elseif(eventdata.Indices(2)==9) % FitLog
         end
         ar.model(jm).data(jd).logfitting(:) = eventdata.EditData;
     end
-    arPlotY(false, false);
 elseif(eventdata.Indices(2)==10) % Fit
     for jd = ar.model(jm).plot(jplot).dLink
         ar.model(jm).data(jd).qFit(:) = eventdata.EditData;
     end
-    arPlotY(false, true);
 end
+
+
+% --- Executes on button press in pushbutton1.
+function pushbutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+arPlot(false, false, false, false);
