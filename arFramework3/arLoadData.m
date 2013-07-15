@@ -441,6 +441,9 @@ end
 
 
 function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, pcond, removeEmptyObs, dpPerShoot)
+
+matVer = ver('MATLAB');
+
 % normalization of columns
 nfactor = max(data, [], 1);
 
