@@ -302,7 +302,11 @@ ar.model(m).condition(c).px0 = union(vertcat(varlist{:}), [])'; %R2013a compatib
 % remaining parameters
 varlist = cellfun(@symvar, ar.model(m).condition(c).fp, 'UniformOutput', false);
 ar.model(m).condition(c).pold = ar.model(m).condition(c).p;
-ar.model(m).condition(c).p = union(vertcat(varlist{:}), [],'legacy')'; %R2013a compatible
+if(str2double(matVer.Version)>=8.1)
+    ar.model(m).condition(c).p = union(vertcat(varlist{:}), [], 'legacy')';
+else
+    ar.model(m).condition(c).p = union(vertcat(varlist{:}), [])';
+end
 
 if(doskip)
     fprintf('skipping\n');
