@@ -26,7 +26,9 @@ if(exist([ar.fkt '.' mexext],'file') && ~forceFullCompile)
 end
 
 ar_path = strrep(which('arInit.m'),'/arInit.m','');
-sundials_path = [strrep(which('arInit.m'),'/arInit.m','') '/sundials-2.4.0/'];
+
+% sundials_path = [strrep(which('arInit.m'),'/arInit.m','') '/sundials-2.4.0/']; % sundials 2.4.0
+sundials_path = [strrep(which('arInit.m'),'/arInit.m','') '/sundials-2.5.0/']; % sundials 2.5.0
 
 % include directories
 includes = {'include', 'src/cvodes'};

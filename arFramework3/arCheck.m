@@ -19,16 +19,30 @@ if(exist('JEInterface','file') == 0)
     addpath([ar_path '/EvA2/JEInterface'])
 end
 
-% configure sundials
-if(exist([ar_path '/sundials-2.4.0'],'dir') == 0)
+% % configure sundials 2.4.0
+% if(exist([ar_path '/sundials-2.4.0'],'dir') == 0)
+%     path_backup = cd;
+%     cd(ar_path);
+%     !tar -xvf sundials-2.4.0.tar
+%     cd(path_backup);
+% end
+% if(exist([ar_path '/sundials-2.4.0/config.h'],'file') == 0)
+%     path_backup = cd;
+%     cd([ar_path '/sundials-2.4.0']);
+%     !./configure
+%     cd(path_backup);
+% end
+
+% configure sundials 2.5.0
+if(exist([ar_path '/sundials-2.5.0'],'dir') == 0)
     path_backup = cd;
     cd(ar_path);
-    !tar -xvf sundials-2.4.0.tar
+    !tar -xvf sundials-2.5.0.tar
     cd(path_backup);
 end
-if(exist([ar_path '/sundials-2.4.0/config.h'],'file') == 0)
+if(exist([ar_path '/sundials-2.5.0/config.h'],'file') == 0)
     path_backup = cd;
-    cd([ar_path '/sundials-2.4.0']);
+    cd([ar_path '/sundials-2.5.0']);
     !./configure
     cd(path_backup);
 end

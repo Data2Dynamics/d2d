@@ -318,7 +318,8 @@ fprintf(fid, ' void dvdp_%s(realtype t, N_Vector x, void *user_data);\n', ar.mod
 fprintf(fid, ' int fx_%s(realtype t, N_Vector x, N_Vector xdot, void *user_data);\n', ar.model(m).condition(c).fkt);
 fprintf(fid, ' void fxdouble_%s(realtype t, N_Vector x, double *xdot_tmp, void *user_data);\n', ar.model(m).condition(c).fkt);
 fprintf(fid, ' void fx0_%s(N_Vector x0, void *user_data);\n', ar.model(m).condition(c).fkt);
-fprintf(fid, ' int dfxdx_%s(int N, realtype t, N_Vector x,', ar.model(m).condition(c).fkt);
+% fprintf(fid, ' int dfxdx_%s(int N, realtype t, N_Vector x,', ar.model(m).condition(c).fkt); % sundials 2.4.0
+fprintf(fid, ' int dfxdx_%s(long int N, realtype t, N_Vector x,', ar.model(m).condition(c).fkt); % sundials 2.5.0
 fprintf(fid, 'N_Vector fx, DlsMat J, void *user_data,');
 fprintf(fid, 'N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);\n');
 fprintf(fid, ' int fsx_%s(int Ns, realtype t, N_Vector x, N_Vector xdot,', ar.model(m).condition(c).fkt);
@@ -485,7 +486,8 @@ end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write dfxdx
-fprintf(fid, ' int dfxdx_%s(int N, realtype t, N_Vector x, \n', ar.model(m).condition(c).fkt);
+% fprintf(fid, ' int dfxdx_%s(int N, realtype t, N_Vector x, \n', ar.model(m).condition(c).fkt); % sundials 2.4.0
+fprintf(fid, ' int dfxdx_%s(long int N, realtype t, N_Vector x, \n', ar.model(m).condition(c).fkt); % sundials 2.5.0
 fprintf(fid, '  \tN_Vector fx, DlsMat J, void *user_data, \n');
 fprintf(fid, '  \tN_Vector tmp1, N_Vector tmp2, N_Vector tmp3)\n{\n');
 if(timedebug)
