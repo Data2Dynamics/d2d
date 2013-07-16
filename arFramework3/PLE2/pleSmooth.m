@@ -41,9 +41,11 @@ elseif(jk <= length(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}) && pleGl
     n = length(pleGlobals.chi2s{jk});
     chi2s = pleGlobals.chi2s{jk};
     
+    [~, globminindex] = min(chi2s);
+    
     candidateindex_down = [];
     % down
-    for j=ceil(n/2):-1:2
+    for j=globminindex:-1:2
         crumin = chi2s(j);
         [minchi2, minindex] = min(chi2s(1:j));
         if(minindex ~= j && ~isnan(minchi2) && (crumin-minchi2)>dchi2)         
@@ -53,7 +55,7 @@ elseif(jk <= length(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}) && pleGl
     
     candidateindex_up = [];
     % up
-    for j=ceil(n/2):1:n-1
+    for j=globminindex:1:(n-1)
         crumin = chi2s(j);
         [minchi2, minindex] = min(chi2s(j:n));
         if((minindex+j-1) ~= j && ~isnan(minchi2) && (crumin-minchi2)>dchi2)

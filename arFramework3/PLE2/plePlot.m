@@ -200,13 +200,18 @@ for jj=1:length(indices)
         set(g, 'FontSize', labelfontsize);
         set(g, 'FontName', 'TimesNewRoman');
         
+        if(subs_para==2)
+            ps(:,notjk) = bsxfun(@minus,ps(:,notjk),pleGlobals.lb(notjk));
+            ps(:,notjk) = bsxfun(@rdivide,ps(:,notjk),pleGlobals.ub(notjk)-pleGlobals.lb(notjk));
+        end
+        
         ccount = 1;
         for j=find(notjk)
             qisnonan = ~isnan(ps(:,j));
             ps_var(ccount) = max(ps(qisnonan,j)) - min(ps(qisnonan,j));
             zeichenindex = mod(floor((j-1)/7)+1, 3)+1;
-            
-            if(subs_para)
+
+            if(subs_para==1)
                 medianp = pleGlobals.p(j);
 %                 medianp = median(ps(qisnonan,j));
             else
