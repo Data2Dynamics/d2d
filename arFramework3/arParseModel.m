@@ -266,6 +266,9 @@ fprintf('done\n');
 
 % Condition
 function arParseCondition(m, c, doskip)
+
+matVer = ver('MATLAB');
+
 global ar
 
 fprintf('parsing condition m%i c%i, %s (%s)...', m, c, ar.model(m).name, ar.model(m).condition(c).checkstr);
