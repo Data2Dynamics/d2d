@@ -50,6 +50,10 @@ for j=1:length(pLabels)
     for jple=1:length(ples)
         qj = strmatch(pLabels{j},strvcat(ples{jple}.p_labels),'exact'); %#ok<REMFF1,MATCH3>
         
+        if ples{jple}.q_fit(strmatch(pLabels{j},ples{jple}.p_labels,'exact'))==0
+            qj=[];
+        end
+        
         if(~isempty(qj))
             % profile
             hs(jple) = plot(ples{jple}.ps{qj}(:,qj), (ples{jple}.chi2s{qj} - ples{jple}.chi2)/dchi2, 'Color', colors(jple,:));

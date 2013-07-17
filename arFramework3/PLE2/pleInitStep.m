@@ -66,13 +66,13 @@ while(true)
             else
                 lbub = 'lower';
             end
-            fprintf('PLE#%i parameter %s hit %s bounary\n', jk, pleGlobals.p_labels{jk}, lbub);
+            fprintf('PLE#%i parameter %s hit %s boundary\n', jk, pleGlobals.p_labels{jk}, lbub);
             pStep = nan(size(pLast));
             return
         end
     elseif(sum(q_hit_lb(q_not_jk) & pleGlobals.breakonlb(q_not_jk))>0 ||...
             sum(q_hit_ub(q_not_jk) & pleGlobals.breakonub(q_not_jk))>0) % other than jk hit boundaries
-        fprintf('STOP: other parameters hit hard bounaries:\n')
+        fprintf('STOP: other parameters hit hard boundaries:\n')
         fprintf('\t%s\n', pleGlobals.p_labels{(q_hit_lb | q_hit_ub) & q_not_jk})
         pStep = nan(size(pLast));
         return
