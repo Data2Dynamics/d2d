@@ -12,11 +12,10 @@ function arSSA(m, scaling, nruns)
 
 global ar
 
-ar.config.ssa_runs = nruns;
-
 if(~exist('nruns','var'))
     nruns = 10;
 end
+ar.config.ssa_runs = nruns;
 if(~exist('scaling','var') || isempty(scaling))
     scaling = ones(1,length(ar.model(m).x));
 end
