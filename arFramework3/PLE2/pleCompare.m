@@ -25,7 +25,10 @@ end
 
 pLabels = {};
 for j=1:length(ples)
-    pLabels = union(pLabels, ples{j}.p_labels(ples{j}.q_fit==1)); %R2013a compatible
+    qq = ples{j}.q_fit==1;
+    qq(1:length(ples{j}.ps)) = qq(1:length(ples{j}.ps)) & ~cellfun(@isempty, ples{j}.ps);
+    qq((length(ples{j}.ps)+1):end) = false;
+    pLabels = union(pLabels, ples{j}.p_labels(qq)); %R2013a compatible
 end
 
 ncols = ceil(length(pLabels)^(0.4))+1;
@@ -50,11 +53,7 @@ for j=1:length(pLabels)
     for jple=1:length(ples)
         qj = strmatch(pLabels{j},strvcat(ples{jple}.p_labels),'exact'); %#ok<REMFF1,MATCH3>
         
-        if ples{jple}.q_fit(strmatch(pLabels{j},ples{jple}.p_labels,'exact'))==0
-            qj=[];
-        end
-        
-        if(~isempty(qj))
+        if(~isempty(qj) && size(ples{jple}.ps,2)>=qj && ~isempty(ples{jple}.ps))
             % profile
             hs(jple) = plot(ples{jple}.ps{qj}(:,qj), (ples{jple}.chi2s{qj} - ples{jple}.chi2)/dchi2, 'Color', colors(jple,:));
             hold on
