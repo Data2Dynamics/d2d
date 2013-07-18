@@ -2,6 +2,8 @@
 
 function arClearCFiles
 
+[~, c_version_code] = arGetVersion;
+
 filelist = dir;
 
 for j=1:length(filelist)
@@ -11,7 +13,7 @@ for j=1:length(filelist)
     end
 end
 
-filelist = dir(['./Compiled/' ar.info.c_version_code]);
+filelist = dir(['./Compiled/' c_version_code]);
 
 for j=1:length(filelist)
     indexes = strfind(filelist(j).name, 'mex');

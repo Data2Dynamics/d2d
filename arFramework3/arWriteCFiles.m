@@ -87,7 +87,7 @@ for m=1:length(ar.model)
             fprintf(fid, '#include "%s.h"\n', ar.model(m).data(d).fkt);
             fprintf('writing data m%i d%i, %s (%s)...', m, d, ar.model(m).data(d).name, ar.model(m).data(d).checkstr);
             if(forcedCompile || ~exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.h'],'file'))
-                fid_obsH = fopen(['./Compiled/' ar.model(m).data(d).fkt '.h'], 'W'); % create header file
+                fid_obsH = fopen(['./Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.h'], 'W'); % create header file
                 arWriteHFilesOBS(fid_obsH, m, d);
                 fclose(fid_obsH);
             end
