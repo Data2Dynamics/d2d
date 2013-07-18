@@ -51,6 +51,9 @@ elseif(mode==2)
 elseif(mode==3)
     pleGlobals.initstep_fkt = @pleInitStepLinear;
     pleGlobals.mode = 3;
+elseif(mode==4)
+    pleGlobals.initstep_fkt = @pleInitStepComposite;
+    pleGlobals.mode = 4;
 end
 
 pleGlobals.savePath = [arSave '/PLE'];
