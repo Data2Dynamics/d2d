@@ -169,6 +169,7 @@ for jk=jks
         hold off
 
         xlabel(['log_{10}(' myNameTrafo(pleGlobals.p_labels{jk}) ')'])
+        title(sprintf('parameter #%i', jk));
         
         if(mod(count-1,ncols)==0)
             ylabel(pleGlobals.ylabel)

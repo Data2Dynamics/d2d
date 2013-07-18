@@ -1,5 +1,5 @@
 % adaptive step reconciling chi^2 increase
-% direct step method
+% linear step method
 
 function [pStep, dpNew, beta, alpha] = pleInitStepLinear(jk, pLast, dpLast)
 
@@ -8,16 +8,9 @@ global pleGlobals;
 % mag factor
 stepfaktor = 2;
 
-if(~pleGlobals.breakon_point)
-    dchi2 = pleGlobals.dchi2;
-else
-    dchi2 = pleGlobals.dchi2_point;
-end
+dchi2 = pleGlobals.dchi2_point;
 
 chi2last = feval(pleGlobals.merit_fkt);
-
-beta = [];
-alpha = [];
 
 dpNew = dpLast;
 if(length(dpLast) ~= length(pLast))
@@ -26,6 +19,9 @@ if(length(dpLast) ~= length(pLast))
     dpNew = dpNewtmp;
 end
 pStep = dpNew;
+
+beta = [];
+alpha = [];
 
 q_not_jk = 1:length(pLast);
 q_not_jk = q_not_jk~=jk & pleGlobals.q_fit;

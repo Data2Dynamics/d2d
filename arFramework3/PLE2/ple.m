@@ -163,7 +163,7 @@ try
         tic;
         % Fit
         [p, gradient] = feval(pleGlobals.fit_fkt, jk);
-        if(pleGlobals.mode == 3)
+        if(length(dpLast)>1)
             dpLast = p - pLast;
         end
         pLast = p;
@@ -224,7 +224,7 @@ try
         tic;
         % Fit
         [p, gradient] = feval(pleGlobals.fit_fkt, jk); 
-        if(pleGlobals.mode == 3)
+        if(length(dpLast)>1)
             dpLast = p - pLast;
         end
         pLast = p;
