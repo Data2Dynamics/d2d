@@ -1,6 +1,7 @@
 % Compile CVODES c-functions
 %
 % arCompile(forceFullCompile)
+%
 %   forceFullCompile:   recompile all object files      [false]
 %
 %   This function is based on install_STB written by Radu Serban
@@ -36,7 +37,7 @@ includesstr = '';
 for j=1:length(includes)
     includesstr = strcat(includesstr, [' -I"' sundials_path includes{j} '"']);
 end
-includesstr = strcat(includesstr, [' -I"' pwd '/Compiled"']);
+includesstr = strcat(includesstr, [' -I"' pwd '/Compiled/' ar.info.c_version_code '"']);
 includesstr = strcat(includesstr, [' -I"' ar_path '"']);
 
 % source files
@@ -102,13 +103,13 @@ objects = {
 
 objectsstr = '';
 for j=1:length(objects)
-    objectsstr = strcat(objectsstr, [' Compiled/' mexext '/' objects{j}]);
+    objectsstr = strcat(objectsstr, [' Compiled/' ar.info.c_version_code '/' mexext '/' objects{j}]);
 end
 
 % compile
 
-if(~exist([cd '/Compiled/' mexext], 'dir'))
-    mkdir([cd '/Compiled/' mexext])
+if(~exist([cd '/Compiled/' ar.info.c_version_code '/' mexext], 'dir'))
+    mkdir([cd '/Compiled/' ar.info.c_version_code '/' mexext])
 end
 
 % serial code
@@ -119,14 +120,14 @@ outputstr = [' -output ' ar.fkt];
 
 % pre-compile CVODES sources
 for j=1:length(sources)
-    if(~exist(['Compiled/' mexext '/' objects{j}], 'file'))
+    if(~exist(['Compiled/' ar.info.c_version_code '/' mexext '/' objects{j}], 'file'))
         fprintf('o');
-        eval(['mex -c -outdir Compiled/'  mexext '/' includesstr ' ' sundials_path sources{j}]);
+        eval(['mex -c -outdir Compiled/'  ar.info.c_version_code '/' mexext '/' includesstr ' ' sundials_path sources{j}]);
     end
 end
 
 % pre-compile input functions
-eval(['mex -c -outdir Compiled/'  mexext '/' includesstr ' ' ar_path '/arInputFunctionsC.c']);
+eval(['mex -c -outdir Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' ar_path '/arInputFunctionsC.c']);
 
 % pre-compile conditions
 sources_con = {};
@@ -134,8 +135,8 @@ objects_con = {};
 
 for jm = 1:length(ar.model)
     for sc = 1:length(ar.model(jm).condition)
-        sources_con{end+1} = ['./Compiled/' ar.model(jm).condition(sc).fkt '.c']; %#ok<AGROW>
-        objects_con{end+1} = ['./Compiled/' mexext '/' ar.model(jm).condition(sc).fkt '.o']; %#ok<AGROW>
+        sources_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' ar.model(jm).condition(sc).fkt '.c']; %#ok<AGROW>
+        objects_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).condition(sc).fkt '.o']; %#ok<AGROW>
     end
 end
 
@@ -146,7 +147,7 @@ end
 for j=1:length(sources_con)
     if(~exist(objects_con{j}, 'file'))
         fprintf('o');
-        eval(['mex -c -outdir ./Compiled/' mexext '/' includesstr ' ' sources_con{j}]);
+        eval(['mex -c -outdir ./Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' sources_con{j}]);
     end
 end
 
@@ -157,8 +158,8 @@ if(isfield(ar.model, 'data'))
     
     for jm = 1:length(ar.model)
         for sc = 1:length(ar.model(jm).data)
-            sources_dat{end+1} = ['./Compiled/' ar.model(jm).data(sc).fkt '.c']; %#ok<AGROW>
-            objects_dat{end+1} = ['./Compiled/' mexext '/' ar.model(jm).data(sc).fkt '.o']; %#ok<AGROW>
+            sources_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' ar.model(jm).data(sc).fkt '.c']; %#ok<AGROW>
+            objects_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).data(sc).fkt '.o']; %#ok<AGROW>
         end
     end
     
@@ -169,7 +170,7 @@ if(isfield(ar.model, 'data'))
     for j=1:length(sources_dat)
         if(~exist(objects_dat{j}, 'file'))
             fprintf('o');
-            eval(['mex -c -outdir ./Compiled/' mexext '/' includesstr ' ' sources_dat{j}]);
+            eval(['mex -c -outdir ./Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' sources_dat{j}]);
         end
     end
 end

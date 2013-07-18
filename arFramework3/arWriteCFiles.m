@@ -24,6 +24,9 @@ end
 if(~exist([cd '/Compiled'], 'dir'))
 	mkdir([cd '/Compiled'])
 end
+if(~exist([cd '/Compiled/' ar.info.c_version_code], 'dir'))
+	mkdir([cd '/Compiled/' ar.info.c_version_code])
+end
 
 % link back parameters & thread indexing
 thread_count_x = 0;
@@ -34,7 +37,7 @@ for m = 1:length(ar.model)
 end
 
 % udata.h
-fid = fopen('./Compiled/udata.h', 'W');
+fid = fopen(['./Compiled/' ar.info.c_version_code '/udata.h'], 'W');
 fprintf(fid, '#ifndef _MY_UDATA\n');
 fprintf(fid, '#define _MY_UDATA\n');
 fprintf(fid, 'typedef struct {\n');
@@ -51,12 +54,12 @@ fprintf(fid, '#endif /* _MY_UDATA */\n');
 fclose(fid);
 
 % Variables
-fid = fopen('./Compiled/arSimuCalcVariables.c', 'W');
+fid = fopen(['./Compiled/' ar.info.c_version_code '/arSimuCalcVariables.c'], 'W');
 fprintf(fid, 'pthread_t threads_x[%i];\n\n', thread_count_x);
 fclose(fid);
 
 % Functions
-fid = fopen('./Compiled/arSimuCalcFunctions.c', 'W');
+fid = fopen(['./Compiled/' ar.info.c_version_code '/arSimuCalcFunctions.c'], 'W');
 
 % model equations
 fprintf('\n');
@@ -65,13 +68,13 @@ for m=1:length(ar.model)
 %         fprintf(fid, '#include "%s.c"\n', ar.model(m).condition(c).fkt);
         fprintf(fid, '#include "%s.h"\n', ar.model(m).condition(c).fkt); % changed to .h
         fprintf('writing condition m%i c%i, %s (%s)...', m, c, ar.model(m).name, ar.model(m).condition(c).checkstr);
-        if(forcedCompile || ~exist(['./Compiled/' ar.model(m).condition(c).fkt '.h'],'file'))
-            fid_odeH = fopen(['./Compiled/' ar.model(m).condition(c).fkt '.h'], 'W'); % create header file
+        if(forcedCompile || ~exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.h'],'file'))
+            fid_odeH = fopen(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.h'], 'W'); % create header file
             arWriteHFilesODE(fid_odeH, m, c);
             fclose(fid_odeH);
         end
-        if(forcedCompile || ~exist(['./Compiled/' ar.model(m).condition(c).fkt '.c'],'file'))
-            fid_ode = fopen(['./Compiled/' ar.model(m).condition(c).fkt '.c'], 'W');
+        if(forcedCompile || ~exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.c'],'file'))
+            fid_ode = fopen(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.c'], 'W');
             arWriteCFilesODE(fid_ode, m, c);
             fclose(fid_ode);
         else
@@ -83,13 +86,13 @@ for m=1:length(ar.model)
         for d=1:length(ar.model(m).data)
             fprintf(fid, '#include "%s.h"\n', ar.model(m).data(d).fkt);
             fprintf('writing data m%i d%i, %s (%s)...', m, d, ar.model(m).data(d).name, ar.model(m).data(d).checkstr);
-            if(forcedCompile || ~exist(['./Compiled/' ar.model(m).data(d).fkt '.h'],'file'))
+            if(forcedCompile || ~exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.h'],'file'))
                 fid_obsH = fopen(['./Compiled/' ar.model(m).data(d).fkt '.h'], 'W'); % create header file
                 arWriteHFilesOBS(fid_obsH, m, d);
                 fclose(fid_obsH);
             end
-            if(forcedCompile || ~exist(['./Compiled/' ar.model(m).data(d).fkt '.c'],'file'))
-                fid_obs = fopen(['./Compiled/' ar.model(m).data(d).fkt '.c'], 'W');
+            if(forcedCompile || ~exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.c'],'file'))
+                fid_obs = fopen(['./Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.c'], 'W');
                 arWriteCFilesOBS(fid_obs, m, d);
                 fclose(fid_obs);
             else

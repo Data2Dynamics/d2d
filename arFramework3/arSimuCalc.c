@@ -208,6 +208,7 @@ void *x_calc(void *threadarg) {
     /* printf("computing model #%i, condition #%i\n", im, ic); */
     
     /* begin of CVODES */
+    
     void *cvode_mem;
     UserData data;
     

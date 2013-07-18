@@ -11,11 +11,11 @@ for j=1:length(filelist)
     end
 end
 
-filelist = dir('./Compiled');
+filelist = dir(['./Compiled/' ar.info.c_version_code]);
 
 for j=1:length(filelist)
     indexes = strfind(filelist(j).name, 'mex');
     if(isempty(indexes) && ~strcmp(filelist(j).name, '.') && ~strcmp(filelist(j).name, '..'))
-        delete(['./Compiled/' filelist(j).name]);
+        delete(['./Compiled/' ar.info.c_version_code '/' filelist(j).name]);
     end
 end

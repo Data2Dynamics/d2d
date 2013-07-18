@@ -84,7 +84,7 @@ for m=1:length(ar.model)
                 % global checksum
                 checksum_global = addToCheckSum(ar.model(m).condition(cindex).fkt, checksum_global);
                 
-                doskip = ~forceParsing && exist(['./Compiled/' ar.model(m).condition(cindex).fkt '.c'],'file');
+                doskip = ~forceParsing && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(cindex).fkt '.c'],'file');
                 arParseCondition(m, cindex, doskip);
                 
                 % link data to condition
@@ -116,7 +116,7 @@ for m=1:length(ar.model)
         
         % parse data
         for d=1:length(ar.model(m).data)
-            doskip = ~forceParsing && exist(['./Compiled/' ar.model(m).data(d).fkt '.c'],'file');
+            doskip = ~forceParsing && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.c'],'file');
             arParseOBS(m, d, doskip);
         end
     else
@@ -151,7 +151,7 @@ for m=1:length(ar.model)
             checksum_global = addToCheckSum(ar.model(m).condition(cindex).fkt, checksum_global);
         end
         
-        doskip = ~forceParsing && exist(['./Compiled/' ar.model(m).condition(cindex).fkt '.c'],'file');
+        doskip = ~forceParsing && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(cindex).fkt '.c'],'file');
         arParseCondition(m, cindex, doskip);
         
         % plot setup
@@ -500,8 +500,7 @@ function arParseOBS(m, d, doskip)
 global ar
 
 c = ar.model(m).data(d).cLink;
-fprintf('parsing data m%i d%i, %s (%s -> %s)...', m, d, ar.model(m).data(d).name, ar.model(m).data(d).checkstr, ...
-    ar.model(m).condition(c).checkstr);
+fprintf('parsing data m%i d%i -> c%i, %s (%s)...', m, d, c, ar.model(m).data(d).name, ar.model(m).data(d).checkstr);
 
 % hard code conditions
 ar.model(m).data(d).sym.p = sym(ar.model(m).data(d).p);

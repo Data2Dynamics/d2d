@@ -22,6 +22,7 @@
 #include <math.h>
 #include <mex.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 #include <cvodes/cvodes.h>           /* prototypes for CVODES fcts. and consts. */
 #include <cvodes/cvodes_dense.h>     /* prototype for CVDENSE fcts. and constants */
@@ -40,36 +41,19 @@ struct thread_data_x {
     int	im;
     int ic;
     mxArray *arcondition;
-};
-
-struct thread_data_y {
-    int	im;
-    int id;
     mxArray *ardata;
-    mxArray *arcondition;
-    int dt;
 };
-
-typedef struct {
-    double *u;
-    double *su;
-    double *p;
-    double *v;
-    double *dvdx;
-    double *dvdu;
-    double *dvdp;
-    double *sv;
-} *UserData;
 
 mxArray *armodel;
 
 int     parallel;
 double  mintau;
 int     nruns;
+struct  timeval t1;
 
 /* Prototypes of private functions */
 void *x_calc(void *threadarg);
-void *y_calc(void *threadarg);
+void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition);
 
 static int check_flag(void *flagvalue, char *funcname, int opt);
 
@@ -77,10 +61,15 @@ static int check_flag(void *flagvalue, char *funcname, int opt);
 #include "arSimuCalcFunctions.c"
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    struct timeval t2, tdiff;
+    double *ticks_stop;
+    ticks_stop = mxGetData(mxGetField(prhs[0], 0, "stop"));
+    
+    gettimeofday(&t1, NULL);
     
     srand( (unsigned)time(NULL) );
     
-    int nthreads_x, nthreads_y, nm, im, nc, ic, tid, dtid, nd, id, rc, has_tExp;
+    int nthreads_x, nm, im, nc, ic, tid, dtid, nd, id, rc, has_tExp;
     
     mxArray    *arconfig;
     mxArray    *arcondition;
@@ -92,20 +81,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         mexErrMsgTxt("field ar.model not existing");
     }
     
-    parallel = 1;
-    
     /* get ar.config */
     arconfig = mxGetField(prhs[0], 0, "config");
+    parallel = (int) mxGetScalar(mxGetField(arconfig, 0, "useParallel"));
     mintau = mxGetScalar(mxGetField(arconfig, 0, "ssa_min_tau"));
     nruns = (int) mxGetScalar(mxGetField(arconfig, 0, "ssa_runs"));
     
     /* threads */
     nthreads_x = mxGetScalar(mxGetField(arconfig, 0, "nthreads_x"));
-    nthreads_y = mxGetScalar(mxGetField(arconfig, 0, "nthreads_y"));
     pthread_t threads_x[nthreads_x];
-    pthread_t threads_y[nthreads_y];
     struct thread_data_x thread_data_x_array[nthreads_x];
-    struct thread_data_y thread_data_y_array[nthreads_y];
     
 /*    printf("%i x-threads (%i runs, %g min-tau)\n", nthreads_x, nruns, mintau);
     printf("%i y-threads\n", nthreads_y); */
@@ -120,6 +105,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             mexErrMsgTxt("field ar.model.condition not existing");
         }
         
+        /* get ar.model(im).data */
+        ardata = mxGetField(armodel, im, "data");
+        
         nc = mxGetNumberOfElements(arcondition);
         /* loop over conditions */
         for(ic=0; ic<nc; ++ic){
@@ -128,7 +116,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             thread_data_x_array[tid].im = im;
             thread_data_x_array[tid].ic = ic;
             thread_data_x_array[tid].arcondition = arcondition;
-            
+            thread_data_x_array[tid].ardata = ardata;
+
             if(parallel==1){
                 /* printf("creating condition thread %i, m=%i, c=%i\n", tid, im, ic); */
                 rc = pthread_create(&threads_x[tid], NULL, x_calc, (void *) &thread_data_x_array[tid]);
@@ -165,64 +154,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         }
     }
     
-    /* loop over models */
-    for(im=0; im<nm; ++im){
-        /* get ar.model(im).data */
-        ardata = mxGetField(armodel, im, "data");
-        
-        if(ardata!=NULL){
-            arcondition = mxGetField(armodel, im, "condition");
-            
-            nd = mxGetNumberOfElements(ardata);
-            /* loop over data */
-            for(id=0; id<nd; ++id){
-                tid = mxGetScalar(mxGetField(ardata, id, "thread_id"));
-                
-                thread_data_y_array[tid].im = im;
-                thread_data_y_array[tid].id = id;
-                thread_data_y_array[tid].ardata = ardata;
-                thread_data_y_array[tid].arcondition = arcondition;
-                
-                dtid = mxGetScalar(mxGetField(ardata, id, "dthread_id"));
-                thread_data_y_array[tid].dt = dtid;
-                
-                if(parallel==1){
-                    /* printf("creating data thread %i, m=%i, d=%i (wait call for condition #%i)\n", tid, im, id, dtid); */
-                    rc = pthread_create(&threads_y[tid], NULL, y_calc, (void *) &thread_data_y_array[tid]);
-                    if (rc){
-                        mexErrMsgTxt("ERROR at pthread_create y");
-                    }
-                } else {
-                    y_calc(&thread_data_y_array[tid]);
-                }
-            }
-        }
-    }
-    
-    /* wait for termination of data threads = pthread_exit(NULL);*/
-    if(parallel==1){
-        /* loop over models */
-        for(im=0; im<nm; ++im){
-            /* get ar.model(im).data */
-            ardata = mxGetField(armodel, im, "data");
-            
-            if(ardata!=NULL){
-                arcondition = mxGetField(armodel, im, "condition");
-                
-                nd = mxGetNumberOfElements(ardata);
-                /* loop over data */
-                for(id=0; id<nd; ++id){
-                    tid = mxGetScalar(mxGetField(ardata, id, "thread_id"));
-                    
-                    rc = pthread_join(threads_y[tid], NULL);
-                    if (rc){
-                        mexErrMsgTxt("ERROR at pthread_join y");
-                    }
-                }
-            }
-            
-        }
-    }
+    gettimeofday(&t2, NULL);
+    timersub(&t2, &t1, &tdiff);
+    ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
 }
 
 
@@ -234,6 +168,23 @@ void *x_calc(void *threadarg) {
     int im = my_data->im;
     int ic = my_data->ic;
     mxArray *arcondition = my_data->arcondition;
+    mxArray *ardata = my_data->ardata;
+    
+    struct timeval t2, t3, t4, tdiff;
+    double *ticks_start, *ticks_stop_data, *ticks_stop;
+    ticks_start = mxGetData(mxGetField(arcondition, ic, "start"));
+    ticks_stop = mxGetData(mxGetField(arcondition, ic, "stop"));
+    ticks_stop_data = mxGetData(mxGetField(arcondition, ic, "stop_data"));
+    
+    gettimeofday(&t2, NULL);
+    
+    mxArray *dLink;
+    int id, nd, has_tExp;
+    double *dLinkints; 
+    
+    int flag;
+    int is, js, ks, ids;
+    int nout, neq;
     
     /* printf("computing model #%i, condition #%i\n", im, ic); */
     
@@ -388,17 +339,41 @@ void *x_calc(void *threadarg) {
             t = t + tau;
         }
     }
-//     printf("model #%i, condition #%i: done\n", im+1, ic+1);
     
+    /* Free memory */
     N_VDestroy_Serial(x);
     N_VDestroy_Serial(x_lb);
     N_VDestroy_Serial(x_ub);
-    
     free(data);
     
     /* end of SSA */
     
+    gettimeofday(&t3, NULL);
+    
     /* printf("computing model #%i, condition #%i (done)\n", im, ic); */
+    
+    /* call y_calc */
+    if(ardata!=NULL){
+        dLink = mxGetField(arcondition, ic, "dLink");
+        dLinkints = mxGetData(dLink);
+        
+        nd = mxGetNumberOfElements(dLink);
+        
+        /* loop over data */
+        for(ids=0; ids<nd; ++ids){
+            id = ((int) dLinkints[ids]) - 1;
+            
+            y_calc(im, id, ardata, arcondition);
+        }
+    }
+    
+    gettimeofday(&t4, NULL);
+    timersub(&t2, &t1, &tdiff);
+    ticks_start[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
+    timersub(&t3, &t1, &tdiff);
+    ticks_stop_data[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
+    timersub(&t4, &t1, &tdiff);
+    ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
     
     if(parallel==1) {pthread_exit(NULL);}
 }
@@ -406,24 +381,8 @@ void *x_calc(void *threadarg) {
 
 
 /* calculate observations */
-void *y_calc(void *threadarg) {
-    struct thread_data_y *my_data = (struct thread_data_y *) threadarg;
-    
-    int im = my_data->im;
-    int id = my_data->id;
-    int dt = my_data->dt;
-    int rc;   
-    mxArray *ardata = my_data->ardata;
-    mxArray *arcondition = my_data->arcondition;
-    
-    /* wait for dependend x thread */
-/*    printf("computing model #%i, data #%i (waiting for %i)\n", im, id, dt);
-    if(parallel==1) {
-        rc = pthread_join(threads_x[dt], NULL);
-        if (rc){
-            mexErrMsgTxt("ERROR at pthread_join");
-        }
-    }*/
+void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
+    int rc;
     
     /* printf("computing model #%i, data #%i\n", im, id); */
     
@@ -530,8 +489,6 @@ void *y_calc(void *threadarg) {
     }
 
     /* printf("computing model #%i, data #%i (done)\n", im, id); */
-    
-    if(parallel==1) pthread_exit(NULL);
 }
 
 
