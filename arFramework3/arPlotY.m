@@ -32,6 +32,8 @@ labelfonttype = 'Arial';
 rowstocols = 0.5;
 overplot = 0.1;
 
+logplotting_xaxis = true;
+
 figcount = 1;
 for jm = 1:length(ar.model)
     ar.model(jm).chi2 = 0;
@@ -247,7 +249,8 @@ for jm = 1:length(ar.model)
                         Clines = myLineStyle(length(times)*length(jcs), ccount);
                         
                         for jy = 1:ny
-                            [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break] = getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink);
+                            [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break] = ...
+                                getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
                             
                             if(~fastPlotTmp)
                                 g = subplot(nrows,ncols,jy);
@@ -371,7 +374,7 @@ for jm = 1:length(ar.model)
                         if(~ar.model(jm).plot(jplot).doseresponse)
                             xlabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).tUnits{3}, ar.model(jm).data(jd).tUnits{2}));
                         else
-                            if(ar.model(jm).data(jd).logplotting == 1)
+                            if(logplotting_xaxis)
                                 xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
                             else
                                 xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
@@ -484,7 +487,7 @@ end
 
 
 
-function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break] = getDataDoseResponse(jm, jy, ds, ttime, dLink)
+function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break] = getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
 global ar
 
 zero_break = [];
@@ -493,7 +496,7 @@ ccount = 1;
 for jd = ds
 	qt = ar.model(jm).data(jd).tExp == ttime;
     for jt = find(qt')
-        if(ar.model(jm).data(jd).logplotting == 1)
+        if(logplotting_xaxis)
             t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(1).value)); %#ok<AGROW>
         else
             t(ccount,1) = str2double(ar.model(jm).data(jd).condition(1).value); %#ok<AGROW>
@@ -501,12 +504,12 @@ for jd = ds
         if(isinf(t(ccount,1)))
             doses = [];
             for jd2 = dLink
-                if(ar.model(jm).data(jd).logplotting == 1)
+                if(logplotting_xaxis)
                     if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(1).value))))
                         doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(1).value)); %#ok<AGROW>
                     end
                 else
-                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(1).value);
+                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(1).value); %#ok<AGROW>
                 end
             end
 			doses = unique(doses); %R2013a compatible
