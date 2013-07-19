@@ -34,6 +34,8 @@ rowstocols = 0.5; %0.7; 0.45;
 overplot = 0.1;
 linesize = 0.5;
 
+logplotting_xaxis = true;
+
 figcount = 1;
 figcountx = 1;
 figcountv = 1;
@@ -160,12 +162,13 @@ for jp=1:np
                                 
                                 jd = ds(1);
                                 Clines = myLineStyle(length(times)*length(jcs), ccount, weight);
-                                if(length(ar.model(jm).plot(jplot).dLink)==1)
+                                if(isempty(ar.model(jm).plot(jplot).condition))
                                     Clines{2} = jeti(jp,:);
                                 end
                                 
                                 for jy = 1:ny
-                                    [t, y, ystd, tExp, yExp, yExpStd] = getDataDoseResponse(jm, jy, ds, times(jt)); %#ok<ASGLU>
+                                    [t, y, ~, tExp, yExp, yExpStd, ~, ~, zero_break] = ...
+                                        getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
                                     
                                     if(jp==1)
                                         g = subplot(nrows,ncols,jy);
@@ -181,7 +184,7 @@ for jp=1:np
                                     end
                                     
                                     Clinesdata = Clines;
-                                    if(length(ar.model(jm).plot(jplot).dLink)==1)
+                                    if(isempty(ar.model(jm).plot(jplot).condition))
                                         Clinesdata{2} = [0 0 0];
                                     end
                                     if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
@@ -210,6 +213,9 @@ for jp=1:np
                                                 errorbar(g, tExp, yExp, yExpStd, markerstyle, Clinesdata{:});
                                             end
                                         end
+                                    end
+                                    if(jp==np && ~isempty(zero_break))
+                                        plot(g, [zero_break zero_break], ylim(g), 'k--');
                                     end
                                 end
                                 ccount = ccount + 1;
@@ -286,7 +292,8 @@ for jp=1:np
                         end
                     else
                         times = [];
-                        for jd = ar.model(jm).plot(jplot).dLink
+                        ds = ar.model(jm).plot(jplot).dLink;
+                        for jd = ds
 							times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
                             [ncols, nrows, nu, ~, iu, ix] = myColsAndRowsX(jm, rowstocols);
                         end
@@ -294,14 +301,14 @@ for jp=1:np
                         cclegendstyles = zeros(1,length(times));
                         for jt = 1:length(times)
                             Clines = myLineStyle(length(times), jt, weight);
-                            if(length(ar.model(jm).plot(jplot).dLink)==1)
+                            if(isempty(ar.model(jm).plot(jplot).condition))
                                 Clines{2} = jeti(jp,:);
                             end
                             
                             countu = 0;
                             for ju = iu
                                 countu = countu + 1;
-                                [t, u] = getDataDoseResponseU(jm, jplot, ju, times(jt));
+                                [t, u, ~, ~, zero_break] = getDataDoseResponseU(jm, ju, ds, times(jt));
                                 if(jp==1)
                                     g = subplot(nrows,ncols,countu);
                                     ar.model(jm).plot(jplot).gu(ju) = g;
@@ -313,11 +320,14 @@ for jp=1:np
                                 cclegendstyles(ccount) = ltmp;
                                 ar.model(jm).data(jd).plot.u(ju,jt) = ltmp;
                                 hold(g, 'on');
+                                if(jp==np && ~isempty(zero_break))
+                                    plot(g, [zero_break zero_break], ylim(g), 'k--');
+                                end
                             end
                             countx = 0;
                             for jx = ix
                                 countx = countx + 1;
-                                [t, x] = getDataDoseResponseX(jm, jplot, jx, times(jt));
+                                [t, x, ~, ~, zero_break] = getDataDoseResponseX(jm, jx, ds, times(jt));
                                 if(jp==1)
                                     g = subplot(nrows,ncols,countx+nu);
                                     ar.model(jm).plot(jplot).gx(jx) = g;
@@ -329,6 +339,9 @@ for jp=1:np
                                 cclegendstyles(ccount) = ltmp;
                                 ar.model(jm).data(jd).plot.x(jx,jt) = ltmp;
                                 hold(g, 'on');
+                                if(jp==np && ~isempty(zero_break))
+                                    plot(g, [zero_break zero_break], ylim(g), 'k--');
+                                end
                             end
                         end
                     end
@@ -382,7 +395,8 @@ for jp=1:np
                         end
                     else
                         times = [];
-                        for jd = ar.model(jm).plot(jplot).dLink
+                        ds = ar.model(jm).plot(jplot).dLink;
+                        for jd = ds
 							times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
 							[ncols, nrows, iv] = myColsAndRowsV(jm, rowstocols);
                         end
@@ -390,14 +404,14 @@ for jp=1:np
                         cclegendstyles = zeros(1,length(times));
                         for jt = 1:length(times)
                             Clines = myLineStyle(length(times), jt, weight);
-                            if(length(ar.model(jm).plot(jplot).dLink)==1)
+                            if(isempty(ar.model(jm).plot(jplot).condition))
                                 Clines{2} = jeti(jp,:);
                             end
                             
                             countv = 0;
                             for jv = iv
                                 countv = countv + 1;
-                                [t, v] = getDataDoseResponseV(jm, jv, ds, times(jt));
+                                [t, v, ~, ~, zero_break] = getDataDoseResponseV(jm, jv, ds, times(jt));
                                 if(jp==1)
                                     g = subplot(nrows,ncols,countv);
                                     ar.model(jm).plot(jplot).gv(jv) = g;
@@ -409,6 +423,9 @@ for jp=1:np
                                 cclegendstyles(ccount) = ltmp;
                                 ar.model(jm).data(jd).plot.v(jv,jt) = ltmp;
                                 hold(g, 'on');
+                                if(jp==np && ~isempty(zero_break))
+                                    plot(g, [zero_break zero_break], ylim(g), 'k--');
+                                end
                             end
                         end
                     end
@@ -624,14 +641,40 @@ else
 end
 
 
-function [t, y, ystd, tExp, yExp, yExpStd] = getDataDoseResponse(jm, jy, ds, ttime)
+function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break] = getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
 global ar
+
+zero_break = [];
 
 ccount = 1;
 for jd = ds
-    qt = ar.model(jm).data(jd).tExp == ttime;
+	qt = ar.model(jm).data(jd).tExp == ttime;
     for jt = find(qt')
-        t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(1).value)); %#ok<AGROW>
+        if(logplotting_xaxis)
+            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(1).value)); %#ok<AGROW>
+        else
+            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(1).value); %#ok<AGROW>
+        end
+        if(isinf(t(ccount,1)))
+            doses = [];
+            for jd2 = dLink
+                if(logplotting_xaxis)
+                    if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(1).value))))
+                        doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(1).value)); %#ok<AGROW>
+                    end
+                else
+                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(1).value); %#ok<AGROW>
+                end
+            end
+			doses = unique(doses); %R2013a compatible
+            if(length(doses)>1)
+                t(ccount,1) = doses(1) - (doses(2)-doses(1)); %#ok<AGROW>
+                zero_break = (t(ccount,1)+doses(1))/2;
+            else
+                t(ccount,1) = doses(1) - 0.1; %#ok<AGROW>
+                zero_break = (t(ccount,1)+doses(1))/2;
+            end
+        end
         tExp(ccount,1) = t(ccount,1); %#ok<AGROW>
         
         [tdiffmin, jtfine] = min(abs(ar.model(jm).data(jd).tFine-ar.model(jm).data(jd).tExp(jt))); %#ok<ASGLU>
@@ -644,6 +687,14 @@ for jd = ds
         else
             yExpStd(ccount,1) = ar.model(jm).data(jd).ystdExpSimu(jt,jy); %#ok<AGROW>
         end
+        if(isfield(ar.model(jm).data(jd), 'yExpUB'))
+            lb(ccount,1) = ar.model(jm).data(jd).yFineLB(jtfine,jy); %#ok<AGROW>
+            ub(ccount,1) = ar.model(jm).data(jd).yFineUB(jtfine,jy); %#ok<AGROW>
+        else
+            lb = [];
+            ub = [];
+        end
+        
         ccount = ccount + 1;
     end
 end
@@ -677,36 +728,92 @@ else
     v = ar.model(jm).condition(jc).vFineSimu;
 end
 
-function [t, u] = getDataDoseResponseU(jm, jplot, ju, ttime)
+function [t, u, lb, ub, zero_break] = getDataDoseResponseU(jm, ju, ds, ttime)
 global ar
 
+zero_break = [];
+
 ccount = 1;
-for jd = ar.model(jm).plot(jplot).dLink
+for jd = ds
     jc = ar.model(jm).data(jd).cLink;
     qt = ar.model(jm).condition(jc).tExp == ttime;
     for jt = find(qt')
         t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(1).value)); %#ok<AGROW>
+        if(isinf(t(ccount,1)))
+            doses = [];
+            for jd2 = ds
+                if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(1).value))))
+                    doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(1).value)); %#ok<AGROW>
+                end
+            end
+            doses = sort(doses);
+            if(length(doses)>1)
+                t(ccount,1) = doses(1) - (doses(2)-doses(1)); %#ok<AGROW>
+                zero_break = (t(ccount,1)+doses(1))/2;
+            else
+                t(ccount,1) = doses(1) - 0.1; %#ok<AGROW>
+                zero_break = (t(ccount,1)+doses(1))/2;
+            end
+        end
         u(ccount,1) = ar.model(jm).condition(jc).uExpSimu(jt,ju); %#ok<AGROW>
+        
+        if(isfield(ar.model(jm).condition(jc), 'uExpUB'))
+            lb(ccount,1) = ar.model(jm).condition(jc).uExpLB(jt,ju); %#ok<AGROW>
+            ub(ccount,1) = ar.model(jm).condition(jc).uExpUB(jt,ju); %#ok<AGROW>
+        else
+            lb = [];
+            ub = [];
+        end
+        
         ccount = ccount + 1;
     end
 end
 
 
-function [t, x] = getDataDoseResponseX(jm, jplot, jx, ttime)
+function [t, x, lb, ub, zero_break] = getDataDoseResponseX(jm, jx, ds, ttime)
 global ar
 
+zero_break = [];
+
 ccount = 1;
-for jd = ar.model(jm).plot(jplot).dLink
+for jd = ds
     jc = ar.model(jm).data(jd).cLink;
     qt = ar.model(jm).condition(jc).tExp == ttime;
     for jt = find(qt')
         t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(1).value)); %#ok<AGROW>
+        if(isinf(t(ccount,1)))
+            doses = [];
+            for jd2 = ds
+                if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(1).value))))
+                    doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(1).value)); %#ok<AGROW>
+                end
+            end
+            
+			doses = unique(doses); %R2013a compatible
+            
+            if(length(doses)>1)
+                t(ccount,1) = doses(1) - (doses(2)-doses(1)); %#ok<AGROW>
+                zero_break = (t(ccount,1)+doses(1))/2;
+            else
+                t(ccount,1) = doses(1) - 0.1; %#ok<AGROW>
+                zero_break = (t(ccount,1)+doses(1))/2;
+            end
+        end
         x(ccount,1) = ar.model(jm).condition(jc).xExpSimu(jt,jx); %#ok<AGROW>
+        
+        if(isfield(ar.model(jm).condition(jc), 'xExpUB'))
+            lb(ccount,1) = ar.model(jm).condition(jc).xExpLB(jt,jx); %#ok<AGROW>
+            ub(ccount,1) = ar.model(jm).condition(jc).xExpUB(jt,jx); %#ok<AGROW>
+        else
+            lb = [];
+            ub = [];
+        end
+        
         ccount = ccount + 1;
     end
 end
 
-function [t, v] = getDataDoseResponseV(jm, jv, ds, ttime)
+function [t, v, lb, ub, zero_break] = getDataDoseResponseV(jm, jv, ds, ttime)
 global ar
 
 ccount = 1;
@@ -715,7 +822,27 @@ for jd = ds
     qt = ar.model(jm).condition(jc).tExp == ttime;
     for jt = find(qt')
         t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(1).value)); %#ok<AGROW>
-        v(ccount,1) = ar.model(jm).condition(jc).vExpSimu(jt,jv); %#ok<AGROW>        
+        if(isinf(t(ccount,1)))
+            doses = [];
+            for jd2 = ds
+                if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(1).value))))
+                    doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(1).value)); %#ok<AGROW>
+                end
+            end
+			doses = unique(doses); %R2013a compatible
+            t(ccount,1) = doses(1) - (doses(2)-doses(1)); %#ok<AGROW>
+            zero_break = (t(ccount,1)+doses(1))/2;
+        end
+        v(ccount,1) = ar.model(jm).condition(jc).vExpSimu(jt,jv); %#ok<AGROW>
+        
+        if(isfield(ar.model(jm).condition(jc), 'vExpUB'))
+            lb(ccount,1) = ar.model(jm).condition(jc).vExpLB(jt,jv); %#ok<AGROW>
+            ub(ccount,1) = ar.model(jm).condition(jc).vExpUB(jt,jv); %#ok<AGROW>
+        else
+            lb = [];
+            ub = [];
+        end
+        
         ccount = ccount + 1;
     end
 end
