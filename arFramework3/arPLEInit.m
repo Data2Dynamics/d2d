@@ -88,6 +88,8 @@ function chi2 = arPLEPrior(jk)
 global ar
 if(ar.type(jk)==1)
     chi2 = ((ar.mean(jk)-ar.p(jk))./ar.std(jk))^2;
+elseif(ar.type(jk)==3)
+    chi2 = abs((ar.mean(jk)-ar.p(jk))./ar.std(jk));
 else
     chi2 = 0;
 end

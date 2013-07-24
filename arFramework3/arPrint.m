@@ -71,6 +71,8 @@ end
             str = sprintf('normal(%g,%g^2)', ar.mean(j), ar.std(j));
         elseif(ar.type(j) == 2)
             str = sprintf('uniform(%g,%g) with soft bounds', ar.lb(j), ar.ub(j));
+        elseif(ar.type(j) == 3)
+            str = sprintf('L1(%g,%g)', ar.mean(j), ar.std(j));
         end
     end
 end
