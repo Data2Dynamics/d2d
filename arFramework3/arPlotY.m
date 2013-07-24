@@ -654,15 +654,5 @@ set(g, 'FontName', labelfonttype);
 function [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols)
 global ar
 ny = size(ar.model(jm).data(jd).y, 2);
-[nrows, ncols] = NtoColsAndRows(ny, rowstocols);
-
-
-
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
-
-
-
-
+[nrows, ncols] = arNtoColsAndRows(ny, rowstocols);
 
