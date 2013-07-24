@@ -1,4 +1,11 @@
 % load model struct and last ple results
+%
+% WARNING: 
+% for some reason, after 
+% > ar = arLoadFilename(filename)
+% another
+% > global ar
+% has to be executed. 
 
 function [ar, pleGlobals] = arLoadFilename(filename)
 
