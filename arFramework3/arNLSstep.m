@@ -107,7 +107,7 @@ else % own step implementation
         
         % solve reduced subproblem
         [dp_red, normdpmu_type, solver_calls_tmp] = getDP(p(~qred), lb(~qred), ub(~qred), ...
-            gred, Hred, sresred, mu, dpmem(~qred), method, qred);
+            gred, Hred, sresred, mu, dpmem, method, qred);
         solver_calls = solver_calls + solver_calls_tmp;
         
         dp(:) = 0;
@@ -161,6 +161,11 @@ if(mu==0)
 else
     solver_calls_tmp = 1;
 end
+
+if(~isempty(dpmem))
+    dpmem = dpmem(~qred);
+end
+    
 
 switch method
     case 0 % trust region solution
@@ -590,15 +595,15 @@ switch method
         end
         
         % additional directions
-        tmpp = randn(1,length(v1));
-        Z(:,end+1) = tmpp/norm(tmpp);
-%         if(~isempty(dpmem))
-%             tmpp = DM*dpmem';
-%             Z(:,end+1) = tmpp/norm(tmpp);
-%         end
+%         tmpp = randn(1,length(v1));
+%         Z(:,end+1) = tmpp/norm(tmpp);
+        if(~isempty(dpmem))
+            tmpp = DM*dpmem';
+            Z(:,end+1) = tmpp/norm(tmpp);
+        end
 %         tmpp = transpose(pinv(H)*g');
 %         Z(:,end+1) = tmpp/norm(tmpp);
-%         Z = mgrscho(Z);
+        Z = mgrscho(Z);
         
         % reduce to subspace
         W = DM*Z;        
