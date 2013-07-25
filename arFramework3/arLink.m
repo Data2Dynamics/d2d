@@ -229,11 +229,19 @@ ar.pLabel = {};
 for m = 1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d = 1:length(ar.model(m).data)
-			ar.pLabel = union(ar.pLabel, ar.model(m).data(d).p); %R2013a compatible
+            if(str2double(matVer.Version)>=8.1)
+                ar.pLabel = union(ar.pLabel, ar.model(m).data(d).p,'legacy'); %R2013a compatible
+            else
+                ar.pLabel = union(ar.pLabel, ar.model(m).data(d).p);
+            end
         end
     end
     for c = 1:length(ar.model(m).condition)
-		ar.pLabel = union(ar.pLabel, ar.model(m).condition(c).p); %R2013a compatible                  
+        if(str2double(matVer.Version)>=8.1)
+            ar.pLabel = union(ar.pLabel, ar.model(m).condition(c).p,'legacy'); %R2013a compatible                  
+        else
+            ar.pLabel = union(ar.pLabel, ar.model(m).condition(c).p);
+        end
     end
 end
 ar.qFit = ones(size(ar.pLabel));
