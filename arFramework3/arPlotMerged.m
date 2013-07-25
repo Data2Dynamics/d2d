@@ -14,6 +14,8 @@ if(~exist('saveToFile','var'))
 	saveToFile = false;
 end
 
+ar.model.qPlotYs(:) = 1;
+
 %% log
 clc
 
@@ -30,6 +32,13 @@ ylink = cell(size(ylabels));
 ylink{6} = 12; % pAkt_au
 ylink{8} = 22; % pERK_au
 ylink{10} = 21; % pMEK_au
+ylink{11} = 1; % pMet_au
+ylink{12} = 18; % pRaf_au
+ylink{5} = 25; % double_RSK_au
+ylink{13} = 24; % single_RSK_au
+standcond = 'HGF_input=100';
+
+
 
 % ylink{4} = 18;
 % ylink{5} = 17;
@@ -109,7 +118,7 @@ for jm=1:length(ar.model);
                     end
                 end
             else
-                tmpstr = 'standard';
+                tmpstr = standcond;
             end
             fprintf('\tcondition #%i, %s\n\n', jc, tmpstr);
             
@@ -135,7 +144,7 @@ for jm=1:length(ar.model);
             hold(g, 'on');
             box(g, 'on');
             
-            if(~isempty(time))
+            if(~isempty(ctime{jc}))
                 tFine = ar.model.condition(jc).tFine;
                 xFine = ar.model.condition(jc).xFineSimu(:,ylink{j});
                 plot(g, ar.model.condition(jc).tFine, ar.model.condition(jc).xFineSimu(:,ylink{j}), ...
