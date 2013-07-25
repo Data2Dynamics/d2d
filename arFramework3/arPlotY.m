@@ -253,7 +253,14 @@ for jm = 1:length(ar.model)
                         for jy = 1:ny
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break] = ...
                                 getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
-                            
+                            if(length(t)==1)
+                                t = [t-0.1; t+0.1];
+                                y = [y; y]; %#ok<AGROW>
+                                ystd = [ystd; ystd]; %#ok<AGROW>
+                                lb = [lb; lb]; %#ok<AGROW>
+                                ub = [ub; ub]; %#ok<AGROW>
+                            end
+
                             if(~fastPlotTmp)
                                 g = subplot(nrows,ncols,jy);
                                 ar.model(jm).plot(jplot).gy(jy) = g;
@@ -366,6 +373,11 @@ for jm = 1:length(ar.model)
             end
             
             % axis & titles
+            for jc = 1:length(ar.model(jm).data(jd).condition)
+                if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
+                    jcondi = jc;
+                end
+            end
             for jy = 1:ny
                 g = ar.model(jm).plot(jplot).gy(jy);
                 if(~fastPlotTmp)
@@ -377,9 +389,9 @@ for jm = 1:length(ar.model)
                             xlabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).tUnits{3}, ar.model(jm).data(jd).tUnits{2}));
                         else
                             if(logplotting_xaxis)
-                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
+                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
                             else
-                                xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
+                                xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
                             end
                         end
                     end
@@ -497,21 +509,26 @@ zero_break = [];
 ccount = 1;
 for jd = ds
 	qt = ar.model(jm).data(jd).tExp == ttime;
+    for jc = 1:length(ar.model(jm).data(jd).condition)
+        if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
+            jcondi = jc;
+        end
+    end
     for jt = find(qt')
         if(logplotting_xaxis)
-            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(1).value)); %#ok<AGROW>
+            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
         else
-            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(1).value); %#ok<AGROW>
+            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(jcondi).value); %#ok<AGROW>
         end
         if(isinf(t(ccount,1)))
             doses = [];
             for jd2 = dLink
                 if(logplotting_xaxis)
-                    if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(1).value))))
-                        doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(1).value)); %#ok<AGROW>
+                    if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
+                        doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
                     end
                 else
-                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(1).value); %#ok<AGROW>
+                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(jcondi).value); %#ok<AGROW>
                 end
             end
 			doses = unique(doses); %R2013a compatible
