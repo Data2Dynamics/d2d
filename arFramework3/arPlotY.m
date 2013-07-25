@@ -145,8 +145,10 @@ for jm = 1:length(ar.model)
                                 tmpx = t;
                                 tmpy = y;
                                 qfinite = ~isinf(tmpy);
-                                ar.model(jm).data(jd).plot.y(jy) = plot(g, tmpx(qfinite), tmpy(qfinite), Clines{:});
-                                cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
+                                if(sum(qfinite)>0)
+                                    ar.model(jm).data(jd).plot.y(jy) = plot(g, tmpx(qfinite), tmpy(qfinite), Clines{:});
+                                    cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
+                                end
                                 hold(g, 'on');
                                 if(ar.config.ploterrors ~= 1)
                                     tmpx = [t(:); flipud(t(:))];
