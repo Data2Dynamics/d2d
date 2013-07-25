@@ -1,0 +1,4 @@
+syntax: glob
+arFramework3/arInitUser.m
+arFramework3/sundials-2.4.0/
+arFramework3/sundials-2.5.0/
