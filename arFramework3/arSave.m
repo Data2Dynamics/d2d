@@ -41,7 +41,7 @@ if(isempty(ar.config.savepath))
         end
     end
     
-    save([ar.config.savepath '/workspace.mat'],'-v7.3');
+    save([ar.config.savepath '/workspace.mat']);
     fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
 else
     if(exist('name','var'))

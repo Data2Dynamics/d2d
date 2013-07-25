@@ -253,7 +253,7 @@ for jm = 1:length(ar.model)
                         for jy = 1:ny
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break] = ...
                                 getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
-                            if(length(t)==1)
+                            if(length(unique(t))==1)
                                 t = [t-0.1; t+0.1];
                                 y = [y; y]; %#ok<AGROW>
                                 ystd = [ystd; ystd]; %#ok<AGROW>
