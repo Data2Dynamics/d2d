@@ -14,7 +14,10 @@ if(~exist('saveToFile','var'))
 	saveToFile = false;
 end
 
-ar.model.qPlotYs(:) = 1;
+ar.model.qPlotYs(:) = 1; %Adjust, if only a subset of the data setup should be plotted
+%ar.model.qPlotYs([110]) = 0;
+
+standcond = 'HGF_input=100'; % Insert standard condition
 
 %% log
 clc
@@ -32,12 +35,14 @@ ylink = cell(size(ylabels));
 ylink{6} = 12; % pAkt_au
 ylink{8} = 22; % pERK_au
 ylink{10} = 21; % pMEK_au
-ylink{11} = 1; % pMet_au
-ylink{12} = 18; % pRaf_au
-ylink{5} = 25; % double_RSK_au
-ylink{13} = 24; % single_RSK_au
-standcond = 'HGF_input=100';
+%ylink{11} = 1; % pMet_au
+%ylink{12} = 18; % pRaf_au
+%ylink{5} = 25; % double_RSK_au
+%ylink{13} = 24; % single_RSK_au
 
+%ylink{2} = 12; % pAkt_au_only_inhib
+%ylink{3} = 22; % pERK_au_only_inhib
+%ylink{4} = 21; % pMEK_au_only_inhib
 
 
 % ylink{4} = 18;
@@ -182,6 +187,7 @@ for jm=1:length(ar.model);
         figcount = figcount + 1;
     end
 end
+ar.model.qPlotYs(:) = 0;
 
 
 
