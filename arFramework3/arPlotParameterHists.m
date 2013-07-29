@@ -12,7 +12,7 @@ if(~exist('nbins','var'))
     nbins = 50;
 end
 
-figure(1)
+figure(1); clf;
 
 % constants
 labelfontsize = 12;

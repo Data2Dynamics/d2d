@@ -21,10 +21,11 @@ ar.chi2sconstr_sorted = ar.chi2sconstr(isorted);
 ar.ps_sorted = ar.ps(isorted,:);
 
 chi2min = min([chi2s ar.chi2fit]);
-chi2minconstr = min([ar.chi2sconstr_sorted ar.chi2constr]);
 ar.chi2s_start_sorted = ar.chi2s_start(isorted);
 ar.ps_start_sorted = ar.ps_start(isorted,:);
 optim_krit = ar.optim_crit(isorted);
+
+dchi2 = chi2inv(0.95, 1);
 
 figure(1)
 
@@ -33,6 +34,7 @@ hold on
 h = semilogy(find(exitflag>0), chi2s(exitflag>0) - chi2min + 1, 'o');
 h2 = semilogy(ar.chi2s_start_sorted - chi2min + 1, 'x--','Color', [.6 .6 .6]);
 plot(xlim, [1 1], 'k--');
+plot(xlim, [dchi2 dchi2], 'k:');
 hold off
 if(ar.config.fiterrors == 1)    
     ylabel('-2*log(L) + const');
@@ -62,7 +64,7 @@ semilogy(optim_krit, 'o--');
 xlabel('run index (sorted by likelihood)');
 ylabel('first order optimality criterion');
 
-if(~isempty(ar.chi2sconstr_sorted))
+if(~isempty(ar.chi2sconstr_sorted) && ar.nconstr>0)
     figure(3)
     
     semilogy(ar.chi2sconstr_sorted, '--');
@@ -74,7 +76,7 @@ if(~isempty(ar.chi2sconstr_sorted))
     xlim([0 length(chi2s)+1])
     title(sprintf('%i fits in total, %i without errors, %i converged', ...
         length(exitflag), sum(~isnan(chi2s)) ,sum(exitflag>0)));
-    legend([h], 'converged fits', 'Location','Best');
+    legend(h, 'converged fits', 'Location','Best');
 end
 
 %% scatter plots
