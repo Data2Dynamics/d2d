@@ -308,7 +308,6 @@ else
 end
 ar.model(m).plot(end).doseresponse = ar.model(m).data(d).doseresponse;
 ar.model(m).plot(end).dLink = d;
-ar.model(m).plot(end).dColor = 1;
 ar.model(m).plot(end).ny = length(ar.model(m).data(d).y);
 ar.model(m).plot(end).condition = {};
 jplot = length(ar.model(m).plot);
@@ -425,7 +424,6 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
                     d = d + 1;
                     jplot = jplot + 1;
                     ar.model(m).plot(jplot).dLink = d;
-                    ar.model(m).plot(jplot).dColor = 1;
                 end
             else
                 fprintf('local random effect #%i: no matching data, skipped\n', j);
@@ -543,7 +541,6 @@ if(sum(qcond) > 0)
         if(j < size(condis,1))
             d = d + 1;
             ar.model(m).plot(jplot).dLink(end+1) = d;
-            ar.model(m).plot(jplot).dColor(end+1) = ar.model(m).plot(jplot).dColor(end)+1;
         end
     end
 else
@@ -608,7 +605,6 @@ for j=1:nints
     if(j<nints)
         ar.model(m).data(end+1) = ar.model(m).data(d);
         ar.model(m).plot(jplot).dLink(end+1) = d+1;
-        ar.model(m).plot(jplot).dColor(end+1) = ar.model(m).plot(jplot).dColor(end);
     end
     
     if(j>1)
