@@ -44,8 +44,26 @@ else
     end
 end
 
+% condition labels
+conditions1 = cell(1,length(ar.model(jm).plot(index1).dLink));
+for j=1:length(ar.model(jm).plot(index1).dLink)
+    if(isempty(ar.model(jm).plot(index1).condition) || isempty(ar.model(jm).plot(index1).condition{j}))
+        conditions1{j} = label_name1;
+    else
+        conditions1{j} = [ar.model(jm).plot(index1).condition{j} ' - ' label_name1];
+    end
+end
+conditions2 = cell(1,length(ar.model(jm).plot(index2).dLink));
+for j=1:length(ar.model(jm).plot(index2).dLink)
+    if(isempty(ar.model(jm).plot(index2).condition) || isempty(ar.model(jm).plot(index2).condition{j}))
+        conditions2{j} = label_name2;
+    else
+        conditions2{j} = [ar.model(jm).plot(index2).condition{j} ' - ' label_name2];
+    end
+end
+
 ar.model(jm).plot(index1).dLink = [ar.model(jm).plot(index1).dLink ar.model(jm).plot(index2).dLink];
-ar.model(jm).plot(index1).condition = {label_name1 label_name2};
+ar.model(jm).plot(index1).condition = [conditions1 conditions2];
 ar.model(jm).plot(index1).name = [ar.model(jm).plot(index1).name '_' ar.model(jm).plot(index2).name];
 
 ar.model(jm).plot = ar.model(jm).plot([1:(index2-1) (index2+1:length(ar.model(jm).plot))]);
