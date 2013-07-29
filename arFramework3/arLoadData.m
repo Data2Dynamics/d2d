@@ -7,7 +7,7 @@
 % d                 target position for data (deprecated!!!)
 % extension         data file name-extension: 'xls', 'csv'          ['xls']
 %                   'none' = don't load data                           
-% removeEmptyObs     remove observation without data                [false]
+% removeEmptyObs    remove observation without data                [false]
 %
 %
 % In der ersten Spalte:
@@ -58,7 +58,7 @@ else
     d = 1;
 end
 
-if(~exist('extension','var'))
+if(~exist('extension','var') || isempty(extension))
     extension = 'xls';
 end
 if(~exist('removeEmptyObs','var'))
@@ -147,31 +147,49 @@ varlist = cellfun(@symvar, ar.model(m).data(d).fu, 'UniformOutput', false);
 ar.model(m).data(d).pu = setdiff(vertcat(varlist{:}), {ar.model(m).t, ''}); %R2013a compatible
 
 % OBSERVABLES
-ar.model(m).data(d).y = {};
-ar.model(m).data(d).yNames = {};
-ar.model(m).data(d).yUnits = {};
-ar.model(m).data(d).normalize = [];
-ar.model(m).data(d).logfitting = [];
-ar.model(m).data(d).logplotting = [];
-ar.model(m).data(d).fy = {};
+if(isfield(ar.model(m),'y'))
+    ar.model(m).data(d).y = ar.model(m).y;
+    ar.model(m).data(d).yNames = ar.model(m).yNames;
+    ar.model(m).data(d).yUnits = ar.model(m).yUnits;
+    ar.model(m).data(d).normalize = ar.model(m).normalize;
+    ar.model(m).data(d).logfitting = ar.model(m).logfitting;
+    ar.model(m).data(d).logplotting = ar.model(m).logplotting;
+    ar.model(m).data(d).fy = strrep(ar.model(m).fy, '_filename', ['_' ar.model(m).data(d).name]);
+else 
+    ar.model(m).data(d).y = {};
+    ar.model(m).data(d).yNames = {};
+    ar.model(m).data(d).yUnits = {};
+    ar.model(m).data(d).normalize = [];
+    ar.model(m).data(d).logfitting = [];
+    ar.model(m).data(d).logplotting = [];
+    ar.model(m).data(d).fy = {};
+end
 C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'ERRORS'))
-    ar.model(m).data(d).y(end+1) = C{1};
-    ar.model(m).data(d).yUnits(end+1,1) = C{2};
-    ar.model(m).data(d).yUnits(end,2) = C{3};
-    ar.model(m).data(d).yUnits(end,3) = C{4};
-    ar.model(m).data(d).normalize(end+1) = C{5};
-    ar.model(m).data(d).logfitting(end+1) = C{6};
-    ar.model(m).data(d).logplotting(end+1) = C{6};
-    ar.model(m).data(d).fy(end+1,1) = C{7};
-    if(~isempty(cell2mat(C{8})))
-        ar.model(m).data(d).yNames(end+1) = C{8};
+    qyindex = ismember(ar.model(m).data(d).y, C{1});
+    if(sum(qyindex)==1)
+        yindex = find(qyindex);
+    elseif(sum(qyindex)==0)
+        yindex = length(ar.model(m).data(d).y) + 1;
     else
-        ar.model(m).data(d).yNames(end+1) = ar.model(m).data(d).y(end);
+        error('multiple matches for %s', cell2mat(C{1}))
+    end
+    ar.model(m).data(d).y(yindex) = C{1};
+    ar.model(m).data(d).yUnits(yindex,1) = C{2};
+    ar.model(m).data(d).yUnits(yindex,2) = C{3};
+    ar.model(m).data(d).yUnits(yindex,3) = C{4};
+    ar.model(m).data(d).normalize(yindex) = C{5};
+    ar.model(m).data(d).logfitting(yindex) = C{6};
+    ar.model(m).data(d).logplotting(yindex) = C{6};
+    ar.model(m).data(d).fy(yindex,1) = C{7};
+    if(~isempty(cell2mat(C{8})))
+        ar.model(m).data(d).yNames(yindex) = C{8};
+    else
+        ar.model(m).data(d).yNames(yindex) = ar.model(m).data(d).y(yindex);
     end
     C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
-    if(sum(ismember(ar.model(m).x, ar.model(m).data(d).y{end}))>0) %R2013a compatible
-        error('%s already defined in STATES', ar.model(m).data(d).y{end});
+    if(sum(ismember(ar.model(m).x, ar.model(m).data(d).y{yindex}))>0) %R2013a compatible
+        error('%s already defined in STATES', ar.model(m).data(d).y{yindex});
     end
 end
 
@@ -184,28 +202,33 @@ for j=1:length(ar.model(m).data(d).fy)
 end
 
 % ERRORS
-ar.model(m).data(d).fystd = cell(size(ar.model(m).data(d).fy));
-errors_assigned = false(size(ar.model(m).data(d).fy));
+if(isfield(ar.model(m),'y'))
+    ar.model(m).data(d).fystd = strrep(ar.model(m).fystd, '_filename', ['_' ar.model(m).data(d).name]);
+else
+    ar.model(m).data(d).fystd = cell(size(ar.model(m).data(d).fy));
+end
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INVARIANTS'))
-    qy = ismember(ar.model(m).data(d).y, C{1}); %R2013a compatible
-    if(sum(qy)~=1)
-        error('unknown observable %s', cell2mat(C{1}));
+    qyindex = ismember(ar.model(m).data(d).y, C{1});
+    if(sum(qyindex)==1)
+        yindex = find(qyindex);
+    elseif(sum(qyindex)==0)
+        yindex = length(ar.model(m).data(d).y) + 1;
+    else
+        error('multiple matches for %s', cell2mat(C{1}))
     end
-    ar.model(m).data(d).fystd(qy) = C{2};
-    errors_assigned(qy) = true;
+    ar.model(m).data(d).fystd(yindex) = C{2};
     C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
-if(length(ar.model(m).data(d).fystd)<length(ar.model(m).data(d).fy) || sum(~errors_assigned) > 0)
-    error('some observables do not have an defined error model');
+if(length(ar.model(m).data(d).fystd)<length(ar.model(m).data(d).fy))
+    error('some observables do not have an error model defined');
 end
 
 % error parameters
 varlist = cellfun(@symvar, ar.model(m).data(d).fystd, 'UniformOutput', false);
 ar.model(m).data(d).pystd = setdiff(vertcat(varlist{:}), union(union(union(ar.model(m).x, ar.model(m).u), ... %R2013a compatible
     ar.model(m).data(d).y), ar.model(m).t));
-    
     
 for j=1:length(ar.model(m).data(d).fystd)
     varlist = symvar(ar.model(m).data(d).fystd{j});

@@ -349,9 +349,6 @@ varlist = cellfun(@symvar, ar.model(m).fv, 'UniformOutput', false);
 ar.model(m).px = union(setdiff(vertcat(varlist{:}), union(ar.model(m).x, ar.model(m).u)), ... %R2013a compatible
     ar.model(m).px);
 
-
-
-
 % setup rhs
 C = cell(size(ar.model(m).N));
 if(length(ar.model(m).c)>1)    
@@ -397,7 +394,7 @@ end
 % INVARIANTS
 ar.model(m).fxeq = {};
 C = textscan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
-while(~strcmp(C{1},'CONDITIONS'))
+while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'OBSERVABLES'))
     if(~strcmp(C{1},''))
         ar.model(m).fxeq(end+1) = C{1};
     end
@@ -411,7 +408,53 @@ ar.model(m).pxeq = setdiff(vertcat(varlist{:}), union(ar.model(m).x, union(ar.mo
 % collect parameters needed for ODE
 ar.model(m).p = union(ar.model(m).px, union(ar.model(m).px0, union(ar.model(m).pc, union(ar.model(m).pxeq, ar.model(m).pu)))); %R2013a compatible
 
-
+if(strcmp(C{1},'OBSERVABLES'))
+    
+    % OBSERVABLES
+    ar.model(m).y = {};
+    ar.model(m).yNames = {};
+    ar.model(m).yUnits = {};
+    ar.model(m).normalize = [];
+    ar.model(m).logfitting = [];
+    ar.model(m).logplotting = [];
+    ar.model(m).fy = {};
+    C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+    while(~strcmp(C{1},'ERRORS'))
+        ar.model(m).y(end+1) = C{1};
+        ar.model(m).yUnits(end+1,1) = C{2};
+        ar.model(m).yUnits(end,2) = C{3};
+        ar.model(m).yUnits(end,3) = C{4};
+        ar.model(m).normalize(end+1) = C{5};
+        ar.model(m).logfitting(end+1) = C{6};
+        ar.model(m).logplotting(end+1) = C{6};
+        ar.model(m).fy(end+1,1) = C{7};
+        if(~isempty(cell2mat(C{8})))
+            ar.model(m).yNames(end+1) = C{8};
+        else
+            ar.model(m).yNames(end+1) = ar.model(m).y(end);
+        end
+        C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+        if(sum(ismember(ar.model(m).x, ar.model(m).y{end}))>0) %R2013a compatible
+            error('%s already defined in STATES', ar.model(m).y{end});
+        end
+    end
+    
+    % ERRORS
+    ar.model(m).fystd = cell(size(ar.model(m).fy));
+    C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    while(~strcmp(C{1},'CONDITIONS'))
+        qy = ismember(ar.model(m).y, C{1}); %R2013a compatible
+        if(sum(qy)~=1)
+            error('unknown observable %s', cell2mat(C{1}));
+        end
+        ar.model(m).fystd(qy) = C{2};
+        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    end
+    
+    if(length(ar.model(m).fystd)<length(ar.model(m).fy))
+        error('some observables do not have an error model defined');
+    end
+end
 
 % CONDITIONS
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
@@ -430,7 +473,6 @@ end
 % extra conditional parameters
 varlist = cellfun(@symvar, ar.model(m).fp, 'UniformOutput', false);
 ar.model(m).pcond = setdiff(setdiff(setdiff(vertcat(varlist{:}), ar.model(m).p), ar.model(m).x), ar.model(m).u); %R2013a compatible
-
 
 % PARAMETERS
 if(~isfield(ar, 'pExternLabels'))
