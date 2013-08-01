@@ -27,12 +27,12 @@ printHead;
 for j=1:length(ar.p)
     printPar(j, ar.qCloseToBound(j));
 	if(mod(j,10)==0 && j<length(ar.p))
-		fprintf(['     |   | ' extendstr('', maxlabellength) ' |                                |              |         |      \n']);
+		fprintf(['     |   | ' arExtendStr('', maxlabellength) ' |                                |              |         |      \n']);
 	end
 end
 
     function printHead
-        strhead = ['     |   | ' extendstr('name', maxlabellength) ' | lb       value       ub        | 10^value      | fitted | prior\n'];
+        strhead = ['     |   | ' arExtendStr('name', maxlabellength) ' | lb       value       ub        | 10^value      | fitted | prior\n'];
         strhead = strrep(strhead, '|', ' ');
         fprintf(strhead);
     end
@@ -62,7 +62,7 @@ end
             fit_flag = '#';
         end
         fprintf(outstream, '%s%4i|%s%s%s| %s | %+8.2g   %+8.2g   %+8.2g | %i   %+8.2g | %7i | %s \n', ...
-            fit_flag, j, strdyn, strinit, strerr, extendstr(ar.pLabel{j}, maxlabellength), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), pTrans(j), ar.qFit(j), priorStr(j));
+            fit_flag, j, strdyn, strinit, strerr, arExtendStr(ar.pLabel{j}, maxlabellength), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), pTrans(j), ar.qFit(j), priorStr(j));
         
     end
 
@@ -80,8 +80,4 @@ end
 end
 
 
-function str = extendstr(str, n)
-nd = n - length(str);
-S = ' ';
-str = [str S(ones(1,nd))];
-end
+
