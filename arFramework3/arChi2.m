@@ -16,11 +16,11 @@ ar.fevals = ar.fevals + 1;
 if(~exist('sensi', 'var'))
 	sensi = false;
 end
-if(exist('pTrial', 'var'))
+if(exist('pTrial', 'var') && ~isempty(pTrial))
 	ar.p(ar.qFit==1) = pTrial;
 end
 
-silent = nargin~=0;
+silent = nargin>1;
 
 ar.ndata = 0;
 ar.nprior = 0;
@@ -31,6 +31,8 @@ ar.chi2err = 0;
 ar.chi2prior = 0;
 ar.chi2constr = 0;
 ar.chi2fit = 0;
+
+ar.firstorderopt = nan;
 
 if(~isfield(ar,'res'))
     ar.res = [];
@@ -376,19 +378,43 @@ if(has_error)
     ar.chi2err = Inf;
     ar.chi2fit = Inf;
 end
-    
-if(~silent && ar.ndata>0)
-    if(ar.config.fiterrors == 1)
-        fprintf('-2*log(L) = %f, %i data points, %i free parameters', ...
-            2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata, sum(ar.qFit==1));
-    else
-        fprintf('global chi^2 = %f, %i data points, %i free parameters', ar.chi2, ar.ndata, sum(ar.qFit==1));
+
+% calculate first order optimality criterion
+if(sensi)
+    res = [ar.res ar.constr];
+    sres = [];
+    if(~isempty(ar.sres))
+        sres = ar.sres(:, ar.qFit==1);
     end
+    if(~isempty(ar.sconstr))
+        sres = [sres; ar.sconstr(:, ar.qFit==1)];
+    end
+    g = -2*res*sres; % gradient
+    onbound = [ar.p(ar.qFit==1)==ar.ub(ar.qFit==1); ar.p(ar.qFit==1)==ar.lb(ar.qFit==1)];
+    exbounds = [g>0; g<0];
+    qred = sum(onbound & exbounds,1)>0;
+    ar.firstorderopt = norm(g(~qred));
+%     fprintf('first order optimality criterion %f (%i)\n', ar.firstorderopt, -sum(qred));
+end
+    
+if(~silent)
+    if(ar.ndata>0)
+        if(ar.config.fiterrors == 1)
+            fprintf('-2*log(L) = %-8.2g, %i data points, ', ...
+                2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
+        else
+            fprintf('global chi^2 = %-8.2g, %i data points, ', ar.chi2, ar.ndata);
+        end
+    end
+    fprintf('%i free parameters', sum(ar.qFit==1));
     if(ar.chi2constr ~=0)
-        fprintf(', %f violation of %i constraints', ar.chi2constr, ar.nconstr);
+        fprintf(', %-8.2g violation of %i constraints', ar.chi2constr, ar.nconstr);
     end
     if(ar.chi2prior ~=0)
-        fprintf(', %f violation of %i prior assumptions', ar.chi2prior, ar.nprior);
+        fprintf(', %-8.2g violation of %i prior assumptions', ar.chi2prior, ar.nprior);
+    end
+    if(sensi)
+        fprintf(', first order optimality criterion %-8.2g (%i)', ar.firstorderopt, -sum(qred));
     end
     fprintf('\n');
 end

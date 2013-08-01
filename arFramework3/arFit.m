@@ -46,7 +46,7 @@ ar.fit.maxstepsize_hist = nan(1,ar.config.optim.MaxIter);
 ar.fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
 ar.config.optim.OutputFcn = @arPlotFast;
 
-arChi2(false);
+arChi2(false, []);
 chi2_old = ar.chi2fit;
 
 ub = ar.ub;
@@ -101,7 +101,7 @@ elseif(ar.config.optimizer == 4)
     ar.fit.output = output;
     ar.fit.history = history;
     
-    arChi2(false);
+    arChi2(false, []);
     fprintf('STRSCNE finished after %i iterations: code %i, total chi2 improvement = %g\n', ...
         output(1), exitflag, chi2_old - ar.chi2fit);
     
@@ -158,7 +158,7 @@ if(~silent || exitflag < 1)
         case -99
             outputstr = sprintf('Multiple Shooting: mean constraint violation > %e\n', ar.ms_treshold);
     end
-    arChi2(false);
+    arChi2(false, []);
     
     switch ar.config.optimizer
         case 1
@@ -184,7 +184,10 @@ global ar
 arChi2(ar.config.useSensis, pTrial)
 res = [ar.res ar.constr];
 if(nargout>1 && ar.config.useSensis)
-    sres = ar.sres(:, ar.qFit==1);
+    sres = [];
+    if(~isempty(ar.sres))
+        sres = ar.sres(:, ar.qFit==1);
+    end
     if(~isempty(ar.sconstr))
         sres = [sres; ar.sconstr(:, ar.qFit==1)];
     end
@@ -260,7 +263,9 @@ global ar
 
 if(strcmp(state, 'iter'))
     ar.fit.chi2_hist(optimValues.iteration+1) = ar.chi2fit;
+    ar.fit.constr_hist(optimValues.iteration+1) = ar.chi2constr;
     ar.fit.p_hist(optimValues.iteration+1,:) = ar.p;
+    ar.fit.opti_hist(optimValues.iteration+1,:) = ar.firstorderopt;
     
     if(ar.config.optimizer == 5)
         if(isscalar(optimValues.mu))

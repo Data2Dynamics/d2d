@@ -106,9 +106,14 @@ llh = sum(res.^2);      % objective function
 g = -2*res*sres;        % gradient
 H = 2*(sres'*sres);     % Hessian matrix
 
+% calculate first order optimality criterion
+onbound = [p==ub; p==lb];
+exbounds = [g>0; g<0];
+firstorderopt = norm(g(sum(onbound & exbounds,1)==0));
+
 % output
 if(debug>2)
-    fprintf('%3i/%3i  resnorm=%-8.2g\n', iter, options.MaxIter, resnorm);
+    fprintf('%3i/%3i  resnorm=%-8.2g   norm(g)=%-8.2g\n', iter, options.MaxIter, resnorm, firstorderopt);
 end
 optimValues = struct([]);
 optimValues(1).iteration = 0;
@@ -119,14 +124,13 @@ if(~isempty(options.OutputFcn))
 end
 
 q_converged = false;
-firstorderopt = nan;
 while(iter < options.MaxIter && ~q_converged)
     iter = iter + 1;
     
     % solve subproblem - get trial point
     [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect, normdpmu_type] = ...
         arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
-    firstorderopt = norm(g(~qred));
+    
     pt = p + dp;
     
     % ensure strict feasibility - the hard way
@@ -162,6 +166,11 @@ while(iter < options.MaxIter && ~q_converged)
         llh = sum(res.^2);      % objective function
         g = -2*res*sres;        % gradient
         H = 2*(sres'*sres);     % Hessian matrix
+        
+        % calculate first order optimality criterion
+        onbound = [p==ub; p==lb];
+        exbounds = [g>0; g<0];
+        firstorderopt = norm(g(sum(onbound & exbounds,1)==0));
         
         % call output function
         if(~isempty(options.OutputFcn))

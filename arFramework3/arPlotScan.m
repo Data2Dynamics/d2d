@@ -43,11 +43,8 @@ for jk=jks
 end
 chi2curr = ar.chi2fit;
 if(ar.config.fiterrors == 1)
-    minchi2 = 2*ar.ndata*log(sqrt(2*pi)) + minchi2;
     chi2curr = 2*ar.ndata*log(sqrt(2*pi)) + chi2curr;
 end
-
-dchi2 = chi2inv(1-ar.ppl.alpha_level, ar.ppl.ndof);
 
 for jk=jks
     if(~isempty(ar.scan.ps{jk}))
@@ -55,41 +52,26 @@ for jk=jks
         
         ps = ar.scan.ps{jk};
         chi2s = ar.scan.chi2s{jk};
+        constrs = ar.scan.constrs{jk};
         
         if(ar.config.fiterrors == 1)
             chi2s = 2*ar.ndata*log(sqrt(2*pi)) + chi2s;
         end
         
         plot(ps, chi2s, 'k-', 'LineWidth', 1)
+        hold on
+        plot(ps, constrs, 'r--', 'LineWidth', 1)
+        hold off
         
         ax1 = g;
-%         ax2 = axes('Position',get(ax1,'Position'),...
-%             'XAxisLocation','top',...
-%             'YAxisLocation','right',...
-%             'Color','none',...
-%             'XColor','r','YColor','r');
-        
-%         chi2factor = 1.3;
-%         ylimmax = minchi2+dchi2*chi2factor;
-%         ylim(ax2, [minchi2-(dchi2*chi2factor*overplot) ylimmax+(dchi2*chi2factor*overplot)]);
-
-%         line(ps, chi2s, 'LineWidth', 1, 'Parent', ax2, 'Color', [1 0 0])
         
         % optimum
         line(ar.p(jk), chi2curr, 'Marker', '*', 'Color', [.5 .5 .5], 'LineWidth', 1, 'MarkerSize', 8, ...
             'Parent', ax1)
         
-%         % thresholds
-%         line(xlim, [0 0]+minchi2+dchi2, 'LineWidth', 1, 'Parent', ax1, 'Color', [1 0 0], 'LineStyle', '--')
-%         if(count == 1)
-%             text(mean(xlim), minchi2+dchi2, sprintf('%2i%%', (1-ar.ppl.alpha_level)*100), 'Color', 'r', ...
-%                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize', labelfontsize, ...
-%                 'Parent', ax1)
-%         end
 
         xlabel(ax1, ['log_{10}(' myNameTrafo(ar.pLabel{jk}) ')'])
         spacedAxisLimits(g, overplot)
-%         box(g, 'off')
         
         if(mod(count-1,ncols)==0)
             if(ar.config.fiterrors == 1)

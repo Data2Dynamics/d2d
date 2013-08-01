@@ -27,7 +27,7 @@ end
 
 n = size(ps,1);
 
-arChi2(true);
+arChi2(true,[]);
 pReset = ar.p;
 chi2Reset = ar.chi2fit;
 
@@ -82,7 +82,7 @@ for j=1:n
     ar.p = ps(j,:);
     tic;
     try
-        arChi2(true);
+        arChi2(true,[]);
         ar.chi2s_start(j) = ar.chi2fit;
         if(dynamic_only)
             arFitDyn(true);
@@ -119,7 +119,7 @@ else
     fprintf('did not find better fit\n');
     ar.p = pReset;
 end
-arChi2(false);
+arChi2(false,[]);
 
 if plot_summary
     if(sum(q_select)<6)

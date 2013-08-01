@@ -30,6 +30,7 @@
 % 15 = trdog pcgr 2D subspace 
 % 16 = trdog pcgr (no DM) 2D subspace 
 % 17 = trdog pcgr (no DM) 3D subspace 
+% 18 = trust region (with DG, based on modified trust.m)
 
 function [dp, solver_calls, qred, dpmem, grad_dir_frac, llh_expect, normdpmu_type] = ...
     arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method)
@@ -43,7 +44,7 @@ if(nargin==0)
     dp{5} = 'gradient-descent';
     dp{6} = 'dogleg';
     dp{7} = 'generalized-trustregion';
-    dp{8} = 'trdog';
+    dp{8} = 'MATLAB-trdog';
     dp{9} = 'Newton-pcgr';
     dp{10} = 'trdog-pcgr';
     dp{11} = 'dogleg-Newton-pcgr';
@@ -54,6 +55,7 @@ if(nargin==0)
     dp{16} = 'trdog-pcgr-2D-subspace';
     dp{17} = 'trdog-pcgr-noDM-2D-subspace';
     dp{18} = 'trdog-pcgr-noDM-3D-subspace';
+    dp{19} = 'trustregion-withDG';
     return;
 end
 
@@ -629,6 +631,24 @@ switch method
         % got back to original space
         dp = Z*dp;
         dp = transpose(DM*dp);
+        normdpmu_type = -1;
+        
+    case 18 % trust region solution (with DG)
+        g_pcgr = -0.5*g';
+        [~, dv] = definev(g_pcgr',p,lb,ub);
+        DG = sparse(1:length(g),1:length(g),full(abs(g_pcgr).*dv));
+        
+        dp = trust(-g',H+DG,mu)';
+        
+        % the function trust has a bug, therefore, in some cases
+        % the problem has to be regularized
+        lambda = 1e-6;
+        while(norm(dp)/mu > 1.01)
+            %             fprintf('trust.m problem %g, regularizing with new lambda=%g\n', norm(dp)/mu, lambda);
+            dp = trust(-g',H+DG+lambda*eye(size(H)),mu)';
+            solver_calls_tmp = solver_calls_tmp + 1;
+            lambda = lambda * 10;
+        end
         normdpmu_type = -1;
 end
 

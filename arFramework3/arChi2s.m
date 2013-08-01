@@ -38,7 +38,7 @@ for j=1:n
     ar.p = ps(j,:);
     tic;
     try
-        arChi2(sensis);
+        arChi2(sensis, []);
         ar.timing(j) = toc;
         ar.chi2s(j) = ar.chi2fit;
         ar.chi2sconstr(j) = ar.chi2constr;
@@ -55,7 +55,7 @@ fprintf('mean feval time: %fsec, %i/%i errors\n', mean(ar.timing(~isnan(ar.timin
 arWaitbar(-1);
 
 ar.p = pReset;
-arChi2(false);
+arChi2(false, []);
 
 if(~silent)
     if(sum(ar.qFit==1)<6)
