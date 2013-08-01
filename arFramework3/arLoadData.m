@@ -199,6 +199,9 @@ ar.model(m).data(d).py = setdiff(setdiff(vertcat(varlist{:}), union(ar.model(m).
 for j=1:length(ar.model(m).data(d).fy)
     varlist = symvar(ar.model(m).data(d).fy{j});
     ar.model(m).data(d).py_sep(j).pars = setdiff(setdiff(varlist, union(ar.model(m).x, ar.model(m).u)), {ar.model(m).t, ''}); %R2013a compatible
+    
+    % exclude parameters form model definition
+    ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).px);
 end
 
 % ERRORS
@@ -229,11 +232,13 @@ end
 varlist = cellfun(@symvar, ar.model(m).data(d).fystd, 'UniformOutput', false);
 ar.model(m).data(d).pystd = setdiff(vertcat(varlist{:}), union(union(union(ar.model(m).x, ar.model(m).u), ... %R2013a compatible
     ar.model(m).data(d).y), ar.model(m).t));
-    
 for j=1:length(ar.model(m).data(d).fystd)
     varlist = symvar(ar.model(m).data(d).fystd{j});
 	ar.model(m).data(d).py_sep(j).pars = union(ar.model(m).data(d).py_sep(j).pars, ... %R2013a compatible
         setdiff(varlist, union(ar.model(m).x, ar.model(m).u))); %R2013a compatible
+    
+    % exclude parameters form model definition
+    ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).px);
 end
 
 % INVARIANTS
@@ -254,17 +259,14 @@ ar.model(m).data(d).pxeq = setdiff(vertcat(varlist{:}), union(ar.model(m).x, uni
 % TODO solve for invariants
 
 % collect parameters needed for OBS
-
-ar.model(m).data(d).p = union(ar.model(m).p, union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
+ar.model(m).data(d).p = union(strrep(ar.model(m).p, '_filename', ['_' ar.model(m).data(d).name]), union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
 ar.model(m).data(d).p = union(ar.model(m).data(d).p, union(ar.model(m).data(d).pystd, ar.model(m).data(d).pxeq)); %R2013a compatible
-
-
 
 % CONDITIONS
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).fp = transpose(ar.model(m).data(d).p);
-qcondparamodel = ismember(ar.model(m).data(d).p, ar.model(m).p); %R2013a compatible
-ar.model(m).data(d).fp(qcondparamodel) = ar.model(m).fp;
+qcondparamodel = ismember(ar.model(m).data(d).p, strrep(ar.model(m).p, '_filename', ['_' ar.model(m).data(d).name])); %R2013a compatible
+ar.model(m).data(d).fp(qcondparamodel) = strrep(ar.model(m).fp, '_filename', ['_' ar.model(m).data(d).name]);
 while(~isempty(C{1}) && ~strcmp(C{1},'RANDOM'))
     qcondpara = ismember(ar.model(m).data(d).p, C{1}); %R2013a compatible
     if(sum(qcondpara)>0)

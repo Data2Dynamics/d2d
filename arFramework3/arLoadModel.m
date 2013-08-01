@@ -39,9 +39,25 @@ ar.model(m).name = name;
 
 % DESCRIPTION
 str = textscan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
-if(~strcmp(str{1},'DESCRIPTION'))
-    error('parsing model %s for DESCRIPTION', name);
+if(isempty(strfind(str{1},'DESCRIPTION')))
+    error('parsing model %s for DESCRIPTION', ar.model(m).name);
 end
+
+if(strcmp(str{1},'DESCRIPTION'))
+    arLoadModelV1(m, fid);
+elseif(strcmp(str{1},'DESCRIPTION-V2'))
+    arLoadModelV2(m, fid);
+else
+    error('invalid version identifier: %s', cell2mat(str{1}));
+end
+
+
+
+function arLoadModelV1(m, fid)
+
+global ar
+
+% read comments
 str = textscan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).description = {};
 while(~strcmp(str{1},'PREDICTOR'))
@@ -346,9 +362,9 @@ end
 
 % dynamic parameters
 varlist = cellfun(@symvar, ar.model(m).fv, 'UniformOutput', false);
-ar.model(m).px = union(setdiff(vertcat(varlist{:}), union(ar.model(m).x, ar.model(m).u)), ... %R2013a compatible
-    ar.model(m).px);
-
+ar.model(m).pv = setdiff(vertcat(varlist{:}), union(ar.model(m).t, union(ar.model(m).x, ar.model(m).u))); %R2013a compatible
+ar.model(m).px = union(union(ar.model(m).pv, ar.model(m).px), ar.model(m).px0); %R2013a compatible
+    
 % setup rhs
 C = cell(size(ar.model(m).N));
 if(length(ar.model(m).c)>1)    
@@ -405,8 +421,8 @@ end
 varlist = cellfun(@symvar, ar.model(m).fxeq, 'UniformOutput', false);
 ar.model(m).pxeq = setdiff(vertcat(varlist{:}), union(ar.model(m).x, union(ar.model(m).u, ar.model(m).px))); %R2013a compatible
 
-% collect parameters needed for ODE
-ar.model(m).p = union(ar.model(m).px, union(ar.model(m).px0, union(ar.model(m).pc, union(ar.model(m).pxeq, ar.model(m).pu)))); %R2013a compatible
+% collect parameters needed for model
+ar.model(m).p = union(ar.model(m).px, union(ar.model(m).px0, union(ar.model(m).pxeq, ar.model(m).pu))); %R2013a compatible
 
 if(strcmp(C{1},'OBSERVABLES'))
     
@@ -439,6 +455,10 @@ if(strcmp(C{1},'OBSERVABLES'))
         end
     end
     
+    % observation parameters
+    varlist = cellfun(@symvar, ar.model(m).fy, 'UniformOutput', false);
+    ar.model(m).py = setdiff(setdiff(vertcat(varlist{:}), union(ar.model(m).x, ar.model(m).u)), {ar.model(m).t, ''}); %R2013a compatible
+    
     % ERRORS
     ar.model(m).fystd = cell(size(ar.model(m).fy));
     C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
@@ -454,6 +474,14 @@ if(strcmp(C{1},'OBSERVABLES'))
     if(length(ar.model(m).fystd)<length(ar.model(m).fy))
         error('some observables do not have an error model defined');
     end
+    
+    % error parameters
+    varlist = cellfun(@symvar, ar.model(m).fystd, 'UniformOutput', false);
+    ar.model(m).pystd = setdiff(vertcat(varlist{:}), union(union(union(ar.model(m).x, ar.model(m).u), ... %R2013a compatible
+        ar.model(m).y), ar.model(m).t));
+    
+    % add to parameters needed for model
+    ar.model(m).p = union(union(ar.model(m).p, ar.model(m).py), ar.model(m).pystd);
 end
 
 % CONDITIONS

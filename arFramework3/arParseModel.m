@@ -28,7 +28,7 @@ for m=1:length(ar.model)
         for d=1:length(ar.model(m).data)
             
             % conditions checksum
-            qdynparas = ismember(ar.model(m).data(d).p, ar.model(m).p) | ... %R2013a compatible
+            qdynparas = ismember(ar.model(m).data(d).p, ar.model(m).px) | ... %R2013a compatible
             	ismember(ar.model(m).data(d).p, ar.model(m).data(d).pu); %R2013a compatible
             
             checksum_cond = addToCheckSum(ar.model(m).data(d).fu);
@@ -120,9 +120,12 @@ for m=1:length(ar.model)
             arParseOBS(m, d, doskip);
         end
     else
+        qdynparas = ismember(ar.model(m).p, ar.model(m).px) | ... %R2013a compatible
+            ismember(ar.model(m).p, ar.model(m).pu); %R2013a compatible
+        
         % conditions checksum
         checksum_cond = addToCheckSum(ar.model(m).fu);
-        checksum_cond = addToCheckSum(ar.model(m).p, checksum_cond);
+        checksum_cond = addToCheckSum(ar.model(m).p(qdynparas), checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).fv, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).fxeq, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).N, checksum_cond);
@@ -136,8 +139,8 @@ for m=1:length(ar.model)
         
         ar.model(m).condition(cindex).fxeq = ar.model(m).fxeq;
         ar.model(m).condition(cindex).fu = ar.model(m).fu;
-        ar.model(m).condition(cindex).fp = ar.model(m).fp;
-        ar.model(m).condition(cindex).p = ar.model(m).p;
+        ar.model(m).condition(cindex).fp = ar.model(m).fp(qdynparas);
+        ar.model(m).condition(cindex).p = ar.model(m).p(qdynparas);
         
         ar.model(m).condition(cindex).checkstr = getCheckStr(checksum_cond);
         ar.model(m).condition(cindex).fkt = [ar.model(m).name '_' ar.model(m).condition(cindex).checkstr];
@@ -266,8 +269,6 @@ fprintf('done\n');
 
 % Condition
 function arParseCondition(m, c, doskip)
-
-matVer = ver('MATLAB');
 
 global ar
 
