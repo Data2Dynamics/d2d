@@ -61,7 +61,7 @@ if(ar.p(ar.tuner.index) > ar.ub(ar.tuner.index))
     ar.p(ar.tuner.index) = ar.ub(ar.tuner.index);
 end
 % arChi2(false)
-arPlot(false, true)
+arPlot(false, true, true)
 refresh_textbox(handles)
 
 % --- Executes on button press in pushbutton2.
@@ -75,7 +75,7 @@ if(ar.p(ar.tuner.index) > ar.ub(ar.tuner.index))
     ar.p(ar.tuner.index) = ar.ub(ar.tuner.index);
 end
 % arChi2(false)
-arPlot(false, true)
+arPlot(false, true, true)
 refresh_textbox(handles)
 
 % --- Executes during object creation, after setting all properties.

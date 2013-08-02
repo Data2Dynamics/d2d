@@ -35,7 +35,7 @@ end
 if(evalfun)
     try
         if(silent)
-            arChi2(false);
+            arChi2(false, []);
         else
             arChi2;
         end
