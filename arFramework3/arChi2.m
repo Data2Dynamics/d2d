@@ -400,21 +400,21 @@ end
 if(~silent)
     if(ar.ndata>0)
         if(ar.config.fiterrors == 1)
-            fprintf('-2*log(L) = %-8.2g, %i data points, ', ...
+            fprintf('-2*log(L) = %g, %i data points, ', ...
                 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
         else
-            fprintf('global chi^2 = %-8.2g, %i data points, ', ar.chi2, ar.ndata);
+            fprintf('global chi^2 = %g, %i data points, ', ar.chi2, ar.ndata);
         end
     end
     fprintf('%i free parameters', sum(ar.qFit==1));
     if(ar.chi2constr ~=0)
-        fprintf(', %-8.2g violation of %i constraints', ar.chi2constr, ar.nconstr);
+        fprintf(', %g violation of %i constraints', ar.chi2constr, ar.nconstr);
     end
     if(ar.chi2prior ~=0)
-        fprintf(', %-8.2g violation of %i prior assumptions', ar.chi2prior, ar.nprior);
+        fprintf(', %g violation of %i prior assumptions', ar.chi2prior, ar.nprior);
     end
     if(sensi)
-        fprintf(', first order optimality criterion %-8.2g (%i)', ar.firstorderopt, -sum(qred));
+        fprintf(', first order optimality criterion %g (%i)', ar.firstorderopt, -sum(qred));
     end
     fprintf('\n');
 end
