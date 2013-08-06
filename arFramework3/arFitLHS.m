@@ -24,8 +24,8 @@ if(exist('rng','file')~=0)
         ar.lhs_seed = randomseed;
         rng(randomseed);
     else
-        ar.lhs_seed = now;
-        rng(ar.lhs_seed);
+        rngsettings = rng('shuffle');
+        ar.lhs_seed = rngsettings.Seed;
     end
 end
 if(~exist('dynamic_only','var'))
