@@ -1,7 +1,9 @@
 % Initialize and clear workspace of framework
 %
-% Copyright D2D Development Team
-% Contact: Andreas Raue (andreas.raue@fdm.uni-freiburg.de)
+% Data-2-Dynamics Software
+% Website: https://bitbucket.org/d2d-development/d2d-software/wiki/Home
+% Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de
+% Copyright 2013 D2D Development Team. All rights reserved.
 
 arCheck;
 
@@ -15,10 +17,12 @@ arInitUser;
 
 ar.info.initTime = now;
 [ar.info.def_version_code ar.info.c_version_code] = arGetVersion;
-fprintf('arFramework3 (.def version %i, c-code version %s)\n', ...
+fprintf('Data 2 Dynamics Software\n');
+fprintf('(arFramework3, def-version %i, c-version %s)\n', ...
     ar.info.def_version_code, ar.info.c_version_code);
-fprintf('Copyright 2013 D2D Development Team. All rights reserved.\n');
-fprintf('Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de\n\n');
+fprintf('Website: https://bitbucket.org/d2d-development/d2d-software/wiki/Home\n');
+fprintf('Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de\n');
+fprintf('Copyright 2013 D2D Development Team. All rights reserved.\n\n');
 
 ar.checksum = [];
 
