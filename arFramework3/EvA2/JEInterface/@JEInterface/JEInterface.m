@@ -58,6 +58,9 @@ int.optParams = [];
 int.optParamValues = [];
 int.hexMask=hex2dec('ffffffff');
 int.dataType=''; % to be set later!
+int.outputAllStatsFields=1;
+int.seedPop=[];
+int.seedPopFit=[];
 
 if (isa(fhandle, 'function_handle'))
     int.f = fhandle;

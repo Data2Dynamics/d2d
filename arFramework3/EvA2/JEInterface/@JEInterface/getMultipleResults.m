@@ -10,7 +10,7 @@ else
     sArr(1) = int.mp.getIntermediateResult();
 end
 
-fits=zeros(size(sArr,1),1);
+%fits=zeros(size(sArr,1),1);
 
 for i=1:size(sArr,1)
     if (isempty(int.range)) % binary case
@@ -20,8 +20,8 @@ for i=1:size(sArr,1)
     end;
     %disp(sols(i,:));
     if (isempty(int.args))
-        fits(i) = feval(int.f, sols(i,:));
+        fits(i,:) = feval(int.f, sols(i,:));
     else
-        fits(i) = feval(int.f, sols(i,:), int.args);
+        fits(i,:) = feval(int.f, sols(i,:), int.args);
     end
 end

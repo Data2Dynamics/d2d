@@ -77,6 +77,7 @@ if ((nargin == 2) || (nargin == 3))
             eva2.OptimizerFactory.addTerminator(EvaluationTerminator(maxEvals), 0);
         end
     end
+    int.mp.setOutputAllStatFields(int.outputAllStatsFields==1);
 
     % set display
     if (strcmp(int.opts.Display,'off') || isempty(int.opts.Display))
@@ -94,6 +95,11 @@ if ((nargin == 2) || (nargin == 3))
         error('invalid Display option, only off/final/notify/iter are recognized');
     end
     
+    if isempty(int.seedPop) % set the seed data
+        int.mp.clearSeedPopulation;
+    else
+        int.mp.setSeedPopulation(int.seedPop, int.seedPopFit);
+    end
     int=runEvalLoopJE(int, 1, optType, outputFilePrefix, -1, -1, -1);
     
 else

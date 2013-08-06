@@ -17,8 +17,8 @@ ar.info.initTime = now;
 [ar.info.def_version_code ar.info.c_version_code] = arGetVersion;
 fprintf('arFramework3 (.def version %i, c-code version %s)\n', ...
     ar.info.def_version_code, ar.info.c_version_code);
-fprintf('Copyright D2D Development Team 2013 ');
-fprintf('(contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de)\n\n');
+fprintf('Copyright 2013 D2D Development Team. All rights reserved.\n');
+fprintf('Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de\n\n');
 
 ar.checksum = [];
 

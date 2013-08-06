@@ -1,4 +1,5 @@
 % check systems setup
+% addpath and configure sundials
 
 function arCheck
 
@@ -7,9 +8,10 @@ if(verLessThan('symbolic', '5.5'))
 end
 
 ar_path = strrep(which('arInit.m'),'/arInit.m','');
+addpath(ar_path)
 
 % load path of sub-directories
-if(exist('ple','file') == 0)
+if(exist('pleInit','file') == 0)
     addpath([ar_path '/PLE2'])
 end
 if(exist('fileChooser','file') == 0)

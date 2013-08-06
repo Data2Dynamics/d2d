@@ -16,11 +16,19 @@ JI=optimize(JI, 4);
 finalPop=getMultipleResults(JI);
 
 % binary case
-R=20;
+R=30;
 JI=JEInterface(@testfun, 'binary', R, R, 4, 'Display', 'iter');
-JI=optimize(JI, 3);
+JI=setOutputAllStatsFields(JI, 0); % suppress output of additional statistics, spares runtime with large populations
+JI=optimizeWith(JI, 3, 'population', eva2.server.go.populations.Population(1000);
 [sol, fit]=getResult(JI);
 finalPop=getMultipleResults(JI);
+
+% binary case with a multi-objective fitness function
+R=30;
+JI=JEInterface(@testfun, 'binary', R, R, 6, 'Display', 'iter', 'TolX', 0, 'TolFun', 0, 'MaxFunEvals', 3000);
+JI=optimizeWith(JI, 14);
+% The resulting solution set is a pareto dominant set found with NSGA-II
+[finalSols, finalFit]=getMultipleResults(JI);
 
 % integer case with specific initialization range
 initR=[-15 -15 -15 -15 -15; -5 -5 -5 -5 -5];
