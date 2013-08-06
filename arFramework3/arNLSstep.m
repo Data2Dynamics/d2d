@@ -31,9 +31,10 @@
 % 16 = trdog pcgr (no DM) 2D subspace 
 % 17 = trdog pcgr (no DM) 3D subspace 
 % 18 = trust region (with DG, based on modified trust.m)
+% 19 = trust region solution (with EV)
 
-function [dp, solver_calls, qred, dpmem, grad_dir_frac, llh_expect, normdpmu_type] = ...
-    arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method)
+function [dp, solver_calls, qred, grad_dir_frac, llh_expect, normdpmu_type] = ...
+    arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, method)
 
 if(nargin==0)
     dp = {};
@@ -56,6 +57,7 @@ if(nargin==0)
     dp{17} = 'trdog-pcgr-noDM-2D-subspace';
     dp{18} = 'trdog-pcgr-noDM-3D-subspace';
     dp{19} = 'trustregion-withDG';
+    dp{20} = 'trustregion-withEV';
     return;
 end
 
@@ -134,12 +136,6 @@ else % own step implementation
         dp = dp * dpredfac;
     end
 end
-
-% inertial effect using memory
-if(useInertia>0 && ~isempty(dpmem))
-    dp = useInertia*dpmem + (1-useInertia)*dp;
-end
-dpmem = dp;
 
 % proportion of step in direction of gradient
 grad_dir_frac = dp(~qred)*g(~qred)'/norm(dp(~qred))/norm(g(~qred));
@@ -650,8 +646,36 @@ switch method
             lambda = lambda * 10;
         end
         normdpmu_type = -1;
-end
+        
+    case 19 % trust region solution (with EV)
+%         [U,S,V] = svd(H);
+%         Q = S/max(S(:));
+%         S2 = S;
+%         S2(Q<1e-6) = 0;
+%         H2 = U*S2*V';
 
+        [V,D] = eig(H);
+        q = diag(D/max(D(:))) > 0;
+        
+        Z = V(:,q);
+        g = transpose(Z'*g');
+        H = Z'*H*Z;
+
+        dp = trust(-g',H,mu)';
+        
+        % the function trust has a bug, therefore, in some cases
+        % the problem has to be regularized
+        lambda = 1e-6;
+        while(norm(dp)/mu > 1.01)
+            fprintf('trust.m problem %g, regularizing with new lambda=%g\n', norm(dp)/mu, lambda);
+            dp = trust(-g',H+lambda*eye(size(H)),mu)';
+            solver_calls_tmp = solver_calls_tmp + 1;
+            lambda = lambda * 10;
+        end
+        
+        dp = transpose(Z*dp');
+        normdpmu_type = -1;
+end
 
 
 
@@ -672,6 +696,8 @@ v(arg3)  = -1;
 dv(arg3) = 0;
 v(arg4)  = 1;
 dv(arg4) = 0;
+
+
 
 function A = mgrscho(A)
 %MGRSHO Modified Gram-Schmidt orthogonalization procedure. 
@@ -791,8 +817,8 @@ end
 [~, n]=size(A);
 
 for j= 1:n
-    R(j,j)=norm(A(:,j));
+    R(j,j)=norm(A(:,j)); %#ok<AGROW>
     A(:,j)=A(:,j)/R(j,j);
-    R(j,j+1:n)=A(:,j)'*A(:,j+1:n);
+    R(j,j+1:n)=A(:,j)'*A(:,j+1:n); %#ok<AGROW>
     A(:,j+1:n)=A(:,j+1:n)-A(:,j)*R(j,j+1:n);
 end

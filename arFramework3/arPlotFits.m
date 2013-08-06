@@ -13,41 +13,84 @@ end
 
 %% chi^2 plots
 
-[chi2s, isorted] = sort(ar.chi2s);
+chi2constr = ar.chi2s + ar.chi2sconstr;
+chi2constr_start = ar.chi2s_start + ar.chi2sconstr_start;
+[chi2constr, isorted] = sort(chi2constr);
+chi2constr_start = chi2constr_start(isorted);
+
+ar.chi2s_sorted = ar.chi2s(isorted);
+ar.chi2s_start_sorted = ar.chi2s_start(isorted);
+ar.chi2sconstr_sorted = ar.chi2sconstr(isorted);
+ar.chi2sconstr_start_sorted = ar.chi2sconstr_start(isorted);
+
+ar.ps_sorted = ar.ps(isorted,:);
 exitflag = ar.exitflag(isorted);
 
-ar.chi2s_sorted = chi2s;
-ar.chi2sconstr_sorted = ar.chi2sconstr(isorted);
-ar.ps_sorted = ar.ps(isorted,:);
+chi2min = min([ar.chi2s ar.chi2fit]);
+constrmin = min([ar.chi2sconstr ar.chi2constr]);
+chi2constrmin = min([ar.chi2s+ar.chi2sconstr ar.chi2fit+ar.chi2constr]);
 
-chi2min = min([chi2s ar.chi2fit]);
-ar.chi2s_start_sorted = ar.chi2s_start(isorted);
 ar.ps_start_sorted = ar.ps_start(isorted,:);
 optim_krit = ar.optim_crit(isorted);
 
 dchi2 = chi2inv(0.95, 1);
 
-figure(1)
+figure(1); clf;
+nsub = sum([ar.ndata>0 ar.nconstr>0])+1;
+isub = 1;
 
-semilogy(chi2s - chi2min + 1, '--');
-hold on
-h = semilogy(find(exitflag>0), chi2s(exitflag>0) - chi2min + 1, 'o');
-h2 = semilogy(ar.chi2s_start_sorted - chi2min + 1, 'x--','Color', [.6 .6 .6]);
-plot(xlim, [1 1], 'k--');
-plot(xlim, [dchi2 dchi2], 'k:');
-hold off
-if(ar.config.fiterrors == 1)    
-    ylabel('-2*log(L) + const');
-else
-    ylabel('\chi^2');
+if(ar.ndata>0)
+    subplot(1,nsub,isub);
+    
+    semilogy(ar.chi2s_sorted - chi2min + 1, '--');
+    hold on
+    h = semilogy(find(exitflag>0), ar.chi2s_sorted(exitflag>0) - chi2min + 1, 'o');
+    h2 = semilogy(ar.chi2s_start_sorted - chi2min + 1, 'x--','Color', [.6 .6 .6]);
+    xlim([0 length(chi2constr)+1])
+    plot(xlim, [1 1], 'k--');
+    plot(xlim, [dchi2 dchi2], 'k:');
+    hold off
+    title('likelihood');
+    xlabel('run index (sorted by likelihood)');
+    
+    isub = isub + 1;
 end
-xlabel('run index (sorted by likelihood)');
-xlim([0 length(chi2s)+1])
-title(sprintf('%i fits in total, %i without errors, %i converged', ...
-    length(exitflag), sum(~isnan(chi2s)) ,sum(exitflag>0)));
+
+if(ar.nconstr>0)
+    subplot(1,nsub,isub);
+    
+    semilogy(ar.chi2sconstr_sorted - constrmin + 1, '--');
+    hold on
+    h = semilogy(find(exitflag>0), ar.chi2sconstr_sorted(exitflag>0) - constrmin + 1, 'o');
+    h2 = semilogy(ar.chi2sconstr_start_sorted - constrmin + 1, 'x--','Color', [.6 .6 .6]);
+    xlim([0 length(chi2constr)+1])
+    plot(xlim, [1 1], 'k--');
+    plot(xlim, [dchi2 dchi2], 'k:');
+    hold off
+    title('constraints');
+    xlabel('run index (sorted by likelihood)');
+    
+    isub = isub + 1;
+end
+
+if(ar.ndata>0 && ar.nconstr>0)
+    subplot(1,nsub,isub);
+    
+    semilogy(chi2constr - chi2constrmin + 1, '--');
+    hold on
+    h = semilogy(find(exitflag>0), chi2constr(exitflag>0) - chi2constrmin + 1, 'o');
+    h2 = semilogy(chi2constr_start - chi2constrmin + 1, 'x--','Color', [.6 .6 .6]);
+    xlim([0 length(chi2constr)+1])
+    plot(xlim, [1 1], 'k--');
+    plot(xlim, [dchi2 dchi2], 'k:');
+    hold off
+    title('likelihood + constraints');
+    xlabel('run index (sorted by likelihood)');
+end
 legend([h h2], 'converged fits', 'initial value', 'Location','Best');
 
-figure(2)
+
+figure(2); clf;
 
 subplot(2,2,1);
 hist(ar.timing, 50);
@@ -63,21 +106,6 @@ subplot(2,2,[3 4]);
 semilogy(optim_krit, 'o--');
 xlabel('run index (sorted by likelihood)');
 ylabel('first order optimality criterion');
-
-if(~isempty(ar.chi2sconstr_sorted) && ar.nconstr>0)
-    figure(3)
-    
-    semilogy(ar.chi2sconstr_sorted, '--');
-    hold on
-    h = semilogy(find(exitflag>0), ar.chi2sconstr_sorted(exitflag>0), 'o');
-    hold off
-    ylabel('constraint violation');
-    xlabel('run index (sorted by likelihood)');
-    xlim([0 length(chi2s)+1])
-    title(sprintf('%i fits in total, %i without errors, %i converged', ...
-        length(exitflag), sum(~isnan(chi2s)) ,sum(exitflag>0)));
-    legend(h, 'converged fits', 'Location','Best');
-end
 
 %% scatter plots
 

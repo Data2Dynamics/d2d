@@ -40,7 +40,9 @@ else
     ar.config.optim.Jacobian = 'off';
 end
 
+ar.fit.iter_count = 0;
 ar.fit.chi2_hist = nan(1,ar.config.optim.MaxIter);
+ar.fit.constr_hist = nan(1,ar.config.optim.MaxIter);
 ar.fit.p_hist = nan(ar.config.optim.MaxIter,length(ar.p));
 ar.fit.maxstepsize_hist = nan(1,ar.config.optim.MaxIter);
 ar.fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
@@ -261,23 +263,36 @@ function stop = arPlotFast(~,optimValues,state)
 
 global ar
 
+stop = false;
+
 if(strcmp(state, 'iter'))
-    ar.fit.chi2_hist(optimValues.iteration+1) = ar.chi2fit;
-    ar.fit.constr_hist(optimValues.iteration+1) = ar.chi2constr;
-    ar.fit.p_hist(optimValues.iteration+1,:) = ar.p;
-    ar.fit.opti_hist(optimValues.iteration+1,:) = ar.firstorderopt;
+    if(ar.fit.iter_count>0)
+        if((ar.chi2fit+ar.chi2constr) > (ar.fit.chi2_hist(ar.fit.iter_count) + ...
+                ar.fit.constr_hist(ar.fit.iter_count)))
+            return;
+        end
+    end
+        
+    ar.fit.chi2_hist(ar.fit.iter_count+1) = ar.chi2fit;
+    ar.fit.constr_hist(ar.fit.iter_count+1) = ar.chi2constr;
+    ar.fit.p_hist(ar.fit.iter_count+1,:) = ar.p;
+    ar.fit.opti_hist(ar.fit.iter_count+1,:) = ar.firstorderopt;
     
     if(ar.config.optimizer == 5)
         if(isscalar(optimValues.mu))
-            ar.fit.maxstepsize_hist(optimValues.iteration+1) = optimValues.mu;
+            ar.fit.maxstepsize_hist(ar.fit.iter_count+1) = optimValues.mu;
         else
-            ar.fit.maxstepsize_hist(optimValues.iteration+1) = det(optimValues.mu);
+            ar.fit.maxstepsize_hist(ar.fit.iter_count+1) = det(optimValues.mu);
         end
-        ar.fit.stepsize_hist(optimValues.iteration+1) = optimValues.normdp;
+        ar.fit.stepsize_hist(ar.fit.iter_count+1) = optimValues.normdp;
     else
-        ar.fit.maxstepsize_hist(optimValues.iteration+1) = nan;
-        ar.fit.stepsize_hist(optimValues.iteration+1) = nan;
+        ar.fit.maxstepsize_hist(ar.fit.iter_count+1) = nan;
+        if(ar.fit.iter_count>0)
+            ar.fit.stepsize_hist(ar.fit.iter_count+1) = norm(ar.fit.p_hist(ar.fit.iter_count,:) - ar.p);
+        end
     end
+    
+    ar.fit.iter_count = ar.fit.iter_count + 1;
     
     if(ar.config.showFitting)
         arPlot(false, true, false, true, true);
@@ -285,4 +300,3 @@ if(strcmp(state, 'iter'))
     end
 end
 
-stop = false;

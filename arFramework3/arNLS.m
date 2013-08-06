@@ -128,8 +128,8 @@ while(iter < options.MaxIter && ~q_converged)
     iter = iter + 1;
     
     % solve subproblem - get trial point
-    [dp, solver_calls, qred, dpmem, grad_dir_frac, resnorm_expect, normdpmu_type] = ...
-        arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, useInertia, method);
+    [dp, solver_calls, qred, grad_dir_frac, resnorm_expect, normdpmu_type] = ...
+        arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, method);
     
     pt = p + dp;
     
@@ -179,6 +179,13 @@ while(iter < options.MaxIter && ~q_converged)
             optimValues(1).normdp = norm(dp);
             feval(options.OutputFcn,p,optimValues,'iter');
         end
+        
+        % inertial effect using memory
+        if(~isempty(dpmem))
+            dpmem = useInertia*dpmem + (1-useInertia)*dp;
+        else
+            dpmem = dp;
+        end
     end
     
     % update schedule for trust region
@@ -208,7 +215,7 @@ while(iter < options.MaxIter && ~q_converged)
     % output
     if(debug>2)
         printiter(iter, options.MaxIter, resnorm, mu_old, dmu, norm(dp), normdpmu_type, dresnorm, ...
-            firstorderopt, sum(qred), grad_dir_frac, approx_qual, q_accept_step);
+            firstorderopt, find(qred), grad_dir_frac, approx_qual, q_accept_step, cond(H));
     end
     
     % check convergence
@@ -267,7 +274,7 @@ end
 
 % print iteration
 function printiter(iter, maxIter, resnorm, mu, dmu, norm_dp, normdpmu, dresnorm, ...
-    norm_gred, dim_red, grad_dir_frac, approx_qual, step_accept)
+    norm_gred, dim_red, grad_dir_frac, approx_qual, step_accept, condition_number)
 
 if(~step_accept)
     outstream = 2;
@@ -296,8 +303,13 @@ if(~isscalar(mu))
      
     fprintf(outstream, 'mu=%-8.2g %s (det=%-8.2g cond=%-8.2g maxeig=%-8.2g)  ', normdpmu, dmu, det(mu), cond(mu), max(eig(mu)));
 else
-    fprintf(outstream, 'mu=%-8.2g %s (%-5.2f) ', mu, dmu, normdpmu);
+    fprintf(outstream, 'mu=%-8.2g %s ', mu, dmu);
+    if(normdpmu>0)
+        fprintf(outstream, '(%-5.2f) ', normdpmu);
+    end
 end
 fprintf(outstream, 'norm(dp)=%-8.2g  dresnorm=%-8.2g  ', norm_dp, dresnorm);
-fprintf(outstream, 'approx_qual=%-5.2f  norm(g)=%-8.2g  dim_red=%i  grad_dir=%3.1f\n', ...
-    approx_qual, norm_gred, dim_red, grad_dir_frac);
+fprintf(outstream, 'approx_qual=%-8.2g  norm(g)=%-8.2g  grad_dir=%3.1f  cond(H)=%-8.2g  dim_red: ', ...
+    approx_qual, norm_gred, grad_dir_frac, condition_number);
+fprintf(outstream, '%i ', dim_red);
+fprintf(outstream, '\n');

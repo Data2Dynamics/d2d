@@ -29,7 +29,7 @@ n = size(ps,1);
 
 arChi2(true,[]);
 pReset = ar.p;
-chi2Reset = ar.chi2fit;
+chi2Reset = ar.chi2fit + ar.chi2constr;
 
 if(append && isfield(ar,'ps') && isfield(ar, 'chi2s') && ...
         isfield(ar, 'exitflag') && isfield(ar, 'timing') && ...
@@ -39,6 +39,7 @@ if(append && isfield(ar,'ps') && isfield(ar, 'chi2s') && ...
     ar.chi2s = [nan(1,n) ar.chi2s];
     ar.chi2sconstr = [nan(1,n) ar.chi2sconstr];
     ar.chi2s_start = [nan(1,n) ar.chi2s_start];
+    ar.chi2sconstr_start = [nan(1,n) ar.chi2sconstr_start];
     ar.timing = [nan(1,n) ar.timing];
     ar.exitflag = [-ones(1,n) ar.exitflag];
     ar.fun_evals = [nan(1,n) ar.fun_evals];
@@ -49,6 +50,7 @@ else
     ar.chi2s = nan(1,n);
     ar.chi2sconstr = nan(1,n);
     ar.chi2s_start = nan(1,n);
+    ar.chi2sconstr_start = nan(1,n);
     ar.timing = nan(1,n);
     ar.fun_evals = nan(1,n);
     ar.optim_crit = nan(1,n);
@@ -72,18 +74,13 @@ end
 
 arWaitbar(0);
 for j=1:n
-    if(ar.config.fiterrors == 1)  
-        text = sprintf('best minimum: -2*log(L) = %f (old = %f)', ...
-            min(2*ar.ndata*log(sqrt(2*pi)) + ar.chi2s), 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
-    else
-        text = sprintf('best minimum: chi^2 = %f (old = %f)', min(ar.chi2s), chi2Reset);
-    end
-    arWaitbar(j, n, text);
+    arWaitbar(j, n);
     ar.p = ps(j,:);
     tic;
     try
         arChi2(true,[]);
         ar.chi2s_start(j) = ar.chi2fit;
+        ar.chi2sconstr_start(j) = ar.chi2constr;
         if(dynamic_only)
             arFitDyn(true);
         end
@@ -107,14 +104,10 @@ fprintf('mean fitting time: %fsec\n', 10^mean(log10(ar.timing(~isnan(ar.timing))
 arWaitbar(-1);
 
 if(chi2Reset>min(ar.chi2s))
-    [chi2min,imin] = min(ar.chi2s);
+    [chi2min,imin] = min(ar.chi2s + ar.chi2sconstr);
     ar.p = ar.ps(imin,:);
-    if(ar.config.fiterrors == 1)
-        fprintf('selected best fit #%i with -2*log(L) = %f (old = %f)\n', ...
-            imin, 2*ar.ndata*log(sqrt(2*pi)) + chi2min, 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
-    else
-        fprintf('selected best fit #%i with chi^2 = %f (old = %f)\n', imin, chi2min, chi2Reset);
-    end
+    fprintf('selected best fit #%i with %f (old = %f)\n', ...
+        imin, chi2min, chi2Reset);
 else
     fprintf('did not find better fit\n');
     ar.p = pReset;
