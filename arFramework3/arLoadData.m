@@ -103,6 +103,7 @@ if(strcmp(str{1},'PREDICTOR-DOSERESPONSE'))
     fprintf('dose-response to %s\n', ar.model(m).data(d).response_parameter);
 else
     ar.model(m).data(d).doseresponse = false;
+    ar.model(m).data(d).response_parameter = '';
     fprintf('\n');
 end
 C = textscan(fid, '%s %s %q %q %n %n %n %n\n',1, 'CommentStyle', ar.config.comment_string);

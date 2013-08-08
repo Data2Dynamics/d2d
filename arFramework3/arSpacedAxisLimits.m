@@ -6,19 +6,39 @@ if(~exist('overplot','var'))
     overplot = 0.1;
 end
 [xmin xmax ymin ymax] = axisLimits(g);
+
+% x-axis
+if(~strcmp(get(g, 'XScale'), 'linear'))
+    xmin = log10(xmin);
+    xmax = log10(xmax);
+end
 xrange = xmax - xmin;
 if(xrange == 0)
     xrange = 1;
+end
+if(~isnan(xrange))
+    if(strcmp(get(g, 'XScale'), 'linear'))
+        xlim(g, [xmin-(xrange*overplot) xmax+(xrange*overplot)]);
+    else
+        xlim(g, 10.^[xmin-(xrange*overplot) xmax+(xrange*overplot)]);
+    end
+end
+
+% y-axis
+if(~strcmp(get(g, 'YScale'), 'linear'))
+    ymin = log10(ymin);
+    ymax = log10(ymax);
 end
 yrange = ymax - ymin;
 if(yrange == 0)
     yrange = 1;
 end
-if(~isnan(xrange))
-    xlim(g, [xmin-(xrange*overplot) xmax+(xrange*overplot)]);
-end
 if(~isnan(yrange))
-    ylim(g, [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+    if(strcmp(get(g, 'YScale'), 'linear'))
+        ylim(g, [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+    else
+        ylim(g, 10.^[ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+    end
 end
 
 
