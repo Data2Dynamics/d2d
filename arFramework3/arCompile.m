@@ -19,7 +19,7 @@ if(~exist('forceFullCompile','var'))
     forceFullCompile = false;
 end
 
-fprintf('\ncompiling...');
+fprintf('\n');
 
 if(exist([ar.fkt '.' mexext],'file') && ~forceFullCompile)
     fprintf('skipped\n');
@@ -112,29 +112,28 @@ if(~exist([cd '/Compiled/' ar.info.c_version_code '/' mexext], 'dir'))
     mkdir([cd '/Compiled/' ar.info.c_version_code '/' mexext])
 end
 
-% serial code
-% outputstr = ' -output arSimuCalcSerial';
-
-% parallel code using POSIX threads
-outputstr = [' -output ' ar.fkt];
-
 % pre-compile CVODES sources
+% fprintf('comiling condition m%i c%i, %s (%s)...', m, c, ar.model(m).name, ar.model(m).condition(c).checkstr);
+fprintf('compiling CVODES...');
 for j=1:length(sources)
     if(~exist(['Compiled/' ar.info.c_version_code '/' mexext '/' objects{j}], 'file'))
         fprintf('o');
         eval(['mex -c -outdir Compiled/'  ar.info.c_version_code '/' mexext '/' includesstr ' ' sundials_path sources{j}]);
     end
 end
+fprintf('done\n');
 
 % pre-compile input functions
 eval(['mex -c -outdir Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' ar_path '/arInputFunctionsC.c']);
 
 % pre-compile conditions
+labels = {};
 sources_con = {};
 objects_con = {};
 
 for jm = 1:length(ar.model)
     for sc = 1:length(ar.model(jm).condition)
+        labels{end+1} = ar.model(jm).condition(sc).fkt; %#ok<AGROW>
         sources_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' ar.model(jm).condition(sc).fkt '.c']; %#ok<AGROW>
         objects_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).condition(sc).fkt '.o']; %#ok<AGROW>
     end
@@ -145,19 +144,24 @@ for j=1:length(objects_con)
 end
 
 for j=1:length(sources_con)
+    fprintf('compiling condition %s...', labels{j});
     if(~exist(objects_con{j}, 'file'))
-        fprintf('o');
         eval(['mex -c -outdir ./Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' sources_con{j}]);
+        fprintf('done\n');
+    else
+        fprintf('skipped\n');
     end
 end
 
 % pre-compile data
 if(isfield(ar.model, 'data'))
+    labels = {};
     sources_dat = {};
     objects_dat = {};
     
     for jm = 1:length(ar.model)
         for sc = 1:length(ar.model(jm).data)
+            labels{end+1} = ar.model(jm).data(sc).fkt; %#ok<AGROW>
             sources_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' ar.model(jm).data(sc).fkt '.c']; %#ok<AGROW>
             objects_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).data(sc).fkt '.o']; %#ok<AGROW>
         end
@@ -168,18 +172,26 @@ if(isfield(ar.model, 'data'))
     end
     
     for j=1:length(sources_dat)
+        fprintf('compiling data %s...', labels{j});
         if(~exist(objects_dat{j}, 'file'))
-            fprintf('o');
             eval(['mex -c -outdir ./Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' sources_dat{j}]);
+            fprintf('done\n');
+        else
+            fprintf('skipped\n');
         end
     end
 end
 
-% compile and link main mex file
-fprintf('o');
-eval(['mex' outputstr includesstr ' "' which('arSimuCalc.c') '"' objectsstr]);
+% serial code
+% outputstr = ' -output arSimuCalcSerial';
 
-fprintf('... done\n');
+% parallel code using POSIX threads
+outputstr = [' -output ' ar.fkt];
+
+% compile and link main mex file
+fprintf('compiling and linking %s...', ar.fkt);
+eval(['mex' outputstr includesstr ' "' which('arSimuCalc.c') '"' objectsstr]);
+fprintf('done\n');
 
 % refresh file cache
 rehash

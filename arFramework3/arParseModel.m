@@ -19,6 +19,8 @@ end
 
 checksum_global = addToCheckSum(ar.info.c_version_code);
 for m=1:length(ar.model)
+    fprintf('\n');
+    
     % parse model
     arParseODE(m);
     
@@ -309,7 +311,7 @@ ar.model(m).condition(c).pold = ar.model(m).condition(c).p;
 ar.model(m).condition(c).p = union(vertcat(varlist{:}), [])'; %R2013a compatible
 
 if(doskip)
-    fprintf('skipping\n');
+    fprintf('skipped\n');
     return;
 end
 
@@ -528,7 +530,7 @@ ar.model(m).data(d).p = union(vertcat(varlist{:}), [])'; %R2013a compatible
 
 
 if(doskip)
-    fprintf('skipping\n');
+    fprintf('skipped\n');
     return;
 end
 
@@ -725,7 +727,12 @@ fprintf('done\n');
 % better subs
 function out = mysubs(in, old, new)
 if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    out = subs(in, old(:), new(:));
+    matVer = ver('MATLAB');
+    if(str2double(matVer.Version)>=8.1)
+        out = subs(in, old(:), new(:));
+    else
+        out = subs(in, old(:), new(:), 0);
+    end
 else
     out = in;
 end

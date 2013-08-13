@@ -490,6 +490,9 @@ switch method
         grad = DM*g_pcgr;
         [R,permR] = feval(@aprecon,sres,pcoptions,DM,DG);
         [dp, posdef] = pcgr(DM,DG,grad,kmax,pcgtol,@atamult,sres,R,permR,'jacobprecon',pcoptions);
+
+%         posdef = 1;
+%         dp = (DM*H*DM + DG)\g';
         
         % calculate subspace Z
         tol2 = sqrt(eps);

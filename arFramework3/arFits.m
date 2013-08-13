@@ -90,13 +90,18 @@ for j=1:n
         ar.chi2sconstr(j) = ar.chi2constr;
         ar.exitflag(j) = ar.fit.exitflag;
         ar.fun_evals(j) = ar.fevals;
-        ar.optim_crit(j) = ar.fit.output.firstorderopt;
+        ar.optim_crit(j) = ar.firstorderopt;
     catch exception
         fprintf('fit #%i: %s\n', j, exception.message);
     end
     ar.timing(j) = toc;
     if(log_fit_history)
-        arSaveFit(sprintf('run%i', j));
+        name = ar.config.optimizers{ar.config.optimizer};
+        if(ar.config.optimizer==5)
+            tmpnames = arNLS;
+            name = [name '_' tmpnames{ar.config.optimizerStep+1}]; %#ok<AGROW>
+        end
+        arSaveFit([name '_' sprintf('run%i', j)]);
     end
 end
 fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
