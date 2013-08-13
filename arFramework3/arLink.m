@@ -161,9 +161,7 @@ for m = 1:length(ar.model)
             end
             
             ar.model(m).data(d).yFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y));
-            ar.model(m).data(d).syFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
             ar.model(m).data(d).ystdFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y));
-            ar.model(m).data(d).systdFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
         end
     end
     for c = 1:length(ar.model(m).condition)
@@ -188,11 +186,8 @@ for m = 1:length(ar.model)
         end
         
         ar.model(m).condition(c).uFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).u));
-        ar.model(m).condition(c).suFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).u), length(ar.model(m).condition(c).p));
         ar.model(m).condition(c).vFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).vs));
-        ar.model(m).condition(c).svFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).vs), length(ar.model(m).condition(c).p));
         ar.model(m).condition(c).xFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).x));
-        ar.model(m).condition(c).sxFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).x), length(ar.model(m).condition(c).p));
         
         % steady state sensitivities
         ar.model(m).condition(c).qSteadyState = false(1,length(ar.model(m).x));

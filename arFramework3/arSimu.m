@@ -2,7 +2,7 @@
 %
 % arSimu(sensi,fine)
 %   sensi:          calculate sensitivities         [true]
-%   fine:           fine grid for plotting          [true]
+%   fine:           fine grid for plotting          [false]
 
 function arSimu(sensi,fine)
 
@@ -12,7 +12,7 @@ if(~exist('sensi', 'var'))
     sensi = true;
 end
 if(~exist('fine', 'var'))
-    fine = true;
+    fine = false;
 end
 
 if(~isfield(ar,'p'))
@@ -57,6 +57,11 @@ end
 %     arWriteCFiles;
 % end
 
+% initialize fine senistivities
+if(fine && sensi)
+    initFineSensis;
+end
+
 eval([ar.fkt '(ar, fine, ar.config.useSensis && sensi);'])
 
 % integration error ?
@@ -92,5 +97,25 @@ if(fine && sensi && ar.config.useSensis)
                 end
             end
         end
+    end
+end
+
+
+% Initialize arrays for fine sensitivities with zeros
+function initFineSensis
+
+global ar
+
+for m = 1:length(ar.model)
+    if(isfield(ar.model(m), 'data'))
+        for d = 1:length(ar.model(m).data)
+            ar.model(m).data(d).syFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+            ar.model(m).data(d).systdFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+        end
+    end
+    for c = 1:length(ar.model(m).condition)
+        ar.model(m).condition(c).suFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).u), length(ar.model(m).condition(c).p));
+        ar.model(m).condition(c).svFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).vs), length(ar.model(m).condition(c).p));
+        ar.model(m).condition(c).sxFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).x), length(ar.model(m).condition(c).p));
     end
 end
