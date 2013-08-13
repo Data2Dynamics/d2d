@@ -33,7 +33,7 @@ if(n>7)
 end
 
 if(~exist('color','var') || isempty(color))
-    colors = lines(n);
+    % colors = lines(n);
     colors = jet(n);
     colors = bsxfun(@rdivide, colors, sqrt(sum(colors.^2,2)));
     jc = mymod(j,length(colors));
