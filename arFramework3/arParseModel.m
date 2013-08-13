@@ -723,12 +723,9 @@ fprintf('done\n');
 
 
 % better subs
-function out = mysubs(in, old, new, flag)
-if(~exist('flag','var'))
-    flag = 0;
-end
+function out = mysubs(in, old, new)
 if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    out = subs(in, old(:), new(:), flag);
+    out = subs(in, old(:), new(:));
 else
     out = in;
 end
