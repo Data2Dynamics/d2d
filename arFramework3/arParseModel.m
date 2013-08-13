@@ -727,7 +727,12 @@ fprintf('done\n');
 % better subs
 function out = mysubs(in, old, new)
 if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    out = subs(in, old(:), new(:));
+    matVer = ver('MATLAB');
+    if(str2double(matVer.Version)>=8.1)
+        out = subs(in, old(:), new(:));
+    else
+        out = subs(in, old(:), new(:), 0);
+    end
 else
     out = in;
 end
