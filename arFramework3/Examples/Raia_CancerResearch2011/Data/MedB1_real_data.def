@@ -1,0 +1,91 @@
+DESCRIPTION
+"Experimenter: Valentina Raia"
+
+PREDICTOR
+t               T   min         time	0	100
+
+INPUTS
+
+OBSERVABLES
+RecSurf_obs                 C   au  conc.   0   0   "Rec + IL13_Rec + p_IL13_Rec"
+IL13_cell_obs               C   au  conc.   0   0   "scale_IL13_cell_obs * (IL13_Rec + p_IL13_Rec + p_IL13_Rec_i + IL13_DecoyR)"
+pIL4Ra_obs                  C   au  conc.   0   0   "scale_pIL4Ra_obs * (p_IL13_Rec + p_IL13_Rec_i)"
+pJAK2_obs                   C   au  conc.   0   0   "scale_pJAK2_obs * pJAK2"
+SOCS3mRNA_obs               C   au  conc.   0   0   "scale_SOCS3mRNA_obs * SOCS3mRNA"
+CD274mRNA_obs               C   au  conc.   0   0   "scale_CD274mRNA_obs * CD274mRNA"
+SOCS3_obs                   C   au  conc.   0   0   "SOCS3"
+pSTAT5_obs                  C   au  conc.   0   0   "pSTAT5"
+        
+// RecSurf_obs                 C   au  conc.   0   1   "Rec + IL13_Rec + p_IL13_Rec"
+// IL13_cell_obs               C   au  conc.   1   1   "scale_IL13_cell_obs * (IL13_Rec + p_IL13_Rec + p_IL13_Rec_i + IL13_DecoyR)"
+// pIL4Ra_obs                  C   au  conc.   1   1   "scale_pIL4Ra_obs * (p_IL13_Rec + p_IL13_Rec_i)"
+// pJAK2_obs                   C   au  conc.   1   1   "scale_pJAK2_obs * pJAK2"
+// SOCS3mRNA_obs               C   au  conc.   1   1   "scale_SOCS3mRNA_obs * SOCS3mRNA"
+// CD274mRNA_obs               C   au  conc.   1   1   "scale_CD274mRNA_obs * CD274mRNA"
+// SOCS3_obs                   C   au  conc.   0   1   "SOCS3"
+// pSTAT5_obs                  C   au  conc.   0   1   "pSTAT5"
+
+// RecSurf_obs                 C   au  conc.   0   1   "off1 + Rec + IL13_Rec + p_IL13_Rec"
+// IL13_cell_obs               C   au  conc.   1   1   "off2 + scale_IL13_cell_obs * (IL13_Rec + p_IL13_Rec + p_IL13_Rec_i + IL13_DecoyR)"
+// pIL4Ra_obs                  C   au  conc.   1   1   "off3 + scale_pIL4Ra_obs * (p_IL13_Rec + p_IL13_Rec_i)"
+// pJAK2_obs                   C   au  conc.   1   1   "off4 + scale_pJAK2_obs * pJAK2"
+// SOCS3mRNA_obs               C   au  conc.   1   1   "off5 + scale_SOCS3mRNA_obs * SOCS3mRNA"
+// CD274mRNA_obs               C   au  conc.   1   1   "off6 + scale_CD274mRNA_obs * CD274mRNA"
+// SOCS3_obs                   C   au  conc.   0   1   "off7 + SOCS3"
+// pSTAT5_obs                  C   au  conc.   0   1   "off8 + pSTAT5"
+        
+ERRORS
+// RecSurf_obs		"0.1 + 0.1*RecSurf_obs"
+// IL13_cell_obs	"0.1 + 0.1*IL13_cell_obs"
+// pIL4Ra_obs		"0.1 + 0.1*pIL4Ra_obs"
+// pJAK2_obs		"0.1 + 0.1*pJAK2_obs"
+// SOCS3mRNA_obs	"0.1 + 0.1*SOCS3mRNA_obs"
+// CD274mRNA_obs	"0.1 + 0.1*CD274mRNA_obs"
+// SOCS3_obs		"0.1 + 0.1*SOCS3_obs"
+// pSTAT5_obs		"0.1 + 0.1*pSTAT5_obs"
+        
+RecSurf_obs		"RecSurf_obs1 + RecSurf_obs2*RecSurf_obs"
+IL13_cell_obs	"IL13_cell_obs1 + IL13_cell_obs2*IL13_cell_obs"
+pIL4Ra_obs		"pIL4Ra_obs1 + pIL4Ra_obs2*pIL4Ra_obs"
+pJAK2_obs		"pJAK2_obs1 + pJAK2_obs2*pJAK2_obs"
+SOCS3mRNA_obs	"SOCS3mRNA_obs1 + SOCS3mRNA_obs2*SOCS3mRNA_obs"
+CD274mRNA_obs	"CD274mRNA_obs1 + CD274mRNA_obs2*CD274mRNA_obs"
+SOCS3_obs		"SOCS3_obs1 + SOCS3_obs2*SOCS3_obs"
+pSTAT5_obs		"pSTAT5_obs1 + pSTAT5_obs2*pSTAT5_obs"
+        
+// RecSurf_obs		"0.01 + 0.01*RecSurf_obs"
+// IL13_cell_obs	"0.01 + 0.01*IL13_cell_obs"
+// pIL4Ra_obs		"0.01 + 0.01*pIL4Ra_obs"
+// pJAK2_obs		"0.01 + 0.01*pJAK2_obs"
+// SOCS3mRNA_obs	"0.01 + 0.01*SOCS3mRNA_obs"
+// CD274mRNA_obs	"0.01 + 0.01*CD274mRNA_obs"
+// SOCS3_obs		"0.01 + 0.01*SOCS3_obs"
+// pSTAT5_obs		"0.01 + 0.01*pSTAT5_obs"
+        
+// RecSurf_obs		"sd_RecSurf_obs"
+// IL13_cell_obs	"sd_IL13_cell_obs"
+// pIL4Ra_obs		"sd_pIL4Ra_obs"
+// pJAK2_obs		"sd_pJAK2_obs"
+// SOCS3mRNA_obs	"sd_SOCS3mRNA_obs"
+// CD274mRNA_obs	"sd_CD274mRNA_obs"
+// SOCS3_obs		"sd_SOCS3_obs"
+// pSTAT5_obs		"sd_pSTAT5_obs"
+
+INVARIANTS
+        
+CONDITIONS
+init_Rec			"1.3"
+init_IL13_Rec		"0"
+init_p_IL13_Rec 	"0"
+init_p_IL13_Rec_i	"0"
+init_JAK2           "2.8"
+init_pJAK2  		"0"
+// init_SHP1   		"91"
+SHP1                "91"
+init_STAT5  		"165"
+init_pSTAT5			"0"
+init_SOCS3mRNA		"0"
+init_DecoyR			"0.34"
+init_IL13_DecoyR	"0"
+init_SOCS3  		"0"
+init_CD274mRNA		"0"

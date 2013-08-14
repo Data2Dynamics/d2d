@@ -18,7 +18,7 @@ if(nargin==0)
 end
 
 if(~silent)
-    fprintf('linking time points... ');
+    fprintf('\nlinking time points... ');
 end
 
 for m=1:length(ar.model)
