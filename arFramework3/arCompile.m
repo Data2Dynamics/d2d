@@ -121,7 +121,7 @@ for j=1:length(sources)
         eval(['mex -c -outdir Compiled/'  ar.info.c_version_code '/' mexext '/' includesstr ' ' sundials_path sources{j}]);
     end
 end
-fprintf('done\n');
+fprintf('...done\n');
 
 % pre-compile input functions
 eval(['mex -c -outdir Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' ar_path '/arInputFunctionsC.c']);
