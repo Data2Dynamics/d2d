@@ -7,7 +7,6 @@ function basepath = arSave(name, withSyms)
 
 global ar
 global pleGlobals 
-global mledist
 
 if(~exist('withSyms','var'))
     withSyms = false;
@@ -41,7 +40,7 @@ if(isempty(ar.config.savepath))
         end
     end
     
-    save([ar.config.savepath '/workspace.mat']);
+    save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals');
     fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
 else
     if(exist('name','var'))
@@ -71,7 +70,7 @@ else
             end
         end
         
-        save([ar.config.savepath '/workspace.mat']);
+        save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals');
         fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
     else
         if(nargout == 0)
@@ -100,7 +99,7 @@ else
                 end
             end
             
-            save([ar.config.savepath '/workspace.mat']);
+            save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals');
             fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
         else
             if(~exist(ar.config.savepath, 'dir'))
@@ -120,7 +119,7 @@ else
                     end
                 end
                 
-                save([ar.config.savepath '/workspace.mat']);
+                save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals');
                 fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
             end
         end

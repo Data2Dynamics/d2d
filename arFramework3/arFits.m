@@ -1,14 +1,15 @@
 % fit sequence
 %
-% arFits(ps, append)
+% arFits(ps, append, dynamic_only, plot_summary, log_fit_history, backup_save)
 %
 % ps:                           parameter values      
 % append:                       [false]
 % dynamic_only                  [false]
 % plot_summary                  [false]
 % log_fit_history               [false]
+% backup_save                   [false]
 
-function arFits(ps, append, dynamic_only, plot_summary, log_fit_history)
+function arFits(ps, append, dynamic_only, plot_summary, log_fit_history, backup_save)
 
 global ar
 
@@ -23,6 +24,9 @@ if(~exist('plot_summary','var'))
 end
 if(~exist('log_fit_history','var'))
     log_fit_history = false;
+end
+if(~exist('backup_save','var'))
+    backup_save = false;
 end
 
 n = size(ps,1);
@@ -102,6 +106,9 @@ for j=1:n
             name = [name '_' tmpnames{ar.config.optimizerStep+1}]; %#ok<AGROW>
         end
         arSaveFit([name '_' sprintf('run%i', j)]);
+    end
+    if(backup_save)
+        save('arFits_backup.mat','ar');
     end
 end
 fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));

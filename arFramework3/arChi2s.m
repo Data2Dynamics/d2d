@@ -25,7 +25,7 @@ ar.chi2s = nan(1,n);
 ar.chi2sconstr = nan(1,n);
 ar.timing = nan(1,n);
 ar.exitflag = nan(1,n);
-ar.fun_evals = [];
+ar.fun_evals = nan(1,n);
 
 if(sum(ar.qFit==1)<6)
     figure(1)

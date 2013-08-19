@@ -1,6 +1,6 @@
 % fit sequence using latin hyper cube sampling
 %
-% arFitLHS(n, append, randomseed, dynamic_only)
+% arFitLHS(n, append, randomseed, dynamic_only, plot_summary, log_fit_history, backup_save)
 %
 % n:        number of runs      [10]
 % append:                       [false]
@@ -8,8 +8,9 @@
 % dynamic_only                  [false]
 % plot_summary                  [false]
 % log_fit_history               [false]
+% backup_save                   [false]
 
-function arFitLHS(n, append, randomseed, dynamic_only, plot_summary, log_fit_history)
+function arFitLHS(n, append, randomseed, dynamic_only, plot_summary, log_fit_history, backup_save)
 
 global ar
 
@@ -37,9 +38,8 @@ end
 if(~exist('log_fit_history','var'))
     log_fit_history = false;
 end
-
-if(~isfield(ar.config,'useModifiedFits'))
-    ar.config.useModifiedFits = false;
+if(~exist('backup_save','var'))
+    backup_save = false;
 end
 
 ps = ones(n,1) * ar.p;
@@ -56,9 +56,6 @@ psrand = psrand + (ones(n,1)*ar.lb(q_select));
 
 ps(:,q_select) = psrand;
 
-if(ar.config.useModifiedFits)
-	arFits_modified(ps, append, dynamic_only, plot_summary);
-else
-	arFits(ps, append, dynamic_only, plot_summary, log_fit_history);
-end
+arFits(ps, append, dynamic_only, plot_summary, log_fit_history, backup_save);
+
 
