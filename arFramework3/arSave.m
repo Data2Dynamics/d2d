@@ -12,6 +12,11 @@ if(~exist('withSyms','var'))
     withSyms = false;
 end
 
+matVer = ver('MATLAB');
+if(str2double(matVer.Version)<7.3)
+    error('MATLAB version should be > 7.3');
+end
+    
 if(isempty(ar.config.savepath))
     if(~exist('name','var'))
         name = input('enter new repository name addition: ', 's');
@@ -40,7 +45,7 @@ if(isempty(ar.config.savepath))
         end
     end
     
-    save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals');
+    save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
     fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
 else
     if(exist('name','var'))
@@ -70,7 +75,7 @@ else
             end
         end
         
-        save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals');
+        save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
         fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
     else
         if(nargout == 0)
@@ -99,7 +104,7 @@ else
                 end
             end
             
-            save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals');
+            save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
             fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
         else
             if(~exist(ar.config.savepath, 'dir'))
@@ -119,7 +124,7 @@ else
                     end
                 end
                 
-                save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals');
+                save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
                 fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
             end
         end
