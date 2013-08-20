@@ -12,11 +12,6 @@ if(~exist('withSyms','var'))
     withSyms = false;
 end
 
-matVer = ver('MATLAB');
-if(str2double(matVer.Version)<7.3)
-    error('MATLAB version should be > 7.3');
-end
-    
 if(isempty(ar.config.savepath))
     if(~exist('name','var'))
         name = input('enter new repository name addition: ', 's');
