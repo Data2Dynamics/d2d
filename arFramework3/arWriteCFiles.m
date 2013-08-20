@@ -610,6 +610,7 @@ fprintf(fid, '\n  return;\n}\n\n\n');
 fprintf('done\n');
 
 
+
 % write OBS headers
 function arWriteHFilesOBS(fid, m, d)
 global ar
@@ -624,6 +625,7 @@ fprintf(fid, '#include <sundials/sundials_types.h>\n');
 fprintf(fid, '#include <sundials/sundials_math.h>\n');  
 fprintf(fid, '#include <udata.h>\n');
 fprintf(fid, '#include <math.h>\n');
+fprintf(fid, '#include <arInputFunctionsC.h>\n');
 fprintf(fid,'\n\n\n');
 
 fprintf(fid, ' void fy_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int iruns, double *y, double *p, double *u, double *x);\n', ar.model(m).data(d).fkt);
@@ -639,6 +641,17 @@ fprintf('header...');
 % OBS
 function arWriteCFilesOBS(fid, m, d)
 global ar
+
+fprintf(fid, '#include "%s.h"\n',  ar.model(m).data(d).fkt);
+fprintf(fid, '#include <cvodes/cvodes.h>\n');    
+fprintf(fid, '#include <cvodes/cvodes_dense.h>\n');
+fprintf(fid, '#include <nvector/nvector_serial.h>\n');
+fprintf(fid, '#include <sundials/sundials_types.h>\n'); 
+fprintf(fid, '#include <sundials/sundials_math.h>\n');  
+fprintf(fid, '#include <udata.h>\n');
+fprintf(fid, '#include <math.h>\n');
+fprintf(fid, '#include <arInputFunctionsC.h>\n');
+fprintf(fid,'\n\n\n');
 
 % write y
 fprintf(fid, ' void fy_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int iruns, double *y, double *p, double *u, double *x){\n', ar.model(m).data(d).fkt);

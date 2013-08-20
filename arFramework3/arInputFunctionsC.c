@@ -1,3 +1,5 @@
+#include <math.h>
+
 /* general input functions */
 
 double step1(double t, double u1, double t1, double u2) {
@@ -48,3 +50,24 @@ double dstep2(double t, double u1, double t1, double u2, double t2, double u3, i
             return(0);
     }
 }
+
+/* custom rate laws */
+
+double mmenten(double x, double vmax, double km){
+    return(vmax * x / (km + x));
+}
+
+double mmenten_alt(double x, double klin, double ksat){
+    return(0);
+}
+
+double hill_kd(double x, double h, double kd){
+    return(pow(x,h) / (kd + pow(x,h)));
+}
+
+double hill_ka(double x, double h, double ka){
+    /* return(pow(x,h) / (pow(ka,h) + pow(x,h))); */
+    return(1 / (pow((ka/x),h) + 1));
+}
+
+

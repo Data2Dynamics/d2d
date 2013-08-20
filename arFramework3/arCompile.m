@@ -22,7 +22,7 @@ end
 fprintf('\n');
 
 if(exist([ar.fkt '.' mexext],'file') && ~forceFullCompile)
-    fprintf('skipped\n');
+    fprintf('compiling %s...skipped\n', ar.fkt);
     return
 end
 
