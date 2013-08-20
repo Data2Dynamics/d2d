@@ -121,6 +121,8 @@ title('parameters - differential changes')
 xlabel('iterations')
 xlim([0 length(xs)-1])
 
+return
+
 figure(3); clf;
 % xs = 100:500;
 % xs = 100:200;

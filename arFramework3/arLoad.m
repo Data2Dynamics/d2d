@@ -13,3 +13,6 @@ ar = S.ar;
 fprintf('workspace loaded from file %s\n', filename);
 
 pleGlobals = pleLoad(ar);
+
+clear S
+clear filename

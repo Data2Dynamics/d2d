@@ -31,3 +31,6 @@ else
 end
 ar.fit_hist(j).config = ar.config.optim;
 ar.fit_hist(j).name = name;
+
+[~,imin] = min(ar.fit.chi2_hist + ar.fit.constr_hist);
+ar.fit_hist(j).p = ar.fit.p_hist(imin,:);

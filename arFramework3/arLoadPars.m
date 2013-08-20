@@ -1,13 +1,17 @@
 % load model parameters and parameter setting from .mat
 % and reconcile with current parameters
 %
-% arLoadPars(filename, fixAssigned)
+% arLoadPars(filename, fixAssigned, only_values)
+%
+% filename:     source file name
+% fixAssigned:  fix the assigned parameters
+% only_values:  only load parameter values, not bound and status
 
-function arLoadPars(filename, fixAssigned)
+function arLoadPars(filename, fixAssigned, only_values)
 
 global ar
 
-if(nargin<1)
+if(~exist('filename','var') || isempty(filename))
     [~, filename] = fileChooser('./Results', 1, true);
 	filename = ['./Results/' filename '/workspace.mat'];
 else
@@ -21,6 +25,9 @@ end
 if(~exist('fixAssigned', 'var'))
     fixAssigned = false;  
 end
+if(~exist('only_values', 'var'))
+    only_values = false;  
+end
 
 S = load(filename);
 fprintf('parameters loaded from file %s:\n', filename);
@@ -31,11 +38,25 @@ for j=1:length(ar.p)
     if(isempty(qi))
         fprintf('                      %s\n', ar.pLabel{j});
     else
-        ar.p(j) = S.ar.p(qi);
-        ar.qLog10(j) = S.ar.qLog10(qi);
-        ar.qFit(j) = S.ar.qFit(qi);
-        ar.lb(j) = S.ar.lb(qi);        
-        ar.ub(j) = S.ar.ub(qi);        
+        if(~only_values)
+            ar.p(j) = S.ar.p(qi);
+            ar.qLog10(j) = S.ar.qLog10(qi);
+            ar.qFit(j) = S.ar.qFit(qi);
+            ar.lb(j) = S.ar.lb(qi);
+            ar.ub(j) = S.ar.ub(qi);
+        else
+            if(ar.qLog10(j) == S.ar.qLog10(qi))
+                ar.p(j) = S.ar.p(qi);
+            elseif(ar.qLog10(j)==1 && S.ar.qLog10(qi)==0)
+                ar.p(j) = log10(S.ar.p(qi));
+            elseif(ar.qLog10(j)==0 && S.ar.qLog10(qi)==1)
+                ar.p(j) = 10^(S.ar.p(qi));
+            end
+            
+            % check bound
+            ar.p(ar.p<ar.lb) = ar.lb(ar.p<ar.lb);
+            ar.p(ar.p>ar.ub) = ar.ub(ar.p>ar.ub);
+        end
         
         if(fixAssigned)
             ar.qFit(j) = 0;
