@@ -356,12 +356,22 @@ end
 % end
 
 % cut off too long arrays
-if(isfield(ar.model, 'data') && isfield(ar,'res'))
-    if(length(ar.res)>=resindex)
-        ar.res(resindex:end) = [];
+if(isfield(ar.model, 'data'))
+    if(isfield(ar,'res'))
+        if(length(ar.res)>=resindex)
+            ar.res(resindex:end) = [];
+        end
+        if(ar.config.useSensis && sensi && size(ar.sres,1)>=sresindex)
+            ar.sres(sresindex:end,:) = [];
+        end
     end
-    if(ar.config.useSensis && sensi && size(ar.sres,1)>=sresindex)
-        ar.sres(sresindex:end,:) = [];
+    if(isfield(ar,'constr'))
+        if(length(ar.constr)>=constrindex)
+            ar.constr(constrindex:end) = [];
+        end
+        if(ar.config.useSensis && sensi && size(ar.sconstr,1)>=sconstrindex)
+            ar.sconstr(sconstrindex:end,:) = [];
+        end
     end
 end
 
