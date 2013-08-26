@@ -33,9 +33,9 @@ S = load(filename);
 fprintf('parameters loaded from file %s:\n', filename);
 
 for j=1:length(ar.p)
-    qi = strmatch(ar.pLabel{j}, strvcat(S.ar.pLabel), 'exact'); %#ok<MATCH3,REMFF1>
+    qi = ismember(S.ar.pLabel, ar.pLabel{j});
     
-    if(isempty(qi))
+    if(isempty(qi) || sum(qi) == 0)
         fprintf('                      %s\n', ar.pLabel{j});
     else
         if(~only_values)
