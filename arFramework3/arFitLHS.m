@@ -25,7 +25,8 @@ if(exist('rng','file')~=0)
         ar.lhs_seed = randomseed;
         rng(randomseed);
     else
-        rngsettings = rng('shuffle');
+        rng('shuffle');
+        rngsettings = rng;
         ar.lhs_seed = rngsettings.Seed;
     end
 end
