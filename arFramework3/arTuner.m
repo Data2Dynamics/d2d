@@ -2,7 +2,7 @@ function varargout = arTuner(varargin)
 % ARTUNER M-file for arTuner.fig
 % GUI to assign parameter values
 
-% Last Modified by GUIDE v2.5 25-Jun-2013 11:48:32
+% Last Modified by GUIDE v2.5 26-Aug-2013 10:20:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -308,4 +308,3 @@ elseif(ar.qFit(ar.tuner.index)==0)
 elseif(ar.qFit(ar.tuner.index)==2)
     set(handles.radiobutton6, 'Value', 1);
 end
-

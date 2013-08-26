@@ -36,7 +36,10 @@ optim_krit = ar.optim_crit(isorted);
 dchi2 = chi2inv(0.95, 1);
 
 figure(1); clf;
-nsub = sum([ar.ndata>0 ar.nconstr>0])+1;
+nsub = sum([ar.ndata>0 ar.nconstr>0]);
+if(nsub==2)
+    nsub = 3;
+end
 isub = 1;
 
 if(ar.ndata>0)

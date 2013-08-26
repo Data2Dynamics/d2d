@@ -58,9 +58,13 @@ for jk=jks
             chi2s = 2*ar.ndata*log(sqrt(2*pi)) + chi2s;
         end
         
-        plot(ps, chi2s, 'k-', 'LineWidth', 1)
-        hold on
-        plot(ps, constrs, 'r--', 'LineWidth', 1)
+        if(ar.ndata>0)
+            plot(ps, chi2s, 'k-', 'LineWidth', 1)
+            hold on
+        end
+        if(ar.nconstr>0)
+            plot(ps, constrs, 'r--', 'LineWidth', 1)
+        end
         hold off
         
         ax1 = g;

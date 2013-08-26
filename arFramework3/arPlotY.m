@@ -251,7 +251,7 @@ for jm = 1:length(ar.model)
                         Clines = myLineStyle(length(times)*length(jcs), ccount);
                         
                         for jy = 1:ny
-                            [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break] = ...
+                            [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit] = ...
                                 getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
                             if(length(unique(t))==1)
                                 t = [t-0.1; t+0.1];
@@ -265,7 +265,11 @@ for jm = 1:length(ar.model)
                                 g = subplot(nrows,ncols,jy);
                                 ar.model(jm).plot(jplot).gy(jy) = g;
                                 
-                                markerstyle = '*';
+                                if(data_qFit)
+                                    markerstyle = '*';
+                                else
+                                    markerstyle = 'o';
+                                end
                                 
                                 if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
                                     qfinite = ~isinf(t) & ~isinf(y);
@@ -501,13 +505,16 @@ end
 
 
 
-function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break] = getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
+function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit] = ...
+    getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
 global ar
 
 zero_break = [];
+data_qFit = true;
 
 ccount = 1;
 for jd = ds
+    data_qFit = data_qFit & ar.model(jm).data(jd).qFit(jy);
 	qt = ar.model(jm).data(jd).tExp == ttime;
     for jc = 1:length(ar.model(jm).data(jd).condition)
         if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
