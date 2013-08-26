@@ -97,14 +97,19 @@ funevals = 0;
 solver_calls = 0;
 
 % initial function evaluation
-[res, sres] = feval(fun, p);
+funevals = funevals + 1;
+if(nargout(fun)==2)
+    [res, sres] = feval(fun, p);
+    H = 2*(sres'*sres);             % Hessian matrix approximation
+elseif(nargout(fun)==3)
+    [res, sres, H] = feval(fun, p); % user Hessian matrix
+else
+    error('nargout(fun)==2 or 3');
+end
 resnorm = sum(res.^2);
 resnorm_start = resnorm;
-funevals = funevals + 1;
-
 llh = sum(res.^2);      % objective function
 g = -2*res*sres;        % gradient
-H = 2*(sres'*sres);     % Hessian matrix
 
 % calculate first order optimality criterion
 onbound = [p==ub; p==lb];
@@ -138,7 +143,11 @@ while(iter < options.MaxIter && ~q_converged)
     pt(pt>ub) = ub(pt>ub);
     
     % evaluate trial point
-    [rest, srest] = feval(fun, pt);
+    if(nargout(fun)==2)
+        [rest, srest] = feval(fun, pt);
+    elseif(nargout(fun)==3)
+        [rest, srest, Ht] = feval(fun, pt);
+    end
     resnormt = sum(rest.^2);
     funevals = funevals + 1;
     
@@ -165,8 +174,12 @@ while(iter < options.MaxIter && ~q_converged)
         
         llh = sum(res.^2);      % objective function
         g = -2*res*sres;        % gradient
-        H = 2*(sres'*sres);     % Hessian matrix
-        
+        if(nargout(fun)==2)
+            H = 2*(sres'*sres); % Hessian matrix approximation
+        elseif(nargout(fun)==3)
+            H = Ht;             % user Hessian matrix
+        end
+            
         % calculate first order optimality criterion
         onbound = [p==ub; p==lb];
         exbounds = [g>0; g<0];
