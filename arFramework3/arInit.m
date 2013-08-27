@@ -5,7 +5,9 @@
 % Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de
 % Copyright 2013 D2D Development Team. All rights reserved.
 
-arCheck;
+if(~arCheck)
+    return;
+end
 
 global ar
 

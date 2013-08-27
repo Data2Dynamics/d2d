@@ -1,13 +1,18 @@
 % check systems setup
 % addpath and configure sundials
 
-function arCheck
+function docontinue = arCheck
 
 if(verLessThan('symbolic', '5.5'))
 	error('MUPAD symbolic toolbox version >= 5.5 required');
 end
 
-ar_path = strrep(which('arInit.m'),'/arInit.m','');
+if(~ispc)
+    ar_path = strrep(which('arInit.m'),'/arInit.m','');
+else
+    ar_path = strrep(which('arInit.m'),'\arInit.m','');
+end
+
 addpath(ar_path)
 
 % load path of sub-directories
@@ -37,16 +42,28 @@ end
 
 % configure sundials 2.5.0
 if(exist([ar_path '/sundials-2.5.0'],'dir') == 0)
-    path_backup = cd;
-    cd(ar_path);
-    !tar -xvf sundials-2.5.0.tar
-    cd(path_backup);
+    if(~ispc)
+        path_backup = cd;
+        cd(ar_path);
+        !tar -xvf sundials-2.5.0.tar
+        cd(path_backup);
+    else
+        fprintf('Please unpack %s and repeat action.\n', [ar_path '\sundials-2.5.0.tar']);
+        docontinue = false;
+        return
+    end
 end
 if(exist([ar_path '/sundials-2.5.0/config.h'],'file') == 0)
-    path_backup = cd;
-    cd([ar_path '/sundials-2.5.0']);
-    !./configure
-    cd(path_backup);
+    if(~ispc)
+        path_backup = cd;
+        cd([ar_path '/sundials-2.5.0']);
+        !./configure
+        cd(path_backup);
+    else
+        fprintf('Please run ./configure in folder %s and repeat action.\n', [ar_path '\sundials-2.5.0.tar']);
+        docontinue = false;
+        return
+    end
 end
 
 % EvA2 Toolbox
@@ -73,3 +90,5 @@ if exist('arInitUser.m','file')==0
 	fprintf(1,'\n%s\n','arInitUser.m has been successfully created!');
     rehash path
 end
+
+docontinue = true;
