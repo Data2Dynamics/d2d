@@ -12,7 +12,8 @@
 #include <string.h>
 #include <math.h>
 #include <mex.h>
-#include <pthread.h>
+/* #include <pthread.h> */
+#include <sys/time.h>
 
 #include <cvodes/cvodes.h>           /* prototypes for CVODES fcts. and consts. */
 #include <cvodes/cvodes_dense.h>     /* prototype for CVDENSE fcts. and constants */
@@ -24,33 +25,18 @@
 #define Ith(v, i)    NV_Ith_S(v, i-1)       /* i-th vector component i=1..neq */
 #define IJth(A, i, j) DENSE_ELEM(A, i-1, j-1) /* (i,j)-th matrix component i,j=1..neq */
 
+#define MXNCF        20
+#define MXNEF        20
+
 /* user variables */
-#include "arSimuCalcVariables.c"
+/* #include "arSimuCalcVariables.c" */
 
 struct thread_data_x {
     int	im;
     int ic;
     mxArray *arcondition;
-};
-
-struct thread_data_y {
-    int	im;
-    int id;
     mxArray *ardata;
-    mxArray *arcondition;
-    int dt;
 };
-
-typedef struct {
-    double *u;
-    double *su;
-    double *p;
-    double *v;
-    double *dvdx;
-    double *dvdu;
-    double *dvdp;
-    double *sv;
-} *UserData;
 
 mxArray *armodel;
 
@@ -63,26 +49,31 @@ double  cvodes_atol;
 int  cvodes_maxsteps;
 int  fiterrors;
 double fiterrors_correction;
-bool error_corr = FALSE;
+struct timeval t1;
 
 /* Prototypes of private functions */
 void *x_calc(void *threadarg);
-void *y_calc(void *threadarg);
+void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition);
 
-static void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2);
-static void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd);
-static void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2);
-static void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *yexp, double *y, double *ystd, double *res, double *reserr);
+void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2);
+void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd);
+void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2);
+void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr);
 
-static int check_flag(void *flagvalue, char *funcname, int opt);
-static int ewt(N_Vector y, N_Vector w, void *user_data);
+int check_flag(void *flagvalue, char *funcname, int opt);
+int ewt(N_Vector y, N_Vector w, void *user_data);
 
 /* user functions */
 #include "arSimuCalcFunctions.c"
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    struct timeval t2, tdiff;
+    double *ticks_stop;
+    ticks_stop = mxGetData(mxGetField(prhs[0], 0, "stop"));
     
-    int nthreads_x, nthreads_y, nm, im, nc, ic, tid, dtid, nd, id, rc, has_tExp;
+    gettimeofday(&t1, NULL);
+    
+    int nthreads_x, nm, im, nc, ic, tid, dtid, nd, id, rc, has_tExp;
     
     mxArray    *arconfig;
     mxArray    *arcondition;
@@ -109,15 +100,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             
     /* threads */
     nthreads_x = mxGetScalar(mxGetField(arconfig, 0, "nthreads_x"));
-    nthreads_y = mxGetScalar(mxGetField(arconfig, 0, "nthreads_y"));
-    pthread_t threads_x[nthreads_x];
-    pthread_t threads_y[nthreads_y];
+/*    pthread_t threads_x[nthreads_x]; */
     struct thread_data_x thread_data_x_array[nthreads_x];
-    struct thread_data_y thread_data_y_array[nthreads_y];
     
 /*    printf("%i x-threads (%i fine, %i sensi, %i jacobian, %g rtol, %g atol, %i maxsteps)\n", nthreads_x, fine,
-            sensi, jacobian, cvodes_rtol, cvodes_atol, cvodes_maxsteps);
-    printf("%i y-threads\n", nthreads_y); */
+            sensi, jacobian, cvodes_rtol, cvodes_atol, cvodes_maxsteps); */
     
     nm = mxGetNumberOfElements(armodel);
     /* loop over models */
@@ -128,6 +115,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if(arcondition==NULL){
             mexErrMsgTxt("field ar.model.condition not existing");
         }
+        
+        /* get ar.model(im).data */
+        ardata = mxGetField(armodel, im, "data");
         
         nc = mxGetNumberOfElements(arcondition);
         /* loop over conditions */
@@ -140,34 +130,35 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 thread_data_x_array[tid].im = im;
                 thread_data_x_array[tid].ic = ic;
                 thread_data_x_array[tid].arcondition = arcondition;
+                thread_data_x_array[tid].ardata = ardata;
                 
-                if(parallel==1){
+/*                if(parallel==1){ */
                     /* printf("creating condition thread %i, m=%i, c=%i\n", tid, im, ic); */
-                    rc = pthread_create(&threads_x[tid], NULL, x_calc, (void *) &thread_data_x_array[tid]);
+/*                    rc = pthread_create(&threads_x[tid], NULL, x_calc, (void *) &thread_data_x_array[tid]);
                     if (rc){
                         mexErrMsgTxt("ERROR at pthread_create");
                     }
-                } else {
+                } else {*/
                     x_calc(&thread_data_x_array[tid]);
-                }
+/*                }*/
             }
         }
     }
     
     /* wait for termination of condition threads = pthread_exit(NULL);*/
-    if(parallel==1){
+/*    if(parallel==1){ */
         /* loop over models */
-        for(im=0; im<nm; ++im){
+/*        for(im=0; im<nm; ++im){ */
             
             /* get ar.model(im).condition */
-            arcondition = mxGetField(armodel, im, "condition");
+/*            arcondition = mxGetField(armodel, im, "condition");
             if(arcondition==NULL){
                 mexErrMsgTxt("field ar.model.condition not existing");
             }
             
-            nc = mxGetNumberOfElements(arcondition);
+            nc = mxGetNumberOfElements(arcondition); */
             /* loop over conditions */
-            for(ic=0; ic<nc; ++ic){
+/*            for(ic=0; ic<nc; ++ic){
                 has_tExp = (int) mxGetScalar(mxGetField(arcondition, ic, "has_tExp"));
                 
                 if(has_tExp == 1 | fine == 1) {
@@ -180,74 +171,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 }
             }
         }
-    }
+    }*/
     
-    /* loop over models */
-    for(im=0; im<nm; ++im){
-        /* get ar.model(im).data */
-        ardata = mxGetField(armodel, im, "data");
-        
-        if(ardata!=NULL){
-            arcondition = mxGetField(armodel, im, "condition");
-            
-            nd = mxGetNumberOfElements(ardata);
-            /* loop over data */
-            for(id=0; id<nd; ++id){
-                has_tExp = (int) mxGetScalar(mxGetField(ardata, id, "has_tExp"));
-                
-                if(has_tExp == 1 | fine == 1) {
-                    tid = mxGetScalar(mxGetField(ardata, id, "thread_id"));
-                    
-                    thread_data_y_array[tid].im = im;
-                    thread_data_y_array[tid].id = id;
-                    thread_data_y_array[tid].ardata = ardata;
-                    thread_data_y_array[tid].arcondition = arcondition;
-                    
-                    dtid = mxGetScalar(mxGetField(ardata, id, "dthread_id"));
-                    thread_data_y_array[tid].dt = dtid;
-                    
-                    if(parallel==1){
-                        /* printf("creating data thread %i, m=%i, d=%i (wait call for condition #%i)\n", tid, im, id, dtid); */
-                        rc = pthread_create(&threads_y[tid], NULL, y_calc, (void *) &thread_data_y_array[tid]);
-                        if (rc){
-                            mexErrMsgTxt("ERROR at pthread_create");
-                        }
-                    } else {
-                        y_calc(&thread_data_y_array[tid]);
-                    }
-                }
-            }
-        }
-    }
-    
-    /* wait for termination of data threads = pthread_exit(NULL);*/
-    if(parallel==1){
-        /* loop over models */
-        for(im=0; im<nm; ++im){
-            /* get ar.model(im).data */
-            ardata = mxGetField(armodel, im, "data");
-            
-            if(ardata!=NULL){
-                arcondition = mxGetField(armodel, im, "condition");
-                
-                nd = mxGetNumberOfElements(ardata);
-                /* loop over data */
-                for(id=0; id<nd; ++id){
-                    has_tExp = (int) mxGetScalar(mxGetField(ardata, id, "has_tExp"));
-                    
-                    if(has_tExp == 1 | fine == 1) {
-                        tid = mxGetScalar(mxGetField(ardata, id, "thread_id"));
-                        
-                        rc = pthread_join(threads_y[tid], NULL);
-                        if (rc){
-                            mexErrMsgTxt("ERROR at pthread_join");
-                        }
-                    }
-                }
-            }
-            
-        }
-    }
+    gettimeofday(&t2, NULL);
+    timersub(&t2, &t1, &tdiff);
+    ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
 }
 
 
@@ -259,20 +187,35 @@ void *x_calc(void *threadarg) {
     int im = my_data->im;
     int ic = my_data->ic;
     mxArray *arcondition = my_data->arcondition;
+    mxArray *ardata = my_data->ardata;
+    
+    struct timeval t2, t3, t4, tdiff;
+    double *ticks_start, *ticks_stop_data, *ticks_stop;
+    ticks_start = mxGetData(mxGetField(arcondition, ic, "start"));
+    ticks_stop = mxGetData(mxGetField(arcondition, ic, "stop"));
+    ticks_stop_data = mxGetData(mxGetField(arcondition, ic, "stop_data"));
+    
+    gettimeofday(&t2, NULL);
+    
+    mxArray *dLink;
+    int id, nd, has_tExp;
+    double *dLinkints;      
+    
+    int flag;
+    int is, js, ks, ids;
+    int nout, neq;
     
     /* printf("computing model #%i, condition #%i\n", im, ic); */
     
     /* begin of CVODES */
+    
     void *cvode_mem;
     UserData data;
-    
-    int flag;
-    int is, js, ks;
-    int nout, neq;
     
     realtype t;
     double tstart;
     N_Vector x;
+    N_Vector atols_ss;
     N_Vector *sx;
     realtype *sxtmp;
     
@@ -288,6 +231,7 @@ void *x_calc(void *threadarg) {
     double *returnddxdtdp;
     
     int sensi_meth = CV_SIMULTANEOUS; /* CV_SIMULTANEOUS or CV_STAGGERED */
+    bool error_corr = TRUE;
     
     /* MATLAB values */
     status = mxGetData(mxGetField(arcondition, ic, "status"));
@@ -328,7 +272,7 @@ void *x_calc(void *threadarg) {
     /* User data structure */
     status[0] = 1;
     data = (UserData) malloc(sizeof *data);
-    if (check_flag((void *)data, "malloc", 2)) {if(parallel==1) {pthread_exit(NULL);} return;}
+    if (check_flag((void *)data, "malloc", 2)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
     
     data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
     int nu = mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
@@ -350,7 +294,7 @@ void *x_calc(void *threadarg) {
         /* Initial conditions */
         status[0] = 2;
         x = N_VNew_Serial(neq);
-        if (check_flag((void *)x, "N_VNew_Serial", 0)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (check_flag((void *)x, "N_VNew_Serial", 0)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
         for (is=0; is<neq; is++) Ith(x, is+1) = 0.0;
         fx0(x, data, im, ic);
         fv(data, 0.0, x, im, ic);
@@ -359,33 +303,38 @@ void *x_calc(void *threadarg) {
         /* Create CVODES object */
         status[0] = 3;
         cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
-        if (check_flag((void *)cvode_mem, "CVodeCreate", 0)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (check_flag((void *)cvode_mem, "CVodeCreate", 0)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
         
         /* Allocate space for CVODES */
         status[0] = 4;
         flag = AR_CVodeInit(cvode_mem, x, tstart, im, ic);
-        if (check_flag(&flag, "CVodeInit", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (check_flag(&flag, "CVodeInit", 1)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
+        
+        /* Number of maximal internal steps */
+        status[0] = 15;
+        flag = CVodeSetMaxNumSteps(cvode_mem, cvodes_maxsteps);
+        if(check_flag(&flag, "CVodeSetMaxNumSteps", 1)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
         
         /* Use private function to compute error weights */
         status[0] = 5;
         flag = CVodeSStolerances(cvode_mem, RCONST(cvodes_rtol), RCONST(cvodes_atol));
-        if (check_flag(&flag, "CVodeSetTol", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (check_flag(&flag, "CVodeSetTol", 1)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
         
         /* Attach user data */
         status[0] = 6;
         flag = CVodeSetUserData(cvode_mem, data);
-        if (check_flag(&flag, "CVodeSetUserData", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (check_flag(&flag, "CVodeSetUserData", 1)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
         
         /* Attach linear solver */
         status[0] = 7;
         flag = CVDense(cvode_mem, neq);
-        if (check_flag(&flag, "CVDense", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (check_flag(&flag, "CVDense", 1)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
         
         /* Jacobian-related settings */
         if (jacobian == 1) {
             status[0] = 8;
             flag = AR_CVDlsSetDenseJacFn(cvode_mem, im, ic);
-            if (check_flag(&flag, "CVDlsSetDenseJacFn", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            if (check_flag(&flag, "CVDlsSetDenseJacFn", 1)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
         }
         
         /* custom error weight function */
@@ -408,7 +357,7 @@ void *x_calc(void *threadarg) {
             /* Load sensitivity initial conditions */
             status[0] = 9;
             sx = N_VCloneVectorArray_Serial(nps, x);
-            if (check_flag((void *)sx, "N_VCloneVectorArray_Serial", 0)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            if (check_flag((void *)sx, "N_VCloneVectorArray_Serial", 0)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
             for(js=0; js < nps; js++) {
                 sxtmp = NV_DATA_S(sx[js]);
                 for(ks=0; ks < neq; ks++) {
@@ -421,8 +370,9 @@ void *x_calc(void *threadarg) {
             
             status[0] = 10;
             flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sx, im, ic);
-            if(check_flag(&flag, "CVodeSensInit1", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            if(check_flag(&flag, "CVodeSensInit1", 1)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
             
+            /*
             status[0] = 11;
             flag = CVodeSensEEtolerances(cvode_mem);
             if(check_flag(&flag, "CVodeSensEEtolerances", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
@@ -430,14 +380,20 @@ void *x_calc(void *threadarg) {
             status[0] = 13;
             flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
             if (check_flag(&flag, "CVodeSetSensParams", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            */
+            
+            atols_ss = N_VNew_Serial(np);
+            if (check_flag((void *)atols_ss, "N_VNew_Serial", 0)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
+            for (is=0; is<np; is++) Ith(atols_ss, is+1) = cvodes_atol;
+
+            status[0] = 11;
+            flag = CVodeSensSStolerances(cvode_mem, RCONST(cvodes_rtol), N_VGetArrayPointer(atols_ss));
+            if(check_flag(&flag, "CVodeSensSStolerances", 1)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
+            
+            status[0] = 13;
+            flag = CVodeSetSensErrCon(cvode_mem, error_corr);
+            if(check_flag(&flag, "CVodeSetSensErrCon", 1)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
         }
-    }
-    
-    if(neq>0){
-        /* Number of maximal internal steps */
-        status[0] = 15;
-        flag = CVodeSetMaxNumSteps(cvode_mem, cvodes_maxsteps);
-        if(check_flag(&flag, "CVodeSetMaxNumSteps", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
     }
     
     /* loop over output points */
@@ -460,9 +416,9 @@ void *x_calc(void *threadarg) {
                     CVodeFree(&cvode_mem);
                     free(data);
 
-                    if(parallel==1) {
+/*                    if(parallel==1) {
                         pthread_exit(NULL);
-                    } 
+                    } */
                     return;
                 }
             }
@@ -482,7 +438,7 @@ void *x_calc(void *threadarg) {
                 if(neq>0) {
                     status[0] = 14;
                     flag = CVodeGetSens(cvode_mem, &t, sx);
-                    if (check_flag(&flag, "CVodeGetSens", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+                    if (check_flag(&flag, "CVodeGetSens", 1)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
                 }
             }
             fsu(data, ts[is], im, ic);
@@ -516,33 +472,44 @@ void *x_calc(void *threadarg) {
     
     /* end of CVODES */
     
+    gettimeofday(&t3, NULL);
+    
     /* printf("computing model #%i, condition #%i (done)\n", im, ic); */
     
-    if(parallel==1) {pthread_exit(NULL);}
+    /* call y_calc */
+    if(ardata!=NULL){
+        dLink = mxGetField(arcondition, ic, "dLink");
+        dLinkints = mxGetData(dLink);
+        
+        nd = mxGetNumberOfElements(dLink);
+        
+        /* loop over data */
+        for(ids=0; ids<nd; ++ids){
+            id = ((int) dLinkints[ids]) - 1;
+            has_tExp = (int) mxGetScalar(mxGetField(ardata, id, "has_tExp"));
+            
+            if(has_tExp == 1 | fine == 1) {
+                y_calc(im, id, ardata, arcondition);
+            }
+        }
+    }
+    
+    gettimeofday(&t4, NULL);
+    timersub(&t2, &t1, &tdiff);
+    ticks_start[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
+    timersub(&t3, &t1, &tdiff);
+    ticks_stop_data[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
+    timersub(&t4, &t1, &tdiff);
+    ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
+    
+/*    if(parallel==1) {pthread_exit(NULL);} */
 }
 
 
 
 /* calculate observations */
-void *y_calc(void *threadarg) {
-    struct thread_data_y *my_data = (struct thread_data_y *) threadarg;
-    
-    int im = my_data->im;
-    int id = my_data->id;
-    int dt = my_data->dt;
-    int rc;   
-    mxArray *ardata = my_data->ardata;
-    mxArray *arcondition = my_data->arcondition;
-    
-    
-    /* wait for dependend x thread */
-/*    printf("computing model #%i, data #%i (waiting for %i)\n", im, id, dt);
-    if(parallel==1) {
-        rc = pthread_join(threads_x[dt], NULL);
-        if (rc){
-            mexErrMsgTxt("ERROR at pthread_join");
-        }
-    }*/
+void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
+    int rc;
     
     /* printf("computing model #%i, data #%i\n", im, id); */
     
@@ -701,13 +668,12 @@ void *y_calc(void *threadarg) {
             }
         }
     }
-    /* printf("computing model #%i, data #%i (done)\n", im, id); */
     
-    if(parallel==1) pthread_exit(NULL);
+    /* printf("computing model #%i, data #%i (done)\n", im, id); */
 }
 
 /* standard least squares */
-static void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2) {
+void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2) {
     int iy;
     
     for(iy=0; iy<ny; iy++){
@@ -720,7 +686,7 @@ static void fres(int nt, int ny, int it, double *res, double *y, double *yexp, d
         chi2[iy] += pow(res[it + (iy*nt)], 2);
     }
 }
-static void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd) {
+void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd) {
     int iy, ip;
     
     for(iy=0; iy<ny; iy++){
@@ -734,7 +700,7 @@ static void fsres(int nt, int ny, int np, int it, double *sres, double *sy, doub
 }
 
 /* least squares for error model fitting */
-static void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2err) {
+void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2err) {
     int iy;
     
     double add_c = 50.0;
@@ -747,13 +713,13 @@ static void fres_error(int nt, int ny, int it, double *reserr, double *res, doub
             ystd[it + (iy*nt)] = 0.0/0.0;
         } else {
             reserr[it + (iy*nt)] += add_c;
-            if(reserr[it + (iy*nt)] < 0) mexErrMsgTxt("ERROR error model < 1e-10 not allowed"); /* s*log(ystd) + add_c > 0 */
+            if(reserr[it + (iy*nt)] < 0) mexErrMsgTxt("ERROR error model < 1e-10 not allowed"); /* 2*log(ystd) + add_c > 0 */
             reserr[it + (iy*nt)] = sqrt(reserr[it + (iy*nt)]);
             chi2err[iy] += pow(reserr[it + (iy*nt)], 2) - add_c;
         }
     }
 }
-static void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *yexp, double *y, double *ystd, double *res, double *reserr) {
+void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr) {
     int iy, ip;
     double rtmp;
     
@@ -761,7 +727,6 @@ static void fsres_error(int nt, int ny, int np, int it, double *sres, double *sr
         for(ip=0; ip<np; ip++){
             sres[it + (iy*nt) + (ip*nt*ny)] -= systd[it + (iy*nt) + (ip*nt*ny)] * res[it + (iy*nt)] / ystd[it + (iy*nt)];
             sreserr[it + (iy*nt) + (ip*nt*ny)] = systd[it + (iy*nt) + (ip*nt*ny)] / (reserr[it + (iy*nt)] * ystd[it + (iy*nt)]);
-            
             if(mxIsNaN(yexp[it + (iy*nt)])) {
                 sres[it + (iy*nt) + (ip*nt*ny)] = 0.0;
                 sreserr[it + (iy*nt) + (ip*nt*ny)] = 0.0;
@@ -781,7 +746,7 @@ static void fsres_error(int nt, int ny, int np, int it, double *sres, double *sr
  *             NULL pointer
  */
 
-static int check_flag(void *flagvalue, char *funcname, int opt) {
+int check_flag(void *flagvalue, char *funcname, int opt) {
     int *errflag;
     
     /* Check if SUNDIALS function returned NULL pointer - no memory allocated */
@@ -808,8 +773,9 @@ static int check_flag(void *flagvalue, char *funcname, int opt) {
     return(0);
 }
 
-/* custom error weight function
-static int ewt(N_Vector y, N_Vector w, void *user_data)
+/* custom error weight function */
+/*
+int ewt(N_Vector y, N_Vector w, void *user_data)
 {
   int i;
   realtype yy, ww;
@@ -819,8 +785,9 @@ static int ewt(N_Vector y, N_Vector w, void *user_data)
     ww = cvodes_rtol * ABS(yy) + cvodes_atol;  
     if (ww <= 0.0) return (-1);
     Ith(w,i) = 1.0/ww;
+    printf("%e ", ww);
   }
-
+  printf("\n");
   return(0);
 } 
 */

@@ -182,15 +182,17 @@ if(isfield(ar.model, 'data'))
     end
 end
 
-% serial code
-% outputstr = ' -output arSimuCalcSerial';
-
-% parallel code using POSIX threads
 outputstr = [' -output ' ar.fkt];
 
 % compile and link main mex file
 fprintf('compiling and linking %s...', ar.fkt);
-eval(['mex' outputstr includesstr ' "' which('arSimuCalc.c') '"' objectsstr]);
+if(~ispc) 
+    % parallel code using POSIX threads for unix type OS
+    eval(['mex' outputstr includesstr ' "' which('arSimuCalc.c') '"' objectsstr]);
+else
+    % serial code for windows OS
+    eval(['mex' outputstr includesstr ' "' which('arSimuCalcWin.c') '"' objectsstr]);
+end
 fprintf('done\n');
 
 % refresh file cache
