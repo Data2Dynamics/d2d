@@ -114,6 +114,21 @@ elseif(ar.config.optimizer == 5)
     [pFit, chi2, resnorm, exitflag, output, lambda, jac] = ...
         arNLS(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim, ar.config.optimizerStep);
     
+% fmincon as least squares fit
+elseif(ar.config.optimizer == 6)
+    options = optimset('fmincon');
+    options.GradObj = 'on';
+    options.TolFun = ar.config.optim.TolFun;
+    options.TolX = ar.config.optim.TolX;
+    options.Display = ar.config.optim.Display;
+    options.MaxIter = ar.config.optim.MaxIter;
+    options.OutputFcn = ar.config.optim.OutputFcn;
+    
+    [pFit, chi2, exitflag, output, lambda, jac] = ...
+        fmincon(@merit_fkt_fmincon_lsq, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
+        [],options);
+    resnorm = merit_fkt(pFit);
+    
 else
     error('ar.config.optimizer invalid');
 end
@@ -198,15 +213,32 @@ end
 % fmincon
 function [l, g, H] = merit_fkt_fmincon(pTrial)
 global ar
-global fmincon_pTrial
 arChi2(ar.config.useSensis, pTrial)
-fmincon_pTrial = pTrial(:);
 l = sum(ar.res.^2);
 if(nargout>1)
     g = ar.res*ar.sres(:, ar.qFit==1);
 end
 if(nargout>2)
     H = ar.sres(:, ar.qFit==1)'*ar.sres(:, ar.qFit==1);
+end
+
+% fmincon as lsq
+function [l, g] = merit_fkt_fmincon_lsq(pTrial)
+global ar
+arChi2(ar.config.useSensis, pTrial)
+res = [ar.res ar.constr];
+if(nargout>1 && ar.config.useSensis)
+    sres = [];
+    if(~isempty(ar.sres))
+        sres = ar.sres(:, ar.qFit==1);
+    end
+    if(~isempty(ar.sconstr))
+        sres = [sres; ar.sconstr(:, ar.qFit==1)];
+    end
+end
+l = sum(res.^2);
+if(nargout>1)
+    g = res*sres;
 end
 
 function [c, ceq, gc, gceq] = confun(pTrial)

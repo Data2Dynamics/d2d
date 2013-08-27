@@ -9,6 +9,7 @@ for jm=1:length(ar.model)
     ar.model(jm).qPlotXs(:) = 0;
     ar.model(jm).qPlotVs(:) = 0;
 end
+arPlotY;
 
 for jm=1:length(ar.model)
     for jplot=1:length(ar.model(jm).plot)
