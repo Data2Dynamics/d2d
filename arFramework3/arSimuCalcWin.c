@@ -13,7 +13,7 @@
 #include <math.h>
 #include <mex.h>
 /* #include <pthread.h> */
-#include <sys/time.h>
+/* #include <sys/time.h> */
 
 #include <cvodes/cvodes.h>           /* prototypes for CVODES fcts. and consts. */
 #include <cvodes/cvodes_dense.h>     /* prototype for CVDENSE fcts. and constants */
@@ -31,12 +31,12 @@
 /* user variables */
 /* #include "arSimuCalcVariables.c" */
 
-struct thread_data_x {
+/* struct thread_data_x {
     int	im;
     int ic;
     mxArray *arcondition;
     mxArray *ardata;
-};
+}; */
 
 mxArray *armodel;
 
@@ -49,10 +49,11 @@ double  cvodes_atol;
 int  cvodes_maxsteps;
 int  fiterrors;
 double fiterrors_correction;
-struct timeval t1;
+/* struct timeval t1; */
 
 /* Prototypes of private functions */
-void *x_calc(void *threadarg);
+/* void *x_calc(void *threadarg); */
+void x_calc(int im, int ic, mxArray *arcondition, mxArray *ardata);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition);
 
 void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2);
@@ -67,13 +68,14 @@ int ewt(N_Vector y, N_Vector w, void *user_data);
 #include "arSimuCalcFunctions.c"
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    struct timeval t2, tdiff;
+/*    struct timeval t2, tdiff;
     double *ticks_stop;
     ticks_stop = mxGetData(mxGetField(prhs[0], 0, "stop"));
     
-    gettimeofday(&t1, NULL);
+    gettimeofday(&t1, NULL); */
     
-    int nthreads_x, nm, im, nc, ic, tid, dtid, nd, id, rc, has_tExp;
+    int nthreads_x, nm, im, nc, ic, has_tExp;
+/*    int tid, dtid, rc; */
     
     mxArray    *arconfig;
     mxArray    *arcondition;
@@ -101,7 +103,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     /* threads */
     nthreads_x = mxGetScalar(mxGetField(arconfig, 0, "nthreads_x"));
 /*    pthread_t threads_x[nthreads_x]; */
-    struct thread_data_x thread_data_x_array[nthreads_x];
+/*    struct thread_data_x thread_data_x_array[nthreads_x]; */
     
 /*    printf("%i x-threads (%i fine, %i sensi, %i jacobian, %g rtol, %g atol, %i maxsteps)\n", nthreads_x, fine,
             sensi, jacobian, cvodes_rtol, cvodes_atol, cvodes_maxsteps); */
@@ -125,12 +127,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             has_tExp = (int) mxGetScalar(mxGetField(arcondition, ic, "has_tExp"));
             
             if(has_tExp == 1 | fine == 1) {
-                tid = mxGetScalar(mxGetField(arcondition, ic, "thread_id"));
+/*                tid = mxGetScalar(mxGetField(arcondition, ic, "thread_id"));
                 
                 thread_data_x_array[tid].im = im;
                 thread_data_x_array[tid].ic = ic;
                 thread_data_x_array[tid].arcondition = arcondition;
-                thread_data_x_array[tid].ardata = ardata;
+                thread_data_x_array[tid].ardata = ardata;*/
                 
 /*                if(parallel==1){ */
                     /* printf("creating condition thread %i, m=%i, c=%i\n", tid, im, ic); */
@@ -138,8 +140,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     if (rc){
                         mexErrMsgTxt("ERROR at pthread_create");
                     }
-                } else {*/
-                    x_calc(&thread_data_x_array[tid]);
+                } else {
+                    x_calc(&thread_data_x_array[tid]); */
+                    x_calc(im, ic, arcondition, ardata);
 /*                }*/
             }
         }
@@ -171,31 +174,32 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 }
             }
         }
-    }*/
+    }
     
     gettimeofday(&t2, NULL);
     timersub(&t2, &t1, &tdiff);
-    ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
+    ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6); */
 }
 
 
 
 /* calculate dynamics by calling CVODES */
-void *x_calc(void *threadarg) {
+/* void *x_calc(void *threadarg) {
     struct thread_data_x *my_data = (struct thread_data_x *) threadarg;
     
     int im = my_data->im;
     int ic = my_data->ic;
     mxArray *arcondition = my_data->arcondition;
-    mxArray *ardata = my_data->ardata;
+    mxArray *ardata = my_data->ardata; */
+void x_calc(int im, int ic, mxArray *arcondition, mxArray *ardata) {
     
-    struct timeval t2, t3, t4, tdiff;
+/*    struct timeval t2, t3, t4, tdiff;
     double *ticks_start, *ticks_stop_data, *ticks_stop;
     ticks_start = mxGetData(mxGetField(arcondition, ic, "start"));
     ticks_stop = mxGetData(mxGetField(arcondition, ic, "stop"));
     ticks_stop_data = mxGetData(mxGetField(arcondition, ic, "stop_data"));
     
-    gettimeofday(&t2, NULL);
+    gettimeofday(&t2, NULL); */
     
     mxArray *dLink;
     int id, nd, has_tExp;
@@ -204,6 +208,7 @@ void *x_calc(void *threadarg) {
     int flag;
     int is, js, ks, ids;
     int nout, neq;
+    int nu, np, nps, nv;
     
     /* printf("computing model #%i, condition #%i\n", im, ic); */
     
@@ -275,14 +280,14 @@ void *x_calc(void *threadarg) {
     if (check_flag((void *)data, "malloc", 2)) {/*if(parallel==1) {pthread_exit(NULL);}*/ return;}
     
     data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
-    int nu = mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
+    nu = mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
     
     data->p = mxGetData(mxGetField(arcondition, ic, "pNum"));
-    int np = mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
-    int nps = np;
+    np = mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
+    nps = np;
     
     data->v = mxGetData(mxGetField(arcondition, ic, "vNum"));
-    int nv = mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
+    nv = mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
     data->dvdx = mxGetData(mxGetField(arcondition, ic, "dvdxNum"));
     data->dvdu = mxGetData(mxGetField(arcondition, ic, "dvduNum"));
     data->dvdp = mxGetData(mxGetField(arcondition, ic, "dvdpNum"));
@@ -472,7 +477,7 @@ void *x_calc(void *threadarg) {
     
     /* end of CVODES */
     
-    gettimeofday(&t3, NULL);
+/*    gettimeofday(&t3, NULL); */
     
     /* printf("computing model #%i, condition #%i (done)\n", im, ic); */
     
@@ -494,13 +499,13 @@ void *x_calc(void *threadarg) {
         }
     }
     
-    gettimeofday(&t4, NULL);
+/*    gettimeofday(&t4, NULL);
     timersub(&t2, &t1, &tdiff);
     ticks_start[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
     timersub(&t3, &t1, &tdiff);
     ticks_stop_data[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
     timersub(&t4, &t1, &tdiff);
-    ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
+    ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6); */
     
 /*    if(parallel==1) {pthread_exit(NULL);} */
 }
@@ -509,8 +514,6 @@ void *x_calc(void *threadarg) {
 
 /* calculate observations */
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
-    int rc;
-    
     /* printf("computing model #%i, data #%i\n", im, id); */
     
     int nt, it, iy, ip, ntlink, itlink;
@@ -680,8 +683,8 @@ void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *
         res[it + (iy*nt)] = (yexp[it + (iy*nt)] - y[it + (iy*nt)]) / ystd[it + (iy*nt)] * sqrt(fiterrors_correction);
         if(mxIsNaN(yexp[it + (iy*nt)])) {
             res[it + (iy*nt)] = 0.0;
-            y[it + (iy*nt)] = 0.0/0.0;
-            ystd[it + (iy*nt)] = 0.0/0.0;
+            y[it + (iy*nt)] = yexp[it + (iy*nt)];
+            ystd[it + (iy*nt)] = yexp[it + (iy*nt)];
         }
         chi2[iy] += pow(res[it + (iy*nt)], 2);
     }
@@ -709,8 +712,8 @@ void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, 
         reserr[it + (iy*nt)] = 2.0*log(ystd[it + (iy*nt)]);
         if(mxIsNaN(yexp[it + (iy*nt)])) {
             reserr[it + (iy*nt)] = 0.0;
-            y[it + (iy*nt)] = 0.0/0.0;
-            ystd[it + (iy*nt)] = 0.0/0.0;
+            y[it + (iy*nt)] = yexp[it + (iy*nt)];
+            ystd[it + (iy*nt)] = yexp[it + (iy*nt)];
         } else {
             reserr[it + (iy*nt)] += add_c;
             if(reserr[it + (iy*nt)] < 0) mexErrMsgTxt("ERROR error model < 1e-10 not allowed"); /* 2*log(ystd) + add_c > 0 */
@@ -721,7 +724,6 @@ void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, 
 }
 void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr) {
     int iy, ip;
-    double rtmp;
     
     for(iy=0; iy<ny; iy++){
         for(ip=0; ip<np; ip++){

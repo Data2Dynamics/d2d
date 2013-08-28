@@ -129,5 +129,5 @@ ar.info.cvodes_flags{25} = 'CV_BAD_T';
 ar.info.cvodes_flags{26} = 'CV_BAD_DKY';
 ar.info.cvodes_flags{27} = 'CV_TOO_CLOSE';
 
-
+clear j
 

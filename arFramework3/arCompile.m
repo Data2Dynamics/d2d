@@ -34,6 +34,10 @@ else
     sundials_path = [strrep(which('arInit.m'),'\arInit.m','') '\sundials-2.5.0\']; % sundials 2.5.0
 end
 
+% compile directory
+if(~exist([cd '/Compiled/' ar.info.c_version_code '/' mexext], 'dir'))
+    mkdir([cd '/Compiled/' ar.info.c_version_code '/' mexext])
+end
 
 % include directories
 includes = {'include', 'src/cvodes'};
@@ -43,6 +47,10 @@ for j=1:length(includes)
 end
 includesstr = strcat(includesstr, [' -I"' pwd '/Compiled/' ar.info.c_version_code '"']);
 includesstr = strcat(includesstr, [' -I"' ar_path '"']);
+
+%% pre-compile CVODES sources
+
+fprintf('compiling CVODES...');
 
 % source files
 sources = {
@@ -104,6 +112,9 @@ objects = {
     'nvector_serial.o';
     'arInputFunctionsC.o';
     };
+if(ispc)
+    objects = strrep(objects, '.o', '.obj');
+end
 
 objectsstr = '';
 for j=1:length(objects)
@@ -111,13 +122,6 @@ for j=1:length(objects)
 end
 
 % compile
-
-if(~exist([cd '/Compiled/' ar.info.c_version_code '/' mexext], 'dir'))
-    mkdir([cd '/Compiled/' ar.info.c_version_code '/' mexext])
-end
-
-% pre-compile CVODES sources
-fprintf('compiling CVODES...');
 for j=1:length(sources)
     if(~exist(['Compiled/' ar.info.c_version_code '/' mexext '/' objects{j}], 'file'))
         fprintf('o');
@@ -126,10 +130,12 @@ for j=1:length(sources)
 end
 fprintf('...done\n');
 
-% pre-compile input functions
+%% pre-compile input functions
+
 eval(['mex -c -outdir Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' ar_path '/arInputFunctionsC.c']);
 
-% pre-compile conditions
+%% pre-compile conditions
+
 labels = {};
 sources_con = {};
 objects_con = {};
@@ -138,7 +144,11 @@ for jm = 1:length(ar.model)
     for sc = 1:length(ar.model(jm).condition)
         labels{end+1} = ar.model(jm).condition(sc).fkt; %#ok<AGROW>
         sources_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' ar.model(jm).condition(sc).fkt '.c']; %#ok<AGROW>
-        objects_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).condition(sc).fkt '.o']; %#ok<AGROW>
+        if(~ispc)
+            objects_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).condition(sc).fkt '.o']; %#ok<AGROW>
+        else
+            objects_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).condition(sc).fkt '.obj']; %#ok<AGROW>
+        end
     end
 end
 
@@ -156,7 +166,7 @@ for j=1:length(sources_con)
     end
 end
 
-% pre-compile data
+%% pre-compile data
 if(isfield(ar.model, 'data'))
     labels = {};
     sources_dat = {};
@@ -166,7 +176,11 @@ if(isfield(ar.model, 'data'))
         for sc = 1:length(ar.model(jm).data)
             labels{end+1} = ar.model(jm).data(sc).fkt; %#ok<AGROW>
             sources_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' ar.model(jm).data(sc).fkt '.c']; %#ok<AGROW>
-            objects_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).data(sc).fkt '.o']; %#ok<AGROW>
+            if(~ispc)
+                objects_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).data(sc).fkt '.o']; %#ok<AGROW>
+            else
+                objects_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).data(sc).fkt '.obj']; %#ok<AGROW>
+            end
         end
     end
     
@@ -185,11 +199,12 @@ if(isfield(ar.model, 'data'))
     end
 end
 
+%% compile and link main mex file
+
 outputstr = [' -output ' ar.fkt];
 
-% compile and link main mex file
 fprintf('compiling and linking %s...', ar.fkt);
-if(~ispc) 
+if(~ispc)
     % parallel code using POSIX threads for unix type OS
     eval(['mex' outputstr includesstr ' "' which('arSimuCalc.c') '"' objectsstr]);
 else

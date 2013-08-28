@@ -73,7 +73,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     gettimeofday(&t1, NULL);
     
-    int nthreads_x, nm, im, nc, ic, tid, dtid, nd, id, rc, has_tExp;
+    int nthreads_x, nm, im, nc, ic, has_tExp;
+    int tid, dtid, rc;
     
     mxArray    *arconfig;
     mxArray    *arcondition;
@@ -204,6 +205,7 @@ void *x_calc(void *threadarg) {
     int flag;
     int is, js, ks, ids;
     int nout, neq;
+    int nu, np, nps, nv;
     
     /* printf("computing model #%i, condition #%i\n", im, ic); */
     
@@ -275,14 +277,14 @@ void *x_calc(void *threadarg) {
     if (check_flag((void *)data, "malloc", 2)) {if(parallel==1) {pthread_exit(NULL);} return;}
     
     data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
-    int nu = mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
+    nu = mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
     
     data->p = mxGetData(mxGetField(arcondition, ic, "pNum"));
-    int np = mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
-    int nps = np;
+    np = mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
+    nps = np;
     
     data->v = mxGetData(mxGetField(arcondition, ic, "vNum"));
-    int nv = mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
+    nv = mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
     data->dvdx = mxGetData(mxGetField(arcondition, ic, "dvdxNum"));
     data->dvdu = mxGetData(mxGetField(arcondition, ic, "dvduNum"));
     data->dvdp = mxGetData(mxGetField(arcondition, ic, "dvdpNum"));
@@ -509,8 +511,6 @@ void *x_calc(void *threadarg) {
 
 /* calculate observations */
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
-    int rc;
-    
     /* printf("computing model #%i, data #%i\n", im, id); */
     
     int nt, it, iy, ip, ntlink, itlink;
@@ -680,8 +680,8 @@ void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *
         res[it + (iy*nt)] = (yexp[it + (iy*nt)] - y[it + (iy*nt)]) / ystd[it + (iy*nt)] * sqrt(fiterrors_correction);
         if(mxIsNaN(yexp[it + (iy*nt)])) {
             res[it + (iy*nt)] = 0.0;
-            y[it + (iy*nt)] = 0.0/0.0;
-            ystd[it + (iy*nt)] = 0.0/0.0;
+            y[it + (iy*nt)] = yexp[it + (iy*nt)];
+            ystd[it + (iy*nt)] = yexp[it + (iy*nt)];
         }
         chi2[iy] += pow(res[it + (iy*nt)], 2);
     }
@@ -709,8 +709,8 @@ void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, 
         reserr[it + (iy*nt)] = 2.0*log(ystd[it + (iy*nt)]);
         if(mxIsNaN(yexp[it + (iy*nt)])) {
             reserr[it + (iy*nt)] = 0.0;
-            y[it + (iy*nt)] = 0.0/0.0;
-            ystd[it + (iy*nt)] = 0.0/0.0;
+            y[it + (iy*nt)] = yexp[it + (iy*nt)];
+            ystd[it + (iy*nt)] = yexp[it + (iy*nt)];
         } else {
             reserr[it + (iy*nt)] += add_c;
             if(reserr[it + (iy*nt)] < 0) mexErrMsgTxt("ERROR error model < 1e-10 not allowed"); /* 2*log(ystd) + add_c > 0 */
@@ -721,7 +721,6 @@ void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, 
 }
 void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr) {
     int iy, ip;
-    double rtmp;
     
     for(iy=0; iy<ny; iy++){
         for(ip=0; ip<np; ip++){

@@ -111,13 +111,14 @@ for m=1:length(ar.model)
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
+fprintf(fid, '  return(-1);\n');
 fprintf(fid, '}\n\n');
 
 % map fx
 fprintf(fid, ' void fx(realtype t, N_Vector x, double *xdot, void *user_data, int im, int ic){\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if(im==%i & ic==%i) return fxdouble_%s(t, x, xdot, user_data);\n', ...
+        fprintf(fid, '  if(im==%i & ic==%i) fxdouble_%s(t, x, xdot, user_data);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
@@ -142,6 +143,7 @@ for m=1:length(ar.model)
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
+fprintf(fid, '  return(-1);\n');
 fprintf(fid, '}\n\n');
 
 % map fsx0
@@ -163,6 +165,7 @@ for m=1:length(ar.model)
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
+fprintf(fid, '  return(-1);\n');
 fprintf(fid, '}\n\n');
 
 % map fu
