@@ -26,21 +26,7 @@ if(exist('JEInterface','file') == 0)
     addpath([ar_path '/EvA2/JEInterface'])
 end
 
-% % configure sundials 2.4.0
-% if(exist([ar_path '/sundials-2.4.0'],'dir') == 0)
-%     path_backup = cd;
-%     cd(ar_path);
-%     !tar -xvf sundials-2.4.0.tar
-%     cd(path_backup);
-% end
-% if(exist([ar_path '/sundials-2.4.0/config.h'],'file') == 0)
-%     path_backup = cd;
-%     cd([ar_path '/sundials-2.4.0']);
-%     !./configure
-%     cd(path_backup);
-% end
-
-% configure sundials 2.5.0
+% uncompress and expand CVODES
 if(exist([ar_path '/sundials-2.5.0'],'dir') == 0)
     if(~ispc)
         path_backup = cd;
@@ -48,22 +34,21 @@ if(exist([ar_path '/sundials-2.5.0'],'dir') == 0)
         !tar -xvf sundials-2.5.0.tar
         cd(path_backup);
     else
-        fprintf('Please unpack %s and repeat action.\n', [ar_path '\sundials-2.5.0.tar']);
+        fprintf('Please uncompress and expand the CVODES sources\n%s\nand repeat.\n', [ar_path '\sundials-2.5.0.tar']);
         docontinue = false;
         return
     end
 end
-if(exist([ar_path '/sundials-2.5.0/config.h'],'file') == 0)
-    if(~ispc)
-        path_backup = cd;
-        cd([ar_path '/sundials-2.5.0']);
-        !./configure
-        cd(path_backup);
-    else
-        fprintf('Please run ./configure in folder %s and repeat action.\n', [ar_path '\sundials-2.5.0.tar']);
-        docontinue = false;
-        return
-    end
+
+% write sundials_config.h
+if(exist([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'],'file') == 0)
+    fid = fopen([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'], 'W');
+    fprintf(fid, '#define SUNDIALS_PACKAGE_VERSION "2.5.0"\n');
+    fprintf(fid, '#define SUNDIALS_DOUBLE_PRECISION 1\n');
+    fprintf(fid, '#define SUNDIALS_USE_GENERIC_MATH\n');
+    fprintf(fid, '#define SUNDIALS_BLAS_LAPACK 0\n');
+    fprintf(fid, '#define SUNDIALS_EXPORT\n');
+    fclose(fid);
 end
 
 % EvA2 Toolbox
@@ -81,11 +66,7 @@ if exist('arInitUser.m','file')==0
 	fprintf(fid,'\n%s\n','function arInitUser');
 	fprintf(fid,'\n%s\n','global ar');
 	fprintf(fid,'\n%s%s%s','ar.config.username = ''',user,''';');
-	comment_string = input('\nPlease define a comment string (default is ''//'')\n-> ','s');
-	if isempty(comment_string)
-		comment_string = '//';
-	end
-	fprintf(fid,'\n%s%s%s','ar.config.comment_string = ''',comment_string,''';');
+	fprintf(fid,'\n%s%s%s','ar.config.comment_string = ''//'';');
 	fclose(fid);
 	fprintf(1,'\n%s\n','arInitUser.m has been successfully created!');
     rehash path

@@ -26,10 +26,14 @@ if(exist([ar.fkt '.' mexext],'file') && ~forceFullCompile)
     return
 end
 
-ar_path = strrep(which('arInit.m'),'/arInit.m','');
+if(~ispc)
+    ar_path = strrep(which('arInit.m'),'/arInit.m','');
+    sundials_path = [strrep(which('arInit.m'),'/arInit.m','') '/sundials-2.5.0/']; % sundials 2.5.0
+else
+    ar_path = strrep(which('arInit.m'),'\arInit.m','');
+    sundials_path = [strrep(which('arInit.m'),'\arInit.m','') '\sundials-2.5.0\']; % sundials 2.5.0
+end
 
-% sundials_path = [strrep(which('arInit.m'),'/arInit.m','') '/sundials-2.4.0/']; % sundials 2.4.0
-sundials_path = [strrep(which('arInit.m'),'/arInit.m','') '/sundials-2.5.0/']; % sundials 2.5.0
 
 % include directories
 includes = {'include', 'src/cvodes'};
@@ -113,7 +117,6 @@ if(~exist([cd '/Compiled/' ar.info.c_version_code '/' mexext], 'dir'))
 end
 
 % pre-compile CVODES sources
-% fprintf('comiling condition m%i c%i, %s (%s)...', m, c, ar.model(m).name, ar.model(m).condition(c).checkstr);
 fprintf('compiling CVODES...');
 for j=1:length(sources)
     if(~exist(['Compiled/' ar.info.c_version_code '/' mexext '/' objects{j}], 'file'))
