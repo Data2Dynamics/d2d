@@ -7,8 +7,6 @@ global arWaitbarGlobal;
 % disable waitbar window and use command line output instead
 arWaitbar.showWindow = 1;
 
-% Ntimes = 20;
-
 if(length(j) > 1)
     if(length(j) == length(n))
         jsum = j(end);
@@ -23,6 +21,12 @@ if(length(j) > 1)
 end
 
 if(j==0 && nargin==1)
+    if(isfield(arWaitbarGlobal,'h'))
+        try %#ok<TRYNC>
+            close(arWaitbarGlobal.h);
+        end
+    end
+    
     arWaitbarGlobal.tic = clock;
     arWaitbarGlobal.ticlast = clock;
     arWaitbarGlobal.ticmove = clock;
@@ -59,53 +63,47 @@ else
         if(etime(clock, arWaitbarGlobal.ticlast)>arWaitbarGlobal.tcount)
             timeelapsed = etime(clock, arWaitbarGlobal.tic);
 
-            timeleft = (n-j) * (timeelapsed/j); % mean over all points
+            timeleft = (n-j) * timeelapsed/(j-1); % mean over all points
+            
+            funtext = '';
+            if(timeleft > 60*5)
+                funtext = '   (get a coffee !)';
+            end
+            if(timeleft > 60*30)
+                funtext = '   (go for lunch !)';
+            end
+            if(timeleft > 60*60*2)
+                funtext = '   (go home !)';
+            end
+            if(timeleft > 60*60*24*7)
+                funtext = '   (come back next week !)';
+            end
+            if(timeleft > 60*60*24*7*30)
+                funtext = '   (this must be a joke !)';
+            end
 
-%             js = find(~isnan(arWaitbarGlobal.timeperstep));
-%             if(length(js)>Ntimes)
-%                 js = js((end-Ntimes):end);
-%             end
-%             times = arWaitbarGlobal.timeperstep(js);
-%             js = js(~isnan(times));
-%             times = times(~isnan(times));
-            
-%             timeleft = (n-j) * median(times); % mean over last points
-            
-%             mjs = mean(js);
-%             mtimes = mean(times);
-%             js = [js js];
-%             times = [times mtimes*ones(size(times))];
-%             b = sum((times-mtimes).^2)/sum((js-mjs).*(times-mtimes));
-%             a = mtimes - b*mjs;
-%             predtime = a + b.*((j+1):n);
-%             timeleft = sum(predtime(predtime>0));
-%             if(timeleft<0)
-%                 timeleft = 0;
-%             end
-            
             if(exist('text','var') && ~isempty(text))
                 if(arWaitbarGlobal.hasMonitor && arWaitbar.showWindow)
                     arWaitbarGlobal.h = waitbar(j/n, arWaitbarGlobal.h, ...
-                        sprintf('%s\n%i/%i | %2i%% | %s -> %s', ...
-                        text, j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed)));
+                        sprintf('%s\n%i/%i   %2i%%   %s -> %s%s', ...
+                        text, j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext));
                 else
-                    fprintf('%s %i/%i | %2i%% | %s -> %s\n', ...
-                        text, j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed)); 
+                    fprintf('%s %i/%i   %2i%%   %s -> %s%s', ...
+                        text, j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext); 
                     drawnow;
                 end
             else
                 if(arWaitbarGlobal.hasMonitor && arWaitbar.showWindow)
                     arWaitbarGlobal.h = waitbar(j/n, arWaitbarGlobal.h, ...
-                        sprintf('%i/%i | %2i%% | %s -> %s', ...
-                        j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed)));
+                        sprintf('%i/%i   %2i%%   %s -> %s%s', ...
+                        j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext));
                 else
-                    fprintf('%i/%i | %2i%% | %s -> %s\n', ...
-                        j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed)); 
+                    fprintf('%i/%i   %2i%%   %s -> %s%s\n', ...
+                        j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext); 
                     drawnow;
                 end
             end
             
-%             arWaitbarGlobal.timeperstep(j) = nan;
             arWaitbarGlobal.ticlast = clock;
         end
     end
