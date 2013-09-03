@@ -55,7 +55,9 @@ fprintf('mean feval time: %fsec, %i/%i errors\n', mean(ar.timing(~isnan(ar.timin
 arWaitbar(-1);
 
 ar.p = pReset;
-arChi2(false, []);
+try %#ok<TRYNC>
+    arChi2(false, []);
+end
 
 if(~silent)
     if(sum(ar.qFit==1)<6)
