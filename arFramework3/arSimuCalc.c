@@ -60,7 +60,6 @@ void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yex
 void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2);
 void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr);
 
-int check_flag(void *flagvalue, char *funcname, int opt);
 int ewt(N_Vector y, N_Vector w, void *user_data);
 
 /* user functions */
@@ -221,6 +220,7 @@ void *x_calc(void *threadarg) {
     N_Vector *sx;
     realtype *sxtmp;
     
+    double *qpositivex;
     double *status;
     double *ts;
     double *returnu;
@@ -236,6 +236,7 @@ void *x_calc(void *threadarg) {
     bool error_corr = TRUE;
     
     /* MATLAB values */
+    qpositivex = mxGetData(mxGetField(armodel, im, "qPositiveX"));
     status = mxGetData(mxGetField(arcondition, ic, "status"));
     tstart = mxGetScalar(mxGetField(arcondition, ic, "tstart"));
     neq = mxGetNumberOfElements(mxGetField(armodel, im, "xs"));
@@ -272,10 +273,10 @@ void *x_calc(void *threadarg) {
     }
     
     /* User data structure */
-    status[0] = 1;
     data = (UserData) malloc(sizeof *data);
-    if (check_flag((void *)data, "malloc", 2)) {if(parallel==1) {pthread_exit(NULL);} return;}
+    if (data == NULL) {status[0] = 1; if(parallel==1) {pthread_exit(NULL);} return;}
     
+    data->qpositivex = qpositivex;
     data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
     nu = mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
     
@@ -294,55 +295,47 @@ void *x_calc(void *threadarg) {
     
     if(neq>0){
         /* Initial conditions */
-        status[0] = 2;
         x = N_VNew_Serial(neq);
-        if (check_flag((void *)x, "N_VNew_Serial", 0)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (x == NULL) {status[0] = 2; if(parallel==1) {pthread_exit(NULL);} return;}
         for (is=0; is<neq; is++) Ith(x, is+1) = 0.0;
         fx0(x, data, im, ic);
         fv(data, 0.0, x, im, ic);
         fx(0.0, x, returndxdt, data, im, ic);
         
         /* Create CVODES object */
-        status[0] = 3;
         cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
-        if (check_flag((void *)cvode_mem, "CVodeCreate", 0)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (cvode_mem == NULL) {status[0] = 3; if(parallel==1) {pthread_exit(NULL);} return;}
         
         /* Allocate space for CVODES */
-        status[0] = 4;
         flag = AR_CVodeInit(cvode_mem, x, tstart, im, ic);
-        if (check_flag(&flag, "CVodeInit", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (flag < 0) {status[0] = 4; if(parallel==1) {pthread_exit(NULL);} return;}
         
         /* Number of maximal internal steps */
-        status[0] = 15;
         flag = CVodeSetMaxNumSteps(cvode_mem, cvodes_maxsteps);
-        if(check_flag(&flag, "CVodeSetMaxNumSteps", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if(flag < 0) {status[0] = 15; if(parallel==1) {pthread_exit(NULL);} return;}
         
         /* Use private function to compute error weights */
-        status[0] = 5;
         flag = CVodeSStolerances(cvode_mem, RCONST(cvodes_rtol), RCONST(cvodes_atol));
-        if (check_flag(&flag, "CVodeSetTol", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (flag < 0) {status[0] = 5; if(parallel==1) {pthread_exit(NULL);} return;}
         
         /* Attach user data */
-        status[0] = 6;
         flag = CVodeSetUserData(cvode_mem, data);
-        if (check_flag(&flag, "CVodeSetUserData", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (flag < 0) {status[0] = 6; if(parallel==1) {pthread_exit(NULL);} return;}
         
         /* Attach linear solver */
-        status[0] = 7;
         flag = CVDense(cvode_mem, neq);
-        if (check_flag(&flag, "CVDense", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (flag < 0) {status[0] = 7; if(parallel==1) {pthread_exit(NULL);} return;}
         
         /* Jacobian-related settings */
         if (jacobian == 1) {
-            status[0] = 8;
             flag = AR_CVDlsSetDenseJacFn(cvode_mem, im, ic);
-            if (check_flag(&flag, "CVDlsSetDenseJacFn", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            if (flag < 0) {status[0] = 8; if(parallel==1) {pthread_exit(NULL);} return;}
         }
         
         /* custom error weight function */
         /*
         flag = CVodeWFtolerances(cvode_mem, ewt);
-        if (check_flag(&flag, "CVodeWFtolerances", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+        if (flag < 0) {if(parallel==1) {pthread_exit(NULL);} return;}
         */
     }
     
@@ -357,9 +350,8 @@ void *x_calc(void *threadarg) {
         
         if(neq>0){
             /* Load sensitivity initial conditions */
-            status[0] = 9;
             sx = N_VCloneVectorArray_Serial(nps, x);
-            if (check_flag((void *)sx, "N_VCloneVectorArray_Serial", 0)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            if (sx == NULL) {status[0] = 9; if(parallel==1) {pthread_exit(NULL);} return;}
             for(js=0; js < nps; js++) {
                 sxtmp = NV_DATA_S(sx[js]);
                 for(ks=0; ks < neq; ks++) {
@@ -370,31 +362,26 @@ void *x_calc(void *threadarg) {
             fsv(data, 0.0, x, im, ic);
             dfxdp(data, 0.0, x, returnddxdtdp, im, ic);
             
-            status[0] = 10;
             flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sx, im, ic);
-            if(check_flag(&flag, "CVodeSensInit1", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            if(flag < 0) {status[0] = 10; if(parallel==1) {pthread_exit(NULL);} return;}
             
             /*
-            status[0] = 11;
             flag = CVodeSensEEtolerances(cvode_mem);
-            if(check_flag(&flag, "CVodeSensEEtolerances", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            if(flag < 0) {status[0] = 11; if(parallel==1) {pthread_exit(NULL);} return;}
             
-            status[0] = 13;
             flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
-            if (check_flag(&flag, "CVodeSetSensParams", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            if (flag < 0) {status[0] = 13; if(parallel==1) {pthread_exit(NULL);} return;}
             */
             
             atols_ss = N_VNew_Serial(np);
-            if (check_flag((void *)atols_ss, "N_VNew_Serial", 0)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            if (atols_ss == NULL) {if(parallel==1) {pthread_exit(NULL);} return;}
             for (is=0; is<np; is++) Ith(atols_ss, is+1) = cvodes_atol;
 
-            status[0] = 11;
             flag = CVodeSensSStolerances(cvode_mem, RCONST(cvodes_rtol), N_VGetArrayPointer(atols_ss));
-            if(check_flag(&flag, "CVodeSensSStolerances", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            if(flag < 0) {status[0] = 11; if(parallel==1) {pthread_exit(NULL);} return;}
             
-            status[0] = 13;
             flag = CVodeSetSensErrCon(cvode_mem, error_corr);
-            if(check_flag(&flag, "CVodeSetSensErrCon", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+            if(flag < 0) {status[0] = 13; if(parallel==1) {pthread_exit(NULL);} return;}
         }
     }
     
@@ -402,65 +389,75 @@ void *x_calc(void *threadarg) {
     for (is=0; is < nout; is++) {
         /* printf("%f x-loop (im=%i ic=%i)\n", ts[is], im, ic); */
         
-        /* only integrate after tstart */
-        if(ts[is] > tstart) {
-            if(neq>0) {
-                flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
-                status[0] = flag;
-                if(flag==-1) printf("CV_TOO_MUCH_WORK stoped at t=%f, did not reach output time after %i steps (m=%i, c=%i).\n", t, cvodes_maxsteps, im, ic);
-                if(flag<-1) printf("CVODES stoped at t=%f (m=%i, c=%i).\n", t, im, ic);
-                if (check_flag(&flag, "CVode", 1)) {
-                    /* Free memory */
-                    N_VDestroy_Serial(x);
-                    if (sensi == 1) {
-                        N_VDestroyVectorArray_Serial(sx, nps);
-                    }
-                    CVodeFree(&cvode_mem);
-                    free(data);
-
-                    if(parallel==1) {
-                        pthread_exit(NULL);
-                    } 
-                    return;
-                }
-            }
-        }
-        fu(data, ts[is], im, ic);
-        fv(data, ts[is], x, im, ic);
-
-        
-        /* set output values */
-        for(js=0; js < nu; js++) returnu[js*nout+is] = data->u[js];
-        if(nv>0) { for(js=0; js < nv; js++) returnv[js*nout+is] = data->v[js]; }
-        if(neq>0) { for(js=0; js < neq; js++) returnx[js*nout+is] = Ith(x, js+1); }
-        
-        /* set output sensitivities */
-        if (sensi == 1) {
+        /* only integrate if no errors occured */
+        if(status[0] == 0.0) {
+            /* only integrate after tstart */
             if(ts[is] > tstart) {
                 if(neq>0) {
-                    status[0] = 14;
-                    flag = CVodeGetSens(cvode_mem, &t, sx);
-                    if (check_flag(&flag, "CVodeGetSens", 1)) {if(parallel==1) {pthread_exit(NULL);} return;}
+                    flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
+                    status[0] = flag;
+//                     if(flag==-1) printf("CVODES stoped at t=%f, TOO_MUCH_WORK, did not reach output time after %i steps (m=%i, c=%i).\n", t, cvodes_maxsteps, im, ic);
+//                     if(flag<-1) printf("CVODES stoped at t=%f (m=%i, c=%i).\n", t, im, ic);
                 }
             }
-            fsu(data, ts[is], im, ic);
-            fsv(data, ts[is], x, im, ic);
+            fu(data, ts[is], im, ic);
+            fv(data, ts[is], x, im, ic);
             
-            for(js=0; js < nps; js++) {
-                if(neq>0) {
-                    sxtmp = NV_DATA_S(sx[js]);
-                    for(ks=0; ks < neq; ks++) {
-                        returnsx[js*neq*nout + ks*nout + is] = sxtmp[ks];
+            for(js=0; js < nu; js++) returnu[js*nout+is] = data->u[js];
+            for(js=0; js < nv; js++) {
+                returnv[js*nout+is] = data->v[js];
+            }
+            for(js=0; js < neq; js++) {
+                returnx[js*nout+is] = Ith(x, js+1);
+                /* set negative values to zeros */
+                if(qpositivex[js]>0.5 && returnx[js*nout+is]<0.0) returnx[js*nout+is] = 0.0;
+            }
+        } else {
+            for(js=0; js < nu; js++) returnu[js*nout+is] = 0.0;
+            for(js=0; js < nv; js++) returnv[js*nout+is] = 0.0;
+            for(js=0; js < neq; js++) returnx[js*nout+is] = 0.0;
+        }
+        
+        /* only set output sensitivities if no errors occured */
+        if(status[0] == 0.0) {
+            if (sensi == 1) {
+                if(ts[is] > tstart) {
+                    if(neq>0) {
+                        flag = CVodeGetSens(cvode_mem, &t, sx);
+                        if (flag < 0) {status[0] = 14; if(parallel==1) {pthread_exit(NULL);} return;}
                     }
                 }
-                for(ks=0; ks < nu; ks++) {
-                    returnsu[js*nu*nout + ks*nout + is] = data->su[(js*nu)+ks];
+                fsu(data, ts[is], im, ic);
+                fsv(data, ts[is], x, im, ic);
+                
+                for(js=0; js < nps; js++) {
+                    if(neq>0) {
+                        sxtmp = NV_DATA_S(sx[js]);
+                        for(ks=0; ks < neq; ks++) {
+                            returnsx[js*neq*nout + ks*nout + is] = sxtmp[ks];
+                        }
+                    }
+                    for(ks=0; ks < nu; ks++) {
+                        returnsu[js*nu*nout + ks*nout + is] = data->su[(js*nu)+ks];
+                    }
+                }
+            }
+        } else {
+            if (sensi == 1) {
+                for(js=0; js < nps; js++) {
+                    if(neq>0) {
+                        sxtmp = NV_DATA_S(sx[js]);
+                        for(ks=0; ks < neq; ks++) {
+                            returnsx[js*neq*nout + ks*nout + is] = 0.0;
+                        }
+                    }
+                    for(ks=0; ks < nu; ks++) {
+                        returnsu[js*nu*nout + ks*nout + is] = 0.0;
+                    }
                 }
             }
         }
     }
-    
-    status[0] = 0;
     
     /* Free memory */
     if(neq>0) {
@@ -734,43 +731,6 @@ void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, 
     }
 }
 
-
-/*
- * Check function return value of CVODES.
- *    opt == 0 means SUNDIALS function allocates memory so check if
- *             returned NULL pointer
- *    opt == 1 means SUNDIALS function returns a flag so check if
- *             flag >= 0
- *    opt == 2 means function allocates memory so check if returned
- *             NULL pointer
- */
-
-int check_flag(void *flagvalue, char *funcname, int opt) {
-    int *errflag;
-    
-    /* Check if SUNDIALS function returned NULL pointer - no memory allocated */
-    if (opt == 0 && flagvalue == NULL) {
-        /* printf("\nSUNDIALS ERROR: %s() failed - returned NULL pointer\n\n", funcname); */
-        return(1);
-    }
-    
-    /* Check if flag < 0 */
-    else if (opt == 1) {
-        errflag = (int *) flagvalue;
-        if (*errflag < 0) {
-            /* printf("\nSUNDIALS ERROR: %s() failed with flag = %d\n\n", funcname, *errflag); */
-            return(1);
-        }
-    }
-    
-    /* Check if function returned NULL pointer - no memory allocated */
-    else if (opt == 2 && flagvalue == NULL) {
-        /* printf("\nMEMORY ERROR: %s() failed - returned NULL pointer\n\n", funcname); */
-        return(1);
-    }
-    
-    return(0);
-}
 
 /* custom error weight function */
 /*

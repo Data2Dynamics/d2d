@@ -108,7 +108,8 @@ ar.model(m).xNames = {};
 ar.model(m).xUnits = {};
 ar.model(m).cLink = [];
 ar.model(m).qPlotX = [];
-C = textscan(fid, '%s %q %q %q %s %n %q\n',1, 'CommentStyle', ar.config.comment_string);
+ar.model(m).qPositiveX = [];
+C = textscan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INPUTS'))
     if(length(cell2mat(C{1}))<2)
         error('STATE names need to be longer than 1');
@@ -134,8 +135,13 @@ while(~strcmp(C{1},'INPUTS'))
     else
         ar.model(m).xNames{end+1} = ar.model(m).x{end};
     end
+    if(isempty(C{8}) || isnan(C{8}))
+        ar.model(m).qPositiveX(end+1) = 1;
+    else
+        ar.model(m).qPositiveX(end+1) = C{8};
+    end
     ar.model(m).px0(end+1) = {['init_' cell2mat(C{1})]};
-    C = textscan(fid, '%s %q %q %q %s %n %q\n',1, 'CommentStyle', ar.config.comment_string);
+    C = textscan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 % INPUTS

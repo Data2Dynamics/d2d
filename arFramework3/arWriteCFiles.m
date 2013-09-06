@@ -6,7 +6,7 @@
 %
 % Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
 
-function arWriteCFiles(forcedCompile)
+function arWriteCFiles(forcedCompile, debug_mode)
 
 warnreset = warning;
 warning('off','symbolic:mupadmex:MuPADTextWarning');
@@ -19,6 +19,9 @@ end
 
 if(~exist('forcedCompile','var'))
 	forcedCompile = false;
+end
+if(~exist('debug_mode','var'))
+    debug_mode = false;
 end
 
 if(~exist([cd '/Compiled'], 'dir'))
@@ -41,6 +44,7 @@ fid = fopen(['./Compiled/' ar.info.c_version_code '/udata.h'], 'W');
 fprintf(fid, '#ifndef _MY_UDATA\n');
 fprintf(fid, '#define _MY_UDATA\n');
 fprintf(fid, 'typedef struct {\n');
+fprintf(fid, '\tdouble *qpositivex;\n');
 fprintf(fid, '\tdouble *u;\n');
 fprintf(fid, '\tdouble *su;\n');
 fprintf(fid, '\tdouble *p;\n');
@@ -65,8 +69,11 @@ fid = fopen(['./Compiled/' ar.info.c_version_code '/arSimuCalcFunctions.c'], 'W'
 fprintf('\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-%         fprintf(fid, '#include "%s.c"\n', ar.model(m).condition(c).fkt);
-        fprintf(fid, '#include "%s.h"\n', ar.model(m).condition(c).fkt); % changed to .h
+        if(~debug_mode)
+            fprintf(fid, '#include "%s.h"\n', ar.model(m).condition(c).fkt);
+        else
+            fprintf(fid, '#include "%s.c"\n', ar.model(m).condition(c).fkt);
+        end
         fprintf('writing condition m%i c%i, %s (%s)...', m, c, ar.model(m).name, ar.model(m).condition(c).checkstr);
         if(forcedCompile || ~exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.h'],'file'))
             fid_odeH = fopen(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.h'], 'W'); % create header file
@@ -84,7 +91,11 @@ for m=1:length(ar.model)
     
     if(isfield(ar.model(m), 'data'))
         for d=1:length(ar.model(m).data)
-            fprintf(fid, '#include "%s.h"\n', ar.model(m).data(d).fkt);
+            if(~debug_mode)
+                fprintf(fid, '#include "%s.h"\n', ar.model(m).data(d).fkt);
+            else
+                fprintf(fid, '#include "%s.c"\n', ar.model(m).data(d).fkt);
+            end
             fprintf('writing data m%i d%i, %s (%s)...', m, d, ar.model(m).data(d).name, ar.model(m).data(d).checkstr);
             if(forcedCompile || ~exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.h'],'file'))
                 fid_obsH = fopen(['./Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.h'], 'W'); % create header file
@@ -445,16 +456,18 @@ end
 if(~isempty(ar.model(m).xs))
     fprintf(fid, '  int is;\n');
     fprintf(fid, '  UserData data = (UserData) user_data;\n');
+    fprintf(fid, '  double *qpositivex = data->qpositivex;\n');
     fprintf(fid, '  double *p = data->p;\n');
     fprintf(fid, '  double *u = data->u;\n');
     fprintf(fid, '  double *v = data->v;\n');
-    % fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
+    fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
     fprintf(fid, '  double *xdot_tmp = N_VGetArrayPointer(xdot);\n');
     fprintf(fid, '  fu_%s(data, t);\n', ar.model(m).condition(c).fkt);
     fprintf(fid, '  fv_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
     writeCcode(fid, m, c, 'fx');
     fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(ar.model(m).x));
-    fprintf(fid, '    if(isnan(xdot_tmp[is])) xdot_tmp[is] = 0;\n');
+    fprintf(fid, '    if(isnan(xdot_tmp[is])) xdot_tmp[is] = 0.0;\n');
+    fprintf(fid, '    if(qpositivex[is]>0.5 && x_tmp[is]<0.0 && xdot_tmp[is]<0.0) xdot_tmp[is] = -xdot_tmp[is];\n');
     fprintf(fid, '  }\n');
 end
 
@@ -475,7 +488,7 @@ if(~isempty(ar.model(m).xs))
     fprintf(fid, '  fv_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
     writeCcode(fid, m, c, 'fx');
     fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(ar.model(m).x));
-    fprintf(fid, '    if(isnan(xdot_tmp[is])) xdot_tmp[is] = 0;\n');
+    fprintf(fid, '    if(isnan(xdot_tmp[is])) xdot_tmp[is] = 0.0;\n');
     fprintf(fid, '  }\n');
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
@@ -511,7 +524,7 @@ if(~isempty(ar.model(m).xs))
         fprintf(fid, '  dvdx_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
         writeCcode(fid, m, c, 'dfxdx');
         fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(ar.model(m).x)^2);
-        fprintf(fid, '    if(isnan(J->data[is])) J->data[is] = 0;\n');
+        fprintf(fid, '    if(isnan(J->data[is])) J->data[is] = 0.0;\n');
         fprintf(fid, '  }\n');
     end
 end
@@ -556,7 +569,7 @@ if(~isempty(ar.model(m).xs))
         end
         fprintf(fid, '  }\n');
         fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(ar.model(m).x));
-        fprintf(fid, '    if(isnan(sxdot_tmp[is])) sxdot_tmp[is] = 0;\n');
+        fprintf(fid, '    if(isnan(sxdot_tmp[is])) sxdot_tmp[is] = 0.0;\n');
         fprintf(fid, '  }\n');
     end
 end
@@ -603,7 +616,7 @@ if(~isempty(ar.model(m).xs))
             fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
             writeCcode(fid, m, c, 'dfxdp');
             fprintf(fid, '  for (is=0; is<%i; is++) {\n', numel(ar.model(m).condition(c).sym.dfxdp));
-            fprintf(fid, '    if(isnan(dfxdp[is])) dfxdp[is] = 0;\n');
+            fprintf(fid, '    if(isnan(dfxdp[is])) dfxdp[is] = 0.0;\n');
             fprintf(fid, '  }\n');
         end
     end
@@ -712,7 +725,7 @@ elseif(strcmp(svar,'dvdp'))
 elseif(strcmp(svar,'fx'))
     cstr = ccode(ar.model(m).condition(id2).sym.fx(:));
     for j=find(ar.model(m).condition(id2).sym.fx(:)' == 0)
-        cstr = [cstr sprintf('\n  T[%i][0] = 0;',j-1)]; %#ok<AGROW>
+        cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  'xdot_tmp';
 elseif(strcmp(svar,'fx0'))
@@ -721,7 +734,7 @@ elseif(strcmp(svar,'fx0'))
 elseif(strcmp(svar,'dfxdx'))
     cstr = ccode(ar.model(m).condition(id2).sym.dfxdx(:));
     for j=find(ar.model(m).condition(id2).sym.dfxdx(:)' == 0)
-        cstr = [cstr sprintf('\n  T[%i][0] = 0;',j-1)]; %#ok<AGROW>
+        cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  'J->data';
 elseif(strcmp(svar,'fsv'))
@@ -730,7 +743,7 @@ elseif(strcmp(svar,'fsv'))
 elseif(strcmp(svar,'fsx'))
     cstr = ccode(ar.model(m).condition(id2).sym.fsx(:,ip));
     for j=find(ar.model(m).condition(id2).sym.fsx(:,ip)' == 0)
-        cstr = [cstr sprintf('\n  T[%i][0] = 0;',j-1)]; %#ok<AGROW>
+        cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  'sxdot_tmp';
 elseif(strcmp(svar,'fsx0'))

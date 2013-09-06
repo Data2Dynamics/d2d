@@ -7,7 +7,7 @@
 %   This function is based on install_STB written by Radu Serban
 %   and installs only the parts of the sundials toolbox.
 
-function arCompile(forceFullCompile)
+function arCompile(forceFullCompile, debug_mode)
 
 global ar
 
@@ -18,13 +18,11 @@ end
 if(~exist('forceFullCompile','var'))
     forceFullCompile = false;
 end
+if(~exist('debug_mode','var'))
+    debug_mode = false;
+end
 
 fprintf('\n');
-
-if(exist([ar.fkt '.' mexext],'file') && ~forceFullCompile)
-    fprintf('compiling %s...skipped\n', ar.fkt);
-    return
-end
 
 if(~ispc)
     ar_path = strrep(which('arInit.m'),'/arInit.m','');
@@ -49,7 +47,6 @@ includesstr = strcat(includesstr, [' -I"' pwd '/Compiled/' ar.info.c_version_cod
 includesstr = strcat(includesstr, [' -I"' ar_path '"']);
 
 %% pre-compile CVODES sources
-
 fprintf('compiling CVODES...');
 
 % source files
@@ -131,67 +128,23 @@ end
 fprintf('...done\n');
 
 %% pre-compile input functions
-
 eval(['mex -c -outdir Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' ar_path '/arInputFunctionsC.c']);
 
 %% pre-compile conditions
-
-labels = {};
-sources_con = {};
 objects_con = {};
-
 for jm = 1:length(ar.model)
     for sc = 1:length(ar.model(jm).condition)
-        labels{end+1} = ar.model(jm).condition(sc).fkt; %#ok<AGROW>
-        sources_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' ar.model(jm).condition(sc).fkt '.c']; %#ok<AGROW>
+        fprintf('compiling condition m%i c%i, %s...', jm, sc, ar.model(jm).condition(sc).fkt);
+        
         if(~ispc)
             objects_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).condition(sc).fkt '.o']; %#ok<AGROW>
         else
             objects_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).condition(sc).fkt '.obj']; %#ok<AGROW>
         end
-    end
-end
-
-for j=1:length(objects_con)
-    objectsstr = strcat(objectsstr, [' ' objects_con{j}]);
-end
-
-for j=1:length(sources_con)
-    fprintf('compiling condition %s...', labels{j});
-    if(~exist(objects_con{j}, 'file'))
-        eval(['mex -c -outdir ./Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' sources_con{j}]);
-        fprintf('done\n');
-    else
-        fprintf('skipped\n');
-    end
-end
-
-%% pre-compile data
-if(isfield(ar.model, 'data'))
-    labels = {};
-    sources_dat = {};
-    objects_dat = {};
-    
-    for jm = 1:length(ar.model)
-        for sc = 1:length(ar.model(jm).data)
-            labels{end+1} = ar.model(jm).data(sc).fkt; %#ok<AGROW>
-            sources_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' ar.model(jm).data(sc).fkt '.c']; %#ok<AGROW>
-            if(~ispc)
-                objects_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).data(sc).fkt '.o']; %#ok<AGROW>
-            else
-                objects_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).data(sc).fkt '.obj']; %#ok<AGROW>
-            end
-        end
-    end
-    
-    for j=1:length(objects_dat)
-        objectsstr = strcat(objectsstr, [' ' objects_dat{j}]);
-    end
-    
-    for j=1:length(sources_dat)
-        fprintf('compiling data %s...', labels{j});
-        if(~exist(objects_dat{j}, 'file'))
-            eval(['mex -c -outdir ./Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' sources_dat{j}]);
+        
+        if(~exist(objects_con{end}, 'file') || forceFullCompile)
+            eval(['mex -c -outdir ./Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' ...
+                './Compiled/' ar.info.c_version_code '/' ar.model(jm).condition(sc).fkt '.c']);
             fprintf('done\n');
         else
             fprintf('skipped\n');
@@ -199,20 +152,59 @@ if(isfield(ar.model, 'data'))
     end
 end
 
-%% compile and link main mex file
-
-outputstr = [' -output ' ar.fkt];
-
-fprintf('compiling and linking %s...', ar.fkt);
-if(~ispc)
-    % parallel code using POSIX threads for unix type OS
-    eval(['mex' outputstr includesstr ' "' which('arSimuCalc.c') '"' objectsstr]);
-else
-    % serial code for windows OS
-    eval(['mex' outputstr includesstr ' "' which('arSimuCalcWin.c') '"' objectsstr]);
+if(~debug_mode)
+    for j=1:length(objects_con)
+        objectsstr = strcat(objectsstr, [' ' objects_con{j}]);
+    end
 end
-fprintf('done\n');
 
-% refresh file cache
+%% pre-compile data
+if(isfield(ar.model, 'data'))
+    objects_dat = {};
+    
+    for jm = 1:length(ar.model)
+        for sc = 1:length(ar.model(jm).data)            
+            fprintf('compiling data m%i d%i, %s...', jm, sc, ar.model(jm).data(sc).fkt);
+            
+            if(~ispc)
+                objects_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).data(sc).fkt '.o']; %#ok<AGROW>
+            else
+                objects_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).data(sc).fkt '.obj']; %#ok<AGROW>
+            end
+            
+            if(~exist(objects_dat{end}, 'file') || forceFullCompile)
+                eval(['mex -c -outdir ./Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' ...
+                    './Compiled/' ar.info.c_version_code '/' ar.model(jm).data(sc).fkt '.c']);
+                fprintf('done\n');
+            else
+                fprintf('skipped\n');
+            end
+        end
+    end
+    
+    if(~debug_mode)
+        for j=1:length(objects_dat)
+            objectsstr = strcat(objectsstr, [' ' objects_dat{j}]);
+        end
+    end
+end
+
+%% compile and link main mex file
+fprintf('compiling and linking %s...', ar.fkt);
+if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile)
+    outputstr = [' -output ' ar.fkt];
+    if(~ispc)
+        % parallel code using POSIX threads for unix type OS
+        eval(['mex' outputstr includesstr ' "' which('arSimuCalc.c') '"' objectsstr]);
+    else
+        % serial code for windows OS
+        eval(['mex' outputstr includesstr ' "' which('arSimuCalcWin.c') '"' objectsstr]);
+    end
+    fprintf('done\n');
+else
+    fprintf('skipped\n');
+end
+
+%% refresh file cache
 rehash
 

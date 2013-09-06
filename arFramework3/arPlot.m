@@ -33,19 +33,15 @@ if(~exist('doLegends','var'))
 end
 
 if(evalfun)
-    try
+    try %#ok<TRYNC>
+        arSimu(false, true);
+    end
+    try %#ok<TRYNC>
         if(silent)
             arChi2(false, []);
         else
             arChi2;
         end
-    catch error_id
-        disp(error_id.message);
-    end
-    try
-        arSimu(false, true);
-    catch error_id
-        disp(error_id.message);
     end
 end
 
