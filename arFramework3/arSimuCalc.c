@@ -396,8 +396,10 @@ void *x_calc(void *threadarg) {
                 if(neq>0) {
                     flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
                     status[0] = flag;
-//                     if(flag==-1) printf("CVODES stoped at t=%f, TOO_MUCH_WORK, did not reach output time after %i steps (m=%i, c=%i).\n", t, cvodes_maxsteps, im, ic);
-//                     if(flag<-1) printf("CVODES stoped at t=%f (m=%i, c=%i).\n", t, im, ic);
+                    /*
+                    if(flag==-1) printf("CVODES stoped at t=%f, TOO_MUCH_WORK, did not reach output time after %i steps (m=%i, c=%i).\n", t, cvodes_maxsteps, im, ic);
+                    if(flag<-1) printf("CVODES stoped at t=%f (m=%i, c=%i).\n", t, im, ic);
+                    */
                 }
             }
             fu(data, ts[is], im, ic);
