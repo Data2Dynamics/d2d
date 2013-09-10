@@ -419,7 +419,7 @@ void *x_calc(void *threadarg) {
             for(js=0; js < nv; js++) returnv[js*nout+is] = 0.0;
             for(js=0; js < neq; js++) returnx[js*nout+is] = 0.0;
         }
-        
+
         /* only set output sensitivities if no errors occured */
         if(status[0] == 0.0) {
             if (sensi == 1) {
