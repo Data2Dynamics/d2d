@@ -26,6 +26,8 @@ if(exist('JEInterface','file') == 0)
     addpath([ar_path '/EvA2/JEInterface'])
 end
 
+%% CVODES
+
 % uncompress and expand CVODES
 if(exist([ar_path '/sundials-2.5.0'],'dir') == 0)
     if(~ispc)
@@ -50,6 +52,8 @@ if(exist([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'],'file') 
     fprintf(fid, '#define SUNDIALS_EXPORT\n');
     fclose(fid);
 end
+
+%% Rest
 
 % EvA2 Toolbox
 javaaddpath([ar_path '/EvA2/EvA2Base.jar'])

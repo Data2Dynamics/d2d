@@ -36,11 +36,15 @@ if(evalfun)
     try %#ok<TRYNC>
         arSimu(false, true);
     end
-    try %#ok<TRYNC>
+    try 
         if(silent)
             arChi2(false, []);
         else
             arChi2;
+        end
+    catch err_id
+        if(silent)
+            disp(err_id.message);
         end
     end
 end

@@ -37,12 +37,14 @@ if(~exist([cd '/Compiled/' ar.info.c_version_code '/' mexext], 'dir'))
     mkdir([cd '/Compiled/' ar.info.c_version_code '/' mexext])
 end
 
-% include directories
-includes = {'include', 'src/cvodes'};
+%% include directories
 includesstr = '';
-for j=1:length(includes)
-    includesstr = strcat(includesstr, [' -I"' sundials_path includes{j} '"']);
-end
+
+% CVODES
+includesstr = strcat(includesstr, [' -I"' sundials_path 'include"']);
+includesstr = strcat(includesstr, [' -I"' sundials_path 'src/cvodes"']);
+
+% arFramework3
 includesstr = strcat(includesstr, [' -I"' pwd '/Compiled/' ar.info.c_version_code '"']);
 includesstr = strcat(includesstr, [' -I"' ar_path '"']);
 
