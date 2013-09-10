@@ -20,7 +20,7 @@ nSTAT4          C   "nM"      "conc."    nuc
 nSTAT5          C   "nM"      "conc."    nuc
 
 INPUTS
-pEpoR           C   "au"      "conc."   "gif_amp_trans*(1-exp(-t/gif_timescale_sust))*exp(-t/(gif_timescale_trans)) + gif_amp_sust*(1-exp(-t/gif_timescale_sust))"
+pEpoR           C   "au"      "conc."   "spline_pos5(t, 0.0, sp1, 5.0, sp2, 10.0, sp3, 20.0, sp4, 60.0, sp5, 0, 0.0)"
 
 REACTIONS
 STAT             ->  pSTAT            CUSTOM "p1 * pEpoR * STAT"
@@ -40,7 +40,7 @@ INVARIANTS
 OBSERVABLES
 tSTAT_au        C   "au"  "conc."   1   0   "offset_tSTAT + scale_tSTAT * (STAT + pSTAT + 2*pSTAT_pSTAT)"
 pSTAT_au        C   "au"  "conc."   1   0   "offset_pSTAT + scale_pSTAT * (pSTAT + 2*pSTAT_pSTAT)"
-pEpoR_au        C   "au"  "conc."   1   0   "scale_pEpoR * pEpoR"
+pEpoR_au        C   "au"  "conc."   1   0   "pEpoR"
 
 ERRORS
 tSTAT_au       "sd_tSTAT_au"

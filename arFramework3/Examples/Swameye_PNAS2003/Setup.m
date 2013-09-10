@@ -10,7 +10,7 @@ arLink;
 % load best fit parameter values
 arLoadPars('BestFit');
 
-useErrorModel = false;
+useErrorModel = true;
 if(~useErrorModel)
     % do not fit error model
     ar.config.fiterrors = -1;
@@ -22,10 +22,11 @@ if(~useErrorModel)
     ar.model.data.qFit(3) = 0;
     
     % fix parameter for input and error model
-    arSetPars('gif_amp_sust',[],2);
-    arSetPars('gif_amp_trans',[],2);
-    arSetPars('gif_timescale_sust',[],2);
-    arSetPars('gif_timescale_trans',[],2);
+    arSetPars('sp1',[],2);
+    arSetPars('sp2',[],2);
+    arSetPars('sp3',[],2);
+    arSetPars('sp4',[],2);
+    arSetPars('sp5',[],2);
     arSetPars('scale_pEpoR',[],2);
     arSetPars('sd_pEpoR_au',[],2);
     arSetPars('sd_pSTAT_au',[],2);
