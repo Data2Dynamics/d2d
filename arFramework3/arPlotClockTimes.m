@@ -4,29 +4,30 @@ global ar
 
 figure(1)
 
-ccount = 0;
-
 c = 1e-3;
 
-plot([0 ar.stop]*c, [ccount ccount], '*-k');
+plot([0 ar.stop]*c, [0 0], '*-k');
 hold on
 
 labels = {'overall'};
 
-for jm=1:length(ar.model)
-    for jc=1:length(ar.model(jm).condition)
-        ccount = ccount + 1;
+for jt=1:length(ar.config.threads)
+    for jmc=1:length(ar.config.threads(jt).ms)
+        C = arLineMarkersAndColors(jmc, length(ar.config.threads(jt).ms), [], '*','-');
+        jm = ar.config.threads(jt).ms(jmc)+1;
+        jc = ar.config.threads(jt).cs(jmc)+1;
         plot([ar.model(jm).condition(jc).start ...
             ar.model(jm).condition(jc).stop_data ...
             ar.model(jm).condition(jc).stop]*c, ...
-            [ccount ccount ccount], '*-b');
-        labels{ccount+1} = sprintf('m=%i c=%i (#d=%i)', jm, jc, ...
-            length(ar.model(jm).condition(jc).dLink));
+            [jt jt jt], C{:});
+        hold on
     end
+    labels{jt+1} = sprintf('thread %i (#mc=%i, #d=%i)', jt, ...
+            ar.config.threads(jt).n, ar.config.threads(jt).nd);
 end
 hold off
-ylim([-0.5 ccount+0.5])
-set(gca, 'yTick', 0:ccount);
+ylim([-0.2 ar.config.nParallel+0.2])
+set(gca, 'yTick', 0:ar.config.nParallel);
 set(gca, 'yTickLabel', labels);
 xlabel('time [milli seconds]');
 grid on

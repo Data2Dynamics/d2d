@@ -206,14 +206,15 @@ end
 
 %% compile and link main mex file
 fprintf('compiling and linking %s...', ar.fkt);
-if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile)
+% if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile)
+if(~exist([ar.fkt '.' mexext],'file') || true)
     outputstr = [' -output ' ar.fkt];
     if(~ispc)
         % parallel code using POSIX threads for unix type OS
-        eval(['mex' outputstr includesstr ' "' which('arSimuCalc.c') '"' objectsstr]);
+        eval(['mex' outputstr includesstr ' -DHAS_PTHREAD=1 -DHAS_SYSTIME=1 "' which('arSimuCalc.c') '"' objectsstr]);
     else
         % serial code for windows OS
-        eval(['mex' outputstr includesstr ' "' which('arSimuCalcWin.c') '"' objectsstr]);
+        eval(['mex' outputstr includesstr ' "' which('arSimuCalc.c') '"' objectsstr]);
     end
     fprintf('done\n');
 else

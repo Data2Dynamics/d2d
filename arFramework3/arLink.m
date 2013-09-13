@@ -292,8 +292,7 @@ ar.type = zeros(size(ar.pLabel));
 ar.mean = zeros(size(ar.pLabel));
 ar.std = zeros(size(ar.pLabel));
 
-% link back parameters & thread indexing
-thread_count_x = 0;
+% link back parameters
 for m = 1:length(ar.model)
     for c = 1:length(ar.model(m).condition)
         if(~isempty(ar.model(m).condition(c).p))
@@ -302,8 +301,6 @@ for m = 1:length(ar.model)
             ar.model(m).condition(c).pLink = [];
         end
         ar.model(m).condition(c).pNum = 10.^ar.p(ar.model(m).condition(c).pLink);
-        ar.model(m).condition(c).thread_id = thread_count_x;
-        thread_count_x = thread_count_x + 1;
     end
     if(isfield(ar.model(m), 'data'))
         for d = 1:length(ar.model(m).data)
@@ -316,7 +313,38 @@ for m = 1:length(ar.model)
         end
     end
 end
-ar.config.nthreads_x = thread_count_x;
+
+% populate threads
+ar.config.threads = [];
+ar.config.threads(1).id = 0;
+ar.config.threads(1).n = 0;
+ar.config.threads(1).nd = 0;
+ar.config.threads(1).ms = int32([]);
+ar.config.threads(1).cs = int32([]);
+ithread = 1;
+ar.config.nTasks = 0;
+for m = 1:length(ar.model)
+    for c = 1:length(ar.model(m).condition)
+        if(length(ar.config.threads)<ithread)
+            ar.config.threads(ithread).id = ithread-1;
+            ar.config.threads(ithread).n = 0;
+            ar.config.threads(ithread).nd = 0;
+            ar.config.threads(ithread).ms = int32([]);
+            ar.config.threads(ithread).cs = int32([]);
+        end
+        ar.config.nTasks = ar.config.nTasks + 1;
+        ar.config.threads(ithread).n = ar.config.threads(ithread).n + 1;
+        ar.config.threads(ithread).nd = ar.config.threads(ithread).nd + ...
+            length(ar.model(m).condition(c).dLink);        
+        ar.config.threads(ithread).ms(end+1) = int32(m-1);
+        ar.config.threads(ithread).cs(end+1) = int32(c-1);
+        ithread = ithread + 1;
+        if(ithread>ar.config.nParallel)
+            ithread = 1;
+        end
+    end
+end
+ar.config.nThreads = length(ar.config.threads);
 
 % reset values
 if(exist('plabel','var'))
