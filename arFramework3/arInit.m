@@ -18,7 +18,7 @@ ar.fevals = 0;
 arInitUser;
 
 ar.info.initTime = now;
-[ar.info.def_version_code ar.info.c_version_code] = arGetVersion;
+[ar.info.def_version_code, ar.info.c_version_code] = arGetVersion;
 fprintf('Data 2 Dynamics Software\n');
 fprintf('(arFramework3, def-version %i, c-version %s)\n', ...
     ar.info.def_version_code, ar.info.c_version_code);
@@ -28,7 +28,9 @@ fprintf('Copyright 2013 D2D Development Team. All rights reserved.\n\n');
 
 ar.checksum = [];
 
+% parallelization
 ar.config.useParallel = true;
+ar.config.nCore = feature('numCores');
 ar.config.nParallel = feature('numCores');
 
 % plotting options

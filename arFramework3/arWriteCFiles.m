@@ -31,37 +31,6 @@ if(~exist([cd '/Compiled/' ar.info.c_version_code], 'dir'))
 	mkdir([cd '/Compiled/' ar.info.c_version_code])
 end
 
-% link back parameters & thread indexing
-thread_count_x = 0;
-for m = 1:length(ar.model)
-	for c = 1:length(ar.model(m).condition)
-		thread_count_x = thread_count_x + 1;
-	end
-end
-
-% udata.h
-fid = fopen(['./Compiled/' ar.info.c_version_code '/udata.h'], 'W');
-fprintf(fid, '#ifndef _MY_UDATA\n');
-fprintf(fid, '#define _MY_UDATA\n');
-fprintf(fid, 'typedef struct {\n');
-fprintf(fid, '\tdouble *qpositivex;\n');
-fprintf(fid, '\tdouble *u;\n');
-fprintf(fid, '\tdouble *su;\n');
-fprintf(fid, '\tdouble *p;\n');
-fprintf(fid, '\tdouble *v;\n');
-fprintf(fid, '\tdouble *sv;\n');
-fprintf(fid, '\tdouble *dvdx;\n');
-fprintf(fid, '\tdouble *dvdu;\n');
-fprintf(fid, '\tdouble *dvdp;\n');
-fprintf(fid, '\t} *UserData;\n');
-fprintf(fid, '#endif /* _MY_UDATA */\n');
-fclose(fid);
-
-% Variables
-fid = fopen(['./Compiled/' ar.info.c_version_code '/arSimuCalcVariables.c'], 'W');
-fprintf(fid, 'pthread_t threads_x[%i];\n\n', thread_count_x);
-fclose(fid);
-
 % Functions
 fid = fopen(['./Compiled/' ar.info.c_version_code '/arSimuCalcFunctions.c'], 'W');
 

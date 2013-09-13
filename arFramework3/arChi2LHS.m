@@ -16,7 +16,6 @@ if(~exist('sensis','var'))
     sensis = false;
 end
 
-
 if(~exist('silent','var'))
     silent = false;
 end

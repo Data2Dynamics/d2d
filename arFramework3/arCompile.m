@@ -130,7 +130,20 @@ end
 fprintf('...done\n');
 
 %% pre-compile input functions
-eval(['mex -c -outdir Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' ar_path '/arInputFunctionsC.c']);
+fprintf('compiling input functions...');
+
+if(~ispc)
+    objects_inp = ['./Compiled/' ar.info.c_version_code '/' mexext '/arInputFunctionsC.o'];
+else
+    objects_inp = ['./Compiled/' ar.info.c_version_code '/' mexext '/arInputFunctionsC.obj'];
+end
+
+if(~exist(objects_inp, 'file') || forceFullCompile)
+    eval(['mex -c -outdir Compiled/' ar.info.c_version_code '/' mexext '/' includesstr ' ' ar_path '/arInputFunctionsC.c']);
+    fprintf('done\n');
+else
+    fprintf('skipped\n');
+end
 
 %% pre-compile conditions
 objects_con = {};
