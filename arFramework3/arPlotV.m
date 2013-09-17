@@ -158,8 +158,11 @@ for jm = 1:length(ar.model)
                         g = ar.model(jm).plot(jplot).gv(jv);
                         if(~fastPlotTmp)
                             hold(g, 'off');
-                            
-                            title(g, sprintf('v_{%i}', jv));
+                            if(isempty(ar.model(jm).v{jv}))
+                                title(g, sprintf('v_{%i}', jv));
+                            else
+                                title(g,myNameTrafo(ar.model(jm).v{jv}));
+                            end
                             %                         fprintf('v%i: %s\n', jv, ar.model(jm).fv{jv});
                             %                         title(g, sprintf('v_{%i}: %s', jv, myNameTrafo(ar.model(jm).fv{jv})));
                             
