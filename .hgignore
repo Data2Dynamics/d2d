@@ -4,6 +4,7 @@ arFramework3/sundials-2.4.0/
 arFramework3/sundials-2.5.0/
 arFramework3/Examples/Bachmann_MSB2011/Compiled/
 arFramework3/Examples/Bachmann_MSB2011/arSimuCalc*
+arFramework3/Examples/Bachmann_MSB2011/arCheckParallel*
 arFramework3/Examples/Becker_Science2010/Compiled/
 arFramework3/Examples/Becker_Science2010/arSimuCalc*
 arFramework3/Examples/Bolus_Injection_Test/Compiled/
