@@ -474,7 +474,7 @@ if(ar.config.useSensis)
             end
         end
         
-        % derivatives of spline_pos5
+        % derivatives of spline_pos3
         for j=1:length(ar.model(m).u)
             if(strfind(ar.model(m).condition(c).fu{j}, 'spline_pos3('))
                 for j2=1:length(ar.model(m).condition(c).sym.dfudp(j,:))
@@ -591,6 +591,88 @@ if(ar.config.useSensis)
                 end
             end
         end
+        
+          % derivatives of spline10
+        for j=1:length(ar.model(m).u)
+            if(strfind(ar.model(m).condition(c).fu{j}, 'spline10('))
+                for j2=1:length(ar.model(m).condition(c).sym.dfudp(j,:))
+                    ustr = char(ar.model(m).condition(c).sym.dfudp(j,j2));
+                    if(strfind(ustr, 'D([3], spline10)('))
+                        ustr = strrep(ustr, 'D([3], spline10)(', 'Dspline10(');
+                        ustr = strrep(ustr, ')', ', 1)');
+                    elseif(strfind(ustr, 'D([5], spline10)('))
+                        ustr = strrep(ustr, 'D([5], spline10)(', 'Dspline10(');
+                        ustr = strrep(ustr, ')', ', 2)');
+                    elseif(strfind(ustr, 'D([7], spline10)('))
+                        ustr = strrep(ustr, 'D([7], spline10)(', 'Dspline10(');
+                        ustr = strrep(ustr, ')', ', 3)');
+                    elseif(strfind(ustr, 'D([9], spline10)('))
+                        ustr = strrep(ustr, 'D([9], spline10)(', 'Dspline10(');
+                        ustr = strrep(ustr, ')', ', 4)');
+                    elseif(strfind(ustr, 'D([11], spline10)('))
+                        ustr = strrep(ustr, 'D([11], spline10)(', 'Dspline10(');
+                        ustr = strrep(ustr, ')', ', 5)');
+                    elseif(strfind(ustr, 'D([13], spline10)('))
+                        ustr = strrep(ustr, 'D([13], spline10)(', 'Dspline10(');
+                        ustr = strrep(ustr, ')', ', 6)');
+                    elseif(strfind(ustr, 'D([15], spline10)('))
+                        ustr = strrep(ustr, 'D([15], spline10)(', 'Dspline10(');
+                        ustr = strrep(ustr, ')', ', 7)');
+                    elseif(strfind(ustr, 'D([17], spline10)('))
+                        ustr = strrep(ustr, 'D([17], spline10)(', 'Dspline10(');
+                        ustr = strrep(ustr, ')', ', 8)');
+                    elseif(strfind(ustr, 'D([19], spline10)('))
+                        ustr = strrep(ustr, 'D([19], spline10)(', 'Dspline10(');
+                        ustr = strrep(ustr, ')', ', 9)');
+                    elseif(strfind(ustr, 'D([21], spline10)('))
+                        ustr = strrep(ustr, 'D([21], spline10)(', 'Dspline10(');
+                        ustr = strrep(ustr, ')', ', 10)');
+                    end
+                    ar.model(m).condition(c).sym.dfudp(j,j2) = sym(ustr);
+                end
+            end
+        end
+        
+        % derivatives of spline_pos10
+        for j=1:length(ar.model(m).u)
+            if(strfind(ar.model(m).condition(c).fu{j}, 'spline_pos10('))
+                for j2=1:length(ar.model(m).condition(c).sym.dfudp(j,:))
+                    ustr = char(ar.model(m).condition(c).sym.dfudp(j,j2));
+                    if(strfind(ustr, 'D([3], spline_pos10)('))
+                        ustr = strrep(ustr, 'D([3], spline_pos10)(', 'Dspline_pos10(');
+                        ustr = strrep(ustr, ')', ', 1)');
+                    elseif(strfind(ustr, 'D([5], spline_pos10)('))
+                        ustr = strrep(ustr, 'D([5], spline_pos10)(', 'Dspline_pos10(');
+                        ustr = strrep(ustr, ')', ', 2)');
+                    elseif(strfind(ustr, 'D([7], spline_pos10)('))
+                        ustr = strrep(ustr, 'D([7], spline_pos10)(', 'Dspline_pos10(');
+                        ustr = strrep(ustr, ')', ', 3)');
+                    elseif(strfind(ustr, 'D([9], spline_pos10)('))
+                        ustr = strrep(ustr, 'D([9], spline_pos10)(', 'Dspline_pos10(');
+                        ustr = strrep(ustr, ')', ', 4)');
+                    elseif(strfind(ustr, 'D([11], spline_pos10)('))
+                        ustr = strrep(ustr, 'D([11], spline_pos10)(', 'Dspline_pos10(');
+                        ustr = strrep(ustr, ')', ', 5)');
+                    elseif(strfind(ustr, 'D([13], spline_pos10)('))
+                        ustr = strrep(ustr, 'D([13], spline_pos10)(', 'Dspline_pos10(');
+                        ustr = strrep(ustr, ')', ', 6)');
+                    elseif(strfind(ustr, 'D([15], spline_pos10)('))
+                        ustr = strrep(ustr, 'D([15], spline_pos10)(', 'Dspline_pos10(');
+                        ustr = strrep(ustr, ')', ', 7)');
+                    elseif(strfind(ustr, 'D([17], spline_pos10)('))
+                        ustr = strrep(ustr, 'D([17], spline_pos10)(', 'Dspline_pos10(');
+                        ustr = strrep(ustr, ')', ', 8)');
+                    elseif(strfind(ustr, 'D([19], spline_pos10)('))
+                        ustr = strrep(ustr, 'D([19], spline_pos10)(', 'Dspline_pos10(');
+                        ustr = strrep(ustr, ')', ', 9)');
+                    elseif(strfind(ustr, 'D([21], spline_pos10)('))
+                        ustr = strrep(ustr, 'D([21], spline_pos10)(', 'Dspline_pos10(');
+                        ustr = strrep(ustr, ')', ', 10)');
+                    end
+                    ar.model(m).condition(c).sym.dfudp(j,j2) = sym(ustr);
+                end
+            end
+        end 
     end
     
 	% sx
