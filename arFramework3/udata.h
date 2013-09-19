@@ -1,5 +1,6 @@
 #ifndef _MY_UDATA
 #define _MY_UDATA
+
 typedef struct {
 	double *qpositivex;
 	double *u;
