@@ -258,6 +258,13 @@ for jm = 1:length(ar.model)
             
             % axis & titles
             for jd = ar.model(jm).plot(jplot).dLink
+                if(isfield(ar.model(jm), 'data'))
+                    for jc = 1:length(ar.model(jm).data(jd).condition)
+                        if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
+                            jcondi = jc;
+                        end
+                    end
+                end
                 countu = 0;
                 for ju = iu
                     countu = countu + 1;
@@ -292,7 +299,7 @@ for jm = 1:length(ar.model)
                             if(~ar.model(jm).plot(jplot).doseresponse)
                                 xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                             else
-                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
+                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
                             end
                         end
                         ylabel(g, sprintf('%s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}));
@@ -339,7 +346,7 @@ for jm = 1:length(ar.model)
                             if(~ar.model(jm).plot(jplot).doseresponse)
                                 xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                             else
-                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
+                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
                             end
                         end
                         ylabel(g, sprintf('%s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}));
@@ -400,18 +407,24 @@ zero_break = [];
 
 ccount = 1;
 for jd = ds
+    for jc = 1:length(ar.model(jm).data(jd).condition)
+        if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
+            jcondi = jc;
+        end
+    end
+    
     jc = ar.model(jm).data(jd).cLink;
     qt = ar.model(jm).condition(jc).tExp == ttime;
     for jt = find(qt')
-        t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(1).value)); %#ok<AGROW>
+        t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
         if(isinf(t(ccount,1)))
             doses = [];
             for jd2 = ds
-                if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(1).value))))
-                    doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(1).value)); %#ok<AGROW>
+                if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
+                    doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
                 end
             end
-            doses = sort(doses);
+            doses = unique(doses); %R2013a compatible
             if(length(doses)>1)
                 t(ccount,1) = doses(1) - (doses(2)-doses(1)); %#ok<AGROW>
                 zero_break = (t(ccount,1)+doses(1))/2;
@@ -442,20 +455,24 @@ zero_break = [];
 
 ccount = 1;
 for jd = ds
+    for jc = 1:length(ar.model(jm).data(jd).condition)
+        if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
+            jcondi = jc;
+        end
+    end
+    
     jc = ar.model(jm).data(jd).cLink;
     qt = ar.model(jm).condition(jc).tExp == ttime;
     for jt = find(qt')
-        t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(1).value)); %#ok<AGROW>
+        t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
         if(isinf(t(ccount,1)))
             doses = [];
             for jd2 = ds
-                if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(1).value))))
-                    doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(1).value)); %#ok<AGROW>
+                if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
+                    doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
                 end
             end
-            
 			doses = unique(doses); %R2013a compatible
-            
             if(length(doses)>1)
                 t(ccount,1) = doses(1) - (doses(2)-doses(1)); %#ok<AGROW>
                 zero_break = (t(ccount,1)+doses(1))/2;

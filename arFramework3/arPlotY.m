@@ -431,16 +431,16 @@ for jm = 1:length(ar.model)
                 titstr = {};
                 if(isfield(ar.model(jm).data(jd), 'yNames') && ~isempty(ar.model(jm).data(jd).yNames{jy}) && ...
                         ~strcmp(ar.model(jm).data(jd).yNames{jy}, ar.model(jm).data(jd).y{jy}))
-                    titstr{1} = [myNameTrafo(ar.model(jm).data(jd).yNames{jy}) ' (' myNameTrafo(ar.model(jm).data(jd).y{jy}) ')']; %#ok<AGROW>
+                    titstr{1} = [myNameTrafo(ar.model(jm).data(jd).yNames{jy}) ' (' myNameTrafo(ar.model(jm).data(jd).y{jy}) ')'];
                 else
-                    titstr{1} = myNameTrafo(ar.model(jm).data(jd).y{jy}); %#ok<AGROW>
+                    titstr{1} = myNameTrafo(ar.model(jm).data(jd).y{jy});
                 end
                 if(isfield(ar.model(jm).data(jd), 'yExp'))
                     if(ndata(jy)>0)
                         if(ar.config.fiterrors == 1)
-                            titstr{2} = sprintf('-2 log(L)_{%i} = %g', ndata(jy), 2*ndata(jy)*log(sqrt(2*pi)) + chi2(jy)); %#ok<AGROW>
+                            titstr{2} = sprintf('-2 log(L)_{%i} = %g', ndata(jy), 2*ndata(jy)*log(sqrt(2*pi)) + chi2(jy));
                         else
-                            titstr{2} = sprintf('chi^2_{%i} = %g', ndata(jy), chi2(jy)); %#ok<AGROW>
+                            titstr{2} = sprintf('chi^2_{%i} = %g', ndata(jy), chi2(jy));
                         end
                     end
                 end
