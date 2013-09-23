@@ -505,7 +505,9 @@ if(sum(qcond) > 0)
         if(removeEmptyObs)
             for jj=find(~qhasdata)
                 fprintf('\t%20s no data, removed\n', ar.model(m).data(d).y{jj});
-                for jjj=find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars)) %R2013a compatible
+                jjjs = find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars)); %R2013a compatible
+                jjjs = jjjs(:)';
+                for jjj=jjjs
                     remove = 1;
                     for jjjj = find(qhasdata)
                         if sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0 %R2013a compatible
@@ -576,14 +578,16 @@ else
     if(removeEmptyObs)
         for jj=find(~qhasdata)
             fprintf('\t%20s no data, removed\n', ar.model(m).data(d).y{jj});
-            for jjj=find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars)) %R2013a compatible
+            jjjs = find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars)); %R2013a compatible
+            jjjs = jjjs(:)';
+            for jjj=jjjs
                 remove = 1;
                 for jjjj = find(qhasdata)
                     if sum(ismember(ar.model(m).data(d).py_sep(jjjj).pars, ar.model(m).data(d).p(jjj))) > 0 %R2013a compatible
                         remove = 0;
                     end
                 end
-                if remove
+                if(remove==1)
                     ar.model(m).data(d).fp{jjj} = '0';
                 end
             end
