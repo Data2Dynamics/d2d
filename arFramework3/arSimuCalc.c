@@ -326,7 +326,7 @@ void x_calc(int im, int ic) {
     data->dvdp = mxGetData(mxGetField(arcondition, ic, "dvdpNum"));
     
     /* fill for t=0 */
-    fu(data, 0.0, im, ic);
+    fu(data, tstart, im, ic);
     
     if(neq>0){
         /* Initial conditions */
@@ -334,8 +334,8 @@ void x_calc(int im, int ic) {
         if (x == NULL) {status[0] = 2; return;}
         for (is=0; is<neq; is++) Ith(x, is+1) = 0.0;
         fx0(x, data, im, ic);
-        fv(data, 0.0, x, im, ic);
-        fx(0.0, x, returndxdt, data, im, ic);
+        fv(data, tstart, x, im, ic);
+        fx(tstart, x, returndxdt, data, im, ic);
         
         /* Create CVODES object */
         cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
@@ -381,7 +381,7 @@ void x_calc(int im, int ic) {
         data->sv = mxGetData(mxGetField(arcondition, ic, "svNum"));
         
         /* fill inputs */
-        fsu(data, 0.0, im, ic);
+        fsu(data, tstart, im, ic);
         
         if(neq>0){
             /* Load sensitivity initial conditions */
@@ -394,8 +394,8 @@ void x_calc(int im, int ic) {
                 }
             }
             for (is=0;is<nps;is++) fsx0(is, sx[is], data, im, ic);
-            fsv(data, 0.0, x, im, ic);
-            dfxdp(data, 0.0, x, returnddxdtdp, im, ic);
+            fsv(data, tstart, x, im, ic);
+            dfxdp(data, tstart, x, returnddxdtdp, im, ic);
             
             flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sx, im, ic);
             if(flag < 0) {status[0] = 10; return;}
