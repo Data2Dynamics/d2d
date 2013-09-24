@@ -57,7 +57,12 @@ if(~isempty(ar.model(m).c))
                 pvalue = ar.model(m).condition(c).fp{qp};
                 M.compartment(jc).size = str2double(pvalue);
             else
-                error('%s not found', ar.model(m).pc{jc});
+                pvalue = str2double(ar.model(m).pc{jc});
+                if(~isnan(pvalue))
+                    M.compartment(jc).size = pvalue;
+                else 
+                    error('%s not found', ar.model(m).pc{jc});
+                end
             end
         else
             error('%s not found', ar.model(m).pc{jc});
@@ -181,7 +186,7 @@ end
 fv = ar.model(m).fv;
 fv = sym(fv);
 fv = subs(fv, ar.model(m).u, ar.model(m).fu);
-fv = subs(fv, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp);
+fv = subs(fv, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp');
 
 vcount = 1;
 arWaitbar(0);
