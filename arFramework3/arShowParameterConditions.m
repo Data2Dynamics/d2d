@@ -30,9 +30,9 @@ fprintf('\n');
 c = ar.model(m).data(d).cLink;
 maxlabellength = max(cellfun(@length, ar.model(m).condition(c).p));
 fprintf('Condition c%i\n', c);
-for j=1:length(ar.model(m).condition(c).p)
-    if(~strcmp(ar.model(m).condition(c).p{j},ar.model(m).condition(c).fp{j}))
-        fprintf('\t%s -> %s\n', arExtendStr(ar.model(m).condition(c).p{j},maxlabellength), ar.model(m).condition(c).fp{j});
+for j=1:length(ar.model(m).condition(c).pold)
+    if(~strcmp(ar.model(m).condition(c).pold{j},ar.model(m).condition(c).fp{j}))
+        fprintf('\t%s -> %s\n', arExtendStr(ar.model(m).condition(c).pold{j},maxlabellength), ar.model(m).condition(c).fp{j});
     end
 end
 fprintf('\n');
