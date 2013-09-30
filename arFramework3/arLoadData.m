@@ -350,6 +350,8 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
         warntmp = warning;
         warning('off','all')
         [data, Cstr] = xlsread(['Data/' name '.xls']);
+        data = data(:,1:size(Cstr,2));
+        
         warning(warntmp);
         
         header = Cstr(1,2:end);
@@ -360,6 +362,23 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
         if(size(data,2)<length(header))
             data = [data nan(size(data,1),length(header)-size(data,2))];
         end
+        
+        Cstr = Cstr(2:end,2:end);
+        dataCell = cell(size(data));
+        for j1 = 1:size(data,1)
+            for j2 = 1:size(data,2)
+                if(isnan(data(j1,j2)))
+                    if(j1<=size(Cstr,1) && j2<=size(Cstr,2) && ~isempty(Cstr{j1,j2}))
+                        dataCell{j1,j2} = Cstr{j1,j2};
+                    else
+                        dataCell{j1,j2} = header{j2};
+                    end
+                else
+                    dataCell{j1,j2} = num2str(data(j1,j2));
+                end
+            end
+        end
+        
     elseif(strcmp(extension,'csv'))
         fid = fopen(['Data/' name '.csv'], 'r');
         
@@ -381,6 +400,9 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
             C = textscan(fid,'%q',length(header)+1,'Delimiter',',');
             rcount = rcount + 1;
         end
+        
+        % funcitonality not implemented fro csv
+        dataCell = [];
         
         fclose(fid);
     end
@@ -443,7 +465,7 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
                     end
                 end
                
-                [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), ...
+                [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
                     strrep(pcond, randis_header{jj}, [randis_header{jj} num2str(randis(j,jj))]), removeEmptyObs, dpPerShoot);
                 
                 if(j < size(randis,1))
@@ -456,7 +478,7 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
             end
         end
     else
-        ar = setConditions(ar, m, d, jplot, header, times, data, pcond, removeEmptyObs, dpPerShoot);
+        ar = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot);
     end
 else
     ar.model(m).data(d).condition = [];
@@ -464,9 +486,9 @@ end
 
 
 
-function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, pcond, removeEmptyObs, dpPerShoot)
+function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot)
 
-matVer = ver('MATLAB');
+% matVer = ver('MATLAB');
 
 % normalization of columns
 nfactor = max(data, [], 1);
@@ -478,16 +500,14 @@ qhasdata = ismember(ar.model(m).data(d).y, header(qobs)); %R2013a compatible
 qcond = ismember(header, pcond); %R2013a compatible
 if(sum(qcond) > 0)
     condi_header = header(qcond);
-    qnonnanconds = sum(isnan(data(:,qcond)),2) == 0;
-    if(str2double(matVer.Version)>=8.1)
-        [condis, icondis, jcondis] = unique(data(qnonnanconds,qcond),'rows','legacy');  %#ok<ASGLU>
-    else
-        [condis, icondis, jcondis] = unique(data(qnonnanconds,qcond),'rows');  %#ok<ASGLU>
-    end
+    [condis, ~, jcondis] = uniqueRowsCA(dataCell(:,qcond));
+    
     active_condi = false(size(condis(1,:)));
     tmpcondi = condis(1,:);
-    for j=2:size(condis,1)
-        active_condi = active_condi | (tmpcondi ~= condis(j,:));
+    for j1=2:size(condis,1)
+        for j2=1:size(condis,2)
+            active_condi(j2) = active_condi(j2) | (~strcmp(tmpcondi{j2}, condis{j1,j2}));
+        end
     end
     
     for j=1:size(condis,1)
@@ -530,29 +550,33 @@ if(sum(qcond) > 0)
         end
         
         for jj=1:size(condis,2)
-            fprintf('\t%20s = %g\n', condi_header{jj}, condis(j,jj))
-            
-            qcondjj = ismember(ar.model(m).data(d).p, condi_header{jj}); %R2013a compatible
-            if(sum(qcondjj)>0)
-                ar.model(m).data(d).fp{qcondjj} = num2str(condis(j,jj));
-            end
-            qcondjj = ~strcmp(ar.model(m).data(d).p, ar.model(m).data(d).fp');
-            ar.model(m).data(d).fp(qcondjj) = strrep(ar.model(m).data(d).fp(qcondjj), ...
-                condi_header{jj}, num2str(condis(j,jj)));
-           
-            ar.model(m).data(d).condition(jj).parameter = condi_header{jj};
-            ar.model(m).data(d).condition(jj).value = num2str(condis(j,jj));
-            
-            % plot
-            if(active_condi(jj))
-                if(ar.model(m).data(d).doseresponse==0 || ~strcmp(condi_header{jj}, ar.model(m).data(d).response_parameter))
-                    if(length(ar.model(m).plot(jplot).condition) >= j && ~isempty(ar.model(m).plot(jplot).condition{j}))
-                        ar.model(m).plot(jplot).condition{j} = [ar.model(m).plot(jplot).condition{j} ' & ' ...
-                            ar.model(m).data(d).condition(jj).parameter '=' ...
-                            ar.model(m).data(d).condition(jj).value];
-                    else
-                        ar.model(m).plot(jplot).condition{j} = [ar.model(m).data(d).condition(jj).parameter '=' ...
-                            ar.model(m).data(d).condition(jj).value];
+            if(~isempty(condis{j,jj}))
+                fprintf('\t%20s = %s\n', condi_header{jj}, condis{j,jj})
+                
+                qcondjj = ismember(ar.model(m).data(d).p, condi_header{jj}); %R2013a compatible
+                if(sum(qcondjj)>0)
+                    ar.model(m).data(d).fp{qcondjj} =  ['(' condis{j,jj} ')'];
+                end
+                qcondjj = ~strcmp(ar.model(m).data(d).p, ar.model(m).data(d).fp');
+                if(~isnan(str2double(condis{j,jj})))
+                    ar.model(m).data(d).fp(qcondjj) = strrep(ar.model(m).data(d).fp(qcondjj), ...
+                        condi_header{jj}, condis{j,jj});
+                end
+                
+                ar.model(m).data(d).condition(jj).parameter = condi_header{jj};
+                ar.model(m).data(d).condition(jj).value = condis{j,jj};
+                
+                % plot
+                if(active_condi(jj))
+                    if(ar.model(m).data(d).doseresponse==0 || ~strcmp(condi_header{jj}, ar.model(m).data(d).response_parameter))
+                        if(length(ar.model(m).plot(jplot).condition) >= j && ~isempty(ar.model(m).plot(jplot).condition{j}))
+                            ar.model(m).plot(jplot).condition{j} = [ar.model(m).plot(jplot).condition{j} ' & ' ...
+                                ar.model(m).data(d).condition(jj).parameter '=' ...
+                                ar.model(m).data(d).condition(jj).value];
+                        else
+                            ar.model(m).plot(jplot).condition{j} = [ar.model(m).data(d).condition(jj).parameter '=' ...
+                                ar.model(m).data(d).condition(jj).value];
+                        end
                     end
                 end
             end
