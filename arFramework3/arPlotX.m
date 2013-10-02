@@ -446,6 +446,12 @@ for jd = ds
         ccount = ccount + 1;
     end
 end
+[t,it] = sort(t);
+u = u(it);
+if(~isempty(lb))
+    lb = lb(it);
+    ub = ub(it);
+end
 
 
 function [t, x, lb, ub, zero_break] = getDataDoseResponseX(jm, jx, ds, ttime)
@@ -495,6 +501,12 @@ for jd = ds
     end
 end
 
+[t,it] = sort(t);
+x = x(it);
+if(~isempty(lb))
+    lb = lb(it);
+    ub = ub(it);
+end
 
 %% sub-functions
 

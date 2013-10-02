@@ -571,6 +571,13 @@ for jd = ds
     end
 end
 
+[t,it] = sort(t);
+y = y(it);
+ystd = ystd(it);
+if(~isempty(lb))
+    lb = lb(it);
+    ub = ub(it);
+end
 
 
 %% sub-functions

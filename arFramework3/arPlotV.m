@@ -260,6 +260,12 @@ for jd = ds
         ccount = ccount + 1;
     end
 end
+[t,it] = sort(t);
+v = v(it);
+if(~isempty(lb))
+    lb = lb(it);
+    ub = ub(it);
+end
 
 
 %% sub-functions
