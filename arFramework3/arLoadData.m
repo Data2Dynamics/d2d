@@ -350,7 +350,9 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
         warntmp = warning;
         warning('off','all')
         [data, Cstr] = xlsread(['Data/' name '.xls']);
-        data = data(:,1:size(Cstr,2));
+        if(length(data(1,:))>length(Cstr(1,:)))
+            data = data(:,1:length(Cstr(1,:)));
+        end
         
         warning(warntmp);
         

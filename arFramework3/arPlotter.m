@@ -117,7 +117,6 @@ for jm=1:length(ar.model)
             end
         end
         llhreltodata(end+1) = chi2/ndata; %#ok<AGROW>
-        
         ar.plotter.C{end+1,1} = ar.model(jm).plot(jplot).name;
         ar.plotter.C{end,2} = chi2;
         ar.plotter.C{end,3} = ndata;
@@ -125,8 +124,8 @@ for jm=1:length(ar.model)
         ar.plotter.C{end,5} = ar.model(jm).qPlotYs(jplot);
         ar.plotter.C{end,6} = ar.model(jm).qPlotXs(jplot);
         ar.plotter.C{end,7} = ar.model(jm).qPlotVs(jplot);
-        ar.plotter.C{end,8} = logfitting>0;
-        ar.plotter.C{end,9} = logplotting>0;
+        ar.plotter.C{end,8} = logplotting>0;
+        ar.plotter.C{end,9} = logfitting>0;
         ar.plotter.C{end,10} = qfit==0;
         
         ar.plotter.jm(end+1) = jm;
