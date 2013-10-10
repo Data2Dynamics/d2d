@@ -502,7 +502,12 @@ qhasdata = ismember(ar.model(m).data(d).y, header(qobs)); %R2013a compatible
 qcond = ismember(header, pcond); %R2013a compatible
 if(sum(qcond) > 0)
     condi_header = header(qcond);
-    [condis, ~, jcondis] = uniqueRowsCA(dataCell(:,qcond));
+    if ~isempty(dataCell)
+        [condis, ~, jcondis] = uniqueRowsCA(dataCell(:,qcond));
+    else
+        [condis, ~, jcondis] = unique(data(:,qcond),'rows');
+        condis = cellstr(num2str(condis));
+    end
     
     active_condi = false(size(condis(1,:)));
     tmpcondi = condis(1,:);
