@@ -466,10 +466,14 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
                             randis_header{jj}, [randis_header{jj} sprintf('%04i',randis(j,jj))]);
                     end
                 end
-               
-                [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
-                    strrep(pcond, randis_header{jj}, [randis_header{jj} num2str(randis(j,jj))]), removeEmptyObs, dpPerShoot);
                 
+                if ~isempty(dataCell)
+                    [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
+                        strrep(pcond, randis_header{jj}, [randis_header{jj} num2str(randis(j,jj))]), removeEmptyObs, dpPerShoot);
+                else
+                    [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell, ...
+                        strrep(pcond, randis_header{jj}, [randis_header{jj} num2str(randis(j,jj))]), removeEmptyObs, dpPerShoot);
+                end
                 if(j < size(randis,1))
                     d = d + 1;
                     jplot = jplot + 1;
