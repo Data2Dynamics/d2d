@@ -45,6 +45,7 @@ mxArray *armodel;
 
 int    fine;
 int    sensi;
+int    dynamics;
 int    jacobian;
 int    parallel;
 int    fiterrors;
@@ -100,6 +101,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     fine = (int) mxGetScalar(prhs[1]);
     sensi = (int) mxGetScalar(prhs[2]);
+    dynamics = (int) mxGetScalar(prhs[3]);
     
     /* get ar.config */
     arconfig = mxGetField(prhs[0], 0, "config");
@@ -268,246 +270,246 @@ void x_calc(int im, int ic) {
     gettimeofday(&t2, NULL);
 #endif
     
-    /* begin of CVODES */
+    if(dynamics == 1) { /* begin of CVODES */
         
-    /* get MATLAB values */
-    qpositivex = mxGetData(mxGetField(armodel, im, "qPositiveX"));
-    status = mxGetData(mxGetField(arcondition, ic, "status"));
-    tstart = mxGetScalar(mxGetField(arcondition, ic, "tstart"));
-    neq = mxGetNumberOfElements(mxGetField(armodel, im, "xs"));
-    
-    if(fine == 1){
-        ts = mxGetData(mxGetField(arcondition, ic, "tFine"));
-        nout = mxGetNumberOfElements(mxGetField(arcondition, ic, "tFine"));
+        /* get MATLAB values */
+        qpositivex = mxGetData(mxGetField(armodel, im, "qPositiveX"));
+        status = mxGetData(mxGetField(arcondition, ic, "status"));
+        tstart = mxGetScalar(mxGetField(arcondition, ic, "tstart"));
+        neq = mxGetNumberOfElements(mxGetField(armodel, im, "xs"));
         
-        returnu = mxGetData(mxGetField(arcondition, ic, "uFineSimu"));
-        returnv = mxGetData(mxGetField(arcondition, ic, "vFineSimu"));
-        returnx = mxGetData(mxGetField(arcondition, ic, "xFineSimu"));
+        if(fine == 1){
+            ts = mxGetData(mxGetField(arcondition, ic, "tFine"));
+            nout = mxGetNumberOfElements(mxGetField(arcondition, ic, "tFine"));
+            
+            returnu = mxGetData(mxGetField(arcondition, ic, "uFineSimu"));
+            returnv = mxGetData(mxGetField(arcondition, ic, "vFineSimu"));
+            returnx = mxGetData(mxGetField(arcondition, ic, "xFineSimu"));
+            if (sensi == 1) {
+                returnsu = mxGetData(mxGetField(arcondition, ic, "suFineSimu"));
+                returnsv = mxGetData(mxGetField(arcondition, ic, "svFineSimu"));
+                returnsx = mxGetData(mxGetField(arcondition, ic, "sxFineSimu"));
+            }
+        }
+        else{
+            ts = mxGetData(mxGetField(arcondition, ic, "tExp"));
+            nout = mxGetNumberOfElements(mxGetField(arcondition, ic, "tExp"));
+            
+            returnu = mxGetData(mxGetField(arcondition, ic, "uExpSimu"));
+            returnv = mxGetData(mxGetField(arcondition, ic, "vExpSimu"));
+            returnx = mxGetData(mxGetField(arcondition, ic, "xExpSimu"));
+            if (sensi == 1) {
+                returnsu = mxGetData(mxGetField(arcondition, ic, "suExpSimu"));
+                returnsv = mxGetData(mxGetField(arcondition, ic, "svExpSimu"));
+                returnsx = mxGetData(mxGetField(arcondition, ic, "sxExpSimu"));
+            }
+        }
+        returndxdt = mxGetData(mxGetField(arcondition, ic, "dxdt"));
         if (sensi == 1) {
-            returnsu = mxGetData(mxGetField(arcondition, ic, "suFineSimu"));
-            returnsv = mxGetData(mxGetField(arcondition, ic, "svFineSimu"));
-            returnsx = mxGetData(mxGetField(arcondition, ic, "sxFineSimu"));
-        }
-    }
-    else{
-        ts = mxGetData(mxGetField(arcondition, ic, "tExp"));
-        nout = mxGetNumberOfElements(mxGetField(arcondition, ic, "tExp"));
-        
-        returnu = mxGetData(mxGetField(arcondition, ic, "uExpSimu"));
-        returnv = mxGetData(mxGetField(arcondition, ic, "vExpSimu"));
-        returnx = mxGetData(mxGetField(arcondition, ic, "xExpSimu"));
-        if (sensi == 1) {
-            returnsu = mxGetData(mxGetField(arcondition, ic, "suExpSimu"));
-            returnsv = mxGetData(mxGetField(arcondition, ic, "svExpSimu"));
-            returnsx = mxGetData(mxGetField(arcondition, ic, "sxExpSimu"));
-        }
-    }
-    returndxdt = mxGetData(mxGetField(arcondition, ic, "dxdt"));
-    if (sensi == 1) {
-        returnddxdtdp = mxGetData(mxGetField(arcondition, ic, "ddxdtdp"));
-    }
-    
-    /* User data structure */
-    data = (UserData) malloc(sizeof *data);
-    if (data == NULL) {status[0] = 1; return;}
-    
-    data->qpositivex = qpositivex;
-    data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
-    nu = mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
-    
-    data->p = mxGetData(mxGetField(arcondition, ic, "pNum"));
-    np = mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
-    nps = np;
-    
-    data->v = mxGetData(mxGetField(arcondition, ic, "vNum"));
-    nv = mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
-    data->dvdx = mxGetData(mxGetField(arcondition, ic, "dvdxNum"));
-    data->dvdu = mxGetData(mxGetField(arcondition, ic, "dvduNum"));
-    data->dvdp = mxGetData(mxGetField(arcondition, ic, "dvdpNum"));
-    
-    /* fill for t=0 */
-    fu(data, tstart, im, ic);
-    
-    if(neq>0){
-        /* Initial conditions */
-        x = N_VNew_Serial(neq);
-        if (x == NULL) {status[0] = 2; return;}
-        for (is=0; is<neq; is++) Ith(x, is+1) = 0.0;
-        fx0(x, data, im, ic);
-        fv(data, tstart, x, im, ic);
-        fx(tstart, x, returndxdt, data, im, ic);
-        
-        /* Create CVODES object */
-        cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
-        if (cvode_mem == NULL) {status[0] = 3; return;}
-        
-        /* Allocate space for CVODES */
-        flag = AR_CVodeInit(cvode_mem, x, tstart, im, ic);
-        if (flag < 0) {status[0] = 4; return;}
-        
-        /* Number of maximal internal steps */
-        flag = CVodeSetMaxNumSteps(cvode_mem, cvodes_maxsteps);
-        if(flag < 0) {status[0] = 15; return;}
-        
-        /* Use private function to compute error weights */
-        flag = CVodeSStolerances(cvode_mem, RCONST(cvodes_rtol), RCONST(cvodes_atol));
-        if (flag < 0) {status[0] = 5; return;}
-        
-        /* Attach user data */
-        flag = CVodeSetUserData(cvode_mem, data);
-        if (flag < 0) {status[0] = 6; return;}
-        
-        /* Attach linear solver */
-        flag = CVDense(cvode_mem, neq);
-        if (flag < 0) {status[0] = 7; return;}
-        
-        /* Jacobian-related settings */
-        if (jacobian == 1) {
-            flag = AR_CVDlsSetDenseJacFn(cvode_mem, im, ic);
-            if (flag < 0) {status[0] = 8; return;}
+            returnddxdtdp = mxGetData(mxGetField(arcondition, ic, "ddxdtdp"));
         }
         
-        /* custom error weight function */
-        /*
-        flag = CVodeWFtolerances(cvode_mem, ewt);
-        if (flag < 0) return;}
-        */
-    }
-    
-    /* Sensitivity-related settings */
-    if (sensi == 1) {
         /* User data structure */
-        data->su = mxGetData(mxGetField(arcondition, ic, "suNum"));
-        data->sv = mxGetData(mxGetField(arcondition, ic, "svNum"));
+        data = (UserData) malloc(sizeof *data);
+        if (data == NULL) {status[0] = 1; return;}
         
-        /* fill inputs */
-        fsu(data, tstart, im, ic);
+        data->qpositivex = qpositivex;
+        data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
+        nu = mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
+        
+        data->p = mxGetData(mxGetField(arcondition, ic, "pNum"));
+        np = mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
+        nps = np;
+        
+        data->v = mxGetData(mxGetField(arcondition, ic, "vNum"));
+        nv = mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
+        data->dvdx = mxGetData(mxGetField(arcondition, ic, "dvdxNum"));
+        data->dvdu = mxGetData(mxGetField(arcondition, ic, "dvduNum"));
+        data->dvdp = mxGetData(mxGetField(arcondition, ic, "dvdpNum"));
+        
+        /* fill for t=0 */
+        fu(data, tstart, im, ic);
         
         if(neq>0){
-            /* Load sensitivity initial conditions */
-            sx = N_VCloneVectorArray_Serial(nps, x);
-            if (sx == NULL) {status[0] = 9; return;}
-            for(js=0; js < nps; js++) {
-                sxtmp = NV_DATA_S(sx[js]);
-                for(ks=0; ks < neq; ks++) {
-                    sxtmp[ks] = 0.0;
-                }
+            /* Initial conditions */
+            x = N_VNew_Serial(neq);
+            if (x == NULL) {status[0] = 2; return;}
+            for (is=0; is<neq; is++) Ith(x, is+1) = 0.0;
+            fx0(x, data, im, ic);
+            fv(data, tstart, x, im, ic);
+            fx(tstart, x, returndxdt, data, im, ic);
+            
+            /* Create CVODES object */
+            cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
+            if (cvode_mem == NULL) {status[0] = 3; return;}
+            
+            /* Allocate space for CVODES */
+            flag = AR_CVodeInit(cvode_mem, x, tstart, im, ic);
+            if (flag < 0) {status[0] = 4; return;}
+            
+            /* Number of maximal internal steps */
+            flag = CVodeSetMaxNumSteps(cvode_mem, cvodes_maxsteps);
+            if(flag < 0) {status[0] = 15; return;}
+            
+            /* Use private function to compute error weights */
+            flag = CVodeSStolerances(cvode_mem, RCONST(cvodes_rtol), RCONST(cvodes_atol));
+            if (flag < 0) {status[0] = 5; return;}
+            
+            /* Attach user data */
+            flag = CVodeSetUserData(cvode_mem, data);
+            if (flag < 0) {status[0] = 6; return;}
+            
+            /* Attach linear solver */
+            flag = CVDense(cvode_mem, neq);
+            if (flag < 0) {status[0] = 7; return;}
+            
+            /* Jacobian-related settings */
+            if (jacobian == 1) {
+                flag = AR_CVDlsSetDenseJacFn(cvode_mem, im, ic);
+                if (flag < 0) {status[0] = 8; return;}
             }
-            for (is=0;is<nps;is++) fsx0(is, sx[is], data, im, ic);
-            fsv(data, tstart, x, im, ic);
-            dfxdp(data, tstart, x, returnddxdtdp, im, ic);
             
-            flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sx, im, ic);
-            if(flag < 0) {status[0] = 10; return;}
-            
+            /* custom error weight function */
             /*
+        flag = CVodeWFtolerances(cvode_mem, ewt);
+        if (flag < 0) return;}
+             */
+        }
+        
+        /* Sensitivity-related settings */
+        if (sensi == 1) {
+            /* User data structure */
+            data->su = mxGetData(mxGetField(arcondition, ic, "suNum"));
+            data->sv = mxGetData(mxGetField(arcondition, ic, "svNum"));
+            
+            /* fill inputs */
+            fsu(data, tstart, im, ic);
+            
+            if(neq>0){
+                /* Load sensitivity initial conditions */
+                sx = N_VCloneVectorArray_Serial(nps, x);
+                if (sx == NULL) {status[0] = 9; return;}
+                for(js=0; js < nps; js++) {
+                    sxtmp = NV_DATA_S(sx[js]);
+                    for(ks=0; ks < neq; ks++) {
+                        sxtmp[ks] = 0.0;
+                    }
+                }
+                for (is=0;is<nps;is++) fsx0(is, sx[is], data, im, ic);
+                fsv(data, tstart, x, im, ic);
+                dfxdp(data, tstart, x, returnddxdtdp, im, ic);
+                
+                flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sx, im, ic);
+                if(flag < 0) {status[0] = 10; return;}
+                
+                /*
             flag = CVodeSensEEtolerances(cvode_mem);
             if(flag < 0) {status[0] = 11; return;}
-            
+             
             flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
             if (flag < 0) {status[0] = 13; return;}
-            */
-            
-            atols_ss = N_VNew_Serial(np);
-            if (atols_ss == NULL) {return;}
-            for (is=0; is<np; is++) Ith(atols_ss, is+1) = cvodes_atol;
-
-            flag = CVodeSensSStolerances(cvode_mem, RCONST(cvodes_rtol), N_VGetArrayPointer(atols_ss));
-            if(flag < 0) {status[0] = 11; return;}
-            
-            flag = CVodeSetSensErrCon(cvode_mem, error_corr);
-            if(flag < 0) {status[0] = 13; return;}
+                 */
+                
+                atols_ss = N_VNew_Serial(np);
+                if (atols_ss == NULL) {return;}
+                for (is=0; is<np; is++) Ith(atols_ss, is+1) = cvodes_atol;
+                
+                flag = CVodeSensSStolerances(cvode_mem, RCONST(cvodes_rtol), N_VGetArrayPointer(atols_ss));
+                if(flag < 0) {status[0] = 11; return;}
+                
+                flag = CVodeSetSensErrCon(cvode_mem, error_corr);
+                if(flag < 0) {status[0] = 13; return;}
+            }
         }
-    }
-    
-    /* loop over output points */
-    for (is=0; is < nout; is++) {
-        /* printf("%f x-loop (im=%i ic=%i)\n", ts[is], im, ic); */
         
-        /* only integrate if no errors occured */
-        if(status[0] == 0.0) {
-            /* only integrate after tstart */
-            if(ts[is] > tstart) {
-                if(neq>0) {
-                    flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
-                    status[0] = flag;
-                    /*
-                    if(flag==-1) printf("CVODES stoped at t=%f, TOO_MUCH_WORK, did not reach output time after %i steps (m=%i, c=%i).\n", t, cvodes_maxsteps, im, ic);
-                    if(flag<-1) printf("CVODES stoped at t=%f (m=%i, c=%i).\n", t, im, ic);
-                    */
-                }
-            }
-            fu(data, ts[is], im, ic);
-            fv(data, ts[is], x, im, ic);
+        /* loop over output points */
+        for (is=0; is < nout; is++) {
+            /* printf("%f x-loop (im=%i ic=%i)\n", ts[is], im, ic); */
             
-            for(js=0; js < nu; js++) returnu[js*nout+is] = data->u[js];
-            for(js=0; js < nv; js++) {
-                returnv[js*nout+is] = data->v[js];
-            }
-            for(js=0; js < neq; js++) {
-                returnx[js*nout+is] = Ith(x, js+1);
-                /* set negative values to zeros */
-                if(qpositivex[js]>0.5 && returnx[js*nout+is]<0.0) returnx[js*nout+is] = 0.0;
-            }
-        } else {
-            for(js=0; js < nu; js++) returnu[js*nout+is] = 0.0;
-            for(js=0; js < nv; js++) returnv[js*nout+is] = 0.0;
-            for(js=0; js < neq; js++) returnx[js*nout+is] = 0.0;
-        }
-
-        /* only set output sensitivities if no errors occured */
-        if(status[0] == 0.0) {
-            if (sensi == 1) {
+            /* only integrate if no errors occured */
+            if(status[0] == 0.0) {
+                /* only integrate after tstart */
                 if(ts[is] > tstart) {
                     if(neq>0) {
-                        flag = CVodeGetSens(cvode_mem, &t, sx);
-                        if (flag < 0) {status[0] = 14; return;}
+                        flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
+                        status[0] = flag;
+                        /*
+                    if(flag==-1) printf("CVODES stoped at t=%f, TOO_MUCH_WORK, did not reach output time after %i steps (m=%i, c=%i).\n", t, cvodes_maxsteps, im, ic);
+                    if(flag<-1) printf("CVODES stoped at t=%f (m=%i, c=%i).\n", t, im, ic);
+                         */
                     }
                 }
-                fsu(data, ts[is], im, ic);
-                fsv(data, ts[is], x, im, ic);
+                fu(data, ts[is], im, ic);
+                fv(data, ts[is], x, im, ic);
                 
-                for(js=0; js < nps; js++) {
-                    if(neq>0) {
-                        sxtmp = NV_DATA_S(sx[js]);
-                        for(ks=0; ks < neq; ks++) {
-                            returnsx[js*neq*nout + ks*nout + is] = sxtmp[ks];
+                for(js=0; js < nu; js++) returnu[js*nout+is] = data->u[js];
+                for(js=0; js < nv; js++) {
+                    returnv[js*nout+is] = data->v[js];
+                }
+                for(js=0; js < neq; js++) {
+                    returnx[js*nout+is] = Ith(x, js+1);
+                    /* set negative values to zeros */
+                    if(qpositivex[js]>0.5 && returnx[js*nout+is]<0.0) returnx[js*nout+is] = 0.0;
+                }
+            } else {
+                for(js=0; js < nu; js++) returnu[js*nout+is] = 0.0;
+                for(js=0; js < nv; js++) returnv[js*nout+is] = 0.0;
+                for(js=0; js < neq; js++) returnx[js*nout+is] = 0.0;
+            }
+            
+            /* only set output sensitivities if no errors occured */
+            if(status[0] == 0.0) {
+                if (sensi == 1) {
+                    if(ts[is] > tstart) {
+                        if(neq>0) {
+                            flag = CVodeGetSens(cvode_mem, &t, sx);
+                            if (flag < 0) {status[0] = 14; return;}
                         }
                     }
-                    for(ks=0; ks < nu; ks++) {
-                        returnsu[js*nu*nout + ks*nout + is] = data->su[(js*nu)+ks];
+                    fsu(data, ts[is], im, ic);
+                    fsv(data, ts[is], x, im, ic);
+                    
+                    for(js=0; js < nps; js++) {
+                        if(neq>0) {
+                            sxtmp = NV_DATA_S(sx[js]);
+                            for(ks=0; ks < neq; ks++) {
+                                returnsx[js*neq*nout + ks*nout + is] = sxtmp[ks];
+                            }
+                        }
+                        for(ks=0; ks < nu; ks++) {
+                            returnsu[js*nu*nout + ks*nout + is] = data->su[(js*nu)+ks];
+                        }
+                    }
+                }
+            } else {
+                if (sensi == 1) {
+                    for(js=0; js < nps; js++) {
+                        if(neq>0) {
+                            sxtmp = NV_DATA_S(sx[js]);
+                            for(ks=0; ks < neq; ks++) {
+                                returnsx[js*neq*nout + ks*nout + is] = 0.0;
+                            }
+                        }
+                        for(ks=0; ks < nu; ks++) {
+                            returnsu[js*nu*nout + ks*nout + is] = 0.0;
+                        }
                     }
                 }
             }
-        } else {
+        }
+        
+        /* Free memory */
+        if(neq>0) {
+            N_VDestroy_Serial(x);
             if (sensi == 1) {
-                for(js=0; js < nps; js++) {
-                    if(neq>0) {
-                        sxtmp = NV_DATA_S(sx[js]);
-                        for(ks=0; ks < neq; ks++) {
-                            returnsx[js*neq*nout + ks*nout + is] = 0.0;
-                        }
-                    }
-                    for(ks=0; ks < nu; ks++) {
-                        returnsu[js*nu*nout + ks*nout + is] = 0.0;
-                    }
-                }
+                N_VDestroyVectorArray_Serial(sx, nps);
             }
+            CVodeFree(&cvode_mem);
         }
-    }
-    
-    /* Free memory */
-    if(neq>0) {
-        N_VDestroy_Serial(x);
-        if (sensi == 1) {
-            N_VDestroyVectorArray_Serial(sx, nps);
-        }
-        CVodeFree(&cvode_mem);
-    }
-    free(data);
-    
-    /* end of CVODES */
-    
+        free(data);
+        
+    } /* end of CVODES */
+
 #ifdef HAS_SYSTIME
     gettimeofday(&t3, NULL);
 #endif

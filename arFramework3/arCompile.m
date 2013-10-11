@@ -7,7 +7,7 @@
 %   This function is based on install_STB written by Radu Serban
 %   and installs only the parts of the sundials toolbox.
 
-function arCompile(forceFullCompile, debug_mode)
+function arCompile(forceFullCompile, forceCompileLast, debug_mode)
 
 global ar
 
@@ -17,6 +17,9 @@ end
 
 if(~exist('forceFullCompile','var'))
     forceFullCompile = false;
+end
+if(~exist('forceCompileLast','var'))
+    forceCompileLast = false;
 end
 if(~exist('debug_mode','var'))
     debug_mode = false;
@@ -206,8 +209,7 @@ end
 
 %% compile and link main mex file
 fprintf('compiling and linking %s...', ar.fkt);
-% if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile)
-if(~exist([ar.fkt '.' mexext],'file') || true)
+if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
     outputstr = [' -output ' ar.fkt];
     if(~ispc)
         % parallel code using POSIX threads for unix type OS

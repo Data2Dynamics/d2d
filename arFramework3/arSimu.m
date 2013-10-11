@@ -3,8 +3,9 @@
 % arSimu(sensi,fine)
 %   sensi:          calculate sensitivities         [true]
 %   fine:           fine grid for plotting          [false]
+%   dynamics:       evaluate dynamics               [true]
 
-function arSimu(sensi,fine)
+function arSimu(sensi,fine,dynamics)  %#ok<INUSD>
 
 global ar
 
@@ -13,6 +14,9 @@ if(~exist('sensi', 'var'))
 end
 if(~exist('fine', 'var'))
     fine = false;
+end
+if(~exist('dynamics', 'var'))
+    dynamics = sum(ar.qDynamic == 1 & ar.qFit == 1) > 0 || ~sensi; %#ok<NASGU>
 end
 
 if(~isfield(ar,'p'))
@@ -62,7 +66,7 @@ if(fine && sensi)
     initFineSensis;
 end
 
-eval([ar.fkt '(ar, fine, ar.config.useSensis && sensi);'])
+eval([ar.fkt '(ar, fine, ar.config.useSensis && sensi, dynamics);'])
 
 % integration error ?
 for m=1:length(ar.model)
