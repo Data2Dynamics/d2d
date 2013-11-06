@@ -434,12 +434,14 @@ if(ar.config.useSensis)
     ar.model(m).condition(c).sym.su = sym(ar.model(m).condition(c).su);
     fprintf('su=%i, ', length(ar.model(m).condition(c).ps)*sum(ar.model(m).condition(c).qfu_nonzero(:)));
     
-    % input derivatives
-    ar.model(m).condition(c).sym.dfudp = [];
+    % input derivatives 
     if(~isempty(ar.model(m).condition(c).sym.ps))
+        if(~isempty(ar.model(m).condition(c).sym.fu))
         ar.model(m).condition(c).sym.dfudp = ...
             jacobian(ar.model(m).condition(c).sym.fu, ar.model(m).condition(c).sym.ps);
-        
+        else
+            ar.model(m).condition(c).sym.dfudp = sym(ones(0,length(ar.model(m).condition(c).sym.ps)));
+        end
         % derivatives of step1 (DISABLED)
         for j=1:length(ar.model(m).u)
             if(strfind(ar.model(m).condition(c).fu{j}, 'step1('))
