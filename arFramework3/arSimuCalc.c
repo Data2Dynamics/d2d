@@ -239,20 +239,36 @@ void x_calc(int im, int ic) {
     bool error_corr = TRUE;
         
     /* printf("computing model #%i, condition #%i\n", im, ic); */
-    
+            
     /* check if im in range */
     nm = mxGetNumberOfElements(armodel);
-    if(nm<=im) mexErrMsgTxt("im > length(ar.model)");
+    if(nm<=im) {
+        printf("im > length(ar.model)\n");
+#ifdef HAS_PTHREAD
+        if(parallel==1) {pthread_exit(NULL);}
+#endif
+        return;
+    }
         
     /* get ar.model(im).condition */
     arcondition = mxGetField(armodel, im, "condition");
     if(arcondition==NULL){
-        mexErrMsgTxt("field ar.model.condition not existing");
+        printf("field ar.model.condition not existing\n");
+#ifdef HAS_PTHREAD
+        if(parallel==1) {pthread_exit(NULL);}
+#endif
+        return;
     }
     
     /* check if ic in range */
     nc = mxGetNumberOfElements(arcondition);
-    if(nc<=ic) mexErrMsgTxt("ic > length(ar.model.condition)");
+    if(nc<=ic) {
+        printf("ic > length(ar.model.condition)\n");
+#ifdef HAS_PTHREAD
+        if(parallel==1) {pthread_exit(NULL);}
+#endif
+        return;
+    }
     
     has_tExp = (int) mxGetScalar(mxGetField(arcondition, ic, "has_tExp"));
     if(has_tExp == 0 && fine == 0) return;
@@ -660,6 +676,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
         /* log trafo of y */
         for (iy=0; iy<ny; iy++) {
             if(qlogy[iy] > 0.5){
+                if(y[it + (iy*nt)]<=0.0) printf("WARNING, check for concentrations <= 0 !!!\n");
                 y[it + (iy*nt)] = log10(y[it + (iy*nt)]);
             }
         }
@@ -684,7 +701,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
             if(fiterrors!=-1) fsystd(t[it], nt, it, ntlink, itlink, systd, p, y, u, x, sy, su, sx, im, id);
         }
         
-        if (has_yExp == 1 & fine == 0) {
+        if ((has_yExp == 1) & (fine == 0)) {
             fres(nt, ny, it, res, y, yexp, ystd, chi2);
             if(sensi == 1) fsres(nt, ny, np, it, sres, sy, yexp, ystd);
             
@@ -695,7 +712,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
         }
         
         /* log trafo of parameters */
-        if (sensi == 1 & has_yExp == 1 & fine == 0) {
+        if ((sensi == 1) & (has_yExp == 1) & (fine == 0)) {
             for (ip=0; ip < np; ip++) {
                 if (qlogp[ip] > 0.5) {
                     for (iy=0; iy<ny; iy++) {
@@ -751,7 +768,11 @@ void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, 
             ystd[it + (iy*nt)] = yexp[it + (iy*nt)];
         } else {
             reserr[it + (iy*nt)] += add_c;
-            if(reserr[it + (iy*nt)] < 0) mexErrMsgTxt("ERROR error model < 1e-10 not allowed"); /* 2*log(ystd) + add_c > 0 */
+            /* 2*log(ystd) + add_c > 0 */
+            if(reserr[it + (iy*nt)] < 0) {
+                printf("ERROR error model < 1e-10 not allowed\n");
+                return;
+            }
             reserr[it + (iy*nt)] = sqrt(reserr[it + (iy*nt)]);
             chi2err[iy] += pow(reserr[it + (iy*nt)], 2) - add_c;
         }

@@ -400,11 +400,16 @@ if(sensi)
         sres = [sres; ar.sconstr(:, ar.qFit==1)];
     end
     g = -2*res*sres; % gradient
-    onbound = [ar.p(ar.qFit==1)==ar.ub(ar.qFit==1); ar.p(ar.qFit==1)==ar.lb(ar.qFit==1)];
-    exbounds = [g>0; g<0];
-    qred = sum(onbound & exbounds,1)>0;
-    ar.firstorderopt = norm(g(~qred));
-%     fprintf('first order optimality criterion %f (%i)\n', ar.firstorderopt, -sum(qred));
+    if(~isempty(g))
+        onbound = [ar.p(ar.qFit==1)==ar.ub(ar.qFit==1); ar.p(ar.qFit==1)==ar.lb(ar.qFit==1)];
+        exbounds = [g>0; g<0];
+        qred = sum(onbound & exbounds,1)>0;
+        ar.firstorderopt = norm(g(~qred));
+%         fprintf('first order optimality criterion %f (%i)\n', ar.firstorderopt, -sum(qred));
+    else
+        qred = nan;
+        ar.firstorderopt = nan;
+    end
 end
     
 if(~silent)

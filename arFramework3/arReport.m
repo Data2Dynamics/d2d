@@ -508,7 +508,7 @@ for jm=1:length(ar.model)
                     % conditions
                     if(~isempty(ar.model(jm).data(jd2).condition))
                         for jp = 1:length(ar.model(jm).data(jd2).condition)
-                            fprintf(fid, '& %s ', ar.model(jm).data(jd2).condition(jp).value);
+                            fprintf(fid, '& %s ', strrep(ar.model(jm).data(jd2).condition(jp).value,'_','\_'));
                         end
                     end
                     
