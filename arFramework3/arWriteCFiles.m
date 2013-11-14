@@ -292,6 +292,7 @@ fprintf(fid, '#include <sundials/sundials_types.h>\n');
 fprintf(fid, '#include <sundials/sundials_math.h>\n');  
 fprintf(fid, '#include <udata.h>\n');
 fprintf(fid, '#include <math.h>\n');
+fprintf(fid, '#include <mex.h>\n');
 fprintf(fid, '#include <arInputFunctionsC.h>\n');
 fprintf(fid,'\n\n\n');
 
@@ -331,6 +332,7 @@ fprintf(fid, '#include <sundials/sundials_types.h>\n');
 fprintf(fid, '#include <sundials/sundials_math.h>\n');  
 fprintf(fid, '#include <udata.h>\n');
 fprintf(fid, '#include <math.h>\n');
+fprintf(fid, '#include <mex.h>\n');
 fprintf(fid, '#include <arInputFunctionsC.h>\n');
 fprintf(fid,'\n\n\n');
 
@@ -435,7 +437,7 @@ if(~isempty(ar.model(m).xs))
     fprintf(fid, '  fv_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
     writeCcode(fid, m, c, 'fx');
     fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(ar.model(m).x));
-    fprintf(fid, '    if(isnan(xdot_tmp[is])) xdot_tmp[is] = 0.0;\n');
+    fprintf(fid, '    if(mxIsNaN(xdot_tmp[is])) xdot_tmp[is] = 0.0;\n');
     fprintf(fid, '    if(qpositivex[is]>0.5 && x_tmp[is]<0.0 && xdot_tmp[is]<0.0) xdot_tmp[is] = -xdot_tmp[is];\n');
     fprintf(fid, '  }\n');
 end
@@ -457,7 +459,7 @@ if(~isempty(ar.model(m).xs))
     fprintf(fid, '  fv_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
     writeCcode(fid, m, c, 'fx');
     fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(ar.model(m).x));
-    fprintf(fid, '    if(isnan(xdot_tmp[is])) xdot_tmp[is] = 0.0;\n');
+    fprintf(fid, '    if(mxIsNaN(xdot_tmp[is])) xdot_tmp[is] = 0.0;\n');
     fprintf(fid, '  }\n');
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
@@ -493,7 +495,7 @@ if(~isempty(ar.model(m).xs))
         fprintf(fid, '  dvdx_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
         writeCcode(fid, m, c, 'dfxdx');
         fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(ar.model(m).x)^2);
-        fprintf(fid, '    if(isnan(J->data[is])) J->data[is] = 0.0;\n');
+        fprintf(fid, '    if(mxIsNaN(J->data[is])) J->data[is] = 0.0;\n');
         fprintf(fid, '  }\n');
     end
 end
@@ -538,7 +540,7 @@ if(~isempty(ar.model(m).xs))
         end
         fprintf(fid, '  }\n');
         fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(ar.model(m).x));
-        fprintf(fid, '    if(isnan(sxdot_tmp[is])) sxdot_tmp[is] = 0.0;\n');
+        fprintf(fid, '    if(mxIsNaN(sxdot_tmp[is])) sxdot_tmp[is] = 0.0;\n');
         fprintf(fid, '  }\n');
     end
 end
@@ -585,7 +587,7 @@ if(~isempty(ar.model(m).xs))
             fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
             writeCcode(fid, m, c, 'dfxdp');
             fprintf(fid, '  for (is=0; is<%i; is++) {\n', numel(ar.model(m).condition(c).sym.dfxdp));
-            fprintf(fid, '    if(isnan(dfxdp[is])) dfxdp[is] = 0.0;\n');
+            fprintf(fid, '    if(mxIsNaN(dfxdp[is])) dfxdp[is] = 0.0;\n');
             fprintf(fid, '  }\n');
         end
     end
@@ -610,6 +612,7 @@ fprintf(fid, '#include <sundials/sundials_types.h>\n');
 fprintf(fid, '#include <sundials/sundials_math.h>\n');  
 fprintf(fid, '#include <udata.h>\n');
 fprintf(fid, '#include <math.h>\n');
+fprintf(fid, '#include <mex.h>\n');
 fprintf(fid, '#include <arInputFunctionsC.h>\n');
 fprintf(fid,'\n\n\n');
 
@@ -635,6 +638,7 @@ fprintf(fid, '#include <sundials/sundials_types.h>\n');
 fprintf(fid, '#include <sundials/sundials_math.h>\n');  
 fprintf(fid, '#include <udata.h>\n');
 fprintf(fid, '#include <math.h>\n');
+fprintf(fid, '#include <mex.h>\n');
 fprintf(fid, '#include <arInputFunctionsC.h>\n');
 fprintf(fid,'\n\n\n');
 
