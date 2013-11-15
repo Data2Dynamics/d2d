@@ -87,9 +87,10 @@ elseif(ar.config.optimizer == 2)
         @confun,options);
     resnorm = merit_fkt(pFit);
     
-% empty
+% PSO
 elseif(ar.config.optimizer == 3) 
-    error('unspecified optimizer');
+    [pFit, chi2, resnorm, exitflag, output, lambda, jac] = ...
+        arFitPSO(lb, ub, ar.config.optim);
    
 % STRSCNE
 elseif(ar.config.optimizer == 4)
@@ -140,10 +141,12 @@ if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
 end
 
 ar.p(ar.qFit==1) = pFit;
+arChi2(false, []);
+
 ar.fit.exitflag = exitflag;
 ar.fit.output = output;
 ar.fit.iter = output.iterations;
-ar.fit.chi2 = chi2;
+ar.fit.chi2 = ar.chi2fit;
 ar.fit.lambda = lambda;
 ar.fit.qFit = ar.qFit;
 ar.fit.res = resnorm;
@@ -174,19 +177,14 @@ if(~silent || exitflag < 1)
             outputstr = sprintf('Multiple Shooting: constraint strength not controlable > %e\n', 1e20);
         case -99
             outputstr = sprintf('Multiple Shooting: mean constraint violation > %e\n', ar.ms_treshold);
-    end
-    arChi2(false, []);
-    
-    switch ar.config.optimizer
-        case 1
-            fprintf('lsqnonlin ');
-        case 2
-            fprintf('fmincon ');
-        case 5
-            fprintf('arNLS ');
+        case 50
+            outputstr = 'MaxIter Reached';
+        case 51
+            outputstr = 'FitCount Reache';
     end
     
-    fprintf('finished after %i iterations: %s, total chi2 improvement = %g\n', ...
+    fprintf('%s finished after %i iterations: %s, total improvement = %g\n', ...
+        ar.config.optimizers{ar.config.optimizer}, ...
         ar.fit.output.iterations, outputstr, chi2_old - ar.chi2fit);
 end
 

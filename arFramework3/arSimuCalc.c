@@ -676,7 +676,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
         /* log trafo of y */
         for (iy=0; iy<ny; iy++) {
             if(qlogy[iy] > 0.5){
-                if(y[it + (iy*nt)]<=0.0) printf("WARNING, check for concentrations <= 0 !!!\n");
+                if(y[it + (iy*nt)]<0.0) printf("WARNING, check for concentrations <= 0 !!!\n");
                 y[it + (iy*nt)] = log10(y[it + (iy*nt)]);
             }
         }

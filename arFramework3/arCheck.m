@@ -3,7 +3,8 @@
 
 function docontinue = arCheck
 
-if(verLessThan('symbolic', '5.5'))
+symbtool = ver('symbolic');
+if(~isempty(symbtool) && verLessThan('symbolic', '5.5'))
 	error('MUPAD symbolic toolbox version >= 5.5 required');
 end
 

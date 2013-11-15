@@ -60,6 +60,7 @@ else
     ar.optim_crit = nan(1,n);
     ar.exitflag = -ones(1,n);
 end
+ar.ps_errors = [];
 
 if(log_fit_history)
     ar.fit_hist = [];
@@ -96,6 +97,7 @@ for j=1:n
         ar.fun_evals(j) = ar.fevals;
         ar.optim_crit(j) = ar.firstorderopt;
     catch exception
+        ar.ps_errors(end+1,:) = ar.p;
         fprintf('fit #%i: %s\n', j, exception.message);
     end
     ar.timing(j) = toc;
