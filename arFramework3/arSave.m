@@ -29,8 +29,10 @@ if(isempty(ar.config.savepath))
     if(~withSyms)
         for jm = 1:length(ar.model)
             ar.model(jm).sym = [];
-            for jc = 1:length(ar.model(jm).condition)
-                ar.model(jm).condition(jc).sym = [];
+            if(isfield(ar.model(jm),'condition'))
+                for jc = 1:length(ar.model(jm).condition)
+                    ar.model(jm).condition(jc).sym = [];
+                end
             end
             if(isfield(ar.model(jm), 'data'))
                 for jd = 1:length(ar.model(jm).data)
