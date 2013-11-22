@@ -1,0 +1,27 @@
+DESCRIPTION
+"model .def file template"
+
+PREDICTOR
+t	T	"min"	"time"	0	100
+
+COMPARTMENTS
+cyt	V	"pl"	"vol."	1
+
+STATES
+Prot1	C	"nM"	"conc."	cyt	1	"Protein 1" 1
+
+INPUTS
+Stim1	C	"nM"	"conc."	"k1*exp(-k2*t)"
+
+REACTIONS
+Prot1	->	0	CUSTOM "k3 * Prot1"	"Protein 1 degratation"
+
+INVARIANTS
+        
+OBSERVABLES
+Prot1_wb	C	"au"	"conc."	1	1	"scale_prot1 * Prot1"
+        
+ERRORS
+Prot1_wb    "sd_prot1"
+
+CONDITIONS

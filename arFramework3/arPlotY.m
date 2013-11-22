@@ -66,7 +66,7 @@ for jm = 1:length(ar.model)
                             g = subplot(nrows,ncols,jy);
                             ar.model(jm).plot(jplot).gy(jy) = g;
                             
-                            if(ar.model(jm).data(jd).qFit(jy))
+                            if(~isfield(ar.model(jm).data(jd),'qFit') || ar.model(jm).data(jd).qFit(jy))
                                 markerstyle = '*';
                             else
                                 markerstyle = 'o';
@@ -199,7 +199,7 @@ for jm = 1:length(ar.model)
                         end
                         
                         % chi^2 & ndata
-                        if(ar.model(jm).data(jd).qFit(jy)==1 && ~isempty(ar.model(jm).data(jd).chi2))
+                        if(isfield(ar.model(jm).data(jd),'qFit') && ar.model(jm).data(jd).qFit(jy)==1 && ~isempty(ar.model(jm).data(jd).chi2))
                             chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2(jy);
                             ndata(jy) = ndata(jy) + ar.model(jm).data(jd).ndata(jy);
                             if(ar.config.fiterrors==1)
@@ -479,16 +479,26 @@ end
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub] = getData(jm, jd, jy)
 global ar
 
-t = ar.model(jm).data(jd).tFine;
-y = ar.model(jm).data(jd).yFineSimu(:,jy);
-ystd = ar.model(jm).data(jd).ystdFineSimu(:,jy);
+if(isfield(ar.model(jm).data(jd),'tFine'))
+    t = ar.model(jm).data(jd).tFine;
+    y = ar.model(jm).data(jd).yFineSimu(:,jy);
+    ystd = ar.model(jm).data(jd).ystdFineSimu(:,jy);
+else
+    t = nan;
+    y = nan;
+    ystd = nan;
+end
 if(isfield(ar.model(jm).data(jd), 'yExp') && ~isempty(ar.model(jm).data(jd).yExp))
     tExp = ar.model(jm).data(jd).tExp;
     yExp = ar.model(jm).data(jd).yExp(:,jy);
     if(ar.config.fiterrors == -1)
         yExpStd = ar.model(jm).data(jd).yExpStd(:,jy);
     else
-        yExpStd = ar.model(jm).data(jd).ystdExpSimu(:,jy);
+        if(isfield(ar.model(jm).data(jd),'ystdExpSimu'))
+            yExpStd = ar.model(jm).data(jd).ystdExpSimu(:,jy);
+        else
+            yExpStd = nan;
+        end
     end
 else
     tExp = [];

@@ -17,8 +17,10 @@ if(~exist('qp','var'))
 end
 
 chi2s = fit.chi2_hist;
-constrs = fit.constr_hist;
-chi2sconstrs = chi2s + constrs;
+if(isfield(fit,'constr_hist'))
+    constrs = fit.constr_hist;
+    chi2sconstrs = chi2s + constrs;
+end
 opti = fit.opti_hist;
 xs = 1:sum(~isnan(chi2s));
 if(length(xs)<2)
