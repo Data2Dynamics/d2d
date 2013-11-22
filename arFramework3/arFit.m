@@ -48,7 +48,7 @@ ar.fit.maxstepsize_hist = nan(1,ar.config.optim.MaxIter);
 ar.fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
 ar.config.optim.OutputFcn = @arPlotFast;
 
-arChi2(false, []);
+arChi2(true, []);
 chi2_old = ar.chi2fit;
 
 ub = ar.ub;
@@ -60,7 +60,7 @@ lb = lb(ar.qFit==1);
 
 % lsqnonlin
 if(ar.config.optimizer == 1)     
-    [pFit, chi2, resnorm, exitflag, output, lambda, jac] = ...
+    [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
     
 % fmincon
@@ -82,14 +82,14 @@ elseif(ar.config.optimizer == 2)
     % options2.InitBarrierParam = 1e+6;
     % options2.InitTrustRegionRadius = 1e-1;
 
-    [pFit, chi2, exitflag, output, lambda, jac] = ...
+    [pFit, ~, exitflag, output, lambda, jac] = ...
         fmincon(@merit_fkt_fmincon, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
         @confun,options);
     resnorm = merit_fkt(pFit);
     
 % PSO
 elseif(ar.config.optimizer == 3) 
-    [pFit, chi2, resnorm, exitflag, output, lambda, jac] = ...
+    [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         arFitPSO(lb, ub, ar.config.optim);
    
 % STRSCNE
@@ -112,7 +112,7 @@ elseif(ar.config.optimizer == 4)
 
 % arNLS
 elseif(ar.config.optimizer == 5)     
-    [pFit, chi2, resnorm, exitflag, output, lambda, jac] = ...
+    [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         arNLS(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim, ar.config.optimizerStep);
     
 % fmincon as least squares fit
@@ -125,7 +125,7 @@ elseif(ar.config.optimizer == 6)
     options.MaxIter = ar.config.optim.MaxIter;
     options.OutputFcn = ar.config.optim.OutputFcn;
     
-    [pFit, chi2, exitflag, output, lambda, jac] = ...
+    [pFit, ~, exitflag, output, lambda, jac] = ...
         fmincon(@merit_fkt_fmincon_lsq, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
         [],options);
     resnorm = merit_fkt(pFit);
@@ -141,7 +141,7 @@ if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
 end
 
 ar.p(ar.qFit==1) = pFit;
-arChi2(false, []);
+arChi2(true, []);
 
 ar.fit.exitflag = exitflag;
 ar.fit.output = output;
@@ -189,7 +189,7 @@ if(~silent || exitflag < 1)
 end
 
 if(~silent)
-    arChi2;
+    arChi2(true);
 end
 
 

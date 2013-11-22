@@ -241,11 +241,16 @@ else
 end
 
 % derivatives
-ar.model(m).sym.dfvdx = jacobian(ar.model(m).sym.fv, ar.model(m).sym.x);
-if(~isempty(ar.model(m).sym.us))
-    ar.model(m).sym.dfvdu = jacobian(ar.model(m).sym.fv, ar.model(m).sym.u);
+if(~isempty(ar.model(m).sym.fv))
+    ar.model(m).sym.dfvdx = jacobian(ar.model(m).sym.fv, ar.model(m).sym.x);
+    if(~isempty(ar.model(m).sym.us))
+        ar.model(m).sym.dfvdu = jacobian(ar.model(m).sym.fv, ar.model(m).sym.u);
+    else
+        ar.model(m).sym.dfvdu = sym(ones(length(ar.model(m).sym.fv), 0));
+    end
 else
-    ar.model(m).sym.dfvdu = sym(ones(length(ar.model(m).sym.fv), 0));
+    ar.model(m).sym.dfvdx = sym(ones(0, length(ar.model(m).sym.x)));
+    ar.model(m).sym.dfvdu = sym(ones(0, length(ar.model(m).sym.u)));
 end
 
 ar.model(m).qdvdx_nonzero = logical(ar.model(m).sym.dfvdx~=0);
@@ -345,13 +350,19 @@ if(~isempty(ar.model(m).sym.us))
 end
 
 % derivatives
-ar.model(m).condition(c).sym.dfvdx = jacobian(ar.model(m).condition(c).sym.fv, ar.model(m).sym.xs);
-if(~isempty(ar.model(m).sym.us))
-    ar.model(m).condition(c).sym.dfvdu = jacobian(ar.model(m).condition(c).sym.fv, ar.model(m).sym.us);
+if(~isempty(ar.model(m).condition(c).sym.fv))
+    ar.model(m).condition(c).sym.dfvdx = jacobian(ar.model(m).condition(c).sym.fv, ar.model(m).sym.xs);
+    if(~isempty(ar.model(m).sym.us))
+        ar.model(m).condition(c).sym.dfvdu = jacobian(ar.model(m).condition(c).sym.fv, ar.model(m).sym.us);
+    else
+        ar.model(m).condition(c).sym.dfvdu = sym(ones(length(ar.model(m).condition(c).sym.fv), 0));
+    end
+    ar.model(m).condition(c).sym.dfvdp = jacobian(ar.model(m).condition(c).sym.fv, ar.model(m).condition(c).sym.ps);
 else
-    ar.model(m).condition(c).sym.dfvdu = sym(ones(length(ar.model(m).condition(c).sym.fv), 0));
+    ar.model(m).condition(c).sym.dfvdx = sym(ones(0, length(ar.model(m).sym.xs)));
+    ar.model(m).condition(c).sym.dfvdu = sym(ones(0, length(ar.model(m).sym.us)));
+    ar.model(m).condition(c).sym.dfvdp = sym(ones(0, length(ar.model(m).condition(c).sym.ps)));
 end
-ar.model(m).condition(c).sym.dfvdp = jacobian(ar.model(m).condition(c).sym.fv, ar.model(m).condition(c).sym.ps);
 
 % flux signs
 ar.model(m).condition(c).qdvdx_nonzero = logical(ar.model(m).condition(c).sym.dfvdx~=0);
@@ -708,7 +719,11 @@ if(ar.config.useSensis)
     fprintf('sx=%i... ', numel(ar.model(m).condition(c).sym.fsx));
     
     % sx initials
-    ar.model(m).condition(c).sym.fsx0 = jacobian(ar.model(m).condition(c).sym.fpx0, ar.model(m).condition(c).sym.ps);
+    if(~isempty(ar.model(m).condition(c).sym.fpx0))
+        ar.model(m).condition(c).sym.fsx0 = jacobian(ar.model(m).condition(c).sym.fpx0, ar.model(m).condition(c).sym.ps);
+    else
+        ar.model(m).condition(c).sym.fsx0 = sym(ones(0, length(ar.model(m).condition(c).sym.ps)));
+    end
     
     % steady state sensitivities
     ar.model(m).condition(c).sym.dfxdp = (ar.model(m).N .* ar.model(m).condition(c).sym.C) * (ar.model(m).condition(c).sym.dvdp + ...

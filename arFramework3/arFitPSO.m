@@ -10,7 +10,7 @@ PSOopts.ObjFuncData = [];
 PSOopts.ObjFuncDir  = '';
 
 PSOopts.MaxIter = ar_opts.MaxIter;
-PSOopts.Verbose = false; %~strcmp(ar_opts.Display, 'off');
+PSOopts.Verbose = ~strcmp(ar_opts.Display, 'off');
 
 [pFit, chi2, ExitReason] = mnb_PSOFit('arFitPSOFkt',LB,UB,PSOopts);
 
