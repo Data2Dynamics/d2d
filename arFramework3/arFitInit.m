@@ -12,6 +12,11 @@ end
 qFitReset = ar.qFit + 0;
 
 ar.qFit(ar.qFit==1 & ar.qInitial==0) = 0;
-arFit(silent);
-
+try	
+	arFit(silent);
+catch err
+    ar.qFit = qFitReset;
+    error(err.message)
+end
+	
 ar.qFit = qFitReset;

@@ -13,6 +13,11 @@ qFitReset = ar.qFit + 0;
 
 qDoFit = ismember(1:length(ar.p),ips);
 ar.qFit(ar.qFit==1 & ~qDoFit) = 0;
-arFit(silent);
+try	
+	arFit(silent);
+catch err
+    ar.qFit = qFitReset;
+    error(err.message)
+end
 
 ar.qFit = qFitReset;

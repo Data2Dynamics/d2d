@@ -61,7 +61,7 @@ end
 %     arWriteCFiles;
 % end
 
-% initialize fine senistivities
+% initialize fine sensitivities
 if(fine && sensi)
     initFineSensis;
 end
