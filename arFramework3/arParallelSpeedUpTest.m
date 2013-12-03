@@ -1,6 +1,6 @@
 % arCheckParallelSpeedUp(nmax, nrep, sensi, randomseed)
 
-function arCheckParallelSpeedUp(nmax, nrep, sensi, randomseed)
+function arParallelSpeedUpTest(nmax, nrep, sensi, randomseed)
 
 global ar
 
