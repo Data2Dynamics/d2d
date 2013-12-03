@@ -37,11 +37,11 @@
 #ifdef HAS_PTHREAD
 struct thread_data_x {
     int	id;
-    mxArray *arthread;
 };
 #endif
 
 mxArray *armodel;
+mxArray *arthread;
 
 int    fine;
 int    sensi;
@@ -62,7 +62,7 @@ struct timeval t1;
 #ifdef HAS_PTHREAD
 void *thread_calc(void *threadarg);
 #else
-void thread_calc(int id, mxArray *arthread);
+void thread_calc(int id);
 #endif
 void x_calc(int im, int ic);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition);
@@ -84,7 +84,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #endif
 
     mxArray    *arconfig;
-    mxArray    *arthread;
     
 #ifdef HAS_SYSTIME
     struct timeval t2, tdiff;
@@ -130,7 +129,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         tid = (int) mxGetScalar(mxGetField(arthread, ithreads, "id"));
         
         thread_data_x_array[tid].id = tid;
-        thread_data_x_array[tid].arthread = arthread;
 
         if(parallel==1){
             /* printf("creating thread %i\n", tid); */
@@ -158,7 +156,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     /* loop over threads sequential */
     for(ithreads=0; ithreads<nthreads; ++ithreads){
         tid = (int) mxGetScalar(mxGetField(arthread, ithreads, "id"));
-        thread_calc(tid, arthread);
+        thread_calc(tid);
     }
 #endif    
     
@@ -175,9 +173,8 @@ void *thread_calc(void *threadarg) {
     struct thread_data_x *my_data = (struct thread_data_x *) threadarg;
     
     int id = my_data->id;
-    mxArray *arthread = my_data->arthread;
 #else
-void thread_calc(int id, mxArray *arthread) {
+void thread_calc(int id) {
 #endif
     
     int n = (int) mxGetScalar(mxGetField(arthread, id, "n"));
