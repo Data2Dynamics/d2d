@@ -6,7 +6,7 @@
 % arLoadData('data2', jm);
 % ...
 % arLoadData('dataN', jm);
-% arMergePlot(jm, {'data1', 'data2', ..., 'dataN'}, {'label for data1', 'label for data2', ..., 'label for dataN'});
+% arMergePlotMulti(jm, {'data1', 'data2', ..., 'dataN'}, {'label for data1', 'label for data2', ..., 'label for dataN'});
 
 function arMergePlotMulti(jm, index_names, label_names)
 

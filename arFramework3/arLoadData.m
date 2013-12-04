@@ -413,12 +413,15 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
     qrandis = ismember(header, ar.model(m).data(d).prand); %R2013a compatible
     if(sum(qrandis) > 0)
         qobs = ismember(header, ar.model(m).data(d).y); %R2013a compatible
+        
         randis_header = header(qrandis);
-        if(str2double(matVer.Version)>=8.1)
-            [randis, irandis, jrandis] = unique(data(:,qrandis),'rows','legacy');  %#ok<ASGLU>
+        if ~isempty(dataCell)
+            [randis, ~, jrandis] = uniqueRowsCA(dataCell(:,qrandis));
         else
-            [randis, irandis, jrandis] = unique(data(:,qrandis),'rows');  %#ok<ASGLU>
+            [randis, ~, jrandis] = unique(data(:,qrandis),'rows');
+            randis = cellstr(num2str(randis));
         end
+               
         for j=1:size(randis,1)
             qvals = jrandis == j;
             tmpdata = data(qvals,qobs);
@@ -431,48 +434,48 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
                 end
                 
                 for jj=1:size(randis,2)
-                    fprintf('\t%20s = %g\n', randis_header{jj}, randis(j,jj))
+                    fprintf('\t%20s = %s\n', randis_header{jj}, randis{j,jj})
                     
                     ar.model(m).plot(jplot).name = [ar.model(m).plot(jplot).name '_' ...
-                        randis_header{jj} sprintf('%04i',randis(j,jj))];
+                        randis_header{jj} randis{j,jj}];
                     
                     ar.model(m).data(d).name = [ar.model(m).data(d).name '_' ...
-                        randis_header{jj} sprintf('%04i',randis(j,jj))];
+                        randis_header{jj} randis{j,jj}];
                     
                     ar.model(m).data(d).fy = strrep(ar.model(m).data(d).fy, ...
-                        randis_header{jj}, [randis_header{jj} sprintf('%04i',randis(j,jj))]);
+                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     ar.model(m).data(d).py = strrep(ar.model(m).data(d).py, ...
-                        randis_header{jj}, [randis_header{jj} sprintf('%04i',randis(j,jj))]);
+                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     
                     ar.model(m).data(d).fystd = strrep(ar.model(m).data(d).fystd, ...
-                        randis_header{jj}, [randis_header{jj} sprintf('%04i',randis(j,jj))]);
+                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     ar.model(m).data(d).pystd = strrep(ar.model(m).data(d).pystd, ...
-                        randis_header{jj}, [randis_header{jj} sprintf('%04i',randis(j,jj))]);
+                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     
                     ar.model(m).data(d).fxeq = strrep(ar.model(m).data(d).fxeq, ...
-                        randis_header{jj}, [randis_header{jj} sprintf('%04i',randis(j,jj))]);
+                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     ar.model(m).data(d).pxeq = strrep(ar.model(m).data(d).pxeq, ...
-                        randis_header{jj}, [randis_header{jj} sprintf('%04i',randis(j,jj))]);
+                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     
                     ar.model(m).data(d).p = strrep(ar.model(m).data(d).p, ...
-                        randis_header{jj}, [randis_header{jj} sprintf('%04i',randis(j,jj))]);
+                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     ar.model(m).data(d).fp = strrep(ar.model(m).data(d).fp, ...
-                        randis_header{jj}, [randis_header{jj} sprintf('%04i',randis(j,jj))]);
+                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     ar.model(m).data(d).pcond = strrep(ar.model(m).data(d).pcond, ...
-                        randis_header{jj}, [randis_header{jj} sprintf('%04i',randis(j,jj))]);
+                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     
                     for jjj=1:length(ar.model(m).data(d).py_sep)
                         ar.model(m).data(d).py_sep(jjj).pars = strrep(ar.model(m).data(d).py_sep(jjj).pars, ...
-                            randis_header{jj}, [randis_header{jj} sprintf('%04i',randis(j,jj))]);
+                            randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     end
                 end
                 
                 if ~isempty(dataCell)
                     [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
-                        strrep(pcond, randis_header{jj}, [randis_header{jj} num2str(randis(j,jj))]), removeEmptyObs, dpPerShoot);
+                        strrep(pcond, randis_header{jj}, [randis_header{jj} randis{j,jj}]), removeEmptyObs, dpPerShoot);
                 else
                     [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell, ...
-                        strrep(pcond, randis_header{jj}, [randis_header{jj} num2str(randis(j,jj))]), removeEmptyObs, dpPerShoot);
+                        strrep(pcond, randis_header{jj}, [randis_header{jj} randis{j,jj}]), removeEmptyObs, dpPerShoot);
                 end
                 if(j < size(randis,1))
                     d = d + 1;

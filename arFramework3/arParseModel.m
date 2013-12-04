@@ -31,7 +31,7 @@ for m=1:length(ar.model)
             
             % conditions checksum
             qdynparas = ismember(ar.model(m).data(d).p, ar.model(m).px) | ... %R2013a compatible
-            	ismember(ar.model(m).data(d).p, ar.model(m).data(d).pu); %R2013a compatible
+                ismember(ar.model(m).data(d).p, ar.model(m).data(d).pu); %R2013a compatible
             
             checksum_cond = addToCheckSum(ar.model(m).data(d).fu);
             checksum_cond = addToCheckSum(ar.model(m).p, checksum_cond);
@@ -336,8 +336,8 @@ ar.model(m).condition(c).sym.px0s = mysubs(sym(ar.model(m).condition(c).px0), ..
 % make syms
 ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).sym.x, ar.model(m).sym.xs);
 ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).sym.u, ar.model(m).sym.us);
-ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
 
+ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
 ar.model(m).condition(c).sym.fu = mysubs(ar.model(m).condition(c).sym.fu, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
 ar.model(m).condition(c).sym.fpx0 = mysubs(ar.model(m).condition(c).sym.fpx0, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
 ar.model(m).condition(c).sym.fxeq = mysubs(ar.model(m).condition(c).sym.fxeq, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);

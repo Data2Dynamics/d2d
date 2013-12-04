@@ -41,7 +41,7 @@ for j=1:length(filenames)
             minchi2 = min([minchi2 min(tmpple.ar.chi2s)]);
         end
     else
-        fprintf('%s does not contains PLE\n', filenames{j});
+        fprintf('%s does not contain workspace\n', filenames{j});
     end
 end
 arWaitbar(-1);
@@ -93,6 +93,11 @@ boxplot(log10(timing), 'orientation', 'horizontal', 'labels', labels, ...
     'orientation', 'horizontal', ...
     'plotstyle', 'compact', 'colors', colors);
 xlabel('log_{10} runtime [s]');
+
+sumtimes = sum(timing);
+for j=1:length(sumtimes)
+    fprintf('%s total runtime %s\n', labels{j}, secToHMS(sumtimes(j)));
+end
 
 subplot(3,1,3);
 for j=1:length(chi2s)

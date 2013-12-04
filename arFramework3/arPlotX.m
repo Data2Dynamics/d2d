@@ -584,6 +584,10 @@ if(~exist(savePath, 'dir'))
     mkdir(savePath)
 end
 
+if(length(name)>30)
+    name = name(1:30);
+end
+
 savePath = mypath([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
