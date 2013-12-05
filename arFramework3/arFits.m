@@ -72,9 +72,11 @@ else
     q_select = ar.qFit==1;
 end
 
-if(sum(q_select)<6)
-    figure(1)
-    plotmatrix(ps(:,q_select), 'x');
+if plot_summary
+    if(sum(q_select)<6)
+        figure(1)
+        plotmatrix(ps(:,q_select), 'x');
+    end
 end
 
 arWaitbar(0);

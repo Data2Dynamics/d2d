@@ -408,7 +408,7 @@ for jm = 1:length(ar.model)
                     if(doLegends && jy == 1 && (~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                         if(~ar.model(jm).plot(jplot).doseresponse)
                             if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition))
+                                legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition),'Location','Best')
                             end
                         else
                             legendtmp = {};
@@ -424,7 +424,7 @@ for jm = 1:length(ar.model)
                                     ccount = ccount + 1;
                                 end
                             end
-                            legend(g, cclegendstyles, myNameTrafo(legendtmp))
+                            legend(g, cclegendstyles, myNameTrafo(legendtmp),'Location','Best')
                         end
                     end
                 end

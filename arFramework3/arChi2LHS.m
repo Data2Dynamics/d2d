@@ -1,6 +1,6 @@
 % chi2 sequence using latin hyper cube sampling
 %
-% arChi2LHS(n, sensis)
+% arChi2LHS(n, sensis, silent)
 %
 % n:        number of runs      [10]
 

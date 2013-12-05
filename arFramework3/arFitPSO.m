@@ -5,6 +5,12 @@ function [pFit, chi2, resnorm, exitflag, output, lambda, jac] = ...
 
 PSOopts = mnb_PSOOptions();
 
+PSOopts.NumSwp      = 40;
+PSOopts.lmin        = 4;
+PSOopts.wcount_min  = 3;
+PSOopts.wcount_max  = 6;
+
+
 % Objective function options
 PSOopts.ObjFuncData = [];
 PSOopts.ObjFuncDir  = '';
