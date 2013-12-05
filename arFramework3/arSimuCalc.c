@@ -81,6 +81,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int nthreads, ithreads, tid;
 #ifdef HAS_PTHREAD
     int rc;
+    pthread_t threads_x[NMAXTHREADS];
+    struct thread_data_x thread_data_x_array[NMAXTHREADS];
 #endif
 
     mxArray    *arconfig;
@@ -115,9 +117,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     /* threads */
     arthread = mxGetField(arconfig, 0, "threads");
     nthreads = (int) mxGetScalar(mxGetField(arconfig, 0, "nThreads"));
+    
 #ifdef HAS_PTHREAD
-    pthread_t threads_x[nthreads];
-    struct thread_data_x thread_data_x_array[nthreads];
+    if(NMAXTHREADS<nthreads) mexErrMsgTxt("ERROR at NMAXTHREADS < nthreads");
 #endif
     
     /* printf("%i threads (%i fine, %i sensi, %i jacobian, %g rtol, %g atol, %i maxsteps)\n", nthreads, fine,
@@ -171,7 +173,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #ifdef HAS_PTHREAD
 void *thread_calc(void *threadarg) {
     struct thread_data_x *my_data = (struct thread_data_x *) threadarg;
-    
     int id = my_data->id;
 #else
 void thread_calc(int id) {

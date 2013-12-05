@@ -54,6 +54,14 @@ if(exist([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'],'file') 
     fclose(fid);
 end
 
+%% check Windows libraries for pthread-win32
+
+if(ispc)
+    if(~exist('C:\Windows\pthreadGC2.dll','file')>0 || ~exist('C:\Windows\pthreadVC2.dll','file')>0)
+        fprintf(fid, 'Please copy content of %s to C:\\Windows\n', [ar_path '\pthreads-w32_2.9.1\dll\' mexext]);
+    end
+end
+
 %% Rest
 
 % EvA2 Toolbox

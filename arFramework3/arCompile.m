@@ -212,11 +212,17 @@ fprintf('compiling and linking %s...', ar.fkt);
 if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
     outputstr = [' -output ' ar.fkt];
     if(~ispc)
-        % parallel code using POSIX threads for unix type OS
-        eval(['mex' outputstr includesstr ' -DHAS_PTHREAD=1 -DHAS_SYSTIME=1 "' which('arSimuCalc.c') '"' objectsstr]);
+        % parallel code using POSIX threads for Unix type OS
+        eval(['mex' outputstr includesstr sprintf(' -DHAS_PTHREAD=1 -DNMAXTHREADS=%i -DHAS_SYSTIME=1 "', ar.config.nMaxThreads) which('arSimuCalc.c') '"' objectsstr]);
     else
-        % serial code for windows OS
-        eval(['mex' outputstr includesstr ' "' which('arSimuCalc.c') '"' objectsstr]);
+        if(exist('C:\Windows\pthreadGC2.dll','file')>0 && exist('C:\Windows\pthreadVC2.dll','file')>0)
+            % parallel code using POSIX threads (pthread-win32) for Windows type OS
+            includesstr = strcat(includesstr, [' -I"' ar_path '\pthreads-w32_2.9.1\include" -L"' ar_path '\pthreads-w32_2.9.1\lib\' mexext '" -lpthreadVC2']);
+            eval(['mex' outputstr includesstr sprintf(' -DHAS_PTHREAD=1 -DNMAXTHREADS=%i "', ar.config.nMaxThreads) which('arSimuCalc.c') '"' objectsstr]);
+        else
+            % serial code for windows OS
+            eval(['mex' outputstr includesstr ' "' which('arSimuCalc.c') '"' objectsstr]);
+        end 
     end
     fprintf('done\n');
 else

@@ -32,6 +32,7 @@ ar.checksum = [];
 ar.config.useParallel = true;
 ar.config.nCore = feature('numCores');
 ar.config.nParallel = feature('numCores');
+ar.config.nMaxThreads = 64;
 
 % plotting options
 ar.config.nFinePoints = 300;
