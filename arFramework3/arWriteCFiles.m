@@ -575,7 +575,7 @@ if(~isempty(ar.model(m).xs))
         
         % Equations
         fprintf(fid, '  switch (ip) {\n');
-        for j2=1:size(ar.model(m).condition(c).sym.fsx,2)
+        for j2=1:size(ar.model(m).condition(c).sym.fsx0,2)
             fprintf(fid, '  case %i: {\n', j2-1);
             writeCcode(fid, m, c, 'fsx0', j2);
             fprintf(fid, '  } break;\n\n');
