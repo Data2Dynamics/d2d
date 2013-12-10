@@ -138,12 +138,25 @@ end
 fprintf(fid, '}\n\n');
 
 % map CVodeSensInit1 to fsx
-fprintf(fid, ' int AR_CVodeSensInit1(void *cvode_mem, int nps, int sensi_meth, N_Vector *sx, int im, int ic){\n');
+fprintf(fid, ' int AR_CVodeSensInit1(void *cvode_mem, int nps, int sensi_meth, int sensirhs, N_Vector *sx, int im, int ic){\n');
+if(ar.config.useSensiRHS)
+    fprintf(fid, '  if (sensirhs == 1) {\n');
+    for m=1:length(ar.model)
+        for c=1:length(ar.model(m).condition)
+            fprintf(fid, '    if(im==%i & ic==%i) return CVodeSensInit1(cvode_mem, nps, sensi_meth, fsx_%s, sx);\n', ...
+                m-1, c-1, ar.model(m).condition(c).fkt);
+        end
+    end
+    fprintf(fid, '  } else {\n');
+end
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if(im==%i & ic==%i) return CVodeSensInit1(cvode_mem, nps, sensi_meth, fsx_%s, sx);\n', ...
-            m-1, c-1, ar.model(m).condition(c).fkt);
+        fprintf(fid, '    if(im==%i & ic==%i) return CVodeSensInit1(cvode_mem, nps, sensi_meth, NULL, sx);\n', ...
+            m-1, c-1);
     end
+end
+if(ar.config.useSensiRHS)
+    fprintf(fid, '  }\n');
 end
 fprintf(fid, '  return(-1);\n');
 fprintf(fid, '}\n\n');
@@ -309,9 +322,11 @@ fprintf(fid, ' void fx0_%s(N_Vector x0, void *user_data);\n', ar.model(m).condit
 fprintf(fid, ' int dfxdx_%s(long int N, realtype t, N_Vector x,', ar.model(m).condition(c).fkt); % sundials 2.5.0
 fprintf(fid, 'N_Vector fx, DlsMat J, void *user_data,');
 fprintf(fid, 'N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);\n');
-fprintf(fid, ' int fsx_%s(int Ns, realtype t, N_Vector x, N_Vector xdot,', ar.model(m).condition(c).fkt);
-fprintf(fid, 'int ip, N_Vector sx, N_Vector sxdot, void *user_data,');
-fprintf(fid, 'N_Vector tmp1, N_Vector tmp2);\n');
+if(ar.config.useSensiRHS)
+    fprintf(fid, ' int fsx_%s(int Ns, realtype t, N_Vector x, N_Vector xdot,', ar.model(m).condition(c).fkt);
+    fprintf(fid, 'int ip, N_Vector sx, N_Vector sxdot, void *user_data,');
+    fprintf(fid, 'N_Vector tmp1, N_Vector tmp2);\n');
+end
 fprintf(fid, ' void fsx0_%s(int ip, N_Vector sx0, void *user_data);\n', ar.model(m).condition(c).fkt);
 fprintf(fid, ' void dfxdp_%s(realtype t, N_Vector x, double *dfxdp, void *user_data);\n\n', ar.model(m).condition(c).fkt);
 fprintf(fid, '#endif /* _MY_%s */\n', ar.model(m).condition(c).fkt);
@@ -502,49 +517,51 @@ end
 fprintf(fid, '\n  return(0);\n}\n\n\n');
 
 % write fsv & fsx
-fprintf(fid, ' int fsx_%s(int Ns, realtype t, N_Vector x, N_Vector xdot, \n', ar.model(m).condition(c).fkt);
-fprintf(fid, '  \tint ip, N_Vector sx, N_Vector sxdot, void *user_data, \n');
-fprintf(fid, '  \tN_Vector tmp1, N_Vector tmp2)\n{\n');
-
-if(~isempty(ar.model(m).xs))
-    if(ar.config.useSensis)
-        fprintf(fid, '  int is;\n');
-        fprintf(fid, '  UserData data = (UserData) user_data;\n');
-        fprintf(fid, '  double *p = data->p;\n');
-        fprintf(fid, '  double *u = data->u;\n');
-        fprintf(fid, '  double *sv = data->sv;\n');
-        fprintf(fid, '  double *dvdx = data->dvdx;\n');
-        fprintf(fid, '  double *dvdu = data->dvdu;\n');
-        fprintf(fid, '  double *dvdp = data->dvdp;\n');
-        fprintf(fid, '  double *su = data->su;\n');
-        % 	fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
-        fprintf(fid, '  double *sx_tmp = N_VGetArrayPointer(sx);\n');
-        fprintf(fid, '  double *sxdot_tmp = N_VGetArrayPointer(sxdot);\n');
-        
-        % Equations
-        fprintf(fid, '  switch (ip) {\n');
-        for j2=1:size(ar.model(m).condition(c).sym.fsx,2)
-            fprintf(fid, '  case %i: {\n', j2-1);
-            if(timedebug)
-                fprintf(fid, '  printf("%%g \\t fsx%i\\n", t);\n', j2-1);
+if(ar.config.useSensiRHS)
+    fprintf(fid, ' int fsx_%s(int Ns, realtype t, N_Vector x, N_Vector xdot, \n', ar.model(m).condition(c).fkt);
+    fprintf(fid, '  \tint ip, N_Vector sx, N_Vector sxdot, void *user_data, \n');
+    fprintf(fid, '  \tN_Vector tmp1, N_Vector tmp2)\n{\n');
+    
+    if(~isempty(ar.model(m).xs))
+        if(ar.config.useSensis)
+            fprintf(fid, '  int is;\n');
+            fprintf(fid, '  UserData data = (UserData) user_data;\n');
+            fprintf(fid, '  double *p = data->p;\n');
+            fprintf(fid, '  double *u = data->u;\n');
+            fprintf(fid, '  double *sv = data->sv;\n');
+            fprintf(fid, '  double *dvdx = data->dvdx;\n');
+            fprintf(fid, '  double *dvdu = data->dvdu;\n');
+            fprintf(fid, '  double *dvdp = data->dvdp;\n');
+            fprintf(fid, '  double *su = data->su;\n');
+            % 	fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
+            fprintf(fid, '  double *sx_tmp = N_VGetArrayPointer(sx);\n');
+            fprintf(fid, '  double *sxdot_tmp = N_VGetArrayPointer(sxdot);\n');
+            
+            % Equations
+            fprintf(fid, '  switch (ip) {\n');
+            for j2=1:size(ar.model(m).condition(c).sym.fsx,2)
+                fprintf(fid, '  case %i: {\n', j2-1);
+                if(timedebug)
+                    fprintf(fid, '  printf("%%g \\t fsx%i\\n", t);\n', j2-1);
+                end
+                if(j2==1)
+                    fprintf(fid, '  fsu_%s(data, t);\n', ar.model(m).condition(c).fkt);
+                    fprintf(fid, '  dvdx_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
+                    fprintf(fid, '  dvdu_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
+                    fprintf(fid, '  dvdp_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
+                end
+                writeCcode(fid, m, c, 'fsv', j2);
+                writeCcode(fid, m, c, 'fsx', j2);
+                fprintf(fid, '  } break;\n\n');
             end
-            if(j2==1)
-                fprintf(fid, '  fsu_%s(data, t);\n', ar.model(m).condition(c).fkt);
-                fprintf(fid, '  dvdx_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
-                fprintf(fid, '  dvdu_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
-                fprintf(fid, '  dvdp_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
-            end
-            writeCcode(fid, m, c, 'fsv', j2);
-            writeCcode(fid, m, c, 'fsx', j2);
-            fprintf(fid, '  } break;\n\n');
+            fprintf(fid, '  }\n');
+            fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(ar.model(m).x));
+            fprintf(fid, '    if(mxIsNaN(sxdot_tmp[is])) sxdot_tmp[is] = 0.0;\n');
+            fprintf(fid, '  }\n');
         end
-        fprintf(fid, '  }\n');
-        fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(ar.model(m).x));
-        fprintf(fid, '    if(mxIsNaN(sxdot_tmp[is])) sxdot_tmp[is] = 0.0;\n');
-        fprintf(fid, '  }\n');
     end
+    fprintf(fid, '\n  return(0);\n}\n\n\n');
 end
-fprintf(fid, '\n  return(0);\n}\n\n\n');
 
 
 % write fsx0

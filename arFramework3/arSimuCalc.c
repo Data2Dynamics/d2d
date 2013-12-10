@@ -48,6 +48,7 @@ int    sensi;
 int    dynamics;
 int    jacobian;
 int    parallel;
+int    sensirhs;
 int    fiterrors;
 int    cvodes_maxsteps;
 double cvodes_rtol;
@@ -108,6 +109,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     arconfig = mxGetField(prhs[0], 0, "config");
     parallel = (int) mxGetScalar(mxGetField(arconfig, 0, "useParallel"));
     jacobian = (int) mxGetScalar(mxGetField(arconfig, 0, "useJacobian"));
+    sensirhs = (int) mxGetScalar(mxGetField(arconfig, 0, "useSensiRHS"));
     cvodes_rtol = mxGetScalar(mxGetField(arconfig, 0, "rtol"));
     cvodes_atol = mxGetScalar(mxGetField(arconfig, 0, "atol"));
     cvodes_maxsteps = (int) mxGetScalar(mxGetField(arconfig, 0, "maxsteps"));
@@ -413,16 +415,16 @@ void x_calc(int im, int ic) {
                 fsv(data, tstart, x, im, ic);
                 dfxdp(data, tstart, x, returnddxdtdp, im, ic);
                 
-                flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sx, im, ic);
+                flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sensirhs, sx, im, ic);
                 if(flag < 0) {status[0] = 10; return;}
                 
                 /*
-            flag = CVodeSensEEtolerances(cvode_mem);
-            if(flag < 0) {status[0] = 11; return;}
-             
-            flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
-            if (flag < 0) {status[0] = 13; return;}
-                 */
+                flag = CVodeSensEEtolerances(cvode_mem);
+                if(flag < 0) {status[0] = 11; return;}
+                */
+                
+                flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
+                if (flag < 0) {status[0] = 13; return;} 
                 
                 atols_ss = N_VNew_Serial(np);
                 if (atols_ss == NULL) {return;}

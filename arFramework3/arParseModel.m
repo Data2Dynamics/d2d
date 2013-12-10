@@ -715,8 +715,12 @@ if(ar.config.useSensis)
     ar.model(m).condition(c).sym.sv = sym(ar.model(m).condition(c).sv);
     fprintf('sv=%i, ', sum(ar.model(m).condition(c).qfsv_nonzero(:)));
     
-    ar.model(m).condition(c).sym.fsx = (ar.model(m).N .* ar.model(m).condition(c).sym.C) * ar.model(m).condition(c).sym.sv;
-    fprintf('sx=%i... ', numel(ar.model(m).condition(c).sym.fsx));
+    if(ar.config.useSensiRHS)
+        ar.model(m).condition(c).sym.fsx = (ar.model(m).N .* ar.model(m).condition(c).sym.C) * ar.model(m).condition(c).sym.sv;
+        fprintf('sx=%i... ', numel(ar.model(m).condition(c).sym.fsx));
+    else
+        fprintf('sx=skipped ');
+    end
     
     % sx initials
     if(~isempty(ar.model(m).condition(c).sym.fpx0))

@@ -61,6 +61,7 @@ ar.config.plotter_sorted = false;
 % optimization options
 ar.config.useSensis = true; 
 ar.config.useJacobian = true;
+ar.config.useSensiRHS = true;
 
 ar.config.optimizer = 1;
 ar.config.optimizers = {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq'};
