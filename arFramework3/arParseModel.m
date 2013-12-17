@@ -36,7 +36,6 @@ for m=1:length(ar.model)
             checksum_cond = addToCheckSum(ar.model(m).data(d).fu);
             checksum_cond = addToCheckSum(ar.model(m).p, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).fv, checksum_cond);
-            checksum_cond = addToCheckSum(ar.model(m).fxeq, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).N, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).cLink, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).data(d).fp(qdynparas), checksum_cond);
@@ -47,7 +46,6 @@ for m=1:length(ar.model)
             checksum_data = addToCheckSum(ar.model(m).data(d).p, checksum_data);
             checksum_data = addToCheckSum(ar.model(m).data(d).fy, checksum_data);
             checksum_data = addToCheckSum(ar.model(m).data(d).fystd, checksum_data);
-            checksum_data = addToCheckSum(ar.model(m).data(d).fxeq, checksum_data);
             checksum_data = addToCheckSum(ar.model(m).data(d).fp, checksum_data);
             checkstr_data = getCheckStr(checksum_data);
             
@@ -73,7 +71,6 @@ for m=1:length(ar.model)
                 
                 ar.model(m).condition(cindex).status = 0;
                 
-                ar.model(m).condition(cindex).fxeq = ar.model(m).data(d).fxeq;
                 ar.model(m).condition(cindex).fu = ar.model(m).data(d).fu;
                 ar.model(m).condition(cindex).fp = ar.model(m).data(d).fp(qdynparas);
                 ar.model(m).condition(cindex).p = ar.model(m).data(d).p(qdynparas);
@@ -129,7 +126,6 @@ for m=1:length(ar.model)
         checksum_cond = addToCheckSum(ar.model(m).fu);
         checksum_cond = addToCheckSum(ar.model(m).p(qdynparas), checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).fv, checksum_cond);
-        checksum_cond = addToCheckSum(ar.model(m).fxeq, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).N, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).cLink, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).fp, checksum_cond);
@@ -139,7 +135,6 @@ for m=1:length(ar.model)
         
         ar.model(m).condition(cindex).status = 0;
         
-        ar.model(m).condition(cindex).fxeq = ar.model(m).fxeq;
         ar.model(m).condition(cindex).fu = ar.model(m).fu;
         ar.model(m).condition(cindex).fp = ar.model(m).fp(qdynparas);
         ar.model(m).condition(cindex).p = ar.model(m).p(qdynparas);
@@ -288,14 +283,6 @@ ar.model(m).condition(c).sym.fpx0 = sym(ar.model(m).px0);
 ar.model(m).condition(c).sym.fpx0 = mysubs(ar.model(m).condition(c).sym.fpx0, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.fp);
 ar.model(m).condition(c).sym.fv = sym(ar.model(m).fv);
 ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.fp);
-if(~isempty(ar.model(m).condition(c).fxeq))
-    for j=1:length(ar.model(m).condition(c).fxeq)
-        ar.model(m).condition(c).sym.fxeq(j) = sym(ar.model(m).condition(c).fxeq{j});
-    end
-else
-    ar.model(m).condition(c).sym.fxeq = sym([]);
-end
-ar.model(m).condition(c).sym.fxeq = mysubs(ar.model(m).condition(c).sym.fxeq, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.fp);
 ar.model(m).condition(c).sym.fu = sym(ar.model(m).condition(c).fu);
 ar.model(m).condition(c).sym.fu = mysubs(ar.model(m).condition(c).sym.fu, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.fp);
 ar.model(m).condition(c).sym.C = mysubs(ar.model(m).sym.C, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.fp);
@@ -340,7 +327,6 @@ ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.mod
 ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
 ar.model(m).condition(c).sym.fu = mysubs(ar.model(m).condition(c).sym.fu, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
 ar.model(m).condition(c).sym.fpx0 = mysubs(ar.model(m).condition(c).sym.fpx0, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
-ar.model(m).condition(c).sym.fxeq = mysubs(ar.model(m).condition(c).sym.fxeq, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
 
 % remove zero inputs
 ar.model(m).condition(c).qfu_nonzero = logical(ar.model(m).condition(c).sym.fu ~= 0);

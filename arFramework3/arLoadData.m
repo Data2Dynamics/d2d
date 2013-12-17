@@ -28,8 +28,6 @@
 
 function arLoadData(name, m, d, extension, removeEmptyObs, dpPerShoot)
 
-matVer = ver('MATLAB');
-
 global ar
 
 if(isempty(ar))
@@ -88,6 +86,17 @@ str = textscan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(~strcmp(str{1},'DESCRIPTION'))
     error('parsing data %s for DESCRIPTION', name);
 end
+
+% check version
+if(strcmp(str{1},'DESCRIPTION'))
+    % def_version = 1;
+elseif(strcmp(str{1},'DESCRIPTION-V2'))
+    error('DESCRIPTION-V2 not supported yet');
+else
+    error('invalid version identifier: %s', cell2mat(str{1}));
+end
+
+% read comments
 str = textscan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).description = {};
 while(~strcmp(str{1},'PREDICTOR') && ~strcmp(str{1},'PREDICTOR-DOSERESPONSE'))
@@ -252,16 +261,9 @@ while(~strcmp(C{1},'CONDITIONS'))
     C = textscan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
-% extra invariational parameters
-varlist = cellfun(@symvar, ar.model(m).data(d).fxeq, 'UniformOutput', false);
-ar.model(m).data(d).pxeq = setdiff(vertcat(varlist{:}), union(ar.model(m).x, union(ar.model(m).u, ... %R2013a compatible
-	ar.model(m).px)));   
-
-% TODO solve for invariants
-
 % collect parameters needed for OBS
 ar.model(m).data(d).p = union(strrep(ar.model(m).p, '_filename', ['_' ar.model(m).data(d).name]), union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
-ar.model(m).data(d).p = union(ar.model(m).data(d).p, union(ar.model(m).data(d).pystd, ar.model(m).data(d).pxeq)); %R2013a compatible
+ar.model(m).data(d).p = union(ar.model(m).data(d).p, ar.model(m).data(d).pystd); %R2013a compatible
 
 % CONDITIONS
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);

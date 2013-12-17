@@ -43,19 +43,14 @@ if(isempty(strfind(str{1},'DESCRIPTION')))
     error('parsing model %s for DESCRIPTION', ar.model(m).name);
 end
 
+% check version
 if(strcmp(str{1},'DESCRIPTION'))
-    arLoadModelV1(m, fid);
+    % def_version = 1;
 elseif(strcmp(str{1},'DESCRIPTION-V2'))
-    arLoadModelV2(m, fid);
+    error('DESCRIPTION-V2 not supported yet');
 else
     error('invalid version identifier: %s', cell2mat(str{1}));
 end
-
-
-
-function arLoadModelV1(m, fid)
-
-global ar
 
 % read comments
 str = textscan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
@@ -233,7 +228,6 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             massaction = false;
         end
         
-%         str = textscan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
         C = textscan(fid, '%q %q\n', 1, 'CommentStyle', ar.config.comment_string);
         str = C(1);
         ar.model(m).v{end+1} = cell2mat(C{2});
@@ -370,7 +364,8 @@ end
 varlist = cellfun(@symvar, ar.model(m).fv, 'UniformOutput', false);
 ar.model(m).pv = setdiff(vertcat(varlist{:}), union(ar.model(m).t, union(ar.model(m).x, ar.model(m).u))); %R2013a compatible
 ar.model(m).px = union(union(ar.model(m).pv, ar.model(m).px), ar.model(m).px0); %R2013a compatible
-    
+ar.model(m).p = union(ar.model(m).px, ar.model(m).pu); %R2013a compatible
+
 % setup rhs
 C = cell(size(ar.model(m).N));
 if(length(ar.model(m).c)>1)    
@@ -422,13 +417,6 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'OBSERVABLES'))
     end
     C = textscan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
 end
-
-% extra invariational parameters
-varlist = cellfun(@symvar, ar.model(m).fxeq, 'UniformOutput', false);
-ar.model(m).pxeq = setdiff(vertcat(varlist{:}), union(ar.model(m).x, union(ar.model(m).u, ar.model(m).px))); %R2013a compatible
-
-% collect parameters needed for model
-ar.model(m).p = union(ar.model(m).px, union(ar.model(m).px0, union(ar.model(m).pxeq, ar.model(m).pu))); %R2013a compatible
 
 if(strcmp(C{1},'OBSERVABLES'))
     
