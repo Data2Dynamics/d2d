@@ -275,7 +275,7 @@ while(~isempty(C{1}) && ~strcmp(C{1},'RANDOM'))
     if(sum(qcondpara)>0)
         ar.model(m).data(d).fp{qcondpara} = ['(' cell2mat(C{2}) ')'];
     else
-        error('unknown parameter in conditions %s', cell2mat(C{1}));
+        warning('unknown parameter in conditions %s', cell2mat(C{1}));
     end
     C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
@@ -722,8 +722,14 @@ for j=1:length(ar.model(m).data(d).y)
         
         % log-fitting
         if(ar.model(m).data(d).logfitting(j))
-            ar.model(m).data(d).yExp(:,j) = log10(ar.model(m).data(d).yExp(:,j));
-            fprintf(' for log-fitting');
+            qdatapos = ar.model(m).data(d).yExp(:,j)>0;
+            ar.model(m).data(d).yExp(qdatapos,j) = log10(ar.model(m).data(d).yExp(qdatapos,j));
+            ar.model(m).data(d).yExp(~qdatapos,j) = nan;
+            if(sum(~qdatapos)==0)
+                fprintf(' for log-fitting');
+            else
+                fprintf(' for log-fitting (%i values <=0 removed)', sum(~qdatapos));
+            end
         end
         
         % empirical stds

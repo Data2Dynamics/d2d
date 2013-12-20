@@ -5,7 +5,7 @@ function [pFit, chi2, resnorm, exitflag, output, lambda, jac] = ...
 
 PSOopts = mnb_PSOOptions();
 
-PSOopts.NumSwp      = 40;
+PSOopts.NumSwp      = 100;
 PSOopts.lmin        = 4;
 PSOopts.wcount_min  = 3;
 PSOopts.wcount_max  = 6;

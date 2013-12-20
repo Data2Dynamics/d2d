@@ -584,16 +584,19 @@ if(~exist(savePath, 'dir'))
     mkdir(savePath)
 end
 
-if(length(name)>30)
-    name = name(1:30);
+if(length(name)>50)
+    name = name(1:50);
 end
 
 savePath = mypath([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc2', savePath);
-system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
-
+if(ispc)
+    print('-dpdf', savePath);
+else
+    system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+end
 
 
 function str = mypath(str)

@@ -300,7 +300,7 @@ ar.model(m).condition(c).px0 = union(vertcat(varlist{:}), [])'; %R2013a compatib
 % remaining parameters
 varlist = cellfun(@symvar, ar.model(m).condition(c).fp, 'UniformOutput', false);
 ar.model(m).condition(c).pold = ar.model(m).condition(c).p;
-ar.model(m).condition(c).p = union(vertcat(varlist{:}), [])'; %R2013a compatible
+ar.model(m).condition(c).p = setdiff(setdiff(union(vertcat(varlist{:}), [])', ar.model(m).x), ar.model(m).u); %R2013a compatible
 
 if(doskip)
     fprintf('skipped\n');
@@ -752,9 +752,7 @@ ar.model(m).data(d).sym.fystd = mysubs(ar.model(m).data(d).sym.fystd, sym(ar.mod
 % remaining parameters
 varlist = cellfun(@symvar, ar.model(m).data(d).fp, 'UniformOutput', false);
 ar.model(m).data(d).pold = ar.model(m).data(d).p;
-ar.model(m).data(d).p = union(vertcat(varlist{:}), [])'; %R2013a compatible
-
-
+ar.model(m).data(d).p = setdiff(setdiff(union(vertcat(varlist{:}), [])', ar.model(m).x), ar.model(m).u); %R2013a compatible
 
 if(doskip)
     fprintf('skipped\n');

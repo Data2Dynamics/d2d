@@ -348,7 +348,11 @@ savePath = mypath([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc2', savePath);
-eval(['!ps2pdf  -dEPSCrop -dAutoRotatePages=/None ' savePath '.eps '  savePath '.pdf']);
+if(ispc)
+    print('-dpdf', savePath);
+else
+    eval(['!ps2pdf  -dEPSCrop -dAutoRotatePages=/None ' savePath '.eps '  savePath '.pdf']);
+end
 
 
 

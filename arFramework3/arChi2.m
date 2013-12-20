@@ -154,7 +154,8 @@ for jm = 1:nm
             qss = ar.model(jm).condition(jc).qSteadyState==1;
             if(sum(qss)>0)
                 if(qRelativeToInitialValue)
-                    if(isfield(ar.model(jm).condition(jc), 'xExpSimu'))
+                    if(isfield(ar.model(jm).condition(jc), 'xExpSimu') && ...
+                            ~isempty(ar.model(jm).condition(jc).xExpSimu))
                         x = ar.model(jm).condition(jc).xExpSimu(1,qss);
                     else
                         x = ar.model(jm).condition(jc).xFineSimu(1,qss);
@@ -168,7 +169,8 @@ for jm = 1:nm
                     
                     if(ar.config.useSensis && sensi)
                         tmpsconstr = zeros(length(tmpconstr(:)), np);
-                        if(isfield(ar.model(jm).condition(jc), 'sxExpSimu'))
+                        if(isfield(ar.model(jm).condition(jc), 'sxExpSimu') && ...
+                            ~isempty(ar.model(jm).condition(jc).sxExpSimu))
                             dxdp = squeeze(ar.model(jm).condition(jc).sxExpSimu(1,qss,:));
                             dxdp(:,ar.model(jm).condition(jc).qLog10 == 1) = bsxfun(@times, ... % log trafo
                                 dxdp(:,ar.model(jm).condition(jc).qLog10 == 1), ...
