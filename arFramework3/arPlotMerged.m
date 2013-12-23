@@ -19,13 +19,13 @@ if(~exist('only_inhib','var'))
 end
 
 if(~exist('condition_link_bool','var'))
-	condition_link_bool = false;
+	condition_link_bool = true;
 end
 
 ar.model.qPlotYs(:) = 1; %Adjust, if only a subset of the data setup should be plotted
 %ar.model.qPlotYs([110]) = 0;
 
-standcond = 'HGF_input=100'; % Insert standard condition
+standcond = 'Control'; % Insert standard condition
 
 %% log
 clc
@@ -38,34 +38,50 @@ disp(ylabels)
 disp(ar.model.x)
 
 %% link
-ylink = cell(size(ylabels));
+ylink = cell(size(ylabels(:)'));
 
-if(only_inhib == false)
-    ylink{6} = 12; % pAkt_au
-    ylink{8} = 22; % pERK_au
-    ylink{10} = 21; % pMEK_au
-    %ylink{11} = 1; % pMet_au
-    %ylink{12} = 18; % pRaf_au
-    %ylink{5} = 25; % double_RSK_au
-    %ylink{13} = 24; % single_RSK_au
-else
-    ylink{2} = 12; % pAkt_au_only_inhib
-    ylink{3} = 22; % pERK_au_only_inhib
-    ylink{4} = 21; % pMEK_au_only_inhib
-end;
+% ylink{1} = 22; % 'Mdm2_mRNA_fold'
+% ylink{2} = 20; % 'Wip1_mRNA_fold'
+% ylink{3} = 18; % 'p21_mRNA_fold'
+ylink{4} = 11; % 'pATM_au'
+ylink{5} = 9; % 'pChk1_au'
+ylink{6} = 13; % 'pChk2_au'
+ylink{7} = 15; % 'pDNAPK_au'
+ylink{8} = 17; % 'pp53_au'
+ylink{9} = 19; % 'tp21_au'
+% ylink{10} = nan; % 'tp53_au'
+
+% if(only_inhib == false)
+%     ylink{6} = 12; % pAkt_au
+%     ylink{8} = 22; % pERK_au
+%     ylink{10} = 21; % pMEK_au
+%     %ylink{11} = 1; % pMet_au
+%     %ylink{12} = 18; % pRaf_au
+%     %ylink{5} = 25; % double_RSK_au
+%     %ylink{13} = 24; % single_RSK_au
+% else
+%     ylink{2} = 12; % pAkt_au_only_inhib
+%     ylink{3} = 22; % pERK_au_only_inhib
+%     ylink{4} = 21; % pMEK_au_only_inhib
+% end;
 
 % ylink{4} = 18;
 % ylink{5} = 17;
 % ylink{6} = 11;
 
-condition_link = [22 23]; %Adjust for required condition combination
+condition_link = [1 2 3 4]; %Adjust for required condition combination
+% condition_link = [1 5 6 7]; %Adjust for required condition combination
+% condition_link = [1 8 9 10]; %Adjust for required condition combination
 
 %% plot
 
 figcount = 1;
 for jm=1:length(ar.model);
-    % colors = lines(length(ar.model.condition));
-    colors = zeros(length(ar.model.condition),3);
+    if(condition_link_bool)
+        colors = lines(length(ar.model.condition));
+    else
+        colors = zeros(length(ar.model.condition),3);
+    end
     
     % time course plots
     for j=find(~cellfun(@isempty, ylink))
@@ -151,14 +167,14 @@ for jm=1:length(ar.model);
         h = myRaiseFigure(jm, j, ar.model(jm).plot_merged(j).name, figcount);
         
         qsub = ~cellfun(@isempty, ctime);
-        nsub = sum(qsub);
-        [nrows, ncols] = arNtoColsAndRows(nsub);
-        
-        subcount = 1;
         if(condition_link_bool)
             qsub(:) = 0;
             qsub(condition_link(:)) = 1;
         end;
+        nsub = sum(qsub);
+        [nrows, ncols] = arNtoColsAndRows(nsub);
+            
+        subcount = 1;
         for jc = find(qsub);
             if(~condition_link_bool)
                 g = subplot(nrows, ncols, subcount);
@@ -186,6 +202,7 @@ for jm=1:length(ar.model);
             if(~condition_link_bool)
                 hold(g, 'off');
             end;
+            
             if(~condition_link_bool)
                 if(ar.config.fiterrors == 1)
                     titstr = sprintf('-2 log(L)_{%i} = %g', ndatas(jc), 2*ndatas(jc)*log(sqrt(2*pi)) + chi2s(jc));

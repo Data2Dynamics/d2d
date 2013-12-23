@@ -19,13 +19,13 @@ end
 pReset = ar.p;
 
 n = size(ps,1);
-ar.ps = ps;
-ar.ps_errors = [];
-ar.chi2s = nan(1,n);
-ar.chi2sconstr = nan(1,n);
-ar.timing = nan(1,n);
-ar.exitflag = nan(1,n);
-ar.fun_evals = nan(1,n);
+
+ps_errors = nan(n,length(ar.p));
+chi2s = nan(1,n);
+chi2sconstr = nan(1,n);
+timing = nan(1,n);
+exitflag = nan(1,n);
+fun_evals = nan(1,n);
 
 if(sum(ar.qFit==1)<6)
     figure(1)
@@ -35,26 +35,38 @@ end
 if(~silent) 
     arWaitbar(0); 
 end
-for j=1:n
+ar1 = ar;
+parfor j=1:n
+    ar2 = ar1;
     if(~silent) 
-        arWaitbar(j, n);
+        arWaitbar(n-j+1, n);
     end
-    ar.p = ps(j,:);
+    ar2.p = ps(j,:);
     try
-        arChi2(sensis, []);
-        ar.timing(j) = ar.stop;
-        ar.chi2s(j) = ar.chi2fit;
-        ar.chi2sconstr(j) = ar.chi2constr;
-        ar.exitflag(j) = 1;
+        tic;
+        ar2 = arChi2(ar2, sensis, []); 
+        timing(j) = ar2.stop;
+        chi2s(j) = ar2.chi2fit;
+        chi2sconstr(j) = ar2.chi2constr;
+        exitflag(j) = 1;
     catch exception
-        ar.timing(j) = ar.stop;
-        ar.ps_errors(end+1,:) = ar.p;
+        timing(j) = ar2.stop;
+        ps_errors(j,:) = ar2.p;
         if(~silent) 
             fprintf('feval #%i: %s\n', j, exception.message);
         end
-        ar.exitflag(j) = -1;
+        exitflag(j) = -1;
     end
 end
+
+ar.ps = ps;
+ar.ps_errors = ps_errors;
+ar.chi2s = chi2s;
+ar.chi2sconstr = chi2sconstr;
+ar.timing = timing;
+ar.exitflag = exitflag;
+ar.fun_evals = fun_evals;
+
 if(~silent) 
     fprintf('mean feval time: %fsec, %i/%i errors\n', mean(ar.timing(~isnan(ar.timing))), ...
         sum(ar.exitflag==-1),n);
