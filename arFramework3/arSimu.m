@@ -1,29 +1,49 @@
 % Simulate for current parameter settings
 %
-% arSimu(sensi,fine)
+% arSimu(sensi, fine, dynamics)
 %   sensi:          calculate sensitivities         [true]
 %   fine:           fine grid for plotting          [false]
 %   dynamics:       evaluate dynamics               [true]
+% 
+% or
+%
+% ar = arSimu(ar, sensi, fine, dynamics)
+%   ar:             d2d model/data structure
 
-function arSimu(sensi,fine,dynamics)  %#ok<INUSD>
+function varargout = arSimu(varargin)
 
-global ar
+if(nargin==0 || ~isstruct(varargin{1}))
+    global ar %#ok<TLEV>
+    qglobalar = true;
+else
+    ar = varargin{1};
+    if(nargin>1)
+        varargin = varargin(2:end);
+    else
+        varargin = {};
+    end
+    qglobalar = false;
+end
 
-if(~exist('sensi', 'var'))
+if(~isempty(varargin))
+    sensi = varargin{1};
+else
     sensi = true;
 end
-if(~exist('fine', 'var'))
+if(length(varargin)>1)
+    fine = varargin{2};
+else
     fine = false;
 end
-if(~exist('dynamics', 'var'))
+if(length(varargin)>2)
+    dynamics = varargin{3}; %#ok<NASGU>
+else
     dynamics = sum(ar.qDynamic == 1 & ar.qFit == 1) > 0 || ~sensi; %#ok<NASGU>
 end
 
 if(~isfield(ar,'p'))
-    fprintf('WARNING: forgot linking\n');
-    arLink;
+    fprintf('ERROR: forgot arLink\n');
 end
-
 if(~isfield(ar.config,'useParallel'))
     ar.config.useParallel = true;
 end
@@ -56,14 +76,9 @@ for m=1:length(ar.model)
     end
 end
 
-% if(~exist(ar.fkt, 'file'))
-%     fprintf('WARNING: file %s does not exist, recomplining...\n', ar.fkt);
-%     arWriteCFiles;
-% end
-
 % initialize fine sensitivities
 if(fine && sensi)
-    initFineSensis;
+    ar = initFineSensis(ar);
 end
 
 eval([ar.fkt '(ar, fine, ar.config.useSensis && sensi, dynamics);'])
@@ -104,11 +119,16 @@ if(fine && sensi && ar.config.useSensis)
     end
 end
 
+if(nargout>0 && ~qglobalar)
+    varargout{1} = ar;
+else
+    varargout = {};
+end
+
+
 
 % Initialize arrays for fine sensitivities with zeros
-function initFineSensis
-
-global ar
+function ar = initFineSensis(ar)
 
 for m = 1:length(ar.model)
     if(isfield(ar.model(m), 'data'))

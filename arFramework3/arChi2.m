@@ -3,24 +3,47 @@
 % arChi2(sensi, pTrial)
 %   sensi:          propagate sensitivities         [false]
 %   pTrial:         trial parameter of fitting
+% 
+% or
+%
+% ar = arChi2(ar, sensi, pTrial)
+%   ar:             d2d model/data structure
 
-function arChi2(sensi, pTrial)
+function varargout = arChi2(varargin)
 
-global ar
+if(nargin==0 || ~isstruct(varargin{1}))
+    global ar %#ok<TLEV>
+    qglobalar = true;
+else
+    ar = varargin{1};
+    if(nargin>1)
+        varargin = varargin(2:end);
+    else
+        varargin = {};
+    end
+    qglobalar = false;
+end
+
+if(~isempty(varargin))
+    sensi = varargin{1};
+else
+    sensi = false;
+end
+if(length(varargin)>1)
+    pTrial = varargin{2};
+    silent = true;
+else
+    silent = false;
+end
+
+if(exist('pTrial', 'var') && ~isempty(pTrial))
+	ar.p(ar.qFit==1) = pTrial;
+end
 
 if(~isfield(ar, 'fevals'))
     ar.fevals = 0; 
 end
 ar.fevals = ar.fevals + 1;
-
-if(~exist('sensi', 'var'))
-	sensi = false;
-end
-if(exist('pTrial', 'var') && ~isempty(pTrial))
-	ar.p(ar.qFit==1) = pTrial;
-end
-
-silent = nargin>1;
 
 ar.ndata = 0;
 ar.nprior = 0;
@@ -81,7 +104,11 @@ else
 end
 
 try
-    arSimu(sensi, ~isfield(ar.model(jm), 'data'));
+    if(qglobalar)
+        arSimu(sensi, ~isfield(ar.model(jm), 'data'));
+    else
+        ar = arSimu(ar, sensi, ~isfield(ar.model(jm), 'data'));
+    end
     has_error = false;
 catch error_id
     if(~silent)
@@ -411,7 +438,7 @@ if(sensi)
         ar.firstorderopt = nan;
     end
 end
-    
+
 if(~silent)
     if(ar.ndata>0)
         if(ar.config.fiterrors == 1)
@@ -459,3 +486,10 @@ if(isfield(ar.model, 'data') && isfield(ar,'res'))
         error('NaN in derivative of residuals: %i', sum(sum(isnan(ar.sres(:,ar.qFit==1)))));
     end
 end
+
+if(nargout>0 && ~qglobalar)
+    varargout{1} = ar;
+else
+    varargout = {};
+end
+
