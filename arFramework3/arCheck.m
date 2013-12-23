@@ -46,6 +46,9 @@ end
 % write sundials_config.h
 if(exist([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'],'file') == 0)
     fid = fopen([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'], 'W');
+    if(fid==-1)
+        error('could not write file %s!', [ar_path '/sundials-2.5.0/include/sundials/sundials_config.h']),
+    end
     fprintf(fid, '#define SUNDIALS_PACKAGE_VERSION "2.5.0"\n');
     fprintf(fid, '#define SUNDIALS_DOUBLE_PRECISION 1\n');
     fprintf(fid, '#define SUNDIALS_USE_GENERIC_MATH\n');
@@ -58,7 +61,7 @@ end
 
 if(ispc)
     if(exist('C:\Windows\pthreadGC2.dll','file')==0 || exist('C:\Windows\pthreadVC2.dll','file')==0)
-        fprintf(fid, 'Please copy content of %s to C:\\Windows\n', [ar_path '\pthreads-w32_2.9.1\dll\' mexext]);
+        fprintf('Please copy content of %s to C:\\Windows\n', [ar_path '\pthreads-w32_2.9.1\dll\' mexext]);
     end
 end
 
@@ -74,7 +77,10 @@ if exist('arInitUser.m','file')==0
 	while isempty(user)
 		user = input('Please enter your full name (e.g. John Doe)\n-> ','s');
 	end
-	fid = fopen( [ar_path '/arInitUser.m'],'w');
+	fid = fopen([ar_path '/arInitUser.m'],'w');
+    if(fid==-1)
+        error('could not write file %s!', [ar_path '/arInitUser.m']),
+    end
 	fprintf(fid,'%s\n','% initialize user settings');
 	fprintf(fid,'\n%s\n','function arInitUser');
 	fprintf(fid,'\n%s\n','global ar');
