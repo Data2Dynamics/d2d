@@ -36,6 +36,7 @@ if(~silent)
     arWaitbar(0); 
 end
 ar1 = ar;
+tic;
 parfor j=1:n
     ar2 = ar1;
     if(~silent) 
@@ -43,14 +44,13 @@ parfor j=1:n
     end
     ar2.p = ps(j,:);
     try
-        tic;
         ar2 = arChi2(ar2, sensis, []); 
-        timing(j) = ar2.stop;
+        timing(j) = ar2.stop/1e6;
         chi2s(j) = ar2.chi2fit;
         chi2sconstr(j) = ar2.chi2constr;
         exitflag(j) = 1;
     catch exception
-        timing(j) = ar2.stop;
+        timing(j) = ar2.stop/1e6;
         ps_errors(j,:) = ar2.p;
         if(~silent) 
             fprintf('feval #%i: %s\n', j, exception.message);
@@ -58,6 +58,7 @@ parfor j=1:n
         exitflag(j) = -1;
     end
 end
+toc;
 
 ar.ps = ps;
 ar.ps_errors = ps_errors;
