@@ -83,9 +83,6 @@ for m=1:length(ar.model)
                 % global checksum
                 checksum_global = addToCheckSum(ar.model(m).condition(cindex).fkt, checksum_global);
                 
-                doskip = ~forceParsing && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(cindex).fkt '.c'],'file');
-                arParseCondition(m, cindex, doskip);
-                
                 % link data to condition
                 ar.model(m).data(d).cLink = length(ar.model(m).condition);
                 
@@ -113,11 +110,44 @@ for m=1:length(ar.model)
             end
         end
         
-        % parse data
-        for d=1:length(ar.model(m).data)
-            doskip = ~forceParsing && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.c'],'file');
-            arParseOBS(m, d, doskip);
+        % skip parse conditions
+        doskip = nan(1,length(ar.model(m).condition));
+        for c=1:length(ar.model(m).condition)
+            doskip(c) = ~forceParsing && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.c'],'file');
         end
+        
+        % parse conditions
+        config = ar.config;
+        model.name = ar.model(m).name;
+        model.fv = ar.model(m).fv;
+        model.px0 = ar.model(m).px0;
+        model.sym = ar.model(m).sym;
+        model.t = ar.model(m).t;
+        model.x = ar.model(m).x;
+        model.u = ar.model(m).u;
+        model.us = ar.model(m).us;
+        model.xs = ar.model(m).xs;
+        model.vs = ar.model(m).vs;
+        model.N = ar.model(m).N;
+        condition = ar.model(m).condition;
+        parfor c=1:length(ar.model(m).condition)
+             condition_new(c) = arParseCondition(config, model, condition(c), m, c, doskip(c));
+        end
+        ar.model(m).condition = condition_new;
+        
+        % skip parse data
+        doskip = nan(1,length(ar.model(m).data));
+        for d=1:length(ar.model(m).data)            
+            doskip(d) = ~forceParsing && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.c'],'file');
+        end
+        
+        % parse data
+        data = ar.model(m).data;
+        parfor d=1:length(ar.model(m).data)
+            c = data(d).cLink;
+            data_new(d) = arParseOBS(config, model, condition_new(c), data(d), m, c, d, doskip(d));
+        end
+        ar.model(m).data = data_new;
     else
         qdynparas = ismember(ar.model(m).p, ar.model(m).px) | ... %R2013a compatible
             ismember(ar.model(m).p, ar.model(m).pu); %R2013a compatible
@@ -130,18 +160,15 @@ for m=1:length(ar.model)
         checksum_cond = addToCheckSum(ar.model(m).cLink, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).fp, checksum_cond);
         
-        % append new condition
-        cindex = length(ar.model(m).condition) + 1;
+        % append condition
+        cindex = 1;
         
         ar.model(m).condition(cindex).status = 0;
-        
         ar.model(m).condition(cindex).fu = ar.model(m).fu;
         ar.model(m).condition(cindex).fp = ar.model(m).fp(qdynparas);
         ar.model(m).condition(cindex).p = ar.model(m).p(qdynparas);
-        
         ar.model(m).condition(cindex).checkstr = getCheckStr(checksum_cond);
         ar.model(m).condition(cindex).fkt = [ar.model(m).name '_' ar.model(m).condition(cindex).checkstr];
-        
         ar.model(m).condition(cindex).dLink = [];
         
         % global checksum
@@ -151,8 +178,30 @@ for m=1:length(ar.model)
             checksum_global = addToCheckSum(ar.model(m).condition(cindex).fkt, checksum_global);
         end
         
-        doskip = ~forceParsing && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(cindex).fkt '.c'],'file');
-        arParseCondition(m, cindex, doskip);
+        % skip parse conditions
+        doskip = nan(1,length(ar.model(m).condition));
+        for c=1:length(ar.model(m).condition)
+            doskip(c) = ~forceParsing && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.c'],'file');
+        end
+        
+        % parse conditions
+        config = ar.config;
+        model.name = ar.model(m).name;
+        model.fv = ar.model(m).fv;
+        model.px0 = ar.model(m).px0;
+        model.sym = ar.model(m).sym;
+        model.t = ar.model(m).t;
+        model.x = ar.model(m).x;
+        model.u = ar.model(m).u;
+        model.us = ar.model(m).us;
+        model.xs = ar.model(m).xs;
+        model.vs = ar.model(m).vs;
+        model.N = ar.model(m).N;
+        condition = ar.model(m).condition;
+        parfor c=1:length(ar.model(m).condition)
+             condition_new(c) = arParseCondition(config, model, condition(c), m, c, doskip(c));
+        end
+        ar.model(m).condition = condition_new;
         
         % plot setup
         if(~isfield(ar.model(m), 'plot'))
@@ -270,194 +319,208 @@ fprintf('done\n');
 
 
 % Condition
-function arParseCondition(m, c, doskip)
+function condition = arParseCondition(config, model, condition, m, c, doskip)
 
-global ar
-
-fprintf('parsing condition m%i c%i, %s (%s)...', m, c, ar.model(m).name, ar.model(m).condition(c).checkstr);
+fprintf('parsing condition m%i c%i, %s (%s)...', m, c, model.name, condition.checkstr);
 
 % hard code conditions
-ar.model(m).condition(c).sym.p = sym(ar.model(m).condition(c).p);
-ar.model(m).condition(c).sym.fp = sym(ar.model(m).condition(c).fp);
-ar.model(m).condition(c).sym.fpx0 = sym(ar.model(m).px0);
-ar.model(m).condition(c).sym.fpx0 = mysubs(ar.model(m).condition(c).sym.fpx0, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.fp);
-ar.model(m).condition(c).sym.fv = sym(ar.model(m).fv);
-ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.fp);
-ar.model(m).condition(c).sym.fu = sym(ar.model(m).condition(c).fu);
-ar.model(m).condition(c).sym.fu = mysubs(ar.model(m).condition(c).sym.fu, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.fp);
-ar.model(m).condition(c).sym.C = mysubs(ar.model(m).sym.C, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.fp);
+condition.sym.p = sym(condition.p);
+condition.sym.fp = sym(condition.fp);
+condition.sym.fpx0 = sym(model.px0);
+condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.fp);
+condition.sym.fv = sym(model.fv);
+condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.fp);
+condition.sym.fu = sym(condition.fu);
+condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.fp);
+condition.sym.C = mysubs(model.sym.C, condition.sym.p, condition.sym.fp);
 
 % predictor
-ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, sym(ar.model(m).t), sym('t'));
-ar.model(m).condition(c).sym.fu = mysubs(ar.model(m).condition(c).sym.fu, sym(ar.model(m).t), sym('t'));
+condition.sym.fv = mysubs(condition.sym.fv, sym(model.t), sym('t'));
+condition.sym.fu = mysubs(condition.sym.fu, sym(model.t), sym('t'));
 
 % remaining initial conditions
-qinitial = ismember(ar.model(m).condition(c).p, ar.model(m).px0); %R2013a compatible
+qinitial = ismember(condition.p, model.px0); %R2013a compatible
 
-varlist = cellfun(@symvar, ar.model(m).condition(c).fp(qinitial), 'UniformOutput', false);
-ar.model(m).condition(c).px0 = union(vertcat(varlist{:}), [])'; %R2013a compatible
+varlist = cellfun(@symvar, condition.fp(qinitial), 'UniformOutput', false);
+condition.px0 = union(vertcat(varlist{:}), [])'; %R2013a compatible
 
 % remaining parameters
-varlist = cellfun(@symvar, ar.model(m).condition(c).fp, 'UniformOutput', false);
-ar.model(m).condition(c).pold = ar.model(m).condition(c).p;
-ar.model(m).condition(c).p = setdiff(setdiff(union(vertcat(varlist{:}), [])', ar.model(m).x), ar.model(m).u); %R2013a compatible
+varlist = cellfun(@symvar, condition.fp, 'UniformOutput', false);
+condition.pold = condition.p;
+condition.p = setdiff(setdiff(union(vertcat(varlist{:}), [])', model.x), model.u); %R2013a compatible
 
 if(doskip)
     fprintf('skipped\n');
+    
+    condition.ps = {};
+    condition.qfu_nonzero = [];
+    condition.qdvdx_nonzero = [];
+    condition.qdvdu_nonzero = [];
+    condition.qdvdp_nonzero = [];
+    condition.dvdx = {};
+    condition.dvdu = {};
+    condition.dvdp = {};
+    condition.qdfxdx_nonzero = [];
+    condition.dfxdx = {};
+    condition.su = {};
+    condition.sx = {};
+    condition.qfsv_nonzero = [];
+    condition.sv = {};
+    
     return;
 end
 
 % make short strings
-ar.model(m).condition(c).ps = {};
-for j=1:length(ar.model(m).condition(c).p)
-    ar.model(m).condition(c).ps{j} = sprintf('p[%i]',j);
+condition.ps = {};
+for j=1:length(condition.p)
+    condition.ps{j} = sprintf('p[%i]',j);
 end
-fprintf('p=%i, ', length(ar.model(m).condition(c).p));
+fprintf('p=%i, ', length(condition.p));
 
 % make syms
-ar.model(m).condition(c).sym.p = sym(ar.model(m).condition(c).p);
-ar.model(m).condition(c).sym.ps = sym(ar.model(m).condition(c).ps);
-ar.model(m).condition(c).sym.px0s = mysubs(sym(ar.model(m).condition(c).px0), ...
-    ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
+condition.sym.p = sym(condition.p);
+condition.sym.ps = sym(condition.ps);
+condition.sym.px0s = mysubs(sym(condition.px0), ...
+    condition.sym.p, condition.sym.ps);
 
 % make syms
-ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).sym.x, ar.model(m).sym.xs);
-ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).sym.u, ar.model(m).sym.us);
+condition.sym.fv = mysubs(condition.sym.fv, model.sym.x, model.sym.xs);
+condition.sym.fv = mysubs(condition.sym.fv, model.sym.u, model.sym.us);
 
-ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
-ar.model(m).condition(c).sym.fu = mysubs(ar.model(m).condition(c).sym.fu, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
-ar.model(m).condition(c).sym.fpx0 = mysubs(ar.model(m).condition(c).sym.fpx0, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
+condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.ps);
+condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.ps);
+condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.ps);
 
 % remove zero inputs
-ar.model(m).condition(c).qfu_nonzero = logical(ar.model(m).condition(c).sym.fu ~= 0);
-if(~isempty(ar.model(m).sym.us))
-    ar.model(m).condition(c).sym.fv = mysubs(ar.model(m).condition(c).sym.fv, ar.model(m).sym.us(~ar.model(m).condition(c).qfu_nonzero), ...
-        sym(zeros(1,sum(~ar.model(m).condition(c).qfu_nonzero))));
+condition.qfu_nonzero = logical(condition.sym.fu ~= 0);
+if(~isempty(model.sym.us))
+    condition.sym.fv = mysubs(condition.sym.fv, model.sym.us(~condition.qfu_nonzero), ...
+        sym(zeros(1,sum(~condition.qfu_nonzero))));
 end
 
 % derivatives
-if(~isempty(ar.model(m).condition(c).sym.fv))
-    ar.model(m).condition(c).sym.dfvdx = jacobian(ar.model(m).condition(c).sym.fv, ar.model(m).sym.xs);
-    if(~isempty(ar.model(m).sym.us))
-        ar.model(m).condition(c).sym.dfvdu = jacobian(ar.model(m).condition(c).sym.fv, ar.model(m).sym.us);
+if(~isempty(condition.sym.fv))
+    condition.sym.dfvdx = jacobian(condition.sym.fv, model.sym.xs);
+    if(~isempty(model.sym.us))
+        condition.sym.dfvdu = jacobian(condition.sym.fv, model.sym.us);
     else
-        ar.model(m).condition(c).sym.dfvdu = sym(ones(length(ar.model(m).condition(c).sym.fv), 0));
+        condition.sym.dfvdu = sym(ones(length(condition.sym.fv), 0));
     end
-    ar.model(m).condition(c).sym.dfvdp = jacobian(ar.model(m).condition(c).sym.fv, ar.model(m).condition(c).sym.ps);
+    condition.sym.dfvdp = jacobian(condition.sym.fv, condition.sym.ps);
 else
-    ar.model(m).condition(c).sym.dfvdx = sym(ones(0, length(ar.model(m).sym.xs)));
-    ar.model(m).condition(c).sym.dfvdu = sym(ones(0, length(ar.model(m).sym.us)));
-    ar.model(m).condition(c).sym.dfvdp = sym(ones(0, length(ar.model(m).condition(c).sym.ps)));
+    condition.sym.dfvdx = sym(ones(0, length(model.sym.xs)));
+    condition.sym.dfvdu = sym(ones(0, length(model.sym.us)));
+    condition.sym.dfvdp = sym(ones(0, length(condition.sym.ps)));
 end
 
 % flux signs
-ar.model(m).condition(c).qdvdx_nonzero = logical(ar.model(m).condition(c).sym.dfvdx~=0);
-ar.model(m).condition(c).qdvdu_nonzero = logical(ar.model(m).condition(c).sym.dfvdu~=0);
-ar.model(m).condition(c).qdvdp_nonzero = logical(ar.model(m).condition(c).sym.dfvdp~=0);
+condition.qdvdx_nonzero = logical(condition.sym.dfvdx~=0);
+condition.qdvdu_nonzero = logical(condition.sym.dfvdu~=0);
+condition.qdvdp_nonzero = logical(condition.sym.dfvdp~=0);
 
 % short terms
-ar.model(m).condition(c).dvdx = cell(length(ar.model(m).vs), length(ar.model(m).xs));
-for j=1:length(ar.model(m).vs)
-    for i=1:length(ar.model(m).xs)
-        if(ar.model(m).condition(c).qdvdx_nonzero(j,i))
-            ar.model(m).condition(c).dvdx{j,i} = sprintf('dvdx[%i]', j + (i-1)*length(ar.model(m).vs));
+condition.dvdx = cell(length(model.vs), length(model.xs));
+for j=1:length(model.vs)
+    for i=1:length(model.xs)
+        if(condition.qdvdx_nonzero(j,i))
+            condition.dvdx{j,i} = sprintf('dvdx[%i]', j + (i-1)*length(model.vs));
         else
-            ar.model(m).condition(c).dvdx{j,i} = '0';
+            condition.dvdx{j,i} = '0';
         end
     end
 end
-ar.model(m).condition(c).sym.dvdx = sym(ar.model(m).condition(c).dvdx);
-fprintf('dvdx=%i, ', sum(ar.model(m).condition(c).qdvdx_nonzero(:)));
+condition.sym.dvdx = sym(condition.dvdx);
+fprintf('dvdx=%i, ', sum(condition.qdvdx_nonzero(:)));
 
-ar.model(m).condition(c).dvdu = cell(length(ar.model(m).vs), length(ar.model(m).us));
-for j=1:length(ar.model(m).vs)
-    for i=1:length(ar.model(m).us)
-        if(ar.model(m).condition(c).qdvdu_nonzero(j,i))
-            ar.model(m).condition(c).dvdu{j,i} = sprintf('dvdu[%i]', j + (i-1)*length(ar.model(m).vs));
+condition.dvdu = cell(length(model.vs), length(model.us));
+for j=1:length(model.vs)
+    for i=1:length(model.us)
+        if(condition.qdvdu_nonzero(j,i))
+            condition.dvdu{j,i} = sprintf('dvdu[%i]', j + (i-1)*length(model.vs));
         else
-            ar.model(m).condition(c).dvdu{j,i} = '0';
+            condition.dvdu{j,i} = '0';
         end
     end
 end
-ar.model(m).condition(c).sym.dvdu = sym(ar.model(m).condition(c).dvdu);
-fprintf('dvdu=%i, ', sum(ar.model(m).condition(c).qdvdu_nonzero(:)));
+condition.sym.dvdu = sym(condition.dvdu);
+fprintf('dvdu=%i, ', sum(condition.qdvdu_nonzero(:)));
 
-ar.model(m).condition(c).dvdp = cell(length(ar.model(m).vs), length(ar.model(m).condition(c).ps));
-for j=1:length(ar.model(m).vs)
-    for i=1:length(ar.model(m).condition(c).ps)
-        if(ar.model(m).condition(c).qdvdp_nonzero(j,i))
-            ar.model(m).condition(c).dvdp{j,i} = sprintf('dvdp[%i]', j + (i-1)*length(ar.model(m).vs));
+condition.dvdp = cell(length(model.vs), length(condition.ps));
+for j=1:length(model.vs)
+    for i=1:length(condition.ps)
+        if(condition.qdvdp_nonzero(j,i))
+            condition.dvdp{j,i} = sprintf('dvdp[%i]', j + (i-1)*length(model.vs));
         else
-            ar.model(m).condition(c).dvdp{j,i} = '0';
+            condition.dvdp{j,i} = '0';
         end
     end
 end
-ar.model(m).condition(c).sym.dvdp = sym(ar.model(m).condition(c).dvdp);
-fprintf('dvdp=%i, ', sum(ar.model(m).condition(c).qdvdp_nonzero(:)));
+condition.sym.dvdp = sym(condition.dvdp);
+fprintf('dvdp=%i, ', sum(condition.qdvdp_nonzero(:)));
 
 % make equations
-ar.model(m).condition(c).sym.C = mysubs(ar.model(m).condition(c).sym.C, ar.model(m).condition(c).sym.p, ar.model(m).condition(c).sym.ps);
-ar.model(m).condition(c).sym.fx = (ar.model(m).N .* ar.model(m).condition(c).sym.C) * transpose(ar.model(m).sym.vs);
+condition.sym.C = mysubs(condition.sym.C, condition.sym.p, condition.sym.ps);
+condition.sym.fx = (model.N .* condition.sym.C) * transpose(model.sym.vs);
 
 % Jacobian dfxdx
-if(ar.config.useJacobian)
-    ar.model(m).condition(c).sym.dfxdx = (ar.model(m).N .* ar.model(m).condition(c).sym.C) * ar.model(m).condition(c).sym.dvdx;
-    ar.model(m).condition(c).qdfxdx_nonzero = logical(ar.model(m).condition(c).sym.dfxdx~=0);
-    for j=1:length(ar.model(m).xs)
-        for i=1:length(ar.model(m).xs)
-            if(ar.model(m).condition(c).qdfxdx_nonzero(j,i))
-                ar.model(m).condition(c).dfxdx{j,i} = sprintf('dfxdx[%i]', j + (i-1)*length(ar.model(m).xs));
+if(config.useJacobian)
+    condition.sym.dfxdx = (model.N .* condition.sym.C) * condition.sym.dvdx;
+    condition.qdfxdx_nonzero = logical(condition.sym.dfxdx~=0);
+    for j=1:length(model.xs)
+        for i=1:length(model.xs)
+            if(condition.qdfxdx_nonzero(j,i))
+                condition.dfxdx{j,i} = sprintf('dfxdx[%i]', j + (i-1)*length(model.xs));
             else
-                ar.model(m).condition(c).dfxdx{j,i} = '0';
+                condition.dfxdx{j,i} = '0';
             end
         end
     end
-    fprintf('dfxdx=%i, ', sum(ar.model(m).condition(c).qdfxdx_nonzero(:)));
+    fprintf('dfxdx=%i, ', sum(condition.qdfxdx_nonzero(:)));
 end
 
 % sx sensitivities
-if(ar.config.useSensis)
+if(config.useSensis)
 	% su
-    ar.model(m).condition(c).su = cell(length(ar.model(m).us), length(ar.model(m).condition(c).ps));
-    for j=1:length(ar.model(m).us)
-        for i=1:length(ar.model(m).condition(c).ps)
-            if(ar.model(m).condition(c).qfu_nonzero(j))
-                ar.model(m).condition(c).su{j,i} = sprintf('su[%i]', j + (i-1)*length(ar.model(m).us));
+    condition.su = cell(length(model.us), length(condition.ps));
+    for j=1:length(model.us)
+        for i=1:length(condition.ps)
+            if(condition.qfu_nonzero(j))
+                condition.su{j,i} = sprintf('su[%i]', j + (i-1)*length(model.us));
             else
-                ar.model(m).condition(c).su{j,i} = '0';
+                condition.su{j,i} = '0';
             end
         end
     end
-    ar.model(m).condition(c).sym.su = sym(ar.model(m).condition(c).su);
-    fprintf('su=%i, ', length(ar.model(m).condition(c).ps)*sum(ar.model(m).condition(c).qfu_nonzero(:)));
+    condition.sym.su = sym(condition.su);
+    fprintf('su=%i, ', length(condition.ps)*sum(condition.qfu_nonzero(:)));
     
     % input derivatives 
-    if(~isempty(ar.model(m).condition(c).sym.ps))
-        if(~isempty(ar.model(m).condition(c).sym.fu))
-        ar.model(m).condition(c).sym.dfudp = ...
-            jacobian(ar.model(m).condition(c).sym.fu, ar.model(m).condition(c).sym.ps);
+    if(~isempty(condition.sym.ps))
+        if(~isempty(condition.sym.fu))
+        condition.sym.dfudp = ...
+            jacobian(condition.sym.fu, condition.sym.ps);
         else
-            ar.model(m).condition(c).sym.dfudp = sym(ones(0,length(ar.model(m).condition(c).sym.ps)));
+            condition.sym.dfudp = sym(ones(0,length(condition.sym.ps)));
         end
         % derivatives of step1 (DISABLED)
-        for j=1:length(ar.model(m).u)
-            if(strfind(ar.model(m).condition(c).fu{j}, 'step1('))
-                ar.model(m).condition(c).sym.dfudp(j,:) = 0;
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'step1('))
+                condition.sym.dfudp(j,:) = 0;
             end
         end
         
         % derivatives of step2 (DISABLED)
-        for j=1:length(ar.model(m).u)
-            if(strfind(ar.model(m).condition(c).fu{j}, 'step2('))
-                ar.model(m).condition(c).sym.dfudp(j,:) = 0;
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'step2('))
+                condition.sym.dfudp(j,:) = 0;
             end
         end
         
         % derivatives of spline3
-        for j=1:length(ar.model(m).u)
-            if(strfind(ar.model(m).condition(c).fu{j}, 'spline3('))
-                for j2=1:length(ar.model(m).condition(c).sym.dfudp(j,:))
-                    ustr = char(ar.model(m).condition(c).sym.dfudp(j,j2));
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'spline3('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
                     if(strfind(ustr, 'D([3], spline3)('))
                         ustr = strrep(ustr, 'D([3], spline3)(', 'Dspline3(');
                         ustr = strrep(ustr, ')', ', 1)');
@@ -468,16 +531,16 @@ if(ar.config.useSensis)
                         ustr = strrep(ustr, 'D([7], spline3)(', 'Dspline3(');
                         ustr = strrep(ustr, ')', ', 3)');
                     end
-                    ar.model(m).condition(c).sym.dfudp(j,j2) = sym(ustr);
+                    condition.sym.dfudp(j,j2) = sym(ustr);
                 end
             end
         end
         
         % derivatives of spline_pos3
-        for j=1:length(ar.model(m).u)
-            if(strfind(ar.model(m).condition(c).fu{j}, 'spline_pos3('))
-                for j2=1:length(ar.model(m).condition(c).sym.dfudp(j,:))
-                    ustr = char(ar.model(m).condition(c).sym.dfudp(j,j2));
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'spline_pos3('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
                     if(strfind(ustr, 'D([3], spline_pos3)('))
                         ustr = strrep(ustr, 'D([3], spline_pos3)(', 'Dspline_pos3(');
                         ustr = strrep(ustr, ')', ', 1)');
@@ -488,16 +551,16 @@ if(ar.config.useSensis)
                         ustr = strrep(ustr, 'D([7], spline_pos3)(', 'Dspline_pos3(');
                         ustr = strrep(ustr, ')', ', 3)');
                     end
-                    ar.model(m).condition(c).sym.dfudp(j,j2) = sym(ustr);
+                    condition.sym.dfudp(j,j2) = sym(ustr);
                 end
             end
         end
         
         % derivatives of spline4
-        for j=1:length(ar.model(m).u)
-            if(strfind(ar.model(m).condition(c).fu{j}, 'spline4('))
-                for j2=1:length(ar.model(m).condition(c).sym.dfudp(j,:))
-                    ustr = char(ar.model(m).condition(c).sym.dfudp(j,j2));
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'spline4('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
                     if(strfind(ustr, 'D([3], spline4)('))
                         ustr = strrep(ustr, 'D([3], spline4)(', 'Dspline4(');
                         ustr = strrep(ustr, ')', ', 1)');
@@ -511,16 +574,16 @@ if(ar.config.useSensis)
                         ustr = strrep(ustr, 'D([9], spline4)(', 'Dspline4(');
                         ustr = strrep(ustr, ')', ', 4)');
                     end
-                    ar.model(m).condition(c).sym.dfudp(j,j2) = sym(ustr);
+                    condition.sym.dfudp(j,j2) = sym(ustr);
                 end
             end
         end
         
         % derivatives of spline_pos4
-        for j=1:length(ar.model(m).u)
-            if(strfind(ar.model(m).condition(c).fu{j}, 'spline_pos4('))
-                for j2=1:length(ar.model(m).condition(c).sym.dfudp(j,:))
-                    ustr = char(ar.model(m).condition(c).sym.dfudp(j,j2));
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'spline_pos4('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
                     if(strfind(ustr, 'D([3], spline_pos4)('))
                         ustr = strrep(ustr, 'D([3], spline_pos4)(', 'Dspline_pos4(');
                         ustr = strrep(ustr, ')', ', 1)');
@@ -534,16 +597,16 @@ if(ar.config.useSensis)
                         ustr = strrep(ustr, 'D([9], spline_pos4)(', 'Dspline_pos4(');
                         ustr = strrep(ustr, ')', ', 4)');
                     end
-                    ar.model(m).condition(c).sym.dfudp(j,j2) = sym(ustr);
+                    condition.sym.dfudp(j,j2) = sym(ustr);
                 end
             end
         end
         
         % derivatives of spline5
-        for j=1:length(ar.model(m).u)
-            if(strfind(ar.model(m).condition(c).fu{j}, 'spline5('))
-                for j2=1:length(ar.model(m).condition(c).sym.dfudp(j,:))
-                    ustr = char(ar.model(m).condition(c).sym.dfudp(j,j2));
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'spline5('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
                     if(strfind(ustr, 'D([3], spline5)('))
                         ustr = strrep(ustr, 'D([3], spline5)(', 'Dspline5(');
                         ustr = strrep(ustr, ')', ', 1)');
@@ -560,16 +623,16 @@ if(ar.config.useSensis)
                         ustr = strrep(ustr, 'D([11], spline5)(', 'Dspline5(');
                         ustr = strrep(ustr, ')', ', 5)');
                     end
-                    ar.model(m).condition(c).sym.dfudp(j,j2) = sym(ustr);
+                    condition.sym.dfudp(j,j2) = sym(ustr);
                 end
             end
         end
         
         % derivatives of spline_pos5
-        for j=1:length(ar.model(m).u)
-            if(strfind(ar.model(m).condition(c).fu{j}, 'spline_pos5('))
-                for j2=1:length(ar.model(m).condition(c).sym.dfudp(j,:))
-                    ustr = char(ar.model(m).condition(c).sym.dfudp(j,j2));
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'spline_pos5('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
                     if(strfind(ustr, 'D([3], spline_pos5)('))
                         ustr = strrep(ustr, 'D([3], spline_pos5)(', 'Dspline_pos5(');
                         ustr = strrep(ustr, ')', ', 1)');
@@ -586,16 +649,16 @@ if(ar.config.useSensis)
                         ustr = strrep(ustr, 'D([11], spline_pos5)(', 'Dspline_pos5(');
                         ustr = strrep(ustr, ')', ', 5)');
                     end
-                    ar.model(m).condition(c).sym.dfudp(j,j2) = sym(ustr);
+                    condition.sym.dfudp(j,j2) = sym(ustr);
                 end
             end
         end
         
           % derivatives of spline10
-        for j=1:length(ar.model(m).u)
-            if(strfind(ar.model(m).condition(c).fu{j}, 'spline10('))
-                for j2=1:length(ar.model(m).condition(c).sym.dfudp(j,:))
-                    ustr = char(ar.model(m).condition(c).sym.dfudp(j,j2));
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'spline10('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
                     if(strfind(ustr, 'D([3], spline10)('))
                         ustr = strrep(ustr, 'D([3], spline10)(', 'Dspline10(');
                         ustr = strrep(ustr, ')', ', 1)');
@@ -627,16 +690,16 @@ if(ar.config.useSensis)
                         ustr = strrep(ustr, 'D([21], spline10)(', 'Dspline10(');
                         ustr = strrep(ustr, ')', ', 10)');
                     end
-                    ar.model(m).condition(c).sym.dfudp(j,j2) = sym(ustr);
+                    condition.sym.dfudp(j,j2) = sym(ustr);
                 end
             end
         end
         
         % derivatives of spline_pos10
-        for j=1:length(ar.model(m).u)
-            if(strfind(ar.model(m).condition(c).fu{j}, 'spline_pos10('))
-                for j2=1:length(ar.model(m).condition(c).sym.dfudp(j,:))
-                    ustr = char(ar.model(m).condition(c).sym.dfudp(j,j2));
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'spline_pos10('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
                     if(strfind(ustr, 'D([3], spline_pos10)('))
                         ustr = strrep(ustr, 'D([3], spline_pos10)(', 'Dspline_pos10(');
                         ustr = strrep(ustr, ')', ', 1)');
@@ -668,57 +731,57 @@ if(ar.config.useSensis)
                         ustr = strrep(ustr, 'D([21], spline_pos10)(', 'Dspline_pos10(');
                         ustr = strrep(ustr, ')', ', 10)');
                     end
-                    ar.model(m).condition(c).sym.dfudp(j,j2) = sym(ustr);
+                    condition.sym.dfudp(j,j2) = sym(ustr);
                 end
             end
         end 
     end
     
 	% sx
-    ar.model(m).condition(c).sx = cell(length(ar.model(m).xs), length(ar.model(m).condition(c).ps));
-    for j=1:length(ar.model(m).xs)
-        for i=1:length(ar.model(m).condition(c).ps)
-            ar.model(m).condition(c).sx{j,i} = sprintf('sx[%i]', j);
+    condition.sx = cell(length(model.xs), length(condition.ps));
+    for j=1:length(model.xs)
+        for i=1:length(condition.ps)
+            condition.sx{j,i} = sprintf('sx[%i]', j);
         end
     end
-	ar.model(m).condition(c).sym.sx = sym(ar.model(m).condition(c).sx);
+	condition.sym.sx = sym(condition.sx);
     
-    ar.model(m).condition(c).sym.fsv = ar.model(m).condition(c).sym.dvdx * ar.model(m).condition(c).sym.sx + ...
-        ar.model(m).condition(c).sym.dvdu * ar.model(m).condition(c).sym.su + ar.model(m).condition(c).sym.dvdp;
+    condition.sym.fsv = condition.sym.dvdx * condition.sym.sx + ...
+        condition.sym.dvdu * condition.sym.su + condition.sym.dvdp;
     
 	% sv
-    ar.model(m).condition(c).qfsv_nonzero = logical(ar.model(m).condition(c).sym.fsv ~= 0);
-    ar.model(m).condition(c).sv = cell(length(ar.model(m).vs), length(ar.model(m).condition(c).ps));
-    for j=1:length(ar.model(m).vs)
-        for i=1:length(ar.model(m).condition(c).ps)
-            if(ar.model(m).condition(c).qfsv_nonzero(j,i))
-                ar.model(m).condition(c).sv{j,i} = sprintf('sv[%i]', j);
+    condition.qfsv_nonzero = logical(condition.sym.fsv ~= 0);
+    condition.sv = cell(length(model.vs), length(condition.ps));
+    for j=1:length(model.vs)
+        for i=1:length(condition.ps)
+            if(condition.qfsv_nonzero(j,i))
+                condition.sv{j,i} = sprintf('sv[%i]', j);
             else
-                ar.model(m).condition(c).sv{j,i} = '0';
+                condition.sv{j,i} = '0';
             end
         end
     end
-    ar.model(m).condition(c).sym.sv = sym(ar.model(m).condition(c).sv);
-    fprintf('sv=%i, ', sum(ar.model(m).condition(c).qfsv_nonzero(:)));
+    condition.sym.sv = sym(condition.sv);
+    fprintf('sv=%i, ', sum(condition.qfsv_nonzero(:)));
     
-    if(ar.config.useSensiRHS)
-        ar.model(m).condition(c).sym.fsx = (ar.model(m).N .* ar.model(m).condition(c).sym.C) * ar.model(m).condition(c).sym.sv;
-        fprintf('sx=%i... ', numel(ar.model(m).condition(c).sym.fsx));
+    if(config.useSensiRHS)
+        condition.sym.fsx = (model.N .* condition.sym.C) * condition.sym.sv;
+        fprintf('sx=%i... ', numel(condition.sym.fsx));
     else
         fprintf('sx=skipped ');
     end
     
     % sx initials
-    if(~isempty(ar.model(m).condition(c).sym.fpx0))
-        ar.model(m).condition(c).sym.fsx0 = jacobian(ar.model(m).condition(c).sym.fpx0, ar.model(m).condition(c).sym.ps);
+    if(~isempty(condition.sym.fpx0))
+        condition.sym.fsx0 = jacobian(condition.sym.fpx0, condition.sym.ps);
     else
-        ar.model(m).condition(c).sym.fsx0 = sym(ones(0, length(ar.model(m).condition(c).sym.ps)));
+        condition.sym.fsx0 = sym(ones(0, length(condition.sym.ps)));
     end
     
     % steady state sensitivities
-    ar.model(m).condition(c).sym.dfxdp = (ar.model(m).N .* ar.model(m).condition(c).sym.C) * (ar.model(m).condition(c).sym.dvdp + ...
-        ar.model(m).condition(c).sym.dvdx*ar.model(m).condition(c).sym.fsx0 + ...
-        ar.model(m).condition(c).sym.dvdu * ar.model(m).condition(c).sym.dfudp);
+    condition.sym.dfxdp = (model.N .* condition.sym.C) * (condition.sym.dvdp + ...
+        condition.sym.dvdx*condition.sym.fsx0 + ...
+        condition.sym.dvdu * condition.sym.dfudp);
 end
 
 fprintf('done\n');
@@ -726,223 +789,230 @@ fprintf('done\n');
 
 
 % OBS
-function arParseOBS(m, d, doskip)
-global ar
+function data = arParseOBS(config, model, condition, data, m, c, d, doskip)
 
-c = ar.model(m).data(d).cLink;
-fprintf('parsing data m%i d%i -> c%i, %s (%s)...', m, d, c, ar.model(m).data(d).name, ar.model(m).data(d).checkstr);
+fprintf('parsing data m%i d%i -> c%i, %s (%s)...', m, d, c, data.name, data.checkstr);
 
 % hard code conditions
-ar.model(m).data(d).sym.p = sym(ar.model(m).data(d).p);
-ar.model(m).data(d).sym.fp = sym(ar.model(m).data(d).fp);
-ar.model(m).data(d).sym.fy = sym(ar.model(m).data(d).fy);
-ar.model(m).data(d).sym.fy = mysubs(ar.model(m).data(d).sym.fy, ar.model(m).data(d).sym.p, ar.model(m).data(d).sym.fp);
-ar.model(m).data(d).sym.fystd = sym(ar.model(m).data(d).fystd);
-ar.model(m).data(d).sym.fystd = mysubs(ar.model(m).data(d).sym.fystd, ar.model(m).data(d).sym.p, ar.model(m).data(d).sym.fp);
+data.sym.p = sym(data.p);
+data.sym.fp = sym(data.fp);
+data.sym.fy = sym(data.fy);
+data.sym.fy = mysubs(data.sym.fy, data.sym.p, data.sym.fp);
+data.sym.fystd = sym(data.fystd);
+data.sym.fystd = mysubs(data.sym.fystd, data.sym.p, data.sym.fp);
 
-ar.model(m).data(d).sym.fu = sym(ar.model(m).condition(c).fu);
-ar.model(m).data(d).sym.fu = mysubs(ar.model(m).data(d).sym.fu, ar.model(m).data(d).sym.p, ar.model(m).data(d).sym.fp);
-ar.model(m).data(d).qfu_nonzero = logical(ar.model(m).data(d).sym.fu ~= 0);
+data.sym.fu = sym(condition.fu);
+data.sym.fu = mysubs(data.sym.fu, data.sym.p, data.sym.fp);
+data.qfu_nonzero = logical(data.sym.fu ~= 0);
 
 % predictor
-ar.model(m).data(d).sym.fu = mysubs(ar.model(m).data(d).sym.fu, sym(ar.model(m).t), sym('t'));
-ar.model(m).data(d).sym.fy = mysubs(ar.model(m).data(d).sym.fy, sym(ar.model(m).t), sym('t'));
-ar.model(m).data(d).sym.fystd = mysubs(ar.model(m).data(d).sym.fystd, sym(ar.model(m).t), sym('t'));
+data.sym.fu = mysubs(data.sym.fu, sym(model.t), sym('t'));
+data.sym.fy = mysubs(data.sym.fy, sym(model.t), sym('t'));
+data.sym.fystd = mysubs(data.sym.fystd, sym(model.t), sym('t'));
 
 % remaining parameters
-varlist = cellfun(@symvar, ar.model(m).data(d).fp, 'UniformOutput', false);
-ar.model(m).data(d).pold = ar.model(m).data(d).p;
-ar.model(m).data(d).p = setdiff(setdiff(union(vertcat(varlist{:}), [])', ar.model(m).x), ar.model(m).u); %R2013a compatible
+varlist = cellfun(@symvar, data.fp, 'UniformOutput', false);
+data.pold = data.p;
+data.p = setdiff(setdiff(union(vertcat(varlist{:}), [])', model.x), model.u); %R2013a compatible
 
 if(doskip)
     fprintf('skipped\n');
+    
+    data.ps = {};
+    data.ys = [];
+    data.qu_measured = [];
+    data.qx_measured = [];
+    data.dfydxnon0 = {};
+    data.sx = {};
+    data.sy = {};
+    
     return;
 end
 
 % make short strings
-for j=1:length(ar.model(m).data(d).p)
-    ar.model(m).data(d).ps{j} = sprintf('p[%i]',j);
+for j=1:length(data.p)
+    data.ps{j} = sprintf('p[%i]',j);
 end
-ar.model(m).data(d).ys = {};
-for j=1:length(ar.model(m).data(d).y)
-    ar.model(m).data(d).ys{j} = sprintf('y[%i]',j);
+data.ys = {};
+for j=1:length(data.y)
+    data.ys{j} = sprintf('y[%i]',j);
 end
-fprintf('y=%i, p=%i, ', length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+fprintf('y=%i, p=%i, ', length(data.y), length(data.p));
 
 % make syms
-ar.model(m).data(d).sym.p = sym(ar.model(m).data(d).p);
-ar.model(m).data(d).sym.ps = sym(ar.model(m).data(d).ps);
-ar.model(m).data(d).sym.y = sym(ar.model(m).data(d).y);
-ar.model(m).data(d).sym.ys = sym(ar.model(m).data(d).ys);
+data.sym.p = sym(data.p);
+data.sym.ps = sym(data.ps);
+data.sym.y = sym(data.y);
+data.sym.ys = sym(data.ys);
 
 % substitute
-ar.model(m).data(d).sym.fy = mysubs(ar.model(m).data(d).sym.fy, ...
-    ar.model(m).sym.x, ar.model(m).sym.xs);
-ar.model(m).data(d).sym.fy = mysubs(ar.model(m).data(d).sym.fy, ...
-    ar.model(m).sym.u, ar.model(m).sym.us);
-ar.model(m).data(d).sym.fy = mysubs(ar.model(m).data(d).sym.fy, ...
-    ar.model(m).data(d).sym.p, ar.model(m).data(d).sym.ps);
+data.sym.fy = mysubs(data.sym.fy, ...
+    model.sym.x, model.sym.xs);
+data.sym.fy = mysubs(data.sym.fy, ...
+    model.sym.u, model.sym.us);
+data.sym.fy = mysubs(data.sym.fy, ...
+    data.sym.p, data.sym.ps);
 
-ar.model(m).data(d).sym.fystd = mysubs(ar.model(m).data(d).sym.fystd, ...
-    ar.model(m).sym.x, ar.model(m).sym.xs);
-ar.model(m).data(d).sym.fystd = mysubs(ar.model(m).data(d).sym.fystd, ...
-    ar.model(m).sym.u, ar.model(m).sym.us);
-ar.model(m).data(d).sym.fystd = mysubs(ar.model(m).data(d).sym.fystd, ...
-    ar.model(m).data(d).sym.y, ar.model(m).data(d).sym.ys);
-ar.model(m).data(d).sym.fystd = mysubs(ar.model(m).data(d).sym.fystd, ...
-    ar.model(m).data(d).sym.p, ar.model(m).data(d).sym.ps);
+data.sym.fystd = mysubs(data.sym.fystd, ...
+    model.sym.x, model.sym.xs);
+data.sym.fystd = mysubs(data.sym.fystd, ...
+    model.sym.u, model.sym.us);
+data.sym.fystd = mysubs(data.sym.fystd, ...
+    data.sym.y, data.sym.ys);
+data.sym.fystd = mysubs(data.sym.fystd, ...
+    data.sym.p, data.sym.ps);
 
 % remove zero inputs
-% ar.model(m).data(d).sym.fy = mysubs(ar.model(m).data(d).sym.fy, ar.model(m).sym.us(~ar.model(m).condition(c).qfu_nonzero), ...
-%     sym(zeros(1,sum(~ar.model(m).condition(c).qfu_nonzero))));
-% ar.model(m).data(d).sym.fystd = mysubs(ar.model(m).data(d).sym.fystd, ar.model(m).sym.us(~ar.model(m).condition(c).qfu_nonzero), ...
-%     sym(zeros(1,sum(~ar.model(m).condition(c).qfu_nonzero))));
+% data.sym.fy = mysubs(data.sym.fy, model.sym.us(~condition.qfu_nonzero), ...
+%     sym(zeros(1,sum(~condition.qfu_nonzero))));
+% data.sym.fystd = mysubs(data.sym.fystd, model.sym.us(~condition.qfu_nonzero), ...
+%     sym(zeros(1,sum(~condition.qfu_nonzero))));
 
 % derivatives fy
-if(~isempty(ar.model(m).data(d).sym.fy))
-    if(~isempty(ar.model(m).sym.us))
-        ar.model(m).data(d).sym.dfydu = jacobian(ar.model(m).data(d).sym.fy, ar.model(m).sym.us);
+if(~isempty(data.sym.fy))
+    if(~isempty(model.sym.us))
+        data.sym.dfydu = jacobian(data.sym.fy, model.sym.us);
     else
-        ar.model(m).data(d).sym.dfydu = sym(ones(length(ar.model(m).data(d).y), 0));
+        data.sym.dfydu = sym(ones(length(data.y), 0));
     end
-    if(~isempty(ar.model(m).x))
-        ar.model(m).data(d).sym.dfydx = jacobian(ar.model(m).data(d).sym.fy, ar.model(m).sym.xs);
+    if(~isempty(model.x))
+        data.sym.dfydx = jacobian(data.sym.fy, model.sym.xs);
     else
-        ar.model(m).data(d).sym.dfydx = [];
+        data.sym.dfydx = [];
     end
-	ar.model(m).data(d).sym.dfydp = jacobian(ar.model(m).data(d).sym.fy, ar.model(m).data(d).sym.ps);
+	data.sym.dfydp = jacobian(data.sym.fy, data.sym.ps);
 else
-	ar.model(m).data(d).sym.dfydu = [];
-	ar.model(m).data(d).sym.dfydx = [];
-	ar.model(m).data(d).sym.dfydp = [];
+	data.sym.dfydu = [];
+	data.sym.dfydx = [];
+	data.sym.dfydp = [];
 end
 
 % what is measured ?
-ar.model(m).data(d).qu_measured = sum(logical(ar.model(m).data(d).sym.dfydu~=0),1)>0;
-ar.model(m).data(d).qx_measured = sum(logical(ar.model(m).data(d).sym.dfydx~=0),1)>0;
+data.qu_measured = sum(logical(data.sym.dfydu~=0),1)>0;
+data.qx_measured = sum(logical(data.sym.dfydx~=0),1)>0;
 
 % derivatives fystd
-if(~isempty(ar.model(m).data(d).sym.fystd))
-    if(~isempty(ar.model(m).sym.us))
-        ar.model(m).data(d).sym.dfystddu = jacobian(ar.model(m).data(d).sym.fystd, ar.model(m).sym.us);
+if(~isempty(data.sym.fystd))
+    if(~isempty(model.sym.us))
+        data.sym.dfystddu = jacobian(data.sym.fystd, model.sym.us);
     else
-        ar.model(m).data(d).sym.dfystddu = sym(ones(length(ar.model(m).data(d).y), 0));
+        data.sym.dfystddu = sym(ones(length(data.y), 0));
     end
-    if(~isempty(ar.model(m).x))
-        ar.model(m).data(d).sym.dfystddx = jacobian(ar.model(m).data(d).sym.fystd, ar.model(m).sym.xs);
+    if(~isempty(model.x))
+        data.sym.dfystddx = jacobian(data.sym.fystd, model.sym.xs);
     else
-        ar.model(m).data(d).sym.dfystddx = [];
+        data.sym.dfystddx = [];
     end
-    ar.model(m).data(d).sym.dfystddp = jacobian(ar.model(m).data(d).sym.fystd, ar.model(m).data(d).sym.ps);
-    ar.model(m).data(d).sym.dfystddy = jacobian(ar.model(m).data(d).sym.fystd, ar.model(m).data(d).sym.ys);
+    data.sym.dfystddp = jacobian(data.sym.fystd, data.sym.ps);
+    data.sym.dfystddy = jacobian(data.sym.fystd, data.sym.ys);
 else
-	ar.model(m).data(d).sym.dfystddp = [];
-	ar.model(m).data(d).sym.dfystddy = [];
-    ar.model(m).data(d).sym.dfystddx = [];
+	data.sym.dfystddp = [];
+	data.sym.dfystddy = [];
+    data.sym.dfystddx = [];
 end
 
 % observed directly and exclusively
-ar.model(m).data(d).dfydxnon0 = logical(ar.model(m).data(d).sym.dfydx ~= 0);
+data.dfydxnon0 = logical(data.sym.dfydx ~= 0);
 
-if(ar.config.useSensis)
+if(config.useSensis)
     % sx sensitivities
-    ar.model(m).data(d).sx = {};
-    for j=1:length(ar.model(m).xs)
-        for i=1:length(ar.model(m).condition(c).p)
-            ar.model(m).data(d).sx{j,i} = sprintf('sx[%i]', j + (i-1)*length(ar.model(m).xs));
+    data.sx = {};
+    for j=1:length(model.xs)
+        for i=1:length(condition.p)
+            data.sx{j,i} = sprintf('sx[%i]', j + (i-1)*length(model.xs));
         end
     end
-    ar.model(m).data(d).sym.sx = sym(ar.model(m).data(d).sx);
+    data.sym.sx = sym(data.sx);
     
     % sy sensitivities
-    ar.model(m).data(d).sy = {};
-    for j=1:length(ar.model(m).data(d).sym.fy)
-        for i=1:length(ar.model(m).data(d).sym.ps)
-            ar.model(m).data(d).sy{j,i} = sprintf('sy[%i]', j + (i-1)*length(ar.model(m).data(d).sym.fy));
+    data.sy = {};
+    for j=1:length(data.sym.fy)
+        for i=1:length(data.sym.ps)
+            data.sy{j,i} = sprintf('sy[%i]', j + (i-1)*length(data.sym.fy));
         end
     end
-	ar.model(m).data(d).sym.sy = sym(ar.model(m).data(d).sy);
+	data.sym.sy = sym(data.sy);
     
     % calculate sy
-    if(~isempty(ar.model(m).data(d).sym.sy))
-        ar.model(m).data(d).sym.fsy = ar.model(m).data(d).sym.dfydp;
-        if(~isempty(ar.model(m).condition(c).p))
-            qdynpara = ismember(ar.model(m).data(d).p, ar.model(m).condition(c).p); %R2013a compatible
+    if(~isempty(data.sym.sy))
+        data.sym.fsy = data.sym.dfydp;
+        if(~isempty(condition.p))
+            qdynpara = ismember(data.p, condition.p); %R2013a compatible
         else
-            qdynpara = false(size(ar.model(m).data(d).p));
+            qdynpara = false(size(data.p));
         end
         
-        if(~isempty(ar.model(m).condition(c).p))
-            tmpfsx = ar.model(m).data(d).sym.dfydx * ...
-                ar.model(m).data(d).sym.sx;
-            if(~isfield(ar.model(m).condition(c), 'sym') || ~isfield(ar.model(m).condition(c).sym, 'su'))
+        if(~isempty(condition.p))
+            tmpfsx = data.sym.dfydx * ...
+                data.sym.sx;
+            if(~isfield(condition, 'sym') || ~isfield(condition.sym, 'su'))
                 % su
-                ar.model(m).condition(c).su = cell(length(ar.model(m).us), length(ar.model(m).condition(c).p));
-                for j=1:length(ar.model(m).us)
-                    for i=1:length(ar.model(m).condition(c).p)
-                        if(ar.model(m).data(d).qfu_nonzero(j))
-                            ar.model(m).condition(c).su{j,i} = sprintf('su[%i]', j + (i-1)*length(ar.model(m).us));
+                condition.su = cell(length(model.us), length(condition.p));
+                for j=1:length(model.us)
+                    for i=1:length(condition.p)
+                        if(data.qfu_nonzero(j))
+                            condition.su{j,i} = sprintf('su[%i]', j + (i-1)*length(model.us));
                         else
-                            ar.model(m).condition(c).su{j,i} = '0';
+                            condition.su{j,i} = '0';
                         end
                     end
                 end
-                ar.model(m).condition(c).sym.su = sym(ar.model(m).condition(c).su);
-                fprintf('su=%i, ', length(ar.model(m).condition(c).p)*sum(ar.model(m).data(d).qfu_nonzero(:)));
+                condition.sym.su = sym(condition.su);
+                fprintf('su=%i, ', length(condition.p)*sum(data.qfu_nonzero(:)));
             end
-            tmpfsu = ar.model(m).data(d).sym.dfydu * ...
-                ar.model(m).condition(c).sym.su;
-            if(~isempty(ar.model(m).x))
-                ar.model(m).data(d).sym.fsy(:,qdynpara) = ar.model(m).data(d).sym.fsy(:,qdynpara) + tmpfsx + tmpfsu;
+            tmpfsu = data.sym.dfydu * ...
+                condition.sym.su;
+            if(~isempty(model.x))
+                data.sym.fsy(:,qdynpara) = data.sym.fsy(:,qdynpara) + tmpfsx + tmpfsu;
             else
-                ar.model(m).data(d).sym.fsy(:,qdynpara) = ar.model(m).data(d).sym.fsy(:,qdynpara) + tmpfsu;
+                data.sym.fsy(:,qdynpara) = data.sym.fsy(:,qdynpara) + tmpfsu;
             end
         end
     else
-        ar.model(m).data(d).sym.fsy = [];
+        data.sym.fsy = [];
     end
-    fprintf('sy=%i, ', sum(logical(ar.model(m).data(d).sym.fsy(:)~=0)));
+    fprintf('sy=%i, ', sum(logical(data.sym.fsy(:)~=0)));
     
     % calculate systd
-    if(~isempty(ar.model(m).data(d).sym.sy))
-        ar.model(m).data(d).sym.fsystd = ar.model(m).data(d).sym.dfystddp + ...
-            ar.model(m).data(d).sym.dfystddy * ar.model(m).data(d).sym.sy;
-        if(~isempty(ar.model(m).condition(c).p))
-            qdynpara = ismember(ar.model(m).data(d).p, ar.model(m).condition(c).p); %R2013a compatible
+    if(~isempty(data.sym.sy))
+        data.sym.fsystd = data.sym.dfystddp + ...
+            data.sym.dfystddy * data.sym.sy;
+        if(~isempty(condition.p))
+            qdynpara = ismember(data.p, condition.p); %R2013a compatible
         else
-            qdynpara = false(size(ar.model(m).data(d).p));
+            qdynpara = false(size(data.p));
         end
         
-        if(~isempty(ar.model(m).condition(c).p))
-            tmpfsx = ar.model(m).data(d).sym.dfystddx * ...
-                ar.model(m).data(d).sym.sx;
-            if(~isfield(ar.model(m).condition(c), 'sym') || ~isfield(ar.model(m).condition(c).sym, 'su'))
+        if(~isempty(condition.p))
+            tmpfsx = data.sym.dfystddx * ...
+                data.sym.sx;
+            if(~isfield(condition, 'sym') || ~isfield(condition.sym, 'su'))
                 % su
-                ar.model(m).condition(c).su = cell(length(ar.model(m).us), length(ar.model(m).condition(c).p));
-                for j=1:length(ar.model(m).us)
-                    for i=1:length(ar.model(m).condition(c).p)
-                        if(ar.model(m).data(d).qfu_nonzero(j))
-                            ar.model(m).condition(c).su{j,i} = sprintf('su[%i]', j + (i-1)*length(ar.model(m).us));
+                condition.su = cell(length(model.us), length(condition.p));
+                for j=1:length(model.us)
+                    for i=1:length(condition.p)
+                        if(data.qfu_nonzero(j))
+                            condition.su{j,i} = sprintf('su[%i]', j + (i-1)*length(model.us));
                         else
-                            ar.model(m).condition(c).su{j,i} = '0';
+                            condition.su{j,i} = '0';
                         end
                     end
                 end
-                ar.model(m).condition(c).sym.su = sym(ar.model(m).condition(c).su);
-                fprintf('su=%i, ', length(ar.model(m).condition(c).p)*sum(ar.model(m).data(d).qfu_nonzero(:)));
+                condition.sym.su = sym(condition.su);
+                fprintf('su=%i, ', length(condition.p)*sum(data.qfu_nonzero(:)));
             end
-            tmpfsu = ar.model(m).data(d).sym.dfystddu * ...
-                ar.model(m).condition(c).sym.su;
-            if(~isempty(ar.model(m).x))
-                ar.model(m).data(d).sym.fsystd(:,qdynpara) = ar.model(m).data(d).sym.fsystd(:,qdynpara) + tmpfsx + tmpfsu;
+            tmpfsu = data.sym.dfystddu * ...
+                condition.sym.su;
+            if(~isempty(model.x))
+                data.sym.fsystd(:,qdynpara) = data.sym.fsystd(:,qdynpara) + tmpfsx + tmpfsu;
             else
-                ar.model(m).data(d).sym.fsystd(:,qdynpara) = ar.model(m).data(d).sym.fsystd(:,qdynpara) + tmpfsu;
+                data.sym.fsystd(:,qdynpara) = data.sym.fsystd(:,qdynpara) + tmpfsu;
             end
         end
     else
-        ar.model(m).data(d).sym.fsystd = [];
+        data.sym.fsystd = [];
     end
-    fprintf('systd=%i, ', sum(logical(ar.model(m).data(d).sym.fsystd(:)~=0)));
+    fprintf('systd=%i, ', sum(logical(data.sym.fsystd(:)~=0)));
 end
 
 fprintf('done\n');
