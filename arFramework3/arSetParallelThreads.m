@@ -11,7 +11,11 @@ global ar
 ar.config.nCore = feature('numCores');
 
 if(~exist('n','var'))
-    n = ar.config.nCore;
+    if(ispc)
+        n = 2*ar.config.nCore;
+    else
+        n = ar.config.nCore;
+    end
 end
 if(~exist('silent','var'))
     silent = true;

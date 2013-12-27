@@ -81,7 +81,8 @@ if(fine && sensi)
     ar = initFineSensis(ar);
 end
 
-eval([ar.fkt '(ar, fine, ar.config.useSensis && sensi, dynamics);'])
+% call mex function to simulate models
+feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics)
 
 % integration error ?
 for m=1:length(ar.model)

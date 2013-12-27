@@ -2,7 +2,7 @@
 %
 % this function is experimental, please contact Andreas Raue for help
 
-function arPlotMerged(saveToFile, condition_link_bool, only_inhib)
+function arPlotMerged(saveToFile)
 
 global ar
 
@@ -14,16 +14,7 @@ if(~exist('saveToFile','var'))
 	saveToFile = false;
 end
 
-if(~exist('only_inhib','var'))
-	only_inhib = false;
-end
-
-if(~exist('condition_link_bool','var'))
-	condition_link_bool = true;
-end
-
 ar.model.qPlotYs(:) = 1; %Adjust, if only a subset of the data setup should be plotted
-%ar.model.qPlotYs([110]) = 0;
 
 standcond = 'Control'; % Insert standard condition
 
@@ -43,12 +34,14 @@ ylink = cell(size(ylabels(:)'));
 % ylink{1} = 22; % 'Mdm2_mRNA_fold'
 % ylink{2} = 20; % 'Wip1_mRNA_fold'
 % ylink{3} = 18; % 'p21_mRNA_fold'
+
 ylink{4} = 11; % 'pATM_au'
 ylink{5} = 9; % 'pChk1_au'
 ylink{6} = 13; % 'pChk2_au'
 ylink{7} = 15; % 'pDNAPK_au'
 ylink{8} = 17; % 'pp53_au'
 ylink{9} = 19; % 'tp21_au'
+
 % ylink{10} = nan; % 'tp53_au'
 
 % if(only_inhib == false)
@@ -69,19 +62,13 @@ ylink{9} = 19; % 'tp21_au'
 % ylink{5} = 17;
 % ylink{6} = 11;
 
-condition_link = [1 2 3 4]; %Adjust for required condition combination
-% condition_link = [1 5 6 7]; %Adjust for required condition combination
-% condition_link = [1 8 9 10]; %Adjust for required condition combination
+condition_link = {[1 2 3 4], [1 5 6 7], [1 8 9 10]}; %Adjust for required condition combination
 
 %% plot
 
 figcount = 1;
 for jm=1:length(ar.model);
-    if(condition_link_bool)
-        colors = lines(length(ar.model.condition));
-    else
-        colors = zeros(length(ar.model.condition),3);
-    end
+    colors = lines(length(ar.model.condition));
     
     % time course plots
     for j=find(~cellfun(@isempty, ylink))
@@ -90,11 +77,15 @@ for jm=1:length(ar.model);
         fprintf('%s:\n\n', ar.model(jm).plot_merged(j).name);
         
         % determine y range
-        yscale = 0;
+        yrange = 0;
+        ymax = 0;
+        xmax = 0;
         for jc = 1:length(ar.model.condition)
-            yscale = max([yscale range(ar.model.condition(jc).xExpSimu(:,ylink{j}))]);
+            yrange = max([yrange range(ar.model.condition(jc).xExpSimu(:,ylink{j}))]);
+            ymax = max([ymax; ar.model.condition(jc).xExpSimu(:,ylink{j})]);
+            xmax = max([xmax; ar.model.condition(jc).tExp(:)]);
         end
-        yscale = 0.1*yscale;
+        yscale = 0.1*yrange;
         
         %collect
         ctime = cell(1,length(ar.model.condition));
@@ -103,6 +94,7 @@ for jm=1:length(ar.model);
         nds = nan(1,length(ar.model.condition));
         chi2s = nan(1,length(ar.model.condition));
         ndatas = nan(1,length(ar.model.condition));
+        condition_link_std = {};
         for jc = 1:length(ar.model.condition)
             time = [];
             data = [];
@@ -160,78 +152,75 @@ for jm=1:length(ar.model);
             nds(jc) = ndstmp;
             chi2s(jc) = chi2tmp;
             ndatas(jc) = ndatatmp;
+            
+            if(~isempty(ctime{jc}))
+                condition_link_std{end+1} = jc; %#ok<AGROW>
+            end
         end
         fprintf('\n');
+        
+        if(~exist('condition_link','var'))
+            condition_link = condition_link_std;
+        end
         
         % plot
         h = myRaiseFigure(jm, j, ar.model(jm).plot_merged(j).name, figcount);
         
-        qsub = ~cellfun(@isempty, ctime);
-        if(condition_link_bool)
-            qsub(:) = 0;
-            qsub(condition_link(:)) = 1;
-        end;
-        nsub = sum(qsub);
-        [nrows, ncols] = arNtoColsAndRows(nsub);
+        [nrows, ncols] = arNtoColsAndRows(length(condition_link));
+        
+        for jcs = 1:length(condition_link)
+            g = subplot(nrows, ncols, jcs);
+            hold(g, 'on');
+            box(g, 'on');
             
-        subcount = 1;
-        for jc = find(qsub);
-            if(~condition_link_bool)
-                g = subplot(nrows, ncols, subcount);
-                hold(g, 'on');
-                box(g, 'on');
-            elseif(condition_link_bool && jc == condition_link(1))
-                g = subplot(1, 1, 1);
-                hold(g, 'on');
-                box(g, 'on');
-            end;
+            ndatastmp = 0;
+            chi2stmp = 0;
             
-            if(~isempty(ctime{jc}))
+            hstmp = [];
+            clabelstmp = {}; 
+            
+            colindex = 1;
+            for jc = condition_link{jcs}
                 tFine = ar.model.condition(jc).tFine;
                 xFine = ar.model.condition(jc).xFineSimu(:,ylink{j});
-                plot(g, ar.model.condition(jc).tFine, ar.model.condition(jc).xFineSimu(:,ylink{j}), ...
-                    'Color', colors(jc,:));
+                hstmp(end+1) = plot(g, ar.model.condition(jc).tFine, ar.model.condition(jc).xFineSimu(:,ylink{j}), ...
+                    'Color', colors(colindex,:)); %#ok<AGROW>
                 tFineP = [tFine; flipud(tFine)];
                 xFineP = [xFine + yscale; flipud(xFine - yscale)];
                 patch(tFineP, xFineP, zeros(size(xFineP))-2, ones(size(xFineP)), ...
-                    'FaceColor', colors(jc,:)*0.1+0.9, 'EdgeColor', colors(jc,:)*0.1+0.9)
+                    'FaceColor', colors(colindex,:)*0.1+0.9, 'EdgeColor', colors(colindex,:)*0.1+0.9)
                 patch(tFineP, xFineP, zeros(size(xFineP))-1, ones(size(xFineP)), 'LineStyle', '--', ...
-                    'FaceColor', 'none', 'EdgeColor', colors(jc,:)*0.3+0.7)
-                plot(g, ctime{jc}, cdata{jc}, '*', 'Color', colors(jc,:))
+                    'FaceColor', 'none', 'EdgeColor', colors(colindex,:)*0.3+0.7)
+                plot(g, ctime{jc}, cdata{jc}, '*', 'Color', colors(colindex,:))
+                
+                ndatastmp = ndatastmp + ndatas(jc);
+                chi2stmp = chi2stmp + chi2s(jc);
+                
+                clabelstmp{end+1} = strrep(clabel{jc},'_','\_'); %#ok<AGROW>
+                
+                colindex = colindex + 1;
             end
-            if(~condition_link_bool)
-                hold(g, 'off');
-            end;
             
-            if(~condition_link_bool)
-                if(ar.config.fiterrors == 1)
-                    titstr = sprintf('-2 log(L)_{%i} = %g', ndatas(jc), 2*ndatas(jc)*log(sqrt(2*pi)) + chi2s(jc));
-                else
-                    titstr = sprintf('chi^2_{%i} = %g', ndatas(jc), chi2s(jc));
-                end
+            if(ar.config.fiterrors == 1)
+                titstr = sprintf('-2 log(L)_{%i} = %g', ndatastmp, 2*ndatas(jc)*log(sqrt(2*pi)) + chi2stmp);
             else
-                titstr = '';
+                titstr = sprintf('chi^2_{%i} = %g', ndatastmp, chi2stmp);
             end
-            if(~condition_link_bool)
-                title(g, {sprintf('condition %i (#d%i)', jc, nds(jc)), strrep(clabel{jc},'_','\_'), titstr});
+            
+            if(length(condition_link{jcs})==1)
+                title(g, {sprintf('condition %i (#d%i)', jc, nds(jc)), titstr});
             else
-                titstr = sprintf('Condition Link:');
-                for title_i = 1:length(condition_link)
-                    if(ar.config.fiterrors == 1)
-                        titstr = strcat([titstr ' ' sprintf('\nCondition %i (#d%i) -2 log(L)_{%i} = %g', condition_link(title_i), nds(condition_link(title_i)) , ndatas(condition_link(title_i)), 2*ndatas(condition_link(title_i))*log(sqrt(2*pi)) + chi2s(condition_link(title_i)))]);
-                    else
-                        titstr = strcat([titstr ' ' sprintf('\nCondition %i (#d%i) chi^2_{%i} = %g', condition_link(title_i), nds(condition_link(title_i)), ndatas(condition_link(title_i)), chi2s(condition_link(title_i)))]);
-                    end
-                end;
-                title(g, {titstr});
+                title(g, {sprintf('condition (#c%i, #d%i)', length(condition_link{jcs}), nds(jc)), titstr});
             end
-            arSpacedAxisLimits(g);
-            if(subcount == (nrows-1)*ncols + 1)
+            
+%             arSpacedAxisLimits(g);
+            xlim([0-0.1*xmax xmax+0.1*xmax])
+            ylim([0-2*yscale ymax+2*yscale])
+%             if(jcs == (nrows-1)*ncols + 1)
                 xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
-            end
+%             end
             ylabel(g, sprintf('%s [%s]', ar.model(jm).xUnits{ylink{j},3}, ar.model(jm).xUnits{ylink{j},2}));
-            
-            subcount = subcount + 1;
+            legend(hstmp, clabelstmp);
         end
         
         % save

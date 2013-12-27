@@ -161,7 +161,8 @@ fprintf(fid, '}\n');
 fclose(fid);
 
 %% Render and save
-eval(['!dot -Tpdf ' savePath '.dot -o' savePath '.pdf']);
-% eval(['!neato -Tpdf ' savePath '.dot -o' savePath '.pdf']);
-% eval(['!fdp -Tpdf ' savePath '.dot -o' savePath '.pdf']);
-
+if(~ispc)
+    eval(['!dot -Tpdf ' savePath '.dot -o' savePath '.pdf']);
+    % eval(['!neato -Tpdf ' savePath '.dot -o' savePath '.pdf']);
+    % eval(['!fdp -Tpdf ' savePath '.dot -o' savePath '.pdf']);
+end
