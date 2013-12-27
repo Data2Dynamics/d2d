@@ -31,6 +31,11 @@ if(~exist([cd '/Compiled/' ar.info.c_version_code], 'dir'))
 	mkdir([cd '/Compiled/' ar.info.c_version_code])
 end
 
+% Cluster Compiled Folder Hook
+fid = fopen('./Compiled/arClusterCompiledHook.m', 'W');
+fprintf(fid, 'function arClusterCompiledHook\n');
+fclose(fid);
+
 % Functions
 fid = fopen(['./Compiled/' ar.info.c_version_code '/arSimuCalcFunctions.c'], 'W');
 
