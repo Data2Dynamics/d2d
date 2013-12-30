@@ -16,10 +16,10 @@
 
 function varargout = arFit(varargin)
 
+global ar
 global fit
 
 if(nargin==0 || ~isstruct(varargin{1}))
-    global ar %#ok<TLEV>
     qglobalar = true;
 else
     ar = varargin{1};
@@ -81,10 +81,9 @@ ub = ub(ar.qFit==1);
 lb = lb(ar.qFit==1);
 
 % lsqnonlin
-if(ar.config.optimizer == 1)     
-    f = @(x)merit_fkt(x,ar);
+if(ar.config.optimizer == 1)    
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
-        lsqnonlin(f, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
+        lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
     
 % fmincon
 elseif(ar.config.optimizer == 2)
@@ -101,14 +100,12 @@ elseif(ar.config.optimizer == 2)
     options.SubproblemAlgorithm = 'cg';
     % options.Hessian = 'fin-diff-grads';
     options.Hessian = 'user-supplied';
-    f2 = @(x,y)fmincon_hessianfcn(x,y,ar);
-    options.HessFcn = f2;
+    options.HessFcn = @fmincon_hessianfcn;
     % options2.InitBarrierParam = 1e+6;
     % options2.InitTrustRegionRadius = 1e-1;
 
-    f = @(x)merit_fkt_fmincon(x,ar);
     [pFit, ~, exitflag, output, lambda, jac] = ...
-        fmincon(f, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
+        fmincon(@merit_fkt_fmincon, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
         @confun,options);
     resnorm = merit_fkt(pFit);
     
@@ -121,10 +118,9 @@ elseif(ar.config.optimizer == 3)
 elseif(ar.config.optimizer == 4)
     warnreset = warning;
     warning('off','MATLAB:rankDeficientMatrix');
-    f = @(x)merit_fkt_STRSCNE(x,ar);
-    f2 = @(x)merit_dfkt_STRSCNE(x,ar);
     [pFit, exitflag, output, history] = ...
-        STRSCNE(ar.p(ar.qFit==1), f, [-Inf,0], lb, ub, [1000,1000,1,1], f2);
+        STRSCNE(ar.p(ar.qFit==1), @merit_fkt_STRSCNE, [-Inf,0], ...
+        lb, ub, [1000,1000,1,1], @merit_dfkt_STRSCNE);
     warning(warnreset);
     ar.p(ar.qFit==1) = pFit;
     fit.exitflag = exitflag;
@@ -139,9 +135,8 @@ elseif(ar.config.optimizer == 4)
 
 % arNLS
 elseif(ar.config.optimizer == 5)
-    f = @(x)merit_fkt(x,ar);
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
-        arNLS(f, ar.p(ar.qFit==1), lb, ub, ar.config.optim, ar.config.optimizerStep);
+        arNLS(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim, ar.config.optimizerStep);
     
 % fmincon as least squares fit
 elseif(ar.config.optimizer == 6)
@@ -153,9 +148,8 @@ elseif(ar.config.optimizer == 6)
     options.MaxIter = ar.config.optim.MaxIter;
     options.OutputFcn = ar.config.optim.OutputFcn;
     
-    f = @(x)merit_fkt_fmincon_lsq(x,ar);
     [pFit, ~, exitflag, output, lambda, jac] = ...
-        fmincon(f, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
+        fmincon(@merit_fkt_fmincon_lsq, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
         [],options);
     resnorm = merit_fkt(pFit,ar);
     
@@ -232,8 +226,9 @@ end
 
 
 % lsqnonlin and arNLS
-function [res, sres] = merit_fkt(pTrial, ar)
-ar = arChi2(ar, ar.config.useSensis, pTrial);
+function [res, sres] = merit_fkt(pTrial)
+global ar
+arChi2(ar.config.useSensis, pTrial);
 arLogFit(ar);
 res = [ar.res ar.constr];
 if(nargout>1 && ar.config.useSensis)
@@ -247,8 +242,9 @@ if(nargout>1 && ar.config.useSensis)
 end
 
 % fmincon
-function [l, g, H] = merit_fkt_fmincon(pTrial, ar)
-ar = arChi2(ar, ar.config.useSensis, pTrial);
+function [l, g, H] = merit_fkt_fmincon(pTrial)
+global ar
+arChi2(ar.config.useSensis, pTrial);
 arLogFit(ar);
 l = sum(ar.res.^2);
 if(nargout>1)
@@ -259,8 +255,9 @@ if(nargout>2)
 end
 
 % fmincon as lsq
-function [l, g] = merit_fkt_fmincon_lsq(pTrial, ar)
-ar = arChi2(ar, ar.config.useSensis, pTrial);
+function [l, g] = merit_fkt_fmincon_lsq(pTrial)
+global ar
+arChi2(ar.config.useSensis, pTrial);
 arLogFit(ar);
 res = [ar.res ar.constr];
 if(nargout>1 && ar.config.useSensis)
@@ -277,8 +274,9 @@ if(nargout>1)
     g = res*sres;
 end
 
-function [c, ceq, gc, gceq] = confun(pTrial, ar)
-ar = arChi2(ar, ar.config.useSensis, pTrial);
+function [c, ceq, gc, gceq] = confun(pTrial)
+global ar
+arChi2(ar.config.useSensis, pTrial);
 arLogFit(ar);
 % Nonlinear inequality constraints
 c = [];
@@ -289,8 +287,9 @@ if(nargout>2)
     gceq = ar.sconstr(:, ar.qFit==1)';
 end
 
-function hessian = fmincon_hessianfcn(pTrial, lambda, ar)
-ar = arChi2(ar, ar.config.useSensis, pTrial);
+function hessian = fmincon_hessianfcn(pTrial, lambda)
+global ar
+arChi2(ar.config.useSensis, pTrial);
 arLogFit(ar);
 H = ar.sres(:, ar.qFit==1)'*ar.sres(:, ar.qFit==1);
 Hconstr = zeros(size(H));
@@ -300,13 +299,15 @@ end
 hessian = H + Hconstr;
 
 % STRSCNE
-function res = merit_fkt_STRSCNE(pTrial, ar)
-ar = arChi2(ar, ar.config.useSensis, pTrial);
+function res = merit_fkt_STRSCNE(pTrial)
+global ar
+arChi2(ar.config.useSensis, pTrial);
 arLogFit(ar);
 res = [ar.res ar.constr]';
 
 % derivatives for STRSCNE
-function sres = merit_dfkt_STRSCNE(~, ar)
+function sres = merit_dfkt_STRSCNE(~)
+global ar
 if(ar.config.useSensis)
     sres = ar.sres(:, ar.qFit==1);
     if(~isempty(ar.sconstr))
