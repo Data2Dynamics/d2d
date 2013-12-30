@@ -14,9 +14,29 @@
 %           current search direction.
 %
 
-function arFit(silent)
+function varargout = arFit(varargin)
 
-global ar
+global fit
+
+if(nargin==0 || ~isstruct(varargin{1}))
+    global ar %#ok<TLEV>
+    qglobalar = true;
+else
+    ar = varargin{1};
+    if(nargin>1)
+        varargin = varargin(2:end);
+    else
+        varargin = {};
+    end
+    qglobalar = false;
+end
+
+if(~isempty(varargin))
+    silent = varargin{1};
+else
+    silent = false;
+end
+
 
 if(~isfield(ar.config, 'optimizer'))
     ar.config.optimizer = 1;
@@ -27,12 +47,13 @@ end
 if(~isfield(ar.config, 'showFitting'))
     ar.config.showFitting = 0;
 end
+if(ar.config.showFitting)
+    ar.config.optim.OutputFcn = @arPlotFast;
+end
 
 if(nargin==0)
     silent = false;
 end
-
-ar.fevals = 0;
 
 if(ar.config.useSensis)
     ar.config.optim.Jacobian = 'on';
@@ -40,15 +61,16 @@ else
     ar.config.optim.Jacobian = 'off';
 end
 
-ar.fit.iter_count = 0;
-ar.fit.chi2_hist = nan(1,ar.config.optim.MaxIter);
-ar.fit.constr_hist = nan(1,ar.config.optim.MaxIter);
-ar.fit.p_hist = nan(ar.config.optim.MaxIter,length(ar.p));
-ar.fit.maxstepsize_hist = nan(1,ar.config.optim.MaxIter);
-ar.fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
-ar.config.optim.OutputFcn = @arPlotFast;
+fit = struct([]);
+fit(1).iter_count = 0;
+fit.chi2_hist = nan(1,ar.config.optim.MaxIter);
+fit.constr_hist = nan(1,ar.config.optim.MaxIter);
+fit.p_hist = nan(ar.config.optim.MaxIter,length(ar.p));
+fit.maxstepsize_hist = nan(1,ar.config.optim.MaxIter);
+fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
+fit.fevals = 0;
 
-arChi2(true, []);
+ar = arChi2(ar, true, []);
 chi2_old = ar.chi2fit;
 
 ub = ar.ub;
@@ -60,8 +82,9 @@ lb = lb(ar.qFit==1);
 
 % lsqnonlin
 if(ar.config.optimizer == 1)     
+    f = @(x)merit_fkt(x,ar);
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
-        lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
+        lsqnonlin(f, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
     
 % fmincon
 elseif(ar.config.optimizer == 2)
@@ -78,42 +101,47 @@ elseif(ar.config.optimizer == 2)
     options.SubproblemAlgorithm = 'cg';
     % options.Hessian = 'fin-diff-grads';
     options.Hessian = 'user-supplied';
-    options.HessFcn = @fmincon_hessianfcn;
+    f2 = @(x,y)fmincon_hessianfcn(x,y,ar);
+    options.HessFcn = f2;
     % options2.InitBarrierParam = 1e+6;
     % options2.InitTrustRegionRadius = 1e-1;
 
+    f = @(x)merit_fkt_fmincon(x,ar);
     [pFit, ~, exitflag, output, lambda, jac] = ...
-        fmincon(@merit_fkt_fmincon, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
+        fmincon(f, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
         @confun,options);
     resnorm = merit_fkt(pFit);
     
 % PSO
 elseif(ar.config.optimizer == 3) 
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
-        arFitPSO(lb, ub, ar.config.optim);
+        arFitPSO(lb, ub, ar);
    
 % STRSCNE
 elseif(ar.config.optimizer == 4)
     warnreset = warning;
     warning('off','MATLAB:rankDeficientMatrix');
+    f = @(x)merit_fkt_STRSCNE(x,ar);
+    f2 = @(x)merit_dfkt_STRSCNE(x,ar);
     [pFit, exitflag, output, history] = ...
-        STRSCNE(ar.p(ar.qFit==1), @merit_fkt_STRSCNE, [-Inf,0], lb, ub, [1000,1000,1,1], @merit_dfkt_STRSCNE);
+        STRSCNE(ar.p(ar.qFit==1), f, [-Inf,0], lb, ub, [1000,1000,1,1], f2);
     warning(warnreset);
     ar.p(ar.qFit==1) = pFit;
-    ar.fit.exitflag = exitflag;
-    ar.fit.output = output;
-    ar.fit.history = history;
+    fit.exitflag = exitflag;
+    fit.output = output;
+    fit.history = history;
     
-    arChi2(false, []);
+    ar = arChi2(ar, false, []);
     fprintf('STRSCNE finished after %i iterations: code %i, total chi2 improvement = %g\n', ...
         output(1), exitflag, chi2_old - ar.chi2fit);
     
     return;
 
 % arNLS
-elseif(ar.config.optimizer == 5)     
+elseif(ar.config.optimizer == 5)
+    f = @(x)merit_fkt(x,ar);
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
-        arNLS(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim, ar.config.optimizerStep);
+        arNLS(f, ar.p(ar.qFit==1), lb, ub, ar.config.optim, ar.config.optimizerStep);
     
 % fmincon as least squares fit
 elseif(ar.config.optimizer == 6)
@@ -125,10 +153,11 @@ elseif(ar.config.optimizer == 6)
     options.MaxIter = ar.config.optim.MaxIter;
     options.OutputFcn = ar.config.optim.OutputFcn;
     
+    f = @(x)merit_fkt_fmincon_lsq(x,ar);
     [pFit, ~, exitflag, output, lambda, jac] = ...
-        fmincon(@merit_fkt_fmincon_lsq, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
+        fmincon(f, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
         [],options);
-    resnorm = merit_fkt(pFit);
+    resnorm = merit_fkt(pFit,ar);
     
 else
     error('ar.config.optimizer invalid');
@@ -141,16 +170,18 @@ if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
 end
 
 ar.p(ar.qFit==1) = pFit;
-arChi2(true, []);
+ar = arChi2(ar, true, []);
 
-ar.fit.exitflag = exitflag;
-ar.fit.output = output;
-ar.fit.iter = output.iterations;
-ar.fit.chi2 = ar.chi2fit;
-ar.fit.lambda = lambda;
-ar.fit.qFit = ar.qFit;
-ar.fit.res = resnorm;
-ar.fit.sres = full(jac);
+fit.exitflag = exitflag;
+fit.output = output;
+fit.iter = output.iterations;
+fit.chi2 = ar.chi2fit;
+fit.lambda = lambda;
+fit.qFit = ar.qFit;
+fit.res = resnorm;
+fit.sres = full(jac);
+
+ar.fit = fit;
 
 if(~silent || exitflag < 1)
     outputstr = '';
@@ -185,18 +216,25 @@ if(~silent || exitflag < 1)
     
     fprintf('%s finished after %i iterations: %s, total improvement = %g\n', ...
         ar.config.optimizers{ar.config.optimizer}, ...
-        ar.fit.output.iterations, outputstr, chi2_old - ar.chi2fit);
+        fit.output.iterations, outputstr, chi2_old - ar.chi2fit);
 end
 
 if(~silent)
-    arChi2(true);
+    ar = arChi2(ar, true);
+end
+
+if(nargout>0 && ~qglobalar)
+    varargout{1} = ar;
+else
+    varargout = {};
 end
 
 
+
 % lsqnonlin and arNLS
-function [res, sres] = merit_fkt(pTrial)
-global ar
-arChi2(ar.config.useSensis, pTrial)
+function [res, sres] = merit_fkt(pTrial, ar)
+ar = arChi2(ar, ar.config.useSensis, pTrial);
+arLogFit(ar);
 res = [ar.res ar.constr];
 if(nargout>1 && ar.config.useSensis)
     sres = [];
@@ -209,9 +247,9 @@ if(nargout>1 && ar.config.useSensis)
 end
 
 % fmincon
-function [l, g, H] = merit_fkt_fmincon(pTrial)
-global ar
-arChi2(ar.config.useSensis, pTrial)
+function [l, g, H] = merit_fkt_fmincon(pTrial, ar)
+ar = arChi2(ar, ar.config.useSensis, pTrial);
+arLogFit(ar);
 l = sum(ar.res.^2);
 if(nargout>1)
     g = ar.res*ar.sres(:, ar.qFit==1);
@@ -221,9 +259,9 @@ if(nargout>2)
 end
 
 % fmincon as lsq
-function [l, g] = merit_fkt_fmincon_lsq(pTrial)
-global ar
-arChi2(ar.config.useSensis, pTrial)
+function [l, g] = merit_fkt_fmincon_lsq(pTrial, ar)
+ar = arChi2(ar, ar.config.useSensis, pTrial);
+arLogFit(ar);
 res = [ar.res ar.constr];
 if(nargout>1 && ar.config.useSensis)
     sres = [];
@@ -239,13 +277,9 @@ if(nargout>1)
     g = res*sres;
 end
 
-function [c, ceq, gc, gceq] = confun(pTrial)
-global ar
-global fmincon_pTrial
-if(sum(pTrial(:)~=fmincon_pTrial)>0)
-    arChi2(ar.config.useSensis, pTrial)
-    fmincon_pTrial = pTrial(:);
-end
+function [c, ceq, gc, gceq] = confun(pTrial, ar)
+ar = arChi2(ar, ar.config.useSensis, pTrial);
+arLogFit(ar);
 % Nonlinear inequality constraints
 c = [];
 % Nonlinear equality constraints
@@ -255,13 +289,9 @@ if(nargout>2)
     gceq = ar.sconstr(:, ar.qFit==1)';
 end
 
-function hessian = fmincon_hessianfcn(pTrial, lambda)
-global ar
-global fmincon_pTrial
-if(sum(pTrial(:)~=fmincon_pTrial)>0)
-    arChi2(ar.config.useSensis, pTrial)
-    fmincon_pTrial = pTrial(:);
-end
+function hessian = fmincon_hessianfcn(pTrial, lambda, ar)
+ar = arChi2(ar, ar.config.useSensis, pTrial);
+arLogFit(ar);
 H = ar.sres(:, ar.qFit==1)'*ar.sres(:, ar.qFit==1);
 Hconstr = zeros(size(H));
 for jc = 1:length(ar.constr)
@@ -269,16 +299,14 @@ for jc = 1:length(ar.constr)
 end
 hessian = H + Hconstr;
 
-
 % STRSCNE
-function res = merit_fkt_STRSCNE(pTrial)
-global ar
-arChi2(ar.config.useSensis, pTrial)
+function res = merit_fkt_STRSCNE(pTrial, ar)
+ar = arChi2(ar, ar.config.useSensis, pTrial);
+arLogFit(ar);
 res = [ar.res ar.constr]';
 
 % derivatives for STRSCNE
-function sres = merit_dfkt_STRSCNE(~)
-global ar
+function sres = merit_dfkt_STRSCNE(~, ar)
 if(ar.config.useSensis)
     sres = ar.sres(:, ar.qFit==1);
     if(~isempty(ar.sconstr))
@@ -286,47 +314,37 @@ if(ar.config.useSensis)
     end
 end
 
-
-
-
-function stop = arPlotFast(~,optimValues,state)
-
+% plot fitting
+function stop = arPlotFast(~,~,state)
 global ar
-
 stop = false;
-
-if(strcmp(state, 'iter'))
-    if(ar.fit.iter_count>0)
-        if((ar.chi2fit+ar.chi2constr) > (ar.fit.chi2_hist(ar.fit.iter_count) + ...
-                ar.fit.constr_hist(ar.fit.iter_count)))
-            return;
-        end
-    end
-        
-    ar.fit.chi2_hist(ar.fit.iter_count+1) = ar.chi2fit;
-    ar.fit.constr_hist(ar.fit.iter_count+1) = ar.chi2constr;
-    ar.fit.p_hist(ar.fit.iter_count+1,:) = ar.p;
-    ar.fit.opti_hist(ar.fit.iter_count+1,:) = ar.firstorderopt;
-    
-    if(ar.config.optimizer == 5)
-        if(isscalar(optimValues.mu))
-            ar.fit.maxstepsize_hist(ar.fit.iter_count+1) = optimValues.mu;
-        else
-            ar.fit.maxstepsize_hist(ar.fit.iter_count+1) = det(optimValues.mu);
-        end
-        ar.fit.stepsize_hist(ar.fit.iter_count+1) = optimValues.normdp;
-    else
-        ar.fit.maxstepsize_hist(ar.fit.iter_count+1) = nan;
-        if(ar.fit.iter_count>0)
-            ar.fit.stepsize_hist(ar.fit.iter_count+1) = norm(ar.fit.p_hist(ar.fit.iter_count,:) - ar.p);
-        end
-    end
-    
-    ar.fit.iter_count = ar.fit.iter_count + 1;
-    
+if(strcmp(state, 'iter'))    
     if(ar.config.showFitting)
         arPlot(false, true, false, true, true);
         drawnow;
     end
 end
 
+% log fitting
+function arLogFit(ar)
+
+global fit
+
+if(fit.iter_count>0)
+    if((ar.chi2fit+ar.chi2constr) > (fit.chi2_hist(fit.iter_count) + ...
+            fit.constr_hist(fit.iter_count)))
+        return;
+    end
+end
+
+fit.chi2_hist(fit.iter_count+1) = ar.chi2fit;
+fit.constr_hist(fit.iter_count+1) = ar.chi2constr;
+fit.p_hist(fit.iter_count+1,:) = ar.p;
+fit.opti_hist(fit.iter_count+1,:) = ar.firstorderopt;
+fit.maxstepsize_hist(fit.iter_count+1) = nan;
+if(fit.iter_count>0)
+    fit.stepsize_hist(fit.iter_count+1) = norm(fit.p_hist(fit.iter_count,:) - ar.p);
+end
+
+fit.iter_count = fit.iter_count + 1;
+fit.fevals = fit.fevals + 1;

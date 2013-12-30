@@ -1,120 +1,89 @@
 % fit sequence
 %
-% arFits(ps, append, dynamic_only, plot_summary, log_fit_history, backup_save)
+% arFits(ps, log_fit_history)
 %
 % ps:                           parameter values      
-% append:                       [false]
-% dynamic_only                  [false]
-% plot_summary                  [false]
 % log_fit_history               [false]
-% backup_save                   [false]
 
-function arFits(ps, append, dynamic_only, plot_summary, log_fit_history, backup_save)
+function arFits(ps, log_fit_history)
 
 global ar
 
-if(~exist('append','var'))
-    append = false;
-end
-if(~exist('dynamic_only','var'))
-    dynamic_only = false;
-end
-if(~exist('plot_summary','var'))
-    plot_summary = false;
-end
 if(~exist('log_fit_history','var'))
     log_fit_history = false;
 end
-if(~exist('backup_save','var'))
-    backup_save = false;
-end
 
 n = size(ps,1);
+ps_errors = nan(size(ps));
+ar.ps_start = ps;
 
 arChi2(true,[]);
 pReset = ar.p;
 chi2Reset = ar.chi2fit + ar.chi2constr;
 
-if(append && isfield(ar,'ps') && isfield(ar, 'chi2s') && ...
-        isfield(ar, 'exitflag') && isfield(ar, 'timing') && ...
-        isfield(ar, 'fun_evals'))
-    ar.ps = [nan(n, length(ar.p)); ar.ps];
-    ar.ps_start = [ps; ar.ps_start];
-    ar.chi2s = [nan(1,n) ar.chi2s];
-    ar.chi2sconstr = [nan(1,n) ar.chi2sconstr];
-    ar.chi2s_start = [nan(1,n) ar.chi2s_start];
-    ar.chi2sconstr_start = [nan(1,n) ar.chi2sconstr_start];
-    ar.timing = [nan(1,n) ar.timing];
-    ar.exitflag = [-ones(1,n) ar.exitflag];
-    ar.fun_evals = [nan(1,n) ar.fun_evals];
-    ar.optim_crit = [nan(1,n) ar.optim_crit];
-else
-    ar.ps = nan(n, length(ar.p));
-    ar.ps_start = ps;
-    ar.chi2s = nan(1,n);
-    ar.chi2sconstr = nan(1,n);
-    ar.chi2s_start = nan(1,n);
-    ar.chi2sconstr_start = nan(1,n);
-    ar.timing = nan(1,n);
-    ar.fun_evals = nan(1,n);
-    ar.optim_crit = nan(1,n);
-    ar.exitflag = -ones(1,n);
-end
-ar.ps_errors = [];
-
 if(log_fit_history)
     ar.fit_hist = [];
 end
 
-if(dynamic_only)
-    q_select = ar.qFit==1 & ar.qDynamic==1;
-else
-    q_select = ar.qFit==1;
-end
-
-if plot_summary
-    if(sum(q_select)<6)
-        figure(1)
-        plotmatrix(ps(:,q_select), 'x');
-    end
-end
-
 arWaitbar(0);
-for j=1:n
-    arWaitbar(j, n);
-    ar.p = ps(j,:);
+ar1 = ar;
+parfor j=1:n
+    ar2 = ar1;
+    arWaitbar(n-j+1, n);
+    ar2.p = ps(j,:);
     tic;
     try
-        arChi2(true,[]);
-        ar.chi2s_start(j) = ar.chi2fit;
-        ar.chi2sconstr_start(j) = ar.chi2constr;
-        if(dynamic_only)
-            arFitDyn(true);
-        end
-        arFit(true);
-        ar.ps(j,:) = ar.p;
-        ar.chi2s(j) = ar.chi2fit;
-        ar.chi2sconstr(j) = ar.chi2constr;
-        ar.exitflag(j) = ar.fit.exitflag;
-        ar.fun_evals(j) = ar.fevals;
-        ar.optim_crit(j) = ar.firstorderopt;
+        ar2 = arChi2(ar2, true, []);
+        chi2s_start(j) = ar2.chi2fit;
+        chi2sconstr_start(j) = ar2.chi2constr;
+        ar2 = arFit(ar2, true);
+        ps(j,:) = ar2.p;
+        chi2s(j) = ar2.chi2fit;
+        chi2sconstr(j) = ar2.chi2constr;
+        exitflag(j) = ar2.fit.exitflag;
+        fun_evals(j) = ar2.fit.fevals;
+        optim_crit(j) = ar2.firstorderopt;
     catch exception
-        ar.ps_errors(end+1,:) = ar.p;
+        ps_errors(j,:) = ar2.p;
         fprintf('fit #%i: %s\n', j, exception.message);
     end
-    ar.timing(j) = toc;
+    timing(j) = toc;
     if(log_fit_history)
-        name = ar.config.optimizers{ar.config.optimizer};
-        if(ar.config.optimizer==5)
+        name = ar2.config.optimizers{ar2.config.optimizer};
+        if(ar2.config.optimizer==5)
             tmpnames = arNLS;
-            name = [name '_' tmpnames{ar.config.optimizerStep+1}]; %#ok<AGROW>
+            name = [name '_' tmpnames{ar2.config.optimizerStep+1}];
         end
-        arSaveFit([name '_' sprintf('run%i', j)]);
-    end
-    if(backup_save)
-        save('arFits_backup.mat','ar');
+        
+        fit_hist(j).hist = ar2.fit;
+        fit_hist(j).optimizer = ar2.config.optimizer;
+        if(ar2.config.optimizer==5)
+            fit_hist(j).optimizerStep = ar2.config.optimizerStep;
+        else
+            fit_hist(j).optimizerStep = nan;
+        end
+        fit_hist(j).config = ar2.config.optim;
+        fit_hist(j).name = [name '_' sprintf('run%i', j)];
+        
+        [~,imin] = min(ar2.fit.chi2_hist + ar2.fit.constr_hist);
+        fit_hist(j).p = ar2.fit.p_hist(imin,:);
     end
 end
+
+ar.chi2s_start = chi2s_start;
+ar.chi2sconstr_start = chi2sconstr_start;
+ar.ps = ps;
+ar.chi2s = chi2s;
+ar.chi2sconstr = chi2sconstr;
+ar.exitflag = exitflag;
+ar.fun_evals = fun_evals;
+ar.optim_crit = optim_crit;
+ar.ps_errors = ps_errors;
+ar.timing = timing;
+if(log_fit_history)
+    ar.fit_hist = fit_hist;
+end
+
 fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
 fprintf('mean fitting time: %fsec\n', 10^mean(log10(ar.timing(~isnan(ar.timing)))));
 arWaitbar(-1);
@@ -123,18 +92,10 @@ if(chi2Reset>min(ar.chi2s))
     [chi2min,imin] = min(ar.chi2s + ar.chi2sconstr);
     ar.p = ar.ps(imin,:);
     fprintf('selected best fit #%i with %f (old = %f)\n', ...
-        imin, chi2min, chi2Reset);
+        imin, 2*ar.ndata*log(sqrt(2*pi)) + chi2min, 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
 else
     fprintf('did not find better fit\n');
     ar.p = pReset;
 end
 arChi2(false,[]);
 
-if plot_summary
-    if(sum(q_select)<6)
-        figure(2)
-        plotmatrix(ar.ps(:,q_select), 'x');
-    end
-    
-    arPlotFits;
-end

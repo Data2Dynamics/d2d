@@ -98,7 +98,7 @@ solver_calls = 0;
 
 % initial function evaluation
 funevals = funevals + 1;
-if(nargout(fun)==2)
+if(nargout(fun)==2 || nargout(fun)==-1)
     [res, sres] = feval(fun, p);
     H = 2*(sres'*sres);             % Hessian matrix approximation
 elseif(nargout(fun)==3)
@@ -120,12 +120,8 @@ firstorderopt = norm(g(sum(onbound & exbounds,1)==0));
 if(debug>2)
     fprintf('%3i/%3i  resnorm=%-8.2g   norm(g)=%-8.2g\n', iter, options.MaxIter, resnorm, firstorderopt);
 end
-optimValues = struct([]);
-optimValues(1).iteration = 0;
-optimValues(1).mu = mu;
-optimValues(1).normdp = nan;
 if(~isempty(options.OutputFcn))
-    feval(options.OutputFcn,p,optimValues,'iter');
+    feval(options.OutputFcn,p,[],'iter');
 end
 
 q_converged = false;
@@ -143,7 +139,7 @@ while(iter < options.MaxIter && ~q_converged)
     pt(pt>ub) = ub(pt>ub);
     
     % evaluate trial point
-    if(nargout(fun)==2)
+    if(nargout(fun)==2 || nargout(fun)==-1)
         [rest, srest] = feval(fun, pt);
     elseif(nargout(fun)==3)
         [rest, srest, Ht] = feval(fun, pt);
@@ -174,7 +170,7 @@ while(iter < options.MaxIter && ~q_converged)
         
         llh = sum(res.^2);      % objective function
         g = -2*res*sres;        % gradient
-        if(nargout(fun)==2)
+        if(nargout(fun)==2 || nargout(fun)==-1)
             H = 2*(sres'*sres); % Hessian matrix approximation
         elseif(nargout(fun)==3)
             H = Ht;             % user Hessian matrix
@@ -187,10 +183,7 @@ while(iter < options.MaxIter && ~q_converged)
         
         % call output function
         if(~isempty(options.OutputFcn))
-            optimValues(1).iteration = optimValues(1).iteration + 1;
-            optimValues(1).mu = mu;
-            optimValues(1).normdp = norm(dp);
-            feval(options.OutputFcn,p,optimValues,'iter');
+            feval(options.OutputFcn,p,[],'iter');
         end
         
         % inertial effect using memory

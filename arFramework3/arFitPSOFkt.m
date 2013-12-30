@@ -1,9 +1,7 @@
-function f=arFitPSOFkt(p, ~)
-
-global ar
+function f=arFitPSOFkt(p, ar)
 
 try
-    arChi2(false,p);
+    ar = arChi2(ar, false,p);
     f = sum(ar.res.^2);
 catch
     f = Inf;

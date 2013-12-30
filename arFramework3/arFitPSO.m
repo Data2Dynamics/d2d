@@ -1,7 +1,7 @@
 % run Merrimack PSO algorithm
 
 function [pFit, chi2, resnorm, exitflag, output, lambda, jac] = ...
-    arFitPSO(LB, UB, ar_opts)
+    arFitPSO(LB, UB, ar)
 
 PSOopts = mnb_PSOOptions();
 
@@ -12,11 +12,11 @@ PSOopts.wcount_max  = 6;
 
 
 % Objective function options
-PSOopts.ObjFuncData = [];
+PSOopts.ObjFuncData = ar;
 PSOopts.ObjFuncDir  = '';
 
-PSOopts.MaxIter = ar_opts.MaxIter;
-PSOopts.Verbose = ~strcmp(ar_opts.Display, 'off');
+PSOopts.MaxIter = ar.config.optim.MaxIter;
+PSOopts.Verbose = ~strcmp(ar.config.optim.Display, 'off');
 
 [pFit, chi2, ExitReason] = mnb_PSOFit('arFitPSOFkt',LB,UB,PSOopts);
 
