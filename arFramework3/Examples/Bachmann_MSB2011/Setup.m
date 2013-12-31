@@ -18,9 +18,7 @@ arLoadData('CFUE_DoseResp_30min', 1);
 arLoadData('CFUE_DoseResp_pSTAT5_10min_fine', 1);
 arLoadData('CFUE_DoseResp_CIS_90min', 1);
 
-arParseModel;
-arWriteCFiles;
-arLink;
+arCompileAll;
 
 % parameters with prior information
 [tmpmean,tmpsd] = arLogNtoN(4.1513, 4.1513*0.3); 

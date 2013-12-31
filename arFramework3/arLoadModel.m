@@ -31,7 +31,7 @@ if(~exist('m','var'))
     end
 end
 
-fprintf('loading model #%i, from file Models/%s.def ...\n', m, name);
+fprintf('loading model #%i, from file Models/%s.def...\n', m, name);
 fid = fopen(['Models/' name '.def'], 'r');
 
 % initial setup

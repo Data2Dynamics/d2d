@@ -2,9 +2,7 @@
 
 arInit;
 arLoadModel('bolus_test',1);
-arParseModel;
-arWriteCFiles;
-arLink;
+arCompileAll;
 
 %% set parameters for bolus injection
 

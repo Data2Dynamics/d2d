@@ -7,6 +7,10 @@
 
 function arParseModel(forceParsing)
 
+error(['The function arParseModel is deprecated. Please use arCompileAll instead. ' ...
+    'See https://bitbucket.org/d2d-development/d2d-software/wiki/First%20steps for description of work flow.']);
+
+
 global ar
 
 if(isempty(ar))
@@ -16,6 +20,8 @@ end
 if(~exist('forceParsing','var'))
     forceParsing = false;
 end
+
+usePool = matlabpool('size')>0;
 
 checksum_global = addToCheckSum(ar.info.c_version_code);
 for m=1:length(ar.model)
@@ -130,8 +136,14 @@ for m=1:length(ar.model)
         model.vs = ar.model(m).vs;
         model.N = ar.model(m).N;
         condition = ar.model(m).condition;
-        parfor c=1:length(ar.model(m).condition)
-             condition_new(c) = arParseCondition(config, model, condition(c), m, c, doskip(c));
+        if(usePool)
+            parfor c=1:length(ar.model(m).condition)
+                condition_new(c) = arParseCondition(config, model, condition(c), m, c, doskip(c));
+            end
+        else
+            for c=1:length(ar.model(m).condition)
+                condition_new(c) = arParseCondition(config, model, condition(c), m, c, doskip(c)); %#ok<AGROW>
+            end
         end
         ar.model(m).condition = condition_new;
         
@@ -143,9 +155,16 @@ for m=1:length(ar.model)
         
         % parse data
         data = ar.model(m).data;
-        parfor d=1:length(ar.model(m).data)
-            c = data(d).cLink;
-            data_new(d) = arParseOBS(config, model, condition_new(c), data(d), m, c, d, doskip(d));
+        if(usePool)
+            parfor d=1:length(ar.model(m).data)
+                c = data(d).cLink;
+                data_new(d) = arParseOBS(config, model, condition_new(c), data(d), m, c, d, doskip(d)); %#ok<PFBNS>
+            end
+        else
+            for d=1:length(ar.model(m).data)
+                c = data(d).cLink;
+                data_new(d) = arParseOBS(config, model, condition_new(c), data(d), m, c, d, doskip(d)); %#ok<AGROW>
+            end
         end
         ar.model(m).data = data_new;
     else

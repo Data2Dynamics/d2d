@@ -3,9 +3,7 @@
 arInit
 arLoadModel('pnas_jak_stat', 1);
 arLoadData('pnas_data_original', 1);
-arParseModel;
-arWriteCFiles;
-arLink;
+arCompileAll;
 
 % load best fit parameter values
 arLoadPars('BestFit');

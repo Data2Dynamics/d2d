@@ -9,6 +9,9 @@
 
 function arWriteCFiles(forcedCompile, debug_mode)
 
+error(['The function arWriteCFiles is deprecated. Please use arCompileAll instead. ' ...
+    'See https://bitbucket.org/d2d-development/d2d-software/wiki/First%20steps for description of work flow.']);
+
 warnreset = warning;
 warning('off','symbolic:mupadmex:MuPADTextWarning');
 
@@ -40,6 +43,8 @@ fclose(fid);
 % Functions
 fid = fopen(['./Compiled/' ar.info.c_version_code '/arSimuCalcFunctions.c'], 'W');
 
+usePool = matlabpool('size')>0;
+
 % model equations
 fprintf('\n');
 for m=1:length(ar.model)
@@ -61,21 +66,41 @@ for m=1:length(ar.model)
     model.us = ar.model(m).us;
     model.xs = ar.model(m).xs;
     condition = ar.model(m).condition;
-    parfor c=1:length(ar.model(m).condition)
-        strtmp = '';
-        if(do_h(c))
-            fid_odeH = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.h'], 'W'); % create header file
-            arWriteHFilesODE(fid_odeH, config, condition(c));
-            fclose(fid_odeH);
-            strtmp = 'header...';
+    if(usePool)
+        parfor c=1:length(ar.model(m).condition)
+            strtmp = '';
+            if(do_h(c))
+                fid_odeH = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.h'], 'W'); % create header file
+                arWriteHFilesODE(fid_odeH, config, condition(c));
+                fclose(fid_odeH);
+                strtmp = 'header...';
+            end
+            if(do_c(c))
+                fid_ode = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.c'], 'W');
+                arWriteCFilesODE(fid_ode, config, model, condition(c));
+                fclose(fid_ode);
+                fprintf('writing condition m%i c%i, %s (%s)...%sdone\n', m, c, model.name, condition(c).checkstr, strtmp);
+            else
+                fprintf('writing condition m%i c%i, %s (%s)...%sskipped\n', m, c, model.name, condition(c).checkstr, strtmp);
+            end
         end
-        if(do_c(c))
-            fid_ode = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.c'], 'W');
-            arWriteCFilesODE(fid_ode, config, model, condition(c));
-            fclose(fid_ode);
-            fprintf('writing condition m%i c%i, %s (%s)...%sdone\n', m, c, model.name, condition(c).checkstr, strtmp);
-        else
-            fprintf('writing condition m%i c%i, %s (%s)...%sskipped\n', m, c, model.name, condition(c).checkstr, strtmp);
+    else
+        for c=1:length(ar.model(m).condition)
+            strtmp = '';
+            if(do_h(c))
+                fid_odeH = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.h'], 'W'); % create header file
+                arWriteHFilesODE(fid_odeH, config, condition(c));
+                fclose(fid_odeH);
+                strtmp = 'header...';
+            end
+            if(do_c(c))
+                fid_ode = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.c'], 'W');
+                arWriteCFilesODE(fid_ode, config, model, condition(c));
+                fclose(fid_ode);
+                fprintf('writing condition m%i c%i, %s (%s)...%sdone\n', m, c, model.name, condition(c).checkstr, strtmp);
+            else
+                fprintf('writing condition m%i c%i, %s (%s)...%sskipped\n', m, c, model.name, condition(c).checkstr, strtmp);
+            end
         end
     end
     
@@ -94,21 +119,41 @@ for m=1:length(ar.model)
         
         data = ar.model(m).data;
         model_name = model.name;
-        parfor d=1:length(ar.model(m).data)
-            strtmp = '';
-            if(do_h(d))
-                fid_obsH = fopen(['./Compiled/' c_version_code '/' data(d).fkt '.h'], 'W'); % create header file
-                arWriteHFilesOBS(fid_obsH, data(d));
-                fclose(fid_obsH);
-                strtmp = 'header...';
+        if(usePool)
+            parfor d=1:length(ar.model(m).data)
+                strtmp = '';
+                if(do_h(d))
+                    fid_obsH = fopen(['./Compiled/' c_version_code '/' data(d).fkt '.h'], 'W'); % create header file
+                    arWriteHFilesOBS(fid_obsH, data(d));
+                    fclose(fid_obsH);
+                    strtmp = 'header...';
+                end
+                if(do_d(d))
+                    fid_obs = fopen(['./Compiled/' c_version_code '/' data(d).fkt '.c'], 'W');
+                    arWriteCFilesOBS(fid_obs, config, data(d));
+                    fclose(fid_obs);
+                    fprintf('writing data m%i d%i, %s (%s)...%sdone\n', m, d, model_name, data(d).checkstr, strtmp);
+                else
+                    fprintf('writing data m%i d%i, %s (%s)...%sskipped\n', m, d, model_name, data(d).checkstr, strtmp);
+                end
             end
-            if(do_d(d))
-                fid_obs = fopen(['./Compiled/' c_version_code '/' data(d).fkt '.c'], 'W');
-                arWriteCFilesOBS(fid_obs, config, data(d));
-                fclose(fid_obs);
-                fprintf('writing data m%i d%i, %s (%s)...%sdone\n', m, d, model_name, data(d).checkstr, strtmp);
-            else
-                fprintf('writing data m%i d%i, %s (%s)...%sskipped\n', m, d, model_name, data(d).checkstr, strtmp);
+        else
+            for d=1:length(ar.model(m).data)
+                strtmp = '';
+                if(do_h(d))
+                    fid_obsH = fopen(['./Compiled/' c_version_code '/' data(d).fkt '.h'], 'W'); % create header file
+                    arWriteHFilesOBS(fid_obsH, data(d));
+                    fclose(fid_obsH);
+                    strtmp = 'header...';
+                end
+                if(do_d(d))
+                    fid_obs = fopen(['./Compiled/' c_version_code '/' data(d).fkt '.c'], 'W');
+                    arWriteCFilesOBS(fid_obs, config, data(d));
+                    fclose(fid_obs);
+                    fprintf('writing data m%i d%i, %s (%s)...%sdone\n', m, d, model_name, data(d).checkstr, strtmp);
+                else
+                    fprintf('writing data m%i d%i, %s (%s)...%sskipped\n', m, d, model_name, data(d).checkstr, strtmp);
+                end
             end
         end
     end

@@ -18,7 +18,7 @@ if(nargin==0)
 end
 
 if(~silent)
-    fprintf('\nlinking time points... ');
+    fprintf('\nlinking time points...\n');
 end
 
 for m=1:length(ar.model)
@@ -202,8 +202,7 @@ for m = 1:length(ar.model)
 end
 
 if(~silent)
-    fprintf('done\n');
-    fprintf('linking parameters... ');
+    fprintf('linking parameters...\n');
 end
 
 % remember existing values
@@ -349,10 +348,6 @@ ar.config.nThreads = length(ar.config.threads);
 % reset values
 if(exist('plabel','var'))
     arSetPars(plabel, p, qfit, qlog10, lb, ub, type, meanp, stdp);
-end
-
-if(~silent)
-    fprintf('done\n');
 end
 
 % plotting

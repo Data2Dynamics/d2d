@@ -78,7 +78,7 @@ end
 % initial setup
 ar.model(m).data(d).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
 
-fprintf('\nloading data #%i, from file Data/%s.def ...', d, name);
+fprintf('\nloading data #%i, from file Data/%s.def...', d, name);
 fid = fopen(['Data/' name '.def'], 'r');
 
 % DESCRIPTION
@@ -345,7 +345,7 @@ fclose(fid);
 % XLS file
 if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(extension,'xls')) || ...
         (exist(['Data/' name '.csv'],'file') && strcmp(extension,'csv'))))
-    fprintf('loading data #%i, from file Data/%s.%s ...\n', d, name, extension);
+    fprintf('loading data #%i, from file Data/%s.%s...\n', d, name, extension);
     
     % read from file
     if(strcmp(extension,'xls'))

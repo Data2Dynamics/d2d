@@ -29,6 +29,8 @@ else
     end
 end
 
+usePool = matlabpool('size')>0;
+
 if(~isempty(varargin))
     forceFullCompile = varargin{1};
 else
@@ -150,13 +152,25 @@ for j=1:length(objects)
 end
 
 % compile
-parfor j=1:length(sources)
-    if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file'))
-        mex('-c', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
-            includesstr{:}, [sundials_path sources{j}]); %#ok<PFBNS>
-        fprintf('compiling CVODES(%s)...done\n', objects{j});
-    else
-        fprintf('compiling CVODES(%s)...skipped\n', objects{j});
+if(usePool)
+    parfor j=1:length(sources)
+        if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file'))
+            mex('-c', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
+                includesstr{:}, [sundials_path sources{j}]); %#ok<PFBNS>
+            fprintf('compiling CVODES(%s)...done\n', objects{j});
+        else
+            fprintf('compiling CVODES(%s)...skipped\n', objects{j});
+        end
+    end
+else
+    for j=1:length(sources)
+        if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file'))
+            mex('-c', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
+                includesstr{:}, [sundials_path sources{j}]);
+            fprintf('compiling CVODES(%s)...done\n', objects{j});
+        else
+            fprintf('compiling CVODES(%s)...skipped\n', objects{j});
+        end
     end
 end
 
@@ -186,7 +200,7 @@ file_con = {};
 ms = [];
 cs = [];
 for jm = 1:length(ar.model)
-    for jc = 1:length(ar.model(jm).condition)       
+    for jc = 1:length(ar.model(jm).condition)
         if(~ispc)
             objects_con{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).condition(jc).fkt '.o']; %#ok<AGROW>
         else
@@ -197,19 +211,36 @@ for jm = 1:length(ar.model)
         cs(end+1) = jc; %#ok<AGROW>
     end
 end
-        
-parfor j=1:length(objects_con)
-    if(~exist(objects_con{j}, 'file') || forceFullCompile)
-        if(isempty(compiled_cluster_path))
-            mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
-                includesstr{:}, ['./Compiled/' c_version_code '/' file_con{j}]);  %#ok<PFBNS>
+
+if(usePool)
+    parfor j=1:length(objects_con)
+        if(~exist(objects_con{j}, 'file') || forceFullCompile)
+            if(isempty(compiled_cluster_path))
+                mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                    includesstr{:}, ['./Compiled/' c_version_code '/' file_con{j}]);  %#ok<PFBNS>
+            else
+                mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                    includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_con{j}]);
+            end
+            fprintf('compiling condition m%i c%i, %s...done\n', ms(j), cs(j), file_con{j});
         else
-            mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
-                includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_con{j}]);
+            fprintf('compiling condition m%i c%i, %s...skipped\n', ms(j), cs(j), file_con{j});
         end
-        fprintf('compiling condition m%i c%i, %s...done\n', ms(j), cs(j), file_con{j});
-    else
-        fprintf('compiling condition m%i c%i, %s...skipped\n', ms(j), cs(j), file_con{j});
+    end
+else
+    for j=1:length(objects_con)
+        if(~exist(objects_con{j}, 'file') || forceFullCompile)
+            if(isempty(compiled_cluster_path))
+                mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                    includesstr{:}, ['./Compiled/' c_version_code '/' file_con{j}]);
+            else
+                mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                    includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_con{j}]);
+            end
+            fprintf('compiling condition m%i c%i, %s...done\n', ms(j), cs(j), file_con{j});
+        else
+            fprintf('compiling condition m%i c%i, %s...skipped\n', ms(j), cs(j), file_con{j});
+        end
     end
 end
 
@@ -237,18 +268,35 @@ if(isfield(ar.model, 'data'))
         end
     end
     
-    parfor j=1:length(objects_dat)
-        if(~exist(objects_dat{j}, 'file') || forceFullCompile)
-            if(isempty(compiled_cluster_path))
-                mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
-                    includesstr{:}, ['./Compiled/' c_version_code '/' file_dat{j}]);  %#ok<PFBNS>
+    if(usePool)
+        parfor j=1:length(objects_dat)
+            if(~exist(objects_dat{j}, 'file') || forceFullCompile)
+                if(isempty(compiled_cluster_path))
+                    mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                        includesstr{:}, ['./Compiled/' c_version_code '/' file_dat{j}]);  %#ok<PFBNS>
+                else
+                    mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                        includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_dat{j}]);
+                end
+                fprintf('compiling data m%i d%i, %s...done\n', ms(j), ds(j), file_dat{j});
             else
-                mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
-                includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_dat{j}]);
+                fprintf('compiling data m%i d%i, %s...skipped\n', ms(j), ds(j), file_dat{j});
             end
-            fprintf('compiling data m%i d%i, %s...done\n', ms(j), ds(j), file_dat{j});
-        else
-            fprintf('compiling data m%i d%i, %s...skipped\n', ms(j), ds(j), file_dat{j});
+        end
+    else
+        for j=1:length(objects_dat)
+            if(~exist(objects_dat{j}, 'file') || forceFullCompile)
+                if(isempty(compiled_cluster_path))
+                    mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                        includesstr{:}, ['./Compiled/' c_version_code '/' file_dat{j}]);
+                else
+                    mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                        includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_dat{j}]);
+                end
+                fprintf('compiling data m%i d%i, %s...done\n', ms(j), ds(j), file_dat{j});
+            else
+                fprintf('compiling data m%i d%i, %s...skipped\n', ms(j), ds(j), file_dat{j});
+            end
         end
     end
     
