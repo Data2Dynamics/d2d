@@ -262,14 +262,15 @@ while(~strcmp(C{1},'CONDITIONS'))
 end
 
 % collect parameters needed for OBS
-ar.model(m).data(d).p = union(strrep(ar.model(m).p, '_filename', ['_' ar.model(m).data(d).name]), union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
+ptmp = union(ar.model(m).px, ar.model(m).pu);
+ar.model(m).data(d).p = union(strrep(ptmp, '_filename', ['_' ar.model(m).data(d).name]), union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
 ar.model(m).data(d).p = union(ar.model(m).data(d).p, ar.model(m).data(d).pystd); %R2013a compatible
 
 % CONDITIONS
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).fp = transpose(ar.model(m).data(d).p);
-qcondparamodel = ismember(ar.model(m).data(d).p, strrep(ar.model(m).p, '_filename', ['_' ar.model(m).data(d).name])); %R2013a compatible
-ar.model(m).data(d).fp(qcondparamodel) = strrep(ar.model(m).fp, '_filename', ['_' ar.model(m).data(d).name]);
+qcondparamodel = ismember(ar.model(m).data(d).p, strrep(ptmp, '_filename', ['_' ar.model(m).data(d).name])); %R2013a compatible
+ar.model(m).data(d).fp(qcondparamodel) = strrep(ar.model(m).fp(ismember(ar.model(m).p, ptmp)), '_filename', ['_' ar.model(m).data(d).name]);
 while(~isempty(C{1}) && ~strcmp(C{1},'RANDOM'))
     qcondpara = ismember(ar.model(m).data(d).p, C{1}); %R2013a compatible
     if(sum(qcondpara)>0)

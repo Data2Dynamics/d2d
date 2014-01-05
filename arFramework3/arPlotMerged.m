@@ -14,7 +14,7 @@ if(~exist('saveToFile','var'))
 	saveToFile = false;
 end
 
-ar.model.qPlotYs(:) = 1; %Adjust, if only a subset of the data setup should be plotted
+% ar.model.qPlotYs(:) = 1; %Adjust, if only a subset of the data setup should be plotted
 
 standcond = 'Control'; % Insert standard condition
 
@@ -32,39 +32,29 @@ disp(ar.model.x)
 ylink = cell(size(ylabels(:)'));
 
 % ylink{1} = 22; % 'Mdm2_mRNA_fold'
-% ylink{2} = 20; % 'Wip1_mRNA_fold'
-% ylink{3} = 18; % 'p21_mRNA_fold'
+% ylink{2} = 30; % 'Wip1_mRNA_fold'
+% ylink{3} = 37; % 'p21_mRNA_fold'
 
-ylink{4} = 11; % 'pATM_au'
-ylink{5} = 9; % 'pChk1_au'
-ylink{6} = 13; % 'pChk2_au'
-ylink{7} = 15; % 'pDNAPK_au'
-ylink{8} = 17; % 'pp53_au'
-ylink{9} = 19; % 'tp21_au'
+% ylink{4} = 11; % 'pATM_au'
+% ylink{5} = 9; % 'pChk1_au'
+% ylink{6} = 13; % 'pChk2_au'
+% ylink{7} = 15; % 'pDNAPK_au'
+% ylink{8} = 17; % 'pp53_au'
+% condition_link = {[1 2 3 4], [1 5 6 7], [1 8 9 10]};
+
+ylink{9} = 24; % 'tp21_au'
+condition_link = {[1 2] [1 5 6 7], [1 8 9 10]}; 
 
 % ylink{10} = nan; % 'tp53_au'
 
-% if(only_inhib == false)
-%     ylink{6} = 12; % pAkt_au
-%     ylink{8} = 22; % pERK_au
-%     ylink{10} = 21; % pMEK_au
-%     %ylink{11} = 1; % pMet_au
-%     %ylink{12} = 18; % pRaf_au
-%     %ylink{5} = 25; % double_RSK_au
-%     %ylink{13} = 24; % single_RSK_au
-% else
-%     ylink{2} = 12; % pAkt_au_only_inhib
-%     ylink{3} = 22; % pERK_au_only_inhib
-%     ylink{4} = 21; % pMEK_au_only_inhib
-% end;
-
-% ylink{4} = 18;
-% ylink{5} = 17;
-% ylink{6} = 11;
-
-condition_link = {[1 2 3 4], [1 5 6 7], [1 8 9 10]}; %Adjust for required condition combination
-
 %% plot
+
+if(exist('condition_link','var'))
+    all_cs = [];
+    for jcs = 1:length(condition_link)
+        all_cs = union(all_cs, condition_link{jcs});
+    end
+end
 
 figcount = 1;
 for jm=1:length(ar.model);
@@ -81,11 +71,22 @@ for jm=1:length(ar.model);
         ymax = 0;
         xmax = 0;
         for jc = 1:length(ar.model.condition)
-            yrange = max([yrange range(ar.model.condition(jc).xExpSimu(:,ylink{j}))]);
-            ymax = max([ymax; ar.model.condition(jc).xExpSimu(:,ylink{j})]);
-            xmax = max([xmax; ar.model.condition(jc).tExp(:)]);
+            if(~exist('condition_link','var') || sum(all_cs==jc)>0)
+                for jp = 1:length(ar.model.plot)
+                    if(ar.model.qPlotYs(jp)==1 && ar.model.plot(jp).doseresponse==0)
+                        for jd = ar.model.plot(jp).dLink
+                            qy = ismember(ar.model.data(jd).y, ylabels{j});
+                            if(jc==ar.model.data(jd).cLink && sum(qy)==1 && ar.model.data(jd).doseresponse==0)
+                                yrange = max([yrange range(ar.model.condition(jc).xExpSimu(:,ylink{j}))]);
+                                ymax = max([ymax; ar.model.condition(jc).xExpSimu(:,ylink{j})]);
+                                xmax = max([xmax; ar.model.condition(jc).tExp(:)]);
+                            end
+                        end
+                    end
+                end
+            end
         end
-        yscale = 0.1*yrange;
+        yscale = 0.05*yrange;
         
         %collect
         ctime = cell(1,length(ar.model.condition));
@@ -167,9 +168,12 @@ for jm=1:length(ar.model);
         h = myRaiseFigure(jm, j, ar.model(jm).plot_merged(j).name, figcount);
         
         [nrows, ncols] = arNtoColsAndRows(length(condition_link));
+        gs = [];
         
         for jcs = 1:length(condition_link)
             g = subplot(nrows, ncols, jcs);
+            gs(jcs) = g; %#ok<AGROW>
+            
             hold(g, 'on');
             box(g, 'on');
             
@@ -182,10 +186,11 @@ for jm=1:length(ar.model);
             colindex = 1;
             for jc = condition_link{jcs}
                 tFine = ar.model.condition(jc).tFine;
-                xFine = ar.model.condition(jc).xFineSimu(:,ylink{j});
-                hstmp(end+1) = plot(g, ar.model.condition(jc).tFine, ar.model.condition(jc).xFineSimu(:,ylink{j}), ...
+                qt = tFine < xmax*1.1;
+                xFine = ar.model.condition(jc).xFineSimu(qt,ylink{j});
+                hstmp(end+1) = plot(g, tFine(qt), ar.model.condition(jc).xFineSimu(qt,ylink{j}), ...
                     'Color', colors(colindex,:)); %#ok<AGROW>
-                tFineP = [tFine; flipud(tFine)];
+                tFineP = [tFine(qt); flipud(tFine(qt))];
                 xFineP = [xFine + yscale; flipud(xFine - yscale)];
                 patch(tFineP, xFineP, zeros(size(xFineP))-2, ones(size(xFineP)), ...
                     'FaceColor', colors(colindex,:)*0.1+0.9, 'EdgeColor', colors(colindex,:)*0.1+0.9)
@@ -214,14 +219,15 @@ for jm=1:length(ar.model);
             end
             
 %             arSpacedAxisLimits(g);
-            xlim([0-0.1*xmax xmax+0.1*xmax])
-            ylim([0-2*yscale ymax+2*yscale])
+%             xlim([0-0.1*xmax xmax+0.1*xmax])
+%             ylim([0-2*yscale ymax+2*yscale])
 %             if(jcs == (nrows-1)*ncols + 1)
                 xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
 %             end
             ylabel(g, sprintf('%s [%s]', ar.model(jm).xUnits{ylink{j},3}, ar.model(jm).xUnits{ylink{j},2}));
             legend(hstmp, clabelstmp);
         end
+        arSpacedAxisLimits(gs);
         
         % save
         if(saveToFile)
@@ -231,7 +237,6 @@ for jm=1:length(ar.model);
         figcount = figcount + 1;
     end
 end
-ar.model.qPlotYs(:) = 0;
 
 
 
@@ -273,7 +278,11 @@ savePath = mypath([savePath '/' name]);
 saveas(h, savePath, 'fig');
 print('-depsc', savePath);
 % print('-dpng', savePath);
-system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+if(ispc)
+    print('-dpdf', savePath);
+else
+    system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+end
 % plot2svg([savePath '.svg'], h);
 
 function str = mypath(str)

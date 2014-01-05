@@ -139,12 +139,16 @@ while(iter < options.MaxIter && ~q_converged)
     pt(pt>ub) = ub(pt>ub);
     
     % evaluate trial point
-    if(nargout(fun)==2 || nargout(fun)==-1)
-        [rest, srest] = feval(fun, pt);
-    elseif(nargout(fun)==3)
-        [rest, srest, Ht] = feval(fun, pt);
+    try
+        if(nargout(fun)==2 || nargout(fun)==-1)
+            [rest, srest] = feval(fun, pt);
+        elseif(nargout(fun)==3)
+            [rest, srest, Ht] = feval(fun, pt);
+        end
+        resnormt = sum(rest.^2);
+    catch
+        resnormt = Inf;
     end
-    resnormt = sum(rest.^2);
     funevals = funevals + 1;
     
     % fit improvement statistics

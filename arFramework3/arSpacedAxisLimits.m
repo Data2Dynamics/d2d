@@ -5,42 +5,66 @@ end
 if(~exist('overplot','var'))
     overplot = 0.1;
 end
-[xmin, xmax, ymin, ymax] = axisLimits(g);
 
-% x-axis
-if(~strcmp(get(g, 'XScale'), 'linear'))
-    xmin = log10(xmin);
-    xmax = log10(xmax);
-end
-xrange = xmax - xmin;
-if(xrange == 0)
-    xrange = 1;
-end
-if(~isnan(xrange))
-    if(strcmp(get(g, 'XScale'), 'linear'))
-        xlim(g, [xmin-(xrange*overplot) xmax+(xrange*overplot)]);
-    else
-        xlim(g, 10.^[xmin-(xrange*overplot) xmax+(xrange*overplot)]);
+if(length(g)==1)
+    [xmin, xmax, ymin, ymax] = axisLimits(g);
+else
+    xmin = Inf;
+    xmax = -Inf;
+    ymin = Inf;
+    ymax = -Inf;
+    for j=1:length(g)
+        [tmpxmin, tmpxmax, tmpymin, tmpymax] = axisLimits(g(j));
+        if(tmpxmin<xmin)
+            xmin = tmpxmin;
+        end
+        if(tmpxmax>xmax)
+            xmax = tmpxmax;
+        end
+        if(tmpymin<ymin)
+            ymin = tmpymin;
+        end
+        if(tmpymax>ymax)
+            ymax = tmpymax;
+        end
     end
 end
 
-% y-axis
-if(~strcmp(get(g, 'YScale'), 'linear'))
-    ymin = log10(ymin);
-    ymax = log10(ymax);
-end
-yrange = ymax - ymin;
-if(yrange == 0)
-    yrange = 1;
-end
-if(~isnan(yrange))
-    if(strcmp(get(g, 'YScale'), 'linear'))
-        ylim(g, [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
-    else
-        ylim(g, 10.^[ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+for j=1:length(g)
+    % x-axis
+    if(~strcmp(get(g(j), 'XScale'), 'linear'))
+        xmin = log10(xmin);
+        xmax = log10(xmax);
+    end
+    xrange = xmax - xmin;
+    if(xrange == 0)
+        xrange = 1;
+    end
+    if(~isnan(xrange))
+        if(strcmp(get(g(j), 'XScale'), 'linear'))
+            xlim(g(j), [xmin-(xrange*overplot) xmax+(xrange*overplot)]);
+        else
+            xlim(g(j), 10.^[xmin-(xrange*overplot) xmax+(xrange*overplot)]);
+        end
+    end
+    
+    % y-axis
+    if(~strcmp(get(g(j), 'YScale'), 'linear'))
+        ymin = log10(ymin);
+        ymax = log10(ymax);
+    end
+    yrange = ymax - ymin;
+    if(yrange == 0)
+        yrange = 1;
+    end
+    if(~isnan(yrange))
+        if(strcmp(get(g(j), 'YScale'), 'linear'))
+            ylim(g(j), [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+        else
+            ylim(g(j), 10.^[ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+        end
     end
 end
-
 
 function [xmin, xmax, ymin, ymax] = axisLimits(g)
 p = get(g,'Children');
