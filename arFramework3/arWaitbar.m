@@ -5,7 +5,9 @@ function arWaitbar(j, n, text)
 global arWaitbarGlobal;
 
 % disable waitbar window and use command line output instead
-arWaitbar.showWindow = 1;
+if ~isfield(arWaitbarGlobal,'showWindow')
+    arWaitbarGlobal.showWindow = 1;
+end
 
 if(length(j) > 1)
     if(length(j) == length(n))
@@ -37,7 +39,7 @@ if(j==0 && nargin==1)
     
     arWaitbarGlobal.tcount = 1;
 	
-    if(arWaitbarGlobal.hasMonitor && arWaitbar.showWindow)
+    if(arWaitbarGlobal.hasMonitor && arWaitbarGlobal.showWindow)
         if(exist('text','var') && ~isempty(text))
             arWaitbarGlobal.h = waitbar(0, text);
         else
@@ -45,7 +47,7 @@ if(j==0 && nargin==1)
         end
     end
 elseif(j<0)
-    if(arWaitbarGlobal.hasMonitor && arWaitbar.showWindow)
+    if(arWaitbarGlobal.hasMonitor && arWaitbarGlobal.showWindow)
         try %#ok<TRYNC>
             close(arWaitbarGlobal.h);
         end
@@ -83,17 +85,17 @@ else
             end
 
             if(exist('text','var') && ~isempty(text))
-                if(arWaitbarGlobal.hasMonitor && arWaitbar.showWindow)
+                if(arWaitbarGlobal.hasMonitor && arWaitbarGlobal.showWindow)
                     arWaitbarGlobal.h = waitbar(j/n, arWaitbarGlobal.h, ...
                         sprintf('%s\n%i/%i   %2i%%   %s -> %s%s', ...
                         text, j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext));
                 else
-                    fprintf('%s %i/%i   %2i%%   %s -> %s%s', ...
+                    fprintf('%s %i/%i   %2i%%   %s -> %s%s\n', ...
                         text, j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext); 
                     drawnow;
                 end
             else
-                if(arWaitbarGlobal.hasMonitor && arWaitbar.showWindow)
+                if(arWaitbarGlobal.hasMonitor && arWaitbarGlobal.showWindow)
                     arWaitbarGlobal.h = waitbar(j/n, arWaitbarGlobal.h, ...
                         sprintf('%i/%i   %2i%%   %s -> %s%s', ...
                         j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext));
