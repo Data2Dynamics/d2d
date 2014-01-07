@@ -14,7 +14,7 @@ if(~exist('n','var'))
     n = 2*ar.config.nCore;
 end
 if(~exist('silent','var'))
-    silent = true;
+    silent = false;
 end
 
 if(~silent)
