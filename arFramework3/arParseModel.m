@@ -21,7 +21,7 @@ if(~exist('forceParsing','var'))
     forceParsing = false;
 end
 
-usePool = matlabpool('size')>0;
+usePool = exist('matlabpool','file')>0 && matlabpool('size')>0;
 
 checksum_global = addToCheckSum(ar.info.c_version_code);
 for m=1:length(ar.model)

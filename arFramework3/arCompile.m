@@ -29,7 +29,7 @@ else
     end
 end
 
-usePool = matlabpool('size')>0;
+usePool = exist('matlabpool','file')>0 && matlabpool('size')>0;
 
 if(~isempty(varargin))
     forceFullCompile = varargin{1};

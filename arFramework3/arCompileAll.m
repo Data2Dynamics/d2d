@@ -42,7 +42,7 @@ warning('off','symbolic:mupadmex:MuPADTextWarning');
 % enable timedebug mode, use with debug_mode = true!
 timedebug = false;
 
-usePool = matlabpool('size')>0;
+usePool = exist('matlabpool','file')>0 && matlabpool('size')>0;
 
 % main loop
 checksum_global = addToCheckSum(ar.info.c_version_code);
