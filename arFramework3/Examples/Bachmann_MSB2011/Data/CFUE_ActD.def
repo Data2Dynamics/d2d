@@ -9,9 +9,9 @@ t               T   min     time	0	200
 INPUTS
 
 OBSERVABLES
-pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_actd + scale_pJAK2_actd / init_EpoRJAK2 * 2 * (EpoRpJAK2 + p1EpoRpJAK2 + p2EpoRpJAK2 + p12EpoRpJAK2)"
-pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_actd + scale_pEpoR_actd / init_EpoRJAK2 * 16 * (p1EpoRpJAK2 + p2EpoRpJAK2 + p12EpoRpJAK2)"
-tSTAT5_au           C   au  conc.   1   1   "scale_tSTAT5_actd / init_STAT5 * (STAT5+pSTAT5)"
+pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_actd + scale_pJAK2_actd / init_EpoRJAK2 * pJAK2"
+pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_actd + scale_pEpoR_actd / init_EpoRJAK2 * pEpoR"
+tSTAT5_au           C   au  conc.   1   1   "scale_tSTAT5_actd / init_STAT5 * tSTAT5"
 pSTAT5_au           C   au  conc.   1   1   "offset_pSTAT5_actd + scale_pSTAT5_actd / init_STAT5 * pSTAT5"
 CIS_au              C   au  conc.   1   1   "offset_CIS_actd + scale_CIS_actd / CISEqc / CISRNAEqc / init_STAT5 * CIS"
 
@@ -21,8 +21,6 @@ pEpoR_au		"sd_JAK2EpoR_au"
 tSTAT5_au		"sd_STAT5_au"
 pSTAT5_au		"sd_STAT5_au"
 CIS_au			"sd_CIS_au"
-
-INVARIANTS
 
 CONDITIONS
 epo_level			"1.25e-7"

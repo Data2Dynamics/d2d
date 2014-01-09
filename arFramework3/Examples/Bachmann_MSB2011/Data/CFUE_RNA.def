@@ -24,8 +24,6 @@ CISRNA_foldA		"sd_RNA_fold"
 CISRNA_foldB		"sd_RNA_fold"
 CISRNA_foldC		"sd_RNA_fold"
 
-INVARIANTS
-
 CONDITIONS
 epo_level			"1.25e-7"
 ActD				"0"

@@ -17,7 +17,7 @@ if(~exist('dp', 'var'))
 end
 
 pRef = ar.p;
-arChi2(false);
+arChi2(false,[]);
 
 ar.sresFD = ar.res' * ones(1,length(pRef)) + 0;
 
@@ -29,11 +29,13 @@ for jp=1:length(ar.pLabel)
             if(jp==1)
                 ar.model(jm).condition(jc).suExpSimuFD = zeros(size(ar.model(jm).condition(jc).suExpSimu));
                 ar.model(jm).condition(jc).sxExpSimuFD = zeros(size(ar.model(jm).condition(jc).sxExpSimu));
+                ar.model(jm).condition(jc).szExpSimuFD = zeros(size(ar.model(jm).condition(jc).szExpSimu));
             end
             qp = ismember(ar.model(jm).condition(jc).p, ar.pLabel{jp}); %R2013a compatible
             if(sum(qp)>0)
                 ar.model(jm).condition(jc).suExpSimuFD(:,:,qp) = ar.model(jm).condition(jc).uExpSimu;
                 ar.model(jm).condition(jc).sxExpSimuFD(:,:,qp) = ar.model(jm).condition(jc).xExpSimu;
+                ar.model(jm).condition(jc).szExpSimuFD(:,:,qp) = ar.model(jm).condition(jc).zExpSimu;
             end
         end
         for jd=1:length(ar.model(jm).data)
@@ -59,7 +61,7 @@ for jp=1:length(ar.pLabel)
     
     % disturb p(jp)
     ar.p(jp) = ar.p(jp) + dp;
-    arChi2(false);
+    arChi2(false,[]);
     
     for jm=1:length(ar.model)
         for jc=1:length(ar.model(jm).condition)
@@ -69,6 +71,8 @@ for jp=1:length(ar.pLabel)
                     (ar.model(jm).condition(jc).uExpSimu - ar.model(jm).condition(jc).suExpSimuFD(:,:,qp)) / dp;
                 ar.model(jm).condition(jc).sxExpSimuFD(:,:,qp) = ...
                     (ar.model(jm).condition(jc).xExpSimu - ar.model(jm).condition(jc).sxExpSimuFD(:,:,qp)) / dp;
+                ar.model(jm).condition(jc).szExpSimuFD(:,:,qp) = ...
+                    (ar.model(jm).condition(jc).zExpSimu - ar.model(jm).condition(jc).szExpSimuFD(:,:,qp)) / dp;
             end
         end
         for jd=1:length(ar.model(jm).data)
@@ -92,6 +96,6 @@ for jp=1:length(ar.pLabel)
     
     % reset p
     ar.p = pRef;
-    arChi2(false);
+    arChi2(false,[]);
 end
 arWaitbar(-1);

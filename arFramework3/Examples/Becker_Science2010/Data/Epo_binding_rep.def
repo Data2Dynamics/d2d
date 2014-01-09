@@ -14,8 +14,6 @@ Epo_bound     C     pM  conc.   0	1   "epo_bound"
 ERRORS
 Epo_bound       "sd_Epo_bound"
 
-INVARIANTS
-
 CONDITIONS
 kD              "kD"
 init_EpoR       "init_Epo * init_EpoR_rel"

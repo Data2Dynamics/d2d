@@ -13,7 +13,7 @@ epo_bound    C   pM     "log_{10}(conc. bound Epo)" 	"init_EpoR * (10^epo_free) 
 
 REACTIONS
         
-INVARIANTS
+DERIVED
 
 CONDITIONS
 kD          "koff/kon"

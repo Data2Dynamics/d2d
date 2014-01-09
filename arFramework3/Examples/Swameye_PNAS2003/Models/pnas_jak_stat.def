@@ -35,11 +35,13 @@ nSTAT3           ->  nSTAT4           CUSTOM "p4 * nSTAT3"
 nSTAT4           ->  nSTAT5           CUSTOM "p4 * nSTAT4"
 nSTAT5           ->  STAT             CUSTOM "p4 * nSTAT5"
 
-INVARIANTS
+DERIVED
+tSTAT           C   "nM"  "conc."    "STAT + pSTAT + 2*pSTAT_pSTAT"
+tpSTAT          C   "nM"  "conc."    "pSTAT + 2*pSTAT_pSTAT"
         
 OBSERVABLES
-tSTAT_au        C   "au"  "conc."   1   0   "offset_tSTAT + scale_tSTAT * (STAT + pSTAT + 2*pSTAT_pSTAT)"
-pSTAT_au        C   "au"  "conc."   1   0   "offset_pSTAT + scale_pSTAT * (pSTAT + 2*pSTAT_pSTAT)"
+tSTAT_au        C   "au"  "conc."   1   0   "offset_tSTAT + scale_tSTAT * tSTAT"
+pSTAT_au        C   "au"  "conc."   1   0   "offset_pSTAT + scale_pSTAT * tpSTAT"
 pEpoR_au        C   "au"  "conc."   1   0   "pEpoR"
 
 ERRORS

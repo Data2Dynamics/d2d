@@ -18,10 +18,19 @@ if(~exist('dp', 'var'))
 end
 
 pRef = ar.p;
-arChi2(false);
+arChi2(false,[]);
 
-ar.sresFD = ar.res' * ones(1,length(pRef)) + 0;
-ar.sconstrFD = ar.constr' * ones(1,length(pRef)) + 0;
+if(~isempty(ar.res))
+    ar.sresFD = ar.res' * ones(1,length(pRef)) + 0;
+else
+    ar.sresFD = [];
+end
+
+if(~isempty(ar.constr))
+    ar.sconstrFD = ar.constr' * ones(1,length(pRef)) + 0;
+else
+    ar.sconstrFD = [];
+end
 
 arWaitbar(0);
 for jp=1:length(ar.pLabel)
@@ -30,14 +39,19 @@ for jp=1:length(ar.pLabel)
     % disturb p(jp)
     ar.p = pRef;
     ar.p(jp) = ar.p(jp) + dp;
-    arChi2(false);
+    arChi2(false,[]);
     
-    ar.sresFD(:,jp) = (ar.res' - ar.sresFD(:,jp)) / dp + 0;
-    ar.sconstrFD(:,jp) = (ar.constr' - ar.sconstrFD(:,jp)) / dp + 0;
+    if(~isempty(ar.res))
+        ar.sresFD(:,jp) = (ar.res' - ar.sresFD(:,jp)) / dp + 0;
+    end
+    
+    if(~isempty(ar.constr))
+        ar.sconstrFD(:,jp) = (ar.constr' - ar.sconstrFD(:,jp)) / dp + 0;
+    end
 end
 
 ar.p = pRef;
-arChi2(true);
+arChi2(true,[]);
 
 arWaitbar(-1);
 

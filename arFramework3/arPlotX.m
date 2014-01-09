@@ -45,10 +45,10 @@ for jm = 1:length(ar.model)
                 cclegendstyles = zeros(1,length(ar.model(jm).plot(jplot).dLink));
                 
                 for jd = ar.model(jm).plot(jplot).dLink
-                    [t, u, x, ulb, uub, xlb, xub, jc, dxdt] = getData(jm, jd);
+                    [t, u, x, z, ulb, uub, xlb, xub, zlb, zub, jc, dxdt] = getData(jm, jd);
                     
                     % rows and cols
-                    [ncols, nrows, nu, nx, iu, ix] = myColsAndRows(jm, rowstocols);
+                    [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm, rowstocols);
                     
                     Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount);
                     countu = 0;
@@ -164,13 +164,79 @@ for jm = 1:length(ar.model)
                             end
                         end
                     end
+                    countz = 0;
+                    for jz = iz
+                        countz = countz + 1;
+                        if(~fastPlotTmp)
+                            g = subplot(nrows,ncols,countz+nu+nx);
+                            ar.model(jm).plot(jplot).gz(jz) = g;
+                            mySubplotStyle(g, labelfontsize, labelfonttype);
+                            
+                            % plot ssa
+                            if(isfield(ar.model(jm).condition(jc), 'zFineSSA'))
+                                for jssa = 1:size(ar.model(jm).condition(jc).zFineSSA_lb, 3)
+                                    tmpx = [t(:); flipud(t(:))];
+                                    tmpy = [ar.model(jm).condition(jc).zFineSSA_ub(:,jz,jssa); ...
+                                        flipud(ar.model(jm).condition(jc).zFineSSA_lb(:,jz,jssa))];
+                                    patch(tmpx, tmpy, tmpx*0-2*eps, 'EdgeColor', Clines{2}*0.2+0.8, 'FaceColor', Clines{2}*0.2+0.8)
+                                    %                                 patch(tmpx, tmpy, tmpx*0-2*eps, 'EdgeColor', Clines{2}*0.4+0.6, 'FaceColor', Clines{2}*0.4+0.6)
+                                    hold(g, 'on');
+                                end
+                                for jssa = 1:size(ar.model(jm).condition(jc).zFineSSA_lb, 3)
+                                    plot(t, ar.model(jm).condition(jc).zFineSSA(:,jz,jssa), 'Color', Clines{2}*0.4+0.6)
+                                    hold(g, 'on');
+                                end
+                                if(size(ar.model(jm).condition(jc).zFineSSA,3)>1)
+                                    plot(t, mean(ar.model(jm).condition(jc).zFineSSA(:,jz,:),3), '--', 'Color', Clines{2})
+                                end
+                                
+                                % density plot
+                                %                             xtmp = linspace(min(min(ar.model(jm).condition(jc).zFineSSA_lb(:,jz,:)))*0.8, ...
+                                %                                 max(max(ar.model(jm).condition(jc).zFineSSA_ub(:,jz,:)))*1.2, 100);
+                                %                             zSSAdens = zeros(length(t), length(xtmp));
+                                %                             for jssa=1:length(t)
+                                %                                 zSSAdens(jssa,:) = ksdensity(squeeze((ar.model(jm).condition(jc).zFineSSA_ub(jssa,jz,:) + ...
+                                %                                 ar.model(jm).condition(jc).zFineSSA_lb(jssa,jz,:))/2), xtmp);
+                                %                                 zSSAdens(jssa,:) = zSSAdens(jssa,:) / sum(zSSAdens(jssa,:));
+                                %                             end
+                                %                             [A,B] = meshgrid(xtmp,t);
+                                %                             colormap jet
+                                %                             contourf(B, A, zSSAdens);
+                                %                             hold(g, 'on');
+                            end
+                            
+                            ltmp = plot(g, t, z(:,jz), Clines{:});
+                            cclegendstyles(ccount) = ltmp;
+                            if(jd~=0)
+                                ar.model(jm).data(jd).plot.z(jz,jc) = ltmp;
+                            else
+                                ar.model(jm).condition(jc).plot.z(jz,jc) = ltmp;
+                            end
+                            hold(g, 'on');
+                            
+                            if(ar.config.ploterrors == -1)
+                                tmpx = [t(:); flipud(t(:))];
+                                tmpy = [zub(:,jz); flipud(zlb(:,jz))];
+                                ltmp = patch(tmpx, tmpy, tmpx*0-2*eps, 'r');
+                                set(ltmp, 'FaceColor', Clines{2}*0.1+0.9, 'EdgeColor', Clines{2}*0.1+0.9);
+                                ltmp2 = patch(tmpx, tmpy, tmpx*0-eps, 'r');
+                                set(ltmp2, 'LineStyle', '--', 'FaceColor', 'none', 'EdgeColor', Clines{2}*0.3+0.7);
+                            end
+                        else
+                            if(jd~=0)
+                                set(ar.model(jm).data(jd).plot.z(jz,jc), 'YData', z(:,jz));
+                            else
+                                set(ar.model(jm).condition(jc).plot.z(jz,jc), 'YData', z(:,jz));
+                            end
+                        end
+                    end
                     ccount = ccount + 1;
                 end
             else
                 times = [];
                 for jd = ar.model(jm).plot(jplot).dLink
 					times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
-                    [ncols, nrows, nu, nx, iu, ix] = myColsAndRows(jm, rowstocols);
+                    [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm, rowstocols);
                 end
                 
                 if(str2double(matVer.Version)>=8.1)
@@ -249,6 +315,33 @@ for jm = 1:length(ar.model)
                                 end
                             else
                                 set(ar.model(jm).data(jd).plot.x(jx,jt,jc), 'YData', x);
+                            end
+                        end
+                        countz = 0;
+                        for jz = iz
+                            countz = countz + 1;
+                            [t, z, lb, ub, zero_break] = getDataDoseResponseZ(jm, jz, ds, times(jt));
+                            if(~fastPlotTmp)
+                                g = subplot(nrows,ncols,countz+nu+nx);
+                                ar.model(jm).plot(jplot).gz(jz) = g;
+                                mySubplotStyle(g, labelfontsize, labelfonttype);
+                                ltmp = plot(g, t, z, Clines{:});
+                                cclegendstyles(ccount) = ltmp;
+                                ar.model(jm).data(jd).plot.z(jz,jt,jc) = ltmp;
+                                hold(g, 'on');
+                                if(ar.config.ploterrors == -1)
+                                    tmpx = [t(:); flipud(t(:))];
+                                    tmpy = [ub(:); flipud(lb(:))];
+                                    ltmp = patch(tmpx, tmpy, tmpx*0-2*eps, 'r');
+                                    set(ltmp, 'FaceColor', Clines{2}*0.1+0.9, 'EdgeColor', Clines{2}*0.1+0.9);
+                                    ltmp2 = patch(tmpx, tmpy, tmpx*0-eps, 'r');
+                                    set(ltmp2, 'LineStyle', '--', 'FaceColor', 'none', 'EdgeColor', Clines{2}*0.3+0.7);
+                                end
+                                if(~isempty(zero_break))
+                                    plot([zero_break zero_break], ylim, 'k--');
+                                end
+                            else
+                                set(ar.model(jm).data(jd).plot.z(jz,jt,jc), 'YData', z);
                             end
                         end
                         ccount = ccount + 1;
@@ -353,6 +446,25 @@ for jm = 1:length(ar.model)
                     end
                     arSpacedAxisLimits(g, overplot);
                 end
+                countz = 0;
+                for jz = iz
+                    countz = countz + 1;
+                    g = ar.model(jm).plot(jplot).gz(jz);
+                    if(~fastPlotTmp)
+                        hold(g, 'off');
+                        
+                        title(g, myNameTrafo(ar.model(jm).z{jz}));                            
+                        if(countz+nu+nx == (nrows-1)*ncols + 1)
+                            if(~ar.model(jm).plot(jplot).doseresponse)
+                                xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
+                            else
+                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                            end
+                        end
+                        ylabel(g, sprintf('%s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2}));
+                    end
+                    arSpacedAxisLimits(g, overplot);
+                end
             end
             
             if(saveToFile)
@@ -373,7 +485,7 @@ for jm = 1:length(ar.model)
     end
 end
 
-function [t, u, x, ulb, uub, xlb, xub, jc, dxdt] = getData(jm, jd)
+function [t, u, x, z, ulb, uub, xlb, xub, zlb, zub, jc, dxdt] = getData(jm, jd)
 global ar
 
 if(jd~=0)
@@ -384,16 +496,21 @@ end
 t = ar.model(jm).condition(jc).tFine;
 u = ar.model(jm).condition(jc).uFineSimu;
 x = ar.model(jm).condition(jc).xFineSimu;
+z = ar.model(jm).condition(jc).zFineSimu;
 if(isfield(ar.model(jm).condition(jc), 'xExpUB'))
     ulb = ar.model(jm).condition(jc).uFineLB;
     uub = ar.model(jm).condition(jc).uFineUB;
     xlb = ar.model(jm).condition(jc).xFineLB;
     xub = ar.model(jm).condition(jc).xFineUB;
+    zlb = ar.model(jm).condition(jc).zFineLB;
+    zub = ar.model(jm).condition(jc).zFineUB;
 else
     ulb = [];
     uub = [];
     xlb = [];
     xub = [];
+    zlb = [];
+    zub = [];
 end
 dxdt = ar.model(jm).condition(jc).dxdt;
 dxdt(ar.model(jm).condition(jc).qSteadyState==0) = nan;
@@ -508,6 +625,61 @@ if(~isempty(lb))
     ub = ub(it);
 end
 
+
+function [t, z, lb, ub, zero_break] = getDataDoseResponseZ(jm, jz, ds, ttime)
+global ar
+
+zero_break = [];
+
+ccount = 1;
+for jd = ds
+    for jc = 1:length(ar.model(jm).data(jd).condition)
+        if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
+            jcondi = jc;
+        end
+    end
+    
+    jc = ar.model(jm).data(jd).cLink;
+    qt = ar.model(jm).condition(jc).tExp == ttime;
+    for jt = find(qt')
+        t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
+        if(isinf(t(ccount,1)))
+            doses = [];
+            for jd2 = ds
+                if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
+                    doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
+                end
+            end
+			doses = unique(doses); %R2013a compatible
+            if(length(doses)>1)
+                t(ccount,1) = doses(1) - (doses(2)-doses(1)); %#ok<AGROW>
+                zero_break = (t(ccount,1)+doses(1))/2;
+            else
+                t(ccount,1) = doses(1) - 0.1; %#ok<AGROW>
+                zero_break = (t(ccount,1)+doses(1))/2;
+            end
+        end
+        z(ccount,1) = ar.model(jm).condition(jc).zExpSimu(jt,jz); %#ok<AGROW>
+        
+        if(isfield(ar.model(jm).condition(jc), 'zExpUB'))
+            lb(ccount,1) = ar.model(jm).condition(jc).zExpLB(jt,jz); %#ok<AGROW>
+            ub(ccount,1) = ar.model(jm).condition(jc).zExpUB(jt,jz); %#ok<AGROW>
+        else
+            lb = [];
+            ub = [];
+        end
+        
+        ccount = ccount + 1;
+    end
+end
+
+[t,it] = sort(t);
+z = z(it);
+if(~isempty(lb))
+    lb = lb(it);
+    ub = ub(it);
+end
+
 %% sub-functions
 
 function C = myLineStyle(n, j)
@@ -617,7 +789,7 @@ set(g, 'FontName', labelfonttype);
 
 
 
-function [ncols, nrows, nu, nx, iu, ix] = myColsAndRows(jm, rowstocols)
+function [ncols, nrows, nu, nx, nz, iu, ix, iz] = myColsAndRows(jm, rowstocols)
 global ar
 if(~isfield(ar.model(jm), 'qPlotU'))
     nu = size(ar.model(jm).u, 2);
@@ -633,7 +805,14 @@ else
     nx = sum(ar.model(jm).qPlotX);
     ix = find(ar.model(jm).qPlotX);
 end
-[nrows, ncols] = NtoColsAndRows(nu+nx, rowstocols);
+if(~isfield(ar.model(jm), 'qPlotZ'))
+    nz = size(ar.model(jm).z, 2);
+    iz = 1:nz;
+else
+    nz = sum(ar.model(jm).qPlotZ);
+    iz = find(ar.model(jm).qPlotZ);
+end
+[nrows, ncols] = NtoColsAndRows(nu+nx+nz, rowstocols);
 
 
 

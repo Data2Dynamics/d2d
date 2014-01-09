@@ -178,7 +178,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
     end
     vcount = 1;
     str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
-    while(~strcmp(str{1},'INVARIANTS'))
+    while(~strcmp(str{1},'INVARIANTS') && ~strcmp(str{1},'DERIVED'))
         source = {};
         while(~strcmp(str{1},'->') && ~strcmp(str{1},'<->'))
             if(~strcmp(str{1},'0') && ~strcmp(str{1},'+'))
@@ -339,7 +339,7 @@ elseif(strcmp(C{1},'ODES'))
     ar.model(m).isReactionBased = false;
     str = textscan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
     ode_count = 0;
-    while(~strcmp(str{1},'INVARIANTS'))
+    while(~strcmp(str{1},'INVARIANTS') && ~strcmp(str{1},'DERIVED'))
         if(~strcmp(str{1},''))
             ode_count = ode_count + 1;
             ar.model(m).fv{end+1,1} = cell2mat(str{1});
@@ -408,15 +408,40 @@ for j=1:length(ar.model(m).x) % for every species j
     ar.model(m).fx{j} = char(tmpfx(j));
 end
 
-% INVARIANTS
-ar.model(m).fxeq = {};
-C = textscan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
+% DERIVED (previously INVARIANTS)
+if(strcmp(str{1},'INVARIANTS'))
+    error(['Section INVARIANTS in model definition file is deprecated! ' ...
+        'Please replace by DERIVED and see usage in: ' ...
+        'https://bitbucket.org/d2d-development/d2d-software/wiki/Setting%20up%20models']);
+end
+ar.model(m).z = {};
+ar.model(m).zUnits = {};
+ar.model(m).fz = {};
+C = textscan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'OBSERVABLES'))
     if(~strcmp(C{1},''))
-        ar.model(m).fxeq(end+1) = C{1};
+        if(sum(ismember(ar.model(m).x, C{1}))>0) %R2013a compatible
+            error('derived variable %s already defined in STATES', cell2mat(C{1}));
+        end
+        if(sum(ismember(ar.model(m).u, C{1}))>0) %R2013a compatible
+            error('derived variable %s already defined in INPUTS', cell2mat(C{1}));
+        end
+        ar.model(m).z(end+1) = C{1};
+        ar.model(m).zUnits(end+1,1) = C{2};
+        ar.model(m).zUnits(end,2) = C{3};
+        ar.model(m).zUnits(end,3) = C{4};
+        ar.model(m).fz(end+1,1) = C{5};
     end
-    C = textscan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
+    C = textscan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
+ar.model(m).qPlotZ = ones(size(ar.model(m).z));
+
+% derived variables parameters
+varlist = cellfun(@symvar, ar.model(m).fz, 'UniformOutput', false);
+ar.model(m).pz = setdiff(setdiff(vertcat(varlist{:}), {ar.model(m).t, ''}), union(ar.model(m).x, ar.model(m).u)); %R2013a compatible
+ar.model(m).px = union(ar.model(m).px, ar.model(m).pz); %R2013a compatible
+ar.model(m).p = union(ar.model(m).p, ar.model(m).pz); %R2013a compatible
+
 
 if(strcmp(C{1},'OBSERVABLES'))
     
@@ -447,11 +472,17 @@ if(strcmp(C{1},'OBSERVABLES'))
         if(sum(ismember(ar.model(m).x, ar.model(m).y{end}))>0) %R2013a compatible
             error('%s already defined in STATES', ar.model(m).y{end});
         end
+        if(sum(ismember(ar.model(m).u, ar.model(m).y{end}))>0) %R2013a compatible
+            error('%s already defined in INPUTS', ar.model(m).y{end});
+        end
+        if(sum(ismember(ar.model(m).z, ar.model(m).y{end}))>0) %R2013a compatible
+            error('%s already defined in DERIVED', ar.model(m).y{end});
+        end
     end
     
     % observation parameters
     varlist = cellfun(@symvar, ar.model(m).fy, 'UniformOutput', false);
-    ar.model(m).py = setdiff(setdiff(vertcat(varlist{:}), union(ar.model(m).x, ar.model(m).u)), {ar.model(m).t, ''}); %R2013a compatible
+    ar.model(m).py = setdiff(setdiff(vertcat(varlist{:}), union(union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z), ar.model(m).z)), {ar.model(m).t, ''}); %R2013a compatible
     
     % ERRORS
     ar.model(m).fystd = cell(size(ar.model(m).fy));
@@ -471,8 +502,8 @@ if(strcmp(C{1},'OBSERVABLES'))
     
     % error parameters
     varlist = cellfun(@symvar, ar.model(m).fystd, 'UniformOutput', false);
-    ar.model(m).pystd = setdiff(vertcat(varlist{:}), union(union(union(ar.model(m).x, ar.model(m).u), ... %R2013a compatible
-        ar.model(m).y), ar.model(m).t));
+    ar.model(m).pystd = setdiff(vertcat(varlist{:}), union(union(union(union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z), ... %R2013a compatible
+        ar.model(m).z), ar.model(m).y), ar.model(m).t));
     
     % add to parameters needed for model
     ar.model(m).p = union(union(ar.model(m).p, ar.model(m).py), ar.model(m).pystd);

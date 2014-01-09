@@ -201,14 +201,20 @@ while(~strcmp(C{1},'ERRORS'))
     if(sum(ismember(ar.model(m).x, ar.model(m).data(d).y{yindex}))>0) %R2013a compatible
         error('%s already defined in STATES', ar.model(m).data(d).y{yindex});
     end
+    if(sum(ismember(ar.model(m).u, ar.model(m).data(d).y{end}))>0) %R2013a compatible
+        error('%s already defined in INPUTS', ar.model(m).data(d).y{end});
+    end
+    if(sum(ismember(ar.model(m).z, ar.model(m).data(d).y{end}))>0) %R2013a compatible
+        error('%s already defined in DERIVED', ar.model(m).data(d).y{end});
+    end
 end
 
 % observation parameters
 varlist = cellfun(@symvar, ar.model(m).data(d).fy, 'UniformOutput', false);
-ar.model(m).data(d).py = setdiff(setdiff(vertcat(varlist{:}), union(ar.model(m).x, ar.model(m).u)), {ar.model(m).t, ''}); %R2013a compatible
+ar.model(m).data(d).py = setdiff(setdiff(vertcat(varlist{:}), union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z)), {ar.model(m).t, ''}); %R2013a compatible
 for j=1:length(ar.model(m).data(d).fy)
     varlist = symvar(ar.model(m).data(d).fy{j});
-    ar.model(m).data(d).py_sep(j).pars = setdiff(setdiff(varlist, union(ar.model(m).x, ar.model(m).u)), {ar.model(m).t, ''}); %R2013a compatible
+    ar.model(m).data(d).py_sep(j).pars = setdiff(setdiff(varlist, union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z)), {ar.model(m).t, ''}); %R2013a compatible
     
     % exclude parameters form model definition
     ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).px);
@@ -221,7 +227,7 @@ else
     ar.model(m).data(d).fystd = cell(size(ar.model(m).data(d).fy));
 end
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
-while(~strcmp(C{1},'INVARIANTS'))
+while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'CONDITIONS'))
     qyindex = ismember(ar.model(m).data(d).y, C{1});
     if(sum(qyindex)==1)
         yindex = find(qyindex);
@@ -240,7 +246,7 @@ end
 
 % error parameters
 varlist = cellfun(@symvar, ar.model(m).data(d).fystd, 'UniformOutput', false);
-ar.model(m).data(d).pystd = setdiff(vertcat(varlist{:}), union(union(union(ar.model(m).x, ar.model(m).u), ... %R2013a compatible
+ar.model(m).data(d).pystd = setdiff(vertcat(varlist{:}), union(union(union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z), ... %R2013a compatible
     ar.model(m).data(d).y), ar.model(m).t));
 for j=1:length(ar.model(m).data(d).fystd)
     varlist = symvar(ar.model(m).data(d).fystd{j});
@@ -252,13 +258,10 @@ for j=1:length(ar.model(m).data(d).fystd)
 end
 
 % INVARIANTS
-ar.model(m).data(d).fxeq = ar.model(m).fxeq;
-C = textscan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
-while(~strcmp(C{1},'CONDITIONS'))
-    if(~strcmp(C{1},''))
-        ar.model(m).data(d).fxeq(end+1) = C{1};
-    end
-    C = textscan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
+if(strcmp(C{1},'INVARIANTS'))
+    error(['Section INVARIANTS in data definition file is deprecated! ' ...
+        'Please remove and see usage in: ' ...
+        'https://bitbucket.org/d2d-development/d2d-software/wiki/Setting%20up%20models']);
 end
 
 % collect parameters needed for OBS

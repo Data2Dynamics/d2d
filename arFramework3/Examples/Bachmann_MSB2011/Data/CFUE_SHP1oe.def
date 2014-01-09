@@ -9,10 +9,10 @@ t               T   min     time	0	65
 INPUTS
 
 OBSERVABLES
-pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_shp1oe + scale_pJAK2_shp1oe / init_EpoRJAK2 * 2 * (EpoRpJAK2 + p1EpoRpJAK2 + p2EpoRpJAK2 + p12EpoRpJAK2)"
-pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_shp1oe + scale_pEpoR_shp1oe / init_EpoRJAK2 * 16 * (p1EpoRpJAK2 + p2EpoRpJAK2 + p12EpoRpJAK2)"
+pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_shp1oe + scale_pJAK2_shp1oe / init_EpoRJAK2 * pJAK2"
+pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_shp1oe + scale_pEpoR_shp1oe / init_EpoRJAK2 * pEpoR"
 CIS_au              C   au  conc.   1   1   "offset_CIS_shp1oe + scale_CIS_shp1oe / CISEqc / CISRNAEqc / init_STAT5 * CIS"
-tSTAT5_au           C   au  conc.   1   1   "scale_tSTAT5_shp1oe / init_STAT5 * (STAT5+pSTAT5)"
+tSTAT5_au           C   au  conc.   1   1   "scale_tSTAT5_shp1oe / init_STAT5 * tSTAT5"
 pSTAT5_au           C   au  conc.   1   1   "offset_pSTAT5_shp1oe + scale_pSTAT5_shp1oe / init_STAT5 * pSTAT5"
 tSHP1_au			C   au  conc.   1   1   "scale_SHP1_shp1oe / init_SHP1 * (SHP1 + SHP1Act) * (1 + (SHP1oe * SHP1ProOE))"
 
@@ -23,8 +23,6 @@ CIS_au			"sd_CIS_au"
 tSTAT5_au		"sd_STAT5_au"
 pSTAT5_au		"sd_STAT5_au"
 tSHP1_au		"sd_SHP1_au"
-
-INVARIANTS
 
 CONDITIONS
 epo_level			"1.25e-7"

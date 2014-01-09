@@ -105,6 +105,8 @@ if(fine && sensi && ar.config.useSensis)
                     ar.model(m).condition(c).pNum(j) * log(10);
                 ar.model(m).condition(c).sxFineSimu(:,:,j) = ar.model(m).condition(c).sxFineSimu(:,:,j) * ...
                     ar.model(m).condition(c).pNum(j) * log(10);
+                ar.model(m).condition(c).szFineSimu(:,:,j) = ar.model(m).condition(c).szFineSimu(:,:,j) * ...
+                    ar.model(m).condition(c).pNum(j) * log(10);
             end
         end
         if(isfield(ar.model(m), 'data'))
@@ -134,13 +136,20 @@ function ar = initFineSensis(ar)
 for m = 1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d = 1:length(ar.model(m).data)
-            ar.model(m).data(d).syFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
-            ar.model(m).data(d).systdFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+            ar.model(m).data(d).syFineSimu = zeros(length(ar.model(m).data(d).tFine), ...
+                length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+            ar.model(m).data(d).systdFineSimu = zeros(length(ar.model(m).data(d).tFine), ...
+                length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
         end
     end
     for c = 1:length(ar.model(m).condition)
-        ar.model(m).condition(c).suFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).u), length(ar.model(m).condition(c).p));
-        ar.model(m).condition(c).svFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).vs), length(ar.model(m).condition(c).p));
-        ar.model(m).condition(c).sxFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).x), length(ar.model(m).condition(c).p));
+        ar.model(m).condition(c).suFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
+            length(ar.model(m).u), length(ar.model(m).condition(c).p));
+        ar.model(m).condition(c).svFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
+            length(ar.model(m).vs), length(ar.model(m).condition(c).p));
+        ar.model(m).condition(c).sxFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
+            length(ar.model(m).x), length(ar.model(m).condition(c).p));
+        ar.model(m).condition(c).szFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
+            length(ar.model(m).z), length(ar.model(m).condition(c).p));
     end
 end

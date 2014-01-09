@@ -87,8 +87,11 @@ SOCS3           ->              CUSTOM "SOCS3Turn * SOCS3"
         
                 ->  SOCS3       CUSTOM "SOCS3oe * SOCS3EqcOE * SOCS3Turn"
 
-INVARIANTS
-
+DERIVED
+pJAK2      C   au      conc.    "2 * (EpoRpJAK2 + p1EpoRpJAK2 + p2EpoRpJAK2 + p12EpoRpJAK2)"
+pEpoR      C   au      conc.    "16 * (p1EpoRpJAK2 + p2EpoRpJAK2 + p12EpoRpJAK2)"
+tSTAT5     C   au      conc.    "STAT5+pSTAT5"
+        
 CONDITIONS
 init_EpoRpJAK2		"0"
 init_p1EpoRpJAK2	"0"

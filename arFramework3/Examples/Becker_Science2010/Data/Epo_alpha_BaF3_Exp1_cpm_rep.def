@@ -10,16 +10,14 @@ time        T   min time    0	350
 INPUTS
 
 OBSERVABLES
-Epo_ext     C	au  act.   0	1   "offset + scale * (Epo + dEpo_e)"  
-Epo_mem     C 	au  act.   0	1   "offset + scale * Epo_EpoR"        
-Epo_int     C 	au  act.   0	1   "offset + scale * (Epo_EpoR_i + dEpo_i)" 
+Epo_ext_cpm     C	au  act.   0	1   "offset + scale * Epo_ext"  
+Epo_mem_cpm     C 	au  act.   0	1   "offset + scale * Epo_EpoR"        
+Epo_int_cpm     C 	au  act.   0	1   "offset + scale * Epo_int" 
         
 ERRORS
-Epo_ext         "sd_Epo_ext"
-Epo_mem         "sd_Epo_mem"
-Epo_int         "sd_Epo_int"
-        
-INVARIANTS
+Epo_ext_cpm         "sd_Epo_ext"
+Epo_mem_cpm         "sd_Epo_mem"
+Epo_int_cpm         "sd_Epo_int"
 
 CONDITIONS
 init_EpoR  "4 * init_Epo * init_EpoR_rel"

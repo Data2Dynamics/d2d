@@ -24,8 +24,6 @@ SOCS3_abs		"sd_SOCS3_abs"
 // pSTAT5A_rel		"sd_pSTAT5_rel"
 pSTAT5B_rel		"sd_pSTAT5_rel"
 
-INVARIANTS
-
 CONDITIONS
 epo_level			"1.25e-7"
 ActD				"0"

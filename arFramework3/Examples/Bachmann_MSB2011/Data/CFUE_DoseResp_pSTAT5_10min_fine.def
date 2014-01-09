@@ -14,8 +14,6 @@ pSTAT5_au         C   au  conc.   1   1   "scale_pSTAT5_dr10 / init_STAT5 * pSTA
 ERRORS
 pSTAT5_au		"sd_STAT5_au"
 
-INVARIANTS
-
 CONDITIONS
 ActD				"0"
 CISoe               "0"

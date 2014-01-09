@@ -67,6 +67,8 @@ for m=1:length(ar.model)
             checksum_cond = addToCheckSum(ar.model(m).fv, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).N, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).cLink, checksum_cond);
+            checksum_cond = addToCheckSum(ar.model(m).z, checksum_cond);
+            checksum_cond = addToCheckSum(ar.model(m).fz, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).data(d).fp(qdynparas), checksum_cond);
             checkstr_cond = getCheckStr(checksum_cond);
             
@@ -149,14 +151,17 @@ for m=1:length(ar.model)
         config = ar.config;
         model.name = ar.model(m).name;
         model.fv = ar.model(m).fv;
+        model.fz = ar.model(m).fz;
         model.px0 = ar.model(m).px0;
         model.sym = ar.model(m).sym;
         model.t = ar.model(m).t;
         model.x = ar.model(m).x;
         model.u = ar.model(m).u;
+        model.z = ar.model(m).z;
         model.us = ar.model(m).us;
         model.xs = ar.model(m).xs;
         model.vs = ar.model(m).vs;
+        model.zs = ar.model(m).zs;
         model.N = ar.model(m).N;
         condition = ar.model(m).condition;
         newp = cell(1,length(ar.model(m).condition));
@@ -267,6 +272,8 @@ for m=1:length(ar.model)
         checksum_cond = addToCheckSum(ar.model(m).fv, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).N, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).cLink, checksum_cond);
+        checksum_cond = addToCheckSum(ar.model(m).z, checksum_cond);
+        checksum_cond = addToCheckSum(ar.model(m).fz, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).fp, checksum_cond);
         
         % append condition
@@ -297,14 +304,17 @@ for m=1:length(ar.model)
         config = ar.config;
         model.name = ar.model(m).name;
         model.fv = ar.model(m).fv;
+        model.fz = ar.model(m).fz;
         model.px0 = ar.model(m).px0;
         model.sym = ar.model(m).sym;
         model.t = ar.model(m).t;
         model.x = ar.model(m).x;
         model.u = ar.model(m).u;
+        model.z = ar.model(m).z;
         model.us = ar.model(m).us;
         model.xs = ar.model(m).xs;
         model.vs = ar.model(m).vs;
+        model.zs = ar.model(m).zs;
         model.N = ar.model(m).N;
         condition = ar.model(m).condition;
         newp = cell(1,length(ar.model(m).condition));
@@ -392,11 +402,15 @@ fprintf('calculating model m%i, %s...\n', m, ar.model(m).name);
 
 % make short strings
 ar.model(m).xs = {};
+ar.model(m).zs = {};
 ar.model(m).us = {};
 ar.model(m).vs = {};
 
 for j=1:length(ar.model(m).x)
     ar.model(m).xs{j} = sprintf('x[%i]',j);
+end
+for j=1:length(ar.model(m).z)
+    ar.model(m).zs{j} = sprintf('z[%i]',j);
 end
 for j=1:length(ar.model(m).u)
     ar.model(m).us{j} = sprintf('u[%i]',j);
@@ -408,6 +422,8 @@ end
 % make syms
 ar.model(m).sym.x = sym(ar.model(m).x);
 ar.model(m).sym.xs = sym(ar.model(m).xs);
+ar.model(m).sym.z = sym(ar.model(m).z);
+ar.model(m).sym.zs = sym(ar.model(m).zs);
 ar.model(m).sym.px0 = sym(ar.model(m).px0);
 ar.model(m).sym.u = sym(ar.model(m).u);
 ar.model(m).sym.us = sym(ar.model(m).us);
@@ -495,11 +511,14 @@ condition.sym.fv = sym(model.fv);
 condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.fp);
 condition.sym.fu = sym(condition.fu);
 condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.fp);
+condition.sym.fz = sym(model.fz);
+condition.sym.fz = mysubs(condition.sym.fz, condition.sym.p, condition.sym.fp);
 condition.sym.C = mysubs(model.sym.C, condition.sym.p, condition.sym.fp);
 
 % predictor
 condition.sym.fv = mysubs(condition.sym.fv, sym(model.t), sym('t'));
 condition.sym.fu = mysubs(condition.sym.fu, sym(model.t), sym('t'));
+condition.sym.fz = mysubs(condition.sym.fz, sym(model.t), sym('t'));
 
 % remaining initial conditions
 qinitial = ismember(condition.p, model.px0); %R2013a compatible
@@ -527,6 +546,7 @@ if(doskip)
     condition.sx = {};
     condition.qfsv_nonzero = [];
     condition.sv = {};
+    condition.sz = {};
     
     return;
 end
@@ -546,9 +566,14 @@ condition.sym.px0s = mysubs(sym(condition.px0), ...
 % make syms
 condition.sym.fv = mysubs(condition.sym.fv, model.sym.x, model.sym.xs);
 condition.sym.fv = mysubs(condition.sym.fv, model.sym.u, model.sym.us);
-
 condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.ps);
+
 condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.ps);
+
+condition.sym.fz = mysubs(condition.sym.fz, model.sym.x, model.sym.xs);
+condition.sym.fz = mysubs(condition.sym.fz, model.sym.u, model.sym.us);
+condition.sym.fz = mysubs(condition.sym.fz, condition.sym.p, condition.sym.ps);
+
 condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.ps);
 
 % remove zero inputs
@@ -634,7 +659,7 @@ if(config.useJacobian)
     end
 end
 
-% sx sensitivities
+% sensitivities
 if(config.useSensis)
 	% su
     condition.su = cell(length(model.us), 1);
@@ -923,6 +948,23 @@ if(config.useSensis)
     condition.sym.dfxdp = (model.N .* condition.sym.C) * (condition.sym.dvdp + ...
         condition.sym.dvdx*condition.sym.fsx0 + ...
         condition.sym.dvdu * condition.sym.dfudp);
+    
+    % derivatives fz
+    condition.sym.dfzdu = jacobian(condition.sym.fz, model.sym.us);
+    condition.sym.dfzdx = jacobian(condition.sym.fz, model.sym.xs);
+    condition.sym.dfzdp = jacobian(condition.sym.fz, condition.sym.ps);
+    
+    % sz
+    condition.sz = cell(length(model.zs), 1);
+    for j=1:length(model.zs)
+        condition.sz{j,1} = sprintf('sz[%i]', j);
+    end
+    condition.sym.sz = sym(condition.sz);
+    
+    condition.sym.sz = sym(condition.sz);
+    condition.sym.fsz1 = condition.sym.dfzdx * condition.sym.sx;
+    condition.sym.fsz2 = condition.sym.dfzdu * condition.sym.dfudp + ...
+        condition.sym.dfzdp;
 end
 
 
@@ -966,6 +1008,7 @@ if(doskip)
     data.qx_measured = [];
     data.dfydxnon0 = {};
     data.sx = {};
+    data.sz = {};
     data.sy = {};
     
     return;
@@ -992,12 +1035,16 @@ data.sym.fy = mysubs(data.sym.fy, ...
 data.sym.fy = mysubs(data.sym.fy, ...
     model.sym.u, model.sym.us);
 data.sym.fy = mysubs(data.sym.fy, ...
+    model.sym.z, model.sym.zs);
+data.sym.fy = mysubs(data.sym.fy, ...
     data.sym.p, data.sym.ps);
 
 data.sym.fystd = mysubs(data.sym.fystd, ...
     model.sym.x, model.sym.xs);
 data.sym.fystd = mysubs(data.sym.fystd, ...
     model.sym.u, model.sym.us);
+data.sym.fystd = mysubs(data.sym.fystd, ...
+    model.sym.z, model.sym.zs);
 data.sym.fystd = mysubs(data.sym.fystd, ...
     data.sym.y, data.sym.ys);
 data.sym.fystd = mysubs(data.sym.fystd, ...
@@ -1015,16 +1062,23 @@ if(~isempty(data.sym.fy))
     else
         data.sym.dfydx = [];
     end
+    if(~isempty(model.z))
+        data.sym.dfydz = jacobian(data.sym.fy, model.sym.zs);
+    else
+        data.sym.dfydz = [];
+    end
 	data.sym.dfydp = jacobian(data.sym.fy, data.sym.ps);
 else
 	data.sym.dfydu = [];
 	data.sym.dfydx = [];
+    data.sym.dfydz = [];
 	data.sym.dfydp = [];
 end
 
 % what is measured ?
 data.qu_measured = sum(logical(data.sym.dfydu~=0),1)>0;
 data.qx_measured = sum(logical(data.sym.dfydx~=0),1)>0;
+data.qz_measured = sum(logical(data.sym.dfydz~=0),1)>0;
 
 % derivatives fystd
 if(~isempty(data.sym.fystd))
@@ -1038,16 +1092,25 @@ if(~isempty(data.sym.fystd))
     else
         data.sym.dfystddx = [];
     end
+    if(~isempty(model.z))
+        data.sym.dfystddz = jacobian(data.sym.fystd, model.sym.zs);
+    else
+        data.sym.dfystddz = [];
+    end
     data.sym.dfystddp = jacobian(data.sym.fystd, data.sym.ps);
     data.sym.dfystddy = jacobian(data.sym.fystd, data.sym.ys);
 else
-	data.sym.dfystddp = [];
+    data.sym.dfystddu = [];
+    data.sym.dfystddp = [];
 	data.sym.dfystddy = [];
     data.sym.dfystddx = [];
+    data.sym.dfystddz = [];
 end
 
 % observed directly and exclusively
+data.dfydunon0 = logical(data.sym.dfydu ~= 0);
 data.dfydxnon0 = logical(data.sym.dfydx ~= 0);
+data.dfydznon0 = logical(data.sym.dfydz ~= 0);
 
 if(config.useSensis)
     % sx sensitivities
@@ -1071,6 +1134,15 @@ if(config.useSensis)
         end
     end
     data.sym.su = sym(data.su);
+    
+    % sz
+    data.sz = cell(length(model.zs), length(data.p_condition));
+    for j=1:length(model.zs)
+        for i=1:length(data.p_condition)
+            data.sz{j,i} = sprintf('sz[%i]', j + (i-1)*length(model.zs));
+        end
+    end
+    data.sym.sz = sym(data.sz);
     
     % sy sensitivities
     data.sy = {};
@@ -1097,10 +1169,16 @@ if(config.useSensis)
                 data.sym.sx;
             tmpfsu = data.sym.dfydu * ...
                 data.sym.su;
-            if(~isempty(model.x))
-                data.sym.fsy(:,qdynpara) = data.sym.fsy(:,qdynpara) + tmpfsx + tmpfsu;
-            else
+            tmpfsz = data.sym.dfydz * ...
+                data.sym.sz;
+            if(~isempty(model.u))
                 data.sym.fsy(:,qdynpara) = data.sym.fsy(:,qdynpara) + tmpfsu;
+            end
+            if(~isempty(model.x))
+                data.sym.fsy(:,qdynpara) = data.sym.fsy(:,qdynpara) + tmpfsx;
+            end
+            if(~isempty(model.z))
+                data.sym.fsy(:,qdynpara) = data.sym.fsy(:,qdynpara) + tmpfsz;
             end
         end
     else
@@ -1117,10 +1195,16 @@ if(config.useSensis)
                 data.sym.sx;
             tmpfsu = data.sym.dfystddu * ...
                 data.sym.su;
-            if(~isempty(model.x))
-                data.sym.fsystd(:,qdynpara) = data.sym.fsystd(:,qdynpara) + tmpfsx + tmpfsu;
-            else
+            tmpfsz = data.sym.dfystddz * ...
+                data.sym.sz;
+            if(~isempty(model.u))
                 data.sym.fsystd(:,qdynpara) = data.sym.fsystd(:,qdynpara) + tmpfsu;
+            end
+            if(~isempty(model.x))
+                data.sym.fsystd(:,qdynpara) = data.sym.fsystd(:,qdynpara) + tmpfsx;
+            end
+            if(~isempty(model.z))
+                data.sym.fsystd(:,qdynpara) = data.sym.fsystd(:,qdynpara) + tmpfsz;
             end
         end
     else
@@ -1201,6 +1285,8 @@ if(config.useSensiRHS)
 end
 fprintf(fid, ' void fsx0_%s(int ip, N_Vector sx0, void *user_data);\n', condition.fkt);
 fprintf(fid, ' void dfxdp_%s(realtype t, N_Vector x, double *dfxdp, void *user_data);\n\n', condition.fkt);
+fprintf(fid, ' void fz_%s(double t, int nt, int it, int nz, int nx, int iruns, double *z, double *p, double *u, double *x);\n', condition.fkt);
+fprintf(fid, ' void fsz_%s(double t, int nt, int it, int np, double *sz, double *p, double *u, double *x, double *z, double *su, double *sx);\n\n', condition.fkt);
 fprintf(fid, '#endif /* _MY_%s */\n', condition.fkt);
 
 fprintf(fid,'\n\n\n');
@@ -1492,6 +1578,27 @@ if(~isempty(model.xs))
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
+% write z
+fprintf(fid, ' void fz_%s(double t, int nt, int it, int nz, int nx, int iruns, double *z, double *p, double *u, double *x){\n', condition.fkt);
+if(~isempty(model.zs))
+    writeCcode(fid, condition, 'fz');
+end
+fprintf(fid, '\n  return;\n}\n\n\n');
+
+% write sz
+fprintf(fid, ' void fsz_%s(double t, int nt, int it, int np, double *sz, double *p, double *u, double *x, double *z, double *su, double *sx){\n', condition.fkt);
+if(config.useSensis)
+    if(~isempty(model.zs))
+        fprintf(fid, '  int jp;\n');
+        fprintf(fid, '  for (jp=0; jp<np; jp++) {\n');
+        writeCcode(fid, condition, 'fsz1');
+        fprintf(fid, '  };\n');
+        fprintf(fid, '\n');
+        writeCcode(fid, condition, 'fsz2');
+    end
+end
+fprintf(fid, '\n  return;\n}\n\n\n');
+
 
 % write data headers
 function arWriteHFilesData(fid, data)
@@ -1510,10 +1617,10 @@ fprintf(fid, '#include <mex.h>\n');
 fprintf(fid, '#include <arInputFunctionsC.h>\n');
 fprintf(fid,'\n\n\n');
 
-fprintf(fid, ' void fy_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int iruns, double *y, double *p, double *u, double *x);\n', data.fkt);
-fprintf(fid, ' void fystd_%s(double t, int nt, int it, int ntlink, int itlink, double *ystd, double *y, double *p, double *u, double *x);\n', data.fkt);
-fprintf(fid, ' void fsy_%s(double t, int nt, int it, int ntlink, int itlink, double *sy, double *p, double *u, double *x, double *su, double *sx);\n', data.fkt);
-fprintf(fid, ' void fsystd_%s(double t, int nt, int it, int ntlink, int itlink, double *systd, double *p, double *y, double *u, double *x, double *sy, double *su, double *sx);\n\n', data.fkt);
+fprintf(fid, ' void fy_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int nz, int iruns, double *y, double *p, double *u, double *x, double *z);\n', data.fkt);
+fprintf(fid, ' void fystd_%s(double t, int nt, int it, int ntlink, int itlink, double *ystd, double *y, double *p, double *u, double *x, double *z);\n', data.fkt);
+fprintf(fid, ' void fsy_%s(double t, int nt, int it, int ntlink, int itlink, double *sy, double *p, double *u, double *x, double *z, double *su, double *sx, double *sz);\n', data.fkt);
+fprintf(fid, ' void fsystd_%s(double t, int nt, int it, int ntlink, int itlink, double *systd, double *p, double *y, double *u, double *x, double *z, double *sy, double *su, double *sx, double *sz);\n\n', data.fkt);
 
 fprintf(fid, '#endif /* _MY_%s */\n', data.fkt);
 fprintf(fid,'\n\n\n');
@@ -1537,24 +1644,24 @@ fprintf(fid, '#include <arInputFunctionsC.h>\n');
 fprintf(fid,'\n\n\n');
 
 % write y
-fprintf(fid, ' void fy_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int iruns, double *y, double *p, double *u, double *x){\n', data.fkt);
+fprintf(fid, ' void fy_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int nz, int iruns, double *y, double *p, double *u, double *x, double *z){\n', data.fkt);
 writeCcode(fid, data, 'fy');
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write ystd
-fprintf(fid, ' void fystd_%s(double t, int nt, int it, int ntlink, int itlink, double *ystd, double *y, double *p, double *u, double *x){\n', data.fkt);
+fprintf(fid, ' void fystd_%s(double t, int nt, int it, int ntlink, int itlink, double *ystd, double *y, double *p, double *u, double *x, double *z){\n', data.fkt);
 writeCcode(fid, data, 'fystd');
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write sy
-fprintf(fid, ' void fsy_%s(double t, int nt, int it, int ntlink, int itlink, double *sy, double *p, double *u, double *x, double *su, double *sx){\n', data.fkt);
+fprintf(fid, ' void fsy_%s(double t, int nt, int it, int ntlink, int itlink, double *sy, double *p, double *u, double *x, double *z, double *su, double *sx, double *sz){\n', data.fkt);
 if(config.useSensis)
     writeCcode(fid, data, 'fsy');
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write systd
-fprintf(fid, ' void fsystd_%s(double t, int nt, int it, int ntlink, int itlink, double *systd, double *p, double *y, double *u, double *x, double *sy, double *su, double *sx){\n', data.fkt);
+fprintf(fid, ' void fsystd_%s(double t, int nt, int it, int ntlink, int itlink, double *systd, double *p, double *y, double *u, double *x, double *z, double *sy, double *su, double *sx, double *sz){\n', data.fkt);
 if(config.useSensis)
     writeCcode(fid, data, 'fsystd');
 end
@@ -1612,6 +1719,18 @@ elseif(strcmp(svar,'fu'))
 elseif(strcmp(svar,'fsu'))
     cstr = ccode(cond_data.sym.dfudp(:));
     cvar =  'data->su';
+elseif(strcmp(svar,'fz'))
+    cstr = ccode(cond_data.sym.fz(:));
+    cvar =  'z';
+elseif(strcmp(svar,'fsz1'))
+    cstr = ccode(cond_data.sym.fsz1);
+    for j=find(cond_data.sym.fsz1' == 0)
+        cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
+    end
+    cvar =  '    sz';
+elseif(strcmp(svar,'fsz2'))
+    cstr = ccode(cond_data.sym.fsz2(:));
+    cvar =  'sz';
 elseif(strcmp(svar,'fy'))
     cstr = ccode(cond_data.sym.fy(:));
     cvar =  'y';
@@ -1627,18 +1746,13 @@ elseif(strcmp(svar,'fsystd'))
 elseif(strcmp(svar,'dfxdp'))
     cstr = ccode(cond_data.sym.dfxdp(:));
     cvar =  'dfxdp';
+else
+    error('unkown %s', svar);
 end
 
 cstr = strrep(cstr, 't0', [cvar '[0]']);
 cstr = strrep(cstr, '][0]', ']');
 cstr = strrep(cstr, 'T', cvar);
-
-if(strcmp(svar,'fsv1'))
-    cstr = strrep(cstr, 'su[', sprintf('su[(ip*%i)+',length(cond_data.sym.su)));
-end
-if(strcmp(svar,'fsv2'))
-    cstr = strrep(cstr, '=', '+=');
-end
 
 % % debug
 % fprintf('\n\n');
@@ -1652,20 +1766,59 @@ end
 % fprintf('\n');
 
 if(~(length(cstr)==1 && isempty(cstr{1})))
-	if(strcmp(svar,'fy') || strcmp(svar,'fystd') || strcmp(svar,'fsy') || strcmp(svar,'fsystd'))
-        if(strcmp(svar,'fy'))
-            cstr = strrep(cstr, 'x[', 'x[nx*ntlink*iruns+itlink+ntlink*');
-            cstr = strrep(cstr, 'y[', 'y[ny*nt*iruns+it+nt*');
-        else
-            cstr = strrep(cstr, 'x[', 'x[itlink+ntlink*');
-            cstr = strrep(cstr, 'y[', 'y[it+nt*');
-        end
-		cstr = strrep(cstr, 'u[', 'u[itlink+ntlink*');
-		cstr = strrep(cstr, 'ystd[', 'ystd[it+nt*');
-	else
-		cstr = strrep(cstr, 'x[', 'x_tmp[');
+    if(strcmp(svar,'fy'))
+        cstr = strrep(cstr, 'x[', 'x[nx*ntlink*iruns+itlink+ntlink*');
+        cstr = strrep(cstr, 'z[', 'z[nz*ntlink*iruns+itlink+ntlink*');
+        cstr = strrep(cstr, 'y[', 'y[ny*nt*iruns+it+nt*');
+        cstr = strrep(cstr, 'u[', 'u[itlink+ntlink*');
+    elseif(strcmp(svar,'fsy'))
+        cstr = strrep(cstr, 'x[', 'x[itlink+ntlink*');
+        cstr = strrep(cstr, 'z[', 'z[itlink+ntlink*');
+        cstr = strrep(cstr, 'u[', 'u[itlink+ntlink*');
+        cstr = strrep(cstr, 'y[', 'y[it+nt*');        
+    elseif(strcmp(svar,'fystd'))
+        cstr = strrep(cstr, 'x[', 'x[itlink+ntlink*');
+        cstr = strrep(cstr, 'z[', 'z[itlink+ntlink*');
+        cstr = strrep(cstr, 'u[', 'u[itlink+ntlink*');
+        cstr = strrep(cstr, 'y[', 'y[it+nt*');
+        cstr = strrep(cstr, 'ystd[', 'ystd[it+nt*');
+    elseif(strcmp(svar,'fsystd'))
+        cstr = strrep(cstr, 'x[', 'x[itlink+ntlink*');
+        cstr = strrep(cstr, 'z[', 'z[itlink+ntlink*');
+        cstr = strrep(cstr, 'u[', 'u[itlink+ntlink*');
+        cstr = strrep(cstr, 'y[', 'y[it+nt*');
+        cstr = strrep(cstr, 'ystd[', 'ystd[it+nt*');
+        
+    elseif(strcmp(svar,'fz'))
+        cstr = strrep(cstr, 'x[', 'x[nx*nt*iruns+it+nt*');
+        cstr = strrep(cstr, 'z[', 'z[nz*nt*iruns+it+nt*');
+        cstr = strrep(cstr, 'u[', 'u[nu*nt*iruns+it+nt*');
+    elseif(strcmp(svar,'fsz1'))
+        cstr = strrep(cstr, 'x[', 'x[it+nt*');
+        cstr = strrep(cstr, 'z[', 'z[it+nt*');
+        cstr = strrep(cstr, 'u[', 'u[it+nt*');
+        cstr = strrep(cstr, 'sx[it+nt*', sprintf('sx[it + nt*%i*jp + nt*', length(cond_data.sx)));
+        cstr = strrep(cstr, 'sz[it+nt*', sprintf('sz[it + nt*%i*jp + nt*', length(cond_data.sz)));
+        cstr = strrep(cstr, 'su[it+nt*', sprintf('su[it + nt*%i*jp + nt*', length(cond_data.su)));
+    elseif(strcmp(svar,'fsz2'))
+        cstr = strrep(cstr, 'x[', 'x[it+nt*');
+        cstr = strrep(cstr, 'z[', 'z[it+nt*');
+        cstr = strrep(cstr, 'u[', 'u[it+nt*');
+        cstr = strrep(cstr, '=', '+=');
+        
+    elseif(strcmp(svar,'fsv1'))
+        cstr = strrep(cstr, 'su[', sprintf('su[(ip*%i)+',length(cond_data.su)));
+        cstr = strrep(cstr, 'x[', 'x_tmp[');
 		cstr = strrep(cstr, 'dvdx_tmp', 'dvdx');
-	end
+    elseif(strcmp(svar,'fsv2'))
+        cstr = strrep(cstr, '=', '+=');
+        cstr = strrep(cstr, 'x[', 'x_tmp[');
+		cstr = strrep(cstr, 'dvdx_tmp', 'dvdx');
+        
+    else
+        cstr = strrep(cstr, 'x[', 'x_tmp[');
+		cstr = strrep(cstr, 'dvdx_tmp', 'dvdx');
+    end
 end
 
 fprintf(fid, '%s\n', cstr);
@@ -1835,12 +1988,33 @@ for m=1:length(ar.model)
 end
 fprintf(fid, '}\n\n');
 
+
+% map fz
+fprintf(fid, 'void fz(double t, int nt, int it, int nz, int nx, int iruns, double *z, double *p, double *u, double *x, int im, int ic){\n');
+for m=1:length(ar.model)
+    for c=1:length(ar.model(m).condition)
+        fprintf(fid, '  if(im==%i & ic==%i) fz_%s(t, nt, it, nz, nx, iruns, z, p, u, x);\n', ...
+            m-1, c-1, ar.model(m).condition(c).fkt);
+    end
+end
+fprintf(fid, '}\n\n');
+
+% map fsz
+fprintf(fid, 'void fsz(double t, int nt, int it, int np, double *sz, double *p, double *u, double *x, double *z, double *su, double *sx, int im, int ic){\n');
+for m=1:length(ar.model)
+    for c=1:length(ar.model(m).condition)
+        fprintf(fid, '  if(im==%i & ic==%i) fsz_%s(t, nt, it, np, sz, p, u, x, z, su, sx);\n', ...
+            m-1, c-1, ar.model(m).condition(c).fkt);
+    end
+end
+fprintf(fid, '}\n\n');
+
 % map fy
-fprintf(fid, ' void fy(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int iruns, double *y, double *p, double *u, double *x, int im, int id){\n');
+fprintf(fid, ' void fy(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int nz, int iruns, double *y, double *p, double *u, double *x, double *z, int im, int id){\n');
 for m=1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d=1:length(ar.model(m).data)
-            fprintf(fid, '  if(im==%i & id==%i) fy_%s(t, nt, it, ntlink, itlink, ny, nx, iruns, y, p, u, x);\n', ...
+            fprintf(fid, '  if(im==%i & id==%i) fy_%s(t, nt, it, ntlink, itlink, ny, nx, nz, iruns, y, p, u, x, z);\n', ...
                 m-1, d-1, ar.model(m).data(d).fkt);
         end
     end
@@ -1848,11 +2022,11 @@ end
 fprintf(fid, '}\n\n');
 
 % map fystd
-fprintf(fid, ' void fystd(double t, int nt, int it, int ntlink, int itlink, double *ystd, double *y, double *p, double *u, double *x, int im, int id){\n');
+fprintf(fid, ' void fystd(double t, int nt, int it, int ntlink, int itlink, double *ystd, double *y, double *p, double *u, double *x, double *z, int im, int id){\n');
 for m=1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d=1:length(ar.model(m).data)
-            fprintf(fid, '  if(im==%i & id==%i) fystd_%s(t, nt, it, ntlink, itlink, ystd, y, p, u, x);\n', ...
+            fprintf(fid, '  if(im==%i & id==%i) fystd_%s(t, nt, it, ntlink, itlink, ystd, y, p, u, x, z);\n', ...
                 m-1, d-1, ar.model(m).data(d).fkt);
         end
     end
@@ -1860,11 +2034,11 @@ end
 fprintf(fid, '}\n\n');
 
 % map fsy
-fprintf(fid, ' void fsy(double t, int nt, int it, int ntlink, int itlink, double *sy, double *p, double *u, double *x, double *su, double *sx, int im, int id){\n');
+fprintf(fid, ' void fsy(double t, int nt, int it, int ntlink, int itlink, double *sy, double *p, double *u, double *x, double *z, double *su, double *sx, double *sz, int im, int id){\n');
 for m=1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d=1:length(ar.model(m).data)
-            fprintf(fid, '  if(im==%i & id==%i) fsy_%s(t, nt, it, ntlink, itlink, sy, p, u, x, su, sx);\n', ...
+            fprintf(fid, '  if(im==%i & id==%i) fsy_%s(t, nt, it, ntlink, itlink, sy, p, u, x, z, su, sx, sz);\n', ...
                 m-1, d-1, ar.model(m).data(d).fkt);
         end
     end
@@ -1872,11 +2046,11 @@ end
 fprintf(fid, '}\n\n');
 
 % map fsystd
-fprintf(fid, ' void fsystd(double t, int nt, int it, int ntlink, int itlink, double *systd, double *p, double *y, double *u, double *x, double *sy, double *su, double *sx, int im, int id){\n');
+fprintf(fid, ' void fsystd(double t, int nt, int it, int ntlink, int itlink, double *systd, double *p, double *y, double *u, double *x, double *z, double *sy, double *su, double *sx, double *sz, int im, int id){\n');
 for m=1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d=1:length(ar.model(m).data)
-            fprintf(fid, '  if(im==%i & id==%i) fsystd_%s(t, nt, it, ntlink, itlink, systd, p, y, u, x, sy, su, sx);\n', ...
+            fprintf(fid, '  if(im==%i & id==%i) fsystd_%s(t, nt, it, ntlink, itlink, systd, p, y, u, x, z, sy, su, sx, sz);\n', ...
                 m-1, d-1, ar.model(m).data(d).fkt);
         end
     end

@@ -9,14 +9,12 @@ t               T   min     time	0	75
 INPUTS
 
 OBSERVABLES
-pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_fine + scale_pJAK2_fine / init_EpoRJAK2 * 2 * (EpoRpJAK2 + p1EpoRpJAK2 + p2EpoRpJAK2 + p12EpoRpJAK2)"
-pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_fine + scale_pEpoR_fine / init_EpoRJAK2 * 16 * (p1EpoRpJAK2 + p2EpoRpJAK2 + p12EpoRpJAK2)"
+pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_fine + scale_pJAK2_fine / init_EpoRJAK2 * pJAK2"
+pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_fine + scale_pEpoR_fine / init_EpoRJAK2 * pEpoR"
 
 ERRORS
 pJAK2_au		"sd_JAK2EpoR_au"
 pEpoR_au		"sd_JAK2EpoR_au"
-
-INVARIANTS
 
 CONDITIONS
 epo_level			"1.25e-6"

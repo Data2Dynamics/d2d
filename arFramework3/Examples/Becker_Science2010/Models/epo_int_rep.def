@@ -26,8 +26,10 @@ Epo_EpoR_i      ->  EpoR Epo        CUSTOM "kex * Epo_EpoR_i"
 Epo_EpoR_i      ->  dEpo_i          CUSTOM "kdi * Epo_EpoR_i"
 Epo_EpoR_i      ->  dEpo_e          CUSTOM "kde * Epo_EpoR_i"
 
-INVARIANTS
-
+DERIVED
+Epo_ext         C   pM   conc.   "Epo + dEpo_e"
+Epo_int         C   pM   conc.   "Epo_EpoR_i + dEpo_i"
+        
 CONDITIONS
 init_Epo_EpoR       "0"
 init_Epo_EpoR_i     "0"

@@ -30,7 +30,8 @@ for m=1:length(ar.model)
             else
                 ar.model(m).condition(c).tExp = [];
             end
-            ar.model(m).condition(c).tFine = linspace(ar.model(m).tLim(1), ar.model(m).tLim(2), ar.config.nFinePoints)';
+            ar.model(m).condition(c).tFine = ...
+                linspace(ar.model(m).tLim(1), ar.model(m).tLim(2), ar.config.nFinePoints)';
         end
         
         % collect time points
@@ -41,7 +42,8 @@ for m=1:length(ar.model)
 				ar.model(m).data(d).tExp), 0);
             end
             
-            ar.model(m).data(d).tFine = linspace(ar.model(m).data(d).tLim(1), ar.model(m).data(d).tLim(2), ar.config.nFinePoints)';
+            ar.model(m).data(d).tFine = ...
+                linspace(ar.model(m).data(d).tLim(1), ar.model(m).data(d).tLim(2), ar.config.nFinePoints)';
             
 			ar.model(m).condition(ar.model(m).data(d).cLink).tFine = union( ... %R2013a compatible
 			   ar.model(m).condition(ar.model(m).data(d).cLink).tFine, ...
@@ -57,20 +59,24 @@ for m=1:length(ar.model)
             for jms=1:ar.model(m).ms_count
                 for c=1:length(ar.model(m).condition)
                     for c2=1:length(ar.model(m).condition)
-                        if(~isempty(ar.model(m).condition(c).ms_index) && ~isempty(ar.model(m).condition(c2).ms_index))
+                        if(~isempty(ar.model(m).condition(c).ms_index) && ...
+                                ~isempty(ar.model(m).condition(c2).ms_index))
                             qc = ar.model(m).condition(c).ms_index == jms;
                             qc2 = ar.model(m).condition(c2).ms_index == jms;
                             
                             if(sum(qc)>1 || sum(qc2)>1)
                                 error('wrong multiple shooting indexing');
                             end
-                            if(sum(qc)==1 && sum(qc2)==1 && ar.model(m).condition(c).ms_snip_index(qc)+1 == ar.model(m).condition(c2).ms_snip_index(qc2))
+                            if(sum(qc)==1 && sum(qc2)==1 && ...
+                                    ar.model(m).condition(c).ms_snip_index(qc)+1 == ar.model(m).condition(c2).ms_snip_index(qc2))
                                 
                                 tlink = ar.model(m).condition(c2).ms_snip_start;
                                 fprintf('linking condition %i and %i for multiple shooting at t = %f\n', c, c2, tlink);
                                 
-                                ar.model(m).condition(c).tExp = union(ar.model(m).condition(c).tExp, tlink); %R2013a compatible
-								ar.model(m).condition(c2).tExp = union(ar.model(m).condition(c2).tExp, tlink); %R2013a compatible 
+                                ar.model(m).condition(c).tExp = ...
+                                    union(ar.model(m).condition(c).tExp, tlink); %R2013a compatible
+								ar.model(m).condition(c2).tExp = ...
+                                    union(ar.model(m).condition(c2).tExp, tlink); %R2013a compatible 
 
                                 
                                 if(~isfield(ar.model(m), 'ms_link'))
@@ -112,8 +118,10 @@ for m=1:length(ar.model)
         % link back for multiple shooting
         if(isfield(ar.model(m), 'ms_link') && ~isempty(ar.model(m).ms_link))
             for jms = 1:size(ar.model(m).ms_link, 1)
-                ar.model(m).ms_link(jms,4) = find(ar.model(m).condition(ar.model(m).ms_link(jms,1)).tExp == ar.model(m).ms_link(jms,3));
-                ar.model(m).ms_link(jms,5) = find(ar.model(m).condition(ar.model(m).ms_link(jms,2)).tExp == ar.model(m).ms_link(jms,3));
+                ar.model(m).ms_link(jms,4) = ...
+                    find(ar.model(m).condition(ar.model(m).ms_link(jms,1)).tExp == ar.model(m).ms_link(jms,3));
+                ar.model(m).ms_link(jms,5) = ...
+                    find(ar.model(m).condition(ar.model(m).ms_link(jms,2)).tExp == ar.model(m).ms_link(jms,3));
             end
         end
         
@@ -136,20 +144,25 @@ for m=1:length(ar.model)
     end
 end
 
-% loading array for x and y
+% loading array for x, z and y
 for m = 1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d = 1:length(ar.model(m).data)
-            if(isfield(ar.model(m).data(d), 'tExp') && ~isempty(ar.model(m).data(d).tExp))
-                ar.model(m).data(d).yExpSimu = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y));
-                ar.model(m).data(d).syExpSimu = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
-                ar.model(m).data(d).ystdExpSimu = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y));
-                ar.model(m).data(d).systdExpSimu = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+            nt = length(ar.model(m).data(d).tExp);
+            ntf = length(ar.model(m).data(d).tFine);
+            ny = length(ar.model(m).data(d).y);
+            np = length(ar.model(m).data(d).p);
+            
+            if(isfield(ar.model(m).data(d), 'tExp') && nt>0)
+                ar.model(m).data(d).yExpSimu = zeros(nt, ny);
+                ar.model(m).data(d).syExpSimu = zeros(nt, ny, np);
+                ar.model(m).data(d).ystdExpSimu = zeros(nt, ny);
+                ar.model(m).data(d).systdExpSimu = zeros(nt, ny, np);
                 if(isfield(ar.model(m).data(d), 'yExp') && ~isempty(ar.model(m).data(d).yExp))
-                    ar.model(m).data(d).res = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y));
-                    ar.model(m).data(d).reserr = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y));
-                    ar.model(m).data(d).sres = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
-                    ar.model(m).data(d).sreserr = zeros(length(ar.model(m).data(d).tExp), length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+                    ar.model(m).data(d).res = zeros(nt, ny);
+                    ar.model(m).data(d).reserr = zeros(nt, ny);
+                    ar.model(m).data(d).sres = zeros(nt, ny, np);
+                    ar.model(m).data(d).sreserr = zeros(nt, ny, np);
                     ar.model(m).data(d).has_yExp = true;
                 else
                     ar.model(m).data(d).has_yExp = false;
@@ -160,40 +173,52 @@ for m = 1:length(ar.model)
                 ar.model(m).data(d).has_yExp = false;
             end
             
-            ar.model(m).data(d).yFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y));
-            ar.model(m).data(d).ystdFineSimu = zeros(length(ar.model(m).data(d).tFine), length(ar.model(m).data(d).y));
+            ar.model(m).data(d).yFineSimu = zeros(ntf, ny);
+            ar.model(m).data(d).ystdFineSimu = zeros(ntf, ny);
         end
     end
     for c = 1:length(ar.model(m).condition)
-        ar.model(m).condition(c).uNum = zeros(1, length(ar.model(m).u));
-        ar.model(m).condition(c).vNum = zeros(1, length(ar.model(m).vs));
-        ar.model(m).condition(c).dvdxNum = zeros(length(ar.model(m).vs), length(ar.model(m).x)); 
-        ar.model(m).condition(c).dvduNum = zeros(length(ar.model(m).vs), length(ar.model(m).u)); 
-        ar.model(m).condition(c).dvdpNum = zeros(length(ar.model(m).vs), length(ar.model(m).condition(c).p)); 
-        ar.model(m).condition(c).suNum = zeros(length(ar.model(m).u), length(ar.model(m).condition(c).p));
-        ar.model(m).condition(c).svNum = zeros(1, length(ar.model(m).vs));
+        ntf = length(ar.model(m).condition(c).tFine);
+        nu = length(ar.model(m).u);
+        nv = length(ar.model(m).vs);
+        nx = length(ar.model(m).x);
+        nz = length(ar.model(m).z);
+        np = length(ar.model(m).condition(c).p);
+        
+        ar.model(m).condition(c).uNum = zeros(1, nu);
+        ar.model(m).condition(c).vNum = zeros(1, nv);
+        ar.model(m).condition(c).dvdxNum = zeros(nv, nx); 
+        ar.model(m).condition(c).dvduNum = zeros(nv, nu); 
+        ar.model(m).condition(c).dvdpNum = zeros(nv, np); 
+        ar.model(m).condition(c).suNum = zeros(nu, np);
+        ar.model(m).condition(c).svNum = zeros(1, nv);
 
         if(isfield(ar.model(m).condition(c), 'tExp'))
-            ar.model(m).condition(c).uExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).u));
-            ar.model(m).condition(c).suExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).u), length(ar.model(m).condition(c).p));
-            ar.model(m).condition(c).vExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).vs));
-            ar.model(m).condition(c).svExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).vs), length(ar.model(m).condition(c).p));
-            ar.model(m).condition(c).xExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).x));
-            ar.model(m).condition(c).sxExpSimu = zeros(length(ar.model(m).condition(c).tExp), length(ar.model(m).x), length(ar.model(m).condition(c).p));
+            nt = length(ar.model(m).condition(c).tExp);
+            
+            ar.model(m).condition(c).uExpSimu = zeros(nt, nu);
+            ar.model(m).condition(c).suExpSimu = zeros(nt, nu, np);
+            ar.model(m).condition(c).vExpSimu = zeros(nt, nv);
+            ar.model(m).condition(c).svExpSimu = zeros(nt, nv, np);
+            ar.model(m).condition(c).xExpSimu = zeros(nt, nx);
+            ar.model(m).condition(c).sxExpSimu = zeros(nt, nx, np);
+            ar.model(m).condition(c).zExpSimu = zeros(nt, nz);
+            ar.model(m).condition(c).szExpSimu = zeros(nt, nz, np);
             ar.model(m).condition(c).has_tExp = true;
         else
             ar.model(m).condition(c).has_tExp = false;
         end
         
-        ar.model(m).condition(c).uFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).u));
-        ar.model(m).condition(c).vFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).vs));
-        ar.model(m).condition(c).xFineSimu = zeros(length(ar.model(m).condition(c).tFine), length(ar.model(m).x));
+        ar.model(m).condition(c).uFineSimu = zeros(ntf, nu);
+        ar.model(m).condition(c).vFineSimu = zeros(ntf, nv);
+        ar.model(m).condition(c).xFineSimu = zeros(ntf, nx);
+        ar.model(m).condition(c).zFineSimu = zeros(ntf, nz);
         
         % steady state sensitivities
-        ar.model(m).condition(c).qSteadyState = false(1,length(ar.model(m).x));
-        ar.model(m).condition(c).dxdt = zeros(1, length(ar.model(m).x));
-        ar.model(m).condition(c).ddxdtdp = zeros(length(ar.model(m).x), length(ar.model(m).condition(c).p));
-        ar.model(m).condition(c).stdSteadyState = zeros(1,length(ar.model(m).x)) + ar.config.steady_state_constraint;
+        ar.model(m).condition(c).qSteadyState = false(1,nx);
+        ar.model(m).condition(c).dxdt = zeros(1, nx);
+        ar.model(m).condition(c).ddxdtdp = zeros(nx, np);
+        ar.model(m).condition(c).stdSteadyState = zeros(1,nx) + ar.config.steady_state_constraint;
         
         ar.model(m).condition(c).start = 0;
         ar.model(m).condition(c).stop = 0;

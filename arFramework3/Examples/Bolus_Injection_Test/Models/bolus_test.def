@@ -21,7 +21,7 @@ ProteinB      ->  ProteinC        CUSTOM "k3*ProteinB"
         
               ->  ProteinA        CUSTOM "BolusInjection"
         
-INVARIANTS
+DERIVED
 
 CONDITIONS
 init_ProteinA       "9"

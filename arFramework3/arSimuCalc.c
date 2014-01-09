@@ -1,8 +1,6 @@
 /*
  *  MATLAB usage: arSimuCalc(struct ar, int fine, int sensi)
  *
- *  (adaptation from Scott D. Cohen, Alan C. Hindmarsh, and Radu Serban @ LLNL)
- *
  *  Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
  *
  */
@@ -66,6 +64,7 @@ void *thread_calc(void *threadarg);
 void thread_calc(int id);
 #endif
 void x_calc(int im, int ic);
+void z_calc(int im, int ic, mxArray *arcondition);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition);
 
 void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2);
@@ -286,7 +285,9 @@ void x_calc(int im, int ic) {
     gettimeofday(&t2, NULL);
 #endif
     
-    if(dynamics == 1) { /* begin of CVODES */
+    if(dynamics == 1) { 
+        
+        /**** begin of CVODES ****/
         
         /* get MATLAB values */
         qpositivex = mxGetData(mxGetField(armodel, im, "qPositiveX"));
@@ -387,8 +388,8 @@ void x_calc(int im, int ic) {
             
             /* custom error weight function */
             /*
-        flag = CVodeWFtolerances(cvode_mem, ewt);
-        if (flag < 0) return;}
+            flag = CVodeWFtolerances(cvode_mem, ewt);
+            if (flag < 0) return;
              */
         }
         
@@ -524,7 +525,11 @@ void x_calc(int im, int ic) {
         }
         free(data);
         
-    } /* end of CVODES */
+        /**** end of CVODES ****/
+        
+        /* call z_calc */
+        z_calc(im, ic, arcondition);
+    }
 
 #ifdef HAS_SYSTIME
     gettimeofday(&t3, NULL);
@@ -561,7 +566,66 @@ void x_calc(int im, int ic) {
 #endif
 }
 
-
+/* calculate derived variables */
+void z_calc(int im, int ic, mxArray *arcondition) {
+    
+    /* printf("computing model #%i, condition #%i, derived variables\n", im, ic); */
+    
+    int nt, np;
+    int it;
+            
+    double *t;
+    
+    double *p;
+    double *u;
+    double *x;
+    double *z;
+    double *su;
+    double *sx;
+    double *sz;
+    
+    /* MATLAB values */
+    if(fine == 1){
+        t = mxGetData(mxGetField(arcondition, ic, "tFine"));
+        nt = mxGetNumberOfElements(mxGetField(arcondition, ic, "tFine"));
+        
+        u = mxGetData(mxGetField(arcondition, ic, "uFineSimu"));
+        x = mxGetData(mxGetField(arcondition, ic, "xFineSimu"));
+        z = mxGetData(mxGetField(arcondition, ic, "zFineSimu"));
+        if (sensi == 1) {
+            su = mxGetData(mxGetField(arcondition, ic, "suFineSimu"));
+            sx = mxGetData(mxGetField(arcondition, ic, "sxFineSimu"));
+            sz = mxGetData(mxGetField(arcondition, ic, "szFineSimu"));
+        }
+    }
+    else{
+        t = mxGetData(mxGetField(arcondition, ic, "tExp"));
+        nt = mxGetNumberOfElements(mxGetField(arcondition, ic, "tExp"));
+        
+        u = mxGetData(mxGetField(arcondition, ic, "uExpSimu"));
+        x = mxGetData(mxGetField(arcondition, ic, "xExpSimu"));
+        z = mxGetData(mxGetField(arcondition, ic, "zExpSimu"));
+        if (sensi == 1) {
+            su = mxGetData(mxGetField(arcondition, ic, "suExpSimu"));
+            sx = mxGetData(mxGetField(arcondition, ic, "sxExpSimu"));
+            sz = mxGetData(mxGetField(arcondition, ic, "szExpSimu"));
+        }
+    }
+    p = mxGetData(mxGetField(arcondition, ic, "pNum"));
+    np = mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
+    
+    /* loop over output points */
+    for (it=0; it < nt; it++) {
+        /* printf("%f y-loop (im=%i id=%i)\n", t[it], im, id); */
+        
+        fz(t[it], nt, it, 0, 0, 0, z, p, u, x, im, ic);
+        if (sensi == 1) {
+            fsz(t[it], nt, it, np, sz, p, u, x, z, su, sx, im, ic);
+        }
+    }
+    
+    /* printf("computing model #%i, condition #%i, derived variables (done)\n", im, ic); */
+}
 
 /* calculate observations */
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
@@ -591,8 +655,10 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
     double *p;
     double *u;
     double *x;
+    double *z;
     double *su;
     double *sx;
+    double *sz;
     
     double *chi2;
     double *chi2err;
@@ -618,6 +684,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
         
         u = mxGetData(mxGetField(arcondition, ic, "uFineSimu"));
         x = mxGetData(mxGetField(arcondition, ic, "xFineSimu"));
+        z = mxGetData(mxGetField(arcondition, ic, "zFineSimu"));
         
         if (sensi == 1) {
             sy = mxGetData(mxGetField(ardata, id, "syFineSimu"));
@@ -625,6 +692,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
             
             su = mxGetData(mxGetField(arcondition, ic, "suFineSimu"));
             sx = mxGetData(mxGetField(arcondition, ic, "sxFineSimu"));
+            sz = mxGetData(mxGetField(arcondition, ic, "szFineSimu"));
         }
     }
     else{
@@ -638,6 +706,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
         
         u = mxGetData(mxGetField(arcondition, ic, "uExpSimu"));
         x = mxGetData(mxGetField(arcondition, ic, "xExpSimu"));
+        z = mxGetData(mxGetField(arcondition, ic, "zExpSimu"));
         
         if (sensi == 1) {
             sy = mxGetData(mxGetField(ardata, id, "syExpSimu"));
@@ -645,6 +714,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
             
             su = mxGetData(mxGetField(arcondition, ic, "suExpSimu"));
             sx = mxGetData(mxGetField(arcondition, ic, "sxExpSimu"));
+            sz = mxGetData(mxGetField(arcondition, ic, "szExpSimu"));
         }
         
         if (has_yExp == 1) {
@@ -671,7 +741,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
         /* printf("%f y-loop (im=%i id=%i)\n", t[it], im, id); */
         itlink = (int) tlink[it] - 1;
         
-        fy(t[it], nt, it, ntlink, itlink, 0, 0, 0, y, p, u, x, im, id);
+        fy(t[it], nt, it, ntlink, itlink, 0, 0, 0, 0, y, p, u, x, z, im, id);
         
         /* log trafo of y */
         for (iy=0; iy<ny; iy++) {
@@ -681,10 +751,10 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
             }
         }
         
-        if(fiterrors!=-1) fystd(t[it], nt, it, ntlink, itlink, ystd, y, p, u, x, im, id);
+        if(fiterrors!=-1) fystd(t[it], nt, it, ntlink, itlink, ystd, y, p, u, x, z, im, id);
         
         if (sensi == 1) {
-            fsy(t[it], nt, it, ntlink, itlink, sy, p, u, x, su, sx, im, id);
+            fsy(t[it], nt, it, ntlink, itlink, sy, p, u, x, z, su, sx, sz, im, id);
             
             /* log trafo of sy */
             for (iy=0; iy<ny; iy++) {
@@ -698,7 +768,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
                 }
             }
             
-            if(fiterrors!=-1) fsystd(t[it], nt, it, ntlink, itlink, systd, p, y, u, x, sy, su, sx, im, id);
+            if(fiterrors!=-1) fsystd(t[it], nt, it, ntlink, itlink, systd, p, y, u, x, z, sy, su, sx, sz, im, id);
         }
         
         if ((has_yExp == 1) & (fine == 0)) {

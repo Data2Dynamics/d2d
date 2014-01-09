@@ -23,7 +23,7 @@ for jm = 1:length(ar.model)
         myRaiseFigure(jm, ['SX: ' ar.model(jm).name ' - ' ar.model(jm).condition(jc).checkstr], fcount);
         
         % rows and cols
-        [ncols, nrows, nu, nx] = myColsAndRows(jm, rowstocols);
+        [ncols, nrows, nu, nx, nz] = myColsAndRows(jm, rowstocols);
         
         np = length(ar.model(jm).condition(jc).p);
         for ju = 1:nu
@@ -69,6 +69,29 @@ for jm = 1:length(ar.model)
             title(g, myNameTrafo(ar.model(jm).x{jx}));
             
             if(jx+nu == (nrows-1)*ncols + 1)
+                xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
+                ylabel(g, 'sensitivity');
+            end
+        end
+        for jz = 1:nz
+            g = subplot(nrows,ncols,jz+nu+nx);
+            mySubplotStyle(g, labelfontsize, labelfonttype);
+            
+            for jp = 1:np
+                linestyle = myLineStyle(np,jp);
+                plot(g, ar.model(jm).condition(jc).tFine, squeeze(ar.model(jm).condition(jc).szFineSimu(:,jz,jp)), linestyle{:});
+                hold(g, 'on');
+                % plot(g, ar.model(jm).condition(jc).tExp, squeeze(ar.model(jm).condition(jc).szExpSimu(:,jz,jp)), 'o');
+                if(isfield(ar.model(jm).condition(jc), 'szExpSimuFD'))
+                    plot(g, ar.model(jm).condition(jc).tExp, ar.model(jm).condition(jc).szExpSimuFD(:,jz,jp), linestyle{:}, 'Marker', '*');
+                end
+            end
+            hold(g, 'off');
+            
+            spacedAxisLimits(g, overplot);
+            title(g, myNameTrafo(ar.model(jm).z{jz}));
+            
+            if(jz+nu+nx == (nrows-1)*ncols + 1)
                 xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                 ylabel(g, 'sensitivity');
             end
@@ -130,11 +153,12 @@ set(g, 'FontName', labelfonttype);
 
 
 
-function [ncols, nrows, nu, nx] = myColsAndRows(jm, rowstocols)
+function [ncols, nrows, nu, nx, nz] = myColsAndRows(jm, rowstocols)
 global ar
 nu = size(ar.model(jm).u, 2);
 nx = size(ar.model(jm).x, 2);
-[nrows, ncols] = NtoColsAndRows(nu+nx, rowstocols);
+nz = size(ar.model(jm).z, 2);
+[nrows, ncols] = NtoColsAndRows(nu+nx+nz, rowstocols);
 
 
 
@@ -145,7 +169,7 @@ ncols = ceil(n / nrows);
 
 
 function spacedAxisLimits(g, overplot)
-[xmin xmax ymin ymax] = axisLimits(g);
+[xmin, xmax, ymin, ymax] = axisLimits(g);
 xrange = xmax - xmin;
 if(xrange == 0)
     xrange = 1;
@@ -159,7 +183,7 @@ ylim(g, [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
 
 
 
-function [xmin xmax ymin ymax] = axisLimits(g)
+function [xmin, xmax, ymin, ymax] = axisLimits(g)
 p = get(g,'Children');
 xmin = nan;
 xmax = nan;

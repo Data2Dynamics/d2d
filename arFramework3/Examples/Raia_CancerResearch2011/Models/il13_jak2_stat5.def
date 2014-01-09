@@ -46,7 +46,9 @@ DecoyR          ->  IL13_DecoyR     CUSTOM "il13_level * 2.265 * DecoyR_binding 
 SOCS3           ->                  CUSTOM "SOCS3_degradation * SOCS3"
                 ->  CD274mRNA       CUSTOM "pSTAT5 * CD274mRNA_production"
 
-INVARIANTS
+DERIVED
+IL13_cell       C   nmol/l      conc.   "IL13_Rec + p_IL13_Rec + p_IL13_Rec_i + IL13_DecoyR"
+pIL4Ra          C   nmol/l      conc.   "p_IL13_Rec + p_IL13_Rec_i"
         
 CONDITIONS
 il13_level      "1"

@@ -42,8 +42,8 @@ ylink = cell(size(ylabels(:)'));
 % ylink{8} = 17; % 'pp53_au'
 % condition_link = {[1 2 3 4], [1 5 6 7], [1 8 9 10]};
 
-ylink{9} = 24; % 'tp21_au'
-condition_link = {[1 2] [1 5 6 7], [1 8 9 10]}; 
+% ylink{9} = 24; % 'tp21_au'
+% condition_link = {[1 2] [1 5 6 7], [1 8 9 10]}; 
 
 % ylink{10} = nan; % 'tp53_au'
 
