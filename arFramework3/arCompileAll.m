@@ -462,9 +462,9 @@ end
 
 % derivatives
 if(~isempty(ar.model(m).sym.fv))
-    ar.model(m).sym.dfvdx = jacobian(ar.model(m).sym.fv, ar.model(m).sym.x);
+    ar.model(m).sym.dfvdx = myJacobian(ar.model(m).sym.fv, ar.model(m).sym.x);
     if(~isempty(ar.model(m).sym.us))
-        ar.model(m).sym.dfvdu = jacobian(ar.model(m).sym.fv, ar.model(m).sym.u);
+        ar.model(m).sym.dfvdu = myJacobian(ar.model(m).sym.fv, ar.model(m).sym.u);
     else
         ar.model(m).sym.dfvdu = sym(ones(length(ar.model(m).sym.fv), 0));
     end
@@ -585,13 +585,13 @@ end
 
 % derivatives
 if(~isempty(condition.sym.fv))
-    condition.sym.dfvdx = jacobian(condition.sym.fv, model.sym.xs);
+    condition.sym.dfvdx = myJacobian(condition.sym.fv, model.sym.xs);
     if(~isempty(model.sym.us))
-        condition.sym.dfvdu = jacobian(condition.sym.fv, model.sym.us);
+        condition.sym.dfvdu = myJacobian(condition.sym.fv, model.sym.us);
     else
         condition.sym.dfvdu = sym(ones(length(condition.sym.fv), 0));
     end
-    condition.sym.dfvdp = jacobian(condition.sym.fv, condition.sym.ps);
+    condition.sym.dfvdp = myJacobian(condition.sym.fv, condition.sym.ps);
 else
     condition.sym.dfvdx = sym(ones(0, length(model.sym.xs)));
     condition.sym.dfvdu = sym(ones(0, length(model.sym.us)));
@@ -676,7 +676,7 @@ if(config.useSensis)
     if(~isempty(condition.sym.ps))
         if(~isempty(condition.sym.fu))
             condition.sym.dfudp = ...
-                jacobian(condition.sym.fu, condition.sym.ps);
+                myJacobian(condition.sym.fu, condition.sym.ps);
         else
             condition.sym.dfudp = sym(ones(0,length(condition.sym.ps)));
         end
@@ -939,7 +939,7 @@ if(config.useSensis)
     
     % sx initials
     if(~isempty(condition.sym.fpx0))
-        condition.sym.fsx0 = jacobian(condition.sym.fpx0, condition.sym.ps);
+        condition.sym.fsx0 = myJacobian(condition.sym.fpx0, condition.sym.ps);
     else
         condition.sym.fsx0 = sym(ones(0, length(condition.sym.ps)));
     end
@@ -950,9 +950,9 @@ if(config.useSensis)
         condition.sym.dvdu * condition.sym.dfudp);
     
     % derivatives fz
-    condition.sym.dfzdu = jacobian(condition.sym.fz, model.sym.us);
-    condition.sym.dfzdx = jacobian(condition.sym.fz, model.sym.xs);
-    condition.sym.dfzdp = jacobian(condition.sym.fz, condition.sym.ps);
+    condition.sym.dfzdu = myJacobian(condition.sym.fz, model.sym.us);
+    condition.sym.dfzdx = myJacobian(condition.sym.fz, model.sym.xs);
+    condition.sym.dfzdp = myJacobian(condition.sym.fz, condition.sym.ps);
     
     % sz
     condition.sz = cell(length(model.zs), 1);
@@ -1053,21 +1053,21 @@ data.sym.fystd = mysubs(data.sym.fystd, ...
 % derivatives fy
 if(~isempty(data.sym.fy))
     if(~isempty(model.sym.us))
-        data.sym.dfydu = jacobian(data.sym.fy, model.sym.us);
+        data.sym.dfydu = myJacobian(data.sym.fy, model.sym.us);
     else
         data.sym.dfydu = sym(ones(length(data.y), 0));
     end
     if(~isempty(model.x))
-        data.sym.dfydx = jacobian(data.sym.fy, model.sym.xs);
+        data.sym.dfydx = myJacobian(data.sym.fy, model.sym.xs);
     else
         data.sym.dfydx = [];
     end
     if(~isempty(model.z))
-        data.sym.dfydz = jacobian(data.sym.fy, model.sym.zs);
+        data.sym.dfydz = myJacobian(data.sym.fy, model.sym.zs);
     else
         data.sym.dfydz = [];
     end
-	data.sym.dfydp = jacobian(data.sym.fy, data.sym.ps);
+	data.sym.dfydp = myJacobian(data.sym.fy, data.sym.ps);
 else
 	data.sym.dfydu = [];
 	data.sym.dfydx = [];
@@ -1083,22 +1083,22 @@ data.qz_measured = sum(logical(data.sym.dfydz~=0),1)>0;
 % derivatives fystd
 if(~isempty(data.sym.fystd))
     if(~isempty(model.sym.us))
-        data.sym.dfystddu = jacobian(data.sym.fystd, model.sym.us);
+        data.sym.dfystddu = myJacobian(data.sym.fystd, model.sym.us);
     else
         data.sym.dfystddu = sym(ones(length(data.y), 0));
     end
     if(~isempty(model.x))
-        data.sym.dfystddx = jacobian(data.sym.fystd, model.sym.xs);
+        data.sym.dfystddx = myJacobian(data.sym.fystd, model.sym.xs);
     else
         data.sym.dfystddx = [];
     end
     if(~isempty(model.z))
-        data.sym.dfystddz = jacobian(data.sym.fystd, model.sym.zs);
+        data.sym.dfystddz = myJacobian(data.sym.fystd, model.sym.zs);
     else
         data.sym.dfystddz = [];
     end
-    data.sym.dfystddp = jacobian(data.sym.fystd, data.sym.ps);
-    data.sym.dfystddy = jacobian(data.sym.fystd, data.sym.ys);
+    data.sym.dfystddp = myJacobian(data.sym.fystd, data.sym.ps);
+    data.sym.dfystddy = myJacobian(data.sym.fystd, data.sym.ys);
 else
     data.sym.dfystddu = [];
     data.sym.dfystddp = [];
@@ -2074,3 +2074,14 @@ fprintf(fid, '}\n\n');
 
 fclose(fid);
 
+
+function J = myJacobian(F,x)
+% function checks if first argument is empty to provide R2013b compatibility.
+% If F is not empty, the built-in jacobian is called. Else, the function returns 
+% an empty sym in the right dimensions.
+
+if(~isempty(F))
+    J = jacobian(F,x);
+else
+    J = sym(NaN(0,length(x)));
+end
