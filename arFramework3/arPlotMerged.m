@@ -1,243 +1,323 @@
-% plot trajectories
-%
-% this function is experimental, please contact Andreas Raue for help
+% plot merged
 
-function arPlotMerged(saveToFile)
+function arPlotMerged(condition_link, reference_condition, saveToFile)
 
 global ar
 
 if(isempty(ar))
-	error('please initialize by arInit')
+    error('please initialize by arInit')
 end
 
-if(~exist('saveToFile','var'))
-	saveToFile = false;
-end
-
-% ar.model.qPlotYs(:) = 1; %Adjust, if only a subset of the data setup should be plotted
-
-standcond = 'Control'; % Insert standard condition
-
-%% log
-clc
-
-ylabels = {};
-for jd = 1:length(ar.model.data)
-    ylabels = union(ylabels,ar.model.data(jd).y);
-end
-disp(ylabels)
-disp(ar.model.x)
-
-%% link
-ylink = cell(size(ylabels(:)'));
-
-% ylink{1} = 22; % 'Mdm2_mRNA_fold'
-% ylink{2} = 30; % 'Wip1_mRNA_fold'
-% ylink{3} = 37; % 'p21_mRNA_fold'
-
-% ylink{4} = 11; % 'pATM_au'
-% ylink{5} = 9; % 'pChk1_au'
-% ylink{6} = 13; % 'pChk2_au'
-% ylink{7} = 15; % 'pDNAPK_au'
-% ylink{8} = 17; % 'pp53_au'
-% condition_link = {[1 2 3 4], [1 5 6 7], [1 8 9 10]};
-
-% ylink{9} = 24; % 'tp21_au'
-% condition_link = {[1 2] [1 5 6 7], [1 8 9 10]}; 
-
-% ylink{10} = nan; % 'tp53_au'
-
-%% plot
-
-if(exist('condition_link','var'))
-    all_cs = [];
-    for jcs = 1:length(condition_link)
-        all_cs = union(all_cs, condition_link{jcs});
+if(~exist('condition_link','var') || isempty(condition_link))
+    condition_link = {};
+    for jm=1:length(ar.model);
+        condition_link_tmp = {};
+        for jc = 1:length(ar.model(jm).condition)
+            condition_link_tmp{jc} = jc; %#ok<AGROW>
+        end
+        condition_link{jm} = condition_link_tmp; %#ok<AGROW>
     end
 end
+if(~exist('reference_condition','var'))
+    for jm=1:length(ar.model)
+        reference_condition{jm} = 1;
+    end
+end
+if(~exist('saveToFile','var'))
+    saveToFile = false;
+end
+
+standcond = 'Reference'; % Insert standard condition
+
+xrangefac = 0.1;
 
 figcount = 1;
-for jm=1:length(ar.model);
-    colors = lines(length(ar.model.condition));
+for jm=1:length(ar.model)
+    clabel = arSummarizeConditions(jm, standcond, reference_condition{jm});
     
-    % time course plots
-    for j=find(~cellfun(@isempty, ylink))
-        ar.model(jm).plot_merged(j).name = sprintf('%s_%s_TC', ar.model(jm).name, ylabels{j});
-        
-        fprintf('%s:\n\n', ar.model(jm).plot_merged(j).name);
-        
-        % determine y range
-        yrange = 0;
-        ymax = 0;
-        xmax = 0;
-        for jc = 1:length(ar.model.condition)
-            if(~exist('condition_link','var') || sum(all_cs==jc)>0)
-                for jp = 1:length(ar.model.plot)
-                    if(ar.model.qPlotYs(jp)==1 && ar.model.plot(jp).doseresponse==0)
-                        for jd = ar.model.plot(jp).dLink
-                            qy = ismember(ar.model.data(jd).y, ylabels{j});
-                            if(jc==ar.model.data(jd).cLink && sum(qy)==1 && ar.model.data(jd).doseresponse==0)
-                                yrange = max([yrange range(ar.model.condition(jc).xExpSimu(:,ylink{j}))]);
-                                ymax = max([ymax; ar.model.condition(jc).xExpSimu(:,ylink{j})]);
-                                xmax = max([xmax; ar.model.condition(jc).tExp(:)]);
-                            end
-                        end
-                    end
-                end
+    figcount = do_TC(figcount, 'x', jm, xrangefac, saveToFile, condition_link{jm}, clabel);
+    figcount = do_TC(figcount, 'z', jm, xrangefac, saveToFile, condition_link{jm}, clabel);
+    figcount = do_TC(figcount, 'u', jm, xrangefac, saveToFile, condition_link{jm}, clabel);
+end
+
+
+function clabel = arSummarizeConditions(jm, standcond, reference_condition)
+
+global ar
+
+% collect condition labels (TC)
+clabel = cell(1,length(ar.model(jm).condition));
+fprintf('m%i: %s TC\n', jm, ar.model(jm).name);
+for jc = 1:length(ar.model(jm).condition)
+    tmpstr = sprintf('(c%i) ',jc);
+    if(jc~=reference_condition)
+        jd = ar.model(jm).condition(jc).dLink(1);
+        jdref = ar.model(jm).condition(reference_condition).dLink(1);
+        for jdc=1:length(ar.model(jm).data(jd).condition)
+            if(str2double(ar.model(jm).data(jd).condition(jdc).value) ~= ...
+                    str2double(ar.model(jm).data(jdref).condition(jdc).value))
+                tmpstr = [tmpstr sprintf('%s=%s ',ar.model(jm).data(jd).condition(jdc).parameter, ...
+                    ar.model(jm).data(jd).condition(jdc).value)]; %#ok<AGROW>
             end
         end
-        yscale = 0.05*yrange;
-        
-        %collect
-        ctime = cell(1,length(ar.model.condition));
-        cdata = cell(1,length(ar.model.condition));
-        clabel = cell(1,length(ar.model.condition));
-        nds = nan(1,length(ar.model.condition));
-        chi2s = nan(1,length(ar.model.condition));
-        ndatas = nan(1,length(ar.model.condition));
-        condition_link_std = {};
-        for jc = 1:length(ar.model.condition)
-            time = [];
-            data = [];
-            ndstmp = 0;
-            chi2tmp = 0;
-            ndatatmp = 0;
-            
-            % data
-            for jp = 1:length(ar.model.plot)
-                if(ar.model.qPlotYs(jp)==1 && ar.model.plot(jp).doseresponse==0)
-                    for jd = ar.model.plot(jp).dLink
-                        qy = ismember(ar.model.data(jd).y, ylabels{j});
-                        if(jc==ar.model.data(jd).cLink && sum(qy)==1 && ar.model.data(jd).doseresponse==0)
-                            tExp = ar.model.condition(jc).tExp(ar.model.data(jd).tLinkExp);
-                            yExp = ar.model.condition(jc).xExpSimu(ar.model.data(jd).tLinkExp,ylink{j}) + ...
-                                yscale * ar.model.data(jd).res(:,qy);
-                            time = [time; tExp(:)]; %#ok<AGROW>
-                            data = [data; yExp(:)]; %#ok<AGROW>
-                            ndstmp = ndstmp + 1;
-                            chi2tmp = chi2tmp + ar.model.data(jd).chi2(qy);
-                            if(ar.config.fiterrors==1)
-                                chi2tmp = chi2tmp + ar.model.data(jd).chi2err(qy);
-                            end
-                            ndatatmp = ndatatmp + ar.model.data(jd).ndata(qy);
-                            
-                            fprintf('\tcondition #%i, plot #%i, %s\n', jc, jp, ar.model.data(jd).name);
-                        end
-                    end
-                end
-            end
-            qnan = isnan(data);
-            time = time(~qnan);
-            data = data(~qnan);
-            
-            % label
-            if(jc>1)
-                tmpstr = '';
-                jd = ar.model.condition(jc).dLink(1);
-                jdref = ar.model.condition(1).dLink(1);
-                for jdc=1:length(ar.model(jm).data(jd).condition)
-                    if(str2double(ar.model(jm).data(jd).condition(jdc).value) ~= ...
-                            str2double(ar.model(jm).data(jdref).condition(jdc).value))
-                        tmpstr = [tmpstr sprintf('%s=%s ',ar.model(jm).data(jd).condition(jdc).parameter, ...
-                            ar.model(jm).data(jd).condition(jdc).value)]; %#ok<AGROW>
-                    end
-                end
-            else
-                tmpstr = standcond;
-            end
-            fprintf('\tcondition #%i, %s\n\n', jc, tmpstr);
-            
-            ctime{jc} = time;
-            cdata{jc} = data;
-            clabel{jc} = tmpstr;
-            nds(jc) = ndstmp;
-            chi2s(jc) = chi2tmp;
-            ndatas(jc) = ndatatmp;
-            
-            if(~isempty(ctime{jc}))
-                condition_link_std{end+1} = jc; %#ok<AGROW>
-            end
+    else
+        tmpstr = [tmpstr standcond]; %#ok<AGROW>
+    end
+    clabel{jc} = strtrim(tmpstr);
+    
+    hasTC = false;
+    for jd=ar.model(jm).condition(jc).dLink
+        if(ar.model(jm).data(jd).doseresponse==0)
+            hasTC = true;
         end
-        fprintf('\n');
-        
-        if(~exist('condition_link','var'))
-            condition_link = condition_link_std;
-        end
-        
-        % plot
-        h = myRaiseFigure(jm, j, ar.model(jm).plot_merged(j).name, figcount);
-        
-        [nrows, ncols] = arNtoColsAndRows(length(condition_link));
-        gs = [];
-        
-        for jcs = 1:length(condition_link)
-            g = subplot(nrows, ncols, jcs);
-            gs(jcs) = g; %#ok<AGROW>
-            
-            hold(g, 'on');
-            box(g, 'on');
-            
-            ndatastmp = 0;
-            chi2stmp = 0;
-            
-            hstmp = [];
-            clabelstmp = {}; 
-            
-            colindex = 1;
-            for jc = condition_link{jcs}
-                tFine = ar.model.condition(jc).tFine;
-                qt = tFine < xmax*1.1;
-                xFine = ar.model.condition(jc).xFineSimu(qt,ylink{j});
-                hstmp(end+1) = plot(g, tFine(qt), ar.model.condition(jc).xFineSimu(qt,ylink{j}), ...
-                    'Color', colors(colindex,:)); %#ok<AGROW>
-                tFineP = [tFine(qt); flipud(tFine(qt))];
-                xFineP = [xFine + yscale; flipud(xFine - yscale)];
-                patch(tFineP, xFineP, zeros(size(xFineP))-2, ones(size(xFineP)), ...
-                    'FaceColor', colors(colindex,:)*0.1+0.9, 'EdgeColor', colors(colindex,:)*0.1+0.9)
-                patch(tFineP, xFineP, zeros(size(xFineP))-1, ones(size(xFineP)), 'LineStyle', '--', ...
-                    'FaceColor', 'none', 'EdgeColor', colors(colindex,:)*0.3+0.7)
-                plot(g, ctime{jc}, cdata{jc}, '*', 'Color', colors(colindex,:))
-                
-                ndatastmp = ndatastmp + ndatas(jc);
-                chi2stmp = chi2stmp + chi2s(jc);
-                
-                clabelstmp{end+1} = strrep(clabel{jc},'_','\_'); %#ok<AGROW>
-                
-                colindex = colindex + 1;
-            end
-            
-            if(ar.config.fiterrors == 1)
-                titstr = sprintf('-2 log(L)_{%i} = %g', ndatastmp, 2*ndatas(jc)*log(sqrt(2*pi)) + chi2stmp);
-            else
-                titstr = sprintf('chi^2_{%i} = %g', ndatastmp, chi2stmp);
-            end
-            
-            if(length(condition_link{jcs})==1)
-                title(g, {sprintf('condition %i (#d%i)', jc, nds(jc)), titstr});
-            else
-                title(g, {sprintf('condition (#c%i, #d%i)', length(condition_link{jcs}), nds(jc)), titstr});
-            end
-            
-%             arSpacedAxisLimits(g);
-%             xlim([0-0.1*xmax xmax+0.1*xmax])
-%             ylim([0-2*yscale ymax+2*yscale])
-%             if(jcs == (nrows-1)*ncols + 1)
-                xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
-%             end
-            ylabel(g, sprintf('%s [%s]', ar.model(jm).xUnits{ylink{j},3}, ar.model(jm).xUnits{ylink{j},2}));
-            legend(hstmp, clabelstmp);
-        end
-        arSpacedAxisLimits(gs);
-        
-        % save
-        if(saveToFile)
-            ar.model(jm).plot_merged(j).savePath_FigY = mySaveFigure(h, ar.model(jm).plot_merged(j).name);
-        end
-        
-        figcount = figcount + 1;
+    end
+    if(hasTC)
+        fprintf('m%i: %s\n', jm, clabel{jc});
+    else
+        fprintf('[m%i: no TC %s]\n', jm, clabel{jc});
     end
 end
 
+
+% % collect condition labels (DR)
+% clabelDR = cell(0,4);
+% fprintf('m%i: %s DR\n', jm, ar.model(jm).name);
+% for jp=1:length(ar.model(jm).plot)
+%     if(ar.model(jm).plot(jp).doseresponse==1)
+%         responsepar = ar.model(jm).data(ar.model(jm).plot(jp).dLink(1)).response_parameter;
+%         times = [];
+%         for jd=ar.model(jm).plot(jp).dLink
+%             times = union(times, ar.model(jm).data(jd).tExp);
+%         end
+%         for jt=1:length(times)
+%             if(size(clabelDR,1)>0)
+%                 q = ismember(clabelDR(:,1:2), {responsepar, num2str(times(jt))});
+%                 q = sum(q,2)==2;
+%                 if(sum(q)==0)
+%                     clabelDR{end+1,1} = responsepar; %#ok<AGROW>
+%                     clabelDR{end,2} = num2str(times(jt));
+%                     clabelDR{end,3} = [responsepar ' t=' num2str(times(jt))];
+%                     clabelDR{end,4} = [];
+%                     q = ismember(clabelDR(:,1:2), {responsepar, num2str(times(jt))});
+%                     q = sum(q,2)==2;
+%                 end
+%             else
+%                 clabelDR{end+1,1} = responsepar; %#ok<AGROW>
+%                 clabelDR{end,2} = num2str(times(jt));
+%                 clabelDR{end,3} = [responsepar ' t=' num2str(times(jt))];
+%                 clabelDR{end,4} = [];
+%                 q = 1;
+%             end
+%             
+%             for jd=ar.model(jm).plot(jp).dLink
+%                 for jc = 1:length(ar.model(jm).data(jd).condition)
+%                     if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, responsepar))
+%                         jcondi = jc;
+%                     end
+%                 end
+%                 dose = str2double(ar.model(jm).data(jd).condition(jcondi).value);
+%                 
+%                 clabelDR{q,4} = union(clabelDR{q,4}, dose);
+%             end
+%         end
+%     end
+% end
+% for j=1:size(clabelDR,1)
+%     fprintf('m%i: (cdr%i) %s\n', jm, j, clabelDR{j,3});
+% end
+% fprintf('\n');
+
+
+
+function figcount = do_TC(figcount, fname, jm, xrangefac, saveToFile, condition_link, clabel)
+
+global ar
+
+all_cs = [];
+for jcs = 1:length(condition_link)
+    all_cs = union(all_cs, condition_link{jcs});
+end
+
+colors = lines(length(ar.model(jm).condition));
+
+% collect data
+collect_cs = cell(1,length(ar.model(jm).(fname)));
+collect_cs_dr = cell(1,length(ar.model(jm).(fname)));
+
+ctime = cell(length(ar.model(jm).condition),length(ar.model(jm).(fname)));
+cdata = cell(length(ar.model(jm).condition),length(ar.model(jm).(fname)));
+xdata = cell(length(ar.model(jm).condition),length(ar.model(jm).(fname)));
+xrange = zeros(1,length(ar.model(jm).(fname)));
+
+ctime_dr = cell(1,length(ar.model(jm).(fname)));
+cdata_dr = cell(1,length(ar.model(jm).(fname)));
+
+for jp=find(ar.model(jm).qPlotYs)
+    fprintf('merging %s ...\n', ar.model(jm).plot(jp).name);
+    for jd = ar.model(jm).plot(jp).dLink
+        if(strcmp(fname,'x'))
+            qPlotX = ar.model(jm).qPlotX;
+        elseif(strcmp(fname,'z'))
+            qPlotX = ar.model(jm).qPlotZ;
+        elseif(strcmp(fname,'u'))
+            qPlotX = ar.model(jm).qPlotU;
+        end
+        for jx=find(qPlotX)
+            linkname = ['merge_linker_' fname];
+            if(~isfield(ar.model(jm).data(jd), linkname) || ...
+                    length(ar.model(jm).data(jd).(linkname))<jx)
+                ar.model(jm).data(jd).(linkname){jx} = findinobs(ar.model(jm).data(jd).fy, ...
+                    ar.model(jm).(fname){jx}, ar.model(jm).(fname));
+            end
+            qy = ar.model(jm).data(jd).(linkname){jx};
+            
+            if(sum(qy)>0)
+                jc = ar.model(jm).data(jd).cLink;
+                if(sum(all_cs==jc)~=0)
+                    if(ar.model(jm).plot(jp).doseresponse==0)
+                        collect_cs{jx} = union(collect_cs{jx}, jc);
+                        if(strcmp(fname,'x'))
+                            xFineSimu = ar.model(jm).condition(jc).xFineSimu(:,jx);
+                        elseif(strcmp(fname,'z'))
+                            xFineSimu = ar.model(jm).condition(jc).zFineSimu(:,jx);
+                        elseif(strcmp(fname,'u'))
+                            xFineSimu = ar.model(jm).condition(jc).uFineSimu(:,jx);
+                        end
+                        xrange(jx) = max([xrange(jx) range(xFineSimu)]);
+                    else
+                        collect_cs_dr{jx} = union(collect_cs_dr{jx}, ar.model(jm).data(jd).cLink);
+                    end
+                    for jy=find(qy)
+                        tExp = ar.model(jm).data(jd).tExp;
+                        tExpLink = ar.model(jm).data(jd).tLinkExp;
+                        if(strcmp(fname,'x'))
+                            xExp = ar.model(jm).condition(jc).xExpSimu(tExpLink,jx);
+                        elseif(strcmp(fname,'z'))
+                            xExp = ar.model(jm).condition(jc).zExpSimu(tExpLink,jx);
+                        elseif(strcmp(fname,'u'))
+                            xExp = ar.model(jm).condition(jc).uExpSimu(tExpLink,jx);
+                        end
+                        res = ar.model(jm).data(jd).res(:,jy);
+                        if(ar.model(jm).plot(jp).doseresponse==0)
+                            ctime{jc,jx} = [ctime{jc,jx}; tExp(:)];
+                            cdata{jc,jx} = [cdata{jc,jx}; res(:)];
+                            xdata{jc,jx} = [xdata{jc,jx}; xExp(:)];
+                        else
+                            
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+
+
+
+% recalc link
+condition_link_new = {};
+for jx = find(~cellfun(@isempty, collect_cs))
+    condition_link_tmp = {};
+    for j = 1:length(condition_link)
+        condition_link_tmp{j} = intersect(condition_link{j}, collect_cs{jx}); %#ok<AGROW>
+    end
+    condition_link_tmp = condition_link_tmp(~cellfun(@isempty, condition_link_tmp));
+    condition_link_new{jx} = condition_link_tmp; %#ok<AGROW>
+end
+
+% plot time course
+for jx = find(~cellfun(@isempty, collect_cs))
+    % time course plots
+    ar.model(jm).plot_merged(jx).name = sprintf('%s_%s_TC', ar.model(jm).name, ar.model(jm).(fname){jx});
+    h = myRaiseFigure(jm, jx, ar.model(jm).plot_merged(jx).name, figcount);
+    
+    condition_link = condition_link_new{jx};
+    
+    [nrows, ncols] = arNtoColsAndRows(length(condition_link));
+    
+    gs = [];
+    for jcs = 1:length(condition_link)
+        colindex = 1;
+        hstmp = [];
+        clabelstmp = {};
+        
+        g = subplot(nrows, ncols, jcs);
+        gs(end+1) = g; %#ok<AGROW>
+        
+        for jc = condition_link{jcs}
+            hold(g, 'on');
+            
+            tFine = ar.model(jm).condition(jc).tFine;
+            qt = tFine < max(ctime{jc,jx}(:))*1.1;
+            % qt = true(size(tFine));
+            xFine = ar.model(jm).condition(jc).xFineSimu(qt,jx);
+            if(strcmp(fname,'x'))
+                xFine = ar.model(jm).condition(jc).xFineSimu(qt,jx);
+            elseif(strcmp(fname,'z'))
+                xFine = ar.model(jm).condition(jc).zFineSimu(qt,jx);
+            elseif(strcmp(fname,'u'))
+                xFine = ar.model(jm).condition(jc).uFineSimu(qt,jx);
+            end
+            hstmp(end+1) = plot(g, tFine(qt), xFine, 'Color', colors(colindex,:)); %#ok<AGROW>
+            
+            xrangefactmp = xrange(jx)*xrangefac;
+            tFineP = [tFine(qt); flipud(tFine(qt))];
+            xFineP = [xFine + xrangefactmp/2; flipud(xFine - xrangefactmp/2)];
+            patch(tFineP, xFineP, zeros(size(xFineP))-2, ones(size(xFineP)), ...
+                'FaceColor', colors(colindex,:)*0.1+0.9, 'EdgeColor', colors(colindex,:)*0.1+0.9)
+            patch(tFineP, xFineP, zeros(size(xFineP))-1, ones(size(xFineP)), 'LineStyle', '--', ...
+                'FaceColor', 'none', 'EdgeColor', colors(colindex,:)*0.3+0.7)
+            plot(g, ctime{jc,jx}, xdata{jc,jx} + xrangefactmp*cdata{jc,jx}, '*', 'Color', colors(colindex,:))
+            
+            clabelstmp{end+1} = strrep(clabel{jc},'_','\_'); %#ok<AGROW>
+            colindex = colindex + 1;
+        end
+        
+        hold(g, 'off');
+        box(g, 'on');
+        
+        title(g, strrep(ar.model(jm).(fname){jx},'_','\_'));
+        if(jc == (nrows-1)*ncols + 1)
+            xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
+        end
+        if(strcmp(fname,'x'))
+            xUnits = ar.model(jm).xUnits;
+        elseif(strcmp(fname,'z'))
+            xUnits = ar.model(jm).zUnits;
+        elseif(strcmp(fname,'u'))
+            xUnits = ar.model(jm).uUnits;
+        end
+        ylabel(g, sprintf('%s [%s]', xUnits{jx,3}, xUnits{jx,2}));
+        legend(hstmp, clabelstmp);
+        % legend(hstmp, clabelstmp, 'Location','Best');
+        
+    end
+    arSpacedAxisLimits(gs);
+    
+    % save
+    if(saveToFile)
+        ar.model(jm).plot_merged(jx).savePath_FigY = mySaveFigure(h, ar.model(jm).plot_merged(jx).name);
+    end
+    
+    figcount = figcount + 1;
+end
+
+
+function qy = findinobs(fy, x, xs)
+
+xother = setdiff(xs, x);
+
+qy = false(size(fy));
+for j=1:length(fy)
+    varlist = symvar(fy{j});
+    qx = sum(ismember(varlist, x));
+    qxother = sum(ismember(varlist, xother));
+    
+    if(qx==1 && qxother==0)
+        qy(j) = true;
+    end
+end
 
 
 function h = myRaiseFigure(m, jplot, figname, figcount)
