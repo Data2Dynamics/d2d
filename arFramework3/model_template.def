@@ -16,7 +16,7 @@ Stim1	C	"nM"	"conc."	"k1*exp(-k2*t)"
 REACTIONS
 Prot1	->	0	CUSTOM "k3 * Prot1"	"Protein 1 degratation"
 
-INVARIANTS
+DERIVED
         
 OBSERVABLES
 Prot1_wb	C	"au"	"conc."	1	1	"scale_prot1 * Prot1"

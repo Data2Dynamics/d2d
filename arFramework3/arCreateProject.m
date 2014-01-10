@@ -28,9 +28,7 @@ if(~isempty(name))
         fprintf(fid, 'arInit;\n');
         fprintf(fid, 'arLoadModel(''model_template'',1);\n');
         fprintf(fid, 'arLoadData(''data_template'',1);\n');
-        fprintf(fid, 'arParseModel;\n');
-        fprintf(fid, 'arWriteCFiles;\n');
-        fprintf(fid, 'arLink;\n');
+        fprintf(fid, 'arCompileAll;\n');
         
         fclose(fid);
     end    
