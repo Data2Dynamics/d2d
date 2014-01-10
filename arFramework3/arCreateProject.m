@@ -21,6 +21,7 @@ if(~isempty(name))
         mkdir('Data');
         cd('Data');
         copyfile(which('data_template.def'),'./data_template.def');
+        copyfile(which('data_template.xls'),'./data_template.xls');
         cd ..
         
         fid = fopen('./Setup.m' , 'W');
