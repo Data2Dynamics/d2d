@@ -189,6 +189,11 @@ if(savetofile && exist(pleGlobals.savePath, 'dir'))
     pleGlobals.figPathMulti{jk} = [pleGlobals.savePath '/multi_plot'];
     saveas(gcf, [pleGlobals.savePath '/multi_plot'], 'fig')
     print('-depsc2', [pleGlobals.savePath '/multi_plot']);
+    if(ispc)
+        print('-dpdf', [pleGlobals.savePath '/multi_plot']);
+    else
+        system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' [pleGlobals.savePath '/multi_plot'] '.eps '  [pleGlobals.savePath '/multi_plot'] '.pdf']);
+    end
 end
 
 

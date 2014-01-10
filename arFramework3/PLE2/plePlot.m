@@ -263,6 +263,11 @@ for jj=1:length(indices)
             pleGlobals.figPath{jk} = [pleGlobals.savePath '/' pleGlobals.p_labels{jk}];
             saveas(gcf, [pleGlobals.savePath '/' pleGlobals.p_labels{jk}], 'fig')
             print('-depsc2', [pleGlobals.savePath '/' pleGlobals.p_labels{jk}]);
+            if(ispc)
+                print('-dpdf', [pleGlobals.savePath '/' pleGlobals.p_labels{jk}]);
+            else
+                system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' [pleGlobals.savePath '/' pleGlobals.p_labels{jk}] '.eps '  [pleGlobals.savePath '/' pleGlobals.p_labels{jk}] '.pdf']);
+            end
         end
         
         count = count + 1;
