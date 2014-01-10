@@ -227,7 +227,7 @@ else
     ar.model(m).data(d).fystd = cell(size(ar.model(m).data(d).fy));
 end
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
-while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'CONDITIONS'))
+while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS'))
     qyindex = ismember(ar.model(m).data(d).y, C{1});
     if(sum(qyindex)==1)
         yindex = find(qyindex);
