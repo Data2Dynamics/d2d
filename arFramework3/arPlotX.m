@@ -28,6 +28,14 @@ labelfontsize = 12;
 labelfonttype = 'Arial';
 rowstocols = 0.5;
 overplot = 0.1;
+if(ar.config.ploterrors == -1)
+    linesize = 0.5;
+else
+    linesize = 2;
+end
+
+logplotting_xaxis = true;
+fine_dr_plot_n = 100;
 
 figcount = 1;
 for jm = 1:length(ar.model)
@@ -58,7 +66,7 @@ for jm = 1:length(ar.model)
                             g = subplot(nrows,ncols,countu);
                             ar.model(jm).plot(jplot).gu(ju) = g;
                             mySubplotStyle(g, labelfontsize, labelfonttype);
-                            ltmp = plot(g, t, u(:,ju), Clines{:});
+                            ltmp = plot(g, t, u(:,ju), Clines{:}, 'LineWidth', linesize);
                             cclegendstyles(ccount) = ltmp;
                             if(jd~=0)
                                 ar.model(jm).data(jd).plot.u(ju,jc) = ltmp;
@@ -123,7 +131,7 @@ for jm = 1:length(ar.model)
                                 %                             hold(g, 'on');
                             end
                             
-                            ltmp = plot(g, t, x(:,jx), Clines{:});
+                            ltmp = plot(g, t, x(:,jx), Clines{:}, 'LineWidth', linesize);
                             cclegendstyles(ccount) = ltmp;
                             if(jd~=0)
                                 ar.model(jm).data(jd).plot.x(jx,jc) = ltmp;
@@ -205,7 +213,7 @@ for jm = 1:length(ar.model)
                                 %                             hold(g, 'on');
                             end
                             
-                            ltmp = plot(g, t, z(:,jz), Clines{:});
+                            ltmp = plot(g, t, z(:,jz), Clines{:}, 'LineWidth', linesize);
                             cclegendstyles(ccount) = ltmp;
                             if(jd~=0)
                                 ar.model(jm).data(jd).plot.z(jz,jc) = ltmp;
@@ -266,12 +274,19 @@ for jm = 1:length(ar.model)
                         countu = 0;
                         for ju = iu
                             countu = countu + 1;
-                            [t, u, lb, ub, zero_break] = getDataDoseResponseU(jm, ju, ds, times(jt));
+                            [t, u, lb, ub, zero_break] = getDataDoseResponseU(jm, ju, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
+                            if(length(unique(t))==1)
+                                t = [t-0.1; t+0.1];
+                                u = [u; u]; %#ok<AGROW>
+                                lb = [lb; lb]; %#ok<AGROW>
+                                ub = [ub; ub]; %#ok<AGROW>
+                            end
+                            
                             if(~fastPlotTmp)
                                 g = subplot(nrows,ncols,countu);
                                 ar.model(jm).plot(jplot).gu(ju) = g;
                                 mySubplotStyle(g, labelfontsize, labelfonttype);
-                                ltmp = plot(g, t, u, Clines{:});
+                                ltmp = plot(g, t, u, Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 ar.model(jm).data(jd).plot.u(ju,jt,jc) = ltmp;
                                 hold(g, 'on');
@@ -293,12 +308,19 @@ for jm = 1:length(ar.model)
                         countx = 0;
                         for jx = ix
                             countx = countx + 1;
-                            [t, x, lb, ub, zero_break] = getDataDoseResponseX(jm, jx, ds, times(jt));
+                            [t, x, lb, ub, zero_break] = getDataDoseResponseX(jm, jx, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
+                            if(length(unique(t))==1)
+                                t = [t-0.1; t+0.1];
+                                x = [x; x]; %#ok<AGROW>
+                                lb = [lb; lb]; %#ok<AGROW>
+                                ub = [ub; ub]; %#ok<AGROW>
+                            end
+                            
                             if(~fastPlotTmp)
                                 g = subplot(nrows,ncols,countx+nu);
                                 ar.model(jm).plot(jplot).gx(jx) = g;
                                 mySubplotStyle(g, labelfontsize, labelfonttype);
-                                ltmp = plot(g, t, x, Clines{:});
+                                ltmp = plot(g, t, x, Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 ar.model(jm).data(jd).plot.x(jx,jt,jc) = ltmp;
                                 hold(g, 'on');
@@ -320,12 +342,19 @@ for jm = 1:length(ar.model)
                         countz = 0;
                         for jz = iz
                             countz = countz + 1;
-                            [t, z, lb, ub, zero_break] = getDataDoseResponseZ(jm, jz, ds, times(jt));
+                            [t, z, lb, ub, zero_break] = getDataDoseResponseZ(jm, jz, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
+                            if(length(unique(t))==1)
+                                t = [t-0.1; t+0.1];
+                                z = [z; z]; %#ok<AGROW>
+                                lb = [lb; lb]; %#ok<AGROW>
+                                ub = [ub; ub]; %#ok<AGROW>
+                            end
+                            
                             if(~fastPlotTmp)
                                 g = subplot(nrows,ncols,countz+nu+nx);
                                 ar.model(jm).plot(jplot).gz(jz) = g;
                                 mySubplotStyle(g, labelfontsize, labelfonttype);
-                                ltmp = plot(g, t, z, Clines{:});
+                                ltmp = plot(g, t, z, Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 ar.model(jm).data(jd).plot.z(jz,jt,jc) = ltmp;
                                 hold(g, 'on');
@@ -392,7 +421,11 @@ for jm = 1:length(ar.model)
                             if(~ar.model(jm).plot(jplot).doseresponse)
                                 xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                             else
-                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                if(logplotting_xaxis)
+                                    xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                else
+                                    xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter))); %#ok<UNRCH>
+                                end
                             end
                         end
                         ylabel(g, sprintf('%s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}));
@@ -439,7 +472,11 @@ for jm = 1:length(ar.model)
                             if(~ar.model(jm).plot(jplot).doseresponse)
                                 xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                             else
-                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                if(logplotting_xaxis)
+                                    xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                else
+                                    xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter))); %#ok<UNRCH>
+                                end
                             end
                         end
                         ylabel(g, sprintf('%s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}));
@@ -458,7 +495,11 @@ for jm = 1:length(ar.model)
                             if(~ar.model(jm).plot(jplot).doseresponse)
                                 xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                             else
-                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                if(logplotting_xaxis)
+                                    xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                else
+                                    xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter))); %#ok<UNRCH>
+                                end
                             end
                         end
                         ylabel(g, sprintf('%s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2}));
@@ -517,7 +558,7 @@ dxdt(ar.model(jm).condition(jc).qSteadyState==0) = nan;
 
 
 
-function [t, u, lb, ub, zero_break] = getDataDoseResponseU(jm, ju, ds, ttime)
+function [t, u, lb, ub, zero_break] = getDataDoseResponseU(jm, ju, ds, ttime, dLink, logplotting_xaxis)
 global ar
 
 zero_break = [];
@@ -533,12 +574,20 @@ for jd = ds
     jc = ar.model(jm).data(jd).cLink;
     qt = ar.model(jm).condition(jc).tExp == ttime;
     for jt = find(qt')
-        t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
+        if(logplotting_xaxis)
+            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
+        else
+            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(jcondi).value); %#ok<AGROW>
+        end
         if(isinf(t(ccount,1)))
             doses = [];
-            for jd2 = ds
-                if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
-                    doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
+            for jd2 = dLink
+                if(logplotting_xaxis)
+                    if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
+                        doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
+                    end
+                else
+                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(jcondi).value); %#ok<AGROW>
                 end
             end
             doses = unique(doses); %R2013a compatible
@@ -571,7 +620,7 @@ if(~isempty(lb))
 end
 
 
-function [t, x, lb, ub, zero_break] = getDataDoseResponseX(jm, jx, ds, ttime)
+function [t, x, lb, ub, zero_break] = getDataDoseResponseX(jm, jx, ds, ttime, dLink, logplotting_xaxis)
 global ar
 
 zero_break = [];
@@ -587,12 +636,20 @@ for jd = ds
     jc = ar.model(jm).data(jd).cLink;
     qt = ar.model(jm).condition(jc).tExp == ttime;
     for jt = find(qt')
-        t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
+        if(logplotting_xaxis)
+            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
+        else
+            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(jcondi).value); %#ok<AGROW>
+        end
         if(isinf(t(ccount,1)))
             doses = [];
-            for jd2 = ds
-                if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
-                    doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
+            for jd2 = dLink
+                if(logplotting_xaxis)
+                    if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
+                        doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
+                    end
+                else
+                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(jcondi).value); %#ok<AGROW>
                 end
             end
 			doses = unique(doses); %R2013a compatible
@@ -626,7 +683,7 @@ if(~isempty(lb))
 end
 
 
-function [t, z, lb, ub, zero_break] = getDataDoseResponseZ(jm, jz, ds, ttime)
+function [t, z, lb, ub, zero_break] = getDataDoseResponseZ(jm, jz, ds, ttime, dLink, logplotting_xaxis)
 global ar
 
 zero_break = [];
@@ -642,12 +699,20 @@ for jd = ds
     jc = ar.model(jm).data(jd).cLink;
     qt = ar.model(jm).condition(jc).tExp == ttime;
     for jt = find(qt')
-        t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
+        if(logplotting_xaxis)
+            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
+        else
+            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(jcondi).value); %#ok<AGROW>
+        end
         if(isinf(t(ccount,1)))
             doses = [];
-            for jd2 = ds
-                if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
-                    doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
+            for jd2 = dLink
+                if(logplotting_xaxis)
+                    if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
+                        doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
+                    end
+                else
+                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(jcondi).value); %#ok<AGROW>
                 end
             end
 			doses = unique(doses); %R2013a compatible

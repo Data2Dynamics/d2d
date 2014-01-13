@@ -395,7 +395,7 @@ for jm = 1:length(ar.model)
                             if(logplotting_xaxis)
                                 xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
                             else
-                                xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter))); %#ok<UNRCH>
                             end
                         end
                     end

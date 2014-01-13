@@ -33,6 +33,7 @@ if(sum(~fkt_does_exist)>0)
     
     fprintf('done\n');
     
+    % TODO pctRunOnAll
     ar1 = ar;
     parfor j=1:n
         if(exist(filename,'file')==0)
