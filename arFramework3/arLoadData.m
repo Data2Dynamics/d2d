@@ -227,7 +227,7 @@ else
     ar.model(m).data(d).fystd = cell(size(ar.model(m).data(d).fy));
 end
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
-while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'CONDITIONS'))
+while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS'))
     qyindex = ismember(ar.model(m).data(d).y, C{1});
     if(sum(qyindex)==1)
         yindex = find(qyindex);
@@ -257,6 +257,12 @@ for j=1:length(ar.model(m).data(d).fystd)
     ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).px);
 end
 
+% DERIVED
+if(strcmp(C{1},'DERIVED'))
+    error(['There is no need for a section DERIVED in data definition file! ' ...
+        'Please remove and see usage in: ' ...
+        'https://bitbucket.org/d2d-development/d2d-software/wiki/Setting%20up%20models']);
+end
 % INVARIANTS
 if(strcmp(C{1},'INVARIANTS'))
     error(['Section INVARIANTS in data definition file is deprecated! ' ...
