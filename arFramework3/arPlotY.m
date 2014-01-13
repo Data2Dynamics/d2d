@@ -33,6 +33,13 @@ rowstocols = 0.5;
 overplot = 0.1;
 
 logplotting_xaxis = true;
+if(isfield(ar.config,'nfine_dr_plot'))
+    nfine_dr_plot = ar.config.nfine_dr_plot;
+    nfine_dr_method = ar.config.nfine_dr_method;
+else
+    nfine_dr_plot = 1;
+    nfine_dr_method = 'spline';
+end
 
 figcount = 1;
 for jm = 1:length(ar.model)
@@ -259,6 +266,20 @@ for jm = 1:length(ar.model)
                                 ystd = [ystd; ystd]; %#ok<AGROW>
                                 lb = [lb; lb]; %#ok<AGROW>
                                 ub = [ub; ub]; %#ok<AGROW>
+                            elseif(nfine_dr_plot>10)
+                                tf = linspace(min(t), max(t), nfine_dr_plot);
+                                y = interp1(t,y,tf,nfine_dr_method);
+                                ystd = interp1(t,ystd,tf,nfine_dr_method);
+                                if(~isempty(lb))
+                                    lb = interp1(t,lb,tf,nfine_dr_method);
+                                    ub = interp1(t,ub,tf,nfine_dr_method);
+                                end
+                                t = tf;
+                            end
+                           
+                            if(ar.config.ploterrors==0)
+                                lb = y(:) - ystd(:)/2;
+                                ub = y(:) + ystd(:)/2;
                             end
 
                             if(~fastPlotTmp)
@@ -279,11 +300,7 @@ for jm = 1:length(ar.model)
                                     hold(g, 'on');
                                     if(ar.config.ploterrors ~= 1)
                                         tmpx = [t(:); flipud(t(:))];
-                                        if(ar.config.ploterrors==0)
-                                            tmpy = [10.^(y + ystd/2); flipud(10.^(y - ystd/2))];
-                                        elseif(ar.config.ploterrors==-1)
-                                            tmpy = [10.^ub; flipud(10.^lb)];
-                                        end
+                                        tmpy = [10.^ub; flipud(10.^lb)];
                                         qfinite = ~isinf(tmpy) & ~isinf(tmpx);
                                         ltmp = patch(tmpx(qfinite), tmpy(qfinite), tmpx(qfinite)*0-2*eps, 'r');
                                         set(ltmp, 'FaceColor', Clines{2}*0.1+0.9, 'EdgeColor', Clines{2}*0.1+0.9);
@@ -309,12 +326,8 @@ for jm = 1:length(ar.model)
                                     hold(g, 'on');
                                     if(ar.config.ploterrors ~= 1)
                                         tmpx = [t(:); flipud(t(:))];
-										if(ar.config.ploterrors==0)
-											tmpy = [y + ystd/2; flipud(y - ystd/2)];
-										elseif(ar.config.ploterrors==-1)
-											tmpy = [ub; flipud(lb)];
-										end
-                                        qfinite = ~isinf(tmpy) & ~isinf(tmpx);
+										tmpy = [ub; flipud(lb)];
+										qfinite = ~isinf(tmpy) & ~isinf(tmpx);
                                         if(sum(qfinite)>0)
                                             ltmp = patch(tmpx(qfinite), tmpy(qfinite), -2*eps*ones(size(tmpy(qfinite))), 'r');
                                             set(ltmp, 'FaceColor', Clines{2}*0.1+0.9, 'EdgeColor', Clines{2}*0.1+0.9);
@@ -341,11 +354,7 @@ for jm = 1:length(ar.model)
                                     set(ar.model(jm).data(jd).plot.y(jy,jt,jc), 'YData', 10.^y(qfinite));
                                     if(ar.config.fiterrors ~= -1)
                                         tmpx = [t(:); flipud(t(:))];
-                                        if(ar.config.ploterrors==0)
-                                            tmpy = [10.^(y + ystd/2); flipud(10.^(y - ystd/2))];
-                                        elseif(ar.config.ploterrors==-1)
-                                            tmpy = [10.^ub; flipud(10.^lb)];
-                                        end
+                                        tmpy = [10.^ub; flipud(10.^lb)];
                                         qfinite = ~isinf(tmpy) & ~isinf(tmpx);
                                         set(ar.model(jm).data(jd).plot.ystd(jy,jt,jc), 'YData', tmpy(qfinite));
                                         set(ar.model(jm).data(jd).plot.ystd2(jy,jt,jc), 'YData', tmpy(qfinite));
@@ -357,12 +366,8 @@ for jm = 1:length(ar.model)
                                     set(ar.model(jm).data(jd).plot.y(jy,jt,jc), 'YData', tmpy(qfinite));
                                     if(ar.config.fiterrors ~= -1)
                                         tmpx = [t(:); flipud(t(:))];
-										if(ar.config.ploterrors==0)
-											tmpy = [y + ystd/2; flipud(y - ystd/2)];
-										elseif(ar.config.ploterrors==-1)
-											tmpy = [ub; flipud(lb)];
-										end
-                                        qfinite = ~isinf(tmpy) & ~isinf(tmpx);
+										tmpy = [ub; flipud(lb)];
+										qfinite = ~isinf(tmpy) & ~isinf(tmpx);
                                         if(sum(qfinite)>0)
                                             set(ar.model(jm).data(jd).plot.ystd(jy,jt,jc), 'YData', tmpy(qfinite));
                                             set(ar.model(jm).data(jd).plot.ystd2(jy,jt,jc), 'YData', tmpy(qfinite));

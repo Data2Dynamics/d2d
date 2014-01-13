@@ -35,7 +35,13 @@ else
 end
 
 logplotting_xaxis = true;
-fine_dr_plot_n = 100;
+if(isfield(ar.config,'nfine_dr_plot'))
+    nfine_dr_plot = ar.config.nfine_dr_plot;
+    nfine_dr_method = ar.config.nfine_dr_method;
+else
+    nfine_dr_plot = 1;
+    nfine_dr_method = 'spline';
+end
 
 figcount = 1;
 for jm = 1:length(ar.model)
@@ -280,6 +286,14 @@ for jm = 1:length(ar.model)
                                 u = [u; u]; %#ok<AGROW>
                                 lb = [lb; lb]; %#ok<AGROW>
                                 ub = [ub; ub]; %#ok<AGROW>
+                            elseif(nfine_dr_plot>10)
+                                tf = linspace(min(t), max(t), nfine_dr_plot);
+                                u = interp1(t,u,tf,nfine_dr_method);
+                                if(~isempty(lb))
+                                    lb = interp1(t,lb,tf,nfine_dr_method);
+                                    ub = interp1(t,ub,tf,nfine_dr_method);
+                                end
+                                t = tf;
                             end
                             
                             if(~fastPlotTmp)
@@ -314,6 +328,14 @@ for jm = 1:length(ar.model)
                                 x = [x; x]; %#ok<AGROW>
                                 lb = [lb; lb]; %#ok<AGROW>
                                 ub = [ub; ub]; %#ok<AGROW>
+                            elseif(nfine_dr_plot>10)
+                                tf = linspace(min(t), max(t), nfine_dr_plot);
+                                x = interp1(t,x,tf,nfine_dr_method);
+                                if(~isempty(lb))
+                                    lb = interp1(t,lb,tf,nfine_dr_method);
+                                    ub = interp1(t,ub,tf,nfine_dr_method);
+                                end
+                                t = tf;
                             end
                             
                             if(~fastPlotTmp)
@@ -348,6 +370,14 @@ for jm = 1:length(ar.model)
                                 z = [z; z]; %#ok<AGROW>
                                 lb = [lb; lb]; %#ok<AGROW>
                                 ub = [ub; ub]; %#ok<AGROW>
+                            elseif(nfine_dr_plot>10)
+                                tf = linspace(min(t), max(t), nfine_dr_plot);
+                                z = interp1(t,z,tf,nfine_dr_method);
+                                if(~isempty(lb))
+                                    lb = interp1(t,lb,tf,nfine_dr_method);
+                                    ub = interp1(t,ub,tf,nfine_dr_method);
+                                end
+                                t = tf;
                             end
                             
                             if(~fastPlotTmp)
