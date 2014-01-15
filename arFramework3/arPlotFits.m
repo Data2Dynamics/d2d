@@ -98,8 +98,9 @@ figure(2); clf;
 subplot(2,2,1);
 hist(ar.timing, 50);
 xlabel('fit time / sec.');
-title(sprintf('total time for %i fits %s', ...
-    length(ar.chi2s), secToHMS(sum(ar.timing(~isnan(ar.timing))))));
+title(sprintf('total time for %i fits: %s', ...
+    sum(~isnan(ar.timing)), ...
+    secToHMS(sum(ar.timing(~isnan(ar.timing))))));
 
 subplot(2,2,2);
 hist(ar.fun_evals, 50);

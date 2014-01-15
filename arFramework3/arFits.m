@@ -4,18 +4,31 @@
 %
 % ps:                           parameter values      
 % log_fit_history               [false]
+% backup_save                   [false]
 
-function arFits(ps, log_fit_history)
+function arFits(ps, log_fit_history, backup_save)
 
 global ar
 
 if(~exist('log_fit_history','var'))
     log_fit_history = false;
 end
+if(~exist('backup_save','var'))
+    backup_save = false;
+end
 
 n = size(ps,1);
-ps_errors = nan(size(ps));
 ar.ps_start = ps;
+ar.ps = nan(size(ps));
+ar.ps_errors = nan(size(ps));
+ar.chi2s_start = nan(1,n);
+ar.chi2sconstr_start = nan(1,n);
+ar.chi2s = nan(1,n);
+ar.chi2sconstr = nan(1,n);
+ar.exitflag = nan(1,n);
+ar.timing = nan(1,n);
+ar.fun_evals = nan(1,n);
+ar.optim_crit = nan(1,n);
 
 arChi2(true,[]);
 pReset = ar.p;
@@ -26,62 +39,49 @@ if(log_fit_history)
 end
 
 arWaitbar(0);
-ar1 = ar;
-parfor j=1:n
-    ar2 = ar1;
-    arWaitbar(n-j+1, n);
-    ar2.p = ps(j,:);
+for j=1:n
+    arWaitbar(j, n);
+    ar.p = ps(j,:);
     tic;
     try
-        ar2 = arChi2(ar2, true, []);
-        chi2s_start(j) = ar2.chi2fit;
-        chi2sconstr_start(j) = ar2.chi2constr;
-        ar2 = arFit(ar2, true);
-        ps(j,:) = ar2.p;
-        chi2s(j) = ar2.chi2fit;
-        chi2sconstr(j) = ar2.chi2constr;
-        exitflag(j) = ar2.fit.exitflag;
-        fun_evals(j) = ar2.fit.fevals;
-        optim_crit(j) = ar2.firstorderopt;
+        arChi2(true, []);
+        ar.chi2s_start(j) = ar.chi2fit;
+        ar.chi2sconstr_start(j) = ar.chi2constr;
+        arFit(true);
+        ar.ps(j,:) = ar.p;
+        ar.chi2s(j) = ar.chi2fit;
+        ar.chi2sconstr(j) = ar.chi2constr;
+        ar.exitflag(j) = ar.fit.exitflag;
+        ar.fun_evals(j) = ar.fit.fevals;
+        ar.optim_crit(j) = ar.firstorderopt;
     catch exception
-        ps_errors(j,:) = ar2.p;
+        ar.ps_errors(j,:) = ar.p;
         fprintf('fit #%i: %s\n', j, exception.message);
     end
-    timing(j) = toc;
+    ar.timing(j) = toc;
     if(log_fit_history)
-        name = ar2.config.optimizers{ar2.config.optimizer};
-        if(ar2.config.optimizer==5)
+        name = ar.config.optimizers{ar.config.optimizer};
+        if(ar.config.optimizer==5)
             tmpnames = arNLS;
-            name = [name '_' tmpnames{ar2.config.optimizerStep+1}];
+            name = [name '_' tmpnames{ar.config.optimizerStep+1}]; %#ok<AGROW>
         end
         
-        fit_hist(j).hist = ar2.fit;
-        fit_hist(j).optimizer = ar2.config.optimizer;
-        if(ar2.config.optimizer==5)
-            fit_hist(j).optimizerStep = ar2.config.optimizerStep;
+        ar.fit_hist(j).hist = ar.fit;
+        ar.fit_hist(j).optimizer = ar.config.optimizer;
+        if(ar.config.optimizer==5)
+            ar.fit_hist(j).optimizerStep = ar.config.optimizerStep;
         else
-            fit_hist(j).optimizerStep = nan;
+            ar.fit_hist(j).optimizerStep = nan;
         end
-        fit_hist(j).config = ar2.config.optim;
-        fit_hist(j).name = [name '_' sprintf('run%i', j)];
+        ar.fit_hist(j).config = ar.config.optim;
+        ar.fit_hist(j).name = [name '_' sprintf('run%i', j)];
         
-        [~,imin] = min(ar2.fit.chi2_hist + ar2.fit.constr_hist);
-        fit_hist(j).p = ar2.fit.p_hist(imin,:);
+        [~,imin] = min(ar.fit.chi2_hist + ar.fit.constr_hist);
+        ar.fit_hist(j).p = ar.fit.p_hist(imin,:);
     end
-end
-
-ar.chi2s_start = chi2s_start;
-ar.chi2sconstr_start = chi2sconstr_start;
-ar.ps = ps;
-ar.chi2s = chi2s;
-ar.chi2sconstr = chi2sconstr;
-ar.exitflag = exitflag;
-ar.fun_evals = fun_evals;
-ar.optim_crit = optim_crit;
-ar.ps_errors = ps_errors;
-ar.timing = timing;
-if(log_fit_history)
-    ar.fit_hist = fit_hist;
+    if(backup_save)
+        save('arFits_backup.mat','ar');
+    end    
 end
 
 fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
