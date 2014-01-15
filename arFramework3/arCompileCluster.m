@@ -42,6 +42,6 @@ if(sum(~fkt_does_exist)>0)
         end
     end
 else
-    fprintf('All %i workers are ready.\n',n);
+    fprintf('%i workers are ready.\n',n);
 end
 

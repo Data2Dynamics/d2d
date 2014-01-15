@@ -8,4 +8,15 @@
 % log_fit_history                       [false]
 
 function arFitLHSCluster(n, randomseed, log_fit_history)
-arFitLHS(n, randomseed, log_fit_history, backup_save, true);
+if(~exist('n','var'))
+    n = 10;
+end
+if(~exist('randomseed','var'))
+    rng('shuffle');
+    rngsettings = rng;
+    randomseed = rngsettings.Seed;
+end
+if(~exist('log_fit_history','var'))
+    log_fit_history = false;
+end
+arFitLHS(n, randomseed, log_fit_history, false, true);

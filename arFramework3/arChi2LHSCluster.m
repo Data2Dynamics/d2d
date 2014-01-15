@@ -8,4 +8,13 @@
 % silent:       no output               [false]
 
 function arChi2LHSCluster(n, sensis, silent)
+if(~exist('n','var'))
+    n = 10;
+end
+if(~exist('sensis','var'))
+    sensis = false;
+end
+if(~exist('silent','var'))
+    silent = false;
+end
 arChi2LHS(n, sensis, silent, true);

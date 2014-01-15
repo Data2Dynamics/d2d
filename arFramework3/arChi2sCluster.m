@@ -32,16 +32,10 @@ if(sum(ar.qFit==1)<6)
     plotmatrix(ps(:,ar.qFit==1), 'x');
 end
 
-if(~silent) 
-    arWaitbar(0); 
-end
 ar1 = ar;
 tic;
 parfor j=1:n
     ar2 = ar1;
-    if(~silent) 
-        arWaitbar(n-j+1, n);
-    end
     ar2.p = ps(j,:);
     try
         ar2 = arChi2(ar2, sensis, []); 
@@ -49,6 +43,9 @@ parfor j=1:n
         chi2s(j) = ar2.chi2fit;
         chi2sconstr(j) = ar2.chi2constr;
         exitflag(j) = 1;
+        if(~silent) 
+            fprintf('feval #%i: onjective function %g\n', j, ar2.chi2fit);
+        end
     catch exception
         timing(j) = ar2.stop/1e6;
         ps_errors(j,:) = ar2.p;
@@ -71,7 +68,6 @@ ar.fun_evals = fun_evals;
 if(~silent) 
     fprintf('mean feval time: %fsec, %i/%i errors\n', mean(ar.timing(~isnan(ar.timing))), ...
         sum(ar.exitflag==-1),n);
-    arWaitbar(-1);
 end
 
 ar.p = pReset;

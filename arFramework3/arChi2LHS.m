@@ -14,7 +14,6 @@ global ar
 if(~exist('n','var'))
     n = 10;
 end
-
 if(~exist('sensis','var'))
     sensis = false;
 end
