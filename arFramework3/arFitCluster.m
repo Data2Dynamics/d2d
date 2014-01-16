@@ -1,6 +1,10 @@
 % send a single fit to a matlab cluster worker
+%
+% job = arFitCluster(cluster)
+%
+% cluster:      MATLAB cluster object   (see help parcluster)
 
-function arFitCluster(cluster)
+function varargout = arFitCluster(cluster)
 
 global ar
 global ar_fit_cluster
@@ -13,7 +17,13 @@ if(isempty(ar_fit_cluster)) % new job
     fprintf('done\n');
     
 elseif(isa(ar_fit_cluster,'parallel.job.MJSIndependentJob')) % old job
-    fprintf('arFitCluster (ID %i) ', ar_fit_cluster.ID);
+    try
+        fprintf('arFitCluster (ID %i) ', ar_fit_cluster.ID);
+    catch
+        fprintf('arFitCluster invalid job ID, deleting...\n');
+        clear global ar_fit_cluster
+        return
+    end
     
     if(~strcmp(ar_fit_cluster.State, 'finished')) % still running
         fprintf('status %s...\n', ar_fit_cluster.State);
@@ -25,7 +35,6 @@ elseif(isa(ar_fit_cluster,'parallel.job.MJSIndependentJob')) % old job
             ar = S{1};
             delete(ar_fit_cluster);
             clear global ar_fit_cluster
-            arFitPrint;
         catch err_id
             delete(ar_fit_cluster);
             clear global ar_fit_cluster
@@ -34,6 +43,10 @@ elseif(isa(ar_fit_cluster,'parallel.job.MJSIndependentJob')) % old job
     end
 else
     error('arFitCluster global variable ar_fit_cluster is invalid!\n');
+end
+
+if(nargout>0)
+    varargout{1} = ar_fit_cluster;
 end
 
 function ar = arFitClusterFun(ar)
