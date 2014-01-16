@@ -278,7 +278,10 @@ ar.model(m).data(d).p = union(ar.model(m).data(d).p, ar.model(m).data(d).pystd);
 % CONDITIONS
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).fp = transpose(ar.model(m).data(d).p);
-ptmp = union(union(ar.model(m).px, ar.model(m).pu), ar.model(m).py);
+ptmp = union(ar.model(m).px, ar.model(m).pu);
+if(isfield(ar.model(m),'py'))
+    ptmp = union(union(ptmp, ar.model(m).py), ar.model(m).pystd);
+end
 qcondparamodel = ismember(ar.model(m).data(d).p, strrep(ptmp, '_filename', ['_' ar.model(m).data(d).name])); %R2013a compatible
 ar.model(m).data(d).fp(qcondparamodel) = strrep(ar.model(m).fp(ismember(ar.model(m).p, ptmp)), '_filename', ['_' ar.model(m).data(d).name]);
 while(~isempty(C{1}) && ~strcmp(C{1},'RANDOM'))
