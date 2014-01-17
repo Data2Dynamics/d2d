@@ -162,14 +162,17 @@ for jp=1:np
                                 
                                 jd = ds(1);
                                 Clines = myLineStyle(length(times)*length(jcs), ccount, weight);
-                                if(isempty(ar.model(jm).plot(jplot).condition))
+                                if(length(times)*length(jcs) == 1)
                                     Clines{2} = jeti(jp,:);
                                 end
                                 
                                 for jy = 1:ny
                                     [t, y, ~, tExp, yExp, yExpStd, ~, ~, zero_break] = ...
                                         getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
-                                    
+                                    if(length(unique(t))==1)
+                                        t = [t-0.1; t+0.1];
+                                        y = [y; y]; %#ok<AGROW>
+                                    end
                                     if(jp==1)
                                         g = subplot(nrows,ncols,jy);
                                         ar.model(jm).plot(jplot).gy(jy) = g;
@@ -245,7 +248,7 @@ for jp=1:np
                             [ncols, nrows, nu, ~, iu, ix] = myColsAndRowsX(jm, rowstocols);
                             
                             Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount, weight);
-                            if(length(ar.model(jm).plot(jplot).dLink)==1)
+                            if(length(times)*length(jcs) == 1)
                                 Clines{2} = jeti(jp,:);
                             end
                             
@@ -368,7 +371,7 @@ for jp=1:np
                             [ncols, nrows, iv] = myColsAndRowsV(jm, rowstocols);
                             
                             Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount, weight);
-                            if(length(ar.model(jm).plot(jplot).dLink)==1)
+                            if(length(times)*length(jcs) == 1)
                                 Clines{2} = jeti(jp,:);
                             end
                             
@@ -649,21 +652,26 @@ zero_break = [];
 ccount = 1;
 for jd = ds
 	qt = ar.model(jm).data(jd).tExp == ttime;
+    for jc = 1:length(ar.model(jm).data(jd).condition)
+        if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
+            jcondi = jc;
+        end
+    end
     for jt = find(qt')
         if(logplotting_xaxis)
-            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(1).value)); %#ok<AGROW>
+            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
         else
-            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(1).value); %#ok<AGROW>
+            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(jcondi).value); %#ok<AGROW>
         end
         if(isinf(t(ccount,1)))
             doses = [];
             for jd2 = dLink
                 if(logplotting_xaxis)
-                    if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(1).value))))
-                        doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(1).value)); %#ok<AGROW>
+                    if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
+                        doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
                     end
                 else
-                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(1).value); %#ok<AGROW>
+                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(jcondi).value); %#ok<AGROW>
                 end
             end
 			doses = unique(doses); %R2013a compatible
