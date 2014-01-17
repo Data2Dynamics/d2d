@@ -54,8 +54,15 @@ for jc = 1:length(ar.model(jm).condition)
         jd = ar.model(jm).condition(jc).dLink(1);
         jdref = ar.model(jm).condition(reference_condition).dLink(1);
         for jdc=1:length(ar.model(jm).data(jd).condition)
-            if(str2double(ar.model(jm).data(jd).condition(jdc).value) ~= ...
-                    str2double(ar.model(jm).data(jdref).condition(jdc).value))
+            jdcref = -1;
+            for jdc2=1:length(ar.model(jm).data(jdref).condition)
+                if(strcmp(ar.model(jm).data(jd).condition(jdc).parameter, ...
+                        ar.model(jm).data(jdref).condition(jdc2).parameter))
+                    jdcref = jdc2;
+                end
+            end
+            if(jdcref == -1 || str2double(ar.model(jm).data(jd).condition(jdc).value) ~= ...
+                    str2double(ar.model(jm).data(jdref).condition(jdcref).value))
                 tmpstr = [tmpstr sprintf('%s=%s ',ar.model(jm).data(jd).condition(jdc).parameter, ...
                     ar.model(jm).data(jd).condition(jdc).value)]; %#ok<AGROW>
             end
@@ -259,18 +266,20 @@ for jx = find(~cellfun(@isempty, collect_cs))
             elseif(strcmp(fname,'u'))
                 xFine = ar.model(jm).condition(jc).uFineSimu(qt,jx);
             end
-            hstmp(end+1) = plot(g, tFine(qt), xFine, 'Color', colors(colindex,:)); %#ok<AGROW>
-            
-            xrangefactmp = xrange(jx)*xrangefac;
-            tFineP = [tFine(qt); flipud(tFine(qt))];
-            xFineP = [xFine + xrangefactmp/2; flipud(xFine - xrangefactmp/2)];
-            patch(tFineP, xFineP, zeros(size(xFineP))-2, ones(size(xFineP)), ...
-                'FaceColor', colors(colindex,:)*0.1+0.9, 'EdgeColor', colors(colindex,:)*0.1+0.9)
-            patch(tFineP, xFineP, zeros(size(xFineP))-1, ones(size(xFineP)), 'LineStyle', '--', ...
-                'FaceColor', 'none', 'EdgeColor', colors(colindex,:)*0.3+0.7)
-            plot(g, ctime{jc,jx}, xdata{jc,jx} + xrangefactmp*cdata{jc,jx}, '*', 'Color', colors(colindex,:))
-            
-            clabelstmp{end+1} = strrep(clabel{jc},'_','\_'); %#ok<AGROW>
+            if(sum(qt)>0)
+                hstmp(end+1) = plot(g, tFine(qt), xFine, 'Color', colors(colindex,:)); %#ok<AGROW>
+                
+                xrangefactmp = xrange(jx)*xrangefac;
+                tFineP = [tFine(qt); flipud(tFine(qt))];
+                xFineP = [xFine + xrangefactmp/2; flipud(xFine - xrangefactmp/2)];
+                patch(tFineP, xFineP, zeros(size(xFineP))-2, ones(size(xFineP)), ...
+                    'FaceColor', colors(colindex,:)*0.1+0.9, 'EdgeColor', colors(colindex,:)*0.1+0.9)
+                patch(tFineP, xFineP, zeros(size(xFineP))-1, ones(size(xFineP)), 'LineStyle', '--', ...
+                    'FaceColor', 'none', 'EdgeColor', colors(colindex,:)*0.3+0.7)
+                plot(g, ctime{jc,jx}, xdata{jc,jx} + xrangefactmp*cdata{jc,jx}, '*', 'Color', colors(colindex,:))
+                
+                clabelstmp{end+1} = strrep(clabel{jc},'_','\_'); %#ok<AGROW>
+            end
             colindex = colindex + 1;
         end
         
