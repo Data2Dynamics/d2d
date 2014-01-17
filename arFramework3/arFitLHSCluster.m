@@ -33,7 +33,12 @@ if(isempty(ar_fitlhs_cluster)) % new job
         'CurrentFolder', '.');
     fprintf('done\n');
     
-elseif(isa(ar_fitlhs_cluster,'parallel.job.MJSIndependentJob')) % old job
+elseif(isa(ar_fitlhs_cluster,'parallel.job.MJSIndependentJob') || ...
+        isa(ar_fitlhs_cluster,'parallel.job.MJSCommunicatingJob')) % old job
+    if(nargout>0)
+        varargout{1} = ar_fitlhs_cluster;
+        return
+    end
     try
         fprintf('arFitLHSCluster (ID %i) ', ar_fitlhs_cluster.ID);
     catch
@@ -60,10 +65,6 @@ elseif(isa(ar_fitlhs_cluster,'parallel.job.MJSIndependentJob')) % old job
     end
 else
     error('arFitLHSCluster global variable ar_fitlhs_cluster is invalid!\n');
-end
-
-if(nargout>0)
-    varargout{1} = ar_fitlhs_cluster;
 end
 
 function ar = arChi2LHSClusterFun(ar2, n, randomseed, log_fit_history)

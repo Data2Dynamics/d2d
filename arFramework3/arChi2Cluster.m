@@ -21,7 +21,12 @@ if(isempty(ar_chi2_cluster)) % new job
         'CurrentFolder', '.');
     fprintf('done\n');
     
-elseif(isa(ar_chi2_cluster,'parallel.job.MJSIndependentJob')) % old job
+elseif(isa(ar_chi2_cluster,'parallel.job.MJSIndependentJob') || ...
+        isa(ar_chi2_cluster,'parallel.job.MJSCommunicatingJob')) % old job
+    if(nargout>0)
+        varargout{1} = ar_chi2_cluster;
+        return
+    end
     try
         fprintf('arChi2Cluster (ID %i) ', ar_chi2_cluster.ID);
     catch
@@ -48,10 +53,6 @@ elseif(isa(ar_chi2_cluster,'parallel.job.MJSIndependentJob')) % old job
     end
 else
     error('arChi2Cluster global variable ar_chi2_cluster is invalid!\n');
-end
-
-if(nargout>0)
-    varargout{1} = ar_chi2_cluster;
 end
 
 function ar = arChi2ClusterFun(ar, sensi)

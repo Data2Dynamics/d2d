@@ -16,7 +16,12 @@ if(isempty(ar_fit_cluster)) % new job
         'CurrentFolder', '.');
     fprintf('done\n');
     
-elseif(isa(ar_fit_cluster,'parallel.job.MJSIndependentJob')) % old job
+elseif(isa(ar_fit_cluster,'parallel.job.MJSIndependentJob') || ...
+        isa(ar_fit_cluster,'parallel.job.MJSCommunicatingJob')) % old job
+    if(nargout>0)
+        varargout{1} = ar_fit_cluster;
+        return
+    end
     try
         fprintf('arFitCluster (ID %i) ', ar_fit_cluster.ID);
     catch
@@ -43,10 +48,6 @@ elseif(isa(ar_fit_cluster,'parallel.job.MJSIndependentJob')) % old job
     end
 else
     error('arFitCluster global variable ar_fit_cluster is invalid!\n');
-end
-
-if(nargout>0)
-    varargout{1} = ar_fit_cluster;
 end
 
 function ar = arFitClusterFun(ar)
