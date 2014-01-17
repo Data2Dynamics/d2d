@@ -14,8 +14,17 @@ if(~exist('log_fit_history','var'))
 end
 
 n = size(ps,1);
-ps_errors = nan(size(ps));
 ar.ps_start = ps;
+ps = nan(size(ps));
+ps_errors = nan(size(ps));
+chi2s_start = nan(1,n);
+chi2sconstr_start = nan(1,n);
+chi2s = nan(1,n);
+chi2sconstr = nan(1,n);
+exitflag = nan(1,n);
+timing = nan(1,n);
+fun_evals = nan(1,n);
+optim_crit = nan(1,n);
 
 arChi2(true,[]);
 pReset = ar.p;

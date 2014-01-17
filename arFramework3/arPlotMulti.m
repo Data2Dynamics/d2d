@@ -449,7 +449,7 @@ for jm = 1:length(ar.model)
         if(ar.model(jm).qPlotYs(jplot) && ar.model(jm).plot(jplot).ny>0)
             h = myRaiseFigure(jm, jplot, ['Y: ' ar.model(jm).plot(jplot).name], figcount);
             
-            ny = ar.model(jm).plot(jplot).ny;
+            ny = length(ar.model(jm).data(ar.model(jm).plot(jplot).dLink(1)).y);
             % axis & titles
             for jy = 1:ny
                 jd = ar.model(jm).plot(jplot).dLink(1);
