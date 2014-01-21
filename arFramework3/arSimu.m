@@ -12,8 +12,9 @@
 
 function varargout = arSimu(varargin)
 
+global ar
+
 if(nargin==0 || ~isstruct(varargin{1}))
-    global ar %#ok<TLEV>
     qglobalar = true;
 else
     ar = varargin{1};

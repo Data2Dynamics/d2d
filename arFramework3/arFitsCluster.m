@@ -15,7 +15,6 @@ end
 
 n = size(ps,1);
 ar.ps_start = ps;
-ps = nan(size(ps));
 ps_errors = nan(size(ps));
 chi2s_start = nan(1,n);
 chi2sconstr_start = nan(1,n);
@@ -51,31 +50,32 @@ parfor j=1:n
         fun_evals(j) = ar2.fit.fevals;
         optim_crit(j) = ar2.firstorderopt;
         fprintf('fit #%i: objective function %g\n', j, ar2.chi2fit);
+        
+        if(log_fit_history)
+            name = ar2.config.optimizers{ar2.config.optimizer};
+            if(ar2.config.optimizer==5)
+                tmpnames = arNLS;
+                name = [name '_' tmpnames{ar2.config.optimizerStep+1}];
+            end
+            
+            fit_hist(j).hist = ar2.fit;
+            fit_hist(j).optimizer = ar2.config.optimizer;
+            if(ar2.config.optimizer==5)
+                fit_hist(j).optimizerStep = ar2.config.optimizerStep;
+            else
+                fit_hist(j).optimizerStep = nan;
+            end
+            fit_hist(j).config = ar2.config.optim;
+            fit_hist(j).name = [name '_' sprintf('run%i', j)];
+            
+            [~,imin] = min(ar2.fit.chi2_hist + ar2.fit.constr_hist);
+            fit_hist(j).p = ar2.fit.p_hist(imin,:);
+        end
     catch exception
         ps_errors(j,:) = ar2.p;
         fprintf('fit #%i: %s\n', j, exception.message);
     end
     timing(j) = toc;
-    if(log_fit_history)
-        name = ar2.config.optimizers{ar2.config.optimizer};
-        if(ar2.config.optimizer==5)
-            tmpnames = arNLS;
-            name = [name '_' tmpnames{ar2.config.optimizerStep+1}];
-        end
-        
-        fit_hist(j).hist = ar2.fit;
-        fit_hist(j).optimizer = ar2.config.optimizer;
-        if(ar2.config.optimizer==5)
-            fit_hist(j).optimizerStep = ar2.config.optimizerStep;
-        else
-            fit_hist(j).optimizerStep = nan;
-        end
-        fit_hist(j).config = ar2.config.optim;
-        fit_hist(j).name = [name '_' sprintf('run%i', j)];
-        
-        [~,imin] = min(ar2.fit.chi2_hist + ar2.fit.constr_hist);
-        fit_hist(j).p = ar2.fit.p_hist(imin,:);
-    end
 end
 
 ar.chi2s_start = chi2s_start;

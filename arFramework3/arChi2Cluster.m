@@ -22,7 +22,9 @@ if(isempty(ar_chi2_cluster)) % new job
     fprintf('done\n');
     
 elseif(isa(ar_chi2_cluster,'parallel.job.MJSIndependentJob') || ...
-        isa(ar_chi2_cluster,'parallel.job.MJSCommunicatingJob')) % old job
+        isa(ar_chi2_cluster,'parallel.job.MJSCommunicatingJob') || ...
+        isa(ar_chi2_cluster,'parallel.job.CJSIndependentJob') || ...
+        isa(ar_chi2_cluster,'parallel.job.CJSCommunicatingJob')) % old job
     if(nargout>0)
         varargout{1} = ar_chi2_cluster;
         return

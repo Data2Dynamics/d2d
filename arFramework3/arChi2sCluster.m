@@ -44,7 +44,7 @@ parfor j=1:n
         chi2sconstr(j) = ar2.chi2constr;
         exitflag(j) = 1;
         if(~silent) 
-            fprintf('feval #%i: onjective function %g\n', j, ar2.chi2fit);
+            fprintf('feval #%i: objective function %g\n', j, ar2.chi2fit);
         end
     catch exception
         timing(j) = ar2.stop/1e6;

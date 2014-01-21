@@ -24,6 +24,9 @@ if(~exist('use_cluster','var'))
     use_cluster = false;
 end
 
+if(exist('rng','file')~=0)
+    rng('shuffle');
+end
 ps = ones(n,1) * ar.p;
 psrand = lhsdesign(n,sum(ar.qFit==1));
 

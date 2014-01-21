@@ -1,8 +1,11 @@
 function f=arFitPSOFkt(p, ar)
 
+global fit
+
+fit.fevals = fit.fevals + 1;
 try
     ar = arChi2(ar, false,p);
-    f = sum(ar.res.^2);
+    f = ar.chi2fit;
 catch
     f = Inf;
 end

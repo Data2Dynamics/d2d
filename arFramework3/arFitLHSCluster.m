@@ -13,28 +13,33 @@ function varargout = arFitLHSCluster(cluster, n, randomseed, log_fit_history)
 global ar
 global ar_fitlhs_cluster
 
-if(isempty(ar_fitlhs_cluster)) % new job
+pool_size = 3;
+
+if(isempty(ar_fitlhs_cluster)) % new job    
     if(~exist('n','var'))
         n = 10;
     end
     if(~exist('randomseed','var'))
-        rng('shuffle');
-        rngsettings = rng;
-        randomseed = rngsettings.Seed;
+        randomseed = [];
     end
     if(~exist('log_fit_history','var'))
         log_fit_history = false;
     end
 
     fprintf('arFitLHSCluster sending job...');
-    ar_fitlhs_cluster = batch(cluster, @arChi2LHSClusterFun, 1, ...
+    ar_fitlhs_cluster = batch(cluster, @arFitLHSClusterFun, 1, ...
         {ar, n, randomseed, log_fit_history}, ...
         'CaptureDiary', true, ...
-        'CurrentFolder', '.');
+        'CurrentFolder', '.', ...
+        'AttachedFiles', {'arFitPSOFkt'}, ...
+        'Matlabpool', pool_size);
+    
     fprintf('done\n');
     
 elseif(isa(ar_fitlhs_cluster,'parallel.job.MJSIndependentJob') || ...
-        isa(ar_fitlhs_cluster,'parallel.job.MJSCommunicatingJob')) % old job
+        isa(ar_fitlhs_cluster,'parallel.job.MJSCommunicatingJob') || ...
+        isa(ar_fitlhs_cluster,'parallel.job.CJSIndependentJob') || ...
+        isa(ar_fitlhs_cluster,'parallel.job.CJSCommunicatingJob')) % old job
     if(nargout>0)
         varargout{1} = ar_fitlhs_cluster;
         return
@@ -67,7 +72,7 @@ else
     error('arFitLHSCluster global variable ar_fitlhs_cluster is invalid!\n');
 end
 
-function ar = arChi2LHSClusterFun(ar2, n, randomseed, log_fit_history)
+function ar = arFitLHSClusterFun(ar2, n, randomseed, log_fit_history)
 global ar %#ok<REDEF>
 ar = ar2; %#ok<NASGU>
 arFitLHS(n, randomseed, log_fit_history, false, true);

@@ -65,6 +65,7 @@ fit = struct([]);
 fit(1).iter_count = 0;
 fit.chi2_hist = nan(1,ar.config.optim.MaxIter);
 fit.constr_hist = nan(1,ar.config.optim.MaxIter);
+fit.opti_hist = nan(1,ar.config.optim.MaxIter);
 fit.p_hist = nan(ar.config.optim.MaxIter,length(ar.p));
 fit.maxstepsize_hist = nan(1,ar.config.optim.MaxIter);
 fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
@@ -112,7 +113,7 @@ elseif(ar.config.optimizer == 2)
 % PSO
 elseif(ar.config.optimizer == 3) 
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
-        arFitPSO(lb, ub, ar);
+        arFitPSO(lb, ub);
    
 % STRSCNE
 elseif(ar.config.optimizer == 4)

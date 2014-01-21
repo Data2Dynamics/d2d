@@ -16,7 +16,7 @@ if(~exist('n','var'))
     n = 10;
 end
 if(exist('rng','file')~=0)
-    if(exist('randomseed','var'))
+    if(exist('randomseed','var') && ~isempty(randomseed))
         ar.lhs_seed = randomseed;
         rng(randomseed);
     else
