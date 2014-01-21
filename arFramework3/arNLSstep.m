@@ -62,6 +62,7 @@ if(nargin==0)
 end
 
 qred = false(size(p));
+% qred = sum(abs(sres),1)<1e-3;
 
 if(isscalar(mu) && mu==0)
     dp = zeros(size(g));
@@ -99,7 +100,7 @@ else % own step implementation
     exbounds = [p+dp-ub; -(p+dp - lb)] > 0; % dp bejond bound ?
     
     % if p on bounds and dp pointing bejond bound, reduce problem
-    qred = sum(onbound & exbounds,1)>0;
+    qred = qred | sum(onbound & exbounds,1)>0;
     if(sum(~qred)==0)
         error('solution outside bounds, no further step possible');
     end

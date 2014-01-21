@@ -142,8 +142,10 @@ while(iter < options.MaxIter && ~q_converged)
     try
         if(nargout(fun)==2 || nargout(fun)==-1)
             [rest, srest] = feval(fun, pt);
-        elseif(nargout(fun)==3)
+        elseif(nargout(fun)==3 && nargin(fun)==1)
             [rest, srest, Ht] = feval(fun, pt);
+        elseif(nargout(fun)==3 && nargin(fun)==5)
+            [rest, srest, Ht] = feval(fun, pt, p, res, sres, H);
         end
         resnormt = sum(rest.^2);
     catch
@@ -159,13 +161,36 @@ while(iter < options.MaxIter && ~q_converged)
     approx_qual = dresnorm/dresnorm_expect;
     q_approx_qual = approx_qual > 0.75;
     
+    % calculate first order optimality criterion
+    onbound = [p==ub; p==lb];
+    exbounds = [g>0; g<0];
+    firstorderopt = norm(g(sum(onbound & exbounds,1)==0));
+    
     % reduction achieved ?
     q_reduction = dresnorm<0;
     
+    % accept step ?
 %     q_accept_step = q_reduction;
     q_accept_step = q_reduction && q_approx_qual;
+    
+    % output
+    if(debug>2)
+        printiter(iter, options.MaxIter, resnorm, mu, norm(dp), normdpmu_type, dresnorm, ...
+            firstorderopt, find(qred), grad_dir_frac, approx_qual, q_accept_step, cond(H));
+    end
+    
+    % call output function
+    if(~isempty(options.OutputFcn))
+        feval(options.OutputFcn,p,[],'iter');
+    end
+    
+    % call plot function
+    if(~isempty(options.PlotFcns))
+        feval(options.PlotFcns, p, H, mu);
+    end
+    
     % update if step was accepted
-    if(q_accept_step)
+    if(q_accept_step)    
         p = pt;
         
         res = rest;
@@ -178,16 +203,6 @@ while(iter < options.MaxIter && ~q_converged)
             H = 2*(sres'*sres); % Hessian matrix approximation
         elseif(nargout(fun)==3)
             H = Ht;             % user Hessian matrix
-        end
-            
-        % calculate first order optimality criterion
-        onbound = [p==ub; p==lb];
-        exbounds = [g>0; g<0];
-        firstorderopt = norm(g(sum(onbound & exbounds,1)==0));
-        
-        % call output function
-        if(~isempty(options.OutputFcn))
-            feval(options.OutputFcn,p,[],'iter');
         end
         
         % inertial effect using memory
@@ -208,7 +223,6 @@ while(iter < options.MaxIter && ~q_converged)
     end
     q_shrink = ~q_reduction || ~q_approx_qual;
     
-    mu_old = mu;
     dmu = 0;
     if(q_enlarge) % enlarge trust region
         mu = arNLSTrustTrafo(mu, mu_fac, dp, false);
@@ -220,12 +234,6 @@ while(iter < options.MaxIter && ~q_converged)
         end
         mu = arNLSTrustTrafo(mu, mu_red_fac, dp, false);
         dmu = -1;
-    end
-   
-    % output
-    if(debug>2)
-        printiter(iter, options.MaxIter, resnorm, mu_old, dmu, norm(dp), normdpmu_type, dresnorm, ...
-            firstorderopt, find(qred), grad_dir_frac, approx_qual, q_accept_step, cond(H));
     end
     
     % check convergence
@@ -283,21 +291,13 @@ end
 
 
 % print iteration
-function printiter(iter, maxIter, resnorm, mu, dmu, norm_dp, normdpmu, dresnorm, ...
+function printiter(iter, maxIter, resnorm, mu, norm_dp, normdpmu, dresnorm, ...
     norm_gred, dim_red, grad_dir_frac, approx_qual, step_accept, condition_number)
 
 if(~step_accept)
     outstream = 2;
 else
     outstream = 1;
-end
-
-if(dmu==-1)
-    dmu = '-';
-elseif(dmu==+1)
-    dmu = '+';
-else
-    dmu = '0';
 end
 
 fprintf(outstream, '%3i/%3i  resnorm=%-8.2g  ', iter, maxIter, resnorm);
@@ -311,9 +311,9 @@ if(~isscalar(mu))
     colorbar;
     drawnow;
      
-    fprintf(outstream, 'mu=%-8.2g %s (det=%-8.2g cond=%-8.2g maxeig=%-8.2g)  ', normdpmu, dmu, det(mu), cond(mu), max(eig(mu)));
+    fprintf(outstream, 'mu=%-8.2g (det=%-8.2g cond=%-8.2g maxeig=%-8.2g)  ', normdpmu, det(mu), cond(mu), max(eig(mu)));
 else
-    fprintf(outstream, 'mu=%-8.2g %s ', mu, dmu);
+    fprintf(outstream, 'mu=%-8.2g ', mu);
     if(normdpmu>0)
         fprintf(outstream, '(%-5.2f) ', normdpmu);
     end
