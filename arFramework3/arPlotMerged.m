@@ -194,7 +194,7 @@ for jp=find(ar.model(jm).qPlotYs)
                     else
                         collect_cs_dr{jx} = union(collect_cs_dr{jx}, ar.model(jm).data(jd).cLink);
                     end
-                    for jy=find(qy)
+                    for jy=find(qy')
                         tExp = ar.model(jm).data(jd).tExp;
                         tExpLink = ar.model(jm).data(jd).tLinkExp;
                         if(strcmp(fname,'x'))
