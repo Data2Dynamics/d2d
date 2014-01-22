@@ -103,6 +103,8 @@ if(nargout(fun)==2 || nargout(fun)==-1)
     H = 2*(sres'*sres);             % Hessian matrix approximation
 elseif(nargout(fun)==3)
     [res, sres, H] = feval(fun, p); % user Hessian matrix
+elseif(nargout(fun)==4)
+    [res, sres, H, ssres] = feval(fun, p); % user second derivatives
 else
     error('nargout(fun)==2 or 3');
 end
@@ -146,6 +148,8 @@ while(iter < options.MaxIter && ~q_converged)
             [rest, srest, Ht] = feval(fun, pt);
         elseif(nargout(fun)==3 && nargin(fun)==5)
             [rest, srest, Ht] = feval(fun, pt, p, res, sres, H);
+        elseif(nargout(fun)==4 && nargin(fun)==5)
+            [rest, srest, Ht, ssrest] = feval(fun, pt, p, res, sres, ssres);
         end
         resnormt = sum(rest.^2);
     catch
@@ -203,6 +207,9 @@ while(iter < options.MaxIter && ~q_converged)
             H = 2*(sres'*sres); % Hessian matrix approximation
         elseif(nargout(fun)==3)
             H = Ht;             % user Hessian matrix
+        elseif(nargout(fun)==4)
+            H = Ht;             % user Hessian matrix
+            ssres = ssrest;     % user second derivatives
         end
         
         % inertial effect using memory

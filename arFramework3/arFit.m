@@ -154,6 +154,11 @@ elseif(ar.config.optimizer == 6)
         [],options);
     resnorm = merit_fkt(pFit,ar);
     
+% arNLS boosted by SR1 updates
+elseif(ar.config.optimizer == 7)
+    [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
+        arNLS(@merit_fkt_sr1, ar.p(ar.qFit==1), lb, ub, ar.config.optim, ar.config.optimizerStep);
+    
 else
     error('ar.config.optimizer invalid');
 end
@@ -209,6 +214,58 @@ if(nargout>1 && ar.config.useSensis)
     if(~isempty(ar.sconstr))
         sres = [sres; ar.sconstr(:, ar.qFit==1)];
     end
+end
+
+% arNLS boosted by SR1 updates
+function [res, sres, H, ssres] = merit_fkt_sr1(p, pc, ~, sresc, ssresc)
+global ar
+arChi2(ar.config.useSensis, p);
+arLogFit(ar);
+res = [ar.res ar.constr];
+if(nargout>1 && ar.config.useSensis)
+    sres = [];
+    if(~isempty(ar.sres))
+        sres = ar.sres(:, ar.qFit==1);
+    end
+    if(~isempty(ar.sconstr))
+        sres = [sres; ar.sconstr(:, ar.qFit==1)];
+    end
+    
+    if(nargout>2)
+        if(nargin<2)
+            H = 2*(sres'*sres);
+            ssres = zeros([length(p) length(p) length(res)]);
+            return;
+        end
+        
+        % SR1 update on residuals
+        ssres = nan(size(ssresc));
+        for j=1:length(res)
+            ssres(:,:,j) = sr1_update(ssresc(:,:,j), pc, sresc(j,:), p, sres(j,:));
+            % ssres(j,:,:) = sr1_update(ssresc(j,:,:), pc, 2*sresc(j,:), p, 2*sres(j,:));
+            % ssres(:,:,j) = sr1_update(ssresc(:,:,j), pc, 0.5*sresc(j,:), p, 0.5*sres(j,:));
+            % ssres(j,:,:) = sr1_update(ssresc(:,:,j), pc, -2*sresc(j,:), p, -2*sres(j,:));
+            % ssres(j,:,:) = sr1_update(ssresc(:,:,j), pc, -sresc(j,:), p, -sres(j,:));
+        end
+        
+%         figure(1);
+%         subplot(1,2,1)
+%         imagesc(2*(sres'*sres));
+%         subplot(1,2,2)
+%         imagesc(squeeze(sum(bsxfun(@times, res', ssres),1)));
+        
+        H = 2*(sres'*sres) + sum(bsxfun(@times, shiftdim(res,-1), ssres),3);
+    end
+end
+
+% SR1 updates
+function H = sr1_update(H, pC, gC, pO, gO)
+sk = transpose(pC - pO);
+yk = transpose(gC - gO);
+rk = yk - H*sk;
+c1 = 0.5;
+if(abs(rk'*sk) > c1*norm(rk)*norm(sk))
+    H = H + (rk*rk') / (rk'*sk);
 end
 
 % fmincon

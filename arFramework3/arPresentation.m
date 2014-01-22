@@ -954,16 +954,18 @@ fclose(fid);
 fprintf('done\n');
 
 %% pdflatex
-fprintf('pdflatex, file %s...', fname);
-cd(savePath);
-eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
-eval(['!bibtex ' fnamebib ' > log_bibtex.txt']);
-eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
-eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
-cd('../../..');
-copyfile([savePath '/' 'presentation.pdf'], [savePath '/' sprintf('presentation_%s.pdf', datestr(now,30))])
-fprintf('done\n');
 
+if(~ispc)
+    fprintf('pdflatex, file %s...', fname);
+    cd(savePath);
+    eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
+    eval(['!bibtex ' fnamebib ' > log_bibtex.txt']);
+    eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
+    eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
+    cd('../../..');
+    copyfile([savePath '/' 'presentation.pdf'], [savePath '/' sprintf('presentation_%s.pdf', datestr(now,30))])
+    fprintf('done\n');
+end
 
 function lp(varargin)
 if(nargin>2)

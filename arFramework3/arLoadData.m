@@ -251,7 +251,7 @@ ar.model(m).data(d).pystd = setdiff(vertcat(varlist{:}), union(union(union(union
 for j=1:length(ar.model(m).data(d).fystd)
     varlist = symvar(ar.model(m).data(d).fystd{j});
 	ar.model(m).data(d).py_sep(j).pars = union(ar.model(m).data(d).py_sep(j).pars, ... %R2013a compatible
-        setdiff(varlist, union(ar.model(m).x, ar.model(m).u))); %R2013a compatible
+        setdiff(varlist, union(union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z), ar.model(m).data(d).y))); %R2013a compatible
     
     % exclude parameters form model definition
     ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).px);
@@ -278,12 +278,10 @@ ar.model(m).data(d).p = union(ar.model(m).data(d).p, ar.model(m).data(d).pystd);
 % CONDITIONS
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).fp = transpose(ar.model(m).data(d).p);
-ptmp = union(ar.model(m).px, ar.model(m).pu);
-if(isfield(ar.model(m),'py'))
-    ptmp = union(union(ptmp, ar.model(m).py), ar.model(m).pystd);
-end
+ptmp = ar.model(m).p;
 qcondparamodel = ismember(ar.model(m).data(d).p, strrep(ptmp, '_filename', ['_' ar.model(m).data(d).name])); %R2013a compatible
-ar.model(m).data(d).fp(qcondparamodel) = strrep(ar.model(m).fp(ismember(ar.model(m).p, ptmp)), '_filename', ['_' ar.model(m).data(d).name]);
+qmodelparacond = ismember(strrep(ptmp, '_filename', ['_' ar.model(m).data(d).name]), ar.model(m).data(d).p); %R2013a compatible
+ar.model(m).data(d).fp(qcondparamodel) = strrep(ar.model(m).fp(qmodelparacond), '_filename', ['_' ar.model(m).data(d).name]);
 while(~isempty(C{1}) && ~strcmp(C{1},'RANDOM'))
     qcondpara = ismember(ar.model(m).data(d).p, C{1}); %R2013a compatible
     if(sum(qcondpara)>0)
@@ -572,6 +570,7 @@ if(sum(qcond) > 0)
             ar.model(m).data(d).logplotting = ar.model(m).data(d).logplotting(qhasdata);
             ar.model(m).data(d).fy = ar.model(m).data(d).fy(qhasdata);
             ar.model(m).data(d).fystd = ar.model(m).data(d).fystd(qhasdata);
+            ar.model(m).data(d).py_sep = ar.model(m).data(d).py_sep(qhasdata);
         end
         
         for jj=1:size(condis,2)
@@ -649,6 +648,7 @@ else
         ar.model(m).data(d).logplotting = ar.model(m).data(d).logplotting(qhasdata);
         ar.model(m).data(d).fy = ar.model(m).data(d).fy(qhasdata);
         ar.model(m).data(d).fystd = ar.model(m).data(d).fystd(qhasdata);
+        ar.model(m).data(d).py_sep = ar.model(m).data(d).py_sep(qhasdata);
     end
     
     ar = setValues(ar, m, d, header, nfactor, data, times);

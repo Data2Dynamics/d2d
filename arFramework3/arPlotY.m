@@ -411,9 +411,10 @@ for jm = 1:length(ar.model)
                     end
                     
                     if(doLegends && jy == 1 && (~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
+                        hl = [];
                         if(~ar.model(jm).plot(jplot).doseresponse)
                             if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition),'Location','Best')
+                                hl = legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition));
                             end
                         else
                             legendtmp = {};
@@ -429,7 +430,15 @@ for jm = 1:length(ar.model)
                                     ccount = ccount + 1;
                                 end
                             end
-                            legend(g, cclegendstyles, myNameTrafo(legendtmp),'Location','Best')
+                            hl = legend(g, cclegendstyles, myNameTrafo(legendtmp));
+                        end
+                        if(~isempty(hl))
+                            gref = subplot(nrows,ncols,nrows*ncols);
+                            axis(gref,'off');
+                            grefloc = get(gref, 'Position');
+                            legloc = get(hl, 'Position');
+                            legloc(1:2) = grefloc(1:2) + [grefloc(3)-legloc(3) 0];
+                            set(hl, 'Position', legloc);
                         end
                     end
                 end
@@ -710,5 +719,5 @@ set(g, 'FontName', labelfonttype);
 function [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols)
 global ar
 ny = size(ar.model(jm).data(jd).y, 2);
-[nrows, ncols] = arNtoColsAndRows(ny, rowstocols);
+[nrows, ncols] = arNtoColsAndRows(ny+1, rowstocols);
 
