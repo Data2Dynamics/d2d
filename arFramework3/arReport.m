@@ -82,7 +82,7 @@ for jm=1:length(ar.model)
     if(~isempty(ar.model(jm).description))
         lp(fid, '\\subsection{Comments}');
         for jd=1:length(ar.model(jm).description)
-            lp(fid, '%s', strrep(strrep(ar.model(jm).description{jd}, '%', '\%'), '_', '\_'));
+            lp(fid, '%s\\\\', strrep(strrep(ar.model(jm).description{jd}, '%', '\%'), '_', '\_'));
         end
     end
     
@@ -377,7 +377,7 @@ for jm=1:length(ar.model)
             if(~isempty(ar.model(jm).data(jd).description))
                 lp(fid, '\\subsubsection{Comments}');
                 for jdes=1:length(ar.model(jm).data(jd).description)
-                    lp(fid, '%s', strrep(strrep(ar.model(jm).data(jd).description{jdes}, '%', '\%'), '_', '\_'));
+                    lp(fid, '%s\\\\', strrep(strrep(ar.model(jm).data(jd).description{jdes}, '%', '\%'), '_', '\_'));
                 end
             end
             
@@ -638,8 +638,8 @@ for jm=1:length(ar.model)
             for jp=1:length(ar.model(jm).data(jd).fp)
                 % check if this observable was removed
                 wasRemoved = false;
-                if(sum(strcmp(ar.model(jm).data(jd).py, ar.model(jm).data(jd2).pold{jp}) | ...
-                        strcmp(ar.model(jm).data(jd).pystd, ar.model(jm).data(jd2).pold{jp}))>0)
+                if(sum(strcmp(ar.model(jm).data(jd).py, ar.model(jm).data(jd2).pold{jp}))>0 || ...
+                        sum(strcmp(ar.model(jm).data(jd).pystd, ar.model(jm).data(jd2).pold{jp}))>0)
                     if(sum(strcmp(ar.p, ar.model(jm).data(jd2).pold{jp}))==0)
                         wasRemoved = true;
                     end

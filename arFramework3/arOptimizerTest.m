@@ -1,10 +1,10 @@
-function arOptimizerTest(range, method, N)
+function arOptimizerTest(range, submethod, N)
 
 if(~exist('range','var'))
     range = -1;
 end
-if(~exist('method','var'))
-    method = [0 6];
+if(~exist('submethod','var'))
+    submethod = [0];
 end
 if(~exist('N','var'))
     N = 10;
@@ -17,11 +17,12 @@ lb = ar.lb + 0;
 ub = ar.ub + 0;
 
 ar.p = p;
-arChi2(true);
+arChi2(true,[]);
 
-llh = ar.chi2fit;
-sres = ar.sres(:,ar.qFit==1); 
-g = -2*ar.res*sres;
+llh = ar.chi2fit + ar.chi2constr;
+res = [ar.res ar.constr];
+sres = [ar.sres(:,ar.qFit==1); ar.sconstr(:,ar.qFit==1)]; 
+g = -2*res*sres;
 H = 2*(sres'*sres);
 
 % H = hessian(@my_hess_fkt,p(ar.qFit==1));
@@ -38,7 +39,7 @@ chi2s_expect = {};
 xs = {};
 ps = {};
 
-% method:   
+% submethod:   
 %  0 = trust region (based on modified trust.m)
 %  1 = Levenberg-Marquardt
 %  2 = Newton (with maximal step length mu)
@@ -57,20 +58,20 @@ ps = {};
 % 15 = trdog pcgr 2D subspace 
 % 16 = trdog pcgr (no DM) 2D subspace 
 labels = arNLSstep;
-labels = labels(method+1);
+labels = labels(submethod+1);
 
 minllhs = [];
 arWaitbar(0);
 % try %#ok<TRYNC>
-    for jm = 1:length(method)
+    for jm = 1:length(submethod)
         ar.p = p;
         for j = 1:N
-            arWaitbar([jm j],[length(method) N]);
+            arWaitbar([jm j],[length(submethod) N]);
             
-            [dptmp, solver_calls, qred, ~, grad_dir_frac, llh_expect] = ...
+            [dptmp, solver_calls, qred, grad_dir_frac, llh_expect] = ...
                 arNLSstep(llh, g, H, sres, mus(j), ...
-                p(ar.qFit==1), lb(ar.qFit==1), ub(ar.qFit==1), 0, [], 0, method(jm));
-
+                p(ar.qFit==1), lb(ar.qFit==1), ub(ar.qFit==1), 0, [], submethod(jm));
+            
             fprintf('%s mu=%8.2g norm(dp)=%8.2g solver_calls=%i grad_dir_frac=%4.2f qred=', ...
                 labels{jm}, mus(j), norm(dptmp), solver_calls, grad_dir_frac);
             ired = find(qred);
@@ -83,11 +84,11 @@ arWaitbar(0);
                 ps{jm}(j,:) = dptmp; %#ok<AGROW>
                 
                 ar.p(ar.qFit==1) = p(ar.qFit==1) + dptmp;
-                arChi2(true);
+                arChi2(true,[]);
                 
                 chi2s_expect{jm}(j) = llh_expect; %#ok<AGROW>
                 xs{jm}(j) = norm(dptmp); %#ok<AGROW>
-                chi2s{jm}(j) = ar.chi2fit; %#ok<AGROW>
+                chi2s{jm}(j) = ar.chi2fit + ar.chi2constr; %#ok<AGROW>
             end
         end
         minllhs(jm) = min([chi2s{jm} chi2s_expect{jm}]); %#ok<AGROW>
@@ -96,7 +97,7 @@ arWaitbar(0);
 arWaitbar(-1);
 
 ar.p = p;
-arChi2(true);
+arChi2(true,[]);
 
 %% plot
 
@@ -104,7 +105,7 @@ figure(1);
 clf
 dminllh = llh-minllhs;
 dminllh(dminllh<1e-3) = 1e-3;
-if(length(method)==1)
+if(length(submethod)==1)
     plot(xs{1}, chi2s{1}, 'ko-');
     hold on
     plot(xs{1}, chi2s_expect{1}, 'ko--');
@@ -112,10 +113,10 @@ if(length(method)==1)
     title(labels{1});    
     ylim([llh-dminllh*1.1 llh+dminllh*0.1])
 else
-    for jm = 1:length(method)
-        C1 = arLineMarkersAndColors(jm,[],'o','-');
-        C2 = arLineMarkersAndColors(jm,[],'o','--');
-        subplot(3,length(method),jm);
+    for jm = 1:length(submethod)
+        C1 = arLineMarkersAndColors(jm,length(submethod),[],'o','-');
+        C2 = arLineMarkersAndColors(jm,length(submethod),[],'o','--');
+        subplot(3,length(submethod),jm);
         plot(xs{jm}, chi2s{jm}, C1{:});
         hold on
         plot(xs{jm}, chi2s_expect{jm}, C2{:});
@@ -124,10 +125,10 @@ else
         ylim([llh-dminllh(jm)*1.1 llh+dminllh(jm)*0.1])
     end
     
-    subplot(3,length(method),(length(method)+1):(3*length(method)));
-    for jm = 1:length(method)
-        C1 = arLineMarkersAndColors(jm,[],'o','-');
-        C2 = arLineMarkersAndColors(jm,[],'o','--');
+    subplot(3,length(submethod),(length(submethod)+1):(3*length(submethod)));
+    for jm = 1:length(submethod)
+        C1 = arLineMarkersAndColors(jm,length(submethod),[],'o','-');
+        C2 = arLineMarkersAndColors(jm,length(submethod),[],'o','--');
         plot(xs{jm}, chi2s{jm}, C1{:});
         hold on
         plot(xs{jm}, chi2s_expect{jm}, C2{:});
@@ -139,8 +140,8 @@ end
 
 % figure(2);
 % clf
-% for jm = 1:length(method)
-%     subplot(1,length(method),jm);
+% for jm = 1:length(submethod)
+%     subplot(1,length(submethod),jm);
 %     h = plot(xs{jm}, ps{jm});
 %     title(labels{jm});
 %     
@@ -168,7 +169,7 @@ global ar
 pRes = ar.p;
 try
     ar.p(ar.qFit==1) = p;
-    arChi2(true);
+    arChi2(true,[]);
     l = ar.chi2fit;
     ar.p = pRes;
 catch 
