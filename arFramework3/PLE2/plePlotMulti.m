@@ -191,6 +191,8 @@ if(savetofile && exist(pleGlobals.savePath, 'dir'))
     print('-depsc2', [pleGlobals.savePath '/multi_plot']);
     if(ispc)
         print('-dpdf', [pleGlobals.savePath '/multi_plot']);
+    elseif(ismac)
+        system(['ps2pdf  -dEPSCrop ' [pleGlobals.savePath '/multi_plot'] '.eps '  [pleGlobals.savePath '/multi_plot'] '.pdf']);
     else
         system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' [pleGlobals.savePath '/multi_plot'] '.eps '  [pleGlobals.savePath '/multi_plot'] '.pdf']);
     end

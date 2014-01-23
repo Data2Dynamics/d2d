@@ -265,6 +265,8 @@ for jj=1:length(indices)
             print('-depsc2', [pleGlobals.savePath '/' pleGlobals.p_labels{jk}]);
             if(ispc)
                 print('-dpdf', [pleGlobals.savePath '/' pleGlobals.p_labels{jk}]);
+            elseif(ismac)
+                system(['ps2pdf  -dEPSCrop ' [pleGlobals.savePath '/' pleGlobals.p_labels{jk}] '.eps '  [pleGlobals.savePath '/' pleGlobals.p_labels{jk}] '.pdf']);
             else
                 system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' [pleGlobals.savePath '/' pleGlobals.p_labels{jk}] '.eps '  [pleGlobals.savePath '/' pleGlobals.p_labels{jk}] '.pdf']);
             end
