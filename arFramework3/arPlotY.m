@@ -393,7 +393,11 @@ for jm = 1:length(ar.model)
                     hold(g, 'off');
                     mySubplotStyle(g, labelfontsize, labelfonttype);
                     
-                    if(jy == (nrows-1)*ncols + 1)
+                    qxlabel = jy == (nrows-1)*ncols + 1;
+                    if(ny <= (nrows-1)*ncols)
+                        qxlabel = jy == (nrows-2)*ncols + 1;
+                    end
+                    if(qxlabel)
                         if(~ar.model(jm).plot(jplot).doseresponse)
                             xlabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).tUnits{3}, ar.model(jm).data(jd).tUnits{2}));
                         else
@@ -438,6 +442,7 @@ for jm = 1:length(ar.model)
                             grefloc = get(gref, 'Position');
                             legloc = get(hl, 'Position');
                             legloc(1:2) = grefloc(1:2) + [grefloc(3)-legloc(3) 0];
+                            % legloc(1:2) = [1-legloc(3) 0];
                             set(hl, 'Position', legloc);
                         end
                     end
@@ -721,5 +726,8 @@ set(g, 'FontName', labelfonttype);
 function [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols)
 global ar
 ny = size(ar.model(jm).data(jd).y, 2);
-[nrows, ncols] = arNtoColsAndRows(ny+1, rowstocols);
+[nrows, ncols] = arNtoColsAndRows(ny, rowstocols);
+if(nrows*ncols == ny)
+    [nrows, ncols] = arNtoColsAndRows(ny+1, rowstocols);
+end
 

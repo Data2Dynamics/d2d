@@ -14,6 +14,9 @@ if(~exist([cd '/' savePath], 'dir'))
     mkdir([cd '/' savePath])
 end
 
+% copy lib.bib
+copyfile(which('lib.bib'), [savePath '/lib.bib']);
+
 % latex file
 fname = 'report.tex';
 fnamebib = 'report.aux';
@@ -32,9 +35,11 @@ lp(fid, '\\usepackage{graphicx} ');
 lp(fid, '\\usepackage{rotating} ');
 lp(fid, '\\usepackage{lscape}');
 lp(fid, '\\usepackage{color}');
-% lp(fid, '\\usepackage{natbib}');
+lp(fid, '\\usepackage{natbib}');
 lp(fid, '\\usepackage{lmodern} ');
 lp(fid, '\\usepackage{xcolor} ');
+lp(fid, '\\usepackage{chemist} ');
+lp(fid, '\\usepackage{calc} ');
 lp(fid, '\\usepackage[normal,footnotesize,bf]{caption}');
 lp(fid, '\\usepackage{subfig}');
 lp(fid, '\\usepackage{sidecap}');
@@ -65,10 +70,23 @@ lp(fid, '\\newcommand{\\mycaption}[3]{\\caption{\\textbf{#1}\\\\ #3 \\label{#2}}
 lp(fid, '\n\\begin{document}\n');
 
 %% Header
-lp(fid, '\\title{Modeling Report}');
-lp(fid, '\\author{%s\\footnote{Numerical calculations provided by andreas.raue@fdm.uni-freiburg.de}}', ar.config.username);
+% lp(fid, ['\\title{Data-2-Dynamics Software' ...
+%     '\\footnote{Website: \\href{https://bitbucket.org/d2d-development/d2d-software}' ...
+%     '{\\url{https://bitbucket.org/d2d-development/d2d-software}} \\\\ ', ...
+%     'Reference: \\citet{Raue:2012zt}}'...
+%     ' \\\\ Modeling Report}']);
+
+lp(fid, '\\title{Data 2 Dynamics Software -- Modeling Report}');
+lp(fid, '\\author{%s}', ar.config.username);
 lp(fid, '\\date{%s}', datestr(now));
 lp(fid, '\\maketitle\n');
+
+lp(fid, ['\\noindent {\\bf Website:} \\href{https://bitbucket.org/d2d-development/d2d-software}' ...
+    '{\\url{https://bitbucket.org/d2d-development/d2d-software}} \\\\\\\\']);
+lp(fid, ['{\\bf Reference:} A~Raue, M~Schilling, J~Bachmann, A~Matteson, M~Schelker, ' ...
+    'D~Kaschek, S~Hug, C~Kreutz, BD~Harms, F~Theis, U~Klingm{\\"u}ller, and J~Timmer.', ...
+    ' Lessons learned from quantitative dynamical modeling in systems biology.', ...
+    ' {\\em PLOS ONE}, 8(9):e74335, 2013.']);
 
 lp(fid, '\\tableofcontents');
 
@@ -92,7 +110,8 @@ for jm=1:length(ar.model)
         lp(fid, 'The model contains %i dynamic variables:', length(ar.model(jm).x));
         lp(fid, '\\begin{itemize}');
         for jx = 1:length(ar.model(jm).x)
-            lp(fid, '\\item {\\bf Dynamic variable %i:} %s', jx, strrep(ar.model(jm).x{jx}, '_', '\_'));
+            lp(fid, '\\item {\\bf Dynamic variable %i:} %s', ...
+                jx, strrep(ar.model(jm).x{jx}, '_', '\_'));
             
             lp(fid, '{\\footnotesize');
             lp(fid, '\\begin{equation}');
@@ -104,6 +123,8 @@ for jm=1:length(ar.model)
                 sprintf('%s_init%i', ar.model(jm).name, jx));
             lp(fid, '\\end{aligned}');
             lp(fid, '\\end{equation}}');
+            
+            lp(fid, 'Unit: %s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2});
         end
         lp(fid, '\\end{itemize}');
     end
@@ -114,7 +135,8 @@ for jm=1:length(ar.model)
         lp(fid, 'The model contains %i external inputs variables:', length(ar.model(jm).u));
         lp(fid, '\\begin{itemize}');
         for ju = 1:length(ar.model(jm).u)
-            lp(fid, '\\item {\\bf Input variable %i:} %s', ju, strrep(ar.model(jm).u{ju}, '_', '\_'));
+            lp(fid, '\\item {\\bf Input variable %i:} %s', ...
+                ju, strrep(ar.model(jm).u{ju}, '_', '\_'));
             
             if(~isempty(ar.model(jm).fu{ju}))
                 lp(fid, '{\\footnotesize');
@@ -128,6 +150,8 @@ for jm=1:length(ar.model)
                 lp(fid, '\\end{aligned}');
                 lp(fid, '\\end{equation}}');
             end
+            
+            lp(fid, 'Unit: %s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2});
         end
         lp(fid, '\\end{itemize}');
     end
@@ -143,15 +167,21 @@ for jm=1:length(ar.model)
             
             % source
             isfirst = true;
+            sourcestr = '';
+            sources = {};
             for jx = 1:length(ar.model(jm).fx)
                 if(ar.model(jm).N(jx,jv)<0)
+                    sources{end+1} = strrep(ar.model(jm).x{jx}, '_', '\_');
                     if(~isfirst)
-                        lp(fid, '+ ');
+                        sourcestr = [sourcestr '+ '];
                     end
                     if(abs(ar.model(jm).N(jx,jv))>1)
-                        lp(fid, '$%i \\cdot$ %s ', abs(ar.model(jm).N(jx,jv)), strrep(ar.model(jm).x{jx}, '_', '\_'));
+                        sourcestr = [sourcestr ...
+                            sprintf('%i \\cdot %s ', abs(ar.model(jm).N(jx,jv)), ...
+                            strrep(ar.model(jm).x{jx}, '_', '\_'))];
                     else
-                        lp(fid, '%s ', strrep(ar.model(jm).x{jx}, '_', '\_'));
+                        sourcestr = [sourcestr ...
+                            sprintf('%s ', strrep(ar.model(jm).x{jx}, '_', '\_'))];
                     end
                     if(isfirst)
                         isfirst = false;
@@ -159,22 +189,25 @@ for jm=1:length(ar.model)
                 end
             end
             if(isfirst)
-                lp(fid, '$\\varnothing$');
+                sourcestr = [sourcestr '\varnothing'];
             end
-            
-            lp(fid, '$\\rightarrow$ ');
-            
+                        
             % target
             isfirst = true;
+            targetstr = '';
+            targets = {};
             for jx = 1:length(ar.model(jm).fx)
                 if(ar.model(jm).N(jx,jv)>0)
+                    targets{end+1} = strrep(ar.model(jm).x{jx}, '_', '\_');
                     if(~isfirst)
-                        lp(fid, '+ ');
+                        targetstr = [targetstr '+ '];
                     end
                     if(abs(ar.model(jm).N(jx,jv))>1)
-                        lp(fid, '$%i \\cdot$ %s ', abs(ar.model(jm).N(jx,jv)), strrep(ar.model(jm).x{jx}, '_', '\_'));
+                        targetstr = [targetstr ...
+                            sprintf('%i \\cdot %s ', abs(ar.model(jm).N(jx,jv)), strrep(ar.model(jm).x{jx}, '_', '\_'))];
                     else
-                        lp(fid, '%s ', strrep(ar.model(jm).x{jx}, '_', '\_'));
+                        targetstr = [targetstr ...
+                            sprintf('%s ', strrep(ar.model(jm).x{jx}, '_', '\_'))];
                     end
                     if(isfirst)
                         isfirst = false;
@@ -182,9 +215,28 @@ for jm=1:length(ar.model)
                 end
             end
             if(isfirst)
-                lp(fid, '$\\varnothing$');
+                targetstr = [targetstr '\varnothing'];
             end
             lp(fid, '\\\\');
+            
+            % modifiers
+            mod_pos = [getModifierStr(jm,jv,false,'x',sources,targets) ...
+                getModifierStr(jm,jv,false,'u',sources,targets)];
+            mod_neg = [getModifierStr(jm,jv,true,'x',sources,targets) ...
+                getModifierStr(jm,jv,true,'u',sources,targets)];
+            
+            % chem reaction
+            lp(fid, '\\begin{chemmath}');
+            lp(fid, '%s', sourcestr);
+            if(length(mod_pos)>length(mod_neg))
+                lp(fid, '\\reactrarrow{1pt}{\\widthof{%s}+0.5cm}{%s}{\\color{red}%s}', ...
+                    mod_pos, mod_pos, mod_neg);
+            else
+                lp(fid, '\\reactrarrow{1pt}{\\widthof{%s}+0.5cm}{%s}{\\color{red}%s}', ...
+                    mod_neg, mod_pos, mod_neg);
+            end
+            lp(fid, '%s', targetstr);
+            lp(fid, '\\end{chemmath}');
             
             % rate equation
             lp(fid, '{\\footnotesize');
@@ -279,7 +331,8 @@ for jm=1:length(ar.model)
         lp(fid, 'The model contains %i derived variables:', length(ar.model(jm).z));
         lp(fid, '\\begin{itemize}');
         for jz = 1:length(ar.model(jm).z)
-            lp(fid, '\\item {\\bf Derived variable %i:} %s', jz, strrep(ar.model(jm).z{jz}, '_', '\_'));
+            lp(fid, '\\item {\\bf Derived variable %i:} %s', ...
+                jz, strrep(ar.model(jm).z{jz}, '_', '\_'));
             
             lp(fid, '{\\footnotesize');
             lp(fid, '\\begin{equation}');
@@ -291,6 +344,8 @@ for jm=1:length(ar.model)
                 sprintf('%s_derived%i', ar.model(jm).name, jz));
             lp(fid, '\\end{aligned}');
             lp(fid, '\\end{equation}}');
+            
+            lp(fid, 'Unit: %s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2});
         end
         lp(fid, '\\end{itemize}');
     end
@@ -301,7 +356,8 @@ for jm=1:length(ar.model)
         lp(fid, 'The model contains %i standard observables:', length(ar.model(jm).y));
         lp(fid, '\\begin{itemize}');
         for jy = 1:length(ar.model(jm).y)
-            lp(fid, '\\item {\\bf Observable %i:} %s', jy, strrep(ar.model(jm).y{jy}, '_', '\_'));
+            lp(fid, '\\item {\\bf Observable %i:} %s', ...
+                jy, strrep(ar.model(jm).y{jy}, '_', '\_'));
             
             strtmp = myFormulas(ar.model(jm).fy{jy}, jm);
             if(ar.model(jm).logfitting(jy))
@@ -318,6 +374,8 @@ for jm=1:length(ar.model)
                 sprintf('%s_std_obs%i', ar.model(jm).name, jy));
             lp(fid, '\\end{aligned}');
             lp(fid, '\\end{equation}}');
+            
+            lp(fid, 'Unit: %s [%s]; ', ar.model(jm).yUnits{jy,3}, ar.model(jm).yUnits{jy,2});
             
             lp(fid, 'With error model:');
             
@@ -559,7 +617,8 @@ for jm=1:length(ar.model)
                     lp(fid, 'The following observables are modified in this data set:');
                     lp(fid, '\\begin{itemize}');
                     for jy = find(qmod)
-                        lp(fid, '\\item {\\bf Observable:} %s', strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
+                        lp(fid, '\\item {\\bf Observable:} %s', ...
+                            strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
                         
                         strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
                         if(ar.model(jm).logfitting(jy))
@@ -576,6 +635,8 @@ for jm=1:length(ar.model)
                             sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, jy));
                         lp(fid, '\\end{aligned}');
                         lp(fid, '\\end{equation}}');
+                        
+                        lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
                         
                         lp(fid, 'With error model:');
                         
@@ -598,7 +659,8 @@ for jm=1:length(ar.model)
                     lp(fid, 'The following observables are added in this data set:');
                     lp(fid, '\\begin{itemize}');
                     for jy = find(qadd)
-                        lp(fid, '\\item {\\bf Observable:} %s', strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
+                        lp(fid, '\\item {\\bf Observable:} %s', ...
+                            strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
                         
                         strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
                         if(ar.model(jm).logfitting(jy))
@@ -615,6 +677,8 @@ for jm=1:length(ar.model)
                             sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, jy));
                         lp(fid, '\\end{aligned}');
                         lp(fid, '\\end{equation}}');
+                        
+                        lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
                         
                         lp(fid, 'With error model:');
                         
@@ -980,7 +1044,7 @@ if(exist(plePath,'dir'))
 end
 
 lp(fid, '\\bibliographystyle{plain}');
-lp(fid, '\\bibliography{/Users/araue/Sites/pub/bibtex/Library}');
+lp(fid, '\\bibliography{lib}');
 
 lp(fid, '\\end{document}');
 
@@ -1081,6 +1145,35 @@ if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
     end
 else
     out = in;
+end
+
+function mod = getModifierStr(jm,jv,useNeg,str,sources,targets)
+
+global ar
+
+field1 = ['qdvd' str '_negative'];
+field2 = ['qdvd' str '_nonzero'];
+
+if(useNeg)
+    qneg = ar.model(jm).(field1)(jv,:);
+else
+    qneg = ~ar.model(jm).(field1)(jv,:);
+end
+
+isfirst = true;
+mod = '';
+for jx = find(qneg & ar.model(jm).(field2)(jv,:))
+    if(sum(ismember(sources, strrep(ar.model(jm).(str){jx}, '_', '\_'))) ...
+            + sum(ismember(targets, strrep(ar.model(jm).(str){jx}, '_', '\_'))) == 0)
+        if(~isfirst)
+            mod = [mod ', '];
+        end
+        mod = [mod ...
+            sprintf('%s', strrep(ar.model(jm).(str){jx}, '_', '\_'))];
+        if(isfirst)
+            isfirst = false;
+        end
+    end
 end
 
 % %% Residuals
