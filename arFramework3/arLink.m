@@ -148,12 +148,12 @@ end
 for m = 1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d = 1:length(ar.model(m).data)
-            nt = length(ar.model(m).data(d).tExp);
             ntf = length(ar.model(m).data(d).tFine);
             ny = length(ar.model(m).data(d).y);
             np = length(ar.model(m).data(d).p);
             
             if(isfield(ar.model(m).data(d), 'tExp') && nt>0)
+                nt = length(ar.model(m).data(d).tExp);
                 ar.model(m).data(d).yExpSimu = zeros(nt, ny);
                 ar.model(m).data(d).syExpSimu = zeros(nt, ny, np);
                 ar.model(m).data(d).ystdExpSimu = zeros(nt, ny);
