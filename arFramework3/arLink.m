@@ -152,22 +152,24 @@ for m = 1:length(ar.model)
             ny = length(ar.model(m).data(d).y);
             np = length(ar.model(m).data(d).p);
             
-            if(isfield(ar.model(m).data(d), 'tExp') && nt>0)
+            if(isfield(ar.model(m).data(d), 'tExp'))
                 nt = length(ar.model(m).data(d).tExp);
-                ar.model(m).data(d).yExpSimu = zeros(nt, ny);
-                ar.model(m).data(d).syExpSimu = zeros(nt, ny, np);
-                ar.model(m).data(d).ystdExpSimu = zeros(nt, ny);
-                ar.model(m).data(d).systdExpSimu = zeros(nt, ny, np);
-                if(isfield(ar.model(m).data(d), 'yExp') && ~isempty(ar.model(m).data(d).yExp))
-                    ar.model(m).data(d).res = zeros(nt, ny);
-                    ar.model(m).data(d).reserr = zeros(nt, ny);
-                    ar.model(m).data(d).sres = zeros(nt, ny, np);
-                    ar.model(m).data(d).sreserr = zeros(nt, ny, np);
-                    ar.model(m).data(d).has_yExp = true;
-                else
-                    ar.model(m).data(d).has_yExp = false;
+                if(nt>0)
+                    ar.model(m).data(d).yExpSimu = zeros(nt, ny);
+                    ar.model(m).data(d).syExpSimu = zeros(nt, ny, np);
+                    ar.model(m).data(d).ystdExpSimu = zeros(nt, ny);
+                    ar.model(m).data(d).systdExpSimu = zeros(nt, ny, np);
+                    if(isfield(ar.model(m).data(d), 'yExp') && ~isempty(ar.model(m).data(d).yExp))
+                        ar.model(m).data(d).res = zeros(nt, ny);
+                        ar.model(m).data(d).reserr = zeros(nt, ny);
+                        ar.model(m).data(d).sres = zeros(nt, ny, np);
+                        ar.model(m).data(d).sreserr = zeros(nt, ny, np);
+                        ar.model(m).data(d).has_yExp = true;
+                    else
+                        ar.model(m).data(d).has_yExp = false;
+                    end
+                    ar.model(m).data(d).has_tExp = true;
                 end
-                ar.model(m).data(d).has_tExp = true;
             else
                 ar.model(m).data(d).has_tExp = false;
                 ar.model(m).data(d).has_yExp = false;
