@@ -2081,7 +2081,11 @@ function J = myJacobian(F,x)
 % an empty sym in the right dimensions.
 
 if(~isempty(F))
-    J = jacobian(F,x);
+    if(~isempty(x))
+        J = jacobian(F,x);
+    else
+        J = sym(NaN(length(F),0));
+    end
 else
     J = sym(NaN(0,length(x)));
 end
