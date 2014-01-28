@@ -28,7 +28,7 @@ end
 if(~isempty(varargin))
     sensi = varargin{1};
 else
-    sensi = false;
+    sensi = true;
 end
 if(length(varargin)>1)
     pTrial = varargin{2};
@@ -448,7 +448,7 @@ if(~silent)
             fprintf('-2*log(L) = %g, %i data points, ', ...
                 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
         else
-            fprintf('global chi^2 = %g, %i data points, ', ar.chi2, ar.ndata);
+            fprintf('global chi^2 = %g, %i data points, ', ar.chi2fit, ar.ndata);
         end
     end
     fprintf('%i free parameters', sum(ar.qFit==1));

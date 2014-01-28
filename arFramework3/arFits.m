@@ -1,6 +1,6 @@
 % fit sequence
 %
-% arFits(ps, log_fit_history)
+% arFits(ps, log_fit_history, backup_save)
 %
 % ps:                           parameter values      
 % log_fit_history               [false]
@@ -88,14 +88,19 @@ fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
 fprintf('mean fitting time: %fsec\n', 10^mean(log10(ar.timing(~isnan(ar.timing)))));
 arWaitbar(-1);
 
-if(chi2Reset>min(ar.chi2s))
+if(chi2Reset>min(ar.chi2s + ar.chi2sconstr))
     [chi2min,imin] = min(ar.chi2s + ar.chi2sconstr);
     ar.p = ar.ps(imin,:);
-    fprintf('selected best fit #%i with %f (old = %f)\n', ...
-        imin, 2*ar.ndata*log(sqrt(2*pi)) + chi2min, 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
+    if(ar.config.fiterrors == 1)
+        fprintf('selected best fit #%i with %f (old = %f)\n', ...
+            imin, 2*ar.ndata*log(sqrt(2*pi)) + chi2min, 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
+    else
+        fprintf('selected best fit #%i with %f (old = %f)\n', ...
+            imin, chi2min, chi2Reset);
+    end
 else
     fprintf('did not find better fit\n');
     ar.p = pReset;
 end
-arChi2(false,[]);
+arChi2(true,[]);
 

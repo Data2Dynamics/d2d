@@ -49,7 +49,13 @@ parfor j=1:n
         exitflag(j) = ar2.fit.exitflag;
         fun_evals(j) = ar2.fit.fevals;
         optim_crit(j) = ar2.firstorderopt;
-        fprintf('fit #%i: objective function %g\n', j, ar2.chi2fit);
+        if(ar2.config.fiterrors == 1)
+            fprintf('fit #%i: objective function %g\n', j, ...
+                2*ar2.ndata*log(sqrt(2*pi)) + ar2.chi2fit + ar2.chi2constr);
+        else
+            fprintf('fit #%i: objective function %g\n', j, ...
+                ar2.chi2fit + ar2.chi2constr);
+        end
         
         if(log_fit_history)
             name = ar2.config.optimizers{ar2.config.optimizer};
@@ -95,14 +101,19 @@ end
 fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
 fprintf('mean fitting time: %fsec\n', 10^mean(log10(ar.timing(~isnan(ar.timing)))));
 
-if(chi2Reset>min(ar.chi2s))
+if(chi2Reset>min(ar.chi2s + ar.chi2sconstr))
     [chi2min,imin] = min(ar.chi2s + ar.chi2sconstr);
     ar.p = ar.ps(imin,:);
-    fprintf('selected best fit #%i with %f (old = %f)\n', ...
-        imin, 2*ar.ndata*log(sqrt(2*pi)) + chi2min, 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
+    if(ar.config.fiterrors == 1)
+        fprintf('selected best fit #%i with %f (old = %f)\n', ...
+            imin, 2*ar.ndata*log(sqrt(2*pi)) + chi2min, 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
+    else
+        fprintf('selected best fit #%i with %f (old = %f)\n', ...
+            imin, chi2min, chi2Reset);
+    end
 else
     fprintf('did not find better fit\n');
     ar.p = pReset;
 end
-arChi2(false,[]);
+arChi2(true,[]);
 
