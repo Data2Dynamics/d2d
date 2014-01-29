@@ -248,7 +248,7 @@ for jp=1:np
                             [ncols, nrows, nu, ~, iu, ix] = myColsAndRowsX(jm, rowstocols);
                             
                             Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount, weight);
-                            if(length(times)*length(jcs) == 1)
+                            if(length(ar.model(jm).plot(jplot).dLink)==1)
                                 Clines{2} = jeti(jp,:);
                             end
                             
@@ -295,8 +295,7 @@ for jp=1:np
                         end
                     else
                         times = [];
-                        ds = ar.model(jm).plot(jplot).dLink;
-                        for jd = ds
+                        for jd = ar.model(jm).plot(jplot).dLink
 							times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
                             [ncols, nrows, nu, ~, iu, ix] = myColsAndRowsX(jm, rowstocols);
                         end
@@ -371,7 +370,7 @@ for jp=1:np
                             [ncols, nrows, iv] = myColsAndRowsV(jm, rowstocols);
                             
                             Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount, weight);
-                            if(length(times)*length(jcs) == 1)
+                            if(length(ar.model(jm).plot(jplot).dLink)==1)
                                 Clines{2} = jeti(jp,:);
                             end
                             
