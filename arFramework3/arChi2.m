@@ -200,6 +200,9 @@ for jm = 1:nm
                         if(isfield(ar.model(jm).condition(jc), 'sxExpSimu') && ...
                             ~isempty(ar.model(jm).condition(jc).sxExpSimu))
                             dxdp = squeeze(ar.model(jm).condition(jc).sxExpSimu(1,qss,:));
+                            if(iscolumn(dxdp)) % transpose dxdp if squeeze returns column vector (sum(qss)==1)
+                                dxdp = dxdp';
+                            end
                             dxdp(:,ar.model(jm).condition(jc).qLog10 == 1) = bsxfun(@times, ... % log trafo
                                 dxdp(:,ar.model(jm).condition(jc).qLog10 == 1), ...
                                 ar.model(jm).condition(jc).pNum(ar.model(jm).condition(jc).qLog10 == 1) * log(10));
