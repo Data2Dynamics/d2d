@@ -348,7 +348,7 @@ global ar
 stop = false;
 if(strcmp(state, 'iter'))    
     if(ar.config.showFitting)
-        arPlot(false, true, false, true, true);
+        arPlot(false, true, true, true, true);
         drawnow;
     end
 end

@@ -25,6 +25,7 @@ if(exist('fileChooser','file') == 0)
 end
 if(exist('JEInterface','file') == 0)
     addpath([ar_path '/EvA2/JEInterface'])
+    javaaddpath([ar_path '/EvA2/EvA2Base.jar'])
 end
 
 %% CVODES
@@ -65,10 +66,7 @@ if(ispc)
     end
 end
 
-%% Rest
-
-% EvA2 Toolbox
-javaaddpath([ar_path '/EvA2/EvA2Base.jar'])
+%% user name
 
 % check if arInitUser.m exists and create the file if necessary
 if exist('arInitUser.m','file')==0

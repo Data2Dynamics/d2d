@@ -29,10 +29,16 @@ for j=1:length(filenames)
         if(isfield(tmpple.ar, 'chi2s'))
             jcount = jcount + 1;
             chi2s{jcount} = tmpple.ar.chi2s; %#ok<AGROW>
-            chi2sconstr{jcount} = tmpple.ar.chi2sconstr; %#ok<AGROW>
+            if(isfield(tmpple.ar,'chi2sconstr'))
+                chi2sconstr{jcount} = tmpple.ar.chi2sconstr; %#ok<AGROW>
+            else
+                chi2sconstr{jcount} = zeros(size(tmpple.ar.chi2s)); %#ok<AGROW>
+            end
             labels{jcount} = filenames{j}; %#ok<AGROW>
             if(isfield(tmpple.ar, 'optim_crit'))
                 optim_krit{jcount} = tmpple.ar.optim_crit; %#ok<AGROW>
+            else
+                optim_krit{jcount} = nan(size(tmpple.ar.chi2s)); %#ok<AGROW>
             end
             fevals(1:length(tmpple.ar.fun_evals),jcount) = tmpple.ar.fun_evals; %#ok<AGROW>
             timing(1:length(tmpple.ar.timing),jcount) = tmpple.ar.timing; %#ok<AGROW>
@@ -69,11 +75,18 @@ for j=1:length(chi2s)
     h(j) = semilogy(chi2s_sorted + 1 - minchi2, '-', C{:});
     hold on
     C = arLineMarkersAndColors(j,length(chi2s),[],'o','none');
-    semilogy(find(exit_sorted>0), chi2s_sorted(exit_sorted>0) + 1 - minchi2, C{:}, ...
+    if(~iscell(exit_sorted))
+        qexit1 = exit_sorted>0;
+        qexit2 = exit_sorted==0;
+    else
+        qexit1 = true(size(exit_sorted));
+        qexit2 = true(size(exit_sorted));
+    end    
+    semilogy(find(qexit1), chi2s_sorted(qexit1) + 1 - minchi2, C{:}, ...
         'MarkerFaceColor','w', ...
         'MarkerSize',4);
     C = arLineMarkersAndColors(j,length(chi2s),[],'x','none');
-    semilogy(find(exit_sorted==0), chi2s_sorted(exit_sorted==0) + 1 - minchi2, C{:}, ...
+    semilogy(find(qexit2), chi2s_sorted(qexit2) + 1 - minchi2, C{:}, ...
         'MarkerSize',6);
 end
 hold off
@@ -128,12 +141,19 @@ if(~isempty(chi2sconstr))
         colors(j,:) = C{6}; %#ok<AGROW>
         h(j) = semilogy(chi2sconstr_sorted, '-', C{:});
         hold on
+        if(~iscell(exit_sorted))
+            qexit1 = exit_sorted>0;
+            qexit2 = exit_sorted==0;
+        else
+            qexit1 = true(size(exit_sorted));
+            qexit2 = true(size(exit_sorted));
+        end
         C = arLineMarkersAndColors(j,length(chi2s),[],'o','none');
-        semilogy(find(exit_sorted>0), chi2sconstr_sorted(exit_sorted>0), C{:}, ...
+        semilogy(find(qexit1), chi2sconstr_sorted(qexit1), C{:}, ...
             'MarkerFaceColor','w', ...
             'MarkerSize',4);
         C = arLineMarkersAndColors(j,length(chi2s),[],'x','none');
-        semilogy(find(exit_sorted==0), chi2sconstr_sorted(exit_sorted==0), C{:}, ...
+        semilogy(find(qexit2), chi2sconstr_sorted(qexit2), C{:}, ...
             'MarkerSize',6);
     end
     hold off

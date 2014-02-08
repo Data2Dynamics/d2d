@@ -167,14 +167,14 @@ end
     
 
 switch method
-    case 0 % trust region solution
+    case 0 % trust region solution       
         dp = trust(-g',H,mu)';
         
         % the function trust has a bug, therefore, in some cases
         % the problem has to be regularized
         lambda = 1e-6;
         while(norm(dp)/mu > 1.01)
-%             fprintf('trust.m problem %g, regularizing with new lambda=%g\n', norm(dp)/mu, lambda);
+            % fprintf('trust.m problem %g, regularizing with new lambda=%g\n', norm(dp)/mu, lambda);
             dp = trust(-g',H+lambda*eye(size(H)),mu)';
             solver_calls_tmp = solver_calls_tmp + 1;
             lambda = lambda * 10;

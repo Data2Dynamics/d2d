@@ -21,7 +21,12 @@ arChi2(true,[]);
 
 llh = ar.chi2fit + ar.chi2constr;
 res = [ar.res ar.constr];
-sres = [ar.sres(:,ar.qFit==1); ar.sconstr(:,ar.qFit==1)]; 
+if(~isempty(ar.sconstr))
+    sres = [ar.sres(:,ar.qFit==1); ar.sconstr(:,ar.qFit==1)];
+else
+    sres = ar.sres(:,ar.qFit==1);
+end
+
 g = -2*res*sres;
 H = 2*(sres'*sres);
 
@@ -29,10 +34,11 @@ H = 2*(sres'*sres);
 % Ht = load('Ht.mat'); 
 % H = Ht.Ht;                                         
 
-fprintf('norm(g) = %f\n', norm(g));
-fprintf('cond(H) = %f\n', cond(H));
+fprintf('norm(g) = %g\n', norm(g));
+fprintf('cond(H) = %g\n', cond(H));
 
-mus = linspace(0,10^range,N);
+% mus = linspace(0,10^range,N);
+mus = [0 logspace(range-5,range,N-1)];
 
 chi2s = {};
 chi2s_expect = {};
@@ -72,15 +78,15 @@ arWaitbar(0);
                 arNLSstep(llh, g, H, sres, mus(j), ...
                 p(ar.qFit==1), lb(ar.qFit==1), ub(ar.qFit==1), 0, [], submethod(jm));
             
-            fprintf('%s mu=%8.2g norm(dp)=%8.2g solver_calls=%i grad_dir_frac=%4.2f qred=', ...
-                labels{jm}, mus(j), norm(dptmp), solver_calls, grad_dir_frac);
+            fprintf('%s mu=%8.2g norm(dp)=%8.2g solver_calls=%i grad_dir_frac=%4.2f cond(H)=%g qred=', ...
+                labels{jm}, mus(j), norm(dptmp), solver_calls, grad_dir_frac, cond(H(qred==0,qred==0)));
             ired = find(qred);
             for jred = ired
                 fprintf('%i ', jred);
             end
             fprintf('\n');
             
-            try %#ok<TRYNC>
+            try 
                 ps{jm}(j,:) = dptmp; %#ok<AGROW>
                 
                 ar.p(ar.qFit==1) = p(ar.qFit==1) + dptmp;
@@ -89,6 +95,11 @@ arWaitbar(0);
                 chi2s_expect{jm}(j) = llh_expect; %#ok<AGROW>
                 xs{jm}(j) = norm(dptmp); %#ok<AGROW>
                 chi2s{jm}(j) = ar.chi2fit + ar.chi2constr; %#ok<AGROW>
+            catch err_id
+                disp(err_id.message)
+                chi2s_expect{jm}(j) = nan; %#ok<AGROW>
+                xs{jm}(j) = nan; %#ok<AGROW>
+                chi2s{jm}(j) = nan; %#ok<AGROW>
             end
         end
         minllhs(jm) = min([chi2s{jm} chi2s_expect{jm}]); %#ok<AGROW>

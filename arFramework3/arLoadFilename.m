@@ -7,7 +7,7 @@
 % > global ar
 % has to be executed. 
 
-function [ar, pleGlobals] = arLoadFilename(filename)
+function [arout, pleGlobals] = arLoadFilename(filename)
 
 arCheck;
 
@@ -16,7 +16,7 @@ if(~exist('filename', 'var'))
 end
 
 S = load(['./Results/' filename '/workspace.mat']);
-ar = S.ar;
+arout = S.ar;
 fprintf('workspace loaded from file %s\n', filename);
 
-pleGlobals = pleLoad(ar);
+pleGlobals = pleLoad(arout);

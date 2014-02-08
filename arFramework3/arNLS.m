@@ -1,4 +1,4 @@
-% [p,resnorm,res,exitflag,output] = arNLS(fun,p,lb,ub,options,method)
+% [p,resnorm,res,exitflag,output] = arNLS(fun,p,lb,ub,options,submethod)
 %
 % use like LSQNONLIN
 % 
@@ -9,7 +9,7 @@
 %  3  Change in resnorm too small.
 %  4  Computed search direction too small.
 %
-% method:   
+% sub-method:   
 %  0 = trust region (based on modified trust.m)
 %  1 = Levenberg-Marquardt
 %  2 = Newton (with maximal step length mu)
@@ -29,15 +29,15 @@
 % 16 = trdog pcgr (no DM) 2D subspace 
 % 17 = trdog pcgr (no DM) 3D subspace 
 
-function [p,resnorm,res,exitflag,output,lambda,jac] = arNLS(fun,p,lb,ub,options,method)
+function [p,resnorm,res,exitflag,output,lambda,jac] = arNLS(fun,p,lb,ub,options,submethod)
 
 if(nargin==0)
     p = arNLSstep;
     return;
 end
 
-if(~exist('method','var'))
-    method = 0;
+if(~exist('submethod','var'))
+    submethod = 0;
 end
 
 % check bounds
@@ -84,7 +84,7 @@ if(isempty(options.InitTrustRegionRadius))
 else
     mu = options.InitTrustRegionRadius;
 end
-if(method==6)
+if(submethod==6)
     mu = eye(length(p))*mu;
 end
 
@@ -132,7 +132,7 @@ while(iter < options.MaxIter && ~q_converged)
     
     % solve subproblem - get trial point
     [dp, solver_calls, qred, grad_dir_frac, resnorm_expect, normdpmu_type] = ...
-        arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, method);
+        arNLSstep(llh, g, H, sres, mu, p, lb, ub, solver_calls, dpmem, submethod);
     
     pt = p + dp;
     
@@ -270,6 +270,7 @@ if (nargout>4)
     output.solverCount = solver_calls;
     output.algorithm = 'arNLS';
     output.firstorderopt = firstorderopt;
+    output.H = H;
     switch(exitflag)
         case(0)
             output.message = 'Too many function evaluations or iterations.';
