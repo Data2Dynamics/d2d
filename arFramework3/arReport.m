@@ -17,6 +17,10 @@ end
 % copy lib.bib
 copyfile(which('lib.bib'), [savePath '/lib.bib']);
 
+% latex packages
+copyfile(which('assurechemist.sty'), [savePath '/assurechemist.sty']);
+copyfile(which('chemist.sty'), [savePath '/chemist.sty']);
+
 % latex file
 fname = 'report.tex';
 fnamebib = 'report.aux';
@@ -220,10 +224,24 @@ for jm=1:length(ar.model)
             lp(fid, '\\\\');
             
             % modifiers
-            mod_pos = [getModifierStr(jm,jv,false,'x',sources,targets) ...
-                getModifierStr(jm,jv,false,'u',sources,targets)];
-            mod_neg = [getModifierStr(jm,jv,true,'x',sources,targets) ...
-                getModifierStr(jm,jv,true,'u',sources,targets)];
+            mod_pos = getModifierStr(jm,jv,false,'x',sources,targets);
+            mod_posu = getModifierStr(jm,jv,false,'u',sources,targets);
+            if(~isempty(mod_posu))
+                if(~isempty(mod_pos))
+                    mod_pos = [mod_pos ', ' mod_posu];
+                else
+                    mod_pos = mod_posu;
+                end
+            end
+            mod_neg = getModifierStr(jm,jv,true,'x',sources,targets);
+            mod_negu = getModifierStr(jm,jv,true,'u',sources,targets);
+            if(~isempty(mod_negu))
+                if(~isempty(mod_neg))
+                    mod_neg = [mod_neg ', ' mod_negu];
+                else
+                    mod_neg = mod_negu;
+                end
+            end
             
             % chem reaction
             lp(fid, '\\begin{chemmath}');
@@ -1062,8 +1080,12 @@ if(~ispc)
     eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
     eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
     cd('../../..');
-    copyfile([savePath '/' 'report.pdf'], [savePath '/' sprintf('report_%s.pdf', datestr(now,30))])
-    fprintf('done\n');
+    try
+        copyfile([savePath '/' 'report.pdf'], [savePath '/' sprintf('report_%s.pdf', datestr(now,30))])
+        fprintf('done\n');
+    catch
+        fprintf('report.pdf was not written correctly\n');
+    end
 end
 
 function lp(varargin)
