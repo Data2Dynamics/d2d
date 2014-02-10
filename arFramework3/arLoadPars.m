@@ -13,14 +13,14 @@ global ar
 
 if(~exist('filename','var') || isempty(filename))
     [~, filename] = fileChooser('./Results', 1, true);
-	filename = ['./Results/' filename '/workspace.mat'];
 else
     if(strcmp(filename,'end'))
         filelist = fileList('./Results');
         filename = filelist{end};
     end
-    filename = ['./Results/' filename '/workspace.mat'];
 end
+filename = ['./Results/' filename '/workspace.mat'];
+filename_pars = ['./Results/' filename '/workspace_pars_only.mat'];
 
 if(~exist('fixAssigned', 'var'))
     fixAssigned = false;  
@@ -29,8 +29,13 @@ if(~exist('only_values', 'var'))
     only_values = false;  
 end
 
-S = load(filename);
-fprintf('parameters loaded from file %s:\n', filename);
+if(exist(filename_pars,'file'))
+    S = load(filename_pars);
+    fprintf('parameters loaded from file %s:\n', filename_pars);
+else
+    S = load(filename);
+    fprintf('parameters loaded from file %s:\n', filename);
+end
 
 for j=1:length(ar.p)
     qi = ismember(S.ar.pLabel, ar.pLabel{j});

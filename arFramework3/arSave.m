@@ -44,6 +44,16 @@ if(isempty(ar.config.savepath))
     
     save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
     fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
+    
+    % save only parameters
+    ar2 = struct([]);
+    ar2(1).pLabel = ar.pLabel;
+    ar2.p = ar.p;
+    ar2.qLog10 = ar.qLog10;
+    ar2.qFit = ar.qFit;
+    ar2.lb = ar.lb;
+    ar2.ub = ar.ub;
+    arSaveParOnly(ar2, ar.config.savepath);
 else
     if(exist('name','var'))
         if(~strcmp(name, 'current'))
@@ -74,6 +84,16 @@ else
         
         save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
         fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
+        
+        % save only parameters
+        ar2 = struct([]);
+        ar2(1).pLabel = ar.pLabel;
+        ar2.p = ar.p;
+        ar2.qLog10 = ar.qLog10;
+        ar2.qFit = ar.qFit;
+        ar2.lb = ar.lb;
+        ar2.ub = ar.ub;
+        arSaveParOnly(ar2, ar.config.savepath);
     else
         if(nargout == 0)
             name = input(sprintf('enter new repository name addition [%s]: ', ...
@@ -103,6 +123,16 @@ else
             
             save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
             fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
+            
+            % save only parameters
+            ar2 = struct([]);
+            ar2(1).pLabel = ar.pLabel;
+            ar2.p = ar.p;
+            ar2.qLog10 = ar.qLog10;
+            ar2.qFit = ar.qFit;
+            ar2.lb = ar.lb;
+            ar2.ub = ar.ub;
+            arSaveParOnly(ar2, ar.config.savepath);
         else
             if(~exist(ar.config.savepath, 'dir'))
                 mkdir(ar.config.savepath)
@@ -123,6 +153,16 @@ else
                 
                 save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
                 fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
+                
+                % save only parameters
+                ar2 = struct([]);
+                ar2(1).pLabel = ar.pLabel;
+                ar2.p = ar.p;
+                ar2.qLog10 = ar.qLog10;
+                ar2.qFit = ar.qFit;
+                ar2.lb = ar.lb;
+                ar2.ub = ar.ub;
+                arSaveParOnly(ar2, ar.config.savepath);
             end
         end
     end
@@ -133,3 +173,5 @@ if(nargout>0)
     basepath = ar.config.savepath;
 end
 
+function arSaveParOnly(ar, savepath) %#ok<INUSL>
+save([savepath '/workspace_pars_only.mat'],'ar','-v7.3');
