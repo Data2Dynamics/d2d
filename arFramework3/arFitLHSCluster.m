@@ -13,9 +13,16 @@ function varargout = arFitLHSCluster(cluster, n, randomseed, log_fit_history)
 global ar
 global ar_fitlhs_cluster
 
-pool_size = 3;
+pool_size = 7;
 
-if(isempty(ar_fitlhs_cluster)) % new job    
+if(isempty(ar_fitlhs_cluster)) % new job
+    if(nargin==0)
+        error('specify cluster!');
+    end
+    if(nargout>0)
+        error('no job available');
+    end
+    
     if(~exist('n','var'))
         n = 10;
     end

@@ -1,6 +1,6 @@
 % create report
 
-function arReport
+function arReport(project_name)
 
 global ar
 
@@ -80,10 +80,18 @@ lp(fid, '\n\\begin{document}\n');
 %     'Reference: \\citet{Raue:2012zt}}'...
 %     ' \\\\ Modeling Report}']);
 
-lp(fid, '\\title{Data 2 Dynamics Software -- Modeling Report}');
+if(nargin==0)
+    project_name = 'Data 2 Dynamics Software -- Modeling Report';
+end
+
+lp(fid, '\\title{%s}', project_name);
 lp(fid, '\\author{%s}', ar.config.username);
 lp(fid, '\\date{%s}', datestr(now));
 lp(fid, '\\maketitle\n');
+
+if(nargin>0)
+    lp(fid, '\\noindent {\\bf Data 2 Dynamics Software -- Modeling Report}\\\\\\\\');
+end
 
 lp(fid, ['\\noindent {\\bf Website:} \\href{https://bitbucket.org/d2d-development/d2d-software}' ...
     '{\\url{https://bitbucket.org/d2d-development/d2d-software}} \\\\\\\\']);

@@ -4,9 +4,9 @@
 % 
 % arLoadData('data1', jm);
 % arLoadData('data2', jm);
-% arMergePlot(jm, 'data1', 'data2', 'label for data1', 'label for data2');
+% arMergePlot(jm, 'data1', 'data2', 'label for data1', 'label for data2', 'new condition name');
 
-function arMergePlot(jm, index_name1, index_name2, label_name1, label_name2)
+function arMergePlot(jm, index_name1, index_name2, label_name1, label_name2, new_condition_name)
 
 global ar
 
@@ -50,7 +50,7 @@ for j=1:length(ar.model(jm).plot(index1).dLink)
     if(isempty(ar.model(jm).plot(index1).condition) || isempty(ar.model(jm).plot(index1).condition{j}))
         conditions1{j} = label_name1;
     else
-        conditions1{j} = [ar.model(jm).plot(index1).condition{j} ' - ' label_name1];
+        conditions1{j} = [ar.model(jm).plot(index1).condition{j} ' & ' label_name1];
     end
 end
 conditions2 = cell(1,length(ar.model(jm).plot(index2).dLink));
@@ -58,12 +58,31 @@ for j=1:length(ar.model(jm).plot(index2).dLink)
     if(isempty(ar.model(jm).plot(index2).condition) || isempty(ar.model(jm).plot(index2).condition{j}))
         conditions2{j} = label_name2;
     else
-        conditions2{j} = [ar.model(jm).plot(index2).condition{j} ' - ' label_name2];
+        conditions2{j} = [ar.model(jm).plot(index2).condition{j} ' & ' label_name2];
     end
 end
 
+% response parameters
+if(ar.model(jm).plot(index1).doseresponse==1 && ar.model(jm).plot(index2).doseresponse==1)
+    resppar1 = ar.model(jm).data(ar.model(jm).plot(index1).dLink(1)).response_parameter;
+    resppar2 = ar.model(jm).data(ar.model(jm).plot(index2).dLink(1)).response_parameter;
+    if(~strcmp(resppar1, resppar2))
+        ar.model(jm).plot(index1).response_parameter = 'dose';
+        ar.model(jm).plot(index2).response_parameter = 'dose';
+    else
+        ar.model(jm).plot(index1).response_parameter = resppar1;
+        ar.model(jm).plot(index2).response_parameter = resppar2;
+    end
+elseif(ar.model(jm).plot(index1).doseresponse==1 || ar.model(jm).plot(index2).doseresponse==1)
+    error('trying to merge dose response with time course plots');
+end
+
+% do merge
 ar.model(jm).plot(index1).dLink = [ar.model(jm).plot(index1).dLink ar.model(jm).plot(index2).dLink];
 ar.model(jm).plot(index1).condition = [conditions1 conditions2];
-ar.model(jm).plot(index1).name = [ar.model(jm).plot(index1).name '_' ar.model(jm).plot(index2).name];
-
+if(exist('new_condition_name','var'))
+    ar.model(jm).plot(index1).name = new_condition_name;
+else
+    ar.model(jm).plot(index1).name = [ar.model(jm).plot(index1).name '_' ar.model(jm).plot(index2).name];
+end 
 ar.model(jm).plot = ar.model(jm).plot([1:(index2-1) (index2+1:length(ar.model(jm).plot))]);
