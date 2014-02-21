@@ -134,7 +134,7 @@ accept_rate = 0;
 
 % mcmc
 arWaitbar(0);
-accepts = nan(1,100);
+accepts = nan(1,10);
 i_accepts = 1;
 fprintf('MCMC sampling...')
 tic;
@@ -152,6 +152,7 @@ for jruns = 1:((nruns*nthinning)+nburnin)
     end
     
     p_trial = mvnrnd(mu_curr, covar_curr);
+    L_trial = 0;
     
     if(sum(p_trial<lb) + sum(p_trial>ub) == 0) % check bounds
         try

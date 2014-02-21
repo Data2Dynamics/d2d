@@ -522,7 +522,7 @@ if(sum(qcond) > 0)
         [condis, ~, jcondis] = uniqueRowsCA(dataCell(:,qcond));
     else
         [condis, ~, jcondis] = unique(data(:,qcond),'rows');
-        condis = cellstr(num2str(condis));
+        condis = mymat2cell(condis);
     end
     
     active_condi = false(size(condis(1,:)));
@@ -658,6 +658,14 @@ else
     end
 end
 
+
+function C = mymat2cell(D)
+C = cell(size(D));
+for j=1:size(D,1)
+    for jj=1:size(D,2)
+        C{j,jj} = num2str(D(j,jj));
+    end
+end
 
 function [ar,d] = doMS(ar,m,d,jplot,dpPerShoot)
 
