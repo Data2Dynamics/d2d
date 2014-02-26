@@ -404,6 +404,7 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
         header = C(2:end)';
         
         data = nan(0, length(header));
+        dataCell = cell(0, length(header));
         times = [];
         rcount = 1;
         C = textscan(fid,'%q',length(header)+1,'Delimiter',',');
@@ -412,13 +413,11 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
             times(rcount,1) = str2double(C{1});
             for j=1:length(header)
                 data(rcount,j) = str2double(C{j+1});
+                dataCell{rcount,j} = C{j+1};
             end
             C = textscan(fid,'%q',length(header)+1,'Delimiter',',');
             rcount = rcount + 1;
         end
-        
-        % funcitonality not implemented fro csv
-        dataCell = [];
         
         fclose(fid);
     end

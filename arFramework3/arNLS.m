@@ -263,7 +263,7 @@ if(firstorderopt < 1e-6)
 end
 
 % assign output structure
-if (nargout>4)
+if(nargout>4)
     output = struct([]);
     output(1).iterations = iter;
     output.funcCount = funevals;
@@ -280,6 +280,9 @@ if (nargout>4)
             output.message = 'Change in p too small.';
     end
     output.totalimprove = resnorm_start - resnorm;
+end
+if(nargout>5)
+    jac = sres;
 end
 
 % output

@@ -691,8 +691,8 @@ if(~exist(savePath, 'dir'))
 	mkdir(savePath)
 end
 
-if(length(name)>50)
-    name = name(1:50);
+if(length(name)>60)
+    name = name(1:60);
 end
 
 savePath = mypath([savePath '/' name]);
