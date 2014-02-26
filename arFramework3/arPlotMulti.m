@@ -35,6 +35,13 @@ overplot = 0.1;
 linesize = 0.5;
 
 logplotting_xaxis = true;
+if(isfield(ar.config,'nfine_dr_plot'))
+    nfine_dr_plot = ar.config.nfine_dr_plot;
+    nfine_dr_method = ar.config.nfine_dr_method;
+else
+    nfine_dr_plot = 1;
+    nfine_dr_method = 'spline';
+end
 
 figcount = 1;
 figcountx = 1;
@@ -172,7 +179,13 @@ for jp=1:np
                                     if(length(unique(t))==1)
                                         t = [t-0.1; t+0.1];
                                         y = [y; y]; %#ok<AGROW>
+                                    elseif(nfine_dr_plot>10)
+                                        tf = linspace(min(t), max(t), nfine_dr_plot);
+                                        y = interp1(t,y,tf,nfine_dr_method);
+                                        t = tf;
                                     end
+                                    
+                                    
                                     if(jp==1)
                                         g = subplot(nrows,ncols,jy);
                                         ar.model(jm).plot(jplot).gy(jy) = g;
@@ -704,6 +717,14 @@ for jd = ds
         
         ccount = ccount + 1;
     end
+end
+
+[t,it] = sort(t);
+y = y(it);
+ystd = ystd(it);
+if(~isempty(lb))
+    lb = lb(it);
+    ub = ub(it);
 end
 
 
