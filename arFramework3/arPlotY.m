@@ -107,7 +107,7 @@ for jm = 1:length(ar.model)
                                 if(ar.config.ploterrors ~= 1)
                                     tmpx = [t(:); flipud(t(:))];
                                     if(ar.config.ploterrors==0)
-                                        tmpy = [10.^(y + ystd/2); flipud(10.^(y - ystd/2))];
+                                        tmpy = [10.^(y + ystd); flipud(10.^(y - ystd))];
                                     elseif(ar.config.ploterrors==-1)
                                         tmpy = [10.^ub; flipud(10.^lb)];
                                     end
@@ -160,7 +160,7 @@ for jm = 1:length(ar.model)
                                 if(ar.config.ploterrors ~= 1)
                                     tmpx = [t(:); flipud(t(:))];
                                     if(ar.config.ploterrors==0)
-                                        tmpy = [y + ystd/2; flipud(y - ystd/2)];
+                                        tmpy = [y + ystd; flipud(y - ystd)];
                                     elseif(ar.config.ploterrors==-1)
                                         tmpy = [ub; flipud(lb)];
                                     end
@@ -187,15 +187,15 @@ for jm = 1:length(ar.model)
                             if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
                                 set(ar.model(jm).data(jd).plot.y(jy), 'YData', 10.^y);
                                 if(ar.config.fiterrors ~= -1 && ar.config.ploterrors ~= 1)
-                                    set(ar.model(jm).data(jd).plot.ystd(jy), 'YData', [10.^(y + ystd/2); flipud(10.^(y - ystd/2))]);
-                                    set(ar.model(jm).data(jd).plot.ystd2(jy), 'YData', [10.^(y + ystd/2); flipud(10.^(y - ystd/2))]);
+                                    set(ar.model(jm).data(jd).plot.ystd(jy), 'YData', [10.^(y + ystd); flipud(10.^(y - ystd))]);
+                                    set(ar.model(jm).data(jd).plot.ystd2(jy), 'YData', [10.^(y + ystd); flipud(10.^(y - ystd))]);
                                 end
                             else
                                 tmpy = y;
                                 qfinite = ~isinf(tmpy);
                                 set(ar.model(jm).data(jd).plot.y(jy), 'YData', tmpy(qfinite));
                                 if(ar.config.fiterrors ~= -1 && ar.config.ploterrors ~= 1)
-                                    tmpy = [y + ystd/2; flipud(y - ystd/2)];
+                                    tmpy = [y + ystd; flipud(y - ystd)];
                                     qfinite = ~isinf(tmpy);
                                     if(sum(qfinite)>0)
                                         set(ar.model(jm).data(jd).plot.ystd(jy), 'YData', tmpy(qfinite));
@@ -278,8 +278,8 @@ for jm = 1:length(ar.model)
                             end
                            
                             if(ar.config.ploterrors==0)
-                                lb = y(:) - ystd(:)/2;
-                                ub = y(:) + ystd(:)/2;
+                                lb = y(:) - ystd(:);
+                                ub = y(:) + ystd(:);
                             end
 
                             if(~fastPlotTmp)
