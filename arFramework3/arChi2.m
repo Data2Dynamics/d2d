@@ -1,12 +1,13 @@
 % Calculate chi^2 value and number of data points
 %
-% arChi2(sensi, pTrial)
+% arChi2(sensi, pTrial, dynamics)
 %   sensi:          propagate sensitivities         [false]
 %   pTrial:         trial parameter of fitting
+%   dynamics:       evaluate dynamics               [true]
 % 
 % or
 %
-% ar = arChi2(ar, sensi, pTrial)
+% ar = arChi2(ar, sensi, pTrial, dynamics)
 %   ar:             d2d model/data structure
 
 function varargout = arChi2(varargin)
@@ -105,10 +106,19 @@ else
 end
 
 try
-    if(qglobalar)
-        arSimu(sensi, ~isfield(ar.model(jm), 'data'));
+    if(length(varargin)>2)
+        dynamics = varargin{3};
+        if(qglobalar)
+            arSimu(sensi, ~isfield(ar.model(jm), 'data'), dynamics);
+        else
+            ar = arSimu(ar, sensi, ~isfield(ar.model(jm), 'data'), dynamics);
+        end
     else
-        ar = arSimu(ar, sensi, ~isfield(ar.model(jm), 'data'));
+        if(qglobalar)
+            arSimu(sensi, ~isfield(ar.model(jm), 'data'));
+        else
+            ar = arSimu(ar, sensi, ~isfield(ar.model(jm), 'data'));
+        end
     end
     has_error = false;
 catch error_id

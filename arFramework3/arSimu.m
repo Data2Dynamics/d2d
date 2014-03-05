@@ -37,9 +37,9 @@ else
     fine = false;
 end
 if(length(varargin)>2)
-    dynamics = varargin{3}; %#ok<NASGU>
+    dynamics = varargin{3};
 else
-    dynamics = sum(ar.qDynamic == 1 & ar.qFit == 1) > 0 || ~sensi; %#ok<NASGU>
+    dynamics = sum(ar.qDynamic == 1 & ar.qFit == 1) > 0 || ~sensi;
 end
 
 if(~isfield(ar,'p'))

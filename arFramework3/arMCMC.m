@@ -23,6 +23,8 @@ function arMCMC(nruns, nburnin, method, append, nthinning)
 
 global ar;
 
+rng('shuffle');
+
 if(~exist('nruns','var'))
     nruns = 1000;
 end
@@ -100,7 +102,6 @@ elseif(method==4)
     burnin = true;
     ps_hist = nan(nwindow, sum(ar.qFit == 1));
     ps_hist_index = 1;
-    % muAdapt = zeros(1,sum(ar.qFit == 1));
     CAdapt = eye(sum(ar.qFit == 1));
 end
 
@@ -112,9 +113,8 @@ svd_threshold = 0; 1e-8; % 0 ist besser!
 
 Cmax = 1e8;
 Cmin = 1e-8;
-Cmod = 1.01;
-% Cfactor = (2.38/sqrt(sum(qFit)))^2 / sum(qFit);
-Cfactor = Cmin;
+Cmod = 1.1;
+Cfactor = (2.38/sqrt(sum(qFit)))^2 / sum(qFit);
 
 if(~use_sensis)
     arChi2(false);
@@ -128,13 +128,15 @@ else
 end
 L_curr = ar.chi2fit;
 jrungo = -nburnin+1;
-accept_rate = 0;
-[mu_curr, covar_curr] = feval(fkt, p_curr, res_curr, Sres_curr);
-% disp(covar_curr)
+    
+% additional functionality
+do_chain_resets = false;
+do_reflect_bounds = true;
 
 % mcmc
 arWaitbar(0);
-accepts = nan(1,10);
+naccepts = 30;
+accepts = nan(1,naccepts);
 i_accepts = 1;
 fprintf('MCMC sampling...')
 tic;
@@ -142,7 +144,9 @@ count_chain_reset = 0;
 jthin = 1;
 jcount = 1;
 for jruns = 1:((nruns*nthinning)+nburnin)
-    accept_rate = sum(accepts)/length(accepts);
+    % figure(1); plot(accepts,'*-'); drawnow;
+    qnonnanacc = ~isnan(accepts);
+    accept_rate = sum(accepts(qnonnanacc))/length(accepts(qnonnanacc));
     if(jrungo>0)
         arWaitbar(jruns, (nruns*nthinning)+nburnin, sprintf('MCMC run (acceptance rate %4.1f%%)', ...
             accept_rate*100));
@@ -151,10 +155,22 @@ for jruns = 1:((nruns*nthinning)+nburnin)
             accept_rate*100));
     end
     
+    [mu_curr, covar_curr] = feval(fkt, p_curr, res_curr, Sres_curr);
     p_trial = mvnrnd(mu_curr, covar_curr);
     L_trial = 0;
     
+    % reflect from bejond bounds
+    if(do_reflect_bounds == true)
+        if(sum(p_trial<lb) + sum(p_trial>ub) > 0)
+            qlb = p_trial<lb;
+            p_trial(qlb) = p_trial(qlb) + 2*(lb(qlb) - p_trial(qlb));
+            qub = p_trial>ub;
+            p_trial(qub) = p_trial(qub) + 2*(ub(qub) - p_trial(qub));
+        end
+    end
+    
     if(sum(p_trial<lb) + sum(p_trial>ub) == 0) % check bounds
+        % fprintf('#%i bounds ok\n', jrungo);
         try
             if(~use_sensis)
                 arChi2(false,p_trial);
@@ -189,6 +205,9 @@ for jruns = 1:((nruns*nthinning)+nburnin)
         elseif(accept_rate < min_accept && Cfactor/Cmod>Cmin)
             Cfactor = Cfactor/Cmod;
         end
+        if(method==2)
+            fprintf('#%i Cfactor = %g, Acceptance Rate = %4.1f%%\n', jruns, Cfactor, accept_rate*100);
+        end
     end
     
     accepts(i_accepts) = qa;
@@ -198,29 +217,28 @@ for jruns = 1:((nruns*nthinning)+nburnin)
     end
     
     % reset chain ?
-    %     if(jtrials==100 && jruns+jindexoffset-1>0)
-    %         p_curr = ar.ps(randi(jruns+jindexoffset-1,1),:);
-    %         if(~use_sensis)
-    %             arChi2(false,p_curr);
-    %             res_curr = [];
-    %             Sres_curr = [];
-    %         else
-    %             arChi2(true,p_curr);
-    %             res_curr = ar.res;
-    %             Sres_curr = ar.sres(:,qFit);
-    %         end
-    %         L_curr = ar.chi2fit;
-    %         [mu_curr, covar_curr] = feval(fkt, p_curr, res_curr, Sres_curr);
-    %         jtrials = 1;
-    %         count_chain_reset = count_chain_reset + 1;
-    %     end
+    if(do_chain_resets == true)
+        if(jtrials==100 && jruns+jindexoffset-1>0)
+            p_curr = ar.ps(randi(jruns+jindexoffset-1,1),:);
+            if(~use_sensis)
+                arChi2(false,p_curr);
+                res_curr = [];
+                Sres_curr = [];
+            else
+                arChi2(true,p_curr);
+                res_curr = ar.res;
+                Sres_curr = ar.sres(:,qFit);
+            end
+            L_curr = ar.chi2fit;
+            jtrials = 1;
+            count_chain_reset = count_chain_reset + 1;
+        end
+    end
     
     % update
     if(qa)
         p_curr = p_trial;
         L_curr = L_trial;
-        mu_curr = mu_trial;
-        covar_curr = covar_trial;
         
         if(method==4)
             ps_hist(ps_hist_index,:) = p_curr;
@@ -256,11 +274,13 @@ if(isfield(ar,'mcmc_toc') && append)
 else
     ar.mcmc_toc = toc;
 end
+ar.p = pReset;
+
 
 % N(0,1)
     function [mu, covar] = mcmc_norm_mvnrnd(ptmp, ~, ~)
         mu = ptmp;
-        covar = eye(length(ptmp));
+        covar = eye(length(ptmp)) * 1e-8;
     end
 
 % N(0,c) scaled
@@ -313,27 +333,13 @@ end
 
 % Adaptive MCMC
     function [mu, covar] = mcmc_adaptive(ptmp, ~, ~)
-        %         fprintf('%i/%i %e\n', sum(isnan(ps_hist(:,1))), nwindow, Cfactor);
-        if((isnan(accept_rate) || accept_rate > max_accept || accept_rate < min_accept) ...
-                && (sum(isnan(ps_hist(:,1)))>0 || jrungo<=0))
+        if(jrungo<=0)
             mu = ptmp;
             covar = eye(length(ptmp)) * Cfactor;
-            if(sum(isnan(ps_hist(:,1))) == 0)
-                % muAdapt = mean(ps_hist);
-                CAdapt = cov(ps_hist);
-            end
         else
-            if(ps_hist_index == nwindow && sum(isnan(ps_hist(:,1)))==0)
-                % muAdapt = mean(ps_hist);
-                CAdapt = cov(ps_hist);
-%                 figure(1)
-%                 plot(ps_hist(:,1),'x-');
-%                 figure(2)
-%                 imagesc(CAdapt);
-%                 colorbar
-            end
+            qnonnan = ~isnan(ps_hist(:,1));
+            CAdapt = cov(ps_hist(qnonnan,:));
             mu = ptmp;
-            % mu = muAdapt;
             covar = CAdapt;
         end
     end

@@ -42,7 +42,17 @@ global ar;
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-set(hObject, 'String', ar.pLabel)
+ar.navi.C = {};
+ar.navi.jm = [];
+ar.navi.jplot = [];
+for jm=1:length(ar.model)
+    for jplot=1:length(ar.model(jm).plot)
+        ar.navi.C{end+1,1} = ar.model(jm).plot(jplot).name;
+        ar.navi.jm(end+1) = jm;
+        ar.navi.jplot(end+1) = jplot;
+    end
+end
+set(hObject, 'String', ar.navi.C)
 
 % --- Executes on selection change in popupmenu1.
 function popupmenu1_Callback(hObject, eventdata, handles)

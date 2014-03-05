@@ -63,7 +63,9 @@ for jk=jks
     plot(ps(:,jk), 'kx', 'MarkerSize', 1)
     hold off
 
-    ylim([xlimtmp(1)-xlimtmp2*0.05 xlimtmp(2)+xlimtmp2*0.05]);
+    if(xlimtmp2>0)
+        ylim([xlimtmp(1)-xlimtmp2*0.05 xlimtmp(2)+xlimtmp2*0.05]);
+    end
     xlim([1 size(ps,1)]);
     title(myNameTrafo(ar.pLabel{jk}))
     

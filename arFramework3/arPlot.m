@@ -1,14 +1,15 @@
 % Plot models and datasets
 %
-% arPlot(saveToFile, fastPlot, silent, evalfun, doLegends)
+% arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics)
 %
 % saveToFile    [false]
 % fastPlot      [false]
 % silent        [false]
-% evalfun       [false]
-% doLegends      [true]
+% evalfun       [true]
+% doLegends     [true]
+% dynamics:     [true]
 
-function arPlot(saveToFile, fastPlot, silent, evalfun, doLegends)
+function arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics)
 
 global ar
 
@@ -31,14 +32,17 @@ end
 if(~exist('doLegends','var'))
 	doLegends = true;
 end
+if(~exist('dynamics','var'))
+	dynamics = true;
+end
 
 if(evalfun)
     try %#ok<TRYNC>
-        arSimu(false, true);
+        arSimu(false, true, dynamics);
     end
     try 
         if(silent)
-            arChi2(false, []);
+            arChi2(false, [], dynamics);
         else
             arChi2;
         end

@@ -79,5 +79,4 @@ global ar %#ok<REDEF>
 ar = ar2; %#ok<NASGU>
 global arWaitbarGlobal
 arWaitbarGlobal.showWindow = 0;
-mnb_AddSimBioUnits;
 arMCMC(nruns, nburnin, method, append, nthinning);

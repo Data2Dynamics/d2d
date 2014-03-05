@@ -42,16 +42,22 @@ for jk=jks
     set(g, 'FontName', 'TimesNewRoman');
 
     plot(ps(:,jk), chi2s, 'kx', 'MarkerSize', 1)
-    hold on
-    colors = jet(length(popt));
-    for j=1:length(popt)
-        plot(popt{j}(jk), chi2opt(j), '*', 'Color', colors(j,:));
+    if(nargin>2)
+        hold on
+        colors = jet(length(popt));
+        for j=1:length(popt)
+            plot(popt{j}(jk), chi2opt(j), '*', 'Color', colors(j,:));
+        end
+        hold off
     end
-    hold off
-
     
     xlim([xlimtmp(1)-xlimtmp2*0.05 xlimtmp(2)+xlimtmp2*0.05]);
-    %ylim([1 size(ps,1)]);
+    
+    if(nargin>2)
+        ylim([min(chi2opt) quantile(chi2s, 0.95)]);
+    else
+        ylim([min(chi2s) quantile(chi2s, 0.95)]);
+    end
     title(myNameTrafo(ar.pLabel{jk}))
     
     count = count + 1;
