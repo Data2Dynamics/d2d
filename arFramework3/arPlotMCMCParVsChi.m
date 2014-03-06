@@ -44,9 +44,10 @@ for jk=jks
     plot(ps(:,jk), chi2s, 'kx', 'MarkerSize', 1)
     if(nargin>2)
         hold on
-        colors = jet(length(popt));
+        % colors = jet(length(popt));
         for j=1:length(popt)
-            plot(popt{j}(jk), chi2opt(j), '*', 'Color', colors(j,:));
+            % plot(popt{j}(jk), chi2opt(j), '*', 'Color', colors(j,:));
+            plot(popt{j}(jk), chi2opt(j), '*r');
         end
         hold off
     end
@@ -54,9 +55,9 @@ for jk=jks
     xlim([xlimtmp(1)-xlimtmp2*0.05 xlimtmp(2)+xlimtmp2*0.05]);
     
     if(nargin>2)
-        ylim([min(chi2opt) quantile(chi2s, 0.95)]);
+        ylim([min([chi2s(:); chi2opt(:)]) quantile(chi2s, 0.99)]);
     else
-        ylim([min(chi2s) quantile(chi2s, 0.95)]);
+        ylim([min(chi2s(:)) quantile(chi2s, 0.99)]);
     end
     title(myNameTrafo(ar.pLabel{jk}))
     
