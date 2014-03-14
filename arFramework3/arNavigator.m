@@ -93,7 +93,9 @@ global ar;
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-set(hObject, 'String', ar.navi.C)
+if isfield(ar,'navi')
+    set(hObject, 'String', ar.navi.C)
+end
 
 function myplot(handles, fastPlot, silent, evalfun)
 arPlot(false, fastPlot, silent, evalfun, get(handles.checkbox1, 'value')==1, false);
