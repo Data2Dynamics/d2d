@@ -22,7 +22,7 @@ function varargout = arNavigator(varargin)
 
 % Edit the above text to modify the response to help arNavigator
 
-% Last Modified by GUIDE v2.5 05-Mar-2014 13:34:42
+% Last Modified by GUIDE v2.5 14-Mar-2014 10:41:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -371,3 +371,15 @@ function edit3_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in pushbutton10.
+function pushbutton10_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global ar;
+arFitSingle(ar.navi.jp(ar.navi.pindex), true);
+%arChi2(false)
+myplot(handles, true, true, true);
+refresh_all_p(handles);
