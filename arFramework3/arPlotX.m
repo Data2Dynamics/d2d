@@ -288,8 +288,12 @@ for jm = 1:length(ar.model)
                                 ub = [ub; ub]; %#ok<AGROW>
                             elseif(nfine_dr_plot>10)
                                 tf = linspace(min(t), max(t), nfine_dr_plot);
+                                [t, qit] = unique(t);
+                                u = u(qit);
                                 u = interp1(t,u,tf,nfine_dr_method);
                                 if(~isempty(lb))
+                                    lb = lb(qit);
+                                    ub = ub(qit);
                                     lb = interp1(t,lb,tf,nfine_dr_method);
                                     ub = interp1(t,ub,tf,nfine_dr_method);
                                 end
@@ -330,8 +334,12 @@ for jm = 1:length(ar.model)
                                 ub = [ub; ub]; %#ok<AGROW>
                             elseif(nfine_dr_plot>10)
                                 tf = linspace(min(t), max(t), nfine_dr_plot);
+                                [t, qit] = unique(t);
+                                x = x(qit);
                                 x = interp1(t,x,tf,nfine_dr_method);
                                 if(~isempty(lb))
+                                    lb = lb(qit);
+                                    ub = ub(qit);
                                     lb = interp1(t,lb,tf,nfine_dr_method);
                                     ub = interp1(t,ub,tf,nfine_dr_method);
                                 end
@@ -372,8 +380,12 @@ for jm = 1:length(ar.model)
                                 ub = [ub; ub]; %#ok<AGROW>
                             elseif(nfine_dr_plot>10)
                                 tf = linspace(min(t), max(t), nfine_dr_plot);
+                                [t, qit] = unique(t);
+                                z = z(qit);
                                 z = interp1(t,z,tf,nfine_dr_method);
                                 if(~isempty(lb))
+                                    lb = lb(qit);
+                                    ub = ub(qit);
                                     lb = interp1(t,lb,tf,nfine_dr_method);
                                     ub = interp1(t,ub,tf,nfine_dr_method);
                                 end

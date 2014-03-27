@@ -164,7 +164,7 @@ if(isfield(ar.model(m),'y'))
     ar.model(m).data(d).normalize = ar.model(m).normalize;
     ar.model(m).data(d).logfitting = ar.model(m).logfitting;
     ar.model(m).data(d).logplotting = ar.model(m).logplotting;
-    ar.model(m).data(d).fy = strrep(ar.model(m).fy, '_filename', ['_' ar.model(m).data(d).name]);
+    ar.model(m).data(d).fy = ar.model(m).fy;
 else 
     ar.model(m).data(d).y = {};
     ar.model(m).data(d).yNames = {};
@@ -222,7 +222,7 @@ end
 
 % ERRORS
 if(isfield(ar.model(m),'y'))
-    ar.model(m).data(d).fystd = strrep(ar.model(m).fystd, '_filename', ['_' ar.model(m).data(d).name]);
+    ar.model(m).data(d).fystd = ar.model(m).fystd;
 else
     ar.model(m).data(d).fystd = cell(size(ar.model(m).data(d).fy));
 end
@@ -272,8 +272,13 @@ end
 
 % collect parameters needed for OBS
 ptmp = union(ar.model(m).px, ar.model(m).pu);
-ar.model(m).data(d).p = union(strrep(ptmp, '_filename', ['_' ar.model(m).data(d).name]), union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
+ar.model(m).data(d).p = union(ptmp, union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
 ar.model(m).data(d).p = union(ar.model(m).data(d).p, ar.model(m).data(d).pystd); %R2013a compatible
+
+% replace filename
+ar.model(m).data(d).p = strrep(ar.model(m).data(d).p, '_filename', ['_' ar.model(m).data(d).name]);
+ar.model(m).data(d).fy = strrep(ar.model(m).data(d).fy, '_filename', ['_' ar.model(m).data(d).name]);
+ar.model(m).data(d).fystd = strrep(ar.model(m).data(d).fystd, '_filename', ['_' ar.model(m).data(d).name]);
 
 % CONDITIONS
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
@@ -465,8 +470,8 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
                     ar.model(m).data(d).pystd = strrep(ar.model(m).data(d).pystd, ...
                         randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     
-                    ar.model(m).data(d).p = strrep(ar.model(m).data(d).p, ...
-                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
+%                     ar.model(m).data(d).p = strrep(ar.model(m).data(d).p, ...
+%                         randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     ar.model(m).data(d).fp = strrep(ar.model(m).data(d).fp, ...
                         randis_header{jj}, [randis_header{jj} randis{j,jj}]);
                     ar.model(m).data(d).pcond = strrep(ar.model(m).data(d).pcond, ...

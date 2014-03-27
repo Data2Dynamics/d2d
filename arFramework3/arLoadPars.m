@@ -49,6 +49,9 @@ for j=1:length(ar.p)
             ar.qFit(j) = S.ar.qFit(qi);
             ar.lb(j) = S.ar.lb(qi);
             ar.ub(j) = S.ar.ub(qi);
+            ar.type(j) = S.ar.type(qi);
+            ar.mean(j) = S.ar.mean(qi);
+            ar.std(j) = S.ar.std(qi);
         else
             if(ar.qLog10(j) == S.ar.qLog10(qi))
                 ar.p(j) = S.ar.p(qi);
