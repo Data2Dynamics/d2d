@@ -31,3 +31,16 @@ for jp = 1:length(ar.model(m).data(d).pold)
 end
 
 fclose(fid);
+
+fid = fopen(sprintf('daniel_%s_obs.txt',ar.model(m).name),'w');
+
+for jd = 1:length(ar.model(m).data)
+    
+    for jy = 1:length(ar.model(m).data(jd).y)
+       fprintf(fid, '%s',ar.model(m).data(jd).y{jy});
+       fprintf(fid, ' = %s \n',ar.model(m).data(jd).fy{jy});
+    end
+    
+end
+
+fclose(fid);
