@@ -175,7 +175,7 @@ for jm=1:length(ar.model)
             length(ar.model(jm).fv));
         lp(fid, '\\begin{itemize}');
         for jv = 1:length(ar.model(jm).fv)
-            lp(fid, '\\item {\\bf Rection %i:}', jv);
+            lp(fid, '\\item {\\bf Reaction %i:}', jv);
             
             % source
             isfirst = true;
@@ -377,7 +377,7 @@ for jm=1:length(ar.model)
     end
     
     %% standard observations and error model
-    if(~isempty(ar.model(jm).y))
+    if(isfield(ar.model(jm), 'y'))
         lp(fid, '\\subsection{Observables}');
         lp(fid, 'The model contains %i standard observables:', length(ar.model(jm).y));
         lp(fid, '\\begin{itemize}');
@@ -619,8 +619,14 @@ for jm=1:length(ar.model)
             end
             
             %% observations and error model
-            qadd = ~ismember(ar.model(jm).data(jd).y, ar.model(jm).y);
-            if(~isempty(ar.model(jm).y))
+            
+            if(isfield(ar.model(jm), 'y'))
+                qadd = ~ismember(ar.model(jm).data(jd).y, ar.model(jm).y);
+            else
+                qadd = 0;
+            end
+            
+            if(isfield(ar.model(jm), 'y'))
                 fytmp = strrep(ar.model(jm).fy, '_filename', ['_' ar.model(jm).data(jd).name]);
                 fystdtmp = strrep(ar.model(jm).fystd, '_filename', ['_' ar.model(jm).data(jd).name]);
                 qmod = [];
@@ -689,7 +695,7 @@ for jm=1:length(ar.model)
                             strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
                         
                         strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
-                        if(ar.model(jm).logfitting(jy))
+                        if(exist(ar.model(jm).logfitting,'var') && ar.model(jm).logfitting(jy))
                             strtmp = ['\log_{10}(' strtmp ')'];
                         end
                         
@@ -802,11 +808,11 @@ for jm=1:length(ar.model)
                             ccount = ccount + 1;
                         end
                     end
-                    
-                    if(ccount>1 && jp==length(ar.model(jm).data(jd).fp))
-                        lp(fid, '\\end{array}');
-                        lp(fid, '\\end{displaymath}\n}\n\n');
-                    end
+                end    
+                
+                if(ccount>1 && jp==length(ar.model(jm).data(jd).fp))
+                	lp(fid, '\\end{array}');
+                	lp(fid, '\\end{displaymath}\n}\n\n');
                 end
             end
         end
