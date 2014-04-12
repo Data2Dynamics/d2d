@@ -37,9 +37,11 @@ for m=1:length(ar.model)
         % collect time points
         for d=1:length(ar.model(m).data)
             if(isfield(ar.model(m).data(d), 'tExp'))
-				ar.model(m).condition(ar.model(m).data(d).cLink).tExp = union(union( ... %R2013a compatible
-				ar.model(m).condition(ar.model(m).data(d).cLink).tExp, ...
-				ar.model(m).data(d).tExp), 0);
+                ar.model(m).condition(ar.model(m).data(d).cLink).tExp = union(union( ... %R2013a compatible
+                    ar.model(m).condition(ar.model(m).data(d).cLink).tExp, ...
+                    ar.model(m).data(d).tExp), 0);
+                ar.model(m).condition(ar.model(m).data(d).cLink).tExp = ...
+                    ar.model(m).condition(ar.model(m).data(d).cLink).tExp(:);
             end
             
             ar.model(m).data(d).tFine = ...

@@ -56,6 +56,8 @@ for j=1:length(g)
     yrange = ymax - ymin;
     if(yrange == 0)
         yrange = 1;
+%     if(yrange < 1e-3)
+%         yrange = 1e-3;
     end
     if(~isnan(yrange))
         if(strcmp(get(g(j), 'YScale'), 'linear'))
