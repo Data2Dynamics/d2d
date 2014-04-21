@@ -1,14 +1,16 @@
 % Compile c- and mex-files for models, conditions and data sets
 %
-% arCompileAll(forcedCompile)
-%   forcedCompile:                                   [false]
-%
+% arCompileAll(forcedCompile, debug_mode, ext_source_dir)
+%   forcedCompile:                                      [false]
+%   debug_mode:         exclude precompiled objects     [false]
+%   source_dir:         source directory                []
+
 % See https://bitbucket.org/d2d-development/d2d-software/wiki/First%20steps 
 % for description of work flow. 
 %
 % Copyright Andreas Raue 2013 (andreas.raue@fdm.uni-freiburg.de)
 
-function arCompileAll(forcedCompile, debug_mode)
+function arCompileAll(forcedCompile, debug_mode, source_dir)
 
 global ar
 
@@ -22,19 +24,24 @@ end
 if(~exist('debug_mode','var'))
     debug_mode = false;
 end
+if(~exist('source_dir','var'))
+    source_dir = cd;
+end
 
 % folders
-if(~exist([cd '/Compiled'], 'dir'))
-	mkdir([cd '/Compiled'])
+if(~exist([source_dir '/Compiled'], 'dir'))
+	mkdir([source_dir '/Compiled'])
 end
-if(~exist([cd '/Compiled/' ar.info.c_version_code], 'dir'))
-	mkdir([cd '/Compiled/' ar.info.c_version_code])
+if(~exist([source_dir '/Compiled/' ar.info.c_version_code], 'dir'))
+	mkdir([source_dir '/Compiled/' ar.info.c_version_code])
 end
 
 % Compiled folder hook for cluster usage
-fid = fopen('./Compiled/arClusterCompiledHook.m', 'W');
-fprintf(fid, 'function arClusterCompiledHook\n');
-fclose(fid);
+if(~exist([source_dir '/Compiled/arClusterCompiledHook.m'],'file'))
+    fid = fopen([source_dir '/Compiled/arClusterCompiledHook.m'], 'W');
+    fprintf(fid, 'function arClusterCompiledHook\n');
+    fclose(fid);
+end
 
 warnreset = warning;
 warning('off','symbolic:mupadmex:MuPADTextWarning');
@@ -144,7 +151,7 @@ for m=1:length(ar.model)
         % skip calc conditions
         doskip = nan(1,length(ar.model(m).condition));
         for c=1:length(ar.model(m).condition)
-            doskip(c) = ~forcedCompile && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.c'],'file');
+            doskip(c) = ~forcedCompile && exist([source_dir '/Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.c'],'file');
         end
         
         % calc conditions
@@ -175,13 +182,17 @@ for m=1:length(ar.model)
                 newpx0{c} = condition_sym.px0;
                 if(~doskip(c))
                     % header
-                    fid_odeH = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.h'], 'W');
+                    fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W');
                     arWriteHFilesCondition(fid_odeH, config, condition_sym);
                     fclose(fid_odeH);
+                    movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], ...
+                        [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.h'],'f');
                     % body
-                    fid_ode = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.c'], 'W');
+                    fid_ode = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], 'W');
                     arWriteCFilesCondition(fid_ode, config, model, condition_sym, m, c, timedebug);
                     fclose(fid_ode);
+                    movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], ...
+                        [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.c'],'f');
                 end
             end
         else
@@ -192,13 +203,17 @@ for m=1:length(ar.model)
                 newpx0{c} = condition_sym.px0;
                 if(~doskip(c))
                     % header
-                    fid_odeH = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.h'], 'W');
+                    fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W');
                     arWriteHFilesCondition(fid_odeH, config, condition_sym);
                     fclose(fid_odeH);
+                    movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], ...
+                        [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.h'],'f');
                     % body
-                    fid_ode = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.c'], 'W');
+                    fid_ode = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], 'W');
                     arWriteCFilesCondition(fid_ode, config, model, condition_sym, m, c, timedebug);
                     fclose(fid_ode);
+                    movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], ...
+                        [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.c'],'f');
                 end
             end
         end
@@ -214,7 +229,7 @@ for m=1:length(ar.model)
         doskip = nan(1,length(ar.model(m).data));
         for d=1:length(ar.model(m).data)
             ar.model(m).data(d).p_condition = ar.model(m).condition(ar.model(m).data(d).cLink).p;
-            doskip(d) = ~forcedCompile && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.c'],'file');
+            doskip(d) = ~forcedCompile && exist([source_dir '/Compiled/' ar.info.c_version_code '/' ar.model(m).data(d).fkt '.c'],'file');
         end
         
         % calc data
@@ -229,13 +244,17 @@ for m=1:length(ar.model)
                 newpold{d} = data_sym.pold;
                 if(~doskip(d))
                     % header
-                    fid_obsH = fopen(['./Compiled/' c_version_code '/' data(d).fkt '.h'], 'W');
+                    fid_obsH = fopen([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.h'], 'W');
                     arWriteHFilesData(fid_obsH, data_sym);
                     fclose(fid_obsH);
+                    movefile([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.h'], ...
+                        [source_dir '/Compiled/' c_version_code '/' data(d).fkt '.h'],'f');
                     % body
-                    fid_obs = fopen(['./Compiled/' c_version_code '/' data(d).fkt '.c'], 'W');
+                    fid_obs = fopen([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.c'], 'W');
                     arWriteCFilesData(fid_obs, config, m, c, d, data_sym);
                     fclose(fid_obs);
+                    movefile([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.c'], ...
+                        [source_dir '/Compiled/' c_version_code '/' data(d).fkt '.c'],'f');
                 end
             end
         else
@@ -246,13 +265,17 @@ for m=1:length(ar.model)
                 newpold{d} = data_sym.pold;
                 if(~doskip(d))
                     % header
-                    fid_obsH = fopen(['./Compiled/' c_version_code '/' data(d).fkt '.h'], 'W');
+                    fid_obsH = fopen([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.h'], 'W');
                     arWriteHFilesData(fid_obsH, data_sym);
                     fclose(fid_obsH);
+                    movefile([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.h'], ...
+                        [source_dir '/Compiled/' c_version_code '/' data(d).fkt '.h'],'f');
                     % body
-                    fid_obs = fopen(['./Compiled/' c_version_code '/' data(d).fkt '.c'], 'W');
+                    fid_obs = fopen([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.c'], 'W');
                     arWriteCFilesData(fid_obs, config, m, c, d, data_sym);
                     fclose(fid_obs);
+                    movefile([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.c'], ...
+                        [source_dir '/Compiled/' c_version_code '/' data(d).fkt '.c'],'f');
                 end
             end
         end
@@ -297,7 +320,7 @@ for m=1:length(ar.model)
         % skip calc conditions
         doskip = nan(1,length(ar.model(m).condition));
         for c=1:length(ar.model(m).condition)
-            doskip(c) = ~forcedCompile && exist(['./Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.c'],'file');
+            doskip(c) = ~forcedCompile && exist([source_dir '/Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.c'],'file');
         end
         
         % calc conditions
@@ -328,13 +351,17 @@ for m=1:length(ar.model)
                 newpx0{c} = condition_sym.px0;
                 if(~doskip(c))
                     % header
-                    fid_odeH = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.h'], 'W'); % create header file
+                    fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W'); % create header file
                     arWriteHFilesCondition(fid_odeH, config, condition_sym);
                     fclose(fid_odeH);
+                    movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], ...
+                        [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.h'],'f');
                     % body
-                    fid_ode = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.c'], 'W');
+                    fid_ode = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], 'W');
                     arWriteCFilesCondition(fid_ode, config, model, condition_sym, m, c, timedebug);
                     fclose(fid_ode);
+                    movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], ...
+                        [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.c'],'f');
                 end
             end
         else
@@ -345,13 +372,17 @@ for m=1:length(ar.model)
                 newpx0{c} = condition_sym.px0;
                 if(~doskip(c))
                     % header
-                    fid_odeH = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.h'], 'W'); % create header file
+                    fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W'); % create header file
                     arWriteHFilesCondition(fid_odeH, config, condition_sym);
                     fclose(fid_odeH);
+                    movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], ...
+                        [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.h'],'f');
                     % body
-                    fid_ode = fopen(['./Compiled/' c_version_code '/' condition(c).fkt '.c'], 'W');
+                    fid_ode = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], 'W');
                     arWriteCFilesCondition(fid_ode, config, model, condition_sym, m, c, timedebug);
                     fclose(fid_ode);
+                    movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], ...
+                        [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.c'],'f');
                 end
             end
         end
@@ -383,7 +414,7 @@ ar.fkt = ['arSimuCalcFun_' ar.checkstr];
 writeSimuCalcFunctions(debug_mode);
 
 % compile
-arCompile(forcedCompile);
+arCompile(forcedCompile, false, false, source_dir);
 
 % link
 arLink;

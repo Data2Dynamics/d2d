@@ -1,14 +1,15 @@
 % Compile CVODES c-functions
 %
-% function arCompile(forceFullCompile, forceCompileLast, debug_mode)
+% function arCompile(forceFullCompile, forceCompileLast, debug_mode, source_dir)
 %
 %   forceFullCompile:   recompile all objects files     [false]
 %   forceCompileLast:   only recompile mex-file         [false]
 %   debug_mode:         exclude precompiled objects     [false]
+%   source_dir:         external source directory       []
 % 
 % or
 %
-% arCompile(ar, forceFullCompile, forceCompileLast, debug_mode)
+% arCompile(ar, forceFullCompile, forceCompileLast, debug_mode, source_dir)
 %   ar:                 d2d model/data structure
 
 
@@ -46,6 +47,11 @@ if(length(varargin)>2)
 else
     debug_mode = false;
 end
+if(length(varargin)>3)
+    source_dir = varargin{4};
+else
+    source_dir = pwd;
+end
 
 fprintf('\n');
 
@@ -60,8 +66,8 @@ else
 end
 
 % compile directory
-if(~exist([cd '/Compiled/' ar.info.c_version_code '/' mexext], 'dir'))
-    mkdir([cd '/Compiled/' ar.info.c_version_code '/' mexext])
+if(~exist(['./Compiled/' ar.info.c_version_code '/' mexext], 'dir'))
+    mkdir(['./Compiled/' ar.info.c_version_code '/' mexext])
 end
 
 %% include directories
@@ -73,6 +79,7 @@ includesstr{end+1} = ['-I"' sundials_path 'src/cvodes"'];
 
 % arFramework3
 includesstr{end+1} = ['-I"' pwd '/Compiled/' ar.info.c_version_code '"'];
+includesstr{end+1} = ['-I"' source_dir '/Compiled/' ar.info.c_version_code '"'];
 includesstr{end+1} = ['-I"' ar_path '"'];
 if(~isempty(compiled_cluster_path))
     includesstr{end+1} = ['-I"' compiled_cluster_path '/' ar.info.c_version_code '"'];
@@ -217,7 +224,7 @@ if(usePool)
         if(~exist(objects_con{j}, 'file') || forceFullCompile)
             if(isempty(compiled_cluster_path))
                 mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
-                    includesstr{:}, ['./Compiled/' c_version_code '/' file_con{j}]);  %#ok<PFBNS>
+                    includesstr{:}, [source_dir '/Compiled/' c_version_code '/' file_con{j}]);  %#ok<PFBNS>
             else
                 mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                     includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_con{j}]);
@@ -232,7 +239,7 @@ else
         if(~exist(objects_con{j}, 'file') || forceFullCompile)
             if(isempty(compiled_cluster_path))
                 mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
-                    includesstr{:}, ['./Compiled/' c_version_code '/' file_con{j}]);
+                    includesstr{:}, [source_dir '/Compiled/' c_version_code '/' file_con{j}]);
             else
                 mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                     includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_con{j}]);
@@ -273,7 +280,7 @@ if(isfield(ar.model, 'data'))
             if(~exist(objects_dat{j}, 'file') || forceFullCompile)
                 if(isempty(compiled_cluster_path))
                     mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
-                        includesstr{:}, ['./Compiled/' c_version_code '/' file_dat{j}]);  %#ok<PFBNS>
+                        includesstr{:}, [source_dir '/Compiled/' c_version_code '/' file_dat{j}]);  %#ok<PFBNS>
                 else
                     mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                         includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_dat{j}]);
@@ -288,7 +295,7 @@ if(isfield(ar.model, 'data'))
             if(~exist(objects_dat{j}, 'file') || forceFullCompile)
                 if(isempty(compiled_cluster_path))
                     mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
-                        includesstr{:}, ['./Compiled/' c_version_code '/' file_dat{j}]);
+                        includesstr{:}, [source_dir '/Compiled/' c_version_code '/' file_dat{j}]);
                 else
                     mex('-c','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                         includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_dat{j}]);
