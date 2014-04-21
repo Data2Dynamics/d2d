@@ -8,12 +8,10 @@
 % randomseed:                               rng(randomseed)
 % log_fit_history                           [false]
 
-function varargout = arFitLHSCluster(cluster, n, randomseed, log_fit_history)
+function varargout = arFitLHSCluster(cluster, n, randomseed, log_fit_history, pool_size)
 
 global ar
 global ar_fitlhs_cluster
-
-pool_size = 7;
 
 if(isempty(ar_fitlhs_cluster)) % new job
     if(nargin==0)
@@ -31,6 +29,10 @@ if(isempty(ar_fitlhs_cluster)) % new job
     end
     if(~exist('log_fit_history','var'))
         log_fit_history = false;
+    end
+    
+    if(~exist('pool_size','var'))
+        pool_size = ceil(length(cluster.IdleWorkers)/2);
     end
 
     fprintf('arFitLHSCluster sending job...');
