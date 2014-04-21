@@ -1,10 +1,10 @@
 % Load data set to next free slot
 %
-% arLoadModel(name, m, d, extension, removeEmptyObs)
+% arLoadData(name, m, extension, removeEmptyObs)
 %
 % name              filename of data definition file
-% m                 target position for model                       [last]
-% d                 target position for data (deprecated!!!)
+% m                 target position (int) for model                [last loaded model]
+%                   or: model name (string)
 % extension         data file name-extension: 'xls', 'csv'          ['xls']
 %                   'none' = don't load data                           
 % removeEmptyObs    remove observation without data                [false]
@@ -26,7 +26,7 @@
 %
 % Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
 
-function arLoadData(name, m, d, extension, removeEmptyObs, dpPerShoot)
+function arLoadData(name, m, extension, removeEmptyObs, dpPerShoot)
 
 global ar
 
@@ -45,10 +45,22 @@ end
 if(~exist('m','var') || isempty(m))
     m = length(ar.model);
 end
-
-if(exist('d','var') && ~isempty(d))
-    warning('arLoadData(name, m, d, ... input argument d is deprecated !!!'); %#ok<WNTAG>
+if(exist('m','var') && ischar(m))
+    for jm=1:length(ar.model)
+        if(strcmp(m, ar.model(jm).name))
+            m = jm;
+        end
+    end
+    if(ischar(m))
+        error('Model %s was not found', m);
+    end
 end
+
+if(exist('extension','var') && isnumeric(extension))
+    error(['arLoadData(name, m, d, ...) input argument d is deprecated !!! ' ...
+        'Please see new usage arLoadModel(name, m, extension, removeEmptyObs) and function help text.']);
+end
+
 if(isfield(ar.model(m), 'data'))
     d = length(ar.model(m).data) + 1;
 else

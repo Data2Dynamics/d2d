@@ -1,9 +1,8 @@
-% Load Model definition
+% Load Model definition to next free index position
 % 
-% arLoadModel(name, m)
+% arLoadModel(name)
 %
 % name      filename of model definition file
-% m         target position for model               [next]
 %
 % Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
 
@@ -29,6 +28,9 @@ if(~exist('m','var'))
     else
         m = 1;
     end
+else
+    error(['Usage arLoadModel(name, m) is deprecated. Please use arLoadModel(name) ' ...
+        'and note that the model will be loaded to the next free index position by default.']);
 end
 
 fprintf('loading model #%i, from file Models/%s.def...\n', m, name);
