@@ -2,10 +2,10 @@
 
 arInit;
 
-arLoadModel('epo_int_rep',1);
-arLoadModel('epo_binding',2);
-arLoadData('Epo_alpha_BaF3_Exp1_cpm_rep',1);
-arLoadData('Epo_binding_rep',2);
+arLoadModel('epo_int_rep');
+arLoadModel('epo_binding');
+arLoadData('Epo_alpha_BaF3_Exp1_cpm_rep','epo_int_rep');
+arLoadData('Epo_binding_rep','epo_binding');
 
 arCompileAll;
 

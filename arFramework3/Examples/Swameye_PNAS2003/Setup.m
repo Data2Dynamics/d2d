@@ -1,8 +1,8 @@
 % Load models & data
 
 arInit
-arLoadModel('pnas_jak_stat', 1);
-arLoadData('pnas_data_original', 1);
+arLoadModel('pnas_jak_stat');
+arLoadData('pnas_data_original');
 arCompileAll;
 
 % load best fit parameter values

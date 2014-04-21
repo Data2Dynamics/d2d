@@ -1,7 +1,7 @@
 % Load models & data
 
 arInit;
-arLoadModel('bolus_test',1);
+arLoadModel('bolus_test');
 arCompileAll;
 
 %% set parameters for bolus injection
