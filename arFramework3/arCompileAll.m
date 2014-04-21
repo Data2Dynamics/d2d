@@ -1890,7 +1890,7 @@ fprintf(fid, '\n');
 fprintf(fid, ' int AR_CVodeInit(void *cvode_mem, N_Vector x, double t, int im, int ic){\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if(im==%i & ic==%i) return CVodeInit(cvode_mem, fx_%s, RCONST(t), x);\n', ...
+        fprintf(fid, '  if((im==%i) & (ic==%i)) return CVodeInit(cvode_mem, fx_%s, RCONST(t), x);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
@@ -1901,7 +1901,7 @@ fprintf(fid, '}\n\n');
 fprintf(fid, ' void fx(realtype t, N_Vector x, double *xdot, void *user_data, int im, int ic){\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if(im==%i & ic==%i) fxdouble_%s(t, x, xdot, user_data);\n', ...
+        fprintf(fid, '  if((im==%i) & (ic==%i)) fxdouble_%s(t, x, xdot, user_data);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
@@ -1912,7 +1912,7 @@ fprintf(fid, ' void fx0(N_Vector x0, void *user_data, int im, int ic){\n');
 fprintf(fid, '  UserData data = (UserData) user_data;\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if(im==%i & ic==%i) fx0_%s(x0, data);\n', ...
+        fprintf(fid, '  if((im==%i) & (ic==%i)) fx0_%s(x0, data);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
@@ -1922,7 +1922,7 @@ fprintf(fid, '}\n\n');
 fprintf(fid, ' int AR_CVDlsSetDenseJacFn(void *cvode_mem, int im, int ic){\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if(im==%i & ic==%i) return CVDlsSetDenseJacFn(cvode_mem, dfxdx_%s);\n', ...
+        fprintf(fid, '  if((im==%i) & (ic==%i)) return CVDlsSetDenseJacFn(cvode_mem, dfxdx_%s);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
@@ -1934,7 +1934,7 @@ fprintf(fid, ' void fsx0(int is, N_Vector sx_is, void *user_data, int im, int ic
 fprintf(fid, '  UserData data = (UserData) user_data;\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if(im==%i & ic==%i) fsx0_%s(is, sx_is, data);\n', ...
+        fprintf(fid, '  if((im==%i) & (ic==%i)) fsx0_%s(is, sx_is, data);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
@@ -1946,7 +1946,7 @@ if(ar.config.useSensiRHS)
     fprintf(fid, '  if (sensirhs == 1) {\n');
     for m=1:length(ar.model)
         for c=1:length(ar.model(m).condition)
-            fprintf(fid, '    if(im==%i & ic==%i) return CVodeSensInit1(cvode_mem, nps, sensi_meth, fsx_%s, sx);\n', ...
+            fprintf(fid, '    if((im==%i) & (ic==%i)) return CVodeSensInit1(cvode_mem, nps, sensi_meth, fsx_%s, sx);\n', ...
                 m-1, c-1, ar.model(m).condition(c).fkt);
         end
     end
@@ -1954,7 +1954,7 @@ if(ar.config.useSensiRHS)
 end
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '    if(im==%i & ic==%i) return CVodeSensInit1(cvode_mem, nps, sensi_meth, NULL, sx);\n', ...
+        fprintf(fid, '    if((im==%i) & (ic==%i)) return CVodeSensInit1(cvode_mem, nps, sensi_meth, NULL, sx);\n', ...
             m-1, c-1);
     end
 end
@@ -1969,7 +1969,7 @@ fprintf(fid, ' void fu(void *user_data, double t, int im, int ic){\n');
 fprintf(fid, '  UserData data = (UserData) user_data;\n');
 for m=1:length(ar.model)
 	for c=1:length(ar.model(m).condition)
-		fprintf(fid, '  if(im==%i & ic==%i) fu_%s(data, t);\n', ...
+		fprintf(fid, '  if((im==%i) & (ic==%i)) fu_%s(data, t);\n', ...
 			m-1, c-1, ar.model(m).condition(c).fkt);
 	end
 end
@@ -1980,7 +1980,7 @@ fprintf(fid, ' void fsu(void *user_data, double t, int im, int ic){\n');
 fprintf(fid, '  UserData data = (UserData) user_data;\n');
 for m=1:length(ar.model)
 	for c=1:length(ar.model(m).condition)
-		fprintf(fid, '  if(im==%i & ic==%i) fsu_%s(data, t);\n', ...
+		fprintf(fid, '  if((im==%i) & (ic==%i)) fsu_%s(data, t);\n', ...
 			m-1, c-1, ar.model(m).condition(c).fkt);
 	end
 end
@@ -1991,7 +1991,7 @@ fprintf(fid, ' void fv(void *user_data, double t, N_Vector x, int im, int ic){\n
 fprintf(fid, '  UserData data = (UserData) user_data;\n');
 for m=1:length(ar.model)
 	for c=1:length(ar.model(m).condition)
-		fprintf(fid, '  if(im==%i & ic==%i) fv_%s(t, x, data);\n', ...
+		fprintf(fid, '  if((im==%i) & (ic==%i)) fv_%s(t, x, data);\n', ...
 			m-1, c-1, ar.model(m).condition(c).fkt);
 	end
 end
@@ -2002,7 +2002,7 @@ fprintf(fid, ' void fsv(void *user_data, double t, N_Vector x, int im, int ic){\
 fprintf(fid, '  UserData data = (UserData) user_data;\n');
 for m=1:length(ar.model)
 	for c=1:length(ar.model(m).condition)
-		fprintf(fid, '  if(im==%i & ic==%i) {\n\tdvdp_%s(t, x, data);\n\tdvdu_%s(t, x, data);\n\tdvdx_%s(t, x, data);\n}\n', ...
+		fprintf(fid, '  if((im==%i) & (ic==%i)) {\n\tdvdp_%s(t, x, data);\n\tdvdu_%s(t, x, data);\n\tdvdx_%s(t, x, data);\n}\n', ...
 			m-1, c-1, ar.model(m).condition(c).fkt, ar.model(m).condition(c).fkt, ar.model(m).condition(c).fkt);
 	end
 end
@@ -2013,7 +2013,7 @@ fprintf(fid, ' void dfxdp(void *user_data, double t, N_Vector x, double *dfxdp, 
 fprintf(fid, '  UserData data = (UserData) user_data;\n');
 for m=1:length(ar.model)
 	for c=1:length(ar.model(m).condition)
-		fprintf(fid, '  if(im==%i & ic==%i) dfxdp_%s(t, x, dfxdp, data);\n', ...
+		fprintf(fid, '  if((im==%i) & (ic==%i)) dfxdp_%s(t, x, dfxdp, data);\n', ...
 			m-1, c-1, ar.model(m).condition(c).fkt);
 	end
 end
@@ -2024,7 +2024,7 @@ fprintf(fid, '}\n\n');
 fprintf(fid, 'void fz(double t, int nt, int it, int nz, int nx, int iruns, double *z, double *p, double *u, double *x, int im, int ic){\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if(im==%i & ic==%i) fz_%s(t, nt, it, nz, nx, iruns, z, p, u, x);\n', ...
+        fprintf(fid, '  if((im==%i) & (ic==%i)) fz_%s(t, nt, it, nz, nx, iruns, z, p, u, x);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
@@ -2034,7 +2034,7 @@ fprintf(fid, '}\n\n');
 fprintf(fid, 'void fsz(double t, int nt, int it, int np, double *sz, double *p, double *u, double *x, double *z, double *su, double *sx, int im, int ic){\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if(im==%i & ic==%i) fsz_%s(t, nt, it, np, sz, p, u, x, z, su, sx);\n', ...
+        fprintf(fid, '  if((im==%i) & (ic==%i)) fsz_%s(t, nt, it, np, sz, p, u, x, z, su, sx);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
@@ -2045,7 +2045,7 @@ fprintf(fid, ' void fy(double t, int nt, int it, int ntlink, int itlink, int ny,
 for m=1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d=1:length(ar.model(m).data)
-            fprintf(fid, '  if(im==%i & id==%i) fy_%s(t, nt, it, ntlink, itlink, ny, nx, nz, iruns, y, p, u, x, z);\n', ...
+            fprintf(fid, '  if((im==%i) & (id==%i)) fy_%s(t, nt, it, ntlink, itlink, ny, nx, nz, iruns, y, p, u, x, z);\n', ...
                 m-1, d-1, ar.model(m).data(d).fkt);
         end
     end
@@ -2057,7 +2057,7 @@ fprintf(fid, ' void fystd(double t, int nt, int it, int ntlink, int itlink, doub
 for m=1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d=1:length(ar.model(m).data)
-            fprintf(fid, '  if(im==%i & id==%i) fystd_%s(t, nt, it, ntlink, itlink, ystd, y, p, u, x, z);\n', ...
+            fprintf(fid, '  if((im==%i) & (id==%i)) fystd_%s(t, nt, it, ntlink, itlink, ystd, y, p, u, x, z);\n', ...
                 m-1, d-1, ar.model(m).data(d).fkt);
         end
     end
@@ -2069,7 +2069,7 @@ fprintf(fid, ' void fsy(double t, int nt, int it, int ntlink, int itlink, double
 for m=1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d=1:length(ar.model(m).data)
-            fprintf(fid, '  if(im==%i & id==%i) fsy_%s(t, nt, it, ntlink, itlink, sy, p, u, x, z, su, sx, sz);\n', ...
+            fprintf(fid, '  if((im==%i) & (id==%i)) fsy_%s(t, nt, it, ntlink, itlink, sy, p, u, x, z, su, sx, sz);\n', ...
                 m-1, d-1, ar.model(m).data(d).fkt);
         end
     end
@@ -2081,7 +2081,7 @@ fprintf(fid, ' void fsystd(double t, int nt, int it, int ntlink, int itlink, dou
 for m=1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d=1:length(ar.model(m).data)
-            fprintf(fid, '  if(im==%i & id==%i) fsystd_%s(t, nt, it, ntlink, itlink, systd, p, y, u, x, z, sy, su, sx, sz);\n', ...
+            fprintf(fid, '  if((im==%i) & (id==%i)) fsystd_%s(t, nt, it, ntlink, itlink, systd, p, y, u, x, z, sy, su, sx, sz);\n', ...
                 m-1, d-1, ar.model(m).data(d).fkt);
         end
     end
@@ -2095,7 +2095,7 @@ fprintf(fid, ' void fvSSA(void *user_data, double t, N_Vector x, int im, int ic)
 fprintf(fid, '  UserData data = (UserData) user_data;\n');
 for m=1:length(ar.model)
 	for c=1:length(ar.model(m).condition)
-		fprintf(fid, '  if(im==%i & ic==%i) {\n', m-1, c-1);
+		fprintf(fid, '  if((im==%i) & (ic==%i)) {\n', m-1, c-1);
         fprintf(fid, '    fu_%s(data, t);\n', ar.model(m).condition(c).fkt);
         fprintf(fid, '    fv_%s(t, x, data);\n', ar.model(m).condition(c).fkt);
         fprintf(fid, '  }\n');

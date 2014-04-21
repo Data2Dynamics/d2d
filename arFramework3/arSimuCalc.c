@@ -196,6 +196,7 @@ void thread_calc(int id) {
 #ifdef HAS_PTHREAD
     if(parallel==1) {pthread_exit(NULL);}
 #endif
+    return 0;
 }
 
 /* calculate dynamics by CVODES */
@@ -240,7 +241,7 @@ void x_calc(int im, int ic) {
     /* printf("computing model #%i, condition #%i\n", im, ic); */
             
     /* check if im in range */
-    nm = mxGetNumberOfElements(armodel);
+    nm = (int) mxGetNumberOfElements(armodel);
     if(nm<=im) {
         printf("im > length(ar.model)\n");
 #ifdef HAS_PTHREAD
@@ -260,7 +261,7 @@ void x_calc(int im, int ic) {
     }
     
     /* check if ic in range */
-    nc = mxGetNumberOfElements(arcondition);
+    nc = (int) mxGetNumberOfElements(arcondition);
     if(nc<=ic) {
         printf("ic > length(ar.model.condition)\n");
 #ifdef HAS_PTHREAD
@@ -293,11 +294,11 @@ void x_calc(int im, int ic) {
         qpositivex = mxGetData(mxGetField(armodel, im, "qPositiveX"));
         status = mxGetData(mxGetField(arcondition, ic, "status"));
         tstart = mxGetScalar(mxGetField(arcondition, ic, "tstart"));
-        neq = mxGetNumberOfElements(mxGetField(armodel, im, "xs"));
+        neq = (int) mxGetNumberOfElements(mxGetField(armodel, im, "xs"));
         
         if(fine == 1){
             ts = mxGetData(mxGetField(arcondition, ic, "tFine"));
-            nout = mxGetNumberOfElements(mxGetField(arcondition, ic, "tFine"));
+            nout = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "tFine"));
             
             returnu = mxGetData(mxGetField(arcondition, ic, "uFineSimu"));
             returnv = mxGetData(mxGetField(arcondition, ic, "vFineSimu"));
@@ -310,7 +311,7 @@ void x_calc(int im, int ic) {
         }
         else{
             ts = mxGetData(mxGetField(arcondition, ic, "tExp"));
-            nout = mxGetNumberOfElements(mxGetField(arcondition, ic, "tExp"));
+            nout = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "tExp"));
             
             returnu = mxGetData(mxGetField(arcondition, ic, "uExpSimu"));
             returnv = mxGetData(mxGetField(arcondition, ic, "vExpSimu"));
@@ -332,14 +333,14 @@ void x_calc(int im, int ic) {
         
         data->qpositivex = qpositivex;
         data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
-        nu = mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
+        nu = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
         
         data->p = mxGetData(mxGetField(arcondition, ic, "pNum"));
-        np = mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
+        np = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
         nps = np;
         
         data->v = mxGetData(mxGetField(arcondition, ic, "vNum"));
-        nv = mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
+        nv = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
         data->dvdx = mxGetData(mxGetField(arcondition, ic, "dvdxNum"));
         data->dvdu = mxGetData(mxGetField(arcondition, ic, "dvduNum"));
         data->dvdp = mxGetData(mxGetField(arcondition, ic, "dvdpNum"));
@@ -542,14 +543,14 @@ void x_calc(int im, int ic) {
         dLink = mxGetField(arcondition, ic, "dLink");
         dLinkints = mxGetData(dLink);
         
-        nd = mxGetNumberOfElements(dLink);
+        nd = (int) mxGetNumberOfElements(dLink);
         
         /* loop over data */
         for(ids=0; ids<nd; ++ids){
             id = ((int) dLinkints[ids]) - 1;
             has_tExp = (int) mxGetScalar(mxGetField(ardata, id, "has_tExp"));
             
-            if(has_tExp == 1 | fine == 1) {
+            if((has_tExp == 1) | (fine == 1)) {
                 y_calc(im, id, ardata, arcondition);
             }
         }
@@ -587,7 +588,7 @@ void z_calc(int im, int ic, mxArray *arcondition) {
     /* MATLAB values */
     if(fine == 1){
         t = mxGetData(mxGetField(arcondition, ic, "tFine"));
-        nt = mxGetNumberOfElements(mxGetField(arcondition, ic, "tFine"));
+        nt = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "tFine"));
         
         u = mxGetData(mxGetField(arcondition, ic, "uFineSimu"));
         x = mxGetData(mxGetField(arcondition, ic, "xFineSimu"));
@@ -600,7 +601,7 @@ void z_calc(int im, int ic, mxArray *arcondition) {
     }
     else{
         t = mxGetData(mxGetField(arcondition, ic, "tExp"));
-        nt = mxGetNumberOfElements(mxGetField(arcondition, ic, "tExp"));
+        nt = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "tExp"));
         
         u = mxGetData(mxGetField(arcondition, ic, "uExpSimu"));
         x = mxGetData(mxGetField(arcondition, ic, "xExpSimu"));
@@ -612,7 +613,7 @@ void z_calc(int im, int ic, mxArray *arcondition) {
         }
     }
     p = mxGetData(mxGetField(arcondition, ic, "pNum"));
-    np = mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
+    np = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
     
     /* loop over output points */
     for (it=0; it < nt; it++) {
@@ -667,17 +668,17 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
     ic = (int) mxGetScalar(mxGetField(ardata, id, "cLink")) - 1;
     has_yExp = (int) mxGetScalar(mxGetField(ardata, id, "has_yExp"));
     
-    ny = mxGetNumberOfElements(mxGetField(ardata, id, "y"));
+    ny = (int) mxGetNumberOfElements(mxGetField(ardata, id, "y"));
     qlogy = mxGetData(mxGetField(ardata, id, "logfitting"));
     qlogp = mxGetData(mxGetField(ardata, id, "qLog10"));
     p = mxGetData(mxGetField(ardata, id, "pNum"));
-    np = mxGetNumberOfElements(mxGetField(ardata, id, "pNum"));
+    np = (int) mxGetNumberOfElements(mxGetField(ardata, id, "pNum"));
     
     if(fine == 1){
         t = mxGetData(mxGetField(ardata, id, "tFine"));
-        nt = mxGetNumberOfElements(mxGetField(ardata, id, "tFine"));
+        nt = (int) mxGetNumberOfElements(mxGetField(ardata, id, "tFine"));
         tlink = mxGetData(mxGetField(ardata, id, "tLinkFine"));
-        ntlink = mxGetNumberOfElements(mxGetField(arcondition, ic, "tFine"));
+        ntlink = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "tFine"));
         
         y = mxGetData(mxGetField(ardata, id, "yFineSimu"));
         ystd = mxGetData(mxGetField(ardata, id, "ystdFineSimu"));
@@ -697,9 +698,9 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
     }
     else{
         t = mxGetData(mxGetField(ardata, id, "tExp"));
-        nt = mxGetNumberOfElements(mxGetField(ardata, id, "tExp"));
+        nt = (int) mxGetNumberOfElements(mxGetField(ardata, id, "tExp"));
         tlink = mxGetData(mxGetField(ardata, id, "tLinkExp"));
-        ntlink = mxGetNumberOfElements(mxGetField(arcondition, ic, "tExp"));
+        ntlink = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "tExp"));
         
         y = mxGetData(mxGetField(ardata, id, "yExpSimu"));
         ystd = mxGetData(mxGetField(ardata, id, "ystdExpSimu"));
