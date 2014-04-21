@@ -2,7 +2,7 @@ function arCompileCluster
 
 global ar
 
-n = matlabpool('size');
+n = parpool('size');
 
 filename = ar.fkt;
 fkt_does_exist = nan(1,n);
@@ -15,9 +15,9 @@ if(sum(~fkt_does_exist)>0)
     fprintf('Transfering files to workers...');
     
     try
-        matlabpool('addAttachedFiles',{'.\Compiled'})
+        parpool('addAttachedFiles',{'.\Compiled'})
     catch 
-        matlabpool('updateAttachedFiles');
+        parpool('updateAttachedFiles');
     end
     
     if(~ispc)
@@ -26,9 +26,9 @@ if(sum(~fkt_does_exist)>0)
         ar_path = strrep(which('arInit.m'),'\arInit.m','');
     end
     try
-        matlabpool('addAttachedFiles',{ar_path})
+        parpool('addAttachedFiles',{ar_path})
     catch 
-        matlabpool('updateAttachedFiles');
+        parpool('updateAttachedFiles');
     end
     
     fprintf('done\n');

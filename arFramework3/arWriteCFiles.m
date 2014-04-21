@@ -43,7 +43,7 @@ fclose(fid);
 % Functions
 fid = fopen(['./Compiled/' ar.info.c_version_code '/arSimuCalcFunctions.c'], 'W');
 
-usePool = exist('matlabpool','file')>0 && matlabpool('size')>0;
+usePool = exist('gcp','file')>0 && ~isempty(gcp('nocreate'));
 
 % model equations
 fprintf('\n');

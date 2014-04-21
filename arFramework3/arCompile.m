@@ -30,7 +30,7 @@ else
     end
 end
 
-usePool = exist('matlabpool','file')>0 && matlabpool('size')>0;
+usePool = exist('gcp','file')>0 && ~isempty(gcp('nocreate'));
 
 if(~isempty(varargin))
     forceFullCompile = varargin{1};

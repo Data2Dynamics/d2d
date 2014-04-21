@@ -49,7 +49,7 @@ warning('off','symbolic:mupadmex:MuPADTextWarning');
 % enable timedebug mode, use with debug_mode = true!
 timedebug = false;
 
-usePool = exist('matlabpool','file')>0 && matlabpool('size')>0;
+usePool = exist('gcp','file')>0 && ~isempty(gcp('nocreate'));
 
 % main loop
 checksum_global = addToCheckSum(ar.info.c_version_code);
