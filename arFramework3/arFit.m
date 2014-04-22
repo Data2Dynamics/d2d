@@ -311,7 +311,11 @@ c = [];
 ceq = ar.constr;
 if(nargout>2)
     gc = [];
-    gceq = ar.sconstr(:, ar.qFit==1)';
+    if(~isempty(ar.sconstr))
+        gceq = ar.sconstr(:, ar.qFit==1)';
+    else
+        gceq = [];
+    end
 end
 
 function hessian = fmincon_hessianfcn(pTrial, lambda)

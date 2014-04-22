@@ -149,7 +149,7 @@ for j=1:length(m.reaction)
 end
 arWaitbar(-1);
 
-fprintf(fid, '\nINVARIANTS\n');
+fprintf(fid, '\nDERIVED\n');
 
 fprintf(fid, '\nCONDITIONS\n');
 
@@ -240,11 +240,7 @@ for j=1:length(m.species)
     fprintf(fid, '%s_obs\t "sd_%s"\n', m.species(j).id, m.species(j).id);
 end
 
-fprintf(fid, '\nINVARIANTS\n');
-
 fprintf(fid, '\nCONDITIONS\n');
-
-fprintf(fid, '\nRANDOM\n');
 
 fprintf(fid, '\nPARAMETERS\n');
 
