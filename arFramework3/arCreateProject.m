@@ -27,8 +27,8 @@ if(~isempty(name))
         fid = fopen('./Setup.m' , 'W');
         
         fprintf(fid, 'arInit;\n');
-        fprintf(fid, 'arLoadModel(''model_template'',1);\n');
-        fprintf(fid, 'arLoadData(''data_template'',1);\n');
+        fprintf(fid, 'arLoadModel(''model_template'');\n');
+        fprintf(fid, 'arLoadData(''data_template'');\n');
         fprintf(fid, 'arCompileAll;\n');
         
         fclose(fid);
