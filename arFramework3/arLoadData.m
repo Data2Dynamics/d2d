@@ -73,6 +73,11 @@ if(~exist('extension','var') || isempty(extension))
 end
 if(~exist('removeEmptyObs','var'))
     removeEmptyObs = false;
+else
+    if(ischar(removeEmptyObs))
+        error(['arLoadData(name, m, d, ...) input argument d is deprecated !!! ' ...
+            'Please see new usage arLoadModel(name, m, extension, removeEmptyObs) and function help text.']);
+    end
 end
 
 if(exist('dpPerShoot','var') && dpPerShoot>0)

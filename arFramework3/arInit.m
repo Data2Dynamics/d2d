@@ -35,13 +35,15 @@ ar.config.nParallel = 2*feature('numCores');
 ar.config.nMaxThreads = 64;
 
 % plotting options
-ar.config.nFinePoints = 300;
 ar.config.savepath = [];
+ar.config.nFinePoints = 300;
 ar.config.par_close_to_bound = 0.1;
-ar.config.ssa_min_tau = 1e-3;
-ar.config.ssa_runs = 1;
 ar.config.nfine_dr_method = 'pchip'; %'spline';
 ar.config.nfine_dr_plot = 0; % use value >10 to enable smoothing of DR curves
+
+% stochastic simulation
+ar.config.ssa_min_tau = 1e-3;
+ar.config.ssa_runs = 1;
 
 % ar.config.fiterrors:
 %   0 = error model (fixed)
