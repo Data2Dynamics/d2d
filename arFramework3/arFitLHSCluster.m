@@ -1,14 +1,16 @@
 % fit sequence using latin hyper cube sampling
 % run on MATLAB cluster
 %
-% job = arFitLHSCluster(cluster, n, randomseed, log_fit_history)
+% job = arFitLHSCluster(cluster, clusterpath, pool_size, n, randomseed, log_fit_history)
 %
-% cluster:          MATLAB cluster object   (see help parcluster)
-% n:                number of runs          [10]
-% randomseed:                               rng(randomseed)
-% log_fit_history                           [false]
+% cluster:          MATLAB cluster object       (see help parcluster)
+% clusterpath:      execution path on cluster   ['.']
+% pool_size:        additional workers          [ceil(length(cluster.IdleWorkers)/2)]
+% n:                number of runs              [10]
+% randomseed:                                   rng(randomseed)
+% log_fit_history                               [false]
 
-function varargout = arFitLHSCluster(cluster, n, randomseed, log_fit_history, pool_size)
+function varargout = arFitLHSCluster(cluster, clusterpath, pool_size, n, randomseed, log_fit_history)
 
 global ar
 global ar_fitlhs_cluster
@@ -21,6 +23,13 @@ if(isempty(ar_fitlhs_cluster)) % new job
         error('no job available');
     end
     
+    if(~exist('clusterpath','var') || isempty(clusterpath))
+        clusterpath = '.';
+    end
+    if(~exist('pool_size','var') || isempty(pool_size))
+        pool_size = ceil(length(cluster.IdleWorkers)/2);
+    end
+    
     if(~exist('n','var'))
         n = 10;
     end
@@ -30,18 +39,14 @@ if(isempty(ar_fitlhs_cluster)) % new job
     if(~exist('log_fit_history','var'))
         log_fit_history = false;
     end
-    
-    if(~exist('pool_size','var'))
-        pool_size = ceil(length(cluster.IdleWorkers)/2);
-    end
 
     fprintf('arFitLHSCluster sending job...');
     ar_fitlhs_cluster = batch(cluster, @arFitLHSClusterFun, 1, ...
         {ar, n, randomseed, log_fit_history}, ...
         'CaptureDiary', true, ...
-        'CurrentFolder', '.', ...
-        'AttachedFiles', {'arFitPSOFkt'}, ...
-        'Matlabpool', pool_size);
+        'CurrentFolder', clusterpath, ...
+        'Matlabpool', pool_size, ...
+        'AttachedFiles', {'arFitPSOFkt'});
     
     fprintf('done\n');
     

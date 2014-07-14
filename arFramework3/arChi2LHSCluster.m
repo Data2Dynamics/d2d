@@ -1,24 +1,37 @@
 % chi2 sequence using latin hyper cube sampling
 % run on MATLAB cluster
 %
-% job = arChi2LHSCluster(cluster, n, sensis, silent)
+% job = arChi2LHSCluster(cluster, clusterpath, pool_size, n, sensis, randomseed, silent)
 %
-% cluster:      MATLAB cluster object   (see help parcluster)
-% n:            number of runs          [10]
-% sensis:       use sensitivities       [false]
-% silent:       show output             [false]
+% cluster:      MATLAB cluster object       (see help parcluster)
+% clusterpath:  execution path on cluster   ['.']
+% pool_size:    additional workers          [ceil(length(cluster.IdleWorkers)/2)]
+% n:            number of runs              [10]
+% sensis:       use sensitivities           [false]
+% randomseed:                               rng(randomseed)
+% silent:       show output                 [false]
 
-function varargout = arChi2LHSCluster(cluster, n, sensis, silent)
+function varargout = arChi2LHSCluster(cluster, clusterpath, pool_size, n, sensis, randomseed, silent)
 
 global ar
 global ar_chi2lhs_cluster
 
-if(isempty(ar_chi2lhs_cluster)) % new job    
+if(isempty(ar_chi2lhs_cluster)) % new job
+    if(~exist('clusterpath','var') || isempty(clusterpath))
+        clusterpath = '.';
+    end
+    if(~exist('pool_size','var') || isempty(pool_size))
+        pool_size = ceil(length(cluster.IdleWorkers)/2);
+    end
+    
     if(~exist('n','var'))
         n = 10;
     end
     if(~exist('sensis','var'))
         sensis = false;
+    end
+    if(~exist('randomseed','var'))
+        randomseed = [];
     end
     if(~exist('silent','var'))
         silent = false;
@@ -26,9 +39,10 @@ if(isempty(ar_chi2lhs_cluster)) % new job
 
     fprintf('arChi2LHSCluster sending job...');
     ar_chi2lhs_cluster = batch(cluster, @arChi2LHSClusterFun, 1, ...
-        {ar, n, sensis, silent}, ...
+        {ar, n, sensis, randomseed, silent}, ...
         'CaptureDiary', true, ...
-        'CurrentFolder', '.');
+        'CurrentFolder', clusterpath, ...
+        'Matlabpool', pool_size);
     fprintf('done\n');
     
 elseif(isa(ar_chi2lhs_cluster,'parallel.job.MJSIndependentJob') || ...
@@ -67,7 +81,7 @@ else
     error('arChi2LHSCluster global variable ar_chi2lhs_cluster is invalid!\n');
 end
 
-function ar = arChi2LHSClusterFun(ar2, n, sensis, silent)
+function ar = arChi2LHSClusterFun(ar2, n, sensis, randomseed, silent)
 global ar %#ok<REDEF>
 ar = ar2; %#ok<NASGU>
-arChi2LHS(n, sensis, silent, true);
+arChi2LHS(n, sensis, randomseed, silent, true);

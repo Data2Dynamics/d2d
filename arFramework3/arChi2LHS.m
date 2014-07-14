@@ -1,13 +1,14 @@
 % chi2 sequence using latin hyper cube sampling
 %
-% arChi2LHS(n, sensis, silent, use_cluster)
+% arChi2LHS(n, sensis, randomseed, silent, use_cluster)
 %
 % n:            number of runs          [10]
 % sensis:       use sensitivities       [false]
+% randomseed:                           rng(randomseed)
 % silent:       no output               [false]
 % use_cluster:                          [false]
 
-function arChi2LHS(n, sensis, silent, use_cluster)
+function arChi2LHS(n, sensis, randomseed, silent, use_cluster)
 
 global ar
 
@@ -17,6 +18,16 @@ end
 if(~exist('sensis','var'))
     sensis = false;
 end
+if(exist('rng','file')~=0)
+    if(exist('randomseed','var') && ~isempty(randomseed))
+        ar.lhs_seed = randomseed;
+        rng(randomseed);
+    else
+        rng('shuffle');
+        rngsettings = rng;
+        ar.lhs_seed = rngsettings.Seed;
+    end
+end
 if(~exist('silent','var'))
     silent = false;
 end
@@ -24,9 +35,6 @@ if(~exist('use_cluster','var'))
     use_cluster = false;
 end
 
-if(exist('rng','file')~=0)
-    rng('shuffle');
-end
 ps = ones(n,1) * ar.p;
 psrand = lhsdesign(n,sum(ar.qFit==1));
 

@@ -43,8 +43,7 @@ for jn = 1:length(nmax)
         break;
     end
     
-    rng(randomseed);
-    arChi2LHS(nrep, sensi, true)
+    arChi2LHS(nrep, sensi, randomseed, true)
     T(:,jn) = ar.timing;
 end
 ar.config.nParallel = nreset;
