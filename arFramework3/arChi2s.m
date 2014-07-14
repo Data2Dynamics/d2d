@@ -36,20 +36,27 @@ end
 if(~silent) 
     arWaitbar(0); 
 end
-tic;
+t1 = tic;
 for j=1:n
     if(~silent) 
         arWaitbar(j, n);
     end
     ar.p = ps(j,:);
     try
+        t2 = tic;
         arChi2(sensis, []); 
         ar.timing(j) = ar.stop/1e6;
+        if(ar.stop==0)
+            ar.timing(j) = toc(t2);
+        end
         ar.chi2s(j) = ar.chi2fit;
         ar.chi2sconstr(j) = ar.chi2constr;
         ar.exitflag(j) = 1;
     catch exception
         ar.timing(j) = ar.stop/1e6;
+        if(ar.stop==0)
+            ar.timing(j) = toc(t2);
+        end
         ar.ps_errors(j,:) = ar.p;
         if(~silent) 
             fprintf('feval #%i: %s\n', j, exception.message);
@@ -57,7 +64,7 @@ for j=1:n
         ar.exitflag(j) = -1;
     end
 end
-toc;
+toc(t1);
 
 if(~silent) 
     fprintf('mean feval time: %fsec, %i/%i errors\n', mean(ar.timing(~isnan(ar.timing))), ...
