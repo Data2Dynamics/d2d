@@ -83,7 +83,7 @@ if(fine && sensi)
 end
 
 % call mex function to simulate models
-feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics)
+feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false)
 
 % integration error ?
 for m=1:length(ar.model)
