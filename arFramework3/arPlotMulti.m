@@ -313,50 +313,71 @@ for jp=1:np
                             [ncols, nrows, nu, ~, iu, ix] = myColsAndRowsX(jm, rowstocols);
                         end
                         
-                        cclegendstyles = zeros(1,length(times));
+                        if(str2double(matVer.Version)>=8.1)
+                            [conditions, iconditions, jconditions] = unique(ar.model(jm).plot(jplot).condition,'legacy'); %#ok<ASGLU>
+                        else
+                            [conditions, iconditions, jconditions] = unique(ar.model(jm).plot(jplot).condition); %#ok<ASGLU>
+                        end
+                        
+                        cclegendstyles = zeros(1,length(times)*length(conditions));
                         for jt = 1:length(times)
-                            Clines = myLineStyle(length(times), jt, weight);
-                            if(isempty(ar.model(jm).plot(jplot).condition))
-                                Clines{2} = jeti(jp,:);
+                            if(isempty(conditions))
+                                jcs = 1;
+                            else
+                                jcs = 1:length(conditions);
                             end
-                            
-                            countu = 0;
-                            for ju = iu
-                                countu = countu + 1;
-                                [t, u, ~, ~, zero_break] = getDataDoseResponseU(jm, ju, ds, times(jt));
-                                if(jp==1)
-                                    g = subplot(nrows,ncols,countu);
-                                    ar.model(jm).plot(jplot).gu(ju) = g;
+                            for jc = jcs
+                                if(isempty(conditions))
+                                    ds = ar.model(jm).plot(jplot).dLink;
                                 else
-                                    g = ar.model(jm).plot(jplot).gu(ju);
+                                    ds = ar.model(jm).plot(jplot).dLink(find(jconditions==jc)); %#ok<FNDSB>
                                 end
-                                mySubplotStyle(g, labelfontsize, labelfonttype);
-                                ltmp = plot(g, t, u, Clines{:}, 'LineWidth', linesize);
-                                cclegendstyles(ccount) = ltmp;
-                                ar.model(jm).data(jd).plot.u(ju,jt) = ltmp;
-                                hold(g, 'on');
-                                if(jp==np && ~isempty(zero_break))
-                                    plot(g, [zero_break zero_break], ylim(g), 'k--');
+                                
+                                jd = ds(1);
+                                Clines = myLineStyle(length(times)*length(jcs), ccount, weight);
+                                if(length(times)*length(jcs) == 1)
+                                    Clines{2} = jeti(jp,:);
                                 end
-                            end
-                            countx = 0;
-                            for jx = ix
-                                countx = countx + 1;
-                                [t, x, ~, ~, zero_break] = getDataDoseResponseX(jm, jx, ds, times(jt));
-                                if(jp==1)
-                                    g = subplot(nrows,ncols,countx+nu);
-                                    ar.model(jm).plot(jplot).gx(jx) = g;
-                                else
-                                    g = ar.model(jm).plot(jplot).gx(jx);
+                                
+                                countu = 0;
+                                for ju = iu
+                                    countu = countu + 1;
+                                    [t, u, ~, ~, zero_break] = getDataDoseResponseU(jm, ju, ds, times(jt));
+                                    if(jp==1)
+                                        g = subplot(nrows,ncols,countu);
+                                        ar.model(jm).plot(jplot).gu(ju) = g;
+                                    else
+                                        g = ar.model(jm).plot(jplot).gu(ju);
+                                    end
+                                    mySubplotStyle(g, labelfontsize, labelfonttype);
+                                    ltmp = plot(g, t, u, Clines{:}, 'LineWidth', linesize);
+                                    cclegendstyles(ccount) = ltmp;
+                                    ar.model(jm).data(jd).plot.u(ju,jt) = ltmp;
+                                    hold(g, 'on');
+                                    if(jp==np && ~isempty(zero_break))
+                                        plot(g, [zero_break zero_break], ylim(g), 'k--');
+                                    end
                                 end
-                                mySubplotStyle(g, labelfontsize, labelfonttype);
-                                ltmp = plot(g, t, x, Clines{:}, 'LineWidth', linesize);
-                                cclegendstyles(ccount) = ltmp;
-                                ar.model(jm).data(jd).plot.x(jx,jt) = ltmp;
-                                hold(g, 'on');
-                                if(jp==np && ~isempty(zero_break))
-                                    plot(g, [zero_break zero_break], ylim(g), 'k--');
+                                countx = 0;
+                                for jx = ix
+                                    countx = countx + 1;
+                                    [t, x, ~, ~, zero_break] = getDataDoseResponseX(jm, jx, ds, times(jt));
+                                    if(jp==1)
+                                        g = subplot(nrows,ncols,countx+nu);
+                                        ar.model(jm).plot(jplot).gx(jx) = g;
+                                    else
+                                        g = ar.model(jm).plot(jplot).gx(jx);
+                                    end
+                                    mySubplotStyle(g, labelfontsize, labelfonttype);
+                                    ltmp = plot(g, t, x, Clines{:}, 'LineWidth', linesize);
+                                    cclegendstyles(ccount) = ltmp;
+                                    ar.model(jm).data(jd).plot.x(jx,jt) = ltmp;
+                                    hold(g, 'on');
+                                    if(jp==np && ~isempty(zero_break))
+                                        plot(g, [zero_break zero_break], ylim(g), 'k--');
+                                    end
                                 end
+                                ccount = ccount + 1;
                             end
                         end
                     end
