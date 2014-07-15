@@ -56,7 +56,8 @@ if(exist('m','var') && ischar(m))
     end
 end
 
-if(exist('extension','var') && isnumeric(extension))
+if(exist('extension','var') && isnumeric(extension) && ...
+        ~(isempty(extension) && nargin>3))
     error(['arLoadData(name, m, d, ...) input argument d is deprecated !!! ' ...
         'Please see new usage arLoadModel(name, m, extension, removeEmptyObs) and function help text.']);
 end
