@@ -111,6 +111,9 @@ while(~strcmp(C{1},'INPUTS'))
     if(length(cell2mat(C{1}))<2)
         error('STATE names need to be longer than 1');
     end
+    if(isempty(symvar(sym(C{1}))))
+        error('STATE name ''%s'' is reserved by MATLAB. Please rename!',cell2mat({'Li'}));
+    end
     ar.model(m).x(end+1) = C{1};
     ar.model(m).xUnits(end+1,1) = C{2};
     ar.model(m).xUnits(end,2) = C{3};
