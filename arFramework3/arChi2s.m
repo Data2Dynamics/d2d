@@ -67,7 +67,7 @@ end
 toc(t1);
 
 if(~silent) 
-    fprintf('mean feval time: %fsec, %i/%i errors\n', mean(ar.timing(~isnan(ar.timing))), ...
+    fprintf('median feval time: %fsec, %i/%i errors\n', median(ar.timing(~isnan(ar.timing))), ...
         sum(ar.exitflag==-1),n);
     arWaitbar(-1);
 end
