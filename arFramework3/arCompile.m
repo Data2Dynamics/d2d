@@ -312,11 +312,12 @@ if(isfield(ar.model, 'data'))
     end
 end
 
+includesstr=strrep(includesstr,'"', '');
 %% compile and link main mex file
 if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
     if(~ispc)
         % parallel code using POSIX threads for Unix type OS
-        
+
         mex('-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
             sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), '-DHAS_SYSTIME=1', ...
             which('arSimuCalc.c'), objectsstr{:});
