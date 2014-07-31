@@ -73,7 +73,8 @@ ar.exitflag = exitflag;
 ar.fun_evals = fun_evals;
 
 if(~silent) 
-    fprintf('mean feval time: %fsec, %i/%i errors\n', mean(ar.timing(~isnan(ar.timing))), ...
+    fprintf('median feval time: %fsec, %i/%i errors\n', median(ar.timing(~isnan(ar.timing) & ...
+        ar.exitflag>=0)), ...
         sum(ar.exitflag==-1),n);
 end
 
