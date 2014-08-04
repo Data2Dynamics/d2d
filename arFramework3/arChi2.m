@@ -400,7 +400,7 @@ end
 
 % cut off too long arrays
 if(isfield(ar.model, 'data'))
-    if(isfield(ar,'res'))
+    if(~isempty(ar.res))
         if(length(ar.res)>=resindex)
             ar.res(resindex:end) = [];
         end
@@ -408,7 +408,7 @@ if(isfield(ar.model, 'data'))
             ar.sres(sresindex:end,:) = [];
         end
     end
-    if(isfield(ar,'constr'))
+    if(~isempty(ar.constr))
         if(length(ar.constr)>=constrindex)
             ar.constr(constrindex:end) = [];
         end
@@ -481,11 +481,11 @@ if(has_error)
     rethrow(error_id)
 end
 
-if(isfield(ar.model, 'data') && isfield(ar,'res'))
+if(isfield(ar.model, 'data') && ~isempty(ar.res))
     if(sum(isnan(ar.res))>0)
         error('NaN in residuals: %i', sum(isnan(ar.res)));
     end
-    if(sensi && isfield(ar,'sres') && sum(sum(isnan(ar.sres(:,ar.qFit==1))))>0)
+    if(sensi && ~isempty(ar.sres) && sum(sum(isnan(ar.sres(:,ar.qFit==1))))>0)
         for jm = 1:nm
             if(isfield(ar.model(jm), 'data'))
                 nd = length(ar.model(jm).data);

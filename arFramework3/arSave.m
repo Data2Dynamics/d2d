@@ -53,6 +53,9 @@ if(isempty(ar.config.savepath))
     ar2.qFit = ar.qFit;
     ar2.lb = ar.lb;
     ar2.ub = ar.ub;
+    ar2.type = ar.type;
+    ar2.mean = ar.mean;
+    ar2.std = ar.std;
     arSaveParOnly(ar2, ar.config.savepath);
 else
     if(exist('name','var'))
@@ -93,6 +96,9 @@ else
         ar2.qFit = ar.qFit;
         ar2.lb = ar.lb;
         ar2.ub = ar.ub;
+        ar2.type = ar.type;
+        ar2.mean = ar.mean;
+        ar2.std = ar.std;
         arSaveParOnly(ar2, ar.config.savepath);
     else
         if(nargout == 0)
@@ -132,6 +138,9 @@ else
             ar2.qFit = ar.qFit;
             ar2.lb = ar.lb;
             ar2.ub = ar.ub;
+            ar2.type = ar.type;
+            ar2.mean = ar.mean;
+            ar2.std = ar.std;
             arSaveParOnly(ar2, ar.config.savepath);
         else
             if(~exist(ar.config.savepath, 'dir'))
@@ -162,6 +171,9 @@ else
                 ar2.qFit = ar.qFit;
                 ar2.lb = ar.lb;
                 ar2.ub = ar.ub;
+                ar2.type = ar.type;
+                ar2.mean = ar.mean;
+                ar2.std = ar.std;
                 arSaveParOnly(ar2, ar.config.savepath);
             end
         end

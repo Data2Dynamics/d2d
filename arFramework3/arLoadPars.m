@@ -19,8 +19,9 @@ else
         filename = filelist{end};
     end
 end
+filename_tmp = filename;
 filename = ['./Results/' filename '/workspace.mat'];
-filename_pars = ['./Results/' filename '/workspace_pars_only.mat'];
+filename_pars = ['./Results/' filename_tmp '/workspace_pars_only.mat'];
 
 if(~exist('fixAssigned', 'var'))
     fixAssigned = false;  
@@ -49,9 +50,15 @@ for j=1:length(ar.p)
             ar.qFit(j) = S.ar.qFit(qi);
             ar.lb(j) = S.ar.lb(qi);
             ar.ub(j) = S.ar.ub(qi);
-            ar.type(j) = S.ar.type(qi);
-            ar.mean(j) = S.ar.mean(qi);
-            ar.std(j) = S.ar.std(qi);
+            if isfield(S.ar,'type')
+                ar.type(j) = S.ar.type(qi);
+            end
+            if isfield(S.ar,'mean')
+                ar.mean(j) = S.ar.mean(qi);
+            end
+            if isfield(S.ar,'std')
+                ar.std(j) = S.ar.std(qi);
+            end
         else
             if(ar.qLog10(j) == S.ar.qLog10(qi))
                 ar.p(j) = S.ar.p(qi);
