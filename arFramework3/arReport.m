@@ -695,7 +695,7 @@ for jm=1:length(ar.model)
                             strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
                         
                         strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
-                        if(exist(ar.model(jm).logfitting,'var') && ar.model(jm).logfitting(jy))
+                        if(isfield(ar.model(jm),'logfitting') && ar.model(jm).logfitting(jy))
                             strtmp = ['\log_{10}(' strtmp ')'];
                         end
                         

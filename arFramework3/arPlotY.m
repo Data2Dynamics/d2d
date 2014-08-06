@@ -697,7 +697,7 @@ if(~exist(savePath, 'dir'))
 end
 
 if(length(name)>60)
-    name = name(1:60);
+    name = name([1:29 (end-29):end]);
 end
 
 savePath = mypath([savePath '/' name]);

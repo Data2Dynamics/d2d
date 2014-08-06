@@ -62,6 +62,7 @@ for jm=1:length(ar.model)
         ar.navi.jplot(end+1) = jplot;
     end
 end
+set(handles.popupmenu1, 'String', ar.navi.C)
 refresh_all(handles)
 
 % --- Outputs from this function are returned to the command line.
@@ -92,9 +93,6 @@ function popupmenu1_CreateFcn(hObject, eventdata, handles)
 global ar;
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
-end
-if isfield(ar,'navi')
-    set(hObject, 'String', ar.navi.C)
 end
 
 function myplot(handles, fastPlot, silent, evalfun)
