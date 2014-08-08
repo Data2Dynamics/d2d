@@ -50,8 +50,8 @@ elseif(length(jk)>1)
         end
     end
     pleGlobals.showCalculation = do_plotting;
-    pleGlobals.tmean = mean(pleGlobals.timing(jk));
-    pleGlobals.tstd = std(pleGlobals.timing(jk));    
+    pleGlobals.tmean = mean(pleGlobals.timing(pleGlobals.q_fit(jk)));
+    pleGlobals.tstd = std(pleGlobals.timing(pleGlobals.q_fit(jk)));    
     fprintf('\nPLE mean elapsed time for %i parameter: %s +/- %s\n', ...
         length(jk), secToHMS(pleGlobals.tmean), secToHMS(pleGlobals.tstd));
     return
