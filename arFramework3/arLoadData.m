@@ -461,7 +461,7 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
         for j=1:size(randis,1)
             qvals = jrandis == j;
             tmpdata = data(qvals,qobs);
-            if(sum(~isnan(tmpdata(:)))>0)
+            if(sum(~isnan(tmpdata(:)))>0 || ~removeEmptyObs)
                 fprintf('local random effect #%i:\n', j)
                 
                 if(j < size(randis,1))

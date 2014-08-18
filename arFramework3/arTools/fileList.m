@@ -1,9 +1,12 @@
 % Dateiliste erstellen
 
-function out = fileList(filepath, searchpattern)
+function out = fileList(filepath, searchpattern, doAnd)
 
 if(~exist('searchpattern', 'var'))
     searchpattern = {};
+end
+if(~exist('doAnd', 'var'))
+    doAnd = false;
 end
 
 filesyslist = dir(filepath);
@@ -13,7 +16,7 @@ count = 0;
 for j=1:length(filesyslist)
     q = true;
     if(length(searchpattern)>0) %#ok<ISMT>
-        q = findPattern(filesyslist(j).name, searchpattern);
+        q = findPattern(filesyslist(j).name, searchpattern, doAnd);
     end
     if(filesyslist(j).name(1)~='.' && q)
         count = count + 1;
@@ -23,7 +26,7 @@ end
 
 
 
-function out = findPattern(string, searchpattern)
+function out = findPattern(string, searchpattern, doAnd)
 
 count = 0;
 out = false;
@@ -32,6 +35,12 @@ for j=1:length(searchpattern)
     count = count + length(strfind(string, searchpattern{j}));
 end
 
-if(count>0)	
-    out = true; 
+if(~doAnd)
+    if(count>0)
+        out = true;
+    end
+else
+    if(count==length(searchpattern))
+        out = true;
+    end
 end

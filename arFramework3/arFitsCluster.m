@@ -99,7 +99,7 @@ if(log_fit_history)
 end
 
 fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
-fprintf('mean fitting time: %fsec\n', 10^mean(log10(ar.timing(~isnan(ar.timing)))));
+fprintf('median fitting time: %fsec\n', median(ar.timing(~isnan(ar.timing))));
 
 if(chi2Reset>min(ar.chi2s + ar.chi2sconstr))
     [chi2min,imin] = min(ar.chi2s + ar.chi2sconstr);
@@ -116,4 +116,7 @@ else
     ar.p = pReset;
 end
 arChi2(true,[]);
+
+%% backup save on cluster before transfer
+save('arFitsCluster_backup.mat', 'ar');
 
