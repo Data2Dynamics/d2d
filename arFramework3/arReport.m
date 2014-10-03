@@ -482,9 +482,9 @@ for jm=1:length(ar.model)
                 copyfile([ar.model(jm).plot(jplot).savePath_FigY '.pdf'], ...
                     [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
                 
-                lp(fid, 'The model observables and the experimental data is show in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
+                lp(fid, 'The model observables and the experimental data is shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
                 captiontext = sprintf('\\textbf{%s observables and experimental data for the experiment.} ', myNameTrafo(ar.model(jm).plot(jplot).name));
-                captiontext = [captiontext 'The observables are displayed as solid lines.'];
+                captiontext = [captiontext 'The observables are displayed as solid lines. '];
                 captiontext = [captiontext 'The error model that describes the measurement noise ' ...
                     'is indicated by shades.'];
                 lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
@@ -831,7 +831,7 @@ else
         sum(ar.qFit==1), ar.chi2, ar.ndata);
 end
 
-lp(fid, 'The model parameter were estimated by maximum likelihood estimation applying the MATLAB lsqnonlin algorithm.');
+lp(fid, 'The model parameters were estimated by maximum likelihood estimation applying the MATLAB lsqnonlin algorithm.');
 
 N = 50;
 ntables = ceil(length(ar.p)/N);
@@ -915,7 +915,7 @@ if(exist(plePath,'dir'))
     
     S = load([plePath '/results.mat']);
     
-    lp(fid, 'In order to evaluate the identifiability of the model parameters and to assess confidence intervals');
+    lp(fid, 'In order to evaluate the identifiability of the model parameters and to assess confidence intervals, ');
     lp(fid, 'the profile likelihood \\cite{Raue:2009ec} was calculated.');
     lp(fid, 'The mean calculation time of the profile likelihood per parameter was %s $\\pm$ %s.', ...
         secToHMS(mean(S.pleGlobals.timing(S.pleGlobals.q_fit(size(S.pleGlobals.timing))))), ...
@@ -930,9 +930,9 @@ if(exist(plePath,'dir'))
         eval(['!ps2pdf  -dEPSCrop ' sourcestr ' ' targetstr]);
         
         captiontext = '\textbf{Overview of the profile likelihood of the model parameters}\\';
-        captiontext = [captiontext 'The solide lines indicate the profile likelihood. '];
+        captiontext = [captiontext 'The solid lines indicate the profile likelihood. '];
         captiontext = [captiontext 'The broken lines indicate the threshold to assess confidence intervals. '];
-        captiontext = [captiontext 'The asterisk indicate the optimal parameter values. '];
+        captiontext = [captiontext 'The asterisks indicate the optimal parameter values. '];
         lpfigure(fid, 1, 'multi_plot.pdf', captiontext, 'multi_plot');
     end
     

@@ -139,7 +139,7 @@ for jm=1:length(ar.model)
     % Inputs
     if(doEquations && ~isempty(ar.model(jm).u))
         lp(fid, '\\begin{frame}');
-        lp(fid, '\\noindent The model dynamics depends on the external inputs:');
+        lp(fid, '\\noindent The model dynamics depend on the external inputs:');
         lp(fid, '{\\tiny');
         lp(fid, '\\begin{eqnarray}');
         for ju=1:length(ar.model(jm).fu)
@@ -172,7 +172,7 @@ for jm=1:length(ar.model)
     if(~isempty(ar.model(jm).fv))
         lp(fid, '\\begin{frame}');
         if(doEquations)
-            lp(fid, '\\noindent The rate equations corresponding to the reactions included in the model are give by:');
+            lp(fid, '\\noindent The rate equations corresponding to the reactions included in the model are given by:');
         else
             lp(fid, '\\noindent \\quad \\\\');
         end
@@ -382,8 +382,8 @@ for jm=1:length(ar.model)
                     end
                     lp(fid, '\\end{itemize}');
                 end
-                %             lp(fid, '\\noindent The agreement of the model outpxuts and the experimental data, given in Table \\ref{%s_data}, ', ar.model(jm).plot(jplot).name);
-                lp(fid, '\\noindent The agreement of the model outpxuts and the experimental data, ');
+                %             lp(fid, '\\noindent The agreement of the model outputs and the experimental data, given in Table \\ref{%s_data}, ', ar.model(jm).plot(jplot).name);
+                lp(fid, '\\noindent The agreement of the model outputs and the experimental data, ');
                 
                 if(ar.config.fiterrors == 1)
                     lp(fid, 'yields a value of the objective function $-2 \\log(L) = %g$ for %i data points in this data set.', ...
