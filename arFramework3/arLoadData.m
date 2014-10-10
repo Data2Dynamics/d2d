@@ -365,9 +365,9 @@ if(isfield(ar.model(m).data(d), 'response_parameter') && ...
     end
 end
 if(~isfield(ar.model(m), 'plot'))
-    ar.model(m).plot(1).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
+    [~, ar.model(m).plot(1).name] = getDataName(name);
 else
-    ar.model(m).plot(end+1).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
+    [~, ar.model(m).plot(end+1).name] = getDataName(name);
 end
 ar.model(m).plot(end).doseresponse = ar.model(m).data(d).doseresponse;
 ar.model(m).plot(end).dLink = d;
