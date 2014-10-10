@@ -10,7 +10,7 @@ arCheck;
 
 [~, filename] = fileChooser('./Results', 1, true);
 
-remove = input(sprintf('do you really want to remove the workspace \"%s\"? Y/[N]\n', filename),'s');
+remove = input(sprintf('do you really want to remove the workspace \"%s\"?\nY/[N] ', filename),'s');
 if strcmpi(remove,'y')
     system(['rm -R ./Results/' filename]);
     fprintf('workspace \"%s\" successfully removed!\n', filename);
