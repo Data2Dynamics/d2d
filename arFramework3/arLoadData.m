@@ -94,7 +94,7 @@ else
 end
 
 % initial setup
-ar.model(m).data(d).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
+[ar.model(m).data(d).folder, ar.model(m).data(d).name] = getDataName(name);
 
 fprintf('\nloading data #%i, from file Data/%s.def...', d, name);
 fid = fopen(['Data/' name '.def'], 'r');
@@ -792,4 +792,18 @@ for j=1:length(ar.model(m).data(d).y)
     
     fprintf('\n');
 end
+
+
+%% takes path of data file and returns filename and foldername
+function [foldername, filename] = getDataName(name)
+    name = strrep(strrep(strrep(name,'=','_'),'.',''),'-','_');
+    splitted = strsplit(name,'/');
+    if length(splitted)>1
+        foldername  = strcat(splitted{1:end-1});
+        filename = splitted{end};
+    else
+        foldername = '';
+        filename = name;
+    end
+
 
