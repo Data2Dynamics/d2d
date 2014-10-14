@@ -12,7 +12,11 @@ ar = Stmpload.ar;
 
 fprintf('workspace loaded from file %s\n', filename);
 
-pleGlobals = pleLoad(ar);
+try
+    pleGlobals = pleLoad(ar);
+catch
+    fprintf(1,'No valid PLE workspace found!\n');
+end
 
 clear Stmpload
 clear filename

@@ -1,8 +1,8 @@
 % Compare profile likelihoods of two runs
 
-function pleCompare(ples, labels)
+function pleCompare(ples, labels, savetofile)
 
-if(nargin==0)
+if(nargin==0) || (isempty(ples) || labels)
     filenames = fileChooserMulti('./Results', true);
     
     ples = {};
@@ -84,9 +84,24 @@ for j=1:length(pLabels)
     end
     
     if(j == length(pLabels))
-        legend(hs, strrep(labels,'_','\_'), strrep(labels,'_','\_'));
+        legend(hs, strrep(labels,'_','\_'), strrep(labels,'_','\_'),'Location','SouthOutside');
     end
     set(gca, 'YTickLabel', {})
+end
+
+if ~exist('savetofile','var')
+    savetofile = false;
+end
+
+% save
+if(savetofile && exist(ples{end}.savePath, 'dir'))
+    saveas(gcf, [ples{end}.savePath '/ple_compare'], 'fig')
+    print('-depsc2', [ples{end}.savePath '/ple_compare']);
+    if(ispc)
+        print('-dpdf', [ples{end}.savePath '/ple_compare']);
+    else
+        system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' [ples{end}.savePath '/ple_compare'] '.eps '  [ples{end}.savePath '/ple_compare'] '.pdf']);
+    end
 end
 
 

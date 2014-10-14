@@ -23,7 +23,7 @@ end
 if(~exist('jks','var') || isempty(jks))
     jks = 1:length(pleGlobals.ps);
 end
-if(~exist('savetofile','var'))
+if(~exist('savetofile','var') || isempty(savetofile))
     savetofile = false;
 end
 

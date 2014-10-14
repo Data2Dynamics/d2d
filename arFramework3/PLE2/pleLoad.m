@@ -9,7 +9,6 @@ if(exist(savepath,'dir')==7)
     ple = S.pleGlobals;
     fprintf(1,'PLE workspace loaded from file %s\n', [savepath '/results.mat']);
 else
-%     fprintf(1,'No saved PLE workspace found!\n');
     ple = [];
 end
     
