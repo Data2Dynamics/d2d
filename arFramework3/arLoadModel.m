@@ -515,7 +515,12 @@ if(strcmp(C{1},'OBSERVABLES'))
 end
 
 % CONDITIONS
-C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
+matVer = ver('MATLAB');
+if(str2double(matVer.Version)>=8.4)
+    C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+else
+    C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
+end
 ar.model(m).fp = transpose(ar.model(m).p);
 while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
     qcondpara = ismember(ar.model(m).p, C{1}); %R2013a compatible
@@ -524,8 +529,11 @@ while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
     else
         warning('unknown parameter in conditions: %s', cell2mat(C{1})); %#ok<WNTAG>
     end
-    C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, ...
-        'BufSize', 2^16-1);
+    if(str2double(matVer.Version)>=8.4)
+        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    else
+        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+    end
 end
 
 % extra conditional parameters
