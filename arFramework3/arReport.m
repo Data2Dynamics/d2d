@@ -14,6 +14,10 @@ if(~exist([cd '/' savePath], 'dir'))
     mkdir([cd '/' savePath])
 end
 
+% empty LD_LIBRARY_PATH (MATLAB-shipped libraries conflict with libs pdflatex is linked to)
+library_path = getenv('LD_LIBRARY_PATH');
+setenv('LD_LIBRARY_PATH', '');
+
 % copy lib.bib
 copyfile(which('lib.bib'), [savePath '/lib.bib']);
 
@@ -1101,6 +1105,7 @@ if(~ispc)
         fprintf('report.pdf was not written correctly\n');
     end
 end
+setenv('LD_LIBRARY_PATH', library_path);
 
 function lp(varargin)
 if(nargin>2)
