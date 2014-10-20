@@ -59,3 +59,6 @@ clear ar_tmp;
 
 pleGlobals = pleGlobals_tmp;
 clear pleGlobals_tmp;
+
+function arSaveParOnly(ar, savepath) %#ok<INUSL>
+save([savepath '/workspace_pars_only.mat'],'ar','-v7.3');

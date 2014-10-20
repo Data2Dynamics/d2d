@@ -16,6 +16,7 @@ try
     pleGlobals = pleLoad(ar);
 catch
     fprintf(1,'No valid PLE workspace found!\n');
+    clear pleGlobals;
 end
 
 clear Stmpload
