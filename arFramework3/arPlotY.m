@@ -611,6 +611,9 @@ for jd = ds
     end
 end
 
+[tExp,itexp] = sort(tExp);
+yExp = yExp(itexp);
+
 [t,it] = sort(t);
 y = y(it);
 ystd = ystd(it);
@@ -618,6 +621,8 @@ if(~isempty(lb))
     lb = lb(it);
     ub = ub(it);
 end
+
+
 
 
 %% sub-functions
