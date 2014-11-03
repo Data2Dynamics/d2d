@@ -30,11 +30,6 @@ for j=find(qnonzero)'
     fcount = fcount + 1;
 end
 
-fcons = cell(1, length(ar.model(m).fxeq));
-for j=1:length(ar.model(m).fxeq)
-    fcons{j} = char(mysubs(sym(ar.model(m).fxeq{j}), ar.model(m).sym.x, ar.model(m).sym.px0));
-end
-
 fp = cell(1, sum(logical(qnonzero)));
 fcount = 1;
 for j=find(qnonzero)'
@@ -47,18 +42,13 @@ for j=1:length(fstrings)
     disp(['d' dxdt{j} '/dt = ' fstrings{j}])
 end
 
-fprintf('\nconserved moieties (%i):\n', length(fcons));
-for j=1:length(fcons)
-    disp(fcons{j})
-end
-
 fprintf('\nsolving for (%i):\n', length(fp));
 for j=1:length(fp)
     disp(fp{j})
 end
 fprintf('\n---\n');
 
-ar.model(m).ss_solution = solve(fstrings{:}, fcons{:}, fp{:});
+ar.model(m).ss_solution = solve(fstrings{:}, fp{:});
 
 if(~isempty(ar.model(m).ss_solution))
     fprintf('---\n');
