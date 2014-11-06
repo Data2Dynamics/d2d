@@ -1,8 +1,55 @@
+%   arPrint
+%   arPrint(3:4)
+%   arPrint('sd')
+% 
 % print parameter values
+% 
+%   js      Indices of the parameters to be displayed
+%           (see Example below)
+% 
+% 
+% Examples:
+% arPrint('turn')
+%            name                      lb       value       ub          10^value        fitted   prior
+% #  22|DI | geneA_turn              |       -5      -0.41         +3 | 1      +0.39 |       1 | uniform(-5,3) 
+% #  31|DI | geneB_turn              |       -5       -2.7         +3 | 1    +0.0022 |       1 | uniform(-5,3) 
+% #  40|DI | geneC_turn              |       -5      -0.91         +3 | 1      +0.12 |       1 | uniform(-5,3) 
+%      |   |                         |                                |              |         |      
+% #  49|DI | geneD_turn              |       -5       -2.1         +3 | 1     +0.008 |       1 | uniform(-5,3) 
+% #  58|DI | geneE_turn              |       -5       -2.5         +3 | 1     +0.003 |       1 | uniform(-5,3) 
+% 
+% arPrint(15:17)
+% Parameters: # = free, C = constant, D = dynamic, I = initial value, E = error model
+% 
+% Example:
+%            name                      lb       value       ub          10^value        fitted   prior
+% #  15|D  | geneA_deg1              |       -2         -2         +3 | 1      +0.01 |       1 | uniform(-2,3) 
+% #  16|D  | geneA_deg2              |       -2      +0.36         +3 | 1       +2.3 |       1 | uniform(-2,3) 
+% #  17|D  | geneA_deg3              |       -2       -1.2         +3 | 1     +0.063 |       1 | uniform(-2,3) 
 
-function arPrint
-
+function arPrint(js)
 global ar
+
+if(~exist('js','var') | isempty(js))
+    js = 1:length(ar.p);
+elseif(isnumeric(js))
+    if(size(js,1)>1)
+        js = js'; %should not be a row
+    end
+elseif(ischar(js))
+    js = find(~cellfun(@isempty,regexp(ar.pLabel,js)));
+    if isempty(js)
+        disp('Pattern not found in ar.pLabel');
+        return;
+    end
+else
+    error('Argument has to be a string or an array of indices.')
+end
+
+if(sum(isnan(js))>0 || sum(isinf(js))>0 || min(js)<1 || max(js-round(js))>eps)
+    js
+    warning('arPrint.m: argument js is not plausible (should be an array of indices).')
+end
 
 if(isempty(ar))
     error('please initialize by arInit')
@@ -24,9 +71,9 @@ maxlabellength = max(cellfun(@length, ar.pLabel));
 
 fprintf('Parameters: # = free, C = constant, D = dynamic, I = initial value, E = error model\n\n');
 printHead;
-for j=1:length(ar.p)
+for j=js
     printPar(j, ar.qCloseToBound(j));
-	if(mod(j,10)==0 && j<length(ar.p))
+	if(mod(j,10)==0 && j<max(js))
 		fprintf(['     |   | ' arExtendStr('', maxlabellength) ' |                                |              |         |      \n']);
 	end
 end
