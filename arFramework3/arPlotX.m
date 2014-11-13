@@ -5,6 +5,10 @@
 %
 % saveToFile    [false]
 % fastPlot      [false]
+% 
+%   After clicking the subplot of interest, the following command provides
+%   annotation of the displayed plot:
+%   get(gca,'UserData') 
 
 function arPlotX(saveToFile, fastPlot)
 
@@ -43,8 +47,11 @@ else
     nfine_dr_method = 'spline';
 end
 
+clinks = cell(size(ar.model));
+
 figcount = 1;
 for jm = 1:length(ar.model)
+    clinks{jm} = cell(size(ar.model(jm).plot));
     for jplot = 1:length(ar.model(jm).plot)
         if(ar.model(jm).qPlotXs(jplot)==1)
             if(ar.config.ploterrors == -1)
@@ -61,6 +68,7 @@ for jm = 1:length(ar.model)
                 for jd = ar.model(jm).plot(jplot).dLink
                     [t, u, x, z, ulb, uub, xlb, xub, zlb, zub, jc, dxdt] = getData(jm, jd);
                     
+                    clinks{jm}{jplot} = [clinks{jm}{jplot},jc];
                     % rows and cols
                     [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm, rowstocols);
                     
@@ -433,6 +441,16 @@ for jm = 1:length(ar.model)
                 for ju = iu
                     countu = countu + 1;
                     g = ar.model(jm).plot(jplot).gu(ju);
+
+                    set(g,'UserData',...
+                        struct('jm',jm,'jplot',jplot,'ju',ju, ...
+                        'dLink',ar.model(jm).plot(jplot).dLink, ...
+                        'cLink',clinks{jm}{jplot}, ...
+                        'u', ar.model(jm).u{ju},...
+                        'model_name',ar.model(jm).name, ...
+                        'plot_name',ar.model(jm).plot(jplot).name ...
+                        ))
+
                     if(~fastPlotTmp)
                         hold(g, 'off');
                         
@@ -478,6 +496,16 @@ for jm = 1:length(ar.model)
                 for jx = ix
                     countx = countx + 1;
                     g = ar.model(jm).plot(jplot).gx(jx);
+
+                    set(g,'UserData',...
+                        struct('jm',jm,'jplot',jplot,'jx',jx, ...
+                        'dLink',ar.model(jm).plot(jplot).dLink, ...
+                        'cLink',clinks{jm}{jplot}, ...
+                        'xName',ar.model(jm).xNames{jx}, ...
+                        'model_name',ar.model(jm).name, ...
+                        'plot_name',ar.model(jm).plot(jplot).name ...
+                        ))
+                    
                     if(~fastPlotTmp)
                         hold(g, 'off');
                         
@@ -529,6 +557,15 @@ for jm = 1:length(ar.model)
                 for jz = iz
                     countz = countz + 1;
                     g = ar.model(jm).plot(jplot).gz(jz);
+                    
+                    set(g,'UserData',...
+                        struct('jm',jm,'jplot',jplot,'jx',jx, ...
+                        'dLink',ar.model(jm).plot(jplot).dLink, ...
+                        'cLink',clinks{jm}{jplot}, ...
+                        'model_name',ar.model(jm).name, ...
+                        'plot_name',ar.model(jm).plot(jplot).name ...
+                        ))
+                    
                     if(~fastPlotTmp)
                         hold(g, 'off');
                         
@@ -548,8 +585,13 @@ for jm = 1:length(ar.model)
                     end
                     arSpacedAxisLimits(g, overplot);
                 end
+                
             end
             
+            if(exist('suptitle')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
+                suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
+            end
+
             if(saveToFile)
                 if(ar.config.ploterrors == -1)
                     ar.model(jm).plot(jplot).savePath_FigXCI = mySaveFigure(h, ar.model(jm).plot(jplot).name);
