@@ -94,7 +94,7 @@ else
 end
 
 % initial setup
-[ar.model(m).data(d).folder, ar.model(m).data(d).name] = getDataName(name);
+ar.model(m).data(d).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
 
 fprintf('\nloading data #%i, from file Data/%s.def...', d, name);
 fid = fopen(['Data/' name '.def'], 'r');
@@ -365,9 +365,9 @@ if(isfield(ar.model(m).data(d), 'response_parameter') && ...
     end
 end
 if(~isfield(ar.model(m), 'plot'))
-    [~, ar.model(m).plot(1).name] = getDataName(name);
+    ar.model(m).plot(1).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
 else
-    [~, ar.model(m).plot(end+1).name] = getDataName(name);
+    ar.model(m).plot(end+1).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
 end
 ar.model(m).plot(end).doseresponse = ar.model(m).data(d).doseresponse;
 ar.model(m).plot(end).dLink = d;
@@ -792,18 +792,4 @@ for j=1:length(ar.model(m).data(d).y)
     
     fprintf('\n');
 end
-
-
-%% takes path of data file and returns filename and foldername
-function [foldername, filename] = getDataName(name)
-    name = strrep(strrep(strrep(name,'=','_'),'.',''),'-','_');
-    splitted = strsplit(name,'/');
-    if length(splitted)>1
-        foldername  = strcat(splitted{1:end-1});
-        filename = splitted{end};
-    else
-        foldername = '';
-        filename = name;
-    end
-
 

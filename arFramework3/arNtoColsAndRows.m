@@ -1,3 +1,5 @@
+% [nrows, ncols] = arNtoColsAndRows(n, rowstocols)
+
 function [nrows, ncols] = arNtoColsAndRows(n, rowstocols)
 
 if(~exist('rowstocols', 'var'))
