@@ -5,6 +5,11 @@
 % saveToFile    [false]
 % fastPlot      [false]
 % doLegends      [true]
+% 
+%   After clicking the subplot of interest, the following command provides
+%   annotation of the displayed plot:
+%   get(gca,'UserData') 
+
 
 function arPlotY(saveToFile, fastPlot, doLegends)
 
@@ -475,7 +480,21 @@ for jm = 1:length(ar.model)
                     end
                 end
                 title(g, titstr);
+                set(g,'UserData',...
+                    struct('jm',jm,'jplot',jplot,'jy',jy, ...
+                    'dLink',ar.model(jm).plot(jplot).dLink, ...
+                    'yName',ar.model(jm).data(jd).yNames{jy}, ...
+                    'model_name',ar.model(jm).name, ...
+                    'plot_name',ar.model(jm).plot(jplot).name, ...
+                    'data_name',ar.model(jm).data(jd).name, ...
+                    'fy',ar.model(jm).data(jd).fy{jy}, ...
+                    'fystd',ar.model(jm).data(jd).fystd{jy} ...                    
+                    ))
                 arSpacedAxisLimits(g, overplot);
+            end
+            
+            if(exist('suptitle')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
+                suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
             end
             
             ar.model(jm).plot(jplot).chi2 = sum(chi2);
