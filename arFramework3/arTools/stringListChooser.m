@@ -8,8 +8,11 @@ if(~exist('zeigen', 'var'))
 end
 
 if(zeigen)
+    maxlen = max(cellfun(@length,liste));
+    
     for j=1:length(liste)
-        fprintf('#%3i : %s\n', j, liste{j});
+        anno = readParameterAnnotation(liste{j});
+        fprintf(['#%3i : %',num2str(maxlen),'s  %s\n'], j, liste{j},anno);
     end
 end
 
@@ -67,3 +70,45 @@ while(isnan(out))
         end
     end
 end
+
+function anno = readParameterAnnotation(filename_tmp)
+filename_pars = ['./Results/' filename_tmp '/workspace_pars_only.mat'];
+
+if(exist(filename_pars,'file'))    
+    S = load(filename_pars);
+
+    nstr = '';
+    priorstr = '';
+    pstr = '';
+    qstr = '';
+    chi2str = '';
+    errstr = '';
+    
+    if(isfield(S.ar,'ndata'))
+        nstr = ['N=',sprintf('%4i ',S.ar.ndata),' '];
+    end
+    if(isfield(S.ar,'nprior'))
+        priorstr = ['#prior=',sprintf('%3i ',S.ar.nprior),' '];
+    end
+    if(isfield(S.ar,'p'))
+        pstr = ['#p=',sprintf('%3i ',length(S.ar.p)),' '];
+    end
+    if(isfield(S.ar,'qFit'))
+        qstr = ['#fitted=',sprintf('%3i ',sum(S.ar.qFit==1)),' '];
+    end
+    if(isfield(S.ar,'chi2fit'))
+        chi2str = ['chi2fit=',sprintf('%4.3f ',S.ar.chi2fit),' '];
+    end    
+    if(isfield(S.ar,'config'))
+        if(S.ar.config.fiterrors==1)
+            errstr = 'errors fitted';
+        end
+    end
+    
+    anno = sprintf('(%s%s%s%s%s%s)',chi2str,nstr,pstr,qstr,priorstr,errstr);
+else
+    anno = '';
+end
+ 
+
+ 
