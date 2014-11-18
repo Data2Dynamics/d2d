@@ -1,5 +1,8 @@
 function y = arSplineFit(xd, yd, xp, x, initialSlope, curveConstr)
 
+[xd, isort] = sort(xd);
+yd = yd(isort);
+
 if(~exist('x','var'))
     x = [];
 end
@@ -34,7 +37,7 @@ if(~isempty(initialSlope))
     ppdt = arSplineDer(pp);
     F(end+1) = ppval(ppdt,xp(1)) - initialSlope;
 end
-if(~isempty(initialSlope))
+if(~isempty(curveConstr))
     if(~exist('ppdt','var'))
         ppdt = arSplineDer(pp);
     end
