@@ -39,7 +39,12 @@ if(~exist('Data','dir'))
     error('folder Data/ does not exist')
 end
 if(~exist(['Data/' name '.def'],'file'))
-    error('data definition file %s.def does not exist in folder Data/', name)
+    if(~exist(['Data/' name '.xls'],'file') && ~exist(['Data/' name '.csv'],'file'))
+        error('data definition file %s.def does not exist in folder Data/', name)
+    else
+        fprintf('\ncreating generic .def file for Data/%s ...\n', name);
+        copyfile(which('data_template.def'),['./Data/' name '.def']);
+    end
 end
 
 if(~exist('m','var') || isempty(m))
@@ -370,6 +375,7 @@ else
     ar.model(m).plot(end+1).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
 end
 ar.model(m).plot(end).doseresponse = ar.model(m).data(d).doseresponse;
+ar.model(m).plot(end).doseresponselog10xaxis = true;
 ar.model(m).plot(end).dLink = d;
 ar.model(m).plot(end).ny = length(ar.model(m).data(d).y);
 ar.model(m).plot(end).condition = {};
