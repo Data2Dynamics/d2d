@@ -61,9 +61,13 @@ for j=1:length(g)
     end
     if(~isnan(yrange))
         if(strcmp(get(g(j), 'YScale'), 'linear'))
-            ylim(g(j), [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+            if(ymin-(yrange*overplot) < ymax+(yrange*overplot))
+                ylim(g(j), [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+            end
         else
-            ylim(g(j), 10.^[ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+            if(ymin-(yrange*overplot) < ymax+(yrange*overplot))
+                ylim(g(j), 10.^[ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+            end
         end
     end
 end
