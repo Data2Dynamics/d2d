@@ -307,6 +307,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             ar.model(m).vUnits{end+1,1} = [ar.model(m).xUnits{ix,1} '/' ar.model(m).tUnits{1}];
             ar.model(m).vUnits{end,2} = [ar.model(m).xUnits{ix,2} '/' ar.model(m).tUnits{2}];
             ar.model(m).vUnits{end,3} = [ar.model(m).xUnits{ix,3} '/' ar.model(m).tUnits{3}];
+            ar.model(m).v{end+1} = cell2mat(C{2});
             
             % setup N
             ar.model(m).N(1:length(ar.model(m).x),vcount) = 0;
@@ -501,7 +502,7 @@ if(strcmp(C{1},'OBSERVABLES'))
         C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
     end
     
-    if(length(ar.model(m).fystd)<length(ar.model(m).fy))
+    if(length(ar.model(m).fystd)<length(ar.model(m).fy) || sum(cellfun(@isempty, ar.model(m).fystd))>0)
         error('some observables do not have an error model defined');
     end
     
