@@ -37,7 +37,6 @@ labelfonttype = 'Arial';
 rowstocols = 0.5;
 overplot = 0.1;
 
-logplotting_xaxis = true;
 if(isfield(ar.config,'nfine_dr_plot'))
     nfine_dr_plot = ar.config.nfine_dr_plot;
     nfine_dr_method = ar.config.nfine_dr_method;
@@ -57,6 +56,12 @@ for jm = 1:length(ar.model)
                 [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['CI-Y: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
             else
                 [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['Y: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
+            end
+            
+            if(isfield(ar.model(jm).plot(jplot), 'doseresponselog10xaxis'))
+                logplotting_xaxis = ar.model(jm).plot(jplot).doseresponselog10xaxis;
+            else
+                logplotting_xaxis = true;
             end
             
             % plotting
@@ -420,7 +425,7 @@ for jm = 1:length(ar.model)
                             if(logplotting_xaxis)
                                 xlabel(g, sprintf('log_{10}(%s)', resppar));
                             else
-                                xlabel(g, sprintf('%s', resppar)); %#ok<UNRCH>
+                                xlabel(g, sprintf('%s', resppar));
                             end
                         end
                     end

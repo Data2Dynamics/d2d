@@ -46,15 +46,14 @@ else
     nfine_dr_method = 'spline';
 end
 
-<<<<<<< local
+
 if(isfield(ar.config,'plot_x_collected'))
     plot_x_collected = ar.config.plot_x_collected;
 else
     plot_x_collected = false;
 end
-=======
+
 clinks = cell(size(ar.model));
->>>>>>> other
 
 figcount = 1;
 for jm = 1:length(ar.model)
@@ -531,12 +530,21 @@ for jm = 1:length(ar.model)
                         jcondi = jc;
                     end
                 end
-<<<<<<< local
             end
             countu = 0;
             for ju = iu
                 countu = countu + 1;
                 g = ar.model(jm).plot(jplot).gu(ju);
+                
+                set(g,'UserData',...
+                    struct('jm',jm,'jplot',jplot,'ju',ju, ...
+                    'dLink',ar.model(jm).plot(jplot).dLink, ...
+                    'cLink',clinks{jm}{jplot}, ...
+                    'u', ar.model(jm).u{ju},...
+                    'model_name',ar.model(jm).name, ...
+                    'plot_name',ar.model(jm).plot(jplot).name ...
+                    ))
+                
                 if(~fastPlotTmp)
                     hold(g, 'off');
                     
@@ -561,38 +569,6 @@ for jm = 1:length(ar.model)
                                             end
                                         else
                                             legendtmp{ccount} = sprintf('t=%g%s', times(jt), ar.model(jm).tUnits{2}); %#ok<AGROW>
-=======
-                countu = 0;
-                for ju = iu
-                    countu = countu + 1;
-                    g = ar.model(jm).plot(jplot).gu(ju);
-
-                    set(g,'UserData',...
-                        struct('jm',jm,'jplot',jplot,'ju',ju, ...
-                        'dLink',ar.model(jm).plot(jplot).dLink, ...
-                        'cLink',clinks{jm}{jplot}, ...
-                        'u', ar.model(jm).u{ju},...
-                        'model_name',ar.model(jm).name, ...
-                        'plot_name',ar.model(jm).plot(jplot).name ...
-                        ))
-
-                    if(~fastPlotTmp)
-                        hold(g, 'off');
-                        
-                        title(g, myNameTrafo(ar.model(jm).u{ju}));
-                        if(ju == 1 && (~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
-                            if(~ar.model(jm).plot(jplot).doseresponse)
-                                if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                    legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition))
-                                end
-                            else
-                                legendtmp = {};
-                                ccount = 1;
-                                for jt=1:length(times)
-                                    if(~isempty(conditions))
-                                        for jc = 1:length(conditions)
-                                            legendtmp{ccount} = sprintf('t=%g%s : %s', times(jt), ar.model(jm).tUnits{2}, conditions{jc}); %#ok<AGROW>
->>>>>>> other
                                             ccount = ccount + 1;
                                         end
                                     end
@@ -614,32 +590,24 @@ for jm = 1:length(ar.model)
                     end
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}));
                 end
-<<<<<<< local
                 arSpacedAxisLimits(g, overplot);
             end
             countx = 0;
             for jx = ix
                 countx = countx + 1;
                 g = ar.model(jm).plot(jplot).gx(jx);
+                
+                set(g,'UserData',...
+                    struct('jm',jm,'jplot',jplot,'jx',jx, ...
+                    'dLink',ar.model(jm).plot(jplot).dLink, ...
+                    'cLink',clinks{jm}{jplot}, ...
+                    'xName',ar.model(jm).xNames{jx}, ...
+                    'model_name',ar.model(jm).name, ...
+                    'plot_name',ar.model(jm).plot(jplot).name ...
+                    ))
+                
                 if(~fastPlotTmp)
-                    hold(g, 'off');
-=======
-                countx = 0;
-                for jx = ix
-                    countx = countx + 1;
-                    g = ar.model(jm).plot(jplot).gx(jx);
-
-                    set(g,'UserData',...
-                        struct('jm',jm,'jplot',jplot,'jx',jx, ...
-                        'dLink',ar.model(jm).plot(jplot).dLink, ...
-                        'cLink',clinks{jm}{jplot}, ...
-                        'xName',ar.model(jm).xNames{jx}, ...
-                        'model_name',ar.model(jm).name, ...
-                        'plot_name',ar.model(jm).plot(jplot).name ...
-                        ))
->>>>>>> other
-                    
-<<<<<<< local
+                    hold(g, 'off');    
                     if(nu == 0 && jx == 1)
                         if(plot_x_collected)
                             legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u ar.model(jm).x ar.model(jm).z]))
@@ -660,23 +628,6 @@ for jm = 1:length(ar.model)
                                             end
                                         else
                                             legendtmp{ccount} = sprintf('t=%g%s', times(jt), ar.model(jm).tUnits{2}); %#ok<AGROW>
-=======
-                    if(~fastPlotTmp)
-                        hold(g, 'off');
-                        
-                        if(nu == 0 && jx == 1 && (~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
-                            if(~ar.model(jm).plot(jplot).doseresponse)
-                                if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                    legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition))
-                                end
-                            else
-                                legendtmp = {};
-                                ccount = 1;
-                                for jt=1:length(times)
-                                    if(~isempty(conditions))
-                                        for jc = 1:length(conditions)
-                                            legendtmp{ccount} = sprintf('t=%g%s : %s', times(jt), ar.model(jm).tUnits{2}, conditions{jc}); %#ok<AGROW>
->>>>>>> other
                                             ccount = ccount + 1;
                                         end
                                     end
@@ -685,17 +636,7 @@ for jm = 1:length(ar.model)
                             end
                         end
                     end
-<<<<<<< local
-=======
-                    arSpacedAxisLimits(g, overplot);
-                end
-                countz = 0;
-                for jz = iz
-                    countz = countz + 1;
-                    g = ar.model(jm).plot(jplot).gz(jz);
->>>>>>> other
-                    
-<<<<<<< local
+
                     if(isfield(ar.model(jm), 'xNames') && ~isempty(ar.model(jm).xNames{jx}) && ...
                             ~strcmp(ar.model(jm).xNames{jx},ar.model(jm).x{jx}))
                         title(g, [myNameTrafo(ar.model(jm).xNames{jx}) ' (' myNameTrafo(ar.model(jm).x{jx}) ')']);
@@ -708,23 +649,7 @@ for jm = 1:length(ar.model)
                         else
                             if(logplotting_xaxis)
                                 xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
-=======
-                    set(g,'UserData',...
-                        struct('jm',jm,'jplot',jplot,'jx',jx, ...
-                        'dLink',ar.model(jm).plot(jplot).dLink, ...
-                        'cLink',clinks{jm}{jplot}, ...
-                        'model_name',ar.model(jm).name, ...
-                        'plot_name',ar.model(jm).plot(jplot).name ...
-                        ))
-                    
-                    if(~fastPlotTmp)
-                        hold(g, 'off');
-                        
-                        title(g, myNameTrafo(ar.model(jm).z{jz}));                            
-                        if(countz+nu+nx == (nrows-1)*ncols + 1)
-                            if(~ar.model(jm).plot(jplot).doseresponse)
-                                xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
->>>>>>> other
+
                             else
                                 xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
                             end
@@ -732,13 +657,22 @@ for jm = 1:length(ar.model)
                     end
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}));
                 end
-<<<<<<< local
+                
                 arSpacedAxisLimits(g, overplot);
             end
             countz = 0;
             for jz = iz
                 countz = countz + 1;
                 g = ar.model(jm).plot(jplot).gz(jz);
+                
+                set(g,'UserData',...
+                    struct('jm',jm,'jplot',jplot,'jx',jx, ...
+                    'dLink',ar.model(jm).plot(jplot).dLink, ...
+                    'cLink',clinks{jm}{jplot}, ...
+                    'model_name',ar.model(jm).name, ...
+                    'plot_name',ar.model(jm).plot(jplot).name ...
+                    ))
+                
                 if(~fastPlotTmp)
                     hold(g, 'off');
                     
@@ -757,12 +691,9 @@ for jm = 1:length(ar.model)
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2}));
                 end
                 arSpacedAxisLimits(g, overplot);
-=======
-                
->>>>>>> other
             end
             
-            if(exist('suptitle')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
+            if(exist('suptitle','file')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
                 suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
             end
 
