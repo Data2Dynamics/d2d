@@ -60,7 +60,10 @@ ar.config.useFitErrorCorrection = true;
 %  -1 = confidence bands 
 ar.config.ploterrors = 0;
 
-ar.config.plotter_sorted = false;
+% ar.config.plot_x_collected:
+%   0 = show seperate subplot for species and inputs
+%   1 = all in one
+ar.config.plot_x_collected = false;
 
 % optimization options
 ar.config.useSensis = true; 

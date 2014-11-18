@@ -38,7 +38,6 @@ else
     linesize = 2;
 end
 
-logplotting_xaxis = true;
 if(isfield(ar.config,'nfine_dr_plot'))
     nfine_dr_plot = ar.config.nfine_dr_plot;
     nfine_dr_method = ar.config.nfine_dr_method;
@@ -47,7 +46,15 @@ else
     nfine_dr_method = 'spline';
 end
 
+<<<<<<< local
+if(isfield(ar.config,'plot_x_collected'))
+    plot_x_collected = ar.config.plot_x_collected;
+else
+    plot_x_collected = false;
+end
+=======
 clinks = cell(size(ar.model));
+>>>>>>> other
 
 figcount = 1;
 for jm = 1:length(ar.model)
@@ -60,10 +67,20 @@ for jm = 1:length(ar.model)
                 [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['X: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
             end
             
+            if(isfield(ar.model(jm).plot(jplot), 'doseresponselog10xaxis'))
+                logplotting_xaxis = ar.model(jm).plot(jplot).doseresponselog10xaxis;
+            else
+                logplotting_xaxis = true;
+            end
+            
             % plotting
             ccount = 1;
             if(~ar.model(jm).plot(jplot).doseresponse)
-                cclegendstyles = zeros(1,length(ar.model(jm).plot(jplot).dLink));
+                if(plot_x_collected)
+                    cclegendstyles = zeros(1, length(ar.model(jm).u) + length(ar.model(jm).x) + length(ar.model(jm).z));
+                else
+                    cclegendstyles = zeros(1,length(ar.model(jm).plot(jplot).dLink));
+                end
                 
                 for jd = ar.model(jm).plot(jplot).dLink
                     [t, u, x, z, ulb, uub, xlb, xub, zlb, zub, jc, dxdt] = getData(jm, jd);
@@ -73,15 +90,28 @@ for jm = 1:length(ar.model)
                     [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm, rowstocols);
                     
                     Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount);
+                    
                     countu = 0;
                     for ju = iu
                         countu = countu + 1;
+                        if(plot_x_collected)
+                            Clines = arLineMarkersAndColors(countu, length(ar.model(jm).u) + length(ar.model(jm).x) + ...
+                                length(ar.model(jm).z), [], 'none');
+                        end
                         if(~fastPlotTmp)
-                            g = subplot(nrows,ncols,countu);
+                            if(plot_x_collected)
+                                g = subplot(1,1,1);
+                            else
+                                g = subplot(nrows,ncols,countu);
+                            end
                             ar.model(jm).plot(jplot).gu(ju) = g;
                             mySubplotStyle(g, labelfontsize, labelfonttype);
                             ltmp = plot(g, t, u(:,ju), Clines{:}, 'LineWidth', linesize);
-                            cclegendstyles(ccount) = ltmp;
+                            if(plot_x_collected)
+                                cclegendstyles(countu) = ltmp;
+                            else
+                                cclegendstyles(ccount) = ltmp;
+                            end
                             if(jd~=0)
                                 ar.model(jm).data(jd).plot.u(ju,jc) = ltmp;
                             else
@@ -107,8 +137,16 @@ for jm = 1:length(ar.model)
                     countx = 0;
                     for jx = ix
                         countx = countx + 1;
+                        if(plot_x_collected)
+                            Clines = arLineMarkersAndColors(countu+countx, length(ar.model(jm).u) + length(ar.model(jm).x) + ...
+                                length(ar.model(jm).z), [], 'none');
+                        end
                         if(~fastPlotTmp)
-                            g = subplot(nrows,ncols,countx+nu);
+                            if(plot_x_collected)
+                                g = subplot(1,1,1);
+                            else
+                                g = subplot(nrows,ncols,countx+nu);
+                            end
                             ar.model(jm).plot(jplot).gx(jx) = g;
                             mySubplotStyle(g, labelfontsize, labelfonttype);
                             
@@ -146,7 +184,11 @@ for jm = 1:length(ar.model)
                             end
                             
                             ltmp = plot(g, t, x(:,jx), Clines{:}, 'LineWidth', linesize);
-                            cclegendstyles(ccount) = ltmp;
+                            if(plot_x_collected)
+                                cclegendstyles(countu+countx) = ltmp;
+                            else
+                                cclegendstyles(ccount) = ltmp;
+                            end
                             if(jd~=0)
                                 ar.model(jm).data(jd).plot.x(jx,jc) = ltmp;
                             else
@@ -189,8 +231,16 @@ for jm = 1:length(ar.model)
                     countz = 0;
                     for jz = iz
                         countz = countz + 1;
+                        if(plot_x_collected)
+                            Clines = arLineMarkersAndColors(countu+countx+countz, length(ar.model(jm).u) + length(ar.model(jm).x) + ...
+                            length(ar.model(jm).z), [], 'none');
+                        end
                         if(~fastPlotTmp)
-                            g = subplot(nrows,ncols,countz+nu+nx);
+                            if(plot_x_collected)
+                                g = subplot(1,1,1);
+                            else
+                                g = subplot(nrows,ncols,countz+nu+nx);
+                            end
                             ar.model(jm).plot(jplot).gz(jz) = g;
                             mySubplotStyle(g, labelfontsize, labelfonttype);
                             
@@ -228,7 +278,11 @@ for jm = 1:length(ar.model)
                             end
                             
                             ltmp = plot(g, t, z(:,jz), Clines{:}, 'LineWidth', linesize);
-                            cclegendstyles(ccount) = ltmp;
+                            if(plot_x_collected)
+                                cclegendstyles(countu+countx+countz) = ltmp;
+                            else
+                                cclegendstyles(ccount) = ltmp;
+                            end
                             if(jd~=0)
                                 ar.model(jm).data(jd).plot.z(jz,jc) = ltmp;
                             else
@@ -267,7 +321,12 @@ for jm = 1:length(ar.model)
                     [conditions, iconditions, jconditions] = unique(ar.model(jm).plot(jplot).condition); %#ok<ASGLU>
                 end
                 
-                cclegendstyles = zeros(1,length(times)*length(conditions));
+                if(plot_x_collected)
+                    cclegendstyles = zeros(1, length(ar.model(jm).u) + length(ar.model(jm).x) + length(ar.model(jm).z));
+                else
+                    cclegendstyles = zeros(1,length(times)*length(conditions));
+                end
+                
                 for jt = 1:length(times)
                     if(isempty(conditions))
                         jcs = 1;
@@ -288,6 +347,10 @@ for jm = 1:length(ar.model)
                         countu = 0;
                         for ju = iu
                             countu = countu + 1;
+                            if(plot_x_collected)
+                                Clines = arLineMarkersAndColors(countu, length(ar.model(jm).u) + length(ar.model(jm).x) + ...
+                                    length(ar.model(jm).z), [], 'none');
+                            end
                             [t, u, lb, ub, zero_break] = getDataDoseResponseU(jm, ju, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
                             if(length(unique(t))==1)
                                 t = [t-0.1; t+0.1];
@@ -309,11 +372,19 @@ for jm = 1:length(ar.model)
                             end
                             
                             if(~fastPlotTmp)
-                                g = subplot(nrows,ncols,countu);
+                                if(plot_x_collected)
+                                    g = subplot(1,1,1);
+                                else
+                                    g = subplot(nrows,ncols,countu);
+                                end
                                 ar.model(jm).plot(jplot).gu(ju) = g;
                                 mySubplotStyle(g, labelfontsize, labelfonttype);
                                 ltmp = plot(g, t, u, Clines{:}, 'LineWidth', linesize);
-                                cclegendstyles(ccount) = ltmp;
+                                if(plot_x_collected)
+                                    cclegendstyles(countu) = ltmp;
+                                else
+                                    cclegendstyles(ccount) = ltmp;
+                                end
                                 ar.model(jm).data(jd).plot.u(ju,jt,jc) = ltmp;
                                 hold(g, 'on');
                                 if(ar.config.ploterrors == -1)
@@ -334,6 +405,10 @@ for jm = 1:length(ar.model)
                         countx = 0;
                         for jx = ix
                             countx = countx + 1;
+                            if(plot_x_collected)
+                                Clines = arLineMarkersAndColors(countu+countx, length(ar.model(jm).u) + length(ar.model(jm).x) + ...
+                                    length(ar.model(jm).z), [], 'none');
+                            end
                             [t, x, lb, ub, zero_break] = getDataDoseResponseX(jm, jx, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
                             if(length(unique(t))==1)
                                 t = [t-0.1; t+0.1];
@@ -355,11 +430,19 @@ for jm = 1:length(ar.model)
                             end
                             
                             if(~fastPlotTmp)
-                                g = subplot(nrows,ncols,countx+nu);
+                                if(plot_x_collected)
+                                    g = subplot(1,1,1);
+                                else
+                                    g = subplot(nrows,ncols,countx+nu);
+                                end
                                 ar.model(jm).plot(jplot).gx(jx) = g;
                                 mySubplotStyle(g, labelfontsize, labelfonttype);
                                 ltmp = plot(g, t, x, Clines{:}, 'LineWidth', linesize);
-                                cclegendstyles(ccount) = ltmp;
+                                if(plot_x_collected)
+                                    cclegendstyles(countu+countx) = ltmp;
+                                else
+                                    cclegendstyles(ccount) = ltmp;
+                                end
                                 ar.model(jm).data(jd).plot.x(jx,jt,jc) = ltmp;
                                 hold(g, 'on');
                                 if(ar.config.ploterrors == -1)
@@ -380,6 +463,10 @@ for jm = 1:length(ar.model)
                         countz = 0;
                         for jz = iz
                             countz = countz + 1;
+                            if(plot_x_collected)
+                                Clines = arLineMarkersAndColors(countu+countx+countz, length(ar.model(jm).u) + length(ar.model(jm).x) + ...
+                                    length(ar.model(jm).z), [], 'none');
+                            end
                             [t, z, lb, ub, zero_break] = getDataDoseResponseZ(jm, jz, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
                             if(length(unique(t))==1)
                                 t = [t-0.1; t+0.1];
@@ -401,11 +488,19 @@ for jm = 1:length(ar.model)
                             end
                             
                             if(~fastPlotTmp)
-                                g = subplot(nrows,ncols,countz+nu+nx);
+                                if(plot_x_collected)
+                                    g = subplot(1,1,1);
+                                else
+                                    g = subplot(nrows,ncols,countz+nu+nx);
+                                end
                                 ar.model(jm).plot(jplot).gz(jz) = g;
                                 mySubplotStyle(g, labelfontsize, labelfonttype);
                                 ltmp = plot(g, t, z, Clines{:}, 'LineWidth', linesize);
-                                cclegendstyles(ccount) = ltmp;
+                                if(plot_x_collected)
+                                    cclegendstyles(countu+countx+countz) = ltmp;
+                                else
+                                    cclegendstyles(ccount) = ltmp;
+                                end
                                 ar.model(jm).data(jd).plot.z(jz,jt,jc) = ltmp;
                                 hold(g, 'on');
                                 if(ar.config.ploterrors == -1)
@@ -429,14 +524,44 @@ for jm = 1:length(ar.model)
             end
             
             % axis & titles
-            for jd = ar.model(jm).plot(jplot).dLink
-                if(isfield(ar.model(jm), 'data'))
-                    for jc = 1:length(ar.model(jm).data(jd).condition)
-                        if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
-                            jcondi = jc;
-                        end
+            jd = ar.model(jm).plot(jplot).dLink(1);
+            if(isfield(ar.model(jm), 'data'))
+                for jc = 1:length(ar.model(jm).data(jd).condition)
+                    if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
+                        jcondi = jc;
                     end
                 end
+<<<<<<< local
+            end
+            countu = 0;
+            for ju = iu
+                countu = countu + 1;
+                g = ar.model(jm).plot(jplot).gu(ju);
+                if(~fastPlotTmp)
+                    hold(g, 'off');
+                    
+                    title(g, myNameTrafo(ar.model(jm).u{ju}));
+                    if(ju == 1)
+                        if(plot_x_collected)
+                            legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u ar.model(jm).x ar.model(jm).z]))
+                        else
+                            if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
+                                if(~ar.model(jm).plot(jplot).doseresponse)
+                                    if(length(ar.model(jm).plot(jplot).dLink)>1)
+                                        legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition))
+                                    end
+                                else
+                                    legendtmp = {};
+                                    ccount = 1;
+                                    for jt=1:length(times)
+                                        if(~isempty(conditions))
+                                            for jc = 1:length(conditions)
+                                                legendtmp{ccount} = sprintf('t=%g%s : %s', times(jt), ar.model(jm).tUnits{2}, conditions{jc}); %#ok<AGROW>
+                                                ccount = ccount + 1;
+                                            end
+                                        else
+                                            legendtmp{ccount} = sprintf('t=%g%s', times(jt), ar.model(jm).tUnits{2}); %#ok<AGROW>
+=======
                 countu = 0;
                 for ju = iu
                     countu = countu + 1;
@@ -467,31 +592,38 @@ for jm = 1:length(ar.model)
                                     if(~isempty(conditions))
                                         for jc = 1:length(conditions)
                                             legendtmp{ccount} = sprintf('t=%g%s : %s', times(jt), ar.model(jm).tUnits{2}, conditions{jc}); %#ok<AGROW>
+>>>>>>> other
                                             ccount = ccount + 1;
                                         end
-                                    else
-                                        legendtmp{ccount} = sprintf('t=%g%s', times(jt), ar.model(jm).tUnits{2}); %#ok<AGROW>
-                                        ccount = ccount + 1;
                                     end
-                                end
-                                legend(g, cclegendstyles, myNameTrafo(legendtmp))
-                            end
-                        end
-                        if(nx==0 && countu == (nrows-1)*ncols + 1)
-                            if(~ar.model(jm).plot(jplot).doseresponse)
-                                xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
-                            else
-                                if(logplotting_xaxis)
-                                    xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
-                                else
-                                    xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter))); %#ok<UNRCH>
+                                    legend(g, cclegendstyles, myNameTrafo(legendtmp))
                                 end
                             end
                         end
-                        ylabel(g, sprintf('%s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}));
                     end
-                    arSpacedAxisLimits(g, overplot);
+                    if(nx==0 && countu == (nrows-1)*ncols + 1)
+                        if(~ar.model(jm).plot(jplot).doseresponse)
+                            xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
+                        else
+                            if(logplotting_xaxis)
+                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                            else
+                                xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                            end
+                        end
+                    end
+                    ylabel(g, sprintf('%s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}));
                 end
+<<<<<<< local
+                arSpacedAxisLimits(g, overplot);
+            end
+            countx = 0;
+            for jx = ix
+                countx = countx + 1;
+                g = ar.model(jm).plot(jplot).gx(jx);
+                if(~fastPlotTmp)
+                    hold(g, 'off');
+=======
                 countx = 0;
                 for jx = ix
                     countx = countx + 1;
@@ -505,7 +637,30 @@ for jm = 1:length(ar.model)
                         'model_name',ar.model(jm).name, ...
                         'plot_name',ar.model(jm).plot(jplot).name ...
                         ))
+>>>>>>> other
                     
+<<<<<<< local
+                    if(nu == 0 && jx == 1)
+                        if(plot_x_collected)
+                            legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u ar.model(jm).x ar.model(jm).z]))
+                        else
+                            if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
+                                if(~ar.model(jm).plot(jplot).doseresponse)
+                                    if(length(ar.model(jm).plot(jplot).dLink)>1)
+                                        legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition))
+                                    end
+                                else
+                                    legendtmp = {};
+                                    ccount = 1;
+                                    for jt=1:length(times)
+                                        if(~isempty(conditions))
+                                            for jc = 1:length(conditions)
+                                                legendtmp{ccount} = sprintf('t=%g%s : %s', times(jt), ar.model(jm).tUnits{2}, conditions{jc}); %#ok<AGROW>
+                                                ccount = ccount + 1;
+                                            end
+                                        else
+                                            legendtmp{ccount} = sprintf('t=%g%s', times(jt), ar.model(jm).tUnits{2}); %#ok<AGROW>
+=======
                     if(~fastPlotTmp)
                         hold(g, 'off');
                         
@@ -521,43 +676,39 @@ for jm = 1:length(ar.model)
                                     if(~isempty(conditions))
                                         for jc = 1:length(conditions)
                                             legendtmp{ccount} = sprintf('t=%g%s : %s', times(jt), ar.model(jm).tUnits{2}, conditions{jc}); %#ok<AGROW>
+>>>>>>> other
                                             ccount = ccount + 1;
                                         end
-                                    else
-                                        legendtmp{ccount} = sprintf('t=%g%s', times(jt), ar.model(jm).tUnits{2}); %#ok<AGROW>
-                                        ccount = ccount + 1;
                                     end
-                                end
-                                legend(g, cclegendstyles, myNameTrafo(legendtmp))
-                            end
-                        end
-                        
-                        if(isfield(ar.model(jm), 'xNames') && ~isempty(ar.model(jm).xNames{jx}) && ...
-                                ~strcmp(ar.model(jm).xNames{jx},ar.model(jm).x{jx}))
-                            title(g, [myNameTrafo(ar.model(jm).xNames{jx}) ' (' myNameTrafo(ar.model(jm).x{jx}) ')']);
-                        else
-                            title(g, myNameTrafo(ar.model(jm).x{jx}));                            
-                        end
-                        if(countx+nu == (nrows-1)*ncols + 1)
-                            if(~ar.model(jm).plot(jplot).doseresponse)
-                                xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
-                            else
-                                if(logplotting_xaxis)
-                                    xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
-                                else
-                                    xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter))); %#ok<UNRCH>
+                                    legend(g, cclegendstyles, myNameTrafo(legendtmp))
                                 end
                             end
                         end
-                        ylabel(g, sprintf('%s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}));
                     end
+<<<<<<< local
+=======
                     arSpacedAxisLimits(g, overplot);
                 end
                 countz = 0;
                 for jz = iz
                     countz = countz + 1;
                     g = ar.model(jm).plot(jplot).gz(jz);
+>>>>>>> other
                     
+<<<<<<< local
+                    if(isfield(ar.model(jm), 'xNames') && ~isempty(ar.model(jm).xNames{jx}) && ...
+                            ~strcmp(ar.model(jm).xNames{jx},ar.model(jm).x{jx}))
+                        title(g, [myNameTrafo(ar.model(jm).xNames{jx}) ' (' myNameTrafo(ar.model(jm).x{jx}) ')']);
+                    else
+                        title(g, myNameTrafo(ar.model(jm).x{jx}));
+                    end
+                    if(countx+nu == (nrows-1)*ncols + 1)
+                        if(~ar.model(jm).plot(jplot).doseresponse)
+                            xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
+                        else
+                            if(logplotting_xaxis)
+                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+=======
                     set(g,'UserData',...
                         struct('jm',jm,'jplot',jplot,'jx',jx, ...
                         'dLink',ar.model(jm).plot(jplot).dLink, ...
@@ -573,19 +724,42 @@ for jm = 1:length(ar.model)
                         if(countz+nu+nx == (nrows-1)*ncols + 1)
                             if(~ar.model(jm).plot(jplot).doseresponse)
                                 xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
+>>>>>>> other
                             else
-                                if(logplotting_xaxis)
-                                    xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
-                                else
-                                    xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter))); %#ok<UNRCH>
-                                end
+                                xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
                             end
                         end
-                        ylabel(g, sprintf('%s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2}));
                     end
-                    arSpacedAxisLimits(g, overplot);
+                    ylabel(g, sprintf('%s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}));
                 end
+<<<<<<< local
+                arSpacedAxisLimits(g, overplot);
+            end
+            countz = 0;
+            for jz = iz
+                countz = countz + 1;
+                g = ar.model(jm).plot(jplot).gz(jz);
+                if(~fastPlotTmp)
+                    hold(g, 'off');
+                    
+                    title(g, myNameTrafo(ar.model(jm).z{jz}));
+                    if(countz+nu+nx == (nrows-1)*ncols + 1)
+                        if(~ar.model(jm).plot(jplot).doseresponse)
+                            xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
+                        else
+                            if(logplotting_xaxis)
+                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                            else
+                                xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter))); 
+                            end
+                        end
+                    end
+                    ylabel(g, sprintf('%s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2}));
+                end
+                arSpacedAxisLimits(g, overplot);
+=======
                 
+>>>>>>> other
             end
             
             if(exist('suptitle')==2) % suptitle function is available (can be downloaded from matlab fileexchange)

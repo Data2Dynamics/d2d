@@ -33,7 +33,6 @@ else
     linesize = 2;
 end
 
-logplotting_xaxis = true;
 if(isfield(ar.config,'nfine_dr_plot'))
     nfine_dr_plot = ar.config.nfine_dr_plot;
     nfine_dr_method = ar.config.nfine_dr_method;
@@ -54,6 +53,12 @@ for jm = 1:length(ar.model)
                     [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['CI-V: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
                 else
                     [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['V: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
+                end
+                
+                if(isfield(ar.model(jm).plot(jplot), 'doseresponselog10xaxis'))
+                    logplotting_xaxis = ar.model(jm).plot(jplot).doseresponselog10xaxis;
+                else
+                    logplotting_xaxis = true;
                 end
                 
                 % plotting
