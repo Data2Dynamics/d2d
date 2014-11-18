@@ -204,7 +204,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         
         target = {};
         str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
-        while(~strcmp(str{1},'CUSTOM') && ~strcmp(str{1},'MASSACTION'))
+        while(~strcmp(str{1},'CUSTOM') && ~strcmp(str{1},'MASSACTION') && ~strcmp(str{1},'MASSACTIONKD'))
             if(~strcmp(str{1},'0') && ~strcmp(str{1},'+'))
                 target(end+1) = str{1}; %#ok<AGROW>
             end
@@ -229,8 +229,13 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         
         if(strcmp(str{1},'MASSACTION'))
             massaction = true;
+            massactionkd = false;
         else
             massaction = false;
+        end
+        if(strcmp(str{1},'MASSACTIONKD'))
+            massaction = true;
+            massactionkd = true;
         end
         
         C = textscan(fid, '%q %q\n', 1, 'CommentStyle', ar.config.comment_string);
@@ -251,7 +256,11 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                     ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' source{j}];
                 end
             else
-                ar.model(m).fv{end+1,1} = [cell2mat(str{1}) '_1'];
+                if(massactionkd)
+                    ar.model(m).fv{end+1,1} = [cell2mat(str{1}) '_1*' cell2mat(str{1}) '_2'];
+                else
+                    ar.model(m).fv{end+1,1} = [cell2mat(str{1}) '_1'];
+                end
                 ar.model(m).fv_ma_reverse_pbasename{end} = cell2mat(str{1});
                 for j=1:length(source)
                     ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' source{j}];
