@@ -50,10 +50,28 @@ if(nargin>8 && ~isempty(stdp) && length(stdp)==1)
 end
 
 for j=1:length(pLabel)
-        q = ismember(ar.pLabel, pLabel(j)); %R2013a compatible
+    q = ismember(ar.pLabel, pLabel(j)); %R2013a compatible
     if(sum(q)==1)
         if(nargin>1 && ~isempty(p))
             ar.p(q) = p(j);
+            if(nargin>4 && ~isempty(lb))
+                if(p(j) < lb(j))
+                    error('trying to set p < lb');
+                end
+            else
+                if(p(j) < ar.lb(q))
+                    error('trying to set p < lb');
+                end
+            end
+            if(nargin>5 && ~isempty(ub))
+                if(p(j) > ub(j))
+                    error('trying to set p > ub');
+                end
+            else
+                if(p(j) > ar.ub(q))
+                    error('trying to set p > ub');
+                end
+            end
         end
         if(nargin>2 && ~isempty(qFit))
             ar.qFit(q) = qFit(j);
