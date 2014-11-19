@@ -553,9 +553,9 @@ for jm = 1:length(ar.model)
                     hold(g, 'off');
                     
                     title(g, myNameTrafo(ar.model(jm).u{ju}));
-                    if(ju == 1)
+                    if(ju == iu(1))
                         if(plot_x_collected)
-                            legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u ar.model(jm).x ar.model(jm).z]))
+                            legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
                         else
                             if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                                 if(~ar.model(jm).plot(jplot).doseresponse)
@@ -612,7 +612,7 @@ for jm = 1:length(ar.model)
                 
                 if(~fastPlotTmp)
                     hold(g, 'off');    
-                    if(nu == 0 && jx == 1)
+                    if(nu == 0 && jx == ix(1))
                         if(plot_x_collected)
                             legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
                         else
