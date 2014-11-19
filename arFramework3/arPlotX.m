@@ -523,6 +523,10 @@ for jm = 1:length(ar.model)
             end
             
             % axis & titles
+            if(exist('suptitle','file')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
+                suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
+            end
+            
             jd = ar.model(jm).plot(jplot).dLink(1);
             if(isfield(ar.model(jm), 'data'))
                 for jc = 1:length(ar.model(jm).data(jd).condition)
@@ -610,7 +614,7 @@ for jm = 1:length(ar.model)
                     hold(g, 'off');    
                     if(nu == 0 && jx == 1)
                         if(plot_x_collected)
-                            legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u ar.model(jm).x ar.model(jm).z]))
+                            legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
                         else
                             if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                                 if(~ar.model(jm).plot(jplot).doseresponse)
@@ -691,10 +695,6 @@ for jm = 1:length(ar.model)
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2}));
                 end
                 arSpacedAxisLimits(g, overplot);
-            end
-            
-            if(exist('suptitle','file')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
-                suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
             end
 
             if(saveToFile)
