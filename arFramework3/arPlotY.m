@@ -9,6 +9,8 @@
 %   After clicking the subplot of interest, the following command provides
 %   annotation of the displayed plot:
 %   get(gca,'UserData') 
+% 
+%   ar.model(jm).data(jd).highlight(jt,jy) can be used to highlight data points
 
 
 function arPlotY(saveToFile, fastPlot, doLegends)
@@ -78,7 +80,7 @@ for jm = 1:length(ar.model)
                     Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount);
                     
                     for jy = 1:ny
-                        [t, y, ystd, tExp, yExp, yExpStd, lb, ub] = getData(jm, jd, jy);
+                        [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl] = getData(jm, jd, jy);
                         if(~fastPlotTmp)
                             g = subplot(nrows,ncols,jy);
                             ar.model(jm).plot(jplot).gy(jy) = g;
@@ -104,7 +106,7 @@ for jm = 1:length(ar.model)
                                     end
                                     for jssa = 1:size(ar.model(jm).data(jd).yFineSSA, 3)
                                         plot(t, 10.^ar.model(jm).data(jd).yFineSSA(:,jy,jssa), 'Color', Clines{2}*0.4+0.6)
-                                        hold(g, 'on');
+                                        hold(g, 'on');                                        
                                     end
                                     if(size(ar.model(jm).data(jd).yFineSSA,3)>1)
                                         plot(t, 10.^mean(ar.model(jm).data(jd).yFineSSA(:,jy,:),3), '--', 'Color', Clines{2})
@@ -128,13 +130,24 @@ for jm = 1:length(ar.model)
                                     ar.model(jm).data(jd).plot.ystd(jy) = ltmp;
                                     ar.model(jm).data(jd).plot.ystd2(jy) = ltmp2;
                                 end
+
                                 
                                 if(isfield(ar.model(jm).data(jd), 'yExp'))
                                     if(ar.config.ploterrors ~= 1)
                                         plot(g, tExp, 10.^yExp, markerstyle, Clines{:});
+                                        if(sum(~isnan(yExpHl))>0)
+                                            hold(g,'on');
+                                            plot(g, tExp, 10.^yExpHl, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
+                                        end
+                                        
                                     else
                                         errorbar(g, tExp, 10.^yExp, ...
                                             10.^yExp - 10.^(yExp - yExpStd), 10.^(yExp + yExpStd) - 10.^yExp, markerstyle, Clines{:});
+                                        if(sum(~isnan(yExpHl))>0)
+                                            hold(g,'on');
+                                            errorbar(g, tExp, 10.^yExpHl, ...
+                                                10.^yExp - 10.^(yExp - yExpStd), 10.^(yExp + yExpStd) - 10.^yExp, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
+                                        end
                                     end
                                 end
                             else
@@ -188,8 +201,16 @@ for jm = 1:length(ar.model)
                                 if(isfield(ar.model(jm).data(jd), 'yExp'))
                                     if(ar.config.ploterrors ~= 1)
                                         plot(g, tExp, yExp, markerstyle, Clines{:});
+                                        if(sum(~isnan(yExpHl))>0)
+                                            hold(g,'on');
+                                            plot(g, tExp, yExpHl, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
+                                        end
                                     else
                                         errorbar(g, tExp, yExp, yExpStd, markerstyle, Clines{:});
+                                        if(sum(~isnan(yExpHl))>0)
+                                            hold(g,'on');
+                                            errorbar(g, tExp, yExpHl, yExpStd, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
+                                        end
                                     end
                                 end
                             end
@@ -268,7 +289,7 @@ for jm = 1:length(ar.model)
                         Clines = myLineStyle(length(times)*length(jcs), ccount);
                         
                         for jy = 1:ny
-                            [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit] = ...
+                            [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
                                 getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
                             if(length(unique(t))==1)
                                 t = [t-0.1; t+0.1];
@@ -327,9 +348,14 @@ for jm = 1:length(ar.model)
                                     if(isfield(ar.model(jm).data(jd), 'yExp'))
                                         if(ar.config.ploterrors~=1)
                                             plot(g, tExp, 10.^yExp, markerstyle, Clines{:});
+                                            hold(g,'on');
+                                            plot(g, tExp, 10.^yExpHl, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
                                         else
                                             errorbar(g, tExp, 10.^yExp, 10.^yExp - 10.^(yExp - yExpStd), ...
                                                 10.^(yExp + yExpStd) - 10.^yExp, markerstyle, Clines{:});
+                                            hold(g,'on');
+                                            errorbar(g, tExp, 10.^yExpHl, 10.^yExp - 10.^(yExp - yExpStd), ...
+                                                10.^(yExp + yExpStd) - 10.^yExp, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
                                         end
                                     end
                                 else
@@ -355,8 +381,12 @@ for jm = 1:length(ar.model)
                                     if(isfield(ar.model(jm).data(jd), 'yExp'))
                                         if(ar.config.ploterrors~=1)
                                             plot(g, tExp, yExp, markerstyle, Clines{:});
+                                            hold(g,'on');
+                                            plot(g, tExp, yExpHl, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);                                            
                                         else
                                             errorbar(g, tExp, yExp, yExpStd, markerstyle, Clines{:});
+                                            hold(g,'on')
+                                            errorbar(g, tExp, yExp, yExpStd, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
                                         end
                                     end
                                 end
@@ -530,7 +560,7 @@ end
 
 
 
-function [t, y, ystd, tExp, yExp, yExpStd, lb, ub] = getData(jm, jd, jy)
+function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl] = getData(jm, jd, jy)
 global ar
 
 if(isfield(ar.model(jm).data(jd),'tFine'))
@@ -554,10 +584,18 @@ if(isfield(ar.model(jm).data(jd), 'yExp') && ~isempty(ar.model(jm).data(jd).yExp
             yExpStd = nan;
         end
     end
+    if(isfield(ar.model(jm).data(jd),'highlight'))
+        hl = ar.model(jm).data(jd).highlight(:,jy);
+    else
+        hl = zeros(size(yExp));
+    end
+    yExpHl = yExp;
+    yExpHl(hl==0) = NaN;
 else
     tExp = [];
     yExp = [];
 	yExpStd = [];
+    yExpHl = [];
 end
 if(isfield(ar.model(jm).data(jd), 'yFineLB'))
 	lb = ar.model(jm).data(jd).yFineLB(:,jy);
@@ -566,10 +604,13 @@ else
 	lb = [];
 	ub = [];
 end
+if(sum(abs(size(yExp)-size(yExpHl)))>0)
+    error('')
+end
 
 
 
-function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit] = ...
+function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
     getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
 global ar
 
@@ -618,6 +659,12 @@ for jd = ds
         ystd(ccount,1) = ar.model(jm).data(jd).ystdFineSimu(jtfine,jy); %#ok<AGROW>
         
         yExp(ccount,1) = ar.model(jm).data(jd).yExp(jt,jy); %#ok<AGROW>
+        yExpHl(ccount,1) = NaN;
+        if(isfield(ar.model(jm).data(jd),'highlight'))
+            if(ar.model(jm).data(jd).highlight(jt,jy)~=0)
+                yExpHl(ccount,1) = yExp(ccount,1);                
+            end
+        end
         if(ar.config.fiterrors == -1)
             yExpStd(ccount,1) = ar.model(jm).data(jd).yExpStd(jt,jy); %#ok<AGROW>
         else
@@ -630,13 +677,14 @@ for jd = ds
             lb = [];
             ub = [];
         end
-        
+                
         ccount = ccount + 1;
     end
 end
 
 [tExp,itexp] = sort(tExp);
 yExp = yExp(itexp);
+yExpHl = yExpHl(itexp);
 
 [t,it] = sort(t);
 y = y(it);
