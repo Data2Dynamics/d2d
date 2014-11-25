@@ -435,6 +435,11 @@ for jm = 1:length(ar.model)
             end
             
             % axis & titles
+            
+            if(exist('suptitle')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
+                suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
+            end
+            
             for jc = 1:length(ar.model(jm).data(jd).condition)
                 if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
                     jcondi = jc;
@@ -534,10 +539,6 @@ for jm = 1:length(ar.model)
                     'fystd',ar.model(jm).data(jd).fystd{jy} ...                    
                     ))
                 arSpacedAxisLimits(g, overplot);
-            end
-            
-            if(exist('suptitle')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
-                suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
             end
             
             ar.model(jm).plot(jplot).chi2 = sum(chi2);
