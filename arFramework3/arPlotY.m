@@ -348,14 +348,18 @@ for jm = 1:length(ar.model)
                                     if(isfield(ar.model(jm).data(jd), 'yExp'))
                                         if(ar.config.ploterrors~=1)
                                             plot(g, tExp, 10.^yExp, markerstyle, Clines{:});
-                                            hold(g,'on');
-                                            plot(g, tExp, 10.^yExpHl, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
+                                            if(sum(~isnan(yExpHl))>0)
+                                                hold(g,'on');
+                                                plot(g, tExp, 10.^yExpHl, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
+                                            end
                                         else
                                             errorbar(g, tExp, 10.^yExp, 10.^yExp - 10.^(yExp - yExpStd), ...
                                                 10.^(yExp + yExpStd) - 10.^yExp, markerstyle, Clines{:});
-                                            hold(g,'on');
-                                            errorbar(g, tExp, 10.^yExpHl, 10.^yExp - 10.^(yExp - yExpStd), ...
-                                                10.^(yExp + yExpStd) - 10.^yExp, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
+                                            if(sum(~isnan(yExpHl))>0)
+                                                hold(g,'on');
+                                                errorbar(g, tExp, 10.^yExpHl, 10.^yExp - 10.^(yExp - yExpStd), ...
+                                                    10.^(yExp + yExpStd) - 10.^yExp, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
+                                            end
                                         end
                                     end
                                 else
@@ -381,12 +385,16 @@ for jm = 1:length(ar.model)
                                     if(isfield(ar.model(jm).data(jd), 'yExp'))
                                         if(ar.config.ploterrors~=1)
                                             plot(g, tExp, yExp, markerstyle, Clines{:});
-                                            hold(g,'on');
-                                            plot(g, tExp, yExpHl, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);                                            
+                                            if(sum(~isnan(yExpHl))>0)
+                                                hold(g,'on');
+                                                plot(g, tExp, yExpHl, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);                                            
+                                            end
                                         else
                                             errorbar(g, tExp, yExp, yExpStd, markerstyle, Clines{:});
-                                            hold(g,'on')
-                                            errorbar(g, tExp, yExp, yExpStd, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
+                                            if(sum(~isnan(yExpHl))>0)
+                                                hold(g,'on')
+                                                errorbar(g, tExp, yExp, yExpStd, markerstyle, Clines{:},'LineWidth',2,'MarkerSize',10);
+                                            end
                                         end
                                     end
                                 end
@@ -613,6 +621,7 @@ end
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
     getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
 global ar
+
 
 zero_break = [];
 data_qFit = true;
