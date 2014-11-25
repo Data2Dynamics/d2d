@@ -436,7 +436,7 @@ for jm = 1:length(ar.model)
             
             % axis & titles
             
-            if(exist('suptitle')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
+            if(~fastPlotTmp && exist('suptitle','file')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
                 suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
             end
             
