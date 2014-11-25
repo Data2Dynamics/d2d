@@ -12,7 +12,7 @@ if(zeigen)
     
     for j=1:length(liste)
         anno = readParameterAnnotation(liste{j});
-        fprintf(['#%3i : %',num2str(maxlen),'s  %s\n'], j, liste{j},anno);
+        fprintf(['#%3i : %-',num2str(maxlen),'s  %s\n'], j, liste{j}, anno);
     end
 end
 
