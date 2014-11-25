@@ -259,12 +259,14 @@ for m=1:length(ar.model)
         ar.model(m).condition(c).svFineSimu = [];
         ar.model(m).condition(c).sxFineSimu_dim = size(ar.model(m).condition(c).sxFineSimu);
         ar.model(m).condition(c).sxFineSimu = [];
-        ar.model(m).condition(c).suExpSimu_dim = size(ar.model(m).condition(c).suExpSimu);
-        ar.model(m).condition(c).suExpSimu = [];
-        ar.model(m).condition(c).svExpSimu_dim = size(ar.model(m).condition(c).svExpSimu);
-        ar.model(m).condition(c).svExpSimu = [];
-        ar.model(m).condition(c).sxExpSimu_dim = size(ar.model(m).condition(c).sxExpSimu);
-        ar.model(m).condition(c).sxExpSimu = [];
+        if(isfield(ar.model(m), 'data'))
+            ar.model(m).condition(c).suExpSimu_dim = size(ar.model(m).condition(c).suExpSimu);
+            ar.model(m).condition(c).suExpSimu = [];
+            ar.model(m).condition(c).svExpSimu_dim = size(ar.model(m).condition(c).svExpSimu);
+            ar.model(m).condition(c).svExpSimu = [];
+            ar.model(m).condition(c).sxExpSimu_dim = size(ar.model(m).condition(c).sxExpSimu);
+            ar.model(m).condition(c).sxExpSimu = [];
+        end
     end
 end
 
