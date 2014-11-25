@@ -65,9 +65,11 @@ if(isempty(ar.config.savepath))
     ar2.type = ar.type;
     ar2.mean = ar.mean;
     ar2.std = ar.std;
-    ar2.chi2fit = ar.chi2fit;
-    ar2.ndata = ar.ndata;
-    ar2.nprior = ar.nprior;
+    try
+        ar2.chi2fit = ar.chi2fit;
+        ar2.ndata = ar.ndata;
+        ar2.nprior = ar.nprior;
+    end
     ar2.config.fiterrors = ar.config.fiterrors;
     
     arSaveParOnly(ar2, ar.config.savepath);
