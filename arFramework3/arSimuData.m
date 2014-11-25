@@ -13,19 +13,33 @@ if(isempty(ar))
     error('please initialize by arInit')
 end 
 
-if(~exist('m','var'))
+if ~exist('tpoints','var')
+    tpoints = [];
+end
+
+if(~exist('m','var') | isempty(m))
     for jm=1:length(ar.model) 
         arSimuData(tpoints, jm);
     end
     return
-else
+else % m index provided:
     if(~exist('d','var'))
         for jd=1:length(ar.model(m).data)
             arSimuData(tpoints, m, jd);
         end
         return
+    elseif(length(d)>1)
+        for jd=d
+            arSimuData(tpoints, m, jd);
+        end     
+        return
     end
 end
+
+if(isempty(tpoints))
+    tpoints = ar.model(m).data(d).tExp;
+end
+
 
 ar.model(m).data(d).tExp = sort(tpoints(:));
 ar.model(m).data(d).yExp = zeros(length(tpoints), length(ar.model(m).data(d).y));
@@ -42,6 +56,7 @@ ar.pTrue = ar.p;
 % simulate data
 ar.model(m).data(d).yExp = ar.model(m).data(d).yExpSimu + ...
     randn(size(ar.model(m).data(d).yExpSimu)) .* ar.model(m).data(d).ystdExpSimu;
+ar.model(m).data(d).yExpStd = ar.model(m).data(d).ystdExpSimu;
 
 ar.model(m).data(d).tLim = ar.model(m).data(d).tLimExp;
 arLink(true);
