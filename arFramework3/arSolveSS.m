@@ -1,12 +1,12 @@
 % solve steady state condition
 %
-% arSolveSS(m, c, fu)
+% arSolveSS(m, fu, fextra)
 %
-% m:    model index
-% c:    condition index
-% fu:   custom initial input
+% m:        model index
+% fu:       custom initial input
+% fextra:   additional equations
 
-function arSolveSS(m, fu)
+function arSolveSS(m, fu, fextra)
 
 global ar
 
@@ -48,7 +48,11 @@ for j=1:length(fp)
 end
 fprintf('\n---\n');
 
-ar.model(m).ss_solution = solve(fstrings{:}, fp{:});
+if(exist('fextra','var'))
+    ar.model(m).ss_solution = solve(fstrings{:}, fextra{:}, fp{:});
+else
+    ar.model(m).ss_solution = solve(fstrings{:}, fp{:});
+end
 
 if(~isempty(ar.model(m).ss_solution))
     fprintf('---\n');
@@ -65,12 +69,14 @@ if(~isempty(ar.model(m).ss_solution))
 end
 
 % better subs
-function out = mysubs(in, old, new, flag)
-if(~exist('flag','var'))
-    flag = 0;
-end
+function out = mysubs(in, old, new)
 if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    out = subs(in, old(:), new(:), flag);
+    matVer = ver('MATLAB');
+    if(str2double(matVer.Version)>=8.1)
+        out = subs(in, old(:), new(:));
+    else
+        out = subs(in, old(:), new(:), 0);
+    end
 else
     out = in;
 end
