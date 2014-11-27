@@ -45,6 +45,8 @@ if(nargin == 1)
     return
 end
 
+pleClearNaNs(jk)
+
 if(samplesize>0)
     updowntag = 'upper';
     lastchi2 = pleGlobals.chi2s{jk}(end);

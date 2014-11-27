@@ -61,7 +61,7 @@ for jp=1:np
     end
     
     ar.p = ps(jp,:) + 0;
-%     try
+    try
 % 		arFitObs(true);
         arSimu(false, true);
         arSimu(false, false);
@@ -472,9 +472,9 @@ for jp=1:np
                 end
             end
         end
-%     catch exception
-%         fprintf('ERROR for parameter set #%i: %s\n', jp, exception.message);
-%     end
+    catch exception
+        fprintf('ERROR for parameter set #%i: %s\n', jp, exception.message);
+    end
 end
 
 figcount = 1;

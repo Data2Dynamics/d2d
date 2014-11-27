@@ -2,7 +2,7 @@
 
 function pleCompare(ples, labels, savetofile)
 
-if(nargin==0) || (isempty(ples) || labels)
+if(nargin==0) || (isempty(ples) || isempty(labels))
     filenames = fileChooserMulti('./Results', true);
     
     ples = {};
@@ -31,8 +31,8 @@ for j=1:length(ples)
     pLabels = union(pLabels, ples{j}.p_labels(qq)); %R2013a compatible
 end
 
-ncols = ceil(length(pLabels)^(0.4))+1;
-nrows = ceil(length(pLabels)/ncols);
+ncols = ceil((length(pLabels)+1)^(0.4))+1;
+nrows = ceil((length(pLabels)+1)/ncols);
 
 h = figure(1);
 set(h, 'Color', [1 1 1]);
@@ -82,11 +82,16 @@ for j=1:length(pLabels)
     else
         ylabel('')
     end
+    set(gca, 'YTickLabel', {})
     
     if(j == length(pLabels))
-        legend(hs, strrep(labels,'_','\_'), strrep(labels,'_','\_'),'Location','SouthOutside');
+        subplot(nrows,ncols,j+1)
+        mypos = get(gca,'Position');
+        myleg = legend(hs, strrep(labels,'_','\_'), strrep(labels,'_','\_'));
+        legpos = get(myleg,'Position');
+        set(myleg,'Position',[mypos(1) mypos(2)+mypos(4)-legpos(4) legpos(3:4)])
+        set(gca,'Visible','off')
     end
-    set(gca, 'YTickLabel', {})
 end
 
 if ~exist('savetofile','var')
