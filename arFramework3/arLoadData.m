@@ -611,8 +611,12 @@ if(sum(qcond) > 0)
                 end
                 qcondjj = ~strcmp(ar.model(m).data(d).p, ar.model(m).data(d).fp');
                 if(~isnan(str2double(condis{j,jj})))
-                    ar.model(m).data(d).fp(qcondjj) = strrep(ar.model(m).data(d).fp(qcondjj), ...
-                        condi_header{jj}, condis{j,jj});
+                    tmpfp = subs(sym(ar.model(m).data(d).fp(qcondjj)), ...
+                        sym(condi_header{jj}), sym(condis{j,jj}));
+                    jps = find(qcondjj);
+                    for jp = 1:length(jps)
+                        ar.model(m).data(d).fp{jps(jp)} = char(tmpfp(jp));
+                    end
                 end
                 
                 ar.model(m).data(d).condition(jj).parameter = condi_header{jj};
