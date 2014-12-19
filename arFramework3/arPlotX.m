@@ -75,6 +75,9 @@ for jm = 1:length(ar.model)
             % plotting
             ccount = 1;
             if(~ar.model(jm).plot(jplot).doseresponse)
+                % rows and cols
+                [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm, rowstocols);
+                
                 if(plot_x_collected)
                     cclegendstyles = zeros(1, length(ar.model(jm).u) + length(ar.model(jm).x) + length(ar.model(jm).z));
                 else
@@ -85,8 +88,6 @@ for jm = 1:length(ar.model)
                     [t, u, x, z, ulb, uub, xlb, xub, zlb, zub, jc, dxdt] = getData(jm, jd);
                     
                     clinks{jm}{jplot} = [clinks{jm}{jplot},jc];
-                    % rows and cols
-                    [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm, rowstocols);
                     
                     Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount);
                     
@@ -321,7 +322,7 @@ for jm = 1:length(ar.model)
                 end
                 
                 if(plot_x_collected)
-                    cclegendstyles = zeros(1, length(ar.model(jm).u) + length(ar.model(jm).x) + length(ar.model(jm).z));
+                    cclegendstyles = zeros(1, length(iu) + length(ix) + length(iz));
                 else
                     cclegendstyles = zeros(1,length(times)*length(conditions));
                 end
@@ -681,6 +682,36 @@ for jm = 1:length(ar.model)
                     hold(g, 'off');
                     
                     title(g, myNameTrafo(ar.model(jm).z{jz}));
+                    
+                    if(nu == 0 && nx == 0 && jz == iz(1))
+                        if(plot_x_collected)
+                            legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
+                        else
+                            if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
+                                if(~ar.model(jm).plot(jplot).doseresponse)
+                                    if(length(ar.model(jm).plot(jplot).dLink)>1)
+                                        legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition))
+                                    end
+                                else
+                                    legendtmp = {};
+                                    ccount = 1;
+                                    for jt=1:length(times)
+                                        if(~isempty(conditions))
+                                            for jc = 1:length(conditions)
+                                                legendtmp{ccount} = sprintf('t=%g%s : %s', times(jt), ar.model(jm).tUnits{2}, conditions{jc}); %#ok<AGROW>
+                                                ccount = ccount + 1;
+                                            end
+                                        else
+                                            legendtmp{ccount} = sprintf('t=%g%s', times(jt), ar.model(jm).tUnits{2}); %#ok<AGROW>
+                                            ccount = ccount + 1;
+                                        end
+                                    end
+                                    legend(g, cclegendstyles, myNameTrafo(legendtmp))
+                                end
+                            end
+                        end
+                    end
+                    
                     if(countz+nu+nx == (nrows-1)*ncols + 1)
                         if(~ar.model(jm).plot(jplot).doseresponse)
                             xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
