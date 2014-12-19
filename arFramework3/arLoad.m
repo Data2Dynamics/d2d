@@ -8,6 +8,10 @@ arCheck;
 global ar
 global pleGlobals
 
+% set the two variables also as global in the command line workspace:
+evalin('base','clear ar pleGlobals');  
+evalin('base','global ar pleGlobals');  
+
 if(~exist('filename', 'var') || isempty(filename))
     [~, filename] = fileChooser('./Results', 1, true);
 elseif(isnumeric(filename)) % filename is the file-number
