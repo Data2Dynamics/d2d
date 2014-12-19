@@ -17,7 +17,7 @@ try
 	arFit(silent);
 catch err
     ar.qFit = qFitReset;
-    error(err.message)
+    rethrow(err)
 end
 
 ar.qFit = qFitReset;
