@@ -50,6 +50,8 @@ int    parallel;
 int    sensirhs;
 int    fiterrors;
 int    cvodes_maxsteps;
+int    cvodes_atolV;
+int    cvodes_atolV_Sens;
 double cvodes_rtol;
 double cvodes_atol;
 double fiterrors_correction;
@@ -116,6 +118,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     parallel = (int) mxGetScalar(mxGetField(arconfig, 0, "useParallel"));
     jacobian = (int) mxGetScalar(mxGetField(arconfig, 0, "useJacobian"));
     sensirhs = (int) mxGetScalar(mxGetField(arconfig, 0, "useSensiRHS"));
+    cvodes_atolV = (int) mxGetScalar(mxGetField(arconfig, 0, "atolV"));
+    cvodes_atolV_Sens = (int) mxGetScalar(mxGetField(arconfig, 0, "atolV_Sens"));
     cvodes_rtol = mxGetScalar(mxGetField(arconfig, 0, "rtol"));
     cvodes_atol = mxGetScalar(mxGetField(arconfig, 0, "atol"));
     cvodes_maxsteps = (int) mxGetScalar(mxGetField(arconfig, 0, "maxsteps"));
@@ -216,11 +220,11 @@ void x_calc(int im, int ic) {
     mxArray *dLink;
     double *dLinkints;      
     
-    int nm, nc, id, nd, has_tExp;
+    int nm, nc, id, nd, has_tExp, has_yExp;
     int flag;
     int is, js, ks, ids;
-    int nout, neq;
-    int nu, np, nps, nv;
+    int nout, neq, nyout;
+    int nu, np, nps, nv, ny;
     
     void *cvode_mem;
     UserData data;
@@ -228,7 +232,10 @@ void x_calc(int im, int ic) {
     realtype t;
     double tstart;
     N_Vector x;
+    N_Vector atolV;
     N_Vector atols_ss;
+    N_Vector *atolV_ss;
+    realtype *atolV_tmp;
     N_Vector *sx;
     realtype *sxtmp;
     
@@ -256,6 +263,12 @@ void x_calc(int im, int ic) {
     double *returnsx;
     double *returndxdt;
     double *returnddxdtdp;
+
+    double *y;
+    double *yExp;
+    double *yStd;
+    double *y_scale;
+    double *y_max_scale;
     
     int sensi_meth = CV_SIMULTANEOUS; /* CV_SIMULTANEOUS or CV_STAGGERED */
     bool error_corr = TRUE;
@@ -325,6 +338,7 @@ void x_calc(int im, int ic) {
                 returnu = mxGetData(mxGetField(arcondition, ic, "uFineSimu"));
                 returnv = mxGetData(mxGetField(arcondition, ic, "vFineSimu"));
                 returnx = mxGetData(mxGetField(arcondition, ic, "xFineSimu"));
+		y_max_scale = mxGetData(mxGetField(arcondition, ic, "y_atol"));
                 if (sensi == 1) {
                     returnsu = mxGetData(mxGetField(arcondition, ic, "suFineSimu"));
                     returnsv = mxGetData(mxGetField(arcondition, ic, "svFineSimu"));
@@ -338,6 +352,45 @@ void x_calc(int im, int ic) {
                 returnu = mxGetData(mxGetField(arcondition, ic, "uExpSimu"));
                 returnv = mxGetData(mxGetField(arcondition, ic, "vExpSimu"));
                 returnx = mxGetData(mxGetField(arcondition, ic, "xExpSimu"));
+		y_max_scale = mxGetData(mxGetField(arcondition, ic, "y_atol"));
+		/* Scaling part, take Residuals and y_scale from last iter */
+	      if(ardata!=NULL && (cvodes_atolV ==1 || cvodes_atolV_Sens==1) && neq>0){  
+		dLink = mxGetField(arcondition, ic, "dLink");
+		dLinkints = mxGetData(dLink);
+		nd = (int) mxGetNumberOfElements(dLink);
+		/* loop over data */
+		for(ids=0; ids<nd; ++ids){
+		  id = ((int) dLinkints[ids]) - 1;
+		  has_yExp = (int) mxGetScalar(mxGetField(ardata, id, "has_yExp"));
+		  if(has_yExp == 1) {
+		    y = mxGetData(mxGetField(ardata, id, "yExpSimu"));
+		    ny = (int) mxGetNumberOfElements(mxGetField(ardata, id, "y"));
+		    yExp = mxGetData(mxGetField(ardata, id, "yExp"));
+		    yStd = mxGetData(mxGetField(ardata, id, "ystdExpSimu"));
+		    nyout = (int) mxGetNumberOfElements(mxGetField(ardata, id, "tExp"));
+		    if(fiterrors==-1) yStd = mxGetData(mxGetField(ardata, id, "yExpStd"));
+		    y_scale = mxGetData(mxGetField(ardata, id, "y_scale"));
+		    
+		    for(is=0; is<neq; is++){
+		      for(js=0; js<nyout; js++){
+			for(ks=0; ks<ny; ks++){
+			   
+			  if(!mxIsNaN(yExp[js + (ks*nyout)]) && !mxIsNaN(y[js + (ks*nyout)]) && !mxIsNaN(yStd[js + (ks*nyout)]) && yStd[js + (ks*nyout)]>0.) {
+			    y_scale[js+ks*nyout+is*nyout*ny] = y_scale[js+ks*nyout+is*nyout*ny] * 2* abs(yExp[js + (ks*nyout)] - y[js + (ks*nyout)]) / pow(yStd[js + (ks*nyout)],2) * sqrt(fiterrors_correction);
+			  }
+			  
+			  if(abs(y_scale[js+ks*nyout+is*nyout*ny])>y_max_scale[is] && !mxIsNaN(y_scale[js+ks*nyout+is*nyout*ny]))
+			    y_max_scale[is] = abs(y_scale[js+ks*nyout+is*nyout*ny]);
+			  /*printf("y_scale old = %f and scale for neq %i, t %i, y %i, thus %i is = %f \n", y_max_scale[is], is, js, ks, js+ks*nout+is*nout*ny, y_scale[js+ks*nout+is*nout*ny]); */
+			  
+			}
+		      }
+		    }
+		    
+		  }
+		  
+		}
+	      }
                 if (sensi == 1) {
                     returnsu = mxGetData(mxGetField(arcondition, ic, "suExpSimu"));
                     returnsv = mxGetData(mxGetField(arcondition, ic, "svExpSimu"));
@@ -392,7 +445,27 @@ void x_calc(int im, int ic) {
                 if(flag < 0) {status[0] = 15; return;}
                 
                 /* Use private function to compute error weights */
-                flag = CVodeSStolerances(cvode_mem, RCONST(cvodes_rtol), RCONST(cvodes_atol));
+		atolV = N_VNew_Serial(neq);
+		if (atolV == NULL) {status[0] = 2; return;}
+		for (is=0; is<neq; is++) Ith(atolV, is+1) = 0.0;
+		 
+		if(cvodes_atolV==1)   { 		 
+		  for(ks=0; ks < neq; ks++) {		    
+		    if(y_max_scale[ks]==0 || y_max_scale[ks]<1){
+		      Ith(atolV, ks+1) = cvodes_atol;
+		    }else if(y_max_scale[ks]>1e6){
+		      Ith(atolV, ks+1) = cvodes_atol * 1e-6;			  
+		    }else if(y_max_scale[ks]>1 && y_max_scale[ks]<1e6){
+		      Ith(atolV, ks+1) = 1./y_max_scale[ks]*cvodes_atol;
+		    }else{
+		      Ith(atolV, ks+1) = cvodes_atol;
+		    }
+		    /* printf("atolV for neq=%i is %d \n", ks, Ith(atolV, ks+1)); */
+		  }		  
+		  flag = CVodeSVtolerances(cvode_mem, RCONST(cvodes_rtol), atolV);
+		}else{                
+		  flag = CVodeSStolerances(cvode_mem, RCONST(cvodes_rtol), RCONST(cvodes_atol));
+		}
                 if (flag < 0) {status[0] = 5; return;}
                 
                 /* Attach user data */
@@ -454,7 +527,36 @@ void x_calc(int im, int ic) {
                     if (atols_ss == NULL) {return;}
                     for (is=0; is<np; is++) Ith(atols_ss, is+1) = cvodes_atol;
                     
-                    flag = CVodeSensSStolerances(cvode_mem, RCONST(cvodes_rtol), N_VGetArrayPointer(atols_ss));
+                    atolV_ss = N_VCloneVectorArray_Serial(nps, x);
+		    if (atolV_ss == NULL) {status[0] = 9; return;}
+		    for(js=0; js < nps; js++) {
+		      atolV_tmp = NV_DATA_S(atolV_ss[js]);
+		      for(ks=0; ks < neq; ks++) {
+			atolV_tmp[ks] = 0.0;
+		      }
+                    }
+
+		    if(cvodes_atolV_Sens==1)   { 
+		      
+		      for(js=0; js < nps; js++) {
+                        atolV_tmp = NV_DATA_S(atolV_ss[js]);
+                        for(ks=0; ks < neq; ks++) {
+			  if(y_max_scale[ks]==0. || y_max_scale[ks]<1){
+			    atolV_tmp[ks] = cvodes_atol;
+			  }else if(y_max_scale[ks]>1e6){
+			    atolV_tmp[ks] = cvodes_atol*1e-6;			  
+			  }else if(y_max_scale[ks]<1e6 && y_max_scale[ks]>1){
+                            atolV_tmp[ks] = 1./y_max_scale[ks]*cvodes_atol;
+			  }else{
+			    atolV_tmp[ks] = cvodes_atol;
+			  }			  
+			  /* printf("atolV_ss for neq=%i is %f\n", ks, atolV_tmp[ks]); */
+                        }
+		      }                                       		    
+		      flag = CVodeSensSVtolerances(cvode_mem, RCONST(cvodes_rtol), atolV_ss);
+		    }else{
+		      flag = CVodeSensSStolerances(cvode_mem, RCONST(cvodes_rtol), N_VGetArrayPointer(atols_ss));
+		    }
                     if(flag < 0) {status[0] = 11; return;}
                     
                     flag = CVodeSetSensErrCon(cvode_mem, error_corr);
@@ -541,8 +643,11 @@ void x_calc(int im, int ic) {
             /* Free memory */
             if(neq>0) {
                 N_VDestroy_Serial(x);
+		 N_VDestroy_Serial(atolV);
                 if (sensi == 1) {
                     N_VDestroyVectorArray_Serial(sx, nps);
+		    N_VDestroy_Serial(atols_ss);
+		    N_VDestroyVectorArray_Serial(atolV_ss, nps);
                 }
                 CVodeFree(&cvode_mem);
             }
@@ -753,7 +858,7 @@ void z_calc(int im, int ic, mxArray *arcondition) {
     
     /* printf("computing model #%i, condition #%i, derived variables\n", im, ic); */
     
-    int nt, np;
+  int nt, np, nx;
     int it;
             
     double *t;
@@ -765,6 +870,7 @@ void z_calc(int im, int ic, mxArray *arcondition) {
     double *su;
     double *sx;
     double *sz;
+    double *dzdx;
     
     /* MATLAB values */
     if(fine == 1){
@@ -787,6 +893,7 @@ void z_calc(int im, int ic, mxArray *arcondition) {
         u = mxGetData(mxGetField(arcondition, ic, "uExpSimu"));
         x = mxGetData(mxGetField(arcondition, ic, "xExpSimu"));
         z = mxGetData(mxGetField(arcondition, ic, "zExpSimu"));
+	dzdx = mxGetData(mxGetField(arcondition, ic, "dzdx"));
         if (sensi == 1) {
             su = mxGetData(mxGetField(arcondition, ic, "suExpSimu"));
             sx = mxGetData(mxGetField(arcondition, ic, "sxExpSimu"));
@@ -795,12 +902,16 @@ void z_calc(int im, int ic, mxArray *arcondition) {
     }
     p = mxGetData(mxGetField(arcondition, ic, "pNum"));
     np = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
+    nx = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "dxdt"));
     
     /* loop over output points */
     for (it=0; it < nt; it++) {
         /* printf("%f y-loop (im=%i id=%i)\n", t[it], im, id); */
         
         fz(t[it], nt, it, 0, 0, 0, z, p, u, x, im, ic);
+	if( fine == 0 ) {
+	  dfzdx(t[it], nt, it, 0, nx, 0, dzdx, z, p, u, x, im, ic);
+	}
         if (sensi == 1) {
             fsz(t[it], nt, it, np, sz, p, u, x, z, su, sx, im, ic);
         }
@@ -841,6 +952,8 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
     double *su;
     double *sx;
     double *sz;
+    double *y_scale;
+    double *dzdx;
     
     double *chi2;
     double *chi2err;
@@ -886,6 +999,8 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
         y = mxGetData(mxGetField(ardata, id, "yExpSimu"));
         ystd = mxGetData(mxGetField(ardata, id, "ystdExpSimu"));
         
+	y_scale = mxGetData(mxGetField(ardata, id, "y_scale"));
+	dzdx = mxGetData(mxGetField(arcondition, ic, "dzdx"));
         u = mxGetData(mxGetField(arcondition, ic, "uExpSimu"));
         x = mxGetData(mxGetField(arcondition, ic, "xExpSimu"));
         z = mxGetData(mxGetField(arcondition, ic, "zExpSimu"));
@@ -925,10 +1040,15 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
         
         fy(t[it], nt, it, ntlink, itlink, 0, 0, 0, 0, y, p, u, x, z, im, id);
         
+	if(fine==0){
+	  fy_scale(t[it], nt, it, ntlink, itlink, 0, 0, 0, 0, y_scale, p, u, x, z, dzdx, im, id);
+	}
+
         /* log trafo of y */
         for (iy=0; iy<ny; iy++) {
             if(qlogy[iy] > 0.5){
                 if(y[it + (iy*nt)]<0.0) printf("WARNING, check for concentrations <= 0 !!!\n");
+		if(fine==0)  y_scale[it + (iy*nt)] = y_scale[it + (iy*nt)] / y[it + (iy*nt)] / log(10.0);	   	
                 y[it + (iy*nt)] = log10(y[it + (iy*nt)]);
             }
         }

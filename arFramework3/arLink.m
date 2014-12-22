@@ -160,6 +160,11 @@ for m = 1:length(ar.model)
                     ar.model(m).data(d).yExpSimu = zeros(nt, ny);
                     ar.model(m).data(d).syExpSimu = zeros(nt, ny, np);
                     ar.model(m).data(d).ystdExpSimu = zeros(nt, ny);
+                    if(isempty(ar.model(m).x))
+                        ar.model(m).data(d).y_scale = zeros(nt, ny, 1);
+                    else
+                        ar.model(m).data(d).y_scale = zeros(nt, ny, length(ar.model(m).x));                    
+                    end
                     ar.model(m).data(d).systdExpSimu = zeros(nt, ny, np);
                     if(isfield(ar.model(m).data(d), 'yExp') && ~isempty(ar.model(m).data(d).yExp))
                         ar.model(m).data(d).res = zeros(nt, ny);
@@ -196,7 +201,8 @@ for m = 1:length(ar.model)
         ar.model(m).condition(c).dvdpNum = zeros(nv, np); 
         ar.model(m).condition(c).suNum = zeros(nu, np);
         ar.model(m).condition(c).svNum = zeros(1, nv);
-
+        ar.model(m).condition(c).y_atol = zeros(nx,1);
+        
         if(isfield(ar.model(m).condition(c), 'tExp'))
             nt = length(ar.model(m).condition(c).tExp);
             
@@ -208,6 +214,7 @@ for m = 1:length(ar.model)
             ar.model(m).condition(c).sxExpSimu = zeros(nt, nx, np);
             ar.model(m).condition(c).zExpSimu = zeros(nt, nz);
             ar.model(m).condition(c).szExpSimu = zeros(nt, nz, np);
+            ar.model(m).condition(c).dzdx = zeros(nt, nz, nx);
             ar.model(m).condition(c).has_tExp = true;
         else
             ar.model(m).condition(c).has_tExp = false;

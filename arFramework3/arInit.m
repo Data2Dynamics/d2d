@@ -69,6 +69,8 @@ ar.config.plot_x_collected = false;
 ar.config.useSensis = true; 
 ar.config.useJacobian = true;
 ar.config.useSensiRHS = true;
+ar.config.atolV = false; 
+ar.config.atolV_Sens = false;
 
 ar.config.optimizer = 1;
 ar.config.optimizers = {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1'};

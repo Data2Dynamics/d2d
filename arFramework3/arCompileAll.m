@@ -690,6 +690,9 @@ if(config.useJacobian)
     end
 end
 
+condition.sym.dfzdu = myJacobian(condition.sym.fz, model.sym.us);
+condition.sym.dfzdx = myJacobian(condition.sym.fz, model.sym.xs);
+
 % sensitivities
 if(config.useSensis)
 	% su
@@ -981,8 +984,6 @@ if(config.useSensis)
         condition.sym.dvdu * condition.sym.dfudp);
     
     % derivatives fz
-    condition.sym.dfzdu = myJacobian(condition.sym.fz, model.sym.us);
-    condition.sym.dfzdx = myJacobian(condition.sym.fz, model.sym.xs);
     condition.sym.dfzdp = myJacobian(condition.sym.fz, condition.sym.ps);
     
     % sz
@@ -992,7 +993,6 @@ if(config.useSensis)
     end
     condition.sym.sz = sym(condition.sz);
     
-    condition.sym.sz = sym(condition.sz);
     condition.sym.fsz1 = condition.sym.dfzdx * condition.sym.sx;
     condition.sym.fsz2 = condition.sym.dfzdu * condition.sym.dfudp + ...
         condition.sym.dfzdp;
@@ -1142,6 +1142,33 @@ end
 data.dfydunon0 = logical(data.sym.dfydu ~= 0);
 data.dfydxnon0 = logical(data.sym.dfydx ~= 0);
 data.dfydznon0 = logical(data.sym.dfydz ~= 0);
+
+% dzdx sensitivities
+data.dfzdx = cell(length(model.zs), length(model.xs));
+for j=1:length(model.zs)
+    for i=1:length(model.xs)
+        data.dfzdx{j,i} = sprintf('dfzdx[%i]', j + (i-1)*length(model.zs));
+    end
+end
+data.sym.dfzdx = sym(data.dfzdx);
+
+% calculate y_scale
+if(isempty(data.sym.dfydx) && isempty(data.sym.dfydz))
+    data.sym.y_scale = sym(zeros(length(data.sym.fy)));
+else
+    if(~isempty(data.sym.dfydx))
+        data.sym.y_scale = data.sym.dfydx;    
+    end
+    if(~isempty(data.sym.dfydz))
+        tmpfsz = data.sym.dfydz * ...
+            data.sym.dfzdx;           
+        if(~isempty(data.sym.dfydx))
+            data.sym.y_scale = data.sym.y_scale + tmpfsz;
+        else   
+            data.sym.y_scale = tmpfsz;
+        end
+    end       
+end
 
 if(config.useSensis)
     % sx sensitivities
@@ -1318,6 +1345,7 @@ fprintf(fid, ' void fsx0_%s(int ip, N_Vector sx0, void *user_data);\n', conditio
 fprintf(fid, ' void dfxdp_%s(realtype t, N_Vector x, double *dfxdp, void *user_data);\n\n', condition.fkt);
 fprintf(fid, ' void fz_%s(double t, int nt, int it, int nz, int nx, int iruns, double *z, double *p, double *u, double *x);\n', condition.fkt);
 fprintf(fid, ' void fsz_%s(double t, int nt, int it, int np, double *sz, double *p, double *u, double *x, double *z, double *su, double *sx);\n\n', condition.fkt);
+fprintf(fid, ' void dfzdx_%s(double t, int nt, int it, int nz, int nx, int iruns, double *dfzdxs, double *z, double *p, double *u, double *x);\n', condition.fkt);
 fprintf(fid, '#endif /* _MY_%s */\n', condition.fkt);
 
 fprintf(fid,'\n\n\n');
@@ -1630,6 +1658,16 @@ if(config.useSensis)
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
+% write dfzdx
+fprintf(fid, ' void dfzdx_%s(double t, int nt, int it, int nz, int nx, int iruns, double *dfzdxs, double *z, double *p, double *u, double *x){\n', condition.fkt);
+if(config.useSensis)
+    if(~isempty(model.zs))
+        writeCcode(fid, condition, 'dfzdx');        
+        fprintf(fid, '\n');        
+    end
+end
+fprintf(fid, '\n  return;\n}\n\n\n');
+
 
 % write data headers
 function arWriteHFilesData(fid, data)
@@ -1652,7 +1690,7 @@ fprintf(fid, ' void fy_%s(double t, int nt, int it, int ntlink, int itlink, int 
 fprintf(fid, ' void fystd_%s(double t, int nt, int it, int ntlink, int itlink, double *ystd, double *y, double *p, double *u, double *x, double *z);\n', data.fkt);
 fprintf(fid, ' void fsy_%s(double t, int nt, int it, int ntlink, int itlink, double *sy, double *p, double *u, double *x, double *z, double *su, double *sx, double *sz);\n', data.fkt);
 fprintf(fid, ' void fsystd_%s(double t, int nt, int it, int ntlink, int itlink, double *systd, double *p, double *y, double *u, double *x, double *z, double *sy, double *su, double *sx, double *sz);\n\n', data.fkt);
-
+fprintf(fid, ' void fy_scale_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int nz, int iruns, double *y_scale, double *p, double *u, double *x, double *z, double *dfzdx);\n', data.fkt);
 fprintf(fid, '#endif /* _MY_%s */\n', data.fkt);
 fprintf(fid,'\n\n\n');
 
@@ -1660,7 +1698,7 @@ fprintf(fid,'\n\n\n');
 % Write Data
 function arWriteCFilesData(fid, config, m, c, d, data)
 
-fprintf(' -> writing data m%i d%i -> c%i, %s...\n', m, c, d, data.name);
+fprintf(' -> writing data m%i d%i -> c%i, %s...\n', m, d, c, data.name);
 
 fprintf(fid, '#include "%s.h"\n',  data.fkt);
 fprintf(fid, '#include <cvodes/cvodes.h>\n');    
@@ -1698,6 +1736,12 @@ if(config.useSensis)
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
+% write y_scale
+fprintf(fid, ' void fy_scale_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int nz, int iruns, double *y_scale, double *p, double *u, double *x, double *z, double *dfzdx){\n', data.fkt);
+if(~isempty(data.sym.y_scale))
+	writeCcode(fid, data, 'y_scale');
+end
+fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write C code
 function writeCcode(fid, cond_data, svar, ip)
@@ -1753,6 +1797,9 @@ elseif(strcmp(svar,'fsu'))
 elseif(strcmp(svar,'fz'))
     cstr = ccode(cond_data.sym.fz(:));
     cvar =  'z';
+elseif(strcmp(svar,'dfzdx'))
+    cstr = ccode(cond_data.sym.dfzdx(:));
+    cvar =  '    dfzdxs';
 elseif(strcmp(svar,'fsz1'))
     cstr = ccode(cond_data.sym.fsz1);
     for j=find(cond_data.sym.fsz1' == 0)
@@ -1765,6 +1812,9 @@ elseif(strcmp(svar,'fsz2'))
 elseif(strcmp(svar,'fy'))
     cstr = ccode(cond_data.sym.fy(:));
     cvar =  'y';
+elseif(strcmp(svar,'y_scale'))
+    cstr = ccode(cond_data.sym.y_scale(:));
+    cvar =  'y_scale';
 elseif(strcmp(svar,'fystd'))
     cstr = ccode(cond_data.sym.fystd(:));
     cvar =  'ystd';
@@ -1802,6 +1852,11 @@ if(~(length(cstr)==1 && isempty(cstr{1})))
         cstr = strrep(cstr, 'z[', 'z[nz*ntlink*iruns+itlink+ntlink*');
         cstr = strrep(cstr, 'y[', 'y[ny*nt*iruns+it+nt*');
         cstr = strrep(cstr, 'u[', 'u[itlink+ntlink*');
+    elseif(strcmp(svar,'y_scale'))
+        cstr = strrep(cstr, 'x[', 'x[nx*ntlink*iruns+itlink+ntlink*');
+        cstr = strrep(cstr, 'z[', 'z[nz*ntlink*iruns+itlink+ntlink*');
+        cstr = strrep(cstr, 'y_scale[', 'y_scale[ny*nt*iruns+it+nt*');
+        cstr = strrep(cstr, 'u[', 'u[itlink+ntlink*');
     elseif(strcmp(svar,'fsy'))
         cstr = strrep(cstr, 'x[', 'x[itlink+ntlink*');
         cstr = strrep(cstr, 'z[', 'z[itlink+ntlink*');
@@ -1823,6 +1878,10 @@ if(~(length(cstr)==1 && isempty(cstr{1})))
     elseif(strcmp(svar,'fz'))
         cstr = strrep(cstr, 'x[', 'x[nx*nt*iruns+it+nt*');
         cstr = strrep(cstr, 'z[', 'z[nz*nt*iruns+it+nt*');
+        cstr = strrep(cstr, 'u[', 'u[nu*nt*iruns+it+nt*');
+    elseif(strcmp(svar,'dfzdx'))
+        cstr = strrep(cstr, 'x[', 'x[nx*nt*iruns+it+nt*');
+        cstr = strrep(cstr, 'dfzdxs[', 'dfzdxs[nx*nt*iruns+it+nt*');
         cstr = strrep(cstr, 'u[', 'u[nu*nt*iruns+it+nt*');
     elseif(strcmp(svar,'fsz1'))
         cstr = strrep(cstr, 'x[', 'x[it+nt*');
@@ -2030,6 +2089,16 @@ for m=1:length(ar.model)
 end
 fprintf(fid, '}\n\n');
 
+% map dfzdx
+fprintf(fid, 'void dfzdx(double t, int nt, int it, int nz, int nx, int iruns, double *dfzdx, double *z, double *p, double *u, double *x, int im, int ic){\n');
+for m=1:length(ar.model)
+    for c=1:length(ar.model(m).condition)
+        fprintf(fid, '  if((im==%i) & (ic==%i)) dfzdx_%s(t, nt, it, nz, nx, iruns, dfzdx, z, p, u, x);\n', ...
+            m-1, c-1, ar.model(m).condition(c).fkt);
+    end
+end
+fprintf(fid, '}\n\n');
+
 % map fsz
 fprintf(fid, 'void fsz(double t, int nt, int it, int np, double *sz, double *p, double *u, double *x, double *z, double *su, double *sx, int im, int ic){\n');
 for m=1:length(ar.model)
@@ -2046,6 +2115,18 @@ for m=1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
         for d=1:length(ar.model(m).data)
             fprintf(fid, '  if((im==%i) & (id==%i)) fy_%s(t, nt, it, ntlink, itlink, ny, nx, nz, iruns, y, p, u, x, z);\n', ...
+                m-1, d-1, ar.model(m).data(d).fkt);
+        end
+    end
+end
+fprintf(fid, '}\n\n');
+
+% map fy_scale
+fprintf(fid, ' void fy_scale(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int nz, int iruns, double *y_scale, double *p, double *u, double *x, double *z, double *dfzdx, int im, int id){\n');
+for m=1:length(ar.model)
+    if(isfield(ar.model(m), 'data'))
+        for d=1:length(ar.model(m).data)
+            fprintf(fid, '  if((im==%i) & (id==%i)) fy_scale_%s(t, nt, it, ntlink, itlink, ny, nx, nz, iruns, y_scale, p, u, x, z, dfzdx);\n', ...
                 m-1, d-1, ar.model(m).data(d).fkt);
         end
     end
