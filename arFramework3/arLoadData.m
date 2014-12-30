@@ -425,28 +425,12 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
         end
         
     elseif(strcmp(extension,'csv'))
-        fid = fopen(['Data/' name '.csv'], 'r');
-        
-        C = textscan(fid,'%s\n',1);
-        C = textscan(C{1}{1},'%q','Delimiter',',');
-        C = C{1};
-        header = C(2:end)';
-        
-        data = nan(0, length(header));
-        dataCell = cell(0, length(header));
-        times = [];
-        rcount = 1;
-        C = textscan(fid,'%q',length(header)+1,'Delimiter',',');
-        while(~isempty(C{1}))
-            C = strrep(C{1}',',','.');
-            times(rcount,1) = str2double(C{1});
-            for j=1:length(header)
-                data(rcount,j) = str2double(C{j+1});
-                dataCell{rcount,j} = C{j+1};
-            end
-            C = textscan(fid,'%q',length(header)+1,'Delimiter',',');
-            rcount = rcount + 1;
-        end
+        [header, data, dataCell] = arReadCSVHeaderFile(['Data/' name '.csv'], ',', true);
+
+        header = header(2:end);
+        times = data(:,1);
+        data = data(:,2:end);
+        dataCell = dataCell(:,2:end);
         
         fclose(fid);
     end
@@ -483,6 +467,7 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
                     
                     ar.model(m).data(d).name = [ar.model(m).data(d).name '_' ...
                         randis_header{jj} randis{j,jj}];
+                    ar.model(m).data(d).fprand = randis{j,jj};
                     
                     ar.model(m).data(d).fy = strrep(ar.model(m).data(d).fy, ...
                         randis_header{jj}, [randis_header{jj} randis{j,jj}]);
