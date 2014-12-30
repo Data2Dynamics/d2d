@@ -7,10 +7,17 @@
 % ...
 % arLoadData('dataN', jm);
 % arMergePlotMulti(jm, {'data1', 'data2', ..., 'dataN'}, {'label for data1', 'label for data2', ..., 'label for dataN'}, 'new condition name');
+% 
+% comment: actually the names of the plots as defined in ar.model.plot.name
+% are used
 
 function arMergePlotMulti(jm, index_names, label_names, new_condition_name)
 
 global ar
+
+if(isempty(index_names))
+    return
+end
 
 nNames = length(index_names);
 index = nan(1,nNames);

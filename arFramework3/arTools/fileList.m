@@ -9,6 +9,10 @@ if(~exist('doAnd', 'var'))
     doAnd = false;
 end
 
+if(~iscell(searchpattern))
+    searchpattern = {searchpattern};
+end
+
 filesyslist = dir(filepath);
 out = {};
 count = 0;
