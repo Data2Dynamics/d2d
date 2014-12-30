@@ -2,7 +2,12 @@ for i=1:50:length(ar.p)
     figure;
     if i+50 > length(ar.p)
         xdata = linspace(i,length(ar.p),length(ar.p)-i+1);
-        errorbar(xdata,ar.mean(i:length(ar.p)),ar.std(i:length(ar.p)),'b.');
+        types = ar.type(i:length(ar.p));
+        means = ar.mean(i:length(ar.p));
+        stds = ar.std(i:length(ar.p));
+        means(types==0) = nan;
+        stds(types==0) = nan;
+        errorbar(xdata,means,stds,'b.');
         xlim([i length(ar.p)]);
         ylim([-5.5 3.5]);
         set(gca,'tickdir','out');
@@ -14,7 +19,12 @@ for i=1:50:length(ar.p)
         hold off
     else
         xdata = linspace(i,i+49,50);
-        errorbar(xdata,ar.mean(i:i+49),ar.std(i:i+49),'b.');
+        types = ar.type(i:i+49);
+        means = ar.mean(i:i+49);
+        stds = ar.std(i:i+49);
+        means(types==0) = nan;
+        stds(types==0) = nan;
+        errorbar(xdata,means,stds,'b.');
         xlim([i i+49]);
         ylim([-5.5 3.5]);
         set(gca,'tickdir','out');
