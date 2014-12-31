@@ -490,7 +490,11 @@ for jm = 1:length(ar.model)
                             for jt=1:length(times)
                                 if(~isempty(conditions))
                                     for jc = 1:length(conditions)
-                                        legendtmp{ccount} = sprintf('t=%g%s : %s', times(jt), ar.model(jm).tUnits{2}, conditions{jc}); %#ok<AGROW>
+                                        if(~isempty(conditions{jc}))
+                                            legendtmp{ccount} = sprintf('t=%g%s : %s', times(jt), ar.model(jm).tUnits{2}, conditions{jc}); %#ok<AGROW>
+                                        else
+                                            legendtmp{ccount} = sprintf('t=%g%s', times(jt), ar.model(jm).tUnits{2}); %#ok<AGROW>
+                                        end
                                         ccount = ccount + 1;
                                     end
                                 else
