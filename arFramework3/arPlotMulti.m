@@ -994,7 +994,13 @@ savePath = mypath([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc', savePath);
-eval(['!ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+if(ispc)
+    print('-dpdf', savePath);
+elseif(ismac)
+    system(['/usr/local/bin/ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+else
+    system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+end
 
 
 
@@ -1009,7 +1015,13 @@ savePath = mypath([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc2', savePath);
-eval(['!ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+if(ispc)
+    print('-dpdf', savePath);
+elseif(ismac)
+    system(['/usr/local/bin/ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+else
+    system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+end
 
 
 function savePath = mySaveFigureV(h, name, filenameAddition)
@@ -1023,7 +1035,13 @@ savePath = mypath([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc2', savePath);
-eval(['!ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+if(ispc)
+    print('-dpdf', savePath);
+elseif(ismac)
+    system(['/usr/local/bin/ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+else
+    system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+end
 
 
 function str = mypath(str)

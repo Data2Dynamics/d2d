@@ -161,8 +161,12 @@ fprintf(fid, '}\n');
 fclose(fid);
 
 %% Render and save
-if(~ispc)
+if(isunix)
     eval(['!dot -Tpdf ' savePath '.dot -o' savePath '.pdf']);
+    % eval(['!neato -Tpdf ' savePath '.dot -o' savePath '.pdf']);
+    % eval(['!fdp -Tpdf ' savePath '.dot -o' savePath '.pdf']);
+elseif(ismac)
+    eval(['!/usr/local/bin/dot -Tpdf ' savePath '.dot -o' savePath '.pdf']);
     % eval(['!neato -Tpdf ' savePath '.dot -o' savePath '.pdf']);
     % eval(['!fdp -Tpdf ' savePath '.dot -o' savePath '.pdf']);
 end

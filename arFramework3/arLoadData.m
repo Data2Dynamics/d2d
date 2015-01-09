@@ -434,8 +434,6 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
         times = data(:,1);
         data = data(:,2:end);
         dataCell = dataCell(:,2:end);
-        
-        fclose(fid);
     end
     
     % random effects

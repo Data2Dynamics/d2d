@@ -827,15 +827,17 @@ end
 lp(fid, '\\clearpage\n');
 lp(fid, '\\section{Estimated model parameters} \\label{estimatedparameters}\n');
 
-if(ar.config.fiterrors == 1)
-    lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
-        sum(ar.qFit==1), 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
-else
-    lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $\\chi^2 = %g$ for a total of %i data points.', ...
-        sum(ar.qFit==1), ar.chi2, ar.ndata);
-end
+if(isfield(ar,'ndata') && isfield(ar,'chi2fit') && isfield(ar,'chi2'))
+    if(ar.config.fiterrors == 1)
+        lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
+            sum(ar.qFit==1), 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
+    else
+        lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $\\chi^2 = %g$ for a total of %i data points.', ...
+            sum(ar.qFit==1), ar.chi2, ar.ndata);
+    end
 
-lp(fid, 'The model parameters were estimated by maximum likelihood estimation applying the MATLAB lsqnonlin algorithm.');
+    lp(fid, 'The model parameters were estimated by maximum likelihood estimation applying the MATLAB lsqnonlin algorithm.');
+end
 
 N = 50;
 ntables = ceil(length(ar.p)/N);
@@ -931,7 +933,13 @@ if(exist(plePath,'dir'))
         
         sourcestr = [plePath '/multi_plot.eps'];
         targetstr = [savePath '/multi_plot.pdf'];
-        eval(['!ps2pdf  -dEPSCrop ' sourcestr ' ' targetstr]);
+        if(ispc)
+            print('-dpdf', targetstr);
+        elseif(ismac)
+            system(['/usr/local/bin/ps2pdf  -dEPSCrop ' sourcestr ' ' targetstr]);
+        else
+            system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' sourcestr ' ' targetstr]);
+        end
         
         captiontext = '\textbf{Overview of the profile likelihood of the model parameters}\\';
         captiontext = [captiontext 'The solid lines indicate the profile likelihood. '];
@@ -958,7 +966,13 @@ if(exist(plePath,'dir'))
                 lp(fid, '\\clearpage\n');
                 count = count + 1;
                 targetstr = [savePath '/' S.pleGlobals.p_labels{j} '.pdf'];
-                eval(['!ps2pdf  -dEPSCrop ' S.pleGlobals.figPath{j} '.eps ' targetstr]);
+                if(ispc)
+                    print('-dpdf', targetstr);
+                elseif(ismac)
+                    system(['/usr/local/bin/ps2pdf  -dEPSCrop ' S.pleGlobals.figPath{j} '.eps ' targetstr]);
+                else
+                    system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' S.pleGlobals.figPath{j} '.eps ' targetstr]);
+                end
                 
                 captiontext = sprintf('\\textbf{Profile likelihood of parameter %s}\\\\', strrep(S.pleGlobals.p_labels{j},'_','\_'));
                 captiontext = [captiontext 'Upper panel: The solide line indicates the profile likelihood. '];
@@ -1090,13 +1104,27 @@ fclose(fid);
 fprintf('done\n');
 
 %% pdflatex
-if(~ispc)
+if(isunix)
     fprintf('pdflatex, file %s...', fname);
     cd(savePath);
     eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
     eval(['!bibtex ' fnamebib ' > log_bibtex.txt']);
     eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
     eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
+    cd('../../..');
+    try
+        copyfile([savePath '/' 'report.pdf'], [savePath '/' sprintf('report_%s.pdf', datestr(now,30))])
+        fprintf('done\n');
+    catch
+        fprintf('report.pdf was not written correctly\n');
+    end
+elseif(ismac)
+    fprintf('pdflatex, file %s...', fname);
+    cd(savePath);
+    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+    eval(['!/usr/texbin/bibtex ' fnamebib ' > log_bibtex.txt']);
+    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
     cd('../../..');
     try
         copyfile([savePath '/' 'report.pdf'], [savePath '/' sprintf('report_%s.pdf', datestr(now,30))])

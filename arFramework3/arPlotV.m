@@ -405,8 +405,10 @@ saveas(h, savePath, 'fig');
 print('-depsc2', savePath);
 if(ispc)
     print('-dpdf', savePath);
+elseif(ismac)
+    system(['/usr/local/bin/ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
 else
-    eval(['!ps2pdf  -dEPSCrop -dAutoRotatePages=/None ' savePath '.eps '  savePath '.pdf']);
+    system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
 end
 
 

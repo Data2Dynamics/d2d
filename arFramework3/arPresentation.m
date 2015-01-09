@@ -955,13 +955,23 @@ fprintf('done\n');
 
 %% pdflatex
 
-if(~ispc)
+if(isunix)
     fprintf('pdflatex, file %s...', fname);
     cd(savePath);
     eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
     eval(['!bibtex ' fnamebib ' > log_bibtex.txt']);
     eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
     eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
+    cd('../../..');
+    copyfile([savePath '/' 'presentation.pdf'], [savePath '/' sprintf('presentation_%s.pdf', datestr(now,30))])
+    fprintf('done\n');
+elseif(ismac)
+    fprintf('pdflatex, file %s...', fname);
+    cd(savePath);
+    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+    eval(['!/usr/texbin/bibtex ' fnamebib ' > log_bibtex.txt']);
+    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
     cd('../../..');
     copyfile([savePath '/' 'presentation.pdf'], [savePath '/' sprintf('presentation_%s.pdf', datestr(now,30))])
     fprintf('done\n');

@@ -1052,7 +1052,7 @@ print('-depsc2', savePath);
 if(ispc)
     print('-dpdf', savePath);
 elseif(ismac)
-    system(['ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
+    system(['/usr/local/bin/ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
 else
     system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
 end
