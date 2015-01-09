@@ -116,7 +116,7 @@ for j=1:length(m.reaction)
         
         C = textscan(tmpfun, '%s', 'Whitespace', ',');
         C = C{1};
-        
+
         tmpstr = replaceFunction(tmpstr, m.functionDefinition(jj).id, C(1:end-1), C(end));
     end
     
@@ -289,8 +289,11 @@ while(~isempty(funindex))
     end
     
     funtmplate = funmat;
+    
+    % Replace longest names first               %#<JV>
+    [~,I]=sort(cellfun(@length,C), 'descend');  %#<JV>
     for j=1:length(D)
-        funtmplate = strrep(funtmplate, C{j}, ['(' D{j} ')']);
+        funtmplate = strrep(funtmplate, C{I(j)}, ['(' D{I(j)} ')']);  %#<JV> {j}=>I(j)
     end
     funtmplate = ['(' funtmplate ')']; %#ok<AGROW>
     % disp(funtmplate)
@@ -359,8 +362,11 @@ while(~isempty(funindex))
     end
     
     funtmplate = funmat;
+    
+    % Replace longest names first               %#<JV>
+    [~,I]=sort(cellfun(@length,C), 'descend');  %#<JV>
     for j=1:length(D)
-        funtmplate = strrep(funtmplate, C{j}, ['(' D{j} ')']);
+        funtmplate = strrep(funtmplate, C{I(j)}, ['(' D{I(j)} ')']); %#<JV> {j}=>I(j)
     end
     funtmplate = ['(' funtmplate ')']; %#ok<AGROW>
 %     disp(funtmplate)
