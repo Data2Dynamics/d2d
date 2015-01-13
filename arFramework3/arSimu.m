@@ -52,6 +52,10 @@ if(~isfield(ar.config,'fiterrors_correction'))
     ar.config.fiterrors_correction = 1;
 end
 
+if(fine && isfield(ar, 'isCompressed') && ar.isCompressed)
+    error('workspace compressed, please arUncompress before running a simulation on a fine grid');
+end
+
 ar.stop = 0;
 
 % propagate parameters
