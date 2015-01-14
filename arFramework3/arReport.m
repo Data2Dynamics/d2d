@@ -36,7 +36,7 @@ lp(fid, '\\nonstopmode');
 lp(fid, '\\documentclass[10pt, oneside, fleqn]{article}');
 
 lp(fid, '\\usepackage[utf8]{inputenc}');
-lp(fid, '\\usepackage{amsmath, amsthm, amssymb}');
+lp(fid, '\\usepackage{amsmath, amsthm, amssymb, amstext}');
 lp(fid, '\\usepackage{listings} ');
 lp(fid, '\\usepackage{epsfig} ');
 lp(fid, '\\usepackage{graphicx} ');
@@ -48,6 +48,7 @@ lp(fid, '\\usepackage{lmodern} ');
 lp(fid, '\\usepackage{xcolor} ');
 lp(fid, '\\usepackage{chemist} ');
 lp(fid, '\\usepackage{calc} ');
+lp(fid, '\\usepackage{pgfplots}  ');
 lp(fid, '\\usepackage[normal,footnotesize,bf]{caption}');
 lp(fid, '\\usepackage{subfig}');
 lp(fid, '\\usepackage{sidecap}');
@@ -74,6 +75,11 @@ lp(fid, '\\newcommand{\\dobegincenter}{\\begin{center}}');
 lp(fid, '\\newcommand{\\doendcenter}{\\end{center}}');
 
 lp(fid, '\\newcommand{\\mycaption}[3]{\\caption{\\textbf{#1}\\\\ #3 \\label{#2}}}');
+
+lp(fid, '\\pgfplotsset{compat=newest} ');
+lp(fid, '\\pgfplotsset{plot coordinates/math parser=false} ');
+lp(fid, '\\newlength\\figureheight ');
+lp(fid, '\\newlength\\figurewidth ');
 
 lp(fid, '\n\\begin{document}\n');
 
@@ -483,15 +489,20 @@ for jm=1:length(ar.model)
             
             %% plots
             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigY') && ~isempty(ar.model(jm).plot(jplot).savePath_FigY))
-                copyfile([ar.model(jm).plot(jplot).savePath_FigY '.pdf'], ...
-                    [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
-                
                 lp(fid, 'The model observables and the experimental data is shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
                 captiontext = sprintf('\\textbf{%s observables and experimental data for the experiment.} ', myNameTrafo(ar.model(jm).plot(jplot).name));
                 captiontext = [captiontext 'The observables are displayed as solid lines. '];
                 captiontext = [captiontext 'The error model that describes the measurement noise ' ...
                     'is indicated by shades.'];
-                lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
+                if(exist([ar.model(jm).plot(jplot).savePath_FigY '.tex'],'file')==2)
+                    copyfile([ar.model(jm).plot(jplot).savePath_FigY '.tex'], ...
+                    [savePath '/' ar.model(jm).plot(jplot).name '_y.tex']);
+                    lpfigurePGF(fid, [ar.model(jm).plot(jplot).name '_y.tex'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
+                else
+                    copyfile([ar.model(jm).plot(jplot).savePath_FigY '.pdf'], ...
+                    [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
+                    lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
+                end
             end
             
             %% experimental data
@@ -1104,7 +1115,7 @@ fclose(fid);
 fprintf('done\n');
 
 %% pdflatex
-if(isunix)
+if(isunix && ~ismac)
     fprintf('pdflatex, file %s...', fname);
     cd(savePath);
     eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
@@ -1148,6 +1159,12 @@ lp(fid, '\\begin{center}');
 lp(fid, '\\includegraphics[width=%f\\textwidth]{%s} \\caption{%s} \\label{%s}', textwidth, figpath, figcaption, figlabel);
 lp(fid, '\\end{center}');
 lp(fid, '\\end{figure}');
+
+function lpfigurePGF(fid, figpath, figcaption, figlabel)
+lp(fid, '\\begin{figure}[!ht]');
+lp(fid, '\\centering');
+lp(fid, '\\input{%s} \\caption{%s} \\label{%s}', figpath, figcaption, figlabel);
+lp(fid, '\\end{figure}')
 
 function hmstimestr = secToHMS(seconds)
 hours = floor(seconds/3600);

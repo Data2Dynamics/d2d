@@ -437,7 +437,10 @@ for jm = 1:length(ar.model)
             % axis & titles
             
             if(~fastPlotTmp && exist('suptitle','file')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
-                suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
+                tmp = which('suptitle');
+                if(isempty(strmatch(tmp(end-35:end),'/toolbox/bioinfo/biodemos/suptitle.m','exact')))
+                    suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
+                end
             end
             
             for jc = 1:length(ar.model(jm).data(jd).condition)
@@ -803,8 +806,30 @@ elseif(ismac)
 else
     system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
 end
-% plot2svg([savePath '.svg'], h);
-
+if(exist('plot2svg','file')==2)
+    plot2svg([savePath '.svg'], h);
+end
+if(exist('matlab2tikz','file')==2)
+    set(h,'Units','in')
+    haxes = findobj(h, 'type', 'axes');
+    for iaxis = 1:length(haxes)
+        hlines = findobj(haxes(iaxis), 'type', 'line');
+        axischild = get(haxes(iaxis),'Children');
+        lineind = ismember(axischild,hlines);
+        hpatches = findobj(haxes(iaxis), 'type', 'patch');
+        patchind = find(ismember(axischild,hpatches));
+        patchind_sorted = [];
+        for ipatch = patchind'
+            if(isnumeric(get(axischild(ipatch),'FaceColor')))
+                patchind_sorted = [patchind_sorted ipatch];
+            else
+                patchind_sorted = [ipatch patchind_sorted];
+            end
+        end
+        set(haxes(iaxis),'Children',[axischild(lineind); axischild(patchind_sorted)])
+    end
+    matlab2tikz([savePath '.tex'],'figurehandle',h,'showInfo', false, 'width','0.9\textwidth')
+end
 
 
 function str = mypath(str)
