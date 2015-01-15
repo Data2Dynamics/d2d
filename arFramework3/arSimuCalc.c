@@ -1048,13 +1048,13 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
         for (iy=0; iy<ny; iy++) {
             if(qlogy[iy] > 0.5){
                 if(y[it + (iy*nt)]<0.0) printf("WARNING, check for concentrations <= 0 !!!\n");
-		if(fine==0)  y_scale[it + (iy*nt)] = y_scale[it + (iy*nt)] / y[it + (iy*nt)] / log(10.0);	   	
+                if(fine==0)  y_scale[it + (iy*nt)] = y_scale[it + (iy*nt)] / y[it + (iy*nt)] / log(10.0);
                 y[it + (iy*nt)] = log10(y[it + (iy*nt)]);
             }
         }
         
         if(fiterrors!=-1) fystd(t[it], nt, it, ntlink, itlink, ystd, y, p, u, x, z, im, id);
-        
+
         if (sensi == 1) {
             fsy(t[it], nt, it, ntlink, itlink, sy, p, u, x, z, su, sx, sz, im, id);
             

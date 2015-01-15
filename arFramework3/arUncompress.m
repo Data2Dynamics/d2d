@@ -14,25 +14,33 @@ end
 if(isfield(ar,'isCompressed') && ar.isCompressed ~=0)
     for m=1:length(ar.model)
         for c=1:length(ar.model(m).condition)
-            ar.model(m).condition(c).uFineSimu = zeros(ar.model(m).condition(c).uFineSimu_dim);
-            ar.model(m).condition(c).vFineSimu = zeros(ar.model(m).condition(c).vFineSimu_dim);
-            ar.model(m).condition(c).xFineSimu = zeros(ar.model(m).condition(c).xFineSimu_dim);
-            ar.model(m).condition(c).zFineSimu = zeros(ar.model(m).condition(c).zFineSimu_dim);
+            if(isfield(ar.model(m).condition, 'uFineSimu_dim'))
+                ar.model(m).condition(c).uFineSimu = zeros(ar.model(m).condition(c).uFineSimu_dim);
+                ar.model(m).condition(c).vFineSimu = zeros(ar.model(m).condition(c).vFineSimu_dim);
+                ar.model(m).condition(c).xFineSimu = zeros(ar.model(m).condition(c).xFineSimu_dim);
+                ar.model(m).condition(c).zFineSimu = zeros(ar.model(m).condition(c).zFineSimu_dim);
+            end
             
             ar.model(m).condition(c).suFineSimu = zeros(ar.model(m).condition(c).suFineSimu_dim);
             ar.model(m).condition(c).svFineSimu = zeros(ar.model(m).condition(c).svFineSimu_dim);
             ar.model(m).condition(c).sxFineSimu = zeros(ar.model(m).condition(c).sxFineSimu_dim);
-            ar.model(m).condition(c).szFineSimu = zeros(ar.model(m).condition(c).szFineSimu_dim);
+            if(isfield(ar.model(m).condition, 'szFineSimu_dim'))
+                ar.model(m).condition(c).szFineSimu = zeros(ar.model(m).condition(c).szFineSimu_dim);
+            end
         end
-        ar.model(m).condition = rmfield(ar.model(m).condition,'uFineSimu_dim');
-        ar.model(m).condition = rmfield(ar.model(m).condition,'vFineSimu_dim');
-        ar.model(m).condition = rmfield(ar.model(m).condition,'xFineSimu_dim');
-        ar.model(m).condition = rmfield(ar.model(m).condition,'zFineSimu_dim');
+        if(isfield(ar.model(m).condition, 'uFineSimu_dim'))
+            ar.model(m).condition = rmfield(ar.model(m).condition,'uFineSimu_dim');
+            ar.model(m).condition = rmfield(ar.model(m).condition,'vFineSimu_dim');
+            ar.model(m).condition = rmfield(ar.model(m).condition,'xFineSimu_dim');
+            ar.model(m).condition = rmfield(ar.model(m).condition,'zFineSimu_dim');
+        end
         
         ar.model(m).condition = rmfield(ar.model(m).condition,'suFineSimu_dim');
         ar.model(m).condition = rmfield(ar.model(m).condition,'svFineSimu_dim');
         ar.model(m).condition = rmfield(ar.model(m).condition,'sxFineSimu_dim');
-        ar.model(m).condition = rmfield(ar.model(m).condition,'szFineSimu_dim');
+        if(isfield(ar.model(m).condition, 'szFineSimu_dim'))
+            ar.model(m).condition = rmfield(ar.model(m).condition,'szFineSimu_dim');
+        end
     end
     
     try % for computers where simulation is not feasible
