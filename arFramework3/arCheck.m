@@ -35,12 +35,14 @@ end
 if(exist('suptitle','file') == 0)
     addpath([ar_path '/ThirdParty/BlandAltman'])
 end
+if(exist('export_fig','file') == 0)
+    addpath([ar_path '/ThirdParty/export_fig-master'])
+end
 if(exist('plot2svg','file') == 0)
     addpath([ar_path '/ThirdParty/plot2svg_20120915/plot2svg_20120915'])
 end
 if(exist('matlab2tikz','file') == 0)
     addpath([ar_path '/ThirdParty/matlab2tikz-matlab2tikz-722609f/src'])
-    addpath([ar_path '/ThirdParty/matlab2tikz-matlab2tikz-722609f/src/private'])
 end
     
 %% CVODES
