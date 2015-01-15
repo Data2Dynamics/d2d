@@ -436,11 +436,8 @@ for jm = 1:length(ar.model)
             
             % axis & titles
             
-            if(~fastPlotTmp && exist('suptitle','file')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
-                tmp = which('suptitle');
-                if(isempty(strmatch(tmp(end-35:end),'/toolbox/bioinfo/biodemos/suptitle.m','exact')))
-                    suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
-                end
+            if(~fastPlotTmp && exist('suptitle','file')==2 && isfield(ar.config, 'useSuptitle') && ar.config.useSuptitle) % suptitle function is available
+                suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]))
             end
             
             for jc = 1:length(ar.model(jm).data(jd).condition)
