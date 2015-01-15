@@ -529,7 +529,7 @@ for jm=1:length(ar.model)
                     myNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
                 headtab = [headtab 'r'];
                 if(ar.config.fiterrors == -1)
-                    headstr = [headstr sprintf('& %s\_std ', myNameTrafo(ar.model(jm).data(jd).y{jy}))];
+                    headstr = [headstr sprintf('& %s\\_std ', myNameTrafo(ar.model(jm).data(jd).y{jy}))];
                     unitstr = [unitstr sprintf('& %s [%s] ', myNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
                         myNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
                     headtab = [headtab 'r'];
