@@ -811,6 +811,8 @@ if(exist('plot2svg','file')==2)
 end
 if(exist('matlab2tikz','file')==2)
     set(h,'Units','in')
+    
+    % Permute lines and patches
     haxes = findobj(h, 'type', 'axes');
     for iaxis = 1:length(haxes)
         hlines = findobj(haxes(iaxis), 'type', 'line');
@@ -821,13 +823,19 @@ if(exist('matlab2tikz','file')==2)
         patchind_sorted = [];
         for ipatch = patchind'
             if(isnumeric(get(axischild(ipatch),'FaceColor')))
+                % Patch with FaceColor to the background
                 patchind_sorted = [patchind_sorted ipatch];
             else
+                % Patch without FaceColor to the front
                 patchind_sorted = [ipatch patchind_sorted];
             end
         end
-        set(haxes(iaxis),'Children',[axischild(lineind); axischild(patchind_sorted)])
+        % Find other handles (e.g. text)
+        otherhandles = ~ismember(1:length(axischild),[find(lineind)' patchind_sorted]);
+        % Lines to the front, then patches, then other handles
+        set(haxes(iaxis),'Children',[axischild(lineind); axischild(patchind_sorted); axischild(otherhandles)])
     end
+    
     matlab2tikz([savePath '.tex'],'figurehandle',h,'showInfo', false, 'width','0.9\textwidth')
 end
 
