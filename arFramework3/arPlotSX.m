@@ -14,7 +14,7 @@ fcount = 1;
 for jm = 1:length(ar.model)
     nc = length(ar.model(jm).condition);
     for jc = 1:nc
-        myRaiseFigure(jm, ['SX: ' ar.model(jm).name ' - ' ar.model(jm).condition(jc).checkstr], fcount);
+        arRaiseFigure(ar.model(jm).plots(jf), 'fighandel_sx', ['SX: ' ar.model(jm).name ' - ' ar.model(jm).condition(jc).checkstr], fcount);
         
         % rows and cols
         [ncols, nrows, nu, nx, nz] = myColsAndRows(jm);
@@ -97,32 +97,6 @@ end
 
 
 %% sub-functions
-
-
-
-
-function h = myRaiseFigure(m, figname, jf)
-global ar
-openfigs = get(0,'Children');
-
-figcolor = [1 1 1];
-figdist = 0.02;
-
-ar.model(m).plots(jf).time = now;
-
-if(isfield(ar.model(m).plots(jf), 'fighandel_sx') && ~isempty(ar.model(m).plots(jf).fighandel_sx) && ...
-        ar.model(m).plots(jf).fighandel_sx ~= 0 && sum(ar.model(m).plots(jf).fighandel_sx==openfigs)>0 && ...
-        strcmp(get(ar.model(m).plots(jf).fighandel_sx, 'Name'), figname))
-    h = ar.model(m).plots(jf).fighandel_sx;
-    figure(h);
-else
-    h = figure('Name', figname, 'NumberTitle','off', ...
-        'Units', 'normalized', 'Position', ...
-        [0.45+((jf-1)*figdist) 0.45-((jf-1)*figdist) 0.3 0.45]);
-    set(h,'Color', figcolor);
-    ar.model(m).plots(jf).fighandel_sx = h;
-end
-
 
 function [ncols, nrows, nu, nx, nz] = myColsAndRows(jm)
 global ar

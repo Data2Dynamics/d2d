@@ -37,7 +37,7 @@ else
     strtitle = sprintf('profile log-likelihood');
 end
 
-h = myRaiseFigure(strtitle);
+h = arRaiseFigure(pleGlobals, 'fighandel_multi2', strtitle);
 set(h, 'Color', [1 1 1]);
 
 count = 1;
@@ -112,26 +112,5 @@ if(savetofile && exist(pleGlobals.savePath, 'dir'))
     print('-depsc2', [pleGlobals.savePath '/multi_plot2']);
 end
 
-
-function h = myRaiseFigure(figname)
-global pleGlobals
-openfigs = get(0,'Children');
-
-figcolor = [1 1 1];
-
-if(isfield(pleGlobals, 'fighandel_multi2') && ~isempty(pleGlobals.fighandel_multi2) && ...
-    pleGlobals.fighandel_multi2 ~= 0 && ...
-    sum(pleGlobals.fighandel_multi2==openfigs)>0 && ...
-    strcmp(get(pleGlobals.fighandel_multi2, 'Name'), figname))
-
-    h = pleGlobals.fighandel_multi2;
-    figure(h);
-else
-    h = figure('Name', figname, 'NumberTitle','off', ...
-        'Units', 'normalized', 'Position', ...
-        [0.1 0.1 0.6 0.8]);
-    set(h,'Color', figcolor);
-    pleGlobals.fighandel_multi2 = h;
-end
 
 

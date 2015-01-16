@@ -17,7 +17,7 @@ if(Nthinning>1)
     ps2 = ps2(mod(1:size(ps2,1),Nthinning)==1,:);
 end
    
-h = myRaiseFigure('mcmc chains');
+h = arRaiseFigure(pleGlobals, 'fighandel_multi', 'mcmc chains');
 set(h, 'Color', [1 1 1]);
 
 if(~exist('jks','var') || isempty(jks))
@@ -55,29 +55,6 @@ for jk=jks
     arSubplotStyle(g);
     
     count = count + 1;
-end
-
-
-
-function h = myRaiseFigure(figname)
-global pleGlobals
-openfigs = get(0,'Children');
-
-figcolor = [1 1 1];
-
-if(isfield(pleGlobals, 'fighandel_multi') && ~isempty(pleGlobals.fighandel_multi) && ...
-    pleGlobals.fighandel_multi ~= 0 && ...
-    sum(pleGlobals.fighandel_multi==openfigs)>0 && ...
-    strcmp(get(pleGlobals.fighandel_multi, 'Name'), figname))
-
-    h = pleGlobals.fighandel_multi;
-    figure(h);
-else
-    h = figure('Name', figname, 'NumberTitle','off', ...
-        'Units', 'normalized', 'Position', ...
-        [0.1 0.1 0.6 0.8]);
-    set(h,'Color', figcolor);
-    pleGlobals.fighandel_multi = h;
 end
 
 

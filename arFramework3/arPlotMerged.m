@@ -237,7 +237,7 @@ end
 for jx = find(~cellfun(@isempty, collect_cs))
     % time course plots
     ar.model(jm).plot_merged(jx).name = sprintf('%s_%s_TC', ar.model(jm).name, ar.model(jm).(fname){jx});
-    h = myRaiseFigure(jm, jx, ar.model(jm).plot_merged(jx).name, figcount);
+    h = arRaiseFigure(ar.model(jm).plot_merged(jx), 'fighandel_y', ar.model(jm).plot_merged(jx).name, figcount);
     
     condition_link = condition_link_new{jx};
     
@@ -328,31 +328,4 @@ for j=1:length(fy)
         qy(j) = true;
     end
 end
-
-
-function h = myRaiseFigure(m, jplot, figname, figcount)
-global ar
-openfigs = get(0,'Children');
-
-figcolor = [1 1 1];
-figdist = 0.02;
-
-ar.model(m).plot_merged(jplot).time = now;
-
-if(isfield(ar.model(m).plot_merged(jplot), 'fighandel_y') && ~isempty(ar.model(m).plot_merged(jplot).fighandel_y) && ...
-        ar.model(m).plot_merged(jplot).fighandel_y ~= 0 && ...
-        sum(ar.model(m).plot_merged(jplot).fighandel_y==openfigs)>0 && ...
-        strcmp(get(ar.model(m).plot_merged(jplot).fighandel_y, 'Name'), figname))
-    
-    h = ar.model(m).plot_merged(jplot).fighandel_y;
-    figure(h);
-else
-    h = figure('Name', figname, 'NumberTitle','off', ...
-        'Units', 'normalized', 'Position', ...
-        [0.1+((figcount-1)*figdist) 0.35-((figcount-1)*figdist) 0.3 0.45]);
-    set(h,'Color', figcolor);
-    ar.model(m).plot_merged(jplot).fighandel_y = h;
-end
-clf;
-
 

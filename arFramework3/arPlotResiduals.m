@@ -16,7 +16,7 @@ if(~exist('saveToFile','var'))
     saveToFile = false;
 end
 
-h = myRaiseFigure('Residuals');
+h = arRaiseFigure(ar.plot, 'fighandel_res', 'Residuals');
 
 tmpres = [];
 for m=1:length(ar.model)
@@ -71,33 +71,4 @@ xlabel(g, 'residuals t_{i+1}')
 if(saveToFile)
     ar.plot.savePath_ResFig = arSaveFigure(h, 'residuals', '/Figures');
 end
-
-%% sub-functions
-
-
-
-function h = myRaiseFigure(figname)
-global ar
-openfigs = get(0,'Children');
-
-figcolor = [1 1 1];
-
-ar.plot.time = now;
-
-if(isfield(ar.plot, 'fighandel_res') && ~isempty(ar.plot.fighandel_res) && ...
-    ar.plot.fighandel_res ~= 0 && ...
-    sum(ar.plot.fighandel_res==openfigs)>0 && ...
-    strcmp(get(ar.plot.fighandel_res, 'Name'), figname))
-
-    h = ar.plot.fighandel_res;
-    figure(h);
-else
-    h = figure('Name', figname, 'NumberTitle','off', ...
-        'Units', 'normalized', 'Position', ...
-        [0.71 0.7 0.25 0.2]);
-    set(h,'Color', figcolor);
-    ar.plot.fighandel_res = h;
-end
-
-
 
