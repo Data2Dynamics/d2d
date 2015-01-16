@@ -65,13 +65,9 @@ function arSaveFull(withSyms)
 global ar
 global pleGlobals  %#ok<NUSED>
 
-% remove storage-consuming fields in global ar if ar is huge:
-tmp = whos('ar');
-if(tmp.bytes > 5e8 || true)
-    arUncompressed = arCompress; % large matrices are removed, e.g. sx, su, ...
-else 
-    arUncompressed = [];
-end
+% remove storage-consuming fields in global ar
+% that are non-essential
+arCompress;
 
 % check is dir exists
 if(~exist(ar.config.savepath, 'dir'))
@@ -96,10 +92,6 @@ end
 save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
 fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
 
-if(~isempty(arUncompressed))
-    arUncompressed.config.savepath = ar.config.savepath;
-    ar = arUncompressed;
-end
 
 
 % save only parameters
