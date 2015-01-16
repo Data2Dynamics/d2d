@@ -17,9 +17,6 @@ end
 figure(jk)
 clf;
 
-% constants
-overplot = 0.1;
-
 if(ar.config.fiterrors == 1)
     chi2s = 2*ar.ndata*log(sqrt(2*pi)) + ar.ple.chi2s{jk};
     if(isfield(ar,'scan'))
@@ -66,7 +63,7 @@ text(mean(xlim), chi2curr+dchi2, sprintf('%2i%%', (1-ar.ple.alpha)*100), 'Color'
 
 hold off
 arSubplotStyle(gca)
-spacedAxisLimits(gca, overplot)
+arSpacedAxisLimits(gca)
 ylabel(ylabeltmp);
 
 if(sum(~isnan(chi2s))>0)
@@ -100,7 +97,7 @@ end
 plot([ar.ple.pStart(jk) ar.ple.pStart(jk)], ylim, 'k--')
 hold off
 
-spacedAxisLimits(gca, overplot)
+arSpacedAxisLimits(gca)
 xlim(xtmp);
 ylabel('parameter changes');
 xlabel(arNameTrafo(ar.pLabel{jk}));
@@ -111,48 +108,4 @@ if(length(istds)>nplot)
 else
     legend(ptmp)
 end
-
-
-function spacedAxisLimits(g, overplot)
-[xmin xmax ymin ymax] = axisLimits(g);
-xrange = xmax - xmin;
-if(xrange == 0)
-	xrange = 1;
-end
-yrange = ymax - ymin;
-if(yrange == 0)
-	yrange = 1;
-end
-xlim(g, [xmin-(xrange*overplot) xmax+(xrange*overplot)]);
-ylim(g, [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
-
-
-
-function [xmin xmax ymin ymax] = axisLimits(g)
-p = get(g,'Children');
-xmin = nan;
-xmax = nan;
-ymin = nan;
-ymax = nan;
-for j = 1:length(p)
-	if(~strcmp(get(p(j), 'Type'), 'text'))
-		xmin = min([xmin toRowVector(get(p(j), 'XData'))]);
-		xmax = max([xmax toRowVector(get(p(j), 'XData'))]);
-		%         get(p(j), 'UData')
-		%         get(p(j), 'LData')
-		%         set(p(j), 'LData', get(p(j), 'LData')*2)
-		if(strcmp(get(p(j), 'Type'),'hggroup'))
-			ymin = min([ymin toRowVector(get(p(j), 'YData'))-toRowVector(get(p(j), 'LData'))]);
-			ymax = max([ymax toRowVector(get(p(j), 'YData'))+toRowVector(get(p(j), 'UData'))]);
-		else
-			ymin = min([ymin toRowVector(get(p(j), 'YData'))]);
-			ymax = max([ymax toRowVector(get(p(j), 'YData'))]);
-		end
-	end
-end
-
-
-
-function b = toRowVector(a)
-b = a(:)';
 

@@ -33,11 +33,6 @@ if(~exist('doLegends','var'))
 	doLegends = true;
 end
 
-% constants
-
-
-overplot = 0.1;
-
 if(isfield(ar.config,'nfine_dr_plot'))
     nfine_dr_plot = ar.config.nfine_dr_plot;
     nfine_dr_method = ar.config.nfine_dr_method;
@@ -541,7 +536,7 @@ for jm = 1:length(ar.model)
                     'fy',ar.model(jm).data(jd).fy{jy}, ...
                     'fystd',ar.model(jm).data(jd).fystd{jy} ...                    
                     ))
-                arSpacedAxisLimits(g, overplot);
+                arSpacedAxisLimits(g);
             end
             
             ar.model(jm).plot(jplot).chi2 = sum(chi2);

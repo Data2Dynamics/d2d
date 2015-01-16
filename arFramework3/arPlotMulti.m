@@ -28,7 +28,6 @@ if(~exist('ps_weigths','var') || isempty(ps_weigths))
 end
 
 % constants
-overplot = 0.1;
 linesize = 0.5;
 
 logplotting_xaxis = true;
@@ -526,7 +525,7 @@ for jm = 1:length(ar.model)
                 end
                 
                 title(g, arNameTrafo(ar.model(jm).data(jd).y{jy}));
-                spacedAxisLimits(g, overplot);
+                arSpacedAxisLimits(g);
             end
             
             if(saveToFile)
@@ -579,7 +578,7 @@ for jm = 1:length(ar.model)
                     end
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}));
 
-                    spacedAxisLimits(g, overplot);
+                    arSpacedAxisLimits(g);
                 end
                 countx = 0;
                 for jx = ix
@@ -597,7 +596,7 @@ for jm = 1:length(ar.model)
                     end
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}));
                     
-                    spacedAxisLimits(g, overplot);
+                    arSpacedAxisLimits(g);
                 end
             end
             
@@ -634,7 +633,7 @@ for jm = 1:length(ar.model)
                     end
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).vUnits{jv,3}, ar.model(jm).vUnits{jv,2}));
                     
-                    spacedAxisLimits(g, overplot);
+                    arSpacedAxisLimits(g);
                 end
             end
             
@@ -1080,50 +1079,5 @@ else
     iv = find(ar.model(jm).qPlotV);
 end
 [nrows, ncols] = arNtoColsAndRows(nv);
-
-
-function spacedAxisLimits(g, overplot)
-[xmin xmax ymin ymax] = axisLimits(g);
-xrange = xmax - xmin;
-if(xrange == 0)
-	xrange = 1;
-end
-yrange = ymax - ymin;
-if(yrange == 0)
-	yrange = 1;
-end
-xlim(g, [xmin-(xrange*overplot) xmax+(xrange*overplot)]);
-ylim(g, [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
-
-
-
-function [xmin xmax ymin ymax] = axisLimits(g)
-p = get(g,'Children');
-xmin = nan;
-xmax = nan;
-ymin = nan;
-ymax = nan;
-for j = 1:length(p)
-	if(~strcmp(get(p(j), 'Type'), 'text'))
-		xmin = min([xmin toRowVector(get(p(j), 'XData'))]);
-		xmax = max([xmax toRowVector(get(p(j), 'XData'))]);
-		%         get(p(j), 'UData')
-		%         get(p(j), 'LData')
-		%         set(p(j), 'LData', get(p(j), 'LData')*2)
-		if(strcmp(get(p(j), 'Type'),'hggroup'))
-			ymin = min([ymin toRowVector(get(p(j), 'YData'))-toRowVector(get(p(j), 'LData'))]);
-			ymax = max([ymax toRowVector(get(p(j), 'YData'))+toRowVector(get(p(j), 'UData'))]);
-		else
-			ymin = min([ymin toRowVector(get(p(j), 'YData'))]);
-			ymax = max([ymax toRowVector(get(p(j), 'YData'))]);
-		end
-	end
-end
-
-
-
-function b = toRowVector(a)
-b = a(:)';
-
 
 

@@ -28,7 +28,6 @@ if(~exist('fastPlot','var'))
 end
 
 % constants
-overplot = 0.1;
 if(ar.config.ploterrors == -1)
     linesize = 0.5;
 else
@@ -592,7 +591,7 @@ for jm = 1:length(ar.model)
                     end
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}));
                 end
-                arSpacedAxisLimits(g, overplot);
+                arSpacedAxisLimits(g);
             end
             countx = 0;
             for jx = ix
@@ -660,7 +659,7 @@ for jm = 1:length(ar.model)
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}));
                 end
                 
-                arSpacedAxisLimits(g, overplot);
+                arSpacedAxisLimits(g);
             end
             countz = 0;
             for jz = iz
@@ -722,7 +721,7 @@ for jm = 1:length(ar.model)
                     end
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2}));
                 end
-                arSpacedAxisLimits(g, overplot);
+                arSpacedAxisLimits(g);
             end
 
             if(saveToFile)

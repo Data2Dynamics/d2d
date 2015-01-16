@@ -8,9 +8,6 @@ global pleGlobals
 figure(1)
 clf;
 
-% constants
-overplot = 0.1;
-
 if(ar.config.fiterrors == 1)
     chi2s = 2*ar.ndata*log(sqrt(2*pi)) + ar.sampling.chi2s;
     chi2curr = 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit;
@@ -36,7 +33,7 @@ if(length(ar.sampling.ps)==1)
         plot(ar.sampling.ps{1}(qerrors), ar.sampling.chi2s_ple(qerrors), 'rs');
     end
     hold off
-    spacedAxisLimits(gca, overplot)
+    arSpacedAxisLimits(gca)
     ylabel(ylabeltmp);
     xlabel(arNameTrafo(ar.pLabel{ar.sampling.index}));
 elseif(length(ar.sampling.ps)==2)
@@ -96,48 +93,3 @@ elseif(length(ar.sampling.ps)==2)
     ylim([min(ar.sampling.ps{2}) max(ar.sampling.ps{2})])
     
 end
-
-
-function spacedAxisLimits(g, overplot)
-[xmin xmax ymin ymax] = axisLimits(g);
-xrange = xmax - xmin;
-if(xrange == 0)
-	xrange = 1;
-end
-yrange = ymax - ymin;
-if(yrange == 0)
-	yrange = 1;
-end
-xlim(g, [xmin-(xrange*overplot) xmax+(xrange*overplot)]);
-ylim(g, [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
-
-
-
-function [xmin xmax ymin ymax] = axisLimits(g)
-p = get(g,'Children');
-xmin = nan;
-xmax = nan;
-ymin = nan;
-ymax = nan;
-for j = 1:length(p)
-	if(~strcmp(get(p(j), 'Type'), 'text'))
-		xmin = min([xmin toRowVector(get(p(j), 'XData'))]);
-		xmax = max([xmax toRowVector(get(p(j), 'XData'))]);
-		%         get(p(j), 'UData')
-		%         get(p(j), 'LData')
-		%         set(p(j), 'LData', get(p(j), 'LData')*2)
-		if(strcmp(get(p(j), 'Type'),'hggroup'))
-			ymin = min([ymin toRowVector(get(p(j), 'YData'))-toRowVector(get(p(j), 'LData'))]);
-			ymax = max([ymax toRowVector(get(p(j), 'YData'))+toRowVector(get(p(j), 'UData'))]);
-		else
-			ymin = min([ymin toRowVector(get(p(j), 'YData'))]);
-			ymax = max([ymax toRowVector(get(p(j), 'YData'))]);
-		end
-	end
-end
-
-
-
-function b = toRowVector(a)
-b = a(:)';
-

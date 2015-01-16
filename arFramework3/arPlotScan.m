@@ -11,8 +11,6 @@ if(~exist('savetofile','var'))
     savetofile = false;
 end
 
-overplot = 0.1;
-
 sumples = 0;
 for j=jks
     if(~isempty(ar.scan.ps{j}))
@@ -69,7 +67,7 @@ for jk=jks
         
 
         xlabel(ax1, ['log_{10}(' arNameTrafo(ar.pLabel{jk}) ')'])
-        spacedAxisLimits(g, overplot)
+        arSpacedAxisLimits(g)
         
         if(mod(count-1,ncols)==0)
             if(ar.config.fiterrors == 1)
@@ -112,47 +110,3 @@ else
     set(h,'Color', figcolor);
     pleGlobals.fighandel_multi = h;
 end
-
-
-function spacedAxisLimits(g, overplot)
-[xmin xmax ymin ymax] = axisLimits(g);
-xrange = xmax - xmin;
-if(xrange == 0)
-    xrange = 1;
-end
-yrange = ymax - ymin;
-if(yrange == 0)
-    yrange = 1;
-end
-xlim(g, [xmin-(xrange*overplot) xmax+(xrange*overplot)]);
-ylim(g, [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
-
-function [xmin xmax ymin ymax] = axisLimits(g)
-p = get(g,'Children');
-xmin = nan;
-xmax = nan;
-ymin = nan;
-ymax = nan;
-for j = 1:length(p)
-    if(~strcmp(get(p(j), 'Type'), 'text'))
-        xmin = min([xmin toRowVector(get(p(j), 'XData'))]);
-        xmax = max([xmax toRowVector(get(p(j), 'XData'))]);
-        %         get(p(j), 'UData')
-        %         get(p(j), 'LData')
-        %         set(p(j), 'LData', get(p(j), 'LData')*2)
-        if(strcmp(get(p(j), 'Type'),'hggroup'))
-            ymin = min([ymin toRowVector(get(p(j), 'YData'))-toRowVector(get(p(j), 'LData'))]);
-            ymax = max([ymax toRowVector(get(p(j), 'YData'))+toRowVector(get(p(j), 'UData'))]);
-        else
-            ymin = min([ymin toRowVector(get(p(j), 'YData'))]);
-            ymax = max([ymax toRowVector(get(p(j), 'YData'))]);
-        end
-    end
-end
-
-
-
-function b = toRowVector(a)
-b = a(:)';
-
-

@@ -23,8 +23,6 @@ if(~exist('fastPlot','var'))
 end
 
 % constants
-
-overplot = 0.1;
 if(ar.config.ploterrors == -1)
     linesize = 0.5;
 else
@@ -207,7 +205,7 @@ for jm = 1:length(ar.model)
                             end
                             % ylabel(g, sprintf('%s [%s]', ar.model(jm).vUnits{jv,3}, ar.model(jm).vUnits{jv,2}));
                         end
-                        arSpacedAxisLimits(g, overplot);
+                        arSpacedAxisLimits(g);
                     end
                 end
                 

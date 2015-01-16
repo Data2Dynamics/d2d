@@ -13,9 +13,6 @@ end
 arSimu(true, true);
 arSimu(true, false);
 
-% constants
-overplot = 0.1;
-
 fcount = 1;
 for jm = 1:length(ar.model)
     nd = length(ar.model(jm).data);
@@ -43,7 +40,7 @@ for jm = 1:length(ar.model)
             end
             hold(g, 'off');
             
-            spacedAxisLimits(g, overplot);
+            arSpacedAxisLimits(g);
             title(g, arNameTrafo(ar.model(jm).data(jd).y{jy}));
             if(jy == 1)
                 legend(g, legendhandle, arNameTrafo(ar.model(jm).data(jd).p));
@@ -106,52 +103,5 @@ function [ncols, nrows, ny] = myColsAndRows(jm, jd)
 global ar
 ny = size(ar.model(jm).data(jd).y, 2);
 [nrows, ncols] = arNtoColsAndRows(ny);
-
-
-
-
-
-function spacedAxisLimits(g, overplot)
-[xmin xmax ymin ymax] = axisLimits(g);
-xrange = xmax - xmin;
-if(xrange == 0)
-    xrange = 1;
-end
-yrange = ymax - ymin;
-if(yrange == 0)
-    yrange = 1;
-end
-xlim(g, [xmin-(xrange*overplot) xmax+(xrange*overplot)]);
-ylim(g, [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
-
-
-
-function [xmin xmax ymin ymax] = axisLimits(g)
-p = get(g,'Children');
-xmin = nan;
-xmax = nan;
-ymin = nan;
-ymax = nan;
-for j = 1:length(p)
-    if(~strcmp(get(p(j), 'Type'), 'text'))
-        xmin = min([xmin toRowVector(get(p(j), 'XData'))]);
-        xmax = max([xmax toRowVector(get(p(j), 'XData'))]);
-        %         get(p(j), 'UData')
-        %         get(p(j), 'LData')
-        %         set(p(j), 'LData', get(p(j), 'LData')*2)
-        if(strcmp(get(p(j), 'Type'),'hggroup'))
-            ymin = min([ymin toRowVector(get(p(j), 'YData'))-toRowVector(get(p(j), 'LData'))]);
-            ymax = max([ymax toRowVector(get(p(j), 'YData'))+toRowVector(get(p(j), 'UData'))]);
-        else
-            ymin = min([ymin toRowVector(get(p(j), 'YData'))]);
-            ymax = max([ymax toRowVector(get(p(j), 'YData'))]);
-        end
-    end
-end
-
-
-
-function b = toRowVector(a)
-b = a(:)';
 
 

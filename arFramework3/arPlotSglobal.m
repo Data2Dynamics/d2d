@@ -24,9 +24,6 @@ end
 
 arChi2(true);
 
-% constants
-overplot = 0.1;
-
 % rows and cols
 np = length(ip);
 [nrows, ncols] = arNtoColsAndRows(np);
@@ -44,7 +41,7 @@ for jp = ip
         hold(g, 'off');
     end
     
-    arSpacedAxisLimits(g, overplot);
+    arSpacedAxisLimits(g);
     title(g, arNameTrafo(ar.pLabel{jp}));
     if(ccount == 1 && isfield(ar,'sresFD'))
         legend(g, {'SE','FD'});
@@ -85,7 +82,7 @@ for jp = ip
         hold(g, 'off');
     end
     
-    arSpacedAxisLimits(g, overplot);
+    arSpacedAxisLimits(g);
     title(g, arNameTrafo(ar.pLabel{jp}));
     if(ccount == 1 && isfield(ar,'sconstrFD'))
         legend(g, {'SE','FD'});
