@@ -17,7 +17,10 @@ for jm = 1:length(ar.model)
         arRaiseFigure(ar.model(jm).plots(jf), 'fighandel_sx', ['SX: ' ar.model(jm).name ' - ' ar.model(jm).condition(jc).checkstr], fcount);
         
         % rows and cols
-        [ncols, nrows, nu, nx, nz] = myColsAndRows(jm);
+        nu = size(ar.model(jm).u, 2);
+        nx = size(ar.model(jm).x, 2);
+        nz = size(ar.model(jm).z, 2);
+        [nrows, ncols] = arNtoColsAndRows(nu+nx+nz);
         
         np = length(ar.model(jm).condition(jc).p);
         for ju = 1:nu
@@ -93,18 +96,6 @@ for jm = 1:length(ar.model)
         fcount = fcount + 1;
     end
 end
-
-
-
-%% sub-functions
-
-function [ncols, nrows, nu, nx, nz] = myColsAndRows(jm)
-global ar
-nu = size(ar.model(jm).u, 2);
-nx = size(ar.model(jm).x, 2);
-nz = size(ar.model(jm).z, 2);
-[nrows, ncols] = arNtoColsAndRows(nu+nx+nz);
-
 
 
 

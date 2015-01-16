@@ -19,7 +19,8 @@ for jm = 1:length(ar.model)
         arRaiseFigure(ar.model(jm).data(jd), 'fighandel_sres', ['SRES: ' ar.model(jm).data(jd).name ' - ' ar.model(jm).data(jd).checkstr], fcount);
         
         % rows and cols
-        [ncols, nrows, ny] = myColsAndRows(jm, jd);
+        ny = size(ar.model(jm).data(jd).y, 2);
+        [nrows, ncols] = arNtoColsAndRows(ny);
         
         np = length(ar.model(jm).data(jd).p);
         for jy = 1:ny
@@ -57,13 +58,3 @@ end
 if(ar.config.fiterrors == 1)
     arPlotSRESERR
 end
-
-%% sub-functions
-
-
-
-function [ncols, nrows, ny] = myColsAndRows(jm, jd)
-global ar
-ny = size(ar.model(jm).data(jd).y, 2);
-[nrows, ncols] = arNtoColsAndRows(ny);
-

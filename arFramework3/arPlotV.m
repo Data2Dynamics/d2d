@@ -70,7 +70,7 @@ for jm = 1:length(ar.model)
                         [t, v, vlb, vub, jc] = getData(jm, jd);
                         
                         % rows and cols
-                        [ncols, nrows, iv] = myColsAndRows(jm);
+                        [ncols, nrows, iv] = myColsAndRowsV(jm);
                         
                         Clines = arLineMarkersAndColors(ccount, ...
                             length(ar.model(jm).plot(jplot).dLink), ...
@@ -113,7 +113,7 @@ for jm = 1:length(ar.model)
                     times = [];
                     for jd = ar.model(jm).plot(jplot).dLink
 						times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
-                        [ncols, nrows, iv] = myColsAndRows(jm);
+                        [ncols, nrows, iv] = myColsAndRowsV(jm);
                     end
                     
                 if(str2double(matVer.Version)>=8.1)
@@ -329,12 +329,7 @@ if(~isempty(lb))
     ub = ub(it);
 end
 
-
-%% sub-functions
-
-
-
-function [ncols, nrows, iv] = myColsAndRows(jm)
+function [ncols, nrows, iv] = myColsAndRowsV(jm)
 global ar
 if(~isfield(ar.model(jm), 'qPlotV'))
     nv = size(ar.model(jm).fv, 2);

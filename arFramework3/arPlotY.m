@@ -73,7 +73,11 @@ for jm = 1:length(ar.model)
                 
                 for jd = ar.model(jm).plot(jplot).dLink
                     % rows and cols
-                    [ncols, nrows, ny] = myColsAndRows(jm, jd);
+                    ny = size(ar.model(jm).data(jd).y, 2);
+                    [nrows, ncols] = arNtoColsAndRows(ny);
+                    if(nrows*ncols == ny)
+                        [nrows, ncols] = arNtoColsAndRows(ny+1);
+                    end
                     
                     Clines = arLineMarkersAndColors(ccount, ...
                         length(ar.model(jm).plot(jplot).dLink), ...
@@ -253,8 +257,12 @@ for jm = 1:length(ar.model)
             else
                 times = [];
                 for jd = ar.model(jm).plot(jplot).dLink
-					times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
-                    [ncols, nrows, ny] = myColsAndRows(jm, jd);
+                    times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
+                    ny = size(ar.model(jm).data(jd).y, 2);
+                    [nrows, ncols] = arNtoColsAndRows(ny);
+                    if(nrows*ncols == ny)
+                        [nrows, ncols] = arNtoColsAndRows(ny+1);
+                    end
 
                     for jy = 1:ny
                         % chi^2 & ndata
@@ -719,15 +727,3 @@ if(~isempty(lb))
 end
 
 
-
-
-%% sub-functions
-
-
-function [ncols, nrows, ny] = myColsAndRows(jm, jd)
-global ar
-ny = size(ar.model(jm).data(jd).y, 2);
-[nrows, ncols] = arNtoColsAndRows(ny);
-if(nrows*ncols == ny)
-    [nrows, ncols] = arNtoColsAndRows(ny+1);
-end

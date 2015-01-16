@@ -18,7 +18,8 @@ for jm = 1:length(ar.model)
             ['SYSTD: ' ar.model(jm).data(jd).name ' - ' ar.model(jm).data(jd).checkstr], fcount);
         
         % rows and cols
-        [ncols, nrows, ny] = myColsAndRows(jm, jd);
+        ny = size(ar.model(jm).data(jd).y, 2);
+        [nrows, ncols] = arNtoColsAndRows(ny);
         
         np = length(ar.model(jm).data(jd).p);
         for jy = 1:ny
@@ -52,14 +53,6 @@ for jm = 1:length(ar.model)
         fcount = fcount + 1;
     end
 end
-
-
-
-
-function [ncols, nrows, ny] = myColsAndRows(jm, jd)
-global ar
-ny = size(ar.model(jm).data(jd).y, 2);
-[nrows, ncols] = arNtoColsAndRows(ny);
 
 
 

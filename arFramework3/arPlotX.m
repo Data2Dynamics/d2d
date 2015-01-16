@@ -76,7 +76,7 @@ for jm = 1:length(ar.model)
             ccount = 1;
             if(~ar.model(jm).plot(jplot).doseresponse)
                 % rows and cols
-                [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm);
+                [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRowsX(jm);
                 
                 if(plot_x_collected)
                     cclegendstyles = zeros(1, length(ar.model(jm).u) + length(ar.model(jm).x) + length(ar.model(jm).z));
@@ -316,7 +316,7 @@ for jm = 1:length(ar.model)
                 times = [];
                 for jd = ar.model(jm).plot(jplot).dLink
 					times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
-                    [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm);
+                    [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRowsX(jm);
                 end
                 
                 if(str2double(matVer.Version)>=8.1)
@@ -972,10 +972,8 @@ if(~isempty(lb))
     ub = ub(it);
 end
 
-%% sub-functions
 
-
-function [ncols, nrows, nu, nx, nz, iu, ix, iz] = myColsAndRows(jm)
+function [ncols, nrows, nu, nx, nz, iu, ix, iz] = myColsAndRowsX(jm)
 global ar
 if(~isfield(ar.model(jm), 'qPlotU'))
     nu = size(ar.model(jm).u, 2);
