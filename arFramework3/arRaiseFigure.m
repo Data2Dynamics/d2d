@@ -43,6 +43,7 @@ else
         'Units', 'normalized', 'Position', ...
         [figpos figsize]);
     set(h,'Color', figcolor);
+    base.(fieldname) = h;
     fastPlotTmp = false;
 end
 
