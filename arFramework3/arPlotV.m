@@ -216,9 +216,11 @@ for jm = 1:length(ar.model)
                 
                 if(saveToFile)
                     if(ar.config.ploterrors == -1)
-                        ar.model(jm).plot(jplot).savePath_FigVCI = mySaveFigure(h, ar.model(jm).plot(jplot).name);
+                        ar.model(jm).plot(jplot).savePath_FigVCI = arSaveFigure(h, ...
+                            ar.model(jm).plot(jplot).name, '/FiguresCI/V');
                     else
-                        ar.model(jm).plot(jplot).savePath_FigV = mySaveFigure(h, ar.model(jm).plot(jplot).name);
+                        ar.model(jm).plot(jplot).savePath_FigV = arSaveFigure(h, ...
+                            ar.model(jm).plot(jplot).name, '/Figures/V');
                     end
                 end
                 
@@ -377,35 +379,6 @@ end
 if(~fastPlot)
     clf
 end
-
-
-
-function savePath = mySaveFigure(h, name)
-global ar
-if(ar.config.ploterrors == -1)
-    savePath = [arSave '/FiguresCI/V'];
-else
-    savePath = [arSave '/Figures/V'];
-end
-
-if(~exist(savePath, 'dir'))
-    mkdir(savePath)
-end
-
-savePath = arPathConvert([savePath '/' name]);
-
-saveas(h, savePath, 'fig');
-print('-depsc2', savePath);
-if(ispc)
-    print('-dpdf', savePath);
-elseif(ismac)
-    system(['/usr/local/bin/ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
-else
-    system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
-end
-
-
-
 
 
 

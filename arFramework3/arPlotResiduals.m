@@ -69,7 +69,7 @@ ylabel(g, 'residuals t_i')
 xlabel(g, 'residuals t_{i+1}')
 
 if(saveToFile)
-    ar.plot.savePath_ResFig = mySaveFigure(h, 'residuals');
+    ar.plot.savePath_ResFig = arSaveFigure(h, 'residuals', '/Figures');
 end
 
 %% sub-functions
@@ -98,30 +98,6 @@ else
     set(h,'Color', figcolor);
     ar.plot.fighandel_res = h;
 end
-
-
-
-function savePath = mySaveFigure(h, name)
-savePath = [arSave '/Figures'];
-
-if(~exist(savePath, 'dir'))
-    mkdir(savePath)
-end
-
-savePath = arPathConvert([savePath '/' name]);
-
-saveas(h, savePath, 'fig');
-print('-depsc2', savePath);
-if(ispc)
-    print('-dpdf', savePath);
-elseif(ismac)
-    system(['/usr/local/bin/ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
-else
-    system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
-end
-
-
-
 
 
 

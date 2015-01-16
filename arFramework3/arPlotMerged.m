@@ -306,7 +306,8 @@ for jx = find(~cellfun(@isempty, collect_cs))
     
     % save
     if(saveToFile)
-        ar.model(jm).plot_merged(jx).savePath_FigY = mySaveFigure(h, ar.model(jm).plot_merged(jx).name);
+        ar.model(jm).plot_merged(jx).savePath_FigY = arSaveFigure(h, ...
+            ar.model(jm).plot_merged(jx).name, '/FiguresMerged/Y');
     end
     
     figcount = figcount + 1;
@@ -353,27 +354,5 @@ else
     ar.model(m).plot_merged(jplot).fighandel_y = h;
 end
 clf;
-
-function savePath = mySaveFigure(h, name)
-
-savePath = [arSave '/FiguresMerged/Y'];
-
-if(~exist(savePath, 'dir'))
-	mkdir(savePath)
-end
-
-savePath = arPathConvert([savePath '/' name]);
-
-saveas(h, savePath, 'fig');
-print('-depsc', savePath);
-% print('-dpng', savePath);
-if(ispc)
-    print('-dpdf', savePath);
-elseif(ismac)
-    system(['/usr/local/bin/ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
-else
-    system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
-end
-% plot2svg([savePath '.svg'], h);
 
 
