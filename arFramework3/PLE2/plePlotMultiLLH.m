@@ -18,8 +18,6 @@ if(~exist('savetofile','var'))
     savetofile = false;
 end
 
-labelfontsize = 10;
-
 sumples = 0;
 for j=1:length(pleGlobals.ps)
     if(~isempty(pleGlobals.ps{j}))
@@ -50,8 +48,7 @@ count = 1;
 for jk=1:length(pleGlobals.ps)
     if(~isempty(pleGlobals.ps{jk}))
         g = subplot(nrows,ncols,count);
-        set(g, 'FontSize', labelfontsize);
-        set(g, 'FontName', 'TimesNewRoman');
+        arSubplotStyle(g);
 
         % profile
         plot(pleGlobals.ps{jk}(:,jk), transformFromLog(pleGlobals.chi2s{jk}), 'k', 'LineWidth', 1)
@@ -73,7 +70,7 @@ for jk=1:length(pleGlobals.ps)
 %         end
         
         % optimum
-        plot(pleGlobals.p(jk), transformFromLog(pleGlobals.chi2), '*', 'Color', [.5 .5 .5], 'LineWidth', 1, 'MarkerSize', labelfontsize)
+        plot(pleGlobals.p(jk), transformFromLog(pleGlobals.chi2), '*', 'Color', [.5 .5 .5], 'LineWidth', 1)
         hold off
         
         xlimtmp2 = (max(pleGlobals.ps{jk}(:,jk))-min(pleGlobals.ps{jk}(:,jk)))*0.05;
@@ -81,7 +78,7 @@ for jk=1:length(pleGlobals.ps)
             xlimtmp = [min(pleGlobals.ps{jk}(:,jk))-xlimtmp2 max(pleGlobals.ps{jk}(:,jk))+xlimtmp2];
             xlim(xlimtmp);
         end  
-        xlabel(['log_{10}(' myNameTrafo(pleGlobals.p_labels{jk})])
+        xlabel(['log_{10}(' arNameTrafo(pleGlobals.p_labels{jk})])
         
         dchi2 = pleGlobals.dchi2_point;
         if(pleGlobals.plot_simu)
@@ -132,6 +129,3 @@ else
     set(h,'Color', figcolor);
     pleGlobals.fighandel_multi_llh = h;
 end
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');

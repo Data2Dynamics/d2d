@@ -22,8 +22,6 @@ if(~exist('savetofile','var'))
     savetofile = false;
 end
 
-labelfontsize = 12;
-
 sumples = 0;
 for j=jks
     if(~isempty(pleGlobals.ps{j}))
@@ -72,7 +70,7 @@ for jk=jks
         
         count = count + 1;
         
-        labels{end+1} = myNameTrafo(pleGlobals.p_labels{jk}); %#ok<AGROW>
+        labels{end+1} = arNameTrafo(pleGlobals.p_labels{jk}); %#ok<AGROW>
     end
 end
 
@@ -95,8 +93,7 @@ if(count == 1)
     end
 end
 
-set(gca, 'FontSize', labelfontsize);
-set(gca, 'FontName', 'TimesNewRoman');
+arSubplotStyle(gca);
 
 ylimmax = pleGlobals.chi2+dchi2*1.3;
 ylim([minchi2-dchi2*0.1 ylimmax]);
@@ -136,9 +133,5 @@ else
     set(h,'Color', figcolor);
     pleGlobals.fighandel_multi2 = h;
 end
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
-
 
 

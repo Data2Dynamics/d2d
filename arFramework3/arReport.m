@@ -116,7 +116,7 @@ N = 10;
 
 for jm=1:length(ar.model)
     lp(fid, '\\clearpage\n');
-    lp(fid, '\\section{Model: %s}\n', myNameTrafo(ar.model(jm).name));
+    lp(fid, '\\section{Model: %s}\n', arNameTrafo(ar.model(jm).name));
     
     %% descriptions
     if(~isempty(ar.model(jm).description))
@@ -296,7 +296,7 @@ for jm=1:length(ar.model)
             lp(fid, 'The model structure is depicted in Figure \\ref{%s}.', [ar.model(jm).name '_graph']);
             
             copyfile(savePath_Graph, [savePath '/' ar.model(jm).name '_graph.pdf'])
-            captiontext = sprintf('\\textbf{%s network representation.} ', myNameTrafo(ar.model(jm).name));
+            captiontext = sprintf('\\textbf{%s network representation.} ', arNameTrafo(ar.model(jm).name));
             if(~isempty(ar.model(jm).u))
                 captiontext = [captiontext 'Diamond shaped nodes correspond to model inputs, see Equation '];
                 if(length(ar.model(jm).u)==1)
@@ -465,7 +465,7 @@ for jm=1:length(ar.model)
         jd = ar.model(jm).plot(jplot).dLink(1);
         if(isfield(ar.model(jm), 'data'))
             lp(fid, '\\clearpage\n');
-            lp(fid, '\\subsection{Experiment: %s}\n', myNameTrafo(ar.model(jm).plot(jplot).name));
+            lp(fid, '\\subsection{Experiment: %s}\n', arNameTrafo(ar.model(jm).plot(jplot).name));
             
             %% descriptions
             if(~isempty(ar.model(jm).data(jd).description))
@@ -490,7 +490,7 @@ for jm=1:length(ar.model)
             %% plots
             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigY') && ~isempty(ar.model(jm).plot(jplot).savePath_FigY))
                 lp(fid, 'The model observables and the experimental data is shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
-                captiontext = sprintf('\\textbf{%s observables and experimental data for the experiment.} ', myNameTrafo(ar.model(jm).plot(jplot).name));
+                captiontext = sprintf('\\textbf{%s observables and experimental data for the experiment.} ', arNameTrafo(ar.model(jm).plot(jplot).name));
                 captiontext = [captiontext 'The observables are displayed as solid lines. '];
                 captiontext = [captiontext 'The error model that describes the measurement noise ' ...
                     'is indicated by shades.'];
@@ -510,28 +510,28 @@ for jm=1:length(ar.model)
             headtab = '';
             unitstr = '';
             % time
-            unitstr = [unitstr sprintf('%s [%s] ', myNameTrafo(ar.model(jm).data(jd).tUnits{3}), ...
-                myNameTrafo(ar.model(jm).data(jd).tUnits{2}))];
+            unitstr = [unitstr sprintf('%s [%s] ', arNameTrafo(ar.model(jm).data(jd).tUnits{3}), ...
+                arNameTrafo(ar.model(jm).data(jd).tUnits{2}))];
             headstr = [headstr ' '];
             headtab = [headtab 'r'];
             % conditions
             if(~isempty(ar.model(jm).data(jd).condition))
                 for jp = 1:length(ar.model(jm).data(jd).condition)
-                    headstr = [headstr sprintf('& %s ', myNameTrafo(ar.model(jm).data(jd).condition(jp).parameter))];
+                    headstr = [headstr sprintf('& %s ', arNameTrafo(ar.model(jm).data(jd).condition(jp).parameter))];
                     unitstr = [unitstr '& '];
                     headtab = [headtab 'r'];
                 end
             end
             % y & ystd headers
             for jy=1:length(ar.model(jm).data(jd).y)
-                headstr = [headstr sprintf('& %s ', myNameTrafo(ar.model(jm).data(jd).y{jy}))];
-                unitstr = [unitstr sprintf('& %s [%s] ', myNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
-                    myNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
+                headstr = [headstr sprintf('& %s ', arNameTrafo(ar.model(jm).data(jd).y{jy}))];
+                unitstr = [unitstr sprintf('& %s [%s] ', arNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
+                    arNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
                 headtab = [headtab 'r'];
                 if(ar.config.fiterrors == -1)
-                    headstr = [headstr sprintf('& %s\\_std ', myNameTrafo(ar.model(jm).data(jd).y{jy}))];
-                    unitstr = [unitstr sprintf('& %s [%s] ', myNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
-                        myNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
+                    headstr = [headstr sprintf('& %s\\_std ', arNameTrafo(ar.model(jm).data(jd).y{jy}))];
+                    unitstr = [unitstr sprintf('& %s [%s] ', arNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
+                        arNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
                     headtab = [headtab 'r'];
                 end
             end
@@ -576,7 +576,7 @@ for jm=1:length(ar.model)
             
             lp(fid, '\t\t\t\\botrule');
             lp(fid, '\t\t\\end{tabular}}');
-            lp(fid, '\t\t\\mycaption{Experimental data for the experiment %s}{%s_data}{}', myNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name);
+            lp(fid, '\t\t\\mycaption{Experimental data for the experiment %s}{%s_data}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name);
             lp(fid, '\t\\doendcenter');
             lp(fid, '\t\\end{table}');
             
@@ -589,7 +589,7 @@ for jm=1:length(ar.model)
                     [savePath '/' ar.model(jm).plot(jplot).name '_x.pdf'])
                 
                 captiontext = sprintf('\\textbf{%s trajectories of the input, dynamic and derived variables.} ', ....
-                    myNameTrafo(ar.model(jm).plot(jplot).name));
+                    arNameTrafo(ar.model(jm).plot(jplot).name));
                 captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system, see Equation '];
                 captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \ref{' ...
                     sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
@@ -601,7 +601,7 @@ for jm=1:length(ar.model)
                 copyfile([ar.model(jm).plot(jplot).savePath_FigV '.pdf'], ...
                     [savePath '/' ar.model(jm).plot(jplot).name '_v.pdf'])
                 
-                captiontext = sprintf('\\textbf{%s reaction fluxes.} ', myNameTrafo(ar.model(jm).plot(jplot).name));
+                captiontext = sprintf('\\textbf{%s reaction fluxes.} ', arNameTrafo(ar.model(jm).plot(jplot).name));
                 captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system, see Equation '];
                 captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) ...
                     '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
@@ -1173,9 +1173,6 @@ minutes = floor(seconds/60);
 seconds = seconds - minutes*60;
 hmstimestr = sprintf('%02i:%02i:%05.2f', hours, minutes, seconds);
 
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
-str = strrep(str, '%', '\%');
 
 function str = myFormulas(str, jm)
 global ar

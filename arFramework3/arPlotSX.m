@@ -11,9 +11,6 @@ if(isempty(ar))
 end
 
 % constants
-labelfontsize = 12;
-labelfonttype = 'TimesNewRoman';
-rowstocols = 0.5; %0.7; 0.45;
 overplot = 0.1;
 
 fcount = 1;
@@ -23,12 +20,12 @@ for jm = 1:length(ar.model)
         myRaiseFigure(jm, ['SX: ' ar.model(jm).name ' - ' ar.model(jm).condition(jc).checkstr], fcount);
         
         % rows and cols
-        [ncols, nrows, nu, nx, nz] = myColsAndRows(jm, rowstocols);
+        [ncols, nrows, nu, nx, nz] = myColsAndRows(jm);
         
         np = length(ar.model(jm).condition(jc).p);
         for ju = 1:nu
             g = subplot(nrows,ncols,ju);
-            arSubplotStyle(g, labelfontsize, labelfonttype);
+            arSubplotStyle(g);
             
             legendhandle = zeros(1,np);
             
@@ -45,14 +42,14 @@ for jm = 1:length(ar.model)
             hold(g, 'off');
             
             spacedAxisLimits(g, overplot);
-            title(g, myNameTrafo(ar.model(jm).u{ju}));
+            title(g, arNameTrafo(ar.model(jm).u{ju}));
             if(ju == 1)
-                legend(g, legendhandle, myNameTrafo(ar.model(jm).condition(jc).p));
+                legend(g, legendhandle, arNameTrafo(ar.model(jm).condition(jc).p));
             end
         end
         for jx = 1:nx
             g = subplot(nrows,ncols,jx+nu);
-            arSubplotStyle(g, labelfontsize, labelfonttype);
+            arSubplotStyle(g);
             
             for jp = 1:np
                 linestyle = myLineStyle(np,jp);
@@ -66,7 +63,7 @@ for jm = 1:length(ar.model)
             hold(g, 'off');
             
             spacedAxisLimits(g, overplot);
-            title(g, myNameTrafo(ar.model(jm).x{jx}));
+            title(g, arNameTrafo(ar.model(jm).x{jx}));
             
             if(jx+nu == (nrows-1)*ncols + 1)
                 xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
@@ -75,7 +72,7 @@ for jm = 1:length(ar.model)
         end
         for jz = 1:nz
             g = subplot(nrows,ncols,jz+nu+nx);
-            arSubplotStyle(g, labelfontsize, labelfonttype);
+            arSubplotStyle(g);
             
             for jp = 1:np
                 linestyle = myLineStyle(np,jp);
@@ -89,7 +86,7 @@ for jm = 1:length(ar.model)
             hold(g, 'off');
             
             spacedAxisLimits(g, overplot);
-            title(g, myNameTrafo(ar.model(jm).z{jz}));
+            title(g, arNameTrafo(ar.model(jm).z{jz}));
             
             if(jz+nu+nx == (nrows-1)*ncols + 1)
                 xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
@@ -141,26 +138,15 @@ else
 end
 
 
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
-
-
-
-
-
-function [ncols, nrows, nu, nx, nz] = myColsAndRows(jm, rowstocols)
+function [ncols, nrows, nu, nx, nz] = myColsAndRows(jm)
 global ar
 nu = size(ar.model(jm).u, 2);
 nx = size(ar.model(jm).x, 2);
 nz = size(ar.model(jm).z, 2);
-[nrows, ncols] = NtoColsAndRows(nu+nx+nz, rowstocols);
+[nrows, ncols] = arNtoColsAndRows(nu+nx+nz);
 
 
 
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
 
 
 

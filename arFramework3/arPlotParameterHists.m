@@ -14,34 +14,24 @@ end
 
 figure(1); clf;
 
-% constants
-labelfontsize = 12;
-labelfonttype = 'TimesNewRoman';
-rowstocols = 0.5; %0.7; 0.45;
-
-[nrows, ncols] = NtoColsAndRows(length(jks), rowstocols);
+[nrows, ncols] = arNtoColsAndRows(length(jks));
 
 count = 1;
 for j=jks
     g = subplot(nrows,ncols,count);
-    arSubplotStyle(g, labelfontsize, labelfonttype)
+    arSubplotStyle(g)
     hist(ps(:,j), nbins);
     xlim([ar.lb(j) ar.ub(j)]);
     hold on
     plot([ar.p(j) ar.p(j)], ylim, 'r');
     hold off
     count = count + 1;
-    title(myNameTrafo(ar.pLabel{j}));
+    title(arNameTrafo(ar.pLabel{j}));
 end
 
 
 
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
 
 
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
 
 

@@ -13,10 +13,6 @@ if(~exist('saveToFile','var'))
     saveToFile = false;
 end
 
-% constants
-labelfontsize = 8;
-labelfonttype = 'TimesNewRoman';
-
 hfig = myRaiseFigure;
 
 for j=1:length(mledist)
@@ -65,7 +61,7 @@ for j=1:length(mledist)
     plot(chi2tmp, chi2pdftmp(:,j), 'Color', colors(j,:))
     hold off
     
-    arSubplotStyle(gca, labelfontsize, labelfonttype);
+    arSubplotStyle(gca);
     
     if(j==1)
         title('\chi^2 ')
@@ -83,7 +79,7 @@ for j=1:length(mledist)
     nc = nc / sum(nc) / xbinsdiff(1);
     bar(xbins, nc, 'EdgeColor', colors(j,:), 'FaceColor','w');
     
-    arSubplotStyle(gca, labelfontsize, labelfonttype);
+    arSubplotStyle(gca);
     
     if(j==1)
         title('\chi_{err}^2 ')
@@ -100,7 +96,7 @@ for j=1:length(mledist)
     nc = nc / sum(nc) / xbinsdiff(1);
     bar(xbins, nc, 'EdgeColor', colors(j,:), 'FaceColor','w');
     
-    arSubplotStyle(gca, labelfontsize, labelfonttype);
+    arSubplotStyle(gca);
     
     if(j==1)
         title('\chi_{fit}^2 ')
@@ -112,7 +108,7 @@ boxplot(g, datapdiff, 'orientation', 'horizontal', ...
     'labels', datalabels, 'outliersize', 1, 'jitter', 1, 'factordirection', 'list', ...
     'colors', morecolors, 'symbol', 'k.', ...
     'positions', datapos);
-arSubplotStyle(g, labelfontsize, labelfonttype);
+arSubplotStyle(g);
 title(g, 'difference of truth and estimate')
 xlabel(g, 'log_{10}(\theta-\theta^*)');
 
@@ -155,16 +151,11 @@ if(~exist(savePath, 'dir'))
     mkdir(savePath)
 end
 
-savePath = mypath([savePath '/' name]);
+savePath = arPathConvert([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc2', savePath);
 eval(['!ps2pdf  -dEPSCrop ' savePath '.eps '  savePath '.pdf']);
 
 
-
-function str = mypath(str)
-str = strrep(str, ' ', '\ ');
-str = strrep(str, '(', '\(');
-str = strrep(str, ')', '\)');
 

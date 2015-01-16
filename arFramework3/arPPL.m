@@ -119,7 +119,7 @@ ps = nan(n,length(ar.p));
 dx = sqrt(ar.ppl.dchi2*ar.ppl.rel_increase) * xstd;
 
 t = ar.model(m).condition(c).tExp(it);
-xLabel = myNameTrafo(ar.model(m).x{ix});
+xLabel = arNameTrafo(ar.model(m).x{ix});
 
 xExp = xSim;
 for j = 1:n
@@ -214,11 +214,6 @@ end
 
 end
 
-
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
-end
 
 function inv = chi2inv (x, n)
 if (nargin ~= 2)

@@ -27,8 +27,6 @@ if(~exist('savetofile','var') || isempty(savetofile))
     savetofile = false;
 end
 
-labelfontsize = 10;
-
 sumples = 0;
 for j=jks
     if(~isempty(pleGlobals.ps{j}))
@@ -76,8 +74,7 @@ end
 for jk=jks
     if(~isempty(pleGlobals.ps{jk}))
         g = subplot(nrows,ncols,count);
-        set(g, 'FontSize', labelfontsize);
-        set(g, 'FontName', 'TimesNewRoman');
+        arSubplotStyle(g);
         
         ps = pleGlobals.ps{jk};
         chi2s = pleGlobals.chi2s{jk};
@@ -144,15 +141,15 @@ for jk=jks
             if(count == 1)
                 if(pleGlobals.plot_point && ~pleGlobals.plot_simu)
                     text(mean(xlim), minchi2+chi2inv(1-pleGlobals.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
-                        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize', labelfontsize)
+                        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
                 elseif(~pleGlobals.plot_point && pleGlobals.plot_simu)
                     text(mean(xlim), minchi2+chi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), sprintf('%2i%% (simultaneous)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
-                        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize', labelfontsize)
+                        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
                 else
                     text(mean(xlim), minchi2+chi2inv(1-pleGlobals.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
-                        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize', labelfontsize)
+                        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
                     text(mean(xlim), minchi2+chi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), sprintf('%2i%% (simultaneous)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
-                        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize', labelfontsize)
+                        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
                 end
             end
         end
@@ -165,10 +162,10 @@ for jk=jks
 %         end
         
         % optimum
-        plot(pleGlobals.p(jk), pleGlobals.chi2, '*', 'Color', [.5 .5 .5], 'LineWidth', 1, 'MarkerSize', labelfontsize)
+        plot(pleGlobals.p(jk), pleGlobals.chi2, '*', 'Color', [.5 .5 .5], 'LineWidth', 1)
         hold off
 
-        xlabel(['log_{10}(' myNameTrafo(pleGlobals.p_labels{jk}) ')'])
+        xlabel(['log_{10}(' arNameTrafo(pleGlobals.p_labels{jk}) ')'])
         title(sprintf('parameter #%i', jk));
         
         if(mod(count-1,ncols)==0)
@@ -219,9 +216,5 @@ else
     set(h,'Color', figcolor);
     pleGlobals.fighandel_multi = h;
 end
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
-
 
 

@@ -40,7 +40,6 @@ if(~exist(pleGlobals.savePath, 'dir'))
     mkdir('.', pleGlobals.savePath)
 end
 
-labelfontsize = 12;
 farben = lines(length(pleGlobals.p_labels));
 zeichen = {'-', '--', '-.'};
 ps_label_count = 5;
@@ -58,8 +57,7 @@ for jj=1:length(indices)
         set(h, 'Color', [1 1 1]);
         
         g = subplot(5,1,[1 2 3]);
-        set(g, 'FontSize', labelfontsize);
-        set(g, 'FontName', 'TimesNewRoman');
+        arSubplotStyle(g);
         
         ps = pleGlobals.ps{jk};
         chi2s = pleGlobals.chi2s{jk};
@@ -197,8 +195,7 @@ for jj=1:length(indices)
         ps_var = zeros(1,sum(notjk));
         
         g = subplot(5,1,[4 5]);
-        set(g, 'FontSize', labelfontsize);
-        set(g, 'FontName', 'TimesNewRoman');
+        arSubplotStyle(g);
         
         if(subs_para==2)
             ps(:,notjk) = bsxfun(@minus,ps(:,notjk),pleGlobals.lb(notjk));
@@ -228,7 +225,7 @@ for jj=1:length(indices)
                 plot(ps(qhitbound(:,j),jk), ps(qhitbound(:,j),j)-medianp, 'o', 'Color', farben(j,:));
             end
             
-            legendstmp{ccount} = myNameTrafo(pleGlobals.p_labels{j}); %#ok<*AGROW>
+            legendstmp{ccount} = arNameTrafo(pleGlobals.p_labels{j}); %#ok<*AGROW>
             legendstmplines(ccount) = line_s;
             ccount = ccount + 1;
         end
@@ -251,9 +248,9 @@ for jj=1:length(indices)
         end
         ylabel({'change of';'other parameters'})
         if(pleGlobals.q_log10(jk))
-            xlabel(['log_{10}(' myNameTrafo(pleGlobals.p_labels{jk}) ')'])
+            xlabel(['log_{10}(' arNameTrafo(pleGlobals.p_labels{jk}) ')'])
         else
-            xlabel(myNameTrafo(pleGlobals.p_labels{jk}))
+            xlabel(arNameTrafo(pleGlobals.p_labels{jk}))
         end
         grid(g,'on');
 %         axis(g,'square');
@@ -300,7 +297,5 @@ else
     pleGlobals.fighandel(jk) = h;
 end
 
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
 
 

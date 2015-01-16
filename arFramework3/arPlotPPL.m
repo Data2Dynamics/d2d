@@ -49,7 +49,7 @@ text(mean(xlim), min(ppl)+ar.ppl.dchi2, sprintf('%2i%% (ndof = %i)', (1-ar.ppl.a
     ar.ppl.ndof), 'Color', 'r', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
 hold off
 legend('PPL','VPL');
-title(sprintf('%s (m=%i, c=%i, t=%g)', myNameTrafo(ar.model(m).x{ix}), m, c, t));
+title(sprintf('%s (m=%i, c=%i, t=%g)', arNameTrafo(ar.model(m).x{ix}), m, c, t));
 xlimtmp = xlim;
 
 if(ar.config.fiterrors == 1)
@@ -80,7 +80,7 @@ for j=find(qFit)
     line_s = plot(xfit(qisnonan), ps(qisnonan,j)-medianp, [zeichen{zeichenindex}], 'color', farben(j,:));
     hold on
     
-    legendstmp{ccount} = myNameTrafo(ar.pLabel{j}); %#ok<*agrow>
+    legendstmp{ccount} = arNameTrafo(ar.pLabel{j}); %#ok<*agrow>
     legendstmplines(ccount) = line_s;
     ccount = ccount + 1;
 end
@@ -101,13 +101,11 @@ end
 xlim(xlimtmp);
 ylabel({'change of parameters'})
 if(qLog10)
-    xlabel(['log_{10}(' myNameTrafo(ar.model(m).x{ix}) ')'])
+    xlabel(['log_{10}(' arNameTrafo(ar.model(m).x{ix}) ')'])
 else
-    xlabel(myNameTrafo(ar.model(m).x{ix}))
+    xlabel(arNameTrafo(ar.model(m).x{ix}))
 end
 grid(g,'on');
 
 
 
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');

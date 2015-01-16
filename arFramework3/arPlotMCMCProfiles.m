@@ -5,8 +5,6 @@ function arPlotMCMCProfiles(jks, Nthinning)
 global ar
 global pleGlobals;
 
-labelfontsize = 12;
-
 if(~exist('Nthinning','var'))
     Nthinning = 1;
 end
@@ -18,11 +16,9 @@ if(~exist('jks','var') || isempty(jks))
     jks = find(ar.qFit==1);
 end
 
-rowstocols = 0.5; %0.7; 0.45;
-
 jks = jks(ar.qFit(jks)==1);
 
-[nrows, ncols] = NtoColsAndRows(length(jks), rowstocols);
+[nrows, ncols] = arNtoColsAndRows(length(jks));
 
 if(isfield(ar,'ps') && ~isempty(ar.ps))
     ps_mcmc = ar.ps;
@@ -69,8 +65,7 @@ for jk=jks
     end
     
     g = subplot(nrows, ncols, count);
-    set(g, 'FontSize', labelfontsize);
-    set(g, 'FontName', 'TimesNewRoman');
+    arSubplotStyle(g);
     
     % plot MCMC
     if(~isempty(ps_mcmc))
@@ -95,7 +90,7 @@ for jk=jks
     hold off
 
     xlim([xlimtmp(1)-xlimtmp2*0.05 xlimtmp(2)+xlimtmp2*0.05]);
-    xlabel(['log_{10}(' myNameTrafo(pleGlobals.p_labels{jk}) ')'])
+    xlabel(['log_{10}(' arNameTrafo(pleGlobals.p_labels{jk}) ')'])
     ylabel(ystr);
     
     if(~isempty(ps_ple))
@@ -151,10 +146,4 @@ else
     pleGlobals.fighandel_multi = h;
 end
 
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
-
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
 

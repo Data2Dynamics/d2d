@@ -14,8 +14,6 @@ if(Nthinning>1)
     chi2s = chi2s(mod(1:length(chi2s),Nthinning)==1,:);
 end
 
-labelfontsize = 12;
-
 h = myRaiseFigure('mcmc chains');
 set(h, 'Color', [1 1 1]);
 
@@ -23,11 +21,10 @@ if(~exist('jks','var') || isempty(jks))
     jks = find(ar.qFit==1);
 end
 
-rowstocols = 0.5; %0.7; 0.45;
 
 jks = jks(ar.qFit(jks)==1);
 
-[nrows, ncols] = NtoColsAndRows(length(jks), rowstocols);
+[nrows, ncols] = arNtoColsAndRows(length(jks));
 
 count = 1;
 for jk=jks
@@ -38,8 +35,7 @@ for jk=jks
     end
     
     g = subplot(nrows, ncols, count);
-    set(g, 'FontSize', labelfontsize);
-    set(g, 'FontName', 'TimesNewRoman');
+    arSubplotStyle(g)
 
     plot(ps(:,jk), chi2s, 'kx', 'MarkerSize', 1)
     if(nargin>2)
@@ -59,7 +55,7 @@ for jk=jks
     else
         ylim([min(chi2s(:)) quantile(chi2s, 0.99)]);
     end
-    title(myNameTrafo(ar.pLabel{jk}))
+    title(arNameTrafo(ar.pLabel{jk}))
     
     count = count + 1;
 end
@@ -87,10 +83,5 @@ else
     pleGlobals.fighandel_multi = h;
 end
 
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
 
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
 

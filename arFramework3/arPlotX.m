@@ -28,9 +28,6 @@ if(~exist('fastPlot','var'))
 end
 
 % constants
-labelfontsize = 12;
-labelfonttype = 'Arial';
-rowstocols = 0.5;
 overplot = 0.1;
 if(ar.config.ploterrors == -1)
     linesize = 0.5;
@@ -76,7 +73,7 @@ for jm = 1:length(ar.model)
             ccount = 1;
             if(~ar.model(jm).plot(jplot).doseresponse)
                 % rows and cols
-                [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm, rowstocols);
+                [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm);
                 
                 if(plot_x_collected)
                     cclegendstyles = zeros(1, length(ar.model(jm).u) + length(ar.model(jm).x) + length(ar.model(jm).z));
@@ -105,7 +102,7 @@ for jm = 1:length(ar.model)
                                 g = subplot(nrows,ncols,countu);
                             end
                             ar.model(jm).plot(jplot).gu(ju) = g;
-                            arSubplotStyle(g, labelfontsize, labelfonttype);
+                            arSubplotStyle(g);
                             ltmp = plot(g, t, u(:,ju), Clines{:}, 'LineWidth', linesize);
                             if(plot_x_collected)
                                 cclegendstyles(countu) = ltmp;
@@ -148,7 +145,7 @@ for jm = 1:length(ar.model)
                                 g = subplot(nrows,ncols,countx+nu);
                             end
                             ar.model(jm).plot(jplot).gx(jx) = g;
-                            arSubplotStyle(g, labelfontsize, labelfonttype);
+                            arSubplotStyle(g);
                             
                             % plot ssa
                             if(isfield(ar.model(jm).condition(jc), 'xFineSSA'))
@@ -242,7 +239,7 @@ for jm = 1:length(ar.model)
                                 g = subplot(nrows,ncols,countz+nu+nx);
                             end
                             ar.model(jm).plot(jplot).gz(jz) = g;
-                            arSubplotStyle(g, labelfontsize, labelfonttype);
+                            arSubplotStyle(g);
                             
                             % plot ssa
                             if(isfield(ar.model(jm).condition(jc), 'zFineSSA'))
@@ -312,7 +309,7 @@ for jm = 1:length(ar.model)
                 times = [];
                 for jd = ar.model(jm).plot(jplot).dLink
 					times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
-                    [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm, rowstocols);
+                    [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRows(jm);
                 end
                 
                 if(str2double(matVer.Version)>=8.1)
@@ -378,7 +375,7 @@ for jm = 1:length(ar.model)
                                     g = subplot(nrows,ncols,countu);
                                 end
                                 ar.model(jm).plot(jplot).gu(ju) = g;
-                                arSubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g);
                                 ltmp = plot(g, t, u, Clines{:}, 'LineWidth', linesize);
                                 if(plot_x_collected)
                                     cclegendstyles(countu) = ltmp;
@@ -436,7 +433,7 @@ for jm = 1:length(ar.model)
                                     g = subplot(nrows,ncols,countx+nu);
                                 end
                                 ar.model(jm).plot(jplot).gx(jx) = g;
-                                arSubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g);
                                 ltmp = plot(g, t, x, Clines{:}, 'LineWidth', linesize);
                                 if(plot_x_collected)
                                     cclegendstyles(countu+countx) = ltmp;
@@ -494,7 +491,7 @@ for jm = 1:length(ar.model)
                                     g = subplot(nrows,ncols,countz+nu+nx);
                                 end
                                 ar.model(jm).plot(jplot).gz(jz) = g;
-                                arSubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g);
                                 ltmp = plot(g, t, z, Clines{:}, 'LineWidth', linesize);
                                 if(plot_x_collected)
                                     cclegendstyles(countu+countx+countz) = ltmp;
@@ -525,7 +522,7 @@ for jm = 1:length(ar.model)
             
             % axis & titles
             if(~fastPlotTmp && exist('suptitle','file')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
-                suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
+                suptitle(arNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
             end
             
             jd = ar.model(jm).plot(jplot).dLink(1);
@@ -553,15 +550,15 @@ for jm = 1:length(ar.model)
                 if(~fastPlotTmp)
                     hold(g, 'off');
                     
-                    title(g, myNameTrafo(ar.model(jm).u{ju}));
+                    title(g, arNameTrafo(ar.model(jm).u{ju}));
                     if(ju == iu(1))
                         if(plot_x_collected)
-                            legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
+                            legend(g, cclegendstyles, arNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
                         else
                             if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                                 if(~ar.model(jm).plot(jplot).doseresponse)
                                     if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                        legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition))
+                                        legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition))
                                     end
                                 else
                                     legendtmp = {};
@@ -577,7 +574,7 @@ for jm = 1:length(ar.model)
                                             ccount = ccount + 1;
                                         end
                                     end
-                                    legend(g, cclegendstyles, myNameTrafo(legendtmp))
+                                    legend(g, cclegendstyles, arNameTrafo(legendtmp))
                                 end
                             end
                         end
@@ -587,9 +584,9 @@ for jm = 1:length(ar.model)
                             xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                         else
                             if(logplotting_xaxis)
-                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                xlabel(g, sprintf('log_{10}(%s)', arNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
                             else
-                                xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                xlabel(g, sprintf('%s', arNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
                             end
                         end
                     end
@@ -615,12 +612,12 @@ for jm = 1:length(ar.model)
                     hold(g, 'off');    
                     if(nu == 0 && jx == ix(1))
                         if(plot_x_collected)
-                            legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
+                            legend(g, cclegendstyles, arNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
                         else
                             if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                                 if(~ar.model(jm).plot(jplot).doseresponse)
                                     if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                        legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition))
+                                        legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition))
                                     end
                                 else
                                     legendtmp = {};
@@ -636,7 +633,7 @@ for jm = 1:length(ar.model)
                                             ccount = ccount + 1;
                                         end
                                     end
-                                    legend(g, cclegendstyles, myNameTrafo(legendtmp))
+                                    legend(g, cclegendstyles, arNameTrafo(legendtmp))
                                 end
                             end
                         end
@@ -644,19 +641,19 @@ for jm = 1:length(ar.model)
 
                     if(isfield(ar.model(jm), 'xNames') && ~isempty(ar.model(jm).xNames{jx}) && ...
                             ~strcmp(ar.model(jm).xNames{jx},ar.model(jm).x{jx}))
-                        title(g, [myNameTrafo(ar.model(jm).xNames{jx}) ' (' myNameTrafo(ar.model(jm).x{jx}) ')']);
+                        title(g, [arNameTrafo(ar.model(jm).xNames{jx}) ' (' arNameTrafo(ar.model(jm).x{jx}) ')']);
                     else
-                        title(g, myNameTrafo(ar.model(jm).x{jx}));
+                        title(g, arNameTrafo(ar.model(jm).x{jx}));
                     end
                     if(countx+nu == (nrows-1)*ncols + 1)
                         if(~ar.model(jm).plot(jplot).doseresponse)
                             xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                         else
                             if(logplotting_xaxis)
-                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                xlabel(g, sprintf('log_{10}(%s)', arNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
 
                             else
-                                xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                xlabel(g, sprintf('%s', arNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
                             end
                         end
                     end
@@ -681,16 +678,16 @@ for jm = 1:length(ar.model)
                 if(~fastPlotTmp)
                     hold(g, 'off');
                     
-                    title(g, myNameTrafo(ar.model(jm).z{jz}));
+                    title(g, arNameTrafo(ar.model(jm).z{jz}));
                     
                     if(nu == 0 && nx == 0 && jz == iz(1))
                         if(plot_x_collected)
-                            legend(g, cclegendstyles, myNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
+                            legend(g, cclegendstyles, arNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
                         else
                             if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                                 if(~ar.model(jm).plot(jplot).doseresponse)
                                     if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                        legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition))
+                                        legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition))
                                     end
                                 else
                                     legendtmp = {};
@@ -706,7 +703,7 @@ for jm = 1:length(ar.model)
                                             ccount = ccount + 1;
                                         end
                                     end
-                                    legend(g, cclegendstyles, myNameTrafo(legendtmp))
+                                    legend(g, cclegendstyles, arNameTrafo(legendtmp))
                                 end
                             end
                         end
@@ -717,9 +714,9 @@ for jm = 1:length(ar.model)
                             xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                         else
                             if(logplotting_xaxis)
-                                xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
+                                xlabel(g, sprintf('log_{10}(%s)', arNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter)));
                             else
-                                xlabel(g, sprintf('%s', myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter))); 
+                                xlabel(g, sprintf('%s', arNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter))); 
                             end
                         end
                     end
@@ -1045,7 +1042,7 @@ if(length(name)>50)
     name = name(1:50);
 end
 
-savePath = mypath([savePath '/' name]);
+savePath = arPathConvert([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc2', savePath);
@@ -1058,21 +1055,12 @@ else
 end
 
 
-function str = mypath(str)
-str = strrep(str, ' ', '\ ');
-str = strrep(str, '(', '\(');
-str = strrep(str, ')', '\)');
-
-
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
 
 
 
 
 
-function [ncols, nrows, nu, nx, nz, iu, ix, iz] = myColsAndRows(jm, rowstocols)
+function [ncols, nrows, nu, nx, nz, iu, ix, iz] = myColsAndRows(jm)
 global ar
 if(~isfield(ar.model(jm), 'qPlotU'))
     nu = size(ar.model(jm).u, 2);
@@ -1095,12 +1083,8 @@ else
     nz = sum(ar.model(jm).qPlotZ);
     iz = find(ar.model(jm).qPlotZ);
 end
-[nrows, ncols] = NtoColsAndRows(nu+nx+nz, rowstocols);
+[nrows, ncols] = arNtoColsAndRows(nu+nx+nz);
 
 
-
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
 
 

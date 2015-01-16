@@ -16,9 +16,7 @@ ps2 = ar.ps;
 if(Nthinning>1)
     ps2 = ps2(mod(1:size(ps2,1),Nthinning)==1,:);
 end
-    
-labelfontsize = 12;
-
+   
 h = myRaiseFigure('mcmc chains');
 set(h, 'Color', [1 1 1]);
 
@@ -26,11 +24,10 @@ if(~exist('jks','var') || isempty(jks))
     jks = find(ar.qFit==1);
 end
 
-rowstocols = 0.5; %0.7; 0.45;
 
 jks = jks(ar.qFit(jks)==1);
 
-[nrows, ncols] = NtoColsAndRows(length(jks), rowstocols);
+[nrows, ncols] = arNtoColsAndRows(length(jks));
 
 count = 1;
 for jk=jks
@@ -55,8 +52,7 @@ for jk=jks
     if(Nthinning>1 && count==1)
         legend('no thinning', sprintf('1/%i thinning',Nthinning));
     end
-    set(g, 'FontSize', labelfontsize);
-    set(g, 'FontName', 'TimesNewRoman');
+    arSubplotStyle(g);
     
     count = count + 1;
 end
@@ -84,10 +80,4 @@ else
     pleGlobals.fighandel_multi = h;
 end
 
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
-
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
 

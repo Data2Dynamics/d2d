@@ -12,17 +12,12 @@ figure(1); clf;
 
 dchi2 = chi2inv(0.95, 1);
 
-% constants
-labelfontsize = 12;
-labelfonttype = 'TimesNewRoman';
-rowstocols = 0.5; %0.7; 0.45;
-
-[nrows, ncols] = NtoColsAndRows(length(jks), rowstocols);
+[nrows, ncols] = arNtoColsAndRows(length(jks));
 
 count = 1;
 for j=jks
     g = subplot(nrows,ncols,count);
-    arSubplotStyle(g, labelfontsize, labelfonttype)
+    arSubplotStyle(g)
 
     plot(ar.ps(:,j), log10(ar.chi2s-min(ar.chi2s)+1), 'xk');
     xlim([ar.lb(j) ar.ub(j)]);
@@ -32,17 +27,8 @@ for j=jks
     plot(xlim, log10([dchi2 dchi2]), 'k:');
     hold off
     count = count + 1;
-    title(myNameTrafo(ar.pLabel{j}));
+    title(arNameTrafo(ar.pLabel{j}));
     arSpacedAxisLimits;
 end
 
-
-
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
-
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
 

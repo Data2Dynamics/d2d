@@ -11,7 +11,6 @@ if(~exist('savetofile','var'))
     savetofile = false;
 end
 
-labelfontsize = 10;
 overplot = 0.1;
 
 sumples = 0;
@@ -21,13 +20,8 @@ for j=jks
     end
 end
 
-if(~exist('ncols', 'var') || isempty(ncols))
-    ncols = ceil(sumples^(0.4))+1;
-    nrows = ceil(sumples/ncols);
-end
-if(~exist('nrows', 'var') || isempty(nrows))
-    nrows = ceil(sumples/ncols);
-end
+[nrows, ncols] = arNtoColsAndRows(sumples);
+
 
 h = myRaiseFigure('likelihood scan');
 clf
@@ -74,7 +68,7 @@ for jk=jks
             'Parent', ax1)
         
 
-        xlabel(ax1, ['log_{10}(' myNameTrafo(ar.pLabel{jk}) ')'])
+        xlabel(ax1, ['log_{10}(' arNameTrafo(ar.pLabel{jk}) ')'])
         spacedAxisLimits(g, overplot)
         
         if(mod(count-1,ncols)==0)
@@ -119,8 +113,6 @@ else
     pleGlobals.fighandel_multi = h;
 end
 
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
 
 function spacedAxisLimits(g, overplot)
 [xmin xmax ymin ymax] = axisLimits(g);

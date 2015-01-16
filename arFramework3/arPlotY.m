@@ -34,9 +34,8 @@ if(~exist('doLegends','var'))
 end
 
 % constants
-labelfontsize = 12;
-labelfonttype = 'Arial';
-rowstocols = 0.5;
+
+
 overplot = 0.1;
 
 if(isfield(ar.config,'nfine_dr_plot'))
@@ -75,7 +74,7 @@ for jm = 1:length(ar.model)
                 
                 for jd = ar.model(jm).plot(jplot).dLink
                     % rows and cols
-                    [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols);
+                    [ncols, nrows, ny] = myColsAndRows(jm, jd);
                     
                     Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount);
                     
@@ -251,7 +250,7 @@ for jm = 1:length(ar.model)
                 times = [];
                 for jd = ar.model(jm).plot(jplot).dLink
 					times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
-                    [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols);
+                    [ncols, nrows, ny] = myColsAndRows(jm, jd);
 
                     for jy = 1:ny
                         % chi^2 & ndata
@@ -437,7 +436,7 @@ for jm = 1:length(ar.model)
             % axis & titles
             
             if(~fastPlotTmp && exist('suptitle','file')==2 && isfield(ar.config, 'useSuptitle') && ar.config.useSuptitle) % suptitle function is available
-                suptitle(myNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]))
+                suptitle(arNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]))
             end
             
             for jc = 1:length(ar.model(jm).data(jd).condition)
@@ -449,7 +448,7 @@ for jm = 1:length(ar.model)
                 g = ar.model(jm).plot(jplot).gy(jy);
                 if(~fastPlotTmp)
                     hold(g, 'off');
-                    arSubplotStyle(g, labelfontsize, labelfonttype);
+                    arSubplotStyle(g);
                     
                     qxlabel = jy == (nrows-1)*ncols + 1;
                     if(ny <= (nrows-1)*ncols)
@@ -463,7 +462,7 @@ for jm = 1:length(ar.model)
                                     ~isempty(ar.model(jm).plot(jplot).response_parameter))
                                 resppar = ar.model(jm).plot(jplot).response_parameter;
                             else
-                                resppar = myNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter);
+                                resppar = arNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter);
                             end
                             if(logplotting_xaxis)
                                 xlabel(g, sprintf('log_{10}(%s)', resppar));
@@ -482,7 +481,7 @@ for jm = 1:length(ar.model)
                         hl = [];
                         if(~ar.model(jm).plot(jplot).doseresponse)
                             if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                hl = legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition));
+                                hl = legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition));
                             end
                         else
                             legendtmp = {};
@@ -502,7 +501,7 @@ for jm = 1:length(ar.model)
                                     ccount = ccount + 1;
                                 end
                             end
-                            hl = legend(g, cclegendstyles, myNameTrafo(legendtmp));
+                            hl = legend(g, cclegendstyles, arNameTrafo(legendtmp));
                         end
                         if(~isempty(hl))
                             gref = subplot(nrows,ncols,nrows*ncols);
@@ -518,9 +517,9 @@ for jm = 1:length(ar.model)
                 titstr = {};
                 if(isfield(ar.model(jm).data(jd), 'yNames') && ~isempty(ar.model(jm).data(jd).yNames{jy}) && ...
                         ~strcmp(ar.model(jm).data(jd).yNames{jy}, ar.model(jm).data(jd).y{jy}))
-                    titstr{1} = [myNameTrafo(ar.model(jm).data(jd).yNames{jy}) ' (' myNameTrafo(ar.model(jm).data(jd).y{jy}) ')'];
+                    titstr{1} = [arNameTrafo(ar.model(jm).data(jd).yNames{jy}) ' (' arNameTrafo(ar.model(jm).data(jd).y{jy}) ')'];
                 else
-                    titstr{1} = myNameTrafo(ar.model(jm).data(jd).y{jy});
+                    titstr{1} = arNameTrafo(ar.model(jm).data(jd).y{jy});
                 end
                 if(isfield(ar.model(jm).data(jd), 'yExp'))
                     if(ndata(jy)>0)
@@ -791,7 +790,7 @@ if(length(name)>60)
     name = name([1:29 (end-29):end]);
 end
 
-savePath = mypath([savePath '/' name]);
+savePath = arPathConvert([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc', savePath);
@@ -814,25 +813,20 @@ if(exist('matlab2tikz','file')==2)
 end
 
 
-function str = mypath(str)
-str = strrep(str, ' ', '\ ');
-str = strrep(str, '(', '\(');
-str = strrep(str, ')', '\)');
-
-
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
 
 
 
 
-function [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols)
+
+
+
+
+function [ncols, nrows, ny] = myColsAndRows(jm, jd)
 global ar
 ny = size(ar.model(jm).data(jd).y, 2);
-[nrows, ncols] = arNtoColsAndRows(ny, rowstocols);
+[nrows, ncols] = arNtoColsAndRows(ny);
 if(nrows*ncols == ny)
-    [nrows, ncols] = arNtoColsAndRows(ny+1, rowstocols);
+    [nrows, ncols] = arNtoColsAndRows(ny+1);
 end
 
 

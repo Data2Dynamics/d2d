@@ -25,12 +25,11 @@ end
 arChi2(true);
 
 % constants
-rowstocols = 0.5; %0.7; 0.45;
 overplot = 0.1;
 
 % rows and cols
 np = length(ip);
-[nrows, ncols] = arNtoColsAndRows(np, rowstocols);
+[nrows, ncols] = arNtoColsAndRows(np);
 
 % data (and prior) residuals
 figure(1); clf;
@@ -46,7 +45,7 @@ for jp = ip
     end
     
     arSpacedAxisLimits(g, overplot);
-    title(g, myNameTrafo(ar.pLabel{jp}));
+    title(g, arNameTrafo(ar.pLabel{jp}));
     if(ccount == 1 && isfield(ar,'sresFD'))
         legend(g, {'SE','FD'});
     end
@@ -65,7 +64,7 @@ if(isfield(ar,'sresFD'))
     semilogy(min(abs(ar.sres(ires,ip) - ar.sresFD(ires,ip))./abs(ar.sres(ires,ip)), ...
         abs(ar.sres(ires,ip) - ar.sresFD(ires,ip))), 'x-')
     if(length(ip)<6)
-        legend(myNameTrafo(ar.pLabel(ip)))
+        legend(arNameTrafo(ar.pLabel(ip)))
     end
 end
 
@@ -87,7 +86,7 @@ for jp = ip
     end
     
     arSpacedAxisLimits(g, overplot);
-    title(g, myNameTrafo(ar.pLabel{jp}));
+    title(g, arNameTrafo(ar.pLabel{jp}));
     if(ccount == 1 && isfield(ar,'sconstrFD'))
         legend(g, {'SE','FD'});
     end
@@ -107,14 +106,8 @@ if(isfield(ar,'sconstrFD'))
         abs(ar.sconstr(iconstr,ip) - ar.sconstrFD(iconstr,ip))), 'x-');
     
     if(length(ip)<6)
-        legend(myNameTrafo(ar.pLabel(ip)))
+        legend(arNameTrafo(ar.pLabel(ip)))
     end
 end
 
 
-
-
-
-% sub-function
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');

@@ -14,9 +14,6 @@ arSimu(true, true);
 arSimu(true, false);
 
 % constants
-labelfontsize = 12;
-labelfonttype = 'TimesNewRoman';
-rowstocols = 0.5; %0.7; 0.45;
 overplot = 0.1;
 
 fcount = 1;
@@ -26,12 +23,12 @@ for jm = 1:length(ar.model)
         myRaiseFigure(jm, ['SRESERR: ' ar.model(jm).data(jd).name ' - ' ar.model(jm).data(jd).checkstr], fcount, jd);
         
         % rows and cols
-        [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols);
+        [ncols, nrows, ny] = myColsAndRows(jm, jd);
         
         np = length(ar.model(jm).data(jd).p);
         for jy = 1:ny
             g = subplot(nrows,ncols,jy);
-            arSubplotStyle(g, labelfontsize, labelfonttype);
+            arSubplotStyle(g);
             
             legendhandle = zeros(1,np);
             
@@ -47,9 +44,9 @@ for jm = 1:length(ar.model)
             hold(g, 'off');
             
             spacedAxisLimits(g, overplot);
-            title(g, myNameTrafo(ar.model(jm).data(jd).y{jy}));
+            title(g, arNameTrafo(ar.model(jm).data(jd).y{jy}));
             if(jy == 1)
-                legend(g, legendhandle, myNameTrafo(ar.model(jm).data(jd).p));
+                legend(g, legendhandle, arNameTrafo(ar.model(jm).data(jd).p));
             end
             
             if(jy == (nrows-1)*ncols + 1)
@@ -100,23 +97,17 @@ end
 
 
 
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
 
 
 
 
 
-function [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols)
+function [ncols, nrows, ny] = myColsAndRows(jm, jd)
 global ar
 ny = size(ar.model(jm).data(jd).y, 2);
-[nrows, ncols] = NtoColsAndRows(ny, rowstocols);
+[nrows, ncols] = arNtoColsAndRows(ny);
 
 
-
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
 
 
 

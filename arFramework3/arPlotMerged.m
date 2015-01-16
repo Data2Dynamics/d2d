@@ -362,7 +362,7 @@ if(~exist(savePath, 'dir'))
 	mkdir(savePath)
 end
 
-savePath = mypath([savePath '/' name]);
+savePath = arPathConvert([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc', savePath);
@@ -376,8 +376,4 @@ else
 end
 % plot2svg([savePath '.svg'], h);
 
-function str = mypath(str)
-str = strrep(str, ' ', '\ ');
-str = strrep(str, '(', '\(');
-str = strrep(str, ')', '\)');
 

@@ -38,7 +38,7 @@ if(length(ar.sampling.ps)==1)
     hold off
     spacedAxisLimits(gca, overplot)
     ylabel(ylabeltmp);
-    xlabel(myNameTrafo(ar.pLabel{ar.sampling.index}));
+    xlabel(arNameTrafo(ar.pLabel{ar.sampling.index}));
 elseif(length(ar.sampling.ps)==2)
     [X,Y] = meshgrid(ar.sampling.ps{1}, ar.sampling.ps{2});
     
@@ -89,17 +89,14 @@ elseif(length(ar.sampling.ps)==2)
     
     hold off
     
-    xlabel(myNameTrafo(ar.pLabel{ar.sampling.index(1)}));
-    ylabel(myNameTrafo(ar.pLabel{ar.sampling.index(2)}));
+    xlabel(arNameTrafo(ar.pLabel{ar.sampling.index(1)}));
+    ylabel(arNameTrafo(ar.pLabel{ar.sampling.index(2)}));
     
     xlim([min(ar.sampling.ps{1}) max(ar.sampling.ps{1})])
     ylim([min(ar.sampling.ps{2}) max(ar.sampling.ps{2})])
     
 end
 
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
 
 function spacedAxisLimits(g, overplot)
 [xmin xmax ymin ymax] = axisLimits(g);

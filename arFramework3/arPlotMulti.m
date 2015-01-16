@@ -28,9 +28,6 @@ if(~exist('ps_weigths','var') || isempty(ps_weigths))
 end
 
 % constants
-labelfontsize = 12;
-labelfonttype = 'TimesNewRoman';
-rowstocols = 0.5; %0.7; 0.45;
 overplot = 0.1;
 linesize = 0.5;
 
@@ -81,7 +78,7 @@ for jp=1:np
                         
                         for jd = ar.model(jm).plot(jplot).dLink
                             % rows and cols
-                            [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols);
+                            [ncols, nrows, ny] = myColsAndRows(jm, jd);
                             ar.model(jm).plot(jplot).ny = ny;
                             
                             Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount, weight);
@@ -144,7 +141,7 @@ for jp=1:np
                         times = [];
                         for jd = ar.model(jm).plot(jplot).dLink
 							times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
-                            [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols);
+                            [ncols, nrows, ny] = myColsAndRows(jm, jd);
                         end
                         
                         if(str2double(matVer.Version)>=8.1)
@@ -258,7 +255,7 @@ for jp=1:np
                             [t, u, x, jc] = getDataX(jm, jd);
                             
                             % rows and cols
-                            [ncols, nrows, nu, ~, iu, ix] = myColsAndRowsX(jm, rowstocols);
+                            [ncols, nrows, nu, ~, iu, ix] = myColsAndRowsX(jm);
                             
                             Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount, weight);
                             if(length(ar.model(jm).plot(jplot).dLink)==1)
@@ -275,7 +272,7 @@ for jp=1:np
                                     g = ar.model(jm).plot(jplot).gu(ju);
                                 end
                                 
-                                arSubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g);
                                 ltmp = plot(g, t, u(:,ju), Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 if(jd~=0)
@@ -294,7 +291,7 @@ for jp=1:np
                                 else
                                     g = ar.model(jm).plot(jplot).gx(jx);
                                 end
-                                arSubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g);
                                 ltmp = plot(g, t, x(:,jx), Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 if(jd~=0)
@@ -310,7 +307,7 @@ for jp=1:np
                         times = [];
                         for jd = ar.model(jm).plot(jplot).dLink
 							times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
-                            [ncols, nrows, nu, ~, iu, ix] = myColsAndRowsX(jm, rowstocols);
+                            [ncols, nrows, nu, ~, iu, ix] = myColsAndRowsX(jm);
                         end
                         
                         if(str2double(matVer.Version)>=8.1)
@@ -349,7 +346,7 @@ for jp=1:np
                                     else
                                         g = ar.model(jm).plot(jplot).gu(ju);
                                     end
-                                    arSubplotStyle(g, labelfontsize, labelfonttype);
+                                    arSubplotStyle(g);
                                     ltmp = plot(g, t, u, Clines{:}, 'LineWidth', linesize);
                                     cclegendstyles(ccount) = ltmp;
                                     ar.model(jm).data(jd).plot.u(ju,jt) = ltmp;
@@ -368,7 +365,7 @@ for jp=1:np
                                     else
                                         g = ar.model(jm).plot(jplot).gx(jx);
                                     end
-                                    arSubplotStyle(g, labelfontsize, labelfonttype);
+                                    arSubplotStyle(g);
                                     ltmp = plot(g, t, x, Clines{:}, 'LineWidth', linesize);
                                     cclegendstyles(ccount) = ltmp;
                                     ar.model(jm).data(jd).plot.x(jx,jt) = ltmp;
@@ -401,7 +398,7 @@ for jp=1:np
                             [t, v, jc] = getDataV(jm, jd);
                             
                             % rows and cols
-                            [ncols, nrows, iv] = myColsAndRowsV(jm, rowstocols);
+                            [ncols, nrows, iv] = myColsAndRowsV(jm);
                             
                             Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount, weight);
                             if(length(ar.model(jm).plot(jplot).dLink)==1)
@@ -417,7 +414,7 @@ for jp=1:np
                                 else
                                     g = ar.model(jm).plot(jplot).gv(jv);
                                 end
-                                arSubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g);
                                 ltmp = plot(g, t, v(:,jv), Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 if(jd~=0)
@@ -434,7 +431,7 @@ for jp=1:np
                         ds = ar.model(jm).plot(jplot).dLink;
                         for jd = ds
 							times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
-							[ncols, nrows, iv] = myColsAndRowsV(jm, rowstocols);
+							[ncols, nrows, iv] = myColsAndRowsV(jm);
                         end
                         
                         cclegendstyles = zeros(1,length(times));
@@ -454,7 +451,7 @@ for jp=1:np
                                 else
                                     g = ar.model(jm).plot(jplot).gv(jv);
                                 end
-                                arSubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g);
                                 ltmp = plot(g, t, v, Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 ar.model(jm).data(jd).plot.v(jv,jt) = ltmp;
@@ -492,13 +489,13 @@ for jm = 1:length(ar.model)
                 g = ar.model(jm).plot(jplot).gy(jy);
                 
                 hold(g, 'off');
-                arSubplotStyle(g, labelfontsize, labelfonttype);
+                arSubplotStyle(g);
                 
                 if(jy == (nrows-1)*ncols + 1)
                     if(~ar.model(jm).plot(jplot).doseresponse)
                         xlabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).tUnits{3}, ar.model(jm).data(jd).tUnits{2}));
                     else
-                        xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
+                        xlabel(g, sprintf('log_{10}(%s)', arNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
                     end
                 end
                 if(ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))
@@ -509,7 +506,7 @@ for jm = 1:length(ar.model)
                 
                 if(jy == 1 &&  (~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                     if(~ar.model(jm).plot(jplot).doseresponse)
-                        legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition))
+                        legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition))
                     else
                         legendtmp = {};
                         ccount = 1;
@@ -524,11 +521,11 @@ for jm = 1:length(ar.model)
                                 ccount = ccount + 1;
                             end
                         end
-                        legend(g, cclegendstyles, myNameTrafo(legendtmp))
+                        legend(g, cclegendstyles, arNameTrafo(legendtmp))
                     end
                 end
                 
-                title(g, myNameTrafo(ar.model(jm).data(jd).y{jy}));
+                title(g, arNameTrafo(ar.model(jm).data(jd).y{jy}));
                 spacedAxisLimits(g, overplot);
             end
             
@@ -541,7 +538,7 @@ for jm = 1:length(ar.model)
         
         if(ar.model(jm).qPlotXs(jplot))
             h = myRaiseFigureX(jm, jplot, ['X: ' ar.model(jm).plot(jplot).name], figcountx);
-            [ncols, nrows, nu, nx, iu, ix] = myColsAndRowsX(jm, rowstocols);
+            [ncols, nrows, nu, nx, iu, ix] = myColsAndRowsX(jm);
             
             % axis & titles
             for jd = ar.model(jm).plot(jplot).dLink
@@ -552,10 +549,10 @@ for jm = 1:length(ar.model)
                     
                     hold(g, 'off');
                     
-                    title(g, myNameTrafo(ar.model(jm).u{ju}));
+                    title(g, arNameTrafo(ar.model(jm).u{ju}));
                     if(ju == 1 &&  (~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                         if(~ar.model(jm).plot(jplot).doseresponse)
-                            legend(g, cclegendstyles, myNameTrafo(ar.model(jm).plot(jplot).condition))
+                            legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition))
                         else
                             legendtmp = {};
                             ccount = 1;
@@ -570,14 +567,14 @@ for jm = 1:length(ar.model)
                                     ccount = ccount + 1;
                                 end
                             end
-                            legend(g, cclegendstyles, myNameTrafo(legendtmp))
+                            legend(g, cclegendstyles, arNameTrafo(legendtmp))
                         end
                     end
                     if(nx==0 && countu == (nrows-1)*ncols + 1)
                         if(~ar.model(jm).plot(jplot).doseresponse)
                             xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                         else
-                            xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
+                            xlabel(g, sprintf('log_{10}(%s)', arNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
                         end
                     end
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}));
@@ -590,12 +587,12 @@ for jm = 1:length(ar.model)
                     g = ar.model(jm).plot(jplot).gx(jx);
                     hold(g, 'off');
                     
-                    title(g, myNameTrafo(ar.model(jm).x{jx}));
+                    title(g, arNameTrafo(ar.model(jm).x{jx}));
                     if(countx+nu == (nrows-1)*ncols + 1)
                         if(~ar.model(jm).plot(jplot).doseresponse)
                             xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                         else
-                            xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
+                            xlabel(g, sprintf('log_{10}(%s)', arNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
                         end
                     end
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}));
@@ -613,7 +610,7 @@ for jm = 1:length(ar.model)
         
         if(ar.model(jm).qPlotVs(jplot))
             h = myRaiseFigureV(jm, jplot, ['V: ' ar.model(jm).plot(jplot).name], figcountv);
-            [ncols, nrows, iv] = myColsAndRowsV(jm, rowstocols);
+            [ncols, nrows, iv] = myColsAndRowsV(jm);
             
             % axis & titles
             for jd = ar.model(jm).plot(jplot).dLink
@@ -626,13 +623,13 @@ for jm = 1:length(ar.model)
 %                         title(g, sprintf('v_{%i}', jv));
 %                         fprintf('v%i: %s\n', jv, ar.model(jm).fv{jv});
 
-                    title(g, sprintf('v_{%i}: %s', jv, myNameTrafo(ar.model(jm).fv{jv})));
+                    title(g, sprintf('v_{%i}: %s', jv, arNameTrafo(ar.model(jm).fv{jv})));
 
                     if(countv == (nrows-1)*ncols + 1)
                         if(~ar.model(jm).plot(jplot).doseresponse)
                             xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                         else
-                            xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
+                            xlabel(g, sprintf('log_{10}(%s)', arNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
                         end
                     end
                     ylabel(g, sprintf('%s [%s]', ar.model(jm).vUnits{jv,3}, ar.model(jm).vUnits{jv,2}));
@@ -990,7 +987,7 @@ if(~exist(savePath, 'dir'))
 	mkdir(savePath)
 end
 
-savePath = mypath([savePath '/' name]);
+savePath = arPathConvert([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc', savePath);
@@ -1011,7 +1008,7 @@ if(~exist(savePath, 'dir'))
     mkdir(savePath)
 end
 
-savePath = mypath([savePath '/' name]);
+savePath = arPathConvert([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc2', savePath);
@@ -1031,7 +1028,7 @@ if(~exist(savePath, 'dir'))
     mkdir(savePath)
 end
 
-savePath = mypath([savePath '/' name]);
+savePath = arPathConvert([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc2', savePath);
@@ -1044,31 +1041,17 @@ else
 end
 
 
-function str = mypath(str)
-str = strrep(str, ' ', '\ ');
-str = strrep(str, '(', '\(');
-str = strrep(str, ')', '\)');
 
 
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
-
-
-
-
-function [ncols, nrows, ny] = myColsAndRows(jm, jd, rowstocols)
+function [ncols, nrows, ny] = myColsAndRows(jm, jd)
 global ar
 ny = size(ar.model(jm).data(jd).y, 2);
-[nrows, ncols] = NtoColsAndRows(ny, rowstocols);
+[nrows, ncols] = arNtoColsAndRows(ny);
 
 
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
 
 
-function [ncols, nrows, nu, nx, iu, ix] = myColsAndRowsX(jm, rowstocols)
+function [ncols, nrows, nu, nx, iu, ix] = myColsAndRowsX(jm)
 global ar
 if(~isfield(ar.model(jm), 'qPlotU'))
     nu = size(ar.model(jm).u, 2);
@@ -1084,10 +1067,10 @@ else
     nx = sum(ar.model(jm).qPlotX);
     ix = find(ar.model(jm).qPlotX);
 end
-[nrows, ncols] = NtoColsAndRows(nu+nx, rowstocols);
+[nrows, ncols] = arNtoColsAndRows(nu+nx);
 
 
-function [ncols, nrows, iv] = myColsAndRowsV(jm, rowstocols)
+function [ncols, nrows, iv] = myColsAndRowsV(jm)
 global ar
 if(~isfield(ar.model(jm), 'qPlotV'))
     nv = size(ar.model(jm).fv, 2);
@@ -1096,7 +1079,7 @@ else
     nv = sum(ar.model(jm).qPlotV);
     iv = find(ar.model(jm).qPlotV);
 end
-[nrows, ncols] = NtoColsAndRows(nv, rowstocols);
+[nrows, ncols] = arNtoColsAndRows(nv);
 
 
 function spacedAxisLimits(g, overplot)

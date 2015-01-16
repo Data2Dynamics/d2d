@@ -23,9 +23,7 @@ if(~exist('fastPlot','var'))
 end
 
 % constants
-labelfontsize = 12;
-labelfonttype = 'Arial';
-rowstocols = 0.5;
+
 overplot = 0.1;
 if(ar.config.ploterrors == -1)
     linesize = 0.5;
@@ -70,7 +68,7 @@ for jm = 1:length(ar.model)
                         [t, v, vlb, vub, jc] = getData(jm, jd);
                         
                         % rows and cols
-                        [ncols, nrows, iv] = myColsAndRows(jm, rowstocols);
+                        [ncols, nrows, iv] = myColsAndRows(jm);
                         
                         Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount);
                         countv = 0;
@@ -79,7 +77,7 @@ for jm = 1:length(ar.model)
                             if(~fastPlotTmp)
                                 g = subplot(nrows,ncols,countv);
                                 ar.model(jm).plot(jplot).gv(jv) = g;
-                                arSubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g);
                                 ltmp = plot(g, t, v(:,jv), Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 if(jd~=0)
@@ -110,7 +108,7 @@ for jm = 1:length(ar.model)
                     times = [];
                     for jd = ar.model(jm).plot(jplot).dLink
 						times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
-                        [ncols, nrows, iv] = myColsAndRows(jm, rowstocols);
+                        [ncols, nrows, iv] = myColsAndRows(jm);
                     end
                     
                 if(str2double(matVer.Version)>=8.1)
@@ -159,7 +157,7 @@ for jm = 1:length(ar.model)
                                 if(~fastPlotTmp)
                                     g = subplot(nrows,ncols,countv);
                                     ar.model(jm).plot(jplot).gv(jv) = g;
-                                    arSubplotStyle(g, labelfontsize, labelfonttype);
+                                    arSubplotStyle(g);
                                     ltmp = plot(g, t, v, Clines{:}, 'LineWidth', linesize);
                                     cclegendstyles(ccount) = ltmp;
                                     ar.model(jm).data(jd).plot.v(jv,jt,jc) = ltmp;
@@ -195,16 +193,16 @@ for jm = 1:length(ar.model)
                             if(isempty(ar.model(jm).v{jv}))
                                 title(g, sprintf('v_{%i}', jv));
                             else
-                                title(g,myNameTrafo(ar.model(jm).v{jv}));
+                                title(g,arNameTrafo(ar.model(jm).v{jv}));
                             end
                             fprintf('v%i: %s\n', jv, ar.model(jm).fv{jv});
-                            % title(g, sprintf('v_{%i}: %s', jv, myNameTrafo(ar.model(jm).fv{jv})));
+                            % title(g, sprintf('v_{%i}: %s', jv, arNameTrafo(ar.model(jm).fv{jv})));
                             
                             if(countv == (nrows-1)*ncols + 1)
                                 if(~ar.model(jm).plot(jplot).doseresponse)
                                     xlabel(g, sprintf('%s [%s]', ar.model(jm).tUnits{3}, ar.model(jm).tUnits{2}));
                                 else
-                                    xlabel(g, sprintf('log_{10}(%s)', myNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
+                                    xlabel(g, sprintf('log_{10}(%s)', arNameTrafo(ar.model(jm).data(jd).condition(1).parameter)));
                                 end
                             end
                             % ylabel(g, sprintf('%s [%s]', ar.model(jm).vUnits{jv,3}, ar.model(jm).vUnits{jv,2}));
@@ -399,7 +397,7 @@ if(~exist(savePath, 'dir'))
     mkdir(savePath)
 end
 
-savePath = mypath([savePath '/' name]);
+savePath = arPathConvert([savePath '/' name]);
 
 saveas(h, savePath, 'fig');
 print('-depsc2', savePath);
@@ -413,19 +411,10 @@ end
 
 
 
-function str = mypath(str)
-str = strrep(str, ' ', '\ ');
-str = strrep(str, '(', '\(');
-str = strrep(str, ')', '\)');
 
 
 
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
-
-
-
-function [ncols, nrows, iv] = myColsAndRows(jm, rowstocols)
+function [ncols, nrows, iv] = myColsAndRows(jm)
 global ar
 if(~isfield(ar.model(jm), 'qPlotV'))
     nv = size(ar.model(jm).fv, 2);
@@ -434,13 +423,8 @@ else
     nv = sum(ar.model(jm).qPlotV);
     iv = find(ar.model(jm).qPlotV);
 end
-[nrows, ncols] = NtoColsAndRows(nv, rowstocols);
+[nrows, ncols] = arNtoColsAndRows(nv);
 
-
-
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
 
 
 

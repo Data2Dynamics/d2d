@@ -79,12 +79,12 @@ lp(fid, '\\maketitle\n');
 N = 10;
 
 for jm=1:length(ar.model)
-    lp(fid, '\\section{Model: %s}\n', myNameTrafo(ar.model(jm).name));
+    lp(fid, '\\section{Model: %s}\n', arNameTrafo(ar.model(jm).name));
     lp(fid, '\\subsection{General Definition}\n');
     
     if(doEquations)
         lp(fid, '\\begin{frame}');
-        lp(fid, '\\frametitle{Model: %s}\n', myNameTrafo(ar.model(jm).name));
+        lp(fid, '\\frametitle{Model: %s}\n', arNameTrafo(ar.model(jm).name));
         if(~isempty(ar.model(jm).description))
             lp(fid, '\\begin{itemize}');
             for jdes=1:length(ar.model(jm).description)
@@ -118,7 +118,7 @@ for jm=1:length(ar.model)
     if(exist(savePath_Graph,'file'))
         lp(fid, '\\begin{frame}');
         copyfile(savePath_Graph, [savePath '/' ar.model(jm).name '_graph.pdf'])
-% 		captiontext = sprintf('\\textbf{Network representation of the model %s}\\\\ ', myNameTrafo(ar.model(jm).name));
+% 		captiontext = sprintf('\\textbf{Network representation of the model %s}\\\\ ', arNameTrafo(ar.model(jm).name));
 % 		if(~isempty(ar.model(jm).u))
 % 			captiontext = [captiontext 'Diamond shaped nodes correspond to model inputs, see Equation '];
 % 			if(length(ar.model(jm).u)==1)
@@ -205,17 +205,17 @@ for jm=1:length(ar.model)
             for js = 1:length(ssource)
                 if(abs(ar.model(jm).N(ssource(js),jv)) == 1)
                     if(js>1)
-                        str = [str ' + ' myNameTrafo(ar.model(jm).x{ssource(js)})];
+                        str = [str ' + ' arNameTrafo(ar.model(jm).x{ssource(js)})];
                     else
-                        str = [str myNameTrafo(ar.model(jm).x{ssource(js)})];
+                        str = [str arNameTrafo(ar.model(jm).x{ssource(js)})];
                     end
                 else
                     if(js>1)
                         str = [str ' + ' num2str(abs(ar.model(jm).N(ssource(js),jv))) ...
-                            '*' myNameTrafo(ar.model(jm).x{ssource(js)})];
+                            '*' arNameTrafo(ar.model(jm).x{ssource(js)})];
                     else
                         str = [str num2str(abs(ar.model(jm).N(ssource(js),jv))) ...
-                            '*' myNameTrafo(ar.model(jm).x{ssource(js)})];
+                            '*' arNameTrafo(ar.model(jm).x{ssource(js)})];
                     end
                 end
             end
@@ -226,9 +226,9 @@ for jm=1:length(ar.model)
             starget = find(ar.model(jm).N(:,jv)>0);
             for js = 1:length(starget)
                 if(js>1)
-                    str = [str ' + ' myNameTrafo(ar.model(jm).x{starget(js)})];
+                    str = [str ' + ' arNameTrafo(ar.model(jm).x{starget(js)})];
                 else
-                    str = [str myNameTrafo(ar.model(jm).x{starget(js)})];
+                    str = [str arNameTrafo(ar.model(jm).x{starget(js)})];
                 end
             end
             if(isempty(starget))
@@ -368,13 +368,13 @@ for jm=1:length(ar.model)
 %% Experiments    
     
     for jplot=1:length(ar.model(jm).plot)
-        lp(fid, '\\subsection{Experiment: %s}\n', myNameTrafo(ar.model(jm).plot(jplot).name));
+        lp(fid, '\\subsection{Experiment: %s}\n', arNameTrafo(ar.model(jm).plot(jplot).name));
         jd = ar.model(jm).plot(jplot).dLink(1);
 
         if(isfield(ar.model(jm), 'data'))
             if(doEquations)
                 lp(fid, '\\begin{frame}');
-                lp(fid, '\\frametitle{Experiment: %s}', myNameTrafo(ar.model(jm).plot(jplot).name));
+                lp(fid, '\\frametitle{Experiment: %s}', arNameTrafo(ar.model(jm).plot(jplot).name));
                 if(~isempty(ar.model(jm).data(jd).description))
                     lp(fid, '\\begin{itemize}');
                     for jdes=1:length(ar.model(jm).data(jd).description)
@@ -584,7 +584,7 @@ for jm=1:length(ar.model)
                     [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
                 
 %                 lp(fid, 'The model outputs and the experimental data is show in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
-%                 captiontext = sprintf('\\textbf{Agreement of model outputs and experimental data for the experiment %s}\\\\', myNameTrafo(ar.model(jm).plot(jplot).name));
+%                 captiontext = sprintf('\\textbf{Agreement of model outputs and experimental data for the experiment %s}\\\\', arNameTrafo(ar.model(jm).plot(jplot).name));
 %                 captiontext = [captiontext 'The displayed model outputs (solid lines) are defined by Equation '];
 %                 captiontext = [captiontext '\ref{' sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, 1) '} -- \ref{' sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, length(ar.model(jm).data(jd).fy)) '}. '];
 %                 captiontext = [captiontext 'The error model that describes the measurement noise for each model output is indicated by shades around the model outputs and is given by Equation '];
@@ -599,28 +599,28 @@ for jm=1:length(ar.model)
 %             headtab = '';
 %             unitstr = '';
 %             % time
-%             unitstr = [unitstr sprintf('%s [%s] ', myNameTrafo(ar.model(jm).data(jd).tUnits{3}), ...
-%                 myNameTrafo(ar.model(jm).data(jd).tUnits{2}))];
+%             unitstr = [unitstr sprintf('%s [%s] ', arNameTrafo(ar.model(jm).data(jd).tUnits{3}), ...
+%                 arNameTrafo(ar.model(jm).data(jd).tUnits{2}))];
 %             headstr = [headstr ' '];
 %             headtab = [headtab 'r'];
 %             % conditions
 %             if(~isempty(ar.model(jm).data(jd).condition))
 %                 for jp = 1:length(ar.model(jm).data(jd).condition)
-%                     headstr = [headstr sprintf('& %s ', myNameTrafo(ar.model(jm).data(jd).condition(jp).parameter))];
+%                     headstr = [headstr sprintf('& %s ', arNameTrafo(ar.model(jm).data(jd).condition(jp).parameter))];
 %                     unitstr = [unitstr '& '];
 %                     headtab = [headtab 'r'];
 %                 end
 %             end
 %             % y & ystd headers
 %             for jy=1:length(ar.model(jm).data(jd).y)
-%                 headstr = [headstr sprintf('& %s ', myNameTrafo(ar.model(jm).data(jd).y{jy}))];
-%                 unitstr = [unitstr sprintf('& %s [%s] ', myNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
-%                     myNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
+%                 headstr = [headstr sprintf('& %s ', arNameTrafo(ar.model(jm).data(jd).y{jy}))];
+%                 unitstr = [unitstr sprintf('& %s [%s] ', arNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
+%                     arNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
 %                 headtab = [headtab 'r'];
 %                 if(ar.config.fiterrors == -1)
-%                     headstr = [headstr sprintf('& %s\_std ', myNameTrafo(ar.model(jm).data(jd).y{jy}))];
-%                     unitstr = [unitstr sprintf('& %s [%s] ', myNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
-%                         myNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
+%                     headstr = [headstr sprintf('& %s\_std ', arNameTrafo(ar.model(jm).data(jd).y{jy}))];
+%                     unitstr = [unitstr sprintf('& %s [%s] ', arNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
+%                         arNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
 %                     headtab = [headtab 'r'];
 %                 end
 %             end
@@ -665,7 +665,7 @@ for jm=1:length(ar.model)
 %             
 %             lp(fid, '\t\t\t\\botrule');
 %             lp(fid, '\t\t\\end{tabular}}');
-%             lp(fid, '\t\t\\mycaption{Experimental data for the experiment %s}{%s_data}{}', myNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name);
+%             lp(fid, '\t\t\\mycaption{Experimental data for the experiment %s}{%s_data}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name);
 %             lp(fid, '\t\\doendcenter');
 %             lp(fid, '\t\\end{table}');
         end
@@ -676,7 +676,7 @@ for jm=1:length(ar.model)
             lp(fid, 'The trajectories of the dynamical variables and external inputs that correspond to the experimental conditions in this experiment are shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_x']);
             copyfile([ar.model(jm).plot(jplot).savePath_FigX '.pdf'], ...
                 [savePath '/' ar.model(jm).plot(jplot).name '_x.pdf'])  
-%             captiontext = sprintf('\\textbf{Trajectories of the dynamical variables and external inputs for the experiment %s}\\\\', myNameTrafo(ar.model(jm).plot(jplot).name));
+%             captiontext = sprintf('\\textbf{Trajectories of the dynamical variables and external inputs for the experiment %s}\\\\', arNameTrafo(ar.model(jm).plot(jplot).name));
 %             captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system, see Equation '];
 %             captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
             lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_x.pdf'], [], [ar.model(jm).plot(jplot).name '_x']);
@@ -687,7 +687,7 @@ for jm=1:length(ar.model)
             lp(fid, 'The reaction fluxes that correspond to the experimental conditions in this experiment are shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_v']);
             copyfile([ar.model(jm).plot(jplot).savePath_FigV '.pdf'], ...
                 [savePath '/' ar.model(jm).plot(jplot).name '_v.pdf'])
-%             captiontext = sprintf('\\textbf{Reaction fluxes for the experiment %s}\\\\', myNameTrafo(ar.model(jm).plot(jplot).name));
+%             captiontext = sprintf('\\textbf{Reaction fluxes for the experiment %s}\\\\', arNameTrafo(ar.model(jm).plot(jplot).name));
 %             captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system, see Equation '];
 %             captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
             lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_v.pdf'], [], [ar.model(jm).plot(jplot).name '_v']);
@@ -1002,9 +1002,6 @@ minutes = floor(seconds/60);
 seconds = seconds - minutes*60;
 hmstimestr = sprintf('%02i:%02i:%05.2f', hours, minutes, seconds);
 
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
-str = strrep(str, '%', '\%');
 
 function str = myFormulas(str, jm)
 global ar

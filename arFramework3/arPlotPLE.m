@@ -18,8 +18,6 @@ figure(jk)
 clf;
 
 % constants
-labelfontsize = 12;
-labelfonttype = 'TimesNewRoman';
 overplot = 0.1;
 
 if(ar.config.fiterrors == 1)
@@ -64,10 +62,10 @@ plot(ps(qerrors,jk), chi2s(qerrors), 'x', 'Color', [.5 .5 .5]);
 % thresholds
 plot(xlim, [0 0]+chi2curr+dchi2, 'r--')
 text(mean(xlim), chi2curr+dchi2, sprintf('%2i%%', (1-ar.ple.alpha)*100), 'Color', 'r', ...
-    'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize', labelfontsize)
+    'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
 
 hold off
-arSubplotStyle(gca, labelfontsize, labelfonttype)
+arSubplotStyle(gca)
 spacedAxisLimits(gca, overplot)
 ylabel(ylabeltmp);
 
@@ -105,7 +103,7 @@ hold off
 spacedAxisLimits(gca, overplot)
 xlim(xtmp);
 ylabel('parameter changes');
-xlabel(myNameTrafo(ar.pLabel{jk}));
+xlabel(arNameTrafo(ar.pLabel{jk}));
 ptmp = ar.pLabel(notjk);
 ptmp = strrep(ptmp,'_','\_');
 if(length(istds)>nplot)
@@ -113,9 +111,6 @@ if(length(istds)>nplot)
 else
     legend(ptmp)
 end
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
 
 
 function spacedAxisLimits(g, overplot)

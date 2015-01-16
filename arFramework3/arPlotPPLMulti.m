@@ -16,13 +16,8 @@ if(~exist('dosurf','var'))
     dosurf = false;
 end
 
-% constants
-labelfontsize = 12;
-labelfonttype = 'TimesNewRoman';
-rowstocols = 0.5; %0.7; 0.45;
-
 qLog10 = ar.ppl.qLog10;
-[nrows, ncols] = NtoColsAndRows(length(ar.model(m).condition(c).ppl.ix), rowstocols);
+[nrows, ncols] = arNtoColsAndRows(length(ar.model(m).condition(c).ppl.ix));
 
 chi2 = ar.chi2fit;
 if(ar.config.fiterrors == 1)
@@ -37,8 +32,7 @@ clf;
 for jx=1:length(ar.model(m).condition(c).ppl.ix)
     ix = ar.model(m).condition(c).ppl.ix(jx);
     g = subplot(nrows, ncols, jx);
-    set(g, 'FontSize', labelfontsize);
-    set(g, 'FontName', labelfonttype);
+    arSubplotStyle(g)
     
     t = ar.model(m).condition(c).ppl.t;
     if(vpl)
@@ -217,17 +211,10 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
         end
     end
 
-    title(sprintf('%s', myNameTrafo(ar.model(m).x{ix})));
+    title(sprintf('%s', arNameTrafo(ar.model(m).x{ix})));
     
     xlabel(g, sprintf('%s [%s]', ar.model(m).tUnits{3}, ar.model(m).tUnits{2}));
     ylabel(sprintf('%s [%s]', ar.model(m).xUnits{jx,3}, ar.model(m).xUnits{jx,2}))
 end
 
 
-
-function str = myNameTrafo(str)
-str = strrep(str, '_', '\_');
-
-function [nrows, ncols] = NtoColsAndRows(n, rowstocols)
-nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
