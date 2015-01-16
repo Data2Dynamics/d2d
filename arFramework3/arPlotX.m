@@ -57,13 +57,9 @@ for jm = 1:length(ar.model)
     for jplot = 1:length(ar.model(jm).plot)
         if(ar.model(jm).qPlotXs(jplot)==1)
             if(ar.config.ploterrors == -1)
-                [h, fastPlotTmp] = arRaiseFigure(ar.model(jm).plot(jplot), ...
-                    'fighandel_xCI', ['CI-X: ' ar.model(jm).plot(jplot).name], ...
-                    figcount, fastPlot, 2);
+                [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['CI-X: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
             else
-                [h, fastPlotTmp] = arRaiseFigure(ar.model(jm).plot(jplot), ...
-                    'fighandel_', ['X: ' ar.model(jm).plot(jplot).name], ...
-                    figcount, fastPlot, 2);
+                [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['X: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
             end
             
             if(isfield(ar.model(jm).plot(jplot), 'doseresponselog10xaxis'))
@@ -973,6 +969,61 @@ if(~isempty(lb))
 end
 
 %% sub-functions
+
+
+function [h, fastPlotTmp] = myRaiseFigure(m, jplot, figname, figcount, fastPlot)
+global ar
+openfigs = get(0,'Children');
+
+figcolor = [1 1 1];
+figdist = 0.02;
+
+ar.model(m).plot(jplot).time = now;
+fastPlotTmp = fastPlot;
+
+if(ar.config.ploterrors == -1)
+    if(isfield(ar.model(m).plot(jplot), 'fighandel_xCI') && ~isempty(ar.model(m).plot(jplot).fighandel_xCI) && ...
+            ar.model(m).plot(jplot).fighandel_xCI ~= 0 && ...
+            sum(ar.model(m).plot(jplot).fighandel_xCI==openfigs)>0 && ...
+            strcmp(get(ar.model(m).plot(jplot).fighandel_xCI, 'Name'), figname))
+        
+        h = ar.model(m).plot(jplot).fighandel_xCI;
+        if(~fastPlot)
+            figure(h);
+        end
+    else
+        h = figure('Name', figname, 'NumberTitle','off', ...
+            'Units', 'normalized', 'Position', ...
+            [0.4+((figcount-1)*figdist) 0.35-((figcount-1)*figdist) 0.3 0.45]);
+        set(h,'Color', figcolor);
+        ar.model(m).plot(jplot).fighandel_xCI = h;
+        fastPlotTmp = false;
+    end    
+else
+    if(isfield(ar.model(m).plot(jplot), 'fighandel_x') && ~isempty(ar.model(m).plot(jplot).fighandel_x) && ...
+            ar.model(m).plot(jplot).fighandel_x ~= 0 && ...
+            sum(ar.model(m).plot(jplot).fighandel_x==openfigs)>0 && ...
+            strcmp(get(ar.model(m).plot(jplot).fighandel_x, 'Name'), figname))
+        
+        h = ar.model(m).plot(jplot).fighandel_x;
+        if(~fastPlot)
+            figure(h);
+        end
+    else
+        h = figure('Name', figname, 'NumberTitle','off', ...
+            'Units', 'normalized', 'Position', ...
+            [0.4+((figcount-1)*figdist) 0.35-((figcount-1)*figdist) 0.3 0.45]);
+        set(h,'Color', figcolor);
+        ar.model(m).plot(jplot).fighandel_x = h;
+        fastPlotTmp = false;
+    end
+end
+if(~fastPlot)
+    clf
+end
+
+
+
 
 
 function [ncols, nrows, nu, nx, nz, iu, ix, iz] = myColsAndRows(jm)
