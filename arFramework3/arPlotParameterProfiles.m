@@ -22,7 +22,7 @@ rowstocols = 0.5; %0.7; 0.45;
 count = 1;
 for j=jks
     g = subplot(nrows,ncols,count);
-    mySubplotStyle(g, labelfontsize, labelfonttype)
+    arSubplotStyle(g, labelfontsize, labelfonttype)
 
     plot(ar.ps(:,j), log10(ar.chi2s-min(ar.chi2s)+1), 'xk');
     xlim([ar.lb(j) ar.ub(j)]);
@@ -46,8 +46,3 @@ ncols = ceil(n / nrows);
 function str = myNameTrafo(str)
 str = strrep(str, '_', '\_');
 
-
-
-function mySubplotStyle(g, labelfontsize, labelfonttype)
-set(g, 'FontSize', labelfontsize);
-set(g, 'FontName', labelfonttype);

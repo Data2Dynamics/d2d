@@ -36,7 +36,7 @@ xbinsdiff = diff(xbins);
 [nc] = histc(mledist.chi2, xbins);
 nc = nc / sum(nc) / xbinsdiff(1);
 bar(xbins, nc, 'EdgeColor', 'k', 'FaceColor','w');
-mySubplotStyle(gca, labelfontsize, labelfonttype);
+arSubplotStyle(gca, labelfontsize, labelfonttype);
 if(plotChi2dist)
 	if(mledist.fiterrors==1)
 		chi2tmp = linspace(min(mledist.chi2),max(mledist.chi2), 100);
@@ -60,7 +60,7 @@ if(mledist.fiterrors==1)
 	[nc] = histc(mledist.chi2err, xbins);
 	nc = nc / sum(nc) / xbinsdiff(1);
 	bar(xbins, nc, 'EdgeColor', 'k', 'FaceColor','w');
-	mySubplotStyle(gca, labelfontsize, labelfonttype);
+	arSubplotStyle(gca, labelfontsize, labelfonttype);
 	title('\chi_{err}^2')
 else
 	cla 
@@ -74,7 +74,7 @@ if(mledist.fiterrors==1)
 	[nc] = histc(mledist.chi2fit, xbins);
 	nc = nc / sum(nc) / xbinsdiff(1);
 	bar(xbins, nc, 'EdgeColor', 'k', 'FaceColor','w');
-	mySubplotStyle(gca, labelfontsize, labelfonttype);
+	arSubplotStyle(gca, labelfontsize, labelfonttype);
 	title('\chi_{fit}^2 ')
 else
 	cla 
@@ -91,7 +91,7 @@ catch
     'labels', ar.pLabel(ar.qFit==1), ...
     'colors', [0 0 0], 'symbol', 'k.');
 end
-mySubplotStyle(g, labelfontsize, labelfonttype);
+arSubplotStyle(g, labelfontsize, labelfonttype);
 title(g, 'difference of truth and estimate')
 xlabel(g, 'log_{10}(\theta)-log_{10}(\theta^*)');
 
@@ -103,10 +103,6 @@ end
 
 
 
-
-function mySubplotStyle(g, labelfontsize, labelfonttype)
-set(g, 'FontSize', labelfontsize);
-set(g, 'FontName', labelfonttype);
 
 function h = myRaiseFigure
 global mledist

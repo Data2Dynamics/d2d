@@ -79,7 +79,7 @@ for jm = 1:length(ar.model)
                             if(~fastPlotTmp)
                                 g = subplot(nrows,ncols,countv);
                                 ar.model(jm).plot(jplot).gv(jv) = g;
-                                mySubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g, labelfontsize, labelfonttype);
                                 ltmp = plot(g, t, v(:,jv), Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 if(jd~=0)
@@ -159,7 +159,7 @@ for jm = 1:length(ar.model)
                                 if(~fastPlotTmp)
                                     g = subplot(nrows,ncols,countv);
                                     ar.model(jm).plot(jplot).gv(jv) = g;
-                                    mySubplotStyle(g, labelfontsize, labelfonttype);
+                                    arSubplotStyle(g, labelfontsize, labelfonttype);
                                     ltmp = plot(g, t, v, Clines{:}, 'LineWidth', linesize);
                                     cclegendstyles(ccount) = ltmp;
                                     ar.model(jm).data(jd).plot.v(jv,jt,jc) = ltmp;
@@ -422,12 +422,6 @@ str = strrep(str, ')', '\)');
 
 function str = myNameTrafo(str)
 str = strrep(str, '_', '\_');
-
-
-
-function mySubplotStyle(g, labelfontsize, labelfonttype)
-set(g, 'FontSize', labelfontsize);
-set(g, 'FontName', labelfonttype);
 
 
 

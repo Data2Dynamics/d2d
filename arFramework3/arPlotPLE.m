@@ -67,7 +67,7 @@ text(mean(xlim), chi2curr+dchi2, sprintf('%2i%%', (1-ar.ple.alpha)*100), 'Color'
     'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'FontSize', labelfontsize)
 
 hold off
-mySubplotStyle(gca, labelfontsize, labelfonttype)
+arSubplotStyle(gca, labelfontsize, labelfonttype)
 spacedAxisLimits(gca, overplot)
 ylabel(ylabeltmp);
 
@@ -117,9 +117,6 @@ end
 function str = myNameTrafo(str)
 str = strrep(str, '_', '\_');
 
-function mySubplotStyle(g, labelfontsize, labelfonttype)
-set(g, 'FontSize', labelfontsize);
-set(g, 'FontName', labelfonttype);
 
 function spacedAxisLimits(g, overplot)
 [xmin xmax ymin ymax] = axisLimits(g);

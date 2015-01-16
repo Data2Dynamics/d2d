@@ -65,7 +65,7 @@ for j=1:length(mledist)
     plot(chi2tmp, chi2pdftmp(:,j), 'Color', colors(j,:))
     hold off
     
-    mySubplotStyle(gca, labelfontsize, labelfonttype);
+    arSubplotStyle(gca, labelfontsize, labelfonttype);
     
     if(j==1)
         title('\chi^2 ')
@@ -83,7 +83,7 @@ for j=1:length(mledist)
     nc = nc / sum(nc) / xbinsdiff(1);
     bar(xbins, nc, 'EdgeColor', colors(j,:), 'FaceColor','w');
     
-    mySubplotStyle(gca, labelfontsize, labelfonttype);
+    arSubplotStyle(gca, labelfontsize, labelfonttype);
     
     if(j==1)
         title('\chi_{err}^2 ')
@@ -100,7 +100,7 @@ for j=1:length(mledist)
     nc = nc / sum(nc) / xbinsdiff(1);
     bar(xbins, nc, 'EdgeColor', colors(j,:), 'FaceColor','w');
     
-    mySubplotStyle(gca, labelfontsize, labelfonttype);
+    arSubplotStyle(gca, labelfontsize, labelfonttype);
     
     if(j==1)
         title('\chi_{fit}^2 ')
@@ -112,7 +112,7 @@ boxplot(g, datapdiff, 'orientation', 'horizontal', ...
     'labels', datalabels, 'outliersize', 1, 'jitter', 1, 'factordirection', 'list', ...
     'colors', morecolors, 'symbol', 'k.', ...
     'positions', datapos);
-mySubplotStyle(g, labelfontsize, labelfonttype);
+arSubplotStyle(g, labelfontsize, labelfonttype);
 title(g, 'difference of truth and estimate')
 xlabel(g, 'log_{10}(\theta-\theta^*)');
 
@@ -122,10 +122,6 @@ end
 
 
 
-
-function mySubplotStyle(g, labelfontsize, labelfonttype)
-set(g, 'FontSize', labelfontsize);
-set(g, 'FontName', labelfonttype);
 
 function h = myRaiseFigure
 global mledist

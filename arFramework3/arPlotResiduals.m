@@ -33,7 +33,7 @@ for m=1:length(ar.model)
 end
 
 g = subplot(1,2,1);
-mySubplotStyle(g, labelfontsize, labelfonttype);
+arSubplotStyle(g, labelfontsize, labelfonttype);
 qqplot(tmpres);
 box(g, 'on')
 axis(g,'equal')
@@ -43,7 +43,7 @@ ylabel(g, 'Quantiles of Input Sample');
 xlabel(g, 'Standard Normal Quantiles');
 
 g = subplot(1,2,2);
-mySubplotStyle(g, labelfontsize, labelfonttype);
+arSubplotStyle(g, labelfontsize, labelfonttype);
 for m=1:length(ar.model)
     for d=1:length(ar.model(m).data)
         for y=1:size(ar.model(m).data(d).res, 2)
@@ -133,8 +133,4 @@ str = strrep(str, ')', '\)');
 
 
 
-
-function mySubplotStyle(g, labelfontsize, labelfonttype)
-set(g, 'FontSize', labelfontsize);
-set(g, 'FontName', labelfonttype);
 

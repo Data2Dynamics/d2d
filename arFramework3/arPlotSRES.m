@@ -30,7 +30,7 @@ for jm = 1:length(ar.model)
         np = length(ar.model(jm).data(jd).p);
         for jy = 1:ny
             g = subplot(nrows,ncols,jy);
-            mySubplotStyle(g, labelfontsize, labelfonttype);
+            arSubplotStyle(g, labelfontsize, labelfonttype);
             
             legendhandle = zeros(1,np);
             
@@ -106,10 +106,6 @@ function str = myNameTrafo(str)
 str = strrep(str, '_', '\_');
 
 
-
-function mySubplotStyle(g, labelfontsize, labelfonttype)
-set(g, 'FontSize', labelfontsize);
-set(g, 'FontName', labelfonttype);
 
 
 

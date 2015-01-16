@@ -105,7 +105,7 @@ for jm = 1:length(ar.model)
                                 g = subplot(nrows,ncols,countu);
                             end
                             ar.model(jm).plot(jplot).gu(ju) = g;
-                            mySubplotStyle(g, labelfontsize, labelfonttype);
+                            arSubplotStyle(g, labelfontsize, labelfonttype);
                             ltmp = plot(g, t, u(:,ju), Clines{:}, 'LineWidth', linesize);
                             if(plot_x_collected)
                                 cclegendstyles(countu) = ltmp;
@@ -148,7 +148,7 @@ for jm = 1:length(ar.model)
                                 g = subplot(nrows,ncols,countx+nu);
                             end
                             ar.model(jm).plot(jplot).gx(jx) = g;
-                            mySubplotStyle(g, labelfontsize, labelfonttype);
+                            arSubplotStyle(g, labelfontsize, labelfonttype);
                             
                             % plot ssa
                             if(isfield(ar.model(jm).condition(jc), 'xFineSSA'))
@@ -242,7 +242,7 @@ for jm = 1:length(ar.model)
                                 g = subplot(nrows,ncols,countz+nu+nx);
                             end
                             ar.model(jm).plot(jplot).gz(jz) = g;
-                            mySubplotStyle(g, labelfontsize, labelfonttype);
+                            arSubplotStyle(g, labelfontsize, labelfonttype);
                             
                             % plot ssa
                             if(isfield(ar.model(jm).condition(jc), 'zFineSSA'))
@@ -378,7 +378,7 @@ for jm = 1:length(ar.model)
                                     g = subplot(nrows,ncols,countu);
                                 end
                                 ar.model(jm).plot(jplot).gu(ju) = g;
-                                mySubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g, labelfontsize, labelfonttype);
                                 ltmp = plot(g, t, u, Clines{:}, 'LineWidth', linesize);
                                 if(plot_x_collected)
                                     cclegendstyles(countu) = ltmp;
@@ -436,7 +436,7 @@ for jm = 1:length(ar.model)
                                     g = subplot(nrows,ncols,countx+nu);
                                 end
                                 ar.model(jm).plot(jplot).gx(jx) = g;
-                                mySubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g, labelfontsize, labelfonttype);
                                 ltmp = plot(g, t, x, Clines{:}, 'LineWidth', linesize);
                                 if(plot_x_collected)
                                     cclegendstyles(countu+countx) = ltmp;
@@ -494,7 +494,7 @@ for jm = 1:length(ar.model)
                                     g = subplot(nrows,ncols,countz+nu+nx);
                                 end
                                 ar.model(jm).plot(jplot).gz(jz) = g;
-                                mySubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g, labelfontsize, labelfonttype);
                                 ltmp = plot(g, t, z, Clines{:}, 'LineWidth', linesize);
                                 if(plot_x_collected)
                                     cclegendstyles(countu+countx+countz) = ltmp;
@@ -1069,10 +1069,6 @@ function str = myNameTrafo(str)
 str = strrep(str, '_', '\_');
 
 
-
-function mySubplotStyle(g, labelfontsize, labelfonttype)
-set(g, 'FontSize', labelfontsize);
-set(g, 'FontName', labelfonttype);
 
 
 

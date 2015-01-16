@@ -275,7 +275,7 @@ for jp=1:np
                                     g = ar.model(jm).plot(jplot).gu(ju);
                                 end
                                 
-                                mySubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g, labelfontsize, labelfonttype);
                                 ltmp = plot(g, t, u(:,ju), Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 if(jd~=0)
@@ -294,7 +294,7 @@ for jp=1:np
                                 else
                                     g = ar.model(jm).plot(jplot).gx(jx);
                                 end
-                                mySubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g, labelfontsize, labelfonttype);
                                 ltmp = plot(g, t, x(:,jx), Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 if(jd~=0)
@@ -349,7 +349,7 @@ for jp=1:np
                                     else
                                         g = ar.model(jm).plot(jplot).gu(ju);
                                     end
-                                    mySubplotStyle(g, labelfontsize, labelfonttype);
+                                    arSubplotStyle(g, labelfontsize, labelfonttype);
                                     ltmp = plot(g, t, u, Clines{:}, 'LineWidth', linesize);
                                     cclegendstyles(ccount) = ltmp;
                                     ar.model(jm).data(jd).plot.u(ju,jt) = ltmp;
@@ -368,7 +368,7 @@ for jp=1:np
                                     else
                                         g = ar.model(jm).plot(jplot).gx(jx);
                                     end
-                                    mySubplotStyle(g, labelfontsize, labelfonttype);
+                                    arSubplotStyle(g, labelfontsize, labelfonttype);
                                     ltmp = plot(g, t, x, Clines{:}, 'LineWidth', linesize);
                                     cclegendstyles(ccount) = ltmp;
                                     ar.model(jm).data(jd).plot.x(jx,jt) = ltmp;
@@ -417,7 +417,7 @@ for jp=1:np
                                 else
                                     g = ar.model(jm).plot(jplot).gv(jv);
                                 end
-                                mySubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g, labelfontsize, labelfonttype);
                                 ltmp = plot(g, t, v(:,jv), Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 if(jd~=0)
@@ -454,7 +454,7 @@ for jp=1:np
                                 else
                                     g = ar.model(jm).plot(jplot).gv(jv);
                                 end
-                                mySubplotStyle(g, labelfontsize, labelfonttype);
+                                arSubplotStyle(g, labelfontsize, labelfonttype);
                                 ltmp = plot(g, t, v, Clines{:}, 'LineWidth', linesize);
                                 cclegendstyles(ccount) = ltmp;
                                 ar.model(jm).data(jd).plot.v(jv,jt) = ltmp;
@@ -492,7 +492,7 @@ for jm = 1:length(ar.model)
                 g = ar.model(jm).plot(jplot).gy(jy);
                 
                 hold(g, 'off');
-                mySubplotStyle(g, labelfontsize, labelfonttype);
+                arSubplotStyle(g, labelfontsize, labelfonttype);
                 
                 if(jy == (nrows-1)*ncols + 1)
                     if(~ar.model(jm).plot(jplot).doseresponse)
@@ -1054,11 +1054,6 @@ str = strrep(str, ')', '\)');
 function str = myNameTrafo(str)
 str = strrep(str, '_', '\_');
 
-
-
-function mySubplotStyle(g, labelfontsize, labelfonttype)
-set(g, 'FontSize', labelfontsize);
-set(g, 'FontName', labelfonttype);
 
 
 

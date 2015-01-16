@@ -449,7 +449,7 @@ for jm = 1:length(ar.model)
                 g = ar.model(jm).plot(jplot).gy(jy);
                 if(~fastPlotTmp)
                     hold(g, 'off');
-                    mySubplotStyle(g, labelfontsize, labelfonttype);
+                    arSubplotStyle(g, labelfontsize, labelfonttype);
                     
                     qxlabel = jy == (nrows-1)*ncols + 1;
                     if(ny <= (nrows-1)*ncols)
@@ -824,11 +824,6 @@ str = strrep(str, ')', '\)');
 function str = myNameTrafo(str)
 str = strrep(str, '_', '\_');
 
-
-
-function mySubplotStyle(g, labelfontsize, labelfonttype)
-set(g, 'FontSize', labelfontsize);
-set(g, 'FontName', labelfonttype);
 
 
 
