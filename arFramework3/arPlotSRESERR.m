@@ -30,7 +30,7 @@ for jm = 1:length(ar.model)
             legendhandle = zeros(1,np);
             
             for jp = 1:np
-                linestyle = myLineStyle(np,jp);
+                linestyle = arLineMarkersAndColors(jp, np, [], 'none');
                 ltmp = plot(g, ar.model(jm).data(jd).tExp, ar.model(jm).data(jd).sreserr(:,jy,jp), linestyle{:}, 'Marker', 'o');
                 legendhandle(jp) = ltmp;
                 hold(g, 'on');
@@ -59,15 +59,6 @@ end
 
 
 %% sub-functions
-
-function C = myLineStyle(n, j)
-farben = lines(n);
-zeichen = {':', '-', '--', '-.'};
-zeichenindex = mod(floor((j-1)/7)+1, 4)+1;
-C = cell(1,3);
-C{1} = [zeichen{zeichenindex}];
-C{2} = 'Color';
-C{3} = farben(j,:);
 
 
 

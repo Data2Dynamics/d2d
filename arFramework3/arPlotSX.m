@@ -27,7 +27,7 @@ for jm = 1:length(ar.model)
             legendhandle = zeros(1,np);
             
             for jp = 1:np
-                linestyle = myLineStyle(np,jp);
+                linestyle = arLineMarkersAndColors(jp, np, [], 'none');
                 ltmp = plot(g, ar.model(jm).condition(jc).tFine, ar.model(jm).condition(jc).suFineSimu(:,ju,jp), linestyle{:});
                 legendhandle(jp) = ltmp;
                 hold(g, 'on');
@@ -49,7 +49,7 @@ for jm = 1:length(ar.model)
             arSubplotStyle(g);
             
             for jp = 1:np
-                linestyle = myLineStyle(np,jp);
+                linestyle = arLineMarkersAndColors(jp, np, [], 'none');
                 plot(g, ar.model(jm).condition(jc).tFine, squeeze(ar.model(jm).condition(jc).sxFineSimu(:,jx,jp)), linestyle{:});
                 hold(g, 'on');
                 % plot(g, ar.model(jm).condition(jc).tExp, squeeze(ar.model(jm).condition(jc).sxExpSimu(:,jx,jp)), 'o');
@@ -72,7 +72,7 @@ for jm = 1:length(ar.model)
             arSubplotStyle(g);
             
             for jp = 1:np
-                linestyle = myLineStyle(np,jp);
+                linestyle = arLineMarkersAndColors(jp, np, [], 'none');
                 plot(g, ar.model(jm).condition(jc).tFine, squeeze(ar.model(jm).condition(jc).szFineSimu(:,jz,jp)), linestyle{:});
                 hold(g, 'on');
                 % plot(g, ar.model(jm).condition(jc).tExp, squeeze(ar.model(jm).condition(jc).szExpSimu(:,jz,jp)), 'o');
@@ -97,17 +97,6 @@ end
 
 
 %% sub-functions
-
-
-
-function C = myLineStyle(n, j)
-farben = lines(n);
-zeichen = {':', '-', '--', '-.'};
-zeichenindex = mod(floor((j-1)/7)+1, 4)+1;
-C = cell(1,3);
-C{1} = [zeichen{zeichenindex}];
-C{2} = 'Color';
-C{3} = farben(j,:);
 
 
 

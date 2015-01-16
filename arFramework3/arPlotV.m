@@ -68,7 +68,10 @@ for jm = 1:length(ar.model)
                         % rows and cols
                         [ncols, nrows, iv] = myColsAndRows(jm);
                         
-                        Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount);
+                        Clines = arLineMarkersAndColors(ccount, ...
+                            length(ar.model(jm).plot(jplot).dLink), ...
+                            [], 'none', '-');
+                        
                         countv = 0;
                         for jv = iv
                             countv = countv + 1;
@@ -131,7 +134,9 @@ for jm = 1:length(ar.model)
                             
                             jd = ds(1);
                             
-                            Clines = myLineStyle(length(times)*length(jcs), ccount);
+                            Clines = arLineMarkersAndColors(ccount, ...
+                                length(times)*length(jcs), ...
+                                [], 'none', '-');
                             
                             countv = 0;
                             for jv = iv
@@ -320,14 +325,6 @@ end
 
 
 %% sub-functions
-
-function C = myLineStyle(n, j)
-farben = lines(n);
-farben(1,:) = [0 0 0];
-C = cell(1,2);
-C{1} = 'Color';
-C{2} = farben(j,:);
-
 
 
 function [h, fastPlotTmp] = myRaiseFigure(m, jplot, figname, figcount, fastPlot)

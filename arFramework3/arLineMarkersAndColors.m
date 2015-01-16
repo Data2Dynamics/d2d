@@ -6,21 +6,16 @@ function C = arLineMarkersAndColors(j,n,color,markerstyle,linestyle)
 
 % test function
 if(nargin==0 || isempty(j))
-    if(~exist('color','var') || isempty(color))
-        color = [];
-    end
-    if(~exist('markerstyle','var') || isempty(markerstyle))
-        markerstyle = [];
-    end
-    if(~exist('linestyle','var') || isempty(linestyle))
-        linestyle = [];
-    end
+    color = [];
+    markerstyle = '.';
+    linestyle = '-';
+
     figure(1); clf;
-    N = 20;
+    N = 4;
     h = [];
     for j=1:N
-        C = arLineMarkersAndColors(j,color,markerstyle,linestyle);
-        h(end+1) = plot(randn(1,10), C{:});
+        C = arLineMarkersAndColors(j,N,color,markerstyle,linestyle);
+        h(end+1) = plot(randn(1,10), C{:}); %#ok<AGROW>
         hold on
     end
     hold off
@@ -28,14 +23,26 @@ if(nargin==0 || isempty(j))
     return
 end
 
-if(n>7)
-    n=7;
+if(n>8)
+    n=8;
 end
 
 if(~exist('color','var') || isempty(color))
-    % colors = lines(n);
-    colors = jet(n);
-    colors = bsxfun(@rdivide, colors, sqrt(sum(colors.^2,2)));
+    if(n==1)
+        colors = [0 0 0];
+    elseif(n==2)
+        colors = [0 0 0; 1 0 0];
+    elseif(n==3)
+        colors = [0 0 0; 1 0 0; 0 0 1];
+    elseif(n==4)
+        colors = [0 0 0; 1 0 0; 1 0 1; 0 0 1];
+        colors(3,:) = bsxfun(@rdivide, colors(3,:), ...
+            sqrt(sum(colors(3,:).^2,2)));
+    else
+        colors = jet(n-1);
+        colors = bsxfun(@rdivide, colors, sqrt(sum(colors.^2,2)));
+        colors = [0 0 0; colors];
+    end
     jc = mymod(j,length(colors));
     color = colors(jc,:);
 end
@@ -52,7 +59,7 @@ if(~exist('linestyle','var') || isempty(linestyle))
     linestyle = linestyles{jl};
 end
 
-C = {'LineStyle',linestyle,'Marker',markerstyle,'Color',color};
+C = {'Color',color,'LineStyle',linestyle,'Marker',markerstyle};
 
 
 function j = mymod(k,N)

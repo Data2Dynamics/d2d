@@ -85,13 +85,16 @@ for jm = 1:length(ar.model)
                     
                     clinks{jm}{jplot} = [clinks{jm}{jplot},jc];
                     
-                    Clines = myLineStyle(length(ar.model(jm).plot(jplot).dLink), ccount);
+                    Clines = arLineMarkersAndColors(ccount, ...
+                        length(ar.model(jm).plot(jplot).dLink), ...
+                        [], 'none', '-');
                     
                     countu = 0;
                     for ju = iu
                         countu = countu + 1;
                         if(plot_x_collected)
-                            Clines = arLineMarkersAndColors(countu, length(ar.model(jm).u) + length(ar.model(jm).x) + ...
+                            Clines = arLineMarkersAndColors(countu, ...
+                                length(ar.model(jm).u) + length(ar.model(jm).x) + ...
                                 length(ar.model(jm).z), [], 'none');
                         end
                         if(~fastPlotTmp)
@@ -134,7 +137,8 @@ for jm = 1:length(ar.model)
                     for jx = ix
                         countx = countx + 1;
                         if(plot_x_collected)
-                            Clines = arLineMarkersAndColors(countu+countx, length(ar.model(jm).u) + length(ar.model(jm).x) + ...
+                            Clines = arLineMarkersAndColors(countu+countx, ...
+                                length(ar.model(jm).u) + length(ar.model(jm).x) + ...
                                 length(ar.model(jm).z), [], 'none');
                         end
                         if(~fastPlotTmp)
@@ -338,7 +342,8 @@ for jm = 1:length(ar.model)
                         
                         jd = ds(1);
                         
-                        Clines = myLineStyle(length(times)*length(jcs), ccount);
+                        Clines = arLineMarkersAndColors(ccount, length(times)*length(jcs), ...
+                            [], 'none', '-');
                         
                         countu = 0;
                         for ju = iu
@@ -520,7 +525,7 @@ for jm = 1:length(ar.model)
             end
             
             % axis & titles
-            if(~fastPlotTmp && exist('suptitle','file')==2) % suptitle function is available (can be downloaded from matlab fileexchange)
+            if(~fastPlotTmp && exist('suptitle','file')==2 && isfield(ar.config, 'useSuptitle') && ar.config.useSuptitle) % suptitle function is available
                 suptitle(arNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]),'FontSize',12)
             end
             
@@ -962,14 +967,6 @@ if(~isempty(lb))
 end
 
 %% sub-functions
-
-function C = myLineStyle(n, j)
-farben = lines(n);
-farben(1,:) = [0 0 0];
-C = cell(1,2);
-C{1} = 'Color';
-C{2} = farben(j,:);
-
 
 
 function [h, fastPlotTmp] = myRaiseFigure(m, jplot, figname, figcount, fastPlot)
