@@ -1,11 +1,14 @@
 % plot scan of likelihood
 
-function arPlotScan(jks)
+function arPlotScan(jks, savetofile)
 
 global ar
 
 if(~exist('jks','var') || isempty(jks))
     jks = find(~cellfun(@isempty, ar.scan.ps));
+end
+if(~exist('savetofile','var'))
+    savetofile = false;
 end
 
 sumples = 0;
@@ -18,7 +21,7 @@ end
 [nrows, ncols] = arNtoColsAndRows(sumples);
 
 
-h = arRaiseFigure(ar, 'fighandel_multi', 'likelihood scan');
+h = myRaiseFigure('likelihood scan');
 clf
 set(h, 'Color', [1 1 1]);
 
@@ -76,4 +79,34 @@ for jk=jks
         
         count = count + 1;
     end
+end
+
+% save
+if(savetofile && exist(pleGlobals.savePath, 'dir'))
+    pleGlobals.figPathMulti{jk} = [pleGlobals.savePath '/multi_plot'];
+    save([pleGlobals.savePath '/results.mat'], 'pleGlobals');
+    saveas(gcf, [pleGlobals.savePath '/multi_plot'], 'fig')
+    print('-depsc2', [pleGlobals.savePath '/multi_plot']);
+end
+
+
+function h = myRaiseFigure(figname)
+global pleGlobals
+openfigs = get(0,'Children');
+
+figcolor = [1 1 1];
+
+if(isfield(pleGlobals, 'fighandel_multi') && ~isempty(pleGlobals.fighandel_multi) && ...
+        pleGlobals.fighandel_multi ~= 0 && ...
+        sum(pleGlobals.fighandel_multi==openfigs)>0 && ...
+        strcmp(get(pleGlobals.fighandel_multi, 'Name'), figname))
+    
+    h = pleGlobals.fighandel_multi;
+    figure(h);
+else
+    h = figure('Name', figname, 'NumberTitle','off', ...
+        'Units', 'normalized', 'Position', ...
+        [0.1 0.1 0.6 0.8]);
+    set(h,'Color', figcolor);
+    pleGlobals.fighandel_multi = h;
 end
