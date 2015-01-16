@@ -496,7 +496,7 @@ for jm = 1:length(ar.model)
                         ylabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2}));
                     end
                     
-                    if(doLegends && jy == 1 && (~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
+                    if(doLegends && jy == ny && (~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                         hl = [];
                         if(~ar.model(jm).plot(jplot).doseresponse)
                             if(length(ar.model(jm).plot(jplot).dLink)>1)

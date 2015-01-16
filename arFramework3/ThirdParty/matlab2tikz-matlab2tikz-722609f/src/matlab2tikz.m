@@ -815,6 +815,10 @@ function m2t = drawAxes(m2t, handle)
         m2t.axesContainers{end}.options = ...
             opts_add(m2t.axesContainers{end}.options, ...
             'scale only axis', []);
+        % align legends to the left
+        m2t.axesContainers{end}.options = ...
+            opts_add(m2t.axesContainers{end}.options, ...
+            'legend cell align=left', []);
     end
     % Add the physical dimension of one unit of length in the coordinate system.
     % This is used later on to translate lengths to physical units where
@@ -3877,9 +3881,9 @@ function [lStyle] = legendPosition(m2t, handle, lStyle)
         case 'none'
             legendPos = get(handle, 'Position');
             unit = get(handle, 'Units');
-            if isequal(unit, 'normalized')
-                position = legendPos(1:2);
-            else
+%             if isequal(unit, 'normalized')
+%                 position = legendPos(1:2);
+%             else
                 % Calculate where the legend is located w.r.t. the axes.
                 axesPos = get(m2t.currentHandles.gca, 'Position');
                 axesUnit = get(m2t.currentHandles.gca, 'Units');
@@ -3888,7 +3892,7 @@ function [lStyle] = legendPosition(m2t, handle, lStyle)
                 % By default, the axes position is given w.r.t. to the figure,
                 % and so is the legend.
                 position = (legendPos(1:2)-axesPos(1:2)) ./ axesPos(3:4);
-            end
+%             end
             anchor = 'south west';
         case {'best','bestoutside'}
             % TODO: Implement these.
