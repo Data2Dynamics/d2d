@@ -8,7 +8,7 @@ if(~exist('nbest','var') || isempty(nbest))
     nbest = size(ar.ps_sorted,1);
 end
 if(~exist('jks','var'))
-    jks = 1:size(ar.p);
+    jks = 1:length(ar.p);
 end
 
 [chi2s, isorted] = sort(ar.chi2s);
@@ -28,6 +28,5 @@ hold off
 
 ylim([0 length(ar.p(jks))+1])
 set(gca,'YTick',1:length(ar.p(jks)));
-% set(gca,'YTickLabel',strrep(ar.pLabel(jks),'_','\_'));
-set(gca,'YTickLabel',ar.pLabel(jks));
-% xticklabel_rotate
+set(gca,'YTickLabel', arNameTrafo(ar.pLabel(jks)));
+
