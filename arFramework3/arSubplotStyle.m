@@ -1,7 +1,7 @@
 function arSubplotStyle(g, labelfontsize, labelfonttype)
 
 if(~exist('labelfontsize','var'))
-    labelfontsize = 10;
+    labelfontsize = 12;
 end
 if(~exist('labelfonttype','var'))
     labelfonttype = 'Arial';
