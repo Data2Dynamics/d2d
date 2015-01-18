@@ -36,6 +36,8 @@ if(~exist('dynamics','var'))
     dynamics = true;
 end
 
+matVer = ver('MATLAB');
+
 if(evalfun)
     try
         arSimu(false, true, dynamics);
@@ -66,18 +68,6 @@ if(~isfield(ar.model, 'qPlotYs'))
     end
 end
 
-matVer = ver('MATLAB');
-
-if(~exist('saveToFile','var'))
-    saveToFile = false;
-end
-if(~exist('fastPlot','var'))
-    fastPlot = false;
-end
-if(~exist('doLegends','var'))
-    doLegends = true;
-end
-
 if(isfield(ar.config,'nfine_dr_plot'))
     nfine_dr_plot = ar.config.nfine_dr_plot;
     nfine_dr_method = ar.config.nfine_dr_method;
@@ -92,10 +82,62 @@ for jm = 1:length(ar.model)
     ar.model(jm).ndata = 0;
     
     for jplot = 1:length(ar.model(jm).plot)
+        qDR = ar.model(jm).plot(jplot).doseresponse;
+        
+        % log 10 dose response axis
+        if(isfield(ar.model(jm).plot(jplot), 'doseresponselog10xaxis'))
+            logplotting_xaxis = ar.model(jm).plot(jplot).doseresponselog10xaxis;
+        else
+            logplotting_xaxis = true;
+        end
+        
+        % chi^2, ndata and dr_times
+        chi2 = zeros(1,ar.model(jm).plot(jplot).ny);
+        ndata = zeros(1,ar.model(jm).plot(jplot).ny);
+        dr_times = [];
+        for jd = ar.model(jm).plot(jplot).dLink
+            if(qDR)
+                dr_times = union(dr_times, ar.model(jm).data(jd).tExp); %R2013a compatible
+            end
+            
+            ny = length(ar.model(jm).data(jd).y);
+            for jy = 1:ny
+                % chi^2 & ndata
+                if(ar.model(jm).data(jd).qFit(jy)==1)
+                    chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2(jy);
+                    ndata(jy) = ndata(jy) + ar.model(jm).data(jd).ndata(jy);
+                    if(ar.config.fiterrors==1)
+                        chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2err(jy);
+                    end
+                end
+            end
+        end
+        
+        ar.model(jm).plot(jplot).chi2 = sum(chi2);
+        ar.model(jm).plot(jplot).ndata = sum(ndata);
+        
+        ar.model(jm).chi2 = ar.model(jm).chi2 + sum(chi2);
+        ar.model(jm).ndata = ar.model(jm).ndata + sum(ndata);
+        
+        if(isempty(dr_times)) % for non dose response
+            dr_times = 0;
+        end
+        
+        % conditions
+        if(str2double(matVer.Version)>=8.1)
+            [conditions, iconditions, jconditions] = ...
+                unique(ar.model(jm).plot(jplot).condition,'legacy'); %#ok<ASGLU>
+        else
+            [conditions, iconditions, jconditions] = ...
+                unique(ar.model(jm).plot(jplot).condition); %#ok<ASGLU>
+        end
+        
+        % legends handles and labels
+        Clegend = zeros(1,length(dr_times)*length(conditions));
+        Clegendlabel = cell(1,length(dr_times)*length(conditions));
+        
         if(ar.model(jm).qPlotYs(jplot)==1 && ar.model(jm).plot(jplot).ny>0)
 
-            qDR = ar.model(jm).plot(jplot).doseresponse;
-            
             % setup figure
             if(ar.config.ploterrors == -1)
                 [h, fastPlotTmp] = arRaiseFigure(ar.model(jm).plot(jplot), ...
@@ -108,52 +150,11 @@ for jm = 1:length(ar.model)
                     figcount, fastPlot);
                 ar.model(jm).plot(jplot).fighandel_y = h;
             end
-            
-            % log 10 dose response axis
-            if(isfield(ar.model(jm).plot(jplot), 'doseresponselog10xaxis'))
-                logplotting_xaxis = ar.model(jm).plot(jplot).doseresponselog10xaxis;
-            else
-                logplotting_xaxis = true;
-            end
-            
-            % chi^2, ndata and times
-            chi2 = zeros(1,ar.model(jm).plot(jplot).ny);
-            ndata = zeros(1,ar.model(jm).plot(jplot).ny);
-            times = [];
-            for jd = ar.model(jm).plot(jplot).dLink
-                if(qDR)
-                    times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
-                end
-                
-                ny = size(ar.model(jm).data(jd).y, 2);
-                for jy = 1:ny
-                    % chi^2 & ndata
-                    if(ar.model(jm).data(jd).qFit(jy)==1)
-                        chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2(jy);
-                        ndata(jy) = ndata(jy) + ar.model(jm).data(jd).ndata(jy);
-                        if(ar.config.fiterrors==1)
-                            chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2err(jy);
-                        end
-                    end
-                end
-            end
-            if(isempty(times)) % for non dose response
-                times = 0;
-            end
-            
-            % conditions
-            if(str2double(matVer.Version)>=8.1)
-                [conditions, iconditions, jconditions] = unique(ar.model(jm).plot(jplot).condition,'legacy'); %#ok<ASGLU>
-            else
-                [conditions, iconditions, jconditions] = unique(ar.model(jm).plot(jplot).condition); %#ok<ASGLU>
-            end
-            
-            % legends handles
-            cclegendstyles = zeros(1,length(times)*length(conditions));
+            figcount = figcount + 1;
             
             % plotting
             ccount = 1;
-            for jt = 1:length(times)
+            for jt = 1:length(dr_times)
                 if(isempty(conditions))
                     jcs = 1;
                 else
@@ -168,97 +169,81 @@ for jm = 1:length(ar.model)
                     
                     jd = ds(1);
                     
-                    % rows and cols
-                    ny = size(ar.model(jm).data(jd).y, 2);
-                    [nrows, ncols] = arNtoColsAndRows(ny);
-                    if(nrows*ncols == ny)
-                        [nrows, ncols] = arNtoColsAndRows(ny+1);
+                    qUnlog = ar.model(jm).data(jd).logfitting & ...
+                        ~ar.model(jm).data(jd).logplotting;
+                    qLog = ar.model(jm).data(jd).logplotting;
+                    
+                    % get data
+                    if(qDR)
+                        [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, qFit, yExpHl] = ...
+                            getDataDoseResponse(jm, ds, dr_times(jt), ...
+                            ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
+                        y_ssa = [];
+                        y_ssa_lb = [];
+                        y_ssa_ub = [];
+                    else
+                        [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, ...
+                            y_ssa, y_ssa_lb, y_ssa_ub] = getData(jm, jd);
+                        qFit = ~isfield(ar.model(jm).data(jd),'qFit') | ...
+                            ar.model(jm).data(jd).qFit;
+                        zero_break = [];
+                    end
+                    [tUnits, response_parameter, yLabel, yNames, yUnits] = getInfo(jm, jd);
+                    
+                    if(isfield(ar.model(jm).data(jd),'plot') && ...
+                            isfield(ar.model(jm).data(jd).plot,'y'))
+                        hys = ar.model(jm).data(jd).plot.y;
+                    else
+                        hys = [];
+                    end
+                    if(isfield(ar.model(jm).data(jd),'plot') && ...
+                            isfield(ar.model(jm).data(jd).plot,'y'))
+                        hystds = ar.model(jm).data(jd).plot.ystd;
+                    else
+                        hystds = [];
                     end
                     
-                    % styles
-                    Clines = arLineMarkersAndColors(ccount, ...
-                        length(times)*length(jcs), ...
-                        [], 'none', '-');
-                    ClinesExp = arLineMarkersAndColors(ccount, ...
-                        length(times)*length(jcs), ...
-                        [], 'none', 'none');
+                    [hys, hystds, nrows, ncols] = arPlotTrajectories(ccount, ...
+                        length(dr_times)*length(jcs), ...
+                        t, y, ystd, lb, ub, nfine_dr_plot, ...
+                        nfine_dr_method, tExp, yExp, yExpHl, yExpStd, ...
+                        y_ssa, y_ssa_lb, y_ssa_ub, ...
+                        ar.config.ploterrors, qUnlog, qLog, qFit, ...
+                        zero_break, fastPlotTmp, hys, hystds, ...
+                        jt==length(dr_times) && jc==jcs(end), qDR, ndata, chi2, ...
+                        tUnits, response_parameter, yLabel, yNames, yUnits, ...
+                        ar.config.fiterrors, logplotting_xaxis);
                     
-                    for jy = 1:ny
-                        if(qDR)
-                            [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, qFit, yExpHl] = ...
-                                getDataDoseResponse(jm, jy, ds, times(jt), ...
-                                ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
-                            y_ssa = [];
-                            y_ssa_lb = [];
-                            y_ssa_ub = [];
+                    % line and patch handels
+                    ar.model(jm).data(jd).plot.y = hys;
+                    ar.model(jm).data(jd).plot.ystd = hystds;
+                    
+                    % legends
+                    Clegend(ccount) = hystds(1);
+                    if(qDR)
+                        if(~isempty(conditions) && ~isempty(conditions{jc}))
+                            Clegendlabel{ccount} = sprintf('t=%g%s : %s', dr_times(jt), ...
+                                tUnits{2}, arNameTrafo(conditions{jc}));
                         else
-                            [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, ...
-                                y_ssa, y_ssa_lb, y_ssa_ub] = getData(jm, jd, jy);
-                            qFit = ~isfield(ar.model(jm).data(jd),'qFit') || ...
-                                ar.model(jm).data(jd).qFit(jy);
-                            zero_break = [];
+                            Clegendlabel{ccount} = sprintf('t=%g%s', dr_times(jt), ...
+                                tUnits{2});
                         end
-                        if(length(unique(t))==1)
-                            t = [t-0.1; t+0.1];
-                            y = [y; y]; %#ok<AGROW>
-                            ystd = [ystd; ystd]; %#ok<AGROW>
-                            lb = [lb; lb]; %#ok<AGROW>
-                            ub = [ub; ub]; %#ok<AGROW>
-                        elseif(nfine_dr_plot>10)
-                            tf = linspace(min(t), max(t), nfine_dr_plot);
-                            [t, qit] = unique(t);
-                            y = y(qit);
-                            ystd = ystd(qit);
-                            y = interp1(t,y,tf,nfine_dr_method);
-                            ystd = interp1(t,ystd,tf,nfine_dr_method);
-                            y = y(:);
-                            ystd = ystd(:);
-                            if(~isempty(lb))
-                                lb = lb(qit);
-                                ub = ub(qit);
-                                lb = interp1(t,lb,tf,nfine_dr_method);
-                                ub = interp1(t,ub,tf,nfine_dr_method);
-                            end
-                            t = tf;
-                        end
-                        
-                        qUnlog = ar.model(jm).data(jd).logfitting(jy) && ...
-                            ~ar.model(jm).data(jd).logplotting(jy);
-                        
-                        if(~fastPlotTmp)
-                            g = subplot(nrows,ncols,jy);
-                            hold(g, 'on');
-                            ar.model(jm).plot(jplot).gy(jy) = g;
-                            
-                            % call arPlotTrajectory
-                            [hy, hystd] = arPlotTrajectory(t, y, ystd, lb, ub, ...
-                                tExp, yExp, yExpHl, yExpStd, ...
-                                y_ssa, y_ssa_lb, y_ssa_ub, ...
-                                ar.config.ploterrors, Clines, ClinesExp, qUnlog, ...
-                                [], [], qFit, zero_break);
-                            
-                            % save handles for fast plotting
-                            ar.model(jm).data(jd).plot.y(jy) = hy;
-                            if(isempty(hystd))
-                                hystd = hy;
-                            end
-                            cclegendstyles(ccount) = hystd;
-                            ar.model(jm).data(jd).plot.ystd(jy) = hystd;
-                        else
-                            % call arPlotTrajectory
-                            arPlotTrajectory(t, y, ystd, lb, ub, ...
-                                tExp, yExp, yExpHl, yExpStd, ...
-                                y_ssa, y_ssa_lb, y_ssa_ub, ...
-                                ar.config.ploterrors, Clines, ClinesExp, qUnlog, ...
-                                ar.model(jm).data(jd).plot.y(jy), ...
-                                ar.model(jm).data(jd).plot.ystd(jy), qFit, []);
+                    else
+                        if(~isempty(conditions) && ~isempty(conditions{jc}))
+                            Clegendlabel{ccount} = arNameTrafo(conditions{jc});
                         end
                     end
+                    
                     ccount = ccount + 1;
                 end
             end
             
-            % axis & titles
+            % legend
+            if(doLegends && (~isempty(conditions) || qDR))
+                g = subplot(nrows, ncols, nrows*ncols);
+                axis(g,'off');
+                legend(g,Clegend, Clegendlabel);
+            end
             
             % optional suptitle
             if(~fastPlotTmp && exist('suptitle','file')==2 && ...
@@ -266,119 +251,7 @@ for jm = 1:length(ar.model)
                 suptitle(arNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]))
             end
             
-            for jc = 1:length(ar.model(jm).data(jd).condition)
-                if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
-                    jcondi = jc;
-                end
-            end
-            for jy = 1:ny
-                g = ar.model(jm).plot(jplot).gy(jy);
-                if(~fastPlotTmp)
-                    hold(g, 'off');
-                    arSubplotStyle(g);
-                    
-                    qxlabel = jy == (nrows-1)*ncols + 1;
-                    if(ny <= (nrows-1)*ncols)
-                        qxlabel = jy == (nrows-2)*ncols + 1;
-                    end
-                    if(qxlabel)
-                        if(~ar.model(jm).plot(jplot).doseresponse)
-                            xlabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).tUnits{3}, ar.model(jm).data(jd).tUnits{2}));
-                        else
-                            if(isfield(ar.model(jm).plot(jplot), 'response_parameter') && ...
-                                    ~isempty(ar.model(jm).plot(jplot).response_parameter))
-                                resppar = ar.model(jm).plot(jplot).response_parameter;
-                            else
-                                resppar = arNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter);
-                            end
-                            if(logplotting_xaxis)
-                                xlabel(g, sprintf('log_{10}(%s)', resppar));
-                            else
-                                xlabel(g, sprintf('%s', resppar));
-                            end
-                        end
-                    end
-                    if(ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))
-                        ylabel(g, sprintf('log_{10}(%s) [%s]', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2}));
-                    else
-                        ylabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2}));
-                    end
-                    
-                    if(doLegends && jy == 1 && (~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
-                        hl = [];
-                        if(~ar.model(jm).plot(jplot).doseresponse)
-                            if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                hl = legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition));
-                            end
-                        else
-                            legendtmp = {};
-                            ccount = 1;
-                            for jt=1:length(times)
-                                if(~isempty(conditions))
-                                    for jc = 1:length(conditions)
-                                        if(~isempty(conditions{jc}))
-                                            legendtmp{ccount} = sprintf('t=%g%s : %s', times(jt), ar.model(jm).tUnits{2}, conditions{jc}); %#ok<AGROW>
-                                        else
-                                            legendtmp{ccount} = sprintf('t=%g%s', times(jt), ar.model(jm).tUnits{2}); %#ok<AGROW>
-                                        end
-                                        ccount = ccount + 1;
-                                    end
-                                else
-                                    legendtmp{ccount} = sprintf('t=%g%s', times(jt), ar.model(jm).tUnits{2}); %#ok<AGROW>
-                                    ccount = ccount + 1;
-                                end
-                            end
-                            hl = legend(g, cclegendstyles, arNameTrafo(legendtmp));
-                        end
-                        if(~isempty(hl))
-                            gref = subplot(nrows,ncols,nrows*ncols);
-                            axis(gref,'off');
-                            grefloc = get(gref, 'Position');
-                            legloc = get(hl, 'Position');
-                            legloc(1:2) = grefloc(1:2) + [grefloc(3)-legloc(3) 0];
-                            % legloc(1:2) = [1-legloc(3) 0];
-                            set(hl, 'Position', legloc);
-                        end
-                    end
-                end
-                titstr = {};
-                if(isfield(ar.model(jm).data(jd), 'yNames') && ~isempty(ar.model(jm).data(jd).yNames{jy}) && ...
-                        ~strcmp(ar.model(jm).data(jd).yNames{jy}, ar.model(jm).data(jd).y{jy}))
-                    titstr{1} = [arNameTrafo(ar.model(jm).data(jd).yNames{jy}) ' (' arNameTrafo(ar.model(jm).data(jd).y{jy}) ')'];
-                else
-                    titstr{1} = arNameTrafo(ar.model(jm).data(jd).y{jy});
-                end
-                if(isfield(ar.model(jm).data(jd), 'yExp'))
-                    if(ndata(jy)>0)
-                        if(ar.config.fiterrors == 1)
-                            titstr{2} = sprintf('-2 log(L)_{%i} = %g', ndata(jy), 2*ndata(jy)*log(sqrt(2*pi)) + chi2(jy));
-                        else
-                            titstr{2} = sprintf('chi^2_{%i} = %g', ndata(jy), chi2(jy));
-                        end
-                    end
-                end
-                title(g, titstr);
-                set(g,'UserData',...
-                    struct('jm',jm,'jplot',jplot,'jy',jy, ...
-                    'dLink',ar.model(jm).plot(jplot).dLink, ...
-                    'yName',ar.model(jm).data(jd).yNames{jy}, ...
-                    'model_name',ar.model(jm).name, ...
-                    'plot_name',ar.model(jm).plot(jplot).name, ...
-                    'data_name',ar.model(jm).data(jd).name, ...
-                    'fy',ar.model(jm).data(jd).fy{jy}, ...
-                    'fystd',ar.model(jm).data(jd).fystd{jy} ...
-                    ))
-                arSpacedAxisLimits(g);
-            end
-            
-            ar.model(jm).plot(jplot).chi2 = sum(chi2);
-            ar.model(jm).plot(jplot).ndata = sum(ndata);
-            
-            ar.model(jm).chi2 = ar.model(jm).chi2 + sum(chi2);
-            ar.model(jm).ndata = ar.model(jm).ndata + sum(ndata);
-            
-            figcount = figcount + 1;
-            
+            % save figure
             if(saveToFile)
                 if(ar.config.ploterrors == -1)
                     ar.model(jm).plot(jplot).savePath_FigYCI = arSaveFigure(h, ...
@@ -395,37 +268,35 @@ for jm = 1:length(ar.model)
             ar.model(jm).plot(jplot).fighandel_y = [];
         end
     end
-    
-    
 end
 
 
 
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, ...
-    yExpHl, y_ssa, y_ssa_lb, y_ssa_ub] = getData(jm, jd, jy)
+    yExpHl, y_ssa, y_ssa_lb, y_ssa_ub] = getData(jm, jd)
 
 global ar
 
 if(isfield(ar.model(jm).data(jd),'yFineSSA'))
-    y_ssa = ar.model(jm).data(jd).yFineSSA(:,jy,:);
+    y_ssa = ar.model(jm).data(jd).yFineSSA;
 else
     y_ssa = nan;
 end
 if(isfield(ar.model(jm).data(jd),'yFineSSA_lb'))
-    y_ssa_lb = ar.model(jm).data(jd).yFineSSA_lb(:,jy,:);
+    y_ssa_lb = ar.model(jm).data(jd).yFineSSA_lb;
 else
     y_ssa_lb = nan;
 end
 if(isfield(ar.model(jm).data(jd),'yFineSSA_ub'))
-    y_ssa_ub = ar.model(jm).data(jd).yFineSSA_ub(:,jy,:);
+    y_ssa_ub = ar.model(jm).data(jd).yFineSSA_ub;
 else
     y_ssa_ub = nan;
 end
 
 if(isfield(ar.model(jm).data(jd),'tFine'))
     t = ar.model(jm).data(jd).tFine;
-    y = ar.model(jm).data(jd).yFineSimu(:,jy);
-    ystd = ar.model(jm).data(jd).ystdFineSimu(:,jy);
+    y = ar.model(jm).data(jd).yFineSimu;
+    ystd = ar.model(jm).data(jd).ystdFineSimu;
 else
     t = nan;
     y = nan;
@@ -434,18 +305,18 @@ end
 
 if(isfield(ar.model(jm).data(jd), 'yExp') && ~isempty(ar.model(jm).data(jd).yExp))
     tExp = ar.model(jm).data(jd).tExp;
-    yExp = ar.model(jm).data(jd).yExp(:,jy);
+    yExp = ar.model(jm).data(jd).yExp;
     if(ar.config.fiterrors == -1)
-        yExpStd = ar.model(jm).data(jd).yExpStd(:,jy);
+        yExpStd = ar.model(jm).data(jd).yExpStd;
     else
         if(isfield(ar.model(jm).data(jd),'ystdExpSimu'))
-            yExpStd = ar.model(jm).data(jd).ystdExpSimu(:,jy);
+            yExpStd = ar.model(jm).data(jd).ystdExpSimu;
         else
             yExpStd = nan;
         end
     end
     if(isfield(ar.model(jm).data(jd),'highlight'))
-        hl = ar.model(jm).data(jd).highlight(:,jy);
+        hl = ar.model(jm).data(jd).highlight;
     else
         hl = zeros(size(yExp));
     end
@@ -459,8 +330,8 @@ else
 end
 
 if(isfield(ar.model(jm).data(jd), 'yFineLB'))
-    lb = ar.model(jm).data(jd).yFineLB(:,jy);
-    ub = ar.model(jm).data(jd).yFineUB(:,jy);
+    lb = ar.model(jm).data(jd).yFineLB;
+    ub = ar.model(jm).data(jd).yFineUB;
 else
     lb = [];
     ub = [];
@@ -470,7 +341,7 @@ end
 
 
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
-    getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
+    getDataDoseResponse(jm, ds, ttime, dLink, logplotting_xaxis)
 global ar
 
 
@@ -479,7 +350,7 @@ data_qFit = true;
 
 ccount = 1;
 for jd = ds
-    data_qFit = data_qFit & ar.model(jm).data(jd).qFit(jy);
+    data_qFit = data_qFit & ar.model(jm).data(jd).qFit;
     qt = ar.model(jm).data(jd).tExp == ttime;
     for jc = 1:length(ar.model(jm).data(jd).condition)
         if(strcmp(ar.model(jm).data(jd).condition(jc).parameter, ar.model(jm).data(jd).response_parameter))
@@ -515,24 +386,24 @@ for jd = ds
         tExp(ccount,1) = t(ccount,1); %#ok<AGROW>
         
         [tdiffmin, jtfine] = min(abs(ar.model(jm).data(jd).tFine-ar.model(jm).data(jd).tExp(jt))); %#ok<ASGLU>
-        y(ccount,1) = ar.model(jm).data(jd).yFineSimu(jtfine,jy); %#ok<AGROW>
-        ystd(ccount,1) = ar.model(jm).data(jd).ystdFineSimu(jtfine,jy); %#ok<AGROW>
+        y(ccount,:) = ar.model(jm).data(jd).yFineSimu(jtfine,:); %#ok<AGROW>
+        ystd(ccount,:) = ar.model(jm).data(jd).ystdFineSimu(jtfine,:); %#ok<AGROW>
         
-        yExp(ccount,1) = ar.model(jm).data(jd).yExp(jt,jy); %#ok<AGROW>
-        yExpHl(ccount,1) = NaN; %#ok<AGROW>
+        yExp(ccount,:) = ar.model(jm).data(jd).yExp(jt,:); %#ok<AGROW>
+        yExpHl(ccount,:) = NaN; %#ok<AGROW>
         if(isfield(ar.model(jm).data(jd),'highlight'))
-            if(ar.model(jm).data(jd).highlight(jt,jy)~=0)
-                yExpHl(ccount,1) = yExp(ccount,1);                 %#ok<AGROW>
+            if(ar.model(jm).data(jd).highlight(jt,:)~=0)
+                yExpHl(ccount,:) = yExp(ccount,:);                 %#ok<AGROW>
             end
         end
         if(ar.config.fiterrors == -1)
-            yExpStd(ccount,1) = ar.model(jm).data(jd).yExpStd(jt,jy); %#ok<AGROW>
+            yExpStd(ccount,:) = ar.model(jm).data(jd).yExpStd(jt,:); %#ok<AGROW>
         else
-            yExpStd(ccount,1) = ar.model(jm).data(jd).ystdExpSimu(jt,jy); %#ok<AGROW>
+            yExpStd(ccount,:) = ar.model(jm).data(jd).ystdExpSimu(jt,:); %#ok<AGROW>
         end
         if(isfield(ar.model(jm).data(jd), 'yExpUB'))
-            lb(ccount,1) = ar.model(jm).data(jd).yFineLB(jtfine,jy); %#ok<AGROW>
-            ub(ccount,1) = ar.model(jm).data(jd).yFineUB(jtfine,jy); %#ok<AGROW>
+            lb(ccount,:) = ar.model(jm).data(jd).yFineLB(jtfine,:); %#ok<AGROW>
+            ub(ccount,:) = ar.model(jm).data(jd).yFineUB(jtfine,:); %#ok<AGROW>
         else
             lb = [];
             ub = [];
@@ -543,15 +414,27 @@ for jd = ds
 end
 
 [tExp,itexp] = sort(tExp);
-yExp = yExp(itexp);
-yExpHl = yExpHl(itexp);
+yExp = yExp(itexp,:);
+yExpHl = yExpHl(itexp,:);
 
 [t,it] = sort(t);
-y = y(it);
-ystd = ystd(it);
+y = y(it,:);
+ystd = ystd(it,:);
 if(~isempty(lb))
-    lb = lb(it);
-    ub = ub(it);
+    lb = lb(it,:);
+    ub = ub(it,:);
 end
 
+
+function [tUnits, response_parameter, yLabel, yNames, yUnits] = getInfo(jm, jd)
+global ar
+tUnits = ar.model(jm).data(jd).tUnits;
+response_parameter = ar.model(jm).data(jd).response_parameter;
+yLabel = ar.model(jm).data(jd).y;
+if(isfield(ar.model(jm).data(jd), 'yNames'))
+    yNames = ar.model(jm).data(jd).yNames;
+else
+    yNames = [];
+end 
+yUnits = ar.model(jm).data(jd).yUnits;
 
