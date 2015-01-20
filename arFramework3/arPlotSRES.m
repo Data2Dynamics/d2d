@@ -16,7 +16,7 @@ fcount = 1;
 for jm = 1:length(ar.model)
     nd = length(ar.model(jm).data);
     for jd = 1:nd
-        arRaiseFigure(ar.model(jm).data(jd), 'fighandel_sres', ['SRES: ' ar.model(jm).data(jd).name ' - ' ar.model(jm).data(jd).checkstr], fcount);
+        myRaiseFigure(jm, ['SRES: ' ar.model(jm).data(jd).name ' - ' ar.model(jm).data(jd).checkstr], fcount, jd);
         
         % rows and cols
         ny = size(ar.model(jm).data(jd).y, 2);
@@ -58,3 +58,26 @@ end
 if(ar.config.fiterrors == 1)
     arPlotSRESERR
 end
+
+
+function h = myRaiseFigure(m, figname, jk, jd)
+global ar
+openfigs = get(0,'Children');
+
+figcolor = [1 1 1];
+figdist = 0.02;
+
+if(isfield(ar.model(m).data(jd), 'fighandel_sres') && ~isempty(ar.model(m).data(jd).fighandel_sres) && ...
+        ar.model(m).data(jd).fighandel_sres ~= 0 && sum(ar.model(m).data(jd).fighandel_sres==openfigs)>0 && ...
+        strcmp(get(ar.model(m).data(jd).fighandel_sres, 'Name'), figname))
+    h = ar.model(m).data(jd).fighandel_sres;
+    figure(h);
+else
+    h = figure('Name', figname, 'NumberTitle','off', ...
+        'Units', 'normalized', 'Position', ...
+        [0.05+((jk-1)*figdist) 0.45-((jk-1)*figdist) 0.3 0.45]);
+    set(h,'Color', figcolor);
+    ar.model(m).data(jd).fighandel_sres = h;
+end
+
+

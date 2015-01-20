@@ -41,7 +41,7 @@ else
     strtitle = sprintf('profile likelihood');
 end
 
-h = arRaiseFigure(pleGlobals, 'fighandel_multi_llh', strtitle);
+h = myRaiseFigure(strtitle);
 set(h, 'Color', [1 1 1]);
 
 count = 1;
@@ -109,4 +109,23 @@ end
 function b = transformFromLog(a)
 b = exp(-0.5*a);
 
+function h = myRaiseFigure(figname)
+global pleGlobals
+openfigs = get(0,'Children');
 
+figcolor = [1 1 1];
+
+if(isfield(pleGlobals, 'fighandel_multi_llh') && ~isempty(pleGlobals.fighandel_multi_llh) && ...
+    pleGlobals.fighandel_multi_llh ~= 0 && ...
+    sum(pleGlobals.fighandel_multi_llh==openfigs)>0 && ...
+    strcmp(get(pleGlobals.fighandel_multi_llh, 'Name'), figname))
+
+    h = pleGlobals.fighandel_multi_llh;
+    figure(h);
+else
+    h = figure('Name', figname, 'NumberTitle','off', ...
+        'Units', 'normalized', 'Position', ...
+        [0.1 0.1 0.6 0.8]);
+    set(h,'Color', figcolor);
+    pleGlobals.fighandel_multi_llh = h;
+end

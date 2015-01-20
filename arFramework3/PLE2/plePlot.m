@@ -53,7 +53,7 @@ count = 0;
 for jj=1:length(indices)
     jk = indices(jj);
     if(~isempty(pleGlobals.ps{jk}))
-        h = arRaiseFigure(pleGlobals, 'fighandel', sprintf('PLE#%i %s', jk, pleGlobals.p_labels{jk}), count);
+        h = myRaiseFigure(jk, sprintf('PLE#%i %s', jk, pleGlobals.p_labels{jk}), count);
         set(h, 'Color', [1 1 1]);
         
         g = subplot(5,1,[1 2 3]);
@@ -271,6 +271,30 @@ for jj=1:length(indices)
         
         count = count + 1;
     end
+end
+
+
+
+function h = myRaiseFigure(jk, figname, figcount)
+global pleGlobals
+openfigs = get(0,'Children');
+
+figcolor = [1 1 1];
+figdist = 0.01;
+
+if(isfield(pleGlobals, 'fighandel') && ~isempty(pleGlobals.fighandel) && ...
+    pleGlobals.fighandel(jk) ~= 0 && ...
+    sum(pleGlobals.fighandel(jk)==openfigs)>0 && ...
+    strcmp(get(pleGlobals.fighandel(jk), 'Name'), figname))
+
+    h = pleGlobals.fighandel(jk);
+    figure(h);
+else
+    h = figure('Name', figname, 'NumberTitle','off', ...
+        'Units', 'normalized', 'Position', ...
+        [0.05+((figcount-1)*figdist) 0.45-((figcount-1)*figdist) 0.3 0.45]);
+    set(h,'Color', figcolor);
+    pleGlobals.fighandel(jk) = h;
 end
 
 

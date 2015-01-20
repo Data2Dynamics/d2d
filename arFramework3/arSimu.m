@@ -52,10 +52,6 @@ if(~isfield(ar.config,'fiterrors_correction'))
     ar.config.fiterrors_correction = 1;
 end
 
-if(fine && isfield(ar, 'isCompressed') && ar.isCompressed)
-    error('workspace compressed, please arUncompress before running a simulation on a fine grid');
-end
-
 ar.stop = 0;
 
 % propagate parameters
@@ -82,6 +78,7 @@ for m=1:length(ar.model)
 end
 
 % initialize fine sensitivities
+% this is very important, c code crashes otherwise!
 if(fine && sensi)
     ar = initFineSensis(ar);
 end
@@ -135,7 +132,7 @@ end
 
 
 
-% Initialize arrays for fine sensitivities with zeros
+% (Re-)Initialize arrays for fine sensitivities with zeros
 function ar = initFineSensis(ar)
 
 for m = 1:length(ar.model)

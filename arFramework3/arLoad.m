@@ -32,10 +32,5 @@ catch
 end
 
 
-if(isfield(ar,'isCompressed') && ar.isCompressed ~=0)
-    arUncompress
-end
-
-
 
 
