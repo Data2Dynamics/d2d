@@ -494,8 +494,8 @@ for jm=1:length(ar.model)
                 captiontext = [captiontext 'The observables are displayed as solid lines. '];
                 captiontext = [captiontext 'The error model that describes the measurement noise ' ...
                     'is indicated by shades.'];
-                if(exist([ar.model(jm).plot(jplot).savePath_FigY '.tex'],'file')==2)
-                    copyfile([ar.model(jm).plot(jplot).savePath_FigY '.tex'], ...
+                if(exist([ar.model(jm).plot(jplot).savePath_FigY '_Report.tex'],'file')==2)
+                    copyfile([ar.model(jm).plot(jplot).savePath_FigY '_Report.tex'], ...
                     [savePath '/' ar.model(jm).plot(jplot).name '_y.tex']);
                     lpfigurePGF(fid, [ar.model(jm).plot(jplot).name '_y.tex'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
                 else

@@ -233,9 +233,9 @@ for jm = 1:length(ar.model)
                         
                         % legends
                         if(jtype == 1)
-                            Clegend(ccount) = hystds(1);
+                            Clegend(ccount) = hystds(end);
                         else
-                            Clegend(ccount) = hys(1);
+                            Clegend(ccount) = hys(end);
                         end
                         if(qDR)
                             if(~isempty(conditions) && ~isempty(conditions{jc}))
@@ -258,8 +258,15 @@ for jm = 1:length(ar.model)
                 % legend
                 if(doLegends && (~isempty(conditions) || qDR))
                     g = subplot(nrows, ncols, nrows*ncols);
+                    lpar = get(Clegend(1),'Parent');
+                    set(g,'FontName',get(lpar,'FontName'));
+                    set(g,'FontSize',get(lpar,'FontSize'));
                     axis(g,'off');
-                    legend(g,Clegend, Clegendlabel);
+                    hltmp = legend(g,Clegend, Clegendlabel);
+                    lpos = get(hltmp,'Position');
+                    delete(hltmp);
+                    hl = legend(lpar,Clegend, Clegendlabel);
+                    set(hl, 'Position', lpos);
                 end
                 
                 % optional suptitle
