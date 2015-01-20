@@ -118,14 +118,14 @@ if(~isempty(yExp) && ~fastPlot)
         yExpHl = 10.^yExpHl;
     end
     if(ploterrors ~= 1)
-        plot(tExp, yExp(:,jy), ClinesExp{:});
+        plot(tExp, yExp(:,jy), ClinesExp{:},'MarkerSize',18);
         if(sum(~isnan(yExpHl))>0)
-            plot(tExp, yExpHl(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',10);
+            plot(tExp, yExpHl(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',24);
         end
     else
-        errorbar(tExp, yExp(:,jy), yExpStd(:,jy), ClinesExp{:});
+        errorbar(tExp, yExp(:,jy), yExpStd(:,jy), ClinesExp{:},'MarkerSize',18);
         if(sum(~isnan(yExpHl))>0)
-            errorbar(tExp, yExpHl(:,jy), yExpStd(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',10);
+            errorbar(tExp, yExpHl(:,jy), yExpStd(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',24);
         end
     end
 end

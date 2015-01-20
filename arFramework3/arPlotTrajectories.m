@@ -28,15 +28,13 @@ for jys = 1:length(iy)
     elseif(nfine_dr_plot>10)
         tf = linspace(min(t), max(t), nfine_dr_plot);
         [t, qit] = unique(t);
-        y = y(qit);
-        ystd = ystd(qit);
+        y = y(qit,:);
+        ystd = ystd(qit,:);
         y = interp1(t,y,tf,nfine_dr_method);
         ystd = interp1(t,ystd,tf,nfine_dr_method);
-        y = y(:);
-        ystd = ystd(:);
         if(~isempty(lb))
-            lb = lb(qit);
-            ub = ub(qit);
+            lb = lb(qit,:);
+            ub = ub(qit,:);
             lb = interp1(t,lb,tf,nfine_dr_method);
             ub = interp1(t,ub,tf,nfine_dr_method);
         end

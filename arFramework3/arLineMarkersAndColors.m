@@ -23,8 +23,9 @@ if(nargin==0 || isempty(j))
     return
 end
 
-if(n>8)
-    n=8;
+Nmax = 8;
+if(n>Nmax)
+    n=Nmax;
 end
 
 if(~exist('color','var') || isempty(color))
