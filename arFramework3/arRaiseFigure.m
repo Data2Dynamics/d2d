@@ -11,7 +11,7 @@ if(~exist('figcount','var'))
     figcount = 1;
 end
 
-levels = [0.1 0.4 0.8];
+levels = [0.1 0.4 0.7]-0.05;
 
 openfigs = get(0,'Children');
 
