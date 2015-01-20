@@ -29,9 +29,11 @@ for jys = 1:length(iy)
         tf = linspace(min(t), max(t), nfine_dr_plot);
         [t, qit] = unique(t);
         y = y(qit,:);
-        ystd = ystd(qit,:);
         y = interp1(t,y,tf,nfine_dr_method);
-        ystd = interp1(t,ystd,tf,nfine_dr_method);
+        if(~isempty(ystd))
+            ystd = ystd(qit,:);
+            ystd = interp1(t,ystd,tf,nfine_dr_method);
+        end
         if(~isempty(lb))
             lb = lb(qit,:);
             ub = ub(qit,:);
@@ -66,6 +68,7 @@ for jys = 1:length(iy)
         if(isLast)
             arSubplotStyle(g);
             
+            % labels
             qxlabel = jys == (nrows-1)*ncols + 1;
             if(ny <= (nrows-1)*ncols)
                 qxlabel = jys == (nrows-2)*ncols + 1;
@@ -87,22 +90,26 @@ for jys = 1:length(iy)
                 ylabel(g, sprintf('%s [%s]', yUnits{jy,3}, yUnits{jy,2}));
             end
             
-            titstr = {};
+            % title
             if(~isempty(yNames) && ~isempty(yNames{jy}) && ~strcmp(yNames{jy}, yLabel{jy}))
-                titstr{1} = [arNameTrafo(yNames{jy}) ' (' arNameTrafo(yLabel{jy}) ')'];
+                titstr = [arNameTrafo(yNames{jy}) ' (' arNameTrafo(yLabel{jy}) ')'];
             else
-                titstr{1} = arNameTrafo(yLabel{jy});
+                titstr = arNameTrafo(yLabel{jy});
             end
+            title(g, titstr);
+            
+            % text
             if(~isempty(yExp))
                 if(ndata(jy)>0)
                     if(fiterrors == 1)
-                        titstr{2} = sprintf('-2 log(L)_{%i} = %g', ndata(jy), 2*ndata(jy)*log(sqrt(2*pi)) + chi2(jy));
+                        titstr = sprintf('  -2 log(L)_{%i} = %g', ndata(jy), 2*ndata(jy)*log(sqrt(2*pi)) + chi2(jy));
                     else
-                        titstr{2} = sprintf('chi^2_{%i} = %g', ndata(jy), chi2(jy));
+                        titstr = sprintf('  chi^2_{%i} = %g', ndata(jy), chi2(jy));
                     end
+                    text(0,0, titstr, 'Units', 'normalized', 'FontSize', 8, ...
+                        'VerticalAlignment', 'bottom');
                 end
             end
-            title(g, titstr);
             
             arSpacedAxisLimits(g);
             hold(g, 'off');

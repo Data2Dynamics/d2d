@@ -51,11 +51,15 @@ if(jtype == 2)
         if(isfield(ar.model(jm).data(jd),'plot') && ...
                 isfield(ar.model(jm).data(jd).plot,'xss'))
             hysss = ar.model(jm).data(jd).plot.xss;
+        else
+            hysss = [];
         end
     else
         if(isfield(ar.model(jm).condition(jc),'plot') && ...
                 isfield(ar.model(jm).condition(jc).plot,'xss'))
             hysss = ar.model(jm).condition(jc).plot.xss;
+        else
+            hysss = [];
         end
     end
 else

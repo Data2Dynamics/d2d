@@ -233,9 +233,11 @@ for jm = 1:length(ar.model)
                         
                         % legends
                         if(jtype == 1)
-                            Clegend(ccount) = hystds(end);
+                            inonzero = find(hystds~=0);
+                            Clegend(ccount) = inonzero(end);
                         else
-                            Clegend(ccount) = hys(end);
+                            inonzero = find(hys~=0);
+                            Clegend(ccount) = inonzero(end);
                         end
                         if(qDR)
                             if(~isempty(conditions) && ~isempty(conditions{jc}))
