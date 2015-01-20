@@ -441,6 +441,9 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'OBSERVABLES'))
         if(sum(ismember(ar.model(m).u, C{1}))>0) %R2013a compatible
             error('derived variable %s already defined in INPUTS', cell2mat(C{1}));
         end
+        if(sum(ismember(ar.model(m).p, C{1}))>0) %R2013a compatible
+            error('derived variable %s already defined as parameter', cell2mat(C{1}));
+        end
         ar.model(m).z(end+1) = C{1};
         ar.model(m).zUnits(end+1,1) = C{2};
         ar.model(m).zUnits(end,2) = C{3};
@@ -492,6 +495,9 @@ if(strcmp(C{1},'OBSERVABLES'))
         end
         if(sum(ismember(ar.model(m).z, ar.model(m).y{end}))>0) %R2013a compatible
             error('%s already defined in DERIVED', ar.model(m).y{end});
+        end
+        if(sum(ismember(ar.model(m).p, ar.model(m).y{end}))>0) %R2013a compatible
+            error('%s already defined as parameter', ar.model(m).y{end});
         end
     end
     

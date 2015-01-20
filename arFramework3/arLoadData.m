@@ -230,6 +230,9 @@ while(~strcmp(C{1},'ERRORS'))
     if(sum(ismember(ar.model(m).z, ar.model(m).data(d).y{end}))>0) %R2013a compatible
         error('%s already defined in DERIVED', ar.model(m).data(d).y{end});
     end
+    if(sum(ismember(ar.model(m).p, ar.model(m).data(d).y{end}))>0) %R2013a compatible
+        error('%s already defined as parameter', ar.model(m).data(d).y{end});
+    end
 end
 
 % observation parameters
