@@ -36,7 +36,7 @@ if(~exist('dynamics','var'))
 	dynamics = true;
 end
 
-if(ar.config.useNewPlots)
+if(isfield(ar.config, 'useNewPlots') && ar.config.useNewPlots)
     arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics);
     return;
 end
