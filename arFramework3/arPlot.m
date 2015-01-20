@@ -36,6 +36,11 @@ if(~exist('dynamics','var'))
 	dynamics = true;
 end
 
+if(ar.config.useNewPlots)
+    arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics);
+    return;
+end
+
 if(evalfun)
     try %#ok<TRYNC>
         arSimu(false, true, dynamics);

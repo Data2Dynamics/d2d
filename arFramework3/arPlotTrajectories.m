@@ -1,11 +1,11 @@
-function [hys, hystds, nrows, ncols] = arPlotTrajectories(ccount, ncount, t, y, ystd, lb, ub, nfine_dr_plot, ...
+function [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ncount, t, y, ystd, lb, ub, nfine_dr_plot, ...
     nfine_dr_method, tExp, yExp, yExpHl, yExpStd, y_ssa, y_ssa_lb, y_ssa_ub, ...
-    ploterrors, qUnlog, qLog, qFit, zero_break, fastPlotTmp, hys, hystds, isLast, qDR, ...
+    ploterrors, qUnlog, qLog, qFit, zero_break, fastPlotTmp, hys, hystds, hysss, dydt, isLast, qDR, ...
     ndata, chi2, tUnits, response_parameter, yLabel, yNames, yUnits, fiterrors, ...
-    logplotting_xaxis)
+    logplotting_xaxis, iy)
 
 % rows and cols
-ny = size(y,2);
+ny = length(iy);
 [nrows, ncols] = arNtoColsAndRows(ny);
 if(nrows*ncols == ny)
     [nrows, ncols] = arNtoColsAndRows(ny+1);
@@ -15,7 +15,8 @@ end
 Clines = arLineMarkersAndColors(ccount, ncount, [], 'none', '-');
 ClinesExp = arLineMarkersAndColors(ccount, ncount, [], 'none', 'none');
 
-for jy = 1:ny
+for jys = 1:length(iy)
+    jy = iy(jys);
     
     % smooth plotted trajectory
     if(length(unique(t))==1)
@@ -43,15 +44,15 @@ for jy = 1:ny
     end
     
     if(~fastPlotTmp)
-        g = subplot(nrows,ncols,jy);
+        g = subplot(nrows,ncols,jys);
         hold(g, 'on');
         
         % call arPlotTrajectory
-        [hy, hystd] = arPlotTrajectory(jy, t, y, ystd, lb, ub, ...
+        [hy, hystd, hyss] = arPlotTrajectory(jy, t, y, ystd, lb, ub, ...
             tExp, yExp, yExpHl, yExpStd, ...
             y_ssa, y_ssa_lb, y_ssa_ub, ...
-            ploterrors, Clines, ClinesExp, qUnlog(jy), ...
-            [], [], qFit(jy), zero_break);
+            ploterrors, Clines, ClinesExp, qUnlog, ...
+            [], [], [], dydt, qFit, zero_break);
         
         % save handles for fast plotting
         hys(jy) = hy;
@@ -59,15 +60,17 @@ for jy = 1:ny
             hystd = hy;
         end
         hystds(jy) = hystd;
-        
+        if(~isempty(hyss))
+            hysss(jy) = hyss;
+        end
         
         % labels and title in last call
         if(isLast)
             arSubplotStyle(g);
             
-            qxlabel = jy == (nrows-1)*ncols + 1;
+            qxlabel = jys == (nrows-1)*ncols + 1;
             if(ny <= (nrows-1)*ncols)
-                qxlabel = jy == (nrows-2)*ncols + 1;
+                qxlabel = jys == (nrows-2)*ncols + 1;
             end
             if(qxlabel)
                 if(~qDR)
@@ -111,8 +114,7 @@ for jy = 1:ny
         arPlotTrajectory(jy, t, y, ystd, lb, ub, ...
             tExp, yExp, yExpHl, yExpStd, ...
             y_ssa, y_ssa_lb, y_ssa_ub, ...
-            ploterrors, Clines, ClinesExp, qUnlog(jy), ...
-            hys(jy), ...
-            hystds(jy), qFit(jy), []);
+            ploterrors, Clines, ClinesExp, qUnlog, ...
+            hys, hystds, hysss, dydt, qFit, []);
     end
 end
