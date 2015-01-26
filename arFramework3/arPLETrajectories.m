@@ -22,10 +22,10 @@ end
 if(~exist('jks','var') || isempty(jks))
     jks = 1:length(ar.pLabel);
 end
-if(~exist('n','var'))
+if(~exist('n','var') || isempty(n))
     n = 10;
 end
-if(~exist('show_hit_bound','var'))
+if(~exist('show_hit_bound','var') || isempty(show_hit_bound))
     show_hit_bound = false;
 end
 if(~exist('saveToFile','var'))
