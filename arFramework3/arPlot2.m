@@ -259,16 +259,8 @@ for jm = 1:length(ar.model)
                 
                 % legend
                 if(doLegends && (~isempty(conditions) || qDR))
-                    g = subplot(nrows, ncols, nrows*ncols);
-                    lpar = get(Clegend(1),'Parent');
-                    set(g,'FontName',get(lpar,'FontName'));
-                    set(g,'FontSize',get(lpar,'FontSize'));
-                    axis(g,'off');
-                    hltmp = legend(g,Clegend, Clegendlabel);
-                    lpos = get(hltmp,'Position');
-                    delete(hltmp);
-                    hl = legend(lpar,Clegend, Clegendlabel);
-                    set(hl, 'Position', lpos);
+                    g = subplot(nrows, ncols, 1);
+                    legend(g,Clegend, Clegendlabel);
                 end
                 
                 % optional suptitle
