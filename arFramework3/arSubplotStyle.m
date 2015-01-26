@@ -9,3 +9,4 @@ end
 
 set(g, 'FontSize', labelfontsize);
 set(g, 'FontName', labelfonttype);
+set(g, 'TickDir', 'out');

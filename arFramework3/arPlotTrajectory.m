@@ -112,20 +112,25 @@ if(isInfWarn)
 end
 
 % plot data
+if(~isempty(qFit) && qFit(jy))
+    markersize = 18;
+else
+    markersize = 12;
+end
 if(~isempty(yExp) && ~fastPlot)
     if(~isempty(qUnlog) && qUnlog(jy))
         yExp = 10.^yExp;
         yExpHl = 10.^yExpHl;
     end
     if(ploterrors ~= 1)
-        plot(tExp, yExp(:,jy), ClinesExp{:},'MarkerSize',18);
+        plot(tExp, yExp(:,jy), ClinesExp{:},'MarkerSize',markersize);
         if(sum(~isnan(yExpHl))>0)
-            plot(tExp, yExpHl(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',24);
+            plot(tExp, yExpHl(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',markersize+6);
         end
     else
-        errorbar(tExp, yExp(:,jy), yExpStd(:,jy), ClinesExp{:},'MarkerSize',18);
+        errorbar(tExp, yExp(:,jy), yExpStd(:,jy), ClinesExp{:},'MarkerSize',markersize);
         if(sum(~isnan(yExpHl))>0)
-            errorbar(tExp, yExpHl(:,jy), yExpStd(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',24);
+            errorbar(tExp, yExpHl(:,jy), yExpStd(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',markersize+6);
         end
     end
 end

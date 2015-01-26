@@ -106,7 +106,7 @@ for jys = 1:length(iy)
                     else
                         titstr = sprintf('  chi^2_{%i} = %g', ndata(jy), chi2(jy));
                     end
-                    text(0,0, titstr, 'Units', 'normalized', 'FontSize', 8, ...
+                    text(.02,.95, titstr, 'Units', 'normalized', 'FontSize', 8, ...
                         'VerticalAlignment', 'bottom');
                 end
             end
