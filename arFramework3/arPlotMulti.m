@@ -177,10 +177,11 @@ for jp=1:np
                                         y = [y; y]; %#ok<AGROW>
                                     elseif(nfine_dr_plot>10)
                                         tf = linspace(min(t), max(t), nfine_dr_plot);
+                                        [t, qit] = unique(t);
+                                        y = y(qit);
                                         y = interp1(t,y,tf,nfine_dr_method);
                                         t = tf;
                                     end
-                                    
                                     
                                     if(jp==1)
                                         g = subplot(nrows,ncols,jy);
@@ -470,6 +471,7 @@ for jp=1:np
         end
     catch exception
         fprintf('ERROR for parameter set #%i: %s\n', jp, exception.message);
+        rethrow(exception)
     end
 end
 
@@ -673,8 +675,10 @@ else
 end
 
 
-function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break] = getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
+function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break] = ...
+    getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
 global ar
+
 
 zero_break = [];
 
@@ -731,10 +735,13 @@ for jd = ds
             lb = [];
             ub = [];
         end
-        
+                
         ccount = ccount + 1;
     end
 end
+
+[tExp,itexp] = sort(tExp);
+yExp = yExp(itexp);
 
 [t,it] = sort(t);
 y = y(it);
@@ -743,6 +750,7 @@ if(~isempty(lb))
     lb = lb(it);
     ub = ub(it);
 end
+
 
 
 function [t, u, x, jc] = getDataX(jm, jd)
