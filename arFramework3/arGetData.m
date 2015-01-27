@@ -119,8 +119,10 @@ end
 % steady state
 if(jtype==2)
     dydt = ar.model(jm).condition(jc).dxdt;
-    dydt(ar.model(jm).condition(jc).qSteadyState==0) = nan;
-    dydt = [nan(size(ar.model(jm).u)) dydt nan(size(ar.model(jm).z))];
+    dydt = dydt(ar.model(jm).condition(jc).qSteadyState==1);
+    if(~isempty(dydt))
+        dydt = [nan(size(ar.model(jm).u)) dydt nan(size(ar.model(jm).z))];
+    end
 else
     dydt = [];
 end
