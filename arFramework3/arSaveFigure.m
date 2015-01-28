@@ -19,6 +19,7 @@ saveas(h, savePath, 'fig');
 %% pdf generation
 if(ispc)
     print('-dpdf', savePath);
+    print('-dmeta', savePath);
 elseif(isunix)
     set(h,'Units','in')
     myaxes = findobj(h,'Type','axes');
@@ -61,3 +62,5 @@ elseif(isunix)
     end
     set(h,'Position',myfigpos);
 end
+
+
