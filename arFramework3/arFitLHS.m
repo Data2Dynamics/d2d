@@ -1,4 +1,6 @@
-% fit sequence using latin hyper cube sampling
+% fit sequence using 
+%   - latin hyper cube sampling (ar.config.useLHS = true)
+%   - random sampling from prior
 %
 % arFitLHS(n, randomseed, log_fit_history, backup_save, use_cluster)
 %
@@ -10,20 +12,11 @@
 
 function arFitLHS(n, randomseed, log_fit_history, backup_save, use_cluster)
 
-global ar
-
 if(~exist('n','var'))
     n = 10;
 end
-if(exist('rng','file')~=0)
-    if(exist('randomseed','var') && ~isempty(randomseed))
-        ar.lhs_seed = randomseed;
-        rng(randomseed);
-    else
-        rng('shuffle');
-        rngsettings = rng;
-        ar.lhs_seed = rngsettings.Seed;
-    end
+if(~exist('randomseed','var'))
+    randomseed = [];
 end
 if(~exist('log_fit_history','var'))
     log_fit_history = false;
@@ -35,14 +28,8 @@ if(~exist('use_cluster','var'))
     use_cluster = false;
 end
 
-ps = ones(n,1) * ar.p;
-
-q_select = ar.qFit==1;
-psrand = lhsdesign(n,sum(q_select));
-psrand = psrand .* (ones(n,1)*(ar.ub(q_select) - ar.lb(q_select)));
-psrand = psrand + (ones(n,1)*ar.lb(q_select));
-
-ps(:,q_select) = psrand;
+% generate random values
+ps = arRandomPars(n, randomseed);
 
 if(~use_cluster)
     arFits(ps, log_fit_history, backup_save);

@@ -41,7 +41,7 @@ ar.config.par_close_to_bound = 0.1;
 ar.config.nfine_dr_method = 'pchip'; %'spline';
 ar.config.nfine_dr_plot = 0; % use value >10 to enable smoothing of DR curves
 ar.config.useSuptitle = false;
-ar.config.useNewPlots = false;
+ar.config.useNewPlots = true;
 
 % stochastic simulation
 ar.config.ssa_min_tau = 1e-3;
@@ -55,6 +55,7 @@ ar.config.fiterrors = 1;
 ar.config.fiterrors_correction = 1;
 ar.config.fiterrors_correction_warning = false;
 ar.config.useFitErrorCorrection = true;
+ar.config.useLHS = false;
 
 % ar.config.ploterrors:
 %   0 = error bands
