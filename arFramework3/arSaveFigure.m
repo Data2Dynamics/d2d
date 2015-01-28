@@ -44,7 +44,10 @@ elseif(isunix)
     matlab2tikz([savePath '_Report.tex'],'figurehandle',h,'showInfo', false, 'showWarnings',false, 'width','0.9\textwidth','automaticLabels',true,'extraAxisOptions',axoptions)
     matlab2tikz([savePath '.tex'],'figurehandle',h,'showInfo', false, 'showWarnings',false, 'standalone', true,'automaticLabels',true,'extraAxisOptions',axoptions)
     
+    % empty LD_LIBRARY_PATH (MATLAB-shipped libraries conflict with libs pdflatex is linked to)
     library_path = getenv('LD_LIBRARY_PATH');
+    setenv('LD_LIBRARY_PATH', '');
+    
     cd([arSave subdir]);
     
     if(ismac)
