@@ -234,10 +234,10 @@ for jm = 1:length(ar.model)
                         % legends
                         if(jtype == 1)
                             inonzero = find(hystds~=0);
-                            Clegend(ccount) = hystds(inonzero(end));
+                            Clegend(ccount) = hystds(inonzero(1));
                         else
                             inonzero = find(hys~=0);
-                            Clegend(ccount) = hys(inonzero(end));
+                            Clegend(ccount) = hys(inonzero(1));
                         end
                         if(qDR)
                             if(~isempty(conditions) && ~isempty(conditions{jc}))
@@ -260,15 +260,14 @@ for jm = 1:length(ar.model)
                 % legend
                 if(doLegends && (~isempty(conditions) || qDR))
                     g = subplot(nrows, ncols, nrows*ncols);
-                    lpar = get(Clegend(1),'Parent');
-                    set(g,'FontName',get(lpar,'FontName'));
-                    set(g,'FontSize',get(lpar,'FontSize'));
-                    axis(g,'off');
-                    hltmp = legend(g,Clegend, Clegendlabel);
-                    lpos = get(hltmp,'Position');
-                    delete(hltmp);
-                    hl = legend(lpar,Clegend, Clegendlabel);
-                    set(hl, 'Position', lpos);
+                    lpos = get(g,'Position');
+                    delete(g);
+                    g = subplot(nrows, ncols, 1);
+                    hl = legend(g, Clegend, Clegendlabel, 'Location', 'SouthWest');
+                    lpos2 = get(hl,'Position');
+                    lpos2(1:2) = lpos(1:2);
+                    set(hl, 'Position', lpos2);
+                    box(hl,'off');
                 end
                 
                 % optional suptitle
