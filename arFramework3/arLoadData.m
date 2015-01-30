@@ -390,15 +390,25 @@ jplot = length(ar.model(m).plot);
 fclose(fid);
 
 % XLS file
-if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(extension,'xls')) || ...
-        (exist(['Data/' name '.csv'],'file') && strcmp(extension,'csv'))))
+if(~strcmp(extension,'none') && ( ...
+    (exist(['Data/' name '.xlsx'],'file') && strcmp(extension,'xlsx')) ||...
+    (exist(['Data/' name '.xlsx'],'file') && strcmp(extension,'xls')) ||...
+    (exist(['Data/' name '.xls'],'file') && strcmp(extension,'xls')) || ...
+    (exist(['Data/' name '.csv'],'file') && strcmp(extension,'csv'))))
     fprintf('loading data #%i, from file Data/%s.%s...\n', d, name, extension);
     
     % read from file
     if(strcmp(extension,'xls'))
         warntmp = warning;
         warning('off','all')
-        [data, Cstr] = xlsread(['Data/' name '.xls']);
+        
+        if (exist(['Data/' name '.xlsx'],'file'))      
+            [data, Cstr] = xlsread(['Data/' name '.xlsx']);
+        end
+        if (exist(['Data/' name '.xls'],'file'))      
+            [data, Cstr] = xlsread(['Data/' name '.xls']);
+        end
+        
         if(length(data(1,:))>length(Cstr(1,:)))
             data = data(:,1:length(Cstr(1,:)));
         end
@@ -437,6 +447,7 @@ if(~strcmp(extension,'none') && ((exist(['Data/' name '.xls'],'file') && strcmp(
         times = data(:,1);
         data = data(:,2:end);
         dataCell = dataCell(:,2:end);
+
     end
     
     % random effects
