@@ -1,4 +1,6 @@
-% fit sequence using latin hyper cube sampling
+% fit sequence using 
+%   - latin hyper cube sampling (ar.config.useLHS = true)
+%   - random sampling from prior
 % run on MATLAB cluster
 %
 % job = arFitLHSCluster(cluster, clusterpath, pool_size, n, randomseed, log_fit_history)

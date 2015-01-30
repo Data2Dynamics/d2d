@@ -2,7 +2,8 @@
 %   sets the highlight flag ar.model(jm).data(jd).highlight(jt,jy) = 1
 %   This flag is used by arPlotY to highlight data points.
 % 
-% arHighlightY  sets all highlight flags to zero.
+% arHighlightY      sets all highlight flags to zero.
+% arHighlightY(0)   sets all highlight flags to zero.
 
 function arHighlightY(jm,jd,jy,jt)
 global ar
@@ -20,8 +21,13 @@ if(~exist('jt','var') || isempty(jt))
 end
 
 if(nargin>0)
+    if(jm==0)
+        arHighlightY
+        return
+    end
+    
     if(length(jm)==1 & isempty(jd))
-        jd = 1:length(ar.model(jm));
+        jd = 1:length(ar.model(jm).data);
     end
     if(isempty(jy) & length(jm)==1 & length(jd)==1)
         jy = size(ar.model(jm).data(jd).yExp,2);

@@ -26,7 +26,7 @@ for jys = 1:length(iy)
         lb = [lb; lb]; %#ok<AGROW>
         ub = [ub; ub]; %#ok<AGROW>
     elseif(nfine_dr_plot>10)
-        tf = linspace(min(t), max(t), nfine_dr_plot);
+        tf = linspace(min(t), max(t), nfine_dr_plot)';
         [t, qit] = unique(t);
         y = y(qit,:);
         y = interp1(t,y,tf,nfine_dr_method);
@@ -106,8 +106,8 @@ for jys = 1:length(iy)
                     else
                         titstr = sprintf('  chi^2_{%i} = %g', ndata(jy), chi2(jy));
                     end
-                    text(.02,.95, titstr, 'Units', 'normalized', 'FontSize', 8, ...
-                        'VerticalAlignment', 'bottom');
+                    text(.95,.95, titstr, 'Units', 'normalized', 'FontSize', 8, ...
+                        'VerticalAlignment', 'top', 'HorizontalAlignment', 'right');
                 end
             end
             

@@ -39,6 +39,9 @@ if(isfield(ar.model(jm).data(jd),'plot') && ...
 else
     hys = [];
 end
+if(jtype == 2 && isfield(ar.model(jm).data(jd),linehandle_name) && size(ar.model(jm).data(jd).plot.(linehandle_name),1) > 1)
+    hys = [];
+end
 
 if(jtype == 1 && isfield(ar.model(jm).data(jd),'plot') && ...
         isfield(ar.model(jm).data(jd).plot,'ystd'))

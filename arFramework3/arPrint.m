@@ -1,6 +1,7 @@
 %   arPrint
 %   arPrint(3:4)
 %   arPrint('sd')
+%   arPrint({'para1','para2'})
 % 
 % print parameter values
 % 
@@ -27,14 +28,19 @@
 % #  16|D  | geneA_deg2              |       -2      +0.36         +3 | 1       +2.3 |       1 | uniform(-2,3) 
 % #  17|D  | geneA_deg3              |       -2       -1.2         +3 | 1     +0.063 |       1 | uniform(-2,3) 
 
-function arPrint(js)
+function varargout = arPrint(js)
 global ar
 
 if(~exist('js','var') | isempty(js))
     js = 1:length(ar.p);
+elseif(islogical(js))
+    js = find(js);
 elseif(isnumeric(js))
     if(size(js,1)>1)
         js = js'; %should not be a row
+    end
+    if(sum(js==1 | js==0) ==length(js) && length(js)>1)
+        js = find(js);
     end
 elseif(ischar(js))
     js = find(~cellfun(@isempty,regexp(ar.pLabel,js)));
@@ -42,6 +48,8 @@ elseif(ischar(js))
         disp('Pattern not found in ar.pLabel');
         return;
     end
+elseif(iscell(js)) % cell of pNames
+    [~,js] = intersect(ar.pLabel,js);
 else
     error('Argument has to be a string or an array of indices.')
 end
@@ -49,6 +57,14 @@ end
 if(sum(isnan(js))>0 || sum(isinf(js))>0 || min(js)<1 || max(js-round(js))>eps)
     js
     warning('arPrint.m: argument js is not plausible (should be an array of indices).')
+else
+    if(size(js,1)~=1)
+        js = js';
+    end
+end
+
+if nargout>0
+    varargout{1} = js;
 end
 
 if(isempty(ar))

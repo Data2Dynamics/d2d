@@ -1,4 +1,6 @@
-% chi2 sequence using latin hyper cube sampling
+% chi2 sequence using 
+%   - latin hyper cube sampling (ar.config.useLHS = true)
+%   - random sampling from prior
 % run on MATLAB cluster
 %
 % job = arChi2LHSCluster(cluster, clusterpath, pool_size, n, sensis, randomseed, silent)
