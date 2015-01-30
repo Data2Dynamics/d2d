@@ -391,7 +391,6 @@ fclose(fid);
 
 % XLS file
 if(~strcmp(extension,'none') && ( ...
-    (exist(['Data/' name '.xlsx'],'file') && strcmp(extension,'xlsx')) ||...
     (exist(['Data/' name '.xlsx'],'file') && strcmp(extension,'xls')) ||...
     (exist(['Data/' name '.xls'],'file') && strcmp(extension,'xls')) || ...
     (exist(['Data/' name '.csv'],'file') && strcmp(extension,'csv'))))
@@ -402,11 +401,10 @@ if(~strcmp(extension,'none') && ( ...
         warntmp = warning;
         warning('off','all')
         
-        if (exist(['Data/' name '.xlsx'],'file'))      
-            [data, Cstr] = xlsread(['Data/' name '.xlsx']);
-        end
         if (exist(['Data/' name '.xls'],'file'))      
             [data, Cstr] = xlsread(['Data/' name '.xls']);
+        elseif (exist(['Data/' name '.xlsx'],'file'))      
+            [data, Cstr] = xlsread(['Data/' name '.xlsx']);
         end
         
         if(length(data(1,:))>length(Cstr(1,:)))
