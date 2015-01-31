@@ -42,7 +42,7 @@ else % random samples
             if(ar.type(jp)==0) % uniform prior
                 ps(:,jp) = ar.lb(jp) + (ar.ub(jp) - ar.lb(jp)) * rand(n,1);
             elseif(ar.type(jp)==1) % normal prior
-                psrand = ar.mean(jp) + ar.std(jp) * rand(n,1);
+                psrand = ar.mean(jp) + ar.std(jp) * randn(n,1);
                 psrand(psrand>ar.ub(jp)) = ar.ub(jp);
                 psrand(psrand<ar.lb(jp)) = ar.lb(jp);
                 ps(:,jp) = psrand;
