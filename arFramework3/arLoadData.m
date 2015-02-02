@@ -238,6 +238,9 @@ end
 % observation parameters
 varlist = cellfun(@symvar, ar.model(m).data(d).fy, 'UniformOutput', false);
 ar.model(m).data(d).py = setdiff(setdiff(vertcat(varlist{:}), union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z)), {ar.model(m).t, ''}); %R2013a compatible
+if(isempty(ar.model(m).data(d).fy))
+    error('No OBSERVABLE specified. Specify an OBSERVABLE in the model or data definition file. See "Defining the OBSERVABLES".');
+end
 for j=1:length(ar.model(m).data(d).fy)
     varlist = symvar(ar.model(m).data(d).fy{j});
     ar.model(m).data(d).py_sep(j).pars = setdiff(setdiff(varlist, union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z)), {ar.model(m).t, ''}); %R2013a compatible
@@ -250,7 +253,7 @@ end
 if(isfield(ar.model(m),'y'))
     ar.model(m).data(d).fystd = ar.model(m).fystd;
 else
-    ar.model(m).data(d).fystd = cell(size(ar.model(m).data(d).fy));
+    ar.model(m).data(d).fystd = cell(0); % if the cell array was pre initialized, the check for the number of ERRORS some lines below would not work
 end
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS'))
