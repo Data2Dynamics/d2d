@@ -110,7 +110,11 @@ try
     arFit(true);
     
     gradient = nan(1, length(ar.p));
-    gradient(ar.qFit==1) = 2 * (ar.fit.res * ar.fit.sres);
+    if ~isempty(ar.fit.sres)
+        gradient(ar.qFit==1) = 2 * (ar.fit.res * ar.fit.sres);
+    else
+        gradient(ar.qFit==1) = ar.fit.grad;
+    end
     
     if(nargin==1)
         ar.qFit = qFitReset;
