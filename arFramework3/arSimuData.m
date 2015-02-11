@@ -17,20 +17,24 @@ if ~exist('tpoints','var')
     tpoints = [];
 end
 
+if(~exist('jplot','var') || isempty(jplot))
+    jplot = [];
+end
+
 if(~exist('m','var') || isempty(m))
-    for jm=1:length(ar.model) 
-        arSimuData(tpoints, jm);
+    for jm=1:length(ar.model)
+        arSimuData(jm, jplot, tpoints);
     end
     return
 else % m index provided:
-    if(~exist('jplot','var'))
+    if(isempty(jplot))
         for jplot=1:length(ar.model(m).plot)
-            arSimuData(tpoints, m, jplot);
+            arSimuData(m, jplot, tpoints);
         end
         return
     elseif(length(jplot)>1)
         for jjplot=jplot
-            arSimuData(tpoints, m, jjplot);
+            arSimuData(m, jjplot, tpoints);
         end     
         return
     end
