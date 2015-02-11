@@ -42,6 +42,6 @@ hold off
 
 xlabel('parameter value');
 set(gca, 'YTick', 1:length(pLabelCollect));
-set(gca, 'YTickLabel', pLabelCollect);
+set(gca, 'YTickLabel', arNameTrafo(pLabelCollect));
 ylim([0 length(pLabelCollect)+1])
 legend(h, strrep(filenames,'_','\_'))
