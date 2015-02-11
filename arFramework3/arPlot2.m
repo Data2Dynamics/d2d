@@ -258,7 +258,7 @@ for jm = 1:length(ar.model)
                 end
                 
                 % legend
-                if(doLegends && (~isempty(conditions) || qDR))
+                if(doLegends && ~fastPlot && (~isempty(conditions) || qDR))
                     g = subplot(nrows, ncols, nrows*ncols);
                     lpos = get(g,'Position');
                     delete(g);

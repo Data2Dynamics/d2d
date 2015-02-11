@@ -115,7 +115,7 @@ end
 if(~isempty(qFit) && qFit(jy))
     markersize = 18;
 else
-    markersize = 12;
+    markersize = 6;
 end
 if(~isempty(yExp) && ~fastPlot)
     if(~isempty(qUnlog) && qUnlog(jy))
