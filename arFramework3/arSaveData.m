@@ -66,7 +66,7 @@ for jd = ar.model(m).plot(jplot).dLink
         % conditions
         if(~isempty(ar.model(m).data(jd).condition))
             for jp = 1:length(ar.model(m).data(jd).condition)
-                fprintf(fid, '"%s",', ar.model(m).data(jd).condition(jp).value);
+                fprintnumtab(fid, str2double(ar.model(m).data(jd).condition(jp).value));
             end
         end
         
@@ -92,9 +92,12 @@ end
 fclose(fid);
 fprintf('done\n');
 
-function fprintnumtab(fid, num)
+function fprintnumtab(fid, num, template)
+if(~exist('template','var'))
+    template = '"%s",';
+end
 strtmp = sprintf('%f', num);
-strtmp = strrep(strtmp, '.', ',');
-fprintf(fid, '"%s",', strtrim(strtmp));
+strtmp = strrep(strtmp, ',', '.');
+fprintf(fid, template, strtrim(strtmp));
 
 

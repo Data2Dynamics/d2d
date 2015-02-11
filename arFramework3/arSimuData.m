@@ -1,11 +1,11 @@
 % Simulate data for current parameter settings
 %
-% arSimuData(tpoints, m, d)
+% arSimuData(m, jplot, tpoints)
 %   tpoints:    time points for simulation        
 %   m:          model index                    
-%   d:          data index                    
+%   jplot:      plot index                    
 
-function arSimuData(tpoints, m, d)
+function arSimuData(m, jplot, tpoints)
 
 global ar
 
@@ -17,46 +17,58 @@ if ~exist('tpoints','var')
     tpoints = [];
 end
 
-if(~exist('m','var') | isempty(m))
+if(~exist('m','var') || isempty(m))
     for jm=1:length(ar.model) 
         arSimuData(tpoints, jm);
     end
     return
 else % m index provided:
-    if(~exist('d','var'))
-        for jd=1:length(ar.model(m).data)
-            arSimuData(tpoints, m, jd);
+    if(~exist('jplot','var'))
+        for jplot=1:length(ar.model(m).plot)
+            arSimuData(tpoints, m, jplot);
         end
         return
-    elseif(length(d)>1)
-        for jd=d
-            arSimuData(tpoints, m, jd);
+    elseif(length(jplot)>1)
+        for jjplot=jplot
+            arSimuData(tpoints, m, jjplot);
         end     
         return
     end
 end
 
+ds = ar.model(m).plot(jplot).dLink;
 if(isempty(tpoints))
-    tpoints = ar.model(m).data(d).tExp;
+    tpoints = ar.model(m).data(ds(1)).tExp;
 end
 
-
-ar.model(m).data(d).tExp = sort(tpoints(:));
-ar.model(m).data(d).yExp = zeros(length(tpoints), length(ar.model(m).data(d).y));
-ar.model(m).data(d).yExpStd = zeros(length(tpoints), length(ar.model(m).data(d).y));
-
+% set time point and clear arrays
+for d=ds
+    assigne_new_timepoints(tpoints, m, d);
+end
 arLink(true);
 
 % simulate model
-ar.model(m).data(d).yExpSimu(:) = 0;
-ar.model(m).data(d).ystdExpSimu(:) = 0;
 arSimu(false,false);
 ar.pTrue = ar.p;
 
 % simulate data
+for d=ds
+    simulate_data(m, d);
+end
+arLink(true);
+
+
+function assigne_new_timepoints(tpoints, m, d)
+global ar
+ar.model(m).data(d).tExp = sort(tpoints(:));
+ar.model(m).data(d).yExp = zeros(length(tpoints), length(ar.model(m).data(d).y));
+ar.model(m).data(d).yExpStd = zeros(length(tpoints), length(ar.model(m).data(d).y));
+ar.model(m).data(d).yExpSimu = zeros(length(tpoints), length(ar.model(m).data(d).y));
+ar.model(m).data(d).ystdExpSimu = zeros(length(tpoints), length(ar.model(m).data(d).y));
+
+function simulate_data(m, d)
+global ar
 ar.model(m).data(d).yExp = ar.model(m).data(d).yExpSimu + ...
     randn(size(ar.model(m).data(d).yExpSimu)) .* ar.model(m).data(d).ystdExpSimu;
 ar.model(m).data(d).yExpStd = ar.model(m).data(d).ystdExpSimu;
-
 ar.model(m).data(d).tLim = ar.model(m).data(d).tLimExp;
-arLink(true);

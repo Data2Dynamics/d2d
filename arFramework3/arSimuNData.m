@@ -56,4 +56,4 @@ for j=1:nrep
     ntpoints = [ntpoints; tpoints]; %#ok<AGROW>
 end
 
-arSimuData(ntpoints, m, d);
+arSimuData(m, d, ntpoints);
