@@ -98,17 +98,27 @@ elseif(ar.config.optimizer == 2)
     options.OutputFcn = ar.config.optim.OutputFcn;
     
     options.Algorithm = 'interior-point';
+    % options.Algorithm = 'trust-region-reflective';
     options.SubproblemAlgorithm = 'cg';
     % options.Hessian = 'fin-diff-grads';
     options.Hessian = 'user-supplied';
     options.HessFcn = @fmincon_hessianfcn;
     % options2.InitBarrierParam = 1e+6;
     % options2.InitTrustRegionRadius = 1e-1;
+    
+    switch options.Algorithm
+        case 'interior-point'
+            myconfun = @confun;
+        case 'trust-region-reflective'
+            myconfun = [];
+    end
 
-    [pFit, ~, exitflag, output, lambda, jac] = ...
+    [pFit, ~, exitflag, output, lambda, grad] = ...
         fmincon(@merit_fkt_fmincon, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
-        @confun,options);
+        myconfun,options);
     resnorm = merit_fkt(pFit);
+    jac = [];
+    fit.grad = grad;
     
 % PSO
 elseif(ar.config.optimizer == 3) 
@@ -278,7 +288,11 @@ if(nargout>1)
     g = ar.res*ar.sres(:, ar.qFit==1);
 end
 if(nargout>2)
+    type3_ind = ar.type == 3;
+    type3_ind = type3_ind(ar.qFit==1);
+    
     H = ar.sres(:, ar.qFit==1)'*ar.sres(:, ar.qFit==1);
+    H(type3_ind,type3_ind) = H(type3_ind,type3_ind) .* ~eye(sum(type3_ind));
 end
 
 % fmincon as lsq
