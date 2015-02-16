@@ -682,6 +682,7 @@ else
     end
     
     ar = setValues(ar, m, d, header, nfactor, data, times);
+    ar.model(m).data(d).tLim(2) = round(max(times)*1.1);
     
     if(dpPerShoot~=0)
         [ar,d] = doMS(ar,m,d,jplot,dpPerShoot);
