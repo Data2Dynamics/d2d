@@ -560,7 +560,7 @@ condition.px0 = union(vertcat(varlist{:}), [])'; %R2013a compatible
 % remaining parameters
 varlist = cellfun(@symvar, condition.fp, 'UniformOutput', false);
 condition.pold = condition.p;
-condition.p = setdiff(setdiff(union(vertcat(varlist{:}), [])', model.x), model.u); %R2013a compatible
+condition.p = setdiff(setdiff(union(vertcat(varlist{:}), {})', model.x), model.u); %R2013a compatible
 
 if(doskip)
     condition.ps = {};
@@ -979,9 +979,14 @@ if(config.useSensis)
     end
     
     % steady state sensitivities
-    condition.sym.dfxdp = (model.N .* condition.sym.C) * (condition.sym.dvdp + ...
-        condition.sym.dvdx*condition.sym.fsx0 + ...
-        condition.sym.dvdu * condition.sym.dfudp);
+    if(isfield(condition.sym, 'dfudp'))
+        condition.sym.dfxdp = (model.N .* condition.sym.C) * (condition.sym.dvdp + ...
+            condition.sym.dvdx*condition.sym.fsx0 + ...
+            condition.sym.dvdu * condition.sym.dfudp);
+    else
+        condition.sym.dfxdp = (model.N .* condition.sym.C) * (condition.sym.dvdp + ...
+            condition.sym.dvdx*condition.sym.fsx0);
+    end
     
     % derivatives fz
     condition.sym.dfzdp = myJacobian(condition.sym.fz, condition.sym.ps);
@@ -994,8 +999,12 @@ if(config.useSensis)
     condition.sym.sz = sym(condition.sz);
     
     condition.sym.fsz1 = condition.sym.dfzdx * condition.sym.sx;
-    condition.sym.fsz2 = condition.sym.dfzdu * condition.sym.dfudp + ...
-        condition.sym.dfzdp;
+    if(isfield(condition.sym, 'dfudp'))
+        condition.sym.fsz2 = condition.sym.dfzdu * condition.sym.dfudp + ...
+            condition.sym.dfzdp;
+    else
+        condition.sym.fsz2 = condition.sym.dfzdp;
+    end
 end
 
 
@@ -1383,11 +1392,13 @@ fprintf(fid, '\n  return;\n}\n\n\n');
 % write fsu
 fprintf(fid, ' void fsu_%s(void *user_data, double t)\n{\n', condition.fkt);
 if(config.useSensis)
-    if(sum(logical(condition.sym.dfudp(:)~=0))>0)
-        fprintf(fid, '  UserData data = (UserData) user_data;\n');
-        fprintf(fid, '  double *p = data->p;\n');
-    
-        writeCcode(fid, condition, 'fsu');
+    if(isfield(condition.sym, 'dfudp'))
+        if(sum(logical(condition.sym.dfudp(:)~=0))>0)
+            fprintf(fid, '  UserData data = (UserData) user_data;\n');
+            fprintf(fid, '  double *p = data->p;\n');
+            
+            writeCcode(fid, condition, 'fsu');
+        end
     end
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
