@@ -18,9 +18,11 @@ for m=1:length(ar.model)
         ar.model(m).condition(c).sxFineSimu = [];
         ar.model(m).condition(c).szFineSimu = [];
     end
-    for d=1:length(ar.model(m).data)
-        ar.model(m).data(d).syFineSimu = [];
-        ar.model(m).data(d).systdFineSimu = [];
+    if(isfield(ar.model(m), 'data'))
+        for d=1:length(ar.model(m).data)
+            ar.model(m).data(d).syFineSimu = [];
+            ar.model(m).data(d).systdFineSimu = [];
+        end
     end
 end
 
