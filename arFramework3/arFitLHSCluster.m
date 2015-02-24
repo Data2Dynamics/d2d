@@ -71,18 +71,12 @@ elseif(isa(ar_fitlhs_cluster,'parallel.job.MJSIndependentJob') || ...
     if(~strcmp(ar_fitlhs_cluster.State, 'finished')) % still running
         fprintf('status %s...\n', ar_fitlhs_cluster.State);
     else % finished
-        try
-            fprintf('retrieving results %s...\n', ar_fitlhs_cluster.State);
-            diary(ar_fitlhs_cluster);
-            S = fetchOutputs(ar_fitlhs_cluster);
-            ar = S{1};
-            delete(ar_fitlhs_cluster);
-            clear global ar_fitlhs_cluster
-        catch err_id
-            delete(ar_fitlhs_cluster);
-            clear global ar_fitlhs_cluster
-            rethrow(err_id);
-        end
+        fprintf('retrieving results %s...\n', ar_fitlhs_cluster.State);
+        diary(ar_fitlhs_cluster);
+        S = fetchOutputs(ar_fitlhs_cluster);
+        ar = S{1};
+        delete(ar_fitlhs_cluster);
+        clear global ar_fitlhs_cluster
     end
 else
     error('arFitLHSCluster global variable ar_fitlhs_cluster is invalid!\n');
