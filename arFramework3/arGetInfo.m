@@ -40,13 +40,15 @@ end
 
 % get handels
 if(jd~=0)
-    if(isfield(ar.model(jm).data(jd).plot, linehandle_name))
+    if(isfield(ar.model(jm).data(jd), 'plot') && ...
+            isfield(ar.model(jm).data(jd).plot, linehandle_name))
         hys = ar.model(jm).data(jd).plot.(linehandle_name);
     else
         hys = [];
     end
 else
-    if(isfield(ar.model(jm).plot, linehandle_name))
+    if(isfield(ar.model(jm), 'plot') && ...
+            isfield(ar.model(jm).plot, linehandle_name))
         hys = ar.model(jm).plot.(linehandle_name);
     else
         hys = [];
@@ -54,13 +56,15 @@ else
 end
 
 if(jd~=0)
-    if(isfield(ar.model(jm).data(jd).plot,'ystd'))
+    if(isfield(ar.model(jm).data(jd), 'plot') && ...
+            isfield(ar.model(jm).data(jd).plot,'ystd'))
         hystds = ar.model(jm).data(jd).plot.ystd;
     else
         hystds = [];
     end
 else
-    if(isfield(ar.model(jm).plot,'ystd'))
+    if(isfield(ar.model(jm), 'plot') && ...
+            isfield(ar.model(jm).plot,'ystd'))
         hystds = ar.model(jm).plot.ystd;
     else
         hystds = [];
