@@ -19,6 +19,7 @@ saveas(h, savePath, 'fig');
 %% pdf generation
 if(ispc)
     print('-dpdf', savePath);
+    print('-dpng', savePath);
     print('-dmeta', savePath);
 elseif(isunix)
     set(h,'Units','in')
