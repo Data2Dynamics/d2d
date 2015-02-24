@@ -96,18 +96,20 @@ for jm = 1:length(ar.model)
         ndata = zeros(1,ar.model(jm).plot(jplot).ny);
         dr_times = [];
         for jd = ar.model(jm).plot(jplot).dLink
-            if(qDR)
-                dr_times = union(dr_times, ar.model(jm).data(jd).tExp); %R2013a compatible
-            end
-            
-            ny = length(ar.model(jm).data(jd).y);
-            for jy = 1:ny
-                % chi^2 & ndata
-                if(ar.model(jm).data(jd).qFit(jy)==1)
-                    chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2(jy);
-                    ndata(jy) = ndata(jy) + ar.model(jm).data(jd).ndata(jy);
-                    if(ar.config.fiterrors==1)
-                        chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2err(jy);
+            if(isfield(ar.model(jm),'data'))
+                if(qDR)
+                    dr_times = union(dr_times, ar.model(jm).data(jd).tExp); %R2013a compatible
+                end
+                
+                ny = length(ar.model(jm).data(jd).y);
+                for jy = 1:ny
+                    % chi^2 & ndata
+                    if(ar.model(jm).data(jd).qFit(jy)==1)
+                        chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2(jy);
+                        ndata(jy) = ndata(jy) + ar.model(jm).data(jd).ndata(jy);
+                        if(ar.config.fiterrors==1)
+                            chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2err(jy);
+                        end
                     end
                 end
             end
@@ -139,7 +141,14 @@ for jm = 1:length(ar.model)
         qplotname = {'qPlotYs', 'qPlotXs', 'qPlotVs'};
         
         didPlot = false;
-        for jtype = 1:3
+        
+        if(isfield(ar.model(jm),'data'))
+            jtypes = 1:3;
+        else
+            jtypes = 2:3;
+        end
+        
+        for jtype = jtypes
             
             % legends handles and labels
             Clegend = zeros(1,length(dr_times)*length(conditions));
@@ -219,17 +228,28 @@ for jm = 1:length(ar.model)
                             ar.config.fiterrors, logplotting_xaxis, iy);
                         
                         % save handels
-                        ar.model(jm).data(jd).plot.(linehandle_name{jtype}) = hys;
-                        if(jtype == 1)
-                            ar.model(jm).data(jd).plot.ystd = hystds;
-                        end
-                        if(jtype == 2)
-                            if(jd~=0) % mean no data loaded
-                                ar.model(jm).data(jd).plot.xss = hysss;
-                            else
-                                ar.model(jm).condition(jc).plot.xss = hysss;
+                        if(jd~=0)
+                            ar.model(jm).data(jd).plot.(linehandle_name{jtype}) = hys;
+                            if(jtype == 1)
+                                ar.model(jm).data(jd).plot.ystd = hystds;
+                            end
+                            if(jtype == 2)
+                                if(jd~=0) % mean no data loaded
+                                    ar.model(jm).data(jd).plot.xss = hysss;
+                                else
+                                    ar.model(jm).condition(jc).plot.xss = hysss;
+                                end
+                            end
+                        else
+                            ar.model(jm).plot.(linehandle_name{jtype}) = hys;
+                            if(jtype == 1)
+                                ar.model(jm).plot.ystd = hystds;
+                            end
+                            if(jtype == 2)
+                                ar.model(jm).plot.xss = hysss;
                             end
                         end
+
                         
                         % legends
                         if(jtype == 1)

@@ -34,27 +34,29 @@ elseif(jtype==3)
     
 end
 
-jc = ar.model(jm).data(jd).cLink;
+if(isfield(ar.model(jm), 'data'))
+    jc = ar.model(jm).data(jd).cLink;
+else
+    jc = 1;
+end
 
 % trajectories and error bands
-if(isfield(ar.model(jm).data(jd),'tFine'))
-    if(jtype==1)
-        t = ar.model(jm).data(jd).tFine;
-        y = ar.model(jm).data(jd).yFineSimu;
-        ystd = ar.model(jm).data(jd).ystdFineSimu;
-        
-    elseif(jtype==2)
-        t = ar.model(jm).condition(jc).tFine;
-        y = [ar.model(jm).condition(jc).uFineSimu ar.model(jm).condition(jc).xFineSimu ...
-            ar.model(jm).condition(jc).zFineSimu];
-        ystd = [];
-        
-    elseif(jtype==3)
-        t = ar.model(jm).condition(jc).tFine;
-        y = ar.model(jm).condition(jc).vFineSimu;
-        ystd = [];
-        
-    end
+if(jtype==1 && isfield(ar.model(jm), 'data') && isfield(ar.model(jm).data(jd),'tFine'))
+    t = ar.model(jm).data(jd).tFine;
+    y = ar.model(jm).data(jd).yFineSimu;
+    ystd = ar.model(jm).data(jd).ystdFineSimu;
+    
+elseif(jtype==2)
+    t = ar.model(jm).condition(jc).tFine;
+    y = [ar.model(jm).condition(jc).uFineSimu ar.model(jm).condition(jc).xFineSimu ...
+        ar.model(jm).condition(jc).zFineSimu];
+    ystd = [];
+    
+elseif(jtype==3)
+    t = ar.model(jm).condition(jc).tFine;
+    y = ar.model(jm).condition(jc).vFineSimu;
+    ystd = [];
+    
 else
     t = nan;
     y = nan;
@@ -62,7 +64,8 @@ else
 end
 
 % data
-if(jtype==1 && isfield(ar.model(jm).data(jd), 'yExp') && ~isempty(ar.model(jm).data(jd).yExp))
+if(jtype==1 && isfield(ar.model(jm), 'data') && isfield(ar.model(jm).data(jd), 'yExp') && ...
+        ~isempty(ar.model(jm).data(jd).yExp))
     tExp = ar.model(jm).data(jd).tExp;
     yExp = ar.model(jm).data(jd).yExp;
     if(ar.config.fiterrors == -1)
@@ -94,14 +97,14 @@ end
 % confidence bands
 lb = [];
 ub = [];
-if(jtype==1)
+if(jtype==1 && isfield(ar.model(jm), 'data') && isfield(ar.model(jm).data(jd),'tFine'))
     if(isfield(ar.model(jm).data(jd), 'yFineLB'))
         lb = ar.model(jm).data(jd).yFineLB;
         ub = ar.model(jm).data(jd).yFineUB;
     end
     
 elseif(jtype==2)
-    if(isfield(ar.model(jm).data(jd), 'xFineLB'))
+    if(isfield(ar.model(jm).condition(jc), 'xFineLB'))
         lb = [ar.model(jm).condition(jc).uFineLB ar.model(jm).condition(jc).xFineLB ...
             ar.model(jm).condition(jc).zFineLB];
         ub = [ar.model(jm).condition(jc).uFineUB ar.model(jm).condition(jc).xFineUB ...
@@ -109,7 +112,7 @@ elseif(jtype==2)
     end
     
 elseif(jtype==3)
-    if(isfield(ar.model(jm).data(jd), 'vFineLB'))
+    if(isfield(ar.model(jm).condition(jc), 'vFineLB'))
         lb = ar.model(jm).condition(jc).vFineLB;
         ub = ar.model(jm).condition(jc).vFineUB;
     end
