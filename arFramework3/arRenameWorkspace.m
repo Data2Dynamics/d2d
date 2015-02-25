@@ -30,7 +30,7 @@ if ~strcmpi(old_name,name)
     move = input(sprintf('do you really want to rename the workspace \"%s\" into \"%s\"?\nY/[N] ', old_name, name),'s');
     
     if strcmpi(move,'y')
-        system(['mv ' ar.config.savepath ' ' new_savepath]);
+        movefile(ar.config.savepath, new_savepath);
         ar.config.savepath = new_savepath;
         save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
         
