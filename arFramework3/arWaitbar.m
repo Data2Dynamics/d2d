@@ -1,4 +1,5 @@
 % waitbar with time estimation
+% arWaitbar(j, n, text)
 
 function arWaitbar(j, n, text)
 

@@ -61,7 +61,7 @@ if(ar.p(ar.tuner.index) > ar.ub(ar.tuner.index))
     ar.p(ar.tuner.index) = ar.ub(ar.tuner.index);
 end
 % arChi2(false)
-arPlot(false, true, true)
+arPlot(false, true)
 refresh_textbox(handles)
 
 % --- Executes on button press in pushbutton2.
@@ -75,7 +75,7 @@ if(ar.p(ar.tuner.index) > ar.ub(ar.tuner.index))
     ar.p(ar.tuner.index) = ar.ub(ar.tuner.index);
 end
 % arChi2(false)
-arPlot(false, true, true)
+arPlot(false, true)
 refresh_textbox(handles)
 
 % --- Executes during object creation, after setting all properties.
@@ -100,7 +100,7 @@ if(~isnan(newval))
 end
 set(hObject, 'String', ar.p(ar.tuner.index));
 % arChi2(false)
-arPlot(false, true, true)
+arPlot(false, true)
 
 % --- Executes during object creation, after setting all properties.
 function checkbox1_CreateFcn(hObject, eventdata, handles)
@@ -185,14 +185,14 @@ end
 function pushbutton3_Callback(hObject, eventdata, handles)
 arFit(true);
 arChi2(false)
-arPlot(false, true, true)
+arPlot(false, true)
 refresh_textbox(handles)
 
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
 arFitObs(true);
 arChi2(false)
-arPlot(false, true, true)
+arPlot(false, true)
 refresh_textbox(handles)
 
 
@@ -200,7 +200,7 @@ refresh_textbox(handles)
 function pushbutton5_Callback(hObject, eventdata, handles)
 arFitDyn(true);
 arChi2(false)
-arPlot(false, true, true)
+arPlot(false, true)
 refresh_textbox(handles)
 
 
@@ -209,7 +209,7 @@ function pushbutton10_Callback(hObject, eventdata, handles)
 global ar;
 arFitInit(true);
 arChi2(false)
-arPlot(false, true, true)
+arPlot(false, true)
 refresh_textbox(handles)
 
 % --- Executes on button press in pushbutton6.
@@ -217,7 +217,7 @@ function pushbutton6_Callback(hObject, eventdata, handles)
 global ar;
 arFitSingle(ar.tuner.index, true);
 arChi2(false)
-arPlot(false, true, true)
+arPlot(false, true)
 refresh_textbox(handles)
 
 
