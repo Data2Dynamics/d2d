@@ -1,3 +1,96 @@
 \begin{thebibliography}{}
 
+\bibitem[Bachmann {\em et~al.}(2011)Bachmann, Raue, Schilling, B{\"o}hm,
+  Kreutz, Kaschek, Busch, Gretz, Lehmann, Timmer, and
+  Klingm{\"u}ller]{Bachmann:2011fk}
+Bachmann, J., Raue, A., Schilling, M., B{\"o}hm, M., Kreutz, C., Kaschek, D.,
+  Busch, H., Gretz, N., Lehmann, W., Timmer, J., and Klingm{\"u}ller, U.
+  (2011).
+\newblock Division of labor by dual feedback regulators controls {JAK2/STAT5}
+  signaling over broad ligand range.
+\newblock {\em Molecular Systems Biology\/}, {\bf 7}, 516.
+
+\bibitem[Becker {\em et~al.}(2010)Becker, Schilling, Bachmann, Baumann, Raue,
+  Maiwald, Timmer, and Klingmueller]{Becker:2010hs}
+Becker, V., Schilling, M., Bachmann, J., Baumann, U., Raue, A., Maiwald, T.,
+  Timmer, J., and Klingmueller, U. (2010).
+\newblock Covering a broad dynamic range: information processing at the
+  erythropoietin receptor.
+\newblock {\em Science\/}, {\bf 328}(5984), 1404--1408.
+
+\bibitem[Hug {\em et~al.}(2013)Hug, Raue, Hasenauer, Bachmann, Klingm{\"u}ller,
+  Timmer, and Theis]{Hug:2012fk}
+Hug, S., Raue, A., Hasenauer, J., Bachmann, J., Klingm{\"u}ller, U., Timmer,
+  J., and Theis, F. (2013).
+\newblock High-dimensional {Bayesian} parameter estimation: Case study for a
+  model of {JAK2/\-STAT5} signaling.
+\newblock {\em Mathematical Biosciences\/}, {\bf 246}(2), 293--304.
+
+\bibitem[Kreutz {\em et~al.}(2012)Kreutz, Raue, and Timmer]{Kreutz:2011kx}
+Kreutz, C., Raue, A., and Timmer, J. (2012).
+\newblock Likelihood based observability analysis and confidence intervals for
+  predictions of dynamic models.
+\newblock {\em BMC Systems Biology\/}, {\bf 6}, 120.
+
+\bibitem[Kreutz {\em et~al.}(2013)Kreutz, Raue, Kaschek, and
+  Timmer]{Kreutz:2013uq}
+Kreutz, C., Raue, A., Kaschek, D., and Timmer, J. (2013).
+\newblock Profile likelihood in systems biology.
+\newblock {\em FEBS Journal\/}, {\bf 280}(11), 2564--2571.
+
+\bibitem[Raia {\em et~al.}(2011)Raia, Schilling, B{\"o}hm, Hahn, Kowarsch,
+  Raue, Sticht, Bohl, Saile, M{\"o}ller, Gretz, Timmer, Theis, Lehmann,
+  Lichter, and Klingm{\"u}ller]{Raia:2011vn}
+Raia, V., Schilling, M., B{\"o}hm, M., Hahn, B., Kowarsch, A., Raue, A.,
+  Sticht, C., Bohl, S., Saile, M., M{\"o}ller, P., Gretz, N., Timmer, J.,
+  Theis, F., Lehmann, W., Lichter, P., and Klingm{\"u}ller, U. (2011).
+\newblock Dynamic mathematical modeling of {IL13}-induced signaling in
+  {Hodgkin} and primary mediastinal {B}-cell lymphoma allows prediction of
+  therapeutic targets.
+\newblock {\em Cancer Research\/}, {\bf 71}, 693--704.
+
+\bibitem[Raue {\em et~al.}(2009)Raue, Kreutz, Maiwald, Bachmann, Schilling,
+  Klingm{\"u}ller, and Timmer]{Raue:2009ec}
+Raue, A., Kreutz, C., Maiwald, T., Bachmann, J., Schilling, M.,
+  Klingm{\"u}ller, U., and Timmer, J. (2009).
+\newblock Structural and practical identifiability analysis of partially
+  observed dynamical models by exploiting the profile likelihood.
+\newblock {\em Bioinformatics\/}, {\bf 25}(15), 1923--1929.
+
+\bibitem[Raue {\em et~al.}(2010)Raue, Becker, Klingm{\"u}ller, and
+  Timmer]{Raue:2010fk}
+Raue, A., Becker, V., Klingm{\"u}ller, U., and Timmer, J. (2010).
+\newblock Identifiability and observability analysis for experimental design in
+  non-linear dynamical models.
+\newblock {\em Chaos\/}, {\bf 20}(4), 045105.
+
+\bibitem[Raue {\em et~al.}(2013a)Raue, Kreutz, Theis, and Timmer]{Raue:2013fk}
+Raue, A., Kreutz, C., Theis, F., and Timmer, J. (2013a).
+\newblock Joining forces of {Bayesian} and frequentist methodology: A study for
+  inference in the presence of non-identifiability.
+\newblock {\em Phil. Trans. Roy. Soc. A\/}, {\bf 371}, 20110544.
+
+\bibitem[Raue {\em et~al.}(2013b)Raue, Schilling, Bachmann, Matteson, Schelker,
+  Kaschek, Hug, Kreutz, Harms, Theis, Klingm{\"u}ller, and Timmer]{Raue:2012zt}
+Raue, A., Schilling, M., Bachmann, J., Matteson, A., Schelker, M., Kaschek, D.,
+  Hug, S., Kreutz, C., Harms, B., Theis, F., Klingm{\"u}ller, U., and Timmer,
+  J. (2013b).
+\newblock Lessons learned from quantitative dynamical modeling in systems
+  biology.
+\newblock {\em PLOS ONE\/}, {\bf 8}(9), e74335.
+
+\bibitem[Schelker {\em et~al.}(2012)Schelker, Raue, Timmer, and
+  Kreutz]{Schelker:2012uq}
+Schelker, M., Raue, A., Timmer, J., and Kreutz, C. (2012).
+\newblock Comprehensive estimation of input signals and dynamical parameters in
+  biochemical reaction networks.
+\newblock {\em Bioinformatics\/}, {\bf 28}(18), i522--i528.
+
+\bibitem[Steiert {\em et~al.}(2012)Steiert, Raue, Timmer, and
+  Kreutz]{Steiert:2012fk}
+Steiert, B., Raue, A., Timmer, J., and Kreutz, C. (2012).
+\newblock Experimental design for parameter estimation of gene regulatory
+  networks.
+\newblock {\em PLOS ONE\/}, {\bf 7}(7), e40052.
+
 \end{thebibliography}
