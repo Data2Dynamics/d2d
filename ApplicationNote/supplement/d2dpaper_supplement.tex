@@ -83,6 +83,8 @@ The time-scales in of cellular processes can differ by orders of magnitude. As a
 \end{equation}
 to the ODE solver. Here, again, Equation~(\ref{fluxsystem2}) can be exploited to simplify computations.
 
+\section{Detailed user guide for the \citet{Raia:2011vn} example model and data} \label{user_guide}
+
 \section{Parallelization of computations} \label{sec:parallel}
 For each experimental condition Equation~(\ref{fluxsystem2}) and~(\ref{jac_mat}) has to be modified according to the treatment applied. This can for example be a different network structure represented by $\mathbf{N}$ due to knock-out or inhibition experiments or different experimental treatments incorporated by the function $\mathbf{u}(t, \boldsymbol{\theta})$. Consequently, there can be as many variants of the ODE systems as experimental conditions, each having a different numerical solution for the dynamics. For one comparison of the whole model to the experimental data, given a specific set of candidate parameters, all ODE variants have to be solved. During parameter estimation many evaluations of the whole model are necessary. This can be a numerically intensive task. All ODE variants can be solved independently, therefore this problem is ideal for parallel computing. Here, a multithreading technique was employed that results in a significant acceleration on multi-core machines. For the \citet{Bachmann:2011fk} model 24 ODE variants have to be solved consecutively. As displayed in Figure~\ref{Acceleration}, the speed up increases as expected with increasing number of threads used.
 

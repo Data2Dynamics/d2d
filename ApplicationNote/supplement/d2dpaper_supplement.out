@@ -1,5 +1,6 @@
 \BOOKMARK [1][-]{section.1}{Efficient solution of the ODE system}{}% 1
-\BOOKMARK [1][-]{section.2}{Parallelization of computations}{}% 2
-\BOOKMARK [1][-]{section.3}{Maximum Likelihood Estimation framework and deterministic optimization algorithms}{}% 3
-\BOOKMARK [1][-]{section.4}{Derivative calculations for ODE models}{}% 4
-\BOOKMARK [1][-]{section.5}{Efficient solution of the sensitivity equations}{}% 5
+\BOOKMARK [1][-]{section.2}{Detailed user guide for the Raia:2011vn example model and data}{}% 2
+\BOOKMARK [1][-]{section.3}{Parallelization of computations}{}% 3
+\BOOKMARK [1][-]{section.4}{Maximum Likelihood Estimation framework and deterministic optimization algorithms}{}% 4
+\BOOKMARK [1][-]{section.5}{Derivative calculations for ODE models}{}% 5
+\BOOKMARK [1][-]{section.6}{Efficient solution of the sensitivity equations}{}% 6

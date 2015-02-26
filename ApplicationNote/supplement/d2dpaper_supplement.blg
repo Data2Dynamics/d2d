@@ -4,45 +4,45 @@ The top-level auxiliary file: d2dpaper_supplement.aux
 The style file: plainnat_mod.bst
 Database file #1: /Users/araue/Sites/pub/bibtex/Library.bib
 Warning--can't use both author and editor fields in Lambert:1977fk
-You've used 15 entries,
+You've used 16 entries,
             2756 wiz_defined-function locations,
-            721 strings with 7775 characters,
-and the built_in function-call counts, 7037 in all, are:
-= -- 613
-> -- 478
+            729 strings with 8271 characters,
+and the built_in function-call counts, 8157 in all, are:
+= -- 694
+> -- 625
 < -- 11
-+ -- 162
-- -- 147
-* -- 651
-:= -- 1141
-add.period$ -- 45
-call.type$ -- 15
-change.case$ -- 89
-chr.to.int$ -- 15
-cite$ -- 31
-duplicate$ -- 257
-empty$ -- 480
-format.name$ -- 172
-if$ -- 1406
++ -- 211
+- -- 195
+* -- 775
+:= -- 1333
+add.period$ -- 48
+call.type$ -- 16
+change.case$ -- 108
+chr.to.int$ -- 16
+cite$ -- 33
+duplicate$ -- 274
+empty$ -- 514
+format.name$ -- 221
+if$ -- 1619
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 20
-newline$ -- 83
-num.names$ -- 60
-pop$ -- 124
+missing$ -- 21
+newline$ -- 88
+num.names$ -- 64
+pop$ -- 156
 preamble$ -- 1
-purify$ -- 79
+purify$ -- 97
 quote$ -- 0
-skip$ -- 245
+skip$ -- 273
 stack$ -- 0
-substring$ -- 273
-swap$ -- 26
+substring$ -- 296
+swap$ -- 27
 text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 140
+type$ -- 151
 warning$ -- 1
-while$ -- 65
+while$ -- 69
 width$ -- 0
-write$ -- 203
+write$ -- 216
 (There was 1 warning)

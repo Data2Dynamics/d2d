@@ -1,4 +1,4 @@
-\begin{thebibliography}{15}
+\begin{thebibliography}{16}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -72,6 +72,17 @@ Marquardt~D.
 Press~W, Teukolsky~S, Flannery~B, and Vetterling~W.
 \newblock \emph{Numerical Recipes: FORTRAN}.
 \newblock Cambridge University Press, Cambridge, UK, 1990.
+
+\bibitem[Raia et~al.(2011)Raia, Schilling, B{\"o}hm, Hahn, Kowarsch, Raue,
+  Sticht, Bohl, Saile, M{\"o}ller, Gretz, Timmer, Theis, Lehmann, Lichter, and
+  Klingm{\"u}ller]{Raia:2011vn}
+Raia~V, Schilling~M, B{\"o}hm~M, Hahn~B, Kowarsch~A, Raue~A, Sticht~C, Bohl~S,
+  Saile~M, M{\"o}ller~P, Gretz~N, Timmer~J, Theis~F, Lehmann~W, Lichter~P, and
+  Klingm{\"u}ller~U.
+\newblock Dynamic mathematical modeling of {IL13}-induced signaling in
+  {Hodgkin} and primary mediastinal {B}-cell lymphoma allows prediction of
+  therapeutic targets.
+\newblock \emph{Cancer Research} \textbf{71},~\penalty0 693--704, 2011.
 
 \bibitem[Rosenbrock(1960)]{Rosenbrock:1960fk}
 Rosenbrock~H.

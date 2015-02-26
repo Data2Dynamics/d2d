@@ -1,9 +1,10 @@
 \contentsline {section}{\numberline {1}Efficient solution of the ODE system}{1}{section.1}
-\contentsline {section}{\numberline {2}Parallelization of computations}{2}{section.2}
-\contentsline {section}{\numberline {3}Maximum Likelihood Estimation framework and deterministic optimization algorithms}{4}{section.3}
-\contentsline {paragraph}{\nonumberline Gradient descent method.}{4}{section*.4}
-\contentsline {paragraph}{\nonumberline Newton and quasi-Newton methods.}{4}{section*.5}
+\contentsline {section}{\numberline {2}Detailed user guide for the \citet {Raia:2011vn} example model and data}{2}{section.2}
+\contentsline {section}{\numberline {3}Parallelization of computations}{2}{section.3}
+\contentsline {section}{\numberline {4}Maximum Likelihood Estimation framework and deterministic optimization algorithms}{3}{section.4}
+\contentsline {paragraph}{\nonumberline Gradient descent method.}{3}{section*.4}
+\contentsline {paragraph}{\nonumberline Newton and quasi-Newton methods.}{5}{section*.5}
 \contentsline {paragraph}{\nonumberline Levenberg-Marquardt method.}{5}{section*.6}
 \contentsline {paragraph}{\nonumberline Trust region methods.}{5}{section*.7}
-\contentsline {section}{\numberline {4}Derivative calculations for ODE models}{6}{section.4}
-\contentsline {section}{\numberline {5}Efficient solution of the sensitivity equations}{9}{section.5}
+\contentsline {section}{\numberline {5}Derivative calculations for ODE models}{6}{section.5}
+\contentsline {section}{\numberline {6}Efficient solution of the sensitivity equations}{9}{section.6}

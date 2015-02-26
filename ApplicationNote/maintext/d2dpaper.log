@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2014.2.7)  25 FEB 2015 21:41
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2014.2.7)  25 FEB 2015 21:51
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -488,18 +488,18 @@ an Ministry
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 11.
 )
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-Extra height:30.51544pt when 306.75772pt
-Extra height:10.0pt when 307.75772pt
-Extra height:10.0pt when 308.75772pt
-Extra height:0.0pt when 309.75772pt
-(2)Left:309.75772pt Right:309.51544pt Output:309.75772pt
+Extra height:10.0pt when 323.25772pt
+Extra height:10.0pt when 324.25772pt
+Extra height:10.0pt when 325.25772pt
+Extra height:10.0pt when 326.25772pt
+Extra height:10.0pt when 327.25772pt
+Extra height:0.0pt when 328.25772pt
+(2)Left:328.25772pt Right:327.51544pt Output:328.25772pt
 - LAST -
 Extra skip:0.0pt
-Left:309.75772pt
-Right:309.51544pt
-Output:309.75772pt
+Left:328.25772pt
+Right:327.51544pt
+Output:328.25772pt
 
 Overfull \hbox (261.0pt too wide) has occurred while \output is active
 [][] 
@@ -520,7 +520,7 @@ LaTeX Font Warning: Size substitutions with differences
 Here is how much of TeX's memory you used:
  3301 strings out of 494536
  42620 string characters out of 6167447
- 116297 words of memory out of 5000000
+ 117297 words of memory out of 5000000
  6442 multiletter control sequences out of 15000+600000
  51780 words of font info for 110 fonts, out of 8000000 for 9000
  323 hyphenation exceptions out of 8191
@@ -542,7 +542,7 @@ c/uhvro8a.pfb></usr/local/texlive/2013basic/texmf-dist/fonts/type1/urw/times/ut
 mb8a.pfb></usr/local/texlive/2013basic/texmf-dist/fonts/type1/urw/times/utmr8a.
 pfb></usr/local/texlive/2013basic/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
 
-Output written on d2dpaper.pdf (3 pages, 2001678 bytes).
+Output written on d2dpaper.pdf (3 pages, 2001841 bytes).
 PDF statistics:
  507 PDF objects out of 1000 (max. 8388607)
  225 compressed objects within 3 object streams
