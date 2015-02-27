@@ -1,4 +1,4 @@
-\begin{thebibliography}{16}
+\begin{thebibliography}{18}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -48,6 +48,12 @@ Hindmarsh~A, Brown~P, Grant~K, Lee~S, Serban~R, Shumaker~D, and Woodward~C.
 \newblock \emph{ACM T Math Software} \textbf{31}\penalty0 (3),~\penalty0
   363--396, 2005.
 
+\bibitem[Kronfeld et~al.(2010)Kronfeld, Planatscher, and Zell]{Kronfeld:2010fk}
+Kronfeld~M, Planatscher~H, and Zell~A.
+\newblock The {EvA2} optimization framework.
+\newblock \emph{Learning and Intelligent Optimization} \textbf{6073},~\penalty0
+  247--250, 2010.
+
 \bibitem[Lambert(1977)]{Lambert:1977fk}
 Lambert~J.
 \newblock \emph{The State of the Art in Numerical Analysis}, chapter The
@@ -83,6 +89,14 @@ Raia~V, Schilling~M, B{\"o}hm~M, Hahn~B, Kowarsch~A, Raue~A, Sticht~C, Bohl~S,
   {Hodgkin} and primary mediastinal {B}-cell lymphoma allows prediction of
   therapeutic targets.
 \newblock \emph{Cancer Research} \textbf{71},~\penalty0 693--704, 2011.
+
+\bibitem[Raue et~al.(2013)Raue, Schilling, Bachmann, Matteson, Schelker,
+  Kaschek, Hug, Kreutz, Harms, Theis, Klingm{\"u}ller, and Timmer]{Raue:2012zt}
+Raue~A, Schilling~M, Bachmann~J, Matteson~A, Schelker~M, Kaschek~D, Hug~S,
+  Kreutz~C, Harms~B, Theis~F, Klingm{\"u}ller~U, and Timmer~J.
+\newblock Lessons learned from quantitative dynamical modeling in systems
+  biology.
+\newblock \emph{PLOS ONE} \textbf{8}\penalty0 (9),~\penalty0 e74335, 2013.
 
 \bibitem[Rosenbrock(1960)]{Rosenbrock:1960fk}
 Rosenbrock~H.
