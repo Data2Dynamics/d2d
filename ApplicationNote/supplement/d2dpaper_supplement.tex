@@ -63,6 +63,27 @@
 \tableofcontents
 
 \section{Efficient solution of the ODE system} \label{sec:ode_solvers}
+
+%Mathematically, such dynamical systems can be characterized by 
+%\begin{equation}
+%{\bf \dot  x}(t,{\boldsymbol \theta}) = {\bf f}({\bf x}(t,{\boldsymbol \theta}),{\bf u}(t,{\boldsymbol \theta}),{\boldsymbol \theta})
+%\quad \textnormal{with} \quad {\bf x}(0,{\boldsymbol \theta}) = {\bf g}(\boldsymbol{\theta}).
+%\label{eq:ode}
+%\end{equation}
+%${\bf \dot  x}(t,{\boldsymbol \theta}) = {\bf f}({\bf x}(t,{\boldsymbol \theta}),{\bf u}(t,{\boldsymbol \theta}),{\boldsymbol \theta})$
+%with ${\bf x}(0,{\boldsymbol \theta}) = {\bf g}(\boldsymbol{\theta})$. In this case the vector of state variables ${\bf x}(t,{\boldsymbol \theta})$ describes the dynamics of molecular components. The function ${\bf u}(t,{\boldsymbol \theta})$ represents experimental treatments that are time-varying inputs to the ODE systems.
+
+%The initial concentrations %${\bf x}(0,{\boldsymbol \theta})$ 
+%can be considered as functions %${\bf g}(\boldsymbol{\theta})$ 
+%of unknown parameters as well. 
+
+%Each possible measurement is mathematically represented by a functional mapping
+%%\begin{equation}
+%%    {\bf y}(t,{\boldsymbol \theta}) = {\bf h}({\bf x}(t,{\boldsymbol \theta}),{\bf u}(t,{\boldsymbol \theta}),{\boldsymbol \theta}). \label{eq:obs}
+%%\end{equation}
+%${\bf y}(t,{\boldsymbol \theta}) = {\bf h}({\bf x}(t,{\boldsymbol \theta}),{\bf u}(t,{\boldsymbol \theta}),{\boldsymbol \theta})$
+%that and 
+
 The dynamics of biochemical reaction networks, i.e.~the time evolution of the concentra\-tions of the involved molecular compounds, can be modeled by systems of ordinary differential equations (ODE)
 \begin{equation}
 	\DD{}{t}{\mathbf{x}}(t, \boldsymbol{\theta}) = \mathbf{f}_{x}(\mathbf{x}(t, \boldsymbol{\theta}), \mathbf{u}(t, \boldsymbol{\theta}), \boldsymbol{\theta}). \label{odesystem2}
