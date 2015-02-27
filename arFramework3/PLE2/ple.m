@@ -4,6 +4,10 @@
 %
 % i:                    i'th parameter, see pwInfo
 %                       [if omitted, all free parameters are considered]
+%                       alternatively the name of a parameter or a cell of
+%                       names can be provided. If one parameter name is
+%                       provided which is not in ar.pLabel, then the string
+%                       is interpreted as a regular expression.
 % samplesize:           number of sampling steps            [100]
 % relchi2stepincrease:  percentage chi^2 increase of a step [0.1]
 % maxstepsize:          maximum size of a step              [0.2 * p_jk]
@@ -22,6 +26,27 @@ end
 if(~isfield(pleGlobals, 'showCalculation'))
     pleGlobals.showCalculation = true;
 end
+
+if(ischar(jk))
+    global ar
+    tref = strmatch(jk,ar.pLabel,'exact');
+    if(isempty(tref))
+        jk = find(~cellfun(@isempty,regexp(ar.pLabel,jk)));
+    else 
+        jk = tref;
+    end
+    
+    if isempty(jk)
+        disp('Pattern ''',jk,''' not found in ar.pLabel');
+        return;
+    end
+elseif(iscell(jk)) % cell of pLabels
+    [~,jk] = intersect(ar.pLabel,jk);
+elseif(isnumeric(jk))
+else
+    error('Argument has to be a string or an array of indices.')
+end
+
 if(nargin<1)
     fprintf('PLE for %i parameters ...\n', sum(pleGlobals.q_fit))
     jindex = find(pleGlobals.q_fit);
