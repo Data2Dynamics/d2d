@@ -41,9 +41,9 @@
 % differential opterators
 \newcommand{\dd}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\ddd}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
-\newcommand{\DD}[2]{\frac{d #1}{d #2}}
-\newcommand{\DDsquare}[2]{\frac{d^2 #1}{d #2^2}}
-\newcommand{\DDD}[3]{\frac{d^2 #1}{d #2 d #3}}
+\newcommand{\DD}[2]{\frac{\mathrm{d} #1}{\mathrm{d} #2}}
+\newcommand{\DDsquare}[2]{\frac{\mathrm{d}^2 #1}{\mathrm{d} #2^2}}
+\newcommand{\DDD}[3]{\frac{\mathrm{d}^2 #1}{\mathrm{d} #2\mathrm{d} #3}}
 
 
 % hyperlink color
@@ -57,8 +57,8 @@ urlcolor=black]{hyperref}
 \begin{document}
 
 \section*{SUPPLEMENTARY INFORMATION}
-\section*{Data-2-Dynamics: a modeling environment 
-tailored to parameter estimation in dynamical systems}
+\section*{Data2Dynamics: a modeling environment tailored to parameter 
+estimation in dynamical systems}
 
 \noindent A.~Raue\,$^{1,}$, B.~Steiert$^{2}$, M.~Schelker$^{3}$, C.~Kreutz$^{2}$, H.~Hass$^{2}$, J.~Vanlier$^{2}$, C.~T\"onsing$^{2}$, L.~Adlung$^{4}$, R.~Engesser$^{2}$, W.~Mader$^{2}$, T.~Heinemann$^{5}$, J.~Hasenauer$^{6}$, M.~Schilling$^{4}$, T.~H\"ofer$^{5}$, E.~Klipp$^{2}$, B.~Sch\"oberl$^{1}$, F.~Theis$^{6}$, U.~Klingm\"uller$^{4}$ and J.~Timmer\,$^{2,7,8}$
 
@@ -89,7 +89,7 @@ The Data2Dynamics modeling environment is at \href{http://www.data2dynamics.org}
 \section{Efficient solution of the ODE system} \label{sec:ode_solvers}
 
 The dynamics of biochemical reaction networks, i.e.~the time evolution of the concentra\-
-tions of the involved molecular compounds, can be modeled by systems of ordinary 
+tions of the involved molecular compounds, can be modeled by a system of ordinary 
 differential equations (ODE)
 \begin{equation}
 	\DD{}{t}{\mathbf{x}}(t, \boldsymbol{\theta}) = \mathbf{f}_{x}(\mathbf{x}(t, 
@@ -97,7 +97,7 @@ differential equations (ODE)
 \label{odesystem2}
 \end{equation}
 The variables $\mathbf{x}$ correspond to the dynamics of the concentration of $n$ 
-molecular compounds such as hormons, proteins in different phosphorylation states, 
+molecular compounds such as hormones, proteins in different phosphorylation states, 
 mRNA or complexes thereof. A time dependent experimental treatment that alters the 
 dynamical behavior of the system can be incorporated by the function $\mathbf{u}(t, 
 \boldsymbol{\theta})$. To be able to handle unknown quantities in these driving inputs, we 
@@ -109,9 +109,9 @@ instance, $\mathbf{u}$ can represented by a smoothing spline as described in
 \label{init_ode_sys}
 \end{equation}	
 The set of parameters $\boldsymbol{\theta} = \{\theta_1 \dots \theta_l\}$ determines the  
-dynamics. Even in simple cases the analytical solution to Equation~(\ref{odesystem2}) is 
-not available any more. Therefore, the dynamics has to be computed by a numerical ODE 
-solver. For biochemical ODE systems, one reaction flux occurs multiple times in the right 
+dynamics. Except for very small systems the analytical solution to Equation~(\ref{odesystem2}) is 
+not available any more. Therefore, the dynamics have to be computed by a numerical ODE 
+solver. For ODE systems describing biochemical reactions, one reaction flux occurs multiple times in the right 
 hand side of Equation~(\ref{odesystem2}). Therefore, the right hand side of 
 Equation~(\ref{odesystem2}) can usually be decomposed into a stoichiometry matrix $
 \mathbf{N}$ and rate equations $\mathbf{v}$ of the reaction fluxes of the molecular 
@@ -130,12 +130,12 @@ consequence the resulting nonlinear ordinary differential equations can be stiff
 general introduction into this topic see \citet{Lambert:1977fk}. Roughly speaking, stiffness 
 is characterized by the presence of at least one rapidly damped mode, whose time 
 constant is small compared to the time scale of the remaining dynamics. In the presented 
-software package, the CVODES solver \citep{Hindmarsh:2005fb} that is coded in C for 
+software package, the CVODES solver \citep{Hindmarsh:2005fb} that is implemented in C for 
 efficiency is used. It solves both stiff and non-stiff systems. The methods used in CVODES 
 are variable-order, variable-step multistep methods, based on the Adams-Moulton 
 formulas for non-stiff and on the Backward Differentiation Formulas for stiff systems 
 \citep{Byrne:1975uq}. CVODES also allows for efficient simultaneous solution of the 
-sensitivity equations, see Section~\ref{sec:ode_simu}. For conveniency the solver was 
+sensitivity equations, see Section~\ref{sec:ode_simu}. For convenience the solver was 
 implemented in combination with a MATLAB mex-interface. For numerical efficiency it is 
 favorable to provide the Jacobian matrix $\mathbf{J}$ of the right hand side of 
 Equation~(\ref{odesystem2}) with respect to the dynamic variables $\mathbf{x}$ 
@@ -153,13 +153,13 @@ Experimental measurements are mathematically represented by functional mappings
     {\bf y}(t,{\boldsymbol \theta}) = {\bf f}_y({\bf x}(t,{\boldsymbol \theta}),{\bf u}(t,{\boldsymbol 
 \theta}),{\boldsymbol \theta}). \label{eq:obs}
 \end{equation}
-For each experimental condition Equation~(\ref{fluxsystem2}) and~(\ref{jac_mat}) has to 
+For each experimental condition Equation~(\ref{fluxsystem2}) and~(\ref{jac_mat}) have to 
 be modified according to the treatment applied. This can for example be a different 
 network structure represented by $\mathbf{N}$ due to knock-out, knock-in, or inhibition 
 experiments or different experimental treatments incorporated by the function $\mathbf{u}
 (t, \boldsymbol{\theta})$ or $\mathbf{f}_{x_0}(\boldsymbol{\theta})$ . Consequently, there 
-can be as many variants of the ODE systems as experimental conditions, each having a 
-different numerical solution for the dynamics. For one comparison of the whole model to 
+can be as many variants of the ODE systems as experimental conditions, each having an 
+individual numerical solution for the dynamics. For comparing the whole model to 
 the experimental data, given a specific set of candidate parameters, all ODE variants have 
 to be solved. During parameter estimation many evaluations of the whole model are 
 necessary. This can be a numerically intensive task. All ODE variants can be solved 
@@ -176,8 +176,8 @@ increasing number of threads used.
 \caption{Acceleration of numerical computations for the solution of ODE systems by 
 multithreading. For each bar in the figure the 24 variants of the ODE systems used for the 
 \citet{Bachmann:2011fk} model were solved for 1000 randomly drawn sets of parameters 
-using a Latin hypercube sampling strategy. The theoretically possible acceleration is 
-displayed by the red line. A 12-core processor was used in this benchmark.}
+using a Latin hypercube sampling strategy. The red line displays the theoretically possible
+acceleration. A 12-core processor was used in this benchmark.}
 \label{Acceleration}
 \end{figure}
 
@@ -186,14 +186,15 @@ algorithms} \label{sec:det_optimization}
 Numerical optimization algorithms try to find the argument $\boldsymbol{\hat \theta}$ that 
 minimize the value of an objective function $L(\boldsymbol{\theta})$. In the case of 
 independently and normally distributed measurement noise the objective function for 
-maximum likelihood estimation is give by
+maximum likelihood estimation is given by
 \begin{equation}
 	L(\boldsymbol{\theta}) = \sum_{k=1}^m \sum_{i=1}^{d_k}\, 2\log(\sqrt{2 \pi}) + 
 2\log(\sigma_k(t_i, \boldsymbol{\theta}))\, + \left(\frac{y_{ki}^\dagger - y_{k}(t_{i}, 
 \boldsymbol{\theta})}{\sigma_k(t_i, \boldsymbol{\theta})}\right)^2 \label{llhoodfun2}
 \end{equation}
 where $L(\boldsymbol{\theta}) =  - 2\cdot \log(\mathcal{L}(\mathbf{y}^\dagger|\,
-\boldsymbol{\theta}))$ of the likelihood $\mathcal{L}$, ${\bf y}^\dagger$ is the experimental data and normally distributed measurement noise is assumed. The variance can be a 
+\boldsymbol{\theta}))$ of the likelihood $\mathcal{L}$, ${\bf y}^\dagger$ is the experimental 
+data and normally distributed measurement noise is assumed. The variance can be a 
 parameterized function $\sigma_k(t_i, \boldsymbol{\theta})^2$ and the corresponding 
 parameter can be estimated together with the other parameters. In the following we will 
 refer to both $\mathcal{L}$ and $L$ simply as likelihood. The minimum of 
@@ -247,7 +248,7 @@ and leads, if the approximation is a good one, to the optimal solution in a sing
 Compared to the gradient descent method the Newton method exhibits quadratic 
 convergence rate \citep{Stoer:2005fk}. The performance decreases considerably as the 
 goodness of the approximation decreases. In this case and also for non-positive definite $
-\mathbf{H}$, the method can become unstable, i.e.~a decrease in the objective function is 
+\mathbf{H}$, the method can become unstable, i.e.~decrease in the objective function is 
 not guaranteed for each step. 
 
 Instead of computing $\mathbf{H}$ directly from the model, \emph{quasi-Newton} methods 
@@ -294,7 +295,7 @@ using direct matrix inversion that is considerably slower for large parameter sp
 For deterministic optimization algorithms the gradient $\mathbf{g} = \nabla 
 L(\boldsymbol{\theta})$ and Hessian matrix $\mathbf{H} = \nabla^\top\nabla\, 
 L(\boldsymbol{\theta})$ of the likelihood are required. The first term in 
-Equation~(\ref{llhoodfun2}) is a constant. The last term is the well known weighted sum of 
+Equation~(\ref{llhoodfun2}) is a constant. The last term is the well-known weighted sum of 
 squared residuals, sometimes denoted by $\chi^2(\boldsymbol{\theta})$. 
 Equation~(\ref{llhoodfun2}) can be reformulated
 \begin{eqnarray}
@@ -347,7 +348,7 @@ evaluated by
 and
 \begin{equation}
 	\DDsquare{{\tilde r}}{\boldsymbol{\theta}}  = \frac{1}{{\tilde r} {\sigma}}
-\frac{d^2{\sigma}}{d \boldsymbol{\theta}^2} - \frac{1}{{\tilde r} {\sigma}^2}\DD{{\sigma}}
+\frac{\mathrm{d}^2{\sigma}}{\mathrm{d} \boldsymbol{\theta}^2} - \frac{1}{{\tilde r} {\sigma}^2}\DD{{\sigma}}
 {\boldsymbol{\theta}}\cdot \DD{{\sigma}}{\boldsymbol{\theta}} - \frac{1}{{\tilde r}^2 {\sigma}}
 \DD{{\sigma}}{\boldsymbol{\theta}}\cdot \DD{{\tilde r}}{\boldsymbol{\theta}.}
 \end{equation}
@@ -377,12 +378,12 @@ With the equation for the measurements ${f}_y$ we can resolve
 \end{equation}
 All expressions in Equations~(\ref{reserrfirst}-\ref{sderive}) can be calculated analytically 
 except for terms indicated in red. In Equation~(\ref{sderive}), the derivatives of the 
-dynamic variables $d \mathbf{x}/d \boldsymbol{\theta}$, the so called \emph{sensitivities}, 
+dynamic variables $\mathrm{d} \mathbf{x}/\mathrm{d} \boldsymbol{\theta}$, the so called \emph{sensitivities}, 
 can be calculated numerically, as described in Section~\ref{sec:ode_simu}. The calculation 
-of $d^2 {y}/d \boldsymbol{\theta}^2$  involves second order sensitivities $d^2 \mathbf{x}/d 
+of $\mathrm{d}^2 {y}/\mathrm{d} \boldsymbol{\theta}^2$  involves second order sensitivities $\mathrm{d}^2 \mathbf{x}/\mathrm{d} 
 \boldsymbol{\theta}^2$ of the dynamics that are expensive to evaluate numerically. 
 
-The calculation of the last term in Equation~(\ref{fullH}) ${r} \cdot d^2{r}/d
+The calculation of the last term in Equation~(\ref{fullH}) ${r} \cdot \mathrm{d}^2{r}/\mathrm{d}
 \boldsymbol{\theta}^2$ is more complicated. Following the argumentation in~\citet[Section 
 15.5 Nonlinear Models]{Press:1990rw}, in the proximity of a good model fit the normalized 
 residuals ${r}$ fluctuate uncorrelated around zero. Therefore, the term tends to cancel out 
@@ -440,16 +441,16 @@ With Equation~(\ref{rl3}) we can calculate
 \frac{{r}^2}{{\sigma}} \DDD{{\sigma}}{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_b.} 
 \label{problemend}
 \end{eqnarray}
-Indicated in red color are the before mentioned second order derivatives that are 
+Indicated in red color are the before-mentioned second order derivatives that are 
 problematic to evaluate numerically. The terms in Equations~(\ref{problem1}-
 \ref{problemend}) do contain either ${r}$ or  ${r}^2$. As discussed above, the terms 
 containing ${r}$ do cancel out when summed over $q$ in the proximity of a good model fit 
 whereas the terms containing ${r}^2$ do not. Fortunately, the problematic terms that 
-contain second order derivatives $d^2 {y}/d \boldsymbol{\theta}^2$,  marked in red, are 
+contain second order derivatives $\mathrm{d}^2 {y}/\mathrm{d} \boldsymbol{\theta}^2$,  marked in red, are 
 amongst those that do cancel out when summed over $q$ in Equations~(\ref{problem1}-
 \ref{problemend}). With the remaining terms of Equation~(\ref{fullH}) an approximate 
 Hessian matrix $\mathbf{\hat H}$ can be calculated without the second order derivatives 
-$d^2 {y}/d \boldsymbol{\theta}^2$. As the quality of the model fit improves, the quality of 
+$\mathrm{d}^2 {y}/\mathrm{d} \boldsymbol{\theta}^2$. As the quality of the model fit improves, the quality of 
 the approximation $\mathbf{\hat H}$ improves. For cases where the measurement noise 
 function does not explicitly depend on the observables, the missing term in 
 Equation~(\ref{ddsigma}) vanishes as well because $\partial f_\sigma / \partial y= 0$. Thus 
@@ -460,24 +461,24 @@ the case where measurement noise parameters are estimated.
 The assumption $\partial f_\sigma / \partial y = 0$ holds true for many applications. To 
 which extend more general functions with $\partial f_\sigma / \partial y \not= 0$ for the 
 measurement noise have to be considered for applications, and to which extend this 
-would impact on optimization performance remains to clarified.
+would impact on optimization performance remains to be clarified.
 
 If, due to log-normal measurement noise, the observables and experimental data points 
-are compared on a logarithmic scale, e.g.~using log-10, an additional transformation
+are compared on a logarithmic scale, e.g.~using $\log_{10}$, an additional transformation
 \begin{equation}
-	\DD{y_k^{log}}{\boldsymbol{\theta}} =  \frac{1}{\log(10) \cdot y_k}\DD{y_k}
+	\DD{y_k^{\log}}{\boldsymbol{\theta}} =  \frac{1}{\log(10) \cdot y_k}\DD{y_k}
 {\boldsymbol{\theta}}
 \end{equation}
 has to be applied. 
-If, for efficiency, parameter values are estimated on a logarithmic scale, e.g.~using log-10, 
+If, for efficiency, parameter values are estimated on a logarithmic scale, e.g.~using $\log_{10}$, 
 an additional transformation
 \begin{equation}
-	\DD{}{\theta_j^{log}} = \log(10)\cdot \theta_j \cdot \DD{}{\theta_j}
+	\DD{}{\theta_j^{\log}} = \log(10)\cdot \theta_j \cdot \DD{}{\theta_j}
 \end{equation}
 has to be used. 
 
 \section{Efficient solution of the sensitivity equations} \label{sec:ode_simu}
-The derivatives $d\mathbf{x}(t,\boldsymbol{\theta}) / d \boldsymbol{\theta}$, also called 
+The derivatives $\mathrm{d}\mathbf{x}(t,\boldsymbol{\theta}) / \mathrm{d} \boldsymbol{\theta}$, also called 
 \emph{sensitivities}, can be calculated accurately using the sensitivity equations. The 
 sensitivity equations represent an additional ODE system
 \begin{eqnarray}
@@ -486,8 +487,8 @@ _x}{\mathbf{x}}  \DD{\mathbf{x}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} +
 \dd{\mathbf{f}_x}{\mathbf{u}}  \DD{\mathbf{u}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} + 
 \dd{\mathbf{f}_x}{\boldsymbol{\theta}} \label{ssystem2}
 \end{eqnarray}
-for the derivatives \citep{Leis:1988dl} that are solved simultaneously with the original ODE 
-system, see Equation~(\ref{odesystem2}). Using the abbreviation $s_{ij} = d x_i / d \theta_j
+for the derivatives \citep{Leis:1988dl} that is solved simultaneously with the original ODE 
+system, see Equation~(\ref{odesystem2}). Using the abbreviation $s_{ij} = \mathrm{d} x_i / \mathrm{d} \theta_j
 $ with $i = 1 \dots n$ and $j = 1 \dots l$ and Equation~(\ref{jac_mat}) we rewrite 
 component wise
 \begin{eqnarray}
@@ -498,7 +499,7 @@ component wise
 which are $n \times l$ additional ODEs. The initial conditions for 
 Equation~(\ref{ssystemcomp}) can be calculated by 
 \begin{equation}
-	\mathbf{s}(0) = \DD{\mathbf{f}_{x_0}}{\boldsymbol{\theta},}
+	\mathbf{s}(t=0,\boldsymbol{\theta}) = \DD{\mathbf{f}_{x_0}}{\boldsymbol{\theta},}
 \end{equation}
 see Equation~(\ref{init_ode_sys}). An efficient algorithm for solving the enlarged ODE 
 system is the CVODES solver. There are some numerical properties that allow to increase 
@@ -506,7 +507,7 @@ the performance of solving the enlarged ODE system, see in \cite{Hindmarsh:2005f
 details. Similar to the calculation of the Jacobian matrix $\mathbf{J}$, see 
 Equation~(\ref{jac_mat}), of the right hand side of Equation~(\ref{odesystem2}), it is 
 favorable to provide analytically the Jacobian matrix $\mathbf{J}_s$ of the right hand side 
-of Equation~(\ref{ssystemcomp}) with respect to the sensitivities. From equation 
+of Equation~(\ref{ssystemcomp}) with respect to the sensitivities. From 
 Equation~(\ref{ssystemcomp}) we see that $\mathbf{J}_s$ is composed blockwise out of $
 \mathbf{J}$ by
 \begin{displaymath}
@@ -531,7 +532,7 @@ Equation~(\ref{ssystemcomp}) we see that $\mathbf{J}_s$ is composed blockwise ou
 Therefore, explicit calculation of $\mathbf{J}_s$ can be omited. In addition, this feature 
 leads to some numerical properties that allow to further increase the performance of 
 solving the enlarged ODE system, see in \cite{Hindmarsh:2005fb} for details. For instance, 
-Equation~(\ref{ssystem2}) inherit the stiffness properties of Equation~(\ref{odesystem2}). 
+Equation~(\ref{ssystem2}) inherits the stiffness properties of Equation~(\ref{odesystem2}). 
 Consequently, the adaptive step size control for the enlarged ODE system can be chosen 
 equal to that of the original system. Again, Equation~(\ref{fluxsystem2}) can be used to 
 simplify computation of Equation~(\ref{ssystem2}) by 
