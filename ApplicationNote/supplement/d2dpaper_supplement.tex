@@ -56,92 +56,197 @@
 
 \begin{document}
 
-\section*{SUPPLEMENTARY INFORMATION\\Data-2-Dynamics: a modeling environment tailored to parameter estimation in dynamical systems}
+\section*{SUPPLEMENTARY INFORMATION\\Data-2-Dynamics: a modeling environment tailored to 
+parameter estimation in dynamical systems}
 
 % table of contents
 \renewcommand*\contentsname{Contents}
 \tableofcontents
 
 \section{Efficient solution of the ODE system} \label{sec:ode_solvers}
-The dynamics of biochemical reaction networks, i.e.~the time evolution of the concentra\-tions of the involved molecular compounds, can be modeled by systems of ordinary differential equations (ODE)
+The dynamics of biochemical reaction networks, i.e.~the time evolution of the concentra\-tions of the 
+involved molecular compounds, can be modeled by systems of ordinary differential equations (ODE)
 \begin{equation}
-	\DD{}{t}{\mathbf{x}}(t, \boldsymbol{\theta}) = \mathbf{f}_{x}(\mathbf{x}(t, \boldsymbol{\theta}), \mathbf{u}(t, \boldsymbol{\theta}), \boldsymbol{\theta}). \label{odesystem2}
+	\DD{}{t}{\mathbf{x}}(t, \boldsymbol{\theta}) = \mathbf{f}_{x}(\mathbf{x}(t, \boldsymbol{\theta}), 
+\mathbf{u}(t, \boldsymbol{\theta}), \boldsymbol{\theta}). \label{odesystem2}
 \end{equation}
-The variables $\mathbf{x}$ correspond to the dynamics of the concentration of $n$ molecular compounds such as hormons, proteins in different phosphorylation states, mRNA or complexes thereof. A time dependent experimental treatment that alters the dynamical behavior of the system can be incorporated by the function $\mathbf{u}(t, \boldsymbol{\theta})$. To be able to handle unknown quantities in these driving inputs, we consider the case where the function $\mathbf{u}$ can also be parameter dependent. For instance, $\mathbf{u}$ can represented by a smoothing spline as described in \citet{Schelker:2012uq}. The initial state of the system is described by 
+The variables $\mathbf{x}$ correspond to the dynamics of the concentration of $n$ molecular compounds 
+such as hormons, proteins in different phosphorylation states, mRNA or complexes thereof. A time 
+dependent experimental treatment that alters the dynamical behavior of the system can be incorporated by 
+the function $\mathbf{u}(t, \boldsymbol{\theta})$. To be able to handle unknown quantities in these driving 
+inputs, we consider the case where the function $\mathbf{u}$ can also be parameter dependent. For 
+instance, $\mathbf{u}$ can represented by a smoothing spline as described in \citet{Schelker:2012uq}. The 
+initial state of the system is described by 
 \begin{equation}
 	\mathbf{x}(0, \boldsymbol{\theta}) = \mathbf{f}_{x_0}(\boldsymbol{\theta}). \label{init_ode_sys}
 \end{equation}	
-The set of parameters $\boldsymbol{\theta} = \{\theta_1 \dots \theta_l\}$ determines the  dynamics. Even in simple cases the analytical solution to Equation~(\ref{odesystem2}) is not available any more. Therefore, the dynamics has to be computed by a numerical ODE solver. For biochemical ODE systems, one reaction flux occurs multiple times in the right hand side of Equation~(\ref{odesystem2}). Therefore, the right hand side of Equation~(\ref{odesystem2}) can usually be decomposed into a stoichiometry matrix $\mathbf{N}$ and rate equations $\mathbf{v}$ of the reaction fluxes of the molecular interactions
+The set of parameters $\boldsymbol{\theta} = \{\theta_1 \dots \theta_l\}$ determines the  dynamics. Even in 
+simple cases the analytical solution to Equation~(\ref{odesystem2}) is not available any more. Therefore, 
+the dynamics has to be computed by a numerical ODE solver. For biochemical ODE systems, one reaction 
+flux occurs multiple times in the right hand side of Equation~(\ref{odesystem2}). Therefore, the right hand 
+side of Equation~(\ref{odesystem2}) can usually be decomposed into a stoichiometry matrix $\mathbf{N}$ 
+and rate equations $\mathbf{v}$ of the reaction fluxes of the molecular interactions
 \begin{equation}
-	\mathbf{f}_{x}(\mathbf{x}(t, \boldsymbol{\theta}), \mathbf{u}(t, \boldsymbol{\theta}), \boldsymbol{\theta}) = \mathbf{N} \cdot \mathbf{v}(\mathbf{x}(t, \boldsymbol{\theta}), \mathbf{u}(t, \boldsymbol{\theta}), \boldsymbol{\theta}). \label{fluxsystem2}
+	\mathbf{f}_{x}(\mathbf{x}(t, \boldsymbol{\theta}), \mathbf{u}(t, \boldsymbol{\theta}), \boldsymbol{\theta}) 
+= \mathbf{N} \cdot \mathbf{v}(\mathbf{x}(t, \boldsymbol{\theta}), \mathbf{u}(t, \boldsymbol{\theta}), 
+\boldsymbol{\theta}). \label{fluxsystem2}
 \end{equation}
-The stoichiometry matrix $\mathbf{N}$ is sparse. For numerical efficiency it is advantageous to precompute the reaction fluxes $\mathbf{v}$ and use Equation~(\ref{fluxsystem2}) as right hand side of the ODE system. 
+The stoichiometry matrix $\mathbf{N}$ is sparse. For numerical efficiency it is advantageous to precompute 
+the reaction fluxes $\mathbf{v}$ and use Equation~(\ref{fluxsystem2}) as right hand side of the ODE 
+system. 
 
-The time-scales in of cellular processes can differ by orders of magnitude. As a consequence the resulting nonlinear ordinary differential equations can be stiff, for a general introduction into this topic see \citet{Lambert:1977fk}. Roughly speaking, stiffness is characterized by the presence of at least one rapidly damped mode, whose time constant is small compared to the time scale of the remaining dynamics. In the presented software package, the CVODES solver \citep{Hindmarsh:2005fb} that is coded in C for efficiency is used. It solves both stiff and non-stiff systems. The methods used in CVODES are variable-order, variable-step multistep methods, based on the Adams-Moulton formulas for non-stiff and on the Backward Differentiation Formulas for stiff systems \citep{Byrne:1975uq}. CVODES also allows for efficient simultaneous solution of the sensitivity equations, see Section~\ref{sec:ode_simu}. For conveniency the solver was implemented in combination with a MATLAB mex-interface. For numerical efficiency it is favorable to provide the Jacobian matrix $\mathbf{J}$ of the right hand side of Equation~(\ref{odesystem2}) with respect to the dynamic variables $\mathbf{x}$ 
+The time-scales in of cellular processes can differ by orders of magnitude. As a consequence the resulting 
+nonlinear ordinary differential equations can be stiff, for a general introduction into this topic see 
+\citet{Lambert:1977fk}. Roughly speaking, stiffness is characterized by the presence of at least one rapidly 
+damped mode, whose time constant is small compared to the time scale of the remaining dynamics. In the 
+presented software package, the CVODES solver \citep{Hindmarsh:2005fb} that is coded in C for efficiency 
+is used. It solves both stiff and non-stiff systems. The methods used in CVODES are variable-order, 
+variable-step multistep methods, based on the Adams-Moulton formulas for non-stiff and on the Backward 
+Differentiation Formulas for stiff systems \citep{Byrne:1975uq}. CVODES also allows for efficient 
+simultaneous solution of the sensitivity equations, see Section~\ref{sec:ode_simu}. For conveniency the 
+solver was implemented in combination with a MATLAB mex-interface. For numerical efficiency it is 
+favorable to provide the Jacobian matrix $\mathbf{J}$ of the right hand side of Equation~(\ref{odesystem2}) 
+with respect to the dynamic variables $\mathbf{x}$ 
 \begin{equation}
-	\mathbf{J} = \dd{\mathbf{f}_{x}}{\mathbf{x}} = \mathbf{N} \cdot \dd{\mathbf{v}}{\mathbf{x}}\label{jac_mat}
+	\mathbf{J} = \dd{\mathbf{f}_{x}}{\mathbf{x}} = \mathbf{N} \cdot \dd{\mathbf{v}}{\mathbf{x}}
+\label{jac_mat}
 \end{equation}
 to the ODE solver. Here, again, Equation~(\ref{fluxsystem2}) can be exploited to simplify computations.
 
 \section{Detailed user guide for the \citet{Raia:2011vn} example model and data} \label{user_guide}
 
 \section{Parallelization of computations} \label{sec:parallel}
-For each experimental condition Equation~(\ref{fluxsystem2}) and~(\ref{jac_mat}) has to be modified according to the treatment applied. This can for example be a different network structure represented by $\mathbf{N}$ due to knock-out, knock-in, or inhibition experiments or different experimental treatments incorporated by the function $\mathbf{u}(t, \boldsymbol{\theta})$ or $\mathbf{f}_{x_0}(\boldsymbol{\theta})$ . Consequently, there can be as many variants of the ODE systems as experimental conditions, each having a different numerical solution for the dynamics. For one comparison of the whole model to the experimental data, given a specific set of candidate parameters, all ODE variants have to be solved. During parameter estimation many evaluations of the whole model are necessary. This can be a numerically intensive task. All ODE variants can be solved independently, therefore this problem is ideal for parallel computing. Here, a multithreading technique was employed that results in a significant acceleration on multi-core machines. For the \citet{Bachmann:2011fk} model, 24 ODE variants have to be solved consecutively. As displayed in Figure~\ref{Acceleration}, the speed up increases as expected with increasing number of threads used.
+For each experimental condition Equation~(\ref{fluxsystem2}) and~(\ref{jac_mat}) has to be modified 
+according to the treatment applied. This can for example be a different network structure represented by $
+\mathbf{N}$ due to knock-out, knock-in, or inhibition experiments or different experimental treatments 
+incorporated by the function $\mathbf{u}(t, \boldsymbol{\theta})$ or $\mathbf{f}_{x_0}(\boldsymbol{\theta})$ . 
+Consequently, there can be as many variants of the ODE systems as experimental conditions, each having 
+a different numerical solution for the dynamics. For one comparison of the whole model to the experimental 
+data, given a specific set of candidate parameters, all ODE variants have to be solved. During parameter 
+estimation many evaluations of the whole model are necessary. This can be a numerically intensive task. All 
+ODE variants can be solved independently, therefore this problem is ideal for parallel computing. Here, a 
+multithreading technique was employed that results in a significant acceleration on multi-core machines. For 
+the \citet{Bachmann:2011fk} model, 24 ODE variants have to be solved consecutively. As displayed in 
+Figure~\ref{Acceleration}, the speed up increases as expected with increasing number of threads used.
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=\textwidth]{./figures_QDM/bachmann_MSB2011_speed_up_test.png}
 \end{center}
-\caption{Acceleration of numerical computations for the solution of ODE systems by multithreading. For each bar in the figure the 24 variants of the ODE systems used for the \citet{Bachmann:2011fk} model were solved for 1000 randomly drawn sets of parameters using a Latin hypercube sampling strategy. The theoretically possible acceleration is displayed by the red line. A 12-core processor was used in this benchmark.}
+\caption{Acceleration of numerical computations for the solution of ODE systems by multithreading. For 
+each bar in the figure the 24 variants of the ODE systems used for the \citet{Bachmann:2011fk} model were 
+solved for 1000 randomly drawn sets of parameters using a Latin hypercube sampling strategy. The 
+theoretically possible acceleration is displayed by the red line. A 12-core processor was used in this 
+benchmark.}
 \label{Acceleration}
 \end{figure}
 
-\section{Maximum Likelihood Estimation framework and deterministic optimization algorithms} \label{sec:det_optimization}
-Numerical optimization algorithms try to find the argument $\boldsymbol{\hat \theta}$ that minimize the value of an objective function $L(\boldsymbol{\theta})$. In the case of independently and normally distributed measurement noise the objective function for maximum likelihood estimation is give by
+\section{Maximum Likelihood Estimation framework and deterministic optimization algorithms} 
+\label{sec:det_optimization}
+Numerical optimization algorithms try to find the argument $\boldsymbol{\hat \theta}$ that minimize the 
+value of an objective function $L(\boldsymbol{\theta})$. In the case of independently and normally 
+distributed measurement noise the objective function for maximum likelihood estimation is give by
 \begin{equation}
-	L(\boldsymbol{\theta}) = \sum_{k=1}^m \sum_{i=1}^{d_k}\, 2\log(\sqrt{2 \pi}) + 2\log(\sigma_k(t_i, \boldsymbol{\theta}))\, + \left(\frac{y_{ki}^\dagger - y_{k}(t_{i}, \boldsymbol{\theta})}{\sigma_k(t_i, \boldsymbol{\theta})}\right)^2 \label{llhoodfun2}
+	L(\boldsymbol{\theta}) = \sum_{k=1}^m \sum_{i=1}^{d_k}\, 2\log(\sqrt{2 \pi}) + 2\log(\sigma_k(t_i, 
+\boldsymbol{\theta}))\, + \left(\frac{y_{ki}^\dagger - y_{k}(t_{i}, \boldsymbol{\theta})}{\sigma_k(t_i, 
+\boldsymbol{\theta})}\right)^2 \label{llhoodfun2}
 \end{equation}
-where $L(\boldsymbol{\theta}) =  - 2\cdot \log(\mathcal{L}(\mathbf{y}^\dagger|\,\boldsymbol{\theta}))$ of the likelihood $\mathcal{L}$. The variance can be a parameterized function $\sigma_k(t_i, \boldsymbol{\theta})^2$ and the corresponding parameter can be estimated together with the other parameters. In the following we will refer to both $\mathcal{L}$ and $L$ simply as likelihood. The minimum of $L(\boldsymbol{\theta})$ is called the best fit of the model to the experimental data and the corresponding parameters $\boldsymbol{\hat \theta}$ are the maximum likelihood estimates since they maximize $\mathcal{L}$. Numerical algorithms have to be used to estimate the parameters because of the non-linearity of the optimization problem. Deterministic optimization algorithms try to take steps $\Delta \boldsymbol{\theta}$ that successively decrease the value of $L(\boldsymbol{\theta})$ beginning from an initial guess $\boldsymbol{\theta}_0$ \citep{Press:1990rw}. The parameters are updated by $\boldsymbol{\theta}_{i+1} = \boldsymbol{\theta}_{i} + \Delta \boldsymbol{\theta}$. To generate steps deterministic optimization algorithms evaluate derivatives of the likelihood. 
+where $L(\boldsymbol{\theta}) =  - 2\cdot \log(\mathcal{L}(\mathbf{y}^\dagger|\,\boldsymbol{\theta}))$ of the 
+likelihood $\mathcal{L}$. The variance can be a parameterized function $\sigma_k(t_i, 
+\boldsymbol{\theta})^2$ and the corresponding parameter can be estimated together with the other 
+parameters. In the following we will refer to both $\mathcal{L}$ and $L$ simply as likelihood. The minimum 
+of $L(\boldsymbol{\theta})$ is called the best fit of the model to the experimental data and the corresponding 
+parameters $\boldsymbol{\hat \theta}$ are the maximum likelihood estimates since they maximize $
+\mathcal{L}$. Numerical algorithms have to be used to estimate the parameters because of the non-linearity 
+of the optimization problem. Deterministic optimization algorithms try to take steps $\Delta 
+\boldsymbol{\theta}$ that successively decrease the value of $L(\boldsymbol{\theta})$ beginning from an 
+initial guess $\boldsymbol{\theta}_0$ \citep{Press:1990rw}. The parameters are updated by $
+\boldsymbol{\theta}_{i+1} = \boldsymbol{\theta}_{i} + \Delta \boldsymbol{\theta}$. To generate steps 
+deterministic optimization algorithms evaluate derivatives of the likelihood. 
 
 \paragraph{Gradient descent method.}
 The \emph{gradient descent} method takes steps 
 \begin{equation}
 	\Delta \boldsymbol{\theta} = - \gamma \cdot \nabla L(\boldsymbol{\theta}) \label{gradientstep}
 \end{equation}	
-down the gradient of $L$. $\gamma$ is chosen sufficiently small such that a decrease in the objective function $L(\boldsymbol{\theta}_{i+1}) < L(\boldsymbol{\theta}_{i})$ can be guaranteed. It is well known that this simple method exhibits only linear convergence rate \citep{Stoer:2005fk}. Furthermore, for non-linear problems the method has convergence problems if the objective function contains long and flat valleys \citep{Rosenbrock:1960fk}. These structures are typical for likelihood functions of ODE models describing biochemical reaction networks, sometimes referred to as \emph{sloppiness} \citep{Gutenkunst:2007ct}. 
+down the gradient of $L$. $\gamma$ is chosen sufficiently small such that a decrease in the objective 
+function $L(\boldsymbol{\theta}_{i+1}) < L(\boldsymbol{\theta}_{i})$ can be guaranteed. It is well known that 
+this simple method exhibits only linear convergence rate \citep{Stoer:2005fk}. Furthermore, for non-linear 
+problems the method has convergence problems if the objective function contains long and flat valleys 
+\citep{Rosenbrock:1960fk}. These structures are typical for likelihood functions of ODE models describing 
+biochemical reaction networks, sometimes referred to as \emph{sloppiness} \citep{Gutenkunst:2007ct}. 
 
 \paragraph{Newton and quasi-Newton methods.}
-To circumvent convergence problems of the gradient descent method the \emph{Newton} method applies a second order Taylor expansion of the objective function
+To circumvent convergence problems of the gradient descent method the \emph{Newton} method applies a 
+second order Taylor expansion of the objective function
 \begin{equation}
-	\tilde L(\Delta \boldsymbol{\theta}) = L(\boldsymbol{\theta}) + \mathbf{g} \cdot \Delta \boldsymbol{\theta} + \frac{1}{2} \Delta \boldsymbol{\theta}^\top \cdot \mathbf{H} \cdot \Delta \boldsymbol{\theta}, \label{2taylor}
+	\tilde L(\Delta \boldsymbol{\theta}) = L(\boldsymbol{\theta}) + \mathbf{g} \cdot \Delta 
+\boldsymbol{\theta} + \frac{1}{2} \Delta \boldsymbol{\theta}^\top \cdot \mathbf{H} \cdot \Delta 
+\boldsymbol{\theta}, \label{2taylor}
 \end{equation}
-where $\mathbf{g} = \nabla L(\boldsymbol{\theta})$ is the gradient and $\mathbf{H} = \nabla^\top\nabla\, L(\boldsymbol{\theta})$ is the Hessian matrix of $L(\boldsymbol{\theta})$. For the calculation of $\mathbf{g}$ and $\mathbf{H}$ for ODE models, see in the Section~\ref{sec:derivativies}. The Newton step is given by 
+where $\mathbf{g} = \nabla L(\boldsymbol{\theta})$ is the gradient and $\mathbf{H} = \nabla^\top\nabla\, 
+L(\boldsymbol{\theta})$ is the Hessian matrix of $L(\boldsymbol{\theta})$. For the calculation of $\mathbf{g}
+$ and $\mathbf{H}$ for ODE models, see in the Section~\ref{sec:derivativies}. The Newton step is given by 
 \begin{equation}
 	\Delta \boldsymbol{\theta} = -\mathbf{H}^{-1} \cdot \mathbf{g} \label{newtonstep}
 \end{equation}
-and leads, if the approximation is a good one, to the optimal solution in a single step. Compared to the gradient descent method the Newton method exhibits quadratic convergence rate \citep{Stoer:2005fk}. The performance decreases considerably as the goodness of the approximation decreases. In this case and also for non-positive definite $\mathbf{H}$, the method can become unstable, i.e.~a decrease in the objective function is not guaranteed for each step. 
+and leads, if the approximation is a good one, to the optimal solution in a single step. Compared to the 
+gradient descent method the Newton method exhibits quadratic convergence rate \citep{Stoer:2005fk}. The 
+performance decreases considerably as the goodness of the approximation decreases. In this case and 
+also for non-positive definite $\mathbf{H}$, the method can become unstable, i.e.~a decrease in the 
+objective function is not guaranteed for each step. 
 
-Instead of computing $\mathbf{H}$ directly from the model, \emph{quasi-Newton} methods build up information about $\mathbf{H}$ iteratively from sequential evaluations of $\mathbf{g}$, see for example the \emph{Broyden-Fletcher-Goldfarb-Shanno} update \citep{Shanno:1970fk}. Iterative approaches are especially useful if computation of second derivatives are not feasible. As explained in Section~\ref{sec:derivativies}, this is not necessary for ODE models.
+Instead of computing $\mathbf{H}$ directly from the model, \emph{quasi-Newton} methods build up 
+information about $\mathbf{H}$ iteratively from sequential evaluations of $\mathbf{g}$, see for example the 
+\emph{Broyden-Fletcher-Goldfarb-Shanno} update \citep{Shanno:1970fk}. Iterative approaches are 
+especially useful if computation of second derivatives are not feasible. As explained in Section~
+\ref{sec:derivativies}, this is not necessary for ODE models.
 
 \paragraph{Levenberg-Marquardt method.}
-To circumvent stability problems of Newton methods the \emph{Levenberg-Marquardt} method \citep{Marquardt:1963uq} uses 
+To circumvent stability problems of Newton methods the \emph{Levenberg-Marquardt} method 
+\citep{Marquardt:1963uq} uses 
 \begin{equation}
 	\Delta \boldsymbol{\theta} = -(\mathbf{H} + \lambda \cdot \mathbf{1})^{-1} \cdot 	\mathbf{g}. 
 \end{equation}	
-For $\lambda \rightarrow 0$ the Newton step of Equation~(\ref{newtonstep}) is obtained, for $\lambda \rightarrow \infty$ the gradient descent step direction of Equation~(\ref{gradientstep}) is obtained. Also, with increasing $\lambda$ the step size is reduced. Consequently, $L(\boldsymbol{\theta}_{i+1}) < L(\boldsymbol{\theta}_{i})$ can be guaranteed but also efficient Newton steps can be performed if the approximation is a good one. It can be shown that the quality of the approximation~(\ref{2taylor}) increases in the proximity of an optimum in the likelihood \citep{Seber:2003kq}.
+For $\lambda \rightarrow 0$ the Newton step of Equation~(\ref{newtonstep}) is obtained, for $\lambda 
+\rightarrow \infty$ the gradient descent step direction of Equation~(\ref{gradientstep}) is obtained. Also, with 
+increasing $\lambda$ the step size is reduced. Consequently, $L(\boldsymbol{\theta}_{i+1}) < 
+L(\boldsymbol{\theta}_{i})$ can be guaranteed but also efficient Newton steps can be performed if the 
+approximation is a good one. It can be shown that the quality of the approximation~(\ref{2taylor}) increases 
+in the proximity of an optimum in the likelihood \citep{Seber:2003kq}.
 
 \paragraph{Trust region methods.}
-Closely related to the Levenberg-Marquardt method are \emph{trust region} methods \citep{Coleman:1996fk}. These methods minimize Equation~(\ref{2taylor}) under the constraint $\left|\left| \Delta \boldsymbol{\theta} \right|\right| \leq \mu $ to generate the trial step. The parameter $\mu$ that defines the radius of the trust region has a similar effect as $\lambda$ in the Levenberg-Marquardt method, i.e.~for small enough $\mu$, $L(\boldsymbol{\theta}_{i+1}) < L(\boldsymbol{\theta}_{i})$ can be guaranteed.
+Closely related to the Levenberg-Marquardt method are \emph{trust region} methods \citep{Coleman:
+1996fk}. These methods minimize Equation~(\ref{2taylor}) under the constraint $\left|\left| \Delta 
+\boldsymbol{\theta} \right|\right| \leq \mu $ to generate the trial step. The parameter $\mu$ that defines the 
+radius of the trust region has a similar effect as $\lambda$ in the Levenberg-Marquardt method, i.e.~for 
+small enough $\mu$, $L(\boldsymbol{\theta}_{i+1}) < L(\boldsymbol{\theta}_{i})$ can be guaranteed.
 
-Here, the trust region algorithm LSQNONLIN (MATLAB, The Mathworks Inc., Natick, MA) is used. To reduce expensiveness of the constrained minimization of Equation~(\ref{2taylor}) the LSQNONLIN algorithm formulates a two dimensional approximation to Equation~(\ref{2taylor}) by a plane in parameter space. The gradient descent direction of Equation~(\ref{gradientstep}) and an approximate Newton step of Equation~(\ref{newtonstep}) span the plane of this new approximation. Since the gradient decent direction is contained $L(\boldsymbol{\theta}_{i+1}) < L(\boldsymbol{\theta}_{i})$ for small $\mu$ can be guaranteed again. The approximate Newton step is obtained by \emph{preconditioned conjugated gradients} methods \citep{Barrett:1994uq} instead of using direct matrix inversion that is considerably slower for large parameter space.
+Here, the trust region algorithm LSQNONLIN (MATLAB, The Mathworks Inc., Natick, MA) is used. To reduce 
+expensiveness of the constrained minimization of Equation~(\ref{2taylor}) the LSQNONLIN algorithm 
+formulates a two dimensional approximation to Equation~(\ref{2taylor}) by a plane in parameter space. The 
+gradient descent direction of Equation~(\ref{gradientstep}) and an approximate Newton step of 
+Equation~(\ref{newtonstep}) span the plane of this new approximation. Since the gradient decent direction 
+is contained $L(\boldsymbol{\theta}_{i+1}) < L(\boldsymbol{\theta}_{i})$ for small $\mu$ can be guaranteed 
+again. The approximate Newton step is obtained by \emph{preconditioned conjugated gradients} methods 
+\citep{Barrett:1994uq} instead of using direct matrix inversion that is considerably slower for large parameter 
+space.
 
 \section{Derivative calculations for ODE models} \label{sec:derivativies}
-For deterministic optimization algorithms the gradient $\mathbf{g} = \nabla L(\boldsymbol{\theta})$ and Hessian matrix $\mathbf{H} = \nabla^\top\nabla\, L(\boldsymbol{\theta})$ of the likelihood are required. The first term in Equation~(\ref{llhoodfun2}) is a constant. The last term is the well known weighted sum of squared residuals, sometimes denoted by $\chi^2(\boldsymbol{\theta})$. Equation~(\ref{llhoodfun2}) can be reformulated
+For deterministic optimization algorithms the gradient $\mathbf{g} = \nabla L(\boldsymbol{\theta})$ and 
+Hessian matrix $\mathbf{H} = \nabla^\top\nabla\, L(\boldsymbol{\theta})$ of the likelihood are required. The 
+first term in Equation~(\ref{llhoodfun2}) is a constant. The last term is the well known weighted sum of 
+squared residuals, sometimes denoted by $\chi^2(\boldsymbol{\theta})$. Equation~(\ref{llhoodfun2}) can be 
+reformulated
 \begin{eqnarray}
-	L(\boldsymbol{\theta}) & = & const + \sum_{k=1}^m \sum_{i=1}^{d_k}\, 2\log(\sigma_k(t_i, \boldsymbol{\theta}))\, +  \left(\frac{y_{ki}^\dagger - y_{k}(t_{i}, \boldsymbol{\theta})}{\sigma_k(t_i, \boldsymbol{\theta})}\right)^2 = \label{llhoodfun3ij} \\
-	& = & const + \sum_{q=1}^{s} \tilde r_{q}(\boldsymbol{\theta})^2 + \sum_{q=1}^{s}  r_{q}(\boldsymbol{\theta})^2 \label{llhoodfun3}
+	L(\boldsymbol{\theta}) & = & const + \sum_{k=1}^m \sum_{i=1}^{d_k}\, 2\log(\sigma_k(t_i, 
+\boldsymbol{\theta}))\, +  \left(\frac{y_{ki}^\dagger - y_{k}(t_{i}, \boldsymbol{\theta})}{\sigma_k(t_i, 
+\boldsymbol{\theta})}\right)^2 = \label{llhoodfun3ij} \\
+	& = & const + \sum_{q=1}^{s} \tilde r_{q}(\boldsymbol{\theta})^2 + \sum_{q=1}^{s}  r_{q}
+(\boldsymbol{\theta})^2 \label{llhoodfun3}
 \end{eqnarray}
-where the new sum index $q$ runs over all $i$ and $j$ in ($\ref{llhoodfun3ij}$) and $s = \sum_{k=1}^m d_k$. The first sum contains the elements 
+where the new sum index $q$ runs over all $i$ and $j$ in ($\ref{llhoodfun3ij}$) and $s = \sum_{k=1}^m d_k
+$. The first sum contains the elements 
 \begin{equation}
 	\tilde r_{q}(\boldsymbol{\theta}) = \sqrt{2\log(\sigma_k(t_i, \boldsymbol{\theta}))}. \label{rl1}
 \end{equation}	
@@ -149,102 +254,181 @@ Since $\log(\sigma_k(t_i, \boldsymbol{\theta}))$ can be negative, in practice
 \begin{equation}
 	\tilde r_{q}(\boldsymbol{\theta}) = \sqrt{2\log(\sigma_k(t_i, \boldsymbol{\theta})) + c} \label{rl2}
 \end{equation}
-is used, where $c$ is a large enough constant. The constant $c$ adds another constant to Equation~(\ref{llhoodfun3}) but does not change the shape of the likelihood function, hence, MLE and confidence intervals are not affected. The second sum contains the normalized residuals 
+is used, where $c$ is a large enough constant. The constant $c$ adds another constant to 
+Equation~(\ref{llhoodfun3}) but does not change the shape of the likelihood function, hence, MLE and 
+confidence intervals are not affected. The second sum contains the normalized residuals 
 \begin{equation}
-	r_{q}(\boldsymbol{\theta}) = \frac{y_{ki}^\dagger - y_{k}(t_{i}, \boldsymbol{\theta})}{\sigma_k(t_i, \boldsymbol{\theta}).}  \label{rl3}
+	r_{q}(\boldsymbol{\theta}) = \frac{y_{ki}^\dagger - y_{k}(t_{i}, \boldsymbol{\theta})}{\sigma_k(t_i, 
+\boldsymbol{\theta}).}  \label{rl3}
 \end{equation}
 The gradient can then be obtained by
 \begin{equation}
-	\mathbf{g} = \DD{L}{\boldsymbol{\theta}} = 2 \sum_{q=1}^{s} \left( {\tilde r}_{q} \cdot \DD{{\tilde r}_{q}}{\boldsymbol{\theta}} + {r}_{q} \cdot \DD{{r}_{q}}{\boldsymbol{\theta}} \right)
+	\mathbf{g} = \DD{L}{\boldsymbol{\theta}} = 2 \sum_{q=1}^{s} \left( {\tilde r}_{q} \cdot \DD{{\tilde r}_{q}}
+{\boldsymbol{\theta}} + {r}_{q} \cdot \DD{{r}_{q}}{\boldsymbol{\theta}} \right)
 \end{equation}
 and the Hessian matrix by 
 \begin{equation}
-	\mathbf{H} = \DDsquare{L}{\boldsymbol{\theta}} = 2 \sum_{q=1}^{s} \left( \DD{{\tilde r}_{q}}{\boldsymbol{\theta}} \cdot \DD{{\tilde r}_{q}}{\boldsymbol{\theta}} + {\tilde r}_{q} \cdot \DDsquare{{\tilde r}_{q}}{\boldsymbol{\theta}} + \DD{{r}_{q}}{\boldsymbol{\theta}} \cdot \DD{{r}_{q}}{\boldsymbol{\theta}} + {r}_{q} \cdot \DDsquare{{r}_{q}}{\boldsymbol{\theta}} \right). \label{fullH}
+	\mathbf{H} = \DDsquare{L}{\boldsymbol{\theta}} = 2 \sum_{q=1}^{s} \left( \DD{{\tilde r}_{q}}
+{\boldsymbol{\theta}} \cdot \DD{{\tilde r}_{q}}{\boldsymbol{\theta}} + {\tilde r}_{q} \cdot \DDsquare{{\tilde r}
+_{q}}{\boldsymbol{\theta}} + \DD{{r}_{q}}{\boldsymbol{\theta}} \cdot \DD{{r}_{q}}{\boldsymbol{\theta}} + {r}_{q} 
+\cdot \DDsquare{{r}_{q}}{\boldsymbol{\theta}} \right). \label{fullH}
 \end{equation}
-For the following calculations we look at each component $q$ individually and drop the index for better readability. First and second order derivatives of ${\tilde r}$ can be evaluated by
+For the following calculations we look at each component $q$ individually and drop the index for better 
+readability. First and second order derivatives of ${\tilde r}$ can be evaluated by
 \begin{equation}
-	\DD{{\tilde r}}{\boldsymbol{\theta}}  = \frac{1}{{\tilde r}{\sigma}} \DD{{\sigma}}{\boldsymbol{\theta}} \label{reserrfirst}
+	\DD{{\tilde r}}{\boldsymbol{\theta}}  = \frac{1}{{\tilde r}{\sigma}} \DD{{\sigma}}{\boldsymbol{\theta}} 
+\label{reserrfirst}
 \end{equation}
 and
 \begin{equation}
-	\DDsquare{{\tilde r}}{\boldsymbol{\theta}}  = \frac{1}{{\tilde r} {\sigma}}\frac{d^2{\sigma}}{d \boldsymbol{\theta}^2} - \frac{1}{{\tilde r} {\sigma}^2}\DD{{\sigma}}{\boldsymbol{\theta}}\cdot \DD{{\sigma}}{\boldsymbol{\theta}} - \frac{1}{{\tilde r}^2 {\sigma}}\DD{{\sigma}}{\boldsymbol{\theta}}\cdot \DD{{\tilde r}}{\boldsymbol{\theta}.}
+	\DDsquare{{\tilde r}}{\boldsymbol{\theta}}  = \frac{1}{{\tilde r} {\sigma}}\frac{d^2{\sigma}}{d 
+\boldsymbol{\theta}^2} - \frac{1}{{\tilde r} {\sigma}^2}\DD{{\sigma}}{\boldsymbol{\theta}}\cdot \DD{{\sigma}}
+{\boldsymbol{\theta}} - \frac{1}{{\tilde r}^2 {\sigma}}\DD{{\sigma}}{\boldsymbol{\theta}}\cdot \DD{{\tilde r}}
+{\boldsymbol{\theta}.}
 \end{equation}
 First order derivatives of ${r}$ can be calculated by
 \begin{equation}
-	\DD{{r}}{\boldsymbol{\theta}}  = \frac{-1}{{\sigma}} \DD{{y}}{\boldsymbol{\theta}} - \frac{{r}}{{\sigma}} \DD{{\sigma}}{\boldsymbol{\theta}.} \label{resderivatives}
+	\DD{{r}}{\boldsymbol{\theta}}  = \frac{-1}{{\sigma}} \DD{{y}}{\boldsymbol{\theta}} - \frac{{r}}{{\sigma}} 
+\DD{{\sigma}}{\boldsymbol{\theta}.} \label{resderivatives}
 \end{equation}
-Let ${f}_\sigma$ be the equation for the variance $\sigma_k(t_i, \boldsymbol{\theta})^2$. We can then further obtain
+Let ${f}_\sigma$ be the equation for the variance $\sigma_k(t_i, \boldsymbol{\theta})^2$. We can then 
+further obtain
 \begin{equation}
-\DD{{\sigma}}{\boldsymbol{\theta}} = \dd{f_\sigma}{{y}}\DD{{y}}{\boldsymbol{\theta}} + \dd{f_\sigma}{\boldsymbol{\theta}.} \label{sigmaderivatives}
+\DD{{\sigma}}{\boldsymbol{\theta}} = \dd{f_\sigma}{{y}}\DD{{y}}{\boldsymbol{\theta}} + \dd{f_\sigma}
+{\boldsymbol{\theta}.} \label{sigmaderivatives}
 \end{equation} 
 and
 \begin{equation}
- \DDsquare{{\sigma}}{\boldsymbol{\theta}} = 2\ddd{f_\sigma}{y}{\boldsymbol{\theta}} \DD{{y}}{\boldsymbol{\theta}} + \dd{f_\sigma}{y}{\color{red}\DDsquare{{y}}{\boldsymbol{\theta}}} + \frac{\partial^2f_\sigma}{\partial y^2}\DD{{y}}{\boldsymbol{\theta}}\DD{{y}}{\boldsymbol{\theta}} + \DDsquare{f_\sigma}{\boldsymbol{\theta}}. \label{ddsigma}
+ \DDsquare{{\sigma}}{\boldsymbol{\theta}} = 2\ddd{f_\sigma}{y}{\boldsymbol{\theta}} \DD{{y}}
+{\boldsymbol{\theta}} + \dd{f_\sigma}{y}{\color{red}\DDsquare{{y}}{\boldsymbol{\theta}}} + \frac{\partial^2f_
+\sigma}{\partial y^2}\DD{{y}}{\boldsymbol{\theta}}\DD{{y}}{\boldsymbol{\theta}} + \DDsquare{f_\sigma}
+{\boldsymbol{\theta}}. \label{ddsigma}
 \end{equation}
 With the equation for the measurements ${f}_y$ we can resolve
 \begin{equation}
-	\DD{{y}}{\boldsymbol{\theta}} = \dd{{f}_y}{\mathbf{x}} {\color{red}\DD{\mathbf{x}}{\boldsymbol{\theta}}} + \dd{{f}_y}{\mathbf{u}} \DD{\mathbf{u}}{\boldsymbol{\theta}} + \dd{{f}_y}{\boldsymbol{\theta}.} \label{sderive}
+	\DD{{y}}{\boldsymbol{\theta}} = \dd{{f}_y}{\mathbf{x}} {\color{red}\DD{\mathbf{x}}{\boldsymbol{\theta}}} 
++ \dd{{f}_y}{\mathbf{u}} \DD{\mathbf{u}}{\boldsymbol{\theta}} + \dd{{f}_y}{\boldsymbol{\theta}.} \label{sderive}
 \end{equation}
-All expressions in Equations~(\ref{reserrfirst}-\ref{sderive}) can be calculated analytically except for terms indicated in red. In Equation~(\ref{sderive}), the derivatives of the dynamic variables $d \mathbf{x}/d \boldsymbol{\theta}$, the so called \emph{sensitivities}, can be calculated numerically, as described in Section~\ref{sec:ode_simu}. The calculation of $d^2 {y}/d \boldsymbol{\theta}^2$  involves second order sensitivities $d^2 \mathbf{x}/d \boldsymbol{\theta}^2$ of the dynamics that are expensive to evaluate numerically. 
+All expressions in Equations~(\ref{reserrfirst}-\ref{sderive}) can be calculated analytically except for terms 
+indicated in red. In Equation~(\ref{sderive}), the derivatives of the dynamic variables $d \mathbf{x}/d 
+\boldsymbol{\theta}$, the so called \emph{sensitivities}, can be calculated numerically, as described in 
+Section~\ref{sec:ode_simu}. The calculation of $d^2 {y}/d \boldsymbol{\theta}^2$  involves second order 
+sensitivities $d^2 \mathbf{x}/d \boldsymbol{\theta}^2$ of the dynamics that are expensive to evaluate 
+numerically. 
 
-The calculation of the last term in Equation~(\ref{fullH}) ${r} \cdot d^2{r}/d\boldsymbol{\theta}^2$ is more complicated. Following the argumentation in~\citet[Section 15.5 Nonlinear Models]{Press:1990rw}, in the proximity of a good model fit the normalized residuals ${r}$ fluctuate uncorrelated around zero. Therefore, the term tends to cancel out when summed over $q$ and quadratic convergence of optimization algorithms using Newton steps can be obtained without calculating second order sensitivities. 
+The calculation of the last term in Equation~(\ref{fullH}) ${r} \cdot d^2{r}/d\boldsymbol{\theta}^2$ is more 
+complicated. Following the argumentation in~\citet[Section 15.5 Nonlinear Models]{Press:1990rw}, in the 
+proximity of a good model fit the normalized residuals ${r}$ fluctuate uncorrelated around zero. Therefore, 
+the term tends to cancel out when summed over $q$ and quadratic convergence of optimization algorithms 
+using Newton steps can be obtained without calculating second order sensitivities. 
 
-However, if measurement noise parameters are estimated as well, the argumentation is more involved. In the following, the parameters are collected in three groups: $\boldsymbol{\theta}_y$ are parameters that only affect the observables ${y}$, $\boldsymbol{\theta}_s$ are parameters that only affect the measurement noise ${\sigma}$ and $\boldsymbol{\theta}_{b}$ are parameters that affect both. Correspondingly, the last term in Equation~(\ref{fullH}) can be reformulated to
+However, if measurement noise parameters are estimated as well, the argumentation is more involved. In 
+the following, the parameters are collected in three groups: $\boldsymbol{\theta}_y$ are parameters that 
+only affect the observables ${y}$, $\boldsymbol{\theta}_s$ are parameters that only affect the measurement 
+noise ${\sigma}$ and $\boldsymbol{\theta}_{b}$ are parameters that affect both. Correspondingly, the last 
+term in Equation~(\ref{fullH}) can be reformulated to
 \begin{displaymath}
 {r} \cdot \DDsquare{{r}}{\boldsymbol{\theta}} = {r} \cdot \left( 
 \begin{array}{ccc}
-\DDsquare{{r}}{\boldsymbol{\theta}_y} & \DDD{{r}}{\boldsymbol{\theta}_y}{\boldsymbol{\theta}_s} & \DDD{{r}}{\boldsymbol{\theta}_y}{\boldsymbol{\theta}_b} \\
+\DDsquare{{r}}{\boldsymbol{\theta}_y} & \DDD{{r}}{\boldsymbol{\theta}_y}{\boldsymbol{\theta}_s} & 
+\DDD{{r}}{\boldsymbol{\theta}_y}{\boldsymbol{\theta}_b} \\
 \\
-\DDD{{r}}{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_y} & \DDsquare{{r}}{\boldsymbol{\theta}_s} & \DDD{{r}}{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_b} \\
+\DDD{{r}}{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_y} & \DDsquare{{r}}{\boldsymbol{\theta}_s} & 
+\DDD{{r}}{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_b} \\
 \\
-\DDD{{r}}{\boldsymbol{\theta}_b}{\boldsymbol{\theta}_y} & \DDD{{r}}{\boldsymbol{\theta}_b}{\boldsymbol{\theta}_s} & \DDsquare{{r}}{\boldsymbol{\theta}_b}
+\DDD{{r}}{\boldsymbol{\theta}_b}{\boldsymbol{\theta}_y} & \DDD{{r}}{\boldsymbol{\theta}_b}
+{\boldsymbol{\theta}_s} & \DDsquare{{r}}{\boldsymbol{\theta}_b}
 \end{array} 
 \right).
 \end{displaymath}
 With Equation~(\ref{rl3}) we can calculate
 \begin{eqnarray}
-	{r} \cdot \DDsquare{{r}}{\boldsymbol{\theta}_y} & = & \frac{-{r}}{{\sigma}}{\color{red}\DDsquare{{y}}{\boldsymbol{\theta}_y}} \label{problem1}
+	{r} \cdot \DDsquare{{r}}{\boldsymbol{\theta}_y} & = & \frac{-{r}}{{\sigma}}{\color{red}\DDsquare{{y}}
+{\boldsymbol{\theta}_y}} \label{problem1}
 	\\
-	{r} \cdot \DDsquare{{r}}{\boldsymbol{\theta}_s} & = & \frac{{r}^2}{{\sigma}^2}\DD{{\sigma}}{\boldsymbol{\theta}_s}\DD{{\sigma}}{\boldsymbol{\theta}_s} - \frac{{r}^2}{{\sigma}}\DDsquare{{\sigma}}{\boldsymbol{\theta}_s} 
+	{r} \cdot \DDsquare{{r}}{\boldsymbol{\theta}_s} & = & \frac{{r}^2}{{\sigma}^2}\DD{{\sigma}}
+{\boldsymbol{\theta}_s}\DD{{\sigma}}{\boldsymbol{\theta}_s} - \frac{{r}^2}{{\sigma}}\DDsquare{{\sigma}}
+{\boldsymbol{\theta}_s} 
 	\\
-	{r} \cdot \DDsquare{{r}}{\boldsymbol{\theta}_b} & = & \frac{{r}}{{\sigma}^2}\DD{{y}}{\boldsymbol{\theta}_b}\DD{{\sigma}}{\boldsymbol{\theta}_b} - \frac{{r}}{{\sigma}}\DD{{r}}{\boldsymbol{\theta}_b}\DD{{\sigma}}{\boldsymbol{\theta}_b} - \frac{{r}}{{\sigma}}{\color{red}\DDsquare{{y}}{\boldsymbol{\theta}_b}} + \frac{{r}^2}{{\sigma}^2}\DD{{\sigma}}{\boldsymbol{\theta}_b}\DD{{\sigma}}{\boldsymbol{\theta}_b} - \frac{{r}^2}{{\sigma}}\DDsquare{{\sigma}}{\boldsymbol{\theta}_b}\quad\quad \label{problem2}
+	{r} \cdot \DDsquare{{r}}{\boldsymbol{\theta}_b} & = & \frac{{r}}{{\sigma}^2}\DD{{y}}{\boldsymbol{\theta}
+_b}\DD{{\sigma}}{\boldsymbol{\theta}_b} - \frac{{r}}{{\sigma}}\DD{{r}}{\boldsymbol{\theta}_b}\DD{{\sigma}}
+{\boldsymbol{\theta}_b} - \frac{{r}}{{\sigma}}{\color{red}\DDsquare{{y}}{\boldsymbol{\theta}_b}} + \frac{{r}^2}
+{{\sigma}^2}\DD{{\sigma}}{\boldsymbol{\theta}_b}\DD{{\sigma}}{\boldsymbol{\theta}_b} - \frac{{r}^2}{{\sigma}}
+\DDsquare{{\sigma}}{\boldsymbol{\theta}_b}\quad\quad \label{problem2}
 	\\
 	\nonumber \\
-	{r} \cdot \DDD{{r}}{\boldsymbol{\theta}_y}{\boldsymbol{\theta}_s} & = & \frac{{r}}{{\sigma}^2}\DD{{y}}{\boldsymbol{\theta}_y}\DD{{\sigma}}{\boldsymbol{\theta}_s} 
+	{r} \cdot \DDD{{r}}{\boldsymbol{\theta}_y}{\boldsymbol{\theta}_s} & = & \frac{{r}}{{\sigma}^2}\DD{{y}}
+{\boldsymbol{\theta}_y}\DD{{\sigma}}{\boldsymbol{\theta}_s} 
 	\\
-	{r} \cdot \DDD{{r}}{\boldsymbol{\theta}_y}{\boldsymbol{\theta}_b} & = & \frac{{r}}{{\sigma}^2}\DD{{y}}{\boldsymbol{\theta}_y}\DD{{\sigma}}{\boldsymbol{\theta}_b}  - \frac{{r}}{{\sigma}}{\color{red}\DDD{{y}}{\boldsymbol{\theta}_y}{\boldsymbol{\theta}_b}}  \label{problem3}
+	{r} \cdot \DDD{{r}}{\boldsymbol{\theta}_y}{\boldsymbol{\theta}_b} & = & \frac{{r}}{{\sigma}^2}\DD{{y}}
+{\boldsymbol{\theta}_y}\DD{{\sigma}}{\boldsymbol{\theta}_b}  - \frac{{r}}{{\sigma}}{\color{red}\DDD{{y}}
+{\boldsymbol{\theta}_y}{\boldsymbol{\theta}_b}}  \label{problem3}
 	\\
-	 {r} \cdot \DDD{{r}}{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_b} & = & \frac{{r}^2}{{{\sigma}}^2} \DD{{\sigma}}{\boldsymbol{\theta}_s}\DD{{\sigma}}{\boldsymbol{\theta}_b} - \frac{{r}}{{\sigma}}\DD{{\sigma}}{\boldsymbol{\theta}_s}\DD{{r}}{\boldsymbol{\theta}_b} - \frac{{r}^2}{{\sigma}} \DDD{{\sigma}}{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_b.} \label{problemend}
+	 {r} \cdot \DDD{{r}}{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_b} & = & \frac{{r}^2}{{{\sigma}}^2} 
+\DD{{\sigma}}{\boldsymbol{\theta}_s}\DD{{\sigma}}{\boldsymbol{\theta}_b} - \frac{{r}}{{\sigma}}\DD{{\sigma}}
+{\boldsymbol{\theta}_s}\DD{{r}}{\boldsymbol{\theta}_b} - \frac{{r}^2}{{\sigma}} \DDD{{\sigma}}
+{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_b.} \label{problemend}
 \end{eqnarray}
-Indicated in red color are the before mentioned second order derivatives that are problematic to evaluate numerically. The terms in Equations~(\ref{problem1}-\ref{problemend}) do contain either ${r}$ or  ${r}^2$. As discussed above, the terms containing ${r}$ do cancel out when summed over $q$ in the proximity of a good model fit whereas the terms containing ${r}^2$ do not. Fortunately, the problematic terms that contain second order derivatives $d^2 {y}/d \boldsymbol{\theta}^2$,  marked in red, are amongst those that do cancel out when summed over $q$ in Equations~(\ref{problem1}-\ref{problemend}). With the remaining terms of Equation~(\ref{fullH}) an approximate Hessian matrix $\mathbf{\hat H}$ can be calculated without the second order derivatives $d^2 {y}/d \boldsymbol{\theta}^2$. As the quality of the model fit improves, the quality of the approximation $\mathbf{\hat H}$ improves. For cases where the measurement noise function does not explicitly depend on the observables, the missing term in Equation~(\ref{ddsigma}) vanishes as well because $\partial f_\sigma / \partial y= 0$. Thus in these cases, as the quality of the model fit improves $\mathbf{\hat H} \rightarrow \mathbf{H}$ and quadratic convergence of optimization algorithms can be obtained also in the case where measurement noise parameters are estimated. 
+Indicated in red color are the before mentioned second order derivatives that are problematic to evaluate 
+numerically. The terms in Equations~(\ref{problem1}-\ref{problemend}) do contain either ${r}$ or  ${r}^2$. As 
+discussed above, the terms containing ${r}$ do cancel out when summed over $q$ in the proximity of a 
+good model fit whereas the terms containing ${r}^2$ do not. Fortunately, the problematic terms that contain 
+second order derivatives $d^2 {y}/d \boldsymbol{\theta}^2$,  marked in red, are amongst those that do 
+cancel out when summed over $q$ in Equations~(\ref{problem1}-\ref{problemend}). With the remaining 
+terms of Equation~(\ref{fullH}) an approximate Hessian matrix $\mathbf{\hat H}$ can be calculated without 
+the second order derivatives $d^2 {y}/d \boldsymbol{\theta}^2$. As the quality of the model fit improves, the 
+quality of the approximation $\mathbf{\hat H}$ improves. For cases where the measurement noise function 
+does not explicitly depend on the observables, the missing term in Equation~(\ref{ddsigma}) vanishes as 
+well because $\partial f_\sigma / \partial y= 0$. Thus in these cases, as the quality of the model fit improves 
+$\mathbf{\hat H} \rightarrow \mathbf{H}$ and quadratic convergence of optimization algorithms can be 
+obtained also in the case where measurement noise parameters are estimated. 
 
-The assumption $\partial f_\sigma / \partial y = 0$ holds true for many applications. To which extend more general functions with $\partial f_\sigma / \partial y \not= 0$ for the measurement noise have to be considered for applications, and to which extend this would impact on optimization performance remains to clarified.
+The assumption $\partial f_\sigma / \partial y = 0$ holds true for many applications. To which extend more 
+general functions with $\partial f_\sigma / \partial y \not= 0$ for the measurement noise have to be 
+considered for applications, and to which extend this would impact on optimization performance remains to 
+clarified.
 
-If, due to log-normal measurement noise, the observables and experimental data points are compared on a logarithmic scale, e.g.~using log-10, an additional transformation
+If, due to log-normal measurement noise, the observables and experimental data points are compared on a 
+logarithmic scale, e.g.~using log-10, an additional transformation
 \begin{equation}
 	\DD{y_k^{log}}{\boldsymbol{\theta}} =  \frac{1}{\log(10) \cdot y_k}\DD{y_k}{\boldsymbol{\theta}}
 \end{equation}
 has to be applied. 
-If, for efficiency, parameter values are estimated on a logarithmic scale, e.g.~using log-10, an additional transformation
+If, for efficiency, parameter values are estimated on a logarithmic scale, e.g.~using log-10, an additional 
+transformation
 \begin{equation}
 	\DD{}{\theta_j^{log}} = \log(10)\cdot \theta_j \cdot \DD{}{\theta_j}
 \end{equation}
 has to be used. 
 
 \section{Efficient solution of the sensitivity equations} \label{sec:ode_simu}
-The derivatives $d\mathbf{x}(t,\boldsymbol{\theta}) / d \boldsymbol{\theta}$, also called \emph{sensitivities}, can be calculated accurately using the sensitivity equations. The sensitivity equations represent an additional ODE system
+The derivatives $d\mathbf{x}(t,\boldsymbol{\theta}) / d \boldsymbol{\theta}$, also called \emph{sensitivities}, 
+can be calculated accurately using the sensitivity equations. The sensitivity equations represent an 
+additional ODE system
 \begin{eqnarray}
-	\DD{}{t} \DD{\mathbf{x}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}}  =  \dd{\mathbf{f}_x}{\mathbf{x}}  \DD{\mathbf{x}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} +  \dd{\mathbf{f}_x}{\mathbf{u}}  \DD{\mathbf{u}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} + \dd{\mathbf{f}_x}{\boldsymbol{\theta}} \label{ssystem2}
+	\DD{}{t} \DD{\mathbf{x}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}}  =  \dd{\mathbf{f}_x}{\mathbf{x}}  
+\DD{\mathbf{x}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} +  \dd{\mathbf{f}_x}{\mathbf{u}}  \DD{\mathbf{u}
+(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} + \dd{\mathbf{f}_x}{\boldsymbol{\theta}} \label{ssystem2}
 \end{eqnarray}
-for the derivatives \citep{Leis:1988dl} that are solved simultaneously with the original ODE system, see Equation~(\ref{odesystem2}). Using the abbreviation $s_{ij} = d x_i / d \theta_j$ with $i = 1 \dots n$ and $j = 1 \dots l$ and Equation~(\ref{jac_mat}) we rewrite component wise
+for the derivatives \citep{Leis:1988dl} that are solved simultaneously with the original ODE system, see 
+Equation~(\ref{odesystem2}). Using the abbreviation $s_{ij} = d x_i / d \theta_j$ with $i = 1 \dots n$ and $j = 
+1 \dots l$ and Equation~(\ref{jac_mat}) we rewrite component wise
 \begin{eqnarray}
-	\DD{}{t} s_{ij}  =  \mathbf{J} \cdot s_{ij} +  \dd{\mathbf{f}_x}{\mathbf{u}}  \DD{\mathbf{u}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} + \dd{\mathbf{f}_x}{\boldsymbol{\theta}} \label{ssystemcomp}
+	\DD{}{t} s_{ij}  =  \mathbf{J} \cdot s_{ij} +  \dd{\mathbf{f}_x}{\mathbf{u}}  \DD{\mathbf{u}(t,
+\boldsymbol{\theta})}{\boldsymbol{\theta}} + \dd{\mathbf{f}_x}{\boldsymbol{\theta}} \label{ssystemcomp}
 \end{eqnarray}
-which are $n \times l$ additional ODEs. The initial conditions for Equation~(\ref{ssystemcomp}) can be calculated by 
+which are $n \times l$ additional ODEs. The initial conditions for Equation~(\ref{ssystemcomp}) can be 
+calculated by 
 \begin{equation}
 	\mathbf{s}(0) = \DD{\mathbf{f}_{x_0}}{\boldsymbol{\theta},}
 \end{equation}
-see Equation~(\ref{init_ode_sys}). An efficient algorithm for solving the enlarged ODE system is the CVODES solver. There are some numerical properties that allow to increase the performance of solving the enlarged ODE system, see in \cite{Hindmarsh:2005fb} for details. Similar to the calculation of the Jacobian matrix $\mathbf{J}$, see Equation~(\ref{jac_mat}), of the right hand side of Equation~(\ref{odesystem2}), it is favorable to provide analytically the Jacobian matrix $\mathbf{J}_s$ of the right hand side of Equation~(\ref{ssystemcomp}) with respect to the sensitivities. From equation Equation~(\ref{ssystemcomp}) we see that $\mathbf{J}_s$ is composed blockwise out of $\mathbf{J}$ by
+see Equation~(\ref{init_ode_sys}). An efficient algorithm for solving the enlarged ODE system is the 
+CVODES solver. There are some numerical properties that allow to increase the performance of solving the 
+enlarged ODE system, see in \cite{Hindmarsh:2005fb} for details. Similar to the calculation of the Jacobian 
+matrix $\mathbf{J}$, see Equation~(\ref{jac_mat}), of the right hand side of Equation~(\ref{odesystem2}), it 
+is favorable to provide analytically the Jacobian matrix $\mathbf{J}_s$ of the right hand side of 
+Equation~(\ref{ssystemcomp}) with respect to the sensitivities. From equation 
+Equation~(\ref{ssystemcomp}) we see that $\mathbf{J}_s$ is composed blockwise out of $\mathbf{J}$ by
 \begin{displaymath}
 \mathbf{J}_s = \left( 
 \begin{array}{ccccc}
@@ -264,11 +448,20 @@ see Equation~(\ref{init_ode_sys}). An efficient algorithm for solving the enlarg
 \end{array} 
 \right).
 \end{displaymath}
-Therefore, explicit calculation of $\mathbf{J}_s$ can be omited. In addition, this feature leads to some numerical properties that allow to further increase the performance of solving the enlarged ODE system, see in \cite{Hindmarsh:2005fb} for details. For instance, Equation~(\ref{ssystem2}) inherit the stiffness properties of Equation~(\ref{odesystem2}). Consequently, the adaptive step size control for the enlarged ODE system can be chosen equal to that of the original system. Again, Equation~(\ref{fluxsystem2}) can be used to simplify computation of Equation~(\ref{ssystem2}) by 
+Therefore, explicit calculation of $\mathbf{J}_s$ can be omited. In addition, this feature leads to some 
+numerical properties that allow to further increase the performance of solving the enlarged ODE system, 
+see in \cite{Hindmarsh:2005fb} for details. For instance, Equation~(\ref{ssystem2}) inherit the stiffness 
+properties of Equation~(\ref{odesystem2}). Consequently, the adaptive step size control for the enlarged 
+ODE system can be chosen equal to that of the original system. Again, Equation~(\ref{fluxsystem2}) can be 
+used to simplify computation of Equation~(\ref{ssystem2}) by 
 \begin{eqnarray}
-	\DD{}{t} \DD{\mathbf{x}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}}  =  \mathbf{N}\cdot \left(  \dd{\mathbf{v}}{\mathbf{x}}  \DD{\mathbf{x}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} +  \dd{\mathbf{v}}{\mathbf{u}}  \DD{\mathbf{u}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} + \dd{\mathbf{v}}{\boldsymbol{\theta}} \right). \label{ssystemflux}
+	\DD{}{t} \DD{\mathbf{x}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}}  =  \mathbf{N}\cdot 
+\left(  \dd{\mathbf{v}}{\mathbf{x}}  \DD{\mathbf{x}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} +  
+\dd{\mathbf{v}}{\mathbf{u}}  \DD{\mathbf{u}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} + \dd{\mathbf{v}}
+{\boldsymbol{\theta}} \right). \label{ssystemflux}
 \end{eqnarray}
-The matrices $\partial{\mathbf{v}}/\partial{\mathbf{x}}$, $\partial{\mathbf{v}}/\partial{\mathbf{u}}$ and $\partial{\mathbf{v}}/\partial{\boldsymbol{\theta}}$ can be calculated analytically.
+The matrices $\partial{\mathbf{v}}/\partial{\mathbf{x}}$, $\partial{\mathbf{v}}/\partial{\mathbf{u}}$ and $
+\partial{\mathbf{v}}/\partial{\boldsymbol{\theta}}$ can be calculated analytically.
 
 \renewcommand{\bibname}{References}
 \renewcommand{\bibfont}{\small}
