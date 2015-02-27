@@ -80,7 +80,7 @@ trajectories in different color in Fig.~1.
 \begin{figure}[!tpb]
 \centerline{\includegraphics[width=\linewidth]{Figure_D2D_AppNote_v2a.pdf}}
 \caption{\citet{Raia:2011vn} model fitted to experimental data (dots) representing four 
-different doses of IL-13. The solid lines are the the fitted model trajectories, the shades 
+different doses of IL-13. The solid lines are the fitted model trajectories, the shades 
 the estimated experimental noise levels of the data.}\label{fig:01}
 \end{figure}
 For dose-response experiments, the software again automatically generates all required 
@@ -89,10 +89,10 @@ computational efficiency, experimental conditions, and thus model variants, that
 shared between different experiments are calculated only once. Since all variants of the 
 original ODE system have to be solved independently, the C code automatically 
 parallelizes the execution of the ODE solver. The mapping between experimental data 
-and the simulated model can contains additional parameters that can account for 
+and the simulated model can contain additional parameters that can account for 
 unknown offsets or scaling factors. A unique feature of the Data2Dynamics software is its 
 ability to estimate the magnitude of experimental errors together with the model 
-dynamics. To this end a full likelihood function is automatically generated.
+dynamics. To this end, a full likelihood function is automatically generated.
 
 A critical task in modeling of dynamical systems is the efficient and reliable estimation of 
 model parameters, also called model fitting. We implemented a variety of different 
@@ -103,11 +103,11 @@ be estimated on a log-scale. Prior knowledge about the parameters can be conside
 well. If steady state assumptions for the model dynamics are required and the functional 
 relationship to parameters are unknown, steady state constraints can be added to the 
 objective function. A quality control, as proposed in 
-\citet{Raue:2012zt} can be performed to validate robustness of the estimation results. The 
+\citet{Raue:2012zt}, can be performed to validate robustness of the estimation results. The 
 software implements a sophisticated method to calculate model sensitivities, i.e.~the 
 derivatives of the dynamics with respect to model parameters. The sensitivity equations 
 are derived automatically by symbolic differentiation, translated to C code and complied 
-together with the original ODE systems and solver. We showed previously 
+together with the original ODE system and solver. We showed previously 
 \citep{Raue:2012zt} that this approach is not only about ten times faster but also more 
 precise than the default approach using finite differences. A reliable calculation of these 
 derivatives is key to successful parameter estimation. 
