@@ -73,10 +73,14 @@ $^{8}$Zentrum f\"ur Biosystemanalyse, University of Freiburg, 79104 Freiburg,
 Germany
 
 \subsection*{Implementation and System Requirements} 
-The Data2Dynamics modeling environment is MATLAB based, open source and freely available. MATLAB R2012 or later recommended, MATLAB Optimization Toolbox and Symbolic Math Toolbox required. Windows, Mac and Linux systems are supported. For MATLAB mex compilation under Windows systems, freely available Windows SDK 7.1 is required.
+The Data2Dynamics modeling environment is MATLAB-based, open source and freely available. 
+MATLAB R2012 or later recommended, MATLAB Optimization Toolbox and Symbolic Math Toolbox required. 
+Windows, Mac and Linux systems are supported. For MATLAB mex compilation under Windows systems, freely available Windows SDK 7.1 is required.
 
 \subsection*{Availability, Documentation and Bug Reports}
-The Data2Dynamics modeling environment is at \href{http://www.data2dynamics.org}{{\bf http://www.data2dynamics.org}}. The website contains full documentation and a description of the example applications. Code changes between version can be tracked, bug reports can be issued and code improvement and additional functionality can be submitted. Participation is highly welcome! 
+The Data2Dynamics modeling environment is available at \href{http://www.data2dynamics.org}{{\bf http://www.data2dynamics.org}}. 
+The website contains full documentation and a description of the example applications. Code changes between version can be tracked, 
+bug reports can be issued and code improvement and additional functionality can be submitted. Participation is highly welcome! 
 
 \subsection*{Contact}
 \href{andreas.raue@fdm.uni-freiburg.de}{andreas.raue@fdm.uni-freiburg.de} \\
@@ -88,8 +92,8 @@ The Data2Dynamics modeling environment is at \href{http://www.data2dynamics.org}
 
 \section{Efficient solution of the ODE system} \label{sec:ode_solvers}
 
-The dynamics of biochemical reaction networks, i.e.~the time evolution of the concentra\-
-tions of the involved molecular compounds, can be modeled by a system of ordinary 
+The dynamics of biochemical reaction networks, i.e.~the time evolution of the concentrations 
+of the involved molecular compounds, can be modeled by a system of ordinary 
 differential equations (ODE)
 \begin{equation}
 	\DD{}{t}{\mathbf{x}}(t, \boldsymbol{\theta}) = \mathbf{f}_{x}(\mathbf{x}(t, 
@@ -98,7 +102,7 @@ differential equations (ODE)
 \end{equation}
 The variables $\mathbf{x}$ correspond to the dynamics of the concentration of $n$ 
 molecular compounds such as hormones, proteins in different phosphorylation states, 
-mRNA or complexes thereof. A time dependent experimental treatment that alters the 
+mRNA or complexes thereof. A time-dependent experimental treatment that alters the 
 dynamical behavior of the system can be incorporated by the function $\mathbf{u}(t, 
 \boldsymbol{\theta})$. To be able to handle unknown quantities in these driving inputs, we 
 consider the case where the function $\mathbf{u}$ can also be parameter dependent. For 
@@ -111,7 +115,7 @@ instance, $\mathbf{u}$ can represented by a smoothing spline as described in
 The set of parameters $\boldsymbol{\theta} = \{\theta_1 \dots \theta_l\}$ determines the  
 dynamics. Except for very small systems the analytical solution to Equation~(\ref{odesystem2}) is 
 not available any more. Therefore, the dynamics have to be computed by a numerical ODE 
-solver. For ODE systems describing biochemical reactions, one reaction flux occurs multiple times in the right 
+solver. For ODE systems describing biochemical reactions, a reaction flux occurs multiple times in the right 
 hand side of Equation~(\ref{odesystem2}). Therefore, the right hand side of 
 Equation~(\ref{odesystem2}) can usually be decomposed into a stoichiometry matrix $
 \mathbf{N}$ and rate equations $\mathbf{v}$ of the reaction fluxes of the molecular 
@@ -125,11 +129,11 @@ The stoichiometry matrix $\mathbf{N}$ is sparse. For numerical efficiency it is
 advantageous to precompute the reaction fluxes $\mathbf{v}$ and use 
 Equation~(\ref{fluxsystem2}) as right hand side of the ODE system. 
 
-The time-scales in of cellular processes can differ by orders of magnitude. As a 
-consequence the resulting nonlinear ordinary differential equations can be stiff, for a 
+The timescales of cellular processes can differ by orders of magnitude. As a 
+consequence, the resulting nonlinear ordinary differential equations can be stiff, for a 
 general introduction into this topic see \citet{Lambert:1977fk}. Roughly speaking, stiffness 
-is characterized by the presence of at least one rapidly damped mode, whose time 
-constant is small compared to the time scale of the remaining dynamics. In the presented 
+is characterized by the presence of at least one rapidly damped mode whose time 
+constant is small compared to the timescale of the remaining dynamics. In the presented 
 software package, the CVODES solver \citep{Hindmarsh:2005fb} that is implemented in C for 
 efficiency is used. It solves both stiff and non-stiff systems. The methods used in CVODES 
 are variable-order, variable-step multistep methods, based on the Adams-Moulton 
@@ -165,7 +169,7 @@ to be solved. During parameter estimation many evaluations of the whole model ar
 necessary. This can be a numerically intensive task. All ODE variants can be solved 
 independently, therefore this problem is ideal for parallel computing. Here, a multithreading 
 technique was employed that results in a significant acceleration on multi-core machines. 
-For the \citet{Bachmann:2011fk} model, 24 ODE variants have to be solved consecutively. 
+For the model of \citet{Bachmann:2011fk}, 24 ODE variants have to be solved consecutively. 
 As displayed in Figure~\ref{Acceleration}, the speed up increases as expected with 
 increasing number of threads used.
 
@@ -174,8 +178,8 @@ increasing number of threads used.
 \includegraphics[width=\textwidth]{./figures_QDM/bachmann_MSB2011_speed_up_test.png}
 \end{center}
 \caption{Acceleration of numerical computations for the solution of ODE systems by 
-multithreading. For each bar in the figure the 24 variants of the ODE systems used for the 
-\citet{Bachmann:2011fk} model were solved for 1000 randomly drawn sets of parameters 
+multithreading. For each bar, 24 variants of the ODE systems used for the model by 
+\citet{Bachmann:2011fk} were solved for 1000 randomly drawn sets of parameters 
 using a Latin hypercube sampling strategy. The red line displays the theoretically possible
 acceleration. A 12-core processor was used in this benchmark.}
 \label{Acceleration}
@@ -184,7 +188,7 @@ acceleration. A 12-core processor was used in this benchmark.}
 \section{Maximum Likelihood estimation and deterministic optimization 
 algorithms} \label{sec:det_optimization}
 Numerical optimization algorithms try to find the argument $\boldsymbol{\hat \theta}$ that 
-minimize the value of an objective function $L(\boldsymbol{\theta})$. In the case of 
+minimizes the value of an objective function $L(\boldsymbol{\theta})$. In the case of 
 independently and normally distributed measurement noise the objective function for 
 maximum likelihood estimation is given by
 \begin{equation}
@@ -195,25 +199,25 @@ maximum likelihood estimation is given by
 where $L(\boldsymbol{\theta}) =  - 2\cdot \log(\mathcal{L}(\mathbf{y}^\dagger|\,
 \boldsymbol{\theta}))$ of the likelihood $\mathcal{L}$, ${\bf y}^\dagger$ is the experimental 
 data and normally distributed measurement noise is assumed. The variance can be a 
-parameterized function $\sigma_k(t_i, \boldsymbol{\theta})^2$ and the corresponding 
+parameterized function $\sigma_k(t_i, \boldsymbol{\theta})^2$, and the corresponding 
 parameter can be estimated together with the other parameters. In the following we will 
 refer to both $\mathcal{L}$ and $L$ simply as likelihood. The minimum of 
 $L(\boldsymbol{\theta})$ is called the best fit of the model to the experimental data and the 
 corresponding parameters $\boldsymbol{\hat \theta}$ are the maximum likelihood 
 estimates since they maximize $\mathcal{L}$. Numerical algorithms have to be used to 
 estimate the parameters because of the non-linearity of the optimization problem. 
-Deterministic optimization algorithms try to take steps $\Delta \boldsymbol{\theta}$ that 
+Deterministic optimization algorithms try to take steps of $\Delta \boldsymbol{\theta}$ that 
 successively decrease the value of $L(\boldsymbol{\theta})$ beginning from an initial 
 guess $\boldsymbol{\theta}_0$ \citep{Press:1990rw}. The parameters are updated by $
 \boldsymbol{\theta}_{i+1} = \boldsymbol{\theta}_{i} + \Delta \boldsymbol{\theta}$. To 
-generate steps deterministic optimization algorithms evaluate derivatives of the likelihood. 
+generate steps, deterministic optimization algorithms evaluate derivatives of the likelihood. 
 The Data2Dynamics software also implements stochastic optimization algorithms, such as
  particle swarm optimization, differential evolution, simulated annealing, genetic algorithm 
  and others, see \citet{Kronfeld:2010fk} for a detailed description of methods an 
- implementation, for a benchmark comparison see \citet{Raue:2012zt}. The most efficient 
+ implementation, for a benchmark comparison, see \citet{Raue:2012zt}. The most efficient 
  and reliable algorithm for parameter estimation in our hands is a deterministic trust region 
  approach combined with multi-start strategy to map out local minima. Parameters can and 
- should be estimated on a log-scale.
+ should be estimated on a logarithmic scale.
 
 \paragraph{Gradient descent method.}
 The \emph{gradient descent} method takes steps 
@@ -230,7 +234,7 @@ These structures are typical for likelihood functions of ODE models describing b
 reaction networks, sometimes referred to as \emph{sloppiness} \citep{Gutenkunst:2007ct}. 
 
 \paragraph{Newton and quasi-Newton methods.}
-To circumvent convergence problems of the gradient descent method the \emph{Newton} 
+To circumvent convergence problems of the gradient descent method, the \emph{Newton} 
 method applies a second order Taylor expansion of the objective function
 \begin{equation}
 	\tilde L(\Delta \boldsymbol{\theta}) = L(\boldsymbol{\theta}) + \mathbf{g} \cdot \Delta 
@@ -244,8 +248,8 @@ Section~\ref{sec:derivativies}. The Newton step is given by
 \begin{equation}
 	\Delta \boldsymbol{\theta} = -\mathbf{H}^{-1} \cdot \mathbf{g} \label{newtonstep}
 \end{equation}
-and leads, if the approximation is a good one, to the optimal solution in a single step. 
-Compared to the gradient descent method the Newton method exhibits quadratic 
+and leads, if the approximation is good, to the optimal solution in a single step. 
+Compared to the gradient descent method, the Newton method exhibits quadratic 
 convergence rate \citep{Stoer:2005fk}. The performance decreases considerably as the 
 goodness of the approximation decreases. In this case and also for non-positive definite $
 \mathbf{H}$, the method can become unstable, i.e.~decrease in the objective function is 
@@ -254,8 +258,8 @@ not guaranteed for each step.
 Instead of computing $\mathbf{H}$ directly from the model, \emph{quasi-Newton} methods 
 build up information about $\mathbf{H}$ iteratively from sequential evaluations of $
 \mathbf{g}$, see for example the \emph{Broyden-Fletcher-Goldfarb-Shanno} update 
-\citep{Shanno:1970fk}. Iterative approaches are especially useful if computation of second 
-derivatives are not feasible. As explained in Section~\ref{sec:derivativies}, this is not 
+\citep{Shanno:1970fk}. Iterative approaches are especially useful if computation of second order
+derivatives is not feasible. As explained in Section~\ref{sec:derivativies}, this is not 
 necessary for ODE models.
 
 \paragraph{Levenberg-Marquardt method.}
@@ -267,7 +271,7 @@ method \citep{Marquardt:1963uq} uses
 \end{equation}	
 For $\lambda \rightarrow 0$ the Newton step of Equation~(\ref{newtonstep}) is obtained, 
 for $\lambda \rightarrow \infty$ the gradient descent step direction of 
-Equation~(\ref{gradientstep}) is obtained. Also, with increasing $\lambda$ the step size is 
+Equation~(\ref{gradientstep}) is obtained. With increasing $\lambda$, the step size is 
 reduced. Consequently, $L(\boldsymbol{\theta}_{i+1}) < L(\boldsymbol{\theta}_{i})$ can be 
 guaranteed but also efficient Newton steps can be performed if the approximation is a 
 good one. It can be shown that the quality of the approximation~(\ref{2taylor}) increases in 
@@ -282,7 +286,7 @@ as $\lambda$ in the Levenberg-Marquardt method, i.e.~for small enough $\mu$,
 $L(\boldsymbol{\theta}_{i+1}) < L(\boldsymbol{\theta}_{i})$ can be guaranteed.
 
 Here, the trust region algorithm LSQNONLIN implemented in MATLAB is used. To reduce expensiveness of the constrained minimization of 
-Equation~(\ref{2taylor}) the LSQNONLIN algorithm formulates a two dimensional 
+Equation~(\ref{2taylor}), the LSQNONLIN algorithm formulates a two-dimensional 
 approximation to Equation~(\ref{2taylor}) by a plane in parameter space. The gradient 
 descent direction of Equation~(\ref{gradientstep}) and an approximate Newton step of 
 Equation~(\ref{newtonstep}) span the plane of this new approximation. Since the gradient 
@@ -292,7 +296,7 @@ for small $\mu$ can be guaranteed again. The approximate Newton step is obtained
 using direct matrix inversion that is considerably slower for large parameter space.
 
 \section{Derivative calculations for ODE models} \label{sec:derivativies}
-For deterministic optimization algorithms the gradient $\mathbf{g} = \nabla 
+For deterministic optimization algorithms, the gradient $\mathbf{g} = \nabla 
 L(\boldsymbol{\theta})$ and Hessian matrix $\mathbf{H} = \nabla^\top\nabla\, 
 L(\boldsymbol{\theta})$ of the likelihood are required. The first term in 
 Equation~(\ref{llhoodfun2}) is a constant. The last term is the well-known weighted sum of 
@@ -301,7 +305,7 @@ Equation~(\ref{llhoodfun2}) can be reformulated
 \begin{eqnarray}
 	L(\boldsymbol{\theta}) & = & const + \sum_{k=1}^m \sum_{i=1}^{d_k}\, 
 2\log(\sigma_k(t_i, \boldsymbol{\theta}))\, +  \left(\frac{y_{ki}^\dagger - y_{k}(t_{i}, 
-\boldsymbol{\theta})}{\sigma_k(t_i, \boldsymbol{\theta})}\right)^2 = \label{llhoodfun3ij} \\
+\boldsymbol{\theta})}{\sigma_k(t_i, \boldsymbol{\theta})}\right)^2 \label{llhoodfun3ij} \\
 	& = & const + \sum_{q=1}^{s} \tilde r_{q}(\boldsymbol{\theta})^2 + \sum_{q=1}^{s}  
 r_{q}(\boldsymbol{\theta})^2 \label{llhoodfun3}
 \end{eqnarray}
@@ -318,11 +322,11 @@ Since $\log(\sigma_k(t_i, \boldsymbol{\theta}))$ can be negative, in practice
 \end{equation}
 is used, where $c$ is a large enough constant. The constant $c$ adds another constant to 
 Equation~(\ref{llhoodfun3}) but does not change the shape of the likelihood function, 
-hence, MLE and confidence intervals are not affected. The second sum contains the 
+hence, maximum likelihood estimation and confidence intervals are not affected. The second sum contains the 
 normalized residuals 
 \begin{equation}
 	r_{q}(\boldsymbol{\theta}) = \frac{y_{ki}^\dagger - y_{k}(t_{i}, \boldsymbol{\theta})}
-{\sigma_k(t_i, \boldsymbol{\theta}).}  \label{rl3}
+{\sigma_k(t_i, \boldsymbol{\theta})}.  \label{rl3}
 \end{equation}
 The gradient can then be obtained by
 \begin{equation}
@@ -350,7 +354,7 @@ and
 	\DDsquare{{\tilde r}}{\boldsymbol{\theta}}  = \frac{1}{{\tilde r} {\sigma}}
 \frac{\mathrm{d}^2{\sigma}}{\mathrm{d} \boldsymbol{\theta}^2} - \frac{1}{{\tilde r} {\sigma}^2}\DD{{\sigma}}
 {\boldsymbol{\theta}}\cdot \DD{{\sigma}}{\boldsymbol{\theta}} - \frac{1}{{\tilde r}^2 {\sigma}}
-\DD{{\sigma}}{\boldsymbol{\theta}}\cdot \DD{{\tilde r}}{\boldsymbol{\theta}.}
+\DD{{\sigma}}{\boldsymbol{\theta}}\cdot \DD{{\tilde r}}{\boldsymbol{\theta}}.
 \end{equation}
 First order derivatives of ${r}$ can be calculated by
 \begin{equation}
@@ -361,7 +365,7 @@ Let ${f}_\sigma$ be the equation for the variance $\sigma_k(t_i, \boldsymbol{\th
 We can then further obtain
 \begin{equation}
 \DD{{\sigma}}{\boldsymbol{\theta}} = \dd{f_\sigma}{{y}}\DD{{y}}{\boldsymbol{\theta}} + 
-\dd{f_\sigma}{\boldsymbol{\theta}.} \label{sigmaderivatives}
+\dd{f_\sigma}{\boldsymbol{\theta}} \label{sigmaderivatives}
 \end{equation} 
 and
 \begin{equation}
@@ -374,7 +378,7 @@ With the equation for the measurements ${f}_y$ we can resolve
 \begin{equation}
 	\DD{{y}}{\boldsymbol{\theta}} = \dd{{f}_y}{\mathbf{x}} {\color{red}\DD{\mathbf{x}}
 {\boldsymbol{\theta}}} + \dd{{f}_y}{\mathbf{u}} \DD{\mathbf{u}}{\boldsymbol{\theta}} + 
-\dd{{f}_y}{\boldsymbol{\theta}.} \label{sderive}
+\dd{{f}_y}{\boldsymbol{\theta}}. \label{sderive}
 \end{equation}
 All expressions in Equations~(\ref{reserrfirst}-\ref{sderive}) can be calculated analytically 
 except for terms indicated in red. In Equation~(\ref{sderive}), the derivatives of the 
@@ -383,10 +387,10 @@ can be calculated numerically, as described in Section~\ref{sec:ode_simu}. The c
 of $\mathrm{d}^2 {y}/\mathrm{d} \boldsymbol{\theta}^2$  involves second order sensitivities $\mathrm{d}^2 \mathbf{x}/\mathrm{d} 
 \boldsymbol{\theta}^2$ of the dynamics that are expensive to evaluate numerically. 
 
-The calculation of the last term in Equation~(\ref{fullH}) ${r} \cdot \mathrm{d}^2{r}/\mathrm{d}
+The calculation of the last term in Equation~(\ref{fullH}), ${r} \cdot \mathrm{d}^2{r}/\mathrm{d}
 \boldsymbol{\theta}^2$ is more complicated. Following the argumentation in~\citet[Section 
-15.5 Nonlinear Models]{Press:1990rw}, in the proximity of a good model fit the normalized 
-residuals ${r}$ fluctuate uncorrelated around zero. Therefore, the term tends to cancel out 
+15.5 Nonlinear Models]{Press:1990rw}, in the proximity of a good model fit, the normalized 
+residuals ${r}$ fluctuate in an uncorrelated manner around zero. Therefore, the term tends to cancel out 
 when summed over $q$ and quadratic convergence of optimization algorithms using 
 Newton steps can be obtained without calculating second order sensitivities. 
 
@@ -438,7 +442,7 @@ With Equation~(\ref{rl3}) we can calculate
 	 {r} \cdot \DDD{{r}}{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_b} & = & \frac{{r}^2}
 {{{\sigma}}^2} \DD{{\sigma}}{\boldsymbol{\theta}_s}\DD{{\sigma}}{\boldsymbol{\theta}_b} - 
 \frac{{r}}{{\sigma}}\DD{{\sigma}}{\boldsymbol{\theta}_s}\DD{{r}}{\boldsymbol{\theta}_b} - 
-\frac{{r}^2}{{\sigma}} \DDD{{\sigma}}{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_b.} 
+\frac{{r}^2}{{\sigma}} \DDD{{\sigma}}{\boldsymbol{\theta}_s}{\boldsymbol{\theta}_b}. 
 \label{problemend}
 \end{eqnarray}
 Indicated in red color are the before-mentioned second order derivatives that are 
@@ -448,20 +452,19 @@ containing ${r}$ do cancel out when summed over $q$ in the proximity of a good m
 whereas the terms containing ${r}^2$ do not. Fortunately, the problematic terms that 
 contain second order derivatives $\mathrm{d}^2 {y}/\mathrm{d} \boldsymbol{\theta}^2$,  marked in red, are 
 amongst those that do cancel out when summed over $q$ in Equations~(\ref{problem1}-
-\ref{problemend}). With the remaining terms of Equation~(\ref{fullH}) an approximate 
+\ref{problemend}). With the remaining terms of Equation~(\ref{fullH}), an approximate 
 Hessian matrix $\mathbf{\hat H}$ can be calculated without the second order derivatives 
 $\mathrm{d}^2 {y}/\mathrm{d} \boldsymbol{\theta}^2$. As the quality of the model fit improves, the quality of 
-the approximation $\mathbf{\hat H}$ improves. For cases where the measurement noise 
+$\mathbf{\hat H}$ improves. For cases where the measurement noise 
 function does not explicitly depend on the observables, the missing term in 
-Equation~(\ref{ddsigma}) vanishes as well because $\partial f_\sigma / \partial y= 0$. Thus 
-in these cases, as the quality of the model fit improves $\mathbf{\hat H} \rightarrow 
-\mathbf{H}$ and quadratic convergence of optimization algorithms can be obtained also in 
-the case where measurement noise parameters are estimated. 
+Equation~(\ref{ddsigma}) vanishes as well because $\partial f_\sigma / \partial y= 0$. In these cases, 
+as the quality of the model fit improves, $\mathbf{\hat H} \rightarrow 
+\mathbf{H}$, and quadratic convergence of optimization algorithms can be obtained even if measurement noise parameters are estimated. 
 
 The assumption $\partial f_\sigma / \partial y = 0$ holds true for many applications. To 
 which extend more general functions with $\partial f_\sigma / \partial y \not= 0$ for the 
-measurement noise have to be considered for applications, and to which extend this 
-would impact on optimization performance remains to be clarified.
+measurement noise have to be considered for applications, and to which extent this 
+would impact on optimization performance, remains to be clarified.
 
 If, due to log-normal measurement noise, the observables and experimental data points 
 are compared on a logarithmic scale, e.g.~using $\log_{10}$, an additional transformation
@@ -489,12 +492,12 @@ _x}{\mathbf{x}}  \DD{\mathbf{x}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} +
 \end{eqnarray}
 for the derivatives \citep{Leis:1988dl} that is solved simultaneously with the original ODE 
 system, see Equation~(\ref{odesystem2}). Using the abbreviation $s_{ij} = \mathrm{d} x_i / \mathrm{d} \theta_j
-$ with $i = 1 \dots n$ and $j = 1 \dots l$ and Equation~(\ref{jac_mat}) we rewrite 
-component wise
+$ with $i = 1 \dots n$ and $j = 1 \dots l$ and Equation~(\ref{jac_mat}), we rewrite 
+component-wise
 \begin{eqnarray}
 	\DD{}{t} s_{ij}  =  \mathbf{J} \cdot s_{ij} +  \dd{\mathbf{f}_x}{\mathbf{u}}  
 \DD{\mathbf{u}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}} + \dd{\mathbf{f}_x}
-{\boldsymbol{\theta}} \label{ssystemcomp}
+{\boldsymbol{\theta}}, \label{ssystemcomp}
 \end{eqnarray}
 which are $n \times l$ additional ODEs. The initial conditions for 
 Equation~(\ref{ssystemcomp}) can be calculated by 
@@ -503,12 +506,12 @@ Equation~(\ref{ssystemcomp}) can be calculated by
 \end{equation}
 see Equation~(\ref{init_ode_sys}). An efficient algorithm for solving the enlarged ODE 
 system is the CVODES solver. There are some numerical properties that allow to increase 
-the performance of solving the enlarged ODE system, see in \cite{Hindmarsh:2005fb} for 
+the performance of solving the enlarged ODE system, see \cite{Hindmarsh:2005fb} for 
 details. Similar to the calculation of the Jacobian matrix $\mathbf{J}$, see 
 Equation~(\ref{jac_mat}), of the right hand side of Equation~(\ref{odesystem2}), it is 
 favorable to provide analytically the Jacobian matrix $\mathbf{J}_s$ of the right hand side 
 of Equation~(\ref{ssystemcomp}) with respect to the sensitivities. From 
-Equation~(\ref{ssystemcomp}) we see that $\mathbf{J}_s$ is composed blockwise out of $
+Equation~(\ref{ssystemcomp}), we see that $\mathbf{J}_s$ is composed blockwise of $
 \mathbf{J}$ by
 \begin{displaymath}
 \mathbf{J}_s = \left( 
@@ -534,7 +537,7 @@ leads to some numerical properties that allow to further increase the performanc
 solving the enlarged ODE system, see in \cite{Hindmarsh:2005fb} for details. For instance, 
 Equation~(\ref{ssystem2}) inherits the stiffness properties of Equation~(\ref{odesystem2}). 
 Consequently, the adaptive step size control for the enlarged ODE system can be chosen 
-equal to that of the original system. Again, Equation~(\ref{fluxsystem2}) can be used to 
+equally to that of the original system. Again, Equation~(\ref{fluxsystem2}) can be used to 
 simplify computation of Equation~(\ref{ssystem2}) by 
 \begin{eqnarray}
 	\DD{}{t} \DD{\mathbf{x}(t,\boldsymbol{\theta})}{\boldsymbol{\theta}}  =  \mathbf{N}
