@@ -11,5 +11,6 @@ typedef struct {
 	double *dvdx;
 	double *dvdu;
 	double *dvdp;
+	double t;
 	} *UserData;
 #endif /* _MY_UDATA */

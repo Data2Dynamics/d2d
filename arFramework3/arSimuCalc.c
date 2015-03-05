@@ -46,6 +46,8 @@ int    sensi;
 int    dynamics;
 int    ssa;
 int    jacobian;
+int    ms;
+int    events;
 int    parallel;
 int    sensirhs;
 int    fiterrors;
@@ -127,6 +129,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     fiterrors_correction = (double) mxGetScalar(mxGetField(arconfig, 0, "fiterrors_correction"));
     mintau = mxGetScalar(mxGetField(arconfig, 0, "ssa_min_tau"));
     nruns = (int) mxGetScalar(mxGetField(arconfig, 0, "ssa_runs"));
+    ms = (int) mxGetScalar(mxGetField(arconfig, 0, "useMS"));
+    events = (int) mxGetScalar(mxGetField(arconfig, 0, "useEvents"));
+    if ( ms == 1 ) events = 1;
     
     /* threads */
     arthread = mxGetField(arconfig, 0, "threads");
@@ -225,7 +230,14 @@ void x_calc(int im, int ic) {
     int is, js, ks, ids;
     int nout, neq, nyout;
     int nu, np, nps, nv, ny;
-    
+
+    /* Multiple shooting and events */
+    int qMS, qEvents;
+    int nMS, iMS;
+    int nEvents, iEvents;
+    double *tMS, *tEvents;    
+    mxArray *arms; 
+
     void *cvode_mem;
     UserData data;
     
@@ -401,10 +413,40 @@ void x_calc(int im, int ic) {
             if (sensi == 1) {
                 returnddxdtdp = mxGetData(mxGetField(arcondition, ic, "ddxdtdp"));
             }
-            
+
+            /* For re-initializing the solver at events and/or for multiple shooting */
+            iEvents = 0;	/* Array location */
+            iMS = 0;		/* Array location */
+            qMS = 0;		/* Flag */
+            if (ms == 1) qMS = (int) mxGetScalar(mxGetField(arcondition, ic, "qMS"));
+
+            qEvents = 0;
+            if (events == 1) qEvents = (int) mxGetScalar(mxGetField(arcondition, ic, "qEvents"));
+
+            if (qMS==1) {
+                qEvents = 1;
+                nMS = (int) mxGetScalar(mxGetField(arcondition, ic, "nMS"));
+                tMS = (double*) mxGetData(mxGetField(arcondition, ic, "tMS"));
+
+                arms = mxGetField(arcondition, ic, "ms");
+                if (arms==NULL)
+                    mexErrMsgTxt("field ar.model.condition.ms doesn't exist!");
+            }
+
+            /* Solver re-initialization points */
+            /* Note that all the tMS points are also in this list */
+            if (qEvents==1) {
+                tEvents = (double*) mxGetData(mxGetField(arcondition, ic, "tEvents"));
+                nEvents = mxGetNumberOfElements(mxGetField(arcondition, ic, "tEvents"));
+
+                while(tEvents[iEvents] <= tstart)
+                 iEvents++;
+            }
+
             /* User data structure */
             data = (UserData) malloc(sizeof *data);
             if (data == NULL) {status[0] = 1; return;}
+            data->t = tstart;
             
             data->qpositivex = qpositivex;
             data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
@@ -413,6 +455,9 @@ void x_calc(int im, int ic) {
             data->p = mxGetData(mxGetField(arcondition, ic, "pNum"));
             np = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
             nps = np;
+            
+            /* If there are no parameters, do not compute sensitivities; otherwise failure at N_VCloneVectorArray_Serial */
+            if (nps==0) sensi = 0;
             
             data->v = mxGetData(mxGetField(arcondition, ic, "vNum"));
             nv = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
@@ -573,7 +618,25 @@ void x_calc(int im, int ic) {
                     /* only integrate after tstart */
                     if(ts[is] > tstart) {
                         if(neq>0) {
+                            
+                            /* If this condition has events, make sure we don't go over them as this leads to loss of accuracy */
+                            if (qEvents==1)
+                                if (iEvents < nEvents)
+                                    CVodeSetStopTime(cvode_mem, RCONST(tEvents[iEvents]));
+                                else
+                                    CVodeSetStopTime(cvode_mem, ts[nout-1]+1.0);
+                            
+                            /* Simulate up to the next time point */
+                            data->t = ts[is];
                             flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
+                            
+                            /* Found an event */
+                            if ((qEvents==1) && (ts[is]==tEvents[iEvents])) /*flag==CV_TSTOP_RETURN*/
+                            {
+                              qEvents = 2;    /* qEvents=2 denotes that an event just happened */
+                              flag = 0.0;     /* Re-set the flag for legacy error-checking reasons */
+                            }
+
                             status[0] = flag;
                             /*
                     if(flag==-1) printf("CVODES stoped at t=%f, TOO_MUCH_WORK, did not reach output time after %i steps (m=%i, c=%i).\n", t, cvodes_maxsteps, im, ic);
@@ -637,6 +700,23 @@ void x_calc(int im, int ic) {
                             }
                         }
                     }
+                }
+                
+                /* Event handling */
+                if (qEvents==2)
+                {
+                    /* Placeholder for multiple shooting */
+                    
+                    /* Reinitialize the solver */
+                    flag = CVodeReInit(cvode_mem, RCONST(tEvents[iEvents]), x);
+                    if (flag < 0) {status[0] = 16; return;}
+                    if (sensi==1) {
+                        flag = CVodeSensReInit(cvode_mem, sensi_meth, sx);
+                        if (flag < 0) {printf( "%d", flag ); status[0] = 17; return;}
+                    }
+                    
+                    iEvents++;
+                    qEvents = 1;
                 }
             }
             

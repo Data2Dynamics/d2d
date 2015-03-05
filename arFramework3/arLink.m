@@ -21,7 +21,15 @@ if(~silent)
     fprintf('\nlinking time points...\n');
 end
 
+useMS 		= 0;
+useEvents 	= 0;
+
 for m=1:length(ar.model)
+    for c=1:length(ar.model(m).condition)
+        if(~isfield(ar.model(m).condition(c), 'tEvents'))
+            ar.model(m).condition(c).tEvents = [];
+        end
+    end
     if(isfield(ar.model(m), 'data'))
         % clear condition time points
         for c=1:length(ar.model(m).condition)
@@ -53,6 +61,13 @@ for m=1:length(ar.model)
             
             ar.model(m).condition(ar.model(m).data(d).cLink).tstart = ...
                 min(ar.model(m).condition(ar.model(m).data(d).cLink).tFine);
+            
+            % Events defined in the data
+            if(isfield(ar.model(m).data(ar.model(m).data(d).cLink), 'tEvents'))
+                ar.model(m).condition(ar.model(m).data(d).cLink).tEvents = ...
+                    union( ar.model(m).condition(ar.model(m).data(d).cLink).tEvents, ...
+                           ar.model(m).data(d).tEvents );
+            end            
         end
         
         % collect time points for multiple shooting
@@ -75,11 +90,11 @@ for m=1:length(ar.model)
                                 tlink = ar.model(m).condition(c2).ms_snip_start;
                                 fprintf('linking condition %i and %i for multiple shooting at t = %f\n', c, c2, tlink);
                                 
-                                ar.model(m).condition(c).tExp = ...
-                                    union(ar.model(m).condition(c).tExp, tlink); %R2013a compatible
-								ar.model(m).condition(c2).tExp = ...
-                                    union(ar.model(m).condition(c2).tExp, tlink); %R2013a compatible 
-
+                                % Add multiple shooting points to the event list
+                                ar.model(m).condition(c).tEvents = ...
+                                    union(ar.model(m).condition(c).tEvents, tlink); %R2013a compatible
+                                ar.model(m).condition(c2).tEvents = ...
+                                    union(ar.model(m).condition(c2).tEvents, tlink); %R2013a compatible                         
                                 
                                 if(~isfield(ar.model(m), 'ms_link'))
                                     ar.model(m).ms_link = [c c2 tlink];
@@ -93,6 +108,16 @@ for m=1:length(ar.model)
                     end
                 end
             end
+        end
+        
+        % remove events before tstart and add event time points to tFine and tExp
+        for c=1:length(ar.model(m).condition)
+            ar.model(m).condition(c).tEvents( find( ar.model(m).condition(c).tEvents <= ar.model(m).condition(c).tstart ) ) = [];
+            
+            ar.model(m).condition(c).tExp = ...
+                union(ar.model(m).condition(c).tExp, ar.model(m).condition(c).tEvents);
+            ar.model(m).condition(c).tFine = ...
+                union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tEvents);
         end
         
         % link back time points
@@ -234,12 +259,32 @@ for m = 1:length(ar.model)
         ar.model(m).condition(c).start = 0;
         ar.model(m).condition(c).stop = 0;
         ar.model(m).condition(c).stop_data = 0;
+        
+        % conditions with events
+        if(length(ar.model(m).condition(c).tEvents)>0)
+            useEvents = 1;
+            ar.model(m).condition(c).qEvents = 1;
+        else
+            ar.model(m).condition(c).qEvents = 0;
+        end
     end
 end
 
 if(~silent)
     fprintf('linking parameters...\n');
 end
+
+% copy old values for event and multiple shooting settings if they exist
+if (isfield(ar, 'config'))
+    if (isfield(ar.config, 'useMS'))
+        useMS = ar.config.useMS;
+    end
+    if (isfield(ar.config, 'useEvents'))
+        useEvents = ar.config.useEvents;
+    end
+end
+ar.config.useEvents = useEvents;
+ar.config.useMS 	= useMS;
 
 % remember existing values
 if(isfield(ar, 'pLabel'))

@@ -119,6 +119,8 @@ ar.info.arsimucalc_flags{12} = 'CVodeSetSensErrCon()';
 ar.info.arsimucalc_flags{13} = 'CVodeSetSensParams()';
 ar.info.arsimucalc_flags{14} = 'CVodeGetSens()';
 ar.info.arsimucalc_flags{15} = 'CVodeSetMaxNumSteps';
+ar.info.arsimucalc_flags{16} = 'CVodeReInit()';
+ar.info.arsimucalc_flags{17} = 'CVodeSensReInit()';
 
 ar.info.cvodes_flags = cell(1,30);
 
