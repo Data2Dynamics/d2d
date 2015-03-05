@@ -219,6 +219,8 @@ if(savetofile && exist(pleGlobals.savePath, 'dir'))
 
         library_path = getenv('LD_LIBRARY_PATH');
         setenv('LD_LIBRARY_PATH', '');
+        
+        workingdir = cd;
         cd(pleGlobals.savePath);
 
         if(ismac)
@@ -227,7 +229,8 @@ if(savetofile && exist(pleGlobals.savePath, 'dir'))
             eval(['!pdflatex ' [arPathConvert(name) '.tex'] ' > log_pdflatex.txt']);
         end
 
-        cd('../../..');
+        cd(workingdir);
+        setenv('LD_LIBRARY_PATH', library_path);
 
         for ia = 1:length(myaxes)
             set(myaxes(ia),'Position',mypos(ia,:))

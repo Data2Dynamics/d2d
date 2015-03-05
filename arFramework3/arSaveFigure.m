@@ -53,6 +53,7 @@ elseif(isunix)
     library_path = getenv('LD_LIBRARY_PATH');
     setenv('LD_LIBRARY_PATH', '');
     
+    workingdir = cd;
     cd([arSave subdir]);
     
     if(ismac)
@@ -61,7 +62,7 @@ elseif(isunix)
         eval(['!pdflatex ' [arPathConvert(name) '.tex'] ' > log_pdflatex.txt']);
     end
     
-    cd('../../../..');
+    cd(workingdir);
     setenv('LD_LIBRARY_PATH', library_path);
     
     for ia = 1:length(myaxes)
@@ -71,6 +72,7 @@ elseif(isunix)
 end
 
 if(which('plot2svg'))
+%     [filepath,filename] = strsplit(savePath,'/');
     plot2svg([savePath '.svg'],h)
 end
 
