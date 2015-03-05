@@ -26,13 +26,13 @@ if(nargin>0)
         return
     end
     
-    if(length(jm)==1 & isempty(jd))
+    if(length(jm)==1 && isempty(jd))
         jd = 1:length(ar.model(jm).data);
     end
-    if(isempty(jy) & length(jm)==1 & length(jd)==1)
+    if(isempty(jy) && length(jm)==1 && length(jd)==1)
         jy = size(ar.model(jm).data(jd).yExp,2);
     end
-    if(isempty(jt) & length(jm)==1 & length(jd)==1)
+    if(isempty(jt) && length(jm)==1 && length(jd)==1)
         jt = size(ar.model(jm).data(jd).yExp,1);
     end
 end

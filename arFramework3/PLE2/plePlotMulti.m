@@ -218,6 +218,7 @@ if(savetofile && exist(pleGlobals.savePath, 'dir'))
         matlab2tikz([savePath '.tex'],'figurehandle',h,'showInfo', false, 'showWarnings',false, 'standalone', true,'automaticLabels',true,'extraAxisOptions',axoptions)
 
         library_path = getenv('LD_LIBRARY_PATH');
+        setenv('LD_LIBRARY_PATH', '');
         cd(pleGlobals.savePath);
 
         if(ismac)
@@ -227,12 +228,15 @@ if(savetofile && exist(pleGlobals.savePath, 'dir'))
         end
 
         cd('../../..');
-        setenv('LD_LIBRARY_PATH', library_path);
 
         for ia = 1:length(myaxes)
             set(myaxes(ia),'Position',mypos(ia,:))
         end
         set(h,'Position',myfigpos);
+    end
+    
+    if(which('plot2svg'))
+        plot2svg([savePath '.svg'],h)
     end
     
 end

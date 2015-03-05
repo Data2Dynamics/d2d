@@ -70,4 +70,8 @@ elseif(isunix)
     set(h,'Position',myfigpos);
 end
 
+if(which('plot2svg'))
+    plot2svg([savePath '.svg'],h)
+end
+
 
