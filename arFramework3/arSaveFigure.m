@@ -31,7 +31,7 @@ elseif(isunix)
     mycols = unique(round(mypos(:,1)*1e6)/1e6);
     myrows = unique(round(mypos(:,2)*1e6)/1e6);
     if(myrows(end) - max(mypos(:,3)) > 0)
-        myrows = [0 myrows];
+        myrows = [0 myrows'];
     end
     nCols = length(mycols);
     nRows = length(myrows);
