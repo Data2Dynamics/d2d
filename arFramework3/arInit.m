@@ -96,6 +96,8 @@ ar.ppl.n = 300;
 ar.config.atol = 1e-6;
 ar.config.rtol = 1e-6;
 ar.config.maxsteps = 1000;
+ar.config.useEvents = 0;
+ar.config.useMS 	= 0;
 
 ar.config.steady_state_constraint = 1;
 

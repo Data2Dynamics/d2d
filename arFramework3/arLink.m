@@ -112,7 +112,7 @@ for m=1:length(ar.model)
         
         % remove events before tstart and add event time points to tFine and tExp
         for c=1:length(ar.model(m).condition)
-            ar.model(m).condition(c).tEvents( find( ar.model(m).condition(c).tEvents <= ar.model(m).condition(c).tstart ) ) = [];
+            ar.model(m).condition(c).tEvents(ar.model(m).condition(c).tEvents <= ar.model(m).condition(c).tstart) = [];
             
             ar.model(m).condition(c).tExp = ...
                 union(ar.model(m).condition(c).tExp, ar.model(m).condition(c).tEvents);
@@ -261,7 +261,7 @@ for m = 1:length(ar.model)
         ar.model(m).condition(c).stop_data = 0;
         
         % conditions with events
-        if(length(ar.model(m).condition(c).tEvents)>0)
+        if(~isempty(ar.model(m).condition(c).tEvents))
             useEvents = 1;
             ar.model(m).condition(c).qEvents = 1;
         else
