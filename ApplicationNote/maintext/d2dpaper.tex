@@ -22,11 +22,11 @@ C.~T\"onsing$^{2}$,
 L.~Adlung$^{4}$, 
 R.~Engesser$^{2}$, 
 W.~Mader$^{2}$, 
-T.~Heinemann$^{5}$, 
+T.~Heinemann$^{4,5}$, 
 J.~Hasenauer$^{6}$, 
 M.~Schilling$^{4}$, 
-T.~H\"ofer$^{5}$, 
-E.~Klipp$^{2}$, 
+T.~H\"ofer$^{4,5}$, 
+E.~Klipp$^{3}$, 
 F.~Theis$^{6}$, 
 U.~Klingm\"uller$^{4}$,
 B.~Sch\"oberl$^{1}$ 
@@ -34,10 +34,10 @@ and J.~Timmer\,$^{2,7}$}
 \address{$^{1}$Merrimack Pharmaceuticals Inc., 02139 Cambridge, MA, USA\\
 $^{2}$University of Freiburg, Institute for Physics, 79104 Freiburg, Germany\\
 $^{3}$Humboldt-Universit\"at zu Berlin, Theoretical Biophysics, 10115 Berlin, Germany\\
-$^{4}$German Cancer Research Center, 69120 Heidelberg, Germany.\\
-$^{5}$BioQuant, University of Heidelberg, 69120 Freiburg, Germany\\
-$^{6}$Helmholtz Center Munich, 85764 Neuherberg, Germany.\\
-$^{7}$BIOSS Centre for Biological Signalling Studies, University of Freiburg, 79104 Freiburg, Germany.}
+$^{4}$German Cancer Research Center, 69120 Heidelberg, Germany\\
+$^{5}$BioQuant, University of Heidelberg, 69120 Heidelberg, Germany\\
+$^{6}$Helmholtz Center Munich, 85764 Neuherberg, Germany\\
+$^{7}$BIOSS Centre for Biological Signalling Studies, University of Freiburg, 79104 Freiburg, Germany}
 
 \history{Received on XXXXX; revised on XXXXX; accepted on XXXXX}
 
@@ -73,12 +73,12 @@ For the construction of computational models that are used to analyze signal
 transduction pathways, gene regulation and cellular decisions, 
 data sets generated under a wide 
 range of experimental conditions have to be analyzed comprehensively. The Data2Dynamics software 
-environment is designed for computationally efficient and user friendly integration of 
+environment is designed for computationally efficient and user-friendly integration of 
 complex experimental data into models consisting of coupled non-linear ordinary 
 differential equations (ODE). 
 
 Our software allows to specify the right hand side of the ODE manually, or to 
-automatically generate it by  providing the reaction scheme with the respective rate-law such as Mass Action, Michaelis-Menten or a custom rate 
+automatically generate it by providing the reaction scheme with the respective rate-law such as Mass Action, Michaelis-Menten or a custom rate 
 equation. The resulting ODE system as well as its Jacobian matrix that is calculated 
 automatically by symbolic differentiation are translated to C code and complied together 
 with the ODE solver into a MATLAB mex-function. The code makes efficient use of pre-calculated reaction fluxes. 
@@ -86,7 +86,7 @@ Time-varying inputs to the ODE systems can be represented by custom or predefine
 functions such as steps, pulses and splines that can depend on unknown parameters 
 \citep{Schelker:2012uq}. The initial concentrations can be considered as functions of 
 unknown parameters as well. The software allows considering multiple different models 
-that can share common parameters and fit them simultaneously to all available data. 
+that can share common parameters and fitting them simultaneously to all available data. 
 
 The software is able to automatically create model variants that 
 represent different experimental conditions. The conditions can be defined directly in 
@@ -118,7 +118,7 @@ unknown model parameters, also called model fitting.
 We implemented a variety of different 
 parameter estimation algorithms \citep{Raue:2012zt}. The most efficient and reliable 
 algorithm for parameter estimation in our hands is a deterministic trust region approach 
-combined with multi-start strategy to map out local minima. Parameters can and should 
+combined with a multi-start strategy to map out local minima. Parameters can and should 
 be estimated on a log-scale. Prior knowledge about the parameters can be considered as 
 well. If steady state assumptions for the model dynamics are required and the functional 
 relationship to parameters are unknown, steady state constraints can be added to the 
@@ -126,7 +126,7 @@ objective function. A quality control, as proposed in
 \citet{Raue:2012zt}, can be performed to validate robustness of the estimation results. The 
 software implements a sophisticated method to calculate model sensitivities, i.e.~the 
 derivatives of the dynamics with respect to model parameters. The sensitivity equations 
-are derived automatically by symbolic differentiation, translated to C code and complied 
+are derived automatically by symbolic differentiation, translated to C code and compiled 
 together with the original ODE system and solver. We showed previously 
 \citep{Raue:2012zt} that this approach is not only about ten times faster but also more 
 precise than the default approach using finite differences. A reliable calculation of these 
