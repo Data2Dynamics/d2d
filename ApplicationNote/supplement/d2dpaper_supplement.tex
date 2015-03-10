@@ -73,14 +73,14 @@ L.~Adlung$^{4}$,
 R.~Engesser$^{2}$, 
 W.~Mader$^{2}$, 
 T.~Heinemann$^{4,5}$, 
-J.~Hasenauer$^{6}$, 
+J.~Hasenauer$^{6,7}$, 
 M.~Schilling$^{4}$, 
 T.~H\"ofer$^{4,5}$, 
 E.~Klipp$^{3}$, 
-F.~Theis$^{6}$, 
+F.~Theis$^{6,7}$, 
 U.~Klingm\"uller$^{4}$, 
 B.~Sch\"oberl$^{1}$ and 
-J.~Timmer\,$^{2,7}$
+J.~Timmer\,$^{2,8}$
 
 \noindent $^{1}$Merrimack Pharmaceuticals Inc., 02139 Cambridge, MA, USA\\
 $^{2}$University of Freiburg, Institute for Physics, 79104 Freiburg, Germany\\
@@ -88,7 +88,8 @@ $^{3}$Humboldt-Universit\"at zu Berlin, Theoretical Biophysics, 10115 Berlin, Ge
 $^{4}$German Cancer Research Center, 69120 Heidelberg, Germany\\
 $^{5}$BioQuant, University of Heidelberg, 69120 Heidelberg, Germany\\
 $^{6}$Helmholtz Center Munich, 85764 Neuherberg, Germany\\
-$^{7}$BIOSS Centre for Biological Signalling Studies, University of Freiburg, 79104 Freiburg, Germany
+$^{7}$Technische Universit\"at M\"unchen, 85748 Garching, Germany \\
+$^{8}$BIOSS Centre for Biological Signalling Studies, University of Freiburg, 79104 Freiburg, Germany
 
 \subsection*{Implementation and System Requirements} 
 The Data2Dynamics modeling environment is MATLAB-based, 
@@ -159,8 +160,9 @@ consequence, the resulting nonlinear ordinary differential equations can be stif
 general introduction into this topic see \citet{Lambert:1977fk}. Roughly speaking, stiffness 
 is characterized by the presence of at least one rapidly damped mode whose time 
 constant is small compared to the timescale of the remaining dynamics. In the presented 
-software package, the CVODES solver \citep{Hindmarsh:2005fb} that is implemented in C for 
-efficiency is used. It solves both stiff and non-stiff systems. The methods used in CVODES 
+software package, the CVODES solver \citep{Hindmarsh:2005fb} is used. 
+CVODES solves both stiff and non-stiff systems and, for reasons of
+efficiency, is implemented in C. The methods used in CVODES 
 are variable-order, variable-step multistep methods, based on the Adams-Moulton 
 formulas for non-stiff and on the Backward Differentiation Formulas for stiff systems 
 \citep{Byrne:1975uq}. CVODES also allows for efficient simultaneous solution of the 
@@ -217,14 +219,17 @@ minimizes the value of an objective function $L(\boldsymbol{\theta})$. In the ca
 independently and normally distributed measurement noise the objective function for 
 maximum likelihood estimation is given by
 \begin{equation}
-	L(\boldsymbol{\theta}) = \sum_{k=1}^m \sum_{i=1}^{d_k}\, 2\log(\sqrt{2 \pi}) + 
-2\log(\sigma_k(t_i, \boldsymbol{\theta}))\, + \left(\frac{y_{ki}^\dagger - y_{k}(t_{i}, 
-\boldsymbol{\theta})}{\sigma_k(t_i, \boldsymbol{\theta})}\right)^2 \label{llhoodfun2}
+	L(\boldsymbol{\theta}) = \sum_{k=1}^m \sum_{j=1}^{d_k}\, 2\log(\sqrt{2 \pi}) + 
+2\log(\sigma_k(t_j, \boldsymbol{\theta}))\, + \left(\frac{y_{kj}^\dagger - y_{k}(t_{j}, 
+\boldsymbol{\theta})}{\sigma_k(t_j, \boldsymbol{\theta})}\right)^2 \label{llhoodfun2}
 \end{equation}
 where $L(\boldsymbol{\theta}) =  - 2\cdot \log(\mathcal{L}(\mathbf{y}^\dagger|\,
 \boldsymbol{\theta}))$ of the likelihood $\mathcal{L}$, ${\bf y}^\dagger$ is the experimental 
-data and normally distributed measurement noise is assumed. The variance can be a 
-parameterized function $\sigma_k(t_i, \boldsymbol{\theta})^2$, and the corresponding 
+data and normally distributed measurement noise is assumed. The index $k$ runs over all 
+experimental measurements, the index $j$ over all time points for the measurements. For 
+simplicity, the sum over the different data sets is omitted here. 
+The variance can be a 
+parameterized function $\sigma_k(t_j, \boldsymbol{\theta})^2$, and the corresponding 
 parameter can be estimated together with the other parameters. In the following we will 
 refer to both $\mathcal{L}$ and $L$ simply as likelihood. The minimum of 
 $L(\boldsymbol{\theta})$ is called the best fit of the model to the experimental data and the 
@@ -260,7 +265,7 @@ reaction networks, sometimes referred to as \emph{sloppiness} \citep{Gutenkunst:
 
 \paragraph{Newton and quasi-Newton methods.}
 To circumvent convergence problems of the gradient descent method, the \emph{Newton} 
-method applies a second order Taylor expansion of the objective function
+method applies a second order Taylor expansion $\tilde L$ of the objective function
 \begin{equation}
 	\tilde L(\Delta \boldsymbol{\theta}) = L(\boldsymbol{\theta}) + \mathbf{g} \cdot \Delta 
 \boldsymbol{\theta} + \frac{1}{2} \Delta \boldsymbol{\theta}^\top \cdot \mathbf{H} \cdot 
@@ -328,21 +333,21 @@ Equation~(\ref{llhoodfun2}) is a constant. The last term is the well-known weigh
 squared residuals, sometimes denoted by $\chi^2(\boldsymbol{\theta})$. 
 Equation~(\ref{llhoodfun2}) can be reformulated
 \begin{eqnarray}
-	L(\boldsymbol{\theta}) & = & const + \sum_{k=1}^m \sum_{i=1}^{d_k}\, 
-2\log(\sigma_k(t_i, \boldsymbol{\theta}))\, +  \left(\frac{y_{ki}^\dagger - y_{k}(t_{i}, 
-\boldsymbol{\theta})}{\sigma_k(t_i, \boldsymbol{\theta})}\right)^2 \label{llhoodfun3ij} \\
+	L(\boldsymbol{\theta}) & = & const + \sum_{k=1}^m \sum_{j=1}^{d_k}\, 
+2\log(\sigma_k(t_j, \boldsymbol{\theta}))\, +  \left(\frac{y_{kj}^\dagger - y_{k}(t_{j}, 
+\boldsymbol{\theta})}{\sigma_k(t_j, \boldsymbol{\theta})}\right)^2 \label{llhoodfun3ij} \\
 	& = & const + \sum_{q=1}^{s} \tilde r_{q}(\boldsymbol{\theta})^2 + \sum_{q=1}^{s}  
 r_{q}(\boldsymbol{\theta})^2 \label{llhoodfun3}
 \end{eqnarray}
-where the new sum index $q$ runs over all $i$ and $j$ in ($\ref{llhoodfun3ij}$) and $s = 
+where the new sum index $q$ runs over all $k$ and $j$ in ($\ref{llhoodfun3ij}$) and $s = 
 \sum_{k=1}^m d_k$. The first sum contains the elements 
 \begin{equation}
-	\tilde r_{q}(\boldsymbol{\theta}) = \sqrt{2\log(\sigma_k(t_i, \boldsymbol{\theta}))}. 
+	\tilde r_{q}(\boldsymbol{\theta}) = \sqrt{2\log(\sigma_k(t_j, \boldsymbol{\theta}))}. 
 \label{rl1}
 \end{equation}	
-Since $\log(\sigma_k(t_i, \boldsymbol{\theta}))$ can be negative, in practice 
+Since $\log(\sigma_k(t_j, \boldsymbol{\theta}))$ can be negative, in practice 
 \begin{equation}
-	\tilde r_{q}(\boldsymbol{\theta}) = \sqrt{2\log(\sigma_k(t_i, \boldsymbol{\theta})) + c} 
+	\tilde r_{q}(\boldsymbol{\theta}) = \sqrt{2\log(\sigma_k(t_j, \boldsymbol{\theta})) + c} 
 \label{rl2}
 \end{equation}
 is used, where $c$ is a large enough constant. The constant $c$ adds another constant to 
@@ -350,8 +355,8 @@ Equation~(\ref{llhoodfun3}) but does not change the shape of the likelihood func
 hence, maximum likelihood estimation and confidence intervals are not affected. The second sum contains the 
 normalized residuals 
 \begin{equation}
-	r_{q}(\boldsymbol{\theta}) = \frac{y_{ki}^\dagger - y_{k}(t_{i}, \boldsymbol{\theta})}
-{\sigma_k(t_i, \boldsymbol{\theta})}.  \label{rl3}
+	r_{q}(\boldsymbol{\theta}) = \frac{y_{ki}^\dagger - y_{k}(t_j, \boldsymbol{\theta})}
+{\sigma_k(t_j, \boldsymbol{\theta})}.  \label{rl3}
 \end{equation}
 The gradient can then be obtained by
 \begin{equation}
@@ -386,7 +391,7 @@ First order derivatives of ${r}$ can be calculated by
 	\DD{{r}}{\boldsymbol{\theta}}  = \frac{-1}{{\sigma}} \DD{{y}}{\boldsymbol{\theta}} - 
 \frac{{r}}{{\sigma}} \DD{{\sigma}}{\boldsymbol{\theta}.} \label{resderivatives}
 \end{equation}
-Let ${f}_\sigma$ be the equation for the variance $\sigma_k(t_i, \boldsymbol{\theta})^2$. 
+Let ${f}_\sigma$ be the equation for the variance $\sigma_k(t_j, \boldsymbol{\theta})^2$. 
 We can then further obtain
 \begin{equation}
 \DD{{\sigma}}{\boldsymbol{\theta}} = \dd{f_\sigma}{{y}}\DD{{y}}{\boldsymbol{\theta}} + 
