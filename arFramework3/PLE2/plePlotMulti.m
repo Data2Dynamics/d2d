@@ -100,6 +100,10 @@ for jk=jks
             mod_const = min(chi2s(qplot) - pleGlobals.chi2spriors{jk}(qplot));
             plot(ps(qplot,jk), pleGlobals.chi2spriors{jk}(qplot) + mod_const, 'b--', 'LineWidth', 1)
         end
+        if(isfield(pleGlobals,'chi2spriorsAll'))
+            mod_const = min(chi2s(qplot) - pleGlobals.chi2spriorsAll{jk}(qplot));
+            plot(ps(qplot,jk), pleGlobals.chi2spriorsAll{jk}(qplot) + mod_const, 'c--', 'LineWidth', 1)
+        end
         
         % boundary values
         if(sum(show_hit_bound==jk)>0 && plot_hit_bound)
