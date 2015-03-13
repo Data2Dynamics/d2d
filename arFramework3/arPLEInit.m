@@ -26,6 +26,7 @@ global pleGlobals;
 
 pleGlobals.violations = @arPLEMeritViolations;
 pleGlobals.priors = @arPLEPrior;
+pleGlobals.priorsAll = @arPLEPriorAll;
 
 if(breakon_point)
     pleGlobals.breakon_point = true;
@@ -93,6 +94,17 @@ elseif(ar.type(jk)==3)
 else
     chi2 = 0;
 end
+
+function chi2all = arPLEPriorAll
+global ar
+type1 = find(ar.type==1);
+chi21 = ((ar.mean(type1)-ar.p(type1))./ar.std(type1)).^2;
+
+type3 = find(ar.type==3);
+chi23 = abs((ar.mean(type3)-ar.p(type3))./ar.std(type3));
+
+chi2all = sum(chi21) + sum(chi23);
+    
 
 function [beta, alpha] = arPLEDiffMerit
 global ar

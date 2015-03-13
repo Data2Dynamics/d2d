@@ -414,6 +414,7 @@ if(~strcmp(extension,'none') && ( ...
         warning(warntmp);
         
         header = Cstr(1,2:end);
+        header = strrep(header,' ',''); % remove spaces which are sometimes in the column header by accident    
         times = data(:,1);
         qtimesnonnan = ~isnan(times);
         times = times(qtimesnonnan);

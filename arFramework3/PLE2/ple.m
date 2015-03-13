@@ -20,6 +20,7 @@ function ple(jk, samplesize, relchi2stepincrease, ...
 
 global pleGlobals;
 
+
 if(isempty(pleGlobals))
     error('PLE ERROR: please initialize')
 end 
@@ -27,7 +28,10 @@ if(~isfield(pleGlobals, 'showCalculation'))
     pleGlobals.showCalculation = true;
 end
 
-if(ischar(jk))
+if(~exist('jk','var'))
+    global ar
+    jk = find(ar.qFit==1);
+elseif(ischar(jk))
     global ar
     tref = strmatch(jk,ar.pLabel,'exact');
     if(isempty(tref))
@@ -121,6 +125,7 @@ pleGlobals.psinitstep{jk} = nan(2*pleGlobals.samplesize(jk)+1, length(p));
 pleGlobals.chi2s{jk} = nan(1,2*pleGlobals.samplesize(jk)+1);
 pleGlobals.chi2sviolations{jk} = nan(1,2*pleGlobals.samplesize(jk)+1);
 pleGlobals.chi2spriors{jk} = nan(1,2*pleGlobals.samplesize(jk)+1);
+pleGlobals.chi2spriorsAll{jk} = nan(1,2*pleGlobals.samplesize(jk)+1);
 pleGlobals.chi2sinit{jk} = nan(1,2*pleGlobals.samplesize(jk)+1);
 pleGlobals.gradient{jk} = nan(2*pleGlobals.samplesize(jk)+1, length(p));
 jindex = pleGlobals.samplesize(jk)+1;
@@ -146,6 +151,9 @@ if(isfield(pleGlobals,'violations'))
 end
 if(isfield(pleGlobals,'priors'))
     pleGlobals.chi2spriors{jk}(jindex) = feval(pleGlobals.priors, jk);
+end
+if(isfield(pleGlobals,'priorsAll'))
+    pleGlobals.chi2spriorsAll{jk}(jindex) = feval(pleGlobals.priorsAll);
 end
 
 %% Algorithm
@@ -201,6 +209,9 @@ try
         end
         if(isfield(pleGlobals,'priors'))
             pleGlobals.chi2spriors{jk}(jindex) = feval(pleGlobals.priors, jk);
+        end
+        if(isfield(pleGlobals,'priorsAll'))
+            pleGlobals.chi2spriorsAll{jk}(jindex) = feval(pleGlobals.priorsAll);
         end
         fittime = fittime + toc;
         
@@ -262,6 +273,9 @@ try
         end
         if(isfield(pleGlobals,'priors'))
             pleGlobals.chi2spriors{jk}(jindex) = feval(pleGlobals.priors, jk);
+        end
+        if(isfield(pleGlobals,'priorsAll'))
+            pleGlobals.chi2spriorsAll{jk}(jindex) = feval(pleGlobals.priorsAll);
         end
         fittime = fittime + toc;
         
