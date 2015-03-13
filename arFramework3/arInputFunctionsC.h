@@ -1,6 +1,8 @@
 #include <math.h>
 
 /* general input functions */
+double heaviside(double t);
+double dirac(double t);
 
 double step1(double t, double u1, double t1, double u2);
 double dstep1(double t, double u1, double t1, double u2, int p_index);

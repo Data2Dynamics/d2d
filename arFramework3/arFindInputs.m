@@ -22,9 +22,13 @@
 % events for a specific condition, manually set ar.model(#).condition(#).qEvents
 % to 1.
 
-function arFindInputs()
+function arFindInputs( verbose )
 
 global ar;
+
+if ( nargin < 1 )
+    verbose = 0;
+end
 
 % Sort parameter labels by size to avoid replacing ones which are a shorter
 % substring of longer ones first.
@@ -46,7 +50,7 @@ for m = 1 : length( ar.model )
         for b = 1 : length( ar.model(m).data(a).fu );
             step1 = findstr(ar.model(m).data(a).fu{b}, 'step1');
             step2 = findstr(ar.model(m).data(a).fu{b}, 'step2');
-
+          
             for c = 1 : length( step1 )
                 ar.model(m).data(a).fu{b}(step1(c):end);
                 chk = strsplit(ar.model(m).data(a).fu{b}(step1(c):end),',');
@@ -59,6 +63,10 @@ for m = 1 : length( ar.model )
             end        
         end
 
+        % Transform the parameters that are defined in log space
+        parVals = ar.p;
+        parVals( ar.qLog10 > 0 ) = 10.^parVals( ar.qLog10 > 0 );
+        
         for b = 1 : length( stepLocations )
             l = str2num(stepLocations{b});
 
@@ -67,9 +75,13 @@ for m = 1 : length( ar.model )
             if isempty( l )
                 l       = stepLocations{b};
                 lold    = l;
+                
+                % Parameter values
                 for c = 1 : length( ar.pLabel )
-                    l = strrep( l, ar.pLabel{I(c)}, num2str(ar.p(I(c))) );
+                    l = strrep( l, ar.pLabel{I(c)}, num2str(parVals(I(c))) );
                 end
+                
+                % Condition values
                 for c = 1 : length( ar.model(m).data(a).condition )
                     l = strrep( l, ar.model(m).data(a).condition(c).parameter, ar.model(m).data(a).condition(c).value );
                 end
@@ -79,6 +91,9 @@ for m = 1 : length( ar.model )
 
             try
                 events(end+1) = l;
+                if ( verbose )
+                    disp( l );
+                end
             catch
                 disp( sprintf( 'Failure to parse input %s for model %d and data %d', stepLocations{b}, m, a ) );
             end

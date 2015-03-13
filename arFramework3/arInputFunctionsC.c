@@ -2,6 +2,17 @@
 #include "spline.c"
 
 /* general input functions */
+double heaviside(double t) {
+    if (t < 0)
+        return(0.0);
+    else
+        return(1.0);
+}
+
+/* delta functions are silently dropped */
+double dirac(double t) {
+    return 0.0;
+}
 
 double step1(double t, double u1, double t1, double u2) {
     if(t <= t1) {

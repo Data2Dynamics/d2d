@@ -27,6 +27,38 @@ end
 if(~exist('source_dir','var'))
     source_dir = cd;
 end
+if (isfield(ar.config, 'legacy_steps'))
+    legacy_steps = ar.config.legacy_steps;
+else
+    legacy_steps = 0;
+end
+
+% Special function definitions
+if ( ~legacy_steps )
+    % Argument formats for functional replacements.
+    % First indicates the function name, second indicates the function,
+    % third is the argument list mapping. Note that only valid symbolic
+    % expressions can be used as functional replacements!
+    % The smooth steps are based on fermi functions. Note that the location
+    % parameters have to be in increasing order for this to work.
+    %
+    % Note that they have to be ordered in decreasing identifier length
+    % (first column); since detection is based on string searches.
+    ar.config.specialFunc = { ...
+            {'smoothstep1',     '%s + (%s-%s) / (exp((%s-%s) / %s) + 1)', [4, 2, 4, 1, 3, 5]}, ...
+            {'smoothstep2',     '%s + (%s-%s) / (exp((%s-%s) / %s) + 1) + (%s-%s) / (exp((%s-%s) / %s) + 1)', [6, 2, 4, 1, 3, 7, 4, 6, 1, 5, 7] }, ...        
+            {'step1',           '%s + (%s-%s) * heaviside(%s-%s)', [2, 4, 2, 1, 3]}, ...
+            {'step2',           '%s + (%s-%s) * heaviside(%s-%s) + (%s-%s)*heaviside(%s-%s)', [2, 4, 2, 1, 3, 6, 4, 1, 5]}, ...
+            {'bolus',           '%s * (1 / sqrt( 2 * pi * %s^2 ) ) * exp(-(%s - %s)^2 / (2*%s^2))', [2, 4, 1, 3, 4] };
+        };
+        
+    % Add brackets for replacement safety
+    for a = 1 : size( ar.config.specialFunc, 2 )
+        ar.config.specialFunc{a}{2} = strrep(ar.config.specialFunc{a}{2}, '%s', '(%s)');
+    end
+else
+    ar.config.specialFunc         = [];
+end
 
 % folders
 if(~exist([source_dir '/Compiled'], 'dir'))
@@ -450,16 +482,19 @@ for j=1:length(ar.model(m).fv)
     ar.model(m).vs{j} = sprintf('v[%i]',j);
 end
 
+% Obtain special functions (such as step functions)
+specialFunc = ar.config.specialFunc;
+
 % make syms
-ar.model(m).sym.x = sym(ar.model(m).x);
-ar.model(m).sym.xs = sym(ar.model(m).xs);
-ar.model(m).sym.z = sym(ar.model(m).z);
-ar.model(m).sym.zs = sym(ar.model(m).zs);
+ar.model(m).sym.x = sym(ar.model(m).x, specialFunc);
+ar.model(m).sym.xs = sym(ar.model(m).xs, specialFunc);
+ar.model(m).sym.z = sym(ar.model(m).z, specialFunc);
+ar.model(m).sym.zs = sym(ar.model(m).zs, specialFunc);
 ar.model(m).sym.px0 = sym(ar.model(m).px0);
-ar.model(m).sym.u = sym(ar.model(m).u);
-ar.model(m).sym.us = sym(ar.model(m).us);
-ar.model(m).sym.vs = sym(ar.model(m).vs);
-ar.model(m).sym.fv = sym(ar.model(m).fv);
+ar.model(m).sym.u = sym(ar.model(m).u, specialFunc);
+ar.model(m).sym.us = sym(ar.model(m).us, specialFunc);
+ar.model(m).sym.vs = sym(ar.model(m).vs, specialFunc);
+ar.model(m).sym.fv = sym(ar.model(m).fv, specialFunc);
 
 % compartment volumes
 if(~isempty(ar.model(m).pc)) 
@@ -534,15 +569,16 @@ else
 end
 
 % hard code conditions
+specialFunc = config.specialFunc;
 condition.sym.p = sym(condition.p);
 condition.sym.fp = sym(condition.fp);
 condition.sym.fpx0 = sym(model.px0);
 condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.fp);
-condition.sym.fv = sym(model.fv);
+condition.sym.fv = mySym(model.fv, specialFunc);
 condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.fp);
-condition.sym.fu = sym(condition.fu);
+condition.sym.fu = mySym(condition.fu, specialFunc);
 condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.fp);
-condition.sym.fz = sym(model.fz);
+condition.sym.fz = mySym(model.fz, specialFunc);
 condition.sym.fz = mysubs(condition.sym.fz, condition.sym.p, condition.sym.fp);
 condition.sym.C = mysubs(model.sym.C, condition.sym.p, condition.sym.fp);
 
@@ -704,7 +740,7 @@ if(config.useSensis)
             condition.su{j} = '0';
         end
     end
-    condition.sym.su = sym(condition.su);
+    condition.sym.su = mySym(condition.su, specialFunc);
     
     % input derivatives 
     if(~isempty(condition.sym.ps))
@@ -714,20 +750,7 @@ if(config.useSensis)
         else
             condition.sym.dfudp = sym(ones(0,length(condition.sym.ps)));
         end
-        % derivatives of step1 (DISABLED)
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'step1('))
-                condition.sym.dfudp(j,:) = 0;
-            end
-        end
-        
-        % derivatives of step2 (DISABLED)
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'step2('))
-                condition.sym.dfudp(j,:) = 0;
-            end
-        end
-        
+                
         % derivatives of spline3
         for j=1:length(model.u)
             if(strfind(condition.fu{j}, 'spline3('))
@@ -946,7 +969,11 @@ if(config.useSensis)
                     condition.sym.dfudp(j,j2) = sym(ustr);
                 end
             end
-        end 
+
+            % This function checks whether the inputs were sensible and
+            % gives a warning for problematic discontinuities in the sensitivities.
+            verifyRow( condition.sym.dfudp(j,:), condition.sym.fu(j), 'input' );
+        end
     end
     
 	% sx
@@ -1007,8 +1034,28 @@ if(config.useSensis)
     end
 end
 
-
-
+% This function checks whether any deltas appear in the sensitivity
+% equations. They are incompatible with continuous optimizers
+function sensBlock = verifyRow( sensBlock, func, location )
+    for k = 1 : size( sensBlock, 2 )
+        jacElemStr = char(sensBlock(1,k));
+        if (numel(strfind(jacElemStr, 'dirac(')>0))
+            % We failed to resolve the derivatives. Give up, but
+            % let the user know the offending lines.
+            message = {     'UNRESOLVABLE DERIVATIVE FOUND IN SENSITIVITY JACOBIAN\n\n'         , ...
+                            'Equation (in ', char(location), ' section):\n\n', char( func )     , ...
+                            '\n\nSensitivity equation:\n\n', char( sensBlock(1,k) )             , ...
+                            '\n\nThis is likely due to a step function with variable location'  , ...
+                            '\nparameter. Consider changing the equation to a continuous\n'     , ...
+                            'function (e.g. smoothstep1).\n\nSetting corresponding sensitivity ' , ...
+                            'to zero.\n\nThis means the sensitivity solution is now incorrect. ', ...
+                            'Which\nmeans the corresponding parameter cannot be optimized using', ...
+                            ' a\nderivative based optimization algorithm.\n\n'                   , ...
+                            'Hit any key to proceed compiling (at your own risk).'};
+            warning( sprintf( sprintf( '%s', message{:} ) ) );
+            pause;
+        end
+    end            
 
 % Calc Data
 function data = arCalcData(config, model, data, m, c, d, doskip)
@@ -1019,15 +1066,18 @@ else
     fprintf('calculating data m%i d%i -> c%i, %s...\n', m, d, c, data.name);
 end
 
+% Grab special functions list
+specialFunc = config.specialFunc;
+
 % hard code conditions
 data.sym.p = sym(data.p);
 data.sym.fp = sym(data.fp);
-data.sym.fy = sym(data.fy);
+data.sym.fy = mySym(data.fy, specialFunc);
 data.sym.fy = mysubs(data.sym.fy, data.sym.p, data.sym.fp);
 data.sym.fystd = sym(data.fystd);
 data.sym.fystd = mysubs(data.sym.fystd, data.sym.p, data.sym.fp);
 
-data.sym.fu = sym(data.fu);
+data.sym.fu = mySym(data.fu, specialFunc);
 data.sym.fu = mysubs(data.sym.fu, data.sym.p, data.sym.fp);
 data.qfu_nonzero = logical(data.sym.fu ~= 0);
 
@@ -2212,3 +2262,136 @@ if(~isempty(F))
 else
     J = sym(NaN(0,length(x)));
 end
+
+% Replace special functions before converting to symbolic expression
+function s = mySym( s, specialFunc )
+    if ( isempty( specialFunc ) )
+        s = sym(s);
+    else
+        for a = 1 : size( s, 1 )
+            for b = 1 : size( s, 2 )
+                s{a,b} = replaceFunctions( s{a,b}, specialFunc, 1 );
+            end
+        end
+        s = sym(s);
+    end
+
+function str = replaceFunctions(str, funcTypes, checkValidity)
+
+    if (nargin < 3)
+        checkValidity = 0;
+    end
+
+    str  = char(str);
+    stro = str; replaced = 0;
+    for a = 1 : length( funcTypes )
+        funcs = findFunc( str, funcTypes{a}{1} );
+        argLayout = funcTypes{a}{3};
+        
+        for b = 1 : length( funcs )
+            if ( length( funcs(b).args ) ~= max(argLayout) )
+                msg = { 'Invalid number of function argument for function "', ...
+                        funcTypes{a}{1}, '" expected ', num2str(max(argLayout)), ...
+                        ' got ', num2str( length( funcs(b).args ) ) };
+                error( sprintf( '%s', msg{:} ) );
+            else
+                % Determine what the function should be replaced with;
+                % feed the appropriate function arguments and replace it
+                % Also making sure to use extra brackets for safety (e.g.
+                % 5*(a+b) != 5*a+b)
+                try
+                    to = sprintf( ['(' funcTypes{a}{2} ')'], funcs(b).args{funcTypes{a}{3}} );
+                    str = strrep( str, funcs(b).func, to );
+                    replaced = replaced + 1;
+                catch
+                    msg = { 'Failed to replace function ', funcTypes{a}{1}, ...
+                        ' in:', funcs(b).func, 'Please expression check for error.' };
+                    error( sprintf( '%s\n', msg{:} ) );
+                end
+            end
+        end
+    end
+    
+    % Determine whether we got a valid symbolic expression and optionally
+    % simplify it
+    try
+        if (checkValidity)
+            str = char( sym( str ) );
+        end
+        % Enable for input function debug purposes
+        % if ( replaced > 0 )
+        %     disp(sprintf( '%s =>\n\t\t%s', stro, str ));
+        % end
+    catch
+        msg = { 'Failed to obtain valid expression from: ', ...
+                str, 'Please expression check for error.' };
+        error(sprintf('%s\n', msg{:}))
+    end
+
+
+% Function to scan for specific function name and extract its arguments
+function [f] = findFunc( st, funcName )
+    loc     = strfind( st, [funcName '('] );
+    if ( length(loc) > 0 )
+        for a = 1 : length( loc )
+            brackets = 1;
+            f(a) = fetchArgs( st(loc(a):end) );
+            f(a).fin = f(a).fin + loc(a)-1;
+        end
+    else
+        f = [];
+    end
+
+
+% Function to fetch function arguments
+function f = fetchArgs( st )
+    commas  	= [];
+    cur         = 0;
+    brackets    = 0;
+    while( brackets == 0 )
+        cur = cur + 1;
+        if ( cur > length( st ) )
+            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+        end
+        if ( brackets < 0 )
+            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+        end
+        if ( st( cur ) == '(' )
+            brackets = brackets + 1;
+        end
+        if ( st( cur ) == ')' )
+            brackets = brackets - 1;
+        end        
+    end
+    if ( brackets < 0 )
+        error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+    end    
+    
+    f.name = strtrim( st(1:cur-1) );
+    stPos = cur;
+    
+    while( brackets > 0 )
+        cur = cur + 1;
+        if ( cur > length( st ) )
+            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+        end            
+        if ( st( cur ) == '(' )
+            brackets = brackets + 1;
+        end
+        if ( st( cur ) == ')' )
+            brackets = brackets - 1;
+        end
+        if ( ( st( cur ) == ',' ) && ( brackets == 1 ) )
+            commas(end+1) = cur;
+        end
+    end
+    
+    f.fin    = cur;
+        
+    list = [stPos, commas, f.fin];
+    for b = 1 : length( list ) - 1
+        f.args{b} = strtrim( st(list(b)+1:list(b+1)-1) );
+    end
+    
+    f.func = st(1:cur);
+    

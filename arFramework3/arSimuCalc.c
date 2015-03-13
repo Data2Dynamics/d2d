@@ -627,8 +627,8 @@ void x_calc(int im, int ic) {
                                     CVodeSetStopTime(cvode_mem, ts[nout-1]+1.0);
                             
                             /* Simulate up to the next time point */
-                            data->t = ts[is];
                             flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
+                            data->t = ts[is];
                             
                             /* Found an event */
                             if ((qEvents==1) && (ts[is]==tEvents[iEvents])) /*flag==CV_TSTOP_RETURN*/
