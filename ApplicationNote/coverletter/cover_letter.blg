@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2014)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: cover_letter.aux
+The style file: plainnat_mod.bst
+Database file #1: ./publications_using_d2d.bib
+You've used 29 entries,
+            2756 wiz_defined-function locations,
+            843 strings with 14217 characters,
+and the built_in function-call counts, 20210 in all, are:
+= -- 1596
+> -- 2075
+< -- 0
++ -- 695
+- -- 663
+* -- 2197
+:= -- 3365
+add.period$ -- 87
+call.type$ -- 29
+change.case$ -- 307
+chr.to.int$ -- 26
+cite$ -- 58
+duplicate$ -- 490
+empty$ -- 971
+format.name$ -- 692
+if$ -- 3911
+int.to.chr$ -- 4
+int.to.str$ -- 1
+missing$ -- 29
+newline$ -- 153
+num.names$ -- 116
+pop$ -- 440
+preamble$ -- 1
+purify$ -- 278
+quote$ -- 0
+skip$ -- 554
+stack$ -- 0
+substring$ -- 606
+swap$ -- 41
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 319
+warning$ -- 0
+while$ -- 123
+width$ -- 0
+write$ -- 383
