@@ -486,15 +486,15 @@ end
 specialFunc = ar.config.specialFunc;
 
 % make syms
-ar.model(m).sym.x = sym(ar.model(m).x, specialFunc);
-ar.model(m).sym.xs = sym(ar.model(m).xs, specialFunc);
-ar.model(m).sym.z = sym(ar.model(m).z, specialFunc);
-ar.model(m).sym.zs = sym(ar.model(m).zs, specialFunc);
+ar.model(m).sym.x = mySym(ar.model(m).x, specialFunc);
+ar.model(m).sym.xs = mySym(ar.model(m).xs, specialFunc);
+ar.model(m).sym.z = mySym(ar.model(m).z, specialFunc);
+ar.model(m).sym.zs = mySym(ar.model(m).zs, specialFunc);
 ar.model(m).sym.px0 = sym(ar.model(m).px0);
-ar.model(m).sym.u = sym(ar.model(m).u, specialFunc);
-ar.model(m).sym.us = sym(ar.model(m).us, specialFunc);
-ar.model(m).sym.vs = sym(ar.model(m).vs, specialFunc);
-ar.model(m).sym.fv = sym(ar.model(m).fv, specialFunc);
+ar.model(m).sym.u = mySym(ar.model(m).u, specialFunc);
+ar.model(m).sym.us = mySym(ar.model(m).us, specialFunc);
+ar.model(m).sym.vs = mySym(ar.model(m).vs, specialFunc);
+ar.model(m).sym.fv = mySym(ar.model(m).fv, specialFunc);
 
 % compartment volumes
 if(~isempty(ar.model(m).pc)) 
@@ -1053,7 +1053,6 @@ function sensBlock = verifyRow( sensBlock, func, location )
                             ' a\nderivative based optimization algorithm.\n\n'                   , ...
                             'Hit any key to proceed compiling (at your own risk).'};
             warning( sprintf( sprintf( '%s', message{:} ) ) );
-            pause;
         end
     end            
 
