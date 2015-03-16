@@ -253,7 +253,7 @@ end
 if(isfield(ar.model(m),'y'))
     ar.model(m).data(d).fystd = ar.model(m).fystd;
 else
-    ar.model(m).data(d).fystd = cell(0); % if the cell array was pre initialized, the check for the number of ERRORS some lines below would not work
+    ar.model(m).data(d).fystd = cell(0);
 end
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS'))
