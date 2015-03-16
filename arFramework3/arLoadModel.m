@@ -185,6 +185,10 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
     str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
     while(~strcmp(str{1},'INVARIANTS') && ~strcmp(str{1},'DERIVED'))
         source = {};
+
+        if ( strcmp(str{1}, 'OBSERVABLES') || strcmp(str{1}, 'CONDITIONS') )
+            error('Missing field DERIVED. This section should be specified after REACTIONS and before OBSERVABLES / CONDITIONS. See: "Setting up models paragraph 1.7"');
+        end
         while(~strcmp(str{1},'->') && ~strcmp(str{1},'<->'))
             if(~strcmp(str{1},'0') && ~strcmp(str{1},'+'))
                 source(end+1) = str{1}; %#ok<AGROW>
