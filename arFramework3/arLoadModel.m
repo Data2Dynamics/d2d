@@ -477,6 +477,9 @@ if(strcmp(C{1},'OBSERVABLES'))
     ar.model(m).fy = {};
     C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
     while(~strcmp(C{1},'ERRORS'))
+        if ( strcmp( C{1}, 'CONDITIONS' ) )
+            error( 'When OBSERVABLES section is specified; ERRORS section must also be specified.' );
+        end        
         ar.model(m).y(end+1) = C{1};
         ar.model(m).yUnits(end+1,1) = C{2};
         ar.model(m).yUnits(end,2) = C{3};
