@@ -39,14 +39,18 @@ if(~exist('Data','dir'))
     error('folder Data/ does not exist')
 end
 if(~exist(['Data/' name '.def'],'file'))
-    if(~exist(['Data/' name '.xls'],'file') && ~exist(['Data/' name '.csv'],'file'))
+    if(~exist(['Data/' name '.xls'],'file') && ~exist(['Data/' name '.csv'],'file') && ~exist(['Data/' name '.xlsx'],'file'))
         error('data definition file %s.def does not exist in folder Data/', name)
     else
         fprintf('\ncreating generic .def file for Data/%s ...\n', name);
         copyfile(which('data_template.def'),['./Data/' name '.def']);
     end
+else
+    if(~exist(['Data/' name '.xls'],'file') && ~exist(['Data/' name '.csv'],'file') && ~exist(['Data/' name '.xlsx'],'file'))
+        warning('data file corresponding to %s.def does not exist in folder Data/', name)
+    end
 end
-
+    
 if(~exist('m','var') || isempty(m))
     m = length(ar.model);
 end

@@ -1333,10 +1333,31 @@ end
 function out = mysubs(in, old, new)
 if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
     matVer = ver('MATLAB');
-    if(str2double(matVer.Version)>=8.1)
-        out = subs(in, old(:), new(:));
-    else
-        out = subs(in, old(:), new(:), 0);
+    try
+        if(str2double(matVer.Version)>=8.1)
+            out = subs(in, old(:), new(:));
+        else
+            out = subs(in, old(:), new(:), 0);
+        end
+    catch
+        % Failure to substitute, provide some info that might help debug
+        % the problem; try them one by one and output those that failed
+        s{1} = sprintf( 'Error: Model substitution failure in %s: \n\nThe following substitutions failed:\n', char( in ) );
+        for a = 1 : length( old )
+            try
+                if(str2double(matVer.Version)>=8.1)
+                    out = subs(in, old(a), new(a));
+                else
+                    out = subs(in, old(a), new(a), 0);
+                end
+            catch ME
+                s{end+1} = sprintf( 'Subs [%10s => %5s failed]: %s\n', ...
+                    char( old(a) ), char( new(a) ), strtok(ME(1).message, sprintf('\n')) );
+            end
+        end
+        s{end+1} = sprintf( '\n\nPlease check substitution errors for clues where the error may be.\n' );
+        
+        error( sprintf('%s',s{:}) );
     end
 else
     out = in;
