@@ -661,7 +661,7 @@ void x_calc(int im, int ic) {
                             if ((qEvents==1) && (ts[is]==event_data->t[event_data->i])) /*flag==CV_TSTOP_RETURN*/
                             {
                               qEvents = 2;    /* qEvents=2 denotes that an event just happened */
-                              flag = 0.0;     /* Re-set the flag for legacy error-checking reasons */
+                              flag = 0;     /* Re-set the flag for legacy error-checking reasons */
                             }
 
                             status[0] = flag;
@@ -1080,6 +1080,8 @@ int fetch_vector( mxArray* arcondition, int ic, double **vector, const char* fie
 
 /* This function initializes time point lists */
 int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double** timePoints, int* currentIndex, const char* flagFieldName, const char* timePointFieldName ) {
+    int ID;
+          
     int flag = (int) mxGetScalar(mxGetField(arcondition, ic, flagFieldName));
     if (flag==1) {
         mxArray *timePointField = mxGetField(arcondition, ic, timePointFieldName);
@@ -1089,7 +1091,7 @@ int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double
              *nPoints     = mxGetNumberOfElements( timePointField );
 
              /* Move past pre-simulation points */
-             int ID = 0;
+             ID = 0;
              while((time[ID] < tstart)&&(ID<(*nPoints)))
                  ID++;
 

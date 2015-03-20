@@ -11,6 +11,7 @@ end
 
 figure(1)
 C = jet(nbest);
+C = bsxfun(@rdivide, C, sqrt(sum(C.^2,2)));
 for j=1:nbest
     plot(ps(j,jks), 1:length(jks), 'Color', C(j,:));
     hold on
