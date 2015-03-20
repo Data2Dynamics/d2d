@@ -253,7 +253,7 @@ for m = 1:length(ar.model)
         % event assignment/override operations
         nte = length( ar.model(m).condition(c).tEvents );
         ar.model(m).condition(c).modx_A = ones(nte, nx);
-        ar.model(m).condition(c).modx_B = ones(nte, nx);
+        ar.model(m).condition(c).modx_B = zeros(nte, nx);
         ar.model(m).condition(c).modsx_A = ones(nte, nx, np);
         ar.model(m).condition(c).modsx_B = zeros(nte, nx, np);
         
