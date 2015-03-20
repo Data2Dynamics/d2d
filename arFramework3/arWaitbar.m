@@ -69,20 +69,20 @@ else
             timeleft = (n-j) * timeelapsed/(j-1); % mean over all points
             
             funtext = '';
-            if(timeleft > 60*5)
+            if(timeleft > 60*10)
                 funtext = '   (get a coffee !)';
             end
-            if(timeleft > 60*30)
+            if(timeleft > 60*60)
                 funtext = '   (go for lunch !)';
             end
-            if(timeleft > 60*60*2)
+            if(timeleft > 60*60*3)
                 funtext = '   (go home !)';
             end
             if(timeleft > 60*60*24*7)
                 funtext = '   (come back next week !)';
             end
             if(timeleft > 60*60*24*7*30)
-                funtext = '   (this must be a joke !)';
+                funtext = '   (are you serious ?)';
             end
 
             if(exist('text','var') && ~isempty(text))

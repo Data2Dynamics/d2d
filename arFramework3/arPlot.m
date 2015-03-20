@@ -42,8 +42,12 @@ if(isfield(ar.config, 'useNewPlots') && ar.config.useNewPlots)
 end
 
 if(evalfun)
-    try %#ok<TRYNC>
+    try
         arSimu(false, true, dynamics);
+    catch err_id
+        if(~silent)
+            disp(err_id.message);
+        end
     end
     try 
         if(silent)
@@ -52,7 +56,7 @@ if(evalfun)
             arChi2;
         end
     catch err_id
-        if(silent)
+        if(~silent)
             disp(err_id.message);
         end
     end
