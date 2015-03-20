@@ -58,6 +58,12 @@ double cvodes_rtol;
 double cvodes_atol;
 double fiterrors_correction;
 
+/* Equilibration variables (Used when time point Inf is encountered) */
+int    max_eq_steps;				/* Maximal equilibration steps */
+double init_eq_step; 			/* Initial equilibration stepsize attempt */
+double eq_step_factor; 			/* Factor with which to increase the time at each equilibration step */
+double eq_tol;						/* Absolute tolerance for equilibration */
+
 #ifdef HAS_SYSTIME
 struct timeval t1;
 #endif
@@ -81,9 +87,15 @@ void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, 
 void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr);
 
 int ewt(N_Vector y, N_Vector w, void *user_data);
+void thr_error( const char* msg );
+int fetch_vector( mxArray* arcondition, int ic, double **vector, const char* fieldname, int desiredLength );
+int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double** timePoints, int* currentIndex, const char* flagFieldName, const char* timePointFieldName );
 
 /* user functions */
 #include "arSimuCalcFunctions.c"
+
+void handle_event( EventData event_data, UserData user_data, N_Vector x, N_Vector *sx, int nps, int neq );
+int equilibrate(void *cvode_mem, UserData user_data, N_Vector x, realtype t, double *returndxdt, double *teq, int neq, int im, int ic );
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int nthreads, ithreads, tid;
@@ -114,7 +126,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     sensi = (int) mxGetScalar(prhs[2]);
     dynamics = (int) mxGetScalar(prhs[3]);
     ssa = (int) mxGetScalar(prhs[4]);
-    
+       
     /* get ar.config */
     arconfig = mxGetField(prhs[0], 0, "config");
     parallel = (int) mxGetScalar(mxGetField(arconfig, 0, "useParallel"));
@@ -131,6 +143,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     nruns = (int) mxGetScalar(mxGetField(arconfig, 0, "ssa_runs"));
     ms = (int) mxGetScalar(mxGetField(arconfig, 0, "useMS"));
     events = (int) mxGetScalar(mxGetField(arconfig, 0, "useEvents"));
+    max_eq_steps = (int) mxGetScalar(mxGetField(arconfig, 0, "max_eq_steps"));
+    init_eq_step = (double) mxGetScalar(mxGetField(arconfig, 0, "init_eq_step"));
+    eq_step_factor = (double) mxGetScalar(mxGetField(arconfig, 0, "eq_step_factor"));
+    eq_tol = (double) mxGetScalar(mxGetField(arconfig, 0, "eq_tol"));
+
     if ( ms == 1 ) events = 1;
     
     /* threads */
@@ -217,7 +234,7 @@ void thread_calc(int id) {
     return 0;
 }
 
-/* calculate dynamics by CVODES */
+/* calculate dynamics */
 void x_calc(int im, int ic) {
     mxArray    *arcondition;
     mxArray    *ardata;
@@ -233,16 +250,14 @@ void x_calc(int im, int ic) {
 
     /* Multiple shooting and events */
     int qMS, qEvents;
-    int nMS, iMS;
-    int nEvents, iEvents;
-    double *tMS, *tEvents;    
-    mxArray *arms; 
+    EventData event_data;
 
     void *cvode_mem;
     UserData data;
     
     realtype t;
     double tstart;
+    double inf;
     N_Vector x;
     N_Vector atolV;
     N_Vector atols_ss;
@@ -267,6 +282,7 @@ void x_calc(int im, int ic) {
     double *qpositivex;
     double *status;
     double *ts;
+    double *teq;
     double *returnu;
     double *returnsu;
     double *returnv;
@@ -286,40 +302,37 @@ void x_calc(int im, int ic) {
     bool error_corr = TRUE;
         
     /* printf("computing model #%i, condition #%i\n", im, ic); */
-            
+
+    /* Grab value of infinity (for steady state simulations) */
+    inf = mxGetInf();    
+
     /* check if im in range */
     nm = (int) mxGetNumberOfElements(armodel);
     if(nm<=im) {
-        printf("im > length(ar.model)\n");
-#ifdef HAS_PTHREAD
-        if(parallel==1) {pthread_exit(NULL);}
-#endif
+        thr_error("im > length(ar.model)\n");
         return;
     }
         
     /* get ar.model(im).condition */
     arcondition = mxGetField(armodel, im, "condition");
     if(arcondition==NULL){
-        printf("field ar.model.condition not existing\n");
-#ifdef HAS_PTHREAD
-        if(parallel==1) {pthread_exit(NULL);}
-#endif
+        thr_error("field ar.model.condition not existing\n");
         return;
     }
-    
+   
     /* check if ic in range */
     nc = (int) mxGetNumberOfElements(arcondition);
     if(nc<=ic) {
-        printf("ic > length(ar.model.condition)\n");
-#ifdef HAS_PTHREAD
-        if(parallel==1) {pthread_exit(NULL);}
-#endif
+        thr_error("ic > length(ar.model.condition)\n");
         return;
     }
-    
+
+    /* Get double handle to store equilibrium value */
+    teq = mxGetData(mxGetField(arcondition, ic, "tEq"));
+   
     has_tExp = (int) mxGetScalar(mxGetField(arcondition, ic, "has_tExp"));
     if(has_tExp == 0 && fine == 0) return;
-    
+   
     /* get ar.model(im).data */
     ardata = mxGetField(armodel, im, "data");
      
@@ -414,40 +427,20 @@ void x_calc(int im, int ic) {
                 returnddxdtdp = mxGetData(mxGetField(arcondition, ic, "ddxdtdp"));
             }
 
-            /* For re-initializing the solver at events and/or for multiple shooting */
-            iEvents = 0;	/* Array location */
-            iMS = 0;		/* Array location */
-            qMS = 0;		/* Flag */
-            if (ms == 1) qMS = (int) mxGetScalar(mxGetField(arcondition, ic, "qMS"));
-
-            qEvents = 0;
-            if (events == 1) qEvents = (int) mxGetScalar(mxGetField(arcondition, ic, "qEvents"));
-
-            if (qMS==1) {
-                qEvents = 1;
-                nMS = (int) mxGetScalar(mxGetField(arcondition, ic, "nMS"));
-                tMS = (double*) mxGetData(mxGetField(arcondition, ic, "tMS"));
-
-                arms = mxGetField(arcondition, ic, "ms");
-                if (arms==NULL)
-                    mexErrMsgTxt("field ar.model.condition.ms doesn't exist!");
-            }
-
-            /* Solver re-initialization points */
-            /* Note that all the tMS points are also in this list */
-            if (qEvents==1) {
-                tEvents = (double*) mxGetData(mxGetField(arcondition, ic, "tEvents"));
-                nEvents = mxGetNumberOfElements(mxGetField(arcondition, ic, "tEvents"));
-
-                while(tEvents[iEvents] <= tstart)
-                 iEvents++;
-            }
-
             /* User data structure */
             data = (UserData) malloc(sizeof *data);
             if (data == NULL) {status[0] = 1; return;}
             data->t = tstart;
             
+            /* Event structure */
+            event_data = (EventData) malloc(sizeof *event_data);
+            if (event_data == NULL) {status[0] = 1; return;}
+
+            /* Initialize multiple shooting list */
+            if (ms==1) 
+               qMS = init_list(arcondition, ic, tstart, &(event_data->nMS), &(event_data->tMS), &(event_data->iMS), "qMS", "tMS");
+
+            /* Initialize userdata and derivatives */
             data->qpositivex = qpositivex;
             data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
             nu = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
@@ -464,10 +457,30 @@ void x_calc(int im, int ic) {
             data->dvdx = mxGetData(mxGetField(arcondition, ic, "dvdxNum"));
             data->dvdu = mxGetData(mxGetField(arcondition, ic, "dvduNum"));
             data->dvdp = mxGetData(mxGetField(arcondition, ic, "dvdpNum"));
+
+            /* Initialize event list (points where solver needs to be reinitialized) */
+            if (events==1)
+            {
+               qEvents = init_list(arcondition, ic, tstart, &(event_data->n), &(event_data->t), &(event_data->i), "qEvents", "tEvents");        
+
+               /* Allow state values and sensitivity values to be overwritten at events */
+					event_data->overrides = 1;
+
+               /* Grab additional data required for assignment operations */
+               /* Assignment operations are of the form Ax+B where X is the state variable */
+               flag = fetch_vector( arcondition, ic, &(event_data->value_A), "modx_A", neq*event_data->n );
+               if ( flag < 0 ) { event_data->overrides = 0; };
+               flag = fetch_vector( arcondition, ic, &(event_data->value_B), "modx_B", neq*event_data->n );
+               if ( flag < 0 ) { event_data->overrides = 0; };
+               flag = fetch_vector( arcondition, ic, &(event_data->sensValue_A), "modsx_A", neq*nps*event_data->n );
+               if ( flag < 0 ) { event_data->overrides = 0; };
+               flag = fetch_vector( arcondition, ic, &(event_data->sensValue_B), "modsx_B", neq*nps*event_data->n );
+               if ( flag < 0 ) { event_data->overrides = 0; };
+            }
             
             /* fill for t=0 */
             fu(data, tstart, im, ic);
-            
+    
             if(neq>0){
                 /* Initial conditions */
                 x = N_VNew_Serial(neq);
@@ -476,7 +489,7 @@ void x_calc(int im, int ic) {
                 fx0(x, data, im, ic);
                 fv(data, tstart, x, im, ic);
                 fx(tstart, x, returndxdt, data, im, ic);
-                
+
                 /* Create CVODES object */
                 cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
                 if (cvode_mem == NULL) {status[0] = 3; return;}
@@ -608,49 +621,61 @@ void x_calc(int im, int ic) {
                     if(flag < 0) {status[0] = 13; return;}
                 }
             }
-            
+
+            /* Do we have a startup event? */
+            if ( qEvents == 1 ) {
+                if ( event_data->t[event_data->i] == tstart ) {
+                    handle_event( event_data, data, x, sx, nps, neq );
+                    (event_data->i)++;
+                }
+            }
+
             /* loop over output points */
             for (is=0; is < nout; is++) {
                 /* printf("%f x-loop (im=%i ic=%i)\n", ts[is], im, ic); */
                 
                 /* only integrate if no errors occured */
                 if(status[0] == 0.0) {
+
                     /* only integrate after tstart */
                     if(ts[is] > tstart) {
+
                         if(neq>0) {
-                            
                             /* If this condition has events, make sure we don't go over them as this leads to loss of accuracy */
                             if (qEvents==1)
-                                if (iEvents < nEvents)
-                                    CVodeSetStopTime(cvode_mem, RCONST(tEvents[iEvents]));
+                                if (event_data->i < event_data->n)
+                                    CVodeSetStopTime(cvode_mem, RCONST(event_data->t[event_data->i]));
                                 else
                                     CVodeSetStopTime(cvode_mem, ts[nout-1]+1.0);
                             
-                            /* Simulate up to the next time point */
-                            flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
-                            data->t = ts[is];
+                            if ( ts[is] == inf ) {
+                                /* Equilibrate the system */
+                                flag = equilibrate(cvode_mem, data, x, t, returndxdt, teq, neq, im, ic);
+                            } else {
+                                /* Simulate up to the next time point */
+                                flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
+                                data->t = ts[is];
+                            }
                             
                             /* Found an event */
-                            if ((qEvents==1) && (ts[is]==tEvents[iEvents])) /*flag==CV_TSTOP_RETURN*/
+                            if ((qEvents==1) && (ts[is]==event_data->t[event_data->i])) /*flag==CV_TSTOP_RETURN*/
                             {
                               qEvents = 2;    /* qEvents=2 denotes that an event just happened */
                               flag = 0.0;     /* Re-set the flag for legacy error-checking reasons */
                             }
 
                             status[0] = flag;
-                            /*
-                    if(flag==-1) printf("CVODES stoped at t=%f, TOO_MUCH_WORK, did not reach output time after %i steps (m=%i, c=%i).\n", t, cvodes_maxsteps, im, ic);
-                    if(flag<-1) printf("CVODES stoped at t=%f (m=%i, c=%i).\n", t, im, ic);
-                             */
                         }
                     }
+                }
+
+                /* Store time step results */
+                if(status[0] == 0.0) {
                     fu(data, ts[is], im, ic);
                     fv(data, ts[is], x, im, ic);
                     
                     for(js=0; js < nu; js++) returnu[js*nout+is] = data->u[js];
-                    for(js=0; js < nv; js++) {
-                        returnv[js*nout+is] = data->v[js];
-                    }
+                    for(js=0; js < nv; js++) returnv[js*nout+is] = data->v[js];
                     for(js=0; js < neq; js++) {
                         returnx[js*nout+is] = Ith(x, js+1);
                         /* set negative values to zeros */
@@ -662,7 +687,7 @@ void x_calc(int im, int ic) {
                     for(js=0; js < neq; js++) returnx[js*nout+is] = 0.0;
                 }
                 
-                /* only set output sensitivities if no errors occured */
+                /* Store output sensitivities */
                 if(status[0] == 0.0) {
                     if (sensi == 1) {
                         if(ts[is] > tstart) {
@@ -678,11 +703,11 @@ void x_calc(int im, int ic) {
                             if(neq>0) {
                                 sxtmp = NV_DATA_S(sx[js]);
                                 for(ks=0; ks < neq; ks++) {
-                                    returnsx[js*neq*nout + ks*nout + is] = sxtmp[ks];
+                                    returnsx[(js*neq+ks)*nout + is] = sxtmp[ks];
                                 }
                             }
                             for(ks=0; ks < nu; ks++) {
-                                returnsu[js*nu*nout + ks*nout + is] = data->su[(js*nu)+ks];
+                                returnsu[(js*nu+ks)*nout + is] = data->su[(js*nu)+ks];
                             }
                         }
                     }
@@ -705,20 +730,20 @@ void x_calc(int im, int ic) {
                 /* Event handling */
                 if (qEvents==2)
                 {
-                    /* Placeholder for multiple shooting */
+                    handle_event(event_data, data, x, sx, nps, neq);
                     
                     /* Reinitialize the solver */
-                    flag = CVodeReInit(cvode_mem, RCONST(tEvents[iEvents]), x);
+                    flag = CVodeReInit(cvode_mem, RCONST(event_data->t[event_data->i]), x);
                     if (flag < 0) {status[0] = 16; return;}
                     if (sensi==1) {
                         flag = CVodeSensReInit(cvode_mem, sensi_meth, sx);
                         if (flag < 0) {printf( "%d", flag ); status[0] = 17; return;}
                     }
                     
-                    iEvents++;
                     qEvents = 1;
+                    (event_data->i)++;
                 }
-            }
+            } /* End of simulation loop */
             
             /* Free memory */
             if(neq>0) {
@@ -732,6 +757,7 @@ void x_calc(int im, int ic) {
                 CVodeFree(&cvode_mem);
             }
             free(data);
+            free(event_data);
             
             /**** end of CVODES ****/
         } else {
@@ -931,6 +957,152 @@ void x_calc(int im, int ic) {
     timersub(&t4, &t1, &tdiff);
     ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
 #endif
+}
+
+/* Equilibrate the system until the RHS is under a specified threshold */
+int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *returndxdt, double *teq, int neq, int im, int ic ) {
+    int    i;
+    int    step;
+    int    flag;
+    double time;
+    double current_stepsize;
+    bool   converged;
+
+    flag = 0;
+    step = 0;
+    current_stepsize = init_eq_step;
+    converged = false;
+
+    /* Set the time to the last succesful time step */
+    time = data->t;
+    while( !converged )
+    {
+        time = time + current_stepsize;
+
+        flag = CVode(cvode_mem, RCONST(time), x, &t, CV_NORMAL);
+
+        /* Abort on integration failure */
+        if ( flag < 0 )
+            converged = true;
+
+        /* Store dxdt and update inputs/fluxes */
+        fu(data, time, im, ic);
+        fv(data, time, x, im, ic);
+        fx(time, x, returndxdt, data, im, ic);
+
+        converged = true;
+        for (i=0; i<neq; i++) converged = (converged && (fabs(returndxdt[i])<eq_tol));
+
+        /* Oh no, we didn't make it! Terminate anyway. */
+        if ( step > max_eq_steps )
+        {
+            converged = true;
+				flag = -1;
+            printf( "\n>>> Failed to meet equilibration tolerances. Does the system have a stable steady state?\n" );
+        }
+
+        /* Increase step size */
+        step++;
+        current_stepsize = current_stepsize * eq_step_factor;
+    }
+    *teq = time;
+
+    return flag;
+}
+
+/* This function can be used to display errors from the threaded environment 
+   mexErrMsgTxt crashes on R2013b when called from a thread */
+void thr_error( const char* msg ) {
+    printf( msg );
+    #ifdef HAS_PTHREAD
+        if(parallel==1) {pthread_exit(NULL);}
+    #endif
+}
+
+/* Event handler */
+/* Put functions that are supposed to be evaluated on events here */
+void handle_event( EventData event_data, UserData user_data, N_Vector x, N_Vector *sx, int nps, int neq )
+{
+   int state, pars;
+   realtype* sxtmp;
+
+   /* Current events */
+	int cStep = event_data->i;
+
+   /* Total events */
+   int tStep = event_data->n;
+
+   /* Do we override state and sensitivity values? */
+   if (event_data->overrides==1)
+   {
+	   /* Override state variables */
+      for(state=0; state<neq; state++) {
+          double A = event_data->value_A[state*tStep+cStep];
+			 double B = event_data->value_B[state*tStep+cStep];
+          Ith(x, state+1) = A * Ith(x, state+1) + B;
+      }
+   
+      /* Override sensitivity equations */
+      if (sensi==1) {
+          for (pars=0; pars<nps; pars++) {
+              if (neq>0) {
+                  sxtmp = NV_DATA_S(sx[pars]);
+                  for (state=0; state<neq; state++)
+                  {
+                     double A = event_data->sensValue_A[(pars*neq*+state)*tStep+cStep];
+                     double B = event_data->sensValue_B[(pars*neq*+state)*tStep+cStep];
+                     sxtmp[state] = A * sxtmp[state] + B;
+                  }
+              }
+          }
+      }
+   }
+}
+
+/* This function loads a vector/matrix from MATLAB and checks it against desired length */
+int fetch_vector( mxArray* arcondition, int ic, double **vector, const char* fieldname, int desiredLength ) {
+    mxArray *field = mxGetField(arcondition, ic, fieldname);
+
+    if ( field != NULL )
+    {
+        /* Check whether vector has the desired length */
+        int nPoints = (int) mxGetNumberOfElements( field );
+        if (nPoints != desiredLength)
+           return -1;
+
+        /* Grab the data */
+        *vector = (double*) mxGetData( field );
+        return 1;
+    } else {
+        return -1;
+    }
+}
+
+/* This function initializes time point lists */
+int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double** timePoints, int* currentIndex, const char* flagFieldName, const char* timePointFieldName ) {
+    int flag = (int) mxGetScalar(mxGetField(arcondition, ic, flagFieldName));
+    if (flag==1) {
+        mxArray *timePointField = mxGetField(arcondition, ic, timePointFieldName);
+
+        if ( timePointField != NULL ) {
+             double* time = (double*) mxGetData( timePointField );
+             *nPoints     = mxGetNumberOfElements( timePointField );
+
+             /* Move past pre-simulation points */
+             int ID = 0;
+             while((time[ID] < tstart)&&(ID<(*nPoints)))
+                 ID++;
+
+             /* Set output values */
+             *currentIndex = ID;
+             *timePoints = time;
+        } else { 
+             thr_error( "Cannot find time point field. Not using events.\n" );
+             return 0;
+        }
+    }
+
+	 return flag;
 }
 
 /* calculate derived variables */

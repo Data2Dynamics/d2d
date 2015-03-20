@@ -108,6 +108,10 @@ ar.model(m).qPlotX = [];
 ar.model(m).qPositiveX = [];
 C = textscan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INPUTS'))
+    if ( strcmp( C{1}, 'REACTIONS' ) )
+        error( 'Missing field INPUTS. This section should be specified after STATES and before REACTIONS. See: "Setting up models"' );
+    end    
+    
     if(length(cell2mat(C{1}))<2)
         error('STATE names need to be longer than 1');
     end
