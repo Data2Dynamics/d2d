@@ -205,9 +205,6 @@ for jm = 1:length(ar.model)
                         else
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, dydt, ...
                                 y_ssa, y_ssa_lb, y_ssa_ub, qFit] = arGetData(jm, jd, jtype);
-                            t = t(2:end);
-                            y = y(2:end,:);
-                            ystd = ystd(2:end,:);
                             zero_break = [];
                         end
                         [tUnits, response_parameter, yLabel, yNames, yUnits, iy, ...
