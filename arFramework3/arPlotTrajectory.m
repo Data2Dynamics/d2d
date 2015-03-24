@@ -14,7 +14,7 @@ if(~isempty(qFit))
 end
 
 % plot ssa
-if(~isempty(y_ssa) && ploterrors==1)
+if(~isempty(y_ssa) && ploterrors==1 &&  sum(~isnan(y_ssa))>0)
     if(~isempty(qUnlog) && qUnlog(jy))
         y_ssa = 10.^y_ssa;
     end
