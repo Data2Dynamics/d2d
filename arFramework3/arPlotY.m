@@ -523,7 +523,9 @@ for jm = 1:length(ar.model)
                             legloc = get(hl, 'Position');
                             legloc(1:2) = grefloc(1:2) + [grefloc(3)-legloc(3) 0];
                             % legloc(1:2) = [1-legloc(3) 0];
-                            set(hl, 'Position', legloc);
+                            if(sum(isinf(legloc))==0)
+                                set(hl, 'Position', legloc);
+                            end
                         end
                     end
                 end

@@ -74,6 +74,10 @@ fit.fevals = 0;
 ar = arChi2(ar, true, []);
 chi2_old = ar.chi2fit;
 
+if(sum(ar.qFit==1)<=0)
+    error('No parameters are allowed to be fitted. Check ar.qFit.')
+end
+
 ub = ar.ub;
 lb = ar.lb;
 ub(ar.type==2) = ub(ar.type==2) + 1;

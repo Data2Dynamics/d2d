@@ -115,7 +115,11 @@ try
         end
     else
         if(qglobalar)
-            arSimu(sensi, ~isfield(ar.model(jm), 'data'));
+            try
+                arSimu(sensi, ~isfield(ar.model(jm), 'data'));
+            catch
+                arSimu(sensi, isfield(ar.model(jm), 'data'));
+            end
         else
             ar = arSimu(ar, sensi, ~isfield(ar.model(jm), 'data'));
         end
@@ -482,9 +486,13 @@ if(has_error)
 end
 
 if(isfield(ar.model, 'data') && ~isempty(ar.res))
-    if(sum(isnan(ar.res))>0)
-        error('NaN in residuals: %i', sum(isnan(ar.res)));
+    ar.res_NaN = find(isnan(ar.res));
+    if(sum(ar.res_NaN)>0)
+        error('%i NaNs in residuals (check ar.res_NaN)', sum(isnan(ar.res)));
+    else
+        ar = rmfield(ar,'res_NaN');
     end
+
     if(sensi && ~isempty(ar.sres) && sum(sum(isnan(ar.sres(:,ar.qFit==1))))>0)
         for jm = 1:nm
             if(isfield(ar.model(jm), 'data'))
