@@ -1,5 +1,7 @@
 function savePath = arSaveFigure(h, name, subdir)
 
+global ar
+
 savePath = [arSave subdir];
 
 if(~exist(savePath, 'dir'))
@@ -17,10 +19,12 @@ set(h,'Renderer','painters')
 saveas(h, savePath, 'fig');
 
 %% pdf generation
-if(ispc)
+if(ispc || ar.config.useNewPlots==0)
     print('-dpdf', savePath);
     print('-dpng', savePath);
-    print('-dmeta', savePath);
+    if ispc
+        print('-dmeta', savePath);
+    end
 elseif(isunix)
     set(h,'Units','in')
     myaxes = findobj(h,'Type','axes');
@@ -73,7 +77,9 @@ end
 
 if(which('plot2svg'))
 %     [filepath,filename] = strsplit(savePath,'/');
-    plot2svg([savePath '.svg'],h)
+    try
+        plot2svg([savePath '.svg'],h);
+    end
 end
 
 
