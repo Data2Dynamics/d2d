@@ -21,6 +21,10 @@ end
 
 Stmpload = load(['./Results/' filename '/workspace.mat']);
 ar = Stmpload.ar;
+if(strcmp(ar.config.savepath,['./Results/' filename])~=1)
+    ar.config.savepath = ['./Results/' filename]
+end
+    
 
 fprintf('workspace loaded from file %s\n', filename);
 
