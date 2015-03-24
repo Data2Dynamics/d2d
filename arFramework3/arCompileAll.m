@@ -33,6 +33,10 @@ else
     legacy_steps = 0;
 end
 
+if(isfield(ar,'checkstr'))
+    prepareBecauseOfRepeatedCompilation;
+end
+
 % Special function definitions
 if ( ~legacy_steps )
     % Argument formats for functional replacements.
@@ -268,6 +272,7 @@ for m=1:length(ar.model)
         data = ar.model(m).data;
         newp = cell(1,length(ar.model(m).data));
         newpold = cell(1,length(ar.model(m).data));
+
         if(usePool)
             parfor d=1:length(ar.model(m).data)
                 c = data(d).cLink;
@@ -2415,3 +2420,12 @@ function f = fetchArgs( st )
     
     f.func = st(1:cur);
     
+
+    function prepareBecauseOfRepeatedCompilation
+        global ar
+        for m=1:length(ar.model)
+            for d=1:length(ar.model(m).data)
+                ar.model(m).data(d).p = ar.model(m).data(d).pold;
+            end
+        end
+        
