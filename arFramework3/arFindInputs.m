@@ -111,3 +111,5 @@ end
 
 disp( sprintf( '%d input events assigned!', totalEvents ) );
 close(h);
+
+arLink(true);

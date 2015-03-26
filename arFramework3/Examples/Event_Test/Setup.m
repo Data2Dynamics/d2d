@@ -9,9 +9,6 @@ arCompileAll;
 % time points.
 arFindInputs;
 
-% Relink the model (required after arFindInputs)
-arLink;
-
 % Plot the results without events
 arPlot; title( 'Without events [press any key]' );
 disp('Press any key' );

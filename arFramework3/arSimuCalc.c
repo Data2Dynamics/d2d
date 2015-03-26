@@ -29,6 +29,7 @@
 #define Ith(v, i)     NV_Ith_S(v, i-1)        /* i-th vector component i=1..neq */
 #define IJth(A, i, j) DENSE_ELEM(A, i-1, j-1) /* (i,j)-th matrix component i,j=1..neq */
 
+#define MXSTRING		32
 #define MXNCF        20
 #define MXNEF        20
 
@@ -42,7 +43,7 @@ mxArray *armodel;
 mxArray *arthread;
 
 int    fine;
-int    sensi;
+int    globalsensi;
 int    dynamics;
 int    ssa;
 int    jacobian;
@@ -58,11 +59,17 @@ double cvodes_rtol;
 double cvodes_atol;
 double fiterrors_correction;
 
+/* Name of the substructure with conditions we're currently evaluating */
+char condition_name[MXSTRING];
+
+/* Name of the threads substructure we are currently using */
+char threads_name[MXSTRING];
+
 /* Equilibration variables (Used when time point Inf is encountered) */
-int    max_eq_steps;				/* Maximal equilibration steps */
-double init_eq_step; 			/* Initial equilibration stepsize attempt */
-double eq_step_factor; 			/* Factor with which to increase the time at each equilibration step */
-double eq_tol;						/* Absolute tolerance for equilibration */
+int    max_eq_steps;          /* Maximal equilibration steps */
+double init_eq_step;          /* Initial equilibration stepsize attempt */
+double eq_step_factor;        /* Factor with which to increase the time at each equilibration step */
+double eq_tol;                /* Absolute tolerance for equilibration */
 
 #ifdef HAS_SYSTIME
 struct timeval t1;
@@ -77,9 +84,9 @@ void *thread_calc(void *threadarg);
 #else
 void thread_calc(int id);
 #endif
-void x_calc(int im, int ic);
-void z_calc(int im, int ic, mxArray *arcondition);
-void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition);
+void x_calc(int im, int ic, int sensi);
+void z_calc(int im, int ic, mxArray *arcondition, int sensi);
+void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi);
 
 void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2);
 void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd);
@@ -94,7 +101,7 @@ int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double
 /* user functions */
 #include "arSimuCalcFunctions.c"
 
-void handle_event( EventData event_data, UserData user_data, N_Vector x, N_Vector *sx, int nps, int neq );
+int handle_event(void *cvode_mem, EventData event_data, UserData user_data, N_Vector x, N_Vector *sx, int nps, int neq, int sensi, int sensi_meth );
 int equilibrate(void *cvode_mem, UserData user_data, N_Vector x, realtype t, double *returndxdt, double *teq, int neq, int im, int ic );
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
@@ -119,14 +126,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     /* get ar.model */
     armodel = mxGetField(prhs[0], 0, "model");
     if(armodel==NULL){
-        mexErrMsgTxt("field ar.model not existing");
+        mexErrMsgTxt("field ar.model doesn't exist");
     }
     
     fine = (int) mxGetScalar(prhs[1]);
-    sensi = (int) mxGetScalar(prhs[2]);
+    globalsensi = (int) mxGetScalar(prhs[2]);
     dynamics = (int) mxGetScalar(prhs[3]);
     ssa = (int) mxGetScalar(prhs[4]);
-       
+
+    if ( mxGetString(prhs[5], condition_name, MXSTRING ) != 0 )
+        mexErrMsgTxt("Failed to provide condition identifier to arSimuCalc. Aborting ...");
+    
+    if ( mxGetString(prhs[6], threads_name, MXSTRING ) != 0 )
+        mexErrMsgTxt("Failed to provide name of condition list to arSimuCalc. Aborting ...");    
+
     /* get ar.config */
     arconfig = mxGetField(prhs[0], 0, "config");
     parallel = (int) mxGetScalar(mxGetField(arconfig, 0, "useParallel"));
@@ -151,8 +164,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if ( ms == 1 ) events = 1;
     
     /* threads */
-    arthread = mxGetField(arconfig, 0, "threads");
-    nthreads = (int) mxGetScalar(mxGetField(arconfig, 0, "nThreads"));
+    arthread = mxGetField(arconfig, 0, threads_name);
+    /*nthreads = (int) mxGetScalar(mxGetField(arconfig, 0, "nThreads"));*/
+    nthreads = (int) mxGetNumberOfElements(arthread);
     
 #ifdef HAS_PTHREAD
     if(NMAXTHREADS<nthreads) mexErrMsgTxt("ERROR at NMAXTHREADS < nthreads");
@@ -223,7 +237,7 @@ void thread_calc(int id) {
     
     for(in=0; in<n; ++in){
         /* printf("computing thread #%i, task %i/%i (m=%i, c=%i)\n", id, in, n, ms[in], cs[in]); */
-        x_calc(ms[in], cs[in]);
+        x_calc(ms[in], cs[in], globalsensi);
     }
     
     /* printf("computing thread #%i(done)\n", id); */
@@ -231,11 +245,10 @@ void thread_calc(int id) {
 #ifdef HAS_PTHREAD
     if(parallel==1) {pthread_exit(NULL);}
 #endif
-    return 0;
 }
 
 /* calculate dynamics */
-void x_calc(int im, int ic) {
+void x_calc(int im, int ic, int sensi) {
     mxArray    *arcondition;
     mxArray    *ardata;
     
@@ -300,7 +313,7 @@ void x_calc(int im, int ic) {
     
     int sensi_meth = CV_SIMULTANEOUS; /* CV_SIMULTANEOUS or CV_STAGGERED */
     bool error_corr = TRUE;
-        
+    
     /* printf("computing model #%i, condition #%i\n", im, ic); */
 
     /* Grab value of infinity (for steady state simulations) */
@@ -312,27 +325,26 @@ void x_calc(int im, int ic) {
         thr_error("im > length(ar.model)\n");
         return;
     }
-        
+    
     /* get ar.model(im).condition */
-    arcondition = mxGetField(armodel, im, "condition");
+    arcondition = mxGetField(armodel, im, condition_name);
     if(arcondition==NULL){
-        thr_error("field ar.model.condition not existing\n");
         return;
     }
-   
+    
     /* check if ic in range */
     nc = (int) mxGetNumberOfElements(arcondition);
     if(nc<=ic) {
         thr_error("ic > length(ar.model.condition)\n");
         return;
     }
-
+    
     /* Get double handle to store equilibrium value */
     teq = mxGetData(mxGetField(arcondition, ic, "tEq"));
-   
+    
     has_tExp = (int) mxGetScalar(mxGetField(arcondition, ic, "has_tExp"));
     if(has_tExp == 0 && fine == 0) return;
-   
+    
     /* get ar.model(im).data */
     ardata = mxGetField(armodel, im, "data");
      
@@ -422,6 +434,7 @@ void x_calc(int im, int ic) {
                     returnsx = mxGetData(mxGetField(arcondition, ic, "sxExpSimu"));
                 }
             }
+            
             returndxdt = mxGetData(mxGetField(arcondition, ic, "dxdt"));
             if (sensi == 1) {
                 returnddxdtdp = mxGetData(mxGetField(arcondition, ic, "ddxdtdp"));
@@ -434,12 +447,12 @@ void x_calc(int im, int ic) {
             
             /* Event structure */
             event_data = (EventData) malloc(sizeof *event_data);
-            if (event_data == NULL) {status[0] = 1; return;}
+            if (event_data == NULL) {status[0] = 18; return;}
 
             /* Initialize multiple shooting list */
             if (ms==1) 
                qMS = init_list(arcondition, ic, tstart, &(event_data->nMS), &(event_data->tMS), &(event_data->iMS), "qMS", "tMS");
-
+            
             /* Initialize userdata and derivatives */
             data->qpositivex = qpositivex;
             data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
@@ -459,28 +472,29 @@ void x_calc(int im, int ic) {
             data->dvdp = mxGetData(mxGetField(arcondition, ic, "dvdpNum"));
 
             /* Initialize event list (points where solver needs to be reinitialized) */
+            qEvents = 0;
             if (events==1)
             {
-               qEvents = init_list(arcondition, ic, tstart, &(event_data->n), &(event_data->t), &(event_data->i), "qEvents", "tEvents");        
+                qEvents = init_list(arcondition, ic, tstart, &(event_data->n), &(event_data->t), &(event_data->i), "qEvents", "tEvents");        
 
-               /* Allow state values and sensitivity values to be overwritten at events */
-					event_data->overrides = 1;
+                /* Allow state values and sensitivity values to be overwritten at events */
+                event_data->overrides = 1;
 
-               /* Grab additional data required for assignment operations */
-               /* Assignment operations are of the form Ax+B where X is the state variable */
-               flag = fetch_vector( arcondition, ic, &(event_data->value_A), "modx_A", neq*event_data->n );
-               if ( flag < 0 ) { event_data->overrides = 0; };
-               flag = fetch_vector( arcondition, ic, &(event_data->value_B), "modx_B", neq*event_data->n );
-               if ( flag < 0 ) { event_data->overrides = 0; };
-               flag = fetch_vector( arcondition, ic, &(event_data->sensValue_A), "modsx_A", neq*nps*event_data->n );
-               if ( flag < 0 ) { event_data->overrides = 0; };
-               flag = fetch_vector( arcondition, ic, &(event_data->sensValue_B), "modsx_B", neq*nps*event_data->n );
-               if ( flag < 0 ) { event_data->overrides = 0; };
+                /* Grab additional data required for assignment operations */
+                /* Assignment operations are of the form Ax+B where X is the state variable */
+                flag = fetch_vector( arcondition, ic, &(event_data->value_A), "modx_A", neq*event_data->n );
+                if ( flag < 0 ) { event_data->overrides = 0; };
+                flag = fetch_vector( arcondition, ic, &(event_data->value_B), "modx_B", neq*event_data->n );
+                if ( flag < 0 ) { event_data->overrides = 0; };
+                flag = fetch_vector( arcondition, ic, &(event_data->sensValue_A), "modsx_A", neq*nps*event_data->n );
+                if ( flag < 0 ) { event_data->overrides = 0; };
+                flag = fetch_vector( arcondition, ic, &(event_data->sensValue_B), "modsx_B", neq*nps*event_data->n );
+                if ( flag < 0 ) { event_data->overrides = 0; };
             }
             
             /* fill for t=0 */
             fu(data, tstart, im, ic);
-    
+            
             if(neq>0){
                 /* Initial conditions */
                 x = N_VNew_Serial(neq);
@@ -555,7 +569,7 @@ void x_calc(int im, int ic) {
                 
                 /* fill inputs */
                 fsu(data, tstart, im, ic);
-                
+                  
                 if(neq>0){
                     /* Load sensitivity initial conditions */
                     sx = N_VCloneVectorArray_Serial(nps, x);
@@ -625,11 +639,13 @@ void x_calc(int im, int ic) {
             /* Do we have a startup event? */
             if ( qEvents == 1 ) {
                 if ( event_data->t[event_data->i] == tstart ) {
-                    handle_event( event_data, data, x, sx, nps, neq );
+                    flag = handle_event( cvode_mem, event_data, data, x, sx, nps, neq, sensi, sensi_meth );
                     (event_data->i)++;
+
+                    if (flag < 0) {status[0] = 16; thr_error("Failed to reinitialize solver at event"); return;}
                 }
             }
-
+            
             /* loop over output points */
             for (is=0; is < nout; is++) {
                 /* printf("%f x-loop (im=%i ic=%i)\n", ts[is], im, ic); */
@@ -662,6 +678,11 @@ void x_calc(int im, int ic) {
                             {
                               qEvents = 2;    /* qEvents=2 denotes that an event just happened */
                               flag = 0;     /* Re-set the flag for legacy error-checking reasons */
+                            }
+                            
+                            if ( flag==CV_TSTOP_RETURN )
+                            {
+                              thr_error( "Error in the event system. Did the model link properly?" );
                             }
 
                             status[0] = flag;
@@ -730,15 +751,8 @@ void x_calc(int im, int ic) {
                 /* Event handling */
                 if (qEvents==2)
                 {
-                    handle_event(event_data, data, x, sx, nps, neq);
-                    
-                    /* Reinitialize the solver */
-                    flag = CVodeReInit(cvode_mem, RCONST(event_data->t[event_data->i]), x);
-                    if (flag < 0) {status[0] = 16; return;}
-                    if (sensi==1) {
-                        flag = CVodeSensReInit(cvode_mem, sensi_meth, sx);
-                        if (flag < 0) {printf( "%d", flag ); status[0] = 17; return;}
-                    }
+                    flag = handle_event(cvode_mem, event_data, data, x, sx, nps, neq, sensi, sensi_meth );
+                    if (flag < 0) {status[0] = 16; thr_error("Failed to reinitialize solver at event"); return;}
                     
                     qEvents = 1;
                     (event_data->i)++;
@@ -921,7 +935,7 @@ void x_calc(int im, int ic) {
         }
         
         /* call z_calc */
-        z_calc(im, ic, arcondition);
+        z_calc(im, ic, arcondition, sensi);
     }
 
 #ifdef HAS_SYSTIME
@@ -943,7 +957,7 @@ void x_calc(int im, int ic) {
             has_tExp = (int) mxGetScalar(mxGetField(ardata, id, "has_tExp"));
             
             if((has_tExp == 1) | (fine == 1)) {
-                y_calc(im, id, ardata, arcondition);
+                y_calc(im, id, ardata, arcondition, sensi);
             }
         }
     }
@@ -979,25 +993,28 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
     {
         time = time + current_stepsize;
 
+        /* Simulate up to next checkpoint */
+        CVodeSetStopTime(cvode_mem, RCONST(time));
         flag = CVode(cvode_mem, RCONST(time), x, &t, CV_NORMAL);
 
         /* Abort on integration failure */
         if ( flag < 0 )
+        {
+            printf( "\n>>> Integration failure\n" );
             converged = true;
+        }
 
-        /* Store dxdt and update inputs/fluxes */
-        fu(data, time, im, ic);
-        fv(data, time, x, im, ic);
+        /* Store dxdt */
         fx(time, x, returndxdt, data, im, ic);
 
         converged = true;
         for (i=0; i<neq; i++) converged = (converged && (fabs(returndxdt[i])<eq_tol));
-
+        
         /* Oh no, we didn't make it! Terminate anyway. */
         if ( step > max_eq_steps )
         {
             converged = true;
-				flag = -1;
+            flag = -1;
             printf( "\n>>> Failed to meet equilibration tolerances. Does the system have a stable steady state?\n" );
         }
 
@@ -1021,54 +1038,80 @@ void thr_error( const char* msg ) {
 
 /* Event handler */
 /* Put functions that are supposed to be evaluated on events here */
-void handle_event( EventData event_data, UserData user_data, N_Vector x, N_Vector *sx, int nps, int neq )
+int handle_event( void* cvode_mem, EventData event_data, UserData user_data, N_Vector x, N_Vector *sx, int nps, int neq, int sensi, int sensi_meth )
 {
-   int state, pars;
-   realtype* sxtmp;
+    double A, B;
+	int state, pars, flag, cStep, tStep;
+	realtype* sxtmp;
 
-   /* Current events */
-	int cStep = event_data->i;
+    flag = 0;
+    
+	/* Current events */
+	cStep = event_data->i;
 
-   /* Total events */
-   int tStep = event_data->n;
+	/* Total events */
+    tStep = event_data->n;
 
-   /* Do we override state and sensitivity values? */
-   if (event_data->overrides==1)
-   {
-	   /* Override state variables */
-      for(state=0; state<neq; state++) {
-          double A = event_data->value_A[state*tStep+cStep];
-			 double B = event_data->value_B[state*tStep+cStep];
-          Ith(x, state+1) = A * Ith(x, state+1) + B;
-      }
+	/* Do we override state and sensitivity values? */
+	if (event_data->overrides==1)
+    {
+        /* Override state variables */
+        for(state=0; state<neq; state++) {
+            A = event_data->value_A[state*tStep+cStep];
+            B = event_data->value_B[state*tStep+cStep];
+            Ith(x, state+1) = A * Ith(x, state+1) + B;
+        }
    
-      /* Override sensitivity equations */
-      if (sensi==1) {
-          for (pars=0; pars<nps; pars++) {
-              if (neq>0) {
-                  sxtmp = NV_DATA_S(sx[pars]);
-                  for (state=0; state<neq; state++)
-                  {
-                     double A = event_data->sensValue_A[(pars*neq*+state)*tStep+cStep];
-                     double B = event_data->sensValue_B[(pars*neq*+state)*tStep+cStep];
-                     sxtmp[state] = A * sxtmp[state] + B;
-                  }
-              }
-          }
-      }
-   }
+        /* Override sensitivity equations */
+        if (sensi==1) {
+            for (pars=0; pars<nps; pars++) {
+                if (neq>0) {
+                    sxtmp = NV_DATA_S(sx[pars]);
+                    for (state=0; state<neq; state++)
+                    {
+                        A = event_data->sensValue_A[(pars*neq+state)*tStep+cStep];
+                        B = event_data->sensValue_B[(pars*neq+state)*tStep+cStep];
+                        sxtmp[state] = A * sxtmp[state] + B;
+                    }
+                }
+            }
+        }
+	}
+
+    /* Reinitialize the solver */
+    flag = CVodeReInit(cvode_mem, RCONST(event_data->t[event_data->i]), x);
+    if (flag>=0) {
+        if (sensi==1) {
+            flag = CVodeSensReInit(cvode_mem, sensi_meth, sx);
+        }
+    }
+        
+    return flag;
 }
 
 /* This function loads a vector/matrix from MATLAB and checks it against desired length */
 int fetch_vector( mxArray* arcondition, int ic, double **vector, const char* fieldname, int desiredLength ) {
-    mxArray *field = mxGetField(arcondition, ic, fieldname);
+    
+    mxArray *field;
+    int nPoints;      
+    
+    field = mxGetField(arcondition, ic, fieldname);
 
     if ( field != NULL )
     {
         /* Check whether vector has the desired length */
-        int nPoints = (int) mxGetNumberOfElements( field );
-        if (nPoints != desiredLength)
+        nPoints = (int) mxGetNumberOfElements( field );
+        
+        /* No points => silently drop */
+        if (nPoints == 0)
            return -1;
+        
+        /* Wrong length => warn! */
+        if (nPoints != desiredLength)
+        {
+           printf( "Warning, mod vector has incorrect size -> overrides disabled\n" );
+           return -1;
+        }
 
         /* Grab the data */
         *vector = (double*) mxGetData( field );
@@ -1080,15 +1123,16 @@ int fetch_vector( mxArray* arcondition, int ic, double **vector, const char* fie
 
 /* This function initializes time point lists */
 int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double** timePoints, int* currentIndex, const char* flagFieldName, const char* timePointFieldName ) {
-    int ID;
+    int ID, flag;
+    double *time;
           
-    int flag = (int) mxGetScalar(mxGetField(arcondition, ic, flagFieldName));
+    flag = (int) mxGetScalar(mxGetField(arcondition, ic, flagFieldName));
     if (flag==1) {
         mxArray *timePointField = mxGetField(arcondition, ic, timePointFieldName);
 
         if ( timePointField != NULL ) {
-             double* time = (double*) mxGetData( timePointField );
-             *nPoints     = mxGetNumberOfElements( timePointField );
+             time = (double*) mxGetData( timePointField );
+             *nPoints     = (int) mxGetNumberOfElements( timePointField );
 
              /* Move past pre-simulation points */
              ID = 0;
@@ -1108,7 +1152,7 @@ int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double
 }
 
 /* calculate derived variables */
-void z_calc(int im, int ic, mxArray *arcondition) {
+void z_calc(int im, int ic, mxArray *arcondition, int sensi) {
     
     /* printf("computing model #%i, condition #%i, derived variables\n", im, ic); */
     
@@ -1175,7 +1219,7 @@ void z_calc(int im, int ic, mxArray *arcondition) {
 }
 
 /* calculate observations */
-void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition) {
+void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
     /* printf("computing model #%i, data #%i\n", im, id); */
     
     int nt, it, iy, ip, ntlink, itlink;

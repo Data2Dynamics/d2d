@@ -88,7 +88,7 @@ end
 % fprintf('Stochastic simulation (%i runs)...', ar.config.ssa_runs); tic;
 
 % call mex function to simulate models
-feval(ar.fkt, ar, true, false, true, true)
+feval(ar.fkt, ar, true, false, true, true, 'condition', 'threads')
 
 % fprintf('done (%g sec)\n', toc);
 

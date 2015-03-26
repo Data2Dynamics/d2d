@@ -110,15 +110,16 @@ for m=1:length(ar.model)
             end
         end
         
-        % remove events before tstart and add event time points to tFine and tExp
-        for c=1:length(ar.model(m).condition)
-            ar.model(m).condition(c).tEvents(ar.model(m).condition(c).tEvents <= ar.model(m).condition(c).tstart) = [];
-            
-            ar.model(m).condition(c).tExp = ...
-                union(ar.model(m).condition(c).tExp, ar.model(m).condition(c).tEvents);
+        % Add events to tFine and tExp (if it exists)
+        for c = 1 : length( ar.model(m).condition )
+            if isfield(ar.model(m).condition(c), 'tExp')
+                ar.model(m).condition(c).tExp = ...
+                     union(ar.model(m).condition(c).tExp, ar.model(m).condition(c).tEvents);
+            end
+    
             ar.model(m).condition(c).tFine = ...
-                union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tEvents);
-        end
+                union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tEvents);      
+        end  
         
         % link back time points
         for d=1:length(ar.model(m).data)
@@ -154,7 +155,10 @@ for m=1:length(ar.model)
         
         % statistics
         for d=1:length(ar.model(m).data)
-            ar.model(m).data(d).qFit = true(size(ar.model(m).data(d).y));
+            % Only overwrite qFit if it doesn't exist yet or if it is empty
+            if ((~isfield( ar.model(m).data(d), 'qFit' ))||(isempty(ar.model(m).data(d).qFit)))
+                ar.model(m).data(d).qFit = true(size(ar.model(m).data(d).y));
+            end
             if(isfield(ar.model(m).data(d), 'tExp') && isfield(ar.model(m).data(d), 'yExp'))
                 ar.model(m).data(d).ndata = sum(~isnan(ar.model(m).data(d).yExp),1);
             else
@@ -163,11 +167,22 @@ for m=1:length(ar.model)
             ar.model(m).data(d).chi2 = zeros(size(ar.model(m).data(d).ndata));
             ar.model(m).data(d).chi2err = zeros(size(ar.model(m).data(d).ndata));
         end
-    else
+    else              
         for c = 1:length(ar.model(m).condition)
             ar.model(m).condition(c).tFine = linspace(ar.model(m).tLim(1), ar.model(m).tLim(2), ar.config.nFinePoints);
             ar.model(m).condition(c).tstart = min(ar.model(m).condition(c).tFine);
         end
+        
+        % Add events to tFine and tExp (if it exists)
+        for c = 1 : length( ar.model(m).condition )
+            if isfield(ar.model(m).condition(c), 'tExp')
+                ar.model(m).condition(c).tExp = ...
+                     union(ar.model(m).condition(c).tExp, ar.model(m).condition(c).tEvents);
+            end
+    
+            ar.model(m).condition(c).tFine = ...
+                union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tEvents);      
+        end          
     end
 end
 
@@ -252,12 +267,34 @@ for m = 1:length(ar.model)
         
         % event assignment/override operations
         nte = length( ar.model(m).condition(c).tEvents );
-        ar.model(m).condition(c).modx_A = ones(nte, nx);
-        ar.model(m).condition(c).modx_B = zeros(nte, nx);
-        ar.model(m).condition(c).modsx_A = ones(nte, nx, np);
-        ar.model(m).condition(c).modsx_B = zeros(nte, nx, np);
         
-        ar.model(m).condition(c).tEq = NaN;
+        modx_A = ones(nte, nx);
+        modx_B = zeros(nte, nx);
+        modsx_A = ones(nte, nx, np);
+        modsx_B = zeros(nte, nx, np);        
+        
+        % which events were already in the list?
+        if ( isfield( ar.model(m).condition(c), 'modt' ) )              
+            % preserve the old values for the modification parameters
+            mod_id = ismember( ar.model(m).condition(c).tEvents, ...
+                               ar.model(m).condition(c).modt );
+                           
+            if ( ~isempty( mod_id ) )
+                modx_A(mod_id,:) = ar.model(m).condition(c).modx_A;
+                modx_B(mod_id,:) = ar.model(m).condition(c).modx_B;
+                modsx_A(mod_id,:,:) = ar.model(m).condition(c).modsx_A;
+                modsx_B(mod_id,:,:) = ar.model(m).condition(c).modsx_B;
+            end
+        end
+        
+        ar.model(m).condition(c).modt = ar.model(m).condition(c).tEvents;
+        ar.model(m).condition(c).modx_A = modx_A;
+        ar.model(m).condition(c).modx_B = modx_B;
+        ar.model(m).condition(c).modsx_A = modsx_A;
+        ar.model(m).condition(c).modsx_B = modsx_B;
+    
+        % Equilibration time
+        ar.model(m).condition(c).tEq = NaN;        
                
         % steady state sensitivities
         ar.model(m).condition(c).qSteadyState = false(1,nx);
@@ -405,35 +442,8 @@ for m = 1:length(ar.model)
 end
 
 % populate threads
-ar.config.threads = [];
-ar.config.threads(1).id = 0;
-ar.config.threads(1).n = 0;
-ar.config.threads(1).nd = 0;
-ar.config.threads(1).ms = int32([]);
-ar.config.threads(1).cs = int32([]);
-ithread = 1;
-ar.config.nTasks = 0;
-for m = 1:length(ar.model)
-    for c = 1:length(ar.model(m).condition)
-        if(length(ar.config.threads)<ithread)
-            ar.config.threads(ithread).id = ithread-1;
-            ar.config.threads(ithread).n = 0;
-            ar.config.threads(ithread).nd = 0;
-            ar.config.threads(ithread).ms = int32([]);
-            ar.config.threads(ithread).cs = int32([]);
-        end
-        ar.config.nTasks = ar.config.nTasks + 1;
-        ar.config.threads(ithread).n = ar.config.threads(ithread).n + 1;
-        ar.config.threads(ithread).nd = ar.config.threads(ithread).nd + ...
-            length(ar.model(m).condition(c).dLink);        
-        ar.config.threads(ithread).ms(end+1) = int32(m-1);
-        ar.config.threads(ithread).cs(end+1) = int32(c-1);
-        ithread = ithread + 1;
-        if(ithread>ar.config.nParallel)
-            ithread = 1;
-        end
-    end
-end
+populate_threads( 'threads', 'condition' );
+populate_threads( 'ss_threads', 'ss_condition' );
 ar.config.nThreads = length(ar.config.threads);
 
 % reset values
@@ -469,3 +479,41 @@ if(isfield(ar, 'pExternLabels'))
         ar.lbExtern, ar.ubExtern);
 end
 
+function populate_threads( thread_fieldname, condition_fieldname )
+
+    global ar;
+    
+    % populate threads
+    ar.config.(thread_fieldname) = [];
+    ar.config.(thread_fieldname)(1).id = 0;
+    ar.config.(thread_fieldname)(1).n = 0;
+    ar.config.(thread_fieldname)(1).nd = 0;
+    ar.config.(thread_fieldname)(1).ms = int32([]);
+    ar.config.(thread_fieldname)(1).cs = int32([]);
+    ithread = 1;
+    ar.config.nTasks = 0;
+    for m = 1:length(ar.model)
+        if (isfield(ar.model(m), condition_fieldname))
+            for c = 1:length(ar.model(m).(condition_fieldname) )
+                if(length(ar.config.(thread_fieldname))<ithread)
+                    ar.config.(thread_fieldname)(ithread).id = ithread-1;
+                    ar.config.(thread_fieldname)(ithread).n = 0;
+                    ar.config.(thread_fieldname)(ithread).nd = 0;
+                    ar.config.(thread_fieldname)(ithread).ms = int32([]);
+                    ar.config.(thread_fieldname)(ithread).cs = int32([]);
+                end
+                ar.config.nTasks = ar.config.nTasks + 1;
+                ar.config.(thread_fieldname)(ithread).n = ...
+                    ar.config.(thread_fieldname)(ithread).n + 1;
+                ar.config.(thread_fieldname)(ithread).nd = ...
+                    ar.config.(thread_fieldname)(ithread).nd + ...
+                    length(ar.model(m).(condition_fieldname)(c).dLink);        
+                ar.config.(thread_fieldname)(ithread).ms(end+1) = int32(m-1);
+                ar.config.(thread_fieldname)(ithread).cs(end+1) = int32(c-1);
+                ithread = ithread + 1;
+                if(ithread>ar.config.nParallel)
+                    ithread = 1;
+                end
+            end
+        end
+    end

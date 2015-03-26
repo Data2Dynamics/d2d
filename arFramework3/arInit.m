@@ -102,9 +102,9 @@ ar.config.useMS 	= 0;
 ar.config.steady_state_constraint = 1;
 
 % Equilibration options
-ar.config.max_eq_steps = 10;
-ar.config.init_eq_step = 10.0;
-ar.config.eq_step_factor = 1.5;
+ar.config.max_eq_steps = 20;
+ar.config.init_eq_step = 100.0;
+ar.config.eq_step_factor = 5;
 ar.config.eq_tol = 1e-8;
 
 % CVODES flags
@@ -129,6 +129,7 @@ ar.info.arsimucalc_flags{14} = 'CVodeGetSens()';
 ar.info.arsimucalc_flags{15} = 'CVodeSetMaxNumSteps';
 ar.info.arsimucalc_flags{16} = 'CVodeReInit()';
 ar.info.arsimucalc_flags{17} = 'CVodeSensReInit()';
+ar.info.arsimucalc_flags{18} = 'malloc EventData';
 
 ar.info.cvodes_flags = cell(1,30);
 

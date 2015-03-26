@@ -54,8 +54,26 @@ end
 
 ar.stop = 0;
 
+ss_presimulation = 0;
+if ( isfield( ar, 'ss_conditions' ) && ( ar.ss_conditions ) )
+    ss_presimulation = 1;
+end
+
 % propagate parameters
-for m=1:length(ar.model)  
+for m=1:length(ar.model)
+    if ( ss_presimulation )
+        for c=1:length(ar.model(m).ss_condition)       
+            ar.model(m).ss_condition(c).status = 0;
+            ar.model(m).ss_condition(c).pNum = ar.p(ar.model(m).ss_condition(c).pLink);
+            ar.model(m).ss_condition(c).qLog10 = ar.qLog10(ar.model(m).ss_condition(c).pLink);
+            ar.model(m).ss_condition(c).pNum(ar.model(m).ss_condition(c).qLog10 == 1) = ...
+                10.^ar.model(m).ss_condition(c).pNum(ar.model(m).ss_condition(c).qLog10 == 1);
+            ar.model(m).ss_condition(c).start = 0;
+            ar.model(m).ss_condition(c).stop = 0;
+            ar.model(m).ss_condition(c).stop_data = 0;
+        end
+    end
+    
     for c=1:length(ar.model(m).condition)       
         ar.model(m).condition(c).status = 0;
         ar.model(m).condition(c).pNum = ar.p(ar.model(m).condition(c).pLink);
@@ -83,8 +101,36 @@ if(fine && sensi)
     ar = initFineSensis(ar);
 end
 
+% do we have steady state presimulations?
+if ( ss_presimulation )
+    if ( sensi )
+        ar = initSteadyStateSensis(ar);
+    end
+    feval(ar.fkt, ar, true, ar.config.useSensis && sensi, dynamics, false, 'ss_condition', 'ss_threads');
+    
+    for m = 1 : length( ar.model )
+        % Map the steady states onto the respective target conditions
+        for ssID = 1 : length( ar.model(m).ss_condition )
+            targetConditions    = ar.model(m).ss_condition(ssID).ssLink;
+            SSval               = ar.model(m).ss_condition(ssID).xFineSimu(end, :) + 0;     % + 0 is for R2013 compatibility
+            SSsens              = ar.model(m).ss_condition(ssID).sxFineSimu(end, :, :) + 0;
+
+            nStates = length(ar.model(m).x);
+            % Copy the steady state values and sensitivities into the target
+            % conditions taking into account any parameter order remapping
+            for a = 1 : length( targetConditions )
+                ar.model(m).condition(targetConditions(a)).modx_A(1,:) = zeros(1,nStates);
+                ar.model(m).condition(targetConditions(a)).modsx_A(1,:,:) = zeros(1,nStates,length(ar.model(m).condition(targetConditions(a)).p));
+                ar.model(m).condition(targetConditions(a)).modx_B(1,:) = SSval + 0;
+                ar.model(m).condition(targetConditions(a)).modsx_B(1,:,:) = ...
+                    SSsens(:,:,ar.model(m).condition(targetConditions(a)).ssParLink) + 0;
+            end
+        end
+    end
+end
+
 % call mex function to simulate models
-feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false)
+feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads')
 
 % integration error ?
 for m=1:length(ar.model)
@@ -153,5 +199,20 @@ for m = 1:length(ar.model)
             length(ar.model(m).x), length(ar.model(m).condition(c).p));
         ar.model(m).condition(c).szFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
             length(ar.model(m).z), length(ar.model(m).condition(c).p));
+    end
+end
+
+function ar = initSteadyStateSensis(ar)
+
+for m = 1:length(ar.model)
+    for c = 1:length(ar.model(m).ss_condition)
+        ar.model(m).ss_condition(c).suFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
+            length(ar.model(m).u), length(ar.model(m).ss_condition(c).p));
+        ar.model(m).ss_condition(c).svFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
+            length(ar.model(m).vs), length(ar.model(m).ss_condition(c).p));
+        ar.model(m).ss_condition(c).sxFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
+            length(ar.model(m).x), length(ar.model(m).ss_condition(c).p));       
+        ar.model(m).ss_condition(c).szFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
+            length(ar.model(m).z), length(ar.model(m).ss_condition(c).p));
     end
 end
