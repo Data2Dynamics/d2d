@@ -3,20 +3,21 @@
 % Usage:
 %   arAddEvent((ar), model, conditionSS, conditionAffected, (tstart) )
 %
-% Adds a steady state presimulation to a number of conditions. Here
-% conditionSS refers to the condition the steady state is taken from. Note
-% that the condition events of the steady state simulation condition
-% are ignored. However, input functions will behave as they were for that
-% specific condition. In many cases, it is therefore desirable to use a
+% Adds a pre-equilibration to a number of conditions. ConditionSS refers
+% to the condition used for equilibration to steady state (source).
+% Events beloning to the steady state simulation condition are ignored
+% when equilibrating. Input functions will behave as they were for the
+% source condition. In many cases, it is therefore desirable to use a
 % steady state condition with no inputs.
 %
 % The optional argument tstart refers to the starting timepoint of the 
 % steady state simulation.
 %
-% For the target conditions, note that any event at tStart will be 
-% overwritten by the steady state. If an event immediately upon start is 
-% required (for example, concentration = 2*steadystate), consider placing 
-% your events beyond tstart and shifting the entire simulation.
+% For the target conditions, note that any event occuring immediately at
+% the start of the simulation will be overwritten by the event that
+% initializes this condition to steady state. If an event immediately 
+% upon start is required (for example, concentration = 2*steadystate), 
+% consider adding time points before the desired event.
 %
 % Hint: If you wish to see how the conditions are set up, you can use 
 % the command 'arShowDataConditionStructure'
@@ -30,7 +31,7 @@
 %    simulations
 %    Steady state simulations will not check whether a stable steady state
 %    exists. If this is not the case, pre-equilibration will fail and
-%    an error will be thrown.
+%    an error will be thrown
 
 function ar = arSteadyState( varargin )
 
