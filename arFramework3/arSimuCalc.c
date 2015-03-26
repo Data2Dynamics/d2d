@@ -260,6 +260,13 @@ void x_calc(int im, int ic, int sensi) {
     int is, js, ks, ids;
     int nout, neq, nyout;
     int nu, np, nps, nv, ny;
+    
+    /* Which condition to simulate */
+    int isim;
+    
+    /* Used to override which condition to simulate */
+    mxArray *src;    
+    double  *isrc;
 
     /* Multiple shooting and events */
     int qMS, qEvents;
@@ -492,24 +499,33 @@ void x_calc(int im, int ic, int sensi) {
                 if ( flag < 0 ) { event_data->overrides = 0; };
             }
             
+            /* Override which condition to simulate */
+            src = mxGetField(arcondition, ic, "src");
+            if (src == NULL)
+                isim = ic;
+            else {
+                isrc = mxGetData(src);
+                isim = (int) (*isrc) - 1;
+            }
+            
             /* fill for t=0 */
-            fu(data, tstart, im, ic);
+            fu(data, tstart, im, isim);
             
             if(neq>0){
                 /* Initial conditions */
                 x = N_VNew_Serial(neq);
                 if (x == NULL) {status[0] = 2; return;}
                 for (is=0; is<neq; is++) Ith(x, is+1) = 0.0;
-                fx0(x, data, im, ic);
-                fv(data, tstart, x, im, ic);
-                fx(tstart, x, returndxdt, data, im, ic);
+                fx0(x, data, im, isim);
+                fv(data, tstart, x, im, isim);
+                fx(tstart, x, returndxdt, data, im, isim);
 
                 /* Create CVODES object */
                 cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
                 if (cvode_mem == NULL) {status[0] = 3; return;}
                 
                 /* Allocate space for CVODES */
-                flag = AR_CVodeInit(cvode_mem, x, tstart, im, ic);
+                flag = AR_CVodeInit(cvode_mem, x, tstart, im, isim);
                 if (flag < 0) {status[0] = 4; return;}
                 
                 /* Number of maximal internal steps */
@@ -550,7 +566,7 @@ void x_calc(int im, int ic, int sensi) {
                 
                 /* Jacobian-related settings */
                 if (jacobian == 1) {
-                    flag = AR_CVDlsSetDenseJacFn(cvode_mem, im, ic);
+                    flag = AR_CVDlsSetDenseJacFn(cvode_mem, im, isim);
                     if (flag < 0) {status[0] = 8; return;}
                 }
                 
@@ -568,7 +584,7 @@ void x_calc(int im, int ic, int sensi) {
                 data->sv = mxGetData(mxGetField(arcondition, ic, "svNum"));
                 
                 /* fill inputs */
-                fsu(data, tstart, im, ic);
+                fsu(data, tstart, im, isim);
                   
                 if(neq>0){
                     /* Load sensitivity initial conditions */
@@ -580,11 +596,11 @@ void x_calc(int im, int ic, int sensi) {
                             sxtmp[ks] = 0.0;
                         }
                     }
-                    for (is=0;is<nps;is++) fsx0(is, sx[is], data, im, ic);
-                    fsv(data, tstart, x, im, ic);
-                    dfxdp(data, tstart, x, returnddxdtdp, im, ic);
+                    for (is=0;is<nps;is++) fsx0(is, sx[is], data, im, isim);
+                    fsv(data, tstart, x, im, isim);
+                    dfxdp(data, tstart, x, returnddxdtdp, im, isim);
                     
-                    flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sensirhs, sx, im, ic);
+                    flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sensirhs, sx, im, isim);
                     if(flag < 0) {status[0] = 10; return;}
                     
                     /*
@@ -666,7 +682,7 @@ void x_calc(int im, int ic, int sensi) {
                             
                             if ( ts[is] == inf ) {
                                 /* Equilibrate the system */
-                                flag = equilibrate(cvode_mem, data, x, t, returndxdt, teq, neq, im, ic);
+                                flag = equilibrate(cvode_mem, data, x, t, returndxdt, teq, neq, im, isim);
                             } else {
                                 /* Simulate up to the next time point */
                                 flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
@@ -692,8 +708,8 @@ void x_calc(int im, int ic, int sensi) {
 
                 /* Store time step results */
                 if(status[0] == 0.0) {
-                    fu(data, ts[is], im, ic);
-                    fv(data, ts[is], x, im, ic);
+                    fu(data, ts[is], im, isim);
+                    fv(data, ts[is], x, im, isim);
                     
                     for(js=0; js < nu; js++) returnu[js*nout+is] = data->u[js];
                     for(js=0; js < nv; js++) returnv[js*nout+is] = data->v[js];
@@ -717,8 +733,8 @@ void x_calc(int im, int ic, int sensi) {
                                 if (flag < 0) {status[0] = 14; return;}
                             }
                         }
-                        fsu(data, ts[is], im, ic);
-                        fsv(data, ts[is], x, im, ic);
+                        fsu(data, ts[is], im, isim);
+                        fsv(data, ts[is], x, im, isim);
                         
                         for(js=0; js < nps; js++) {
                             if(neq>0) {
