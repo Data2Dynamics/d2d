@@ -100,6 +100,7 @@ for m = 1 : length( ar.model )
         end
 
         totalEvents = totalEvents + length( events );
+        
         if isfield( ar.model(m).data(a), 'tEvents' )
             ar.model(m).data(a).tEvents = union( ar.model(m).data(a).tEvents, events );
         else
