@@ -64,11 +64,6 @@ function ar = arAddEvent( varargin )
         end
     end
     
-    doLink = true;
-    if ( length( varargin ) > 6 )
-        doLink = false;
-    end
-    
     manualSensitivity = 0;
     if ( length( varargin ) > 6 )
         manualSensitivity = 1;
@@ -85,6 +80,11 @@ function ar = arAddEvent( varargin )
             error( 'Sensitivity matrix has the wrong dimensions. Should be 1 x nStates x nPars' );
         end
     end
+    
+    doLink = true;
+    if ( length( varargin ) > 8 )
+        doLink = varargin{9};
+    end    
     
     % Insert event
     [ar.model(m).condition(c).tEvents, ~, i] = union( ar.model(m).condition(c).tEvents, t );

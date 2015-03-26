@@ -12,9 +12,11 @@ function ar = arClearEvents( varargin )
     end
 
     % Clear all events
+    h = waitbar(0, 'Clearing events');
     for m = 1 : length( ar.model )
         if isfield(ar.model(m), 'condition' )
             for c = 1 : length( ar.model(m).condition )
+                waitbar(0.9*c/length( ar.model(m).condition ), h, sprintf('Clearing events for model %d [condition %d/%d]', m, c, length( ar.model(m).condition )));
                 ar.model(m).condition(c).modt = [];
                 ar.model(m).condition(c).modx_A = [];
                 ar.model(m).condition(c).modx_B = [];
@@ -31,10 +33,14 @@ function ar = arClearEvents( varargin )
     end
     
     % Wipe steady state conditions
+    h = waitbar(0.9, h, 'Removing steady state conditions');
     if isfield(ar.model, 'ss_condition')
         ar.model = rmfield(ar.model,'ss_condition');
-    end          
+    end
     
+    h = waitbar(0.95, h, 'Linking model');
     % The event removal requires linking (silent link)
     arLink(true);
+    
+    close(h);
 end

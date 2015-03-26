@@ -120,15 +120,18 @@ function ar = arSteadyState( varargin )
     end
     insertionPoint = length(ar.model.ss_condition);
     
+    h = waitbar(0, 'Linking up steady state');
     % Link up the target conditions
     for a = 1 : length( cTarget )
+        waitbar(a/length(cTarget), h, sprintf('Linking up steady state %d/%d', a, length(cTarget)));
+        
         % Map the parameters from the ss condition to the target condition
         fromP   = ar.model(m).condition(cSS).p;
         toP     = ar.model(m).condition(cTarget(a)).p;
         map     = mapStrings( fromP, toP );
     
         nStates = numel( ar.model(m).x );
-        nPars   = numel( ar.model(m).condition(cSS).p );
+        nPars   = numel( toP );
         ar.model(m).condition(cTarget(a)).ssParLink = map;
         ar.model(m).condition(cTarget(a)).ssLink = insertionPoint;
         
@@ -139,6 +142,7 @@ function ar = arSteadyState( varargin )
             ar.model(m).condition(cTarget(a)).tstart, ...
             [1:nStates], vals, vals, sens, sens, false );
     end
+    close(h);
     
     ar.ss_conditions = true;
     
