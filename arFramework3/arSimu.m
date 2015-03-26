@@ -113,17 +113,22 @@ if ( ss_presimulation )
         for ssID = 1 : length( ar.model(m).ss_condition )
             targetConditions    = ar.model(m).ss_condition(ssID).ssLink;
             SSval               = ar.model(m).ss_condition(ssID).xFineSimu(end, :) + 0;     % + 0 is for R2013 compatibility
-            SSsens              = ar.model(m).ss_condition(ssID).sxFineSimu(end, :, :) + 0;
+            if ( sensi )
+                SSsens              = ar.model(m).ss_condition(ssID).sxFineSimu(end, :, :) + 0;
+            end
 
             nStates = length(ar.model(m).x);
             % Copy the steady state values and sensitivities into the target
             % conditions taking into account any parameter order remapping
             for a = 1 : length( targetConditions )
                 ar.model(m).condition(targetConditions(a)).modx_A(1,:) = zeros(1,nStates);
-                ar.model(m).condition(targetConditions(a)).modsx_A(1,:,:) = zeros(1,nStates,length(ar.model(m).condition(targetConditions(a)).p));
                 ar.model(m).condition(targetConditions(a)).modx_B(1,:) = SSval + 0;
-                ar.model(m).condition(targetConditions(a)).modsx_B(1,:,:) = ...
-                    SSsens(:,:,ar.model(m).condition(targetConditions(a)).ssParLink) + 0;
+                if ( sensi )
+                    ar.model(m).condition(targetConditions(a)).modsx_A(1,:,:) = ...
+                        zeros(1,nStates,length(ar.model(m).condition(targetConditions(a)).p));
+                    ar.model(m).condition(targetConditions(a)).modsx_B(1,:,:) = ...
+                        SSsens(:,:,ar.model(m).condition(targetConditions(a)).ssParLink) + 0;
+                end
             end
         end
     end
