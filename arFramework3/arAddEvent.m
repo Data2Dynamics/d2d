@@ -110,7 +110,7 @@ function ar = arAddEvent( varargin )
     
     % Merge mod matrices if required
     if ( newEvent )
-        ar.model(m).condition(c).modt     = [ ar.model(m).condition(c).modt(1:I-1) t ar.model(m).condition(c).modt(I:end) ];
+        ar.model(m).condition(c).modt     = union( ar.model(m).condition(c).modt, t );
         ar.model(m).condition(c).modx_A   = [ ar.model(m).condition(c).modx_A(1:I-1,:) ; modx_A_ins ; ar.model(m).condition(c).modx_A(I:end,:) ];
         ar.model(m).condition(c).modx_B   = [ ar.model(m).condition(c).modx_B(1:I-1,:) ; modx_B_ins ; ar.model(m).condition(c).modx_B(I:end,:) ];
         ar.model(m).condition(c).modsx_A  = [ ar.model(m).condition(c).modsx_A(1:I-1,:,:) ; modsx_A_ins ; ar.model(m).condition(c).modsx_A(I:end,:,:) ];

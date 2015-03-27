@@ -267,6 +267,7 @@ void x_calc(int im, int ic, int sensi) {
     /* Used to override which condition to simulate */
     mxArray *src;    
     double  *isrc;
+    int     only_sim;
 
     /* Multiple shooting and events */
     int qMS, qEvents;
@@ -501,11 +502,13 @@ void x_calc(int im, int ic, int sensi) {
             
             /* Override which condition to simulate */
             src = mxGetField(arcondition, ic, "src");
-            if (src == NULL)
-                isim = ic;
-            else {
-                isrc = mxGetData(src);
-                isim = (int) (*isrc) - 1;
+            if (src == NULL) {
+                only_sim    = 0;
+                isim        = ic;
+            } else {
+                isrc        = mxGetData(src);
+                isim        = (int) (*isrc) - 1;
+                only_sim    = 1;
             }
             
             /* fill for t=0 */
@@ -778,11 +781,11 @@ void x_calc(int im, int ic, int sensi) {
             /* Free memory */
             if(neq>0) {
                 N_VDestroy_Serial(x);
-		 N_VDestroy_Serial(atolV);
+                N_VDestroy_Serial(atolV);
                 if (sensi == 1) {
                     N_VDestroyVectorArray_Serial(sx, nps);
-		    N_VDestroy_Serial(atols_ss);
-		    N_VDestroyVectorArray_Serial(atolV_ss, nps);
+                    N_VDestroy_Serial(atols_ss);
+                    N_VDestroyVectorArray_Serial(atolV_ss, nps);
                 }
                 CVodeFree(&cvode_mem);
             }
@@ -951,7 +954,8 @@ void x_calc(int im, int ic, int sensi) {
         }
         
         /* call z_calc */
-        z_calc(im, ic, arcondition, sensi);
+        if ( only_sim == 0 )
+            z_calc(im, ic, arcondition, sensi);
     }
 
 #ifdef HAS_SYSTIME
