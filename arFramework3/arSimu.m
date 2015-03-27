@@ -116,7 +116,7 @@ if ( ss_presimulation )
             if ( sensi )
                 SSsens              = ar.model(m).ss_condition(ssID).sxFineSimu(end, :, :) + 0;
             end
-
+            
             nStates = length(ar.model(m).x);
             % Copy the steady state values and sensitivities into the target
             % conditions taking into account any parameter order remapping
@@ -128,6 +128,13 @@ if ( ss_presimulation )
                         zeros(1,nStates,length(ar.model(m).condition(targetConditions(a)).p));
                     ar.model(m).condition(targetConditions(a)).modsx_B(1,:,:) = ...
                         SSsens(:,:,ar.model(m).condition(targetConditions(a)).ssParLink) + 0;
+                    
+                    % Certain sensitivities are not mappable from SS to target
+                    % do not tamper with these.
+                    if ~isempty( ar.model(m).ssUnmapped )
+                        ar.model(m).condition(targetConditions(a)).modsx_A(1,:,ar.model(m).ssUnmapped) = 1;
+                        ar.model(m).condition(targetConditions(a)).modsx_B(1,:,ar.model(m).ssUnmapped) = 0;
+                    end
                 end
             end
         end

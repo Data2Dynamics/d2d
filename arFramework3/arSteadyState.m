@@ -130,6 +130,17 @@ function ar = arSteadyState( varargin )
         fromP   = ar.model(m).condition(cSS).p;
         toP     = ar.model(m).condition(cTarget(a)).p;
         map     = mapStrings( fromP, toP );
+        
+        % Certain parameters may be unmapped (do not exist in target condition).
+        ar.model(m).ssUnmapped = [];
+        L = find( isnan(map) );
+        if ~isempty( L )
+            warning( 'Certain states in target condition not present in steady state reference!' );
+            warning( 'The following sensitivities will *not* take the equilibration into account:' );
+            disp( sprintf( '%s\n', ar.model(m).condition(cTarget(a)).p{L} ) );
+            ar.model(m).condition(cTarget(a)).ssUnmapped = L;
+            map(L) = 1;
+        end
     
         nStates = numel( ar.model(m).x );
         nPars   = numel( toP );
