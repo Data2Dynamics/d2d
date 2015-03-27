@@ -110,6 +110,11 @@ for m=1:length(ar.model)
             end
         end
         
+        % Remove events before tstart
+        for c = 1 : length( ar.model(m).condition )
+            ar.model(m).condition(c).tEvents( find( ar.model(m).condition(c).tEvents < ar.model(m).condition(c).tstart ) ) = [];
+        end
+        
         % Add events to tFine and tExp (if it exists)
         for c = 1 : length( ar.model(m).condition )
             if isfield(ar.model(m).condition(c), 'tExp')
@@ -273,7 +278,7 @@ for m = 1:length(ar.model)
         modsx_A = ones(nte, nx, np);
         modsx_B = zeros(nte, nx, np);        
         
-        % which events were already in the list?
+        % which events were already in the list upon last link?
         if ( isfield( ar.model(m).condition(c), 'modt' ) )              
             % preserve the old values for the modification parameters
             mod_id = ismember( ar.model(m).condition(c).tEvents, ...
