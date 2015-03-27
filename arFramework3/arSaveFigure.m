@@ -61,9 +61,9 @@ elseif(isunix)
     cd([arSave subdir]);
     
     if(ismac)
-        eval(['!/usr/texbin/pdflatex ' [arPathConvert(name) '.tex'] ' > log_pdflatex.txt']);
+        eval(['!/usr/texbin/pdflatex -interaction=nonstopmode ' [arPathConvert(name) '.tex'] ' > log_pdflatex.txt']);
     else
-        eval(['!pdflatex ' [arPathConvert(name) '.tex'] ' > log_pdflatex.txt']);
+        eval(['!pdflatex -interaction=nonstopmode ' [arPathConvert(name) '.tex'] ' > log_pdflatex.txt']);
     end
     
     cd(workingdir);
