@@ -244,6 +244,7 @@ void thread_calc(int id) {
     
 #ifdef HAS_PTHREAD
     if(parallel==1) {pthread_exit(NULL);}
+    return NULL;
 #endif
 }
 
@@ -677,11 +678,12 @@ void x_calc(int im, int ic, int sensi) {
 
                         if(neq>0) {
                             /* If this condition has events, make sure we don't go over them as this leads to loss of accuracy */
-                            if (qEvents==1)
+                            if (qEvents==1){
                                 if (event_data->i < event_data->n)
                                     CVodeSetStopTime(cvode_mem, RCONST(event_data->t[event_data->i]));
                                 else
                                     CVodeSetStopTime(cvode_mem, ts[nout-1]+1.0);
+                            }
                             
                             if ( ts[is] == inf ) {
                                 /* Equilibrate the system */
