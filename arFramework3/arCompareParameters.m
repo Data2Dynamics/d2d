@@ -1,7 +1,10 @@
-function arCompareParameters(filenames)
+function arCompareParameters(filenames, onlyCommons)
 
-if(nargin==0)
+if(nargin==0 || isempty(filenames))
     filenames = fileChooserMulti('./Results', true);
+end
+if(~exist('onlyCommons','var'))
+    onlyCommons = false;
 end
 if(~iscell(filenames))
     filelist = fileList('./Results');
@@ -16,14 +19,26 @@ for j=1:length(filenames)
     if(exist(fname,'file'))
         tmp = load(fname);
         pLabel{j} = tmp.ar.pLabel; %#ok<AGROW>
-        pLabelCollect = union(pLabelCollect, pLabel{j});
+        if(onlyCommons)
+            if(~isempty(pLabelCollect))
+                pLabelCollect = intersect(pLabelCollect, pLabel{j});
+            else
+                pLabelCollect = pLabel{j};
+            end
+        else
+            pLabelCollect = union(pLabelCollect, pLabel{j});
+        end
         p{j} = tmp.ar.p; %#ok<AGROW>
     end
 end
 
 ps = nan(length(pLabelCollect),length(filenames));
 for j=1:length(filenames)
-    ps(ismember(pLabelCollect, pLabel{j}),j) = p{j};
+    if(onlyCommons)
+        ps(:,j) = p{j}(ismember(pLabel{j}, pLabelCollect));
+    else
+        ps(ismember(pLabelCollect, pLabel{j}),j) = p{j};
+    end
 end
 
 figure(1)
