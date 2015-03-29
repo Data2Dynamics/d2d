@@ -25,7 +25,7 @@ for jys = 1:length(iy)
         ystd = [ystd; ystd]; %#ok<AGROW>
         lb = [lb; lb]; %#ok<AGROW>
         ub = [ub; ub]; %#ok<AGROW>
-    elseif(nfine_dr_plot>10)
+    elseif(nfine_dr_plot>10 && nfine_dr_plot>2*length(t))
         tf = linspace(min(t), max(t), nfine_dr_plot)';
         [t, qit] = unique(t);
         y = y(qit,:);
@@ -121,5 +121,6 @@ for jys = 1:length(iy)
             y_ssa, y_ssa_lb, y_ssa_ub, ...
             ploterrors, Clines, ClinesExp, qUnlog, ...
             hys, hystds, hysss, dydt, qFit, []);
+        arSpacedAxisLimits(get(hys(jy),'Parent'));
     end
 end
