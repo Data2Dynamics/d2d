@@ -53,6 +53,7 @@ int    parallel;
 int    sensirhs;
 int    fiterrors;
 int    cvodes_maxsteps;
+double cvodes_maxstepsize;
 int    cvodes_atolV;
 int    cvodes_atolV_Sens;
 double cvodes_rtol;
@@ -150,6 +151,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     cvodes_rtol = mxGetScalar(mxGetField(arconfig, 0, "rtol"));
     cvodes_atol = mxGetScalar(mxGetField(arconfig, 0, "atol"));
     cvodes_maxsteps = (int) mxGetScalar(mxGetField(arconfig, 0, "maxsteps"));
+    cvodes_maxstepsize = mxGetScalar(mxGetField(arconfig, 0, "maxstepsize"));
     fiterrors = (int) mxGetScalar(mxGetField(arconfig, 0, "fiterrors"));
     fiterrors_correction = (double) mxGetScalar(mxGetField(arconfig, 0, "fiterrors_correction"));
     mintau = mxGetScalar(mxGetField(arconfig, 0, "ssa_min_tau"));
@@ -535,6 +537,10 @@ void x_calc(int im, int ic, int sensi) {
                 /* Number of maximal internal steps */
                 flag = CVodeSetMaxNumSteps(cvode_mem, cvodes_maxsteps);
                 if(flag < 0) {status[0] = 15; return;}
+                
+                /* Maximal internal step size */
+                flag = CVodeSetMaxStep(cvode_mem, cvodes_maxstepsize);
+                if(flag < 0) {status[0] = 19; return;}
                 
                 /* Use private function to compute error weights */
 		atolV = N_VNew_Serial(neq);

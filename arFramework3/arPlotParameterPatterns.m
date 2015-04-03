@@ -9,7 +9,7 @@ if(~exist('jks','var'))
     jks = 1:length(ar.p);
 end
 
-figure(1)
+figure(1); clf;
 C = jet(nbest);
 C = bsxfun(@rdivide, C, sqrt(sum(C.^2,2)));
 patch([ar.lb(jks) fliplr(ar.ub(jks))], [1:length(jks) length(jks):-1:1], ...

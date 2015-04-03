@@ -100,6 +100,7 @@ ar.ppl.n = 300;
 ar.config.atol = 1e-6;
 ar.config.rtol = 1e-6;
 ar.config.maxsteps = 1000;
+ar.config.maxstepsize = Inf;
 ar.config.useEvents = 0;
 ar.config.useMS 	= 0;
 
@@ -130,10 +131,11 @@ ar.info.arsimucalc_flags{11} = 'CVodeSensEEtolerances()';
 ar.info.arsimucalc_flags{12} = 'CVodeSetSensErrCon()';
 ar.info.arsimucalc_flags{13} = 'CVodeSetSensParams()';
 ar.info.arsimucalc_flags{14} = 'CVodeGetSens()';
-ar.info.arsimucalc_flags{15} = 'CVodeSetMaxNumSteps';
+ar.info.arsimucalc_flags{15} = 'CVodeSetMaxNumSteps()';
 ar.info.arsimucalc_flags{16} = 'CVodeReInit()';
 ar.info.arsimucalc_flags{17} = 'CVodeSensReInit()';
 ar.info.arsimucalc_flags{18} = 'malloc EventData';
+ar.info.arsimucalc_flags{19} = 'CVodeSetMaxNumSteps()';
 
 ar.info.cvodes_flags = cell(1,30);
 
