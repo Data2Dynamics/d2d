@@ -265,7 +265,7 @@ end
 % priors
 for jp=1:np
     if(ar.type(jp) == 0) % flat prior with hard bounds
-    elseif(ar.type(jp) == 1) % gaussian prior
+    elseif(ar.type(jp) == 1) % normal prior
         tmpres = (ar.mean(jp)-ar.p(jp))./ar.std(jp);
         ar.res(resindex) = tmpres;
         resindex = resindex+1;
@@ -279,7 +279,7 @@ for jp=1:np
         ar.nprior = ar.nprior + 1;
         ar.chi2 = ar.chi2 + tmpres^2;
         ar.chi2prior = ar.chi2prior + tmpres^2;
-    elseif(ar.type(jp) == 2) % uniform with gaussian bounds
+    elseif(ar.type(jp) == 2) % uniform with normal bounds
         tmpres = 0;
         w = 0.1;
         if(ar.p(jp) < ar.lb(jp))
