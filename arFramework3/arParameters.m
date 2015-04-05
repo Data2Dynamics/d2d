@@ -81,7 +81,6 @@ function uitable1_CreateFcn(hObject, eventdata, handles)
 
 global ar
 
-fit = {'fitted','fixed','constant'};
 type = {'uniform','normal','uniform with normal bounds','L1'};
 C = cell(length(ar.p),9);
 for jp=1:length(ar.p)
@@ -90,7 +89,7 @@ for jp=1:length(ar.p)
     C{jp,3} = ar.p(jp);
     C{jp,4} = ar.ub(jp);
     C{jp,5} = ar.qLog10(jp)==1;
-    C{jp,6} = fit{ar.qFit(jp)+1};
+    C{jp,6} = ar.qFit(jp)==1;
     C{jp,7} = type{ar.type(jp)+1};
     C{jp,8} = ar.mean(jp);
     C{jp,9} = ar.std(jp);
@@ -117,7 +116,6 @@ jt = eventdata.Indices(2);
 newval = eventdata.EditData;
 C = get(hObject, 'Data');
 
-fit = {'fitted','fixed','constant'};
 type = {'uniform','normal','uniform with normal bounds','L1'};
 
 % check for nan
@@ -189,7 +187,7 @@ elseif(jt==5) % qLog10
         end
     end
 elseif(jt==6) % qFit
-    ar.qFit(jp) = find(ismember(fit, newval))-1;
+    ar.qFit(jp) = newval;
 elseif(jt==7) % type
     ar.type(jp) = find(ismember(type, newval))-1;
 elseif(jt==8) % mean
