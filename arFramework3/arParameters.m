@@ -22,7 +22,7 @@ function varargout = arParameters(varargin)
 
 % Edit the above text to modify the response to help arParameters
 
-% Last Modified by GUIDE v2.5 04-Apr-2015 16:16:58
+% Last Modified by GUIDE v2.5 05-Apr-2015 19:38:47
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -197,7 +197,12 @@ elseif(jt==9) % std
     newval = str2double(newval);
     ar.std(jp) = newval;
 end
-    
-    
-    
-    
+  
+
+% --- Executes on button press in pushbutton1.
+function pushbutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+arPlot;
