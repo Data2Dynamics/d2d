@@ -258,24 +258,26 @@ for jm = 1:length(ar.model)
 
                         
                         % legends
-                        if(jtype == 1)
-                            inonzero = find(hystds~=0);
-                            Clegend(ccount) = hystds(inonzero(1));
-                        else
-                            inonzero = find(hys~=0);
-                            Clegend(ccount) = hys(inonzero(1));
-                        end
-                        if(qDR)
-                            if(~isempty(conditions) && ~isempty(conditions{jc}))
-                                Clegendlabel{ccount} = sprintf('t=%g%s : %s', dr_times(jt), ...
-                                    tUnits{2}, arNameTrafo(conditions{jc}));
+                        if(~isempty(hys))
+                            if(jtype == 1)
+                                inonzero = find(hystds~=0);
+                                Clegend(ccount) = hystds(inonzero(1));
                             else
-                                Clegendlabel{ccount} = sprintf('t=%g%s', dr_times(jt), ...
-                                    tUnits{2});
+                                inonzero = find(hys~=0);
+                                Clegend(ccount) = hys(inonzero(1));
                             end
-                        else
-                            if(~isempty(conditions) && ~isempty(conditions{jc}))
-                                Clegendlabel{ccount} = arNameTrafo(conditions{jc});
+                            if(qDR)
+                                if(~isempty(conditions) && ~isempty(conditions{jc}))
+                                    Clegendlabel{ccount} = sprintf('t=%g%s : %s', dr_times(jt), ...
+                                        tUnits{2}, arNameTrafo(conditions{jc}));
+                                else
+                                    Clegendlabel{ccount} = sprintf('t=%g%s', dr_times(jt), ...
+                                        tUnits{2});
+                                end
+                            else
+                                if(~isempty(conditions) && ~isempty(conditions{jc}))
+                                    Clegendlabel{ccount} = arNameTrafo(conditions{jc});
+                                end
                             end
                         end
                         
@@ -284,7 +286,7 @@ for jm = 1:length(ar.model)
                 end
                 
                 % legend
-                if(doLegends && ~fastPlot && (~isempty(conditions) || qDR))
+                if(doLegends && ~fastPlot && (~isempty(conditions) && nrows*ncols>0 || qDR))
                     g = subplot(nrows, ncols, nrows*ncols);
                     lpos = get(g,'Position');
                     delete(g);
