@@ -75,6 +75,8 @@ end
 
 function ar = arLoadParsCore(ar, filename, fixAssigned, only_values)
 
+N = 1000;
+
 filename_tmp = filename;
 filename = ['./Results/' filename '/workspace.mat'];
 filename_pars = ['./Results/' filename_tmp '/workspace_pars_only.mat'];
@@ -92,7 +94,7 @@ for j=1:length(ar.p)
     
     if(isempty(qi) || sum(qi) == 0)
         ass(j) = 0;
-        if(length(ar.p)<=100)
+        if(length(ar.p)<=N)
             fprintf('                      %s\n', ar.pLabel{j});
         end
     else
@@ -128,22 +130,22 @@ for j=1:length(ar.p)
         
         if(fixAssigned)
             ar.qFit(j) = 0;
-            if(length(ar.p)<=100)
+            if(length(ar.p)<=N)
                 fprintf('fixed and assigned -> %s\n', ar.pLabel{j});
             end
         else
-            if(length(ar.p)<=100)
+            if(length(ar.p)<=N)
                 fprintf('          assigned -> %s\n', ar.pLabel{j});
             end
         end
     end
 end
 
-if(length(ar.p)>100)
+if(length(ar.p)>N)
     nnot = length(ass)-sum(ass);
     fprintf('%i assigned, %i not assigned.\n',sum(ass),nnot);
     if(nnot<=30 && nnot>0)
-        fprintf('Not assigned are: %s \n',sprintf('%s, ',ar.pLabel{find(ass==0)}));
+        fprintf('Not assigned are: %s \n',sprintf('%s, ',ar.pLabel{ass==0}));
     end
 end
 

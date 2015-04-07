@@ -7,4 +7,8 @@ if(~exist('rowstocols', 'var'))
 end
 
 nrows = ceil(n^rowstocols);
-ncols = ceil(n / nrows);
+if(nrows~=0)
+    ncols = ceil(n / nrows);
+else
+    ncols = 0;
+end
