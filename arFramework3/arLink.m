@@ -447,9 +447,10 @@ for m = 1:length(ar.model)
 end
 
 % populate threads
-populate_threads( 'threads', 'condition' );
-populate_threads( 'ss_threads', 'ss_condition' );
+populate_threads( 'threads', 'condition', 'nTasks');
+populate_threads( 'ss_threads', 'ss_condition', 'nssTasks');
 ar.config.nThreads = length(ar.config.threads);
+ar.config.nssThreads = length(ar.config.ss_threads);
 
 % reset values
 if(exist('plabel','var'))
@@ -484,7 +485,7 @@ if(isfield(ar, 'pExternLabels'))
         ar.lbExtern, ar.ubExtern);
 end
 
-function populate_threads( thread_fieldname, condition_fieldname )
+function populate_threads( thread_fieldname, condition_fieldname, ntask_fieldname)
 
     global ar;
     
@@ -496,7 +497,7 @@ function populate_threads( thread_fieldname, condition_fieldname )
     ar.config.(thread_fieldname)(1).ms = int32([]);
     ar.config.(thread_fieldname)(1).cs = int32([]);
     ithread = 1;
-    ar.config.nTasks = 0;
+    ar.config.(ntask_fieldname) = 0;
     for m = 1:length(ar.model)
         if (isfield(ar.model(m), condition_fieldname))
             for c = 1:length(ar.model(m).(condition_fieldname) )
@@ -507,7 +508,7 @@ function populate_threads( thread_fieldname, condition_fieldname )
                     ar.config.(thread_fieldname)(ithread).ms = int32([]);
                     ar.config.(thread_fieldname)(ithread).cs = int32([]);
                 end
-                ar.config.nTasks = ar.config.nTasks + 1;
+                ar.config.(ntask_fieldname) = ar.config.(ntask_fieldname) + 1;
                 ar.config.(thread_fieldname)(ithread).n = ...
                     ar.config.(thread_fieldname)(ithread).n + 1;
                 ar.config.(thread_fieldname)(ithread).nd = ...

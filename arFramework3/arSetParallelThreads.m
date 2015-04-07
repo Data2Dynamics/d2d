@@ -18,7 +18,7 @@ if(~exist('silent','var'))
 end
 
 if(~silent)
-    fprintf('requesting %i threads for %i tasks on %i core machine.\n', ...
+    fprintf('requesting %i thread(s) for %i task(s) on %i core(s).\n', ...
         n, ar.config.nTasks, ar.config.nCore);
 end
 
