@@ -701,7 +701,7 @@ void x_calc(int im, int ic, int sensi) {
                             }
                             
                             /* Found an event */
-                            if ((qEvents==1) && (ts[is]==event_data->t[event_data->i])) /*flag==CV_TSTOP_RETURN*/
+                            if ((qEvents==1) && (event_data->i < event_data->n) && (ts[is]==event_data->t[event_data->i])) /*flag==CV_TSTOP_RETURN*/
                             {
                               qEvents = 2;    /* qEvents=2 denotes that an event just happened */
                               flag = 0;     /* Re-set the flag for legacy error-checking reasons */
@@ -1090,6 +1090,7 @@ int handle_event( void* cvode_mem, EventData event_data, UserData user_data, N_V
             Ith(x, state+1) = A * Ith(x, state+1) + B;
         }
    
+        /* printf("t[%d/%d]=%f  A: %f, B: %f\n", cStep, tStep, event_data->t[event_data->i], A, B); */
         /* Override sensitivity equations */
         if (sensi==1) {
             for (pars=0; pars<nps; pars++) {
