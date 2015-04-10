@@ -8,6 +8,10 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
+% Fetch MATLAB version
+matVer = ver('MATLAB');
+ar.config.matlabVersion = str2double(matVer.Version);
+
 savePath = [arSave '/Latex'];
 
 if(~exist([cd '/' savePath], 'dir'))
@@ -1219,9 +1223,9 @@ fprintf(fid, '& %s ', sprintf('%g', num));
 
 % better subs
 function out = mysubs(in, old, new)
+global ar
 if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    matVer = ver('MATLAB');
-    if(str2double(matVer.Version)>=8.1)
+    if(ar.config.matlabVersion>=8.1)
         out = subs(in, old(:), new(:));
     else
         out = subs(in, old(:), new(:), 0);
