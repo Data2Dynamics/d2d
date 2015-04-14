@@ -118,11 +118,16 @@ if ( ss_presimulation )
             end
             
             nStates = length(ar.model(m).x);
+            
+            % Which states do we change?
+            ssStates = ar.model(m).ss_condition(ssID).ssStates;
+            ssIgnore = ar.model(m).ss_condition(ssID).ssIgnore;
+            
             % Copy the steady state values and sensitivities into the target
             % conditions taking into account any parameter order remapping
             for a = 1 : length( targetConditions )
-                ar.model(m).condition(targetConditions(a)).modx_A(1,:) = zeros(1,nStates);
-                ar.model(m).condition(targetConditions(a)).modx_B(1,:) = SSval + 0;
+                ar.model(m).condition(targetConditions(a)).modx_A(1,:) = 1 - ssStates;
+                ar.model(m).condition(targetConditions(a)).modx_B(1,:) = SSval .* ssStates;
                 if ( sensi )
                     ar.model(m).condition(targetConditions(a)).modsx_A(1,:,:) = ...
                         zeros(1,nStates,length(ar.model(m).condition(targetConditions(a)).p));
@@ -131,9 +136,13 @@ if ( ss_presimulation )
                     
                     % Certain sensitivities are not mappable from SS to target
                     % do not tamper with these.
-                    if ~isempty( ar.model(m).ssUnmapped )
-                        ar.model(m).condition(targetConditions(a)).modsx_A(1,:,ar.model(m).ssUnmapped) = 1;
-                        ar.model(m).condition(targetConditions(a)).modsx_B(1,:,ar.model(m).ssUnmapped) = 0;
+                    if ~isempty( ar.model(m).condition(targetConditions(a)).ssUnmapped )
+                        ar.model(m).condition(targetConditions(a)).modsx_A(1,:,ar.model(m).condition(targetConditions(a)).ssUnmapped) = 1;
+                        ar.model(m).condition(targetConditions(a)).modsx_B(1,:,ar.model(m).condition(targetConditions(a)).ssUnmapped) = 0;
+                    end
+                    if ~isempty( ssIgnore )
+                        ar.model(m).condition(targetConditions(a)).modsx_A(1,ssIgnore,:) = 1;
+                        ar.model(m).condition(targetConditions(a)).modsx_B(1,ssIgnore,:) = 0;
                     end
                 end
             end

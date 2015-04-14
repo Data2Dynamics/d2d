@@ -1,23 +1,29 @@
 % Add steady state pre-simulation
 %
 % Usage:
-%   arAddEvent((ar), model, conditionSS, conditionAffected, (tstart) )
+%   arSteadyState((ar), model, conditionSS, conditionAffected, (states), (tstart) )
 %
-% Adds a pre-equilibration to a number of conditions. ConditionSS refers
-% to the condition used for equilibration to steady state (source).
-% Events beloning to the steady state simulation condition are ignored
-% when equilibrating. Input functions will behave as they were for the
-% source condition. In many cases, it is therefore desirable to use a
-% steady state condition with no inputs.
-%
-% The optional argument tstart refers to the starting timepoint of the 
-% steady state simulation.
+%   Adds a pre-equilibration to a number of conditions. ConditionSS refers
+%   to the condition used for equilibration to steady state (source).
+%   Events beloning to the steady state simulation condition are ignored
+%   when equilibrating. Input functions will behave as they were for the
+%   source condition. In many cases, it is therefore desirable to use a
+%   steady state condition with no inputs.
 %
 % For the target conditions, note that any event occuring immediately at
 % the start of the simulation will be overwritten by the event that
 % initializes this condition to steady state. If an event immediately 
 % upon start is required (for example, concentration = 2*steadystate), 
 % consider adding time points before the desired event.
+%
+% Advanced use:
+%   By default, all values of a steady state equilibration are copied into 
+%   the destination initial condition. In some cases, this is undesirable.
+%   If you wish to omit states; supply a cell array of state names that are
+%   to be omitted from the equilibration.
+%
+%   The optional argument tstart refers to the starting timepoint of the 
+%   steady state simulation.
 %
 % Hint: If you wish to see how the conditions are set up, you can use 
 % the command 'arShowDataConditionStructure'
@@ -48,10 +54,32 @@ function ar = arSteadyState( varargin )
     m       = varargin{1};
     cSS     = varargin{2};
     cTarget = varargin{3};
+    if ( length(varargin) > 3 )
+        varargin = varargin(4:end);
+    end
+    
+    omissions = [];
+    if iscell( varargin{1} )
+        for a = 1 : length( varargin{1} )
+            state = find(strcmp(ar.model.x, varargin{1}{a}));
+            if ( isempty( state ) )
+                error( 'Cannot find state %s in the supplied model', varargin{1}{a} );
+            else
+                omissions = union( omissions, state );
+            end
+        end
+        if ( length( varargin ) > 1 )
+            varargin = varargin(2:end);
+        end
+    end
     
     tstart = 0;
-    if ( length(varargin)>3 )
-        tstart = varargin{4};
+    if ( length(varargin)>0 )
+        try
+            tstart = varargin{1};
+        catch
+            error( 'Invalid argument passed for tstart' );
+        end
     end
     
     if ( ischar(cTarget) )
@@ -62,6 +90,8 @@ function ar = arSteadyState( varargin )
         end
     end
 
+    nStates = numel( ar.model(m).x );    
+    
     % Set up the steady state condition
     % Note that the explicit manual copy is intentional since in R2013
     % structure copies tend to be shallow copies.
@@ -114,6 +144,12 @@ function ar = arSteadyState( varargin )
     ss_condition.ddxdtdp    = zeros(size(origin.ddxdtdp));
     ss_condition.ssLink     = cTarget;
     
+    % Which states to map to the target condition (default = all)
+    ssStates                = ones(1,nStates);
+    ssStates(omissions)     = 0;
+    ss_condition.ssStates   = ssStates;
+    ss_condition.ssIgnore   = omissions;
+    
     if ( isfield( ar.model(m), 'ss_condition' ) )
         ar.model.ss_condition(end+1) = ss_condition;
     else
@@ -132,17 +168,16 @@ function ar = arSteadyState( varargin )
         map     = mapStrings( fromP, toP );
         
         % Certain parameters may be unmapped (do not exist in target condition).
-        ar.model(m).ssUnmapped = [];
+        ar.model(m).condition(cTarget(a)).ssUnmapped = [];
         L = find( isnan(map) );
         if ~isempty( L )
-            warning( 'Certain states in target condition not present in steady state reference!' );
+            warning( 'Certain parameters in target condition not present in steady state reference!' );
             warning( 'The following sensitivities will *not* take the equilibration into account:' );
             disp( sprintf( '%s\n', ar.model(m).condition(cTarget(a)).p{L} ) );
             ar.model(m).condition(cTarget(a)).ssUnmapped = L;
             map(L) = 1;
         end
     
-        nStates = numel( ar.model(m).x );
         nPars   = numel( toP );
         ar.model(m).condition(cTarget(a)).ssParLink = map;
         ar.model(m).condition(cTarget(a)).ssLink = insertionPoint;
@@ -161,7 +196,7 @@ function ar = arSteadyState( varargin )
     % The event addition requires linking (silent link)
     arLink(true);
     
-    % Show usercount (to prevent users from forgetting arClearEvents)
+    % Show steady state count (to prevent users from forgetting arClearEvents)
     cnt = 0;
     for a = 1 : length( ar.model )
         cnt = cnt + length(ar.model(m).ss_condition);
