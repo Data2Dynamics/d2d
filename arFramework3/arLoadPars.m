@@ -5,22 +5,23 @@
 %
 % filename:     source file name
 %               or number according to the filelist
+%               or a previously created global variable ar
 % fixAssigned:  fix the assigned parameters
 % only_values:  only load parameter values, not bound and status
 % pfad          path to the results folder, default: './Results'
 % 
 % 
-%  Examples for loading several parameter sets:
-% ars = arLoadPars({2,5});
-% [ars,ps] = arLoadPars({'Result1','ResultNr2'});
+% Examples for loading several parameter sets:
+%   ars = arLoadPars({2,5});
+%   [ars,ps] = arLoadPars({'Result1','ResultNr2'});
 % 
-%  Examples for loading all parameter sets:
-% ars = arLoadPars('all');
-% [ars,ps] = arLoadPars('all');
-% arFits(ps)
+% Examples for loading all parameter sets:
+%   ars = arLoadPars('all');
+%   [ars,ps] = arLoadPars('all');
+%   arFits(ps)
 % 
-%  Example:
-% arLoadPars('20141112T084549_model_fitted',[],[],'../OtherFolder/Results')
+% Example:
+%   arLoadPars('20141112T084549_model_fitted',[],[],'../OtherFolder/Results')
 
 function varargout = arLoadPars(filename, fixAssigned, only_values, pfad)
 if(~exist('pfad','var') || isempty(pfad))
@@ -33,6 +34,13 @@ end
 
 global ar
 
+if(~exist('fixAssigned', 'var') || isempty(fixAssigned))
+    fixAssigned = false;
+end
+if(~exist('only_values', 'var') || isempty(only_values))
+    only_values = false;
+end
+
 if(~exist('filename','var') || isempty(filename))
     [~, filename] = fileChooser(pfad, 1, true);
 elseif(isnumeric(filename)) % filename is the file-number
@@ -43,16 +51,7 @@ elseif(strcmp(filename,'end'))
     filename = filelist{end};
 elseif(strcmp(filename,'all'))
     filename = fileList(pfad);
-%     filename = filename(1:4)
 end
-
-if(~exist('fixAssigned', 'var') || isempty(fixAssigned))
-    fixAssigned = false;
-end
-if(~exist('only_values', 'var') || isempty(only_values))
-    only_values = false;
-end
-
 
 if(~iscell(filename))    
     ar = arLoadParsCore(ar, filename, fixAssigned, only_values, pfad);
@@ -85,17 +84,23 @@ end
 function ar = arLoadParsCore(ar, filename, fixAssigned, only_values, pfad)
 N = 1000;
 
-filename_tmp = filename;
-
-filename = [pfad,'/' filename '/workspace.mat'];
-filename_pars = [pfad,'/' filename_tmp '/workspace_pars_only.mat'];
-if(exist(filename_pars,'file'))
-    S = load(filename_pars);
+if(ischar(filename))
+    filename_tmp = filename;
+    
+    filename = [pfad,'/' filename '/workspace.mat'];
+    filename_pars = [pfad,'/' filename_tmp '/workspace_pars_only.mat'];
+    if(exist(filename_pars,'file'))
+        S = load(filename_pars);
+    else
+        S = load(filename);
+    end
+    fprintf('parameters loaded from file %s:\n', filename);
+elseif(isstruct(filename))
+    S = struct([]);
+    S(1).ar = filename;
 else
-    S = load(filename);
+    error('not supported variable type for filename');
 end
-
-fprintf('parameters loaded from file %s:\n', filename);
 
 ass = NaN(size(ar.p));
 for j=1:length(ar.p)

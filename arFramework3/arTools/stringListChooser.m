@@ -96,9 +96,16 @@ if(exist(filename_pars,'file'))
     if(isfield(S.ar,'qFit'))
         qstr = ['#fitted=',sprintf('%3i ',sum(S.ar.qFit==1)),' '];
     end
+    
     if(isfield(S.ar,'chi2fit'))
-        chi2str = ['chi2fit=',sprintf('%4.3f ',S.ar.chi2fit),' '];
-    end    
+        if(S.ar.config.fiterrors == 1)
+            chi2str = sprintf('-2*log(L)=%g  ', ...
+                2*S.ar.ndata*log(sqrt(2*pi)) + S.ar.chi2fit);
+        else
+            chi2str = sprintf('chi^2=%g  ', S.ar.chi2fit);
+        end
+    end
+    
     if(isfield(S.ar,'config'))
         if(S.ar.config.fiterrors==1)
             errstr = 'errors fitted';

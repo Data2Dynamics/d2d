@@ -111,6 +111,26 @@ try %#ok<TRYNC>
     ar.ndata = ar2.ndata;
     ar.nprior = ar2.nprior;
 end
+try %#ok<TRYNC>
+    ar.ps = ar2.ps;
+    ar.ps_errors = ar2.ps_errors;
+    ar.chi2s = ar2.chi2s;
+    ar.chi2sconstr = ar2.chi2sconstr;
+    ar.timing = ar2.timing;
+    ar.exitflag = ar2.exitflag;
+    ar.fun_evals = ar2.fun_evals;
+    ar.ps_start = ar2.ps_start;
+    ar.chi2s_start = ar2.chi2s_start;
+    ar.chi2sconstr_start = ar2.chi2sconstr_start;
+    ar.optim_crit = ar2.optim_crit;
+    
+    ar.chi2s_sorted = ar2.chi2s_sorted;
+    ar.chi2sconstr_sorted = ar2.chi2sconstr_sorted;
+    ar.ps_sorted = ar2.ps_sorted;
+    ar.chi2s_start_sorted = ar2.chi2s_start_sorted;
+    ar.chi2sconstr_start_sorted = ar2.chi2sconstr_start_sorted;
+    ar.ps_start_sorted = ar2.ps_start_sorted;
+end
 ar.config.fiterrors = ar2.config.fiterrors; %#ok<STRNU>
 save([savepath '/workspace_pars_only.mat'],'ar','-v7.3');
 
