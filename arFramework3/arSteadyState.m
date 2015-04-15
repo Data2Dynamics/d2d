@@ -70,6 +70,8 @@ function ar = arSteadyState( varargin )
         end
         if ( length( varargin ) > 1 )
             varargin = varargin(2:end);
+        else
+            varargin = {};
         end
     end
     
