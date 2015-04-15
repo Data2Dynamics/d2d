@@ -57,7 +57,7 @@ if(nargin<1)
     do_plotting = pleGlobals.showCalculation;
     pleGlobals.showCalculation = false;
     for j=1:length(jindex)
-        ple(jindex(j))
+        ple(jindex(j));
         if(do_plotting)
             plePlotMulti;
         end
@@ -73,7 +73,7 @@ elseif(length(jk)>1)
     do_plotting = pleGlobals.showCalculation;
     pleGlobals.showCalculation = false;
     for j=1:length(jk)
-        ple(jk(j))
+        ple(jk(j));
         if(do_plotting)
             plePlotMulti;
         end

@@ -1,3 +1,5 @@
+% arCompareParameters(filenames, onlyCommons)
+
 function arCompareParameters(filenames, onlyCommons)
 
 if(nargin==0 || isempty(filenames))

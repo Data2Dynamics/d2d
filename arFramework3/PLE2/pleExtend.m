@@ -101,6 +101,7 @@ if(samplesize>0)
     pleGlobals.chi2s{jk} = [pleGlobals.chi2s{jk} nan(1,samplesize)];
     pleGlobals.chi2sviolations{jk} = [pleGlobals.chi2sviolations{jk} nan(1,samplesize)];
     pleGlobals.chi2spriors{jk} = [pleGlobals.chi2spriors{jk} nan(1,samplesize)];
+    pleGlobals.chi2spriorsAll{jk} = [pleGlobals.chi2spriorsAll{jk} nan(1,samplesize)];
     pleGlobals.psinit{jk} = [pleGlobals.psinit{jk}; nan(samplesize,length(p))];
     pleGlobals.psinitstep{jk} = [pleGlobals.psinitstep{jk}; nan(samplesize,length(p))];
     pleGlobals.ps{jk} = [pleGlobals.ps{jk}; nan(samplesize,length(p))];
@@ -141,6 +142,9 @@ if(samplesize>0)
             if(isfield(pleGlobals,'priors'))
                 pleGlobals.chi2spriors{jk}(jindex) = feval(pleGlobals.priors, jk);
             end
+            if(isfield(pleGlobals,'priorsAll'))
+                pleGlobals.chi2spriorsAll{jk}(jindex) = feval(pleGlobals.priorsAll);
+            end
             fittime = fittime + toc;
             
             if(pleGlobals.showCalculation)
@@ -166,6 +170,7 @@ else
     pleGlobals.chi2s{jk} = [nan(1,samplesize) pleGlobals.chi2s{jk}];
     pleGlobals.chi2sviolations{jk} = [nan(1,samplesize) pleGlobals.chi2sviolations{jk}];
     pleGlobals.chi2spriors{jk} = [nan(1,samplesize) pleGlobals.chi2spriors{jk}];
+    pleGlobals.chi2spriorsAll{jk} = [nan(1,samplesize) pleGlobals.chi2spriorsAll{jk}];
     pleGlobals.psinit{jk} = [nan(samplesize,length(p)); pleGlobals.psinit{jk}];
     pleGlobals.psinitstep{jk} = [nan(samplesize,length(p)); pleGlobals.psinitstep{jk}];
     pleGlobals.ps{jk} = [nan(samplesize,length(p)); pleGlobals.ps{jk}];
@@ -205,6 +210,9 @@ else
             end
             if(isfield(pleGlobals,'priors'))
                 pleGlobals.chi2spriors{jk}(jindex) = feval(pleGlobals.priors, jk);
+            end
+            if(isfield(pleGlobals,'priorsAll'))
+                pleGlobals.chi2spriorsAll{jk}(jindex) = feval(pleGlobals.priorsAll);
             end
             fittime = fittime + toc;
             

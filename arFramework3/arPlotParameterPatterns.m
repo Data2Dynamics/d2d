@@ -19,6 +19,9 @@ hold on
 for j=1:nbest
     plot(ps(j,jks), 1:length(jks), 'Color', C(j,:));
 end
+if(isfield(ar, 'pTrue'))
+    plot(ar.pTrue, 1:length(jks), 'k--');
+end
 hold off
 title(sprintf('parameter differences between %i best fits', nbest));
 xlabel('parameter values')

@@ -114,14 +114,17 @@ elseif(jk <= length(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}) && pleGl
         
         if(chi2 < pleGlobals.chi2s{jk}(candidateindex+direction))
             candidateindex = candidateindex+direction;
-            pleGlobals.ps{jk}(candidateindex,:) = p;
-            pleGlobals.chi2s{jk}(candidateindex) = chi2;
-            pleGlobals.gradient{jk}(candidateindex,:) = g;
+            pleGlobals.ps{jk}(candidateindex,:) = p+0;
+            pleGlobals.chi2s{jk}(candidateindex) = chi2+0;
+            pleGlobals.gradient{jk}(candidateindex,:) = g+0;
             if(isfield(pleGlobals,'violations'))
                 pleGlobals.chi2sviolations{jk}(candidateindex) = feval(pleGlobals.violations);
             end
             if(isfield(pleGlobals,'priors'))
                 pleGlobals.chi2spriors{jk}(candidateindex) = feval(pleGlobals.priors, jk);
+            end
+            if(isfield(pleGlobals,'priorsAll'))
+                pleGlobals.chi2spriorsAll{jk}(candidateindex) = feval(pleGlobals.priorsAll);
             end
         else
             break;
