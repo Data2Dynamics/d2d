@@ -63,6 +63,7 @@ end
 % arChi2(false)
 arPlot(false, true)
 refresh_textbox(handles)
+updateYLims
 
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
@@ -77,6 +78,7 @@ end
 % arChi2(false)
 arPlot(false, true)
 refresh_textbox(handles)
+updateYLims
 
 % --- Executes during object creation, after setting all properties.
 function edit1_CreateFcn(hObject, eventdata, handles)
@@ -101,6 +103,7 @@ end
 set(hObject, 'String', ar.p(ar.tuner.index));
 % arChi2(false)
 arPlot(false, true)
+updateYLims
 
 % --- Executes during object creation, after setting all properties.
 function checkbox1_CreateFcn(hObject, eventdata, handles)
@@ -187,6 +190,7 @@ arFit(true);
 arChi2(false)
 arPlot(false, true)
 refresh_textbox(handles)
+updateYLims
 
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
@@ -194,6 +198,7 @@ arFitObs(true);
 arChi2(false)
 arPlot(false, true)
 refresh_textbox(handles)
+updateYLims
 
 
 % --- Executes on button press in pushbutton5.
@@ -202,6 +207,7 @@ arFitDyn(true);
 arChi2(false)
 arPlot(false, true)
 refresh_textbox(handles)
+updateYLims
 
 
 % --- Executes on button press in pushbutton10.
@@ -211,6 +217,7 @@ arFitInit(true);
 arChi2(false)
 arPlot(false, true)
 refresh_textbox(handles)
+updateYLims
 
 % --- Executes on button press in pushbutton6.
 function pushbutton6_Callback(hObject, eventdata, handles)
@@ -219,6 +226,7 @@ arFitSingle(ar.tuner.index, true);
 arChi2(false)
 arPlot(false, true)
 refresh_textbox(handles)
+updateYLims
 
 
 % --- Executes on button press in pushbutton8.
@@ -308,3 +316,59 @@ elseif(ar.qFit(ar.tuner.index)==0)
 elseif(ar.qFit(ar.tuner.index)==2)
     set(handles.radiobutton6, 'Value', 1);
 end
+
+
+function updateYLims
+global ar
+
+for m=1:length(ar.model)
+    if(isfield(ar.model(m).plot,'fighandel_x'))
+        for p=1:length(ar.model(m).plot)
+            for i=1:length(ar.model(m).plot(p).fighandel_x)
+                updateYLim(ar.model(m).plot(p).fighandel_x(i))
+            end
+        end
+    end
+    if(isfield(ar.model(m).plot,'fighandel_v'))
+        for p=1:length(ar.model(m).plot)
+        for i=1:length(ar.model(m).plot(p).fighandel_v)
+            updateYLim(ar.model(m).plot(p).fighandel_v(i))
+        end
+        end
+    end
+    if(isfield(ar.model(m).plot,'fighandel_y'))
+        for p=1:length(ar.model(m).plot)
+        for i=1:length(ar.model(m).plot(p).fighandel_y)
+            updateYLim(ar.model(m).plot(p).fighandel_y(i))
+        end
+        end
+    end
+end
+
+
+
+function updateYLim(fighandle)
+
+axs = findobj(fighandle,'Type','axes');
+for i=1:length(axs)
+    lin = [findobj(axs(i),'Type','line');findobj(axs(i),'Type','Patch')];
+    miny = Inf;
+    maxy = -Inf;
+    for j=1:length(lin)
+        ydat = get(lin(j),'YData');
+        maxy = max(max(ydat(~isinf(ydat))),maxy);
+        miny = min(min(ydat(~isinf(ydat))),miny);
+    end
+    
+    yl = get(axs(i),'YLim');
+    if(yl(1)>miny)
+        yl(1) = miny - (maxy-miny)/20;
+    end
+    if(yl(2)<maxy)
+        yl(2) = maxy + (maxy-miny)/20;
+    end
+    if(sum(isnan(yl))==0 && yl(2)>yl(1))
+        set(axs(i),'YLim',yl);
+    end
+end
+
