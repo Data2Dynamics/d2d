@@ -2,7 +2,7 @@
 % structure
 % 
 % Usage:
-%   function ar = arEnableData( to, data, (verbose) )
+%   function ar = arEnableData( (ar), data, (verbose) )
 %
 %   The variable "data" either contains a cell array of strings referring 
 %   to the datasets to disable, the keyword 'all' or a reference ar
@@ -12,10 +12,11 @@
 %
 % Examples:
 %
-%   ar = arEnableData( ar, {'myData1', 'myData2'}, ar )
-%   Disables myData1 and myData2 in the ar structure.
+%   ar = arEnableData( ar, {'myData1', 'myData2'} )
+%   Enables myData1 and myData2 in the ar structure.
 %
-%   ar = arEnableData( ar, arFindData( ar, 'names', 'myData' ) )
+%   ar = arEnableData( ar, arFindData( ar, 'myData', 'names' ) )
+%   Enables all datasets containing 'myData' in the name
 
 function ar = arEnableData( varargin )
 
