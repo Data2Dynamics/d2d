@@ -7,17 +7,22 @@
 % Example:
 %   arFindData( ar, (model no), 'mydata' )
 %       Returns all condition IDs whose name contains "mydata"
+%   arFindData( ar, (model no), {'mydata', 'potato'} )
+%       Returns all condition IDs whose name contains "mydata" or "potato"
 %   arFindData( ar, (model no), 'mydata', 'dose', '100', 'actd', '1' )
 %       Returns all condition IDs whose name contains "mydata" and who
 %       correspond to dose being set to 100 and actd being set to 1.
-%   arFindData( ar, (model no), 'verbose', 'mydata' )
+%   arFindData( ar, (model no), 'mydata', 'verbose' )
 %       Returns all condition IDs whose name contains "mydata" and prints
 %       them.
+%   arFindData( ar, (model no), 'mydata', 'names' )
+%       Only return the full names of the found datasets
 %
 % The argument ar is optional. If not specified, the global ar structure is
 % used. 
 %
-% Returns: List of IDs that correspond to the query.
+% Returns: List of IDs that correspond to the query and a cell array of the
+% data names which match the search criterion.
 
 function [olist names m] = arFindDataSet( varargin )
 
@@ -46,10 +51,13 @@ function [olist names m] = arFindDataSet( varargin )
     end
         
     if ( ischar( varargin{1} ) )
+        string{1} = varargin{1};
+        varargin = varargin(2:end);
+    elseif ( iscell( varargin{1} ) )
         string = varargin{1};
         varargin = varargin(2:end);
     else
-        error( 'Need to supply data name' );
+        error( 'Please supply a data name' );
     end
     
     verbose = 0;
@@ -65,8 +73,8 @@ function [olist names m] = arFindDataSet( varargin )
     % Return names instead
     returnNames = false;
     if (length( varargin ) > 0)
-        if isnumeric( varargin{1} )
-            if (varargin{1} == 2)
+        if ischar( varargin{1} )
+            if ( strcmp( varargin{1}, 'names' ) )
                 returnNames = true;
             end
             varargin = varargin(2:end);
@@ -81,21 +89,10 @@ function [olist names m] = arFindDataSet( varargin )
 
     % Find datasets with the correct name
     olist    = [];
-    names    = {};
-    if ~iscell( string )
-        for a = 1 : length( ar.model.data )
-            if ~isempty( findstr(lower(ar.model.data(a).name), lower(string) ) )
-                olist = [ olist a ];
-                names = { names{:}, ar.model.data(a).name };
-            end
-        end
-    else
-        for b = 1 : length( string )
-            for a = 1 : length( ar.model.data )
-                if ~isempty( findstr(lower(ar.model.data(a).name), lower(string{b}) ) )
-                    olist = [ olist a ];
-                    names = { names{:}, ar.model.data(a).name };
-                end
+    for b = 1 : length( string )
+        for a = 1 : length( ar.model(m).data )
+            if ~isempty( findstr(lower(ar.model(m).data(a).name), lower(string{b}) ) )
+                olist = union( olist, a );
             end
         end
     end
@@ -103,9 +100,9 @@ function [olist names m] = arFindDataSet( varargin )
     % Filter based on condition variables
     filt = ones(size(olist));
     for a = 1 : length( olist )
-        for b = 1 : length(ar.model.data(olist(a)).condition)  
-            par = ar.model.data(olist(a)).condition(b).parameter;
-            val = ar.model.data(olist(a)).condition(b).value;
+        for b = 1 : length(ar.model(m).data(olist(a)).condition)  
+            par = ar.model(m).data(olist(a)).condition(b).parameter;
+            val = ar.model(m).data(olist(a)).condition(b).value;
             for c = 1 : 2 : length(varargin)
                 if ( strcmp( par, varargin(c) ) )
                     condList(c) = 0;
@@ -116,21 +113,27 @@ function [olist names m] = arFindDataSet( varargin )
             end
         end
     end
-    
+                
     % Remove the ones that don't pass the condition filter
-    olist( filt == 0)   = [];
-    names( filt == 0 )  = [];
+    olist( filt == 0 )   = [];
+    
+    % Fetch the names
+    names = cell( length( olist ), 1 );
+    for a = 1 : length( olist )
+        names{a} = ar.model(m).data(olist(a)).name;
+    end
+    names = unique(names);
     
     % Output
     for a = 1 : length( olist )
         str = [];
-        for b = 1 : length(ar.model.data(olist(a)).condition)     
-            par = ar.model.data(olist(a)).condition(b).parameter;
-            val = ar.model.data(olist(a)).condition(b).value;
+        for b = 1 : length(ar.model(m).data(olist(a)).condition)     
+            par = ar.model(m).data(olist(a)).condition(b).parameter;
+            val = ar.model(m).data(olist(a)).condition(b).value;
             str = sprintf( '%s | %s = %s', str, par, val );
         end
         if ( verbose )
-            disp( sprintf( '[%d] %s %s', olist(a), ar.model.data(olist(a)).name, str ) );
+            disp( sprintf( '[%d] %s %s', olist(a), ar.model(m).data(olist(a)).name, str ) );
         end
     end
     
@@ -147,3 +150,4 @@ function [olist names m] = arFindDataSet( varargin )
     if (returnNames == true)
         olist = names;
     end
+end

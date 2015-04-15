@@ -10,7 +10,7 @@
 %   arFindCondition( ar, (model no), 'mydata', 'dose', '100', 'actd', '1' )
 %       Returns all condition IDs whose name contains "mydata" and who
 %       correspond to dose being set to 100 and actd being set to 1.
-%   arFindCondition( ar, (model no), 'verbose', 'mydata' )
+%   arFindCondition( ar, (model no), 'mydata', 'verbose' )
 %       Returns all condition IDs whose name contains "mydata" and prints
 %       them.
 %
