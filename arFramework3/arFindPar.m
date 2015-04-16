@@ -2,7 +2,7 @@
 % as a vector.
 %
 % Usage:
-%   arFindPar( (ar), names, (returnNames), (verbose) )
+%   arFindPar( (ar), names, (returnNames), (verbose), (dynamic) )
 %
 % Example:
 %   arFindPar( ar, 'degrad' )
@@ -13,6 +13,8 @@
 %       Returns names of the parameters whose name contains "degrad" or "pro"
 %   arFindPar( ar, {'degrad', 'pro'}, 'verbose' )
 %       Shows the names of the parameters it is returning
+%   arFindPar( ar, {'degrad', 'pro'}, 'dynamic', 'names' )
+%       Only returns dynamic parameters and returns them by name
 %
 % The argument ar is optional. If not specified, the global ar structure is
 % used.
@@ -38,39 +40,41 @@ function olist = arFindPar( varargin )
     else
         string = varargin{1};
     end
-    
-    names = 0;
-    if ( length(varargin) > 1 )
-        if ( strcmp( varargin{2}, 'names' ) )
-            names = 1;
-            if ( length( varargin ) > 1 )
-                varargin = varargin(2:end);
-            end
-        end
-    end    
-    
-    showNames = 0;
-    if ( length(varargin) > 1 )
-        if ( strcmp( varargin{2}, 'verbose' ) )
-            showNames = 1;
-        end
-    end
+
+    opts = argSwitch( {'names', 'verbose', 'dynamic'}, varargin{2:end} );
 
     list = ar.pLabel;
     
     olist    = [];
     for b = 1 : length( string )
         for a = 1 : length( list )
-             if ~isempty( strfind(lower(list{a}), lower(string{b}) ) )
-                 olist = union( olist, a );
+            if ~isempty( strfind(lower(list{a}), lower(string{b}) ) )
+                if (~opts.dynamic || ar.qDynamic(a))
+                    olist = union( olist, a );
+                end
             end
         end
     end
-    if ( showNames )
+    if ( opts.verbose )
         fprintf('%s\n', ar.pLabel{olist});
     end
     
-    if (names)
+    if ( opts.names )
         olist = ar.pLabel(olist);
     end
+end
+
+function [opts] = argSwitch( switches, varargin )
+
+    for a = 1 : length(switches)
+        opts.(switches{a}) = 0;
+    end
+
+    for a = 1 : length( varargin )
+        if ( max( strcmp( varargin{a}, switches ) ) == 0 )
+            error( 'Invalid switch argument was provided %s', varargin{a} );
+        end
+        opts.(varargin{a}) = 1;
+    end    
+end
     
