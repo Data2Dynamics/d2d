@@ -76,11 +76,11 @@ function [olist names m] = arFindDataSet( varargin )
         if ischar( varargin{1} )
             if ( strcmp( varargin{1}, 'names' ) )
                 returnNames = true;
+                varargin = varargin(2:end);
             end
-            varargin = varargin(2:end);
         end
     end
-    
+
     if ( mod(length(varargin), 2) ~= 0 )
         error( 'Uneven number of condition arguments' );
     end
