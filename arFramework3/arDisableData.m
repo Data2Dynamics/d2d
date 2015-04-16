@@ -8,7 +8,7 @@
 %   to the datasets to disable, the keyword 'all' or a reference ar
 %   structure.
 %
-%   Note that arFind may be used to find these datasets more easily.
+%   Note: arFindData may be used to find the names of datasets more easily
 %
 % Examples:
 %
