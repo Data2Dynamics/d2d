@@ -176,6 +176,8 @@ ar.model(m).pu = setdiff(vertcat(varlist{:}), {ar.model(m).t, ''}); %R2013a comp
 ar.model(m).N = [];
 ar.model(m).v = {};
 ar.model(m).fv = {};
+ar.model(m).fv_source = {};
+ar.model(m).fv_target = {};
 ar.model(m).fv_ma_reverse_pbasename = {};
 ar.model(m).vUnits = {};
 if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
@@ -288,6 +290,8 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                 ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) + 1;
             end
         end
+        ar.model(m).fv_source{end+1,1} = source;
+        ar.model(m).fv_target{end+1,1} = target;
         
         % check for inconsistent educt compartments
         if(~isempty(ar.model(m).c) && ~ar.model(m).isAmountBased)
@@ -308,6 +312,8 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         % setup reversed reaction
         if(massaction && reversible)
             ar.model(m).fv{end+1,1} = [cell2mat(str{1}) '_2'];
+            ar.model(m).fv_source{end+1,1} = ar.model(m).fv_target{end,1};
+            ar.model(m).fv_target{end+1,1} = ar.model(m).fv_source{end,1};
             ar.model(m).fv_ma_reverse_pbasename{end+1} = cell2mat(str{1});
             for j=1:length(target)
                 ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' target{j}];
@@ -384,8 +390,13 @@ if(isempty(ar.model(m).fv))
 end
 
 % dynamic parameters
-varlist = cellfun(@symvar, ar.model(m).fv, 'UniformOutput', false);
-ar.model(m).pv = setdiff(vertcat(varlist{:}), union(ar.model(m).t, union(ar.model(m).x, ar.model(m).u))); %R2013a compatible
+ar.model(m).pvs = cell(size(ar.model(m).fv));
+ar.model(m).pv = {};
+for jv=1:length(ar.model(m).fv)
+    varlist = symvar(ar.model(m).fv{jv});
+    ar.model(m).pvs{jv} = setdiff(varlist, union(ar.model(m).t, union(ar.model(m).x, ar.model(m).u))); %R2013a compatible
+    ar.model(m).pv = union(ar.model(m).pv, ar.model(m).pvs{jv});
+end
 ar.model(m).px = union(union(ar.model(m).pv, ar.model(m).px), ar.model(m).px0); %R2013a compatible
 ar.model(m).p = union(ar.model(m).px, ar.model(m).pu); %R2013a compatible
 
