@@ -34,7 +34,7 @@ pause;
 %% Equilibrate condition 1 and use that as initial value for all conditions
 %  this is incorrect since condition 2 and 3 use an inhibitor
 %  Note the fifth input (-1e7) which means equilibration runs from
-%  t=-1*10^-7. This is to avoid simulating with the input during the steady
+%  t=-1*10^7. This is to avoid simulating with the input during the steady
 %  state simulation. A cleaner way to approach this would be to add a specific 
 %  condition where the input is set to zero for steady state purposes.
 model = 1;
