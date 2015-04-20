@@ -240,11 +240,7 @@ for jm = 1:length(ar.model)
                                 ar.model(jm).data(jd).plot.ystd = hystds;
                             end
                             if(jtype == 2)
-                                if(jd~=0) % mean no data loaded
-                                    ar.model(jm).data(jd).plot.xss = hysss;
-                                else
-                                    ar.model(jm).condition(jc).plot.xss = hysss;
-                                end
+                                ar.model(jm).data(jd).plot.xss = hysss;
                             end
                         else
                             ar.model(jm).plot.(linehandle_name{jtype}) = hys;

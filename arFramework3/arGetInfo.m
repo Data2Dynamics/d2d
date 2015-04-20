@@ -71,22 +71,18 @@ else
     end
 end
 
-if(isfield(ar.model(jm), 'data') && jtype == 2)
-    if(jd~=0)
-        if(isfield(ar.model(jm).data(jd),'plot') && ...
-                isfield(ar.model(jm).data(jd).plot,'xss'))
-            hysss = ar.model(jm).data(jd).plot.xss;
-        else
-            hysss = [];
-        end
+if(jd~=0 && jtype == 2)
+    if(isfield(ar.model(jm).data(jd),'plot') && ...
+            isfield(ar.model(jm).data(jd).plot,'xss'))
+        hysss = ar.model(jm).data(jd).plot.xss;
     else
-        if(isfield(ar.model(jm).condition(jc),'plot') && ...
-                isfield(ar.model(jm).condition(jc).plot,'xss'))
-            hysss = ar.model(jm).condition(jc).plot.xss;
-        else
-            hysss = [];
-        end
+        hysss = [];
     end
 else
-    hysss = [];
+    if(isfield(ar.model(jm),'plot') && ...
+            isfield(ar.model(jm).plot,'xss'))
+        hysss = ar.model(jm).plot.xss;
+    else
+        hysss = [];
+    end
 end
