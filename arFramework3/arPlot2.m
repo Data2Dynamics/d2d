@@ -321,9 +321,11 @@ for jm = 1:length(ar.model)
                     end
                 end
             else
-                if(sum(hs==ar.model(jm).plot(jplot).(fighandel_name{jtype}))==0)
-                    try %#ok<TRYNC>
-                        close(ar.model(jm).plot(jplot).(fighandel_name{jtype}))
+                if(isfield(ar.model(jm).plot(jplot), fighandel_name{jtype}))
+                    if(sum(hs==ar.model(jm).plot(jplot).(fighandel_name{jtype}))==0)
+                        try %#ok<TRYNC>
+                            close(ar.model(jm).plot(jplot).(fighandel_name{jtype}))
+                        end
                     end
                 end
                 ar.model(jm).plot(jplot).(fighandel_name{jtype}) = [];
