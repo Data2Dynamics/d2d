@@ -1,6 +1,8 @@
-% Plot models and datasets
+% Plot models and datasets (new function)
 %
-% arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics)
+% hs = arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs)
+%
+% hs: figure handles;
 %
 % saveToFile    [false]
 % fastPlot      [false]
@@ -8,8 +10,9 @@
 % evalfun       [true]
 % doLegends     [true]
 % dynamics:     [true]
+% hs:           []      custom figure handels
 
-function arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics)
+function varargout = arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs)
 
 global ar
 
@@ -34,6 +37,9 @@ if(~exist('doLegends','var'))
 end
 if(~exist('dynamics','var'))
     dynamics = true;
+end
+if(~exist('hs','var'))
+	hs = [];
 end
 
 matVer = ver('MATLAB');
@@ -81,6 +87,7 @@ else
     nfine_dr_plot = 1;
     nfine_dr_method = 'spline';
 end
+hsnew = [];
 
 figcount = 1;
 for jm = 1:length(ar.model)
@@ -167,14 +174,15 @@ for jm = 1:length(ar.model)
                 if(ar.config.ploterrors == -1)
                     [h, fastPlotTmp] = arRaiseFigure(ar.model(jm).plot(jplot), ...
                         [fighandel_name{jtype} 'CI'], ['CI-' fig_name{jtype} ar.model(jm).plot(jplot).name], ...
-                        figcount, fastPlot, jtype);
+                        figcount, fastPlot, jtype, hs);
                     ar.model(jm).plot(jplot).([fighandel_name{jtype} 'CI']) = h;
                 else
                     [h, fastPlotTmp] = arRaiseFigure(ar.model(jm).plot(jplot), ...
                         fighandel_name{jtype}, [fig_name{jtype} ar.model(jm).plot(jplot).name], ...
-                        figcount, fastPlot, jtype);
+                        figcount, fastPlot, jtype, hs);
                     ar.model(jm).plot(jplot).(fighandel_name{jtype}) = h;
                 end
+                hsnew(end+1) = h; %#ok<AGROW>
                 
                 % plotting
                 ccount = 1;
@@ -313,8 +321,10 @@ for jm = 1:length(ar.model)
                     end
                 end
             else
-                try %#ok<TRYNC>
-                    close(ar.model(jm).plot(jplot).(fighandel_name{jtype}))
+                if(sum(hs==ar.model(jm).plot(jplot).(fighandel_name{jtype}))==0)
+                    try %#ok<TRYNC>
+                        close(ar.model(jm).plot(jplot).(fighandel_name{jtype}))
+                    end
                 end
                 ar.model(jm).plot(jplot).(fighandel_name{jtype}) = [];
             end
@@ -323,5 +333,9 @@ for jm = 1:length(ar.model)
             figcount = figcount + 1;
         end
     end
+end
+
+if(nargout>0)
+    varargout(1) = {hsnew};
 end
 

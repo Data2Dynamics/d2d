@@ -22,7 +22,7 @@ function varargout = arPlotter(varargin)
 
 % Edit the above text to modify the response to help arPlotter
 
-% Last Modified by GUIDE v2.5 19-Aug-2013 07:52:23
+% Last Modified by GUIDE v2.5 20-Apr-2015 15:50:33
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -203,3 +203,19 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 close all
+
+
+% --- Executes on button press in pushbutton3.
+function pushbutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+arTuner;
+
+
+% --- Executes on button press in pushbutton4.
+function pushbutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+arSubPlotter

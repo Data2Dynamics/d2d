@@ -6,7 +6,7 @@ function varargout = arSubPlotter(varargin)
 
 % Edit the above text to modify the response to help arSubPlotter
 
-% Last Modified by GUIDE v2.5 06-Apr-2015 09:40:05
+% Last Modified by GUIDE v2.5 20-Apr-2015 15:51:31
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -329,3 +329,19 @@ function pushbutton9_Callback(hObject, eventdata, handles)
 global ar
 ar.model(ar.subplotter.jm).qPlotV(:) = 1;
 refresh_all(handles)
+
+
+% --- Executes on button press in pushbutton10.
+function pushbutton10_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+arTuner
+
+
+% --- Executes on button press in pushbutton11.
+function pushbutton11_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+arPlotter

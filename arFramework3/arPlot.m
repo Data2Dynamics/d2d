@@ -1,6 +1,8 @@
 % Plot models and datasets
 %
-% arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics)
+% hs = arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs)
+%
+% hs: figure handles;
 %
 % saveToFile    [false]
 % fastPlot      [false]
@@ -8,8 +10,9 @@
 % evalfun       [true]
 % doLegends     [true]
 % dynamics:     [true]
+% hs:           []      custom figure handels
 
-function arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics)
+function varargout = arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs)
 
 global ar
 
@@ -35,9 +38,16 @@ end
 if(~exist('dynamics','var'))
 	dynamics = true;
 end
+if(~exist('hs','var'))
+	hs = [];
+end
+
 
 if(isfield(ar.config, 'useNewPlots') && ar.config.useNewPlots)
-    arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics);
+    hs = arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs);
+    if(nargout>0)
+        varargout(1) = {hs};
+    end
     return;
 end
 

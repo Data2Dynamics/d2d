@@ -90,13 +90,19 @@ function popupmenu1_CreateFcn(hObject, eventdata, handles)
 
 % Hint: popupmenu controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
-global ar;
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 function myplot(handles, fastPlot, silent, evalfun)
-arPlot(false, fastPlot, silent, evalfun, get(handles.checkbox1, 'value')==1, false);
+global ar
+if(isfield(ar.navi,'fighandle'))
+    h = ar.navi.fighandle;
+else
+    h = [];
+end
+h = arPlot(false, fastPlot, silent, evalfun, get(handles.checkbox1, 'value')==1, false, h);
+ar.navi.fighandle = h;
 
 function refresh_all(handles)
 global ar;

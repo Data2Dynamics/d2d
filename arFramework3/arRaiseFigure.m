@@ -1,5 +1,5 @@
 function [h, fastPlotTmp] = arRaiseFigure(base, fieldname, figname, ...
-    figcount, fastPlot, level)
+    figcount, fastPlot, level, hcustom)
 
 if(~exist('level','var'))
     level = 1;
@@ -9,6 +9,9 @@ if(~exist('fastPlot','var'))
 end
 if(~exist('figcount','var'))
     figcount = 1;
+end
+if(~exist('hcustom','var'))
+    hcustom = [];
 end
 
 levels = [0.1 0.4 0.7]-0.05;
@@ -39,14 +42,20 @@ if(isfield(base, fieldname) && ~isempty(base.(fieldname)) && ...
         figure(h);
     end
 else
-    h = figure('Name', figname, 'NumberTitle','off', ...
-        'Units', 'normalized', 'Position', ...
-        [figpos figsize]);
+    if(~isempty(hcustom) && sum(hcustom==openfigs)>0)
+        h = hcustom;
+        figure(h);
+        set(h, 'Name', figname);
+    else
+        h = figure('Name', figname, 'NumberTitle','off', ...
+            'Units', 'normalized', 'Position', ...
+            [figpos figsize]);
+    end
     set(h,'Color', figcolor);
     base.(fieldname) = h;
     fastPlotTmp = false;
 end
 
 if(~fastPlot)
-    clf
+    clf(h)
 end
