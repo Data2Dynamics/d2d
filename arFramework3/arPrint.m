@@ -80,8 +80,8 @@ ar.qCloseToBound(qLog10) = ar.p(qLog10) - ar.lb(qLog10) < ar.config.par_close_to
 qPos = ar.p>0;
 ar.qCloseToBound(~qLog10 & ~qPos) = ar.p(~qLog10 & ~qPos) - ar.lb(~qLog10 & ~qPos) < ar.config.par_close_to_bound | ...
     ar.ub(~qLog10 & ~qPos) - ar.p(~qLog10 & ~qPos) < ar.config.par_close_to_bound;
-ar.qCloseToBound(~qLog10 & qPos) = log10(ar.p(~qLog10 & qPos)) - log10(ar.lb(~qLog10 & qPos)) < ar.config.par_close_to_bound | ...
-    log10(ar.ub(~qLog10 & qPos)) - log10(ar.p(~qLog10 & qPos)) < ar.config.par_close_to_bound;
+ar.qCloseToBound(~qLog10 & qPos) = (ar.p(~qLog10 & qPos)) - (ar.lb(~qLog10 & qPos)) < ar.config.par_close_to_bound | ...
+    (ar.ub(~qLog10 & qPos)) - (ar.p(~qLog10 & qPos)) < ar.config.par_close_to_bound;
 
 maxlabellength = max(cellfun(@length, ar.pLabel));
 
