@@ -5,9 +5,17 @@
 % 
 % print parameter values
 % 
-%   js      Indices of the parameters to be displayed
+%   js      Indices of the parameters to be displayed. 'All' refers to all
+%           parameters
 %           (see Example below)
-% 
+%
+% optional arguments:
+%           'initial'       - only show initial conditions
+%           'fitted'        - only show fitted parameters
+%           'constant'      - only show constants
+%           'dynamic'       - only show dynamic parameters
+%           'observation'   - only show non-dynamic parameters
+%           Combinations of these flags are possible
 % 
 % Examples:
 % arPrint('turn')
@@ -27,8 +35,15 @@
 % #  15|D  | geneA_deg1              |       -2         -2         +3 | 1      +0.01 |       1 | uniform(-2,3) 
 % #  16|D  | geneA_deg2              |       -2      +0.36         +3 | 1       +2.3 |       1 | uniform(-2,3) 
 % #  17|D  | geneA_deg3              |       -2       -1.2         +3 | 1     +0.063 |       1 | uniform(-2,3) 
+%
+% Other examples:
+% arPrint(1:4, 'constant')                  - Show the constants among the
+%                                             first four parameters
+% arPrint('all', 'fitted', 'dynamic')       - Show all fitted dynamic parameters
+% arPrint('gene', 'observation')            - Show all observation parameters
+%                                             containing the string "gene" in the name
 
-function varargout = arPrint(js)
+function varargout = arPrint(js, varargin)
 global ar
 
 if(~exist('js','var') | isempty(js))
@@ -43,10 +58,14 @@ elseif(isnumeric(js))
         js = find(js);
     end
 elseif(ischar(js))
-    js = find(~cellfun(@isempty,regexp(ar.pLabel,js)));
-    if isempty(js)
-        disp('Pattern not found in ar.pLabel');
-        return;
+    if ( strcmp( js, 'all' ) )
+        js = 1:length(ar.p);
+    else
+        js = find(~cellfun(@isempty,regexp(ar.pLabel,js)));
+        if isempty(js)
+            disp('Pattern not found in ar.pLabel');
+            return;
+        end
     end
 elseif(iscell(js)) % cell of pNames
     [~,js] = intersect(ar.pLabel,js);
@@ -60,6 +79,35 @@ if(sum(isnan(js))>0 || sum(isinf(js))>0 || min(js)<1 || max(js-round(js))>eps)
 else
     if(size(js,1)~=1)
         js = js';
+    end
+end
+
+% Additional options
+if ( nargin > 1 )
+    opts = argSwitch( {'initial', 'fitted', 'dynamic', 'constant', 'observation'}, varargin{:} );
+
+    if ( opts.constant && opts.fitted )
+        error( 'Incompatible flag constant and fitted' );
+    end
+    if ( opts.observation && opts.dynamic )
+        error( 'Incompatible flag observation and dynamic' );
+    end    
+
+    if ( opts.fitted )
+        js = js( ar.qFit( js ) == 1 );
+    end
+
+    if ( opts.constant )
+        js = js( ar.qFit( js ) == 2 );
+    end
+    if ( opts.dynamic )
+        js = js( ar.qDynamic( js ) == 1 );
+    end
+    if ( opts.observation )
+        js = js( ar.qDynamic( js ) == 0 );
+    end
+    if ( opts.initial )
+        js = js( ar.qInitial( js ) == 1 );
     end
 end
 
@@ -140,6 +188,22 @@ end
             str = sprintf('L1(%g,%g)', ar.mean(j), ar.std(j));
         end
     end
+end
+
+function [opts] = argSwitch( switches, varargin )
+
+    for a = 1 : length(switches)
+        opts.(switches{a}) = 0;
+    end
+
+    for a = 1 : length( varargin )
+        if ( max( strcmp( varargin{a}, switches ) ) == 0 )
+            str = sprintf( 'Legal switch arguments are:\n' );
+            str = [str sprintf( '%s\n', switches{:} ) ];
+            error( 'Invalid switch argument was provided. Provided %s, %s', varargin{a}, str );
+        end
+        opts.(varargin{a}) = 1;
+    end    
 end
 
 
