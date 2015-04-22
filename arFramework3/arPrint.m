@@ -135,9 +135,9 @@ maxlabellength = max(cellfun(@length, ar.pLabel));
 
 fprintf('Parameters: # = free, C = constant, D = dynamic, I = initial value, E = error model\n\n');
 printHead;
-for j=js
-    printPar(j, ar.qCloseToBound(j));
-	if(mod(j,10)==0 && j<max(js))
+for j=1:length(js)
+    printPar(js(j), ar.qCloseToBound(js(j)));
+	if(mod(j,10)==0 && j<length(js))
 		fprintf(['     |   | ' arExtendStr('', maxlabellength) ' |                                |              |         |      \n']);
 	end
 end
