@@ -2,8 +2,10 @@ function arPlotParameterPatterns(ps, jks)
 
 global ar
 
-if(~exist('nbest','var'))
+if(exist('ps','var'))
     nbest = size(ps,1);
+else
+    nbest = 0;
 end
 if(~exist('jks','var'))
     jks = 1:length(ar.p);
@@ -28,11 +30,11 @@ for j=1:nbest
 end
 h = plot(ar.p(jks), 1:length(jks), 'ko');
 hs(end+1) = h;
-hlabel{end+1} = 'current';
+hlabel{end+1} = 'current value';
 if(isfield(ar, 'pTrue'))
     h = plot(ar.pTrue(jks), 1:length(jks), 'k--');
     hs(end+1) = h;
-    hlabel{end+1} = 'true';
+    hlabel{end+1} = 'true value';
 end
 hold off
 title(sprintf('parameter differences between %i best fits', nbest));

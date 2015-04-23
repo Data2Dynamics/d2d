@@ -115,11 +115,7 @@ try
         end
     else
         if(qglobalar)
-            try
-                arSimu(sensi, ~isfield(ar.model(jm), 'data'));
-            catch
-                arSimu(sensi, isfield(ar.model(jm), 'data'));
-            end
+            arSimu(sensi, ~isfield(ar.model(jm), 'data'));
         else
             ar = arSimu(ar, sensi, ~isfield(ar.model(jm), 'data'));
         end
