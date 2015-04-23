@@ -24,3 +24,4 @@ arFramework3/Examples/Raia_CancerResearch2011/arSimuCalc*
 arFramework3/Examples/Swameye_PNAS2003/Compiled/
 arFramework3/Examples/Swameye_PNAS2003/SBML/
 arFramework3/Examples/Swameye_PNAS2003/arSimuCalc*
+*.dat

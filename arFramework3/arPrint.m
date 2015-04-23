@@ -131,7 +131,7 @@ ar.qCloseToBound(~qLog10 & ~qPos) = ar.p(~qLog10 & ~qPos) - ar.lb(~qLog10 & ~qPo
 ar.qCloseToBound(~qLog10 & qPos) = (ar.p(~qLog10 & qPos)) - (ar.lb(~qLog10 & qPos)) < ar.config.par_close_to_bound | ...
     (ar.ub(~qLog10 & qPos)) - (ar.p(~qLog10 & qPos)) < ar.config.par_close_to_bound;
 
-maxlabellength = max(cellfun(@length, ar.pLabel));
+maxlabellength = max(cellfun(@length, ar.pLabel(js)));
 
 fprintf('Parameters: # = free, C = constant, D = dynamic, I = initial value, E = error model\n\n');
 printHead;
