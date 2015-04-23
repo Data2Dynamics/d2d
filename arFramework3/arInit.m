@@ -162,5 +162,10 @@ ar.info.cvodes_flags{25} = 'CV_BAD_T';
 ar.info.cvodes_flags{26} = 'CV_BAD_DKY';
 ar.info.cvodes_flags{27} = 'CV_TOO_CLOSE';
 
+ar = orderfields(ar);
+ar.info = orderfields(ar.info);
+ar.config = orderfields(ar.config);
+ar.ppl = orderfields(ar.ppl);
+
 clear j
 

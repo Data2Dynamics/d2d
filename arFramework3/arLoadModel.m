@@ -599,3 +599,7 @@ while(~isempty(C{1}))
 end
 
 fclose(fid);
+
+ar = orderfields(ar);
+ar.model = orderfields(ar.model);
+

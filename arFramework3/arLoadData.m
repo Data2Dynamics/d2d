@@ -536,6 +536,10 @@ else
     ar.model(m).data(d).condition = [];
 end
 
+ar = orderfields(ar);
+ar.model = orderfields(ar.model);
+ar.model.data = orderfields(ar.model.data);
+ar.model.plot = orderfields(ar.model.plot);
 
 
 function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot)

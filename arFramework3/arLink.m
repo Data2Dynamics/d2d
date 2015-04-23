@@ -55,9 +55,9 @@ for m=1:length(ar.model)
             ar.model(m).data(d).tFine = ...
                 linspace(ar.model(m).data(d).tLim(1), ar.model(m).data(d).tLim(2), ar.config.nFinePoints)';
             
-			ar.model(m).condition(ar.model(m).data(d).cLink).tFine = union( ... %R2013a compatible
-			   ar.model(m).condition(ar.model(m).data(d).cLink).tFine, ...
-			   ar.model(m).data(d).tFine);
+            ar.model(m).condition(ar.model(m).data(d).cLink).tFine = union( ... %R2013a compatible
+                ar.model(m).condition(ar.model(m).data(d).cLink).tFine, ...
+                ar.model(m).data(d).tFine);
             
             ar.model(m).condition(ar.model(m).data(d).cLink).tstart = ...
                 min(ar.model(m).condition(ar.model(m).data(d).cLink).tFine);
@@ -66,8 +66,8 @@ for m=1:length(ar.model)
             if(isfield(ar.model(m).data(ar.model(m).data(d).cLink), 'tEvents'))
                 ar.model(m).condition(ar.model(m).data(d).cLink).tEvents = ...
                     union( ar.model(m).condition(ar.model(m).data(d).cLink).tEvents, ...
-                           ar.model(m).data(d).tEvents );
-            end            
+                    ar.model(m).data(d).tEvents );
+            end
         end
         
         % collect time points for multiple shooting
@@ -94,7 +94,7 @@ for m=1:length(ar.model)
                                 ar.model(m).condition(c).tEvents = ...
                                     union(ar.model(m).condition(c).tEvents, tlink); %R2013a compatible
                                 ar.model(m).condition(c2).tEvents = ...
-                                    union(ar.model(m).condition(c2).tEvents, tlink); %R2013a compatible                         
+                                    union(ar.model(m).condition(c2).tEvents, tlink); %R2013a compatible
                                 
                                 if(~isfield(ar.model(m), 'ms_link'))
                                     ar.model(m).ms_link = [c c2 tlink];
@@ -119,12 +119,12 @@ for m=1:length(ar.model)
         for c = 1 : length( ar.model(m).condition )
             if isfield(ar.model(m).condition(c), 'tExp')
                 ar.model(m).condition(c).tExp = ...
-                     union(ar.model(m).condition(c).tExp, ar.model(m).condition(c).tEvents);
+                    union(ar.model(m).condition(c).tExp, ar.model(m).condition(c).tEvents);
             end
-    
+            
             ar.model(m).condition(c).tFine = ...
-                union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tEvents);      
-        end  
+                union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tEvents);
+        end
         
         % link back time points
         for d=1:length(ar.model(m).data)
@@ -172,7 +172,7 @@ for m=1:length(ar.model)
             ar.model(m).data(d).chi2 = zeros(size(ar.model(m).data(d).ndata));
             ar.model(m).data(d).chi2err = zeros(size(ar.model(m).data(d).ndata));
         end
-    else              
+    else
         for c = 1:length(ar.model(m).condition)
             ar.model(m).condition(c).tFine = linspace(ar.model(m).tLim(1), ar.model(m).tLim(2), ar.config.nFinePoints);
             ar.model(m).condition(c).tstart = min(ar.model(m).condition(c).tFine);
@@ -182,12 +182,12 @@ for m=1:length(ar.model)
         for c = 1 : length( ar.model(m).condition )
             if isfield(ar.model(m).condition(c), 'tExp')
                 ar.model(m).condition(c).tExp = ...
-                     union(ar.model(m).condition(c).tExp, ar.model(m).condition(c).tEvents);
+                    union(ar.model(m).condition(c).tExp, ar.model(m).condition(c).tEvents);
             end
-    
+            
             ar.model(m).condition(c).tFine = ...
-                union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tEvents);      
-        end          
+                union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tEvents);
+        end
     end
 end
 
@@ -208,7 +208,7 @@ for m = 1:length(ar.model)
                     if(isempty(ar.model(m).x))
                         ar.model(m).data(d).y_scale = zeros(nt, ny, 1);
                     else
-                        ar.model(m).data(d).y_scale = zeros(nt, ny, length(ar.model(m).x));                    
+                        ar.model(m).data(d).y_scale = zeros(nt, ny, length(ar.model(m).x));
                     end
                     ar.model(m).data(d).systdExpSimu = zeros(nt, ny, np);
                     if(isfield(ar.model(m).data(d), 'yExp') && ~isempty(ar.model(m).data(d).yExp))
@@ -241,9 +241,9 @@ for m = 1:length(ar.model)
         
         ar.model(m).condition(c).uNum = zeros(1, nu);
         ar.model(m).condition(c).vNum = zeros(1, nv);
-        ar.model(m).condition(c).dvdxNum = zeros(nv, nx); 
-        ar.model(m).condition(c).dvduNum = zeros(nv, nu); 
-        ar.model(m).condition(c).dvdpNum = zeros(nv, np); 
+        ar.model(m).condition(c).dvdxNum = zeros(nv, nx);
+        ar.model(m).condition(c).dvduNum = zeros(nv, nu);
+        ar.model(m).condition(c).dvdpNum = zeros(nv, np);
         ar.model(m).condition(c).suNum = zeros(nu, np);
         ar.model(m).condition(c).svNum = zeros(1, nv);
         ar.model(m).condition(c).y_atol = zeros(nx,1);
@@ -276,14 +276,14 @@ for m = 1:length(ar.model)
         modx_A = ones(nte, nx);
         modx_B = zeros(nte, nx);
         modsx_A = ones(nte, nx, np);
-        modsx_B = zeros(nte, nx, np);        
+        modsx_B = zeros(nte, nx, np);
         
         % which events were already in the list upon last link?
-        if ( isfield( ar.model(m).condition(c), 'modt' ) )              
+        if ( isfield( ar.model(m).condition(c), 'modt' ) )
             % preserve the old values for the modification parameters
             mod_id = ismember( ar.model(m).condition(c).tEvents, ...
-                               ar.model(m).condition(c).modt );
-                           
+                ar.model(m).condition(c).modt );
+            
             if ( ~isempty( mod_id ) )
                 modx_A(mod_id,:) = ar.model(m).condition(c).modx_A;
                 modx_B(mod_id,:) = ar.model(m).condition(c).modx_B;
@@ -297,10 +297,10 @@ for m = 1:length(ar.model)
         ar.model(m).condition(c).modx_B = modx_B;
         ar.model(m).condition(c).modsx_A = modsx_A;
         ar.model(m).condition(c).modsx_B = modsx_B;
-    
+        
         % Equilibration time
-        ar.model(m).condition(c).tEq = NaN;        
-               
+        ar.model(m).condition(c).tEq = NaN;
+        
         % steady state sensitivities
         ar.model(m).condition(c).qSteadyState = false(1,nx);
         ar.model(m).condition(c).ssRelative = false(1,nx);
@@ -365,7 +365,7 @@ for m = 1:length(ar.model)
     end
     for c = 1:length(ar.model(m).condition)
         if(str2double(matVer.Version)>=8.1)
-            ar.pLabel = union(ar.pLabel, ar.model(m).condition(c).p,'legacy'); %R2013a compatible                  
+            ar.pLabel = union(ar.pLabel, ar.model(m).condition(c).p,'legacy'); %R2013a compatible
         else
             ar.pLabel = union(ar.pLabel, ar.model(m).condition(c).p);
         end
@@ -485,41 +485,47 @@ if(isfield(ar, 'pExternLabels'))
         ar.lbExtern, ar.ubExtern);
 end
 
+ar = orderfields(ar);
+ar.model = orderfields(ar.model);
+ar.model.data = orderfields(ar.model.data);
+ar.model.plot = orderfields(ar.model.plot);
+
+
 function populate_threads( thread_fieldname, condition_fieldname, ntask_fieldname)
 
-    global ar;
-    
-    % populate threads
-    ar.config.(thread_fieldname) = [];
-    ar.config.(thread_fieldname)(1).id = 0;
-    ar.config.(thread_fieldname)(1).n = 0;
-    ar.config.(thread_fieldname)(1).nd = 0;
-    ar.config.(thread_fieldname)(1).ms = int32([]);
-    ar.config.(thread_fieldname)(1).cs = int32([]);
-    ithread = 1;
-    ar.config.(ntask_fieldname) = 0;
-    for m = 1:length(ar.model)
-        if (isfield(ar.model(m), condition_fieldname))
-            for c = 1:length(ar.model(m).(condition_fieldname) )
-                if(length(ar.config.(thread_fieldname))<ithread)
-                    ar.config.(thread_fieldname)(ithread).id = ithread-1;
-                    ar.config.(thread_fieldname)(ithread).n = 0;
-                    ar.config.(thread_fieldname)(ithread).nd = 0;
-                    ar.config.(thread_fieldname)(ithread).ms = int32([]);
-                    ar.config.(thread_fieldname)(ithread).cs = int32([]);
-                end
-                ar.config.(ntask_fieldname) = ar.config.(ntask_fieldname) + 1;
-                ar.config.(thread_fieldname)(ithread).n = ...
-                    ar.config.(thread_fieldname)(ithread).n + 1;
-                ar.config.(thread_fieldname)(ithread).nd = ...
-                    ar.config.(thread_fieldname)(ithread).nd + ...
-                    length(ar.model(m).(condition_fieldname)(c).dLink);        
-                ar.config.(thread_fieldname)(ithread).ms(end+1) = int32(m-1);
-                ar.config.(thread_fieldname)(ithread).cs(end+1) = int32(c-1);
-                ithread = ithread + 1;
-                if(ithread>ar.config.nParallel)
-                    ithread = 1;
-                end
+global ar;
+
+% populate threads
+ar.config.(thread_fieldname) = [];
+ar.config.(thread_fieldname)(1).id = 0;
+ar.config.(thread_fieldname)(1).n = 0;
+ar.config.(thread_fieldname)(1).nd = 0;
+ar.config.(thread_fieldname)(1).ms = int32([]);
+ar.config.(thread_fieldname)(1).cs = int32([]);
+ithread = 1;
+ar.config.(ntask_fieldname) = 0;
+for m = 1:length(ar.model)
+    if (isfield(ar.model(m), condition_fieldname))
+        for c = 1:length(ar.model(m).(condition_fieldname) )
+            if(length(ar.config.(thread_fieldname))<ithread)
+                ar.config.(thread_fieldname)(ithread).id = ithread-1;
+                ar.config.(thread_fieldname)(ithread).n = 0;
+                ar.config.(thread_fieldname)(ithread).nd = 0;
+                ar.config.(thread_fieldname)(ithread).ms = int32([]);
+                ar.config.(thread_fieldname)(ithread).cs = int32([]);
+            end
+            ar.config.(ntask_fieldname) = ar.config.(ntask_fieldname) + 1;
+            ar.config.(thread_fieldname)(ithread).n = ...
+                ar.config.(thread_fieldname)(ithread).n + 1;
+            ar.config.(thread_fieldname)(ithread).nd = ...
+                ar.config.(thread_fieldname)(ithread).nd + ...
+                length(ar.model(m).(condition_fieldname)(c).dLink);
+            ar.config.(thread_fieldname)(ithread).ms(end+1) = int32(m-1);
+            ar.config.(thread_fieldname)(ithread).cs(end+1) = int32(c-1);
+            ithread = ithread + 1;
+            if(ithread>ar.config.nParallel)
+                ithread = 1;
             end
         end
     end
+end
