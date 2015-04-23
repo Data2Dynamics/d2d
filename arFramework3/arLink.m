@@ -487,8 +487,12 @@ end
 
 ar = orderfields(ar);
 ar.model = orderfields(ar.model);
-ar.model.data = orderfields(ar.model.data);
-ar.model.plot = orderfields(ar.model.plot);
+if(isfield(ar.model,'data'))
+    ar.model.data = orderfields(ar.model.data);
+end
+if(isfield(ar.model,'plot'))
+    ar.model.plot = orderfields(ar.model.plot);
+end
 
 
 function populate_threads( thread_fieldname, condition_fieldname, ntask_fieldname)
