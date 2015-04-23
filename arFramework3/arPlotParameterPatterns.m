@@ -14,7 +14,7 @@ C = jet(nbest);
 C = bsxfun(@rdivide, C, sqrt(sum(C.^2,2)));
 patch([ar.lb(jks) fliplr(ar.ub(jks))], [1:length(jks) length(jks):-1:1], ...
     -1*ones(size([1:length(jks) length(jks):-1:1])), ...
-    'FaceColor', [.8 .8 .8], 'EdgeColor', 'none')
+    'FaceColor', [.8 .8 .8], 'EdgeColor', 'none', 'FaceAlpha', 0.5)
 hold on
 for j=1:nbest
     plot(ps(j,jks), 1:length(jks), 'Color', C(j,:));
@@ -32,3 +32,4 @@ set(gca, 'YDir','reverse');
 ylim([0 length(jks)+1])
 xrange = 0.01*(max(ar.ub(jks)) - min(ar.lb(jks)));
 xlim([min(ar.lb(jks))-xrange max(ar.ub(jks))+xrange])
+grid on
