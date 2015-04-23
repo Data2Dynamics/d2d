@@ -1,12 +1,15 @@
-% arCompareParameters(filenames, onlyCommons)
+% arCompareParameters(filenames, onlyCommons, onlyFitted)
 
-function arCompareParameters(filenames, onlyCommons)
+function arCompareParameters(filenames, onlyCommons, onlyFitted)
 
 if(nargin==0 || isempty(filenames))
     filenames = fileChooserMulti('./Results', true);
 end
 if(~exist('onlyCommons','var'))
     onlyCommons = false;
+end
+if(~exist('onlyFitted','var'))
+    onlyFitted = false;
 end
 if(~iscell(filenames))
     filelist = fileList('./Results');
@@ -20,7 +23,11 @@ for j=1:length(filenames)
     fname = ['./Results/' filenames{j} '/workspace_pars_only.mat'];
     if(exist(fname,'file'))
         tmp = load(fname);
-        pLabel{j} = tmp.ar.pLabel; %#ok<AGROW>
+        if(onlyFitted)
+            pLabel{j} = tmp.ar.pLabel(tmp.ar.qFit==1); %#ok<AGROW>
+        else
+            pLabel{j} = tmp.ar.pLabel; %#ok<AGROW>
+        end
         if(onlyCommons)
             if(~isempty(pLabelCollect))
                 pLabelCollect = intersect(pLabelCollect, pLabel{j});
@@ -30,7 +37,11 @@ for j=1:length(filenames)
         else
             pLabelCollect = union(pLabelCollect, pLabel{j});
         end
-        p{j} = tmp.ar.p; %#ok<AGROW>
+        if(onlyFitted)
+            p{j} = tmp.ar.p(tmp.ar.qFit==1); %#ok<AGROW>
+        else
+            p{j} = tmp.ar.p; %#ok<AGROW>
+        end
     end
 end
 
