@@ -488,6 +488,7 @@ end
 if(isfield(ar.model, 'data') && ~isempty(ar.res))
     ar.res_NaN = find(isnan(ar.res));
     if(sum(ar.res_NaN)>0)
+        arDebugResidual;
         error('%i NaNs in residuals (check ar.res_NaN)', sum(isnan(ar.res)));
     else
         ar = rmfield(ar,'res_NaN');
