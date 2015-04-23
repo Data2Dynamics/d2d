@@ -8,7 +8,7 @@
 %   d.sres   maximal difference of ar.sres
 %   d.chi2   maximal difference of ar.chi2fit
 
-function d = arCheckODETolerances(dtol)
+function [d,res,sres] = arCheckODETolerances(dtol)
 if(~exist('dtol','var') || isempty(dtol))
     dtol = [.1,1,2];
 end
@@ -29,24 +29,31 @@ chi2  = NaN(1,length(dtol));
 for i=1:length(dtol)
     ar.config.atol = atolIn*dtol(i);
     ar.config.rtol = rtolIn*dtol(i);
-    
+
+    fprintf('atol=%.3e, rtol=%.3e\n',ar.config.atol,ar.config.rtol);
     try
-        arChi2
+        arChi2(ar)
         res(:,i) = ar.res;
         sres(:,:,i)  = ar.sres;
         chi2(i) = ar.chi2fit;
     catch ERR
         ar.config.atol = atolIn;
         ar.config.rtol = rtolIn;
-        rethrow(ERR);
+        if ~isempty(regexp(ERR.message,'cvodes failed at CV_TOO_MUCH_WORK', 'once'))
+            warning(ERR.message);
+        elseif ~isempty(regexp(ERR.message,'NaN in derivative of residuals', 'once'))            
+            warning(ERR.message);
+        else
+            rethrow(ERR);
+        end
     end
 end    
 
 ar.config.atol = atolIn;
 ar.config.rtol = rtolIn;
 
-d.res = max(max(abs(diff(res,[],2))));
-d.sres = max(max(max(abs(diff(sres,[],3)))));
-d.chi2 = max(diff(chi2));
+d.res = max(max(abs(range(res,2))));
+d.sres = max(max(max(abs(range(sres,3)))));
+d.chi2 = max(range(chi2));
 
 
