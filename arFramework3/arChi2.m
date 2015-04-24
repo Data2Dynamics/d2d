@@ -1,45 +1,89 @@
 % Calculate chi^2 value and number of data points
 %
-% arChi2(sensi, pTrial, dynamics)
+% arChi2(sensi, pTrial, dynamics, doSimu)
 %   sensi:          propagate sensitivities         [false]
+%                   this argument is passed to arSimu
 %   pTrial:         trial parameter of fitting
 %   dynamics:       evaluate dynamics               [true]
+%   doSimu          should arSimu be called         [true]
 % 
 % or
 %
 % ar = arChi2(ar, sensi, pTrial, dynamics)
 %   ar:             d2d model/data structure
+% 
+% Possible calls:
+% arChi2        then:
+%               qglobalar = true
+%               sensi = true
+% 
+% arChi2(ar)    here, the global ar is overwritten by the argument
+%               qglobalar = false
+%               sensi = true
+% 
+% arChi2(ar,sensi)
+% arChi2(sensi)
+%               like arChi2, but sensi can be set 
+% 
+% arChi2(ar,sensi,ptrial)
+% arChi2(sensi,ptrial)
+%               like arChi2(ar,sensi), but 
+%               silent = true
+%               ar.p is set to ptrial
+%               this is the only possiblity to set 'silent' to true
+% 
+% arChi2(sensi,ptrial,dynamics)
+% arChi2(ar,sensi,ptrial,dynamics)
+%               dynamics is passed to arSimu, otherwise arSimu is called
+%               without this argument, i.e. with its default 
+%               
+% arChi2(sensi,ptrial,dynamics,doSimu)
+% arChi2(ar,sensi,ptrial,dynamics,doSimu)
+%           doSimu  can be set to false, then the residuals are calculated
+%           without updating the model trajectories (e.g. if ar.qFit or ar.
+%           model.data.qFit) has been changed.
 
 function varargout = arChi2(varargin)
 
 global ar
 
-if(nargin==0 || ~isstruct(varargin{1}))
-    qglobalar = true;
-else
+nargs = nargin;
+% The possiblity providing ar as an argument and to use of qglobalar==0 is
+% obsolete because the gloal "ar" is overwritten anyway in arSimu 
+% Implementation due to backwards compability:
+if nargs>0 && isstruct(varargin{1})
     ar = varargin{1};
-    if(nargin>1)
-        varargin = varargin(2:end);
-    else
-        varargin = {};
-    end
+    varargin = varargin(2:end);
+    nargs = nargs-1;    
     qglobalar = false;
+else
+    qglobalar = true;
 end
 
-if(~isempty(varargin))
+if nargs>=1 && ~isempty(varargin{1})
     sensi = varargin{1};
-else
+else 
     sensi = true;
 end
-if(length(varargin)>1)
+
+if nargs>=2 && ~isempty(varargin{2})
     pTrial = varargin{2};
+	ar.p(ar.qFit==1) = pTrial;
     silent = true;
 else
     silent = false;
 end
 
-if(exist('pTrial', 'var') && ~isempty(pTrial))
-	ar.p(ar.qFit==1) = pTrial;
+if nargs>=3 && ~isempty(varargin{3})
+    dynamics = varargin{3};
+else
+    dynamics = [];
+end
+
+if nargs>=4 && ~isempty(varargin{4})
+    doSimu = varargin{4};
+else
+    doSimu = true;
 end
 
 if(~isfield(ar, 'fevals'))
@@ -106,18 +150,11 @@ else
 end
 
 try
-    if(length(varargin)>2)
-        dynamics = varargin{3};
-        if(qglobalar)
+    if doSimu
+        if(qglobalar)  % since ar is overwritten anyway in arSimu, the possiblity to use of qglobalar obsolete
             arSimu(sensi, ~isfield(ar.model(jm), 'data'), dynamics);
         else
             ar = arSimu(ar, sensi, ~isfield(ar.model(jm), 'data'), dynamics);
-        end
-    else
-        if(qglobalar)
-            arSimu(sensi, ~isfield(ar.model(jm), 'data'));
-        else
-            ar = arSimu(ar, sensi, ~isfield(ar.model(jm), 'data'));
         end
     end
     has_error = false;
@@ -511,6 +548,6 @@ end
 if(nargout>0 && ~qglobalar)
     varargout{1} = ar;
 else
-    varargout = {};
+    varargout = cell(0);
 end
 

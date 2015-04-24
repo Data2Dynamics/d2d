@@ -26,17 +26,17 @@ else
     qglobalar = false;
 end
 
-if(~isempty(varargin))
+if(~isempty(varargin) && ~isempty(varargin{1}))
     sensi = varargin{1};
 else
     sensi = true;
 end
-if(length(varargin)>1)
+if(length(varargin)>1 && ~isempty(varargin{2}))
     fine = varargin{2};
 else
     fine = false;
 end
-if(length(varargin)>2)
+if(length(varargin)>2 && ~isempty(varargin{3}))
     dynamics = varargin{3};
 else
     dynamics = sum(ar.qDynamic == 1 & ar.qFit == 1) > 0 || ~sensi;
