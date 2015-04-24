@@ -485,13 +485,33 @@ if(isfield(ar, 'pExternLabels'))
         ar.lbExtern, ar.ubExtern);
 end
 
+
+% assigning first to cells 'tmp' and then in an array of SIMILAR structs is
+% required for serveral models/several data sets/ several plots:
 ar = orderfields(ar);
-ar.model = orderfields(ar.model);
-if(isfield(ar.model,'data'))
-    ar.model.data = orderfields(ar.model.data);
+tmp = cell(size(ar.model));
+for m=1:length(ar.model)
+    tmp{m} = orderfields(ar.model(m));
 end
-if(isfield(ar.model,'plot'))
-    ar.model.plot = orderfields(ar.model.plot);
+ar.model = [tmp{:}];
+
+for m=1:length(ar.model)
+    if(isfield(ar.model(m),'data'))
+        tmp = cell(size(ar.model(m).data));
+        for d=1:length(ar.model(m).data)
+            tmp{d} = orderfields(ar.model(m).data(d));
+        end
+        ar.model(m).data = [tmp{:}];
+    end
+
+    if(isfield(ar.model(m),'plot'))
+        tmp = cell(size(ar.model(m).plot));
+        for p=1:length(ar.model(m).plot)
+            tmp{p} = orderfields(ar.model(m).plot(p));
+        end
+        ar.model(m).plot = [tmp{:}];
+    end
+
 end
 
 
