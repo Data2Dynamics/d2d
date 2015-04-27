@@ -23,7 +23,7 @@ if(nargin==0 || isempty(j))
     return
 end
 
-Nmax = 8;
+Nmax = 9;
 if(n>Nmax)
     n=Nmax;
 end

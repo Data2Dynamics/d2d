@@ -22,11 +22,13 @@ ar.info.initTime = now;
 fprintf('Data 2 Dynamics Software\n');
 fprintf('(arFramework3, def-version %i, c-version %s)\n', ...
     ar.info.def_version_code, ar.info.c_version_code);
-fprintf('Website: https://bitbucket.org/d2d-development/d2d-software/wiki/Home\n');
+fprintf('Website: http://www.data2dynamics.org\n');
 fprintf('Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de\n');
-fprintf('Copyright 2013 D2D Development Team. All rights reserved.\n\n');
+fprintf('Copyright 2015 D2D Development Team. All rights reserved.\n\n');
 
 ar.checksum = [];
+
+ar.config.checkForNegFluxes = true;
 
 % parallelization
 ar.config.useParallel = true;

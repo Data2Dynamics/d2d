@@ -616,7 +616,7 @@ for jm = 1:length(ar.model)
                     hold(g, 'off');    
                     if(nu == 0 && jx == ix(1))
                         if(plot_x_collected)
-                            legend(g, cclegendstyles, arNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
+                            legend(g, cclegendstyles(cclegendstyles~=0), arNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
                         else
                             if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                                 if(~ar.model(jm).plot(jplot).doseresponse)
