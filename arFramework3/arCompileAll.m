@@ -1832,6 +1832,8 @@ fprintf(fid, '\n  return;\n}\n\n\n');
 % write C code
 function writeCcode(fid, cond_data, svar, ip)
 
+global ar;
+    
 if(strcmp(svar,'fv'))
     cstr = ccode(cond_data.sym.fv(:));
     cvar =  'data->v';
@@ -1914,7 +1916,7 @@ elseif(strcmp(svar,'dfxdp'))
     cstr = ccode(cond_data.sym.dfxdp(:));
     cvar =  'dfxdp';
 else
-    error('unkown %s', svar);
+    error('unknown %s', svar);
 end
 
 cstr = strrep(cstr, 't0', [cvar '[0]']);
@@ -1931,6 +1933,13 @@ cstr = strrep(cstr, 'T', cvar);
 %     fprintf('%s', cstr);
 % end
 % fprintf('\n');
+
+% Find instances of heaviside functions (these need special treatment)
+if ( isfield( ar.config, 'accurateSteps' ) )
+    if ( ar.config.accurateSteps == 1 )
+        cstr = replaceWithinFunc(cstr, 'heaviside', 't', 'data->t');
+    end
+end
 
 if(~(length(cstr)==1 && isempty(cstr{1})))
     if(strcmp(svar,'fy'))
@@ -2301,6 +2310,13 @@ function s = mySym( s, specialFunc )
         s = sym(s);
     end
 
+% Replace variables in the arguments of specific functions
+function str = replaceWithinFunc(str, func, from, to)
+    funcs = findFunc( str, func );
+    for a = 1 : length( funcs )
+        str = strrep(str, funcs(a).func, strrep(funcs(a).func,from,to));
+    end
+    
 function str = replaceFunctions(str, funcTypes, checkValidity)
 
     if (nargin < 3)
