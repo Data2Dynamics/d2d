@@ -44,7 +44,7 @@ for j=1:n
     ar.p = ps(j,:);
     try
         t2 = tic;
-        arChi2(sensis, []); 
+        arChi2(sensis,ar.p(ar.qFit==1));
         ar.timing(j) = ar.stop/1e6;
         if(ar.stop==0)
             ar.timing(j) = toc(t2);
@@ -75,7 +75,7 @@ end
 
 ar.p = pReset;
 try %#ok<TRYNC>
-    arChi2(false, []);
+    arChi2(false, ar.p(ar.qFit==1));
 end
 
 if(~silent)

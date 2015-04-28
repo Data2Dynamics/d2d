@@ -39,7 +39,7 @@ parfor j=1:n
     ar2.p = ps(j,:);
     try
         t2 = tic;
-        ar2 = arChi2(ar2, sensis, []); 
+        ar2 = arChi2(ar2, sensis, ar2.p(ar2.qFit==1));
         timing(j) = ar2.stop/1e6;
         if(ar2.stop==0)
             timing(j) = toc(t2);
@@ -80,7 +80,7 @@ end
 
 ar.p = pReset;
 try %#ok<TRYNC>
-    arChi2(false, []);
+    arChi2(false, ar.p(ar.qFit==1));
 end
 
 if(~silent)

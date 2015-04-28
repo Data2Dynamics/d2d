@@ -30,7 +30,7 @@ ar.timing = nan(1,n);
 ar.fun_evals = nan(1,n);
 ar.optim_crit = nan(1,n);
 
-arChi2(true,[]);
+arChi2(true,ar.p(ar.qFit==1));
 pReset = ar.p;
 chi2Reset = ar.chi2fit + ar.chi2constr;
 
