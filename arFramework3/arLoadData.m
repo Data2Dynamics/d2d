@@ -538,8 +538,8 @@ end
 
 ar = orderfields(ar);
 ar.model = orderfields(ar.model);
-ar.model.data = orderfields(ar.model.data);
-ar.model.plot = orderfields(ar.model.plot);
+ar.model(m).data = orderfields(ar.model(m).data);
+ar.model(m).plot = orderfields(ar.model(m).plot);
 
 
 function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot)
