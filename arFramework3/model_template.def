@@ -30,4 +30,4 @@ Prot2_wb    "sd_prot2"
 
 CONDITIONS
 init_Prot1      "1"
-init_Prot1      "0"
+init_Prot2      "0"

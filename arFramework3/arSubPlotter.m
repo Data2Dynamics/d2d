@@ -231,7 +231,7 @@ set(handles.uitable1, 'Data', [ar.model(ar.subplotter.jm).u' num2cell(ar.model(a
 set(handles.uitable2, 'Data', [ar.model(ar.subplotter.jm).z' num2cell(ar.model(ar.subplotter.jm).qPlotZ==1)']);
 v = cell(1,length(ar.model(ar.subplotter.jm).fv));
 for j = 1:length(ar.model(ar.subplotter.jm).fv)
-    v{j} = arAssambleReactionStr(ar.model.fv_source{j}, ar.model.fv_target{j});
+    v{j} = arAssembleReactionStr(ar.model.fv_source{j}, ar.model.fv_target{j});
 end
 set(handles.uitable4, 'Data', [v' ar.model(ar.subplotter.jm).fv num2cell(ar.model(ar.subplotter.jm).qPlotV==1)']);
 set(handles.popupmenu1, 'Value', ar.subplotter.jm);
