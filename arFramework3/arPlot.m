@@ -49,6 +49,10 @@ if(isfield(ar.config, 'useNewPlots') && ar.config.useNewPlots)
         varargout(1) = {hs};
     end
     return;
+else
+    if(nargout>0)
+        varargout(1) = {hs};
+    end
 end
 
 if(evalfun)
