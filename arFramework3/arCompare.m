@@ -190,7 +190,12 @@ for i=1:length(fn)
     elseif(iscell(val1))
         if(isempty(val1) && isempty(val2))
         else
-            [csame,reason1,reason2] = cellcmp(val1,val2);
+            try
+                [csame,reason1,reason2] = cellcmp(val1,val2);
+            catch
+                val1
+                val2
+            end
             if(~csame)
                 same = false;
                 eval(['d1.',Fn{i},' = reason1;']);
@@ -340,12 +345,39 @@ same = true;
 reason1 = '';
 reason2 = '';
 
+if ~isempty(c1)
+    isc = find(~cellfun(@isnumeric,c1));
+elseif isempty(c1) & isempty(c2)
+    return
+else
+    same = false;
+    reason1 = sprintf('isempty=',isempty(c1));
+    reason2 = sprintf('isempty=',isempty(c2));
+    return
+end
+
 if(sum(abs(size(c1)-size(c2)))~=0)
     same = false;
     reason1 = sprintf('size=%i,',size(c1));
     reason2 = sprintf('size=%i,',size(c2));
     return;
-elseif(sum(abs(celllength(c1)-celllength(c2)))>0)
+elseif sum(abs(cellfun(@iscell,c1(isc))-cellfun(@iscell,c2(isc))))>0
+    reason1 = sprintf('cellfun(@iscell,...) different');
+    reason2 = sprintf('cellfun(@iscell,...) different');
+    same = false;
+elseif size(c1,1)==1 && sum(strcmpi(cellfun(@class,c1,'UniformOutput',false), cellfun(@class,c2,'UniformOutput',false))~=1)>0
+    reason1 = sprintf('cellfun(@class,...) different');
+    reason2 = sprintf('cellfun(@class,...) different');
+    same = false;
+elseif size(c1,2)==1 && sum(strcmpi(cellfun(@class,c1,'UniformOutput',false)', cellfun(@class,c2,'UniformOutput',false)')~=1)>0
+    reason1 = sprintf('cellfun(@class,...) different');
+    reason2 = sprintf('cellfun(@class,...) different');
+    same = false;
+elseif sum(cellfun(@isempty,c1(isc)) - cellfun(@isempty,c2(isc)))>0
+    reason1 = sprintf('cellfun(@isempty,...) different');
+    reason2 = sprintf('cellfun(@isempty,...) different');
+    same = false;
+elseif(sum(abs(celllength(c1(isc))-celllength(c2(isc))))>0)
     reason1 = sprintf('length of cell entries');
     reason2 = sprintf('length of cell entries');
     same = false;
