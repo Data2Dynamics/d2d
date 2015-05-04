@@ -593,15 +593,13 @@ condition.sym.fu = mysubs(condition.sym.fu, sym(model.t), sym('t'));
 condition.sym.fz = mysubs(condition.sym.fz, sym(model.t), sym('t'));
 
 % remaining initial conditions
-qinitial = ismember(condition.p, model.px0); %R2013a compatible
-
-varlist = cellfun(@symvar, condition.fp(qinitial), 'UniformOutput', false);
-condition.px0 = union(vertcat(varlist{:}), [])'; %R2013a compatible
+varlist = symvar(condition.sym.fpx0);
+condition.px0 = sym2str(varlist);
 
 % remaining parameters
-varlist = cellfun(@symvar, condition.fp, 'UniformOutput', false);
+varlist = symvar([condition.sym.fv(:); condition.sym.fu(:); condition.sym.fz(:); condition.sym.fpx0(:)]);
 condition.pold = condition.p;
-condition.p = setdiff(setdiff(union(vertcat(varlist{:}), {})', model.x), model.u); %R2013a compatible
+condition.p = setdiff(setdiff(setdiff(setdiff(sym2str(varlist), model.x), model.u), model.z), 't');
 
 if(doskip)
     condition.ps = {};
@@ -1091,9 +1089,10 @@ data.sym.fy = mysubs(data.sym.fy, sym(model.t), sym('t'));
 data.sym.fystd = mysubs(data.sym.fystd, sym(model.t), sym('t'));
 
 % remaining parameters
-varlist = cellfun(@symvar, data.fp, 'UniformOutput', false);
+varlist = symvar([data.sym.fy(:); data.sym.fystd(:)]);
 data.pold = data.p;
-data.p = setdiff(setdiff(union(vertcat(varlist{:}), [])', model.x), model.u); %R2013a compatible
+othervars = union(union(union(union(model.x, model.u), model.z), data.y), 't');
+data.p = setdiff(union(sym2str(varlist), data.p_condition), othervars); %R2013a compatible
 
 if(doskip)
     data.ps = {};
@@ -1935,7 +1934,7 @@ cstr = strrep(cstr, 'T', cvar);
 % fprintf('\n');
 
 % Find instances of heaviside functions (these need special treatment)
-if ( isfield( ar.config, 'accurateSteps' ) )
+if (exist('ar','var') && ~isempty(ar) && isfield( ar.config, 'accurateSteps' ) )
     if ( ar.config.accurateSteps == 1 )
         cstr = replaceWithinFunc(cstr, 'heaviside', 't', 'data->t');
     end
@@ -2309,6 +2308,14 @@ function s = mySym( s, specialFunc )
         end
         s = sym(s);
     end
+    
+% convert sym array to string array
+function a = sym2str(b)
+a = cell(size(b));
+for j=1:length(b);
+    a{j} = char(b(j));
+end
+    
 
 % Replace variables in the arguments of specific functions
 function str = replaceWithinFunc(str, func, from, to)
