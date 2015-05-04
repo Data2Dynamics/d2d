@@ -15,8 +15,34 @@
 #include <pthread.h>
 #endif
 
-#ifdef HAS_SYSTIME
+#ifdef _WIN32
+#include <winsock.h>
+#else
 #include <sys/time.h>
+#endif
+
+/* additional sys/time functions missing under Windows */
+#ifdef _WIN32
+#include <sys/timeb.h>
+#include <sys/types.h>
+#include <winsock.h>
+void gettimeofday(struct timeval* t, void* timezone)
+{
+    struct _timeb timebuffer;
+    _ftime( &timebuffer );
+    t->tv_sec=timebuffer.time;
+    t->tv_usec=1000*timebuffer.millitm;
+}
+void timersub(struct timeval* tvp, struct timeval* uvp, struct timeval* vvp)
+{
+    vvp->tv_sec = tvp->tv_sec - uvp->tv_sec;
+    vvp->tv_usec = tvp->tv_usec - uvp->tv_usec;
+    if (vvp->tv_usec < 0)
+    {
+        --vvp->tv_sec;
+        vvp->tv_usec += 1000000;
+    }
+}
 #endif
 
 #include <cvodes/cvodes.h>           /* prototypes for CVODES fcts. and consts. */
@@ -72,9 +98,7 @@ double init_eq_step;          /* Initial equilibration stepsize attempt */
 double eq_step_factor;        /* Factor with which to increase the time at each equilibration step */
 double eq_tol;                /* Absolute tolerance for equilibration */
 
-#ifdef HAS_SYSTIME
 struct timeval t1;
-#endif
 
 double  mintau;
 int     nruns;
@@ -114,13 +138,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #endif
 
     mxArray    *arconfig;
-    
-#ifdef HAS_SYSTIME
+
     struct timeval t2, tdiff;
     double *ticks_stop;
     ticks_stop = mxGetData(mxGetField(prhs[0], 0, "stop"));
     gettimeofday(&t1, NULL);
-#endif
     
     srand( (unsigned)time(NULL) );
     
@@ -213,12 +235,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         thread_calc(tid);
     }
 #endif    
-    
-#ifdef HAS_SYSTIME
+
     gettimeofday(&t2, NULL);
     timersub(&t2, &t1, &tdiff);
     ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
-#endif
 }
 
 /* work of threads */
@@ -321,6 +341,14 @@ void x_calc(int im, int ic, int sensi) {
     double *yStd;
     double *y_scale;
     double *y_max_scale;
+
+    struct timeval t2;
+    struct timeval t3;
+    struct timeval t4;
+    struct timeval tdiff;
+    double *ticks_start;
+    double *ticks_stop_data;
+    double *ticks_stop;
     
     int sensi_meth = CV_SIMULTANEOUS; /* CV_SIMULTANEOUS or CV_STAGGERED */
     bool error_corr = TRUE;
@@ -358,16 +386,12 @@ void x_calc(int im, int ic, int sensi) {
     
     /* get ar.model(im).data */
     ardata = mxGetField(armodel, im, "data");
-     
-#ifdef HAS_SYSTIME
-    struct timeval t2, t3, t4, tdiff;
-    double *ticks_start, *ticks_stop_data, *ticks_stop;
+
     ticks_start = mxGetData(mxGetField(arcondition, ic, "start"));
     ticks_stop = mxGetData(mxGetField(arcondition, ic, "stop"));
     ticks_stop_data = mxGetData(mxGetField(arcondition, ic, "stop_data"));
 
     gettimeofday(&t2, NULL);
-#endif
     
     if(dynamics == 1) {
         if(ssa == 0) {
@@ -966,9 +990,7 @@ void x_calc(int im, int ic, int sensi) {
             z_calc(im, ic, arcondition, sensi);
     }
 
-#ifdef HAS_SYSTIME
     gettimeofday(&t3, NULL);
-#endif
     
     /* printf("computing model #%i, condition #%i (done)\n", im, ic); */
     
@@ -989,8 +1011,7 @@ void x_calc(int im, int ic, int sensi) {
             }
         }
     }
-    
-#ifdef HAS_SYSTIME
+
     gettimeofday(&t4, NULL);
     timersub(&t2, &t1, &tdiff);
     ticks_start[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
@@ -998,7 +1019,6 @@ void x_calc(int im, int ic, int sensi) {
     ticks_stop_data[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
     timersub(&t4, &t1, &tdiff);
     ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
-#endif
 }
 
 /* Equilibrate the system until the RHS is under a specified threshold */
