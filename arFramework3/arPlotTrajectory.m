@@ -1,5 +1,5 @@
 function [hy, hystd, hyss] = arPlotTrajectory(jy, t, y, ystd, lb, ub, tExp, yExp, yExpHl, yExpStd, ...
-    y_ssa, y_ssa_lb, y_ssa_ub, ploterrors, Clines, ClinesExp, qUnlog, hy, hystd, hyss, dydt, ...
+    y_ssa, y_ssa_lb, y_ssa_ub, ploterrors, Clines, ClinesExp, qUnlog, qLog, hy, hystd, hyss, dydt, ...
     qFit, zero_break)
 
 fastPlot = false;
@@ -18,12 +18,19 @@ if(~isempty(y_ssa) && ploterrors==1 &&  sum(~isnan(y_ssa))>0)
     if(~isempty(qUnlog) && qUnlog(jy))
         y_ssa = 10.^y_ssa;
     end
+    if(~isempty(qLog) && qLog(jy))
+        y_ssa = log10(y_ssa);
+    end
     
     % create patch around ssa simulation
     if(~isempty(y_ssa_lb))
         if(~isempty(qUnlog) && qUnlog(jy))
             y_ssa_lb = 10.^y_ssa_lb;
             y_ssa_ub = 10.^y_ssa_ub;
+        end
+        if(~isempty(qLog) && qLog(jy))
+            y_ssa_lb = log10(y_ssa_lb);
+            y_ssa_ub = log10(y_ssa_ub);
         end
         for jssa = 1:size(y_ssa_lb, 3)
             tmpx = [t(:); flipud(t(:))];
@@ -43,6 +50,9 @@ end
 tmpy = y(:,jy);
 if(~isempty(qUnlog) && qUnlog(jy))
     tmpy = 10.^tmpy;
+end
+if(~isempty(qLog) && qLog(jy))
+    tmpy = log10(tmpy);
 end
 isInfWarn = sum(isinf(tmpy))>0;
 tmpy(isinf(tmpy)) = nan;
@@ -87,6 +97,9 @@ if(ploterrors ~= 1)
         if(~isempty(qUnlog) && qUnlog(jy))
             tmpy = 10.^tmpy;
         end
+        if(~isempty(qLog) && qLog(jy))
+            tmpy = log10(tmpy);
+        end
         isInfWarn = isInfWarn || sum(isinf(tmpy))>0;
         tmpy(isinf(tmpy)) = nan;
         qnan = isnan(tmpy);
@@ -121,6 +134,10 @@ if(~isempty(yExp) && ~fastPlot)
     if(~isempty(qUnlog) && qUnlog(jy))
         yExp = 10.^yExp;
         yExpHl = 10.^yExpHl;
+    end
+    if(~isempty(qLog) && qLog(jy))
+        yExp = log10(yExp);
+        yExpHl = log10(yExpHl);
     end
     if(ploterrors ~= 1)
         plot(tExp, yExp(:,jy), ClinesExp{:},'MarkerSize',markersize);
