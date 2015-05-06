@@ -14,7 +14,17 @@ else
     ar_path = strrep(which('arInit.m'),'\arInit.m','');
 end
 
-addpath(ar_path)
+warning('off','MATLAB:rmpath:DirNotFound')
+
+% add all subfolders of arFramework3 folder to MATLAB search path
+addpath(genpath(ar_path))
+
+%removes Examples folder and subfolders of arFramework3 from the MATLAB
+%serach path to avoid loading data from those examples for accidentially
+%identical file names
+rmpath(genpath([ar_path '/Examples']))
+
+warning('on','MATLAB:rmpath:DirNotFound')
 
 % load path of sub-directories
 if(exist('pleInit','file') == 0)
