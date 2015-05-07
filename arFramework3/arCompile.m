@@ -322,6 +322,7 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
             sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
             which('arSimuCalc.c'), objectsstr{:});
     else
+        % parallel code using POSIX threads (pthread-win32) for Windows type OS
         includesstr{end+1} = ['-I"' ar_path '\pthreads-w32_2.9.1\include"'];
         includesstr{end+1} = ['-L"' ar_path '\pthreads-w32_2.9.1\lib\' mexext '"'];
         includesstr{end+1} = '-lpthreadVC2';
