@@ -322,22 +322,13 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
             sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
             which('arSimuCalc.c'), objectsstr{:});
     else
-        if(exist('C:\Windows\pthreadGC2.dll','file')>0 && exist('C:\Windows\pthreadVC2.dll','file')>0)
-            % parallel code using POSIX threads (pthread-win32) for Windows type OS
-            
-            includesstr{end+1} = ['-I"' ar_path '\pthreads-w32_2.9.1\include"'];
-            includesstr{end+1} = ['-L"' ar_path '\pthreads-w32_2.9.1\lib\' mexext '"'];
-            includesstr{end+1} = '-lpthreadVC2';
-            
-            mex('-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
-                sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
-                which('arSimuCalc.c'), objectsstr{:});
-        else
-            % serial code for windows OS
-            
-            mex('-output', ar.fkt, includesstr{:}, ...
-                which('arSimuCalc.c'), objectsstr{:});
-        end 
+        includesstr{end+1} = ['-I"' ar_path '\pthreads-w32_2.9.1\include"'];
+        includesstr{end+1} = ['-L"' ar_path '\pthreads-w32_2.9.1\lib\' mexext '"'];
+        includesstr{end+1} = '-lpthreadVC2';
+
+        mex('-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
+            sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
+            which('arSimuCalc.c'), objectsstr{:});
     end
     fprintf('compiling and linking %s...done\n', ar.fkt);
 else

@@ -19,9 +19,9 @@ warning('off','MATLAB:rmpath:DirNotFound')
 % add all subfolders of arFramework3 folder to MATLAB search path
 addpath(genpath(ar_path))
 
-%removes Examples folder and subfolders of arFramework3 from the MATLAB
-%serach path to avoid loading data from those examples for accidentially
-%identical file names
+% removes Examples folder and subfolders of arFramework3 from the MATLAB
+% serach path to avoid loading data from those examples for accidentially
+% identical file names
 rmpath(genpath([ar_path '/Examples']))
 
 warning('on','MATLAB:rmpath:DirNotFound')
@@ -86,10 +86,14 @@ if(exist([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'],'file') 
 end
 
 %% check Windows libraries for pthread-win32
-
 if(ispc)
     if(exist('C:\Windows\pthreadGC2.dll','file')==0 || exist('C:\Windows\pthreadVC2.dll','file')==0)
-        fprintf('Please copy content of %s to C:\\Windows\n', [ar_path '\pthreads-w32_2.9.1\dll\' mexext]);
+        if(exist('.\pthreadGC2.dll','file')==0)
+            copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadGC2.dll'], 'pthreadGC2.dll');
+        end
+        if(exist('.\pthreadVC2.dll','file')==0)
+            copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadVC2.dll'], 'pthreadVC2.dll');
+        end
     end
 end
 
