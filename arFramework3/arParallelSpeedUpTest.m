@@ -76,4 +76,4 @@ set(gca, 'yTick', 1:length(nthreads));
 set(gca, 'yTickLabel', nthreads);
 set(gca, 'XScale', 'log');
 legend([h1 h2],'expected speed up','machine core limit','Location','SouthEast')
-
+grid on

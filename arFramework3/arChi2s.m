@@ -43,20 +43,13 @@ for j=1:n
     end
     ar.p = ps(j,:);
     try
-        t2 = tic;
         arChi2(sensis,ar.p(ar.qFit==1));
         ar.timing(j) = ar.stop/1e6;
-        if(ar.stop==0)
-            ar.timing(j) = toc(t2);
-        end
         ar.chi2s(j) = ar.chi2fit;
         ar.chi2sconstr(j) = ar.chi2constr;
         ar.exitflag(j) = 1;
     catch exception
         ar.timing(j) = ar.stop/1e6;
-        if(ar.stop==0)
-            ar.timing(j) = toc(t2);
-        end
         ar.ps_errors(j,:) = ar.p;
         if(~silent) 
             fprintf('feval #%i: %s\n', j, exception.message);
