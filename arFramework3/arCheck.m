@@ -59,16 +59,10 @@ end
 
 % uncompress and expand CVODES
 if(exist([ar_path '/sundials-2.5.0'],'dir') == 0)
-    if(~ispc)
-        path_backup = cd;
-        cd(ar_path);
-        !tar -xvf sundials-2.5.0.tar
-        cd(path_backup);
-    else
-        fprintf('Please uncompress and expand the CVODES sources\n%s\nand repeat.\n', [ar_path '\sundials-2.5.0.tar']);
-        docontinue = false;
-        return
-    end
+    path_backup = cd;
+    cd(ar_path);
+    untar('sundials-2.5.0.tar');
+    cd(path_backup);
 end
 
 % write sundials_config.h
