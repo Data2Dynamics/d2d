@@ -38,12 +38,8 @@ parfor j=1:n
     ar2 = ar1;
     ar2.p = ps(j,:);
     try
-        t2 = tic;
         ar2 = arChi2(ar2, sensis, ar2.p(ar2.qFit==1));
         timing(j) = ar2.stop/1e6;
-        if(ar2.stop==0)
-            timing(j) = toc(t2);
-        end
         chi2s(j) = ar2.chi2fit;
         chi2sconstr(j) = ar2.chi2constr;
         exitflag(j) = 1;
@@ -52,9 +48,6 @@ parfor j=1:n
         end
     catch exception
         timing(j) = ar2.stop/1e6;
-        if(ar2.stop==0)
-            timing(j) = toc(t2);
-        end
         ps_errors(j,:) = ar2.p;
         if(~silent) 
             fprintf('feval #%i: %s\n', j, exception.message);
