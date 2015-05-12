@@ -89,10 +89,11 @@ for jk=jks
             pleGlobals.gradient{jk}(:,pleGlobals.q_fit==1) < -pleGlobals.grad_thres & qCloseToUB(:,pleGlobals.q_fit==1);
         
         % profile
-        qplot = sum(qhitbound,2)==0;
+        qplot = true(size(ps,1),1);
         if(sum(show_hit_bound==jk)>0)
             plot(ps(:,jk), chi2s, 'k-', 'LineWidth', 1)
         else
+            qplot = sum(qhitbound,2)==0;
             plot(ps(qplot,jk), chi2s(qplot), 'k-', 'LineWidth', 1)
         end
         hold on
