@@ -23,7 +23,7 @@
 % Example:
 %   arLoadPars('20141112T084549_model_fitted',[],[],'../OtherFolder/Results')
 
-function varargout = arLoadPars(filename, fixAssigned, only_values, pfad)
+function varargout = arLoadPars(filename, fixAssigned, pars_only, pfad)
 if(~exist('pfad','var') || isempty(pfad))
     pfad = './Results';
 else
@@ -37,8 +37,8 @@ global ar
 if(~exist('fixAssigned', 'var') || isempty(fixAssigned))
     fixAssigned = false;
 end
-if(~exist('only_values', 'var') || isempty(only_values))
-    only_values = false;
+if(~exist('pars_only', 'var') || isempty(pars_only))
+    pars_only = false;
 end
 
 if(~exist('filename','var') || isempty(filename))
@@ -54,7 +54,7 @@ elseif(strcmp(filename,'all'))
 end
 
 if(~iscell(filename))    
-    ar = arLoadParsCore(ar, filename, fixAssigned, only_values, pfad);
+    ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad);
     varargout = cell(0);
 else
     ars = cell(size(filename));
@@ -66,7 +66,7 @@ else
             file = filename{i};
         end
 
-        ars{i} = arLoadParsCore(ar, file, fixAssigned, only_values, pfad);
+        ars{i} = arLoadParsCore(ar, file, fixAssigned, pars_only, pfad);
     end
     varargout{1} = ars;
     if nargout>1
@@ -81,7 +81,7 @@ end
 
 
 
-function ar = arLoadParsCore(ar, filename, fixAssigned, only_values, pfad)
+function ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad)
 N = 1000;
 
 if(ischar(filename))
@@ -113,7 +113,7 @@ for j=1:length(ar.p)
         end
     else
         ass(j) = 1;
-        if(~only_values)
+        if(~pars_only)
             ar.p(j) = S.ar.p(qi);
             ar.qLog10(j) = S.ar.qLog10(qi);
             ar.qFit(j) = S.ar.qFit(qi);
