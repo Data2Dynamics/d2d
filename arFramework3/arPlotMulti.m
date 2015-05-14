@@ -111,7 +111,7 @@ for jp=1:np
                                     hold(g, 'on');
                                     if(isfield(ar.model(jm).data(jd), 'yExp') && jp==np)
                                         
-                                        if(ar.config.ploterrors==0)
+                                        if(ar.config.ploterrors~=1)
                                             plot(g, tExp, 10.^yExp, markerstyle, Clinesdata{:});
                                         else
                                             errorbar(g, tExp, 10.^yExp, 10.^yExp - 10.^(yExp - yExpStd), ...
@@ -126,7 +126,7 @@ for jp=1:np
                                     cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
                                     hold(g, 'on');
                                     if(isfield(ar.model(jm).data(jd), 'yExp') && jp==np)
-                                        if(ar.config.ploterrors==0)
+                                        if(ar.config.ploterrors~=1)
                                             plot(g, tExp, yExp, markerstyle, Clinesdata{:});
                                         else
                                             errorbar(g, tExp, yExp, yExpStd, markerstyle, Clinesdata{:});
@@ -205,7 +205,7 @@ for jp=1:np
                                         cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
                                         hold(g, 'on');
                                         if(isfield(ar.model(jm).data(jd), 'yExp') && jp==np)
-                                            if(ar.config.ploterrors==0)
+                                            if(ar.config.ploterrors~=1)
                                                 plot(g, tExp, 10.^yExp, markerstyle, Clinesdata{:});
                                             else
                                                 errorbar(g, ar.model(jm).data(jd).tExp, 10.^yExp, ...
@@ -220,7 +220,7 @@ for jp=1:np
                                         cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
                                         hold(g, 'on');
                                         if(isfield(ar.model(jm).data(jd), 'yExp') && jp==np)
-                                            if(ar.config.ploterrors==0)
+                                            if(ar.config.ploterrors~=1)
                                                 plot(g, tExp, yExp, markerstyle, Clinesdata{:});
                                             else
                                                 errorbar(g, tExp, yExp, yExpStd, markerstyle, Clinesdata{:});
