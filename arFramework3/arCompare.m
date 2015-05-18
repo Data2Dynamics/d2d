@@ -378,7 +378,7 @@ elseif sum(cellfun(@isempty,c1(isc)) - cellfun(@isempty,c2(isc)))>0
     reason1 = sprintf('cellfun(@isempty,...) different');
     reason2 = sprintf('cellfun(@isempty,...) different');
     same = false;
-elseif(sum(abs(celllength(c1(isc))-celllength(c2(isc))))>0)
+elseif(sum(abs(cellfun('length',c1(isc))-cellfun('length',c2(isc))))>0)
     reason1 = sprintf('length of cell entries');
     reason2 = sprintf('length of cell entries');
     same = false;
@@ -451,7 +451,7 @@ end
 function a = cell2array(c)
 a = NaN*ones(size(c));
 c = {c{:}};
-cl = celllength(c);
+cl = cellfun('length',c);
 
 if(sum(cl==1)==length(cl))
     for i=1:length(c)
