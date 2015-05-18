@@ -193,6 +193,7 @@ for i=1:length(fn)
             try
                 [csame,reason1,reason2] = cellcmp(val1,val2);
             catch
+                csame = 1;
                 val1
                 val2
             end
