@@ -55,6 +55,9 @@ end
 
 fprintf('\n');
 
+if(length(which('arClusterCompiledHook.m','-all'))>1)
+    warning('arClusterCompiledHook.m is found multiple times which can cause compilation errors. Check your matlab path.');
+end
 if(~ispc)
     ar_path = strrep(which('arInit.m'),'/arInit.m','');
     sundials_path = [strrep(which('arInit.m'),'/arInit.m','') '/sundials-2.5.0/']; % sundials 2.5.0
