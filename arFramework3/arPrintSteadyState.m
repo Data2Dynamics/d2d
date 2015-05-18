@@ -4,58 +4,77 @@
 % the model.
 %
 % Usage:
-%    arPrintSteadyState( (model) )
+%    arPrintSteadyState( (model), (mode) )
 %
 % Optional argument:
 %    Model refers to the model number in the ar structure. If omitted, all
 %    models are traversed.
+%    Mode refers to the display mode (0 = full, 1 = only condition numbers, 
+%    2 = only errors). Note that mode can only be specified if the model
+%    has been specified explicitly
 
-function arPrintSteadyState( models )
+function arPrintSteadyState( models, mode )
 
     global ar;
     
     if nargin < 1
         models = 1 : length( ar.model );
     end
+    if nargin < 2
+        mode = 0;
+    end
     
     for mno = 1 : length( models )
         m = models(mno);
         if ( isfield( ar.model(m), 'ss_condition' ) )
             model = ar.model(m);
-            linkMatrix = zeros(numel(model.condition));
+            if ( mode ~= 2 )
+                linkMatrix = zeros(numel(model.condition));
 
-            ignoreStr = cell(1, length(model.ss_condition));
-            for ssc = 1 : length( model.ss_condition )
-                linkMatrix(model.ss_condition(ssc).src, model.ss_condition(ssc).ssLink) = 1;
-                for a = 1 : numel(model.ss_condition(ssc).src)
-                    ignoreStr{model.ss_condition(ssc).src(a)} = sprintf( '%s ', model.x{model.ss_condition(ssc).ssIgnore } );
-                end
-            end
-
-            ml = struct;
-            for d = 1 : length( model.data )
-                ml = maxLengths(ml, model.data(d).condition);
-            end
-
-            conditionStr = cell(1, length(model.condition));
-            for c = 1 : length( model.condition )
-                conditionStr{c} = formatCondition( model.data(model.condition(c).dLink(1)).condition, ml );
-            end
-
-            maxStrLen = max(cellfun(@length, conditionStr));
-            fprintf( '#m  | #c  | %s | #c  | %s | Non-equilibrated states\n', arExtendStr( 'Target condition variables', maxStrLen ), arExtendStr( 'Steady state condition variables', maxStrLen ) );
-
-            for to = 1 : length( model.condition )
-                printed = 0;
-                for from = 1 : length( model.condition )
-                    if ( linkMatrix( from, to ) )
-                        fprintf( '%.3d | %.3d | %s | %.3d | %s | %s \n', m, to, arExtendStr( conditionStr{to}, maxStrLen ), from, arExtendStr( conditionStr{from}, maxStrLen ), ignoreStr{from} );
-                        printed = 1;
+                ignoreStr = cell(1, length(model.condition));
+                for ssc = 1 : length( model.ss_condition )
+                    linkMatrix(model.ss_condition(ssc).src, model.ss_condition(ssc).ssLink) = 1;
+                    for a = 1 : numel(model.ss_condition(ssc).ssIgnore)
+                        ignoreStr{model.ss_condition(ssc).src} = sprintf( '%s %s ', ignoreStr{model.ss_condition(ssc).src}, model.x{model.ss_condition(ssc).ssIgnore(a) } );
+                    end
+                    
+                    if ( mode == 1 )
+                        fprintf( '%.3d => ', model.ss_condition(ssc).src )
+                        fprintf( '%.3d ', model.ss_condition(ssc).ssLink );
+                        if ( length( model.ss_condition(ssc).ssIgnore ) > 0 )
+                            fprintf( 'without%s', ignoreStr{model.ss_condition(ssc).src} );
+                        end
+                        fprintf( '\n' );
                     end
                 end
-                % No steady state equilibration linked up
-                if ( ~printed )
-                    fprintf( '%.3d | %.3d | %s | No equilibration assigned\n', m, to, arExtendStr( conditionStr{to}, maxStrLen ) );
+
+                if ( mode == 0 )
+                    ml = struct;
+                    for d = 1 : length( model.data )
+                        ml = maxLengths(ml, model.data(d).condition);
+                    end
+
+                    conditionStr = cell(1, length(model.condition));
+                    for c = 1 : length( model.condition )
+                        conditionStr{c} = formatCondition( model.data(model.condition(c).dLink(1)).condition, ml );
+                    end
+
+                    maxStrLen = max(cellfun(@length, conditionStr));
+                    fprintf( '#m  | #c  | %s | #c  | %s | Non-equilibrated states\n', arExtendStr( 'Target condition variables', maxStrLen ), arExtendStr( 'Steady state condition variables', maxStrLen ) );
+
+                    for to = 1 : length( model.condition )
+                        printed = 0;
+                        for from = 1 : length( model.condition )
+                            if ( linkMatrix( from, to ) )
+                                fprintf( '%.3d | %.3d | %s | %.3d | %s | %s \n', m, to, arExtendStr( conditionStr{to}, maxStrLen ), from, arExtendStr( conditionStr{from}, maxStrLen ), ignoreStr{from} );
+                                printed = 1;
+                            end
+                        end
+                        % No steady state equilibration linked up
+                        if ( ~printed )
+                            fprintf( '%.3d | %.3d | %s | No equilibration assigned\n', m, to, arExtendStr( conditionStr{to}, maxStrLen ) );
+                        end
+                    end
                 end
             end
 

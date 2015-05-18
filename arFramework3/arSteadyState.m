@@ -204,6 +204,9 @@ function ar = arSteadyState( varargin )
         cnt = cnt + length(ar.model(m).ss_condition);
     end
     disp( sprintf( 'Number of steady state equilibrations: %d', cnt ) );
+    
+    % Show any errors
+    arPrintSteadyState(m, 2);    
 end
 
 function ID = mapStrings( str1, str2 )
