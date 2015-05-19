@@ -108,6 +108,18 @@ if ( ss_presimulation )
     end
     feval(ar.fkt, ar, true, ar.config.useSensis && sensi, dynamics, false, 'ss_condition', 'ss_threads');
     
+    % integration error ?
+    for m=1:length(ar.model)
+        for c=1:length(ar.model(m).ss_condition)
+            if(ar.model(m).ss_condition(c).status>0)
+                error('arSimuCalc failed at %s for model %i, condition %i during pre-equilibration %i', ar.info.arsimucalc_flags{ar.model(m).ss_condition(c).status}, m, ar.model(m).ss_condition(c).src, c);
+            elseif(ar.model(m).ss_condition(c).status<0)
+                error('cvodes failed at %s for model %i, condition %i during pre-equilibration %i', ...
+                    ar.info.cvodes_flags{abs(ar.model(m).ss_condition(c).status)}, m, ar.model(m).ss_condition(c).src, c);
+            end
+        end
+    end
+    
     for m = 1 : length( ar.model )
         % Map the steady states onto the respective target conditions
         for ssID = 1 : length( ar.model(m).ss_condition )
@@ -196,8 +208,6 @@ if(nargout>0 && ~qglobalar)
 else
     varargout = {};
 end
-
-
 
 % (Re-)Initialize arrays for fine sensitivities with zeros
 function ar = initFineSensis(ar)
