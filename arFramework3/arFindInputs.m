@@ -10,7 +10,7 @@
 % condition values are supported. Events that do not correspond to 
 % this format raise a warning but are ignored.
 %
-% Event locations are stored in ar.model(#).data(#).tEvents
+% Event locations are stored in ar.model(#).condition(#).tEvents
 % Please note that a relink of the model is required after running this 
 % command to be able to make use of the event system (arLink).
 % An additional recompile is *not* required.
@@ -36,28 +36,28 @@ end
 
 % Find out how long to make the waitbar
 for m = 1 : length( ar.model )
-    allData = length( ar.model(m).data );
+    allData = length( ar.model(m).condition );
 end
 
 h = waitbar(0); lastParse = ''; lastA = 0; totalEvents = 0;
 for m = 1 : length( ar.model )
-    for a = 1 : length( ar.model(m).data )
+    for a = 1 : length( ar.model(m).condition )
         waitbar(a/allData, h, sprintf( 'Processing step inputs [%d/%d] %s', a, allData, lastParse ) );
         
         events = [];
         stepLocations = {};
         % Find the event time points
-        for b = 1 : length( ar.model(m).data(a).fu );
-            step1 = findstr(ar.model(m).data(a).fu{b}, 'step1');
-            step2 = findstr(ar.model(m).data(a).fu{b}, 'step2');
+        for b = 1 : length( ar.model(m).condition(a).fu );
+            step1 = findstr(ar.model(m).condition(a).fu{b}, 'step1');
+            step2 = findstr(ar.model(m).condition(a).fu{b}, 'step2');
           
             for c = 1 : length( step1 )
-                ar.model(m).data(a).fu{b}(step1(c):end);
-                chk = strsplit(ar.model(m).data(a).fu{b}(step1(c):end),',');
+                ar.model(m).condition(a).fu{b}(step1(c):end);
+                chk = strsplit(ar.model(m).condition(a).fu{b}(step1(c):end),',');
                 stepLocations{end+1} = chk{3};
             end
             for c = 1 : length( step2 )
-                chk = strsplit(ar.model(m).data(a).fu{b}(step2(c):end),',');
+                chk = strsplit(ar.model(m).condition(a).fu{b}(step2(c):end),',');
                 stepLocations{end+1} = chk{3};
                 stepLocations{end+1} = chk{5};
             end        
@@ -82,8 +82,8 @@ for m = 1 : length( ar.model )
                 end
                 
                 % Condition values
-                for c = 1 : length( ar.model(m).data(a).condition )
-                    l = strrep( l, ar.model(m).data(a).condition(c).parameter, ar.model(m).data(a).condition(c).value );
+                for c = 1 : length( ar.model(m).condition(a).condition )
+                    l = strrep( l, ar.model(m).condition(a).condition(c).parameter, ar.model(m).condition(a).condition(c).value );
                 end
                 l = str2num(l);
                 lastParse = sprintf( '%s => %s', strrep( lold, '_', '\_' ), strrep( num2str(l), '_', '\_' ) );
@@ -101,16 +101,17 @@ for m = 1 : length( ar.model )
 
         totalEvents = totalEvents + length( events );
         
-        if isfield( ar.model(m).data(a), 'tEvents' )
-            ar.model(m).data(a).tEvents = union( ar.model(m).data(a).tEvents, events );
+        if isfield( ar.model(m).condition(a), 'tEvents' )
+            ar.model(m).condition(a).tEvents = union( ar.model(m).condition(a).tEvents, events );
         else
-            ar.model(m).data(a).tEvents = union( [], events );
+            ar.model(m).condition(a).tEvents = union( [], events );
         end
     end
-    lastA = lastA + length( ar.model(m).data );
+    lastA = lastA + length( ar.model(m).condition );
 end
 
 disp( sprintf( '%d input events assigned!', totalEvents ) );
 close(h);
 
+ar.config.useEvents = 1;
 arLink(true);
