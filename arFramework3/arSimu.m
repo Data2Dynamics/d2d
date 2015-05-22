@@ -171,7 +171,7 @@ for m=1:length(ar.model)
         if(ar.model(m).condition(c).status>0)
             error('arSimuCalc failed at %s', ar.info.arsimucalc_flags{ar.model(m).condition(c).status});
         elseif(ar.model(m).condition(c).status<0)
-            error('cvodes failed at %s for model %i, condition %i', ...
+            error('cvodes failed at %s for model %i, condition %i. Trying arCheckSimu could be an option. ', ...
                 ar.info.cvodes_flags{abs(ar.model(m).condition(c).status)}, m, c);
         end
     end
