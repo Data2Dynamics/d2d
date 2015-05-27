@@ -60,7 +60,7 @@ for j=1:length(pLabel)
                 end
             else
                 if(p(j) < ar.lb(q))
-                    error('trying to set p < lb   [%.4f < %.4f (%d: %s)]', p(j), ar.lb(q), q, pLabel{j});
+                    error('trying to set p < lb   [%.4f < %.4f (%d: %s)]', p(j), ar.lb(q), find(q), pLabel{j});
                 end
             end
             if(nargin>5 && ~isempty(ub))
@@ -69,7 +69,7 @@ for j=1:length(pLabel)
                 end
             else
                 if(p(j) > ar.ub(q))
-                    error('trying to set p > ub   [%.4f > %.4f (%d: %s)]', p(j), ar.ub(q), q, pLabel{j});
+                    error('trying to set p > ub   [%.4f > %.4f (%d: %s)]', p(j), ar.ub(q), find(q), pLabel{j});
                 end
             end
         end
