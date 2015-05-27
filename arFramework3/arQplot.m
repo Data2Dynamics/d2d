@@ -3,7 +3,6 @@
 % type          'y' only plots y, i.e. created by arPlotY 
 %               'x' only plots x, i.e. created by arPlotX
 %               'xy' only plots x AND y
-%               'c'
 %               0   all qPlot?s varialbes are set to zero, i.e. not plots are opened
 % 
 % 
@@ -26,7 +25,18 @@
 % 2) Plot all data of model 1
 % arQplot('y',1)
 % arPlot
-
+% 
+% 3) Only dose-reponse data:
+% arQplot('dose-response')
+% 
+% 4) Only data, not used for fitting:
+% arQplot('qfit0')
+% 
+% 5) Only data, used for fitting:
+% arQplot('qfit1')
+% 
+% 6) x and y of a specifc data set, indicated by ar.model.data.name
+% arQplot('data_def_name')
 
 
 function arQplot(type, m, subset)
@@ -65,28 +75,19 @@ end
 for jm=m
     dnames = {ar.model(jm).data.name};
     switch(lower(type))            
-        case 'c'
-            ar.model(jm).qPlotCs(:) = 1;
-            ar.model(jm).qPlotXs(:) = 0;
-            ar.model(jm).qPlotYs(:) = 0;
-            ar.model(jm).qPlotVs(:) = 0;
         case 'y'
-            ar.model(jm).qPlotCs(:) = 0;
             ar.model(jm).qPlotXs(:) = 0;
             ar.model(jm).qPlotYs(jp{jm}) = 1;
             ar.model(jm).qPlotVs(:) = 0;
         case 'v'
-            ar.model(jm).qPlotCs(:) = 0;
             ar.model(jm).qPlotXs(:) = 0;
             ar.model(jm).qPlotYs(:) = 0;
             ar.model(jm).qPlotVs(jp{jm}) = 1;
         case 'x'
-            ar.model(jm).qPlotCs(:) = 0;
             ar.model(jm).qPlotXs(jp{jm}) = 1;
             ar.model(jm).qPlotYs(:) = 0;
             ar.model(jm).qPlotVs(:) = 0;
         case 'xy'
-            ar.model(jm).qPlotCs(:) = 0;
             ar.model(jm).qPlotXs(jp{jm}) = 1;
             ar.model(jm).qPlotYs(jp{jm}) = 1;
             ar.model(jm).qPlotVs(:) = 0;
@@ -98,7 +99,6 @@ for jm=m
             ar.model(jm).qPlotVs(jp{jm}) = 1;
             
         case {0,false,'off'}
-            ar.model(jm).qPlotCs(jp{jm}) = 0;
             ar.model(jm).qPlotXs(jp{jm}) = 0;
             ar.model(jm).qPlotYs(jp{jm}) = 0;
             ar.model(jm).qPlotVs(jp{jm}) = 0;
