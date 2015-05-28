@@ -106,7 +106,7 @@ function [olist names m] = arFindDataSet( varargin )
             for c = 1 : 2 : length(varargin)
                 if ( strcmp( par, varargin(c) ) )
                     condList(c) = 0;
-                    if ( ~strcmp( val, num2str(varargin{c+1}) ) )
+                    if ( str2num(val) == varargin{c+1} )
                         filt(a) = 0;
                     end
                 end
