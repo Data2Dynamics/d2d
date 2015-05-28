@@ -21,10 +21,8 @@ end
 sumples = 0;
 length(pleGlobals.ps)
 for j=1:length(pleGlobals.ps)
-    j
     if(~isempty(pleGlobals.ps{j}))
         sumples = sumples + 1;
-        sumples
     end
 end
 

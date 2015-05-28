@@ -77,11 +77,6 @@ elseif(length(jk)>1)
         if(do_plotting)
             plePlotMulti;
         end
-        
-        if(~exist([cd '/' pleGlobals.savePath], 'dir'))
-            mkdir([cd '/' pleGlobals.savePath])
-        end
-        save([pleGlobals.savePath sprintf('/backup_%d.mat', j)], 'pleGlobals');
     end
     pleGlobals.showCalculation = do_plotting;
     pleGlobals.tmean = mean(pleGlobals.timing(pleGlobals.q_fit(jk)));
