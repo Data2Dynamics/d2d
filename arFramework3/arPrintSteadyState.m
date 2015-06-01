@@ -56,7 +56,11 @@ function arPrintSteadyState( models, mode )
 
                     conditionStr = cell(1, length(model.condition));
                     for c = 1 : length( model.condition )
-                        conditionStr{c} = formatCondition( model.data(model.condition(c).dLink(1)).condition, ml );
+                        try
+                            conditionStr{c} = formatCondition( model.data(model.condition(c).dLink(1)).condition, ml );
+                        catch
+                            conditionStr{c} = 'model default';
+                        end
                     end
 
                     maxStrLen = max(cellfun(@length, conditionStr));

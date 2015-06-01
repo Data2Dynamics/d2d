@@ -29,14 +29,14 @@ if(~exist('nruns','var'))
     nruns = 1000;
 end
 nwindow = sum(ar.qFit == 1)*50;
+if(~exist('method','var'))
+    method = 1;
+end
 if(~exist('nburnin','var') || nburnin == 0)
     nburnin = 0;
     if(method==4)
         nburnin = nwindow * 50;
     end
-end
-if(~exist('method','var'))
-    method = 1;
 end
 if(~exist('append','var'))
     append = false;
