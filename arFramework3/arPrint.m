@@ -16,6 +16,7 @@
 %           'dynamic'                   - only show dynamic parameters
 %           'observation'               - only show non-dynamic parameters
 %           'error'                     - only show error model parameters
+%           'closetobound'              - show the parameters near bounds
 %           'lb' followed by value      - only show values above lb
 %           'ub' followed by value      - only show values below lb
 %           Combinations of these flags are possible
@@ -48,6 +49,10 @@
 
 function varargout = arPrint(js, varargin)
 global ar
+
+if(isempty(ar))
+    error('please initialize by arInit')
+end
 
 if(~exist('js','var') | isempty(js))
     js = 1:length(ar.p);
@@ -85,9 +90,22 @@ else
     end
 end
 
+pTrans = ar.p;
+pTrans(ar.qLog10==1) = 10.^pTrans(ar.qLog10==1);
+ 
+% Determine which parameters are close to their bounds
+qLog10 = ar.qLog10 == 1;
+ar.qCloseToBound(qLog10) = ar.p(qLog10) - ar.lb(qLog10) < ar.config.par_close_to_bound | ...
+    ar.ub(qLog10) - ar.p(qLog10) < ar.config.par_close_to_bound;
+qPos = ar.p>0;
+ar.qCloseToBound(~qLog10 & ~qPos) = ar.p(~qLog10 & ~qPos) - ar.lb(~qLog10 & ~qPos) < ar.config.par_close_to_bound | ...
+    ar.ub(~qLog10 & ~qPos) - ar.p(~qLog10 & ~qPos) < ar.config.par_close_to_bound;
+ar.qCloseToBound(~qLog10 & qPos) = (ar.p(~qLog10 & qPos)) - (ar.lb(~qLog10 & qPos)) < ar.config.par_close_to_bound | ...
+    (ar.ub(~qLog10 & qPos)) - (ar.p(~qLog10 & qPos)) < ar.config.par_close_to_bound;
+
 % Additional options
 if ( nargin > 1 )
-    opts = argSwitch( {'initial', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub'}, varargin{:} );
+    opts = argSwitch( {'closetobound', 'initial', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub'}, varargin{:} );
 
     if ( opts.constant && opts.fitted )
         error( 'Incompatible flag constant and fitted' );
@@ -99,7 +117,6 @@ if ( nargin > 1 )
     if ( opts.fitted )
         js = js( ar.qFit( js ) == 1 );
     end
-
     if ( opts.constant )
         js = js( ar.qFit( js ) == 2 );
     end
@@ -120,28 +137,15 @@ if ( nargin > 1 )
     end
     if ( opts.lb )
         js = js( ar.p(js) > opts.lb );
-    end    
+    end
+    if ( opts.closetobound )
+        js = js( ar.qCloseToBound(js) );
+    end
 end
 
 if nargout>0
     varargout{1} = js;
 end
-
-if(isempty(ar))
-    error('please initialize by arInit')
-end
-
-pTrans = ar.p;
-pTrans(ar.qLog10==1) = 10.^pTrans(ar.qLog10==1);
-
-qLog10 = ar.qLog10 == 1;
-ar.qCloseToBound(qLog10) = ar.p(qLog10) - ar.lb(qLog10) < ar.config.par_close_to_bound | ...
-    ar.ub(qLog10) - ar.p(qLog10) < ar.config.par_close_to_bound;
-qPos = ar.p>0;
-ar.qCloseToBound(~qLog10 & ~qPos) = ar.p(~qLog10 & ~qPos) - ar.lb(~qLog10 & ~qPos) < ar.config.par_close_to_bound | ...
-    ar.ub(~qLog10 & ~qPos) - ar.p(~qLog10 & ~qPos) < ar.config.par_close_to_bound;
-ar.qCloseToBound(~qLog10 & qPos) = (ar.p(~qLog10 & qPos)) - (ar.lb(~qLog10 & qPos)) < ar.config.par_close_to_bound | ...
-    (ar.ub(~qLog10 & qPos)) - (ar.p(~qLog10 & qPos)) < ar.config.par_close_to_bound;
 
 maxlabellength = max(cellfun(@length, ar.pLabel(js)));
 
