@@ -1048,7 +1048,6 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
         /* Abort on integration failure */
         if ( flag < 0 )
         {
-            printf( "\n>>> Integration failure\n" );
             converged = true;
         }
 
@@ -1061,9 +1060,8 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
         /* Oh no, we didn't make it! Terminate anyway. */
         if ( step > max_eq_steps )
         {
+            flag = 20;
             converged = true;
-            flag = -1;
-            printf( "\n>>> Failed to meet equilibration tolerances. Does the system have a stable steady state?\n" );
         }
 
         /* Increase step size */

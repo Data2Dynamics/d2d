@@ -7,6 +7,12 @@
 %   d.res    maximal difference of ar.res
 %   d.sres   maximal difference of ar.sres
 %   d.chi2   maximal difference of ar.chi2fit
+% 
+% Example:
+% arCheckODETolerances
+% 
+% Example:
+% arCheckODETolerances(logspace(-2,2,5))
 
 function [d,res,sres] = arCheckODETolerances(dtol)
 if(~exist('dtol','var') || isempty(dtol))
@@ -32,7 +38,7 @@ for i=1:length(dtol)
 
     fprintf('atol=%.3e, rtol=%.3e\n',ar.config.atol,ar.config.rtol);
     try
-        arChi2(ar)
+        arChi2(true,ar.p(ar.qFit==1))
         res(:,i) = ar.res;
         sres(:,:,i)  = ar.sres;
         chi2(i) = ar.chi2fit;
@@ -56,4 +62,8 @@ d.res = max(max(abs(range(res,2))));
 d.sres = max(max(max(abs(range(sres,3)))));
 d.chi2 = max(range(chi2));
 
+fprintf('Maximal absolute impact of the tolerances:\n');
+fprintf('%15s\t%12s:\t %e\n','chi2','(ar.chi2fit)',d.chi2);
+fprintf('%15s\t%12s:\t %e\n','Residuals','(ar.res)',d.res);
+fprintf('%15s\t%12s:\t %e\n','Sensititivites','(ar.sres)',d.sres);
 

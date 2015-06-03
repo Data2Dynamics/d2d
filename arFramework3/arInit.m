@@ -138,6 +138,7 @@ ar.info.arsimucalc_flags{16} = 'CVodeReInit()';
 ar.info.arsimucalc_flags{17} = 'CVodeSensReInit()';
 ar.info.arsimucalc_flags{18} = 'malloc EventData';
 ar.info.arsimucalc_flags{19} = 'CVodeSetMaxNumSteps()';
+ar.info.arsimucalc_flags{20} = 'equilibration. Failed to meet tolerance. Does the system have a steady state? Failure occurred ';
 
 ar.info.cvodes_flags = cell(1,30);
 

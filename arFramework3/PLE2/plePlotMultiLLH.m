@@ -19,6 +19,7 @@ if(~exist('savetofile','var'))
 end
 
 sumples = 0;
+length(pleGlobals.ps)
 for j=1:length(pleGlobals.ps)
     if(~isempty(pleGlobals.ps{j}))
         sumples = sumples + 1;

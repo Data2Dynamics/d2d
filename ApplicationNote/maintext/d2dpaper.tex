@@ -54,7 +54,7 @@ approach in the field of Systems Biology. Two of the most critical steps in this
 to construct dynamical models of biochemical reaction networks for large 
 data sets and complex experimental conditions and to perform efficient and reliable 
 parameter estimation for model fitting. We present a modeling 
-environment that pioneers these challenges. The numerically expensive parts of the 
+environment {\color{red} for MATLAB} that pioneers these challenges. The numerically expensive parts of the 
 calculations such as the solving of the differential equations and of the 
 associated sensitivity system are parallelized and automatically compiled into efficient C 
 code. A variety of parameter estimation algorithms as well as frequentist and Bayesian 
@@ -119,9 +119,13 @@ unknown model parameters, also called model fitting.
 We implemented a variety of different 
 parameter estimation algorithms \citep{Raue:2012zt}. The most efficient and reliable 
 algorithm for parameter estimation in our hands is a deterministic trust region approach 
-combined with a multi-start strategy to map out local minima. Parameters can and should 
-be estimated on a log-scale. Prior knowledge about the parameters can be considered as 
-well. If steady state assumptions for the model dynamics are required and the functional 
+combined with a multi-start strategy to map out local minima. 
+{\color{red} A variety of global optimization algorithms is implemented as well \citep{Kronfeld:2010fk}.} 
+Parameters can and should 
+be estimated on a log-scale. Prior knowledge about the parameters can be considered 
+{\color{red} by prior distributions. The respective penalization of the likelihood leads to 
+maximum a posteriori estimation.} 
+If steady state assumptions for the model dynamics are required and the functional 
 relationship to parameters are unknown, steady state constraints can be added to the 
 objective function. A quality control, as proposed in 
 \citet{Raue:2012zt}, can be performed to validate robustness of the estimation results. The 
@@ -129,17 +133,18 @@ software implements a sophisticated method to calculate model sensitivities, i.e
 derivatives of the dynamics with respect to model parameters. The sensitivity equations 
 are derived automatically by symbolic differentiation, translated to C code and compiled 
 together with the original ODE system and solver. We showed previously 
-\citep{Raue:2012zt} that this approach is not only about ten times faster but also more 
+\citep{Raue:2012zt} that this approach{\color{red}, which is not implemented in any other software packages, } is not only about ten times faster but also more 
 precise than the default approach using finite differences. A reliable calculation of these 
 derivatives is key to successful parameter estimation. 
+{\color{red} Goodness of fit analysis, Likelihood ratio test, QQ-plots and auto-correlation 
+of the residuals are available.} 
 
 In addition to finding the best model fit to a given collection of data, the Data2Dynamics 
 software implements a wide range of algorithms that are able to determine uncertainties 
 in the estimated parameter as well as in the predicted model dynamics. In particular, the 
 frequentist profile likelihood approach for identifiability analysis \citep{Raue:2009ec}, the 
-prediction profile likelihood approach for observability analysis \citep{Kreutz:2011kx} as 
-well as a variety of Bayesian approaches \citep{Raue:2013fk, Hug:2012fk} that calculate 
-posterior probability distributions are available. Based on the results of such uncertainty 
+prediction profile likelihood approach for observability analysis \citep{Kreutz:2011kx}{\color{red}.
+A variety of Markov-chain Monte Carlo approaches are implemented to perform Bayesian inference \citep{Raue:2013fk, Hug:2012fk}.} Based on the results of such uncertainty 
 analyses, the software allows to design additional experiments \citep{Steiert:2012fk} that 
 can resolve non-identifiability and non-observability \citep{Raue:2010fk} 
 and improve prediction accuracy \citep{Kreutz:2013uq}.
@@ -160,6 +165,6 @@ SBEpo 0316182B).
 %\paragraph{Confict of interest\textcolon} None declared.
 
 \bibliographystyle{natbib}
-\bibliography{/Users/araue/Sites/pub/bibtex/Library}
+\bibliography{library}
 
 \end{document}

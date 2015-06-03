@@ -1,4 +1,4 @@
-function arRecompile
+function arRecompile(varargin)
 
 global ar
 
@@ -23,6 +23,6 @@ for m=1:length(ds)
     end
 end
 
-arCompileAll
+arCompileAll(varargin{:})
 arSave('Recompile');
 

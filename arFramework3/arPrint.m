@@ -10,11 +10,15 @@
 %           (see Example below)
 %
 % optional arguments:
-%           'initial'       - only show initial conditions
-%           'fitted'        - only show fitted parameters
-%           'constant'      - only show constants
-%           'dynamic'       - only show dynamic parameters
-%           'observation'   - only show non-dynamic parameters
+%           'initial'                   - only show initial conditions
+%           'fitted'                    - only show fitted parameters
+%           'constant'                  - only show constants
+%           'dynamic'                   - only show dynamic parameters
+%           'observation'               - only show non-dynamic parameters
+%           'error'                     - only show error model parameters
+%           'closetobound'              - show the parameters near bounds
+%           'lb' followed by value      - only show values above lb
+%           'ub' followed by value      - only show values below lb
 %           Combinations of these flags are possible
 % 
 % Examples:
@@ -46,6 +50,10 @@
 function varargout = arPrint(js, varargin)
 global ar
 
+if(isempty(ar))
+    error('please initialize by arInit')
+end
+
 if(~exist('js','var') | isempty(js))
     js = 1:length(ar.p);
 elseif(islogical(js))
@@ -74,7 +82,7 @@ else
 end
 
 if(sum(isnan(js))>0 || sum(isinf(js))>0 || min(js)<1 || max(js-round(js))>eps)
-    js
+    js %#ok
     warning('arPrint.m: argument js is not plausible (should be an array of indices).')
 else
     if(size(js,1)~=1)
@@ -82,9 +90,22 @@ else
     end
 end
 
+pTrans = ar.p;
+pTrans(ar.qLog10==1) = 10.^pTrans(ar.qLog10==1);
+ 
+% Determine which parameters are close to their bounds
+qLog10 = ar.qLog10 == 1;
+ar.qCloseToBound(qLog10) = ar.p(qLog10) - ar.lb(qLog10) < ar.config.par_close_to_bound | ...
+    ar.ub(qLog10) - ar.p(qLog10) < ar.config.par_close_to_bound;
+qPos = ar.p>0;
+ar.qCloseToBound(~qLog10 & ~qPos) = ar.p(~qLog10 & ~qPos) - ar.lb(~qLog10 & ~qPos) < ar.config.par_close_to_bound | ...
+    ar.ub(~qLog10 & ~qPos) - ar.p(~qLog10 & ~qPos) < ar.config.par_close_to_bound;
+ar.qCloseToBound(~qLog10 & qPos) = (ar.p(~qLog10 & qPos)) - (ar.lb(~qLog10 & qPos)) < ar.config.par_close_to_bound | ...
+    (ar.ub(~qLog10 & qPos)) - (ar.p(~qLog10 & qPos)) < ar.config.par_close_to_bound;
+
 % Additional options
 if ( nargin > 1 )
-    opts = argSwitch( {'initial', 'fitted', 'dynamic', 'constant', 'observation'}, varargin{:} );
+    opts = argSwitch( {'closetobound', 'initial', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub'}, varargin{:} );
 
     if ( opts.constant && opts.fitted )
         error( 'Incompatible flag constant and fitted' );
@@ -96,7 +117,6 @@ if ( nargin > 1 )
     if ( opts.fitted )
         js = js( ar.qFit( js ) == 1 );
     end
-
     if ( opts.constant )
         js = js( ar.qFit( js ) == 2 );
     end
@@ -106,30 +126,26 @@ if ( nargin > 1 )
     if ( opts.observation )
         js = js( ar.qDynamic( js ) == 0 );
     end
+    if ( opts.error )
+        js = js( ar.qError( js ) == 1 );
+    end    
     if ( opts.initial )
         js = js( ar.qInitial( js ) == 1 );
+    end
+    if ( opts.ub )
+        js = js( ar.p(js) < opts.ub );
+    end
+    if ( opts.lb )
+        js = js( ar.p(js) > opts.lb );
+    end
+    if ( opts.closetobound )
+        js = js( ar.qCloseToBound(js) );
     end
 end
 
 if nargout>0
     varargout{1} = js;
 end
-
-if(isempty(ar))
-    error('please initialize by arInit')
-end
-
-pTrans = ar.p;
-pTrans(ar.qLog10==1) = 10.^pTrans(ar.qLog10==1);
-
-qLog10 = ar.qLog10 == 1;
-ar.qCloseToBound(qLog10) = ar.p(qLog10) - ar.lb(qLog10) < ar.config.par_close_to_bound | ...
-    ar.ub(qLog10) - ar.p(qLog10) < ar.config.par_close_to_bound;
-qPos = ar.p>0;
-ar.qCloseToBound(~qLog10 & ~qPos) = ar.p(~qLog10 & ~qPos) - ar.lb(~qLog10 & ~qPos) < ar.config.par_close_to_bound | ...
-    ar.ub(~qLog10 & ~qPos) - ar.p(~qLog10 & ~qPos) < ar.config.par_close_to_bound;
-ar.qCloseToBound(~qLog10 & qPos) = (ar.p(~qLog10 & qPos)) - (ar.lb(~qLog10 & qPos)) < ar.config.par_close_to_bound | ...
-    (ar.ub(~qLog10 & qPos)) - (ar.p(~qLog10 & qPos)) < ar.config.par_close_to_bound;
 
 maxlabellength = max(cellfun(@length, ar.pLabel(js)));
 
@@ -196,14 +212,27 @@ function [opts] = argSwitch( switches, varargin )
         opts.(switches{a}) = 0;
     end
 
-    for a = 1 : length( varargin )
+    a = 1;
+    while (a <= length(varargin))
         if ( max( strcmp( varargin{a}, switches ) ) == 0 )
             str = sprintf( 'Legal switch arguments are:\n' );
-            str = [str sprintf( '%s\n', switches{:} ) ];
+            str = [str sprintf( '%s\n', switches{:} ) ];%#ok<AGROW>
             error( 'Invalid switch argument was provided. Provided %s, %s', varargin{a}, str );
+        else
+            fieldname = varargin{a};
         end
-        opts.(varargin{a}) = 1;
-    end    
+        
+        val = 1;
+        if ( length(varargin) > a )
+            if isnumeric( varargin{a+1} )
+                val = varargin{a+1};
+                a = a + 1;
+            end
+        end
+        
+        opts.(fieldname) = val;
+        a = a + 1;
+    end
 end
 
 
