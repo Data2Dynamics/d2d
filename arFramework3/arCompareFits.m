@@ -71,7 +71,7 @@ for j=1:length(chi2s)
         optim_krit{j} = optim_krit{j}(isort); %#ok<AGROW>
     end
     C = arLineMarkersAndColors(j,length(chi2s),[],'no',[]);
-    colors(j,:) = C{6}; %#ok<AGROW>
+    colors(j,:) = C{2}; %#ok<AGROW>
     h(j) = semilogy(chi2s_sorted + 1 - minchi2, '-', C{:});
     hold on
     C = arLineMarkersAndColors(j,length(chi2s),[],'o','none');

@@ -39,9 +39,9 @@ if(isfield(ar.config, 'useLHS') && ar.config.useLHS) % LHS samples
 else % random samples
     for jp=1:length(ar.p)
         if(ar.qFit(jp)==1)
-            if(ar.type(jp)==0) % uniform prior
+            if(ar.type(jp)==0 || ar.type(jp)==2) % uniform prior or uniform with normal bounds
                 ps(:,jp) = ar.lb(jp) + (ar.ub(jp) - ar.lb(jp)) * rand(n,1);
-            elseif(ar.type(jp)==1) % normal prior
+            elseif(ar.type(jp)==1 || ar.type(jp)==3) % normal prior or L1
                 psrand = ar.mean(jp) + ar.std(jp) * randn(n,1);
                 psrand(psrand>ar.ub(jp)) = ar.ub(jp);
                 psrand(psrand<ar.lb(jp)) = ar.lb(jp);
