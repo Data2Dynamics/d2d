@@ -161,7 +161,7 @@ end
 % compile
 if(usePool)
     parfor j=1:length(sources)
-        if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file'))
+        if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file') || forceFullCompile)
             mex('-c', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [sundials_path sources{j}]); %#ok<PFBNS>
             fprintf('compiling CVODES(%s)...done\n', objects{j});
@@ -171,7 +171,7 @@ if(usePool)
     end
 else
     for j=1:length(sources)
-        if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file'))
+        if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file') || forceFullCompile)
             mex('-c', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [sundials_path sources{j}]);
             fprintf('compiling CVODES(%s)...done\n', objects{j});

@@ -67,7 +67,7 @@ else
 end
 
 % steady state
-if(~isempty(dydt))
+if(~isempty(dydt) && length(dydt)>=jy)
     if(~isnan(dydt(jy)))
         yss = y(1,jy) + dydt(jy)*(t-min(t));
         if(isempty(hyss))
