@@ -1,0 +1,28 @@
+DESCRIPTION
+"Lorenz Adlung"
+
+PREDICTOR
+timepoint               T   min     time	0	3565
+
+INPUTS
+
+OBSERVABLES
+Bacnorm            C   au    conc.     0   0   "Bac"
+IndconcNormRange   C   au    conc.     0   0   "Ind"
+
+ERRORS
+Bacnorm 	        "sd_Bacnorm"
+IndconcNormRange  	"sd_IndconcNormRange"
+
+
+CONDITIONS
+beta  "beta_typeID_ExpID"
+Bacmax  "Bacmax_typeID_ExpID"
+tau    "tau_typeID_ExpID"
+kdegi 	"kdegi_typeID"
+kdim		"kdim_typeID"
+ksyn		"ksyn_typeID"
+
+RANDOM
+ExpID INDEPENDENT
+typeID INDEPENDENT
