@@ -82,6 +82,8 @@ if(~inok)
         fprintf('\n\n')
     end
 else
+    if nargout==0
+        fprintf('Integration with the initial parameters (ar.p), feasible => Checking the parameters for causing intergration problems omitted.');
+    end
     ok = true;
 end
-
