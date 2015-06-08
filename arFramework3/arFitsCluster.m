@@ -35,11 +35,12 @@ end
 
 ar1 = ar;
 parfor j=1:n
+    thisworker = getCurrentWorker; % Worker object
     ar2 = ar1;
     ar2.p = ps(j,:);
     tic;
     try
-        ar2 = arChi2(ar2, true, []);
+        ar2 = arChi2(ar2, true, ar2.p(ar2.qFit==1));
         chi2s_start(j) = ar2.chi2fit;
         chi2sconstr_start(j) = ar2.chi2constr;
         ar2 = arFit(ar2, true);
@@ -50,11 +51,11 @@ parfor j=1:n
         fun_evals(j) = ar2.fit.fevals;
         optim_crit(j) = ar2.firstorderopt;
         if(ar2.config.fiterrors == 1)
-            fprintf('fit #%i: objective function %g\n', j, ...
-                2*ar2.ndata*log(sqrt(2*pi)) + ar2.chi2fit + ar2.chi2constr);
+            fprintf('fit #%i (%s): objective function %g\n', j, ...
+                thisworker.Name, 2*ar2.ndata*log(sqrt(2*pi)) + ar2.chi2fit + ar2.chi2constr);
         else
-            fprintf('fit #%i: objective function %g\n', j, ...
-                ar2.chi2fit + ar2.chi2constr);
+            fprintf('fit #%i (%s): objective function %g\n', j, ...
+                thisworker.Name, ar2.chi2fit + ar2.chi2constr);
         end
         
         if(log_fit_history)

@@ -9,6 +9,7 @@
 % clusterpath:      execution path on cluster   ['.']
 % pool_size:        additional workers          [ceil(length(cluster.IdleWorkers)/2)]
 % n:                number of runs              [10]
+%                   OR: initial parameter matrix !
 % randomseed:                                   rng(randomseed)
 % log_fit_history                               [false]
 
@@ -85,4 +86,10 @@ end
 function ar = arFitLHSClusterFun(ar2, n, randomseed, log_fit_history)
 global ar %#ok<REDEF>
 ar = ar2; %#ok<NASGU>
-arFitLHS(n, randomseed, log_fit_history, false, true);
+
+if(isscalar(n))
+    arFitLHS(n, randomseed, log_fit_history, false, true);
+else
+    arFitsCluster(n, log_fit_history);
+end
+

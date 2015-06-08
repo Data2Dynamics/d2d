@@ -34,7 +34,9 @@ end
 
 ar1 = ar;
 t1 = tic;
+
 parfor j=1:n
+    thisworker = getCurrentWorker; % Worker object
     ar2 = ar1;
     ar2.p = ps(j,:);
     try
@@ -44,13 +46,15 @@ parfor j=1:n
         chi2sconstr(j) = ar2.chi2constr;
         exitflag(j) = 1;
         if(~silent) 
-            fprintf('feval #%i: objective function %g\n', j, ar2.chi2fit);
+            fprintf('feval #%i (%s): objective function %g\n', j, ...
+                thisworker.Name, ar2.chi2fit);
         end
     catch exception
         timing(j) = ar2.stop/1e6;
         ps_errors(j,:) = ar2.p;
         if(~silent) 
-            fprintf('feval #%i: %s\n', j, exception.message);
+            fprintf('feval #%i (%s): %s\n', j, ...
+                thisworker.Name, exception.message);
         end
         exitflag(j) = -1;
     end

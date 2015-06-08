@@ -21,6 +21,11 @@ global fit
 
 if(nargin==0 || ~isstruct(varargin{1}))
     qglobalar = true;
+    if(~isempty(varargin))
+        silent = varargin{1};
+    else
+        silent = false;
+    end
 else
     ar = varargin{1};
     if(nargin>1)
@@ -29,14 +34,12 @@ else
         varargin = {};
     end
     qglobalar = false;
+    if(nargin>2)
+        silent = varargin{2};
+    else
+        silent = false;
+    end
 end
-
-if(~isempty(varargin))
-    silent = varargin{1};
-else
-    silent = false;
-end
-
 
 if(~isfield(ar.config, 'optimizer'))
     ar.config.optimizer = 1;
