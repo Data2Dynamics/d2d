@@ -80,7 +80,8 @@ parfor j=1:n
         end
     catch exception
         ps_errors(j,:) = ar2.p;
-        fprintf('fit #%i: %s\n', j, exception.message);
+        fprintf('fit #%i (%s): %s\n', j, ...
+            thisworker.Name, exception.message);
     end
     timing(j) = toc;
 end
@@ -116,7 +117,7 @@ else
     fprintf('did not find better fit\n');
     ar.p = pReset;
 end
-arChi2(true,[]);
+arChi2(true,ar.p(ar.qFit==1));
 
 %% backup save on cluster before transfer
 save('arFitsCluster_backup.mat', 'ar');

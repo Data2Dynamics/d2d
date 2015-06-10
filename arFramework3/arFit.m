@@ -19,23 +19,23 @@ function varargout = arFit(varargin)
 global ar
 global fit
 
-if(nargin==0 || ~isstruct(varargin{1}))
+if(nargin==0)
     qglobalar = true;
+else
+    if(isstruct(varargin{1}))
+        qglobalar = false;
+        ar = varargin{1};
+        if(nargin>1)
+            varargin = varargin(2:end);
+        else
+            varargin = {};
+        end
+    else
+        qglobalar = true;
+    end
+    
     if(~isempty(varargin))
         silent = varargin{1};
-    else
-        silent = false;
-    end
-else
-    ar = varargin{1};
-    if(nargin>1)
-        varargin = varargin(2:end);
-    else
-        varargin = {};
-    end
-    qglobalar = false;
-    if(nargin>2)
-        silent = varargin{2};
     else
         silent = false;
     end
@@ -52,10 +52,6 @@ if(~isfield(ar.config, 'showFitting'))
 end
 if(ar.config.showFitting)
     ar.config.optim.OutputFcn = @arPlotFast;
-end
-
-if(nargin==0)
-    silent = false;
 end
 
 if(ar.config.useSensis)
@@ -145,7 +141,7 @@ elseif(ar.config.optimizer == 4)
     fit.output = output;
     fit.history = history;
     
-    ar = arChi2(ar, false, []);
+    ar = arChi2(ar, false, ar.p(ar.qFit==1));
     fprintf('STRSCNE finished after %i iterations: code %i, total chi2 improvement = %g\n', ...
         output(1), exitflag, chi2_old - ar.chi2fit);
     
@@ -187,7 +183,7 @@ if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
 end
 
 ar.p(ar.qFit==1) = pFit;
-ar = arChi2(ar, true, []);
+ar = arChi2(ar, true, ar.p(ar.qFit==1));
 
 fit.exitflag = exitflag;
 fit.output = output;
