@@ -237,6 +237,8 @@ for jm = 1:nm
                     end
                     dxdt = ar.model(jm).condition(jc).dxdt(qss);
                     tmpconstr = (dxdt ./ x) ./ ar.model(jm).condition(jc).stdSteadyState(qss);
+                    validconstr = ~(isnan(tmpconstr) | isinf(tmpconstr));
+                    tmpconstr = tmpconstr(validconstr);
                     ar.constr(constrindex:(constrindex+length(tmpconstr(:))-1)) = tmpconstr;
                     constrindex = constrindex+length(tmpconstr(:));
                     ar.nconstr = ar.nconstr + sum(qss);
@@ -261,8 +263,9 @@ for jm = 1:nm
                             ddxdtdp(:,ar.model(jm).condition(jc).qLog10 == 1), ...
                             ar.model(jm).condition(jc).pNum(ar.model(jm).condition(jc).qLog10 == 1) * log(10));
                         
-                        tmpsconstr(:,ar.model(jm).condition(jc).pLink) = bsxfun(@rdivide,ddxdtdp,x') - bsxfun(@times,bsxfun(@rdivide,dxdt,x.^2)', dxdp);
-                        tmpsconstr = tmpsconstr ./ (ar.model(jm).condition(jc).stdSteadyState(qss)'*ones(1,np));
+                        tmptmpsconstr = bsxfun(@rdivide,ddxdtdp,x') - bsxfun(@times,bsxfun(@rdivide,dxdt,x.^2)', dxdp);
+                        tmpsconstr(:,ar.model(jm).condition(jc).pLink) = tmptmpsconstr(validconstr,:);
+                        tmpsconstr = tmpsconstr ./ (ar.model(jm).condition(jc).stdSteadyState(qss & validconstr)'*ones(1,np));
                         tmpsconstr(:,ar.qFit~=1) = 0;
                         
                         ar.sconstr(sconstrindex:(sconstrindex+length(tmpconstr(:))-1),:) = tmpsconstr;
