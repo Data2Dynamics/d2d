@@ -54,6 +54,9 @@ end
 if(exist('matlab2tikz','file') == 0)
     addpath([ar_path '/ThirdParty/matlab2tikz-matlab2tikz-722609f/src'])
 end
+if(exist('parfor_progress','file') == 0)
+    addpath([ar_path '/ThirdParty/parfor_progress'])
+end
     
 %% CVODES
 

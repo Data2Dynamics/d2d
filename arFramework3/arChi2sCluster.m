@@ -35,6 +35,7 @@ end
 ar1 = ar;
 t1 = tic;
 
+pct = parfor_progress(n); %#ok<NASGU>
 parfor j=1:n
     thisworker = getCurrentWorker; % Worker object
     ar2 = ar1;
@@ -46,19 +47,22 @@ parfor j=1:n
         chi2sconstr(j) = ar2.chi2constr;
         exitflag(j) = 1;
         if(~silent) 
-            fprintf('feval #%i (%s): objective function %g\n', j, ...
+            pct = parfor_progress/100;
+            fprintf('%i/%i feval #%i (%s): objective function %g\n', round(n*pct), n, j, ...
                 thisworker.Name, ar2.chi2fit);
         end
     catch exception
         timing(j) = ar2.stop/1e6;
         ps_errors(j,:) = ar2.p;
         if(~silent) 
-            fprintf('feval #%i (%s): %s\n', j, ...
+            pct = parfor_progress/100;
+            fprintf('%i/%i feval #%i (%s): %s\n', round(n*pct), n, j, ...
                 thisworker.Name, exception.message);
         end
         exitflag(j) = -1;
     end
 end
+pct = parfor_progress(0); %#ok<NASGU>
 toc(t1);
 
 ar.ps = ps;
@@ -78,13 +82,4 @@ end
 ar.p = pReset;
 try %#ok<TRYNC>
     arChi2(false, ar.p(ar.qFit==1));
-end
-
-if(~silent)
-    if(sum(ar.qFit==1)<6)
-        figure(2)
-        plotmatrix(ar.ps(:,ar.qFit==1), 'x');
-    end
-    
-    arPlotChi2s
 end

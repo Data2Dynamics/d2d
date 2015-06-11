@@ -34,6 +34,7 @@ if(log_fit_history)
 end
 
 ar1 = ar;
+pct = parfor_progress(n); %#ok<NASGU>
 parfor j=1:n
     thisworker = getCurrentWorker; % Worker object
     ar2 = ar1;
@@ -50,11 +51,12 @@ parfor j=1:n
         exitflag(j) = ar2.fit.exitflag;
         fun_evals(j) = ar2.fit.fevals;
         optim_crit(j) = ar2.firstorderopt;
+        pct = parfor_progress/100;
         if(ar2.config.fiterrors == 1)
-            fprintf('fit #%i (%s): objective function %g\n', j, ...
+            fprintf('%i/%i fit #%i (%s): objective function %g\n', n*pct, n, j, ...
                 thisworker.Name, 2*ar2.ndata*log(sqrt(2*pi)) + ar2.chi2fit + ar2.chi2constr);
         else
-            fprintf('fit #%i (%s): objective function %g\n', j, ...
+            fprintf('%i/%i fit #%i (%s): objective function %g\n', n*pct, n, j, ...
                 thisworker.Name, ar2.chi2fit + ar2.chi2constr);
         end
         
@@ -80,11 +82,13 @@ parfor j=1:n
         end
     catch exception
         ps_errors(j,:) = ar2.p;
-        fprintf('fit #%i (%s): %s\n', j, ...
+        pct = parfor_progress/100;
+        fprintf('%i/%i fit #%i (%s): %s\n', n*pct, n, j, ...
             thisworker.Name, exception.message);
     end
     timing(j) = toc;
 end
+pct = parfor_progress(0); %#ok<NASGU>
 
 ar.chi2s_start = chi2s_start;
 ar.chi2sconstr_start = chi2sconstr_start;
