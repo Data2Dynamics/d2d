@@ -448,11 +448,11 @@ void x_calc(int im, int ic, int sensi) {
 			for(ks=0; ks<ny; ks++){
 			   
 			  if(!mxIsNaN(yExp[js + (ks*nyout)]) && !mxIsNaN(y[js + (ks*nyout)]) && !mxIsNaN(yStd[js + (ks*nyout)]) && yStd[js + (ks*nyout)]>0.) {
-			    y_scale[js+ks*nyout+is*nyout*ny] = y_scale[js+ks*nyout+is*nyout*ny] * 2* abs(yExp[js + (ks*nyout)] - y[js + (ks*nyout)]) / pow(yStd[js + (ks*nyout)],2) * sqrt(fiterrors_correction);
+			    y_scale[js+ks*nyout+is*nyout*ny] = y_scale[js+ks*nyout+is*nyout*ny] * 2* fabs(yExp[js + (ks*nyout)] - y[js + (ks*nyout)]) / pow(yStd[js + (ks*nyout)],2) * sqrt(fiterrors_correction);
 			  }
 			  
-			  if(abs(y_scale[js+ks*nyout+is*nyout*ny])>y_max_scale[is] && !mxIsNaN(y_scale[js+ks*nyout+is*nyout*ny]))
-			    y_max_scale[is] = abs(y_scale[js+ks*nyout+is*nyout*ny]);
+			  if(fabs(y_scale[js+ks*nyout+is*nyout*ny])>y_max_scale[is] && !mxIsNaN(y_scale[js+ks*nyout+is*nyout*ny]))
+			    y_max_scale[is] = fabs(y_scale[js+ks*nyout+is*nyout*ny]);
 			  /*printf("y_scale old = %f and scale for neq %i, t %i, y %i, thus %i is = %f \n", y_max_scale[is], is, js, ks, js+ks*nout+is*nout*ny, y_scale[js+ks*nout+is*nout*ny]); */
 			  
 			}
