@@ -31,18 +31,26 @@ function ar = arAddEvent( varargin )
     if ( nargin < 2 )
         error( 'Function needs at least two arguments.' );
     end
-
+       
     global ar;
     if ( isstruct(varargin{1}) )
         ar = varargin{1};
         varargin = varargin(2:end);
     end
+
+    % If we were called from a high level event function, since the higher
+    % level function will already be in the command log and this one doesn't 
+    % need to be added.
+    s = dbstack(1);
+    if ( (length(s)==0) || ( (~strcmp( s.file, 'arSteadyState.m' )) && (~strcmp( s.file, 'arFindInputs.m' )) ) )
+        logCall( 'arAddEvent', varargin{:} );
+    end      
     
     m = varargin{1};
     c = varargin{2};
     t = varargin{3};
 
-    nStates = numel(ar.model.x);
+    nStates = numel( ar.model.x );
     nPars   = numel( ar.model(m).condition(c).p );    
     
     if ( length( varargin ) > 3 )
@@ -80,7 +88,7 @@ function ar = arAddEvent( varargin )
             error( 'Sensitivity matrix has the wrong dimensions. Should be 1 x nStates x nPars' );
         end
     end
-    
+       
     doLink = true;
     if ( length( varargin ) > 8 )
         doLink = varargin{9};
@@ -141,4 +149,21 @@ function ar = arAddEvent( varargin )
     if (doLink)
         arLink(true);
     end
+end
+
+function logCall( fn, varargin )
+    global ar;
+    
+    if ~isfield(ar, 'eventLog')
+        ar.eventLog = {};
+    end
+    call = [fn '('];
+    if length( varargin ) > 0
+        call = sprintf('%s%s', call, mat2str(varargin{1}) );
+    end
+    for a = 2 : length( varargin )
+        call = sprintf('%s, %s', call, mat2str(varargin{a}) );
+    end
+    call = [call ')'];
+    ar.eventLog{length(ar.eventLog)+1} = call;
 end

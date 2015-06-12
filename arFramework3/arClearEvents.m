@@ -38,6 +38,11 @@ function ar = arClearEvents( varargin )
         ar.model = rmfield(ar.model,'ss_condition');
     end
     
+    % Clear the event log
+    if ( isfield( ar, 'eventLog' ) )
+        ar = rmfield(ar,'eventLog')
+    end
+    
     ar.ss_conditions = 0;
     h = waitbar(0.95, h, 'Linking model');
     % The event removal requires linking (silent link)

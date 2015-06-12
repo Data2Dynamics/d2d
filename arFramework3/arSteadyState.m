@@ -42,7 +42,7 @@
 function ar = arSteadyState( varargin )
 
     global ar;
-    
+        
     if ( nargin < 3 )
         error( 'Function needs at least three arguments.' );
     end
@@ -50,6 +50,8 @@ function ar = arSteadyState( varargin )
         ar = varargin{1};
         varargin = varargin(2:end);
     end
+    
+    logCall( 'arSteadyState', varargin{:} );
     
     m       = varargin{1};
     cSS     = varargin{2};
@@ -91,7 +93,7 @@ function ar = arSteadyState( varargin )
             error( 'Invalid target condition. Specify either a number or ''all''.' );
         end
     end
-
+        
     nStates = numel( ar.model(m).x );    
     
     % Set up the steady state condition
@@ -222,4 +224,21 @@ function ID = mapStrings( str1, str2 )
             end
         end
     end
+end
+
+function logCall( fn, varargin )
+    global ar;
+    
+    if ~isfield(ar, 'eventLog')
+        ar.eventLog = {};
+    end
+    call = [fn '('];
+    if length( varargin ) > 0
+        call = sprintf('%s%s', call, mat2str(varargin{1}) );
+    end
+    for a = 2 : length( varargin )
+        call = sprintf('%s, %s', call, mat2str(varargin{a}) );
+    end
+    call = [call ')'];
+    ar.eventLog{length(ar.eventLog)+1} = call;
 end
