@@ -21,6 +21,7 @@ global fit
 
 if(nargin==0)
     qglobalar = true;
+    silent = false;
 else
     if(isstruct(varargin{1}))
         qglobalar = false;
