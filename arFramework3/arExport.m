@@ -47,7 +47,7 @@ function arExport(directory, models)
     fileList = listFiles( {}, 'Data' );
     fileListU = strrep(fileList,'/','_');    
     
-    setupFile = sprintf('arInit;\n\n');
+    setupFile = sprintf('%% D2D Model Package\n%%   Model author: %s.\n%%   More information: http://bitbucket.org/d2d-development/d2d-software/wiki/Home\n\n%% Initialize D2D framework\narInit;\n', ar.config.username );
     h = waitbar(0);
     for m = 1 : length( models )
         data = {};
@@ -55,7 +55,7 @@ function arExport(directory, models)
         % Grab the models
         modelName = [ 'Models/' ar.model(m).name '.def' ];
         modelDescription = sprintf('%s ', ar.model(m).description{:});
-        setupFile = sprintf( '\n%s\n%%%s\n\narLoadModel(''%s'');\n', setupFile, modelDescription, ar.model(m).name );
+        setupFile = sprintf( '%s\n%% Load model and data for %s.def\n%% %s\narLoadModel(''%s'');\n', setupFile, ar.model(m).name, modelDescription, ar.model(m).name );
         mName = strrep(ar.model(m).name, '_', '\_');
         if ( ~exist( modelName, 'file' ) )
             error( 'Cannot find model file %s', modelName );
@@ -109,15 +109,86 @@ function arExport(directory, models)
         end 
     end
     
-    arCompress;
-    save( [ directory '/Results/arStruct.mat' ], 'ar' );
-    setupFile = sprintf( '%s\n\narCompileAll;\n\nload(''Results/arStruct.mat'');\narChi2(false);\narPlotY;', setupFile );
+    arSaveParOnly( ar, sprintf( '%s/Results/%s', directory, directory ) );
+    
+    if ( isfield( ar, 'eventLog' ) && (length(ar.eventLog)>0) )
+        eventCommands = sprintf('%s;\n', ar.eventLog{:} );
+        eventCommands = sprintf('%% Setup events\n%s\n', eventCommands );
+    else
+        eventCommands = '';
+    end
+    
+    configFields    = { 'rtol', 'atol', 'eq_tol', 'eq_step_factor', 'init_eq_step', 'max_eq_steps', 'maxsteps', 'maxstepsize', 'nFinePoints', 'atolV', 'atolV_Sens', 'ssa_min_tau', 'ssa_runs', 'steady_state_constraint', 'useEvents', 'useFitErrorCorrection' };
+    configFile      = sprintf( '%% D2D Configuration file\n%s', fieldcode( ar.config, configFields{:} ) );
+    
+    setupFile = sprintf( '%s\n%% Compile model\narCompileAll;\n\n%% Load configuration\nmodelConfig\n\n%% Load parameters\narLoadPars(''%s'');\n\n%s%% Simulate and plot\narSimu(false,true,true);\narChi2(false);\narPlotY;', setupFile, directory, eventCommands );
     
     fid = fopen( [directory '/Setup.m' ], 'w+' );
     fprintf( fid, '%s', setupFile );
     fclose(fid);
     
+    fid = fopen( [directory '/modelConfig.m' ], 'w+' );
+    fprintf( fid, '%s', configFile );
+    fclose(fid);    
+    
     close(h);
+end
+
+function str = fieldcode( struct, varargin )
+    global ar;
+    
+    maxLen = max(cellfun(@length, varargin));
+    
+    str = [];
+    for a = 1 : length( varargin )
+        str = sprintf( '%sar.config.%s = %s;\n', str, arExtendStr( varargin{a}, maxLen ), mat2str(ar.config.(varargin{a})) );
+    end
+end
+
+% save only parameters
+function arSaveParOnly(ar2, savepath)
+
+    ar = struct([]);
+    ar(1).pLabel = ar2.pLabel;
+    ar.p = ar2.p;
+    ar.qLog10 = ar2.qLog10;
+    ar.qFit = ar2.qFit;
+    ar.lb = ar2.lb;
+    ar.ub = ar2.ub;
+    ar.type = ar2.type;
+    ar.mean = ar2.mean;
+    ar.std = ar2.std;
+    try %#ok<TRYNC>
+        ar.chi2fit = ar2.chi2fit;
+        ar.ndata = ar2.ndata;
+        ar.nprior = ar2.nprior;
+    end
+    try %#ok<TRYNC>
+        ar.ps = ar2.ps;
+        ar.ps_errors = ar2.ps_errors;
+        ar.chi2s = ar2.chi2s;
+        ar.chi2sconstr = ar2.chi2sconstr;
+        ar.timing = ar2.timing;
+        ar.exitflag = ar2.exitflag;
+        ar.fun_evals = ar2.fun_evals;
+        ar.ps_start = ar2.ps_start;
+        ar.chi2s_start = ar2.chi2s_start;
+        ar.chi2sconstr_start = ar2.chi2sconstr_start;
+        ar.optim_crit = ar2.optim_crit;
+
+        ar.chi2s_sorted = ar2.chi2s_sorted;
+        ar.chi2sconstr_sorted = ar2.chi2sconstr_sorted;
+        ar.ps_sorted = ar2.ps_sorted;
+        ar.chi2s_start_sorted = ar2.chi2s_start_sorted;
+        ar.chi2sconstr_start_sorted = ar2.chi2sconstr_start_sorted;
+        ar.ps_start_sorted = ar2.ps_start_sorted;
+    end
+    ar.config.fiterrors = ar2.config.fiterrors; %#ok<STRNU>
+    
+    warning('off', 'MATLAB:MKDIR:DirectoryExists');
+    mkdir( savepath );
+	warning('on', 'MATLAB:MKDIR:DirectoryExists');    
+    save([savepath '/workspace_pars_only.mat'],'ar','-v7.3');
 end
 
 function fileList = listFiles( fileList, directory )
