@@ -42,9 +42,9 @@ function ar = arAddEvent( varargin )
     % level function will already be in the command log and this one doesn't 
     % need to be added.
     s = dbstack(1);
-    if ( (length(s)==0) || ( (~strcmp( s.file, 'arSteadyState.m' )) && (~strcmp( s.file, 'arFindInputs.m' )) ) )
+    if ( (length(s)==0) || ( (~strcmp( s(1).file, 'arSteadyState.m' )) && (~strcmp( s(1).file, 'arFindInputs.m' )) ) )
         logCall( 'arAddEvent', varargin{:} );
-    end      
+    end
     
     m = varargin{1};
     c = varargin{2};
