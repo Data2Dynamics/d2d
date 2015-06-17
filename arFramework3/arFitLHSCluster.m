@@ -3,7 +3,7 @@
 %   - random sampling from prior
 % run on MATLAB cluster
 %
-% job = arFitLHSCluster(cluster, clusterpath, pool_size, n, randomseed, log_fit_history)
+% job = arFitLHSCluster(cluster, clusterpath, pool_size, n, randomseed, log_fit_history, backup_save)
 %
 % cluster:          MATLAB cluster object       (see help parcluster)
 % clusterpath:      execution path on cluster   ['.']
@@ -12,8 +12,9 @@
 %                   OR: initial parameter matrix !
 % randomseed:                                   rng(randomseed)
 % log_fit_history                               [false]
+% backup_save                                   [false]
 
-function varargout = arFitLHSCluster(cluster, clusterpath, pool_size, n, randomseed, log_fit_history)
+function varargout = arFitLHSCluster(cluster, clusterpath, pool_size, n, randomseed, log_fit_history, backup_save)
 
 global ar
 global ar_fitlhs_cluster
@@ -42,10 +43,13 @@ if(isempty(ar_fitlhs_cluster)) % new job
     if(~exist('log_fit_history','var'))
         log_fit_history = false;
     end
+    if(~exist('backup_save','var'))
+        backup_save = false;
+    end
 
     fprintf('arFitLHSCluster sending job...');
     ar_fitlhs_cluster = batch(cluster, @arFitLHSClusterFun, 1, ...
-        {ar, n, randomseed, log_fit_history}, ...
+        {ar, n, randomseed, log_fit_history, backup_save}, ...
         'CaptureDiary', true, ...
         'CurrentFolder', clusterpath, ...
         'pool', pool_size, ...
@@ -83,13 +87,13 @@ else
     error('arFitLHSCluster global variable ar_fitlhs_cluster is invalid!\n');
 end
 
-function ar = arFitLHSClusterFun(ar2, n, randomseed, log_fit_history)
+function ar = arFitLHSClusterFun(ar2, n, randomseed, log_fit_history, backup_save)
 global ar %#ok<REDEF>
 ar = ar2; %#ok<NASGU>
 
 if(isscalar(n))
-    arFitLHS(n, randomseed, log_fit_history, false, true);
+    arFitLHS(n, randomseed, log_fit_history, backup_save, true);
 else
-    arFitsCluster(n, log_fit_history);
+    arFitsCluster(n, log_fit_history, backup_save);
 end
 

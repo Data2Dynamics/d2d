@@ -1,16 +1,20 @@
 % fit sequence on MATLAB cluster
 %
-% arFitsCluster(ps, log_fit_history)
+% arFitsCluster(ps, log_fit_history, backup_save)
 %
 % ps:                           parameter values      
 % log_fit_history               [false]
+% backup_save                   [false]
 
-function arFitsCluster(ps, log_fit_history)
+function arFitsCluster(ps, log_fit_history, backup_save)
 
 global ar
 
 if(~exist('log_fit_history','var'))
     log_fit_history = false;
+end
+if(~exist('backup_save','var'))
+    backup_save = false;
 end
 
 n = size(ps,1);
@@ -33,10 +37,33 @@ if(log_fit_history)
     ar.fit_hist = [];
 end
 
+if(backup_save && exist('arFitCluster_Backup','dir')~=7)
+    mkdir('arFitCluster_Backup');
+end
+
 ar1 = ar;
 pct = parfor_progress(n); %#ok<NASGU>
 parfor j=1:n
     thisworker = getCurrentWorker; % Worker object
+    
+    % load from backup if exist
+    if(backup_save && exist(sprintf('./arFitCluster_Backup/fit_%i.mat', j),'file'))
+        S = load(sprintf('./arFitCluster_Backup/fit_%i.mat', j));
+        chi2s_start(j) = S.x.chi2fit;
+        chi2sconstr_start(j) = S.x.chi2constr;
+        ps(j,:) = S.x.p;
+        chi2s(j) = S.x.chi2fit;
+        chi2sconstr(j) = S.x.chi2constr;
+        exitflag(j) = S.x.exitflag;
+        fun_evals(j) = S.x.fevals;
+        optim_crit(j) = S.x.firstorderopt;
+        timing(j) = S.x.timing;
+        pct = parfor_progress/100;
+        fprintf('%i/%i fit #%i (%s, %s): loaded from backup\n', round(n*pct), n, j, ...
+            thisworker.Name, char(datetime));
+        continue
+    end
+    
     ar2 = ar1;
     ar2.p = ps(j,:);
     tic;
@@ -53,11 +80,13 @@ parfor j=1:n
         optim_crit(j) = ar2.firstorderopt;
         pct = parfor_progress/100;
         if(ar2.config.fiterrors == 1)
-            fprintf('%i/%i fit #%i (%s): objective function %g\n', n*pct, n, j, ...
-                thisworker.Name, 2*ar2.ndata*log(sqrt(2*pi)) + ar2.chi2fit + ar2.chi2constr);
+            fprintf('%i/%i fit #%i (%s, %s): objective function %g\n', round(n*pct), n, j, ...
+                thisworker.Name, char(datetime), ...
+                2*ar2.ndata*log(sqrt(2*pi)) + ar2.chi2fit + ar2.chi2constr);
         else
-            fprintf('%i/%i fit #%i (%s): objective function %g\n', n*pct, n, j, ...
-                thisworker.Name, ar2.chi2fit + ar2.chi2constr);
+            fprintf('%i/%i fit #%i (%s, %s): objective function %g\n', round(n*pct), n, j, ...
+                thisworker.Name, char(datetime), ...
+                ar2.chi2fit + ar2.chi2constr);
         end
         
         if(log_fit_history)
@@ -83,10 +112,26 @@ parfor j=1:n
     catch exception
         ps_errors(j,:) = ar2.p;
         pct = parfor_progress/100;
-        fprintf('%i/%i fit #%i (%s): %s\n', n*pct, n, j, ...
-            thisworker.Name, exception.message);
+        fprintf('%i/%i fit #%i (%s, %s): %s\n', round(n*pct), n, j, ...
+            thisworker.Name, char(datetime), ...
+            exception.message);
     end
     timing(j) = toc;
+    
+    % save to backup if not exist
+    if(backup_save && ~exist(sprintf('./arFitCluster_Backup/fit_%i.mat', j),'file'))
+        ar3 = struct([]);
+        ar3(1).chi2fit = chi2s_start(j);
+        ar3.chi2constr = chi2sconstr_start(j);
+        ar3.p = ps(j,:);
+        ar3.chi2fit = chi2s(j);
+        ar3.chi2constr = chi2sconstr(j);
+        ar3.exitflag = exitflag(j);
+        ar3.fevals = fun_evals(j);
+        ar3.firstorderopt = optim_crit(j);
+        ar3.timing = timing(j);
+        parsave(sprintf('./arFitCluster_Backup/fit_%i.mat', j), ar3)
+    end
 end
 pct = parfor_progress(0); %#ok<NASGU>
 
