@@ -619,7 +619,7 @@ for jm=1:length(ar.model)
                     lp(fid, '\\subsubsection{Input variables}');
                     lp(fid, 'The following inputs variables are modified in this data set:');
                     lp(fid, '\\begin{itemize}');
-                    for ju = find(qmod)
+                    for ju = find(qmod)'
                         lp(fid, '\\item {\\bf Input variable %i:} %s', ju, strrep(ar.model(jm).u{ju}, '_', '\_'));
                         
                         lp(fid, '{\\footnotesize');
