@@ -43,7 +43,7 @@ ps = arRandomPars(n, randomseed);
 if(~use_cluster)
     arFits(ps, log_fit_history, backup_save);
 else
-    arFitsCluster(ps, log_fit_history);
+    arFitsCluster(ps, log_fit_history, backup_save);
 end
 
 if ar.config.restartLHS ==1 && isempty(randomseed)
@@ -66,7 +66,7 @@ if ar.config.restartLHS ==1 && isempty(randomseed)
         if(~use_cluster)
             arFits(pstmp, log_fit_history, backup_save);
         else
-            arFitsCluster(pstmp, log_fit_history);
+            arFitsCluster(pstmp, log_fit_history, backup_save);
         end
         indnan = find(isnan(ar.chi2s));
     end
