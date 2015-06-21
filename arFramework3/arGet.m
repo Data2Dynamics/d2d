@@ -1,11 +1,13 @@
-% data = arGet(fields, jm, jd, struct)
+% data = arGet(fields, m, d, c, struct)
 %
 %   Returns data from ar struct according to a cell of field names
 % 
 %   data     cell array containing all fields specified in fields
 %   fields   single string or cell array of strings
-%   jm       optional model count (default = 1)
-%   jd       optional data count  (default = 1)
+%   m       optional model count (default = 1)
+%   d       optional data count  (default = 1)
+%   c       optional condition count (default = 1)
+%   struct  optional struct (with ar structure) (default = global ar)
 %
 % Examples:
 %   arGet('model.data.yFineSimu', 2, 3) 
@@ -19,17 +21,26 @@
 % for convenience:
 %   arGet('ar.model') == arGet('model')
 
-function data = arGet(fields, jm, jd)
+function data = arGet(fields, m, d, c, struct)
 
 global ar
 
 % Fill in unset optional values.
 switch nargin
     case 1
-        jm = 1;
-        jd = 1;
+        m = 1;
+        d = 1;
+        c = 1;
+        struct = ar;
     case 2
-        jd = 1;
+        d = 1;
+        c = 1;
+        struct = ar;
+    case 3
+        c = 1;
+        struct = ar;
+    case 4
+        struct = ar;
 end
 
 % make single string a cell
@@ -53,15 +64,21 @@ for i=1:length(fields)
         
             fields(i) = {regexprep(char(fields(i)),'^data.', '')};
             S = substruct_arg(fields(i));
-            data{i}=subsref(ar.model(jm).data(jd), substruct(S{:}));
+            data{i}=subsref(struct.model(m).data(d), substruct(S{:}));
             
+        elseif(regexp(char(fields(i)), '^condition.'))
+        
+            fields(i) = {regexprep(char(fields(i)),'^condition.', '')};
+            S = substruct_arg(fields(i));
+            data{i}=subsref(struct.model(m).condition(c), substruct(S{:}));
+                
         else
             S = substruct_arg(fields(i));
-            data{i}=subsref(ar.model(jm), substruct(S{:}));
+            data{i}=subsref(struct.model(m), substruct(S{:}));
         end
     else
         S = substruct_arg(fields(i));
-        data{i}=subsref(ar, substruct(S{:}));
+        data{i}=subsref(struct, substruct(S{:}));
     end
     
 end
