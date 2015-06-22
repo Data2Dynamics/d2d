@@ -236,7 +236,8 @@ for jm = 1:nm
                         x = ar.model(jm).condition(jc).xFineSimu(1,qss);
                     end
                     dxdt = ar.model(jm).condition(jc).dxdt(qss);
-                    tmpconstr = (dxdt ./ x) ./ ar.model(jm).condition(jc).stdSteadyState(qss);
+                    tmpStdSteadystate = ar.model(jm).condition(jc).stdSteadyState(qss);
+                    tmpconstr = (dxdt ./ x) ./ tmpStdSteadystate;
                     validconstr = ~(isnan(tmpconstr) | isinf(tmpconstr));
                     tmpconstr = tmpconstr(validconstr);
                     ar.constr(constrindex:(constrindex+length(tmpconstr(:))-1)) = tmpconstr;
@@ -265,7 +266,7 @@ for jm = 1:nm
                         
                         tmptmpsconstr = bsxfun(@rdivide,ddxdtdp,x') - bsxfun(@times,bsxfun(@rdivide,dxdt,x.^2)', dxdp);
                         tmpsconstr(:,ar.model(jm).condition(jc).pLink) = tmptmpsconstr(validconstr,:);
-                        tmpsconstr = tmpsconstr ./ (ar.model(jm).condition(jc).stdSteadyState(qss & validconstr)'*ones(1,np));
+                        tmpsconstr = tmpsconstr ./ (tmpStdSteadystate(validconstr)'*ones(1,np));
                         tmpsconstr(:,ar.qFit~=1) = 0;
                         
                         ar.sconstr(sconstrindex:(sconstrindex+length(tmpconstr(:))-1),:) = tmpsconstr;
