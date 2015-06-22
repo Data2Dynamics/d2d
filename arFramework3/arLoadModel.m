@@ -267,7 +267,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                     symtmpsubs = subs(symtmp, sym(source{j}), 0);
                     if(symtmpsubs~=0)
                         fprintf(2, 'Possible negative flux in reaction #%i:\n', length(ar.model(m).fv));
-                        fprintf(2, '%s : %s\n', arAssambleReactionStr(source, target), cell2mat(str{1}));
+                        fprintf(2, '%s : %s\n', arAssembleReactionStr(source, target), cell2mat(str{1}));
                         fprintf(2, 'Source species %s missing ?\n\n', source{j});
                         fprintf(2, 'Deactivate this error message with: ar.config.checkForNegFluxes = false;\n\n');
                         error('Possible negative fluxes in reaction');
