@@ -51,6 +51,25 @@ else
     error('Argument has to be a string or an array of indices.')
 end
 
+if(exist('samplesize', 'var'))
+    pleGlobals.samplesize(jk) = samplesize;
+end
+if(exist('relchi2stepincrease', 'var'))
+    pleGlobals.relchi2stepincrease(jk) = relchi2stepincrease;
+end
+if(exist('maxstepsize', 'var'))
+    pleGlobals.maxstepsize(jk) = maxstepsize;
+end
+if(exist('minstepsize', 'var'))
+    pleGlobals.minstepsize(jk) = minstepsize;
+end
+if(exist('breakonlb', 'var'))
+    pleGlobals.breakonlb(jk) = breakonlb;
+end
+if(exist('breakonub', 'var'))
+    pleGlobals.breakonub(jk) = breakonub;
+end
+
 if(nargin<1)
     fprintf('PLE for %i parameters ...\n', sum(pleGlobals.q_fit))
     jindex = find(pleGlobals.q_fit);
@@ -90,25 +109,6 @@ if(~pleGlobals.q_fit(jk))
     return
 else
     fprintf('\nPLE#%i for parameter %s\n', jk, pleGlobals.p_labels{jk});
-end
-
-if(exist('samplesize', 'var'))
-    pleGlobals.samplesize(jk) = samplesize;
-end
-if(exist('relchi2stepincrease', 'var'))
-    pleGlobals.relchi2stepincrease(jk) = relchi2stepincrease;
-end
-if(exist('maxstepsize', 'var'))
-    pleGlobals.maxstepsize(jk) = maxstepsize;
-end
-if(exist('minstepsize', 'var'))
-    pleGlobals.minstepsize(jk) = minstepsize;
-end
-if(exist('breakonlb', 'var'))
-    pleGlobals.breakonlb(jk) = breakonlb;
-end
-if(exist('breakonub', 'var'))
-    pleGlobals.breakonub(jk) = breakonub;
 end
 
 % respress warning "Matrix is close to singular or badly scaled."
