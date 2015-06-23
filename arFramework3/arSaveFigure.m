@@ -44,8 +44,8 @@ elseif(isunix)
     set(h,'Position',[myfigpos(1:2) 4*nCols 4*nRows]);
 
     for ia = 1:length(myaxes)
-        [tmp, indCol] = min(abs(mypos(ia,1) - mycols));
-        [tmp, indRow] = min(abs(mypos(ia,2) - myrows));
+        [~, indCol] = min(abs(mypos(ia,1) - mycols));
+        [~, indRow] = min(abs(mypos(ia,2) - myrows));
 
         set(myaxes(ia),'Position',[(indCol-1)/nCols+(1/nCols)*0.15 (indRow-1)/nRows+(1/nRows)*0.1 (1/nCols)*0.7 (1/nRows)*0.8])
     end
