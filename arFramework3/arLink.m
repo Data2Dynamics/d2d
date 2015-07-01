@@ -3,7 +3,7 @@
 % arLink(silent, tExpAdd)
 
 
-function arLink(silent, tExpAdd)
+function arLink(silent, tExpAdd, dataAdd, ix, id, im, newData, yStd, add_sec)
 
 matVer = ver('MATLAB');
 
@@ -23,6 +23,30 @@ end
 
 useMS 		= 0;
 useEvents 	= 0;
+
+%Set variables to temporarily add data points
+if(~exist('add_sec','var'))
+    add_sec = false;
+end
+
+if(~exist('yStd','var'))
+    if(ar.config.fiterrors==1)
+        yStd = NaN;
+    else
+        yStd = 0.1;
+
+    end
+end
+
+if(~exist('dataAdd','var'))
+    dataAdd = false;
+    add_sec = false;
+    newData = [];
+    ix = [];
+    id = [];
+    im = [];
+    yStd = [];
+end
 
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
@@ -45,11 +69,73 @@ for m=1:length(ar.model)
         % collect time points
         for d=1:length(ar.model(m).data)
             if(isfield(ar.model(m).data(d), 'tExp'))
+                %delete data point
+                if(dataAdd && d==id && m==im && isfield(ar.model(m).data(d),'ppl'))
+                    if((isfield(ar.model(m).data(d).ppl,'Added') && ~isempty(ar.model(m).data(d).ppl.Added)) ...
+                        || (isfield(ar.model(m).data(d).ppl,'Added2') && ~isempty(ar.model(m).data(d).ppl.Added2)))
+                        if(~add_sec && ~isempty(ar.model(m).data(d).ppl.Added))
+                            ar.model(m).data(d).tExp(ar.model(m).data(d).ppl.Added)=[];
+                            ar.model(m).data(d).yExp(ar.model(m).data(d).ppl.Added,:)=[];
+                            ar.model(m).data(d).yExpStd(ar.model(m).data(d).ppl.Added,:)=[];
+                            ar.model(m).data(d).ppl.Added=[];                       
+                        end
+                    end
+                end
                 ar.model(m).condition(ar.model(m).data(d).cLink).tExp = union(union( ... %R2013a compatible
                     ar.model(m).condition(ar.model(m).data(d).cLink).tExp, ...
                     ar.model(m).data(d).tExp), 0);
                 ar.model(m).condition(ar.model(m).data(d).cLink).tExp = ...
-                    ar.model(m).condition(ar.model(m).data(d).cLink).tExp(:);
+                    ar.model(m).condition(ar.model(m).data(d) ...
+                                          .cLink).tExp(:);
+                %add new data point in id, im
+                if(dataAdd && d==id && m==im && ~isnan(newData))
+                    if(add_sec && isempty(ar.model(m).data(d).ppl.Added))
+                        error('\n You have to add a first data point before adding a second \n')                       
+                    end
+                    infl_tExp = [ ar.model(m).data(d).tExp; tExpAdd ];
+                    %[ar.model(m).data(d).tExp, iAdd, ic]=unique( infl_tExp );
+                    ar.model(m).data(d).tExp=sort( infl_tExp );
+                    new_data=NaN(1,size(ar.model(m).data(d).yExp,2));
+                    new_data(ix) = newData;
+                    [~,it_tmp] = min(abs(ar.model(m).data(d).tExp-tExpAdd));
+                    if(length(find(ar.model(m).data(d).tExp==tExpAdd))==1)
+                        ar.model(m).data(d).yExp =  [ar.model(m).data(d).yExp(1:(it_tmp-1),:); new_data; ar.model(m).data(d).yExp(it_tmp:end,:)];
+                        new_data(ix) = yStd;
+                        ar.model(m).data(d).yExpStd =  [ar.model(m).data(d).yExpStd(1:(it_tmp-1),:); new_data; ar.model(m).data(d).yExpStd(it_tmp:end,:)];
+                    else
+                        ar.model(m).data(d).yExp =  [ar.model(m).data(d).yExp(1:it_tmp,:); new_data; ar.model(m).data(d).yExp(it_tmp+1:end,:)];
+                        new_data(ix) = yStd;
+                        ar.model(m).data(d).yExpStd =  [ar.model(m).data(d).yExpStd(1:it_tmp,:); new_data; ar.model(m).data(d).yExpStd(it_tmp+1:end,:)];
+                    end
+                    %possibility to add a second data point
+                    if(add_sec)
+                        ar.model(m).data(d).ppl.Added2=find(ar.model(m).data(d).tExp==tExpAdd,1,'last');
+                        if(~isempty(ar.model(m).data(d).ppl.Added) && ar.model(m).data(d).ppl.Added2<ar.model(m).data(d).ppl.Added)
+                            ar.model(m).data(d).ppl.Added = ar.model(m).data(d).ppl.Added + 1;
+                        end
+                    else
+                        ar.model(m).data(d).ppl.Added=find(ar.model(m).data(d).tExp==tExpAdd,1,'last');               
+                    end
+                    
+                    %set variable to retrieve data point in ar.res
+                    resi = 0;
+                    for m_res=1:im-1
+                        for d_res=1:length(ar.model(m_res).data)
+                            resi = resi + sum(sum(~isnan(ar.model(m_res).data(d_res).yExp)));
+                        end
+                    end
+                    for d_res = 1:id-1
+                        resi = resi + sum(sum(~isnan(ar.model(im).data(d_res).yExp)));
+                    end
+                    for x_res = 1:ix-1
+                        resi = resi + sum(~isnan(ar.model(im).data(id).yExp(:,x_res)));
+                    end
+                    ar.ppl.resi_tmp = resi + sum(~isnan(ar.model(im).data(id).yExp(1:ar.model(m).data(d).ppl.Added,ix)));
+                    
+                    if(add_sec)
+                        ar.ppl.resi2_tmp = resi + sum(~isnan(ar.model(im).data(id).yExp(1:ar.model(m).data(d).ppl.Added2,ix)));
+                    end
+                end
             end
             
             ar.model(m).data(d).tFine = ...
@@ -205,11 +291,12 @@ for m = 1:length(ar.model)
                     ar.model(m).data(d).yExpSimu = zeros(nt, ny);
                     ar.model(m).data(d).syExpSimu = zeros(nt, ny, np);
                     ar.model(m).data(d).ystdExpSimu = zeros(nt, ny);
-                    if(isempty(ar.model(m).x))
-                        ar.model(m).data(d).y_scale = zeros(nt, ny, 1);
-                    else
+                    if(length(ar.model(m).x)>0)
                         ar.model(m).data(d).y_scale = zeros(nt, ny, length(ar.model(m).x));
+                    else
+                        ar.model(m).data(d).y_scale = zeros(nt, ny, 1);
                     end
+                    ar.model(m).data(d).dydt = zeros(nt, ny);
                     ar.model(m).data(d).systdExpSimu = zeros(nt, ny, np);
                     if(isfield(ar.model(m).data(d), 'yExp') && ~isempty(ar.model(m).data(d).yExp))
                         ar.model(m).data(d).res = zeros(nt, ny);
@@ -260,6 +347,7 @@ for m = 1:length(ar.model)
             ar.model(m).condition(c).zExpSimu = zeros(nt, nz);
             ar.model(m).condition(c).szExpSimu = zeros(nt, nz, np);
             ar.model(m).condition(c).dzdx = zeros(nt, nz, nx);
+            ar.model(m).condition(c).dxdts = zeros(nt, nx);
             ar.model(m).condition(c).has_tExp = true;
         else
             ar.model(m).condition(c).has_tExp = false;

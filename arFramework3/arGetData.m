@@ -1,5 +1,5 @@
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, ...
-    yExpHl, dydt, y_ssa, y_ssa_lb, y_ssa_ub, qFit] = arGetData(jm, jd, jtype)
+    yExpHl, dydt, y_ssa, y_ssa_lb, y_ssa_ub, qFit, t_ppl, y_ppl_ub, y_ppl_lb] = arGetData(jm, jd, jtype)
 
 global ar
 
@@ -39,19 +39,42 @@ if(isfield(ar.model(jm), 'data'))
 else
     jc = 1;
 end
+t_ppl = [];
+y_ppl_ub = [];
+y_ppl_lb = [];
 
 % trajectories and error bands
 if(jtype==1 && isfield(ar.model(jm), 'data') && isfield(ar.model(jm).data(jd),'tFine'))
     t = ar.model(jm).data(jd).tFine;
     y = ar.model(jm).data(jd).yFineSimu;
     ystd = ar.model(jm).data(jd).ystdFineSimu;
-    
+    %Get data points of model profile likelihood
+     if(isfield(ar.model(jm).data(jd),'ppl') && ~isempty(ar.model(jm).data(jd).ppl))
+        t_ppl = ar.model(jm).data(jd).ppl.tstart;
+        if(nansum(nansum(~isnan(ar.model(jm).data(jd).ppl.ub_fit))>0))
+            y_ppl_ub = ar.model(jm).data(jd).ppl.ub_fit;
+            y_ppl_lb = ar.model(jm).data(jd).ppl.lb_fit;
+        else
+            y_ppl_ub = ar.model(jm).data(jd).ppl.ub_fit_vpl;
+            y_ppl_lb = ar.model(jm).data(jd).ppl.lb_fit_vpl;
+        end
+    end
 elseif(jtype==2)
     t = ar.model(jm).condition(jc).tFine;
     y = [ar.model(jm).condition(jc).uFineSimu ar.model(jm).condition(jc).xFineSimu ...
         ar.model(jm).condition(jc).zFineSimu];
     ystd = [];
-    
+    %Get data points of model profile likelihood
+    if(isfield(ar.model(jm).condition(jc),'ppl') && ~isempty(ar.model(jm).condition(jc).ppl))
+        t_ppl = ar.model(jm).condition(jc).ppl.tstart;
+        if(nansum(nansum(~isnan(ar.model(jm).condition(jc).ppl.ub_fit)))>0)
+            y_ppl_ub = ar.model(jm).condition(jc).ppl.ub_fit;
+            y_ppl_lb = ar.model(jm).condition(jc).ppl.lb_fit;
+        else
+            y_ppl_ub = ar.model(jm).condition(jc).ppl.ub_fit_vpl;
+            y_ppl_lb = ar.model(jm).condition(jc).ppl.lb_fit_vpl;
+        end
+    end
 elseif(jtype==3)
     t = ar.model(jm).condition(jc).tFine;
     y = ar.model(jm).condition(jc).vFineSimu;

@@ -22,10 +22,10 @@ C.~T\"onsing$^{2}$,
 L.~Adlung$^{4}$, 
 R.~Engesser$^{2}$, 
 W.~Mader$^{2}$, 
-T.~Heinemann$^{4,5}$, 
+T.~Heinemann$^{9,5}$, 
 J.~Hasenauer$^{6,7}$, 
 M.~Schilling$^{4}$, 
-T.~H\"ofer$^{4,5}$, 
+T.~H\"ofer$^{9,5}$, 
 E.~Klipp$^{3}$, 
 F.~Theis$^{6,7}$, 
 U.~Klingm\"uller$^{4}$,
@@ -34,11 +34,12 @@ and J.~Timmer\,$^{2,8}$}
 \address{$^{1}$Merrimack Pharmaceuticals Inc., 02139 Cambridge, MA, USA\\
 $^{2}$University of Freiburg, Institute for Physics, 79104 Freiburg, Germany\\
 $^{3}$Humboldt-Universit\"at zu Berlin, Theoretical Biophysics, 10115 Berlin, Germany\\
-$^{4}$German Cancer Research Center, 69120 Heidelberg, Germany\\
+$^{4}$Systems Biology of Signal Transduction, German Cancer Research Center, 69120 Heidelberg, Germany\\
 $^{5}$BioQuant, University of Heidelberg, 69120 Heidelberg, Germany\\
 $^{6}$Helmholtz Center Munich, 85764 Neuherberg, Germany\\
 $^{7}$Technische Universit\"at M\"unchen, 85748 Garching, Germany \\
-$^{8}$BIOSS Centre for Biological Signalling Studies, University of Freiburg, 79104 Freiburg, Germany}
+$^{8}$BIOSS Centre for Biological Signalling Studies, University of Freiburg, 79104 Freiburg, Germany\\
+$^{9}$Divison of Theoretical Systems Biology, German Cancer Research Center, 69120 Heidelberg, Germany}
 
 \history{Received on XXXXX; revised on XXXXX; accepted on XXXXX}
 
@@ -54,7 +55,7 @@ approach in the field of Systems Biology. Two of the most critical steps in this
 to construct dynamical models of biochemical reaction networks for large 
 data sets and complex experimental conditions and to perform efficient and reliable 
 parameter estimation for model fitting. We present a modeling 
-environment {\color{red} for MATLAB} that pioneers these challenges. The numerically expensive parts of the 
+environment { for MATLAB} that pioneers these challenges. The numerically expensive parts of the 
 calculations such as the solving of the differential equations and of the 
 associated sensitivity system are parallelized and automatically compiled into efficient C 
 code. A variety of parameter estimation algorithms as well as frequentist and Bayesian 
@@ -120,10 +121,10 @@ We implemented a variety of different
 parameter estimation algorithms \citep{Raue:2012zt}. The most efficient and reliable 
 algorithm for parameter estimation in our hands is a deterministic trust region approach 
 combined with a multi-start strategy to map out local minima. 
-{\color{red} A variety of global optimization algorithms is implemented as well \citep{Kronfeld:2010fk}.} 
+{ A variety of global optimization algorithms is implemented as well \citep{Kronfeld:2010fk}.} 
 Parameters can and should 
 be estimated on a log-scale. Prior knowledge about the parameters can be considered 
-{\color{red} by prior distributions. The respective penalization of the likelihood leads to 
+{ by prior distributions. The respective penalization of the likelihood leads to 
 maximum a posteriori estimation.} 
 If steady state assumptions for the model dynamics are required and the functional 
 relationship to parameters are unknown, steady state constraints can be added to the 
@@ -133,17 +134,17 @@ software implements a sophisticated method to calculate model sensitivities, i.e
 derivatives of the dynamics with respect to model parameters. The sensitivity equations 
 are derived automatically by symbolic differentiation, translated to C code and compiled 
 together with the original ODE system and solver. We showed previously 
-\citep{Raue:2012zt} that this approach{\color{red}, which is not implemented in any other software packages, } is not only about ten times faster but also more 
+\citep{Raue:2012zt} that this approach{, which is not implemented in any other software packages, } is not only about ten times faster but also more 
 precise than the default approach using finite differences. A reliable calculation of these 
 derivatives is key to successful parameter estimation. 
-{\color{red} Goodness of fit analysis, Likelihood ratio test, QQ-plots and auto-correlation 
+{ Goodness of fit analysis, Likelihood ratio test, QQ-plots and auto-correlation 
 of the residuals are available.} 
 
 In addition to finding the best model fit to a given collection of data, the Data2Dynamics 
 software implements a wide range of algorithms that are able to determine uncertainties 
 in the estimated parameter as well as in the predicted model dynamics. In particular, the 
 frequentist profile likelihood approach for identifiability analysis \citep{Raue:2009ec}, the 
-prediction profile likelihood approach for observability analysis \citep{Kreutz:2011kx}{\color{red}.
+prediction profile likelihood approach for observability analysis \citep{Kreutz:2011kx}{.
 A variety of Markov-chain Monte Carlo approaches are implemented to perform Bayesian inference \citep{Raue:2013fk, Hug:2012fk}.} Based on the results of such uncertainty 
 analyses, the software allows to design additional experiments \citep{Steiert:2012fk} that 
 can resolve non-identifiability and non-observability \citep{Raue:2010fk} 

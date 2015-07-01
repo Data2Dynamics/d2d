@@ -1,6 +1,6 @@
 function [hy, hystd, hyss] = arPlotTrajectory(jy, t, y, ystd, lb, ub, tExp, yExp, yExpHl, yExpStd, ...
     y_ssa, y_ssa_lb, y_ssa_ub, ploterrors, Clines, ClinesExp, qUnlog, qLog, hy, hystd, hyss, dydt, ...
-    qFit, zero_break)
+    qFit, zero_break, t_ppl, y_ppl_ub, y_ppl_lb, ClinesPPL)
 
 fastPlot = false;
 
@@ -58,6 +58,15 @@ isInfWarn = sum(isinf(tmpy))>0;
 tmpy(isinf(tmpy)) = nan;
 if(isempty(hy))
     hy = plot(t, tmpy, Clines{:});
+    %plot data points of model prediction profile likelihood as stars
+    if(~isempty(t_ppl))
+        if(~isempty(qUnlog) && qUnlog(jy))
+            hyss = plot([t_ppl(:,jy) ; t_ppl(:,jy)], [10.^y_ppl_lb(:,jy); 10.^y_ppl_ub(:,jy)],ClinesPPL{:}); 
+        else
+            hyss = plot([t_ppl(:,jy) ; t_ppl(:,jy)], [y_ppl_lb(:,jy); y_ppl_ub(:,jy)],ClinesPPL{:}); 
+        end
+       
+    end
     if(ploterrors ~= 1)
         set(hy, 'LineWidth', 1.5);
     end 
