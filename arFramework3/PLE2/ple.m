@@ -410,7 +410,7 @@ else
             pleGlobals.p_true >= pleGlobals.conf_lb_point;
     end
     
-    % calculate elapse times
+    % calculate elapsed times
     rel_estimate = 100 * estimatetime / (estimatetime+fittime);
     rel_fit = 100 * fittime / (estimatetime+fittime);
     fprintf('PLE#%i elapsed time %s (step: %2.0f%%, fit: %2.0f%%)\n', jk, ...
