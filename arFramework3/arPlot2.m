@@ -212,7 +212,7 @@ for jm = 1:length(ar.model)
                             dydt = [];
                         else
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, dydt, ...
-                                y_ssa, y_ssa_lb, y_ssa_ub, qFit] = arGetData(jm, jd, jtype);
+                                y_ssa, y_ssa_lb, y_ssa_ub, qFit, t_ppl, y_ppl_ub, y_ppl_lb] = arGetData(jm, jd, jtype);
                             zero_break = [];
                         end
                         [tUnits, response_parameter, yLabel, yNames, yUnits, iy, ...
@@ -242,7 +242,7 @@ for jm = 1:length(ar.model)
                             zero_break, fastPlotTmp, hys, hystds, hysss, dydt, ...
                             jt==length(dr_times) && jc==jcs(end), qDR, ndata, chi2, ...
                             tUnits, response_parameter, yLabel, yNames, yUnits, ...
-                            ar.config.fiterrors, logplotting_xaxis, iy);
+                            ar.config.fiterrors, logplotting_xaxis, iy, t_ppl, y_ppl_ub, y_ppl_lb);
                         
                         % save handels
                         if(jd~=0)
