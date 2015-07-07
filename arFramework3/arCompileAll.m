@@ -585,6 +585,7 @@ condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.fp);
 condition.sym.fu = mySym(condition.fu, specialFunc);
 condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.fp);
 condition.sym.fz = mySym(model.fz, specialFunc);
+condition.sym.fz = mysubs(condition.sym.fz, model.sym.z, condition.sym.fz); % Substitute references to derived variables
 condition.sym.fz = mysubs(condition.sym.fz, condition.sym.p, condition.sym.fp);
 condition.sym.C = mysubs(model.sym.C, condition.sym.p, condition.sym.fp);
 
