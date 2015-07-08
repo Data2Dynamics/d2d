@@ -5,10 +5,14 @@ global ar
 ms = {ar.model.name};
 ds = cell(size(ms));
 for m=1:length(ar.model)
-    ds{m} = {ar.model(m).data.name};
-    [uni,ia,ib]= unique(regexprep(ds{m},'_nExpID(\d)+',''));
-    ds{m} = uni(ib);  % replace zurueck
-    ds{m} = ds{m}(sort(ia)); % nur die unique, aber in alter reihenfolge
+    if(isfield(ar.model(m).data,'name'))
+        ds{m} = {ar.model(m).data.name};
+        [uni,ia,ib]= unique(regexprep(ds{m},'_nExpID(\d)+',''));
+        ds{m} = uni(ib);  % replace zurueck
+        ds{m} = ds{m}(sort(ia)); % nur die unique, aber in alter reihenfolge
+    else
+        ds{m} = [];
+    end
 end
 
 arInit

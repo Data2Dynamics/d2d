@@ -22,6 +22,10 @@ end
 
 if(~exist('indices','var') || isempty(indices))
     indices = 1:length(pleGlobals.ps);
+elseif ischar(indices)
+    indices = strmatch(indices,pleGlobals.p_labels,'exact');
+elseif ischar(indices)
+    [~,indices] = intersect(pleGlobals.p_labels,indices);
 end
 if(~exist('savetofile','var'))
     savetofile = false;
