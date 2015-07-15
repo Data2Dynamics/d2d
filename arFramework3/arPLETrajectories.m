@@ -2,7 +2,7 @@
 %
 % arPLETrajectories(jks, n, show_hit_bound, saveToFile)
 %
-% jks               par response                                    [all]
+% jks               par response, indices or parameter name         [all]
 % n                 trajectories per parameter                      [10] (0=all)
 % show_hit_bound    show hitting boundary of parameters             [false]
 % saveToFile                                                        [false]
@@ -35,7 +35,11 @@ end
 ps = [];
 chi2s = [];
 
-jks = find(ismember(pleGlobals.p_labels, ar.pLabel(jks))); %R2013a compatible
+if(ischar(jks))
+    jks = find(ismember(pleGlobals.p_labels, jks)); %R2013a compatible
+else
+    jks = find(ismember(pleGlobals.p_labels, ar.pLabel(jks))); %R2013a compatible
+end
 
 if(length(jks)>2)
     response_str = '_multi';

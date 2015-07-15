@@ -1,8 +1,18 @@
+% arLoad(workspace_name)
+% 
 % load model struct and last ple results
 % 
-%   filename    either the name of the result folder or its number
+%   workspace_name    either 
+%                 - the name of the result folder 
+%                 - ar.config.savepath
+%                 - or the number as displayed by arLoad without argument
+%   Examples:
+% arLoad
+% arLoad(1)
+% arLoad(ar.config.savepath)
+% arLoad('NameOfAnExistingResultFolder')
 
-function arLoad(filename)
+function arLoad(workspace_name)
 arCheck;
 
 global ar
@@ -12,21 +22,23 @@ global pleGlobals
 evalin('base','clear ar pleGlobals');  
 evalin('base','global ar pleGlobals');  
 
-if(~exist('filename', 'var') || isempty(filename))
-    [~, filename] = fileChooser('./Results', 1, true);
-elseif(isnumeric(filename)) % filename is the file-number
+if(~exist('workspace_name', 'var') || isempty(workspace_name))
+    [~, workspace_name] = fileChooser('./Results', 1, true);
+elseif(isnumeric(workspace_name)) % workspace_name is the file-number
     [~, ~, file_list] = fileChooser('./Results', 1, -1);    
-    filename = file_list{filename};
+    workspace_name = file_list{workspace_name};
+elseif(ischar(workspace_name)) 
+    [~,workspace_name]=fileparts(workspace_name);    % remove path
 end
 
-Stmpload = load(['./Results/' filename '/workspace.mat']);
+Stmpload = load(['./Results/' workspace_name '/workspace.mat']);
 ar = Stmpload.ar;
-if(strcmp(ar.config.savepath,['./Results/' filename])~=1)
-    ar.config.savepath = ['./Results/' filename]
+if(strcmp(ar.config.savepath,['./Results/' workspace_name])~=1)
+    ar.config.savepath = ['./Results/' workspace_name]
 end
     
 
-fprintf('workspace loaded from file %s\n', filename);
+fprintf('workspace loaded from file %s\n', workspace_name);
 
 try
     pleGlobals = pleLoad(ar);
