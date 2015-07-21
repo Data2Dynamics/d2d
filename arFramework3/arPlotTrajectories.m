@@ -14,7 +14,6 @@ end
 % styles
 Clines = arLineMarkersAndColors(ccount, ncount, [], 'none', '-');
 ClinesExp = arLineMarkersAndColors(ccount, ncount, [], 'none', 'none');
-ClinesPPL = arLineMarkersAndColors(ccount, ncount, 'black', '*', 'none');
 
 for jys = 1:length(iy)
     jy = iy(jys);
@@ -53,7 +52,7 @@ for jys = 1:length(iy)
             tExp, yExp, yExpHl, yExpStd, ...
             y_ssa, y_ssa_lb, y_ssa_ub, ...
             ploterrors, Clines, ClinesExp, qUnlog, qLog, ...
-            [], [], [], dydt, qFit, zero_break, t_ppl, y_ppl_ub, y_ppl_lb, ClinesPPL);
+            [], [], [], dydt, qFit, zero_break, t_ppl, y_ppl_ub, y_ppl_lb);
         
         % save handles for fast plotting
         hys(jy) = hy;

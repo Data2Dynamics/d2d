@@ -81,7 +81,7 @@ if(~exist('onlyProfile','var'))
 end
 
 if(~exist('fineInt','var'))
-    fineInt = false;
+    fineInt = true;
 end
 
 if(~exist('backward','var'))
@@ -424,10 +424,10 @@ end
     else
         ar.model(m).qPlotYs(c) = 1;        
     end
-    ploterror_tmp = ar.config.ploterrors;
-    ar.config.ploterrors = -1;
-    arPlot2();
-    ar.config.ploterrors = ploterror_tmp;
+    %ploterror_tmp = ar.config.ploterrors;
+    %ar.config.ploterrors = -1;
+    %arPlot2();
+    %ar.config.ploterrors = ploterror_tmp;
 end
 
 function [xFit, ps] = xstart_ppl(m, c, jx, t, doPPL, xstd, pReset, chi2start, whichT, takeY, save, dir, xFit)

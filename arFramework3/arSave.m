@@ -2,6 +2,11 @@
 % or return base path of last arSave
 %
 % basepath = arSave(name, withSyms)
+% 
+% Special case:
+% arSave('current')
+% saves to the current repository (i.e. current value of ar.config.savepath)
+
 
 function basepath = arSave(name, withSyms)
 

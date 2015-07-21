@@ -1,6 +1,6 @@
 function [hy, hystd, hyss] = arPlotTrajectory(jy, t, y, ystd, lb, ub, tExp, yExp, yExpHl, yExpStd, ...
     y_ssa, y_ssa_lb, y_ssa_ub, ploterrors, Clines, ClinesExp, qUnlog, qLog, hy, hystd, hyss, dydt, ...
-    qFit, zero_break, t_ppl, y_ppl_ub, y_ppl_lb, ClinesPPL)
+    qFit, zero_break, t_ppl, y_ppl_ub, y_ppl_lb)
 
 fastPlot = false;
 
@@ -61,11 +61,11 @@ if(isempty(hy))
     %plot data points of model prediction profile likelihood as stars
     if(~isempty(t_ppl))
         if(~isempty(qUnlog) && qUnlog(jy))
-            hyss = plot([t_ppl(:,jy) ; t_ppl(:,jy)], [10.^y_ppl_lb(:,jy); 10.^y_ppl_ub(:,jy)],ClinesPPL{:}); 
+            hyss = patch([t_ppl(:,jy) ; flipud(t_ppl(:,jy))], [10.^y_ppl_lb(:,jy); flipud(10.^y_ppl_ub(:,jy))], ones(size([y_ppl_lb(:,jy); y_ppl_ub(:,jy)])));             
         else
-            hyss = plot([t_ppl(:,jy) ; t_ppl(:,jy)], [y_ppl_lb(:,jy); y_ppl_ub(:,jy)],ClinesPPL{:}); 
+            hyss = patch([t_ppl(:,jy) ; flipud(t_ppl(:,jy))], [y_ppl_lb(:,jy); flipud(y_ppl_ub(:,jy))], ones(size([y_ppl_lb(:,jy); y_ppl_ub(:,jy)])));             
         end
-       
+       set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2);
     end
     if(ploterrors ~= 1)
         set(hy, 'LineWidth', 1.5);
@@ -119,7 +119,7 @@ if(ploterrors ~= 1)
             if(isempty(tmpx))
                 hystd = patch([0 0 0], [0 0 0], -2*ones(1,3), ones(1,3));
             else
-                hystd = patch(tmpx, tmpy, -2*ones(size(tmpx)), ones(size(tmpy)));
+                hystd = patch(tmpx, tmpy, -2*ones(size(tmpx)), ones(size(tmpy)));               
             end
             set(hystd, 'FaceColor', Clines{2}, 'EdgeColor', 'none', 'FaceAlpha', 0.2);
         else

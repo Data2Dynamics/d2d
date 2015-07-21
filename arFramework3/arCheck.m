@@ -30,8 +30,8 @@ warning('on','MATLAB:rmpath:DirNotFound')
 if(exist('pleInit','file') == 0)
     addpath([ar_path '/PLE2'])
 end
-if(exist('fileChooser','file') == 0)
-    addpath([ar_path '/arTools'])
+if(exist('doPPL','file') == 0)
+    addpath([ar_path '/PPL'])
 end
 if(exist('fileChooser','file') == 0)
     addpath([ar_path '/arTools'])
