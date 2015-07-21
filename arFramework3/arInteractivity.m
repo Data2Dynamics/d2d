@@ -13,16 +13,16 @@
 
 function interactive = arInteractivity( varargin )
 
-    global arInteractivity;
+    global arInteractivityStruct;
     
-    if ( isempty( arInteractivity ) )
+    if ( isempty( arInteractivityStruct ) )
         initInteractivity;
     end
     
     % No arguments means we want to know whether the interactivity system
     % is operational
     if (nargin == 0)
-        interactive = arInteractivity.active;
+        interactive = arInteractivityStruct.active;
         return;
     end
     
@@ -31,30 +31,30 @@ function interactive = arInteractivity( varargin )
     end    
 
     if strcmp( lower(varargin{1}), 'on' )
-        arInteractivity.active = 1;
+        arInteractivityStruct.active = 1;
     end
     if strcmp( lower(varargin{1}), 'off' )
-        arInteractivity.active = 0;
+        arInteractivityStruct.active = 0;
     end
     
     % PLE interactivity functions
     if strcmp( varargin{1}, 'ple' );
-        arInteractivity.ple.legend = varargin{2};
+        arInteractivityStruct.ple.legend = varargin{2};
         set(gcf,'WindowButtonDownFcn', @(hObject, eventData)pleFcn2(hObject, eventData) );
     end
 end
 
 function initInteractivity()
-    global arInteractivity;
+    global arInteractivityStruct;
     
-    arInteractivity.active = 0;
+    arInteractivityStruct.active = 0;
 end
 
 function pleFcn2(hObject, eventData)
-    global arInteractivity;
-    
-    if ( arInteractivity.active )
-        userData = arInteractivity.ple.legend;
+    global arInteractivityStruct;
+
+    if ( ~isempty( arInteractivityStruct ) && arInteractivityStruct.active && isfield( arInteractivityStruct, 'ple' ) )
+        userData = arInteractivityStruct.ple.legend;
         cp      = get(gca, 'CurrentPoint'); 
         try
             name = userData.legends( find( gco == userData.handles ) );
@@ -68,6 +68,6 @@ function pleFcn2(hObject, eventData)
         catch
             error( 'Unknown interactivity error in callback' );
         end
-        arInteractivity.ple.legend = userData;
+        arInteractivityStruct.ple.legend = userData;
     end
 end
