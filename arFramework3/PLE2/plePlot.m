@@ -232,7 +232,7 @@ for jj=1:length(indices)
             legendstmp{ccount} = arNameTrafo(pleGlobals.p_labels{j}); %#ok<*AGROW>
             legendstmplines(ccount) = line_s;
             ccount = ccount + 1;
-        end
+        end 
         hold off
         if(~isempty(legendstmplines))
             if(ps_label_count<length(legendstmp))
@@ -247,6 +247,21 @@ for jj=1:length(indices)
                 legend(legendstmplines, legendstmp, 'Location', 'Best')
             end
         end
+        
+        % If the interactivity system is enabled, register the callbacks
+        % and provide arInteractivity with the required data.
+        if ( arInteractivity )
+            if (~i_largest_std)
+                i_largest_std = 1 : length( legendstmp );
+            end
+            lineLegends.legends = legendstmp;
+            lineLegends.handles = legendstmplines;
+            lineLegends.currentLegend.handles = legendstmplines(i_largest_std);
+            lineLegends.currentLegend.legends = legendstmp(i_largest_std);
+            lineLegends.currentLegend.ID = 1;
+            arInteractivity( 'ple', lineLegends );
+        end
+        
         if(xlimtmp2>0)
             xlim(xlimtmp);
         end
@@ -300,6 +315,4 @@ else
     set(h,'Color', figcolor);
     pleGlobals.fighandel(jk) = h;
 end
-
-
 

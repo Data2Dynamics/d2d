@@ -585,7 +585,9 @@ condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.fp);
 condition.sym.fu = mySym(condition.fu, specialFunc);
 condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.fp);
 condition.sym.fz = mySym(model.fz, specialFunc);
-condition.sym.fz = mysubs(condition.sym.fz, model.sym.z, condition.sym.fz); % Substitute references to derived variables
+condition.sym.fz = mysubsrepeated(condition.sym.fz, model.sym.z, condition.sym.fz); % Substitute references to derived variables
+
+
 condition.sym.fz = mysubs(condition.sym.fz, condition.sym.p, condition.sym.fp);
 condition.sym.C = mysubs(model.sym.C, condition.sym.p, condition.sym.fp);
 
@@ -1334,6 +1336,21 @@ if(config.useSensis)
     end
 end
 
+% substitute until no more changes (for self-substitutions of derived
+% variables)
+function out = mysubsrepeated(in, old, new)
+    done = false;
+    
+    while ( ~done )
+        out = mysubs(in, old, new);
+        
+        % No more changes?
+        if ( isempty( setdiff(out,in) ) )
+            done = true;
+        else
+            in = out;
+        end
+    end
 
 % better subs
 function out = mysubs(in, old, new)
