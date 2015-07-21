@@ -18,9 +18,6 @@ function interactive = arInteractivity( varargin )
     if ( isempty( arInteractivity ) )
         initInteractivity;
     end
-    if ( ~ischar( varargin{1} ) )
-        error( 'First argument should be a string' );
-    end
     
     % No arguments means we want to know whether the interactivity system
     % is operational
@@ -28,6 +25,10 @@ function interactive = arInteractivity( varargin )
         interactive = arInteractivity.active;
         return;
     end
+    
+    if ( ~ischar( varargin{1} ) )
+        error( 'First argument should be a string' );
+    end    
 
     if strcmp( lower(varargin{1}), 'on' )
         arInteractivity.active = 1;
@@ -41,7 +42,6 @@ function interactive = arInteractivity( varargin )
         arInteractivity.ple.legend = varargin{2};
         set(gcf,'WindowButtonDownFcn', @(hObject, eventData)pleFcn2(hObject, eventData) );
     end
-    
 end
 
 function initInteractivity()
