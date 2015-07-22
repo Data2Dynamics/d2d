@@ -7,7 +7,7 @@
 %   but afaik none of them are used in the ar struct as of now.
 %
 %   py_struct   new python compatible ar struct
-%   struct      optional struct (with ar structure) (default = global ar)
+%   struct      optional struct (default = global ar)
 
 
 function py_struct = arToPython(struct)
@@ -31,6 +31,9 @@ for len=1:length(struct)
                 arToPython(struct(len).(fields{i}));
         elseif iscell(struct(len).(fields{i}))
             c = size(struct(len).(fields{i}));
+            if c(1) == 0
+                py_struct{len}.(fields{i}) = struct(len).(fields{i});
+            end
             for x=1:c(1)
                 py_struct{len}.(fields{i}){x} = ...
                     struct(len).(fields{i})(x,:);
