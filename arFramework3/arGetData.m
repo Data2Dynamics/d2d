@@ -128,12 +128,17 @@ if(jtype==1 && isfield(ar.model(jm), 'data') && isfield(ar.model(jm).data(jd),'t
     
 elseif(jtype==2)
     if(isfield(ar.model(jm).condition(jc), 'xFineLB'))
-        lb = [ar.model(jm).condition(jc).uFineLB ar.model(jm).condition(jc).xFineLB ...
-            ar.model(jm).condition(jc).zFineLB];
-        ub = [ar.model(jm).condition(jc).uFineUB ar.model(jm).condition(jc).xFineUB ...
-            ar.model(jm).condition(jc).zFineUB];
+        lb = [ar.model(jm).condition(jc).xFineLB];
+        ub = [ar.model(jm).condition(jc).xFineUB];
     end
-    
+    if(isfield(ar.model(jm).condition(jc), 'uFineLB'))
+        lb = [ar.model(jm).condition(jc).uFineLB lb];
+        ub = [ar.model(jm).condition(jc).uFineUB ub];
+    end
+    if(isfield(ar.model(jm).condition(jc), 'zFineLB'))
+        lb = [lb ar.model(jm).condition(jc).zFineLB];
+        ub = [ub ar.model(jm).condition(jc).zFineUB];
+    end
 elseif(jtype==3)
     if(isfield(ar.model(jm).condition(jc), 'vFineLB'))
         lb = ar.model(jm).condition(jc).vFineLB;

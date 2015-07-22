@@ -65,51 +65,51 @@ global ar
 ar.config.SimuPPL=1;
 ar.ppl.qLog10=0;
 
-if(~exist('n_start','var'))
+if(~exist('n_start','var') || isempty(n_start))
     n_start = 100;
 end
 
 ar.ppl.n=n_start;
 n = n_start;
 
-if(~exist('doPPL','var'))
+if(~exist('doPPL','var') || isempty(doPPL))
     doPPL = false;
 end
 
-if(~exist('onlyProfile','var'))
+if(~exist('onlyProfile','var') || isempty(onlyProfile))
     onlyProfile = false;
 end
 
-if(~exist('fineInt','var'))
+if(~exist('fineInt','var') || isempty(fineInt))
     fineInt = true;
 end
 
-if(~exist('backward','var'))
+if(~exist('backward','var') || isempty(backward))
     backward = false;
 end
 
-if(~exist('rel_increase','var'))
+if(~exist('rel_increase','var') || isempty(rel_increase))
     rel_increase = 0.15;
 end
 
-if(~exist('trust_radius','var'))
+if(~exist('trust_radius','var') || isempty(trust_radius))
     trust_radius = true;
 end
 
 ar.ppl.rel_increase=rel_increase;
-if(~exist('xstd','var'))
+if(~exist('xstd','var') || isempty(xstd))
     xstd = 0.1;
 end
 
-if(~exist('ed_steps','var'))
+if(~exist('ed_steps','var') || isempty(ed_steps))
     ed_steps = true;
 end
 
-if(~exist('whichT','var'))
+if(~exist('whichT','var') || isempty(whichT))
     whichT = 1;
 end
 
-if(~exist('tEnd','var'))
+if(~exist('tEnd','var') || isempty(tEnd))
     if(takeY)
        tEnd = ar.model(m).data(c).tFine(end);
     else
@@ -117,19 +117,19 @@ if(~exist('tEnd','var'))
     end
 end
 
-if(~exist('dir','var'))
+if(~exist('dir','var') || isempty(dir))
     dir=0;
 end
 
-if(~exist('constr_method','var'))
+if(~exist('constr_method','var') || isempty(constr_method))
     constr_method = false;
 end
 ar.ppl.constr_method=constr_method;
-if(~exist('takeY','var'))
+if(~exist('takeY','var') || isempty(takeY))
     takeY = true;
 end
 
-if(~exist('stepsize','var'))
+if(~exist('stepsize','var') || isempty(stepsize))
     if(takeY)
         stepsize = 1/(size(ar.model(m).data(c).tFine,1)/(ar.model(m).data(c).tLim(end)-ar.model(m).data(c).tLim(1)));
     else
@@ -139,11 +139,11 @@ end
 nsteps = abs(floor((tEnd-t(whichT)) / stepsize));
 ar.ppl.nsteps=nsteps;
 
-if(length(gammas) ~= length(ix))
+if(~isempty(gammas) && length(gammas) ~= length(ix))
     gammas = repmat(gammas,1,length(ix)/length(gammas));
 end
 
-if(~exist('gammas','var'))
+if(~exist('gammas','var') || isempty(gammas))
     gammas = ones(size(t))*1./stepsize;
 end
 

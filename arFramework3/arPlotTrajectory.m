@@ -65,7 +65,7 @@ if(isempty(hy))
         else
             hyss = patch([t_ppl(:,jy) ; flipud(t_ppl(:,jy))], [y_ppl_lb(:,jy); flipud(y_ppl_ub(:,jy))], ones(size([y_ppl_lb(:,jy); y_ppl_ub(:,jy)])));             
         end
-       set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2);
+       set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2,'LineStyle','none','Marker','*');
     end
     if(ploterrors ~= 1)
         set(hy, 'LineWidth', 1.5);
