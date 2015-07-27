@@ -51,7 +51,10 @@ elseif(strcmp(filename,'end'))
     filename = filelist{end};
 elseif(strcmp(filename,'all'))
     filename = fileList(pfad);
+elseif ischar(filename)
+    [~,filename]=fileparts(filename);    % remove path
 end
+
 
 if(~iscell(filename))    
     ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad);
