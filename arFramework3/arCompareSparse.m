@@ -107,8 +107,5 @@ catch ERR
 end
 ar.p = pIn;
 
-tnormal = tnormal/niter;
-tsparse = tsparse/niter;
-
 fprintf('\nmean(tsparse) = %f, mean(tnormal) = %f, mean(tsparse)/mean(tnormal) = %.3f\n\n',mean(tsparse), mean(tnormal), mean(tsparse)/mean(tnormal));
 
