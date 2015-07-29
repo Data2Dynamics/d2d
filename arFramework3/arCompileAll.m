@@ -612,9 +612,9 @@ condition.px0 = sym2str(varlist);
 varlist = symvar([condition.sym.fv(:); condition.sym.fu(:); condition.sym.fz(:); condition.sym.fpx0(:)]);
 condition.pold = condition.p;
 condition.p = setdiff(setdiff(setdiff(setdiff(sym2str(varlist), model.x), model.u), model.z), 't');
-
 condition.dfxdx_rowVals = [];
 condition.dfxdx_colptrs = [];  
+
 if(doskip)
     condition.ps = {};
     condition.qfu_nonzero = [];
@@ -631,7 +631,7 @@ if(doskip)
     condition.qfsv_nonzero = [];
     condition.sv = {};
     condition.sz = {};
-    
+    condition.dfxdx_colptrs = length(model.xs).^2; 
     return;
 end
 

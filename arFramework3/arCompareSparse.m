@@ -31,16 +31,17 @@ try
     tnormal = 0;
     
     for i=1:niter
-        ar.config.useSparseJac=1;
+        
         switch ptrial_opt
             case 0
-                ptrial = ar.p;
+                ptrial = ar.p(ar.qFit==1);
             case 1  % rand between lb and ub
-                ptrial = rand(size(ar.p)).*(ar.ub-ar.lb)+ar.lb;
+                ptrial = rand(size(ar.p(ar.qFit==1))).*(ar.ub(ar.qFit==1)-ar.lb(ar.qFit==1))+ar.lb(ar.qFit==1);
             case 2  % randn around -1, std=1
-                ptrial = randn(size(ar.p))-1;
+                ptrial = randn(size(ar.p(ar.qFit==1)))-1;
         end
         
+        ar.config.useSparseJac=1;
         tic
         arChi2(true,ptrial)
         tsparse = tsparse+toc;
