@@ -373,6 +373,7 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
     
     /* get ar.model(im).condition */
     arcondition = mxGetField(armodel, im, condition_name);
+           
     if(arcondition==NULL){
         return;
     }
@@ -408,8 +409,8 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
             status = mxGetData(mxGetField(arcondition, ic, "status"));
             tstart = mxGetScalar(mxGetField(arcondition, ic, "tstart"));
             neq = (int) mxGetNumberOfElements(mxGetField(armodel, im, "xs"));
-            nnz = (int) mxGetScalar(mxGetField(arcondition, ic, "nnz"));
-            
+            nnz = (int) mxGetScalar(mxGetField(armodel, im, "nnz"));
+     
             if(fine == 1){
                 ts = mxGetData(mxGetField(arcondition, ic, "tFine"));
                 nout = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "tFine"));

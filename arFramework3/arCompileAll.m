@@ -211,14 +211,13 @@ for m=1:length(ar.model)
         newp = cell(1,length(ar.model(m).condition));
         newpold = cell(1,length(ar.model(m).condition));
         newpx0 = cell(1,length(ar.model(m).condition));
-        sum_nonzero = zeros(1,length(ar.model(m).condition));
+        
         if(usePool)
             parfor c=1:length(ar.model(m).condition)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
-                sum_nonzero(c) = condition_sym.dfxdx_colptrs(end);
                 if(~doskip(c))
                     % header
                     fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W');
@@ -237,7 +236,6 @@ for m=1:length(ar.model)
         else
             for c=1:length(ar.model(m).condition)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
-                sum_nonzero(c) = condition_sym.dfxdx_colptrs(end);
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
@@ -263,7 +261,6 @@ for m=1:length(ar.model)
             ar.model(m).condition(c).p = newp{c};
             ar.model(m).condition(c).pold = newpold{c};
             ar.model(m).condition(c).px0 = newpx0{c};
-            ar.model(m).condition(c).nnz = sum_nonzero(c);
         end
         
         % skip calc data
@@ -385,14 +382,13 @@ for m=1:length(ar.model)
         newp = cell(1,length(ar.model(m).condition));
         newpold = cell(1,length(ar.model(m).condition));
         newpx0 = cell(1,length(ar.model(m).condition));
-        sum_nonzero = zeros(1,length(ar.model(m).condition));
+        
         if(usePool)
             parfor c=1:length(ar.model(m).condition)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
-                sum_nonzero(c) = condition_sym.dfxdx_colptrs(end);
                 if(~doskip(c))
                     % header
                     fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W'); % create header file
@@ -414,7 +410,6 @@ for m=1:length(ar.model)
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
-                sum_nonzero(c) = condition_sym.dfxdx_colptrs(end);
                 if(~doskip(c))
                     % header
                     fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W'); % create header file
@@ -437,7 +432,6 @@ for m=1:length(ar.model)
             ar.model(m).condition(c).p = newp{c};
             ar.model(m).condition(c).pold = newpold{c};
             ar.model(m).condition(c).px0 = newpx0{c};
-            ar.model(m).condition(c).nnz = sum_nonzero(c);
         end
         
         % plot setup
@@ -570,6 +564,13 @@ tmpsym = mysubs(tmpsym, sym(ar.model(m).p), ones(size(ar.model(m).p))/2);
 
 ar.model(m).qdvdu_negative = double(tmpsym) < 0;
 
+tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
+ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
+
+if(length(ar.model(m).x) * log(length(ar.model(m).x)) > ar.model(m).nnz)
+   ar.config.useSparseJac = 1; 
+end
+
 
 
 
@@ -630,8 +631,8 @@ if(doskip)
     condition.sx = {};
     condition.qfsv_nonzero = [];
     condition.sv = {};
-    condition.sz = {};
-    condition.dfxdx_colptrs = length(model.xs).^2; 
+    condition.sz = {};    
+    
     return;
 end
 
