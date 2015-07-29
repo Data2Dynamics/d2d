@@ -211,12 +211,14 @@ for m=1:length(ar.model)
         newp = cell(1,length(ar.model(m).condition));
         newpold = cell(1,length(ar.model(m).condition));
         newpx0 = cell(1,length(ar.model(m).condition));
+        sum_nonzero = zeros(1,length(ar.model(m).condition));
         if(usePool)
             parfor c=1:length(ar.model(m).condition)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
+                sum_nonzero(c) = condition_sym.dfxdx_colptrs(end);
                 if(~doskip(c))
                     % header
                     fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W');
@@ -235,6 +237,7 @@ for m=1:length(ar.model)
         else
             for c=1:length(ar.model(m).condition)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
+                sum_nonzero(c) = condition_sym.dfxdx_colptrs(end);
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
@@ -260,6 +263,7 @@ for m=1:length(ar.model)
             ar.model(m).condition(c).p = newp{c};
             ar.model(m).condition(c).pold = newpold{c};
             ar.model(m).condition(c).px0 = newpx0{c};
+            ar.model(m).condition(c).nnz = sum_nonzero(c);
         end
         
         % skip calc data
@@ -381,12 +385,14 @@ for m=1:length(ar.model)
         newp = cell(1,length(ar.model(m).condition));
         newpold = cell(1,length(ar.model(m).condition));
         newpx0 = cell(1,length(ar.model(m).condition));
+        sum_nonzero = zeros(1,length(ar.model(m).condition));
         if(usePool)
             parfor c=1:length(ar.model(m).condition)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
+                sum_nonzero(c) = condition_sym.dfxdx_colptrs(end);
                 if(~doskip(c))
                     % header
                     fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W'); % create header file
@@ -408,6 +414,7 @@ for m=1:length(ar.model)
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
+                sum_nonzero(c) = condition_sym.dfxdx_colptrs(end);
                 if(~doskip(c))
                     % header
                     fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W'); % create header file
@@ -430,6 +437,7 @@ for m=1:length(ar.model)
             ar.model(m).condition(c).p = newp{c};
             ar.model(m).condition(c).pold = newpold{c};
             ar.model(m).condition(c).px0 = newpx0{c};
+            ar.model(m).condition(c).nnz = sum_nonzero(c);
         end
         
         % plot setup
@@ -567,7 +575,7 @@ ar.model(m).qdvdu_negative = double(tmpsym) < 0;
 
 % Calc Condition
 function condition = arCalcCondition(config, model, condition, m, c, doskip)
-
+    
 if(doskip)
     fprintf('calculating condition m%i c%i, %s...skipped\n', m, c, model.name);
 else
@@ -605,6 +613,8 @@ varlist = symvar([condition.sym.fv(:); condition.sym.fu(:); condition.sym.fz(:);
 condition.pold = condition.p;
 condition.p = setdiff(setdiff(setdiff(setdiff(sym2str(varlist), model.x), model.u), model.z), 't');
 
+condition.dfxdx_rowVals = [];
+condition.dfxdx_colptrs = [];  
 if(doskip)
     condition.ps = {};
     condition.qfu_nonzero = [];
@@ -614,7 +624,7 @@ if(doskip)
     condition.dvdx = {};
     condition.dvdu = {};
     condition.dvdp = {};
-    condition.qdfxdx_nonzero = [];
+    condition.qdfxdx_nonzero = [];     
     condition.dfxdx = {};
     condition.su = {};
     condition.sx = {};
@@ -717,22 +727,38 @@ condition.sym.dvdp = sym(condition.dvdp);
 % make equations
 condition.sym.C = mysubs(condition.sym.C, condition.sym.p, condition.sym.ps);
 condition.sym.fx = (model.N .* condition.sym.C) * transpose(model.sym.vs);
-
+firstcol = true;
 % Jacobian dfxdx
 if(config.useJacobian)
     condition.sym.dfxdx = (model.N .* condition.sym.C) * condition.sym.dvdx;
     condition.qdfxdx_nonzero = logical(condition.sym.dfxdx~=0);
+    condition.sym.dfxdx_nonzero = sym(zeros(1, nansum(nansum(condition.qdfxdx_nonzero))));
     for j=1:length(model.xs)
         for i=1:length(model.xs)
-            if(condition.qdfxdx_nonzero(j,i))
-                condition.dfxdx{j,i} = sprintf('dfxdx[%i]', j + (i-1)*length(model.xs));
+            if(i==1)
+               firstcol = true;
+            end
+            if(condition.qdfxdx_nonzero(i,j))
+                condition.dfxdx{i,j} = sprintf('dfxdx[%i]', i + (j-1)*length(model.xs));                
+                condition.dfxdx_rowVals = [condition.dfxdx_rowVals i-1];
+                condition.sym.dfxdx_nonzero(length(condition.dfxdx_rowVals)) = condition.sym.dfxdx(i,j);
+                if(firstcol)
+                    condition.dfxdx_colptrs = [condition.dfxdx_colptrs length(condition.dfxdx_rowVals)-1];
+                    firstcol = false;
+                end                
             else
-                condition.dfxdx{j,i} = '0';
+                condition.dfxdx{i,j} = '0';
+            end
+            if(firstcol && i==length(model.xs))
+                condition.dfxdx_rowVals = [condition.dfxdx_rowVals i-1];
+                condition.sym.dfxdx_nonzero(length(condition.dfxdx_rowVals)) = 'RCONST(0.0)';
+                condition.dfxdx_colptrs = [condition.dfxdx_colptrs length(condition.dfxdx_rowVals)-1];
+                firstcol = false;
             end
         end
     end
 end
-
+condition.dfxdx_colptrs = [condition.dfxdx_colptrs length(condition.dfxdx_rowVals)];
 condition.sym.dfzdu = myJacobian(condition.sym.fz, model.sym.us);
 condition.sym.dfzdx = myJacobian(condition.sym.fz, model.sym.xs);
 
@@ -1416,9 +1442,13 @@ fprintf(fid, '#define _MY_%s\n\n', condition.fkt);
 
 fprintf(fid, '#include <cvodes/cvodes.h>\n'); 
 fprintf(fid, '#include <cvodes/cvodes_dense.h>\n');
+fprintf(fid, '#include <cvodes/cvodes_sparse.h>\n');
 fprintf(fid, '#include <nvector/nvector_serial.h>\n');
 fprintf(fid, '#include <sundials/sundials_types.h>\n'); 
-fprintf(fid, '#include <sundials/sundials_math.h>\n');  
+fprintf(fid, '#include <sundials/sundials_math.h>\n');
+fprintf(fid, '#include <cvodes/cvodes_klu.h>\n');
+%fprintf(fid, '#include <cvodes/cvodes_superlumt.h>\n');
+fprintf(fid, '#include <sundials/sundials_sparse.h>\n');
 fprintf(fid, '#include <udata.h>\n');
 fprintf(fid, '#include <math.h>\n');
 fprintf(fid, '#include <mex.h>\n');
@@ -1437,6 +1467,9 @@ fprintf(fid, ' void fx0_%s(N_Vector x0, void *user_data);\n', condition.fkt);
 % fprintf(fid, ' int dfxdx_%s(int N, realtype t, N_Vector x,', condition.fkt); % sundials 2.4.0
 fprintf(fid, ' int dfxdx_%s(long int N, realtype t, N_Vector x,', condition.fkt); % sundials 2.5.0
 fprintf(fid, 'N_Vector fx, DlsMat J, void *user_data,');
+fprintf(fid, 'N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);\n');
+fprintf(fid, ' int dfxdx_sparse_%s(realtype t, N_Vector x,', condition.fkt); % sundials 2.6.1 with KLU/SuperLU
+fprintf(fid, 'N_Vector fx, SlsMat J, void *user_data,'); %DlsMat for Dense solver
 fprintf(fid, 'N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);\n');
 if(config.useSensiRHS)
     fprintf(fid, ' int fsx_%s(int Ns, realtype t, N_Vector x, N_Vector xdot,', condition.fkt);
@@ -1461,9 +1494,13 @@ fprintf(' -> writing condition m%i c%i, %s...\n', m, c, model.name);
 fprintf(fid, '#include "%s.h"\n',  condition.fkt);
 fprintf(fid, '#include <cvodes/cvodes.h>\n');    
 fprintf(fid, '#include <cvodes/cvodes_dense.h>\n');
+fprintf(fid, '#include <cvodes/cvodes_sparse.h>\n');
 fprintf(fid, '#include <nvector/nvector_serial.h>\n');
 fprintf(fid, '#include <sundials/sundials_types.h>\n'); 
 fprintf(fid, '#include <sundials/sundials_math.h>\n');  
+%fprintf(fid, '#include <cvodes/cvodes_superlumt.h>\n');
+fprintf(fid, '#include <sundials/sundials_sparse.h>\n');
+fprintf(fid, '#include <cvodes/cvodes_klu.h>\n');
 fprintf(fid, '#include <udata.h>\n');
 fprintf(fid, '#include <math.h>\n');
 fprintf(fid, '#include <mex.h>\n');
@@ -1640,6 +1677,45 @@ if(~isempty(model.xs))
 end
 fprintf(fid, '\n  return(0);\n}\n\n\n');
 
+% write sparse dfxdx SPARSE (KLU)
+fprintf(fid, ' int dfxdx_sparse_%s(realtype t, N_Vector x, \n', condition.fkt); % sundials 2.6.1 with KLU
+fprintf(fid, '  \tN_Vector fx, SlsMat J, void *user_data, \n');
+fprintf(fid, '  \tN_Vector tmp1, N_Vector tmp2, N_Vector tmp3)\n{\n');
+if(timedebug)
+    fprintf(fid, '  printf("%%g \\t dfxdx\\n", t);\n');
+end
+
+if(~isempty(model.xs))
+    if(config.useJacobian)
+        fprintf(fid, '  int is;\n');
+        fprintf(fid, '  UserData data = (UserData) user_data;\n');
+        fprintf(fid, '  double *p = data->p;\n');
+        fprintf(fid, '  double *u = data->u;\n');
+        fprintf(fid, '  double *dvdx = data->dvdx;\n');
+        fprintf(fid, '  dvdx_%s(t, x, data);\n', condition.fkt);
+        
+%         fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(condition.dfxdx_rowVals));
+%         fprintf(fid, '    J->data[is] = 0.0;\n');
+%         fprintf(fid, '  }\n');         
+        fprintf(fid, '  SlsSetToZero(J);\n');
+        for j=1:length(condition.dfxdx_rowVals)
+            fprintf(fid, '    J->rowvals[%i] = %i', j-1, condition.dfxdx_rowVals(j)); 
+            fprintf(fid, ';\n'); 
+        end
+        fprintf(fid, '\n');
+        for j=1:length(condition.dfxdx_colptrs)
+            fprintf(fid, '    J->colptrs[%i] = %i', j-1, condition.dfxdx_colptrs(j)); 
+            fprintf(fid, ';\n'); 
+        end
+        fprintf(fid, '\n');
+        writeCcode(fid, condition, 'dfxdx_sparse');
+        fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(condition.dfxdx_rowVals));
+        fprintf(fid, '    if(mxIsNaN(J->data[is])) J->data[is] = RCONST(0.0);\n');
+        fprintf(fid, '  }\n');
+    end
+end
+fprintf(fid, '\n  return(0);\n}\n\n\n');
+
 % write fsv & fsx
 if(config.useSensiRHS)
     fprintf(fid, ' int fsx_%s(int Ns, realtype t, N_Vector x, N_Vector xdot, \n', condition.fkt);
@@ -1781,9 +1857,13 @@ fprintf(fid, '#define _MY_%s\n\n', data.fkt);
 
 fprintf(fid, '#include <cvodes/cvodes.h>\n'); 
 fprintf(fid, '#include <cvodes/cvodes_dense.h>\n');
+fprintf(fid, '#include <cvodes/cvodes_sparse.h>\n');
 fprintf(fid, '#include <nvector/nvector_serial.h>\n');
 fprintf(fid, '#include <sundials/sundials_types.h>\n'); 
 fprintf(fid, '#include <sundials/sundials_math.h>\n');  
+%fprintf(fid, '#include <cvodes/cvodes_superlumt.h>\n');
+fprintf(fid, '#include <sundials/sundials_sparse.h>\n');
+fprintf(fid, '#include <cvodes/cvodes_klu.h>\n');
 fprintf(fid, '#include <udata.h>\n');
 fprintf(fid, '#include <math.h>\n');
 fprintf(fid, '#include <mex.h>\n');
@@ -1807,9 +1887,13 @@ fprintf(' -> writing data m%i d%i -> c%i, %s...\n', m, d, c, data.name);
 fprintf(fid, '#include "%s.h"\n',  data.fkt);
 fprintf(fid, '#include <cvodes/cvodes.h>\n');    
 fprintf(fid, '#include <cvodes/cvodes_dense.h>\n');
+fprintf(fid, '#include <cvodes/cvodes_sparse.h>\n');
 fprintf(fid, '#include <nvector/nvector_serial.h>\n');
 fprintf(fid, '#include <sundials/sundials_types.h>\n'); 
 fprintf(fid, '#include <sundials/sundials_math.h>\n');  
+%fprintf(fid, '#include <cvodes/cvodes_superlumt.h>\n');
+fprintf(fid, '#include <sundials/sundials_sparse.h>\n');
+fprintf(fid, '#include <cvodes/cvodes_klu.h>\n');
 fprintf(fid, '#include <udata.h>\n');
 fprintf(fid, '#include <math.h>\n');
 fprintf(fid, '#include <mex.h>\n');
@@ -1879,6 +1963,9 @@ elseif(strcmp(svar,'dfxdx'))
 %         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
 %     end
     cvar =  'J->data';
+elseif(strcmp(svar,'dfxdx_sparse'))
+    cstr = ccode(cond_data.sym.dfxdx_nonzero(:));    
+    cvar =  'J->data';
 elseif(strcmp(svar,'fsv1'))
     cstr = ccode(cond_data.sym.fsv1);
     cvar =  'sv';
@@ -1939,7 +2026,7 @@ end
 
 cstr = strrep(cstr, 't0', [cvar '[0]']);
 cstr = strrep(cstr, '][0]', ']');
-cstr = strrep(cstr, 'T', cvar);
+cstr = strrep(cstr, 'T[', [cvar '[']);
 
 % % debug
 % fprintf('\n\n');
@@ -2091,11 +2178,14 @@ end
 fprintf(fid, '}\n\n');
 
 % map CVDlsSetDenseJacFn to dfxdx
-fprintf(fid, ' int AR_CVDlsSetDenseJacFn(void *cvode_mem, int im, int ic){\n');
+fprintf(fid, ' int AR_CVDlsSetDenseJacFn(void *cvode_mem, int im, int ic, int setSparse){\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if((im==%i) & (ic==%i)) return CVDlsSetDenseJacFn(cvode_mem, dfxdx_%s);\n', ...
+        fprintf(fid, '  if((im==%i) & (ic==%i) & (setSparse==0)){ \n return CVDlsSetDenseJacFn(cvode_mem, dfxdx_%s);\n', ...   
             m-1, c-1, ar.model(m).condition(c).fkt);
+        fprintf(fid, ' \n }else if((im==%i) & (ic==%i) & (setSparse==1)){ \n return CVSlsSetSparseJacFn(cvode_mem, dfxdx_sparse_%s);\n', ...
+            m-1, c-1, ar.model(m).condition(c).fkt);
+        fprintf(fid, '\n}\n');
     end
 end
 fprintf(fid, '  return(-1);\n');
