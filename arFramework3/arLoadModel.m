@@ -152,7 +152,8 @@ end
 ar.model(m).u = {};
 ar.model(m).uUnits = {};
 ar.model(m).fu = {};
-C = textscan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+ar.model(m).uNames = {};
+C = textscan(fid, '%s %q %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'REACTIONS') && ~strcmp(C{1},'REACTIONS-AMOUNTBASED') && ~strcmp(C{1},'ODES'))
     if(~strcmp(C{1},''))
         if(sum(ismember(ar.model(m).x, C{1}))>0) %R2013a compatible
@@ -163,8 +164,13 @@ while(~strcmp(C{1},'REACTIONS') && ~strcmp(C{1},'REACTIONS-AMOUNTBASED') && ~str
         ar.model(m).uUnits(end,2) = C{3};
         ar.model(m).uUnits(end,3) = C{4};
         ar.model(m).fu(end+1,1) = C{5};
+        if(~isempty(cell2mat(C{6})))
+            ar.model(m).uNames(end+1) = C{6};
+        else
+            ar.model(m).uNames{end+1} = '';
+        end
     end
-    C = textscan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+    C = textscan(fid, '%s %q %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 ar.model(m).qPlotU = ones(size(ar.model(m).u));
 
