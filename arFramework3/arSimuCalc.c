@@ -47,9 +47,13 @@ void timersub(struct timeval* tvp, struct timeval* uvp, struct timeval* vvp)
 
 #include <cvodes/cvodes.h>           /* prototypes for CVODES fcts. and consts. */
 #include <cvodes/cvodes_dense.h>     /* prototype for CVDENSE fcts. and constants */
+#include <cvodes/cvodes_sparse.h>     /* prototype for CVSPARSE fcts. and constants */
 #include <nvector/nvector_serial.h>  /* defs. of serial NVECTOR fcts. and macros  */
 #include <sundials/sundials_types.h> /* def. of type realtype */
 #include <sundials/sundials_math.h>  /* definition of ABS */
+/*#include <cvodes/cvodes_superlumt.h> */  /* prototype for CVSUPERLUMT */
+#include <sundials/sundials_sparse.h> /* definitions SlsMat */
+#include <cvodes/cvodes_klu.h> /* definition of CVKLU sparse solver */
 
 /* Accessor macros */
 #define Ith(v, i)     NV_Ith_S(v, i-1)        /* i-th vector component i=1..neq */
@@ -73,6 +77,7 @@ int    globalsensi;
 int    dynamics;
 int    ssa;
 int    jacobian;
+int    setSparse;
 int    ms;
 int    events;
 int    parallel;
@@ -109,7 +114,7 @@ void *thread_calc(void *threadarg);
 #else
 void thread_calc(int id);
 #endif
-void x_calc(int im, int ic, int sensi);
+void x_calc(int im, int ic, int sensi, int setSparse);
 void z_calc(int im, int ic, mxArray *arcondition, int sensi);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi);
 
@@ -167,6 +172,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     arconfig = mxGetField(prhs[0], 0, "config");
     parallel = (int) mxGetScalar(mxGetField(arconfig, 0, "useParallel"));
     jacobian = (int) mxGetScalar(mxGetField(arconfig, 0, "useJacobian"));
+    setSparse = (int) mxGetScalar(mxGetField(arconfig, 0, "useSparseJac"));
     sensirhs = (int) mxGetScalar(mxGetField(arconfig, 0, "useSensiRHS"));
     cvodes_atolV = (int) mxGetScalar(mxGetField(arconfig, 0, "atolV"));
     cvodes_atolV_Sens = (int) mxGetScalar(mxGetField(arconfig, 0, "atolV_Sens"));
@@ -259,7 +265,7 @@ void thread_calc(int id) {
     
     for(in=0; in<n; ++in){
         /* printf("computing thread #%i, task %i/%i (m=%i, c=%i)\n", id, in, n, ms[in], cs[in]); */
-        x_calc(ms[in], cs[in], globalsensi);
+        x_calc(ms[in], cs[in], globalsensi, setSparse);
     }
     
     /* printf("computing thread #%i(done)\n", id); */
@@ -271,7 +277,7 @@ void thread_calc(int id) {
 }
 
 /* calculate dynamics */
-void x_calc(int im, int ic, int sensi) {
+void x_calc(int im, int ic, int sensi, int setSparse) {
     mxArray    *arcondition;
     mxArray    *ardata;
     
@@ -282,7 +288,7 @@ void x_calc(int im, int ic, int sensi) {
     int flag;
     int is, js, ks, ids;
     int nout, neq, nyout;
-    int nu, np, nps, nv, ny;
+    int nu, np, nps, nv, ny, nnz;
     
     /* Which condition to simulate */
     int isim;
@@ -367,6 +373,7 @@ void x_calc(int im, int ic, int sensi) {
     
     /* get ar.model(im).condition */
     arcondition = mxGetField(armodel, im, condition_name);
+           
     if(arcondition==NULL){
         return;
     }
@@ -402,7 +409,8 @@ void x_calc(int im, int ic, int sensi) {
             status = mxGetData(mxGetField(arcondition, ic, "status"));
             tstart = mxGetScalar(mxGetField(arcondition, ic, "tstart"));
             neq = (int) mxGetNumberOfElements(mxGetField(armodel, im, "xs"));
-            
+            nnz = (int) mxGetScalar(mxGetField(armodel, im, "nnz"));
+     
             if(fine == 1){
                 ts = mxGetData(mxGetField(arcondition, ic, "tFine"));
                 nout = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "tFine"));
@@ -595,12 +603,18 @@ void x_calc(int im, int ic, int sensi) {
                 if (flag < 0) {status[0] = 6; return;}
                 
                 /* Attach linear solver */
-                flag = CVDense(cvode_mem, neq);
+                if(setSparse == 0){
+                    /* Dense solver */
+                    flag = CVDense(cvode_mem, neq);
+                }else{              
+                    /* sparse linear solver KLU */
+                    flag = CVKLU(cvode_mem, neq, nnz);
+                }
                 if (flag < 0) {status[0] = 7; return;}
                 
                 /* Jacobian-related settings */
                 if (jacobian == 1) {
-                    flag = AR_CVDlsSetDenseJacFn(cvode_mem, im, isim);
+                    flag = AR_CVDlsSetDenseJacFn(cvode_mem, im, isim, setSparse);
                     if (flag < 0) {status[0] = 8; return;}
                 }
                 
@@ -819,7 +833,7 @@ void x_calc(int im, int ic, int sensi) {
                     N_VDestroy_Serial(atols_ss);
                     N_VDestroyVectorArray_Serial(atolV_ss, nps);
                 }
-                CVodeFree(&cvode_mem);
+               CVodeFree(&cvode_mem);              
             }
             free(data);
             free(event_data);

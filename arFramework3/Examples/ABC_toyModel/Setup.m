@@ -11,7 +11,7 @@ arCompileAll();
 
 %Simulate new data points
 %arSetPars('init_A_star.ate',0,1,1,-3,3);
-%arSetPars('p1',log10(0.1),1,1,-3,3);
+%arSetPars('p1',log10(0.05),1,1,-3,3);
 %arSetPars('p2',log10(0.1),1,1,-3,3);
 
 %Take error 0.1 of data def

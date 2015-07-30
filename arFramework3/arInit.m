@@ -77,6 +77,7 @@ ar.config.plot_x_collected = false;
 % optimization options
 ar.config.useSensis = true; 
 ar.config.useJacobian = true;
+ar.config.useSparseJac = false;
 ar.config.useSensiRHS = true;
 ar.config.atolV = false; 
 ar.config.atolV_Sens = false;

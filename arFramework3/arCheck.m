@@ -61,26 +61,39 @@ end
 %% CVODES
 
 % uncompress and expand CVODES
-if(exist([ar_path '/sundials-2.5.0'],'dir') == 0)
+if(exist([ar_path '/sundials-2.6.1'],'dir') == 0)
     path_backup = cd;
     cd(ar_path);
-    untar('sundials-2.5.0.tar');
+    untar('sundials-2.6.1.tar');
     cd(path_backup);
 end
 
 % write sundials_config.h
-if(exist([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'],'file') == 0)
-    fid = fopen([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'], 'W');
+% if(exist([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'],'file') == 0)
+%     fid = fopen([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'], 'W');
+if(exist([ar_path '/sundials-2.6.1/include/sundials/sundials_config.h'],'file') == 0)
+    fid = fopen([ar_path '/sundials-2.6.1/include/sundials/sundials_config.h'], 'W');
     if(fid==-1)
-        error('could not write file %s!', [ar_path '/sundials-2.5.0/include/sundials/sundials_config.h']),
+        error('could not write file %s!', [ar_path '/sundials-2.6.1/include/sundials/sundials_config.h']),
     end
-    fprintf(fid, '#define SUNDIALS_PACKAGE_VERSION "2.5.0"\n');
+    fprintf(fid, '#define SUNDIALS_PACKAGE_VERSION "2.6.1"\n');
     fprintf(fid, '#define SUNDIALS_DOUBLE_PRECISION 1\n');
     fprintf(fid, '#define SUNDIALS_USE_GENERIC_MATH\n');
     fprintf(fid, '#define SUNDIALS_BLAS_LAPACK 0\n');
     fprintf(fid, '#define SUNDIALS_EXPORT\n');
     fclose(fid);
 end
+
+%% SuiteSparse 4.2.1
+
+% uncompress and expand KLU solver
+if(exist([ar_path '/KLU-1.2.1'],'dir') == 0)
+    path_backup = cd;
+    cd(ar_path);
+    untar('KLU-1.2.1.tar');
+    cd(path_backup);
+end
+
 
 %% check Windows libraries for pthread-win32
 if(ispc)
