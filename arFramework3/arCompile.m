@@ -205,7 +205,7 @@ end
 if(usePool)
     parfor j=1:length(sourcesKLU)
         if(~exist(['Compiled/' c_version_code '/' mexext '/' objectsKLU{j}], 'file') || forceFullCompile)
-            mex('-c','-largeArrayDims', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
+            mex('-c','-largeArrayDims', '-DNTIMER', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [KLU_path sourcesKLU{j}]); %#ok<PFBNS>
             fprintf('compiling KLU(%s)...done\n', objectsKLU{j});
         else
@@ -215,7 +215,7 @@ if(usePool)
 else
     for j=1:length(sourcesKLU)
         if(~exist(['Compiled/' c_version_code '/' mexext '/' objectsKLU{j}], 'file') || forceFullCompile)
-            mex('-c','-largeArrayDims', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
+            mex('-c','-largeArrayDims', '-DNTIMER', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [KLU_path sourcesKLU{j}]);
             fprintf('compiling KLU(%s)...done\n', objectsKLU{j});
         else
