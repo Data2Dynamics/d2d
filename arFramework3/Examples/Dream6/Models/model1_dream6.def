@@ -1,0 +1,111 @@
+DESCRIPTION
+"SBML level 3 version 1"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 25	
+
+COMPARTMENTS
+DefaultCompartment	 V	 "n/a"	 vol.	 1
+
+STATES
+pp1_mrna	C	 "n/a"	 conc.	 DefaultCompartment	 1	 "pp1_mrna"
+p1          C	 "n/a"	 conc.	 DefaultCompartment	 1	 "p1"
+pp5_mrna	C	 "n/a"	 conc.	 DefaultCompartment	 1	 "pp5_mrna"
+p5          C	 "n/a"	 conc.	 DefaultCompartment	 1	 "p5"
+pp2_mrna	C	 "n/a"	 conc.	 DefaultCompartment	 1	 "pp2_mrna"
+p2          C	 "n/a"	 conc.	 DefaultCompartment	 1	 "p2"
+pp6_mrna	C	 "n/a"	 conc.	 DefaultCompartment	 1	 "pp6_mrna"
+p6          C	 "n/a"	 conc.	 DefaultCompartment	 1	 "p6"
+pp3_mrna	C	 "n/a"	 conc.	 DefaultCompartment	 1	 "pp3_mrna"
+p3          C	 "n/a"	 conc.	 DefaultCompartment	 1	 "p3"
+pp4_mrna	C	 "n/a"	 conc.	 DefaultCompartment	 1	 "pp4_mrna"
+p4          C	 "n/a"	 conc.	 DefaultCompartment	 1	 "p4"
+
+INPUTS
+
+REACTIONS-AMOUNTBASED
+ 	-> pp1_mrna 	 CUSTOM "pro1_strength" 	"pp1_v1"
+pp1_mrna 	->  	 CUSTOM "pp1_mrna*pp1_mrna_degradation_rate" 	"pp1_v2"
+ 	-> p1 	 CUSTOM "pp1_mrna*rbs1_strength" 	"pp1_v3"
+p1 	->  	 CUSTOM "p1*p1_degradation_rate" 	"pp1_v4"
+ 	-> pp5_mrna 	 CUSTOM "pro5_strength/((p4/v6_Kd)^v6_h + 1)" 	"pp5_v1"
+pp5_mrna 	->  	 CUSTOM "pp5_mrna*pp5_mrna_degradation_rate" 	"pp5_v2"
+ 	-> p5 	 CUSTOM "pp5_mrna*rbs5_strength" 	"pp5_v3"
+p5 	->  	 CUSTOM "p5*p5_degradation_rate" 	"pp5_v4"
+ 	-> pp2_mrna 	 CUSTOM "(pro2_strength*(p1/v2_Kd)^v2_h)/(((p1/v2_Kd)^v2_h + 1)*((p6/v5_Kd)^v5_h + 1))" 	"pp2_v1"
+pp2_mrna 	->  	 CUSTOM "pp2_mrna*pp2_mrna_degradation_rate" 	"pp2_v2"
+ 	-> p2 	 CUSTOM "pp2_mrna*rbs2_strength" 	"pp2_v3"
+p2 	->  	 CUSTOM "p2*p2_degradation_rate" 	"pp2_v4"
+ 	-> pp6_mrna 	 CUSTOM "pro6_strength/((p4/v7_Kd)^v7_h + 1)" 	"pp6_v1"
+pp6_mrna 	->  	 CUSTOM "pp6_mrna*pp6_mrna_degradation_rate" 	"pp6_v2"
+ 	-> p6 	 CUSTOM "pp6_mrna*rbs6_strength" 	"pp6_v3"
+p6 	->  	 CUSTOM "p6*p6_degradation_rate" 	"pp6_v4"
+ 	-> pp3_mrna 	 CUSTOM "(pro3_strength*(p1/v3_Kd)^v3_h)/(((p1/v3_Kd)^v3_h + 1)*((p2/v4_Kd)^v4_h + 1))" 	"pp3_v1"
+pp3_mrna 	->  	 CUSTOM "pp3_mrna*pp3_mrna_degradation_rate" 	"pp3_v2"
+ 	-> p3 	 CUSTOM "pp3_mrna*rbs3_strength" 	"pp3_v3"
+p3 	->  	 CUSTOM "p3*p3_degradation_rate" 	"pp3_v4"
+ 	-> pp4_mrna 	 CUSTOM "(pro4_strength*(p1/v1_Kd)^v1_h)/(((p1/v1_Kd)^v1_h + 1)*((p5/v8_Kd)^v8_h + 1))" 	"pp4_v1"
+pp4_mrna 	->  	 CUSTOM "pp4_mrna*pp4_mrna_degradation_rate" 	"pp4_v2"
+ 	-> p4 	 CUSTOM "pp4_mrna*rbs4_strength" 	"pp4_v3"
+p4 	->  	 CUSTOM "p4*p4_degradation_rate" 	"pp4_v4"
+
+DERIVED
+
+CONDITIONS
+init_pp1_mrna	"0"
+init_p1         "1"
+init_pp5_mrna	"0"
+init_p5         "1"
+init_pp2_mrna	"0"
+init_p2         "1"
+init_pp6_mrna	"0"
+init_p6         "1"
+init_pp3_mrna	"0"
+init_p3         "1"
+init_pp4_mrna	"0"
+init_p4         "1"
+        
+p1_degradation_rate	 "p_degradation_rate"
+p2_degradation_rate	 "p_degradation_rate"
+p3_degradation_rate	 "p_degradation_rate"
+p4_degradation_rate	 "p_degradation_rate"
+p5_degradation_rate	 "p_degradation_rate"
+p6_degradation_rate	 "p_degradation_rate"
+
+pp1_mrna_degradation_rate	 "1"
+pp2_mrna_degradation_rate	 "1"
+pp3_mrna_degradation_rate	 "1"
+pp4_mrna_degradation_rate	 "1"
+pp5_mrna_degradation_rate	 "1"
+pp6_mrna_degradation_rate	 "1"
+        
+pro1_strength   "pro1_strength*(1-gene1_ko)"
+rbs1_strength   "rbs1_strength*(1-gene1_ko)"
+pro2_strength   "pro2_strength*(1-gene2_ko)"
+rbs2_strength   "rbs2_strength*(1-gene2_ko)"
+pro3_strength   "pro3_strength*(1-gene3_ko)"
+rbs3_strength   "rbs3_strength*(1-gene3_ko)"
+pro4_strength   "pro4_strength*(1-gene4_ko)"
+rbs4_strength   "rbs4_strength*(1-gene4_ko)"
+pro5_strength   "pro5_strength*(1-gene5_ko)"
+rbs5_strength   "rbs5_strength*(1-gene5_ko)"
+pro6_strength   "pro6_strength*(1-gene6_ko)"
+rbs6_strength   "rbs6_strength*(1-gene6_ko)"
+
+pp1_mrna_degradation_rate 	"1 + (4*sirna1_kd)"
+pp2_mrna_degradation_rate 	"1 + (4*sirna2_kd)"
+pp3_mrna_degradation_rate 	"1 + (4*sirna3_kd)"
+pp4_mrna_degradation_rate 	"1 + (4*sirna4_kd)"
+pp5_mrna_degradation_rate 	"1 + (4*sirna5_kd)"
+pp6_mrna_degradation_rate 	"1 + (4*sirna6_kd)"
+
+rbs1_strength	"rbs1_strength*(1+rbs1_ic)"
+rbs2_strength	"rbs2_strength*(1+rbs2_ic)"
+rbs3_strength	"rbs3_strength*(1+rbs3_ic)"
+rbs4_strength	"rbs4_strength*(1+rbs4_ic)"
+rbs5_strength	"rbs5_strength*(1+rbs5_ic)"
+rbs6_strength	"rbs6_strength*(1+rbs6_ic)"
+
+        
+PARAMETERS
+// rbs1_strength	 1	 0	 0	 0	 1000
