@@ -27,6 +27,7 @@ function olist = arFindPar( varargin )
 
     global ar;
     if ( isstruct( varargin{1} ) )
+        arOld = ar;
         ar = varargin{1};
         if ( length( varargin ) > 1 )
             varargin = varargin(2:end);
@@ -61,6 +62,10 @@ function olist = arFindPar( varargin )
     
     if ( opts.names )
         olist = ar.pLabel(olist);
+    end
+    
+    if ( exist( 'arOld' ) )
+        ar = arOld;
     end
 end
 
