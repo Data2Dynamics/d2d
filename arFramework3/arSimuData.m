@@ -49,7 +49,11 @@ end
 for d=ds
     assigne_new_timepoints(tpoints, m, d);
 end
+
+% remember existing parameters
+p = ar.p;
 arLink(true);
+ar.p = p;
 
 % simulate model
 arSimu(false,false);
