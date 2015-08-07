@@ -134,9 +134,7 @@ if(samplesize>0)
             try
                 [p, gradient] = feval(pleGlobals.fit_fkt, jk);
                 pLast = p;
-                attempts = 0;
-
-
+                
                 pleGlobals.ps{jk}(jindex,:) = pLast;
                 pleGlobals.gradient{jk}(jindex,:) = gradient;
                 pleGlobals.chi2s{jk}(jindex) = feval(pleGlobals.merit_fkt);
@@ -158,6 +156,9 @@ if(samplesize>0)
                 if(feval(pleGlobals.merit_fkt) > pleGlobals.chi2+dchi2*1.2)
                     break
                 end
+                
+                % Reset attempts
+                attempts = 0;
                 
             catch exception
                 % Do a few more attempts
@@ -214,8 +215,6 @@ else
             try
                 [p, gradient] = feval(pleGlobals.fit_fkt, jk);
                 pLast = p;
-                attempts = 0;
-        
             
                 pleGlobals.ps{jk}(jindex,:) = pLast;
                 pleGlobals.gradient{jk}(jindex,:) = gradient;
@@ -238,6 +237,10 @@ else
                 if(feval(pleGlobals.merit_fkt) > pleGlobals.chi2+dchi2*1.2)
                     break
                 end
+                
+                % Reset attempts
+                attempts = 0;
+                
             catch exception
                 % Do a few more attempts
                 attempts = attempts + 1;
