@@ -107,6 +107,7 @@ if(samplesize>0)
     pleGlobals.ps{jk} = [pleGlobals.ps{jk}; nan(samplesize,length(p))];
     pleGlobals.gradient{jk} = [pleGlobals.gradient{jk}; nan(samplesize,length(p))];
     
+    attempts = 0;
     try
         for j=1:samplesize
             jindex = old_length + j;
@@ -130,35 +131,45 @@ if(samplesize>0)
             
             tic;
             % Fit
-            [p, gradient] = feval(pleGlobals.fit_fkt, jk);
-            pLast = p;
-            
-            pleGlobals.ps{jk}(jindex,:) = pLast;
-            pleGlobals.gradient{jk}(jindex,:) = gradient;
-            pleGlobals.chi2s{jk}(jindex) = feval(pleGlobals.merit_fkt);
-            if(isfield(pleGlobals,'violations'))
-                pleGlobals.chi2sviolations{jk}(jindex) = feval(pleGlobals.violations);
-            end
-            if(isfield(pleGlobals,'priors'))
-                pleGlobals.chi2spriors{jk}(jindex) = feval(pleGlobals.priors, jk);
-            end
-            if(isfield(pleGlobals,'priorsAll'))
-                pleGlobals.chi2spriorsAll{jk}(jindex) = feval(pleGlobals.priorsAll);
-            end
-            fittime = fittime + toc;
-            
-            if(pleGlobals.showCalculation)
-                plePlot(jk);
-            end
-            
-            if(feval(pleGlobals.merit_fkt) > pleGlobals.chi2+dchi2*1.2)
-                break
+            try
+                [p, gradient] = feval(pleGlobals.fit_fkt, jk);
+                pLast = p;
+                attempts = 0;
+
+
+                pleGlobals.ps{jk}(jindex,:) = pLast;
+                pleGlobals.gradient{jk}(jindex,:) = gradient;
+                pleGlobals.chi2s{jk}(jindex) = feval(pleGlobals.merit_fkt);
+                if(isfield(pleGlobals,'violations'))
+                    pleGlobals.chi2sviolations{jk}(jindex) = feval(pleGlobals.violations);
+                end
+                if(isfield(pleGlobals,'priors'))
+                    pleGlobals.chi2spriors{jk}(jindex) = feval(pleGlobals.priors, jk);
+                end
+                if(isfield(pleGlobals,'priorsAll'))
+                    pleGlobals.chi2spriorsAll{jk}(jindex) = feval(pleGlobals.priorsAll);
+                end
+                fittime = fittime + toc;
+
+                if(pleGlobals.showCalculation)
+                    plePlot(jk);
+                end
+
+                if(feval(pleGlobals.merit_fkt) > pleGlobals.chi2+dchi2*1.2)
+                    break
+                end
+                
+            catch exception
+                % Do a few more attempts
+                attempts = attempts + 1;
+                if ( attempts > pleGlobals.attempts )
+                    rethrow(exception);
+                end
             end
         end
     catch exception
         fprintf('ERROR PLE: going to upper bound (%s)\n', exception.message);
     end
-    
 else
     samplesize = abs(samplesize);
     
@@ -176,6 +187,7 @@ else
     pleGlobals.ps{jk} = [nan(samplesize,length(p)); pleGlobals.ps{jk}];
     pleGlobals.gradient{jk} = [nan(samplesize,length(p)); pleGlobals.gradient{jk}];
     
+    attempts = 0;
     try
         for j=1:samplesize
             jindex = samplesize + 1 - j;
@@ -198,32 +210,42 @@ else
             estimatetime = estimatetime + toc;
             
             tic;
-            % Fit
-            [p, gradient] = feval(pleGlobals.fit_fkt, jk);
-            pLast = p;
+            % Fit           
+            try
+                [p, gradient] = feval(pleGlobals.fit_fkt, jk);
+                pLast = p;
+                attempts = 0;
+        
             
-            pleGlobals.ps{jk}(jindex,:) = pLast;
-            pleGlobals.gradient{jk}(jindex,:) = gradient;
-            pleGlobals.chi2s{jk}(jindex) = feval(pleGlobals.merit_fkt);
-            if(isfield(pleGlobals,'violations'))
-                pleGlobals.chi2sviolations{jk}(jindex) = feval(pleGlobals.violations);
+                pleGlobals.ps{jk}(jindex,:) = pLast;
+                pleGlobals.gradient{jk}(jindex,:) = gradient;
+                pleGlobals.chi2s{jk}(jindex) = feval(pleGlobals.merit_fkt);
+                if(isfield(pleGlobals,'violations'))
+                    pleGlobals.chi2sviolations{jk}(jindex) = feval(pleGlobals.violations);
+                end
+                if(isfield(pleGlobals,'priors'))
+                    pleGlobals.chi2spriors{jk}(jindex) = feval(pleGlobals.priors, jk);
+                end
+                if(isfield(pleGlobals,'priorsAll'))
+                    pleGlobals.chi2spriorsAll{jk}(jindex) = feval(pleGlobals.priorsAll);
+                end
+                fittime = fittime + toc;
+
+                if(pleGlobals.showCalculation)
+                    plePlot(jk);
+                end
+
+                if(feval(pleGlobals.merit_fkt) > pleGlobals.chi2+dchi2*1.2)
+                    break
+                end
+            catch exception
+                % Do a few more attempts
+                attempts = attempts + 1;
+                if ( attempts > pleGlobals.attempts )
+                    rethrow(exception);
+                end
             end
-            if(isfield(pleGlobals,'priors'))
-                pleGlobals.chi2spriors{jk}(jindex) = feval(pleGlobals.priors, jk);
-            end
-            if(isfield(pleGlobals,'priorsAll'))
-                pleGlobals.chi2spriorsAll{jk}(jindex) = feval(pleGlobals.priorsAll);
-            end
-            fittime = fittime + toc;
-            
-            if(pleGlobals.showCalculation)
-                plePlot(jk);
-            end
-            
-            if(feval(pleGlobals.merit_fkt) > pleGlobals.chi2+dchi2*1.2)
-                break
-            end
-        end
+        end                
     catch exception
         fprintf('ERROR PLE: going to lower bound (%s)\n', exception.message);
     end

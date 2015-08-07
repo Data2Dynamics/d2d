@@ -37,6 +37,7 @@ pleGlobals.maxstepsize = (ub-lb)./pleGlobals.samplesize;
 pleGlobals.minstepsize = ones(size(pleGlobals.maxstepsize))*1e-3;
 pleGlobals.breakonlb = false(size(pleGlobals.p));
 pleGlobals.breakonub = false(size(pleGlobals.p));
+pleGlobals.attempts = 4;
 
 pleGlobals.showCalculation = true;
 
