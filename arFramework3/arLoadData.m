@@ -402,7 +402,7 @@ if(~strcmp(extension,'none') && ( ...
     (exist(['Data/' name '.xls'],'file') && strcmp(extension,'xls')) || ...
     (exist(['Data/' name '.csv'],'file') && strcmp(extension,'csv'))))
     fprintf('loading data #%i, from file Data/%s.%s...\n', d, name, extension);
-    
+
     % read from file
     if(strcmp(extension,'xls'))
         warntmp = warning;
@@ -533,6 +533,7 @@ if(~strcmp(extension,'none') && ( ...
         ar = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot);
     end
 else
+    warning('Cannot find data file corresponding to %s', name);
     ar.model(m).data(d).condition = [];
 end
 
