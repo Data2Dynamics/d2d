@@ -13,6 +13,7 @@
 %           'initial'                   - only show initial conditions
 %           'fitted'                    - only show fitted parameters
 %           'constant'                  - only show constants
+%           'fixed'                     - only show fixed parameters
 %           'dynamic'                   - only show dynamic parameters
 %           'observation'               - only show non-dynamic parameters
 %           'error'                     - only show error model parameters
@@ -105,15 +106,24 @@ ar.qCloseToBound(~qLog10 & qPos) = (ar.p(~qLog10 & qPos)) - (ar.lb(~qLog10 & qPo
 
 % Additional options
 if ( nargin > 1 )
-    opts = argSwitch( {'closetobound', 'initial', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub'}, varargin{:} );
+    opts = argSwitch( {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub'}, varargin{:} );
 
     if ( opts.constant && opts.fitted )
         error( 'Incompatible flag constant and fitted' );
+    end
+    if ( opts.fixed && opts.fitted )
+        error( 'Incompatible flag fixed and fitted' );
+    end    
+    if ( opts.constant && opts.fixed )
+        error( 'Incompatible flag constant and fixed' );
     end
     if ( opts.observation && opts.dynamic )
         error( 'Incompatible flag observation and dynamic' );
     end    
 
+    if ( opts.fixed )
+        js = js( ar.qFit( js ) == 0 );
+    end
     if ( opts.fitted )
         js = js( ar.qFit( js ) == 1 );
     end
