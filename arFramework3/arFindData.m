@@ -132,42 +132,30 @@ function [olist names m] = arFindData( varargin )
     filt = ones(size(olist));
     for a = 1 : length( olist )
         for c = 1 : 2 : length(varargin)
-            for b = 1 : length(ar.model(m).data(olist(a)).condition)  
-                par = ar.model(m).data(olist(a)).condition(b).parameter;
-                val = ar.model(m).data(olist(a)).condition(b).value;    
+            val = ar.model(m).data(olist(a)).condition(b).value;    
                 
-                % Is it in the condition variable list?
-                if ( strcmp( par, varargin(c) ) )
+            % Is it in the condition variable list?
+            ID = find( strcmp( ar.model(m).data(olist(a)).pold, varargin(c) ) );
+            if ( ~isempty(ID) )
+                val = str2num(ar.model.data(olist(a)).fp{ID});
+                % Is it a value?
+                if ~isempty(val)
                     condList(c) = 0;
                     % Does it pass? If so ==> OK
-                    if ( str2num(val) ~= varargin{c+1} )
+                    if ( val ~= varargin{c+1} )
                         filt(a) = 0;
                     end
-                end
-            end
-            if ( condList(c) == 1 )
-                % We did not find this one. Is it in the default parameter list?
-                Q = find(strcmp(ar.model.p,varargin(c)));
-                if ~isempty(Q)
-                    val = str2num(ar.model.fp{Q});
-                    % Is it a value?
-                    if ~isempty(val)
+                else
+                    % It is a string; Does it refer to a parameter?
+                    Q = find(strcmp(ar.pLabel, ar.model.p{ID}));
+                    if ~isempty(Q)
                         condList(c) = 0;
+                        val = ar.p(Q);
                         if ( val ~= varargin{c+1} )
                             filt(a) = 0;
                         end
-                    else
-                        % It is a string; Does it refer to a parameter?
-                        Q = find(strcmp(ar.pLabel, ar.model.p{Q}));
-                        if ~isempty(Q)
-                            condList(c) = 0;
-                            val = ar.p(Q);
-                            if ( val ~= varargin{c+1} )
-                                filt(a) = 0;
-                            end
-                            if (verbose)
-                                disp('Warning: Filtering on open parameter');
-                            end
+                        if (verbose)
+                            disp('Warning: Filtering on open parameter');
                         end
                     end
                 end
