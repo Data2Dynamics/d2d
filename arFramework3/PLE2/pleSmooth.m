@@ -52,7 +52,7 @@ elseif(jk <= length(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}) && pleGl
         if(minindex == j-1 && ~isnan(minchi2) && (crumin-minchi2)>dchi2)         
             candidateindex_down = union(candidateindex_down, minindex); %R2013a compatible
         end
-        if(chi2s(j-1) < chi2s(j) && chi2s(j+1) < chi2s(j))
+        if(chi2s(j-1) < crumin-.01 && chi2s(j+1) < crumin-.01)
             if chi2s(j-1) < chi2s(j+1)
                 candidateindex_down = union(candidateindex_down, j-1);
             else
