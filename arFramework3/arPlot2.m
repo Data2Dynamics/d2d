@@ -210,6 +210,9 @@ for jm = 1:length(ar.model)
                             y_ssa_lb = [];
                             y_ssa_ub = [];
                             dydt = [];
+                            t_ppl = [];
+                            y_ppl_ub = [];
+                            y_ppl_lb = [];
                         else
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, dydt, ...
                                 y_ssa, y_ssa_lb, y_ssa_ub, qFit, t_ppl, y_ppl_ub, y_ppl_lb] = arGetData(jm, jd, jtype);
