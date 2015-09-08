@@ -496,7 +496,7 @@ ar.model(m).qPlotZ = ones(size(ar.model(m).z));
 
 % derived variables parameters
 varlist = cellfun(@symvar, ar.model(m).fz, 'UniformOutput', false);
-ar.model(m).pz = setdiff(setdiff(vertcat(varlist{:}), {ar.model(m).t, ''}), union(ar.model(m).x, union(ar.model(m).u, ar.model.z))); %R2013a compatible
+ar.model(m).pz = setdiff(setdiff(vertcat(varlist{:}), {ar.model(m).t, ''}), union(ar.model(m).x, union(ar.model(m).u, ar.model(m).z))); %R2013a compatible
 ar.model(m).px = union(ar.model(m).px, ar.model(m).pz); %R2013a compatible
 ar.model(m).p = union(ar.model(m).p, ar.model(m).pz); %R2013a compatible
 
