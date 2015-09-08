@@ -581,11 +581,11 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
 		 
 		if(cvodes_atolV==1)   { 		 
 		  for(ks=0; ks < neq; ks++) {		    
-		    if(y_max_scale[ks]==0 || y_max_scale[ks]<1){
-		      Ith(atolV, ks+1) = cvodes_atol;
-		    }else if(y_max_scale[ks]>1e6){
-		      Ith(atolV, ks+1) = cvodes_atol * 1e-6;			  
-		    }else if(y_max_scale[ks]>1 && y_max_scale[ks]<1e6){
+		    if(y_max_scale[ks]==0 || y_max_scale[ks]<1e-3){
+		      Ith(atolV, ks+1) = cvodes_atol * 1e3;
+		    }else if(y_max_scale[ks]>1e3){
+		      Ith(atolV, ks+1) = cvodes_atol * 1e-3;			  
+		    }else if(y_max_scale[ks]>1e-3 && y_max_scale[ks]<1e3){
 		      Ith(atolV, ks+1) = 1./y_max_scale[ks]*cvodes_atol;
 		    }else{
 		      Ith(atolV, ks+1) = cvodes_atol;
@@ -677,11 +677,11 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
 		      for(js=0; js < nps; js++) {
                         atolV_tmp = NV_DATA_S(atolV_ss[js]);
                         for(ks=0; ks < neq; ks++) {
-			  if(y_max_scale[ks]==0. || y_max_scale[ks]<1){
-			    atolV_tmp[ks] = cvodes_atol;
-			  }else if(y_max_scale[ks]>1e6){
-			    atolV_tmp[ks] = cvodes_atol*1e-6;			  
-			  }else if(y_max_scale[ks]<1e6 && y_max_scale[ks]>1){
+			  if(y_max_scale[ks]==0. || y_max_scale[ks]<1e-3){
+			    atolV_tmp[ks] = cvodes_atol*1e3;
+			  }else if(y_max_scale[ks]>1e3){
+			    atolV_tmp[ks] = cvodes_atol*1e-3;			  
+			  }else if(y_max_scale[ks]<1e3 && y_max_scale[ks]>1e-3){
                             atolV_tmp[ks] = 1./y_max_scale[ks]*cvodes_atol;
 			  }else{
 			    atolV_tmp[ks] = cvodes_atol;
