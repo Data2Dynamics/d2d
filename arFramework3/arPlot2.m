@@ -206,6 +206,13 @@ for jm = 1:length(ar.model)
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, qFit, yExpHl] = ...
                                 arGetDataDoseResponse(jm, ds, dr_times(jt), ...
                                 ar.model(jm).plot(jplot).dLink, logplotting_xaxis, jtype);
+                            
+                            % TODO
+                            t_ppl = [];
+                            y_ppl_ub = [];
+                            y_ppl_lb = [];
+                            % TODO
+                            
                             y_ssa = [];
                             y_ssa_lb = [];
                             y_ssa_ub = [];
