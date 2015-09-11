@@ -294,11 +294,11 @@ for jx = 1:length(ix)
             || (takeY && doPPL && isnan(ar.model(m).data(c).ppl.kind_high(whichT,ix(jx)))) ...
             || (takeY && ~doPPL && (isnan(ar.model(m).data(c).ppl.kind_high_vpl(whichT,ix(jx))))))
             
-        if(ar.config.fiterrors~= -1 && takeY && ~isnan(ar.model(m).data(c).ystdExpSimu(1,ix(jx))))
-            xstd = ar.model(m).data(c).ystdExpSimu(1,ix(jx));
+        if(ar.config.fiterrors~= -1 && takeY && ~isnan(ar.model(m).data(c).ystdFineSimu(1,ix(jx))))
+            xstd = ar.model(m).data(c).ystdFineSimu(1,ix(jx));
            
         end
-        xstart_ppl(m, c, ix(jx), t, doPPL, xstd, pReset, chi2start, whichT, takeY, true, 1);
+        xstart_ppl(m, c, ix(jx), t, doPPL, xstd, pReset, chi2start, whichT, takeY, true, 1, [], onlyProfile);
         if(onlyProfile)
             if(takeY)
                 arLink(true,0.,true,ix(jx), c, m,NaN);
@@ -430,7 +430,7 @@ end
     %ar.config.ploterrors = ploterror_tmp;
 end
 
-function [xFit, ps] = xstart_ppl(m, c, jx, t, doPPL, xstd, pReset, chi2start, whichT, takeY, save, dir, xFit)
+function [xFit, ps] = xstart_ppl(m, c, jx, t, doPPL, xstd, pReset, chi2start, whichT, takeY, save, dir, xFit, onlyProfile)
 global ar;
 
 if(~exist('dir','var'))
@@ -567,7 +567,7 @@ for ts = 1:length(t)
             lb_tmp_vpl = -Inf;                
             fprintf('No -95 VPL for t=%d\n',t(ts));
             if(dir==-1 || dir==0)
-                return;
+%                 return;
             end
         else
             kind_low_tmp_vpl = find(xtrial_tmp==lb_tmp_vpl);
@@ -581,7 +581,7 @@ for ts = 1:length(t)
             ub_tmp_vpl = Inf;
             fprintf('No +95 VPL for t=%d\n',t(ts));
             if(dir==1 || dir==0)
-                return;
+%                 return;
             end
         else
             kind_high_tmp_vpl = find(xtrial_tmp==ub_tmp_vpl); 
@@ -592,18 +592,20 @@ for ts = 1:length(t)
             xtrial_tmp([kind_high_tmp_vpl kind_high_tmp_vpl+1]), chi2start+ar.ppl.dchi2);
         end
     end
-    if(dir==1 && doPPL)        
-        xFit = ub_tmp;
-        ps = ps_tmp(kind_high_tmp,:);
-    elseif(dir==-1 && doPPL)        
-        xFit = lb_tmp;
-        ps = ps_tmp(kind_low_tmp,:);        
-    elseif(dir == 1 && ~doPPL)
-        xFit = ub_tmp_vpl;
-        ps = ps_tmp(kind_high_tmp_vpl,:);    
-    else
-        xFit = lb_tmp_vpl;
-        ps = ps_tmp(kind_low_tmp_vpl,:);               
+    if ~onlyProfile
+        if(dir==1 && doPPL)        
+            xFit = ub_tmp;
+            ps = ps_tmp(kind_high_tmp,:);
+        elseif(dir==-1 && doPPL)        
+            xFit = lb_tmp;
+            ps = ps_tmp(kind_low_tmp,:);        
+        elseif(dir == 1 && ~doPPL)
+            xFit = ub_tmp_vpl;
+            ps = ps_tmp(kind_high_tmp_vpl,:);    
+        else
+            xFit = lb_tmp_vpl;
+            ps = ps_tmp(kind_low_tmp_vpl,:);               
+        end
     end
     if(takeY && save)   
         ar.model(m).data(c).ppl.xtrial(ts, jx,:) = xtrial_tmp;
@@ -611,16 +613,18 @@ for ts = 1:length(t)
         ar.model(m).data(c).ppl.ppl(ts, jx,:) = ppl_tmp;
         ar.model(m).data(c).ppl.vpl(ts, jx,:) = vpl_tmp;
         ar.model(m).data(c).ppl.ps(ts, jx,:,:) = ps_tmp;
-        if(doPPL)
-            ar.model(m).data(c).ppl.lb_fit(ts, jx) = lb_tmp;
-            ar.model(m).data(c).ppl.ub_fit(ts, jx) = ub_tmp;
-            ar.model(m).data(c).ppl.kind_high(ts, jx) = kind_high_tmp;
-            ar.model(m).data(c).ppl.kind_low(ts, jx) = kind_low_tmp;
-        else
-            ar.model(m).data(c).ppl.lb_fit_vpl(ts, jx) = lb_tmp_vpl;
-            ar.model(m).data(c).ppl.ub_fit_vpl(ts, jx) = ub_tmp_vpl;
-            ar.model(m).data(c).ppl.kind_high_vpl(ts, jx) = kind_high_tmp_vpl;
-            ar.model(m).data(c).ppl.kind_low_vpl(ts, jx) = kind_low_tmp_vpl;
+        if ~onlyProfile
+            if(doPPL)
+                ar.model(m).data(c).ppl.lb_fit(ts, jx) = lb_tmp;
+                ar.model(m).data(c).ppl.ub_fit(ts, jx) = ub_tmp;
+                ar.model(m).data(c).ppl.kind_high(ts, jx) = kind_high_tmp;
+                ar.model(m).data(c).ppl.kind_low(ts, jx) = kind_low_tmp;
+            else
+                ar.model(m).data(c).ppl.lb_fit_vpl(ts, jx) = lb_tmp_vpl;
+                ar.model(m).data(c).ppl.ub_fit_vpl(ts, jx) = ub_tmp_vpl;
+                ar.model(m).data(c).ppl.kind_high_vpl(ts, jx) = kind_high_tmp_vpl;
+                ar.model(m).data(c).ppl.kind_low_vpl(ts, jx) = kind_low_tmp_vpl;
+            end
         end
     elseif(~takeY && save)
         ar.model(m).condition(c).ppl.xtrial(ts, jx,:) = xtrial_tmp;
@@ -628,16 +632,18 @@ for ts = 1:length(t)
         ar.model(m).condition(c).ppl.ppl(ts, jx,:) = ppl_tmp;
         ar.model(m).condition(c).ppl.vpl(ts, jx,:) = vpl_tmp;
         ar.model(m).condition(c).ppl.ps(ts, jx,:,:) = ps_tmp;
-        if(doPPL)            
-            ar.model(m).condition(c).ppl.lb_fit(ts, jx) = lb_tmp;
-            ar.model(m).condition(c).ppl.ub_fit(ts, jx) = ub_tmp;
-            ar.model(m).condition(c).ppl.kind_high(ts, jx) = kind_high_tmp;
-            ar.model(m).condition(c).ppl.kind_low(ts, jx) = kind_low_tmp;
-        else
-            ar.model(m).condition(c).ppl.lb_fit_vpl(ts, jx) = lb_tmp_vpl;
-            ar.model(m).condition(c).ppl.ub_fit_vpl(ts, jx) = ub_tmp_vpl;
-            ar.model(m).condition(c).ppl.kind_high_vpl(ts, jx) = kind_high_tmp_vpl;
-            ar.model(m).condition(c).ppl.kind_low_vpl(ts, jx) = kind_low_tmp_vpl;  
+        if ~onlyProfile
+            if(doPPL)            
+                ar.model(m).condition(c).ppl.lb_fit(ts, jx) = lb_tmp;
+                ar.model(m).condition(c).ppl.ub_fit(ts, jx) = ub_tmp;
+                ar.model(m).condition(c).ppl.kind_high(ts, jx) = kind_high_tmp;
+                ar.model(m).condition(c).ppl.kind_low(ts, jx) = kind_low_tmp;
+            else
+                ar.model(m).condition(c).ppl.lb_fit_vpl(ts, jx) = lb_tmp_vpl;
+                ar.model(m).condition(c).ppl.ub_fit_vpl(ts, jx) = ub_tmp_vpl;
+                ar.model(m).condition(c).ppl.kind_high_vpl(ts, jx) = kind_high_tmp_vpl;
+                ar.model(m).condition(c).ppl.kind_low_vpl(ts, jx) = kind_low_tmp_vpl;  
+            end
         end
     end
 end
