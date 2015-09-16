@@ -6,10 +6,30 @@
 % log_fit_history               [false]
 % backup_save                   [false]
 % 
-% if ps contains rows with only NaN, then this fit is not performed and the
-% old fit result is maintained, if existing. This enables overwriting fits
-% where integration was not feasible (e.g. in arFitLHS).
-
+% if 
+%   1) ps has the same size as ar.ps or is larger  AND
+%   2) contains rows with only NaN, then this fits corresponding to NaN
+%   rows are not performed and the old fit result is maintained. 
+%   This enables overwriting fits where integration was not feasible (e.g. in arFitLHS)
+%   and adding new fits.
+% 
+% Examples:
+% % 1) Standard call:
+% ps = ones(100,1)*ar.p;
+% ps(:,1) = linspace(-1,1,100);
+% arFits(ps)
+% 
+% % 2) Add new Fits to result of 1)
+% ps2 = ps;
+% ps2(:,2) = linspace(-1,1,100);
+% arFits([NaN(size(ar.ps));ps2])
+% 
+% % 3) Restart a single Fit (e.g. the 5th) with altered tolerances:
+% ar.config.atol = ar.config.atol/10;
+% ps3 = NaN(size(ar.ps));
+% ps3(5,:) = ar.ps_start(5,:);
+% arFits(ps3)
+% 
 function arFits(ps, log_fit_history, backup_save)
 
 global ar
@@ -22,66 +42,36 @@ if(~exist('backup_save','var'))
 end
 
 dop = find(sum(~isnan(ps),2)>0);
-
 n = length(dop);
+if ~isfield(ar,'ps') || size(ps,1)<size(ar.ps,1)
+    replaceOld = true;
+else
+    replaceOld = false;
+end
 
-if(~isfield(ar,'ps_start'))
+if replaceOld
     ar.ps_start = ps;
+    ar.ps = nan(size(ps));
+    ar.ps_errors = nan(size(ps));
+    ar.chi2s_start = nan(1,n);
+    ar.chi2sconstr_start = nan(1,n);
+    ar.chi2s = nan(1,n);
+    ar.chi2sconstr = nan(1,n);
+    ar.exitflag = nan(1,n);
+    ar.timing = nan(1,n);
+    ar.fun_evals = nan(1,n);
+    ar.optim_crit = nan(1,n);
 else
     ar.ps_start(dop,:) = ps(dop,:);
-end
-
-if(~isfield(ar,'ps'))
-    ar.ps = nan(size(ps));
-else
     ar.ps(dop,:) = nan(size(ps(dop,:)));
-end
-
-if(~isfield(ar,'ps_errors'))
-    ar.ps_errors = nan(size(ps));
-else
     ar.ps_errors(dop,:) = nan(size(ps(dop,:)));
-end
-
-if(~isfield(ar,'chi2s_start'))
-    ar.chi2s_start = nan(1,size(ps,1));
-else
     ar.chi2s_start(dop) = nan(1,size(ps(dop,:),1));
-end
-
-if(~isfield(ar,'chi2sconstr_start'))
-    ar.chi2sconstr_start = nan(1,size(ps,1));
-else
     ar.chi2sconstr_start(dop) = nan(1,size(ps(dop,:),1));
-end
-if(~isfield(ar,'chi2s'))
-    ar.chi2s = nan(1,size(ps,1));
-else
     ar.chi2s(dop) = nan(1,size(ps(dop,:),1));
-end
-if(~isfield(ar,'chi2sconstr'))
-    ar.chi2sconstr = nan(1,size(ps,1));
-else
     ar.chi2sconstr(dop) = nan(1,size(ps(dop,:),1));
-end
-if(~isfield(ar,'exitflag'))
-    ar.exitflag = nan(1,size(ps,1));
-else
     ar.exitflag(dop) = nan(1,size(ps(dop,:),1));
-end
-if(~isfield(ar,'timing'))
-    ar.timing = nan(1,size(ps,1));
-else
     ar.timing(dop) = nan(1,size(ps(dop,:),1));
-end
-if(~isfield(ar,'fun_evals'))
-    ar.fun_evals = nan(1,size(ps,1));
-else
     ar.fun_evals(dop) = nan(1,size(ps(dop,:),1));
-end
-if(~isfield(ar,'optim_crit'))
-    ar.optim_crit = nan(1,size(ps,1));
-else
     ar.optim_crit(dop) = nan(1,size(ps(dop,:),1));
 end
 
