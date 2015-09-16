@@ -149,20 +149,81 @@ else
     ar.config.fiterrors_correction = 1;
 end
 
-try
-    if doSimu
-        if(qglobalar)  % since ar is overwritten anyway in arSimu, the possiblity to use of qglobalar obsolete
-            arSimu(sensi, ~isfield(ar.model(jm), 'data'), dynamics);
-        else
-            ar = arSimu(ar, sensi, ~isfield(ar.model(jm), 'data'), dynamics);
+atol = ar.config.atol;
+rtol = ar.config.rtol;
+maxsteps = ar.config.maxsteps;
+qPositiveX = cell(1,length(ar.model));
+
+if(~isfield(ar.config, 'nCVRestart'))
+    nCVRestart = 1;
+else
+    nCVRestart = ar.config.nCVRestart;
+end
+
+for i = 1:nCVRestart
+    try
+        if doSimu
+            if(qglobalar)  % since ar is overwritten anyway in arSimu, the possiblity to use of qglobalar obsolete
+                arSimu(sensi, ~isfield(ar.model(jm), 'data'), dynamics);
+            else
+                ar = arSimu(ar, sensi, ~isfield(ar.model(jm), 'data'), dynamics);
+            end
+        end
+        has_error = false;
+        break
+    catch error_id
+        has_error = true;
+        if(~silent)
+            disp(error_id.message);
+        end
+        if nCVRestart > 1
+            if strcmp(error_id.identifier,'MATLAB:UndefinedFunction')
+                break
+            else
+                error_printed = 0;
+                for m=1:length(ar.model)
+                    for c=1:length(ar.model(m).condition)
+                        if(ar.model(m).condition(c).status==-1)
+                            % CV_TOO_MUCH_WORK
+                            if(isempty(qPositiveX{m}))
+                                qPositiveX{m} = ar.model(m).qPositiveX;
+                                ar.model(m).qPositiveX(:) = 0;
+                            else
+                                ar.config.maxsteps = (1+.2*i)*maxsteps;
+                                if(~error_printed)
+                                    fprintf('Integration error, restarting %d / %d with 20%% increased maxsteps.\n',i,nCVRestart-1)
+                                    error_printed = 1;
+                                end
+                            end
+                        elseif(ar.model(m).condition(c).status<-1)
+                            ar.config.atol = (1+.05*i)*atol;
+                            ar.config.rtol = (1+.05*i)*rtol;
+                            if(~error_printed)
+                                fprintf('Integration error, restarting %d / %d with 5%% increased precision.\n',i,nCVRestart)
+                                error_printed = 1;
+                            end
+                        end
+                    end
+                end
+
+            end
+        end 
+    end
+end
+ar.config.atol = atol;
+ar.config.rtol = rtol;
+ar.config.maxsteps = maxsteps;
+for m=1:length(ar.model)
+    if(~isempty(qPositiveX{m}))
+        ar.model(m).qPositiveX = qPositiveX{m};
+    end
+end
+for m=1:length(ar.model)
+    for c=1:length(ar.model(m).condition)
+        if(sum(sum(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1) < -1e-10) > 0))
+            fprintf('Negative state in model %d condition %d detected that is defined as positive! Double-check model definition!\nPlot negative states by calling ar.model(%d).qPositiveX(:) = 0; with subsequent arPlot call.\n',m,c,m)
         end
     end
-    has_error = false;
-catch error_id
-    if(~silent)
-        disp(error_id.message);
-    end
-    has_error = true;
 end
 
 useMSextension = false;

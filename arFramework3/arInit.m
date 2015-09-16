@@ -106,6 +106,7 @@ ar.config.maxsteps = 1000;
 ar.config.maxstepsize = Inf;
 ar.config.useEvents = 0;
 ar.config.useMS 	= 0;
+ar.config.nCVRestart = 10;
 
 ar.config.steady_state_constraint = 1;
 

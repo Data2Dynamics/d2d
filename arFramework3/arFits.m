@@ -93,7 +93,7 @@ for j=1:n
     
     tic;
     try
-        arChi2(true, []);
+        arChi2(true);
         ar.chi2s_start(dop(j)) = ar.chi2fit;
         ar.chi2sconstr_start(dop(j)) = ar.chi2constr;
         arFit(true);
