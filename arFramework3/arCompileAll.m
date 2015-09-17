@@ -305,6 +305,8 @@ for m=1:length(ar.model)
                 if(~doskip(d))
                     % header
                     fid_obsH = fopen([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.h'], 'W');
+                    [source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.h']
+                    fid_obsH
                     arWriteHFilesData(fid_obsH, data_sym);
                     fclose(fid_obsH);
                     movefile([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.h'], ...

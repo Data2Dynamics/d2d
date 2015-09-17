@@ -197,13 +197,22 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
     str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
     while(~strcmp(str{1},'INVARIANTS') && ~strcmp(str{1},'DERIVED'))
         source = {};
+        sourceCoeffs = [];
 
         if ( strcmp(str{1}, 'OBSERVABLES') || strcmp(str{1}, 'CONDITIONS') )
             error('Missing field DERIVED. This section should be specified after REACTIONS and before OBSERVABLES / CONDITIONS. See: "Setting up models paragraph 1.7"');
         end
+        nextValue = 1;
         while(~strcmp(str{1},'->') && ~strcmp(str{1},'<->'))
             if(~strcmp(str{1},'0') && ~strcmp(str{1},'+'))
-                source(end+1) = str{1}; %#ok<AGROW>
+                % Check whether a stoichiometric coefficient is specified
+                if ~isempty(str2num(str{1}{1})) %#ok
+                    nextValue = str2num(str{1}{1}); %#ok
+                else
+                    source(end+1) = str{1}; %#ok<AGROW>
+                    sourceCoeffs(end+1) = nextValue; %#ok<AGROW>
+                    nextValue = 1;
+                end
             end
             str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
         end
@@ -219,10 +228,19 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         end
         
         target = {};
+        targetCoeffs = [];
+        nextValue = 1;
         str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
         while(~strcmp(str{1},'CUSTOM') && ~strcmp(str{1},'MASSACTION') && ~strcmp(str{1},'MASSACTIONKD'))
             if(~strcmp(str{1},'0') && ~strcmp(str{1},'+'))
-                target(end+1) = str{1}; %#ok<AGROW>
+                % Check whether a stoichiometric coefficient is specified
+                if ( ~isempty(str2num(str{1}{1})) )  %#ok
+                    nextValue = str2num(str{1}{1});   %#ok
+                else
+                    target(end+1)       = str{1}; %#ok<AGROW> 
+                    targetCoeffs(end+1) = nextValue; %#ok<AGROW>
+                    nextValue = 1;
+                end
             end
             str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
         end
@@ -270,10 +288,11 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             if(ar.config.checkForNegFluxes)
                 symtmp = sym(str{1});
                 for j=1:length(source)
+                    subs(symtmp, sym(source{j}), 0);
                     symtmpsubs = subs(symtmp, sym(source{j}), 0);
                     if(symtmpsubs~=0)
                         fprintf(2, 'Possible negative flux in reaction #%i:\n', length(ar.model(m).fv));
-                        fprintf(2, '%s : %s\n', arAssembleReactionStr(source, target), cell2mat(str{1}));
+                        fprintf(2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
                         fprintf(2, 'Source species %s missing ?\n\n', source{j});
                         fprintf(2, 'Deactivate this error message with: ar.config.checkForNegFluxes = false;\n\n');
                         error('Possible negative fluxes in reaction');
@@ -303,12 +322,12 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         ar.model(m).N(1:length(ar.model(m).x),vcount) = 0;
         for jj=1:length(source)
             for j=find(ismember(ar.model(m).x, source{jj})) %R2013a compatible
-                ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) - 1;
+                ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) - sourceCoeffs(jj);
             end
         end
         for jj=1:length(target)
             for j=find(ismember(ar.model(m).x, target{jj})) %R2013a compatible
-                ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) + 1;
+                ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) + targetCoeffs(jj);
             end
         end
         ar.model(m).fv_source{end+1,1} = source;
@@ -357,12 +376,12 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             ar.model(m).N(1:length(ar.model(m).x),vcount) = 0;
             for jj=1:length(source)
                 for j=find(ismember(ar.model(m).x, source{jj})) %R2013a compatible
-                    ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) + 1;
+                    ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) + sourceCoeffs(jj);
                 end
             end
             for jj=1:length(target)
                 for j=find(ismember(ar.model(m).x, target{jj})) %R2013a compatible
-                    ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) - 1;
+                    ar.model(m).N(j, vcount) = ar.model(m).N(j, vcount) - targetCoeffs(jj);
                 end
             end
             

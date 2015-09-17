@@ -94,4 +94,3 @@ end
 arPlotY(saveToFile, fastPlot, doLegends);
 arPlotX(saveToFile, fastPlot);
 arPlotV(saveToFile, fastPlot);
-

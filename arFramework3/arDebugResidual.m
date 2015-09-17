@@ -10,7 +10,7 @@ function arDebugResidual()
             maxObsLength  = max( [ max(cellfun(@length, ar.model(m).data(d).y)) maxObsLength ] );
         end
     end
-  
+    
     a = 0;
     str = sprintf('Problematic residual detected\n');
     str = sprintf('%s\nErr   Model   %s    %s #dataset    #data no.\n', str, arExtendStr('Observable',maxObsLength), arExtendStr('Data file',maxDataLength) );
