@@ -303,7 +303,11 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             if(~reversible)
                 ar.model(m).fv{end+1,1} = cell2mat(str{1});
                 for j=1:length(source)
-                    ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' source{j}];
+                    if ( sourceCoeffs ~= 1 )
+                        ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' source{j} '^' num2str(sourceCoeffs(j))];
+                    else
+                        ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' source{j} ];
+                    end
                 end
             else
                 if(massactionkd)
@@ -313,7 +317,11 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                 end
                 ar.model(m).fv_ma_reverse_pbasename{end} = cell2mat(str{1});
                 for j=1:length(source)
-                    ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' source{j}];
+                    if ( sourceCoeffs ~= 1 )
+                        ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' source{j} '^' num2str(sourceCoeffs(j))];
+                    else
+                        ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' source{j} ];
+                    end
                 end
             end
         end
@@ -356,7 +364,11 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             ar.model(m).fv_target{end+1,1} = ar.model(m).fv_source{end,1};
             ar.model(m).fv_ma_reverse_pbasename{end+1} = cell2mat(str{1});
             for j=1:length(target)
-                ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' target{j}];
+                if ( targetCoeffs(j) ~= 1 )
+                    ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' target{j} '^' num2str(targetCoeffs(j))];
+                else
+                    ar.model(m).fv{end,1} = [ar.model(m).fv{end,1} '*' target{j}];
+                end
             end
             
             % infer flux units

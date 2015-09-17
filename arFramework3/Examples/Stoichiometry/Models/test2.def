@@ -1,0 +1,28 @@
+DESCRIPTION
+"Basic model using stoichiometry in the reaction expressions"
+
+PREDICTOR
+t               T   min         time	0	50
+
+COMPARTMENTS
+med             V   pl          vol.    1
+
+STATES
+sA            C   mM          conc.   med     1
+sB            C   mM          conc.   med     1
+sC            C   mM          conc.   med     1
+sD            C   mM          conc.   med     1
+
+INPUTS
+
+REACTIONS
+3 sA        ->  sB          CUSTOM     "sA^3.0"
+3 sC        ->  sD          MASSACTION 1
+
+DERIVED
+
+CONDITIONS
+init_sA     "1"
+init_sB     "0"
+init_sC     "1"
+init_sD     "0"
