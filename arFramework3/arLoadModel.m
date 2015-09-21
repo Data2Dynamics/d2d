@@ -184,6 +184,8 @@ ar.model(m).v = {};
 ar.model(m).fv = {};
 ar.model(m).fv_source = {};
 ar.model(m).fv_target = {};
+ar.model(m).fv_sourceCoeffs = {};
+ar.model(m).fv_targetCoeffs = {};
 ar.model(m).fv_ma_reverse_pbasename = {};
 ar.model(m).vUnits = {};
 if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
@@ -340,6 +342,8 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         end
         ar.model(m).fv_source{end+1,1} = source;
         ar.model(m).fv_target{end+1,1} = target;
+        ar.model(m).fv_sourceCoeffs{end+1,1} = sourceCoeffs;
+        ar.model(m).fv_targetCoeffs{end+1,1} = targetCoeffs;        
         
         % check for inconsistent educt compartments
         if(~isempty(ar.model(m).c) && ~ar.model(m).isAmountBased)

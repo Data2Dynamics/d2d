@@ -22,7 +22,7 @@ function varargout = arPlotter(varargin)
 
 % Edit the above text to modify the response to help arPlotter
 
-% Last Modified by GUIDE v2.5 20-Apr-2015 15:50:33
+% Last Modified by GUIDE v2.5 21-Aug-2015 17:38:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -219,3 +219,21 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 arSubPlotter
+
+
+% --- Executes when selected cell(s) is changed in uitable1.
+function uitable1_CellSelectionCallback(hObject, eventdata, handles)
+% hObject    handle to uitable1 (see GCBO)
+% eventdata  structure with the following fields (see UITABLE)
+%	Indices: row and column indices of the cell(s) currently selecteds
+% handles    structure with handles and user data (see GUIDATA)
+    eventdata
+
+
+% --------------------------------------------------------------------
+function uitable1_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to uitable1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+eventdata
