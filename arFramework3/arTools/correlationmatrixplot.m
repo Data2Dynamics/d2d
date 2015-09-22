@@ -1,44 +1,58 @@
-function f = correlationmatrixplot(A,names)
+function f = correlationmatrixplot(A,names,p_val)
 %CORRELATIONMATRIXPLOT
 %
 % 2015 Max Schelker
 
+if(~exist('p_val','var'))
+    p_val = 0.01;
+end
+
 scale = 10/size(A,1);
 f = figure('Name','Correlation matrix');
-l = 0;
+f.Color = 'w';
+
 colors = redwhiteblue(11);
+[R,p] = corr(A');
+R(isnan(R)) = 0;
+p(isnan(p)) = 1;
+
+l = 0;
 for i=1:size(A,1)
     for j=1:size(A,1)
         l = l+1;
         subaxis(size(A,1),size(A,1),l, 'Spacing', 0.005, 'Padding', 0, 'Margin', 0.01);
         if i>j
-            R = corr(A(i,:)',A(j,:)');
-            cindex = round((1+R)*5)+1;
-            scatter(A(i,:),A(j,:),'k.');
-            xl = xlim;
-            yl = ylim;
-            cla;
-            p = patch([xl(1) xl(2) xl(2) xl(1)],[yl(1) yl(1) yl(2) yl(2)],colors(cindex,:));
-            p.FaceAlpha = 0.5;
-            p.EdgeColor = 'w';
-            hold on;
+            cindex = round((1+R(i,j))*5)+1;
+            xl = [min(A(i,:)) max(A(i,:))];
+            if(diff(xl)==0)
+                xl = [0 1];
+            end
+            yl = [min(A(j,:)) max(A(j,:))];
+            if(diff(yl)==0)
+                yl = [0 1];
+            end
+            axis([xl yl]);
+            if(p(i,j)<p_val)
+                hp = patch([xl(1) xl(2) xl(2) xl(1)],[yl(1) yl(1) yl(2) yl(2)],colors(cindex,:));
+                hp.FaceAlpha = 0.5;
+                hp.EdgeColor = 'w';
+                hold on;
+            end
             scatter(A(i,:),A(j,:),'.k');
             hold off
-            axis off
         elseif i<j
-            [R,p] = corr(A(i,:)',A(j,:)');
-            text(0.1,.5,sprintf('%1.2f\n%1.1g',R,p),'Units','normalized','FontSize',scale*11)
-            cindex = round((1+R)*5)+1;
-            xl = [0 1];
-            yl = [0 1];
-            p = patch([xl(1) xl(2) xl(2) xl(1)],[yl(1) yl(1) yl(2) yl(2)],colors(cindex,:));
-            p.FaceAlpha = 0.5;
-            p.EdgeColor = 'w';
-            axis off
+            text(0.2,.5,sprintf('%1.2f',R(i,j)),'Units','normalized','FontSize',scale*11)
+            if(p(i,j)<p_val)
+                cindex = round((1+R(i,j))*5)+1;
+                xl = [0 1];
+                yl = [0 1];
+                hp = patch([xl(1) xl(2) xl(2) xl(1)],[yl(1) yl(1) yl(2) yl(2)],colors(cindex,:));
+                hp.FaceAlpha = 0.5;
+                hp.EdgeColor = 'w';
+            end
         else
             text(0.05,.5,linewrap(names{i},10),'Units','normalized','FontSize',scale*9,'FontWeight','bold')
-            axis off
         end
+        axis off
     end
 end
-
