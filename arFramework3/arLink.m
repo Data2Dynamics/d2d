@@ -198,7 +198,9 @@ for m=1:length(ar.model)
         
         % Remove events before tstart
         for c = 1 : length( ar.model(m).condition )
-            ar.model(m).condition(c).tEvents( find( ar.model(m).condition(c).tEvents < ar.model(m).condition(c).tstart ) ) = [];
+            if ~isempty(ar.model(m).condition(c).tEvents)
+                ar.model(m).condition(c).tEvents( ar.model(m).condition(c).tEvents < ar.model(m).condition(c).tstart ) = [];
+            end
         end
         
         % Add events to tFine and tExp (if it exists)
@@ -372,7 +374,7 @@ for m = 1:length(ar.model)
             mod_id = ismember( ar.model(m).condition(c).tEvents, ...
                 ar.model(m).condition(c).modt );
             
-            if ( ~isempty( mod_id ) )
+            if ( ~isempty( mod_id ) && sum( mod_id ) > 0 )
                 modx_A(mod_id,:) = ar.model(m).condition(c).modx_A;
                 modx_B(mod_id,:) = ar.model(m).condition(c).modx_B;
                 modsx_A(mod_id,:,:) = ar.model(m).condition(c).modsx_A;
