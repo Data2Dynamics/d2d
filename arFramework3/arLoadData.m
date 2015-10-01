@@ -348,6 +348,8 @@ while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
     ar.model(m).data(d).prand{end+1} = cell2mat(C{1});
     if(strcmp(C{2}, 'INDEPENDENT'))
         ar.model(m).data(d).rand_type(end+1) = 0;
+    elseif(strcmp(C{2}, 'NORMAL'))
+        ar.model(m).data(d).rand_type(end+1) = 1;
     else
         warning('unknown random type %s', cell2mat(C{2}));  %#ok<WNTAG>
     end
