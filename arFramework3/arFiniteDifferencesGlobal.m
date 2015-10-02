@@ -18,7 +18,7 @@ if(~exist('dp', 'var'))
 end
 
 pRef = ar.p;
-arChi2(false,[]);
+arChi2(false,ar.p(ar.qFit==1));
 
 if(~isempty(ar.res))
     ar.sresFD = ar.res' * ones(1,length(pRef)) + 0;
@@ -39,7 +39,7 @@ for jp=1:length(ar.pLabel)
     % disturb p(jp)
     ar.p = pRef;
     ar.p(jp) = ar.p(jp) + dp;
-    arChi2(false,[]);
+    arChi2(false,ar.p(ar.qFit==1));
     
     if(~isempty(ar.res))
         ar.sresFD(:,jp) = (ar.res' - ar.sresFD(:,jp)) / dp + 0;
@@ -51,7 +51,7 @@ for jp=1:length(ar.pLabel)
 end
 
 ar.p = pRef;
-arChi2(true,[]);
+arChi2(true,ar.p(ar.qFit==1));
 
 arWaitbar(-1);
 

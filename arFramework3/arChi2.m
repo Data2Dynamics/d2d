@@ -93,11 +93,13 @@ ar.fevals = ar.fevals + 1;
 
 ar.ndata = 0;
 ar.nprior = 0;
+ar.nrandom = 0;
 ar.nconstr = 0;
 
 ar.chi2 = 0;
 ar.chi2err = 0;
 ar.chi2prior = 0;
+ar.chi2random = 0;
 ar.chi2constr = 0;
 ar.chi2fit = 0;
 
@@ -415,6 +417,25 @@ for jp=1:np
         ar.nprior = ar.nprior + 1;
         ar.chi2 = ar.chi2 + tmpres^2;
         ar.chi2prior = ar.chi2prior + tmpres^2;
+    end
+end
+
+% random effects
+if(isfield(ar, 'random'))
+    for j=1:length(ar.random)
+        [tmpres, tmpsres] = arRandomEffect(ar.p(ar.random{j}));
+        ar.res(resindex) = tmpres;
+        resindex = resindex+1;
+        if(ar.config.useSensis && sensi)
+            tmpsres2 = zeros(size(ar.p));
+            tmpsres2(ar.random{j}) = tmpsres;
+            ar.sres(sresindex,:) = tmpsres2;
+            sresindex = sresindex+1;
+        end
+        ar.ndata = ar.ndata + 1;
+        ar.nrandom = ar.nrandom + 1;
+        ar.chi2 = ar.chi2 + tmpres^2;
+        ar.chi2random = ar.chi2random + tmpres^2;        
     end
 end
 
