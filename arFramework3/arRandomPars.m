@@ -30,13 +30,13 @@ end
 % default matrix
 ps = ones(n,1) * ar.p;
 
-if(isfield(ar.config, 'useLHS') && ar.config.useLHS) % LHS samples
+if(isfield(ar.config, 'useLHS') && ar.config.useLHS==1) % LHS samples
     q_select = ar.qFit==1;
     psrand = lhsdesign(n,sum(q_select));
     psrand = psrand .* (ones(n,1)*(ar.ub(q_select) - ar.lb(q_select)));
     psrand = psrand + (ones(n,1)*ar.lb(q_select));
     ps(:,q_select) = psrand;
-else % random samples
+elseif(isfield(ar.config, 'useLHS') && ar.config.useLHS==2) % random samples without LHS, prior considered if available
     for jp=1:length(ar.p)
         if(ar.qFit(jp)==1)
             if(ar.type(jp)==0 || ar.type(jp)==2) % uniform prior or uniform with normal bounds
@@ -51,4 +51,10 @@ else % random samples
             end
         end
     end
+else % uniformly distributed, i.e. rand within the range [ar.lb, ar.ub]
+    q_select = ar.qFit==1;
+    psrand = rand(n,sum(q_select));
+    psrand = psrand .* (ones(n,1)*(ar.ub(q_select) - ar.lb(q_select)));
+    psrand = psrand + (ones(n,1)*ar.lb(q_select));
+    ps(:,q_select) = psrand;
 end
