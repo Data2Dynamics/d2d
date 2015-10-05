@@ -191,9 +191,9 @@ for i = 1:nCVRestart
                                 qPositiveX{m} = ar.model(m).qPositiveX;
                                 ar.model(m).qPositiveX(:) = 0;
                             else
-                                ar.config.maxsteps = (1+.2*i)*maxsteps;
+                                ar.config.maxsteps = (1+.2*(i-1))*maxsteps;
                                 if(~error_printed)
-                                    fprintf('Integration error, restarting %d / %d with 20%% increased maxsteps.\n',i,nCVRestart-1)
+                                    fprintf('Integration error, restarting %d / %d with 20%% increased maxsteps.\n',i-1,nCVRestart)
                                     error_printed = 1;
                                 end
                             end
@@ -222,7 +222,7 @@ for m=1:length(ar.model)
 end
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        if(sum(sum(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1) < -1e-10) > 0))
+        if(sum((min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) ./ range(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),1) < -ar.config.rtol) & (min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) < -ar.config.atol)) > 0)
             fprintf('Negative state in model %d condition %d detected that is defined as positive! Double-check model definition!\nPlot negative states by calling ar.model(%d).qPositiveX(:) = 0; with subsequent arPlot call.\n',m,c,m)
         end
     end
