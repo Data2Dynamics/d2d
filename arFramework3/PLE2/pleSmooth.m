@@ -1,6 +1,19 @@
-% smooth jumps to local optima
+% Smoothen jumps to local optima
+%
+% Usage: 
+%   function pleSmooth(jk, quick, point, dr)
+% 
+% Mandatory parameter:
+%   jk         parameter to smoothen
 
-function pleSmooth(jk, quick)
+% Optional parameters
+%   quick      skip selection and pick the first trial point (default = 0) 
+%   point      provide custom parameter value to start at (closest point
+%              will be chosen)
+%   dr         initial search direction (-1 or 1; required when point is 
+%              specified)
+
+function pleSmooth(jk, quick, point, dr)
 
 global pleGlobals;
 
@@ -28,6 +41,12 @@ elseif(length(jk)>1)
     return
 end
 
+if (nargin>3)
+    if (nargin<4)
+        error('Need to specify point and direction');
+    end
+end
+
 dchi2 = 0.1;
 
 if(~pleGlobals.q_fit(jk))
@@ -36,67 +55,74 @@ if(~pleGlobals.q_fit(jk))
 elseif(jk <= length(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}) && pleGlobals.IDstatus(jk)~=4)
     fprintf('\nPLE#%i smoothing for parameter %s\n', jk, pleGlobals.p_labels{jk});
     
-    trialP = zeros(0,length(pleGlobals.p));
     
+    trialP = zeros(0,length(pleGlobals.p));
+
     n = length(pleGlobals.chi2s{jk});
     chi2s = pleGlobals.chi2s{jk};
-    
     [~, globminindex] = min(chi2s);
     
-    candidateindex_down = [];
-    candidateindex_up = [];
-    % down
-    for j=globminindex:-1:2
-        crumin = chi2s(j);
-        [minchi2, minindex] = min(chi2s(1:j));
-        if(minindex == j-1 && ~isnan(minchi2) && (crumin-minchi2)>dchi2)         
-            candidateindex_down = union(candidateindex_down, minindex); %R2013a compatible
-        end
-        if(chi2s(j-1) < crumin-.01 && chi2s(j+1) < crumin-.01)
-            if chi2s(j-1) < chi2s(j+1)
-                candidateindex_down = union(candidateindex_down, j-1);
-            else
-                candidateindex_up = union(candidateindex_up, j+1);
+    if ( nargin < 3 )
+        candidateindex_down = [];
+        candidateindex_up = [];
+        % down
+        for j=globminindex:-1:2
+            crumin = chi2s(j);
+            [minchi2, minindex] = min(chi2s(1:j));
+            if(minindex == j-1 && ~isnan(minchi2) && (crumin-minchi2)>dchi2)         
+                candidateindex_down = union(candidateindex_down, minindex); %R2013a compatible
+            end
+            if(chi2s(j-1) < crumin-.01 && chi2s(j+1) < crumin-.01)
+                if chi2s(j-1) < chi2s(j+1)
+                    candidateindex_down = union(candidateindex_down, j-1);
+                else
+                    candidateindex_up = union(candidateindex_up, j+1);
+                end
             end
         end
-    end
-    
-    % up
-    for j=globminindex:1:(n-1)
-        crumin = chi2s(j);
-        [minchi2, minindex] = min(chi2s(j:n));
-        if(minindex == 2 && ~isnan(minchi2) && (crumin-minchi2)>dchi2)
-            candidateindex_up = union(candidateindex_up, (minindex+j-1)); %R2013a compatible
-        end
-    end
-    
-    direction = [ones(size(candidateindex_down)) -ones(size(candidateindex_up))];
-    candidateindex = [candidateindex_down candidateindex_up];
-    trialP = [trialP; pleGlobals.ps{jk}(candidateindex,:)]; 
-    pleGlobals.local_minima{jk} = trialP;
-  
-    if(~quick)
-        if(size(trialP,1)>1)
-            h2 = plePlot(jk, false, true, [], true, false);
-            drawnow;
-            trail_list = cell(1, size(trialP,1));
-            for jp=1:size(trialP,1)
-                trail_list{jp} = sprintf('%s = %f', pleGlobals.p_labels{jk}, trialP(jp,jk));
+
+        % up
+        for j=globminindex:1:(n-1)
+            crumin = chi2s(j);
+            [minchi2, minindex] = min(chi2s(j:n));
+            if(minindex == 2 && ~isnan(minchi2) && (crumin-minchi2)>dchi2)
+                candidateindex_up = union(candidateindex_up, (minindex+j-1)); %R2013a compatible
             end
-            result = stringListChooser(trail_list, 1, true);
+        end
+
+        direction = [ones(size(candidateindex_down)) -ones(size(candidateindex_up))];
+        candidateindex = [candidateindex_down candidateindex_up];
+        trialP = [trialP; pleGlobals.ps{jk}(candidateindex,:)]; 
+        pleGlobals.local_minima{jk} = trialP;
+
+        if(~quick)
+            if(size(trialP,1)>1)
+                h2 = plePlot(jk, false, true, [], true, false);
+                drawnow;
+                trail_list = cell(1, size(trialP,1));
+                for jp=1:size(trialP,1)
+                    trail_list{jp} = sprintf('%s = %f', pleGlobals.p_labels{jk}, trialP(jp,jk));
+                end
+                result = stringListChooser(trail_list, 1, true);
+                candidateindex = candidateindex(result);
+                trialP = trialP(result,:);
+                direction = direction(result);
+                close(h2);
+            elseif(size(trialP,1)==0)
+                fprintf('no trial point\n');
+                return
+            end
+        else
+            result = 1;
             candidateindex = candidateindex(result);
             trialP = trialP(result,:);
             direction = direction(result);
-            close(h2);
-        elseif(size(trialP,1)==0)
-            fprintf('no trial point\n');
-            return
         end
     else
-        result = 1;
-        candidateindex = candidateindex(result);
-        trialP = trialP(result,:);
-        direction = direction(result);
+        % Find closest point
+        [~,candidateindex]  = min( abs( pleGlobals.ps{jk}(:,jk) - point ) );
+        trialP              = pleGlobals.ps{jk}(candidateindex,:);
+        direction           = dr;
     end
     
     fprintf('trial point: %s = %f\n', pleGlobals.p_labels{jk}, trialP(jk));
