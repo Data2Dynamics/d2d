@@ -1381,7 +1381,7 @@ function out = mysubsrepeated(in, old, new)
 
 % better subs
 function out = mysubs(in, old, new)
-if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
+if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
     matVer = ver('MATLAB');
     try
         if(str2double(matVer.Version)>=8.1)
@@ -1938,88 +1938,88 @@ function writeCcode(fid, cond_data, svar, ip)
 global ar;
     
 if(strcmp(svar,'fv'))
-    cstr = ccode(cond_data.sym.fv(:));
+    cstr = ccode2(cond_data.sym.fv(:));
     cvar =  'data->v';
 elseif(strcmp(svar,'dvdx'))
-    cstr = ccode(cond_data.sym.dfvdx(:));
+    cstr = ccode2(cond_data.sym.dfvdx(:));
     cvar =  'data->dvdx';
 elseif(strcmp(svar,'dvdu'))
-    cstr = ccode(cond_data.sym.dfvdu(:));
+    cstr = ccode2(cond_data.sym.dfvdu(:));
     cvar =  'data->dvdu';
 elseif(strcmp(svar,'dvdp'))
-    cstr = ccode(cond_data.sym.dfvdp(:));
+    cstr = ccode2(cond_data.sym.dfvdp(:));
     cvar =  'data->dvdp';
 elseif(strcmp(svar,'fx'))
-    cstr = ccode(cond_data.sym.fx(:));
+    cstr = ccode2(cond_data.sym.fx(:));
     for j=find(cond_data.sym.fx(:)' == 0)
         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  'xdot_tmp';
 elseif(strcmp(svar,'fx0'))
-    cstr = ccode(cond_data.sym.fpx0(:));
+    cstr = ccode2(cond_data.sym.fpx0(:));
     cvar =  'x0_tmp';
 elseif(strcmp(svar,'dfxdx'))
-    cstr = ccode(cond_data.sym.dfxdx(:));
+    cstr = ccode2(cond_data.sym.dfxdx(:));
 %     for j=find(cond_data.sym.dfxdx(:)' == 0)
 %         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
 %     end
     cvar =  'J->data';
 elseif(strcmp(svar,'dfxdx_sparse'))
-    cstr = ccode(cond_data.sym.dfxdx_nonzero(:));    
+    cstr = ccode2(cond_data.sym.dfxdx_nonzero(:));    
     cvar =  'J->data';
 elseif(strcmp(svar,'fsv1'))
-    cstr = ccode(cond_data.sym.fsv1);
+    cstr = ccode2(cond_data.sym.fsv1);
     cvar =  'sv';
 elseif(strcmp(svar,'fsv2'))
-    cstr = ccode(cond_data.sym.dvdp(:,ip));
+    cstr = ccode2(cond_data.sym.dvdp(:,ip));
     cvar =  '    sv';
 elseif(strcmp(svar,'fsx'))
-    cstr = ccode(cond_data.sym.fsx);
+    cstr = ccode2(cond_data.sym.fsx);
     for j=find(cond_data.sym.fsx' == 0)
         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  'sxdot_tmp';
 elseif(strcmp(svar,'fsx0'))
-    cstr = ccode(cond_data.sym.fsx0(:,ip));
+    cstr = ccode2(cond_data.sym.fsx0(:,ip));
     cvar =  '    sx0_tmp';
 elseif(strcmp(svar,'fu'))
-    cstr = ccode(cond_data.sym.fu(:));
+    cstr = ccode2(cond_data.sym.fu(:));
     cvar =  'data->u';
 elseif(strcmp(svar,'fsu'))
-    cstr = ccode(cond_data.sym.dfudp(:));
+    cstr = ccode2(cond_data.sym.dfudp(:));
     cvar =  'data->su';
 elseif(strcmp(svar,'fz'))
-    cstr = ccode(cond_data.sym.fz(:));
+    cstr = ccode2(cond_data.sym.fz(:));
     cvar =  'z';
 elseif(strcmp(svar,'dfzdx'))
-    cstr = ccode(cond_data.sym.dfzdx(:));
+    cstr = ccode2(cond_data.sym.dfzdx(:));
     cvar =  '    dfzdxs';
 elseif(strcmp(svar,'fsz1'))
-    cstr = ccode(cond_data.sym.fsz1);
+    cstr = ccode2(cond_data.sym.fsz1);
     for j=find(cond_data.sym.fsz1' == 0)
         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  '    sz';
 elseif(strcmp(svar,'fsz2'))
-    cstr = ccode(cond_data.sym.fsz2(:));
+    cstr = ccode2(cond_data.sym.fsz2(:));
     cvar =  'sz';
 elseif(strcmp(svar,'fy'))
-    cstr = ccode(cond_data.sym.fy(:));
+    cstr = ccode2(cond_data.sym.fy(:));
     cvar =  'y';
 elseif(strcmp(svar,'y_scale'))
-    cstr = ccode(cond_data.sym.y_scale(:));
+    cstr = ccode2(cond_data.sym.y_scale(:));
     cvar =  'y_scale';
 elseif(strcmp(svar,'fystd'))
-    cstr = ccode(cond_data.sym.fystd(:));
+    cstr = ccode2(cond_data.sym.fystd(:));
     cvar =  'ystd';
 elseif(strcmp(svar,'fsy'))
-    cstr = ccode(cond_data.sym.fsy(:));
+    cstr = ccode2(cond_data.sym.fsy(:));
     cvar =  'sy';
 elseif(strcmp(svar,'fsystd'))
-    cstr = ccode(cond_data.sym.fsystd(:));
+    cstr = ccode2(cond_data.sym.fsystd(:));
     cvar =  'systd';
 elseif(strcmp(svar,'dfxdp'))
-    cstr = ccode(cond_data.sym.dfxdp(:));
+    cstr = ccode2(cond_data.sym.dfxdp(:));
     cvar =  'dfxdp';
 else
     error('unknown %s', svar);
@@ -2554,11 +2554,25 @@ function f = fetchArgs( st )
     f.func = st(1:cur);
     
 
-    function prepareBecauseOfRepeatedCompilation
-        global ar
-        for m=1:length(ar.model)
-            for d=1:length(ar.model(m).data)
-                ar.model(m).data(d).p = ar.model(m).data(d).pold;
-            end
+function prepareBecauseOfRepeatedCompilation
+    global ar
+    for m=1:length(ar.model)
+        for d=1:length(ar.model(m).data)
+            ar.model(m).data(d).p = ar.model(m).data(d).pold;
         end
+    end
         
+
+function cstr = ccode2(T)
+% R2015b compatibility fix
+    matVer = ver('MATLAB');
+    if(str2double(matVer.Version)>=8.6)
+        sym_str = sym2str(T);
+        if all(strncmp('0',sym_str,1))
+            cstr = char;
+        else
+            cstr = ccode(T);
+        end
+    else
+        cstr = ccode(T);
+    end

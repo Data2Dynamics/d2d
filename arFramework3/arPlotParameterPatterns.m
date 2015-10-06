@@ -1,3 +1,7 @@
+% Plot parameter sets from optimization run
+%
+% arPlotParameterPatterns(ps, jks, doCenter)
+
 function arPlotParameterPatterns(ps, jks, doCenter)
 
 global ar

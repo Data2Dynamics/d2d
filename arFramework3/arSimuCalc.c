@@ -1464,10 +1464,15 @@ void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *
     
     for(iy=0; iy<ny; iy++){
         res[it + (iy*nt)] = (yexp[it + (iy*nt)] - y[it + (iy*nt)]) / ystd[it + (iy*nt)] * sqrt(fiterrors_correction);
+        /* in case of missing data (nan) */
         if(mxIsNaN(yexp[it + (iy*nt)])) {
             res[it + (iy*nt)] = 0.0;
             y[it + (iy*nt)] = yexp[it + (iy*nt)];
             ystd[it + (iy*nt)] = yexp[it + (iy*nt)];
+        }
+        /* in case of Inf data after log10(0) */
+        if(mxIsInf(yexp[it + (iy*nt)])) {
+            res[it + (iy*nt)] = 0.0;
         }
         chi2[iy] += pow(res[it + (iy*nt)], 2);
     }
@@ -1478,7 +1483,12 @@ void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yex
     for(iy=0; iy<ny; iy++){
         for(ip=0; ip<np; ip++){
             sres[it + (iy*nt) + (ip*nt*ny)] = - sy[it + (iy*nt) + (ip*nt*ny)] / ystd[it + (iy*nt)] * sqrt(fiterrors_correction);
+            /* in case of missing data (nan) */
             if(mxIsNaN(yexp[it + (iy*nt)])) {
+                sres[it + (iy*nt) + (ip*nt*ny)] = 0.0;
+            }
+            /* in case of Inf data after log10(0) */
+            if(mxIsInf(yexp[it + (iy*nt)])) {
                 sres[it + (iy*nt) + (ip*nt*ny)] = 0.0;
             }
         }

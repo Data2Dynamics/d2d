@@ -25,3 +25,5 @@ arFramework3/Examples/Swameye_PNAS2003/Compiled/
 arFramework3/Examples/Swameye_PNAS2003/SBML/
 arFramework3/Examples/Swameye_PNAS2003/arSimuCalc*
 *.dat
+arFramework3\sundials-2.6.1\
+arFramework3\KLU-1.2.1\
