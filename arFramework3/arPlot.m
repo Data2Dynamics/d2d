@@ -65,7 +65,7 @@ if(evalfun)
     end
     try 
         if(silent)
-            arChi2(false, [], dynamics);
+            arChi2(false, ar.p(ar.qFit==1), dynamics);
         else
             arChi2;
         end
