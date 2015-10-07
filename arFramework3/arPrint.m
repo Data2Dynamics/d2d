@@ -96,8 +96,8 @@ pTrans(ar.qLog10==1) = 10.^pTrans(ar.qLog10==1);
  
 % Determine which parameters are close to their bounds
 qLog10 = ar.qLog10 == 1;
-ar.qCloseToBound(qLog10) = ar.p(qLog10) - ar.lb(qLog10) < ar.config.par_close_to_bound | ...
-    ar.ub(qLog10) - ar.p(qLog10) < ar.config.par_close_to_bound;
+ar.qCloseToBound(qLog10) = (ar.p(qLog10) - ar.lb(qLog10)) < ar.config.par_close_to_bound*(ar.p(qLog10) - ar.lb(qLog10)) | ...
+    (ar.ub(qLog10) - ar.p(qLog10)) < ar.config.par_close_to_bound*(ar.p(qLog10) - ar.lb(qLog10));
 qPos = ar.p>0;
 ar.qCloseToBound(~qLog10 & ~qPos) = ar.p(~qLog10 & ~qPos) - ar.lb(~qLog10 & ~qPos) < ar.config.par_close_to_bound | ...
     ar.ub(~qLog10 & ~qPos) - ar.p(~qLog10 & ~qPos) < ar.config.par_close_to_bound;
