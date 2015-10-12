@@ -39,7 +39,7 @@ ar.config.nMaxThreads = 64;
 % plotting options
 ar.config.savepath = [];
 ar.config.nFinePoints = 300;
-ar.config.par_close_to_bound = 0.1;
+ar.config.par_close_to_bound = 0.01; % notify if parameters are within 1% (relative to ub-lb)
 ar.config.nfine_dr_method = 'pchip'; %'spline';
 ar.config.nfine_dr_plot = 0; % use value >10 to enable smoothing of DR curves
 ar.config.useSuptitle = false;
