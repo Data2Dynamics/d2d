@@ -805,6 +805,26 @@ if(config.useSensis)
             end
         end
         
+        % derivatives of monotone spline3
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'monospline3('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
+                    if(strfind(ustr, 'D([3], monospline3)('))
+                        ustr = strrep(ustr, 'D([3], monospline3)(', 'Dmonospline3(');
+                        ustr = strrep(ustr, ')', ', 1)');
+                    elseif(strfind(ustr, 'D([5], monospline3)('))
+                        ustr = strrep(ustr, 'D([5], monospline3)(', 'Dmonospline3(');
+                        ustr = strrep(ustr, ')', ', 2)');
+                    elseif(strfind(ustr, 'D([7], monospline3)('))
+                        ustr = strrep(ustr, 'D([7], monospline3)(', 'Dmonospline3(');
+                        ustr = strrep(ustr, ')', ', 3)');
+                    end
+                    condition.sym.dfudp(j,j2) = sym(ustr);
+                end
+            end
+        end            
+        
         % derivatives of spline_pos3
         for j=1:length(model.u)
             if(strfind(condition.fu{j}, 'spline_pos3('))
@@ -847,6 +867,29 @@ if(config.useSensis)
                 end
             end
         end
+        
+        % derivatives of monotone spline4
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'monospline4('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
+                    if(strfind(ustr, 'D([3], monospline4)('))
+                        ustr = strrep(ustr, 'D([3], monospline4)(', 'Dmonospline4(');
+                        ustr = strrep(ustr, ')', ', 1)');
+                    elseif(strfind(ustr, 'D([5], monospline4)('))
+                        ustr = strrep(ustr, 'D([5], monospline4)(', 'Dmonospline4(');
+                        ustr = strrep(ustr, ')', ', 2)');
+                    elseif(strfind(ustr, 'D([7], monospline4)('))
+                        ustr = strrep(ustr, 'D([7], monospline4)(', 'Dmonospline4(');
+                        ustr = strrep(ustr, ')', ', 3)');
+                    elseif(strfind(ustr, 'D([9], monospline4)('))
+                        ustr = strrep(ustr, 'D([9], monospline4)(', 'Dmonospline4(');
+                        ustr = strrep(ustr, ')', ', 4)');
+                    end
+                    condition.sym.dfudp(j,j2) = sym(ustr);
+                end
+            end
+        end        
         
         % derivatives of spline_pos4
         for j=1:length(model.u)
@@ -896,6 +939,32 @@ if(config.useSensis)
                 end
             end
         end
+        
+        % derivatives of monotone spline5
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'monospline5('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
+                    if(strfind(ustr, 'D([3], monospline5)('))
+                        ustr = strrep(ustr, 'D([3], monospline5)(', 'Dmonospline5(');
+                        ustr = strrep(ustr, ')', ', 1)');
+                    elseif(strfind(ustr, 'D([5], monospline5)('))
+                        ustr = strrep(ustr, 'D([5], monospline5)(', 'Dmonospline5(');
+                        ustr = strrep(ustr, ')', ', 2)');
+                    elseif(strfind(ustr, 'D([7], monospline5)('))
+                        ustr = strrep(ustr, 'D([7], monospline5)(', 'Dmonospline5(');
+                        ustr = strrep(ustr, ')', ', 3)');
+                    elseif(strfind(ustr, 'D([9], monospline5)('))
+                        ustr = strrep(ustr, 'D([9], monospline5)(', 'Dmonospline5(');
+                        ustr = strrep(ustr, ')', ', 4)');
+                    elseif(strfind(ustr, 'D([11], monospline5)('))
+                        ustr = strrep(ustr, 'D([11], monospline5)(', 'Dmonospline5(');
+                        ustr = strrep(ustr, ')', ', 5)');
+                    end
+                    condition.sym.dfudp(j,j2) = sym(ustr);
+                end
+            end
+        end         
         
         % derivatives of spline_pos5
         for j=1:length(model.u)
@@ -963,6 +1032,47 @@ if(config.useSensis)
                 end
             end
         end
+        
+          % derivatives of monotone spline10
+        for j=1:length(model.u)
+            if(strfind(condition.fu{j}, 'monospline10('))
+                for j2=1:length(condition.sym.dfudp(j,:))
+                    ustr = char(condition.sym.dfudp(j,j2));
+                    if(strfind(ustr, 'D([3], monospline10)('))
+                        ustr = strrep(ustr, 'D([3], monospline10)(', 'Dmonospline10(');
+                        ustr = strrep(ustr, ')', ', 1)');
+                    elseif(strfind(ustr, 'D([5], monospline10)('))
+                        ustr = strrep(ustr, 'D([5], monospline10)(', 'Dmonospline10(');
+                        ustr = strrep(ustr, ')', ', 2)');
+                    elseif(strfind(ustr, 'D([7], monospline10)('))
+                        ustr = strrep(ustr, 'D([7], monospline10)(', 'Dmonospline10(');
+                        ustr = strrep(ustr, ')', ', 3)');
+                    elseif(strfind(ustr, 'D([9], monospline10)('))
+                        ustr = strrep(ustr, 'D([9], monospline10)(', 'Dmonospline10(');
+                        ustr = strrep(ustr, ')', ', 4)');
+                    elseif(strfind(ustr, 'D([11], monospline10)('))
+                        ustr = strrep(ustr, 'D([11], monospline10)(', 'Dmonospline10(');
+                        ustr = strrep(ustr, ')', ', 5)');
+                    elseif(strfind(ustr, 'D([13], monospline10)('))
+                        ustr = strrep(ustr, 'D([13], monospline10)(', 'Dmonospline10(');
+                        ustr = strrep(ustr, ')', ', 6)');
+                    elseif(strfind(ustr, 'D([15], monospline10)('))
+                        ustr = strrep(ustr, 'D([15], monospline10)(', 'Dmonospline10(');
+                        ustr = strrep(ustr, ')', ', 7)');
+                    elseif(strfind(ustr, 'D([17], monospline10)('))
+                        ustr = strrep(ustr, 'D([17], monospline10)(', 'Dmonospline10(');
+                        ustr = strrep(ustr, ')', ', 8)');
+                    elseif(strfind(ustr, 'D([19], monospline10)('))
+                        ustr = strrep(ustr, 'D([19], monospline10)(', 'Dmonospline10(');
+                        ustr = strrep(ustr, ')', ', 9)');
+                    elseif(strfind(ustr, 'D([21], monospline10)('))
+                        ustr = strrep(ustr, 'D([21], monospline10)(', 'Dmonospline10(');
+                        ustr = strrep(ustr, ')', ', 10)');
+                    end
+                    condition.sym.dfudp(j,j2) = sym(ustr);
+                end
+            end
+        end        
         
         % derivatives of spline_pos10
         for j=1:length(model.u)

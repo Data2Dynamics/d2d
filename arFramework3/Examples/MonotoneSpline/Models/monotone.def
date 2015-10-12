@@ -1,0 +1,29 @@
+DESCRIPTION
+"Basic model using stoichiometry in the reaction expressions"
+
+PREDICTOR
+t               T   min         time	0	50
+
+COMPARTMENTS
+med             V   pl          vol.    1
+
+STATES
+sA              C   mM          conc.   med     1
+
+INPUTS
+spline          C   nmol/l      conc.   "monospline10(t, 0.0, knot1, 1.0, knot2, 2.0, knot3, 4.0, knot4, 6.0, knot5, 9.0, knot6, 13.0, knot7, 20.0, knot8, 26.0, knot9, 37.0, knot10)"    "spline"
+
+REACTIONS
+            ->  sA          CUSTOM    "0"
+sA          ->              CUSTOM    "kd * sA"
+
+DERIVED
+
+OBSERVABLES
+data            C   au  conc.   0  0  "spline"
+
+ERRORS
+data            "1"
+
+CONDITIONS
+init_sA     "0"

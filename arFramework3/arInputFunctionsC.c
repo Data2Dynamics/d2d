@@ -1,5 +1,6 @@
 #include <math.h>
 #include "spline.c"
+#include "monotone.c"
 
 /* general input functions */
 double heaviside(double t) {
@@ -89,6 +90,30 @@ double spline3(double t, double t1, double p1, double t2, double p2, double t3, 
     return(uout);
 }
 
+double monospline3(double t, double t1, double p1, double t2, double p2, double t3, double p3) {   
+    double uout;
+    
+    double ts[3];
+    double us[3];
+    
+    double b[3];
+    double c[3];
+    double d[3];
+    
+    ts[0] = t1;
+    ts[1] = t2;
+    ts[2] = t3;
+    
+    us[0] = p1;
+    us[1] = p2;
+    us[2] = p3;
+
+    monotoneSpline( 3, ts, us, b, c, d );
+    uout = seval(3, t, ts, us, b, c, d);
+    
+    return(uout);
+}
+
 double spline_pos3(double t, double t1, double p1, double t2, double p2, double t3, double p3, int ss, double dudt) {   
     int is;
     double uout;
@@ -140,6 +165,32 @@ double spline4(double t, double t1, double p1, double t2, double p2, double t3, 
     us[3] = p4;
     
     spline(4, ss, 0, dudt, 0.0, ts, us, b, c, d);
+    uout = seval(4, t, ts, us, b, c, d);
+    
+    return(uout);
+}
+
+double monospline4(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4) {   
+    double uout;
+    
+    double ts[4];
+    double us[4];
+    
+    double b[4];
+    double c[4];
+    double d[4];
+    
+    ts[0] = t1;
+    ts[1] = t2;
+    ts[2] = t3;
+    ts[3] = t4;
+    
+    us[0] = p1;
+    us[1] = p2;
+    us[2] = p3;
+    us[3] = p4;
+
+    monotoneSpline( 4, ts, us, b, c, d );
     uout = seval(4, t, ts, us, b, c, d);
     
     return(uout);
@@ -200,6 +251,34 @@ double spline5(double t, double t1, double p1, double t2, double p2, double t3, 
     us[4] = p5;
     
     spline(5, ss, 0, dudt, 0.0, ts, us, b, c, d);
+    uout = seval(5, t, ts, us, b, c, d);
+    
+    return(uout);
+}
+
+double monospline5(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5) {   
+    double uout;
+    
+    double ts[5];
+    double us[5];
+    
+    double b[5];
+    double c[5];
+    double d[5];
+    
+    ts[0] = t1;
+    ts[1] = t2;
+    ts[2] = t3;
+    ts[3] = t4;
+    ts[4] = t5;
+    
+    us[0] = p1;
+    us[1] = p2;
+    us[2] = p3;
+    us[3] = p4;
+    us[4] = p5;
+
+    monotoneSpline( 5, ts, us, b, c, d );
     uout = seval(5, t, ts, us, b, c, d);
     
     return(uout);
@@ -277,6 +356,44 @@ double spline10(double t, double t1, double p1, double t2, double p2, double t3,
     return(uout);
 }
 
+double monospline10(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10) {   
+    double uout;
+    
+    double ts[10];
+    double us[10];
+    
+    double b[10];
+    double c[10];
+    double d[10];
+    
+    ts[0] = t1;
+    ts[1] = t2;
+    ts[2] = t3;
+    ts[3] = t4;
+    ts[4] = t5;
+    ts[5] = t6;
+    ts[6] = t7;
+    ts[7] = t8;
+    ts[8] = t9;
+    ts[9] = t10;
+    
+    us[0] = p1;
+    us[1] = p2;
+    us[2] = p3;
+    us[3] = p4;
+    us[4] = p5;
+    us[5] = p6;
+    us[6] = p7;
+    us[7] = p8;
+    us[8] = p9;
+    us[9] = p10;
+
+    monotoneSpline( 10, ts, us, b, c, d );
+    uout = seval(10, t, ts, us, b, c, d);
+    
+    return(uout);
+}
+
 double spline_pos10(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, int ss, double dudt) {   
     int is;
     double uout;
@@ -349,6 +466,32 @@ double Dspline3(double t, double t1, double p1, double t2, double p2, double t3,
     return(uout);
 }
 
+double Dmonospline3(double t, double t1, double p1, double t2, double p2, double t3, double p3, int id) {   
+    double uout;
+    
+    double ts[3];
+    double us[3];
+    
+    double b[3];
+    double c[3];
+    double d[3];
+    
+    ts[0] = t1;
+    ts[1] = t2;
+    ts[2] = t3;
+    
+    us[0] = 0.0;
+    us[1] = 0.0;
+    us[2] = 0.0;
+    
+    us[id-1] = 1.0;
+    
+    monotoneSpline( 3, ts, us, b, c, d );
+    uout = seval(3, t, ts, us, b, c, d);
+    
+    return(uout);
+}
+
 double Dspline_pos3(double t, double t1, double p1, double t2, double p2, double t3, double p3, int ss, double dudt, int id) {   
     
     double uout;
@@ -392,6 +535,34 @@ double Dspline4(double t, double t1, double p1, double t2, double p2, double t3,
     us[id-1] = 1.0;
     
     spline(4, ss, 0, dudt, 0.0, ts, us, b, c, d);
+    uout = seval(4, t, ts, us, b, c, d);
+    
+    return(uout);
+}
+
+double Dmonospline4(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, int id) {   
+    double uout;
+    
+    double ts[4];
+    double us[4];
+    
+    double b[4];
+    double c[4];
+    double d[4];
+    
+    ts[0] = t1;
+    ts[1] = t2;
+    ts[2] = t3;
+    ts[3] = t4;
+    
+    us[0] = 0.0;
+    us[1] = 0.0;
+    us[2] = 0.0;
+    us[3] = 0.0;
+    
+    us[id-1] = 1.0;
+    
+    monotoneSpline( 4, ts, us, b, c, d );
     uout = seval(4, t, ts, us, b, c, d);
     
     return(uout);
@@ -443,6 +614,36 @@ double Dspline5(double t, double t1, double p1, double t2, double p2, double t3,
     us[id-1] = 1.0;
     
     spline(5, ss, 0, dudt, 0.0, ts, us, b, c, d);
+    uout = seval(5, t, ts, us, b, c, d);
+    
+    return(uout);
+}
+
+double Dmonospline5(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, int id) {   
+    double uout;
+    
+    double ts[5];
+    double us[5];
+    
+    double b[5];
+    double c[5];
+    double d[5];
+    
+    ts[0] = t1;
+    ts[1] = t2;
+    ts[2] = t3;
+    ts[3] = t4;
+    ts[4] = t5;
+    
+    us[0] = 0.0;
+    us[1] = 0.0;
+    us[2] = 0.0;
+    us[3] = 0.0;
+    us[4] = 0.0;
+    
+    us[id-1] = 1.0;
+    
+    monotoneSpline( 5, ts, us, b, c, d );
     uout = seval(5, t, ts, us, b, c, d);
     
     return(uout);
@@ -505,6 +706,46 @@ double Dspline10(double t, double t1, double p1, double t2, double p2, double t3
     us[id-1] = 1.0;
     
     spline(10, ss, 0, dudt, 0.0, ts, us, b, c, d);
+    uout = seval(10, t, ts, us, b, c, d);
+    
+    return(uout);
+}
+
+double Dmonospline10(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, int id) {   
+    double uout;
+    
+    double ts[10];
+    double us[10];
+    
+    double b[10];
+    double c[10];
+    double d[10];
+    
+    ts[0] = t1;
+    ts[1] = t2;
+    ts[2] = t3;
+    ts[3] = t4;
+    ts[4] = t5;
+    ts[5] = t6;
+    ts[6] = t7;
+    ts[7] = t8;
+    ts[8] = t9;
+    ts[9] = t10;
+    
+    us[0] = 0.0;
+    us[1] = 0.0;
+    us[2] = 0.0;
+    us[3] = 0.0;
+    us[4] = 0.0;
+    us[5] = 0.0;
+    us[6] = 0.0;
+    us[7] = 0.0;
+    us[8] = 0.0;
+    us[9] = 0.0;
+    
+    us[id-1] = 1.0;
+    
+    monotoneSpline( 10, ts, us, b, c, d );
     uout = seval(10, t, ts, us, b, c, d);
     
     return(uout);
