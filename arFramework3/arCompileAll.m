@@ -784,340 +784,21 @@ if(config.useSensis)
         else
             condition.sym.dfudp = sym(ones(0,length(condition.sym.ps)));
         end
+        
+        % Replace spline derivatives
+        for j = 1 : length( model.u )
+            if ( strfind( condition.fu{j}, 'spline' ) )
+                for j2 = 1 : length( condition.sym.dfudp(j,:) )
+                    ustr = char(condition.sym.dfudp(j, j2));
+                    ustr = repSplineDer( ustr );
+                    condition.sym.dfudp(j,j2) = sym(ustr);
+                end
+            end
+        end
                 
-        % derivatives of spline3
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'spline3('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], spline3)('))
-                        ustr = strrep(ustr, 'D([3], spline3)(', 'Dspline3(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], spline3)('))
-                        ustr = strrep(ustr, 'D([5], spline3)(', 'Dspline3(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], spline3)('))
-                        ustr = strrep(ustr, 'D([7], spline3)(', 'Dspline3(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-        end
-        
-        % derivatives of monotone spline3
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'monospline3('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], monospline3)('))
-                        ustr = strrep(ustr, 'D([3], monospline3)(', 'Dmonospline3(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], monospline3)('))
-                        ustr = strrep(ustr, 'D([5], monospline3)(', 'Dmonospline3(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], monospline3)('))
-                        ustr = strrep(ustr, 'D([7], monospline3)(', 'Dmonospline3(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-        end            
-        
-        % derivatives of spline_pos3
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'spline_pos3('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], spline_pos3)('))
-                        ustr = strrep(ustr, 'D([3], spline_pos3)(', 'Dspline_pos3(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], spline_pos3)('))
-                        ustr = strrep(ustr, 'D([5], spline_pos3)(', 'Dspline_pos3(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], spline_pos3)('))
-                        ustr = strrep(ustr, 'D([7], spline_pos3)(', 'Dspline_pos3(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-        end
-        
-        % derivatives of spline4
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'spline4('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], spline4)('))
-                        ustr = strrep(ustr, 'D([3], spline4)(', 'Dspline4(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], spline4)('))
-                        ustr = strrep(ustr, 'D([5], spline4)(', 'Dspline4(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], spline4)('))
-                        ustr = strrep(ustr, 'D([7], spline4)(', 'Dspline4(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    elseif(strfind(ustr, 'D([9], spline4)('))
-                        ustr = strrep(ustr, 'D([9], spline4)(', 'Dspline4(');
-                        ustr = strrep(ustr, ')', ', 4)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-        end
-        
-        % derivatives of monotone spline4
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'monospline4('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], monospline4)('))
-                        ustr = strrep(ustr, 'D([3], monospline4)(', 'Dmonospline4(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], monospline4)('))
-                        ustr = strrep(ustr, 'D([5], monospline4)(', 'Dmonospline4(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], monospline4)('))
-                        ustr = strrep(ustr, 'D([7], monospline4)(', 'Dmonospline4(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    elseif(strfind(ustr, 'D([9], monospline4)('))
-                        ustr = strrep(ustr, 'D([9], monospline4)(', 'Dmonospline4(');
-                        ustr = strrep(ustr, ')', ', 4)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-        end        
-        
-        % derivatives of spline_pos4
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'spline_pos4('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], spline_pos4)('))
-                        ustr = strrep(ustr, 'D([3], spline_pos4)(', 'Dspline_pos4(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], spline_pos4)('))
-                        ustr = strrep(ustr, 'D([5], spline_pos4)(', 'Dspline_pos4(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], spline_pos4)('))
-                        ustr = strrep(ustr, 'D([7], spline_pos4)(', 'Dspline_pos4(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    elseif(strfind(ustr, 'D([9], spline_pos4)('))
-                        ustr = strrep(ustr, 'D([9], spline_pos4)(', 'Dspline_pos4(');
-                        ustr = strrep(ustr, ')', ', 4)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-        end
-        
-        % derivatives of spline5
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'spline5('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], spline5)('))
-                        ustr = strrep(ustr, 'D([3], spline5)(', 'Dspline5(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], spline5)('))
-                        ustr = strrep(ustr, 'D([5], spline5)(', 'Dspline5(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], spline5)('))
-                        ustr = strrep(ustr, 'D([7], spline5)(', 'Dspline5(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    elseif(strfind(ustr, 'D([9], spline5)('))
-                        ustr = strrep(ustr, 'D([9], spline5)(', 'Dspline5(');
-                        ustr = strrep(ustr, ')', ', 4)');
-                    elseif(strfind(ustr, 'D([11], spline5)('))
-                        ustr = strrep(ustr, 'D([11], spline5)(', 'Dspline5(');
-                        ustr = strrep(ustr, ')', ', 5)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-        end
-        
-        % derivatives of monotone spline5
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'monospline5('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], monospline5)('))
-                        ustr = strrep(ustr, 'D([3], monospline5)(', 'Dmonospline5(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], monospline5)('))
-                        ustr = strrep(ustr, 'D([5], monospline5)(', 'Dmonospline5(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], monospline5)('))
-                        ustr = strrep(ustr, 'D([7], monospline5)(', 'Dmonospline5(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    elseif(strfind(ustr, 'D([9], monospline5)('))
-                        ustr = strrep(ustr, 'D([9], monospline5)(', 'Dmonospline5(');
-                        ustr = strrep(ustr, ')', ', 4)');
-                    elseif(strfind(ustr, 'D([11], monospline5)('))
-                        ustr = strrep(ustr, 'D([11], monospline5)(', 'Dmonospline5(');
-                        ustr = strrep(ustr, ')', ', 5)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-        end         
-        
-        % derivatives of spline_pos5
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'spline_pos5('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], spline_pos5)('))
-                        ustr = strrep(ustr, 'D([3], spline_pos5)(', 'Dspline_pos5(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], spline_pos5)('))
-                        ustr = strrep(ustr, 'D([5], spline_pos5)(', 'Dspline_pos5(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], spline_pos5)('))
-                        ustr = strrep(ustr, 'D([7], spline_pos5)(', 'Dspline_pos5(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    elseif(strfind(ustr, 'D([9], spline_pos5)('))
-                        ustr = strrep(ustr, 'D([9], spline_pos5)(', 'Dspline_pos5(');
-                        ustr = strrep(ustr, ')', ', 4)');
-                    elseif(strfind(ustr, 'D([11], spline_pos5)('))
-                        ustr = strrep(ustr, 'D([11], spline_pos5)(', 'Dspline_pos5(');
-                        ustr = strrep(ustr, ')', ', 5)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-        end
-        
-          % derivatives of spline10
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'spline10('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], spline10)('))
-                        ustr = strrep(ustr, 'D([3], spline10)(', 'Dspline10(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], spline10)('))
-                        ustr = strrep(ustr, 'D([5], spline10)(', 'Dspline10(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], spline10)('))
-                        ustr = strrep(ustr, 'D([7], spline10)(', 'Dspline10(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    elseif(strfind(ustr, 'D([9], spline10)('))
-                        ustr = strrep(ustr, 'D([9], spline10)(', 'Dspline10(');
-                        ustr = strrep(ustr, ')', ', 4)');
-                    elseif(strfind(ustr, 'D([11], spline10)('))
-                        ustr = strrep(ustr, 'D([11], spline10)(', 'Dspline10(');
-                        ustr = strrep(ustr, ')', ', 5)');
-                    elseif(strfind(ustr, 'D([13], spline10)('))
-                        ustr = strrep(ustr, 'D([13], spline10)(', 'Dspline10(');
-                        ustr = strrep(ustr, ')', ', 6)');
-                    elseif(strfind(ustr, 'D([15], spline10)('))
-                        ustr = strrep(ustr, 'D([15], spline10)(', 'Dspline10(');
-                        ustr = strrep(ustr, ')', ', 7)');
-                    elseif(strfind(ustr, 'D([17], spline10)('))
-                        ustr = strrep(ustr, 'D([17], spline10)(', 'Dspline10(');
-                        ustr = strrep(ustr, ')', ', 8)');
-                    elseif(strfind(ustr, 'D([19], spline10)('))
-                        ustr = strrep(ustr, 'D([19], spline10)(', 'Dspline10(');
-                        ustr = strrep(ustr, ')', ', 9)');
-                    elseif(strfind(ustr, 'D([21], spline10)('))
-                        ustr = strrep(ustr, 'D([21], spline10)(', 'Dspline10(');
-                        ustr = strrep(ustr, ')', ', 10)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-        end
-        
-          % derivatives of monotone spline10
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'monospline10('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], monospline10)('))
-                        ustr = strrep(ustr, 'D([3], monospline10)(', 'Dmonospline10(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], monospline10)('))
-                        ustr = strrep(ustr, 'D([5], monospline10)(', 'Dmonospline10(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], monospline10)('))
-                        ustr = strrep(ustr, 'D([7], monospline10)(', 'Dmonospline10(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    elseif(strfind(ustr, 'D([9], monospline10)('))
-                        ustr = strrep(ustr, 'D([9], monospline10)(', 'Dmonospline10(');
-                        ustr = strrep(ustr, ')', ', 4)');
-                    elseif(strfind(ustr, 'D([11], monospline10)('))
-                        ustr = strrep(ustr, 'D([11], monospline10)(', 'Dmonospline10(');
-                        ustr = strrep(ustr, ')', ', 5)');
-                    elseif(strfind(ustr, 'D([13], monospline10)('))
-                        ustr = strrep(ustr, 'D([13], monospline10)(', 'Dmonospline10(');
-                        ustr = strrep(ustr, ')', ', 6)');
-                    elseif(strfind(ustr, 'D([15], monospline10)('))
-                        ustr = strrep(ustr, 'D([15], monospline10)(', 'Dmonospline10(');
-                        ustr = strrep(ustr, ')', ', 7)');
-                    elseif(strfind(ustr, 'D([17], monospline10)('))
-                        ustr = strrep(ustr, 'D([17], monospline10)(', 'Dmonospline10(');
-                        ustr = strrep(ustr, ')', ', 8)');
-                    elseif(strfind(ustr, 'D([19], monospline10)('))
-                        ustr = strrep(ustr, 'D([19], monospline10)(', 'Dmonospline10(');
-                        ustr = strrep(ustr, ')', ', 9)');
-                    elseif(strfind(ustr, 'D([21], monospline10)('))
-                        ustr = strrep(ustr, 'D([21], monospline10)(', 'Dmonospline10(');
-                        ustr = strrep(ustr, ')', ', 10)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-        end        
-        
-        % derivatives of spline_pos10
-        for j=1:length(model.u)
-            if(strfind(condition.fu{j}, 'spline_pos10('))
-                for j2=1:length(condition.sym.dfudp(j,:))
-                    ustr = char(condition.sym.dfudp(j,j2));
-                    if(strfind(ustr, 'D([3], spline_pos10)('))
-                        ustr = strrep(ustr, 'D([3], spline_pos10)(', 'Dspline_pos10(');
-                        ustr = strrep(ustr, ')', ', 1)');
-                    elseif(strfind(ustr, 'D([5], spline_pos10)('))
-                        ustr = strrep(ustr, 'D([5], spline_pos10)(', 'Dspline_pos10(');
-                        ustr = strrep(ustr, ')', ', 2)');
-                    elseif(strfind(ustr, 'D([7], spline_pos10)('))
-                        ustr = strrep(ustr, 'D([7], spline_pos10)(', 'Dspline_pos10(');
-                        ustr = strrep(ustr, ')', ', 3)');
-                    elseif(strfind(ustr, 'D([9], spline_pos10)('))
-                        ustr = strrep(ustr, 'D([9], spline_pos10)(', 'Dspline_pos10(');
-                        ustr = strrep(ustr, ')', ', 4)');
-                    elseif(strfind(ustr, 'D([11], spline_pos10)('))
-                        ustr = strrep(ustr, 'D([11], spline_pos10)(', 'Dspline_pos10(');
-                        ustr = strrep(ustr, ')', ', 5)');
-                    elseif(strfind(ustr, 'D([13], spline_pos10)('))
-                        ustr = strrep(ustr, 'D([13], spline_pos10)(', 'Dspline_pos10(');
-                        ustr = strrep(ustr, ')', ', 6)');
-                    elseif(strfind(ustr, 'D([15], spline_pos10)('))
-                        ustr = strrep(ustr, 'D([15], spline_pos10)(', 'Dspline_pos10(');
-                        ustr = strrep(ustr, ')', ', 7)');
-                    elseif(strfind(ustr, 'D([17], spline_pos10)('))
-                        ustr = strrep(ustr, 'D([17], spline_pos10)(', 'Dspline_pos10(');
-                        ustr = strrep(ustr, ')', ', 8)');
-                    elseif(strfind(ustr, 'D([19], spline_pos10)('))
-                        ustr = strrep(ustr, 'D([19], spline_pos10)(', 'Dspline_pos10(');
-                        ustr = strrep(ustr, ')', ', 9)');
-                    elseif(strfind(ustr, 'D([21], spline_pos10)('))
-                        ustr = strrep(ustr, 'D([21], spline_pos10)(', 'Dspline_pos10(');
-                        ustr = strrep(ustr, ')', ', 10)');
-                    end
-                    condition.sym.dfudp(j,j2) = sym(ustr);
-                end
-            end
-
-            % This function checks whether the inputs were sensible and
-            % gives a warning for problematic discontinuities in the sensitivities.
-            verifyRow( condition.sym.dfudp(j,:), condition.sym.fu(j), 'input' );
-        end
+        % This function checks whether the inputs were sensible and
+        % gives a warning for problematic discontinuities in the sensitivities.
+        verifyRow( condition.sym.dfudp(j,:), condition.sym.fu(j), 'input' );
     end
     
 	% sx
@@ -2536,6 +2217,24 @@ for j=1:length(b);
     a{j} = char(b(j));
 end
     
+% Safely map derivatives to the appropriate C functions
+%   pattern replaces D([#], func)(args) to Dfunc(args, floor(#/2)) 
+function str = repSplineDer( str )
+
+    % Pattern that matches the derivatives D([#], func)(args)
+    pattern = 'D[\(][\[](\d+)[\]][\,]\s(\w*)[\)][\(]([\[\].\s,\w]*)[\)]';
+    
+    % Compute the mask for the printf
+    % Performs regexprep which transforms D([#], name)(args) => Dname(args, %d)
+    mask = regexprep(str, pattern,'D$2($3,%d)');
+    
+    % Now the derivative IDs are computed with another
+    % regexprep (divided by two and floored)
+    chunks = regexp(str, pattern, 'match');
+    values = regexprep(chunks, pattern, '$1');
+    values = floor( cellfun(@str2num, values) / 2 );
+
+    str = sprintf( mask, values );
 
 % Replace variables in the arguments of specific functions
 function str = replaceWithinFunc(str, func, from, to)
@@ -2595,7 +2294,6 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
                 str, 'Please expression check for error.' };
         error(sprintf('%s\n', msg{:}))
     end
-
 
 % Function to scan for specific function name and extract its arguments
 function [f] = findFunc( st, funcName )
