@@ -28,7 +28,7 @@ int monotoneSpline( int n, double x[], double y[], double b[], double c[], doubl
     
     /* Degree one coefficients */
     b[0] = ms[0];
-    for ( i = 0; i < (n-2); i++ )
+    for ( i = 0; i < (n-1); i++ )
     {
         if ( ms[i]*ms[i+1] <= 0 )
             b[i+1] = 0;
