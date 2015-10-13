@@ -2222,7 +2222,7 @@ end
 function str = repSplineDer( str )
 
     % Pattern that matches the derivatives D([#], func)(args)
-    pattern = 'D[\(][\[](\d+)[\]][\,]\s(\w*)[\)][\(]([\[\].\s,\w]*)[\)]';
+    pattern = 'D[\(][\[](\d+)[\]][\,]\s(\w*)[\)][\(]([\[\]\-\.\s,\w]*)[\)]';
     
     % Compute the mask for the printf
     % Performs regexprep which transforms D([#], name)(args) => Dname(args, %d)

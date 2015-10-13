@@ -244,7 +244,7 @@ if(savetofile && exist(pleGlobals.savePath, 'dir'))
     end
     
     if(which('plot2svg'))
-        plot2svg([savePath '.svg'],h)
+%        plot2svg([savePath '.svg'],h)
     end
     
 end
