@@ -137,17 +137,18 @@ function [olist names m] = arFindData( varargin )
             % Is it in the condition variable list?
             ID = find( strcmp( ar.model(m).data(olist(a)).pold, varargin(c) ) );
             if ( ~isempty(ID) )
-                val = str2double(ar.model.data(olist(a)).fp{ID});
+                val = str2num(ar.model.data(olist(a)).fp{ID}); %#ok
                 % Is it a value?
                 if ~isempty(val)
                     condList(c) = 0;
                     % Does it pass? If so ==> OK
                     chk = varargin{c+1};
                     if ( ~isnumeric(chk) )
-                        chk = str2double( chk );
+                        chk = str2num( chk ); %#ok
                     end
                     
                     if ( val ~= chk )
+                        disp('Failed filter');
                         filt(a) = 0;
                     end
                 else
