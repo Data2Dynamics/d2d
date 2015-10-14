@@ -148,7 +148,6 @@ function [olist names m] = arFindData( varargin )
                     end
                     
                     if ( val ~= chk )
-                        disp('Failed filter');
                         filt(a) = 0;
                     end
                 else
