@@ -798,7 +798,9 @@ if(config.useSensis)
                 
         % This function checks whether the inputs were sensible and
         % gives a warning for problematic discontinuities in the sensitivities.
-        verifyRow( condition.sym.dfudp(j,:), condition.sym.fu(j), 'input' );
+        for j = 1 : length( model.u )
+            verifyRow( condition.sym.dfudp(j,:), condition.sym.fu(j), 'input' );
+        end
     end
     
 	% sx
