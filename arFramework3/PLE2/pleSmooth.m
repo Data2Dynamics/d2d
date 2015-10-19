@@ -5,7 +5,7 @@
 % 
 % Mandatory parameter:
 %   jk         parameter to smoothen
-
+%
 % Optional parameters
 %   quick      skip selection and pick the first trial point (default = 0) 
 %   point      provide custom parameter value to start at (closest point
