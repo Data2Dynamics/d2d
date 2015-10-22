@@ -11,10 +11,32 @@
 % type		0=box prior, 1=normal prior
 % meanp		mean of normal prior
 % stdp		standard deviation of normal prior
+% 
+% Alternative call:
+% arSetPars(arStruct2)
+% 
+%   In this case, the respective argumens are taken from the provided
+%   ar-struct.
 
-function arSetPars(pLabel, p, qFit, qLog10, lb, ub, type, meanp, stdp)
+function arSetPars(pLabel_or_ar, p, qFit, qLog10, lb, ub, type, meanp, stdp)
 
 global ar
+
+if(nargin==1 && isstruct(pLabel_or_ar))
+    arIn    = pLabel_or_ar;
+    pLabel  = arIn.pLabel;
+    p       = arIn.p;
+    qFit    = arIn.qFit;
+    qLog10  = arIn.qLog10;
+    lb      = arIn.lb;
+    ub      = arIn.ub;
+    type    = arIn.type;
+    meanp   = arIn.mean;
+    stdp    = arIn.std;    
+else
+    pLabel = pLabel_or_ar;
+end
+    
 
 if(isempty(ar))
     error('please initialize by arInit')
