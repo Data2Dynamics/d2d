@@ -60,11 +60,7 @@ if replaceOld
     ar.exitflag = nan(1,n);
     ar.timing = nan(1,n);
     ar.fun_evals = nan(1,n);
-    ar.iter = nan(1,n);
     ar.optim_crit = nan(1,n);
-    if(ar.config.logFitting) 
-        ar.optimLogs = cell(1,n);
-    end
 else
     ar.ps_start(dop,:) = ps(dop,:);
     ar.ps(dop,:) = nan(size(ps(dop,:)));
@@ -76,16 +72,7 @@ else
     ar.exitflag(dop) = nan(1,size(ps(dop,:),1));
     ar.timing(dop) = nan(1,size(ps(dop,:),1));
     ar.fun_evals(dop) = nan(1,size(ps(dop,:),1));
-    ar.iter(dop) = nan(1,size(ps(dop,:),1));
     ar.optim_crit(dop) = nan(1,size(ps(dop,:),1));
-    if(ar.config.logFitting) 
-        if(~isfield(ar,'optimLogs'))
-            ar.optimLogs = cell(1,n);
-        else
-            ar.optimLogs(dop) = cell(1,length(dop));
-        end
-    end
-
 end
 
 arChi2(true,ar.p(ar.qFit==1));
@@ -115,17 +102,12 @@ for j=1:n
         ar.chi2sconstr(dop(j)) = ar.chi2constr;
         ar.exitflag(dop(j)) = ar.fit.exitflag;
         ar.fun_evals(dop(j)) = ar.fit.fevals;
-        ar.iter(dop(j)) = ar.fit.iter;
         ar.optim_crit(dop(j)) = ar.firstorderopt;
     catch exception
         ar.ps_errors(dop(j),:) = ar.p;
         fprintf('fit #%i: %s\n', dop(j), exception.message);
     end
     ar.timing(dop(j)) = toc;
-    if(isfield(ar.fit,'optimLog'))  % coincides with ar.config.logFitting
-        ar.optimLogs{dop(j)} = ar.fit.optimLog;
-    end
-        
     if(log_fit_history)
         name = ar.config.optimizers{ar.config.optimizer};
         if(ar.config.optimizer==5)

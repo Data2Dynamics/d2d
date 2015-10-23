@@ -51,19 +51,8 @@ end
 if(~isfield(ar.config, 'showFitting'))
     ar.config.showFitting = 0;
 end
-if(~isfield(ar.config, 'logFitting'))
-    ar.config.logFitting = 0;
-end
-ar.config.optim.OutputFcn = cell(0);
-if(ar.config.logFitting)
-    ar.config.optim.OutputFcn = [ar.config.optim.OutputFcn, {@arLogFitDetailed}];
-elseif(isfield(ar,'fit'));
-    if(isfield(ar.fit,'optimLog'))
-        ar.fit = rmfield(ar.fit,'optimLog');
-    end
-end
 if(ar.config.showFitting)
-    ar.config.optim.OutputFcn = [ar.config.optim.OutputFcn, {@arPlotFast}];
+    ar.config.optim.OutputFcn = @arPlotFast;
 end
 
 if(ar.config.useSensis)
@@ -206,9 +195,6 @@ fit.qFit = ar.qFit;
 fit.res = resnorm;
 fit.sres = full(jac);
 fit.improve = chi2_old - ar.chi2fit;
-if(isfield(ar,'fit') && isfield(ar.fit,'optimLog'))
-    fit.optimLog = ar.fit.optimLog;
-end
 
 ar.fit = fit;
 
@@ -394,8 +380,6 @@ function arLogFit(ar)
 
 global fit
 
-fit.fevals = fit.fevals + 1;
-
 if(fit.iter_count>0)
     if((ar.chi2fit+ar.chi2constr) > (fit.chi2_hist(fit.iter_count) + ...
             fit.constr_hist(fit.iter_count)))
@@ -411,31 +395,6 @@ fit.maxstepsize_hist(fit.iter_count+1) = nan;
 if(fit.iter_count>0)
     fit.stepsize_hist(fit.iter_count+1) = norm(fit.p_hist(fit.iter_count,:) - ar.p);
 end
+
 fit.iter_count = fit.iter_count + 1;
-
-
-function stop = arLogFitDetailed(x,optimValues,state)
-stop = false;
-global ar
-
-if(ar.config.optimizer ==1)
-    fn = {'iteration','funccount','stepsize','firstorderopt','cgiterations','positivedefinite','ratio','degenerate','trustregionradius','resnorm','gradient_norm'};
-end
-
-optimValues.gradient_norm = norm(optimValues.gradient);
-% optimValues.x = x;
-% optimValues = rmfield(optimValues,'gradient');
-% optimValues = rmfield(optimValues,'residual');
-switch state
-    case 'init'
-        ar.fit.optimLog.values = NaN(ar.config.optim.MaxIter,length(fn));
-        ar.fit.optimLog.labels = fn;
-    case 'iter'
-        for i=1:length(fn)
-            ar.fit.optimLog.values(optimValues.funccount,i) = optimValues.(fn{i});
-        end
-    case 'done'
-        ar.fit.optimLog.values = ar.fit.optimLog.values(sum(~isnan(ar.fit.optimLog.values),2)>0,:);
-    otherwise
-end
-
+fit.fevals = fit.fevals + 1;
