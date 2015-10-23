@@ -725,6 +725,23 @@ for j=1:length(model.vs)
 end
 condition.sym.dvdp = sym(condition.dvdp);
 
+% do we have variable volumes?
+if ( ~isempty( symvar( condition.sym.C ) ) )
+    % This warning is a temporary solution, a permanent solution would be 
+    % to properly add these terms to the right hand side function of the sensitivity
+    % equations (see sections fsx, fsv1, fsv2), but this may require
+    % additional refactoring.
+    warning( 'Variable volume detected. Sensitivities for variable volumes are still in an experimental stage' );
+    warning( 'Setting config.useSensiRHS to zero as this is currently not supported in this mode.' );
+    global ar;
+    ar.config.useSensiRHS = 0;
+    
+    for a = 1 : length( condition.sym.p )
+        condition.sym.dcdpv(:,a) = (diff(model.N.*condition.sym.C, condition.sym.p(a)))*condition.sym.fv;
+    end
+    condition.sym.dcdpv = mysubs(condition.sym.dcdpv, condition.sym.p, condition.sym.ps);
+end
+
 % make equations
 condition.sym.C = mysubs(condition.sym.C, condition.sym.p, condition.sym.ps);
 condition.sym.fx = (model.N .* condition.sym.C) * transpose(model.sym.vs);
@@ -840,6 +857,11 @@ if(config.useSensis)
     else
         condition.sym.dfxdp = (model.N .* condition.sym.C) * (condition.sym.dvdp + ...
             condition.sym.dvdx*condition.sym.fsx0);
+    end
+
+    % Add variable volume terms here
+    if (isfield(condition.sym, 'dcdpv'))
+        condition.sym.dfxdp = condition.sym.dfxdp + condition.sym.dcdpv;
     end
     
     % derivatives fz

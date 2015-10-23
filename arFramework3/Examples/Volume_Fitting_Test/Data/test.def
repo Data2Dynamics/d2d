@@ -1,0 +1,19 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	0 
+
+INPUTS
+
+OBSERVABLES
+sAA 	C   au	conc.	0  0	"AA"
+sBB     C   au	conc.       0  0	"BB"
+sCC     C   au	conc.       0  0	"CC"
+
+ERRORS    
+sAA	".01"
+sBB	".01"
+sCC	".01"
+        
+CONDITIONS
+
