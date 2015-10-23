@@ -2,13 +2,11 @@
 % as a vector.
 %
 % Usage:
-%   arFindPar( (ar), names, (returnNames), (verbose), (dynamic), (exact) )
+%   arFindPar( (ar), names, (returnNames), (verbose), (dynamic) )
 %
 % Example:
 %   arFindPar( ar, 'degrad' )
 %       Returns all parameter IDs containing "degrad" in the name
-%   arFindPar( ar, 'degrad', 'exact' )
-%       Returns the parameter ID corresponding to the parameter named degrad
 %   arFindPar( ar, {'degrad', 'pro'} )
 %       Returns all parameter IDs whose name contains "degrad" or "pro"
 %   arFindPar( ar, {'degrad', 'pro'}, 'names' )
@@ -44,23 +42,14 @@ function olist = arFindPar( varargin )
         string = varargin{1};
     end
 
-    opts = argSwitch( {'names', 'verbose', 'dynamic', 'exact'}, varargin{2:end} );
+    opts = argSwitch( {'names', 'verbose', 'dynamic'}, varargin{2:end} );
 
     list = ar.pLabel;
     
     olist    = [];
     for b = 1 : length( string )
         for a = 1 : length( list )
-            if ( opts.exact )
-                if strcmp(lower(list{a}), lower(string{b}) )
-                    l = 1;
-                else
-                    l = [];
-                end
-            else
-                l = strfind(lower(list{a}), lower(string{b}) );
-            end
-            if ~isempty( l )
+            if ~isempty( strfind(lower(list{a}), lower(string{b}) ) )
                 if (~opts.dynamic || ar.qDynamic(a))
                     olist = union( olist, a );
                 end

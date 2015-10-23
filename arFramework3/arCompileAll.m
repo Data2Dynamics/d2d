@@ -610,7 +610,7 @@ varlist = symvar(condition.sym.fpx0);
 condition.px0 = sym2str(varlist);
 
 % remaining parameters
-varlist = union( symvar([condition.sym.fv(:); condition.sym.fu(:); condition.sym.fz(:); condition.sym.fpx0(:)]), symvar( condition.sym.C ) );
+varlist = symvar([condition.sym.fv(:); condition.sym.fu(:); condition.sym.fz(:); condition.sym.fpx0(:)]);
 condition.pold = condition.p;
 condition.p = setdiff(setdiff(setdiff(setdiff(sym2str(varlist), model.x), model.u), model.z), 't');
 condition.dfxdx_rowVals = [];

@@ -34,16 +34,12 @@ if(~ispc)
     leer = find(isspace(cmdout)==1);
     cmdout = cmdout(1:leer(2));
     ar.info.revision = cmdout;
-    cmdout = [];
-    leer = [];
 else
     ar_path = strrep(which('arInit.m'),'\arFramework3\arInit.m','');
     [~,cmdout] = system(['hg summary -R ',ar_path]);
     leer = find(isspace(cmdout)==1);
     cmdout = cmdout(1:leer(2));
     ar.info.revision = cmdout;
-    cmdout = [];
-    leer = [];
 end
 
 ar.config.checkForNegFluxes = true;

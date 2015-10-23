@@ -387,7 +387,7 @@ double monospline10(double t, double t1, double p1, double t2, double p2, double
     us[7] = p8;
     us[8] = p9;
     us[9] = p10;
-    
+
     monotoneSpline( 10, ts, us, b, c, d );
     uout = seval(10, t, ts, us, b, c, d);
     

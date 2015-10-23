@@ -17,7 +17,7 @@ int monotoneSpline( int n, double x[], double y[], double b[], double c[], doubl
     double dy[10];
     double dx[10];
     double ms[10];
-    
+        
     /* Slopes and differences */
     for ( i = 0; i < (n-1); i++ )
     {
@@ -28,7 +28,7 @@ int monotoneSpline( int n, double x[], double y[], double b[], double c[], doubl
     
     /* Degree one coefficients */
     b[0] = ms[0];
-    for ( i = 0; i < (n-2); i++ )
+    for ( i = 0; i < (n-1); i++ )
     {
         if ( ms[i]*ms[i+1] <= 0 )
             b[i+1] = 0;
@@ -38,7 +38,7 @@ int monotoneSpline( int n, double x[], double y[], double b[], double c[], doubl
             b[i+1] = (3*common/((common + dx[i+1])/ms[i] + (common+dx[i])/(ms[i+1])));
         }
     }
-    b[n-1] = ms[n-2];
+    b[n-1] = ms[n-1];
     
 	/* Degree two and three coefficients */
 	for ( i = 0; i < (n-1); i++ )
@@ -51,8 +51,6 @@ int monotoneSpline( int n, double x[], double y[], double b[], double c[], doubl
         c[i] = (m-coeff-common)*invDx;
         d[i] = (common*invDx*invDx);
 	}
-    c[n-1] = 0;
-    d[n-1] = 0;
         
     return 1;
 }
