@@ -104,6 +104,7 @@ end
 
 % initial setup
 ar.model(m).data(d).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
+ar.model(m).data(d).uNames = {};
 
 fprintf('\nloading data #%i, from file Data/%s.def...', d, name);
 fid = fopen(['Data/' name '.def'], 'r');
@@ -207,7 +208,7 @@ else
     ar.model(m).data(d).logplotting = [];
     ar.model(m).data(d).fy = {};
 end
-ar.model(m).data(d).uNames = {};
+
 C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'ERRORS'))
     qyindex = ismember(ar.model(m).data(d).y, C{1});
