@@ -727,19 +727,12 @@ condition.sym.dvdp = sym(condition.dvdp);
 
 % do we have variable volumes?
 if ( ~isempty( symvar( condition.sym.C ) ) )
-    % This warning is a temporary solution, a permanent solution would be 
-    % to properly add these terms to the right hand side function of the sensitivity
-    % equations (see sections fsx, fsv1, fsv2), but this may require
-    % additional refactoring.
     warning( 'Variable volume detected. Sensitivities for variable volumes are still in an experimental stage' );
-    warning( 'Setting config.useSensiRHS to zero as this is currently not supported in this mode.' );
-    global ar;
-    ar.config.useSensiRHS = 0;
     
     for a = 1 : length( condition.sym.p )
-        condition.sym.dcdpv(:,a) = (diff(model.N.*condition.sym.C, condition.sym.p(a)))*condition.sym.fv;
+        condition.sym.dfcdp(:,a) = (diff(model.N.*condition.sym.C, condition.sym.p(a)))*condition.sym.fv;
     end
-    condition.sym.dcdpv = mysubs(condition.sym.dcdpv, condition.sym.p, condition.sym.ps);
+    condition.sym.dfcdp = mysubs(condition.sym.dfcdp, condition.sym.p, condition.sym.ps);
 end
 
 % make equations
@@ -860,8 +853,8 @@ if(config.useSensis)
     end
 
     % Add variable volume terms here
-    if (isfield(condition.sym, 'dcdpv'))
-        condition.sym.dfxdp = condition.sym.dfxdp + condition.sym.dcdpv;
+    if (isfield(condition.sym, 'dfcdp'))
+        condition.sym.dfxdp = condition.sym.dfxdp + condition.sym.dfcdp;
     end
     
     % derivatives fz
@@ -1548,6 +1541,8 @@ if(config.useSensiRHS)
             fprintf(fid, '  double *dvdx = data->dvdx;\n');
             fprintf(fid, '  double *dvdu = data->dvdu;\n');
             fprintf(fid, '  double *dvdp = data->dvdp;\n');
+            fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
+            
             fprintf(fid, '  double *su = data->su;\n');
             % 	fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
             fprintf(fid, '  double *sx_tmp = N_VGetArrayPointer(sx);\n');
@@ -1574,6 +1569,24 @@ if(config.useSensiRHS)
             end
             fprintf(fid, '  }\n');
             writeCcode(fid, condition, 'fsx');
+            
+            % Add sensitivity RHS contributions corresponding to the compartment volumes
+            if ( isfield( condition.sym, 'dfcdp' ) )
+                for svs = 1 : length(condition.sym.fsx)
+                    sxdot_tmp{svs} = sprintf( 'sxdot_tmp[%d]', svs );
+                end
+                sxdot_tmp = sym(repmat(sxdot_tmp, size(condition.sym.dvdp,2), 1));
+                condition.sym.dfcdp2 = (sxdot_tmp.' + condition.sym.dfcdp);
+                
+                disp( 'Encoding volume changes...' );
+                fprintf(fid, '  switch (ip) {\n');
+                for j2=1:size(condition.sym.dvdp,2)
+                    fprintf(fid, '    case %i: {\n', j2-1);
+                    writeCcode(fid, condition, 'dfcdp2', j2);
+                    fprintf(fid, '    } break;\n');
+                end
+                fprintf(fid, '  }\n');
+            end
             
             fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(model.xs));
             fprintf(fid, '    if(mxIsNaN(sxdot_tmp[is])) sxdot_tmp[is] = 0.0;\n');
@@ -1794,6 +1807,9 @@ elseif(strcmp(svar,'fsx'))
         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  'sxdot_tmp';
+elseif(strcmp(svar,'dfcdp2'))
+    cstr = ccode2(cond_data.sym.dfcdp2(:,ip));
+    cvar =  'sxdot_tmp';    
 elseif(strcmp(svar,'fsx0'))
     cstr = ccode2(cond_data.sym.fsx0(:,ip));
     cvar =  '    sx0_tmp';
