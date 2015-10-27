@@ -167,16 +167,22 @@ str = textscan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(~strcmp(str{1},'INPUTS'))
     error('parsing data %s for INPUTS', name);
 end
-C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+C = textscan(fid, '%s %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).fu = ar.model(m).fu;
 while(~strcmp(C{1},'OBSERVABLES'))
     qu = ismember(ar.model(m).u, C{1}); %R2013a compatible
     if(sum(qu)~=1)
         error('unknown input %s', cell2mat(C{1}));
     end
+    % Input replacement description
     ar.model(m).data(d).fu(qu) = C{2};
+    if(~isempty(cell2mat(C{3})))
+        ar.model(m).data(d).uNames(end+1) = C{3};
+    else
+        ar.model(m).data(d).uNames{end+1} = '';
+    end
     
-    C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    C = textscan(fid, '%s %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 % input parameters
