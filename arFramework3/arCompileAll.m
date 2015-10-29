@@ -2416,7 +2416,7 @@ function cstr = ccode2(T)
     matVer = ver('MATLAB');
     if(str2double(matVer.Version)>=8.6)
         sym_str = sym2str(T);
-        if all(strncmp('0',sym_str,1))
+        if all(strcmp('0',sym_str))
             cstr = char;
         else
             cstr = ccode(T);
