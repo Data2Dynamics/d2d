@@ -53,9 +53,7 @@ if ar.config.restartLHS ==1 && isempty(randomseed)
     while ~isempty(indnan) && counter<10
         counter = counter+1;
     
-        fprintf('Repeat fits');
-        fprintf('%i, ',indnan);
-        fprintf('\n');
+        fprintf('Repeat fits %i\n', indnan);
 
         ar.lhsRepeats(indnan) = ar.lhsRepeats(indnan) +1;
         

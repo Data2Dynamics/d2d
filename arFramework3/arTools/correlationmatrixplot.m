@@ -1,4 +1,4 @@
-function f = correlationmatrixplot(A,names,p_val)
+function f = correlationmatrixplot(A,names,p_val,corr_type)
 %CORRELATIONMATRIXPLOT
 %
 % 2015 Max Schelker
@@ -6,15 +6,20 @@ function f = correlationmatrixplot(A,names,p_val)
 if(~exist('p_val','var'))
     p_val = 0.01;
 end
+if(~exist('corr_type','var'))
+    corr_type = 'Pearson';
+end
+
 
 scale = 10/size(A,1);
 f = figure('Name','Correlation matrix');
 f.Color = 'w';
 
 colors = redwhiteblue(11);
-[R,p] = corr(A');
+[R,p] = corr(A','type',corr_type);
 R(isnan(R)) = 0;
 p(isnan(p)) = 1;
+
 
 l = 0;
 for i=1:size(A,1)
@@ -41,7 +46,7 @@ for i=1:size(A,1)
             scatter(A(i,:),A(j,:),'.k');
             hold off
         elseif i<j
-            text(0.2,.5,sprintf('%1.2f',R(i,j)),'Units','normalized','FontSize',scale*11)
+            text(0.25,0.5,sprintf('%1.2f',R(i,j)),'Units','normalized','FontSize',scale*10)
             if(p(i,j)<p_val)
                 cindex = round((1+R(i,j))*5)+1;
                 xl = [0 1];
