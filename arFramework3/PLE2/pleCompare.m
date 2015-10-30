@@ -19,9 +19,20 @@ if(nargin==0) || (isempty(ples) || isempty(labels))
     end
 end
 
-if(isempty(ples))
-    return;
+drin = [];
+for i=1:length(ples)
+    if(~isempty(ples{i}.ps))
+        drin = [drin,i];
+    end
 end
+if(isempty(drin))
+    warning('pleCompare.m: No calculated ples provided!')
+    return
+else
+    ples = ples(drin);
+    labels = labels(drin);
+end
+
 
 pLabels = {};
 for j=1:length(ples)
@@ -55,8 +66,15 @@ for j=1:length(pLabels)
        %  
         if(~isempty(qj) && size(ples{jple}.ps,2)>=qj && ~isempty(ples{jple}.ps{qj}))
             % profile
-            hs(jple) = plot(ples{jple}.ps{qj}(:,qj), (ples{jple}.chi2s{qj} - ples{jple}.chi2)/dchi2, 'Color', colors(jple,:), ...
-                'LineWidth', 2);
+            if(length(ples)==2 & jple==2)
+                lw = 1;
+                marker = 'o';
+            else
+                lw = 2;
+                marker = '.';
+            end
+            hs(jple) = plot(ples{jple}.ps{qj}(:,qj), (ples{jple}.chi2s{qj} - ples{jple}.chi2)/dchi2, marker,'Color', colors(jple,:), ...
+                'LineWidth', lw);
             hold on
             
             % optimum

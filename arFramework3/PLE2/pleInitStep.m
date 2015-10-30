@@ -1,7 +1,7 @@
 % adaptive step reconciling chi^2 increase
 % progressive step method
 
-function [pStep, dpNew, beta, alpha] = pleInitStep(jk, pLast, dpLast)
+function [pStep, dpNew, beta, alpha] = pleInitStep(jk, pLast, dpLast, lastAll)
 
 global pleGlobals;
 

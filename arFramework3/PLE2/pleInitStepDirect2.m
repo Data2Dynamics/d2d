@@ -1,7 +1,16 @@
 % adaptive step reconciling chi^2 increase
 % direct step method
+% 
+%   The new functionality enters after five steps.
+%   The idea is to use previous chi2-increase to predict how many steps are
+%   necessary to cross the threshold. If this exceeds the samplesize, the
+%   stepsize is increase by a factor sqrt(2).
+% 
+%   last.dx      previous stepsize      [not used here, but provided for
+%                                           alternative strategies]
+%   last.dy   previous chi2-change
 
-function [pStep, dpNew, beta, alpha] = pleInitStepDirect(jk, pLast, dpLast, lastAll)
+function [pStep, dpNew, beta, alpha] = pleInitStepDirect2(jk, pLast, dpLast, last)
 
 global pleGlobals;
 
@@ -43,6 +52,19 @@ while(true)
         fprintf('\t%s\n', pleGlobals.p_labels{(q_hit_lb | q_hit_ub) & q_not_jk})
         pStep = nan(size(pLast));
         return
+    elseif sum(~isnan(last.dx))>5  % if >5 last values are available
+        ub = pleGlobals.ub(jk);
+        lb = pleGlobals.lb(jk);
+        ytarget = icdf('chi2',0.95,1)*1.2;
+        minx = pleGlobals.minstepsize(jk);
+        maxx = pleGlobals.maxstepsize(jk);
+        ss = pleGlobals.samplesize(jk);
+
+        dpNew = profileStepControl(last,lb,ub,ytarget,minx,maxx,ss);
+
+        pStep(jk) = dpNew;
+        return
+            
     else
         feval(pleGlobals.integrate_fkt, pLast+pStep);
         chi2trial = feval(pleGlobals.merit_fkt);
@@ -50,7 +72,7 @@ while(true)
         if(chi2trial-chi2last > dchi2*pleGlobals.relchi2stepincrease(jk))
             dpNew = dpNew / stepfaktor;
             if(abs(dpNew)<pleGlobals.minstepsize(jk))
-                fprintf('WARNING: could not control step size (minstepsize = %e)\n', pleGlobals.minstepsize(jk))
+%                 fprintf('WARNING: could not control step size (minstepsize = %e)\n', pleGlobals.minstepsize(jk))
                 dpNew = dpNew * stepfaktor;
                 return
             end

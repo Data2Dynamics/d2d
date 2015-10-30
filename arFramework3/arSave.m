@@ -10,7 +10,7 @@
 
 function basepath = arSave(name, withSyms)
 
-global ar
+global ar pleGlobals
 
 if(~exist('withSyms','var'))
     withSyms = false;
@@ -26,7 +26,7 @@ if(isempty(ar.config.savepath)) % never saved before, ask for name
         ar.config.savepath = ['./Results/' datestr(now, 30) '_noname'];
     end
     arSaveFull(withSyms);
-    arSaveParOnly(ar, ar.config.savepath);
+    arSaveParOnly(ar, ar.config.savepath, pleGlobals);
 else
     if(exist('name','var')) % saved before, but new name give
         if(~strcmp(name, 'current'))
@@ -37,7 +37,7 @@ else
             end
         end
         arSaveFull(withSyms);
-        arSaveParOnly(ar, ar.config.savepath);
+        arSaveParOnly(ar, ar.config.savepath, pleGlobals);
         
     else
         if(nargout == 0) % saved before, ask for new name give
@@ -49,13 +49,13 @@ else
             end
             
             arSaveFull(withSyms);     
-            arSaveParOnly(ar, ar.config.savepath);
+            arSaveParOnly(ar, ar.config.savepath, pleGlobals);
         else
             if(~exist(ar.config.savepath, 'dir')) 
                 % saved before, path output requested, 
                 % however save path does not exist anymore
                 arSaveFull(withSyms);
-                arSaveParOnly(ar, ar.config.savepath);
+                arSaveParOnly(ar, ar.config.savepath, pleGlobals);
             end
         end
     end
@@ -100,7 +100,16 @@ fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
 
 
 % save only parameters
-function arSaveParOnly(ar2, savepath)
+function arSaveParOnly(ar2, savepath, pleGlobals2)
+if nargin>2
+    if(isfield(pleGlobals2,'chi2s'))
+        pleGlobals.chi2s = pleGlobals2.chi2s;
+    else
+        pleGlobals = [];
+    end
+else
+    pleGlobals = [];
+end
 ar = struct([]);
 ar(1).pLabel = ar2.pLabel;
 ar.p = ar2.p;
@@ -134,10 +143,10 @@ try %#ok<TRYNC>
     ar.ps_sorted = ar2.ps_sorted;
     ar.chi2s_start_sorted = ar2.chi2s_start_sorted;
     ar.chi2sconstr_start_sorted = ar2.chi2sconstr_start_sorted;
-    ar.ps_start_sorted = ar2.ps_start_sorted;
+    ar.ps_start_sorted = ar2.ps_start_sorted;        
 end
 ar.config.fiterrors = ar2.config.fiterrors; %#ok<STRNU>
-save([savepath '/workspace_pars_only.mat'],'ar','-v7.3');
+save([savepath '/workspace_pars_only.mat'],'ar','pleGlobals','-v7.3');
 
 
 
