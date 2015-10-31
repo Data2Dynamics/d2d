@@ -19,13 +19,13 @@ function arFitLHS(n, randomseed, log_fit_history, backup_save, use_cluster)
 if(~exist('n','var'))
     n = 10;
 end
-if(~exist('randomseed','var'))
+if(~exist('randomseed','var') || isempty(randomseed))
     randomseed = [];
 end
-if(~exist('log_fit_history','var'))
+if(~exist('log_fit_history','var') || isempty(log_fit_history))
     log_fit_history = false;
 end
-if(~exist('backup_save','var'))
+if(~exist('backup_save','var') || isempty(backup_save))
     backup_save = false;
 end
 if(~exist('use_cluster','var'))
