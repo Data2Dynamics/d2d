@@ -78,4 +78,4 @@ else
     end
 end
 
-
+ar.LhsSampleSizeCalculation = arLhsSampleSizeCalculation;
