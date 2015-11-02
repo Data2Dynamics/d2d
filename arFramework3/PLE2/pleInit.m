@@ -17,16 +17,21 @@
 % stdalpha:                  confidence level in standard deviation [1] = 68%
 
 function pleInit(p, q_fit, lb, ub, q_log10, integrate_fkt, merit_fkt, ...
-    diffmerit_fkt, fit_fkt, setoptim_fkt, p_labels, alpha)
+    diffmerit_fkt, fit_fkt, setoptim_fkt, p_labels, alpha, force)
+if(~exist('force','var') || isempty(force))
+    force = true;
+end
 
 global pleGlobals;
-pleGlobals = struct('p', p, 'q_fit', q_fit, 'lb', lb, 'ub', ub, ...
-    'q_log10', q_log10, ...
-    'integrate_fkt', integrate_fkt, 'merit_fkt', merit_fkt, ...
-    'diffmerit_fkt', diffmerit_fkt, 'fit_fkt', fit_fkt, ...
-    'setoptim_fkt', setoptim_fkt, ...
-    'initstep_fkt', @pleInitStep, ...
-    'dof', sum(q_fit), 'dof_point', 1);
+if(~isstruct(pleGlobals) || force)
+    pleGlobals = struct('p', p, 'q_fit', q_fit, 'lb', lb, 'ub', ub, ...
+        'q_log10', q_log10, ...
+        'integrate_fkt', integrate_fkt, 'merit_fkt', merit_fkt, ...
+        'diffmerit_fkt', diffmerit_fkt, 'fit_fkt', fit_fkt, ...
+        'setoptim_fkt', setoptim_fkt, ...
+        'initstep_fkt', @pleInitStepDirect, ...  % is overwritten in arPLEInit, if mode is provided
+        'dof', sum(q_fit), 'dof_point', 1);
+end
 
 pleGlobals(1).allowbetteroptimum = false;
 
@@ -88,11 +93,23 @@ pleGlobals.IDstatus_point = nan(1,length(p));
 pleGlobals.IDlabel = {'', 'pra.nID', 'str.nID', 'single str.nID'};
 pleGlobals.savePath = ['PLE-' datestr(now, 30)];
 
-pleGlobals.ps = {};
-pleGlobals.psinit = {};
-pleGlobals.psinitstep = {};
-pleGlobals.chi2s = {};
-pleGlobals.chi2sinit = {};
+if(~isfield(pleGlobals,'ps') || force)
+    pleGlobals.ps = {};
+end
+if(~isfield(pleGlobals,'psinit') || force)
+    pleGlobals.psinit = {};
+end
+if(~isfield(pleGlobals,'psinitstep') || force)
+    pleGlobals.psinitstep = {};
+end
+if(~isfield(pleGlobals,'chi2s') || force)
+    pleGlobals.chi2s = {};
+end
+if(~isfield(pleGlobals,'chi2sinit') || force)
+    pleGlobals.chi2sinit = {};
+end
+
+pleGlobals.finished = 0;
 
 % fprintf('\nProfile Likelihood Approach for Identifiability Analysis\n\n');
 % fprintf('For detailed information please read:\n');

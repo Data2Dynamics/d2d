@@ -74,7 +74,7 @@ end
 function anno = readParameterAnnotation(filename_tmp)
 filename_pars = ['./Results/' filename_tmp '/workspace_pars_only.mat'];
 
-if(exist(filename_pars,'file'))    
+    if(exist(filename_pars,'file'))    
     S = load(filename_pars);
 
     nstr = '';
@@ -83,6 +83,7 @@ if(exist(filename_pars,'file'))
     qstr = '';
     chi2str = '';
     errstr = '';
+    plestr = '';
     
     if(isfield(S.ar,'ndata'))
         nstr = ['N=',sprintf('%4i ',S.ar.ndata),' '];
@@ -106,13 +107,21 @@ if(exist(filename_pars,'file'))
         end
     end
     
+    
     if(isfield(S.ar,'config'))
         if(S.ar.config.fiterrors==1)
             errstr = 'errors fitted';
         end
     end
     
-    anno = sprintf('(%s%s%s%s%s%s)',chi2str,nstr,pstr,qstr,priorstr,errstr);
+    if(isfield(S,'pleGlobals'))
+        if(isfield(S.pleGlobals,'chi2s'))
+            nple = sum(~cellfun(@isempty,S.pleGlobals.chi2s));
+            plestr = [' #PLE=',num2str(nple)];
+        end
+    end
+    
+    anno = sprintf('(%s%s%s%s%s%s%s)',chi2str,nstr,pstr,qstr,priorstr,errstr,plestr);
 else
     anno = '';
 end
