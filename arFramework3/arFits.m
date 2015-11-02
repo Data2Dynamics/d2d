@@ -62,8 +62,10 @@ if replaceOld
     ar.fun_evals = nan(1,n);
     ar.iter = nan(1,n);
     ar.optim_crit = nan(1,n);
-    if(ar.config.logFitting) 
-        ar.optimLogs = cell(1,n);
+    if(isfield(ar.config,'logFitting') && ar.config.logFitting) 
+        if(ar.config.logFitting)
+            ar.optimLogs = cell(1,n);
+        end
     end
 else
     ar.ps_start(dop,:) = ps(dop,:);
@@ -78,7 +80,7 @@ else
     ar.fun_evals(dop) = nan(1,size(ps(dop,:),1));
     ar.iter(dop) = nan(1,size(ps(dop,:),1));
     ar.optim_crit(dop) = nan(1,size(ps(dop,:),1));
-    if(ar.config.logFitting) 
+    if(isfield(ar.config,'logFitting') && ar.config.logFitting) 
         if(~isfield(ar,'optimLogs'))
             ar.optimLogs = cell(1,n);
         else

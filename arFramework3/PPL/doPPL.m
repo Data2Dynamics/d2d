@@ -876,9 +876,9 @@ function ppl_calc(m, c, jx, xFit, p, t, doPPL, takeY, dir, stepsize, xstd, ed_st
         end
         if(toc>tcount)        
             if(dir==1)
-                arWaitbar((jt+npre), nsteps, sprintf('PPL (up) for %s at t=%g %i/%i', xLabel, t_tmp, jt, nsteps));
+                arWaitbar((jt+npre), nsteps, sprintf('PPL-integration (upper bound) for %s at t=%g %i/%i', xLabel, t_tmp, jt, nsteps));
             else
-                arWaitbar((jt+npre), nsteps, sprintf('PPL (down) for %s at t=%g %i/%i', xLabel, t_tmp, jt, nsteps));
+                arWaitbar((jt+npre), nsteps, sprintf('PPL-integration (lower bound) for %s at t=%g %i/%i', xLabel, t_tmp, jt, nsteps));
             end
             tcount = tcount + 0.5; % update every half second
         end        
