@@ -227,7 +227,6 @@ function uitable1_CellSelectionCallback(hObject, eventdata, handles)
 % eventdata  structure with the following fields (see UITABLE)
 %	Indices: row and column indices of the cell(s) currently selecteds
 % handles    structure with handles and user data (see GUIDATA)
-    eventdata
 
 
 % --------------------------------------------------------------------
@@ -236,4 +235,3 @@ function uitable1_ButtonDownFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-eventdata

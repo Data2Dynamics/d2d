@@ -45,7 +45,8 @@ function arExport(directory, models)
     
     % Grab all filenames in the data folder, so we have something to match against
     fileList = listFiles( {}, 'Data' );
-    fileListU = strrep(fileList,'/','_');    
+    fileListU = strrep(fileList,'/','_');
+    fileListU = strrep(fileListU,'-','_');
     
     setupFile = sprintf('%% D2D Model Package\n%%   Model author: %s.\n%%   More information: http://bitbucket.org/d2d-development/d2d-software/wiki/Home\n\n%% Initialize D2D framework\narInit;\n', ar.config.username );
     h = waitbar(0);
@@ -77,7 +78,15 @@ function arExport(directory, models)
             
             % Fetch the names of the files
             for d = 1 : length( ar.model(m).data )
-                data = union( data, ['Data_' ar.model(m).data(d).name] );
+                name = ar.model(m).data(d).name;
+                
+                % Do we have RANDOM name substitutions? ==> Remove these.
+                if ( isfield( ar.model(m).data(d), 'fprand' ) )
+                    for jr = 1 : length( ar.model(m).data(d).prand )
+                        name = strrep( name, sprintf('_%s%s', ar.model(m).data(d).prand{jr}, ar.model(m).data(d).fprand(jr)), '');
+                    end
+                end
+                data = union( data, ['Data_' name] );
             end
         end
         
@@ -111,7 +120,7 @@ function arExport(directory, models)
     
     arSaveParOnly( ar, sprintf( '%s/Results/%s', directory, directory ) );
     
-    if ( isfield( ar, 'eventLog' ) && (length(ar.eventLog)>0) )
+    if ( isfield( ar, 'eventLog' ) && (length(ar.eventLog)>0) ) %#ok
         eventCommands = sprintf('%s;\n', ar.eventLog{:} );
         eventCommands = sprintf('%% Setup events\n%s\n', eventCommands );
     else
@@ -134,7 +143,7 @@ function arExport(directory, models)
     close(h);
 end
 
-function str = fieldcode( struct, varargin )
+function str = fieldcode( struct, varargin ) %#ok
     global ar;
     
     maxLen = max(cellfun(@length, varargin));
