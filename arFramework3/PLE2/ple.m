@@ -51,6 +51,8 @@ else
     error('Argument has to be a string or an array of indices.')
 end
 
+pleGlobals.finished = 0;
+
 if(exist('samplesize', 'var'))
     pleGlobals.samplesize(jk) = samplesize;
 end
@@ -145,6 +147,7 @@ end
 ps_start = p;
 pleGlobals.psinitstep{jk}(jindex,:) = zeros(size(p));
 pleGlobals.chi2 = feval(pleGlobals.merit_fkt);
+last.y = pleGlobals.chi2sinit{jk}(jindex)-pleGlobals.chi2;
 pleGlobals.chi2s{jk}(jindex) = pleGlobals.chi2;
 if(isfield(pleGlobals,'violations'))
     pleGlobals.chi2sviolations{jk}(jindex) = feval(pleGlobals.violations);
@@ -167,6 +170,9 @@ end
 pLast = ps_start;
 feval(pleGlobals.integrate_fkt, pLast);
 dpLast = pleGlobals.maxstepsize(jk)/2.1; % exploiting upper bound, base step
+last.dx = NaN(1,pleGlobals.samplesize(jk));
+last.dy = NaN(1,pleGlobals.samplesize(jk));
+last.dy(1) = dpLast;
 
 estimatetime = 0;
 fittime = 0;
@@ -179,8 +185,10 @@ try
             jk, strrep(pleGlobals.p_labels{jk},'_', '\_')));
         
         tic;
-        % estimate intial step
-        [pStep, dpLast] = feval(pleGlobals.initstep_fkt, jk, pLast, dpLast);
+        % estimate (intial) step
+        last.x = pLast(jk);
+        [pStep, dpLast] = feval(pleGlobals.initstep_fkt, jk, pLast, dpLast, last);
+        last.dx(j) = dpLast;   
         if(sum(isnan(pStep))>0)
             break;
         end
@@ -188,6 +196,7 @@ try
         
         feval(pleGlobals.integrate_fkt, pTrial);
         pleGlobals.chi2sinit{jk}(jindex) = feval(pleGlobals.merit_fkt);
+        last.y = pleGlobals.chi2sinit{jk}(jindex)-pleGlobals.chi2;
         pleGlobals.psinit{jk}(jindex,:) = pTrial;
         pleGlobals.psinitstep{jk}(jindex,:) = pStep;
         
@@ -204,6 +213,9 @@ try
         pleGlobals.ps{jk}(jindex,:) = pLast;
         pleGlobals.gradient{jk}(jindex,:) = gradient;
         pleGlobals.chi2s{jk}(jindex) = feval(pleGlobals.merit_fkt);
+        last.y = pleGlobals.chi2s{jk}(jindex)-pleGlobals.chi2;
+        
+        last.dy(j) = pleGlobals.chi2s{jk}(jindex) - pleGlobals.chi2s{jk}(jindex-1);
         if(isfield(pleGlobals,'violations'))
             pleGlobals.chi2sviolations{jk}(jindex) = feval(pleGlobals.violations);
         end
@@ -234,6 +246,8 @@ arWaitbar(-1);
 pLast = ps_start;
 feval(pleGlobals.integrate_fkt, pLast);
 dpLast = -pleGlobals.maxstepsize(jk)/2.1; % exploiting lower bound, base step
+last.dx = NaN(1,pleGlobals.samplesize(jk));
+last.dy = NaN(1,pleGlobals.samplesize(jk));
 
 arWaitbar(0);
 try
@@ -244,7 +258,9 @@ try
         
         tic;
         % estimate intial step
-        [pStep, dpLast] = feval(pleGlobals.initstep_fkt, jk, pLast, dpLast);
+        last.x = pLast(jk);
+        [pStep, dpLast] = feval(pleGlobals.initstep_fkt, jk, pLast, dpLast, last);
+        last.dx(j) = dpLast;
         if(sum(isnan(pStep))>0)
             break;
         end
@@ -252,6 +268,7 @@ try
         
         feval(pleGlobals.integrate_fkt, pTrial);
         pleGlobals.chi2sinit{jk}(jindex) = feval(pleGlobals.merit_fkt);
+        last.y = pleGlobals.chi2sinit{jk}(jindex)-pleGlobals.chi2;
         pleGlobals.psinit{jk}(jindex,:) = pTrial;
         pleGlobals.psinitstep{jk}(jindex,:) = pStep;
         
@@ -268,6 +285,8 @@ try
         pleGlobals.ps{jk}(jindex,:) = pLast;
         pleGlobals.gradient{jk}(jindex,:) = gradient;
         pleGlobals.chi2s{jk}(jindex) = feval(pleGlobals.merit_fkt);
+        last.y = pleGlobals.chi2s{jk}(jindex)-pleGlobals.chi2;
+        last.dy(j) = pleGlobals.chi2s{jk}(jindex) - pleGlobals.chi2s{jk}(jindex+1);
         if(isfield(pleGlobals,'violations'))
             pleGlobals.chi2sviolations{jk}(jindex) = feval(pleGlobals.violations);
         end
@@ -429,5 +448,6 @@ end
 if(~exist([cd '/' pleGlobals.savePath], 'dir'))
     mkdir([cd '/' pleGlobals.savePath])
 end
+pleGlobals.finished = 1;
 save([pleGlobals.savePath '/results.mat'], 'pleGlobals');
 

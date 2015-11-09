@@ -17,6 +17,10 @@ if(~isfield(pleGlobals, 'showCalculation'))
     pleGlobals.showCalculation = true;
 end
 
+if(isempty(pleGlobals.chi2s))
+    error('pleExtend.m: pleGlobals does not contain the result of ple. Perform ple first.')
+end
+
 if(nargin == 0 || isempty(jk))
     if(~exist('samplesize','var'))
         samplesize = 100;

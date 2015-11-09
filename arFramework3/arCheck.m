@@ -17,7 +17,9 @@ end
 warning('off','MATLAB:rmpath:DirNotFound')
 
 % add all subfolders of arFramework3 folder to MATLAB search path
-addpath(genpath(ar_path))
+rmpath(genpath( [ar_path,'/PM']))
+disp('arCheck.m: rm PM from matlab path');
+
 
 % removes Examples folder and subfolders of arFramework3 from the MATLAB
 % serach path to avoid loading data from those examples for accidentially

@@ -96,7 +96,7 @@ pTrans(ar.qLog10==1) = 10.^pTrans(ar.qLog10==1);
  
 % Determine which parameters are close to their bounds
 qFit = ar.qFit == 1;
-ar.qCloseToBound(size(ar.qFit)) = 0;
+ar.qCloseToBound(1:length(ar.qFit)) = 0;
 ar.qCloseToBound(qFit) = (ar.p(qFit) - ar.lb(qFit)) < ar.config.par_close_to_bound*(ar.p(qFit) - ar.lb(qFit)) | ...
     (ar.ub(qFit) - ar.p(qFit)) < ar.config.par_close_to_bound*(ar.p(qFit) - ar.lb(qFit));
 

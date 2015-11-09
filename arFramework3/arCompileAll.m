@@ -213,8 +213,10 @@ for m=1:length(ar.model)
         newpx0 = cell(1,length(ar.model(m).condition));
         
         if(usePool)
+            csyms = cell(size(ar.model(m).condition));
             parfor c=1:length(ar.model(m).condition)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
+                csyms{c} = condition_sym.sym;
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
@@ -233,9 +235,13 @@ for m=1:length(ar.model)
                         [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.c'],'f');
                 end
             end
+            for c=1:length(condition)
+                ar.model(m).condition(c).sym = csyms{c};
+            end
         else
             for c=1:length(ar.model(m).condition)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
+                ar.model(m).condition(c).sym = condition_sym.sym;
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
