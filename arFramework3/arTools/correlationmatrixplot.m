@@ -13,6 +13,7 @@ end
 
 scale = 10/size(A,1);
 f = figure('Name','Correlation matrix');
+clf;
 f.Color = 'w';
 
 colors = redwhiteblue(11);
