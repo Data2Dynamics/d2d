@@ -3,12 +3,16 @@ function varargout = arLhsSampleSizeCalculation
 global ar
 
 if(~isfield(ar,'chi2s') || sum( ~isnan(ar.chi2s))==0 || sum( ~isnan(ar.chi2s))<=50)
-    fprintf('Less than 50 LHS fits available.\n')
-    fprintf('arLhsSampleSizeCalculation requires a sufficient number of fits to be executed.\n')
+    fprintf('> arLhsSampleSizeCalculation ... stopped.\n')
+    fprintf('> Less than 50 LHS fits available.\n')
+    fprintf('> If sample size calculation is intended, a sufficient number of fits has to be executed.\n')
     if(~isfield(ar,'chi2s') || sum( ~isnan(ar.chi2s))==0)
-        fprintf('Run e.g. arFitLHS(%g) first.\n',100);
+        fprintf('> If intended, run e.g. arFitLHS(%g) first.\n',100);
     else
-        fprintf('Run e.g. arFitLHS(%g,[],[],true) first.\n',100-sum(~isnan(ar.chi2s)));
+        fprintf('> If intended, run e.g. arFitLHS(%g,[],[],true) first.\n',100-sum(~isnan(ar.chi2s)));
+    end
+    if(nargout>0)
+        varargout{1} = [];
     end
     return
 end
