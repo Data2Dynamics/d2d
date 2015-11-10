@@ -18,6 +18,10 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
+% Cache the MATLAB version for use later (much faster)
+matVer = ver('MATLAB');
+ar.config.matlab_version = str2double(matVer.Version);
+
 if(~exist('forcedCompile','var'))
     forcedCompile = false;
 end
@@ -1195,10 +1199,11 @@ function out = mysubsrepeated(in, old, new)
 
 % better subs
 function out = mysubs(in, old, new)
+global ar;
+
 if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
-    matVer = ver('MATLAB');
     try
-        if(str2double(matVer.Version)>=8.1)
+        if(ar.config.matlab_version>=8.1)
             out = subs(in, old(:), new(:));
         else
             out = subs(in, old(:), new(:), 0);
@@ -1209,7 +1214,7 @@ if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
         s{1} = sprintf( 'Error: Model substitution failure in %s: \n\nThe following substitutions failed:\n', char( in ) );
         for a = 1 : length( old )
             try
-                if(str2double(matVer.Version)>=8.1)
+                if(ar.config.matlab_version>=8.1)
                     out = subs(in, old(a), new(a));
                 else
                     out = subs(in, old(a), new(a), 0);
@@ -2340,6 +2345,7 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
         msg = { 'Failed to obtain valid expression from: ', ...
                 str, 'Please expression check for error.' };
         error(sprintf('%s\n', msg{:}))
+        
     end
 
 % Function to scan for specific function name and extract its arguments
@@ -2419,9 +2425,9 @@ function prepareBecauseOfRepeatedCompilation
         
 
 function cstr = ccode2(T)
-% R2015b compatibility fix
-    matVer = ver('MATLAB');
-    if(str2double(matVer.Version)>=8.6)
+    global ar;
+    % R2015b compatibility fix
+    if(ar.config.matlab_version>=8.6)
         sym_str = sym2str(T);
         if all(strcmp('0',sym_str))
             cstr = char;
