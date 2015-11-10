@@ -22,6 +22,9 @@ dat.exitflag = ar.exitflag;
 dat.dchi2_thresh = 0.01;
 
 if fun_checkExitflag(dat)==0
+    if(nargout>0)
+        varargout{1} = [];
+    end
     return
 end
 
