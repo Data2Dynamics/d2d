@@ -464,7 +464,11 @@ ar.fkt = ['arSimuCalcFun_' ar.checkstr];
 writeSimuCalcFunctions(debug_mode);
 
 % compile
-arCompile(forcedCompile, false, false, source_dir);
+if ( forcedCompile == 2 )
+    arCompile(false, true, false, source_dir);
+else
+    arCompile(forcedCompile, false, false, source_dir);
+end
 
 % link
 arLink;
