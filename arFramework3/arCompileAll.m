@@ -1202,7 +1202,6 @@ function out = mysubsrepeated(in, old, new, matlab_version)
 
 % better subs
 function out = mysubs(in, old, new, matlab_version)
-global ar;
 
 if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
     try
@@ -2426,7 +2425,7 @@ function prepareBecauseOfRepeatedCompilation
         
 
 function cstr = ccode2(T, matlab_version)
-    global ar;
+
     % R2015b compatibility fix
     if(matlab_version>=8.6)
         sym_str = sym2str(T);
