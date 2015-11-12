@@ -81,8 +81,11 @@ else
     end
 end
 
-
-
+% Remove vector with last simulated parameters, so that future simulations
+% do not skip simulation
+if isfield( ar, 'pLastSimulated' )
+    ar = rmfield( ar, 'pLastSimulated' );
+end
 
 function ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad)
 N = 1000;

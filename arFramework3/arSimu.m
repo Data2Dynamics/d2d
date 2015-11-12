@@ -39,7 +39,26 @@ end
 if(length(varargin)>2 && ~isempty(varargin{3}))
     dynamics = varargin{3};
 else
-    dynamics = sum(ar.qDynamic == 1 & ar.qFit == 1) > 0 || ~sensi;
+    % If no sensitivities are requested, we always simulate (fast anyway)
+    dynamics = ~sensi;
+    
+    % If dynamics are not requested, check whether we already simulated these
+    % same dynamics.
+    if ( ~dynamics )
+        if ~isfield( ar, 'pLastSimulated' )
+            ar.pLastSimulated.fine   = nan(size(ar.p));
+            ar.pLastSimulated.exp    = nan(size(ar.p));
+        end
+        
+        if ( fine && ( ~isequal( ar.pLastSimulated.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
+            ar.pLastSimulated.fine = ar.p;
+            dynamics = 1;
+        end
+        if ( ~fine && ( ~isequal( ar.pLastSimulated.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
+            ar.pLastSimulated.exp = ar.p;
+            dynamics = 1;
+        end
+    end
 end
 
 if(~isfield(ar,'p'))

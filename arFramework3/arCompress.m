@@ -26,6 +26,8 @@ for m=1:length(ar.model)
     end
 end
 
-
-
-
+% Remove vector with last simulated parameters, so that future simulations
+% do not skip simulation
+if isfield( ar, 'pLastSimulated' )
+    ar = rmfield( ar, 'pLastSimulated' );
+end
