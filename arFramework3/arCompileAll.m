@@ -18,10 +18,6 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
-% Cache the MATLAB version for use later (much faster)
-matVer = ver('MATLAB');
-ar.config.matlab_version = str2double(matVer.Version);
-
 if(~exist('forcedCompile','var'))
     forcedCompile = false;
 end
@@ -98,8 +94,11 @@ c_version_code = ar.info.c_version_code;
 for m=1:length(ar.model)
     fprintf('\n');
     
+    matVer = ver('MATLAB');
+    matlab_version = str2double(matVer.Version);    
+    
     % calc model
-    arCalcModel(m);
+    arCalcModel(m, matlab_version);
     
     % extract conditions
     ar.model(m).condition = [];
@@ -219,7 +218,7 @@ for m=1:length(ar.model)
         if(usePool)
             csyms = cell(size(ar.model(m).condition));
             parfor c=1:length(ar.model(m).condition)
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
                 csyms{c} = condition_sym.sym;
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
@@ -233,7 +232,7 @@ for m=1:length(ar.model)
                         [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.h'],'f');
                     % body
                     fid_ode = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], 'W');
-                    arWriteCFilesCondition(fid_ode, config, model, condition_sym, m, c, timedebug);
+                    arWriteCFilesCondition(fid_ode, matlab_version, config, model, condition_sym, m, c, timedebug);
                     fclose(fid_ode);
                     movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], ...
                         [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.c'],'f');
@@ -242,9 +241,9 @@ for m=1:length(ar.model)
             for c=1:length(condition)
                 ar.model(m).condition(c).sym = csyms{c};
             end
-        else
+        else      
             for c=1:length(ar.model(m).condition)
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
                 ar.model(m).condition(c).sym = condition_sym.sym;
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
@@ -258,7 +257,7 @@ for m=1:length(ar.model)
                         [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.h'],'f');
                     % body
                     fid_ode = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], 'W');
-                    arWriteCFilesCondition(fid_ode, config, model, condition_sym, m, c, timedebug);
+                    arWriteCFilesCondition(fid_ode, matlab_version, config, model, condition_sym, m, c, timedebug);
                     fclose(fid_ode);
                     movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], ...
                         [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.c'],'f');
@@ -288,7 +287,7 @@ for m=1:length(ar.model)
         if(usePool)
             parfor d=1:length(ar.model(m).data)
                 c = data(d).cLink;
-                data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d));
+                data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
                 newp{d} = data_sym.p;
                 newpold{d} = data_sym.pold;
                 if(~doskip(d))
@@ -300,7 +299,7 @@ for m=1:length(ar.model)
                         [source_dir '/Compiled/' c_version_code '/' data(d).fkt '.h'],'f');
                     % body
                     fid_obs = fopen([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.c'], 'W');
-                    arWriteCFilesData(fid_obs, config, m, c, d, data_sym);
+                    arWriteCFilesData(fid_obs, matlab_version, config, m, c, d, data_sym);
                     fclose(fid_obs);
                     movefile([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.c'], ...
                         [source_dir '/Compiled/' c_version_code '/' data(d).fkt '.c'],'f');
@@ -309,7 +308,7 @@ for m=1:length(ar.model)
         else
             for d=1:length(ar.model(m).data)
                 c = data(d).cLink;
-                data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d));
+                data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
                 newp{d} = data_sym.p;
                 newpold{d} = data_sym.pold;
                 if(~doskip(d))
@@ -321,7 +320,7 @@ for m=1:length(ar.model)
                         [source_dir '/Compiled/' c_version_code '/' data(d).fkt '.h'],'f');
                     % body
                     fid_obs = fopen([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.c'], 'W');
-                    arWriteCFilesData(fid_obs, config, m, c, d, data_sym);
+                    arWriteCFilesData(fid_obs, matlab_version, config, m, c, d, data_sym);
                     fclose(fid_obs);
                     movefile([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.c'], ...
                         [source_dir '/Compiled/' c_version_code '/' data(d).fkt '.c'],'f');
@@ -394,8 +393,8 @@ for m=1:length(ar.model)
         newpx0 = cell(1,length(ar.model(m).condition));
         
         if(usePool)
-            parfor c=1:length(ar.model(m).condition)
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
+            parfor c=1:length(ar.model(m).condition)            
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
@@ -408,15 +407,15 @@ for m=1:length(ar.model)
                         [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.h'],'f');
                     % body
                     fid_ode = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], 'W');
-                    arWriteCFilesCondition(fid_ode, config, model, condition_sym, m, c, timedebug);
+                    arWriteCFilesCondition(fid_ode, matlab_version, config, model, condition_sym, m, c, timedebug);
                     fclose(fid_ode);
                     movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], ...
                         [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.c'],'f');
                 end
             end
-        else
+        else        
             for c=1:length(ar.model(m).condition)
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c));
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
@@ -429,7 +428,7 @@ for m=1:length(ar.model)
                         [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.h'],'f');
                     % body
                     fid_ode = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], 'W');
-                    arWriteCFilesCondition(fid_ode, config, model, condition_sym, m, c, timedebug);
+                    arWriteCFilesCondition(fid_ode, matlab_version, config, model, condition_sym, m, c, timedebug);
                     fclose(fid_ode);
                     movefile([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.c'], ...
                         [source_dir '/Compiled/' c_version_code '/' condition(c).fkt '.c'],'f');
@@ -480,7 +479,7 @@ warning(warnreset);
 
 
 % Calc Model
-function arCalcModel(m)
+function arCalcModel(m, matlab_version)
 global ar
 
 fprintf('calculating model m%i, %s...\n', m, ar.model(m).name);
@@ -565,16 +564,16 @@ ar.model(m).qdvdx_nonzero = logical(ar.model(m).sym.dfvdx~=0);
 ar.model(m).qdvdu_nonzero = logical(ar.model(m).sym.dfvdu~=0);
 
 tmpsym = ar.model(m).sym.dfvdx;
-tmpsym = mysubs(tmpsym, ar.model(m).sym.x, ones(size(ar.model(m).sym.x))/2);
-tmpsym = mysubs(tmpsym, ar.model(m).sym.u, ones(size(ar.model(m).sym.u))/2);
-tmpsym = mysubs(tmpsym, sym(ar.model(m).p), ones(size(ar.model(m).p))/2);
+tmpsym = mysubs(tmpsym, ar.model(m).sym.x, ones(size(ar.model(m).sym.x))/2, matlab_version);
+tmpsym = mysubs(tmpsym, ar.model(m).sym.u, ones(size(ar.model(m).sym.u))/2, matlab_version);
+tmpsym = mysubs(tmpsym, sym(ar.model(m).p), ones(size(ar.model(m).p))/2, matlab_version);
 
 ar.model(m).qdvdx_negative = double(tmpsym) < 0;
 
 tmpsym = ar.model(m).sym.dfvdu;
-tmpsym = mysubs(tmpsym, ar.model(m).sym.x, ones(size(ar.model(m).sym.x))/2);
-tmpsym = mysubs(tmpsym, ar.model(m).sym.u, ones(size(ar.model(m).sym.u))/2);
-tmpsym = mysubs(tmpsym, sym(ar.model(m).p), ones(size(ar.model(m).p))/2);
+tmpsym = mysubs(tmpsym, ar.model(m).sym.x, ones(size(ar.model(m).sym.x))/2, matlab_version);
+tmpsym = mysubs(tmpsym, ar.model(m).sym.u, ones(size(ar.model(m).sym.u))/2, matlab_version);
+tmpsym = mysubs(tmpsym, sym(ar.model(m).p), ones(size(ar.model(m).p))/2, matlab_version);
 
 ar.model(m).qdvdu_negative = double(tmpsym) < 0;
 
@@ -589,8 +588,8 @@ end
 
 
 % Calc Condition
-function condition = arCalcCondition(config, model, condition, m, c, doskip)
-    
+function condition = arCalcCondition(config, model, condition, m, c, doskip, matlab_version)
+
 if(doskip)
     fprintf('calculating condition m%i c%i, %s...skipped\n', m, c, model.name);
 else
@@ -602,22 +601,22 @@ specialFunc = config.specialFunc;
 condition.sym.p = sym(condition.p);
 condition.sym.fp = sym(condition.fp);
 condition.sym.fpx0 = sym(model.px0);
-condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.fp);
+condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.fv = mySym(model.fv, specialFunc);
-condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.fp);
+condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.fu = mySym(condition.fu, specialFunc);
-condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.fp);
+condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.fz = mySym(model.fz, specialFunc);
-condition.sym.fz = mysubsrepeated(condition.sym.fz, model.sym.z, condition.sym.fz); % Substitute references to derived variables
+condition.sym.fz = mysubsrepeated(condition.sym.fz, model.sym.z, condition.sym.fz, matlab_version); % Substitute references to derived variables
 
 
-condition.sym.fz = mysubs(condition.sym.fz, condition.sym.p, condition.sym.fp);
-condition.sym.C = mysubs(model.sym.C, condition.sym.p, condition.sym.fp);
+condition.sym.fz = mysubs(condition.sym.fz, condition.sym.p, condition.sym.fp, matlab_version);
+condition.sym.C = mysubs(model.sym.C, condition.sym.p, condition.sym.fp, matlab_version);
 
 % predictor
-condition.sym.fv = mysubs(condition.sym.fv, sym(model.t), sym('t'));
-condition.sym.fu = mysubs(condition.sym.fu, sym(model.t), sym('t'));
-condition.sym.fz = mysubs(condition.sym.fz, sym(model.t), sym('t'));
+condition.sym.fv = mysubs(condition.sym.fv, sym(model.t), sym('t'), matlab_version);
+condition.sym.fu = mysubs(condition.sym.fu, sym(model.t), sym('t'), matlab_version);
+condition.sym.fz = mysubs(condition.sym.fz, sym(model.t), sym('t'), matlab_version);
 
 % remaining initial conditions
 varlist = symvar(condition.sym.fpx0);
@@ -660,26 +659,26 @@ end
 condition.sym.p = sym(condition.p);
 condition.sym.ps = sym(condition.ps);
 condition.sym.px0s = mysubs(sym(condition.px0), ...
-    condition.sym.p, condition.sym.ps);
+    condition.sym.p, condition.sym.ps, matlab_version);
 
 % make syms
-condition.sym.fv = mysubs(condition.sym.fv, model.sym.x, model.sym.xs);
-condition.sym.fv = mysubs(condition.sym.fv, model.sym.u, model.sym.us);
-condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.ps);
+condition.sym.fv = mysubs(condition.sym.fv, model.sym.x, model.sym.xs, matlab_version);
+condition.sym.fv = mysubs(condition.sym.fv, model.sym.u, model.sym.us, matlab_version);
+condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.ps, matlab_version);
 
-condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.ps);
+condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.ps, matlab_version);
 
-condition.sym.fz = mysubs(condition.sym.fz, model.sym.x, model.sym.xs);
-condition.sym.fz = mysubs(condition.sym.fz, model.sym.u, model.sym.us);
-condition.sym.fz = mysubs(condition.sym.fz, condition.sym.p, condition.sym.ps);
+condition.sym.fz = mysubs(condition.sym.fz, model.sym.x, model.sym.xs, matlab_version);
+condition.sym.fz = mysubs(condition.sym.fz, model.sym.u, model.sym.us, matlab_version);
+condition.sym.fz = mysubs(condition.sym.fz, condition.sym.p, condition.sym.ps, matlab_version);
 
-condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.ps);
+condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.ps, matlab_version);
 
 % remove zero inputs
 condition.qfu_nonzero = logical(condition.sym.fu ~= 0);
 if(~isempty(model.sym.us))
     condition.sym.fv = mysubs(condition.sym.fv, model.sym.us(~condition.qfu_nonzero), ...
-        sym(zeros(1,sum(~condition.qfu_nonzero))));
+        sym(zeros(1,sum(~condition.qfu_nonzero))), matlab_version);
 end
 
 % derivatives
@@ -746,11 +745,11 @@ if ( ~isempty( symvar( condition.sym.C ) ) )
     for a = 1 : length( condition.sym.p )
         condition.sym.dfcdp(:,a) = (diff(model.N.*condition.sym.C, condition.sym.p(a)))*condition.sym.fv;
     end
-    condition.sym.dfcdp = mysubs(condition.sym.dfcdp, condition.sym.p, condition.sym.ps);
+    condition.sym.dfcdp = mysubs(condition.sym.dfcdp, condition.sym.p, condition.sym.ps, matlab_version);
 end
 
 % make equations
-condition.sym.C = mysubs(condition.sym.C, condition.sym.p, condition.sym.ps);
+condition.sym.C = mysubs(condition.sym.C, condition.sym.p, condition.sym.ps, matlab_version);
 condition.sym.fx = (model.N .* condition.sym.C) * transpose(model.sym.vs);
 firstcol = true;
 % Jacobian dfxdx
@@ -913,7 +912,7 @@ function sensBlock = verifyRow( sensBlock, func, location )
     end            
 
 % Calc Data
-function data = arCalcData(config, model, data, m, c, d, doskip)
+function data = arCalcData(config, model, data, m, c, d, doskip, matlab_version)
 
 if(doskip)
     fprintf('calculating data m%i d%i -> c%i, %s...skipped\n', m, d, c, data.name);
@@ -928,18 +927,18 @@ specialFunc = config.specialFunc;
 data.sym.p = sym(data.p);
 data.sym.fp = sym(data.fp);
 data.sym.fy = mySym(data.fy, specialFunc);
-data.sym.fy = mysubs(data.sym.fy, data.sym.p, data.sym.fp);
+data.sym.fy = mysubs(data.sym.fy, data.sym.p, data.sym.fp, matlab_version);
 data.sym.fystd = sym(data.fystd);
-data.sym.fystd = mysubs(data.sym.fystd, data.sym.p, data.sym.fp);
+data.sym.fystd = mysubs(data.sym.fystd, data.sym.p, data.sym.fp, matlab_version);
 
 data.sym.fu = mySym(data.fu, specialFunc);
-data.sym.fu = mysubs(data.sym.fu, data.sym.p, data.sym.fp);
+data.sym.fu = mysubs(data.sym.fu, data.sym.p, data.sym.fp, matlab_version);
 data.qfu_nonzero = logical(data.sym.fu ~= 0);
 
 % predictor
-data.sym.fu = mysubs(data.sym.fu, sym(model.t), sym('t'));
-data.sym.fy = mysubs(data.sym.fy, sym(model.t), sym('t'));
-data.sym.fystd = mysubs(data.sym.fystd, sym(model.t), sym('t'));
+data.sym.fu = mysubs(data.sym.fu, sym(model.t), sym('t'), matlab_version);
+data.sym.fy = mysubs(data.sym.fy, sym(model.t), sym('t'), matlab_version);
+data.sym.fystd = mysubs(data.sym.fystd, sym(model.t), sym('t'), matlab_version);
 
 % remaining parameters
 varlist = symvar([data.sym.fy(:); data.sym.fystd(:)]);
@@ -977,24 +976,24 @@ data.sym.ys = sym(data.ys);
 
 % substitute
 data.sym.fy = mysubs(data.sym.fy, ...
-    model.sym.x, model.sym.xs);
+    model.sym.x, model.sym.xs, matlab_version);
 data.sym.fy = mysubs(data.sym.fy, ...
-    model.sym.u, model.sym.us);
+    model.sym.u, model.sym.us, matlab_version);
 data.sym.fy = mysubs(data.sym.fy, ...
-    model.sym.z, model.sym.zs);
+    model.sym.z, model.sym.zs, matlab_version);
 data.sym.fy = mysubs(data.sym.fy, ...
-    data.sym.p, data.sym.ps);
+    data.sym.p, data.sym.ps, matlab_version);
 
 data.sym.fystd = mysubs(data.sym.fystd, ...
-    model.sym.x, model.sym.xs);
+    model.sym.x, model.sym.xs, matlab_version);
 data.sym.fystd = mysubs(data.sym.fystd, ...
-    model.sym.u, model.sym.us);
+    model.sym.u, model.sym.us, matlab_version);
 data.sym.fystd = mysubs(data.sym.fystd, ...
-    model.sym.z, model.sym.zs);
+    model.sym.z, model.sym.zs, matlab_version);
 data.sym.fystd = mysubs(data.sym.fystd, ...
-    data.sym.y, data.sym.ys);
+    data.sym.y, data.sym.ys, matlab_version);
 data.sym.fystd = mysubs(data.sym.fystd, ...
-    data.sym.p, data.sym.ps);
+    data.sym.p, data.sym.ps, matlab_version);
 
 % derivatives fy
 if(~isempty(data.sym.fy))
@@ -1187,11 +1186,11 @@ end
 
 % substitute until no more changes (for self-substitutions of derived
 % variables)
-function out = mysubsrepeated(in, old, new)
+function out = mysubsrepeated(in, old, new, matlab_version)
     done = false;
     
     while ( ~done )
-        out = mysubs(in, old, new);
+        out = mysubs(in, old, new, matlab_version);
         
         % No more changes?
         if ( isempty( setdiff(out,in) ) )
@@ -1202,12 +1201,12 @@ function out = mysubsrepeated(in, old, new)
     end
 
 % better subs
-function out = mysubs(in, old, new)
+function out = mysubs(in, old, new, matlab_version)
 global ar;
 
 if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
     try
-        if(ar.config.matlab_version>=8.1)
+        if(matlab_version>=8.1)
             out = subs(in, old(:), new(:));
         else
             out = subs(in, old(:), new(:), 0);
@@ -1218,7 +1217,7 @@ if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
         s{1} = sprintf( 'Error: Model substitution failure in %s: \n\nThe following substitutions failed:\n', char( in ) );
         for a = 1 : length( old )
             try
-                if(ar.config.matlab_version>=8.1)
+                if(matlab_version>=8.1)
                     out = subs(in, old(a), new(a));
                 else
                     out = subs(in, old(a), new(a), 0);
@@ -1311,7 +1310,7 @@ fprintf(fid,'\n\n\n');
 
 
 % Write Condition
-function arWriteCFilesCondition(fid, config, model, condition, m, c, timedebug)
+function arWriteCFilesCondition(fid, matlab_version, config, model, condition, m, c, timedebug)
 
 fprintf(' -> writing condition m%i c%i, %s...\n', m, c, model.name);
 
@@ -1339,7 +1338,7 @@ end;
 if(~isempty(model.us))
     fprintf(fid, '  UserData data = (UserData) user_data;\n');
     fprintf(fid, '  double *p = data->p;\n');
-    writeCcode(fid, condition, 'fu');
+    writeCcode(fid, matlab_version, condition, 'fu');
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
@@ -1351,7 +1350,7 @@ if(config.useSensis)
             fprintf(fid, '  UserData data = (UserData) user_data;\n');
             fprintf(fid, '  double *p = data->p;\n');
             
-            writeCcode(fid, condition, 'fsu');
+            writeCcode(fid, matlab_version, condition, 'fsu');
         end
     end
 end
@@ -1367,7 +1366,7 @@ if(~isempty(model.xs))
     fprintf(fid, '  double *p = data->p;\n');
     fprintf(fid, '  double *u = data->u;\n');
     fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
-    writeCcode(fid, condition, 'fv');
+    writeCcode(fid, matlab_version, condition, 'fv');
 end
 
 fprintf(fid, '\n  return;\n}\n\n\n');
@@ -1382,7 +1381,7 @@ if(~isempty(model.xs))
     fprintf(fid, '  double *p = data->p;\n');
     fprintf(fid, '  double *u = data->u;\n');
     fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
-    writeCcode(fid, condition, 'dvdx');
+    writeCcode(fid, matlab_version, condition, 'dvdx');
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
@@ -1396,7 +1395,7 @@ if(~isempty(model.us) && ~isempty(model.xs))
     fprintf(fid, '  double *p = data->p;\n');
     fprintf(fid, '  double *u = data->u;\n');
     fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
-    writeCcode(fid, condition, 'dvdu');
+    writeCcode(fid, matlab_version, condition, 'dvdu');
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
@@ -1411,7 +1410,7 @@ if(~isempty(model.xs))
     fprintf(fid, '  double *u = data->u;\n');
     fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
     if(~isempty(condition.sym.dfvdp))
-        writeCcode(fid, condition, 'dvdp');
+        writeCcode(fid, matlab_version, condition, 'dvdp');
     end
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
@@ -1432,7 +1431,7 @@ if(~isempty(model.xs))
     fprintf(fid, '  double *xdot_tmp = N_VGetArrayPointer(xdot);\n');
     fprintf(fid, '  fu_%s(data, t);\n', condition.fkt);
     fprintf(fid, '  fv_%s(t, x, data);\n', condition.fkt);
-    writeCcode(fid, condition, 'fx');
+    writeCcode(fid, matlab_version, condition, 'fx');
     fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(model.xs));
     fprintf(fid, '    if(mxIsNaN(xdot_tmp[is])) xdot_tmp[is] = 0.0;\n');
     fprintf(fid, '    if(qpositivex[is]>0.5 && x_tmp[is]<0.0 && xdot_tmp[is]<0.0) xdot_tmp[is] = -xdot_tmp[is];\n');
@@ -1454,7 +1453,7 @@ if(~isempty(model.xs))
     fprintf(fid, '  double *v = data->v;\n');
     fprintf(fid, '  fu_%s(data, t);\n', condition.fkt);
     fprintf(fid, '  fv_%s(t, x, data);\n', condition.fkt);
-    writeCcode(fid, condition, 'fx');
+    writeCcode(fid, matlab_version, condition, 'fx');
     fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(model.xs));
     fprintf(fid, '    if(mxIsNaN(xdot_tmp[is])) xdot_tmp[is] = 0.0;\n');
     fprintf(fid, '  }\n');
@@ -1468,7 +1467,7 @@ if(~isempty(model.xs))
     fprintf(fid, '  double *p = data->p;\n');
     fprintf(fid, '  double *u = data->u;\n');
     fprintf(fid, '  double *x0_tmp = N_VGetArrayPointer(x0);\n');
-    writeCcode(fid, condition, 'fx0');
+    writeCcode(fid, matlab_version, condition, 'fx0');
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
@@ -1493,7 +1492,7 @@ if(~isempty(model.xs))
         fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(model.xs)^2);
         fprintf(fid, '    J->data[is] = 0.0;\n');
         fprintf(fid, '  }\n');
-        writeCcode(fid, condition, 'dfxdx');
+        writeCcode(fid, matlab_version, condition, 'dfxdx');
         fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(model.xs)^2);
         fprintf(fid, '    if(mxIsNaN(J->data[is])) J->data[is] = 0.0;\n');
         fprintf(fid, '  }\n');
@@ -1532,7 +1531,7 @@ if(~isempty(model.xs))
             fprintf(fid, ';\n'); 
         end
         fprintf(fid, '\n');
-        writeCcode(fid, condition, 'dfxdx_sparse');
+        writeCcode(fid, matlab_version, condition, 'dfxdx_sparse');
         fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(condition.dfxdx_rowVals));
         fprintf(fid, '    if(mxIsNaN(J->data[is])) J->data[is] = RCONST(0.0);\n');
         fprintf(fid, '  }\n');
@@ -1575,15 +1574,15 @@ if(config.useSensiRHS)
             fprintf(fid, '    sv[is] = 0.0;\n');
             fprintf(fid, '  }\n');
             
-            writeCcode(fid, condition, 'fsv1');
+            writeCcode(fid, matlab_version, condition, 'fsv1');
             fprintf(fid, '  switch (ip) {\n');
             for j2=1:size(condition.sym.dvdp,2)
                 fprintf(fid, '    case %i: {\n', j2-1);
-                writeCcode(fid, condition, 'fsv2', j2);
+                writeCcode(fid, matlab_version, condition, 'fsv2', j2);
                 fprintf(fid, '    } break;\n');
             end
             fprintf(fid, '  }\n');
-            writeCcode(fid, condition, 'fsx');
+            writeCcode(fid, matlab_version, condition, 'fsx');
             
             % Add sensitivity RHS contributions corresponding to the compartment volumes
             if ( isfield( condition.sym, 'dfcdp' ) )
@@ -1597,7 +1596,7 @@ if(config.useSensiRHS)
                 fprintf(fid, '  switch (ip) {\n');
                 for j2=1:size(condition.sym.dvdp,2)
                     fprintf(fid, '    case %i: {\n', j2-1);
-                    writeCcode(fid, condition, 'dfcdp2', j2);
+                    writeCcode(fid, matlab_version, condition, 'dfcdp2', j2);
                     fprintf(fid, '    } break;\n');
                 end
                 fprintf(fid, '  }\n');
@@ -1626,7 +1625,7 @@ if(~isempty(model.xs))
         for j2=1:size(condition.sym.fsx0,2)
             if(sum(logical(condition.sym.fsx0(:,j2)~=0))>0)
                 fprintf(fid, '    case %i: {\n', j2-1);
-                writeCcode(fid, condition, 'fsx0', j2);
+                writeCcode(fid, matlab_version, condition, 'fsx0', j2);
                 fprintf(fid, '    } break;\n');
             end
         end
@@ -1652,7 +1651,7 @@ if(~isempty(model.xs))
             fprintf(fid, '  double *dvdx = data->dvdx;\n');
             fprintf(fid, '  double *dvdu = data->dvdu;\n');
             fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
-            writeCcode(fid, condition, 'dfxdp');
+            writeCcode(fid, matlab_version, condition, 'dfxdp');
             fprintf(fid, '  for (is=0; is<%i; is++) {\n', numel(condition.sym.dfxdp));
             fprintf(fid, '    if(mxIsNaN(dfxdp[is])) dfxdp[is] = 0.0;\n');
             fprintf(fid, '  }\n');
@@ -1664,7 +1663,7 @@ fprintf(fid, '\n  return;\n}\n\n\n');
 % write z
 fprintf(fid, ' void fz_%s(double t, int nt, int it, int nz, int nx, int iruns, double *z, double *p, double *u, double *x){\n', condition.fkt);
 if(~isempty(model.zs))
-    writeCcode(fid, condition, 'fz');
+    writeCcode(fid, matlab_version, condition, 'fz');
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
@@ -1674,10 +1673,10 @@ if(config.useSensis)
     if(~isempty(model.zs))
         fprintf(fid, '  int jp;\n');
         fprintf(fid, '  for (jp=0; jp<np; jp++) {\n');
-        writeCcode(fid, condition, 'fsz1');
+        writeCcode(fid, matlab_version, condition, 'fsz1');
         fprintf(fid, '  };\n');
         fprintf(fid, '\n');
-        writeCcode(fid, condition, 'fsz2');
+        writeCcode(fid, matlab_version, condition, 'fsz2');
     end
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
@@ -1686,7 +1685,7 @@ fprintf(fid, '\n  return;\n}\n\n\n');
 fprintf(fid, ' void dfzdx_%s(double t, int nt, int it, int nz, int nx, int iruns, double *dfzdxs, double *z, double *p, double *u, double *x){\n', condition.fkt);
 if(config.useSensis)
     if(~isempty(model.zs))
-        writeCcode(fid, condition, 'dfzdx');        
+        writeCcode(fid, matlab_version, condition, 'dfzdx');        
         fprintf(fid, '\n');        
     end
 end
@@ -1724,7 +1723,7 @@ fprintf(fid,'\n\n\n');
 
 
 % Write Data
-function arWriteCFilesData(fid, config, m, c, d, data)
+function arWriteCFilesData(fid, matlab_version, config, m, c, d, data)
 
 fprintf(' -> writing data m%i d%i -> c%i, %s...\n', m, d, c, data.name);
 
@@ -1746,126 +1745,124 @@ fprintf(fid,'\n\n\n');
 
 % write y
 fprintf(fid, ' void fy_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int nz, int iruns, double *y, double *p, double *u, double *x, double *z){\n', data.fkt);
-writeCcode(fid, data, 'fy');
+writeCcode(fid, matlab_version, data, 'fy');
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write ystd
 fprintf(fid, ' void fystd_%s(double t, int nt, int it, int ntlink, int itlink, double *ystd, double *y, double *p, double *u, double *x, double *z){\n', data.fkt);
-writeCcode(fid, data, 'fystd');
+writeCcode(fid, matlab_version, data, 'fystd');
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write sy
 fprintf(fid, ' void fsy_%s(double t, int nt, int it, int ntlink, int itlink, double *sy, double *p, double *u, double *x, double *z, double *su, double *sx, double *sz){\n', data.fkt);
 if(config.useSensis)
-    writeCcode(fid, data, 'fsy');
+    writeCcode(fid, matlab_version, data, 'fsy');
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write systd
 fprintf(fid, ' void fsystd_%s(double t, int nt, int it, int ntlink, int itlink, double *systd, double *p, double *y, double *u, double *x, double *z, double *sy, double *su, double *sx, double *sz){\n', data.fkt);
 if(config.useSensis)
-    writeCcode(fid, data, 'fsystd');
+    writeCcode(fid, matlab_version, data, 'fsystd');
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write y_scale
 fprintf(fid, ' void fy_scale_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int nz, int iruns, double *y_scale, double *p, double *u, double *x, double *z, double *dfzdx){\n', data.fkt);
 if(~isempty(data.sym.y_scale))
-	writeCcode(fid, data, 'y_scale');
+	writeCcode(fid, matlab_version, data, 'y_scale');
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write C code
-function writeCcode(fid, cond_data, svar, ip)
-
-global ar;
+function writeCcode(fid, matlab_version, cond_data, svar, ip)
     
 if(strcmp(svar,'fv'))
-    cstr = ccode2(cond_data.sym.fv(:));
+    cstr = ccode2(cond_data.sym.fv(:), matlab_version);
     cvar =  'data->v';
 elseif(strcmp(svar,'dvdx'))
-    cstr = ccode2(cond_data.sym.dfvdx(:));
+    cstr = ccode2(cond_data.sym.dfvdx(:), matlab_version);
     cvar =  'data->dvdx';
 elseif(strcmp(svar,'dvdu'))
-    cstr = ccode2(cond_data.sym.dfvdu(:));
+    cstr = ccode2(cond_data.sym.dfvdu(:), matlab_version);
     cvar =  'data->dvdu';
 elseif(strcmp(svar,'dvdp'))
-    cstr = ccode2(cond_data.sym.dfvdp(:));
+    cstr = ccode2(cond_data.sym.dfvdp(:), matlab_version);
     cvar =  'data->dvdp';
 elseif(strcmp(svar,'fx'))
-    cstr = ccode2(cond_data.sym.fx(:));
+    cstr = ccode2(cond_data.sym.fx(:), matlab_version);
     for j=find(cond_data.sym.fx(:)' == 0)
         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  'xdot_tmp';
 elseif(strcmp(svar,'fx0'))
-    cstr = ccode2(cond_data.sym.fpx0(:));
+    cstr = ccode2(cond_data.sym.fpx0(:), matlab_version);
     cvar =  'x0_tmp';
 elseif(strcmp(svar,'dfxdx'))
-    cstr = ccode2(cond_data.sym.dfxdx(:));
+    cstr = ccode2(cond_data.sym.dfxdx(:), matlab_version);
 %     for j=find(cond_data.sym.dfxdx(:)' == 0)
 %         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
 %     end
     cvar =  'J->data';
 elseif(strcmp(svar,'dfxdx_sparse'))
-    cstr = ccode2(cond_data.sym.dfxdx_nonzero(:));    
+    cstr = ccode2(cond_data.sym.dfxdx_nonzero(:), matlab_version);    
     cvar =  'J->data';
 elseif(strcmp(svar,'fsv1'))
-    cstr = ccode2(cond_data.sym.fsv1);
+    cstr = ccode2(cond_data.sym.fsv1, matlab_version);
     cvar =  'sv';
 elseif(strcmp(svar,'fsv2'))
-    cstr = ccode2(cond_data.sym.dvdp(:,ip));
+    cstr = ccode2(cond_data.sym.dvdp(:,ip), matlab_version);
     cvar =  '    sv';
 elseif(strcmp(svar,'fsx'))
-    cstr = ccode2(cond_data.sym.fsx);
+    cstr = ccode2(cond_data.sym.fsx, matlab_version);
     for j=find(cond_data.sym.fsx' == 0)
         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  'sxdot_tmp';
 elseif(strcmp(svar,'dfcdp2'))
-    cstr = ccode2(cond_data.sym.dfcdp2(:,ip));
+    cstr = ccode2(cond_data.sym.dfcdp2(:,ip), matlab_version);
     cvar =  'sxdot_tmp';    
 elseif(strcmp(svar,'fsx0'))
-    cstr = ccode2(cond_data.sym.fsx0(:,ip));
+    cstr = ccode2(cond_data.sym.fsx0(:,ip), matlab_version);
     cvar =  '    sx0_tmp';
 elseif(strcmp(svar,'fu'))
-    cstr = ccode2(cond_data.sym.fu(:));
+    cstr = ccode2(cond_data.sym.fu(:), matlab_version);
     cvar =  'data->u';
 elseif(strcmp(svar,'fsu'))
-    cstr = ccode2(cond_data.sym.dfudp(:));
+    cstr = ccode2(cond_data.sym.dfudp(:), matlab_version);
     cvar =  'data->su';
 elseif(strcmp(svar,'fz'))
-    cstr = ccode2(cond_data.sym.fz(:));
+    cstr = ccode2(cond_data.sym.fz(:), matlab_version);
     cvar =  'z';
 elseif(strcmp(svar,'dfzdx'))
-    cstr = ccode2(cond_data.sym.dfzdx(:));
+    cstr = ccode2(cond_data.sym.dfzdx(:), matlab_version);
     cvar =  '    dfzdxs';
 elseif(strcmp(svar,'fsz1'))
-    cstr = ccode2(cond_data.sym.fsz1);
+    cstr = ccode2(cond_data.sym.fsz1, matlab_version);
     for j=find(cond_data.sym.fsz1' == 0)
         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  '    sz';
 elseif(strcmp(svar,'fsz2'))
-    cstr = ccode2(cond_data.sym.fsz2(:));
+    cstr = ccode2(cond_data.sym.fsz2(:), matlab_version);
     cvar =  'sz';
 elseif(strcmp(svar,'fy'))
-    cstr = ccode2(cond_data.sym.fy(:));
+    cstr = ccode2(cond_data.sym.fy(:), matlab_version);
     cvar =  'y';
 elseif(strcmp(svar,'y_scale'))
-    cstr = ccode2(cond_data.sym.y_scale(:));
+    cstr = ccode2(cond_data.sym.y_scale(:), matlab_version);
     cvar =  'y_scale';
 elseif(strcmp(svar,'fystd'))
-    cstr = ccode2(cond_data.sym.fystd(:));
+    cstr = ccode2(cond_data.sym.fystd(:), matlab_version);
     cvar =  'ystd';
 elseif(strcmp(svar,'fsy'))
-    cstr = ccode2(cond_data.sym.fsy(:));
+    cstr = ccode2(cond_data.sym.fsy(:), matlab_version);
     cvar =  'sy';
 elseif(strcmp(svar,'fsystd'))
-    cstr = ccode2(cond_data.sym.fsystd(:));
+    cstr = ccode2(cond_data.sym.fsystd(:), matlab_version);
     cvar =  'systd';
 elseif(strcmp(svar,'dfxdp'))
-    cstr = ccode2(cond_data.sym.dfxdp(:));
+    cstr = ccode2(cond_data.sym.dfxdp(:), matlab_version);
     cvar =  'dfxdp';
 else
     error('unknown %s', svar);
@@ -1887,11 +1884,11 @@ cstr = strrep(cstr, 'T[', [cvar '[']);
 % fprintf('\n');
 
 % Find instances of heaviside functions (these need special treatment)
-if (exist('ar','var') && ~isempty(ar) && isfield( ar.config, 'accurateSteps' ) )
-    if ( ar.config.accurateSteps == 1 )
-        cstr = replaceWithinFunc(cstr, 'heaviside', 't', 'data->t');
-    end
-end
+%if (exist('ar','var') && ~isempty(ar) && isfield( ar.config, 'accurateSteps' ) )
+%    if ( ar.config.accurateSteps == 1 )
+%        cstr = replaceWithinFunc(cstr, 'heaviside', 't', 'data->t');
+%    end
+%end
 
 if(~(length(cstr)==1 && isempty(cstr{1})))
     if(strcmp(svar,'fy'))
@@ -2428,10 +2425,10 @@ function prepareBecauseOfRepeatedCompilation
     end
         
 
-function cstr = ccode2(T)
+function cstr = ccode2(T, matlab_version)
     global ar;
     % R2015b compatibility fix
-    if(ar.config.matlab_version>=8.6)
+    if(matlab_version>=8.6)
         sym_str = sym2str(T);
         if all(strcmp('0',sym_str))
             cstr = char;
