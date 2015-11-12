@@ -158,11 +158,19 @@ for j=1:length(ar.p)
     end
 end
 
-if(length(ar.p)>N)
-    nnot = length(ass)-sum(ass);
-    fprintf('%i assigned, %i not assigned.\n',sum(ass),nnot);
+nnot = length(ass)-sum(ass);
+if ( nnot > 0 )
+    fprintf('%i parameters were assigned in the destination model (%i not assigned).\n',sum(ass),nnot);
     if(nnot<=30 && nnot>0)
         fprintf('Not assigned are: %s \n',sprintf('%s, ',ar.pLabel{find(ass==0)}));
     end
+else
+    fprintf('All parameters assigned.\n');
 end
+
+nnot = length(S.ar.p)-sum(ass);
+if ( nnot > 0 )
+    fprintf('There were %i more parameters in the loaded struct than in the target model.\n',nnot);
+end
+
 
