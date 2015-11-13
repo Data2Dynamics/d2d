@@ -2,20 +2,20 @@ function varargout = arLhsSampleSizeCalculation
 
 global ar
 
-% if(~isfield(ar,'chi2s') || sum( ~isnan(ar.chi2s))==0 || sum( ~isnan(ar.chi2s))<=50)
-%     fprintf('> arLhsSampleSizeCalculation ... stopped.\n')
-%     fprintf('> Less than 50 LHS fits available.\n')
-%     fprintf('> If sample size calculation is intended, a sufficient number of fits has to be executed.\n')
-%     if(~isfield(ar,'chi2s') || sum( ~isnan(ar.chi2s))==0)
-%         fprintf('> If intended, run e.g. arFitLHS(%g) first.\n',100);
-%     else
-%         fprintf('> If intended, run e.g. arFitLHS(%g,[],[],true) first.\n',100-sum(~isnan(ar.chi2s)));
-%     end
-%     if(nargout>0)
-%         varargout{1} = [];
-%     end
-%     return
-% end
+if(~isfield(ar,'chi2s') || sum( ~isnan(ar.chi2s))==0 || sum( ~isnan(ar.chi2s))<=50)
+    fprintf('> arLhsSampleSizeCalculation ... stopped.\n')
+    fprintf('> Less than 50 LHS fits available.\n')
+    fprintf('> If sample size calculation is intended, a sufficient number of fits has to be executed.\n')
+    if(~isfield(ar,'chi2s') || sum( ~isnan(ar.chi2s))==0)
+        fprintf('> If intended, run e.g. arFitLHS(%g) first.\n',100);
+    else
+        fprintf('> If intended, run e.g. arFitLHS(%g,[],[],true) first.\n',100-sum(~isnan(ar.chi2s)));
+    end
+    if(nargout>0)
+        varargout{1} = [];
+    end
+    return
+end
 
 dat.chi2s = ar.chi2s;
 dat.exitflag = ar.exitflag;
