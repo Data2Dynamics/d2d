@@ -564,16 +564,16 @@ ar.model(m).qdvdx_nonzero = logical(ar.model(m).sym.dfvdx~=0);
 ar.model(m).qdvdu_nonzero = logical(ar.model(m).sym.dfvdu~=0);
 
 tmpsym = ar.model(m).sym.dfvdx;
-tmpsym = mysubs(tmpsym, ar.model(m).sym.x, ones(size(ar.model(m).sym.x))/2, matlab_version);
-tmpsym = mysubs(tmpsym, ar.model(m).sym.u, ones(size(ar.model(m).sym.u))/2, matlab_version);
-tmpsym = mysubs(tmpsym, sym(ar.model(m).p), ones(size(ar.model(m).p))/2, matlab_version);
+tmpsym = mysubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
+tmpsym = mysubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
+tmpsym = mysubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
 
 ar.model(m).qdvdx_negative = double(tmpsym) < 0;
 
 tmpsym = ar.model(m).sym.dfvdu;
-tmpsym = mysubs(tmpsym, ar.model(m).sym.x, ones(size(ar.model(m).sym.x))/2, matlab_version);
-tmpsym = mysubs(tmpsym, ar.model(m).sym.u, ones(size(ar.model(m).sym.u))/2, matlab_version);
-tmpsym = mysubs(tmpsym, sym(ar.model(m).p), ones(size(ar.model(m).p))/2, matlab_version);
+tmpsym = mysubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
+tmpsym = mysubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
+tmpsym = mysubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
 
 ar.model(m).qdvdu_negative = double(tmpsym) < 0;
 

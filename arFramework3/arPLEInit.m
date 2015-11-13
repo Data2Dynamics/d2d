@@ -72,6 +72,9 @@ global ar
 try
     arChi2(false, p(ar.qFit==1));
 catch exception
+    if ( ~isfield( ar, 'ple_errors' ) )
+        ar.ple_errors = ar.p;
+    end
     ar.ple_errors(end+1,:) = ar.p;
     fprintf('ERROR INTEGRATOR (#%i): %s\n', size(ar.ple_errors,1), exception.message);
     rethrow(exception)  
