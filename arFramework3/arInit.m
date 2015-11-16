@@ -128,6 +128,9 @@ ar.config.nCVRestart = 10;
 
 ar.config.steady_state_constraint = 1;
 
+% Do hierarchical substitutions for the CONDITIONS (beta)
+ar.config.hierarchical = 0;
+
 % Equilibration options
 ar.config.max_eq_steps = 20;
 ar.config.init_eq_step = 100.0;

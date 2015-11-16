@@ -1189,8 +1189,21 @@ end
 function out = mysubsrepeated(in, old, new, matlab_version)
     done = false;
     
+    k = 0; orig = in;
     while ( ~done )
         out = mysubs(in, old, new, matlab_version);
+        
+        if ( k > 5 )
+            v = '';
+            for c = 1 : length( orig )
+                if ~isequal( in(c), out(c) )
+                    v = sprintf( '%s\n%s = %s', v, char(old(c)), char(orig(c)) );
+                end
+            end
+            s = sprintf( 'Substitution recursion limit (5) exceeded!\nSolutions that cannot be obtained by simple substitution are not supported.\nDo you have any cyclic substitutions?\n%s\n', v );
+            
+            error( s );
+        end        
         
         % No more changes?
         if ( isempty( setdiff(out,in) ) )
@@ -1198,6 +1211,7 @@ function out = mysubsrepeated(in, old, new, matlab_version)
         else
             in = out;
         end
+        k = k + 1;
     end
 
 % better subs
