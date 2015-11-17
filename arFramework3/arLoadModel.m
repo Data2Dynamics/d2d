@@ -638,7 +638,7 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
     end
 
     if ( sum(ismodelpar) > 0 )
-        s = sprintf( '%s\n', ar.model(m).p{ismember(ar.model(m).p, C{1})} );
+        s = sprintf( '%s\n', fromSubs{ismodelpar>0} );
         error( 'Cannot substitute model parameters. These following parameters belong under CONDITIONS:\n%s', s );
     end
 
