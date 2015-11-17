@@ -919,14 +919,14 @@ function out = mysubsrepeated(in, old, new, matlab_version)
     while ( ~done )
         out = mysubs(in, old, new, matlab_version);
         
-        if ( k > 5 )
+        if ( k > 15 )
             v = '';
             for c = 1 : length( orig )
                 if ~isequal( in(c), out(c) )
                     v = sprintf( '%s\n%s = %s', v, char(old(c)), char(orig(c)) );
                 end
             end
-            error( 'Substitution recursion limit (5) exceeded!\nSolutions that cannot be obtained by simple substitution are not supported.\nDo you have any cyclic substitutions?\n%s\n', v );
+            error( 'Substitution recursion limit (15) exceeded!\nSolutions that cannot be obtained by simple substitution are not supported.\nDo you have any cyclic substitutions?\n%s\n', v );
         end        
         
         % No more changes?
