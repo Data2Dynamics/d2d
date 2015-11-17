@@ -508,7 +508,7 @@ ar.model(m).z = {};
 ar.model(m).zUnits = {};
 ar.model(m).fz = {};
 C = textscan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
-while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'OBSERVABLES'))
+while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1},'OBSERVABLES'))
     if(~strcmp(C{1},''))
         if(sum(ismember(ar.model(m).x, C{1}))>0) %R2013a compatible
             error('derived variable %s already defined in STATES', cell2mat(C{1}));
@@ -548,7 +548,7 @@ if(strcmp(C{1},'OBSERVABLES'))
     ar.model(m).fy = {};
     C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
     while(~strcmp(C{1},'ERRORS'))
-        if ( strcmp( C{1}, 'CONDITIONS' ) )
+        if ( strcmp( C{1}, 'CONDITIONS' ) || strcmp( C{1}, 'SUBSTITUTIONS' ) )
             error( 'When OBSERVABLES section is specified; ERRORS section must also be specified.' );
         end        
         ar.model(m).y(end+1) = C{1};
@@ -586,7 +586,7 @@ if(strcmp(C{1},'OBSERVABLES'))
     % ERRORS
     ar.model(m).fystd = cell(size(ar.model(m).fy));
     C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
-    while(~strcmp(C{1},'CONDITIONS'))
+    while(~(strcmp(C{1},'CONDITIONS') || strcmp(C{1},'SUBSTITUTIONS')))
         qy = ismember(ar.model(m).y, C{1}); %R2013a compatible
         if(sum(qy)~=1)
             error('unknown observable %s', cell2mat(C{1}));
@@ -608,8 +608,49 @@ if(strcmp(C{1},'OBSERVABLES'))
     ar.model(m).p = union(union(ar.model(m).p, ar.model(m).py), ar.model(m).pystd);
 end
 
-% CONDITIONS
 matVer = ver('MATLAB');
+
+% SUBSTITUTIONS (beta)
+substitutions = 0;
+if ( strcmp(C{1},'SUBSTITUTIONS') )
+    if(str2double(matVer.Version)>=8.4)
+        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    else
+        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
+    end
+    
+    % Substitutions
+    fromSubs = {};
+    toSubs = {};
+    ismodelpar = [];
+
+    % Fetch desired substitutions
+    while(~isempty(C{1}) && ~strcmp(C{1},'CONDITIONS'))
+        fromSubs(end+1)     = C{1}; %#ok<AGROW>
+        toSubs(end+1)       = C{2}; %#ok<AGROW>
+        ismodelpar(end+1)   = sum(ismember(ar.model(m).p, C{1})); %#ok<AGROW>
+
+        if(str2double(matVer.Version)>=8.4)
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        else
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+        end
+    end
+
+    if ( sum(ismodelpar) > 0 )
+        s = sprintf( '%s\n', ar.model(m).p{ismember(ar.model(m).p, C{1})} );
+        error( 'Cannot substitute model parameters. These following parameters belong under CONDITIONS:\n%s', s );
+    end
+
+    % Perform selfsubstitutions
+    if ( ~isempty(fromSubs) )
+        substitutions = 1;
+        toSubs = mysubsrepeated( toSubs, fromSubs, toSubs, str2double(matVer.Version) );
+    end
+end
+
+
+% CONDITIONS
 if(str2double(matVer.Version)>=8.4)
     C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 else
@@ -617,29 +658,27 @@ else
 end
 ar.model(m).fp = transpose(ar.model(m).p);
 
-if ( isfield( ar.config, 'hierarchical' ) && ar.config.hierarchical == 1 )
-    % Hierarchical substitution path (beta)
-    from = {};
-    to = {};
-    ismodelpar = [];
-    
+if ( substitutions )
+	% Conditions
+    from        = {};
+    to          = {};
+    ismodelpar  = [];
+     
     % Fetch desired substitutions
-    while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
+    while(~isempty(C{1}) && ~strcmp(C{1},'CONDITIONS'))
         from(end+1)         = C{1}; %#ok<AGROW>
         to(end+1)           = C{2}; %#ok<AGROW>
         ismodelpar(end+1)   = sum(ismember(ar.model(m).p, C{1})); %#ok<AGROW>
-        
+
         if(str2double(matVer.Version)>=8.4)
             C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         else
             C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
         end
     end
-    
-    % Perform selfsubstitutions
-    if ( sum(ismodelpar) > 0 )
-        to = mysubsrepeated( to, from(ismodelpar==0), to(ismodelpar==0), str2double(matVer.Version) );
-    end
+        
+    % Perform substitutions (self-substitutions were already done)
+    to = mysubsrepeated( to, fromSubs, toSubs, str2double(matVer.Version) );
     
     % Store substitutions in ar structure
     for a = 1 : length( from )
@@ -647,7 +686,7 @@ if ( isfield( ar.config, 'hierarchical' ) && ar.config.hierarchical == 1 )
         if(sum(qcondpara)>0)
             ar.model(m).fp{qcondpara} = ['(' to{a} ')'];
         else
-            warning('unknown parameter in conditions: %s (hierarchical parameter?)', from{a}); %#ok<WNTAG>
+            warning('unknown parameter in conditions: %s (did you mean to place it under SUBSTITUTIONS?)', from{a}); %#ok<WNTAG>
         end
     end
 else
@@ -657,7 +696,7 @@ else
         if(sum(qcondpara)>0)
             ar.model(m).fp{qcondpara} = ['(' cell2mat(C{2}) ')'];
         else
-            warning('unknown parameter in conditions: %s', cell2mat(C{1})); %#ok<WNTAG>
+            warning('unknown parameter in conditions: %s (did you mean to place it under SUBSTITUTIONS?)', cell2mat(C{1})); %#ok<WNTAG>
         end
         if(str2double(matVer.Version)>=8.4)
             C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
@@ -715,10 +754,8 @@ function out = mysubsrepeated(in, old, new, matlab_version)
                 if ~isequal( in(c), out(c) )
                     v = sprintf( '%s\n%s = %s', v, char(old(c)), char(orig(c)) );
                 end
-            end
-            s = sprintf( 'Substitution recursion limit (5) exceeded!\nSolutions that cannot be obtained by simple substitution are not supported.\nDo you have any cyclic substitutions?\n%s\n', v );
-            
-            error( s );
+            end           
+            error( 'Substitution recursion limit (5) exceeded!\nSolutions that cannot be obtained by simple substitution are not supported.\nDo you have any cyclic substitutions?\n%s\n', v );
         end        
         
         % No more changes?
@@ -731,7 +768,7 @@ function out = mysubsrepeated(in, old, new, matlab_version)
     end
     
     q = out;
-    out = {};
+    out = cell(1,length(q));
     for a = 1 : length(q)
         out{a} = char(q(a));
     end
@@ -753,18 +790,18 @@ if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
         for a = 1 : length( old )
             try
                 if(matlab_version>=8.1)
-                    out = subs(in, old(a), new(a));
+                    out = subs(in, old(a), new(a)); %#ok
                 else
-                    out = subs(in, old(a), new(a), 0);
+                    out = subs(in, old(a), new(a), 0); %#ok
                 end
             catch ME
-                s{end+1} = sprintf( 'Subs [%10s => %5s failed]: %s\n', ...
-                    char( old(a) ), char( new(a) ), strtok(ME(1).message, sprintf('\n')) );
+                s{end+1} = sprintf( 'Subs [%10s => %5s failed]: %s\n', ...                  
+                    char( old(a) ), char( new(a) ), strtok(ME(1).message, sprintf('\n')) ); %#ok<AGROW>
             end
         end
-        s{end+1} = sprintf( '\n\nPlease check substitution errors for clues where the error may be.\n' );
+        s{end+1} = sprintf( '\n\nPlease check substitution errors for clues where the error may be.\n' ); %#OK<AGROW>
         
-        error( sprintf('%s',s{:}) );
+        error( sprintf('%s',s{:}) ); %#ok
     end
 else
     out = in;
