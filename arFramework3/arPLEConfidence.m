@@ -103,6 +103,8 @@ for j = jks
 			hbar = waitbar(((j-1)*size(pstmp,1) + jp)/(size(pstmp,1)*length(jks)), hbar, 'Please wait...');
             ar.p(ismember(ar.pLabel, pleGlobals.p_labels)) = pstmp(jp,ismember(pleGlobals.p_labels, ar.pLabel)); %R2013a compatible
 			try
+                arSimu(false, true);
+				arSimu(false, false);
                 if(do_refit_obs)
                     arFitObs(true);
                 end
