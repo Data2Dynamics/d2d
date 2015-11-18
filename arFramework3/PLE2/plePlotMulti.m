@@ -170,7 +170,11 @@ for jk=jks
         plot(pleGlobals.p(jk), pleGlobals.chi2, '*', 'Color', [.5 .5 .5], 'LineWidth', 1)
         hold off
 
-        xlabel(['log_{10}(' arNameTrafo(pleGlobals.p_labels{jk}) ')'])
+        if ( pleGlobals.q_log10(jk) )
+            xlabel(['log_{10}(' arNameTrafo(pleGlobals.p_labels{jk}) ')']);
+        else
+            xlabel(arNameTrafo(pleGlobals.p_labels{jk}));
+        end
         title(sprintf('parameter #%i', jk));
         
         if(mod(count-1,ncols)==0)
