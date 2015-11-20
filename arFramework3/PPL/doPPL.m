@@ -472,7 +472,7 @@ for ts = 1:length(t)
                 ar.model(m).condition(c).ppl.tstart(ts, jx) = t(ts);
             end
             arLink(true, t_tmp);
-            arChi2(true);
+            arChi2(true,[],1);
             [~,it] = min(abs(ar.model(m).condition(c).tExp-t_tmp));
             xSim = ar.model(m).condition(c).xExpSimu(it,jx);
             
@@ -692,7 +692,7 @@ for j = 1:n
         arLink(true,t);
     end
     xtrial(j) = xExp;    
-    arChi2(ar.config.useSensis, ar.p(ar.qFit==1))
+    arChi2(ar.config.useSensis, ar.p(ar.qFit==1),1)
     if(takeY)
         xSim = ar.model(m).data(c).yExpSimu(it,ix); 
     else
@@ -753,7 +753,7 @@ end
         else
             arLink(true,t);
         end
-        arChi2(ar.config.useSensis, pTrial)
+        arChi2(ar.config.useSensis, pTrial, 1)
         
         res = [ar.res ar.constr];
         %res = ar.res;
