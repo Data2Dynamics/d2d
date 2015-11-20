@@ -38,6 +38,8 @@ else
 end
 if(length(varargin)>2 && ~isempty(varargin{3}))
     dynamics = varargin{3};
+else
+    dynamics = 0;
 end
 
 % If no sensitivities are requested, we always simulate (fast anyway)
@@ -47,8 +49,6 @@ end
 
 % If dynamics are not requested, but sensitivities are, check whether we 
 % already simulated these sensitivities.
-% Note that sensis should be true, since otherwise we could store a last 
-% simulated without sensitivities as 'already simulated sensitivities'.
 % This code *only* prevents unnecessary simulation of sensitivities.
 % TO DO: Add check for tolerance changes
 if ( ~dynamics && sensi )
@@ -56,16 +56,17 @@ if ( ~dynamics && sensi )
         ar.pastSimulated.fine   = nan(size(ar.p));
         ar.pLastSimulated.exp    = nan(size(ar.p));
     end
+    
+    % These are different from the ones we simulated last time
     if ( fine && ( ~isequal( ar.pLastSimulated.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
-        
         dynamics = 1;
     end
     if ( ~fine && ( ~isequal( ar.pLastSimulated.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
-        
         dynamics = 1;
     end
 end
 
+% We simulate sensitivities. Store the new 'last sensitivity simulation' parameters in the cache.
 if ( dynamics && sensi )
     if ( fine )
         ar.pLastSimulated.fine = ar.p;
