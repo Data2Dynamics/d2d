@@ -413,21 +413,21 @@ for jx = 1:length(ix)
     ar.p = pReset;
         
 end
-    if(ar.config.fiterrors==0 && ar.ppl.fittederrors==1)
-        ar.config.fiterrors=1;
-        ar.qFit(strncmp(ar.pLabel,'sd_',3))=1;
-    end
-    ar.config.SimuPPL=0;
-    arChi2(); 
-    if(~takeY)
-        ar.model(m).qPlotXs(ar.model(m).condition(c).dLink(1))=1;        
-    else
-        ar.model(m).qPlotYs(c) = 1;        
-    end
-    %ploterror_tmp = ar.config.ploterrors;
-    %ar.config.ploterrors = -1;
-    %arPlot2();
-    %ar.config.ploterrors = ploterror_tmp;
+if(ar.config.fiterrors==0 && ar.ppl.fittederrors==1)
+    ar.config.fiterrors=1;
+    ar.qFit(strncmp(ar.pLabel,'sd_',3))=1;
+end
+ar.config.SimuPPL=0;
+arChi2(); 
+if(~takeY)
+    ar.model(m).qPlotXs(ar.model(m).condition(c).dLink(1))=1;        
+else
+    ar.model(m).qPlotYs(c) = 1;        
+end
+%ploterror_tmp = ar.config.ploterrors;
+%ar.config.ploterrors = -1;
+%arPlot2();
+%ar.config.ploterrors = ploterror_tmp;
 end
 
 function [xFit, ps] = xstart_ppl(m, c, jx, t, doPPL, xstd, pReset, chi2start, whichT, takeY, save, dir, xFit, onlyProfile)
@@ -457,7 +457,7 @@ for ts = 1:length(t)
             end
             [~,it_first] = min(abs(ar.model(m).data(c).tExp-t_tmp));            
             arLink(true, t_tmp, true, jx, c, m, ar.model(m).data(c).ppl.x_orig(it_first,jx), xstd);
-            arChi2(true);
+            arChi2(0,[],1);
             [~,it] = min(abs(ar.model(m).data(c).tExp-t_tmp));
             if(length(find(ar.model(m).data(c).tExp==t_tmp))>1)
                 it = it+1;               
@@ -472,7 +472,7 @@ for ts = 1:length(t)
                 ar.model(m).condition(c).ppl.tstart(ts, jx) = t(ts);
             end
             arLink(true, t_tmp);
-            arChi2(true,[],1);
+            arChi2(0,[],1);
             [~,it] = min(abs(ar.model(m).condition(c).tExp-t_tmp));
             xSim = ar.model(m).condition(c).xExpSimu(it,jx);
             
@@ -488,7 +488,7 @@ for ts = 1:length(t)
     
         % go down        
         ar.p = pReset;  
-        arChi2(true);
+        arChi2();
         
     else
         xtrial_up = xSim*1.01;
@@ -520,7 +520,7 @@ for ts = 1:length(t)
     if(takeY)
         arLink(true,0.,true,jx, c, m,NaN);
     end
-    arChi2(true);
+    arChi2();
     xtrial_tmp = [fliplr(xtrial_down) xSim xtrial_up];
     xfit_tmp = [fliplr(xfit_down) xSim xfit_up];
     ppl_tmp = [fliplr(ppl_down) chi2start ppl_up];
@@ -692,7 +692,7 @@ for j = 1:n
         arLink(true,t);
     end
     xtrial(j) = xExp;    
-    arChi2(ar.config.useSensis, ar.p(ar.qFit==1),1)
+    arChi2(0, ar.p(ar.qFit==1),1)
     if(takeY)
         xSim = ar.model(m).data(c).yExpSimu(it,ix); 
     else
