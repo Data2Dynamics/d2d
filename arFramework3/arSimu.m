@@ -48,7 +48,7 @@ end
 % If dynamics are not requested, but sensitivities are, check whether we 
 % already simulated these sensitivities.
 % Note that sensis should be true, since otherwise we could store a last 
-% simulated without sensitivities as 'already simulated'.
+% simulated without sensitivities as 'already simulated sensitivities'.
 % This code *only* prevents unnecessary simulation of sensitivities.
 % TO DO: Add check for tolerance changes
 if ( ~dynamics && sensi )
@@ -64,6 +64,13 @@ if ( ~dynamics && sensi )
         ar.pLastSimulated.exp = ar.p;
         dynamics = 1;
     end
+end
+
+% If we finally decide on not simulating the sensitivities, simulate only
+% the model without sensitivities
+if ( ~dynamics )
+    dynamics = 1;
+    sensi = 0;
 end
 
 if(~isfield(ar,'p'))
