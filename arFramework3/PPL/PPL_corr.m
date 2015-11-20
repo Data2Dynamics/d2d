@@ -129,7 +129,7 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 arLink(true,t_tmp);
             end
             try
-                arChi2(ar.config.useSensis, pTrial)
+                arChi2(ar.config.useSensis, pTrial,1)
             catch
                 fprintf('arChi2 failed at t= %d and xFit = %d for x=%i, reset xFit! \n', t_tmp, ar.ppl.xFit_tmp, x);
                 if(dir==1)
@@ -147,7 +147,7 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 end
                 xExp_tmp = ar.ppl.xFit_tmp;
                 arLink(true,t_tmp,true,jx, c, m,xExp_tmp,xstd);  
-                arChi2(ar.config.useSensis, pTrial);
+                arChi2(ar.config.useSensis, pTrial,1);
             end
 
             %res = [ar.res ar.constr];
@@ -262,7 +262,7 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
             arLink(true,t_tmp);
         end
         try
-            arChi2(ar.config.useSensis, pTrial);
+            arChi2(ar.config.useSensis, pTrial,1);
         catch
             fprintf('arChi2 failed at t= %d and xFit = %d, reset xFit! \n', t_tmp, ar.ppl.xFit_tmp);
             if(~doPPL)
@@ -281,7 +281,7 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 end
                 xExp_tmp = ar.ppl.xFit_tmp;
                 arLink(true,t_tmp,true,jx, c, m,xExp_tmp,xstd);  
-                arChi2(ar.config.useSensis, pTrial);
+                arChi2(ar.config.useSensis, pTrial,1);
             end
         end
         %res = [ar.res ar.constr];
@@ -377,9 +377,9 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 arLink(true,t_tmp);
             end
             if(x == 3)
-                arChi2(ar.config.useSensis, xs(1:end-1));
+                arChi2(ar.config.useSensis, xs(1:end-1),1);
             else
-                arChi2(ar.config.useSensis, xs);
+                arChi2(ar.config.useSensis, xs,1);
             end
             res = ar.res;
             if(takeY)
@@ -479,9 +479,9 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 arLink(true,t_tmp);
             end
             if(x == 3)
-                arChi2(ar.config.useSensis, p(1:end-1)); 
+                arChi2(ar.config.useSensis, p(1:end-1),1); 
             elseif(x == 4)
-                arChi2(ar.config.useSensis, p); 
+                arChi2(ar.config.useSensis, p,1); 
             end
             %res = [ar.res ar.constr];   
             res = ar.res;

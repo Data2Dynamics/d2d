@@ -35,7 +35,7 @@ if(takeY)
     
     if(doPPL_stuff)
         arLink(true,t_tmp+stepsize,true,jx, c, m,tmp_xFit,xstd);
-        arChi2(ar.config.useSensis, p_chi2);
+        arChi2(ar.config.useSensis, p_chi2,1);
         [~,it] = min(abs(ar.model(m).data(c).tExp-t_tmp-stepsize));
         if(length(find(ar.model(m).data(c).tExp==t_tmp+stepsize))>1)
             it = it+1;
@@ -45,13 +45,13 @@ if(takeY)
         xSim2 = ar.model(m).data(c).yExpSimu(it,jx);
         
         arLink(true,t_tmp-1.e-3,true,jx, c, m,tmp_xFit,xstd);
-        arChi2(false, p_chi2);
+        arChi2(false, p_chi2,1);
         [~,it] = min(abs(ar.model(m).data(c).tExp-t_tmp+1.e-3));
         xSim3 = ar.model(m).data(c).yExpSimu(it,jx);
         
         if(~isnan(RHS_t))
             arLink(true,t_tmp+RHS_t,true,jx, c, m,tmp_xFit,xstd);
-            arChi2(false, p_chi2);
+            arChi2(false, p_chi2,1);
             [~,it] = min(abs(ar.model(m).data(c).tExp-t_tmp-RHS_t));
             ar.ppl.fRHS_ppl = ar.model(m).data(c).dxdts(it,jx);
         end
@@ -59,7 +59,7 @@ if(takeY)
     
     arLink(true,t_tmp,true,jx, c, m,tmp_xFit,xstd);
     try
-        arChi2(get_sensi, p_chi2)
+        arChi2(get_sensi, p_chi2,1)
     catch
         fprintf('arChi2 doesnt work, exiting for direction %i!\n',dir);
         arLink(true,ar.model(m).data(c).tExp(1),true,jx, c, m,NaN);
@@ -77,7 +77,7 @@ if(takeY)
 else
     if(doPPL_stuff)
         arLink(true,t_tmp+stepsize);
-        arChi2(ar.config.useSensis, p_chi2);
+        arChi2(ar.config.useSensis, p_chi2,1);
         [~,it] = min(abs(ar.model(m).condition(c).tExp-t_tmp-stepsize));
         sxSim = zeros(1,length(ar.p));
         sxSim(ar.model(m).condition(c).pLink) = ...
@@ -93,7 +93,7 @@ else
         xSim2 = ar.model(m).condition(c).xExpSimu(it,jx);
         
         arLink(true,t_tmp-1.e-3);
-        arChi2(false, p_chi2);
+        arChi2(false, p_chi2,1);
         [~,it] = min(abs(ar.model(m).condition(c).tExp-t_tmp+1.e-3));
         xSim3 = ar.model(m).condition(c).xExpSimu(it,jx);
         
@@ -107,7 +107,7 @@ else
     end
     arLink(true,t_tmp);
     try
-        arChi2(get_sensi, p_chi2)
+        arChi2(get_sensi, p_chi2,1)
     catch
         fprintf('arChi2 doesnt work, exiting for t %f !\n',t_tmp);
         ar.p = pReset;
