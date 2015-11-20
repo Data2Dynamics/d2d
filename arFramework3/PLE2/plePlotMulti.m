@@ -62,7 +62,11 @@ end
 h = myRaiseFigure(strtitle);
 set(h, 'Color', [1 1 1]);
 
-count = 1;
+if ( isfield( pleGlobals, 'firstID' ) )
+    count = pleGlobals.firstID;
+else
+    count = 1;
+end
 
 minchi2 = Inf;
 for jk=jks
