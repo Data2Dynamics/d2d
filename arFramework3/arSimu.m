@@ -53,16 +53,24 @@ end
 % TO DO: Add check for tolerance changes
 if ( ~dynamics && sensi )
     if ~isfield( ar, 'pLastSimulated' )
-        ar.pLastSimulated.fine   = nan(size(ar.p));
+        ar.pastSimulated.fine   = nan(size(ar.p));
         ar.pLastSimulated.exp    = nan(size(ar.p));
     end
     if ( fine && ( ~isequal( ar.pLastSimulated.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
-        ar.pLastSimulated.fine = ar.p;
+        
         dynamics = 1;
     end
     if ( ~fine && ( ~isequal( ar.pLastSimulated.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
-        ar.pLastSimulated.exp = ar.p;
+        
         dynamics = 1;
+    end
+end
+
+if ( dynamics && sensi )
+    if ( fine )
+        ar.pLastSimulated.fine = ar.p;
+    else
+        ar.pLastSimulated.exp = ar.p;
     end
 end
 
