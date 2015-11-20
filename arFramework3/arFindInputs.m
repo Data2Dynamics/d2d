@@ -121,6 +121,9 @@ function arFindInputs( verbose )
 
     ar.config.useEvents = 1;
     arLink(true);
+    
+    % Invalidate cache so simulations do not get skipped
+    arCheckCache(1);
 end
 
 

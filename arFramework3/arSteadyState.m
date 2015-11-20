@@ -208,7 +208,10 @@ function ar = arSteadyState( varargin )
     disp( sprintf( 'Number of steady state equilibrations: %d', cnt ) );
     
     % Show any errors
-    arPrintSteadyState(m, 2);    
+    arPrintSteadyState(m, 2);
+    
+    % Invalidate cache so simulations do not get skipped
+    arCheckCache(1);
 end
 
 function ID = mapStrings( str1, str2 )

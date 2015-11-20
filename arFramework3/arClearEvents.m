@@ -49,4 +49,7 @@ function ar = arClearEvents( varargin )
     arLink(true);
     
     close(h);
+    
+    % Invalidate cache so simulations do not get skipped
+    arCheckCache(1);
 end

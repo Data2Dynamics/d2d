@@ -50,18 +50,17 @@ end
 % If dynamics are not requested, but sensitivities are, check whether we 
 % already simulated these sensitivities.
 % This code *only* prevents unnecessary simulation of sensitivities.
-% TO DO: Add check for tolerance changes
 if ( ~dynamics && sensi )
-    if ~isfield( ar, 'pLastSimulated' )
-        ar.pastSimulated.fine   = nan(size(ar.p));
-        ar.pLastSimulated.exp    = nan(size(ar.p));
-    end
+    % Check cached config settings to see if they are still the same. If
+    % not, then ar.cache.fine and ar.cache.exp get cleared.
+    arCheckCache;
     
-    % These are different from the ones we simulated last time
-    if ( fine && ( ~isequal( ar.pLastSimulated.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
+    % Check whether ar.cache.fine and exp are different from the ones we simulated last time
+    % If not, we need to resimulate.
+    if ( fine && ( ~isequal( ar.cache.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
         dynamics = 1;
     end
-    if ( ~fine && ( ~isequal( ar.pLastSimulated.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
+    if ( ~fine && ( ~isequal( ar.cache.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
         dynamics = 1;
     end
 end
@@ -69,14 +68,15 @@ end
 % We simulate sensitivities. Store the new 'last sensitivity simulation' parameters in the cache.
 if ( dynamics && sensi )
     if ( fine )
-        ar.pLastSimulated.fine = ar.p;
+        ar.cache.fine = ar.p;
     else
-        ar.pLastSimulated.exp = ar.p;
+        ar.cache.exp = ar.p;
     end
 end
 
 % If we finally decide on not simulating the sensitivities, simulate only
-% the model without sensitivities
+% the model without sensitivities, since these could have been overwritten
+% in the meantime
 if ( ~dynamics )
     dynamics = 1;
     sensi = 0;
