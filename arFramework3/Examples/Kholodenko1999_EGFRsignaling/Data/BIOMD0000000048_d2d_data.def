@@ -1,0 +1,61 @@
+DESCRIPTION
+"data file for Kholodenko1999 - EGFR signaling"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 100	
+
+INPUTS
+
+OBSERVABLES
+EGF_obs	 C	 "n/a"	 conc.	 0 0 "EGF" "Epidermal_Growth_Factor"
+R_state_obs	 C	 "n/a"	 conc.	 0 0 "R_state" "EGFR"
+Ra_obs	 C	 "n/a"	 conc.	 0 0 "Ra" "EGF_EGFR"
+R2_obs	 C	 "n/a"	 conc.	 0 0 "R2" "(EGF_EGFR)2"
+RP_obs	 C	 "n/a"	 conc.	 0 0 "RP" "(EGF_EGFR)2-P"
+PLCg_obs	 C	 "n/a"	 conc.	 0 0 "PLCg" "PLCg"
+RPLCg_obs	 C	 "n/a"	 conc.	 0 0 "RPLCg" "(EGF_EGFR)2_PLCg"
+RPLCgP_obs	 C	 "n/a"	 conc.	 0 0 "RPLCgP" "(EGF_EGFR)2_PLCg-P"
+PLCgP_obs	 C	 "n/a"	 conc.	 0 0 "PLCgP" "PLCg-P"
+Grb_obs	 C	 "n/a"	 conc.	 0 0 "Grb" "Grb2"
+RG_obs	 C	 "n/a"	 conc.	 0 0 "RG" "(EGF_EGFR)2_Grb2"
+SOS_obs	 C	 "n/a"	 conc.	 0 0 "SOS" "SOS"
+RGS_obs	 C	 "n/a"	 conc.	 0 0 "RGS" "(EGF_EGFR)2_Grb2_SOS"
+GS_obs	 C	 "n/a"	 conc.	 0 0 "GS" "Grb2_SOS"
+Shc_obs	 C	 "n/a"	 conc.	 0 0 "Shc" "Shc"
+RSh_obs	 C	 "n/a"	 conc.	 0 0 "RSh" "(EGF_EGFR)2_Shc"
+RShP_obs	 C	 "n/a"	 conc.	 0 0 "RShP" "(EGF_EGFR)_Shc-P"
+ShP_obs	 C	 "n/a"	 conc.	 0 0 "ShP" "Shc-P"
+RShG_obs	 C	 "n/a"	 conc.	 0 0 "RShG" "(EGF_EGFR)2_Shc_Grb2"
+ShG_obs	 C	 "n/a"	 conc.	 0 0 "ShG" "Shc_Grb2"
+RShGS_obs	 C	 "n/a"	 conc.	 0 0 "RShGS" "(EGF_EGFR)2_Shc_Grb2_SOS"
+ShGS_obs	 C	 "n/a"	 conc.	 0 0 "ShGS" "Shc_Grb2_SOS"
+PLCgl_obs	 C	 "n/a"	 conc.	 0 0 "PLCgl" "PLCgP-I"
+
+ERRORS
+EGF_obs	 "sd_EGF"
+R_state_obs	 "sd_R_state"
+Ra_obs	 "sd_Ra"
+R2_obs	 "sd_R2"
+RP_obs	 "sd_RP"
+PLCg_obs	 "sd_PLCg"
+RPLCg_obs	 "sd_RPLCg"
+RPLCgP_obs	 "sd_RPLCgP"
+PLCgP_obs	 "sd_PLCgP"
+Grb_obs	 "sd_Grb"
+RG_obs	 "sd_RG"
+SOS_obs	 "sd_SOS"
+RGS_obs	 "sd_RGS"
+GS_obs	 "sd_GS"
+Shc_obs	 "sd_Shc"
+RSh_obs	 "sd_RSh"
+RShP_obs	 "sd_RShP"
+ShP_obs	 "sd_ShP"
+RShG_obs	 "sd_RShG"
+ShG_obs	 "sd_ShG"
+RShGS_obs	 "sd_RShGS"
+ShGS_obs	 "sd_ShGS"
+PLCgl_obs	 "sd_PLCgl"
+
+CONDITIONS
+
+PARAMETERS
