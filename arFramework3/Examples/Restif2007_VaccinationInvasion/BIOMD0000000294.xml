@@ -1,0 +1,1214 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+
+<!-- This model was downloaded from BioModels Database -->
+<!-- Fri Nov 20 10:23:45 GMT 2015                      -->
+<!-- http://www.ebi.ac.uk/biomodels/                   -->
+
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="e6c3b037-6b59-4fdd-9889-c7d316e39c9a" version="4">
+  <model id="restif07" name="Restif2007_Vaccination_Invasion" metaid="_264628">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>
+          This is the model described in the article:
+          <br/>
+        <strong>Vaccination and the dynamics of immune evasion.
+          </strong>
+        <br/>
+         Restif O, Grenfell BT.
+          <em>J R Soc Interface.</em> 2007 Feb 22;4(12):143-53. 
+          PMID:<a href="http://www.ncbi.nlm.nih.gov/pubmed/17210532">17210532</a>, doi:<a href="http://dx.doi.org/10.1098/rsif.2006.0167">10.1098/rsif.2006.0167</a>;
+          <br/>
+        <strong>Abstract:</strong>
+        <br/>
+Vaccines exert strong selective pressures on pathogens, favouring the spread of antigenic variants. We propose a simple mathematical model to investigate the dynamics of a novel pathogenic strain that emerges in a population where a previous strain is maintained at low endemic level by a vaccine. We compare three methods to assess the ability of the novel strain to invade and persist: algebraic rate of invasion; deterministic dynamics; and stochastic dynamics. These three techniques provide complementary predictions on the fate of the system. In particular, we emphasize the importance of stochastic simulations, which account for the possibility of extinctions of either strain. More specifically, our model suggests that the probability of persistence of an invasive strain (i) can be minimized for intermediate levels of vaccine cross-protection (i.e. immune protection against the novel strain) and (ii) is lower if cross-immunity acts through a reduced infectious period rather than through reduced susceptibility.
+	</p>
+        <p>
+This version of the model can be used for both the stochastic and the deterministic simulations described in the article. For deterministic interpretations with infinite population sizes, set the population size <em>N</em> = 1. The model does reproduces the deterministic time course. The initial values are set to the steady state values for a latent infection with strain 1 with an invading infection of strain 2 (I2=1e-06), 100 percent vaccination with a susceptibility reduction τ=0.7 at birth (p=1), and all other parameters as in figure 3 of the publication. 
+  </p>
+        <p>
+To be compatible with older software tools, the english letter names instead of the greek symbols were used for parameter names:<br/>
+        <table>
+          <tr>
+            <th>parameter</th>
+            <th>symbol</th>
+            <th>name</th>
+          </tr>
+          <tr>
+            <td>transmission rate</td>
+            <td>β</td>
+            <td>beta</td>
+          </tr>
+          <tr>
+            <td>recovery rate</td>
+            <td>γ</td>
+            <td>gamma</td>
+          </tr>
+          <tr>
+            <td>birth/death rate</td>
+            <td>μ</td>
+            <td>mu</td>
+          </tr>
+          <tr>
+            <td>rate of loss of natural immunity</td>
+            <td>σ</td>
+            <td>sigma</td>
+          </tr>
+          <tr>
+            <td>rate of loss of vaccine immunity</td>
+            <td>σ<sub>v</sub>
+          </td>
+          <td>sigmaV</td>
+        </tr>
+        <tr>
+          <td>reduction of susceptibility by primary infection</td>
+          <td>θ</td>
+          <td>theta</td>
+        </tr>
+        <tr>
+          <td>reduction of infection period by primary infection</td>
+          <td>ν</td>
+          <td>nu</td>
+        </tr>
+        <tr>
+          <td>reduction of susceptibility by vaccination</td>
+          <td>τ</td>
+          <td>tau</td>
+        </tr>
+        <tr>
+          <td>reduction of infection period by vaccination</td>
+          <td>η</td>
+          <td>eta</td>
+        </tr>
+      </table>
+    </p>
+    <p> Originally created by libAntimony v1.4 (using libSBML 3.4.1) </p>
+  </body>
+</notes>
+    <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264628">
+	<dc:creator>
+	<rdf:Bag>
+	<rdf:li rdf:parseType="Resource">
+	<vCard:N rdf:parseType="Resource">
+	<vCard:Family>Endler</vCard:Family>
+	<vCard:Given>Lukas</vCard:Given>
+	</vCard:N>
+	<vCard:EMAIL>lukas@ebi.ac.uk</vCard:EMAIL>
+	<vCard:ORG rdf:parseType="Resource">
+	<vCard:Orgname>EMBL-EBI</vCard:Orgname>
+	</vCard:ORG>
+	</rdf:li>
+	</rdf:Bag>
+	</dc:creator>
+	<dcterms:created rdf:parseType="Resource">
+	<dcterms:W3CDTF>2010-04-20T23:54:23Z</dcterms:W3CDTF>
+	</dcterms:created>
+	<dcterms:modified rdf:parseType="Resource">
+	<dcterms:W3CDTF>2014-10-14T11:58:57Z</dcterms:W3CDTF>
+	</dcterms:modified>
+	<bqmodel:is>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1012210000"/>
+	</rdf:Bag>
+	</bqmodel:is>
+	<bqmodel:is>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000294"/>
+	</rdf:Bag>
+	</bqmodel:is>
+	<bqmodel:isDescribedBy>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/pubmed/17210532"/>
+	</rdf:Bag>
+	</bqmodel:isDescribedBy>
+	<bqmodel:isDerivedFrom>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000249"/>
+	<rdf:li rdf:resource="http://identifiers.org/pubmed/460412"/>
+	<rdf:li rdf:resource="http://identifiers.org/pubmed/460424"/>
+	</rdf:Bag>
+	</bqmodel:isDerivedFrom>
+	<bqbiol:hasTaxon>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/520"/>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	</rdf:Bag>
+	</bqbiol:hasTaxon>
+	<bqbiol:hasVersion>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/icd/A37"/>
+	</rdf:Bag>
+	</bqbiol:hasVersion>
+	<bqbiol:hasProperty>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/mamo/MAMO_0000046"/>
+	</rdf:Bag>
+	</bqbiol:hasProperty>
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0035635"/>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0009814"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	<bqbiol:hasProperty>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/doid/DOID:1116"/>
+	</rdf:Bag>
+	</bqbiol:hasProperty>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" name="individuals" metaid="metaid_0000071">
+        <listOfUnits>
+          <unit metaid="f182e041-7ce8-4a27-9c15-448f43799d52" kind="item"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="years" metaid="metaid_0000072">
+        <listOfUnits>
+          <unit metaid="_109f7d4a-07f6-49da-941f-7526f3d4c08d" multiplier="31536000" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="days" name="days" metaid="metaid_0000073">
+        <listOfUnits>
+          <unit metaid="_6fb540f6-724b-484a-a22c-c7270b65fd05" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_year" name="per_year" metaid="metaid_0000074">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_0e7fe382-20ec-4fa0-8369-71432984cfc2" multiplier="31536000" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="env" name="environment" metaid="_264638" sboTerm="SBO:0000290" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="N" initialAmount="1" hasOnlySubstanceUnits="true" metaid="_264640" sboTerm="SBO:0000240" compartment="env">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">total target population size</p>
+    </notes>
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264640">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="S" initialAmount="0.0588235" hasOnlySubstanceUnits="true" metaid="_264641" sboTerm="SBO:0000240" compartment="env">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264641">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="I1" initialAmount="0.00176967" hasOnlySubstanceUnits="true" metaid="_264642" sboTerm="SBO:0000240" compartment="env">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264642">
+	<bqbiol:hasVersion>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/520"/>
+	</rdf:Bag>
+	</bqbiol:hasVersion>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="I2" initialAmount="1E-6" hasOnlySubstanceUnits="true" metaid="_264643" sboTerm="SBO:0000240" compartment="env">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264643">
+	<bqbiol:hasVersion>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/520"/>
+	</rdf:Bag>
+	</bqbiol:hasVersion>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="R1" initialAmount="0.439407" hasOnlySubstanceUnits="true" metaid="_264646" sboTerm="SBO:0000240" compartment="env">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264646">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="R2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="_264647" sboTerm="SBO:0000240" compartment="env">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264647">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="V" initialAmount="0.9" hasOnlySubstanceUnits="true" metaid="_264650" sboTerm="SBO:0000240" compartment="env">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264650">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="Iv2" initialAmount="0.5" hasOnlySubstanceUnits="true" metaid="_264651" sboTerm="SBO:0000240" compartment="env">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264651">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/520"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="J2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="_264654" sboTerm="SBO:0000240" compartment="env">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264654">
+	<bqbiol:hasVersion>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/520"/>
+	</rdf:Bag>
+	</bqbiol:hasVersion>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="J1" initialAmount="0" hasOnlySubstanceUnits="true" metaid="_264655" sboTerm="SBO:0000240" compartment="env">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264655">
+	<bqbiol:hasVersion>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/520"/>
+	</rdf:Bag>
+	</bqbiol:hasVersion>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="R" initialAmount="0" hasOnlySubstanceUnits="true" metaid="_264658" sboTerm="SBO:0000240" compartment="env">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264658">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="mu" constant="false" metaid="metaid_0000003" sboTerm="SBO:0000022" units="per_year">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">birth/death rate</p>
+    </notes>
+      </parameter>
+      <parameter id="l_e" name="life expectancy" metaid="metaid_0000004" value="50" sboTerm="SBO:0000348" units="time"/>
+      <parameter id="beta" constant="false" metaid="metaid_0000005" sboTerm="SBO:0000023" units="per_year">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">transmission rate</p>
+    </notes>
+      </parameter>
+      <parameter id="R0" metaid="metaid_0000006" value="17" sboTerm="SBO:0000002" units="dimensionless">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">basic reproductive ratio (beta/(gamma+mu)) </p>
+    </notes>
+      </parameter>
+      <parameter id="gamma" constant="false" metaid="metaid_0000007" sboTerm="SBO:0000022" units="per_year">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">recovery rate</p>
+    </notes>
+      </parameter>
+      <parameter id="p" metaid="_264749" value="1" sboTerm="SBO:0000380" units="dimensionless">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">fraction of individuals vaccinated at birth </p>
+    </notes>
+      </parameter>
+      <parameter id="tau" metaid="_264750" value="0.7" sboTerm="SBO:0000380" units="dimensionless"/>
+      <parameter id="theta" metaid="_264751" value="0.5" sboTerm="SBO:0000380" units="dimensionless"/>
+      <parameter id="nu" metaid="_264752" value="0.5" sboTerm="SBO:0000380" units="dimensionless"/>
+      <parameter id="eta" metaid="_264755" value="0.5" sboTerm="SBO:0000380" units="dimensionless"/>
+      <parameter id="sigma" constant="false" metaid="metaid_0000013" sboTerm="SBO:0000022" units="per_year">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">rate of immunity loss</p>
+    </notes>
+      </parameter>
+      <parameter id="sigmaV" constant="false" metaid="_264757" sboTerm="SBO:0000022" units="per_year">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">rate of immunity loss of vacinated individuals</p>
+    </notes>
+      </parameter>
+      <parameter id="tInf" name="infectious period (d)" metaid="_264758" value="21" sboTerm="SBO:0000348" units="days"/>
+      <parameter id="tImm" name="immune period (yr)" metaid="_264759" value="20" sboTerm="SBO:0000348" units="time"/>
+      <parameter id="tImm_V" name="vaccine immune period (yr)" metaid="_264760" value="50" sboTerm="SBO:0000348" units="time"/>
+      <parameter id="strain1_frac" constant="false" metaid="_264761" sboTerm="SBO:0000360" units="dimensionless">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">fraction of individuals infected with strain 1</p>
+    </notes>
+      </parameter>
+      <parameter id="strain2_frac" constant="false" metaid="_264762" sboTerm="SBO:0000360" units="dimensionless">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">fraction of individuals infected with strain 2</p>
+    </notes>
+      </parameter>
+      <parameter id="S_frac" constant="false" metaid="_264763" sboTerm="SBO:0000360" units="dimensionless">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">fraction of susceptible individuals</p>
+    </notes>
+      </parameter>
+      <parameter id="V_frac" constant="false" metaid="_264764" sboTerm="SBO:0000360" units="dimensionless">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">fraction of vaccinated uninfected individuals</p>
+    </notes>
+      </parameter>
+      <parameter id="R_1_frac" constant="false" metaid="_264765" sboTerm="SBO:0000360" units="dimensionless">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">fraction of individuals immune against strain 1 exclusively after infection</p>
+    </notes>
+      </parameter>
+      <parameter id="R_2_frac" constant="false" metaid="_264766" sboTerm="SBO:0000360" units="dimensionless">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">fraction of individuals immune against strain 2 exclusively after infection</p>
+    </notes>
+      </parameter>
+      <parameter id="R_frac" constant="false" metaid="_264767" sboTerm="SBO:0000360" units="dimensionless">
+        <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">fraction of individuals immune to both strains</p>
+    </notes>
+      </parameter>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="_264725" variable="mu">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn type="integer"> 1 </cn>
+            <ci> l_e </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="_264726" variable="beta">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> R0 </ci>
+            <apply>
+              <plus/>
+              <ci> gamma </ci>
+              <ci> mu </ci>
+            </apply>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="_264727" variable="gamma">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn type="integer"> 365 </cn>
+            <ci> tInf </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="_264728" variable="sigma">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn type="integer"> 1 </cn>
+            <ci> tImm </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="_264729" variable="sigmaV">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn type="integer"> 1 </cn>
+            <ci> tImm_V </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="_264732" variable="strain1_frac">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <ci> I1 </ci>
+              <ci> J1 </ci>
+            </apply>
+            <ci> N </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="_264733" variable="strain2_frac">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <ci> I2 </ci>
+              <ci> J2 </ci>
+              <ci> Iv2 </ci>
+            </apply>
+            <ci> N </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="_264734" variable="S_frac">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> S </ci>
+            <ci> N </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="_264737" variable="V_frac">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> V </ci>
+            <ci> N </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="_264738" variable="R_1_frac">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <ci> R1 </ci>
+              <ci> R </ci>
+            </apply>
+            <ci> N </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="_264739" variable="R_2_frac">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <ci> R2 </ci>
+              <ci> R </ci>
+            </apply>
+            <ci> N </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="_264742" variable="R_frac">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> R </ci>
+            <ci> N </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="r1" name="Birth S (unvaccinated)" metaid="_264659" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264659">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0007567"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfProducts>
+          <speciesReference species="S" metaid="_3011e23f-483a-437d-ae5e-07685009d198"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="N" metaid="_8b5d8d53-5992-4c50-84bb-ae01171995d3"/>
+        </listOfModifiers>
+        <kineticLaw metaid="f3305081-abe4-4a28-a550-f29b1b4bb6de">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <apply>
+                <minus/>
+                <cn type="integer"> 1 </cn>
+                <ci> p </ci>
+              </apply>
+              <ci> N </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r2" name="Birth V (vaccinated)" metaid="_264660" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264660">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0007567"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfProducts>
+          <speciesReference species="V" metaid="_5d9f4458-7b83-4110-a1ce-74d8d8a3b03a"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="N" metaid="efd81d80-00ed-4992-965c-e742f096f1ec"/>
+        </listOfModifiers>
+        <kineticLaw metaid="f96a85ff-cb15-43fa-b905-3b2d9c9af5d1">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <ci> p </ci>
+              <ci> N </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r3" name="Death in S" metaid="_264661" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264661">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0016265"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfReactants>
+          <speciesReference species="S" metaid="_3de5343d-b747-4586-98ba-b9c01395cef9"/>
+        </listOfReactants>
+        <kineticLaw metaid="_519c983e-546e-44e8-84ef-ea3efa0365d1">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <ci> S </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r4" name="Death in V" metaid="_264662" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264662">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0016265"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfReactants>
+          <speciesReference species="V" metaid="_55699d90-0878-49e1-91ff-8c18da9b60fc"/>
+        </listOfReactants>
+        <kineticLaw metaid="_381278b0-daa7-4876-95aa-55be79738777">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <ci> V </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r5" name="Death in I1" metaid="_264663" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264663">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0016265"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfReactants>
+          <speciesReference species="I1" metaid="_1463b407-3a8c-42d8-9dac-f97ad54f37c9"/>
+        </listOfReactants>
+        <kineticLaw metaid="_65af6bdb-f91d-47ad-abde-fa5ec9ee6dc8">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <ci> I1 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r6" name="Death in I2" metaid="_264664" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264664">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0016265"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfReactants>
+          <speciesReference species="I2" metaid="c2f40f99-e5cb-4d5a-bf8f-1326cb2ff5e8"/>
+        </listOfReactants>
+        <kineticLaw metaid="_5f122f21-8d15-4f5b-9940-264509f2d2fd">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <ci> I2 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r7" name="Death in Iv2" metaid="_264665" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264665">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0016265"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfReactants>
+          <speciesReference species="Iv2" metaid="_1ef2650f-35c1-4c25-98a4-c26ffd6c218f"/>
+        </listOfReactants>
+        <kineticLaw metaid="_15a2e54e-f656-4797-91bd-daf16943ea97">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <ci> Iv2 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r8" name="Death in R1" metaid="_264666" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264666">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0016265"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfReactants>
+          <speciesReference species="R1" metaid="d05078ca-0cb7-44ad-8109-88a753a6433f"/>
+        </listOfReactants>
+        <kineticLaw metaid="_0da42561-e4f4-4f16-bfec-e42e725e7b56">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <ci> R1 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r9" name="Death in R2" metaid="_264669" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264669">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0016265"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfReactants>
+          <speciesReference species="R2" metaid="a428f181-875e-4413-98dc-9dcadcc83adc"/>
+        </listOfReactants>
+        <kineticLaw metaid="cc9ae628-d8f9-4872-8024-f52083bb3689">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <ci> R2 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r10" name="Death in J1" metaid="_264670" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264670">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0016265"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfReactants>
+          <speciesReference species="J1" metaid="_99a7a2bf-8c8b-45a2-aa25-b8b971711c06"/>
+        </listOfReactants>
+        <kineticLaw metaid="_8fb12f30-49bd-4312-bbc4-3dd051708487">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <ci> J1 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r11" name="Death in J2" metaid="_264673" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264673">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0016265"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfReactants>
+          <speciesReference species="J2" metaid="_80456785-e7c5-4855-b9b1-79da1049b8e6"/>
+        </listOfReactants>
+        <kineticLaw metaid="_7a2c1cc5-8c6d-475e-8128-9ed22cf300c5">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <ci> J2 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r12" name="Death in Rp" metaid="_264674" reversible="false" sboTerm="SBO:0000375">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_264674">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0016265"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+              <listOfReactants>
+          <speciesReference species="R" metaid="e9b324d8-ba77-4452-9661-9d83857f4682"/>
+        </listOfReactants>
+        <kineticLaw metaid="_6f9d7a7b-22ae-4cca-b999-f5e14292e662">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> mu </ci>
+              <ci> R </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r13" name="Primary Infection with strain 1" metaid="_264677" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="S" metaid="cc150ae7-8406-4b13-9a35-7d138dea9979"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="I1" metaid="f5d44b3c-993a-4d06-99d0-bf5eafc33576"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="J1" metaid="_6916bdb1-73b2-476f-aa65-561131d02bcc"/>
+          <modifierSpeciesReference species="N" metaid="_2795b8ed-dc8a-4ab9-a671-0df9300ead5f"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_88641004-4c49-46db-a914-d47def5abd6f">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> beta </ci>
+              <ci> S </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <plus/>
+                  <ci> I1 </ci>
+                  <ci> J1 </ci>
+                </apply>
+                <ci> N </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r14" name="Primary Infection with strain 2" metaid="_264678" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="S" metaid="aa977ec8-a7f4-4804-9507-e82dbebdd4ea"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="I2" metaid="eacce3b5-ddd8-4799-bf3d-9afd6977d142"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="J2" metaid="_9496705d-5bbd-4560-ad65-d84a9f0387c6"/>
+          <modifierSpeciesReference species="N" metaid="_11250416-903d-4a45-8721-86c568c8fb07"/>
+          <modifierSpeciesReference species="Iv2" metaid="_1229e695-6d8a-41ca-8b9c-7ffd68124ac6"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_5786fb2a-99bd-4852-a8e3-0c54cc1d4f17">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> beta </ci>
+              <ci> S </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <plus/>
+                  <ci> I2 </ci>
+                  <ci> J2 </ci>
+                  <ci> Iv2 </ci>
+                </apply>
+                <ci> N </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r15" name="Primary Infection of V with strain 2" metaid="_264681" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="V" metaid="f29a77cf-4f46-4600-aba1-5fdfc0defbfc"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Iv2" metaid="_195c866f-9799-4701-bc64-7804123ba617"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="J2" metaid="_7e3c8fd7-360d-42bf-ab4e-b4e9e0893efd"/>
+          <modifierSpeciesReference species="N" metaid="_5468ad5f-6d6c-4668-986b-5ca6c0217ef3"/>
+          <modifierSpeciesReference species="I2" metaid="accd21a9-1094-4d13-bbb6-85b1c4969f9f"/>
+        </listOfModifiers>
+        <kineticLaw metaid="d848857c-3a6d-48ca-844b-8b5c69eb9355">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> beta </ci>
+              <apply>
+                <minus/>
+                <cn type="integer"> 1 </cn>
+                <ci> tau </ci>
+              </apply>
+              <ci> V </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <plus/>
+                  <ci> I2 </ci>
+                  <ci> J2 </ci>
+                  <ci> Iv2 </ci>
+                </apply>
+                <ci> N </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r16" name="Recovery (I1)" metaid="_264682" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="I1" metaid="a4aaf4de-ffc3-42e9-b602-092d1c293c0b"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="R1" metaid="_1dfdb7b9-fc25-4dce-b59e-7b36b74da87b"/>
+        </listOfProducts>
+        <kineticLaw metaid="e095d5b0-3ba7-41b3-bfde-7d9357cac239">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> gamma </ci>
+              <ci> I1 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r17" name="Recovery (I2)" metaid="_264685" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="I2" metaid="c9401332-3cf3-40db-922c-57ac49d84ab9"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="R2" metaid="_1b351178-8b19-4d45-9a55-43dd084930ac"/>
+        </listOfProducts>
+        <kineticLaw metaid="a21b372a-374f-47b5-8cb7-a9099130f4dc">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> gamma </ci>
+              <ci> I2 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r18" name="Secondary Infection with strain 1" metaid="_264686" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="R2" metaid="_715e7b39-5cbb-4a71-85ce-d59395725156"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="J1" metaid="e9b629b7-81e4-4dda-b4f6-272262d3ec82"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="N" metaid="bfceaaf2-782e-47d7-85f4-62700e0fdcf6"/>
+          <modifierSpeciesReference species="I1" metaid="_7af89cef-759f-4f01-b2c8-8ad3696b3b9f"/>
+        </listOfModifiers>
+        <kineticLaw metaid="d28596d8-1353-4912-b67c-84e6e3c5a630">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> beta </ci>
+                <apply>
+                  <minus/>
+                  <cn type="integer"> 1 </cn>
+                  <ci> theta </ci>
+                </apply>
+                <ci> R2 </ci>
+                <apply>
+                  <plus/>
+                  <ci> I1 </ci>
+                  <ci> J1 </ci>
+                </apply>
+              </apply>
+              <ci> N </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r19" name="Secondary Infection with strain 2" metaid="_264687" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="R1" metaid="_9b82d421-26b4-43bc-b808-7f5c560ca288"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="J2" metaid="_8957d82a-fde2-4a24-9603-8c0aa6dfc8c1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="N" metaid="_6d7b1c74-5de1-418f-ba1e-ecfd5cd2f837"/>
+          <modifierSpeciesReference species="I2" metaid="e1e1abfc-145a-43b8-9726-c1fbdde3ffe8"/>
+          <modifierSpeciesReference species="Iv2" metaid="_969c0235-160e-437a-8a2e-c0dcea8cf9fe"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_01f23e21-35b3-4a68-97aa-1da0088710b9">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> beta </ci>
+                <apply>
+                  <minus/>
+                  <cn type="integer"> 1 </cn>
+                  <ci> theta </ci>
+                </apply>
+                <ci> R1 </ci>
+                <apply>
+                  <plus/>
+                  <ci> I2 </ci>
+                  <ci> J2 </ci>
+                  <ci> Iv2 </ci>
+                </apply>
+              </apply>
+              <ci> N </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r20" name="Recovery (J1)" metaid="_264690" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="J1" metaid="af43d645-4e31-4804-898d-444739ecb4d9"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="R" metaid="_7613a95e-406f-46be-a2c3-1e454241247e"/>
+        </listOfProducts>
+        <kineticLaw metaid="_1ab9da4f-6982-4606-8650-955a2013c47e">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> gamma </ci>
+                <apply>
+                  <minus/>
+                  <cn type="integer"> 1 </cn>
+                  <ci> nu </ci>
+                </apply>
+              </apply>
+              <ci> J1 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r21" name="Recovery (J2)" metaid="_264691" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="J2" metaid="_716e3c80-a330-4257-9485-b1576a8552d2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="R" metaid="e3632c13-d03c-417e-bd00-c6456a0eee46"/>
+        </listOfProducts>
+        <kineticLaw metaid="a2a230d3-e54f-4799-a012-a1205e063cf4">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> gamma </ci>
+                <apply>
+                  <minus/>
+                  <cn type="integer"> 1 </cn>
+                  <ci> nu </ci>
+                </apply>
+              </apply>
+              <ci> J2 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r22" name="Recovery (Iv2)" metaid="_264692" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="Iv2" metaid="_0709e332-bebc-4837-aaae-e75ee16bbdb1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="R" metaid="_3caa73c0-8382-4ae4-97a9-492696a82d12"/>
+        </listOfProducts>
+        <kineticLaw metaid="e6936b21-42e9-4e84-acec-d373bc033ef5">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> gamma </ci>
+                <apply>
+                  <minus/>
+                  <cn type="integer"> 1 </cn>
+                  <ci> eta </ci>
+                </apply>
+              </apply>
+              <ci> Iv2 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r23" name="Loss of Immunity (R1)" metaid="_264693" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="R1" metaid="b369bf70-1a14-4819-83e9-6e11ed34426f"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S" metaid="_953b4ae7-efff-4ff4-8b99-5b5407638168"/>
+        </listOfProducts>
+        <kineticLaw metaid="_98d1658d-0dff-4279-8b13-4c6f7c32cb74">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma </ci>
+              <ci> R1 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r24" name="Loss of Immunity (R2)" metaid="_264694" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="R2" metaid="b066212e-b763-419e-846b-b4e4801a2ac2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S" metaid="_5eeb5f8e-0065-4d2a-af20-21a64f964a22"/>
+        </listOfProducts>
+        <kineticLaw metaid="f48a3894-fe28-460a-9fdf-7a7394ecae1b">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma </ci>
+              <ci> R2 </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r25" name="Loss of Immunity (Rp)" metaid="_264695" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="R" metaid="ef410d49-d8b6-451c-ac1a-030032c1a630"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S" metaid="_4106ac85-46c7-470f-8526-0eb466bb35e4"/>
+        </listOfProducts>
+        <kineticLaw metaid="bb82a509-58b7-41de-8c98-2b449689cf13">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma </ci>
+              <ci> R </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="r26" name="Loss of Immunity (V)" metaid="_264696" reversible="false" sboTerm="SBO:0000375">
+        <listOfReactants>
+          <speciesReference species="V" metaid="_9e93d43c-6750-4c03-8bff-5eddbd801450"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S" metaid="ca83d195-d221-4c17-ad81-3505174f5814"/>
+        </listOfProducts>
+        <kineticLaw metaid="_12d03fa4-b66c-4350-bde7-496e027337ae">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigmaV </ci>
+              <ci> V </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
