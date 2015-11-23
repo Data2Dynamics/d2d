@@ -1,0 +1,859 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+
+<!-- This model was downloaded from BioModels Database -->
+<!-- Fri Nov 20 14:43:57 GMT 2015                      -->
+<!-- http://www.ebi.ac.uk/biomodels/                   -->
+
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model id="DallaMan2007_MealModel_GlucoseInsulinSystem" name="DallaMan2007_MealModel_GlucoseInsulinSystem" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>
+      This a model from the article:
+      <br/>
+        <strong> Meal simulation model of the glucose-insulin system.
+</strong>
+        <br/>
+Dalla Man C, Rizza RA, Cobelli C.<em>IEEE Trans Biomed Eng.</em>2007 Oct;54(10):1740-9.
+      <a href="http://www.ncbi.nlm.nih.gov/pubmed/17926672"> 17926672</a>,
+      <br/>
+        <strong>Abstract:</strong>
+        <br/>
+A simulation model of the glucose-insulin system in the postprandial state can be useful in several circumstances, including testing of glucose sensors, insulin infusion algorithms and decision support systems for diabetes. Here, we present a new simulation model in normal humans that describes the physiological events that occur after a meal, by employing the quantitative knowledge that has become available in recent years. Model parameters were set to fit the mean data of a large normal subject database that underwent a triple tracer meal protocol which provided quasi-model-independent estimates of major glucose and insulin fluxes, e.g., meal rate of appearance, endogenous glucose production, utilization of glucose, insulin secretion. By decomposing the system into subsystems, we have developed parametric models of each subsystem by using a forcing function strategy. Model results are shown in describing both a single meal and normal daily life (breakfast, lunch, dinner) in normal. The same strategy is also applied on a smaller database for extending the model to type 2 diabetes
+   </p>
+        <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.<br/>
+For more information see the <a href="http://www.ebi.ac.uk/biomodels/legal.html" target="_blank">terms of use</a>.<br/>
+To cite BioModels Database, please use: <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+      </p>
+    </body>
+  </notes>
+    <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#metaid_0000002">
+	<dc:creator>
+	<rdf:Bag>
+	<rdf:li rdf:parseType="Resource">
+	<vCard:N rdf:parseType="Resource">
+	<vCard:Family>Ajmera</vCard:Family>
+	<vCard:Given>Ishan</vCard:Given>
+	</vCard:N>
+	<vCard:EMAIL>ajmera@ebi.ac.uk</vCard:EMAIL>
+	<vCard:ORG rdf:parseType="Resource">
+	<vCard:Orgname>EMBL-EBI</vCard:Orgname>
+	</vCard:ORG>
+	</rdf:li>
+	</rdf:Bag>
+	</dc:creator>
+	<dcterms:created rdf:parseType="Resource">
+	<dcterms:W3CDTF>2011-10-03T15:39:22Z</dcterms:W3CDTF>
+	</dcterms:created>
+	<dcterms:modified rdf:parseType="Resource">
+	<dcterms:W3CDTF>2014-10-10T10:35:41Z</dcterms:W3CDTF>
+	</dcterms:modified>
+	<bqmodel:is>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1110030000"/>
+	</rdf:Bag>
+	</bqmodel:is>
+	<bqmodel:is>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000379"/>
+	</rdf:Bag>
+	</bqmodel:is>
+	<bqmodel:isDescribedBy>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/pubmed/17926672"/>
+	</rdf:Bag>
+	</bqmodel:isDescribedBy>
+	<bqbiol:hasTaxon>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	</rdf:Bag>
+	</bqbiol:hasTaxon>
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0061178"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	<bqbiol:hasProperty>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/doid/DOID:9351"/>
+	</rdf:Bag>
+	</bqbiol:hasProperty>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+      <listOfCompartments>
+      <compartment id="Compartment1" name="default" metaid="metaid_0000072" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="G_p" initialAmount="178" name="G_p" metaid="metaid_0000102" compartment="Compartment1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#metaid_0000102">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17234"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="G_t" initialAmount="135" name="G_t" metaid="metaid_0000103" compartment="Compartment1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#metaid_0000103">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17234"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="I_l" initialAmount="4.5" name="I_l" metaid="metaid_0000104" compartment="Compartment1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#metaid_0000104">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P01308"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="I_p" initialAmount="1.25" name="I_p" metaid="metaid_0000105" compartment="Compartment1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#metaid_0000105">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P01308"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="Q_sto1" initialAmount="78000" name="Q_sto1" metaid="metaid_0000106" compartment="Compartment1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#metaid_0000106">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17234"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="Q_gut" initialAmount="0" name="Q_gut" metaid="metaid_0000108" compartment="Compartment1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#metaid_0000108">
+	<bqmodel:is>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17234"/>
+	</rdf:Bag>
+	</bqmodel:is>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="I_1" initialAmount="25" name="I_1" metaid="metaid_0000109" compartment="Compartment1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#metaid_0000109">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P01308"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="I_d" initialAmount="25" name="I_d" metaid="metaid_0000110" sboTerm="SBO:0000375" compartment="Compartment1"/>
+      <species id="X" initialAmount="0" name="X" metaid="metaid_0000111" compartment="Compartment1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#metaid_0000111">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P01308"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="I_po" initialAmount="3.6" name="I_po" metaid="metaid_0000112" compartment="Compartment1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#metaid_0000112">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P01308"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="Y" initialAmount="0" name="Y" metaid="metaid_0000113" sboTerm="SBO:0000236" compartment="Compartment1"/>
+      <species id="Q_sto2" initialAmount="0" name="Q_sto2" metaid="metaid_0000119" compartment="Compartment1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#metaid_0000119">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17234"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="V_G" name="V_G" metaid="metaid_0000010" value="1.88" sboTerm="SBO:0000468"/>
+      <parameter id="k_1" name="k_1" metaid="metaid_0000011" value="0.065" sboTerm="SBO:0000009"/>
+      <parameter id="k_2" name="k_2" metaid="metaid_0000012" value="0.079" sboTerm="SBO:0000009"/>
+      <parameter id="G_b" name="G_b" metaid="metaid_0000013" value="95" sboTerm="SBO:0000009"/>
+      <parameter id="V_I" name="V_I" metaid="metaid_0000014" value="0.05" sboTerm="SBO:0000468"/>
+      <parameter id="m_1" name="m_1" metaid="metaid_0000015" value="0.19" sboTerm="SBO:0000009"/>
+      <parameter id="m_2" name="m_2" metaid="metaid_0000016" value="0.484" sboTerm="SBO:0000009"/>
+      <parameter id="m_4" name="m_4" metaid="metaid_0000017" value="0.194" sboTerm="SBO:0000009"/>
+      <parameter id="m_5" name="m_5" metaid="metaid_0000018" value="0.0304" sboTerm="SBO:0000009"/>
+      <parameter id="m_6" name="m_6" metaid="metaid_0000019" value="0.6471" sboTerm="SBO:0000009"/>
+      <parameter id="HE_b" name="HE_b" metaid="metaid_0000020" value="0.6" sboTerm="SBO:0000009"/>
+      <parameter id="I_b" name="I_b" metaid="metaid_0000021" value="25" sboTerm="SBO:0000009"/>
+      <parameter id="S_b" name="S_b" metaid="metaid_0000022" value="1.8" sboTerm="SBO:0000009"/>
+      <parameter id="S_b_minus" name="S_b_minus" metaid="metaid_0000023" value="-1.8" sboTerm="SBO:0000009"/>
+      <parameter id="k_max" name="k_max" metaid="metaid_0000024" value="0.0558" sboTerm="SBO:0000009"/>
+      <parameter id="k_min" name="k_min" metaid="metaid_0000025" value="0.008" sboTerm="SBO:0000009"/>
+      <parameter id="k_abs" name="k_abs" metaid="metaid_0000026" value="0.057" sboTerm="SBO:0000009"/>
+      <parameter id="k_gri" name="k_gri" metaid="metaid_0000027" value="0.0558" sboTerm="SBO:0000009"/>
+      <parameter id="f" name="f" metaid="metaid_0000028" value="0.9" sboTerm="SBO:0000540"/>
+      <parameter id="b" name="b" metaid="metaid_0000029" value="0.82" sboTerm="SBO:0000009"/>
+      <parameter id="d" name="d" metaid="metaid_0000030" value="0.01" sboTerm="SBO:0000009"/>
+      <parameter id="BW" name="BW" metaid="metaid_0000031" value="78" sboTerm="SBO:0000002"/>
+      <parameter id="k_p1" name="k_p1" metaid="metaid_0000032" value="2.7" sboTerm="SBO:0000009"/>
+      <parameter id="k_p2" name="k_p2" metaid="metaid_0000033" value="0.0021" sboTerm="SBO:0000009"/>
+      <parameter id="k_p3" name="k_p3" metaid="metaid_0000034" value="0.009" sboTerm="SBO:0000009"/>
+      <parameter id="k_p4" name="k_p4" metaid="metaid_0000035" value="0.0618" sboTerm="SBO:0000009"/>
+      <parameter id="k_i" name="k_i" metaid="metaid_0000036" value="0.0079" sboTerm="SBO:0000009"/>
+      <parameter id="U_ii" name="U_ii" metaid="metaid_0000114" value="1" sboTerm="SBO:0000375"/>
+      <parameter id="V_m0" name="V_m0" metaid="metaid_0000037" value="2.5" sboTerm="SBO:0000009"/>
+      <parameter id="V_mX" name="V_mX" metaid="metaid_0000038" value="0.047" sboTerm="SBO:0000009"/>
+      <parameter id="K_m0" name="K_m0" metaid="metaid_0000039" value="225.59" sboTerm="SBO:0000009"/>
+      <parameter id="p_2U" name="p_2U" metaid="metaid_0000040" value="0.0331" sboTerm="SBO:0000009"/>
+      <parameter id="part" name="part" metaid="metaid_0000115" value="0.2" sboTerm="SBO:0000009"/>
+      <parameter id="K" name="K" metaid="metaid_0000041" value="2.3" sboTerm="SBO:0000009"/>
+      <parameter id="alpha" name="alpha" metaid="metaid_0000042" value="0.05" sboTerm="SBO:0000009"/>
+      <parameter id="beta" name="beta" metaid="metaid_0000043" value="0.11" sboTerm="SBO:0000009"/>
+      <parameter id="gamma" name="gamma" metaid="metaid_0000044" value="0.5" sboTerm="SBO:0000009"/>
+      <parameter id="k_e1" name="k_e1" metaid="metaid_0000045" value="0.0005" sboTerm="SBO:0000009"/>
+      <parameter id="k_e2" name="k_e2" metaid="metaid_0000046" value="339" sboTerm="SBO:0000009"/>
+      <parameter id="D" name="D" metaid="metaid_0000047" value="78000" sboTerm="SBO:0000361"/>
+      <parameter id="aa" constant="false" name="aa" metaid="metaid_0000048" value="0.000178062678062678" sboTerm="SBO:0000009"/>
+      <parameter id="cc" constant="false" name="cc" metaid="metaid_0000049" value="0.00320512820512821" sboTerm="SBO:0000009"/>
+      <parameter id="EGP" constant="false" name="EGP" metaid="metaid_0000050" value="1.87872" sboTerm="SBO:0000393"/>
+      <parameter id="V_mmax" constant="false" name="V_mmax" metaid="metaid_0000051" value="2" sboTerm="SBO:0000009"/>
+      <parameter id="E" constant="false" name="E" metaid="metaid_0000052" value="0" sboTerm="SBO:0000375"/>
+      <parameter id="S" constant="false" name="S" metaid="metaid_0000053" value="1.8" sboTerm="SBO:0000375"/>
+      <parameter id="I" constant="false" name="I" metaid="metaid_0000054" value="25" sboTerm="SBO:0000361"/>
+      <parameter id="G" constant="false" name="G" metaid="metaid_0000055" value="94.6808510638298" sboTerm="SBO:0000361"/>
+      <parameter id="HE" constant="false" name="HE" metaid="metaid_0000056" value="0.59238" sboTerm="SBO:0000375"/>
+      <parameter id="m_3" constant="false" name="m_3" metaid="metaid_0000057" value="0.276120406260733" sboTerm="SBO:0000009"/>
+      <parameter id="Q_sto" constant="false" name="Q_sto" metaid="metaid_0000058" value="78000" sboTerm="SBO:0000361"/>
+      <parameter id="Ra" constant="false" name="Ra" metaid="metaid_0000059" value="0" sboTerm="SBO:0000009"/>
+      <parameter id="k_empt" constant="false" name="k_empt" metaid="metaid_0000060" value="0.0554800817258192" sboTerm="SBO:0000009"/>
+      <parameter id="U_idm" constant="false" name="U_idm" metaid="metaid_0000116" value="0.748772844504839" sboTerm="SBO:0000009"/>
+      <parameter id="U_id" constant="false" name="U_id" metaid="metaid_0000117" value="0.748772844504839" sboTerm="SBO:0000009"/>
+      <parameter id="U" constant="false" name="U" metaid="metaid_0000118" value="1.74877284450484" sboTerm="SBO:0000375"/>
+      <parameter id="S_po" constant="false" name="S_po" metaid="metaid_0000061" value="1.76784893617021" sboTerm="SBO:0000375"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="metaid_0000073" variable="aa">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <divide/>
+              <apply>
+                <divide/>
+                <cn> 5 </cn>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <ci> b </ci>
+              </apply>
+            </apply>
+            <ci> D </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000074" variable="cc">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <divide/>
+              <apply>
+                <divide/>
+                <cn> 5 </cn>
+                <cn> 2 </cn>
+              </apply>
+              <ci> d </ci>
+            </apply>
+            <ci> D </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000075" variable="EGP">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <ci> k_p1 </ci>
+                <apply>
+                  <times/>
+                  <ci> k_p2 </ci>
+                  <ci> G_p </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k_p3 </ci>
+                <ci> I_d </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_p4 </ci>
+              <ci> I_po </ci>
+            </apply>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000076" variable="V_mmax">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <minus/>
+              <cn> 1 </cn>
+              <ci> part </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> V_m0 </ci>
+              <apply>
+                <times/>
+                <ci> V_mX </ci>
+                <ci> X </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000077" variable="U_idm">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> V_mmax </ci>
+              <ci> G_t </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> K_m0 </ci>
+              <ci> G_t </ci>
+            </apply>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000078" variable="E">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <cn> 0 </cn>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000079" variable="S">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> gamma </ci>
+            <ci> I_po </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000080" variable="I">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> I_p </ci>
+            <ci> V_I </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000081" variable="G">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> G_p </ci>
+            <ci> V_G </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000082" variable="HE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> m_5 </ci>
+              </apply>
+              <ci> S </ci>
+            </apply>
+            <ci> m_6 </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000083" variable="m_3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> HE </ci>
+              <ci> m_1 </ci>
+            </apply>
+            <apply>
+              <minus/>
+              <cn> 1 </cn>
+              <ci> HE </ci>
+            </apply>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000084" variable="Q_sto">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> Q_sto1 </ci>
+            <ci> Q_sto2 </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000085" variable="Ra">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> f </ci>
+              <ci> k_abs </ci>
+              <ci> Q_gut </ci>
+            </apply>
+            <ci> BW </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000086" variable="k_empt">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> k_min </ci>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> k_max </ci>
+                  <ci> k_min </ci>
+                </apply>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <tanh/>
+                    <apply>
+                      <times/>
+                      <ci> aa </ci>
+                      <apply>
+                        <minus/>
+                        <ci> Q_sto </ci>
+                        <apply>
+                          <times/>
+                          <ci> b </ci>
+                          <ci> D </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <tanh/>
+                    <apply>
+                      <times/>
+                      <ci> cc </ci>
+                      <apply>
+                        <minus/>
+                        <ci> Q_sto </ci>
+                        <apply>
+                          <times/>
+                          <ci> d </ci>
+                          <ci> D </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000087" variable="U_id">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> U_idm </ci>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000088" variable="U">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> U_ii </ci>
+            <ci> U_id </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="metaid_0000089" variable="S_po">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> Y </ci>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> K </ci>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <minus/>
+                        <apply>
+                          <plus/>
+                          <ci> EGP </ci>
+                          <ci> Ra </ci>
+                        </apply>
+                        <ci> E </ci>
+                      </apply>
+                      <ci> U_ii </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> k_1 </ci>
+                      <ci> G_p </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> k_2 </ci>
+                    <ci> G_t </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> V_G </ci>
+            </apply>
+            <ci> S_b </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <rateRule metaid="metaid_0000090" variable="G_p">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <ci> EGP </ci>
+                    <ci> Ra </ci>
+                  </apply>
+                  <ci> E </ci>
+                </apply>
+                <ci> U_ii </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k_1 </ci>
+                <ci> G_p </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_2 </ci>
+              <ci> G_t </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="metaid_0000091" variable="G_t">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <ci> U_id </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k_1 </ci>
+                <ci> G_p </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_2 </ci>
+              <ci> G_t </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="metaid_0000092" variable="I_l">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <ci> m_1 </ci>
+                </apply>
+                <ci> I_l </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> m_3 </ci>
+                <ci> I_l </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> m_2 </ci>
+              <ci> I_p </ci>
+            </apply>
+            <ci> S </ci>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="metaid_0000093" variable="I_p">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <ci> m_2 </ci>
+                </apply>
+                <ci> I_p </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> m_4 </ci>
+                <ci> I_p </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> m_1 </ci>
+              <ci> I_l </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="metaid_0000094" variable="Q_sto1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <minus/>
+              <ci> k_gri </ci>
+            </apply>
+            <ci> Q_sto1 </ci>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="metaid_0000095" variable="Q_sto2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> k_empt </ci>
+              </apply>
+              <ci> Q_sto2 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_gri </ci>
+              <ci> Q_sto1 </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="metaid_0000096" variable="Q_gut">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> k_abs </ci>
+              </apply>
+              <ci> Q_gut </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_empt </ci>
+              <ci> Q_sto2 </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="metaid_0000097" variable="I_1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <minus/>
+              <ci> k_i </ci>
+            </apply>
+            <apply>
+              <minus/>
+              <ci> I_1 </ci>
+              <ci> I </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="metaid_0000098" variable="I_d">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <minus/>
+              <ci> k_i </ci>
+            </apply>
+            <apply>
+              <minus/>
+              <ci> I_d </ci>
+              <ci> I_1 </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="metaid_0000099" variable="X">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> p_2U </ci>
+              </apply>
+              <ci> X </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> p_2U </ci>
+              <apply>
+                <minus/>
+                <ci> I </ci>
+                <ci> I_b </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="metaid_0000100" variable="I_po">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> gamma </ci>
+              </apply>
+              <ci> I_po </ci>
+            </apply>
+            <ci> S_po </ci>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="metaid_0000101" variable="Y">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <minus/>
+              <ci> alpha </ci>
+            </apply>
+            <apply>
+              <minus/>
+              <ci> Y </ci>
+              <apply>
+                <times/>
+                <ci> beta </ci>
+                <apply>
+                  <minus/>
+                  <ci> G </ci>
+                  <ci> G_b </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+    </listOfRules>
+  </model>
+</sbml>
