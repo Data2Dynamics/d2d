@@ -775,6 +775,16 @@ function out = mysubsrepeated(in, old, new, matlab_version)
 
 % better subs
 function out = mysubs(in, old, new, matlab_version)
+keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D'};
+inter = intersect(old,sym(keywords));
+if(~isempty(inter))
+    inter
+    fprintf('Symbolic substitution does not work for the following keywords:\n')
+    fprintf('%s ',keywords{:});
+    fprintf('\n');
+    error(sprintf('Problematic variable name used.'));
+end
+
 
 if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
     try

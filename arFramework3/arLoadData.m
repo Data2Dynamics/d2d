@@ -409,6 +409,7 @@ else
         qcondpara = ismember(ar.model(m).data(d).p, C{1}); %R2013a compatible
         if(sum(qcondpara)>0)
             ar.model(m).data(d).fp{qcondpara} = ['(' cell2mat(C{2}) ')'];
+        elseif(strcmp(cell2mat(C{1}),'PARAMETERS'))
         else
             warning('unknown parameter in conditions %s', cell2mat(C{1}));
         end
@@ -946,6 +947,15 @@ function out = mysubsrepeated(in, old, new, matlab_version)
 
 % better subs
 function out = mysubs(in, old, new, matlab_version)
+keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D'};
+inter = intersect(old,sym(keywords));
+if(~isempty(inter))
+    inter
+    fprintf('Symbolic substitution does not work for the following keywords:\n')
+    fprintf('%s ',keywords{:});
+    fprintf('\n');
+    error(sprintf('Problematic variable name used.'));
+end
 
 if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
     try
