@@ -38,8 +38,8 @@ m = AdaptVariableNames(m);
 m = rules2input(m);
 m = findRateRules(m);
 
-[~,ia] = setdiff({m.species.id},{m.rule.variable});
-m.species = m.species(ia);  % Remove species which are combinations of real dynamic variables, in d2d something like observables
+% [~,ia] = setdiff({m.species.id},{m.rule.variable});
+% m.species = m.species(ia);  % Remove species which are combinations of real dynamic variables, in d2d something like observables
 
 for i=1:length(m.compartment)
     if(sum(m.compartment(i).size<1e-5)>0)
@@ -719,7 +719,7 @@ end
 
 function s = mysubs(s,pat,rep)
 
-keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D'};
+keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','I','E'};
 
 issym = strcmp(class(s),'sym');
 if(~issym)
@@ -788,7 +788,7 @@ end
 function s = sym_check(s)
 %Replacement if symbolic variable coincides with function. Without
 %replacement subs would not work.
-keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D'};
+keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','I','E'};
 
 issym = strcmp(class(s),'sym');
 if(issym)
