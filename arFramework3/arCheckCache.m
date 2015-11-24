@@ -17,6 +17,11 @@ function invalidate = arCheckCache( invalidate )
     if ( nargin < 1 )
         invalidate = 0;
     end
+    
+    % Check if fields are available in ar.config
+    if ( ~invalidate )
+        fields = checkArConfigFields( fields );
+    end
 
     % Check whether the config settings were the same for the previous
     % simulation
@@ -33,6 +38,18 @@ function invalidate = arCheckCache( invalidate )
         setCacheConfigFields( fields );
     end
     
+end
+
+function fields = checkArConfigFields( fields )
+    global ar;
+    
+    remove = zeros(1,length( fields ));
+    for a = 1 : length( fields )
+        if ~isfield( ar.config, fields{a} )
+            remove(a) = 1;
+        end
+    end
+    fields = fields(~remove);
 end
 
 function setCacheConfigFields( fields )
