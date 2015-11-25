@@ -19,9 +19,7 @@ function invalidate = arCheckCache( invalidate )
     end
     
     % Check if fields are available in ar.config
-    if ( ~invalidate )
-        fields = checkArConfigFields( fields );
-    end
+    fields = checkArConfigFields( fields );
 
     % Check whether the config settings were the same for the previous
     % simulation
