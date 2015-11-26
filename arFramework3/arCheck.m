@@ -59,6 +59,9 @@ end
 if(exist('parfor_progress','file') == 0)
     addpath([ar_path '/ThirdParty/parfor_progress'])
 end
+if (exist('compileNL2SOL', 'file') == 0)
+    addpath([ar_path '/ThirdParty/NL2SOL'])
+end
     
 %% CVODES
 
