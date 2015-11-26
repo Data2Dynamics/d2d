@@ -183,9 +183,17 @@ elseif(ar.config.optimizer == 6)
 elseif(ar.config.optimizer == 7)
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         arNLS(@merit_fkt_sr1, ar.p(ar.qFit==1), lb, ub, ar.config.optim, ar.config.optimizerStep);
-    
+
+% NL2SOL
+elseif(ar.config.optimizer == 8)
+    if ~exist('mexnl2sol', 'file')
+        compileNL2SOL;
+    end
+    [pFit, ~, resnorm, exitflag, output.iterations, lambda, jac] = ...
+        mexnl2sol(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim, 1);
+
 else
-    error('ar.config.optimizer invalid');
+    error('ar.config.optimizer invalid');    
 end
 
 if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)

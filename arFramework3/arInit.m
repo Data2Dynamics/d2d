@@ -101,7 +101,7 @@ ar.config.atolV = false;
 ar.config.atolV_Sens = false;
 
 ar.config.optimizer = 1;
-ar.config.optimizers = {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1'};
+ar.config.optimizers = {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1', 'NL2SOL'};
 ar.config.optim = optimset('lsqnonlin');
 ar.config.optim.Display = 'off';
 ar.config.optim.TolFun = 0;
