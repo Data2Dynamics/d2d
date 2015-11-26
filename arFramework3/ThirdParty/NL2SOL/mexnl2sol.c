@@ -117,7 +117,6 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     double  *fEval;              /* Number of function evals     */
     double  *iter;               /* Iteration count              */
     double  *exitFlag;           /* Exit flag                    */
-    double  *lambda;             /* Lambda                       */
     
     /* Defaults */
     maxFun          = 1000;
@@ -304,34 +303,45 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     getStatus(iv[0], printLevel);
 
     /* Handle optimization output */
+    
+    /* Resnorm */
     if ( nlhs > 1 ) {
         plhs[1]     = mxCreateDoubleMatrix(1,1, mxREAL);
         fVal        = mxGetPr( plhs[1] );
         *fVal       = 2*v[9];             /* output = 0.5 sum(r^2) */
     }
     
-    if ( nlhs > 2 ) {
-        plhs[2]     = mxCreateDoubleMatrix(1,1, mxREAL);
-        exitFlag    = mxGetPr( plhs[2] );
+    /* Residual requested. Produce it again. */
+    if ( ( nlhs > 2 ) && ( nlhs < 7 ) ) {
+        memcpy( mxGetPr(userData.callData[1]), x, (p)*sizeof(double) );
+        userData.nrhs = 2;
+        
+        /* Call the MATLAB function one last time */
+        result = mexCallMATLAB( 1, userData.plhs, userData.nrhs, userData.callData, "feval" );
+        
+        /* Point memory to the residual */
+        plhs[2] = userData.plhs[0];
+    }
+    
+    /* Exit flag */
+    if ( nlhs > 3 ) {
+        plhs[3]     = mxCreateDoubleMatrix(1,1, mxREAL);
+        exitFlag    = mxGetPr( plhs[3] );
         *exitFlag   = iv[0];
     }
     
-    if ( nlhs > 3 ) {
-        plhs[3]     = mxCreateDoubleMatrix(1,1, mxREAL);
-        iter        = mxGetPr( plhs[3] );
+    /* Iterations */
+    if ( nlhs > 4 ) {
+        plhs[4]     = mxCreateDoubleMatrix(1,1, mxREAL);
+        iter        = mxGetPr( plhs[4] );
         *iter       = (double)iv[30];
     }
     
-    if ( nlhs > 4 ) {
-        plhs[4]     = mxCreateDoubleMatrix(1,1, mxREAL);
-        fEval       = mxGetPr( plhs[4] );
-        *fEval      = (double)uiparm[0];
-    }
-    
+    /* Function evaluations (replaces lambda) */
     if ( nlhs > 5 ) {
         plhs[5]     = mxCreateDoubleMatrix(1,1, mxREAL);
-        lambda      = mxGetPr( plhs[5] );
-        *lambda     = 0;
+        fEval       = mxGetPr( plhs[5] );
+        *fEval      = (double)uiparm[0];
     }
     
     /* Jacobian requested. Produce it again. */
@@ -342,11 +352,9 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         /* Call the MATLAB function one last time */
         result = mexCallMATLAB( 2, userData.plhs, userData.nrhs, userData.callData, "feval" );
         
-        /* Point memory to the Jacobian */
-        plhs[6]     = userData.plhs[1];
-        
-        /* Clean up memory for residual vector */
-        mxDestroyArray(userData.plhs[0]);
+        /* Point memory to the residual and Jacobian */
+        plhs[2] = userData.plhs[0];
+        plhs[6] = userData.plhs[1];
     }
     
     if ( printLevel > 1 )
@@ -443,7 +451,7 @@ void validateInput( const mxArray *prhs[], int nrhs, int *npars, int *bounded )
     {
         mexPrintf("NL2SOL v2.3 (by John Dennis, David Gay and Roy Welsch)\n");
         mexPrintf("MATLAB wrapper by Joep Vanlier (contact: joep.vanlier at g mail)\n");
-        mexErrMsgTxt("You must supply at least 2 arguments to nl2sol!\n\nmexnl2sol(fun,x0,lb,ub,opts,printlevel)\n");
+        mexErrMsgTxt("You must supply at least 2 arguments to nl2sol!\n\n[X,RESNORM,RESIDUAL,EXITFLAG,ITERATIONS,FEVALS,JACOBIAN] = mexnl2sol(fun,x0,(lb),(ub),(opts),(printlevel))\n");
     }
         
     /* Check Types */

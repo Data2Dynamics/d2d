@@ -1,3 +1,16 @@
+% This function compiles the NL2SOL code with the mex wrapper.
+% It should be called to produce a mex file which is callable. Note that this requires
+% both a C compiler as well as a FORTRAN compiler to be available on the system.
+%
+% NL2SOL is part of the PORT library. More specifically: 
+%		Algorithm 573:  NL2SOL—An Adaptive Nonlinear Least-Squares 
+%		Authors:        John Dennis, David Gay, Roy Welsch
+%
+% After compilation the function can be called (mostly) analogously to lsqnonlin.
+%   e.g. [X,RESNORM,RESIDUAL,EXITFLAG,ITERATIONS,FEVALS,JACOBIAN] = 
+%            mexnl2sol(@fun, x0, (lb), (ub), (opts), (printlevel))
+%
+
 function compileNL2SOL()
 
     % Compile NL2SOL
