@@ -591,46 +591,82 @@ double getStatus(int stat, int printLevel)
     int yes;
     
     switch((int)stat)
-    {     
-        case 3:
-            printIt( "x tolerance reached\n", printLevel );
-        case 4:
-            printIt( "function tolerance reached\n", printLevel );
+    {
         case 5:
-            printIt( "both tolerances reached\n", printLevel );
+            printIt( "Both tolerances reached\n", printLevel );
+            return 1;
+            break;             
+        case 3:
+            printIt( "Below tolerance for x\n", printLevel );
+            return 2;
+            break;            
+        case 4:
+            printIt( "Below function tolerance\n", printLevel );
+            return 1;
+            break;            
         case 6:
-            printIt( "absolute function tolerance reached\n", printLevel );
+            printIt( "Below absolute function tolerance\n", printLevel );
             return 1;
             break;
+        case 7:
+            printIt( "Singular convergence. The hessian near the current iterate appears to be singular or nearly so. Step of length at most V(lmax0) is unlikely to yield a relative function decrease of more than V(rfctol).\n", printLevel );
+            return 1;
+            break;            
+        case 8:
+            printIt( "False convergence. Iterates appear to be converging to a noncritical point. May mean that the convergence tolerances (V(afctol), v(rfctol), V(xctol)) are too small for the accuracy to which the function and gradient are being computed, that there is an error in computing the gradient, or that the function or gradient is discontinuous near x.\n", printLevel );
+            return -1;
+            break;            
         case 9:
-            printIt( "function evaluation limit exceeded\n", printLevel );
-        case 10:
-            printIt( "iteration limit exceeded\n", printLevel );
+            printIt( "Function evaluation limit exceeded\n", printLevel );
             return 0;
             break;
-        case 8:
-            printIt( "tolerances too small\n", printLevel );
-            return -1;
-        case 13:
-            printIt( "bad initial function evaluation\n", printLevel );
-        case 14:
-            printIt( "bad parameters\n", printLevel );
-        case 15:
-            printIt( "bad gradient\n", printLevel );
-        case 16:
-            printIt( "n/p out of range\n", printLevel );
-        case 17:
-        case 18:
-            printIt( "iv out of range\n", printLevel );
-        case 19:
-            printIt( "v out of range\n", printLevel );
-        case 50:
-        case 87:
-            printIt( "v problem\n", printLevel );
-            return -2;
+        case 10:
+            printIt( "Iteration limit exceeded\n", printLevel );
+            return 0;
+            break;
         case 11:
-            return -5;
+            printIt( "Manual interrupt\n", printLevel );
+            return 0;
+            break;            
+        case 13:
+            printIt( "Bad initial guess (function failure)\n", printLevel );
+            return -1;
+            break;
+        case 14:
+            printIt( "Bad initial guess (parameters)\n", printLevel );
+            return -1;
+            break;
+        case 15:
+            printIt( "Bad Jacobian\n", printLevel );
+            return -1;
+            break;
+        case 16:
+            printIt( "Out of range\n", printLevel );
+            return -1;
+            break;
+        case 17:
+            printIt( "Restart attempted with N or P\n", printLevel );
+            return 0;
+            break;            
+        case 18:
+            printIt( "IV(inits) out of range\n", printLevel );
+            return -1;
+            break;
+        case 19:
+            printIt( "V(IV(1)) out of range\n", printLevel );
+            return -1;
+            break;
+        case 50:
+            printIt( "IV(1) was out of range\n", printLevel );
+            return -1;
+            break;            
+        case 87:
+            printIt( "Jtol not positive\n", printLevel );
+            return -1;
+            break;
         default:
-            return -3;        
+            printIt( "Other error\n", printLevel );
+            return -1;
+            break;
     }
 }
