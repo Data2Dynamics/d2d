@@ -93,10 +93,11 @@ ar.config.ploterrors = 0;
 ar.config.plot_x_collected = false;
 
 % optimization options
-ar.config.useSensis = true; 
-ar.config.useJacobian = true;
-ar.config.useSparseJac = false;
-ar.config.useSensiRHS = true;
+ar.config.useSensis = true;         % Use sensitivities
+ar.config.sensiSkip = false;        % Skip sensitivities during fitting when only func is requested (speed-up for some optimizers)
+ar.config.useJacobian = true;       % Use Jacobian
+ar.config.useSparseJac = false;     % Use Sparse Jacobian
+ar.config.useSensiRHS = true;       % Use sensitivities of RHS during simulation
 ar.config.atolV = false; 
 ar.config.atolV_Sens = false;
 

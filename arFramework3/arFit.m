@@ -239,7 +239,16 @@ end
 % lsqnonlin and arNLS
 function [res, sres] = merit_fkt(pTrial)
 global ar
-arChi2(ar.config.useSensis, pTrial);
+
+% Only compute sensis when requested
+if ( isfield( ar.config, 'sensiSkip' ) )
+    sensiskip = ar.config.sensiSkip;
+else
+    sensiskip = false;
+end
+sensi = ar.config.useSensis && (~sensiskip || (nargout > 1));
+
+arChi2(sensi, pTrial);
 arLogFit(ar);
 res = [ar.res ar.constr];
 if(nargout>1 && ar.config.useSensis)
