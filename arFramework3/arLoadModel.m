@@ -140,7 +140,7 @@ while(~strcmp(C{1},'INPUTS'))
         ar.model(m).xNames{end+1} = ar.model(m).x{end};
     end
     if(isempty(C{8}) || isnan(C{8}))
-        ar.model(m).qPositiveX(end+1) = 1;
+        ar.model(m).qPositiveX(end+1) = 0;
     else
         ar.model(m).qPositiveX(end+1) = C{8};
     end
