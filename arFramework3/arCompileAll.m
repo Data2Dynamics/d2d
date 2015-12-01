@@ -564,9 +564,9 @@ ar.model(m).qdvdx_nonzero = logical(ar.model(m).sym.dfvdx~=0);
 ar.model(m).qdvdu_nonzero = logical(ar.model(m).sym.dfvdu~=0);
 
 tmpsym = ar.model(m).sym.dfvdx;
-tmpsym = mysubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
-tmpsym = mysubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
-tmpsym = mysubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
+tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
+tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
 
 try
     ar.model(m).qdvdx_negative = double(tmpsym) < 0;
@@ -583,9 +583,9 @@ catch ERR
 end
 
 tmpsym = ar.model(m).sym.dfvdu;
-tmpsym = mysubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
-tmpsym = mysubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
-tmpsym = mysubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
+tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
+tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
 
 ar.model(m).qdvdu_negative = double(tmpsym) < 0;
 
@@ -613,22 +613,22 @@ specialFunc = config.specialFunc;
 condition.sym.p = sym(condition.p);
 condition.sym.fp = sym(condition.fp);
 condition.sym.fpx0 = sym(model.px0);
-condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.fp, matlab_version);
+condition.sym.fpx0 = arSubs(condition.sym.fpx0, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.fv = mySym(model.fv, specialFunc);
-condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.fp, matlab_version);
+condition.sym.fv = arSubs(condition.sym.fv, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.fu = mySym(condition.fu, specialFunc);
-condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.fp, matlab_version);
+condition.sym.fu = arSubs(condition.sym.fu, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.fz = mySym(model.fz, specialFunc);
 condition.sym.fz = mysubsrepeated(condition.sym.fz, model.sym.z, condition.sym.fz, matlab_version); % Substitute references to derived variables
 
 
-condition.sym.fz = mysubs(condition.sym.fz, condition.sym.p, condition.sym.fp, matlab_version);
-condition.sym.C = mysubs(model.sym.C, condition.sym.p, condition.sym.fp, matlab_version);
+condition.sym.fz = arSubs(condition.sym.fz, condition.sym.p, condition.sym.fp, matlab_version);
+condition.sym.C = arSubs(model.sym.C, condition.sym.p, condition.sym.fp, matlab_version);
 
 % predictor
-condition.sym.fv = mysubs(condition.sym.fv, sym(model.t), sym('t'), matlab_version);
-condition.sym.fu = mysubs(condition.sym.fu, sym(model.t), sym('t'), matlab_version);
-condition.sym.fz = mysubs(condition.sym.fz, sym(model.t), sym('t'), matlab_version);
+condition.sym.fv = arSubs(condition.sym.fv, sym(model.t), sym('t'), matlab_version);
+condition.sym.fu = arSubs(condition.sym.fu, sym(model.t), sym('t'), matlab_version);
+condition.sym.fz = arSubs(condition.sym.fz, sym(model.t), sym('t'), matlab_version);
 
 % remaining initial conditions
 varlist = symvar(condition.sym.fpx0);
@@ -670,26 +670,26 @@ end
 % make syms
 condition.sym.p = sym(condition.p);
 condition.sym.ps = sym(condition.ps);
-condition.sym.px0s = mysubs(sym(condition.px0), ...
+condition.sym.px0s = arSubs(sym(condition.px0), ...
     condition.sym.p, condition.sym.ps, matlab_version);
 
 % make syms
-condition.sym.fv = mysubs(condition.sym.fv, model.sym.x, model.sym.xs, matlab_version);
-condition.sym.fv = mysubs(condition.sym.fv, model.sym.u, model.sym.us, matlab_version);
-condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.ps, matlab_version);
+condition.sym.fv = arSubs(condition.sym.fv, model.sym.x, model.sym.xs, matlab_version);
+condition.sym.fv = arSubs(condition.sym.fv, model.sym.u, model.sym.us, matlab_version);
+condition.sym.fv = arSubs(condition.sym.fv, condition.sym.p, condition.sym.ps, matlab_version);
 
-condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.ps, matlab_version);
+condition.sym.fu = arSubs(condition.sym.fu, condition.sym.p, condition.sym.ps, matlab_version);
 
-condition.sym.fz = mysubs(condition.sym.fz, model.sym.x, model.sym.xs, matlab_version);
-condition.sym.fz = mysubs(condition.sym.fz, model.sym.u, model.sym.us, matlab_version);
-condition.sym.fz = mysubs(condition.sym.fz, condition.sym.p, condition.sym.ps, matlab_version);
+condition.sym.fz = arSubs(condition.sym.fz, model.sym.x, model.sym.xs, matlab_version);
+condition.sym.fz = arSubs(condition.sym.fz, model.sym.u, model.sym.us, matlab_version);
+condition.sym.fz = arSubs(condition.sym.fz, condition.sym.p, condition.sym.ps, matlab_version);
 
-condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.ps, matlab_version);
+condition.sym.fpx0 = arSubs(condition.sym.fpx0, condition.sym.p, condition.sym.ps, matlab_version);
 
 % remove zero inputs
 condition.qfu_nonzero = logical(condition.sym.fu ~= 0);
 if(~isempty(model.sym.us))
-    condition.sym.fv = mysubs(condition.sym.fv, model.sym.us(~condition.qfu_nonzero), ...
+    condition.sym.fv = arSubs(condition.sym.fv, model.sym.us(~condition.qfu_nonzero), ...
         sym(zeros(1,sum(~condition.qfu_nonzero))), matlab_version);
 end
 
@@ -757,11 +757,11 @@ if ( ~isempty( symvar( condition.sym.C ) ) )
     for a = 1 : length( condition.sym.p )
         condition.sym.dfcdp(:,a) = (diff(model.N.*condition.sym.C, condition.sym.p(a)))*condition.sym.fv;
     end
-    condition.sym.dfcdp = mysubs(condition.sym.dfcdp, condition.sym.p, condition.sym.ps, matlab_version);
+    condition.sym.dfcdp = arSubs(condition.sym.dfcdp, condition.sym.p, condition.sym.ps, matlab_version);
 end
 
 % make equations
-condition.sym.C = mysubs(condition.sym.C, condition.sym.p, condition.sym.ps, matlab_version);
+condition.sym.C = arSubs(condition.sym.C, condition.sym.p, condition.sym.ps, matlab_version);
 condition.sym.fx = (model.N .* condition.sym.C) * transpose(model.sym.vs);
 firstcol = true;
 % Jacobian dfxdx
@@ -939,18 +939,18 @@ specialFunc = config.specialFunc;
 data.sym.p = sym(data.p);
 data.sym.fp = sym(data.fp);
 data.sym.fy = mySym(data.fy, specialFunc);
-data.sym.fy = mysubs(data.sym.fy, data.sym.p, data.sym.fp, matlab_version);
+data.sym.fy = arSubs(data.sym.fy, data.sym.p, data.sym.fp, matlab_version);
 data.sym.fystd = sym(data.fystd);
-data.sym.fystd = mysubs(data.sym.fystd, data.sym.p, data.sym.fp, matlab_version);
+data.sym.fystd = arSubs(data.sym.fystd, data.sym.p, data.sym.fp, matlab_version);
 
 data.sym.fu = mySym(data.fu, specialFunc);
-data.sym.fu = mysubs(data.sym.fu, data.sym.p, data.sym.fp, matlab_version);
+data.sym.fu = arSubs(data.sym.fu, data.sym.p, data.sym.fp, matlab_version);
 data.qfu_nonzero = logical(data.sym.fu ~= 0);
 
 % predictor
-data.sym.fu = mysubs(data.sym.fu, sym(model.t), sym('t'), matlab_version);
-data.sym.fy = mysubs(data.sym.fy, sym(model.t), sym('t'), matlab_version);
-data.sym.fystd = mysubs(data.sym.fystd, sym(model.t), sym('t'), matlab_version);
+data.sym.fu = arSubs(data.sym.fu, sym(model.t), sym('t'), matlab_version);
+data.sym.fy = arSubs(data.sym.fy, sym(model.t), sym('t'), matlab_version);
+data.sym.fystd = arSubs(data.sym.fystd, sym(model.t), sym('t'), matlab_version);
 
 % remaining parameters
 varlist = symvar([data.sym.fy(:); data.sym.fystd(:)]);
@@ -987,24 +987,24 @@ data.sym.y = sym(data.y);
 data.sym.ys = sym(data.ys);
 
 % substitute
-data.sym.fy = mysubs(data.sym.fy, ...
+data.sym.fy = arSubs(data.sym.fy, ...
     model.sym.x, model.sym.xs, matlab_version);
-data.sym.fy = mysubs(data.sym.fy, ...
+data.sym.fy = arSubs(data.sym.fy, ...
     model.sym.u, model.sym.us, matlab_version);
-data.sym.fy = mysubs(data.sym.fy, ...
+data.sym.fy = arSubs(data.sym.fy, ...
     model.sym.z, model.sym.zs, matlab_version);
-data.sym.fy = mysubs(data.sym.fy, ...
+data.sym.fy = arSubs(data.sym.fy, ...
     data.sym.p, data.sym.ps, matlab_version);
 
-data.sym.fystd = mysubs(data.sym.fystd, ...
+data.sym.fystd = arSubs(data.sym.fystd, ...
     model.sym.x, model.sym.xs, matlab_version);
-data.sym.fystd = mysubs(data.sym.fystd, ...
+data.sym.fystd = arSubs(data.sym.fystd, ...
     model.sym.u, model.sym.us, matlab_version);
-data.sym.fystd = mysubs(data.sym.fystd, ...
+data.sym.fystd = arSubs(data.sym.fystd, ...
     model.sym.z, model.sym.zs, matlab_version);
-data.sym.fystd = mysubs(data.sym.fystd, ...
+data.sym.fystd = arSubs(data.sym.fystd, ...
     data.sym.y, data.sym.ys, matlab_version);
-data.sym.fystd = mysubs(data.sym.fystd, ...
+data.sym.fystd = arSubs(data.sym.fystd, ...
     data.sym.p, data.sym.ps, matlab_version);
 
 % derivatives fy
@@ -1203,7 +1203,7 @@ function out = mysubsrepeated(in, old, new, matlab_version)
     
     k = 0; orig = in;
     while ( ~done )
-        out = mysubs(in, old, new, matlab_version);
+        out = arSubs(in, old, new, matlab_version);
         
         if ( k > 5 )
             v = '';
@@ -1226,48 +1226,6 @@ function out = mysubsrepeated(in, old, new, matlab_version)
         k = k + 1;
     end
 
-% better subs
-function out = mysubs(in, old, new, matlab_version)
-keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D'};
-inter = intersect(old,sym(keywords));
-if(~isempty(inter))
-    inter
-    fprintf('Symbolic substitution does not work for the following keywords:\n')
-    fprintf('%s ',keywords{:});
-    fprintf('\n');
-    error(sprintf('Problematic variable name used.'));
-end
-
-if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
-    try
-        if(matlab_version>=8.1)
-            out = subs(in, old(:), new(:));
-        else
-            out = subs(in, old(:), new(:), 0);
-        end
-    catch
-        % Failure to substitute, provide some info that might help debug
-        % the problem; try them one by one and output those that failed
-        s{1} = sprintf( 'Error: Model substitution failure in %s: \n\nThe following substitutions failed:\n', char( in ) );
-        for a = 1 : length( old )
-            try
-                if(matlab_version>=8.1)
-                    out = subs(in, old(a), new(a));
-                else
-                    out = subs(in, old(a), new(a), 0);
-                end
-            catch ME
-                s{end+1} = sprintf( 'Subs [%10s => %5s failed]: %s\n', ...
-                    char( old(a) ), char( new(a) ), strtok(ME(1).message, sprintf('\n')) );
-            end
-        end
-        s{end+1} = sprintf( '\n\nPlease check substitution errors for clues where the error may be.\n' );
-        
-        error( sprintf('%s',s{:}) );
-    end
-else
-    out = in;
-end
 
 function checksum = addToCheckSum(str, checksum)
 algs = {'MD2','MD5','SHA-1','SHA-256','SHA-384','SHA-512'};

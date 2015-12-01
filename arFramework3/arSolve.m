@@ -13,7 +13,7 @@ if(isempty(ar))
 end 
 
 rhs = (ar.model(m).N.*ar.model(m).condition(c).sym.C)*ar.model(m).condition(c).sym.fv;
-rhs = mysubs(rhs, ar.model(m).us, ar.model(m).condition(c).sym.fu);
+rhs = arSubs(rhs, ar.model(m).us, ar.model(m).condition(c).sym.fu);
 
 fstrings = cell(1, 2*length(ar.model(m).x));
 for j=1:length(ar.model(m).x)
@@ -42,14 +42,4 @@ if(~isempty(ar.model(m).condition(c).xt_solution))
     end
 end
 
-% better subs
-function out = mysubs(in, old, new, flag)
-if(~exist('flag','var'))
-    flag = 0;
-end
-if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    out = subs(in, old, new, flag);
-else
-    out = in;
-end
 

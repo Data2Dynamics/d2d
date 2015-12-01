@@ -1190,7 +1190,7 @@ end
 sshortlist = sym(shortlist);
 
 strsym = sym(str);
-sstrsym = mysubs(strsym, svarlist, sshortlist);
+sstrsym = arSubs(strsym, svarlist, sshortlist);
 
 str = latex(sstrsym);
 
@@ -1216,23 +1216,10 @@ str = strrep(str, '\,', ' \cdot ');
 
 
 
-
-
 function fprintnumtab(fid, num)
 fprintf(fid, '& %s ', sprintf('%g', num));
 
-% better subs
-function out = mysubs(in, old, new)
-global ar
-if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    if(ar.config.matlabVersion>=8.1)
-        out = subs(in, old(:), new(:));
-    else
-        out = subs(in, old(:), new(:), 0);
-    end
-else
-    out = in;
-end
+
 
 function mod = getModifierStr(jm,jv,useNeg,str,sources,targets)
 

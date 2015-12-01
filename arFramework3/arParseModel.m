@@ -320,16 +320,16 @@ ar.model(m).qdvdx_nonzero = logical(ar.model(m).sym.dfvdx~=0);
 ar.model(m).qdvdu_nonzero = logical(ar.model(m).sym.dfvdu~=0);
 
 tmpsym = ar.model(m).sym.dfvdx;
-tmpsym = mysubs(tmpsym, ar.model(m).sym.x, ones(size(ar.model(m).sym.x))/2);
-tmpsym = mysubs(tmpsym, ar.model(m).sym.u, ones(size(ar.model(m).sym.u))/2);
-tmpsym = mysubs(tmpsym, sym(ar.model(m).p), ones(size(ar.model(m).p))/2);
+tmpsym = arSubs(tmpsym, ar.model(m).sym.x, ones(size(ar.model(m).sym.x))/2);
+tmpsym = arSubs(tmpsym, ar.model(m).sym.u, ones(size(ar.model(m).sym.u))/2);
+tmpsym = arSubs(tmpsym, sym(ar.model(m).p), ones(size(ar.model(m).p))/2);
 
 ar.model(m).qdvdx_negative = double(tmpsym) < 0;
 
 tmpsym = ar.model(m).sym.dfvdu;
-tmpsym = mysubs(tmpsym, ar.model(m).sym.x, ones(size(ar.model(m).sym.x))/2);
-tmpsym = mysubs(tmpsym, ar.model(m).sym.u, ones(size(ar.model(m).sym.u))/2);
-tmpsym = mysubs(tmpsym, sym(ar.model(m).p), ones(size(ar.model(m).p))/2);
+tmpsym = arSubs(tmpsym, ar.model(m).sym.x, ones(size(ar.model(m).sym.x))/2);
+tmpsym = arSubs(tmpsym, ar.model(m).sym.u, ones(size(ar.model(m).sym.u))/2);
+tmpsym = arSubs(tmpsym, sym(ar.model(m).p), ones(size(ar.model(m).p))/2);
 
 ar.model(m).qdvdu_negative = double(tmpsym) < 0;
 
@@ -346,16 +346,16 @@ fprintf('parsing condition m%i c%i, %s (%s)...', m, c, model.name, condition.che
 condition.sym.p = sym(condition.p);
 condition.sym.fp = sym(condition.fp);
 condition.sym.fpx0 = sym(model.px0);
-condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.fp);
+condition.sym.fpx0 = arSubs(condition.sym.fpx0, condition.sym.p, condition.sym.fp);
 condition.sym.fv = sym(model.fv);
-condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.fp);
+condition.sym.fv = arSubs(condition.sym.fv, condition.sym.p, condition.sym.fp);
 condition.sym.fu = sym(condition.fu);
-condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.fp);
-condition.sym.C = mysubs(model.sym.C, condition.sym.p, condition.sym.fp);
+condition.sym.fu = arSubs(condition.sym.fu, condition.sym.p, condition.sym.fp);
+condition.sym.C = arSubs(model.sym.C, condition.sym.p, condition.sym.fp);
 
 % predictor
-condition.sym.fv = mysubs(condition.sym.fv, sym(model.t), sym('t'));
-condition.sym.fu = mysubs(condition.sym.fu, sym(model.t), sym('t'));
+condition.sym.fv = arSubs(condition.sym.fv, sym(model.t), sym('t'));
+condition.sym.fu = arSubs(condition.sym.fu, sym(model.t), sym('t'));
 
 % remaining initial conditions
 qinitial = ismember(condition.p, model.px0); %R2013a compatible
@@ -399,21 +399,21 @@ fprintf('p=%i, ', length(condition.p));
 % make syms
 condition.sym.p = sym(condition.p);
 condition.sym.ps = sym(condition.ps);
-condition.sym.px0s = mysubs(sym(condition.px0), ...
+condition.sym.px0s = arSubs(sym(condition.px0), ...
     condition.sym.p, condition.sym.ps);
 
 % make syms
-condition.sym.fv = mysubs(condition.sym.fv, model.sym.x, model.sym.xs);
-condition.sym.fv = mysubs(condition.sym.fv, model.sym.u, model.sym.us);
+condition.sym.fv = arSubs(condition.sym.fv, model.sym.x, model.sym.xs);
+condition.sym.fv = arSubs(condition.sym.fv, model.sym.u, model.sym.us);
 
-condition.sym.fv = mysubs(condition.sym.fv, condition.sym.p, condition.sym.ps);
-condition.sym.fu = mysubs(condition.sym.fu, condition.sym.p, condition.sym.ps);
-condition.sym.fpx0 = mysubs(condition.sym.fpx0, condition.sym.p, condition.sym.ps);
+condition.sym.fv = arSubs(condition.sym.fv, condition.sym.p, condition.sym.ps);
+condition.sym.fu = arSubs(condition.sym.fu, condition.sym.p, condition.sym.ps);
+condition.sym.fpx0 = arSubs(condition.sym.fpx0, condition.sym.p, condition.sym.ps);
 
 % remove zero inputs
 condition.qfu_nonzero = logical(condition.sym.fu ~= 0);
 if(~isempty(model.sym.us))
-    condition.sym.fv = mysubs(condition.sym.fv, model.sym.us(~condition.qfu_nonzero), ...
+    condition.sym.fv = arSubs(condition.sym.fv, model.sym.us(~condition.qfu_nonzero), ...
         sym(zeros(1,sum(~condition.qfu_nonzero))));
 end
 
@@ -478,7 +478,7 @@ condition.sym.dvdp = sym(condition.dvdp);
 fprintf('dvdp=%i, ', sum(condition.qdvdp_nonzero(:)));
 
 % make equations
-condition.sym.C = mysubs(condition.sym.C, condition.sym.p, condition.sym.ps);
+condition.sym.C = arSubs(condition.sym.C, condition.sym.p, condition.sym.ps);
 condition.sym.fx = (model.N .* condition.sym.C) * transpose(model.sym.vs);
 
 % Jacobian dfxdx
@@ -816,18 +816,18 @@ fprintf('parsing data m%i d%i -> c%i, %s (%s)...', m, d, c, data.name, data.chec
 data.sym.p = sym(data.p);
 data.sym.fp = sym(data.fp);
 data.sym.fy = sym(data.fy);
-data.sym.fy = mysubs(data.sym.fy, data.sym.p, data.sym.fp);
+data.sym.fy = arSubs(data.sym.fy, data.sym.p, data.sym.fp);
 data.sym.fystd = sym(data.fystd);
-data.sym.fystd = mysubs(data.sym.fystd, data.sym.p, data.sym.fp);
+data.sym.fystd = arSubs(data.sym.fystd, data.sym.p, data.sym.fp);
 
 data.sym.fu = sym(condition.fu);
-data.sym.fu = mysubs(data.sym.fu, data.sym.p, data.sym.fp);
+data.sym.fu = arSubs(data.sym.fu, data.sym.p, data.sym.fp);
 data.qfu_nonzero = logical(data.sym.fu ~= 0);
 
 % predictor
-data.sym.fu = mysubs(data.sym.fu, sym(model.t), sym('t'));
-data.sym.fy = mysubs(data.sym.fy, sym(model.t), sym('t'));
-data.sym.fystd = mysubs(data.sym.fystd, sym(model.t), sym('t'));
+data.sym.fu = arSubs(data.sym.fu, sym(model.t), sym('t'));
+data.sym.fy = arSubs(data.sym.fy, sym(model.t), sym('t'));
+data.sym.fystd = arSubs(data.sym.fystd, sym(model.t), sym('t'));
 
 % remaining parameters
 varlist = cellfun(@symvar, data.fp, 'UniformOutput', false);
@@ -865,26 +865,26 @@ data.sym.y = sym(data.y);
 data.sym.ys = sym(data.ys);
 
 % substitute
-data.sym.fy = mysubs(data.sym.fy, ...
+data.sym.fy = arSubs(data.sym.fy, ...
     model.sym.x, model.sym.xs);
-data.sym.fy = mysubs(data.sym.fy, ...
+data.sym.fy = arSubs(data.sym.fy, ...
     model.sym.u, model.sym.us);
-data.sym.fy = mysubs(data.sym.fy, ...
+data.sym.fy = arSubs(data.sym.fy, ...
     data.sym.p, data.sym.ps);
 
-data.sym.fystd = mysubs(data.sym.fystd, ...
+data.sym.fystd = arSubs(data.sym.fystd, ...
     model.sym.x, model.sym.xs);
-data.sym.fystd = mysubs(data.sym.fystd, ...
+data.sym.fystd = arSubs(data.sym.fystd, ...
     model.sym.u, model.sym.us);
-data.sym.fystd = mysubs(data.sym.fystd, ...
+data.sym.fystd = arSubs(data.sym.fystd, ...
     data.sym.y, data.sym.ys);
-data.sym.fystd = mysubs(data.sym.fystd, ...
+data.sym.fystd = arSubs(data.sym.fystd, ...
     data.sym.p, data.sym.ps);
 
 % remove zero inputs
-% data.sym.fy = mysubs(data.sym.fy, model.sym.us(~condition.qfu_nonzero), ...
+% data.sym.fy = arSubs(data.sym.fy, model.sym.us(~condition.qfu_nonzero), ...
 %     sym(zeros(1,sum(~condition.qfu_nonzero))));
-% data.sym.fystd = mysubs(data.sym.fystd, model.sym.us(~condition.qfu_nonzero), ...
+% data.sym.fystd = arSubs(data.sym.fystd, model.sym.us(~condition.qfu_nonzero), ...
 %     sym(zeros(1,sum(~condition.qfu_nonzero))));
 
 % derivatives fy
@@ -1037,19 +1037,6 @@ end
 fprintf('done\n');
 
 
-
-% better subs
-function out = mysubs(in, old, new)
-if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    matVer = ver('MATLAB');
-    if(str2double(matVer.Version)>=8.1)
-        out = subs(in, old(:), new(:));
-    else
-        out = subs(in, old(:), new(:), 0);
-    end
-else
-    out = in;
-end
 
 function checksum = addToCheckSum(str, checksum)
 algs = {'MD2','MD5','SHA-1','SHA-256','SHA-384','SHA-512'};

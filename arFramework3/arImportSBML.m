@@ -116,9 +116,9 @@ end
 
 for i=1:length(pat)
     for j=1:length(m.rule)
-        m.rule(j).variable = mysubs(m.rule(j).variable,pat{i},rep{i});
+        m.rule(j).variable = arSubs(m.rule(j).variable,pat{i},rep{i});
         try
-            m.rule(j).formula   = mysubs(m.rule(j).formula,pat{i},rep{i});
+            m.rule(j).formula   = arSubs(m.rule(j).formula,pat{i},rep{i});
         catch
             m.rule(j).formula = regexprep(m.rule(j).formula,['(^|(\W)',pat{i},'($|\W)'],['$1',rep{i},'$2'],'all');
         end
@@ -128,9 +128,9 @@ end
 if(isfield(m,'raterule'))
     for i=1:length(pat)
         for j=1:length(m.raterule)
-            m.raterule(j).variable = mysubs(m.raterule(j).variable,pat{i},rep{i});
+            m.raterule(j).variable = arSubs(m.raterule(j).variable,pat{i},rep{i});
             try
-                m.raterule(j).formula   = mysubs(m.raterule(j).formula,pat{i},rep{i});
+                m.raterule(j).formula   = arSubs(m.raterule(j).formula,pat{i},rep{i});
             catch
                 m.raterule(j).formula = regexprep(m.raterule(j).formula,['(^|(\W)',pat{i},'($|\W)'],['$1',rep{i},'$2'],'all');
             end
@@ -151,7 +151,7 @@ if isfield(m,'raterule')
        
         prod_spec_name = m.raterule(j).variable;
         for i=1:length(rep)
-            prod_spec_name = mysubs(prod_spec_name,pat{i},rep{i});
+            prod_spec_name = arSubs(prod_spec_name,pat{i},rep{i});
         end
         prod_spec_name = char(prod_spec_name);
         
@@ -160,7 +160,7 @@ if isfield(m,'raterule')
         tmpstr = sym(m.raterule(j).formula);
         % repace species names if too short
         for i=1:length(rep)
-            tmpstr = mysubs(tmpstr,pat{i},rep{i});
+            tmpstr = arSubs(tmpstr,pat{i},rep{i});
         end
         
         tmpstr = replacePowerFunction(tmpstr);
@@ -178,7 +178,7 @@ if isfield(m,'raterule')
             
             for jj=1:length(m.rule)
                 try
-                    tmpstr = mysubs(tmpstr, m.rule(jj).variable, ['(' m.rule(jj).formula ')']);
+                    tmpstr = arSubs(tmpstr, m.rule(jj).variable, ['(' m.rule(jj).formula ')']);
                 catch
 %                     rethrow(lasterr)
                     tmpstr
@@ -217,7 +217,7 @@ else  % specified via reactions (standard case)
             
             react_spec_name = sym(m.reaction(j).reactant(jj).species);
             for i=1:length(rep)
-                react_spec_name = mysubs(react_spec_name,pat{i},rep{i});
+                react_spec_name = arSubs(react_spec_name,pat{i},rep{i});
             end
             react_spec_name = char(react_spec_name);
             
@@ -238,7 +238,7 @@ else  % specified via reactions (standard case)
             
             prod_spec_name = sym(m.reaction(j).product(jj).species);
             for i=1:length(rep)
-                prod_spec_name = mysubs(prod_spec_name,pat{i},rep{i});
+                prod_spec_name = arSubs(prod_spec_name,pat{i},rep{i});
             end
             prod_spec_name = char(prod_spec_name);
             
@@ -258,21 +258,21 @@ else  % specified via reactions (standard case)
         tmpstr = sym(m.reaction(j).kineticLaw.math);
         % repace species names if too short
         for i=1:length(rep)
-            tmpstr = mysubs(tmpstr,pat{i},rep{i});
+            tmpstr = arSubs(tmpstr,pat{i},rep{i});
         end
         
         % make parameters unique
         if(isfield(m.reaction(j).kineticLaw, 'parameter'))
             for jj=1:length(m.reaction(j).kineticLaw.parameter)
-                tmpstr = mysubs(tmpstr, m.reaction(j).kineticLaw.parameter(jj).id, ...
+                tmpstr = arSubs(tmpstr, m.reaction(j).kineticLaw.parameter(jj).id, ...
                     [m.reaction(j).id '_' m.reaction(j).kineticLaw.parameter(jj).id]);
             end
         end
         
         % replace compartement volumes
         for jj=1:length(m.compartment)
-            tmpstr = mysubs(tmpstr, m.compartment(jj).id, num2str(m.compartment(jj).size));
-            %         tmpstr = mysubs(tmpstr, m.compartment(jj).id, 'vol_para');
+            tmpstr = arSubs(tmpstr, m.compartment(jj).id, num2str(m.compartment(jj).size));
+            %         tmpstr = arSubs(tmpstr, m.compartment(jj).id, 'vol_para');
         end
         
         % remove functions
@@ -303,7 +303,7 @@ else  % specified via reactions (standard case)
         while(findrule && count < 100)
             count = count+1;
             for jj=1:length(m.rule)
-                tmpstr = mysubs(tmpstr, m.rule(jj).variable, ['(' m.rule(jj).formula ')']);
+                tmpstr = arSubs(tmpstr, m.rule(jj).variable, ['(' m.rule(jj).formula ')']);
             end
             findrule = false;
             vars = symvar(tmpstr);
@@ -711,47 +711,9 @@ m.u = m.rule(find(is_input==1));
 m.rule = m.rule(find(is_input~=1));
 
 for i=1:length(m.u)
-%     m.u(i).formula = char(mysubs(sym(m.u(i).formula),'time','t')); % does
+%     m.u(i).formula = char(arSubs(sym(m.u(i).formula),'time','t')); % does
 %     not work, at least in R2014a
     m.u(i).formula = strrep(m.u(i).formula,'TIME','t');
-end
-
-
-function s = mysubs(s,pat,rep)
-
-keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','I','E'};
-
-issym = strcmp(class(s),'sym');
-if(~issym)
-    s = sym(s);
-end
-
-if isempty(intersect(pat,keywords))
-    try
-        s = char(subs(s,pat,rep));
-        err=0;
-    catch
-        disp(lasterr)
-        err=1;
-    end
-end
-    
-if ~isempty(intersect(pat,keywords)) || err==1
-  % symbolic toolbox keywords (function) do not work with subs
-    sv = symvar(char(s));
-    svcell = cell(size(sv));
-    for i=1:length(sv)
-        svcell{i} = char(sv(i));
-    end
-    if ~isempty(intersect(pat,svcell))
-        s = char(s);
-        for j=1:3
-            s = regexprep(s,['(^|(\W)',pat,'($|\W)'],['$1',rep,'$2'],'all');
-        end
-        if(issym)
-            s = sym(s);
-        end
-    end
 end
 
 
