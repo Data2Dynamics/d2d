@@ -88,14 +88,9 @@ lp(fid, '\\newlength\\figurewidth ');
 lp(fid, '\n\\begin{document}\n');
 
 %% Header
-% lp(fid, ['\\title{Data-2-Dynamics Software' ...
-%     '\\footnote{Website: \\href{https://bitbucket.org/d2d-development/d2d-software}' ...
-%     '{\\url{https://bitbucket.org/d2d-development/d2d-software}} \\\\ ', ...
-%     'Reference: \\citet{Raue:2012zt}}'...
-%     ' \\\\ Modeling Report}']);
 
 if(nargin==0)
-    project_name = 'Data 2 Dynamics Software -- Modeling Report';
+    project_name = 'Data2Dynamics Software -- Modeling Report';
 end
 
 lp(fid, '\\title{%s}', project_name);
@@ -104,15 +99,27 @@ lp(fid, '\\date{%s}', datestr(now));
 lp(fid, '\\maketitle\n');
 
 if(nargin>0)
-    lp(fid, '\\noindent {\\bf Data 2 Dynamics Software -- Modeling Report}\\\\\\\\');
+    lp(fid, '\\noindent {\\bf Data2Dynamics Software -- Modeling Report}\\\\\\\\');
 end
 
-lp(fid, ['\\noindent {\\bf Website:} \\href{https://bitbucket.org/d2d-development/d2d-software}' ...
-    '{\\url{https://bitbucket.org/d2d-development/d2d-software}} \\\\\\\\']);
-lp(fid, ['{\\bf Reference:} A~Raue, M~Schilling, J~Bachmann, A~Matteson, M~Schelker, ' ...
-    'D~Kaschek, S~Hug, C~Kreutz, BD~Harms, F~Theis, U~Klingm{\\"u}ller, and J~Timmer.', ...
-    ' Lessons learned from quantitative dynamical modeling in systems biology.', ...
-    ' {\\em PLOS ONE}, 8(9):e74335, 2013.']);
+lp(fid, ['\\noindent {\\bf Website:} \\href{http://www.data2dynamics.org}' ...
+    '{\\url{http://www.data2dynamics.org}} \\\\\\\\']);
+lp(fid, '{\\bf Reference:}');
+lp(fid, '\\begin{itemize}');
+lp(fid, ['\\item ', ...
+    '\\href{http://bioinformatics.oxfordjournals.org/cgi/content/abstract/btv405?ijkey=YPsnNzFC4CIzy5g&keytype=ref}' , ...
+    '{Data2Dynamics: a modeling environment tailored to parameter estimation in dynamical systems}. ', ...
+    'A.~Raue, B.~Steiert, M.~Schelker, C.~Kreutz, T.~Maiwald, H.~Hass, ', ...
+    'J.~Vanlier, C.~T{\\"o}nsing, L.~Adlung, R.~Engesser, W.~Mader, T.~Heinemann, J.~Hasenauer, ', ...
+    'M.~Schilling, T.~H{\\"o}fer, E.~Klipp, F.~Theis, U.~Klingm{\\"u}ller, B.~Schoeberl and J.~Timmer. ', ...
+    ' {\\em Bioinformatics}, {\\bf 31}(21), 3558-3560, 2015.']);
+lp(fid, ['\\item ', ... 
+    '\\href{http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0074335}' , ...
+    '{Lessons learned from quantitative dynamical modeling in systems biology}. ', ...
+    'A.~Raue, M.~Schilling, J.~Bachmann, A.~Matteson, M.~Schelker, ' ...
+    'D.~Kaschek, S.~Hug, C.~Kreutz, BD.~Harms, F.~Theis, U.~Klingm{\\"u}ller, and J.~Timmer. ', ...
+    '{\\em PLOS ONE}, {\\bf 8}(9), e74335, 2013.']);
+lp(fid, '\\end{itemize}');
 
 lp(fid, '\\tableofcontents');
 
@@ -293,29 +300,27 @@ for jm=1:length(ar.model)
     end
     
     %% Structure
-    if(isfield(ar.model(jm), 'savePath_Graph') && ~isempty(ar.model(jm).savePath_Graph))
-        savePath_Graph = [arSave '/Figures/Network' sprintf('/%s.pdf', ar.model(jm).name)];
-        if(exist(savePath_Graph,'file'))
-            lp(fid, '\\subsection{Model structure}');
-            lp(fid, 'The model structure is depicted in Figure \\ref{%s}.', [ar.model(jm).name '_graph']);
-            
-            copyfile(savePath_Graph, [savePath '/' ar.model(jm).name '_graph.pdf'])
-            captiontext = sprintf('\\textbf{%s network representation.} ', arNameTrafo(ar.model(jm).name));
-            if(~isempty(ar.model(jm).u))
-                captiontext = [captiontext 'Diamond shaped nodes correspond to model inputs, see Equation '];
-                if(length(ar.model(jm).u)==1)
-                    captiontext = [captiontext '\ref{' sprintf('%s_input%i', ar.model(jm).name, 1) '}. '];
-                else
-                    captiontext = [captiontext '\ref{' sprintf('%s_input%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_input%i', ar.model(jm).name, length(ar.model(jm).u)) '}. '];
-                end
+    savePath_Graph = [arSave '/Figures/Network' sprintf('/%s.pdf', ar.model(jm).name)];
+    if(exist(savePath_Graph,'file'))
+        lp(fid, '\\subsection{Model structure}');
+        lp(fid, 'The model structure is depicted in Figure \\ref{%s}.', [ar.model(jm).name '_graph']);
+        
+        copyfile(savePath_Graph, [savePath '/' ar.model(jm).name '_graph.pdf'])
+        captiontext = sprintf('\\textbf{%s network representation.} ', arNameTrafo(ar.model(jm).name));
+        if(~isempty(ar.model(jm).u))
+            captiontext = [captiontext 'Diamond shaped nodes correspond to model inputs, see Equation '];
+            if(length(ar.model(jm).u)==1)
+                captiontext = [captiontext '\ref{' sprintf('%s_input%i', ar.model(jm).name, 1) '}. '];
+            else
+                captiontext = [captiontext '\ref{' sprintf('%s_input%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_input%i', ar.model(jm).name, length(ar.model(jm).u)) '}. '];
             end
-            captiontext = [captiontext 'Ellipsoid shaped nodes correspond to dynamical variables described by the ODE system, see Equation '];
-            captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
-            captiontext = [captiontext 'Black arrows and box shaped nodes indicate reactions with corresponding rate equations given in Equation '];
-            captiontext = [captiontext '\ref{' sprintf('%s_flux%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_flux%i', ar.model(jm).name, length(ar.model(jm).fv)) '}. '];
-            captiontext = [captiontext 'Red T-shaped arrows indicated inhibitorial influence on a reaction and blue O-shaped arrows indicate catalysing influence on a reaction. '];
-            lpfigure(fid, 0.5, [ar.model(jm).name '_graph.pdf'], captiontext, [ar.model(jm).name '_graph']);
         end
+        captiontext = [captiontext 'Ellipsoid shaped nodes correspond to dynamical variables described by the ODE system, see Equation '];
+        captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
+        captiontext = [captiontext 'Black arrows and box shaped nodes indicate reactions with corresponding rate equations given in Equation '];
+        captiontext = [captiontext '\ref{' sprintf('%s_flux%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_flux%i', ar.model(jm).name, length(ar.model(jm).fv)) '}. '];
+        captiontext = [captiontext 'Red T-shaped arrows indicated inhibitorial influence on a reaction and blue O-shaped arrows indicate catalysing influence on a reaction. '];
+        lpfigure(fid, 0.5, [ar.model(jm).name '_graph.pdf'], captiontext, [ar.model(jm).name '_graph']);
     end
     
     %% ODE system
@@ -875,7 +880,7 @@ lp(fid, '\t\\dobegincenter');
 lp(fid, '\t{\\footnotesize');
 lp(fid, '\t\t\\begin{tabular}{llllllll}');
 lp(fid, '\t\t\t\\toprule');
-lp(fid, '\t\t\t & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & fitted \\\\');
+lp(fid, '\t\t\t & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & estimated \\\\');
 lp(fid, '\t\t\t\\midrule');
 count = 1;
 for j=1:length(ar.p)
@@ -887,7 +892,7 @@ for j=1:length(ar.p)
         lp(fid, '$\\theta_{min}$ and $\\theta_{max}$ indicate the upper and lower bounds for the parameters.');
         lp(fid, 'The log-column indicates if the value of a parameter was log-transformed.');
         lp(fid, 'If log = 1 the non-log-column indicates the non-logarithmic value of the estimate.');
-        lp(fid, 'The fitted-column indicates if the parameter value was estimated (1), was temporarily fixed (0) or if its value was fixed to a constant value (2).}');
+        lp(fid, 'The estimated-column indicates if the parameter value was estimated (1), was temporarily fixed (0) or if its value was fixed to a constant value (2).}');
         lp(fid, '\t\\doendcenter');
         lp(fid, '\t\\end{table}');
         lp(fid, '\t\\begin{table}');
@@ -895,7 +900,7 @@ for j=1:length(ar.p)
         lp(fid, '\t{\\footnotesize');
         lp(fid, '\t\t\\begin{tabular}{llllllll}');
         lp(fid, '\t\t\t\\toprule');
-        lp(fid, '\t\t\t & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & fitted \\\\');
+        lp(fid, '\t\t\t & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & estimated \\\\');
         lp(fid, '\t\t\t\\midrule');
         
         count = count + 1;
@@ -924,7 +929,7 @@ lp(fid, '{$\\hat \\theta$ indicates the estimated value of the parameters.');
 lp(fid, '$\\theta_{min}$ and $\\theta_{max}$ indicate the upper and lower bounds for the parameters.');
 lp(fid, 'The log-column indicates if the value of a parameter was log-transformed.');
 lp(fid, 'If log = 1 the non-log-column indicates the non-logarithmic value of the estimate.');
-lp(fid, 'The fitted-column indicates if the parameter value was estimated (1), was temporarily fixed (0) or if its value was fixed to a constant value (2).}');
+lp(fid, 'The estimated-column indicates if the parameter value was estimated (1), was temporarily fixed (0) or if its value was fixed to a constant value (2).}');
 lp(fid, '\t\\doendcenter');
 lp(fid, '\t\\end{table}');
 
@@ -1112,8 +1117,6 @@ lp(fid, '\\bibliographystyle{plain}');
 lp(fid, '\\bibliography{lib}');
 
 lp(fid, '\\end{document}');
-
-
 
 fclose(fid);
 fprintf('done\n');
