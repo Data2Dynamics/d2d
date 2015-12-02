@@ -1136,10 +1136,17 @@ if(isunix && ~ismac)
 elseif(ismac)
     fprintf('pdflatex, file %s...', fname);
     cd(savePath);
-    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
-    eval(['!/usr/texbin/bibtex ' fnamebib ' > log_bibtex.txt']);
-    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
-    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+    if(exist('/usr/texbin/pdflatex','file'))
+        eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+        eval(['!/usr/texbin/bibtex ' fnamebib ' > log_bibtex.txt']);
+        eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+        eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+    elseif(exist('/Library/TeX/texbin/pdflatex','file'))
+        eval(['!/Library/TeX/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+        eval(['!/Library/TeX/texbin/bibtex ' fnamebib ' > log_bibtex.txt']);
+        eval(['!/Library/TeX/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+        eval(['!/Library/TeX/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+    end
     cd('../../..');
     try
         copyfile([savePath '/' 'report.pdf'], [savePath '/' sprintf('report_%s.pdf', datestr(now,30))])
