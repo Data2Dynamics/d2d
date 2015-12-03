@@ -1,0 +1,70 @@
+DESCRIPTION
+"STAT5AB phosphorylation and dimerization"
+"mass spectrometry data"
+
+
+PREDICTOR
+t               T   min     time	0	300
+
+COMPARTMENTS
+cyt             V   pl      vol.        1.4
+nuc             V   pl      vol.        0.45
+        
+STATES
+
+STAT5A		C	nM	conc.	cyt	1
+STAT5B		C	nM	conc.	cyt	1
+
+pApB		C	nM	conc.	cyt 1
+pApA		C	nM	conc.	cyt	1
+pBpB		C	nM	conc.	cyt	1
+
+nucpApA		C	nM	conc.	nuc	1
+nucpApB		C	nM	conc.	nuc	1
+nucpBpB		C	nM	conc.	nuc	1
+
+
+INPUTS
+BaF3_Epo         C   units/cell conc.  "epo_level * exp(-Epo_degradation_BaF3*t)"
+
+
+REACTIONS
+
+STAT5A + STAT5A     -> 	pApA                CUSTOM	"BaF3_Epo * k_phos * STAT5A * STAT5A" 
+STAT5A + STAT5B     -> 	pApB                CUSTOM	"BaF3_Epo * k_phos * STAT5A * STAT5B"
+STAT5B + STAT5B     -> 	pBpB                CUSTOM	"BaF3_Epo * k_phos * STAT5B * STAT5B"
+
+pApA -> nucpApA       CUSTOM    "k_imp_homo * pApA"
+pApB -> nucpApB       CUSTOM    "k_imp_hetero * pApB"
+pBpB -> nucpBpB       CUSTOM    "k_imp_homo * pBpB"
+
+nucpApA -> STAT5A + STAT5A                 CUSTOM    "k_exp_homo * nucpApA"
+nucpApB -> STAT5A + STAT5B                 CUSTOM    "k_exp_hetero * nucpApB"
+nucpBpB -> STAT5B + STAT5B                 CUSTOM    "k_exp_homo * nucpBpB"
+
+DERIVED
+
+OBSERVABLES
+pSTAT5A_rel        C   % frac.     0   0   "100 * (2 * specC17 * pApA + pApB)/(2 * specC17 * pApA + specC17 * STAT5A + pApB)"
+pSTAT5B_rel        C   % frac.     0   0   "100 * (2 * (1-specC17) * pBpB + pApB)/(2 * (1-specC17) * pBpB + (1-specC17) * STAT5B + pApB)"
+rSTAT5A_rel        C   % frac.     0   0   "100 * (2 * specC17 * pApA + specC17 * STAT5A + pApB)/(2 * specC17 * pApA + 2 * (1-specC17) * pBpB + 2 * pApB + specC17 * STAT5A + (1-specC17) * STAT5B)"
+
+
+ERRORS
+pSTAT5A_rel	"sd_pSTAT5A_rel"
+pSTAT5B_rel	"sd_pSTAT5B_rel"
+rSTAT5A_rel	"sd_rSTAT5A_rel"
+
+
+CONDITIONS
+
+init_STAT5A     "207.6 * ratio"
+init_STAT5B     "207.6 * (1-ratio)"
+
+init_pApB	 "0"
+init_pApA    "0"
+init_pBpB    "0"
+
+init_nucpApA    "0"
+init_nucpApB    "0"
+init_nucpBpB    "0"

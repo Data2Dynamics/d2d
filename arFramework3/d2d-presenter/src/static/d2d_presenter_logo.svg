@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   height="8em"
+   viewBox="0 0 151.32565 109.52682"
+   preserveAspectRatio="xMidYMid meet"
+   version="1.1"
+   id="svg4136"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="d2d_presenter_logo.svg"
+   xml:space="preserve">
+  <metadata
+     id="metadata4159">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     id="namedview4157"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="1.2227055"
+     inkscape:cx="205.35423"
+     inkscape:cy="119.19987"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="surface1" />
+  <defs
+     id="defs4138">
+    <g
+       id="g4140">
+      <symbol
+         overflow="visible"
+         id="glyph0-0"
+         style="overflow:visible">
+        <path
+           style="stroke:none"
+           d="m 1.90625,-6.140625 c 0,-0.265625 -0.21875,-0.53125 -0.515625,-0.53125 -0.34375,0 -0.546875,0.28125 -0.546875,0.53125 0,0.265625 0.234375,0.53125 0.53125,0.53125 0.34375,0 0.53125,-0.28125 0.53125,-0.53125 z m 0,0"
+           id="path4143"
+           inkscape:connector-curvature="0" />
+      </symbol>
+      <symbol
+         overflow="visible"
+         id="glyph1-0"
+         style="overflow:visible">
+        <path
+           style="stroke:none"
+           d="M 3.328125,-3.015625 C 3.390625,-3.265625 3.625,-4.1875 4.3125,-4.1875 c 0.046875,0 0.296875,0 0.5,0.125 C 4.53125,-4 4.34375,-3.765625 4.34375,-3.515625 c 0,0.15625 0.109375,0.34375 0.375,0.34375 0.21875,0 0.53125,-0.171875 0.53125,-0.578125 0,-0.515625 -0.578125,-0.65625 -0.921875,-0.65625 -0.578125,0 -0.921875,0.53125 -1.046875,0.75 -0.25,-0.65625 -0.78125,-0.75 -1.078125,-0.75 -1.03125,0 -1.609375,1.28125 -1.609375,1.53125 0,0.109375 0.109375,0.109375 0.125,0.109375 0.078125,0 0.109375,-0.03125 0.125,-0.109375 0.34375,-1.0625 1,-1.3125 1.34375,-1.3125 0.1875,0 0.53125,0.09375 0.53125,0.671875 0,0.3125 -0.171875,0.96875 -0.53125,2.375 -0.15625,0.609375 -0.515625,1.03125 -0.953125,1.03125 -0.0625,0 -0.28125,0 -0.5,-0.125 0.25,-0.0625 0.46875,-0.265625 0.46875,-0.546875 0,-0.265625 -0.21875,-0.34375 -0.359375,-0.34375 -0.3125,0 -0.546875,0.25 -0.546875,0.578125 0,0.453125 0.484375,0.65625 0.921875,0.65625 0.671875,0 1.03125,-0.703125 1.046875,-0.75 0.125,0.359375 0.484375,0.75 1.078125,0.75 1.03125,0 1.59375,-1.28125 1.59375,-1.53125 0,-0.109375 -0.078125,-0.109375 -0.109375,-0.109375 -0.09375,0 -0.109375,0.046875 -0.140625,0.109375 -0.328125,1.078125 -1,1.3125 -1.3125,1.3125 -0.390625,0 -0.546875,-0.3125 -0.546875,-0.65625 0,-0.21875 0.046875,-0.4375 0.15625,-0.875 z m 0,0"
+           id="path4146"
+           inkscape:connector-curvature="0" />
+      </symbol>
+    </g>
+  </defs>
+  <g
+     id="surface1"
+     transform="translate(-0.07460504,102.69948)">
+    <g
+       style="fill:#000000;fill-opacity:1"
+       id="g4149">
+      <use
+         xlink:href="#glyph0-0"
+         x="1.51484"
+         y="6.7179689"
+         id="use4151"
+         width="100%"
+         height="100%"
+         transform="matrix(16.15142,0,0,16.15142,-1.1303717,-103.44396)" />
+    </g>
+    <g
+       style="fill:#000000;fill-opacity:1"
+       id="g4153"
+       transform="matrix(16.15142,0,0,16.15142,-1.1303717,-103.44396)">
+      <use
+         xlink:href="#glyph1-0"
+         x="-0.22227"
+         y="6.7179689"
+         id="use4155"
+         width="100%"
+         height="100%" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:6px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="61.341671"
+       y="-26.75461"
+       id="text4182"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="61.341671"
+         y="-26.75461"
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Italic';writing-mode:lr-tb"
+         id="tspan4188">presenter</tspan></text>
+  </g>
+</svg>
