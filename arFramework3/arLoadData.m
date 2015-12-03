@@ -611,12 +611,19 @@ if(~strcmp(extension,'none') && ( ...
                     jplot = jplot + 1;
                     ar.model(m).plot(jplot).dLink = d;
                 end
+                
+                % Check whether the user specified any variables with reserved words.
+                checkReserved(m, d);
+                
             else
                 fprintf('local random effect #%i: no matching data, skipped\n', j);
             end
         end
     else
         ar = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot);
+        
+        % Check whether the user specified any variables with reserved words.
+        checkReserved(m, d);
     end
 else
     warning('Cannot find data file corresponding to %s', name);
@@ -628,6 +635,24 @@ ar.model = orderfields(ar.model);
 ar.model(m).data = orderfields(ar.model(m).data);
 ar.model(m).plot = orderfields(ar.model(m).plot);
 
+function checkReserved(m, d)
+    global ar;
+
+    % Check whether the user specified any variables with reserved words.
+    for a = 1 : length( ar.model(m).data(d).fu )
+        arCheckReservedWords( symvar(ar.model(m).data(d).fu{a}), sprintf( 'input function of %s', ar.model(m).data(d).name ), ar.model(m).u{a} );
+    end
+    for a = 1 : length( ar.model(m).data(d).fy )
+        arCheckReservedWords( symvar(ar.model(m).data(d).fy{a}), sprintf( 'observation function of %s', ar.model(m).data(d).name ), ar.model(m).data(d).y{a} );
+    end
+    for a = 1 : length( ar.model(m).data(d).fystd )
+        arCheckReservedWords( symvar(ar.model(m).data(d).fystd{a}), sprintf( 'observation standard deviation function of %s', ar.model(m).data(d).name ), ar.model(m).data(d).y{a} );
+    end
+    for a = 1 : length( ar.model(m).data(d).fp )
+        arCheckReservedWords( symvar(ar.model(m).data(d).fp{a}), sprintf( 'condition parameter transformations of %s', ar.model(m).data(d).name ), ar.model(m).data(d).p{a} );
+    end   
+    arCheckReservedWords( ar.model(m).data(d).p, 'parameters' );
+    arCheckReservedWords( ar.model(m).data(d).y, 'observable names' );
 
 function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot)
 

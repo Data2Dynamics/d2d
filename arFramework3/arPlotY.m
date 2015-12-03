@@ -539,7 +539,7 @@ for jm = 1:length(ar.model)
                 if(isfield(ar.model(jm).data(jd), 'yNames') && ~isempty(ar.model(jm).data(jd).yNames{jy}) && ...
                         ~strcmp(ar.model(jm).data(jd).yNames{jy}, ar.model(jm).data(jd).y{jy}))
                     if ( opts.nameonly )
-                        titstr{1} = [arNameTrafo(ar.model(jm).data(jd).yNames{jy})];
+                        titstr{1} = arNameTrafo(ar.model(jm).data(jd).yNames{jy});
                     else
                         titstr{1} = [arNameTrafo(ar.model(jm).data(jd).yNames{jy}) ' (' arNameTrafo(ar.model(jm).data(jd).y{jy}) ')'];
                     end

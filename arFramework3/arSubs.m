@@ -7,16 +7,6 @@ if(nargin<4)
     matlab_version = str2double(matVer.Version);   
 end
 
-keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D'};
-inter = intersect(old,sym(keywords));
-if(~isempty(inter))
-    disp(inter)
-    fprintf('Symbolic substitution does not work for the following keywords:\n')
-    fprintf('%s ',keywords{:});
-    fprintf('\n');
-    error('Problematic variable name used.');
-end
-
 if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
     try
         if(matlab_version>=8.1)

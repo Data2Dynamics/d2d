@@ -732,5 +732,31 @@ end
 
 fclose(fid);
 
+% Check whether the user specified any variables with reserved words. This
+% would be problematic later.
+for a = 1 : length( ar.model(m).fu )
+    arCheckReservedWords( symvar(ar.model(m).fu{a}), 'input function', ar.model(m).u{a} );
+end
+for a = 1 : length( ar.model(m).fy )
+    arCheckReservedWords( symvar(ar.model(m).fy{a}), 'observation function', ar.model(m).y{a} );
+end
+for a = 1 : length( ar.model(m).fystd )
+    arCheckReservedWords( symvar(ar.model(m).fystd{a}), 'observation standard deviation', ar.model(m).y{a} );
+end
+for a = 1 : length( ar.model(m).fp )
+    arCheckReservedWords( symvar(ar.model(m).fp{a}), 'parameter transformation', ar.model(m).p{a} );
+end
+for a = 1 : length( ar.model(m).fx )
+    arCheckReservedWords( symvar(ar.model(m).fx{a}), 'right hand side', ar.model(m).x{a} );
+end
+
+arCheckReservedWords( ar.model(m).p, 'parameters' );
+arCheckReservedWords( ar.model(m).x, 'state variables' );
+arCheckReservedWords( ar.model(m).y, 'observables' );
+arCheckReservedWords( ar.model(m).z, 'derived variables' );
+arCheckReservedWords( ar.model(m).u, 'inputs' );
+arCheckReservedWords( ar.model(m).c, 'compartments' );
+
 ar = orderfields(ar);
 ar.model = orderfields(ar.model);
+
