@@ -104,7 +104,7 @@ end
 
 lp(fid, ['\\noindent {\\bf Website:} \\href{http://www.data2dynamics.org}' ...
     '{\\url{http://www.data2dynamics.org}} \\\\\\\\']);
-lp(fid, '{\\bf Reference:}');
+lp(fid, '{\\bf Key reference:}');
 lp(fid, '\\begin{itemize}');
 lp(fid, ['\\item ', ...
     '\\href{http://bioinformatics.oxfordjournals.org/cgi/content/abstract/btv405?ijkey=YPsnNzFC4CIzy5g&keytype=ref}' , ...
@@ -140,24 +140,24 @@ for jm=1:length(ar.model)
     %% species
     if(~isempty(ar.model(jm).x))
         lp(fid, '\\subsection{Dynamic variables}');
-        lp(fid, 'The model contains %i dynamic variables:', length(ar.model(jm).x));
+        lp(fid, 'The model contains %i dynamic variables. ', length(ar.model(jm).x));
+        lp(fid, 'The dynamics of those variables evolve according to a system of ordinary differential equations (ODE) as will be defined in the following.');
+        lp(fid, 'The following list indicates the unique variable names and their initial conditions.');
         lp(fid, '\\begin{itemize}');
         for jx = 1:length(ar.model(jm).x)
             lp(fid, '\\item {\\bf Dynamic variable %i:} %s', ...
                 jx, strrep(ar.model(jm).x{jx}, '_', '\_'));
             
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{equation}');
-            lp(fid, '\\begin{aligned}');
-            lp(fid, '%s(%s=0) & = & %s \\label{%s}', ...
+            lp(fid, '\\begin{align}');
+            lp(fid, '%s(%s=0) & = %s \\label{%s}', ...
                 myFormulas(ar.model(jm).x{jx}, jm), ...
                 myFormulas(ar.model(jm).t, jm), ...
                 myFormulas(ar.model(jm).px0{jx}, jm), ...
                 sprintf('%s_init%i', ar.model(jm).name, jx));
-            lp(fid, '\\end{aligned}');
-            lp(fid, '\\end{equation}}');
+            lp(fid, '\\end{align}}');
             
-            lp(fid, 'Unit: %s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2});
+            %lp(fid, 'Unit: %s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2});
         end
         lp(fid, '\\end{itemize}');
     end
@@ -165,7 +165,10 @@ for jm=1:length(ar.model)
     %% inputs
     if(~isempty(ar.model(jm).u))
         lp(fid, '\\subsection{Input variables}');
-        lp(fid, 'The model contains %i external inputs variables:', length(ar.model(jm).u));
+        lp(fid, 'The model contains %i external inputs variables.', length(ar.model(jm).u));
+        lp(fid, 'Those variables evolve according to a regular algebraic equation. ');
+        lp(fid, 'They are calculated before the ODE systems is solved and can appear in reaction rate equations.');
+        lp(fid, 'The following list indicates the unique variable names and their corresponding equations.');
         lp(fid, '\\begin{itemize}');
         for ju = 1:length(ar.model(jm).u)
             lp(fid, '\\item {\\bf Input variable %i:} %s', ...
@@ -173,15 +176,13 @@ for jm=1:length(ar.model)
             
             if(~isempty(ar.model(jm).fu{ju}))
                 lp(fid, '{\\footnotesize');
-                lp(fid, '\\begin{equation}');
-                lp(fid, '\\begin{aligned}');
-                lp(fid, '%s(%s) & = & %s \\label{%s}', ...
+                lp(fid, '\\begin{align}');
+                lp(fid, '%s(%s) & = %s \\label{%s}', ...
                     myFormulas(ar.model(jm).u{ju}, jm), ...
                     myFormulas(ar.model(jm).t, jm), ...
                     myFormulas(ar.model(jm).fu{ju}, jm), ...
                     sprintf('%s_input%i', ar.model(jm).name, ju));
-                lp(fid, '\\end{aligned}');
-                lp(fid, '\\end{equation}}');
+                lp(fid, '\\end{align}}');
             end
             
             lp(fid, 'Unit: %s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2});
@@ -192,8 +193,14 @@ for jm=1:length(ar.model)
     %% reactions
     if(~isempty(ar.model(jm).x))
         lp(fid, '\\subsection{Reactions}');
-        lp(fid, 'The model contains %i reactions:', ...
+        lp(fid, 'The model contains %i reactions.', ...
             length(ar.model(jm).fv));
+        lp(fid, 'Reactions define interactions between dynamics variables and build up the ODE systems. ');
+        lp(fid, 'The following list indicates the reaction laws and their corresponding reaction rate equations.');
+        lp(fid, 'Promoting rate modifiers are indicated in black above the rate law arrow.');
+        lp(fid, 'Inhibitory rate modifiers are indicated in red below the rate law arrow.');
+        lp(fid, 'In the reaction rate equations dynamic and input variables are indicated by square brackets.');
+        lp(fid, 'The remaining variables are model parameters that remain constant over time.');
         lp(fid, '\\begin{itemize}');
         for jv = 1:length(ar.model(jm).fv)
             lp(fid, '\\item {\\bf Reaction %i:}', jv);
@@ -287,12 +294,10 @@ for jm=1:length(ar.model)
             
             % rate equation
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{equation}');
-            lp(fid, '\\begin{aligned}');
-            lp(fid, 'v_{%i} & = & %s \\label{%s}', jv, myFormulas(ar.model(jm).fv{jv}, jm), ...
+            lp(fid, '\\begin{align}');
+            lp(fid, 'v_{%i} & = %s \\label{%s}', jv, myFormulas(ar.model(jm).fv{jv}, jm), ...
                 sprintf('%s_flux%i', ar.model(jm).name, jv));
-            lp(fid, '\\end{aligned}');
-            lp(fid, '\\end{equation}}');
+            lp(fid, '\\end{align}}');
             
             fprintf(fid, '\n');
         end
@@ -303,33 +308,28 @@ for jm=1:length(ar.model)
     savePath_Graph = [arSave '/Figures/Network' sprintf('/%s.pdf', ar.model(jm).name)];
     if(exist(savePath_Graph,'file'))
         lp(fid, '\\subsection{Model structure}');
-        lp(fid, 'The model structure is depicted in Figure \\ref{%s}.', [ar.model(jm).name '_graph']);
+        lp(fid, 'The model structure that emerges from the previously specified reaction laws is depicted in Figure \\ref{%s}.', [ar.model(jm).name '_graph']);
         
         copyfile(savePath_Graph, [savePath '/' ar.model(jm).name '_graph.pdf'])
         captiontext = sprintf('\\textbf{%s network representation.} ', arNameTrafo(ar.model(jm).name));
+        captiontext = [captiontext 'Ellipsoid shaped nodes correspond to dynamical variables. '];        
         if(~isempty(ar.model(jm).u))
-            captiontext = [captiontext 'Diamond shaped nodes correspond to model inputs, see Equation '];
-            if(length(ar.model(jm).u)==1)
-                captiontext = [captiontext '\ref{' sprintf('%s_input%i', ar.model(jm).name, 1) '}. '];
-            else
-                captiontext = [captiontext '\ref{' sprintf('%s_input%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_input%i', ar.model(jm).name, length(ar.model(jm).u)) '}. '];
-            end
+            captiontext = [captiontext 'Diamond shaped nodes correspond to inputs variables. '];
         end
-        captiontext = [captiontext 'Ellipsoid shaped nodes correspond to dynamical variables described by the ODE system, see Equation '];
-        captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
         captiontext = [captiontext 'Black arrows and box shaped nodes indicate reactions with corresponding rate equations given in Equation '];
         captiontext = [captiontext '\ref{' sprintf('%s_flux%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_flux%i', ar.model(jm).name, length(ar.model(jm).fv)) '}. '];
-        captiontext = [captiontext 'Red T-shaped arrows indicated inhibitorial influence on a reaction and blue O-shaped arrows indicate catalysing influence on a reaction. '];
-        lpfigure(fid, 0.5, [ar.model(jm).name '_graph.pdf'], captiontext, [ar.model(jm).name '_graph']);
+        captiontext = [captiontext 'Red T-shaped arrows indicated inhibitorial influence on a reaction and blue O-shaped arrows indicate promoting influence on a reaction. '];
+        lpfigure(fid, 0.5, [ar.model(jm).name '_graph.pdf'], captiontext, [ar.model(jm).name '_graph'], '[h]');
     end
     
     %% ODE system
     if(~isempty(ar.model(jm).x))
         lp(fid, '\\subsection{ODE system}');
         
-        lp(fid, '\\noindent The ODE system determining the time evolution of the dynamical variables is given by:');
+        lp(fid, '\\noindent The specified reation laws and rate equations $v$ determine ODE system. ');
+        lp(fid, 'The time evolution of the dynamical variables is given by this equation system.');
         lp(fid, '{\\footnotesize');
-        lp(fid, '\\begin{eqnarray}');
+        lp(fid, '\\begin{align}');
         for jx=1:size(ar.model(jm).N, 1) % for every species jx
             strtmp = '';
             if(~isempty(ar.model(jm).c))
@@ -354,17 +354,17 @@ for jm=1:length(ar.model)
                 
             end
             if(jx==size(ar.model(jm).N, 1) || mod(jx,N)==0)
-                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = & %s \\label{%s}', myFormulas(ar.model(jm).x{jx}, jm), strtmp, sprintf('%s_ode%i', ar.model(jm).name, jx));
+                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = %s \\label{%s}', myFormulas(ar.model(jm).x{jx}, jm), strtmp, sprintf('%s_ode%i', ar.model(jm).name, jx));
             else
-                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = & %s \\label{%s} \\\\', myFormulas(ar.model(jm).x{jx}, jm), strtmp, sprintf('%s_ode%i', ar.model(jm).name, jx));
+                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = %s \\label{%s} \\\\', myFormulas(ar.model(jm).x{jx}, jm), strtmp, sprintf('%s_ode%i', ar.model(jm).name, jx));
             end
             
             if(mod(jx,N)==0 && jx<size(ar.model(jm).N, 1))
-                lp(fid, '\\end{eqnarray}\n');
-                lp(fid, '\\begin{eqnarray}');
+                lp(fid, '\\end{align}\n');
+                lp(fid, '\\begin{align}');
             end
         end
-        lp(fid, '\\end{eqnarray}}\n\n');
+        lp(fid, '\\end{align}}\n\n');
         
         lp(fid, '\\noindent The ODE system was solved by a parallelized implementation of the CVODES algorithm \\cite{Hindmarsh:2005fb}.');
         lp(fid, 'It also supplies the parameter sensitivities utilized for parameter estimation.\\\\\n\n');
@@ -373,24 +373,25 @@ for jm=1:length(ar.model)
     %% derived
     if(~isempty(ar.model(jm).z))
         lp(fid, '\\subsection{Derived variables}');
-        lp(fid, 'The model contains %i derived variables:', length(ar.model(jm).z));
+        lp(fid, 'The model contains %i derived variables.', length(ar.model(jm).z));
+        lp(fid, 'Derived variables are calculated after the ODE system was solved. ');
+        lp(fid, 'Dynamic and input variables are indicated by square brackets.');
+        lp(fid, 'The remaining variables are model parameters that remain constant over time.');
         lp(fid, '\\begin{itemize}');
         for jz = 1:length(ar.model(jm).z)
             lp(fid, '\\item {\\bf Derived variable %i:} %s', ...
                 jz, strrep(ar.model(jm).z{jz}, '_', '\_'));
             
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{equation}');
-            lp(fid, '\\begin{aligned}');
-            lp(fid, '%s(%s) & = & %s \\label{%s}', ...
+            lp(fid, '\\begin{align}');
+            lp(fid, '%s(%s) & = %s \\label{%s}', ...
                 myFormulas(ar.model(jm).z{jz}, jm), ...
                 myFormulas(ar.model(jm).t, jm), ...
                 myFormulas(ar.model(jm).fz{jz}, jm), ...
                 sprintf('%s_derived%i', ar.model(jm).name, jz));
-            lp(fid, '\\end{aligned}');
-            lp(fid, '\\end{equation}}');
+            lp(fid, '\\end{align}}');
             
-            lp(fid, 'Unit: %s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2});
+            % lp(fid, 'Unit: %s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2});
         end
         lp(fid, '\\end{itemize}');
     end
@@ -398,7 +399,11 @@ for jm=1:length(ar.model)
     %% standard observations and error model
     if(isfield(ar.model(jm), 'y'))
         lp(fid, '\\subsection{Observables}');
-        lp(fid, 'The model contains %i standard observables:', length(ar.model(jm).y));
+        lp(fid, 'The model contains %i standard observables.', length(ar.model(jm).y));
+        lp(fid, 'Observables are calculated after the ODE system was solved and derived variables are calculated. ');
+        lp(fid, 'Dynamic, input and derived variables are indicated by square brackets.');
+        lp(fid, 'The remaining variables are model parameters that remain constant over time.');
+        lp(fid, 'In additon to the equation for the observable, also their corresponding error model $\\sigma$ is indicated.');
         lp(fid, '\\begin{itemize}');
         for jy = 1:length(ar.model(jm).y)
             lp(fid, '\\item {\\bf Observable %i:} %s', ...
@@ -410,30 +415,20 @@ for jm=1:length(ar.model)
             end
             
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{equation}');
-            lp(fid, '\\begin{aligned}');
-            lp(fid, '%s(%s) & = & %s \\label{%s}', ...
+            lp(fid, '\\begin{align}');
+            lp(fid, '%s(%s) & = %s \\label{%s} \\\\', ...
                 myFormulas(ar.model(jm).y{jy}, jm), ...
                 myFormulas(ar.model(jm).t, jm), ...
                 strtmp, ...
                 sprintf('%s_std_obs%i', ar.model(jm).name, jy));
-            lp(fid, '\\end{aligned}');
-            lp(fid, '\\end{equation}}');
-            
-            lp(fid, 'Unit: %s [%s]; ', ar.model(jm).yUnits{jy,3}, ar.model(jm).yUnits{jy,2});
-            
-            lp(fid, 'With error model:');
-            
-            lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{equation}');
-            lp(fid, '\\begin{aligned}');
-            lp(fid, '\\sigma\\{%s\\}(%s) & = & %s \\label{%s}', ...
+            lp(fid, '\\sigma\\{%s\\}(%s) & = %s \\label{%s}', ...
                 myFormulas(ar.model(jm).y{jy}, jm), ...
                 myFormulas(ar.model(jm).t, jm), ...
                 myFormulas(ar.model(jm).fystd{jy}, jm), ...
                 sprintf('%s_std_err%i', ar.model(jm).name, jy));
-            lp(fid, '\\end{aligned}');
-            lp(fid, '\\end{equation}}');
+            lp(fid, '\\end{align}}');
+            
+            %lp(fid, 'Unit: %s [%s]; ', ar.model(jm).yUnits{jy,3}, ar.model(jm).yUnits{jy,2});
         end
         lp(fid, '\\end{itemize}');
     end
@@ -443,27 +438,28 @@ for jm=1:length(ar.model)
     for jp=1:length(ar.model(jm).fp)
         if(~strcmp(ar.model(jm).p{jp}, ar.model(jm).fp{jp}))
             if(ccount==1)
-                lp(fid, '\\subsection{Parameter transformations}');
-                lp(fid, '\\noindent The ODE system is modified by the following parameter transformations:');
+                lp(fid, '\\subsection{Conditions}');
+                lp(fid, '\\noindent Conditions modify previously defined model parameters according to an algebraic equation.');
+                lp(fid, 'New model parameters can be introduced or relations between existing model parameters can be implemented.');
                 lp(fid, '{\\footnotesize');
-                lp(fid, '\\begin{eqnarray}');
+                lp(fid, '\\begin{align}');
             end
             
             if(ccount==length(ar.model(jm).fp) || mod(ccount,N)==0)
-                lp(fid, '\t%s & \\rightarrow & %s', myFormulas(ar.model(jm).p{jp}, jm), ...
+                lp(fid, '\t%s & \\rightarrow %s', myFormulas(ar.model(jm).p{jp}, jm), ...
                     myFormulas(ar.model(jm).fp{jp}, jm));
             else
-                lp(fid, '\t%s & \\rightarrow & %s \\\\', myFormulas(ar.model(jm).p{jp}, jm), ...
+                lp(fid, '\t%s & \\rightarrow %s \\\\', myFormulas(ar.model(jm).p{jp}, jm), ...
                     myFormulas(ar.model(jm).fp{jp}, jm));
             end
             if(mod(ccount,N)==0 && ccount<length(ar.model(jm).fp))
-                lp(fid, '\\end{eqnarray}\n');
-                lp(fid, '\\begin{eqnarray}');
+                lp(fid, '\\end{align}\n');
+                lp(fid, '\\begin{align}');
             end
             ccount = ccount + 1;
         end
         if(ccount>1 && jp==length(ar.model(jm).fp))
-            lp(fid, '\\end{eqnarray}}\n\n');
+            lp(fid, '\\end{align}}\n\n');
         end
     end
     
@@ -849,14 +845,14 @@ lp(fid, '\\section{Estimated model parameters} \\label{estimatedparameters}\n');
 
 if(isfield(ar,'ndata') && isfield(ar,'chi2fit') && isfield(ar,'chi2'))
     if(ar.config.fiterrors == 1)
-        lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
+        lp(fid, 'In total %i parameters are estimated from the experimental data. The best fit yields a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
             sum(ar.qFit==1), 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
     else
         lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $\\chi^2 = %g$ for a total of %i data points.', ...
             sum(ar.qFit==1), ar.chi2, ar.ndata);
     end
 
-    lp(fid, 'The model parameters were estimated by maximum likelihood estimation applying the MATLAB lsqnonlin algorithm.');
+    lp(fid, 'The model parameters were estimated by maximum likelihood estimation.');
 end
 
 N = 50;
@@ -868,9 +864,9 @@ else
 end
 lp(fid, 'Parameters highlighted in red color indicate parameter values close to their bounds.');
 lp(fid, 'The parameter name prefix init\\_ indicates the initial value of a dynamic variable.');
-lp(fid, 'The parameter name prefix offset\\_ indicates a offset of the experimental data.');
-lp(fid, 'The parameter name prefix scale\\_ indicates a scaling factor of the experimental data.');
-lp(fid, 'The parameter name prefix sd\\_ indicates the magnitude of the measurement noise for a specific measurement.\\\\');
+% lp(fid, 'The parameter name prefix offset\\_ indicates a offset of the experimental data.');
+% lp(fid, 'The parameter name prefix scale\\_ indicates a scaling factor of the experimental data.');
+% lp(fid, 'The parameter name prefix sd\\_ indicates the magnitude of the measurement noise for a specific measurement.\\\\');
 
 pTrans = ar.p;
 pTrans(ar.qLog10==1) = 10.^pTrans(ar.qLog10==1);
@@ -1167,8 +1163,11 @@ else
     fprintf(varargin{1}, sprintf('%s\n', varargin{2}));
 end
 
-function lpfigure(fid, textwidth, figpath, figcaption, figlabel)
-lp(fid, '\\begin{figure}');
+function lpfigure(fid, textwidth, figpath, figcaption, figlabel, figmod)
+if(nargin<6)
+    figmod = '';
+end
+lp(fid, ['\\begin{figure}' figmod]);
 lp(fid, '\\begin{center}');
 lp(fid, '\\includegraphics[width=%f\\textwidth]{%s} \\caption{%s} \\label{%s}', textwidth, figpath, figcaption, figlabel);
 lp(fid, '\\end{center}');
@@ -1200,7 +1199,7 @@ end
 sshortlist = sym(shortlist);
 
 strsym = sym(str);
-sstrsym = arSubs(strsym, svarlist, sshortlist);
+sstrsym = subs(strsym, svarlist, sshortlist);
 
 str = latex(sstrsym);
 
