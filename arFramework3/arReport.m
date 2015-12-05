@@ -185,7 +185,7 @@ for jm=1:length(ar.model)
                 lp(fid, '\\end{align}}');
             end
             
-            lp(fid, 'Unit: %s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2});
+            % lp(fid, 'Unit: %s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2});
         end
         lp(fid, '\\end{itemize}');
     end
@@ -480,19 +480,212 @@ for jm=1:length(ar.model)
                 end
             end
             
-            %% fit
-            lp(fid, '\\subsubsection{Model fit and plots}');
-            lp(fid, '\\noindent The agreement of the model observables and the experimental data, given in Table \\ref{%s_data}, ', ar.model(jm).plot(jplot).name);
-            
-            if(ar.config.fiterrors == 1)
-                lp(fid, 'yields a value of the objective function $-2 \\log(L) = %g$ for %i data points in this data set.', ...
-                    2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
-            else
-                lp(fid, 'yields a value of the objective function $\\chi^2 = %g$ for %i data points in this data set.', ...
-                    ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
+
+            %% inputs
+            if(~isempty(ar.model(jm).u))
+                qmod = ~strcmp(ar.model(jm).fu, ar.model(jm).data(jd).fu);
+                if(sum(qmod)>0)
+                    lp(fid, '\\subsubsection{Input variables}');
+                    lp(fid, 'The following inputs variables are modified in this data set.');
+                    lp(fid, '\\begin{itemize}');
+                    for ju = find(qmod)'
+                        lp(fid, '\\item {\\bf Input variable %i:} %s', ...
+                            ju, strrep(ar.model(jm).u{ju}, '_', '\_'));
+                        
+                        lp(fid, '{\\footnotesize');
+                        lp(fid, '\\begin{align}');
+                        lp(fid, '%s(%s) & = %s \\label{%s}', ...
+                            myFormulas(ar.model(jm).u{ju}, jm), ...
+                            myFormulas(ar.model(jm).t, jm), ...
+                            myFormulas(ar.model(jm).data(jd).fu{ju}, jm), ...
+                            sprintf('%s_input%i', ar.model(jm).plot(jplot).name, ju));
+                        lp(fid, '\\end{align}}');
+                    end
+                    lp(fid, '\\end{itemize}');
+                end
             end
             
-            %% plots
+            %% observations and error model
+            
+            if(isfield(ar.model(jm), 'y'))
+                qadd = ~ismember(ar.model(jm).data(jd).y, ar.model(jm).y);
+            else
+                qadd = 0;
+            end
+            
+            if(isfield(ar.model(jm), 'y'))
+                fytmp = strrep(ar.model(jm).fy, '_filename', ['_' ar.model(jm).data(jd).name]);
+                fystdtmp = strrep(ar.model(jm).fystd, '_filename', ['_' ar.model(jm).data(jd).name]);
+                qmod = [];
+                for j=1:length(ar.model(jm).data(jd).fy)
+                    if(~qadd(j))
+                        iy = find(strcmp(ar.model(jm).y, ar.model(jm).data(jd).y{j}));
+                        qmod(j) = ~strcmp(fytmp{iy}, ar.model(jm).data(jd).fy{j}) || ...
+                            ~strcmp(fystdtmp{iy}, ar.model(jm).data(jd).fystd{j});
+                    end
+                end
+            else
+                qmod = false;
+            end
+            
+            if(sum(qmod)>0 || sum(qadd)>0)
+                lp(fid, '\\subsubsection{Observables}');
+                
+                % modified observables
+                if(sum(qmod)>0)
+                    lp(fid, 'The following observables are modified in this data set.');
+                    lp(fid, '\\begin{itemize}');
+                    for jy = find(qmod)
+                        lp(fid, '\\item {\\bf Observable:} %s', ...
+                            strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
+                        
+                        strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
+                        if(ar.model(jm).logfitting(jy))
+                            strtmp = ['\log_{10}(' strtmp ')'];
+                        end
+                        
+                        lp(fid, '{\\footnotesize');
+                        lp(fid, '\\begin{align}');
+                        lp(fid, '%s(%s) & = %s \\label{%s} \\\\', ...
+                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
+                            myFormulas(ar.model(jm).t, jm), ...
+                            strtmp, ...
+                            sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, jy));
+                        lp(fid, '\\sigma\\{%s\\}(%s) & = & %s \\label{%s}', ...
+                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
+                            myFormulas(ar.model(jm).t, jm), ...
+                            myFormulas(ar.model(jm).data(jd).fystd{jy}, jm), ...
+                            sprintf('%s_err%i', ar.model(jm).plot(jplot).name, jy));
+                        lp(fid, '\\end{align}}');
+                        
+                        %lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
+                    end
+                    lp(fid, '\\end{itemize}');
+                end
+                
+                % additional observables
+                if(sum(qadd)>0)
+                    lp(fid, 'The following observables are added in this data set.');
+                    lp(fid, '\\begin{itemize}');
+                    for jy = find(qadd)
+                        lp(fid, '\\item {\\bf Observable:} %s', ...
+                            strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
+                        
+                        strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
+                        if(isfield(ar.model(jm),'logfitting') && ar.model(jm).logfitting(jy))
+                            strtmp = ['\log_{10}(' strtmp ')'];
+                        end
+                        
+                        lp(fid, '{\\footnotesize');
+                        lp(fid, '\\begin{align}');
+                        lp(fid, '%s(%s) & = & %s \\label{%s} \\\\', ...
+                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
+                            myFormulas(ar.model(jm).t, jm), ...
+                            strtmp, ...
+                            sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, jy));
+                        lp(fid, '\\sigma\\{%s\\}(%s) & = & %s \\label{%s}', ...
+                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
+                            myFormulas(ar.model(jm).t, jm), ...
+                            myFormulas(ar.model(jm).data(jd).fystd{jy}, jm), ...
+                            sprintf('%s_err%i', ar.model(jm).plot(jplot).name, jy));
+                        lp(fid, '\\end{align}}');
+                        
+                        %lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
+                    end
+                    lp(fid, '\\end{itemize}');
+                end
+            end
+            
+            %% conditions
+            ccount = 1;
+            for jp=1:length(ar.model(jm).data(jd).fp)
+                % check if this observable was removed
+                wasRemoved = false;
+                if(sum(strcmp(ar.model(jm).data(jd).py, ar.model(jm).data(jd2).pold{jp}))>0 || ...
+                        sum(strcmp(ar.model(jm).data(jd).pystd, ar.model(jm).data(jd2).pold{jp}))>0)
+                    if(sum(strcmp(ar.p, ar.model(jm).data(jd2).pold{jp}))==0)
+                        wasRemoved = true;
+                    end
+                end
+                
+                if(~wasRemoved)
+                    % check if this is really a condition
+                    qlocalcondi = false;
+                    arraystr = 'll';
+                    for jd2 = ar.model(jm).plot(jplot).dLink
+                        qlocalcondi = qlocalcondi || ~strcmp(ar.model(jm).data(jd2).pold{jp}, ar.model(jm).data(jd2).fp{jp});
+                        arraystr = [arraystr 'r'];
+                        if(jd2 ~= ar.model(jm).plot(jplot).dLink(end))
+                            arraystr = [arraystr '|'];
+                        end
+                    end
+                    
+                    if(qlocalcondi)
+                        % check is already shown in model part
+                        qdyn = ismember(ar.model(jm).p, ar.model(jm).data(jd).pold{jp}); %R2013a compatible
+                        if(sum(qdyn)>0)
+                            qalreadyset = true;
+                            for jd2 = ar.model(jm).plot(jplot).dLink
+                                qalreadyset = qalreadyset && strcmp(ar.model(jm).fp{qdyn}, ar.model(jm).data(jd2).fp{jp});
+                            end
+                        else
+                            qalreadyset = false;
+                        end
+                        
+                        if(~qalreadyset)
+                            if(ccount==1)
+                                lp(fid, '\\subsubsection{Conditions}');
+                                lp(fid, ['\\noindent To evaluate the ODE system of Equation \\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \\ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}']);
+                                lp(fid, 'for the conditions in this experiment, the following parameter transformations are applied:');
+                                lp(fid, '{\\footnotesize');
+                                lp(fid, '\\begin{displaymath}');
+                                lp(fid, '\\begin{array}{%s}', arraystr);
+                            else
+                                if(~(mod(ccount-1,N)==0 && ccount-1<length(ar.model(jm).data(jd).fp)))
+                                    lp(fid, ' \\\\');
+                                end
+                            end
+                            
+                            lp(fid, '\t%s & \\rightarrow & ', myFormulas(ar.model(jm).data(jd).pold{jp}, jm));
+                            for jd2 = ar.model(jm).plot(jplot).dLink
+                                try
+                                    ddouble = double(sym(ar.model(jm).data(jd2).fp{jp}));
+                                    if(ddouble ~= 0 && abs(log10(ddouble)) > 3)
+                                        ddouble = sprintf('%.1e', ddouble);
+                                        ddouble = strrep(ddouble, 'e', '\cdot 10^{');
+                                        ddouble = [ddouble '}'];
+                                    else
+                                        ddouble = sprintf('%g', ddouble);
+                                    end
+                                    lp(fid, '%s', ddouble);
+                                catch  %#ok<CTCH>
+                                    lp(fid, '%s', myFormulas(ar.model(jm).data(jd2).fp{jp}, jm));
+                                end
+                                if(length(ar.model(jm).plot(jplot).dLink)>1 && jd2~=ar.model(jm).plot(jplot).dLink(end))
+                                    lp(fid, '& ');
+                                end
+                            end
+                            
+                            if(mod(ccount,N)==0 && ccount<length(ar.model(jm).data(jd).fp))
+                                lp(fid, '\\end{array}');
+                                lp(fid, '\\end{displaymath}\n');
+                                lp(fid, '\\begin{displaymath}');
+                                lp(fid, '\\begin{array}{%s}', arraystr);
+                            end
+                            ccount = ccount + 1;
+                        end
+                    end
+                end    
+                
+                if(ccount>1 && jp==length(ar.model(jm).data(jd).fp))
+                	lp(fid, '\\end{array}');
+                	lp(fid, '\\end{displaymath}\n}\n\n');
+                end
+            end
+            
+            %% fit
+            lp(fid, '\\subsubsection{Experimental data and model fit}');
+           
             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigY') && ~isempty(ar.model(jm).plot(jplot).savePath_FigY))
                 lp(fid, 'The model observables and the experimental data is shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
                 captiontext = sprintf('\\textbf{%s observables and experimental data for the experiment.} ', arNameTrafo(ar.model(jm).plot(jplot).name));
@@ -508,6 +701,15 @@ for jm=1:length(ar.model)
                     [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
                     lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
                 end
+            end
+            
+            lp(fid, '\\noindent The agreement of the model observables and the experimental data, given in Table \\ref{%s_data}, ', ar.model(jm).plot(jplot).name);
+            if(ar.config.fiterrors == 1)
+                lp(fid, 'yields a value of the objective function $-2 \\log(L) = %g$ for %i data points in this data set.', ...
+                    2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
+            else
+                lp(fid, 'yields a value of the objective function $\\chi^2 = %g$ for %i data points in this data set.', ...
+                    ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
             end
             
             %% experimental data
@@ -612,229 +814,6 @@ for jm=1:length(ar.model)
                     '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
                 lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_v.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_v']);
             end            
-            
-            %% inputs
-            if(~isempty(ar.model(jm).u))
-                qmod = ~strcmp(ar.model(jm).fu, ar.model(jm).data(jd).fu);
-                if(sum(qmod)>0)
-                    lp(fid, '\\subsubsection{Input variables}');
-                    lp(fid, 'The following inputs variables are modified in this data set:');
-                    lp(fid, '\\begin{itemize}');
-                    for ju = find(qmod)'
-                        lp(fid, '\\item {\\bf Input variable %i:} %s', ju, strrep(ar.model(jm).u{ju}, '_', '\_'));
-                        
-                        lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{equation}');
-                        lp(fid, '\\begin{aligned}');
-                        lp(fid, '%s(%s) & = & %s \\label{%s}', ...
-                            myFormulas(ar.model(jm).u{ju}, jm), ...
-                            myFormulas(ar.model(jm).t, jm), ...
-                            myFormulas(ar.model(jm).data(jd).fu{ju}, jm), ...
-                            sprintf('%s_input%i', ar.model(jm).plot(jplot).name, ju));
-                        lp(fid, '\\end{aligned}');
-                        lp(fid, '\\end{equation}}');
-                    end
-                    lp(fid, '\\end{itemize}');
-                end
-            end
-            
-            %% observations and error model
-            
-            if(isfield(ar.model(jm), 'y'))
-                qadd = ~ismember(ar.model(jm).data(jd).y, ar.model(jm).y);
-            else
-                qadd = 0;
-            end
-            
-            if(isfield(ar.model(jm), 'y'))
-                fytmp = strrep(ar.model(jm).fy, '_filename', ['_' ar.model(jm).data(jd).name]);
-                fystdtmp = strrep(ar.model(jm).fystd, '_filename', ['_' ar.model(jm).data(jd).name]);
-                qmod = [];
-                for j=1:length(ar.model(jm).data(jd).fy)
-                    if(~qadd(j))
-                        iy = find(strcmp(ar.model(jm).y, ar.model(jm).data(jd).y{j}));
-                        qmod(j) = ~strcmp(fytmp{iy}, ar.model(jm).data(jd).fy{j}) || ...
-                            ~strcmp(fystdtmp{iy}, ar.model(jm).data(jd).fystd{j});
-                    end
-                end
-            else
-                qmod = false;
-            end
-            
-            if(sum(qmod)>0 || sum(qadd)>0)
-                lp(fid, '\\subsubsection{Observables}');
-                
-                % modified observables
-                if(sum(qmod)>0)
-                    lp(fid, 'The following observables are modified in this data set:');
-                    lp(fid, '\\begin{itemize}');
-                    for jy = find(qmod)
-                        lp(fid, '\\item {\\bf Observable:} %s', ...
-                            strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
-                        
-                        strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
-                        if(ar.model(jm).logfitting(jy))
-                            strtmp = ['\log_{10}(' strtmp ')'];
-                        end
-                        
-                        lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{equation}');
-                        lp(fid, '\\begin{aligned}');
-                        lp(fid, '%s(%s) & = & %s \\label{%s}', ...
-                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
-                            myFormulas(ar.model(jm).t, jm), ...
-                            strtmp, ...
-                            sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, jy));
-                        lp(fid, '\\end{aligned}');
-                        lp(fid, '\\end{equation}}');
-                        
-                        lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
-                        
-                        lp(fid, 'With error model:');
-                        
-                        lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{equation}');
-                        lp(fid, '\\begin{aligned}');
-                        lp(fid, '\\sigma\\{%s\\}(%s) & = & %s \\label{%s}', ...
-                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
-                            myFormulas(ar.model(jm).t, jm), ...
-                            myFormulas(ar.model(jm).data(jd).fystd{jy}, jm), ...
-                            sprintf('%s_err%i', ar.model(jm).plot(jplot).name, jy));
-                        lp(fid, '\\end{aligned}');
-                        lp(fid, '\\end{equation}}');
-                    end
-                    lp(fid, '\\end{itemize}');
-                end
-                
-                % additional observables
-                if(sum(qadd)>0)
-                    lp(fid, 'The following observables are added in this data set:');
-                    lp(fid, '\\begin{itemize}');
-                    for jy = find(qadd)
-                        lp(fid, '\\item {\\bf Observable:} %s', ...
-                            strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
-                        
-                        strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
-                        if(isfield(ar.model(jm),'logfitting') && ar.model(jm).logfitting(jy))
-                            strtmp = ['\log_{10}(' strtmp ')'];
-                        end
-                        
-                        lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{equation}');
-                        lp(fid, '\\begin{aligned}');
-                        lp(fid, '%s(%s) & = & %s \\label{%s}', ...
-                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
-                            myFormulas(ar.model(jm).t, jm), ...
-                            strtmp, ...
-                            sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, jy));
-                        lp(fid, '\\end{aligned}');
-                        lp(fid, '\\end{equation}}');
-                        
-                        lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
-                        
-                        lp(fid, 'With error model:');
-                        
-                        lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{equation}');
-                        lp(fid, '\\begin{aligned}');
-                        lp(fid, '\\sigma\\{%s\\}(%s) & = & %s \\label{%s}', ...
-                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
-                            myFormulas(ar.model(jm).t, jm), ...
-                            myFormulas(ar.model(jm).data(jd).fystd{jy}, jm), ...
-                            sprintf('%s_err%i', ar.model(jm).plot(jplot).name, jy));
-                        lp(fid, '\\end{aligned}');
-                        lp(fid, '\\end{equation}}');
-                    end
-                    lp(fid, '\\end{itemize}');
-                end
-            end
-            
-            %% conditions
-            ccount = 1;
-            for jp=1:length(ar.model(jm).data(jd).fp)
-                % check if this observable was removed
-                wasRemoved = false;
-                if(sum(strcmp(ar.model(jm).data(jd).py, ar.model(jm).data(jd2).pold{jp}))>0 || ...
-                        sum(strcmp(ar.model(jm).data(jd).pystd, ar.model(jm).data(jd2).pold{jp}))>0)
-                    if(sum(strcmp(ar.p, ar.model(jm).data(jd2).pold{jp}))==0)
-                        wasRemoved = true;
-                    end
-                end
-                
-                if(~wasRemoved)
-                    % check if this is really a condition
-                    qlocalcondi = false;
-                    arraystr = 'll';
-                    for jd2 = ar.model(jm).plot(jplot).dLink
-                        qlocalcondi = qlocalcondi || ~strcmp(ar.model(jm).data(jd2).pold{jp}, ar.model(jm).data(jd2).fp{jp});
-                        arraystr = [arraystr 'r'];
-                        if(jd2 ~= ar.model(jm).plot(jplot).dLink(end))
-                            arraystr = [arraystr '|'];
-                        end
-                    end
-                    
-                    if(qlocalcondi)
-                        % check is already shown in model part
-                        qdyn = ismember(ar.model(jm).p, ar.model(jm).data(jd).pold{jp}); %R2013a compatible
-                        if(sum(qdyn)>0)
-                            qalreadyset = true;
-                            for jd2 = ar.model(jm).plot(jplot).dLink
-                                qalreadyset = qalreadyset && strcmp(ar.model(jm).fp{qdyn}, ar.model(jm).data(jd2).fp{jp});
-                            end
-                        else
-                            qalreadyset = false;
-                        end
-                        
-                        if(~qalreadyset)
-                            if(ccount==1)
-                                lp(fid, '\\subsubsection{Conditions}');
-                                lp(fid, ['\\noindent To evaluate the ODE system of Equation \\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \\ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}']);
-                                lp(fid, 'for the conditions in this experiment, the following parameter transformations are applied:');
-                                lp(fid, '{\\footnotesize');
-                                lp(fid, '\\begin{displaymath}');
-                                lp(fid, '\\begin{array}{%s}', arraystr);
-                            else
-                                if(~(mod(ccount-1,N)==0 && ccount-1<length(ar.model(jm).data(jd).fp)))
-                                    lp(fid, ' \\\\');
-                                end
-                            end
-                            
-                            lp(fid, '\t%s & \\rightarrow & ', myFormulas(ar.model(jm).data(jd).pold{jp}, jm));
-                            for jd2 = ar.model(jm).plot(jplot).dLink
-                                try
-                                    ddouble = double(sym(ar.model(jm).data(jd2).fp{jp}));
-                                    if(ddouble ~= 0 && abs(log10(ddouble)) > 3)
-                                        ddouble = sprintf('%.1e', ddouble);
-                                        ddouble = strrep(ddouble, 'e', '\cdot 10^{');
-                                        ddouble = [ddouble '}'];
-                                    else
-                                        ddouble = sprintf('%g', ddouble);
-                                    end
-                                    lp(fid, '%s', ddouble);
-                                catch  %#ok<CTCH>
-                                    lp(fid, '%s', myFormulas(ar.model(jm).data(jd2).fp{jp}, jm));
-                                end
-                                if(length(ar.model(jm).plot(jplot).dLink)>1 && jd2~=ar.model(jm).plot(jplot).dLink(end))
-                                    lp(fid, '& ');
-                                end
-                            end
-                            
-                            if(mod(ccount,N)==0 && ccount<length(ar.model(jm).data(jd).fp))
-                                lp(fid, '\\end{array}');
-                                lp(fid, '\\end{displaymath}\n');
-                                lp(fid, '\\begin{displaymath}');
-                                lp(fid, '\\begin{array}{%s}', arraystr);
-                            end
-                            ccount = ccount + 1;
-                        end
-                    end
-                end    
-                
-                if(ccount>1 && jp==length(ar.model(jm).data(jd).fp))
-                	lp(fid, '\\end{array}');
-                	lp(fid, '\\end{displaymath}\n}\n\n');
-                end
-            end
         end
     end
 end
