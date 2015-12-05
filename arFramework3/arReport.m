@@ -85,6 +85,8 @@ lp(fid, '\\pgfplotsset{plot coordinates/math parser=false} ');
 lp(fid, '\\newlength\\figureheight ');
 lp(fid, '\\newlength\\figurewidth ');
 
+lp(fid, '\\renewcommand*\\rmdefault{cmss} ');
+
 lp(fid, '\n\\begin{document}\n');
 
 %% Header
@@ -601,9 +603,9 @@ for jm=1:length(ar.model)
             for jp=1:length(ar.model(jm).data(jd).fp)
                 % check if this observable was removed
                 wasRemoved = false;
-                if(sum(strcmp(ar.model(jm).data(jd).py, ar.model(jm).data(jd2).pold{jp}))>0 || ...
-                        sum(strcmp(ar.model(jm).data(jd).pystd, ar.model(jm).data(jd2).pold{jp}))>0)
-                    if(sum(strcmp(ar.p, ar.model(jm).data(jd2).pold{jp}))==0)
+                if(sum(strcmp(ar.model(jm).data(jd).py, ar.model(jm).data(jd).pold{jp}))>0 || ...
+                        sum(strcmp(ar.model(jm).data(jd).pystd, ar.model(jm).data(jd).pold{jp}))>0)
+                    if(sum(strcmp(ar.p, ar.model(jm).data(jd).pold{jp}))==0)
                         wasRemoved = true;
                     end
                 end
