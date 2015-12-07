@@ -268,7 +268,7 @@ else
     ar.model(m).data(d).fystd = cell(0);
 end
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
-while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS'))
+while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS'))
     qyindex = ismember(ar.model(m).data(d).y, C{1});
     if(sum(qyindex)==1)
         yindex = find(qyindex);
@@ -324,21 +324,97 @@ for j=1:length(ar.model(m).data(d).py_sep)
     ar.model(m).data(d).py_sep(j).pars = strrep(ar.model(m).data(d).py_sep(j).pars, '_filename', ['_' ar.model(m).data(d).name]);
 end
 
+% SUBSTITUTIONS (beta)
+substitutions = 0;
+matVer = ver('MATLAB');
+if ( strcmp(C{1},'SUBSTITUTIONS') )
+    if(str2double(matVer.Version)>=8.4)
+        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    else
+        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
+    end    
+    
+    % Substitutions
+    fromSubs = {};
+    toSubs = {};
+    ismodelpar = [];
+
+    % Fetch desired substitutions
+    while(~isempty(C{1}) && ~strcmp(C{1},'CONDITIONS'))
+        fromSubs(end+1)     = C{1}; %#OK<AGROW>
+        toSubs(end+1)       = C{2}; %#OK<AGROW>
+        ismodelpar(end+1)   = sum(ismember(ar.model(m).p, C{1})); %#OK<AGROW>
+
+        if(str2double(matVer.Version)>=8.4)
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        else
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+        end
+    end
+
+    if ( sum(ismodelpar) > 0 )
+        s = sprintf( '%s\n', fromSubs{ismodelpar>0} );
+        error( 'Cannot substitute model parameters. These following parameters belong under CONDITIONS:\n%s', s );
+    end
+
+    % Perform selfsubstitutions
+    if ( ~isempty(fromSubs) )
+        substitutions = 1;
+        toSubs = arSubsRepeated( toSubs, fromSubs, toSubs, str2double(matVer.Version) );
+    end
+end
+
 % CONDITIONS
-C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);    
 ar.model(m).data(d).fp = transpose(ar.model(m).data(d).p);
 ptmp = ar.model(m).p;
 qcondparamodel = ismember(ar.model(m).data(d).p, strrep(ptmp, '_filename', ['_' ar.model(m).data(d).name])); %R2013a compatible
 qmodelparacond = ismember(strrep(ptmp, '_filename', ['_' ar.model(m).data(d).name]), ar.model(m).data(d).p); %R2013a compatible
 ar.model(m).data(d).fp(qcondparamodel) = strrep(ar.model(m).fp(qmodelparacond), '_filename', ['_' ar.model(m).data(d).name]);
-while(~isempty(C{1}) && ~strcmp(C{1},'RANDOM'))
-    qcondpara = ismember(ar.model(m).data(d).p, C{1}); %R2013a compatible
-    if(sum(qcondpara)>0)
-        ar.model(m).data(d).fp{qcondpara} = ['(' cell2mat(C{2}) ')'];
-    else
-        warning('unknown parameter in conditions %s', cell2mat(C{1}));
+
+if ( substitutions == 1 )
+    % Substitution code path (beta)
+    from        = {};
+    to          = {};
+    ismodelpar  = [];
+    
+    % Fetch desired substitutions
+    while(~isempty(C{1}) && ~strcmp(C{1},'RANDOM'))
+        from(end+1)         = C{1}; %#OK<AGROW>
+        to(end+1)           = C{2}; %#OK<AGROW>
+        ismodelpar(end+1)   = sum(ismember(ar.model(m).data(d).p, C{1})); %#OK<AGROW>
+        
+        if(str2double(matVer.Version)>=8.4)
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        else
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+        end
+    end    
+    
+    % Perform selfsubstitutions
+    to = arSubsRepeated( to, fromSubs, toSubs, str2double(matVer.Version) );
+    
+    % Store substitutions in ar structure
+    for a = 1 : length( from )
+        qcondpara = ismember(ar.model(m).data(d).p, from{a}); %R2013a compatible
+        if(sum(qcondpara)>0)
+            ar.model(m).data(d).fp{qcondpara} = ['(' to{a} ')'];
+        else
+            warning('unknown parameter in conditions: %s (did you mean to place it under SUBSTITUTIONS?)', from{a}); %#ok<WNTAG>
+        end
     end
-    C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+else
+    % old code path
+    while(~isempty(C{1}) && ~strcmp(C{1},'RANDOM'))
+        qcondpara = ismember(ar.model(m).data(d).p, C{1}); %R2013a compatible
+        if(sum(qcondpara)>0)
+            ar.model(m).data(d).fp{qcondpara} = ['(' cell2mat(C{2}) ')'];
+        elseif(strcmp(cell2mat(C{1}),'PARAMETERS'))
+        else
+            warning('unknown parameter in conditions %s', cell2mat(C{1}));
+        end
+        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    end
 end
 
 % extra conditional parameters
@@ -535,12 +611,19 @@ if(~strcmp(extension,'none') && ( ...
                     jplot = jplot + 1;
                     ar.model(m).plot(jplot).dLink = d;
                 end
+                
+                % Check whether the user specified any variables with reserved words.
+                checkReserved(m, d);
+                
             else
                 fprintf('local random effect #%i: no matching data, skipped\n', j);
             end
         end
     else
         ar = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot);
+        
+        % Check whether the user specified any variables with reserved words.
+        checkReserved(m, d);
     end
 else
     warning('Cannot find data file corresponding to %s', name);
@@ -552,6 +635,24 @@ ar.model = orderfields(ar.model);
 ar.model(m).data = orderfields(ar.model(m).data);
 ar.model(m).plot = orderfields(ar.model(m).plot);
 
+function checkReserved(m, d)
+    global ar;
+
+    % Check whether the user specified any variables with reserved words.
+    for a = 1 : length( ar.model(m).data(d).fu )
+        arCheckReservedWords( symvar(ar.model(m).data(d).fu{a}), sprintf( 'input function of %s', ar.model(m).data(d).name ), ar.model(m).u{a} );
+    end
+    for a = 1 : length( ar.model(m).data(d).fy )
+        arCheckReservedWords( symvar(ar.model(m).data(d).fy{a}), sprintf( 'observation function of %s', ar.model(m).data(d).name ), ar.model(m).data(d).y{a} );
+    end
+    for a = 1 : length( ar.model(m).data(d).fystd )
+        arCheckReservedWords( symvar(ar.model(m).data(d).fystd{a}), sprintf( 'observation standard deviation function of %s', ar.model(m).data(d).name ), ar.model(m).data(d).y{a} );
+    end
+    for a = 1 : length( ar.model(m).data(d).fp )
+        arCheckReservedWords( symvar(ar.model(m).data(d).fp{a}), sprintf( 'condition parameter transformations of %s', ar.model(m).data(d).name ), ar.model(m).data(d).p{a} );
+    end   
+    arCheckReservedWords( ar.model(m).data(d).p, 'parameters' );
+    arCheckReservedWords( ar.model(m).data(d).y, 'observable names' );
 
 function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot)
 

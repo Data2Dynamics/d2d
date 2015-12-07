@@ -1,0 +1,685 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+
+<!-- This model was downloaded from BioModels Database -->
+<!-- Thu Nov 19 15:40:01 GMT 2015                      -->
+<!-- http://www.ebi.ac.uk/biomodels/                   -->
+
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="d893b880-ff93-4a54-b969-4ce385c2f434" version="4">
+  <model id="MODEL1407300001" name="Steckmann2012 - Amyloid beta-protein fibrillogenesis (kinetics of secondary structure conversion)" metaid="COPASI0">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <div class="dc:title">Steckmann2012 - Amyloid beta-protein
+fibrillogenesis (kinetics of secondary structure conversion)</div>
+<div class="dc:bibliographicCitation">
+  <p>This model is described in the article:</p>
+  <div class="bibo:title">
+    <a href="http://identifiers.org/pubmed/22586726" title="Access to this publication">Kinetics of peptide
+    secondary structure conversion during amyloid ?-protein
+    fibrillogenesis.</a>
+  </div>
+  <div class="bibo:authorList">Steckmann T, Awan Z, Gerstman BS,
+  Chapagain PP.</div>
+  <div class="bibo:Journal">J. Theor. Biol. 2012 May; 301:
+  95-102</div>
+  <p>Abstract:</p>
+  <div class="bibo:abstract">
+    <p>Amyloid fibrils are a common component in many debilitating
+    human neurological diseases such as Alzheimer's (AD),
+    Parkinson's, and Creutzfeldt-Jakob, and in animal diseases such
+    as BSE. The role of fibrillar ?? proteins in AD has stimulated
+    interest in the kinetics of ?? fibril formation. Kinetic models
+    that include reaction pathways and rate parameters for the
+    various stages of the process can be helpful towards
+    understanding the dynamics on a molecular level. Based upon
+    experimental data, we have developed a mathematical model for
+    the reaction pathways and determined rate parameters for
+    peptide secondary structural conversion and aggregation during
+    the entire fibrillogenesis process from random coil to mature
+    fibrils, including the molecular species that accelerate the
+    conversions. The model and the rate parameters include
+    different molecular structural stages in the nucleation and
+    polymerization processes and the numerical solutions yield
+    graphs of concentrations of different molecular species versus
+    time that are in close agreement with experimental results. The
+    model also allows for the calculation of the time-dependent
+    increase in aggregate size. The calculated results agree well
+    with experimental results, and allow differences in
+    experimental conditions to be included in the calculations. The
+    specific steps of the model and the rate constants that are
+    determined by fitting to experimental data provide insight on
+    the molecular species involved in the fibril formation
+    process.</p>
+  </div>
+</div>
+<div class="dc:publisher">
+  <p>This model is hosted on 
+  <a href="http://www.ebi.ac.uk/biomodels/">BioModels Database</a>
+  and identified by: 
+  <a href="http://identifiers.org/biomodels.db/BIOMD0000000533">BIOMD0000000533</a>.</p>
+  <p>To cite BioModels Database, please use: 
+  <a href="http://identifiers.org/pubmed/20587024" title="Latest BioModels Database publication">BioModels Database:
+  An enhanced, curated and annotated resource for published
+  quantitative kinetic models</a>.</p>
+</div>
+<div class="dc:license">
+  <p>To the extent possible under law, all copyright and related or
+  neighbouring rights to this encoded model have been dedicated to
+  the public domain worldwide. Please refer to 
+  <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Access to: CC0 1.0 Universal (CC0 1.0), Public Domain Dedication">CC0
+  Public Domain Dedication</a> for more information.</p>
+</div>
+</body>
+    </notes>
+    <annotation>
+      <COPASI xmlns="http://www.copasi.org/static/sbml">
+        <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <rdf:Description rdf:about="#COPASI0">
+            <dcterms:created>
+              <rdf:Description>
+                <dcterms:W3CDTF>2014-07-22T10:40:24Z</dcterms:W3CDTF>
+              </rdf:Description>
+            </dcterms:created>
+          </rdf:Description>
+        </rdf:RDF>
+      </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI0">
+	<dc:creator>
+	<rdf:Bag>
+	<rdf:li rdf:parseType="Resource">
+	<vCard:N rdf:parseType="Resource">
+	<vCard:Family>Lloret i Villas</vCard:Family>
+	<vCard:Given>Audald</vCard:Given>
+	</vCard:N>
+	<vCard:EMAIL>lloret@ebi.ac.uk</vCard:EMAIL>
+	<vCard:ORG rdf:parseType="Resource">
+	<vCard:Orgname>EMBL-EBI</vCard:Orgname>
+	</vCard:ORG>
+	</rdf:li>
+	</rdf:Bag>
+	</dc:creator>
+	<dcterms:created rdf:parseType="Resource">
+	<dcterms:W3CDTF>2014-07-30T14:14:54Z</dcterms:W3CDTF>
+	</dcterms:created>
+	<dcterms:modified rdf:parseType="Resource">
+	<dcterms:W3CDTF>2014-09-24T13:16:24Z</dcterms:W3CDTF>
+	</dcterms:modified>
+	<bqmodel:is>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1407300001"/>
+	</rdf:Bag>
+	</bqmodel:is>
+	<bqmodel:is>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000533"/>
+	</rdf:Bag>
+	</bqmodel:is>
+	<bqmodel:isDescribedBy>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/pubmed/22586726"/>
+	</rdf:Bag>
+	</bqmodel:isDescribedBy>
+	<bqbiol:hasTaxon>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	</rdf:Bag>
+	</bqbiol:hasTaxon>
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0034205"/>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0070841"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	<bqbiol:hasProperty>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/doid/DOID:10652"/>
+	</rdf:Bag>
+	</bqbiol:hasProperty>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="volume" name="volume" metaid="c04763db-dc0e-4b35-82d9-d11edc182a6c">
+        <listOfUnits>
+          <unit scale="-3" exponent="1" metaid="d3996fe2-e2fb-4ce2-aa9e-a344cb8f73fc" multiplier="1" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="c40fc2e4-cb80-4935-91db-c4c58eba1134">
+        <listOfUnits>
+          <unit scale="0" exponent="1" metaid="_7a6383fa-fc82-488b-8310-39527df7cb60" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="substance" name="substance" metaid="c4827d76-87ae-4546-81fd-1fe64531aaf4">
+        <listOfUnits>
+          <unit scale="-3" exponent="1" metaid="_34e98882-5b46-4e15-971d-d2067b38571c" multiplier="1" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="cell" constant="true" spatialDimensions="3" name="cell" metaid="_2b1fdd47-0418-4a82-9a84-5e67893bb867" size="1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#_2b1fdd47-0418-4a82-9a84-5e67893bb867">
+	<bqbiol:is>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/bto/BTO:0000142"/>
+	</rdf:Bag>
+	</bqbiol:is>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="RCT0" initialConcentration="88.1" constant="false" hasOnlySubstanceUnits="false" name="RCT0" metaid="COPASI1" boundaryCondition="true" compartment="cell">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI1">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T10:49:00Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI1">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P05067"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="alpha" initialConcentration="0" constant="false" hasOnlySubstanceUnits="false" name="alpha" metaid="COPASI2" boundaryCondition="true" compartment="cell">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI2">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T10:48:59Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI2">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P05067"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="BN1" initialConcentration="11.9" constant="false" hasOnlySubstanceUnits="false" name="BN1" metaid="COPASI3" boundaryCondition="true" compartment="cell">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI3">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:24:46Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI3">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P05067"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="BN2" initialConcentration="0" constant="false" hasOnlySubstanceUnits="false" name="BN2" metaid="COPASI4" boundaryCondition="true" compartment="cell">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI4">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:27:14Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI4">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P05067"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="BN3" initialConcentration="0" constant="false" hasOnlySubstanceUnits="false" name="BN3" metaid="COPASI5" boundaryCondition="true" compartment="cell">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI5">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:28:55Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI5">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P05067"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="BN4" initialConcentration="0" constant="false" hasOnlySubstanceUnits="false" name="BN4" metaid="COPASI6" boundaryCondition="true" compartment="cell">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI6">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:16:49Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI6">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P05067"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="BTX" initialConcentration="0" constant="false" hasOnlySubstanceUnits="false" name="BTX" metaid="COPASI7" boundaryCondition="true" compartment="cell">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI7">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:32:52Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI7">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P05067"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="BM" initialConcentration="0" constant="false" hasOnlySubstanceUnits="false" name="BM" metaid="COPASI8" boundaryCondition="true" compartment="cell">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI8">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:23:53Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI8">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P05067"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="RCT1" initialConcentration="0" constant="false" hasOnlySubstanceUnits="false" name="RCT1" metaid="COPASI9" boundaryCondition="true" compartment="cell">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI9">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:40:19Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI9">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P05067"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="RC" initialConcentration="88.1" constant="false" hasOnlySubstanceUnits="false" name="RC" metaid="COPASI10" boundaryCondition="true" compartment="cell">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI10">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:15:55Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI10">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P05067"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="beta" initialConcentration="11.9" constant="false" hasOnlySubstanceUnits="false" name="beta" metaid="COPASI11" boundaryCondition="true" compartment="cell">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI11">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:17:28Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#COPASI11">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P05067"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="k0" constant="true" name="k0" metaid="_4d07b950-2b6c-47a8-b688-a52a47715158" value="0.59"/>
+      <parameter id="k1" constant="true" name="k1" metaid="COPASI12" value="0.672">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI12">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:11:50Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+        </annotation>
+            </parameter>
+      <parameter id="k2" constant="true" name="k2" metaid="COPASI13" value="0.678">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI13">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:11:47Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+        </annotation>
+            </parameter>
+      <parameter id="k3" constant="true" name="k3" metaid="_9b4eccf5-3056-4f95-b591-57ade8cde3f8" value="0.0392"/>
+      <parameter id="k4" constant="true" name="k4" metaid="_16188cf9-a649-4a4c-b0b3-192ab5e604f6" value="0.554"/>
+      <parameter id="q" constant="true" name="q" metaid="COPASI14" value="2">
+        <annotation>
+          <COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI14">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2014-07-22T11:12:13Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+        </annotation>
+            </parameter>
+      <parameter id="epsilon" constant="true" name="epsilon" metaid="c0e863fd-037f-4a4c-be19-b24367c19133" value="0"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="f2ecd5d0-8095-4f7b-afbb-e7f5d616020b" variable="RC">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> RCT0 </ci>
+            <ci> RCT1 </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="addf4615-1bba-4837-8c4c-f1e2f17d9523" variable="beta">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> BM </ci>
+            <ci> BN1 </ci>
+            <ci> BN2 </ci>
+            <ci> BN3 </ci>
+            <ci> BN4 </ci>
+            <ci> BTX </ci>
+          </apply>
+        </math>
+            </assignmentRule>
+      <rateRule metaid="_6e6d405f-823b-4e35-8fc1-1b74eba8e318" variable="RCT0">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> k0 </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> epsilon </ci>
+                <ci> BM </ci>
+              </apply>
+              <ci> RCT0 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> BTX </ci>
+              <ci> RCT0 </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="_58f9ef41-9ba2-40ca-8430-16d7a621d12b" variable="alpha">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> BTX </ci>
+              <ci> RCT0 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k2 </ci>
+              <apply>
+                <power/>
+                <ci> BTX </ci>
+                <ci> q </ci>
+              </apply>
+              <ci> alpha </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="_465166bf-2790-40d8-a803-8279609c5172" variable="BN1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k2 </ci>
+              <apply>
+                <power/>
+                <ci> BTX </ci>
+                <ci> q </ci>
+              </apply>
+              <ci> alpha </ci>
+            </apply>
+            <apply>
+              <times/>
+              <cn> 4 </cn>
+              <ci> k3 </ci>
+              <ci> BN1 </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="_3e132c6f-100a-43cc-bca2-c3dbb503a32f" variable="BN2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <cn> 4 </cn>
+              <ci> k3 </ci>
+              <ci> BN1 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <cn> 4 </cn>
+              <ci> k3 </ci>
+              <ci> BN2 </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="_778d1a6d-f928-4985-b98d-caab04ee81b1" variable="BN3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <cn> 4 </cn>
+              <ci> k3 </ci>
+              <ci> BN2 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <cn> 4 </cn>
+              <ci> k3 </ci>
+              <ci> BN3 </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="_342ac684-26ff-4264-896d-6b88b2d8b39e" variable="BN4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <cn> 4 </cn>
+              <ci> k3 </ci>
+              <ci> BN3 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <cn> 4 </cn>
+              <ci> k3 </ci>
+              <ci> BN4 </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="_911cc05a-2ea0-4e97-9095-253ecbea32b4" variable="BTX">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <cn> 4 </cn>
+              <ci> k3 </ci>
+              <ci> BN4 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k4 </ci>
+              <ci> BTX </ci>
+            </apply>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="aeec9fe4-dbed-4513-88be-72fbb46f031c" variable="BM">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k4 </ci>
+            <ci> BTX </ci>
+          </apply>
+        </math>
+            </rateRule>
+      <rateRule metaid="f8573fc3-8c33-41cd-b24d-29767f8fa58e" variable="RCT1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k0 </ci>
+            <apply>
+              <plus/>
+              <ci> epsilon </ci>
+              <ci> BM </ci>
+            </apply>
+            <ci> RCT0 </ci>
+          </apply>
+        </math>
+            </rateRule>
+    </listOfRules>
+  </model>
+</sbml>

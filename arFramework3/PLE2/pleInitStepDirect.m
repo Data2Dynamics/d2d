@@ -1,7 +1,7 @@
 % adaptive step reconciling chi^2 increase
 % direct step method
 
-function [pStep, dpNew, beta, alpha] = pleInitStepDirect(jk, pLast, dpLast)
+function [pStep, dpNew, beta, alpha] = pleInitStepDirect(jk, pLast, dpLast, lastAll)
 
 global pleGlobals;
 

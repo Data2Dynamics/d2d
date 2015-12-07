@@ -62,7 +62,11 @@ end
 h = myRaiseFigure(strtitle);
 set(h, 'Color', [1 1 1]);
 
-count = 1;
+if ( isfield( pleGlobals, 'firstID' ) )
+    count = pleGlobals.firstID;
+else
+    count = 1;
+end
 
 minchi2 = Inf;
 for jk=jks
@@ -170,7 +174,11 @@ for jk=jks
         plot(pleGlobals.p(jk), pleGlobals.chi2, '*', 'Color', [.5 .5 .5], 'LineWidth', 1)
         hold off
 
-        xlabel(['log_{10}(' arNameTrafo(pleGlobals.p_labels{jk}) ')'])
+        if ( pleGlobals.q_log10(jk) )
+            xlabel(['log_{10}(' arNameTrafo(pleGlobals.p_labels{jk}) ')']);
+        else
+            xlabel(arNameTrafo(pleGlobals.p_labels{jk}));
+        end
         title(sprintf('parameter #%i', jk));
         
         if(mod(count-1,ncols)==0)
@@ -244,7 +252,7 @@ if(savetofile && exist(pleGlobals.savePath, 'dir'))
     end
     
     if(which('plot2svg'))
-        plot2svg([savePath '.svg'],h)
+%         plot2svg([savePath '.svg'],h)
     end
     
 end

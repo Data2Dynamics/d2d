@@ -1,0 +1,10 @@
+      INTEGER FUNCTION IFLR(X)
+C
+C  IFLR RETURNS FLR(X)
+C
+      IFLR = INT(X)
+      IF (X .GE. 0.0) RETURN
+      IF (FLOAT(IFLR) .NE. X) IFLR = IFLR - 1
+C
+      RETURN
+      END

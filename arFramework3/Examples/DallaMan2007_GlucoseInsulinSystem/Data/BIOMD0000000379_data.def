@@ -1,0 +1,39 @@
+DESCRIPTION
+"data file for DallaMan2007_MealModel_GlucoseInsulinSystem"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 100	
+
+INPUTS
+
+OBSERVABLES
+G_p_obs	 C	 "n/a"	 conc.	 0 0 "G_p" "G_p"
+G_t_obs	 C	 "n/a"	 conc.	 0 0 "G_t" "G_t"
+I_l_obs	 C	 "n/a"	 conc.	 0 0 "I_l" "I_l"
+I_p_obs	 C	 "n/a"	 conc.	 0 0 "I_p" "I_p"
+Q_sto1_obs	 C	 "n/a"	 conc.	 0 0 "Q_sto1" "Q_sto1"
+Q_gut_obs	 C	 "n/a"	 conc.	 0 0 "Q_gut" "Q_gut"
+I_1_obs	 C	 "n/a"	 conc.	 0 0 "I_1" "I_1"
+I_d_obs	 C	 "n/a"	 conc.	 0 0 "I_d" "I_d"
+X_state_obs	 C	 "n/a"	 conc.	 0 0 "X_state" "X"
+I_po_obs	 C	 "n/a"	 conc.	 0 0 "I_po" "I_po"
+Y_state_obs	 C	 "n/a"	 conc.	 0 0 "Y_state" "Y"
+Q_sto2_obs	 C	 "n/a"	 conc.	 0 0 "Q_sto2" "Q_sto2"
+
+ERRORS
+G_p_obs	 "sd_G_p"
+G_t_obs	 "sd_G_t"
+I_l_obs	 "sd_I_l"
+I_p_obs	 "sd_I_p"
+Q_sto1_obs	 "sd_Q_sto1"
+Q_gut_obs	 "sd_Q_gut"
+I_1_obs	 "sd_I_1"
+I_d_obs	 "sd_I_d"
+X_state_obs	 "sd_X_state"
+I_po_obs	 "sd_I_po"
+Y_state_obs	 "sd_Y_state"
+Q_sto2_obs	 "sd_Q_sto2"
+
+CONDITIONS
+
+PARAMETERS

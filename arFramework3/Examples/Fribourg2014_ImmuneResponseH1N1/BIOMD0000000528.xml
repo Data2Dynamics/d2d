@@ -1,0 +1,1027 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+
+<!-- This model was downloaded from BioModels Database -->
+<!-- Thu Nov 19 15:54:47 GMT 2015                      -->
+<!-- http://www.ebi.ac.uk/biomodels/                   -->
+
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_9c8bda74-9347-4e61-aa7e-aee57bbd1b5a" version="4">
+  <model id="MODEL1403310002" name="Fribourg2014 - Dynamics of viral antagonism and innate immune response (H1N1 influenza A virus - Cal/09)" metaid="cell">
+    <notes>
+<body xmlns="http://www.w3.org/1999/xhtml">
+<div class="dc:title">
+ Fribourg2014 - Dynamics of viral antagonism and innate immune response (H1N1 influenza A virus - Cal/09) 
+</div>
+<div class="dc:description">
+ <p>The dynamics of the interplay between the viral antagonism and the innate immune response has been studied using modelling approaches. The responses of human monocyte-derived dendritic cells infected by two influenza A H1N1 strains (the pandemic swine-origin A/California/4/2009 (Cal/09) and the seasonal A/New Caledonia/20/1999 (NC/99)) that have different clinical outcomes have been modelled. From the time course gene expression measurements of a set of selected genes, the dynamic features of viral antagonism and innate immune response are extracted. It is found that the strength and the time scale of action of viral antagonism is significantly different between the two viruses. This model describes the viral infection by seasonal Cal/09.</p>
+</div>
+<div class="dc:bibliographicCitation">
+ <p>This model is described in the article:</p>
+ <div class="bibo:title">
+            <a href="http://identifiers.org/pubmed/24594370" title="Access to this publication">Model of influenza A virus infection: Dynamics of viral antagonism and innate immune response.</a></div>
+ <div class="bibo:authorList">Fribourg M, Hartmann B, Schmolke M, Marjanovic N, Albrecht RA, García-Sastre A, Sealfon SC, Jayaprakash C, Hayot F.</div>
+ <div class="bibo:Journal">J Theor Biol. 2014 Mar 2;351C:47-57. </div>
+ <p>Abstract:</p>
+ <div class="bibo:abstract">  
+   <p>Viral antagonism of host responses is an essential component of virus pathogenicity. The study of the interplay between immune response and viral antagonism is challenging due to the involvement of many processes acting at multiple time scales. Here we develop an ordinary differential equation model to investigate the early, experimentally measured, responses of human monocyte-derived dendritic cells to infection by two H1N1 influenza A viruses of different clinical outcomes: pandemic A/California/4/2009 and seasonal A/New Caledonia/20/1999. Our results reveal how the strength of virus antagonism, and the time scale over which it acts to thwart the innate immune response, differs significantly between the two viruses, as is made clear by their impact on the temporal behavior of a number of measured genes. The model thus sheds light on the mechanisms that underlie the variability of innate immune responses to different H1N1 viruses.</p>
+ </div>
+</div>
+<div class="dc:publisher">
+ <p>This model is hosted on <a href="http://www.ebi.ac.uk/biomodels/">BioModels Database</a> and identified
+by: <a href="http://identifiers.org/biomodels.db/MODEL1403310002">MODEL1403310002</a>.</p>
+ <p>To cite BioModels Database, please use: <a href="http://identifiers.org/pubmed/20587024" title="Latest BioModels Database publication">BioModels Database: An enhanced, curated and annotated resource
+for published quantitative kinetic models</a>.</p>
+</div>
+<div class="dc:license">
+   <p>To the extent possible under law, all copyright and related or
+neighbouring rights to this encoded model have been dedicated to the public
+domain worldwide. Please refer to <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Access to: CC0 1.0 Universal (CC0 1.0), Public Domain Dedication">CC0 Public Domain
+Dedication</a> for more information.</p>
+</div>
+</body>
+</notes>
+    <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#cell">
+	<dc:creator>
+	<rdf:Bag>
+	<rdf:li rdf:parseType="Resource">
+	<vCard:N rdf:parseType="Resource">
+	<vCard:Family>Chelliah</vCard:Family>
+	<vCard:Given>Vijayalakshmi</vCard:Given>
+	</vCard:N>
+	<vCard:EMAIL>viji@ebi.ac.uk</vCard:EMAIL>
+	<vCard:ORG rdf:parseType="Resource">
+	<vCard:Orgname>EMBL-EBI</vCard:Orgname>
+	</vCard:ORG>
+	</rdf:li>
+	<rdf:li rdf:parseType="Resource">
+	<vCard:N rdf:parseType="Resource">
+	<vCard:Family>Fribourg</vCard:Family>
+	<vCard:Given>Miguel</vCard:Given>
+	</vCard:N>
+	<vCard:EMAIL>miguel.fribourg@mssm.edu</vCard:EMAIL>
+	<vCard:ORG rdf:parseType="Resource">
+	<vCard:Orgname>Icahn School of Medicine at Mount Sinai</vCard:Orgname>
+	</vCard:ORG>
+	</rdf:li>
+	</rdf:Bag>
+	</dc:creator>
+	<dcterms:created rdf:parseType="Resource">
+	<dcterms:W3CDTF>2014-04-03T13:51:13Z</dcterms:W3CDTF>
+	</dcterms:created>
+	<dcterms:modified rdf:parseType="Resource">
+	<dcterms:W3CDTF>2015-02-24T20:30:12Z</dcterms:W3CDTF>
+	</dcterms:modified>
+	<bqmodel:is>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1403310002"/>
+	</rdf:Bag>
+	</bqmodel:is>
+	<bqmodel:is>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000528"/>
+	</rdf:Bag>
+	</bqmodel:is>
+	<bqmodel:isDescribedBy>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/pubmed/24594370"/>
+	</rdf:Bag>
+	</bqmodel:isDescribedBy>
+	<bqmodel:isDerivedFrom>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/pubmed/20159146"/>
+	<rdf:li rdf:resource="http://identifiers.org/pubmed/20739535"/>
+	</rdf:Bag>
+	</bqmodel:isDerivedFrom>
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/go/GO:0009814"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	<bqbiol:hasTaxon>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+	<rdf:li rdf:resource="http://identifiers.org/taxonomy/36420"/>
+	</rdf:Bag>
+	</bqbiol:hasTaxon>
+	<bqbiol:occursIn>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/cl/CL:0001056"/>
+	</rdf:Bag>
+	</bqbiol:occursIn>
+	<bqbiol:hasProperty>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/mamo/MAMO_0000046"/>
+	</rdf:Bag>
+	</bqbiol:hasProperty>
+	<bqbiol:hasVersion>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/doid/DOID:0050211"/>
+	</rdf:Bag>
+	</bqbiol:hasVersion>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" name="substance" metaid="substance">
+        <listOfUnits>
+          <unit metaid="CDMT00050" multiplier="1E-6" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="volume" name="volume" metaid="volume">
+        <listOfUnits>
+          <unit metaid="CDMT00051" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="area" name="area" metaid="area">
+        <listOfUnits>
+          <unit exponent="2" metaid="CDMT00052" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="length" name="length" metaid="length">
+        <listOfUnits>
+          <unit metaid="CDMT00053" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="time">
+        <listOfUnits>
+          <unit metaid="CDMT00054" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfSpeciesTypes>
+      <speciesType id="mRNA" name="mRNA" metaid="mRNA"/>
+      <speciesType id="Protein" name="Protein" metaid="Protein"/>
+    </listOfSpeciesTypes>
+    <listOfCompartments>
+      <compartment id="default" metaid="default" sboTerm="SBO:0000290" units="volume" size="1"/>
+      <compartment id="c2" name="Environment" metaid="c2" sboTerm="SBO:0000290" units="volume" outside="default" size="1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#c2">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/bto/BTO:0000316"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </compartment>
+      <compartment id="compartment" name="Cell" metaid="compartment" sboTerm="SBO:0000290" units="volume" outside="default" size="1">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#compartment">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/bto/BTO:0002042"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="w" initialConcentration="0" name="w" metaid="w" boundaryCondition="true" sboTerm="SBO:0000291" compartment="compartment">
+        <annotation/>
+            </species>
+      <species id="IFNb_mRNA" initialConcentration="0" name="IFNb_mRNA" metaid="IFNb_mRNA" compartment="compartment">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#IFNb_mRNA">
+	<bqbiol:encodes>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P01574"/>
+	</rdf:Bag>
+	</bqbiol:encodes>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="IFNb_env" initialConcentration="0" name="IFNb_env" metaid="IFNb_env" compartment="c2">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#IFNb_env">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P01574"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="STATP2n" initialConcentration="0" name="STATP2n" metaid="STATP2n" compartment="compartment">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#STATP2n">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/interpro/IPR001217"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="SOCS1m" initialConcentration="0" name="SOCS1m" metaid="SOCS1m" compartment="compartment">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#SOCS1m">
+	<bqbiol:encodes>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/interpro/IPR028411"/>
+	</rdf:Bag>
+	</bqbiol:encodes>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="IRF7m" initialConcentration="0" name="IRF7m" metaid="IRF7m" compartment="compartment">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#IRF7m">
+	<bqbiol:encodes>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/Q92985"/>
+	</rdf:Bag>
+	</bqbiol:encodes>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="IRF7Pn" initialConcentration="0" name="IRF7Pn" metaid="IRF7Pn" compartment="compartment">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#IRF7Pn">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/Q92985"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="IFNa_mRNA" initialConcentration="0" name="IFNa_mRNA" metaid="IFNa_mRNA" compartment="compartment">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#IFNa_mRNA">
+	<bqbiol:encodes>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/interpro/IPR015589"/>
+	</rdf:Bag>
+	</bqbiol:encodes>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="IFNa_env" initialConcentration="0" name="IFNa_env" metaid="IFNa_env" compartment="c2">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#IFNa_env">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/interpro/IPR015589"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="TNFam" initialConcentration="0" name="TNFam" metaid="TNFam" compartment="compartment">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#TNFam">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P01375"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="TNFenv" initialConcentration="0" name="TNFenv" metaid="TNFenv" compartment="c2">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#TNFenv">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/uniprot/P01375"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="STATm" initialConcentration="0" name="STATm" metaid="STATm" compartment="compartment">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#STATm">
+	<bqbiol:encodes>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/interpro/IPR001217"/>
+	</rdf:Bag>
+	</bqbiol:encodes>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+      <species id="STAT" initialConcentration="0.1" name="STAT" metaid="STAT" compartment="compartment">
+        <annotation>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+	<rdf:Description rdf:about="#STAT">
+	<bqbiol:isVersionOf>
+	<rdf:Bag>
+	<rdf:li rdf:resource="http://identifiers.org/interpro/IPR001217"/>
+	</rdf:Bag>
+	</bqbiol:isVersionOf>
+	</rdf:Description>
+	</rdf:RDF>
+	</annotation>
+            </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="NS" constant="false" metaid="NS" value="0"/>
+      <parameter id="r5" metaid="r5" value="1" units="dimensionless"/>
+      <parameter id="n3" metaid="n3" value="5" units="substance"/>
+      <parameter id="bm" metaid="bm" value="6" units="substance"/>
+      <parameter id="IC1" constant="false" metaid="IC1" value="0"/>
+      <parameter id="sp" metaid="sp" value="0.3" units="substance"/>
+      <parameter id="delta1" metaid="delta1" value="0.1" units="substance"/>
+      <parameter id="n1" metaid="n1" value="1" units="substance"/>
+      <parameter id="IC2" constant="false" metaid="IC2" value="0"/>
+      <parameter id="sv" metaid="sv" value="0.1" units="substance"/>
+      <parameter id="delta2" metaid="delta2" value="0.4" units="substance"/>
+      <parameter id="n2" metaid="n2" value="5" units="substance"/>
+      <parameter id="IC2ifa" constant="false" metaid="IC2ifa" value="0"/>
+      <parameter id="TJ" constant="false" metaid="TJ" value="0"/>
+      <parameter id="TJtot" metaid="TJtot" value="0.0001" units="substance"/>
+      <parameter id="K3" metaid="K3" value="0.0043" units="substance"/>
+      <parameter id="K9" metaid="K9" value="780" units="substance"/>
+      <parameter id="delta" metaid="delta" value="0.0003" units="substance"/>
+      <parameter id="r0" metaid="r0" value="0.001" units="substance"/>
+      <parameter id="k15" metaid="k15" value="3.6E-8" units="substance"/>
+      <parameter id="tao1" metaid="tao1" value="2.5" units="substance"/>
+      <parameter id="C" metaid="C" value="500000" units="substance"/>
+      <parameter id="vmax2" metaid="vmax2" value="72000" units="substance"/>
+      <parameter id="NA" metaid="NA" value="6.023E23" units="substance"/>
+      <parameter id="K2" metaid="K2" value="0.002" units="substance"/>
+      <parameter id="K5" metaid="K5" value="0.01" units="substance"/>
+      <parameter id="tao3" metaid="tao3" value="0.56" units="substance"/>
+      <parameter id="r3" metaid="r3" value="1E-7" units="substance"/>
+      <parameter id="k8" metaid="k8" value="0.0036" units="substance"/>
+      <parameter id="tao4" metaid="tao4" value="0.46" units="substance"/>
+      <parameter id="k11" metaid="k11" value="0.00036" units="substance"/>
+      <parameter id="k14" metaid="k14" value="3.204E-7" units="substance"/>
+      <parameter id="tao6" metaid="tao6" value="1"/>
+      <parameter id="k12" metaid="k12" value="360" units="substance"/>
+      <parameter id="k16" metaid="k16" value="0.36" units="substance"/>
+      <parameter id="tao8" metaid="tao8" value="2" units="substance"/>
+      <parameter id="vmax17" metaid="vmax17" value="72000" units="substance"/>
+      <parameter id="K17" metaid="K17" value="0.002" units="substance"/>
+      <parameter id="r1" metaid="r1" value="0.0001" units="substance"/>
+      <parameter id="rmax20" metaid="rmax20" value="0.001" units="substance"/>
+      <parameter id="K20" metaid="K20" value="0.0006" units="substance"/>
+      <parameter id="tao9" metaid="tao9" value="2" units="substance"/>
+      <parameter id="vmax19" metaid="vmax19" value="154800" units="substance"/>
+      <parameter id="K19" metaid="K19" value="0.004" units="substance"/>
+      <parameter id="r4" metaid="r4" value="1E-5" units="substance"/>
+      <parameter id="k26" metaid="k26" value="0.360085" units="substance"/>
+      <parameter id="tao12" metaid="tao12" value="1" units="substance"/>
+      <parameter id="k28" metaid="k28" value="360" units="substance"/>
+      <parameter id="tao13" metaid="tao13" value="15" units="substance"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="CDMT00055" variable="NS">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> r5 </ci>
+              <apply>
+                <power/>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> n3 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <power/>
+                <ci> bm </ci>
+                <ci> n3 </ci>
+              </apply>
+              <apply>
+                <power/>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> n3 </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="CDMT00056" variable="IC1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <times/>
+                <ci> sp </ci>
+                <apply>
+                  <power/>
+                  <apply>
+                    <divide/>
+                    <ci> NS </ci>
+                    <ci> delta1 </ci>
+                  </apply>
+                  <ci> n1 </ci>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <power/>
+                <apply>
+                  <divide/>
+                  <ci> NS </ci>
+                  <ci> delta1 </ci>
+                </apply>
+                <ci> n1 </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="CDMT00057" variable="IC2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <cn type="integer"> 1 </cn>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="CDMT00058" variable="IC2ifa">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <cn type="integer"> 1 </cn>
+        </math>
+            </assignmentRule>
+      <assignmentRule metaid="CDMT00059" variable="TJ">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> TJtot </ci>
+                  <apply>
+                    <plus/>
+                    <ci> IFNb_env </ci>
+                    <ci> IFNa_env </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> K3 </ci>
+                  <ci> IFNb_env </ci>
+                  <ci> IFNa_env </ci>
+                </apply>
+              </apply>
+              <cn type="integer"> 1 </cn>
+            </apply>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> K9 </ci>
+                  <ci> SOCS1m </ci>
+                </apply>
+                <ci> delta </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+            </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="J1" name="J1" metaid="J1" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00001"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IFNb_mRNA" metaid="CDMT00002"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="IRF7Pn" metaid="CDMT00003"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00004">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> r0 </ci>
+                    <ci> IC1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> k15 </ci>
+                    <ci> IRF7Pn </ci>
+                  </apply>
+                </apply>
+                <ci> IC2 </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> IFNb_mRNA </ci>
+                  <apply>
+                    <ln/>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+                <ci> tao1 </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="J2" name="J2" metaid="J2" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00005"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IFNb_env" metaid="CDMT00006"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="IFNb_mRNA" metaid="CDMT00007"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00008">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <cn type="integer"> 1000000000 </cn>
+                    <ci> C </ci>
+                    <ci> vmax2 </ci>
+                  </apply>
+                  <ci> NA </ci>
+                </apply>
+                <ci> IFNb_mRNA </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> K2 </ci>
+                <ci> IFNb_mRNA </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="J3" name="J3" metaid="J3" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00009"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="STATP2n" metaid="CDMT00010"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="STAT" metaid="CDMT00011"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00012">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> K5 </ci>
+                    <ci> TJ </ci>
+                    <ci> STAT </ci>
+                  </apply>
+                  <cn type="integer"> 2 </cn>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> K5 </ci>
+                  <ci> STAT </ci>
+                </apply>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> STATP2n </ci>
+                  <apply>
+                    <ln/>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+                <ci> tao3 </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="J4" name="J4" metaid="J4" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00013"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SOCS1m" metaid="CDMT00014"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="STATP2n" metaid="CDMT00015"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00016">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> r3 </ci>
+                    <ci> IC1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> k8 </ci>
+                    <ci> STATP2n </ci>
+                  </apply>
+                </apply>
+                <ci> IC2 </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> SOCS1m </ci>
+                  <apply>
+                    <ln/>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+                <ci> tao4 </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="J5" name="J5" metaid="J5" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00017"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRF7m" metaid="CDMT00018"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="STATP2n" metaid="CDMT00019"/>
+          <modifierSpeciesReference species="IRF7Pn" metaid="CDMT00020"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00021">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> k11 </ci>
+                    <ci> STATP2n </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> k14 </ci>
+                    <ci> IRF7Pn </ci>
+                  </apply>
+                </apply>
+                <ci> IC2 </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> IRF7m </ci>
+                  <apply>
+                    <ln/>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+                <ci> tao6 </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="J6" name="J6" metaid="J6" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00022"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRF7Pn" metaid="CDMT00023"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="IRF7m" metaid="CDMT00024"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00025">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k12 </ci>
+              <ci> IC1 </ci>
+              <ci> IRF7m </ci>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="J7" name="J7" metaid="J7" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00026"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IFNa_mRNA" metaid="CDMT00027"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="IRF7Pn" metaid="CDMT00028"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00029">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k16 </ci>
+                <ci> IRF7Pn </ci>
+                <ci> IC2ifa </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> IFNa_mRNA </ci>
+                  <apply>
+                    <ln/>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+                <ci> tao8 </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="J8" name="J8" metaid="J8" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00030"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IFNa_env" metaid="CDMT00031"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="IFNa_mRNA" metaid="CDMT00032"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00033">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <cn type="integer"> 1000000000 </cn>
+                    <ci> C </ci>
+                    <ci> vmax17 </ci>
+                  </apply>
+                  <ci> NA </ci>
+                </apply>
+                <ci> IFNa_mRNA </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> K17 </ci>
+                <ci> IFNa_mRNA </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="J9" name="J9" metaid="J9" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00034"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TNFam" metaid="CDMT00035"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="TNFenv" metaid="CDMT00036"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00037">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> r1 </ci>
+                    <ci> IC1 </ci>
+                  </apply>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <ci> rmax20 </ci>
+                      <ci> TNFenv </ci>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <ci> K20 </ci>
+                      <ci> TNFenv </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> IC2 </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> TNFam </ci>
+                  <apply>
+                    <ln/>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+                <ci> tao9 </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="J10" name="J10" metaid="J10" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00038"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TNFenv" metaid="CDMT00039"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="TNFam" metaid="CDMT00040"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00041">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <cn type="integer"> 1000000000 </cn>
+                    <ci> C </ci>
+                    <ci> vmax19 </ci>
+                  </apply>
+                  <ci> NA </ci>
+                </apply>
+                <ci> TNFam </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> K19 </ci>
+                <ci> TNFam </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="J11" name="J11" metaid="J11" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00042"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="STATm" metaid="CDMT00043"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="STATP2n" metaid="CDMT00044"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00045">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> r4 </ci>
+                    <ci> IC1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> k26 </ci>
+                    <ci> STATP2n </ci>
+                  </apply>
+                </apply>
+                <ci> IC2 </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> STATm </ci>
+                  <apply>
+                    <ln/>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+                <ci> tao12 </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+      <reaction id="J12" name="J12" metaid="J12" reversible="false">
+        <annotation/>
+              <listOfReactants>
+          <speciesReference species="w" metaid="CDMT00046"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="STAT" metaid="CDMT00047"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="STATm" metaid="CDMT00048"/>
+        </listOfModifiers>
+        <kineticLaw metaid="CDMT00049">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k28 </ci>
+                <ci> STATm </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> STAT </ci>
+                  <apply>
+                    <ln/>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+                <ci> tao13 </ci>
+              </apply>
+            </apply>
+          </math>
+                </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

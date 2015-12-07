@@ -26,6 +26,5 @@ for m=1:length(ar.model)
     end
 end
 
-
-
-
+% Invalidate cache so simulations do not get skipped
+arCheckCache(1);

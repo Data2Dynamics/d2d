@@ -1,0 +1,437 @@
+====== corrections to PORT ======
+
+The PORT3 subroutine library has two parts, one with publicly
+available code (freely available from netlib), the other proprietary
+(available for a fee: contact AT&T Technology Licensing, (800) 462-8146;
+10 Independence Blvd, Warren, NJ 07060-0911.)  This file describes
+changes to both parts.  Descriptions of corrections to the proprietary
+part are flagged with ($$); the corrected proprietary routines are
+available "from portfix".
+
+For AT&T people (accessing netlib from a machine known to Network
+Action Central as an AT&T machine "inside the firewall"), all of
+PORT3 is available from netlib.
+
+====== errata ======
+
+N2F (and N2G): the last word in the ``Purpose'' section should be ``N2G''
+rather than ``N2F''.
+
+MNSX and SMNSX ($$):  Usage sections should show these as functions
+rather than subroutines.  See the SMNSX example.
+
+N2FB (and N2GB):  Note 3 should mention ``NSFB or NSGB''
+rather than ``PSNBN, PSNLB, SNLLB, or SNLBN''.
+
+POST ($$): LPLMI calling sequence is WRONG - should be LPLMI(NV,V,X,NX,XI).
+
+*********** (The above errors have been corrected in Port documenttion source.)
+
+From nls Wed Dec 12 10:06 EST 1984
+l2sff calls gq1 (not gqm11) which calls ... which calls "gamma", disagrees with
+cross-reference index of port 3. should check them all.
+
+From dmg Wed Apr 3 8:50 EST 1985
+The examples for MFTCR (label MFTG) and MFTRC (label MFTF) have
+two statements misplaced in the loops that conjugate the output
+from MFTRC:  the statement "N2MK = N-1" should be one line
+higher (just before the outer DO statement) and the statement
+"N2MK     = N2MK - 2" should be one lower (just after the
+CONTINUE closing the inner DO statement).  This has no effect
+on the output of the examples (unless you turn subscript
+checking on), but it does make them confusing.
+
+
+====== Bug fixes ======
+
+From dmg Thu Apr  4 06:25 EST 1985
+Adjust FFT routines ($$) MFTCC, MFTCR, and MFTRC to work correctly when
+N is the product of an odd number of primes.  (Source tapes distributed
+after March of 1985 should have these bugs fixed.)
+
+From dmg Sun Apr  7 14:24 EST 1985
+The scratch storage (from the Port stack) required by MFTCR ($$)
+and MFTRC is (N+2)*NNS rather than N*NNS.
+
+From dmg Tue Sep 24 08:00 EST 1985
+Corrections to Port 3 source:
+	A9RNT[CDILR] (in p3src.frame) and APRNT[CDILR] (in Utilities):
+delete the line "MCOL = MIN0(MCOL, 160)" and later (in the one line
+where MCOL is used) change "MCOL" to "MIN0(MCOL,160)".  [This stops
+these routines from possibly modifying the input-only parameter MCOL.]
+	BPLD, CBPLD, DBPLD (in p3src.lin): insert "CALL ERROFF"
+at label 70 (just before the call on SETERR originally labeled 70).
+[In the unlikely event that SETERR has been called with the message
+"SINGULAR MATRIX", this eliminates the Port error of calling
+SETERR while an error is outstanding.]
+	CBANM and CBPNM (in p3src.lin ($$)): omit the declaration of CABS.
+	QP2NT and DQP2NT (in p3src.linopt ($$)): change "WRITE(6" to
+"WRITE(PU" (twice).
+	LGEA (in p3tests): change "IWRITE = 6" to "IWRITE = I1MACH(2)"
+(on line 7).
+	PRSA (in p3tests): change "WRITE(6" to "WRITE(IWRITE"
+(11 times).
+	M66FT, MFTCC, MFTCR, MFTRC, DM66FT, DMFTCC, DMFTCR, DMFTRC
+(in p3src.fft ($$)):  change "INTEGER IFX(1)" to the following 5 lines:
+C/6S
+      INTEGER IFX(1)
+C/7S
+C     INTEGER IFX(*)
+C/
+[This prevents a compile-time diagnostic of subscript out of range
+on some Fortran 77 compilers when these routines reference IFX(2)
+or IFX(3).]
+	[IRD]1MACH (in p3src.frame): constants for Sequent Balance
+8000 and AT&T 7300 (UNIX PC) added.
+
+From dmg Tue Sep 24 19:32 EST 1985
+	SVAD (in p3tests) should declare UNI to be REAL rather than
+DOUBLE PRECISION and should reference DBLE(UNI(0)) rather than just
+UNI(0).
+
+From dmg Wed Sep 25 13:22 EST 1985
+	DT1UED, DT1UEV, DT2UEV, DT3UEV, DVDSS1 (in p3src.app2 ($$))
+should reference DBLE(FLOAT(...)) rather than DFLOAT(...)
+(or should declare DFLOAT to be DOUBLE PRECISION).  The same applies
+to LYAD, VDAD, VDBD, and VDED in p3tests.
+
+From dmg Wed Oct 16 15:25 EST 1985
+	Linear programming modules changed by Linda Kaufman ($$):
+A4PPG A4PPS C4NST C4ONS D4CLM DA4PPG DA4PPS DC4NST DC4ONS DD4CLM
+DG4ETC DL4P2 DL4PH1 G4ETC L4P2 L4PH1
+
+From dmg Wed Oct 16 15:28 EST 1985
+LRAD and LRPA in p3tests have four FORMAT statements each with
+extra commas in them (before and after a / ).
+
+From ehg Fri Oct 25 18:04 EDT 1985
+In VDSS1 and DVDSS1 ($$), the assignment to L1 should
+involve FLOAT(N-1) rather than FLOAT(N).
+
+From dmg Fri Feb 14 10:57 EST 1986
+In Z1ONE ($$), the lines
+         IF (JCALL .GT. 1 .AND. G2 .GT. 0.0E0) DXTRY = AMIN1(DXTRY, G2)
+         JUSED = 0
+should be changed to
+C        *** G2 IS NOT DEFINED WHEN JCALL .LE. 1 ***
+         IF (JCALL .LE. 1) GO TO 61
+            IF (G2 .GT. 0.0E0) DXTRY = AMIN1(DXTRY, G2)
+   61    JUSED = 0
+Similarly, in DZ1ONE, the lines
+         IF (JCALL .GT. 1 .AND. G2 .GT. 0.0D0) DXTRY = DMIN1(DXTRY, G2)
+         JUSED = 0
+should be changed to
+C        *** G2 IS NOT DEFINED WHEN JCALL .LE. 1 ***
+         IF (JCALL .LE. 1) GO TO 61
+            IF (G2 .GT. 0.0D0) DXTRY = DMIN1(DXTRY, G2)
+   61    JUSED = 0
+
+From dmg Tue Apr 15 23:30 EST 1986
+Linda Kaufman has changed LINPA, LINPR, DLINPA, DLINPR,
+and many of the modules they call ($$).
+
+From dmg Fri Jun 6 17:00 EST 1986
+In RQUAD ($$), the line
+         IF (KWARN  .GT. 0) GO TO 200
+should be added before line 40, i.e., just before
+         EPS = EPSA + EPSR * ABS(ANS)
+
+In DRQUAD ($$), lines 41-43 should be changed from
+         EPS = EPSA + EPSR * DABS(ANS)
+         EPS = EPSA + EPSR * DMAX1(0.5D0*DABS(ANS), DABS(ANS)-ERREST)
+         IF (KWARN .GT. 0) GO TO 200
+to
+         IF (KWARN .GT. 0) GO TO 200
+         EPS = EPSA + EPSR * DABS(ANS)
+         IF (ERREST .LE. EPS) RETURN
+         EPS = EPSA + EPSR * DMAX1(0.5D0*DABS(ANS), DABS(ANS)-ERREST)
+That is, "IF (KWARN..." should go up two lines, and
+"IF (ERREST .LE. EPS) RETURN" should be added after the first
+assignment ot EPS.
+
+From dmg Thu Aug  7 14:54 EDT 1986
+The documentation for NSF1 ($$) should list X as an output (rather than
+input) variable and should define f(x) as
+1/2 sum from i=1 to n ( sum from j=1 to L A sub i,j (x) c sub j y(x) sub i ) sup 2
+(i.e., there should be a left paren between the sumation signs rather
+than before A).
+
+From dmg Tue Sep 30 12:45 EDT 1986
+In subroutines V7DFL and DV7DFL, the statement
+      V(DELTA0) = SQTEPS
+should be moved from line 58 to line 86, i.e., to follow
+      V(DINIT) = 0.D+0
+(This only matters if you provide [D]MN[FG] with an initial
+Hessian approximation.)
+
+From dmg Thu Feb 12 14:38 EST 1987
+DM[135]FT DMFT[CR]I: COMMON /M55FT/ changed to /DM55FT/
+
+From dmg Thu Feb 26 11:02 EST 1987
+[D]MFTC[RC], [D]MFTRC ($$): size of DSTAK made consistent with
+the rest of Port.
+
+From dmg Fri Feb 27 23:32 EST 1987
+[D]LTSQ ($$): calls on [D]G1SVD and [D]C2LSQ should pass DSTAK(IV)
+or RSTAK(IV) rather than A. [bug fix by lck]
+
+From dmg Fri Feb 27 23:38 EST 1987
+Sundry Optimization Chapter modules adjusted so they only
+declare EXTERNAL routines actually used, and so EXTERNAL
+statements come after rather than before relevant type statements.
+
+From dmg Fri Apr 17 7:18:00 EDT 1987
+[D]SVDLS ($$): last two calls on [D]G1SVD should pass .TRUE. rather
+than MATV. [bug fix by lck]
+
+From dmg Thu May 28 17:13 EDT 1987
+[D]HQR2 replaced by versions adapted from EISPACK II
+(to fix a bug in DHQR2).
+
+From dmg Tue Aug 11 11:04 EDT 1987
+EXTERNAL statements shifted in *NSX routines of Optimization Chapter ($$).
+
+From dmg Tue Aug 18 12:52:30 EDT 1987
+[ D]G7QTS: massaged to prevent loop when lower and upper Gerschgorin
+bounds are exact.
+
+From dmg Tue Sep 29 09:10:05 EDT 1987
+Typos in NS[FG][B ] documentation:  change IINC to INCC everywhere, and
+change "For the example discussed in B"
+to "For B in the example discussed" .
+
+From dmg Wed Sep 30 16:00:00 EDT 1987
+DP6MDC ($$) should declare SAVE rather than PSAVE . [fix from nls and lck]
+
+From dmg Sun Oct 8 18:00:00 EST 1987
+MNSX and SMNSX ($$):  RSTAK should be dimensioned 1000 (rather
+than 500 -- for consistency with the rest of Port).
+
+From dmg Fri Jan 29 22:00:00 EST 1988
+I1MACH, R1MACH, D1MACH: constants for CDC machines corrected.
+
+From dmg Fri Sep 23 09:44:00 EDT 1988
+[RD]1MACH: sanity check (stuff involving SC) added.
+
+From dmg Tue Nov 29 07:25:00 EST 1988
+[ D]A4PPG ($$): bug fixes from Linda Kaufman
+
+From dmg Mon Dec 19 18:26:00 EST 1988
+[ D]S[37]GRD: more robust scaling: changed
+	"H = TWO*(AFXETA*AGI/(AAI**2))**(ONE/THREE)" into
+	"H = TWO * (AFXETA*AGI)**(ONE/THREE) * AAI**(-TWO/THREE)"
+
+From dmg Wed Mar 15 06:15 EST 1989
+[ D]G4ETC and [ D]L4PH1 ($$): bug fixes from Linda Kaufman
+(affecting [ D]IQP with bounds = [RD]1MACH(2) ).
+
+From dmg Mon Jul 24 23:55 EDT 1989
+[ D]NSF: second call on CALCA (just after 160 CONTINUE) should
+pass IV(NFGCAL) rather than NF.
+
+From dmg Fri Aug  4 10:47:00 EDT 1989
+[ D]POSTW: K should appear in a DATA stmt:
+	DATA K/0/
+and, for Fortran 77, should appear in a SAVE statement.
+
+From dmg Sat Jan 13 18:58:00 EST 1990
+DSPMLE ($$): lines 104-107: the SETERR call omitted IERR as the
+penultimate parameter: the continuation line should be
+     1         IERR, 2)
+
+From dmg Wed Jan 17 15:18:00 EST 1990
+C5APP ($$): should call MOVEBR rather than MOVEBD.
+N5ERR ($$): the Fortran 77 version should declare MESSG to be
+      CHARACTER*1 MESSG(NMESSG)
+ASYM, DASYM, DSYM, SYM ($$):   the SETERR call omitted the
+string-length argument, 16 (arg 2).
+
+From dmg Sat Jan 20 17:12:14 EST 1990
+DNSF1 ($$): should declare DFMIN to be DOUBLE PRECISION.
+
+From dmg Tue Feb 13 09:53:00 EST 1990
+[ D]G7LIT and [ D]G7ITB: should set IV(RESTOR) properly when declining
+to evaluate the objective function during "internal doubling".  This
+sometime affects the separable nonlinear least-squares routines.
+
+From dmg Sun Apr  1 17:05:04 EDT 1990
+[ D]RN2G[B ]: adjusted to ask just once rather than twice for the
+initial residual in the unusual case where the residual and Jacobian
+matrix are provided in "hunks" (i.e., ND < N).
+
+From dmg Tue Apr  3 19:18:08 EDT 1990
+[ D]NSF and [ D]N2GB: comments about minimum values of LIV and LV corrected.
+
+From dmg Sun Apr 15 00:12:50 EDT 1990
+Minor modifications in [ D]G7ITB, [ D]G7LIT, [ D]RNSG -- should be
+invisible to current PORT uses of these routines.
+
+From dmg Mon May 14 09:57:36 EDT 1990
+[ D]RMN[GH][B ] changed to set IV(RESTOR) properly when declining
+to evaluate the objective function during "internal doubling".  This
+only matters if you're calling one of these routines directly and
+you rely on IV(RESTOR).
+
+From dmg Wed May 16 00:14:43 EDT 1990
+[ D]RMNH[B ] changed to set the initial radius as the nonlinear
+least squares solvers do, to V(LMAX0)/(1 + V(PHMXFC)) (rather than
+just to V(LMAX0)), so that the first step tried is guaranteed to have
+2-norm at most V(LMAX0).
+
+From dmg Tue Aug 14 01:12:47 EDT 1990
+[ D]G7ITB changed to return IV(1) = 82 (as per the Usage Summary)
+when some lower bound exceeds the corresponding upper bound.
+
+From dmg Fri Sep 28 11:37:51 EDT 1990
+Comments on lengths of IV and LIV corrected in [ D][ R][MN[FGH]B.
+(The numbers in the Port manual are correct.)
+
+From dmg Tue Oct 16 12:35:13 EDT 1990
+[ D]N2LRD and [ D]N2RDP: scale of regression diagnostic vector changed:
+it is now scaled (in [ D]N2LRD) by 1/sqrt(f*) when f* is nonzero,
+where f* is the "optimal" objective value; the printing in [ D]N2RDP
+reflects this change.  This change makes the regression diagnostic
+vector independent of "response scale", i.e., of the scale of the
+residual vector.
+
+From dmg Fri Jan 18 00:07:12 EST 1991
+[ D]G7QTS: insert
+      IF (UK .LT. LK) UK = LK
+just before
+      IF (ALPHAK .LT. LK) GO TO 210
+to prevent a rare loop due to roundoff errors.
+
+From dmg Mon Apr 15 14:38:42 EDT 1991
+[ D]A4PPS ($$) updated to fix a stack-overwrite bug in [ D]LINP[AR]
+that sometimes manifested itself when a variable had identical
+simple lower and upper bounds.  (Thanks to lck for the fix.)
+
+From dmg Mon May  6 17:01:59 EDT 1991
+[ D]4CLM, [ D]L4P2, [ D]L4PH1 ($$) modified to correct a bug in
+[ D]LINP[AR].  Possible symptom: continuing to iterate at
+an optimal solution.  (Thanks to lck for the fix.)
+
+From dmg Fri May 10 13:18:46 EDT 1991
+Further tweak by lck to [ D]L4P2 ($$).
+
+From dmg Sat 22 Jun 16:55:34 EDT 1991
+Trivial change to declarations in [ d]s7dmp.f:
+change "X(*), Y(N), Z(*)" to "X(*), Y(*), Z(N)".
+
+From dmg Wed 26 Jun 18:59:26 EDT 1991
+Tweak (from ehg) to D1MACH: in response to a SUN Fortran compiler
+bug, integer arrays involved in EQUIVALENCE and DATA are now
+dimensioned (2) rather than (4), and comments point out the machines
+where (2) must be changed to (4).
+
+From dmg Sat Jul  6 09:47:17 EDT 1991
+[ D]A7SST: use correct tolerance [V(SCTOL)] both places the singular-
+convergence test is made: change V(RFCTOL) to V(SCTOL) in the line
+ 290  IF (-V(NREDUC) .LE. V(RFCTOL) * DABS(V(F0))) IV(IRC) = 11
+
+From dmg Thu Sep 12 09:56:31 EDT 1991
+parck.f: change D11.3 to E11.3 in the FORMAT labelled 130.
+
+From dmg Sat Jan 18 00:24:24 EST 1992
+Correct comments in [ d]rn2gb.f:
+< C LIV...... LENGTH OF IV... LIV MUST BE AT LEAST P + 80.
+< C LV....... LENGTH OF V...  LV  MUST BE AT LEAST 105 + P*(2*P+16).
+---
+> C LIV...... LENGTH OF IV... LIV MUST BE AT LEAST 4*P + 82.
+> C LV....... LENGTH OF V...  LV  MUST BE AT LEAST 105 + P*(2*P+20).
+
+From dmg Sat Mar 21 00:42:45 EST 1992
+Comments in D1MACH about IEEE constants tweaked.
+
+From dmg Tue May 19 22:57:44 EDT 1992
+Commented C source appended just before the END lines of [IRD]1MACH.
+
+From dmg Tue Jul 28 08:52:38 EDT 1992
+DRPOLY and D[12345789]RPLY ($$) changed to do all calculations in
+double precision (to circumvent exponent range limitations on
+machines, such as IEEE arithmetic machines, in which single
+precision has a smaller exponent range than double).
+
+From dmg Tue Mar  9 13:19:23 EST 1993
+[ d]n2g[b ].f: move "NN = N2 - N1 + 1" down 3 lines, so it comes after
+"IF (IV1 .GT. 2) GO TO 10".  This only matters if your machine checks
+for uninitialized integer variables.
+
+From dmg Thu May 13 22:08:11 EDT 1993
+[ d]a7ssT.f: add "V(F) = V(FLSTGD)" to block labelled 60 (to restore
+function value when IV(TOOBIG) is nonzero).  This matters if the next
+function evaluation would exceed the function evaluation limit.
+
+Fri Jun 10 13:09:15 EDT 1994
+[ d]l4ph1.f: lines 86 and 87 ($$): change (I) to (II) throughout.
+
+Wed Feb 15 11:38:13 EST 1995
+[ d]n2g[b ].f: correct volume number in comment on NL2SOL paper.
+
+Mon Jun  5 16:56:53 EDT 1995
+[ d]l7mst.f: fix bug in rescaling fast-Givens transformations: the new
+scale wasn't stored when no rotation was necessary (a rarely seen bug).
+
+Sun Jun 18 00:22:57 EDT 1995
+[ d]a7sst.f: zero IV(TOOBIG) when nonzero.  Sometimes a longer step is
+attempted before accepting a step that would give a decrease.  If this
+longer step caused IV(TOOBIG) to be nonzero, it might be left nonzero
+during the gradient evaluation, leading to an incorrect message about
+the gradient not being computable.
+[ d]rmng.f: fix a wrong goto (used in singular-convergence test).
+[ d]rmn[gh][b ].f: initialize V(F0) to the initial function value.
+
+Fri Sep 15 11:24:08 EDT 1995
+burm1.f: fix glitch in test for overly tight convergence tolerance:
+70c70
+<       IDIG = IFLR(R1MACH(5)*FLOAT(I1MACH(11)))
+---
+>       IDIG = IFLR(R1MACH(5)*FLOAT(I1MACH(14)))
+(burm1.f is only in the AT&T-proprietary part of PORT.)
+[ d]rnsg[b ].f: (not really a bug): adjust second call of [ D]RN2G[B ]
+to pass a copy of NML for arg N2.  This is the change to drnsg.f:
+107c107
+<      1        IPIV1, IER, IV1, J1, JLEN, K, LH, LI, LL1O2, MD, N1,
+---
+>      1        IPIV1, IER, IV1, J1, JLEN, K, LH, LI, LL1O2, MD, N1, N2,
+210c210,211
+<  30   CALL  DRN2G(V(D1), V(DR1L), IV, LIV, LV, NML, N, N1, NML, P,
+---
+>  30   N2 = NML
+>       CALL  DRN2G(V(D1), V(DR1L), IV, LIV, LV, NML, N, N1, N2, P,
+[ d][ r]ns[fg].f: comment that estimated covariance matrices are
+ordered (alf,c): nonlinear parameters first, then linear parameters.
+
+Fri Mar 13 10:51:19 EST 1998
+e9rint.f and seterr.f adjusted so (in the default Fortran 77 format)
+they do not reference I1MACH(6), but simply know that each character
+contains one character.
+
+Thu Nov 18 12:38:30 EST 1999
+[ d]l9stp.f: lines 98, 101: change IW(0) to IW(1).  This only affects
+the error number reported when [ d]l7pf gives a funny return.
+
+Mon Oct 21 14:19:47 EDT 2002
+[ d]a7ss5.f: accept a step that gives a small function reduction if,
+after considering any alternate model, two further trial steps with
+reduced radii did not produce a better step.
+i7shft.f: for a forthcoming addition to the PORT library, allow
+negative K to request a right-circular shift of X(-K), ..., X(N)
+by one position.
+
+Thu Nov 14 09:29:58 EST 2002
+[ d]rn2gb.f: fix a bug in handling problems with N < P (a nonlinear
+least-squares problem with bounds on the parameters being estimated
+and fewer observations than parameters being estimated).
+
+Thu Apr 29 21:53:03 MDT 2004
+  [ d]r7tvm.f:  fix a performance bug that afflicted [ d]n2[fg]b on
+square systems (as many residuals as optimization variables).
+  [ d]g7itb.f:  fix a performance bug that afflicted [d]n2[fg]b
+after a rejected trial step.  The wrong model might have been chosen.
+  [ d]g7lit.f and [ d]g7itb.f:  Restore the "step" vector after rejecting
+a proposed alternate trial function evaluation because the preducted
+function reduction is too small.  This would affect the choice of model
+(Gauss-Newton or augmented) for the next iteration.
+  The above bug fixes also affect the corresponding separable nonlinear
+least-squares solvers [ d]ns[fg][b ].

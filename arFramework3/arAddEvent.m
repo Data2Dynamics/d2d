@@ -149,6 +149,9 @@ function ar = arAddEvent( varargin )
     if (doLink)
         arLink(true);
     end
+    
+    % Invalidate cache so simulations do not get skipped
+    arCheckCache(1);
 end
 
 function logCall( fn, varargin )

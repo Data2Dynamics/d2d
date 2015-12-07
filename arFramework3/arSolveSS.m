@@ -14,11 +14,11 @@ fprintf('solving steady state condition...\n');
 
 rhs = sym(ar.model(m).fx);
 if(exist('fu','var'))
-    rhs = mysubs(rhs, ar.model(m).sym.u, sym(fu));
+    rhs = arSubs(rhs, ar.model(m).sym.u, sym(fu));
 elseif(~isempty(ar.model(m).fu))
-    rhs = mysubs(rhs, ar.model(m).sym.u, sym(ar.model(m).fu));
+    rhs = arSubs(rhs, ar.model(m).sym.u, sym(ar.model(m).fu));
 end
-rhs = mysubs(rhs, ar.model(m).sym.x, ar.model(m).sym.px0);
+rhs = arSubs(rhs, ar.model(m).sym.x, ar.model(m).sym.px0);
 
 qnonzero = rhs~=0;
 fstrings = cell(1, sum(logical(qnonzero)));
@@ -66,18 +66,5 @@ if(~isempty(ar.model(m).ss_solution))
             fprintf('%s\t  "%s"\n', fp{j}, char(tmpstr(jj)));
         end
     end
-end
-
-% better subs
-function out = mysubs(in, old, new)
-if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    matVer = ver('MATLAB');
-    if(str2double(matVer.Version)>=8.1)
-        out = subs(in, old(:), new(:));
-    else
-        out = subs(in, old(:), new(:), 0);
-    end
-else
-    out = in;
 end
 

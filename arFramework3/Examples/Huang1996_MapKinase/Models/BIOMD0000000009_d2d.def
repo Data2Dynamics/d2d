@@ -1,0 +1,149 @@
+DESCRIPTION
+"Huang1996 - Ultrasensitivity in MAPK cascade"" (BIOMD0000000009)"
+"SBML level 2 version 4"
+"<notes>
+  <body xmlns="http://www.w3.org/1999/xhtml">
+    <div class="dc:title">Huang1996 - Ultrasensitivity in MAPK cascade</div>
+    <div class="dc:description">
+      <p>The temporal sequence of kinase activation, from MAPKKK (activated RAF) to the final effector MAPK (activated ERK), is described here. It is observed from the model that there is an increase in sensitivity along the levels of the cascade, where the activity of MAPK reaches its maximal before MAPKKK.</p>
+    </div>
+    <div class="dc:bibliographicCitation">
+      <p>This model is described in the article:</p>
+      <div class="bibo:title">
+        <a href="http://identifiers.org/pubmed/8816754" title="Access to this publication">Ultrasensitivity in the mitogen-activated protein kinase cascade.</a>
+      </div>
+      <div class="bibo:authorList">Huang CY, Ferrell JE Jr</div>
+      <div class="bibo:Journal">Proc. Natl. Acad. Sci. U.S.A. 1996:93(19):10078-83</div>
+      <p>Abstract:</p>
+      <div class="bibo:abstract">
+        <p>The mitogen-activated protein kinase (MAPK) cascade is a highly conserved series of three protein kinases implicated in diverse biological processes. Here we demonstrate that the cascade arrangement has unexpected consequences for the dynamics of MAPK signaling. We solved the rate equations for the cascade numerically and found that MAPK is predicted to behave like a highly cooperative enzyme, even though it was not assumed that any of the enzymes in the cascade were regulated cooperatively. Measurements of MAPK activation in Xenopus oocyte extracts confirmed this prediction. The stimulus/response curve of the MAPK was found to be as steep as that of a cooperative enzyme with a Hill coefficient of 4-5, well in excess of that of the classical allosteric protein hemoglobin. The shape of the MAPK stimulus/ response curve may make the cascade particularly appropriate for mediating processes like mitogenesis, cell fate induction, and oocyte maturation, where a cell switches from one discrete state to another.</p>
+      </div>
+    </div>
+    <div class="bm:curation">
+      <p>The species K_PP_norm, KKK_P_norm and KK_PP_norm are the relative concentrations of the active MAPK, MAPKK and MAPKKK, that is the double, or single resp. phophorylated forms divided by the total concentrations of each kinase. For MAPK additionally the also active MAPK divided by the maximal concentration of active MAPK is given by rel_K_PP_max. The parameter K_PP_norm_max, the maximal ratio of active MapK, has to be calculated for each change of parameters.</p>
+    </div>
+    <div class="dc:publisher">
+      <p>This model is hosted on        <a href="http://www.ebi.ac.uk/biomodels/">BioModels Database</a>
+            and identified by:        <a href="http://identifiers.org/biomodels.db/BIOMD0000000009">BIOMD0000000009</a>
+            .        </p>
+    <p>To cite BioModels Database, please use:        <a href="http://identifiers.org/pubmed/20587024" title="Latest BioModels Database publication">BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models</a>
+            .        </p>
+</div><div class="dc:license">
+  <p>To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to        <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Access to: CC0 1.0 Universal (CC0 1.0), Public Domain Dedication">CC0 Public Domain Dedication</a>
+            for more information.        </p>
+</div>
+</body>
+</notes>"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 100	
+
+COMPARTMENTS
+compartment	 V	 "n/a"	 vol.	 1
+
+STATES
+E1	 C	 "n/a"	 conc.	 compartment	 1	 "MAPKKK activator (Ras)"
+E2	 C	 "n/a"	 conc.	 compartment	 1	 "MAPKKK inactivator"
+KKK	 C	 "n/a"	 conc.	 compartment	 1	 "Mos"
+P_KKK	 C	 "n/a"	 conc.	 compartment	 1	 "Mos-P"
+KK	 C	 "n/a"	 conc.	 compartment	 1	 "Mek1"
+P_KK	 C	 "n/a"	 conc.	 compartment	 1	 "Mek1-P"
+PP_KK	 C	 "n/a"	 conc.	 compartment	 1	 "Mek1-PP"
+K_state	 C	 "n/a"	 conc.	 compartment	 1	 "Erk2"
+P_K	 C	 "n/a"	 conc.	 compartment	 1	 "Erk2-P"
+PP_K	 C	 "n/a"	 conc.	 compartment	 1	 "Erk2-PP"
+KPase	 C	 "n/a"	 conc.	 compartment	 1	 "MAPK-Pase"
+KKPase	 C	 "n/a"	 conc.	 compartment	 1	 "MAPKK-Pase"
+E1_KKK	 C	 "n/a"	 conc.	 compartment	 1	 "E1_Mos"
+E2_P_KKK	 C	 "n/a"	 conc.	 compartment	 1	 "E2_Mos-P"
+P_KKK_KK	 C	 "n/a"	 conc.	 compartment	 1	 "P-Mos_Mek1"
+P_KKK_P_KK	 C	 "n/a"	 conc.	 compartment	 1	 "P-Mos_P-Mek1"
+PP_KK_K	 C	 "n/a"	 conc.	 compartment	 1	 "PP-Mek1_Erk2"
+PP_KK_P_K	 C	 "n/a"	 conc.	 compartment	 1	 "PP-Mek1_P-Erk2"
+KKPase_PP_KK	 C	 "n/a"	 conc.	 compartment	 1	 "MAPKK-Pase_PP-Mek1"
+KKPase_P_KK	 C	 "n/a"	 conc.	 compartment	 1	 "MAPKK-Pase_P-Mek1"
+KPase_PP_K	 C	 "n/a"	 conc.	 compartment	 1	 "MAPK-Pase_PP-Erk2"
+KPase_P_K	 C	 "n/a"	 conc.	 compartment	 1	 "MAPK-Pase_P-Erk2"
+
+INPUTS
+
+REACTIONS
+KKK + E1 	-> E1_KKK 	 CUSTOM "E1*KKK*r1a_a1 - E1_KKK*r1a_d1" 	"binding of MAPKKK activator"
+E1_KKK 	-> E1 + P_KKK 	 CUSTOM "E1_KKK*r1b_k2" 	"MAPKKK activation"
+P_KKK + E2 	-> E2_P_KKK 	 CUSTOM "E2*P_KKK*r2a_a2 - E2_P_KKK*r2a_d2" 	"binding of MAPKKK inactivator"
+E2_P_KKK 	-> E2 + KKK 	 CUSTOM "E2_P_KKK*r2b_k2" 	"MAPKKK inactivation"
+KK + P_KKK 	-> P_KKK_KK 	 CUSTOM "KK*P_KKK*r3a_a3 - P_KKK_KK*r3a_d3" 	"binding P-MAPKKK and MAPKK"
+P_KKK_KK 	-> P_KK + P_KKK 	 CUSTOM "P_KKK_KK*r3b_k3" 	"phosphorylation of MAPKK"
+P_KK + KKPase 	-> KKPase_P_KK 	 CUSTOM "KKPase*P_KK*r4a_a4 - KKPase_P_KK*r4a_d4" 	"binding MAPKK-Pase and P-MAPKK"
+KKPase_P_KK 	-> KK + KKPase 	 CUSTOM "KKPase_P_KK*r4b_k4" 	"dephosphorylation of P-MAPKK"
+P_KK + P_KKK 	-> P_KKK_P_KK 	 CUSTOM "P_KK*P_KKK*r5a_a5 - P_KKK_P_KK*r5a_d5" 	"binding P-MAPKKK and P-MAPKK"
+P_KKK_P_KK 	-> PP_KK + P_KKK 	 CUSTOM "P_KKK_P_KK*r5b_k5" 	"phosphorylation of P-MAPKK"
+PP_KK + KKPase 	-> KKPase_PP_KK 	 CUSTOM "KKPase*PP_KK*r6a_a6 - KKPase_PP_KK*r6a_d6" 	"binding MAPKK-Pase and PP-MAPKK"
+KKPase_PP_KK 	-> P_KK + KKPase 	 CUSTOM "KKPase_PP_KK*r6b_k6" 	"dephosphorylation of PP-MAPKK"
+K_state + PP_KK 	-> PP_KK_K 	 CUSTOM "K_state*PP_KK*r7a_a7 - PP_KK_K*r7a_d7" 	"binding MAPK and PP-MAPKK"
+PP_KK_K 	-> P_K + PP_KK 	 CUSTOM "PP_KK_K*r7b_k7" 	"phosphorylation of MAPK"
+P_K + KPase 	-> KPase_P_K 	 CUSTOM "KPase*P_K*r8a_a8 - KPase_P_K*r8a_d8" 	"binding MAPK-Pase and P-MAPK"
+KPase_P_K 	-> K_state + KPase 	 CUSTOM "KPase_P_K*r8b_k8" 	"dephosphorylation of P-MAPK"
+P_K + PP_KK 	-> PP_KK_P_K 	 CUSTOM "PP_KK*P_K*r9a_a9 - PP_KK_P_K*r9a_d9" 	"binding PP-MAPKK and P-MAPK"
+PP_KK_P_K 	-> PP_KK + PP_K 	 CUSTOM "PP_KK_P_K*r9b_k9" 	"phosphorylation of P-MAPK"
+PP_K + KPase 	-> KPase_PP_K 	 CUSTOM "KPase*PP_K*r10a_a10 - KPase_PP_K*r10a_d10" 	"binding MAPK-Pase and PP-MAPK"
+KPase_PP_K 	-> P_K + KPase 	 CUSTOM "KPase_PP_K*r10b_k10" 	"dephosphorylation of PP-MAPK"
+
+DERIVED
+
+CONDITIONS
+
+PARAMETERS
+init_E1	 3e-05	 1	 0	 0	 1000
+init_E2	 0.0003	 1	 0	 0	 1000
+init_KKK	 0.003	 1	 0	 0	 1000
+init_P_KKK	 0	 1	 0	 0	 1000
+init_KK	 1.2	 1	 0	 0	 1000
+init_P_KK	 0	 1	 0	 0	 1000
+init_PP_KK	 0	 1	 0	 0	 1000
+init_K_state	 1.2	 1	 0	 0	 1000
+init_P_K	 0	 1	 0	 0	 1000
+init_PP_K	 0	 1	 0	 0	 1000
+init_KPase	 0.12	 1	 0	 0	 1000
+init_KKPase	 0.0003	 1	 0	 0	 1000
+init_E1_KKK	 0	 1	 0	 0	 1000
+init_E2_P_KKK	 0	 1	 0	 0	 1000
+init_P_KKK_KK	 0	 1	 0	 0	 1000
+init_P_KKK_P_KK	 0	 1	 0	 0	 1000
+init_PP_KK_K	 0	 1	 0	 0	 1000
+init_PP_KK_P_K	 0	 1	 0	 0	 1000
+init_KKPase_PP_KK	 0	 1	 0	 0	 1000
+init_KKPase_P_KK	 0	 1	 0	 0	 1000
+init_KPase_PP_K	 0	 1	 0	 0	 1000
+init_KPase_P_K	 0	 1	 0	 0	 1000
+K_PP_norm_max	 0.900049	 0	 0	 0	 1000
+r1a_a1	 1000	 0	 0	 0	 1000
+r1a_d1	 150	 0	 0	 0	 1000
+r1b_k2	 150	 0	 0	 0	 1000
+r2a_a2	 1000	 0	 0	 0	 1000
+r2a_d2	 150	 0	 0	 0	 1000
+r2b_k2	 150	 0	 0	 0	 1000
+r3a_a3	 1000	 0	 0	 0	 1000
+r3a_d3	 150	 0	 0	 0	 1000
+r3b_k3	 150	 0	 0	 0	 1000
+r4a_a4	 1000	 0	 0	 0	 1000
+r4a_d4	 150	 0	 0	 0	 1000
+r4b_k4	 150	 0	 0	 0	 1000
+r5a_a5	 1000	 0	 0	 0	 1000
+r5a_d5	 150	 0	 0	 0	 1000
+r5b_k5	 150	 0	 0	 0	 1000
+r6a_a6	 1000	 0	 0	 0	 1000
+r6a_d6	 150	 0	 0	 0	 1000
+r6b_k6	 150	 0	 0	 0	 1000
+r7a_a7	 1000	 0	 0	 0	 1000
+r7a_d7	 150	 0	 0	 0	 1000
+r7b_k7	 150	 0	 0	 0	 1000
+r8a_a8	 1000	 0	 0	 0	 1000
+r8a_d8	 150	 0	 0	 0	 1000
+r8b_k8	 150	 0	 0	 0	 1000
+r9a_a9	 1000	 0	 0	 0	 1000
+r9a_d9	 150	 0	 0	 0	 1000
+r9b_k9	 150	 0	 0	 0	 1000
+r10a_a10	 1000	 0	 0	 0	 1000
+r10a_d10	 150	 0	 0	 0	 1000
+r10b_k10	 150	 0	 0	 0	 1000

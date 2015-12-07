@@ -66,7 +66,7 @@ Gs = mysym(G);
 % replace equilibrium constants in G
 for j=fastreversibleindices
     pname = ar.model(m).fv_ma_reverse_pbasename{j};
-    Gs = mysubs(Gs, mysym([pname 'b']), mysym([pname 'f/' pname 'kD']));
+    Gs = arSubs(Gs, mysym([pname 'b']), mysym([pname 'f/' pname 'kD']));
 end
 fprintf('\nequilibrium relations:\n');
 for j=1:r
@@ -102,11 +102,11 @@ T = [dgdxu;eye(n-r)]; % see (in parts) equation (37)
 
 % replace equilibrium relations in v
 vs = mysym(v);
-vs = mysubs(vs, xs(dependentvars), G);
+vs = arSubs(vs, xs(dependentvars), G);
 % replace equilibrium constants in vs
 for j=fastreversibleindices
     pname = ar.model(m).fv_ma_reverse_pbasename{j};
-    vs = mysubs(vs, mysym([pname 'b']), mysym([pname 'f/' pname 'kD']));
+    vs = arSubs(vs, mysym([pname 'b']), mysym([pname 'f/' pname 'kD']));
 end
 
 dxdtnew = inv(A*T) * A * R * vs;
@@ -134,15 +134,3 @@ else % mupad
     out = sym(in);
 end
 
-
-
-% better subs
-function out = mysubs(in, old, new, flag)
-if(~exist('flag','var'))
-    flag = 0;
-end
-if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    out = subs(in, old, new, flag);
-else
-    out = in;
-end

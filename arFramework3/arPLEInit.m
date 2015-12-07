@@ -1,21 +1,25 @@
 % Initialize Profile Likelihood Exploit
 %
-% arPLEInit(breakon_point, mode)
+% arPLEInit(force, breakon_point, mode)
+%   force:              [true] = exising PLEs are deleted
 %   breakon_point:      [false] = calc simultaneous CIs, true = calc pointwise CIs
 %   mode:               [1] = direct step, 2 = progressive step
 
-function arPLEInit(breakon_point, mode)
+function arPLEInit(force, breakon_point, mode)
 
 global ar
+if(~exist('force','var') || isempty(force))
+    force = true; % existing PLEs are removed
+end
 
-if(isempty(ar))
+if(isempty(ar) )
     error('please initialize by arInit')
 end
 
-if(~exist('breakon_point', 'var'))
+if(~exist('breakon_point', 'var') || isempty(breakon_point))
     breakon_point = true;
 end
-if(~exist('mode', 'var'))
+if(~exist('mode', 'var') || isempty(mode))
     mode = 1;
 end
 if(~isfield(ar.config,'useFitErrorMatrix'))
@@ -23,7 +27,7 @@ if(~isfield(ar.config,'useFitErrorMatrix'))
 end
 
 pleInit(ar.p, ar.qFit==1, ar.lb, ar.ub, ar.qLog10, @arPLEIntegrate, @arPLEMerit, ...
-    @arPLEDiffMerit, @arPLEFit, @arPLESetOptim, ar.pLabel, 1-ar.ppl.alpha_level);
+    @arPLEDiffMerit, @arPLEFit, @arPLESetOptim, ar.pLabel, 1-ar.ppl.alpha_level, force);
 
 global pleGlobals;
 
@@ -59,6 +63,9 @@ elseif(mode==3)
 elseif(mode==4)
     pleGlobals.initstep_fkt = @pleInitStepComposite;
     pleGlobals.mode = 4;
+elseif(mode==5)
+    pleGlobals.initstep_fkt = @pleInitStepDirect2;
+    pleGlobals.mode = 5;
 end
 
 pleGlobals.savePath = [arSave '/PLE'];
@@ -69,6 +76,9 @@ global ar
 try
     arChi2(false, p(ar.qFit==1));
 catch exception
+    if ( ~isfield( ar, 'ple_errors' ) )
+        ar.ple_errors = ar.p;
+    end
     ar.ple_errors(end+1,:) = ar.p;
     fprintf('ERROR INTEGRATOR (#%i): %s\n', size(ar.ple_errors,1), exception.message);
     rethrow(exception)  

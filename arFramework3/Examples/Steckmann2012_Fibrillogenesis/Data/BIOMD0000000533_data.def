@@ -1,0 +1,33 @@
+DESCRIPTION
+"data file for Steckmann2012 - Amyloid beta-protein fibrillogenesis (kinetics of secondary structure conversion)"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 100	
+
+INPUTS
+
+OBSERVABLES
+BM_obs	 C	 "n/a"	 conc.	 0 0 "BM" "BM"
+BN1_obs	 C	 "n/a"	 conc.	 0 0 "BN1" "BN1"
+BN2_obs	 C	 "n/a"	 conc.	 0 0 "BN2" "BN2"
+BN3_obs	 C	 "n/a"	 conc.	 0 0 "BN3" "BN3"
+BN4_obs	 C	 "n/a"	 conc.	 0 0 "BN4" "BN4"
+BTX_obs	 C	 "n/a"	 conc.	 0 0 "BTX" "BTX"
+RCT0_obs	 C	 "n/a"	 conc.	 0 0 "RCT0" "RCT0"
+RCT1_obs	 C	 "n/a"	 conc.	 0 0 "RCT1" "RCT1"
+alpha_obs	 C	 "n/a"	 conc.	 0 0 "alpha" "alpha"
+
+ERRORS
+BM_obs	 "sd_BM"
+BN1_obs	 "sd_BN1"
+BN2_obs	 "sd_BN2"
+BN3_obs	 "sd_BN3"
+BN4_obs	 "sd_BN4"
+BTX_obs	 "sd_BTX"
+RCT0_obs	 "sd_RCT0"
+RCT1_obs	 "sd_RCT1"
+alpha_obs	 "sd_alpha"
+
+CONDITIONS
+
+PARAMETERS

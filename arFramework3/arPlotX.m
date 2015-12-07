@@ -773,18 +773,24 @@ t = ar.model(jm).condition(jc).tFine;
 u = ar.model(jm).condition(jc).uFineSimu;
 x = ar.model(jm).condition(jc).xFineSimu;
 z = ar.model(jm).condition(jc).zFineSimu;
-if(isfield(ar.model(jm).condition(jc), 'xExpUB'))
+if(isfield(ar.model(jm).condition(jc), 'uFineLB'))
     ulb = ar.model(jm).condition(jc).uFineLB;
     uub = ar.model(jm).condition(jc).uFineUB;
-    xlb = ar.model(jm).condition(jc).xFineLB;
-    xub = ar.model(jm).condition(jc).xFineUB;
-    zlb = ar.model(jm).condition(jc).zFineLB;
-    zub = ar.model(jm).condition(jc).zFineUB;
 else
     ulb = [];
     uub = [];
+end
+if(isfield(ar.model(jm).condition(jc), 'xFineLB'))
+    xlb = ar.model(jm).condition(jc).xFineLB;
+    xub = ar.model(jm).condition(jc).xFineUB;
+else
     xlb = [];
     xub = [];
+end
+if(isfield(ar.model(jm).condition(jc), 'zFineLB'))
+    zlb = ar.model(jm).condition(jc).zFineLB;
+    zub = ar.model(jm).condition(jc).zFineUB;
+else
     zlb = [];
     zub = [];
 end

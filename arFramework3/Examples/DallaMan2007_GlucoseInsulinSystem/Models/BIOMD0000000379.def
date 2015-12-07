@@ -1,0 +1,118 @@
+DESCRIPTION
+"DallaMan2007_MealModel_GlucoseInsulinSystem"" (DallaMan2007_MealModel_GlucoseInsulinSystem)"
+"SBML level 2 version 4"
+"<notes>
+  <body xmlns="http://www.w3.org/1999/xhtml">
+    <p>
+      This a model from the article:
+      <br/>
+    <strong> Meal simulation model of the glucose-insulin system.
+</strong>
+    <br/>
+Dalla Man C, Rizza RA, Cobelli C.<em>IEEE Trans Biomed Eng.</em>2007 Oct;54(10):1740-9.
+      <a href="http://www.ncbi.nlm.nih.gov/pubmed/17926672"> 17926672</a>,
+      <br/>
+    <strong>Abstract:</strong>
+    <br/>
+A simulation model of the glucose-insulin system in the postprandial state can be useful in several circumstances, including testing of glucose sensors, insulin infusion algorithms and decision support systems for diabetes. Here, we present a new simulation model in normal humans that describes the physiological events that occur after a meal, by employing the quantitative knowledge that has become available in recent years. Model parameters were set to fit the mean data of a large normal subject database that underwent a triple tracer meal protocol which provided quasi-model-independent estimates of major glucose and insulin fluxes, e.g., meal rate of appearance, endogenous glucose production, utilization of glucose, insulin secretion. By decomposing the system into subsystems, we have developed parametric models of each subsystem by using a forcing function strategy. Model results are shown in describing both a single meal and normal daily life (breakfast, lunch, dinner) in normal. The same strategy is also applied on a smaller database for extending the model to type 2 diabetes
+   </p>
+  <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.<br/>
+For more information see the <a href="http://www.ebi.ac.uk/biomodels/legal.html" target="_blank">terms of use</a>.<br/>
+To cite BioModels Database, please use: <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+</p>
+</body>
+</notes>"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 100	
+
+COMPARTMENTS
+Compartment1	 V	 "n/a"	 vol.	 1
+
+STATES
+G_p	 C	 "n/a"	 conc.	 Compartment1	 1	 "G_p"
+G_t	 C	 "n/a"	 conc.	 Compartment1	 1	 "G_t"
+I_l	 C	 "n/a"	 conc.	 Compartment1	 1	 "I_l"
+I_p	 C	 "n/a"	 conc.	 Compartment1	 1	 "I_p"
+Q_sto1	 C	 "n/a"	 conc.	 Compartment1	 1	 "Q_sto1"
+Q_gut	 C	 "n/a"	 conc.	 Compartment1	 1	 "Q_gut"
+I_1	 C	 "n/a"	 conc.	 Compartment1	 1	 "I_1"
+I_d	 C	 "n/a"	 conc.	 Compartment1	 1	 "I_d"
+X_state	 C	 "n/a"	 conc.	 Compartment1	 1	 "X"
+I_po	 C	 "n/a"	 conc.	 Compartment1	 1	 "I_po"
+Y_state	 C	 "n/a"	 conc.	 Compartment1	 1	 "Y"
+Q_sto2	 C	 "n/a"	 conc.	 Compartment1	 1	 "Q_sto2"
+
+INPUTS
+
+REACTIONS
+	 -> G_p 	 CUSTOM "k_p1 - U_ii - G_p*k_1 + G_t*k_2 - G_p*k_p2 - I_d*k_p3 - I_po*k_p4 + (Q_gut*f_parameter*k_abs)/BW" 	""
+	 -> G_t 	 CUSTOM "G_p*k_1 - G_t*k_2 + (G_t*(V_m0 + V_mX*X_state)*(part - 1))/(G_t + K_m0)" 	""
+	 -> I_l 	 CUSTOM "I_p*m_2 - I_l*m_1 + GAMMA*I_po - (I_l*m_1*(m_6 - GAMMA*I_po*m_5))/(GAMMA*I_po*m_5 - m_6 + 1)" 	""
+	 -> I_p 	 CUSTOM "I_l*m_1 - I_p*m_2 - I_p*m_4" 	""
+	 -> Q_sto1 	 CUSTOM "-Q_sto1*k_gri" 	""
+	 -> Q_sto2 	 CUSTOM "Q_sto1*k_gri - Q_sto2*(k_min + (k_min/2 - k_max/2)*(tanh((5*Q_sto1 + 5*Q_sto2 - 5*D_symbol*d_parameter)/(2*D_symbol*d_parameter)) + tanh((5*Q_sto1 + 5*Q_sto2 - 5*D_symbol*b_parameter)/(2*D_symbol*(b_parameter - 1))) - 2))" 	""
+	 -> Q_gut 	 CUSTOM "Q_sto2*(k_min + (k_min/2 - k_max/2)*(tanh((5*Q_sto1 + 5*Q_sto2 - 5*D_symbol*d_parameter)/(2*D_symbol*d_parameter)) + tanh((5*Q_sto1 + 5*Q_sto2 - 5*D_symbol*b_parameter)/(2*D_symbol*(b_parameter - 1))) - 2)) - Q_gut*k_abs" 	""
+	 -> I_1 	 CUSTOM "-k_i*(I_1 - I_p/V_I)" 	""
+	 -> I_d 	 CUSTOM "k_i*(I_1 - I_d)" 	""
+	 -> X_state 	 CUSTOM "- X_state*p_2U - p_2U*(I_b - I_p/V_I)" 	""
+	 -> I_po 	 CUSTOM "S_b + Y_state - GAMMA*I_po - (K_parameter*(U_ii - k_p1 + G_p*k_1 - G_t*k_2 + G_p*k_p2 + I_d*k_p3 + I_po*k_p4 - (Q_gut*f_parameter*k_abs)/BW))/V_G" 	""
+	 -> Y_state 	 CUSTOM "-alpha*(Y_state + BETA*(G_b - G_p/V_G))" 	""
+
+DERIVED
+
+CONDITIONS
+
+PARAMETERS
+init_G_p	 178	 1	 0	 0	 1000
+init_G_t	 135	 1	 0	 0	 1000
+init_I_l	 4.5	 1	 0	 0	 1000
+init_I_p	 1.25	 1	 0	 0	 1000
+init_Q_sto1	 78000	 1	 0	 0	 780000
+init_Q_gut	 0	 1	 0	 0	 1000
+init_I_1	 25	 1	 0	 0	 1000
+init_I_d	 25	 1	 0	 0	 1000
+init_X_state	 0	 1	 0	 0	 1000
+init_I_po	 3.6	 1	 0	 0	 1000
+init_Y_state	 0	 1	 0	 0	 1000
+init_Q_sto2	 0	 1	 0	 0	 1000
+V_G	 1.88	 0	 0	 0	 1000
+k_1	 0.065	 0	 0	 0	 1000
+k_2	 0.079	 0	 0	 0	 1000
+G_b	 95	 0	 0	 0	 1000
+V_I	 0.05	 0	 0	 0	 1000
+m_1	 0.19	 0	 0	 0	 1000
+m_2	 0.484	 0	 0	 0	 1000
+m_4	 0.194	 0	 0	 0	 1000
+m_5	 0.0304	 0	 0	 0	 1000
+m_6	 0.6471	 0	 0	 0	 1000
+HE_b	 0.6	 0	 0	 0	 1000
+I_b	 25	 0	 0	 0	 1000
+S_b	 1.8	 0	 0	 0	 1000
+S_b_minus	 -1.8	 0	 0	 0	 1000
+k_max	 0.0558	 0	 0	 0	 1000
+k_min	 0.008	 0	 0	 0	 1000
+k_abs	 0.057	 0	 0	 0	 1000
+k_gri	 0.0558	 0	 0	 0	 1000
+f_parameter	 0.9	 0	 0	 0	 1000
+b_parameter	 0.82	 0	 0	 0	 1000
+d_parameter	 0.01	 0	 0	 0	 1000
+BW	 78	 0	 0	 0	 1000
+k_p1	 2.7	 0	 0	 0	 1000
+k_p2	 0.0021	 0	 0	 0	 1000
+k_p3	 0.009	 0	 0	 0	 1000
+k_p4	 0.0618	 0	 0	 0	 1000
+k_i	 0.0079	 0	 0	 0	 1000
+U_ii	 1	 0	 0	 0	 1000
+V_m0	 2.5	 0	 0	 0	 1000
+V_mX	 0.047	 0	 0	 0	 1000
+K_m0	 225.59	 0	 0	 0	 1000
+p_2U	 0.0331	 0	 0	 0	 1000
+part	 0.2	 0	 0	 0	 1000
+K_parameter	 2.3	 0	 0	 0	 1000
+alpha	 0.05	 0	 0	 0	 1000
+BETA	 0.11	 0	 0	 0	 1000
+GAMMA	 0.5	 0	 0	 0	 1000
+k_e1	 0.0005	 0	 0	 0	 1000
+k_e2	 339	 0	 0	 0	 1000
+D_symbol	 78000	 0	 0	 0	 780000

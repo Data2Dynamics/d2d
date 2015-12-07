@@ -1,19 +1,23 @@
 % Plot models Y
 %
-% arPlotY(saveToFile, fastPlot)
+% arPlotY(saveToFile, fastPlot, doLegends, flags);
 %
 % saveToFile    [false]
 % fastPlot      [false]
-% doLegends      [true]
+% doLegends     [true]
+% flags         [none]
 % 
 %   After clicking the subplot of interest, the following command provides
 %   annotation of the displayed plot:
 %   get(gca,'UserData') 
 % 
 %   ar.model(jm).data(jd).highlight(jt,jy) can be used to highlight data points
+%
+% Flags allow you to customize the plot. HideLL, hides the -log(L) value,
+% while nameOnly makes sure either the name or observable variable is used 
+% as title, but not both.
 
-
-function arPlotY(saveToFile, fastPlot, doLegends)
+function arPlotY(saveToFile, fastPlot, doLegends, varargin)
 
 matVer = ver('MATLAB');
 
@@ -32,7 +36,8 @@ end
 if(~exist('doLegends','var'))
 	doLegends = true;
 end
-
+switches = {'hidell', 'nameonly'};
+[opts] = argSwitch( switches, varargin );
 if(isfield(ar.config,'nfine_dr_plot'))
     nfine_dr_plot = ar.config.nfine_dr_plot;
     nfine_dr_method = ar.config.nfine_dr_method;
@@ -546,7 +551,7 @@ for jm = 1:length(ar.model)
                             axis(gref,'off');
                             grefloc = get(gref, 'Position');
                             legloc = get(hl, 'Position');
-                            legloc(1:2) = grefloc(1:2) + [grefloc(3)-legloc(3) 0];
+                            legloc(1:2) = grefloc(1:2) + [.95*(grefloc(3)-legloc(3)) grefloc(4)-legloc(4)];
                             % legloc(1:2) = [1-legloc(3) 0];
                             if(sum(isinf(legloc))==0)
                                 set(hl, 'Position', legloc);
@@ -557,18 +562,24 @@ for jm = 1:length(ar.model)
                 titstr = {};
                 if(isfield(ar.model(jm).data(jd), 'yNames') && ~isempty(ar.model(jm).data(jd).yNames{jy}) && ...
                         ~strcmp(ar.model(jm).data(jd).yNames{jy}, ar.model(jm).data(jd).y{jy}))
-                    titstr{1} = [arNameTrafo(ar.model(jm).data(jd).yNames{jy}) ' (' arNameTrafo(ar.model(jm).data(jd).y{jy}) ')'];
+                    if ( opts.nameonly)
+                        titstr{1} = arNameTrafo(ar.model(jm).data(jd).yNames{jy});
+                    else
+                        titstr{1} = [arNameTrafo(ar.model(jm).data(jd).yNames{jy}) ' (' arNameTrafo(ar.model(jm).data(jd).y{jy}) ')'];
+                    end
                 else
                     titstr{1} = arNameTrafo(ar.model(jm).data(jd).y{jy});
                 end
-                if(isfield(ar.model(jm).data(jd), 'yExp'))
-                    if(ndata(jy)>0)
-                        if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
-                                (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
-                            titstr{2} = sprintf('-2 log(L)_{%i} = %g', ndata(jy), 2*ndata(jy)*log(sqrt(2*pi)) + chi2(jy));
-                        else
-                            titstr{2} = sprintf('chi^2_{%i} = %g', ndata(jy), chi2(jy));
-                        end
+                if(~opts.hidell)
+                    if(isfield(ar.model(jm).data(jd), 'yExp'))
+                        if(ndata(jy)>0)
+                            if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
+                                    (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
+                               titstr{2} = sprintf('-2 log(L)_{%i} = %g', ndata(jy), 2*ndata(jy)*log(sqrt(2*pi)) + chi2(jy));
+                            else
+                               titstr{2} = sprintf('chi^2_{%i} = %g', ndata(jy), chi2(jy));
+                            end
+                       end
                     end
                 end
                 title(g, titstr);
@@ -808,3 +819,17 @@ if(~fastPlot)
     clf
 end
 
+function [opts] = argSwitch( switches, varargin )
+
+    for a = 1 : length(switches)
+        opts.(lower(switches{a})) = 0;
+    end
+    
+    if ~isempty( varargin{1} )
+        for a = 1 : length( varargin{1} )
+            if ( max( strcmp( lower(switches), lower(varargin{1}{a}) ) ) == 0 )
+                error( 'Invalid switch argument was provided %s', varargin{1}{a} );
+            end
+            opts.(lower(varargin{1}{a})) = 1;
+        end
+    end

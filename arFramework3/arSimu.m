@@ -39,7 +39,47 @@ end
 if(length(varargin)>2 && ~isempty(varargin{3}))
     dynamics = varargin{3};
 else
-    dynamics = sum(ar.qDynamic == 1 & ar.qFit == 1) > 0 || ~sensi;
+    dynamics = 0;
+end
+
+% If no sensitivities are requested, we always simulate (fast anyway)
+if ( ~sensi )
+    dynamics = 1;
+end
+
+% If dynamics are not requested, but sensitivities are, check whether we 
+% already simulated these sensitivities.
+% This code *only* prevents unnecessary simulation of sensitivities.
+if ( ~dynamics && sensi )
+    % Check cached config settings to see if they are still the same. If
+    % not, then ar.cache.fine and ar.cache.exp get cleared.
+    arCheckCache;
+    
+    % Check whether ar.cache.fine and exp are different from the ones we simulated last time
+    % If not, we need to resimulate.
+    if ( fine && ( ~isequal( ar.cache.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
+        dynamics = 1;
+    end
+    if ( ~fine && ( ~isequal( ar.cache.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
+        dynamics = 1;
+    end
+end
+
+% We simulate sensitivities. Store the new 'last sensitivity simulation' parameters in the cache.
+if ( dynamics && sensi )
+    if ( fine )
+        ar.cache.fine = ar.p;
+    else
+        ar.cache.exp = ar.p;
+    end
+end
+
+% If we finally decide on not simulating the sensitivities, simulate only
+% the model without sensitivities, since these could have been overwritten
+% in the meantime
+if ( ~dynamics )
+    dynamics = 1;
+    sensi = 0;
 end
 
 if(~isfield(ar,'p'))

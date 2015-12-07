@@ -140,7 +140,7 @@ while(~strcmp(C{1},'INPUTS'))
         ar.model(m).xNames{end+1} = ar.model(m).x{end};
     end
     if(isempty(C{8}) || isnan(C{8}))
-        ar.model(m).qPositiveX(end+1) = 1;
+        ar.model(m).qPositiveX(end+1) = 0;
     else
         ar.model(m).qPositiveX(end+1) = C{8};
     end
@@ -508,7 +508,7 @@ ar.model(m).z = {};
 ar.model(m).zUnits = {};
 ar.model(m).fz = {};
 C = textscan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
-while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'OBSERVABLES'))
+while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1},'OBSERVABLES'))
     if(~strcmp(C{1},''))
         if(sum(ismember(ar.model(m).x, C{1}))>0) %R2013a compatible
             error('derived variable %s already defined in STATES', cell2mat(C{1}));
@@ -548,7 +548,7 @@ if(strcmp(C{1},'OBSERVABLES'))
     ar.model(m).fy = {};
     C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
     while(~strcmp(C{1},'ERRORS'))
-        if ( strcmp( C{1}, 'CONDITIONS' ) )
+        if ( strcmp( C{1}, 'CONDITIONS' ) || strcmp( C{1}, 'SUBSTITUTIONS' ) )
             error( 'When OBSERVABLES section is specified; ERRORS section must also be specified.' );
         end        
         ar.model(m).y(end+1) = C{1};
@@ -586,7 +586,7 @@ if(strcmp(C{1},'OBSERVABLES'))
     % ERRORS
     ar.model(m).fystd = cell(size(ar.model(m).fy));
     C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
-    while(~strcmp(C{1},'CONDITIONS'))
+    while(~(strcmp(C{1},'CONDITIONS') || strcmp(C{1},'SUBSTITUTIONS')))
         qy = ismember(ar.model(m).y, C{1}); %R2013a compatible
         if(sum(qy)~=1)
             error('unknown observable %s', cell2mat(C{1}));
@@ -608,28 +608,104 @@ if(strcmp(C{1},'OBSERVABLES'))
     ar.model(m).p = union(union(ar.model(m).p, ar.model(m).py), ar.model(m).pystd);
 end
 
-% CONDITIONS
 matVer = ver('MATLAB');
+
+% SUBSTITUTIONS (beta)
+substitutions = 0;
+if ( strcmp(C{1},'SUBSTITUTIONS') )
+    if(str2double(matVer.Version)>=8.4)
+        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    else
+        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
+    end
+    
+    % Substitutions
+    fromSubs = {};
+    toSubs = {};
+    ismodelpar = [];
+
+    % Fetch desired substitutions
+    while(~isempty(C{1}) && ~strcmp(C{1},'CONDITIONS'))
+        fromSubs(end+1)     = C{1}; %#ok<AGROW>
+        toSubs(end+1)       = C{2}; %#ok<AGROW>
+        ismodelpar(end+1)   = sum(ismember(ar.model(m).p, C{1})); %#ok<AGROW>
+
+        if(str2double(matVer.Version)>=8.4)
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        else
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+        end
+    end
+
+    if ( sum(ismodelpar) > 0 )
+        s = sprintf( '%s\n', fromSubs{ismodelpar>0} );
+        error( 'Cannot substitute model parameters. These following parameters belong under CONDITIONS:\n%s', s );
+    end
+
+    % Perform selfsubstitutions
+    if ( ~isempty(fromSubs) )
+        substitutions = 1;
+        toSubs = arSubsRepeated( toSubs, fromSubs, toSubs, str2double(matVer.Version) );
+    end
+end
+
+
+% CONDITIONS
 if(str2double(matVer.Version)>=8.4)
     C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 else
     C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
 end
 ar.model(m).fp = transpose(ar.model(m).p);
-while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
-    qcondpara = ismember(ar.model(m).p, C{1}); %R2013a compatible
-    if(sum(qcondpara)>0)
-        ar.model(m).fp{qcondpara} = ['(' cell2mat(C{2}) ')'];
-    else
-        warning('unknown parameter in conditions: %s', cell2mat(C{1})); %#ok<WNTAG>
+
+if ( substitutions )
+	% Conditions
+    from        = {};
+    to          = {};
+    ismodelpar  = [];
+     
+    % Fetch desired substitutions
+    while(~isempty(C{1}) && ~strcmp(C{1},'CONDITIONS'))
+        from(end+1)         = C{1}; %#ok<AGROW>
+        to(end+1)           = C{2}; %#ok<AGROW>
+        ismodelpar(end+1)   = sum(ismember(ar.model(m).p, C{1})); %#ok<AGROW>
+
+        if(str2double(matVer.Version)>=8.4)
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        else
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+        end
     end
-    if(str2double(matVer.Version)>=8.4)
-        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
-    else
-        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+        
+    % Perform substitutions (self-substitutions were already done)
+    to = arSubsRepeated( to, fromSubs, toSubs, str2double(matVer.Version) );
+    
+    % Store substitutions in ar structure
+    for a = 1 : length( from )
+        qcondpara = ismember(ar.model(m).p, from{a}); %R2013a compatible
+        if(sum(qcondpara)>0)
+            ar.model(m).fp{qcondpara} = ['(' to{a} ')'];
+        else
+            warning('unknown parameter in conditions: %s (did you mean to place it under SUBSTITUTIONS?)', from{a}); %#ok<WNTAG>
+        end
+    end
+else
+    % Old code path
+    while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
+        qcondpara = ismember(ar.model(m).p, C{1}); %R2013a compatible
+        if(sum(qcondpara)>0)
+            ar.model(m).fp{qcondpara} = ['(' cell2mat(C{2}) ')'];
+        else
+            warning('unknown parameter in conditions: %s (did you mean to place it under SUBSTITUTIONS?)', cell2mat(C{1})); %#ok<WNTAG>
+        end
+        if(str2double(matVer.Version)>=8.4)
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        else
+            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+        end
     end
 end
-
+    
 % extra conditional parameters
 varlist = cellfun(@symvar, ar.model(m).fp, 'UniformOutput', false);
 ar.model(m).pcond = setdiff(setdiff(setdiff(vertcat(varlist{:}), ar.model(m).p), ar.model(m).x), ar.model(m).u); %R2013a compatible
@@ -655,6 +731,31 @@ while(~isempty(C{1}))
 end
 
 fclose(fid);
+
+% Check whether the user specified any variables with reserved words. This
+% would be problematic later.
+for a = 1 : length( ar.model(m).fu )
+    arCheckReservedWords( symvar(ar.model(m).fu{a}), 'input function', ar.model(m).u{a} );
+end
+for a = 1 : length( ar.model(m).fy )
+    arCheckReservedWords( symvar(ar.model(m).fy{a}), 'observation function', ar.model(m).y{a} );
+end
+for a = 1 : length( ar.model(m).fystd )
+    arCheckReservedWords( symvar(ar.model(m).fystd{a}), 'observation standard deviation', ar.model(m).y{a} );
+end
+for a = 1 : length( ar.model(m).fp )
+    arCheckReservedWords( symvar(ar.model(m).fp{a}), 'parameter transformation', ar.model(m).p{a} );
+end
+for a = 1 : length( ar.model(m).fx )
+    arCheckReservedWords( symvar(ar.model(m).fx{a}), 'right hand side', ar.model(m).x{a} );
+end
+
+arCheckReservedWords( ar.model(m).p, 'parameters' );
+arCheckReservedWords( ar.model(m).x, 'state variables' );
+arCheckReservedWords( ar.model(m).y, 'observables' );
+arCheckReservedWords( ar.model(m).z, 'derived variables' );
+arCheckReservedWords( ar.model(m).u, 'inputs' );
+arCheckReservedWords( ar.model(m).c, 'compartments' );
 
 ar = orderfields(ar);
 ar.model = orderfields(ar.model);

@@ -78,13 +78,14 @@ function arFindInputs( verbose )
                     l       = stepLocations{b};
                     lold    = l;
 
-                    % Condition values
-                    if ~isempty( ar.model(m).condition(a).dLink )
-                        for c = 1 : length( ar.model(m).data(ar.model(m).condition(a).dLink).condition )
-                            l = strrep( l, ar.model(m).data(ar.model(m).condition(a).dLink).condition(c).parameter, ar.model(m).data(ar.model(m).condition(a).dLink).condition(c).value );
-                        end
+                    % Is it in the condition variable list? ==> Replace it
+                    [~,I2] = sort(cellfun(@length,ar.model(m).condition(a).pold), 'descend');
+                    pold = ar.model(m).condition(a).pold(I2);
+                    pnew = ar.model(m).condition(a).fp(I2).';
+                    for c = 1 : length( pold )
+                        l = strrep( l, pold{c}, pnew{c} );
                     end
-                                   
+                    
                     % Parameter values
                     for c = 1 : length( ar.pLabel )
                         l = strrep( l, ar.pLabel{I(c)}, num2str(parVals(I(c))) );
@@ -120,6 +121,9 @@ function arFindInputs( verbose )
 
     ar.config.useEvents = 1;
     arLink(true);
+    
+    % Invalidate cache so simulations do not get skipped
+    arCheckCache(1);
 end
 
 

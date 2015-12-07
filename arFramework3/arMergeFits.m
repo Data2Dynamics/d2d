@@ -1,34 +1,29 @@
 function arMergeFits
 % useful if several workspaces e.g. from arFitClusterLHS with randomseed were
 % saved
-% load one workspace, run arMergeFits and check overall performance
+% select workspaces to be compared and check overall performance
 % e.g. by arPlotChi2
 
 
 global ar
 
-% fileChooserMulti could be used instead
-folders = dir('./Results');
-
-for k = length(folders):-1:1
-    % remove non-folders
-    if ~folders(k).isdir
-        folders(k) = [ ];
-        continue
-    end
-
-    % remove folders starting with .
-    fname = folders(k).name;
-    if fname(1) == '.'
-        folders(k) = [ ];
-    end
+if(isempty(ar))
+    error('please initialize by arInit')
 end
 
-filenames = {folders.name};
+filenames = fileChooserMulti('./Results', true);
+
+if(~iscell(filenames))
+    filelist = fileList('./Results');
+    filenames = filelist(filenames);
+end
 
 jcount = 0;
 kcount = 1;
 excount = 1;
+arWaitbar(0);
+
+
 for j=1:length(filenames)
     fname = ['./Results/' filenames{j} '/workspace.mat'];
     load(fname);
@@ -48,3 +43,6 @@ for j=1:length(filenames)
     ar.exitflag = exitflag;
 end
 
+arWaitbar(-1);
+
+end

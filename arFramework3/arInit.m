@@ -94,20 +94,29 @@ ar.config.ploterrors = 0;
 ar.config.plot_x_collected = false;
 
 % optimization options
-ar.config.useSensis = true; 
-ar.config.useJacobian = true;
-ar.config.useSparseJac = false;
-ar.config.useSensiRHS = true;
+ar.config.useSensis = true;         % Use sensitivities
+ar.config.sensiSkip = false;        % Skip sensitivities during fitting when only func is requested (speed-up for some optimizers)
+ar.config.useJacobian = true;       % Use Jacobian
+ar.config.useSparseJac = false;     % Use Sparse Jacobian
+ar.config.useSensiRHS = true;       % Use sensitivities of RHS during simulation
 ar.config.atolV = false; 
 ar.config.atolV_Sens = false;
 
 ar.config.optimizer = 1;
-ar.config.optimizers = {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1'};
+ar.config.optimizers = {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1', 'NL2SOL'};
 ar.config.optim = optimset('lsqnonlin');
 ar.config.optim.Display = 'off';
 ar.config.optim.TolFun = 0;
 ar.config.optim.TolX = 1e-6;
 ar.config.optim.MaxIter = 1000;
+
+% check licenses
+if ( ~license('test', 'Symbolic_Toolbox') )
+    warning( 'D2D requires a license for the MathWorks symbolic math toolbox. It is unlikely that D2D will work.' );
+end
+if ( ~license('test', 'Optimization_Toolbox') )
+    warning( 'No license found for optimization toolbox. If fitting is required, obtain a license or switch optimization method (e.g. ar.config.optimizer=3).' );
+end
 
 ar.config.showFitting = 0;
 
