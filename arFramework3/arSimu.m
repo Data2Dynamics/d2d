@@ -51,6 +51,9 @@ end
 if(~isfield(ar.config,'fiterrors_correction'))
     ar.config.fiterrors_correction = 1;
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 ar.stop = 0;
 

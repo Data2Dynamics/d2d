@@ -10,6 +10,9 @@ end
 if(~exist('savetofile','var'))
     savetofile = false;
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 sumples = 0;
 for j=jks
@@ -34,8 +37,10 @@ for jk=jks
     end
 end
 chi2curr = ar.chi2fit;
-if(ar.config.fiterrors == 1)
+if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
     chi2curr = 2*ar.ndata*log(sqrt(2*pi)) + chi2curr;
+elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+    chi2curr = 2*ar.ndata_err*log(sqrt(2*pi)) + chi2curr;
 end
 
 for jk=jks
@@ -46,8 +51,10 @@ for jk=jks
         chi2s = ar.scan.chi2s{jk};
         constrs = ar.scan.constrs{jk};
         
-        if(ar.config.fiterrors == 1)
+        if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
             chi2s = 2*ar.ndata*log(sqrt(2*pi)) + chi2s;
+        elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+            chi2s = 2*ar.ndata_err*log(sqrt(2*pi)) + chi2s;
         end
         
         if(ar.ndata>0)
@@ -70,7 +77,8 @@ for jk=jks
         arSpacedAxisLimits(g)
         
         if(mod(count-1,ncols)==0)
-            if(ar.config.fiterrors == 1)
+            if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
+                    (ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0) )
                 ylabel(ax1, '-2*log(L)');
             else
                 ylabel(ax1, '\chi^2');

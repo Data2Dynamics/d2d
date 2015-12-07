@@ -40,6 +40,9 @@ end
 if(~exist('backup_save','var'))
     backup_save = false;
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 dop = find(sum(~isnan(ps),2)>0);
 n = length(dop);
@@ -158,9 +161,12 @@ arWaitbar(-1);
 if(chi2Reset>min(ar.chi2s + ar.chi2sconstr))
     [chi2min,imin] = min(ar.chi2s + ar.chi2sconstr);
     ar.p = ar.ps(imin,:);
-    if(ar.config.fiterrors == 1)
+     if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
         fprintf('selected best fit #%i with %f (old = %f)\n', ...
             imin, 2*ar.ndata*log(sqrt(2*pi)) + chi2min, 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
+     elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix == 1))>0)
+        fprintf('selected best fit #%i with %f (old = %f)\n', ...
+            imin, 2*ar.ndata_err*log(sqrt(2*pi)) + chi2min, 2*ar.ndata_err*log(sqrt(2*pi)) + chi2Reset);
     else
         fprintf('selected best fit #%i with %f (old = %f)\n', ...
             imin, chi2min, chi2Reset);

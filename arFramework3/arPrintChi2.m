@@ -19,6 +19,10 @@ end
 
 global ar
 
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
+
 a = [];
 b = {};
 for jm=1:length(ar.model)
@@ -26,11 +30,15 @@ for jm=1:length(ar.model)
         chi2 = 0;
         chi2err = 0;
         ndata = 0;
+        ndata_err = 0;
         for jd = ar.model(jm).plot(jplot).dLink
             chi2 = chi2 + sum(ar.model(jm).data(jd).chi2(ar.model(jm).data(jd).qFit==1));
             ndata = ndata + sum(ar.model(jm).data(jd).ndata(ar.model(jm).data(jd).qFit==1));
-            if(ar.config.fiterrors == 1)
+            if(ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1)
                 chi2err = chi2err + sum(ar.model(jm).data(jd).chi2err(ar.model(jm).data(jd).qFit==1));
+            elseif(ar.config.useFitErrorMatrix == 1 && ar.config.fiterrors_matrix(jm,jd)==1)
+                chi2err = chi2err + sum(ar.model(jm).data(jd).chi2err(ar.model(jm).data(jd).qFit==1));
+                ndata_err = ndata_err + sum(ar.model(jm).data(jd).ndata(ar.model(jm).data(jd).qFit==1));
             end
         end
         chi2fit = chi2 + chi2err;
@@ -38,10 +46,14 @@ for jm=1:length(ar.model)
         b{end+1} = [ar.model(jm).name '_' ar.model(jm).plot(jplot).name];
         
         if(nargout==0)
-            if(ar.config.fiterrors == 1)
+            if(ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1)
                 fprintf('m=%20s, d=%50s :\t -2*log(L) = %8.2g, %4i data points\n', ...
                     ar.model(jm).name, ar.model(jm).plot(jplot).name, ...
                     2*ndata*log(sqrt(2*pi)) + chi2fit, ndata);
+            elseif(ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==1)
+                fprintf('m=%20s, d=%50s :\t -2*log(L) = %8.2g, %4i data points\n', ...
+                    ar.model(jm).name, ar.model(jm).plot(jplot).name, ...
+                    2*ndata_err*log(sqrt(2*pi)) + chi2fit, ndata);
             else
                 fprintf('m=%20s, d=%50s :\t chi^2 = %8.2g, %4i data points\n', ...
                     ar.model(jm).name, ar.model(jm).plot(jplot).name, ...
@@ -69,14 +81,18 @@ for jm=1:length(ar.model)
             chi2 = 0;
             chi2err = 0;
             ndata = 0;
+            ndata_err = 0;
             res = [];
             for jd = ar.model(jm).plot(jplot).dLink
                 if(ar.model(jm).data(jd).qFit(jy)==1)
                     chi2 = chi2 + sum(ar.model(jm).data(jd).chi2(jy));
                     ndata = ndata + sum(ar.model(jm).data(jd).ndata(jy));
                     res = [res; ar.model(jm).data(jd).res(:,jy)];
-                    if(ar.config.fiterrors == 1)
-                        chi2err = chi2err + sum(ar.model(jm).data(jd).chi2err(jy));
+                    if(ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1)
+                        chi2err = chi2err + sum(ar.model(jm).data(jd).chi2err(ar.model(jm).data(jd).qFit==1));
+                    elseif(ar.config.useFitErrorMatrix == 1 && ar.config.fiterrors_matrix(jm,jd)==1)
+                        chi2err = chi2err + sum(ar.model(jm).data(jd).chi2err(ar.model(jm).data(jd).qFit==1));
+                        ndata_err = ndata_err + sum(ar.model(jm).data(jd).ndata(ar.model(jm).data(jd).qFit==1));
                     end
                 end
             end
@@ -103,10 +119,14 @@ for jm=1:length(ar.model)
 
             
             if(dodisp)
-                if(ar.config.fiterrors == 1)
+                 if(ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1)
                     fprintf('m=%20s, d=%50s, y=%20s :\t -2*log(L) = %8.2g, %4i data points, var(res) = %f %s\n', ...
                         ar.model(jm).name, ar.model(jm).plot(jplot).name, ar.model(jm).data(jd).y{jy}, ...
                         2*ndata*log(sqrt(2*pi)) + chi2fit, ndata, res_var, flag);
+                elseif(ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==1)
+                    fprintf('m=%20s, d=%50s, y=%20s :\t -2*log(L) = %8.2g, %4i data points, var(res) = %f %s\n', ...
+                        ar.model(jm).name, ar.model(jm).plot(jplot).name, ar.model(jm).data(jd).y{jy}, ...
+                        2*ndata_err*log(sqrt(2*pi)) + chi2fit, ndata, res_var, flag);
                 else
                     fprintf('m=%20s, d=%50s, y=%20s :\t chi^2 = %8.2g, %4i data points, var(res) = %f %s\n', ...
                         ar.model(jm).name, ar.model(jm).plot(jplot).name, ar.model(jm).data(jd).y{jy}, ...

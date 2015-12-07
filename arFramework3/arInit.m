@@ -79,6 +79,7 @@ ar.config.fiterrors = 1;
 ar.config.fiterrors_correction = 1;
 ar.config.fiterrors_correction_warning = false;
 ar.config.useFitErrorCorrection = true;
+ar.config.useFitErrorMatrix = false;
 ar.config.useLHS = false;
 
 % ar.config.ploterrors:

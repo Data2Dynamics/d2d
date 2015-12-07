@@ -26,6 +26,9 @@ end
 if(~exist('ps_weigths','var') || isempty(ps_weigths))
 	ps_weigths = ones(1,size(ps,1));
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 % constants
 linesize = 0.5;
@@ -111,7 +114,8 @@ for jp=1:np
                                     hold(g, 'on');
                                     if(isfield(ar.model(jm).data(jd), 'yExp') && jp==np)
                                         
-                                        if(ar.config.ploterrors~=1)
+                                        if( (ar.useFitErrorMatrix == 0 && ar.config.ploterrors~=1) ||...
+                                                (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                             plot(g, tExp, 10.^yExp, markerstyle, Clinesdata{:});
                                         else
                                             errorbar(g, tExp, 10.^yExp, 10.^yExp - 10.^(yExp - yExpStd), ...
@@ -126,7 +130,8 @@ for jp=1:np
                                     cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
                                     hold(g, 'on');
                                     if(isfield(ar.model(jm).data(jd), 'yExp') && jp==np)
-                                        if(ar.config.ploterrors~=1)
+                                        if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors~=1) ||...
+                                                (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                             plot(g, tExp, yExp, markerstyle, Clinesdata{:});
                                         else
                                             errorbar(g, tExp, yExp, yExpStd, markerstyle, Clinesdata{:});
@@ -205,7 +210,8 @@ for jp=1:np
                                         cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
                                         hold(g, 'on');
                                         if(isfield(ar.model(jm).data(jd), 'yExp') && jp==np)
-                                            if(ar.config.ploterrors~=1)
+                                            if( (ar.useFitErrorMatrix == 0 && ar.config.ploterrors~=1) ||...
+                                                (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                                 plot(g, tExp, 10.^yExp, markerstyle, Clinesdata{:});
                                             else
                                                 errorbar(g, ar.model(jm).data(jd).tExp, 10.^yExp, ...
@@ -220,7 +226,8 @@ for jp=1:np
                                         cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
                                         hold(g, 'on');
                                         if(isfield(ar.model(jm).data(jd), 'yExp') && jp==np)
-                                            if(ar.config.ploterrors~=1)
+                                            if( (ar.useFitErrorMatrix == 0 && ar.config.ploterrors~=1) ||...
+                                                (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                                 plot(g, tExp, yExp, markerstyle, Clinesdata{:});
                                             else
                                                 errorbar(g, tExp, yExp, yExpStd, markerstyle, Clinesdata{:});
@@ -663,7 +670,8 @@ ystd = ar.model(jm).data(jd).ystdFineSimu(:,jy);
 if(isfield(ar.model(jm).data(jd), 'yExp'))
     tExp = ar.model(jm).data(jd).tExp;
     yExp = ar.model(jm).data(jd).yExp(:,jy);
-    if(ar.config.fiterrors == -1)
+    if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == -1) || ...
+            (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==-1) )
         yExpStd = ar.model(jm).data(jd).yExpStd(:,jy);
     else
         yExpStd = ar.model(jm).data(jd).ystdExpSimu(:,jy);
@@ -723,7 +731,8 @@ for jd = ds
         ystd(ccount,1) = ar.model(jm).data(jd).ystdFineSimu(jtfine,jy); %#ok<AGROW>
         
         yExp(ccount,1) = ar.model(jm).data(jd).yExp(jt,jy); %#ok<AGROW>
-        if(ar.config.fiterrors == -1)
+        if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == -1) || ...
+            (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==-1) )
             yExpStd(ccount,1) = ar.model(jm).data(jd).yExpStd(jt,jy); %#ok<AGROW>
         else
             yExpStd(ccount,1) = ar.model(jm).data(jd).ystdExpSimu(jt,jy); %#ok<AGROW>

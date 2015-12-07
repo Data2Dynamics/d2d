@@ -26,6 +26,9 @@ if(~exist('d','var'))
     end
     return
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 % simulate model
 arSimu(false,false);
@@ -33,7 +36,8 @@ ar.pTrue = ar.p;
 
 % simulate data
 qnan = isnan(ar.model(m).data(d).yExp);
-if(ar.config.fiterrors ~= -1)
+if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors ~= -1) || ...
+        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(m,d)~=-1) )
     ar.model(m).data(d).yExp = ar.model(m).data(d).yExpSimu + ...
         randn(size(ar.model(m).data(d).yExpSimu)) .* ar.model(m).data(d).ystdExpSimu;
 else

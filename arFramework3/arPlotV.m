@@ -21,9 +21,13 @@ end
 if(~exist('fastPlot','var'))
     fastPlot = false;
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 % constants
-if(ar.config.ploterrors == -1)
+if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) ||...
+        (ar.config.useFitErrorMatrix == 1 && sum(sum(ar.config.ploterrors_matrix == -1))>0) )
     linesize = 0.5;
 else
     linesize = 2;
@@ -45,7 +49,8 @@ for jm = 1:length(ar.model)
                 fprintf('arPlotV: model %i is not reaction based, plotting omitted\n', jm);
                 return;
             else
-                if(ar.config.ploterrors == -1)
+                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                    (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                     [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['CI-V: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
                 else
                     [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['V: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
@@ -87,7 +92,8 @@ for jm = 1:length(ar.model)
                                     ar.model(jm).condition(jc).plot.v(jv,jc) = ltmp;
                                 end
                                 hold(g, 'on');
-                                if(ar.config.ploterrors == -1)
+                                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) ||...
+                                        (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,jd) == -1) )
                                     tmpx = [t(:); flipud(t(:))];
                                     tmpy = [vub(:,jv); flipud(vlb(:,jv))];
                                     ltmp = patch(tmpx, tmpy, tmpx*0-2*eps, 'r');
@@ -165,7 +171,8 @@ for jm = 1:length(ar.model)
                                     cclegendstyles(ccount) = ltmp;
                                     ar.model(jm).data(jd).plot.v(jv,jt,jc) = ltmp;
                                     hold(g, 'on');
-                                    if(ar.config.ploterrors == -1)
+                                    if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) ||...
+                                        (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,jd) == -1) )
                                         tmpx = [t(:); flipud(t(:))];
                                         tmpy = [ub(:); flipud(lb(:))];
                                         ltmp = patch(tmpx, tmpy, tmpx*0-2*eps, 'r');
@@ -215,7 +222,8 @@ for jm = 1:length(ar.model)
                 end
                 
                 if(saveToFile)
-                    if(ar.config.ploterrors == -1)
+                    if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) ||...
+                            (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1)) == -1) )
                         ar.model(jm).plot(jplot).savePath_FigVCI = arSaveFigure(h, ...
                             ar.model(jm).plot(jplot).name, '/FiguresCI/V');
                     else
@@ -339,7 +347,8 @@ figdist = 0.02;
 ar.model(m).plot(jplot).time = now;
 fastPlotTmp = fastPlot;
 
-if(ar.config.ploterrors == -1)
+if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+        (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(m,ar.model(m).plot(jplot).dLink(1))==-1) )
     if(isfield(ar.model(m).plot(jplot), 'fighandel_vCI') && ~isempty(ar.model(m).plot(jplot).fighandel_vCI) && ...
             ar.model(m).plot(jplot).fighandel_vCI ~= 0 && ...
             sum(ar.model(m).plot(jplot).fighandel_vCI==openfigs)>0 && ...

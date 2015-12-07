@@ -39,6 +39,9 @@ if(isfield(ar.model(jm), 'data'))
 else
     jc = 1;
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 t_ppl = [];
 y_ppl_ub = [];
 y_ppl_lb = [];
@@ -91,7 +94,8 @@ if(jtype==1 && isfield(ar.model(jm), 'data') && isfield(ar.model(jm).data(jd), '
         ~isempty(ar.model(jm).data(jd).yExp))
     tExp = ar.model(jm).data(jd).tExp;
     yExp = ar.model(jm).data(jd).yExp;
-    if(ar.config.fiterrors == -1)
+    if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==-1) || ...
+                        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==-1) )
         yExpStd = ar.model(jm).data(jd).yExpStd;
     else
         if(isfield(ar.model(jm).data(jd),'ystdExpSimu'))

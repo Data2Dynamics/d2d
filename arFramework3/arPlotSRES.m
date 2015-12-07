@@ -9,6 +9,9 @@ global ar
 if(isempty(ar))
     error('please initialize by arInit')
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 % arChi2(true);
 
@@ -55,7 +58,8 @@ for jm = 1:length(ar.model)
     end
 end
 
-if(ar.config.fiterrors == 1)
+if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
+        (ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0) )
     arPlotSRESERR
 end
 

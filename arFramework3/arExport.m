@@ -43,6 +43,10 @@ function arExport(directory, models)
     mkdir( [ directory, '/Results' ] );
     warning('on', 'MATLAB:MKDIR:DirectoryExists');
     
+    if(~isfield(ar.config,'useFitErrorMatrix'))
+        ar.config.useFitErrorMatrix = false;
+    end
+    
     % Grab all filenames in the data folder, so we have something to match against
     fileList = listFiles( {}, 'Data' );
     fileListU = strrep(fileList,'/','_');    
@@ -102,7 +106,7 @@ function arExport(directory, models)
                         setupFile = sprintf( '%sarLoadData(''%s'');\n', setupFile, files{f}(6:end-4) );
                     end                    
                     if ( strfind( ff, fliplr( 'csv' ) ) == 1 )
-                        setupFile = sprintf( '%sarLoadData(''%s'', ''csv'');\n', setupFile, files{f}(6:end-4) );
+                        setupFile = sprintf( '%sarLoadData(''%s'', [], ''csv'');\n', setupFile, files{f}(6:end-4) );
                     end
                 end
             end
@@ -118,7 +122,13 @@ function arExport(directory, models)
         eventCommands = '';
     end
     
-    configFields    = { 'rtol', 'atol', 'eq_tol', 'eq_step_factor', 'init_eq_step', 'max_eq_steps', 'maxsteps', 'maxstepsize', 'nFinePoints', 'atolV', 'atolV_Sens', 'ssa_min_tau', 'ssa_runs', 'steady_state_constraint', 'useEvents', 'useFitErrorCorrection' };
+    configFields = { 'rtol', 'atol', 'eq_tol', 'eq_step_factor', 'init_eq_step', 'max_eq_steps', 'maxsteps', 'maxstepsize', 'nFinePoints', 'atolV', 'atolV_Sens', 'ssa_min_tau', 'ssa_runs', 'steady_state_constraint', 'useEvents', 'useFitErrorCorrection', 'useFitErrorMatrix'};
+    if(ar.config.useFitErrorMatrix==0)
+        configFields = [configFields, 'fiterrors', 'ploterrors'];
+    else
+        configFields = [configFields, 'fiterrors_matrix', 'ploterrors_matrix'];
+    end
+        
     configFile      = sprintf( '%% D2D Configuration file\n%s', fieldcode( ar.config, configFields{:} ) );
     
     setupFile = sprintf( '%s\n%% Compile model\narCompileAll;\n\n%% Load configuration\nmodelConfig\n\n%% Load parameters\narLoadPars(''%s'');\n\n%s%% Simulate and plot\narSimu(false,true,true);\narChi2(false);\narPlotY;', setupFile, directory, eventCommands );
@@ -183,7 +193,13 @@ function arSaveParOnly(ar2, savepath)
         ar.chi2sconstr_start_sorted = ar2.chi2sconstr_start_sorted;
         ar.ps_start_sorted = ar2.ps_start_sorted;
     end
-    ar.config.fiterrors = ar2.config.fiterrors; %#ok<STRNU>
+    if(ar2.config.useFitErrorMatrix == 0)
+        ar.config.fiterrors = ar2.config.fiterrors; %#ok<STRNU>
+    else
+        ar.config.useFitErrorMatrix = true;
+        ar.config.fiterrors_matrix = ar2.config.fiterrors_matrix; 
+        ar.config.ploterrors_matrix = ar2.config.ploterrors_matrix;
+    end
     
     warning('off', 'MATLAB:MKDIR:DirectoryExists');
     mkdir( savepath );

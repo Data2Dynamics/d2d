@@ -18,6 +18,9 @@ end
 if(length(t)>1)
     error('length of t must be = 1');
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 qt = ar.model(m).condition(c).ppl.t == t;
 qx = ar.model(m).condition(c).ppl.ix == ix;
@@ -27,8 +30,10 @@ xfit = squeeze(ar.model(m).condition(c).ppl.xfit(qt,qx,:));
 ppl = squeeze(ar.model(m).condition(c).ppl.ppl(qt,qx,:));
 ps = squeeze(ar.model(m).condition(c).ppl.ps(qt,qx,:,:));
 
-if(ar.config.fiterrors == 1)
+if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
     ppl = 2*ar.ndata*log(sqrt(2*pi)) + ppl;
+elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+    ppl = 2*ar.ndata_err*log(sqrt(2*pi)) + ppl;
 end
 
 farben = lines(length(ar.pLabel));
@@ -52,7 +57,8 @@ legend('PPL','VPL');
 title(sprintf('%s (m=%i, c=%i, t=%g)', arNameTrafo(ar.model(m).x{ix}), m, c, t));
 xlimtmp = xlim;
 
-if(ar.config.fiterrors == 1)
+if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
+        (ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0) )
     ylabel('-2*log(PL)');
 else
     ylabel('\chi^2_{PL}');

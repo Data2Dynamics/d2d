@@ -21,21 +21,16 @@ if(~silent)
     fprintf('\nlinking time points...\n');
 end
 
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
+
 useMS 		= 0;
 useEvents 	= 0;
 
 %Set variables to temporarily add data points
 if(~exist('add_sec','var'))
     add_sec = false;
-end
-
-if(~exist('yStd','var'))
-    if(ar.config.fiterrors==1)
-        yStd = NaN;
-    else
-        yStd = 0.1;
-
-    end
 end
 
 if(~exist('dataAdd','var'))
@@ -46,6 +41,16 @@ if(~exist('dataAdd','var'))
     id = [];
     im = [];
     yStd = [];
+end
+
+if(~exist('yStd','var'))
+    if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
+            (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(im,id)==1) )
+        yStd = NaN;
+    else
+        yStd = 0.1;
+
+    end
 end
 
 for m=1:length(ar.model)

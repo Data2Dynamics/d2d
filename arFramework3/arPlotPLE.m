@@ -13,11 +13,14 @@ if(length(jk)>1)
     end
     return;
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 figure(jk)
 clf;
 
-if(ar.config.fiterrors == 1)
+if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
     chi2s = 2*ar.ndata*log(sqrt(2*pi)) + ar.ple.chi2s{jk};
     if(isfield(ar,'scan'))
         chi2s_scan = 2*ar.ndata*log(sqrt(2*pi)) + ar.scan.chi2s{jk};
@@ -25,6 +28,15 @@ if(ar.config.fiterrors == 1)
         chi2s_scan = [];
     end
     chi2curr = 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit;
+    ylabeltmp = '-2*log(L)';
+elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+    chi2s = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.ple.chi2s{jk};
+    if(isfield(ar,'scan'))
+        chi2s_scan = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.scan.chi2s{jk};
+    else
+        chi2s_scan = [];
+    end
+    chi2curr = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.chi2fit;
     ylabeltmp = '-2*log(L)';
 else
     chi2s = ar.ple.chi2s{jk};

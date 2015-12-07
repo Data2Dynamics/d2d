@@ -12,6 +12,9 @@ end
 if(~exist('doYs','var'))
     doYs = false;
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 pReset = ar.p;
 bestp = ar.p(jk);
@@ -55,7 +58,8 @@ end
 plot([bestp bestp], ylim, 'k--');
 hold off
 
-if(ar.config.fiterrors == 1)
+if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1) || ...
+        (ar.config.useFitErrorMatrix ==1 && sum(sum(ar.config.fiterrors_matrix==1))>0) )
     ylabel('-2*log(L) increase');
 else
     ylabel('chi^2 increase');
