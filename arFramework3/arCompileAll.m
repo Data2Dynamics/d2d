@@ -785,7 +785,7 @@ if(config.useJacobian)
             else
                 condition.dfxdx{i,j} = '0';
             end
-            if(firstcol && i==length(model.xs))
+            if(firstcol && i==length(model.xs) && ( size(condition.sym.dfxdx_nonzero, 2) > 0) )
                 condition.dfxdx_rowVals = [condition.dfxdx_rowVals i-1];
                 condition.sym.dfxdx_nonzero(length(condition.dfxdx_rowVals)) = 'RCONST(0.0)';
                 condition.dfxdx_colptrs = [condition.dfxdx_colptrs length(condition.dfxdx_rowVals)-1];
@@ -2419,6 +2419,12 @@ function prepareBecauseOfRepeatedCompilation
 
 function cstr = ccode2(T, matlab_version)
 
+    % If this matrix or value is empty, do not attempt to generate C-code
+    if (numel(T) == 0)
+        cstr = '';
+        return;
+    end
+
     % R2015b compatibility fix
     if(matlab_version>=8.6)
         sym_str = sym2str(T);
@@ -2430,3 +2436,4 @@ function cstr = ccode2(T, matlab_version)
     else
         cstr = ccode(T);
     end
+    
