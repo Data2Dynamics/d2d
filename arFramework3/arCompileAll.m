@@ -1293,9 +1293,9 @@ if(config.useSensiRHS)
 end
 fprintf(fid, ' void fsx0_%s(int ip, N_Vector sx0, void *user_data);\n', condition.fkt);
 fprintf(fid, ' void dfxdp_%s(realtype t, N_Vector x, double *dfxdp, void *user_data);\n\n', condition.fkt);
-fprintf(fid, ' void fz_%s(double t, int nt, int it, int nz, int nx, int iruns, double *z, double *p, double *u, double *x);\n', condition.fkt);
+fprintf(fid, ' void fz_%s(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *z, double *p, double *u, double *x);\n', condition.fkt);
 fprintf(fid, ' void fsz_%s(double t, int nt, int it, int np, double *sz, double *p, double *u, double *x, double *z, double *su, double *sx);\n\n', condition.fkt);
-fprintf(fid, ' void dfzdx_%s(double t, int nt, int it, int nz, int nx, int iruns, double *dfzdxs, double *z, double *p, double *u, double *x);\n', condition.fkt);
+fprintf(fid, ' void dfzdx_%s(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *dfzdxs, double *z, double *p, double *u, double *x);\n', condition.fkt);
 fprintf(fid, '#endif /* _MY_%s */\n', condition.fkt);
 
 fprintf(fid,'\n\n\n');
@@ -1653,7 +1653,7 @@ end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write z
-fprintf(fid, ' void fz_%s(double t, int nt, int it, int nz, int nx, int iruns, double *z, double *p, double *u, double *x){\n', condition.fkt);
+fprintf(fid, ' void fz_%s(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *z, double *p, double *u, double *x){\n', condition.fkt);
 if(~isempty(model.zs))
     writeCcode(fid, matlab_version, condition, 'fz');
 end
@@ -1674,7 +1674,7 @@ end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write dfzdx
-fprintf(fid, ' void dfzdx_%s(double t, int nt, int it, int nz, int nx, int iruns, double *dfzdxs, double *z, double *p, double *u, double *x){\n', condition.fkt);
+fprintf(fid, ' void dfzdx_%s(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *dfzdxs, double *z, double *p, double *u, double *x){\n', condition.fkt);
 if(config.useSensis)
     if(~isempty(model.zs))
         writeCcode(fid, matlab_version, condition, 'dfzdx');        
@@ -2119,20 +2119,20 @@ fprintf(fid, '}\n\n');
 
 
 % map fz
-fprintf(fid, 'void fz(double t, int nt, int it, int nz, int nx, int iruns, double *z, double *p, double *u, double *x, int im, int ic){\n');
+fprintf(fid, 'void fz(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *z, double *p, double *u, double *x, int im, int ic){\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if((im==%i) & (ic==%i)) fz_%s(t, nt, it, nz, nx, iruns, z, p, u, x);\n', ...
+        fprintf(fid, '  if((im==%i) & (ic==%i)) fz_%s(t, nt, it, nz, nx, nu, iruns, z, p, u, x);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
 fprintf(fid, '}\n\n');
 
 % map dfzdx
-fprintf(fid, 'void dfzdx(double t, int nt, int it, int nz, int nx, int iruns, double *dfzdx, double *z, double *p, double *u, double *x, int im, int ic){\n');
+fprintf(fid, 'void dfzdx(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *dfzdx, double *z, double *p, double *u, double *x, int im, int ic){\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if((im==%i) & (ic==%i)) dfzdx_%s(t, nt, it, nz, nx, iruns, dfzdx, z, p, u, x);\n', ...
+        fprintf(fid, '  if((im==%i) & (ic==%i)) dfzdx_%s(t, nt, it, nz, nx, nu, iruns, dfzdx, z, p, u, x);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end

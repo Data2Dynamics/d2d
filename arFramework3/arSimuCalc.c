@@ -1281,9 +1281,9 @@ void z_calc(int im, int ic, mxArray *arcondition, int sensi) {
     for (it=0; it < nt; it++) {
         /* printf("%f y-loop (im=%i id=%i)\n", t[it], im, id); */
         
-        fz(t[it], nt, it, 0, 0, 0, z, p, u, x, im, ic);
+        fz(t[it], nt, it, 0, 0, 0, 0, z, p, u, x, im, ic);
 	if( fine == 0 ) {
-	  dfzdx(t[it], nt, it, 0, nx, 0, dzdx, z, p, u, x, im, ic);
+	  dfzdx(t[it], nt, it, 0, nx, 0, 0, dzdx, z, p, u, x, im, ic);
 	}
         if (sensi == 1) {
             fsz(t[it], nt, it, np, sz, p, u, x, z, su, sx, im, ic);
