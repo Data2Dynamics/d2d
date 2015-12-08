@@ -737,14 +737,18 @@ fclose(fid);
 for a = 1 : length( ar.model(m).fu )
     arCheckReservedWords( symvar(ar.model(m).fu{a}), 'input function', ar.model(m).u{a} );
 end
-for a = 1 : length( ar.model(m).fy )
-    arCheckReservedWords( symvar(ar.model(m).fy{a}), 'observation function', ar.model(m).y{a} );
+if ( isfield( ar.model(m), 'fy' ) )
+    for a = 1 : length( ar.model(m).fy )
+        arCheckReservedWords( symvar(ar.model(m).fy{a}), 'observation function', ar.model(m).y{a} );
+    end
+    for a = 1 : length( ar.model(m).fystd )
+        arCheckReservedWords( symvar(ar.model(m).fystd{a}), 'observation standard deviation', ar.model(m).y{a} );
+    end
 end
-for a = 1 : length( ar.model(m).fystd )
-    arCheckReservedWords( symvar(ar.model(m).fystd{a}), 'observation standard deviation', ar.model(m).y{a} );
-end
-for a = 1 : length( ar.model(m).fp )
-    arCheckReservedWords( symvar(ar.model(m).fp{a}), 'parameter transformation', ar.model(m).p{a} );
+if ( isfield( ar.model(m), 'fp' ) )
+    for a = 1 : length( ar.model(m).fp )
+        arCheckReservedWords( symvar(ar.model(m).fp{a}), 'parameter transformation', ar.model(m).p{a} );
+    end
 end
 for a = 1 : length( ar.model(m).fx )
     arCheckReservedWords( symvar(ar.model(m).fx{a}), 'right hand side', ar.model(m).x{a} );
@@ -752,9 +756,15 @@ end
 
 arCheckReservedWords( ar.model(m).p, 'parameters' );
 arCheckReservedWords( ar.model(m).x, 'state variables' );
-arCheckReservedWords( ar.model(m).y, 'observables' );
-arCheckReservedWords( ar.model(m).z, 'derived variables' );
-arCheckReservedWords( ar.model(m).u, 'inputs' );
+if ( isfield( ar.model(m), 'y' ) )
+    arCheckReservedWords( ar.model(m).y, 'observables' );
+end
+if ( isfield( ar.model(m), 'z' ) )
+    arCheckReservedWords( ar.model(m).z, 'derived variables' );
+end
+if ( isfield( ar.model(m), 'u' ) )
+    arCheckReservedWords( ar.model(m).u, 'inputs' );
+end
 arCheckReservedWords( ar.model(m).c, 'compartments' );
 
 ar = orderfields(ar);
