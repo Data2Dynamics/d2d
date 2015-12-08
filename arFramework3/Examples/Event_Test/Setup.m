@@ -1,5 +1,6 @@
 % Load models & data
 arInit;
+ar.config.checkForNegFluxes = false;
 arLoadModel('pulseTest');
 arLoadData('pulse',1,'csv',true);
 
