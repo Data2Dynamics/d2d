@@ -274,6 +274,7 @@ while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CON
         yindex = find(qyindex);
     elseif(sum(qyindex)==0)
         yindex = length(ar.model(m).data(d).y) + 1;
+        warning('Specified error without specifying observation function (%s in %s). Proceed with caution!', C{1}{1}, ar.model(m).data(d).name);
     else
         error('multiple matches for %s', cell2mat(C{1}))
     end
