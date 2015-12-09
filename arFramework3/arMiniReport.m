@@ -1,7 +1,7 @@
 % Create customized report
 %
 % PLEASE DO NOT EDIT THIS FUNCTION YET. I am still actively working on it
-% and I know it's still full of bugs (Joep).
+% and I know it's still full of bugs (Joep)
 %
 % arMiniReport( reportName, option flags )
 %
@@ -11,26 +11,38 @@
 %   OmitNonFitted     - Omit plotting the graph and displaying data for
 %                       datasets that were not fitted (still shows condition
 %                       data however. Useful for steady states).
+%   OmitLikelihood    - Omit explicit values for -2 Log(L)
 %   OmitNonPlotted    - Omit data/observables that were not plotted.
+%   KeepRandoms       - Currently, condition replacements based on RANDOMs
+%                       are not explicitly mentioned in the tables. If you
+%                       do want to see these, specify this keyword.
+%   KeepFilenames     - Do not shorten data parameters containing entire
+%                       filenames (ones that use the _filename tag)
+%
 
-function arReport(varargin)
+function arMiniReport(varargin)
 
 global ar
-pti = 1;
 
 warning( 'This report functionality is currently in alpha status. Please use arReport instead.' );
 
-switches = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood' };
+switches = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames' };
+descriptions = {    { 'Plotting all Ys', '' }, ...
+                    { 'Plotting all fitted Ys', '' }, ...
+                    { 'Omitting non fitted Ys from report', '' }, ...
+                    { 'Omitting non plotted Ys from report', '' }, ...
+                    { 'Omitting likelihood values from report', 'Including likelihood values in report' }, ...
+                    { 'Displaying RANDOM transforms explicitly', 'Not displaying RANDOM transforms explicitly' }, ...
+                    { 'Not shortening data parameters with filenames.', 'Shortening data parameters with filenames (ones that use the _filename tag)' } };
 
-if( (nargin > 0) && max( strcmp( lower(varargin{1}), lower(switches) ) ) == 0 )
+if( (nargin > 0) && max( strcmpi( varargin{1}, switches ) ) == 0 )
     project_name = varargin{1}{1};
     varargin{1:end-1} = varargin{2:end};
 else
     project_name = 'Data 2 Dynamics Software -- Modeling Report';
 end
 
-opts = argSwitch( switches, varargin );
-
+opts = argSwitch( switches, descriptions, varargin );
 if(isempty(ar))
     error('please initialize by arInit')
 end
@@ -60,6 +72,8 @@ if ( opts.plotfitted )
         end
     end
 end
+
+pti = 1 - opts.keepfilenames;
 
 % Fetch MATLAB version
 matVer = ver('MATLAB');
@@ -237,7 +251,7 @@ for jm=1:length(ar.model)
     end
     lp(fid, 'The %d dynamic variables used in the model are summarized in Table \\ref{variables}', length(ar.model(jm).x) );
     
-    if ( length( ar.model(jm).u ) > 0 )
+    if ( length( ar.model(jm).u ) > 0 ) %#ok
         lp(fid, ', while the %i external inputs variables are summarized in Table \\ref{inputs}.', length(ar.model(jm).u));
     else
         lp(fid, '.', length(ar.model(jm).u));
@@ -250,8 +264,8 @@ for jm=1:length(ar.model)
         lp(fid, '\\titlerowcol \\textbf{Compartment} & \\textbf{Volume}\\\\\\midrule' );
         for jc = 1 : length( ar.model(jm).c )
             volP = ar.model(jm).pc{jc};
-            if ( isempty( str2num( volP ) ) )
-                volP = num2str( str2num( ar.model(jm).fp{ find( strcmp( ar.model(jm).p, volP ) ) } ) );
+            if ( isempty( str2num( volP ) ) ) %#ok
+                volP = num2str( str2num( ar.model(jm).fp{ find( strcmp( ar.model(jm).p, volP ) ) } ) ); %#ok
             end
             lp(fid, '%s%s & %s\\\\', alternate(jc), ar.model(jm).c{jc}, volP );
         end
@@ -298,12 +312,8 @@ for jm=1:length(ar.model)
     end
     
     inputs = 1;
-    reactions = 1;
     graph = 0;
-    odesystem = 0;
-    derived = 0;
     obs = 1;
-    experiments = 0;
     
     %% inputs
     if(~isempty(ar.model(jm).u)&&inputs)
@@ -346,8 +356,8 @@ for jm=1:length(ar.model)
     end
     
     %% reactions
-    vs = sym('v', [1, size(ar.model(jm).N,2)]);
-    cs = sym(strcat('vol_', ar.model(jm).c));
+    %vs = sym('v', [1, size(ar.model(jm).N,2)]);
+    %cs = sym(strcat('vol_', ar.model(jm).c));
     
     lp(fid, '\\noindent The model consists of %d differential equations, which are given by the following equations:', length(ar.model.x) );
     lp(fid, '{\\footnotesize');
@@ -467,11 +477,11 @@ for jm=1:length(ar.model)
    
     %% standard observations and error model
     if(isfield(ar.model(jm), 'y')&&obs)
-        lp(fid, '\\subsection{Observables}');
+        lp(fid, '\\subsection{Observables}\n');
         
-        lp(fid, 'The model contains %i standard observables listed in table \\ref{defaultObservables}. Certain experiments may contain experiment specific observation functions, which are detailed in the experiment section (see \\ref{ExperimentsSection}).', length(ar.model(jm).y));
+        lp(fid, '\\noindent The model contains %i standard observables listed in table \\ref{defaultObservables}. Certain experiments may contain experiment specific observation functions, which are detailed in the experiment section (see \\ref{ExperimentsSection}).\\\\\n', length(ar.model(jm).y));
         
-        lp(fid, '\\begin{table}');
+        lp(fid, '\\begin{statictable}');
         lp(fid, '\t\\centering');
         startFlexbox(fid, 'obstable' );
         lp(fid, '\\begin{tabular}{@{} lll @{}}\\toprule');
@@ -490,8 +500,8 @@ for jm=1:length(ar.model)
         end
         lp(fid, '\\botrule\\end{tabular}');
         endFlexbox(fid, 'obstable' );
-        lp(fid, '\\mycaption{Model observables and error models}{defaultObservables}{}' );
-        lp(fid, '\\end{table}');       
+        lp(fid, '\\mycaptionof{Model observables and error models}{defaultObservables}{}' );
+        lp(fid, '\\end{statictable}');       
    
     end
     
@@ -515,7 +525,7 @@ for jm=1:length(ar.model)
                 % This parameter is an initial condition and equilibrated
                 if ( max( strcmp( ar.model(jm).p{jp}, strcat( 'init_', ar.model.x(preEq) ) ) ) )
                     % It's zero, so not relevant.
-                    if (str2num(ar.model(jm).fp{jp}) == 0)
+                    if (str2num(ar.model(jm).fp{jp}) == 0) %#ok
                         skip = 1;
                     end
                 end
@@ -566,7 +576,8 @@ for jm=1:length(ar.model)
 
     lp(fid, 'The model parameters were estimated by maximum likelihood estimation applying the MATLAB lsqnonlin algorithm.');
     end
-    N = 50;
+    
+    N = 50;    
     ntables = ceil(length(ar.p)/N);
 
     lp(fid, 'The model parameters which influence system dynamics are listed in Table \\ref{dynpars}.');
@@ -658,7 +669,7 @@ for jm=1:length(ar.model)
                 for jplot=1:length(ar.model(jm).plot)
                     if (ar.model(jm).qPlotYs(jplot)||~opts.omitnonplotted)
                         relevantData = intersect( dS, ar.model(jm).plot(jplot).dLink );
-                        if ( length( relevantData ) > 0 )
+                        if ( length( relevantData ) > 0 ) %#ok
                             for s = 1 : length( relevantData )
                                 q(s) = max( ar.model(jm).data( relevantData(s) ).qFit );
                             end
@@ -701,9 +712,11 @@ for jm=1:length(ar.model)
                     lp(fid, '\\label{M%dExp%d}\n', jm, jplot );
                     %% descriptions
                     if(~isempty(ar.model(jm).data(jd).description))
-                        lp(fid, '\\subsubsection{Comments}');
-                        for jdes=1:length(ar.model(jm).data(jd).description)
-                            lp(fid, '%s\\\\', strrep(strrep(ar.model(jm).data(jd).description{jdes}, '%', '\%'), '_', '\_'));
+                        if ~strcmp( ar.model(jm).data(jd).description, 'data .def file template' )
+                            lp(fid, '\\subsubsection{Comments}');
+                            for jdes=1:length(ar.model(jm).data(jd).description)
+                                lp(fid, '%s\\\\', strrep(strrep(ar.model(jm).data(jd).description{jdes}, '%', '\%'), '_', '\_'));
+                            end
                         end
                     end
 
@@ -741,7 +754,7 @@ for jm=1:length(ar.model)
                     end
 
                     % trafo
-                    [condTrans names] = conditionSpecificParameters( jplot, jm, fpSymString );
+                    [condTrans, names] = conditionSpecificParameters( jplot, jm, fpSymString, opts );
                     nUniqueCondTrafo = length(fieldnames(condTrans));
                     if ( nUniqueCondTrafo > 1 )
                         trafo = sprintf('The $%d$ necessary parameter transformations are listed in Table \\ref{%s_conditiontrafo}. Note that transformations with only one entry are the same for all experimental conditions corresponding to this experiment. ', nUniqueCondTrafo, ar.model(jm).plot(jplot).name );
@@ -865,13 +878,13 @@ for jm=1:length(ar.model)
                     end
 
                     if(sum(qmod)>0 || sum(qadd)>0)
-                        lp(fid, '\\subsubsection{Observables}');
+                        lp(fid, '\\subsubsection{Observables}\n');
 
                         % modified observables
                         if(sum(qmod)>0)
-                            lp(fid, '\\noindent The following observables are modified in this data set: \\\\');
+                            lp(fid, '\\noindent The following observables are modified in this data set:\\\\\n');
 
-                            %lp(fid, '\\begin{table}');
+                            lp(fid, '\\begin{statictable}');
                             lp(fid, '\\begin{centering}');
                             box = sprintf('%sobsmod',latexIdentifier(jplot)) ;
                             startFlexbox(fid,  box );
@@ -895,12 +908,12 @@ for jm=1:length(ar.model)
                             endFlexbox(fid, box);
                             lp(fid, '\\mycaptionof{Observables modified for experiment %s}{%s_input}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name );
                             lp(fid, '\t\\end{centering}');
-                            %lp(fid, '\\end{table}');                          
+                            lp(fid, '\\end{statictable}\n');                          
                         end
 
                         % added observables
                         if(sum(qadd)>0)
-                            lp(fid, '\\noindent The following observables are added in this data set:\\\\');
+                            lp(fid, '\\noindent The following observables are added in this data set:\\\\\n');
 
                             lp(fid, '\\begin{statictable}');
                             lp(fid, '\\begin{centering}');
@@ -927,7 +940,7 @@ for jm=1:length(ar.model)
                             endFlexbox(fid, box);
                             lp(fid, '\\mycaptionof{Observables added for experiment %s}{%s_input}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name );
                             lp(fid, '\t\\end{centering}');
-                            lp(fid, '\\end{statictable}');                          
+                            lp(fid, '\\end{statictable}\n');                          
                         end                    
                     end
 
@@ -936,7 +949,7 @@ for jm=1:length(ar.model)
                     str         = cell(0);
                     row         = cell(0);
                     var         = cell(0);
-                    if ( length( vars ) > 0 )
+                    if ( length( vars ) > 0 ) %#ok
 
                         cols = '';
                         for q = 1 : length(condTrans.(vars{1}))
@@ -949,9 +962,10 @@ for jm=1:length(ar.model)
                             row{q} = '';
                             var{q} = '';
                             if (length( unique(condTrans.(vars{jv})) ) == 1 )
-                                variableName = strrep(names.(vars{jv}),'_','\_');
+                                variableName = strrep(PTI(names.(vars{jv}), pti),'_','\_');
+                                PTI(names.(vars{jv}),pti)
                                 str{q} = variableName;
-                                formula = myFormulas(condTrans.(vars{jv}){1}, jm);
+                                formula = myFormulas(PTI(condTrans.(vars{jv}){1}, pti), jm);
                                 str{q} = sprintf('%s & \\multicolumn{%d}{c}{$%s$}', str{q}, length(condTrans.(vars{1})), formula );
                                 var{q} = variableName;
                                 row{q} = strcat( row{q}, formula, 'Q Q ' );
@@ -963,11 +977,12 @@ for jm=1:length(ar.model)
                             row{q} = '';    
                             var{q} = '';
                             if ~(length( unique(condTrans.(vars{jv})) ) == 1 )
-                                variableName = strrep(names.(vars{jv}),'_','\_');
+                                variableName = strrep(PTI(names.(vars{jv}),pti),'_','\_');
+                                PTI(names.(vars{jv}),pti)
                                 str{q} = variableName;
                                 var{q} = variableName;
                                 for jdls = 1 : length(ar.model(jm).plot(jplot).dLink)
-                                    formula = myFormulas(condTrans.(vars{jv}){jdls}, jm);
+                                    formula = myFormulas(PTI(condTrans.(vars{jv}){jdls}, pti), jm);
                                     str{q} = sprintf( '%s & $%s$', str{q}, formula );
                                     row{q} = strcat( row{q}, formula, 'Q Q ' );
                                 end
@@ -976,11 +991,12 @@ for jm=1:length(ar.model)
                         end                           
                         row{q} = 'Q Q Condition values';
                         var{q} = 'Q Q Parameter';
-                        lp(fid, '\\subsubsection{Condition dependent parameter changes}\\\\The following model parameters were changed to simulate these experimental conditions:\\\\');
+                        lp(fid, '\\subsubsection{Condition dependent parameter changes}\\\\ \\hspace{-1.2cm} The following model parameters were changed to simulate these experimental conditions:\\\\');
                         box = sprintf('%schnk',latexIdentifier(jplot));
                         lp(fid, '\\\\\\begin{statictable}\\');
-                        lp(fid, '\t\\centering'); %% HEREE
+                        lp(fid, '\t\\centering');
                         startFlexbox(fid, box);
+                        
                         % Have latex figure out the longest strings in each column
                         maxV = sprintf('\\widthof{$%s$Q Q}', var{1});
                         maxR = sprintf('\\widthof{$%s$}', row{1});
@@ -1010,7 +1026,7 @@ for jm=1:length(ar.model)
                         lp(fid, '\t%s', tail);
                         endFlexbox(fid, box);
 
-                        lp(fid, '\t\\mycaptionof{Model variables modified for experiment %s.}{%s_conditiontrafo}{}', strrep(arNameTrafo(ar.model(jm).plot(jplot).name), '\_', ' '), ar.model(jm).plot(jplot).name );
+                        lp(fid, '\t\\mycaptionof{Model parameters modified for experiment %s. Different columns indicate different conditions.}{%s_conditiontrafo}{}', strrep(arNameTrafo(ar.model(jm).plot(jplot).name), '\_', ' '), ar.model(jm).plot(jplot).name );
                         lp(fid, '\\end{statictable}\\');
                     end
 
@@ -1046,12 +1062,12 @@ for jm=1:length(ar.model)
                             end
                         end
                                                
-                        lp(fid, '\t\\begin{table}');
+                        lp(fid, '\t\\begin{table}');               
+                        lp(fid, '\t\\dobegincenter');
                         if ( headtab > 5 )
-                            box = sprintf('%sdatamod',latexIdentifier(jd)) ;
+                            box = sprintf('datamod%s',latexIdentifier(jd)) ;
                             startFlexbox(fid,  box );
                         end                        
-                        lp(fid, '\t\\dobegincenter');
                         lp(fid, '\t{\\footnotesize');
                         lp(fid, '\t\t\\begin{tabular}{%s}', headtab);
                         lp(fid, '\t\t\t\\toprule');
@@ -1093,10 +1109,10 @@ for jm=1:length(ar.model)
                         lp(fid, '\t\t\t\\botrule');
                         lp(fid, '\t\t\\end{tabular}}');
                         if ( headtab > 5 )
-                            box = sprintf('%sdatamod',latexIdentifier(jd)) ;
+                            box = sprintf('datamod%s',latexIdentifier(jd)) ;
                             endFlexbox(fid,  box );
                         end
-                        lp(fid, '\t\t\\mycaption{Experimental data for the experiment %s}{%s_data}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name);
+                        lp(fid, '\t\t\\mycaption{Experimental data for the experiment %s. NM indicates variables that were not measured.}{%s_data}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name);
                         lp(fid, '\t\\doendcenter');
                         lp(fid, '\t\\end{table}');
                     end
@@ -1117,10 +1133,26 @@ lp(fid, '\\clearpage\n');
 lp(fid, '\\section{Estimated model parameters} \\label{estimatedparameters}\n');
 lp(fid, 'This section lists all the model parameters used in the model.');
 lp(fid, 'Parameters highlighted in red color indicate parameter values close to their bounds.');
-lp(fid, 'The parameter name prefix init\\_ indicates the initial value of a dynamic variable.');
-lp(fid, 'The parameter name prefix offset\\_ indicates a offset of the experimental data.');
-lp(fid, 'The parameter name prefix scale\\_ indicates a scaling factor of the experimental data.');
-lp(fid, 'The parameter name prefix sd\\_ indicates the magnitude of the measurement noise for a specific measurement.\\\\');
+if ( ~isempty( cell2mat( strfind( ar.pLabel, 'init_' ) ) ) ) 
+    lp(fid, 'The parameter name prefix init\\_ indicates the initial value of a dynamic variable.');
+end
+if ( ~isempty( cell2mat( strfind( ar.pLabel, 'offset_' ) ) ) ) 
+    lp(fid, 'The parameter name prefix offset\\_ indicates a offset of the experimental data.');
+end
+if ( ~isempty( cell2mat( strfind( ar.pLabel, 'scale_' ) ) ) ) 
+    lp(fid, 'The parameter name prefix scale\\_ indicates a scaling factor of the experimental data.');
+end
+if ( ~isempty( cell2mat( strfind( ar.pLabel, 'sd_' ) ) ) ) 
+    lp(fid, 'The parameter name prefix sd\\_ indicates the magnitude of the measurement noise for a specific measurement.\\\\');
+end
+
+N = 50;
+% Avoid ending up with a last table with less than 4 entries, since
+% this looks silly.
+overhang = N-round((length(ar.p)/N))*N;
+if ( overhang < 4 )
+    N = 45;
+end
 
 lp(fid, '\t\\begin{table}');
 lp(fid, '\t\\dobegincenter');
@@ -1150,7 +1182,7 @@ for j=1:length(ar.p)
         lp(fid, '\t{\\footnotesize');
         lp(fid, '\t\t\\begin{tabular}{llllllll}');
         lp(fid, '\t\t\t\\toprule');
-        lp(fid, '\t\t\t & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & fitted \\\\');
+        lp(fid, '\t\t\t \\titlerowcol & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & fitted \\\\');
         lp(fid, '\t\t\t\\midrule');
         
         count = count + 1;
@@ -1445,36 +1477,6 @@ seconds = seconds - minutes*60;
 hmstimestr = sprintf('%02i:%02i:%05.2f', hours, minutes, seconds);
 
 
-function str = myFormulasTest(str, jm)
-global ar
-
-strsym = sym(str);
-
-str = latex(strsym);
-
-for jx = 1:length(ar.model(jm).x)
-    str = strrep(str, sprintf('\\mathrm{%s}', ar.model(jm).x{jx}), ...
-        sprintf('\\mathrm{[%s]}', ar.model(jm).x{jx}));
-end
-for ju = 1:length(ar.model(jm).u)
-    str = strrep(str, sprintf('\\mathrm{%s}', ar.model(jm).u{ju}), ...
-        sprintf('\\mathrm{[%s]}', ar.model(jm).u{ju}));
-end
-for jz = 1:length(ar.model(jm).z)
-    str = strrep(str, sprintf('\\mathrm{%s}', ar.model(jm).z{jz}), ...
-        sprintf('\\mathrm{[%s]}', ar.model(jm).z{jz}));
-end
-for jc = 1:length(ar.model(jm).pc)
-    str = strrep(str, sprintf('\\mathrm{%s}', ar.model(jm).pc{jc}), ...
-        sprintf('\\mathrm{V}\\raisebox{-.4ex}{\\tiny %s}', ar.model(jm).c{jc}));
-end
-
-str = strrep(str, '_', '\_');
-str = strrep(str, '\,', ' \cdot ');
-
-
-
-
 function str = myFormulas(str, jm)
 global ar
 
@@ -1527,7 +1529,7 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
     end
 
     str  = char(str);
-    stro = str; replaced = 0;
+    replaced = 0;
     for a = 1 : length( funcTypes )
         funcs = findFunc( str, funcTypes{a}{1} );
         argLayout = funcTypes{a}{3};
@@ -1537,7 +1539,7 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
                 msg = { 'Invalid number of function argument for function "', ...
                         funcTypes{a}{1}, '" expected ', num2str(max(argLayout)), ...
                         ' got ', num2str( length( funcs(b).args ) ) };
-                error( sprintf( '%s', msg{:} ) );
+                error( '%s', msg{:} );
             else
                 % Determine what the function should be replaced with;
                 % feed the appropriate function arguments and replace it
@@ -1550,7 +1552,7 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
                 catch
                     msg = { 'Failed to replace function ', funcTypes{a}{1}, ...
                         ' in:', funcs(b).func, 'Please expression check for error.' };
-                    error( sprintf( '%s\n', msg{:} ) );
+                    error( '%s\n', msg{:} );
                 end
             end
         end
@@ -1569,15 +1571,14 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
     catch
         msg = { 'Failed to obtain valid expression from: ', ...
                 str, 'Please expression check for error.' };
-        error(sprintf('%s\n', msg{:}))
+        error( '%s\n', msg{:} );
     end
 
 % Function to scan for specific function name and extract its arguments
 function [f] = findFunc( st, funcName )
     loc     = strfind( st, [funcName '('] );
-    if ( length(loc) > 0 )
+    if ( length(loc) > 0 ) %#ok
         for a = 1 : length( loc )
-            brackets = 1;
             f(a) = fetchArgs( st(loc(a):end) );
             f(a).fin = f(a).fin + loc(a)-1;
         end
@@ -1593,10 +1594,10 @@ function f = fetchArgs( st )
     while( brackets == 0 )
         cur = cur + 1;
         if ( cur > length( st ) )
-            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+            error( 'Malformed input string for argument fetcher: \n%s', st );
         end
         if ( brackets < 0 )
-            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+            error( 'Malformed input string for argument fetcher: \n%s', st );
         end
         if ( st( cur ) == '(' )
             brackets = brackets + 1;
@@ -1606,7 +1607,7 @@ function f = fetchArgs( st )
         end        
     end
     if ( brackets < 0 )
-        error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+        error( 'Malformed input string for argument fetcher: \n%s', st );
     end    
     
     f.name = strtrim( st(1:cur-1) );
@@ -1615,7 +1616,7 @@ function f = fetchArgs( st )
     while( brackets > 0 )
         cur = cur + 1;
         if ( cur > length( st ) )
-            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+            error( 'Malformed input string for argument fetcher: \n%s', st );
         end            
         if ( st( cur ) == '(' )
             brackets = brackets + 1;
@@ -1640,7 +1641,11 @@ function f = fetchArgs( st )
     
     
 function fprintnumtab(fid, num)
-fprintf(fid, '& %s ', sprintf('%g', num));
+if isnan( num )
+    fprintf(fid, '& NM ');
+else
+    fprintf(fid, '& %s ', sprintf('%g', num));
+end
 
 % better subs
 function out = mysubs(in, old, new)
@@ -1655,7 +1660,7 @@ else
     out = in;
 end
 
-function mod = getModifierStr(jm,jv,useNeg,str,sources,targets)
+function mod = getModifierStr(jm,jv,useNeg,str,sources,targets) %#ok
 
 global ar
 
@@ -1704,7 +1709,7 @@ function hash = hashString(str)
     hash = ['F', hash(:)'];
     clear checksum
     
-function formula = cleanFormula(str)
+function formula = cleanFormula(str) %#ok
 
     formula = strrep(str, '\mathrm{', '');
     formula = strrep(formula, '\', '');
@@ -1720,7 +1725,7 @@ function str = latexIdentifier( j )
 % model. fpSymString contains a list of the model variables transformed to
 % syms and then transformed back to strings again, in order to be able to
 % compare with data specific trafo's that underwent the same procedure
-function [condTrans names] = conditionSpecificParameters( jplot, jm, fpSymString )
+function [condTrans, names] = conditionSpecificParameters( jplot, jm, fpSymString, opts )
 
     global ar;
     
@@ -1733,8 +1738,6 @@ function [condTrans names] = conditionSpecificParameters( jplot, jm, fpSymString
 
         % Setup list of observational
         % parameters (could be optimized)
-        
-        
         obsParameters = strrep(ar.model(jm).data(jd2).py, 'filename', stripRandom( jd2 ) );
         obsParameters = [ obsParameters ; strrep(ar.model(jm).data(jd2).pystd, 'filename', stripRandom( jd2 ) ) ];                              
 
@@ -1747,21 +1750,25 @@ function [condTrans names] = conditionSpecificParameters( jplot, jm, fpSymString
             hash            = hashString(parameterName);
 
             % Check whether it doesn't transform
-            % anything at all!
-            if strcmp( ar.model(jm).data(jd2).pold{jpp}, ar.model(jm).data(jd2).fp{jpp} )
+            % anything at all! Note that RANDOMS explicitly ignored
+            tFrom = ar.model(jm).data(jd2).pold{jpp};
+            if ( ~(opts.keeprandoms) )
+                for jra = 1 : length( ar.model(jm).data(jd2).prand )
+                    tFrom = strrep( tFrom, ar.model(jm).data(jd2).prand{jra}, sprintf('%s%s', ar.model(jm).data(jd2).prand{jra}, ar.model(jm).data(jd2).fprand(jra) ) );
+                end
+            end
+            if strcmp( tFrom, ar.model(jm).data(jd2).fp{jpp} )
                 skip = 1;
-            end                        
+            end
 
             % Check whether it is an observational parameter
-            % note that RANDOMs are not taken into account here and they
-            % will still appear
             if (~skip) && ( max( strcmp( parameterName, obsParameters ) ) )
                 % If so, check whether it is zero
                 % and if so => skip it
                 if strcmp( ar.model(jm).data(jd2).fp{jpp}, '0' )
                     skip = 1;
                 end
-
+                
                 % Check whether it exists in the base model,
                 % and whether it is identical. If so => skip it
                 if ( ~skip )
@@ -1850,7 +1857,7 @@ function str = alternate(i)
     end
     
     
-function [opts] = argSwitch( switches, varargin )
+function [opts] = argSwitch( switches, description, varargin )
 
     for a = 1 : length(switches)
         opts.(lower(switches{a})) = 0;
@@ -1858,11 +1865,14 @@ function [opts] = argSwitch( switches, varargin )
     
     if ~isempty( varargin{1} )
         for a = 1 : length( varargin{1} )
-            if ( max( strcmp( lower(switches), lower(varargin{1}{a}) ) ) == 0 )
+            if ( max( strcmpi( switches, varargin{1}{a} ) ) == 0 )
                 error( 'Invalid switch argument was provided %s', varargin{1}{a} );
             end
             opts.(lower(varargin{1}{a})) = 1;
         end
+    end
+    for a = 1 : length( switches )
+        fprintf( '%s\n', description{a}{2-opts.(lower(switches{a}))} );
     end
     
     
@@ -1872,7 +1882,7 @@ function setchi2fields(jm, jplot)
     % chi^2, ndata and dr_times
     chi2 = zeros(1,ar.model(jm).plot(jplot).ny);
     ndata = zeros(1,ar.model(jm).plot(jplot).ny);
-    dr_times = [];
+    %dr_times = [];
     for jd = ar.model(jm).plot(jplot).dLink
         if(isfield(ar.model(jm),'data'))              
             ny = length(ar.model(jm).data(jd).y);
