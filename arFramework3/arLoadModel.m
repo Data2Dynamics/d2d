@@ -734,6 +734,7 @@ if(~isfield(ar, 'pExternLabels'))
     ar.ubExtern = [];
 end
 C = arTextScan(fid, '%s %f %n %n %f %f\n',1, 'CommentStyle', ar.config.comment_string);
+
 while(~isempty(C{1}))
     ar.pExternLabels(end+1) = C{1};
     ar.pExtern(end+1) = C{2};

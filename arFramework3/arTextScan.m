@@ -1,13 +1,11 @@
 % Read a line and parse it. Make sure the entire line is read.
 function C = arTextScan( fid, varargin )
 
-    tmp = '';
-    while ~feof(fid)&&isempty(tmp)
+    tmp = ''; C{1} = {};
+    while ~feof(fid)&&(isempty(tmp)||isempty(C{1}))
         tmp = fgets(fid);
         
-        if ( min(isspace(tmp)) == 1 )
-            tmp = '';
-        end
+        C = textscan(tmp, varargin{:} );
     end
 
     if ~isempty(tmp)
