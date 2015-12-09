@@ -410,7 +410,11 @@ for jm=1:length(ar.model)
 
     %% derived
     if(~isempty(ar.model(jm).z)&&1)
-        lp(fid, '\\noindent Based on these equations, the model computes %i derived variables which are used to link with the data:', length(ar.model(jm).z));
+        if ( length( ar.model(jm).z ) > 1 )
+            lp(fid, '\\noindent Based on numerical integration of these equations, %i derived quantities are computed:', length(ar.model(jm).z));
+        else
+            lp(fid, '\\noindent Based on numerical integration of these equations, the following derived quantity is computed:' );
+        end
         lp(fid, '{\\footnotesize');
         lp(fid, '\\begin{align}');    
         for jz = 1:length(ar.model(jm).z)            
@@ -419,13 +423,12 @@ for jm=1:length(ar.model)
                 myFormulas(ar.model(jm).t, jm), ...
                 myFormulas(ar.model(jm).fz{jz}, jm), ...
                 sprintf('%s_derived%i', ar.model(jm).name, jz));
-           % lp(fid, 'Unit: %s [%s]', ar.model(jm).zUnits{jz,3}, strrep(ar.model(jm).zUnits{jz,2},'-','\-'));
         end
         lp(fid, '\\end{align}}');
     end    
     
     %% flux expressions
-    lp(fid, '\\noindent The flux expressions corresponding to these equations are provided in Table \\ref{fluxes}. The system of ODEs was integrated using a multi-threaded implementation of the CVODES algorithm \\cite{Hindmarsh:2005fb}. ');
+    lp(fid, '\\noindent The flux expressions corresponding to these equations are provided in Table \\ref{fluxes}. The system of ODEs was integrated using the CVODES algorithm from the SUNDIALS suite of solvers.\\cite{Hindmarsh:2005fb}. ');
     if ( ar.config.useSensis );
         lp(fid, 'First order derivatives were computed using the sensitivity equations and used for numerical optimization. ');
     end
@@ -1061,19 +1064,18 @@ for jm=1:length(ar.model)
                                 headtab = [headtab 'r'];
                             end
                         end
-                                               
-                        lp(fid, '\t\\begin{table}');               
-                        lp(fid, '\t\\dobegincenter');
-                        if ( headtab > 5 )
-                            box = sprintf('datamod%s',latexIdentifier(jd)) ;
-                            startFlexbox(fid,  box );
-                        end                        
-                        lp(fid, '\t{\\footnotesize');
-                        lp(fid, '\t\t\\begin{tabular}{%s}', headtab);
-                        lp(fid, '\t\t\t\\toprule');
-                        lp(fid, '\t\t\t %s \\\\', headstr);
-                        lp(fid, '\t\t\t %s \\\\', unitstr);
-                        lp(fid, '\t\t\t\\midrule');
+                           
+                        Nd = 55;
+                        L = 0;
+                        
+                        % Avoid ending up with a last table with less than 4 entries, since
+                        % this looks silly.
+                        overhang = N-round((length(ar.p)/N))*N;
+                        if ( overhang < 4 )
+                            N = 50;
+                        end
+                        
+                        openDataTable( fid, jm, jd, L, headtab, headstr, unitstr );
 
                         s = 0;
                         for jd2 = ar.model(jm).plot(jplot).dLink
@@ -1102,19 +1104,20 @@ for jm=1:length(ar.model)
                                         fprintnumtab(fid, ar.model(jm).data(jd2).yExpStd(j,jj));
                                     end
                                 end
-                                fprintf(fid, '\\\\\n'); s = s + 1;
+                                fprintf(fid, '\\\\\n'); 
+                                
+                                % Are we going over the page limit?
+                                s = s + 1;
+                                if ( s > Nd )
+                                    closeDataTable( fid, jplot, jm, jd, L, headtab );
+                                    L = L + 1;
+                                    s = 0;
+                                    openDataTable( fid, jm, jd, L, headtab, headstr, unitstr );
+                                end
                             end
                         end
 
-                        lp(fid, '\t\t\t\\botrule');
-                        lp(fid, '\t\t\\end{tabular}}');
-                        if ( headtab > 5 )
-                            box = sprintf('datamod%s',latexIdentifier(jd)) ;
-                            endFlexbox(fid,  box );
-                        end
-                        lp(fid, '\t\t\\mycaption{Experimental data for the experiment %s. NM indicates variables that were not measured.}{%s_data}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name);
-                        lp(fid, '\t\\doendcenter');
-                        lp(fid, '\t\\end{table}');
+                        closeDataTable( fid, jplot, jm, jd, L, headtab );
                     end
 
              %       if(ccount>1 && jp==length(ar.model(jm).data(jd).fp))
@@ -1518,7 +1521,31 @@ end
 str = strrep(str, '_', '\_');
 str = strrep(str, '\,', ' \cdot ');
 
+function openDataTable( fid, jm, jd, L, headtab, headstr, unitstr )   
+	lp(fid, '\t\\begin{table}\n\t\\dobegincenter');
+	if ( headtab > 5 )
+        box = sprintf('datamod%s',latexIdentifier(jd+1000*jm+10000*L)) ;
+        startFlexbox(fid,  box );
+    end                        
+	lp(fid, '\t{\\footnotesize');
+	lp(fid, '\t\t\\begin{tabular}{%s}', headtab);
+	lp(fid, '\t\t\t\\toprule');
+	lp(fid, '\t\t\t %s \\\\', headstr);
+	lp(fid, '\t\t\t %s \\\\', unitstr);
+	lp(fid, '\t\t\t\\midrule');
 
+function closeDataTable( fid, jplot, jm, jd, L, headtab )
+    global ar;
+
+    lp(fid, '\t\t\t\\botrule');
+    lp(fid, '\t\t\\end{tabular}}');
+    if ( headtab > 5 )
+        box = sprintf('datamod%s',latexIdentifier(jd+1000*jm+10000*L)) ;
+        endFlexbox( fid,  box );
+    end
+	lp(fid, '\t\t\\mycaption{Experimental data for the experiment %s. NM indicates variables that were not measured.}{%s_data}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name);
+	lp(fid, '\t\\doendcenter');
+	lp(fid, '\t\\end{table}');
 
 
 
