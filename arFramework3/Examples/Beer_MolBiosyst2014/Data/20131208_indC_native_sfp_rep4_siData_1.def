@@ -15,7 +15,7 @@ Bacnorm 	        "sd_Bacnorm"
 IndconcNormRange  	"sd_IndconcNormRange"
 
 CONDITIONS
-beta  "beta_typeID_ExpID"
+Beta  "beta_typeID_ExpID"
 Bacmax  "Bacmax_typeID_ExpID"
 tau    "tau_typeID_ExpID"
 kdegi 	"kdegi_typeID"

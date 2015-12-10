@@ -18,7 +18,7 @@ INPUTS
 lag        C   "units"    "a.u."   "step1(timepoint, 0, tau, 1)"
 
 ODES
-"(beta * lag) / Bacmax * Bac * (Bacmax - Bac)"
+"(Beta * lag) / Bacmax * Bac * (Bacmax - Bac)"
 "-ksyn * Bac * Glu"
 "ksyn * Glu * Bac - kdim * cGlu * cGlu"
 "kdim * cGlu * cGlu - kdegi * Ind"
