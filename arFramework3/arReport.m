@@ -61,6 +61,8 @@ lp(fid, '\\usepackage{subfig}');
 lp(fid, '\\usepackage{sidecap}');
 lp(fid, '\\captionsetup[subfloat]{position=top}');
 
+lp(fid, '\\allowdisplaybreaks');
+
 lp(fid, '\\setlength{\\textheight}{22 cm}');
 lp(fid, '\\setlength{\\textwidth}{16 cm}');
 lp(fid, '\\setlength{\\topmargin}{-1.5 cm}');
@@ -154,13 +156,13 @@ for jm=1:length(ar.model)
                 jx, strrep(ar.model(jm).x{jx}, '_', '\_'));
             
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{align}');
+            lp(fid, '\\begin{align*}');
             lp(fid, '%s(%s=0) & = %s \\label{%s}', ...
                 myFormulas(ar.model(jm).x{jx}, jm), ...
                 myFormulas(ar.model(jm).t, jm), ...
                 myFormulas(ar.model(jm).px0{jx}, jm), ...
                 sprintf('%s_init%i', ar.model(jm).name, jx));
-            lp(fid, '\\end{align}}');
+            lp(fid, '\\end{align*}}');
             
             %lp(fid, 'Unit: %s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2});
         end
@@ -181,13 +183,13 @@ for jm=1:length(ar.model)
             
             if(~isempty(ar.model(jm).fu{ju}))
                 lp(fid, '{\\footnotesize');
-                lp(fid, '\\begin{align}');
+                lp(fid, '\\begin{align*}');
                 lp(fid, '%s(%s) & = %s \\label{%s}', ...
                     myFormulas(ar.model(jm).u{ju}, jm), ...
                     myFormulas(ar.model(jm).t, jm), ...
                     myFormulas(ar.model(jm).fu{ju}, jm), ...
                     sprintf('%s_input%i', ar.model(jm).name, ju));
-                lp(fid, '\\end{align}}');
+                lp(fid, '\\end{align*}}');
             end
             
             % lp(fid, 'Unit: %s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2});
@@ -299,10 +301,10 @@ for jm=1:length(ar.model)
             
             % rate equation
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{align}');
+            lp(fid, '\\begin{align*}');
             lp(fid, 'v_{%i} & = %s \\label{%s}', jv, myFormulas(ar.model(jm).fv{jv}, jm), ...
                 sprintf('%s_flux%i', ar.model(jm).name, jv));
-            lp(fid, '\\end{align}}');
+            lp(fid, '\\end{align*}}');
             
             fprintf(fid, '\n');
         end
@@ -329,12 +331,12 @@ for jm=1:length(ar.model)
     
     %% ODE system
     if(~isempty(ar.model(jm).x))
-        lp(fid, '\\subsection{ODE system}');
+        lp(fid, '\\subsection{ODE system} \\label{%s}', sprintf('%s_ode', ar.model(jm).name));
         
-        lp(fid, '\\noindent The specified reation laws and rate equations $v$ determine ODE system. ');
-        lp(fid, 'The time evolution of the dynamical variables is given by this equation system.');
+        lp(fid, '\\noindent The specified reation laws and rate equations $v$ determine an ODE system. ');
+        lp(fid, 'The time evolution of the dynamical variables is calculated by solving this equation system.');
         lp(fid, '{\\footnotesize');
-        lp(fid, '\\begin{align}');
+        lp(fid, '\\begin{align*}');
         for jx=1:size(ar.model(jm).N, 1) % for every species jx
             strtmp = '';
             if(~isempty(ar.model(jm).c))
@@ -358,18 +360,13 @@ for jm=1:length(ar.model)
                 end
                 
             end
-            if(jx==size(ar.model(jm).N, 1) || mod(jx,N)==0)
-                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = %s \\label{%s}', myFormulas(ar.model(jm).x{jx}, jm), strtmp, sprintf('%s_ode%i', ar.model(jm).name, jx));
+            if(jx==size(ar.model(jm).N, 1))
+                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = %s ', myFormulas(ar.model(jm).x{jx}, jm), strtmp);
             else
-                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = %s \\label{%s} \\\\', myFormulas(ar.model(jm).x{jx}, jm), strtmp, sprintf('%s_ode%i', ar.model(jm).name, jx));
-            end
-            
-            if(mod(jx,N)==0 && jx<size(ar.model(jm).N, 1))
-                lp(fid, '\\end{align}\n');
-                lp(fid, '\\begin{align}');
+                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = %s \\\\', myFormulas(ar.model(jm).x{jx}, jm), strtmp);
             end
         end
-        lp(fid, '\\end{align}}\n\n');
+        lp(fid, '\\end{align*}}\n\n');
         
         lp(fid, '\\noindent The ODE system was solved by a parallelized implementation of the CVODES algorithm \\cite{Hindmarsh:2005fb}.');
         lp(fid, 'It also supplies the parameter sensitivities utilized for parameter estimation.\\\\\n\n');
@@ -388,13 +385,13 @@ for jm=1:length(ar.model)
                 jz, strrep(ar.model(jm).z{jz}, '_', '\_'));
             
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{align}');
+            lp(fid, '\\begin{align*}');
             lp(fid, '%s(%s) & = %s \\label{%s}', ...
                 myFormulas(ar.model(jm).z{jz}, jm), ...
                 myFormulas(ar.model(jm).t, jm), ...
                 myFormulas(ar.model(jm).fz{jz}, jm), ...
                 sprintf('%s_derived%i', ar.model(jm).name, jz));
-            lp(fid, '\\end{align}}');
+            lp(fid, '\\end{align*}}');
             
             % lp(fid, 'Unit: %s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2});
         end
@@ -420,7 +417,7 @@ for jm=1:length(ar.model)
             end
             
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{align}');
+            lp(fid, '\\begin{align*}');
             lp(fid, '%s(%s) & = %s \\label{%s} \\\\', ...
                 myFormulas(ar.model(jm).y{jy}, jm), ...
                 myFormulas(ar.model(jm).t, jm), ...
@@ -431,7 +428,7 @@ for jm=1:length(ar.model)
                 myFormulas(ar.model(jm).t, jm), ...
                 myFormulas(ar.model(jm).fystd{jy}, jm), ...
                 sprintf('%s_std_err%i', ar.model(jm).name, jy));
-            lp(fid, '\\end{align}}');
+            lp(fid, '\\end{align*}}');
             
             %lp(fid, 'Unit: %s [%s]; ', ar.model(jm).yUnits{jy,3}, ar.model(jm).yUnits{jy,2});
         end
@@ -444,27 +441,25 @@ for jm=1:length(ar.model)
         if(~strcmp(ar.model(jm).p{jp}, ar.model(jm).fp{jp}))
             if(ccount==1)
                 lp(fid, '\\subsection{Conditions}');
-                lp(fid, '\\noindent Conditions modify previously defined model parameters according to an algebraic equation.');
+                lp(fid, ['\\noindent Conditions modify the ODE system defined in Section \\ref{' sprintf('%s_ode', ar.model(jm).name) '} according to a replacement rule.']);                
                 lp(fid, 'New model parameters can be introduced or relations between existing model parameters can be implemented.');
+                lp(fid, 'The following list are default conditions that can be replace my experiment specific conditions defined seperately for each data set.');
                 lp(fid, '{\\footnotesize');
-                lp(fid, '\\begin{align}');
+                lp(fid, '\\begin{align*}');
             end
             
-            if(ccount==length(ar.model(jm).fp) || mod(ccount,N)==0)
+            if(ccount==length(ar.model(jm).fp))
                 lp(fid, '\t%s & \\rightarrow %s', myFormulas(ar.model(jm).p{jp}, jm), ...
                     myFormulas(ar.model(jm).fp{jp}, jm));
             else
                 lp(fid, '\t%s & \\rightarrow %s \\\\', myFormulas(ar.model(jm).p{jp}, jm), ...
                     myFormulas(ar.model(jm).fp{jp}, jm));
             end
-            if(mod(ccount,N)==0 && ccount<length(ar.model(jm).fp))
-                lp(fid, '\\end{align}\n');
-                lp(fid, '\\begin{align}');
-            end
+            
             ccount = ccount + 1;
         end
         if(ccount>1 && jp==length(ar.model(jm).fp))
-            lp(fid, '\\end{align}}\n\n');
+            lp(fid, '\\end{align*}}\n\n');
         end
     end
     
@@ -498,13 +493,13 @@ for jm=1:length(ar.model)
                             ju, strrep(ar.model(jm).u{ju}, '_', '\_'));
                         
                         lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{align}');
+                        lp(fid, '\\begin{align*}');
                         lp(fid, '%s(%s) & = %s \\label{%s}', ...
                             myFormulas(ar.model(jm).u{ju}, jm), ...
                             myFormulas(ar.model(jm).t, jm), ...
                             myFormulas(ar.model(jm).data(jd).fu{ju}, jm), ...
                             sprintf('%s_input%i', ar.model(jm).plot(jplot).name, ju));
-                        lp(fid, '\\end{align}}');
+                        lp(fid, '\\end{align*}}');
                     end
                     lp(fid, '\\end{itemize}');
                 end
@@ -550,7 +545,7 @@ for jm=1:length(ar.model)
                         end
                         
                         lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{align}');
+                        lp(fid, '\\begin{align*}');
                         lp(fid, '%s(%s) & = %s \\label{%s} \\\\', ...
                             myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
                             myFormulas(ar.model(jm).t, jm), ...
@@ -561,7 +556,7 @@ for jm=1:length(ar.model)
                             myFormulas(ar.model(jm).t, jm), ...
                             myFormulas(ar.model(jm).data(jd).fystd{jy}, jm), ...
                             sprintf('%s_err%i', ar.model(jm).plot(jplot).name, jy));
-                        lp(fid, '\\end{align}}');
+                        lp(fid, '\\end{align*}}');
                         
                         %lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
                     end
@@ -582,7 +577,7 @@ for jm=1:length(ar.model)
                         end
                         
                         lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{align}');
+                        lp(fid, '\\begin{align*}');
                         lp(fid, '%s(%s) & = & %s \\label{%s} \\\\', ...
                             myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
                             myFormulas(ar.model(jm).t, jm), ...
@@ -593,7 +588,7 @@ for jm=1:length(ar.model)
                             myFormulas(ar.model(jm).t, jm), ...
                             myFormulas(ar.model(jm).data(jd).fystd{jy}, jm), ...
                             sprintf('%s_err%i', ar.model(jm).plot(jplot).name, jy));
-                        lp(fid, '\\end{align}}');
+                        lp(fid, '\\end{align*}}');
                         
                         %lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
                     end
@@ -639,14 +634,14 @@ for jm=1:length(ar.model)
                         
                         if(~qalreadyset)
                             if(ccount==1)
-                                lp(fid, '\\subsubsection{Conditions}');
-                                lp(fid, ['\\noindent To evaluate the ODE system of Equation \\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \\ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}']);
-                                lp(fid, 'for the conditions in this experiment, the following parameter transformations are applied:');
+                                lp(fid, '\\subsubsection{Experiment specific conditions}');
+                                lp(fid, ['\\noindent To evaluate the ODE system defined in Section \\ref{' sprintf('%s_ode', ar.model(jm).name) '}']);
+                                lp(fid, 'for this experiment the following conditions are applied.');
                                 lp(fid, '{\\footnotesize');
-                                lp(fid, '\\begin{displaymath}');
+                                lp(fid, '\\begin{align*}');
                                 lp(fid, '\\begin{array}{%s}', arraystr);
                             else
-                                if(~(mod(ccount-1,N)==0 && ccount-1<length(ar.model(jm).data(jd).fp)))
+                                if(ccount-1<length(ar.model(jm).data(jd).fp))
                                     lp(fid, ' \\\\');
                                 end
                             end
@@ -671,19 +666,13 @@ for jm=1:length(ar.model)
                                 end
                             end
                             
-                            if(mod(ccount,N)==0 && ccount<length(ar.model(jm).data(jd).fp))
-                                lp(fid, '\\end{array}');
-                                lp(fid, '\\end{displaymath}\n');
-                                lp(fid, '\\begin{displaymath}');
-                                lp(fid, '\\begin{array}{%s}', arraystr);
-                            end
                             ccount = ccount + 1;
                         end
                     end
                 end    
                 
                 if(ccount>1 && jp==length(ar.model(jm).data(jd).fp))
-                	lp(fid, '\\end{array}');
+                	lp(fid, '\\end{align*}');
                 	lp(fid, '\\end{displaymath}\n}\n\n');
                 end
             end
@@ -805,9 +794,7 @@ for jm=1:length(ar.model)
                 
                 captiontext = sprintf('\\textbf{%s trajectories of the input, dynamic and derived variables.} ', ....
                     arNameTrafo(ar.model(jm).plot(jplot).name));
-                captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system, see Equation '];
-                captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \ref{' ...
-                    sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
+                captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system defined in Section \\ref{' sprintf('%s_ode', ar.model(jm).name) '}.'];
                 lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_x.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_x']);
             end
             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigV') && ~isempty(ar.model(jm).plot(jplot).savePath_FigV))
@@ -817,9 +804,7 @@ for jm=1:length(ar.model)
                     [savePath '/' ar.model(jm).plot(jplot).name '_v.pdf'])
                 
                 captiontext = sprintf('\\textbf{%s reaction fluxes.} ', arNameTrafo(ar.model(jm).plot(jplot).name));
-                captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system, see Equation '];
-                captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) ...
-                    '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
+                captiontext = [captiontext 'The dynamical behaviour is determined by the ODE systemdefined in Section \\ref{' sprintf('%s_ode', ar.model(jm).name) '}.'];
                 lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_v.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_v']);
             end            
         end
@@ -1163,8 +1148,11 @@ lp(fid, '\\includegraphics[width=%f\\textwidth]{%s} \\caption{%s} \\label{%s}', 
 lp(fid, '\\end{center}');
 lp(fid, '\\end{figure}');
 
-function lpfigurePGF(fid, figpath, figcaption, figlabel)
-lp(fid, '\\begin{figure}[!ht]');
+function lpfigurePGF(fid, figpath, figcaption, figlabel, figmod)
+if(nargin<6)
+    figmod = '';
+end
+lp(fid, ['\\begin{figure}' figmod]);
 lp(fid, '\\centering');
 lp(fid, '\\input{%s} \\caption{%s} \\label{%s}', figpath, figcaption, figlabel);
 lp(fid, '\\end{figure}')
