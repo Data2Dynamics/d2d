@@ -23,7 +23,7 @@ INPUTS
 pEpoR           C   "au"      "conc."   "spline_pos5(t, 0.0, sp1, 5.0, sp2, 10.0, sp3, 20.0, sp4, 60.0, sp5, 0, 0.0)"
 
 REACTIONS
-             ->  pSTAT            CUSTOM "p1 * pEpoR * STAT"
+STAT             ->  pSTAT            CUSTOM "p1 * pEpoR * STAT"
 pSTAT + pSTAT    ->  pSTAT_pSTAT      CUSTOM "p2 * pSTAT^2"
 pSTAT_pSTAT      ->  npSTAT_npSTAT    CUSTOM "p3 * pSTAT_pSTAT"
 
