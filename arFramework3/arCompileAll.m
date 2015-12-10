@@ -1584,7 +1584,6 @@ if(config.useSensiRHS)
                 sxdot_tmp = sym(repmat(sxdot_tmp, size(condition.sym.dvdp,2), 1));
                 condition.sym.dfcdp2 = (sxdot_tmp.' + condition.sym.dfcdp);
                 
-                disp( 'Encoding volume changes...' );
                 fprintf(fid, '  switch (ip) {\n');
                 for j2=1:size(condition.sym.dvdp,2)
                     fprintf(fid, '    case %i: {\n', j2-1);
