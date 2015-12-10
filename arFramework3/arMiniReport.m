@@ -768,7 +768,7 @@ for jm=1:length(ar.model)
                     end
 
                     if ( isFitted(jm, jplot) )
-                        lp(fid, '\\noindent %s%sThe agreement of the model observables and the experimental data, given in Table \\ref{%s_data}', input, trafo, ar.model(jm).plot(jplot).name);
+                        lp(fid, '\\noindent %s%sThe experimental data is given in Table \\ref{%s_data}. ', input, trafo, ar.model(jm).plot(jplot).name);
 
                         % Was this plot ever simulated?
                         if(~isfield(ar.model(jm).plot(jplot), 'ndata'))
@@ -778,15 +778,15 @@ for jm=1:length(ar.model)
                         
                         if(ar.config.fiterrors == 1)
                             if ( opts.omitlikelihood )
-                                lp( fid, sprintf( '. This dataset contains %i data points.', ar.model(jm).plot(jplot).ndata ) );
+                                lp( fid, sprintf( 'This dataset contains %i data points.', ar.model(jm).plot(jplot).ndata ) );
                             else
-                                lp( fid, sprintf( ', yields a value of the objective function $-2 \\\\log(L) = %g$ for %i data points in this data set.', 2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata ) );
+                                lp( fid, sprintf( 'The model yields a value of $-2 \\\\log(L) = %g$ for %i data points in this data set.', 2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata ) );
                             end
                         else
                             if ( opts.omitlikelihood )
-                                lp( fid, sprintf( '. This dataset contains %i data points.', ar.model(jm).plot(jplot).ndata ) );
+                                lp( fid, sprintf( 'This dataset contains %i data points.', ar.model(jm).plot(jplot).ndata ) );
                             else
-                                lp( fid, sprintf( ', yields a value of the objective function $\\\\chi^2 = %g$ for %i data points in this data set.', ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata ) );
+                                lp( fid, sprintf( 'The model yields a value of $\\\\chi^2 = %g$ for %i data points in this data set.', ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata ) );
                             end        
                         end
                     end

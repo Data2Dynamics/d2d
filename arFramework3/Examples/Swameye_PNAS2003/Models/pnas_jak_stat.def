@@ -23,12 +23,12 @@ INPUTS
 pEpoR           C   "au"      "conc."   "spline_pos5(t, 0.0, sp1, 5.0, sp2, 10.0, sp3, 20.0, sp4, 60.0, sp5, 0, 0.0)"
 
 REACTIONS
-STAT             ->  pSTAT            CUSTOM "p1 * pEpoR * STAT"
+             ->  pSTAT            CUSTOM "p1 * pEpoR * STAT"
 pSTAT + pSTAT    ->  pSTAT_pSTAT      CUSTOM "p2 * pSTAT^2"
 pSTAT_pSTAT      ->  npSTAT_npSTAT    CUSTOM "p3 * pSTAT_pSTAT"
 
 // dissociation, delay and export 
-npSTAT_npSTAT    ->  nSTAT1 + nSTAT1  CUSTOM "p4 * npSTAT_npSTAT"
+npSTAT_npSTAT    ->  nSTAT1 + nSTAT1  CUSTOM "p4 * npSTAT_npSTAT" // test
 nSTAT1           ->  nSTAT2           CUSTOM "p4 * nSTAT1"
 nSTAT2           ->  nSTAT3           CUSTOM "p4 * nSTAT2"
 nSTAT3           ->  nSTAT4           CUSTOM "p4 * nSTAT3"

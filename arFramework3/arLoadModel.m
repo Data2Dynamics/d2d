@@ -203,7 +203,12 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         ar.model(m).isAmountBased = false;
     end
     vcount = 1;
-    str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+    %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+    
+    % Read single line (easier to trace errors back to their line)
+    [ line, remainder ] = readLine( fid, ar.config.comment_string );
+    %str = textscan(line, '%s', 1);
+    [str, remainder] = grabtoken( remainder, '%s', 1 );
     while(~strcmp(str{1},'INVARIANTS') && ~strcmp(str{1},'DERIVED'))
         source = {};
         sourceCoeffs = [];
@@ -223,10 +228,14 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                     nextValue = 1;
                 end
             end
-            str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+            %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+            [str, remainder] = grabtoken( remainder, '%s', 1 );
+            if ( isempty(str{1}) )
+                error('incomplete reaction definition in reaction %i: %s', vcount, line)
+            end
         end
         if(sum(~ismember(source, ar.model(m).x)) > 0) %R2013a compatible
-            error('undefined source species in reaction %i: %s', vcount, ...
+            error('%s\nundefined source species in reaction %i: %s', line, vcount, ...
                 source{~ismember(source, ar.model(m).x)}) %R2013a compatible
         end
         
@@ -239,7 +248,8 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         target = {};
         targetCoeffs = [];
         nextValue = 1;
-        str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+        %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+        [str, remainder] = grabtoken( remainder, '%s', 1 );
         while(~strcmp(str{1},'CUSTOM') && ~strcmp(str{1},'MASSACTION') && ~strcmp(str{1},'MASSACTIONKD'))
             if(~strcmp(str{1},'0') && ~strcmp(str{1},'+'))
                 % Check whether a stoichiometric coefficient is specified
@@ -251,7 +261,12 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                     nextValue = 1;
                 end
             end
-            str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+            %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+            [str, remainder] = grabtoken(remainder, '%s', 1);
+            
+            if ( isempty( str{1} ) )
+                error('missing keyword CUSTOM, MASSACTION or MASSACTIONKD before reaction rate expression');
+            end
         end
         if(sum(~ismember(target, ar.model(m).x)) > 0) %R2013a compatible
             error('undefined target species in reaction %i: %s', vcount, ...
@@ -281,7 +296,10 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             massactionkd = true;
         end
         
-        C = arTextScan(fid, '%q %q\n', 1, 'CommentStyle', ar.config.comment_string);
+        [C, remainder] = grabtoken(remainder, '%q %q', 1);
+        
+        %C = arTextScan(fid, '%q %q\n', 1, 'CommentStyle', ar.config.comment_string);
+        arValidateInput(C, 'REACTIONS', 'reaction rate expression' );
         str = C(1);
         ar.model(m).v{end+1} = cell2mat(C{2});
         
@@ -425,7 +443,12 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             vcount = vcount + 1;
         end
         
-        str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+        %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+        % No string left? Grab a new one
+        if isempty( remainder )
+            [ line, remainder ] = readLine( fid, ar.config.comment_string );
+        end
+        [str, remainder] = grabtoken( remainder, '%s', 1 );
     end
 elseif(strcmp(C{1},'ODES'))
     ar.model(m).isReactionBased = false;
@@ -785,3 +808,26 @@ arCheckReservedWords( ar.model(m).c, 'compartments' );
 ar = orderfields(ar);
 ar.model = orderfields(ar.model);
 
+
+function [ line, remainder ] = readLine( fid, commentStyle )
+    line = '';
+    while ( isempty(line) )
+        line = arTextScan(fid, '%[^\n]' ); 
+        line = strtrim(line{1}{1});
+        Q = strfind( line, commentStyle );
+        if ( ~isempty(Q) )
+            line = line(1:Q-1);
+        end
+    end
+    remainder = line;
+    
+    
+function [str, remainder] = grabtoken( inputString, varargin )
+    if ( isempty( inputString ) )
+        str{1} = {};
+        remainder = '';
+        return;
+    end
+
+	[str, pos] = textscan(inputString, varargin{:});
+	remainder = inputString(pos+1:end);    
