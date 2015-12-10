@@ -610,7 +610,7 @@ for jm = 1:length(ar.model)
             
             if(saveToFile)
                 if( (ar.config.useFitErrorMatrix==0 && ar.config.ploterrors == -1) || ...
-                        (ar.config.useFitErrorMatrix==0 && ar.config.ploterrors_matrix(jm,jd)==-1) )                        
+                        (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==-1) )                        
                     ar.model(jm).plot(jplot).savePath_FigYCI = arSaveFigure(h, ...
                         ar.model(jm).plot(jplot).name, '/FiguresCI/Y');
                 else
