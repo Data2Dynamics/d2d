@@ -19,7 +19,8 @@
 %   KeepFilenames     - Do not shorten data parameters containing entire
 %                       filenames (ones that use the _filename tag)
 %   AlternateFont     - Use a different font for the report
-%
+%   TexPlots          - Use the original tex files for plotting rather than
+%                       the pdfs
 
 function arMiniReport(varargin)
 
@@ -27,7 +28,7 @@ global ar
 
 warning( 'This report functionality is currently in alpha status. Please use arReport instead.' );
 
-switches = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont' };
+switches = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots' };
 descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Plotting all fitted Ys', '' }, ...
                     { 'Omitting non fitted Ys from report', '' }, ...
@@ -36,6 +37,7 @@ descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Displaying RANDOM transforms explicitly', 'Not displaying RANDOM transforms explicitly' }, ...
                     { 'Not shortening data parameters with filenames.', 'Shortening data parameters with filenames (ones that use the _filename tag)' }, ...
                     { 'Using alternate font', '' } ...
+                    { 'Using tex files for incorporating plots', 'Reverting to pre-generated PDFs for plots' }
                     };
 
 if( (nargin > 0) && max( strcmpi( varargin{1}, switches ) ) == 0 )
@@ -741,7 +743,7 @@ for jm=1:length(ar.model)
                             captiontext = [captiontext 'The observables are displayed as solid lines. '];
                             captiontext = [captiontext 'The error model that describes the measurement noise ' ...
                                 'is indicated by shades.'];
-                            if(exist([ar.model(jm).plot(jplot).savePath_FigY '_Report.tex'],'file')==2)
+                            if(opts.texplots&&exist([ar.model(jm).plot(jplot).savePath_FigY '_Report.tex'],'file')==2)
                                 copyfile([ar.model(jm).plot(jplot).savePath_FigY '_Report.tex'], ...
                                 [savePath '/' ar.model(jm).plot(jplot).name '_y.tex']);
                                 lpfigurePGF(fid, [ar.model(jm).plot(jplot).name '_y.tex'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
@@ -1001,9 +1003,9 @@ for jm=1:length(ar.model)
                         end                           
                         row{q} = 'Q Q Condition values';
                         var{q} = 'Q Q Parameter';
-                        lp(fid, '\\subsubsection{Condition dependent parameter changes}\\\\ \\hspace{-1.2cm} The following model parameters were changed to simulate these experimental conditions:\\\\');
+                        lp(fid, '\\subsubsection{Condition dependent parameter changes}\n The following model parameters were changed to simulate these experimental conditions:\\\\\n');
                         box = sprintf('%schnk',latexIdentifier(jplot));
-                        lp(fid, '\\\\\\begin{statictable}\\');
+                        lp(fid, '\\begin{statictable}\\');
                         lp(fid, '\t\\centering');
                         startFlexbox(fid, box);
                         

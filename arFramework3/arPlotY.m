@@ -604,9 +604,13 @@ for jm = 1:length(ar.model)
             
             figcount = figcount + 1;
             
+            if ( ~isfield( ar.config, 'useFitErrorMatrix' ) )
+                ar.config.useFitErrorMatrix = 0;
+            end
+            
             if(saveToFile)
-                if( ((~isfield(ar.config, 'useFitErrorMatrix')&&ar.config.useFitErrorMatrix==0) && ar.config.ploterrors == -1) || ...
-                        ((~isfield(ar.config, 'useFitErrorMatrix')&&ar.config.useFitErrorMatrix==0) && ar.config.ploterrors_matrix(jm,jd)==-1) )                        
+                if( (ar.config.useFitErrorMatrix==0 && ar.config.ploterrors == -1) || ...
+                        (ar.config.useFitErrorMatrix==0 && ar.config.ploterrors_matrix(jm,jd)==-1) )                        
                     ar.model(jm).plot(jplot).savePath_FigYCI = arSaveFigure(h, ...
                         ar.model(jm).plot(jplot).name, '/FiguresCI/Y');
                 else
