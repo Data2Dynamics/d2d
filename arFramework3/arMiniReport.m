@@ -18,6 +18,7 @@
 %                       do want to see these, specify this keyword.
 %   KeepFilenames     - Do not shorten data parameters containing entire
 %                       filenames (ones that use the _filename tag)
+%   AlternateFont     - Use a different font for the report
 %
 
 function arMiniReport(varargin)
@@ -26,14 +27,16 @@ global ar
 
 warning( 'This report functionality is currently in alpha status. Please use arReport instead.' );
 
-switches = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames' };
+switches = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont' };
 descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Plotting all fitted Ys', '' }, ...
                     { 'Omitting non fitted Ys from report', '' }, ...
                     { 'Omitting non plotted Ys from report', '' }, ...
                     { 'Omitting likelihood values from report', 'Including likelihood values in report' }, ...
                     { 'Displaying RANDOM transforms explicitly', 'Not displaying RANDOM transforms explicitly' }, ...
-                    { 'Not shortening data parameters with filenames.', 'Shortening data parameters with filenames (ones that use the _filename tag)' } };
+                    { 'Not shortening data parameters with filenames.', 'Shortening data parameters with filenames (ones that use the _filename tag)' }, ...
+                    { 'Using alternate font', '' } ...
+                    };
 
 if( (nargin > 0) && max( strcmpi( varargin{1}, switches ) ) == 0 )
     project_name = varargin{1}{1};
@@ -147,6 +150,7 @@ lp(fid, '\\usepackage{colortbl}' );
 lp(fid, '\\newcommand{\\altrowcol}{\\rowcolor[gray]{0.925}}');
 lp(fid, '\\newcommand{\\titlerowcol}{\\rowcolor[gray]{0.825}}');
 %lp(fid, '\\captionsetup[subfloat]{position=top}');
+lp(fid, '\\allowdisplaybreaks');
 lp(fid, '\\setlength{\\textheight}{22 cm}');
 lp(fid, '\\setlength{\\textwidth}{16 cm}');
 lp(fid, '\\setlength{\\topmargin}{-1.5 cm}');
@@ -181,6 +185,9 @@ lp(fid, '\\pgfplotsset{plot coordinates/math parser=false} ');
 lp(fid, '\\newlength\\figureheight ');
 lp(fid, '\\newlength\\figurewidth ');
 
+if ( opts.alternatefont )
+    lp(fid, '\\renewcommand*\\rmdefault{cmss} ');
+end
 lp(fid, '\\newcommand{\\crule}[1]{\\multispan{#1}{\\hspace*{\\tabcolsep}\\hrulefill\\hspace*{\\tabcolsep}}}');
 
 lp(fid, '\n\\begin{document}\n');
@@ -1220,6 +1227,9 @@ lp(fid, 'The fitted-column indicates if the parameter value was estimated (1), w
 lp(fid, '\t\\doendcenter');
 lp(fid, '\t\\end{table}');
 
+% Disable PLE inclusion
+if 0
+
 %% PLE
 plePath = [arSave '/PLE'];
 if(exist(plePath,'dir'))
@@ -1399,6 +1409,9 @@ if(exist(plePath,'dir'))
     %% Confidence intervals of model trajectories
     %     \subsection{Confidence intervals of the predicted model dynamics} \label{obsanalysis}
     % TODO
+end
+
+
 end
 
 lp(fid, '\\bibliographystyle{plain}');
