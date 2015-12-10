@@ -5,8 +5,6 @@
 % Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de
 % Copyright 2013 D2D Development Team. All rights reserved.
 
-function arInit( silent )
-
 if(~arCheck)
     return;
 end
@@ -21,14 +19,12 @@ arInitUser;
 
 ar.info.initTime = now;
 [ar.info.def_version_code, ar.info.c_version_code] = arGetVersion;
-if ( nargin < 1 ) || ( silent == 0 )
-    fprintf('Data 2 Dynamics Software\n');
-    fprintf('(arFramework3, def-version %i, c-version %s)\n', ...
-        ar.info.def_version_code, ar.info.c_version_code);
-    fprintf('Website: http://www.data2dynamics.org\n');
-    fprintf('Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de\n');
-    fprintf('Copyright 2015 D2D Development Team. All rights reserved.\n\n');
-end
+fprintf('Data 2 Dynamics Software\n');
+fprintf('(arFramework3, def-version %i, c-version %s)\n', ...
+    ar.info.def_version_code, ar.info.c_version_code);
+fprintf('Website: http://www.data2dynamics.org\n');
+fprintf('Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de\n');
+fprintf('Copyright 2015 D2D Development Team. All rights reserved.\n\n');
 
 ar.checksum = [];
 

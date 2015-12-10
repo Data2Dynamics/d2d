@@ -1,19 +1,22 @@
 fprintf( 'INTEGRATION TEST FOR NON-UNITY STOICHIOMETRY\n' );
 
-arInit(1);
+arInit;
+findState = @(ar, state)find( strcmp(ar.model.x, state ) );
 
 fprintf( 2, 'Parsing model with non-unity stoichiometry ...\n' );
 try
     arLoadModel('test2');
-catch
+catch ME
+    fprintf(getReport(ME));
     error('Test failed');
 end
 
 fprintf( 2, 'Compiling and simulating model with non-unity stoichiometry ...\n' );
 try
-    arCompileAll;
+    arCompileAll(true);
     arSimu(true, true, true);
-catch
+catch ME
+    fprintf(getReport(ME));
     error('Test failed');
 end
 
@@ -29,7 +32,8 @@ try
     else
         fprintf('PASSED\n');
     end
-catch
+catch ME
+    fprintf(getReport(ME));
     error('Test failed');
 end
 
@@ -41,7 +45,8 @@ try
     else
         fprintf('PASSED\n');
     end
-catch
+catch ME
+    fprintf(getReport(ME));
     error('Test failed');
 end
 
@@ -55,7 +60,8 @@ try
     else
         fprintf('PASSED\n');
     end
-catch
+catch ME
+    fprintf(getReport(ME));
     error('Test failed');
 end
 

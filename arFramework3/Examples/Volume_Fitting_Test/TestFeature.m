@@ -1,12 +1,13 @@
 fprintf( 'INTEGRATION TEST FOR VOLUME FITTING\n' );
 
-arInit(1);
+arInit;
 fprintf( 2, 'Parsing model with volume estimation ...\n' );
 try
     arLoadModel('test');
     arLoadData('test', [], 'csv');
-    arCompileAll();
-catch
+    arCompileAll(true);
+catch ME
+    fprintf(getReport(ME));
     error('FAILED');
 end
 

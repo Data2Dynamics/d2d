@@ -1,13 +1,14 @@
 fprintf( 'INTEGRATION TEST FOR SPLINES\n' );
 
-arInit(1);
+arInit;
 fprintf( 2, 'Parsing model with cubic spline ...\n' );
 try
     arLoadModel('normal_cubic');
     arLoadData('test', 1, 'csv');
     arLoadData('normal_cubic', 1, 'csv');
-    arCompileAll;
-catch
+    arCompileAll(true);
+catch ME
+    fprintf(getReport(ME));
     error('FAILED');
 end
 
@@ -18,7 +19,8 @@ try
     if ( norm(ar.model.data(arFindData('normal_cubic')).res) < 1e-3 )
         fprintf('PASSED');
     end
-catch
+catch ME
+    fprintf(getReport(ME));
     error('FAILED');
 end
 
@@ -28,8 +30,9 @@ try
     arLoadModel('positive_cubic');
     arLoadData('test', 1, 'csv');
     arLoadData('positive_cubic', 1, 'csv');
-    arCompileAll;
-catch
+    arCompileAll(2);
+catch ME
+    fprintf(getReport(ME));
     error('FAILED');
 end
 
@@ -40,7 +43,8 @@ try
     if ( norm(ar.model.data(arFindData('positive_cubic')).res) < 1e-3 )
         fprintf('PASSED');
     end
-catch
+catch ME
+    fprintf(getReport(ME));
     error('FAILED');
 end
 
@@ -51,8 +55,9 @@ try
     arLoadModel('monotone');
     arLoadData('test', 1, 'csv');
     arLoadData('monotone', 1, 'csv');
-    arCompileAll;
-catch
+    arCompileAll(2);
+catch ME
+    fprintf(getReport(ME));
     error('FAILED');
 end
 
@@ -63,6 +68,7 @@ try
     if ( norm(ar.model.data(arFindData('monotone')).res) < 1e-3 )
         fprintf('PASSED');
     end
-catch
+catch ME
+    fprintf(getReport(ME));
     error('FAILED');
 end
