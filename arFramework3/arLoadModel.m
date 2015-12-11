@@ -33,7 +33,7 @@ else
         'and note that the model will be loaded to the next free index position by default.']);
 end
 
-fprintf('loading model #%i, from file Models/%s.def...\n', m, name);
+arFprintf(1, 'loading model #%i, from file Models/%s.def...\n', m, name);
 fid = fopen(['Models/' name '.def'], 'r');
 
 % initial setup
@@ -318,10 +318,10 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                     subs(symtmp, sym(source{j}), 0);
                     symtmpsubs = subs(symtmp, sym(source{j}), 0);
                     if(symtmpsubs~=0)
-                        fprintf(2, 'Possible negative flux in reaction #%i:\n', length(ar.model(m).fv));
-                        fprintf(2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
-                        fprintf(2, 'Source species %s missing ?\n\n', source{j});
-                        fprintf(2, 'Deactivate this error message with: ar.config.checkForNegFluxes = false;\n\n');
+                        arFprintf(1, 2, 'Possible negative flux in reaction #%i:\n', length(ar.model(m).fv));
+                        arFprintf(1, 2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
+                        arFprintf(1, 2, 'Source species %s missing ?\n\n', source{j});
+                        arFprintf(1, 2, 'Deactivate this error message with: ar.config.checkForNegFluxes = false;\n\n');
                         error('Possible negative fluxes in reaction');
                     end
                 end

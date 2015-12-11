@@ -177,7 +177,7 @@ function ar = arSteadyState( varargin )
         if ~isempty( L )
             warning( 'Certain parameters in target condition not present in steady state reference!' );
             warning( 'The following sensitivities will *not* take the equilibration into account:' );
-            disp( sprintf( '%s\n', ar.model(m).condition(cTarget(a)).p{L} ) );
+            arFprintf(1, '%s\n', ar.model(m).condition(cTarget(a)).p{L} );
             ar.model(m).condition(cTarget(a)).ssUnmapped = L;
             map(L) = 1;
         end
@@ -205,7 +205,7 @@ function ar = arSteadyState( varargin )
     for a = 1 : length( ar.model )
         cnt = cnt + length(ar.model(m).ss_condition);
     end
-    disp( sprintf( 'Number of steady state equilibrations: %d', cnt ) );
+    arFprintf(1, 'Number of steady state equilibrations: %d', cnt );
     
     % Show any errors
     arPrintSteadyState(m, 2);

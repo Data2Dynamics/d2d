@@ -92,7 +92,7 @@ usePool = exist('gcp','file')>0 && ~isempty(gcp('nocreate'));
 checksum_global = addToCheckSum(ar.info.c_version_code);
 c_version_code = ar.info.c_version_code;
 for m=1:length(ar.model)
-    fprintf('\n');
+    arFprintf(2, '\n');
     
     matVer = ver('MATLAB');
     matlab_version = str2double(matVer.Version);    
@@ -482,7 +482,7 @@ warning(warnreset);
 function arCalcModel(m, matlab_version)
 global ar
 
-fprintf('calculating model m%i, %s...\n', m, ar.model(m).name);
+arFprintf(2, 'calculating model m%i, %s...\n', m, ar.model(m).name);
 
 % make short strings
 ar.model(m).xs = {};
@@ -603,9 +603,9 @@ end
 function condition = arCalcCondition(config, model, condition, m, c, doskip, matlab_version)
 
 if(doskip)
-    fprintf('calculating condition m%i c%i, %s...skipped\n', m, c, model.name);
+    arFprintf(2, 'calculating condition m%i c%i, %s...skipped\n', m, c, model.name);
 else
-    fprintf('calculating condition m%i c%i, %s...\n', m, c, model.name);
+    arFprintf(2, 'calculating condition m%i c%i, %s...\n', m, c, model.name);
 end
 
 % hard code conditions
@@ -927,9 +927,9 @@ function sensBlock = verifyRow( sensBlock, func, location )
 function data = arCalcData(config, model, data, m, c, d, doskip, matlab_version)
 
 if(doskip)
-    fprintf('calculating data m%i d%i -> c%i, %s...skipped\n', m, d, c, data.name);
+    arFprintf(2, 'calculating data m%i d%i -> c%i, %s...skipped\n', m, d, c, data.name);
 else
-    fprintf('calculating data m%i d%i -> c%i, %s...\n', m, d, c, data.name);
+    arFprintf(2, 'calculating data m%i d%i -> c%i, %s...\n', m, d, c, data.name);
 end
 
 % Grab special functions list
@@ -1304,7 +1304,7 @@ fprintf(fid,'\n\n\n');
 % Write Condition
 function arWriteCFilesCondition(fid, matlab_version, config, model, condition, m, c, timedebug)
 
-fprintf(' -> writing condition m%i c%i, %s...\n', m, c, model.name);
+arFprintf(2, ' -> writing condition m%i c%i, %s...\n', m, c, model.name);
 
 fprintf(fid, '#include "%s.h"\n',  condition.fkt);
 fprintf(fid, '#include <cvodes/cvodes.h>\n');    
@@ -1716,7 +1716,7 @@ fprintf(fid,'\n\n\n');
 % Write Data
 function arWriteCFilesData(fid, matlab_version, config, m, c, d, data)
 
-fprintf(' -> writing data m%i d%i -> c%i, %s...\n', m, d, c, data.name);
+arFprintf(2, ' -> writing data m%i d%i -> c%i, %s...\n', m, d, c, data.name);
 
 fprintf(fid, '#include "%s.h"\n',  data.fkt);
 fprintf(fid, '#include <cvodes/cvodes.h>\n');    

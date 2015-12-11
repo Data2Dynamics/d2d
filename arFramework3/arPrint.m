@@ -155,19 +155,19 @@ end
 
 maxlabellength = max(cellfun(@length, ar.pLabel(js)));
 
-fprintf('Parameters: # = free, C = constant, D = dynamic, I = initial value, E = error model\n\n');
+arFprintf(1, 'Parameters: # = free, C = constant, D = dynamic, I = initial value, E = error model\n\n');
 printHead;
 for j=1:length(js)
     printPar(js(j), ar.qCloseToBound(js(j)));
 	if(mod(j,10)==0 && j<length(js))
-		fprintf(['     |   | ' arExtendStr('', maxlabellength) ' |                                |              |         |      \n']);
+		arFprintf(1, ['     |   | ' arExtendStr('', maxlabellength) ' |                                |              |         |      \n']);
 	end
 end
 
     function printHead
         strhead = ['     |   | ' arExtendStr('name', maxlabellength) ' | lb       value       ub        | 10^value      | fitted | prior\n'];
         strhead = strrep(strhead, '|', ' ');
-        fprintf(strhead);
+        arFprintf(1, strhead);
     end
 
     function printPar(j, qclosetobound)
@@ -194,7 +194,7 @@ end
         else
             fit_flag = '#';
         end
-        fprintf(outstream, '%s%4i|%s%s%s| %s | %+8.2g   %+8.2g   %+8.2g | %i   %+8.2g | %7i | %s \n', ...
+        arFprintf(1, outstream, '%s%4i|%s%s%s| %s | %+8.2g   %+8.2g   %+8.2g | %i   %+8.2g | %7i | %s \n', ...
             fit_flag, j, strdyn, strinit, strerr, arExtendStr(ar.pLabel{j}, maxlabellength), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), pTrans(j), ar.qFit(j), priorStr(j));
         
     end

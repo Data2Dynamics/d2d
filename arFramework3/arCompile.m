@@ -30,6 +30,19 @@ else
     end
 end
 
+global arOutputLevel; 
+if isempty( arOutputLevel )
+    arOutputLevel = 2;
+end
+
+if ( arOutputLevel > 2 )
+	verbose{1} = '-v';
+else
+	verbose = {};
+end 
+
+arFprintf(1, 'Compiling files...');
+
 usePool = exist('gcp','file')>0 && ~isempty(gcp('nocreate'));
 
 if(~isempty(varargin))
@@ -53,7 +66,7 @@ else
     source_dir = pwd;
 end
 
-fprintf('\n');
+arFprintf(2, '\n');
 
 if(length(which('arClusterCompiledHook.m','-all'))>1)
     warning('arClusterCompiledHook.m is found multiple times which can cause compilation errors. Check your matlab path.');
@@ -200,26 +213,25 @@ for j=1:length(objectsKLU)
 end
 
 
-
 % compile
-if(usePool)
+if(usePool)   
     parfor j=1:length(sourcesKLU)
         if(~exist(['Compiled/' c_version_code '/' mexext '/' objectsKLU{j}], 'file') || forceFullCompile)
-            mex('-c','-largeArrayDims', '-DNTIMER', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
+            mex('-c',verbose{:},'-largeArrayDims', '-DNTIMER', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [KLU_path sourcesKLU{j}]); %#ok<PFBNS>
-            fprintf('compiling KLU(%s)...done\n', objectsKLU{j});
+            arFprintf(2, 'compiling KLU(%s)...done\n', objectsKLU{j});
         else
-            fprintf('compiling KLU(%s)...skipped\n', objectsKLU{j});
+            arFprintf(2, 'compiling KLU(%s)...skipped\n', objectsKLU{j});
         end
     end
 else
     for j=1:length(sourcesKLU)
         if(~exist(['Compiled/' c_version_code '/' mexext '/' objectsKLU{j}], 'file') || forceFullCompile)
-            mex('-c','-largeArrayDims', '-DNTIMER', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
+            mex('-c',verbose{:},'-largeArrayDims', '-DNTIMER', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [KLU_path sourcesKLU{j}]);
-            fprintf('compiling KLU(%s)...done\n', objectsKLU{j});
+            arFprintf(2, 'compiling KLU(%s)...done\n', objectsKLU{j});
         else
-            fprintf('compiling KLU(%s)...skipped\n', objectsKLU{j});
+            arFprintf(2, 'compiling KLU(%s)...skipped\n', objectsKLU{j});
         end
     end
 end
@@ -304,21 +316,21 @@ end
 if(usePool)
     parfor j=1:length(sources)
         if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file') || forceFullCompile)
-            mex('-c','-largeArrayDims', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
+            mex('-c',verbose{:},'-largeArrayDims', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [sundials_path sources{j}]); %#ok<PFBNS>
-            fprintf('compiling CVODES(%s)...done\n', objects{j});
+            arFprintf(2, 'compiling CVODES(%s)...done\n', objects{j});
         else
-            fprintf('compiling CVODES(%s)...skipped\n', objects{j});
+            arFprintf(2, 'compiling CVODES(%s)...skipped\n', objects{j});
         end
     end
 else
     for j=1:length(sources)
         if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file') || forceFullCompile)
-            mex('-c','-largeArrayDims', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
+            mex('-c',verbose{:},'-largeArrayDims', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [sundials_path sources{j}]);
-            fprintf('compiling CVODES(%s)...done\n', objects{j});
+            arFprintf(2, 'compiling CVODES(%s)...done\n', objects{j});
         else
-            fprintf('compiling CVODES(%s)...skipped\n', objects{j});
+            arFprintf(2, 'compiling CVODES(%s)...skipped\n', objects{j});
         end
     end
 end
@@ -331,11 +343,11 @@ else
 end
 
 if(~exist(objects_inp, 'file') || forceFullCompile)
-    mex('-c','-largeArrayDims','-outdir',['Compiled/' ar.info.c_version_code '/' mexext '/'], ...
+    mex('-c',verbose{:},'-largeArrayDims','-outdir',['Compiled/' ar.info.c_version_code '/' mexext '/'], ...
         includesstr{:}, [ar_path '/arInputFunctionsC.c']);
-    fprintf('compiling input functions...done\n');
+    arFprintf(2, 'compiling input functions...done\n');
 else
-    fprintf('compiling input functions...skipped\n');
+    arFprintf(2, 'compiling input functions...skipped\n');
 end
 
 % TODO I don't know why this gives a link error ... ?
@@ -365,30 +377,30 @@ if(usePool)
     parfor j=1:length(objects_con)
         if(~exist(objects_con{j}, 'file') || forceFullCompile)
             if(isempty(compiled_cluster_path))
-                mex('-c','-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                mex('-c',verbose{:},'-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                     includesstr{:}, [source_dir '/Compiled/' c_version_code '/' file_con{j}]);  %#ok<PFBNS>
             else
-                mex('-c','-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                mex('-c',verbose{:},'-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                     includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_con{j}]);
             end
-            fprintf('compiling condition m%i c%i, %s...done\n', ms(j), cs(j), file_con{j});
+            arFprintf(2, 'compiling condition m%i c%i, %s...done\n', ms(j), cs(j), file_con{j});
         else
-            fprintf('compiling condition m%i c%i, %s...skipped\n', ms(j), cs(j), file_con{j});
+            arFprintf(2, 'compiling condition m%i c%i, %s...skipped\n', ms(j), cs(j), file_con{j});
         end
     end
 else
     for j=1:length(objects_con)
         if(~exist(objects_con{j}, 'file') || forceFullCompile)
             if(isempty(compiled_cluster_path))
-                mex('-c','-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                mex('-c',verbose{:},'-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                     includesstr{:}, [source_dir '/Compiled/' c_version_code '/' file_con{j}]);
             else
-                mex('-c','-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                mex('-c',verbose{:},'-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                     includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_con{j}]);
             end
-            fprintf('compiling condition m%i c%i, %s...done\n', ms(j), cs(j), file_con{j});
+            arFprintf(2, 'compiling condition m%i c%i, %s...done\n', ms(j), cs(j), file_con{j});
         else
-            fprintf('compiling condition m%i c%i, %s...skipped\n', ms(j), cs(j), file_con{j});
+            arFprintf(2, 'compiling condition m%i c%i, %s...skipped\n', ms(j), cs(j), file_con{j});
         end
     end
 end
@@ -421,30 +433,30 @@ if(isfield(ar.model, 'data'))
         parfor j=1:length(objects_dat)
             if(~exist(objects_dat{j}, 'file') || forceFullCompile)
                 if(isempty(compiled_cluster_path))
-                    mex('-c','-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                    mex('-c',verbose{:},'-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                         includesstr{:}, [source_dir '/Compiled/' c_version_code '/' file_dat{j}]);  %#ok<PFBNS>
                 else
-                    mex('-c','-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                    mex('-c',verbose{:},'-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                         includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_dat{j}]);
                 end
-                fprintf('compiling data m%i d%i, %s...done\n', ms(j), ds(j), file_dat{j});
+                arFprintf(2, 'compiling data m%i d%i, %s...done\n', ms(j), ds(j), file_dat{j});
             else
-                fprintf('compiling data m%i d%i, %s...skipped\n', ms(j), ds(j), file_dat{j});
+                arFprintf(2, 'compiling data m%i d%i, %s...skipped\n', ms(j), ds(j), file_dat{j});
             end
         end
     else
         for j=1:length(objects_dat)
             if(~exist(objects_dat{j}, 'file') || forceFullCompile)
                 if(isempty(compiled_cluster_path))
-                    mex('-c','-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                    mex('-c',verbose{:},'-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                         includesstr{:}, [source_dir '/Compiled/' c_version_code '/' file_dat{j}]);
                 else
-                    mex('-c','-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
+                    mex('-c',verbose{:},'-largeArrayDims','-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                         includesstr{:}, [compiled_cluster_path '/' c_version_code '/' file_dat{j}]);
                 end
-                fprintf('compiling data m%i d%i, %s...done\n', ms(j), ds(j), file_dat{j});
+                arFprintf(2, 'compiling data m%i d%i, %s...done\n', ms(j), ds(j), file_dat{j});
             else
-                fprintf('compiling data m%i d%i, %s...skipped\n', ms(j), ds(j), file_dat{j});
+                arFprintf(2, 'compiling data m%i d%i, %s...skipped\n', ms(j), ds(j), file_dat{j});
             end
         end
     end
@@ -460,7 +472,7 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
     if(~ispc)
         % parallel code using POSIX threads for Unix type OS
 
-        mex('-largeArrayDims','-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
+        mex('-largeArrayDims',verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
             sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
             which('arSimuCalc.c'), objectsstr{:});
     else
@@ -469,13 +481,13 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
         includesstr{end+1} = ['-L"' ar_path '\pthreads-w32_2.9.1\lib\' mexext '"'];
         includesstr{end+1} = '-lpthreadVC2';
 
-        mex('-largeArrayDims','-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
+        mex('-largeArrayDims',verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
             sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
             which('arSimuCalc.c'), objectsstr{:});
     end
-    fprintf('compiling and linking %s...done\n', ar.fkt);
+    arFprintf(2, 'compiling and linking %s...done\n', ar.fkt);
 else
-    fprintf('compiling and linking %s...skipped\n', ar.fkt);
+    arFprintf(2, 'compiling and linking %s...skipped\n', ar.fkt);
 end
 
 %% refresh file cache

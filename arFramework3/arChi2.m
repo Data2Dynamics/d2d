@@ -204,7 +204,7 @@ for i = 1:nCVRestart
                             else
                                 ar.config.maxsteps = (1+.2*(i-1))*maxsteps;
                                 if(~error_printed)
-                                    fprintf('Integration error, restarting %d / %d with 20%% increased maxsteps.\n',i-1,nCVRestart)
+                                    arFprintf(1, 'Integration error, restarting %d / %d with 20%% increased maxsteps.\n',i-1,nCVRestart)
                                     error_printed = 1;
                                 end
                             end
@@ -212,7 +212,7 @@ for i = 1:nCVRestart
                             ar.config.atol = (1+.05*i)*atol;
                             ar.config.rtol = (1+.05*i)*rtol;
                             if(~error_printed)
-                                fprintf('Integration error, restarting %d / %d with 5%% increased precision.\n',i,nCVRestart)
+                                arFprintf(1, 'Integration error, restarting %d / %d with 5%% increased precision.\n',i,nCVRestart)
                                 error_printed = 1;
                             end
                         end
@@ -235,7 +235,7 @@ for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
         if(isfield(ar.model(m).condition(c), 'xExpSimu'))
             if(sum((min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) ./ range(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),1) < -ar.config.rtol) & (min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) < -ar.config.atol)) > 0)
-                fprintf('Negative state in model %d condition %d detected that is defined as positive! Double-check model definition!\nPlot negative states by calling ar.model(%d).qPositiveX(:) = 0; with subsequent arPlot call.\n',m,c,m)
+                arFprintf(1, 'Negative state in model %d condition %d detected that is defined as positive! Double-check model definition!\nPlot negative states by calling ar.model(%d).qPositiveX(:) = 0; with subsequent arPlot call.\n',m,c,m)
             end
         end
     end
@@ -597,26 +597,26 @@ end
 if(~silent)
     if(ar.ndata>0)
         if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1)
-            fprintf('-2*log(L) = %g, %i data points, ', ...
+            arFprintf(1, '-2*log(L) = %g, %i data points, ', ...
                 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
         elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
-            fprintf('-2*log(L) = %g, %i data points, ', ...
+            arFprintf(1, '-2*log(L) = %g, %i data points, ', ...
                 2*ar.ndata_err*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
         else
-            fprintf('global chi^2 = %g, %i data points, ', ar.chi2fit, ar.ndata);
+            arFprintf(1, 'global chi^2 = %g, %i data points, ', ar.chi2fit, ar.ndata);
         end
     end
-    fprintf('%i free parameters', sum(ar.qFit==1));
+    arFprintf(1, '%i free parameters', sum(ar.qFit==1));
     if(ar.chi2constr ~=0)
-        fprintf(', %g violation of %i constraints', ar.chi2constr, ar.nconstr);
+        arFprintf(1, ', %g violation of %i constraints', ar.chi2constr, ar.nconstr);
     end
     if(ar.chi2prior ~=0)
-        fprintf(', %g violation of %i prior assumptions', ar.chi2prior, ar.nprior);
+        arFprintf(1, ', %g violation of %i prior assumptions', ar.chi2prior, ar.nprior);
     end
     if(sensi)
-        fprintf(', first order optimality criterion %g (%i)', ar.firstorderopt, -sum(qred));
+        arFprintf(1, ', first order optimality criterion %g (%i)', ar.firstorderopt, -sum(qred));
     end
-    fprintf('\n');
+    arFprintf(1, '\n');
 end
 
 if(has_error)

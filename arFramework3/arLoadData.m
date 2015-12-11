@@ -42,7 +42,7 @@ if(~exist(['Data/' name '.def'],'file'))
     if(~exist(['Data/' name '.xls'],'file') && ~exist(['Data/' name '.csv'],'file') && ~exist(['Data/' name '.xlsx'],'file'))
         error('data definition file %s.def does not exist in folder Data/', name)
     else
-        fprintf('\ncreating generic .def file for Data/%s ...\n', name);
+        arFprintf(1, '\ncreating generic .def file for Data/%s ...\n', name);
         copyfile(which('data_template.def'),['./Data/' name '.def']);
     end
 else
@@ -106,7 +106,7 @@ end
 ar.model(m).data(d).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
 ar.model(m).data(d).uNames = {};
 
-fprintf('\nloading data #%i, from file Data/%s.def...', d, name);
+arFprintf(1, '\nloading data #%i, from file Data/%s.def...', d, name);
 fid = fopen(['Data/' name '.def'], 'r');
 
 % DESCRIPTION
@@ -137,11 +137,11 @@ if(strcmp(str{1},'PREDICTOR-DOSERESPONSE'))
     ar.model(m).data(d).doseresponse = true;
     str = textscan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
     ar.model(m).data(d).response_parameter = cell2mat(str{1});
-    fprintf('dose-response to %s\n', ar.model(m).data(d).response_parameter);
+    arFprintf(2, 'dose-response to %s\n', ar.model(m).data(d).response_parameter);
 else
     ar.model(m).data(d).doseresponse = false;
     ar.model(m).data(d).response_parameter = '';
-    fprintf('\n');
+    arFprintf(2, '\n');
 end
 C = textscan(fid, '%s %s %q %q %n %n %n %n\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).t = cell2mat(C{1});
@@ -488,7 +488,7 @@ if(~strcmp(extension,'none') && ( ...
     (exist(['Data/' name '.xlsx'],'file') && strcmp(extension,'xls')) ||...
     (exist(['Data/' name '.xls'],'file') && strcmp(extension,'xls')) || ...
     (exist(['Data/' name '.csv'],'file') && strcmp(extension,'csv'))))
-    fprintf('loading data #%i, from file Data/%s.%s...\n', d, name, extension);
+    arFprintf(2, 'loading data #%i, from file Data/%s.%s...\n', d, name, extension);
 
     % read from file
     if(strcmp(extension,'xls'))
@@ -560,7 +560,7 @@ if(~strcmp(extension,'none') && ( ...
             qvals = jrandis == j;
             tmpdata = data(qvals,qobs);
             if(sum(~isnan(tmpdata(:)))>0 || ~removeEmptyObs)
-                fprintf('local random effect #%i:\n', j)
+                arFprintf(2, 'local random effect #%i:\n', j)
                 
                 if(j < size(randis,1))
                     ar.model(m).data(d+1) = ar.model(m).data(d);
@@ -568,7 +568,7 @@ if(~strcmp(extension,'none') && ( ...
                 end
                 
                 for jj=1:size(randis,2)
-                    fprintf('\t%20s = %s\n', randis_header{jj}, randis{j,jj})
+                    arFprintf(2, '\t%20s = %s\n', randis_header{jj}, randis{j,jj})
                     
                     ar.model(m).plot(jplot).name = [ar.model(m).plot(jplot).name '_' ...
                         randis_header{jj} randis{j,jj}];
@@ -617,7 +617,7 @@ if(~strcmp(extension,'none') && ( ...
                 checkReserved(m, d);
                 
             else
-                fprintf('local random effect #%i: no matching data, skipped\n', j);
+                arFprintf(2, 'local random effect #%i: no matching data, skipped\n', j);
             end
         end
     else
@@ -686,7 +686,7 @@ if(sum(qcond) > 0)
     
     for j=1:size(condis,1)
         
-        fprintf('local condition #%i:\n', j)
+        arFprintf(2, 'local condition #%i:\n', j)
         
         if(j < size(condis,1))
             if(length(ar.model(m).data) > d)
@@ -698,7 +698,7 @@ if(sum(qcond) > 0)
         % remove obs without data
         if(removeEmptyObs)
             for jj=find(~qhasdata)
-                fprintf('\t%20s no data, removed\n', ar.model(m).data(d).y{jj});
+                arFprintf(2, '\t%20s no data, removed\n', ar.model(m).data(d).y{jj});
                 jjjs = find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars)); %R2013a compatible
                 jjjs = jjjs(:)';
                 for jjj=jjjs
@@ -726,7 +726,7 @@ if(sum(qcond) > 0)
         
         for jj=1:size(condis,2)
             if(~isempty(condis{j,jj}))
-                fprintf('\t%20s = %s\n', condi_header{jj}, condis{j,jj})
+                arFprintf(2, '\t%20s = %s\n', condi_header{jj}, condis{j,jj})
                 
                 qcondjj = ismember(ar.model(m).data(d).p, condi_header{jj}); %R2013a compatible
                 if(sum(qcondjj)>0)
@@ -786,7 +786,7 @@ else
     % remove obs without data
     if(removeEmptyObs)
         for jj=find(~qhasdata)
-            fprintf('\t%20s no data, removed\n', ar.model(m).data(d).y{jj});
+            arFprintf(2, '\t%20s no data, removed\n', ar.model(m).data(d).y{jj});
             jjjs = find(ismember(ar.model(m).data(d).p, ar.model(m).data(d).py_sep(jj).pars)); %R2013a compatible
             jjjs = jjjs(:)';
             for jjj=jjjs
@@ -845,7 +845,7 @@ if(nints==1)
     return;
 end
 
-fprintf('using %i shooting intervals\n', nints);
+arFprintf(2, 'using %i shooting intervals\n', nints);
 ar.model(m).ms_count = ar.model(m).ms_count + 1;
 ar.model(m).data(d).ms_index = ar.model(m).ms_count;
 
@@ -891,12 +891,12 @@ for j=1:length(ar.model(m).data(d).y)
     
     if(sum(q)==1)
         ar.model(m).data(d).yExp(:,j) = data(:,q);
-        fprintf('\t%20s -> %4i data-points assigned', ar.model(m).data(d).y{j}, sum(~isnan(data(:,q))));
+        arFprintf(2, '\t%20s -> %4i data-points assigned', ar.model(m).data(d).y{j}, sum(~isnan(data(:,q))));
         
         % normalize data
         if(ar.model(m).data(d).normalize(j))
             ar.model(m).data(d).yExp(:,j) = ar.model(m).data(d).yExp(:,j) / nfactor(q);
-            fprintf(' normalized');
+            arFprintf(2, ' normalized');
         end
         
         % log-fitting
@@ -905,9 +905,9 @@ for j=1:length(ar.model(m).data(d).y)
             ar.model(m).data(d).yExp(qdatapos,j) = log10(ar.model(m).data(d).yExp(qdatapos,j));
             ar.model(m).data(d).yExp(~qdatapos,j) = nan;
             if(sum(~qdatapos)==0)
-                fprintf(' for log-fitting');
+                arFprintf(2, ' for log-fitting');
             else
-                fprintf(' for log-fitting (%i values <=0 removed)', sum(~qdatapos));
+                arFprintf(2, ' for log-fitting (%i values <=0 removed)', sum(~qdatapos));
             end
         end
         
@@ -915,21 +915,21 @@ for j=1:length(ar.model(m).data(d).y)
         qstd = ismember(header, [ar.model(m).data(d).y{j} '_std']); %R2013a compatible
         if(sum(qstd)==1)
             ar.model(m).data(d).yExpStd(:,j) = data(:,qstd);
-            fprintf(' with stds');
+            arFprintf(2, ' with stds');
             if(ar.model(m).data(d).normalize(j))
                 ar.model(m).data(d).yExpStd(:,j) = ar.model(m).data(d).yExpStd(:,j) / nfactor(q);
-                fprintf(' normalized');
+                arFprintf(2, ' normalized');
             end
         elseif(sum(qstd)>1)
             error('multiple std colums for observable %s', ar.model(m).data(d).y{j})
         end
         
     elseif(sum(q)==0)
-        fprintf('*\t%20s -> not assigned', ar.model(m).data(d).y{j});
+        arFprintf(2, '*\t%20s -> not assigned', ar.model(m).data(d).y{j});
     else
         error('multiple data colums for observable %s', ar.model(m).data(d).y{j})
     end
     
-    fprintf('\n');
+    arFprintf(1, '\n');
 end
 
