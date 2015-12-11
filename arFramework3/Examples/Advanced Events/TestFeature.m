@@ -38,3 +38,13 @@ if ((norm(ar.model.data(1).res)+norm(ar.model.data(2).res)+norm(ar.model.data(3)
 else
     error( 'FINAL ERROR TOO LARGE' );
 end
+
+arSetPars('k_basal', 0);
+arSetPars('k_deg', -1);
+arSimu(false,false,true);
+fprintf( 2, 'Testing correct parameters with equilibration event... ' );
+if ((norm(ar.model.data(1).res)+norm(ar.model.data(2).res)+norm(ar.model.data(3).res))<0.01)
+    fprintf('PASSED\n');
+else
+    error( 'FINAL ERROR TOO LARGE' );
+end
