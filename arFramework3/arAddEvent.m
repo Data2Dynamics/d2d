@@ -5,7 +5,8 @@
 %
 % Adds an event to a condition. Event is added for a specific condition at
 % a specific time point. If you wish to see how the conditions are set up,
-% you can use the command 'arShowDataConditionStructure'
+% you can use the command 'arShowDataConditionStructure'. Specifying 'All'
+% for the conditions sets the event for all model conditions.
 %
 % If a change at the event is required, also specify a state name, and a
 % change. Event changes are of the form Ax+B; where x represents the old
@@ -49,6 +50,10 @@ function ar = arAddEvent( varargin )
     m = varargin{1};
     c = varargin{2};
     t = varargin{3};
+    
+    if ( ischar(c) && strcmpi( c, 'all' ) )
+        c = 1 : length( ar.model(m).condition );
+    end
 
     nStates = numel( ar.model.x );
     nPars   = numel( ar.model(m).condition(c).p );    
