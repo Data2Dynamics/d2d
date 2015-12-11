@@ -154,7 +154,7 @@ elseif(ar.config.optimizer == 4)
     fit.history = history;
     
     ar = arChi2(ar, false, ar.p(ar.qFit==1));
-    fprintf('STRSCNE finished after %i iterations: code %i, total chi2 improvement = %g\n', ...
+    arFprintf(1,'STRSCNE finished after %i iterations: code %i, total chi2 improvement = %g\n', ...
         output(1), exitflag, chi2_old - ar.chi2fit);
     
     return;
@@ -198,7 +198,7 @@ end
 
 if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
     if(max(ar.ms_violation) > ar.ms_threshold)
-        fprintf('Multiple Shooting: continuity constains violated %e > %e\n', max(ar.ms_violation), ar.ms_threshold);
+        arFprintf(1, 'Multiple Shooting: continuity constains violated %e > %e\n', max(ar.ms_violation), ar.ms_threshold);
     end
 end
 

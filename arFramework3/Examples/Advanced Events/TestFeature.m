@@ -1,51 +1,40 @@
 fprintf( 'INTEGRATION TEST FOR EQUILIBRATION\n' );
 
-fprintf( 2, 'Loading model for equilibration test...\n' );
-try
-    arInit;
-    arLoadModel('equilibration');
-    arLoadData('cond1', 1, 'csv');
-    arLoadData('cond2a', 1, 'csv');
-    arLoadData('cond2b', 1, 'csv');
-   
-    % Use the event system (prerequisite for steady state sims)
-    ar.config.useEvents = 1;
+fprintf( 2, 'Loading model for equilibration test... ' );
+arInit;
+arLoadModel('equilibration');
+arLoadData('cond1', 1, 'csv');
+arLoadData('cond2a', 1, 'csv');
+arLoadData('cond2b', 1, 'csv');
 
-    %% Compile the model
-    arCompileAll(true);
+% Use the event system (prerequisite for steady state sims)
+ar.config.useEvents = 1;
 
-    % Don't fit the standard deviation
-    ar.qFit(end)=0;
+%% Compile the model
+arCompileAll(true);
 
-    % Set the parameters to wrong values
-    arSetPars('k_basal', 0);
-    arSetPars('k_deg', -2);
-catch ME
-    fprintf(getReport(ME));
-    error( 'FAILED' );
-end
+% Don't fit the standard deviation
+ar.qFit(end)=0;
 
-try
-    %% Equilibrate condition 1 and use that as initial value for condition 1
-    %  Equilibrate condition 2 and use that as initial condition for 2 and 3
-    arClearEvents(ar); % Clears events
-    arFindInputs;
-    arSteadyState(ar, 1, 1, 1, -1e7);
-    arSteadyState(ar, 1, 2, [2,3], -1e7);
-catch ME
-    fprintf(getReport(ME));
-    error( 'FAILED SETTING UP STEADY STATE' );
-end
+% Set the parameters to wrong values
+arSetPars('k_basal', 0);
+arSetPars('k_deg', -2);
+fprintf( 'PASSED\n' );
 
-try
-    arFit;
-    fprintf( 2, 'Testing fitting with equilibration event...\n' );
-    if ((norm(ar.model.data(1).res)+norm(ar.model.data(2).res)+norm(ar.model.data(3).res))<0.01)
-        fprintf('PASSED\n');
-    else
-        error( 'FAILED TO MEET REQUIRED TOLERANCE' );
-    end
-catch ME
-    fprintf(getReport(ME));
-    error( 'FAILED' );
+fprintf( 2, 'Setting equilibration events... ' );
+
+%% Equilibrate condition 1 and use that as initial value for condition 1
+%  Equilibrate condition 2 and use that as initial condition for 2 and 3
+arClearEvents(ar); % Clears events
+arFindInputs;
+arSteadyState(ar, 1, 1, 1, -1e7);
+arSteadyState(ar, 1, 2, [2,3], -1e7);
+fprintf( 'PASSED\n' );
+
+arFit;
+fprintf( 2, 'Testing fitting with equilibration event... ' );
+if ((norm(ar.model.data(1).res)+norm(ar.model.data(2).res)+norm(ar.model.data(3).res))<0.01)
+    fprintf('PASSED\n');
+else
+    error( 'FINAL ERROR TOO LARGE' );
 end
