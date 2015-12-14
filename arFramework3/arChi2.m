@@ -4,7 +4,7 @@
 %   sensi:          propagate sensitivities         [false]
 %                   this argument is passed to arSimu
 %   pTrial:         trial parameter of fitting
-%   dynamics:       evaluate dynamics               [true]
+%   dynamics:       force evaluation of dynamics    [false]
 %   doSimu          should arSimu be called         [true]
 % 
 % or

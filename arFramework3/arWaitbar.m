@@ -4,10 +4,16 @@
 function arWaitbar(j, n, text)
 
 global arWaitbarGlobal;
+global arOutputLevel;
 
 % disable waitbar window and use command line output instead
 if ~isfield(arWaitbarGlobal,'showWindow')
     arWaitbarGlobal.showWindow = 1;
+end
+
+% suppress waitbar
+if ( arOutputLevel < 2 )
+    return;
 end
 
 if(length(j) > 1)

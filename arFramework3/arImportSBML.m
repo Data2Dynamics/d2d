@@ -172,9 +172,6 @@ if isfield(m,'raterule')
         count = 0;
         while(findrule  && count<100)
             count = count+1;
-            if(count >10)
-                tmpstr
-            end
             
             for jj=1:length(m.rule)
                 try

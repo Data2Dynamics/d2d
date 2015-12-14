@@ -25,6 +25,7 @@
 function arFindInputs( verbose )
 
     global ar;
+    global arOutputLevel;
 
     if ( nargin < 1 )
         verbose = 0;
@@ -41,10 +42,15 @@ function arFindInputs( verbose )
         allData = length( ar.model(m).condition );
     end
 
-    h = waitbar(0); lastParse = ''; lastA = 0; totalEvents = 0;
+    if ( arOutputLevel > 1 )
+        h = waitbar(0);
+    end
+    lastParse = ''; lastA = 0; totalEvents = 0;
     for m = 1 : length( ar.model )
         for a = 1 : length( ar.model(m).condition )
-            waitbar(a/allData, h, sprintf( 'Processing step inputs [%d/%d] %s', a, allData, lastParse ) );
+            if ( arOutputLevel > 1 )
+                waitbar(a/allData, h, sprintf( 'Processing step inputs [%d/%d] %s', a, allData, lastParse ) );
+            end
 
             events = [];
             stepLocations = {};
@@ -116,8 +122,10 @@ function arFindInputs( verbose )
         lastA = lastA + length( ar.model(m).condition );
     end
 
-    arFprintf( 1, '%d input events assigned!', totalEvents );
-    close(h);
+    arFprintf( 1, '%d input events assigned!\n', totalEvents );
+    if ( arOutputLevel > 1 )
+        close(h);
+    end
 
     ar.config.useEvents = 1;
     arLink(true);

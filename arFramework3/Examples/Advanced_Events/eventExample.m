@@ -37,7 +37,7 @@ pause;
 model = 1;
 sourceCondition = 1;
 targetCondition = 1;
-arSteadyState(ar, model, sourceCondition, targetCondition);
+arSteadyState(model, sourceCondition, targetCondition);
 
 arSimu(true,true,true); arChi2(true);
 arPlotX;

@@ -30,10 +30,10 @@ arSetPars('k_deg', -2);
 
 %% Equilibrate condition 1 and use that as initial value for condition 1
 %  Equilibrate condition 2 and use that as initial condition for 2 and 3
-arClearEvents(ar); % Clears events
+arClearEvents; % Clears events
 arFindInputs;
-arSteadyState(ar, 1, 1, 1, -1e7);
-arSteadyState(ar, 1, 2, [2,3], -1e7);
+arSteadyState(1, 1, 1, -1e7);
+arSteadyState(1, 2, [2,3], -1e7);
 
 arSimu(true,true,true); arChi2(true);
 arPlotY;

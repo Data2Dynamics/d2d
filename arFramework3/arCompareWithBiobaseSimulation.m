@@ -14,12 +14,20 @@
 %   file = 'SIMU1447940350922.dat'
 %   arCompareWithBiobaseSimulation(file)
 
-function arCompareWithBiobaseSimulation(file)
+function pass = arCompareWithBiobaseSimulation(file, silent)
 
 global ar
 
 m = 1;
 c = 1;
+
+% Tolerances for a pass
+rtol = 1e-3;
+atol = 1e-4;
+
+if (nargin<2)
+    silent = false;
+end
 
 dat = importdata(file);
 
@@ -52,30 +60,51 @@ end
 close all
 dolegend = 1;
 for i=length(dat.indcol):-1:2
-    subplot(subx,suby,i-1)
-    set(gca,'FontSize',fs)
-    plot(t,dat.data(:,dat.indcol(i)),'k');
-    hold on
-    ind = strmatch(dat.x{dat.indcol(i)},ar.model(m).x,'exact');
+    biomodelsSim = dat.data(:,dat.indcol(i));
+    if ( ~silent )
+        subplot(subx,suby,i-1)
+        set(gca,'FontSize',fs)
+        plot(t, biomodelsSim,'k');
+        hold on
+    end
     
+    ind = strmatch(dat.x{dat.indcol(i)},ar.model(m).x, 'exact'); %#ok
     if isempty(ind)
-        if isempty(strmatch(dat.x{dat.indcol(i)},ar.pLabel,'exact'));
-            fprintf('%s from BIOMODELs simulation neither found as dynamic state nor as parameter.\n',dat.x{dat.indcol(i)})
+        if isempty(strmatch(dat.x{dat.indcol(i)},ar.pLabel, 'exact')); %#ok
+            arFprintf(2, '%s from BIOMODELs simulation neither found as dynamic state nor as parameter.\n',dat.x{dat.indcol(i)})
         end
     elseif(length(ind)>1)
-        warning(sprintf('%s from BIOMODELs simulation multiple times.\n',dat.x{dat.indcol(i)}))
+        warning('%s from BIOMODELs simulation multiple times.\n',dat.x{dat.indcol(i)})
     else
-        plot(t,interp1(ar.model(m).condition(c).tFine,ar.model(m).condition(c).xFineSimu(:,ind),t),'r--')
-        if dolegend ==1
-            set(legend('Biobase','d2d'),'FontSize',fs);
-            dolegend = 0; % only once
+        d2dSim           = interp1(ar.model(m).condition(c).tFine,ar.model(m).condition(c).xFineSimu(:,ind),t);
+        d2dFilt          = bsxfun(@max, d2dSim, atol);
+        biomodelsFilt    = bsxfun(@max, biomodelsSim, atol);
+        maxDifference(i) = max( ( (d2dFilt - biomodelsFilt) ./ (biomodelsFilt) ).^2 );
+
+        if ( ~silent )
+            plot(t, d2dSim,'r--')
+            if dolegend ==1
+                set(legend('Biobase','d2d'),'FontSize',fs);
+                dolegend = 0; % only once
+            end
         end
-    end    
-    xlim([0,100])
-    title(strrep(dat.x{dat.indcol(i)},'_','\_'),'FontSize',fs)
+    end
+    
+    if ( ~silent )
+        xlim([0,100]);
+        title(strrep(dat.x{dat.indcol(i)},'_','\_'),'FontSize',fs);
+    end
 end
 
+% Fit acceptable?
+if ( max( maxDifference ) > rtol )
+    pass = 0;
+else
+    pass = 1;
+end
 
-saveas(gcf,'arCompareWithBiobaseSimulation');
+if ( ~silent )
+    saveas(gcf,'arCompareWithBiobaseSimulation');
+end
 
 

@@ -41,7 +41,7 @@ model = 1;
 sourceCondition = 1;
 targetCondition = [1,2,3];
 arFindInputs;
-arSteadyState(ar, model, sourceCondition, targetCondition, -1e7);
+arSteadyState(model, sourceCondition, targetCondition, -1e7);
 arSimu(true,true,true); arChi2(true);
 arPlotY;
 
@@ -50,9 +50,9 @@ pause;
 
 %% Equilibrate condition 1 and use that as initial value for condition 1
 %  Equilibrate condition 2 and use that as initial condition for 2 and 3
-arClearEvents(ar); % Clears events (required!)
+arClearEvents; % Clears events (required!)
 arFindInputs;
-arSteadyState(ar, 1, 1, 1, -1e7);
-arSteadyState(ar, 1, 2, [2,3], -1e7);
+arSteadyState(1, 1, 1, -1e7);
+arSteadyState(1, 2, [2,3], -1e7);
 arSimu(true,true,true); arChi2(true);
 arPlotY;

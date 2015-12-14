@@ -1,22 +1,20 @@
 % Clears all steady state pre-simulations and events
 
-function ar = arClearEvents( varargin )
+function arClearEvents( varargin )
 
     global ar;
-        
-    if ( nargin > 0 )
-        if ( isstruct(varargin{1}) )
-            ar = varargin{1};
-            varargin = varargin(2:end);
-        end
-    end
+    global arOutputLevel;
 
     % Clear all events
-    h = waitbar(0, 'Clearing events');
+    if ( arOutputLevel > 1 )
+        h = waitbar(0, 'Clearing events');
+    end
     for m = 1 : length( ar.model )
         if isfield(ar.model(m), 'condition' )
             for c = 1 : length( ar.model(m).condition )
-                waitbar(0.9*c/length( ar.model(m).condition ), h, sprintf('Clearing events for model %d [condition %d/%d]', m, c, length( ar.model(m).condition )));
+                if ( arOutputLevel > 1 )
+                    waitbar(0.9*c/length( ar.model(m).condition ), h, sprintf('Clearing events for model %d [condition %d/%d]', m, c, length( ar.model(m).condition )));
+                end
                 ar.model(m).condition(c).modt = [];
                 ar.model(m).condition(c).modx_A = [];
                 ar.model(m).condition(c).modx_B = [];
@@ -33,22 +31,28 @@ function ar = arClearEvents( varargin )
     end
     
     % Wipe steady state conditions
-    h = waitbar(0.9, h, 'Removing steady state conditions');
+    if ( arOutputLevel > 1 )
+        h = waitbar(0.9, h, 'Removing steady state conditions');
+    end
     if isfield(ar.model, 'ss_condition')
         ar.model = rmfield(ar.model,'ss_condition');
     end
     
     % Clear the event log
     if ( isfield( ar, 'eventLog' ) )
-        ar = rmfield(ar,'eventLog')
+        ar = rmfield(ar,'eventLog');
     end
     
     ar.ss_conditions = 0;
-    h = waitbar(0.95, h, 'Linking model');
+    if ( arOutputLevel > 1 )
+        h = waitbar(0.95, h, 'Linking model');
+    end
     % The event removal requires linking (silent link)
     arLink(true);
     
-    close(h);
+    if ( arOutputLevel > 1 )
+        close(h);
+    end
     
     % Invalidate cache so simulations do not get skipped
     arCheckCache(1);

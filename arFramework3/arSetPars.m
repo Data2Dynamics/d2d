@@ -117,7 +117,7 @@ for j=1:length(pLabel)
             ar.std(q) = stdp(j);
         end
     elseif(sum(q)==0)
-        fprintf('arSetPars: parameter %s not found\n', pLabel{j});
+        arFprintf(1, 'arSetPars: parameter %s not found\n', pLabel{j});
     else
         error('multiple parameters %s!?', pLabel{j});
     end
