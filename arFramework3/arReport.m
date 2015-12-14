@@ -599,7 +599,7 @@ for jm=1:length(ar.model)
             %% conditions
             ccount = 1;
             for jp=1:length(ar.model(jm).data(jd).fp)
-                % check if this observable was removed
+                % check if this parameter was removed
                 wasRemoved = false;
                 if(sum(strcmp(ar.model(jm).data(jd).py, ar.model(jm).data(jd).pold{jp}))>0 || ...
                         sum(strcmp(ar.model(jm).data(jd).pystd, ar.model(jm).data(jd).pold{jp}))>0)
@@ -626,7 +626,8 @@ for jm=1:length(ar.model)
                         if(sum(qdyn)>0)
                             qalreadyset = true;
                             for jd2 = ar.model(jm).plot(jplot).dLink
-                                qalreadyset = qalreadyset && strcmp(ar.model(jm).fp{qdyn}, ar.model(jm).data(jd2).fp{jp});
+                                qalreadyset = qalreadyset && isequal(sym(ar.model(jm).fp{qdyn}), ...
+                                    sym(ar.model(jm).data(jd2).fp{jp}));
                             end
                         else
                             qalreadyset = false;
@@ -635,8 +636,7 @@ for jm=1:length(ar.model)
                         if(~qalreadyset)
                             if(ccount==1)
                                 lp(fid, '\\subsubsection{Experiment specific conditions}');
-                                lp(fid, ['\\noindent To evaluate the ODE system defined in Section \\ref{' sprintf('%s_ode', ar.model(jm).name) '}']);
-                                lp(fid, 'for this experiment the following conditions are applied.');
+                                lp(fid, '\\noindent To evaluate the model for this experiment the following conditions are applied.');
                                 lp(fid, '{\\footnotesize');
                                 lp(fid, '\\begin{align*}');
                                 lp(fid, '\\begin{array}{%s}', arraystr);
