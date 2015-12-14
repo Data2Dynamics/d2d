@@ -42,44 +42,35 @@ else
     dynamics = 0;
 end
 
-% If no sensitivities are requested, we always simulate (fast anyway)
-if ( ~sensi )
-    dynamics = 1;
-end
-
-% If dynamics are not requested, but sensitivities are, check whether we 
-% already simulated these sensitivities.
-% This code *only* prevents unnecessary simulation of sensitivities.
-if ( ~dynamics && sensi )
+% If dynamics are not forced, check whether the dynamics of the last simulation
+% were identical. If not, we have to resimulate.
+if ( ~dynamics )
     % Check cached config settings to see if they are still the same. If
-    % not, then ar.cache.fine and ar.cache.exp get cleared.
+    % not, then cache storage gets cleared forcing resimulation.
     arCheckCache;
     
-    % Check whether ar.cache.fine and exp are different from the ones we simulated last time
-    % If not, we need to resimulate.
-    if ( fine && ( ~isequal( ar.cache.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
-        dynamics = 1;
-    end
-    if ( ~fine && ( ~isequal( ar.cache.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
-        dynamics = 1;
-    end
-end
-
-% We simulate sensitivities. Store the new 'last sensitivity simulation' parameters in the cache.
-if ( dynamics && sensi )
+    % Check whether dynamic parameters are different from the ones we 
+    % simulated last time. If so, we need to resimulate!
     if ( fine )
-        ar.cache.fine = ar.p;
+        if ( ~isequal( ar.cache.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) || ( ar.cache.fineSensi ~= sensi ) )
+            dynamics = 1;
+        end
     else
-        ar.cache.exp = ar.p;
+        if ( ~isequal( ar.cache.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) || ( ar.cache.expSensi ~= sensi ) )
+            dynamics = 1;
+        end
     end
 end
 
-% If we finally decide on not simulating the sensitivities, simulate only
-% the model without sensitivities, since these could have been overwritten
-% in the meantime
-if ( ~dynamics )
-    dynamics = 1;
-    sensi = 0;
+% If we are simulating, store the simulation parameters in the cache
+if ( dynamics )
+    if ( fine )
+        ar.cache.fine       = ar.p;
+        ar.cache.fineSensi  = sensi;
+    else
+        ar.cache.exp        = ar.p;
+        ar.cache.expSensi   = sensi;
+    end
 end
 
 if(~isfield(ar,'p'))

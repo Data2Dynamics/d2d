@@ -29,8 +29,10 @@ function invalidate = arCheckCache( invalidate )
     
     % Invalid cache, remove both cached fine and exp field
     if ( invalidate )
-        ar.cache.fine   = nan(size(ar.p));
-        ar.cache.exp    = nan(size(ar.p));
+        ar.cache.fine           = nan(size(ar.p));
+        ar.cache.exp            = nan(size(ar.p));
+        ar.cache.fineSensi      = nan;
+        ar.cache.fineExp        = nan;
         
         % Set the cache to the current cache
         setCacheConfigFields( fields );

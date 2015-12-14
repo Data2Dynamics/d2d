@@ -13,6 +13,15 @@
 %      -4  Line search cannot sufficiently decrease the residual along the
 %           current search direction.
 %
+% Select different optimizers by editing ar.config.optimizer
+%       1 - lsqnonlin (default)
+%       2 - fmincon
+%       4 - STRSCNE (Bellavia et al, A Scaled Trust Region Solver for Constrained Nonlinear Equations)
+%       5 - arNLS (additional method choices under ar.config.optimizerStep; see help arNLS)
+%       6 - fmincon
+%       7 - arNLS with SR1 updates
+%       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL—An Adaptive Nonlinear Least-Squares)
+%
 
 function varargout = arFit(varargin)
 

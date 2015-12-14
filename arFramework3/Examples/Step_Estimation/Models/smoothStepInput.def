@@ -11,7 +11,7 @@ STATES
 stateA          C   nmol/l      conc.   cyt     1
 
 INPUTS
-pulse           C   nmol/l      conc.   "smoothstep1(t,before,position,after,smoothness) * exp( -(t-position)*degrad )"
+pulse           C   nmol/l      conc.   "smoothstep1(t,0,position,after,smoothness) * exp( -(t-position)*degrad )"
 
 REACTIONS
                 ->  stateA      CUSTOM	"pulse"
