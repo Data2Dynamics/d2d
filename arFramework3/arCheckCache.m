@@ -27,6 +27,11 @@ function invalidate = arCheckCache( invalidate )
         invalidate = ~checkCacheConfigFields( fields );
     end
     
+    % For backward compatibility
+    if ( ~isfield( ar.cache, 'expSensi' ) )
+        invalidate = 1;
+    end
+    
     % Invalid cache, remove both cached fine and exp field
     if ( invalidate )
         ar.cache.fine           = nan(size(ar.p));
