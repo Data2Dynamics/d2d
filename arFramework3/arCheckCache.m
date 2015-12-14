@@ -32,7 +32,7 @@ function invalidate = arCheckCache( invalidate )
         ar.cache.fine           = nan(size(ar.p));
         ar.cache.exp            = nan(size(ar.p));
         ar.cache.fineSensi      = nan;
-        ar.cache.fineExp        = nan;
+        ar.cache.expSensi       = nan;
         
         % Set the cache to the current cache
         setCacheConfigFields( fields );
