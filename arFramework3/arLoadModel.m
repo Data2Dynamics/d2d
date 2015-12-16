@@ -669,7 +669,9 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
             C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
         end
         
-        arValidateInput( C, 'substitution', 'substitution identifier', 'expression for the substitution' );
+        if ( ~strcmp(C{1},'CONDITIONS') )
+            arValidateInput( C, 'substitution', 'substitution identifier', 'expression for the substitution' );
+        end
     end
 
     if ( sum(ismodelpar) > 0 )
