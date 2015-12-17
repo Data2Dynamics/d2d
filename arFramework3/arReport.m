@@ -619,7 +619,8 @@ for jm=1:length(ar.model)
             lp(fid, '\\subsubsection{Experiment specific conditions}');
             lp(fid, '\\noindent To evaluate the model for this experiment the following conditions are applied.');
             lp(fid, '\\begin{itemize}');
-            for jd2=1:length(ar.model(jm).plot(jplot).dLink)
+            for jd3=1:length(ar.model(jm).plot(jplot).dLink)
+                jd2 = ar.model(jm).plot(jplot).dLink(jd3);
                 jc = ar.model(jm).data(jd2).cLink;
                 lp(fid, '\\item {\\bf Local condition #%i (global condition #%i):}', jd2, jc);
                 
