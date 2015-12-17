@@ -130,13 +130,21 @@ lp(fid, '\\end{itemize}');
 
 lp(fid, '\\tableofcontents');
 
-N = 10;
+% set counters for waitbar
+nncounter = 0;
+cncounter = 1;
+for jm=1:length(ar.model)
+    nncounter = nncounter + 9; % model sections
+    nncounter = nncounter + length(ar.model(jm).plot)*7; % experiment sections
+end
 
+arWaitbar(0);
 for jm=1:length(ar.model)
     lp(fid, '\\clearpage\n');
     lp(fid, '\\section{Model: %s}\n', arNameTrafo(ar.model(jm).name));
     
     %% descriptions
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).description))
         lp(fid, '\\subsection{Comments}');
         for jd=1:length(ar.model(jm).description)
@@ -145,6 +153,7 @@ for jm=1:length(ar.model)
     end
     
     %% species
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).x))
         lp(fid, '\\subsection{Dynamic variables}');
         lp(fid, 'The model contains %i dynamic variables. ', length(ar.model(jm).x));
@@ -170,6 +179,7 @@ for jm=1:length(ar.model)
     end
     
     %% inputs
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).u))
         lp(fid, '\\subsection{Input variables}');
         lp(fid, 'The model contains %i external inputs variables.', length(ar.model(jm).u));
@@ -198,6 +208,7 @@ for jm=1:length(ar.model)
     end
     
     %% reactions
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).x))
         lp(fid, '\\subsection{Reactions}');
         lp(fid, 'The model contains %i reactions.', ...
@@ -312,6 +323,7 @@ for jm=1:length(ar.model)
     end
     
     %% Structure
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     savePath_Graph = [arSave '/Figures/Network' sprintf('/%s.pdf', ar.model(jm).name)];
     if(exist(savePath_Graph,'file'))
         lp(fid, '\\subsection{Model structure}');
@@ -330,6 +342,7 @@ for jm=1:length(ar.model)
     end
     
     %% ODE system
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).x))
         lp(fid, '\\subsection{ODE system} \\label{%s}', sprintf('%s_ode', ar.model(jm).name));
         
@@ -373,6 +386,7 @@ for jm=1:length(ar.model)
     end
     
     %% derived
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).z))
         lp(fid, '\\subsection{Derived variables}');
         lp(fid, 'The model contains %i derived variables.', length(ar.model(jm).z));
@@ -399,6 +413,7 @@ for jm=1:length(ar.model)
     end
     
     %% standard observations and error model
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(isfield(ar.model(jm), 'y'))
         lp(fid, '\\subsection{Observables}');
         lp(fid, 'The model contains %i standard observables.', length(ar.model(jm).y));
@@ -436,12 +451,13 @@ for jm=1:length(ar.model)
     end
     
     %% Conditions
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     ccount = 1;
     for jp=1:length(ar.model(jm).fp)
         if(~strcmp(ar.model(jm).p{jp}, ar.model(jm).fp{jp}))
             if(ccount==1)
                 lp(fid, '\\subsection{Conditions}');
-                lp(fid, ['\\noindent Conditions modify the ODE system defined in Section \\ref{' sprintf('%s_ode', ar.model(jm).name) '} according to a replacement rule.']);                
+                lp(fid, '\\noindent Conditions modify the model according to replacement rules.'); 
                 lp(fid, 'New model parameters can be introduced or relations between existing model parameters can be implemented.');
                 lp(fid, 'The following list are default conditions that can be replace my experiment specific conditions defined seperately for each data set.');
                 lp(fid, '{\\footnotesize');
@@ -473,6 +489,7 @@ for jm=1:length(ar.model)
             lp(fid, '\\subsection{Experiment: %s}\n', arNameTrafo(ar.model(jm).plot(jplot).name));
             
             %% descriptions
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
             if(~isempty(ar.model(jm).data(jd).description))
                 lp(fid, '\\subsubsection{Comments}');
                 for jdes=1:length(ar.model(jm).data(jd).description)
@@ -482,6 +499,7 @@ for jm=1:length(ar.model)
             
 
             %% inputs
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
             if(~isempty(ar.model(jm).u))
                 qmod = ~strcmp(ar.model(jm).fu, ar.model(jm).data(jd).fu);
                 if(sum(qmod)>0)
@@ -506,7 +524,7 @@ for jm=1:length(ar.model)
             end
             
             %% observations and error model
-            
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
             if(isfield(ar.model(jm), 'y'))
                 qadd = ~ismember(ar.model(jm).data(jd).y, ar.model(jm).y);
             else
@@ -597,87 +615,69 @@ for jm=1:length(ar.model)
             end
             
             %% conditions
-            ccount = 1;
-            for jp=1:length(ar.model(jm).data(jd).fp)
-                % check if this parameter was removed
-                wasRemoved = false;
-                if(sum(strcmp(ar.model(jm).data(jd).py, ar.model(jm).data(jd).pold{jp}))>0 || ...
-                        sum(strcmp(ar.model(jm).data(jd).pystd, ar.model(jm).data(jd).pold{jp}))>0)
-                    if(sum(strcmp(ar.p, ar.model(jm).data(jd).pold{jp}))==0)
-                        wasRemoved = true;
-                    end
-                end
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
+            lp(fid, '\\subsubsection{Experiment specific conditions}');
+            lp(fid, '\\noindent To evaluate the model for this experiment the following conditions are applied.');
+            lp(fid, '\\begin{itemize}');
+            for jd2=1:length(ar.model(jm).plot.dLink)
+                jc = ar.model(jm).data(jd2).cLink;
+                lp(fid, '\\item {\\bf Local condition #%i (global condition #%i):}', jd2, jc);
                 
-                if(~wasRemoved)
-                    % check if this is really a condition
-                    qlocalcondi = false;
-                    arraystr = 'll';
-                    for jd2 = ar.model(jm).plot(jplot).dLink
-                        qlocalcondi = qlocalcondi || ~strcmp(ar.model(jm).data(jd2).pold{jp}, ar.model(jm).data(jd2).fp{jp});
-                        arraystr = [arraystr 'r'];
-                        if(jd2 ~= ar.model(jm).plot(jplot).dLink(end))
-                            arraystr = [arraystr '|'];
-                        end
-                    end
-                    
-                    if(qlocalcondi)
+                ccount = 1;
+                for jp=1:length(ar.model(jm).data(jd2).fp)
+                    if(~strcmp(ar.model(jm).data(jd2).pold{jp}, ar.model(jm).data(jd2).fp{jp}))
+                        
                         % check is already shown in model part
-                        qdyn = ismember(ar.model(jm).p, ar.model(jm).data(jd).pold{jp}); %R2013a compatible
+                        qdyn = ismember(ar.model(jm).p, ar.model(jm).data(jd2).pold{jp}); %R2013a compatible
                         if(sum(qdyn)>0)
                             qalreadyset = true;
-                            for jd2 = ar.model(jm).plot(jplot).dLink
+                            for jd3 = ar.model(jm).plot(jplot).dLink
                                 qalreadyset = qalreadyset && isequal(sym(ar.model(jm).fp{qdyn}), ...
-                                    sym(ar.model(jm).data(jd2).fp{jp}));
+                                    sym(ar.model(jm).data(jd3).fp{jp}));
                             end
                         else
                             qalreadyset = false;
                         end
                         
-                        if(~qalreadyset)
+                        % do not show parameters py that belong to y that
+                        % were removed
+                        qwasremoved = false;
+                        py_tmp = union(strrep(ar.model(jm).data(jd2).py, '_filename', ['_' ar.model(jm).data(jd2).name]), ...
+                            strrep(ar.model(jm).data(jd2).pystd, '_filename', ['_' ar.model(jm).data(jd2).name]));
+                        if(sum(ismember(py_tmp, ar.model(jm).data(jd2).pold{jp}))>0)
+                            py_sep_tmp = {};
+                            for jjysep = 1:length(ar.model(jm).data(jd2).py_sep)
+                                py_sep_tmp = union(py_sep_tmp, ar.model(jm).data(jd2).py_sep(jjysep).pars);
+                            end
+                            qwasremoved = sum(ismember(py_sep_tmp, ar.model(jm).data(jd2).pold{jp}))==0;
+                        end
+
+                        if(~qalreadyset && ~qwasremoved)
                             if(ccount==1)
-                                lp(fid, '\\subsubsection{Experiment specific conditions}');
-                                lp(fid, '\\noindent To evaluate the model for this experiment the following conditions are applied.');
                                 lp(fid, '{\\footnotesize');
                                 lp(fid, '\\begin{align*}');
-                                lp(fid, '\\begin{array}{%s}', arraystr);
-                            else
-                                if(ccount-1<length(ar.model(jm).data(jd).fp))
-                                    lp(fid, ' \\\\');
-                                end
                             end
                             
-                            lp(fid, '\t%s & \\rightarrow & ', myFormulas(ar.model(jm).data(jd).pold{jp}, jm));
-                            for jd2 = ar.model(jm).plot(jplot).dLink
-                                try
-                                    ddouble = double(sym(ar.model(jm).data(jd2).fp{jp}));
-                                    if(ddouble ~= 0 && abs(log10(ddouble)) > 3)
-                                        ddouble = sprintf('%.1e', ddouble);
-                                        ddouble = strrep(ddouble, 'e', '\cdot 10^{');
-                                        ddouble = [ddouble '}'];
-                                    else
-                                        ddouble = sprintf('%g', ddouble);
-                                    end
-                                    lp(fid, '%s', ddouble);
-                                catch  %#ok<CTCH>
-                                    lp(fid, '%s', myFormulas(ar.model(jm).data(jd2).fp{jp}, jm));
-                                end
-                                if(length(ar.model(jm).plot(jplot).dLink)>1 && jd2~=ar.model(jm).plot(jplot).dLink(end))
-                                    lp(fid, '& ');
-                                end
+                            if(ccount==length(ar.model(jm).data(jd2).fp))
+                                lp(fid, '\t%s & \\rightarrow %s', myFormulas(ar.model(jm).data(jd2).pold{jp}, jm), ...
+                                    myFormulas(ar.model(jm).data(jd2).fp{jp}, jm));
+                            else
+                                lp(fid, '\t%s & \\rightarrow %s \\\\', myFormulas(ar.model(jm).data(jd2).pold{jp}, jm), ...
+                                    myFormulas(ar.model(jm).data(jd2).fp{jp}, jm));
                             end
                             
                             ccount = ccount + 1;
                         end
                     end
-                end    
-                
-                if(ccount>1 && jp==length(ar.model(jm).data(jd).fp))
-                	lp(fid, '\\end{align*}');
-                	lp(fid, '\\end{displaymath}\n}\n\n');
+                    if(ccount>1 && jp==length(ar.model(jm).data(jd2).fp))
+                        lp(fid, '\\end{align*}}\n\n');
+                    end
                 end
             end
+            lp(fid, '\\end{itemize}');
             
             %% fit
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
             lp(fid, '\\subsubsection{Experimental data and model fit}');
            
             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigY') && ~isempty(ar.model(jm).plot(jplot).savePath_FigY))
@@ -708,6 +708,7 @@ for jm=1:length(ar.model)
             end
             
             %% experimental data
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
             headstr = '';
             headtab = '';
             unitstr = '';
@@ -785,6 +786,7 @@ for jm=1:length(ar.model)
             lp(fid, '\t\\end{table}');
             
             %% trajectories
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigX') && ~isempty(ar.model(jm).plot(jplot).savePath_FigX))
                 lp(fid, ['The trajectories of the input, dynamic and derived variables that ' ...
                     'correspond to the experimental conditions in this experiment are shown in Figure \\ref{%s}.'], ...
@@ -810,6 +812,7 @@ for jm=1:length(ar.model)
         end
     end
 end
+arWaitbar(-1);
 
 %% Parameters
 lp(fid, '\\clearpage\n');
