@@ -90,26 +90,32 @@ if(ar.ndata>0 && ar.nconstr>0)
     title('likelihood + constraints');
     xlabel('run index (sorted by likelihood)');
 end
-legend([h h2], 'converged fits', 'initial value', 'Location','Best');
+legend([h h2], 'converged fits', 'initial objective function value', 'Location','Best');
 
 
 figure(2); clf;
 
 subplot(2,2,1);
 hist(ar.timing, 50);
-xlabel('fit time / sec.');
-title(sprintf('total time for %i fits: %s', ...
-    sum(~isnan(ar.timing)), ...
-    secToHMS(sum(ar.timing(~isnan(ar.timing))))));
+xlabel('time / sec / fit');
+title({sprintf('run time for %i fits', ...
+    sum(~isnan(ar.timing)))
+    sprintf('(cumulative time: %s)', ...
+    secToHMS(sum(ar.timing(~isnan(ar.timing)))))});
 
 subplot(2,2,2);
 hist(ar.fun_evals, 50);
-xlabel('number of function evaluations');
+xlabel('number of function evaluations / fit');
+title({sprintf('number of function evaluations for %i fits', ...
+    sum(~isnan(ar.fun_evals)))
+    sprintf('(cumulative number: %i)', ...
+    sum(ar.fun_evals(~isnan(ar.fun_evals))))});
 
 subplot(2,2,[3 4]);
 semilogy(optim_krit, 'o--');
 xlabel('run index (sorted by likelihood)');
-ylabel('first order optimality criterion');
+ylabel('gradient length');
+title('first order optimality criterion');
 
 %% scatter plots
 
