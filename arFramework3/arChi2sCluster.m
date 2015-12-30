@@ -33,11 +33,12 @@ if(sum(ar.qFit==1)<6)
 end
 
 ar1 = ar;
-t1 = tic;
 
-pct = parfor_progress(n); %#ok<NASGU>
+tic;
+startTime = clock;
+arShowProgressParFor(n);
+
 parfor j=1:n
-    thisworker = getCurrentWorker; % Worker object
     ar2 = ar1;
     ar2.p = ps(j,:);
     try
@@ -47,23 +48,22 @@ parfor j=1:n
         chi2sconstr(j) = ar2.chi2constr;
         exitflag(j) = 1;
         if(~silent) 
-            pct = parfor_progress/100;
-            fprintf('%i/%i feval #%i (%s): objective function %g\n', round(n*pct), n, j, ...
-                thisworker.Name, ar2.chi2fit);
+            return_message = sprintf('objective function %g', ar2.chi2fit);
         end
     catch exception
         timing(j) = ar2.stop/1e6;
         ps_errors(j,:) = ar2.p;
         if(~silent) 
-            pct = parfor_progress/100;
-            fprintf('%i/%i feval #%i (%s): %s\n', round(n*pct), n, j, ...
-                thisworker.Name, exception.message);
+            return_message = exception.message;
         end
         exitflag(j) = -1;
     end
+    if(~silent) 
+        arShowProgressParFor(j, n, startTime, return_message)
+    end
 end
-pct = parfor_progress(0); %#ok<NASGU>
-toc(t1);
+arShowProgressParFor(0);
+toc;
 
 ar.ps = ps;
 ar.ps_errors = ps_errors;

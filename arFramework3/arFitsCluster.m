@@ -44,10 +44,11 @@ if(backup_save && exist('arFitCluster_Backup','dir')~=7)
     mkdir('arFitCluster_Backup');
 end
 
+startTime = clock;
+arShowProgressParFor(n);
+
 ar1 = ar;
-pct = parfor_progress(n); %#ok<NASGU>
 parfor j=1:n
-    thisworker = getCurrentWorker; % Worker object
     
     % load from backup if exist
     if(backup_save && exist(sprintf('./arFitCluster_Backup/fit_%i.mat', j),'file'))
@@ -61,9 +62,8 @@ parfor j=1:n
         fun_evals(j) = S.x.fevals;
         optim_crit(j) = S.x.firstorderopt;
         timing(j) = S.x.timing;
-        pct = parfor_progress/100;
-        fprintf('%i/%i fit #%i (%s, %s): loaded from backup\n', round(n*pct), n, j, ...
-            thisworker.Name, datestr(now, 0));
+        
+        arShowProgressParFor(j, n, startTime, 'loaded from backup')
         continue
     end
     
@@ -81,20 +81,15 @@ parfor j=1:n
         exitflag(j) = ar2.fit.exitflag;
         fun_evals(j) = ar2.fit.fevals;
         optim_crit(j) = ar2.firstorderopt;
-        pct = parfor_progress/100;
+        
         if(ar2.config.useFitErrorMatrix==0 && ar2.config.fiterrors == 1)
-            fprintf('%i/%i fit #%i (%s, %s): objective function %g\n', round(n*pct), n, j, ...
-                thisworker.Name, datestr(now, 0), ...
-                2*ar2.ndata*log(sqrt(2*pi)) + ar2.chi2fit + ar2.chi2constr);
+            objective_functino_val = 2*ar2.ndata*log(sqrt(2*pi)) + ar2.chi2fit + ar2.chi2constr;
         elseif(ar2.config.useFitErrorMatrix==1 && sum(sum(ar2.config.fiterrors_matrix==1))>0)
-            fprintf('%i/%i fit #%i (%s, %s): objective function %g\n', round(n*pct), n, j, ...
-                thisworker.Name, datestr(now, 0), ...
-                2*ar2.ndata_err*log(sqrt(2*pi)) + ar2.chi2fit + ar2.chi2constr);
+            objective_functino_val = 2*ar2.ndata_err*log(sqrt(2*pi)) + ar2.chi2fit + ar2.chi2constr;
         else
-            fprintf('%i/%i fit #%i (%s, %s): objective function %g\n', round(n*pct), n, j, ...
-                thisworker.Name, datestr(now, 0), ...
-                ar2.chi2fit + ar2.chi2constr);
+            objective_functino_val = ar2.chi2fit + ar2.chi2constr;
         end
+        return_message = sprintf('objective function %g', objective_functino_val);
         
         if(log_fit_history)
             name = ar2.config.optimizers{ar2.config.optimizer};
@@ -118,12 +113,8 @@ parfor j=1:n
         end
     catch exception
         ps_errors(j,:) = ar2.p;
-        pct = parfor_progress/100;
-        fprintf('%i/%i fit #%i (%s, %s): %s\n', round(n*pct), n, j, ...
-            thisworker.Name, datestr(now, 0), ...
-            exception.message);
+        return_message = exception.message;
     end
-    timing(j) = toc;
     
     % save to backup if not exist
     if(backup_save && ~exist(sprintf('./arFitCluster_Backup/fit_%i.mat', j),'file'))
@@ -139,8 +130,11 @@ parfor j=1:n
         ar3.timing = timing(j);
         parsave(sprintf('./arFitCluster_Backup/fit_%i.mat', j), ar3)
     end
+    
+    arShowProgressParFor(j, n, startTime, return_message)
+    timing(j) = toc;
 end
-pct = parfor_progress(0); %#ok<NASGU>
+arShowProgressParFor(0);
 
 ar.chi2s_start = chi2s_start;
 ar.chi2sconstr_start = chi2sconstr_start;
@@ -179,5 +173,10 @@ end
 arChi2(true,ar.p(ar.qFit==1));
 
 %% backup save on cluster before transfer
+% Sometime the automatic data transfer from the cluster does not work.
+% So it is better to save a local copy of the final results that 
+% can be retrieved by file transfer.
+
 save('arFitsCluster_backup.mat', 'ar');
+
 
