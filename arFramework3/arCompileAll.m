@@ -60,7 +60,9 @@ if ( ~legacy_steps )
             {'step1',           '%s + (%s-%s) * heaviside(%s-%s)', [2, 4, 2, 1, 3], 'step1(t, level1, switch_time, level2)'}, ...
             {'step2',           '%s + (%s-%s) * heaviside(%s-%s) + (%s-%s)*heaviside(%s-%s)', [2, 4, 2, 1, 3, 6, 4, 1, 5], 'step2(t, level1, switch_time1, level2, switch_time2, level3)' }, ...
             {'bolus',           '%s * (1 / sqrt( 2 * pi * %s^2 ) ) * exp(-(%s - %s)^2 / (2*%s^2))', [2, 4, 1, 3, 4], 'bolus(t, amount, time_point, duration)' }, ...
-            {'hill_ka',         '1 / (1 + (%s/abs(%s))^%s)', [3, 1, 2], 'hill_ka( conc, ka, n )' }
+            {'hill_ka',         '%s^%s / (%s^%s + %s^%s)', [1, 3, 2, 3, 1, 3], 'hill_ka(conc, ka, n )' }, ...
+            {'hill_kd',         '%s^%s / (%s + %s^%s)', [1, 3, 2, 1, 3], 'hill_kd(conc, kd, n )' }, ...
+            {'isnonzero',       '(2*heaviside(%s))-1', 1, 'isnonzero(level)'}
         };
         
     % Add brackets for replacement safety
@@ -2341,7 +2343,7 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
         % end
     catch
         msg = { 'Failed to obtain valid expression from: ', ...
-                str, 'Please expression check for error.' };
+                str, 'Please check expression for error.' };
         error(sprintf('%s\n', msg{:}))
         
     end
