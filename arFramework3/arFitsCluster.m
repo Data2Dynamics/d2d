@@ -150,8 +150,8 @@ if(log_fit_history)
     ar.fit_hist = fit_hist;
 end
 
-fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
-fprintf('median fitting time: %fsec\n', median(ar.timing(~isnan(ar.timing))));
+fprintf('total fitting time: %s\n', secToHMS(sum(ar.timing(~isnan(ar.timing)))));
+fprintf('median fitting time: %s\n', secToHMS(median(ar.timing(~isnan(ar.timing)))));
 
 if(chi2Reset>min(ar.chi2s + ar.chi2sconstr))
     [chi2min,imin] = min(ar.chi2s + ar.chi2sconstr);

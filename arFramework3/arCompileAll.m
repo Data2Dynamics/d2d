@@ -12,6 +12,9 @@
 
 function arCompileAll(forcedCompile, debug_mode, source_dir)
 
+% turn off warning message for custom c functions
+warning('OFF', 'symbolic:generate:FunctionNotVerifiedToBeValid')
+
 global ar
 
 if(isempty(ar))
