@@ -156,8 +156,8 @@ for j=1:n
     end    
 end
 
-fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
-fprintf('mean fitting time: %fsec\n', 10^mean(log10(ar.timing(~isnan(ar.timing)))));
+fprintf('total fitting time: %s\n', secToHMS(sum(ar.timing(~isnan(ar.timing)))));
+fprintf('mean fitting time: %s\n', secToHMS(10^mean(log10(ar.timing(~isnan(ar.timing))))));
 arWaitbar(-1);
 
 if(chi2Reset>min(ar.chi2s + ar.chi2sconstr))
