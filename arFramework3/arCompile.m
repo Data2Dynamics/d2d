@@ -39,7 +39,21 @@ if ( arOutputLevel > 2 )
 	verbose{1} = '-v';
 else
 	verbose = {};
-end 
+end
+
+if ( arOutputLevel > 3 )
+    if ( ispc )
+        % Full debug output on windows (build a release build, but with 
+        % debugging symbols. This allows attaching the MSVC debugger)
+        % W4        = Warning level 4, produces all relevant warnings
+        % Zi        = Put debug info in obj files
+        % DEBUG     = Build PDB files for use with the MSVC debugger
+        % OPT:REF   = Only include used functions (debug disables this normally)
+        % OPT:ICF   = Enable COMDAT folding (debug disables this normally)
+        verbose{2} = 'COMPFLAGS="$COMPFLAGS -W4 -Zi"';
+        verbose{3} = 'LINKFLAGS="$LINKFLAGS -DEBUG -OPT:REF -OPT:ICF"';
+    end
+end
 
 arFprintf(1, 'Compiling files...');
 

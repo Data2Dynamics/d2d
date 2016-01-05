@@ -7,7 +7,7 @@
 
 int monotoneSpline( int n, double x[], double y[], double b[], double c[], double d[] )
 {
-    unsigned int i;
+    int i;
     double coeff;
     double m;
     double invDx;

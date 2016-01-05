@@ -200,7 +200,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     eq_tol = (double) mxGetScalar(mxGetField(arconfig, 0, "eq_tol"));
 
     if ( ms == 1 ) events = 1;
-    
+        
     /* threads */
     arthread = mxGetField(arconfig, 0, threads_name);
     /*nthreads = (int) mxGetScalar(mxGetField(arconfig, 0, "nThreads"));*/
@@ -368,7 +368,8 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
     bool error_corr = TRUE;
     
     /* printf("computing model #%i, condition #%i\n", im, ic); */
-
+    only_sim = 0;
+    
     /* Grab value of infinity (for steady state simulations) */
     inf = mxGetInf();    
 
@@ -887,6 +888,8 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
                 ntexp = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "tExp"));
                 xssaexp = mxGetData(mxGetField(arcondition, ic, "xExpSSA"));
             }
+            
+            status = mxGetData(mxGetField(arcondition, ic, "status"));
             
             /* User data structure */
             data = (UserData) malloc(sizeof *data);

@@ -1611,6 +1611,12 @@ end
 
 
 % write fsx0
+if (ispc)
+    % On Windows SDK 7.1; code optimization sometimes leads to a rare segfault
+    % using specific expressions. I am currently investigating this, but
+    % this is to prevent it from breaking my current models.
+    fprintf(fid, ' #pragma optimize("", off)\n');
+end
 fprintf(fid, ' void fsx0_%s(int ip, N_Vector sx0, void *user_data)\n{\n', condition.fkt);
 if(~isempty(model.xs))
     if(config.useSensis)
@@ -1632,7 +1638,9 @@ if(~isempty(model.xs))
     end
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
-
+if (ispc)
+    fprintf(fid, ' #pragma optimize("", on)\n');
+end
 
 % write dfxdp
 fprintf(fid, ' void dfxdp_%s(realtype t, N_Vector x, double *dfxdp, void *user_data)\n{\n', condition.fkt);
