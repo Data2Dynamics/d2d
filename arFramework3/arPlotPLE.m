@@ -27,7 +27,7 @@ if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
     else
         chi2s_scan = [];
     end
-    chi2curr = 2*ar.ndata*log(sqrt(2*pi)) + ar.ple.chi2Reset;
+    chi2curr = 2*ar.ndata*log(sqrt(2*pi)) + ar.ple.chi2Reset(jk);
     ylabeltmp = '-2*log(L)';
 elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
     chi2s = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.ple.chi2s{jk};
@@ -36,7 +36,7 @@ elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))
     else
         chi2s_scan = [];
     end
-    chi2curr = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.ple.chi2Reset;
+    chi2curr = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.ple.chi2Reset(jk);
     ylabeltmp = '-2*log(L)';
 else
     chi2s = ar.ple.chi2s{jk};
@@ -45,7 +45,7 @@ else
     else
         chi2s_scan = [];
     end
-    chi2curr = ar.ple.chi2Reset;
+    chi2curr = ar.ple.chi2Reset(jk);
     ylabeltmp = '\chi^2';
 end
 ps = ar.ple.ps{jk};
