@@ -1,18 +1,53 @@
-function arPLE_direct(jk, n)
+% profile likelilhood calculation
+%
+%   arPLE_direct(jk, n)
+%
+%   jk: parameter index or indices
+%   n:  number of ple steps up and down
+
+function varargout = arPLECalc(varargin)
 
 global ar
 
-if(~exist('jk','var') || isempty(jk))
+if(nargin==0)
+    qglobalar = true;
     jk = find(ar.qFit==1);
+    n = 50;
+else
+    if(isstruct(varargin{1}))
+        qglobalar = false;
+        ar = varargin{1};
+        if(nargin==1)
+            jk = find(ar.qFit==1);
+            n = 50;
+        elseif(nargin==2)
+            jk = varargin{2};
+            n = 50;
+        elseif(nargin==3)
+            jk = varargin{2};
+            n = varargin{3};
+        end
+    else
+        qglobalar = true;
+        if(nargin==1)
+            jk = varargin{1};
+            n = 50;
+        elseif(nargin==2)
+            jk = varargin{1};
+            n = varargin{2};
+        end
+    end
 end
+
 if(length(jk)>1)
     for j=1:length(jk)
-        arPLE_direct(jk(j));
+        if(qglobalar)
+            arPLECalc(jk(j));
+        else
+            ar = arPLECalc(ar, jk(j), n);
+        end
     end
     return;
-end
-if(~exist('n','var'))
-    n = 50;
 end
 
 if(~isfield(ar, 'ple'))
@@ -20,13 +55,12 @@ if(~isfield(ar, 'ple'))
     ar.ple.errors = {};
     ar.ple.ps = {};
     ar.ple.run = zeros(size(ar.p));
+    ar.ple.chi2Reset = nan(size(ar.p));
     ar.ple.alpha = 0.05;
     ar.ple.ndof = 1;
 end
 
-arChi2(true);
-
-chi2Reset = ar.chi2fit;
+% save original parameters
 pReset = ar.p;
 ar.ple.pStart = ar.p;
 qFitReset = ar.qFit(jk);
@@ -35,10 +69,16 @@ fprintf('PLE #%i for %s...\n', jk, ar.pLabel{jk});
 arWaitbar(0);
 tic;
 
+% fix parameter of interest
 ar.qFit(jk) = 0;
 
-[chi2sup, psup, errorsup] = ple_task(jk, n, 1, chi2Reset, pReset);
-[chi2sdown, psdown, errorsdown] = ple_task(jk, n, -1, chi2Reset, pReset);
+% calculate initial chi^2
+ar = arChi2(ar, true, ar.p(ar.qFit==1));
+chi2Reset = ar.chi2fit;
+ar.ple.chi2Reset(jk) = chi2Reset;
+
+[chi2sup, psup, errorsup] = ple_task(ar, jk, n, 1, chi2Reset, pReset);
+[chi2sdown, psdown, errorsdown] = ple_task(ar, jk, n, -1, chi2Reset, pReset);
 
 ar.ple.chi2s{jk} = [fliplr(chi2sdown) chi2Reset chi2sup];
 ar.ple.ps{jk} = [flipud(psdown); pReset; psup];
@@ -53,13 +93,17 @@ fprintf('PLE #%i %i errors, %i fit issues, %s elapse time\n', jk, ...
 
 ar.p = pReset;
 ar.qFit(jk) = qFitReset;
-arChi2(false);
+ar = arChi2(ar, true, ar.p(ar.qFit==1));
+
+if(nargout>0 && ~qglobalar)
+    varargout{1} = ar;
+else
+    varargout = {};
+end
 
 
 
-function [chi2s, ps, errors] = ple_task(jk, n, direction, chi2Reset, pReset)
-
-global ar
+function [chi2s, ps, errors] = ple_task(ar, jk, n, direction, chi2Reset, pReset)
 
 chi2s = nan(1,n);
 ps = nan(n,length(pReset));
@@ -82,12 +126,12 @@ for j=1:n
         arWaitbar(j+n,2*n, sprintf('PLE down for %s', strrep(ar.pLabel{jk},'_','\_')));
     end
    
-    arChi2(true);
+    ar = arChi2(ar, true, ar.p(ar.qFit==1));
     pTrial = findTrial(jk, pLast, dp, direction);
     
     try
         ar.p = pTrial;
-        arChi2(false);
+        ar = arChi2(ar, true, ar.p(ar.qFit==1));
         
         while(ar.chi2fit - chi2Last > rel_increase * dchi2)
             dp = dp/2;
@@ -99,11 +143,10 @@ for j=1:n
             pTrial = findTrial(jk, pLast, dp, direction);
             
             ar.p = pTrial;
-            arChi2(false);
+            ar = arChi2(ar, true, ar.p(ar.qFit==1));
         end
-        dp
         
-        arFit(true);
+        ar = arFit(ar, true);
         
         ps(j,:) = ar.p;
         chi2s(j) = ar.chi2fit;
@@ -115,7 +158,11 @@ for j=1:n
     end
     
     if(ar.chi2fit - chi2Reset > 2*dchi2)
-        fprintf('PLE #%i reached confidence limit\n', jk); 
+        if(direction>0)
+            fprintf('PLE #%i reached upper confidence limit\n', jk);
+        else
+            fprintf('PLE #%i reached lower confidence limit\n', jk);
+        end
         break;
     end
     if(pTrial(jk) >= ar.ub(jk))

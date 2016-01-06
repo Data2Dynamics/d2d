@@ -1,3 +1,5 @@
+% use a cluster function, row-wise
+
 function [B, i_sorted] = docluster(A, cutoff)
 
 % a_order=clusterdata(A,cutoff);
