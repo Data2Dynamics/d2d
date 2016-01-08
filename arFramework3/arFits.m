@@ -5,6 +5,8 @@
 % ps:                           parameter values      
 % log_fit_history               [false]
 % backup_save                   [false]
+% prefunc                       function to be called before fitting (optional)
+% postfunc                      function to be called after fitting (optional)
 % 
 % if 
 %   1) ps has the same size as ar.ps or is larger  AND
@@ -30,7 +32,7 @@
 % ps3(5,:) = ar.ps_start(5,:);
 % arFits(ps3)
 % 
-function arFits(ps, log_fit_history, backup_save)
+function arFits(ps, log_fit_history, backup_save, prefunc, postfunc)
 
 global ar
 
@@ -114,7 +116,21 @@ for j=1:n
         arChi2(true,ar.p(ar.qFit==1));
         ar.chi2s_start(dop(j)) = ar.chi2fit;
         ar.chi2sconstr_start(dop(j)) = ar.chi2constr;
+        if (exist('prefunc', 'var'))
+            try
+                feval( prefunc );
+            catch
+                arFprintf(1, 'Error: Failure calling pre-fitting function');
+            end
+        end
         arFit(true);
+        if (exist('postfunc', 'var'))
+            try
+                feval( postfunc );
+            catch
+                arFprintf(1, 'Error: Failure calling post-fitting function');
+            end
+        end
         ar.ps(dop(j),:) = ar.p;
         ar.chi2s(dop(j)) = ar.chi2fit;
         ar.chi2sconstr(dop(j)) = ar.chi2constr;
