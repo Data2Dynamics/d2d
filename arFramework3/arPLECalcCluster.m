@@ -101,6 +101,7 @@ ps = cell(1,njk);
 run = zeros(1,njk);
 chi2Reset = nan(1,njk);
 
+tic;
 startTime = clock;
 arShowProgressParFor(njk);
 ar1 = ar;
@@ -118,6 +119,7 @@ parfor j=1:njk
     arShowProgressParFor(j, njk, startTime)
 end
 arShowProgressParFor(0);
+toc;
 
 ar.ple.chi2s(jk) = chi2s;
 ar.ple.errors(jk) = errors;
