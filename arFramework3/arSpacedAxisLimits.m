@@ -1,9 +1,15 @@
-function arSpacedAxisLimits(g, overplot)
+function arSpacedAxisLimits(g, overplot, doX, doY)
 if(~exist('g','var'))
     g = gca;
 end
-if(~exist('overplot','var'))
+if(~exist('overplot','var') || isempty(overplot))
     overplot = 0.1;
+end
+if(~exist('doX','var'))
+    doX = true;
+end
+if(~exist('doY','var'))
+    doY = true;
 end
 
 if(length(g)==1)
@@ -40,7 +46,7 @@ for j=1:length(g)
     if(xrange == 0)
         xrange = 1;
     end
-    if(~isnan(xrange))
+    if(~isnan(xrange) && doX)
         if(strcmp(get(g(j), 'XScale'), 'linear'))
             xlim(g(j), [xmin-(xrange*overplot) xmax+(xrange*overplot)]);
         else
@@ -59,7 +65,7 @@ for j=1:length(g)
 %     if(yrange < 1e-3)
 %         yrange = 1e-3;
     end
-    if(~isnan(yrange))
+    if(~isnan(yrange) && doY)
         if(strcmp(get(g(j), 'YScale'), 'linear'))
             if(ymin-(yrange*overplot) < ymax+(yrange*overplot))
                 ylim(g(j), [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
