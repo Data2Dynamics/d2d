@@ -10,6 +10,10 @@
 function doTests( varargin )
     global ar;
     global arOutputLevel;
+    global arStrict;
+    
+    arOutputLevel = 0;
+    arStrict      = 1;
 
     fprintf(2, 'This collection of tests checks whether specific functions\n');
     fprintf(2, 'in the D2D functions are working correctly. Please run this\n');
@@ -66,6 +70,7 @@ function doTests( varargin )
    
     fprintf('\n\n----------------\nTesting complete! %d test%s passed, %d test%s failed, %d test%s skipped due to missing dependencies.\n', successes, pluralize(successes), failures, pluralize(failures), skipped, pluralize(skipped) );
     arOutputLevel = 1;
+    arStrict = 0;
 end
 
 function r = pluralize(value)

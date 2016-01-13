@@ -27,6 +27,7 @@ fprintf( 2, 'Setting equilibration events... ' );
 %  Equilibrate condition 2 and use that as initial condition for 2 and 3
 arClearEvents; % Clears events
 arFindInputs;
+
 arSteadyState(1, 1, 1, -1e7);
 arSteadyState(1, 2, [2,3], -1e7);
 fprintf( 'PASSED\n' );

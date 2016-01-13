@@ -696,39 +696,49 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
                     for (is=0; is<np; is++) Ith(atols_ss, is+1) = cvodes_atol;
                     
                     atolV_ss = N_VCloneVectorArray_Serial(nps, x);
-		    if (atolV_ss == NULL) {status[0] = 9; return;}
-		    for(js=0; js < nps; js++) {
-		      atolV_tmp = NV_DATA_S(atolV_ss[js]);
-		      for(ks=0; ks < neq; ks++) {
-			atolV_tmp[ks] = 0.0;
-		      }
-                    }
-
-		    if(cvodes_atolV_Sens==1)   { 
-		      
-		      for(js=0; js < nps; js++) {
+                    if (atolV_ss == NULL) {status[0] = 9; return;}
+                    
+                    for(js=0; js < nps; js++) {
                         atolV_tmp = NV_DATA_S(atolV_ss[js]);
                         for(ks=0; ks < neq; ks++) {
-			  if(y_max_scale_S[ks]==0. || cvodes_atol/y_max_scale_S[ks]>1){
-			    atolV_tmp[ks] = 1;
-			  }else if(cvodes_atol/y_max_scale_S[ks]<1e-8){/* && Ith(atolV, ks+1)==1.e-8){*/
-                  /*printf("atolVS for neq=%i is %d \n", ks+1, atolV_tmp[ks]);*/
-			    atolV_tmp[ks] = 1e-8;			  
-			  }else if(cvodes_atol/y_max_scale_S[ks]>1e-8 && cvodes_atol/y_max_scale_S[ks]<1){
-                            atolV_tmp[ks] = cvodes_atol/y_max_scale_S[ks];
-                            /*if(atolV_tmp[ks] < Ith(atolV, ks+1)){
-                                 atolV_tmp[ks] = Ith(atolV, ks+1);
-                            }*/
-			  }else{
-			    atolV_tmp[ks] = cvodes_atol;
-			  }			  
-			  /*printf("atolV_ss for neq=%i is %f\n", ks, atolV_tmp[ks]);*/
+                            atolV_tmp[ks] = 0.0;
                         }
-		      }                                       		    
-		      flag = CVodeSensSVtolerances(cvode_mem, RCONST(cvodes_rtol), atolV_ss);
-		    }else{
-		      flag = CVodeSensSStolerances(cvode_mem, RCONST(cvodes_rtol), N_VGetArrayPointer(atols_ss));
-		    }
+                    }
+
+                    if(cvodes_atolV_Sens==1)
+                    { 
+                        for(js=0; js < nps; js++) 
+                        {
+                            atolV_tmp = NV_DATA_S(atolV_ss[js]);
+                            for(ks=0; ks < neq; ks++)
+                            {
+                                if(y_max_scale_S[ks]==0. || cvodes_atol/y_max_scale_S[ks]>1)
+                                {
+                                    atolV_tmp[ks] = 1;
+                                } else if (cvodes_atol/y_max_scale_S[ks]<1e-8)
+                                {   
+                                /* && Ith(atolV, ks+1)==1.e-8){*/
+                                /*printf("atolVS for neq=%i is %d \n", ks+1, atolV_tmp[ks]);*/
+                			    atolV_tmp[ks] = 1e-8;			  
+                                }else if(cvodes_atol/y_max_scale_S[ks]>1e-8 && cvodes_atol/y_max_scale_S[ks]<1) 
+                                {
+                                    atolV_tmp[ks] = cvodes_atol/y_max_scale_S[ks];
+                                    /*if(atolV_tmp[ks] < Ith(atolV, ks+1)){
+                                         atolV_tmp[ks] = Ith(atolV, ks+1);
+                                    }*/
+                                }else
+                                {
+                                atolV_tmp[ks] = cvodes_atol;
+                                }			  
+                        /*printf("atolV_ss for neq=%i is %f\n", ks, atolV_tmp[ks]);*/
+                            }
+                        }                                       		    
+                        flag = CVodeSensSVtolerances(cvode_mem, RCONST(cvodes_rtol), atolV_ss);
+        		    }else
+                    {
+                      flag = CVodeSensSStolerances(cvode_mem, RCONST(cvodes_rtol), N_VGetArrayPointer(atols_ss));
+                    }
+                    
                     if(flag < 0) {status[0] = 11; return;}
                     
                     flag = CVodeSetSensErrCon(cvode_mem, error_corr);
