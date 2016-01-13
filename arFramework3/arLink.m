@@ -301,8 +301,10 @@ for m = 1:length(ar.model)
                     ar.model(m).data(d).ystdExpSimu = zeros(nt, ny);
                     if(length(ar.model(m).x)>0)
                         ar.model(m).data(d).y_scale = zeros(nt, ny, length(ar.model(m).x));
+                        ar.model(m).data(d).y_scale_S = zeros(nt, ny, length(ar.model(m).x));
                     else
                         ar.model(m).data(d).y_scale = zeros(nt, ny, 1);
+                        ar.model(m).data(d).y_scale_S = zeros(nt, ny, length(ar.model(m).x));
                     end
                     ar.model(m).data(d).dydt = zeros(nt, ny);
                     ar.model(m).data(d).systdExpSimu = zeros(nt, ny, np);
@@ -342,6 +344,7 @@ for m = 1:length(ar.model)
         ar.model(m).condition(c).suNum = zeros(nu, np);
         ar.model(m).condition(c).svNum = zeros(1, nv);
         ar.model(m).condition(c).y_atol = zeros(nx,1);
+        ar.model(m).condition(c).y_atolS = zeros(nx,1);
         
         if(isfield(ar.model(m).condition(c), 'tExp'))
             nt = length(ar.model(m).condition(c).tExp);
