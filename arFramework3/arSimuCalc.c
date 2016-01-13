@@ -346,7 +346,9 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
     double *yExp;
     double *yStd;
     double *y_scale;
+    double *y_scale_S;
     double *y_max_scale;
+    double *y_max_scale_S;
 
     struct timeval t2;
     struct timeval t3;
@@ -419,6 +421,7 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
                 returnv = mxGetData(mxGetField(arcondition, ic, "vFineSimu"));
                 returnx = mxGetData(mxGetField(arcondition, ic, "xFineSimu"));
 		y_max_scale = mxGetData(mxGetField(arcondition, ic, "y_atol"));
+        y_max_scale_S = mxGetData(mxGetField(arcondition, ic, "y_atolS"));
                 if (sensi == 1) {
                     returnsu = mxGetData(mxGetField(arcondition, ic, "suFineSimu"));
                     returnsv = mxGetData(mxGetField(arcondition, ic, "svFineSimu"));
@@ -433,6 +436,7 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
                 returnv = mxGetData(mxGetField(arcondition, ic, "vExpSimu"));
                 returnx = mxGetData(mxGetField(arcondition, ic, "xExpSimu"));
 		y_max_scale = mxGetData(mxGetField(arcondition, ic, "y_atol"));
+        y_max_scale_S = mxGetData(mxGetField(arcondition, ic, "y_atolS"));
 		/* Scaling part, take Residuals and y_scale from last iter */
 	      if(ardata!=NULL && (cvodes_atolV ==1 || cvodes_atolV_Sens==1) && neq>0){  
 		dLink = mxGetField(arcondition, ic, "dLink");
@@ -449,18 +453,23 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
 		    yStd = mxGetData(mxGetField(ardata, id, "ystdExpSimu"));
 		    nyout = (int) mxGetNumberOfElements(mxGetField(ardata, id, "tExp"));
 		    if(fiterrors==-1) yStd = mxGetData(mxGetField(ardata, id, "yExpStd"));
+            
 		    y_scale = mxGetData(mxGetField(ardata, id, "y_scale"));
+            y_scale_S = mxGetData(mxGetField(ardata, id, "y_scale_S"));
 		    
 		    for(is=0; is<neq; is++){
 		      for(js=0; js<nyout; js++){
 			for(ks=0; ks<ny; ks++){
 			   
 			  if(!mxIsNaN(yExp[js + (ks*nyout)]) && !mxIsNaN(y[js + (ks*nyout)]) && !mxIsNaN(yStd[js + (ks*nyout)]) && yStd[js + (ks*nyout)]>0.) {
-			    y_scale[js+ks*nyout+is*nyout*ny] = y_scale[js+ks*nyout+is*nyout*ny] * 2* fabs(yExp[js + (ks*nyout)] - y[js + (ks*nyout)]) / pow(yStd[js + (ks*nyout)],2) * sqrt(fiterrors_correction);
+			    y_scale_S[js+ks*nyout+is*nyout*ny] = y_scale[js+ks*nyout+is*nyout*ny] * 2* fabs(yExp[js + (ks*nyout)] - y[js + (ks*nyout)]) / pow(yStd[js + (ks*nyout)],2) * sqrt(fiterrors_correction);
 			  }
 			  
 			  if(fabs(y_scale[js+ks*nyout+is*nyout*ny])>y_max_scale[is] && !mxIsNaN(y_scale[js+ks*nyout+is*nyout*ny]))
 			    y_max_scale[is] = fabs(y_scale[js+ks*nyout+is*nyout*ny]);
+              
+              if(fabs(y_scale_S[js+ks*nyout+is*nyout*ny])>y_max_scale_S[is] && !mxIsNaN(y_scale_S[js+ks*nyout+is*nyout*ny]))
+			    y_max_scale_S[is] = fabs(y_scale_S[js+ks*nyout+is*nyout*ny]);
 			  /*printf("y_scale old = %f and scale for neq %i, t %i, y %i, thus %i is = %f \n", y_max_scale[is], is, js, ks, js+ks*nout+is*nout*ny, y_scale[js+ks*nout+is*nout*ny]); */
 			  
 			}
@@ -579,19 +588,26 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
 		if (atolV == NULL) {status[0] = 2; return;}
 		for (is=0; is<neq; is++) Ith(atolV, is+1) = 0.0;
 		 
-		if(cvodes_atolV==1)   { 		 
+		if(cvodes_atolV==1)   { 		
+            double tmp_tol = 1.;
 		  for(ks=0; ks < neq; ks++) {		    
-		    if(y_max_scale[ks]==0 || y_max_scale[ks]<1e-3){
-		      Ith(atolV, ks+1) = cvodes_atol * 1e3;
-		    }else if(y_max_scale[ks]>1e3){
-		      Ith(atolV, ks+1) = cvodes_atol * 1e-3;			  
-		    }else if(y_max_scale[ks]>1e-3 && y_max_scale[ks]<1e3){
-		      Ith(atolV, ks+1) = 1./y_max_scale[ks]*cvodes_atol;
+		    if(y_max_scale[ks]==0 || cvodes_atol/y_max_scale[ks]>1){
+		      Ith(atolV, ks+1) = 1;
+		    }else if(cvodes_atol/y_max_scale[ks]<1e-8){
+		      Ith(atolV, ks+1) = 1e-8;			
+              /*printf("atolV for neq=%i is %d \n", ks+1, Ith(atolV, ks+1));*/
+		    }else if(cvodes_atol/y_max_scale[ks]>1e-8 && cvodes_atol/y_max_scale[ks]<1){
+		      Ith(atolV, ks+1) = cvodes_atol/y_max_scale[ks];
 		    }else{
 		      Ith(atolV, ks+1) = cvodes_atol;
 		    }
-		    /* printf("atolV for neq=%i is %d \n", ks, Ith(atolV, ks+1)); */
-		  }		  
+		    /*printf("atolV for neq=%i is %d \n", ks, Ith(atolV, ks+1));*/
+            tmp_tol *= Ith(atolV, ks+1);
+          }
+          tmp_tol = cvodes_atol / pow(tmp_tol,1/neq);  
+          for(ks=0; ks < neq; ks++) {	
+              Ith(atolV, ks+1) = Ith(atolV, ks+1) * tmp_tol;
+          }
 		  flag = CVodeSVtolerances(cvode_mem, RCONST(cvodes_rtol), atolV);
 		}else{                
 		  flag = CVodeSStolerances(cvode_mem, RCONST(cvodes_rtol), RCONST(cvodes_atol));
@@ -677,16 +693,20 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
 		      for(js=0; js < nps; js++) {
                         atolV_tmp = NV_DATA_S(atolV_ss[js]);
                         for(ks=0; ks < neq; ks++) {
-			  if(y_max_scale[ks]==0. || y_max_scale[ks]<1e-3){
-			    atolV_tmp[ks] = cvodes_atol*1e3;
-			  }else if(y_max_scale[ks]>1e3){
-			    atolV_tmp[ks] = cvodes_atol*1e-3;			  
-			  }else if(y_max_scale[ks]<1e3 && y_max_scale[ks]>1e-3){
-                            atolV_tmp[ks] = 1./y_max_scale[ks]*cvodes_atol;
+			  if(y_max_scale_S[ks]==0. || cvodes_atol/y_max_scale_S[ks]>1){
+			    atolV_tmp[ks] = 1;
+			  }else if(cvodes_atol/y_max_scale_S[ks]<1e-8){/* && Ith(atolV, ks+1)==1.e-8){*/
+                  /*printf("atolVS for neq=%i is %d \n", ks+1, atolV_tmp[ks]);*/
+			    atolV_tmp[ks] = 1e-8;			  
+			  }else if(cvodes_atol/y_max_scale_S[ks]>1e-8 && cvodes_atol/y_max_scale_S[ks]<1){
+                            atolV_tmp[ks] = cvodes_atol/y_max_scale_S[ks];
+                            /*if(atolV_tmp[ks] < Ith(atolV, ks+1)){
+                                 atolV_tmp[ks] = Ith(atolV, ks+1);
+                            }*/
 			  }else{
 			    atolV_tmp[ks] = cvodes_atol;
 			  }			  
-			  /* printf("atolV_ss for neq=%i is %f\n", ks, atolV_tmp[ks]); */
+			  /*printf("atolV_ss for neq=%i is %f\n", ks, atolV_tmp[ks]);*/
                         }
 		      }                                       		    
 		      flag = CVodeSensSVtolerances(cvode_mem, RCONST(cvodes_rtol), atolV_ss);
