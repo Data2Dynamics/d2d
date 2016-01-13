@@ -18,7 +18,11 @@
 function arInitialObservationEstimate( varargin )
 
     global ar;
-    arSimu(false,false,true);
+    
+    try
+        arSimu(false,false,true);
+    catch
+    end
 
     estimateVariance = 1;   % Do we need to estimate variances?
     frac = 0.25;            % Percentage of unexplained variance which is considered O.K.
@@ -166,9 +170,9 @@ function arInitialObservationEstimate( varargin )
             if (~isnan(ratio))
                 pID = find( ismember(ar.pLabel, scaleNames{a} ) );
                 if ( ar.qLog10(pID) )
-                    ar.p(pID) = clamp(ar.p(pID) + log10(ratio), ar.lb(pID), ar.ub(pID));
+                    ar.p(pID) = ar.p(pID) + log10(ratio);
                 else
-                    ar.p(pID) = clamp(ar.p(pID)*ratio, ar.lb(pID), ar.ub(pID));
+                    ar.p(pID) = ar.p(pID)*ratio;
                 end
                 
                 if ( opts.verbose )
@@ -191,15 +195,19 @@ function arInitialObservationEstimate( varargin )
             pID = find( ismember(ar.pLabel, offsetNames{a} ) );
             
             if ( ar.qLog10(pID) )
-                ar.p(pID) = clamp(ar.p(pID) - log10(minOffsetSim) + log10(minOffsetExp), ar.lb(pID), ar.ub(pID));
+                ar.p(pID) = ar.p(pID) - log10(minOffsetSim) + log10(minOffsetExp);
             else
-                ar.p(pID) = clamp(minOffsetExp, ar.lb(pID), ar.ub(pID));
+                ar.p(pID) = minOffsetExp;
             end
             
             if ( opts.verbose )
                arFprintf( 2, '%s: %d\n', offsetNames{a}, ar.p(pID) );
             end 
         end     
+    end
+    
+    for pID = 1 : length( ar.p )
+        ar.p(pID) = clamp(ar.p(pID), ar.lb(pID), ar.ub(pID));
     end
     
 end

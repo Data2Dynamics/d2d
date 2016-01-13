@@ -132,8 +132,6 @@ function [olist names m] = arFindData( varargin )
     filt = ones(size(olist));
     for a = 1 : length( olist )
         for c = 1 : 2 : length(varargin)
-            val = ar.model(m).data(olist(a)).condition(b).value;    
-                
             % Is it in the condition variable list?
             ID = find( strcmp( ar.model(m).data(olist(a)).pold, varargin(c) ) );
             if ( ~isempty(ID) )

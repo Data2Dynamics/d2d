@@ -621,7 +621,7 @@ if(strcmp(C{1},'OBSERVABLES'))
     while(~(strcmp(C{1},'CONDITIONS') || strcmp(C{1},'SUBSTITUTIONS')))
         qy = ismember(ar.model(m).y, C{1}); %R2013a compatible
         if(sum(qy)~=1)
-            error('unknown observable %s', cell2mat(C{1}));
+            error('unknown observable in error specification %s', cell2mat(C{1}));
         end
         arValidateInput( C, 'error', 'observable identifier', 'expression for the error model' );
         ar.model(m).fystd(qy) = C{2};
