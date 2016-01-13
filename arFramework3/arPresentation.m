@@ -16,6 +16,9 @@ savePath = [arSave '/Latex'];
 if(~exist([cd '/' savePath], 'dir'))
     mkdir([cd '/' savePath])
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 % latex file
 fname = 'presentation.tex';
@@ -100,9 +103,12 @@ for jm=1:length(ar.model)
             lp(fid, 'The model structure is depicted in Figure \\ref{%s}.', [ar.model(jm).name '_graph']);
         end
         if(isfield(ar.model(jm), 'data'))
-            if(ar.config.fiterrors == 1)
+            if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
                 lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
                     sum(ar.qFit==1), 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
+            elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+                lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
+                    sum(ar.qFit==1), 2*ar.ndata_err*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
             else
                 lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $\\chi^2 = %g$ for a total of %i data points.', ...
                     sum(ar.qFit==1), ar.chi2, ar.ndata);
@@ -385,7 +391,8 @@ for jm=1:length(ar.model)
                 %             lp(fid, '\\noindent The agreement of the model outputs and the experimental data, given in Table \\ref{%s_data}, ', ar.model(jm).plot(jplot).name);
                 lp(fid, '\\noindent The agreement of the model outputs and the experimental data, ');
                 
-                if(ar.config.fiterrors == 1)
+                if( (ar.config.useFitErrorMatrix == 0 &&  ar.config.fiterrors == 1) || ...
+                        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
                     lp(fid, 'yields a value of the objective function $-2 \\log(L) = %g$ for %i data points in this data set.', ...
                         2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
                 else

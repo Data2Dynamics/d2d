@@ -78,10 +78,15 @@ function uitable1_CreateFcn(hObject, eventdata, handles)
 
 global ar
 
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 % column name
 C = get(hObject, 'ColumnName');
-if(ar.config.fiterrors == 1)
+if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
     C{2} = '-2*log(L)';
+elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+    C{2} = '-2*log(L) / chi^2';
 else
     C{2} = 'chi^2';
 end
@@ -97,14 +102,18 @@ for jm=1:length(ar.model)
     for jplot=1:length(ar.model(jm).plot)
         chi2 = 0;
         ndata = 0;
+        ndata_err = 0;
         logfitting = 0;
         logplotting = 0;
         qfit = 0;
         if(isfield(ar.model(jm),'data'))
             for jd = ar.model(jm).plot(jplot).dLink
                 chi2 = chi2 + sum(ar.model(jm).data(jd).chi2);
-                if(ar.config.fiterrors == 1)
+                if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
                     chi2 = chi2 + sum(ar.model(jm).data(jd).chi2err);
+                elseif(ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd) == 1)
+                    chi2 = chi2 + sum(ar.model(jm).data(jd).chi2err);
+                    ndata_err = ndata_err + sum(ar.model(jm).data(jd).ndata);
                 end
                 ndata = ndata + sum(ar.model(jm).data(jd).ndata);
                 logfitting = logfitting + sum(ar.model(jm).data(jd).logfitting);
@@ -112,8 +121,10 @@ for jm=1:length(ar.model)
                 qfit = qfit + sum(ar.model(jm).data(jd).qFit==0);
             end
             
-            if(ar.config.fiterrors == 1)
+            if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
                 chi2 = 2*ndata*log(sqrt(2*pi)) + chi2;
+            elseif(ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1)
+                chi2 = 2*ndata_err*log(sqrt(2*pi)) + chi2;
             end
         end
         llhreltodata(end+1) = chi2/ndata; %#ok<AGROW>

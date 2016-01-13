@@ -5,12 +5,21 @@ function arPlotSample
 global ar
 global pleGlobals
 
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
+
 figure(1)
 clf;
 
-if(ar.config.fiterrors == 1)
-    chi2s = 2*ar.ndata*log(sqrt(2*pi)) + ar.sampling.chi2s;
+
+if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
+    chi2s = 2*ar.ndata*log(sqrt(2*pi)) + ar.sampling.chi2s
     chi2curr = 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit;
+    ylabeltmp = '-2*log(L)';
+elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+    chi2s = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.sampling.chi2s;
+    chi2curr = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.chi2fit;
     ylabeltmp = '-2*log(L)';
 else
     chi2s = ar.sampling.chi2s;

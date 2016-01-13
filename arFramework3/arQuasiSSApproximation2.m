@@ -52,22 +52,10 @@ end
 % calculate f(x,y(x),0) see fe[.] in (3.8)
 xdotslow = R1*v;
 for j=1:length(dependentvars)
-    xdotslow = mysubs(xdotslow, ar.model(m).x{dependentvars(j)}, yx{j});
+    xdotslow = arSubs(xdotslow, ar.model(m).x{dependentvars(j)}, yx{j});
 end
 fprintf('\nxdotslow:\n');
 for j=1:length(xdotslow)
     fprintf('\td[%s]/dt\t= %s\n', ar.model(m).x{independentvars(j)}, char(xdotslow(j)));
 end
 
-
-
-% better subs
-function out = mysubs(in, old, new, flag)
-if(~exist('flag','var'))
-    flag = 0;
-end
-if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    out = subs(in, old, new, flag);
-else
-    out = in;
-end

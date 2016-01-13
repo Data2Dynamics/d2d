@@ -26,9 +26,13 @@ end
 if(~exist('fastPlot','var'))
     fastPlot = false;
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 % constants
-if(ar.config.ploterrors == -1)
+if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) ||...
+        (ar.config.useFitErrorMatrix == 1 && sum(sum(ar.config.ploterrors_matrix == -1))>0) )
     linesize = 0.5;
 else
     linesize = 2;
@@ -56,7 +60,8 @@ for jm = 1:length(ar.model)
     clinks{jm} = cell(size(ar.model(jm).plot));
     for jplot = 1:length(ar.model(jm).plot)
         if(ar.model(jm).qPlotXs(jplot)==1)
-            if(ar.config.ploterrors == -1)
+            if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                    (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                 [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['CI-X: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
             else
                 [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['X: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
@@ -117,14 +122,15 @@ for jm = 1:length(ar.model)
                                 ar.model(jm).condition(jc).plot.u(ju,jc) = ltmp;
                             end
                             hold(g, 'on');
-                            if(ar.config.ploterrors == -1)
+                            if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                                    (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                                 tmpx = [t(:); flipud(t(:))];
                                 tmpy = [uub(:,ju); flipud(ulb(:,ju))];
                                 ltmp = patch(tmpx, tmpy, tmpx*0-2*eps, 'r');
                                 set(ltmp, 'FaceColor', Clines{2}*0.1+0.9, 'EdgeColor', Clines{2}*0.1+0.9);
                                 ltmp2 = patch(tmpx, tmpy, tmpx*0-eps, 'r');
                                 set(ltmp2, 'LineStyle', '--', 'FaceColor', 'none', 'EdgeColor', Clines{2}*0.3+0.7);
-                            end
+                            end 
                         else
                             if(jd~=0)
                                 set(ar.model(jm).data(jd).plot.u(ju,jc), 'YData', u(:,ju));
@@ -205,7 +211,8 @@ for jm = 1:length(ar.model)
                                 ar.model(jm).condition(jc).plot.xss(jx,jc) = ltmp;
                             end
                             
-                            if(ar.config.ploterrors == -1)
+                            if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                                    (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                                 tmpx = [t(:); flipud(t(:))];
                                 tmpy = [xub(:,jx); flipud(xlb(:,jx))];
                                 ltmp = patch(tmpx, tmpy, tmpx*0-2*eps, 'r');
@@ -290,7 +297,8 @@ for jm = 1:length(ar.model)
                             end
                             hold(g, 'on');
                             
-                            if(ar.config.ploterrors == -1)
+                            if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                                    (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                                 tmpx = [t(:); flipud(t(:))];
                                 tmpy = [zub(:,jz); flipud(zlb(:,jz))];
                                 ltmp = patch(tmpx, tmpy, tmpx*0-2*eps, 'r');
@@ -388,7 +396,8 @@ for jm = 1:length(ar.model)
                                 end
                                 ar.model(jm).data(jd).plot.u(ju,jt,jc) = ltmp;
                                 hold(g, 'on');
-                                if(ar.config.ploterrors == -1)
+                                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                                        (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                                     tmpx = [t(:); flipud(t(:))];
                                     tmpy = [ub(:); flipud(lb(:))];
                                     ltmp = patch(tmpx, tmpy, tmpx*0-2*eps, 'r');
@@ -446,7 +455,8 @@ for jm = 1:length(ar.model)
                                 end
                                 ar.model(jm).data(jd).plot.x(jx,jt,jc) = ltmp;
                                 hold(g, 'on');
-                                if(ar.config.ploterrors == -1)
+                                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                                        (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                                     tmpx = [t(:); flipud(t(:))];
                                     tmpy = [ub(:); flipud(lb(:))];
                                     ltmp = patch(tmpx, tmpy, tmpx*0-2*eps, 'r');
@@ -504,7 +514,8 @@ for jm = 1:length(ar.model)
                                 end
                                 ar.model(jm).data(jd).plot.z(jz,jt,jc) = ltmp;
                                 hold(g, 'on');
-                                if(ar.config.ploterrors == -1)
+                                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                                        (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                                     tmpx = [t(:); flipud(t(:))];
                                     tmpy = [ub(:); flipud(lb(:))];
                                     ltmp = patch(tmpx, tmpy, tmpx*0-2*eps, 'r');
@@ -730,7 +741,8 @@ for jm = 1:length(ar.model)
             end
 
             if(saveToFile)
-                if(ar.config.ploterrors == -1)
+                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                        (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                     ar.model(jm).plot(jplot).savePath_FigXCI = arSaveFigure(h, ...
                         ar.model(jm).plot(jplot).name, '/FiguresCI/X');
                 else
@@ -985,7 +997,8 @@ figdist = 0.02;
 ar.model(m).plot(jplot).time = now;
 fastPlotTmp = fastPlot;
 
-if(ar.config.ploterrors == -1)
+if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+        (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(m,ar.model(m).plot(jplot).dLink(1))==-1) )
     if(isfield(ar.model(m).plot(jplot), 'fighandel_xCI') && ~isempty(ar.model(m).plot(jplot).fighandel_xCI) && ...
             ar.model(m).plot(jplot).fighandel_xCI ~= 0 && ...
             sum(ar.model(m).plot(jplot).fighandel_xCI==openfigs)>0 && ...

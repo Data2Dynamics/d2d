@@ -1,3 +1,5 @@
+% use a cluster function, row-wise
+
 function [B, i_sorted] = docluster(A, cutoff)
 
 % a_order=clusterdata(A,cutoff);
@@ -6,9 +8,19 @@ function [B, i_sorted] = docluster(A, cutoff)
 
 % tree = linkage(A,'average');
 tree = linkage(A,'ward','euclidean','savememory','on');
-D = pdist(A);
-leafOrder = optimalleaforder(tree,D);
+if(size(A,1)<500)
+    D = pdist(A);
+    leafOrder = optimalleaforder(tree,D);
+else
+    leafOrder = [];
+    warning('skipping optimalleaforder');
+end
+
 figure()
-[~, ~, i_sorted] = dendrogram(tree,0,'Reorder',leafOrder);
+if(isempty(leafOrder))
+    [~, ~, i_sorted] = dendrogram(tree,0);
+else
+    [~, ~, i_sorted] = dendrogram(tree,0,'Reorder',leafOrder);
+end
 close
 B = A(i_sorted,:);

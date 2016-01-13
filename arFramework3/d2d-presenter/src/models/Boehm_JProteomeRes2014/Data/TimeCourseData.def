@@ -1,0 +1,16 @@
+DESCRIPTION
+"Experimenter: Lorenz Adlung and Martin Boehm"
+"Technique: Mass spectrometry"
+"Cells: BaF3"
+"Ligand: Epo 5 units/ml"
+
+PREDICTOR
+t               T   min     time	0	300
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS

@@ -15,6 +15,9 @@ global ar pleGlobals
 if(~exist('withSyms','var'))
     withSyms = false;
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 if(isempty(ar.config.savepath)) % never saved before, ask for name
     if(~exist('name','var'))
@@ -143,10 +146,13 @@ try %#ok<TRYNC>
     ar.ps_sorted = ar2.ps_sorted;
     ar.chi2s_start_sorted = ar2.chi2s_start_sorted;
     ar.chi2sconstr_start_sorted = ar2.chi2sconstr_start_sorted;
-    ar.ps_start_sorted = ar2.ps_start_sorted;        
+    ar.ps_start_sorted = ar2.ps_start_sorted;
 end
-ar.config.fiterrors = ar2.config.fiterrors; %#ok<STRNU>
+if(ar2.config.useFitErrorMatrix == 0)
+    ar.config.fiterrors = ar2.config.fiterrors; %#ok<STRNU>
+else
+    ar.config.useFitErrorMatrix = true;
+    ar.config.fiterrors_matrix = ar2.config.fiterrors_matrix;
+    ar.config.ploterrors_matrix = ar2.config.ploterrors_matrix; 
+end
 save([savepath '/workspace_pars_only.mat'],'ar','pleGlobals','-v7.3');
-
-
-

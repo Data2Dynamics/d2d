@@ -1,0 +1,37 @@
+DESCRIPTION
+"data file for Restif2007_Vaccination_Invasion"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 100	
+
+INPUTS
+
+OBSERVABLES
+N_state_obs	 C	 "n/a"	 conc.	 0 0 "N_state" ""
+S_state_obs	 C	 "n/a"	 conc.	 0 0 "S_state" ""
+I1_obs	 C	 "n/a"	 conc.	 0 0 "I1" ""
+I2_obs	 C	 "n/a"	 conc.	 0 0 "I2" ""
+R1_obs	 C	 "n/a"	 conc.	 0 0 "R1" ""
+R2_obs	 C	 "n/a"	 conc.	 0 0 "R2" ""
+V_state_obs	 C	 "n/a"	 conc.	 0 0 "V_state" ""
+Iv2_obs	 C	 "n/a"	 conc.	 0 0 "Iv2" ""
+J2_obs	 C	 "n/a"	 conc.	 0 0 "J2" ""
+J1_obs	 C	 "n/a"	 conc.	 0 0 "J1" ""
+R_state_obs	 C	 "n/a"	 conc.	 0 0 "R_state" ""
+
+ERRORS
+N_state_obs	 "sd_N_state"
+S_state_obs	 "sd_S_state"
+I1_obs	 "sd_I1"
+I2_obs	 "sd_I2"
+R1_obs	 "sd_R1"
+R2_obs	 "sd_R2"
+V_state_obs	 "sd_V_state"
+Iv2_obs	 "sd_Iv2"
+J2_obs	 "sd_J2"
+J1_obs	 "sd_J1"
+R_state_obs	 "sd_R_state"
+
+CONDITIONS
+
+PARAMETERS

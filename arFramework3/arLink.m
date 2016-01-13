@@ -18,7 +18,12 @@ if(nargin==0)
 end
 
 if(~silent)
-    fprintf('\nlinking time points...\n');
+    arFprintf(1, '\nlinking model...');
+    arFprintf(2, '\nlinking time points...\n');
+end
+
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
 end
 
 useMS 		= 0;
@@ -29,15 +34,6 @@ if(~exist('add_sec','var'))
     add_sec = false;
 end
 
-if(~exist('yStd','var'))
-    if(ar.config.fiterrors==1)
-        yStd = NaN;
-    else
-        yStd = 0.1;
-
-    end
-end
-
 if(~exist('dataAdd','var'))
     dataAdd = false;
     add_sec = false;
@@ -46,6 +42,16 @@ if(~exist('dataAdd','var'))
     id = [];
     im = [];
     yStd = [];
+end
+
+if(~exist('yStd','var'))
+    if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
+            (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(im,id)==1) )
+        yStd = NaN;
+    else
+        yStd = 0.1;
+
+    end
 end
 
 for m=1:length(ar.model)
@@ -158,7 +164,7 @@ for m=1:length(ar.model)
         
         % collect time points for multiple shooting
         if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
-            fprintf('\n');
+            arFprintf(2, '\n');
             for jms=1:ar.model(m).ms_count
                 for c=1:length(ar.model(m).condition)
                     for c2=1:length(ar.model(m).condition)
@@ -174,7 +180,7 @@ for m=1:length(ar.model)
                                     ar.model(m).condition(c).ms_snip_index(qc)+1 == ar.model(m).condition(c2).ms_snip_index(qc2))
                                 
                                 tlink = ar.model(m).condition(c2).ms_snip_start;
-                                fprintf('linking condition %i and %i for multiple shooting at t = %f\n', c, c2, tlink);
+                                arFprintf(2, 'linking condition %i and %i for multiple shooting at t = %f\n', c, c2, tlink);
                                 
                                 % Add multiple shooting points to the event list
                                 ar.model(m).condition(c).tEvents = ...
@@ -416,7 +422,7 @@ for m = 1:length(ar.model)
 end
 
 if(~silent)
-    fprintf('linking parameters...\n');
+    arFprintf(2, 'linking parameters...\n');
 end
 
 % copy old values for event and multiple shooting settings if they exist
@@ -555,7 +561,7 @@ for jm=1:length(ar.model)
     if(~isfield(ar.model(jm), 'qPlotYs') || isempty(ar.model(jm).qPlotYs))
         if(length(ar.model(jm).plot) > 10)
             if(~silent)
-                fprintf('Automatic plotting disabled for model %i. Please use arPlotter for plotting.\n', jm);
+                arFprintf(1, 'Automatic plotting disabled for model %i. Please use arPlotter for plotting.\n', jm);
             end
             ar.model(jm).qPlotYs = false(1,length(ar.model(jm).plot));
             ar.model(jm).qPlotXs = false(1,length(ar.model(jm).plot));
@@ -646,3 +652,6 @@ for m = 1:length(ar.model)
         end
     end
 end
+
+% Invalidate cache so simulations do not get skipped
+arCheckCache(1);

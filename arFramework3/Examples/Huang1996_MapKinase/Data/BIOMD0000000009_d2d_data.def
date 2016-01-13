@@ -1,0 +1,67 @@
+DESCRIPTION
+"data file for Huang1996 - Ultrasensitivity in MAPK cascade"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 100	
+
+INPUTS
+
+OBSERVABLES
+E1_obs	 C	 "n/a"	 conc.	 0 0 "E1" "MAPKKK activator (Ras)"
+E2_obs	 C	 "n/a"	 conc.	 0 0 "E2" "MAPKKK inactivator"
+KKK_obs	 C	 "n/a"	 conc.	 0 0 "KKK" "Mos"
+P_KKK_obs	 C	 "n/a"	 conc.	 0 0 "P_KKK" "Mos-P"
+KK_obs	 C	 "n/a"	 conc.	 0 0 "KK" "Mek1"
+P_KK_obs	 C	 "n/a"	 conc.	 0 0 "P_KK" "Mek1-P"
+PP_KK_obs	 C	 "n/a"	 conc.	 0 0 "PP_KK" "Mek1-PP"
+K_state_obs	 C	 "n/a"	 conc.	 0 0 "K_state" "Erk2"
+P_K_obs	 C	 "n/a"	 conc.	 0 0 "P_K" "Erk2-P"
+PP_K_obs	 C	 "n/a"	 conc.	 0 0 "PP_K" "Erk2-PP"
+KPase_obs	 C	 "n/a"	 conc.	 0 0 "KPase" "MAPK-Pase"
+KKPase_obs	 C	 "n/a"	 conc.	 0 0 "KKPase" "MAPKK-Pase"
+E1_KKK_obs	 C	 "n/a"	 conc.	 0 0 "E1_KKK" "E1_Mos"
+E2_P_KKK_obs	 C	 "n/a"	 conc.	 0 0 "E2_P_KKK" "E2_Mos-P"
+P_KKK_KK_obs	 C	 "n/a"	 conc.	 0 0 "P_KKK_KK" "P-Mos_Mek1"
+P_KKK_P_KK_obs	 C	 "n/a"	 conc.	 0 0 "P_KKK_P_KK" "P-Mos_P-Mek1"
+PP_KK_K_obs	 C	 "n/a"	 conc.	 0 0 "PP_KK_K" "PP-Mek1_Erk2"
+PP_KK_P_K_obs	 C	 "n/a"	 conc.	 0 0 "PP_KK_P_K" "PP-Mek1_P-Erk2"
+KKPase_PP_KK_obs	 C	 "n/a"	 conc.	 0 0 "KKPase_PP_KK" "MAPKK-Pase_PP-Mek1"
+KKPase_P_KK_obs	 C	 "n/a"	 conc.	 0 0 "KKPase_P_KK" "MAPKK-Pase_P-Mek1"
+KPase_PP_K_obs	 C	 "n/a"	 conc.	 0 0 "KPase_PP_K" "MAPK-Pase_PP-Erk2"
+KPase_P_K_obs	 C	 "n/a"	 conc.	 0 0 "KPase_P_K" "MAPK-Pase_P-Erk2"
+_obs	 C	 "n/a"	 conc.	 0 0 "" "K_PP_norm"
+_obs	 C	 "n/a"	 conc.	 0 0 "" "KK_PP_norm"
+_obs	 C	 "n/a"	 conc.	 0 0 "" "KKK_P_norm"
+_obs	 C	 "n/a"	 conc.	 0 0 "" "relative maximal K_PP"
+
+ERRORS
+E1_obs	 "sd_E1"
+E2_obs	 "sd_E2"
+KKK_obs	 "sd_KKK"
+P_KKK_obs	 "sd_P_KKK"
+KK_obs	 "sd_KK"
+P_KK_obs	 "sd_P_KK"
+PP_KK_obs	 "sd_PP_KK"
+K_state_obs	 "sd_K_state"
+P_K_obs	 "sd_P_K"
+PP_K_obs	 "sd_PP_K"
+KPase_obs	 "sd_KPase"
+KKPase_obs	 "sd_KKPase"
+E1_KKK_obs	 "sd_E1_KKK"
+E2_P_KKK_obs	 "sd_E2_P_KKK"
+P_KKK_KK_obs	 "sd_P_KKK_KK"
+P_KKK_P_KK_obs	 "sd_P_KKK_P_KK"
+PP_KK_K_obs	 "sd_PP_KK_K"
+PP_KK_P_K_obs	 "sd_PP_KK_P_K"
+KKPase_PP_KK_obs	 "sd_KKPase_PP_KK"
+KKPase_P_KK_obs	 "sd_KKPase_P_KK"
+KPase_PP_K_obs	 "sd_KPase_PP_K"
+KPase_P_K_obs	 "sd_KPase_P_K"
+_obs	 "sd_"
+_obs	 "sd_"
+_obs	 "sd_"
+_obs	 "sd_"
+
+CONDITIONS
+
+PARAMETERS

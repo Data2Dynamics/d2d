@@ -7,6 +7,9 @@ global ar
 if(isempty(ar))
     error('please initialize by arInit')
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 % Fetch MATLAB version
 matVer = ver('MATLAB');
@@ -58,6 +61,8 @@ lp(fid, '\\usepackage{subfig}');
 lp(fid, '\\usepackage{sidecap}');
 lp(fid, '\\captionsetup[subfloat]{position=top}');
 
+lp(fid, '\\allowdisplaybreaks');
+
 lp(fid, '\\setlength{\\textheight}{22 cm}');
 lp(fid, '\\setlength{\\textwidth}{16 cm}');
 lp(fid, '\\setlength{\\topmargin}{-1.5 cm}');
@@ -85,17 +90,14 @@ lp(fid, '\\pgfplotsset{plot coordinates/math parser=false} ');
 lp(fid, '\\newlength\\figureheight ');
 lp(fid, '\\newlength\\figurewidth ');
 
+lp(fid, '\\renewcommand*\\rmdefault{cmss} ');
+
 lp(fid, '\n\\begin{document}\n');
 
 %% Header
-% lp(fid, ['\\title{Data-2-Dynamics Software' ...
-%     '\\footnote{Website: \\href{https://bitbucket.org/d2d-development/d2d-software}' ...
-%     '{\\url{https://bitbucket.org/d2d-development/d2d-software}} \\\\ ', ...
-%     'Reference: \\citet{Raue:2012zt}}'...
-%     ' \\\\ Modeling Report}']);
 
 if(nargin==0)
-    project_name = 'Data 2 Dynamics Software -- Modeling Report';
+    project_name = 'Data2Dynamics Software -- Modeling Report';
 end
 
 lp(fid, '\\title{%s}', project_name);
@@ -104,25 +106,45 @@ lp(fid, '\\date{%s}', datestr(now));
 lp(fid, '\\maketitle\n');
 
 if(nargin>0)
-    lp(fid, '\\noindent {\\bf Data 2 Dynamics Software -- Modeling Report}\\\\\\\\');
+    lp(fid, '\\noindent {\\bf Data2Dynamics Software -- Modeling Report}\\\\\\\\');
 end
 
-lp(fid, ['\\noindent {\\bf Website:} \\href{https://bitbucket.org/d2d-development/d2d-software}' ...
-    '{\\url{https://bitbucket.org/d2d-development/d2d-software}} \\\\\\\\']);
-lp(fid, ['{\\bf Reference:} A~Raue, M~Schilling, J~Bachmann, A~Matteson, M~Schelker, ' ...
-    'D~Kaschek, S~Hug, C~Kreutz, BD~Harms, F~Theis, U~Klingm{\\"u}ller, and J~Timmer.', ...
-    ' Lessons learned from quantitative dynamical modeling in systems biology.', ...
-    ' {\\em PLOS ONE}, 8(9):e74335, 2013.']);
+lp(fid, ['\\noindent {\\bf Website:} \\href{http://www.data2dynamics.org}' ...
+    '{\\url{http://www.data2dynamics.org}} \\\\\\\\']);
+lp(fid, '{\\bf Key reference:}');
+lp(fid, '\\begin{itemize}');
+lp(fid, ['\\item ', ...
+    '\\href{http://bioinformatics.oxfordjournals.org/cgi/content/abstract/btv405?ijkey=YPsnNzFC4CIzy5g&keytype=ref}' , ...
+    '{Data2Dynamics: a modeling environment tailored to parameter estimation in dynamical systems}. ', ...
+    'A.~Raue, B.~Steiert, M.~Schelker, C.~Kreutz, T.~Maiwald, H.~Hass, ', ...
+    'J.~Vanlier, C.~T{\\"o}nsing, L.~Adlung, R.~Engesser, W.~Mader, T.~Heinemann, J.~Hasenauer, ', ...
+    'M.~Schilling, T.~H{\\"o}fer, E.~Klipp, F.~Theis, U.~Klingm{\\"u}ller, B.~Schoeberl and J.~Timmer. ', ...
+    ' {\\em Bioinformatics}, {\\bf 31}(21), 3558-3560, 2015.']);
+lp(fid, ['\\item ', ... 
+    '\\href{http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0074335}' , ...
+    '{Lessons learned from quantitative dynamical modeling in systems biology}. ', ...
+    'A.~Raue, M.~Schilling, J.~Bachmann, A.~Matteson, M.~Schelker, ' ...
+    'D.~Kaschek, S.~Hug, C.~Kreutz, BD.~Harms, F.~Theis, U.~Klingm{\\"u}ller, and J.~Timmer. ', ...
+    '{\\em PLOS ONE}, {\\bf 8}(9), e74335, 2013.']);
+lp(fid, '\\end{itemize}');
 
 lp(fid, '\\tableofcontents');
 
-N = 10;
+% set counters for waitbar
+nncounter = 0;
+cncounter = 1;
+for jm=1:length(ar.model)
+    nncounter = nncounter + 9; % model sections
+    nncounter = nncounter + length(ar.model(jm).plot)*7; % experiment sections
+end
 
+arWaitbar(0);
 for jm=1:length(ar.model)
     lp(fid, '\\clearpage\n');
     lp(fid, '\\section{Model: %s}\n', arNameTrafo(ar.model(jm).name));
     
     %% descriptions
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).description))
         lp(fid, '\\subsection{Comments}');
         for jd=1:length(ar.model(jm).description)
@@ -131,34 +153,39 @@ for jm=1:length(ar.model)
     end
     
     %% species
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).x))
         lp(fid, '\\subsection{Dynamic variables}');
-        lp(fid, 'The model contains %i dynamic variables:', length(ar.model(jm).x));
+        lp(fid, 'The model contains %i dynamic variables. ', length(ar.model(jm).x));
+        lp(fid, 'The dynamics of those variables evolve according to a system of ordinary differential equations (ODE) as will be defined in the following.');
+        lp(fid, 'The following list indicates the unique variable names and their initial conditions.');
         lp(fid, '\\begin{itemize}');
         for jx = 1:length(ar.model(jm).x)
             lp(fid, '\\item {\\bf Dynamic variable %i:} %s', ...
                 jx, strrep(ar.model(jm).x{jx}, '_', '\_'));
             
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{equation}');
-            lp(fid, '\\begin{aligned}');
-            lp(fid, '%s(%s=0) & = & %s \\label{%s}', ...
+            lp(fid, '\\begin{align*}');
+            lp(fid, '%s(%s=0) & = %s \\label{%s}', ...
                 myFormulas(ar.model(jm).x{jx}, jm), ...
                 myFormulas(ar.model(jm).t, jm), ...
                 myFormulas(ar.model(jm).px0{jx}, jm), ...
                 sprintf('%s_init%i', ar.model(jm).name, jx));
-            lp(fid, '\\end{aligned}');
-            lp(fid, '\\end{equation}}');
+            lp(fid, '\\end{align*}}');
             
-            lp(fid, 'Unit: %s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2});
+            %lp(fid, 'Unit: %s [%s]', ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2});
         end
         lp(fid, '\\end{itemize}');
     end
     
     %% inputs
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).u))
         lp(fid, '\\subsection{Input variables}');
-        lp(fid, 'The model contains %i external inputs variables:', length(ar.model(jm).u));
+        lp(fid, 'The model contains %i external inputs variables.', length(ar.model(jm).u));
+        lp(fid, 'Those variables evolve according to a regular algebraic equation. ');
+        lp(fid, 'They are calculated before the ODE systems is solved and can appear in reaction rate equations.');
+        lp(fid, 'The following list indicates the unique variable names and their corresponding equations.');
         lp(fid, '\\begin{itemize}');
         for ju = 1:length(ar.model(jm).u)
             lp(fid, '\\item {\\bf Input variable %i:} %s', ...
@@ -166,27 +193,32 @@ for jm=1:length(ar.model)
             
             if(~isempty(ar.model(jm).fu{ju}))
                 lp(fid, '{\\footnotesize');
-                lp(fid, '\\begin{equation}');
-                lp(fid, '\\begin{aligned}');
-                lp(fid, '%s(%s) & = & %s \\label{%s}', ...
+                lp(fid, '\\begin{align*}');
+                lp(fid, '%s(%s) & = %s \\label{%s}', ...
                     myFormulas(ar.model(jm).u{ju}, jm), ...
                     myFormulas(ar.model(jm).t, jm), ...
                     myFormulas(ar.model(jm).fu{ju}, jm), ...
                     sprintf('%s_input%i', ar.model(jm).name, ju));
-                lp(fid, '\\end{aligned}');
-                lp(fid, '\\end{equation}}');
+                lp(fid, '\\end{align*}}');
             end
             
-            lp(fid, 'Unit: %s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2});
+            % lp(fid, 'Unit: %s [%s]', ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2});
         end
         lp(fid, '\\end{itemize}');
     end
     
     %% reactions
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).x))
         lp(fid, '\\subsection{Reactions}');
-        lp(fid, 'The model contains %i reactions:', ...
+        lp(fid, 'The model contains %i reactions.', ...
             length(ar.model(jm).fv));
+        lp(fid, 'Reactions define interactions between dynamics variables and build up the ODE systems. ');
+        lp(fid, 'The following list indicates the reaction laws and their corresponding reaction rate equations.');
+        lp(fid, 'Promoting rate modifiers are indicated in black above the rate law arrow.');
+        lp(fid, 'Inhibitory rate modifiers are indicated in red below the rate law arrow.');
+        lp(fid, 'In the reaction rate equations dynamic and input variables are indicated by square brackets.');
+        lp(fid, 'The remaining variables are model parameters that remain constant over time.');
         lp(fid, '\\begin{itemize}');
         for jv = 1:length(ar.model(jm).fv)
             lp(fid, '\\item {\\bf Reaction %i:}', jv);
@@ -280,12 +312,10 @@ for jm=1:length(ar.model)
             
             % rate equation
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{equation}');
-            lp(fid, '\\begin{aligned}');
-            lp(fid, 'v_{%i} & = & %s \\label{%s}', jv, myFormulas(ar.model(jm).fv{jv}, jm), ...
+            lp(fid, '\\begin{align*}');
+            lp(fid, 'v_{%i} & = %s \\label{%s}', jv, myFormulas(ar.model(jm).fv{jv}, jm), ...
                 sprintf('%s_flux%i', ar.model(jm).name, jv));
-            lp(fid, '\\end{aligned}');
-            lp(fid, '\\end{equation}}');
+            lp(fid, '\\end{align*}}');
             
             fprintf(fid, '\n');
         end
@@ -293,38 +323,33 @@ for jm=1:length(ar.model)
     end
     
     %% Structure
-    if(isfield(ar.model(jm), 'savePath_Graph') && ~isempty(ar.model(jm).savePath_Graph))
-        savePath_Graph = [arSave '/Figures/Network' sprintf('/%s.pdf', ar.model(jm).name)];
-        if(exist(savePath_Graph,'file'))
-            lp(fid, '\\subsection{Model structure}');
-            lp(fid, 'The model structure is depicted in Figure \\ref{%s}.', [ar.model(jm).name '_graph']);
-            
-            copyfile(savePath_Graph, [savePath '/' ar.model(jm).name '_graph.pdf'])
-            captiontext = sprintf('\\textbf{%s network representation.} ', arNameTrafo(ar.model(jm).name));
-            if(~isempty(ar.model(jm).u))
-                captiontext = [captiontext 'Diamond shaped nodes correspond to model inputs, see Equation '];
-                if(length(ar.model(jm).u)==1)
-                    captiontext = [captiontext '\ref{' sprintf('%s_input%i', ar.model(jm).name, 1) '}. '];
-                else
-                    captiontext = [captiontext '\ref{' sprintf('%s_input%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_input%i', ar.model(jm).name, length(ar.model(jm).u)) '}. '];
-                end
-            end
-            captiontext = [captiontext 'Ellipsoid shaped nodes correspond to dynamical variables described by the ODE system, see Equation '];
-            captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
-            captiontext = [captiontext 'Black arrows and box shaped nodes indicate reactions with corresponding rate equations given in Equation '];
-            captiontext = [captiontext '\ref{' sprintf('%s_flux%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_flux%i', ar.model(jm).name, length(ar.model(jm).fv)) '}. '];
-            captiontext = [captiontext 'Red T-shaped arrows indicated inhibitorial influence on a reaction and blue O-shaped arrows indicate catalysing influence on a reaction. '];
-            lpfigure(fid, 0.5, [ar.model(jm).name '_graph.pdf'], captiontext, [ar.model(jm).name '_graph']);
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
+    savePath_Graph = [arSave '/Figures/Network' sprintf('/%s.pdf', ar.model(jm).name)];
+    if(exist(savePath_Graph,'file'))
+        lp(fid, '\\subsection{Model structure}');
+        lp(fid, 'The model structure that emerges from the previously specified reaction laws is depicted in Figure \\ref{%s}.', [ar.model(jm).name '_graph']);
+        
+        copyfile(savePath_Graph, [savePath '/' ar.model(jm).name '_graph.pdf'])
+        captiontext = sprintf('\\textbf{%s network representation.} ', arNameTrafo(ar.model(jm).name));
+        captiontext = [captiontext 'Ellipsoid shaped nodes correspond to dynamical variables. '];        
+        if(~isempty(ar.model(jm).u))
+            captiontext = [captiontext 'Diamond shaped nodes correspond to inputs variables. '];
         end
+        captiontext = [captiontext 'Black arrows and box shaped nodes indicate reactions with corresponding rate equations given in Equation '];
+        captiontext = [captiontext '\ref{' sprintf('%s_flux%i', ar.model(jm).name, 1) '} -- \ref{' sprintf('%s_flux%i', ar.model(jm).name, length(ar.model(jm).fv)) '}. '];
+        captiontext = [captiontext 'Red T-shaped arrows indicated inhibitorial influence on a reaction and blue O-shaped arrows indicate promoting influence on a reaction. '];
+        lpfigure(fid, 0.5, [ar.model(jm).name '_graph.pdf'], captiontext, [ar.model(jm).name '_graph'], '[h]');
     end
     
     %% ODE system
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).x))
-        lp(fid, '\\subsection{ODE system}');
+        lp(fid, '\\subsection{ODE system} \\label{%s}', sprintf('%s_ode', ar.model(jm).name));
         
-        lp(fid, '\\noindent The ODE system determining the time evolution of the dynamical variables is given by:');
+        lp(fid, '\\noindent The specified reation laws and rate equations $v$ determine an ODE system. ');
+        lp(fid, 'The time evolution of the dynamical variables is calculated by solving this equation system.');
         lp(fid, '{\\footnotesize');
-        lp(fid, '\\begin{eqnarray}');
+        lp(fid, '\\begin{align*}');
         for jx=1:size(ar.model(jm).N, 1) % for every species jx
             strtmp = '';
             if(~isempty(ar.model(jm).c))
@@ -348,52 +373,54 @@ for jm=1:length(ar.model)
                 end
                 
             end
-            if(jx==size(ar.model(jm).N, 1) || mod(jx,N)==0)
-                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = & %s \\label{%s}', myFormulas(ar.model(jm).x{jx}, jm), strtmp, sprintf('%s_ode%i', ar.model(jm).name, jx));
+            if(jx==size(ar.model(jm).N, 1))
+                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = %s ', myFormulas(ar.model(jm).x{jx}, jm), strtmp);
             else
-                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = & %s \\label{%s} \\\\', myFormulas(ar.model(jm).x{jx}, jm), strtmp, sprintf('%s_ode%i', ar.model(jm).name, jx));
-            end
-            
-            if(mod(jx,N)==0 && jx<size(ar.model(jm).N, 1))
-                lp(fid, '\\end{eqnarray}\n');
-                lp(fid, '\\begin{eqnarray}');
+                lp(fid, '\t\\mathrm{d}%s/\\mathrm{dt} & = %s \\\\', myFormulas(ar.model(jm).x{jx}, jm), strtmp);
             end
         end
-        lp(fid, '\\end{eqnarray}}\n\n');
+        lp(fid, '\\end{align*}}\n\n');
         
         lp(fid, '\\noindent The ODE system was solved by a parallelized implementation of the CVODES algorithm \\cite{Hindmarsh:2005fb}.');
         lp(fid, 'It also supplies the parameter sensitivities utilized for parameter estimation.\\\\\n\n');
     end
     
     %% derived
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(~isempty(ar.model(jm).z))
         lp(fid, '\\subsection{Derived variables}');
-        lp(fid, 'The model contains %i derived variables:', length(ar.model(jm).z));
+        lp(fid, 'The model contains %i derived variables.', length(ar.model(jm).z));
+        lp(fid, 'Derived variables are calculated after the ODE system was solved. ');
+        lp(fid, 'Dynamic and input variables are indicated by square brackets.');
+        lp(fid, 'The remaining variables are model parameters that remain constant over time.');
         lp(fid, '\\begin{itemize}');
         for jz = 1:length(ar.model(jm).z)
             lp(fid, '\\item {\\bf Derived variable %i:} %s', ...
                 jz, strrep(ar.model(jm).z{jz}, '_', '\_'));
             
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{equation}');
-            lp(fid, '\\begin{aligned}');
-            lp(fid, '%s(%s) & = & %s \\label{%s}', ...
+            lp(fid, '\\begin{align*}');
+            lp(fid, '%s(%s) & = %s \\label{%s}', ...
                 myFormulas(ar.model(jm).z{jz}, jm), ...
                 myFormulas(ar.model(jm).t, jm), ...
                 myFormulas(ar.model(jm).fz{jz}, jm), ...
                 sprintf('%s_derived%i', ar.model(jm).name, jz));
-            lp(fid, '\\end{aligned}');
-            lp(fid, '\\end{equation}}');
+            lp(fid, '\\end{align*}}');
             
-            lp(fid, 'Unit: %s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2});
+            % lp(fid, 'Unit: %s [%s]', ar.model(jm).zUnits{jz,3}, ar.model(jm).zUnits{jz,2});
         end
         lp(fid, '\\end{itemize}');
     end
     
     %% standard observations and error model
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     if(isfield(ar.model(jm), 'y'))
         lp(fid, '\\subsection{Observables}');
-        lp(fid, 'The model contains %i standard observables:', length(ar.model(jm).y));
+        lp(fid, 'The model contains %i standard observables.', length(ar.model(jm).y));
+        lp(fid, 'Observables are calculated after the ODE system was solved and derived variables are calculated. ');
+        lp(fid, 'Dynamic, input and derived variables are indicated by square brackets.');
+        lp(fid, 'The remaining variables are model parameters that remain constant over time.');
+        lp(fid, 'In additon to the equation for the observable, also their corresponding error model $\\sigma$ is indicated.');
         lp(fid, '\\begin{itemize}');
         for jy = 1:length(ar.model(jm).y)
             lp(fid, '\\item {\\bf Observable %i:} %s', ...
@@ -405,60 +432,50 @@ for jm=1:length(ar.model)
             end
             
             lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{equation}');
-            lp(fid, '\\begin{aligned}');
-            lp(fid, '%s(%s) & = & %s \\label{%s}', ...
+            lp(fid, '\\begin{align*}');
+            lp(fid, '%s(%s) & = %s \\label{%s} \\\\', ...
                 myFormulas(ar.model(jm).y{jy}, jm), ...
                 myFormulas(ar.model(jm).t, jm), ...
                 strtmp, ...
                 sprintf('%s_std_obs%i', ar.model(jm).name, jy));
-            lp(fid, '\\end{aligned}');
-            lp(fid, '\\end{equation}}');
-            
-            lp(fid, 'Unit: %s [%s]; ', ar.model(jm).yUnits{jy,3}, ar.model(jm).yUnits{jy,2});
-            
-            lp(fid, 'With error model:');
-            
-            lp(fid, '{\\footnotesize');
-            lp(fid, '\\begin{equation}');
-            lp(fid, '\\begin{aligned}');
-            lp(fid, '\\sigma\\{%s\\}(%s) & = & %s \\label{%s}', ...
+            lp(fid, '\\sigma\\{%s\\}(%s) & = %s \\label{%s}', ...
                 myFormulas(ar.model(jm).y{jy}, jm), ...
                 myFormulas(ar.model(jm).t, jm), ...
                 myFormulas(ar.model(jm).fystd{jy}, jm), ...
                 sprintf('%s_std_err%i', ar.model(jm).name, jy));
-            lp(fid, '\\end{aligned}');
-            lp(fid, '\\end{equation}}');
+            lp(fid, '\\end{align*}}');
+            
+            %lp(fid, 'Unit: %s [%s]; ', ar.model(jm).yUnits{jy,3}, ar.model(jm).yUnits{jy,2});
         end
         lp(fid, '\\end{itemize}');
     end
     
     %% Conditions
+    arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
     ccount = 1;
     for jp=1:length(ar.model(jm).fp)
         if(~strcmp(ar.model(jm).p{jp}, ar.model(jm).fp{jp}))
             if(ccount==1)
-                lp(fid, '\\subsection{Parameter transformations}');
-                lp(fid, '\\noindent The ODE system is modified by the following parameter transformations:');
+                lp(fid, '\\subsection{Conditions}');
+                lp(fid, '\\noindent Conditions modify the model according to replacement rules.'); 
+                lp(fid, 'New model parameters can be introduced or relations between existing model parameters can be implemented.');
+                lp(fid, 'The following list are default conditions that can be replace my experiment specific conditions defined seperately for each data set.');
                 lp(fid, '{\\footnotesize');
-                lp(fid, '\\begin{eqnarray}');
+                lp(fid, '\\begin{align*}');
             end
             
-            if(ccount==length(ar.model(jm).fp) || mod(ccount,N)==0)
-                lp(fid, '\t%s & \\rightarrow & %s', myFormulas(ar.model(jm).p{jp}, jm), ...
+            if(ccount==length(ar.model(jm).fp))
+                lp(fid, '\t%s & \\rightarrow %s', myFormulas(ar.model(jm).p{jp}, jm), ...
                     myFormulas(ar.model(jm).fp{jp}, jm));
             else
-                lp(fid, '\t%s & \\rightarrow & %s \\\\', myFormulas(ar.model(jm).p{jp}, jm), ...
+                lp(fid, '\t%s & \\rightarrow %s \\\\', myFormulas(ar.model(jm).p{jp}, jm), ...
                     myFormulas(ar.model(jm).fp{jp}, jm));
             end
-            if(mod(ccount,N)==0 && ccount<length(ar.model(jm).fp))
-                lp(fid, '\\end{eqnarray}\n');
-                lp(fid, '\\begin{eqnarray}');
-            end
+            
             ccount = ccount + 1;
         end
         if(ccount>1 && jp==length(ar.model(jm).fp))
-            lp(fid, '\\end{eqnarray}}\n\n');
+            lp(fid, '\\end{align*}}\n\n');
         end
     end
     
@@ -472,6 +489,7 @@ for jm=1:length(ar.model)
             lp(fid, '\\subsection{Experiment: %s}\n', arNameTrafo(ar.model(jm).plot(jplot).name));
             
             %% descriptions
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
             if(~isempty(ar.model(jm).data(jd).description))
                 lp(fid, '\\subsubsection{Comments}');
                 for jdes=1:length(ar.model(jm).data(jd).description)
@@ -479,19 +497,190 @@ for jm=1:length(ar.model)
                 end
             end
             
-            %% fit
-            lp(fid, '\\subsubsection{Model fit and plots}');
-            lp(fid, '\\noindent The agreement of the model observables and the experimental data, given in Table \\ref{%s_data}, ', ar.model(jm).plot(jplot).name);
-            
-            if(ar.config.fiterrors == 1)
-                lp(fid, 'yields a value of the objective function $-2 \\log(L) = %g$ for %i data points in this data set.', ...
-                    2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
-            else
-                lp(fid, 'yields a value of the objective function $\\chi^2 = %g$ for %i data points in this data set.', ...
-                    ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
+
+            %% inputs
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
+            if(~isempty(ar.model(jm).u))
+                qmod = ~strcmp(ar.model(jm).fu, ar.model(jm).data(jd).fu);
+                if(sum(qmod)>0)
+                    lp(fid, '\\subsubsection{Input variables}');
+                    lp(fid, 'The following inputs variables are modified in this data set.');
+                    lp(fid, '\\begin{itemize}');
+                    for ju = find(qmod)'
+                        lp(fid, '\\item {\\bf Input variable %i:} %s', ...
+                            ju, strrep(ar.model(jm).u{ju}, '_', '\_'));
+                        
+                        lp(fid, '{\\footnotesize');
+                        lp(fid, '\\begin{align*}');
+                        lp(fid, '%s(%s) & = %s \\label{%s}', ...
+                            myFormulas(ar.model(jm).u{ju}, jm), ...
+                            myFormulas(ar.model(jm).t, jm), ...
+                            myFormulas(ar.model(jm).data(jd).fu{ju}, jm), ...
+                            sprintf('%s_input%i', ar.model(jm).plot(jplot).name, ju));
+                        lp(fid, '\\end{align*}}');
+                    end
+                    lp(fid, '\\end{itemize}');
+                end
             end
             
-            %% plots
+            %% observations and error model
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
+            if(isfield(ar.model(jm), 'y'))
+                qadd = ~ismember(ar.model(jm).data(jd).y, ar.model(jm).y);
+            else
+                qadd = 0;
+            end
+            
+            if(isfield(ar.model(jm), 'y'))
+                fytmp = strrep(ar.model(jm).fy, '_filename', ['_' ar.model(jm).data(jd).name]);
+                fystdtmp = strrep(ar.model(jm).fystd, '_filename', ['_' ar.model(jm).data(jd).name]);
+                qmod = [];
+                for j=1:length(ar.model(jm).data(jd).fy)
+                    if(~qadd(j))
+                        iy = find(strcmp(ar.model(jm).y, ar.model(jm).data(jd).y{j}));
+                        qmod(j) = ~strcmp(fytmp{iy}, ar.model(jm).data(jd).fy{j}) || ...
+                            ~strcmp(fystdtmp{iy}, ar.model(jm).data(jd).fystd{j});
+                    end
+                end
+            else
+                qmod = false;
+            end
+            
+            if(sum(qmod)>0 || sum(qadd)>0)
+                lp(fid, '\\subsubsection{Observables}');
+                
+                % modified observables
+                if(sum(qmod)>0)
+                    lp(fid, 'The following observables are modified in this data set.');
+                    lp(fid, '\\begin{itemize}');
+                    for jy = find(qmod)
+                        lp(fid, '\\item {\\bf Observable:} %s', ...
+                            strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
+                        
+                        strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
+                        if(ar.model(jm).logfitting(jy))
+                            strtmp = ['\log_{10}(' strtmp ')'];
+                        end
+                        
+                        lp(fid, '{\\footnotesize');
+                        lp(fid, '\\begin{align*}');
+                        lp(fid, '%s(%s) & = %s \\label{%s} \\\\', ...
+                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
+                            myFormulas(ar.model(jm).t, jm), ...
+                            strtmp, ...
+                            sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, jy));
+                        lp(fid, '\\sigma\\{%s\\}(%s) & = & %s \\label{%s}', ...
+                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
+                            myFormulas(ar.model(jm).t, jm), ...
+                            myFormulas(ar.model(jm).data(jd).fystd{jy}, jm), ...
+                            sprintf('%s_err%i', ar.model(jm).plot(jplot).name, jy));
+                        lp(fid, '\\end{align*}}');
+                        
+                        %lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
+                    end
+                    lp(fid, '\\end{itemize}');
+                end
+                
+                % additional observables
+                if(sum(qadd)>0)
+                    lp(fid, 'The following observables are added in this data set.');
+                    lp(fid, '\\begin{itemize}');
+                    for jy = find(qadd)
+                        lp(fid, '\\item {\\bf Observable:} %s', ...
+                            strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
+                        
+                        strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
+                        if(isfield(ar.model(jm),'logfitting') && ar.model(jm).logfitting(jy))
+                            strtmp = ['\log_{10}(' strtmp ')'];
+                        end
+                        
+                        lp(fid, '{\\footnotesize');
+                        lp(fid, '\\begin{align*}');
+                        lp(fid, '%s(%s) & = & %s \\label{%s} \\\\', ...
+                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
+                            myFormulas(ar.model(jm).t, jm), ...
+                            strtmp, ...
+                            sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, jy));
+                        lp(fid, '\\sigma\\{%s\\}(%s) & = & %s \\label{%s}', ...
+                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
+                            myFormulas(ar.model(jm).t, jm), ...
+                            myFormulas(ar.model(jm).data(jd).fystd{jy}, jm), ...
+                            sprintf('%s_err%i', ar.model(jm).plot(jplot).name, jy));
+                        lp(fid, '\\end{align*}}');
+                        
+                        %lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
+                    end
+                    lp(fid, '\\end{itemize}');
+                end
+            end
+            
+            %% conditions
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
+            lp(fid, '\\subsubsection{Experiment specific conditions}');
+            lp(fid, '\\noindent To evaluate the model for this experiment the following conditions are applied.');
+            lp(fid, '\\begin{itemize}');
+            for jd3=1:length(ar.model(jm).plot(jplot).dLink)
+                jd2 = ar.model(jm).plot(jplot).dLink(jd3);
+                jc = ar.model(jm).data(jd2).cLink;
+                lp(fid, '\\item {\\bf Local condition #%i (global condition #%i):}', jd2, jc);
+                
+                ccount = 1;
+                for jp=1:length(ar.model(jm).data(jd2).fp)
+                    if(~strcmp(ar.model(jm).data(jd2).pold{jp}, ar.model(jm).data(jd2).fp{jp}))
+                        
+                        % check is already shown in model part
+                        qdyn = ismember(ar.model(jm).p, ar.model(jm).data(jd2).pold{jp}); %R2013a compatible
+                        if(sum(qdyn)>0)
+                            qalreadyset = true;
+                            for jd3 = ar.model(jm).plot(jplot).dLink
+                                qalreadyset = qalreadyset && isequal(sym(ar.model(jm).fp{qdyn}), ...
+                                    sym(ar.model(jm).data(jd3).fp{jp}));
+                            end
+                        else
+                            qalreadyset = false;
+                        end
+                        
+                        % do not show parameters py that belong to y that
+                        % were removed
+                        qwasremoved = false;
+                        py_tmp = union(strrep(ar.model(jm).data(jd2).py, '_filename', ['_' ar.model(jm).data(jd2).name]), ...
+                            strrep(ar.model(jm).data(jd2).pystd, '_filename', ['_' ar.model(jm).data(jd2).name]));
+                        if(sum(ismember(py_tmp, ar.model(jm).data(jd2).pold{jp}))>0)
+                            py_sep_tmp = {};
+                            for jjysep = 1:length(ar.model(jm).data(jd2).py_sep)
+                                py_sep_tmp = union(py_sep_tmp, ar.model(jm).data(jd2).py_sep(jjysep).pars);
+                            end
+                            qwasremoved = sum(ismember(py_sep_tmp, ar.model(jm).data(jd2).pold{jp}))==0;
+                        end
+
+                        if(~qalreadyset && ~qwasremoved)
+                            if(ccount==1)
+                                lp(fid, '{\\footnotesize');
+                                lp(fid, '\\begin{align*}');
+                            end
+                            
+                            if(ccount==length(ar.model(jm).data(jd2).fp))
+                                lp(fid, '\t%s & \\rightarrow %s', myFormulas(ar.model(jm).data(jd2).pold{jp}, jm), ...
+                                    myFormulas(ar.model(jm).data(jd2).fp{jp}, jm));
+                            else
+                                lp(fid, '\t%s & \\rightarrow %s \\\\', myFormulas(ar.model(jm).data(jd2).pold{jp}, jm), ...
+                                    myFormulas(ar.model(jm).data(jd2).fp{jp}, jm));
+                            end
+                            
+                            ccount = ccount + 1;
+                        end
+                    end
+                    if(ccount>1 && jp==length(ar.model(jm).data(jd2).fp))
+                        lp(fid, '\\end{align*}}\n\n');
+                    end
+                end
+            end
+            lp(fid, '\\end{itemize}');
+            
+            %% fit
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
+            lp(fid, '\\subsubsection{Experimental data and model fit}');
+           
             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigY') && ~isempty(ar.model(jm).plot(jplot).savePath_FigY))
                 lp(fid, 'The model observables and the experimental data is shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
                 captiontext = sprintf('\\textbf{%s observables and experimental data for the experiment.} ', arNameTrafo(ar.model(jm).plot(jplot).name));
@@ -509,7 +698,18 @@ for jm=1:length(ar.model)
                 end
             end
             
+            lp(fid, '\\noindent The agreement of the model observables and the experimental data, given in Table \\ref{%s_data}, ', ar.model(jm).plot(jplot).name);
+            if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1) || ...
+                    (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
+                lp(fid, 'yields a value of the objective function $-2 \\log(L) = %g$ for %i data points in this data set.', ...
+                    2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
+            else
+                lp(fid, 'yields a value of the objective function $\\chi^2 = %g$ for %i data points in this data set.', ...
+                    ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
+            end
+            
             %% experimental data
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
             headstr = '';
             headtab = '';
             unitstr = '';
@@ -532,11 +732,12 @@ for jm=1:length(ar.model)
                 unitstr = [unitstr sprintf('& %s [%s] ', arNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
                     arNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
                 headtab = [headtab 'r'];
-                if(ar.config.fiterrors == -1)
-                    headstr = [headstr sprintf('& %s\\_std ', arNameTrafo(ar.model(jm).data(jd).y{jy}))];
-                    unitstr = [unitstr sprintf('& %s [%s] ', arNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
-                        arNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
-                    headtab = [headtab 'r'];
+                 if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == -1) || ...
+                         (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==-1) )
+                     headstr = [headstr sprintf('& %s\\_std ', arNameTrafo(ar.model(jm).data(jd).y{jy}))];
+                     unitstr = [unitstr sprintf('& %s [%s] ', arNameTrafo(ar.model(jm).data(jd).yUnits{jy,3}), ...
+                         arNameTrafo(ar.model(jm).data(jd).yUnits{jy,2}))];
+                     headtab = [headtab 'r'];
                 end
             end
             lp(fid, '\t\\begin{table}');
@@ -569,7 +770,8 @@ for jm=1:length(ar.model)
                     end
                     
                     % ystd data
-                    if(ar.config.fiterrors == -1)
+                    if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == -1) || ...
+                            (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd2)==-1) )
                         for jj=1:size(ar.model(jm).data(jd2).yExp,2)
                             fprintnumtab(fid, ar.model(jm).data(jd2).yExpStd(j,jj));
                         end
@@ -585,6 +787,7 @@ for jm=1:length(ar.model)
             lp(fid, '\t\\end{table}');
             
             %% trajectories
+            arWaitbar(cncounter, nncounter, 'Writing PDF...'); cncounter = cncounter + 1;
             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigX') && ~isempty(ar.model(jm).plot(jplot).savePath_FigX))
                 lp(fid, ['The trajectories of the input, dynamic and derived variables that ' ...
                     'correspond to the experimental conditions in this experiment are shown in Figure \\ref{%s}.'], ...
@@ -594,9 +797,7 @@ for jm=1:length(ar.model)
                 
                 captiontext = sprintf('\\textbf{%s trajectories of the input, dynamic and derived variables.} ', ....
                     arNameTrafo(ar.model(jm).plot(jplot).name));
-                captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system, see Equation '];
-                captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \ref{' ...
-                    sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
+                captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system defined in Section \\ref{' sprintf('%s_ode', ar.model(jm).name) '}.'];
                 lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_x.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_x']);
             end
             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigV') && ~isempty(ar.model(jm).plot(jplot).savePath_FigV))
@@ -606,252 +807,31 @@ for jm=1:length(ar.model)
                     [savePath '/' ar.model(jm).plot(jplot).name '_v.pdf'])
                 
                 captiontext = sprintf('\\textbf{%s reaction fluxes.} ', arNameTrafo(ar.model(jm).plot(jplot).name));
-                captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system, see Equation '];
-                captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) ...
-                    '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
+                captiontext = [captiontext 'The dynamical behaviour is determined by the ODE systemdefined in Section \\ref{' sprintf('%s_ode', ar.model(jm).name) '}.'];
                 lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_v.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_v']);
             end            
-            
-            %% inputs
-            if(~isempty(ar.model(jm).u))
-                qmod = ~strcmp(ar.model(jm).fu, ar.model(jm).data(jd).fu);
-                if(sum(qmod)>0)
-                    lp(fid, '\\subsubsection{Input variables}');
-                    lp(fid, 'The following inputs variables are modified in this data set:');
-                    lp(fid, '\\begin{itemize}');
-                    for ju = find(qmod)'
-                        lp(fid, '\\item {\\bf Input variable %i:} %s', ju, strrep(ar.model(jm).u{ju}, '_', '\_'));
-                        
-                        lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{equation}');
-                        lp(fid, '\\begin{aligned}');
-                        lp(fid, '%s(%s) & = & %s \\label{%s}', ...
-                            myFormulas(ar.model(jm).u{ju}, jm), ...
-                            myFormulas(ar.model(jm).t, jm), ...
-                            myFormulas(ar.model(jm).data(jd).fu{ju}, jm), ...
-                            sprintf('%s_input%i', ar.model(jm).plot(jplot).name, ju));
-                        lp(fid, '\\end{aligned}');
-                        lp(fid, '\\end{equation}}');
-                    end
-                    lp(fid, '\\end{itemize}');
-                end
-            end
-            
-            %% observations and error model
-            
-            if(isfield(ar.model(jm), 'y'))
-                qadd = ~ismember(ar.model(jm).data(jd).y, ar.model(jm).y);
-            else
-                qadd = 0;
-            end
-            
-            if(isfield(ar.model(jm), 'y'))
-                fytmp = strrep(ar.model(jm).fy, '_filename', ['_' ar.model(jm).data(jd).name]);
-                fystdtmp = strrep(ar.model(jm).fystd, '_filename', ['_' ar.model(jm).data(jd).name]);
-                qmod = [];
-                for j=1:length(ar.model(jm).data(jd).fy)
-                    if(~qadd(j))
-                        iy = find(strcmp(ar.model(jm).y, ar.model(jm).data(jd).y{j}));
-                        qmod(j) = ~strcmp(fytmp{iy}, ar.model(jm).data(jd).fy{j}) || ...
-                            ~strcmp(fystdtmp{iy}, ar.model(jm).data(jd).fystd{j});
-                    end
-                end
-            else
-                qmod = false;
-            end
-            
-            if(sum(qmod)>0 || sum(qadd)>0)
-                lp(fid, '\\subsubsection{Observables}');
-                
-                % modified observables
-                if(sum(qmod)>0)
-                    lp(fid, 'The following observables are modified in this data set:');
-                    lp(fid, '\\begin{itemize}');
-                    for jy = find(qmod)
-                        lp(fid, '\\item {\\bf Observable:} %s', ...
-                            strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
-                        
-                        strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
-                        if(ar.model(jm).logfitting(jy))
-                            strtmp = ['\log_{10}(' strtmp ')'];
-                        end
-                        
-                        lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{equation}');
-                        lp(fid, '\\begin{aligned}');
-                        lp(fid, '%s(%s) & = & %s \\label{%s}', ...
-                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
-                            myFormulas(ar.model(jm).t, jm), ...
-                            strtmp, ...
-                            sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, jy));
-                        lp(fid, '\\end{aligned}');
-                        lp(fid, '\\end{equation}}');
-                        
-                        lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
-                        
-                        lp(fid, 'With error model:');
-                        
-                        lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{equation}');
-                        lp(fid, '\\begin{aligned}');
-                        lp(fid, '\\sigma\\{%s\\}(%s) & = & %s \\label{%s}', ...
-                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
-                            myFormulas(ar.model(jm).t, jm), ...
-                            myFormulas(ar.model(jm).data(jd).fystd{jy}, jm), ...
-                            sprintf('%s_err%i', ar.model(jm).plot(jplot).name, jy));
-                        lp(fid, '\\end{aligned}');
-                        lp(fid, '\\end{equation}}');
-                    end
-                    lp(fid, '\\end{itemize}');
-                end
-                
-                % additional observables
-                if(sum(qadd)>0)
-                    lp(fid, 'The following observables are added in this data set:');
-                    lp(fid, '\\begin{itemize}');
-                    for jy = find(qadd)
-                        lp(fid, '\\item {\\bf Observable:} %s', ...
-                            strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
-                        
-                        strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
-                        if(isfield(ar.model(jm),'logfitting') && ar.model(jm).logfitting(jy))
-                            strtmp = ['\log_{10}(' strtmp ')'];
-                        end
-                        
-                        lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{equation}');
-                        lp(fid, '\\begin{aligned}');
-                        lp(fid, '%s(%s) & = & %s \\label{%s}', ...
-                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
-                            myFormulas(ar.model(jm).t, jm), ...
-                            strtmp, ...
-                            sprintf('%s_obs%i', ar.model(jm).plot(jplot).name, jy));
-                        lp(fid, '\\end{aligned}');
-                        lp(fid, '\\end{equation}}');
-                        
-                        lp(fid, 'Unit: %s [%s]; ', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2});
-                        
-                        lp(fid, 'With error model:');
-                        
-                        lp(fid, '{\\footnotesize');
-                        lp(fid, '\\begin{equation}');
-                        lp(fid, '\\begin{aligned}');
-                        lp(fid, '\\sigma\\{%s\\}(%s) & = & %s \\label{%s}', ...
-                            myFormulas(ar.model(jm).data(jd).y{jy}, jm), ...
-                            myFormulas(ar.model(jm).t, jm), ...
-                            myFormulas(ar.model(jm).data(jd).fystd{jy}, jm), ...
-                            sprintf('%s_err%i', ar.model(jm).plot(jplot).name, jy));
-                        lp(fid, '\\end{aligned}');
-                        lp(fid, '\\end{equation}}');
-                    end
-                    lp(fid, '\\end{itemize}');
-                end
-            end
-            
-            %% conditions
-            ccount = 1;
-            for jp=1:length(ar.model(jm).data(jd).fp)
-                % check if this observable was removed
-                wasRemoved = false;
-                if(sum(strcmp(ar.model(jm).data(jd).py, ar.model(jm).data(jd2).pold{jp}))>0 || ...
-                        sum(strcmp(ar.model(jm).data(jd).pystd, ar.model(jm).data(jd2).pold{jp}))>0)
-                    if(sum(strcmp(ar.p, ar.model(jm).data(jd2).pold{jp}))==0)
-                        wasRemoved = true;
-                    end
-                end
-                
-                if(~wasRemoved)
-                    % check if this is really a condition
-                    qlocalcondi = false;
-                    arraystr = 'll';
-                    for jd2 = ar.model(jm).plot(jplot).dLink
-                        qlocalcondi = qlocalcondi || ~strcmp(ar.model(jm).data(jd2).pold{jp}, ar.model(jm).data(jd2).fp{jp});
-                        arraystr = [arraystr 'r'];
-                        if(jd2 ~= ar.model(jm).plot(jplot).dLink(end))
-                            arraystr = [arraystr '|'];
-                        end
-                    end
-                    
-                    if(qlocalcondi)
-                        % check is already shown in model part
-                        qdyn = ismember(ar.model(jm).p, ar.model(jm).data(jd).pold{jp}); %R2013a compatible
-                        if(sum(qdyn)>0)
-                            qalreadyset = true;
-                            for jd2 = ar.model(jm).plot(jplot).dLink
-                                qalreadyset = qalreadyset && strcmp(ar.model(jm).fp{qdyn}, ar.model(jm).data(jd2).fp{jp});
-                            end
-                        else
-                            qalreadyset = false;
-                        end
-                        
-                        if(~qalreadyset)
-                            if(ccount==1)
-                                lp(fid, '\\subsubsection{Conditions}');
-                                lp(fid, ['\\noindent To evaluate the ODE system of Equation \\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \\ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}']);
-                                lp(fid, 'for the conditions in this experiment, the following parameter transformations are applied:');
-                                lp(fid, '{\\footnotesize');
-                                lp(fid, '\\begin{displaymath}');
-                                lp(fid, '\\begin{array}{%s}', arraystr);
-                            else
-                                if(~(mod(ccount-1,N)==0 && ccount-1<length(ar.model(jm).data(jd).fp)))
-                                    lp(fid, ' \\\\');
-                                end
-                            end
-                            
-                            lp(fid, '\t%s & \\rightarrow & ', myFormulas(ar.model(jm).data(jd).pold{jp}, jm));
-                            for jd2 = ar.model(jm).plot(jplot).dLink
-                                try
-                                    ddouble = double(sym(ar.model(jm).data(jd2).fp{jp}));
-                                    if(ddouble ~= 0 && abs(log10(ddouble)) > 3)
-                                        ddouble = sprintf('%.1e', ddouble);
-                                        ddouble = strrep(ddouble, 'e', '\cdot 10^{');
-                                        ddouble = [ddouble '}'];
-                                    else
-                                        ddouble = sprintf('%g', ddouble);
-                                    end
-                                    lp(fid, '%s', ddouble);
-                                catch  %#ok<CTCH>
-                                    lp(fid, '%s', myFormulas(ar.model(jm).data(jd2).fp{jp}, jm));
-                                end
-                                if(length(ar.model(jm).plot(jplot).dLink)>1 && jd2~=ar.model(jm).plot(jplot).dLink(end))
-                                    lp(fid, '& ');
-                                end
-                            end
-                            
-                            if(mod(ccount,N)==0 && ccount<length(ar.model(jm).data(jd).fp))
-                                lp(fid, '\\end{array}');
-                                lp(fid, '\\end{displaymath}\n');
-                                lp(fid, '\\begin{displaymath}');
-                                lp(fid, '\\begin{array}{%s}', arraystr);
-                            end
-                            ccount = ccount + 1;
-                        end
-                    end
-                end    
-                
-                if(ccount>1 && jp==length(ar.model(jm).data(jd).fp))
-                	lp(fid, '\\end{array}');
-                	lp(fid, '\\end{displaymath}\n}\n\n');
-                end
-            end
         end
     end
 end
+arWaitbar(-1);
 
 %% Parameters
 lp(fid, '\\clearpage\n');
 lp(fid, '\\section{Estimated model parameters} \\label{estimatedparameters}\n');
 
 if(isfield(ar,'ndata') && isfield(ar,'chi2fit') && isfield(ar,'chi2'))
-    if(ar.config.fiterrors == 1)
-        lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
+    if(ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1)
+        lp(fid, 'In total %i parameters are estimated from the experimental data. The best fit yields a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
             sum(ar.qFit==1), 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
+    elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+        lp(fid, 'In total %i parameters are estimated from the experimental data. The best fit yields a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
+            sum(ar.qFit==1), 2*ar.ndata_err*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
     else
         lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $\\chi^2 = %g$ for a total of %i data points.', ...
             sum(ar.qFit==1), ar.chi2, ar.ndata);
     end
 
-    lp(fid, 'The model parameters were estimated by maximum likelihood estimation applying the MATLAB lsqnonlin algorithm.');
+    lp(fid, 'The model parameters were estimated by maximum likelihood estimation.');
 end
 
 N = 50;
@@ -863,9 +843,9 @@ else
 end
 lp(fid, 'Parameters highlighted in red color indicate parameter values close to their bounds.');
 lp(fid, 'The parameter name prefix init\\_ indicates the initial value of a dynamic variable.');
-lp(fid, 'The parameter name prefix offset\\_ indicates a offset of the experimental data.');
-lp(fid, 'The parameter name prefix scale\\_ indicates a scaling factor of the experimental data.');
-lp(fid, 'The parameter name prefix sd\\_ indicates the magnitude of the measurement noise for a specific measurement.\\\\');
+% lp(fid, 'The parameter name prefix offset\\_ indicates a offset of the experimental data.');
+% lp(fid, 'The parameter name prefix scale\\_ indicates a scaling factor of the experimental data.');
+% lp(fid, 'The parameter name prefix sd\\_ indicates the magnitude of the measurement noise for a specific measurement.\\\\');
 
 pTrans = ar.p;
 pTrans(ar.qLog10==1) = 10.^pTrans(ar.qLog10==1);
@@ -875,7 +855,7 @@ lp(fid, '\t\\dobegincenter');
 lp(fid, '\t{\\footnotesize');
 lp(fid, '\t\t\\begin{tabular}{llllllll}');
 lp(fid, '\t\t\t\\toprule');
-lp(fid, '\t\t\t & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & fitted \\\\');
+lp(fid, '\t\t\t & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & estimated \\\\');
 lp(fid, '\t\t\t\\midrule');
 count = 1;
 for j=1:length(ar.p)
@@ -887,7 +867,7 @@ for j=1:length(ar.p)
         lp(fid, '$\\theta_{min}$ and $\\theta_{max}$ indicate the upper and lower bounds for the parameters.');
         lp(fid, 'The log-column indicates if the value of a parameter was log-transformed.');
         lp(fid, 'If log = 1 the non-log-column indicates the non-logarithmic value of the estimate.');
-        lp(fid, 'The fitted-column indicates if the parameter value was estimated (1), was temporarily fixed (0) or if its value was fixed to a constant value (2).}');
+        lp(fid, 'The estimated-column indicates if the parameter value was estimated (1), was temporarily fixed (0) or if its value was fixed to a constant value (2).}');
         lp(fid, '\t\\doendcenter');
         lp(fid, '\t\\end{table}');
         lp(fid, '\t\\begin{table}');
@@ -895,7 +875,7 @@ for j=1:length(ar.p)
         lp(fid, '\t{\\footnotesize');
         lp(fid, '\t\t\\begin{tabular}{llllllll}');
         lp(fid, '\t\t\t\\toprule');
-        lp(fid, '\t\t\t & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & fitted \\\\');
+        lp(fid, '\t\t\t & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & estimated \\\\');
         lp(fid, '\t\t\t\\midrule');
         
         count = count + 1;
@@ -924,7 +904,7 @@ lp(fid, '{$\\hat \\theta$ indicates the estimated value of the parameters.');
 lp(fid, '$\\theta_{min}$ and $\\theta_{max}$ indicate the upper and lower bounds for the parameters.');
 lp(fid, 'The log-column indicates if the value of a parameter was log-transformed.');
 lp(fid, 'If log = 1 the non-log-column indicates the non-logarithmic value of the estimate.');
-lp(fid, 'The fitted-column indicates if the parameter value was estimated (1), was temporarily fixed (0) or if its value was fixed to a constant value (2).}');
+lp(fid, 'The estimated-column indicates if the parameter value was estimated (1), was temporarily fixed (0) or if its value was fixed to a constant value (2).}');
 lp(fid, '\t\\doendcenter');
 lp(fid, '\t\\end{table}');
 
@@ -1113,8 +1093,6 @@ lp(fid, '\\bibliography{lib}');
 
 lp(fid, '\\end{document}');
 
-
-
 fclose(fid);
 fprintf('done\n');
 
@@ -1136,10 +1114,17 @@ if(isunix && ~ismac)
 elseif(ismac)
     fprintf('pdflatex, file %s...', fname);
     cd(savePath);
-    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
-    eval(['!/usr/texbin/bibtex ' fnamebib ' > log_bibtex.txt']);
-    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
-    eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+    if(exist('/usr/texbin/pdflatex','file'))
+        eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+        eval(['!/usr/texbin/bibtex ' fnamebib ' > log_bibtex.txt']);
+        eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+        eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+    elseif(exist('/Library/TeX/texbin/pdflatex','file'))
+        eval(['!/Library/TeX/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+        eval(['!/Library/TeX/texbin/bibtex ' fnamebib ' > log_bibtex.txt']);
+        eval(['!/Library/TeX/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+        eval(['!/Library/TeX/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
+    end
     cd('../../..');
     try
         copyfile([savePath '/' 'report.pdf'], [savePath '/' sprintf('report_%s.pdf', datestr(now,30))])
@@ -1157,15 +1142,21 @@ else
     fprintf(varargin{1}, sprintf('%s\n', varargin{2}));
 end
 
-function lpfigure(fid, textwidth, figpath, figcaption, figlabel)
-lp(fid, '\\begin{figure}');
+function lpfigure(fid, textwidth, figpath, figcaption, figlabel, figmod)
+if(nargin<6)
+    figmod = '';
+end
+lp(fid, ['\\begin{figure}' figmod]);
 lp(fid, '\\begin{center}');
 lp(fid, '\\includegraphics[width=%f\\textwidth]{%s} \\caption{%s} \\label{%s}', textwidth, figpath, figcaption, figlabel);
 lp(fid, '\\end{center}');
 lp(fid, '\\end{figure}');
 
-function lpfigurePGF(fid, figpath, figcaption, figlabel)
-lp(fid, '\\begin{figure}[!ht]');
+function lpfigurePGF(fid, figpath, figcaption, figlabel, figmod)
+if(nargin<6)
+    figmod = '';
+end
+lp(fid, ['\\begin{figure}' figmod]);
 lp(fid, '\\centering');
 lp(fid, '\\input{%s} \\caption{%s} \\label{%s}', figpath, figcaption, figlabel);
 lp(fid, '\\end{figure}')
@@ -1190,7 +1181,7 @@ end
 sshortlist = sym(shortlist);
 
 strsym = sym(str);
-sstrsym = mysubs(strsym, svarlist, sshortlist);
+sstrsym = subs(strsym, svarlist, sshortlist);
 
 str = latex(sstrsym);
 
@@ -1216,23 +1207,10 @@ str = strrep(str, '\,', ' \cdot ');
 
 
 
-
-
 function fprintnumtab(fid, num)
 fprintf(fid, '& %s ', sprintf('%g', num));
 
-% better subs
-function out = mysubs(in, old, new)
-global ar
-if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    if(ar.config.matlabVersion>=8.1)
-        out = subs(in, old(:), new(:));
-    else
-        out = subs(in, old(:), new(:), 0);
-    end
-else
-    out = in;
-end
+
 
 function mod = getModifierStr(jm,jv,useNeg,str,sources,targets)
 

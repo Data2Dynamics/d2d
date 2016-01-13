@@ -81,11 +81,8 @@ else
     end
 end
 
-% Remove vector with last simulated parameters, so that future simulations
-% do not skip simulation
-if isfield( ar, 'pLastSimulated' )
-    ar = rmfield( ar, 'pLastSimulated' );
-end
+% Invalidate cache so simulations do not get skipped
+arCheckCache(1);
 
 function ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad)
 N = 1000;
@@ -100,7 +97,7 @@ if(ischar(filename))
     else
         S = load(filename);
     end
-    fprintf('parameters loaded from file %s:\n', filename);
+    arFprintf(1, 'parameters loaded from file %s:\n', filename);
 elseif(isstruct(filename))
     S = struct([]);
     S(1).ar = filename;
@@ -115,7 +112,7 @@ for j=1:length(ar.p)
     if(isempty(qi) || sum(qi) == 0)
         ass(j) = 0;
         if(length(ar.p)<=N)
-            fprintf('                      %s\n', ar.pLabel{j});
+            arFprintf(1, '                      %s\n', ar.pLabel{j});
         end
     else
         ass(j) = 1;
@@ -151,11 +148,11 @@ for j=1:length(ar.p)
         if(fixAssigned)
             ar.qFit(j) = 0;
             if(length(ar.p)<=N)
-                fprintf('fixed and assigned -> %s\n', ar.pLabel{j});
+                arFprintf(1, 'fixed and assigned -> %s\n', ar.pLabel{j});
             end
         else
             if(length(ar.p)<=N)
-                fprintf('          assigned -> %s\n', ar.pLabel{j});
+                arFprintf(1, '          assigned -> %s\n', ar.pLabel{j});
             end
         end
     end
@@ -163,17 +160,17 @@ end
 
 nnot = length(ass)-sum(ass);
 if ( nnot > 0 )
-    fprintf('%i parameters were assigned in the destination model (%i not assigned).\n',sum(ass),nnot);
+    arFprintf(1, '%i parameters were assigned in the destination model (%i not assigned).\n',sum(ass),nnot);
     if(nnot<=30 && nnot>0)
-        fprintf('Not assigned are: %s \n',sprintf('%s, ',ar.pLabel{find(ass==0)}));
+        arFprintf(1, 'Not assigned are: %s \n',sprintf('%s, ',ar.pLabel{find(ass==0)}));
     end
 else
-    fprintf('All parameters assigned.\n');
+    arFprintf(1, 'All parameters assigned.\n');
 end
 
 nnot = length(S.ar.p)-sum(ass);
 if ( nnot > 0 )
-    fprintf('There were %i more parameters in the loaded struct than in the target model.\n',nnot);
+    arFprintf(1, 'There were %i more parameters in the loaded struct than in the target model.\n',nnot);
 end
 
 

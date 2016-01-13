@@ -1,0 +1,759 @@
+file port/readme
+for important notes on the PORT library
+, Note that dxxxxx.f is the double-precision version of xxxxx.f.
+, To get all of the publicly available portion of the PORT library,
+, direct your browser to http://netlib.sandia.gov/master/index.html
+, and, in the line "lib: port (tar)", click "tar".  You will then
+, be able to download netlibfiles.tar.  Executing
+, tar xf netlibfiles.tar
+, cd port
+, gzip -dN *.gz
+, will recover all the files in the netlib/port directory, most of
+, which are  gzipped.
+, Also: port/readme points to "Usage Summary for Selected Optimization
+, Routines", sometimes known as PORT OPTIMIZATION DOCUMENTATION in
+, http://netlib.bell-labs.com/cm/cs/cstr/153.ps.gz
+, or http://netlib.bell-labs.com/cm/cs/cstr/153.pdf
+
+file port/a0xtrp.f
+
+file port/a7sst.f
+
+file port/a9rntc.f
+
+file port/a9rntd.f
+
+file port/a9rnti.f
+
+file port/a9rntl.f
+
+file port/a9rntr.f
+
+file port/aprntc.f
+for complex array print
+
+file port/aprntd.f
+for double precision array print
+
+file port/aprnti.f
+for integer array print
+
+file port/aprntl.f
+for logical array print
+
+file port/aprntr.f
+for single precision array print
+
+file port/c7vfn.f
+
+file port/call.f
+
+file port/cddiv.f
+
+file port/changes
+for errata
+
+file port/d0xtrp.f
+
+file port/d1mach.f
+for double-precision machine constants
+
+file port/d4sqr.f
+
+file port/d7dgb.f
+
+file port/d7dog.f
+
+file port/d7dup.f
+
+file port/d7egr.f
+
+file port/d7mlp.f
+
+file port/d7tpr.f
+
+file port/d7upd.f
+
+file port/da7sst.f
+
+file port/dalloc.f
+
+file port/dc7vfn.f
+
+file port/dd4sqr.f
+
+file port/dd7dgb.f
+
+file port/dd7dog.f
+
+file port/dd7dup.f
+
+file port/dd7mlp.f
+
+file port/dd7tpr.f
+
+file port/dd7upd.f
+
+file port/deigen.f
+
+file port/df7dhb.f
+
+file port/df7hes.f
+
+file port/dg7itb.f
+
+file port/dg7lit.f
+
+file port/dg7qsb.f
+
+file port/dg7qts.f
+
+file port/dh2rfa.f
+
+file port/dh2rfg.f
+
+file port/dhqr2.f
+
+file port/ditsum.f
+
+file port/divset.f
+
+file port/dl7itv.f
+
+file port/dl7ivm.f
+
+file port/dl7msb.f
+
+file port/dl7mst.f
+
+file port/dl7nvr.f
+
+file port/dl7sqr.f
+
+file port/dl7srt.f
+
+file port/dl7svn.f
+
+file port/dl7svx.f
+
+file port/dl7tsq.f
+
+file port/dl7tvm.f
+
+file port/dl7upd.f
+
+file port/dl7vml.f
+
+file port/dmnf.f
+
+file port/dmnfb.f
+
+file port/dmng.f
+
+file port/dmngb.f
+
+file port/dmnh.f
+
+file port/dmnhb.f
+
+file port/dn2cvp.f
+
+file port/dn2f.f
+
+file port/dn2fb.f
+
+file port/dn2g.f
+
+file port/dn2gb.f
+
+file port/dn2lrd.f
+
+file port/dn2p.f
+
+file port/dn2pb.f
+
+file port/dn2rdp.f
+
+file port/dnsf.f
+
+file port/dnsfb.f
+
+file port/dnsg.f
+
+file port/dnsgb.f
+
+file port/do7prd.f
+
+file port/dorthe.f
+
+file port/dortra.f
+
+file port/dparck.f
+
+file port/dpostx1.f
+
+file port/dpostx10.f
+
+file port/dpostx2.f
+
+file port/dpostx3.f
+
+file port/dpostx4.f
+
+file port/dpostx5.f
+
+file port/dpostx6.f
+
+file port/dpostx7.f
+
+file port/dpostx8.f
+
+file port/dpostx9.f
+
+file port/dq7apl.f
+
+file port/dq7rad.f
+
+file port/dq7rfh.f
+
+file port/dq7rsh.f
+
+file port/dr7mdc.f
+
+file port/dr7tvm.f
+
+file port/drldst.f
+
+file port/drmnf.f
+
+file port/drmnfb.f
+
+file port/drmng.f
+
+file port/drmngb.f
+
+file port/drmnh.f
+
+file port/drmnhb.f
+
+file port/drn2g.f
+
+file port/drn2gb.f
+
+file port/drnsg.f
+
+file port/drnsgb.f
+
+file port/ds3grd.f
+
+file port/ds7bqn.f
+
+file port/ds7cpr.f
+
+file port/ds7dmp.f
+
+file port/ds7grd.f
+
+file port/ds7ipr.f
+
+file port/ds7lup.f
+
+file port/ds7lvm.f
+
+file port/dsm.f
+
+file port/dttgrx1.f
+
+file port/dttgrx1p.f
+
+file port/dttgrx2.f
+
+file port/dttgrx3.f
+
+file port/dttgrx4.f
+
+file port/dttgrx5.f
+
+file port/dttgrx6.f
+
+file port/dttgux1.f
+
+file port/dttgux1p.f
+
+file port/dttgux2.f
+
+file port/dttgux3.f
+
+file port/dttgux4.f
+
+file port/dttgux5.f
+
+file port/dv2axy.f
+
+file port/dv2nrm.f
+
+file port/dv7cpy.f
+
+file port/dv7dfl.f
+
+file port/dv7ipr.f
+
+file port/dv7prm.f
+
+file port/dv7scl.f
+
+file port/dv7scp.f
+
+file port/dv7shf.f
+
+file port/dv7swp.f
+
+file port/dv7vmp.f
+
+file port/dw7zbf.f
+
+file port/dxtrap.f
+
+file port/dzero.f
+
+file port/e9rint.f
+
+file port/eigen.f
+for eigenvalues and eigenvectors of a general real matrix
+
+file port/enter.f
+for save current error recovery mode and storage allocation status
+
+file port/entsrc.f
+for test and set recovery mode (entry)
+
+file port/eprint.f
+for print error message
+
+file port/erroff.f
+for cancel error state
+
+file port/f7dhb.f
+
+file port/f7hes.f
+
+file port/fdump.f
+
+file port/frmatd.f
+
+file port/frmati.f
+
+file port/frmatr.f
+
+file port/g7itb.f
+
+file port/g7lit.f
+
+file port/g7qsb.f
+
+file port/g7qts.f
+
+file port/h2rfa.f
+
+file port/h2rfg.f
+
+file port/hqr2.f
+
+file port/i0tk00.f
+
+file port/i0tk01.f
+
+file port/i10wid.f
+
+file port/i1mach.f
+for integer machine constants
+
+file port/i7copy.f
+
+file port/i7do.f
+
+file port/i7mdcn.f
+
+file port/i7pnvr.f
+
+file port/i7shft.f
+
+file port/i8save.f
+
+file port/i8tsel.f
+
+file port/ialloc.f
+
+file port/iceil.f
+
+file port/iflr.f
+
+file port/istkgt.f
+for get storage from stack
+
+file port/istkin.f
+for initialize stack
+
+file port/istkmd.f
+for modify length of last stack allocation
+
+file port/istkqu.f
+for query the amount of space left in the stack
+
+file port/istkrl.f
+for release stack storage
+
+file port/istkst.f
+for obtain stack statistics
+
+file port/itsum.f
+
+file port/ivset.f
+
+file port/l5stp.f
+
+file port/l7itv.f
+
+file port/l7ivm.f
+
+file port/l7msb.f
+
+file port/l7mst.f
+
+file port/l7nvr.f
+
+file port/l7sqr.f
+
+file port/l7srt.f
+
+file port/l7svn.f
+
+file port/l7svx.f
+
+file port/l7tsq.f
+
+file port/l7tvm.f
+
+file port/l7upd.f
+
+file port/l7vml.f
+
+file port/leave.f
+for restore prior error recovery mode and reset stack
+
+file port/m7seq.f
+
+file port/m7slo.f
+
+file port/mnf.f
+for general optimization
+
+file port/mnfb.f
+for general optimization, simple bounds
+
+file port/mng.f
+for general optimization, needs gradient
+
+file port/mngb.f
+for general optimization, needs gradient, simple bounds
+
+file port/mnh.f
+for general optimization, needs gradient and Hessian
+
+file port/mnhb.f
+for general optimization, needs gradient and Hessian, simple bounds
+
+file port/movebc.f
+
+file port/movebd.f
+
+file port/movebi.f
+
+file port/movebl.f
+
+file port/movebr.f
+
+file port/movefc.f
+
+file port/movefd.f
+
+file port/movefi.f
+
+file port/movefl.f
+
+file port/movefr.f
+
+file port/mtstak.f
+
+file port/n2cvp.f
+
+file port/n2f.f
+
+file port/n2fb.f
+
+file port/n2g.f
+
+file port/n2gb.f
+
+file port/n2lrd.f
+
+file port/n2p.f
+
+file port/n2pb.f
+
+file port/n2rdp.f
+
+file port/n7msrt.f
+
+file port/nerror.f
+for get error number
+
+file port/nirall.f
+
+file port/nsf.f
+for nonlinear separable least squares  (update of nl2sno)
+keywords optimization
+
+file port/nsfb.f
+for nonlinear separable least squares, simple bounds
+keywords optimization
+
+file port/nsg.f
+for nonlinear separable least squares, needs Jacobian  (update of nl2sol)
+keywords optimization
+
+file port/nsgb.f
+for nonlinear separable least squares, needs Jacobian, simple bounds
+keywords optimization
+
+file port/o7prd.f
+
+file port/orthe.f
+
+file port/ortra.f
+
+file port/parck.f
+
+file port/postx1.f
+
+file port/postx10.f
+
+file port/postx2.f
+
+file port/postx3.f
+
+file port/postx4.f
+
+file port/postx5.f
+
+file port/postx6.f
+
+file port/postx7.f
+
+file port/postx8.f
+
+file port/postx9.f
+
+file port/q7apl.f
+
+file port/q7rad.f
+
+file port/q7rfh.f
+
+file port/q7rsh.f
+
+file port/r1mach.f
+for real (single-precision) machine constants
+
+file port/r7mdc.f
+
+file port/r7tvm.f
+
+file port/retsrc.f
+for test and reset recovery mode (return)
+
+file port/rldst.f
+
+for storage economizing FFT for real data
+
+file port/rmnf.f
+for reverse communication version of MNF
+keywords optimization
+
+file port/rmnfb.f
+for reverse communication version of MNFB
+keywords optimization
+
+file port/rmng.f
+for reverse communication version of MNG
+keywords optimization
+
+file port/rmngb.f
+for reverse communication version of MNGB
+keywords optimization
+
+file port/rmnh.f
+for reverse communication version of MNH
+keywords optimization
+
+file port/rmnhb.f
+for reverse communication version of MNHB
+keywords optimization
+
+file port/rn2g.f
+for reverse communication version of N2G
+keywords optimization
+
+file port/rn2gb.f
+for reverse communication version of N2GB
+keywords optimization
+
+file port/rnsg.f
+for reverse communication version of NSG
+keywords optimization
+
+file port/rnsgb.f
+for reverse communication version of NSGB
+keywords optimization
+
+for zeros of real polynomials
+
+file port/s1mach.f
+
+file port/s2mach.f
+
+file port/s3grd.f
+
+file port/s3mach.f
+
+file port/s7bqn.f
+
+file port/s7cpr.f
+
+file port/s7dmp.f
+
+file port/s7etr.f
+
+file port/s7grd.f
+
+file port/s7ipr.f
+
+file port/s7lup.f
+
+file port/s7lvm.f
+
+file port/s7rtdt.f
+
+file port/s88fmt.f
+
+file port/sdump.f
+
+file port/setc.f
+
+file port/setd.f
+
+file port/seterr.f
+for error handling
+
+file port/seti.f
+
+file port/setl.f
+
+file port/setr.f
+
+file port/srecap.f
+
+for apply a plane rotation to a vector
+
+for construct Givens plane rotation
+
+file port/stinit.f
+
+file port/stkdmp.f
+for stack dump
+
+file port/stopx.f
+
+file port/ttgrx1.f
+
+file port/ttgrx1p.f
+
+file port/ttgrx2.f
+
+file port/ttgrx3.f
+
+file port/ttgrx4.f
+
+file port/ttgrx5.f
+
+file port/ttgrx6.f
+
+file port/ttgux1.f
+
+file port/ttgux1p.f
+
+file port/ttgux2.f
+
+file port/ttgux3.f
+
+file port/ttgux4.f
+
+file port/ttgux5.f
+
+file port/u9dmp.f
+
+file port/v2axy.f
+
+file port/v2nrm.f
+
+file port/v7cpy.f
+
+file port/v7dfl.f
+
+file port/v7ipr.f
+
+file port/v7prm.f
+
+file port/v7scl.f
+
+file port/v7scp.f
+
+file port/v7shf.f
+
+file port/v7swp.f
+
+file port/v7vmp.f
+
+file port/w7zbf.f
+
+file port/xtrap.f
+
+file port/zero.f
+for single real root
+
+lib port/Mach
+for obsolete versions of machine constants
+
+lib port/chk
+for drivers to verify proper installation of port
+
+lib port/ex
+for example drivers
+
+lib port/prop.upd
+for updated versions of some routines in the proprietary portion of
+, the PORT3 subroutine library -- for the convenience of people who
+, got the whole PORT3 library before these routines were updated.
+
+file port/c6lcf.f
+
+file port/dc6lcf.f
+
+file port/c6lcf.f
+
+file port/dc6lcf.f
+
+file port/smnfb.f
+
+file port/dsmnfb.f
+

@@ -33,7 +33,7 @@ else
         'and note that the model will be loaded to the next free index position by default.']);
 end
 
-fprintf('loading model #%i, from file Models/%s.def...\n', m, name);
+arFprintf(1, 'loading model #%i, from file Models/%s.def...\n', m, name);
 fid = fopen(['Models/' name '.def'], 'r');
 
 % initial setup
@@ -63,7 +63,8 @@ while(~strcmp(str{1},'PREDICTOR'))
 end
 
 % PREDICTOR
-C = textscan(fid, '%s %q %q %q %n %n\n',1, 'CommentStyle', ar.config.comment_string);
+C = arTextScan(fid, '%s %q %q %q %n %n\n',1, 'CommentStyle', ar.config.comment_string);
+arValidateInput( C, 'predictor', 'identifier for independent variable', 'unit type', 'unit', 'label for plotting' );
 ar.model(m).t = cell2mat(C{1});
 ar.model(m).tUnits(1) = C{2};
 ar.model(m).tUnits(2) = C{3};
@@ -81,13 +82,15 @@ ar.model(m).c = {};
 ar.model(m).cUnits = {};
 ar.model(m).pc = {};
 ar.model(m).px = {};
-C = textscan(fid, '%s %q %q %q %f\n',1, 'CommentStyle', ar.config.comment_string);
+C = arTextScan(fid, '%s %q %q %q %f\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'STATES'))
     if(~strcmp(C{1},'COMPARTMENTS'))
+        arValidateInput( C, 'compartments', 'compartment', 'unit type (i.e. V)', 'unit (i.e. pl)', 'label (i.e. "vol.")' );
         ar.model(m).c(end+1) = C{1};
         ar.model(m).cUnits(end+1,1) = C{2};
         ar.model(m).cUnits(end,2) = C{3};
         ar.model(m).cUnits(end,3) = C{4};
+        
         if(isnan(C{5}))
             ar.model(m).px(end+1) = {['vol_' cell2mat(C{1})]};
             ar.model(m).pc(end+1) = {['vol_' cell2mat(C{1})]};
@@ -95,7 +98,7 @@ while(~strcmp(C{1},'STATES'))
             ar.model(m).pc(end+1) = {num2str(C{5})};
         end
     end
-    C = textscan(fid, '%s %q %q %q %f\n',1, 'CommentStyle', ar.config.comment_string);
+    C = arTextScan(fid, '%s %q %q %q %f\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 % STATES
@@ -106,11 +109,13 @@ ar.model(m).xUnits = {};
 ar.model(m).cLink = [];
 ar.model(m).qPlotX = [];
 ar.model(m).qPositiveX = [];
-C = textscan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
+C = arTextScan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INPUTS'))
     if ( strcmp( C{1}, 'REACTIONS' ) )
         error( 'Missing field INPUTS. This section should be specified after STATES and before REACTIONS. See: "Setting up models"' );
     end    
+    
+    arValidateInput( C, 'state', 'unique identifier', 'unit type (i.e. C)', 'unit (i.e. nM)', 'label for plots (i.e. "conc.")' );
     
     if(length(cell2mat(C{1}))<2)
         error('STATE names need to be longer than 1');
@@ -118,6 +123,7 @@ while(~strcmp(C{1},'INPUTS'))
     if(isempty(symvar(sym(C{1}))))
         error('STATE name ''%s'' is reserved by MATLAB. Please rename!',cell2mat(C{1}));
     end
+    
     ar.model(m).x(end+1) = C{1};
     ar.model(m).xUnits(end+1,1) = C{2};
     ar.model(m).xUnits(end,2) = C{3};
@@ -140,12 +146,12 @@ while(~strcmp(C{1},'INPUTS'))
         ar.model(m).xNames{end+1} = ar.model(m).x{end};
     end
     if(isempty(C{8}) || isnan(C{8}))
-        ar.model(m).qPositiveX(end+1) = 1;
+        ar.model(m).qPositiveX(end+1) = 0;
     else
         ar.model(m).qPositiveX(end+1) = C{8};
     end
     ar.model(m).px0(end+1) = {['init_' cell2mat(C{1})]};
-    C = textscan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
+    C = arTextScan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 % INPUTS
@@ -153,9 +159,10 @@ ar.model(m).u = {};
 ar.model(m).uUnits = {};
 ar.model(m).fu = {};
 ar.model(m).uNames = {};
-C = textscan(fid, '%s %q %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+C = arTextScan(fid, '%s %q %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'REACTIONS') && ~strcmp(C{1},'REACTIONS-AMOUNTBASED') && ~strcmp(C{1},'ODES'))
     if(~strcmp(C{1},''))
+        arValidateInput( C, 'input', 'unique input name', 'unit type (i.e. C)', 'unit (i.e. "units/cell")', 'plain text label for plots ("conc.")', 'input function' );
         if(sum(ismember(ar.model(m).x, C{1}))>0) %R2013a compatible
             error('input %s already defined in STATES', cell2mat(C{1}));
         end
@@ -170,7 +177,7 @@ while(~strcmp(C{1},'REACTIONS') && ~strcmp(C{1},'REACTIONS-AMOUNTBASED') && ~str
             ar.model(m).uNames{end+1} = '';
         end
     end
-    C = textscan(fid, '%s %q %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+    C = arTextScan(fid, '%s %q %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 ar.model(m).qPlotU = ones(size(ar.model(m).u));
 
@@ -196,7 +203,12 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         ar.model(m).isAmountBased = false;
     end
     vcount = 1;
-    str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+    %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+    
+    % Read single line (easier to trace errors back to their line)
+    [ line, remainder ] = readLine( fid, ar.config.comment_string );
+    %str = textscan(line, '%s', 1);
+    [str, remainder] = grabtoken( remainder, '%s', 1 );
     while(~strcmp(str{1},'INVARIANTS') && ~strcmp(str{1},'DERIVED'))
         source = {};
         sourceCoeffs = [];
@@ -216,10 +228,14 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                     nextValue = 1;
                 end
             end
-            str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+            %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+            [str, remainder] = grabtoken( remainder, '%s', 1 );
+            if ( isempty(str{1}) )
+                error('incomplete reaction definition in reaction %i: %s', vcount, line)
+            end
         end
         if(sum(~ismember(source, ar.model(m).x)) > 0) %R2013a compatible
-            error('undefined source species in reaction %i: %s', vcount, ...
+            error('%s\nundefined source species in reaction %i: %s', line, vcount, ...
                 source{~ismember(source, ar.model(m).x)}) %R2013a compatible
         end
         
@@ -232,7 +248,8 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         target = {};
         targetCoeffs = [];
         nextValue = 1;
-        str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+        %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+        [str, remainder] = grabtoken( remainder, '%s', 1 );
         while(~strcmp(str{1},'CUSTOM') && ~strcmp(str{1},'MASSACTION') && ~strcmp(str{1},'MASSACTIONKD'))
             if(~strcmp(str{1},'0') && ~strcmp(str{1},'+'))
                 % Check whether a stoichiometric coefficient is specified
@@ -244,7 +261,12 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                     nextValue = 1;
                 end
             end
-            str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+            %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+            [str, remainder] = grabtoken(remainder, '%s', 1);
+            
+            if ( isempty( str{1} ) )
+                error('missing keyword CUSTOM, MASSACTION or MASSACTIONKD before reaction rate expression');
+            end
         end
         if(sum(~ismember(target, ar.model(m).x)) > 0) %R2013a compatible
             error('undefined target species in reaction %i: %s', vcount, ...
@@ -274,7 +296,10 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             massactionkd = true;
         end
         
-        C = textscan(fid, '%q %q\n', 1, 'CommentStyle', ar.config.comment_string);
+        [C, remainder] = grabtoken(remainder, '%q %q', 1);
+        
+        %C = arTextScan(fid, '%q %q\n', 1, 'CommentStyle', ar.config.comment_string);
+        arValidateInput(C, 'REACTIONS', 'reaction rate expression' );
         str = C(1);
         ar.model(m).v{end+1} = cell2mat(C{2});
         
@@ -293,10 +318,10 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                     subs(symtmp, sym(source{j}), 0);
                     symtmpsubs = subs(symtmp, sym(source{j}), 0);
                     if(symtmpsubs~=0)
-                        fprintf(2, 'Possible negative flux in reaction #%i:\n', length(ar.model(m).fv));
-                        fprintf(2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
-                        fprintf(2, 'Source species %s missing ?\n\n', source{j});
-                        fprintf(2, 'Deactivate this error message with: ar.config.checkForNegFluxes = false;\n\n');
+                        arFprintf(1, 2, 'Possible negative flux in reaction #%i:\n', length(ar.model(m).fv));
+                        arFprintf(1, 2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
+                        arFprintf(1, 2, 'Source species %s missing ?\n\n', source{j});
+                        arFprintf(1, 2, 'Deactivate this error message with: ar.config.checkForNegFluxes = false;\n\n');
                         error('Possible negative fluxes in reaction');
                     end
                 end
@@ -418,11 +443,16 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             vcount = vcount + 1;
         end
         
-        str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+        %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
+        % No string left? Grab a new one
+        if isempty( remainder )
+            [ line, remainder ] = readLine( fid, ar.config.comment_string );
+        end
+        [str, remainder] = grabtoken( remainder, '%s', 1 );
     end
 elseif(strcmp(C{1},'ODES'))
     ar.model(m).isReactionBased = false;
-    str = textscan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
+    str = arTextScan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
     ode_count = 0;
     while(~strcmp(str{1},'INVARIANTS') && ~strcmp(str{1},'DERIVED'))
         if(~strcmp(str{1},''))
@@ -433,7 +463,7 @@ elseif(strcmp(C{1},'ODES'))
             ar.model(m).vUnits{end,2} = [ar.model(m).xUnits{ode_count,2} '/' ar.model(m).tUnits{2}];
             ar.model(m).vUnits{end,3} = [ar.model(m).xUnits{ode_count,3} '/' ar.model(m).tUnits{3}];
         end
-        str = textscan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
+        str = arTextScan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
     end
     if(ode_count ~= length(ar.model(m).x))
         error('number of ODES ~= number of variables');
@@ -507,9 +537,10 @@ end
 ar.model(m).z = {};
 ar.model(m).zUnits = {};
 ar.model(m).fz = {};
-C = textscan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+C = arTextScan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1},'OBSERVABLES'))
     if(~strcmp(C{1},''))
+        arValidateInput( C, 'derived', 'unique identifier', 'unit type (i.e. C)', 'unit (i.e. "units/cell")', 'plain text label for plots ("conc.")', 'derived function expression' );
         if(sum(ismember(ar.model(m).x, C{1}))>0) %R2013a compatible
             error('derived variable %s already defined in STATES', cell2mat(C{1}));
         end
@@ -525,7 +556,7 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1
         ar.model(m).zUnits(end,3) = C{4};
         ar.model(m).fz(end+1,1) = C{5};
     end
-    C = textscan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+    C = arTextScan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 ar.model(m).qPlotZ = ones(size(ar.model(m).z));
 
@@ -546,11 +577,12 @@ if(strcmp(C{1},'OBSERVABLES'))
     ar.model(m).logfitting = [];
     ar.model(m).logplotting = [];
     ar.model(m).fy = {};
-    C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+    C = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
     while(~strcmp(C{1},'ERRORS'))
         if ( strcmp( C{1}, 'CONDITIONS' ) || strcmp( C{1}, 'SUBSTITUTIONS' ) )
             error( 'When OBSERVABLES section is specified; ERRORS section must also be specified.' );
-        end        
+        end
+        arValidateInput( C, 'observable', 'unique identifier', 'unit type (i.e. C)', 'unit (i.e. "units/cell")', 'plain text label for plots ("conc.")', 'indicator whether data should be scaled to 1 (0 or 1)', 'Indicator whether date should be treated in log-space (0 or 1)', 'Mathematical expression for observable' );
         ar.model(m).y(end+1) = C{1};
         ar.model(m).yUnits(end+1,1) = C{2};
         ar.model(m).yUnits(end,2) = C{3};
@@ -564,7 +596,7 @@ if(strcmp(C{1},'OBSERVABLES'))
         else
             ar.model(m).yNames(end+1) = ar.model(m).y(end);
         end
-        C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+        C = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
         if(sum(ismember(ar.model(m).x, ar.model(m).y{end}))>0) %R2013a compatible
             error('%s already defined in STATES', ar.model(m).y{end});
         end
@@ -585,14 +617,15 @@ if(strcmp(C{1},'OBSERVABLES'))
     
     % ERRORS
     ar.model(m).fystd = cell(size(ar.model(m).fy));
-    C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
     while(~(strcmp(C{1},'CONDITIONS') || strcmp(C{1},'SUBSTITUTIONS')))
         qy = ismember(ar.model(m).y, C{1}); %R2013a compatible
         if(sum(qy)~=1)
             error('unknown observable %s', cell2mat(C{1}));
         end
+        arValidateInput( C, 'error', 'observable identifier', 'expression for the error model' );
         ar.model(m).fystd(qy) = C{2};
-        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
     end
     
     if(length(ar.model(m).fystd)<length(ar.model(m).fy) || sum(cellfun(@isempty, ar.model(m).fystd))>0)
@@ -614,9 +647,9 @@ matVer = ver('MATLAB');
 substitutions = 0;
 if ( strcmp(C{1},'SUBSTITUTIONS') )
     if(str2double(matVer.Version)>=8.4)
-        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
     else
-        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
+        C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
     end
     
     % Substitutions
@@ -631,9 +664,13 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
         ismodelpar(end+1)   = sum(ismember(ar.model(m).p, C{1})); %#ok<AGROW>
 
         if(str2double(matVer.Version)>=8.4)
-            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         else
-            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+        end
+        
+        if ( ~strcmp(C{1},'CONDITIONS') )
+            arValidateInput( C, 'substitution', 'substitution identifier', 'expression for the substitution' );
         end
     end
 
@@ -645,16 +682,16 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
     % Perform selfsubstitutions
     if ( ~isempty(fromSubs) )
         substitutions = 1;
-        toSubs = mysubsrepeated( toSubs, fromSubs, toSubs, str2double(matVer.Version) );
+        toSubs = arSubsRepeated( toSubs, fromSubs, toSubs, str2double(matVer.Version) );
     end
 end
 
 
 % CONDITIONS
 if(str2double(matVer.Version)>=8.4)
-    C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 else
-    C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
+    C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
 end
 ar.model(m).fp = transpose(ar.model(m).p);
 
@@ -666,19 +703,20 @@ if ( substitutions )
      
     % Fetch desired substitutions
     while(~isempty(C{1}) && ~strcmp(C{1},'CONDITIONS'))
+        arValidateInput( C, 'condition', 'model parameter', 'new expression' );
         from(end+1)         = C{1}; %#ok<AGROW>
         to(end+1)           = C{2}; %#ok<AGROW>
         ismodelpar(end+1)   = sum(ismember(ar.model(m).p, C{1})); %#ok<AGROW>
 
         if(str2double(matVer.Version)>=8.4)
-            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         else
-            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
         end
     end
         
     % Perform substitutions (self-substitutions were already done)
-    to = mysubsrepeated( to, fromSubs, toSubs, str2double(matVer.Version) );
+    to = arSubsRepeated( to, fromSubs, toSubs, str2double(matVer.Version) );
     
     % Store substitutions in ar structure
     for a = 1 : length( from )
@@ -692,6 +730,7 @@ if ( substitutions )
 else
     % Old code path
     while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
+        arValidateInput( C, 'condition', 'model parameter', 'new expression' );
         qcondpara = ismember(ar.model(m).p, C{1}); %R2013a compatible
         if(sum(qcondpara)>0)
             ar.model(m).fp{qcondpara} = ['(' cell2mat(C{2}) ')'];
@@ -699,9 +738,9 @@ else
             warning('unknown parameter in conditions: %s (did you mean to place it under SUBSTITUTIONS?)', cell2mat(C{1})); %#ok<WNTAG>
         end
         if(str2double(matVer.Version)>=8.4)
-            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         else
-            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
         end
     end
 end
@@ -719,7 +758,8 @@ if(~isfield(ar, 'pExternLabels'))
     ar.lbExtern = [];
     ar.ubExtern = [];
 end
-C = textscan(fid, '%s %f %n %n %f %f\n',1, 'CommentStyle', ar.config.comment_string);
+C = arTextScan(fid, '%s %f %n %n %f %f\n',1, 'CommentStyle', ar.config.comment_string);
+
 while(~isempty(C{1}))
     ar.pExternLabels(end+1) = C{1};
     ar.pExtern(end+1) = C{2};
@@ -727,82 +767,69 @@ while(~isempty(C{1}))
     ar.qLog10Extern(end+1) = C{4};
     ar.lbExtern(end+1) = C{5};
     ar.ubExtern(end+1) = C{6};
-    C = textscan(fid, '%s %f %n %n %f %f\n',1, 'CommentStyle', ar.config.comment_string);
+    C = arTextScan(fid, '%s %f %n %n %f %f\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 fclose(fid);
 
+% Check whether the user specified any variables with reserved words. This
+% would be problematic later.
+for a = 1 : length( ar.model(m).fu )
+    arCheckReservedWords( symvar(ar.model(m).fu{a}), 'input function', ar.model(m).u{a} );
+end
+if ( isfield( ar.model(m), 'fy' ) )
+    for a = 1 : length( ar.model(m).fy )
+        arCheckReservedWords( symvar(ar.model(m).fy{a}), 'observation function', ar.model(m).y{a} );
+    end
+    for a = 1 : length( ar.model(m).fystd )
+        arCheckReservedWords( symvar(ar.model(m).fystd{a}), 'observation standard deviation', ar.model(m).y{a} );
+    end
+end
+if ( isfield( ar.model(m), 'fp' ) )
+    for a = 1 : length( ar.model(m).fp )
+        arCheckReservedWords( symvar(ar.model(m).fp{a}), 'parameter transformation', ar.model(m).p{a} );
+    end
+end
+for a = 1 : length( ar.model(m).fx )
+    arCheckReservedWords( symvar(ar.model(m).fx{a}), 'right hand side', ar.model(m).x{a} );
+end
+
+arCheckReservedWords( ar.model(m).p, 'parameters' );
+arCheckReservedWords( ar.model(m).x, 'state variables' );
+if ( isfield( ar.model(m), 'y' ) )
+    arCheckReservedWords( ar.model(m).y, 'observables' );
+end
+if ( isfield( ar.model(m), 'z' ) )
+    arCheckReservedWords( ar.model(m).z, 'derived variables' );
+end
+if ( isfield( ar.model(m), 'u' ) )
+    arCheckReservedWords( ar.model(m).u, 'inputs' );
+end
+arCheckReservedWords( ar.model(m).c, 'compartments' );
+
 ar = orderfields(ar);
 ar.model = orderfields(ar.model);
 
-% substitute until no more changes (for self-substitutions of derived
-% variables)
-function out = mysubsrepeated(in, old, new, matlab_version)
-    done = false;
 
-    old = sym(old);
-    new = sym(new);
-    in  = sym(in);
-        
-    k = 0; orig = in;
-    while ( ~done )
-        out = mysubs(in, old, new, matlab_version);
-        
-        if ( k > 15 )
-            v = '';
-            for c = 1 : length( orig )
-                if ~isequal( in(c), out(c) )
-                    v = sprintf( '%s\n%s = %s', v, char(old(c)), char(orig(c)) );
-                end
-            end           
-            error( 'Substitution recursion limit (15) exceeded!\nSolutions that cannot be obtained by simple substitution are not supported.\nDo you have any cyclic substitutions?\n%s\n', v );
-        end        
-        
-        % No more changes?
-        if ( isempty( setdiff(out,in) ) )
-            done = true;
-        else
-            in = out;
+function [ line, remainder ] = readLine( fid, commentStyle )
+    line = '';
+    while ( isempty(line) )
+        line = arTextScan(fid, '%[^\n]' ); 
+        line = strtrim(line{1}{1});
+        Q = strfind( line, commentStyle );
+        if ( ~isempty(Q) )
+            line = line(1:Q-1);
         end
-        k = k + 1;
     end
+    remainder = line;
     
-    q = out;
-    out = cell(1,length(q));
-    for a = 1 : length(q)
-        out{a} = char(q(a));
+    
+function [str, remainder] = grabtoken( inputString, varargin )
+    if ( isempty( inputString ) )
+        str{1} = {};
+        remainder = '';
+        return;
     end
 
-% better subs
-function out = mysubs(in, old, new, matlab_version)
-
-if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
-    try
-        if(matlab_version>=8.1)
-            out = subs(in, old(:), new(:));
-        else
-            out = subs(in, old(:), new(:), 0);
-        end
-    catch
-        % Failure to substitute, provide some info that might help debug
-        % the problem; try them one by one and output those that failed
-        s{1} = sprintf( 'Error: Model substitution failure in %s: \n\nThe following substitutions failed:\n', char( in ) );
-        for a = 1 : length( old )
-            try
-                if(matlab_version>=8.1)
-                    out = subs(in, old(a), new(a)); %#ok
-                else
-                    out = subs(in, old(a), new(a), 0); %#ok
-                end
-            catch ME
-                s{end+1} = sprintf( 'Subs [%10s => %5s failed]: %s\n', ...                  
-                    char( old(a) ), char( new(a) ), strtok(ME(1).message, sprintf('\n')) ); %#ok<AGROW>
-            end
-        end
-        s{end+1} = sprintf( '\n\nPlease check substitution errors for clues where the error may be.\n' ); %#OK<AGROW>
-        
-        error( sprintf('%s',s{:}) ); %#ok
-    end
-else
-    out = in;
-end
+	[str, pos] = textscan(inputString, varargin{:});
+	remainder = inputString(pos+1:end);    

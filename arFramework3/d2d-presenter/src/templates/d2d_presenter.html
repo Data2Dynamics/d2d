@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='d2d_presenter_logo.png') }}" />
+  <!-- jQuery -->
+  <script src="{{ url_for('static', filename='extern/jquery/jquery-2.1.4.min.js') }}"></script>
+  <!-- jQuery Mobile -->
+  <script src="{{ url_for('static', filename='extern/jquery_mobile/jquery.mobile-1.4.5.min.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='extern/jquery_mobile/jquery.mobile-1.4.5.min.css') }}" />
+  <!-- Codemirror -->
+  <script src="{{ url_for('static', filename='extern/codemirror/codemirror-compressed.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='extern/codemirror/codemirror.css') }}">
+  <!-- dygraphs -->
+  <script src="{{ url_for('static', filename='extern/dygraphs/dygraph-combined.js') }}"></script>
+  <!-- custom -->
+  <script type="text/javascript">
+    var $SCRIPT_ROOT = {{ request.script_root | tojson | safe }};
+  </script>
+  <script src="{{ url_for('static', filename='d2d_presenter.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='d2d_presenter.css') }}" />
+</head>
+
+<body>
+  <!-- Start of page -->
+  <div data-role="page" class="d2d_page" id="landing_page" data-title="D2D Presenter">
+    <div class="content_background"></div>
+    <div class="panel_button"><a href="#panel_button" class="ui-btn ui-shadow ui-corner-all ui-icon-gear ui-btn-icon-notext">Settings</a></div>
+    <div class="d2d_logo">
+      <a href="#landing_page">
+      <svg width="12em" height="8em">
+    <image xlink:href="{{ url_for('static', filename='d2d_presenter_logo.svg') }}" src="{{ url_for('static', filename='d2d_presenter_logo.png') }}" width="12em" height="8em"/>
+      </svg>
+    </a>
+    </div>
+    <div role="main" class="ui-content my-content">
+      <h3>Models</h3>
+      <div class="landing_page_content tabs_main">
+      </div>
+      <div class="panel">
+        <h3>Settings</h3>
+        <div>
+          <label for="nFinePoints">nFinePoints:</label>
+          <input type="range" name="nFinePoints" id="nFinePoints" min="10" max="1000" value="300">
+          <label for="round">Round:</label>
+          <input type="range" name="round" id="round" min="0" max="10" value="0">
+        </div>
+      </div>
+      <!-- /panel -->
+    </div>
+  </div>
+  <!-- /page -->
+
+  <!-- Start of page -->
+  <div data-role="page" class="d2d_page" id="main_page" data-title="D2D Presenter">
+    <div class="content_background"></div>
+    <div class="panel_button"><a href="#panel_button" class="ui-btn ui-shadow ui-corner-all ui-icon-gear ui-btn-icon-notext">Settings</a></div>
+    <div class="d2d_logo">
+      <a href="#landing_page">
+      <svg width="12em" height="8em">
+    <image xlink:href="{{ url_for('static', filename='d2d_presenter_logo.svg') }}" src="{{ url_for('static', filename='d2d_presenter_logo.png') }}" width="12em" height="8em"/>
+      </svg>
+    </a>
+    </div>
+    <div role="main" class="ui-content my-content">
+      <div data-role="tabs" id="tabs" class="tabs_main">
+        <div data-role="navbar" class="tabs_navigation">
+          <ul>
+            <li><a href="#model" data-ajax="false" id="tab_model">Model</a></li>
+            <li><a href="#plots" data-ajax="false" id="tab_plots">Plots</a></li>
+            <li><a href="#fit" data-ajax="false" id="tab_fit">Fit</a></li>
+            <li><a href="#editor" data-ajax="false" id="tab_editor">Editor</a></li>
+            <li><a href="#console" data-ajax="false" id="tab_console">Console</a></li>
+          </ul>
+        </div>
+        <div id="model" class="tabs">
+          <div class="tabs_content">
+            <div class="model_description">
+              <h3 id="model_title"></h3>
+              <p id="model_description"></p>
+            </div>
+            <div id="model_svg" class="model_svg">
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Settings</h3>
+            <div id="M"></div>
+            <div id="D"></div>
+            <div id="C"></div>
+          </div>
+        </div>
+        <div id="plots" class="tabs">
+          <div class="panel">
+            <div class="graph_controls">
+              <fieldset data-role="controlgroup" data-mini="true" data-type="horizontal">
+                <input type="checkbox" name="toggle_graphs" id="inputs" checked="checked">
+                <label for="inputs">Inputs</label>
+                <input type="checkbox" name="toggle_graphs" id="variables">
+                <label for="variables">Variables</label>
+                <input type="checkbox" name="toggle_graphs" id="observables">
+                <label for="observables">Observables</label>
+              </fieldset>
+            <input type="checkbox" data-role="flipswitch" data-on-text="Scale" data-off-text="Scale" name="autoscale" id="autoscale" checked="" data-wrapper-class="custom-label-flipswitch">
+          </div>
+            <div id="sliders_inputs" class="slider_blocks"><h4>Input parameters</h4></div>
+            <div id="sliders_variables" class="slider_blocks"><h4>Dynamic parameters</h4></div>
+            <div id="sliders_observables" class="slider_blocks"><h4>Observable parameters</h4></div>
+            <div id="sliders_observables_std" class="slider_blocks"><h4>Error parameters</h4></div>
+            <div id="sliders_conditions" class="slider_blocks"><h4>Condition parameters</h4></div>
+          </div>
+          <!-- /panel -->
+          <div class="tabs_content">
+            <p>Select to zoom in. Double click to zoom out.</p>
+            <div id="graphs_inputs">
+              <div class="graphs_title">
+                <h3>Inputs</h3>
+                <div>
+                  <input data-type="search" id="search_graphs_inputs">
+                </div>
+              </div>
+              <div class="g_inputs g_container" data-filter="true" data-input="#search_graphs_inputs"></div>
+            </div>
+            <div class="graphs_variables" id="graphs_variables">
+              <div class="graphs_title">
+                <h3>Variables</h3>
+                <div>
+                  <input data-type="search" id="search_graphs_variables">
+                </div>
+              </div>
+              <div class="g_variables g_container" data-filter="true" data-input="#search_graphs_variables">
+              </div>
+            </div>
+            <div class="graphs_observables" id="graphs_observables">
+              <div class="graphs_title">
+                <h3>Observables</h3>
+                <div>
+                  <input data-type="search" id="search_graphs_observables">
+                </div>
+              </div>
+              <div class="g_observables g_container" data-filter="true" data-input="#search_graphs_observables">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="fit" class="tabs">
+          <div class="panel">
+             <h3>Fit</h3>
+            <div id="max_iter"></div>
+            <div>
+              <button class="ui-btn ui-btn-inline" name="fit">Fit</button>
+              <button class="ui-btn ui-btn-inline" name="fit_auto">Auto</button>
+              <button class="ui-btn ui-btn-inline" name="clear">Clear</button>
+            </div>
+            <h3>Data</h3>
+            <button name="simu_data" class="simu_data ui-btn ui-btn-inline">Simulate Data</button>
+            <button name="initial_guess" class="initial_guess ui-btn ui-btn-inline">Initial guess</button>
+          </div>
+          <div class="tabs_content">
+            <div id="graphs_inputs">
+              <div class="graphs_title">
+                <h3>Fit</h3>
+              </div>
+              <div class="g_container">
+                <div id="g_fit_chi2plot" class="g_observables g_fit_chi2plot g_container_items">Chi2</div>
+                <div id="g_fit_parameters" class="g_observables g_fit_parameters g_container_items">Fit parameters</div>
+              </div>
+            </div>
+            <div class="graphs_title">
+              <h3>Observables</h3>
+              <div>
+                <input data-type="search" id="search_graphs_fit">
+              </div>
+            </div>
+            <div class="g_fit g_container" data-filter="true" data-input="#search_graphs_fit"></div>
+          </div>
+        </div>
+        <div id="editor" class="tabs">
+          <div class="panel">
+            <div id="filetree"></div>
+          </div>
+          <div class="tabs_content">
+            <h3 id="editor_title"></h3>
+            <fieldset data-role="controlgroup" data-type="horizontal">
+              <button class="ui-btn ui-btn-inline" id="save">Save</button>
+            </fieldset>
+            <div id="console_editor" class="console">
+              <textarea id="editor_area" rows="4" cols="10"></textarea>
+            </div>
+          </div>
+        </div>
+        <div id="console" class="tabs">
+          <div class="panel">
+          </div>
+          <div class="tabs_content">
+            <h3>Console</h3>
+            <p>Press 'Shift+Enter' for multiline Input</p>
+            <div id="command_multiline" class="command_multiline">
+              <textarea id="command_multiline_input" rows="5" cols="50"></textarea>
+            </div>
+            <h3>Output</h3>
+            <div id="console_out" class="console_out">
+              <textarea id="cm_console_out" rows="5" cols="50"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /content -->
+  </div>
+  <!-- /page -->
+</body>
+</html>

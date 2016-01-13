@@ -10,10 +10,9 @@
 % conditions.
 %
 % Usage:
-%   arSplitDataConditions( (ar), model, dataIDs, verbose )
+%   arSplitDataConditions( model, dataIDs, verbose )
 %
 % Input arguments:
-%   (ar)        Optional ar structure
 %   model       model number (typically 1)
 %   dataIDs     data IDs (hint: you can find these using arFindData)
 %   verbose     show what changes are made to the struct (1 is debug output on)  
@@ -30,10 +29,6 @@ function arSplitDataConditions( varargin )
     end
        
     global ar;
-    if ( isstruct(varargin{1}) )
-        ar = varargin{1};
-        varargin = varargin(2:end);
-    end
     
     % If we were called from a high level event function, since the higher
     % level function will already be in the command log and this one doesn't 

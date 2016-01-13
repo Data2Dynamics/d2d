@@ -22,6 +22,9 @@ end
 if(~exist('mode', 'var') || isempty(mode))
     mode = 1;
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 pleInit(ar.p, ar.qFit==1, ar.lb, ar.ub, ar.qLog10, @arPLEIntegrate, @arPLEMerit, ...
     @arPLEDiffMerit, @arPLEFit, @arPLESetOptim, ar.pLabel, 1-ar.ppl.alpha_level, force);
@@ -40,7 +43,8 @@ else
     pleGlobals.plot_simu = true;
 end
 
-if(ar.config.fiterrors == 1)
+if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
+        (ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0) )
     pleGlobals.ylabel = '-2 log(PL)';
 end
 
@@ -82,8 +86,10 @@ end
 
 function chi2 = arPLEMerit
 global ar
-if(ar.config.fiterrors == 1)
+if(ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1)
     chi2 = 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit;
+elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+    chi2 = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.chi2fit;
 else
     chi2 = ar.chi2;
 end

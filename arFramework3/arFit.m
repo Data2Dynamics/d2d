@@ -13,6 +13,15 @@
 %      -4  Line search cannot sufficiently decrease the residual along the
 %           current search direction.
 %
+% Select different optimizers by editing ar.config.optimizer
+%       1 - lsqnonlin (default)
+%       2 - fmincon
+%       4 - STRSCNE (Bellavia et al, A Scaled Trust Region Solver for Constrained Nonlinear Equations)
+%       5 - arNLS (additional method choices under ar.config.optimizerStep; see help arNLS)
+%       6 - fmincon
+%       7 - arNLS with SR1 updates
+%       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL—An Adaptive Nonlinear Least-Squares)
+%
 
 function varargout = arFit(varargin)
 
@@ -154,7 +163,7 @@ elseif(ar.config.optimizer == 4)
     fit.history = history;
     
     ar = arChi2(ar, false, ar.p(ar.qFit==1));
-    fprintf('STRSCNE finished after %i iterations: code %i, total chi2 improvement = %g\n', ...
+    arFprintf(1,'STRSCNE finished after %i iterations: code %i, total chi2 improvement = %g\n', ...
         output(1), exitflag, chi2_old - ar.chi2fit);
     
     return;
@@ -183,14 +192,22 @@ elseif(ar.config.optimizer == 6)
 elseif(ar.config.optimizer == 7)
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         arNLS(@merit_fkt_sr1, ar.p(ar.qFit==1), lb, ub, ar.config.optim, ar.config.optimizerStep);
-    
+
+% NL2SOL
+elseif(ar.config.optimizer == 8)
+    if ~exist('mexnl2sol', 'file')
+        compileNL2SOL;
+    end
+    [pFit, ~, resnorm, exitflag, output.iterations, lambda, jac] = ...
+        mexnl2sol(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim, 1);
+
 else
-    error('ar.config.optimizer invalid');
+    error('ar.config.optimizer invalid');    
 end
 
 if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
     if(max(ar.ms_violation) > ar.ms_threshold)
-        fprintf('Multiple Shooting: continuity constains violated %e > %e\n', max(ar.ms_violation), ar.ms_threshold);
+        arFprintf(1, 'Multiple Shooting: continuity constains violated %e > %e\n', max(ar.ms_violation), ar.ms_threshold);
     end
 end
 
@@ -231,7 +248,16 @@ end
 % lsqnonlin and arNLS
 function [res, sres] = merit_fkt(pTrial)
 global ar
-arChi2(ar.config.useSensis, pTrial);
+
+% Only compute sensis when requested
+if ( isfield( ar.config, 'sensiSkip' ) )
+    sensiskip = ar.config.sensiSkip;
+else
+    sensiskip = false;
+end
+sensi = ar.config.useSensis && (~sensiskip || (nargout > 1));
+
+arChi2(sensi, pTrial);
 arLogFit(ar);
 res = [ar.res ar.constr];
 if(nargout>1 && ar.config.useSensis)

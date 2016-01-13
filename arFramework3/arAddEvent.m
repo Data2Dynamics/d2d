@@ -5,7 +5,8 @@
 %
 % Adds an event to a condition. Event is added for a specific condition at
 % a specific time point. If you wish to see how the conditions are set up,
-% you can use the command 'arShowDataConditionStructure'
+% you can use the command 'arShowDataConditionStructure'. Specifying 'All'
+% for the conditions sets the event for all model conditions.
 %
 % If a change at the event is required, also specify a state name, and a
 % change. Event changes are of the form Ax+B; where x represents the old
@@ -46,9 +47,13 @@ function ar = arAddEvent( varargin )
         logCall( 'arAddEvent', varargin{:} );
     end
     
-    m = varargin{1};
-    c = varargin{2};
-    t = varargin{3};
+    m   = varargin{1};
+    c   = varargin{2};
+    tL  = varargin{3};
+    
+    if ( ischar(c) && strcmpi( c, 'all' ) )
+        c = 1 : length( ar.model(m).condition );
+    end
 
     nStates = numel( ar.model.x );
     nPars   = numel( ar.model(m).condition(c).p );    
@@ -94,53 +99,58 @@ function ar = arAddEvent( varargin )
         doLink = varargin{9};
     end    
     
-    % Insert event
-    [ar.model(m).condition(c).tEvents, ~, i] = union( ar.model(m).condition(c).tEvents, t );
-    
-    % Did we actually add a new event, or just modify a modifier?
-    if (length(i) > 0)
-        newEvent = 1;
-    else
-        newEvent = 0;
-    end
-    
-    % Determine where the event was inserted
-    I = find( ar.model(m).condition(c).tEvents > t, 1 )-1;
-    if isempty(I)
-        I = length( ar.model(m).condition(c).tEvents );
-    end
-    
-    % Insertion
-    modx_A_ins = ones(1, nStates);
-    modx_B_ins = zeros(1, nStates);
-    modsx_A_ins = ones(1, nStates, nPars);
-    modsx_B_ins = zeros(1, nStates, nPars);    
-    
-    % Merge mod matrices if required
-    if ( newEvent )
-        ar.model(m).condition(c).modt     = union( ar.model(m).condition(c).modt, t );
-        ar.model(m).condition(c).modx_A   = [ ar.model(m).condition(c).modx_A(1:I-1,:) ; modx_A_ins ; ar.model(m).condition(c).modx_A(I:end,:) ];
-        ar.model(m).condition(c).modx_B   = [ ar.model(m).condition(c).modx_B(1:I-1,:) ; modx_B_ins ; ar.model(m).condition(c).modx_B(I:end,:) ];
-        ar.model(m).condition(c).modsx_A  = [ ar.model(m).condition(c).modsx_A(1:I-1,:,:) ; modsx_A_ins ; ar.model(m).condition(c).modsx_A(I:end,:,:) ];
-        ar.model(m).condition(c).modsx_B  = [ ar.model(m).condition(c).modsx_B(1:I-1,:,:) ; modsx_B_ins ; ar.model(m).condition(c).modsx_B(I:end,:,:) ];        
-    end
-    
-    % Ready to add the event
-    if ( stateChanges )
-        ar.model(m).condition(c).modx_A(I,state) = A;
-        ar.model(m).condition(c).modx_B(I,state) = B;
-    
-        if ( manualSensitivity )
-            ar.model(m).condition(c).modsx_A(I,:,:) = sA;
-            ar.model(m).condition(c).modsx_B(I,:,:) = sB;
+    for nt = 1 : length( tL )
+        t = tL(nt);
+        
+        % Insert event
+        [ar.model(m).condition(c).tEvents, ~, i] = union( ar.model(m).condition(c).tEvents, t );
+
+        % Did we actually add a new event, or just modify a modifier?
+        if (length(i) > 0)
+            newEvent = 1;
         else
-            % Only the multiplicative part of the sensitivity factors in
-            ar.model(m).condition(c).modsx_A(I,state,:) = A;
+            newEvent = 0;
         end
-    end
+
+        % Determine where the event was inserted
+        I = find( ar.model(m).condition(c).tEvents > t, 1 )-1;
+        if isempty(I)
+            I = length( ar.model(m).condition(c).tEvents );
+        end
+
+        % Insertion
+        modx_A_ins = ones(1, nStates);
+        modx_B_ins = zeros(1, nStates);
+        modsx_A_ins = ones(1, nStates, nPars);
+        modsx_B_ins = zeros(1, nStates, nPars);    
+
+        % Merge mod matrices if required
+        if ( newEvent )
+            ar.model(m).condition(c).modt     = union( ar.model(m).condition(c).modt, t );
+            ar.model(m).condition(c).modx_A   = [ ar.model(m).condition(c).modx_A(1:I-1,:) ; modx_A_ins ; ar.model(m).condition(c).modx_A(I:end,:) ];
+            ar.model(m).condition(c).modx_B   = [ ar.model(m).condition(c).modx_B(1:I-1,:) ; modx_B_ins ; ar.model(m).condition(c).modx_B(I:end,:) ];
+            ar.model(m).condition(c).modsx_A  = [ ar.model(m).condition(c).modsx_A(1:I-1,:,:) ; modsx_A_ins ; ar.model(m).condition(c).modsx_A(I:end,:,:) ];
+            ar.model(m).condition(c).modsx_B  = [ ar.model(m).condition(c).modsx_B(1:I-1,:,:) ; modsx_B_ins ; ar.model(m).condition(c).modsx_B(I:end,:,:) ];        
+        end
+
+        % Ready to add the event
+        if ( stateChanges )
+            ar.model(m).condition(c).modx_A(I,state) = A;
+            ar.model(m).condition(c).modx_B(I,state) = B;
+
+            if ( manualSensitivity )
+                ar.model(m).condition(c).modsx_A(I,:,:) = sA;
+                ar.model(m).condition(c).modsx_B(I,:,:) = sB;
+            else
+                % Only the multiplicative part of the sensitivity factors in
+                ar.model(m).condition(c).modsx_A(I,state,:) = A;
+            end
+        end
+
+        % Activate event system for this condition
+        ar.model(m).condition(c).qEvents = 1;
     
-    % Activate event system for this condition
-    ar.model(m).condition(c).qEvents = 1;
+    end
     
     % Activate event handling in general
     ar.config.useEvents = 1;
@@ -149,6 +159,9 @@ function ar = arAddEvent( varargin )
     if (doLink)
         arLink(true);
     end
+    
+    % Invalidate cache so simulations do not get skipped
+    arCheckCache(1);
 end
 
 function logCall( fn, varargin )

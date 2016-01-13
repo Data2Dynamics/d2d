@@ -38,47 +38,39 @@ else
 end
 if(length(varargin)>2 && ~isempty(varargin{3}))
     dynamics = varargin{3};
+else
+    dynamics = 0;
 end
 
-% If no sensitivities are requested, we always simulate (fast anyway)
-if ( ~sensi )
-    dynamics = 1;
-end
-
-% If dynamics are not requested, but sensitivities are, check whether we 
-% already simulated these sensitivities.
-% Note that sensis should be true, since otherwise we could store a last 
-% simulated without sensitivities as 'already simulated sensitivities'.
-% This code *only* prevents unnecessary simulation of sensitivities.
-% TO DO: Add check for tolerance changes
-if ( ~dynamics && sensi )
-    if ~isfield( ar, 'pLastSimulated' )
-        ar.pastSimulated.fine   = nan(size(ar.p));
-        ar.pLastSimulated.exp    = nan(size(ar.p));
-    end
-    if ( fine && ( ~isequal( ar.pLastSimulated.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
-        
-        dynamics = 1;
-    end
-    if ( ~fine && ( ~isequal( ar.pLastSimulated.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) ) )
-        
-        dynamics = 1;
-    end
-end
-
-if ( dynamics && sensi )
-    if ( fine )
-        ar.pLastSimulated.fine = ar.p;
-    else
-        ar.pLastSimulated.exp = ar.p;
-    end
-end
-
-% If we finally decide on not simulating the sensitivities, simulate only
-% the model without sensitivities
+% If dynamics are not forced, check whether the dynamics of the last simulation
+% were identical. If not, we have to resimulate.
 if ( ~dynamics )
-    dynamics = 1;
-    sensi = 0;
+    % Check cached config settings to see if they are still the same. If
+    % not, then cache storage gets cleared forcing resimulation.
+    arCheckCache;
+    
+    % Check whether dynamic parameters are different from the ones we 
+    % simulated last time. If so, we need to resimulate!
+    if ( fine )
+        if ( ~isequal( ar.cache.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) || ( ar.cache.fineSensi ~= sensi ) )
+            dynamics = 1;
+        end
+    else
+        if ( ~isequal( ar.cache.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) || ( ar.cache.expSensi ~= sensi ) )
+            dynamics = 1;
+        end
+    end
+end
+
+% If we are simulating, store the simulation parameters in the cache
+if ( dynamics )
+    if ( fine )
+        ar.cache.fine       = ar.p;
+        ar.cache.fineSensi  = sensi;
+    else
+        ar.cache.exp        = ar.p;
+        ar.cache.expSensi   = sensi;
+    end
 end
 
 if(~isfield(ar,'p'))
@@ -89,6 +81,9 @@ if(~isfield(ar.config,'useParallel'))
 end
 if(~isfield(ar.config,'fiterrors_correction'))
     ar.config.fiterrors_correction = 1;
+end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
 end
 
 ar.stop = 0;

@@ -41,6 +41,9 @@ end
 if(~exist('hs','var'))
 	hs = [];
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 matVer = ver('MATLAB');
 
@@ -120,7 +123,8 @@ for jm = 1:length(ar.model)
                     if(ar.model(jm).data(jd).qFit(jy)==1)
                         chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2(jy);
                         ndata(jy) = ndata(jy) + ar.model(jm).data(jd).ndata(jy);
-                        if(ar.config.fiterrors==1)
+                        if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
+                                (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
                             chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2err(jy);
                         end
                     end
@@ -171,7 +175,8 @@ for jm = 1:length(ar.model)
                 didPlot = true;
                 
                 % setup figure
-                if(ar.config.ploterrors == -1)
+                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) ||...
+                        (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                     [h, fastPlotTmp] = arRaiseFigure(ar.model(jm).plot(jplot), ...
                         [fighandel_name{jtype} 'CI'], ['CI-' fig_name{jtype} ar.model(jm).plot(jplot).name], ...
                         figcount, fastPlot, jtype, hs);
@@ -243,17 +248,24 @@ for jm = 1:length(ar.model)
                         end
                         
                         % call arPlotTrajectories
+                        if(ar.config.useFitErrorMatrix==0)
+                            fiterrors = ar.config.fiterrors;
+                            ploterrors = ar.config.ploterrors;
+                        else
+                            fiterrors = ar.config.fiterrors_matrix(jm,jd);
+                            ploterrors = ar.config.ploterrors_matrix(jm,jd);
+                        end
                         [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ...
                             length(dr_times)*length(jcs), ...
                             t, y, ystd, lb, ub, nfine_dr_plot, ...
                             nfine_dr_method, tExp, yExp, yExpHl, yExpStd, ...
                             y_ssa, y_ssa_lb, y_ssa_ub, ...
-                            ar.config.ploterrors, qUnlog, qLog, qLogPlot, qFit, ...
+                            ploterrors, qUnlog, qLog, qLogPlot, qFit, ...
                             zero_break, fastPlotTmp, hys, hystds, hysss, dydt, ...
                             jt==length(dr_times) && jc==jcs(end), qDR, ndata, chi2, ...
                             tUnits, response_parameter, yLabel, yNames, yUnits, ...
-                            ar.config.fiterrors, logplotting_xaxis, iy, t_ppl, y_ppl_ub, y_ppl_lb);
-                        
+                            fiterrors, logplotting_xaxis, iy, t_ppl, y_ppl_ub, y_ppl_lb);
+        
                         % save handels
                         if(jd~=0)
                             ar.model(jm).data(jd).plot.(linehandle_name{jtype}) = hys;
@@ -323,7 +335,8 @@ for jm = 1:length(ar.model)
                 
                 % save figure
                 if(saveToFile)
-                    if(ar.config.ploterrors == -1)
+                    if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) ||...
+                            (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                         ar.model(jm).plot(jplot).(['savePath_Fig' savepath_name{jtype} 'CI']) = ...
                             arSaveFigure(h, ...
                             ar.model(jm).plot(jplot).name, ['/FiguresCI/' savepath_name{jtype}]);

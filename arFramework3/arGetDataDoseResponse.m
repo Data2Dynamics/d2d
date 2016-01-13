@@ -5,6 +5,10 @@ global ar
 zero_break = [];
 data_qFit = true;
 
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
+
 ccount = 1;
 for jd = ds
     
@@ -83,7 +87,8 @@ for jd = ds
                     yExpHl(ccount,:) = yExp(ccount,:);                 %#ok<AGROW>
                 end
             end
-            if(ar.config.fiterrors == -1)
+            if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==-1) || ...
+                        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==-1) )
                 yExpStd(ccount,:) = ar.model(jm).data(jd).yExpStd(jt,:); %#ok<AGROW>
             else
                 yExpStd(ccount,:) = ar.model(jm).data(jd).ystdExpSimu(jt,:); %#ok<AGROW>

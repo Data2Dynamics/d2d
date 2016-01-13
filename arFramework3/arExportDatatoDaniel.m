@@ -1,6 +1,11 @@
 function arExportDatatoDaniel(m,d)
 
 global ar;
+
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
+
 fid = fopen(sprintf('daniel_%s_data.csv',ar.model(m).name),'w');
 
 fprintf(fid, '"condition","name","time","value","uncertainty"');
@@ -16,7 +21,8 @@ n_time=length(ar.model(m).data(d).tExp);
             if(ar.model(m).data(d).logfitting(jN)==1)
                 
                 fprintf(fid, ',"%i"',10^ar.model(m).data(d).yExp(jt,jN));
-                if(ar.config.fiterrors==-1)
+                if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==-1) || ...
+                        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(m,d)==-1) )
                     fprintf(fid, ',"%i"',10^ar.model(m).data(d).yExp(jt,jN)*ar.model(m).data(d).yExpstd(jt,jN));
                 else
                     fprintf(fid, ',"%i"',10^ar.model(m).data(d).yExp(jt,jN)*ar.model(m).data(d).ystdExpSimu(jt,jN));
@@ -24,7 +30,8 @@ n_time=length(ar.model(m).data(d).tExp);
             else
                 
                 fprintf(fid, ',"%i"',ar.model(m).data(d).yExp(jt,jN));
-                if(ar.config.fiterrors==-1)
+                if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==-1) || ...
+                        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(m,d)==-1) )
                     fprintf(fid, ',"%i"',ar.model(m).data(d).yExpstd(jt,jN));
                 else
                     fprintf(fid, ',"%i"',ar.model(m).data(d).ystdExpSimu(jt,jN));
@@ -69,12 +76,18 @@ fprintf(fid, '\n');
 fprintf(fid, '\n');
 fprintf(fid, '"Name","Type","Units","log-scale","Fitted error","Compartment"');
 fprintf(fid, '\n');
+
+if(ar.config.useFitErrorMatrix==0)
+    fiterrors=ar.config.fiterrors;
+else
+    fiterrors=ar.config.fiterrors_matrix(m,d);
+end
 for jN=1:length(ar.model(m).data(d).yNames)
     fprintf(fid, '"%s"',ar.model(m).data(d).yNames{jN});
     fprintf(fid, ',"%s"',ar.model(m).data(d).yUnits{jN,3});
     fprintf(fid, ',"%s"',ar.model(m).data(d).yUnits{jN,2});
     fprintf(fid, ',"%i"',ar.model(m).data(d).logfitting(jN));
-    fprintf(fid, ',"%i"',ar.config.fiterrors);
+    fprintf(fid, ',"%i"',fiterrors);
     fprintf(fid, ',"%s"',ar.model(m).c{ar.model(m).cLink(jN)});
     fprintf(fid, '\n');
 end

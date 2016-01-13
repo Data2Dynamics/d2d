@@ -1,0 +1,140 @@
+DESCRIPTION
+"Fribourg2014 - Dynamics of viral antagonism and innate immune response (H1N1 influenza A virus - Cal/09)"" (MODEL1403310002)"
+"SBML level 2 version 4"
+"<notes>
+  <body xmlns="http://www.w3.org/1999/xhtml">
+    <div class="dc:title">
+ Fribourg2014 - Dynamics of viral antagonism and innate immune response (H1N1 influenza A virus - Cal/09) 
+</div>
+    <div class="dc:description">
+      <p>The dynamics of the interplay between the viral antagonism and the innate immune response has been studied using modelling approaches. The responses of human monocyte-derived dendritic cells infected by two influenza A H1N1 strains (the pandemic swine-origin A/California/4/2009 (Cal/09) and the seasonal A/New Caledonia/20/1999 (NC/99)) that have different clinical outcomes have been modelled. From the time course gene expression measurements of a set of selected genes, the dynamic features of viral antagonism and innate immune response are extracted. It is found that the strength and the time scale of action of viral antagonism is significantly different between the two viruses. This model describes the viral infection by seasonal Cal/09.</p>
+    </div>
+    <div class="dc:bibliographicCitation">
+      <p>This model is described in the article:</p>
+      <div class="bibo:title">
+        <a href="http://identifiers.org/pubmed/24594370" title="Access to this publication">Model of influenza A virus infection: Dynamics of viral antagonism and innate immune response.</a>
+      </div>
+      <div class="bibo:authorList">Fribourg M, Hartmann B, Schmolke M, Marjanovic N, Albrecht RA, García-Sastre A, Sealfon SC, Jayaprakash C, Hayot F.</div>
+      <div class="bibo:Journal">J Theor Biol. 2014 Mar 2;351C:47-57. </div>
+      <p>Abstract:</p>
+      <div class="bibo:abstract">
+        <p>Viral antagonism of host responses is an essential component of virus pathogenicity. The study of the interplay between immune response and viral antagonism is challenging due to the involvement of many processes acting at multiple time scales. Here we develop an ordinary differential equation model to investigate the early, experimentally measured, responses of human monocyte-derived dendritic cells to infection by two H1N1 influenza A viruses of different clinical outcomes: pandemic A/California/4/2009 and seasonal A/New Caledonia/20/1999. Our results reveal how the strength of virus antagonism, and the time scale over which it acts to thwart the innate immune response, differs significantly between the two viruses, as is made clear by their impact on the temporal behavior of a number of measured genes. The model thus sheds light on the mechanisms that underlie the variability of innate immune responses to different H1N1 viruses.</p>
+      </div>
+    </div>
+    <div class="dc:publisher">
+      <p>This model is hosted on <a href="http://www.ebi.ac.uk/biomodels/">BioModels Database</a> and identified
+by: <a href="http://identifiers.org/biomodels.db/MODEL1403310002">MODEL1403310002</a>.</p>
+    <p>To cite BioModels Database, please use: <a href="http://identifiers.org/pubmed/20587024" title="Latest BioModels Database publication">BioModels Database: An enhanced, curated and annotated resource
+for published quantitative kinetic models</a>.</p>
+</div><div class="dc:license">
+  <p>To the extent possible under law, all copyright and related or
+neighbouring rights to this encoded model have been dedicated to the public
+domain worldwide. Please refer to <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Access to: CC0 1.0 Universal (CC0 1.0), Public Domain Dedication">CC0 Public Domain
+Dedication</a> for more information.</p>
+</div>
+</body>
+</notes>"
+
+PREDICTOR
+time	 T	 "n/a"	 time	 0	 100	
+
+COMPARTMENTS
+default	 V	 "n/a"	 vol.	 1
+c2	 V	 "n/a"	 vol.	 1
+compartment	 V	 "n/a"	 vol.	 1
+
+STATES
+w_state	 C	 "n/a"	 conc.	 compartment	 1	 "w"
+IFNb_mRNA	 C	 "n/a"	 conc.	 compartment	 1	 "IFNb_mRNA"
+IFNb_env	 C	 "n/a"	 conc.	 c2	 1	 "IFNb_env"
+STATP2n	 C	 "n/a"	 conc.	 compartment	 1	 "STATP2n"
+SOCS1m	 C	 "n/a"	 conc.	 compartment	 1	 "SOCS1m"
+IRF7m	 C	 "n/a"	 conc.	 compartment	 1	 "IRF7m"
+IRF7Pn	 C	 "n/a"	 conc.	 compartment	 1	 "IRF7Pn"
+IFNa_mRNA	 C	 "n/a"	 conc.	 compartment	 1	 "IFNa_mRNA"
+IFNa_env	 C	 "n/a"	 conc.	 c2	 1	 "IFNa_env"
+TNFam	 C	 "n/a"	 conc.	 compartment	 1	 "TNFam"
+TNFenv	 C	 "n/a"	 conc.	 c2	 1	 "TNFenv"
+STATm	 C	 "n/a"	 conc.	 compartment	 1	 "STATm"
+STAT	 C	 "n/a"	 conc.	 compartment	 1	 "STAT"
+
+INPUTS
+NS	 C	 ""	 conc.	r5*(t)^(n3)/((bm)^(n3)+(t)^(n3))
+
+REACTIONS
+w_state 	-> IFNb_mRNA 	 CUSTOM "IRF7Pn*k15 + (r0*(sp*(NS/delta1)^n1 + 1))/((NS/delta1)^n1 + 1) - (IFNb_mRNA*log(2))/tao1" 	"J1"
+w_state 	-> IFNb_env 	 CUSTOM "(C_parameter*IFNb_mRNA*vmax2)/(NA*(IFNb_mRNA + K2))" 	"J2"
+w_state 	-> STATP2n 	 CUSTOM "(K5*STAT*TJtot*(IFNa_env + IFNb_env))/(((K9*SOCS1m)/delta + 1)*(2*K5 + 2*STAT)*(IFNa_env + IFNb_env + K3)) - (STATP2n*log(2))/tao3" 	"J3"
+w_state 	-> SOCS1m 	 CUSTOM "STATP2n*k8 + (r3*(sp*(NS/delta1)^n1 + 1))/((NS/delta1)^n1 + 1) - (SOCS1m*log(2))/tao4" 	"J4"
+w_state 	-> IRF7m 	 CUSTOM "IRF7Pn*k14 + STATP2n*k11 - (IRF7m*log(2))/tao6" 	"J5"
+w_state 	-> IRF7Pn 	 CUSTOM "(IRF7m*k12*(sp*(NS/delta1)^n1 + 1))/((NS/delta1)^n1 + 1)" 	"J6"
+w_state 	-> IFNa_mRNA 	 CUSTOM "IRF7Pn*k16 - (IFNa_mRNA*log(2))/tao8" 	"J7"
+w_state 	-> IFNa_env 	 CUSTOM "(C_parameter*IFNa_mRNA*vmax17)/(NA*(IFNa_mRNA + K17))" 	"J8"
+w_state 	-> TNFam 	 CUSTOM "(r1*(sp*(NS/delta1)^n1 + 1))/((NS/delta1)^n1 + 1) + (TNFenv*rmax20)/(K20 + TNFenv) - (TNFam*log(2))/tao9" 	"J9"
+w_state 	-> TNFenv 	 CUSTOM "(C_parameter*TNFam*vmax19)/(NA*(K19 + TNFam))" 	"J10"
+w_state 	-> STATm 	 CUSTOM "STATP2n*k26 + (r4*(sp*(NS/delta1)^n1 + 1))/((NS/delta1)^n1 + 1) - (STATm*log(2))/tao12" 	"J11"
+w_state 	-> STAT 	 CUSTOM "STATm*k28 - (STAT*log(2))/tao13" 	"J12"
+
+DERIVED
+
+CONDITIONS
+
+PARAMETERS
+init_w_state	 0	 1	 0	 0	 1000
+init_IFNb_mRNA	 0	 1	 0	 0	 1000
+init_IFNb_env	 0	 1	 0	 0	 1000
+init_STATP2n	 0	 1	 0	 0	 1000
+init_SOCS1m	 0	 1	 0	 0	 1000
+init_IRF7m	 0	 1	 0	 0	 1000
+init_IRF7Pn	 0	 1	 0	 0	 1000
+init_IFNa_mRNA	 0	 1	 0	 0	 1000
+init_IFNa_env	 0	 1	 0	 0	 1000
+init_TNFam	 0	 1	 0	 0	 1000
+init_TNFenv	 0	 1	 0	 0	 1000
+init_STATm	 0	 1	 0	 0	 1000
+init_STAT	 0.1	 1	 0	 0	 1000
+NS	 0	 1	 0	 0	 1000
+r5	 1	 0	 0	 0	 1000
+n3	 5	 0	 0	 0	 1000
+bm	 6	 0	 0	 0	 1000
+sp	 0.3	 0	 0	 0	 1000
+delta1	 0.1	 0	 0	 0	 1000
+n1	 1	 0	 0	 0	 1000
+sv	 0.1	 0	 0	 0	 1000
+delta2	 0.4	 0	 0	 0	 1000
+n2	 5	 0	 0	 0	 1000
+TJtot	 0.0001	 0	 0	 0	 1000
+K3	 0.0043	 0	 0	 0	 1000
+K9	 780	 0	 0	 0	 1000
+delta	 0.0003	 0	 0	 0	 1000
+r0	 0.001	 0	 0	 0	 1000
+k15	 3.6e-08	 0	 0	 0	 1000
+tao1	 2.5	 0	 0	 0	 1000
+C_parameter	 500000	 0	 0	 0	 5e+06
+vmax2	 72000	 0	 0	 0	 720000
+NA	 6.023e+14	 0	 0	 0	 6.023e+15
+K2	 0.002	 0	 0	 0	 1000
+K5	 0.01	 0	 0	 0	 1000
+tao3	 0.56	 0	 0	 0	 1000
+r3	 1e-07	 0	 0	 0	 1000
+k8	 0.0036	 0	 0	 0	 1000
+tao4	 0.46	 0	 0	 0	 1000
+k11	 0.00036	 0	 0	 0	 1000
+k14	 3.204e-07	 0	 0	 0	 1000
+tao6	 1	 0	 0	 0	 1000
+k12	 360	 0	 0	 0	 1000
+k16	 0.36	 0	 0	 0	 1000
+tao8	 2	 0	 0	 0	 1000
+vmax17	 72000	 0	 0	 0	 720000
+K17	 0.002	 0	 0	 0	 1000
+r1	 0.0001	 0	 0	 0	 1000
+rmax20	 0.001	 0	 0	 0	 1000
+K20	 0.0006	 0	 0	 0	 1000
+tao9	 2	 0	 0	 0	 1000
+vmax19	 154800	 0	 0	 0	 1.548e+06
+K19	 0.004	 0	 0	 0	 1000
+r4	 1e-05	 0	 0	 0	 1000
+k26	 0.360085	 0	 0	 0	 1000
+tao12	 1	 0	 0	 0	 1000
+k28	 360	 0	 0	 0	 1000
+tao13	 15	 0	 0	 0	 1000

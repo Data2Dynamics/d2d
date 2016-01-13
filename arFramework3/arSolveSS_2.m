@@ -13,13 +13,13 @@ fprintf('solving steady state condition...\n');
 
 rhs = sym(ar.model(m).fx);
 if(exist('fu','var'))
-    rhs = mysubs(rhs, ar.model(m).sym.u, sym(fu));
+    rhs = arSubs(rhs, ar.model(m).sym.u, sym(fu));
 elseif(~isempty(ar.model(m).fu))
-    rhs = mysubs(rhs, sym(ar.model(m).u), zeros(1,length(ar.model(m).u)));
+    rhs = arSubs(rhs, sym(ar.model(m).u), zeros(1,length(ar.model(m).u)));
 end
-rhs = mysubs(rhs, sym(ar.model(m).x), sym(ar.model(m).px0));
+rhs = arSubs(rhs, sym(ar.model(m).x), sym(ar.model(m).px0));
 
-rhs= mysubs(rhs, sym(ar.pLabel(strncmp('init_',ar.pLabel,5) & ar.qFit==2 & ar.p == 0)), zeros(1,length(sym(ar.pLabel(strncmp('init_',ar.pLabel,5) & ar.qFit==2 & ar.p == 0)))));
+rhs= arSubs(rhs, sym(ar.pLabel(strncmp('init_',ar.pLabel,5) & ar.qFit==2 & ar.p == 0)), zeros(1,length(sym(ar.pLabel(strncmp('init_',ar.pLabel,5) & ar.qFit==2 & ar.p == 0)))));
 
 qnonzero = rhs~=0;
 fstrings = cell(1, sum(logical(qnonzero)));
@@ -76,14 +76,4 @@ if(~isempty(ar.model(m).ss_solution))
     end
 end
 
-% better subs
-function out = mysubs(in, old, new, flag)
-if(~exist('flag','var'))
-    flag = 0;
-end
-if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
-    out = subs(in, old(:), new(:));
-else
-    out = in;
-end
 

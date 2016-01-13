@@ -5,6 +5,8 @@
 % ps:                           parameter values      
 % log_fit_history               [false]
 % backup_save                   [false]
+% prefunc                       function to be called before fitting (optional)
+% postfunc                      function to be called after fitting (optional)
 % 
 % if 
 %   1) ps has the same size as ar.ps or is larger  AND
@@ -30,7 +32,7 @@
 % ps3(5,:) = ar.ps_start(5,:);
 % arFits(ps3)
 % 
-function arFits(ps, log_fit_history, backup_save)
+function arFits(ps, log_fit_history, backup_save, prefunc, postfunc)
 
 global ar
 
@@ -39,6 +41,9 @@ if(~exist('log_fit_history','var'))
 end
 if(~exist('backup_save','var'))
     backup_save = false;
+end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
 end
 
 dop = find(sum(~isnan(ps),2)>0);
@@ -111,7 +116,21 @@ for j=1:n
         arChi2(true,ar.p(ar.qFit==1));
         ar.chi2s_start(dop(j)) = ar.chi2fit;
         ar.chi2sconstr_start(dop(j)) = ar.chi2constr;
+        if (exist('prefunc', 'var'))
+            try
+                feval( prefunc );
+            catch
+                arFprintf(1, 'Error: Failure calling pre-fitting function');
+            end
+        end
         arFit(true);
+        if (exist('postfunc', 'var'))
+            try
+                feval( postfunc );
+            catch
+                arFprintf(1, 'Error: Failure calling post-fitting function');
+            end
+        end
         ar.ps(dop(j),:) = ar.p;
         ar.chi2s(dop(j)) = ar.chi2fit;
         ar.chi2sconstr(dop(j)) = ar.chi2constr;
@@ -153,16 +172,19 @@ for j=1:n
     end    
 end
 
-fprintf('total fitting time: %fsec\n', sum(ar.timing(~isnan(ar.timing))));
-fprintf('mean fitting time: %fsec\n', 10^mean(log10(ar.timing(~isnan(ar.timing)))));
+fprintf('total fitting time: %s\n', secToHMS(sum(ar.timing(~isnan(ar.timing)))));
+fprintf('mean fitting time: %s\n', secToHMS(10^mean(log10(ar.timing(~isnan(ar.timing))))));
 arWaitbar(-1);
 
 if(chi2Reset>min(ar.chi2s + ar.chi2sconstr))
     [chi2min,imin] = min(ar.chi2s + ar.chi2sconstr);
     ar.p = ar.ps(imin,:);
-    if(ar.config.fiterrors == 1)
+     if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
         fprintf('selected best fit #%i with %f (old = %f)\n', ...
             imin, 2*ar.ndata*log(sqrt(2*pi)) + chi2min, 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
+     elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix == 1))>0)
+        fprintf('selected best fit #%i with %f (old = %f)\n', ...
+            imin, 2*ar.ndata_err*log(sqrt(2*pi)) + chi2min, 2*ar.ndata_err*log(sqrt(2*pi)) + chi2Reset);
     else
         fprintf('selected best fit #%i with %f (old = %f)\n', ...
             imin, chi2min, chi2Reset);

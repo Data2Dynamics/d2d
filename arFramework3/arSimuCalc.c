@@ -90,6 +90,9 @@ int    cvodes_atolV_Sens;
 double cvodes_rtol;
 double cvodes_atol;
 double fiterrors_correction;
+int useFitErrorMatrix;
+double *fiterrors_matrix;
+mwSize nrows_fiterrors_matrix;
 
 /* Name of the substructure with conditions we're currently evaluating */
 char condition_name[MXSTRING];
@@ -118,8 +121,8 @@ void x_calc(int im, int ic, int sensi, int setSparse);
 void z_calc(int im, int ic, mxArray *arcondition, int sensi);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi);
 
-void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2);
-void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd);
+void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2, double fiterrors_correction_factor);
+void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd, double fiterrors_correction_factor);
 void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2);
 void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr);
 
@@ -182,6 +185,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     cvodes_maxstepsize = mxGetScalar(mxGetField(arconfig, 0, "maxstepsize"));
     fiterrors = (int) mxGetScalar(mxGetField(arconfig, 0, "fiterrors"));
     fiterrors_correction = (double) mxGetScalar(mxGetField(arconfig, 0, "fiterrors_correction"));
+    useFitErrorMatrix = (int) mxGetScalar(mxGetField(arconfig, 0, "useFitErrorMatrix"));
+    if(useFitErrorMatrix==1){
+        fiterrors_matrix = (double *) mxGetData(mxGetField(arconfig, 0, "fiterrors_matrix"));
+        nrows_fiterrors_matrix = mxGetM(mxGetField(arconfig, 0, "fiterrors_matrix"));
+    }
     mintau = mxGetScalar(mxGetField(arconfig, 0, "ssa_min_tau"));
     nruns = (int) mxGetScalar(mxGetField(arconfig, 0, "ssa_runs"));
     ms = (int) mxGetScalar(mxGetField(arconfig, 0, "useMS"));
@@ -192,7 +200,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     eq_tol = (double) mxGetScalar(mxGetField(arconfig, 0, "eq_tol"));
 
     if ( ms == 1 ) events = 1;
-    
+        
     /* threads */
     arthread = mxGetField(arconfig, 0, threads_name);
     /*nthreads = (int) mxGetScalar(mxGetField(arconfig, 0, "nThreads"));*/
@@ -362,7 +370,8 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
     bool error_corr = TRUE;
     
     /* printf("computing model #%i, condition #%i\n", im, ic); */
-
+    only_sim = 0;
+    
     /* Grab value of infinity (for steady state simulations) */
     inf = mxGetInf();    
 
@@ -452,19 +461,26 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
 		    yExp = mxGetData(mxGetField(ardata, id, "yExp"));
 		    yStd = mxGetData(mxGetField(ardata, id, "ystdExpSimu"));
 		    nyout = (int) mxGetNumberOfElements(mxGetField(ardata, id, "tExp"));
-		    if(fiterrors==-1) yStd = mxGetData(mxGetField(ardata, id, "yExpStd"));
-            
+
+            if( (useFitErrorMatrix == 0 && fiterrors == -1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == -1) ) {
+                yStd = mxGetData(mxGetField(ardata, id, "yExpStd"));
+            }
+
 		    y_scale = mxGetData(mxGetField(ardata, id, "y_scale"));
-            y_scale_S = mxGetData(mxGetField(ardata, id, "y_scale_S"));
-		    
+		    y_scale_S = mxGetData(mxGetField(ardata, id, "y_scale_S"));
+
 		    for(is=0; is<neq; is++){
 		      for(js=0; js<nyout; js++){
 			for(ks=0; ks<ny; ks++){
 			   
 			  if(!mxIsNaN(yExp[js + (ks*nyout)]) && !mxIsNaN(y[js + (ks*nyout)]) && !mxIsNaN(yStd[js + (ks*nyout)]) && yStd[js + (ks*nyout)]>0.) {
-			    y_scale_S[js+ks*nyout+is*nyout*ny] = y_scale[js+ks*nyout+is*nyout*ny] * 2* fabs(yExp[js + (ks*nyout)] - y[js + (ks*nyout)]) / pow(yStd[js + (ks*nyout)],2) * sqrt(fiterrors_correction);
+			    if(useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] != 1) {
+			      y_scale_S[js+ks*nyout+is*nyout*ny] = y_scale[js+ks*nyout+is*nyout*ny] * 2* fabs(yExp[js + (ks*nyout)] - y[js + (ks*nyout)]) / pow(yStd[js + (ks*nyout)],2);
+			    } else {
+			      y_scale_S[js+ks*nyout+is*nyout*ny] = y_scale[js+ks*nyout+is*nyout*ny] * 2* fabs(yExp[js + (ks*nyout)] - y[js + (ks*nyout)]) / pow(yStd[js + (ks*nyout)],2) * sqrt(fiterrors_correction);
+			    }
 			  }
-			  
+
 			  if(fabs(y_scale[js+ks*nyout+is*nyout*ny])>y_max_scale[is] && !mxIsNaN(y_scale[js+ks*nyout+is*nyout*ny]))
 			    y_max_scale[is] = fabs(y_scale[js+ks*nyout+is*nyout*ny]);
               
@@ -894,6 +910,8 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
                 xssaexp = mxGetData(mxGetField(arcondition, ic, "xExpSSA"));
             }
             
+            status = mxGetData(mxGetField(arcondition, ic, "status"));
+            
             /* User data structure */
             data = (UserData) malloc(sizeof *data);
             if (data == NULL) {status[0] = 1; return;}
@@ -1287,9 +1305,9 @@ void z_calc(int im, int ic, mxArray *arcondition, int sensi) {
     for (it=0; it < nt; it++) {
         /* printf("%f y-loop (im=%i id=%i)\n", t[it], im, id); */
         
-        fz(t[it], nt, it, 0, 0, 0, z, p, u, x, im, ic);
+        fz(t[it], nt, it, 0, 0, 0, 0, z, p, u, x, im, ic);
 	if( fine == 0 ) {
-	  dfzdx(t[it], nt, it, 0, nx, 0, dzdx, z, p, u, x, im, ic);
+	  dfzdx(t[it], nt, it, 0, nx, 0, 0, dzdx, z, p, u, x, im, ic);
 	}
         if (sensi == 1) {
             fsz(t[it], nt, it, np, sz, p, u, x, z, su, sx, im, ic);
@@ -1336,6 +1354,14 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
     
     double *chi2;
     double *chi2err;
+    
+    double fiterrors_correction_factor;
+    
+    if(useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] != 1) {
+        fiterrors_correction_factor = 1;
+    } else {
+        fiterrors_correction_factor = fiterrors_correction;
+    }
     
     /* MATLAB values */
     ic = (int) mxGetScalar(mxGetField(ardata, id, "cLink")) - 1;
@@ -1395,8 +1421,9 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
         
         if (has_yExp == 1) {
             yexp = mxGetData(mxGetField(ardata, id, "yExp"));
-            if(fiterrors==-1) ystd = mxGetData(mxGetField(ardata, id, "yExpStd"));
-            
+            if( (useFitErrorMatrix == 0 && fiterrors == -1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == -1) ) {
+                ystd = mxGetData(mxGetField(ardata, id, "yExpStd"));
+             }
             res = mxGetData(mxGetField(ardata, id, "res"));
             reserr = mxGetData(mxGetField(ardata, id, "reserr"));
             if (sensi == 1) {
@@ -1407,7 +1434,9 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
             chi2err = mxGetData(mxGetField(ardata, id, "chi2err"));
             for(iy=0; iy<ny; iy++) {
                 chi2[iy] = 0.0;
-                if(fiterrors==1) chi2err[iy] = 0.0;
+                if( (useFitErrorMatrix == 0 && fiterrors == 1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == 1) ) {
+                    chi2err[iy] = 0.0;
+                }
             }
         }
     }
@@ -1432,7 +1461,9 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
             }
         }
         
-        if(fiterrors!=-1) fystd(t[it], nt, it, ntlink, itlink, ystd, y, p, u, x, z, im, id);
+        if( (useFitErrorMatrix == 0 && fiterrors != -1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] != -1) ) {
+            fystd(t[it], nt, it, ntlink, itlink, ystd, y, p, u, x, z, im, id);
+        }
 
         if (sensi == 1) {
             fsy(t[it], nt, it, ntlink, itlink, sy, p, u, x, z, su, sx, sz, im, id);
@@ -1449,14 +1480,16 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
                 }
             }
             
-            if(fiterrors!=-1) fsystd(t[it], nt, it, ntlink, itlink, systd, p, y, u, x, z, sy, su, sx, sz, im, id);
+            if( (useFitErrorMatrix == 0 && fiterrors != -1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] != -1) ) {
+                fsystd(t[it], nt, it, ntlink, itlink, systd, p, y, u, x, z, sy, su, sx, sz, im, id);
+            }
         }
         
         if ((has_yExp == 1) & (fine == 0)) {
-            fres(nt, ny, it, res, y, yexp, ystd, chi2);
-            if(sensi == 1) fsres(nt, ny, np, it, sres, sy, yexp, ystd);
+            fres(nt, ny, it, res, y, yexp, ystd, chi2, fiterrors_correction_factor);
+            if(sensi == 1) fsres(nt, ny, np, it, sres, sy, yexp, ystd, fiterrors_correction_factor);
             
-            if(fiterrors==1) {
+            if( (useFitErrorMatrix == 0 && fiterrors == 1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == 1) ) {
                 fres_error(nt, ny, it, reserr, res, y, yexp, ystd, chi2err);
                 if (sensi == 1) fsres_error(nt, ny, np, it, sres, sreserr, sy, systd, y, yexp, ystd, res, reserr);
             }
@@ -1468,7 +1501,9 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
                 if (qlogp[ip] > 0.5) {
                     for (iy=0; iy<ny; iy++) {
                         sres[it + (iy*nt) + (ip*nt*ny)] *= p[ip] * log(10.0);
-                        if(fiterrors==1) sreserr[it + (iy*nt) + (ip*nt*ny)] *= p[ip] * log(10.0);
+                        if( (useFitErrorMatrix == 0 && fiterrors == 1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == 1) ) {
+                            sreserr[it + (iy*nt) + (ip*nt*ny)] *= p[ip] * log(10.0);
+                        }
                     }
                 }
             }
@@ -1479,11 +1514,11 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
 }
 
 /* standard least squares */
-void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2) {
+void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2, double fiterrors_correction_factor) {
     int iy;
     
     for(iy=0; iy<ny; iy++){
-        res[it + (iy*nt)] = (yexp[it + (iy*nt)] - y[it + (iy*nt)]) / ystd[it + (iy*nt)] * sqrt(fiterrors_correction);
+        res[it + (iy*nt)] = (yexp[it + (iy*nt)] - y[it + (iy*nt)]) / ystd[it + (iy*nt)] * sqrt(fiterrors_correction_factor);
         /* in case of missing data (nan) */
         if(mxIsNaN(yexp[it + (iy*nt)])) {
             res[it + (iy*nt)] = 0.0;
@@ -1497,12 +1532,12 @@ void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *
         chi2[iy] += pow(res[it + (iy*nt)], 2);
     }
 }
-void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd) {
+void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd, double fiterrors_correction_factor) {
     int iy, ip;
     
     for(iy=0; iy<ny; iy++){
         for(ip=0; ip<np; ip++){
-            sres[it + (iy*nt) + (ip*nt*ny)] = - sy[it + (iy*nt) + (ip*nt*ny)] / ystd[it + (iy*nt)] * sqrt(fiterrors_correction);
+            sres[it + (iy*nt) + (ip*nt*ny)] = - sy[it + (iy*nt) + (ip*nt*ny)] / ystd[it + (iy*nt)] * sqrt(fiterrors_correction_factor);
             /* in case of missing data (nan) */
             if(mxIsNaN(yexp[it + (iy*nt)])) {
                 sres[it + (iy*nt) + (ip*nt*ny)] = 0.0;

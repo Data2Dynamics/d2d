@@ -1,0 +1,58 @@
+DESCRIPTION
+"Simplified MAP Kinase 1"
+"A sustained or transient input activates the phosphorylation of Ras, which activates the MAP Kinase."
+"This process is restrained through an allestoric inhibitor and amplified by a positive feedback."
+
+PREDICTOR
+t               T   min         time	0	80
+
+COMPARTMENTS
+
+STATES
+Ras                     C   "nM"      "conc."     1
+pRas                    C   "nM"      "conc."     1
+MAPK                    C   "nM"      "conc."     1
+pMAPK                   C   "nM"      "conc."     1
+Inhibitor               C   "nM"      "conc."     1
+pInhibitor              C   "nM"      "conc."     1
+Activator               C   "nM"      "conc."     1
+pActivator              C   "nM"      "conc."     1
+
+INPUTS
+Input             C   "units/cell"   "conc."   "exp(-(t)^2/(p_input^2))*(1-exp(-t))"
+
+REACTIONS
+Ras             ->  pRas            CUSTOM  "p_ras * ( Input + p_activ * pActivator ) * Ras "
+pRas            ->  Ras             CUSTOM  "pRas"
+MAPK            ->  pMAPK           CUSTOM  "p_MAPK * pRas * MAPK * Kd^n/ ( Kd^n + pInhibitor^n )"
+pMAPK           ->  MAPK            CUSTOM  "pMAPK"
+Inhibitor             ->  pInhibitor            CUSTOM  "t_inhib * p_inhib * pMAPK * Inhibitor"
+pInhibitor            ->  Inhibitor             CUSTOM  "t_inhib * pInhibitor"
+Activator             ->  pActivator            CUSTOM  "p_activ * pMAPK * Activator"
+pActivator            ->  Activator             CUSTOM  "pActivator"
+
+DERIVED
+
+OBSERVABLES
+pActivator_obs              C   "au"  "conc."   1   0   "pActivator"
+pInhibitor_obs              C   "au"  "conc."   1   0   "pInhibitor"
+pMAPK_obs             C   "au"  "conc."   1   0   "pMAPK"
+pRas_obs              C   "au"  "conc."   1   0   "pRas"
+
+ERRORS
+pActivator_obs        ".1"
+pInhibitor_obs        ".1"
+pMAPK_obs       ".1"
+pRas_obs        ".1"
+
+CONDITIONS
+init_Ras              "1"
+init_MAPK             "1"
+init_Inhibitor              "1"
+init_Activator              "1"
+init_pRas             "0"
+init_pMAPK            "0"
+init_pInhibitor             "0"
+init_pActivator             "0"
+
+PARAMETERS

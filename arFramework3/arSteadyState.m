@@ -1,7 +1,7 @@
 % Add steady state pre-simulation
 %
 % Usage:
-%   arSteadyState((ar), model, conditionSS, conditionAffected, (states), (tstart) )
+%   arSteadyState(model, conditionSS, conditionAffected, (states), (tstart) )
 %
 %   Adds a pre-equilibration to a number of conditions. ConditionSS refers
 %   to the condition used for equilibration to steady state (source).
@@ -39,16 +39,12 @@
 %    exists. If this is not the case, pre-equilibration will fail and
 %    an error will be thrown
 
-function ar = arSteadyState( varargin )
+function arSteadyState( varargin )
 
     global ar;
         
     if ( nargin < 3 )
         error( 'Function needs at least three arguments.' );
-    end
-    if ( isstruct(varargin{1}) )
-        ar = varargin{1};
-        varargin = varargin(2:end);
     end
     
     logCall( 'arSteadyState', varargin{:} );
@@ -161,10 +157,10 @@ function ar = arSteadyState( varargin )
     end
     insertionPoint = length(ar.model.ss_condition);
     
-    h = waitbar(0, 'Linking up steady state');
+    arWaitbar(0);
     % Link up the target conditions
     for a = 1 : length( cTarget )
-        waitbar(a/length(cTarget), h, sprintf('Linking up steady state %d/%d', a, length(cTarget)));
+        arWaitbar(a, length(cTarget), sprintf('Linking up steady state %d/%d', a, length(cTarget)));
         
         % Map the parameters from the ss condition to the target condition
         fromP   = ar.model(m).condition(cSS).p;
@@ -177,7 +173,7 @@ function ar = arSteadyState( varargin )
         if ~isempty( L )
             warning( 'Certain parameters in target condition not present in steady state reference!' );
             warning( 'The following sensitivities will *not* take the equilibration into account:' );
-            disp( sprintf( '%s\n', ar.model(m).condition(cTarget(a)).p{L} ) );
+            arFprintf(1, '%s\n', ar.model(m).condition(cTarget(a)).p{L} );
             ar.model(m).condition(cTarget(a)).ssUnmapped = L;
             map(L) = 1;
         end
@@ -193,7 +189,7 @@ function ar = arSteadyState( varargin )
             ar.model(m).condition(cTarget(a)).tstart, ...
             [1:nStates], vals, vals, sens, sens, false );
     end
-    close(h);
+    arWaitbar(-1);
     
     ar.ss_conditions = true;
     
@@ -205,10 +201,13 @@ function ar = arSteadyState( varargin )
     for a = 1 : length( ar.model )
         cnt = cnt + length(ar.model(m).ss_condition);
     end
-    disp( sprintf( 'Number of steady state equilibrations: %d', cnt ) );
+    arFprintf(1, 'Number of steady state equilibrations: %d', cnt );
     
     % Show any errors
-    arPrintSteadyState(m, 2);    
+    arPrintSteadyState(m, 2);
+    
+    % Invalidate cache so simulations do not get skipped
+    arCheckCache(1);
 end
 
 function ID = mapStrings( str1, str2 )

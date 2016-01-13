@@ -1,19 +1,23 @@
 % Plot models Y
 %
-% arPlotY(saveToFile, fastPlot)
+% arPlotY(saveToFile, fastPlot, doLegends, flags);
 %
 % saveToFile    [false]
 % fastPlot      [false]
-% doLegends      [true]
+% doLegends     [true]
+% flags         [none]
 % 
 %   After clicking the subplot of interest, the following command provides
 %   annotation of the displayed plot:
 %   get(gca,'UserData') 
 % 
 %   ar.model(jm).data(jd).highlight(jt,jy) can be used to highlight data points
+%
+% Flags allow you to customize the plot. HideLL, hides the -log(L) value,
+% while nameOnly makes sure either the name or observable variable is used 
+% as title, but not both.
 
-
-function arPlotY(saveToFile, fastPlot, doLegends)
+function arPlotY(saveToFile, fastPlot, doLegends, varargin)
 
 matVer = ver('MATLAB');
 
@@ -32,13 +36,17 @@ end
 if(~exist('doLegends','var'))
 	doLegends = true;
 end
-
+switches = {'hidell', 'nameonly'};
+[opts] = argSwitch( switches, varargin );
 if(isfield(ar.config,'nfine_dr_plot'))
     nfine_dr_plot = ar.config.nfine_dr_plot;
     nfine_dr_method = ar.config.nfine_dr_method;
 else
     nfine_dr_plot = 1;
     nfine_dr_method = 'spline';
+end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
 end
 
 figcount = 1;
@@ -48,7 +56,8 @@ for jm = 1:length(ar.model)
     
     for jplot = 1:length(ar.model(jm).plot)
         if(ar.model(jm).qPlotYs(jplot)==1 && ar.model(jm).plot(jplot).ny>0)
-            if(ar.config.ploterrors == -1)
+            if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                    (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                 [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['CI-Y: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
             else
                 [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['Y: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
@@ -96,7 +105,8 @@ for jm = 1:length(ar.model)
                             
                             if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
                                 % plot ssa
-                                if(isfield(ar.model(jm).data(jd), 'yFineSSA') && ar.config.ploterrors==1)
+                                if( (isfield(ar.model(jm).data(jd), 'yFineSSA') && ar.config.useFitErrorMatrix==0 && ar.config.ploterrors==1) || ...
+                                        (isfield(ar.model(jm).data(jd), 'yFineSSA') && ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==1) )
                                     if(isfield(ar.model(jm).data(jd), 'yFineSSA_lb'))
                                         for jssa = 1:size(ar.model(jm).data(jd).yFineSSA_lb, 3)
                                             tmpx = [t(:); flipud(t(:))];
@@ -119,11 +129,14 @@ for jm = 1:length(ar.model)
                                 ar.model(jm).data(jd).plot.y(jy) = plot(g, t, 10.^y, Clines{:});
                                 cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
                                 hold(g, 'on');
-                                if(ar.config.ploterrors ~= 1)
+                                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
+                                        (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                     tmpx = [t(:); flipud(t(:))];
-                                    if(ar.config.ploterrors==0)
+                                    if( (ar.config.useFitErrorMatrix==0 && ar.config.ploterrors==0) || ...
+                                            (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==0) )
                                         tmpy = [10.^(y + ystd); flipud(10.^(y - ystd))];
-                                    elseif(ar.config.ploterrors==-1)
+                                    elseif( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==-1) || ...
+                                            (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==-1) )
                                         tmpy = [10.^ub; flipud(10.^lb)];
                                     end
                                     ltmp = patch(tmpx, tmpy, -2*ones(size(tmpx)), ones(size(tmpx)));
@@ -136,7 +149,8 @@ for jm = 1:length(ar.model)
 
                                 
                                 if(isfield(ar.model(jm).data(jd), 'yExp'))
-                                    if(ar.config.ploterrors ~= 1)
+                                    if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
+                                            (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                         plot(g, tExp, 10.^yExp, ClinesExp{:});
                                         if(sum(~isnan(yExpHl))>0)
                                             hold(g,'on');
@@ -155,7 +169,8 @@ for jm = 1:length(ar.model)
                                 end
                             else
                                 % plot ssa
-                                if(isfield(ar.model(jm).data(jd), 'yFineSSA') && ar.config.ploterrors==1)
+                                if( (isfield(ar.model(jm).data(jd), 'yFineSSA') && ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==1) || ...
+                                        (isfield(ar.model(jm).data(jd), 'yFineSSA') && ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==1) )
                                     if(isfield(ar.model(jm).data(jd), 'yFineSSA_lb'))
                                         for jssa = 1:size(ar.model(jm).data(jd).yFineSSA_lb, 3)
                                             tmpx = [t(:); flipud(t(:))];
@@ -183,11 +198,14 @@ for jm = 1:length(ar.model)
                                     cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
                                 end
                                 hold(g, 'on');
-                                if(ar.config.ploterrors ~= 1)
+                                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
+                                        (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                     tmpx = [t(:); flipud(t(:))];
-                                    if(ar.config.ploterrors==0)
+                                    if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==0) || ...
+                                            (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==0) )
                                         tmpy = [y + ystd; flipud(y - ystd)];
-                                    elseif(ar.config.ploterrors==-1)
+                                    elseif( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==-1) || ...
+                                            (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==-1) )
                                         tmpy = [ub; flipud(lb)];
                                     end
                                     qfinite = ~isinf(tmpy);
@@ -202,7 +220,8 @@ for jm = 1:length(ar.model)
                                 end
                                 
                                 if(isfield(ar.model(jm).data(jd), 'yExp'))
-                                    if(ar.config.ploterrors ~= 1)
+                                    if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
+                                            (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                         plot(g, tExp, yExp, ClinesExp{:});
                                         if(sum(~isnan(yExpHl))>0)
                                             hold(g,'on');
@@ -220,7 +239,8 @@ for jm = 1:length(ar.model)
                         else
                             if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
                                 set(ar.model(jm).data(jd).plot.y(jy), 'YData', 10.^y);
-                                if(ar.config.fiterrors ~= -1 && ar.config.ploterrors ~= 1)
+                                if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors ~= -1 && ar.config.ploterrors ~= 1) || ...
+                                        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)~=-1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                     set(ar.model(jm).data(jd).plot.ystd(jy), 'YData', [10.^(y + ystd); flipud(10.^(y - ystd))]);
                                     set(ar.model(jm).data(jd).plot.ystd2(jy), 'YData', [10.^(y + ystd); flipud(10.^(y - ystd))]);
                                 end
@@ -228,7 +248,8 @@ for jm = 1:length(ar.model)
                                 tmpy = y;
                                 qfinite = ~isinf(tmpy);
                                 set(ar.model(jm).data(jd).plot.y(jy), 'YData', tmpy(qfinite));
-                                if(ar.config.fiterrors ~= -1 && ar.config.ploterrors ~= 1)
+                                if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors ~= -1 && ar.config.ploterrors ~= 1) || ...
+                                        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)~=-1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                     tmpy = [y + ystd; flipud(y - ystd)];
                                     qfinite = ~isinf(tmpy);
                                     if(sum(qfinite)>0)
@@ -243,7 +264,8 @@ for jm = 1:length(ar.model)
                         if(isfield(ar.model(jm).data(jd),'qFit') && ar.model(jm).data(jd).qFit(jy)==1 && ~isempty(ar.model(jm).data(jd).chi2))
                             chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2(jy);
                             ndata(jy) = ndata(jy) + ar.model(jm).data(jd).ndata(jy);
-                            if(ar.config.fiterrors==1)
+                            if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
+                                    (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
                                 chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2err(jy);
                             end
                         end
@@ -265,7 +287,8 @@ for jm = 1:length(ar.model)
                         if(ar.model(jm).data(jd).qFit(jy)==1)
                             chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2(jy);
                             ndata(jy) = ndata(jy) + ar.model(jm).data(jd).ndata(jy);
-                            if(ar.config.fiterrors==1)
+                            if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
+                                    (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
                                 chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2err(jy);
                             end
                         end
@@ -325,7 +348,8 @@ for jm = 1:length(ar.model)
                                 t = tf;
                             end
                            
-                            if(ar.config.ploterrors==0)
+                            if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==0) || ...
+                                    (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==0) )
                                 lb = y(:) - ystd(:);
                                 ub = y(:) + ystd(:);
                             end
@@ -346,7 +370,8 @@ for jm = 1:length(ar.model)
                                     ar.model(jm).data(jd).plot.y(jy,jt,jc) = plot(g, t(qfinite), 10.^y(qfinite), Clines{:});
                                     cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy,jt,jc);
                                     hold(g, 'on');
-                                    if(ar.config.ploterrors ~= 1)
+                                    if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
+                                            (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )                                   
                                         tmpx = [t(:); flipud(t(:))];
                                         tmpy = [10.^ub; flipud(10.^lb)];
                                         qfinite = ~isinf(tmpy) & ~isinf(tmpx);
@@ -358,7 +383,8 @@ for jm = 1:length(ar.model)
                                         ar.model(jm).data(jd).plot.ystd2(jy,jt,jc) = ltmp2;
                                     end
                                     if(isfield(ar.model(jm).data(jd), 'yExp'))
-                                        if(ar.config.ploterrors~=1)
+                                        if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
+                                                (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                             plot(g, tExp, 10.^yExp, ClinesExp{:});
                                             if(sum(~isnan(yExpHl))>0)
                                                 hold(g,'on');
@@ -381,7 +407,8 @@ for jm = 1:length(ar.model)
                                     ar.model(jm).data(jd).plot.y(jy,jt,jc) = plot(g, tmpx(qfinite), tmpy(qfinite), Clines{:});
                                     cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy,jt,jc);
                                     hold(g, 'on');
-                                    if(ar.config.ploterrors ~= 1)
+                                    if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
+                                                (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                         tmpx = [t(:); flipud(t(:))];
 										tmpy = [ub; flipud(lb)];
 										qfinite = ~isinf(tmpy) & ~isinf(tmpx);
@@ -395,7 +422,8 @@ for jm = 1:length(ar.model)
                                         end
                                     end
                                     if(isfield(ar.model(jm).data(jd), 'yExp'))
-                                        if(ar.config.ploterrors~=1)
+                                        if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
+                                                (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                             plot(g, tExp, yExp, ClinesExp{:});
                                             if(sum(~isnan(yExpHl))>0)
                                                 hold(g,'on');
@@ -417,7 +445,8 @@ for jm = 1:length(ar.model)
                                 if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
                                     qfinite = ~isinf(t) & ~isinf(y);
                                     set(ar.model(jm).data(jd).plot.y(jy,jt,jc), 'YData', 10.^y(qfinite));
-                                    if(ar.config.fiterrors ~= -1)
+                                    if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors ~= -1) || ...
+                                            (ar.config.useFitErrorMatrix==1 && ar.config.fiterros_matrix(jm,jd)~=-1) )
                                         tmpx = [t(:); flipud(t(:))];
                                         tmpy = [10.^ub; flipud(10.^lb)];
                                         qfinite = ~isinf(tmpy) & ~isinf(tmpx);
@@ -429,7 +458,8 @@ for jm = 1:length(ar.model)
                                     tmpy = y;
                                     qfinite = ~isinf(tmpy) & ~isinf(tmpx);
                                     set(ar.model(jm).data(jd).plot.y(jy,jt,jc), 'YData', tmpy(qfinite));
-                                    if(ar.config.fiterrors ~= -1)
+                                    if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors ~= -1) || ...
+                                            (ar.config.useFitErrorMatrix==1 && ar.config.fiterros_matrix(jm,jd)~=-1) )
                                         tmpx = [t(:); flipud(t(:))];
 										tmpy = [ub; flipud(lb)];
 										qfinite = ~isinf(tmpy) & ~isinf(tmpx);
@@ -532,17 +562,24 @@ for jm = 1:length(ar.model)
                 titstr = {};
                 if(isfield(ar.model(jm).data(jd), 'yNames') && ~isempty(ar.model(jm).data(jd).yNames{jy}) && ...
                         ~strcmp(ar.model(jm).data(jd).yNames{jy}, ar.model(jm).data(jd).y{jy}))
-                    titstr{1} = [arNameTrafo(ar.model(jm).data(jd).yNames{jy}) ' (' arNameTrafo(ar.model(jm).data(jd).y{jy}) ')'];
+                    if ( opts.nameonly)
+                        titstr{1} = arNameTrafo(ar.model(jm).data(jd).yNames{jy});
+                    else
+                        titstr{1} = [arNameTrafo(ar.model(jm).data(jd).yNames{jy}) ' (' arNameTrafo(ar.model(jm).data(jd).y{jy}) ')'];
+                    end
                 else
                     titstr{1} = arNameTrafo(ar.model(jm).data(jd).y{jy});
                 end
-                if(isfield(ar.model(jm).data(jd), 'yExp'))
-                    if(ndata(jy)>0)
-                        if(ar.config.fiterrors == 1)
-                            titstr{2} = sprintf('-2 log(L)_{%i} = %g', ndata(jy), 2*ndata(jy)*log(sqrt(2*pi)) + chi2(jy));
-                        else
-                            titstr{2} = sprintf('chi^2_{%i} = %g', ndata(jy), chi2(jy));
-                        end
+                if(~opts.hidell)
+                    if(isfield(ar.model(jm).data(jd), 'yExp'))
+                        if(ndata(jy)>0)
+                            if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
+                                    (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
+                               titstr{2} = sprintf('-2 log(L)_{%i} = %g', ndata(jy), 2*ndata(jy)*log(sqrt(2*pi)) + chi2(jy));
+                            else
+                               titstr{2} = sprintf('chi^2_{%i} = %g', ndata(jy), chi2(jy));
+                            end
+                       end
                     end
                 end
                 title(g, titstr);
@@ -567,8 +604,13 @@ for jm = 1:length(ar.model)
             
             figcount = figcount + 1;
             
+            if ( ~isfield( ar.config, 'useFitErrorMatrix' ) )
+                ar.config.useFitErrorMatrix = 0;
+            end
+            
             if(saveToFile)
-                if(ar.config.ploterrors == -1)
+                if( (ar.config.useFitErrorMatrix==0 && ar.config.ploterrors == -1) || ...
+                        (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==-1) )                        
                     ar.model(jm).plot(jplot).savePath_FigYCI = arSaveFigure(h, ...
                         ar.model(jm).plot(jplot).name, '/FiguresCI/Y');
                 else
@@ -604,7 +646,8 @@ end
 if(isfield(ar.model(jm).data(jd), 'yExp') && ~isempty(ar.model(jm).data(jd).yExp))
     tExp = ar.model(jm).data(jd).tExp;
     yExp = ar.model(jm).data(jd).yExp(:,jy);
-    if(ar.config.fiterrors == -1)
+    if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == -1) || ...
+            (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==-1) )
         yExpStd = ar.model(jm).data(jd).yExpStd(:,jy);
     else
         if(isfield(ar.model(jm).data(jd),'ystdExpSimu'))
@@ -695,7 +738,8 @@ for jd = ds
                 yExpHl(ccount,1) = yExp(ccount,1);                
             end
         end
-        if(ar.config.fiterrors == -1)
+        if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == -1) || ...
+                (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==-1) )
             yExpStd(ccount,1) = ar.model(jm).data(jd).yExpStd(jt,jy); %#ok<AGROW>
         else
             yExpStd(ccount,1) = ar.model(jm).data(jd).ystdExpSimu(jt,jy); %#ok<AGROW>
@@ -737,7 +781,8 @@ figdist = 0.02;
 ar.model(m).plot(jplot).time = now;
 fastPlotTmp = fastPlot;
 
-if(ar.config.ploterrors == -1)
+if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+        (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(m,ar.model(m).plot(jplot).dLink(1))==-1) )
     if(isfield(ar.model(m).plot(jplot), 'fighandel_yCI') && ~isempty(ar.model(m).plot(jplot).fighandel_yCI) && ...
             ar.model(m).plot(jplot).fighandel_yCI ~= 0 && ...
             sum(ar.model(m).plot(jplot).fighandel_yCI==openfigs)>0 && ...
@@ -778,3 +823,17 @@ if(~fastPlot)
     clf
 end
 
+function [opts] = argSwitch( switches, varargin )
+
+    for a = 1 : length(switches)
+        opts.(lower(switches{a})) = 0;
+    end
+    
+    if ~isempty( varargin{1} )
+        for a = 1 : length( varargin{1} )
+            if ( max( strcmp( lower(switches), lower(varargin{1}{a}) ) ) == 0 )
+                error( 'Invalid switch argument was provided %s', varargin{1}{a} );
+            end
+            opts.(lower(varargin{1}{a})) = 1;
+        end
+    end

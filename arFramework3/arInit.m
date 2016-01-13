@@ -19,12 +19,12 @@ arInitUser;
 
 ar.info.initTime = now;
 [ar.info.def_version_code, ar.info.c_version_code] = arGetVersion;
-fprintf('Data 2 Dynamics Software\n');
-fprintf('(arFramework3, def-version %i, c-version %s)\n', ...
+arFprintf(1, 'Data 2 Dynamics Software\n');
+arFprintf(1, '(arFramework3, def-version %i, c-version %s)\n', ...
     ar.info.def_version_code, ar.info.c_version_code);
-fprintf('Website: http://www.data2dynamics.org\n');
-fprintf('Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de\n');
-fprintf('Copyright 2015 D2D Development Team. All rights reserved.\n\n');
+arFprintf(1, 'Website: http://www.data2dynamics.org\n');
+arFprintf(1, 'Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de\n');
+arFprintf(1, 'Copyright 2015 D2D Development Team. All rights reserved.\n\n');
 
 ar.checksum = [];
 
@@ -79,6 +79,7 @@ ar.config.fiterrors = 1;
 ar.config.fiterrors_correction = 1;
 ar.config.fiterrors_correction_warning = false;
 ar.config.useFitErrorCorrection = true;
+ar.config.useFitErrorMatrix = false;
 ar.config.useLHS = false;
 
 % ar.config.ploterrors:
@@ -93,20 +94,29 @@ ar.config.ploterrors = 0;
 ar.config.plot_x_collected = false;
 
 % optimization options
-ar.config.useSensis = true; 
-ar.config.useJacobian = true;
-ar.config.useSparseJac = false;
-ar.config.useSensiRHS = true;
+ar.config.useSensis = true;         % Use sensitivities
+ar.config.sensiSkip = false;        % Skip sensitivities during fitting when only func is requested (speed-up for some optimizers)
+ar.config.useJacobian = true;       % Use Jacobian
+ar.config.useSparseJac = false;     % Use Sparse Jacobian
+ar.config.useSensiRHS = true;       % Use sensitivities of RHS during simulation
 ar.config.atolV = false; 
 ar.config.atolV_Sens = false;
 
 ar.config.optimizer = 1;
-ar.config.optimizers = {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1'};
+ar.config.optimizers = {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1', 'NL2SOL'};
 ar.config.optim = optimset('lsqnonlin');
 ar.config.optim.Display = 'off';
 ar.config.optim.TolFun = 0;
 ar.config.optim.TolX = 1e-6;
 ar.config.optim.MaxIter = 1000;
+
+% check licenses
+if ( ~license('test', 'Symbolic_Toolbox') )
+    warning( 'D2D requires a license for the MathWorks symbolic math toolbox. It is unlikely that D2D will work.' );
+end
+if ( ~license('test', 'Optimization_Toolbox') )
+    warning( 'No license found for optimization toolbox. If fitting is required, obtain a license or switch optimization method (e.g. ar.config.optimizer=3).' );
+end
 
 ar.config.showFitting = 0;
 

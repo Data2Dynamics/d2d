@@ -1,0 +1,27 @@
+DESCRIPTION
+"data file for Elowitz2000 - Repressilator"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 100	
+
+INPUTS
+
+OBSERVABLES
+PX_obs	 C	 "n/a"	 conc.	 0 0 "PX" "LacI protein"
+PY_obs	 C	 "n/a"	 conc.	 0 0 "PY" "TetR protein"
+PZ_obs	 C	 "n/a"	 conc.	 0 0 "PZ" "cI protein"
+X_state_obs	 C	 "n/a"	 conc.	 0 0 "X_state" "LacI mRNA"
+Y_state_obs	 C	 "n/a"	 conc.	 0 0 "Y_state" "TetR mRNA"
+Z_state_obs	 C	 "n/a"	 conc.	 0 0 "Z_state" "cI mRNA"
+
+ERRORS
+PX_obs	 "sd_PX"
+PY_obs	 "sd_PY"
+PZ_obs	 "sd_PZ"
+X_state_obs	 "sd_X_state"
+Y_state_obs	 "sd_Y_state"
+Z_state_obs	 "sd_Z_state"
+
+CONDITIONS
+
+PARAMETERS

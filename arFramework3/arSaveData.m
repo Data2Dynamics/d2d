@@ -31,6 +31,9 @@ if(~exist('jplot','var'))
     end
     return
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 fname = ['./Data/' ar.model(m).plot(jplot).name '.csv'];
 fprintf('saving data from model #%i, plot #%i, %s...', m, jplot, fname);
@@ -53,7 +56,8 @@ end
 fprintf(fid, '"%s",', ar.model(m).data(jd).y{:});
 
 % ystd headers
-if(ar.config.fiterrors == -1)
+if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == -1) || ...
+        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(m,jd)==-1) )        
 	fprintf(fid, '"%s_std",', ar.model(m).data(jd).y);
 end
 fprintf(fid, '\n');
@@ -80,7 +84,8 @@ for jd = ar.model(m).plot(jplot).dLink
         end
         
         % ystd data
-        if(ar.config.fiterrors == -1)
+        if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == -1) || ...
+                (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(m,jd)==-1) )  
             for jj=1:size(ar.model(m).data(jd).yExp,2)
                 fprintnumtab(fid, ar.model(m).data(jd).yExpStd(j,jj));
             end

@@ -25,6 +25,7 @@
 function arFindInputs( verbose )
 
     global ar;
+    global arOutputLevel;
 
     if ( nargin < 1 )
         verbose = 0;
@@ -41,27 +42,32 @@ function arFindInputs( verbose )
         allData = length( ar.model(m).condition );
     end
 
-    h = waitbar(0); lastParse = ''; lastA = 0; totalEvents = 0;
+    if ( arOutputLevel > 1 )
+        h = waitbar(0);
+    end
+    lastParse = ''; lastA = 0; totalEvents = 0;
     for m = 1 : length( ar.model )
         for a = 1 : length( ar.model(m).condition )
-            waitbar(a/allData, h, sprintf( 'Processing step inputs [%d/%d] %s', a, allData, lastParse ) );
+            if ( arOutputLevel > 1 )
+                waitbar(a/allData, h, sprintf( 'Processing step inputs [%d/%d] %s', a, allData, lastParse ) );
+            end
 
             events = [];
             stepLocations = {};
             % Find the event time points
             for b = 1 : length( ar.model(m).condition(a).fu );
-                step1 = findstr(ar.model(m).condition(a).fu{b}, 'step1');
-                step2 = findstr(ar.model(m).condition(a).fu{b}, 'step2');
+                step1 = findstr(ar.model(m).condition(a).fu{b}, 'step1'); %#ok
+                step2 = findstr(ar.model(m).condition(a).fu{b}, 'step2'); %#ok
 
                 for c = 1 : length( step1 )
                     ar.model(m).condition(a).fu{b}(step1(c):end);
                     chk = strsplit(ar.model(m).condition(a).fu{b}(step1(c):end),',');
-                    stepLocations{end+1} = chk{3};
+                    stepLocations{end+1} = chk{3}; %#ok
                 end
                 for c = 1 : length( step2 )
                     chk = strsplit(ar.model(m).condition(a).fu{b}(step2(c):end),',');
-                    stepLocations{end+1} = chk{3};
-                    stepLocations{end+1} = chk{5};
+                    stepLocations{end+1} = chk{3}; %#ok
+                    stepLocations{end+1} = chk{5}; %#ok
                 end        
             end
 
@@ -70,7 +76,7 @@ function arFindInputs( verbose )
             parVals( ar.qLog10 > 0 ) = 10.^parVals( ar.qLog10 > 0 );
 
             for b = 1 : length( stepLocations )
-                l = str2num(stepLocations{b});
+                l = str2num(stepLocations{b}); %#ok
                 
                 % Not a numeric value, check whether parameter or condition 
                 % substitution leads to a valid expression
@@ -91,17 +97,17 @@ function arFindInputs( verbose )
                         l = strrep( l, ar.pLabel{I(c)}, num2str(parVals(I(c))) );
                     end
                     
-                    l = str2num(l);
+                    l = str2num(l); %#ok
                     lastParse = sprintf( '%s => %s in condition %d', strrep( lold, '_', '\_' ), strrep( num2str(l), '_', '\_' ), a );
                 end
 
                 try
-                    events(end+1) = l;
+                    events(end+1) = l; %#ok
                     if ( verbose )
-                        disp( l );
+                        arFprintf(1, l);
                     end
                 catch
-                    disp( sprintf( 'Failure to parse input %s for model %d and data %d', stepLocations{b}, m, a ) );
+                    arFprintf( 1, 'Failure to parse input %s for model %d and data %d', stepLocations{b}, m, a );
                 end
             end
 
@@ -116,11 +122,16 @@ function arFindInputs( verbose )
         lastA = lastA + length( ar.model(m).condition );
     end
 
-    disp( sprintf( '%d input events assigned!', totalEvents ) );
-    close(h);
+    arFprintf( 1, '%d input events assigned!\n', totalEvents );
+    if ( arOutputLevel > 1 )
+        close(h);
+    end
 
     ar.config.useEvents = 1;
     arLink(true);
+    
+    % Invalidate cache so simulations do not get skipped
+    arCheckCache(1);
 end
 
 
@@ -131,7 +142,7 @@ function logCall( fn, varargin )
         ar.eventLog = {};
     end
     call = [fn '('];
-    if length( varargin ) > 0
+    if length( varargin ) > 0 %#ok
         call = sprintf('%s%s', call, mat2str(varargin{1}) );
     end
     for a = 2 : length( varargin )

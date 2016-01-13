@@ -15,13 +15,18 @@ end
 if(~exist('dosurf','var'))
     dosurf = false;
 end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
 
 qLog10 = ar.ppl.qLog10;
 [nrows, ncols] = arNtoColsAndRows(length(ar.model(m).condition(c).ppl.ix));
 
 chi2 = ar.chi2fit;
-if(ar.config.fiterrors == 1)
+if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
     chi2 = 2*ar.ndata*log(sqrt(2*pi)) + chi2;
+elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+    chi2 = 2*ar.ndata_err*log(sqrt(2*pi)) + chi2;
 end
 
 arSimu(false, true);
@@ -42,8 +47,10 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
     end
     ppl = squeeze(ar.model(m).condition(c).ppl.ppl(:,jx,:));
     
-    if(ar.config.fiterrors == 1)
+    if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
         ppl = 2*ar.ndata*log(sqrt(2*pi)) + ppl;
+    elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+        ppl = 2*ar.ndata_err*log(sqrt(2*pi)) + ppl;
     end
     
     if(qLog10)
