@@ -32,7 +32,11 @@ elseif(jtype==2)
     
 elseif(jtype==3)
     yLabel = strrep(strrep(ar.model(jm).vs, '[', '_{'), ']', '}');
-    yNames = [];
+    if(isfield(ar.model(jm), 'v'))
+        yNames = ar.model(jm).v;
+    else
+        yNames = [];
+    end
     yUnits = ar.model(jm).vUnits;
     iy = find([ar.model(jm).qPlotV]);
     
