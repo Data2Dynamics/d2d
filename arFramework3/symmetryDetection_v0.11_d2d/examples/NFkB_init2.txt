@@ -1,0 +1,10 @@
+NfkIkb = 1
+pNfkpIkb = 0
+pNfk = 0
+pIkb = 0
+NfkIkbnuc = 0
+Ikb = 0
+pNfknuc = 0
+mIkb = 0
+Nfknuc = 0
+Ikbnuc = 1

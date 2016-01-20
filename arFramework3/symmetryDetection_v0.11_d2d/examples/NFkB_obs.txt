@@ -1,0 +1,4 @@
+NFkBcyt = s1*(NfkIkb + pNfkpIkb +  pNfk)
+NFkBnuc = s2*(Nfknuc + pNfknuc + NfkIkbnuc)
+pNFK = s3*(pNfkpIkb + pNfk)
+pIKB = s4*(pNfkpIkb + pIkb)
