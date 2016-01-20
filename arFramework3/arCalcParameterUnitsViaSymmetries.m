@@ -20,8 +20,8 @@ python_string = sprintf('python symmetryDetection.py %s %s',filenames{1},filenam
 disp(python_string)
 system(python_string);
 
-fileResult = [filenames{1},'_result.txt']
-[group,variable,trsf] = arReadSymmetryDetectionOutput(fileResult)
+fileResult = [filenames{1},'_result.txt'];
+[group,variable,trsf] = arReadSymmetryDetectionOutput(fileResult);
 
 %% edit output von symmetry tool
 trsf2 = strrep(trsf,'*exp(','^(');
