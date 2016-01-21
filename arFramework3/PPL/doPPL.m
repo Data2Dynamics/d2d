@@ -188,8 +188,7 @@ arChi2();
 ar.ppl.chi2_95 = nansum(ar.res.^2)+ar.ppl.dchi2 + 0.5;
 
 % Initialize PPL struct, set values to NaN that are newly computed
-%[t, whichT] = 
-PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY);
+[t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY);
 
 pReset = ar.p;
 chi2start = nansum(ar.res.^2) + 0 ;

@@ -1,0 +1,10 @@
+NfkIkb = NfkIkb_0
+pNfkpIkb = (k1p/k2)*NfkIkb
+pNfk = (k1p/k3)*NfkIkb
+pIkb = (k1p/k4)*NfkIkb
+NfkIkbnuc = (k1p/k11)*NfkIkb
+Ikb = (k3/k9)*pNfk
+pNfknuc = (k3/k5)*rvol*pNfk
+mIkb = (k9/k8)*Ikb
+Nfknuc = (k7/k6)*mIkb
+Ikbnuc = (k5/k10)*(pNfknuc/Nfknuc)

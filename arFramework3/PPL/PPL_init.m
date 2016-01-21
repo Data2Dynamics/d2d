@@ -161,7 +161,7 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
         whichT = find(ar.model(m).condition(c).ppl.tstart(:,ix(1)) == t(whichT));
         t = ar.model(m).condition(c).ppl.tstart(:,ix(1));
     else          
-        whichT = find(ar.model(m).data(c).ppl.tstart == t(whichT));
-        t = ar.model(m).data(c).ppl.tstart;
+        whichT = find(ar.model(m).data(c).ppl.tstart(:,ix(1)) == t(whichT));
+        t = ar.model(m).data(c).ppl.tstart(:,ix(1));
     end
 end
