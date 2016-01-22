@@ -577,7 +577,7 @@ end
 
 % Perform (repeated) derived substitutions
 if ( derivedVariablesInRates )
-	for a = 1 : length( ar.model(m).fv )
+    for a = 1 : length( ar.model(m).fv )
         ar.model(m).fv{a} = char( arSubsRepeated(sym(ar.model(m).fv{a}), ar.model(m).z, ar.model(m).fz, matVer.Version) );
     end
     arFprintf(2, '=> Substituting derived variables in reaction equation.\n' );
