@@ -1,13 +1,12 @@
 % aligns <data> according to labels <A> and <B>
 %
-%    data_aligned = align_position(data, A, B)
+%    data_aligned = align_position(data, A, B, matching_dimensions)
 %
 % such that <data_aligned> will have length(B).
-% For 2D data, looks for matching dimensions.
-% If the length of the data dimensions are equal, 
-% uses first matching dimension.
+% For 2D data, looks for matching dimensions,
+% unless <matching_dimensions> is specified.
 
-function data_aligned = align_position(data, A, B)
+function data_aligned = align_position(data, A, B, matching_dimensions)
 
 if(nargin==0)
     A = {'B' 'A' 'D' 'G'};
@@ -29,9 +28,18 @@ if(length(data_size)>2)
     error('function not supported in more than 2D data');
 end
 
-matching_dimensions = find(data_size==length(A));
-if(isempty(matching_dimensions))
-    error('one dimension of <data> must match length(A)');
+if(~exist('matching_dimensions','var'))
+    matching_dimensions = find(data_size==length(A));
+    if(isempty(matching_dimensions))
+        error('one dimension of <data> must match length(A)');
+    end
+else
+    if(size(data, matching_dimensions) ~= length(A))
+        error('dimension %i of <data> must match length(A)', matching_dimensions);
+    end
+end
+if(length(matching_dimensions)>1)
+    error('multiple matching dimensions, please specify matching_dimensions');
 end
 align_dimension = matching_dimensions(1);
 
@@ -39,7 +47,7 @@ data_size_new = data_size;
 data_size_new(align_dimension) = length(B);
 
 if(iscell(data))
-    data_aligned = cell(data_size_new);
+    data_aligned = repmat({'n/a'},data_size_new);
 elseif(isnumeric(data))
     data_aligned = nan(data_size_new);
 else

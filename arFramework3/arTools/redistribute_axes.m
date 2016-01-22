@@ -19,8 +19,8 @@ end
 
 ccount = 1;
 for j=1:length(ichildren)
-%     h.Children(ichildren(j)).Position = hh.Children(n*m - isort(ccount) + 1).Position;
-    h.Children(length(ichildren) - isort(ichildren(j)) + 1).Position = hh.Children(n*m - ccount + 1).Position;
+    h.Children(ichildren(j)).Position = hh.Children(n*m - isort(ccount) + 1).Position;
+%     h.Children(ichildren(length(ichildren) - isort(ichildren(j)) + 1)).Position = hh.Children(n*m - ccount + 1).Position;
     ccount = ccount + 1;
 end
 

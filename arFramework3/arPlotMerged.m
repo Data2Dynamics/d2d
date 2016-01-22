@@ -219,9 +219,6 @@ for jp=find(ar.model(jm).qPlotYs)
     end
 end
 
-
-
-
 % recalc link
 condition_link_new = {};
 for jx = find(~cellfun(@isempty, collect_cs))

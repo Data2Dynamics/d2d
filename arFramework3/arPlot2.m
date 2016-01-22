@@ -144,11 +144,11 @@ for jm = 1:length(ar.model)
         
         % conditions
         if(str2double(matVer.Version)>=8.1)
-            [conditions, iconditions, jconditions] = ...
-                unique(ar.model(jm).plot(jplot).condition,'legacy'); %#ok<ASGLU>
+            [conditions, ~, jconditions] = ...
+                unique(ar.model(jm).plot(jplot).condition,'legacy');
         else
-            [conditions, iconditions, jconditions] = ...
-                unique(ar.model(jm).plot(jplot).condition); %#ok<ASGLU>
+            [conditions, ~, jconditions] = ...
+                unique(ar.model(jm).plot(jplot).condition);
         end
         
         fighandel_name = {'fighandel_y', 'fighandel_x', 'fighandel_v'};
@@ -216,8 +216,8 @@ for jm = 1:length(ar.model)
                             t_ppl = [];
                             y_ppl_ub = [];
                             y_ppl_lb = [];
-                            % TODO
                             
+                            % TODO
                             y_ssa = [];
                             y_ssa_lb = [];
                             y_ssa_ub = [];
