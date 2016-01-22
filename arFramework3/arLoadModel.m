@@ -536,6 +536,7 @@ if(strcmp(str{1},'INVARIANTS'))
         'Please replace by DERIVED and see usage in: ' ...
         'https://bitbucket.org/d2d-development/d2d-software/wiki/Setting%20up%20models']);
 end
+derivedVariablesInRates = 0;
 ar.model(m).z = {};
 ar.model(m).zUnits = {};
 ar.model(m).fz = {};
@@ -555,19 +556,14 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1
         % the inputs are computed. If the latter => substitute them in!
         if(sum(ismember(ar.model(m).p, C{1}))>0) %R2013a compatible
             ar.model(m).p(ismember(ar.model(m).p, C{1})) = [];
-            for a = 1 : length( ar.model(m).fv )
-                ar.model(m).fv{a} = char( arSubs(sym(ar.model(m).fv{a}), sym(C{1}), sym(C{5}), matVer.Version) );
-            end
-            
+            derivedVariablesInRates = 1;
             fail = 0;
             inputVariables = cellfun(@symvar, ar.model(m).fu, 'UniformOutput', false);
             for ju = 1 : length( inputVariables )
                 fail = fail | max( ismember( inputVariables{ju}, C{1} ) );
             end
             if ( fail )
-                error('derived variable %s already defined as parameter in INPUT section', cell2mat(C{1}));    
-            else
-                arFprintf(2, '=> Substituted derived variable in reaction equation.\n' );
+                error('derived variable %s already defined as parameter in INPUT section', cell2mat(C{1}));
             end
         end
         ar.model(m).z(end+1) = C{1};
@@ -578,6 +574,16 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1
     end
     C = arTextScan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
+
+% Perform (repeated) derived substitutions
+if ( derivedVariablesInRates )
+	for a = 1 : length( ar.model(m).fv )
+        ar.model(m).fv{a} = char( arSubsRepeated(sym(ar.model(m).fv{a}), ar.model(m).z, ar.model(m).fz, matVer.Version) );
+    end
+    arFprintf(2, '=> Substituting derived variables in reaction equation.\n' );
+end
+
+
 ar.model(m).qPlotZ = ones(size(ar.model(m).z));
 
 % derived variables parameters
