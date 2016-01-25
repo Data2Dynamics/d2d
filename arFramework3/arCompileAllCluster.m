@@ -11,7 +11,7 @@ function varargout = arCompileAllCluster(cluster, clusterpath, pool_size)
 global ar
 global ar_compileall_cluster
 
-if(isempty(ar_compileall_cluster) || strcmp(ar_compileall_cluster.Status, 'deleted')) % new job
+if(isempty(ar_compileall_cluster) || strcmp(ar_compileall_cluster.State, 'deleted')) % new job
     fprintf('arCompileAllCluster sending job...');
    
     if(~exist('pool_size','var'))
