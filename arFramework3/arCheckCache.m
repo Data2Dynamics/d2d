@@ -78,10 +78,14 @@ function valid = checkCacheConfigFields( fields )
     end
     
     for a = 1 : length( fields )
-        if ~isequal( ar.cache.(fields{a}), ar.config.(fields{a}) );
-            ar.cache.valid = 0;
+        try
+            if ~isequal( ar.cache.(fields{a}), ar.config.(fields{a}) );
+                ar.cache.valid = 0;
+                valid = 0;
+                return
+            end
+        catch
             valid = 0;
-            return
         end
     end
    
