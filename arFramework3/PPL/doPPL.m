@@ -188,8 +188,7 @@ arChi2();
 ar.ppl.chi2_95 = nansum(ar.res.^2)+ar.ppl.dchi2 + 0.5;
 
 % Initialize PPL struct, set values to NaN that are newly computed
-%[t, whichT] = 
-PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY);
+[t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY);
 
 pReset = ar.p;
 chi2start = nansum(ar.res.^2) + 0 ;
@@ -202,43 +201,43 @@ for jx = 1:length(ix)
         %ar.model(m).condition(c).ppl.x_orig(:,ix(jx))=log10(ar.model(m).condition(c).ppl.x_orig(:,ix(jx)));
     end
     %get starting value for jx
-    if((~takeY && ((doPPL && isnan(ar.model(m).condition(c).ppl.kind_high(whichT,ix(jx)))) ...
-            || (~doPPL && isnan(ar.model(m).condition(c).ppl.kind_high_vpl(whichT,ix(jx)))))) ...
-            || (takeY && doPPL && isnan(ar.model(m).data(c).ppl.kind_high(whichT,ix(jx)))) ...
-            || (takeY && ~doPPL && (isnan(ar.model(m).data(c).ppl.kind_high_vpl(whichT,ix(jx))))))
-        if(xstd_auto)    
-            if(ar.config.fiterrors~= -1 && takeY && ~isnan(ar.model(m).data(c).ystdFineSimu(1,ix(jx))))
-                xstd = ar.model(m).data(c).ystdFineSimu(1,ix(jx));
-            elseif(ar.config.fiterrors==-1 && takeY)
-                [~,it_first] = min(abs(ar.model(m).data(c).tExp-t(whichT))); 
-                 if(~isnan(ar.model(m).data(c).yExpStd(it_first,ix(jx))))
-                     xstd = ar.model(m).data(c).yExpStd(it_first,ix(jx));
-                 end
-            elseif(~takeY)
-                arSimu(0,1,1);
-                xstd = mean(ar.model(m).condition(c).xFineSimu(:,ix(jx)))/10;
-            end
-            
+%     if((~takeY && ((doPPL && isnan(ar.model(m).condition(c).ppl.kind_high(whichT,ix(jx)))) ...
+%             || (~doPPL && isnan(ar.model(m).condition(c).ppl.kind_high_vpl(whichT,ix(jx)))))) ...
+%             || (takeY && doPPL && isnan(ar.model(m).data(c).ppl.kind_high(whichT,ix(jx)))) ...
+%             || (takeY && ~doPPL && (isnan(ar.model(m).data(c).ppl.kind_high_vpl(whichT,ix(jx))))))
+    if(xstd_auto)    
+        if(ar.config.fiterrors~= -1 && takeY && ~isnan(ar.model(m).data(c).ystdFineSimu(1,ix(jx))))
+            xstd = ar.model(m).data(c).ystdFineSimu(1,ix(jx));
+        elseif(ar.config.fiterrors==-1 && takeY)
+            [~,it_first] = min(abs(ar.model(m).data(c).tExp-t(whichT))); 
+             if(~isnan(ar.model(m).data(c).yExpStd(it_first,ix(jx))))
+                 xstd = ar.model(m).data(c).yExpStd(it_first,ix(jx));
+             end
+        elseif(~takeY)
+            arSimu(0,1,1);
+            xstd = max(ar.model(m).condition(c).xFineSimu(:,ix(jx)))/10;
         end
-        xstart_ppl(m, c, ix(jx), t, doPPL, xstd, pReset, chi2start, whichT, takeY, true, 1, [], onlyProfile);
-        if(onlyProfile)
-            if(takeY)
-                arLink(true,0.,true,ix(jx), c, m,NaN);
-            end
-            ar.p = pReset;
-            if(jx==length(ix))
-                arWaitbar(-1);
-                toc;
-            end
-            continue;
-        end
-    else
-        if(~takeY)
-            ar.model(m).condition(c).ppl.t(1,ix(jx)) = t(whichT);
-        else
-            ar.model(m).data(c).ppl.t(1,ix(jx)) = t(whichT);
-        end
+
     end
+    xstart_ppl(m, c, ix(jx), t, doPPL, xstd, pReset, chi2start, whichT, takeY, true, 1, [], onlyProfile);
+    if(onlyProfile)
+        if(takeY)
+            arLink(true,0.,true,ix(jx), c, m,NaN);
+        end
+        ar.p = pReset;
+        if(jx==length(ix))
+            arWaitbar(-1);
+            toc;
+        end
+        continue;
+    end
+%     else
+%         if(~takeY)
+%             ar.model(m).condition(c).ppl.t(1,ix(jx)) = t(whichT);
+%         else
+%             ar.model(m).data(c).ppl.t(1,ix(jx)) = t(whichT);
+%         end
+%     end
     %loop through time  
     if((takeY && ((doPPL && (ar.model(m).data(c).ppl.lb_fit(whichT,ix(jx))==-Inf || ar.model(m).data(c).ppl.ub_fit(whichT,ix(jx))==Inf)) || ...
             (~doPPL && (ar.model(m).data(c).ppl.lb_fit_vpl(whichT,ix(jx))==-Inf || ar.model(m).data(c).ppl.ub_fit_vpl(whichT,ix(jx))==Inf))))...
@@ -362,21 +361,24 @@ if(~exist('xFit','var'))
     xFit = 1.;
     save = true;
 end
-
+if(~exist('onlyProfile','var'))
+    onlyProfile = false;
+end
 arWaitbar(0);
 ntot = ar.ppl.n;
 tcount = 1;
 for ts = 1:length(t)
     t_tmp = t(ts);
-    fprintf('Caliculating PPL for t=%d and state x=%i \n',t(ts),jx);
     %if(save)
-        if(takeY)
+        if(takeY)            
+            ts_tmp = find(ar.model(m).data(c).ppl.tstart(:,jx) == t_tmp);
             if(ts == whichT && save)
                 ar.model(m).data(c).ppl.t(1,jx) = t(ts);
             end
-            if(save)
-                ar.model(m).data(c).ppl.tstart(ts, jx) = t(ts);
-            end
+            if(save && ((doPPL && ~isnan(ar.model(m).data(c).ppl.ub_fit(ts_tmp,jx))) ...
+                    || (~doPPL && ~isnan(ar.model(m).data(c).ppl.ub_fit_vpl(ts_tmp,jx)))))
+               continue; 
+            end            
             [~,it_first] = min(abs(ar.model(m).data(c).tExp-t_tmp));            
             arLink(true, t_tmp, true, jx, c, m, ar.model(m).data(c).yFineSimu(it_first,jx), xstd);
             arChi2(0,[],1);
@@ -387,11 +389,13 @@ for ts = 1:length(t)
             xSim = ar.model(m).data(c).yExpSimu(it,jx);
             arLink(true, t_tmp, true, jx, c, m, xSim, xstd);
         else
+            ts_tmp = find(ar.model(m).condition(c).ppl.tstart(:,jx) == t_tmp);
             if(ts == whichT && save)
                 ar.model(m).condition(c).ppl.t(1,jx) = t(ts);
             end
-            if(save)
-                ar.model(m).condition(c).ppl.tstart(ts, jx) = t(ts);
+            if(save && ((doPPL && ~isnan(ar.model(m).condition(c).ppl.ub_fit(ts_tmp,jx))) ...
+                    || (~doPPL && ~isnan(ar.model(m).condition(c).ppl.ub_fit_vpl(ts_tmp,jx)))))
+               continue; 
             end
             arLink(true, t_tmp);
             arChi2(0,[],1);
@@ -402,6 +406,7 @@ for ts = 1:length(t)
         if(ar.ppl.qLog10)
             xSim = log10(xSim);
         end
+    fprintf('Caliculating PPL for t=%d and state x=%i \n',t(ts),jx);
     % go up
     if(save || dir==1)
         npre = 0;
@@ -530,39 +535,39 @@ for ts = 1:length(t)
         end
     end
     if(takeY && save)   
-        ar.model(m).data(c).ppl.xtrial(ts, jx,:) = xtrial_tmp;
-        ar.model(m).data(c).ppl.xfit(ts, jx,:) = xfit_tmp;
-        ar.model(m).data(c).ppl.ppl(ts, jx,:) = ppl_tmp;
-        ar.model(m).data(c).ppl.vpl(ts, jx,:) = vpl_tmp;
-        ar.model(m).data(c).ppl.ps(ts, jx,:,:) = ps_tmp;
+        ar.model(m).data(c).ppl.xtrial(ts_tmp, jx,:) = xtrial_tmp;
+        ar.model(m).data(c).ppl.xfit(ts_tmp, jx,:) = xfit_tmp;
+        ar.model(m).data(c).ppl.ppl(ts_tmp, jx,:) = ppl_tmp;
+        ar.model(m).data(c).ppl.vpl(ts_tmp, jx,:) = vpl_tmp;
+        ar.model(m).data(c).ppl.ps(ts_tmp, jx,:,:) = ps_tmp;
         if(doPPL)
-            ar.model(m).data(c).ppl.lb_fit(ts, jx) = lb_tmp;
-            ar.model(m).data(c).ppl.ub_fit(ts, jx) = ub_tmp;
-            ar.model(m).data(c).ppl.kind_high(ts, jx) = kind_high_tmp;
-            ar.model(m).data(c).ppl.kind_low(ts, jx) = kind_low_tmp;
+            ar.model(m).data(c).ppl.lb_fit(ts_tmp, jx) = lb_tmp;
+            ar.model(m).data(c).ppl.ub_fit(ts_tmp, jx) = ub_tmp;
+            ar.model(m).data(c).ppl.kind_high(ts_tmp, jx) = kind_high_tmp;
+            ar.model(m).data(c).ppl.kind_low(ts_tmp, jx) = kind_low_tmp;
         else
-            ar.model(m).data(c).ppl.lb_fit_vpl(ts, jx) = lb_tmp_vpl;
-            ar.model(m).data(c).ppl.ub_fit_vpl(ts, jx) = ub_tmp_vpl;
-            ar.model(m).data(c).ppl.kind_high_vpl(ts, jx) = kind_high_tmp_vpl;
-            ar.model(m).data(c).ppl.kind_low_vpl(ts, jx) = kind_low_tmp_vpl;
+            ar.model(m).data(c).ppl.lb_fit_vpl(ts_tmp, jx) = lb_tmp_vpl;
+            ar.model(m).data(c).ppl.ub_fit_vpl(ts_tmp, jx) = ub_tmp_vpl;
+            ar.model(m).data(c).ppl.kind_high_vpl(ts_tmp, jx) = kind_high_tmp_vpl;
+            ar.model(m).data(c).ppl.kind_low_vpl(ts_tmp, jx) = kind_low_tmp_vpl;
         end
         
     elseif(~takeY && save)
-        ar.model(m).condition(c).ppl.xtrial(ts, jx,:) = xtrial_tmp;
-        ar.model(m).condition(c).ppl.xfit(ts, jx,:) = xfit_tmp;
-        ar.model(m).condition(c).ppl.ppl(ts, jx,:) = ppl_tmp;
-        ar.model(m).condition(c).ppl.vpl(ts, jx,:) = vpl_tmp;
-        ar.model(m).condition(c).ppl.ps(ts, jx,:,:) = ps_tmp;
+        ar.model(m).condition(c).ppl.xtrial(ts_tmp, jx,:) = xtrial_tmp;
+        ar.model(m).condition(c).ppl.xfit(ts_tmp, jx,:) = xfit_tmp;
+        ar.model(m).condition(c).ppl.ppl(ts_tmp, jx,:) = ppl_tmp;
+        ar.model(m).condition(c).ppl.vpl(ts_tmp, jx,:) = vpl_tmp;
+        ar.model(m).condition(c).ppl.ps(ts_tmp, jx,:,:) = ps_tmp;
         if(doPPL)            
-            ar.model(m).condition(c).ppl.lb_fit(ts, jx) = lb_tmp;
-            ar.model(m).condition(c).ppl.ub_fit(ts, jx) = ub_tmp;
-            ar.model(m).condition(c).ppl.kind_high(ts, jx) = kind_high_tmp;
-            ar.model(m).condition(c).ppl.kind_low(ts, jx) = kind_low_tmp;
+            ar.model(m).condition(c).ppl.lb_fit(ts_tmp, jx) = lb_tmp;
+            ar.model(m).condition(c).ppl.ub_fit(ts_tmp, jx) = ub_tmp;
+            ar.model(m).condition(c).ppl.kind_high(ts_tmp, jx) = kind_high_tmp;
+            ar.model(m).condition(c).ppl.kind_low(ts_tmp, jx) = kind_low_tmp;
         else
-            ar.model(m).condition(c).ppl.lb_fit_vpl(ts, jx) = lb_tmp_vpl;
-            ar.model(m).condition(c).ppl.ub_fit_vpl(ts, jx) = ub_tmp_vpl;
-            ar.model(m).condition(c).ppl.kind_high_vpl(ts, jx) = kind_high_tmp_vpl;
-            ar.model(m).condition(c).ppl.kind_low_vpl(ts, jx) = kind_low_tmp_vpl;  
+            ar.model(m).condition(c).ppl.lb_fit_vpl(ts_tmp, jx) = lb_tmp_vpl;
+            ar.model(m).condition(c).ppl.ub_fit_vpl(ts_tmp, jx) = ub_tmp_vpl;
+            ar.model(m).condition(c).ppl.kind_high_vpl(ts_tmp, jx) = kind_high_tmp_vpl;
+            ar.model(m).condition(c).ppl.kind_low_vpl(ts_tmp, jx) = kind_low_tmp_vpl;  
         end
         
     end
@@ -843,13 +848,17 @@ function ppl_calc(m, c, jx, xFit, p, t, doPPL, takeY, dir, stepsize, xstd, ed_st
             ar.p(ar.qFit==1)=ar.p(ar.qFit==1) + dps'*stepsize.*region_fac_p;
             ar.ppl.xFit_tmp = ar.ppl.xFit_tmp + dx(1)*stepsize*region_fac;
             ar.p(ar.p>ar.ub) = ar.ub(ar.p>ar.ub);
-            ar.p(ar.p<ar.lb) = ar.lb(ar.p<ar.lb);
-%             end
+            ar.p(ar.p<ar.lb) = ar.lb(ar.p<ar.lb);            
             t_tmp = t_tmp + t_dir*stepsize;  
             if(doPPL)
                 [chi2, xSim] = PPL_chi2(t_tmp,false, m, c, jx, takeY, qLog10, doPPL, t_dir*stepsize, ar.ppl.xFit_tmp, xstd);
                 ar.ppl.xFit_tmp = xSim;
             end
+%             t_tmp
+%             ar.ppl.xFit_tmp
+%             ar.p(ar.qFit==1)
+%             chi2
+            
             curve_xSim = 0;
             if(doPPL && jt>2 && it_orig<length(ar.model(m).condition(c).tFine))   
                 %curve_xSim = (ar.model(m).condition(c).ppl.x_orig(it_orig+1,jx) - 2*ar.model(m).condition(c).ppl.x_orig(it_orig,jx) ...

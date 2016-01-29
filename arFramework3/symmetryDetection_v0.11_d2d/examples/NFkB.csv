@@ -1,0 +1,16 @@
+Description,Rate,NfkIkb,pNfkpIkb,pNfk,pIkb,mIkb,Ikb,Ikbnuc,pNfknuc,Nfknuc,NfkIkbnuc
+complex phosphorilation basal,k1p*NfkIkb,-1,1,,,,,,,,
+complex phosphorilation,k1*NfkIkb*pIkk/(1+k0*pIkk),-1,1,,,,,,,,
+complex break up,k2*pNfkpIkb,,-1,1,1,,,,,,
+pIkb degradationp,k4*pIkb,,,,-1,,,,,,
+pNfk internalization,k3*pNfk,,,-1,,,,,,,
+pNfk internalization int,k3*rvol*pNfk,,,,,,,,1,,
+Nfk dephosphorilation,k5*pNfknuc,,,,,,,,-1,1,
+mIkb production,k6*Nfknuc,,,,,1,,,,,
+mIkb degradation,k7*mIkb,,,,,-1,,,,,
+Ikb production,k8*mIkb,,,,,,1,,,,
+Ikb internalization,k9*Ikb,,,,,,-1,,,,
+Ikb internalization int,k9*rvol*Ikb,,,,,,,1,,,
+Complex production,k10*Ikbnuc*Nfknuc,,,,,,,-1,,-1,1
+Complex externilzation int,k11*rvol*NfkIkbnuc,,,,,,,,,,-1
+Complex externilzation,k11*NfkIkbnuc,1,,,,,,,,,

@@ -19,7 +19,7 @@ function varargout = arFitLHSCluster(cluster, clusterpath, pool_size, n, randoms
 global ar
 global ar_fitlhs_cluster
 
-if(isempty(ar_fitlhs_cluster)) % new job
+if(isempty(ar_fitlhs_cluster) || strcmp(ar_fitlhs_cluster.State, 'deleted')) % new job
     if(nargin==0)
         error('specify cluster!');
     end

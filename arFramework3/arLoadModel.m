@@ -39,6 +39,8 @@ fid = fopen(['Models/' name '.def'], 'r');
 % initial setup
 ar.model(m).name = name;
 
+matVer = ver('MATLAB');
+
 % DESCRIPTION
 str = textscan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(isempty(strfind(str{1},'DESCRIPTION')))
@@ -534,6 +536,7 @@ if(strcmp(str{1},'INVARIANTS'))
         'Please replace by DERIVED and see usage in: ' ...
         'https://bitbucket.org/d2d-development/d2d-software/wiki/Setting%20up%20models']);
 end
+derivedVariablesInRates = 0;
 ar.model(m).z = {};
 ar.model(m).zUnits = {};
 ar.model(m).fz = {};
@@ -547,8 +550,21 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1
         if(sum(ismember(ar.model(m).u, C{1}))>0) %R2013a compatible
             error('derived variable %s already defined in INPUTS', cell2mat(C{1}));
         end
+        % Found derived variable in parameter list. See if it is used in
+        % either the inputs or the reaction equations. If the former, fail
+        % the loading, since we cannot resolve the state values at the time
+        % the inputs are computed. If the latter => substitute them in!
         if(sum(ismember(ar.model(m).p, C{1}))>0) %R2013a compatible
-            error('derived variable %s already defined as parameter', cell2mat(C{1}));
+            ar.model(m).p(ismember(ar.model(m).p, C{1})) = [];
+            derivedVariablesInRates = 1;
+            fail = 0;
+            inputVariables = cellfun(@symvar, ar.model(m).fu, 'UniformOutput', false);
+            for ju = 1 : length( inputVariables )
+                fail = fail | max( ismember( inputVariables{ju}, C{1} ) );
+            end
+            if ( fail )
+                error('derived variable %s already defined as parameter in INPUT section', cell2mat(C{1}));
+            end
         end
         ar.model(m).z(end+1) = C{1};
         ar.model(m).zUnits(end+1,1) = C{2};
@@ -558,6 +574,16 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1
     end
     C = arTextScan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
+
+% Perform (repeated) derived substitutions
+if ( derivedVariablesInRates )
+    for a = 1 : length( ar.model(m).fv )
+        ar.model(m).fv{a} = char( arSubsRepeated(sym(ar.model(m).fv{a}), ar.model(m).z, ar.model(m).fz, matVer.Version) );
+    end
+    arFprintf(2, '=> Substituting derived variables in reaction equation.\n' );
+end
+
+
 ar.model(m).qPlotZ = ones(size(ar.model(m).z));
 
 % derived variables parameters
@@ -640,8 +666,6 @@ if(strcmp(C{1},'OBSERVABLES'))
     % add to parameters needed for model
     ar.model(m).p = union(union(ar.model(m).p, ar.model(m).py), ar.model(m).pystd);
 end
-
-matVer = ver('MATLAB');
 
 % SUBSTITUTIONS (beta)
 substitutions = 0;

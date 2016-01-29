@@ -1,6 +1,14 @@
 % plot correlation of two variables x and y
 
-function pearsoncorrplot(x,y,l,s)
+function pearsoncorrplot(x,y,l,s,~,sy, N)
+
+if(~exist('s','var') || isempty(s))
+    s = 6;
+end
+
+if(~exist('N','var') || isempty(N))
+    N = 1;
+end
 
 % generate test data
 if(nargin==0)
@@ -17,29 +25,56 @@ end
 x = x(:);
 if(isvector(y))
     y = y(:);
+    if(exist('sy','var') && isempty(sy))
+        sy = sy(:);
+    end
 end
+
+% remove nan's
+qnonnan = ~isnan(x) & ~isnan(y);
+x = x(qnonnan);
+y = y(qnonnan);
 
 % plot scatter plots
+colors = lines(size(y,2));
+
 for j=1:size(y,2)
-    h = scatter(x, y(:,j),'filled');
-    h.SizeData = s;
-    hold on
+    if(~exist('sy','var') || isempty(sy))
+        plot(x, y(:,j), '.', 'MarkerSize', s);
+        hold on
+    else
+        qstdzero = sy(:,j)==0;
+        errorbar(x(~qstdzero), y(~qstdzero,j), sy(~qstdzero,j), '.', 'MarkerSize', s, 'Color', colors(j,:));
+        hold on
+        plot(x(qstdzero), y(qstdzero,j), '.', 'MarkerSize', s, 'Color', colors(j,:));
+    end
 end
-hold off
 
 % add regression line(s)
-lsline
+for j=1:size(y,2)
+%     [~,S0,~] = polyfit(x, y(:,j),0);
+    [P,S,mu] = polyfit(x, y(:,j),N);
+    
+%     pval = 1-chi2cdf(S0.normr - S.normr, 1)
+    
+    X = linspace(min(x)-(max(x)-min(x))*0.1, max(x)+(max(x)-min(x))*0.1, 50);
+    [Y,DELTA] = polyconf(P,X,S, 'alpha', 1-0.68, 'mu', mu);
+    
+    plot3(X,Y,zeros(size(X))-1,'Color', colors(j,:));
+    patch([X, fliplr(X)], [Y+DELTA, fliplr(Y-DELTA)], zeros(size([X, fliplr(X)]))-1, ...
+        ones(size([X, fliplr(X)])), 'EdgeColor', 'none', ...
+        'FaceColor', colors(j,:), 'FaceAlpha', 0.2);    
+end
+
+hold off
 
 % add additional labels
 if(isvector(y))
-    % remove nan's
-    qnonnan = ~isnan(x) & ~isnan(y);
-    x = x(qnonnan);
-    y = y(qnonnan);
-
     % plot correlation values
     [corrval,pval] = corr(x, y);
-    text(0.01,1, sprintf('Pearson %4.2f (p-val %4.2f)', corrval,pval), 'Units', 'normalized', ...
+    [corrval2,pval2] = corr(x, y, 'type', 'Spearman');
+    text(0.01,1, sprintf('Pearson %4.2f (p-val %4.2g)\nSpearman %4.2f (p-val %4.2g)', ...
+        corrval, pval, corrval2, pval2), 'Units', 'normalized', ...
         'VerticalAlignment', 'top');
     
     % add labels

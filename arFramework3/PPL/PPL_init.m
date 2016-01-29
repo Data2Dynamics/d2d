@@ -1,4 +1,4 @@
-function PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
+function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
     global ar;
     n = ar.ppl.n;
     nsteps = ar.ppl.nsteps;
@@ -19,6 +19,7 @@ function PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
         ar.model(m).condition(c).ppl.kind_high_vpl = nan(length(t), size(ar.model(m).condition(c).xExpSimu,2));
         ar.model(m).condition(c).ppl.kind_low_vpl = nan(length(t), size(ar.model(m).condition(c).xExpSimu,2));
         ar.model(m).condition(c).ppl.tstart = nan(length(t), size(ar.model(m).condition(c).xExpSimu,2));
+        ar.model(m).condition(c).ppl.tstart(:,ix) = repmat(t,1,length(ix));
         
         ar.model(m).condition(c).xFineLB = nan(length(ar.model(m).condition(c).tFine),size(ar.model(m).condition(c).xExpSimu,2));
         ar.model(m).condition(c).xFineUB = nan(length(ar.model(m).condition(c).tFine),size(ar.model(m).condition(c).xExpSimu,2));
@@ -54,6 +55,7 @@ function PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
             ar.model(m).data(c).ppl.kind_high_vpl = nan(length(t), size(ar.model(m).data(c).yExpSimu,2));
             ar.model(m).data(c).ppl.kind_low_vpl = nan(length(t), size(ar.model(m).data(c).yExpSimu,2));
             ar.model(m).data(c).ppl.tstart = nan(length(t), size(ar.model(m).data(c).yExpSimu,2));
+            ar.model(m).data(c).ppl.tstart(:,ix) = repmat(t,1,length(ix));
             
             ar.model(m).data(c).yFineLB = nan(length(ar.model(m).data(c).tFine),size(ar.model(m).data(c).yExpSimu,2));
             ar.model(m).data(c).yFineUB = nan(length(ar.model(m).data(c).tFine),size(ar.model(m).data(c).yExpSimu,2));
@@ -115,13 +117,14 @@ function PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
     end
     for jt=1:length(t)
         if(~takeY)
-            cur_t = find(ar.model(m).condition(c).ppl.tstart==t(jt));
+            cur_t = find(ar.model(m).condition(c).ppl.tstart(:,ix(jx))==t(jt));
         elseif(takeY)
-            cur_t = find(ar.model(m).data(c).ppl.tstart==t(jt));
+            cur_t = find(ar.model(m).data(c).ppl.tstart(:,ix(jx))==t(jt));
         end
         if(isempty(cur_t))
             if(~takeY)
                 ar.model(m).condition(c).ppl.tstart = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.tstart];
+                ar.model(m).condition(c).ppl.tstart(1,ix(jx)) = t(jt);
                 ar.model(m).condition(c).ppl.xtrial = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1); ar.model(m).condition(c).ppl.xtrial];
                 ar.model(m).condition(c).ppl.xfit = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1); ar.model(m).condition(c).ppl.xfit];
                 ar.model(m).condition(c).ppl.vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1); ar.model(m).condition(c).ppl.vpl ];
@@ -137,6 +140,7 @@ function PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
                 ar.model(m).condition(c).ppl.kind_low_vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.kind_low_vpl];          
             else
                 ar.model(m).data(c).ppl.tstart = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.tstart];
+                ar.model(m).data(c).ppl.tstart(1,ix(jx)) = t(jt);
                 ar.model(m).data(c).ppl.xtrial = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1); ar.model(m).data(c).ppl.xtrial];
                 ar.model(m).data(c).ppl.xfit = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1); ar.model(m).data(c).ppl.xfit];
                 ar.model(m).data(c).ppl.vpl = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1); ar.model(m).data(c).ppl.vpl ];
@@ -153,11 +157,11 @@ function PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
             end
         end
     end
-%     if(~takeY)
-%         t = ar.model(m).condition(c).ppl.tstart;
-%         whichT = find(ar.model(m).condition(c).ppl.tstart == t(whichT));
-%     else  
-%         t = ar.model(m).data(c).ppl.tstart;
-%         whichT = find(ar.model(m).data(c).ppl.tstart == t(whichT));
-%     end
+    if(~takeY)
+        whichT = find(ar.model(m).condition(c).ppl.tstart(:,ix(1)) == t(whichT));
+        t = ar.model(m).condition(c).ppl.tstart(:,ix(1));
+    else          
+        whichT = find(ar.model(m).data(c).ppl.tstart(:,ix(1)) == t(whichT));
+        t = ar.model(m).data(c).ppl.tstart(:,ix(1));
+    end
 end

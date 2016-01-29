@@ -1,0 +1,3 @@
+Nrel = rvol*(NfkIkb+pNfkpIkb+pNfk)/(pNfknuc+Nfknuc+NfkIkbnuc)
+PIKB = pNfkpIkb+pIkb
+MIKB = mIkb

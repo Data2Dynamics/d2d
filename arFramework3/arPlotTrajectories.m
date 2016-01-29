@@ -84,10 +84,14 @@ for jys = 1:length(iy)
                     end
                 end
             end
+            yunitetmp = '';
+            if(~isempty(yUnits{jy,2}))
+                yunitetmp = sprintf(' [%s]', yUnits{jy,2});
+            end
             if(qLogPlot(jy))
-                ylabel(g, sprintf('log_{10}(%s) [%s]', yUnits{jy,3}, yUnits{jy,2}));
+                ylabel(g, sprintf('log_{10}(%s)%s', yUnits{jy,3}, yunitetmp));
             else
-                ylabel(g, sprintf('%s [%s]', yUnits{jy,3}, yUnits{jy,2}));
+                ylabel(g, sprintf('%s%s', yUnits{jy,3}, yunitetmp));
             end
             
             % title
