@@ -1,14 +1,15 @@
 % load model parameters and parameter setting from .mat
 % and reconcile with current parameters
 %
-% arLoadPars(filename, fixAssigned, only_values)
+% arLoadPars(filename, fixAssigned, only_values, path, pattern)
 %
 % filename:     source file name
 %               or number according to the filelist
 %               or a previously created global variable ar
 % fixAssigned:  fix the assigned parameters
 % only_values:  only load parameter values, not bound and status
-% pfad          path to the results folder, default: './Results'
+% path:         path to the results folder, default: './Results'
+% pattern:      search pattern for parameter names
 % 
 % 
 % Examples for loading several parameter sets:
@@ -23,7 +24,7 @@
 % Example:
 %   arLoadPars('20141112T084549_model_fitted',[],[],'../OtherFolder/Results')
 
-function varargout = arLoadPars(filename, fixAssigned, pars_only, pfad)
+function varargout = arLoadPars(filename, fixAssigned, pars_only, pfad, pattern)
 if(~exist('pfad','var') || isempty(pfad))
     pfad = './Results';
 else
@@ -39,6 +40,12 @@ if(~exist('fixAssigned', 'var') || isempty(fixAssigned))
 end
 if(~exist('pars_only', 'var') || isempty(pars_only))
     pars_only = false;
+end
+if(~exist('pars_only', 'var') || isempty(pars_only))
+    pars_only = false;
+end
+if(~exist('pattern', 'var') || isempty(pattern))
+    pattern = [];
 end
 
 if(~exist('filename','var') || isempty(filename))
@@ -57,7 +64,7 @@ end
 
 
 if(~iscell(filename))    
-    ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad);
+    ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad, pattern);
     varargout = cell(0);
 else
     ars = cell(size(filename));
@@ -69,7 +76,7 @@ else
             file = filename{i};
         end
 
-        ars{i} = arLoadParsCore(ar, file, fixAssigned, pars_only, pfad);
+        ars{i} = arLoadParsCore(ar, file, fixAssigned, pars_only, pfad, pattern);
     end
     varargout{1} = ars;
     if nargout>1
@@ -84,7 +91,7 @@ end
 % Invalidate cache so simulations do not get skipped
 arCheckCache(1);
 
-function ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad)
+function ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad, pattern)
 N = 1000;
 
 if(ischar(filename))
@@ -105,8 +112,14 @@ else
     error('not supported variable type for filename');
 end
 
-ass = NaN(size(ar.p));
-for j=1:length(ar.p)
+if(isempty(pattern))
+    js = 1:length(ar.p);
+else
+    js = find(~cellfun(@isempty,regexp(ar.pLabel, pattern)));
+end
+
+ass = zeros(size(ar.p));
+for j=js
     qi = ismember(S.ar.pLabel, ar.pLabel{j});
     
     if(isempty(qi) || sum(qi) == 0)
@@ -162,7 +175,7 @@ nnot = length(ass)-sum(ass);
 if ( nnot > 0 )
     arFprintf(1, '%i parameters were assigned in the destination model (%i not assigned).\n',sum(ass),nnot);
     if(nnot<=30 && nnot>0)
-        arFprintf(1, 'Not assigned are: %s \n',sprintf('%s, ',ar.pLabel{find(ass==0)}));
+        arFprintf(1, 'Not assigned are: %s \n',sprintf('%s, ',ar.pLabel{ass==0}));
     end
 else
     arFprintf(1, 'All parameters assigned.\n');
