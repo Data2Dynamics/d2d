@@ -39,9 +39,8 @@ if(isfield(Stmpload,'pleGlobals'))
 end
 % end new.
 if(strcmp(ar.config.savepath,['./Results/' workspace_name])~=1)
-    ar.config.savepath = ['./Results/' workspace_name]
+    ar.config.savepath = ['./Results/' workspace_name];
 end
-    
 
 fprintf('workspace loaded from file %s\n', workspace_name);
 

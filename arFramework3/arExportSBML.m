@@ -208,7 +208,8 @@ for jv = 1:length(ar.model(m).fv)
         M.reaction(vcount).version = 4;
         
         if(isfield(ar.model(m),'v') && ~isempty(ar.model(m).v{jv}))
-            M.reaction(vcount).id = ar.model(m).v{jv};
+            % replace spaces with underscores
+            M.reaction(vcount).id = strrep(ar.model(m).v{jv},' ','_');
         else
             M.reaction(vcount).id = sprintf('reaction%i', jv);
         end
