@@ -5,7 +5,18 @@ var command_list = [];
 var graphs = {};
 var chi2_hist = [];
 var p_hist = [];
-
+var cpal =["#5DA5DA",
+"#FAA43A",
+"#60BD68",
+"#F17CB0",
+"#B2912F",
+"#B276B2",
+"#DECF3F",
+"#F15854",
+"#4D4D4D",
+"#33315B",
+"#76515B",
+"#306DCE"];
 
 $(document).on("pagecontainershow", function(event, ui) {
 
@@ -598,13 +609,9 @@ function create_graphs_data(options) {
 
   if (options.indexOf('variables') > -1) {
     graphs_data['variables'] = {};
-    for (var i = 0; i < ar.condition.xFineSimu[0].length; i++) {
-      graphs_data.variables[ar.model.xNames[0][i]] = [];
-      for (var _ in ar.condition.tFine) {
-        graphs_data.variables[ar.model.xNames[0][i]].push(
-          [ar.condition.tFine[_][0], ar.condition.xFineSimu[_][i]]
-        );
-      };
+    for (var i = 0; i < ar.plots.xzNames[0].length; i++) {
+        graphs_data.variables[ar.plots.xzNames[0][i]] = ar.plots.variables[i];
+        console.log(ar.plots.variables[i][0]);
     };
 
     return graphs_data
@@ -628,24 +635,47 @@ function create_graphs() {
   for (var key in ar.pLabel[0]) {
     labels_fit_parameters.push(ar.pLabel[0][key]);
   };
+
+  cp_parameters = cpal.slice();
   for (var plot in graphs_data) {
     graphs[plot] = {};
     for (var key in graphs_data[plot]) {
       graphs[plot][key] = [];
       labels_obs = ['x'];
+      series_settings_obs = {};
+      cp = cpal.slice();
       for (var i = 0; i < ar.plot.dLink[0].length; i++) {
-          labels_obs = labels_obs.concat(["Condition" + i, "Condition" + i]);
+          label = "Condition " + i;
+          label_exp = "Condition " + i + " exp";
+          labels_obs = labels_obs.concat(["Condition " + i, "Condition " + i + " exp"]);
+          opts = {};
+          color = cp[cp.push(cp.shift())-1];
+          opts[label_exp] = {
+              color: color,
+              drawPoints: true,
+              connectSeparatedPoints: false,
+          };
+          opts[label] = {
+              color: color,
+              drawPoints: false,
+              connectSeparatedPoints: true,
+          };
+          series_settings_obs = $.extend(series_settings_obs, opts);
+
       };
       g_settings['observables'] = {
+        connectSeparatedPoints: true,
         labels: labels_obs,
         errorBars: true,
         title: key
       };
-      g_settings['observables'][key + ' exp'] = {
+      g_settings['observables'] = $.extend(g_settings['observables'], series_settings_obs);
+      console.log(g_settings['observables']);
+      g_settings['observables'][key + ' exp'] = { // useless atm
         fillAlpha: 1,
         strokeWidth: 3,
         drawPoints: true,
-        pointSize: 3,
+        pointSize: 10,
         plotter: singlePointPlotter
       };
       g_settings['fit'] = {

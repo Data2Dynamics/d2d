@@ -2,6 +2,7 @@ import os
 import re
 import uuid
 import time
+import numpy
 from threading import Thread
 from flask import Flask, jsonify, render_template, request, session, Markup
 
@@ -127,7 +128,7 @@ def update():
             C = int(request.args.get('value'))
 
     if 'simu_data' in options:
-        d2d.eval('arSimuData, arChi2')
+        d2d.eval('arSimuData, aSimu(true, true, true), arChi2')
 
     if 'model' in options:
         try:
@@ -177,7 +178,6 @@ def update():
         d2d.eval("arChi2")
 
         d2d.update()
-        ar = d2d.dic2obj()
 
         data = select_data2(d2d, options)
         data = d2d.convert_struct(data, ROUND)
@@ -251,6 +251,7 @@ def select_data2(d2d, options):
         data2['model']['fu'] = ar.model[M].fu
         data2['model']['name'] = ar.model[M].name
         data2['model']['xNames'] = ar.model[M].xNames
+        data2['model']['z'] = ar.model[M].z
         data2['model']['description'] = ar.model[M].description
     except AttributeError:
         pass
@@ -266,16 +267,20 @@ def select_data2(d2d, options):
         pass
 
     try:
-        data2['data']['tFine'] = ar.model[M].data[D].tFine
-        data2['data']['yFineSimu'] = ar.model[M].data[D].yFineSimu
-        data2['data']['ystdFineSimu'] = ar.model[M].data[D].ystdFineSimu
-        data2['data']['tExp'] = ar.model[M].data[D].tExp  # Exp time
-        data2['data']['yExp'] = ar.model[M].data[D].yExp  # Exp values
-        data2['data']['yExpStd'] = ar.model[M].data[D].yExpStd
         data2['data']['yNames'] = ar.model[M].data[D].yNames
     except AttributeError:
         pass
 
+    data2['data']['tFine'] = ar.model[M].data[0].tFine
+    data2['data']['yFineSimu'] = []
+    data2['data']['ystdFineSimu'] = []
+    data2['data']['tExp'] = ar.model[M].data[0].tExp
+    data2['data']['yExp'] = []
+    data2['data']['yExpStd'] = []
+
+    data2['condition']['tFine'] = ar.model[M].condition[0].tFine
+    data2['condition']['xFineSimu'] = []
+    data2['condition']['zFineSimu'] = []
 
     if isinstance(ar.model[M].plot[D].dLink, (float, int)):
         dLink = [[ar.model[M].plot[D].dLink]]
@@ -285,19 +290,14 @@ def select_data2(d2d, options):
     data2['plot'] = {}
     data2['plot']['dLink'] = dLink
 
-    data2['data']['tFine'] = ar.model[M].data[0].tFine
-    data2['data']['yFineSimu'] = []
-    data2['data']['ystdFineSimu'] = []
-    data2['data']['tExp'] = ar.model[M].data[0].tExp
-    data2['data']['yExp'] = []
-    data2['data']['yExpStd'] = []
-
-    for i in dLink[0]:
+    for h, i in enumerate(dLink[0]):
         i = int(i)
         data2['data']['yFineSimu'].append(ar.model[M].data[i-1].yFineSimu)
         data2['data']['ystdFineSimu'].append(ar.model[M].data[i-1].ystdFineSimu)
         data2['data']['yExp'].append(ar.model[M].data[i-1].yExp)
         data2['data']['yExpStd'].append(ar.model[M].data[i-1].yExpStd)
+        data2['condition']['xFineSimu'].append(ar.model[M].condition[h].xFineSimu)
+        data2['condition']['zFineSimu'].append(ar.model[M].condition[h].zFineSimu)
 
     return data2
 
@@ -309,16 +309,24 @@ def create_dygraphs_data2(data):
 
     for j in range(len(data['data']['yFineSimu'])):
 
-        data['data']['yFineSimu'][j] = [['NaN' if i != i else
+        data['data']['yFineSimu'][j] = [[None if i != i else
                                         i for i in x] for x in
                                         data['data']['yFineSimu'][j]]
         data['data']['ystdFineSimu'][j] = [[0 if i != i else
                                            i for i in x] for x in
                                            data['data']['ystdFineSimu'][j]]
-        data['data']['yExp'][j] = [['NaN' if i != i else i for i in x]
+        data['data']['yExp'][j] = [[None if i != i else i for i in x]
                                    for x in data['data']['yExp'][j]]
         data['data']['yExpStd'][j] = [[0 if i != i else i for i in x]
                                       for x in data['data']['yExpStd'][j]]
+
+    # make sure there are no two data entries with same timestamp, and if so
+    # add epsilon to it, since dygraphs might get confused
+    for i, key in enumerate(data['data']['tExp']):
+        while data['data']['tExp'][i] in data['data']['tFine']:
+            data['data']['tExp'][i][0] = numpy.nextafter(
+                data['data']['tExp'][i][0], abs(
+                    2*data['data']['tExp'][i][0] + 1))
 
     data['plots'] = {}
     data['plots']['observables'] = []
@@ -331,17 +339,54 @@ def create_dygraphs_data2(data):
                 data['plots']['observables'][i][j] = \
                     data['plots']['observables'][i][j] + [[
                         data['data']['yFineSimu'][k][j][i],
-                        data['data']['ystdFineSimu'][k][j][i]], ['NaN', 0]]
+                        data['data']['ystdFineSimu'][k][j][i]], [None, 0]]
 
         for j in range(len(data['data']['tExp'])):
             for k in range(len(data['plot']['dLink'][0])):
                 c = j + len(data['data']['tFine'])
                 data['plots']['observables'][i][c] = \
                     data['plots']['observables'][i][c] + [
-                    ['NaN', 'NaN'], [data['data']['yExp'][k][j][i],
-                                     data['data']['yExpStd'][k][j][i]]]
+                    [None, None], [data['data']['yExp'][k][j][i],
+                                   data['data']['yExpStd'][k][j][i]]]
 
         data['plots']['observables'][i].sort(key=lambda x: x[0])
+
+    data['plots']['variables'] = []
+
+    xzFine = []
+
+    for i in range(len(data['plot']['dLink'][0])):
+        xzFine.append([])
+        for j in range(len(data['condition']['tFine'])):
+            xzFine[i].append(data['condition']['xFineSimu'][i][j] +
+                             data['condition']['zFineSimu'][i][j])
+
+    print(len(xzFine))
+    print(len(xzFine[0]))
+    print(len(xzFine[0][0]))
+    print(xzFine[0][0])
+    print(xzFine[0][0][0])
+
+    data['plots']['xzNames'] = [data['model']['xNames'][0] +
+                                data['model']['z'][0]]
+
+    for i in range(len(data['plots']['xzNames'][0])):
+        data['plots']['variables'].append(data['condition']['tFine'])
+        for j in range(len(data['condition']['tFine'])):
+            for k in range(len(data['plot']['dLink'][0])):
+                print(xzFine[k][j][i])
+                data['plots']['variables'][i][j] = \
+                    data['plots']['variables'][i][j] + [xzFine[k][j][i]]
+                    
+    print(len(data['plots']['xzNames'][0]))
+    print(len(data['condition']['tFine']))
+    print(len(data['plot']['dLink'][0]))
+    print("cut")
+    print(len(data['plots']['variables']))
+    print(len(data['plots']['variables'][0]))
+    print(len(data['plots']['variables'][0][0]))
+    print(len(data['plots']['observables'][0]))
+    print(len(data['plots']['observables'][0][0]))
 
     data['data'].pop('tFine', None)
     data['data'].pop('yFineSimu', None)
@@ -425,8 +470,8 @@ def select_data(d2d, options):
         data['data']['tFine'] = ar.model[M].data[D].tFine
         data['data']['yFineSimu'] = ar.model[M].data[D].yFineSimu
         data['data']['ystdFineSimu'] = ar.model[M].data[D].ystdFineSimu
-        data['data']['tExp'] = ar.model[M].data[D].tExp  # Exp time
-        data['data']['yExp'] = ar.model[M].data[D].yExp  # Exp values
+        data['data']['tExp'] = ar.model[M].data[D].tExp  # exp time poitns
+        data['data']['yExp'] = ar.model[M].data[D].yExp  # exp data values
         data['data']['yExpStd'] = ar.model[M].data[D].yExpStd
         data['data']['yNames'] = ar.model[M].data[D].yNames
     except AttributeError:

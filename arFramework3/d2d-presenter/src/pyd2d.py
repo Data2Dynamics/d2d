@@ -129,7 +129,7 @@ class d2d(mat):
         self.filename = os.path.basename(path)
         self.cd(self.path)
         self.eval("arLoad(1)")
-        # führt setup durch : self.eval(os.path.splitext(os.path.basename(path))[0])
+        #self.eval(os.path.splitext(os.path.basename(path))[0])
         self.ar = self.eval('arToPython;', 1)[0]
 
     def fastload(self):

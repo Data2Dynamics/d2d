@@ -59,8 +59,8 @@ div.ui-slider-switch {
 .g_container_items {
   flex-grow: 1;
   -webkit-flex-grow: 1;
-  height: 10em !important;
-  width: 100em !important;
+  height: 12em !important;
+  width: 15em !important;
 }
 .graphs_variables {
   display: none;
@@ -124,8 +124,8 @@ div.ui-slider-switch {
 
 @media (min-width: 25em) {
   .g_container_items {
-    height: 10em !important;
-    width: 10em !important;
+    height: 16em !important;
+    width: 20em !important;
   }
   .dygraph-title {
     font-size: 0.7em;
@@ -142,8 +142,8 @@ div.ui-slider-switch {
   }
 
   .g_container_items {
-    height: 15em !important;
-    width: 15em !important;
+    height: 24em !important;
+    width: 30em !important;
   }
 
   .panel_button {
