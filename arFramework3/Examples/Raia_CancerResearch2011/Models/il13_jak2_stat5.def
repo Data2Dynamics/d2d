@@ -3,7 +3,7 @@ DESCRIPTION
 "with feedback by SOCS3, CIS and SHP-1"
 
 PREDICTOR
-t               T   min         time	0	100
+t               T   min         time	0	120
 
 COMPARTMENTS
 cyt             V   pl          vol.        100
@@ -58,8 +58,8 @@ SOCS3mRNA_obs               C   au          conc.   0   0   "scale_SOCS3mRNA_obs
 CD274mRNA_obs               C   au          conc.   0   0   "scale_CD274mRNA_obs * CD274mRNA"
 SOCS3_obs                   C   nmol/l      conc.   0   0   "SOCS3"
 pSTAT5_obs                  C   nmol/l      conc.   0   0   "pSTAT5"
-        
-ERRORS        
+
+ERRORS
 RecSurf_obs		"sd_RecSurf_abs + sd_RecSurf_rel*RecSurf_obs"
 IL13_cell_obs	"sd_IL13_cell_abs + sd_IL13_cell_rel*IL13_cell_obs"
 pIL4Ra_obs		"sd_pIL4Ra_abs + sd_pIL4Ra_rel*pIL4Ra_obs"
@@ -85,4 +85,3 @@ init_DecoyR			"0.34"
 init_IL13_DecoyR	"0"
 init_SOCS3  		"0"
 init_CD274mRNA		"0"
-        
