@@ -3,6 +3,7 @@ import os
 import re
 import matlab.engine
 from math import log10, floor
+import copy
 
 __author__ = 'Clemens Blank'
 
@@ -65,21 +66,50 @@ class mat():
 
         return conv
 
+    def convert_struct(self, dic, ROUND=0):
+        """ Converts all matlab.double types in structures into python lists.
+        """
+
+        try:
+            dic = dic.copy()
+
+            if isinstance(dic, dict):
+                for key in dic:
+                    dic[key] = self.convert_struct(dic[key], ROUND)
+            elif isinstance(dic, list):
+                try:
+                    dic[0][0]  # check if already converted matlab.double
+                    if isinstance(dic[0], matlab.double):
+                        for i in range(len(dic)):
+                            dic[i] = self.convert_struct(dic[i], ROUND)
+                except:
+                    for i in range(len(dic)):
+                        dic[i] = self.convert_struct(dic[i], ROUND)
+
+        except:
+            if isinstance(dic, (str, float, bool, int, matlab.logical)):
+                pass
+            elif isinstance(dic, matlab.double):
+                dic = self.convert(dic, ROUND)
+
+        return dic
+
     def round_sig(self, x, sig=2):
         return round(x, sig-int(floor(log10(abs(x))))-1)
 
-    # testing the methods speed
     def benchmark(self, method, args, runs=200):
+        """ Can be used to measure the execution time of methods """
+
         import timeit
         a = timeit.default_timer()
 
         for i in range(runs):
-            x = method(*args)
+            method(*args)
 
         b = timeit.default_timer() - a
 
-        print(str(method) + " braucht durchschnittlich " + str(b / runs))
-        print(str(method) + " brauchte insgesamt " + str(b))
+        print(str(method) + " took an average time of " + str(b / runs))
+        print(str(method) + " took for " + str(runs) + " runs " + str(b))
         return b
 
     def stop(self):
@@ -92,28 +122,46 @@ class mat():
 
 class d2d(mat):
 
+    """Enhances the mat class with d2d specific methods."""
+
     def load_model(self, path):
         self.path = os.path.dirname(path)
         self.filename = os.path.basename(path)
         self.cd(self.path)
-        self.eval(os.path.splitext(os.path.basename(path))[0])
+        self.eval("arLoad(1)")
+        # führt setup durch : self.eval(os.path.splitext(os.path.basename(path))[0])
         self.ar = self.eval('arToPython;', 1)[0]
+
+    def fastload(self):
+        self.load_model(os.path.join(os.getcwd(), 'models/Raia_CancerResearch2011/Setup.m'))
 
     def update(self):
         self.ar = self.eval("arToPython;", 1)[0]
 
-    def dic2obj(self, d=None):
+    def dic2obj(self, d=None, convert=None):
+        """Converts the Python ar structure to a more comfortable object. E.g.
+            "ar['model'][0]['data'][1]['yExp']" becomes
+            "ar.model[0].data[1].yExp".
+            Provides the ability to convert all matlab double fields to
+            Python lists, but keep in mind that this might increase
+            calculation time by faktor 15(!) on common ar structs.
+            It is reccomended to select the fields of interest first and
+            convert only these via convert or convert_struct."""
+
         if d is None:
             d = self.ar
 
         top = type('new', (object,), d)
         seqs = tuple, list, set, frozenset
         for i, j in d.items():
+            if convert is not None:
+                if type(j) is matlab.double:
+                    j = self.convert(j)
             if isinstance(j, dict):
-                setattr(top, i, self.dic2obj(j))
+                setattr(top, i, self.dic2obj(j, convert))
             elif isinstance(j, seqs):
-                setattr(top, i, type(j)(self.dic2obj(sj) if isinstance(
-                    sj, dict) else sj for sj in j))
+                setattr(top, i, type(j)(self.dic2obj(sj, convert) if
+                isinstance(sj, dict) else sj for sj in j))
             else:
                 setattr(top, i, j)
         return top
@@ -130,18 +178,6 @@ class d2d(mat):
                       ')', '').replace("'", "") + ");")
         except:
             print("Set parameters failed.")
-
-    def convert_dic(self, dic, ROUND=0):
-
-        dic = dic.copy()
-
-        for key in dic:
-            if type(dic[key]) is dict:
-                dic[key] = self.convert_dic(dic[key], ROUND)
-            elif type(dic[key]) is matlab.double:
-                dic[key] = self.convert(dic[key], ROUND)
-
-        return dic
 
     def get(self, fields, m=1, d=1, c=1, convert=False):
 

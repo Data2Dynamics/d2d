@@ -556,6 +556,7 @@ function create_graphs_data(options) {
     };
   };
 
+
   if (options.indexOf('fit') > -1 || options.indexOf('create_graphs') > -1) {
     var fit_step = 1;
     var chi2 = ar.chi2fit;
@@ -578,32 +579,9 @@ function create_graphs_data(options) {
   };
   if (options.indexOf('observables') > -1) {
     graphs_data['observables'] = {};
-    for (var i = 0; i < ar.data.yFineSimu[0].length; i++) {
-      graphs_data.observables[ar.data.yNames[0][i]] = [];
-      for (var j in ar.data.tFine) {
-        graphs_data.observables[ar.data.yNames[0][i]].push(
-          [ar.data.tFine[j][0],
-            [ar.data.yFineSimu[j][i],
-              ar.data.ystdFineSimu[j][i]
-            ],
-            ['NaN', 0]
-          ]);
-      };
-      for (var j in ar.data.tExp) {
-        graphs_data.observables[ar.data.yNames[0][i]].push(
-          [ar.data.tExp[j][0],
-            ['NaN', 0],
-            [ar.data.yExp[j][i],
-              ar.data.yExpStd[j][i]
-            ]
-          ]);
-      };
-      graphs_data.observables[ar.data.yNames[0][i]].push(
-        [ar.data.tFine[ar.data.tFine.length - 1][0],
-          ['NaN', 0],
-          ['NaN', 0]
-        ]);
-    };
+    for (var i = 0; i < ar.data.yNames[0].length; i++) {
+        graphs_data.observables[ar.data.yNames[0][i]] = ar.plots.observables[i];
+    }
   };
 
   if (options.indexOf('inputs') > -1) {
@@ -654,8 +632,12 @@ function create_graphs() {
     graphs[plot] = {};
     for (var key in graphs_data[plot]) {
       graphs[plot][key] = [];
+      labels_obs = ['x'];
+      for (var i = 0; i < ar.plot.dLink[0].length; i++) {
+          labels_obs = labels_obs.concat(["Condition" + i, "Condition" + i]);
+      };
       g_settings['observables'] = {
-        labels: ['x', key, key + ' exp'],
+        labels: labels_obs,
         errorBars: true,
         title: key
       };
