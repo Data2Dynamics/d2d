@@ -80,3 +80,4 @@ ar.model(m).data(d).yExp = ar.model(m).data(d).yExpSimu + ...
     randn(size(ar.model(m).data(d).yExpSimu)) .* ar.model(m).data(d).ystdExpSimu;
 ar.model(m).data(d).yExpStd = ar.model(m).data(d).ystdExpSimu;
 ar.model(m).data(d).tLim = ar.model(m).data(d).tLimExp;
+ar.model(m).data(d).tLim(2) = round(max(ar.model(m).data(d).tExp)*1.1);
