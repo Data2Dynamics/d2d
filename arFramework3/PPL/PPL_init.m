@@ -19,8 +19,11 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
         ar.model(m).condition(c).ppl.kind_high_vpl = nan(length(t), size(ar.model(m).condition(c).xExpSimu,2));
         ar.model(m).condition(c).ppl.kind_low_vpl = nan(length(t), size(ar.model(m).condition(c).xExpSimu,2));
         ar.model(m).condition(c).ppl.tstart = nan(length(t), size(ar.model(m).condition(c).xExpSimu,2));
-        ar.model(m).condition(c).ppl.tstart(:,ix) = repmat(t,1,length(ix));
-        
+        if(size(t,1)==1)
+            ar.model(m).condition(c).ppl.tstart(:,ix) = repmat(t',1,length(ix));
+        else
+            ar.model(m).condition(c).ppl.tstart(:,ix) = repmat(t,1,length(ix));
+        end
         ar.model(m).condition(c).xFineLB = nan(length(ar.model(m).condition(c).tFine),size(ar.model(m).condition(c).xExpSimu,2));
         ar.model(m).condition(c).xFineUB = nan(length(ar.model(m).condition(c).tFine),size(ar.model(m).condition(c).xExpSimu,2));
 
@@ -55,7 +58,11 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
             ar.model(m).data(c).ppl.kind_high_vpl = nan(length(t), size(ar.model(m).data(c).yExpSimu,2));
             ar.model(m).data(c).ppl.kind_low_vpl = nan(length(t), size(ar.model(m).data(c).yExpSimu,2));
             ar.model(m).data(c).ppl.tstart = nan(length(t), size(ar.model(m).data(c).yExpSimu,2));
-            ar.model(m).data(c).ppl.tstart(:,ix) = repmat(t,1,length(ix));
+            if(size(t,1)==1)
+                ar.model(m).data(c).ppl.tstart(:,ix) = repmat(t',1,length(ix));
+            else
+                ar.model(m).data(c).ppl.tstart(:,ix) = repmat(t,1,length(ix));
+            end
             
             ar.model(m).data(c).yFineLB = nan(length(ar.model(m).data(c).tFine),size(ar.model(m).data(c).yExpSimu,2));
             ar.model(m).data(c).yFineUB = nan(length(ar.model(m).data(c).tFine),size(ar.model(m).data(c).yExpSimu,2));
