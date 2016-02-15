@@ -456,7 +456,6 @@ function create_events(options) {
         if (x > ar.ub[0][key]) { x = ar.ub[0][key] };
         url_data[ar.pLabel[0][key]] = x;
       };
-      console.log(url_data);
       create_graphs_data(['fit', 'fit_auto']);
     update.update(['set_sliders', 'update_graphs'], url_data, e);
   });
@@ -469,6 +468,11 @@ function create_events(options) {
   $("button[name='fit']").on('click', function(e) {
     $.mobile.loading('show');
     update.update(['fit', 'set_sliders', 'update_graphs'], {}, e);
+  });
+
+  $("button[name='setup']").on('click', function(e) {
+    $.mobile.loading('show');
+    update.update(['setup', 'set_sliders', 'update_graphs'], {}, e);
   });
 
   $("button[name='fit_auto']").on('click', function(e) {
@@ -595,27 +599,20 @@ function create_graphs_data(options) {
     }
   };
 
-  if (options.indexOf('inputs') > -1) {
+  if ((options.indexOf('inputs') > -1) && (ar.model.u[0] != undefined)) {
     graphs_data['inputs'] = {};
-    for (var i = 0; i < ar.condition.uFineSimu[0].length; i++) {
-      graphs_data.inputs[ar.model.u[0][i]] = [];
-      for (var _ in ar.condition.tFine) {
-        graphs_data.inputs[ar.model.u[0][i]].push(
-          [ar.condition.tFine[_][0], ar.condition.uFineSimu[_][i]]
-        );
-      };
+    for (var i = 0; i < ar.model.u[0].length; i++) {
+        graphs_data.inputs[ar.model.u[0][i]] = ar.plots.inputs[i];
     };
   };
 
   if (options.indexOf('variables') > -1) {
     graphs_data['variables'] = {};
-    for (var i = 0; i < ar.plots.xzNames[0].length; i++) {
-        graphs_data.variables[ar.plots.xzNames[0][i]] = ar.plots.variables[i];
-        console.log(ar.plots.variables[i][0]);
+    for (var i = 0; i < ar.model.xNames[0].length; i++) {
+        graphs_data.variables[ar.model.xNames[0][i]] = ar.plots.variables[i];
     };
-
-    return graphs_data
   };
+      return graphs_data
 };
 
 function create_graphs() {
@@ -642,12 +639,14 @@ function create_graphs() {
     for (var key in graphs_data[plot]) {
       graphs[plot][key] = [];
       labels_obs = ['x'];
+      labels_var = ['x'];
       series_settings_obs = {};
       cp = cpal.slice();
       for (var i = 0; i < ar.plot.dLink[0].length; i++) {
           label = "Condition " + i;
           label_exp = "Condition " + i + " exp";
           labels_obs = labels_obs.concat(["Condition " + i, "Condition " + i + " exp"]);
+          labels_var = labels_var.concat(["Condition " + i]);
           opts = {};
           color = cp[cp.push(cp.shift())-1];
           opts[label_exp] = {
@@ -670,7 +669,6 @@ function create_graphs() {
         title: key
       };
       g_settings['observables'] = $.extend(g_settings['observables'], series_settings_obs);
-      console.log(g_settings['observables']);
       g_settings['observables'][key + ' exp'] = { // useless atm
         fillAlpha: 1,
         strokeWidth: 3,
@@ -696,7 +694,7 @@ function create_graphs() {
         title: key
       };
       g_settings['variables'] = {
-        labels: ['x', key],
+        labels: labels_var,
         title: key
       };
       g_settings['chi2plot'] = {

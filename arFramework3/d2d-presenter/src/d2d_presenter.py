@@ -2,6 +2,7 @@ import os
 import re
 import uuid
 import time
+import copy
 import numpy
 from threading import Thread
 from flask import Flask, jsonify, render_template, request, session, Markup
@@ -69,14 +70,14 @@ def start():
     ROUND = int(request.args.get('round'))
 
     d2d_instances.update(
-        {session['uid']: {'d2d': pyd2d.d2d(), 'alive': 1}})
+        {session['uid']: {'d2d': pyd2d.d2d(), 'alive': 1,
+                          'model': os.path.join(os.getcwd(),
+                                                request.args.get('model'))}})
 
     d2d_instances[session['uid']]['d2d'].load_model(
-        os.path.join(os.getcwd(), request.args.get('model')))
+        d2d_instances[session['uid']]['model'], load=1)
 
     d2d_instances[session['uid']]['d2d'].set(D2D_CONFIG)
-    d2d_instances[session['uid']]['d2d'].eval(
-        "arLink, arSimu(true, true, true)")
     d2d_instances[session['uid']]['d2d'].update()
 
     # thread will shut down the matlab instance on inactivity
@@ -118,6 +119,9 @@ def update():
     if 'chi2' in options:
         d2d.eval("arChi2")
 
+    if 'setup' in options:
+        d2d.load_model(d2d_instances[session['uid']]['model'], load=None)
+
     if 'change_mdc' in options:
 
         if request.args.get('name') == 'M':
@@ -128,7 +132,7 @@ def update():
             C = int(request.args.get('value'))
 
     if 'simu_data' in options:
-        d2d.eval('arSimuData, aSimu(true, true, true), arChi2')
+        d2d.eval('arSimuData, arSimu(true, true, true), arChi2')
 
     if 'model' in options:
         try:
@@ -179,11 +183,11 @@ def update():
 
         d2d.update()
 
-        data = select_data2(d2d, options)
+        data = select_data(d2d, options)
         data = d2d.convert_struct(data, ROUND)
 
         # converting data for use in dygraphs.js
-        data = create_dygraphs_data2(data)
+        data = create_dygraphs_data(data)
 
     return jsonify(ar=data, extra=extra)
 
@@ -201,213 +205,10 @@ def console():
 
     return jsonify(console=console)
 
-
-def select_data2(d2d, options):
-
-    ar = d2d.dic2obj()
-
-    data2 = {}
-
-    data2['model'] = {}
-    data2['data'] = {}
-    data2['condition'] = {}
-    data2['config'] = {}
-    data2['fit'] = {}
-
-    try:
-        data2['pLabel'] = ar.pLabel
-        data2['p'] = ar.p
-        data2['lb'] = ar.lb
-        data2['ub'] = ar.ub
-        data2['chi2fit'] = ar.chi2fit
-    except AttributeError:
-        pass
-
-    try:
-        data2['config']['MaxIter'] = ar.config[0].optim[0].MaxIter
-        data2['config']['nFinePoints'] = ar.config[0].nFinePoints
-    except AttributeError:
-        pass
-
-    if 'fit' in options:
-        try:
-            data2['fit']['iter'] = ar.fit[0].iter
-            data2['fit']['iter_count'] = ar.fit[0].iter_count
-            data2['fit']['improve'] = ar.fit[0].improve
-            data2['fit']['p_hist'] = ar.fit[0].p_hist
-            data2['fit']['chi2_hist'] = ar.fit[0].chi2_hist
-            if type(data2['fit']['chi2_hist']) == float:
-                data2['fit']['chi2_hist'] = [[data2['fit']['chi2_hist'], 'NaN']]
-        except:
-            pass
-
-    try:
-        data2['model']['u'] = ar.model[M].u
-        data2['model']['pu'] = ar.model[M].pu
-        data2['model']['py'] = ar.model[M].py
-        data2['model']['pystd'] = ar.model[M].pystd
-        data2['model']['pv'] = ar.model[M].pv
-        data2['model']['pcond'] = ar.model[M].pcond
-        data2['model']['fu'] = ar.model[M].fu
-        data2['model']['name'] = ar.model[M].name
-        data2['model']['xNames'] = ar.model[M].xNames
-        data2['model']['z'] = ar.model[M].z
-        data2['model']['description'] = ar.model[M].description
-    except AttributeError:
-        pass
-
-    try:
-        data2['condition']['tFine'] = ar.model[M].condition[C].tFine
-        data2['condition']['uFineSimu'] = \
-            ar.model[M].condition[C].uFineSimu  # Inputs
-        data2['condition']['xFineSimu'] = \
-            ar.model[M].condition[C].xFineSimu
-    except AttributeError:
-        print("Getting condition data went wrong.")
-        pass
-
-    try:
-        data2['data']['yNames'] = ar.model[M].data[D].yNames
-    except AttributeError:
-        pass
-
-    data2['data']['tFine'] = ar.model[M].data[0].tFine
-    data2['data']['yFineSimu'] = []
-    data2['data']['ystdFineSimu'] = []
-    data2['data']['tExp'] = ar.model[M].data[0].tExp
-    data2['data']['yExp'] = []
-    data2['data']['yExpStd'] = []
-
-    data2['condition']['tFine'] = ar.model[M].condition[0].tFine
-    data2['condition']['xFineSimu'] = []
-    data2['condition']['zFineSimu'] = []
-
-    if isinstance(ar.model[M].plot[D].dLink, (float, int)):
-        dLink = [[ar.model[M].plot[D].dLink]]
-    else:
-        dLink = ar.model[M].plot[D].dLink
-
-    data2['plot'] = {}
-    data2['plot']['dLink'] = dLink
-
-    for h, i in enumerate(dLink[0]):
-        i = int(i)
-        data2['data']['yFineSimu'].append(ar.model[M].data[i-1].yFineSimu)
-        data2['data']['ystdFineSimu'].append(ar.model[M].data[i-1].ystdFineSimu)
-        data2['data']['yExp'].append(ar.model[M].data[i-1].yExp)
-        data2['data']['yExpStd'].append(ar.model[M].data[i-1].yExpStd)
-        data2['condition']['xFineSimu'].append(ar.model[M].condition[h].xFineSimu)
-        data2['condition']['zFineSimu'].append(ar.model[M].condition[h].zFineSimu)
-
-    return data2
-
-def create_dygraphs_data2(data):
-    """Prepares the selected data for use in dygraphs.js.
-        Converts float('nan') to dygraph compatible 'NaN', errors need to
-        be 0 instead. Combibnes all data into a dygraphs compatible data set.
-        """
-
-    for j in range(len(data['data']['yFineSimu'])):
-
-        data['data']['yFineSimu'][j] = [[None if i != i else
-                                        i for i in x] for x in
-                                        data['data']['yFineSimu'][j]]
-        data['data']['ystdFineSimu'][j] = [[0 if i != i else
-                                           i for i in x] for x in
-                                           data['data']['ystdFineSimu'][j]]
-        data['data']['yExp'][j] = [[None if i != i else i for i in x]
-                                   for x in data['data']['yExp'][j]]
-        data['data']['yExpStd'][j] = [[0 if i != i else i for i in x]
-                                      for x in data['data']['yExpStd'][j]]
-
-    # make sure there are no two data entries with same timestamp, and if so
-    # add epsilon to it, since dygraphs might get confused
-    for i, key in enumerate(data['data']['tExp']):
-        while data['data']['tExp'][i] in data['data']['tFine']:
-            data['data']['tExp'][i][0] = numpy.nextafter(
-                data['data']['tExp'][i][0], abs(
-                    2*data['data']['tExp'][i][0] + 1))
-
-    data['plots'] = {}
-    data['plots']['observables'] = []
-
-    for i in range(len(data['data']['yNames'][0])):
-        data['plots']['observables'].append(
-            data['data']['tFine'] + data['data']['tExp'])
-        for j in range(len(data['data']['tFine'])):
-            for k in range(len(data['plot']['dLink'][0])):
-                data['plots']['observables'][i][j] = \
-                    data['plots']['observables'][i][j] + [[
-                        data['data']['yFineSimu'][k][j][i],
-                        data['data']['ystdFineSimu'][k][j][i]], [None, 0]]
-
-        for j in range(len(data['data']['tExp'])):
-            for k in range(len(data['plot']['dLink'][0])):
-                c = j + len(data['data']['tFine'])
-                data['plots']['observables'][i][c] = \
-                    data['plots']['observables'][i][c] + [
-                    [None, None], [data['data']['yExp'][k][j][i],
-                                   data['data']['yExpStd'][k][j][i]]]
-
-        data['plots']['observables'][i].sort(key=lambda x: x[0])
-
-    data['plots']['variables'] = []
-
-    xzFine = []
-
-    for i in range(len(data['plot']['dLink'][0])):
-        xzFine.append([])
-        for j in range(len(data['condition']['tFine'])):
-            xzFine[i].append(data['condition']['xFineSimu'][i][j] +
-                             data['condition']['zFineSimu'][i][j])
-
-    print(len(xzFine))
-    print(len(xzFine[0]))
-    print(len(xzFine[0][0]))
-    print(xzFine[0][0])
-    print(xzFine[0][0][0])
-
-    data['plots']['xzNames'] = [data['model']['xNames'][0] +
-                                data['model']['z'][0]]
-
-    for i in range(len(data['plots']['xzNames'][0])):
-        data['plots']['variables'].append(data['condition']['tFine'])
-        for j in range(len(data['condition']['tFine'])):
-            for k in range(len(data['plot']['dLink'][0])):
-                print(xzFine[k][j][i])
-                data['plots']['variables'][i][j] = \
-                    data['plots']['variables'][i][j] + [xzFine[k][j][i]]
-                    
-    print(len(data['plots']['xzNames'][0]))
-    print(len(data['condition']['tFine']))
-    print(len(data['plot']['dLink'][0]))
-    print("cut")
-    print(len(data['plots']['variables']))
-    print(len(data['plots']['variables'][0]))
-    print(len(data['plots']['variables'][0][0]))
-    print(len(data['plots']['observables'][0]))
-    print(len(data['plots']['observables'][0][0]))
-
-    data['data'].pop('tFine', None)
-    data['data'].pop('yFineSimu', None)
-    data['data'].pop('ystdFineSimu', None)
-    data['data'].pop('tExp', None)
-    data['data'].pop('yExp', None)
-    data['data'].pop('yExpStd', None)
-
-    try:
-        data['fit']['p_hist'] = [['NaN' if i != i else i for i in x]
-                                 for x in data['fit']['p_hist']]
-        data['fit']['chi2_hist'] = [['NaN' if i != i else i for i in x]
-                                    for x in data['fit']['chi2_hist']]
-    except:
-        pass
-
-    return data
-
 def select_data(d2d, options):
 
     ar = d2d.dic2obj()
+
     data = {}
 
     data['model'] = {}
@@ -415,6 +216,8 @@ def select_data(d2d, options):
     data['condition'] = {}
     data['config'] = {}
     data['fit'] = {}
+    data['plot'] = {}
+    data['plots'] = {}
 
     try:
         data['pLabel'] = ar.pLabel
@@ -444,7 +247,7 @@ def select_data(d2d, options):
             pass
 
     try:
-        data['model']['u'] = ar.model[M].u
+        data['model']['u'] = ar.model[M].u  # Input labels
         data['model']['pu'] = ar.model[M].pu
         data['model']['py'] = ar.model[M].py
         data['model']['pystd'] = ar.model[M].pystd
@@ -453,85 +256,171 @@ def select_data(d2d, options):
         data['model']['fu'] = ar.model[M].fu
         data['model']['name'] = ar.model[M].name
         data['model']['xNames'] = ar.model[M].xNames
+        data['model']['z'] = ar.model[M].z  # derived variables labels
         data['model']['description'] = ar.model[M].description
     except AttributeError:
         pass
 
     try:
-        data['condition']['tFine'] = ar.model[M].condition[C].tFine
+        data['condition']['tFine'] = ar.model[M].condition[0].tFine
         data['condition']['uFineSimu'] = \
             ar.model[M].condition[C].uFineSimu  # Inputs
-        data['condition']['xFineSimu'] = \
-            ar.model[M].condition[C].xFineSimu
     except AttributeError:
         pass
 
     try:
-        data['data']['tFine'] = ar.model[M].data[D].tFine
-        data['data']['yFineSimu'] = ar.model[M].data[D].yFineSimu
-        data['data']['ystdFineSimu'] = ar.model[M].data[D].ystdFineSimu
-        data['data']['tExp'] = ar.model[M].data[D].tExp  # exp time poitns
-        data['data']['yExp'] = ar.model[M].data[D].yExp  # exp data values
-        data['data']['yExpStd'] = ar.model[M].data[D].yExpStd
         data['data']['yNames'] = ar.model[M].data[D].yNames
+        data['data']['tFine'] = ar.model[M].data[0].tFine
+        data['data']['tExp'] = ar.model[M].data[0].tExp
     except AttributeError:
         pass
 
-    try:
-        data['data']['test'] = []
-        data['data']['test'].append('ohoo1')
-        data['data']['test'].extend('ohoo2')
-    except AttributeError:
-        pass
+    data['data']['yFineSimu'] = []
+    data['data']['ystdFineSimu'] = []
+    data['data']['yExp'] = []
+    data['data']['yExpStd'] = []
+    data['condition']['xFineSimu'] = []
+    data['condition']['zFineSimu'] = []
 
-    data['data']['yExp2'] = []
+    if isinstance(ar.model[M].plot[D].dLink, (float, int)):
+        data['plot']['dLink'] = [[ar.model[M].plot[D].dLink]]
+    else:
+        data['plot']['dLink'] = ar.model[M].plot[D].dLink
 
-    for i in range(len(ar.model[M].condition)):
-        print("Länge condition:" + str(len(ar.model[M].condition)))
-        print(i)
 
-        if type(ar.model[M].condition[i].dLink) is float:
-            ar.model[M].condition[i].dLink = [[ar.model[M].condition[i].dLink]]
-
-        try:
-            data['data']['yExp2'].append(ar.model[M].data[int(
-                ar.model[M].condition[i].dLink[0][0])-1].yExp)
-        except AttributeError:
-            pass
-
-    data['data']['yExp2'] = []
-
-    print('hallo')
-    print(ar.model[0].condition[0].dLink)
-    print(ar.model[0].condition[0].dLink[0])
+    for h, i in enumerate(data['plot']['dLink'][0]):
+        i = int(i)
+        data['data']['yFineSimu'].append(ar.model[M].data[i-1].yFineSimu)
+        data['data']['ystdFineSimu'].append(ar.model[M].data[i-1].ystdFineSimu)
+        data['data']['yExp'].append(ar.model[M].data[i-1].yExp)
+        data['data']['yExpStd'].append(ar.model[M].data[i-1].yExpStd)
+        data['condition']['xFineSimu'].append(ar.model[M].condition[h].xFineSimu)
+        data['condition']['zFineSimu'].append(ar.model[M].condition[h].zFineSimu)
 
     return data
 
 def create_dygraphs_data(data):
+    """Prepares the selected data for use in dygraphs.js.
+        Converts float('nan') to dygraph compatible values:
+        "'NaN'" creates an actual gap in the data, "None" still allows to
+        connect the seperated points.
+        Errors need to be set to 0 if not available.
+        Sometimes uFineSimu contains float('inf') (javascript: infinity)
+        which does not work in dygraphs - set to None instead.
 
-    # convert float('nan') to dygraph compatible 'NaN', errors need 0
+        Finally combibnes all plot data into a dygraphs compatible data set.
+        """
+
+    for j in range(len(data['data']['yFineSimu'])):
+
+        data['data']['yFineSimu'][j] = [[None if i != i else
+                                        i for i in x] for x in
+                                        data['data']['yFineSimu'][j]]
+        data['data']['ystdFineSimu'][j] = [[None if i != i else
+                                           i for i in x] for x in
+                                           data['data']['ystdFineSimu'][j]]
+        data['data']['yExp'][j] = [[None if i != i else i for i in x]
+                                   for x in data['data']['yExp'][j]]
+        data['data']['yExpStd'][j] = [[None if i != i else i for i in x]
+                                      for x in data['data']['yExpStd'][j]]
+
+        data['condition']['uFineSimu'] = [[None if i == float('inf') else
+                                          i for i in x] for x in
+                                          data['condition']['uFineSimu']]
+
     try:
-        data['data']['yFineSimu'] = [['NaN' if i != i else
-            i for i in x] for x in data['data']['yFineSimu']]
-        data['data']['ystdFineSimu'] = [[0 if i != i else
-            i for i in x] for x in data['data']['ystdFineSimu']]
-        data['data']['yExp'] = [['NaN' if i != i else
-            i for i in x] for x in data['data']['yExp']]
-        data['data']['yExpStd'] = [[0 if i != i else
-            i for i in x] for x in data['data']['yExpStd']]
+        data['fit']['p_hist'] = [['NaN' if i != i else i for i in x]
+                                 for x in data['fit']['p_hist']]
+        data['fit']['chi2_hist'] = [['NaN' if i != i else i for i in x]
+                                    for x in data['fit']['chi2_hist']]
     except:
         pass
 
-    try:
-        data['fit']['p_hist'] = [['NaN' if i != i else
-            i for i in x] for x in data['fit']['p_hist']]
-        data['fit']['chi2_hist'] = [['NaN' if i != i else
-            i for i in x] for x in data['fit']['chi2_hist']]
-    except:
-        pass
+    # make sure there are no two data entries with same timestamp, and if so
+    # add epsilon to it, since dygraphs might get confused
+    for i, key in enumerate(data['data']['tExp']):
+        while data['data']['tExp'][i] in data['data']['tFine']:
+            data['data']['tExp'][i][0] = numpy.nextafter(
+                data['data']['tExp'][i][0], abs(
+                    2*data['data']['tExp'][i][0] + 1))
+
+    data['plots']['observables'] = []
+
+    for i in range(len(data['data']['yNames'][0])):
+        data['plots']['observables'].append(
+            data['data']['tFine'] + data['data']['tExp'])
+        for j in range(len(data['data']['tFine'])):
+            for k in range(len(data['plot']['dLink'][0])):
+                data['plots']['observables'][i][j] = \
+                    data['plots']['observables'][i][j] + [[
+                        data['data']['yFineSimu'][k][j][i],
+                        data['data']['ystdFineSimu'][k][j][i]], [None, 0]]
+
+        for j in range(len(data['data']['tExp'])):
+            for k in range(len(data['plot']['dLink'][0])):
+                c = j + len(data['data']['tFine'])
+                data['plots']['observables'][i][c] = \
+                    data['plots']['observables'][i][c] + [
+                    [None, None], [data['data']['yExp'][k][j][i],
+                                   data['data']['yExpStd'][k][j][i]]]
+
+        data['plots']['observables'][i].sort(key=lambda x: x[0])
+
+
+    if len(data['model']['z']) > 0:
+
+        data['model']['xNames'] = [data['model']['xNames'][0] +
+                                   data['model']['z'][0]]
+
+        xzFine = []
+
+        for i in range(len(data['plot']['dLink'][0])):
+            xzFine.append([])
+            for j in range(len(data['condition']['tFine'])):
+                xzFine[i].append(data['condition']['xFineSimu'][i][j] +
+                                 data['condition']['zFineSimu'][i][j])
+
+        data['condition']['xFineSimu'] = xzFine
+
+    data['plots']['variables'] = []
+
+    for i in range(len(data['model']['xNames'][0])):
+        data['plots']['variables'].append(data['condition']['tFine'].copy())
+        for j in range(len(data['condition']['tFine'])):
+            for k in range(len(data['plot']['dLink'][0])):
+                data['plots']['variables'][i][j] = \
+                    data['plots']['variables'][i][j] + [data['condition']['xFineSimu'][k][j][i]]
+
+    data['plots']['inputs'] = []
+
+    if len(data['model']['u']) > 0:
+        if isinstance(data['model']['u'][0], str):
+            data['condition']['uFineSimu'] = [data['condition']['uFineSimu']]
+        else:
+            data['condition']['uFineSimu'] = data['condition']['uFineSimu']
+
+        if len(data['model']['u']) > 0:
+            for i in range(len(data['model']['u'][0])):
+                data['plots']['inputs'].append(data['condition']['tFine'].copy())
+                for j in range(len(data['condition']['tFine'])):
+                    data['plots']['inputs'][i][j] = \
+                        data['plots']['inputs'][i][j] + \
+                        [data['condition']['uFineSimu'][j][i]]
+
+    # remove unecessary data to lower the traffic
+    data['data'].pop('tFine', None)
+    data['data'].pop('yFineSimu', None)
+    data['data'].pop('ystdFineSimu', None)
+    data['data'].pop('tExp', None)
+    data['data'].pop('yExp', None)
+    data['data'].pop('yExpStd', None)
+    data['condition'].pop('tFine', None)
+    data['condition'].pop('uFineSimu', None)
+    data['condition'].pop('xFineSimu', None)
+    data['condition'].pop('zFineSimu', None)
+    data['condition'].pop('z', None)
 
     return data
-
 
 def editor(option, filename, content=None):
 

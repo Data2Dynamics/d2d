@@ -2,16 +2,33 @@ import io
 import os
 import re
 import matlab.engine
+import numpy
 from math import log10, floor
 import copy
 
 __author__ = 'Clemens Blank'
+
+def convert3(x, ROUND=0):
+
+    conv = numpy.asarray([])
+
+    for _ in range(x.size[0]):
+        lst = numpy.asarray(x._data[_::x.size[0]].tolist())
+
+
+        if ROUND is not 0:
+            lst = numpy.around(lst, ROUND)
+
+        conv = numpy.append(conv, lst)
+    return conv
 
 class mat():
     def __init__(self):
         self.eng = matlab.engine.start_matlab()
         self.cd(os.getcwd())
         self.output_total = ''
+        self.convert_value_vec = numpy.vectorize(self.convert_value, otypes=[numpy.object])
+        self.round_sig_vec = numpy.vectorize(self.round_sig)
 
     def cd(self, arg):
         self.eng.cd(arg, nargout=0)
@@ -66,6 +83,50 @@ class mat():
 
         return conv
 
+    def round_sig(self, x, sig=2):
+        return round(x, sig-int(floor(log10(abs(x))))-1)
+
+    def convert_value(self, x, ROUND=0):
+
+        if x != x:
+            return None
+        elif ROUND != 0 and x != 0:
+            return self.round_sig(x, ROUND)
+        else:
+            return x
+
+    def convert2(self, x, ROUND=0):
+        """Converts data accodring to conver_value()"""
+        return numpy.reshape(numpy.asarray(x._data), (x.size[0], x.size[1]))
+
+    def convert_struct2(self, dic, ROUND=0):
+        """ Converts all matlab.double types in structures into python lists.
+        """
+
+        try:
+            dic = dic.copy()
+
+            if isinstance(dic, dict):
+                for key in dic:
+                    dic[key] = self.convert_struct2(dic[key], ROUND)
+            elif isinstance(dic, list):
+                try:
+                    dic[0][0]  # check if already converted matlab.double
+                    if isinstance(dic[0], matlab.double):
+                        for i in range(len(dic)):
+                            dic[i] = self.convert_struct2(dic[i], ROUND)
+                except:
+                    for i in range(len(dic)):
+                        dic[i] = self.convert_struct2(dic[i], ROUND)
+
+        except:
+            if isinstance(dic, (str, float, bool, int, matlab.logical)):
+                pass
+            elif isinstance(dic, matlab.double):
+                dic = self.convert2(dic, ROUND)
+
+        return dic
+
     def convert_struct(self, dic, ROUND=0):
         """ Converts all matlab.double types in structures into python lists.
         """
@@ -94,8 +155,7 @@ class mat():
 
         return dic
 
-    def round_sig(self, x, sig=2):
-        return round(x, sig-int(floor(log10(abs(x))))-1)
+
 
     def benchmark(self, method, args, runs=200):
         """ Can be used to measure the execution time of methods """
@@ -124,16 +184,30 @@ class d2d(mat):
 
     """Enhances the mat class with d2d specific methods."""
 
-    def load_model(self, path):
+    def load_model(self, path, load=None):
         self.path = os.path.dirname(path)
         self.filename = os.path.basename(path)
         self.cd(self.path)
-        self.eval("arLoad(1)")
-        #self.eval(os.path.splitext(os.path.basename(path))[0])
+
+        if load != None:
+            self.eval("arLoad(" + str(load) + ")")
+        else:
+            print(path)
+            self.eval(os.path.splitext(os.path.basename(path))[0])
+
+        self.eval("arLink, arSimu(true, true, true)")
         self.ar = self.eval('arToPython;', 1)[0]
 
     def fastload(self):
         self.load_model(os.path.join(os.getcwd(), 'models/Raia_CancerResearch2011/Setup.m'))
+        import d2d_presenter
+        self.data = d2d_presenter.select_data(self, '')
+        self.datac2 = self.convert_struct2(self.data)
+        self.datac = self.convert_struct(self.data)
+        print("datac2")
+        print(self.datac2['data']['yExp'])
+        print("datac")
+        print(self.datac['data']['yExp'])
 
     def update(self):
         self.ar = self.eval("arToPython;", 1)[0]
