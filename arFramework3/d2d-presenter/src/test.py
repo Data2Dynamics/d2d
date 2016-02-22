@@ -1,6 +1,18 @@
 from math import log10, floor
+import math
 
-def loopit(data, ROUND=0):
+fields = {'pLabel', 'p', 'lb', 'ub', 'chi2fit', 'config.optim.MaxIter','config.nFinePoints',
+'fit.iter', 'fit.iter_count', 'fit.improve', 'fit.chi2_hist', 'fit.p_hist',
+'model.u', 'model.pu', 'model.py', 'model.pystd', 'model.pv', 'model.pcond', 'model.fu',
+'model.name', 'model.xNames','model.z', 'model.description',
+'model.condition.tFine', 'model.condition.uFineSimu', 'model.data.yNames',
+'model.data.tFine', 'model.data.tExp', 'model.plot.dLink', 'model.data.yFineSimu',
+'model.data.ystdFineSimu', 'model.data.yExp', 'model.data.yExpStd',
+'model.condition.xFineSimu', 'model.condition.zFineSimu'}
+fields2 = {'model.data.tFine', 'model.data.tExp', 'model.plot.dLink', 'model.data.yFineSimu', 'model.data.ystdFineSimu',
+             'model.data.yExp', 'model.data.yExpStd', 'model.condition.xFineSimu', 'model.condition.zFineSimu'}
+
+def loopit(data):
     """Prepares the selected data for use in dygraphs.js.
         Converts float('nan') to dygraph compatible values:
         "'NaN'" creates an actual gap in the data, "None" still allows to
@@ -14,24 +26,74 @@ def loopit(data, ROUND=0):
 
     for j in range(len(data['data']['yFineSimu'])):
 
-        data['data']['yFineSimu'][j] = [[convert_value(i, ROUND) for i in x] for x in
+        data['data']['yFineSimu'][j] = [[convert_value(i) for i in x] for x in
                                         data['data']['yFineSimu'][j]]
-        data['data']['ystdFineSimu'][j] = [[convert_value(i, ROUND) for i in x] for x in
+        data['data']['ystdFineSimu'][j] = [[convert_value(i) for i in x] for x in
                                            data['data']['ystdFineSimu'][j]]
-        data['data']['yExp'][j] = [[convert_value(i, ROUND) for i in x] for x in data['data']['yExp'][j]]
-        data['data']['yExpStd'][j] = [[convert_value(i, ROUND) for i in x] for x in data['data']['yExpStd'][j]]
+        data['data']['yExp'][j] = [[convert_value(i) for i in x] for x in data['data']['yExp'][j]]
+        data['data']['yExpStd'][j] = [[convert_value(i) for i in x] for x in data['data']['yExpStd'][j]]
 
-        data['condition']['uFineSimu'] = [[convert_value(i, ROUND) for i in x] for x in
+        data['condition']['uFineSimu'] = [[convert_value(i) for i in x] for x in
                                           data['condition']['uFineSimu']]
 
     return data
 
-def convert_value(x, ROUND=0):
+def loopit2(data):
+    """Prepares the selected data for use in dygraphs.js.
+        Converts float('nan') to dygraph compatible values:
+        "'NaN'" creates an actual gap in the data, "None" still allows to
+        connect the seperated points.
+        Errors need to be set to 0 if not available.
+        Sometimes uFineSimu contains float('inf') (javascript: infinity)
+        which does not work in dygraphs - set to None instead.
 
-    if x != x:
+        Finally combibnes all plot data into a dygraphs compatible data set.
+        """
+
+    for j in range(len(data['model.data.yFineSimu'])):
+
+        data['model.data.yFineSimu'][j] = [[convert_value(i) for i in x] for x in
+                                        data['model.data.yFineSimu'][j]]
+        data['model.data.ystdFineSimu'][j] = [[convert_value(i) for i in x] for x in
+                                           data['model.data.ystdFineSimu'][j]]
+        data['model.data.yExp'][j] = [[convert_value(i) for i in x] for x in data['model.data.yExp'][j]]
+        data['model.data.yExpStd'][j] = [[convert_value(i) for i in x] for x in data['model.data.yExpStd'][j]]
+
+        data['model.condition.uFineSimu'][j] = [[convert_value(i) for i in x] for x in
+                                          data['model.condition.uFineSimu'][j]]
+        data['model.condition.xFineSimu'][j] = [[convert_value(i) for i in x] for x in
+                                          data['model.condition.xFineSimu'][j]]
+        data['model.condition.zFineSimu'][j] = [[convert_value(i) for i in x] for x in
+                                          data['model.condition.zFineSimu'][j]]
+
+
+    return data
+
+def loopit3(data):  # 10ms
+
+    for j in range(len(data['data']['yFineSimu'])):
+
+        data['data']['yFineSimu'][j] = [[convert_value(i) for i in x] for x in
+                                        data['data']['yFineSimu'][j]]
+        data['data']['ystdFineSimu'][j] = [[convert_value(i) for i in x] for x in
+                                           data['data']['ystdFineSimu'][j]]
+        data['data']['yExp'][j] = [[convert_value(i) for i in x]
+                                   for x in data['data']['yExp'][j]]
+        data['data']['yExpStd'][j] = [[convert_value(i) for i in x]
+                                      for x in data['data']['yExpStd'][j]]
+
+        data['condition']['uFineSimu'] = [[convert_value(i) for i in x] for x in
+                                          data['condition']['uFineSimu']]
+        data['condition']['zFineSimu'] = [[convert_value(i) for i in x] for x in
+                                          data['condition']['zFineSimu']]
+
+    return data
+
+
+def convert_value(x):
+
+    if (x != x) or (math.isinf(x)):
         return None
-    elif ROUND != 0 and x != 0:
-        return round_sig(x, ROUND)
     else:
         return x
 

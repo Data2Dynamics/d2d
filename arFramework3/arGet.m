@@ -1,4 +1,4 @@
-% data = arGet(fields, m, d, c, struct)
+% data = arGet(fields, m, dset, sig, struct)
 %
 %   Returns data from ar struct according to a cell of field names
 % 
@@ -21,7 +21,7 @@
 % for convenience:
 %   arGet('ar.model') == arGet('model')
 
-function data = arGet(fields, m, d, c, struct)
+function data = arGet(fields, m, dset, sig, struct)
 
 global ar
 
@@ -29,15 +29,15 @@ global ar
 switch nargin
     case 1
         m = 1;
-        d = 1;
-        c = 1;
+        dset = 1;
+        sig = false;
         struct = ar;
     case 2
-        d = 1;
-        c = 1;
+        dset = 1;
+        sig = false;
         struct = ar;
     case 3
-        c = 1;
+        sig = false;
         struct = ar;
     case 4
         struct = ar;
@@ -64,14 +64,38 @@ for i=1:length(fields)
         
             fields(i) = {regexprep(char(fields(i)),'^data.', '')};
             S = substruct_arg(fields(i));
-            data{i}=subsref(struct.model(m).data(d), substruct(S{:}));
+            
+            data{i} = cell(1, length(struct.model(m).plot(dset).dLink));
+            for j=struct.model(m).plot(dset).dLink
+                data{i}{j}=subsref(struct.model(m).data(j), substruct(S{:}));
+                
+                if isnumeric(data{i}{j}) && sig
+                    
+                    data{i}{j} = chop(data{i}{j}, sig);
+                end
+            end
             
         elseif(regexp(char(fields(i)), '^condition.'))
         
             fields(i) = {regexprep(char(fields(i)),'^condition.', '')};
             S = substruct_arg(fields(i));
-            data{i}=subsref(struct.model(m).condition(c), substruct(S{:}));
+            
+            data{i} = cell(1, length(struct.model(m).condition));
+            for j=1:length(struct.model(m).condition)
+                data{i}{j}=subsref(struct.model(m).condition(j), substruct(S{:}));
                 
+                if isnumeric(data{i}{j}) && sig
+                    data{i}{j} = chop(data{i}{j}, sig);
+                end
+            end
+        elseif(regexp(char(fields(i)), '^plot.'))   
+            fields(i) = {regexprep(char(fields(i)),'^plot.', '')};
+            S = substruct_arg(fields(i));
+            
+            data{i} = cell(1, length(struct.model(m).plot));
+            for j=1:length(struct.model(m).plot)
+                data{i}{j}=subsref(struct.model(m).plot(j), substruct(S{:}));
+            end
         else
             S = substruct_arg(fields(i));
             data{i}=subsref(struct.model(m), substruct(S{:}));
