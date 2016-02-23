@@ -270,7 +270,7 @@ for jm=1:length(ar.model)
     if ( length( ar.model(jm).c ) > 1 )       
         lp(fid, '\\begin{table}[h]');
         lp(fid, '\\begin{tabular}{@{} *2l @{}}\\toprule');
-        lp(fid, '\\titlerowcol \\textbf{Compartment} & \\textbf{Volume}\\\\\\midrule' );
+        lp(fid, '\\titlerowcol \\textbf{Compartment} & \\textbf{Volume}\\tabularnewline\\midrule' );
         for jc = 1 : length( ar.model(jm).c )
             volP = ar.model(jm).pc{jc};
             if ( isempty( str2num( volP ) ) ) %#ok
@@ -299,7 +299,7 @@ for jm=1:length(ar.model)
         lp(fid, '', length(ar.model(jm).x) );
         lp(fid, '\\begin{table}[h]');
         lp(fid, '\\begin{tabular}{@{} *%dl @{}}\\toprule', nC);
-        lp(fid, '\\titlerowcol \\textbf{Variable} & \\textbf{Unit} & \\textbf{Compartment} & \\textbf{Initial Condition} %s\\\\\\midrule', headerChunk );
+        lp(fid, '\\titlerowcol \\textbf{Variable} & \\textbf{Unit} & \\textbf{Compartment} & \\textbf{Initial Condition} %s\\tabularnewline\\midrule', headerChunk );
         for jx = 1 : length( ar.model(jm).x )
             if ( ( usesPreEquilibration > 0 ) && preEq(jx) && ( sum( preEq ) ~= length( ar.model(jm).x ) ) )
                 asterisk = '*';
@@ -343,7 +343,7 @@ for jm=1:length(ar.model)
             lp(fid, '\\begin{table}');
             startFlexbox(fid, 'ainputbox');
             lp(fid, '\\begin{tabular}{@{} *%dl @{}}\\toprule', nC);
-            lp(fid, '\\titlerowcol \\textbf{Input} & \\textbf{Unit} & \\textbf{Default equation} %s\\\\\\midrule', headerChunk );
+            lp(fid, '\\titlerowcol \\textbf{Input} & \\textbf{Unit} & \\textbf{Default equation} %s\\tabularnewline\\midrule', headerChunk );
             if ( ~strcmp( headerChunk, '' ) )
                 for ku = 1 : length( us )
                     ju = us(ku);
@@ -446,7 +446,7 @@ for jm=1:length(ar.model)
     lp(fid, '\\begin{table}[h]');
     startFlexbox(fid, 'fluxbox');
     lp(fid, '\\begin{tabular}{@{} *5l @{}}\\toprule');
-    lp(fid, '\\titlerowcol \\textbf{Flux} & \\textbf{Equation} %s\\\\\\midrule', headerChunk );
+    lp(fid, '\\titlerowcol \\textbf{Flux} & \\textbf{Equation} %s\\tabularnewline\\midrule', headerChunk );
     for jv = 1 : length( ar.model(jm).fv )
         if ~strcmp( headerChunk, '' )
             lp(fid, '%s$v_{%d}$ & $%s$ & %s\\\\', alternate(jv), jv, myFormulas(ar.model(jm).fv{jv}, jm), ar.model(jm).v{jv} );
@@ -497,7 +497,7 @@ for jm=1:length(ar.model)
         lp(fid, '\t\\centering');
         startFlexbox(fid, 'obstable' );
         lp(fid, '\\begin{tabular}{@{} lll @{}}\\toprule');
-        lp(fid, '\\titlerowcol \\textbf{Observable} & & \\textbf{Equations} \\\\\\midrule' );                        
+        lp(fid, '\\titlerowcol \\textbf{Observable} & & \\textbf{Equations} \\tabularnewline\\midrule' );                        
 
         for jy = 1 : length( ar.model(jm).y )
             strtmp = myFormulas(ar.model(jm).fy{jy}, jm);
@@ -505,9 +505,9 @@ for jm=1:length(ar.model)
                 strtmp = ['\mathrm{log}_{10}(' strtmp ')'];
             end            
             if ( strcmp( ar.model(jm).yNames{jy}, '' ) )
-                lp(fid, ' %s & y & $%s$ \\\\ \\multirow{-2}{*}{%s%s [%s]} & $\\sigma$ & $%s$ \\\\', alternate(jy), strtmp, alternate(jy), strrep(ar.model(jm).y{jy}, '_', '\_\-'), ar.model(jm).yUnits{jy,2}, myFormulas(ar.model(jm).fystd{jy}, jm) );
+                lp(fid, ' %s & y & $%s$ \\tabularnewline %s \\multirow{-2}{*}{%s [%s]} & $\\sigma$ & $%s$ \\tabularnewline\n', alternate(jy), strtmp, alternate(jy), strrep(ar.model(jm).y{jy}, '_', '\_\-'), arNameTrafo( ar.model(jm).yUnits{jy,2} ), myFormulas(ar.model(jm).fystd{jy}, jm) );
             else
-                lp(fid, ' %s & y & $%s$ \\\\ \\multirow{-2}{*}{%s%s [%s]} & $\\sigma$ & $%s$ \\\\', alternate(jy), strtmp, alternate(jy), ar.model(jm).yNames{jy}, ar.model(jm).yUnits{jy,2}, myFormulas(ar.model(jm).fystd{jy}, jm) );
+                lp(fid, ' %s & y & $%s$ \\tabularnewline %s \\multirow{-2}{*}{%s [%s]} & $\\sigma$ & $%s$ \\tabularnewline\n', alternate(jy), strtmp, alternate(jy), ar.model(jm).yNames{jy}, arNameTrafo( ar.model(jm).yUnits{jy,2} ), myFormulas(ar.model(jm).fystd{jy}, jm) );
             end
         end
         lp(fid, '\\botrule\\end{tabular}');
@@ -611,23 +611,23 @@ for jm=1:length(ar.model)
     lp(fid, '\t{\\footnotesize');
     lp(fid, '\t\t\\begin{tabular}{llllllll}');
     lp(fid, '\t\t\t\\toprule');
-    lp(fid, '\\titlerowcol \t\t\t & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & fitted \\\\');
+    lp(fid, '\\titlerowcol \t\t\t & name & $\\theta_{min}$ & $\\hat\\theta$ & $\\theta_{max}$ & log & non-log $\\hat \\theta$ & fitted \\tabularnewline');
     lp(fid, '\t\t\t\\midrule');
     count = 1;
     for dp=1:length(dynPars)   
         j = dynPars(dp);
         if(ar.qFit(j)==1)
             if(ar.p(j) - ar.lb(j) < 0.1 || ar.ub(j) - ar.p(j) < 0.1)
-                lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.0g} & \\color{red}{%+8.4f} & \\color{red}{%+8.0g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\\\', ...
+                lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.0g} & \\color{red}{%+8.4f} & \\color{red}{%+8.0g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\tabularnewline', ...
                     alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                     ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
             else
-                lp(fid, '%s\t\t\t%i & %s & {%+8.0g} & {%+8.4f} & {%+8.0g} & %i & %s & %i \\\\', ...
+                lp(fid, '%s\t\t\t%i & %s & {%+8.0g} & {%+8.4f} & {%+8.0g} & %i & %s & %i \\tabularnewline', ...
                     alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                     ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
             end
         else
-            lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.0g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.0g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\\\', ...
+            lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.0g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.0g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\tabularnewline', ...
                 alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                 ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
         end
@@ -672,7 +672,7 @@ for jm=1:length(ar.model)
             lp(fid, '', length(ar.model(jm).x) );
             lp(fid, '\\begin{table}[h]');
             lp(fid, '\\begin{tabularx}{\\textwidth}{@{} lp{.8\\textwidth} @{}}\\toprule');
-            lp(fid, '\\titlerowcol \\textbf{Variable} & \\textbf{Datasets}\\\\\\midrule' );
+            lp(fid, '\\titlerowcol \\textbf{Variable} & \\textbf{Datasets}\\tabularnewline\\midrule' );
             asterisks = 0;
             for jx = 1 : length( ar.model(jm).x )
                 dS = arFindData( ar, jm, 'state', ar.model(jm).x{jx} );
@@ -697,7 +697,7 @@ for jm=1:length(ar.model)
                 end
                 % Only include lines with data
                 if ( strcmp(str, '') == 0 )
-                    lp(fid, '%s%s & %s\\\\', alternate(jx), strrep(ar.model(jm).x{jx}, '_', '\_'), str );
+                    lp(fid, '%s%s & %s\\tabularnewline', alternate(jx), strrep(ar.model(jm).x{jx}, '_', '\_'), str );
                 end
             end
             lp(fid, '\\botrule\\end{tabularx}');
@@ -846,19 +846,19 @@ for jm=1:length(ar.model)
                             lp(fid, '\\begin{table}');
                             lp(fid, '\t\\centering');
                             lp(fid, '\\begin{tabular}{@{} *%dl @{}}\\toprule', nC);
-                            lp(fid, '\\titlerowcol \\textbf{Input} & \\textbf{Unit} & \\textbf{Modified equation}\\\\\\midrule' );
+                            lp(fid, '\\titlerowcol \\textbf{Input} & \\textbf{Unit} & \\textbf{Modified equation}\\tabularnewline\\midrule' );
                             sk = find(qmod);
                             if ( strcmp( headerChunk, '' ) )
                                 for ku = 1 : length( sk )
                                     ju = sk(ku);
                                     inp = repFunc( ar.model(jm).data(jd).fu{ju}, 'monospline10' );
-                                    lp(fid, '%s%s & %s [%s] & $%s$\\\\', strrep(ar.model(jm).u{ju}, '_', '\_'), alternate(ku), ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}, myFormulas(inp, jm) );
+                                    lp(fid, '%s%s & %s [%s] & $%s$\\tabularnewline', alternate(ku), strrep(ar.model(jm).u{ju}, '_', '\_'), ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}, myFormulas(inp, jm) );
                                 end                            
                             else
                                 for ku = 1 : length( sk )
                                     ju = sk(ku);
                                     inp = repFunc( ar.model(jm).data(jd).fu{ju}, 'monospline10' );
-                                    lp(fid, '%s%s & %s [%s] & $%s$ & %s\\\\', strrep(ar.model(jm).u{ju}, '_', '\_'), alternate(ku), ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}, myFormulas(inp, jm), ar.model(jm).data(jd).uNames{ku} );
+                                    lp(fid, '%s%s & %s [%s] & $%s$ & %s\\tabularnewline', alternate(ku), strrep(ar.model(jm).u{ju}, '_', '\_'), ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}, myFormulas(inp, jm), ar.model(jm).data(jd).uNames{ku} );
                                 end
                             end
                             lp(fid, '\\botrule\\end{tabular}');
@@ -901,7 +901,7 @@ for jm=1:length(ar.model)
                             box = sprintf('%sobsmod',latexIdentifier(jplot)) ;
                             startFlexbox(fid,  box );
                             lp(fid, '\\begin{tabular}{@{} lll @{}}\\toprule');
-                            lp(fid, '\\titlerowcol \\textbf{Observable} & & \\textbf{Equations} \\\\\\midrule' );                        
+                            lp(fid, '\\titlerowcol \\textbf{Observable} & & \\textbf{Equations} \\tabularnewline\\midrule' );                        
 
                             sk = find(qmod);
                             for ky = 1 : length( sk )
@@ -911,9 +911,9 @@ for jm=1:length(ar.model)
                                     strtmp = ['\mathrm{log}_{10}(' strtmp ')'];
                                 end            
                                 if ( strcmp( ar.model(jm).data(jd).yNames{jy}, '' ) )
-                                    lp(fid, ' %s & y & $%s$ \\\\ \\multirow{-2}{*}{%s%s [%s]} & $\\sigma$ & $%s$ \\\\', alternate(ky), strtmp, alternate(jy), strrep(ar.model(jm).data(jd).y{jy}, '_', '\_\-'), ar.model(jm).yUnits{jy,2}, myFormulas(ar.model(jm).data(jd).fystd{jy}, jm) );
+                                    lp(fid, ' %s & y & $%s$ \\tabularnewline %s \\multirow{-2}{*}{%s [%s]} & $\\sigma$ & $%s$ \\tabularnewline', alternate(ky), strtmp, alternate(jy), strrep(ar.model(jm).data(jd).y{jy}, '_', '\_\-'), arNameTrafo( ar.model(jm).yUnits{jy,2} ), myFormulas(ar.model(jm).data(jd).fystd{jy}, jm) );
                                 else
-                                    lp(fid, ' %s & y & $%s$ \\\\ \\multirow{-2}{*}{%s%s [%s]} & $\\sigma$ & $%s$ \\\\', alternate(ky), strtmp, alternate(jy), strrep(ar.model(jm).data(jd).yNames{jy}, '_', '\_\-'), ar.model(jm).yUnits{jy,2}, myFormulas(ar.model(jm).data(jd).fystd{jy}, jm) );
+                                    lp(fid, ' %s & y & $%s$ \\tabularnewline %s \\multirow{-2}{*}{%s [%s]} & $\\sigma$ & $%s$ \\tabularnewline', alternate(ky), strtmp, alternate(jy), strrep(ar.model(jm).data(jd).yNames{jy}, '_', '\_\-'), arNameTrafo( ar.model(jm).yUnits{jy,2} ), myFormulas(ar.model(jm).data(jd).fystd{jy}, jm) );
                                 end
                             end
                             lp(fid, '\\botrule\\end{tabular}');
@@ -932,7 +932,7 @@ for jm=1:length(ar.model)
                             box = sprintf('%sobsadd',latexIdentifier(jplot)) ;
                             startFlexbox(fid,  box);
                             lp(fid, '\\begin{tabular}{@{} lll @{}}\\toprule');
-                            lp(fid, '\\titlerowcol \\textbf{Observable} & & \\textbf{Equations} \\\\\\midrule' );                        
+                            lp(fid, '\\titlerowcol \\textbf{Observable} & & \\textbf{Equations} \\tabularnewline\\midrule' );                        
 
                             sk = find(qadd);
                             for ky = 1 : length( sk )
@@ -943,9 +943,9 @@ for jm=1:length(ar.model)
                                 end
 
                                 if ( strcmp( ar.model(jm).data(jd).yNames{jy}, '' ) )
-                                    lp(fid, ' %s & y & $%s$ \\\\ \\multirow{-2}{*}{%s%s [%s]} & $\\sigma$ & $%s$ \\\\', alternate(ky), strtmp, alternate(jy), strrep(ar.model(jm).data(jd).y{jy}, '_', '\_\-'), ar.model(jm).data(jd).yUnits{jy,2}, myFormulas(ar.model(jm).data(jd).fystd{jy}, jm) );
+                                    lp(fid, ' %s & y & $%s$ \\tabularnewline %s \\multirow{-2}{*}{%s [%s]} & $\\sigma$ & $%s$ \\tabularnewline', alternate(ky), strtmp, alternate(jy), strrep(ar.model(jm).data(jd).y{jy}, '_', '\_\-'), arNameTrafo( ar.model(jm).data(jd).yUnits{jy,2} ), myFormulas(ar.model(jm).data(jd).fystd{jy}, jm) );
                                 else
-                                    lp(fid, ' %s & y & $%s$ \\\\ \\multirow{-2}{*}{%s%s [%s]} & $\\sigma$ & $%s$ \\\\', alternate(ky), strtmp, alternate(jy), strrep(ar.model(jm).data(jd).yNames{jy}, '_', '\_\-'), ar.model(jm).data(jd).yUnits{jy,2}, myFormulas(ar.model(jm).data(jd).fystd{jy}, jm) );
+                                    lp(fid, ' %s & y & $%s$ \\tabularnewline %s \\multirow{-2}{*}{%s [%s]} & $\\sigma$ & $%s$ \\tabularnewline', alternate(ky), strtmp, alternate(jy), strrep(ar.model(jm).data(jd).yNames{jy}, '_', '\_\-'), arNameTrafo( ar.model(jm).data(jd).yUnits{jy,2} ), myFormulas(ar.model(jm).data(jd).fystd{jy}, jm) );
                                 end
                             end
                             lp(fid, '\\botrule\\end{tabular}');
@@ -1029,10 +1029,10 @@ for jm=1:length(ar.model)
                         % Alright, we assembled all the data, start printing
                         % this thing
                         lp(fid, '\t%s', head);
-                        lp(fid, '\\titlerowcol \\textbf{Parameter} & \\multicolumn{%d}{c}{\\textbf{Condition values}} \\\\\\midrule', length(condTrans.(vars{1})) );
+                        lp(fid, '\\titlerowcol \\textbf{Parameter} & \\multicolumn{%d}{c}{\\textbf{Condition values}} \\tabularnewline\\midrule', length(condTrans.(vars{1})) );
                         for a = 1 : length( str )
                             if ( ~isempty(str{a}) )
-                                lp(fid, '\t\t%s\\\\', str{a});
+                                lp(fid, '\t\t%s\\tabularnewline', str{a});
                             end
                         end
                         lp(fid, '\t%s', tail);
