@@ -21,6 +21,9 @@
 %   AlternateFont     - Use a different font for the report
 %   TexPlots          - Use the original tex files for plotting rather than
 %                       the pdfs
+%   ExcludeDynPars    - Provide cell array of masks to exclude from
+%                       parameter shortlist. Cell array must be provided
+%                       as subsequent argument.
 
 function arMiniReport(varargin)
 
@@ -28,7 +31,8 @@ global ar
 
 warning( 'This report functionality is currently in alpha status. Please use arReport instead.' );
 
-switches = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots' };
+switches    = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots', 'ExcludeDynPars' };
+extraArgs   = [         0,            0,               0,                0,                0,             0,               0,               0,         0,                 1 ];
 descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Plotting all fitted Ys', '' }, ...
                     { 'Omitting non fitted Ys from report', '' }, ...
@@ -36,8 +40,9 @@ descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Omitting likelihood values from report', 'Including likelihood values in report' }, ...
                     { 'Displaying RANDOM transforms explicitly', 'Not displaying RANDOM transforms explicitly' }, ...
                     { 'Not shortening data parameters with filenames.', 'Shortening data parameters with filenames (ones that use the _filename tag)' }, ...
-                    { 'Using alternate font', '' } ...
-                    { 'Using tex files for incorporating plots', 'Reverting to pre-generated PDFs for plots' }
+                    { 'Using alternate font', '' }, ...
+                    { 'Using tex files for incorporating plots', 'Reverting to pre-generated PDFs for plots' }, ...
+                    { 'Excluding specific parameters', '' }, ...
                     };
 
 if( (nargin > 0) && max( strcmpi( varargin{1}, switches ) ) == 0 )
@@ -47,7 +52,7 @@ else
     project_name = 'Data 2 Dynamics Software -- Modeling Report';
 end
 
-opts = argSwitch( switches, descriptions, varargin );
+opts = argSwitch( switches, extraArgs, descriptions, varargin );
 if(isempty(ar))
     error('please initialize by arInit')
 end
@@ -269,6 +274,7 @@ for jm=1:length(ar.model)
     %% compartments
     if ( length( ar.model(jm).c ) > 1 )       
         lp(fid, '\\begin{table}[h]');
+        lp(fid, '\\centering');
         lp(fid, '\\begin{tabular}{@{} *2l @{}}\\toprule');
         lp(fid, '\\titlerowcol \\textbf{Compartment} & \\textbf{Volume}\\tabularnewline\\midrule' );
         for jc = 1 : length( ar.model(jm).c )
@@ -616,20 +622,23 @@ for jm=1:length(ar.model)
     count = 1;
     for dp=1:length(dynPars)   
         j = dynPars(dp);
-        if(ar.qFit(j)==1)
-            if(ar.p(j) - ar.lb(j) < 0.1 || ar.ub(j) - ar.p(j) < 0.1)
-                lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.0g} & \\color{red}{%+8.4f} & \\color{red}{%+8.0g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\tabularnewline', ...
-                    alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
-                    ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
+        if ( ~masktest( ar.pLabel{j}, opts.excludedynpars ) )
+            count = count + 1;
+            if(ar.qFit(j)==1)
+                if(ar.p(j) - ar.lb(j) < 0.1 || ar.ub(j) - ar.p(j) < 0.1)
+                    lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.0g} & \\color{red}{%+8.4f} & \\color{red}{%+8.0g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\tabularnewline', ...
+                        alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
+                        ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
+                else
+                    lp(fid, '%s\t\t\t%i & %s & {%+8.0g} & {%+8.4f} & {%+8.0g} & %i & %s & %i \\tabularnewline', ...
+                        alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
+                        ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
+                end
             else
-                lp(fid, '%s\t\t\t%i & %s & {%+8.0g} & {%+8.4f} & {%+8.0g} & %i & %s & %i \\tabularnewline', ...
+                lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.0g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.0g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\tabularnewline', ...
                     alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                     ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
             end
-        else
-            lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.0g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.0g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\tabularnewline', ...
-                alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
-                ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
         end
     end
     lp(fid, '\t\t\t\\botrule');
@@ -1899,22 +1908,41 @@ function str = alternate(i)
     end
     
     
-function [opts] = argSwitch( switches, description, varargin )
+function [opts] = argSwitch( switches, extraArgs, description, varargin )
 
     for a = 1 : length(switches)
-        opts.(lower(switches{a})) = 0;
+        if ( extraArgs(a) == 0 )
+            opts.(lower(switches{a})) = 0;
+        else
+            opts.(lower(switches{a})) = {};
+        end
     end
     
+    a = 1;
     if ~isempty( varargin{1} )
-        for a = 1 : length( varargin{1} )
+        while( a <= length( varargin{1} ) )
             if ( max( strcmpi( switches, varargin{1}{a} ) ) == 0 )
                 error( 'Invalid switch argument was provided %s', varargin{1}{a} );
             end
-            opts.(lower(varargin{1}{a})) = 1;
+            if ( extraArgs( strcmpi( switches, varargin{1}{a} ) ) == 0 )
+                opts.(lower(varargin{1}{a})) = 1;
+            else
+                try
+                    opts.(lower(varargin{1}{a})) = varargin{1}{a+1};
+                    a = a + 1;
+                catch
+                    error( 'Did not provide arguments for flag %s', varargin{1}{a} );
+                end
+            end
+            a = a + 1;
         end
     end
     for a = 1 : length( switches )
-        fprintf( '%s\n', description{a}{2-opts.(lower(switches{a}))} );
+        if ( extraArgs(a) == 0 )
+            fprintf( '%s\n', description{a}{2-opts.(lower(switches{a}))} );
+        else
+            fprintf( '%s\n', description{a}{1+isempty(opts.(lower(switches{a})))} );
+        end
     end
     
     
@@ -1950,4 +1978,14 @@ function qF = isFitted(jm, jp)
     qF = 0;
     for jd = 1 : length( ar.model(jm).plot(jp).dLink )
         qF = max( union( qF, ar.model(jm).data(ar.model(jm).plot(jp).dLink(jd)).qFit ) );
+    end
+    
+function match = masktest( str, masks )
+    match = 0;
+    if ( iscell(masks) )
+        for a = 1 : length( masks )
+            match = max( [ match, regexp( str, masks{a} ) > 0 ] );
+        end
+    else
+        match = max( [ match, regexp( str, masks ) > 0 ] );
     end
