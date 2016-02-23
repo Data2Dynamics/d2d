@@ -4,7 +4,9 @@ import re
 import matlab.engine
 import numpy
 from math import log10, floor
+import math
 import copy
+import test
 
 __author__ = 'Clemens Blank'
 
@@ -74,32 +76,39 @@ class mat():
 
         for _ in range(x.size[0]):
             lst = x._data[_::x.size[0]].tolist()
-
-            if ROUND is not 0:
-                lst = [self.round_sig(elem, ROUND) if elem != 0 and
-                       elem == elem else elem for elem in lst]
-
             conv.append(lst)
 
         return conv
 
     def round_sig(self, x, sig=2):
+
         return round(x, sig-int(floor(log10(abs(x))))-1)
 
-    def convert_value(self, x, ROUND=0):
+    def convert_value(self, x):
 
-        if x != x:
+        if (x != x) or (math.isinf(x)):
             return None
-        elif ROUND != 0 and x != 0:
-            return self.round_sig(x, ROUND)
         else:
             return x
 
-    def convert2(self, x, ROUND=0):
-        """Converts data accodring to conver_value()"""
-        return numpy.reshape(numpy.asarray(x._data), (x.size[0], x.size[1]))
+    def convert2(self, x, key=None):
+        """ removes the matlab double type"""
+        #return self.convert(x)
+        # return [x._data[i:i+x.size[0]] for i in range(0,len(x._data), x._size[0])] # 33ms mit arrays
+        #return list(zip(*[iter(x._data.tolist())]*x.size[0]))  # (35ms) mit tuplen
+        #return [x._data[i:i+x.size[0]] for i in range(0,len(x._data.tolist()), x._size[0])] # 36ms mit arrays
+        #return [x._data.tolist()[x.size[0]*i: x.size[0]*(i+1)] for i in range(x.size[1])] # --> way to slow (120ms to 32ms)
 
-    def convert_struct2(self, dic, ROUND=0):
+        return numpy.reshape(numpy.asarray(x._data), (x.size[1], x.size[0])).tolist() # (75ms)
+
+        #num = numpy.reshape(numpy.asarray(x._data), (x.size[1], x.size[0])).tolist()
+
+        # to speed it up, only the areas with graph data gets converted
+        #if key.startswith('model.condition.') or key.startswith('model.data.'):
+        #    num = self.convert_value_vec(num).tolist()
+        #return num  # (40ms)
+
+    def convert_struct2(self, dic):
         """ Converts all matlab.double types in structures into python lists.
         """
 
@@ -108,22 +117,22 @@ class mat():
 
             if isinstance(dic, dict):
                 for key in dic:
-                    dic[key] = self.convert_struct2(dic[key], ROUND)
+                    dic[key] = self.convert_struct2(dic[key])
             elif isinstance(dic, list):
                 try:
                     dic[0][0]  # check if already converted matlab.double
                     if isinstance(dic[0], matlab.double):
                         for i in range(len(dic)):
-                            dic[i] = self.convert_struct2(dic[i], ROUND)
+                            dic[i] = self.convert_struct2(dic[i])
                 except:
                     for i in range(len(dic)):
-                        dic[i] = self.convert_struct2(dic[i], ROUND)
+                        dic[i] = self.convert_struct2(dic[i])
 
         except:
             if isinstance(dic, (str, float, bool, int, matlab.logical)):
                 pass
             elif isinstance(dic, matlab.double):
-                dic = self.convert2(dic, ROUND)
+                dic = self.convert2(dic)
 
         return dic
 
@@ -192,7 +201,6 @@ class d2d(mat):
         if load != None:
             self.eval("arLoad(" + str(load) + ")")
         else:
-            print(path)
             self.eval(os.path.splitext(os.path.basename(path))[0])
 
         self.eval("arLink, arSimu(true, true, true)")
@@ -253,22 +261,28 @@ class d2d(mat):
         except:
             print("Set parameters failed.")
 
-    def get(self, fields, m=1, d=1, c=1, convert=False):
+    def get(self, fields, m=1, dset=1, sig=False, convert=False):
+        """ Get's a set of fields in the ar struct with the possibility to
+        chop the values after sig digits. """
+        if sig is False:
+            sig = 'false'
 
         try:
-            data = dict(zip(fields, self.eng.eval("arGet(" +
-                        str(fields).replace('[', '{').replace(']', '}') +
-                ", " + str(m) + ", " + str(d) +
-                ", " + str(c) + ");", nargout=1)))
+            data = dict(zip(fields, self.eng.eval("arGet(" + str(fields) +
+                ", " + str(m) + ", " + str(dset) + ", " + str(sig) + ");", nargout=1)))
         except:
-            print("get failed. Please make sure all fields exist.")
+            print("Get failed. Please make sure all fields exist.")
             return None
 
         # Converts matlab.double arrays to python lists
         if convert is True:
             for key in data:
                 if type(data[key]) == matlab.double:
-                    data[key] = self.convert(data[key])
+                    data[key] = self.convert2(data[key], key)
+                elif type(data[key]) == list:
+                    for i in range(len(data[key])):
+                        if type(data[key][i]) == matlab.double:
+                            data[key][i] = self.convert2(data[key][i], key)
 
         return data
 
