@@ -57,6 +57,8 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
+opts.funcwrap = 100;
+
 if ( opts.plotall && opts.plotfitted )
     error( 'Plotall and plotfitted are mutually exclusive options' );
 end
@@ -181,11 +183,11 @@ lp(fid, '\\newcommand{\\mycaption}[3]{\\caption{\\textbf{#1}\\\\ #3 \\label{#2}}
 lp(fid, '\\newcommand{\\mycaptionof}[3]{\\captionof{table}{\\textbf{#1}\\\\ #3 \\label{#2}}}');
 lp(fid, '\\newenvironment{statictable}{}{}\n');
 
-lp(fid, '\\newenvironment{nobreak}');
-lp(fid, '\t{\\par\\nobreak\\vfil\\penalty0\\vfilneg')
-lp(fid, '\t\\vtop\\bgroup}')
-lp(fid, '\t{\\par\\xdef\\tpd{\\the\\prevdepth}\\egroup')
-lp(fid, '\t\\prevdepth=\\tpd}')  
+%lp(fid, '\\newenvironment{nobreak}');
+%lp(fid, '\t{\\par\\nobreak\\vfil\\penalty0\\vfilneg')
+%lp(fid, '\t\\vtop\\bgroup}')
+%lp(fid, '\t{\\par\\xdef\\tpd{\\the\\prevdepth}\\egroup')
+%lp(fid, '\t\\prevdepth=\\tpd}')  
 
 lp(fid, '\\pgfplotsset{compat=newest} ');
 lp(fid, '\\pgfplotsset{plot coordinates/math parser=false} ');
@@ -854,23 +856,25 @@ for jm=1:length(ar.model)
                         if ( sum(qmod) > 0 )
                             lp(fid, '\\begin{table}');
                             lp(fid, '\t\\centering');
-                            lp(fid, '\\begin{tabular}{@{} *%dl @{}}\\toprule', nC);
+                            lp(fid, '\\begin{tabularx}{\\textwidth}{@{} *%dlX @{}}\\toprule', nC-1);
                             lp(fid, '\\titlerowcol \\textbf{Input} & \\textbf{Unit} & \\textbf{Modified equation}\\tabularnewline\\midrule' );
                             sk = find(qmod);
                             if ( strcmp( headerChunk, '' ) )
                                 for ku = 1 : length( sk )
                                     ju = sk(ku);
                                     inp = repFunc( ar.model(jm).data(jd).fu{ju}, 'monospline10' );
-                                    lp(fid, '%s%s & %s [%s] & $%s$\\tabularnewline', alternate(ku), strrep(ar.model(jm).u{ju}, '_', '\_'), ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}, myFormulas(inp, jm) );
+                                    newl = sprintf( '$\\tabularnewline %s & & $', alternate(ku) );
+                                    lp(fid, '%s%s & %s [%s] & $%s$\\tabularnewline', alternate(ku), strrep(ar.model(jm).u{ju}, '_', '\_'), ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}, funcWrap( myFormulas(inp, jm), opts.funcwrap, newl ) );
                                 end                            
                             else
                                 for ku = 1 : length( sk )
                                     ju = sk(ku);
                                     inp = repFunc( ar.model(jm).data(jd).fu{ju}, 'monospline10' );
-                                    lp(fid, '%s%s & %s [%s] & $%s$ & %s\\tabularnewline', alternate(ku), strrep(ar.model(jm).u{ju}, '_', '\_'), ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}, myFormulas(inp, jm), ar.model(jm).data(jd).uNames{ku} );
+                                    newl = sprintf( '$\\tabularnewline %s & & & $', alternate(ku) );
+                                    lp(fid, '%s%s & %s [%s] & $%s$ & %s\\tabularnewline', alternate(ku), strrep(ar.model(jm).u{ju}, '_', '\_'), ar.model(jm).uUnits{ju,3}, ar.model(jm).uUnits{ju,2}, funcWrap( myFormulas(inp, jm), opts.funcwrap, newl ), ar.model(jm).data(jd).uNames{ku} );
                                 end
                             end
-                            lp(fid, '\\botrule\\end{tabular}');
+                            lp(fid, '\\botrule\\end{tabularx}');
                             lp(fid, '\\mycaption{Inputs modified for experiment %s}{%s_input}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name );
                             lp(fid, '\\end{table}');
                         end
@@ -1988,4 +1992,40 @@ function match = masktest( str, masks )
         end
     else
         match = max( [ match, regexp( str, masks ) > 0 ] );
+    end
+    
+function wrapped = funcWrap( str, maxLen, newl )
+    c = 1;
+    cChunk = 0;
+    operators = '+-*/';
+    cb = 0;
+    rb = 0;
+    
+    wrapped = '';
+    while ( c <= length( str ) )
+        if ( str(c) == '(' );
+            rb = rb + 1;
+        end
+        if ( str(c) == ')' )
+            rb = rb - 1;
+        end
+        if ( str(c) == '{' );
+            cb = cb + 1;
+        end
+        if ( str(c) == '}' )
+            cb = cb - 1;
+        end      
+        if ( ismember( str(c), operators ) )
+            % Potential split
+            if ( ( cb == 0 ) && ( rb == 0 ) )
+                if ( cChunk > maxLen )
+                    % Next line!
+                    wrapped = sprintf('%s%s', wrapped, newl);
+                    cChunk = 0;
+                end
+            end
+        end
+        wrapped = [wrapped str(c)];
+        cChunk = cChunk + 1;
+        c = c + 1;
     end
