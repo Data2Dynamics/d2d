@@ -1,183 +1,201 @@
 .d2d_page {
-  background-color: rgb(55, 113, 200);
-  background-size: cover;
+    background-color: white;
+    background-size: cover;
 }
+
 .content_background {
-  background: white;
-  position: fixed;
-  left: 1%;
-  right: 1%;
-  top: 1em;
-  bottom: 1em;
+    background: white;
+    position: fixed;
+    left: 1%;
+    right: 1%;
+    top: 1em;
+    bottom: 1em;
 }
+
 .tabs_main {
-  position: fixed;
-  left: 1%;
-  right: 1%;
-  top: 2em;
-  bottom: 2em;
-  padding: 1em;
+    position: fixed;
+    left: 1%;
+    right: 1%;
+    top: 2em;
+    bottom: 2em;
+    padding: 1em;
 }
+
 .tabs_content {
-  position: fixed;
-  left: 1%;
-  right: 1%;
-  top: 6em;
-  bottom: 4em;
-  padding-left: 2em;
-  padding-right: 2em;
-  overflow: auto;
+    position: fixed;
+    left: 1%;
+    right: 1%;
+    top: 6em;
+    bottom: 4em;
+    padding-left: 2em;
+    padding-right: 2em;
+    overflow: auto;
 }
+
 .model_description {
-  width: 100%;
+    width: 100%;
 }
-.graph_controls{
-  display: table;
-   margin: 0 auto;
+
+.graph_controls {
+    display: table;
+    margin: 0 auto;
 }
+
+
 /* Custom indentations are needed because the length of custom labels differs from
    the length of the standard labels */
+
 .custom-label-flipswitch.ui-flipswitch .ui-btn.ui-flipswitch-on {
     text-indent: -3.4em;
 }
+
 .custom-label-flipswitch.ui-flipswitch .ui-flipswitch-off {
     text-indent: 0.5em;
 }
-div.ui-slider-switch {
- float:right; }
 
-.slider_blocks{
-  display: none;
+div.ui-slider-switch {
+    float: right;
 }
+
+.slider_blocks {
+    display: none;
+}
+
 .g_container {
-  display: -webkit-flex; /* Safari */
-  -webkit-flex-wrap: wrap;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
+    display: -webkit-flex;
+    /* Safari */
+    -webkit-flex-wrap: wrap;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
 }
+
 .g_container_items {
-  flex-grow: 1;
-  -webkit-flex-grow: 1;
-  height: 12em !important;
-  width: 15em !important;
+    flex-grow: 1;
+    -webkit-flex-grow: 1;
+    height: 12em !important;
+    width: 15em !important;
 }
-.graphs_variables {
-  display: none;
-}
-.graphs_observables {
-  display: none;
-}
+
 .graphs_title {
-  display: flex;
-  justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
 }
+
 .dygraph-legend > span.highlight {
-  font-weight: bold;
+    font-weight: bold;
 }
+
 .dygraph-title {
-  font-size: 0.5em;
+    font-size: 0.5em;
 }
+
 .command_multiline {
-  padding-bottom: 1em;
+    padding-bottom: 1em;
 }
+
 .CodeMirror {
-  height: auto;
+    height: auto;
 }
+
 .CodeMirror-scroll {
-  max-height: 600px;
+    max-height: 600px;
 }
+
 .model_description {
-  width: 50%;
-  float: left;
+    width: 50%;
+    float: left;
 }
+
 .model_svg {
-  width: 50%;
-  float: right;
+    width: 50%;
+    float: right;
 }
+
 .d2d_logo {
-  position: fixed;
-  background-color: white;
-  right: 1%;
-  width: 20em;
-  height: 8em;
-  padding: 1em;
-  top: 1em;
-  display: none;
+    position: fixed;
+    background-color: white;
+    right: 1%;
+    width: 20em;
+    height: 8em;
+    padding: 1em;
+    top: 1em;
+    display: none;
 }
+
 .panel {
-  display: none;
-  position: fixed;
-  background-color: lightyellow;
-  width: 12em;
-  right: 1%;
-  padding: 1em;
-  top: 3em;
-  bottom: 1em;
-  overflow: auto;
-  z-index: 15;
+    display: none;
+    position: fixed;
+    background-color: lightyellow;
+    width: 12em;
+    right: 1%;
+    padding: 1em;
+    top: 3em;
+    bottom: 1em;
+    overflow: auto;
+    z-index: 15;
 }
+
 .panel_button {
-  position: fixed;
-  right: 1em;
+    position: fixed;
+    right: 1em;
 }
 
 @media (min-width: 25em) {
-  .g_container_items {
-    height: 16em !important;
-    width: 20em !important;
-  }
-  .dygraph-title {
-    font-size: 0.7em;
-  }
-  .panel{
-      width: 20em;
-  }
+    .g_container_items {
+        height: 16em !important;
+        width: 20em !important;
+    }
+    .dygraph-title {
+        font-size: 0.7em;
+    }
+    .panel {
+        width: 20em;
+    }
 }
 
 @media (min-width: 60em) {
-
-  .dygraph-title {
-    font-size: 0.9em;
-  }
-
-  .g_container_items {
-    height: 24em !important;
-    width: 30em !important;
-  }
-
-  .panel_button {
-    display: none;
-  }
-  .content_background {
-    left: 1em;
-    right: 24em;
-  }
-  .tabs_main {
-    left: 1em;
-    right: 25em;
-  }
-  .tabs_content {
-    left: 1em;
-    right: 25em;
-  }
-  .d2d_logo {
-    right: 1em;
-    display: initial;
-    display: -webkit-flex; /* Safari */
-    -webkit-justify-content: space-around; /* Safari 6.1+ */
-    display: flex;
-    justify-content:center
-  }
-  .panel {
-
-    display: inline; /* IE doesn't support initial */
-    display: initial;
-    background-color: white;
-    left: unset;
-    padding: 1em;
-    top: 10em;
-    right: 1em;
-    right: 1em;
-  }
+    .dygraph-title {
+        font-size: 0.9em;
+    }
+    .g_container_items {
+        height: 24em !important;
+        width: 50% !important;
+    }
+    .panel_button {
+        display: none;
+    }
+    .content_background {
+        left: 1em;
+        right: 24em;
+    }
+    .tabs_main {
+        left: 1em;
+        right: 25em;
+    }
+    .tabs_content {
+        left: 1em;
+        right: 25em;
+    }
+    .d2d_logo {
+        right: 1em;
+        display: initial;
+        display: -webkit-flex;
+        /* Safari */
+        -webkit-justify-content: space-around;
+        /* Safari 6.1+ */
+        display: flex;
+        justify-content: center
+    }
+    .panel {
+        display: inline;
+        /* IE doesn't support initial */
+        display: initial;
+        background-color: white;
+        left: unset;
+        padding: 1em;
+        top: 10em;
+        right: 1em;
+        right: 1em;
+    }
 }
