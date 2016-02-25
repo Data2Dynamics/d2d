@@ -77,6 +77,7 @@ myfigpos = get(h,'Position');
 set(h,'Position',[myfigpos(1:2) 4*nCols 4*nRows]);
 
 maxCol = zeros(nRows, 1);
+myLegend = [];
 for ia = 1:length(myaxes)
     [~, indCol] = min(abs(mypos(ia,1) - mycols));
     [~, indRow] = min(abs(mypos(ia,2) - myrows));
@@ -91,14 +92,16 @@ for ia = 1:length(myaxes)
 end
 
 if ( useNewExport )
-    [indCol, indRow] = min(maxCol);
-    indCol = indCol + 1;
-    
-    oldPos  = get(myLegend, 'Position');
-    AR = oldPos(3) / oldPos(4);
-    sc = .015*numel(get(myLegend, 'String'));
-    
-    set(myLegend,'Position',[(indCol-1)/nCols+(1/nCols)*0.15 (indRow-1)/nRows+(1/nRows)*0.1 sc*AR sc]);
+    if ~isempty( myLegend )
+        [indCol, indRow] = min(maxCol);
+        indCol = indCol + 1;
+
+        oldPos  = get(myLegend, 'Position');
+        AR = oldPos(3) / oldPos(4);
+        sc = .015*numel(get(myLegend, 'String'));
+
+        set(myLegend,'Position',[(indCol-1)/nCols+(1/nCols)*0.15 (indRow-1)/nRows+(1/nRows)*0.1 sc*AR sc]);
+    end
 end
 
 axoptions={'x tick label style={/pgf/number format/fixed}','y tick label style={/pgf/number format/fixed}'};

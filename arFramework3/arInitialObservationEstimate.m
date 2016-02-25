@@ -27,13 +27,13 @@ function arInitialObservationEstimate( varargin )
     estimateVariance = 1;   % Do we need to estimate variances?
     frac = 0.25;            % Percentage of unexplained variance which is considered O.K.
     
-    if ( isnumeric( varargin{1} ) )
+    if (~isempty(varargin)) && ( isnumeric( varargin{1} ) )
         frac        = varargin{1};
         varargin    = varargin(2:end);
         arFprintf(2, 'Fraction set to %.3f\n', frac );
     end
     
-    if ( isnumeric( varargin{1} ) )
+    if (~isempty(varargin)) && ( isnumeric( varargin{1} ) )
         datasets        = varargin{1};
         varargin        = varargin(2:end);
         datasetsString  = sprintf( '%d ', datasets );
