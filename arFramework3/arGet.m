@@ -2,11 +2,11 @@
 %
 %   Returns data from ar struct according to a cell of field names
 % 
-%   data     cell array containing all fields specified in fields
-%   fields   single string or cell array of strings
+%   data    cell array containing all fields specified in fields
+%   fields  single string or cell array of strings
 %   m       optional model count (default = 1)
-%   d       optional data count  (default = 1)
-%   c       optional condition count (default = 1)
+%   dset    optional dataset(!) count (default = 1)
+%   sig     optional chop ot to sig significant digits (default = false)
 %   struct  optional struct (with ar structure) (default = global ar)
 %
 % Examples:
@@ -64,15 +64,15 @@ for i=1:length(fields)
         
             fields(i) = {regexprep(char(fields(i)),'^data.', '')};
             S = substruct_arg(fields(i));
-            
+            c = 1;
             data{i} = cell(1, length(struct.model(m).plot(dset).dLink));
             for j=struct.model(m).plot(dset).dLink
-                data{i}{j}=subsref(struct.model(m).data(j), substruct(S{:}));
-                
-                if isnumeric(data{i}{j}) && sig
+                data{i}{c}=subsref(struct.model(m).data(j), substruct(S{:}));
+                if isnumeric(data{i}{c}) && sig
                     
-                    data{i}{j} = chop(data{i}{j}, sig);
+                    data{i}{c} = chop(data{i}{c}, sig);
                 end
+                c = c + 1;
             end
             
         elseif(regexp(char(fields(i)), '^condition.'))
