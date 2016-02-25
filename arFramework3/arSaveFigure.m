@@ -2,6 +2,11 @@ function savePath = arSaveFigure(h, name, subdir)
 
 global ar
 
+useNewExport = 0;
+if ( isfield( ar, 'config' ) && isfield( ar.config, 'useNewExport' ) )
+    useNewExport = ar.config.useNewExport;
+end
+
 savePath = [arSave subdir];
 
 if(~exist(savePath, 'dir'))
@@ -13,35 +18,89 @@ if(length(name)>60)
 end
 
 savePath = arPathConvert([savePath '/' name]);
-
 set(h,'Renderer','painters')
-
 saveas(h, savePath, 'fig');
 
 %% tex generation
 set(h,'Units','in')
-myaxes = findobj(h,'Type','axes');
+if ( useNewExport )
+    myaxes = unique( [ findobj(h, 'Type', 'Axes'); findobj(h,'Type','Legend') ] );
+    
+    % Remove axes that are not visible
+    rmlist = [];
+    for a = 1 : length( myaxes )
+        if ( strcmp( get(myaxes(a), 'Visible'), 'off' ) )
+            rmlist = [rmlist a]; %ok<AGROW>
+        end
+    end
+    myaxes(rmlist) = [];
+else
+    myaxes = findobj(h, 'Type', 'axes');
+end
+
+axesList = 1 : length( myaxes );
+
+% Manual legend positioning
+if ( useNewExport )
+    legendList = [];
+
+    for a = 1 : length( myaxes )
+        if( strcmp( get(myaxes(a), 'Tag'), 'legend' ) )
+            legendList(end+1) = a; %#ok<AGROW>
+        end
+    end
+    axesList(legendList) = [];
+end
+
 mypos = get(myaxes,'Position');
 if(iscell(mypos))
     mypos = cell2mat(mypos);
 end
-mycols = unique(round(mypos(:,1)*1e6)/1e6);
-myrows = unique(round(mypos(:,2)*1e6)/1e6);
-if(myrows(end) - max(mypos(:,3)) > 0)
-    myrows = [0 myrows'];
+mycols = unique(round(mypos(axesList,1)*1e6)/1e6);
+myrows = unique(round(mypos(axesList,2)*1e6)/1e6);
+if ( ~useNewExport )
+    if(myrows(end) - max(mypos(:,3)) > 0)
+        myrows = [0 myrows'];
+    end
 end
 nCols = length(mycols);
 nRows = length(myrows);
 
+if ( useNewExport )
+    % No room was allocated specifically for the legend
+    if ( ( nRows * nCols ) == ( numel(myaxes) - length( legendList ) ) )
+        nRows = nRows + 1;
+    end
+end
+
 myfigpos = get(h,'Position');
 set(h,'Position',[myfigpos(1:2) 4*nCols 4*nRows]);
 
+maxCol = zeros(nRows, 1);
 for ia = 1:length(myaxes)
     [~, indCol] = min(abs(mypos(ia,1) - mycols));
     [~, indRow] = min(abs(mypos(ia,2) - myrows));
     
-    set(myaxes(ia),'Position',[(indCol-1)/nCols+(1/nCols)*0.15 (indRow-1)/nRows+(1/nRows)*0.1 (1/nCols)*0.7 (1/nRows)*0.8])
+    % Only place the actual axes
+    if ( ~useNewExport || ~strcmp( get(myaxes(ia), 'Tag'), 'legend' ) )
+        maxCol(indRow) = max( [ maxCol(indRow), indCol ] );
+        set(myaxes(ia),'Position',[(indCol-1)/nCols+(1/nCols)*0.15 (indRow-1)/nRows+(1/nRows)*0.1 (1/nCols)*0.7 (1/nRows)*0.8])
+    else
+        myLegend = myaxes(ia);
+    end
 end
+
+if ( useNewExport )
+    [indCol, indRow] = min(maxCol);
+    indCol = indCol + 1;
+    
+    oldPos  = get(myLegend, 'Position');
+    AR = oldPos(3) / oldPos(4);
+    sc = .015*numel(get(myLegend, 'String'));
+    
+    set(myLegend,'Position',[(indCol-1)/nCols+(1/nCols)*0.15 (indRow-1)/nRows+(1/nRows)*0.1 sc*AR sc]);
+end
+
 axoptions={'x tick label style={/pgf/number format/fixed}','y tick label style={/pgf/number format/fixed}'};
 matlab2tikz([savePath '_Report.tex'],'figurehandle',h,'showInfo', false, 'showWarnings',false, 'width','0.9\textwidth','automaticLabels',true,'extraAxisOptions',axoptions)
 matlab2tikz([savePath '.tex'],'figurehandle',h,'showInfo', false, 'showWarnings',false, 'standalone', true,'automaticLabels',true,'extraAxisOptions',axoptions)
