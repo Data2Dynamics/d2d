@@ -109,7 +109,6 @@ function Update() {
         if (options.indexOf('start') > -1) {
             create_content();
             create_events();
-            create_graphs();
         };
         if (options.indexOf('model') > -1) {
             $('#model_title').html(ar['model.name']);
@@ -198,20 +197,11 @@ function Update() {
                 $('#' + ar['pLabel'][key] + '_slider').slider("refresh");
             }
         };
-        if (options.indexOf('resize_graphs') > -1) {
-            for (key in ar['plots']) {
-                for (var i in ar['plots'][key]) {
-                    elm = $('.g_' + key + '_' + ar['plots'][key][i]['layout']['title']);
-                    Plotly.Plots.resize(elm[0]);
-                };
-            };
-            for (var i in ar['plots']['observables']) {
-                elm = $('.g_observables_fit_' + ar['plots']['observables'][i]['layout']['title']);
-                Plotly.Plots.resize(elm[0]);
-            };
-            Plotly.Plots.resize($('.g_fit_chi2plot')[0]);
-            Plotly.Plots.resize($('.g_fit_parameters')[0]);
+        if (options.indexOf('create_graphs') > -1) {
+            $('#' + ar['pLabel'][key] + '_slider').slider('refresh');
+            create_graphs();
         };
+
         if (options.indexOf('update_graphs') > -1) {
             // check that it wont update the graphs after full fit when auto fitting
             if ((event !== null && event.target.name !== 'fit_auto') || (event === null)) {
@@ -233,14 +223,19 @@ function Update() {
                     if ($('#inputs')[0].checked) {
                         for (var i in ar['plots']['inputs']) {
                             elm = $('.g_inputs_' + ar['plots']['inputs'][i]['layout']['title']);
-                            elm[0].data[0].y = ar['plots']['inputs'][i]['data'][0]['y'];
+                            elm[0].data = ar['plots']['inputs'][i]['data'];
+                            //for (var c in ar['plots']['inputs'][i]['data']) {ar['plots']['inputs'][i]['data'][c]['type'] = 'scattergl';};
+                            var t0 = performance.now();
                             Plotly.redraw(elm[0]);
+                            var t1 = performance.now();
+                            console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
                         };
                     };
                     if ($('#variables')[0].checked) {
                         for (var i in ar['plots']['variables']) {
                             elm = $('.g_variables_' + ar['plots']['variables'][i]['layout']['title']);
                             elm[0].data = ar['plots']['variables'][i]['data'];
+                            //for (var c in ar['plots']['variables'][i]['data']) {ar['plots']['variables'][i]['data'][c]['type'] = 'scattergl';};
                             Plotly.redraw(elm[0]);
                         };
                     };
@@ -248,15 +243,26 @@ function Update() {
                         for (var i in ar['plots']['observables']) {
                             elm = $('.g_observables_' + ar['plots']['observables'][i]['layout']['title']);
                             elm[0].data = ar['plots']['observables'][i]['data'];
+                            //for (var c in ar['plots']['observables'][i]['data']) {ar['plots']['observables'][i]['data'][c]['type'] = 'scattergl';};
                             Plotly.redraw(elm[0]);
                         };
                     };
                 };
             };
         };
-        if (options.indexOf('create_graphs') > -1) {
-            $('#' + ar['pLabel'][key] + '_slider').slider('refresh');
-            create_graphs();
+        if (options.indexOf('resize_graphs') > -1) {
+            for (key in ar['plots']) {
+                for (var i in ar['plots'][key]) {
+                    elm = $('.g_' + key + '_' + ar['plots'][key][i]['layout']['title']);
+                    Plotly.Plots.resize(elm[0]);
+                };
+            };
+            for (var i in ar['plots']['observables']) {
+                elm = $('.g_observables_fit_' + ar['plots']['observables'][i]['layout']['title']);
+                Plotly.Plots.resize(elm[0]);
+            };
+            Plotly.Plots.resize($('.g_fit_chi2plot')[0]);
+            Plotly.Plots.resize($('.g_fit_parameters')[0]);
         };
     };
 };
@@ -390,13 +396,14 @@ function create_content() {
     };
     $('.panel').trigger('create');
 };
+
 function create_events(options) {
     $(".select_mdc").change(function(e) {
         var url_data = {};
         url_data.name = e.target.name
         url_data.value = e.target.value;
         update.update([
-            'change_mdc', 'model', 'create_graphs',
+            'change_mdc', 'model',
         ], url_data, e)
     });
     for (var key in ar['pLabel']) {
@@ -484,8 +491,7 @@ function create_events(options) {
         ], {}, e);
     });
     $('#tab_model').click(function(e) {
-        update.update([
-            'update_graphs', 'model',
+        update.update(['model',
         ], {}, e);
     });
     $(window).on('resize', function(e) {
@@ -494,13 +500,13 @@ function create_events(options) {
     $('#tab_plots').click(function(e) {
         $.mobile.loading('show');
         update.update([
-            'set_sliders', 'resize_graphs',
+            'set_sliders', 'create_graphs',
         ], {}, e);
     });
     $('#tab_fit').click(function(e) {
         $.mobile.loading('show');
         update.update([
-            'chi2', 'resize_graphs',
+            'chi2', 'create_graphs', 'resize_graphs',
         ], {}, e);
     });
     $('#tab_editor').one('click', function(e) {
@@ -598,6 +604,7 @@ function create_graphs() {
     for (key in ar['plots']) {
         for (var i in ar['plots'][key]) {
             elm = $('.g_' + key + '_' + ar['plots'][key][i]['layout']['title']);
+            //for (var c in ar['plots'][key][i]['data']) {ar['plots'][key][i]['data'][c]['type'] = 'scattergl';}; // scattergl
             Plotly.newPlot(elm[0], // the ID of the div
                     ar['plots'][key][i]['data'], ar['plots'][key][i]['layout'], {scrollZoom: true});
         };

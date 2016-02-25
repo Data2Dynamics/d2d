@@ -444,6 +444,6 @@ if __name__ == "__main__":
     app.debug = DEBUG
     app.json_encoder = plotly.utils.PlotlyJSONEncoder
     app.run(threaded=True,
-            host="127.0.0.1",
+            host="0.0.0.0",
             port=int("5000")
             )
