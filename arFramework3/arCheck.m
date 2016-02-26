@@ -63,6 +63,9 @@ end
 if (exist('compileNL2SOL', 'file') == 0)
     addpath([ar_path '/ThirdParty/NL2SOL'])
 end
+if (exist('mota', 'file') == 0)
+    addpath([ar_path '/ThirdParty/MOTA'])
+end
     
 %% CVODES
 

@@ -186,7 +186,7 @@ elseif(ar.config.optimizer == 6)
     [pFit, ~, exitflag, output, lambda, jac] = ...
         fmincon(@merit_fkt_fmincon_lsq, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
         [],options);
-    resnorm = merit_fkt(pFit,ar);
+    resnorm = merit_fkt(pFit);
     
 % arNLS boosted by SR1 updates
 elseif(ar.config.optimizer == 7)
