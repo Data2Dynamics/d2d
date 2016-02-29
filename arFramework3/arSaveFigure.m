@@ -69,7 +69,7 @@ nRows = length(myrows);
 if ( useNewExport )
     % No room was allocated specifically for the legend
     if ( ( nRows * nCols ) == ( numel(myaxes) - length( legendList ) ) )
-        nRows = nRows + 1;
+        nCols = nCols + 1;
     end
 end
 
@@ -85,7 +85,11 @@ for ia = 1:length(myaxes)
     % Only place the actual axes
     if ( ~useNewExport || ~strcmp( get(myaxes(ia), 'Tag'), 'legend' ) )
         maxCol(indRow) = max( [ maxCol(indRow), indCol ] );
-        set(myaxes(ia),'Position',[(indCol-1)/nCols+(1/nCols)*0.15 (indRow-1)/nRows+(1/nRows)*0.1 (1/nCols)*0.7 (1/nRows)*0.8])
+        if ( ~useNewExport )
+            set(myaxes(ia),'Position',[(indCol-1)/nCols+(1/nCols)*0.15 (indRow-1)/nRows+(1/nRows)*0.1 (1/nCols)*0.7 (1/nRows)*0.8])
+        else
+            set(myaxes(ia),'Position',[(indCol-1)/nCols+(1/nCols)*0.25 (indRow-1)/nRows+(1/nRows)*0.2 (1/nCols)*0.7 (1/nRows)*0.7])
+        end
     else
         myLegend = myaxes(ia);
     end
@@ -99,8 +103,8 @@ if ( useNewExport )
         oldPos  = get(myLegend, 'Position');
         AR = oldPos(3) / oldPos(4);
         sc = .015*numel(get(myLegend, 'String'));
-
-        set(myLegend,'Position',[(indCol-1)/nCols+(1/nCols)*0.15 (indRow-1)/nRows+(1/nRows)*0.1 sc*AR sc]);
+        
+        set(myLegend,'Position',[(indCol-1)/nCols+(1/nCols)*0.25 (indRow-1)/nRows+(1/nRows)*0.85-sc sc*AR sc]);
     end
 end
 

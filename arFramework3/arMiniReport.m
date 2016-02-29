@@ -6,16 +6,16 @@
 % arMiniReport( reportName, option flags )
 %
 % Option flags are:
-%   PlotAll           - Plot all Ys.
+%   PlotAll           - Plot all Ys
 %   PlotFitted        - Plot only those observables that are fitted.
 %   OmitNonFitted     - Omit plotting the graph and displaying data for
 %                       datasets that were not fitted (still shows condition
-%                       data however. Useful for steady states).
+%                       data however. Useful for steady states)
 %   OmitLikelihood    - Omit explicit values for -2 Log(L)
-%   OmitNonPlotted    - Omit data/observables that were not plotted.
+%   OmitNonPlotted    - Omit data/observables that were not plotted
 %   KeepRandoms       - Currently, condition replacements based on RANDOMs
 %                       are not explicitly mentioned in the tables. If you
-%                       do want to see these, specify this keyword.
+%                       do want to see these, specify this keyword
 %   KeepFilenames     - Do not shorten data parameters containing entire
 %                       filenames (ones that use the _filename tag)
 %   AlternateFont     - Use a different font for the report
@@ -23,7 +23,14 @@
 %                       the pdfs
 %   ExcludeDynPars    - Provide cell array of masks to exclude from
 %                       parameter shortlist. Cell array must be provided
-%                       as subsequent argument.
+%                       as subsequent argument
+%   TexPages          - Provide files with custom tex pages (provide cell
+%                       array of files as next argument)
+%   Figures           - Copy figure directories into tex output dir.
+%                       These can be used in submitted tex files (provide 
+%                       a directory as next argument)
+%   OverridePlots     - Add custom experiment plots from own directory
+%                       (provide a directory as next argument)
 
 function arMiniReport(varargin)
 
@@ -31,8 +38,8 @@ global ar
 
 warning( 'This report functionality is currently in alpha status. Please use arReport instead.' );
 
-switches    = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots', 'ExcludeDynPars' };
-extraArgs   = [         0,            0,               0,                0,                0,             0,               0,               0,         0,                 1 ];
+switches    = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots', 'ExcludeDynPars', 'TexPages', 'Figures', 'OverridePlots' };
+extraArgs   = [         0,            0,               0,                0,                0,             0,               0,               0,         0,                 1,          1,         1,               1 ];
 descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Plotting all fitted Ys', '' }, ...
                     { 'Omitting non fitted Ys from report', '' }, ...
@@ -43,6 +50,9 @@ descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Using alternate font', '' }, ...
                     { 'Using tex files for incorporating plots', 'Reverting to pre-generated PDFs for plots' }, ...
                     { 'Excluding specific parameters', '' }, ...
+                    { 'Including tex pages', '' }, ...
+                    { 'Including figure directories', '' }, ...
+                    { 'Including custom plots', '' }, ...
                     };
 
 if( (nargin > 0) && max( strcmpi( varargin{1}, switches ) ) == 0 )
@@ -93,6 +103,12 @@ ar.config.matlabVersion = str2double(matVer.Version);
 
 savePath = [arSave '/Latex'];
 
+if ~isempty( opts.figures )
+    for a = 1 : length( opts.figures )
+        copyfile( [opts.figures{a} '/*.pdf'], [savePath '/' opts.figures{a} '/'] );
+    end
+end
+
 if(~exist([cd '/' savePath], 'dir'))
     mkdir([cd '/' savePath])
 end
@@ -126,7 +142,6 @@ fname = 'report.tex';
 fnamebib = 'report.aux';
 fprintf('writing latex, file %s...', fname);
 fid = fopen([savePath '/' fname], 'w');
-
 
 %% Head
 lp(fid, '\\nonstopmode');
@@ -663,7 +678,14 @@ for jm=1:length(ar.model)
         lp(fid, strrep(fileread(ar.additionalTex), '\', '\\'));
         lp(fid, '\n');
     end
-        
+    
+    %% Additional description via args
+    if ~isempty( opts.texpages )
+        for a = 1 : length( opts.texpages )
+            lp(fid, strrep(fileread(opts.texpages{a}), '\', '\\'));
+        end
+    end  
+    
     %% Experiments
     if ( 1 )
         lp(fid, '\\FloatBarrier');
@@ -724,6 +746,31 @@ for jm=1:length(ar.model)
         for a = 1 : length( ar.model(jm).fp )
             fpSymString{a} = char(sym(ar.model(jm).fp{a}));
         end
+
+        
+        %% do we override some of the plots
+        if (~isempty(opts.overrideplots))
+            k = dir( [opts.overrideplots '/*.pdf'] );
+            if ( ~isempty(k) )
+                copyfile( [opts.overrideplots '/*.pdf'], [savePath '/' opts.overrideplots] );
+                for a = 1 : length( k )
+                    if ( ~strcmp( k(a).name, '.' ) && ~strcmp( k(a).name, '..' ) )
+                        pdfCrop( [savePath '/' opts.overrideplots '/' k(a).name(1:end-4) ] )
+                    end
+                end
+            end
+            k = dir( [opts.overrideplots '/*.tex'] );
+            if ( ~isempty(k) )
+                copyfile( [opts.overrideplots '/*.tex'], [savePath '/' opts.overrideplots] );
+            end
+            
+            for jplot=1:length(ar.model(jm).plot)
+                if ( exist( [ opts.overrideplots '/' ar.model(jm).plot(jplot).name '.pdf' ], 'file' ) || exist( [ opts.overrideplots '/' ar.model(jm).plot(jplot).name '_Report.tex' ], 'file' ) )
+                    ar.model(jm).plot(jplot).savePath_FigY = [opts.overrideplots '/' ar.model(jm).plot(jplot).name];
+                    fprintf( 'Overridden %s ...', ar.model(jm).plot(jplot).name );
+                end
+            end
+        end
         
         for jplot=1:length(ar.model(jm).plot)
             if (ar.model(jm).qPlotYs(jplot)||~opts.omitnonplotted)
@@ -746,7 +793,7 @@ for jm=1:length(ar.model)
                     %% fit
                     if( ~opts.omitnonfitted || isFitted(jm, jplot) )
                         lp(fid, '\\subsubsection{Model fit and plots}');
-
+                        
                         %% plots
                         if(isfield(ar.model(jm).plot(jplot), 'savePath_FigY') && ~isempty(ar.model(jm).plot(jplot).savePath_FigY))
                             lp(fid, 'The model observables and the experimental data is shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
@@ -761,9 +808,9 @@ for jm=1:length(ar.model)
                             else
                                 copyfile([ar.model(jm).plot(jplot).savePath_FigY '.pdf'], ...
                                 [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
-                                lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
+                                lpfigure(fid, .9, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
                             end
-                        end                
+                        end
                     end
 
                     % input
@@ -824,7 +871,7 @@ for jm=1:length(ar.model)
                         captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system, see Equation '];
                         captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) '} -- \ref{' ...
                             sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
-                        lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_x.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_x']);
+                        lpfigure(fid, .9, [ar.model(jm).plot(jplot).name '_x.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_x']);
                     end
                     if(isfield(ar.model(jm).plot(jplot), 'savePath_FigV') && ~isempty(ar.model(jm).plot(jplot).savePath_FigV))
                         lp(fid, 'The reaction fluxes that correspond to the experimental conditions in this experiment are shown in Figure \\ref{%s}.', ...
@@ -836,7 +883,7 @@ for jm=1:length(ar.model)
                         captiontext = [captiontext 'The dynamical behaviour is determined by the ODE system, see Equation '];
                         captiontext = [captiontext '\ref{' sprintf('%s_ode%i', ar.model(jm).name, 1) ...
                             '} -- \ref{' sprintf('%s_ode%i', ar.model(jm).name, length(ar.model(jm).x)) '}. '];
-                        lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_v.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_v']);
+                        lpfigure(fid, .9, [ar.model(jm).plot(jplot).name '_v.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_v']);
                     end            
 
                     %% inputs
@@ -1434,8 +1481,6 @@ lp(fid, '\\bibliography{lib}');
 
 lp(fid, '\\end{document}');
 
-
-
 fclose(fid);
 fprintf('done\n');
 
@@ -1477,6 +1522,10 @@ if(nargin>2)
 else
     fprintf(varargin{1}, sprintf('%s\n', varargin{2}));
 end
+
+function pdfCrop(fn)
+    system(sprintf('pdfcrop -hires %s.pdf %s_crop.pdf', fn, fn));
+    delete('tmp-pdfcrop-*.tex');
 
 function lpfigure(fid, textwidth, figpath, figcaption, figlabel)
 
