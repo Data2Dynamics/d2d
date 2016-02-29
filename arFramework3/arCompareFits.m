@@ -32,7 +32,7 @@ for j=1:length(filenames)
             if(isfield(tmpple.ar,'chi2sconstr'))
                 chi2sconstr{jcount} = tmpple.ar.chi2sconstr; %#ok<AGROW>
             else
-                chi2sconstr{jcount} = zeros(size(tmpple.ar.chi2s)); %#ok<AGROW>
+                chi2sconstr{jcount} = nan(size(tmpple.ar.chi2s)); %#ok<AGROW>
             end
             labels{jcount} = filenames{j}; %#ok<AGROW>
             if(isfield(tmpple.ar, 'optim_crit'))

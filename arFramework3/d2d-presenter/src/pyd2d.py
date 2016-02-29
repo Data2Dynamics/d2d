@@ -55,9 +55,14 @@ class mat():
         """ round x to sig significant digits"""
         return round(x, sig-int(floor(log10(abs(x))))-1)
 
-    def convert(self, x, key=None):
+    def convert(self, x, key=None, convert='numpy'):
         """ removes the matlab double type"""
-        return numpy.reshape(numpy.asarray(x._data), (x.size[1], x.size[0]))
+        if convert is 'list':
+            return numpy.reshape(numpy.asarray(x._data),
+                                              (x.size[1], x.size[0])).tolist()
+        else:
+            return numpy.reshape(numpy.asarray(x._data),
+                                              (x.size[1], x.size[0]))
 
     def benchmark(self, method, args, runs=200):
         """ Can be used to measure the execution time of methods """
@@ -159,18 +164,18 @@ class d2d(mat):
             return None
 
         # Converts matlab.double arrays to python lists
-        if convert is True:
+        if convert is not False:
             for key in data:
                 if type(data[key]) == matlab.double:
-                    data[key] = self.convert(data[key], key)
+                    data[key] = self.convert(data[key], key, convert)
                 elif type(data[key]) == list:
                     for i in range(len(data[key])):
                         if type(data[key][i]) == matlab.double:
-                            data[key][i] = self.convert(data[key][i], key)
+                            data[key][i] = self.convert(data[key][i], key, convert)
 
         return data
 
-    def simu(self, sensi='true', fine='true', dynamics='true'):
+    def simu(self, sensi='true', fine='true', dynamics='true', options=[]):
         """Executes arSimu. Needs some special attention in order to deal
            with integration errors (CV_CONV_FAILURE) when using a bad
            parameter setting."""
@@ -186,4 +191,8 @@ class d2d(mat):
                 for i, key in enumerate(params[0]):
                     if int(key) is 1:
                         self.eval("ar.p(" + str(int(i+1)) + ") = -1;", 0)
-            self.eval("arChi2;", 0)
+            self.eval("arChi2", 0)
+            self.simu(sensi, fine, dynamics)
+
+            if 'fit' in options:
+                self.eval("arFit")

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="{{ url_for('static', filename='d2d_presenter_logo.png') }}" />
     <!-- jQuery -->
-    <script src="{{ url_for('static', filename='extern/jquery/jquery-2.1.4.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='extern/jquery/jquery-2.2.1.min.js') }}"></script>
     <!-- jQuery Mobile -->
     <script src="{{ url_for('static', filename='extern/jquery_mobile/jquery.mobile-1.4.5.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='extern/jquery_mobile/jquery.mobile-1.4.5.min.css') }}" />
@@ -14,13 +14,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='extern/codemirror/codemirror.css') }}">
     <!-- dygraphs -->
     <script src="{{ url_for('static', filename='extern/dygraphs/dygraph-combined.js') }}"></script>
-    <!-- Plotly.js -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <!-- custom -->
+    <script src="{{ url_for('static', filename='d2d_presenter.js') }}"></script>
     <script type="text/javascript">
       var $SCRIPT_ROOT = {{ request.script_root | tojson | safe }};
     </script>
-    <script src="{{ url_for('static', filename='d2d_presenter.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='d2d_presenter.css') }}" />
 </head>
 
@@ -102,6 +99,7 @@
                                 <input type="checkbox" name="toggle_graphs" id="observables">
                                 <label for="observables">Observables</label>
                             </fieldset>
+                            <input type="checkbox" data-role="flipswitch" data-on-text="Scale" data-off-text="Scale" name="autoscale" id="autoscale" checked="" data-wrapper-class="custom-label-flipswitch">
                         </div>
                         <div id="sliders_inputs" class="slider_blocks">
                             <h4>Input parameters</h4></div>
@@ -117,7 +115,7 @@
                     <!-- /panel -->
                     <div class="tabs_content">
                         <p>Select to zoom in. Double click to zoom out.</p>
-                        <div id="graphs_plotly">
+                        <div id="zing">
                         </div>
                         <div class="graphs_inputs" id="graphs_inputs">
                             <div class="graphs_title">

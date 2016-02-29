@@ -25,7 +25,6 @@ $(document).on("pagecontainershow", function(event, ui) {
         update = new Update();
         update.update([
             'start',
-            'create_fit_data',
             'tree',
             'model',
             'update_graphs',
@@ -103,9 +102,7 @@ function Update() {
         };
     };
     this.success = function(options, event) {
-        if (options.indexOf('create_fit_data') > -1) {
-            create_fit_data(['fit']);
-        };
+
         if (options.indexOf('start') > -1) {
             create_content();
             create_events();
@@ -133,34 +130,43 @@ function Update() {
             update.update(command, url_data, e);
         });
         if (options.indexOf('fit') > -1) {
-            if (event.target.name !== 'fit_auto') {
-                create_fit_data(['fit']);
-            } else {
-                chi2_hist = ar['fit.chi2_hist'];
-                p_hist = ar['fit.p_hist'];
-            };
+          if (event.target.name !== 'fit_auto') {
+            create_graphs_data(['fit']);
+          } else {
+            chi2_hist = ar['fit.chi2_hist'];
+            p_hist = ar['fit.p_hist'];
+          };
+
         };
+
         if (options.indexOf('fit_auto') > -1) {
-            chi2 = chi2_hist.shift()[0];
-            p = [];
-            for (i in p_hist) {
-                p.push(p_hist[i].shift());
+          chi2 = chi2_hist.shift()[0];
+          p = [];
+          for (var i in p_hist) {
+              p.push(p_hist[i].shift());
+          };
+          if (chi2 !== null) {
+            url_data = {};
+            for (var key in ar['pLabel']) {
+                url_data[ar['pLabel'][key]] = p[key];
             };
-            if ((chi2 !== null)) {
-                url_data = {};
-                for (var key in ar['pLabel']) {
-                    url_data[ar['pLabel'][key]] = p[key];
-                };
-                create_fit_data(['fit', 'fit_auto',]);
-                this.update([
-                    'fit_auto', 'set_sliders', 'update_graphs',
-                ], url_data);
-            };
+                create_graphs_data(['fit_auto', 'observables']);
+                this.update(['chi2', 'fit_auto', 'set_sliders', 'update_graphs'], url_data);
+          };
         };
         if (options.indexOf('fit_clear') > -1) {
-            fit_data = {};
-            create_fit_data(['fit']);
+          graphs_data.fit.parameters = [
+            [0]
+          ];
+          for (var i in ar['p']) {
+            graphs_data.fit.parameters[0].push(ar['p'][i]);
+          };
+          graphs_data.fit.chi2plot = [
+            [0, ar['fit.chi2_hist']]
+          ];
+
         };
+
         if (options.indexOf('read') > -1 || options.indexOf('write') > -1) {
             if ($('#console_editor .CodeMirror').length === 0) {
                 CodeMirror.fromTextArea(document.getElementById('editor_area'), {
@@ -199,106 +205,126 @@ function Update() {
         };
         if (options.indexOf('create_graphs') > -1) {
             $('#' + ar['pLabel'][key] + '_slider').slider('refresh');
+            create_graphs_data(['inputs', 'observables', 'variables']);
             create_graphs();
         };
-
         if (options.indexOf('update_graphs') > -1) {
-            // check that it wont update the graphs after full fit when auto fitting
-            if ((event !== null && event.target.name !== 'fit_auto') || (event === null)) {
-                if ($("ul li.ui-state-active")[0].children[0].id === 'tab_fit') {
-                    $('.g_fit_chi2plot')[0].data[0]['x'] = fit_data.chi2plot.x;
-                    $('.g_fit_chi2plot')[0].data[0]['y'] = fit_data.chi2plot.y;
-                    Plotly.redraw($('.g_fit_chi2plot')[0]);
-                    for (var i in ar['p']) {
-                        $('.g_fit_parameters')[0].data[i]['x'] = fit_data.chi2plot.x;
-                        $('.g_fit_parameters')[0].data[i]['y'] = fit_data.parameters.y[i];
-                    };
-                    Plotly.redraw($('.g_fit_parameters')[0]);
-                    for (var i in ar['plots']['observables']) {
-                        elm = $('.g_observables_fit_' + ar['plots']['observables'][i]['layout']['title']);
-                        elm[0].data = ar['plots']['observables'][i]['data'];
-                        Plotly.redraw(elm[0]);
-                    };
-                } else if ($("ul li.ui-state-active")[0].children[0].id === 'tab_plots') {
-                    if ($('#inputs')[0].checked) {
-                        for (var i in ar['plots']['inputs']) {
-                            elm = $('.g_inputs_' + ar['plots']['inputs'][i]['layout']['title']);
-                            elm[0].data = ar['plots']['inputs'][i]['data'];
-                            //for (var c in ar['plots']['inputs'][i]['data']) {ar['plots']['inputs'][i]['data'][c]['type'] = 'scattergl';};
-                            var t0 = performance.now();
-                            Plotly.redraw(elm[0]);
-                            var t1 = performance.now();
-                            console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
+          // check that it wont update the graphs after full fit when auto fitting
+          if ( ( event !== null && event.target.name !== 'fit_auto' ) ||
+              ( event === null ) ) {
+                  if ($("ul li.ui-state-active")[0].children[0].id === 'tab_fit') {
+                      create_graphs_data(['observables', 'fit']);
+                      var type = 'fit';
+                        for (var key in graphs[type]) {
+                          for (var i = 0; i < $('.g_' + type +
+                              '_' + key).length; i++) {
+                            graphs[type][key][i].updateOptions({
+                              'file': graphs_data[type][key]
+                            });
+                          };
                         };
+                        var type = 'observables';
+                        for (var key in graphs[type]) {
+                          for (var i = 0; i < $('.g_' + type +
+                              '_' + key).length; i++) {
+                            graphs[type][key][i].updateOptions({
+                              'file': graphs_data[type][key]
+                            });
+                          };
+                        };
+                    } else if ($("ul li.ui-state-active")[0].children[0].id === 'tab_plots') {
+                     if ($('#inputs')[0].checked) {
+                         create_graphs_data(['inputs']);
+                         var type = 'inputs';
+                         for (var key in graphs[type]) {
+                           for (var i = 0; i < $('.g_' + type +
+                               '_' + key).length; i++) {
+                             graphs[type][key][i].updateOptions({
+                               'file': graphs_data[type][key]
+                             });
+                           };
+                         };
                     };
                     if ($('#variables')[0].checked) {
-                        for (var i in ar['plots']['variables']) {
-                            elm = $('.g_variables_' + ar['plots']['variables'][i]['layout']['title']);
-                            elm[0].data = ar['plots']['variables'][i]['data'];
-                            //for (var c in ar['plots']['variables'][i]['data']) {ar['plots']['variables'][i]['data'][c]['type'] = 'scattergl';};
-                            Plotly.redraw(elm[0]);
+                        create_graphs_data(['variables']);
+                        var type = 'variables';
+                        for (var key in graphs[type]) {
+                          for (var i = 0; i < $('.g_' + type +
+                              '_' + key).length; i++) {
+                            graphs[type][key][i].updateOptions({
+                              'file': graphs_data[type][key]
+                            });
+                          };
                         };
-                    };
-                    if ($('#observables')[0].checked) {
-                        for (var i in ar['plots']['observables']) {
-                            elm = $('.g_observables_' + ar['plots']['observables'][i]['layout']['title']);
-                            elm[0].data = ar['plots']['observables'][i]['data'];
-                            //for (var c in ar['plots']['observables'][i]['data']) {ar['plots']['observables'][i]['data'][c]['type'] = 'scattergl';};
-                            Plotly.redraw(elm[0]);
-                        };
-                    };
-                };
-            };
-        };
-        if (options.indexOf('resize_graphs') > -1) {
-            for (key in ar['plots']) {
-                for (var i in ar['plots'][key]) {
-                    elm = $('.g_' + key + '_' + ar['plots'][key][i]['layout']['title']);
-                    Plotly.Plots.resize(elm[0]);
-                };
-            };
-            for (var i in ar['plots']['observables']) {
-                elm = $('.g_observables_fit_' + ar['plots']['observables'][i]['layout']['title']);
-                Plotly.Plots.resize(elm[0]);
-            };
-            Plotly.Plots.resize($('.g_fit_chi2plot')[0]);
-            Plotly.Plots.resize($('.g_fit_parameters')[0]);
+                   };
+                   if ($('#observables')[0].checked) {
+                       create_graphs_data(['observables']);
+                       var type = 'observables';
+                       for (var key in graphs[type]) {
+                         for (var i = 0; i < $('.g_' + type +
+                             '_' + key).length; i++) {
+                           graphs[type][key][i].updateOptions({
+                             'file': graphs_data[type][key]
+                           });
+                         };
+                       };
+                  };
+              };
+          };
         };
     };
 };
 function create_content() {
-    for (var key in extra.size) {
-        var name;
-        if (key === 'MODEL')
-            name = 'Model';
-        if (key === 'DSET')
-            name = 'Data';
 
-        var div = $('<div />', {
-            'class': 'ui-field-contain',
-            text: '',
+        var div = $('<label />', {
+            'for': 'MODEL',
+            text: 'Model:',
         });
         var select = $('<select />', {
-            name: key,
+            name: 'MODEL',
             class: 'select_mdc',
         });
-        for (var i = 1; i <= extra.size[key]; i++) {
-            if (i === extra[key]) {
+        for (var i = 1; i <= extra.size['MODEL']; i++) {
+            if (i === extra['MODEL']) {
                 var option = $('<option />', {
                     value: i,
-                    text: name + ' ' + i,
+                    text: extra.size['MODELNAMES'][i-1],
                     selected: '',
                 });
             } else {
                 var option = $('<option />', {
                     value: i,
-                    text: name + ' ' + i,
+                    text: extra.size['MODELNAMES'][i-1],
                 });
             };
             select.append(option)
         };
-        $('#' + key).html(div.append(select));
-    };
+        $('#MODEL').html(div.append(select));
+        var div = $('<label />', {
+            'for': 'DSET',
+            text: 'Data:',
+        });
+        var select = $('<select />', {
+            name: 'DSET',
+            class: 'select_mdc',
+        });
+        for (var i = 1; i <= extra.size['DSET']; i++) {
+            if (i === extra['DSET']) {
+                var option = $('<option />', {
+                    value: i,
+                    text: extra.size['model.plot.name'][i-1],
+                    selected: '',
+                });
+            } else {
+                var option = $('<option />', {
+                    value: i,
+                    text: extra.size['model.plot.name'][i-1],
+                });
+            };
+            select.append(option)
+        };
+        $('#DSET').html(div.append(select));
+
     var cm_console_out = CodeMirror.fromTextArea(document.getElementById('cm_console_out'), {
         theme: 'default',
         lineNumbers: true,
@@ -332,8 +358,8 @@ function create_content() {
         });
         $('.g_observables').append(div);
         div = $('<div />', {
-            'class': 'g_container_items g_observables_fit_' + ar['model.data.yNames'][0][key],
-            id: 'g_observables_fit_' + ar['model.data.yNames'][0][key],
+            'class': 'g_container_items g_observables_' + ar['model.data.yNames'][0][key],
+            id: 'g_observables_' + ar['model.data.yNames'][0][key],
         });
         $('.g_fit').append(div);
     };
@@ -417,12 +443,36 @@ function create_events(options) {
                 for (var key in ar['pLabel']) {
                     url_data[ar['pLabel'][key]] = $('#' + ar['pLabel'][key] + '_slider').val();
                 };
-                update.update([
-                    'resize_graphs', 'update_graphs',
-                ], url_data, e);
+                update.update(['update_graphs'], url_data, e);
             };
         });
     };
+    $("#autoscale").change(function(e) {
+    if ( e.target.checked === true){
+        for (var type in graphs) {
+          for (var key in graphs[type]) {
+            for (var i = 0; i < $('.g_' + type +
+                '_' + key).length; i++) {
+              graphs[type][key][i].updateOptions({
+                'valueRange': [null, null]
+              });
+            };
+          };
+        };
+    } else {
+        for (var type in graphs) {
+          for (var key in graphs[type]) {
+            for (var i = 0; i < $('.g_' + type +
+                '_' + key).length; i++) {
+              graphs[type][key][i].updateOptions({
+                'valueRange': graphs[type][key][i].yAxisRange()
+              });
+            };
+          };
+        };
+    };
+
+});
     $('#max_iter').on('slidestop', function(e) {
         update.update(['max_iter'], {
             max_iter: e.target.value
@@ -431,21 +481,14 @@ function create_events(options) {
     $("input[name='toggle_graphs']").change(function(e) {
         $('#graphs_' + e.target.id).toggle();
         if ($('#graphs_' + e.target.id).is(":visible")) {
-            for (key in ar['plots']) {
-                for (var i in ar['plots'][key]) {
-                    elm = $('.g_' + key + '_' + ar['plots'][key][i]['layout']['title']);
-                    Plotly.Plots.resize(elm[0]);
-                };
-            };
-        };
+        update.update(['create_graphs'], {}, e);
+    };
     });
     $(".panel_button").on('click', function(e) {
         $('.panel').toggle();
     });
     $("button[name='simu_data']").on('click', function(e) {
-        update.update([
-            'create_fit_data', 'simu_data', 'update_graphs',
-        ], {}, e);
+        update.update(['simu_data', 'update_graphs'], {}, e);
     });
     $("button[name='initial_guess']").on('click', function(e) {
         var url_data = {};
@@ -463,7 +506,7 @@ function create_events(options) {
             url_data[ar['pLabel'][key]] = x;
         };
         update.update([
-            'create_fit_data', 'set_sliders', 'update_graphs',
+            'chi2', 'set_sliders', 'update_graphs',
         ], url_data, e);
     });
     $("button[name='clear']").on('click', function(e) {
@@ -494,9 +537,6 @@ function create_events(options) {
         update.update(['model',
         ], {}, e);
     });
-    $(window).on('resize', function(e) {
-        update.update(['resize_graphs'], {}, e);
-    });
     $('#tab_plots').click(function(e) {
         $.mobile.loading('show');
         update.update([
@@ -506,7 +546,7 @@ function create_events(options) {
     $('#tab_fit').click(function(e) {
         $.mobile.loading('show');
         update.update([
-            'chi2', 'create_graphs', 'resize_graphs',
+            'chi2', 'create_graphs', 'update_graphs',
         ], {}, e);
     });
     $('#tab_editor').one('click', function(e) {
@@ -556,65 +596,184 @@ function create_events(options) {
         };
     });
 };
-function create_fit_data(options) {
-    if (!fit_data.hasOwnProperty('parameters')) {
-        fit_data.parameters = {};
-        fit_data.parameters.y = [];
-        for (var i in ar['p']) {
-            fit_data.parameters.y.push([ar['p'][i][0]]);
-        };
-        fit_data.chi2plot = {};
-        fit_data.chi2plot.x = [0];
-        fit_data.chi2plot.y = [ar['chi2fit']];
-    } else {
-        if (options.indexOf('fit') > -1 || options.indexOf('create_graphs') > -1) {
-            var fit_step = 1;
-            if (options.indexOf('fit_auto') === -1) {
-                fit_step = ar['fit.iter_count'] || 1;
-            };
-            fit_data.chi2plot.x.push(fit_data.chi2plot.x[fit_data.chi2plot.x.length - 1] + fit_step);
-            fit_data.chi2plot.y.push(ar['chi2fit']);
-            for (var i in ar['p']) {
-                fit_data.parameters.y[i].push(ar['p'][i][0]);
-            };
-        };
-    };
-    return fit_data
-};
-function create_graphs() {
-    labels_fit_parameters = ['n'];
-    for (var key in ar['pLabel']) {
-        labels_fit_parameters.push(ar['pLabel'][key]);
-    };
-    Plotly.newPlot('g_fit_chi2plot', [
-        {
-            x: fit_data.chi2plot.x,
-            y: fit_data.chi2plot.y,
-        }
-    ], {
-        title: '-2*log(L)'
-    }, {scrollZoom: true});
-    param_data = [];
+
+function create_graphs_data(options) {
+
+  // create first fit graphs entries if not already existent
+  if (!graphs_data.hasOwnProperty('fit')) {
+    graphs_data.fit = {};
+    graphs_data.fit.parameters = [
+      [0]
+    ];
+    graphs_data.fit.chi2plot = [
+      [0, ar['chi2fit']]
+    ];
     for (var i in ar['p']) {
-        param_data.push({name: ar['pLabel'][i], x: fit_data.chi2plot.x, y: fit_data.parameters.y[i],})
+      graphs_data.fit.parameters[0].push(ar['p'][i][0]);
     };
-    Plotly.newPlot('g_fit_parameters', param_data, {
-        title: 'Fit parameters'
-    }, {scrollZoom: true});
-    for (key in ar['plots']) {
-        for (var i in ar['plots'][key]) {
-            elm = $('.g_' + key + '_' + ar['plots'][key][i]['layout']['title']);
-            //for (var c in ar['plots'][key][i]['data']) {ar['plots'][key][i]['data'][c]['type'] = 'scattergl';}; // scattergl
-            Plotly.newPlot(elm[0], // the ID of the div
-                    ar['plots'][key][i]['data'], ar['plots'][key][i]['layout'], {scrollZoom: true});
-        };
+  }
+  else{
+
+  if (options.indexOf('fit') > -1 || options.indexOf('create_graphs') > -1) {
+    var fit_step = 1;
+    var chi2 = ar['chi2fit'];
+    if ((chi2_hist !== undefined) && (chi2_hist !== 'NaN')) {
+      chi2 = chi2_hist;
     };
-    for (var i in ar['plots']['observables']) {
-        elm = $('.g_observables_fit_' + ar['plots']['observables'][i]['layout']['title']);
-        Plotly.newPlot(elm[0], // the ID of the div
-                ar['plots']['observables'][i]['data'], ar['plots']['observables'][i]['layout'], {scrollZoom: true});
+
+    if (options.indexOf('fit_auto') === -1) {
+        fit_step = parseInt(ar['fit.iter_count']) || 1;
     };
+    graphs_data.fit.chi2plot.push([
+      graphs_data.fit.chi2plot.slice(-1).pop()[0] + fit_step, ar['chi2fit']
+    ]);
+
+    var arr = [graphs_data.fit.parameters.slice(-1).pop()[0] + fit_step];
+    for (var i in ar['pLabel']) {
+      arr.push(ar['p'][i][0]);
+    };
+    graphs_data.fit.parameters.push(arr);
+  };
+  };
+  if (options.indexOf('observables') > -1) {
+    graphs_data['observables'] = {};
+    for (var i = 0; i < ar['model.data.yNames'][0].length; i++) {
+        graphs_data.observables[ar['model.data.yNames'][0][i]] = ar.plots.observables[i];
+    }
+  };
+
+  if ((options.indexOf('inputs') > -1) && (ar['model.u'] != undefined)) {
+    graphs_data['inputs'] = {};
+    for (var i = 0; i < ar['model.u'].length; i++) {
+        graphs_data.inputs[ar['model.u'][i]] = ar.plots.inputs[i];
+    };
+  };
+
+  if (options.indexOf('variables') > -1) {
+    graphs_data['variables'] = {};
+    for (var i = 0; i < ar['model.xNames'].length; i++) {
+        graphs_data.variables[ar['model.xNames'][i]] = ar.plots.variables[i];
+    };
+  };
+      return graphs_data
 };
+
+function create_graphs() {
+  var g_settings = {};
+  g_settings['global'] = {
+    valueRange: [null, null],
+    strokeWidth: 2,
+    highlightCircleSize: 5,
+    highlightSeriesBackgroundAlpha: 0.8,
+    highlightSeriesOpts: {
+      strokeWidth: 3,
+      strokeBorderWidth: 0,
+      highlightCircleSize: 5
+    }
+  };
+  labels_fit_parameters = ['n'];
+
+  for (var key in ar['pLabel']) {
+    labels_fit_parameters.push(ar['pLabel'][key]);
+  };
+
+  cp_parameters = cpal.slice();
+  for (var plot in graphs_data) {
+      graphs[plot] = {};
+
+    for (var key in graphs_data[plot]) {
+        graphs[plot][key] = [];
+        cp = cpal.slice();
+
+        if (plot === 'fit'){
+            g_settings['fit'] = {
+              labels: ['x', key, key + ' exp'],
+              errorBars: true,
+              title: key
+            };
+            g_settings['fit']['series'] = {};
+            g_settings['fit']['series'][key + ' exp'] = {
+              fillAlpha: 1,
+              strokeWidth: 3,
+              drawPoints: true,
+              pointSize: 3,
+              plotter: singlePointPlotter
+            };
+            g_settings['chi2plot'] = {
+              labels: ['n', 'Chi2'],
+              errorBars: false,
+              title: 'Chi2'
+            };
+            g_settings['parameters'] = {
+              labels: labels_fit_parameters,
+              errorBars: false,
+              title: 'Fit parameters'
+            };
+        };
+        if (plot === 'variables'){
+            labels_var = ['x'];
+            for (var i = 0; i < (ar.plots.variables[0][0].length-1); i++) {
+                labels_var = labels_var.concat(["Condition " + i]);
+            };
+            g_settings['variables'] = {
+              labels: labels_var,
+              title: key
+            };
+        };
+
+        if (plot === 'observables'){
+
+            series_settings_obs = {};
+            labels_obs = ['x'];
+            for (var i = 0; i < (ar.plots.variables[0][0].length-1); i++) {
+
+                label = "Condition " + i;
+                label_exp = "Condition " + i + " exp";
+                labels_obs = labels_obs.concat(["Condition " + i, "Condition " + i + " exp"]);
+                opts = {};
+                opts['series'] = {};
+                color = cp[cp.push(cp.shift())-1];
+                opts['series'][label_exp] = {
+                    color: color,
+                    drawPoints: true,
+                    connectSeparatedPoints: false
+                };
+                opts['series'][label] = {
+                    color: color,
+                    drawPoints: false,
+                    connectSeparatedPoints: true,
+                };
+                series_settings_obs = $.extend(series_settings_obs, opts['series']);
+            };
+            g_settings['observables'] = {
+              connectSeparatedPoints: true,
+              labels: labels_obs,
+              errorBars: true,
+              title: key,
+              series: series_settings_obs
+            };
+        };
+
+        if (plot === 'inputs'){
+            g_settings['inputs'] = {
+              labels: ['t', key],
+              xlabel: ar['model.fu'][0],
+              title: key
+            };
+      };
+
+      for (var i = 0; i < $('.g_' + plot + '_' + key).length; i++) {
+        graphs[plot][key][i] = new Dygraph(
+          $('.g_' + plot + '_' + key)[i],
+          graphs_data[plot][key],
+          $.extend({},
+            g_settings['global'], g_settings[plot], g_settings[key]));
+      };
+    };
+  };
+};
+
+
 function create_filetree(tree) {
     var html = '<ul>';
     for (var key in tree['children']) {
@@ -627,4 +786,43 @@ function create_filetree(tree) {
     };
     html += '</ul>';
     return html
+};
+// single point error bars for dygraphs
+function singleErrorPlotter(e) {
+  var ctx = e.drawingContext;
+  var points = e.points;
+  var g = e.dygraph;
+  var color = e.color;
+  ctx.save();
+  ctx.strokeStyle = e.color;
+  for (var i = 0; i < points.length; i++) {
+    var p = points[i];
+    var center_x = p.canvasx;
+    if (isNaN(p.y_bottom)) continue;
+    var low_y = g.toDomYCoord(p.yval_minus),
+      high_y = g.toDomYCoord(p.yval_plus);
+    ctx.beginPath();
+    ctx.moveTo(center_x, low_y);
+    ctx.lineTo(center_x, high_y);
+    ctx.stroke();
+  }
+  ctx.restore();
+};
+// single point plotter (without connecting line) for dygraphs
+function singlePointPlotter(e) {
+  var ctx = e.drawingContext;
+  var points = e.points;
+  var g = e.dygraph;
+  var color = e.color;
+  var pointSize = e.dygraph.user_attrs_[e.setName].pointSize;
+  var drawPointCallback = Dygraph.Circles.DEFAULT;
+  for (var i = 0; i < points.length; i++) {
+    var p = points[i];
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.arc(p.canvasx, p.canvasy, pointSize, 0, 2 * Math.PI, false);
+    ctx.fill();
+  };
+  ctx.restore();
 };

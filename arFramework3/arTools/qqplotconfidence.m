@@ -1,3 +1,10 @@
+% qq plot with confidence intervals
+%
+% qqplotconfidence(p, runConfInts)
+%
+% p:            data values
+% runConfInts:  compute confidence intervals [false]
+
 function qqplotconfidence(p, runConfInts)
 
 if(~exist('runConfInts','var'))
