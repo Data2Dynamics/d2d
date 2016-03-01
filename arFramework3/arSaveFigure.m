@@ -107,6 +107,10 @@ if ( useNewExport )
         sc = .015*numel(get(myLegend, 'String'));
         
         set(myLegend,'Position',[(indCol-1)/nCols+(1/nCols)*0.25 (indRow-1)/nRows+(1/nRows)*0.85-sc sc*AR sc]);
+        
+        if ( nRows == 1 )
+            nCols = nCols + .5;
+        end
     end
 end
 

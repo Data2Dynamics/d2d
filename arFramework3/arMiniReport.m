@@ -808,8 +808,14 @@ for jm=1:length(ar.model)
                             else
                                 copyfile([ar.model(jm).plot(jplot).savePath_FigY '.pdf'], ...
                                 [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
-                                if ( isfield( ar.model(jm).plot(jplot), 'nRows' ) && ( ar.model(jm).plot(jplot).nRows * ar.model(jm).plot(jplot).nCols == 1 ) )
-                                    figSize = .7;
+                                if ( isfield( ar.model(jm).plot(jplot), 'nCols' ) )
+                                    if ( ar.model(jm).plot(jplot).nCols == 1 )
+                                        figSize = .4;
+                                    elseif ( ar.model(jm).plot(jplot).nCols == 1.5 )
+                                        figSize = .7;
+                                    else
+                                        figSize = .9;
+                                    end
                                 else
                                     figSize = .9;
                                 end
