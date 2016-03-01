@@ -808,7 +808,13 @@ for jm=1:length(ar.model)
                             else
                                 copyfile([ar.model(jm).plot(jplot).savePath_FigY '.pdf'], ...
                                 [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
-                                lpfigure(fid, .9, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
+                                if ( isfield( ar.model(jm).plot(jplot), 'nRows' ) && ( ar.model(jm).plot(jplot).nRows * ar.model(jm).plot(jplot).nCols == 1 ) )
+                                    figSize = .7;
+                                else
+                                    figSize = .9;
+                                end
+
+                                lpfigure(fid, figSize, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
                             end
                         end
                     end

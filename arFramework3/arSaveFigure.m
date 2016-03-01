@@ -1,4 +1,4 @@
-function savePath = arSaveFigure(h, name, subdir)
+function [ savePath, nRows, nCols ] = arSaveFigure(h, name, subdir)
 
 global ar
 
@@ -69,7 +69,9 @@ nRows = length(myrows);
 if ( useNewExport )
     % No room was allocated specifically for the legend
     if ( ( nRows * nCols ) == ( numel(myaxes) - length( legendList ) ) )
-        nCols = nCols + 1;
+        if ( length(legendList) > 0 )
+            nCols = nCols + 1;
+        end
     end
 end
 
