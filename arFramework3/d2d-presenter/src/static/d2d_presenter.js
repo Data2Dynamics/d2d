@@ -209,6 +209,7 @@ function Update() {
             create_graphs();
         };
         if (options.indexOf('update_graphs') > -1) {
+            var tb0 = performance.now();
           // check that it wont update the graphs after full fit when auto fitting
           if ( ( event !== null && event.target.name !== 'fit_auto' ) ||
               ( event === null ) ) {
@@ -234,14 +235,19 @@ function Update() {
                         };
                     } else if ($("ul li.ui-state-active")[0].children[0].id === 'tab_plots') {
                      if ($('#inputs')[0].checked) {
+
                          create_graphs_data(['inputs']);
                          var type = 'inputs';
                          for (var key in graphs[type]) {
                            for (var i = 0; i < $('.g_' + type +
                                '_' + key).length; i++) {
+                                   var t0 = performance.now();
                              graphs[type][key][i].updateOptions({
                                'file': graphs_data[type][key]
                              });
+
+                             var t1 = performance.now();
+                             console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.");
                            };
                          };
                     };
@@ -271,6 +277,8 @@ function Update() {
                   };
               };
           };
+          var tb1 = performance.now();
+          console.log("Call to complete took " + (tb1 - tb0) + " milliseconds.");
         };
     };
 };
