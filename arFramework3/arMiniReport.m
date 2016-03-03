@@ -857,15 +857,15 @@ for jm=1:length(ar.model)
                         
                         if(ar.config.fiterrors == 1)
                             if ( opts.omitlikelihood )
-                                lp( fid, sprintf( 'This dataset contains %i data points.', ar.model(jm).plot(jplot).ndata ) );
+                                lp( fid, sprintf( 'This dataset contains %i data points.\\\\\\\\ \\n', ar.model(jm).plot(jplot).ndata ) );
                             else
-                                lp( fid, sprintf( 'The model yields a value of $-2 \\\\log(L) = %g$ for %i data points in this data set.', 2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata ) );
+                                lp( fid, sprintf( 'The model yields a value of $-2 \\\\log(L) = %g$ for %i data points in this data set.\\\\\\\\ \\n', 2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata ) );
                             end
                         else
                             if ( opts.omitlikelihood )
-                                lp( fid, sprintf( 'This dataset contains %i data points.', ar.model(jm).plot(jplot).ndata ) );
+                                lp( fid, sprintf( 'This dataset contains %i data points.\\\\\\\\ \\n', ar.model(jm).plot(jplot).ndata ) );
                             else
-                                lp( fid, sprintf( 'The model yields a value of $\\\\chi^2 = %g$ for %i data points in this data set.', ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata ) );
+                                lp( fid, sprintf( 'The model yields a value of $\\\\chi^2 = %g$ for %i data points in this data set.\\\\\\\\ \\n', ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata ) );
                             end        
                         end
                     end
@@ -913,8 +913,11 @@ for jm=1:length(ar.model)
                         end      
 
                         if ( sum(qmod) > 0 )
-                            lp(fid, '\\begin{table}');
-                            lp(fid, '\t\\centering');
+                            %lp(fid, '\\begin{table}');
+                            %lp(fid, '\t\\centering');
+                            lp(fid, '\\begin{statictable}');
+                            %lp(fid, '\t\\centering');
+                            lp(fid, '\\begin{centering}');
                             lp(fid, '\\begin{tabularx}{\\textwidth}{@{} *%dlX @{}}\\toprule', nC-1);
                             lp(fid, '\\titlerowcol \\textbf{Input} & \\textbf{Unit} & \\textbf{Modified equation}\\tabularnewline\\midrule' );
                             sk = find(qmod);
@@ -934,10 +937,13 @@ for jm=1:length(ar.model)
                                 end
                             end
                             lp(fid, '\\botrule\\end{tabularx}');
-                            lp(fid, '\\mycaption{Inputs modified for experiment %s}{%s_input}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name );
-                            lp(fid, '\\end{table}');
+                            %lp(fid, '\\mycaption{Inputs modified for experiment %s}{%s_input}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name );
+                            %lp(fid, '\\end{table}');
+                            lp(fid, '\\mycaptionof{Inputs modified for experiment %s}{%s_input}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name );
+                            lp(fid, '\\end{centering}');
+                            lp(fid, '\\end{statictable}');       
                         end
-                    end                
+                    end
 
                     %% observations and error model
                     if(isfield(ar.model(jm), 'y'))
