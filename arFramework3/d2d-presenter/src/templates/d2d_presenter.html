@@ -13,7 +13,7 @@
     <script src="{{ url_for('static', filename='extern/codemirror/codemirror-compressed.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='extern/codemirror/codemirror.css') }}">
     <!-- dygraphs -->
-    <script src="{{ url_for('static', filename='extern/dygraphs/dygraph-combined.js') }}"></script>
+    <script src="{{ url_for('static', filename='extern/dygraphs/dygraph-combined-dev.js') }}"></script>
     <script src="{{ url_for('static', filename='d2d_presenter.js') }}"></script>
     <script type="text/javascript">
       var $SCRIPT_ROOT = {{ request.script_root | tojson | safe }};
@@ -41,9 +41,9 @@
                 <h3>Settings</h3>
                 <div>
                     <label for="nFinePoints">nFinePoints:</label>
-                    <input type="range" name="nFinePoints" id="nFinePoints" min="10" max="1000" value="300">
+                    <input type="range" name="nFinePoints" id="nFinePoints" min="10" max="1000" value="100">
                     <label for="round">Round:</label>
-                    <input type="range" name="round" id="round" min="0" max="10" value="0">
+                    <input type="range" name="round" id="round" min="0" max="10" value="5">
                 </div>
             </div>
             <!-- /panel -->

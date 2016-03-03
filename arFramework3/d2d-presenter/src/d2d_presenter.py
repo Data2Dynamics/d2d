@@ -90,12 +90,27 @@ def start():
                              }
         })
 
+    load = False
+
+    try:
+        results = os.listdir(os.path.join(
+            os.path.dirname(d2d_instances[session['uid']]['model']),
+            'results'))
+
+        for savename in results:
+            if savename.endswith('_d2d_presenter'):
+                load = savename
+                break
+
+    except:
+        print("No saved results found for d2d_presenter, compiling from " +
+              "scratch. This might take some time.")
+
     d2d_instances[session['uid']]['d2d'].load_model(
-        d2d_instances[session['uid']]['model'], load=1)
+        d2d_instances[session['uid']]['model'], load=load)
 
     d2d_instances[session['uid']]['d2d'].set(
         {'ar.config.nFinePoints': nFinePoints})
-
     d2d_instances[session['uid']]['d2d'].eval("arLink;")
     d2d_instances[session['uid']]['d2d'].simu()
     d2d_instances[session['uid']]['d2d'].eval("arChi2;")
@@ -136,7 +151,7 @@ def update():
         extra['console'] = d2d.output_total
 
     if 'setup' in options:
-        d2d.load_model(d2d_instances[session['uid']]['model'], load=None)
+        d2d.load_model(d2d_instances[session['uid']]['model'], load=False)
 
     if 'change_mdc' in options:
 
@@ -289,36 +304,42 @@ def create_dygraphs_data(data):
     data['plots'] = {}
     data['plots']['observables'] = []
 
-    tObs = data['model.data.tFine'][0][0].copy()
-    for i in range(len(data['model.data.tExp'])):
-        tObs = tObs + data['model.data.tExp'][i][0].copy()
-    tObs = [[x] for x in tObs]
+    if data['model.data.yNames'][0]:
 
-    for i in range(len(data['model.data.yNames'][0])):
-        data['plots']['observables'].append(copy.deepcopy(tObs))
-        for k in range(len(data['model.data.tExp'])):
-            for j in range(len(data['model.data.tFine'][k][0])):
-                data['plots']['observables'][i][j].append([
-                    data['model.data.yFineSimu'][k][i][j],
-                    data['model.data.ystdFineSimu'][k][i][j]])
-                data['plots']['observables'][i][j].append([float('nan'), 0])
+        tObs = data['model.data.tFine'][0][0].copy()
 
-        c = len(data['model.data.tFine'][0][0])
-        for k in range(len(data['model.data.tExp'])):
-            for j in range(len(data['model.data.tExp'][k][0])):
-                for l in range(len(data['model.data.tExp'])):
-                    data['plots']['observables'][i][c].append(
-                        [float('nan'), float('nan')])
-                    if l is k:
-                        data['plots']['observables'][i][c].append(
-                            [data['model.data.yExp'][l][i][j],
-                                data['model.data.yExpStd'][l][i][j]])
-                    else:
-                        data['plots']['observables'][i][c].append(
-                            [float('nan'), float('nan')])
-                c = c + 1
+        if data['model.data.tExp'][0]:
+            for i in range(len(data['model.data.tExp'])):
+                tObs = tObs + data['model.data.tExp'][i][0].copy()
+        tObs = [[x] for x in tObs]
 
-        data['plots']['observables'][i].sort(key=lambda x: x[0])
+        for i in range(len(data['model.data.yNames'][0])):
+            data['plots']['observables'].append(copy.deepcopy(tObs))
+            for k in range(len(data['model.data.tFine'])):
+                for j in range(len(data['model.data.tFine'][k][0])):
+                    data['plots']['observables'][i][j].append([
+                        data['model.data.yFineSimu'][k][i][j],
+                        data['model.data.ystdFineSimu'][k][i][j]])
+                    data['plots']['observables'][i][j].append(
+                        [float('nan'), 0])
+
+            if data['model.data.tExp'][0]:
+                c = len(data['model.data.tFine'][0][0])
+                for k in range(len(data['model.data.tExp'])):
+                    for j in range(len(data['model.data.tExp'][k][0])):
+                        for l in range(len(data['model.data.tExp'])):
+                            data['plots']['observables'][i][c].append(
+                                [float('nan'), float('nan')])
+                            if l is k:
+                                data['plots']['observables'][i][c].append(
+                                    [data['model.data.yExp'][l][i][j],
+                                        data['model.data.yExpStd'][l][i][j]])
+                            else:
+                                data['plots']['observables'][i][c].append(
+                                    [float('nan'), float('nan')])
+                        c = c + 1
+
+            data['plots']['observables'][i].sort(key=lambda x: x[0])
 
     if len(data['model.z']) > 0:
 
@@ -373,6 +394,26 @@ def create_dygraphs_data(data):
     data.pop('model.condition.zFineSimu', None)
     data.pop('model.condition.z', None)
     data.pop('model.z', None)
+
+    # remove spaces (spaces wont work in css/html ids)
+    try:
+        for i, key in enumerate(data['model.xNames']):
+            data['model.xNames'][i] = key.replace(
+                ' ', '_').replace('(', '').replace(')', '')
+    except:
+        pass
+    try:
+        for i, key in enumerate(data['model.u']):
+            data['model.u'][i] = key.replace(
+                ' ', '_').replace('(', '').replace(')', '')
+    except:
+        pass
+    try:
+        for i, key in enumerate(data['model.data.yNames'][0]):
+            data['model.data.yNames'][0][i] = key.replace(
+                ' ', '_').replace('(', '').replace(')', '')
+    except:
+        pass
 
     return data
 

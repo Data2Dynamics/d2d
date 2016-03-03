@@ -209,7 +209,6 @@ function Update() {
             create_graphs();
         };
         if (options.indexOf('update_graphs') > -1) {
-            var tb0 = performance.now();
           // check that it wont update the graphs after full fit when auto fitting
           if ( ( event !== null && event.target.name !== 'fit_auto' ) ||
               ( event === null ) ) {
@@ -241,13 +240,9 @@ function Update() {
                          for (var key in graphs[type]) {
                            for (var i = 0; i < $('.g_' + type +
                                '_' + key).length; i++) {
-                                   var t0 = performance.now();
                              graphs[type][key][i].updateOptions({
                                'file': graphs_data[type][key]
                              });
-
-                             var t1 = performance.now();
-                             console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.");
                            };
                          };
                     };
@@ -277,8 +272,6 @@ function Update() {
                   };
               };
           };
-          var tb1 = performance.now();
-          console.log("Call to complete took " + (tb1 - tb0) + " milliseconds.");
         };
     };
 };
@@ -744,7 +737,8 @@ function create_graphs() {
                 opts['series'][label_exp] = {
                     color: color,
                     drawPoints: true,
-                    connectSeparatedPoints: false
+                    connectSeparatedPoints: false,
+                    strokeWidth: 0
                 };
                 opts['series'][label] = {
                     color: color,
@@ -769,18 +763,40 @@ function create_graphs() {
               title: key
             };
       };
-
       for (var i = 0; i < $('.g_' + plot + '_' + key).length; i++) {
         graphs[plot][key][i] = new Dygraph(
           $('.g_' + plot + '_' + key)[i],
           graphs_data[plot][key],
-          $.extend({},
-            g_settings['global'], g_settings[plot], g_settings[key]));
+          $.extend({}, g_settings[plot], g_settings[key], g_settings['global']));
       };
     };
   };
 };
-
+// <form>
+//     <div class="ui-field-contain">
+//         <label for="filter-menu">Basic:</label>
+//         <select id="filter-menu" data-native-menu="false" class="filterable-select">
+//             <option value="SFO">San Francisco</option>
+//             <option value="LAX">Los Angeles</option>
+//             <option value="YVR">Vancouver</option>
+//             <option value="YYZ">Toronto</option>
+//         </select>
+//     </div>
+// </form>
+// function create_filetree(tree) {
+//     var html = '<form><div class="ui-field-contain"><label for="filter-menu">Select model:</label><select id="filter-menu" data-native-menu="false" class="filterable-select">';
+//     for (var key in tree['children']) {
+//         if ('children' in tree['children'][key]) {
+//             html += '<option value=\'' +  tree['children'][key]['name'] + '\'>tree['children'][key]['name'].replace(/^.*(\\|\/|\:)/, '')</option>'
+//             html += '<li>' + tree['children'][key]['name'].replace(/^.*(\\|\/|\:)/, '') + '</li>';
+//             html += create_filetree(tree['children'][key]);
+//         } else {
+//             html += '<li><a name=\'' + tree['children'][key]['name'] + '\'  href=\'#\'>' + tree['children'][key]['name'].replace(/^.*(\\|\/|\:)/, '') + '</a></li>';
+//         };
+//     };
+//     html += '</select></div></form>';
+//     return html
+// };
 
 function create_filetree(tree) {
     var html = '<ul>';

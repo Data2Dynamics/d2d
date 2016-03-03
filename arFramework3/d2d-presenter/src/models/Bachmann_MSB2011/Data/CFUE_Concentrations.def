@@ -1,0 +1,31 @@
+DESCRIPTION
+"Experimenter: Julie Bachmann"
+"Cells: CFU-E"
+"Ligand: Epo 5 units/ml (1.25e-7 units/cell)"
+
+PREDICTOR
+t               T   min     time	0	130
+
+INPUTS
+
+OBSERVABLES
+STAT5_abs           C   nM  conc.   0   1   "STAT5"
+SHP1_abs            C   nM  conc.   0   1   "SHP1 + SHP1Act"
+CIS_abs             C   nM  conc.   0   1   "CIS"
+SOCS3_abs           C   nM  conc.   0   1   "SOCS3"
+// pSTAT5A_rel         C   rel conc.   0   0   "offset_pSTAT5_conc + 100*pSTAT5/(pSTAT5+STAT5)"         
+pSTAT5B_rel         C   rel conc.   0   0   "offset_pSTAT5_conc + 100*pSTAT5/(pSTAT5+STAT5)"         
+
+ERRORS
+STAT5_abs		"sd_STAT5_abs"
+SHP1_abs		"sd_SHP1_abs"
+CIS_abs			"sd_CIS_abs"
+SOCS3_abs		"sd_SOCS3_abs"
+// pSTAT5A_rel		"sd_pSTAT5_rel"
+pSTAT5B_rel		"sd_pSTAT5_rel"
+
+CONDITIONS
+epo_level			"1.25e-7"
+ActD				"0"
+CISoe               "0"
+SOCS3oe             "0"

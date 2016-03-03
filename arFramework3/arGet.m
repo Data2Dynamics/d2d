@@ -65,14 +65,26 @@ for i=1:length(fields)
             fields(i) = {regexprep(char(fields(i)),'^data.', '')};
             S = substruct_arg(fields(i));
             c = 1;
-            data{i} = cell(1, length(struct.model(m).plot(dset).dLink));
-            for j=struct.model(m).plot(dset).dLink
-                data{i}{c}=subsref(struct.model(m).data(j), substruct(S{:}));
-                if isnumeric(data{i}{c}) && sig
-                    
-                    data{i}{c} = chop(data{i}{c}, sig);
+            try
+                data{i} = cell(1, length(struct.model(m).plot(dset).dLink));
+                for j=struct.model(m).plot(dset).dLink
+                    try
+                        data{i}{c}=subsref(struct.model(m).data(j), substruct(S{:}));
+                    catch
+                        data{i}{c} = {};
+                    end
+
+                    if isnumeric(data{i}{c})
+                        if length(data{i}{c}) == 1
+                            data{i}{c} = {{data{i}{c}}};
+                        elseif sig
+                            data{i}{c} = chop(data{i}{c}, sig);
+                        end
+                    end
+                    c = c + 1;
                 end
-                c = c + 1;
+            catch
+                data{i} = {}
             end
             
         elseif(regexp(char(fields(i)), '^condition.'))
@@ -80,13 +92,30 @@ for i=1:length(fields)
             fields(i) = {regexprep(char(fields(i)),'^condition.', '')};
             S = substruct_arg(fields(i));
             
-            data{i} = cell(1, length(struct.model(m).condition));
-            for j=1:length(struct.model(m).condition)
-                data{i}{j}=subsref(struct.model(m).condition(j), substruct(S{:}));
-                
-                if isnumeric(data{i}{j}) && sig
-                    data{i}{j} = chop(data{i}{j}, sig);
+            c = 1;
+            try
+                data{i} = cell(1, length(struct.model(m).plot(dset).dLink));
+                for j=struct.model(m).plot(dset).dLink
+                    if j == 0
+                        data{i}{c}=subsref(struct.model(m).condition(1), substruct(S{:}));
+                    else
+                        try
+                            data{i}{c}=subsref(struct.model(m).condition(j), substruct(S{:}));
+                        catch
+                            data{i}{c}={};
+                        end
+                    end
+                    if isnumeric(data{i}{c})
+                        if length(data{i}{c}) == 1
+                            data{i}{c} = {{data{i}{c}}};
+                        elseif sig
+                            data{i}{c} = chop(data{i}{c}, sig);
+                        end
+                    end
+                    c = c + 1;
                 end
+            catch
+                data{i} = {}
             end
         elseif(regexp(char(fields(i)), '^plot.'))   
             fields(i) = {regexprep(char(fields(i)),'^plot.', '')};
@@ -94,15 +123,42 @@ for i=1:length(fields)
             
             data{i} = cell(1, length(struct.model(m).plot));
             for j=1:length(struct.model(m).plot)
-                data{i}{j}=subsref(struct.model(m).plot(j), substruct(S{:}));
+                try
+                    data{i}{j}=subsref(struct.model(m).plot(j), substruct(S{:}));
+                catch
+                    data{i}{j}={};
+                end
+                if isnumeric(data{i}{j})
+                    if length(data{i}{j}) == 1
+                        data{i}{j} = {{data{i}{j}}};
+                    end
+                end
             end
         else
             S = substruct_arg(fields(i));
-            data{i}=subsref(struct.model(m), substruct(S{:}));
+            try
+                data{i}=subsref(struct.model(m), substruct(S{:}));
+            catch
+                data{i}={};
+            end
+            if isnumeric(data{i})
+                if length(data{i}) == 1
+                    data{i} = {{data{i}}};
+                end
+            end
         end
     else
         S = substruct_arg(fields(i));
-        data{i}=subsref(struct, substruct(S{:}));
+        try
+            data{i}=subsref(struct, substruct(S{:}));
+        catch
+            data{i}={};
+        end
+        if isnumeric(data{i})
+            if length(data{i}) == 1
+                data{i} = {{data{i}}};
+            end
+        end
     end
     
 end

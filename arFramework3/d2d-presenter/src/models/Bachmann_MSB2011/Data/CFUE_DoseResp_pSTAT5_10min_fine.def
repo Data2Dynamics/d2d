@@ -1,0 +1,20 @@
+DESCRIPTION
+"Experimenter: Julie Bachmann"
+"Cells: CFU-E"
+"Ligand: Epo dose response at 10 minutes"
+
+PREDICTOR-DOSERESPONSE  epo_level
+t               T   min     time	0	15
+
+INPUTS
+
+OBSERVABLES
+pSTAT5_au         C   au  conc.   1   1   "scale_pSTAT5_dr10 / init_STAT5 * pSTAT5"
+        
+ERRORS
+pSTAT5_au		"sd_STAT5_au"
+
+CONDITIONS
+ActD				"0"
+CISoe               "0"
+SOCS3oe             "0"

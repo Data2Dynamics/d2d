@@ -9,15 +9,15 @@ __author__ = 'Clemens Blank'
 
 class mat():
     def __init__(self):
+        self.output_total = ''
         self.eng = matlab.engine.start_matlab()
         self.cd(os.getcwd())
-        self.output_total = ''
 
     def cd(self, arg):
-        self.eng.cd(arg, nargout=0)
+        self.eval("cd '" + str(arg) + "'", 0)
 
     def eval(self, exp, args=0):
-
+        print(str(exp) + "  - " + str(args))
         out = io.StringIO()
         err = io.StringIO()
         try:
@@ -91,13 +91,13 @@ class d2d(mat):
 
     """Enhances the mat class with d2d specific methods."""
 
-    def load_model(self, path, load=None):
+    def load_model(self, path, load=False):
         self.path = os.path.dirname(path)
         self.filename = os.path.basename(path)
         self.cd(self.path)
 
-        if load != None:
-            self.eval("arLoad(" + str(load) + ")")
+        if load != False:
+            self.eval("arLoad('" + str(load) + "')")
         else:
             self.eval(os.path.splitext(os.path.basename(path))[0])
         self.update()
@@ -175,24 +175,31 @@ class d2d(mat):
 
         return data
 
-    def simu(self, sensi='true', fine='true', dynamics='true', options=[]):
+    def simu(self, sensi='true', fine='true', dynamics='true', options=[], rec=False):
         """Executes arSimu. Needs some special attention in order to deal
            with integration errors (CV_CONV_FAILURE) when using a bad
            parameter setting."""
 
+        print("mit simu")
+
         status = self.eval(
             'arSimu(' + sensi + ', ' + fine + ', ' + dynamics + ');')
 
+        print(status)
+
         if status is False:
+            print("isinfalse")
             params = self.eval("arCheckSimu", 1)
+            print(params)
             if isinstance(params, bool):
-                self.eval("for (i = 1:length(ar.p)) ar.p(i) = -1; end", 0)
+                self.eval("for (i = 1:length(ar.p)) ar.p(i) = 0; end", 0)
             else:
                 for i, key in enumerate(params[0]):
                     if int(key) is 1:
-                        self.eval("ar.p(" + str(int(i+1)) + ") = -1;", 0)
-            self.eval("arChi2", 0)
-            self.simu(sensi, fine, dynamics)
+                        self.eval("ar.p(" + str(int(i+1)) + ") = 0;", 0)
+            if rec is False:
+                self.eval("arChi2", 0)
+                self.simu(sensi, fine, dynamics, rec=True)
 
             if 'fit' in options:
                 self.eval("arFit")

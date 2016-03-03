@@ -1,0 +1,32 @@
+DESCRIPTION
+"Experimenter: Julie Bachmann"
+"Cells: CFU-E"
+"Ligand: Epo 5 units/ml (1.25e-7 units/cell) + Cis 10-fold OE"
+
+PREDICTOR
+t               T   min     time	0	125
+
+INPUTS
+
+OBSERVABLES
+pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_cisoe + scale_pJAK2_cisoe / init_EpoRJAK2 * pJAK2"
+pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_cisoe + scale_pEpoR_cisoe / init_EpoRJAK2 * pEpoR"
+CIS_au              C   au  conc.   1   1   "offset_CIS_cisoe + scale_CIS_cisoe / CISEqc / CISRNAEqc / init_STAT5 * CIS"
+SOCS3_au            C   au  conc.   1   1   "offset_SOCS3_cisoe + scale_SOCS3_cisoe / SOCS3Eqc / SOCS3RNAEqc / init_STAT5 * SOCS3"
+pSTAT5_au           C   au  conc.   1   1   "offset_pSTAT5_cisoe + scale_pSTAT5_cisoe / init_STAT5 * pSTAT5"
+
+ERRORS
+pJAK2_au		"sd_JAK2EpoR_au"
+pEpoR_au		"sd_JAK2EpoR_au"
+CIS_au			"sd_CIS_au"
+SOCS3_au		"sd_SOCS3_au"
+pSTAT5_au		"sd_STAT5_au"
+        
+CONDITIONS
+epo_level			"1.25e-7"
+ActD				"0"
+SOCS3oe             "0"
+        
+init_CIS			"CISoe * CISEqcOE * CISEqc"
+init_EpoRJAK2_CIS	"CISoe"
+        

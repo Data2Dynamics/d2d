@@ -1,0 +1,32 @@
+DESCRIPTION
+"Test Model for Bolus Injections"
+
+PREDICTOR
+t               T   min     time	0	100
+
+COMPARTMENTS
+
+STATES
+ProteinA         C  nM  conc.  1
+ProteinB         C  nM  conc.  1
+ProteinC         C  nM  conc.  1
+        
+INPUTS
+BolusInjection   C  nM  conc.  "bolus_amount * (1/sqrt(2*pi*injection_duration^2)) * exp(-(t - injection_timepoint)^2/(2*injection_duration^2))"
+
+REACTIONS
+ProteinA      ->  ProteinB        CUSTOM "k1*ProteinA"
+ProteinB      ->  ProteinA        CUSTOM "k2*ProteinB"
+ProteinB      ->  ProteinC        CUSTOM "k3*ProteinB"
+        
+              ->  ProteinA        CUSTOM "BolusInjection"
+        
+DERIVED
+
+CONDITIONS
+init_ProteinA       "9"
+init_ProteinB       "1"
+init_ProteinC       "0"
+k1                  "1"
+k2                  "1"
+k3                  "1"
