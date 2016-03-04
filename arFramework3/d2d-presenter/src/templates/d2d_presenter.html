@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="{{ url_for('static', filename='d2d_presenter_logo.png') }}" />
     <!-- jQuery -->
-    <script src="{{ url_for('static', filename='extern/jquery/jquery-2.2.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='extern/jquery/jquery-1.12.1.min.js') }}"></script>
     <!-- jQuery Mobile -->
     <script src="{{ url_for('static', filename='extern/jquery_mobile/jquery.mobile-1.4.5.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='extern/jquery_mobile/jquery.mobile-1.4.5.min.css') }}" />
@@ -13,7 +13,7 @@
     <script src="{{ url_for('static', filename='extern/codemirror/codemirror-compressed.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='extern/codemirror/codemirror.css') }}">
     <!-- dygraphs -->
-    <script src="{{ url_for('static', filename='extern/dygraphs/dygraph-combined-dev.js') }}"></script>
+    <script src="{{ url_for('static', filename='extern/dygraphs/dygraph-combined.js') }}"></script>
     <script src="{{ url_for('static', filename='d2d_presenter.js') }}"></script>
     <script type="text/javascript">
       var $SCRIPT_ROOT = {{ request.script_root | tojson | safe }};
@@ -34,16 +34,32 @@
             </a>
         </div>
         <div role="main" class="ui-content my-content">
-            <h3>Models</h3>
-            <div class="landing_page_content tabs_main">
-            </div>
+            <div class="tabs_main">
+                <div class="landing_page_content">
+                    <div class="ui-grid-solo">
+                        <div class="ui-block-a">
+                            <div class="choose_model"></div>
+                        </div>
+                    </div>
+                        <div data-role="button" class="ui-btn ui-input-btn ui-shadow custom-btn" id="start" name="start">Start</div>
+                </div>
+        </div>
+
             <div class="panel">
                 <h3>Settings</h3>
                 <div>
-                    <label for="nFinePoints">nFinePoints:</label>
+                    <form><label for="nFinePoints">Plot resolution:</label>
                     <input type="range" name="nFinePoints" id="nFinePoints" min="10" max="1000" value="100">
-                    <label for="round">Round:</label>
+                    <label for="round">Significant digits:</label>
                     <input type="range" name="round" id="round" min="0" max="10" value="5">
+                    <div class="ui-field-contain">
+                        <label for="compile">Compile:</label>
+                        <select name="compile" id="compile" data-role="flipswitch">
+                            <option value="off">Off</option>
+                            <option value="on">On</option>
+                        </select>
+                    </div>
+                </form>
                 </div>
             </div>
             <!-- /panel -->

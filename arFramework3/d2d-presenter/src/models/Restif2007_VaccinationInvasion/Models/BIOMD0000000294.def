@@ -1,0 +1,149 @@
+DESCRIPTION
+"Restif2007_Vaccination_Invasion"" (restif07)"
+"SBML level 2 version 4"
+"<notes>
+  <body xmlns="http://www.w3.org/1999/xhtml">
+    <p>
+          This is the model described in the article:
+          <br/>
+    <strong>Vaccination and the dynamics of immune evasion.
+          </strong>
+    <br/>
+         Restif O, Grenfell BT.
+          <em>J R Soc Interface.</em> 2007 Feb 22;4(12):143-53. 
+          PMID:<a href="http://www.ncbi.nlm.nih.gov/pubmed/17210532">17210532</a>, doi:<a href="http://dx.doi.org/10.1098/rsif.2006.0167">10.1098/rsif.2006.0167</a>;
+          <br/>
+    <strong>Abstract:</strong>
+    <br/>
+Vaccines exert strong selective pressures on pathogens, favouring the spread of antigenic variants. We propose a simple mathematical model to investigate the dynamics of a novel pathogenic strain that emerges in a population where a previous strain is maintained at low endemic level by a vaccine. We compare three methods to assess the ability of the novel strain to invade and persist: algebraic rate of invasion; deterministic dynamics; and stochastic dynamics. These three techniques provide complementary predictions on the fate of the system. In particular, we emphasize the importance of stochastic simulations, which account for the possibility of extinctions of either strain. More specifically, our model suggests that the probability of persistence of an invasive strain (i) can be minimized for intermediate levels of vaccine cross-protection (i.e. immune protection against the novel strain) and (ii) is lower if cross-immunity acts through a reduced infectious period rather than through reduced susceptibility.
+	</p>
+  <p>
+This version of the model can be used for both the stochastic and the deterministic simulations described in the article. For deterministic interpretations with infinite population sizes, set the population size <em>N</em> = 1. The model does reproduces the deterministic time course. The initial values are set to the steady state values for a latent infection with strain 1 with an invading infection of strain 2 (I2=1e-06), 100 percent vaccination with a susceptibility reduction τ=0.7 at birth (p=1), and all other parameters as in figure 3 of the publication. 
+  </p><p>
+To be compatible with older software tools, the english letter names instead of the greek symbols were used for parameter names:<br/><table>
+  <tr>
+    <th>parameter</th>
+    <th>symbol</th>
+    <th>name</th>
+  </tr>
+  <tr>
+    <td>transmission rate</td>
+    <td>β</td>
+    <td>beta</td>
+  </tr>
+  <tr>
+    <td>recovery rate</td>
+    <td>γ</td>
+    <td>gamma</td>
+  </tr>
+  <tr>
+    <td>birth/death rate</td>
+    <td>μ</td>
+    <td>mu</td>
+  </tr>
+  <tr>
+    <td>rate of loss of natural immunity</td>
+    <td>σ</td>
+    <td>sigma</td>
+  </tr>
+  <tr>
+    <td>rate of loss of vaccine immunity</td>
+    <td>σ<sub>v</sub>
+</td><td>sigmaV</td>
+</tr><tr>
+  <td>reduction of susceptibility by primary infection</td>
+  <td>θ</td>
+  <td>theta</td>
+</tr><tr>
+  <td>reduction of infection period by primary infection</td>
+  <td>ν</td>
+  <td>nu</td>
+</tr><tr>
+  <td>reduction of susceptibility by vaccination</td>
+  <td>τ</td>
+  <td>tau</td>
+</tr><tr>
+  <td>reduction of infection period by vaccination</td>
+  <td>η</td>
+  <td>eta</td>
+</tr>
+</table>
+</p><p> Originally created by libAntimony v1.4 (using libSBML 3.4.1) </p>
+</body>
+</notes>"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 100	
+
+COMPARTMENTS
+env	 V	 "n/a"	 vol.	 1
+
+STATES
+N_state	 C	 "n/a"	 conc.	 env	 1	 ""
+S_state	 C	 "n/a"	 conc.	 env	 1	 ""
+I1	 C	 "n/a"	 conc.	 env	 1	 ""
+I2	 C	 "n/a"	 conc.	 env	 1	 ""
+R1	 C	 "n/a"	 conc.	 env	 1	 ""
+R2	 C	 "n/a"	 conc.	 env	 1	 ""
+V_state	 C	 "n/a"	 conc.	 env	 1	 ""
+Iv2	 C	 "n/a"	 conc.	 env	 1	 ""
+J2	 C	 "n/a"	 conc.	 env	 1	 ""
+J1	 C	 "n/a"	 conc.	 env	 1	 ""
+R_state	 C	 "n/a"	 conc.	 env	 1	 ""
+
+INPUTS
+
+REACTIONS
+ 	-> S_state 	 CUSTOM "-(N_state*(p_parameter - 1))/l_e" 	"Birth S (unvaccinated)"
+ 	-> V_state 	 CUSTOM "(N_state*p_parameter)/l_e" 	"Birth V (vaccinated)"
+S_state 	->  	 CUSTOM "S_state/l_e" 	"Death in S"
+V_state 	->  	 CUSTOM "V_state/l_e" 	"Death in V"
+I1 	->  	 CUSTOM "I1/l_e" 	"Death in I1"
+I2 	->  	 CUSTOM "I2/l_e" 	"Death in I2"
+Iv2 	->  	 CUSTOM "Iv2/l_e" 	"Death in Iv2"
+R1 	->  	 CUSTOM "R1/l_e" 	"Death in R1"
+R2 	->  	 CUSTOM "R2/l_e" 	"Death in R2"
+J1 	->  	 CUSTOM "J1/l_e" 	"Death in J1"
+J2 	->  	 CUSTOM "J2/l_e" 	"Death in J2"
+R_state 	->  	 CUSTOM "R_state/l_e" 	"Death in Rp"
+S_state 	-> I1 	 CUSTOM "(R0*S_state*(1/l_e + 365/tInf)*(I1 + J1))/N_state" 	"Primary Infection with strain 1"
+S_state 	-> I2 	 CUSTOM "(R0*S_state*(1/l_e + 365/tInf)*(I2 + Iv2 + J2))/N_state" 	"Primary Infection with strain 2"
+V_state 	-> Iv2 	 CUSTOM "-(R0*V_state*(1/l_e + 365/tInf)*(tau - 1)*(I2 + Iv2 + J2))/N_state" 	"Primary Infection of V with strain 2"
+I1 	-> R1 	 CUSTOM "(365*I1)/tInf" 	"Recovery (I1)"
+I2 	-> R2 	 CUSTOM "(365*I2)/tInf" 	"Recovery (I2)"
+R2 	-> J1 	 CUSTOM "-(R0*R2*(1/l_e + 365/tInf)*(THETA - 1)*(I1 + J1))/N_state" 	"Secondary Infection with strain 1"
+R1 	-> J2 	 CUSTOM "-(R0*R1*(1/l_e + 365/tInf)*(THETA - 1)*(I2 + Iv2 + J2))/N_state" 	"Secondary Infection with strain 2"
+J1 	-> R_state 	 CUSTOM "-(365*J1)/(tInf*(nu - 1))" 	"Recovery (J1)"
+J2 	-> R_state 	 CUSTOM "-(365*J2)/(tInf*(nu - 1))" 	"Recovery (J2)"
+Iv2 	-> R_state 	 CUSTOM "-(365*Iv2)/(tInf*(eta - 1))" 	"Recovery (Iv2)"
+R1 	-> S_state 	 CUSTOM "R1/tImm" 	"Loss of Immunity (R1)"
+R2 	-> S_state 	 CUSTOM "R2/tImm" 	"Loss of Immunity (R2)"
+R_state 	-> S_state 	 CUSTOM "R_state/tImm" 	"Loss of Immunity (Rp)"
+V_state 	-> S_state 	 CUSTOM "V_state/tImm_V" 	"Loss of Immunity (V)"
+
+DERIVED
+
+CONDITIONS
+
+PARAMETERS
+init_N_state	 1	 1	 0	 0	 1000
+init_S_state	 0.0588235	 1	 0	 0	 1000
+init_I1	 0.00176967	 1	 0	 0	 1000
+init_I2	 1e-06	 1	 0	 0	 1000
+init_R1	 0.439407	 1	 0	 0	 1000
+init_R2	 0	 1	 0	 0	 1000
+init_V_state	 0.9	 1	 0	 0	 1000
+init_Iv2	 0.5	 1	 0	 0	 1000
+init_J2	 0	 1	 0	 0	 1000
+init_J1	 0	 1	 0	 0	 1000
+init_R_state	 0	 1	 0	 0	 1000
+l_e	 50	 0	 0	 0	 1000
+R0	 17	 0	 0	 0	 1000
+p_parameter	 1	 0	 0	 0	 1000
+tau	 0.7	 0	 0	 0	 1000
+THETA	 0.5	 0	 0	 0	 1000
+nu	 0.5	 0	 0	 0	 1000
+eta	 0.5	 0	 0	 0	 1000
+tInf	 21	 0	 0	 0	 1000
+tImm	 20	 0	 0	 0	 1000
+tImm_V	 50	 0	 0	 0	 1000

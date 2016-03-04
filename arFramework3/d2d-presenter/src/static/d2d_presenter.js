@@ -38,20 +38,37 @@ $(document).on("pagecontainershow", function(event, ui) {
             dataType: 'json',
             url: ($SCRIPT_ROOT + '/_filetree'),
             success: function(data) {
-                html = create_filetree(data.tree);
-                $('.landing_page_content').html(html);
-                $('.landing_page_content a').on('click', function(e) {
+                html = select_model(data.tree);
+                $('.choose_model').html(html);
+                $('.choose_model').enhanceWithin();
+                $("#start").on('click', function(e) {
+                    if ($( "#select_model" ).val() === 'Select model...'){
+                        alert("Please select a model first.");
+                        return
+                    };
                     $.mobile.loading('show');
                     var url_data = {};
-                    url_data.model = e.target.name;
+                    url_data.model = $( "#select_model" ).val();
                     url_data.nFinePoints = $('#nFinePoints').val();
                     url_data.round = $('#round').val();
+                    url_data.compile = $('#compile').val();
                     $.ajax({
                         dataType: 'json',
                         data: url_data,
                         url: ($SCRIPT_ROOT + '/_start'),
                         success: function(data) {
                             $.mobile.loading('hide');
+                            if (data.status.arSimu !== null) {
+                                alert("Simulation failed. Try to use higher " +
+                                "values for nFinePoints.");
+                                $.mobile.pageContainer.pagecontainer("change", "#landing_page", {transition: "fade"});
+                                return
+                            };
+                            if (data.status.nFinePoints_min) {
+                                alert("nFinePoints set too low for data " +
+                                "simulation. nFinePoints has been set to " +
+                                data.status.nFinePoints_min + " instead.");
+                            };
                             $.mobile.pageContainer.pagecontainer("change", "#main_page", {transition: "fade"});
                             location.reload();
                         },
@@ -94,6 +111,28 @@ function Update() {
                 success: function(data) {
                     ar = $.extend(ar, data.ar);
                     extra = $.extend(extra, data.extra);
+                    if (data.status.arSimuData === false) {
+                        alert("arSimuData failed - no data has been set up.");
+                    };
+                    if (data.status.arSimu === 'p_reset') {
+                        alert("Simulation failed. Probably caused by wrong " +
+                              "paraemter settings. Parameters will be " +
+                              "reseted from ar.d2d_presenter.p and the "+
+                              "content reloaded.");
+                        location.reload();
+                        return
+                    } else if (data.status.arSimu === 'arLoad') {
+                        alert("Simulation failed. Probably caused by wrong " +
+                        "paraemter settings. The last saved state from " +
+                        "ar.config.savepath will be used and the content " +
+                        "reloaded.");
+                        location.reload();
+                    }
+                    else if(data.status.arSimu === 'broken'){
+                        alert("Simulation failed. Probably caused by wrong " +
+                        "paraemter settings. No working configuration has " +
+                        "been found, please rerun the setup.");
+                    };
                     this.complete = 1;
                     this.success(options, event);
                     $.mobile.loading('hide');
@@ -406,7 +445,7 @@ function create_content() {
             min: ar['lb'][key][0],
             max: ar['ub'][key][0],
             value: ar['p'][key][0],
-            step: 0.1,
+            step: 0.00001,
             text: ar['pLabel'][key],
         });
         if (pv.indexOf(ar['pLabel'][key]) > -1) {
@@ -772,31 +811,15 @@ function create_graphs() {
     };
   };
 };
-// <form>
-//     <div class="ui-field-contain">
-//         <label for="filter-menu">Basic:</label>
-//         <select id="filter-menu" data-native-menu="false" class="filterable-select">
-//             <option value="SFO">San Francisco</option>
-//             <option value="LAX">Los Angeles</option>
-//             <option value="YVR">Vancouver</option>
-//             <option value="YYZ">Toronto</option>
-//         </select>
-//     </div>
-// </form>
-// function create_filetree(tree) {
-//     var html = '<form><div class="ui-field-contain"><label for="filter-menu">Select model:</label><select id="filter-menu" data-native-menu="false" class="filterable-select">';
-//     for (var key in tree['children']) {
-//         if ('children' in tree['children'][key]) {
-//             html += '<option value=\'' +  tree['children'][key]['name'] + '\'>tree['children'][key]['name'].replace(/^.*(\\|\/|\:)/, '')</option>'
-//             html += '<li>' + tree['children'][key]['name'].replace(/^.*(\\|\/|\:)/, '') + '</li>';
-//             html += create_filetree(tree['children'][key]);
-//         } else {
-//             html += '<li><a name=\'' + tree['children'][key]['name'] + '\'  href=\'#\'>' + tree['children'][key]['name'].replace(/^.*(\\|\/|\:)/, '') + '</a></li>';
-//         };
-//     };
-//     html += '</select></div></form>';
-//     return html
-// };
+
+function select_model(tree) {
+    var html = '<form><div class="ui-field-contain"><select id="select_model" name="select_model"><option>Select model...</option>';
+    for (var key in tree['children']) {
+        html += '<option value=\'' +  tree['children'][key]['children'][0]['name'] + '\'>' + tree['children'][key]['name'].replace(/^.*(\\|\/|\:)/, '') + '</option>';
+    };
+    html += '</select></div></form>';
+    return html
+};
 
 function create_filetree(tree) {
     var html = '<ul>';

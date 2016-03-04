@@ -141,8 +141,8 @@ class d2d(mat):
         try:
             dict = {k: dict[k] for k in self.ar['pLabel'][0] if k in dict}
 
-            self.eval("arSetPars(" +
-                  str(dict.keys()).replace('dict_keys([', '{').replace(
+            self.eval("arSetPars(" + str(
+                dict.keys()).replace('dict_keys([', '{').replace(
                       '])', '}') + ', ' +
                   str(dict.values()).replace('dict_values(', '').replace(
                       ')', '').replace("'", "") + ");")
@@ -171,35 +171,36 @@ class d2d(mat):
                 elif type(data[key]) == list:
                     for i in range(len(data[key])):
                         if type(data[key][i]) == matlab.double:
-                            data[key][i] = self.convert(data[key][i], key, convert)
+                            data[key][i] = self.convert(
+                                                        data[key][i],
+                                                        key,
+                                                        convert)
 
         return data
 
-    def simu(self, sensi='true', fine='true', dynamics='true', options=[], rec=False):
-        """Executes arSimu. Needs some special attention in order to deal
-           with integration errors (CV_CONV_FAILURE) when using a bad
-           parameter setting."""
+    def simu(self, sensi='true', fine='true', dynamics='true'):
+        """Executes arSimu.
 
-        print("mit simu")
-
+           Tries to reload save parameters when arSimu fails (e.g.
+           CV_CONV_FAILURE) when using a bad parameter setting.
+        """
         status = self.eval(
             'arSimu(' + sensi + ', ' + fine + ', ' + dynamics + ');')
 
-        print(status)
-
         if status is False:
-            print("isinfalse")
-            params = self.eval("arCheckSimu", 1)
-            print(params)
-            if isinstance(params, bool):
-                self.eval("for (i = 1:length(ar.p)) ar.p(i) = 0; end", 0)
-            else:
-                for i, key in enumerate(params[0]):
-                    if int(key) is 1:
-                        self.eval("ar.p(" + str(int(i+1)) + ") = 0;", 0)
-            if rec is False:
-                self.eval("arChi2", 0)
-                self.simu(sensi, fine, dynamics, rec=True)
 
-            if 'fit' in options:
-                self.eval("arFit")
+            params = self.get({'p', 'd2d_presenter.p', 'config.savepath'})
+
+            if len(params['p']) == len(params['d2d_presenter.p']):
+                self.eval("ar.p = ar.d2d_presenter.p;")
+                status = 'p_reset'
+                return status
+            elif params['config.savepath']:
+                self.eval("arLoad('" + params['config.savepath'] + "')")
+                status = 'arLoad'
+                return status
+            else:
+                status = 'broken'
+                return status
+        else:
+            return status

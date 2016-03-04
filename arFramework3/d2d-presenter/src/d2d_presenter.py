@@ -75,7 +75,12 @@ def start():
     if ROUND is 0:
         ROUND = False
 
+    status = {}
+    status['nFinePoints_min'] = False
+    status['arSimu'] = False
+
     nFinePoints = int(request.args.get('nFinePoints'))
+    do_compile = str(request.args.get('compile'))
 
     d2d_instances.update(
         {
@@ -90,36 +95,47 @@ def start():
                              }
         })
 
-    load = False
+    if do_compile.endswith('on'):
+        load = False
+    else:
+        try:
+            results = os.listdir(os.path.join(
+                os.path.dirname(d2d_instances[session['uid']]['model']),
+                'results'))
 
-    try:
-        results = os.listdir(os.path.join(
-            os.path.dirname(d2d_instances[session['uid']]['model']),
-            'results'))
-
-        for savename in results:
-            if savename.endswith('_d2d_presenter'):
-                load = savename
-                break
-
-    except:
-        print("No saved results found for d2d_presenter, compiling from " +
-              "scratch. This might take some time.")
+            for savename in results:
+                if savename.endswith('_d2d_presenter'):
+                    load = savename
+                    break
+        except:
+            print("No saved results found for d2d_presenter, compiling from " +
+                  "scratch. This might take some time.")
 
     d2d_instances[session['uid']]['d2d'].load_model(
         d2d_instances[session['uid']]['model'], load=load)
 
+    try:
+        nFinePoints_min = d2d_instances[session['uid']]['d2d'].get(
+            {'d2d_presenter.nFinePoints_min'},
+            1, 1, False, 'list')['d2d_presenter.nFinePoints_min'][0][0]
+    except:
+        nFinePoints_min = nFinePoints
+
+    if nFinePoints_min > nFinePoints:
+        nFinePoints = nFinePoints_min
+        status['nFinePoints_min'] = nFinePoints
+
     d2d_instances[session['uid']]['d2d'].set(
         {'ar.config.nFinePoints': nFinePoints})
     d2d_instances[session['uid']]['d2d'].eval("arLink;")
-    d2d_instances[session['uid']]['d2d'].simu()
+    status['arSimu'] = d2d_instances[session['uid']]['d2d'].simu()
     d2d_instances[session['uid']]['d2d'].eval("arChi2;")
 
     # thread will shut down the matlab instance on inactivity
     t = Thread(target=d2d_close_instance, args=(session['uid'], ))
     t.start()
 
-    return jsonify({})
+    return jsonify(status=status)
 
 
 @app.route('/_update', methods=['GET'])
@@ -130,6 +146,7 @@ def update():
 
     data = {}
     extra = {}
+    status = {}
 
     d2d = d2d_instances[session['uid']]['d2d']
 
@@ -163,12 +180,13 @@ def update():
                 int(request.args.get('value'))
 
     if 'simu_data' in options:
-        d2d.simu('false', 'false', 'false')
-        d2d.eval(
+        status['arSimu'] = d2d.simu('false', 'false', 'false')
+        status['arSimuData'] = d2d.eval(
             'arSimuData(' +
             str(d2d_instances[session['uid']]['MODEL']) + ',' +
-            str(d2d_instances[session['uid']]['DSET']) + '); arChi2;'
+            str(d2d_instances[session['uid']]['DSET']) + ');'
         )
+        d2d.eval('arChi2;')
 
     if 'model' in options:
         try:
@@ -233,18 +251,18 @@ def update():
         d2d.set_pars_from_dict(request.args.to_dict())
 
     if 'chi2' in options:
-        d2d.simu()
+        status['arSimu'] = d2d.simu()
         d2d.eval("arChi2")
 
     if 'update_graphs' in options or 'create_graphs' in options:
-        d2d.simu('false', 'true', 'false', options)
+        status['arSimu'] = d2d.simu('false', 'true', 'false')
         data = select_data(d2d_instances[session['uid']], options)
 
         data = create_dygraphs_data(data)
 
         d2d_instances[session['uid']]['data'] = data
 
-    return jsonify(ar=data, extra=extra)
+    return jsonify(ar=data, extra=extra, status=status)
 
 
 @app.route('/_console', methods=['GET'])
