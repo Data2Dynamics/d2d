@@ -156,9 +156,9 @@ class d2d(mat):
             sig = 'false'
 
         try:
-            data = dict(zip(fields, self.eng.eval("arGet(" +
+            data = dict(zip(fields, self.eval("arGet(" +
                         str(fields).replace('[', '{').replace(']', '}') +
-                ", " + str(m) + ", " + str(dset) + ", " + str(sig) + ");", nargout=1)))
+                ", " + str(m) + ", " + str(dset) + ", " + str(sig) + ");", 1)))
         except:
             print("Get failed. Please make sure all fields exist.")
             return None

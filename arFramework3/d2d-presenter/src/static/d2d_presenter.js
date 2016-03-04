@@ -433,6 +433,9 @@ function create_content() {
     pcond = ar['model.pcond'].map(function(value, index) {
         return value;
     });
+    pc = ar['model.pc'].map(function(value, index) {
+        return value;
+    });
     for (var key in ar['pLabel']) {
         var label = $('<label />', {for: ar['pLabel'][key] + '_slider',
             text: ar['pLabel'][key],
@@ -448,7 +451,9 @@ function create_content() {
             step: 0.00001,
             text: ar['pLabel'][key],
         });
-        if (pv.indexOf(ar['pLabel'][key]) > -1) {
+        if (pc.indexOf(ar['pLabel'][key]) > -1) {
+            $('#sliders_compartments').append(label, input).show();
+        } else if (pv.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_variables').append(label, input).show();
         } else if (pu.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_inputs').append(label, input).show();

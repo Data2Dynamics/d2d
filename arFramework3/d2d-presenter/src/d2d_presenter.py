@@ -20,7 +20,7 @@ except:
 
 FIELDS = {
     'pLabel', 'p', 'lb', 'ub', 'chi2fit', 'config.optim.MaxIter',
-    'config.nFinePoints', 'model.u', 'model.pu', 'model.py',
+    'config.nFinePoints', 'model.u', 'model.pu', 'model.py', 'model.pc',
     'model.pystd', 'model.pv', 'model.pcond', 'model.fu',
     'model.name', 'model.xNames', 'model.z', 'model.description',
     'model.condition.tFine', 'model.condition.uFineSimu',
