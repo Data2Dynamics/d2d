@@ -34,8 +34,8 @@ pActivator            ->  Activator             CUSTOM  "pActivator"
 DERIVED
 
 OBSERVABLES
-pActivator_obs              C   "au"  "conc."   1   0   "pActivator"
-pInhibitor_obs              C   "au"  "conc."   1   0   "pInhibitor"
+pActivator_obs        C   "au"  "conc."   1   0   "pActivator"
+pInhibitor_obs        C   "au"  "conc."   1   0   "pInhibitor"
 pMAPK_obs             C   "au"  "conc."   1   0   "pMAPK"
 pRas_obs              C   "au"  "conc."   1   0   "pRas"
 

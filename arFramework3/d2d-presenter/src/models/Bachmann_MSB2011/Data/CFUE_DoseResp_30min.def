@@ -1,0 +1,22 @@
+DESCRIPTION
+"Experimenter: Julie Bachmann"
+"Cells: CFU-E"
+"Ligand: Epo dose response at 30 minutes"
+
+PREDICTOR-DOSERESPONSE  epo_level
+t               T   min     time	0	35
+
+INPUTS
+
+OBSERVABLES
+pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_dr30 + scale_pJAK2_dr30 / init_EpoRJAK2 * pJAK2"
+pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_dr30 + scale_pEpoR_dr30 / init_EpoRJAK2 * pEpoR"
+
+ERRORS
+pJAK2_au		"sd_JAK2EpoR_au"
+pEpoR_au		"sd_JAK2EpoR_au"
+
+CONDITIONS
+ActD				"0"
+CISoe               "0"
+SOCS3oe             "0"

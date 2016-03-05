@@ -1,0 +1,37 @@
+DESCRIPTION
+"Volume example"
+
+PREDICTOR
+t               T   min     time	0	11
+
+COMPARTMENTS
+cyt       V   au     vol.   
+nuc       V   au     vol.   
+med       V   au     vol.   
+
+STATES
+AA                 C   au      conc.  nuc
+BB                 C   au      conc.  cyt
+CC                 C   au      conc.  med
+
+INPUTS
+
+
+REACTIONS
+AA -> BB    CUSTOM "k1 * AA"
+BB -> AA    CUSTOM "k2 * BB"
+BB -> CC    CUSTOM "k3 * BB"
+CC -> AA    CUSTOM "k4 * CC"
+
+DERIVED
+
+        
+CONDITIONS
+init_AA "1"
+init_BB "0"
+init_CC "0"
+
+k1 "2"
+k2 "3"
+k3 "4"
+k4 ".1"

@@ -9,15 +9,15 @@ __author__ = 'Clemens Blank'
 
 class mat():
     def __init__(self):
+        self.output_total = ''
         self.eng = matlab.engine.start_matlab()
         self.cd(os.getcwd())
-        self.output_total = ''
 
     def cd(self, arg):
-        self.eng.cd(arg, nargout=0)
+        self.eval("cd '" + str(arg) + "'", 0)
 
     def eval(self, exp, args=0):
-
+        print(str(exp) + "  - " + str(args))
         out = io.StringIO()
         err = io.StringIO()
         try:
@@ -91,13 +91,13 @@ class d2d(mat):
 
     """Enhances the mat class with d2d specific methods."""
 
-    def load_model(self, path, load=None):
+    def load_model(self, path, load=False):
         self.path = os.path.dirname(path)
         self.filename = os.path.basename(path)
         self.cd(self.path)
 
-        if load != None:
-            self.eval("arLoad(" + str(load) + ")")
+        if load != False:
+            self.eval("arLoad('" + str(load) + "')")
         else:
             self.eval(os.path.splitext(os.path.basename(path))[0])
         self.update()
@@ -141,8 +141,8 @@ class d2d(mat):
         try:
             dict = {k: dict[k] for k in self.ar['pLabel'][0] if k in dict}
 
-            self.eval("arSetPars(" +
-                  str(dict.keys()).replace('dict_keys([', '{').replace(
+            self.eval("arSetPars(" + str(
+                dict.keys()).replace('dict_keys([', '{').replace(
                       '])', '}') + ', ' +
                   str(dict.values()).replace('dict_values(', '').replace(
                       ')', '').replace("'", "") + ");")
@@ -156,9 +156,9 @@ class d2d(mat):
             sig = 'false'
 
         try:
-            data = dict(zip(fields, self.eng.eval("arGet(" +
+            data = dict(zip(fields, self.eval("arGet(" +
                         str(fields).replace('[', '{').replace(']', '}') +
-                ", " + str(m) + ", " + str(dset) + ", " + str(sig) + ");", nargout=1)))
+                ", " + str(m) + ", " + str(dset) + ", " + str(sig) + ");", 1)))
         except:
             print("Get failed. Please make sure all fields exist.")
             return None
@@ -171,28 +171,36 @@ class d2d(mat):
                 elif type(data[key]) == list:
                     for i in range(len(data[key])):
                         if type(data[key][i]) == matlab.double:
-                            data[key][i] = self.convert(data[key][i], key, convert)
+                            data[key][i] = self.convert(
+                                                        data[key][i],
+                                                        key,
+                                                        convert)
 
         return data
 
-    def simu(self, sensi='true', fine='true', dynamics='true', options=[]):
-        """Executes arSimu. Needs some special attention in order to deal
-           with integration errors (CV_CONV_FAILURE) when using a bad
-           parameter setting."""
+    def simu(self, sensi='true', fine='true', dynamics='true'):
+        """Executes arSimu.
 
+           Tries to reload save parameters when arSimu fails (e.g.
+           CV_CONV_FAILURE) when using a bad parameter setting.
+        """
         status = self.eval(
             'arSimu(' + sensi + ', ' + fine + ', ' + dynamics + ');')
 
         if status is False:
-            params = self.eval("arCheckSimu", 1)
-            if isinstance(params, bool):
-                self.eval("for (i = 1:length(ar.p)) ar.p(i) = -1; end", 0)
-            else:
-                for i, key in enumerate(params[0]):
-                    if int(key) is 1:
-                        self.eval("ar.p(" + str(int(i+1)) + ") = -1;", 0)
-            self.eval("arChi2", 0)
-            self.simu(sensi, fine, dynamics)
 
-            if 'fit' in options:
-                self.eval("arFit")
+            params = self.get({'p', 'd2d_presenter.p', 'config.savepath'})
+
+            if len(params['p']) == len(params['d2d_presenter.p']):
+                self.eval("ar.p = ar.d2d_presenter.p;")
+                status = 'p_reset'
+                return status
+            elif params['config.savepath']:
+                self.eval("arLoad('" + params['config.savepath'] + "')")
+                status = 'arLoad'
+                return status
+            else:
+                status = 'broken'
+                return status
+        else:
+            return status

@@ -1,0 +1,15 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	-30 200
+
+INPUTS
+pulse "0"
+
+OBSERVABLES
+A_obs         C 	au   conc.   0	0   "stateA"              
+
+ERRORS 
+A_obs         "sd_a"
+        
+CONDITIONS

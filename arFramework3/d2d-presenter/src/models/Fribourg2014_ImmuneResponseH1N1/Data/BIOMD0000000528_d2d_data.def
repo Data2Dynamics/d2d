@@ -1,0 +1,41 @@
+DESCRIPTION
+"data file for Fribourg2014 - Dynamics of viral antagonism and innate immune response (H1N1 influenza A virus - Cal/09)"
+
+PREDICTOR
+time	 T	 "n/a"	 time	 0	 100	
+
+INPUTS
+
+OBSERVABLES
+w_state_obs	 C	 "n/a"	 conc.	 0 0 "w_state" "w"
+IFNb_mRNA_obs	 C	 "n/a"	 conc.	 0 0 "IFNb_mRNA" "IFNb_mRNA"
+IFNb_env_obs	 C	 "n/a"	 conc.	 0 0 "IFNb_env" "IFNb_env"
+STATP2n_obs	 C	 "n/a"	 conc.	 0 0 "STATP2n" "STATP2n"
+SOCS1m_obs	 C	 "n/a"	 conc.	 0 0 "SOCS1m" "SOCS1m"
+IRF7m_obs	 C	 "n/a"	 conc.	 0 0 "IRF7m" "IRF7m"
+IRF7Pn_obs	 C	 "n/a"	 conc.	 0 0 "IRF7Pn" "IRF7Pn"
+IFNa_mRNA_obs	 C	 "n/a"	 conc.	 0 0 "IFNa_mRNA" "IFNa_mRNA"
+IFNa_env_obs	 C	 "n/a"	 conc.	 0 0 "IFNa_env" "IFNa_env"
+TNFam_obs	 C	 "n/a"	 conc.	 0 0 "TNFam" "TNFam"
+TNFenv_obs	 C	 "n/a"	 conc.	 0 0 "TNFenv" "TNFenv"
+STATm_obs	 C	 "n/a"	 conc.	 0 0 "STATm" "STATm"
+STAT_obs	 C	 "n/a"	 conc.	 0 0 "STAT" "STAT"
+
+ERRORS
+w_state_obs	 "sd_w_state"
+IFNb_mRNA_obs	 "sd_IFNb_mRNA"
+IFNb_env_obs	 "sd_IFNb_env"
+STATP2n_obs	 "sd_STATP2n"
+SOCS1m_obs	 "sd_SOCS1m"
+IRF7m_obs	 "sd_IRF7m"
+IRF7Pn_obs	 "sd_IRF7Pn"
+IFNa_mRNA_obs	 "sd_IFNa_mRNA"
+IFNa_env_obs	 "sd_IFNa_env"
+TNFam_obs	 "sd_TNFam"
+TNFenv_obs	 "sd_TNFenv"
+STATm_obs	 "sd_STATm"
+STAT_obs	 "sd_STAT"
+
+CONDITIONS
+
+PARAMETERS

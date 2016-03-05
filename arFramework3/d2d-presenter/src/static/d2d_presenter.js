@@ -38,20 +38,37 @@ $(document).on("pagecontainershow", function(event, ui) {
             dataType: 'json',
             url: ($SCRIPT_ROOT + '/_filetree'),
             success: function(data) {
-                html = create_filetree(data.tree);
-                $('.landing_page_content').html(html);
-                $('.landing_page_content a').on('click', function(e) {
+                html = select_model(data.tree);
+                $('.choose_model').html(html);
+                $('.choose_model').enhanceWithin();
+                $("#start").on('click', function(e) {
+                    if ($( "#select_model" ).val() === 'Select model...'){
+                        alert("Please select a model first.");
+                        return
+                    };
                     $.mobile.loading('show');
                     var url_data = {};
-                    url_data.model = e.target.name;
+                    url_data.model = $( "#select_model" ).val();
                     url_data.nFinePoints = $('#nFinePoints').val();
                     url_data.round = $('#round').val();
+                    url_data.compile = $('#compile').val();
                     $.ajax({
                         dataType: 'json',
                         data: url_data,
                         url: ($SCRIPT_ROOT + '/_start'),
                         success: function(data) {
                             $.mobile.loading('hide');
+                            if (data.status.arSimu !== null) {
+                                alert("Simulation failed. Try to use higher " +
+                                "values for nFinePoints.");
+                                $.mobile.pageContainer.pagecontainer("change", "#landing_page", {transition: "fade"});
+                                return
+                            };
+                            if (data.status.nFinePoints_min) {
+                                alert("nFinePoints set too low for data " +
+                                "simulation. nFinePoints has been set to " +
+                                data.status.nFinePoints_min + " instead.");
+                            };
                             $.mobile.pageContainer.pagecontainer("change", "#main_page", {transition: "fade"});
                             location.reload();
                         },
@@ -94,6 +111,28 @@ function Update() {
                 success: function(data) {
                     ar = $.extend(ar, data.ar);
                     extra = $.extend(extra, data.extra);
+                    if (data.status.arSimuData === false) {
+                        alert("arSimuData failed - no data has been set up.");
+                    };
+                    if (data.status.arSimu === 'p_reset') {
+                        alert("Simulation failed. Probably caused by wrong " +
+                              "paraemter settings. Parameters will be " +
+                              "reseted from ar.d2d_presenter.p and the "+
+                              "content reloaded.");
+                        location.reload();
+                        return
+                    } else if (data.status.arSimu === 'arLoad') {
+                        alert("Simulation failed. Probably caused by wrong " +
+                        "paraemter settings. The last saved state from " +
+                        "ar.config.savepath will be used and the content " +
+                        "reloaded.");
+                        location.reload();
+                    }
+                    else if(data.status.arSimu === 'broken'){
+                        alert("Simulation failed. Probably caused by wrong " +
+                        "paraemter settings. No working configuration has " +
+                        "been found, please rerun the setup.");
+                    };
                     this.complete = 1;
                     this.success(options, event);
                     $.mobile.loading('hide');
@@ -209,7 +248,6 @@ function Update() {
             create_graphs();
         };
         if (options.indexOf('update_graphs') > -1) {
-            var tb0 = performance.now();
           // check that it wont update the graphs after full fit when auto fitting
           if ( ( event !== null && event.target.name !== 'fit_auto' ) ||
               ( event === null ) ) {
@@ -241,13 +279,9 @@ function Update() {
                          for (var key in graphs[type]) {
                            for (var i = 0; i < $('.g_' + type +
                                '_' + key).length; i++) {
-                                   var t0 = performance.now();
                              graphs[type][key][i].updateOptions({
                                'file': graphs_data[type][key]
                              });
-
-                             var t1 = performance.now();
-                             console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.");
                            };
                          };
                     };
@@ -277,8 +311,6 @@ function Update() {
                   };
               };
           };
-          var tb1 = performance.now();
-          console.log("Call to complete took " + (tb1 - tb0) + " milliseconds.");
         };
     };
 };
@@ -401,6 +433,9 @@ function create_content() {
     pcond = ar['model.pcond'].map(function(value, index) {
         return value;
     });
+    pc = ar['model.pc'].map(function(value, index) {
+        return value;
+    });
     for (var key in ar['pLabel']) {
         var label = $('<label />', {for: ar['pLabel'][key] + '_slider',
             text: ar['pLabel'][key],
@@ -413,10 +448,12 @@ function create_content() {
             min: ar['lb'][key][0],
             max: ar['ub'][key][0],
             value: ar['p'][key][0],
-            step: 0.1,
+            step: 0.00001,
             text: ar['pLabel'][key],
         });
-        if (pv.indexOf(ar['pLabel'][key]) > -1) {
+        if (pc.indexOf(ar['pLabel'][key]) > -1) {
+            $('#sliders_compartments').append(label, input).show();
+        } else if (pv.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_variables').append(label, input).show();
         } else if (pu.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_inputs').append(label, input).show();
@@ -744,7 +781,8 @@ function create_graphs() {
                 opts['series'][label_exp] = {
                     color: color,
                     drawPoints: true,
-                    connectSeparatedPoints: false
+                    connectSeparatedPoints: false,
+                    strokeWidth: 0
                 };
                 opts['series'][label] = {
                     color: color,
@@ -769,18 +807,24 @@ function create_graphs() {
               title: key
             };
       };
-
       for (var i = 0; i < $('.g_' + plot + '_' + key).length; i++) {
         graphs[plot][key][i] = new Dygraph(
           $('.g_' + plot + '_' + key)[i],
           graphs_data[plot][key],
-          $.extend({},
-            g_settings['global'], g_settings[plot], g_settings[key]));
+          $.extend({}, g_settings[plot], g_settings[key], g_settings['global']));
       };
     };
   };
 };
 
+function select_model(tree) {
+    var html = '<form><div class="ui-field-contain"><select id="select_model" name="select_model"><option>Select model...</option>';
+    for (var key in tree['children']) {
+        html += '<option value=\'' +  tree['children'][key]['children'][0]['name'] + '\'>' + tree['children'][key]['name'].replace(/^.*(\\|\/|\:)/, '') + '</option>';
+    };
+    html += '</select></div></form>';
+    return html
+};
 
 function create_filetree(tree) {
     var html = '<ul>';

@@ -1,0 +1,33 @@
+DESCRIPTION
+"Indigoidine synthesis and bacterial growth"
+
+
+PREDICTOR
+timepoint               T   min     time	0	3565
+
+COMPARTMENTS
+medium             V   ml      vol.        1
+        
+STATES
+Bac        C   au  conc.   medium 1
+Glu        C   au  conc.   medium 1
+cGlu       C   au  conc.   medium 1
+Ind        C   au  conc.   medium 1
+
+INPUTS
+lag        C   "units"    "a.u."   "step1(timepoint, 0, tau, 1)"
+
+ODES
+"(Beta * lag) / Bacmax * Bac * (Bacmax - Bac)"
+"-ksyn * Bac * Glu"
+"ksyn * Glu * Bac - kdim * cGlu * cGlu"
+"kdim * cGlu * cGlu - kdegi * Ind"
+
+DERIVED
+
+CONDITIONS
+//init_Bac       "0.15"
+init_Glu       "10"
+init_cGlu      "0"
+init_Ind       "0"
+//init_tau       "0"

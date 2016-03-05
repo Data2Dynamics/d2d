@@ -1,0 +1,22 @@
+DESCRIPTION
+"Test Model for different inputs"
+
+PREDICTOR
+t               T   min     time	0	100
+
+COMPARTMENTS
+
+STATES
+        
+INPUTS
+BolusInjection   C  nM  conc.  "bolus(t, bolus_amount, injection_timepoint, injection_duration)"
+Step             C  nM  conc.  "step1(t, pre_step, 50, post_step)"
+TwoStep          C  nM  conc.  "step2(t, pre_step, 25, pre_step+step_size, 50, pre_step+2*step_size )"
+SmoothStep       C  nM  conc.  "smoothstep1(t, pre_step, 50, post_step, smoothness)"
+SmoothTwoStep    C  nM  conc.  "smoothstep2(t, pre_step, 25, pre_step+step_size, 50, pre_step+2*step_size, smoothness)"
+
+REACTIONS
+
+DERIVED
+
+CONDITIONS

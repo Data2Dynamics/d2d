@@ -1,0 +1,34 @@
+DESCRIPTION
+"Test Model for Washing and Bolus Injections"
+
+PREDICTOR
+t               T   min     time	0	100
+
+COMPARTMENTS
+
+STATES
+Ligand         C  nM  conc.  1
+Receptor       C  nM  conc.  1
+Complex        C  nM  conc.  1
+        
+INPUTS
+BolusInjection1   C  nM  conc.  "bolus1_amount * (1/sqrt(2*pi*injection1_duration^2)) * exp(-(t - injection1_timepoint)^2/(2*injection1_duration^2))"
+BolusInjection2   C  nM  conc.  "bolus2_amount * (1/sqrt(2*pi*injection2_duration^2)) * exp(-(t - injection2_timepoint)^2/(2*injection2_duration^2))"
+Washing           C  nM  conc.  "wash_strength * (1/sqrt(2*pi*wash_duration^2)) * exp(-(t - wash_timepoint)^2/(2*wash_duration^2))"
+
+REACTIONS
+Ligand + Receptor  ->  Complex             CUSTOM "kon * Ligand * Receptor"
+Complex            ->  Ligand + Receptor   CUSTOM "koff * Complex"
+        
+                   ->  Ligand              CUSTOM "BolusInjection1 + BolusInjection2"
+Ligand             ->                      CUSTOM "Ligand * Washing"
+        
+DERIVED
+
+CONDITIONS
+init_Ligand       "9"
+init_Receptor     "1"
+init_Complex      "0"
+        
+kon               "0.01"
+koff              "0.1"

@@ -1,0 +1,14 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	-100 200
+
+INPUTS
+
+OBSERVABLES
+A_obs         C 	au   conc.   0	0   "stateA"              
+
+ERRORS 
+A_obs         "sd_a"
+        
+CONDITIONS

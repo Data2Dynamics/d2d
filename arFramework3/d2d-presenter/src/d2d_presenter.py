@@ -20,7 +20,7 @@ except:
 
 FIELDS = {
     'pLabel', 'p', 'lb', 'ub', 'chi2fit', 'config.optim.MaxIter',
-    'config.nFinePoints', 'model.u', 'model.pu', 'model.py',
+    'config.nFinePoints', 'model.u', 'model.pu', 'model.py', 'model.pc',
     'model.pystd', 'model.pv', 'model.pcond', 'model.fu',
     'model.name', 'model.xNames', 'model.z', 'model.description',
     'model.condition.tFine', 'model.condition.uFineSimu',
@@ -75,7 +75,12 @@ def start():
     if ROUND is 0:
         ROUND = False
 
+    status = {}
+    status['nFinePoints_min'] = False
+    status['arSimu'] = False
+
     nFinePoints = int(request.args.get('nFinePoints'))
+    do_compile = str(request.args.get('compile'))
 
     d2d_instances.update(
         {
@@ -90,21 +95,47 @@ def start():
                              }
         })
 
+    if do_compile.endswith('on'):
+        load = False
+    else:
+        try:
+            results = os.listdir(os.path.join(
+                os.path.dirname(d2d_instances[session['uid']]['model']),
+                'results'))
+
+            for savename in results:
+                if savename.endswith('_d2d_presenter'):
+                    load = savename
+                    break
+        except:
+            print("No saved results found for d2d_presenter, compiling from " +
+                  "scratch. This might take some time.")
+
     d2d_instances[session['uid']]['d2d'].load_model(
-        d2d_instances[session['uid']]['model'], load=1)
+        d2d_instances[session['uid']]['model'], load=load)
+
+    try:
+        nFinePoints_min = d2d_instances[session['uid']]['d2d'].get(
+            {'d2d_presenter.nFinePoints_min'},
+            1, 1, False, 'list')['d2d_presenter.nFinePoints_min'][0][0]
+    except:
+        nFinePoints_min = nFinePoints
+
+    if nFinePoints_min > nFinePoints:
+        nFinePoints = nFinePoints_min
+        status['nFinePoints_min'] = nFinePoints
 
     d2d_instances[session['uid']]['d2d'].set(
         {'ar.config.nFinePoints': nFinePoints})
-
     d2d_instances[session['uid']]['d2d'].eval("arLink;")
-    d2d_instances[session['uid']]['d2d'].simu()
+    status['arSimu'] = d2d_instances[session['uid']]['d2d'].simu()
     d2d_instances[session['uid']]['d2d'].eval("arChi2;")
 
     # thread will shut down the matlab instance on inactivity
     t = Thread(target=d2d_close_instance, args=(session['uid'], ))
     t.start()
 
-    return jsonify({})
+    return jsonify(status=status)
 
 
 @app.route('/_update', methods=['GET'])
@@ -115,6 +146,7 @@ def update():
 
     data = {}
     extra = {}
+    status = {}
 
     d2d = d2d_instances[session['uid']]['d2d']
 
@@ -136,7 +168,7 @@ def update():
         extra['console'] = d2d.output_total
 
     if 'setup' in options:
-        d2d.load_model(d2d_instances[session['uid']]['model'], load=None)
+        d2d.load_model(d2d_instances[session['uid']]['model'], load=False)
 
     if 'change_mdc' in options:
 
@@ -148,12 +180,13 @@ def update():
                 int(request.args.get('value'))
 
     if 'simu_data' in options:
-        d2d.simu('false', 'false', 'false')
-        d2d.eval(
+        status['arSimu'] = d2d.simu('false', 'false', 'false')
+        status['arSimuData'] = d2d.eval(
             'arSimuData(' +
             str(d2d_instances[session['uid']]['MODEL']) + ',' +
-            str(d2d_instances[session['uid']]['DSET']) + '); arChi2;'
+            str(d2d_instances[session['uid']]['DSET']) + ');'
         )
+        d2d.eval('arChi2;')
 
     if 'model' in options:
         try:
@@ -218,18 +251,18 @@ def update():
         d2d.set_pars_from_dict(request.args.to_dict())
 
     if 'chi2' in options:
-        d2d.simu()
+        status['arSimu'] = d2d.simu()
         d2d.eval("arChi2")
 
     if 'update_graphs' in options or 'create_graphs' in options:
-        d2d.simu('false', 'true', 'false', options)
+        status['arSimu'] = d2d.simu('false', 'true', 'false')
         data = select_data(d2d_instances[session['uid']], options)
 
         data = create_dygraphs_data(data)
 
         d2d_instances[session['uid']]['data'] = data
 
-    return jsonify(ar=data, extra=extra)
+    return jsonify(ar=data, extra=extra, status=status)
 
 
 @app.route('/_console', methods=['GET'])
@@ -289,36 +322,42 @@ def create_dygraphs_data(data):
     data['plots'] = {}
     data['plots']['observables'] = []
 
-    tObs = data['model.data.tFine'][0][0].copy()
-    for i in range(len(data['model.data.tExp'])):
-        tObs = tObs + data['model.data.tExp'][i][0].copy()
-    tObs = [[x] for x in tObs]
+    if data['model.data.yNames'][0]:
 
-    for i in range(len(data['model.data.yNames'][0])):
-        data['plots']['observables'].append(copy.deepcopy(tObs))
-        for k in range(len(data['model.data.tExp'])):
-            for j in range(len(data['model.data.tFine'][k][0])):
-                data['plots']['observables'][i][j].append([
-                    data['model.data.yFineSimu'][k][i][j],
-                    data['model.data.ystdFineSimu'][k][i][j]])
-                data['plots']['observables'][i][j].append([float('nan'), 0])
+        tObs = data['model.data.tFine'][0][0].copy()
 
-        c = len(data['model.data.tFine'][0][0])
-        for k in range(len(data['model.data.tExp'])):
-            for j in range(len(data['model.data.tExp'][k][0])):
-                for l in range(len(data['model.data.tExp'])):
-                    data['plots']['observables'][i][c].append(
-                        [float('nan'), float('nan')])
-                    if l is k:
-                        data['plots']['observables'][i][c].append(
-                            [data['model.data.yExp'][l][i][j],
-                                data['model.data.yExpStd'][l][i][j]])
-                    else:
-                        data['plots']['observables'][i][c].append(
-                            [float('nan'), float('nan')])
-                c = c + 1
+        if data['model.data.tExp'][0]:
+            for i in range(len(data['model.data.tExp'])):
+                tObs = tObs + data['model.data.tExp'][i][0].copy()
+        tObs = [[x] for x in tObs]
 
-        data['plots']['observables'][i].sort(key=lambda x: x[0])
+        for i in range(len(data['model.data.yNames'][0])):
+            data['plots']['observables'].append(copy.deepcopy(tObs))
+            for k in range(len(data['model.data.tFine'])):
+                for j in range(len(data['model.data.tFine'][k][0])):
+                    data['plots']['observables'][i][j].append([
+                        data['model.data.yFineSimu'][k][i][j],
+                        data['model.data.ystdFineSimu'][k][i][j]])
+                    data['plots']['observables'][i][j].append(
+                        [float('nan'), 0])
+
+            if data['model.data.tExp'][0]:
+                c = len(data['model.data.tFine'][0][0])
+                for k in range(len(data['model.data.tExp'])):
+                    for j in range(len(data['model.data.tExp'][k][0])):
+                        for l in range(len(data['model.data.tExp'])):
+                            data['plots']['observables'][i][c].append(
+                                [float('nan'), float('nan')])
+                            if l is k:
+                                data['plots']['observables'][i][c].append(
+                                    [data['model.data.yExp'][l][i][j],
+                                        data['model.data.yExpStd'][l][i][j]])
+                            else:
+                                data['plots']['observables'][i][c].append(
+                                    [float('nan'), float('nan')])
+                        c = c + 1
+
+            data['plots']['observables'][i].sort(key=lambda x: x[0])
 
     if len(data['model.z']) > 0:
 
@@ -373,6 +412,26 @@ def create_dygraphs_data(data):
     data.pop('model.condition.zFineSimu', None)
     data.pop('model.condition.z', None)
     data.pop('model.z', None)
+
+    # remove spaces (spaces wont work in css/html ids)
+    try:
+        for i, key in enumerate(data['model.xNames']):
+            data['model.xNames'][i] = key.replace(
+                ' ', '_').replace('(', '').replace(')', '')
+    except:
+        pass
+    try:
+        for i, key in enumerate(data['model.u']):
+            data['model.u'][i] = key.replace(
+                ' ', '_').replace('(', '').replace(')', '')
+    except:
+        pass
+    try:
+        for i, key in enumerate(data['model.data.yNames'][0]):
+            data['model.data.yNames'][0][i] = key.replace(
+                ' ', '_').replace('(', '').replace(')', '')
+    except:
+        pass
 
     return data
 
