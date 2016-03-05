@@ -767,6 +767,7 @@ for jm=1:length(ar.model)
             for jplot=1:length(ar.model(jm).plot)
                 if ( exist( [ opts.overrideplots '/' ar.model(jm).plot(jplot).name '.pdf' ], 'file' ) || exist( [ opts.overrideplots '/' ar.model(jm).plot(jplot).name '_Report.tex' ], 'file' ) )
                     ar.model(jm).plot(jplot).savePath_FigY = [opts.overrideplots '/' ar.model(jm).plot(jplot).name];
+                    ar.model(jm).plot(jplot).override = 1;
                     fprintf( 'Overridden %s ...', ar.model(jm).plot(jplot).name );
                 end
             end
@@ -798,9 +799,15 @@ for jm=1:length(ar.model)
                         if(isfield(ar.model(jm).plot(jplot), 'savePath_FigY') && ~isempty(ar.model(jm).plot(jplot).savePath_FigY))
                             lp(fid, 'The model observables and the experimental data is shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
                             captiontext = sprintf('\\textbf{%s observables and experimental data for the experiment.} ', arNameTrafo(ar.model(jm).plot(jplot).name));
-                            captiontext = [captiontext 'The observables are displayed as solid lines. '];
-                            captiontext = [captiontext 'The error model that describes the measurement noise ' ...
+                            if ( ~isfield( ar.model(jm).plot(jplot), 'override' ) )
+                                captiontext = [captiontext 'The observables are displayed as solid lines. '];
+                                captiontext = [captiontext 'The error model that describes the measurement noise ' ...
                                 'is indicated by shades.'];
+                            else
+                                if ( isfield( ar.model(jm).plot(jplot), 'caption' ) )
+                                    captiontext = [captiontext ' ' ar.model(jm).plot(jplot).caption ];
+                                end
+                            end
                             if(opts.texplots&&exist([ar.model(jm).plot(jplot).savePath_FigY '_Report.tex'],'file')==2)
                                 copyfile([ar.model(jm).plot(jplot).savePath_FigY '_Report.tex'], ...
                                 [savePath '/' ar.model(jm).plot(jplot).name '_y.tex']);
@@ -919,8 +926,8 @@ for jm=1:length(ar.model)
                             %lp(fid, '\t\\centering');
                             lp(fid, '\\begin{centering}');
                             lp(fid, '\\begin{tabularx}{\\textwidth}{@{} *%dlX @{}}\\toprule', nC-1);
-                            lp(fid, '\\titlerowcol \\textbf{Input} & \\textbf{Unit} & \\textbf{Modified equation}\\tabularnewline\\midrule' );
                             sk = find(qmod);
+                            lp(fid, '\\titlerowcol \\textbf{Input} & \\textbf{Unit} & \\textbf{Modified equation} %s\\tabularnewline\\midrule', headerChunk );
                             if ( strcmp( headerChunk, '' ) )
                                 for ku = 1 : length( sk )
                                     ju = sk(ku);
