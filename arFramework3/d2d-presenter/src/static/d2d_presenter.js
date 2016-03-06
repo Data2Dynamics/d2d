@@ -6,6 +6,8 @@ var command_list = [];
 var graphs = {};
 var chi2_hist = [];
 var p_hist = [];
+var DSET = 0;
+var MODEL = 0;
 var cpal = [
     "#5DA5DA",
     "#FAA43A",
@@ -391,15 +393,15 @@ function create_content() {
         });
         $('.g_variables').append(div);
     };
-    for (var key in ar['model.data.yNames'][0]) {
+    for (var key in ar['model.data.yNames'][DSET]) {
         var div = $('<div />', {
-            'class': 'g_container_items g_observables_' + ar['model.data.yNames'][0][key],
-            id: 'g_observables_' + ar['model.data.yNames'][0][key],
+            'class': 'g_container_items g_observables_' + ar['model.data.yNames'][DSET][key],
+            id: 'g_observables_' + ar['model.data.yNames'][DSET][key],
         });
         $('.g_observables').append(div);
         div = $('<div />', {
-            'class': 'g_container_items g_observables_' + ar['model.data.yNames'][0][key],
-            id: 'g_observables_' + ar['model.data.yNames'][0][key],
+            'class': 'g_container_items g_observables_' + ar['model.data.yNames'][DSET][key],
+            id: 'g_observables_' + ar['model.data.yNames'][DSET][key],
         });
         $('.g_fit').append(div);
     };
@@ -424,13 +426,25 @@ function create_content() {
     pu = ar['model.pu'].map(function(value, index) {
         return value;
     });
+    pu_data = ar['model.data.pu'][DSET].map(function(value, index) {
+        return value;
+    });
     py = ar['model.py'].map(function(value, index) {
+        return value;
+    });
+    py_data = ar['model.data.py'][DSET].map(function(value, index) {
         return value;
     });
     pystd = ar['model.pystd'].map(function(value, index) {
         return value;
     });
+    pystd_data = ar['model.data.pystd'][DSET].map(function(value, index) {
+        return value;
+    });
     pcond = ar['model.pcond'].map(function(value, index) {
+        return value;
+    });
+    pcond_data = ar['model.data.pcond'][DSET].map(function(value, index) {
         return value;
     });
     pc = ar['model.pc'].map(function(value, index) {
@@ -457,11 +471,19 @@ function create_content() {
             $('#sliders_variables').append(label, input).show();
         } else if (pu.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_inputs').append(label, input).show();
+        } else if (pu_data.indexOf(ar['pLabel'][key]) > -1) {
+            $('#sliders_inputs').append(label, input).show();
         } else if (py.indexOf(ar['pLabel'][key]) > -1) {
+            $('#sliders_observables').append(label, input).show();
+        } else if (py_data.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_observables').append(label, input).show();
         } else if (pystd.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_observables_std').append(label, input).show();
+        } else if (pystd_data.indexOf(ar['pLabel'][key]) > -1) {
+            $('#sliders_observables_std').append(label, input).show();
         } else if (pcond.indexOf(ar['pLabel'][key]) > -1) {
+            $('#sliders_conditions').append(label, input).show();
+        } else if (pcond_data.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_conditions').append(label, input).show();
         };
     };
@@ -472,10 +494,16 @@ function create_events(options) {
     $(".select_mdc").change(function(e) {
         var url_data = {};
         url_data.name = e.target.name
+        if ( e.target.name === 'MODEL') {
+            MODEL = e.target.value;
+        } else {
+            DSET = e.target.value;
+        };
         url_data.value = e.target.value;
         update.update([
             'change_mdc', 'model',
-        ], url_data, e)
+        ], url_data, e);
+        location.reload();
     });
     for (var key in ar['pLabel']) {
         $('#' + ar['pLabel'][key] + '_slider').on('slidestop change', function(e) {
@@ -758,7 +786,7 @@ function create_graphs() {
         if (plot === 'variables'){
             labels_var = ['x'];
             for (var i = 0; i < (ar.plots.variables[0][0].length-1); i++) {
-                labels_var = labels_var.concat(["Condition " + i]);
+                labels_var = labels_var.concat(["Condition " + (i+1)]);
             };
             g_settings['variables'] = {
               labels: labels_var,
@@ -772,9 +800,9 @@ function create_graphs() {
             labels_obs = ['x'];
             for (var i = 0; i < (ar.plots.variables[0][0].length-1); i++) {
 
-                label = "Condition " + i;
-                label_exp = "Condition " + i + " exp";
-                labels_obs = labels_obs.concat(["Condition " + i, "Condition " + i + " exp"]);
+                label = "Condition " + (i+1);
+                label_exp = "Condition " + (i+1) + " exp";
+                labels_obs = labels_obs.concat(["Condition " + (i+1), "Condition " + (i+1) + " exp"]);
                 opts = {};
                 opts['series'] = {};
                 color = cp[cp.push(cp.shift())-1];
@@ -807,6 +835,7 @@ function create_graphs() {
               title: key
             };
       };
+
       for (var i = 0; i < $('.g_' + plot + '_' + key).length; i++) {
         graphs[plot][key][i] = new Dygraph(
           $('.g_' + plot + '_' + key)[i],

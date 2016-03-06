@@ -21,7 +21,8 @@ except:
 FIELDS = {
     'pLabel', 'p', 'lb', 'ub', 'chi2fit', 'config.optim.MaxIter',
     'config.nFinePoints', 'model.u', 'model.pu', 'model.py', 'model.pc',
-    'model.pystd', 'model.pv', 'model.pcond', 'model.fu',
+    'model.pystd', 'model.pv', 'model.pcond', 'model.fu', 'model.data.pystd',
+    'model.data.pcond', 'model.data.pu', 'model.data.py',
     'model.name', 'model.xNames', 'model.z', 'model.description',
     'model.condition.tFine', 'model.condition.uFineSimu',
     'model.data.yNames', 'model.data.tFine', 'model.data.tExp',
@@ -35,7 +36,7 @@ FIELDS_FIT = {
     'fit.p_hist'
 }
 
-SESSION_LIFETIME = 3000
+SESSION_LIFETIME = 900
 DEBUG = True
 
 d2d_instances = {}
@@ -101,7 +102,7 @@ def start():
         try:
             results = os.listdir(os.path.join(
                 os.path.dirname(d2d_instances[session['uid']]['model']),
-                'results'))
+                'Results'))
 
             for savename in results:
                 if savename.endswith('_d2d_presenter'):
@@ -473,7 +474,7 @@ def create_filetree(path=None, depth=0, max_depth=0):
         tree = dict(name=os.path.basename(path), children=[])
 
         try:
-            lst = os.listdir(path)
+            lst = sorted(os.listdir(path))
         except OSError:
             pass  # ignore errors
         else:
