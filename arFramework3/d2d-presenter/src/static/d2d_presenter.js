@@ -9,18 +9,15 @@ var p_hist = [];
 var DSET = 0;
 var MODEL = 0;
 var cpal = [
-    "#5DA5DA",
-    "#FAA43A",
-    "#60BD68",
-    "#F17CB0",
-    "#B2912F",
-    "#B276B2",
-    "#DECF3F",
-    "#F15854",
-    "#4D4D4D",
-    "#33315B",
-    "#76515B",
-    "#306DCE",
+    "#1f77b4",
+    "#ff7f0e",
+    "#2ca02c",
+    "#d62728",
+    "#9467bd",
+    "#8c564b",
+    "#7f7f7f",
+    "#bcbd22",
+    "#17becf"
 ];
 $(document).on("pagecontainershow", function(event, ui) {
     if (ui.toPage[0].id === "main_page") {
@@ -181,7 +178,12 @@ function Update() {
         };
 
         if (options.indexOf('fit_auto') > -1) {
-          chi2 = chi2_hist.shift()[0];
+            try {
+                chi2 = chi2_hist.shift()[0];
+            } catch(e) {
+                    alert("Automatic step-by-step fitting failed for this model, page will be reloaded.");
+                    location.reload();
+            };
           p = [];
           for (var i in p_hist) {
               p.push(p_hist[i].shift());
@@ -733,6 +735,8 @@ function create_graphs_data(options) {
 
 function create_graphs() {
   var g_settings = {};
+  var series_settings = {};
+  cp = cpal.slice();
   g_settings['global'] = {
     valueRange: [null, null],
     strokeWidth: 2,
@@ -748,6 +752,12 @@ function create_graphs() {
 
   for (var key in ar['pLabel']) {
     labels_fit_parameters.push(ar['pLabel'][key]);
+    opts = {};
+    opts['series'] = {};
+    opts['series'][ar['pLabel'][key]] = {
+            color: cp[cp.push(cp.shift())-1]
+    };
+    series_settings = $.extend(series_settings, opts['series']);
   };
 
   cp_parameters = cpal.slice();
@@ -774,29 +784,55 @@ function create_graphs() {
             };
             g_settings['chi2plot'] = {
               labels: ['n', 'Chi2'],
+              color: "#1f77b4",
               errorBars: false,
               title: 'Chi2'
             };
             g_settings['parameters'] = {
               labels: labels_fit_parameters,
               errorBars: false,
-              title: 'Fit parameters'
+              title: 'Fit parameters',
+              series: series_settings
             };
         };
+        if (plot === 'inputs'){
+            labels = ['t'];
+            for (var i = 0; i < (ar.plots.variables[0][0].length-1); i++) {
+                labels = labels.concat(["Condition " + (i+1)]);
+                opts = {};
+                opts['series'] = {};
+                opts['series']["Condition " + (i+1)] = {
+                        color: cp[cp.push(cp.shift())-1]
+                };
+                series_settings = $.extend(series_settings, opts['series']);
+            };
+            g_settings['inputs'] = {
+              labels: labels,
+              xlabel: ar['model.fu'][0],
+              title: key,
+              series: series_settings
+            };
+      };
         if (plot === 'variables'){
             labels_var = ['x'];
             for (var i = 0; i < (ar.plots.variables[0][0].length-1); i++) {
                 labels_var = labels_var.concat(["Condition " + (i+1)]);
+                opts = {};
+                opts['series'] = {};
+                opts['series']["Condition " + (i+1)] = {
+                        color: cp[cp.push(cp.shift())-1]
+                };
+                series_settings = $.extend(series_settings, opts['series']);
             };
             g_settings['variables'] = {
               labels: labels_var,
-              title: key
+              title: key,
+              series: series_settings
             };
         };
 
         if (plot === 'observables'){
 
-            series_settings_obs = {};
             labels_obs = ['x'];
             for (var i = 0; i < (ar.plots.variables[0][0].length-1); i++) {
 
@@ -817,24 +853,16 @@ function create_graphs() {
                     drawPoints: false,
                     connectSeparatedPoints: true,
                 };
-                series_settings_obs = $.extend(series_settings_obs, opts['series']);
+                series_settings = $.extend(series_settings, opts['series']);
             };
             g_settings['observables'] = {
               connectSeparatedPoints: true,
               labels: labels_obs,
               errorBars: true,
               title: key,
-              series: series_settings_obs
+              series: series_settings
             };
         };
-
-        if (plot === 'inputs'){
-            g_settings['inputs'] = {
-              labels: ['t', key],
-              xlabel: ar['model.fu'][0],
-              title: key
-            };
-      };
 
       for (var i = 0; i < $('.g_' + plot + '_' + key).length; i++) {
         graphs[plot][key][i] = new Dygraph(

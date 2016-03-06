@@ -387,18 +387,19 @@ def create_dygraphs_data(data):
 
     data['plots']['inputs'] = []
 
-    if len(data['model.u']) > 0:
-        if isinstance(data['model.u'][0], str):
-            data['model.condition.uFineSimu'] =\
-                [data['model.condition.uFineSimu']]
+    # if len(data['model.u']) > 0:
+    #     if isinstance(data['model.u'][0], str):
+    #         data['model.condition.uFineSimu'] =\
+    #             [data['model.condition.uFineSimu']]
 
-        for i in range(len(data['model.u'])):
-            data['plots']['inputs'].append(
-                data['model.condition.tFine'][0][0].copy())
-            for j in range(len(data['model.condition.tFine'][0][0])):
-                data['plots']['inputs'][i][j] = [data['plots']['inputs'][i][j]]
+    for i in range(len(data['model.u'])):
+        data['plots']['inputs'].append(
+            data['model.condition.tFine'][0][0].copy())
+        for j in range(len(data['model.condition.tFine'][0][0])):
+            data['plots']['inputs'][i][j] = [data['plots']['inputs'][i][j]]
+            for k in range(len(data['model.condition.uFineSimu'])):
                 data['plots']['inputs'][i][j].append(
-                    data['model.condition.uFineSimu'][0][0][i][j])
+                    data['model.condition.uFineSimu'][k][i][j])
 
     # remove unecessary data to lower the traffic
     data.pop('model.data.tFine', None)
