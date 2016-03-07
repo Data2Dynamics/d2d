@@ -26,6 +26,8 @@
 %                       as subsequent argument
 %   TexPages          - Provide files with custom tex pages (provide cell
 %                       array of files as next argument)
+%   Bibs              - Provide fiels with additional bibliography items
+%                       (provide cell array of files as next argument)
 %   Figures           - Copy figure directories into tex output dir.
 %                       These can be used in submitted tex files (provide 
 %                       a directory as next argument)
@@ -38,8 +40,8 @@ global ar
 
 warning( 'This report functionality is currently in alpha status. Please use arReport instead.' );
 
-switches    = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots', 'ExcludeDynPars', 'TexPages', 'Figures', 'OverridePlots' };
-extraArgs   = [         0,            0,               0,                0,                0,             0,               0,               0,         0,                 1,          1,         1,               1 ];
+switches    = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots', 'ExcludeDynPars', 'TexPages', 'Figures', 'OverridePlots', 'Bibs' };
+extraArgs   = [         0,            0,               0,                0,                0,             0,               0,               0,         0,                 1,          1,         1,               1,      1 ];
 descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Plotting all fitted Ys', '' }, ...
                     { 'Omitting non fitted Ys from report', '' }, ...
@@ -53,6 +55,7 @@ descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Including tex pages', '' }, ...
                     { 'Including figure directories', '' }, ...
                     { 'Including custom plots', '' }, ...
+                    { 'Including custom bibliography items', '' }, ...
                     };
 
 if( (nargin > 0) && max( strcmpi( varargin{1}, switches ) ) == 0 )
@@ -132,6 +135,14 @@ if (isfield(ar, 'additionalBib'))
     end
 end
 
+if ~isempty( opts.bibs )
+    fid = fopen( [savePath '/lib.bib'], 'a' );
+	for a = 1 : length( opts.bibs )
+        txt = strrep(strrep(fileread(opts.bibs{a}), '\', '\\'), '%', '%%');
+        fprintf( fid, txt );
+	end
+    fclose(fid);
+end
 
 % latex packages
 copyfile(which('assurechemist.sty'), [savePath '/assurechemist.sty']);
