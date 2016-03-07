@@ -6,7 +6,7 @@ import copy
 import stat
 from distutils.dir_util import copy_tree, remove_tree
 from threading import Thread
-from flask import Flask, jsonify, render_template, request, session, Markup
+from flask import Flask, jsonify, render_template, request, session, Markup, redirect
 from simplejson import JSONEncoder
 import pyd2d
 
@@ -121,9 +121,9 @@ def start():
                              }
         })
 
-    if do_compile.endswith('on'):
-        load = False
-    else:
+    load = False
+
+    if not do_compile.endswith('on'):
         try:
             results = os.listdir(os.path.join(
                 os.path.dirname(d2d_instances[session['uid']]['model']),
@@ -162,7 +162,10 @@ def start():
     t = Thread(target=d2d_close_instance, args=(session['uid'], ))
     t.start()
 
-    return jsonify(status=status)
+    if str(request.args.get('direct_access')).endswith('true'):
+        return redirect("#main_page")
+    else:
+        return jsonify(status=status)
 
 
 @app.route('/_update', methods=['GET'])
