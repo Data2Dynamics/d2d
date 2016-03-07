@@ -1,69 +1,46 @@
 DESCRIPTION
-"Steckmann2012 - Amyloid beta-protein fibrillogenesis (kinetics of secondary structure conversion)"" (MODEL1407300001)"
+"Steckmann2012 - Amyloid beta-protein fibrillogenesis (kinetics of secondary structure conversion)"
+"(MODEL1407300001)"
+" "
 "SBML level 2 version 4"
-"<notes>
-  <body xmlns="http://www.w3.org/1999/xhtml">
-    <div class="dc:title">Steckmann2012 - Amyloid beta-protein
-fibrillogenesis (kinetics of secondary structure conversion)</div>
-    <div class="dc:bibliographicCitation">
-      <p>This model is described in the article:</p>
-      <div class="bibo:title">
-        <a href="http://identifiers.org/pubmed/22586726" title="Access to this publication">Kinetics of peptide
-    secondary structure conversion during amyloid ?-protein
-    fibrillogenesis.</a>
-      </div>
-      <div class="bibo:authorList">Steckmann T, Awan Z, Gerstman BS,
-  Chapagain PP.</div>
-      <div class="bibo:Journal">J. Theor. Biol. 2012 May; 301:
-  95-102</div>
-      <p>Abstract:</p>
-      <div class="bibo:abstract">
-        <p>Amyloid fibrils are a common component in many debilitating
-    human neurological diseases such as Alzheimer&apos;s (AD),
-    Parkinson&apos;s, and Creutzfeldt-Jakob, and in animal diseases such
-    as BSE. The role of fibrillar ?? proteins in AD has stimulated
-    interest in the kinetics of ?? fibril formation. Kinetic models
-    that include reaction pathways and rate parameters for the
-    various stages of the process can be helpful towards
-    understanding the dynamics on a molecular level. Based upon
-    experimental data, we have developed a mathematical model for
-    the reaction pathways and determined rate parameters for
-    peptide secondary structural conversion and aggregation during
-    the entire fibrillogenesis process from random coil to mature
-    fibrils, including the molecular species that accelerate the
-    conversions. The model and the rate parameters include
-    different molecular structural stages in the nucleation and
-    polymerization processes and the numerical solutions yield
-    graphs of concentrations of different molecular species versus
-    time that are in close agreement with experimental results. The
-    model also allows for the calculation of the time-dependent
-    increase in aggregate size. The calculated results agree well
-    with experimental results, and allow differences in
-    experimental conditions to be included in the calculations. The
-    specific steps of the model and the rate constants that are
-    determined by fitting to experimental data provide insight on
-    the molecular species involved in the fibril formation
-    process.</p>
-      </div>
-    </div>
-    <div class="dc:publisher">
-      <p>This model is hosted on 
-  <a href="http://www.ebi.ac.uk/biomodels/">BioModels Database</a>
-  and identified by: 
-  <a href="http://identifiers.org/biomodels.db/BIOMD0000000533">BIOMD0000000533</a>.</p>
-    <p>To cite BioModels Database, please use: 
-  <a href="http://identifiers.org/pubmed/20587024" title="Latest BioModels Database publication">BioModels Database:
-  An enhanced, curated and annotated resource for published
-  quantitative kinetic models</a>.</p>
-</div><div class="dc:license">
-  <p>To the extent possible under law, all copyright and related or
-  neighbouring rights to this encoded model have been dedicated to
-  the public domain worldwide. Please refer to 
-  <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Access to: CC0 1.0 Universal (CC0 1.0), Public Domain Dedication">CC0
-  Public Domain Dedication</a> for more information.</p>
-</div>
-</body>
-</notes>"
+"Steckmann2012 - Amyloid beta-protein"
+"<p>This model is described in the article:</p>"
+"<a href='http://identifiers.org/pubmed/22586726' title='Access to this publication'>Kinetics of peptide secondary structure conversion during amyloid beta-protein fibrillogenesis.</a>"
+"Author: Steckmann T, Awan Z, Gerstman BS, Chapagain PP."
+"Journal: J. Theor. Biol. 2012 May; 301:95-102"
+"<p>Abstract:</p>"
+"<p>Amyloid fibrils are a common component in many debilitating"
+    "human neurological diseases such as Alzheimers (AD),"
+    "Parkinsons, and Creutzfeldt-Jakob, and in animal diseases such"
+    "as BSE. The role of fibrillar ?? proteins in AD has stimulated"
+    "interest in the kinetics of ?? fibril formation. Kinetic models"
+    "that include reaction pathways and rate parameters for the"
+    "various stages of the process can be helpful towards"
+    "understanding the dynamics on a molecular level. Based upon"
+    "experimental data, we have developed a mathematical model for"
+    "the reaction pathways and determined rate parameters for"
+    "peptide secondary structural conversion and aggregation during"
+    "the entire fibrillogenesis process from random coil to mature"
+    "fibrils, including the molecular species that accelerate the"
+    "conversions. The model and the rate parameters include"
+    "different molecular structural stages in the nucleation and"
+    "polymerization processes and the numerical solutions yield"
+    "graphs of concentrations of different molecular species versus"
+    "time that are in close agreement with experimental results. The"
+    "model also allows for the calculation of the time-dependent"
+    "increase in aggregate size. The calculated results agree well"
+    "with experimental results, and allow differences in"
+    "experimental conditions to be included in the calculations. The"
+    "specific steps of the model and the rate constants that are"
+    "determined by fitting to experimental data provide insight on"
+    "the molecular species involved in the fibril formation"
+    "process.</p>"
+"<p>This model is hosted on <a href='http://www.ebi.ac.uk/biomodels/'>BioModels Database</a> and identified by:"
+ "<a href="http://identifiers.org/biomodels.db/BIOMD0000000533">BIOMD0000000533</a>.</p>"
+    "<p>To cite BioModels Database, please use: "
+  "<a href='http://identifiers.org/pubmed/20587024' title='Latest BioModels Database publication'>BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models</a>.</p>"
+"<p>To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to"
+  "the public domain worldwide. Please refer to <a href='http://creativecommons.org/publicdomain/zero/1.0/' title='Access to: CC0 1.0 Universal (CC0 1.0), Public Domain Dedication'>CC0 Public Domain Dedication</a> for more information.</p>"
 
 PREDICTOR
 t	 T	 "n/a"	 time	 0	 100	

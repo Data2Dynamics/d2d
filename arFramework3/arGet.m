@@ -84,35 +84,33 @@ for i=1:length(fields)
                     c = c + 1;
                 end
             catch
-                data{i} = {}
+                data{i} = {};
             end
-            
         elseif(regexp(char(fields(i)), '^condition.'))
         
             fields(i) = {regexprep(char(fields(i)),'^condition.', '')};
             S = substruct_arg(fields(i));
-            
-            c = 1;
+
             try
                 data{i} = cell(1, length(struct.model(m).plot(dset).dLink));
-                for j=struct.model(m).plot(dset).dLink
-                    if j == 0
-                        data{i}{c}=subsref(struct.model(m).condition(1), substruct(S{:}));
-                    else
+                
+                c = 1;
+                for h=struct.model(m).plot(dset).dLink
+                    for j=struct.model(m).data(h).cLink
                         try
                             data{i}{c}=subsref(struct.model(m).condition(j), substruct(S{:}));
                         catch
                             data{i}{c}={};
                         end
-                    end
-                    if isnumeric(data{i}{c})
-                        if length(data{i}{c}) == 1
-                            data{i}{c} = {{data{i}{c}}};
-                        elseif sig
-                            data{i}{c} = chop(data{i}{c}, sig);
+                        if isnumeric(data{i}{c})
+                            if length(data{i}{c}) == 1
+                                data{i}{c} = {{data{i}{c}}};
+                            elseif sig
+                                data{i}{c} = chop(data{i}{c}, sig);
+                            end
                         end
-                    end
                     c = c + 1;
+                    end
                 end
             catch
                 data{i} = {}

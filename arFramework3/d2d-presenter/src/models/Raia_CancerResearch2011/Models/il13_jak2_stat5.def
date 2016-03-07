@@ -28,7 +28,7 @@ CD274mRNA       C   nmol/l      conc.   nuc
 INPUTS
 
 REACTIONS
-Rec             ->  IL13_Rec        CUSTOM "il13_level * Kon_IL13Rec * 2.265 * Rec * Input"
+Rec             ->  IL13_Rec        CUSTOM "il13_level * Kon_IL13Rec * 2.265 * Rec"
 Rec             ->  Rec_i           CUSTOM "Rec_intern * Rec"
 Rec_i           ->  Rec             CUSTOM "Rec_recycle * Rec_i"
 IL13_Rec        ->  p_IL13_Rec      CUSTOM "pJAK2 * Rec_phosphorylation * IL13_Rec"

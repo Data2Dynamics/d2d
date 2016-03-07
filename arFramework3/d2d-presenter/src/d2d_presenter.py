@@ -3,10 +3,22 @@ import re
 import uuid
 import time
 import copy
+import stat
+from distutils.dir_util import copy_tree, remove_tree
 from threading import Thread
-from flask import Flask, jsonify, render_template, request, session, Markup
+from flask import Flask, jsonify, render_template, request, session, Markup, redirect
 from simplejson import JSONEncoder
 import pyd2d
+
+
+# Configuration #
+SESSION_LIFETIME = 900
+DEBUG = True
+MODE = ''
+HIDE_CONSOLE = False
+TEMPLATE = 'd2d_presenter.html'
+HOST = '127.0.0.1'
+PORT = '5000'
 
 __author__ = 'Clemens Blank'
 app = Flask(__name__)
@@ -21,7 +33,8 @@ except:
 FIELDS = {
     'pLabel', 'p', 'lb', 'ub', 'chi2fit', 'config.optim.MaxIter',
     'config.nFinePoints', 'model.u', 'model.pu', 'model.py', 'model.pc',
-    'model.pystd', 'model.pv', 'model.pcond', 'model.fu',
+    'model.pystd', 'model.pv', 'model.pcond', 'model.fu', 'model.data.pystd',
+    'model.data.pcond', 'model.data.pu', 'model.data.py',
     'model.name', 'model.xNames', 'model.z', 'model.description',
     'model.condition.tFine', 'model.condition.uFineSimu',
     'model.data.yNames', 'model.data.tFine', 'model.data.tExp',
@@ -34,9 +47,6 @@ FIELDS_FIT = {
     'fit.iter', 'fit.iter_count', 'fit.improve', 'fit.chi2_hist',
     'fit.p_hist'
 }
-
-SESSION_LIFETIME = 3000
-DEBUG = True
 
 d2d_instances = {}
 
@@ -65,11 +75,16 @@ def filetree():
 @app.route('/d2d_presenter', methods=['GET'])
 def d2d_presenter():
 
-    return render_template('d2d_presenter.html')
+    return render_template(TEMPLATE)
 
 
 @app.route('/_start', methods=['GET'])
 def start():
+    # delete already existing matlab engine for this user
+    try:
+        del(d2d_instances[session['uid']]['d2d'])
+    except:
+        pass
 
     ROUND = int(request.args.get('round'))
     if ROUND is 0:
@@ -82,12 +97,23 @@ def start():
     nFinePoints = int(request.args.get('nFinePoints'))
     do_compile = str(request.args.get('compile'))
 
+    # Set the directory you want to copy from
+    rootDir = os.path.dirname(os.path.join(
+       os.getcwd(),
+       request.args.get('model')))
+
+    if MODE is 'copy':
+        copy_tree(rootDir, os.path.join(os.getcwd(), 'temp',
+                  str(session['uid'])))
+        rootDir = os.path.join(os.getcwd(), 'temp', str(session['uid']),
+                               os.path.basename(request.args.get('model')))
+    else:
+        rootDir = os.path.join(os.getcwd(), request.args.get('model'))
+
     d2d_instances.update(
         {
             session['uid']: {'d2d': pyd2d.d2d(), 'alive': 1,
-                             'model': os.path.join(
-                                os.getcwd(),
-                                request.args.get('model')),
+                             'model': rootDir,
                              'nFinePoints': nFinePoints,
                              'ROUND': ROUND,
                              'MODEL': 1,
@@ -95,19 +121,20 @@ def start():
                              }
         })
 
-    if do_compile.endswith('on'):
-        load = False
-    else:
+    load = False
+
+    if not do_compile.endswith('on'):
         try:
             results = os.listdir(os.path.join(
                 os.path.dirname(d2d_instances[session['uid']]['model']),
-                'results'))
+                'Results'))
 
             for savename in results:
                 if savename.endswith('_d2d_presenter'):
                     load = savename
                     break
         except:
+            load = False
             print("No saved results found for d2d_presenter, compiling from " +
                   "scratch. This might take some time.")
 
@@ -135,7 +162,10 @@ def start():
     t = Thread(target=d2d_close_instance, args=(session['uid'], ))
     t.start()
 
-    return jsonify(status=status)
+    if str(request.args.get('direct_access')).endswith('true'):
+        return redirect("#main_page")
+    else:
+        return jsonify(status=status)
 
 
 @app.route('/_update', methods=['GET'])
@@ -147,6 +177,8 @@ def update():
     data = {}
     extra = {}
     status = {}
+
+    extra['HIDE_CONSOLE'] = HIDE_CONSOLE
 
     d2d = d2d_instances[session['uid']]['d2d']
 
@@ -239,6 +271,7 @@ def update():
 
     if 'tree' in options:
         extra['tree'] = create_filetree(path=d2d.path)
+        print(extra['tree'])
 
     if 'read' in options:
         extra['editor_data'] = editor('read', extra['filename'])
@@ -386,18 +419,19 @@ def create_dygraphs_data(data):
 
     data['plots']['inputs'] = []
 
-    if len(data['model.u']) > 0:
-        if isinstance(data['model.u'][0], str):
-            data['model.condition.uFineSimu'] =\
-                [data['model.condition.uFineSimu']]
+    # if len(data['model.u']) > 0:
+    #     if isinstance(data['model.u'][0], str):
+    #         data['model.condition.uFineSimu'] =\
+    #             [data['model.condition.uFineSimu']]
 
-        for i in range(len(data['model.u'])):
-            data['plots']['inputs'].append(
-                data['model.condition.tFine'][0][0].copy())
-            for j in range(len(data['model.condition.tFine'][0][0])):
-                data['plots']['inputs'][i][j] = [data['plots']['inputs'][i][j]]
+    for i in range(len(data['model.u'])):
+        data['plots']['inputs'].append(
+            data['model.condition.tFine'][0][0].copy())
+        for j in range(len(data['model.condition.tFine'][0][0])):
+            data['plots']['inputs'][i][j] = [data['plots']['inputs'][i][j]]
+            for k in range(len(data['model.condition.uFineSimu'])):
                 data['plots']['inputs'][i][j].append(
-                    data['model.condition.uFineSimu'][0][0][i][j])
+                    data['model.condition.uFineSimu'][k][i][j])
 
     # remove unecessary data to lower the traffic
     data.pop('model.data.tFine', None)
@@ -473,14 +507,15 @@ def create_filetree(path=None, depth=0, max_depth=0):
         tree = dict(name=os.path.basename(path), children=[])
 
         try:
-            lst = os.listdir(path)
+            lst = sorted(os.listdir(path))
         except OSError:
             pass  # ignore errors
         else:
             for name in lst:
                 fn = os.path.join(path, name)
                 if (
-                    os.path.isdir(fn) and re.match('^.*(Compiled)$', fn)
+                    os.path.isdir(fn) and re.match('^.*(Compiled|Results)$',
+                                                   fn)
                     is None
                 ):
                     child = create_filetree(fn, depth + 1, max_depth)
@@ -498,14 +533,27 @@ def d2d_close_instance(uid):
     while True:
         try:
             if d2d_instances[uid]['alive'] == 0:
-                # clean up the global dicts, deletes the instances
+                path = os.path.dirname(d2d_instances[uid]['model'])
+
+                # cleans up the global dict, deletes the instance
                 del(d2d_instances[uid])
+
+                # remove the copied temporary files
+                if (MODE is 'copy') and (str(uid) in path):
+                    # set file acess to writeable before deletion
+                    # (maybe necessary for Windows only)
+                    for root, dirs, files in os.walk(path):
+                        for fname in files:
+                            full_path = os.path.join(root, fname)
+                            os.chmod(full_path, stat.S_IWRITE)
+                    remove_tree(path)
                 break
 
             d2d_instances[uid]['alive'] = 0
             time.sleep(SESSION_LIFETIME)
-        except:
+        except Exception as e:
             print('Unable to shutdown thread ' + str(uid))
+            print(e)
             break
 
 
@@ -523,6 +571,6 @@ if __name__ == "__main__":
     app.debug = DEBUG
     app.json_encoder = JSONEncoder_ignore
     app.run(threaded=True,
-            host="127.0.0.1",
-            port=int("5000")
+            host=HOST,
+            port=int(PORT)
             )

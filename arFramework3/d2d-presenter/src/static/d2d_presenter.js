@@ -6,19 +6,18 @@ var command_list = [];
 var graphs = {};
 var chi2_hist = [];
 var p_hist = [];
+var DSET = 0;
+var MODEL = 0;
 var cpal = [
-    "#5DA5DA",
-    "#FAA43A",
-    "#60BD68",
-    "#F17CB0",
-    "#B2912F",
-    "#B276B2",
-    "#DECF3F",
-    "#F15854",
-    "#4D4D4D",
-    "#33315B",
-    "#76515B",
-    "#306DCE",
+    "#1f77b4",
+    "#ff7f0e",
+    "#2ca02c",
+    "#d62728",
+    "#9467bd",
+    "#8c564b",
+    "#7f7f7f",
+    "#bcbd22",
+    "#17becf"
 ];
 $(document).on("pagecontainershow", function(event, ui) {
     if (ui.toPage[0].id === "main_page") {
@@ -179,7 +178,12 @@ function Update() {
         };
 
         if (options.indexOf('fit_auto') > -1) {
-          chi2 = chi2_hist.shift()[0];
+            try {
+                chi2 = chi2_hist.shift()[0];
+            } catch(e) {
+                    alert("Automatic step-by-step fitting failed for this model, page will be reloaded.");
+                    location.reload();
+            };
           p = [];
           for (var i in p_hist) {
               p.push(p_hist[i].shift());
@@ -370,13 +374,15 @@ function create_content() {
         lineNumbers: true,
         readOnly: true,
     });
-    cm_console_out.setSize('auto', 'auto');
-    var command_multiline = CodeMirror.fromTextArea(document.getElementById('command_multiline_input'), {
-        theme: 'default',
-        lineNumbers: true,
-        readOnly: false,
-    });
-    command_multiline.setSize('auto', 'auto');
+    if (extra['HIDE_CONSOLE'] != true) {
+        cm_console_out.setSize('auto', 'auto');
+        var command_multiline = CodeMirror.fromTextArea(document.getElementById('command_multiline_input'), {
+            theme: 'default',
+            lineNumbers: true,
+            readOnly: false,
+        });
+        command_multiline.setSize('auto', 'auto');
+    };
     for (var key in ar['model.u']) {
         var div = $('<div />', {
             'class': 'g_container_items g_inputs_' + ar['model.u'][key],
@@ -391,15 +397,15 @@ function create_content() {
         });
         $('.g_variables').append(div);
     };
-    for (var key in ar['model.data.yNames'][0]) {
+    for (var key in ar['model.data.yNames'][DSET]) {
         var div = $('<div />', {
-            'class': 'g_container_items g_observables_' + ar['model.data.yNames'][0][key],
-            id: 'g_observables_' + ar['model.data.yNames'][0][key],
+            'class': 'g_container_items g_observables_' + ar['model.data.yNames'][DSET][key],
+            id: 'g_observables_' + ar['model.data.yNames'][DSET][key],
         });
         $('.g_observables').append(div);
         div = $('<div />', {
-            'class': 'g_container_items g_observables_' + ar['model.data.yNames'][0][key],
-            id: 'g_observables_' + ar['model.data.yNames'][0][key],
+            'class': 'g_container_items g_observables_' + ar['model.data.yNames'][DSET][key],
+            id: 'g_observables_' + ar['model.data.yNames'][DSET][key],
         });
         $('.g_fit').append(div);
     };
@@ -424,13 +430,25 @@ function create_content() {
     pu = ar['model.pu'].map(function(value, index) {
         return value;
     });
+    pu_data = ar['model.data.pu'][DSET].map(function(value, index) {
+        return value;
+    });
     py = ar['model.py'].map(function(value, index) {
+        return value;
+    });
+    py_data = ar['model.data.py'][DSET].map(function(value, index) {
         return value;
     });
     pystd = ar['model.pystd'].map(function(value, index) {
         return value;
     });
+    pystd_data = ar['model.data.pystd'][DSET].map(function(value, index) {
+        return value;
+    });
     pcond = ar['model.pcond'].map(function(value, index) {
+        return value;
+    });
+    pcond_data = ar['model.data.pcond'][DSET].map(function(value, index) {
         return value;
     });
     pc = ar['model.pc'].map(function(value, index) {
@@ -457,11 +475,19 @@ function create_content() {
             $('#sliders_variables').append(label, input).show();
         } else if (pu.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_inputs').append(label, input).show();
+        } else if (pu_data.indexOf(ar['pLabel'][key]) > -1) {
+            $('#sliders_inputs').append(label, input).show();
         } else if (py.indexOf(ar['pLabel'][key]) > -1) {
+            $('#sliders_observables').append(label, input).show();
+        } else if (py_data.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_observables').append(label, input).show();
         } else if (pystd.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_observables_std').append(label, input).show();
+        } else if (pystd_data.indexOf(ar['pLabel'][key]) > -1) {
+            $('#sliders_observables_std').append(label, input).show();
         } else if (pcond.indexOf(ar['pLabel'][key]) > -1) {
+            $('#sliders_conditions').append(label, input).show();
+        } else if (pcond_data.indexOf(ar['pLabel'][key]) > -1) {
             $('#sliders_conditions').append(label, input).show();
         };
     };
@@ -472,10 +498,16 @@ function create_events(options) {
     $(".select_mdc").change(function(e) {
         var url_data = {};
         url_data.name = e.target.name
+        if ( e.target.name === 'MODEL') {
+            MODEL = e.target.value;
+        } else {
+            DSET = e.target.value;
+        };
         url_data.value = e.target.value;
         update.update([
             'change_mdc', 'model',
-        ], url_data, e)
+        ], url_data, e);
+        location.reload();
     });
     for (var key in ar['pLabel']) {
         $('#' + ar['pLabel'][key] + '_slider').on('slidestop change', function(e) {
@@ -602,44 +634,46 @@ function create_events(options) {
     $('#tab_console').on('click', function(e) {
         update.update(['console'], {}, e);
     });
-    $('#command_multiline .CodeMirror').each(function(i, e) {
-        command_multiline = e.CodeMirror;
-    });
-    var command = '';
-    command_multiline.on('keyHandled', function(name, event) {
-        if (event === 'Up' && command_multiline.getDoc().lineCount() == 1) {
-            var end = command_list.pop();
-            if (typeof end === 'undefined') {
-                end = '';
-            } else {
-                command_multiline.getDoc().setValue(end);
-                command_list.unshift(end);
-            };
-        };
-        if (event === 'Down' && command_multiline.getDoc().lineCount() == 1) {
-            var start = command_list.shift();
-            if (typeof start === 'undefined') {
-                start = '';
-            } else {
-                command_multiline.getDoc().setValue(command_list[0]);
-                command_list.push(start);
-            };
-        };
-        if (event === 'Enter') {
-            var command = command_multiline.getDoc().getValue();
-            if (command_multiline.getDoc().lineCount() == 2) {
-                command = command.replace(/\n/g, '');
-                if (command != '' && command_list[command_list.length - 1] != command) {
-                    command_list.push(command);
+    if ( extra['HIDE_CONSOLE'] != true) {
+        $('#command_multiline .CodeMirror').each(function(i, e) {
+            command_multiline = e.CodeMirror;
+        });
+        var command = '';
+        command_multiline.on('keyHandled', function(name, event) {
+            if (event === 'Up' && command_multiline.getDoc().lineCount() == 1) {
+                var end = command_list.pop();
+                if (typeof end === 'undefined') {
+                    end = '';
+                } else {
+                    command_multiline.getDoc().setValue(end);
+                    command_list.unshift(end);
                 };
             };
-            command_multiline.getDoc().setValue('');
-            $.mobile.loading('show');
-            update.update(['console'], {
-                command: command
-            }, event);
-        };
-    });
+            if (event === 'Down' && command_multiline.getDoc().lineCount() == 1) {
+                var start = command_list.shift();
+                if (typeof start === 'undefined') {
+                    start = '';
+                } else {
+                    command_multiline.getDoc().setValue(command_list[0]);
+                    command_list.push(start);
+                };
+            };
+            if (event === 'Enter') {
+                var command = command_multiline.getDoc().getValue();
+                if (command_multiline.getDoc().lineCount() == 2) {
+                    command = command.replace(/\n/g, '');
+                    if (command != '' && command_list[command_list.length - 1] != command) {
+                        command_list.push(command);
+                    };
+                };
+                command_multiline.getDoc().setValue('');
+                $.mobile.loading('show');
+                update.update(['console'], {
+                    command: command
+                }, event);
+            };
+        });
+    };
 };
 
 function create_graphs_data(options) {
@@ -705,6 +739,8 @@ function create_graphs_data(options) {
 
 function create_graphs() {
   var g_settings = {};
+  var series_settings = {};
+  cp = cpal.slice();
   g_settings['global'] = {
     valueRange: [null, null],
     strokeWidth: 2,
@@ -720,6 +756,12 @@ function create_graphs() {
 
   for (var key in ar['pLabel']) {
     labels_fit_parameters.push(ar['pLabel'][key]);
+    opts = {};
+    opts['series'] = {};
+    opts['series'][ar['pLabel'][key]] = {
+            color: cp[cp.push(cp.shift())-1]
+    };
+    series_settings = $.extend(series_settings, opts['series']);
   };
 
   cp_parameters = cpal.slice();
@@ -746,35 +788,61 @@ function create_graphs() {
             };
             g_settings['chi2plot'] = {
               labels: ['n', 'Chi2'],
+              color: "#1f77b4",
               errorBars: false,
               title: 'Chi2'
             };
             g_settings['parameters'] = {
               labels: labels_fit_parameters,
               errorBars: false,
-              title: 'Fit parameters'
+              title: 'Fit parameters',
+              series: series_settings
             };
         };
+        if (plot === 'inputs'){
+            labels = ['t'];
+            for (var i = 0; i < (ar.plots.variables[0][0].length-1); i++) {
+                labels = labels.concat(["Condition " + (i+1)]);
+                opts = {};
+                opts['series'] = {};
+                opts['series']["Condition " + (i+1)] = {
+                        color: cp[cp.push(cp.shift())-1]
+                };
+                series_settings = $.extend(series_settings, opts['series']);
+            };
+            g_settings['inputs'] = {
+              labels: labels,
+              xlabel: ar['model.fu'][0],
+              title: key,
+              series: series_settings
+            };
+      };
         if (plot === 'variables'){
             labels_var = ['x'];
             for (var i = 0; i < (ar.plots.variables[0][0].length-1); i++) {
-                labels_var = labels_var.concat(["Condition " + i]);
+                labels_var = labels_var.concat(["Condition " + (i+1)]);
+                opts = {};
+                opts['series'] = {};
+                opts['series']["Condition " + (i+1)] = {
+                        color: cp[cp.push(cp.shift())-1]
+                };
+                series_settings = $.extend(series_settings, opts['series']);
             };
             g_settings['variables'] = {
               labels: labels_var,
-              title: key
+              title: key,
+              series: series_settings
             };
         };
 
         if (plot === 'observables'){
 
-            series_settings_obs = {};
             labels_obs = ['x'];
             for (var i = 0; i < (ar.plots.variables[0][0].length-1); i++) {
 
-                label = "Condition " + i;
-                label_exp = "Condition " + i + " exp";
-                labels_obs = labels_obs.concat(["Condition " + i, "Condition " + i + " exp"]);
+                label = "Condition " + (i+1);
+                label_exp = "Condition " + (i+1) + " exp";
+                labels_obs = labels_obs.concat(["Condition " + (i+1), "Condition " + (i+1) + " exp"]);
                 opts = {};
                 opts['series'] = {};
                 color = cp[cp.push(cp.shift())-1];
@@ -789,24 +857,17 @@ function create_graphs() {
                     drawPoints: false,
                     connectSeparatedPoints: true,
                 };
-                series_settings_obs = $.extend(series_settings_obs, opts['series']);
+                series_settings = $.extend(series_settings, opts['series']);
             };
             g_settings['observables'] = {
               connectSeparatedPoints: true,
               labels: labels_obs,
               errorBars: true,
               title: key,
-              series: series_settings_obs
+              series: series_settings
             };
         };
 
-        if (plot === 'inputs'){
-            g_settings['inputs'] = {
-              labels: ['t', key],
-              xlabel: ar['model.fu'][0],
-              title: key
-            };
-      };
       for (var i = 0; i < $('.g_' + plot + '_' + key).length; i++) {
         graphs[plot][key][i] = new Dygraph(
           $('.g_' + plot + '_' + key)[i],
