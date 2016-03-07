@@ -26,6 +26,8 @@
 %                       as subsequent argument
 %   TexPages          - Provide files with custom tex pages (provide cell
 %                       array of files as next argument)
+%   Bibs              - Provide fiels with additional bibliography items
+%                       (provide cell array of files as next argument)
 %   Figures           - Copy figure directories into tex output dir.
 %                       These can be used in submitted tex files (provide 
 %                       a directory as next argument)
@@ -38,8 +40,8 @@ global ar
 
 warning( 'This report functionality is currently in alpha status. Please use arReport instead.' );
 
-switches    = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots', 'ExcludeDynPars', 'TexPages', 'Figures', 'OverridePlots' };
-extraArgs   = [         0,            0,               0,                0,                0,             0,               0,               0,         0,                 1,          1,         1,               1 ];
+switches    = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots', 'ExcludeDynPars', 'TexPages', 'Figures', 'OverridePlots', 'Bibs' };
+extraArgs   = [         0,            0,               0,                0,                0,             0,               0,               0,         0,                 1,          1,         1,               1,      1 ];
 descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Plotting all fitted Ys', '' }, ...
                     { 'Omitting non fitted Ys from report', '' }, ...
@@ -53,6 +55,7 @@ descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Including tex pages', '' }, ...
                     { 'Including figure directories', '' }, ...
                     { 'Including custom plots', '' }, ...
+                    { 'Including custom bibliography items', '' }, ...
                     };
 
 if( (nargin > 0) && max( strcmpi( varargin{1}, switches ) ) == 0 )
@@ -132,6 +135,14 @@ if (isfield(ar, 'additionalBib'))
     end
 end
 
+if ~isempty( opts.bibs )
+    fid = fopen( [savePath '/lib.bib'], 'a' );
+	for a = 1 : length( opts.bibs )
+        txt = strrep(strrep(fileread(opts.bibs{a}), '\', '\\'), '%', '%%');
+        fprintf( fid, txt );
+	end
+    fclose(fid);
+end
 
 % latex packages
 copyfile(which('assurechemist.sty'), [savePath '/assurechemist.sty']);
@@ -259,7 +270,7 @@ for jm=1:length(ar.model)
         else
             eqStateCaption = sprintf( 'Note that initial conditions denoted by an asterisk are simulated to steady state prior to perturbation in %s of the simulation experiments.', eqType );
         end
-        eqText = sprintf( 'Prior to stimulation, the cells are assumed to be in a resting (i.e. unstimulated) state. To achieve such an initial steady state, dynamic variables in the model (see Table \\ref{variables}) are pre-equilibrated prior to each simulation experiment. Model pre-equilibration was performed by simulating until the right hand side of the differential equations dropped below %.0s.', ar.config.eq_tol );
+        eqText = sprintf( 'Prior to stimulation, the cells are assumed to be in a resting (i.e. unstimulated) state. To achieve such an initial steady state, dynamic variables in the model (see Table \\ref{variables}) are pre-equilibrated prior to each simulation experiment. Model pre-equilibration was performed by simulating until the right hand side of the differential equations dropped below the equilibration threshold (%.0s).', ar.config.eq_tol );
     else
         eqText = '';
         eqStateCaption = '';
@@ -283,7 +294,7 @@ for jm=1:length(ar.model)
     lp(fid, 'The %d dynamic variables used in the model are summarized in Table \\ref{variables}', length(ar.model(jm).x) );
     
     if ( length( ar.model(jm).u ) > 0 ) %#ok
-        lp(fid, ', while the %i external inputs variables are summarized in Table \\ref{inputs}.', length(ar.model(jm).u));
+        lp(fid, ', while the %i external inputs variables are summarized in Table \\ref{inputs}.', sum(~strcmp(ar.model.fu, '0')));
     else
         lp(fid, '.', length(ar.model(jm).u));
     end
@@ -460,7 +471,7 @@ for jm=1:length(ar.model)
     end    
     
     %% flux expressions
-    lp(fid, '\\noindent The flux expressions corresponding to these equations are provided in Table \\ref{fluxes}. The system of ODEs was integrated using the CVODES algorithm from the SUNDIALS suite of solvers.\\cite{Hindmarsh:2005fb}. ');
+    lp(fid, '\\noindent The flux expressions corresponding to these equations are provided in Table \\ref{fluxes}. The system of ODEs was integrated using the CVODES algorithm from the SUNDIALS suite of solvers \\cite{Hindmarsh2005fb}. ');
     if ( ar.config.useSensis );
         lp(fid, 'First order derivatives were computed using the sensitivity equations and used for numerical optimization. ');
     end
@@ -682,7 +693,7 @@ for jm=1:length(ar.model)
     %% Additional description via args
     if ~isempty( opts.texpages )
         for a = 1 : length( opts.texpages )
-            lp(fid, strrep(fileread(opts.texpages{a}), '\', '\\'));
+            lp(fid, strrep(strrep(fileread(opts.texpages{a}), '\', '\\'), '%', '%%'));
         end
     end  
     
@@ -697,8 +708,8 @@ for jm=1:length(ar.model)
         lp(fid, 'information pertaining to the simulation protocol. Different simulation protocols are encoded by applying condition specific ');
         lp(fid, 'parameter and input transformations, which are listed in each of the experiment descriptions. Unlisted parameters either ');
         lp(fid, 'default to the transformation listed in the main model description \\ref{defaultpartransforms}, or to the raw parameter value ');
-        lp(fid, 'as specified in the full table of model parameters \\ref{estimatedparameters}');
-        lp(fid, 'parameters. To get a global overview of the data involved in model parameterization, please refer to Table \\ref{stateData},');
+        lp(fid, 'as specified in the full table of model parameters (see \\ref{estimatedparameters}).');
+        lp(fid, 'To get a global overview of the data involved in model parameterization, please refer to Table \\ref{stateData},');
         lp(fid, 'for a description of which experiments refer to which states.');
         
         if(~isempty(ar.model(jm).x))
@@ -1967,7 +1978,8 @@ function str = PTI( str, pti )
     global ar;
     
     if ( pti == 1 )
-        fileList    = {ar.model.plot.name};
+        %fileList    = {ar.model.plot.name};
+        fileList    = unique({ar.model.data.name});
         for a = 1 : length( fileList )
             str = strrep( str, fileList{a}, num2str(a) );
         end
