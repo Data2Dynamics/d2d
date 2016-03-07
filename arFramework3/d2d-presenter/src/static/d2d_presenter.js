@@ -374,13 +374,15 @@ function create_content() {
         lineNumbers: true,
         readOnly: true,
     });
-    cm_console_out.setSize('auto', 'auto');
-    var command_multiline = CodeMirror.fromTextArea(document.getElementById('command_multiline_input'), {
-        theme: 'default',
-        lineNumbers: true,
-        readOnly: false,
-    });
-    command_multiline.setSize('auto', 'auto');
+    if (extra['HIDE_CONSOLE'] != true) {
+        cm_console_out.setSize('auto', 'auto');
+        var command_multiline = CodeMirror.fromTextArea(document.getElementById('command_multiline_input'), {
+            theme: 'default',
+            lineNumbers: true,
+            readOnly: false,
+        });
+        command_multiline.setSize('auto', 'auto');
+    };
     for (var key in ar['model.u']) {
         var div = $('<div />', {
             'class': 'g_container_items g_inputs_' + ar['model.u'][key],
@@ -632,44 +634,46 @@ function create_events(options) {
     $('#tab_console').on('click', function(e) {
         update.update(['console'], {}, e);
     });
-    $('#command_multiline .CodeMirror').each(function(i, e) {
-        command_multiline = e.CodeMirror;
-    });
-    var command = '';
-    command_multiline.on('keyHandled', function(name, event) {
-        if (event === 'Up' && command_multiline.getDoc().lineCount() == 1) {
-            var end = command_list.pop();
-            if (typeof end === 'undefined') {
-                end = '';
-            } else {
-                command_multiline.getDoc().setValue(end);
-                command_list.unshift(end);
-            };
-        };
-        if (event === 'Down' && command_multiline.getDoc().lineCount() == 1) {
-            var start = command_list.shift();
-            if (typeof start === 'undefined') {
-                start = '';
-            } else {
-                command_multiline.getDoc().setValue(command_list[0]);
-                command_list.push(start);
-            };
-        };
-        if (event === 'Enter') {
-            var command = command_multiline.getDoc().getValue();
-            if (command_multiline.getDoc().lineCount() == 2) {
-                command = command.replace(/\n/g, '');
-                if (command != '' && command_list[command_list.length - 1] != command) {
-                    command_list.push(command);
+    if ( extra['HIDE_CONSOLE'] != true) {
+        $('#command_multiline .CodeMirror').each(function(i, e) {
+            command_multiline = e.CodeMirror;
+        });
+        var command = '';
+        command_multiline.on('keyHandled', function(name, event) {
+            if (event === 'Up' && command_multiline.getDoc().lineCount() == 1) {
+                var end = command_list.pop();
+                if (typeof end === 'undefined') {
+                    end = '';
+                } else {
+                    command_multiline.getDoc().setValue(end);
+                    command_list.unshift(end);
                 };
             };
-            command_multiline.getDoc().setValue('');
-            $.mobile.loading('show');
-            update.update(['console'], {
-                command: command
-            }, event);
-        };
-    });
+            if (event === 'Down' && command_multiline.getDoc().lineCount() == 1) {
+                var start = command_list.shift();
+                if (typeof start === 'undefined') {
+                    start = '';
+                } else {
+                    command_multiline.getDoc().setValue(command_list[0]);
+                    command_list.push(start);
+                };
+            };
+            if (event === 'Enter') {
+                var command = command_multiline.getDoc().getValue();
+                if (command_multiline.getDoc().lineCount() == 2) {
+                    command = command.replace(/\n/g, '');
+                    if (command != '' && command_list[command_list.length - 1] != command) {
+                        command_list.push(command);
+                    };
+                };
+                command_multiline.getDoc().setValue('');
+                $.mobile.loading('show');
+                update.update(['console'], {
+                    command: command
+                }, event);
+            };
+        });
+    };
 };
 
 function create_graphs_data(options) {

@@ -17,7 +17,7 @@ class mat():
         self.eval("cd '" + str(arg) + "'", 0)
 
     def eval(self, exp, args=0):
-        print(str(exp) + "  - " + str(args))
+        # print(str(exp) + "  - " + str(args)) # for debugging
         out = io.StringIO()
         err = io.StringIO()
         try:

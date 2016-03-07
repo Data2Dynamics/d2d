@@ -1,4 +1,3 @@
-tic;
 % Load models & data
 arInit;
 arLoadModel('il13_jak2_stat5');
@@ -7,6 +6,5 @@ arCompileAll;
 
 % load best fit parameter values
 arLoadPars('BestFit');
-toc;
 %arPlot;
 %arPrint;
