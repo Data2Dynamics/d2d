@@ -210,7 +210,7 @@ for jp=1:np
                                         cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
                                         hold(g, 'on');
                                         if(isfield(ar.model(jm).data(jd), 'yExp') && jp==np)
-                                            if( (ar.useFitErrorMatrix == 0 && ar.config.ploterrors~=1) ||...
+                                            if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors~=1) ||...
                                                 (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                                 plot(g, tExp, 10.^yExp, markerstyle, Clinesdata{:});
                                             else
@@ -226,7 +226,7 @@ for jp=1:np
                                         cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
                                         hold(g, 'on');
                                         if(isfield(ar.model(jm).data(jd), 'yExp') && jp==np)
-                                            if( (ar.useFitErrorMatrix == 0 && ar.config.ploterrors~=1) ||...
+                                            if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors~=1) ||...
                                                 (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                                 plot(g, tExp, yExp, markerstyle, Clinesdata{:});
                                             else
