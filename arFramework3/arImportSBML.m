@@ -48,8 +48,8 @@ for i=1:length(m.compartment)
 end
 
 %% model file
-
-fid = fopen([filename '.def'], 'w');
+new_filename = strrep(filename,' ','_');
+fid = fopen([new_filename '.def'], 'w');
 
 fprintf(fid, 'DESCRIPTION\n');
 if(~isempty(m.name))
@@ -393,7 +393,7 @@ fclose(fid);
 
 %% data file
 
-fid = fopen([filename '_data.def'], 'w');
+fid = fopen([new_filename '_data.def'], 'w');
 
 fprintf(fid, 'DESCRIPTION\n');
 if(~isempty(m.name))
@@ -428,10 +428,10 @@ fprintf(fid, '\nPARAMETERS\n');
 fclose(fid);
 
 if(isdir('Models'))
-    system(['mv ',filename '.def Models']);
+    system(['mv ',new_filename '.def Models']);
 end
 if(isdir('Data'))
-    system(['mv ',filename '_data.def Data']);
+    system(['mv ',new_filename '_data.def Data']);
 end
 
 
@@ -489,7 +489,7 @@ while(~isempty(funindex))
     % Replace longest names first               %#<JV>
     [~,I]=sort(cellfun(@length,C), 'descend');  %#<JV>
     for j=1:length(D)
-        pattern = ['(?<=[\(\+\*\-\/])(' C{I(j)} ')(?=[\)\+\*\-\/])']; % use regex for replacing pars and vars correctly
+        pattern = sprintf('(^%s|(?<=[\\(\\+\\*\\-\\/])(%s)(?=[\\)\\+\\*\\-\\/]))', C{I(j)}, C{I(j)}); % use regex for replacing pars and vars correctly
         funtmplate = regexprep(funtmplate, pattern, ['(' D{I(j)} ')']);
     end
     funtmplate = ['(' funtmplate ')']; %#ok<AGROW>
