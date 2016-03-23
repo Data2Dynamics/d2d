@@ -489,7 +489,8 @@ while(~isempty(funindex))
     % Replace longest names first               %#<JV>
     [~,I]=sort(cellfun(@length,C), 'descend');  %#<JV>
     for j=1:length(D)
-        funtmplate = strrep(funtmplate, C{I(j)}, ['(' D{I(j)} ')']);  %#<JV> {j}=>I(j)
+        pattern = ['(?<=[\(\+\*\-\/])(' C{I(j)} ')(?=[\)\+\*\-\/])']; % use regex for replacing pars and vars correctly
+        funtmplate = regexprep(funtmplate, pattern, ['(' D{I(j)} ')']);
     end
     funtmplate = ['(' funtmplate ')']; %#ok<AGROW>
     % disp(funtmplate)
