@@ -21,7 +21,7 @@ if(~exist('tEnd','var') || isempty(tEnd))
     tEnd = 100;
 end
 
-if exist('TranslateSBML')~=3
+if exist('TranslateSBML','file')~=3
     warning('TranslateSBML not found. Please install libSBML and/or add it to Matlab''s search path. EXIT arImportSBML.m now.')
     return
 end
@@ -94,8 +94,8 @@ pat = cell(0); % if length of species names ==1, the species names are extended 
 rep = cell(0);
 for j = find([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration]) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
     if length(m.species(j).id)==1 %|| strcmp(m.species(j).id,'beta')==1  % special cases or too short
-        pat{end+1} =  m.species(j).id;
-        rep{end+1} = [m.species(j).id,'_state'];
+        pat{end+1} =  m.species(j).id; %#ok<AGROW>
+        rep{end+1} = [m.species(j).id,'_state']; %#ok<AGROW>
         m.species(j).id2 = rep{end};        
         fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(rep{end}), 'n/a', ...
             m.species(j).compartment, m.species(j).name);
@@ -108,8 +108,8 @@ end
 
 for j=1:length(m.parameter)
     if length(m.parameter(j).id)==1 %|| strcmp(m.species(j).id,'beta')==1  % special cases or too short
-        pat{end+1} =  m.parameter(j).id;
-        rep{end+1} = [m.parameter(j).id,'_parameter'];
+        pat{end+1} =  m.parameter(j).id; %#ok<AGROW>
+        rep{end+1} = [m.parameter(j).id,'_parameter']; %#ok<AGROW>
         m.parameter(j).id = rep{end};
     end
 end  
@@ -178,7 +178,6 @@ if isfield(m,'raterule')
                     tmpstr = mysubs(tmpstr, m.rule(jj).variable, ['(' m.rule(jj).formula ')']);
                 catch
 %                     rethrow(lasterr)
-                    tmpstr
                     m.rule(jj).variable
                     m.rule(jj).formula
                 end
@@ -427,14 +426,15 @@ fprintf(fid, '\nPARAMETERS\n');
 
 fclose(fid);
 
-if(isdir('Models'))
-    system(['mv ',new_filename '.def Models']);
+if ~isdir('./Models')
+    mkdir('Models');
 end
-if(isdir('Data'))
-    system(['mv ',new_filename '_data.def Data']);
+system(['mv ',new_filename '.def Models']);
+
+if ~isdir('./Data')
+    mkdir('Data');
 end
-
-
+system(['mv ',new_filename '_data.def Data']);
 
 if nargout > 0
     ms.d2d = m;
@@ -555,8 +555,6 @@ while(~isempty(funindex))
     D = textscan(substr, '%s', 'Whitespace', ',');
     D = D{1};
     if(length(C)~=length(D))
-        C
-        D
         error('input output parameter mismatch');
     end
     
@@ -665,8 +663,8 @@ else
     kl = NaN(size(indR));
 	for i = 1:length(indR)
 		kr(i) = indR(i);
-		kl(i) = indL(max(find(indL<indR(i))));
-		indL(find(kl(i)==indL)) = [];
+		kl(i) = indL(max(find(indL<indR(i)))); %#ok<MXFND>
+		indL(find(kl(i)==indL)) = []; %#ok<FNDSB>
 	end
 	% sort according to kl
 	tmp = sortrows([kl;kr]')';
@@ -680,7 +678,7 @@ drin = [];
 for i=1:length(m.rule)
     switch m.rule(i).typecode 
         case 'SBML_ASSIGNMENT_RULE'
-            drin = [drin,i];% standard case
+            drin = [drin,i];%#ok<AGROW> % standard case
         case 'SBML_RATE_RULE'
             if ~isfield(m,'raterule')
                 m.raterule = m.rule(i);
@@ -705,8 +703,8 @@ for r=1:length(m.rule)
     end
 end
 
-m.u = m.rule(find(is_input==1));
-m.rule = m.rule(find(is_input~=1));
+m.u = m.rule(find(is_input==1)); %#ok<FNDSB>
+m.rule = m.rule(find(is_input~=1)); %#ok<FNDSB>
 
 for i=1:length(m.u)
 %     m.u(i).formula = char(mysubs(sym(m.u(i).formula),'time','t')); % does
@@ -750,7 +748,7 @@ function s = sym_check(s)
 %replacement subs would not work.
 keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','I','E'};
 
-issym = strcmp(class(s),'sym');
+issym = strcmp(class(s),'sym'); %#ok<STISA>
 if(issym)
     s = char(s);
 end
@@ -778,7 +776,7 @@ function s = mysubs(s,pat,rep)
 
 keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','I','E'};
 
-issym = strcmp(class(s),'sym');
+issym = strcmp(class(s),'sym'); %#ok<STISA>
 if(~issym)
    s = sym(s);
 end
@@ -786,7 +784,7 @@ if isempty(intersect(pat,keywords))
     try
         s = char(subs(s,pat,rep));
         err=0;
-    catch
+    catch lasterr
         disp(lasterr)
         err=1;
     end
