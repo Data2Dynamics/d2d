@@ -177,7 +177,7 @@ if isfield(m,'raterule')
                 try
                     tmpstr = mysubs(tmpstr, m.rule(jj).variable, ['(' m.rule(jj).formula ')']);
                 catch
-%                     rethrow(lasterr)
+                    % rethrow(lasterr)
                     m.rule(jj).variable
                     m.rule(jj).formula
                 end
@@ -264,13 +264,22 @@ else  % specified via reactions (standard case)
                     [m.reaction(j).id '_' m.reaction(j).kineticLaw.parameter(jj).id]);
             end
         end
+                
+        % divide rates by compartment volume
+        reaction_comp = findReactionCompartment(m,j);
         
-        % replace compartement volumes
-        for jj=1:length(m.compartment)
-            tmpstr = mysubs(tmpstr, m.compartment(jj).id, num2str(m.compartment(jj).size));
-            %         tmpstr = mysubs(tmpstr, m.compartment(jj).id, 'vol_para');
+        if ~isempty(reaction_comp)% && sum(strcmp(reaction_comp,strsplit(tmpstr,'*')))==1
+            tmpstr = [char(tmpstr) '/' sym_check(reaction_comp)];
+            tmpstr = sym(tmpstr);
         end
-        
+            
+
+        % % replace compartement volumes
+        % for jj=1:length(m.compartment)
+        %     tmpstr = mysubs(tmpstr, m.compartment(jj).id, num2str(m.compartment(jj).size));
+        %     % tmpstr = mysubs(tmpstr, m.compartment(jj).id, 'vol_para');
+        % end
+
         % remove functions
         tmpstr = char(tmpstr);
         for jj=1:length(m.functionDefinition)
@@ -281,11 +290,8 @@ else  % specified via reactions (standard case)
             C = textscan(tmpfun, '%s', 'Whitespace', ',');
             C = C{1};
             
-            %         try
             tmpstr = replaceFunction(tmpstr, m.functionDefinition(jj).id, C(1:end-1), C(end));
-            %         catch
-            %             tmpstr
-            %         end
+
         end
         
         % replace power function
@@ -321,7 +327,7 @@ else  % specified via reactions (standard case)
             tmpstr = pow2mcode(tmpstr,'pow');
             %         end
         end
-        
+     
         fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.reaction(j).name);
     end
 end   % end if dynamics specified either raterule or reaction
@@ -408,15 +414,17 @@ end
 
 fprintf(fid, '\nINPUTS\n');
 
-fprintf(fid, '\nOBSERVABLES\n');
-for j=1:length(m.species)    
-    fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.species(j).id2), 'n/a', ...
-        m.species(j).id2, m.species(j).name);
-end
+if isfield(m.species,'id2')
+    fprintf(fid, '\nOBSERVABLES\n');
+    for j=1:length(m.species)    
+        fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.species(j).id2), 'n/a', ...
+            m.species(j).id2, m.species(j).name);
+    end
 
-fprintf(fid, '\nERRORS\n');
-for j=1:length(m.species)
-    fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.species(j).id2), sym_check(m.species(j).id2));
+    fprintf(fid, '\nERRORS\n');
+    for j=1:length(m.species)
+        fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.species(j).id2), sym_check(m.species(j).id2));
+    end
 end
 
 fprintf(fid, '\nCONDITIONS\n');
@@ -739,7 +747,9 @@ for i=1:length(m.reaction)
         m.reaction(i).reactant(j).species = sym_check(m.reaction(i).reactant(j).species);
     end
     m.reaction(i).kineticLaw.math = sym_check( m.reaction(i).kineticLaw.math); 
-    m.reaction(i).kineticLaw.formula = sym_check( m.reaction(i).kineticLaw.formula);     
+    if isfield(m.reaction(i).kineticLaw,'formula')
+        m.reaction(i).kineticLaw.formula = sym_check( m.reaction(i).kineticLaw.formula);     
+    end
 end
 
 
@@ -807,3 +817,38 @@ if ~isempty(intersect(pat,keywords)) || err==1
         end
     end
 end
+
+
+function c = findReactionCompartment(m, j)
+% find compartment of reacting species to convert from SBML rate 
+% convention (particle flux) to d2d (concentration flux).
+
+comp_r = {};
+for jr=1:length(m.reaction(j).reactant);
+    js = strcmp({m.species.id},m.reaction(j).reactant(jr).species);
+    comp_r{jr} = m.species(js).compartment; %#ok<AGROW>
+end
+
+comp_p = {};
+for jr=1:length(m.reaction(j).product);
+    js = strcmp({m.species.id},m.reaction(j).product(jr).species);
+    comp_p{jr} = m.species(js).compartment; %#ok<AGROW>
+end
+
+if ~isempty(comp_r)
+    if length(unique(comp_r))~=1
+        error('more than one educt compartment');
+    else
+    c = comp_r{1};
+    end
+elseif ~isempty(comp_p)
+    if length(unique(comp_p))~=1
+        error('more than one product compartment');
+    else
+        c = comp_p{1};
+    end
+else
+    c = [];
+end
+
+
