@@ -820,8 +820,8 @@ end
 
 
 function c = findReactionCompartment(m, j)
-% find compartment of reacting species to convert from SBML rate 
-% convention (particle flux) to d2d (concentration flux).
+% find compartment of reacting species to convert from SBML rate convention
+% (particle flux) to d2d (concentration flux).
 
 comp_r = {};
 for jr=1:length(m.reaction(j).reactant);
@@ -835,20 +835,33 @@ for jr=1:length(m.reaction(j).product);
     comp_p{jr} = m.species(js).compartment; %#ok<AGROW>
 end
 
+% check educt and product compartements for consistency
 if ~isempty(comp_r)
     if length(unique(comp_r))~=1
         error('more than one educt compartment');
-    else
-    c = comp_r{1};
     end
-elseif ~isempty(comp_p)
+end
+if ~isempty(comp_p)
     if length(unique(comp_p))~=1
         error('more than one product compartment');
-    else
-        c = comp_p{1};
     end
+end
+
+% educt and product exist
+if ~isempty(comp_r) && ~isempty(comp_p)
+    % educt and product in the same compartment
+    if isequal(unique(comp_r),unique(comp_p))
+        c = comp_r{1};
+    else
+        c = [];
+    end
+% only educt has a compartment
+elseif ~isempty(comp_r) && isempty(comp_p)
+    c = comp_r{1};
+% only product has a compartment
+elseif isempty(comp_r) && ~isempty(comp_p)
+    c = comp_p{1};
 else
     c = [];
 end
-
 
