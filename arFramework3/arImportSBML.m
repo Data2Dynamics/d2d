@@ -268,7 +268,7 @@ else  % specified via reactions (standard case)
         % divide rates by compartment volume
         reaction_comp = findReactionCompartment(m,j);
         
-        if ~isempty(reaction_comp)% && sum(strcmp(reaction_comp,strsplit(tmpstr,'*')))==1
+        if ~isempty(reaction_comp) && sum(strcmp(reaction_comp,strsplit(tmpstr,'*')))==1
             tmpstr = [char(tmpstr) '/' sym_check(reaction_comp)];
             tmpstr = sym(tmpstr);
         end
