@@ -35,9 +35,11 @@ if(jresponse==0)
     chi2 = [];
     
     for j=find(pleGlobals.q_fit)
-        if(~isempty(pleGlobals.ps{j}))
-            k = [k;pleGlobals.ps{j}]; %#ok<AGROW>
-            chi2 = [chi2 pleGlobals.chi2s{j}]; %#ok<AGROW>
+        if (j<=size(pleGlobals.ps,2))
+            if(~isempty(pleGlobals.ps{j}))
+                k = [k;pleGlobals.ps{j}]; %#ok<AGROW>
+                chi2 = [chi2 pleGlobals.chi2s{j}]; %#ok<AGROW>
+            end
         end
     end
 else

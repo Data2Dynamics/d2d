@@ -21,7 +21,7 @@ if(~exist('tEnd','var') || isempty(tEnd))
     tEnd = 100;
 end
 
-if exist('TranslateSBML')~=3
+if exist('TranslateSBML','file')~=3
     warning('TranslateSBML not found. Please install libSBML and/or add it to Matlab''s search path. EXIT arImportSBML.m now.')
     return
 end
@@ -48,8 +48,8 @@ for i=1:length(m.compartment)
 end
 
 %% model file
-
-fid = fopen([filename '.def'], 'w');
+new_filename = strrep(filename,' ','_');
+fid = fopen([new_filename '.def'], 'w');
 
 fprintf(fid, 'DESCRIPTION\n');
 if(~isempty(m.name))
@@ -92,10 +92,10 @@ fprintf(fid, '\nSTATES\n');
 % for j=1:length(m.species)
 pat = cell(0); % if length of species names ==1, the species names are extended by '_state'
 rep = cell(0);
-for j = find([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration]) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
+for j = find([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration] & ~[m.species.boundaryCondition]) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
     if length(m.species(j).id)==1 %|| strcmp(m.species(j).id,'beta')==1  % special cases or too short
-        pat{end+1} =  m.species(j).id;
-        rep{end+1} = [m.species(j).id,'_state'];
+        pat{end+1} =  m.species(j).id; %#ok<AGROW>
+        rep{end+1} = [m.species(j).id,'_state']; %#ok<AGROW>
         m.species(j).id2 = rep{end};        
         fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(rep{end}), 'n/a', ...
             m.species(j).compartment, m.species(j).name);
@@ -108,8 +108,8 @@ end
 
 for j=1:length(m.parameter)
     if length(m.parameter(j).id)==1 %|| strcmp(m.species(j).id,'beta')==1  % special cases or too short
-        pat{end+1} =  m.parameter(j).id;
-        rep{end+1} = [m.parameter(j).id,'_parameter'];
+        pat{end+1} =  m.parameter(j).id; %#ok<AGROW>
+        rep{end+1} = [m.parameter(j).id,'_parameter']; %#ok<AGROW>
         m.parameter(j).id = rep{end};
     end
 end  
@@ -141,6 +141,11 @@ end
 fprintf(fid, '\nINPUTS\n');
 for j=1:length(m.u)
     fprintf(fid, '%s\t C\t "%s"\t conc.\t%s\n', sym_check(m.u(j).variable), m.u(j).units, pow2mcode(m.u(j).formula,'power'));
+end
+% treat boundary species as constant inputs
+for j=find([m.species.boundaryCondition])
+    m.species(j).id2 = m.species(j).id;
+    fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.species(j).id), 'n/a', ['init_' m.species(j).id]);
 end
 
 arWaitbar(0);
@@ -177,8 +182,7 @@ if isfield(m,'raterule')
                 try
                     tmpstr = mysubs(tmpstr, m.rule(jj).variable, ['(' m.rule(jj).formula ')']);
                 catch
-%                     rethrow(lasterr)
-                    tmpstr
+                    % rethrow(lasterr)
                     m.rule(jj).variable
                     m.rule(jj).formula
                 end
@@ -211,43 +215,51 @@ else  % specified via reactions (standard case)
     for j=1:length(m.reaction)
         arWaitbar(j,length(m.reaction));
         for jj=1:length(m.reaction(j).reactant)
-            
+            % check if reactant is boundary species
+            reactant_id = strcmp(m.reaction(j).reactant(jj).species,{m.species.id});
+            isboundary = m.species(reactant_id).boundaryCondition;
+            if ~isboundary
             react_spec_name = sym(m.reaction(j).reactant(jj).species);
-            for i=1:length(rep)
-                react_spec_name = mysubs(react_spec_name,pat{i},rep{i});
-            end
-            react_spec_name = char(react_spec_name);
-            
-            if(~isnan(m.reaction(j).reactant(jj).stoichiometry))
-                stoichiometry = m.reaction(j).reactant(jj).stoichiometry;
-            else
-                stoichiometry = 1;
-            end
-            for jjj=1:stoichiometry
-                fprintf(fid, '%s', sym_check(react_spec_name));
-                if(jj ~= length(m.reaction(j).reactant) || jjj ~= stoichiometry)
-                    fprintf(fid, ' + ');
+                for i=1:length(rep)
+                    react_spec_name = mysubs(react_spec_name,pat{i},rep{i});
+                end
+                react_spec_name = char(react_spec_name);
+
+                if(~isnan(m.reaction(j).reactant(jj).stoichiometry))
+                    stoichiometry = m.reaction(j).reactant(jj).stoichiometry;
+                else
+                    stoichiometry = 1;
+                end
+                for jjj=1:stoichiometry
+                    fprintf(fid, '%s', sym_check(react_spec_name));
+                    if(jj ~= length(m.reaction(j).reactant) || jjj ~= stoichiometry)
+                        fprintf(fid, ' + ');
+                    end
                 end
             end
         end
         fprintf(fid, ' \t-> ');
         for jj=1:length(m.reaction(j).product)
-            
-            prod_spec_name = sym(m.reaction(j).product(jj).species);
-            for i=1:length(rep)
-                prod_spec_name = mysubs(prod_spec_name,pat{i},rep{i});
-            end
-            prod_spec_name = char(prod_spec_name);
-            
-            if(~isnan(m.reaction(j).product(jj).stoichiometry))
-                stoichiometry = m.reaction(j).product(jj).stoichiometry;
-            else
-                stoichiometry = 1;
-            end
-            for jjj=1:stoichiometry
-                fprintf(fid, '%s', sym_check(prod_spec_name));
-                if(jj ~= length(m.reaction(j).product) || jjj ~= stoichiometry)
-                    fprintf(fid, ' + ');
+            % check if product is boundary species
+            product_id = strcmp(m.reaction(j).product(jj).species,{m.species.id});
+            isboundary = m.species(product_id).boundaryCondition;
+            if ~isboundary
+                prod_spec_name = sym(m.reaction(j).product(jj).species);
+                for i=1:length(rep)
+                    prod_spec_name = mysubs(prod_spec_name,pat{i},rep{i});
+                end
+                prod_spec_name = char(prod_spec_name);
+
+                if(~isnan(m.reaction(j).product(jj).stoichiometry))
+                    stoichiometry = m.reaction(j).product(jj).stoichiometry;
+                else
+                    stoichiometry = 1;
+                end
+                for jjj=1:stoichiometry
+                    fprintf(fid, '%s', sym_check(prod_spec_name));
+                    if(jj ~= length(m.reaction(j).product) || jjj ~= stoichiometry)
+                        fprintf(fid, ' + ');
+                    end
                 end
             end
         end
@@ -265,13 +277,22 @@ else  % specified via reactions (standard case)
                     [m.reaction(j).id '_' m.reaction(j).kineticLaw.parameter(jj).id]);
             end
         end
+                
+        % divide rates by compartment volume
+        reaction_comp = findReactionCompartment(m,j);
         
-        % replace compartement volumes
-        for jj=1:length(m.compartment)
-            tmpstr = mysubs(tmpstr, m.compartment(jj).id, num2str(m.compartment(jj).size));
-            %         tmpstr = mysubs(tmpstr, m.compartment(jj).id, 'vol_para');
+        if ~isempty(reaction_comp) && sum(strcmp(reaction_comp,strsplit(char(tmpstr),'*')))==1
+            tmpstr = [char(tmpstr) '/' sym_check(reaction_comp)];
+            tmpstr = sym(tmpstr);
         end
-        
+            
+
+        % % replace compartement volumes
+        % for jj=1:length(m.compartment)
+        %     tmpstr = mysubs(tmpstr, m.compartment(jj).id, num2str(m.compartment(jj).size));
+        %     % tmpstr = mysubs(tmpstr, m.compartment(jj).id, 'vol_para');
+        % end
+
         % remove functions
         tmpstr = char(tmpstr);
         for jj=1:length(m.functionDefinition)
@@ -282,11 +303,8 @@ else  % specified via reactions (standard case)
             C = textscan(tmpfun, '%s', 'Whitespace', ',');
             C = C{1};
             
-            %         try
             tmpstr = replaceFunction(tmpstr, m.functionDefinition(jj).id, C(1:end-1), C(end));
-            %         catch
-            %             tmpstr
-            %         end
+
         end
         
         % replace power function
@@ -322,7 +340,7 @@ else  % specified via reactions (standard case)
             tmpstr = pow2mcode(tmpstr,'pow');
             %         end
         end
-        
+     
         fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.reaction(j).name);
     end
 end   % end if dynamics specified either raterule or reaction
@@ -393,7 +411,7 @@ fclose(fid);
 
 %% data file
 
-fid = fopen([filename '_data.def'], 'w');
+fid = fopen([new_filename '_data.def'], 'w');
 
 fprintf(fid, 'DESCRIPTION\n');
 if(~isempty(m.name))
@@ -409,15 +427,17 @@ end
 
 fprintf(fid, '\nINPUTS\n');
 
-fprintf(fid, '\nOBSERVABLES\n');
-for j=1:length(m.species)    
-    fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.species(j).id2), 'n/a', ...
-        m.species(j).id2, m.species(j).name);
-end
+if isfield(m.species,'id2')
+    fprintf(fid, '\nOBSERVABLES\n');
+    for j=1:length(m.species)    
+        fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.species(j).id2), 'n/a', ...
+            m.species(j).id2, m.species(j).name);
+    end
 
-fprintf(fid, '\nERRORS\n');
-for j=1:length(m.species)
-    fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.species(j).id2), sym_check(m.species(j).id2));
+    fprintf(fid, '\nERRORS\n');
+    for j=1:length(m.species)
+        fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.species(j).id2), sym_check(m.species(j).id2));
+    end
 end
 
 fprintf(fid, '\nCONDITIONS\n');
@@ -427,14 +447,15 @@ fprintf(fid, '\nPARAMETERS\n');
 
 fclose(fid);
 
-if(isdir('Models'))
-    system(['mv ',filename '.def Models']);
+if ~isdir('./Models')
+    mkdir('Models');
 end
-if(isdir('Data'))
-    system(['mv ',filename '_data.def Data']);
+system(['mv ',new_filename '.def Models']);
+
+if ~isdir('./Data')
+    mkdir('Data');
 end
-
-
+system(['mv ',new_filename '_data.def Data']);
 
 if nargout > 0
     ms.d2d = m;
@@ -489,7 +510,8 @@ while(~isempty(funindex))
     % Replace longest names first               %#<JV>
     [~,I]=sort(cellfun(@length,C), 'descend');  %#<JV>
     for j=1:length(D)
-        funtmplate = strrep(funtmplate, C{I(j)}, ['(' D{I(j)} ')']);  %#<JV> {j}=>I(j)
+        pattern = sprintf('(^%s|(?<=[\\(\\+\\*\\-\\/])(%s)(?=[\\)\\+\\*\\-\\/]))', C{I(j)}, C{I(j)}); % use regex for replacing pars and vars correctly
+        funtmplate = regexprep(funtmplate, pattern, ['(' D{I(j)} ')']);
     end
     funtmplate = ['(' funtmplate ')']; %#ok<AGROW>
     % disp(funtmplate)
@@ -554,8 +576,6 @@ while(~isempty(funindex))
     D = textscan(substr, '%s', 'Whitespace', ',');
     D = D{1};
     if(length(C)~=length(D))
-        C
-        D
         error('input output parameter mismatch');
     end
     
@@ -664,8 +684,8 @@ else
     kl = NaN(size(indR));
 	for i = 1:length(indR)
 		kr(i) = indR(i);
-		kl(i) = indL(max(find(indL<indR(i))));
-		indL(find(kl(i)==indL)) = [];
+		kl(i) = indL(max(find(indL<indR(i)))); %#ok<MXFND>
+		indL(find(kl(i)==indL)) = []; %#ok<FNDSB>
 	end
 	% sort according to kl
 	tmp = sortrows([kl;kr]')';
@@ -679,7 +699,7 @@ drin = [];
 for i=1:length(m.rule)
     switch m.rule(i).typecode 
         case 'SBML_ASSIGNMENT_RULE'
-            drin = [drin,i];% standard case
+            drin = [drin,i];%#ok<AGROW> % standard case
         case 'SBML_RATE_RULE'
             if ~isfield(m,'raterule')
                 m.raterule = m.rule(i);
@@ -704,8 +724,8 @@ for r=1:length(m.rule)
     end
 end
 
-m.u = m.rule(find(is_input==1));
-m.rule = m.rule(find(is_input~=1));
+m.u = m.rule(find(is_input==1)); %#ok<FNDSB>
+m.rule = m.rule(find(is_input~=1)); %#ok<FNDSB>
 
 for i=1:length(m.u)
 %     m.u(i).formula = char(mysubs(sym(m.u(i).formula),'time','t')); % does
@@ -740,7 +760,9 @@ for i=1:length(m.reaction)
         m.reaction(i).reactant(j).species = sym_check(m.reaction(i).reactant(j).species);
     end
     m.reaction(i).kineticLaw.math = sym_check( m.reaction(i).kineticLaw.math); 
-    m.reaction(i).kineticLaw.formula = sym_check( m.reaction(i).kineticLaw.formula);     
+    if isfield(m.reaction(i).kineticLaw,'formula')
+        m.reaction(i).kineticLaw.formula = sym_check( m.reaction(i).kineticLaw.formula);     
+    end
 end
 
 
@@ -749,7 +771,7 @@ function s = sym_check(s)
 %replacement subs would not work.
 keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','I','E'};
 
-issym = strcmp(class(s),'sym');
+issym = strcmp(class(s),'sym'); %#ok<STISA>
 if(issym)
     s = char(s);
 end
@@ -777,7 +799,7 @@ function s = mysubs(s,pat,rep)
 
 keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','I','E'};
 
-issym = strcmp(class(s),'sym');
+issym = strcmp(class(s),'sym'); %#ok<STISA>
 if(~issym)
    s = sym(s);
 end
@@ -785,7 +807,7 @@ if isempty(intersect(pat,keywords))
     try
         s = char(subs(s,pat,rep));
         err=0;
-    catch
+    catch lasterr
         disp(lasterr)
         err=1;
     end
@@ -808,3 +830,51 @@ if ~isempty(intersect(pat,keywords)) || err==1
         end
     end
 end
+
+
+function c = findReactionCompartment(m, j)
+% find compartment of reacting species to convert from SBML rate convention
+% (particle flux) to d2d (concentration flux).
+
+comp_r = {};
+for jr=1:length(m.reaction(j).reactant);
+    js = strcmp({m.species.id},m.reaction(j).reactant(jr).species);
+    comp_r{jr} = m.species(js).compartment; %#ok<AGROW>
+end
+
+comp_p = {};
+for jr=1:length(m.reaction(j).product);
+    js = strcmp({m.species.id},m.reaction(j).product(jr).species);
+    comp_p{jr} = m.species(js).compartment; %#ok<AGROW>
+end
+
+% check educt and product compartements for consistency
+if ~isempty(comp_r)
+    if length(unique(comp_r))~=1
+        error('more than one educt compartment');
+    end
+end
+if ~isempty(comp_p)
+    if length(unique(comp_p))~=1
+        error('more than one product compartment');
+    end
+end
+
+% educt and product exist
+if ~isempty(comp_r) && ~isempty(comp_p)
+    % educt and product in the same compartment
+    if isequal(unique(comp_r),unique(comp_p))
+        c = comp_r{1};
+    else
+        c = [];
+    end
+% only educt has a compartment
+elseif ~isempty(comp_r) && isempty(comp_p)
+    c = comp_r{1};
+% only product has a compartment
+elseif isempty(comp_r) && ~isempty(comp_p)
+    c = comp_p{1};
+else
+    c = [];
+end
+

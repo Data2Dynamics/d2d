@@ -251,7 +251,7 @@ for jj=1:length(indices)
         % If the interactivity system is enabled, register the callbacks
         % and provide arInteractivity with the required data.
         if ( arInteractivity )
-            if (~i_largest_std)
+            if (~exist('i_largest_std', 'var')||~i_largest_std)
                 i_largest_std = 1 : length( legendstmp );
             end
             lineLegends.legends = legendstmp;

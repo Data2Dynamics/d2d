@@ -76,4 +76,9 @@ else
     end
 end
 
-ar.LhsSampleSizeCalculation = arLhsSampleSizeCalculation;
+try
+    ar.LhsSampleSizeCalculation = arLhsSampleSizeCalculation;
+catch
+    disp(lasterror)
+end
+

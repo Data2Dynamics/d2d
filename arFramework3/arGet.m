@@ -96,9 +96,9 @@ for i=1:length(fields)
                 
                 c = 1;
                 for h=struct.model(m).plot(dset).dLink
-                    for j=struct.model(m).data(h).cLink
+                    if h == 0
                         try
-                            data{i}{c}=subsref(struct.model(m).condition(j), substruct(S{:}));
+                            data{i}{c}=subsref(struct.model(m).condition(1), substruct(S{:}));
                         catch
                             data{i}{c}={};
                         end
@@ -109,11 +109,26 @@ for i=1:length(fields)
                                 data{i}{c} = chop(data{i}{c}, sig);
                             end
                         end
-                    c = c + 1;
+                    else
+                        for j=struct.model(m).data(h).cLink
+                            try
+                                data{i}{c}=subsref(struct.model(m).condition(j), substruct(S{:}));
+                            catch
+                                data{i}{c}={};
+                            end
+                            if isnumeric(data{i}{c})
+                                if length(data{i}{c}) == 1
+                                    data{i}{c} = {{data{i}{c}}};
+                                elseif sig
+                                    data{i}{c} = chop(data{i}{c}, sig);
+                                end
+                            end
+                        c = c + 1;
+                        end
                     end
                 end
             catch
-                data{i} = {}
+                data{i} = {};
             end
         elseif(regexp(char(fields(i)), '^plot.'))   
             fields(i) = {regexprep(char(fields(i)),'^plot.', '')};

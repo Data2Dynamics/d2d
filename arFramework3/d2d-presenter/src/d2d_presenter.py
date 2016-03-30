@@ -82,7 +82,7 @@ def d2d_presenter():
 def start():
     # delete already existing matlab engine for this user
     try:
-        del(d2d_instances[session['uid']]['d2d'])
+        del(d2d_instances[session['uid']])
     except:
         pass
 
@@ -96,16 +96,23 @@ def start():
 
     nFinePoints = int(request.args.get('nFinePoints'))
     do_compile = str(request.args.get('compile'))
-
     # Set the directory you want to copy from
     rootDir = os.path.dirname(os.path.join(
        os.getcwd(),
        request.args.get('model')))
 
     if MODE is 'copy':
-        copy_tree(rootDir, os.path.join(os.getcwd(), 'temp',
-                  str(session['uid'])))
-        rootDir = os.path.join(os.getcwd(), 'temp', str(session['uid']),
+        temp_dir = os.path.join(os.getcwd(), 'temp', str(session['uid']))
+        try:
+            for root, dirs, files in os.walk(temp_dir):
+                for fname in files:
+                    full_path = os.path.join(root, fname)
+                    os.chmod(full_path, stat.S_IWRITE)
+            remove_tree(temp_dir)
+        except:
+            pass
+        copy_tree(rootDir, temp_dir)
+        rootDir = os.path.join(temp_dir,
                                os.path.basename(request.args.get('model')))
     else:
         rootDir = os.path.join(os.getcwd(), request.args.get('model'))
@@ -271,7 +278,6 @@ def update():
 
     if 'tree' in options:
         extra['tree'] = create_filetree(path=d2d.path)
-        print(extra['tree'])
 
     if 'read' in options:
         extra['editor_data'] = editor('read', extra['filename'])
