@@ -92,7 +92,7 @@ fprintf(fid, '\nSTATES\n');
 % for j=1:length(m.species)
 pat = cell(0); % if length of species names ==1, the species names are extended by '_state'
 rep = cell(0);
-for j = find([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration]) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
+for j = find([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration] & ~[m.species.boundaryCondition]) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
     if length(m.species(j).id)==1 %|| strcmp(m.species(j).id,'beta')==1  % special cases or too short
         pat{end+1} =  m.species(j).id; %#ok<AGROW>
         rep{end+1} = [m.species(j).id,'_state']; %#ok<AGROW>
@@ -141,6 +141,11 @@ end
 fprintf(fid, '\nINPUTS\n');
 for j=1:length(m.u)
     fprintf(fid, '%s\t C\t "%s"\t conc.\t%s\n', sym_check(m.u(j).variable), m.u(j).units, pow2mcode(m.u(j).formula,'power'));
+end
+% treat boundary species as constant inputs
+for j=find([m.species.boundaryCondition])
+    m.species(j).id2 = m.species(j).id;
+    fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.species(j).id), 'n/a', ['init_' m.species(j).id]);
 end
 
 arWaitbar(0);
@@ -210,43 +215,51 @@ else  % specified via reactions (standard case)
     for j=1:length(m.reaction)
         arWaitbar(j,length(m.reaction));
         for jj=1:length(m.reaction(j).reactant)
-            
+            % check if reactant is boundary species
+            reactant_id = strcmp(m.reaction(j).reactant(jj).species,{m.species.id});
+            isboundary = m.species(reactant_id).boundaryCondition;
+            if ~isboundary
             react_spec_name = sym(m.reaction(j).reactant(jj).species);
-            for i=1:length(rep)
-                react_spec_name = mysubs(react_spec_name,pat{i},rep{i});
-            end
-            react_spec_name = char(react_spec_name);
-            
-            if(~isnan(m.reaction(j).reactant(jj).stoichiometry))
-                stoichiometry = m.reaction(j).reactant(jj).stoichiometry;
-            else
-                stoichiometry = 1;
-            end
-            for jjj=1:stoichiometry
-                fprintf(fid, '%s', sym_check(react_spec_name));
-                if(jj ~= length(m.reaction(j).reactant) || jjj ~= stoichiometry)
-                    fprintf(fid, ' + ');
+                for i=1:length(rep)
+                    react_spec_name = mysubs(react_spec_name,pat{i},rep{i});
+                end
+                react_spec_name = char(react_spec_name);
+
+                if(~isnan(m.reaction(j).reactant(jj).stoichiometry))
+                    stoichiometry = m.reaction(j).reactant(jj).stoichiometry;
+                else
+                    stoichiometry = 1;
+                end
+                for jjj=1:stoichiometry
+                    fprintf(fid, '%s', sym_check(react_spec_name));
+                    if(jj ~= length(m.reaction(j).reactant) || jjj ~= stoichiometry)
+                        fprintf(fid, ' + ');
+                    end
                 end
             end
         end
         fprintf(fid, ' \t-> ');
         for jj=1:length(m.reaction(j).product)
-            
-            prod_spec_name = sym(m.reaction(j).product(jj).species);
-            for i=1:length(rep)
-                prod_spec_name = mysubs(prod_spec_name,pat{i},rep{i});
-            end
-            prod_spec_name = char(prod_spec_name);
-            
-            if(~isnan(m.reaction(j).product(jj).stoichiometry))
-                stoichiometry = m.reaction(j).product(jj).stoichiometry;
-            else
-                stoichiometry = 1;
-            end
-            for jjj=1:stoichiometry
-                fprintf(fid, '%s', sym_check(prod_spec_name));
-                if(jj ~= length(m.reaction(j).product) || jjj ~= stoichiometry)
-                    fprintf(fid, ' + ');
+            % check if product is boundary species
+            product_id = strcmp(m.reaction(j).product(jj).species,{m.species.id});
+            isboundary = m.species(product_id).boundaryCondition;
+            if ~isboundary
+                prod_spec_name = sym(m.reaction(j).product(jj).species);
+                for i=1:length(rep)
+                    prod_spec_name = mysubs(prod_spec_name,pat{i},rep{i});
+                end
+                prod_spec_name = char(prod_spec_name);
+
+                if(~isnan(m.reaction(j).product(jj).stoichiometry))
+                    stoichiometry = m.reaction(j).product(jj).stoichiometry;
+                else
+                    stoichiometry = 1;
+                end
+                for jjj=1:stoichiometry
+                    fprintf(fid, '%s', sym_check(prod_spec_name));
+                    if(jj ~= length(m.reaction(j).product) || jjj ~= stoichiometry)
+                        fprintf(fid, ' + ');
+                    end
                 end
             end
         end
@@ -268,7 +281,7 @@ else  % specified via reactions (standard case)
         % divide rates by compartment volume
         reaction_comp = findReactionCompartment(m,j);
         
-        if ~isempty(reaction_comp) && sum(strcmp(reaction_comp,strsplit(tmpstr,'*')))==1
+        if ~isempty(reaction_comp) && sum(strcmp(reaction_comp,strsplit(char(tmpstr),'*')))==1
             tmpstr = [char(tmpstr) '/' sym_check(reaction_comp)];
             tmpstr = sym(tmpstr);
         end
