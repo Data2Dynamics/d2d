@@ -146,8 +146,10 @@ if ( ss_presimulation )
     for m=1:length(ar.model)
         for c=1:length(ar.model(m).ss_condition)
             if(ar.model(m).ss_condition(c).status>0)
+                arCheckCache(1); % Invalidate cache so simulations do not get skipped
                 error('arSimuCalc failed at %s for model %i, condition %i during pre-equilibration %i', ar.info.arsimucalc_flags{ar.model(m).ss_condition(c).status}, m, ar.model(m).ss_condition(c).src, c);
             elseif(ar.model(m).ss_condition(c).status<0)
+                arCheckCache(1); % Invalidate cache so simulations do not get skipped
                 error('cvodes failed at %s for model %i, condition %i during pre-equilibration %i', ...
                     ar.info.cvodes_flags{abs(ar.model(m).ss_condition(c).status)}, m, ar.model(m).ss_condition(c).src, c);
             end
@@ -203,8 +205,10 @@ feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'conditio
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
         if(ar.model(m).condition(c).status>0)
+            arCheckCache(1); % Invalidate cache so simulations do not get skipped
             error('arSimuCalc failed at %s', ar.info.arsimucalc_flags{ar.model(m).condition(c).status});
         elseif(ar.model(m).condition(c).status<0)
+            arCheckCache(1); % Invalidate cache so simulations do not get skipped
             error('cvodes failed at %s for model %i, condition %i. Trying arCheckSimu could be an option. ', ...
                 ar.info.cvodes_flags{abs(ar.model(m).condition(c).status)}, m, c);
         end
