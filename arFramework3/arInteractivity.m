@@ -99,7 +99,12 @@ function arCompareModelFcn2(hObject, eventData)
         % Find corresponding plots
         obs = floor( cp(1,1) ) + 1;
         dat = floor( cp(1,2) );
-                   
+        
+        % Early out when not clicking inside the image
+        if ( ( dat < 1 ) || ( dat > length( userData.plotIDs1 ) ) )
+            return;
+        end
+        
         ar = userData.ar1;
         plotCurve( userData.m1, userData.plotIDs1{dat} );
         set(gcf, 'Name', sprintf( '[%s]: %s', userData.ar1.model(userData.m1).name, get(gcf, 'Name') ) );
