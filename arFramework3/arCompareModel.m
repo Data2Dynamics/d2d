@@ -6,7 +6,9 @@
 %
 %   where ar1 and ar2 refer to ar structs and m1 and m2 to model indices.
 %
-% TO DO: Add option to look at subset of data or predictions
+% Note: If interactivity mode is on, you can click the matrix to see the 
+% curves corresponding to the different models. Active interactivity mode 
+% by invoking "arInteractivity on".
 
 function arCompareModel(ar1, m1, ar2, m2)
         
