@@ -32,9 +32,11 @@ function interactive = arInteractivity( varargin )
 
     if strcmp( lower(varargin{1}), 'on' )
         arInteractivityStruct.active = 1;
+        disp( 'Interactivity mode activated' );
     end
     if strcmp( lower(varargin{1}), 'off' )
         arInteractivityStruct.active = 0;
+        disp( 'Interactivity mode disabled' );
     end
     
     % PLE interactivity functions
