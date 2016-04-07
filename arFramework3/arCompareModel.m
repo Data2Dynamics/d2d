@@ -13,7 +13,7 @@
 %   'absrsq'    - Show R^2 per dataset for Model 1 instead of differences
 %
 % Note: If interactivity mode is on, you can click the matrix to see the 
-% curves corresponding to the different models. Active interactivity mode 
+% curves corresponding to the different models. Activate interactivity mode 
 % by invoking "arInteractivity on".
 
 function arCompareModel(varargin)
