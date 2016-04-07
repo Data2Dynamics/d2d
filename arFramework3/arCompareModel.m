@@ -55,8 +55,17 @@ function arCompareModel(ar1, m1, ar2, m2)
             end            
         end
     end
+    
+    imagesc( changeMatrix ); hold on;
+    for a = 1 : length( dataFiles )
+        for b = 1 : length( observables )
+            if ( abs( changeMatrix( a, b ) ) > 1e-2 )
+                text( b, a, sprintf( '%.1f', changeMatrix( a, b ) ), 'Color', 'white', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle' );
+            end
+        end
+    end
     change = max(max(abs(changeMatrix)));
-    imagesc( changeMatrix );
+    
     
     set(gca, 'YTick', [1 : numel(dataFiles)] );
     set(gca, 'XTick', [1 : numel(observables)] );
