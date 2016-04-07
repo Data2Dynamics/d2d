@@ -42,6 +42,19 @@ function interactive = arInteractivity( varargin )
         arInteractivityStruct.ple.legend = varargin{2};
         set(gcf,'WindowButtonDownFcn', @(hObject, eventData)pleFcn2(hObject, eventData) );
     end
+    
+    % arCompareModel interactivity functions
+    if strcmp( varargin{1}, 'arCompareModel' )
+        arInteractivityStruct.arCompareModel.dataFiles      = varargin{2};
+        arInteractivityStruct.arCompareModel.observables    = varargin{3};
+        arInteractivityStruct.arCompareModel.ar1            = varargin{4};
+        arInteractivityStruct.arCompareModel.m1             = varargin{5};
+        arInteractivityStruct.arCompareModel.ar2            = varargin{6};
+        arInteractivityStruct.arCompareModel.m2             = varargin{7};
+        arInteractivityStruct.arCompareModel.plotIDs1       = varargin{8};
+        arInteractivityStruct.arCompareModel.plotIDs2       = varargin{9};
+        set(gcf,'WindowButtonDownFcn', @(hObject, eventData)arCompareModelFcn2(hObject, eventData) );
+    end
 end
 
 function initInteractivity()
@@ -69,5 +82,49 @@ function pleFcn2(hObject, eventData)
             error( 'Unknown interactivity error in callback' );
         end
         arInteractivityStruct.ple.legend = userData;
+    end
+end
+
+function arCompareModelFcn2(hObject, eventData)
+    global arInteractivityStruct;
+    if ( ~isempty( arInteractivityStruct ) && arInteractivityStruct.active && isfield( arInteractivityStruct, 'arCompareModel' ) )
+        userData    = arInteractivityStruct.arCompareModel;
+        cp          = get(gca, 'CurrentPoint');
+
+        global ar;
+        arOld = ar;
+            
+        % Find corresponding plots
+        obs = floor( cp(1,1) ) + 1;
+        dat = floor( cp(1,2) );
+                   
+        ar = userData.ar1;
+        plotCurve( userData.m1, userData.plotIDs1{dat} );
+        set(gcf, 'Name', sprintf( '[%s]: %s', userData.ar1.model(userData.m1).name, get(gcf, 'Name') ) );
+        
+        ar = userData.ar2;
+        plotCurve( userData.m2, userData.plotIDs2{dat} );
+        set(gcf, 'Name', sprintf( '[%s]: %s', userData.ar2.model(userData.m2).name, get(gcf, 'Name') ) );
+        
+        ar = arOld;
+    end
+end
+
+function plotCurve( m, plot )
+    global ar;
+    
+    % Turn only a single plot on but backup the user's settings
+    for jm = 1 : length( ar.model )
+        old(jm, :) = ar.model(jm).qPlotYs;
+        ar.model(jm).qPlotYs = zeros( size( ar.model(jm).qPlotYs) );
+    end
+    ar.model(m).qPlotYs(plot) = 1;
+    
+    % Plot
+    arPlotY(false, 2, true, 'hideLL');
+    
+    % Return user settings
+    for jm = 1 : length( ar.model )
+        ar.model(jm).qPlotYs = old(jm, :);
     end
 end

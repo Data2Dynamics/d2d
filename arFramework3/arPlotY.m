@@ -17,6 +17,8 @@
 % while nameOnly makes sure either the name or observable variable is used 
 % as title, but not both.
 
+% Note: fastplot = 2 suppresses closing the figure and plots a new figure 
+% for each plot.
 function arPlotY(saveToFile, fastPlot, doLegends, varargin)
 
 matVer = ver('MATLAB');
@@ -624,7 +626,9 @@ for jm = 1:length(ar.model)
             end
         else
             try %#ok<TRYNC>
-                close(ar.model(jm).plot(jplot).fighandel_y)
+                if (fastplot ~= 2)
+                    close(ar.model(jm).plot(jplot).fighandel_y)
+                end
             end
             ar.model(jm).plot(jplot).fighandel_y = [];
         end
@@ -823,7 +827,7 @@ else
         fastPlotTmp = false;
     end
 end
-if(~fastPlot)
+if(fastPlot==0)
     clf
 end
 

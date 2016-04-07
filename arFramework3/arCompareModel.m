@@ -16,7 +16,7 @@ function arCompareModel(ar1, m1, ar2, m2)
     states      = intersect( {ar1.model(m1).x{:}, ar1.model(m1).z{:}}, {ar2.model(m2).x{:}, ar2.model(m2).z{:}} );
     observables = intersect( getObsNames(ar1.model(m1)), getObsNames(ar2.model(m2)) );
        
-    dataFiles = intersect( getDataNames(ar1.model(m1)), getDataNames(ar2.model(m2)) );
+    dataFiles   = intersect( getDataNames(ar1.model(m1)), getDataNames(ar2.model(m2)) );
 
     changeMatrix = zeros( numel(dataFiles), numel(observables) );
     for a = 1 : length( dataFiles )
@@ -66,6 +66,12 @@ function arCompareModel(ar1, m1, ar2, m2)
     end
     change = max(max(abs(changeMatrix)));
     
+    % If the interactivity system is enabled, register the callbacks
+    % and provide arInteractivity with the required data.
+    if ( arInteractivity )
+        
+        arInteractivity( 'arCompareModel', dataFiles, observables, ar1, m1, ar2, m2, getPlotIDs(ar1.model(m1), dataFiles), getPlotIDs(ar2.model(m2), dataFiles) );
+    end
     
     set(gca, 'YTick', [1 : numel(dataFiles)] );
     set(gca, 'XTick', [1 : numel(observables)] );
@@ -75,6 +81,21 @@ function arCompareModel(ar1, m1, ar2, m2)
     colormap( redgreencmap(256, 'Interpolation', 'sigmoid') );
     title( sprintf( '%s - %s', strTrafo(name1), strTrafo(name2) ) );
     colorbar;
+end
+
+% Find the corresponding data plots for both models being compared
+function plotIDs = getPlotIDs(model, dataFiles)
+    for a = 1 : length( dataFiles )
+        plotIDs{a} = [];
+        dataIDs = find( strcmp( {model.data.name}, dataFiles{a} ) );
+        for b = 1 : length( model.plot )
+            % Is this plot involved with this dataset? => Add it to the
+            % list
+            if ( max( ismember( model.plot(b).dLink, dataIDs ) ) )
+                plotIDs{a} = [ plotIDs{a}, b ];
+            end
+        end
+    end
 end
 
 function str = strTrafo( str )
