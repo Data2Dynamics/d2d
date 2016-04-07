@@ -30,11 +30,11 @@ function interactive = arInteractivity( varargin )
         error( 'First argument should be a string' );
     end    
 
-    if strcmp( lower(varargin{1}), 'on' )
+    if strcmpi( varargin{1}, 'on' )
         arInteractivityStruct.active = 1;
         disp( 'Interactivity mode activated' );
     end
-    if strcmp( lower(varargin{1}), 'off' )
+    if strcmpi( varargin{1}, 'off' )
         arInteractivityStruct.active = 0;
         disp( 'Interactivity mode disabled' );
     end
@@ -65,15 +65,13 @@ function initInteractivity()
     arInteractivityStruct.active = 0;
 end
 
-function pleFcn2(hObject, eventData)
+function pleFcn2(hObject, eventData) %#ok
     global arInteractivityStruct;
 
     if ( ~isempty( arInteractivityStruct ) && arInteractivityStruct.active && isfield( arInteractivityStruct, 'ple' ) )
         userData = arInteractivityStruct.ple.legend;
-        cp      = get(gca, 'CurrentPoint'); 
         try
-            name = userData.legends( find( gco == userData.handles ) );
-            %text( cp(1,1), cp(1,2), name );
+            name = userData.legends( gco == userData.handles );
             if ( ~isempty( name ) )
                 userData.currentLegend.handles(userData.currentLegend.ID) = gco;
                 userData.currentLegend.legends(userData.currentLegend.ID) = name;
@@ -87,29 +85,33 @@ function pleFcn2(hObject, eventData)
     end
 end
 
-function arCompareModelFcn2(hObject, eventData)
+function arCompareModelFcn2(hObject, eventData) %#ok
     global arInteractivityStruct;
     if ( ~isempty( arInteractivityStruct ) && arInteractivityStruct.active && isfield( arInteractivityStruct, 'arCompareModel' ) )
         userData    = arInteractivityStruct.arCompareModel;
         cp          = get(gca, 'CurrentPoint');
 
-        global ar;
+        global ar;              %#ok
+        global arOutputLevel;   %#ok
         arOld = ar;
             
         % Find corresponding plots
         obs = floor( cp(1,1) ) + 1;
         dat = floor( cp(1,2) );
+        if ( arOutputLevel > 2 )
+            fprintf( 'Clicked data ID %d, observable %d\n', dat, obs );
+        end
         
         % Early out when not clicking inside the image
         if ( ( dat < 1 ) || ( dat > length( userData.plotIDs1 ) ) )
             return;
         end
         
-        ar = userData.ar1;
+        ar = userData.ar1; %#ok
         plotCurve( userData.m1, userData.plotIDs1{dat} );
         set(gcf, 'Name', sprintf( '[%s]: %s', userData.ar1.model(userData.m1).name, get(gcf, 'Name') ) );
         
-        ar = userData.ar2;
+        ar = userData.ar2; %#ok
         plotCurve( userData.m2, userData.plotIDs2{dat} );
         set(gcf, 'Name', sprintf( '[%s]: %s', userData.ar2.model(userData.m2).name, get(gcf, 'Name') ) );
         
@@ -122,7 +124,7 @@ function plotCurve( m, plot )
     
     % Turn only a single plot on but backup the user's settings
     for jm = 1 : length( ar.model )
-        old(jm, :) = ar.model(jm).qPlotYs;
+        old{jm} = ar.model(jm).qPlotYs; %#ok
         ar.model(jm).qPlotYs = zeros( size( ar.model(jm).qPlotYs) );
     end
     ar.model(m).qPlotYs(plot) = 1;
@@ -132,6 +134,6 @@ function plotCurve( m, plot )
     
     % Return user settings
     for jm = 1 : length( ar.model )
-        ar.model(jm).qPlotYs = old(jm, :);
+        ar.model(jm).qPlotYs = old{jm};
     end
 end
