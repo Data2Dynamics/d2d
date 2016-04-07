@@ -123,7 +123,7 @@ function plotCurve( m, plot )
     ar.model(m).qPlotYs(plot) = 1;
     
     % Plot
-    arPlotY(false, 2, true, 'hideLL');
+    arPlotY(false, 2, true);
     
     % Return user settings
     for jm = 1 : length( ar.model )
