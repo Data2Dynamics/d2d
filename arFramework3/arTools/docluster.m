@@ -1,6 +1,6 @@
 % use a cluster function, row-wise
 
-function [B, i_sorted] = docluster(A, cutoff)
+function [B, i_sorted] = docluster(A)
 
 % a_order=clusterdata(A,cutoff);
 % [~, i_sorted] = sort(a_order);
