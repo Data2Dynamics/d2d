@@ -28,3 +28,5 @@ arFramework3/Examples/Swameye_PNAS2003/SBML/
 arFramework3/Examples/Swameye_PNAS2003/arSimuCalc*
 
 *.dat
+arFramework3/TestSuite
+arFramework3/sbml-test-cases-2014-10-22
