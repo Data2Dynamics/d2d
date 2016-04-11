@@ -11,6 +11,7 @@
 % Optional flags:
 %   'relerr'    - Use relative errors instead of chi2 change
 %   'absrsq'    - Show R^2 per dataset for Model 1 instead of differences
+%   'nogrid'    - Don't draw the grid
 %
 % Note: If interactivity mode is on, you can click the matrix to see the 
 % curves corresponding to the different models. Activate interactivity mode 
@@ -21,10 +22,11 @@ function arCompareModel(varargin)
     figure('units','normalized','outerposition',[0 0 1 1], 'Name', 'Model comparison. Green means M1 is better.');
 
     % Special switches
-    switches    = { 'relerr', 'absrsq' };
-    extraArgs   = [ 0, 0 ];
+    switches    = { 'relerr', 'absrsq', 'nogrid' };
+    extraArgs   = [ 0, 0, 0 ];
     descriptions = {    { 'Using relative residual', '' }, ...
                         { 'Showing absolute R squared of M1 only', '' }, ...
+                        { 'Suppressing grid', '' }, ...
                     };
 
     if ( length( varargin ) < 2 )
@@ -190,6 +192,15 @@ function arCompareModel(varargin)
     end
     title( sprintf( '%s - %s', strTrafo(name1), strTrafo(name2) ) );
     colorbar;
+    
+    if ( ~opts.nogrid )
+        for a = 1 : numel(dataFiles)
+            line( [-0.5, numel(observables)+0.5], [a a]+0.5, 'Color', [0.15, 0.15, 0.15]) ;
+        end
+        for a = 1 : numel(observables)
+            line( [a a]+0.5, [-0.5 numel(dataFiles)+0.5], 'Color', [0.15, 0.15, 0.15]) ;
+        end     
+    end
 end
 
 % Find the corresponding data plots for both models being compared
