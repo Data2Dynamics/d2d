@@ -158,12 +158,15 @@ end
 nsteps = abs(floor((tEnd-t(whichT)) / stepsize));
 ar.ppl.nsteps=nsteps;
 
-if(~isempty(gammas) && length(gammas) ~= length(ix))
-    gammas = repmat(gammas,1,length(ix)/length(gammas));
+if(~exist('gammas','var') || isempty(gammas))
+    gammas = ones(size(ix))*1./stepsize;
 end
 
-if(~exist('gammas','var') || isempty(gammas))
-    gammas = ones(size(t))*1./stepsize;
+if(length(gammas) == 1)
+    gammas = repmat(gammas,1,length(ix));
+end
+if(length(gammas) ~= length(ix))
+    error('Argument gammas has an incorrect length');
 end
 
 % optimizer settings (set only once)
@@ -406,7 +409,7 @@ for ts = 1:length(t)
         if(ar.ppl.qLog10)
             xSim = log10(xSim);
         end
-    fprintf('Caliculating PPL for t=%d and state x=%i \n',t(ts),jx);
+    fprintf('Calculating PPL for t=%d and state x=%i \n',t(ts),jx);
     % go up
     if(save || dir==1)
         npre = 0;
@@ -491,7 +494,7 @@ for ts = 1:length(t)
         end        
     else
         if(lb_tmp_vpl==min(xtrial_tmp(vpl_nonnan)))
-            lb_tmp_vpl = -Inf;                
+            lb_tmp_vpl = -Inf;
             fprintf('No -95 VPL for t=%d\n',t(ts));
             if(dir==-1 || dir==0)
 %                 return;

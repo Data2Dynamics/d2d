@@ -57,6 +57,10 @@ function arCompareModel(varargin)
     if ( m2 > length( ar2.model ) )
         error( 'Model ID 2 was specified out of range' );
     end
+    
+    % Validate ar structs
+    ar1 = arInitFields(ar1);
+    ar2 = arInitFields(ar2);
 
     % Process additional flags
     opts = argSwitch( switches, extraArgs, descriptions, varargin );
