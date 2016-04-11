@@ -61,6 +61,8 @@ catch
     clear pleGlobals;
 end
 
+% Make sure we have all the necessary fields
+ar=arInitFields(ar);
 
 
 
