@@ -1,3 +1,5 @@
+% Determine whether any of the residual entries contain NaNs or Infs
+
 function arDebugResidual()
 
     global ar;

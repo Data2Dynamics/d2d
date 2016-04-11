@@ -1,9 +1,9 @@
-%   This function can make your code saver by preventing unintended changes
-%   in the global ar variable if unintended errors occur and therefore a
-%   function cannot finish
+% Wrapper function which can make your code safer by preventing unintended 
+% changes in the global ar variable if an unhandled error occurs
 % 
 % This function ensures that whenever an error occurs that the original
-% global variable is available again.
+% global variable is restored.
+%
 % It prevents changes on the global ar which are not reset to the original
 % state due to an error.
 % 

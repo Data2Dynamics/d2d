@@ -1,3 +1,5 @@
+% Checks whether a word reserved by the symbolic toolbox exists in a string
+
 function arCheckReservedWords( strings, useLocation, offendingString )
 
     keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','x'};

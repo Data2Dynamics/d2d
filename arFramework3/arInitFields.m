@@ -1,6 +1,7 @@
 % This function checks whether all the required fields in the ar structure
-% are present. If some are missing, since the ar struct comes from a
-% previous version, they will be set to the default value.
+% are present. If some are missing, which occurs when the ar struct was 
+% saved with a previous version of D2D, they will be set to the default 
+% value.
 
 function ar = arInitFields(ar)
 

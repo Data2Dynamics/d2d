@@ -1,4 +1,4 @@
-% chi2 sequence on MATLAB cluster
+% Compute chi^2 for multiple parameter sets on MATLAB cluster
 %
 % arChi2sCluster(ps, sensis)
 %

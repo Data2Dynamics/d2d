@@ -1,3 +1,6 @@
+% Function to export data to different modelling framework (dMod)
+% See: https://github.com/dkaschek/dMod
+%
 % arExportModelToDaniel(whichone,m,d,prefix)
 % 
 %   whichone        Which kind of file

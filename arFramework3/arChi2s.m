@@ -1,4 +1,4 @@
-% chi2 sequence
+% Compute chi^2 for multiple parameter sets
 %
 % arChi2s(ps, sensis)
 %

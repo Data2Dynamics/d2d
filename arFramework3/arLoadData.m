@@ -10,19 +10,18 @@
 % removeEmptyObs    remove observation without data                [false]
 %
 %
-% In der ersten Spalte:
-% 1)    Die Messzeitpunkte (duerfen mehrfach vorkommen).
+% In the first column
+% 1)    Measurement time points (are allowed to occur multiple times).
 %
-% Danach in Spalten beliebiger Reihenfolge:
-% 2)    Die experimentellen Bedingungen (z.B. "input_IL6" und "input_IL1").
-% 3)    Die Datenpunkte fuer die einzelnen Spezies (z.B. "P_p38_rel").
+% In the following columns (in any order):
+% 2)    Experimental conditions (e.g. "input_IL6" and "input_IL1").
+% 3)    The data points for the individual observables (e.g. "P_p38_rel").
 %
-% Anmerkungen:
-% 1)    In Spaltenkoepfen duerfen keine Zeichen vorkommen die mathematischen
-%       Operationen entsprechen (z.B. "-" oder "+").
-% 2)    Ich habe Stimulationen immer den Praefix "input_" gegeben. Bei Spezies
-%       bedeuten die Suffixe "_rel" und "_au": relative Phosphorylierung und
-%       arbitrary units, je nachdem.
+% Note:
+% 1)    No mathematical symbols are allowed in the column headers (e.g. "+")
+% 2)    I have always used input_ as a prefix for stimulations. Regarding
+%       observables, the suffixes "_rel" and "_au" refer to relative
+%       phosphorylation and arbitrary units.
 %
 % Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
 
