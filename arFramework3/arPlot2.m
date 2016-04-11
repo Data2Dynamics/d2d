@@ -352,7 +352,7 @@ for jm = 1:length(ar.model)
                 if(isfield(ar.model(jm).plot(jplot), fighandel_name{jtype}))
                     if(sum(hs==ar.model(jm).plot(jplot).(fighandel_name{jtype}))==0)
                         try %#ok<TRYNC>
-                            if ( fastplot != 2 )
+                            if ( fastplot ~= 2 )
                                 close(ar.model(jm).plot(jplot).(fighandel_name{jtype}))
                             end
                         end
