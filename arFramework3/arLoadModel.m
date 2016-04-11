@@ -526,9 +526,15 @@ else
 end
 ar.model(m).fx = cell(length(ar.model(m).x),1);
 tmpfx = (sym(ar.model(m).N).*sym(C)) * sym(ar.model(m).fv);
+
 for j=1:length(ar.model(m).x) % for every species j
-    ar.model(m).fx{j} = char(tmpfx(j));
+    if ~isempty(tmpfx)
+        ar.model(m).fx{j} = char(tmpfx(j));
+    else
+        ar.model(m).fx{j} = char('0');
+    end
 end
+
 
 % DERIVED (previously INVARIANTS)
 if(strcmp(str{1},'INVARIANTS'))

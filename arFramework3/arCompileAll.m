@@ -786,7 +786,7 @@ if(config.useJacobian)
             if(i==1)
                firstcol = true;
             end
-            if(condition.qdfxdx_nonzero(i,j))
+            if(~isempty(condition.qdfxdx_nonzero) && condition.qdfxdx_nonzero(i,j))
                 condition.dfxdx{i,j} = sprintf('dfxdx[%i]', i + (j-1)*length(model.xs));                
                 condition.dfxdx_rowVals = [condition.dfxdx_rowVals i-1];
                 condition.sym.dfxdx_nonzero(length(condition.dfxdx_rowVals)) = condition.sym.dfxdx(i,j);

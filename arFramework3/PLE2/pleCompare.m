@@ -66,7 +66,7 @@ for j=1:length(pLabels)
        %  
         if(~isempty(qj) && size(ples{jple}.ps,2)>=qj && ~isempty(ples{jple}.ps{qj}))
             % profile
-            if(length(ples)==2 & jple==2)
+            if(length(ples)==2 && jple==2)
                 lw = 1;
                 marker = 'o';
             else
