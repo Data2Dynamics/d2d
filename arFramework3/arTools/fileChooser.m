@@ -1,6 +1,6 @@
 function [out, filename,file_list] = fileChooser(filepath, default, zeigen, searchpattern)
 
-if(~exist('default', 'var') || isempty(default))
+if(~exist('default', 'var'))
     default = 1;
 end
 if(~exist('zeigen', 'var') || isempty(zeigen))

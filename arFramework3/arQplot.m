@@ -73,7 +73,11 @@ end
 
 
 for jm=m
-    dnames = {ar.model(jm).data.name};
+    if isfield(ar.model(jm).data,'name') 
+        dnames = {ar.model(jm).data.name};
+    else
+        dnames = cell(0);
+    end
     switch(lower(type))            
         case 'y'
             ar.model(jm).qPlotXs(:) = 0;

@@ -1,5 +1,4 @@
-function arCalcUnits(m)
-
+function punits = arCalcUnits(m)
 
 clc
 
@@ -17,7 +16,7 @@ end
 %% species units
 for jv = 1:length(ar.model(m).fv)
     % [ar.model(m).x' ar.model(m).xUnits]
-    xs = union(ar.model(m).fv_source{jv}, ar.model(m).fv_target{jv});
+    xs = ar.model(m).fv;%union(ar.model(m).fv_source{jv}, ar.model(m).fv_target{jv});
     q = ismember(ar.model(m).x, xs);
     
     xu = ar.model(m).xUnits(q,1);
@@ -46,7 +45,7 @@ for jv = 1:length(ar.model(m).fv)
 end
 
 known_vars = ar.model(m).x;
-known_units = ar.model(m).xUnits(:,1)';
+known_units = ar.model(m).xUnits(:,2)';
 
 %% parameter units for volumes and initial conditions
 ar.model(m).pUnits = cell(size(ar.model(m).p));
@@ -65,7 +64,8 @@ for jp = 1:length(ar.model(m).p)
     % initial conditions
     q = ismember(ar.model(m).px0, ar.model(m).p{jp});
     if(sum(q) == 1)
-        ar.model(m).pUnits(jp) = ar.model(m).xUnits(q,1);
+%         ar.model(m).pUnits(jp) = ar.model(m).xUnits(q,1);
+        ar.model(m).pUnits(jp) = ar.model(m).xUnits(q,2);
         known_vars{end+1} = ar.model(m).p{jp}; %#ok<AGROW>
         known_units(end+1) = ar.model(m).pUnits(jp); %#ok<AGROW>
         continue
@@ -90,9 +90,17 @@ fv = ar.model(m).fv;
 fv = sym(fv);
 fv = subs(fv, sym(known_vars), sym(known_units));
 for jv = 1:length(fv)
-    xs = union(ar.model(m).fv_source{jv}, ar.model(m).fv_target{jv});
-    fv(jv) = fv(jv) * sym(ar.model(m).tUnits{1}) / sym(xs{1}) - 1;
+    xs = ar.model(m).fv;%union(ar.model(m).fv_source{jv}, ar.model(m).fv_target{jv});
+    xs = subs(xs,sym(known_vars), sym(known_units));
+    fv(jv) = fv(jv) * sym(ar.model(m).tUnits{1}) / sym(xs(1)) - 1;
 end
+
+for i=1:length(fv)
+    for j=1:length(px)
+        A(i,j) = ~strcmp(char(fv(i)), char(subs(fv(i),px(j),1)));
+    end
+end
+rref(double(A))  % basis von überbestimmten Design matrizen
 
 punits = unit_solver(fv, px);
 
@@ -137,9 +145,8 @@ px = sym(px);
 for j=1:length(px)
     fvtmp = findasym(fv, px(j));
     
-    px(j)
-    fvtmp
-    S = solve(fvtmp, px(j))
+    S = solve(fvtmp, px(j));  % die u sind nicht durch u Unit ersetzt, wenn mehr Gl. als unbekannte muss man evlt. die Anzahl Gl. reduzieren
+    fprintf('[%s] = %s\n',char(px(j)),char(S));
 end
 
 
