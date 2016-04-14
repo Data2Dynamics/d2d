@@ -26,10 +26,8 @@ class Apoly:
 					for j, r in enumerate(rs):
 						if coefsTmp[i].has(r):
 							self.coefs[i][j] = spy.diff(coefsTmp[i], r)
-			#extract exponents from polynomial
-			self.exps = poly.keys()
-			for i in xrange(len(self.exps)):
-				self.exps[i] = np.array(self.exps[i])
+			#extract exponents from polynomial and turn into np arrays
+			self.exps = map(np.array, poly.keys())
 			self.vars = variables
 			self.rs = rs
 

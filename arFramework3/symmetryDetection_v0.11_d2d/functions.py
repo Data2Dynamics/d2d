@@ -1,5 +1,4 @@
 # Author: Benjamin Merkt, Physikalisches Institut, Universitaet Freiburg
-# Slightly adapted by Clemens Kreutz for unit calculations
 
 import sys
 import time
@@ -23,12 +22,25 @@ except:
 	readlineAvailable = False
 	
 extension_str = '_93502158393064762'
+
+class bcolors:
+	purple = '\033[95m'
+	blue = '\033[94m'
+	green = '\033[92m'
+	yellow = '\033[93m'
+	red = '\033[91m'
+	endc = '\033[0m'
+	bold = '\033[1m'
+	underline = '\033[4m'
 	
 # wrapper on spy.var for renaming QCOSINE variables
 def giveVar(expr):
 	if expr == 'epsilon':
-		#print "\n\n***Error: Transformation parameter 'epsilon' not allowed in any input***"
 		raise(UserWarning("Transformation parameter 'epsilon' not allowed in any input"))
+	if expr == 'lamda':
+		raise(UserWarning("Transformation parameter 'lamda' not allowed in any input"))
+	if expr == 'T':
+		raise(UserWarning("Variable 'T' reserved for time"))
 		
 	for v in ['Q', 'C', 'O', 'S', 'I', 'N', 'E']:
 		expr = expr.replace(v, v + extension_str)
@@ -99,7 +111,7 @@ def makeAnsatz(ansatz, allVariables, m, q, pMax, fixed):
 		#calculate derivatives
 		diffInfis = [[0]*n]
 		for i in range(n):
-			diffInfis[0][i] = spy.diff(infis[i],allVariables[i])
+			diffInfis[0][i] = spy.diff(infis[i], allVariables[i])
 
 	elif ansatz == 'multi':
 		rs = []
@@ -122,9 +134,7 @@ def makeAnsatz(ansatz, allVariables, m, q, pMax, fixed):
 				infis[-1] += degree
 
 		#calculate derivatives
-		diffInfis = [0]*n
-		for i in range(n):
-			diffInfis[i] = [0]*n
+		diffInfis = [[0]*n for i in range(n)]
 		for i in range(n):
 			for j in range(n):
 				diffInfis[i][j] = spy.diff(infis[i],allVariables[j])
@@ -143,7 +153,7 @@ def transformInfisToPoly(infis, diffInfis, allVariables, rs, nProc, ansatz):
 	else:
 		from multiprocessing import Queue
 
-	n = len(allVariables)
+	n = len(infis)
 	k = len(diffInfis)
 
 	ns = 0	
@@ -151,12 +161,14 @@ def transformInfisToPoly(infis, diffInfis, allVariables, rs, nProc, ansatz):
 	### start the transformation for the first equations
 	while ns < min([n+k*n, nProc]):
 		if ns < n:
-			if nProc > 1: p = Process(target=transformExprToPoly, args=(False, ns, infis, queue, allVariables, rs))
+			if nProc > 1: p = Process(target=transformExprToPoly, args=(False, ns, infis, queue, 
+										allVariables, rs))
 			else: transformExprToPoly(False, ns, infis, queue, allVariables, rs)
 		else:
 			if ansatz == 'multi': i = divmod(ns-n,n)		
 			else: i = (0, ns-n)
-			if nProc > 1: p = Process(target=transformExprToPoly, args=(True, i, diffInfis, queue, allVariables, rs))
+			if nProc > 1: p = Process(target=transformExprToPoly, args=(True, i, diffInfis, queue, 
+										allVariables, rs))
 			else: transformExprToPoly(True, i, diffInfis, queue, allVariables, rs)
 		if nProc > 1: p.start()
 		ns += 1
@@ -178,12 +190,14 @@ def transformInfisToPoly(infis, diffInfis, allVariables, rs, nProc, ansatz):
 		finished += 1
 
 		if ns < n:
-			if nProc > 1: p = Process(target=transformExprToPoly, args=(False, ns, infis, queue, allVariables, rs))
+			if nProc > 1: p = Process(target=transformExprToPoly, args=(False, ns, infis, queue, 
+										allVariables, rs))
 			else: transformExprToPoly(False, ns, infis, queue, allVariables, rs)
 		else:
 			if ansatz == 'multi':  i = divmod(ns-n,n)		
 			else: i = (0, ns-n)
-			if nProc > 1: p = Process(target=transformExprToPoly, args=(True, i, diffInfis, queue, allVariables, rs))
+			if nProc > 1: p = Process(target=transformExprToPoly, args=(True, i, diffInfis, queue, 
+										allVariables, rs))
 			else: transformExprToPoly(True, i, diffInfis, queue, allVariables, rs)
 		if nProc > 1: p.start()
 		ns += 1
@@ -269,8 +283,8 @@ def nullSpace(matrix, pivots):
 
 def checkForCommonFactor(infisTmp, allVariables, m):
 	spy.var('epsilon')
-	#extract all factors from first infinitesimal
-	for i in range(len(allVariables)):
+	# extract all factors from first infinitesimal
+	for i in range(len(infisTmp)):
 		if infisTmp[i] != 0:
 			fac = spy.factor(infisTmp[i])
 			if type(fac) == type(epsilon+1):
@@ -282,6 +296,7 @@ def checkForCommonFactor(infisTmp, allVariables, m):
 		
 			break
 
+	# remove all non-parameters from factors list
 	i = 0
 	while i < len(factors):
 		if factors[i].is_number:
@@ -346,13 +361,19 @@ def checkForCommonFactor(infisTmp, allVariables, m):
 
 ### determine known transformations from infinitesimals
 def buildTransformation(infis, allVariables):
-	n = len(allVariables)
+	n = len(infis)
 	spy.var('epsilon')
+	spy.var('lamda')
 	
 	transformations = [0]*n
-	tType = [False]*6 #0: unknown, 1: scaling, 2: translation, 3: MM-like, 4: p>2, 5: generalized translation
+	tType = np.zeros(6,dtype=bool)  #0: unknown, 
+									#1: scaling, 
+									#2: translation, 
+									#3: MM-like, 
+									#4: p>2, 
+									#5: generalized translation
 	for i in range(n):
-		if infis[i] == 0:
+		if infis[i] == 0: # not transformed
 			transformations[i] = allVariables[i]
 		else:
 			poly = spy.Poly(infis[i], allVariables).as_dict()
@@ -374,19 +395,25 @@ def buildTransformation(infis, allVariables):
 					if p == None: # translation
 						transformations[i] = allVariables[i] + epsilon*coefs[0]
 						tType[2] = True
-					elif p <= 0: #
-						transformations[i] = allVariables[i] + epsilon*coefs[0] * allVariables[-p-1]
+					elif p <= 0: # generalized translation
+						transformations[i] = allVariables[i] + epsilon*coefs[0] * \
+												allVariables[-p-1]
 						tType[5] = True
 					elif p == 1: # scaling
-						transformations[i] = spy.exp(epsilon*coefs[0])*allVariables[i]
+						#transformations[i] = spy.exp(epsilon*coefs[0]) * allVariables[i]
+						transformations[i] = lamda**coefs[0] * allVariables[i]
 						tType[1] = True
 					else: # p Symmetry
-						transformations[i] = spy.simplify(allVariables[i]/(1-(p-1)*epsilon*allVariables[i]**(p-1))**(spy.sympify(1)/(p-1)))
+						transformations[i] = spy.simplify(allVariables[i]/(1-(p-1) * epsilon * \
+												allVariables[i]**(p-1))**(spy.sympify(1)/(p-1)))
 						if p == 2: tType[3] = True
 						else: tType[4] = True
 			else:	
 				transformations[i] = '-?-'
 				tType[0] = True
+
+	if tType[1] and not np.all(tType == np.array([0,1,0,0,0,0], dtype=np.bool)):
+		transformations = map(lambda trans: trans.subs(lamda, spy.exp(epsilon)), transformations)
 
 	string = 'Type: '
 	if tType[0]: string += 'unknown, '
@@ -401,12 +428,16 @@ def buildTransformation(infis, allVariables):
 	return transformations, string
 
 ### print found transformations
-def printTransformations(infisAll, allVariables, suffix):
+def printTransformations(infisAll, allVariables, pretty, suffix):
+	st = str(len(infisAll)) + ' transformation(s) found:\n'
+ 	if pretty:
+ 		st = bcolors.purple + bcolors.bold + st + bcolors.endc
+ 	print st
+
 	n = len(infisAll[0])
 
 	fhandle = open( suffix + '_result.txt', 'w');
 	
-
 	length1 = 8
 	length2 = 13
 	length3 = 14
@@ -422,14 +453,27 @@ def printTransformations(infisAll, allVariables, suffix):
 		for i in range(n):
 			if infisAll[l][i] != 0:
 				# get stuff for output line
-				outputs[-1].append(\
-							[str(allVariables[i]), str(infisAll[l][i]), str(transformations[l][i])])
-				
+				t1, t2, t3 = allVariables[i], infisAll[l][i], transformations[l][i]
+				for u in range(len(allVariables)):
+					v_str = str(allVariables[u])
+					for j in ['Q', 'C', 'O', 'S', 'I', 'N', 'E']:
+						v_str = v_str.replace(j + extension_str, j)
+					v = spy.var(v_str)
+					t1 = t1.subs(allVariables[u], v)
+					t2 = t2.subs(allVariables[u], v)
+					if not isinstance(t3, basestring): 
+						t3 = t3.subs(allVariables[u], v)
+				if pretty:
+					t1, t2, t3 = spy.pretty(t1), spy.pretty(t2), spy.pretty(t3)
+				else:
+					t1, t2, t3 = str(t1), str(t2), str(t3)
+				outputs[-1].append([t1, t2, t3])
+
 				# remove string extension
-				for v in ['Q', 'C', 'O', 'S', 'I', 'N', 'E']:
-					outputs[-1][-1][0] = outputs[-1][-1][0].replace(v + extension_str, v)
-					outputs[-1][-1][1] = outputs[-1][-1][1].replace(v + extension_str, v)
-					outputs[-1][-1][2] = outputs[-1][-1][2].replace(v + extension_str, v)
+				#for v in ['Q', 'C', 'O', 'S', 'I', 'N', 'E']:
+					#outputs[-1][-1][0] = outputs[-1][-1][0].replace(v + extension_str, v)
+					#outputs[-1][-1][1] = outputs[-1][-1][1].replace(v + extension_str, v)
+					#outputs[-1][-1][2] = outputs[-1][-1][2].replace(v + extension_str, v)
 				
 				# search for longest string
 				if len(outputs[-1][-1][0]) > length1:
@@ -440,26 +484,68 @@ def printTransformations(infisAll, allVariables, suffix):
 					length3 = len(outputs[-1][-1][2])
 
 	# print all stuff
+	if pretty:
+		print bcolors.bold + bcolors.purple + ('{0:'+str(length1)+'s}').format('Variable') + bcolors.endc + ' : '\
+			+ bcolors.bold + bcolors.purple + ('{0:'+str(length2)+'s}').format('Infinitesimal') + bcolors.endc + ' : '\
+			+ bcolors.bold + bcolors.purple + str('Transformation') + bcolors.endc
 
-	print ('{0:'+str(length1)+'s} : ').format('variable') \
-		+ ('{0:'+str(length2)+'s} : ').format('infinitesimal')\
-		+ str('transformation')
+		for l in range(len(infisAll)):
+			print '='*(length1+length2+14+6)
+			print bcolors.blue + bcolors.bold + '#' + str(l+1) + ': ' + types[l] + bcolors.endc#+'\n'
+			
+			for i, lst in enumerate(outputs[l]):
+				print '-'*(length1+length2+14+6)
+				str1 = lst[0].splitlines()
+				str2 = lst[1].splitlines()
+				str3 = lst[2].splitlines()
+				lines = max([len(str1), len(str2), len(str3)])
 
-	for l in range(len(infisAll)):
-		print '-'*(length1+length2+length3+6)
-		print '#' + str(l+1) + ': ' + types[l]
-		
-		for lst in outputs[l]:
-			print ('{0:'+str(length1)+'s} : ').format(lst[0]) \
-					+ ('{0:'+str(length2)+'s} : ').format(str(lst[1]))\
-					+ str(lst[2])
+				for j in range(lines):
+					if j >= len(str1):	s1 = ''
+					else:				s1 = str1[j]
+					if j >= len(str2):	s2 = ''
+					else:				s2 = str2[j]
+					if j >= len(str3):	s3 = ''
+					else:				s3 = str3[j]
+					print bcolors.bold + s1 + ' '*(length1-len(s1)) + bcolors.endc + ' : ' + \
+							s2 + ' '*(length2-len(s2)) + ' : ' +\
+							s3 + ' '*(length3-len(s3))
+
+
+				# print bcolors.bold + lst[0] + ' '*(length1-len(lst[0])) + bcolors.endc + ' : '\
+				# 		+ lst[1] + ' '*(length2-len(lst[1])) + ' : '\
+				# 		+ lst[2].replace('\n','\n'+' '*length1 + ' : ' + ' '*length2 + ' : ')
+				#print ' '*length1 + ' : ' + ' '*length2 + ' : '
+
+	else:
+		print ('{0:'+str(length1)+'s} : ').format('variable') \
+			+ ('{0:'+str(length2)+'s} : ').format('infinitesimal')\
+			+ str('transformation')
+
+		for l in range(len(infisAll)):
+			print '-'*(length1+length2+length3+6)
+			print '#' + str(l+1) + ': ' + types[l]
+			
+			for lst in outputs[l]:
+				print ('{0:'+str(length1)+'s} : ').format(lst[0]) \
+						+ ('{0:'+str(length2)+'s} : ').format(lst[1])\
+						+ lst[2]
+
 			fhandle.write('#' + str(l+1) + '\t' + types[l] + '\t')
 			fhandle.write(str(lst[0]))
 			fhandle.write('\t')
 			fhandle.write(str(lst[2]))
 			fhandle.write('\n')
 
-
-
 	fhandle.close()						
 
+
+class bcolors:
+	purple = '\033[95m'
+	blue = '\033[94m'
+	green = '\033[92m'
+	yellow = '\033[93m'
+	red = '\033[91m'
+	endc = '\033[0m'
+	bold = '\033[1m'
+	underline = '\033[4m'

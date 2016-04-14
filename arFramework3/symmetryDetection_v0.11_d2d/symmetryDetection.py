@@ -1,5 +1,4 @@
 # Author: Benjamin Merkt, Physikalisches Institut, Universitaet Freiburg
-# Slightly adapted by Clemens Kreutz for unit calculations
 # Version: 0.11
 
 import sys
@@ -22,11 +21,12 @@ except:
 t0 = time.time()
 
 spy.var('epsilon')
-
+spy.var('T')
 
 def symmetryDetection(allVariables, diffEquations, observables, obsFunctions, initFunctions,
 						predictions, predFunctions, ansatz = 'uni', pMax = 2, inputs = [], 
-						fixed = [], parallel = 1, allTrafos = False, suffix=''):
+						fixed = [], parallel = 1, allTrafos = False, timeTrans = False,
+						pretty = True, suffix=''):
 	
 	n = len(allVariables)
 	m = len(diffEquations)
@@ -41,8 +41,18 @@ def symmetryDetection(allVariables, diffEquations, observables, obsFunctions, in
 	# make infinitesimal ansatz
 	infis, diffInfis, rs = makeAnsatz(ansatz, allVariables, m, len(inputs), pMax, fixed)
 
+	# get infinitesimals of time transformation
+	if timeTrans:
+		rs.append(spy.var('r_T_1'))
+		diffInfiT = rs[-1]
+		allVariables += [T]
+	else:
+		diffInfiT = None
+
 	# and convert to polynomial
 	infis, diffInfis = transformInfisToPoly(infis, diffInfis, allVariables, rs, parallel, ansatz)
+	
+	diffInfiT = Apoly(diffInfiT, allVariables, rs)
 
 	### extract numerator and denominator of equations
 	#differential equations
@@ -118,7 +128,7 @@ def symmetryDetection(allVariables, diffEquations, observables, obsFunctions, in
 
 	rSystem = buildSystem(numerators, denominators, derivativesNum, obsDerivativesNum,
 				initDenominatros, initDerivativesNum, initFunctions, 
-				infis, diffInfis, allVariables, rs, parallel, ansatz)
+				infis, diffInfis, diffInfiT, allVariables, rs, parallel, ansatz)
 
 	sys.stdout.write('done\n')
 	sys.stdout.flush()
@@ -158,10 +168,12 @@ def symmetryDetection(allVariables, diffEquations, observables, obsFunctions, in
 	infisAll = []
 	for l in range(baseMatrix.shape[1]):
 		infisTmp = [0]*n
-		for i in range(len(allVariables)):
+		for i in range(len(infis)):
 			infisTmp[i] = infis[i].getCopy()
 			infisTmp[i].rs = baseMatrix[:,l]
 			infisTmp[i] = infisTmp[i].as_expr()
+		if timeTrans:
+			infisTmp.append(baseMatrix[-1,l] * T)
 
 		if allTrafos:
 			infisAll.append(infisTmp)
@@ -174,9 +186,8 @@ def symmetryDetection(allVariables, diffEquations, observables, obsFunctions, in
 	sys.stdout.flush()
 
 	# print transformations
-	print('\n\n' + str(len(infisAll)) + ' transformation(s) found:')
-
-	if len(infisAll) != 0: printTransformations(infisAll, allVariables, suffix)
+	print('\n\n')
+	if len(infisAll) != 0: printTransformations(infisAll, allVariables, pretty,suffix)
 
 	###########################################################################################
 	############################     check predictions    #####################################
@@ -187,6 +198,9 @@ def symmetryDetection(allVariables, diffEquations, observables, obsFunctions, in
 	print(time.strftime('\nTotal time: %Hh:%Mm:%Ss', time.gmtime(time.time()-t0)))
 
 
+###########################################################################################
+###################     main (start program from terminal)    #############################
+###########################################################################################
 def main():	
 
 	# check if run with arguments (i.e. from terminal)
@@ -214,8 +228,12 @@ def main():
 						help = 'variables to consider fixed')
 	parser.add_argument('-P','--parallel', nargs = 1, default=[1], 
 						help = 'maximal number of processes (default = 1)')
+	parser.add_argument('-t','--timeTrans', action='store_true', default=False, 
+						help = 'allow scaling transformations of time variable')
 	parser.add_argument('-A','--allTrafos', action='store_true', default=False, 
 						help = 'do not remove transformations with common parameter factors')
+	parser.add_argument('--notPretty', action='store_false', default=True, 
+						help = 'do not use pretty printing for output of transformations')
 
 	args = parser.parse_args()
     
@@ -237,9 +255,8 @@ def main():
 		sys.stdout.write(s[0:len(s)-2] + '\n')
 		sys.stdout.flush()
 
-	###########################################################################################
-	##########################     read data from files    ####################################
-	###########################################################################################
+
+	####### read data from files #######
 	sys.stdout.write('\nReading files...')
 	sys.stdout.flush()
 
@@ -279,10 +296,17 @@ def main():
         
 	symmetryDetection(allVariables, diffEquations, observables, obsFunctions, initFunctions,
 						 predictions, predFunctions, args.ansatz, args.pMax[0], args.input,
-						 args.fixed, int(args.parallel[0]), args.allTrafos, suffix)
+						 args.fixed, int(args.parallel[0]), args.allTrafos, args.timeTrans,
+						 args.notPretty, suffix)
 
+
+
+###########################################################################################
+#########################     start program from dMod   ###################################
+###########################################################################################
 def symmetryDetectiondMod(model, observation, prediction, initial, ansatz, pMax, inputs, fixed,
-							parallel, allTrafos):
+							parallel, allTrafos, timeTrans=False):
+	'''start program from dMod'''
 
 	if model == None:
 		model = []
@@ -361,7 +385,8 @@ def symmetryDetectiondMod(model, observation, prediction, initial, ansatz, pMax,
 	sys.stdout.flush()
 	
 	symmetryDetection(allVariables, diffEquations, observables, obsFunctions, initFunctions,
-						predictions, predFunctions,	ansatz, pMax, inputs, fixed, parallel, allTrafos)
+						predictions, predFunctions,	ansatz, pMax, inputs, fixed, parallel, 
+						allTrafos, timeTrans=timeTrans, pretty=True)
 
 if __name__ == "__main__":
 	main()

@@ -12,7 +12,7 @@ except:
 
 def checkPredictions(predictions, predFunctions, infisAll, allVariables):
 	n = len(allVariables)
-	print '\nChecking predictions:'
+	print '\n\n\nChecking predictions:\n'
 
 	printStrings = []
 	for i in range(len(predictions)):

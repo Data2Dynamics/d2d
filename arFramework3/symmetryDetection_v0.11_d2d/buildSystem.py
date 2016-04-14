@@ -16,19 +16,26 @@ except:
 
 ### calculate conditions for a differential equation
 def doEquation(k, numerators, denominators, derivativesNum, infis,
-		diffInfis, allVariables, rs, ansatz, queue):
+		diffInfis, diffInfiT, allVariables, rs, ansatz, queue):
 
-	n = len(allVariables)
+	n = len(infis)
 	m = len(numerators)
 	
 	polynomial = Apoly(None, allVariables, rs)
 	if ansatz == 'uni' or ansatz == 'par':
 		#calculate polynomial
-		polynomial.add(diffInfis[0][k].mul(denominators[k]).mul(numerators[k]))
+		polynomial.add(diffInfis[0][k])
+		if diffInfiT is not None:
+			polynomial.sub(diffInfiT)
+		polynomial = polynomial.mul(denominators[k]).mul(numerators[k])
 		for i in range(n):
 			polynomial.sub(infis[i].mul(derivativesNum[k][i]))
 
 	elif ansatz == 'multi':
+		if diffInfiT is not None:
+			polynomial.sub(diffInfiT.mul(numerators[k]))
+			for i in range(m):
+				polynomial = polynomial.mul(denominators[i])
 		for j in range(m):
 			summand = diffInfis[k][j].mul(denominators[k]).mul(numerators[j])
 			for l in range(m):
@@ -50,7 +57,7 @@ def doEquation(k, numerators, denominators, derivativesNum, infis,
 
 ### calculate conditions for an observation equation
 def doObsEquation(k, obsDerivativesNum, infis, allVariables, rs, queue):
-	n = len(allVariables)
+	n = len(infis)
 
 	#calculate polynomial
 	polynomial = Apoly(None, allVariables, rs)
@@ -67,7 +74,7 @@ def doObsEquation(k, obsDerivativesNum, infis, allVariables, rs, queue):
 ### calculate conditions for an initial equation
 def doInitEquation(k, initDenominators, initDerivativesNum,
 			initFunctions, infis, allVariables, rs, queue):
-	n = len(allVariables)
+	n = len(infis)
 	m = len(initFunctions)
 
 	#calculate polynomial
@@ -91,13 +98,13 @@ def doInitEquation(k, initDenominators, initDerivativesNum,
 
 def buildSystem(numerators, denominators, derivativesNum, obsDerivativesNum,
 			initDenominators, initDerivativesNum, initFunctions, 
-			infis, diffInfis, allVariables, rs, nProc, ansatz):
+			infis, diffInfis, diffInfiT, allVariables, rs, nProc, ansatz):
 	if nProc>1:
 		from multiprocessing import Queue, Process
 	else:
 		from multiprocessing import Queue
 
-	n = len(allVariables)
+	n = len(infis)
 	m = len(numerators)
 	h = len(obsDerivativesNum)
 	o = len(initFunctions)
@@ -107,18 +114,21 @@ def buildSystem(numerators, denominators, derivativesNum, obsDerivativesNum,
 	queue = Queue()
 	while ns < min([m+h+o, nProc]):
 		if ns < m:
-			if nProc>1: p = Process(target=doEquation, args=(ns, numerators, denominators, derivativesNum, infis,
-								diffInfis, allVariables, rs, ansatz, queue))
+			if nProc>1: p = Process(target=doEquation, args=(ns, numerators, denominators, 
+									derivativesNum, infis, diffInfis, diffInfiT, allVariables, 
+									rs, ansatz, queue))
 			else: doEquation(ns, numerators, denominators, derivativesNum, infis,
-								diffInfis, allVariables, rs, ansatz, queue)
+									diffInfis, diffInfiT, allVariables, rs, ansatz, queue)
 		elif ns < m+h:
-			if nProc>1: p = Process(target=doObsEquation, args=(ns-m, obsDerivativesNum, infis, allVariables, rs, queue))
+			if nProc>1: p = Process(target=doObsEquation, args=(ns-m, obsDerivativesNum, infis, 
+									allVariables, rs, queue))
 			else: doObsEquation(ns-m, obsDerivativesNum, infis, allVariables, rs, queue)
 		else:
-			if nProc>1: p = Process(target=doInitEquation, args=(ns-m-h, initDenominators, initDerivativesNum,
-								initFunctions, infis, allVariables, rs, queue))
+			if nProc>1: p = Process(target=doInitEquation, args=(ns-m-h, initDenominators, 
+									initDerivativesNum,	initFunctions, infis, allVariables, 
+									rs, queue))
 			else: doInitEquation(ns-m-h, initDenominators, initDerivativesNum,
-								initFunctions, infis, allVariables, rs, queue)
+									initFunctions, infis, allVariables, rs, queue)
 		if nProc>1: p.start()
 		ns += 1
 
@@ -132,18 +142,21 @@ def buildSystem(numerators, denominators, derivativesNum, obsDerivativesNum,
 	while ns < m+h+o:
 		lgs = queue.get()
 		if ns < m:
-			if nProc>1: p = Process(target=doEquation, args=(ns,numerators, denominators, derivativesNum, infis,
-								diffInfis, allVariables, rs, ansatz, queue))
+			if nProc>1: p = Process(target=doEquation, args=(ns, numerators, denominators, 
+									derivativesNum, infis, diffInfis, diffInfiT, allVariables, 
+									rs, ansatz, queue))
 			else: doEquation(ns,numerators, denominators, derivativesNum, infis,
-								diffInfis, allVariables, rs, ansatz, queue)
+									diffInfis, diffInfiT, allVariables, rs, ansatz, queue)
 		elif ns < m+h:
-			if nProc>1: p = Process(target=doObsEquation, args=(ns-m, obsDerivativesNum, infis, allVariables, rs, queue))
+			if nProc>1: p = Process(target=doObsEquation, args=(ns-m, obsDerivativesNum, infis, 
+									allVariables, rs, queue))
 			else: doObsEquation(ns-m, obsDerivativesNum, infis, allVariables, rs, queue)
 		else:
-			if nProc>1: p = Process(target=doInitEquation, args=(ns-m-h, initDenominators, initDerivativesNum,
-								initFunctions, infis, allVariables, rs, queue))
+			if nProc>1: p = Process(target=doInitEquation, args=(ns-m-h, initDenominators, 
+									initDerivativesNum,	initFunctions, infis, allVariables, 
+									rs, queue))
 			else: doInitEquation(ns-m-h, initDenominators, initDerivativesNum,
-								initFunctions, infis, allVariables, rs, queue)
+									initFunctions, infis, allVariables, rs, queue)
 		if nProc>1: p.start()
 		ns += 1
 
