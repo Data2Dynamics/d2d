@@ -10,7 +10,12 @@ function [B, i_sorted] = docluster(A)
 tree = linkage(A,'ward','euclidean','savememory','on');
 if(size(A,1)<500)
     D = pdist(A);
-    leafOrder = optimalleaforder(tree,D);
+    try
+        leafOrder = optimalleaforder(tree,D);
+    catch err_id
+        warning('skipping optimalleaforder (%s)', err_id.message);
+        leafOrder = [];
+    end
 else
     leafOrder = [];
     warning('skipping optimalleaforder');
