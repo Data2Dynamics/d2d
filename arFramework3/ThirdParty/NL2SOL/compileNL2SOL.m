@@ -17,8 +17,8 @@ function compileNL2SOL()
     cpath   = mfilename('fullpath');
     loc     = strfind( fliplr(cpath), '/');
     cpath   = cpath(1:end-loc+1);
-    mask    = sprintf('%sPORT/%%s ', cpath);
-
+    mask    = sprintf('%sPORT/%%s', cpath);
+    
     F = {   'dn2gb.f', 'dn2g.f', 'dn2f.f', 'dn2fb.f', 'dh2rfg.f'...
             'Mach/d1mach.f', 'seterr.f', 'drn2gb.f', 'stopx.f', 'dd7mlp.f', ...
             'drn2g.f', 'dv7scp.f', 'dn2rdp.f', 'dv7dfl.f', 'dh2rfa.f', ...
@@ -39,6 +39,27 @@ function compileNL2SOL()
             };
 
     fprintf( '\nCompiling NL2SOL . . . ' );
-    mex( '-largeArrayDims', '-lmwblas', '-lmwlapack', sprintf('%s/mexnl2sol.c', cpath), ['"' sprintf(mask, F{:}) '"'], '-outdir', cpath);
+    files = cellfun(@(fn)sprintf(mask,fn), F(:), 'UniformOutput', false);
+    outFiles = cellfun(@(fn)strrep(getFileName(fn), '.f', '.o'), F, 'UniformOutput', false);
+    mex( '-c', '-largeArrayDims', '-lmwblas', '-lmwlapack', files{:} );
+    
+    try
+        cc = mex.getCompilerConfigurations('fortran');
+    catch
+        error( 'No Fortran Compiler installed' );
+    end
+    
+    if ( strcmp( cc.Name, 'gfortran' ) )
+        mex( '-largeArrayDims', '-lgfortran', '-lmwblas', '-lmwlapack', sprintf('%s/mexnl2sol.c', cpath), outFiles{:}, '-outdir', cpath);
+    else
+        mex( '-largeArrayDims', '-lmwblas', '-lmwlapack', sprintf('%s/mexnl2sol.c', cpath), outFiles{:}, '-outdir', cpath);
+    end
+    
+    delete(outFiles{:});
     fprintf( '[ OK ]\n');
+end
+
+function filename = getFileName( fullname )
+    [~, filename, ext] = fileparts( fullname );
+    filename = [filename ext];
 end
