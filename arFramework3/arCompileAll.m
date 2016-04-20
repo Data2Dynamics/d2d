@@ -13,7 +13,11 @@
 function arCompileAll(forcedCompile, debug_mode, source_dir)
 
 % turn off warning message for custom c functions
-warning('OFF', 'symbolic:generate:FunctionNotVerifiedToBeValid')
+
+warnreset = warning;
+warning('off','symbolic:mupadmex:MuPADTextWarning');
+warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
+warning('off', 'symbolic:sym:sym:DeprecateExpressions')
 
 global ar
 
@@ -91,9 +95,6 @@ if(~exist([source_dir '/Compiled/arClusterCompiledHook.m'],'file'))
     fprintf(fid, 'function arClusterCompiledHook\n');
     fclose(fid);
 end
-
-warnreset = warning;
-warning('off','symbolic:mupadmex:MuPADTextWarning');
 
 % enable timedebug mode, use with debug_mode = true!
 timedebug = false;
@@ -230,6 +231,10 @@ for m=1:length(ar.model)
         if(usePool)
             csyms = cell(size(ar.model(m).condition));
             parfor c=1:length(ar.model(m).condition)
+                warning('off','symbolic:mupadmex:MuPADTextWarning');
+                warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
+                warning('off', 'symbolic:sym:sym:DeprecateExpressions')
+                
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
                 csyms{c} = condition_sym.sym;
                 newp{c} = condition_sym.p;
@@ -298,6 +303,10 @@ for m=1:length(ar.model)
 
         if(usePool)
             parfor d=1:length(ar.model(m).data)
+                warning('off','symbolic:mupadmex:MuPADTextWarning');
+                warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
+                warning('off', 'symbolic:sym:sym:DeprecateExpressions')
+
                 c = data(d).cLink;
                 data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
                 newp{d} = data_sym.p;
@@ -405,7 +414,11 @@ for m=1:length(ar.model)
         newpx0 = cell(1,length(ar.model(m).condition));
         
         if(usePool)
-            parfor c=1:length(ar.model(m).condition)            
+            parfor c=1:length(ar.model(m).condition)         
+                warning('off','symbolic:mupadmex:MuPADTextWarning');
+                warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
+                warning('off', 'symbolic:sym:sym:DeprecateExpressions')
+
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
