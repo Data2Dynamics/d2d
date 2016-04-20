@@ -148,7 +148,7 @@ if(~isempty(yExp) && ~fastPlot)
         yExp = log10(yExp);
         yExpHl = log10(yExpHl);
     end
-    if(ploterrors ~= -1)
+    if(ploterrors ~= 1)
         plot(tExp, yExp(:,jy), ClinesExp{:},'MarkerSize',markersize);
         if(sum(~isnan(yExpHl))>0)
             plot(tExp, yExpHl(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',markersize+6);
