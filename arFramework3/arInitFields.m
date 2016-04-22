@@ -47,7 +47,7 @@ function ar = arInitFields(ar)
         {'atolV',                       false}, ...                     %   Observation scaled tolerances
         {'atolV_Sens',                  false}, ...                     %   Observation scaled tolerances
         {'optimizer',                   1}, ...                         %   Default optimizer
-        {'optimizers',                  {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1', 'NL2SOL'} }, ...
+        {'optimizers',                  {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1', 'NL2SOL','TRESNEI'} }, ...
         ...                                                             % CVODES settings
         {'atol',                        1e-6}, ...                      %   Absolute tolerance
         {'rtol',                        1e-6}, ...                      %   Relative tolerance

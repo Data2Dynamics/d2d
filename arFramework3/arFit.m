@@ -201,6 +201,11 @@ elseif(ar.config.optimizer == 8)
     [pFit, ~, resnorm, exitflag, output.iterations, lambda, jac] = ...
         mexnl2sol(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim, 1);
 
+% arTRESNEI
+elseif(ar.config.optimizer == 9)
+    [pFit, exitflag, output, lambda, jac] = ...
+        arTRESNEI(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
+    resnorm = merit_fkt(pFit);    
 else
     error('ar.config.optimizer invalid');    
 end
