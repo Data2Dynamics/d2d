@@ -33,6 +33,11 @@ if isempty( arTRESoptions.Jacobian )
 else options.jacobian = arTRESoptions.Jacobian;
 end
 
+% Prohibit termination of algorithm due to first order optimality criterion
+% by setting its tolerance to 0
+options.tol_opt = 0;
+
+
 %Choose output default (documentation from TRESNEI.m)
 %                         .output=0   a final summary output is printed: 
 %                         .output<0   no output is displayed.
@@ -52,12 +57,31 @@ lambda = [];
 jac = [];
 
 % redefine output to fit excpected naming
-output.iterations = output_tresnei.itns;
-output.funcCount = output_tresnei.feval;
-output.firstorderopt = output_tresnei.optimality;
+output.iterations = output_tresnei.itns;                % iterations count
+output.funcCount = output_tresnei.feval;                % F-evaluations count (without F-evals due to Jacobian approx
+output.firstorderopt = output_tresnei.optimality;       % first-oder optimality
+output.Fnorm = output_tresnei.Fnorm;                    % Fnorm (2-Norm of Function at solution)
 
-% set exitflag >0, because TRESNEI.m already prints its own output
-exitflag = 1;
+% Translate exitflag into output Message (code taken from TRESNEI.m)
+if ierr == 0
+      output.ExitMessage = 'Successful Termination. Nonlinear Residual Condition Satisfied.'; 
+      exitflag = 1;
+   elseif ierr == 1
+      output.ExitMessage ='Successful Termination. First-Order Optimality Condition Satisfied.';
+      exitflag = 1;
+   elseif ierr == 2
+      output.ExitMessage ='Maximum Number of Iterations Exceeded.';
+      exitflag = 50;
+   elseif ierr == 3
+      output.ExitMessage ='Maximum Number of Function Evaluations Exceeded.';
+      exitflag = 51;
+   elseif ierr == 4
+      output.ExitMessage ='Trust-Region Radius is Less than Floating-Point Relative Accuracy.';
+      exitflag = 60;
+   elseif ierr == 5
+      output.ExitMessage ='No Improvement on Nonlinear Residual.';
+      exitflag = 1;
+end
 end
 
 

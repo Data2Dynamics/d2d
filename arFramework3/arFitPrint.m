@@ -29,7 +29,9 @@ switch ar.fit.exitflag
     case 50
         outputstr = 'MaxIter Reached';
     case 51
-        outputstr = 'FitCount Reache';
+        outputstr = 'FitCount Reached';
+    case 60
+        outputstr = 'Trust-Region Radius is Less than Floating-Point Relative Accuracy.';
 end
 
 arFprintf(1, '%s finished after %i iterations: %s, total improvement = %g\n', ...
