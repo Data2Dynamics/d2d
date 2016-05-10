@@ -42,6 +42,13 @@ m = findRateRules(m);
 % [~,ia] = setdiff({m.species.id},{m.rule.variable});
 % m.species = m.species(ia);  % Remove species which are combinations of real dynamic variables, in d2d something like observables
 
+%% check for unsupported features
+if(isfield(m,'event') && ~isempty(m.event))
+    error('Conversion of events is not yet supported in D2D!')
+end
+if(isfield(m,'initialAssignment') && ~isempty(m.initialAssignment))
+    error('Conversion of initial assignments is not yet supported in D2D!')
+end
 for i=1:length(m.compartment)
     if(sum(m.compartment(i).size<1e-5)>0)
         warning('Small compartment size exist. Could be rescale the equations because of integration problems.')
@@ -375,12 +382,15 @@ for j=1:length(m.species)
         fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
             m.species(j).initialConcentration, m.species(j).constant==0, ub);
     elseif(m.species(j).isSetInitialAmount)
+        comp_id = strcmp(m.species(1).compartment,{m.compartment.name});
+        comp_vol = m.compartment(comp_id).size;
+        initial_conc = m.species(j).initialAmount/comp_vol;
         ub = 1000;
-        if(m.species(j).initialAmount>ub)
-            ub = m.species(j).initialAmount*10;
+        if(initial_conc>ub)
+            ub = initial_conc*10;
         end
         fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-            m.species(j).initialAmount, m.species(j).constant==0, ub);
+            initial_conc, m.species(j).constant==0, ub);
     end
 end
 for j=1:length(m.parameter)
@@ -471,14 +481,14 @@ if ~isdir('./Data')
 end
 system(['mv ',new_filename '_data.def Data']);
 
-if nargout == 1
+if nargout > 0
     ms.d2d = m;
     ms.sbml = mIn;
     ms.pat = pat;
     ms.rep = rep;
     varargout{1} = ms;
 end
-if nargout == 2
+if nargout > 1
     varargout{2} = new_filename;
 end
 
