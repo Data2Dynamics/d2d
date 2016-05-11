@@ -104,7 +104,14 @@ fprintf(fid, '\nSTATES\n');
 % for j=1:length(m.species)
 pat = cell(0); % if length of species names ==1, the species names are extended by '_state'
 rep = cell(0);
-for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration]) & ~[m.species.boundaryCondition]) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
+
+raterulespecies = unique({m.raterule.variable});
+israterule = false(length(raterulespecies));
+for i=1:length(raterulespecies)
+    israterule = israterule | strcmp(raterulespecies(i),{m.species.id});
+end
+
+for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration]) & ~[m.species.boundaryCondition] | ([m.species.boundaryCondition] & israterule)) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
     if length(m.species(j).id)==1 %|| strcmp(m.species(j).id,'beta')==1  % special cases or too short
         pat{end+1} =  m.species(j).id; %#ok<AGROW>
         rep{end+1} = [m.species(j).id,'_state']; %#ok<AGROW>
@@ -155,7 +162,7 @@ for j=1:length(m.u)
     fprintf(fid, '%s\t C\t "%s"\t conc.\t%s\n', sym_check(m.u(j).variable), m.u(j).units, pow2mcode(m.u(j).formula,'power'));
 end
 % treat boundary species as constant inputs
-for j=find([m.species.boundaryCondition])
+for j=find([m.species.boundaryCondition] & ~israterule)
     m.species(j).id2 = m.species(j).id;
     fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.species(j).id), 'n/a', ['init_' m.species(j).id]);
 end
@@ -223,7 +230,9 @@ if isfield(m,'raterule')
         fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.raterule(j).name);
         
     end
-else  % specified via reactions (standard case)
+end
+
+if isfield(m,'reaction') % specified via reactions (standard case)
     for j=1:length(m.reaction)
         arWaitbar(j,length(m.reaction));
         
@@ -250,12 +259,21 @@ else  % specified via reactions (standard case)
                     else
                         stoichiometry = 1;
                     end
-                    for jjj=1:stoichiometry
-                        fprintf(fid, '%s', sym_check(react_spec_name));
-                        if(jj ~= length(m.reaction(j).reactant) || jjj ~= stoichiometry)
-                            fprintf(fid, ' + ');
+                    
+                    if stoichiometry > 1
+                        if(stoichiometry == uint32(stoichiometry))
+                            fprintf(fid, '%i %s', stoichiometry, sym_check(react_spec_name));
+                        else
+                            fprintf(fid, '%2.2f %s', stoichiometry, sym_check(react_spec_name));
                         end
+                    else 
+                        fprintf(fid, '%s', sym_check(react_spec_name));
                     end
+
+                    if(jj ~= length(m.reaction(j).reactant))
+                        fprintf(fid, ' + ');
+                    end
+
                 end
             end
             fprintf(fid, ' \t-> ');
@@ -275,12 +293,19 @@ else  % specified via reactions (standard case)
                     else
                         stoichiometry = 1;
                     end
-                    for jjj=1:stoichiometry
-                        fprintf(fid, '%s', sym_check(prod_spec_name));
-                        if(jj ~= length(m.reaction(j).product) || jjj ~= stoichiometry)
-                            fprintf(fid, ' + ');
+                    if stoichiometry > 1
+                        if(stoichiometry == uint32(stoichiometry))
+                            fprintf(fid, '%i %s', stoichiometry, sym_check(prod_spec_name));
+                        else
+                            fprintf(fid, '%2.2f %s', stoichiometry, sym_check(prod_spec_name));
                         end
+                    else 
+                        fprintf(fid, '%s', sym_check(prod_spec_name));
                     end
+                    if(jj ~= length(m.reaction(j).product))
+                        fprintf(fid, ' + ');
+                    end
+
                 end
             end
             
@@ -319,7 +344,7 @@ else  % specified via reactions (standard case)
                 tmpfun = m.functionDefinition(jj).math;
                 tmpfun = strrep(tmpfun, 'lambda(', '');
                 tmpfun = tmpfun(1:end-1);
-                
+                tmpfun = replacePowerFunction(tmpfun);
                 C = textscan(tmpfun, '%s', 'Whitespace', ',');
                 C = C{1};
                 
@@ -481,6 +506,16 @@ if ~isdir('./Data')
 end
 system(['mv ',new_filename '_data.def Data']);
 
+% generate Setup.m
+if(~exist('Setup.m','file'))
+    fid = fopen('Setup.m','w');
+    fprintf(fid, 'arInit;\n');
+    fprintf(fid, 'arLoadModel(''%s'');\n',new_filename);
+    fprintf(fid, 'arLoadData(''%s'');\n',[new_filename '_data']);
+    fprintf(fid, 'arCompileAll;\n');
+end
+
+% assign returns
 if nargout > 0
     ms.d2d = m;
     ms.sbml = mIn;
@@ -577,6 +612,7 @@ C{1} = 'a';
 C{2} = 'b';
 funmat = 'a^b';
 
+str = char(str);
 % disp(str);
 funindex = strfind(str, [funstr '(']);
 while(~isempty(funindex))
@@ -631,7 +667,7 @@ while(~isempty(funindex))
 end
 % disp(str)
 
-str = char(sym(str));
+% str = char(sym(str));
 
 
 % Replaces power( ... , ...) syntax to matlab syntax (...)^(...)
