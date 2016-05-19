@@ -66,6 +66,10 @@ end
 if (exist('mota', 'file') == 0)
     addpath([ar_path '/ThirdParty/MOTA'])
 end
+if (exist('arTRESNEI', 'file') == 0)
+    addpath([ar_path '/ThirdParty/TRESNEI'])
+end
+
     
 %% CVODES
 

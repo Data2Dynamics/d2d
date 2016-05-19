@@ -21,6 +21,9 @@
 %       6 - fmincon
 %       7 - arNLS with SR1 updates
 %       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL—An Adaptive Nonlinear Least-Squares)
+%		9 - TRESNEI (B.Morini, M.Porcelli "TRESNEI, a Matlab trust-region solver for systems 
+%       of nonlinear equalities and inequalities")
+%	   10 - Ceres (Sameer Agarwal and Keir Mierle and Others, Google Solver)
 %
 
 function varargout = arFit(varargin)
@@ -201,6 +204,22 @@ elseif(ar.config.optimizer == 8)
     [pFit, ~, resnorm, exitflag, output.iterations, lambda, jac] = ...
         mexnl2sol(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim, 1);
 
+% TRESNEI
+elseif(ar.config.optimizer == 9)
+    [pFit, exitflag, output, lambda, jac] = ...
+        arTRESNEI(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
+    resnorm = merit_fkt(pFit);  
+ 
+ % Ceres
+elseif(ar.config.optimizer == 10)
+    if ~exist('mexceres', 'file')
+         compileCeres;
+    end
+    [pFit, ~, ~, exitflag, output.iterations, jac] = ...
+        ceresd2d(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optimceres, ar.config.optimceres.printLevel);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+      
 else
     error('ar.config.optimizer invalid');    
 end
