@@ -46,8 +46,10 @@ function compileCeres ()
     cpath   = mfilename('fullpath');
     if (ispc)
         slash = '\';
+        objectExtension = '.obj';
     else
         slash = '/';
+        objectExtension = '.o';
     end
     loc     = strfind( fliplr(cpath), slash);
     cpath   = cpath(1:end-loc+1);
@@ -68,7 +70,7 @@ function compileCeres ()
     pre9select       = strfind(fileListCeres, 'jet_test');
     pre10select      = strfind(fileListCeres, 'bundle_adjustment_test');    
     pre11select      = strfind(fileListCeres, 'polynomial_test');
-    pre12select      = strfind(fileListCeres, 'rotation_test');        
+    pre12select      = strfind(fileListCeres, 'rotation_test');
     
     
     select = (~isnan(cellfun(@mean,preselect)));
@@ -85,17 +87,19 @@ function compileCeres ()
     p10 = isnan(cellfun(@mean,pre10select));
     p11 = isnan(cellfun(@mean,pre11select));
     p12 = isnan(cellfun(@mean,pre12select));
-
+    
     ff = logical(p1.*p2.*p3.*p4.*p5.*p6.*p7.*p8.*p9.*p10.*p11.*p12.*select); 
     
     ccfileListCeres = fileListCeres(ff);
     
     ccoutFilesCeres = ccfileListCeres;
     
+    
+    
     for i = 1:length(ccoutFilesCeres)
             loc             = strfind( fliplr(ccoutFilesCeres{i}), slash);
             ccoutFilesCeres{i}   = ccoutFilesCeres{i}(end-loc+2:end);  
-            ccoutFilesCeres{i}   = strrep(ccoutFilesCeres{i},'.cc','.o');
+            ccoutFilesCeres{i}   = strrep(ccoutFilesCeres{i},'.cc',objectExtension);
     end
    
     %ccoutFiles = cellfun(@strrep('.cc', '.o'), ccoutFiles);
@@ -137,18 +141,17 @@ function compileCeres ()
     includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinclude"', slash, slash)];
     includesstr{end+1} = ['-I"' cpath sprintf('%seigen3"', slash)];
     
-    
     disp('compiling');
-    mex  ( '-c', includesstr{:}, '-largeArrayDims', '-lmwblas', '-lmwlapack', ccfileListCeres{:}  );
+    mex  ( '-c', 'CXXFLAGS=''\$CXXFLAGS -fPIC''', includesstr{:}, '-largeArrayDims', '-lmwblas', '-lmwlapack', ccfileListCeres{:}  );
     disp('linking');
-    mex  ( '-v', includesstr{:}, '-largeArrayDims', '-lmwblas', '-lmwlapack', '-lstdc++' ,sprintf('%s%sceresd2d.cpp', cpath, slash), ccoutFilesCeres{:}, '-outdir', cpath);
+    mex  ( includesstr{:}, 'CXXFLAGS=''\$CXXFLAGS -fPIC''', '-largeArrayDims', '-lmwblas', '-lmwlapack',sprintf('%s%sceresd2d.cpp', cpath, slash), ccoutFilesCeres{:}, '-outdir', cpath);
     
 %    mex  -I"/usr/include/eigen3"  -largeArrayDims -lmwblas -lstdc++ -L"/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung" -lceresd2d '/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung/ceresd2d.cpp'
 %    mex  -I"/usr/include/eigen3"  -largeArrayDims -lmwblas -L"/usr/lib/x86_64-linux-gnu/" -lstdc++ -L"/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung" -lceresd2d '/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung/ceresd2d.cpp'
 
 
 %%  Cleanup and exit message
-     delete(ccoutFilesCeres{:});
+   %  delete(ccoutFilesCeres{:});
 
     fprintf( '[ CERES successfully compiled ]\n');    
 end

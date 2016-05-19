@@ -50,6 +50,7 @@ class UData {
 public:
     UData(int p, const mxArray *prhs[])
     {
+        numrhsarguments = 2;
         call2Data[1] = mxCreateDoubleMatrix(p, 1, mxREAL);
         call2Data[0] = (mxArray*) parFUN;
     }
@@ -61,7 +62,7 @@ public:
     mxArray *getParameterArray() { return call2Data[1]; };
     mxArray *getFunctionHandle() { return call2Data[0]; };
     mxArray** getCallData() { return call2Data; };    
-    int numrhsarguments = 2;     // Number of arguments put in mexCallMatlab (function and parameters)
+    int numrhsarguments;     // Number of arguments put in mexCallMatlab (function and parameters)
     int getNumberofArguments() { return numrhsarguments; };
     
     mxArray *call2Data[2]; 
