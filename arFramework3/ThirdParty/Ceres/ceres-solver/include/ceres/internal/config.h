@@ -76,14 +76,22 @@
 // one of these will be defined for any given build.
 // #define CERES_STD_UNORDERED_MAP
 // #define CERES_STD_UNORDERED_MAP_IN_TR1_NAMESPACE
-#define CERES_TR1_UNORDERED_MAP
+#ifndef _WIN32
+    #define CERES_TR1_UNORDERED_MAP
+#else
+    #define CERES_STD_UNORDERED_MAP
+#endif
 // #define CERES_NO_UNORDERED_MAP
 
 // If defined, the memory header is in <tr1/memory>, otherwise <memory>.
-#define CERES_TR1_MEMORY_HEADER
+#ifndef _WIN32
+    #define CERES_TR1_MEMORY_HEADER
+#endif
 
 // If defined shared_ptr is in std::tr1 namespace, otherwise std.
-#define CERES_TR1_SHARED_PTR
+#ifndef _WIN32
+    #define CERES_TR1_SHARED_PTR
+#endif
 
 // If defined, Ceres was built as a shared library.
 // #define CERES_USING_SHARED_LIBRARY
