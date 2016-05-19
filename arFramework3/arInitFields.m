@@ -47,7 +47,7 @@ function ar = arInitFields(ar)
         {'atolV',                       false}, ...                     %   Observation scaled tolerances
         {'atolV_Sens',                  false}, ...                     %   Observation scaled tolerances
         {'optimizer',                   1}, ...                         %   Default optimizer
-        {'optimizers',                  {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1', 'NL2SOL','TRESNEI'} }, ...
+        {'optimizers',                  {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1', 'NL2SOL','TRESNEI','Ceres'} }, ...
         ...                                                             % CVODES settings
         {'atol',                        1e-6}, ...                      %   Absolute tolerance
         {'rtol',                        1e-6}, ...                      %   Relative tolerance
@@ -95,6 +95,42 @@ function ar = arInitFields(ar)
         ar.config.optim.TolX = 1e-6;
         ar.config.optim.MaxIter = 1000;
     end
+    
+    % Ceres optimization options
+    if ~isfield( ar.config, 'optimceres' )
+        ar.config.optimceres.TrustRegionStrategyType = 1;
+        ar.config.optimceres.TrustRegionStrategyTypes = {'DOGLEG', 'LEVENBERG_MARQUARDT'};
+        ar.config.optimceres.DoglegType = 1;
+        ar.config.optimceres.DoglegTypes = {'SUBSPACE_DOGLEG', 'TRADITIONAL_DOGLEG'};
+        ar.config.optimceres.LossFunctionType = 1;
+        ar.config.optimceres.LossFunctions = {'None', 'TrivialLoss', 'HuberLoss', 'SoftLOneLoss', 'CauchyLoss', 'ArctanLoss'};
+        ar.config.optimceres.LossFunctionVar = 1;
+        ar.config.optimceres.TolFun = 0;
+        ar.config.optimceres.TolX = 1e-6;
+        ar.config.optimceres.TolGradient = 0;
+        ar.config.optimceres.MaxIter = 1000;
+        ar.config.optimceres.useNonmonotonicSteps = false;
+        ar.config.optimceres.maxConsecutiveNonmonotonicSteps = 5;       
+        ar.config.optimceres.maxSolverTimeInSeconds = 1e6;        
+        ar.config.optimceres.NumThreads = 8;
+        ar.config.optimceres.NumLinearSolverThreads = 8;       
+        ar.config.optimceres.InitialTrustRegionRadius = 1e4;
+        ar.config.optimceres.MaxTrustRegionRadius = 1e16;
+        ar.config.optimceres.MinTrustRegionRadius = 1e-32;
+        ar.config.optimceres.MinRelativeDecrease = 1e-3;
+        ar.config.optimceres.MinLMDiagonal = 1e6;
+        ar.config.optimceres.MaxLMDiagonal = 1e32;
+        ar.config.optimceres.MaxNumConsecutiveInvalidSteps = 5;
+        ar.config.optimceres.JacobiScaling = true;
+        ar.config.optimceres.useInnerIterations = false;
+        ar.config.optimceres.InnerIterationTolerance = 1e-3;
+        ar.config.optimceres.LinearSolverType = 1;
+        ar.config.optimceres.LinearSolvers = {'DENSE_NORMAL_CHOLESKY', 'DENSE_QR', 'SPARSE_NORMAL_CHOLESKY',  'CGNR', 'DENSE_SCHUR', 'SPARSE_SCHUR', 'ITERATIVE_SCHUR'};
+        ar.config.optimceres.printLevel = 0;
+    
+  end
+    
+    
     
     % CVODES flags
     ar.info.arsimucalc_flags = cell(1,30);
