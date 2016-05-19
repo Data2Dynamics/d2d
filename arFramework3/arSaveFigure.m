@@ -120,7 +120,7 @@ matlab2tikz([savePath '.tex'],'figurehandle',h,'showInfo', false, 'showWarnings'
 
 %% pdf generation
 if(ispc || ar.config.useNewPlots==0)
-    print('-dpdf', savePath);
+    print('-dpdf', savePath, '-bestfit');
     print('-dpng', savePath);
     if ispc
         print('-dmeta', savePath);

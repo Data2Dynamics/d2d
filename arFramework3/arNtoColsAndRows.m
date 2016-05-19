@@ -1,4 +1,10 @@
 % [nrows, ncols] = arNtoColsAndRows(n, rowstocols)
+%
+%   usage:
+%   [nrows, ncols] = arNtoColsAndRows(n);
+%   subplot(nrows, ncols, j);
+%
+
 
 function [nrows, ncols] = arNtoColsAndRows(n, rowstocols)
 

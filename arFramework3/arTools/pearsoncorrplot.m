@@ -51,19 +51,21 @@ for j=1:size(y,2)
 end
 
 % add regression line(s)
-for j=1:size(y,2)
-%     [~,S0,~] = polyfit(x, y(:,j),0);
-    [P,S,mu] = polyfit(x, y(:,j),N);
-    
-%     pval = 1-chi2cdf(S0.normr - S.normr, 1)
-    
-    X = linspace(min(x)-(max(x)-min(x))*0.1, max(x)+(max(x)-min(x))*0.1, 50);
-    [Y,DELTA] = polyconf(P,X,S, 'alpha', 1-0.68, 'mu', mu);
-    
-    plot3(X,Y,zeros(size(X))-1,'Color', colors(j,:));
-    patch([X, fliplr(X)], [Y+DELTA, fliplr(Y-DELTA)], zeros(size([X, fliplr(X)]))-1, ...
-        ones(size([X, fliplr(X)])), 'EdgeColor', 'none', ...
-        'FaceColor', colors(j,:), 'FaceAlpha', 0.2);    
+if(size(y,1)>2)
+    for j=1:size(y,2)
+        %     [~,S0,~] = polyfit(x, y(:,j),0);
+        [P,S,mu] = polyfit(x, y(:,j),N);
+        
+        %     pval = 1-chi2cdf(S0.normr - S.normr, 1)
+        
+        X = linspace(min(x)-(max(x)-min(x))*0.1, max(x)+(max(x)-min(x))*0.1, 50);
+        [Y,DELTA] = polyconf(P,X,S, 'alpha', 1-0.68, 'mu', mu);
+        
+        plot3(X,Y,zeros(size(X))-1,'Color', colors(j,:));
+        patch([X, fliplr(X)], [Y+DELTA, fliplr(Y-DELTA)], zeros(size([X, fliplr(X)]))-1, ...
+            ones(size([X, fliplr(X)])), 'EdgeColor', 'none', ...
+            'FaceColor', colors(j,:), 'FaceAlpha', 0.2);
+    end
 end
 
 hold off
@@ -71,11 +73,13 @@ hold off
 % add additional labels
 if(isvector(y))
     % plot correlation values
-    [corrval,pval] = corr(x, y);
-    [corrval2,pval2] = corr(x, y, 'type', 'Spearman');
-    text(0.01,1, sprintf('Pearson %4.2f (p-val %4.2g)\nSpearman %4.2f (p-val %4.2g)', ...
-        corrval, pval, corrval2, pval2), 'Units', 'normalized', ...
-        'VerticalAlignment', 'top');
+    if(length(y)>2)
+        [corrval,pval] = corr(x, y);
+        [corrval2,pval2] = corr(x, y, 'type', 'Spearman');
+        text(0.01,1, sprintf('Pearson %4.2f (p-val %4.2g)\nSpearman %4.2f (p-val %4.2g)', ...
+            corrval, pval, corrval2, pval2), 'Units', 'normalized', ...
+            'VerticalAlignment', 'top');
+    end
     
     % add labels
     if(nargin>2 && ~isempty(l))

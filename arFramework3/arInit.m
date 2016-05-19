@@ -11,6 +11,8 @@ end
 
 global ar
 
+warning('off', 'symbolic:sym:sym:DeprecateExpressions')
+
 ar = struct([]);
 ar(1).stop = 0;
 ar.fevals = 0; 
