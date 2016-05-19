@@ -35,7 +35,6 @@ using ceres::SoftLOneLoss;
 using ceres::CauchyLoss;
 using ceres::ArctanLoss;
 
-
 void validateInput( const mxArray *prhs[], int nrhs, int *npars, int *bounded );
 void loadOptions( const mxArray *prhs[], int* TrustRegionStrategyType, int* DoglegType, int* LossFunctionType, double* LossFunctionVar, double* TolFun, 
                 double* TolX, double* TolGradient, int* MaxIter, bool* useNonmonotonicSteps,
@@ -44,7 +43,7 @@ void loadOptions( const mxArray *prhs[], int* TrustRegionStrategyType, int* Dogl
                 double* MinLMDiagonal, double* MaxLMDiagonal, int* MaxNumConsecutiveInvalidSteps, bool* JacobiScaling, bool* useInnerIterations, 
                 double* InnerIterationTolerance, int* LinearSolverType, int* printLevel);
 void CallFunctionCheck(const mxArray *prhs[], int p, int* nresidals, int printLevel);
-void PrintFunctionInformation(int MaxIter, int TolFun, int TolX, int TolGradient, int bounded, int n, int p);
+void PrintFunctionInformation(int MaxIter, double TolFun, double TolX, double TolGradient, int bounded, int n, int p);
 
 class UData {
 public:
@@ -139,22 +138,14 @@ class D2DCostFunction : public CostFunction
                             double** jacobians) const
       {      
             int i;                                      // (Local) iterator
-            int l;                                      // (Local) iterator 
-            int result;                                 // Temporary result variable         
+            int l;                                      // (Local) iterator
       
             double *returnValRes;                       // pointer to returned residual 
             double *returnValJac;                       // pointer to returned jacobian 
             mxArray *lhs[2];                            // Temporary varibale for output 
            
-            double pm[P];                               // Temporary store for parameter variables
-            
-            // Read out parameters to temporary store
-            for ( i = 0; i < P; i++ )
-            {
-                pm[i] = parameters[0][i];
-            }
             // Insert parameters 
-            memcpy( mxGetPr(userData->getParameterArray()), pm, P*sizeof(double) );
+            memcpy( mxGetPr(userData->getParameterArray()), parameters[0], P*sizeof(double) );
             
             // Evaluate function to get resdiuals and jacobian entries
             mexCallMATLAB( 2, lhs, userData->getNumberofArguments(), userData->getCallData(), "feval" );
@@ -242,9 +233,6 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     double  *lbtemp;                 // Temporary storage for Lower bound       
     double  *ubtemp;                 // Temporary storage for Upper bound  
     double  *texitflag;
-    int     resize;                  // Temporary Checking variable for inital trust region radius
-    double  minparasize;             // Temporary variable for minimal 1D-parameter space size
-     
    
     // Validate input, check whether we have bounds and determine number of parameters 
     validateInput( prhs, nrhs, &p, &bounded );
@@ -269,8 +257,8 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
         
     // Bounds vector initialization (needs parameter vector length)
-    double lb[p];       // Lower Bounds
-    double ub[p];       // Upper Bounds
+    double* lb = new double[p];       // Lower Bounds
+    double* ub = new double[p];       // Upper Bounds
     
     // Fetch bounds
     if ( bounded == 1)
@@ -294,7 +282,6 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             mexPrintf( "Bounds fetched\n" ); 
         }   
     }
-    
         
     // Call Function to check if it gives out Jacobian
     CallFunctionCheck(prhs, p, &n, printLevel);          
@@ -369,6 +356,10 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         problem.SetParameterLowerBound(x,i,lb[i]);
         problem.SetParameterUpperBound(x,i,ub[i]);
     }
+    
+    delete [] lb;
+    delete [] ub;
+    
     if(printLevel > 0)
     {
         mexPrintf("CostFunction added\n"); 
@@ -682,10 +673,6 @@ void loadOptions(
      int*        printLevel)
 {
 //    mexPrintf("Loading Options...\n");
-    char* stringBuffer;
-    int fieldNumber;
-    mxArray *field;
-    
     
      *TrustRegionStrategyType           = (int) getValueFromStruct( prhs, "TrustRegionStrategyType", (double) *TrustRegionStrategyType );
      *DoglegType                        = (int) getValueFromStruct( prhs, "DoglegType", (double) *DoglegType );
@@ -832,7 +819,7 @@ void validateInput( const mxArray *prhs[], int nrhs, int *npars, int *bounded )
     }
 }
 
-void PrintFunctionInformation(int MaxIter, int TolFun, int TolX, int TolGradient, int bounded, int n, int p)
+void PrintFunctionInformation(int MaxIter, double TolFun, double TolX, double TolGradient, int bounded, int n, int p)
 {
     mexPrintf("Ceres v1.11 - Settings\n");
     mexPrintf("  Maximum iterations:           %d\n", MaxIter );
