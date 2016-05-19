@@ -2456,3 +2456,9 @@ function cstr = ccode2(T, matlab_version)
         cstr = ccode(T);
     end
     
+    % Fixes bug with ccode for single line syms
+    if ( length( cstr ) > 8 )
+        if ( strcmp(cstr(1:9), '  _assign') )
+            cstr = strrep( [cstr(1:end-2) ';'], '_assign(t0,', 't0=' );
+        end     
+    end
