@@ -44,12 +44,17 @@ function compileCeres ()
     end    
     
     cpath   = mfilename('fullpath');
-    loc     = strfind( fliplr(cpath), '/');
+    if (ispc)
+        slash = '\';
+    else
+        slash = '/';
+    end
+    loc     = strfind( fliplr(cpath), slash);
     cpath   = cpath(1:end-loc+1);
     
 %% %%%%%%%%%%%%%%%%%%%%  CERES FILE LIST OF CC FILES %%%%%%%%%%%%%%%%%%%%%
     
-    fileListCeres    = getAllFiles(strcat(sprintf('%s',cpath),'/ceres-solver'));
+    fileListCeres    = getAllFiles(strcat(sprintf('%s',cpath),[slash 'ceres-solver']));
     
     preselect        = strfind(fileListCeres,'.cc');
     pre1select       = strfind(fileListCeres, 'test_util.cc');
@@ -88,7 +93,7 @@ function compileCeres ()
     ccoutFilesCeres = ccfileListCeres;
     
     for i = 1:length(ccoutFilesCeres)
-            loc             = strfind( fliplr(ccoutFilesCeres{i}), '/');
+            loc             = strfind( fliplr(ccoutFilesCeres{i}), slash);
             ccoutFilesCeres{i}   = ccoutFilesCeres{i}(end-loc+2:end);  
             ccoutFilesCeres{i}   = strrep(ccoutFilesCeres{i},'.cc','.o');
     end
@@ -126,17 +131,17 @@ function compileCeres ()
     
     includesstr = {};
     
-    includesstr{end+1} = ['-I"' cpath '/ceres-solver/internal/ceres"'];
-    includesstr{end+1} = ['-I"' cpath '/ceres-solver/internal/ceres/miniglog"'];
-    includesstr{end+1} = ['-I"' cpath '/ceres-solver/internal"'];
-    includesstr{end+1} = ['-I"' cpath '/ceres-solver/include"'];
-    includesstr{end+1} = ['-I"' cpath '/eigen3"'];
+    includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinternal%sceres"', slash, slash, slash)];
+    includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinternal%sceres%sminiglog"', slash, slash, slash, slash)];
+    includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinternal"', slash, slash)];
+    includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinclude"', slash, slash)];
+    includesstr{end+1} = ['-I"' cpath sprintf('%seigen3"', slash)];
     
     
     disp('compiling');
     mex  ( '-c', includesstr{:}, '-largeArrayDims', '-lmwblas', '-lmwlapack', ccfileListCeres{:}  );
     disp('linking');
-    mex  ( '-v', includesstr{:}, '-largeArrayDims', '-lmwblas', '-lmwlapack', '-lstdc++' ,sprintf('%s/ceresd2d.cpp', cpath), ccoutFilesCeres{:}, '-outdir', cpath);
+    mex  ( '-v', includesstr{:}, '-largeArrayDims', '-lmwblas', '-lmwlapack', '-lstdc++' ,sprintf('%s%sceresd2d.cpp', cpath, slash), ccoutFilesCeres{:}, '-outdir', cpath);
     
 %    mex  -I"/usr/include/eigen3"  -largeArrayDims -lmwblas -lstdc++ -L"/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung" -lceresd2d '/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung/ceresd2d.cpp'
 %    mex  -I"/usr/include/eigen3"  -largeArrayDims -lmwblas -L"/usr/lib/x86_64-linux-gnu/" -lstdc++ -L"/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung" -lceresd2d '/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung/ceresd2d.cpp'
