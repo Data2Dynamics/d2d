@@ -59,37 +59,34 @@ function compileCeres ()
     fileListCeres    = getAllFiles(strcat(sprintf('%s',cpath),[slash 'ceres-solver']));
     
     preselect        = strfind(fileListCeres,'.cc');
-    pre1select       = strfind(fileListCeres, 'test_util.cc');
-    pre2select       = strfind(fileListCeres, 'collections_port.cc');
-    pre3select       = strfind(fileListCeres, 'gmock_main.cc');
-    pre4select       = strfind(fileListCeres, 'autodiff');
-    pre5select       = strfind(fileListCeres, 'numeric_diff');    
-    pre6select       = strfind(fileListCeres, 'matrix_utils_test');
-    pre7select       = strfind(fileListCeres, 'compressed_row_sparse_matrix_test');    
-    pre8select       = strfind(fileListCeres, 'dense_sparse_matrix_test');
-    pre9select       = strfind(fileListCeres, 'jet_test');
-    pre10select      = strfind(fileListCeres, 'bundle_adjustment_test');    
-    pre11select      = strfind(fileListCeres, 'polynomial_test');
-    pre12select      = strfind(fileListCeres, 'rotation_test');
-    
     
     select = (~isnan(cellfun(@mean,preselect)));
     
-    p1 = isnan(cellfun(@mean,pre1select));
-    p2 = isnan(cellfun(@mean,pre2select));
-    p3 = isnan(cellfun(@mean,pre3select));
-    p4 = isnan(cellfun(@mean,pre4select));
-    p5 = isnan(cellfun(@mean,pre5select));
-    p6 = isnan(cellfun(@mean,pre6select));
-    p7 = isnan(cellfun(@mean,pre7select));
-    p8 = isnan(cellfun(@mean,pre8select)); 
-    p9 = isnan(cellfun(@mean,pre9select));
-    p10 = isnan(cellfun(@mean,pre10select));
-    p11 = isnan(cellfun(@mean,pre11select));
-    p12 = isnan(cellfun(@mean,pre12select));
+    excludelist = {};
+    excludelist{end+1} = ['test_util.cc'];
+    excludelist{end+1} = ['collections_port.cc'];
+    excludelist{end+1} = ['gmock_main.cc'];
+    excludelist{end+1} = ['autodiff'];
+    excludelist{end+1} = ['numeric_diff'];
+    excludelist{end+1} = ['matrix_utils_test'];
+    excludelist{end+1} = ['compressed_row_sparse_matrix_test'];
+    excludelist{end+1} = ['dense_sparse_matrix_test'];
+    excludelist{end+1} = ['jet_test'];
+    excludelist{end+1} = ['bundle_adjustment_test'];
+    excludelist{end+1} = ['polynomial_test'];
+    excludelist{end+1} = ['rotation_test'];
     
-    ff = logical(p1.*p2.*p3.*p4.*p5.*p6.*p7.*p8.*p9.*p10.*p11.*p12.*select); 
+    ex = ones(length(fileListCeres),1);
     
+    for i = 1:12
+        temp    = strfind(fileListCeres, excludelist{i});
+        ptemp   = isnan(cellfun(@mean,temp));
+        
+        ex      = ex.*ptemp;
+    end
+    
+    ff = logical(ex.*select);
+
     ccfileListCeres = fileListCeres(ff);
     
     ccoutFilesCeres = ccfileListCeres;
@@ -141,8 +138,14 @@ function compileCeres ()
     includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinclude"', slash, slash)];
     includesstr{end+1} = ['-I"' cpath sprintf('%seigen3"', slash)];
     
-    disp('compiling');
-    mex  ( '-c', 'CXXFLAGS=''\$CXXFLAGS -fPIC''', includesstr{:}, '-largeArrayDims', '-lmwblas', '-lmwlapack', ccfileListCeres{:}  );
+    disp('compiling');    
+    h = waitbar(0,'Please wait while compiling...');
+    steps = length(ccfileListCeres);
+    for step = 1:steps
+        mex  ( '-c', includesstr{:}, '-lchol', '-largeArrayDims', '-lmwblas', '-lmwlapack', ccfileListCeres{step}  );
+        waitbar(step / steps)
+    end
+    close(h); 
     disp('linking');
     mex  ( includesstr{:}, 'CXXFLAGS=''\$CXXFLAGS -fPIC''', '-largeArrayDims', '-lmwblas', '-lmwlapack',sprintf('%s%sceresd2d.cpp', cpath, slash), ccoutFilesCeres{:}, '-outdir', cpath);
     
