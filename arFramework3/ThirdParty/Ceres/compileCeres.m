@@ -37,10 +37,10 @@
 function compileCeres ()   
     % Check if we have a C compiler
     try
-        cc = mex.getCompilerConfigurations('C');
-        fprintf( 'C compiler(s):\t\t%s\n', sprintf('[%s] ', cc.Name) );
+        cc = mex.getCompilerConfigurations('C++');
+        fprintf( 'C++ compiler(s):\t\t%s\n', sprintf('[%s] ', cc.Name) );
     catch
-        error( 'No C Compiler installed' );
+        error( 'No C++ Compiler installed' );
     end    
     
     cpath   = mfilename('fullpath');
@@ -133,11 +133,10 @@ function compileCeres ()
     includesstr{end+1} = ['-I"' cpath '/eigen3"'];
     
     
-    
-    mex  ( '-c', includesstr{:}, '-lchol', '-largeArrayDims', '-lmwblas', '-lmwlapack', ccfileListCeres{:}  );
-     
-    mex  ( '-v', includesstr{:}, '-largeArrayDims', '-lmwblas', '-lmwlapack','-lstdc++' ,sprintf('%s/ceresd2d.cpp', cpath), ccoutFilesCeres{:}, '-outdir', cpath);
-    
+    disp('compiling');
+    mex  ( '-c', includesstr{:}, '-largeArrayDims', '-lmwblas', '-lmwlapack', ccfileListCeres{:}  );
+    disp('linking');
+    mex  ( '-v', includesstr{:}, '-largeArrayDims', '-lmwblas', '-lmwlapack', '-lstdc++' ,sprintf('%s/ceresd2d.cpp', cpath), ccoutFilesCeres{:}, '-outdir', cpath);
     
 %    mex  -I"/usr/include/eigen3"  -largeArrayDims -lmwblas -lstdc++ -L"/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung" -lceresd2d '/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung/ceresd2d.cpp'
 %    mex  -I"/usr/include/eigen3"  -largeArrayDims -lmwblas -L"/usr/lib/x86_64-linux-gnu/" -lstdc++ -L"/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung" -lceresd2d '/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung/ceresd2d.cpp'

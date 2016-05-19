@@ -495,6 +495,7 @@ for ts = 1:length(t)
     else
         if(lb_tmp_vpl==min(xtrial_tmp(vpl_nonnan)))
             lb_tmp_vpl = -Inf;
+            % occasional problem here ==> variable missing: kind_low_tmp_vpl
             fprintf('No -95 VPL for t=%d\n',t(ts));
             if(dir==-1 || dir==0)
 %                 return;
@@ -509,6 +510,7 @@ for ts = 1:length(t)
         end
         if(ub_tmp_vpl==max(xtrial_tmp(vpl_nonnan)))
             ub_tmp_vpl = Inf;
+            % occasional problem here ==> variable missing: kind_low_tmp_vpl
             fprintf('No +95 VPL for t=%d\n',t(ts));
             if(dir==1 || dir==0)
 %                 return;

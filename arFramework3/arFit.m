@@ -212,7 +212,7 @@ elseif(ar.config.optimizer == 9)
  
  % Ceres
 elseif(ar.config.optimizer == 10)
-    if ~exist('mexceres', 'file')
+    if ~exist('ceresd2d', 'file')
          compileCeres;
     end
     [pFit, ~, ~, exitflag, output.iterations, jac] = ...

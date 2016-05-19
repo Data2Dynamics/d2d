@@ -74,9 +74,9 @@
 
 // Which version of unordered map was used when Ceres was compiled. Exactly
 // one of these will be defined for any given build.
- #define CERES_STD_UNORDERED_MAP
+// #define CERES_STD_UNORDERED_MAP
 // #define CERES_STD_UNORDERED_MAP_IN_TR1_NAMESPACE
-// #define CERES_TR1_UNORDERED_MAP
+#define CERES_TR1_UNORDERED_MAP
 // #define CERES_NO_UNORDERED_MAP
 
 // If defined, the memory header is in <tr1/memory>, otherwise <memory>.
