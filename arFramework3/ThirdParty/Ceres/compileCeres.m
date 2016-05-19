@@ -139,15 +139,17 @@ function compileCeres ()
     includesstr{end+1} = ['-I"' cpath sprintf('%seigen3"', slash)];
     
     disp('compiling');    
-    h = waitbar(0,'Please wait while compiling...');
-    steps = length(ccfileListCeres);
-    for step = 1:steps
-        mex  ( '-c', includesstr{:}, '-lchol', '-largeArrayDims', '-lmwblas', '-lmwlapack', ccfileListCeres{step}  );
-        waitbar(step / steps)
-    end
-    close(h); 
-    disp('linking');
-    mex  ( includesstr{:}, 'CXXFLAGS=''\$CXXFLAGS -fPIC''', '-largeArrayDims', '-lmwblas', '-lmwlapack',sprintf('%s%sceresd2d.cpp', cpath, slash), ccoutFilesCeres{:}, '-outdir', cpath);
+    %h = waitbar(0,'Please wait while compiling...');
+    %steps = length(ccfileListCeres);
+    %for step = 1:steps
+    %    mex  ( '-c', 'CXXFLAGS=''\$CXXFLAGS -std=c++11''', includesstr{:}, '-lchol', '-largeArrayDims', '-lmwblas', '-lmwlapack', ccfileListCeres{step}  );
+    %    waitbar(step / steps)
+    %end
+    %close(h); 
+    %disp('linking');
+    %mex  ( includesstr{:}, 'CXXFLAGS=''\$CXXFLAGS -std=c++11''', '-largeArrayDims', '-lmwblas', '-lmwlapack', sprintf('%s%sceresd2d.cpp', cpath, slash), ccoutFilesCeres{:}, '-outdir', cpath);
+    
+    mex( includesstr{:}, sprintf('%sceresd2d.cpp', cpath), ccfileListCeres{:} );
     
 %    mex  -I"/usr/include/eigen3"  -largeArrayDims -lmwblas -lstdc++ -L"/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung" -lceresd2d '/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung/ceresd2d.cpp'
 %    mex  -I"/usr/include/eigen3"  -largeArrayDims -lmwblas -L"/usr/lib/x86_64-linux-gnu/" -lstdc++ -L"/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung" -lceresd2d '/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung/ceresd2d.cpp'

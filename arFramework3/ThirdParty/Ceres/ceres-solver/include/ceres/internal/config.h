@@ -45,7 +45,7 @@
 #define CERES_USE_EIGEN_SPARSE
 
 // If defined, Ceres was compiled without LAPACK.
-// #define CERES_NO_LAPACK
+#define CERES_NO_LAPACK
 
 // If defined, Ceres was compiled without SuiteSparse.
 #define CERES_NO_SUITESPARSE
@@ -58,7 +58,7 @@
 
 // If defined, Ceres was compiled to use Eigen instead of hardcoded BLAS
 // routines.
-// #define CERES_NO_CUSTOM_BLAS
+#define CERES_NO_CUSTOM_BLAS
 
 // If defined, Ceres was compiled with C++11.
 // #define CERES_USE_CXX11
