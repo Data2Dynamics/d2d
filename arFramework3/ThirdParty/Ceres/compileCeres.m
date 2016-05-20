@@ -63,18 +63,18 @@ function compileCeres ()
     select = (~isnan(cellfun(@mean,preselect)));
     
     excludelist = {};
-    excludelist{end+1} = ['test_util.cc'];
-    excludelist{end+1} = ['collections_port.cc'];
-    excludelist{end+1} = ['gmock_main.cc'];
-    excludelist{end+1} = ['autodiff'];
-    excludelist{end+1} = ['numeric_diff'];
-    excludelist{end+1} = ['matrix_utils_test'];
-    excludelist{end+1} = ['compressed_row_sparse_matrix_test'];
-    excludelist{end+1} = ['dense_sparse_matrix_test'];
-    excludelist{end+1} = ['jet_test'];
-    excludelist{end+1} = ['bundle_adjustment_test'];
-    excludelist{end+1} = ['polynomial_test'];
-    excludelist{end+1} = ['rotation_test'];
+    excludelist{end+1} = 'test_util.cc';
+    excludelist{end+1} = 'collections_port.cc';
+    excludelist{end+1} = 'gmock_main.cc';
+    excludelist{end+1} = 'autodiff';
+    excludelist{end+1} = 'numeric_diff';
+    excludelist{end+1} = 'matrix_utils_test';
+    excludelist{end+1} = 'compressed_row_sparse_matrix_test';
+    excludelist{end+1} = 'dense_sparse_matrix_test';
+    excludelist{end+1} = 'jet_test';
+    excludelist{end+1} = 'bundle_adjustment_test';
+    excludelist{end+1} = 'polynomial_test';
+    excludelist{end+1} = 'rotation_test';
     
     ex = ones(length(fileListCeres),1);
     
@@ -124,8 +124,8 @@ function compileCeres ()
     %mex  ( includesstr{:}, 'CXXFLAGS=''\$CXXFLAGS -std=c++11''', '-largeArrayDims', '-lmwblas', '-lmwlapack', sprintf('%s%sceresd2d.cpp', cpath, slash), ccoutFilesCeres{:}, '-outdir', cpath);
     
     h = msgbox('Ceres is currently compiling and linking. This process can take up to 15 minutes depending on your system. Please be patient...','Please wait...');     
-    
-    mex( includesstr{:}, sprintf('%sceresd2d.cpp', cpath), ccfileListCeres{:} ,'-outdir', cpath);
+    drawnow;
+    mex( includesstr{:}, 'CXXOPTIMFLAGS=''-O2''', '-DMAX_LOG_LEVEL=1', sprintf('%sceresd2d.cpp', cpath), ccfileListCeres{:} ,'-outdir', cpath);
     
     close(h);
     
@@ -148,7 +148,7 @@ function fileList = getAllFiles(dirName)
                                                %#   that are not '.' or '..'
   for iDir = find(validIndex)                  %# Loop over valid subdirectories
     nextDir = fullfile(dirName,subDirs{iDir});    %# Get the subdirectory path
-    fileList = [fileList; getAllFiles(nextDir)];  %# Recursively call getAllFiles
+    fileList = [fileList; getAllFiles(nextDir)];  %#ok Recursively call getAllFiles
   end
 
 end
