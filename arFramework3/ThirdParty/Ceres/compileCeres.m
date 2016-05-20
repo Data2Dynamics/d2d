@@ -98,34 +98,8 @@ function compileCeres ()
             ccoutFilesCeres{i}   = ccoutFilesCeres{i}(end-loc+2:end);  
             ccoutFilesCeres{i}   = strrep(ccoutFilesCeres{i},'.cc',objectExtension);
     end
-   
-    %ccoutFiles = cellfun(@strrep('.cc', '.o'), ccoutFiles);
-    
    %%%%%%%%%%%%%%%%%%%%  END CERES FILE LIST OF CC FILES %%%%%%%%%%%%%%%%%%
-   
-   
-    
-%% %%%%%%%%%%%%%%%%%%%% SuiteSparse CHOLMOD %%%%%%%%%%%%%%%%%%%
-    
-%     fileListCHOLMOD = getAllFiles(strcat(sprintf('%s',cpath),'/SuiteSparse/CHOLMOD/Core'));
-%     preselectcholmod       = strfind(fileListCHOLMOD,'.c');
-%     selectCHOLMOD = (~isnan(cellfun(@mean,preselectcholmod)));
-%     ccfileListCHOLMOD = fileListCHOLMOD(selectCHOLMOD);
-%     
-%     ccoutFilesCHOLMOD = ccfileListCHOLMOD;
-% 
-%     
-%     for i = 1:length(ccoutFilesCHOLMOD)
-%             loc             = strfind( fliplr(ccoutFilesCHOLMOD{i}), '/');
-%             ccoutFilesCHOLMOD{i}   = ccoutFilesCHOLMOD{i}(end-loc+2:end);  
-%             ccoutFilesCHOLMOD{i}   = strrep(ccoutFilesCHOLMOD{i},'.cc','.o');
-%     end
-
-% %%%%%%%%%%%%%%%%%%%% SuiteSparse CHOLMOD END %%%%%%%%%%%%%%%%%%%    
-    
-    
-
-
+ 
 %% Compilation
 
     fprintf( 'Compiling Ceres... \t' );
@@ -149,15 +123,12 @@ function compileCeres ()
     %disp('linking');
     %mex  ( includesstr{:}, 'CXXFLAGS=''\$CXXFLAGS -std=c++11''', '-largeArrayDims', '-lmwblas', '-lmwlapack', sprintf('%s%sceresd2d.cpp', cpath, slash), ccoutFilesCeres{:}, '-outdir', cpath);
     
+    h = msgbox('Ceres is currently compiling and linking. This process can take up to 15 minutes depending on your system. Please be patient...','Please wait...');     
+    
     mex( includesstr{:}, sprintf('%sceresd2d.cpp', cpath), ccfileListCeres{:} );
     
-%    mex  -I"/usr/include/eigen3"  -largeArrayDims -lmwblas -lstdc++ -L"/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung" -lceresd2d '/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung/ceresd2d.cpp'
-%    mex  -I"/usr/include/eigen3"  -largeArrayDims -lmwblas -L"/usr/lib/x86_64-linux-gnu/" -lstdc++ -L"/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung" -lceresd2d '/home/fgwieland/Bachelor/Matlab-Arbeiten/Eigene Matlab Arbeiten/Solver/CERES/Eigene Implementierung/d2dImplementierung/ceresd2d.cpp'
-
-
-%%  Cleanup and exit message
-   %  delete(ccoutFilesCeres{:});
-
+    close(h);
+    
     fprintf( '[ CERES successfully compiled ]\n');    
 end
 
