@@ -45,6 +45,8 @@ void loadOptions( const mxArray *prhs[], int* TrustRegionStrategyType, int* Dogl
 void CallFunctionCheck(const mxArray *prhs[], int p, int* nresidals, int printLevel);
 void PrintFunctionInformation(int MaxIter, double TolFun, double TolX, double TolGradient, int bounded, int n, int p);
 
+
+// Custum class to store relevant data for function evalutions
 class UData {
 public:
     UData(int p, const mxArray *prhs[])
@@ -66,48 +68,6 @@ public:
     
     mxArray *call2Data[2]; 
 };
-
-///////////// Test CostFunction for simple problem ////////////////////////
-// class QuadraticCostFunction
-//   : public CostFunction
-// {
-//  public:
-//   QuadraticCostFunction()
-//   {
-//     mutable_parameter_block_sizes()->push_back(2);            
-//     set_num_residuals(2);    
-//   }
-//   
-//   virtual ~QuadraticCostFunction() 
-//   {
-//   }
-// 
-//   virtual bool Evaluate(double const* const* parameters,
-//                         double* residuals,
-//                         double** jacobians) const 
-//   {      
-//     
-//    double q1[] = { parameters[0][0], parameters[0][1] };
-// 
-//     mexPrintf("\npara1 %e",parameters[0][0]);
-//     mexPrintf("\npara2 %e\n",parameters[0][1]);
-// 
-// 
-//     residuals[0] = 10 - q1[0];
-//     residuals[1] = -50 - q1[1];
-// 
-//     if (jacobians != NULL && jacobians[0] != NULL) {
-//       jacobians[0][0] = -1;
-//       jacobians[0][1] = 0;
-//       jacobians[0][2] = 0;
-//       jacobians[0][3] = -1;
-//     }
-// 
-//     return true;
-//   }
-// };
-//////////END Test CostFunction for simple problem ////////////////////////
-
 
 // Ceres CostFuntion class with information to residuals and jacobian
 class D2DCostFunction : public CostFunction
@@ -185,7 +145,7 @@ class D2DCostFunction : public CostFunction
        UData *userData;             // Class for function handle
 };
 
-// The MEX gateway function
+// The MEX gateway function being called by matlab
 void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 { 
     
@@ -221,7 +181,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     int        LinearSolverType = 1;
     int        printLevel = 0;                 
                   
-       
+    // Temporary variables   
     double  *tempstor;               // Temporary storage container
     int 	i;                       // Iterator
     
@@ -295,6 +255,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     // Copy initial guess in case everything fails
     memcpy(x, xtemp, p*sizeof(double));    
     
+    // Print Information about solver if requested (printLevel)
     if ( printLevel > 1 )
         PrintFunctionInformation(MaxIter, TolFun, TolX, TolGradient, bounded, n, p);
     
@@ -314,14 +275,16 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     // Set up the residual function (Cost Function)
     CostFunction* cost_function = new D2DCostFunction(n,p, prhs);
-    // CostFunction* cost_function = new QuadraticCostFunction;     // Test CostFunction for simple problem
     if(printLevel > 0)
     {
         mexPrintf("CostFunction created\n"); 
     }
     
+    
+    // Determine loss function of problem
+    // For documentation see Ceres website
     LossFunction* loss = NULL;
-    // Add loss function to problem
+   
     switch(LossFunctionType)
     {
         case 1:
@@ -365,15 +328,14 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         mexPrintf("CostFunction added\n"); 
     }
     
-    
-    
-        
-    // Initalize Options struct for solver
-    Solver::Options options;
+      
+
     
     /////////////////////////////////////////////////////////////////////////////////
     //////////////// OPTIONS READOUT ////////////////////////////////////////////////
     
+    // Initalize Options struct for solver
+    Solver::Options options;
     
     // Trust-region strategy
     // Options are 
@@ -387,6 +349,10 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     {
         options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
     }
+    else
+    {
+        mexPrintf("Trust-region strategy type setup invalid. Standard is used!\n");
+    };
     
     // Dogleg Type
     // 1: Traditional Dogleg
@@ -409,14 +375,14 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     // Maximum number of iterations
     options.max_num_iterations = MaxIter;  
 
-    // Abortion Tolerances
-    // to function change with each step, Default: 1e-6
-    options.function_tolerance = TolFun;
-    // to gradient change , Default: 1e-10
-    options.gradient_tolerance = TolGradient;
-    // to parameter change , Default: 1e-8
-    options.parameter_tolerance = TolX;     
     
+    // Abortion Tolerances
+    // to function change with each step, Default: 0
+    options.function_tolerance = TolFun;
+    // to gradient change , Default: 0
+    options.gradient_tolerance = TolGradient;
+    // to parameter change , Default: 1e-6
+    options.parameter_tolerance = TolX;         
     
 
     // "Relax the requirement that the trust-region algorithm take strictly decreasing steps." Default: false
@@ -458,7 +424,6 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     // Options:
     // 1  DENSE_NORMAL_CHOLESKY  !!Dependency on EIGEN!!  
     // 2  DENSE_QR (for small problems)
-    // 3  SPARSE_NORMAL_CHOLESKY !!Dependency on SuiteSparse and EIGEN!!
     // 4  CGNR for general sparse problems, !!inexact step algorithm used!!
     // for bundle adjustment problems:
     // 5  DENSE_SCHUR
@@ -473,18 +438,15 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             options.linear_solver_type = ceres::DENSE_QR;
             break;
         case 3:
-            options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
-            break;
-        case 4:
             options.linear_solver_type = ceres::CGNR;
             break;
-        case 5:
+        case 4:
              options.linear_solver_type = ceres::DENSE_SCHUR;
             break;
-        case 6:
+        case 5:
             options.linear_solver_type = ceres::SPARSE_SCHUR;
             break;
-        case 7:
+        case 6:
             options.linear_solver_type = ceres::ITERATIVE_SCHUR;
             break;
     }
@@ -501,7 +463,6 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     options.inner_iteration_tolerance = InnerIterationTolerance;
 
 
-    printLevel = 0;
     if(printLevel >0)
     {
        // If set to true, logging output is sent to STDOUT, Default: false
@@ -513,7 +474,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       // PER_MINIMIZER_ITERATION
       options.logging_type = ceres::PER_MINIMIZER_ITERATION;
     }
-    if(printLevel = 0)
+    if(printLevel < 1)
     {
       options.minimizer_progress_to_stdout = false;
       options.logging_type = ceres::SILENT;
@@ -580,10 +541,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         delete temp;
     }    
     
-    
-    
     // Exitflag
-      // Iterations
     if ( nlhs > 3 ) {
         plhs[3]     = mxCreateDoubleMatrix(1,1, mxREAL);
         texitflag        = mxGetPr( plhs[3] );
@@ -671,9 +629,7 @@ void loadOptions(
      double*     InnerIterationTolerance,
      int*        LinearSolverType,
      int*        printLevel)
-{
-//    mexPrintf("Loading Options...\n");
-    
+{    
      *TrustRegionStrategyType           = (int) getValueFromStruct( prhs, "TrustRegionStrategyType", (double) *TrustRegionStrategyType );
      *DoglegType                        = (int) getValueFromStruct( prhs, "DoglegType", (double) *DoglegType );
      *LossFunctionType                  = (int) getValueFromStruct( prhs, "LossFunctionType", (double) *LossFunctionType );
@@ -712,8 +668,8 @@ void CallFunctionCheck(const mxArray *prhs[], int p, int* nresidals, int printLe
     
     UData *tempUData = new UData(p,prhs);
 
-    int result;                 // Temporary result variable
-    mxArray *lhs[2];            // Temporary varibale for output   
+    int result;                     // Temporary result variable
+    mxArray *lhs[2];                // Temporary varibale for output   
     
     double  *x0;                 	// Intial parameter values 
     
@@ -761,10 +717,9 @@ void CallFunctionCheck(const mxArray *prhs[], int p, int* nresidals, int printLe
 
 // Check Input arguments
 // Similar format as lsqnonlin:    lsqnonlin := fit(FUN,X0,LB,UB,OPTIONS)
-//                                 ceresd2d  := fit(FUN,X0,LB,UB,OPTIONS)
+//                                 ceresd2d  := fit(FUN,X0,LB,UB,OPTIONS,PRINTLEVEL)
 void validateInput( const mxArray *prhs[], int nrhs, int *npars, int *bounded )
 {
-//    mexPrintf("Validating Input...\n");
     int pars;
     
     *bounded = 0;

@@ -125,7 +125,7 @@ function compileCeres ()
     
     h = msgbox('Ceres is currently compiling and linking. This process can take up to 15 minutes depending on your system. Please be patient...','Please wait...');     
     
-    mex( includesstr{:}, sprintf('%sceresd2d.cpp', cpath), ccfileListCeres{:} );
+    mex( includesstr{:}, sprintf('%sceresd2d.cpp', cpath), ccfileListCeres{:} ,'-outdir', cpath);
     
     close(h);
     

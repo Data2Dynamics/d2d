@@ -112,8 +112,8 @@ function ar = arInitFields(ar)
         ar.config.optimceres.useNonmonotonicSteps = false;
         ar.config.optimceres.maxConsecutiveNonmonotonicSteps = 5;       
         ar.config.optimceres.maxSolverTimeInSeconds = 1e6;        
-        ar.config.optimceres.NumThreads = 8;
-        ar.config.optimceres.NumLinearSolverThreads = 8;       
+        ar.config.optimceres.NumThreads = 1;
+        ar.config.optimceres.NumLinearSolverThreads = 1;       
         ar.config.optimceres.InitialTrustRegionRadius = 1e4;
         ar.config.optimceres.MaxTrustRegionRadius = 1e16;
         ar.config.optimceres.MinTrustRegionRadius = 1e-32;
@@ -125,7 +125,7 @@ function ar = arInitFields(ar)
         ar.config.optimceres.useInnerIterations = false;
         ar.config.optimceres.InnerIterationTolerance = 1e-3;
         ar.config.optimceres.LinearSolverType = 1;
-        ar.config.optimceres.LinearSolvers = {'DENSE_NORMAL_CHOLESKY', 'DENSE_QR', 'SPARSE_NORMAL_CHOLESKY',  'CGNR', 'DENSE_SCHUR', 'SPARSE_SCHUR', 'ITERATIVE_SCHUR'};
+        ar.config.optimceres.LinearSolvers = {'DENSE_NORMAL_CHOLESKY', 'DENSE_QR', 'CGNR', 'DENSE_SCHUR', 'SPARSE_SCHUR', 'ITERATIVE_SCHUR'};
         ar.config.optimceres.printLevel = 0;
     
   end
