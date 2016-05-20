@@ -630,31 +630,31 @@ void loadOptions(
      int*        LinearSolverType,
      int*        printLevel)
 {    
-     *TrustRegionStrategyType           = (int) getValueFromStruct( prhs, "TrustRegionStrategyType", (double) *TrustRegionStrategyType );
-     *DoglegType                        = (int) getValueFromStruct( prhs, "DoglegType", (double) *DoglegType );
-     *LossFunctionType                  = (int) getValueFromStruct( prhs, "LossFunctionType", (double) *LossFunctionType );
+     *TrustRegionStrategyType           = (int) getValueFromStruct( prhs, "TrustRegionStrategyType", (int) *TrustRegionStrategyType );
+     *DoglegType                        = (int) getValueFromStruct( prhs, "DoglegType", (int) *DoglegType );
+     *LossFunctionType                  = (int) getValueFromStruct( prhs, "LossFunctionType", (int) *LossFunctionType );
      *LossFunctionVar                   = getValueFromStruct( prhs, "LossFunctionVar", (double) *LossFunctionVar );
      *TolFun                            = getValueFromStruct( prhs, "TolFun", (double) *TolFun );
      *TolX                              = getValueFromStruct( prhs, "TolX", (double) *TolX );
      *TolGradient                       = getValueFromStruct( prhs, "TolGradient", (double) *TolGradient );
-     *MaxIter                           = (int) getValueFromStruct( prhs, "MaxIter", (double) *MaxIter );
-     *useNonmonotonicSteps              = (bool) getValueFromStruct( prhs, "useNonmonotonicSteps", (double) *useNonmonotonicSteps );
-     *maxConsecutiveNonmonotonicSteps   = (int) getValueFromStruct( prhs, "maxConsecutiveNonmonotonicSteps", (double) *maxConsecutiveNonmonotonicSteps );
+     *MaxIter                           = (int) getValueFromStruct( prhs, "MaxIter", (int) *MaxIter );
+     *useNonmonotonicSteps              = (bool) getValueFromStruct( prhs, "useNonmonotonicSteps", (bool) *useNonmonotonicSteps );
+     *maxConsecutiveNonmonotonicSteps   = (int) getValueFromStruct( prhs, "maxConsecutiveNonmonotonicSteps", (int) *maxConsecutiveNonmonotonicSteps );
      *maxSolverTimeInSeconds            = getValueFromStruct( prhs, "maxSolverTimeInSeconds", (double) *maxSolverTimeInSeconds );
-     *NumThreads                        = (int) getValueFromStruct( prhs, "NumThreads", (double) *NumThreads );
-     *NumLinearSolverThreads            = (int) getValueFromStruct( prhs, "NumLinearSolverThreads", (double) *NumLinearSolverThreads );
+     *NumThreads                        = (int) getValueFromStruct( prhs, "NumThreads", (int) *NumThreads );
+     *NumLinearSolverThreads            = (int) getValueFromStruct( prhs, "NumLinearSolverThreads", (int) *NumLinearSolverThreads );
      *InitialTrustRegionRadius          = getValueFromStruct( prhs, "InitialTrustRegionRadius", (double) *InitialTrustRegionRadius );
      *MaxTrustRegionRadius              = getValueFromStruct( prhs, "MaxTrustRegionRadius", (double) *MaxTrustRegionRadius );
      *MinTrustRegionRadius              = getValueFromStruct( prhs, "MinTrustRegionRadius", (double) *MinTrustRegionRadius );
      *MinRelativeDecrease               = getValueFromStruct( prhs, "MinRelativeDecrease", (double) *MinRelativeDecrease );
      *MinLMDiagonal                     = getValueFromStruct( prhs, "MinLMDiagonal", (double) *MinLMDiagonal );
      *MaxLMDiagonal                     = getValueFromStruct( prhs, "MaxLMDiagonal", (double) *MaxLMDiagonal );
-     *MaxNumConsecutiveInvalidSteps     = (int) getValueFromStruct( prhs, "MaxNumConsecutiveInvalidSteps", (double) *MaxNumConsecutiveInvalidSteps );
-     *JacobiScaling                     = (bool) getValueFromStruct( prhs, "JacobiScaling", (double) *JacobiScaling );
-     *useInnerIterations                = (bool) getValueFromStruct( prhs, "useInnerIterations", (double) *useInnerIterations );
+     *MaxNumConsecutiveInvalidSteps     = (int) getValueFromStruct( prhs, "MaxNumConsecutiveInvalidSteps", (int) *MaxNumConsecutiveInvalidSteps );
+     *JacobiScaling                     = (bool) getValueFromStruct( prhs, "JacobiScaling", (bool) *JacobiScaling );
+     *useInnerIterations                = (bool) getValueFromStruct( prhs, "useInnerIterations", (bool) *useInnerIterations );
      *InnerIterationTolerance           = getValueFromStruct( prhs, "InnerIterationTolerance", (double) *InnerIterationTolerance );
-     *LinearSolverType                  = (int) getValueFromStruct( prhs, "LinearSolverType", (double) *LinearSolverType );
-     *printLevel                        = (int) getValueFromStruct( prhs, "printLevel", (double) *printLevel );
+     *LinearSolverType                  = (int) getValueFromStruct( prhs, "LinearSolverType", (int) *LinearSolverType );
+     *printLevel                        = (int) getValueFromStruct( prhs, "printLevel", (int) *printLevel );
 }
 
 
