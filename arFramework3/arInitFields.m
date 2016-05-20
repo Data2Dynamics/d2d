@@ -125,7 +125,7 @@ function ar = arInitFields(ar)
         ar.config.optimceres.useInnerIterations = false;
         ar.config.optimceres.InnerIterationTolerance = 1e-3;
         ar.config.optimceres.LinearSolverType = 1;
-        ar.config.optimceres.LinearSolvers = {'DENSE_NORMAL_CHOLESKY', 'DENSE_QR', 'CGNR', 'DENSE_SCHUR', 'SPARSE_SCHUR', 'ITERATIVE_SCHUR'};
+        ar.config.optimceres.LinearSolvers = {'DENSE_QR','DENSE_NORMAL_CHOLESKY', 'CGNR', 'DENSE_SCHUR', 'SPARSE_SCHUR', 'ITERATIVE_SCHUR'};
         ar.config.optimceres.printLevel = 0;
     
   end

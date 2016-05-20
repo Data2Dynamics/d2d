@@ -422,8 +422,9 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     // Linear solver type to solve linear least square problem, 
     // Options:
-    // 1  DENSE_NORMAL_CHOLESKY  !!Dependency on EIGEN!!  
-    // 2  DENSE_QR (for small problems)
+    // 1  DENSE_QR (for small problems)
+    
+    // 2  DENSE_NORMAL_CHOLESKY  !!Dependency on EIGEN!! 
     // 4  CGNR for general sparse problems, !!inexact step algorithm used!!
     // for bundle adjustment problems:
     // 5  DENSE_SCHUR
@@ -432,10 +433,10 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     switch(LinearSolverType)
     {
         case 1:
-            options.linear_solver_type = ceres::DENSE_NORMAL_CHOLESKY;
+            options.linear_solver_type = ceres::DENSE_QR;
             break;
         case 2:
-            options.linear_solver_type = ceres::DENSE_QR;
+            options.linear_solver_type = ceres::DENSE_NORMAL_CHOLESKY;
             break;
         case 3:
             options.linear_solver_type = ceres::CGNR;
@@ -450,7 +451,6 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             options.linear_solver_type = ceres::ITERATIVE_SCHUR;
             break;
     }
-
 
 
     // Determines weather Jacobian is scaled by norm of its columns before being passed to solver,
@@ -706,8 +706,7 @@ void CallFunctionCheck(const mxArray *prhs[], int p, int* nresidals, int printLe
             mexErrMsgTxt("Error: Jacobian wrong size.");
         }
     }        
-    mexPrintf("Function output check successful\n");
-    
+       
     // Clean up
     delete tempUData;
 }
