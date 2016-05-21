@@ -174,7 +174,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     double     MinRelativeDecrease = 1e-3;
     double     MinLMDiagonal = 1e-8;
     double     MaxLMDiagonal = 1e32;
-    int        MaxNumConsecutiveInvalidSteps = 5;
+    int        MaxNumConsecutiveInvalidSteps = 10;
     bool       JacobiScaling = true;
     bool       useInnerIterations = false;
     double     InnerIterationTolerance = 1e-3;
@@ -409,14 +409,14 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     options.max_trust_region_radius = MaxTrustRegionRadius;  
     options.min_trust_region_radius = MinTrustRegionRadius;
 
-    // Minimum relative decrease before trust-region step is accepted
+    // Minimum relative decrease before trust-region step is accepted, Default: 1e-3
     options.min_relative_decrease = MinRelativeDecrease;
 
     // Minimal/Maximal values for diagonal regulazation matrix of Levenber-Marquardt method, Default: 1e6, 1e32
     options.min_lm_diagonal = MinLMDiagonal;
     options.max_lm_diagonal = MaxLMDiagonal;
 
-    // Maximum number of retries (with smaller trust-region/different conditioning) for solver if given trust-region leads to invalid results, Default: 5
+    // Maximum number of retries (with smaller trust-region/different conditioning) for solver if given trust-region leads to invalid results, Default: 10
     options.max_num_consecutive_invalid_steps = MaxNumConsecutiveInvalidSteps;
 
 
