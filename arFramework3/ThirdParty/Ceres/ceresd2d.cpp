@@ -510,14 +510,15 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     // Handle output of mex File
         
     // Resnorm
-    if ( nlhs > 1 ) {
-        plhs[1]     = mxCreateDoubleMatrix(1,1, mxREAL);
+    if ( nlhs > 1 ) 
+    {
+        plhs[1]        = mxCreateDoubleMatrix(1,1, mxREAL);
         finCost        = mxGetPr( plhs[1] );
         *finCost       = summary.final_cost;             
     }   
     
     
-    // Residual and Jacobian (if requested)
+    // Residual and Jacobian (if requested) 
     if ( ( nlhs > 2 )) 
     {
         UData *temp = new UData( p, prhs );
@@ -542,17 +543,28 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }    
     
     // Exitflag
-    if ( nlhs > 3 ) {
-        plhs[3]     = mxCreateDoubleMatrix(1,1, mxREAL);
+    if ( nlhs > 3 ) 
+    {
+        plhs[3]          = mxCreateDoubleMatrix(1,1, mxREAL);
         texitflag        = mxGetPr( plhs[3] );
         *texitflag       = summary.IsSolutionUsable();
-    }      
-    
+    }
+        
     // Iterations
-    if ( nlhs > 4 ) {
+    if ( nlhs > 4 ) 
+    {
         plhs[4]     = mxCreateDoubleMatrix(1,1, mxREAL);
         iter        = mxGetPr( plhs[4] );
         *iter       = summary.num_successful_steps+summary.num_unsuccessful_steps;
+    }   
+    
+    // Exit Message
+    if ( nlhs > 6)
+    {
+        char *stringhandle;
+        stringhandle    = (char*)mxCalloc(summary.message.size(), sizeof(char));
+        std::strcpy(stringhandle,summary.message.c_str());
+        plhs[6]         = mxCreateString(stringhandle);
     }        
 }
 

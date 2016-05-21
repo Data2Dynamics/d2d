@@ -210,16 +210,17 @@ elseif(ar.config.optimizer == 9)
         arTRESNEI(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
     resnorm = merit_fkt(pFit);  
  
- % Ceres
+% Ceres
 elseif(ar.config.optimizer == 10)
     if ~exist('ceresd2d', 'file')
          compileCeres;
     end
-    [pFit, ~, ~, exitflag, output.iterations, jac] = ...
+    [pFit, ~, ~, exitflag, output.iterations, jac, ceresexitmessage] = ...
         ceresd2d(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optimceres, ar.config.optimceres.printLevel);
     resnorm = merit_fkt(pFit);
     lambda = [];
-      
+    fit.ceresexitmessage = ceresexitmessage;
+    
 else
     error('ar.config.optimizer invalid');    
 end
