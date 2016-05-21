@@ -101,8 +101,9 @@ function compileCeres ()
    %%%%%%%%%%%%%%%%%%%%  END CERES FILE LIST OF CC FILES %%%%%%%%%%%%%%%%%%
  
 %% Compilation
-
+    fprintf( 'Copyright 2015 Google Inc. All rights reserved.\n');
     fprintf( 'Compiling Ceres... \t' );
+    
     
     includesstr = {};
     
@@ -111,20 +112,10 @@ function compileCeres ()
     includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinternal"', slash, slash)];
     includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinclude"', slash, slash)];
     includesstr{end+1} = ['-I"' cpath sprintf('%seigen3"', slash)];
-    
-    disp('compiling');    
-    %h = waitbar(0,'Please wait while compiling...');
-    %steps = length(ccfileListCeres);
-    %for step = 1:steps
-    %    mex  ( '-c', 'CXXFLAGS=''\$CXXFLAGS -std=c++11''', includesstr{:}, '-lchol', '-largeArrayDims', '-lmwblas', '-lmwlapack', ccfileListCeres{step}  );
-    %    waitbar(step / steps)
-    %end
-    %close(h); 
-    %disp('linking');
-    %mex  ( includesstr{:}, 'CXXFLAGS=''\$CXXFLAGS -std=c++11''', '-largeArrayDims', '-lmwblas', '-lmwlapack', sprintf('%s%sceresd2d.cpp', cpath, slash), ccoutFilesCeres{:}, '-outdir', cpath);
-    
+      
     h = msgbox('Ceres is currently compiling and linking. This process can take up to 15 minutes depending on your system. Please be patient...','Please wait...');     
     drawnow;
+    
     mex( includesstr{:}, 'CXXOPTIMFLAGS=''-O2''', '-DMAX_LOG_LEVEL=1', sprintf('%sceresd2d.cpp', cpath), ccfileListCeres{:} ,'-outdir', cpath);
     
     close(h);

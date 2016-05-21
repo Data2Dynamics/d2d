@@ -1,3 +1,9 @@
+// This config.h file is not shipped in this folder when downloading Ceres
+// Usually it gets created when building Ceres with CMake.
+// The configurations in it were not determined by a make process but rather
+// created by the D2D-Development team to enable compilation of the Ceres
+// Matlab interface ceresd2d.cpp
+
 // Ceres Solver - A fast non-linear least squares minimizer
 // Copyright 2015 Google Inc. All rights reserved.
 // http://ceres-solver.org/
@@ -77,20 +83,27 @@
 // #define CERES_STD_UNORDERED_MAP
 // #define CERES_STD_UNORDERED_MAP_IN_TR1_NAMESPACE
 #ifndef _WIN32
-    #define CERES_TR1_UNORDERED_MAP
-#else
-    #define CERES_STD_UNORDERED_MAP
+    #ifndef __APPLE__
+        #define CERES_TR1_UNORDERED_MAP
+    #else
+        #define CERES_STD_UNORDERED_MAP
+    #endif
 #endif
 // #define CERES_NO_UNORDERED_MAP
 
+
 // If defined, the memory header is in <tr1/memory>, otherwise <memory>.
 #ifndef _WIN32
-    #define CERES_TR1_MEMORY_HEADER
+    #ifndef __APPLE__
+        #define CERES_TR1_MEMORY_HEADER
+    #endif
 #endif
 
 // If defined shared_ptr is in std::tr1 namespace, otherwise std.
 #ifndef _WIN32
-    #define CERES_TR1_SHARED_PTR
+    #ifndef __APPLE__
+        #define CERES_TR1_SHARED_PTR
+    #endif
 #endif
 
 // If defined, Ceres was built as a shared library.
