@@ -3,48 +3,7 @@
 // uses parts of NL2SOL MEX interface by Joep Vanlier    //
 // Contact: franz-georg.wieland at mars.uni-freiburg.de  //
 
-#include "mex.h"
-#include <string.h> // For memcpy // For NULL
-#include <typeinfo>
-#include "matrix.h"
-#include <vector>
-
-#include "ceres/ceres.h"
-#include "ceres/loss_function.h"
-#include <math.h>
-#include <stdio.h>
-
-// Replace Mex inputs with meaningful names
-#define parFUN              prhs[0]
-#define parX0               prhs[1]
-#define parLB               prhs[2]
-#define parUB               prhs[3]
-#define parOPTS             prhs[4]
-#define parPRINTLEVEL       prhs[5]
-
-using namespace std;
-
-using ceres::CostFunction;
-using ceres::Problem;
-using ceres::Solver;
-using ceres::Solve;
-using ceres::LossFunction;
-using ceres::TrivialLoss;
-using ceres::HuberLoss;
-using ceres::SoftLOneLoss;
-using ceres::CauchyLoss;
-using ceres::ArctanLoss;
-
-void validateInput( const mxArray *prhs[], int nrhs, int *npars, int *bounded );
-void loadOptions( const mxArray *prhs[], int* TrustRegionStrategyType, int* DoglegType, int* LossFunctionType, double* LossFunctionVar, double* TolFun, 
-                double* TolX, double* TolGradient, int* MaxIter, bool* useNonmonotonicSteps,
-                int* maxConsecutiveNonmonotonicSteps, double* maxSolverTimeInSeconds,  int* NumThreads, int* NumLinearSolverThreads,  
-                double* InitialTrustRegionRadius, double* MaxTrustRegionRadius, double* MinTrustRegionRadius, double* MinRelativeDecrease, 
-                double* MinLMDiagonal, double* MaxLMDiagonal, int* MaxNumConsecutiveInvalidSteps, bool* JacobiScaling, bool* useInnerIterations, 
-                double* InnerIterationTolerance, int* LinearSolverType, int* printLevel);
-void CallFunctionCheck(const mxArray *prhs[], int p, int* nresidals, int printLevel);
-void PrintFunctionInformation(int MaxIter, double TolFun, double TolX, double TolGradient, int bounded, int n, int p);
-
+#include "ceresd2d.h"  
 
 // Custum class to store relevant data for function evalutions
 class UData {
@@ -197,7 +156,6 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     // Validate input, check whether we have bounds and determine number of parameters 
     validateInput( prhs, nrhs, &p, &bounded );
     
-    
     // Read out Options struct
     if ( nrhs > 3 )
         loadOptions( prhs, &TrustRegionStrategyType, &DoglegType, &LossFunctionType, &LossFunctionVar,           
@@ -207,8 +165,8 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 					 &MinTrustRegionRadius, &MinRelativeDecrease, &MinLMDiagonal, &MaxLMDiagonal,
 					 &MaxNumConsecutiveInvalidSteps, &JacobiScaling, &useInnerIterations, 
 					 &InnerIterationTolerance, &LinearSolverType, &printLevel);
-        
-       
+     
+   
     // Read out printLevel if specifically assigned (overwrites printLevel from options struct)
     if ( nrhs > 5 )
     {
@@ -351,7 +309,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
     else
     {
-        mexPrintf("Trust-region strategy type setup invalid. Standard is used!\n");
+        mexPrintf("Invalid choice for Trust-region strategy type. Default is used.\n");
     };
     
     // Dogleg Type
@@ -367,7 +325,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
     else
     {
-        mexPrintf("Dogleg Type Setup invalid. Standard is used!\n");
+        mexPrintf("Invalid choice for Dogleg Type. Default is used.\n");
     };
     
        
@@ -449,6 +407,9 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             break;
         case 6:
             options.linear_solver_type = ceres::ITERATIVE_SCHUR;
+            break;
+        default:
+            mexPrintf("Invalid choice for Linear Solver Type. Default is used.\n");
             break;
     }
 
@@ -569,10 +530,10 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 }
 
 
-double getValueFromStruct( const mxArray *prhs[], const char* fieldName, double oldValue )
+
+bool getValueFromStruct( const mxArray *prhs[], const char* fieldName, bool oldValue )
 {
-    double* value;
-    bool*   valuebool;
+    bool* value;
     int fieldNumber;
     mxArray *field;
     
@@ -583,13 +544,43 @@ double getValueFromStruct( const mxArray *prhs[], const char* fieldName, double 
     {
         field = mxGetFieldByNumber(parOPTS, 0, fieldNumber);
         /* Not a valid value? Return -1.0f */
-        if(mxIsLogical(field))
+        if( ( field == NULL ) || !mxIsLogical(field) || mxIsEmpty(field) )
         {
-            // Fetch logical values
-            valuebool = mxGetLogicals(field);
-            return valuebool[0];
+            if (!mxIsEmpty(field))
+                mexPrintf( "Invalid value for field %s\n", fieldName );
+            return oldValue;
+        } 
+        else
+        {
+            /* Fetch the value */
+            value = mxGetLogicals(field);
+            return value[0];
         }
-        else if( ( field == NULL ) || !mxIsDouble(field) || mxIsComplex(field) || mxIsEmpty(field) )
+    } 
+    else
+    {
+        /* Not a valid value? Return -1.0f */        
+        mexPrintf( "Field %s not found. Default value used.\n", fieldName );
+        return oldValue;
+    }   
+}        
+        
+        
+        
+double getValueFromStruct( const mxArray *prhs[], const char* fieldName, double oldValue )
+{
+    double* value;
+    int fieldNumber;
+    mxArray *field;
+    
+    fieldNumber = mxGetFieldNumber(parOPTS, fieldName);
+    
+    /* Does the field exist? */
+    if ( fieldNumber != -1 )
+    {
+        field = mxGetFieldByNumber(parOPTS, 0, fieldNumber);
+        /* Not a valid value? Return -1.0f */
+        if( ( field == NULL ) || !mxIsDouble(field) || mxIsComplex(field) || mxIsEmpty(field) )
         {
             if (!mxIsEmpty(field))
                 mexPrintf( "Invalid value for field %s\n", fieldName );
@@ -603,15 +594,11 @@ double getValueFromStruct( const mxArray *prhs[], const char* fieldName, double 
         }
     } else
     {
-        /* Not a valid value? Return -1.0f */
+        /* Not a valid value? Return -1.0f */        
+        mexPrintf( "Field %s not found. Default value used.\n", fieldName );
         return oldValue;
-    }
-    
-    
-    
+    }   
 }
-
-
 
 // Load options from (custom) ceres options struct
 void loadOptions( 
@@ -641,32 +628,33 @@ void loadOptions(
      double*     InnerIterationTolerance,
      int*        LinearSolverType,
      int*        printLevel)
-{    
-     *TrustRegionStrategyType           = (int) getValueFromStruct( prhs, "TrustRegionStrategyType", (int) *TrustRegionStrategyType );
-     *DoglegType                        = (int) getValueFromStruct( prhs, "DoglegType", (int) *DoglegType );
-     *LossFunctionType                  = (int) getValueFromStruct( prhs, "LossFunctionType", (int) *LossFunctionType );
-     *LossFunctionVar                   = getValueFromStruct( prhs, "LossFunctionVar", (double) *LossFunctionVar );
-     *TolFun                            = getValueFromStruct( prhs, "TolFun", (double) *TolFun );
-     *TolX                              = getValueFromStruct( prhs, "TolX", (double) *TolX );
-     *TolGradient                       = getValueFromStruct( prhs, "TolGradient", (double) *TolGradient );
-     *MaxIter                           = (int) getValueFromStruct( prhs, "MaxIter", (int) *MaxIter );
-     *useNonmonotonicSteps              = (bool) getValueFromStruct( prhs, "useNonmonotonicSteps", (bool) *useNonmonotonicSteps );
-     *maxConsecutiveNonmonotonicSteps   = (int) getValueFromStruct( prhs, "maxConsecutiveNonmonotonicSteps", (int) *maxConsecutiveNonmonotonicSteps );
-     *maxSolverTimeInSeconds            = getValueFromStruct( prhs, "maxSolverTimeInSeconds", (double) *maxSolverTimeInSeconds );
-     *NumThreads                        = (int) getValueFromStruct( prhs, "NumThreads", (int) *NumThreads );
-     *NumLinearSolverThreads            = (int) getValueFromStruct( prhs, "NumLinearSolverThreads", (int) *NumLinearSolverThreads );
-     *InitialTrustRegionRadius          = getValueFromStruct( prhs, "InitialTrustRegionRadius", (double) *InitialTrustRegionRadius );
-     *MaxTrustRegionRadius              = getValueFromStruct( prhs, "MaxTrustRegionRadius", (double) *MaxTrustRegionRadius );
-     *MinTrustRegionRadius              = getValueFromStruct( prhs, "MinTrustRegionRadius", (double) *MinTrustRegionRadius );
-     *MinRelativeDecrease               = getValueFromStruct( prhs, "MinRelativeDecrease", (double) *MinRelativeDecrease );
-     *MinLMDiagonal                     = getValueFromStruct( prhs, "MinLMDiagonal", (double) *MinLMDiagonal );
-     *MaxLMDiagonal                     = getValueFromStruct( prhs, "MaxLMDiagonal", (double) *MaxLMDiagonal );
-     *MaxNumConsecutiveInvalidSteps     = (int) getValueFromStruct( prhs, "MaxNumConsecutiveInvalidSteps", (int) *MaxNumConsecutiveInvalidSteps );
-     *JacobiScaling                     = (bool) getValueFromStruct( prhs, "JacobiScaling", (bool) *JacobiScaling );
-     *useInnerIterations                = (bool) getValueFromStruct( prhs, "useInnerIterations", (bool) *useInnerIterations );
-     *InnerIterationTolerance           = getValueFromStruct( prhs, "InnerIterationTolerance", (double) *InnerIterationTolerance );
-     *LinearSolverType                  = (int) getValueFromStruct( prhs, "LinearSolverType", (int) *LinearSolverType );
-     *printLevel                        = (int) getValueFromStruct( prhs, "printLevel", (int) *printLevel );
+{        
+     *TrustRegionStrategyType           = (int) getValueFromStruct( prhs, "TrustRegionStrategyType", (double) *TrustRegionStrategyType );
+     *DoglegType                        = (int) getValueFromStruct( prhs, "DoglegType", (double) *DoglegType );
+     *LossFunctionType                  = (int) getValueFromStruct( prhs, "LossFunctionType", (double) *LossFunctionType );
+     *LossFunctionVar                   = getValueFromStruct( prhs, "LossFunctionVar",  *LossFunctionVar );
+     *TolFun                            = getValueFromStruct( prhs, "TolFun",  *TolFun );
+     *TolX                              = getValueFromStruct( prhs, "TolX",  *TolX );
+     *TolGradient                       = getValueFromStruct( prhs, "TolGradient",  *TolGradient );
+     *MaxIter                           = (int) getValueFromStruct( prhs, "MaxIter", (double) *MaxIter );
+     *useNonmonotonicSteps              = getValueFromStruct( prhs, "useNonmonotonicSteps", *useNonmonotonicSteps );
+     *maxConsecutiveNonmonotonicSteps   = (int) getValueFromStruct( prhs, "maxConsecutiveNonmonotonicSteps", (double) *maxConsecutiveNonmonotonicSteps );
+     *maxSolverTimeInSeconds            = getValueFromStruct( prhs, "maxSolverTimeInSeconds",  *maxSolverTimeInSeconds );
+     *NumThreads                        = (int) getValueFromStruct( prhs, "NumThreads", (double) *NumThreads );
+     *NumLinearSolverThreads            = (int) getValueFromStruct( prhs, "NumLinearSolverThreads", (double) *NumLinearSolverThreads );
+     *InitialTrustRegionRadius          = getValueFromStruct( prhs, "InitialTrustRegionRadius",  *InitialTrustRegionRadius );
+     *MaxTrustRegionRadius              = getValueFromStruct( prhs, "MaxTrustRegionRadius",  *MaxTrustRegionRadius );
+     *MinTrustRegionRadius              = getValueFromStruct( prhs, "MinTrustRegionRadius",  *MinTrustRegionRadius );
+     *MinRelativeDecrease               = getValueFromStruct( prhs, "MinRelativeDecrease",  *MinRelativeDecrease );
+     *MinLMDiagonal                     = getValueFromStruct( prhs, "MinLMDiagonal",  *MinLMDiagonal );
+     *MaxLMDiagonal                     = getValueFromStruct( prhs, "MaxLMDiagonal",  *MaxLMDiagonal );
+     *MaxNumConsecutiveInvalidSteps     = (int) getValueFromStruct( prhs, "MaxNumConsecutiveInvalidSteps", (double) *MaxNumConsecutiveInvalidSteps );
+     *JacobiScaling                     = getValueFromStruct( prhs, "JacobiScaling", *JacobiScaling );
+     *useInnerIterations                = getValueFromStruct( prhs, "useInnerIterations", *useInnerIterations );
+     *InnerIterationTolerance           = getValueFromStruct( prhs, "InnerIterationTolerance", *InnerIterationTolerance );
+     *LinearSolverType                  = (int) getValueFromStruct( prhs, "LinearSolverType", (double) *LinearSolverType );
+     *printLevel                        = (int) getValueFromStruct( prhs, "printLevel", (double) *printLevel );
+     
 }
 
 

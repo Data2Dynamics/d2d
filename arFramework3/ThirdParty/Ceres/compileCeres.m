@@ -1,6 +1,19 @@
+% Compiler for MEX interface of Ceres Solver
+% (C) Franz-Georg Wieland 2016                        
+% uses parts of compileNL2SOL MEX interface compiler by Joep Vanlier 
+% Contact: franz-georg.wieland at mars.uni-freiburg.de
+%
 % This function compiles the Ceres code with the mex wrapper.
-% It should be called to produce a mex file which is callable. Note that this requires
-% a C compiler
+% It should be called to produce a mex file which is callable. 
+% Note that this requires a C++ compiler
+%
+% Ceres Solver - A fast non-linear least squares minimizer
+% Copyright 2015 Google Inc. All rights reserved.
+% http://ceres-solver.org/
+%
+% After compilation the function can be called (mostly) analogously to lsqnonlin.
+%   e.g. [X,RESNORM,RESIDUAL,EXITFLAG,ITERATIONS,JACOBIAN, CERES_EXITMESSAGE] = 
+%            ceresd2d(@fun, x0, (lb), (ub), (opts), (printlevel))
 
 
 %% LICENSE MESSAGE FROM CERES %%
@@ -35,7 +48,7 @@
 
 
 function compileCeres ()   
-    % Check if we have a C compiler
+    % Check if we have a C++ compiler
     try
         cc = mex.getCompilerConfigurations('C++');
         fprintf( 'C++ compiler(s):\t\t%s\n', sprintf('[%s] ', cc.Name) );
@@ -60,7 +73,7 @@ function compileCeres ()
     
     preselect        = strfind(fileListCeres,'.cc');
     
-    select = (~isnan(cellfun(@mean,preselect)));
+    select           = (~isnan(cellfun(@mean,preselect)));
     
     excludelist = {};
     excludelist{end+1} = 'test_util.cc';
@@ -106,12 +119,12 @@ function compileCeres ()
     
     
     includesstr = {};
-    
-    includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinternal%sceres"', slash, slash, slash)];
-    includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinternal%sceres%sminiglog"', slash, slash, slash, slash)];
-    includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinternal"', slash, slash)];
-    includesstr{end+1} = ['-I"' cpath sprintf('%sceres-solver%sinclude"', slash, slash)];
-    includesstr{end+1} = ['-I"' cpath sprintf('%seigen3"', slash)];
+    includesstr{end+1} = ['-I"' cpath(1:end-1) '"'];    
+    includesstr{end+1} = ['-I"' cpath sprintf('ceres-solver%sinternal%sceres"',  slash, slash)];
+    includesstr{end+1} = ['-I"' cpath sprintf('ceres-solver%sinternal%sceres%sminiglog"',  slash, slash, slash)];
+    includesstr{end+1} = ['-I"' cpath sprintf('ceres-solver%sinternal"',  slash)];
+    includesstr{end+1} = ['-I"' cpath sprintf('ceres-solver%sinclude"',  slash)];
+    includesstr{end+1} = ['-I"' cpath sprintf('eigen3"')];
       
     h = msgbox('Ceres is currently compiling and linking. This process can take up to 15 minutes depending on your system. Please be patient...','Please wait...');     
     drawnow;
@@ -141,7 +154,6 @@ function fileList = getAllFiles(dirName)
     nextDir = fullfile(dirName,subDirs{iDir});    %# Get the subdirectory path
     fileList = [fileList; getAllFiles(nextDir)];  %#ok Recursively call getAllFiles
   end
-
 end
 
 

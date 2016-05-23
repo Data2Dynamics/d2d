@@ -1,14 +1,16 @@
 This folder contains the compiler for the Matlab Interface of Ceres Nonlinear Solver. 
 
-ceresd2d.cpp contains the mex interface for Ceres
-compileCeres.m contains the compiling Script for ceresd2d.cpp
+ceresd2d.cpp    contains the mex interface for Ceres
+ceresd2d.h      contains the relevant includes
+compileCeres.m  contains the compiling Script for ceresd2d.cpp
 
-ceres-solver/ contains Ceres 1.11 as available at http://ceres-solver.org
-eigen3/       contains Eigen 3.2.8 as availbe at http://eigen.tuxfamily.org/index.php?title=Main_Page
+ceres-solver/ contains Ceres 1.11   as available at http://ceres-solver.org
+eigen3/       contains Eigen 3.2.8  as availbe at http://eigen.tuxfamily.org/index.php?title=Main_Page
 
 
 License 
-    for Ceres can be found in ceres-solver/LICENSE
+    for Ceres can be found in ceres-solver/LICENSE.
+    Ceres is under New BSD license
     for Eigen can be found at http://eigen.tuxfamily.org/index.php?title=Licensing_FAQ.
     Eigen is under MPL2 license.
 

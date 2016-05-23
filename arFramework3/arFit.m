@@ -216,7 +216,7 @@ elseif(ar.config.optimizer == 10)
          compileCeres;
     end
     [pFit, ~, ~, exitflag, output.iterations, jac, ceresexitmessage] = ...
-        ceresd2d(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optimceres, ar.config.optimceres.printLevel);
+        ceresd2d(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optimceres);
     resnorm = merit_fkt(pFit);
     lambda = [];
     fit.ceresexitmessage = ceresexitmessage;
