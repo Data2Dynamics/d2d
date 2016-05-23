@@ -1,3 +1,46 @@
+"""The D2D Presenter main application.
+
+   Includes the flask web server and the the modifications to run with
+   dygraphs.js.
+
+   The options are set in this file after the python imports:
+
+   SESSION_LIFETIME: Positive integer
+                     The timespan in seconds, after which the client session
+                     shall be terminated when no user input happened. Get's
+                     resetted everytime the server recieves a request.
+
+   COPY:             False|True
+                     Decides if the working directory per client session should
+                     be a temporary copy, which will be deleted after the
+                     session ends, or if the clients will work with the
+                     original model directories.
+
+   HIDE_CONSOLE:     False|True
+                     Decides if the input console to execute Matlab
+                     commands shall be accesible. For public use this might not
+                     be covered by the Matlab licence.
+
+   DEBUG:            True|False
+                     Sets the mode of the Flask webserver. Should be set to
+                     "False" when used in a productive environment.
+
+   HOST:             IP Adress
+                     Sets the IP adress of the Flask webserver. For external
+                     access set to "0.0.0.0", for internal usage on the same
+                     server use "127.0.0.1".
+
+   PORT:             Positive integer
+                     Sets the port, on which the Flask webserver should listen.
+
+   COMPRESS_LEVEL:   Integer between 0 and 9
+                     If the Flask extension Flaks-compress (flask.ext.compress)
+                     is available, sets the level of compression, where 0 is
+                     no compression and 9 is maximum compression (highest CPU
+                     usage). Highly recommended since it decreases the amount
+                     of traffic immensiveley. Default is 6.
+
+"""
 import os
 import re
 import uuid
@@ -6,26 +49,26 @@ import copy
 import stat
 from distutils.dir_util import copy_tree, remove_tree
 from threading import Thread
-from flask import Flask, jsonify, render_template, request, session, Markup, redirect
+from flask import Flask, jsonify, render_template, request, session, Markup
+from flask import redirect
 from simplejson import JSONEncoder
 import pyd2d
-
 
 # Configuration #
 SESSION_LIFETIME = 900
 DEBUG = True
-MODE = ''
+COPY = False
 HIDE_CONSOLE = False
-TEMPLATE = 'd2d_presenter.html'
 HOST = '127.0.0.1'
 PORT = '5000'
+COMPRESS_LEVEL = 4
 
 __author__ = 'Clemens Blank'
 app = Flask(__name__)
 
 try:
     from flask.ext.compress import Compress
-    app.config['COMPRESS_LEVEL'] = 4
+    app.config['COMPRESS_LEVEL'] = COMPRESS_LEVEL
     Compress(app)
 except:
     pass
@@ -75,7 +118,7 @@ def filetree():
 @app.route('/d2d_presenter', methods=['GET'])
 def d2d_presenter():
 
-    return render_template(TEMPLATE)
+    return render_template('d2d_presenter.html', hide_console=HIDE_CONSOLE)
 
 
 @app.route('/_start', methods=['GET'])
@@ -101,7 +144,7 @@ def start():
        os.getcwd(),
        request.args.get('model')))
 
-    if MODE is 'copy':
+    if COPY is True:
         temp_dir = os.path.join(os.getcwd(), 'temp', str(session['uid']))
         try:
             for root, dirs, files in os.walk(temp_dir):
@@ -280,10 +323,10 @@ def update():
         extra['tree'] = create_filetree(path=d2d.path)
 
     if 'read' in options:
-        extra['editor_data'] = editor('read', extra['filename'])
+        extra['editor_data'] = editor(d2d.path, 'read', extra['filename'])
 
     if 'write' in options:
-        extra['editor_data'] = editor('write', extra['filename'],
+        extra['editor_data'] = editor(d2d.path, 'write', extra['filename'],
                                       request.args.get('content'))
 
     if 'update_graphs' in options:  # set new parameters
@@ -344,7 +387,7 @@ def select_data(d2d_instance, options):
 
 
 def create_dygraphs_data(data):
-    """Converts the data for use in dygraphs.js
+    """Converts the data for use in dygraphs.js.
 
     Errors need to be set to 0 if not available.
     """
@@ -439,7 +482,7 @@ def create_dygraphs_data(data):
                 data['plots']['inputs'][i][j].append(
                     data['model.condition.uFineSimu'][k][i][j])
 
-    # remove unecessary data to lower the traffic
+    # remove unecessary data to decrease the traffic
     data.pop('model.data.tFine', None)
     data.pop('model.data.yFineSimu', None)
     data.pop('model.data.ystdFineSimu', None)
@@ -476,30 +519,38 @@ def create_dygraphs_data(data):
     return data
 
 
-def editor(option, filename, content=None):
+def editor(path, option, filename, content=None):
+    """Reads and writes the model files for the Editor tab.
 
-    file_content = {}
+       Checks if the file is indeed in the working directory and
+       denies access outside of it.
+    """
+    if path.endswith(os.path.dirname(filename)):
+        file_content = {}
 
-    if option == 'read':
-        try:
-            file = open(filename, 'r')
-            file_content = {"content": file.read()}
-            file.close()
-        except:
-            print("Couldn't read file.")
+        if option == 'read':
+            try:
+                file = open(filename, 'r')
+                file_content = {"content": file.read()}
+                file.close()
+            except:
+                print("Couldn't read file.")
 
-    elif option == 'write':
+        elif option == 'write':
 
-        try:
-            file = open(filename, 'w')
-            file.write(content)
-            file.close()
-            file_content = {"content": content}
+            try:
+                file = open(filename, 'w')
+                file.write(content)
+                file.close()
+                file_content = {"content": content}
 
-        except:
-            print("Couldn't write file.")
+            except:
+                print("Couldn't write file.")
 
-    return file_content
+        return file_content
+    else:
+        print("Illegal filename/directory.")
+        return 0
 
 
 def create_filetree(path=None, depth=0, max_depth=0):
@@ -545,7 +596,7 @@ def d2d_close_instance(uid):
                 del(d2d_instances[uid])
 
                 # remove the copied temporary files
-                if (MODE is 'copy') and (str(uid) in path):
+                if (COPY is True) and (str(uid) in path):
                     # set file acess to writeable before deletion
                     # (maybe necessary for Windows only)
                     for root, dirs, files in os.walk(path):
