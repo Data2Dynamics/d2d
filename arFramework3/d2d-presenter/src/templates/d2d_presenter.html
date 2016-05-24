@@ -219,11 +219,13 @@
                     <div class="panel">
                     </div>
                     <div class="tabs_content">
-                        <h3>Console</h3>
-                        <p>Press 'Shift+Enter' for multiline Input</p>
-                        <div id="command_multiline" class="command_multiline">
-                            <textarea id="command_multiline_input" rows="5" cols="50"></textarea>
-                        </div>
+                        {% if not hide_console %}
+                            <h3>Console</h3>
+                            <p>Press 'Shift+Enter' for multiline Input</p>
+                            <div id="command_multiline" class="command_multiline">
+                                <textarea id="command_multiline_input" rows="5" cols="50"></textarea>
+                            </div>
+                        {% endif %}
                         <h3>Output</h3>
                         <div id="console_out" class="console_out">
                             <textarea id="cm_console_out" rows="5" cols="50"></textarea>
