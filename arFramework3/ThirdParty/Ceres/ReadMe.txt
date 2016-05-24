@@ -1,5 +1,12 @@
 This folder contains the compiler for the Matlab Interface of Ceres Nonlinear Solver. 
 
+Please be aware that the compiling of Ceres requires a compiler with support for 
+variadic templates:
+Visual Studio C++   supported from version 2013
+GCC                 supported from version 4.4
+Clang C++           supported from version 2.9
+
+
 ceresd2d.cpp    contains the mex interface for Ceres
 ceresd2d.h      contains the relevant includes
 compileCeres.m  contains the compiling Script for ceresd2d.cpp
