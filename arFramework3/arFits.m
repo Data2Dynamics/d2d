@@ -143,8 +143,10 @@ for j=1:n
         fprintf('fit #%i: %s\n', dop(j), exception.message);
     end
     ar.timing(dop(j)) = toc;
-    if(isfield(ar.fit,'optimLog'))  % coincides with ar.config.logFitting
-        ar.optimLogs{dop(j)} = ar.fit.optimLog;
+    if(isfield(ar, 'fit'))
+        if(isfield(ar.fit,'optimLog'))  % coincides with ar.config.logFitting
+            ar.optimLogs{dop(j)} = ar.fit.optimLog;
+        end
     end
         
     if(log_fit_history)
