@@ -34,3 +34,36 @@ the operating system.
 
 
 
+//////////////////////// GCC VERSION ERROR WHEN RUNNING CERES ///////////////////
+
+When compiling Ceres with a GCC compiler, whose version is above 4.7.x (the currently max
+version supported by MATLAB), you might run into an error when running Ceres which looks like this:
+
+.../libstdc++.so.6: version `GLIBCXX_3.4.20' not found (required by …)
+
+This is due to Matlab preferably using the c++ standard library it has shipped with its distribution.
+This libstdc++, located in MATLABROOT/sys/os/ is outdated and not the one your compiler used when 
+compiling Ceres.
+
+A fix for this issue is to symbolicly link MATLABs shipped version to the newer one your compiler used.
+This can be done (on linux) via the commands:
+
+// Backup old version
+    mv MATLABROOT/sys/os/libstdc++.so.6 MATLABROOT/sys/os/libstdc++.so.6.old
+
+// Create symbolic link to local libstdc++ folder
+    ln -s /path/to/local/libstdc++.so.6 MATLABROOT/sys/os/libstdc++.so.6
+
+If you don't know where your local libstdc++.so.6 is located just run
+    locate libstdc++.so.6
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+An alternate way of fixing this problem is to explicitly tell MATLAB to use the system libstd library.
+However this has to be done before running matlab with the following command and is required for every run:
+env LD_PRELOAD=/path/to/local/libstdc++.so.6 matlab -desktop
+
+
+
+
+
