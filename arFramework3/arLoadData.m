@@ -1,31 +1,48 @@
 % Load data set to next free slot
 %
-% arLoadData(name, m, extension, removeEmptyObs)
+% arLoadData(name, m, extension, removeEmptyObs, opts)
 %
-% name              filename of data definition file
-% m                 target position (int) for model                [last loaded model]
-%                   or: model name (string)
-% extension         data file name-extension: 'xls', 'csv'          ['xls']
-%                   'none' = don't load data                           
-% removeEmptyObs    remove observation without data                [false]
+% name                  filename of data definition file
+% m                     target position (int) for model                [last loaded model]
+%                       or: model name (string)
+% extension             data file name-extension: 'xls', 'csv'         ['xls']
+%                       'none' = don't load data                           
+% removeEmptyObs        remove observation without data                [false]
+% opts                  additional option flags
+%
+% optional option flags are:
+% 'RemoveConditions'    This flag followed by a list of conditions will
+%                       allow you to filter the data that you load. Note
+%                       that the function takes both values, strings
+%                       or function handles. When you provide a function
+%                       handle, the function will be evaluated for each
+%                       condition value (in this case input_dcf). You
+%                       should make the function return 1 if the condition
+%                       is to be removed. Note that the input to the
+%                       function is a *string* not a number.
+%       Example:
+%           arLoadData( 'mydata', 1, 'csv', true, 'RemoveConditions', ...
+%           {'input_il6', '0', 'input_dcf', @(dcf)str2num(dcf)>0};
 %
 %
-% In the first column
-% 1)    Measurement time points (are allowed to occur multiple times).
+% The data file specification is as follows:
 %
-% In the following columns (in any order):
-% 2)    Experimental conditions (e.g. "input_IL6" and "input_IL1").
-% 3)    The data points for the individual observables (e.g. "P_p38_rel").
+%   In the first column
+%   1)    Measurement time points (are allowed to occur multiple times).
 %
-% Note:
-% 1)    No mathematical symbols are allowed in the column headers (e.g. "+")
-% 2)    I have always used input_ as a prefix for stimulations. Regarding
-%       observables, the suffixes "_rel" and "_au" refer to relative
-%       phosphorylation and arbitrary units.
+%   In the following columns (in any order):
+%   2)    Experimental conditions (e.g. "input_IL6" and "input_IL1").
+%   3)    The data points for the individual observables (e.g. "P_p38_rel").
+%
+%   Note:
+%   1)    No mathematical symbols are allowed in the column headers (e.g. "+")
+%   2)    I have always used input_ as a prefix for stimulations. Regarding
+%         observables, the suffixes "_rel" and "_au" refer to relative
+%         phosphorylation and arbitrary units.
 %
 % Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
 
-function arLoadData(name, m, extension, removeEmptyObs, dpPerShoot)
+function arLoadData(name, m, extension, removeEmptyObs, varargin)
 
 global ar
 
@@ -89,13 +106,24 @@ else
     end
 end
 
-if(exist('dpPerShoot','var') && dpPerShoot>0)
-    if(~isfield(ar,'ms_count_snips'))
-        ar.model(m).ms_count = 0;
-        ar.ms_count_snips = 0;
-        ar.ms_strength = 0;
-        ar.ms_threshold = 1e-5;
-        ar.ms_violation = [];
+switches = { 'dppershoot', 'removeconditions' };
+extraArgs = [ 1, 1 ];
+description = { ...
+    {'', 'Multiple shooting on'} ...
+    {'', 'Ignoring specific conditions'} };
+    
+opts = argSwitch( switches, extraArgs, description, 1, varargin );
+
+if( opts.dppershoot )
+    if( opts.dppershoot_args>0 )
+        if(~isfield(ar,'ms_count_snips'))
+            ar.model(m).ms_count = 0;
+            ar.ms_count_snips = 0;
+            ar.ms_strength = 0;
+            ar.ms_threshold = 1e-5;
+            ar.ms_violation = [];
+        end
+        dpPerShoot = opts.dppershoot_args;
     end
 else
     dpPerShoot = 0;
@@ -539,7 +567,6 @@ if(~strcmp(extension,'none') && ( ...
         times = data(:,1);
         data = data(:,2:end);
         dataCell = dataCell(:,2:end);
-
     end
     
     % random effects
@@ -601,10 +628,10 @@ if(~strcmp(extension,'none') && ( ...
                 
                 if ~isempty(dataCell)
                     [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
-                        strrep(pcond, randis_header{jj}, [randis_header{jj} randis{j,jj}]), removeEmptyObs, dpPerShoot);
+                        strrep(pcond, randis_header{jj}, [randis_header{jj} randis{j,jj}]), removeEmptyObs, dpPerShoot, opts);
                 else
                     [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell, ...
-                        strrep(pcond, randis_header{jj}, [randis_header{jj} randis{j,jj}]), removeEmptyObs, dpPerShoot);
+                        strrep(pcond, randis_header{jj}, [randis_header{jj} randis{j,jj}]), removeEmptyObs, dpPerShoot, opts);
                 end
                 if(j < size(randis,1))
                     d = d + 1;
@@ -620,7 +647,7 @@ if(~strcmp(extension,'none') && ( ...
             end
         end
     else
-        ar = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot);
+        ar = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts);
         
         % Check whether the user specified any variables with reserved words.
         checkReserved(m, d);
@@ -654,7 +681,7 @@ function checkReserved(m, d)
     arCheckReservedWords( ar.model(m).data(d).p, 'parameters' );
     arCheckReservedWords( ar.model(m).data(d).y, 'observable names' );
 
-function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot)
+function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts)
 
 % matVer = ver('MATLAB');
 
@@ -674,6 +701,34 @@ if(sum(qcond) > 0)
         [condis, ~, jcondis] = unique(data(:,qcond),'rows');
         condis = mymat2cell(condis);
     end
+
+    if (opts.removeconditions)
+        selected = true(1, size(condis,1));
+        for a = 1 : 2 : length( opts.removeconditions_args )
+            cc = ismember( condi_header, opts.removeconditions_args{a} );
+            if ( sum( cc ) > 0 )
+                values = condis(:,cc);
+                
+                % If the argument is a function handle, we evaluate them
+                % for each element
+                val = opts.removeconditions_args{a+1};
+                if ( isa(val, 'function_handle') )
+                    for jv = 1 : length( values )
+                        accepted(jv) = val(values{jv});
+                    end
+                else
+                    if (isnumeric(val))
+                        val = num2str(val);
+                    end
+                    if ~ischar(val)
+                        error( 'Filter argument for removecondition is of the wrong type' );
+                    end
+                    accepted = ismember(values, val).';
+                end
+            end
+            selected = selected & ~accepted;
+        end
+    end
     
     active_condi = false(size(condis(1,:)));
     tmpcondi = condis(1,:);
@@ -682,7 +737,7 @@ if(sum(qcond) > 0)
             active_condi(j2) = active_condi(j2) | (~strcmp(tmpcondi{j2}, condis{j1,j2}));
         end
     end
-    
+
     for j=1:size(condis,1)
         
         arFprintf(2, 'local condition #%i:\n', j)
