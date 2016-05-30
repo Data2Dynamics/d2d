@@ -725,8 +725,8 @@ if(sum(qcond) > 0)
                     end
                     accepted = ismember(values, val).';
                 end
+                selected = selected & ~accepted;
             end
-            selected = selected & ~accepted;
         end
     end
     
