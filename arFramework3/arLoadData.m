@@ -24,6 +24,9 @@
 %           arLoadData( 'mydata', 1, 'csv', true, 'RemoveConditions', ...
 %           {'input_il6', '0', 'input_dcf', @(dcf)str2num(dcf)>0};
 %
+% 'RemoveObservables'   This can be used to omit observables. Simply pass a
+%                       cell array with names of observables that should be 
+%                       ignored in the data.
 %
 % The data file specification is as follows:
 %
@@ -106,11 +109,12 @@ else
     end
 end
 
-switches = { 'dppershoot', 'removeconditions' };
-extraArgs = [ 1, 1 ];
+switches = { 'dppershoot', 'removeconditions', 'removeobservables' };
+extraArgs = [ 1, 1, 1 ];
 description = { ...
     {'', 'Multiple shooting on'} ...
-    {'', 'Ignoring specific conditions'} };
+    {'', 'Ignoring specific conditions'} ...
+    {'', 'Ignoring specific observables'} };
     
 opts = argSwitch( switches, extraArgs, description, 1, varargin );
 
@@ -246,6 +250,7 @@ while(~strcmp(C{1},'ERRORS'))
     else
         error('multiple matches for %s', cell2mat(C{1}))
     end
+    
     ar.model(m).data(d).y(yindex) = C{1};
     ar.model(m).data(d).yUnits(yindex,1) = C{2};
     ar.model(m).data(d).yUnits(yindex,2) = C{3};
@@ -311,6 +316,32 @@ end
 
 if(length(ar.model(m).data(d).fystd)<length(ar.model(m).data(d).fy))
     error('some observables do not have an error model defined');
+end
+
+% Drop certain observables
+if (opts.removeobservables)
+    if ischar( opts.removeobservables_args )
+        opts.removeobservables_args = {opts.removeobservables_args};
+    end
+    for a = 1 : length( opts.removeobservables_args )
+        jo = 1;
+        while( jo < length( ar.model(m).data(d).y ) )
+            jind = ismember( ar.model(m).data(d).y{jo}, opts.removeobservables_args );
+            if ( sum(jind) > 0 )
+                warning( '>> Explicitly removing %s!\n', ar.model(m).data(d).y{jo} );
+                ar.model(m).data(d).y(jo) = [];
+                ar.model(m).data(d).yUnits(jo,:) = [];
+                ar.model(m).data(d).normalize(jo) = [];
+                ar.model(m).data(d).logfitting(jo) = [];
+                ar.model(m).data(d).logplotting(jo) = [];
+                ar.model(m).data(d).fy(jo) = [];
+                ar.model(m).data(d).yNames(jo) = [];
+                ar.model(m).data(d).fystd(jo) = [];
+            else
+                jo = jo + 1;
+            end
+        end
+    end
 end
 
 % error parameters
