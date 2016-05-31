@@ -17,7 +17,7 @@ class mat():
         self.eval("cd '" + str(arg) + "'", 0)
 
     def eval(self, exp, args=0):
-        # print(str(exp) + "  - " + str(args)) # for debugging
+        print(str(exp) + "  - " + str(args))  # for debugging
         out = io.StringIO()
         err = io.StringIO()
         try:
@@ -91,19 +91,23 @@ class d2d(mat):
 
     """Enhances the mat class with d2d specific methods."""
 
-    def load_model(self, path, load=False):
+    def load_model(self, path, load=False, origin=''):
         self.path = os.path.dirname(path)
+        self.origin = os.path.dirname(origin)
         self.filename = os.path.basename(path)
         self.cd(self.path)
 
-        if load != False:
-            self.eval("arLoad('" + str(load) + "')")
-        else:
+        if load is None:  # no result exist - save a new one for future
             self.eval(os.path.splitext(os.path.basename(path))[0])
-        self.update()
+            self.cd(self.origin)  # save in original model directory
+            self.eval("arSave('d2d_presenter')")
+            self.cd(self.path)  # swap back to the actual working directory
+        elif load is False:  # result may exist but user wants to recompile
+            self.eval(os.path.splitext(os.path.basename(path))[0])
+        else:  # a result will be loaded
+            self.eval("arLoad('" + str(load) + "')")
 
-    def fastload(self):
-        self.load_model(os.path.join(os.getcwd(), 'models/Raia_CancerResearch2011/Setup.m'))
+        self.update()
 
     def update(self):
         self.ar = self.eval("arToPython;", 1)[0]
