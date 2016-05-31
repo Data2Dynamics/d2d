@@ -723,7 +723,13 @@ qobs = ismember(header, ar.model(m).data(d).y) & sum(~isnan(data),1)>0; %R2013a 
 qhasdata = ismember(ar.model(m).data(d).y, header(qobs)); %R2013a compatible
 
 % conditions
-qcond = ismember(header, pcond); %R2013a compatible
+if (~opts.removeconditions)
+    qcond = ismember(header, pcond); %R2013a compatible
+else
+    % Add the condi's we force filtering over (override)
+    qcond = ismember(header, pcond) | ismember(header, opts.removeconditions_args{1:2:end}); %R2013a compatible
+end
+
 if(sum(qcond) > 0)
     condi_header = header(qcond);
     if ~isempty(dataCell)
@@ -760,6 +766,7 @@ if(sum(qcond) > 0)
             end
         end
     end
+    condis = condis(selected,:);
     
     active_condi = false(size(condis(1,:)));
     tmpcondi = condis(1,:);
@@ -768,7 +775,7 @@ if(sum(qcond) > 0)
             active_condi(j2) = active_condi(j2) | (~strcmp(tmpcondi{j2}, condis{j1,j2}));
         end
     end
-
+    condi_header(active_condi)
     for j=1:size(condis,1)
         
         arFprintf(2, 'local condition #%i:\n', j)
