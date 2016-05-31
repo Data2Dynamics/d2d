@@ -775,7 +775,7 @@ if(sum(qcond) > 0)
             active_condi(j2) = active_condi(j2) | (~strcmp(tmpcondi{j2}, condis{j1,j2}));
         end
     end
-    condi_header(active_condi)
+    
     for j=1:size(condis,1)
         
         arFprintf(2, 'local condition #%i:\n', j)
