@@ -56,6 +56,11 @@ function arSteadyState( varargin )
         varargin = varargin(4:end);
     end
     
+    if ( numel( cSS ) > 1 )
+        str = sprintf( '%d ', cSS );
+        error( 'Please pass only one condition as steady state equilibration condition. You passed %s.', str );
+    end
+    
     omissions = [];
     if iscell( varargin{1} )
         for a = 1 : length( varargin{1} )
