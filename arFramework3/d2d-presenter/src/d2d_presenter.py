@@ -38,7 +38,7 @@
                      is available, sets the level of compression, where 0 is
                      no compression and 9 is maximum compression (highest CPU
                      usage). Highly recommended since it decreases the amount
-                     of traffic immensiveley. Default is 6.
+                     of traffic immensiveley. Default is 5.
 
 """
 import os
@@ -55,13 +55,13 @@ from simplejson import JSONEncoder
 import pyd2d
 
 # Configuration #
-SESSION_LIFETIME = 900
+SESSION_LIFETIME = 600
 DEBUG = True
 COPY = False
 HIDE_CONSOLE = False
 HOST = '127.0.0.1'
 PORT = '5000'
-COMPRESS_LEVEL = 4
+COMPRESS_LEVEL = 5
 
 __author__ = 'Clemens Blank'
 app = Flask(__name__)
@@ -144,6 +144,9 @@ def start():
        os.getcwd(),
        request.args.get('model')))
 
+    # save the origin of the copied model
+    originDir = os.path.join(os.getcwd(), request.args.get('model'))
+
     if COPY is True:
         temp_dir = os.path.join(os.getcwd(), 'temp', str(session['uid']))
         try:
@@ -158,12 +161,13 @@ def start():
         rootDir = os.path.join(temp_dir,
                                os.path.basename(request.args.get('model')))
     else:
-        rootDir = os.path.join(os.getcwd(), request.args.get('model'))
+        rootDir = originDir
 
     d2d_instances.update(
         {
             session['uid']: {'d2d': pyd2d.d2d(), 'alive': 1,
                              'model': rootDir,
+                             'origin': originDir,
                              'nFinePoints': nFinePoints,
                              'ROUND': ROUND,
                              'MODEL': 1,
@@ -171,7 +175,7 @@ def start():
                              }
         })
 
-    load = False
+    load = None
 
     if not do_compile.endswith('on'):
         try:
@@ -182,14 +186,22 @@ def start():
             for savename in results:
                 if savename.endswith('_d2d_presenter'):
                     load = savename
+                    print("A result has been found and will be loaded.")
                     break
+            if load is None:
+                print("No saved results found, compiling " +
+                      "from scratch and save the result. This might take " +
+                      "some time. Keep in mind that arSave will only be " +
+                      "persistent if COPY is False.")
         except:
-            load = False
-            print("No saved results found for d2d_presenter, compiling from " +
-                  "scratch. This might take some time.")
+            pass
+    else:
+        load = False
+        print("The model will be compiled. This might take some time.")
 
     d2d_instances[session['uid']]['d2d'].load_model(
-        d2d_instances[session['uid']]['model'], load=load)
+        d2d_instances[session['uid']]['model'], load=load,
+        origin=d2d_instances[session['uid']]['origin'])
 
     try:
         nFinePoints_min = d2d_instances[session['uid']]['d2d'].get(
@@ -244,8 +256,10 @@ def update():
     options = request.args.get('options').split(';')
 
     if 'console' in options:
-        command = request.args.get('command')
-        d2d.eval(command)
+
+        if HIDE_CONSOLE is False:
+            command = request.args.get('command')
+            d2d.eval(command)
 
         extra['console'] = d2d.output_total
 
@@ -525,8 +539,13 @@ def editor(path, option, filename, content=None):
        Checks if the file is indeed in the working directory and
        denies access outside of it.
     """
-    if path.endswith(os.path.dirname(filename)):
+
+    newpath = os.path.join(os.getcwd(), os.path.dirname(filename))
+
+    if newpath.startswith(path):
         file_content = {}
+
+        print("jojojo")
 
         if option == 'read':
             try:
