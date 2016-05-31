@@ -765,8 +765,8 @@ if(sum(qcond) > 0)
                 selected = selected & ~accepted;
             end
         end
+        condis = condis(selected,:);
     end
-    condis = condis(selected,:);
     
     active_condi = false(size(condis(1,:)));
     tmpcondi = condis(1,:);
