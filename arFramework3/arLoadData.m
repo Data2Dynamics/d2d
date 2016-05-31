@@ -766,6 +766,12 @@ if(sum(qcond) > 0)
             end
         end
         condis = condis(selected,:);
+        
+        % Recompute jcondi's (list which points which data row corresponds
+        % to which condition.
+        mapTo   = cumsum(selected);
+        mapTo(~selected) = -1;
+        jcondis = mapTo(jcondis);
     end
     
     active_condi = false(size(condis(1,:)));
