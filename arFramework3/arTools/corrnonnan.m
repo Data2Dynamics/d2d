@@ -17,11 +17,23 @@ for j1=1:size(X,2)
         x = X(:,[j1 j2]);
         x = x(sum(isnan(x),2)==0,:);
         if(size(x,1)>0)
-            [rho, pval] = corr(x, 'type', type);
-            RHO(j1,j2) = rho(1,2);
-            PVAL(j1,j2) = pval(1,2);
-            RHO(j2,j1) = rho(2,1);
-            PVAL(j2,j1) = pval(2,1);
+            if(any(std(x)==0))
+                if(j1==j2)
+                    RHO(j1,j2) = 1;
+                    PVAL(j1,j2) = 0;
+                else
+                    RHO(j1,j2) = 0;
+                    RHO(j2,j1) = 0;
+                    PVAL(j1,j2) = 1;
+                    PVAL(j2,j1) = 1;
+                end
+            else
+                [rho, pval] = corr(x, 'type', type);
+                RHO(j1,j2) = rho(1,2);
+                PVAL(j1,j2) = pval(1,2);
+                RHO(j2,j1) = rho(2,1);
+                PVAL(j2,j1) = pval(2,1);
+            end
         else
             RHO(j1,j2) = nan;
             PVAL(j1,j2) = nan;
