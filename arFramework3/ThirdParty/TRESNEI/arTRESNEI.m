@@ -22,6 +22,7 @@ else options.max_itns = arTRESoptions.MaxIter;
 end
 
 if isempty( arTRESoptions.MaxFunEvals )
+    options.max_feval = 10000;
 else options.max_feval = arTRESoptions.MaxFunEvals;
 end
 
@@ -35,7 +36,8 @@ end
 
 % Prohibit termination of algorithm due to first order optimality criterion
 % by setting its tolerance to 0
-options.tol_opt = 0;
+options.tol_opt = 1e-6;
+options.tol_F   = 1e-6;
 
 
 %Choose output default (documentation from TRESNEI.m)
@@ -44,6 +46,11 @@ options.tol_opt = 0;
 %                         .output>0   one line of summary output for each iteration is 
 %                                     printed: 
 options.output = 0;
+
+
+
+options.delta = 1000;
+
 
 
 % Call TRESNEI.m with relevant data, 

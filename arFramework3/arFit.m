@@ -188,7 +188,8 @@ elseif(ar.config.optimizer == 6)
     
     [pFit, ~, exitflag, output, lambda, jac] = ...
         fmincon(@merit_fkt_fmincon_lsq, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
-        [],options);
+        [],options);% x l, u are transposed because TRESNEI.m uses column notation, opposed to row notation in D2D
+
     resnorm = merit_fkt(pFit);
     
 % arNLS boosted by SR1 updates
