@@ -10,6 +10,9 @@ function arExportSBML(m, c, copasi)
 
 global ar
 
+% simulate once for initial values
+arSimu(0,1,0)
+
 if(~exist([cd '/SBML' ], 'dir'))
     mkdir([cd '/SBML' ])
 end
@@ -60,7 +63,7 @@ if(~isempty(ar.model(m).c))
                 pvalue = str2double(ar.model(m).pc{jc});
                 if(~isnan(pvalue))
                     M.compartment(jc).size = pvalue;
-                else 
+                else
                     error('%s not found', ar.model(m).pc{jc});
                 end
             end
@@ -185,7 +188,7 @@ end
 %% reactions
 fv = ar.model(m).fv;
 fv = sym(fv);
-fv = subs(fv, ar.model(m).u, ar.model(m).fu);
+% fv = subs(fv, ar.model(m).u, ar.model(m).condition(c).fu');
 fv = subs(fv, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp');
 
 vcount = 1;
@@ -234,7 +237,7 @@ for jv = 1:length(ar.model(m).fv)
                 error('influx from different compartments in reaction %i', jv);
             end
             if(~isempty(ar.model(m).cLink))
-                scomp = ar.model.cLink(jsource);
+                scomp = ar.model(m).cLink(jsource);
             end
         end
         
@@ -258,13 +261,14 @@ for jv = 1:length(ar.model(m).fv)
                 error('efflux to different compartments in reaction %i', jv);
             end
             if(~isempty(ar.model(m).cLink))
-                tcomp = ar.model.cLink(jsource);
+                tcomp = ar.model(m).cLink(jsource);
             end
         end
         
         vars = symvar(ratetemplate);
-		vars = setdiff(vars, sym(ar.model(m).x(ar.model(m).N(:,jv)<0))); %R2013a compatible
-		vars = setdiff(vars, sym(ar.model(m).condition(c).p)); %R2013a compatible
+        vars = setdiff(vars, sym(ar.model(m).x(ar.model(m).N(:,jv)<0))); %R2013a compatible
+        vars = setdiff(vars, sym(ar.model(m).condition(c).p)); %R2013a compatible
+        vars = setdiff(vars, sym(ar.model(m).u)); %R2013a compatible
         
         if(~isempty(vars))
             for jmod = 1:length(vars);
@@ -312,6 +316,115 @@ for jv = 1:length(ar.model(m).fv)
         vcount = vcount + 1;
     end
 end
+
+
+%% Inputs
+
+% find all possible input functions from arInputFunctionsC.h
+% fid = fopen([fileparts(which('arInit')) filesep 'arInputFunctionsC.h'],'r');
+% A = fread(fid,'*char')';
+% funs = regexp(A,'\ndouble\s(\w*)','tokens')';
+% funs = [funs{:}];
+funs = cellfun(@(x) x{1}, ar.config.specialFunc,'uniformoutput',0);
+
+for ju = 1:length(ar.model(m).u)
+    
+    fu = ar.model(m).condition(c).fu{ju}; % current input
+    
+    ixfun = cell2mat(cellfun(@(x) strncmp(fu,x,length(x)),funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
+    if any(ixfun)
+        if ~isempty(regexp(fu,'^step1','match')) %simple step functions
+            
+            ixevent = length(M.event) +1;% index of current event
+            
+            %event
+            M.event(ixevent).typecode =  'SBML_EVENT';
+            M.event(ixevent).metaid = '';
+            M.event(ixevent).notes = '';
+            M.event(ixevent).annotation = '';
+            M.event(ixevent).sboTerm = -1;
+            M.event(ixevent).name = ar.model(m).u{ju};
+            M.event(ixevent).id = sprintf('%s_event',ar.model(m).u{ju});
+            M.event(ixevent).useValuesFromTriggerTime = 1;
+            M.event(ixevent).trigger.typecode =  'SBML_TRIGGER';
+            
+            % construct event trigger
+            parts = strsplit(fu,{' ',',',')'});
+            M.event(ixevent).trigger.metaid =  '';
+            M.event(ixevent).trigger.notes =  '';
+            M.event(ixevent).trigger.annotation =  '';
+            M.event(ixevent).trigger.sboTerm =  -1;
+            M.event(ixevent).trigger.math =  sprintf('gt(%s,%s)',ar.model(m).t,parts{3});
+            M.event(ixevent).trigger.level =  2;
+            M.event(ixevent).trigger.version =  4;
+            
+            %         M.event.delay = [1x0 struct];
+            M.event(ixevent).eventAssignment.typecode = 'SBML_EVENT_ASSIGNMENT';
+            M.event(ixevent).eventAssignment.metaid = '';
+            M.event(ixevent).eventAssignment.notes = '';
+            M.event(ixevent).eventAssignment.annotation = '';
+            M.event(ixevent).eventAssignment.sboTerm = -1;
+            M.event(ixevent).eventAssignment.variable = ar.model(m).u{ju};
+            M.event(ixevent).eventAssignment.math = parts{4};
+            M.event(ixevent).eventAssignment.level = 2;
+            M.event(ixevent).eventAssignment.version = 4;
+            
+            M.event(ixevent).level = 2;
+            M.event(ixevent).version = 4;
+            
+            initValue = str2double(parts{2});
+            isConstant = 0;
+            
+        else % all other not supported
+            error('Input function %s not supported.',funs{ixfun})
+        end
+    else
+        %rule
+        
+        ixrule = length(M.rule) +1;% index of current rule
+        
+        M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
+        M.rule(ixrule).metaid = '';
+        M.rule(ixrule).notes = '';
+        M.rule(ixrule).annotation = '';
+        M.rule(ixrule).sboTerm = -1;
+        M.rule(ixrule).formula = fu;
+        M.rule(ixrule).variable = ar.model(m).u{ju};
+        M.rule(ixrule).species = '';
+        M.rule(ixrule).compartment = '';
+        M.rule(ixrule).name = '';
+        M.rule(ixrule).units = '';
+        M.rule(ixrule).level = 2;
+        M.rule(ixrule).version = 4;
+        
+        initValue = ar.model(m).condition(c).uFineSimu(1,ju);
+        isConstant = isempty(symvar(fu)); %only cases whith explicit numbers
+        
+    end
+    
+    % generate new parameter for each input species
+    jp = length(M.parameter)+1;
+    M.parameter(jp).typecode = 'SBML_PARAMETER';
+    M.parameter(jp).metaid = '';
+    M.parameter(jp).notes = '';
+    M.parameter(jp).annotation = '';
+    M.parameter(jp).sboTerm = -1;
+    M.parameter(jp).name = '';
+    M.parameter(jp).id = ar.model(m).u{ju};
+    M.parameter(jp).units = '';
+    M.parameter(jp).constant = isConstant;
+    M.parameter(jp).isSetValue = 1;
+    M.parameter(jp).level = 2;
+    M.parameter(jp).version = 4;
+    M.parameter(jp).value = initValue;
+    
+    
+    
+end
+
+% assign time symbol
+M.time_symbol = ar.model(m).t;
+
 arWaitbar(-1);
 
 [a,b] = isSBML_Model(M);
@@ -324,5 +437,8 @@ if(a == 1)
 else
     error('%s', b);
 end
+
+
+
 
 
