@@ -329,7 +329,13 @@ funs = cellfun(@(x) x{1}, ar.config.specialFunc,'uniformoutput',0);
 
 for ju = 1:length(ar.model(m).u)
     
-    fu = ar.model(m).condition(c).fu{ju}; % current input
+    fu = sym(ar.model(m).condition(c).fu{ju}); % current input
+    
+    % replace p with condition specific parameters
+    fu = char(subs(fu, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp'));
+   
+
+
     
     ixfun = cell2mat(cellfun(@(x) strncmp(fu,x,length(x)),funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
     if any(ixfun)
