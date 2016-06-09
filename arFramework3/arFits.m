@@ -46,7 +46,8 @@ if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
 
-dop = find(sum(~isnan(ps),2)>0);
+dop = find(sum(~isnan(ps),2)==size(ps,2));
+
 n = length(dop);
 if ~isfield(ar,'ps') || size(ps,1)<size(ar.ps,1)
     replaceOld = true;
@@ -139,9 +140,11 @@ for j=1:n
         ar.iter(dop(j)) = ar.fit.iter;
         ar.optim_crit(dop(j)) = ar.firstorderopt;
     catch exception
+        ar.chi2s(dop(j)) = inf;
         ar.ps_errors(dop(j),:) = ar.p;
         fprintf('fit #%i: %s\n', dop(j), exception.message);
     end
+
     ar.timing(dop(j)) = toc;
     if(isfield(ar, 'fit'))
         if(isfield(ar.fit,'optimLog'))  % coincides with ar.config.logFitting
