@@ -59,18 +59,18 @@ if replaceOld
     ar.ps_start = ps;
     ar.ps = nan(size(ps));
     ar.ps_errors = nan(size(ps));
-    ar.chi2s_start = nan(1,n);
-    ar.chi2sconstr_start = nan(1,n);
-    ar.chi2s = nan(1,n);
-    ar.chi2sconstr = nan(1,n);
-    ar.exitflag = nan(1,n);
-    ar.timing = nan(1,n);
-    ar.fun_evals = nan(1,n);
-    ar.iter = nan(1,n);
-    ar.optim_crit = nan(1,n);
+    ar.chi2s_start = nan(1,size(ps,1));
+    ar.chi2sconstr_start = nan(1,size(ps,1));
+    ar.chi2s = nan(1,size(ps,1));
+    ar.chi2sconstr = nan(1,size(ps,1));
+    ar.exitflag = nan(1,size(ps,1));
+    ar.timing = nan(1,size(ps,1));
+    ar.fun_evals = nan(1,size(ps,1));
+    ar.iter = nan(1,size(ps,1));
+    ar.optim_crit = nan(1,size(ps,1));
     if(isfield(ar.config,'logFitting') && ar.config.logFitting) 
         if(ar.config.logFitting)
-            ar.optimLogs = cell(1,n);
+            ar.optimLogs = cell(1,size(ps,1));
         end
     end
 else
@@ -131,7 +131,7 @@ for j=1:n
             catch
                 arFprintf(1, 'Error: Failure calling post-fitting function');
             end
-        end
+        end       
         ar.ps(dop(j),:) = ar.p;
         ar.chi2s(dop(j)) = ar.chi2fit;
         ar.chi2sconstr(dop(j)) = ar.chi2constr;

@@ -484,7 +484,6 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     {
         UData *temp = new UData( p, prhs );
         
-        int numrhsarguments=2;
         mxArray *lhs[2];            // Temporary varibale for output   
 
         memcpy( mxGetPr(temp->getParameterArray()), x, p*sizeof(double) );        
