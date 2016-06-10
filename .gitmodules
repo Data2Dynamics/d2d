@@ -4,3 +4,6 @@
 [submodule "arFramework3/ThirdParty/parfor_progress"]
 	path = arFramework3/ThirdParty/parfor_progress
 	url = git@github.com:dumbmatter/parfor_progress.git
+[submodule "arFramework3/ThirdParty/plot2svg"]
+	path = arFramework3/ThirdParty/plot2svg
+	url = git@github.com:jschwizer99/plot2svg.git
