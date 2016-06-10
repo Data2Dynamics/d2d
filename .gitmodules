@@ -1,0 +1,3 @@
+[submodule "arFramework3/ThirdParty/matlab2tikz"]
+	path = arFramework3/ThirdParty/matlab2tikz
+	url = git@github.com:matlab2tikz/matlab2tikz.git
