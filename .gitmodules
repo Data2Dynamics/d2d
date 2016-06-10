@@ -13,3 +13,6 @@
 [submodule "arFramework3/ThirdParty/export_fig"]
 	path = arFramework3/ThirdParty/export_fig
 	url = git@github.com:altmany/export_fig.git
+[submodule "arFramework3/ThirdParty/Ceres/ceres-solver"]
+	path = arFramework3/ThirdParty/Ceres/ceres-solver
+	url = git@github.com:ceres-solver/ceres-solver.git
