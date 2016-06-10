@@ -42,20 +42,20 @@ end
 
 % path of third party software
 if(exist('JEInterface','file') == 0)
-    addpath([ar_path '/ThirdParty/EvA2/JEInterface'])
-    javaaddpath([ar_path '/ThirdParty/EvA2/EvA2Base.jar'])
+    addpath([ar_path '/ThirdParty/eva2/JEInterface'])
+    javaaddpath([ar_path '/ThirdParty/eva2/EvA2Base.jar'])
 end
 if(exist('suptitle','file') == 0)
     addpath([ar_path '/ThirdParty/BlandAltman'])
 end
 if(exist('export_fig','file') == 0)
-    addpath([ar_path '/ThirdParty/export_fig-master'])
+    addpath([ar_path '/ThirdParty/export_fig'])
 end
 if(exist('plot2svg','file') == 0)
-    addpath([ar_path '/ThirdParty/plot2svg-20141130/src'])
+    addpath([ar_path '/ThirdParty/plot2svg/src'])
 end
 if(exist('matlab2tikz','file') == 0)
-    addpath([ar_path '/ThirdParty/matlab2tikz-matlab2tikz-722609f/src'])
+    addpath([ar_path '/ThirdParty/matlab2tikz/src'])
 end
 if(exist('parfor_progress','file') == 0)
     addpath([ar_path '/ThirdParty/parfor_progress'])
