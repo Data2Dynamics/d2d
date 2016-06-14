@@ -8,11 +8,7 @@ if(~isempty(symbtool) && verLessThan('symbolic', '5.5'))
 	error('MUPAD symbolic toolbox version >= 5.5 required');
 end
 
-if(~ispc)
-    ar_path = strrep(which('arInit.m'),'/arInit.m','');
-else
-    ar_path = strrep(which('arInit.m'),'\arInit.m','');
-end
+ar_path = fileparts(which('arInit.m'));
 
 warning('off','MATLAB:rmpath:DirNotFound')
 
@@ -42,8 +38,8 @@ end
 
 % path of third party software
 if(exist('JEInterface','file') == 0)
-    addpath([ar_path '/ThirdParty/eva2/JEInterface'])
-    javaaddpath([ar_path '/ThirdParty/eva2/EvA2Base.jar'])
+    addpath([ar_path '/ThirdParty/EvA2/JEInterface'])
+    javaaddpath([ar_path '/ThirdParty/EvA2/EvA2Base.jar'])
 end
 if(exist('suptitle','file') == 0)
     addpath([ar_path '/ThirdParty/BlandAltman'])
