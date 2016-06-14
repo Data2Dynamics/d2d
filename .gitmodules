@@ -7,9 +7,6 @@
 [submodule "arFramework3/ThirdParty/plot2svg"]
 	path = arFramework3/ThirdParty/plot2svg
 	url = git@github.com:jschwizer99/plot2svg.git
-[submodule "arFramework3/ThirdParty/eva2"]
-	path = arFramework3/ThirdParty/eva2
-	url = git@github.com:openea/eva2.git
 [submodule "arFramework3/ThirdParty/export_fig"]
 	path = arFramework3/ThirdParty/export_fig
 	url = git@github.com:altmany/export_fig.git
