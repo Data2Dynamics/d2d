@@ -4,7 +4,7 @@
 %
 % cluster:          MATLAB cluster object       (see help parcluster)
 % clusterpath:      execution path on cluster   ['.']
-% pool_size:        additional workers          [ceil(length(cluster.IdleWorkers)/2)]
+% pool_size:        additional workers          [ceil(length(cluster.IdleWorkers)/2) or (cluster.NumWorkers-1)]
 % jk:               parameter index or indices          [all fit parameters]
 % n:                number of ple steps up and down     [50]
 
@@ -14,8 +14,7 @@ global ar
 global ar_plecalc_cluster
 
 if(isempty(ar_plecalc_cluster)) % new job
-    if(nargin==0)
-        error('specify cluster!');
+    if(nargin==0)        error('specify cluster!');
     end
     if(nargout>0)
         error('no job available');
@@ -25,7 +24,11 @@ if(isempty(ar_plecalc_cluster)) % new job
         clusterpath = '.';
     end
     if(~exist('pool_size','var') || isempty(pool_size))
-        pool_size = ceil(length(cluster.IdleWorkers)/2);
+        if isfield(cluster,'IdleWorkers') % only exists for certain cluster objects
+            pool_size = ceil(length(cluster.IdleWorkers)/2);
+        else
+            pool_size = cluster.NumWorkers-1;
+        end
     end
     
     if(~exist('jk','var'))
