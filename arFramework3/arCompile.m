@@ -89,19 +89,12 @@ arFprintf(2, '\n');
 if(length(which('arClusterCompiledHook.m','-all'))>1)
     warning('arClusterCompiledHook.m is found multiple times which can cause compilation errors. Check your matlab path.');
 end
-if(~ispc)
-    ar_path = strrep(which('arInit.m'),'/arInit.m','');
-    %sundials_path = [strrep(which('arInit.m'),'/arInit.m','') '/sundials-2.5.0/']; % sundials 2.5.0
-    sundials_path = [strrep(which('arInit.m'),'/arInit.m','') '/sundials-2.6.1/']; % sundials 2.6.1
-    KLU_path = [strrep(which('arInit.m'),'/arInit.m','') '/KLU-1.2.1/']; % KLU of suitesparse 4.2.1
-    compiled_cluster_path = strrep(which('arClusterCompiledHook.m'),'/arClusterCompiledHook.m','');
-else
-    ar_path = strrep(which('arInit.m'),'\arInit.m','');
-    %sundials_path = [strrep(which('arInit.m'),'\arInit.m','') '\sundials-2.5.0\']; % sundials 2.5.0
-    sundials_path = [strrep(which('arInit.m'),'\arInit.m','') '\sundials-2.6.1\']; % sundials 2.6.1
-    KLU_path = [strrep(which('arInit.m'),'\arInit.m','') '\KLU-1.2.1\']; % KLU of suitesparse 4.2.1
-    compiled_cluster_path = strrep(which('arClusterCompiledHook.m'),'\arClusterCompiledHook.m','');
-end
+
+ar_path = fileparts(which('arInit.m'));
+% sundials_path = [ar_path filesep '/sundials-2.5.0/' filesep]; % sundials 2.5.0
+sundials_path = [ar_path filesep 'sundials-2.6.1' filesep]; % sundials 2.6.1
+KLU_path = [ar_path filesep 'KLU-1.2.1'  filesep]; % KLU of suitesparse 4.2.1
+compiled_cluster_path = fileparts(which('arClusterCompiledHook.m'));
 
 % compile directory
 if(~exist(['./Compiled/' ar.info.c_version_code '/' mexext], 'dir'))

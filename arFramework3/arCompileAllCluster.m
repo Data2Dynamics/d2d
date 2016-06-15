@@ -4,7 +4,7 @@
 %
 % cluster:      MATLAB cluster object       (see help parcluster)
 % clusterpath:  execution path on cluster   ['.']
-% pool_size:    additional workers          [ceil(length(cluster.IdleWorkers)/2)]
+% pool_size:    additional workers          [ceil(length(cluster.IdleWorkers)/2) or (cluster.NumWorkers-1)]
 
 function varargout = arCompileAllCluster(cluster, clusterpath, pool_size)
 
@@ -14,8 +14,15 @@ global ar_compileall_cluster
 if(isempty(ar_compileall_cluster) || strcmp(ar_compileall_cluster.State, 'deleted')) % new job
     fprintf('arCompileAllCluster sending job...');
    
-    if(~exist('pool_size','var'))
-        pool_size = ceil(length(cluster.IdleWorkers)/2);
+    if(~exist('clusterpath','var') || isempty(clusterpath))
+        clusterpath = '.';
+    end
+    if(~exist('pool_size','var') || isempty(pool_size))
+        if isfield(cluster,'IdleWorkers') % only exists for certain cluster objects
+            pool_size = ceil(length(cluster.IdleWorkers)/2);
+        else
+            pool_size = cluster.NumWorkers-1;
+        end
     end
     
     ar_compileall_cluster = batch(cluster, @arCompileAllClusterFun, 1, ...
@@ -24,6 +31,10 @@ if(isempty(ar_compileall_cluster) || strcmp(ar_compileall_cluster.State, 'delete
         'CurrentFolder', clusterpath, ...
         'pool', pool_size);
     fprintf('done\n');
+    if(nargout>0)
+        varargout{1} = ar_compileall_cluster;
+        return
+    end
     
 elseif(isa(ar_compileall_cluster,'parallel.job.MJSIndependentJob') || ...
         isa(ar_compileall_cluster,'parallel.job.MJSCommunicatingJob') || ...
@@ -64,5 +75,5 @@ end
 function ar = arCompileAllClusterFun(ar2)
 global ar %#ok<REDEF>
 ar = ar2; %#ok<NASGU>
-addpath('/data/Andreas/arFramework3');
+addpath(ar.info.ar_path); %#ok<NODEF>
 arCompileAll;

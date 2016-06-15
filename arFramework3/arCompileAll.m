@@ -15,7 +15,7 @@ function arCompileAll(forcedCompile, debug_mode, source_dir)
 % turn off warning message for custom c functions
 
 warnreset = warning;
-warning('off','symbolic:mupadmex:MuPADTextWarning');
+warning('off', 'symbolic:mupadmex:MuPADTextWarning');
 warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
 warning('off', 'symbolic:sym:sym:DeprecateExpressions')
 

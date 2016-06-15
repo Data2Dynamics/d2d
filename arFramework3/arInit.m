@@ -31,6 +31,7 @@ arFprintf(1, 'Copyright 2015 D2D Development Team. All rights reserved.\n\n');
 ar.checksum = [];
 
 ar_path = fileparts(which('arInit.m'));
+ar.info.ar_path = ar_path;
 old_path = pwd;
 cd(ar_path)
 [~,cmdout] = system('git rev-parse HEAD');
@@ -53,6 +54,7 @@ ar = orderfields(ar);
 ar.info = orderfields(ar.info);
 ar.config = orderfields(ar.config);
 ar.ppl = orderfields(ar.ppl);
+
 
 clear j
 

@@ -20,11 +20,8 @@ if(sum(~fkt_does_exist)>0)
         parpool('updateAttachedFiles');
     end
     
-    if(~ispc)
-        ar_path = strrep(which('arInit.m'),'/arInit.m','');
-    else
-        ar_path = strrep(which('arInit.m'),'\arInit.m','');
-    end
+    ar_path = ar.info.ar_path;
+    
     try
         parpool('addAttachedFiles',{ar_path})
     catch 
