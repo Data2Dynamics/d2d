@@ -43,6 +43,10 @@
 %         observables, the suffixes "_rel" and "_au" refer to relative
 %         phosphorylation and arbitrary units.
 %
+% In the observable specification, the first digit (5th argument) indicates 
+% whether data should be normalized, while the second indicates whether
+% data is compared on a log10 scale or not.
+%
 % Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
 
 function arLoadData(name, m, extension, removeEmptyObs, varargin)
