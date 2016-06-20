@@ -40,6 +40,25 @@ if(exist('fileChooser','file') == 0)
     addpath([ar_path '/arTools'])
 end
 
+% check if submodules have been pulled from github
+submodules = {'matlab2tikz',...
+    'parfor_progress',...
+    'plot2svg',...
+    'export_fig',...
+    'Ceres/ceres-solver'};
+for jsm = 1:length(submodules)
+    submod_dir = [ar_path '/ThirdParty/' submodules{jsm}];
+    if(exist(submod_dir,'file')==7 && isempty(ls(submod_dir)))
+        library_path = getenv('LD_LIBRARY_PATH');
+        setenv('LD_LIBRARY_PATH', '');
+        old_path = pwd;
+        cd(ar_path);
+        system('git submodule update --init --recursive > /dev/null')
+        cd(old_path);
+        setenv('LD_LIBRARY_PATH', library_path);
+    end
+end
+
 % path of third party software
 if(exist('JEInterface','file') == 0)
     addpath([ar_path '/ThirdParty/EvA2/JEInterface'])
