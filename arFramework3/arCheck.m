@@ -8,7 +8,11 @@ if(~isempty(symbtool) && verLessThan('symbolic', '5.5'))
 	error('MUPAD symbolic toolbox version >= 5.5 required');
 end
 
-ar_path = fileparts(which('arInit.m'));
+if(~ispc)
+    ar_path = strrep(which('arInit.m'),'/arInit.m','');
+else
+    ar_path = strrep(which('arInit.m'),'\arInit.m','');
+end
 
 warning('off','MATLAB:rmpath:DirNotFound')
 
@@ -45,13 +49,13 @@ if(exist('suptitle','file') == 0)
     addpath([ar_path '/ThirdParty/BlandAltman'])
 end
 if(exist('export_fig','file') == 0)
-    addpath([ar_path '/ThirdParty/export_fig'])
+    addpath([ar_path '/ThirdParty/export_fig-master'])
 end
 if(exist('plot2svg','file') == 0)
-    addpath([ar_path '/ThirdParty/plot2svg/src'])
+    addpath([ar_path '/ThirdParty/plot2svg-20141130/src'])
 end
 if(exist('matlab2tikz','file') == 0)
-    addpath([ar_path '/ThirdParty/matlab2tikz/src'])
+    addpath([ar_path '/ThirdParty/matlab2tikz-matlab2tikz-722609f/src'])
 end
 if(exist('parfor_progress','file') == 0)
     addpath([ar_path '/ThirdParty/parfor_progress'])
@@ -109,11 +113,15 @@ end
 
 %% check Windows libraries for pthread-win32
 if(ispc)
-    if(exist(['.\pthreadGC2_',mexext,'.dll'],'file')==0)
-        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadGC2.dll'], ['pthreadGC2_',mexext,'.dll']);
-    end
-    if(exist(['.\pthreadVC2_',mexext,'.dll'],'file')==0)
-        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadVC2.dll'], ['pthreadVC2_',mexext,'.dll']);
+    if(exist('C:\Windows\pthreadGC2.dll','file')==0 || exist('C:\Windows\pthreadVC2.dll','file')==0)
+%         if(exist('.\pthreadGC2.dll','file')==0)
+% copy in any case to be sure that the dll in the working directory match
+% with mexext
+            copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadGC2.dll'], 'pthreadGC2.dll');
+%         end
+%         if(exist('.\pthreadVC2.dll','file')==0)
+            copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadVC2.dll'], 'pthreadVC2.dll');
+%         end
     end
 end
 
