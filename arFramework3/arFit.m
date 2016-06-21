@@ -456,7 +456,8 @@ fit.p_hist(fit.iter_count+1,:) = ar.p;
 fit.opti_hist(fit.iter_count+1,:) = ar.firstorderopt;
 fit.maxstepsize_hist(fit.iter_count+1) = nan;
 if(fit.iter_count>0)
-    fit.stepsize_hist(fit.iter_count+1) = norm(fit.p_hist(fit.iter_count,:) - ar.p);
+    q = fit.p_hist(fit.iter_count,:);
+    fit.stepsize_hist(fit.iter_count+1) = norm(q(:) - ar.p(:));
 end
 fit.iter_count = fit.iter_count + 1;
 

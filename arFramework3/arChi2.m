@@ -61,9 +61,9 @@ else
 end
 
 if nargs>=1 && ~isempty(varargin{1})
-    sensi = varargin{1};
+    sensi = varargin{1} && ar.config.useSensis;
 else 
-    sensi = true;
+    sensi = true && ar.config.useSensis;
 end
 
 if nargs>=2 && ~isempty(varargin{2})
@@ -585,7 +585,7 @@ if(sensi)
     if(~isempty(g))
         onbound = [ar.p(ar.qFit==1)==ar.ub(ar.qFit==1); ar.p(ar.qFit==1)==ar.lb(ar.qFit==1)];
         exbounds = [g>0; g<0];
-        qred = sum(onbound & exbounds,1)>0;
+        qred = sum(onbound(:) & exbounds(:),1)>0;
         ar.firstorderopt = norm(g(~qred));
 %         fprintf('first order optimality criterion %f (%i)\n', ar.firstorderopt, -sum(qred));
     else
