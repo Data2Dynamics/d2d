@@ -26,6 +26,7 @@ function ar = arInitFields(ar)
         {'plot_x_collected',            false}, ...                     %   0 = show seperate subplot for species and inputs, 1 = all in one
         {'ploterrors',                  0}, ...                         %   Error band plotting options (0=error bands, 1=error bars, -1=confidence bands)
         {'showFitting',                 0}, ...                         %   Show the fitting process in real time
+        {'showLegends',                 true}, ...                      %   Show legends in plots
         {'useSuptitle',                 false}, ...
         ...                                                             % Stochastic simulation
         {'ssa_min_tau',                 1e-3}, ...                      

@@ -316,14 +316,17 @@ for jm = 1:length(ar.model)
                 
                 % legend
                 if(doLegends && ~fastPlot && (~isempty(conditions) && nrows*ncols>0 || qDR))
-                    g = subplot(nrows, ncols, nrows*ncols);
-                    lpos = get(g,'Position');
-                    delete(g);
+                    % The following 6 commented lines got really slow in
+                    % MATLAB R2016a, don't know why, should be revised at
+                    % some point
+%                     g = subplot(nrows, ncols, nrows*ncols);
+%                     lpos = get(g,'Position');
+%                     delete(g);
                     g = subplot(nrows, ncols, 1);
                     hl = legend(g, Clegend, Clegendlabel, 'Location', 'SouthWest');
-                    lpos2 = get(hl,'Position');
-                    lpos2(1:2) = lpos(1:2);
-                    set(hl, 'Position', lpos2);
+%                     lpos2 = get(hl,'Position');
+%                     lpos2(1:2) = lpos(1:2);
+%                     set(hl, 'Position', lpos2);
                     box(hl,'off');
                 end
                 

@@ -33,7 +33,11 @@ if(~exist('evalfun','var'))
     evalfun = true;
 end
 if(~exist('doLegends','var'))
-	doLegends = true;
+    if(isfield(ar.config, 'showLegends'))
+        doLegends = ar.config.showLegends;
+    else
+        doLegends = true;
+    end
 end
 if(~exist('dynamics','var'))
 	dynamics = true;
