@@ -407,7 +407,7 @@ for j=1:length(m.species)
         fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
             m.species(j).initialConcentration, m.species(j).constant==0, ub);
     elseif(m.species(j).isSetInitialAmount)
-        comp_id = strcmp(m.species(1).compartment,{m.compartment.name});
+        comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
         comp_vol = m.compartment(comp_id).size;
         initial_conc = m.species(j).initialAmount/comp_vol;
         ub = 1000;

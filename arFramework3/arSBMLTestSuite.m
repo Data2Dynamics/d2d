@@ -26,7 +26,15 @@ d2d_dir = fileparts(which('arInit.m'));
 
 if(~exist([d2d_dir '/sbml-test-cases-2014-10-22.zip'],'file'))
     fprintf(1, '\nDownloading SBML test cases...\n');
-    websave([d2d_dir '/sbml-test-cases-2014-10-22.zip'],'http://jaist.dl.sourceforge.net/project/sbml/test-suite/3.1.1/cases-archive/sbml-test-cases-2014-10-22.zip');
+    if ( exist( 'websave' ) ) %#ok
+        websave([d2d_dir '/sbml-test-cases-2014-10-22.zip'],'http://jaist.dl.sourceforge.net/project/sbml/test-suite/3.1.1/cases-archive/sbml-test-cases-2014-10-22.zip');
+    else
+        if ( exist( 'urlwrite' ) ) %#ok
+            urlwrite('http://jaist.dl.sourceforge.net/project/sbml/test-suite/3.1.1/cases-archive/sbml-test-cases-2014-10-22.zip', [d2d_dir '/sbml-test-cases-2014-10-22.zip']);
+        else
+            error( 'Failed to obtain file sbml-test-cases-2014-10-22.zip. Please download manually from http://jaist.dl.sourceforge.net/project/sbml/test-suite/3.1.1/cases-archive/sbml-test-cases-2014-10-22.zip' );
+        end
+    end
     if(~exist([d2d_dir '/sbml-test-cases-2014-10-22'],'dir'))
         fprintf(1, '\nUnizpping SBML test cases...\n');
         unzip([d2d_dir '/sbml-test-cases-2014-10-22.zip'],[d2d_dir '/sbml-test-cases-2014-10-22']);
