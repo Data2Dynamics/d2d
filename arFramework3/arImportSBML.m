@@ -106,7 +106,7 @@ pat = cell(0); % if length of species names ==1, the species names are extended 
 rep = cell(0);
 
 raterulespecies = unique({m.raterule.variable});
-israterule = false(length(raterulespecies));
+israterule = false(1,length(raterulespecies));
 for i=1:length(raterulespecies)
     israterule = israterule | strcmp(raterulespecies(i),{m.species.id});
 end
