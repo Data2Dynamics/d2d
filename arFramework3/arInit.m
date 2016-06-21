@@ -30,15 +30,33 @@ arFprintf(1, 'Copyright 2015 D2D Development Team. All rights reserved.\n\n');
 
 ar.checksum = [];
 
-ar_path = fileparts(which('arInit.m'));
-ar.info.ar_path = ar_path;
-old_path = pwd;
-cd(ar_path)
-[~,cmdout] = system('git rev-parse HEAD');
-cd(old_path)
+if(isunix)
+    % check if git exists on system
+    has_git = system('which git > /dev/null')==0;
+else
+    has_git = false;
+end
 
-ar.info.revision = cmdout;
-cmdout = [];
+if(has_git)
+    % find current revision of d2d
+    ar_path = fileparts(which('arInit.m'));
+    ar.info.ar_path = ar_path;
+    old_path = pwd;
+    cd(ar_path)
+    [~,cmdout] = system('git rev-parse HEAD');
+    cd(old_path)
+
+    ar.info.revision = deblank(cmdout);
+    cmdout = [];
+    
+    % get current SHA from github and compare with installed revision
+    gh_data = webread('https://api.github.com/repos/Data2Dynamics/d2d/git/refs/heads/master');
+    if(~isempty(gh_data) && ~strcmp(deblank(gh_data.object.sha),ar.info.revision))
+        warning( 'There is a newer version available on github! Please check http://www.data2dynamics.org for updates.' );
+    end
+else
+    ar.info.revision = [];
+end
 
 ar = arInitFields(ar);
 
@@ -54,7 +72,3 @@ ar = orderfields(ar);
 ar.info = orderfields(ar.info);
 ar.config = orderfields(ar.config);
 ar.ppl = orderfields(ar.ppl);
-
-
-clear j
-
