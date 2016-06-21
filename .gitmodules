@@ -13,3 +13,6 @@
 [submodule "arFramework3/ThirdParty/Ceres/ceres-solver"]
 	path = arFramework3/ThirdParty/Ceres/ceres-solver
 	url = git@github.com:ceres-solver/ceres-solver.git
+[submodule "arFramework3/ThirdParty/NL2SOL"]
+	path = arFramework3/ThirdParty/NL2SOL
+	url = https://github.com/JoepVanlier/mexNL2SOL
