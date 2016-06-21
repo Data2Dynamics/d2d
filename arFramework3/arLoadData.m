@@ -43,10 +43,6 @@
 %         observables, the suffixes "_rel" and "_au" refer to relative
 %         phosphorylation and arbitrary units.
 %
-% In the observable specification, the first digit (5th argument) indicates 
-% whether data should be normalized, while the second indicates whether
-% data is compared on a log10 scale or not.
-%
 % Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
 
 function arLoadData(name, m, extension, removeEmptyObs, varargin)
@@ -113,12 +109,13 @@ else
     end
 end
 
-switches = { 'dppershoot', 'removeconditions', 'removeobservables' };
-extraArgs = [ 1, 1, 1 ];
+switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions'};
+extraArgs = [ 1, 1, 1, 1];
 description = { ...
     {'', 'Multiple shooting on'} ...
     {'', 'Ignoring specific conditions'} ...
-    {'', 'Ignoring specific observables'} };
+    {'', 'Ignoring specific observables'} ...
+    {'', 'Split data set into specific conditions'} };
     
 opts = argSwitch( switches, extraArgs, description, 1, varargin );
 
@@ -605,11 +602,17 @@ if(~strcmp(extension,'none') && ( ...
     end
     
     % random effects
-    qrandis = ismember(header, ar.model(m).data(d).prand); %R2013a compatible
+    prand = ar.model(m).data(d).prand;
+    if(opts.splitconditions)
+        prand = union(prand, opts.splitconditions_args);
+    end
+    qrandis = ismember(header, prand); %R2013a compatible
     if(sum(qrandis) > 0)
         qobs = ismember(header, ar.model(m).data(d).y); %R2013a compatible
         
         randis_header = header(qrandis);
+        qrandis_header_nosplit = ismember(randis_header, ar.model(m).data(d).prand);
+        
         if ~isempty(dataCell)
             [randis, ~, jrandis] = uniqueRowsCA(dataCell(:,qrandis));
         else
@@ -628,45 +631,55 @@ if(~strcmp(extension,'none') && ( ...
                     ar.model(m).plot(jplot+1) = ar.model(m).plot(jplot);
                 end
                 
+                pcondmod = pcond;
                 for jj=1:size(randis,2)
-                    arFprintf(2, '\t%20s = %s\n', randis_header{jj}, randis{j,jj})
-                    
-                    ar.model(m).plot(jplot).name = [ar.model(m).plot(jplot).name '_' ...
-                        randis_header{jj} randis{j,jj}];
-                    
-                    ar.model(m).data(d).name = [ar.model(m).data(d).name '_' ...
-                        randis_header{jj} randis{j,jj}];
-                    ar.model(m).data(d).fprand = randis{j,jj};
-                    
-                    ar.model(m).data(d).fy = strrep(ar.model(m).data(d).fy, ...
-                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
-                    ar.model(m).data(d).py = strrep(ar.model(m).data(d).py, ...
-                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
-                    
-                    ar.model(m).data(d).fystd = strrep(ar.model(m).data(d).fystd, ...
-                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
-                    ar.model(m).data(d).pystd = strrep(ar.model(m).data(d).pystd, ...
-                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
-                    
-%                     ar.model(m).data(d).p = strrep(ar.model(m).data(d).p, ...
-%                         randis_header{jj}, [randis_header{jj} randis{j,jj}]);
-                    ar.model(m).data(d).fp = strrep(ar.model(m).data(d).fp, ...
-                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
-                    ar.model(m).data(d).pcond = strrep(ar.model(m).data(d).pcond, ...
-                        randis_header{jj}, [randis_header{jj} randis{j,jj}]);
-                    
-                    for jjj=1:length(ar.model(m).data(d).py_sep)
-                        ar.model(m).data(d).py_sep(jjj).pars = strrep(ar.model(m).data(d).py_sep(jjj).pars, ...
+                    if(qrandis_header_nosplit(jj))
+                        arFprintf(2, '\t%20s = %s\n', randis_header{jj}, randis{j,jj})
+                        
+                        ar.model(m).plot(jplot).name = [ar.model(m).plot(jplot).name '_' ...
+                            randis_header{jj} randis{j,jj}];
+                        
+                        ar.model(m).data(d).name = [ar.model(m).data(d).name '_' ...
+                            randis_header{jj} randis{j,jj}];
+                        ar.model(m).data(d).fprand = randis{j,jj};
+                        
+                        ar.model(m).data(d).fy = strrep(ar.model(m).data(d).fy, ...
                             randis_header{jj}, [randis_header{jj} randis{j,jj}]);
+                        ar.model(m).data(d).py = strrep(ar.model(m).data(d).py, ...
+                            randis_header{jj}, [randis_header{jj} randis{j,jj}]);
+                        
+                        ar.model(m).data(d).fystd = strrep(ar.model(m).data(d).fystd, ...
+                            randis_header{jj}, [randis_header{jj} randis{j,jj}]);
+                        ar.model(m).data(d).pystd = strrep(ar.model(m).data(d).pystd, ...
+                            randis_header{jj}, [randis_header{jj} randis{j,jj}]);
+                        
+                        %                     ar.model(m).data(d).p = strrep(ar.model(m).data(d).p, ...
+                        %                         randis_header{jj}, [randis_header{jj} randis{j,jj}]);
+                        ar.model(m).data(d).fp = strrep(ar.model(m).data(d).fp, ...
+                            randis_header{jj}, [randis_header{jj} randis{j,jj}]);
+                        ar.model(m).data(d).pcond = strrep(ar.model(m).data(d).pcond, ...
+                            randis_header{jj}, [randis_header{jj} randis{j,jj}]);
+                        
+                        for jjj=1:length(ar.model(m).data(d).py_sep)
+                            ar.model(m).data(d).py_sep(jjj).pars = strrep(ar.model(m).data(d).py_sep(jjj).pars, ...
+                                randis_header{jj}, [randis_header{jj} randis{j,jj}]);
+                        end
+                        
+                        pcondmod = strrep(pcondmod, randis_header{jj}, [randis_header{jj} randis{j,jj}]);
+                    else
+                        arFprintf(2, '\t%20s (split only)\n', randis_header{jj})
+                        
+                        ar.model(m).plot(jplot).name = [ar.model(m).plot(jplot).name '_' ...
+                            randis_header{jj} randis{j,jj}];
                     end
                 end
                 
                 if ~isempty(dataCell)
                     [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
-                        strrep(pcond, randis_header{jj}, [randis_header{jj} randis{j,jj}]), removeEmptyObs, dpPerShoot, opts);
+                        pcondmod, removeEmptyObs, dpPerShoot, opts);
                 else
                     [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell, ...
-                        strrep(pcond, randis_header{jj}, [randis_header{jj} randis{j,jj}]), removeEmptyObs, dpPerShoot, opts);
+                        pcondmod, removeEmptyObs, dpPerShoot, opts);
                 end
                 if(j < size(randis,1))
                     d = d + 1;
