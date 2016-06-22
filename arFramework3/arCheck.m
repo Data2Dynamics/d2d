@@ -88,7 +88,9 @@ end
 if (exist('compileCeres', 'file') == 0)
     addpath([ar_path '/ThirdParty/Ceres'])
 end
-
+if (exist('TranslateSBML', 'file') == 0)
+    addpath([ar_path '/ThirdParty/libsbml'])
+end
     
 %% CVODES
 
