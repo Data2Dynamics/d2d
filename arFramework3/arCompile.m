@@ -490,7 +490,7 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
         % parallel code using POSIX threads (pthread-win32) for Windows type OS
         includesstr{end+1} = ['-I"' ar_path '\pthreads-w32_2.9.1\include"'];
         includesstr{end+1} = ['-L"' ar_path '\pthreads-w32_2.9.1\lib\' mexext '"'];
-        includesstr{end+1} = ['-lpthreadVC2_',mexext];
+        includesstr{end+1} = ['-lpthreadVC2'];
 
         mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
             sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...

@@ -129,12 +129,12 @@ end
 
 %% check Windows libraries for pthread-win32
 if(ispc)
-    if(exist(['.\pthreadGC2_',mexext,'.dll'],'file')==0)
-        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadGC2.dll'], ['pthreadGC2_',mexext,'.dll']);
-    end
-    if(exist(['.\pthreadVC2_',mexext,'.dll'],'file')==0)
-        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadVC2.dll'], ['pthreadVC2_',mexext,'.dll']);
-    end
+%     if(exist(['.\pthreadGC2_',mexext,'.dll'],'file')==0)
+        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadGC2.dll'], ['pthreadGC2.dll']);
+%     end
+%     if(exist(['.\pthreadVC2_',mexext,'.dll'],'file')==0)
+        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadVC2.dll'], ['pthreadVC2.dll']);
+%     end
 end
 
 %% user name
