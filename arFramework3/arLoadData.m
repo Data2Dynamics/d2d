@@ -744,7 +744,7 @@ if (~opts.removeconditions)
     qcond = ismember(header, pcond); %R2013a compatible
 else
     % Add the condi's we force filtering over (override)
-    qcond = ismember(header, pcond) | ismember(header, opts.removeconditions_args{1:2:end}); %R2013a compatible
+    qcond = ismember(header, pcond) | ismember(header, opts.removeconditions_args(1:2:end)); %R2013a compatible
 end
 
 if(sum(qcond) > 0)
@@ -789,6 +789,11 @@ if(sum(qcond) > 0)
         mapTo   = cumsum(selected);
         mapTo(~selected) = -1;
         jcondis = mapTo(jcondis);
+    end
+    
+    % exist if no data left
+    if(size(condis,1)==0)
+        return
     end
     
     active_condi = false(size(condis(1,:)));
