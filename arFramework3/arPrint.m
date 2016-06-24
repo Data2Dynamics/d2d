@@ -17,6 +17,7 @@
 %           'dynamic'                   - only show dynamic parameters
 %           'observation'               - only show non-dynamic parameters
 %           'error'                     - only show error model parameters
+%           'exact'                     - match names exactly
 %           'closetobound'              - show the parameters near bounds
 %           'lb' followed by value      - only show values above lb
 %           'ub' followed by value      - only show values below lb
@@ -55,6 +56,10 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
+if (nargin > 1)
+    opts = argSwitch( {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub', 'exact'}, varargin{:} );
+end
+
 if(~exist('js','var') || isempty(js))
     js = 1:length(ar.p);
 elseif(islogical(js))
@@ -70,7 +75,11 @@ elseif(ischar(js))
     if ( strcmp( js, 'all' ) )
         js = 1:length(ar.p);
     else
-        js = find(~cellfun(@isempty,regexp(ar.pLabel,js)));
+        if ( opts.exact )
+            js = find(strcmp(ar.pLabel, js));
+        else
+            js = find(~cellfun(@isempty,regexp(ar.pLabel,js)));
+        end
         if isempty(js)
             disp('Pattern not found in ar.pLabel');
             return;
@@ -102,8 +111,6 @@ ar.qCloseToBound(qFit) = (ar.p(qFit) - ar.lb(qFit)) < ar.config.par_close_to_bou
 
 % Additional options
 if ( nargin > 1 )
-    opts = argSwitch( {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub'}, varargin{:} );
-
     if ( opts.constant && opts.fitted )
         error( 'Incompatible flag constant and fitted' );
     end
