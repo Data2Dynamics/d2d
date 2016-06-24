@@ -56,9 +56,7 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
-if (nargin > 1)
-    opts = argSwitch( {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub', 'exact'}, varargin{:} );
-end
+opts = argSwitch( {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub', 'exact'}, varargin{:} );
 
 if(~exist('js','var') || isempty(js))
     js = 1:length(ar.p);
