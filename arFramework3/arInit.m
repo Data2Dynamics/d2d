@@ -29,18 +29,13 @@ arFprintf(1, 'Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de\n');
 arFprintf(1, 'Copyright 2016 D2D Development Team. All rights reserved.\n\n');
 
 ar.checksum = [];
+ar_path = fileparts(which('arInit.m'));
+ar.info.ar_path = ar_path;
 
-% check if git exists on system and suppress output
-if(isunix)
-    has_git = system('which git >/dev/null 2>&1')==0;
-else
-    has_git = system('where git >nul 2>&1')==0;
-end
+[has_git, is_repo] = arCheckGit(ar_path);
 
-if(has_git)
+if(has_git && is_repo)
     % find current revision of d2d
-    ar_path = fileparts(which('arInit.m'));
-    ar.info.ar_path = ar_path;
     old_path = pwd;
     cd(ar_path)
     [~, cmdout] = system('git rev-parse HEAD');
@@ -51,13 +46,13 @@ if(has_git)
     
     % get current SHA from github and compare with installed revision
     try
-        if ( exist('webread') ) %#ok
+        if ( exist('webread', 'file')==2 )
             gh_data = webread('https://api.github.com/repos/Data2Dynamics/d2d/git/refs/heads/master');
             if(~isempty(gh_data) && ~strcmp(deblank(gh_data.object.sha),ar.info.revision))
                 warning( 'There is a newer version available on github! Please check http://www.data2dynamics.org for updates.' );
             end
         else
-            if ( exist('urlread') ) %#ok
+            if ( exist('urlread', 'file')==2 )
                 % Code path for older versions of MATLAB
                 try
                     gh_data = urlread('https://api.github.com/repos/Data2Dynamics/d2d/git/refs/heads/master');

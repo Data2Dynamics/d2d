@@ -36,23 +36,23 @@ if(exist('fileChooser','file') == 0)
     addpath([ar_path '/arTools'])
 end
 
-% check if git exists on system and suppress output
-if(isunix)
-    has_git = system('which git >/dev/null 2>&1')==0;
-else
-    has_git = system('where git >nul 2>&1')==0;
-end
-if(has_git)
-    % check if submodules have been pulled from github
-    submodules = {'matlab2tikz',...
-        'parfor_progress',...
-        'plot2svg',...
-        'export_fig',...
-        'NL2SOL',...
-        'Ceres/ceres-solver'};
-    for jsm = 1:length(submodules)
-        submod_dir = [ar_path '/ThirdParty/' submodules{jsm}];
-        if( (exist(submod_dir,'file')==7 && isempty(ls(submod_dir))) || (~exist(submod_dir,'file')) )
+[has_git, is_repo] = arCheckGit(ar_path);
+
+% check if submodules have been pulled from github
+submodules = {'matlab2tikz','https://github.com/matlab2tikz/matlab2tikz/zipball/3a1ee10';...
+    'parfor_progress','https://github.com/dumbmatter/parfor_progress/zipball/1e94f6d';...
+    'plot2svg','https://github.com/jschwizer99/plot2svg/zipball/839a919';...
+    'export_fig','https://github.com/altmany/export_fig/zipball/d8131e4';...
+    'Ceres/ceres-solver','https://github.com/ceres-solver/ceres-solver/zipball/8ea86e1';...
+    'NL2SOL','https://github.com/JoepVanlier/mexNL2SOL/zipball/daabaac';...
+    };
+for jsm = 1:length(submodules)
+    submodule = submodules{jsm,1};
+    submod_dir = [ar_path '/ThirdParty/' submodule];
+    url = submodules{jsm,2};
+    if( (exist(submod_dir,'file')==7 && isempty(ls(submod_dir))) || (~exist(submod_dir,'file')) )
+        if(has_git && is_repo)
+            % fetch submodule via git
             library_path = getenv('LD_LIBRARY_PATH');
             setenv('LD_LIBRARY_PATH', '');
             old_path = pwd;
@@ -64,9 +64,18 @@ if(has_git)
             end
             cd(old_path);
             setenv('LD_LIBRARY_PATH', library_path);
+        elseif(exist('websave','file')==2)
+            % fetch submodule as zip file
+            fname = websave([submod_dir '.zip'], url);
+            dirnames = unzip(fname, [ar_path filesep 'ThirdParty']);
+            dirnames = unique(cellfun(@fileparts,dirnames,'UniformOutput',false));
+            dirname = dirnames{1};
+            movefile(dirname, submod_dir);
+            delete(fname);
         end
     end
 end
+
 
 % path of third party software
 if(exist('JEInterface','file') == 0)
