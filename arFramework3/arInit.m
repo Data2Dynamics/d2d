@@ -30,11 +30,11 @@ arFprintf(1, 'Copyright 2016 D2D Development Team. All rights reserved.\n\n');
 
 ar.checksum = [];
 
+% check if git exists on system
 if(isunix)
-    % check if git exists on system
-    has_git = system('which git > /dev/null')==0;
+    has_git = system('which git >/dev/null 2>&1')==0;
 else
-    has_git = false;
+    has_git = system('where git >nul 2>&1')==0;
 end
 
 if(has_git)
