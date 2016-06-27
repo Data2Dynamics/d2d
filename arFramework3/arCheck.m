@@ -36,23 +36,35 @@ if(exist('fileChooser','file') == 0)
     addpath([ar_path '/arTools'])
 end
 
-% check if submodules have been pulled from github
-submodules = {'matlab2tikz',...
-    'parfor_progress',...
-    'plot2svg',...
-    'export_fig',...
-    'NL2SOL',...
-    'Ceres/ceres-solver'};
-for jsm = 1:length(submodules)
-    submod_dir = [ar_path '/ThirdParty/' submodules{jsm}];
-    if( (exist(submod_dir,'file')==7 && isempty(ls(submod_dir))) || (~exist(submod_dir,'file')) )
-        library_path = getenv('LD_LIBRARY_PATH');
-        setenv('LD_LIBRARY_PATH', '');
-        old_path = pwd;
-        cd(ar_path);
-        system('git submodule update --init --recursive > /dev/null')
-        cd(old_path);
-        setenv('LD_LIBRARY_PATH', library_path);
+% check if git exists on system and suppress output
+if(isunix)
+    has_git = system('which git >/dev/null 2>&1')==0;
+else
+    has_git = system('where git >nul 2>&1')==0;
+end
+if(has_git)
+    % check if submodules have been pulled from github
+    submodules = {'matlab2tikz',...
+        'parfor_progress',...
+        'plot2svg',...
+        'export_fig',...
+        'NL2SOL',...
+        'Ceres/ceres-solver'};
+    for jsm = 1:length(submodules)
+        submod_dir = [ar_path '/ThirdParty/' submodules{jsm}];
+        if( (exist(submod_dir,'file')==7 && isempty(ls(submod_dir))) || (~exist(submod_dir,'file')) )
+            library_path = getenv('LD_LIBRARY_PATH');
+            setenv('LD_LIBRARY_PATH', '');
+            old_path = pwd;
+            cd(ar_path);
+            if(isunix)
+                system('git submodule update --init --recursive >/dev/null 2>&1');
+            else
+                system('git submodule update --init --recursive >nul 2>&1');
+            end
+            cd(old_path);
+            setenv('LD_LIBRARY_PATH', library_path);
+        end
     end
 end
 
@@ -132,10 +144,10 @@ end
 %% check Windows libraries for pthread-win32
 if(ispc)
 %     if(exist(['.\pthreadGC2_',mexext,'.dll'],'file')==0)
-        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadGC2.dll'], ['pthreadGC2.dll']);
+        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadGC2.dll'], 'pthreadGC2.dll');
 %     end
 %     if(exist(['.\pthreadVC2_',mexext,'.dll'],'file')==0)
-        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadVC2.dll'], ['pthreadVC2.dll']);
+        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadVC2.dll'], 'pthreadVC2.dll');
 %     end
 end
 
