@@ -51,6 +51,7 @@ for jsm = 1:length(submodules)
     submod_dir = [ar_path '/ThirdParty/' submodule];
     url = submodules{jsm,2};
     if( (exist(submod_dir,'file')==7 && isempty(ls(submod_dir))) || (~exist(submod_dir,'file')) )
+        arFprintf(2,'Downloading submodule "%s" from github...',submodule);
         if(has_git && is_repo)
             % fetch submodule via git
             library_path = getenv('LD_LIBRARY_PATH');
@@ -66,6 +67,9 @@ for jsm = 1:length(submodules)
             setenv('LD_LIBRARY_PATH', library_path);
         elseif(exist('websave','file')==2)
             % fetch submodule as zip file
+            if(exist(submod_dir,'file')==7)
+                rmdir(submod_dir);
+            end
             fname = websave([submod_dir '.zip'], url);
             dirnames = unzip(fname, [ar_path filesep 'ThirdParty']);
             dirnames = unique(cellfun(@fileparts,dirnames,'UniformOutput',false));
@@ -73,6 +77,7 @@ for jsm = 1:length(submodules)
             movefile(dirname, submod_dir);
             delete(fname);
         end
+        arFprintf(2,' done!\n');
     end
 end
 
