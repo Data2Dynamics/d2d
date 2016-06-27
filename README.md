@@ -66,6 +66,7 @@ The software was awarded twice as **best performer** in the *Dialogue for Revers
 * [How to implement a bolus injection?](https://github.com/Data2Dynamics/d2d/wiki/How to implement a bolus injection) 
 * [How to implement washing and an injection?](https://github.com/Data2Dynamics/d2d/wiki/How to implement washing and bolus injection) 
 * [How to implement a moment ODE model?](https://github.com/Data2Dynamics/d2d/wiki/How to implement a moment ODE model) 
+* [How to run PLE calculations on a Cluster?](https://github.com/Data2Dynamics/d2d/wiki/How to run PLE calculations on a Cluster)
 
 ## Copyright notice
 Copyright © 2016 D2D development team. All rights reserved. [Copyright text and third party software license information.](https://github.com/Data2Dynamics/d2d/wiki/Copyright)
