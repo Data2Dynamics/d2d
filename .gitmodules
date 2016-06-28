@@ -12,7 +12,7 @@
 	url = git@github.com:altmany/export_fig.git
 [submodule "arFramework3/ThirdParty/Ceres/ceres-solver"]
 	path = arFramework3/ThirdParty/Ceres/ceres-solver
-	url = git@github.com:ceres-solver/ceres-solver.git
+	url = https://ceres-solver.googlesource.com/ceres-solver
 [submodule "arFramework3/ThirdParty/NL2SOL"]
 	path = arFramework3/ThirdParty/NL2SOL
 	url = git@github.com:JoepVanlier/mexNL2SOL
