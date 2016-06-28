@@ -47,7 +47,11 @@ function arSteadyState( varargin )
         error( 'Function needs at least three arguments.' );
     end
     
-    logCall( 'arSteadyState', varargin{:} );
+    if ( nargin > 3 )
+        logCall( 'arSteadyState', varargin{1:3} );
+    else
+        logCall( 'arSteadyState', varargin );
+    end
     
     m       = varargin{1};
     cSS     = varargin{2};
