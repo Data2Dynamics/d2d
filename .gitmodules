@@ -15,4 +15,4 @@
 	url = https://ceres-solver.googlesource.com/ceres-solver
 [submodule "arFramework3/ThirdParty/NL2SOL"]
 	path = arFramework3/ThirdParty/NL2SOL
-	url = git@github.com:JoepVanlier/mexNL2SOL
+	url = git@github.com:JoepVanlier/mexNL2SOL.git
