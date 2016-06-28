@@ -18,7 +18,7 @@
 %   ar = arDisableData( ar, arFindData( ar, 'myData', 'names' ) )
 %   Disables all datasets containing 'myData' in the name
 
-function ar = arDisableData( varargin )
+function tar = arDisableData( varargin )
 
     global ar;
     if ( isstruct( varargin{1} ) )
@@ -67,5 +67,9 @@ function ar = arDisableData( varargin )
                 ar.model(c).data(d).qFit = 0 * ar.model(c).data(d).qFit;
             end
         end
+    end
+    
+    if ( nargout > 1 )
+        tar = ar;
     end
 end

@@ -126,14 +126,10 @@ function sanityCheck( model )
     % Conditions that are targetted twice
     err2 = find( ss_targets > 1 );
     
-    if ( length( err1 ) > 0 )
-        fprintf( '\n<<< WARNING >>>\nConditions ' );
-        fprintf( '%d ', err1 );
-        fprintf( 'require equilibration, but serve as equilibration for another steady state.\nThis WILL result in undefined behaviour!\n' );
+    if ( length( err1 ) > 0 ) %#ok
+        error( '<<< FATAL ERROR >>>\nConditions %d require equilibration, but serve as equilibration for another steady state.\nThis WILL result in undefined behaviour!\nDid you forget to call arClearEvents first?\n', err1 );
     end
-    if ( length( err2 ) > 0 )
-        fprintf( '\n<<< WARNING >>>\nConditions ' );
-        fprintf( '%d ', err2 );
-        fprintf( 'are used twice as target in steady state equilibration.\nThis WILL result in undefined behaviour!\n' );
+    if ( length( err2 ) > 0 ) %#ok
+        error( '<<< FATAL ERROR >>>\nConditions %d are used twice as target in steady state equilibration.\nThis WILL result in undefined behaviour!\nDid you forget to call arClearEvents first?\n', err2 );
     end    
 end

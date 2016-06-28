@@ -135,7 +135,7 @@ int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double
 #include "arSimuCalcFunctions.c"
 
 int handle_event(void *cvode_mem, EventData event_data, UserData user_data, N_Vector x, N_Vector *sx, int nps, int neq, int sensi, int sensi_meth );
-int equilibrate(void *cvode_mem, UserData user_data, N_Vector x, realtype t, double *returndxdt, double *teq, int neq, int im, int ic );
+int equilibrate(void *cvode_mem, UserData user_data, N_Vector x, realtype t, double *equilibrated, double *returndxdt, double *teq, int neq, int im, int ic );
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int nthreads, ithreads, tid;
@@ -349,6 +349,7 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
     double *returnsx;
     double *returndxdt;
     double *returnddxdtdp;
+    double *equilibrated;
 
     double *y;
     double *yExp;
@@ -504,6 +505,7 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
             }
             
             returndxdt = mxGetData(mxGetField(arcondition, ic, "dxdt"));
+                      
             if (sensi == 1) {
                 returnddxdtdp = mxGetData(mxGetField(arcondition, ic, "ddxdtdp"));
             }
@@ -561,6 +563,7 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
             }
             
             /* Override which condition to simulate */
+            /* This is used for equilibration purposes */
             src = mxGetField(arcondition, ic, "src");
             if (src == NULL) {
                 only_sim    = 0;
@@ -569,6 +572,13 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
                 isrc        = mxGetData(src);
                 isim        = (int) (*isrc) - 1;
                 only_sim    = 1;
+            }
+            
+            /* Is there a list which states to equilibrate? */
+            if ( mxGetField( arcondition, ic, "ssStates" ) ) {
+                equilibrated = mxGetData(mxGetField(arcondition, ic, "ssStates"));
+            } else {
+                equilibrated = NULL;
             }
             
             /* fill for t=0 */
@@ -777,7 +787,7 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
                             
                             if ( ts[is] == inf ) {
                                 /* Equilibrate the system */
-                                flag = equilibrate(cvode_mem, data, x, t, returndxdt, teq, neq, im, isim);
+                                flag = equilibrate(cvode_mem, data, x, t, equilibrated, returndxdt, teq, neq, im, isim);
                             } else {
                                 /* Simulate up to the next time point */
                                 flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
@@ -1084,7 +1094,7 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
 }
 
 /* Equilibrate the system until the RHS is under a specified threshold */
-int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *returndxdt, double *teq, int neq, int im, int ic ) {
+int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *equilibrated, double *returndxdt, double *teq, int neq, int im, int ic ) {
     int    i;
     int    step;
     int    flag;
@@ -1117,7 +1127,14 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
         fx(time, x, returndxdt, data, im, ic);
 
         converged = true;
-        for (i=0; i<neq; i++) converged = (converged && (fabs(returndxdt[i])<eq_tol));
+        if ( equilibrated )
+        {
+            for (i=0; i<neq; i++)
+                converged = (converged && ( (equilibrated[i] < 0.1) || ( fabs(returndxdt[i])<eq_tol ) ) );
+        } else {
+            for (i=0; i<neq; i++)
+                converged = (converged && fabs(returndxdt[i])<eq_tol );
+        }
         
         /* Oh no, we didn't make it! Terminate anyway. */
         if ( step > max_eq_steps )

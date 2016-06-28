@@ -47,11 +47,7 @@ function arSteadyState( varargin )
         error( 'Function needs at least three arguments.' );
     end
     
-    if ( nargin > 3 )
-        logCall( 'arSteadyState', varargin{1:3} );
-    else
-        logCall( 'arSteadyState', varargin );
-    end
+    logCall( 'arSteadyState', varargin{:} );
     
     m       = varargin{1};
     cSS     = varargin{2};
@@ -83,7 +79,7 @@ function arSteadyState( varargin )
     end
     
     tstart = 0;
-    if ( length(varargin)>0 )
+    if ( length(varargin)>0 ) %#ok
         try
             tstart = varargin{1};
         catch
@@ -206,7 +202,7 @@ function arSteadyState( varargin )
         
         ar = arAddEvent(ar, m, cTarget(a), ...
             ar.model(m).condition(cTarget(a)).tstart, ...
-            [1:nStates], vals, vals, sens, sens, false );
+            1:nStates, vals, vals, sens, sens, false );
     end
     arWaitbar(-1);
     
@@ -235,7 +231,7 @@ end
 function in = compareFields(cID,in,knownCopies,ignoreFields)
 
     global ar;
-    global arOutputLevel;
+    global arOutputLevel; %#ok
     global arStrict;
     
     names = fieldnames(ar.model.condition(cID));
@@ -283,12 +279,27 @@ function logCall( fn, varargin )
         ar.eventLog = {};
     end
     call = [fn '('];
-    if length( varargin ) > 0
-        call = sprintf('%s%s', call, mat2str(varargin{1}) );
+    if ( length( varargin ) > 0 ) %#ok
+        call = serializeArgs( call, varargin(1:end) );
     end
-    for a = 2 : length( varargin )
-        call = sprintf('%s, %s', call, mat2str(varargin{a}) );
-    end
+    
     call = [call ')'];
     ar.eventLog{length(ar.eventLog)+1} = call;
+end
+
+function str = serializeArgs( str, args )
+    for a = 1 : length( args )
+        if ( a > 1 )
+            str = sprintf( '%s, ', str );
+        end
+        if ( iscell( args{a} ) )
+            str = sprintf( '%s {%s}', str, serializeArgs( '', args{a} ) );
+        else
+            if ( ischar( args{a} ) )
+                str = sprintf('%s ''%s''', str, args{a} );
+            else
+                str = sprintf('%s %s', str, mat2str(args{a}) );
+            end
+        end
+    end
 end
