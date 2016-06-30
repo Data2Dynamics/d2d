@@ -1,6 +1,12 @@
 % create report
 
-function arReport(project_name)
+function arReport(project_name,fullODEs)
+if ~exist('project_name','var') || isempty(project_name)
+    project_name = 'Data2Dynamics Software -- Modeling Report';
+end
+if ~exist('fullODEs','var') || isempty(fullODEs)
+    fullODEs = 0;
+end
 
 global ar
 
@@ -95,10 +101,6 @@ lp(fid, '\\renewcommand*\\rmdefault{cmss} ');
 lp(fid, '\n\\begin{document}\n');
 
 %% Header
-
-if(nargin==0)
-    project_name = 'Data2Dynamics Software -- Modeling Report';
-end
 
 lp(fid, '\\title{%s}', project_name);
 lp(fid, '\\author{%s}', ar.config.username);
@@ -380,6 +382,18 @@ for jm=1:length(ar.model)
             end
         end
         lp(fid, '\\end{align*}}\n\n');
+        
+        if fullODEs
+            lp(fid,'Substituting the reaction rates $v_i$ yields:\\\\ \\\\');
+            lp(fid, '{\\scriptsize \\displaystyle \\centering');
+                        
+            % f
+            for jx=1:length(ar.model(jm).fx)
+                lp(fid, '$\\mathrm{d}%s/\\mathrm{dt} & = %s $\\\\ \\\\', myFormulas(ar.model(jm).x{jx}, jm),  myFormulas(ar.model(jm).fx{jx},jm));
+            end
+            
+            lp(fid, '}\n\n');
+        end
         
         lp(fid, '\\noindent The ODE system was solved by a parallelized implementation of the CVODES algorithm \\cite{Hindmarsh:2005fb}.');
         lp(fid, 'It also supplies the parameter sensitivities utilized for parameter estimation.\\\\\n\n');
