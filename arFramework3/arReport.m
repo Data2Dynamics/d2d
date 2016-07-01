@@ -395,7 +395,7 @@ for jm=1:length(ar.model)
             lp(fid, '}\n\n');
         end
         
-        lp(fid, '\\noindent The ODE system was solved by a parallelized implementation of the CVODES algorithm \\cite{Hindmarsh:2005fb}.');
+        lp(fid, '\\noindent The ODE system was solved by a parallelized implementation of the CVODES algorithm \\cite{Hindmarsh2005fb}.');
         lp(fid, 'It also supplies the parameter sensitivities utilized for parameter estimation.\\\\\n\n');
     end
     
@@ -880,7 +880,7 @@ for j=1:length(ar.p)
         lp(fid, '{$\\hat \\theta$ indicates the estimated value of the parameters.');
         lp(fid, '$\\theta_{min}$ and $\\theta_{max}$ indicate the upper and lower bounds for the parameters.');
         lp(fid, 'The log-column indicates if the value of a parameter was log-transformed.');
-        lp(fid, 'If log = 1 the non-log-column indicates the non-logarithmic value of the estimate.');
+        lp(fid, 'If log $\\equiv$ 1 the non-log-column indicates the non-logarithmic value of the estimate.');
         lp(fid, 'The estimated-column indicates if the parameter value was estimated (1), was temporarily fixed (0) or if its value was fixed to a constant value (2).}');
         lp(fid, '\t\\doendcenter');
         lp(fid, '\t\\end{table}');
@@ -917,7 +917,7 @@ lp(fid, '\t\t\\mycaption{Estimated parameter values}{paratable%i}', count);
 lp(fid, '{$\\hat \\theta$ indicates the estimated value of the parameters.');
 lp(fid, '$\\theta_{min}$ and $\\theta_{max}$ indicate the upper and lower bounds for the parameters.');
 lp(fid, 'The log-column indicates if the value of a parameter was log-transformed.');
-lp(fid, 'If log = 1 the non-log-column indicates the non-logarithmic value of the estimate.');
+lp(fid, 'If log $\\equiv$ 1 the non-log-column indicates the non-logarithmic value of the estimate.');
 lp(fid, 'The estimated-column indicates if the parameter value was estimated (1), was temporarily fixed (0) or if its value was fixed to a constant value (2).}');
 lp(fid, '\t\\doendcenter');
 lp(fid, '\t\\end{table}');
