@@ -51,9 +51,20 @@ for d=ds
 end
 
 % remember existing parameters
-p = ar.p;
+tmp_p = ar.p;
+tmp_lb = ar.lb;
+tmp_ub = ar.ub;
+tmp_qFit = ar.qFit;
+tmp_qLog10 = ar.qLog10;
+
 arLink(true);
-ar.p = p;
+
+ar.p = tmp_p;
+ar.lb = tmp_lb
+ar.ub = tmp_ub;
+ar.qFit = tmp_qFit;
+ar.qLog10 = tmp_qLog10;
+
 
 % simulate model
 arSimu(false,false);
