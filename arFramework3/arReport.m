@@ -10,6 +10,11 @@ end
 
 global ar
 
+if strcmp(version('-release'), '2016a')
+    warning('off', 'symbolic:sym:sym:DeprecateExpressions')
+end
+
+
 if(isempty(ar))
     error('please initialize by arInit')
 end
@@ -646,9 +651,9 @@ for jm=1:length(ar.model)
                         qdyn = ismember(ar.model(jm).p, ar.model(jm).data(jd2).pold{jp}); %R2013a compatible
                         if(sum(qdyn)>0)
                             qalreadyset = true;
-                            for jd3 = ar.model(jm).plot(jplot).dLink
+                            for jd4 = ar.model(jm).plot(jplot).dLink
                                 qalreadyset = qalreadyset && isequal(sym(ar.model(jm).fp{qdyn}), ...
-                                    sym(ar.model(jm).data(jd3).fp{jp}));
+                                    sym(ar.model(jm).data(jd4).fp{jp}));
                             end
                         else
                             qalreadyset = false;
@@ -1149,6 +1154,11 @@ elseif(ismac)
 end
 setenv('LD_LIBRARY_PATH', library_path);
 
+if strcmp(version('-release'), '2016a')
+    warning('on', 'symbolic:sym:sym:DeprecateExpressions')
+end
+
+
 function lp(varargin)
 if(nargin>2)
     fprintf(varargin{1}, sprintf('%s\n', varargin{2}), varargin{3:end});
@@ -1264,3 +1274,5 @@ end
 % 	lp(fid, '\\includegraphics[width=\\textwidth]{residuals.pdf}');
 % 	lp(fid, '\\end{center}');
 % end
+
+
