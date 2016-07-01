@@ -14,7 +14,9 @@
                      Decides if the working directory per client session should
                      be a temporary copy, which will be deleted after the
                      session ends, or if the clients will work with the
-                     original model directories.
+                     original model directories. On Windows OS this might need
+                     some fine-tuning due to different file access
+                     restrictions.
 
    HIDE_CONSOLE:     False|True
                      Decides if the input console to execute Matlab
@@ -138,7 +140,7 @@ def start():
     status['arSimu'] = False
 
     nFinePoints = int(request.args.get('nFinePoints'))
-    do_compile = str(request.args.get('compile'))
+    do_compile = int(request.args.get('compile'))
     # Set the directory you want to copy from
     rootDir = os.path.dirname(os.path.join(
        os.getcwd(),
@@ -157,7 +159,11 @@ def start():
             remove_tree(temp_dir)
         except:
             pass
-        copy_tree(rootDir, temp_dir)
+        try:
+            copy_tree(rootDir, temp_dir)
+        except:
+            print("Failed to copy the model directory for COPY mode.")
+
         rootDir = os.path.join(temp_dir,
                                os.path.basename(request.args.get('model')))
     else:
@@ -177,7 +183,7 @@ def start():
 
     load = None
 
-    if not do_compile.endswith('on'):
+    if do_compile == 0:
         try:
             results = os.listdir(os.path.join(
                 os.path.dirname(d2d_instances[session['uid']]['model']),
@@ -188,16 +194,17 @@ def start():
                     load = savename
                     print("A result has been found and will be loaded.")
                     break
-            if load is None:
-                print("No saved results found, compiling " +
-                      "from scratch and save the result. This might take " +
-                      "some time. Keep in mind that arSave will only be " +
-                      "persistent if COPY is False.")
         except:
             pass
     else:
         load = False
         print("The model will be compiled. This might take some time.")
+
+    if load is None:
+        print("No saved results found, compiling " +
+              "from scratch and save the result. This might take " +
+              "some time. Keep in mind that arSave will only be " +
+              "persistent if COPY is False.")
 
     d2d_instances[session['uid']]['d2d'].load_model(
         d2d_instances[session['uid']]['model'], load=load,
