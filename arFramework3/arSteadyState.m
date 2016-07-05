@@ -216,7 +216,7 @@ function arSteadyState( varargin )
     for a = 1 : length( ar.model )
         cnt = cnt + length(ar.model(m).ss_condition);
     end
-    arFprintf(1, 'Number of steady state equilibrations: %d', cnt );
+    arFprintf(1, 'Number of steady state equilibrations: %d\n', cnt );
     
     % Show any errors
     arPrintSteadyState(m, 2);
