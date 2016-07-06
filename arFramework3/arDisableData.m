@@ -69,7 +69,5 @@ function tar = arDisableData( varargin )
         end
     end
     
-    if ( nargout > 1 )
-        tar = ar;
-    end
+    tar = ar;
 end

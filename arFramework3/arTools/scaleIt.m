@@ -1,28 +1,76 @@
 %
-% Work in progress function for merging CSV files
+% Function for merging CSV files
 %
-% Scales data based on minimization of linear model
+% Scales data based on error model.
+% Note: This function is currently work in progress
 %
 % Usage:
-%   mergeCSV( names, outFileName, delimiter )
+%   mergeCSV( names, outFileName, options )
 %
 %   CSV file must have following columns
 %     nExpID  = replicate
-%     input_  = inputs per condition
+%     input_  = inputs per condition (default, can be overriden by setting "inputMask")
 %     time    = dependent variable must be called t, T, time or Time
 %
-% All other columns are assumed data. Scaling factors will be estimated per
-% observable/replicate combination.
+%   All other columns are assumed data. Scaling factors will be estimated per
+%   observable/replicate combination.
+%
+%   Options:
+%     delimiter          Use a custom delimiter for the csv file (default = ',')
+%     obsGroups          Specify observations that share a scaling parameter (e.g. same antibody)
+%                        You have to specify these as cell array e.g:
+%                        { { 'nSTAT3', 'cSTAT3' }, { 'npSTAT3', 'cpSTAT3' } }
+%     inputMask          Use a custom mask to denote that something should be 
+%                        used as condition variable (default is input_)  
+%     depVar             Use different dependent variable (default = 't', 'T', 'time' or 'Time').
+%     expID              Use a different column name to hold the experiment
+%                        index (default = nExpID). This column will be used
+%                        in combination with the observation to indicate the 
+%                        scaling factor.
+%
+% To do: Log trafo scaling, offsets and two component error model scaling
 
-function mergeCSV( names, outFile, delimiter )
-    if ( nargin < 3 )
-        delimiter = ',';
+function scaleIt( names, outFile, varargin )
+
+    if ( nargin < 2 )
+        help scaleIt;
+        error( 'Insufficient arguments' );
     end
+
+    % Load options
+    verbose = 0;
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid'};
+    extraArgs = [ 1, 1, 1, 1, 1 ];
+    description = { ...
+    {'', 'Custom delimiter specified'} ...
+    {'', 'Using custom observation/scaling factor pairing'} ...
+    {'', 'Using input mask'} ...
+    {'', 'Using custom dependent variable name'} ...
+    {'', 'Using custom experiment ID column'}};
+    opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
     timeVars = {'t', 'T', 'time', 'Time'};
     expVar = 'nExpID';
     inputMask = 'input_';
+    obsGroups = [];
 
+    delimiter = ',';
+    if ( opts.delimiter )
+        delimiter = opts.delimiter_args;
+    end
+    if ( opts.obsgroups )
+        obsGroups = opts.obsgroups_args;
+    end
+    if ( opts.inputmask )
+        inputMask = opts.inputmask_args;
+    end
+    if ( opts.depvar )
+        timeVars = {opts.depvar_args};
+    end
+    if ( opts.expid )
+        expVar = opts.expid_args;
+    end
+ 
     % Collect csv files
     fieldNames = {};
     for jN = 1 : length( names )
@@ -49,7 +97,7 @@ function mergeCSV( names, outFile, delimiter )
                     newData     = num2cell(cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})));
                     % +1 is added to make sure that we never overlap even if user starts counting 
                     % from 0 or 1 inconsistently in different files 
-                    expField    = expField + max(cell2mat(data{jD}.(fieldNames{jN}))) + 1;
+                    expField    = expField + max(cell2mat(data{jD}.(fieldNames{jN}))); % + 1;
                 end
                 out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
             end
@@ -57,19 +105,30 @@ function mergeCSV( names, outFile, delimiter )
     end
     
     % Put NaN's in the empty fields
+    filt = struct;
     for jN = 1 : length( fieldNames )               
-        % Filter out columns with no content
-        Q = cellfun(@isnan, out.(fieldNames{jN}));
-        if ( sum(Q) == length(Q) )
+        % Filter out columns with text content
+        Q = ~cellfun(@isnumeric, out.(fieldNames{jN}));
+        if ( sum(Q) > 0 )
+            filt.(fieldNames{jN}) = out.(fieldNames{jN});
             out = rmfield( out, fieldNames{jN} );
+            sprintf('Filtered %s because of non numeric values', fieldNames{jN});
+        else
+            % Filter out columns with no content
+            Q = cellfun(@isnan, out.(fieldNames{jN}));
+            if ( sum(Q) == length(Q) )
+                filt.(fieldNames{jN}) = out.(fieldNames{jN});
+                out = rmfield( out, fieldNames{jN} );
+            end
         end
     end
+    %fieldNames = fieldnames(out);
     
     % Uncomment to test with control case
     % out = unitTest()
     
     % Estimate correct scaling factors
-    [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVars, inputMask );
+    [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVars, inputMask, obsGroups );
        
     % Find unique conditions (unrelated to time this time)
     groupNames = union(fieldNames{ismember(fieldNames, expVar)}, {fieldNames{cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))}});
@@ -101,7 +160,11 @@ function mergeCSV( names, outFile, delimiter )
         title(dataFields{jD});
     end
         
-    newNames = fieldnames(out);
+    % Columns that did not take part in the estimation
+    stringNames = fieldnames( filt );
+    
+    % Names of scaled columns
+    newNames = fieldnames( out );
     
     % Find the ones that have been rescaled => these must be replaced with
     % their scaled variants
@@ -116,6 +179,9 @@ function mergeCSV( names, outFile, delimiter )
     for jN = 2 : length( fieldNames )
         fprintf( fid, ', %s', fieldNames{jN} );
     end
+    for jN = 1 : length( stringNames )
+        fprintf( fid, ', %s', stringNames{jN} );
+    end
     fprintf( fid, '\n' );
     for jD = 1 : length( out.(fieldNames{1}) )
         fprintf( fid, '%d ', out.(fieldNames{1}){jD} );
@@ -126,6 +192,9 @@ function mergeCSV( names, outFile, delimiter )
             else
                 fprintf( fid, ', %d', outArray(jD) );
             end
+        end
+        for jN = 1 : length( stringNames )
+            fprintf( fid, ', %s', filt.(stringNames{jN}){jD} );
         end
         fprintf( fid, '\n' );
     end
@@ -140,9 +209,10 @@ function out = unitTest()
     out.y       = {1,2,3,  2,4,6,  10,20,30     3,6,9,  6,12,18 30,60,90}.';
 end
 
-function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVars, inputMask )
+function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVars, inputMask, obsGroups )
+    verbose = 1;
     fieldNames = fieldnames(out);
-    
+       
     % Sort by fill
     fill = zeros(1, length(fieldNames));
     for jN = 1 : length( fieldNames )
@@ -161,39 +231,103 @@ function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVar
     
     % Assemble condition matrix
     clear data;
-    for ( jD = 1 : length(fieldNames) )
-        data( jD, : ) = out.(fieldNames{jD});
+    for jD = 1 : length(fieldNames)
+        data( jD, : ) = out.(fieldNames{jD}); %#ok
     end
-    
+        
     % Find unique conditions (note that a different time point (field 1) is
     % considered a different condition in this setting)
-    conditionFields = union( fieldNames{1}, {fieldNames{cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))}} );
-    for ( jC = 1 : length(conditionFields) )
-        conds( jC, : ) = out.(conditionFields{jC});
+    conditionFields = union( fieldNames{1}, fieldNames(cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))) );
+    for jC = 1 : length(conditionFields)
+        conds( jC, : ) = out.(conditionFields{jC}); %#ok<AGROW>
     end
     [~, ~, jcondition] = unique( cell2mat( conds ).', 'rows' );
     
-    expVar = {fieldNames{cell2mat(cellfun(@(a)strcmp(a, expVar), fieldNames, 'UniformOutput', false))}};
+    for a = unique(jcondition).'
+        if ( sum(jcondition==a) < 2 )
+            warnLine = '';
+            ID = find( sum(jcondition==a) );
+            for jF = 1 :length( conditionFields )
+                warnLine = sprintf( '%s\n%s: %d', warnLine, conditionFields{jF}, out.(conditionFields{jF}){ID} ); %#ok
+            end
+            warning( 'Found condition with very few data points:\n%s\n', warnLine );
+            pause;
+        end
+    end    
+    
+    % Determine data fields
+    dataFields  = setdiff( fieldNames, union( conditionFields, expVar ) );
+    
+    % Assign data fields to common groups
+    if ( isempty( obsGroups ) )
+        disp( 'No groups specified.' );
+        for jG = 1 : length( dataFields )
+            obsGroups{jG} = jG;
+        end
+    else
+        remainingDatasets = dataFields;
+        for jG = 1 : length( obsGroups )
+            currentGroups = [];
+            for jD = 1 : length( obsGroups{jG} )
+                if ( ~ismember( obsGroups{jG}{jD}, remainingDatasets ) > 0 )
+                    error( sprintf( 'Observable %s does not exist or is already in a group', obsGroups{jG}{jD} ) );
+                end
+                currentGroup = find( ismember( dataFields, obsGroups{jG}{jD} ) );
+                if ~isempty( currentGroup )
+                    currentGroups = [ currentGroups, currentGroup ]; %#ok
+                else
+                    warning( 'Observable %s in grouping not found in datasets. Did you misspell it?', obsGroups{jG} );
+                end
+            end
+            obsGroups{jG} = currentGroups;
+            remainingDatasets = setdiff( remainingDatasets, dataFields(obsGroups{jG}) );
+        end
+        if (~isempty( remainingDatasets ) )
+            for jD = 1 : length( remainingDatasets )
+                obsGroups{end+1} = find( ismember( dataFields, remainingDatasets{jD} ) ); %#ok
+                if ( verbose )
+                    fprintf( '%s was not in a group, adding as separate group.\n', remainingDatasets{jD} );
+                end
+            end
+        end
+    end
+    nGroups = length( obsGroups );
+    
+    expVar = fieldNames(cell2mat(cellfun(@(a)strcmp(a, expVar), fieldNames, 'UniformOutput', false)));
     if (isempty(expVar))
         error( 'Did not find variable which indicates experiment ID' );
     end
-    scales = cell2mat(out.(expVar{1}));
+    nObs  = length( dataFields );
     
-    dataFields  = setdiff( fieldNames, union( conditionFields, expVar ) );
+    % Set up a unique scaling factor for each group
+    scales = cell(1, nObs);
+    current = 0;
+    for jG = 1 : nGroups
+        for jD = obsGroups{jG}
+            scales{jD} = cell2mat(out.(expVar{1})) + current;
+        end
+        current = max([current; scales{jD}]);
+    end
+    
     Nrows = numel(out.(dataFields{1})); 
-    for jD = 1 : length(dataFields)
-        curData         = cell2mat(out.(dataFields{jD}));     % Process single observation
-        Q               = find(~isnan( curData ));            % Fetch points that have data
-        curData         = curData(Q);
-        curConditions   = jcondition(Q).';                    % Fetch condition IDs this observable appears in
-        curScale        = scales(Q);
+    for jG = 1 : nGroups
+        curScale = []; curData = []; curConditions = []; obsjD = [];
+        for jD = obsGroups{jG}
+            nData           = cell2mat(out.(dataFields{jD}));        %    Process single observation
+            Q{jD}           = find(~isnan( nData ));                 %#ok Fetch points that have data
+            curData         = [curData; nData(Q{jD})];               %#ok
+            curConditions   = [curConditions, jcondition(Q{jD}).'];  %#ok Fetch condition IDs this observable appears in
+            obsjD           = [obsjD; jD*ones(size(Q{jD}))];         %#ok Observable => This is paired with the conditions of observables in the same group, to ensure they get separate means in the estimation process
+            curScale        = [curScale; scales{jD}(Q{jD})];         %#ok
+        end
         
         % ConditionLinks links the replicates to the "true" IDs (i.e. true conditions, t, cond pairs)
         % ScaleLinks refers to which scale corresponds to which datapoint.
         % Each "condition" needs a 'true' mean
-        % Each "gel/observable combo" needs its own scale
-        [scaleTargets, ~, scaleLinks] = unique(curScale);                   % ScaleTargets provides a link to the global scales
-        [conditionTargets, ~, conditionLinks] = unique(curConditions);      % ConditionTargets provides a link to global conditions. ConditionTargets(conditionLinks) equates to condition IDs
+        % Each "gel/observable group combo" needs its own scale
+        [scaleTargets, ~, scaleLinks] = unique(curScale);                                     % ScaleTargets provides a link to the global scales
+        [conditionTargets, ~, conditionLinks] = unique([curConditions; obsjD.'].', 'rows');   % ConditionTargets provides a link to global conditions. ConditionTargets(conditionLinks) equates to condition IDs
+        conditionTargets = conditionTargets(:,1).';
         
         % The result of the estimation will be means (in the order
         % specified in conditionTargets) and scaling (in the order
@@ -206,23 +340,43 @@ function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVar
         % means(conditionLinks) and scalings(scaleLinks) will sort them
         % back to the order they were in when they entered this function.
 
-        % Returned quantities are indexed by condition ID
-        out.([dataFields{jD} '_mean'])      = NaN( Nrows, 1 );
-        out.([dataFields{jD} '_mean'])(Q)   = means(conditionLinks);
-        
-        % Returned quantities are indexed by condition ID
-        out.([dataFields{jD} '_lb'])        = NaN( Nrows, 1 );
-        out.([dataFields{jD} '_lb'])(Q)     = mlb(conditionLinks);          
-        
-        % Returned quantities are indexed by condition ID
-        out.([dataFields{jD} '_ub'])        = NaN( Nrows, 1 );
-        out.([dataFields{jD} '_ub'])(Q)     = mub(conditionLinks);        
+        loc = 0;
+        for jD = obsGroups{jG}
+            % Number of unique points in this dataset
+            nData = length( Q{jD} );
+            locs = 1 + loc : nData + loc;
+            
+            % Returned quantities are indexed by condition ID
+            out.([dataFields{jD} '_mean'])          = NaN( Nrows, 1 );
+            out.([dataFields{jD} '_mean'])(Q{jD})   = means(conditionLinks(locs));
 
-        out.([dataFields{jD} '_scale'])     = NaN( Nrows, 1 );
-        out.([dataFields{jD} '_scale'])(Q)  = scalings(scaleLinks);
+            % Returned quantities are indexed by condition ID
+            out.([dataFields{jD} '_lb'])            = NaN( Nrows, 1 );
+            out.([dataFields{jD} '_lb'])(Q{jD})     = mlb(conditionLinks(locs));          
 
-        out.([dataFields{jD} '_scaled'])    = NaN( Nrows, 1 );
-        out.([dataFields{jD} '_scaled'])(Q) = replicates;
+            % Returned quantities are indexed by condition ID
+            out.([dataFields{jD} '_ub'])            = NaN( Nrows, 1 );
+            out.([dataFields{jD} '_ub'])(Q{jD})     = mub(conditionLinks(locs));
+
+            out.([dataFields{jD} '_scale'])         = NaN( Nrows, 1 );
+            out.([dataFields{jD} '_scale'])(Q{jD})  = scalings(scaleLinks(locs));
+
+            out.([dataFields{jD} '_scaled'])        = NaN( Nrows, 1 );
+            out.([dataFields{jD} '_scaled'])(Q{jD}) = replicates(locs);
+            
+            loc = loc + nData;
+        end
+    end
+    
+    if (verbose)
+        fprintf( '\n\nEstimated scalings for following observables:\n');
+        for jG = 1 : length( obsGroups )
+            fprintf( 'Scale group %d: ', jG )
+            for jD = 1 : length( obsGroups{jG} )
+                fprintf( '%s ', dataFields{obsGroups{jG}(jD)} );
+            end
+            fprintf( '\n' );
+        end
     end
 end
 
@@ -251,8 +405,9 @@ function [means, mlb, mub, scalings] = estimateObs( data, scaleTargets, scaleLin
     scalings = ones(numel(scaleTargets)-1,1);
     initPar = [ means.'; scalings ];
     
-    options = optimset('TolFun', 1e-12, 'TolX', 1e-9, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Iter' );
-    [p, ~, r, ~, ~, ~, J] = lsqnonlin( @(pars)model(pars, data, scaleLinks, length(conditionTargets), conditionLinks), initPar, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
+    options                 = optimset('TolFun', 0, 'TolX', 1e-8, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Off' );
+    p                       = lsqnonlin( @(pars)model(pars, data, scaleLinks, length(conditionTargets), conditionLinks), initPar, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
+    [p, ~, r, ~, ~, ~, J]   = lsqnonlin( @(pars)model(pars, data, scaleLinks, length(conditionTargets), conditionLinks), p, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
     ci = nlparci(p,r,'Jacobian',J);
     
     means = p(1:numel(means));
@@ -294,11 +449,15 @@ function data = readCSV( filename, delimiter )
             if(j>length(C))
                 dataBlock(i, j) = {NaN};
             else
-                val = str2num(C{j});
-                if ~isempty( val )
-                    dataBlock(i, j) = {val};
-                else
+                if isempty(C{j})
                     dataBlock(i, j) = {NaN};
+                else
+                    val = str2num(C{j});
+                    if ~isempty( val )
+                        dataBlock(i, j) = {val};
+                    else
+                        dataBlock(i, j) = C(j);
+                    end
                 end
             end
         end

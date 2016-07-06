@@ -19,8 +19,11 @@ function [opts] = argSwitch( switches, extraArgs, description, verbose, varargin
     a = 1;
     if ~isempty( varargin{1} )
         while( a <= length( varargin{1} ) )
+            if (~ischar(varargin{1}{a}))
+                error( 'Provided cell argument without indicating which switch it is for.' );
+            end
             if ( max( strcmpi( switches, varargin{1}{a} ) ) == 0 )
-                error( 'Invalid switch argument was provided %s', varargin{1}{a} );
+                error( sprintf( 'Invalid switch argument was provided "%s". Valid arguments are %s\n', varargin{1}{a}, sprintf( '''%s'' ', switches{:} ) ) ); %#ok
             end
             opts.(lower(varargin{1}{a})) = 1;
             if ( extraArgs( strcmpi( switches, varargin{1}{a} ) ) == 1 )
