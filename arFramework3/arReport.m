@@ -1,4 +1,10 @@
 % create report
+% 
+% Example: Standard call
+% arReport
+% 
+% Example: If the ODEs in their final state should be included, use:
+% arReport('',1)
 
 function arReport(project_name,fullODEs)
 if ~exist('project_name','var') || isempty(project_name)
@@ -641,7 +647,7 @@ for jm=1:length(ar.model)
             for jd3=1:length(ar.model(jm).plot(jplot).dLink)
                 jd2 = ar.model(jm).plot(jplot).dLink(jd3);
                 jc = ar.model(jm).data(jd2).cLink;
-                lp(fid, '\\item {\\bf Local condition #%i (global condition #%i):}', jd2, jc);
+                lp(fid, '\\item {\\bf Local condition \\#%i (global condition \\#%i):}', jd2, jc);
                 
                 ccount = 1;
                 for jp=1:length(ar.model(jm).data(jd2).fp)
