@@ -27,6 +27,8 @@
 %                        index (default = nExpID). This column will be used
 %                        in combination with the observation to indicate the 
 %                        scaling factor.
+%     restrictObs        Restrict estimation to list of observables
+%     ignoreMask         Add mask for which data columns to ignore
 %
 % To do: Log trafo scaling, offsets and two component error model scaling
 
@@ -39,14 +41,16 @@ function scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid'};
-    extraArgs = [ 1, 1, 1, 1, 1 ];
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask'};
+    extraArgs = [ 1, 1, 1, 1, 1, 1, 1 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
     {'', 'Using input mask'} ...
     {'', 'Using custom dependent variable name'} ...
-    {'', 'Using custom experiment ID column'}};
+    {'', 'Using custom experiment ID column'} ...
+    {'', 'Restricting to specific specified observables'} ...
+    {'', 'Using ignore mask'} };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
     timeVars = {'t', 'T', 'time', 'Time'};
@@ -69,6 +73,14 @@ function scaleIt( names, outFile, varargin )
     end
     if ( opts.expid )
         expVar = opts.expid_args;
+    end
+    restrictobs = {};
+    if ( opts.restrictobs )
+        restrictobs = opts.restrictobs_args;
+    end
+    ignoreMask = [];
+    if ( opts.ignoremask )
+        ignoreMask = opts.ignoremask_args;
     end
  
     % Collect csv files
@@ -104,6 +116,22 @@ function scaleIt( names, outFile, varargin )
         end
     end
     
+    % Dump out things in the ignore mask
+    if ~isempty( ignoreMask )
+        K = fieldnames(out);
+        for a = 1 : length( K )
+            if ~iscell( ignoreMask )
+                ignoreMask = {ignoreMask};
+            end
+            for b = 1 : length( ignoreMask )
+                if ~isempty( strfind( K{a}, ignoreMask{b} ) )
+                    out = rmfield( out, K{a} );
+                    fieldNames = setdiff( fieldNames, K{a} );
+                end
+            end
+        end
+    end
+    
     % Put NaN's in the empty fields
     filt = struct;
     for jN = 1 : length( fieldNames )               
@@ -128,12 +156,12 @@ function scaleIt( names, outFile, varargin )
     % out = unitTest()
     
     % Estimate correct scaling factors
-    [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVars, inputMask, obsGroups );
+    [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVars, inputMask, obsGroups, restrictobs );
        
     % Find unique conditions (unrelated to time this time)
     groupNames = union(fieldNames{ismember(fieldNames, expVar)}, {fieldNames{cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))}});
-    for ( jC = 1 : length(groupNames) )
-        groups( jC, : ) = out.(groupNames{jC});
+    for jC = 1 : length(groupNames)
+        groups( jC, : ) = out.(groupNames{jC}); %#ok<AGROW>
     end
     [~, ~, groupIDs] = unique( cell2mat( groups ).', 'rows' );
     
@@ -151,7 +179,6 @@ function scaleIt( names, outFile, varargin )
             yU          = out.([dataFields{jD} '_lb'])(ID);
             yL          = out.([dataFields{jD} '_ub'])(ID);
             yRep        = out.([dataFields{jD} '_scaled'])(ID);
-            
             [time,I]    = sort(time);
             plot( time, y(I), 'Color', colors(a,:)  ); hold on;
             plot( time, yU(I), '--', 'Color', fadeColor(colors(a,:)), 'LineWidth', 0.5  ); hold on;
@@ -221,14 +248,14 @@ function col = fadeColor( col )
     col = col * 0.3 + 0.7;
 end
 
-function out = unitTest()
+function out = unitTest() %#ok
     out.time    = {1,2,3,  1,2,3,  1,2,3        1,2,3,  1,2,3,  1,2,3}.';
     out.nExpID  = {1,1,1,  2,2,2,  3,3,3        1,1,1,  2,2,2,  3,3,3}.';
     out.input_L = {1,1,1,  1,1,1,  1,1,1,       2,2,2,  2,2,2,  3,3,3}.'; 
     out.y       = {1,2,3,  2,4,6,  10,20,30     3,6,9,  6,12,18 30,60,90}.';
 end
 
-function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVars, inputMask, obsGroups )
+function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVars, inputMask, obsGroups, obsList )
     verbose = 1;
     fieldNames = fieldnames(out);
        
@@ -242,7 +269,6 @@ function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVar
     for a = 1 : length( timeVars )
         timeVar = timeVar |  ismember(fieldNames, timeVars{a});
     end
-    timeVar = find(timeVar);
     fill(timeVar)=inf;
         
     [~, fill] = sort( fill, 'descend' );
@@ -277,6 +303,10 @@ function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVar
     % Determine data fields
     dataFields  = setdiff( fieldNames, union( conditionFields, expVar ) );
     
+    if ~isempty( obsList )
+        dataFields = intersect( dataFields, obsList );
+    end
+    
     % Assign data fields to common groups
     if ( isempty( obsGroups ) )
         disp( 'No groups specified.' );
@@ -289,7 +319,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVar
             currentGroups = [];
             for jD = 1 : length( obsGroups{jG} )
                 if ( ~ismember( obsGroups{jG}{jD}, remainingDatasets ) > 0 )
-                    error( sprintf( 'Observable %s does not exist or is already in a group', obsGroups{jG}{jD} ) );
+                    error( sprintf( 'Observable %s does not exist or is already in a group', obsGroups{jG}{jD} ) ); %#ok
                 end
                 currentGroup = find( ismember( dataFields, obsGroups{jG}{jD} ) );
                 if ~isempty( currentGroup )
@@ -353,7 +383,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVar
         % specified in scaleTargets).
         checkDims( data, conds, scaleTargets, conditionTargets );
         [means, mlb, mub, scalings] = estimateObs( curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks ); 
-        replicates = curData .* scalings(scaleLinks);
+        replicates = curData ./ scalings(scaleLinks);
         
         % To get where these are globally we have to map them back
         % means(conditionLinks) and scalings(scaleLinks) will sort them
@@ -424,10 +454,13 @@ function [means, mlb, mub, scalings] = estimateObs( data, scaleTargets, scaleLin
     scalings = ones(numel(scaleTargets)-1,1);
     initPar = [ means.'; scalings ];
     
-    options                 = optimset('TolFun', 0, 'TolX', 1e-8, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Off' );
-    p                       = lsqnonlin( @(pars)model(pars, data, scaleLinks, length(conditionTargets), conditionLinks), initPar, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
-    [p, ~, r, ~, ~, ~, J]   = lsqnonlin( @(pars)model(pars, data, scaleLinks, length(conditionTargets), conditionLinks), p, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
+    options                 = optimset('TolFun', 0, 'TolX', 1e-9, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Iter' );
+    errModel                = @(pars)model(pars, data, scaleLinks, length(conditionTargets), conditionLinks);
+    p                       = lsqnonlin( errModel, initPar, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
+    [p, ~, r, ~, ~, ~, J]   = lsqnonlin( errModel, initPar, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
     ci                      = nlparci(p,r,'Jacobian',J,'alpha',0.05);
+    
+    fprintf( 'Final objective: %g\n', sum(r.^2) );
     
     means = p(1:numel(means));
     mlb = ci(:,1);
@@ -438,7 +471,7 @@ end
 function res = model( pars, data, scaleLinks, Ncond, conditionLinks )
     scales = [1; pars(Ncond+1:end)];
 
-    res = pars(conditionLinks) - scales(scaleLinks) .* data;
+    res = scales(scaleLinks) .* pars(conditionLinks) - data;
 end
 
 function data = readCSV( filename, delimiter )
@@ -465,16 +498,16 @@ function data = readCSV( filename, delimiter )
         %dataBlock{i, :} = cell(1,size(headers, 1)); %#ok
         for j=1:length(headers)
             if(j>length(C))
-                dataBlock(i, j) = {NaN};
+                dataBlock(i, j) = {NaN}; %#ok
             else
                 if isempty(C{j})
-                    dataBlock(i, j) = {NaN};
+                    dataBlock(i, j) = {NaN}; %#ok
                 else
-                    val = str2num(C{j});
+                    val = str2num(C{j}); %#ok
                     if ~isempty( val )
-                        dataBlock(i, j) = {val};
+                        dataBlock(i, j) = {val}; %#ok
                     else
-                        dataBlock(i, j) = C(j);
+                        dataBlock(i, j) = C(j); %#ok
                     end
                 end
             end
