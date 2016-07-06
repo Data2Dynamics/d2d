@@ -138,7 +138,8 @@ function scaleIt( names, outFile, varargin )
     [~, ~, groupIDs] = unique( cell2mat( groups ).', 'rows' );
     
     % Plot results
-    colors = 'rgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmcrgbkmc';
+    
+    colors = colmap;    
     nX = floor(sqrt(length(dataFields)));
     nY = ceil( length(dataFields)/ nX );    
     for jD = 1 : length( dataFields )
@@ -152,10 +153,10 @@ function scaleIt( names, outFile, varargin )
             yRep        = out.([dataFields{jD} '_scaled'])(ID);
             
             [time,I]    = sort(time);
-            plot( time, y(I), colors(a)  ); hold on;
-            plot( time, yU(I), [colors(a), '--'], 'LineWidth', 0.5  ); hold on;
-            plot( time, yL(I), [colors(a), '--'], 'LineWidth', 0.5  ); hold on;
-            plot( time, yRep(I), [colors(a) '.'] ); hold on;
+            plot( time, y(I), 'Color', colors(a,:)  ); hold on;
+            plot( time, yU(I), '--', 'Color', fadeColor(colors(a,:)), 'LineWidth', 0.5  ); hold on;
+            plot( time, yL(I), '--', 'Color', fadeColor(colors(a,:)), 'LineWidth', 0.5  ); hold on;
+            plot( time, yRep(I), '.', 'Color', colors(a,:) ); hold on;
         end
         title(dataFields{jD});
     end
@@ -200,6 +201,24 @@ function scaleIt( names, outFile, varargin )
     end
     
     fclose(fid);
+end
+
+function colors = colmap()
+    colors = [ ...
+            27, 158, 119; ...
+            217, 95, 2; ...
+            117, 112, 179; ...
+            231, 41, 138; ...
+            102, 166, 30; ...
+            230, 171, 2; ...
+            166, 118, 29; ...
+            102, 102, 102 ];
+        
+    colors = repmat( colors, 30, 1 ) / max(max(colors));
+end
+
+function col = fadeColor( col )
+    col = col * 0.3 + 0.7;
 end
 
 function out = unitTest()
@@ -408,13 +427,12 @@ function [means, mlb, mub, scalings] = estimateObs( data, scaleTargets, scaleLin
     options                 = optimset('TolFun', 0, 'TolX', 1e-8, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Off' );
     p                       = lsqnonlin( @(pars)model(pars, data, scaleLinks, length(conditionTargets), conditionLinks), initPar, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
     [p, ~, r, ~, ~, ~, J]   = lsqnonlin( @(pars)model(pars, data, scaleLinks, length(conditionTargets), conditionLinks), p, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
-    ci = nlparci(p,r,'Jacobian',J);
+    ci                      = nlparci(p,r,'Jacobian',J,'alpha',0.05);
     
     means = p(1:numel(means));
     mlb = ci(:,1);
     mub = ci(:,2);
     scalings = [1; p(numel(conditionTargets)+1:end)];
-    
 end
 
 function res = model( pars, data, scaleLinks, Ncond, conditionLinks )
