@@ -465,12 +465,15 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
     
     % Set initial scalings
     scalings = ones(numel(scaleTargets)-1,1);
-    initPar  = [ means.'; scalings; ones( errModelPars, 1) ];
+    initPar  = [ means.'; scalings; 1e10 * ones( errModelPars, 1) ];
+    
+    lb = zeros(size(initPar));
+    lb( end - errModelPars : end ) = 1e-9;
     
     options                 = optimset('TolFun', 0, 'TolX', 1e-9, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Iter' );
     errModel                = @(pars) eModel(pars, data, scaleLinks, length(conditionTargets), length(scalings), conditionLinks);
-    p                       = lsqnonlin( errModel, initPar, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
-    [p, ~, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
+    p                       = lsqnonlin( errModel, initPar, lb, 1e25*ones(size(initPar)), options );
+    [p, ~, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, lb, 1e25*ones(size(initPar)), options );
     ci                      = nlparci(p,r,'Jacobian',J,'alpha',0.05);
     
     fprintf( 'Final objective: %g\n', sum(r.^2) );
@@ -487,11 +490,15 @@ function res = model( pars, data, scaleLinks, Ncond, Nscale, conditionLinks )
 end
 
 function res = flexible_model( pars, data, scaleLinks, Ncond, Nscale, conditionLinks, errorModel )
-    fix     = 40;
+    fix     = 1e10;
     scales  = [1; pars(Ncond+1:Ncond+Nscale)];
     sigma   = errorModel(pars(Ncond+Nscale+1:end), pars(conditionLinks), scales(scaleLinks));
     
-    res = [ ( scales(scaleLinks) .* pars(conditionLinks) - data ) / (sigma / fix), sqrt( 2 * log( sigma * fix ) ) ]
+    if ( max( sigma*fix < 1 ) > 0 ) 
+        error( 'Sigma term negative :(' );
+    end
+    
+    res = [ ( scales(scaleLinks) .* pars(conditionLinks) - data ) / (sigma / fix), sqrt( 2 * log( sigma * fix ) ) ];
 end
 
 function sigma = twocomponent( noisepars, mus, scales )
