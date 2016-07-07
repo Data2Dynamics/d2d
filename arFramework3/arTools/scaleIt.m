@@ -29,6 +29,8 @@
 %                        scaling factor.
 %     restrictObs        Restrict estimation to list of observables
 %     ignoreMask         Add mask for which data columns to ignore
+%     twocomponent       Use two component error model (warning: poorly
+%                        tested so far)
 %
 % To do: Log trafo scaling, offsets and two component error model scaling
 
@@ -81,6 +83,16 @@ function scaleIt( names, outFile, varargin )
     ignoreMask = [];
     if ( opts.ignoremask )
         ignoreMask = opts.ignoremask_args;
+    end
+    
+    % Simplest error model
+    errModel        = @(pars, data, scaleLinks, Ncond, Nscale, conditionLinks) model(pars, data, scaleLinks, Ncond, Nscale, conditionLinks);
+    errModelPars    = 0;
+    
+    if ( opts.twocomponent )
+        % Two component error model
+        errModel        = @(pars, data, scaleLinks, Ncond, Nscale, conditionLinks) flexible_model(pars, data, scaleLinks, Ncond, Nscale, conditionLinks, @twocomponent);
+        errModelPars    = 2;
     end
  
     % Collect csv files
@@ -156,7 +168,7 @@ function scaleIt( names, outFile, varargin )
     % out = unitTest()
     
     % Estimate correct scaling factors
-    [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVars, inputMask, obsGroups, restrictobs );
+    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs );
        
     % Find unique conditions (unrelated to time this time)
     groupNames = union(fieldNames{ismember(fieldNames, expVar)}, {fieldNames{cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))}});
@@ -255,7 +267,7 @@ function out = unitTest() %#ok
     out.y       = {1,2,3,  2,4,6,  10,20,30     3,6,9,  6,12,18 30,60,90}.';
 end
 
-function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVars, inputMask, obsGroups, obsList )
+function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList )
     verbose = 1;
     fieldNames = fieldnames(out);
        
@@ -382,7 +394,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( out, expVar, timeVar
         % specified in conditionTargets) and scaling (in the order
         % specified in scaleTargets).
         checkDims( data, conds, scaleTargets, conditionTargets );
-        [means, mlb, mub, scalings] = estimateObs( curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks ); 
+        [means, mlb, mub, scalings] = estimateObs( errModel, errModelPars, curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks ); 
         replicates = curData ./ scalings(scaleLinks);
         
         % To get where these are globally we have to map them back
@@ -439,7 +451,7 @@ function checkDims( data, condition, scaleTargets, conditionTargets )
     end
 end
 
-function [means, mlb, mub, scalings] = estimateObs( data, scaleTargets, scaleLinks, conditionTargets, conditionLinks )
+function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, scaleTargets, scaleLinks, conditionTargets, conditionLinks )
 
     % Parameters are [ means_for_each_condition , scalings ]
     means = zeros(size(conditionTargets));
@@ -452,26 +464,37 @@ function [means, mlb, mub, scalings] = estimateObs( data, scaleTargets, scaleLin
     
     % Set initial scalings
     scalings = ones(numel(scaleTargets)-1,1);
-    initPar = [ means.'; scalings ];
+    initPar  = [ means.'; scalings; ones( errModelPars, 1) ];
     
     options                 = optimset('TolFun', 0, 'TolX', 1e-9, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Iter' );
-    errModel                = @(pars)model(pars, data, scaleLinks, length(conditionTargets), conditionLinks);
+    errModel                = @(pars) eModel(pars, data, scaleLinks, length(conditionTargets), length(scalings), conditionLinks);
     p                       = lsqnonlin( errModel, initPar, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
-    [p, ~, r, ~, ~, ~, J]   = lsqnonlin( errModel, initPar, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
+    [p, ~, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, zeros(size(initPar)), 1e12*ones(size(initPar)), options );
     ci                      = nlparci(p,r,'Jacobian',J,'alpha',0.05);
     
     fprintf( 'Final objective: %g\n', sum(r.^2) );
     
-    means = p(1:numel(means));
-    mlb = ci(:,1);
-    mub = ci(:,2);
-    scalings = [1; p(numel(conditionTargets)+1:end)];
+    means    = p(1:numel(means));
+    mlb      = ci(:,1);
+    mub      = ci(:,2);
+    scalings = [1; p(numel(conditionTargets)+1:end - errModelPars)];
 end
 
-function res = model( pars, data, scaleLinks, Ncond, conditionLinks )
-    scales = [1; pars(Ncond+1:end)];
-
+function res = model( pars, data, scaleLinks, Ncond, Nscale, conditionLinks )
+    scales = [1; pars(Ncond+1:Ncond+Nscale)];
     res = scales(scaleLinks) .* pars(conditionLinks) - data;
+end
+
+function res = flexible_model( pars, data, scaleLinks, Ncond, Nscale, conditionLinks, errorModel )
+    fix     = 40;
+    scales  = [1; pars(Ncond+1:Ncond+Nscale)];
+    sigma   = errorModel(pars(Ncond+Nscale+1:end), pars(conditionLinks), scales(scaleLinks));
+    
+    res = [ ( scales(scaleLinks) .* pars(conditionLinks) - data ) / (sigma / fix), sqrt( 2 * log( sigma * fix ) ) ];
+end
+
+function sigma = twocomponent( noisepars, mus, scales )
+    sigma = sqrt( noisepars(1)*noisepars(1) + noisepars(2)*noisepars(2)*mus.*mus );
 end
 
 function data = readCSV( filename, delimiter )
