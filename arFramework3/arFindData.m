@@ -37,7 +37,7 @@
 % specifiers always have to come at the end. After the names and verbose
 % flags.
 
-function [olist names m] = arFindData( varargin )
+function [olist, names, m] = arFindData( varargin )
 
     if nargin == 0
         help arFindData;
@@ -67,7 +67,31 @@ function [olist names m] = arFindData( varargin )
             error( 'Need to supply data name' );
         end
     end
-        
+    
+    switches = { 'exact', 'verbose', 'names'};
+    extraArgs = [ 0, 0, 0 ];
+    description = { ...
+    {'', ''} ...
+    {'', ''} ...
+    {'', ''} ...
+    {'', ''} };
+    [opts, varargin] = argSwitch( switches, extraArgs, description, 0, 'softmatching', varargin );
+    
+    exact = 0;
+    if ( opts.exact )
+        exact = 1;
+    end
+    
+    returnNames = false;
+    if ( opts.names )
+        returnNames = true;
+    end
+            
+    verbose = 0;
+    if ( opts.verbose )
+        verbose = 1;
+    end
+    
     observable = [];
     if ( ischar( varargin{1} ) )
         if strcmp( varargin{1}, 'state' )
@@ -87,31 +111,10 @@ function [olist names m] = arFindData( varargin )
         error( 'Please supply a data name' );
     end
     
-    verbose = 0;
-    if ( length(varargin) > 0 )
-        if ( ischar( varargin{1} ) )
-            if ( strcmp( varargin{1}, 'verbose' ) )
-                verbose = 1;
-                varargin = varargin(2:end);
-            end
-        end
-    end
-    
     if ( ~isempty(observable) )
         string = scanObservables(m, observable, verbose);
     end
     
-    % Return names instead
-    returnNames = false;
-    if (length( varargin ) > 0)
-        if ischar( varargin{1} )
-            if ( strcmp( varargin{1}, 'names' ) )
-                returnNames = true;
-                varargin = varargin(2:end);
-            end
-        end
-    end
-
     if ( mod(length(varargin), 2) ~= 0 )
         error( 'Uneven number of condition arguments' );
     end
@@ -122,8 +125,14 @@ function [olist names m] = arFindData( varargin )
     olist    = [];
     for b = 1 : length( string )
         for a = 1 : length( ar.model(m).data )
-            if ~isempty( findstr(lower(ar.model(m).data(a).name), lower(string{b}) ) )
-                olist = union( olist, a );
+            if ( ~exact )
+                if ~isempty( strfind(lower(ar.model(m).data(a).name), lower(string{b}) ) )
+                    olist = union( olist, a );
+                end
+            else
+                if strcmp(ar.model(m).data(a).name, string{b} )
+                    olist = union( olist, a );
+                end
             end
         end
     end
@@ -185,7 +194,7 @@ function [olist names m] = arFindData( varargin )
             str = sprintf( '%s | %s = %s', str, par, val );
         end
         if ( verbose )
-            disp( sprintf( '[%d] %s %s', olist(a), ar.model(m).data(olist(a)).name, str ) );
+            disp( sprintf( '[%d] %s %s', olist(a), ar.model(m).data(olist(a)).name, str ) ); %#ok
         end
     end
     
@@ -193,7 +202,7 @@ function [olist names m] = arFindData( varargin )
     if ( max( condList ) > 0 )
         for a = 1 : length( condList )
             if ( condList(a) > 0 )
-                warning on;
+                warning on; %#ok
                 warning( 'Condition %s = %s was not used as a filter! Please check the inputs.', varargin{2*a-1}, num2str(varargin{2*a}) );
             end
         end
@@ -230,15 +239,15 @@ function sets = scanObservables( m, state, verbose )
     % Find derived variables this state/variable appears in
     matches = [];
     for a = 1 : length( ar.model(m).fz )
-        if max( find( strcmp(strsplit(ar.model(m).fz{a}, {'(',')','/','*','^','+','-',' '}), stateString) ) )
+        if find( strcmp(strsplit(ar.model(m).fz{a}, {'(',')','/','*','^','+','-',' '}), stateString), 1, 'last' )
             matches = union( matches, a );
         end
-        if max( find( strcmp(strsplit(ar.model(m).z{a}, {'(',')','/','*','^','+','-',' '}), stateString) ) )
+        if find( strcmp(strsplit(ar.model(m).z{a}, {'(',')','/','*','^','+','-',' '}), stateString), 1, 'last' )
             matches = union( matches, a );
         end
     end
     
-    if ( verbose )
+    if verbose == 1
         fprintf( 'State/derived variable %s appears in the following (derived) variable: \n', stateString );
         for a = 1 : length( matches )
             fprintf( '%s = %s\n', ar.model(m).z{ matches(a) }, ar.model(m).fz{ matches(a) } );
@@ -271,7 +280,7 @@ function sets = scanObservables( m, state, verbose )
                 end
             end
             if (matched)
-                dataSets{end+1} = ar.model(m).data(a).name;
+                dataSets{end+1} = ar.model(m).data(a).name; %#ok<AGROW>
             end
         end
     end
