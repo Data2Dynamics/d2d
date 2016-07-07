@@ -52,7 +52,15 @@ function arExport(directory, models)
     fileListU = strrep(fileList,'/','_');
     fileListU = strrep(fileListU,'-','_');
     
-    setupFile = sprintf('%% D2D Model Package\n%%   Model author: %s.\n%%   More information: http://bitbucket.org/d2d-development/d2d-software/wiki/Home\n\n%% Initialize D2D framework\narInit;\n', ar.config.username );
+    subPaths = copyDependencies( directory );
+    
+    % If mexfiles exist, copy them!
+    mx = dir([ar.fkt '.*']); %#ok
+    for a = 1 : length( mx );
+        copyfile( mx(a).name, directory );
+    end
+    
+    setupFile = sprintf('%% D2D Model Package\n%%   Model author: %s.\n%%   More information: http://bitbucket.org/d2d-development/d2d-software/wiki/Home\n\n%% Initialize D2D framework\n%% Add extra paths\n%s\narInit;\n', ar.config.username, subPaths );
     h = waitbar(0);
     for m = 1 : length( models )
         data = {};
@@ -65,8 +73,8 @@ function arExport(directory, models)
         if ( ~exist( modelName, 'file' ) )
             error( 'Cannot find model file %s', modelName );
         else
-            dir = fetchDir( modelName );
-            if ~isempty( dir )
+            dirn = fetchDir( modelName );
+            if ~isempty( dirn )
                 warning('off', 'MATLAB:MKDIR:DirectoryExists');
                 mkdir( [ directory '/' fetchDir( modelName ) ] );
                 warning('on', 'MATLAB:MKDIR:DirectoryExists');            
@@ -98,11 +106,11 @@ function arExport(directory, models)
         for d = 1 : length( data )
             % Check which files exist and match up (since the data name mapping is non-unique)
             waitbar( d/length(data), h, sprintf( 'Model %s: Exporting data file %d/%d', mName, d, length(data) ) );
-            [files, dir] = findMatchingFiles( data{d}, fileList, fileListU );
+            [files, dirn] = findMatchingFiles( data{d}, fileList, fileListU );
             
-            if ( ~isempty( dir ) )
+            if ( ~isempty( dirn ) )
                 warning('off', 'MATLAB:MKDIR:DirectoryExists');
-                mkdir( [ directory '/' dir ] );
+                mkdir( [ directory '/' dirn ] );
                 warning('on', 'MATLAB:MKDIR:DirectoryExists');
                 for f = 1 : length( files )
                     copyfile( files{f}, [directory '/' files{f}] );
@@ -126,10 +134,12 @@ function arExport(directory, models)
     
     if ( isfield( ar, 'eventLog' ) && (length(ar.eventLog)>0) ) %#ok
         eventCommands = sprintf('%s;\n', ar.eventLog{:} );
-        eventCommands = sprintf('%% Setup events\n%s\n', eventCommands );
+        eventCommands = sprintf('%% Setup events\n%s', eventCommands );
     else
         eventCommands = '';
     end
+    
+    activeDataCommands = activeDatasets();
     
     configFields = { 'rtol', 'atol', 'eq_tol', 'eq_step_factor', 'init_eq_step', 'max_eq_steps', 'maxsteps', 'maxstepsize', 'nFinePoints', 'atolV', 'atolV_Sens', 'ssa_min_tau', 'ssa_runs', 'steady_state_constraint', 'useEvents', 'useFitErrorCorrection', 'useFitErrorMatrix'};
     if(ar.config.useFitErrorMatrix==0)
@@ -140,7 +150,7 @@ function arExport(directory, models)
         
     configFile      = sprintf( '%% D2D Configuration file\n%s', fieldcode( ar.config, configFields{:} ) );
     
-    setupFile = sprintf( '%s\n%% Compile model\narCompileAll;\n\n%% Load configuration\nmodelConfig\n\n%% Load parameters\narLoadPars(''%s'');\n\n%s%% Simulate and plot\narSimu(false,true,true);\narChi2(false);\narPlotY;', setupFile, directory, eventCommands );
+    setupFile = sprintf( '%s\n%% Compile model\narCompileAll;\n\n%% Load configuration\nmodelConfig\n\n%% Load parameters\narLoadPars(''%s'');\n\n%s\n%% Do not fit specific conditions\n%s\n%% Simulate and plot\narSimu(false,true,true);\narChi2(false);\narPlotY;', setupFile, directory, eventCommands, activeDataCommands );
     
     fid = fopen( [directory '/Setup.m' ], 'w+' );
     fprintf( fid, '%s', setupFile );
@@ -151,6 +161,40 @@ function arExport(directory, models)
     fclose(fid);    
     
     close(h);
+end
+
+function str = activeDatasets()
+    global ar;
+    
+    lines = {};
+    for m = 1 : length( ar.model )
+        for d = 1 : length( ar.model(m).data )
+            name = ar.model(m).data(d).name;
+            if ( sum( ar.model(m).data(d).qFit ) == 0 )
+                lines{end+1} = sprintf( 'arDisableData(arFindData(''%s'', ''exact'', ''names''));', name ); %#ok<AGROW>
+            else
+                if ( sum( ar.model(m).data(d).qFit ) < length( ar.model(m).data(d).qFit ) )
+                    lines{end+1} = sprintf( 'ar.model(%d).data(arFindData(''%s'', ''exact'')).qFit = [%s];', m, name, sprintf('%d ', ar.model(m).data(d).qFit ) ); %#ok<AGROW>
+                end
+            end
+        end
+    end
+    str = sprintf( '%s\n', lines{:} );
+end
+
+function str = copyDependencies(savepath)
+    global ar;
+
+    lines = {};
+    if isfield( ar, 'directories' )
+        for a = 1 : length( ar.directories )
+            warning('off', 'MATLAB:MKDIR:DirectoryExists');
+            copyfile( ar.directories{a}, [savepath '/' ar.directories{a}]);
+            warning('on', 'MATLAB:MKDIR:DirectoryExists');
+            lines{end+1} = sprintf( 'addpath %s;\n', ar.directories{a} ); %#ok<AGROW>
+        end
+    end
+    str = sprintf( '%s', lines{:} );
 end
 
 function str = fieldcode( struct, varargin ) %#ok
@@ -258,3 +302,4 @@ function dir = fetchDir( str )
         dir = '';
     end
 end
+
