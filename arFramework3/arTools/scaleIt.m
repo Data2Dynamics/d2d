@@ -43,8 +43,8 @@ function scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask'};
-    extraArgs = [ 1, 1, 1, 1, 1, 1, 1 ];
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent' };
+    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
@@ -52,7 +52,8 @@ function scaleIt( names, outFile, varargin )
     {'', 'Using custom dependent variable name'} ...
     {'', 'Using custom experiment ID column'} ...
     {'', 'Restricting to specific specified observables'} ...
-    {'', 'Using ignore mask'} };
+    {'', 'Using ignore mask'} ...,
+    {'', 'Using two component error model'} };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
     timeVars = {'t', 'T', 'time', 'Time'};
@@ -490,7 +491,7 @@ function res = flexible_model( pars, data, scaleLinks, Ncond, Nscale, conditionL
     scales  = [1; pars(Ncond+1:Ncond+Nscale)];
     sigma   = errorModel(pars(Ncond+Nscale+1:end), pars(conditionLinks), scales(scaleLinks));
     
-    res = [ ( scales(scaleLinks) .* pars(conditionLinks) - data ) / (sigma / fix), sqrt( 2 * log( sigma * fix ) ) ];
+    res = [ ( scales(scaleLinks) .* pars(conditionLinks) - data ) / (sigma / fix), sqrt( 2 * log( sigma * fix ) ) ]
 end
 
 function sigma = twocomponent( noisepars, mus, scales )
