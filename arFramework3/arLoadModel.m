@@ -671,8 +671,13 @@ if(strcmp(C{1},'OBSERVABLES'))
         C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
     end
     
-    if(length(ar.model(m).fystd)<length(ar.model(m).fy) || sum(cellfun(@isempty, ar.model(m).fystd))>0)
-        error('some observables do not have an error model defined');
+    if (length(ar.model(m).fystd)<length(ar.model(m).fy) || sum(cellfun(@isempty, ar.model(m).fystd))>0)
+        diffErr = ar.model(m).y(cellfun(@isempty, ar.model(m).fystd)>0);
+        if ( length(ar.model(m).fystd)<length(ar.model(m).fy) )
+            diffErr = union( ar.model(m).y( length(ar.model(m).fystd) + 1 : end ), diffErr );
+        end
+        
+        error('Some observables do not have an error model defined. Observable(s) without error model: %s\n', sprintf( '%s ', diffErr{:} ) );
     end
     
     % error parameters
