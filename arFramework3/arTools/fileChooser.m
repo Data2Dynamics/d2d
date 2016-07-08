@@ -11,12 +11,12 @@ if(~exist('searchpattern', 'var'))
 end
 
 if(zeigen==-1) % only return the file_list
-    file_list = fileList(filepath, searchpattern);
+    file_list = fileList(filepath, searchpattern,[],1);
     filename = [];
     out = [];
 else
     
-    file_list = fileList(filepath, searchpattern);
+    file_list = fileList(filepath, searchpattern,[],1);
     if(length(file_list)==0)  %#ok<ISMT>
         error('No matching files found!');
     end

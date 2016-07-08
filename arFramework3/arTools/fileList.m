@@ -1,12 +1,15 @@
 % Dateiliste erstellen
 
-function out = fileList(filepath, searchpattern, doAnd)
+function out = fileList(filepath, searchpattern, doAnd, onlyFolders)
 
-if(~exist('searchpattern', 'var'))
+if(~exist('searchpattern', 'var')  || isempty(searchpattern))
     searchpattern = {};
 end
-if(~exist('doAnd', 'var'))
+if(~exist('doAnd', 'var') || isempty(doAnd))
     doAnd = false;
+end
+if(~exist('onlyFolders', 'var') || isempty(onlyFolders))
+    onlyFolders = false;
 end
 
 if(~iscell(searchpattern))
@@ -14,6 +17,9 @@ if(~iscell(searchpattern))
 end
 
 filesyslist = dir(filepath);
+if onlyFolders
+    filesyslist = filesyslist([filesyslist.isdir]==1);  % only show folders
+end
 out = {};
 count = 0;
 
