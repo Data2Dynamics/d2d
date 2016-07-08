@@ -33,6 +33,8 @@ function [opts, outargin] = argSwitch( switches, extraArgs, description, verbose
                 if ( soft == 0 )
                     error( 'Provided cell argument without indicating which switch it is for.' );
                 end
+                outargin{end+1} = varargin{1}{a};
+                a = a + 1;
             end
             if ( max( strcmpi( switches, varargin{1}{a} ) ) == 0 )
                 if ( soft == 0 )
