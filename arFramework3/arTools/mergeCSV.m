@@ -119,7 +119,9 @@ function data = readCSV( filename, delimiter )
     end
     
     for a = 1 : length( headers )
-        data.(headers{a}) = dataBlock(:,a);
+        if ( ~isempty( headers{a} ) )
+            data.(headers{a}) = dataBlock(:,a);
+        end
     end
     fclose(fid);
 end

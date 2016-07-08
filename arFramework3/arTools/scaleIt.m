@@ -5,7 +5,7 @@
 % Note: This function is currently work in progress
 %
 % Usage:
-%   mergeCSV( names, outFileName, options )
+%   scaleIt( names, outFileName, options )
 %
 %   CSV file must have following columns
 %     nExpID  = replicate
@@ -31,6 +31,7 @@
 %     ignoreMask         Add mask for which data columns to ignore
 %     twocomponent       Use two component error model (warning: poorly
 %                        tested so far)
+%     logtrafo           Do the scaling in logarithmic space
 %
 % To do: Log trafo scaling, offsets and two component error model scaling
 
@@ -43,8 +44,8 @@ function scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent' };
-    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0 ];
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo' };
+    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
@@ -53,7 +54,8 @@ function scaleIt( names, outFile, varargin )
     {'', 'Using custom experiment ID column'} ...
     {'', 'Restricting to specific specified observables'} ...
     {'', 'Using ignore mask'} ...,
-    {'', 'Using two component error model'} };
+    {'', 'Using two component error model'} ...
+    {'', 'Using lognormal error model'} };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
     timeVars = {'t', 'T', 'time', 'Time'};
@@ -86,22 +88,43 @@ function scaleIt( names, outFile, varargin )
         ignoreMask = opts.ignoremask_args;
     end
     
+    % Default mapping
+    trafo           = @(x) x;
+    invTrafo        = @(x) x;
+    
+    if ( opts.logtrafo )
+        trafo       = @(x) log10(x);
+        invTrafo    = @(x) 10.^(x);
+    end
+    
     % Simplest error model
-    errModel        = @(pars, data, scaleLinks, Ncond, Nscale, conditionLinks) model(pars, data, scaleLinks, Ncond, Nscale, conditionLinks);
+    errModel        = @(pars, data, scaleLinks, Ncond, Nscale, conditionLinks) model(pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo);
     errModelPars    = 0;
     
     if ( opts.twocomponent )
         % Two component error model
-        errModel        = @(pars, data, scaleLinks, Ncond, Nscale, conditionLinks) flexible_model(pars, data, scaleLinks, Ncond, Nscale, conditionLinks, @twocomponent);
+        errModel        = @(pars, data, scaleLinks, Ncond, Nscale, conditionLinks) flexible_model(pars, data, scaleLinks, Ncond, Nscale, conditionLinks, @twocomponent, trafo);
         errModelPars    = 2;
     end
- 
+     
     % Collect csv files
     fieldNames = {};
     for jN = 1 : length( names )
         data{jN} = readCSV( names{jN}, delimiter ); %#ok
         fieldNames = union( fieldNames, fieldnames(data{jN}) );
     end
+    
+    % For datasets which have no experiment numbers, we add this column,
+    % but show a warning
+    for jN = 1 : length( names )
+        fields = fieldnames( data{jN} );
+        if ~ismember( fields, expVar )
+            sprintf( 'Did not find variable which indicates experiment ID for dataset %s. Adding it.\n', names{jN} );
+            data{jN}.(expVar) = cell(size(data{jN}.(fields{1}))); %#ok<AGROW>
+            data{jN}.(expVar)(:) = {'1'}; %#ok<AGROW>
+        end
+    end
+    fieldNames = union( fieldNames, expVar );
     
     % Match up the headers
     expField = 0;
@@ -138,8 +161,10 @@ function scaleIt( names, outFile, varargin )
             end
             for b = 1 : length( ignoreMask )
                 if ~isempty( strfind( K{a}, ignoreMask{b} ) )
-                    out = rmfield( out, K{a} );
-                    fieldNames = setdiff( fieldNames, K{a} );
+                    if ( isfield( out, K{a} ) )
+                        out = rmfield( out, K{a} );
+                        fieldNames = setdiff( fieldNames, K{a} );
+                    end
                 end
             end
         end
@@ -169,17 +194,17 @@ function scaleIt( names, outFile, varargin )
     % out = unitTest()
     
     % Estimate correct scaling factors
-    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs );
+    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, invTrafo );
        
     % Find unique conditions (unrelated to time this time)
     groupNames = union(fieldNames{ismember(fieldNames, expVar)}, {fieldNames{cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))}});
+    %groupNames = {fieldNames{ismember(fieldNames, expVar)}};
     for jC = 1 : length(groupNames)
         groups( jC, : ) = out.(groupNames{jC}); %#ok<AGROW>
     end
     [~, ~, groupIDs] = unique( cell2mat( groups ).', 'rows' );
     
     % Plot results
-    
     colors = colmap;    
     nX = floor(sqrt(length(dataFields)));
     nY = ceil( length(dataFields)/ nX );    
@@ -268,7 +293,7 @@ function out = unitTest() %#ok
     out.y       = {1,2,3,  2,4,6,  10,20,30     3,6,9,  6,12,18 30,60,90}.';
 end
 
-function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList )
+function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList, invtrafo )
     verbose = 1;
     fieldNames = fieldnames(out);
        
@@ -356,9 +381,6 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     nGroups = length( obsGroups );
     
     expVar = fieldNames(cell2mat(cellfun(@(a)strcmp(a, expVar), fieldNames, 'UniformOutput', false)));
-    if (isempty(expVar))
-        error( 'Did not find variable which indicates experiment ID' );
-    end
     nObs  = length( dataFields );
     
     % Set up a unique scaling factor for each group
@@ -410,21 +432,21 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
             
             % Returned quantities are indexed by condition ID
             out.([dataFields{jD} '_mean'])          = NaN( Nrows, 1 );
-            out.([dataFields{jD} '_mean'])(Q{jD})   = means(conditionLinks(locs));
+            out.([dataFields{jD} '_mean'])(Q{jD})   = invTrafo( means(conditionLinks(locs)) );
 
             % Returned quantities are indexed by condition ID
             out.([dataFields{jD} '_lb'])            = NaN( Nrows, 1 );
-            out.([dataFields{jD} '_lb'])(Q{jD})     = mlb(conditionLinks(locs));          
+            out.([dataFields{jD} '_lb'])(Q{jD})     = invTrafo( mlb(conditionLinks(locs)) );          
 
             % Returned quantities are indexed by condition ID
             out.([dataFields{jD} '_ub'])            = NaN( Nrows, 1 );
-            out.([dataFields{jD} '_ub'])(Q{jD})     = mub(conditionLinks(locs));
+            out.([dataFields{jD} '_ub'])(Q{jD})     = invTrafo( mub(conditionLinks(locs)) );
 
             out.([dataFields{jD} '_scale'])         = NaN( Nrows, 1 );
             out.([dataFields{jD} '_scale'])(Q{jD})  = scalings(scaleLinks(locs));
 
             out.([dataFields{jD} '_scaled'])        = NaN( Nrows, 1 );
-            out.([dataFields{jD} '_scaled'])(Q{jD}) = replicates(locs);
+            out.([dataFields{jD} '_scaled'])(Q{jD}) = invTrafo( replicates(locs) );
             
             loc = loc + nData;
         end
@@ -484,15 +506,15 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
     scalings = [1; p(numel(conditionTargets)+1:end - errModelPars)];
 end
 
-function res = model( pars, data, scaleLinks, Ncond, Nscale, conditionLinks )
+function res = model( pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo )
     scales = [1; pars(Ncond+1:Ncond+Nscale)];
-    res = scales(scaleLinks) .* pars(conditionLinks) - data;
+    res = trafo( scales(scaleLinks) .* pars(conditionLinks) ) - trafo( data );
 end
 
-function res = flexible_model( pars, data, scaleLinks, Ncond, Nscale, conditionLinks, errorModel )
+function res = flexible_model( pars, data, scaleLinks, Ncond, Nscale, conditionLinks, errorModel, trafo )
     fix     = 1e10;
     scales  = [1; pars(Ncond+1:Ncond+Nscale)];
-    sigma   = errorModel(pars(Ncond+Nscale+1:end), pars(conditionLinks), scales(scaleLinks));
+    sigma   = errorModel(pars(Ncond+Nscale+1:end), trafo( pars(conditionLinks) ), trafo( scales(scaleLinks) ));
     
     if ( max( sigma*fix < 1 ) > 0 ) 
         error( 'Sigma term negative :(' );
@@ -511,10 +533,15 @@ function data = readCSV( filename, delimiter )
         filename = [filename '.csv'];
     end
     
-    fid = fopen(filename, 'r');
+    try
+        fid = fopen(filename, 'r');
+    catch
+        error( 'Failed to open %s', filename );      
+    end
     
     % Fetch header
     C = textscan(fid, '%s\n',1,'Delimiter','');
+    
     
     % Grab header items
     headers = textscan(C{1}{1}, '%q', 'Delimiter', delimiter);
@@ -548,7 +575,9 @@ function data = readCSV( filename, delimiter )
     end
     
     for a = 1 : length( headers )
-        data.(filterField(headers{a})) = dataBlock(:,a);
+        if (~isempty(headers{a}))
+            data.(filterField(headers{a})) = dataBlock(:,a);
+        end
     end
     fclose(fid);
 end
