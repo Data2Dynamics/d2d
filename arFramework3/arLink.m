@@ -545,6 +545,18 @@ for m = 1:length(ar.model)
     end
 end
 
+% Link time points intercondition constraints
+if ( isfield( ar, 'conditionconstraints' ) )
+    for jC = 1 : length( ar.conditionconstraints )
+        m  = ar.conditionconstraints(jC).m;
+        c1 = ar.conditionconstraints(jC).c1;
+        c2 = ar.conditionconstraints(jC).c2;
+        t  = ar.conditionconstraints(jC).t;
+        ar.conditionconstraints(jC).tLink1 = find( ismember( ar.model(m).condition(c1).tExp, t ) );
+        ar.conditionconstraints(jC).tLink2 = find( ismember( ar.model(m).condition(c2).tExp, t ) );
+    end
+end
+
 % populate threads
 populate_threads( 'threads', 'condition', 'nTasks');
 populate_threads( 'ss_threads', 'ss_condition', 'nssTasks');

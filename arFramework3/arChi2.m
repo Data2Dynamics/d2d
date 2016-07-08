@@ -294,6 +294,43 @@ for jm = 1:nm
     end
 end
 
+% Intercondition constraints
+% To do: Further generalize this to arbitrary constraints
+if ( isfield( ar, 'conditionconstraints' ) )
+    for jC = 1 : length( ar.conditionconstraints )
+        m                   = ar.conditionconstraints(jC).m;
+        c1                  = ar.conditionconstraints(jC).c1;
+        c2                  = ar.conditionconstraints(jC).c2;
+        tLink1              = ar.conditionconstraints(jC).tLink1;
+        tLink2              = ar.conditionconstraints(jC).tLink2;
+        sd                  = ar.conditionconstraints(jC).sd;
+        states              = ar.conditionconstraints(jC).states;
+        pLink1              = ar.model(m).condition(c1).pLink;
+        pLink2              = ar.model(m).condition(c2).pLink;
+        
+        nstates             = length(states);
+        npts                = length(tLink1);
+        tmpsres             = zeros(npts*nstates, np);
+        dynamic1            = ar.model(m).condition(c1).xExpSimu(tLink1,states);
+        dynamic2            = ar.model(m).condition(c2).xExpSimu(tLink2,states);   
+        sens1               = reshape( ar.model(m).condition(c1).sxExpSimu(tLink1,states,:), length(states)*npts, sum(pLink1));
+        sens2               = reshape( ar.model(m).condition(c2).sxExpSimu(tLink2,states,:), length(states)*npts, sum(pLink2));
+        tmpsres(:, pLink1)  = tmpsres(:, pLink1) + sens1 / sd;
+        tmpsres(:, pLink2)  = tmpsres(:, pLink2) - sens2 / sd;
+        tmpres              = (dynamic1 - dynamic2)./sd;
+        
+        ar.res(resindex:resindex+npts*nstates-1) = tmpres;
+        ar.sres(sresindex:(sresindex+npts*nstates-1),:) = tmpsres;
+        sresindex = sresindex+npts*nstates;
+        resindex  = resindex+npts*nstates;
+        
+        ar.ndata = ar.ndata + 1;
+        ar.nprior = ar.nprior + 1;
+        ar.chi2 = ar.chi2 + sum(sum(tmpres.^2));
+        ar.chi2prior = ar.chi2prior + sum(sum(tmpres.^2));
+    end
+end
+
 % constraints
 constrindex = 1;
 sconstrindex = 1;
