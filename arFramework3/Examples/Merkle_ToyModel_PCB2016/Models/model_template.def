@@ -1,0 +1,40 @@
+DESCRIPTION
+"2 step model"
+
+PREDICTOR
+t	T	"min"	"time"	0	60
+
+COMPARTMENTS
+cyt	V	"pl"	"vol."	1
+
+STATES
+Prot1	C	"nM"	"conc."	cyt	1	"Protein 1" 1
+Prot2	C	"nM"	"conc."	cyt	1	"Protein 2" 1
+Prot3	C	"nM"	"conc."	cyt	1	"Protein 3" 1
+
+INPUTS
+
+REACTIONS
+Prot1	->	Prot2	CUSTOM "k_1 * Prot1"
+Prot2	->	Prot3	CUSTOM "k_2 * Prot2"
+Prot3	->	Prot2	CUSTOM "k_3 * Prot3"
+
+DERIVED
+        
+OBSERVABLES
+Prot1_abs	C	"nM"	"conc."	0	0	"Prot1"
+Prot3_abs	C	"nM"	"conc."	0	0	"Prot3"
+        
+ERRORS
+Prot1_abs    "0.1"
+Prot3_abs    "0.1"
+
+CONDITIONS
+init_Prot2  "0"
+init_Prot3  "0"
+
+k_1         "k_1 * (1 + iscell2 * (relto_k_1-1))"
+k_2         "k_2 * (1 + iscell2 * (relto_k_2-1))"
+k_3         "k_3 * (1 + iscell2 * (relto_k_3-1))"
+
+init_Prot1  "init_Prot1 * (1 + iscell2 * (relto_init_Prot1-1))"

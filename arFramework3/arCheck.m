@@ -35,6 +35,9 @@ end
 if(exist('fileChooser','file') == 0)
     addpath([ar_path '/arTools'])
 end
+if(exist('l1Init','file') == 0)
+    addpath([ar_path '/l1'])
+end
 
 [has_git, is_repo] = arCheckGit(ar_path);
 

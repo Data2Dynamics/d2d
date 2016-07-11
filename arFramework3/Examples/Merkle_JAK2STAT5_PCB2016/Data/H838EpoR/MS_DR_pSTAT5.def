@@ -1,0 +1,20 @@
+DESCRIPTION
+"Experimenter: Florian Salopiata"
+"Cells: H838"
+"Ligand: Epo dose response at 20 minutes"
+
+PREDICTOR-DOSERESPONSE  epo_level
+t               T   min     time	0	25
+
+INPUTS
+
+OBSERVABLES
+pSTAT5_rel         C   %  frac.   0   0   "100*pSTAT5/(pSTAT5+STAT5)"
+        
+ERRORS
+pSTAT5_rel		"sd_pSTAT5_rel_H838EpoR"
+
+CONDITIONS
+ActD				"0"
+SOCS3oe             "0"
+init_EpoRJAK2       "ReltoH838_init_EpoRJAK2_H838 * init_EpoRJAK2_H838"

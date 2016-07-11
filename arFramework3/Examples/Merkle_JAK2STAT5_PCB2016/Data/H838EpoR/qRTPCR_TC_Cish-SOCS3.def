@@ -1,0 +1,30 @@
+DESCRIPTION
+"Experimenter: Ruth Merkle"
+"Cells: H838EpoR"
+"Ligand: Epo 0-500 units/ml"
+
+PREDICTOR
+t               T   min     time	0	800
+
+INPUTS
+
+OBSERVABLES
+CishRNA_rep1_au          C   au  conc.   0   1   "offset_CISRNA_H838 + scale_CISRNA_H838 / CISHRNAeqm / init_STAT5 * CISHRNA"
+CishRNA_rep2_au          C   au  conc.   0   1   "offset_CISRNA_H838 + scale_CISRNA_H838 / CISHRNAeqm / init_STAT5 * CISHRNA"
+CishRNA_rep3_au          C   au  conc.   0   1   "offset_CISRNA_H838 + scale_CISRNA_H838 / CISHRNAeqm / init_STAT5 * CISHRNA"
+SOCS3RNA_rep1_au         C   au  conc.   0   1   "offset_SOCS3RNA_H838 + scale_SOCS3RNA_H838 / SOCS3RNAeqm / init_STAT5^SOCS3prom * SOCS3RNA"
+SOCS3RNA_rep2_au         C   au  conc.   0   1   "offset_SOCS3RNA_H838 + scale_SOCS3RNA_H838 / SOCS3RNAeqm / init_STAT5^SOCS3prom * SOCS3RNA"
+SOCS3RNA_rep3_au         C   au  conc.   0   1   "offset_SOCS3RNA_H838 + scale_SOCS3RNA_H838 / SOCS3RNAeqm / init_STAT5^SOCS3prom * SOCS3RNA"
+
+ERRORS
+CishRNA_rep1_au     	"sd_RNA_H838"
+CishRNA_rep2_au     	"sd_RNA_H838"
+CishRNA_rep3_au     	"sd_RNA_H838"
+SOCS3RNA_rep1_au		"sd_RNA_H838"
+SOCS3RNA_rep2_au		"sd_RNA_H838"
+SOCS3RNA_rep3_au		"sd_RNA_H838"
+
+CONDITIONS
+ActD				"0"
+SOCS3oe             "0"
+init_EpoRJAK2       "ReltoH838_init_EpoRJAK2_H838 * init_EpoRJAK2_H838"

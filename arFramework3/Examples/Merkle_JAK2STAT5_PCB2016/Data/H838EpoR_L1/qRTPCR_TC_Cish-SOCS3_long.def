@@ -1,0 +1,45 @@
+DESCRIPTION
+"Experimenter: Ruth Merkle"
+"Cells: H838EpoR"
+"Ligand: Epo 0-500 units/ml"
+"Original file: 140403_H838EpoR_qPCR"
+
+PREDICTOR
+t               T   min     time	0	140
+
+INPUTS
+
+OBSERVABLES
+SOCS3RNA_au         C   au  conc.   0   1   "offset_SOCS3RNA_H838 + scale_SOCS3RNA_H838_long1 / SOCS3RNAeqm / init_STAT5^SOCS3prom * SOCS3RNA"
+CishRNA_au          C   au  conc.   0   1   "offset_CISRNA_H838 + scale_CISRNA_H838_long1 / CISHRNAeqm / init_STAT5 * CISHRNA"
+
+ERRORS
+CishRNA_au     		"sd_RNA_H838"
+SOCS3RNA_au         "sd_RNA_H838"
+
+CONDITIONS
+ActD				"0"
+SOCS3oe             "0"
+init_EpoRJAK2       "ReltoH838_init_EpoRJAK2_H838 * init_EpoRJAK2_H838"
+
+init_CISHnRNA1      "CISHRNAbasal_long1*CISHRNAeqm/CISHRNAdelay"
+init_CISHnRNA2      "CISHRNAbasal_long1*CISHRNAeqm/CISHRNAdelay"
+init_CISHnRNA3      "CISHRNAbasal_long1*CISHRNAeqm/CISHRNAdelay"
+init_CISHnRNA4      "CISHRNAbasal_long1*CISHRNAeqm/CISHRNAdelay"
+init_CISHnRNA5      "CISHRNAbasal_long1*CISHRNAeqm/CISHRNAdelay"
+init_CISHRNA        "2.15/11.56*CISHRNAbasal_long1*CISHRNAeqm/(CISHRNAturn * Relto_CFUE_CISHRNAturn)"
+
+init_CIS            "2.15/11.56*CISeqm/CISHRNAeqm*CISHRNAbasal_long1*CISHRNAeqm/(CISHRNAturn * Relto_CFUE_CISHRNAturn)"
+
+CISHRNAbasal        "CISHRNAbasal_long1*CISHRNAeqm"
+        
+init_SOCS3nRNA1     "SOCS3RNAbasal_long1*SOCS3RNAeqm/(SOCS3RNAdelay * Relto_CFUE_SOCS3RNAdelay)"
+init_SOCS3nRNA2     "SOCS3RNAbasal_long1*SOCS3RNAeqm/(SOCS3RNAdelay * Relto_CFUE_SOCS3RNAdelay)"
+init_SOCS3nRNA3     "SOCS3RNAbasal_long1*SOCS3RNAeqm/(SOCS3RNAdelay * Relto_CFUE_SOCS3RNAdelay)"
+init_SOCS3nRNA4     "SOCS3RNAbasal_long1*SOCS3RNAeqm/(SOCS3RNAdelay * Relto_CFUE_SOCS3RNAdelay)"
+init_SOCS3nRNA5     "SOCS3RNAbasal_long1*SOCS3RNAeqm/(SOCS3RNAdelay * Relto_CFUE_SOCS3RNAdelay)"
+init_SOCS3RNA       "2.15/11.56*SOCS3RNAbasal_long1*SOCS3RNAeqm/SOCS3RNAturn"
+
+init_SOCS3          "2.15/11.56*SOCS3eqm/SOCS3RNAeqm*SOCS3RNAbasal_long1*SOCS3RNAeqm/SOCS3RNAturn"
+
+SOCS3RNAbasal       "SOCS3RNAbasal_long1*SOCS3RNAeqm"
