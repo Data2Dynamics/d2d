@@ -2,7 +2,7 @@
 % to change. Please be aware that backward compatibility for this function 
 % is not ensured at this time.
 
-function arAddConditionConstraint( m, c1, c2, t, sd, states )
+function arAddConditionConstraint( m, c1, c2, t, sd, states, relative )
 
     global ar;
     
@@ -11,10 +11,17 @@ function arAddConditionConstraint( m, c1, c2, t, sd, states )
     strct.c2        = c2;
     strct.t         = t;
     strct.sd        = sd;
+    
     if ( ~exist( 'states', 'var' ) )
         strct.states = 1:length(ar.model(m).x);
     else
         strct.states = states;
+    end
+    
+    if ( ~exist( 'relative', 'var' ) )
+        strct.relative = 1;
+    else
+        strct.relative = relative;
     end
 
     if ~isfield( ar, 'conditionconstraints' )

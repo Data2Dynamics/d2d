@@ -24,6 +24,7 @@ pRef = ar.p;
 arChi2(false,[]);
 
 ar.sresFD = ar.res' * ones(1,length(pRef)) + 0;
+ar.sconstrFD = ar.constr' * ones(1,length(pRef)) + 0;
 
 arWaitbar(0);
 for jp=1:length(ar.pLabel)
@@ -65,7 +66,7 @@ for jp=1:length(ar.pLabel)
         end
     end
     
-    % disturb p(jp)
+    % perturb p(jp)
     ar.p(jp) = ar.p(jp) + dp;
     arChi2(false,[]);
     
@@ -100,6 +101,7 @@ for jp=1:length(ar.pLabel)
     end
     
     ar.sresFD(:,jp) = (ar.res' - ar.sresFD(:,jp)) / dp + 0;
+    ar.sconstrFD(:,jp) = (ar.constr' - ar.sconstrFD(:,jp)) / dp + 0;
     
     % reset p
     ar.p = pRef;

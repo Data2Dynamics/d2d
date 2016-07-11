@@ -303,6 +303,7 @@ sconstrindex = 1;
 if ( isfield( ar, 'conditionconstraints' ) )
     for jC = 1 : length( ar.conditionconstraints )
         m                   = ar.conditionconstraints(jC).m;
+        relative            = ar.conditionconstraints(jC).relative;
         c1                  = ar.conditionconstraints(jC).c1;
         c2                  = ar.conditionconstraints(jC).c2;
         tLink1              = ar.conditionconstraints(jC).tLink1;
@@ -323,6 +324,15 @@ if ( isfield( ar, 'conditionconstraints' ) )
         % Fetch sensitivities w.r.t. p
         sens1               = ar.model(m).condition(c1).sxExpSimu(tLink1,states,:);
         sens2               = ar.model(m).condition(c2).sxExpSimu(tLink2,states,:);
+        
+        % Relative?
+        if ( relative )            
+            sens1           = sens1 ./ ( log(10) * repmat(dynamic1,1,1,size(sens1,3)) );
+            sens2           = sens2 ./ ( log(10) * repmat(dynamic2,1,1,size(sens1,3)) );
+            
+            dynamic1        = log10( dynamic1 );
+            dynamic2        = log10( dynamic2 );            
+        end
         
         % Determine sensitivities w.r.t. log10(p) for the logtransformed ones
         trafo1              = ar.qLog10( pLink1 ) .* log(10) .* 10.^ar.p( pLink1 );
@@ -346,10 +356,10 @@ if ( isfield( ar, 'conditionconstraints' ) )
         %ar.sres(sresindex:(sresindex+npts*nstates-1),:) = tmpsres;
         %sresindex = sresindex+npts*nstates;
         
-        ar.res(resindex:resindex+npts*nstates-1) = tmpres;
+        ar.constr(constrindex:constrindex+npts*nstates-1) = tmpres;
         ar.sconstr(sconstrindex:(sconstrindex+npts*nstates-1),:) = tmpsres;
         
-        resindex  = resindex+npts*nstates;
+        constrindex  = constrindex+npts*nstates;
         sconstrindex = sconstrindex+npts*nstates;
          
         ar.nconstr      = ar.nconstr + length(tmpres);
