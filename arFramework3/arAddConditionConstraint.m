@@ -13,6 +13,8 @@ function arAddConditionConstraint( m, c1, c2, t, sd, states )
     strct.sd        = sd;
     if ( ~exist( 'states', 'var' ) )
         strct.states = 1:length(ar.model(m).x);
+    else
+        strct.states = states;
     end
 
     if ~isfield( ar, 'conditionconstraints' )

@@ -294,6 +294,10 @@ for jm = 1:nm
     end
 end
 
+% constraints
+constrindex = 1;
+sconstrindex = 1;
+
 % Intercondition constraints
 % To do: Further generalize this to arbitrary constraints
 if ( isfield( ar, 'conditionconstraints' ) )
@@ -311,29 +315,47 @@ if ( isfield( ar, 'conditionconstraints' ) )
         nstates             = length(states);
         npts                = length(tLink1);
         tmpsres             = zeros(npts*nstates, np);
+        
+        % Fetch simulations
         dynamic1            = ar.model(m).condition(c1).xExpSimu(tLink1,states);
-        dynamic2            = ar.model(m).condition(c2).xExpSimu(tLink2,states);   
-        sens1               = reshape( ar.model(m).condition(c1).sxExpSimu(tLink1,states,:), length(states)*npts, sum(pLink1));
-        sens2               = reshape( ar.model(m).condition(c2).sxExpSimu(tLink2,states,:), length(states)*npts, sum(pLink2));
+        dynamic2            = ar.model(m).condition(c2).xExpSimu(tLink2,states);
+        
+        % Fetch sensitivities w.r.t. p
+        sens1               = ar.model(m).condition(c1).sxExpSimu(tLink1,states,:);
+        sens2               = ar.model(m).condition(c2).sxExpSimu(tLink2,states,:);
+        
+        % Determine sensitivities w.r.t. log10(p) for the logtransformed ones
+        trafo1              = ar.qLog10( pLink1 ) .* log(10) .* 10.^ar.p( pLink1 );
+        trafo2              = ar.qLog10( pLink2 ) .* log(10) .* 10.^ar.p( pLink2 );
+        for a = 1 : length( pLink1 )
+            sens1(:,:,a)    = sens1(:,:,a) .* trafo1(a);
+        end
+        for a = 1 : length( pLink2 )
+            sens2(:,:,a)    = sens2(:,:,a) .* trafo2(a);
+        end
+        
+        % Reshape to fit format desired for sres
+        sens1               = reshape( sens1, length(states)*npts, sum(pLink1));
+        sens2               = reshape( sens2, length(states)*npts, sum(pLink2));
         tmpsres(:, pLink1)  = tmpsres(:, pLink1) + sens1 / sd;
         tmpsres(:, pLink2)  = tmpsres(:, pLink2) - sens2 / sd;
         tmpres              = (dynamic1 - dynamic2)./sd;
         
-        ar.res(resindex:resindex+npts*nstates-1) = tmpres;
-        ar.sres(sresindex:(sresindex+npts*nstates-1),:) = tmpsres;
-        sresindex = sresindex+npts*nstates;
-        resindex  = resindex+npts*nstates;
+        % Store
+        %ar.res(resindex:resindex+npts*nstates-1) = tmpres;
+        %ar.sres(sresindex:(sresindex+npts*nstates-1),:) = tmpsres;
+        %sresindex = sresindex+npts*nstates;
         
-        ar.ndata        = ar.ndata + 1;
-        ar.nprior       = ar.nprior + 1;
-        ar.chi2         = ar.chi2 + sum(sum(tmpres.^2));
-        ar.chi2prior    = ar.chi2prior + sum(sum(tmpres.^2));
+        ar.res(resindex:resindex+npts*nstates-1) = tmpres;
+        ar.sconstr(sconstrindex:(sconstrindex+npts*nstates-1),:) = tmpsres;
+        
+        resindex  = resindex+npts*nstates;
+        sconstrindex = sconstrindex+npts*nstates;
+         
+        ar.nconstr      = ar.nconstr + length(tmpres);
+        ar.chi2constr   = ar.chi2constr + sum(sum(tmpres.^2));        
     end
 end
-
-% constraints
-constrindex = 1;
-sconstrindex = 1;
 
 % steady state conditions
 qRelativeToInitialValue = true;
