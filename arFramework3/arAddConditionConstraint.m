@@ -1,6 +1,20 @@
-% This functionality is still being developed and the interface is subject
-% to change. Please be aware that backward compatibility for this function 
-% is not ensured at this time.
+% function arAddConditionConstraint( m, c1, c2, t, sd, states, relative )
+%   
+%   Mandatory arguments:
+%       m           Model within which to constrain
+%       c1          Condition 1
+%       c2          Condition 2
+%       t           Time points to use in the constraint
+%   Optional arguments:
+%       states      States to constrain (default = 1:nStates)
+%       relative    Constrain on log10-scale? (default = 1)
+%
+% Warning: This function invokes arLink, which may lead you to lose
+% simulation results.
+%
+% Warning: This functionality is still being developed and the interface is 
+% subject to change. Please be aware that backward compatibility for this
+% function is not ensured at this time.
 
 function arAddConditionConstraint( m, c1, c2, t, sd, states, relative )
 
