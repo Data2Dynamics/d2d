@@ -1,0 +1,25 @@
+DESCRIPTION
+"Experimenter: Florian Salopiata"
+"Cells: H838-EpoR"
+"Ligand: Epo dose response at 20 minutes"
+
+PREDICTOR-DOSERESPONSE  epo_level
+t               T   min     time	0	25
+
+INPUTS
+
+OBSERVABLES
+pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_ib_12 + scale_pJAK2_ib_12 / init_EpoRJAK2 * pJAK2"
+pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_ib_12 + scale_pEpoR_ib_12 / init_EpoRJAK2 * pEpoR"
+tEpoR_au            C   au  conc.   1   1   "offset_tEpoR_ib_12 + scale_tEpoR_ib_12 / init_EpoRJAK2 * (EpoRJAK2 + EpoRpJAK2 + pEpoRpJAK2)"
+
+
+ERRORS
+pJAK2_au		"sd_JAK2EpoR_au_H838"
+pEpoR_au		"sd_JAK2EpoR_au_H838"
+tEpoR_au		"sd_JAK2EpoR_au_H838"
+
+CONDITIONS
+ActD				"0"
+SOCS3oe             "0"
+init_EpoRJAK2       "ReltoH838_init_EpoRJAK2_H838 * init_EpoRJAK2_H838"

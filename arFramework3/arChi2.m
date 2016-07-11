@@ -415,6 +415,7 @@ for jm = 1:nm
 end
 
 % priors
+notpriors = 1:sresindex-1;
 for jp=1:np
     if(ar.type(jp) == 0) % flat prior with hard bounds
     elseif(ar.type(jp) == 1) % normal prior
@@ -451,16 +452,16 @@ for jp=1:np
         ar.nprior = ar.nprior + 1;
         ar.chi2 = ar.chi2 + tmpres^2;
         ar.chi2prior = ar.chi2prior + tmpres^2;
-    elseif(ar.type(jp) == 3) % L1 prior
+    elseif(ar.type(jp) == 3 && ~isinf(ar.std(jp))) % L1 prior
         tmpres = sqrt(abs((ar.mean(jp)-ar.p(jp))./ar.std(jp)));
         ar.res(resindex) = tmpres;
         resindex = resindex+1;
         if(ar.config.useSensis && sensi)
             tmpsres = zeros(size(ar.p));
-            if ar.mean(jp) ~= ar.p(jp)
+            if abs(ar.mean(jp) - ar.p(jp)) > 1e-10
                 tmpsres(jp) = sign(ar.p(jp)-ar.mean(jp)) ./ (2*ar.std(jp).*sqrt(abs((ar.mean(jp)-ar.p(jp))./ar.std(jp))));
-            else
-                tmpsres(jp) = 0;
+            elseif abs(2*ar.res(notpriors)*ar.sres(notpriors,jp)) < 1/ar.std(jp)
+                ar.sres(:,jp) = 0;
             end
             ar.sres(sresindex,:) = tmpsres;
             sresindex = sresindex+1;

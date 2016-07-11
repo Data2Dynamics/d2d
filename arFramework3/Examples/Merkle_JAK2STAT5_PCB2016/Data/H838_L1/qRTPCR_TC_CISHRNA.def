@@ -1,0 +1,25 @@
+DESCRIPTION
+"Experimenter: Ruth Merkle"
+"Cells: H838"
+"Ligand: Epo 10 units/ml (2*1e-5 units/cell)"
+
+PREDICTOR
+t               T   min     time	0	1500
+
+INPUTS
+
+OBSERVABLES
+CISRNA_foldA           C   au  "fold change"   0   1   "offset_CISRNA_H838 + scale_CISRNA_foldA_H838 / CISHRNAeqm / init_STAT5 * CISHRNA"
+CISRNA_foldB           C   au  "fold change"   0   1   "offset_CISRNA_H838 + scale_CISRNA_foldB_H838 / CISHRNAeqm / init_STAT5 * CISHRNA"
+CISRNA_foldC           C   au  "fold change"   0   1   "offset_CISRNA_H838 + scale_CISRNA_foldC_H838 / CISHRNAeqm / init_STAT5 * CISHRNA"
+
+
+ERRORS
+CISRNA_foldA		"sd_RNA_fold_H838"
+CISRNA_foldB		"sd_RNA_fold_H838"
+CISRNA_foldC		"sd_RNA_fold_H838"
+
+CONDITIONS
+ActD				"0"
+SOCS3oe             "0"
+init_EpoRJAK2       "init_EpoRJAK2_H838"

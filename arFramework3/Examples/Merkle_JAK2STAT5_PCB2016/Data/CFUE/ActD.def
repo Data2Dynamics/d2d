@@ -1,0 +1,49 @@
+DESCRIPTION
+"Experimenter: Julie Bachmann"
+"Cells: CFU-E"
+"Ligand: Epo 5 units/ml (1.25e-7 units/cell) + ActD 1 mug/ml"
+
+PREDICTOR
+t               T   min     time	0	200
+
+INPUTS
+
+OBSERVABLES
+pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_actd + scale_pJAK2_actd / init_EpoRJAK2 * pJAK2"
+pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_actd + scale_pEpoR_actd / init_EpoRJAK2 * pEpoR"
+tSTAT5_au           C   au  conc.   1   1   "scale_tSTAT5_actd / init_STAT5 * tSTAT5"
+pSTAT5_au           C   au  conc.   1   1   "offset_pSTAT5_actd + scale_pSTAT5_actd / init_STAT5 * pSTAT5"
+CIS_au              C   au  conc.   1   1   "offset_CIS_actd + scale_CIS_actd / CISeqm / CISHRNAeqm / init_STAT5 * CIS"
+
+ERRORS
+pJAK2_au		"sd_JAK2EpoR_au"
+pEpoR_au		"sd_JAK2EpoR_au"
+tSTAT5_au		"sd_STAT5_au"
+pSTAT5_au		"sd_STAT5_au"
+CIS_au			"sd_CIS_au"
+
+CONDITIONS
+epo_level			"1.25e-7"
+SOCS3oe             "0"
+
+
+
+init_CISHnRNA1      "CISHRNAbasal*(1-ActDstrength*ActD)*CISHRNAeqm/CISHRNAdelay"
+init_CISHnRNA2      "CISHRNAbasal*(1-ActDstrength*ActD)*CISHRNAeqm/CISHRNAdelay"
+init_CISHnRNA3      "CISHRNAbasal*(1-ActDstrength*ActD)*CISHRNAeqm/CISHRNAdelay"
+init_CISHnRNA4      "CISHRNAbasal*(1-ActDstrength*ActD)*CISHRNAeqm/CISHRNAdelay"
+init_CISHnRNA5      "CISHRNAbasal*(1-ActDstrength*ActD)*CISHRNAeqm/CISHRNAdelay"
+init_CISHRNA        "0.275/0.4*CISHRNAbasal*(1-ActDstrength*ActD)*CISHRNAeqm/CISHRNAturn"
+
+init_CIS            "0.275/0.4*CISeqm/CISHRNAeqm*CISHRNAbasal*(1-ActDstrength*ActD)*CISHRNAeqm/CISHRNAturn"
+        
+init_SOCS3nRNA1     "SOCS3RNAbasal*(1-ActDstrength*ActD)*SOCS3RNAeqm/SOCS3RNAdelay"
+init_SOCS3nRNA2     "SOCS3RNAbasal*(1-ActDstrength*ActD)*SOCS3RNAeqm/SOCS3RNAdelay"
+init_SOCS3nRNA3     "SOCS3RNAbasal*(1-ActDstrength*ActD)*SOCS3RNAeqm/SOCS3RNAdelay"
+init_SOCS3nRNA4     "SOCS3RNAbasal*(1-ActDstrength*ActD)*SOCS3RNAeqm/SOCS3RNAdelay"
+init_SOCS3nRNA5     "SOCS3RNAbasal*(1-ActDstrength*ActD)*SOCS3RNAeqm/SOCS3RNAdelay"
+init_SOCS3RNA       "0.275/0.4*SOCS3RNAbasal*(1-ActDstrength*ActD)*SOCS3RNAeqm/SOCS3RNAturn"
+
+init_SOCS3          "0.275/0.4*SOCS3eqm/SOCS3RNAeqm*SOCS3RNAbasal*(1-ActDstrength*ActD)*SOCS3RNAeqm/SOCS3RNAturn"
+
+// ActDstrength	    "1"

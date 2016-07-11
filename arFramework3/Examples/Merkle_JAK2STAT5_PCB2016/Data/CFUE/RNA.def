@@ -1,0 +1,37 @@
+DESCRIPTION
+"Experimenter: Julie Bachmann"
+"Cells: CFU-E"
+"Ligand: Epo 5 units/ml (1.25e-7 units/cell)"
+
+PREDICTOR
+t               T   min     time	0	400
+
+INPUTS
+
+OBSERVABLES
+// SOCS3RNA_foldA         C   au  "fold change"   0   1   "1 + scale_SOCS3RNA_foldA / (0.275/0.4*basal_SOCS3RNA/SOCS3RNATurn) * SOCS3RNA"
+// SOCS3RNA_foldB         C   au  "fold change"   0   1   "1 + scale_SOCS3RNA_foldB / (0.275/0.4*basal_SOCS3RNA/SOCS3RNATurn) * SOCS3RNA"
+// SOCS3RNA_foldC         C   au  "fold change"   0   1   "1 + scale_SOCS3RNA_foldC / (0.275/0.4*basal_SOCS3RNA/SOCS3RNATurn) * SOCS3RNA"
+// CISRNA_foldA           C   au  "fold change"   0   1   "1 + scale_CISRNA_foldA / (0.275/0.4*basal_CISRNA/CISRNATurn) * CISRNA"
+// CISRNA_foldB           C   au  "fold change"   0   1   "1 + scale_CISRNA_foldB / (0.275/0.4*basal_CISRNA/CISRNATurn) * CISRNA"
+// CISRNA_foldC           C   au  "fold change"   0   1   "1 + scale_CISRNA_foldC / (0.275/0.4*basal_CISRNA/CISRNATurn) * CISRNA"
+SOCS3RNA_foldA         C   au  "fold change"   0   1   "offset_SOCS3RNA_CFUE + scale_SOCS3RNA_foldA / SOCS3RNAeqm / init_STAT5^SOCS3prom * SOCS3RNA"
+SOCS3RNA_foldB         C   au  "fold change"   0   1   "offset_SOCS3RNA_CFUE + scale_SOCS3RNA_foldB / SOCS3RNAeqm / init_STAT5^SOCS3prom * SOCS3RNA"
+SOCS3RNA_foldC         C   au  "fold change"   0   1   "offset_SOCS3RNA_CFUE + scale_SOCS3RNA_foldC / SOCS3RNAeqm / init_STAT5^SOCS3prom * SOCS3RNA"
+CISHRNA_foldA          C   au  "fold change"   0   1   "offset_CISRNA_CFUE + scale_CISRNA_foldA / CISHRNAeqm / init_STAT5 * CISHRNA"
+CISHRNA_foldB          C   au  "fold change"   0   1   "offset_CISRNA_CFUE + scale_CISRNA_foldB / CISHRNAeqm / init_STAT5 * CISHRNA"
+CISHRNA_foldC          C   au  "fold change"   0   1   "offset_CISRNA_CFUE + scale_CISRNA_foldC / CISHRNAeqm / init_STAT5 * CISHRNA"
+
+ERRORS
+SOCS3RNA_foldA		"sd_RNA_fold"
+SOCS3RNA_foldB		"sd_RNA_fold"
+SOCS3RNA_foldC		"sd_RNA_fold"
+CISHRNA_foldA		"sd_RNA_fold"
+CISHRNA_foldB		"sd_RNA_fold"
+CISHRNA_foldC		"sd_RNA_fold"
+
+CONDITIONS
+epo_level			"1.25e-7"
+ActD				"0"
+SOCS3oe             "0"
+

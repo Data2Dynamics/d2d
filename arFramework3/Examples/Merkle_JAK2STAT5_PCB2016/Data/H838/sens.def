@@ -1,0 +1,22 @@
+DESCRIPTION
+
+PREDICTOR
+t               T   min     time	0	60
+
+INPUTS
+
+OBSERVABLES     
+npSTAT5_auc_pred         C   nN*min conc.*time   0   0   "npSTAT5_auc"         
+
+ERRORS
+npSTAT5_auc_pred		"10"
+
+CONDITIONS
+// epo_level			"1.25e-7"
+epo_level           "epo_level_pred"
+ActD				"0"
+SOCS3oe             "0"
+
+init_CIS            "2.15/11.56*CISEqc * fold_change_CISEqc/CISRNAEqc*basal_CISRNA*CISRNAEqc/CISRNATurn_H838"
+CISInh              "CISInh / (CISEqc * fold_change_CISEqc)"
+CISEqc              "CISEqc * fold_change_CISEqc / CISRNAEqc"

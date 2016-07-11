@@ -1,0 +1,29 @@
+DESCRIPTION
+"Experimenter: Ruth Merkle"
+"Cells: H838EpoR"
+"Ligand: Epo 0-500 units/ml"
+"Original file CFUE_qPCR_data"
+
+PREDICTOR
+t               T   min     time	0	800
+
+INPUTS
+
+OBSERVABLES
+// SOCS3RNA_au         C   au  conc.   0   1   "1 + scale_SOCS3RNA_valCFUE / (0.275/0.4*basal_SOCS3RNA/SOCS3RNATurn) * SOCS3RNA"
+// CishRNA_au          C   au  conc.   0   1   "1 + scale_CishRNA_valCFUE / (0.275/0.4*basal_CISRNA/CISRNATurn) * CISRNA"
+// SOCS3RNA_au         C   au  conc.   0   1   "offset_SOCS3RNA_valCFUE + scale_SOCS3RNA_valCFUE / (0.275/0.4*basal_SOCS3RNA/SOCS3RNATurn) * SOCS3RNA"
+// CishRNA_au          C   au  conc.   0   1   "offset_CishRNA_valCFUE + scale_CishRNA_valCFUE / (0.275/0.4*basal_CISRNA/CISRNATurn) * CISRNA"
+SOCS3RNA_au         C   au  conc.   0   1   "offset_SOCS3RNA_valCFUE + scale_SOCS3RNA_valCFUE / SOCS3RNAeqm / init_STAT5^SOCS3prom * SOCS3RNA"
+CishRNA_au          C   au  conc.   0   1   "offset_CishRNA_valCFUE + scale_CishRNA_valCFUE / CISHRNAeqm / init_STAT5 * CISHRNA"
+
+ERRORS
+CishRNA_au     		"sd_RNA"
+SOCS3RNA_au         "sd_RNA"
+
+CONDITIONS
+ActD				"0"
+SOCS3oe             "0"
+
+epo_level           "1.25e-6"
+isprediction        "0"

@@ -1,0 +1,22 @@
+DESCRIPTION
+"Experimenter: Julie Bachmann"
+"Technique: Mass spectrometry"
+"Cells: H838"
+"Ligand: Epo 10 units/ml"
+"Date: 2011-07-04"
+
+PREDICTOR
+t               T   min     time	0	100
+
+INPUTS
+
+OBSERVABLES
+pSTAT5_rel        C   % frac.     0   0   "100*pSTAT5/(pSTAT5+STAT5)"
+
+ERRORS
+pSTAT5_rel		"sd_pSTAT5_rel_H838"
+
+CONDITIONS
+ActD				"0"
+SOCS3oe             "0"
+init_EpoRJAK2       "init_EpoRJAK2_H838"

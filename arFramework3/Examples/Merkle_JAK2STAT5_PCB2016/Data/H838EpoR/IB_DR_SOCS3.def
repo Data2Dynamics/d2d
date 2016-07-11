@@ -1,0 +1,20 @@
+DESCRIPTION
+"Experimenter: Florian Salopiata"
+"Cells: H838-EpoR"
+"Ligand: Epo dose response at 20 minutes"
+
+PREDICTOR-DOSERESPONSE  epo_level
+t               T   min     time	0	25
+
+INPUTS
+
+OBSERVABLES
+SOCS3_au            C   au  conc.   1   1   "offset_SOCS3_ib_13 + scale_SOCS3_ib_13 / SOCS3eqm / SOCS3RNAeqm / init_STAT5^SOCS3prom * SOCS3"
+
+ERRORS
+SOCS3_au		"sd_SOCS3_au_H838"
+
+CONDITIONS
+ActD				"0"
+SOCS3oe             "0"
+init_EpoRJAK2       "ReltoH838_init_EpoRJAK2_H838 * init_EpoRJAK2_H838"

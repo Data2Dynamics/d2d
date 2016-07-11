@@ -1,0 +1,23 @@
+DESCRIPTION
+"Experimenter: Florian Salopiata"
+"Cells: H838"
+"Ligand: Epo 10 units/ml"
+"Date: 2011-05-31"
+
+PREDICTOR
+t               T   min     time	0	100
+
+INPUTS
+
+OBSERVABLES
+pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_ib_3 + scale_pJAK2_ib_3 / init_EpoRJAK2_H838 * pJAK2"
+pSTAT5_au           C   au  conc.   1   1   "offset_pSTAT5_ib_3 + scale_pSTAT5_ib_3 / init_STAT5 * pSTAT5"
+
+ERRORS
+pJAK2_au		"sd_JAK2EpoR_au_H838"
+pSTAT5_au		"sd_STAT5_au_H838"
+
+CONDITIONS
+ActD				"0"
+SOCS3oe             "0"
+init_EpoRJAK2       "init_EpoRJAK2_H838"

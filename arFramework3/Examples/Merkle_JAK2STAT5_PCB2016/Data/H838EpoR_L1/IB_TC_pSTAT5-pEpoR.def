@@ -1,0 +1,24 @@
+DESCRIPTION
+"Experimenter: Florian Salopiata"
+"Cells: H838-EpoR"
+"Ligand: Epo-beta 10 units/ml"
+"Date: 2012-11-09"
+
+PREDICTOR
+t               T   min     time	0	150
+
+INPUTS
+
+OBSERVABLES
+pSTAT5_au           C   au  conc.   1   1   "offset_pSTAT5_ib_6 + scale_pSTAT5_ib_6 / init_STAT5 * pSTAT5"
+pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_ib_6 + scale_pEpoR_ib_6 / init_EpoRJAK2 * pEpoR"
+
+
+ERRORS
+pSTAT5_au		"sd_STAT5_au_H838"
+pEpoR_au		"sd_JAK2EpoR_au_H838"
+
+CONDITIONS
+ActD				"0"
+SOCS3oe             "0"
+init_EpoRJAK2       "ReltoH838_init_EpoRJAK2_H838 * init_EpoRJAK2_H838"

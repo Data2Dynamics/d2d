@@ -1,0 +1,28 @@
+DESCRIPTION
+"Experimenter: Florian Salopiata"
+"Cells: H838"
+"Ligand: Epo dose response at 10 minutes"
+
+PREDICTOR-DOSERESPONSE  epo_level
+t               T   min     time	0	25
+
+INPUTS
+
+OBSERVABLES
+pJAK2_au            C   au  conc.   1   1   "offset_pJAK2_ib_11 + scale_pJAK2_ib_11 * pJAK2"
+pEpoR_au            C   au  conc.   1   1   "offset_pEpoR_ib_11 + scale_pEpoR_ib_11 * pEpoR"
+
+ERRORS
+pJAK2_au		"sd_JAK2EpoR_au_H838"
+pEpoR_au		"sd_JAK2EpoR_au_H838"
+
+CONDITIONS
+ActD				"0"
+SOCS3oe             "0"
+init_EpoRJAK2       "overexp * ReltoH838_init_EpoRJAK2_H838 * init_EpoRJAK2_H838 + (1-overexp) * init_EpoRJAK2_H838"
+
+// H838 is reference.
+// If done with init_EpoRJAK2 in observation function, then difference between WT and EpoRoe is divided out.
+// Other option would be to use init_EpoRJAK2_H838 directly in observation function.
+scale_pJAK2_ib_11   "scale_pJAK2_ib_11 / init_EpoRJAK2_H838"
+scale_pEpoR_ib_11   "scale_pEpoR_ib_11 / init_EpoRJAK2_H838"
