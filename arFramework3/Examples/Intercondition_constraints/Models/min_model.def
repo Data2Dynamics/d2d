@@ -1,0 +1,43 @@
+DESCRIPTION
+"Model of drug action"
+
+PREDICTOR
+t               T   min         time	0	100
+
+COMPARTMENTS
+
+STATES
+A_state     C   "nM"      "conc."
+B_state     C   "nM"      "conc."
+C_state     C   "nM"      "conc."
+D_state     C   "nM"      "conc."
+
+INPUTS
+stimulus    C   ng/ml   conc.   "step1(t,0,25,input_stimulus)"
+drug_action C   ng/ml   conc.   "step1(t,0,10,input_drug) * (1-exp(-(t-10)/20))"
+
+REACTIONS
+A_state    ->  B_state      CUSTOM "kp * A_state + stimulus * A_state"
+B_state    ->  A_state      CUSTOM "kd * B_state * (1 + drug_effect * drug_action)"
+C_state    ->  D_state      CUSTOM "(kp2 + kq * B_state) * C_state + stimulus * C_state"
+D_state    ->  C_state      CUSTOM "kd2 * D_state"
+
+DERIVED
+        
+OBSERVABLES
+A_au        C   "au"  "conc."   0   0   "A_state"
+B_au        C   "au"  "conc."   0   0   "B_state"
+
+ERRORS
+A_au       ".001"
+B_au       ".001"
+
+CONDITIONS
+init_A_state    "1"
+init_B_state   	"0"
+init_C_state    "100"
+init_D_state   	"0"
+kp2             "1"
+kd2             "1"
+input_stimulus  "1"
+
