@@ -38,6 +38,8 @@ The software and the theoretical concepts implemented therein were developed bas
 
 * [Epo induced JAK2/STAT5 signaling model in CFU-E cells](https://github.com/Data2Dynamics/d2d/wiki/Bachmann_MSB2011) - Bachmann et al., Molecular Systems Biology 2011
 
+* [Epo induced JAK2/STAT5 signaling model in CFU-E and H838 cells](https://github.com/Data2Dynamics/d2d/wiki/Merkle_PCB2016) - Merkle et al., PLOS Computational Biology 2016
+
 * [STAT5 activation model in BaF3-EpoR cells](https://github.com/Data2Dynamics/d2d/wiki/Boehm_JProteomeRes2014) - Boehm et al., Journal of proteome research 2014
 
 * [JAK/STAT signaling model](https://github.com/Data2Dynamics/d2d/wiki/Swameye_PNAS2003) - Swameye et al., PNAS 2003
