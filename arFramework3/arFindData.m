@@ -68,9 +68,10 @@ function [olist, names, m] = arFindData( varargin )
         end
     end
     
-    switches = { 'exact', 'verbose', 'names'};
-    extraArgs = [ 0, 0, 0 ];
+    switches = { 'exact', 'verbose', 'names', 'state'};
+    extraArgs = [ 0, 0, 0, 1 ];
     description = { ...
+    {'', ''} ...
     {'', ''} ...
     {'', ''} ...
     {'', ''} ...
@@ -92,27 +93,26 @@ function [olist, names, m] = arFindData( varargin )
         verbose = 1;
     end
     
-    observable = [];
-    if ( ischar( varargin{1} ) )
-        if strcmp( varargin{1}, 'state' )
-            if ( length( varargin ) < 2 )
-                error('Insufficient arguments');
-            end
-            observable = varargin{2};
-            varargin = varargin(3:end);
-        else
-            string{1} = varargin{1};
-            varargin = varargin(2:end);
-        end
-    elseif ( iscell( varargin{1} ) )
-        string = varargin{1};
-        varargin = varargin(2:end);
-    else
-        error( 'Please supply a data name' );
+    if ( opts.state )
+        observable = opts.state_args;
     end
     
-    if ( ~isempty(observable) )
-        string = scanObservables(m, observable, verbose);
+    if ( length( varargin ) == 0 )
+        string{1} = '';
+    else
+        if ( ischar( varargin{1} ) )
+            string{1} = varargin{1};
+            varargin = varargin(2:end);
+        elseif ( iscell( varargin{1} ) )
+            string = varargin{1};
+            varargin = varargin(2:end);
+        else
+            string = '';
+        end
+    end
+    
+    if ( opts.state )
+        hasObservables = scanObservables(m, observable, verbose);
     end
     
     if ( mod(length(varargin), 2) ~= 0 )
@@ -125,13 +125,18 @@ function [olist, names, m] = arFindData( varargin )
     olist    = [];
     for b = 1 : length( string )
         for a = 1 : length( ar.model(m).data )
-            if ( ~exact )
-                if isempty(lower(string{b})) || ~isempty( strfind(lower(ar.model(m).data(a).name), lower(string{b}) ) )
-                    olist = union( olist, a );
-                end
-            else
-                if strcmp(ar.model(m).data(a).name, string{b} )
-                    olist = union( olist, a );
+            % Does it have the observable we look for?
+            if ( ( opts.state == 0 ) || (ismember( ar.model(m).data(a).name, hasObservables ) ) )
+                % Do we match the name exactly or not?
+                if ( ~exact )
+                    % Does it have the name we look for?
+                    if isempty(lower(string{b})) || ~isempty( strfind(lower(ar.model(m).data(a).name), lower(string{b}) ) )
+                        olist = union( olist, a );
+                    end
+                else
+                    if strcmp(ar.model(m).data(a).name, string{b} )
+                        olist = union( olist, a );
+                    end
                 end
             end
         end
