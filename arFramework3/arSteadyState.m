@@ -149,8 +149,13 @@ function arSteadyState( varargin )
     ss_condition.stop               = 0;
     ss_condition.stop_data          = 0;
     ss_condition.dxdt               = zeros(size(origin.dxdt));
-    ss_condition.dxdts              = zeros(size(origin.dxdts));
-    ss_condition.dzdx               = zeros(size(origin.dzdx));
+    
+    if ( isfield( origin, 'dxdts' ) )
+        ss_condition.dxdts              = zeros(size(origin.dxdts));
+    end
+    if ( isfield( origin, 'dzdx' ) )
+        ss_condition.dzdx               = zeros(size(origin.dzdx));
+    end
     ss_condition.ddxdtdp            = zeros(size(origin.ddxdtdp));    
     ss_condition.ssLink             = cTarget;
     

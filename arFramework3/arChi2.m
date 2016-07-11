@@ -324,10 +324,10 @@ if ( isfield( ar, 'conditionconstraints' ) )
         sresindex = sresindex+npts*nstates;
         resindex  = resindex+npts*nstates;
         
-        ar.ndata = ar.ndata + 1;
-        ar.nprior = ar.nprior + 1;
-        ar.chi2 = ar.chi2 + sum(sum(tmpres.^2));
-        ar.chi2prior = ar.chi2prior + sum(sum(tmpres.^2));
+        ar.ndata        = ar.ndata + 1;
+        ar.nprior       = ar.nprior + 1;
+        ar.chi2         = ar.chi2 + sum(sum(tmpres.^2));
+        ar.chi2prior    = ar.chi2prior + sum(sum(tmpres.^2));
     end
 end
 

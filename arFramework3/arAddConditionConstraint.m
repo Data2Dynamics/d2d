@@ -1,3 +1,7 @@
+% This functionality is still being developed and the interface is subject
+% to change. Please be aware that backward compatibility for this function 
+% is not ensured at this time.
+
 function arAddConditionConstraint( m, c1, c2, t, sd, states )
 
     global ar;

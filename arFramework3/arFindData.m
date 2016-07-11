@@ -126,7 +126,7 @@ function [olist, names, m] = arFindData( varargin )
     for b = 1 : length( string )
         for a = 1 : length( ar.model(m).data )
             if ( ~exact )
-                if ~isempty( strfind(lower(ar.model(m).data(a).name), lower(string{b}) ) )
+                if isempty(lower(string{b})) || ~isempty( strfind(lower(ar.model(m).data(a).name), lower(string{b}) ) )
                     olist = union( olist, a );
                 end
             else
