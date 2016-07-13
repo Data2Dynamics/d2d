@@ -302,28 +302,30 @@ sconstrindex = 1;
 % To do: Further generalize this to arbitrary constraints
 if ( isfield( ar, 'conditionconstraints' ) )
     for jC = 1 : length( ar.conditionconstraints )
-        m                   = ar.conditionconstraints(jC).m;
+        m1                  = ar.conditionconstraints(jC).m1;
+        m2                  = ar.conditionconstraints(jC).m2;
         relative            = ar.conditionconstraints(jC).relative;
         c1                  = ar.conditionconstraints(jC).c1;
         c2                  = ar.conditionconstraints(jC).c2;
         tLink1              = ar.conditionconstraints(jC).tLink1;
         tLink2              = ar.conditionconstraints(jC).tLink2;
         sd                  = ar.conditionconstraints(jC).sd;
-        states              = ar.conditionconstraints(jC).states;
+        states1             = ar.conditionconstraints(jC).states1;
+        states2             = ar.conditionconstraints(jC).states2;
         pLink1              = ar.model(m).condition(c1).pLink;
         pLink2              = ar.model(m).condition(c2).pLink;
         
-        nstates             = length(states);
+        nstates             = length(states1);
         npts                = length(tLink1);
         tmpsres             = zeros(npts*nstates, np);
         
         % Fetch simulations
-        dynamic1            = ar.model(m).condition(c1).xExpSimu(tLink1,states);
-        dynamic2            = ar.model(m).condition(c2).xExpSimu(tLink2,states);
+        dynamic1            = ar.model(m1).condition(c1).xExpSimu(tLink1,states1);
+        dynamic2            = ar.model(m2).condition(c2).xExpSimu(tLink2,states2);
         
         % Fetch sensitivities w.r.t. p
-        sens1               = ar.model(m).condition(c1).sxExpSimu(tLink1,states,:);
-        sens2               = ar.model(m).condition(c2).sxExpSimu(tLink2,states,:);
+        sens1               = ar.model(m1).condition(c1).sxExpSimu(tLink1,states1,:);
+        sens2               = ar.model(m2).condition(c2).sxExpSimu(tLink2,states2,:);
         
         % Relative?
         if ( relative )            
@@ -345,8 +347,8 @@ if ( isfield( ar, 'conditionconstraints' ) )
         end
         
         % Reshape to fit format desired for sres
-        sens1               = reshape( sens1, length(states)*npts, sum(pLink1));
-        sens2               = reshape( sens2, length(states)*npts, sum(pLink2));
+        sens1               = reshape( sens1, nstates*npts, sum(pLink1));
+        sens2               = reshape( sens2, nstates*npts, sum(pLink2));
         tmpsres(:, pLink1)  = tmpsres(:, pLink1) + sens1 / sd;
         tmpsres(:, pLink2)  = tmpsres(:, pLink2) - sens2 / sd;
         tmpres              = (dynamic1 - dynamic2)./sd;

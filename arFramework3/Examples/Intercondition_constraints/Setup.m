@@ -30,12 +30,14 @@ plot( ar.model(1).condition(C2).tFine, ar.model(1).condition(C2).xFineSimu( :, s
 hold on;
 plot( ar.model(1).condition(C2).tFine, ar.model(1).condition(C1).xFineSimu( :, s )-ar.model(1).condition(C2).xFineSimu( :, s ), 'k--', 'LineWidth', 2 );
 title( sprintf( 'The data does not require these two to be different.\nPress a key to introduce condition constraint.' ) );
-legend( 'State3', 'State4' );
+legend( 'State3', 'State4', 'Difference' );
 
 pause;
 
 %% Add soft relative condition constraints
 % Fetch relevant conditions
+m1 = 1;
+m2 = 1;
 C1 = arFindCondition('', 'input_drug', '0', 'input_stimulus', '1');
 C2 = arFindCondition('', 'input_drug', '10', 'input_stimulus', '1');
 
@@ -46,10 +48,10 @@ t = 0:1:120;
 sigma = 1;
 
 % States to constrain (assume we don't know which ones to constrain)
-states = [1,2,3,4];
+states = 'all';
 
 %% Add it
-arAddConditionConstraint( 1, C1, C2, t, sigma, states )
+arAddConditionConstraint( m1, C1, m2, C2, t, sigma, states );
 
 %% Fit and plot
 arFit; arSimu(false, true); arChi2;
@@ -63,5 +65,5 @@ plot( ar.model(1).condition(C2).tFine, ar.model(1).condition(C2).xFineSimu( :, s
 hold on;
 plot( ar.model(1).condition(C2).tFine, ar.model(1).condition(C1).xFineSimu( :, s )-ar.model(1).condition(C2).xFineSimu( :, s ), 'k--', 'LineWidth', 2 );
 title( 'With condition constraint between the states' );
-legend( 'State3', 'State4' );
+legend( 'State3', 'State4', 'Difference' );
 
