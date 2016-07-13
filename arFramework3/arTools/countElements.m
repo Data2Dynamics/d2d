@@ -1,4 +1,4 @@
-function countElements(d, sorted)
+function c = countElements(d, sorted)
 
 if(~exist('sorted','var'))
     sorted = false;
@@ -18,8 +18,10 @@ if(sorted)
     counts = counts(isort);
     ud = ud(isort);
 end
-
-for j=1:length(ud)
-    fprintf([sprintf('%%%is', maxlength) ' : %i\n'], ud{j}, counts(j));
+if nargout==0
+    for j=1:length(ud)
+        fprintf([sprintf('%%%is', maxlength) ' : %i\n'], ud{j}, counts(j));
+    end
+else
+    c = counts;
 end
-
