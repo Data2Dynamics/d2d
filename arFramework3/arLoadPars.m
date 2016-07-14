@@ -41,9 +41,6 @@ end
 if(~exist('pars_only', 'var') || isempty(pars_only))
     pars_only = false;
 end
-if(~exist('pars_only', 'var') || isempty(pars_only))
-    pars_only = false;
-end
 if(~exist('pattern', 'var') || isempty(pattern))
     pattern = [];
 end
@@ -92,7 +89,6 @@ end
 arCheckCache(1);
 
 function ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad, pattern)
-N = 1000;
 
 if(ischar(filename))
     filename_tmp = filename;
@@ -112,78 +108,5 @@ else
     error('not supported variable type for filename');
 end
 
-if(isempty(pattern))
-    js = 1:length(ar.p);
-else
-    js = find(~cellfun(@isempty,regexp(ar.pLabel, pattern)));
-end
-
-ass = zeros(size(ar.p));
-for j=js
-    qi = ismember(S.ar.pLabel, ar.pLabel{j});
-    
-    if(isempty(qi) || sum(qi) == 0)
-        ass(j) = 0;
-        if(length(ar.p)<=N)
-            arFprintf(1, '                      %s\n', ar.pLabel{j});
-        end
-    else
-        ass(j) = 1;
-        if(~pars_only)
-            ar.p(j) = S.ar.p(qi);
-            ar.qLog10(j) = S.ar.qLog10(qi);
-            ar.qFit(j) = S.ar.qFit(qi);
-            ar.lb(j) = S.ar.lb(qi);
-            ar.ub(j) = S.ar.ub(qi);
-            if isfield(S.ar,'type')
-                ar.type(j) = S.ar.type(qi);
-            end
-            if isfield(S.ar,'mean')
-                ar.mean(j) = S.ar.mean(qi);
-            end
-            if isfield(S.ar,'std')
-                ar.std(j) = S.ar.std(qi);
-            end
-        else
-            if(ar.qLog10(j) == S.ar.qLog10(qi))
-                ar.p(j) = S.ar.p(qi);
-            elseif(ar.qLog10(j)==1 && S.ar.qLog10(qi)==0)
-                ar.p(j) = log10(S.ar.p(qi));
-            elseif(ar.qLog10(j)==0 && S.ar.qLog10(qi)==1)
-                ar.p(j) = 10^(S.ar.p(qi));
-            end
-            
-            % check bound
-            ar.p(ar.p<ar.lb) = ar.lb(ar.p<ar.lb);
-            ar.p(ar.p>ar.ub) = ar.ub(ar.p>ar.ub);
-        end
-        
-        if(fixAssigned)
-            ar.qFit(j) = 0;
-            if(length(ar.p)<=N)
-                arFprintf(1, 'fixed and assigned -> %s\n', ar.pLabel{j});
-            end
-        else
-            if(length(ar.p)<=N)
-                arFprintf(1, '          assigned -> %s\n', ar.pLabel{j});
-            end
-        end
-    end
-end
-
-nnot = length(ass)-sum(ass);
-if ( nnot > 0 )
-    arFprintf(1, '%i parameters were assigned in the destination model (%i not assigned).\n',sum(ass),nnot);
-    if(nnot<=30 && nnot>0)
-        arFprintf(1, 'Not assigned are: %s \n',sprintf('%s, ',ar.pLabel{ass==0}));
-    end
-else
-    arFprintf(1, 'All parameters assigned.\n');
-end
-
-nnot = length(S.ar.p)-sum(ass);
-if ( nnot > 0 )
-    arFprintf(1, 'There were %i more parameters in the loaded struct than in the target model.\n',nnot);
-end
-
+ar = arImportPars(S.ar, pars_only, pattern, fixAssigned, ar);
 

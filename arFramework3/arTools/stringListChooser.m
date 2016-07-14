@@ -9,9 +9,8 @@ end
 
 if(zeigen)
     maxlen = max(cellfun(@length,liste));
-    
     for j=1:length(liste)
-        anno = readParameterAnnotation(liste{j});
+        [anno,vals{j}] = readParameterAnnotation(liste{j});  % vals contains npara, nfitted, chi2, ... and is useful when working with a breakpoint
         fprintf(['#%3i : %-',num2str(maxlen),'s  %s\n'], j, liste{j}, anno);
     end
 end
@@ -71,10 +70,11 @@ while(isnan(out))
     end
 end
 
-function anno = readParameterAnnotation(filename_tmp)
+function [anno,vals] = readParameterAnnotation(filename_tmp)
 filename_pars = ['./Results/' filename_tmp '/workspace_pars_only.mat'];
+vals = struct;
 
-    if(exist(filename_pars,'file'))    
+if(exist(filename_pars,'file'))
     S = load(filename_pars);
 
     nstr = '';
@@ -87,24 +87,37 @@ filename_pars = ['./Results/' filename_tmp '/workspace_pars_only.mat'];
     
     if(isfield(S.ar,'ndata'))
         nstr = ['N=',sprintf('%4i ',S.ar.ndata),' '];
+        vals.N = S.ar.ndata;
+    else
+        vals.N = NaN;
     end
     if(isfield(S.ar,'nprior'))
         priorstr = ['#prior=',sprintf('%3i ',S.ar.nprior),' '];
     end
     if(isfield(S.ar,'p'))
         pstr = ['#p=',sprintf('%3i ',length(S.ar.p)),' '];
+        vals.np = length(S.ar.p);
+    else
+        vals.np = NaN;
     end
     if(isfield(S.ar,'qFit'))
         qstr = ['#fitted=',sprintf('%3i ',sum(S.ar.qFit==1)),' '];
+        vals.nfit = sum(S.ar.qFit==1);
+    else
+        vals.nfit = NaN;
     end
     
     if(isfield(S.ar,'chi2fit'))
         if(S.ar.config.fiterrors == 1)
             chi2str = sprintf('-2*log(L)=%g  ', ...
                 2*S.ar.ndata*log(sqrt(2*pi)) + S.ar.chi2fit);
+            vals.chi2 = 2*S.ar.ndata*log(sqrt(2*pi)) + S.ar.chi2fit;
         else
             chi2str = sprintf('chi^2=%g  ', S.ar.chi2fit);
+            vals.chi2 =  S.ar.chi2fit;
         end
+    else
+        vals.chi2 = NaN;
     end
     
     
