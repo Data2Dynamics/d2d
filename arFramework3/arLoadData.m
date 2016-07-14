@@ -362,13 +362,13 @@ end
 if(strcmp(C{1},'DERIVED'))
     error(['There is no need for a section DERIVED in data definition file! ' ...
         'Please remove and see usage in: ' ...
-        'https://bitbucket.org/d2d-development/d2d-software/wiki/Setting%20up%20models']);
+        'https://github.com/Data2Dynamics/d2d/wiki/Setting%20up%20models']);
 end
 % INVARIANTS
 if(strcmp(C{1},'INVARIANTS'))
     error(['Section INVARIANTS in data definition file is deprecated! ' ...
         'Please remove and see usage in: ' ...
-        'https://bitbucket.org/d2d-development/d2d-software/wiki/Setting%20up%20models']);
+        'https://github.com/Data2Dynamics/d2d/wiki/Setting%20up%20models']);
 end
 
 % collect parameters needed for OBS

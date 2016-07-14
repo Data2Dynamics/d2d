@@ -1,11 +1,11 @@
 # D2D Presenter #
 
-A python library to access the [D2D Software framework](https://bitbucket.org/d2d-development/d2d-software/wiki/Home) for Matlab, including a web application visualizing D2D models.
+A python library to access the [D2D Software framework](https://github.com/Data2Dynamics/d2d/wiki/Home) for Matlab, including a web application visualizing D2D models.
 
 ### Installation ###
 
 * Requirements
-    - Matlab with [D2D Software framework](https://bitbucket.org/d2d-development/d2d-software/wiki/Home). If you have a custom version, make sure the matlab files in `/src/matlab` are included in your matlab path. 
+    - Matlab with [D2D Software framework](https://github.com/Data2Dynamics/d2d/wiki/Home). If you have a custom version, make sure the matlab files in `/src/matlab` are included in your matlab path. 
     - Python 3.x
 * Dependencies
     - Install [Matlab Engine for Python](http://de.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html).

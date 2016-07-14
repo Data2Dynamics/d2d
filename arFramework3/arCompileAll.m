@@ -5,7 +5,7 @@
 %   debug_mode:         exclude precompiled objects     [false]
 %   source_dir:         source directory                []
 
-% See https://bitbucket.org/d2d-development/d2d-software/wiki/First%20steps 
+% See https://github.com/Data2Dynamics/d2d/wiki/First%20steps 
 % for description of work flow. 
 %
 % Copyright Andreas Raue 2013 (andreas.raue@fdm.uni-freiburg.de)

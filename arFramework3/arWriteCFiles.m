@@ -10,7 +10,7 @@
 function arWriteCFiles(forcedCompile, debug_mode)
 
 error(['The function arWriteCFiles is deprecated. Please use arCompileAll instead. ' ...
-    'See https://bitbucket.org/d2d-development/d2d-software/wiki/First%20steps for description of work flow.']);
+    'See https://github.com/Data2Dynamics/d2d/wiki/First%20steps for description of work flow.']);
 
 warnreset = warning;
 warning('off','symbolic:mupadmex:MuPADTextWarning');

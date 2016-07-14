@@ -1,7 +1,7 @@
 % Remove workspace folder of your choice
 %
 % Data-2-Dynamics Software
-% Website: https://bitbucket.org/d2d-development/d2d-software/wiki/Home
+% Website: https://github.com/Data2Dynamics/d2d/wiki/Home
 % Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de
 % Copyright 2013 D2D Development Team. All rights reserved.
 
