@@ -7,7 +7,7 @@
 % saveToFile    [false]
 % fastPlot      [false]
 % silent        [false]
-% evalfun       [true]
+% evalfun       [true]  (deprecated)
 % doLegends     [true]
 % dynamics:     [true]
 % hs:           []      custom figure handels
@@ -29,9 +29,12 @@ end
 if(~exist('silent','var'))
     silent = false;
 end
-if(~exist('evalfun','var'))
-    evalfun = true;
-end
+evalfun = true;
+% Always potentially evaluate the model. This will not hurt performance since 
+% arSimu checks against the cache. Running with false will however cause problems.
+% if(~exist('evalfun','var'))
+%     evalfun = true;
+% end
 if(~exist('doLegends','var'))
     if(isfield(ar.config, 'showLegends'))
         doLegends = ar.config.showLegends;
