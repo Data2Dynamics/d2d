@@ -3,16 +3,25 @@
 % arLoadModel(name)
 %
 % name      filename of model definition file
+% m         model index for the model to go into
 %
 % Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
 
-function arLoadModel(name, m)
+function arLoadModel(name, m, varargin)
 
 global ar
 
 if(isempty(ar))
     error('please initialize by arInit')
-end 
+end
+
+% custom
+switches = { 'conditions' };
+extraArgs = [ 1 ];
+description = { ...
+    {'', 'Specified extra conditions'} };
+    
+opts = argSwitch( switches, extraArgs, description, 1, varargin );
 
 % load model from mat-file
 if(~exist('Models','dir'))
@@ -38,6 +47,17 @@ fid = fopen(['Models/' name '.def'], 'r');
 
 % initial setup
 ar.model(m).name = name;
+
+% Validate input
+if ( opts.conditions )
+    if ~(size( opts.conditions_args, 2 ) == 2) || ~iscell( opts.conditions_args )
+        error( 'Additional conditions should be given in Mx2 cell array.' );
+    else
+        ar.model(m).extra_conditions = opts.conditions_args;
+    end
+else
+    ar.model(m).extra_conditions = {};
+end
 
 matVer = ver('MATLAB');
 
@@ -758,6 +778,15 @@ if ( substitutions )
             C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         else
             C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+        end
+    end
+    
+    % Extra conditions specified at compile time
+    if ( opts.conditions )
+        for a = 1 : length( opts.conditions_args )
+            from(end+1)         = opts.conditions_args{a,1}; %#ok<AGROW>
+            to(end+1)           = opts.conditions_args{a,2}; %#ok<AGROW>
+            ismodelpar(end+1)   = sum(ismember(ar.model(m).p, from(end))); %#ok<AGROW>
         end
     end
         
