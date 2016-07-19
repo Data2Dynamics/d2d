@@ -8,7 +8,7 @@
 function arParseModel(forceParsing)
 
 error(['The function arParseModel is deprecated. Please use arCompileAll instead. ' ...
-    'See https://bitbucket.org/d2d-development/d2d-software/wiki/First%20steps for description of work flow.']);
+    'See https://github.com/Data2Dynamics/d2d/wiki/First%20steps for description of work flow.']);
 
 
 global ar

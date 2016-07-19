@@ -1,6 +1,10 @@
 % check D2D version and compare with current revision on github
+%
+% flag = arCheckVersion
+%
+% flag = 1 : D2D is up-to-date
 
-function arCheckVersion
+function flag = arCheckVersion
 
 global ar  
 
@@ -31,7 +35,6 @@ if(has_git && is_repo)
                     gh_data = gh_data(strfind(gh_data, '"sha":')+7:end);
                     br      = strfind(gh_data, '"');
                     gh_data = gh_data(1:br(1)-1);
-                    clear br;
                     if(~isempty(gh_data) && ~strcmp(deblank(gh_data),ar.info.revision))
                         warning( 'There is a newer version available on github! Please check http://www.data2dynamics.org for updates.' );
                     end
@@ -44,4 +47,8 @@ if(has_git && is_repo)
     end
 else
     ar.info.revision = [];
+end
+
+if (nargout==1 && exist('gh_data','var'))
+    flag = (~isempty(gh_data) && strcmp(deblank(gh_data.object.sha),ar.info.revision));
 end

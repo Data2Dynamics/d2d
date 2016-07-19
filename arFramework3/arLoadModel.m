@@ -571,7 +571,7 @@ end
 if(strcmp(str{1},'INVARIANTS'))
     error(['Section INVARIANTS in model definition file is deprecated! ' ...
         'Please replace by DERIVED and see usage in: ' ...
-        'https://bitbucket.org/d2d-development/d2d-software/wiki/Setting%20up%20models']);
+        'https://github.com/Data2Dynamics/d2d/wiki/Setting%20up%20models']);
 end
 derivedVariablesInRates = 0;
 ar.model(m).z = {};
