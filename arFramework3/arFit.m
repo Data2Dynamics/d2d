@@ -232,7 +232,7 @@ elseif(ar.config.optimizer == 11)
     while (((resnormOld-resnorm)/resnorm) > 1e-3)
         resnormOld = resnorm;
         [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
-            lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
+            lsqnonlin(@merit_fkt, pFit, lb, ub, ar.config.optim);
     end
 else
     error('ar.config.optimizer invalid');    
