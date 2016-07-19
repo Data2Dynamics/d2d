@@ -84,6 +84,18 @@ else
     ar.config.optim.Jacobian = 'off';
 end
 
+removeL1path = false;
+if any(ar.type==3)
+    if(~isfield(ar.config, 'l1trdog'))
+        ar.config.l1trdog = 1;
+        l1trdog(); % Modify trdog for L1 regularization
+    end
+    
+    removeL1path = true;
+    ar_path = fileparts(which('arInit.m'));
+    addpath([ar_path '/l1/trdog'])
+end
+
 fit = struct([]);
 fit(1).iter_count = 0;
 fit.chi2_hist = nan(1,ar.config.optim.MaxIter);
@@ -242,6 +254,10 @@ if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
     if(max(ar.ms_violation) > ar.ms_threshold)
         arFprintf(1, 'Multiple Shooting: continuity constains violated %e > %e\n', max(ar.ms_violation), ar.ms_threshold);
     end
+end
+
+if removeL1path
+    rmpath([ar_path '/l1/trdog'])
 end
 
 ar.p(ar.qFit==1) = pFit;

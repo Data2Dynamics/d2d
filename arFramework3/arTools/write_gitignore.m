@@ -25,6 +25,8 @@ lines = {'# This file has been generated using arFramework3/arTools/write_gitign
     ''
     'arFramework3/sbml-test-cases-2014-10-22'
     'arFramework3/sbml-test-cases-2014-10-22.zip'
+    ''
+    'arFramework3/l1/trdog/trdog.m'
     ''};
 
 

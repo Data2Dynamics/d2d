@@ -1,6 +1,3 @@
-addpath('l1scripts')
-addpath('l1helpers')
-
 arInit;
 
 arLoadModel('model_template');

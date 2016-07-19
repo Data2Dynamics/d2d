@@ -16,6 +16,8 @@ arFramework3/TestSuite
 arFramework3/sbml-test-cases-2014-10-22
 arFramework3/sbml-test-cases-2014-10-22.zip
 
+arFramework3/l1/trdog/trdog.m
+
 arFramework3/Examples/ABC_toyModel/Compiled/
 arFramework3/Examples/ABC_toyModel/SBML/
 arFramework3/Examples/ABC_toyModel/arSimuCalc*
@@ -86,10 +88,25 @@ arFramework3/Examples/Input_Tests/SBML/
 arFramework3/Examples/Input_Tests/arSimuCalc*
 arFramework3/Examples/Input_Tests/arCheckParallel*
 
+arFramework3/Examples/Intercondition_constraints/Compiled/
+arFramework3/Examples/Intercondition_constraints/SBML/
+arFramework3/Examples/Intercondition_constraints/arSimuCalc*
+arFramework3/Examples/Intercondition_constraints/arCheckParallel*
+
 arFramework3/Examples/Kholodenko1999_EGFRsignaling/Compiled/
 arFramework3/Examples/Kholodenko1999_EGFRsignaling/SBML/
 arFramework3/Examples/Kholodenko1999_EGFRsignaling/arSimuCalc*
 arFramework3/Examples/Kholodenko1999_EGFRsignaling/arCheckParallel*
+
+arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/Compiled/
+arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/SBML/
+arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/arSimuCalc*
+arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/arCheckParallel*
+
+arFramework3/Examples/Merkle_ToyModel_PCB2016/Compiled/
+arFramework3/Examples/Merkle_ToyModel_PCB2016/SBML/
+arFramework3/Examples/Merkle_ToyModel_PCB2016/arSimuCalc*
+arFramework3/Examples/Merkle_ToyModel_PCB2016/arCheckParallel*
 
 arFramework3/Examples/Raia_CancerResearch2011/Compiled/
 arFramework3/Examples/Raia_CancerResearch2011/SBML/
