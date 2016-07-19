@@ -1005,12 +1005,15 @@ function ar = setValues(ar, m, d, header, nfactor, data, times)
 ar.model(m).data(d).tExp = times;
 ar.model(m).data(d).yExp = nan(length(times), length(ar.model(m).data(d).y));
 ar.model(m).data(d).yExpStd = nan(length(times), length(ar.model(m).data(d).y));
+ar.model(m).data(d).yExpRaw = nan(length(times), length(ar.model(m).data(d).y));
+ar.model(m).data(d).yExpStdRaw = nan(length(times), length(ar.model(m).data(d).y));
 
 for j=1:length(ar.model(m).data(d).y)
     q = ismember(header, ar.model(m).data(d).y{j}); %R2013a compatible
     
     if(sum(q)==1)
         ar.model(m).data(d).yExp(:,j) = data(:,q);
+        ar.model(m).data(d).yExpRaw(:,j) = data(:,q);
         arFprintf(2, '\t%20s -> %4i data-points assigned', ar.model(m).data(d).y{j}, sum(~isnan(data(:,q))));
         
         % normalize data
@@ -1034,6 +1037,7 @@ for j=1:length(ar.model(m).data(d).y)
         % empirical stds
         qstd = ismember(header, [ar.model(m).data(d).y{j} '_std']); %R2013a compatible
         if(sum(qstd)==1)
+            ar.model(m).data(d).yExpStdRaw(:,j) = data(:,qstd);
             ar.model(m).data(d).yExpStd(:,j) = data(:,qstd);
             arFprintf(2, ' with stds');
             if(ar.model(m).data(d).normalize(j))
