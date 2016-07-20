@@ -16,7 +16,7 @@ filenames = arExportModelToDaniel({'model','obsCalcUnits'});
 warning(' The tool currently is only able to calculate the concentration units. Time units are negleted. Parameters without concentration dimension do not occur in the output');
 
 
-python_string = sprintf('python symmetryDetection.py %s %s',filenames{1},filenames{2});
+python_string = sprintf('python symmetryDetection.py %s %s',filenames{1},filenames{2},' -t --notPretty');
 disp(python_string)
 system(python_string);
 
