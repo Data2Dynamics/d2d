@@ -170,7 +170,7 @@ if trd_orig > 0 && trd_l1 == 0
     A_new = [A_new(1:poskey(3)+Ninsert-1) text{5} A_new(poskey(3)+Ninsert:end)];
     
     if ~isequal(exist([ar_path '/l1/trdog'], 'dir'),7)
-        mkdir([ar_path '/l1/trdog'],'trdog')
+        mkdir([ar_path '/l1'],'trdog')
     end
     fileID = fopen([ar_path '/l1/trdog/trdog.m'],'w');
     fwrite(fileID,A_new,'char');
