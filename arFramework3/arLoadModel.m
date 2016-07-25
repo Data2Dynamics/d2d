@@ -105,6 +105,9 @@ ar.model(m).cUnits = {};
 ar.model(m).pc = {};
 ar.model(m).px = {};
 C = arTextScan(fid, '%s %q %q %q %f\n',1, 'CommentStyle', ar.config.comment_string);
+if(~strcmp(C{1},'COMPARTMENTS'))
+    error('currently only one PREDICTOR allowed');
+end
 while(~strcmp(C{1},'STATES'))
     if(~strcmp(C{1},'COMPARTMENTS'))
         arValidateInput( C, 'compartments', 'compartment', 'unit type (i.e. V)', 'unit (i.e. pl)', 'label (i.e. "vol.")' );
