@@ -546,16 +546,18 @@ else
 end
 ar.model(m).fx = cell(length(ar.model(m).x),1);
 
-% inititalize symbolic variables
-if(~isempty(ar.model(m).x))
-    eval(['syms ' sprintf('%s ',ar.model(m).x{:})]);
-end
-if(~isempty(ar.model(m).p))
-    eval(['syms ' sprintf('%s ',ar.model(m).p{:})]);
-end
-if(~isempty(ar.model(m).u))
-    eval(['syms ' sprintf('%s ',ar.model(m).u{:})]);
-end
+% initialize symbolic variables
+% Joep: I have removed this. Not sure if this serves any purpose? Removing
+% it seems to not affect any of the integration tests.
+%if(~isempty(ar.model(m).x))
+%    eval(['syms ' sprintf('%s ',ar.model(m).x{:})]);
+%end
+%if(~isempty(ar.model(m).p))
+%    eval(['syms ' sprintf('%s ',ar.model(m).p{:})]);
+%end
+%if(~isempty(ar.model(m).u))
+%    eval(['syms ' sprintf('%s ',ar.model(m).u{:})]);
+%end
 tmpfx = (sym(ar.model(m).N).*sym(C)) * sym(ar.model(m).fv);
 
 for j=1:length(ar.model(m).x) % for every species j
