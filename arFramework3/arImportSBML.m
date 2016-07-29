@@ -105,10 +105,14 @@ fprintf(fid, '\nSTATES\n');
 pat = cell(0); % if length of species names ==1, the species names are extended by '_state'
 rep = cell(0);
 
-raterulespecies = unique({m.raterule.variable});
-israterule = false(1,length(raterulespecies));
-for i=1:length(raterulespecies)
-    israterule = israterule | strcmp(raterulespecies(i),{m.species.id});
+if isfield(m,'raterule')
+    raterulespecies = unique({m.raterule.variable});
+    israterule = false(1,length(raterulespecies));
+    for i=1:length(raterulespecies)
+        israterule = israterule | strcmp(raterulespecies(i),{m.species.id});
+    end
+else 
+    israterule = false;
 end
 
 for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration]) & ~[m.species.boundaryCondition] | ([m.species.boundaryCondition] & israterule)) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
