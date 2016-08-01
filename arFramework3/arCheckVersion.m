@@ -16,16 +16,17 @@ if(has_git && is_repo)
     cd(ar.info.ar_path)
     [~, cmdout] = system('git rev-parse HEAD');
     cd(old_path)
-    clear old_path;
 
     ar.info.revision = deblank(cmdout);
+
+    update_msg = 'There is a newer version available on github! Please check http://www.data2dynamics.org for updates or run "arUpdateD2D".';
     
     % get current SHA from github and compare with installed revision
     try
         if ( exist('webread', 'file')==2 )
             gh_data = webread('https://api.github.com/repos/Data2Dynamics/d2d/git/refs/heads/master');
             if(~isempty(gh_data) && ~strcmp(deblank(gh_data.object.sha),ar.info.revision))
-                warning( 'There is a newer version available on github! Please check http://www.data2dynamics.org for updates.' );
+                warning(update_msg);
             end
         else
             if ( exist('urlread', 'file')==2 )
@@ -36,7 +37,7 @@ if(has_git && is_repo)
                     br      = strfind(gh_data, '"');
                     gh_data = gh_data(1:br(1)-1);
                     if(~isempty(gh_data) && ~strcmp(deblank(gh_data),ar.info.revision))
-                        warning( 'There is a newer version available on github! Please check http://www.data2dynamics.org for updates.' );
+                        warning(update_msg);
                     end
                 catch
                 end 

@@ -26,7 +26,7 @@ function c = linewrap(s, maxchars)
 % Steven L. Eddins
 % $Revision: 1.7 $  $Date: 2006/02/08 16:54:51 $
 
-error(nargchk(1, 2, nargin));
+narginchk(1, 2);
 
 bad_s = ~ischar(s) || (ndims(s) > 2) || (size(s, 1) ~= 1);
 if bad_s
