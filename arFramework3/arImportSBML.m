@@ -336,11 +336,11 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             end
             
             
-            % % replace compartement volumes
-            % for jj=1:length(m.compartment)
-            %     tmpstr = mysubs(tmpstr, m.compartment(jj).id, num2str(m.compartment(jj).size));
-            %     % tmpstr = mysubs(tmpstr, m.compartment(jj).id, 'vol_para');
-            % end
+            % replace compartement volumes
+            for jj=1:length(m.compartment)
+                tmpstr = mysubs(tmpstr, m.compartment(jj).id, num2str(m.compartment(jj).size));
+                % tmpstr = mysubs(tmpstr, m.compartment(jj).id, 'vol_para');
+            end
             
             % remove functions
             tmpstr = char(tmpstr);
