@@ -29,7 +29,8 @@ function [opts, outargin] = argSwitch( switches, extraArgs, description, verbose
             varargin = varargin(2:end);
         end
         while( a <= length( varargin{1} ) )            
-            if (~ischar(varargin{1}{a}))
+            %if (~ischar(varargin{1}{a}))
+            if (iscell( varargin{1}{a}))
                 if ( soft == 0 )
                     error( 'Provided cell argument without indicating which switch it is for.' );
                 end

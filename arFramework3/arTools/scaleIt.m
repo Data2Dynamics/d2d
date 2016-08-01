@@ -151,7 +151,7 @@ function scaleIt( names, outFile, varargin )
             end
         end
     end
-    
+
     % Dump out things in the ignore mask
     if ~isempty( ignoreMask )
         K = fieldnames(out);
@@ -169,7 +169,6 @@ function scaleIt( names, outFile, varargin )
             end
         end
     end
-    
     % Put NaN's in the empty fields
     filt = struct;
     for jN = 1 : length( fieldNames )               
@@ -178,18 +177,18 @@ function scaleIt( names, outFile, varargin )
         if ( sum(Q) > 0 )
             filt.(fieldNames{jN}) = out.(fieldNames{jN});
             out = rmfield( out, fieldNames{jN} );
-            sprintf('Filtered %s because of non numeric values', fieldNames{jN});
+            fprintf('Filtered field [%s] because of non numeric values\n', fieldNames{jN});
         else
             % Filter out columns with no content
             Q = cellfun(@isnan, out.(fieldNames{jN}));
             if ( sum(Q) == length(Q) )
+                fprintf( 'Filtered field [%s] since it has no content\n', fieldNames{jN} )
                 filt.(fieldNames{jN}) = out.(fieldNames{jN});
                 out = rmfield( out, fieldNames{jN} );
             end
         end
     end
     %fieldNames = fieldnames(out);
-    
     % Uncomment to test with control case
     % out = unitTest()
     
@@ -293,7 +292,7 @@ function out = unitTest() %#ok
     out.y       = {1,2,3,  2,4,6,  10,20,30     3,6,9,  6,12,18 30,60,90}.';
 end
 
-function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList, invtrafo )
+function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList, invTrafo )
     verbose = 1;
     fieldNames = fieldnames(out);
        
@@ -397,6 +396,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     for jG = 1 : nGroups
         curScale = []; curData = []; curConditions = []; obsjD = [];
         for jD = obsGroups{jG}
+            fprintf('Processing obs group %s', dataFields{jD});
             nData           = cell2mat(out.(dataFields{jD}));        %    Process single observation
             Q{jD}           = find(~isnan( nData ));                 %#ok Fetch points that have data
             curData         = [curData; nData(Q{jD})];               %#ok
