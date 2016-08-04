@@ -193,7 +193,7 @@ function scaleIt( names, outFile, varargin )
     % out = unitTest()
     
     % Estimate correct scaling factors
-    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, invTrafo );
+    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo );
        
     % Find unique conditions (unrelated to time this time)
     groupNames = union(fieldNames{ismember(fieldNames, expVar)}, {fieldNames{cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))}});
@@ -292,7 +292,7 @@ function out = unitTest() %#ok
     out.y       = {1,2,3,  2,4,6,  10,20,30     3,6,9,  6,12,18 30,60,90}.';
 end
 
-function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList, invTrafo )
+function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList, trafo, invTrafo )
     verbose = 1;
     fieldNames = fieldnames(out);
        
@@ -418,7 +418,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
         % specified in scaleTargets).
         checkDims( data, conds, scaleTargets, conditionTargets );
         [means, mlb, mub, scalings] = estimateObs( errModel, errModelPars, curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks ); 
-        replicates = curData ./ scalings(scaleLinks);
+        replicates = trafo(curData ./ scalings(scaleLinks));
         
         % To get where these are globally we have to map them back
         % means(conditionLinks) and scalings(scaleLinks) will sort them
