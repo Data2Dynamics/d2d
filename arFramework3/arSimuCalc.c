@@ -843,11 +843,20 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
                         
                         for(js=0; js < nps; js++) {
                             if(neq>0) {
+                                /* Output state sensitivities */
                                 sxtmp = NV_DATA_S(sx[js]);
                                 for(ks=0; ks < neq; ks++) {
                                     returnsx[(js*neq+ks)*nout + is] = sxtmp[ks];
                                 }
+                                
+                                /* Output flux sensitivities */
+                                csv(ts[is], x, js, sx[js], data, im, ic);
+                                for(ks=0; ks < nv; ks++) {
+                                    returnsv[(js*nv+ks)*nout + is] = data->sv[ks];
+                                }      
                             }
+                            
+                            /* Output input sensitivities */
                             for(ks=0; ks < nu; ks++) {
                                 returnsu[(js*nu+ks)*nout + is] = data->su[(js*nu)+ks];
                             }
@@ -865,6 +874,9 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
                             for(ks=0; ks < nu; ks++) {
                                 returnsu[js*nu*nout + ks*nout + is] = 0.0;
                             }
+                            for(ks=0; ks < nv; ks++) {
+                                returnsv[(js*nv+ks)*nout + is] = 0.0;
+                            }                            
                         }
                     }
                 }
@@ -1482,7 +1494,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
         /* log trafo of y */
         for (iy=0; iy<ny; iy++) {
             if(qlogy[iy] > 0.5){
-                if(y[it + (iy*nt)]<0.0) printf("WARNING, check for concentrations <= 0 !!!\n");
+                if(y[it + (iy*nt)]<-cvodes_atol) printf("WARNING, check for concentrations <= 0 !!!\n");
                 if(fine==0)  y_scale[it + (iy*nt)] = y_scale[it + (iy*nt)] / y[it + (iy*nt)] / log(10.0);
                 y[it + (iy*nt)] = log10(y[it + (iy*nt)]);
             }

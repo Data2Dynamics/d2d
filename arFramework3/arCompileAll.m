@@ -1317,6 +1317,7 @@ if(config.useSensiRHS)
     fprintf(fid, 'N_Vector tmp1, N_Vector tmp2);\n');
 end
 fprintf(fid, ' void fsx0_%s(int ip, N_Vector sx0, void *user_data);\n', condition.fkt);
+fprintf(fid, ' void csv_%s(realtype t, N_Vector x, int ip, N_Vector sx, void *user_data);\n', condition.fkt);
 fprintf(fid, ' void dfxdp_%s(realtype t, N_Vector x, double *dfxdp, void *user_data);\n\n', condition.fkt);
 fprintf(fid, ' void fz_%s(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *z, double *p, double *u, double *x);\n', condition.fkt);
 fprintf(fid, ' void fsz_%s(double t, int nt, int it, int np, double *sz, double *p, double *u, double *x, double *z, double *su, double *sx);\n\n', condition.fkt);
@@ -1575,7 +1576,6 @@ if(config.useSensiRHS)
             fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
             
             fprintf(fid, '  double *su = data->su;\n');
-            % 	fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
             fprintf(fid, '  double *sx_tmp = N_VGetArrayPointer(sx);\n');
             fprintf(fid, '  double *sxdot_tmp = N_VGetArrayPointer(sxdot);\n');
             
@@ -1587,6 +1587,7 @@ if(config.useSensiRHS)
             fprintf(fid, '  dvdu_%s(t, x, data);\n', condition.fkt);
             fprintf(fid, '  dvdp_%s(t, x, data);\n', condition.fkt);
             
+            % Flux sensitivities
             fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(condition.sv));
             fprintf(fid, '    sv[is] = 0.0;\n');
             fprintf(fid, '  }\n');
@@ -1626,6 +1627,39 @@ if(config.useSensiRHS)
     fprintf(fid, '\n  return(0);\n}\n\n\n');
 end
 
+% compute flux sensitivity (only for output)
+fprintf(fid, ' void csv_%s(realtype t, N_Vector x, int ip, N_Vector sx, void *user_data)\n{\n', condition.fkt);
+if(~isempty(model.xs))
+    if(config.useSensis)
+        fprintf(fid, '  int is;\n');
+        fprintf(fid, '  UserData data = (UserData) user_data;\n');
+        fprintf(fid, '  double *p = data->p;\n');
+        fprintf(fid, '  double *u = data->u;\n');
+        fprintf(fid, '  double *sv = data->sv;\n');
+        fprintf(fid, '  double *dvdx = data->dvdx;\n');
+        fprintf(fid, '  double *dvdu = data->dvdu;\n');
+        fprintf(fid, '  double *dvdp = data->dvdp;\n');
+        fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
+
+        fprintf(fid, '  double *su = data->su;\n');
+        fprintf(fid, '  double *sx_tmp = N_VGetArrayPointer(sx);\n');
+
+        % Flux sensitivities
+        fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(condition.sv));
+        fprintf(fid, '    sv[is] = 0.0;\n');
+        fprintf(fid, '  }\n');
+
+        writeCcode(fid, matlab_version, condition, 'fsv1');
+        fprintf(fid, '  switch (ip) {\n');
+        for j2=1:size(condition.sym.dvdp,2)
+            fprintf(fid, '    case %i: {\n', j2-1);
+            writeCcode(fid, matlab_version, condition, 'fsv2', j2);
+            fprintf(fid, '    } break;\n');
+        end
+        fprintf(fid, '  }\n');
+    end
+end
+fprintf(fid, '\n  return;\n}\n\n\n');    
 
 % write fsx0
 if (ispc)
@@ -2065,6 +2099,17 @@ fprintf(fid, '  UserData data = (UserData) user_data;\n');
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
         fprintf(fid, '  if((im==%i) & (ic==%i)) fsx0_%s(is, sx_is, data);\n', ...
+            m-1, c-1, ar.model(m).condition(c).fkt);
+    end
+end
+fprintf(fid, '}\n\n');
+
+% map flux sensitivities <== csv is here
+fprintf(fid, ' void csv(realtype t, N_Vector x, int ip, N_Vector sx, void *user_data, int im, int ic){\n');
+fprintf(fid, '  UserData data = (UserData) user_data;\n');
+for m=1:length(ar.model)
+    for c=1:length(ar.model(m).condition)
+        fprintf(fid, '  if((im==%i) & (ic==%i)) csv_%s(t, x, ip, sx, data);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
