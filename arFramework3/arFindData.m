@@ -89,7 +89,7 @@ function [olist, names, m] = arFindData( varargin )
         exact = 1;
     end
     
-    permissive = 1-opts.permissive;
+    permissive = 1-opts.conservative;
     
     returnNames = false;
     if ( opts.names )
