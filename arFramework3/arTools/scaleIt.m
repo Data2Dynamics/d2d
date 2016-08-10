@@ -32,6 +32,7 @@
 %     twocomponent       Use two component error model (warning: poorly
 %                        tested so far)
 %     logtrafo           Do the scaling in logarithmic space
+%     rescale            Adjust scaling factors s.t. maximum becomes 1
 %
 % To do: Log trafo scaling, offsets and two component error model scaling
 
@@ -44,8 +45,8 @@ function scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo' };
-    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0 ];
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale' };
+    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
@@ -55,7 +56,9 @@ function scaleIt( names, outFile, varargin )
     {'', 'Restricting to specific specified observables'} ...
     {'', 'Using ignore mask'} ...,
     {'', 'Using two component error model'} ...
-    {'', 'Using lognormal error model'} };
+    {'', 'Using lognormal error model'} ...
+    {'', 'Rescaling result'} ...
+    };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
     timeVars = {'t', 'T', 'time', 'Time'};
@@ -98,12 +101,12 @@ function scaleIt( names, outFile, varargin )
     end
     
     % Simplest error model
-    errModel        = @(pars, data, scaleLinks, Ncond, Nscale, conditionLinks) model(pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo);
+    errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo);
     errModelPars    = 0;
     
     if ( opts.twocomponent )
         % Two component error model
-        errModel        = @(pars, data, scaleLinks, Ncond, Nscale, conditionLinks) flexible_model(pars, data, scaleLinks, Ncond, Nscale, conditionLinks, @twocomponent, trafo);
+        errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) flexible_model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, @twocomponent, trafo);
         errModelPars    = 2;
     end
      
@@ -193,7 +196,7 @@ function scaleIt( names, outFile, varargin )
     % out = unitTest()
     
     % Estimate correct scaling factors
-    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo );
+    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo, opts.rescale );
        
     % Find unique conditions (unrelated to time this time)
     groupNames = union(fieldNames{ismember(fieldNames, expVar)}, {fieldNames{cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))}});
@@ -292,7 +295,7 @@ function out = unitTest() %#ok
     out.y       = {1,2,3,  2,4,6,  10,20,30     3,6,9,  6,12,18 30,60,90}.';
 end
 
-function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList, trafo, invTrafo )
+function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList, trafo, invTrafo, rescale )
     verbose = 1;
     fieldNames = fieldnames(out);
        
@@ -417,7 +420,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
         % specified in conditionTargets) and scaling (in the order
         % specified in scaleTargets).
         checkDims( data, conds, scaleTargets, conditionTargets );
-        [means, mlb, mub, scalings] = estimateObs( errModel, errModelPars, curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks ); 
+        [means, mlb, mub, scalings] = estimateObs( errModel, errModelPars, curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale ); 
         replicates = trafo(curData ./ scalings(scaleLinks));
         
         % To get where these are globally we have to map them back
@@ -474,7 +477,7 @@ function checkDims( data, condition, scaleTargets, conditionTargets )
     end
 end
 
-function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, scaleTargets, scaleLinks, conditionTargets, conditionLinks )
+function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale )
 
     % Parameters are [ means_for_each_condition , scalings ]
     means = zeros(size(conditionTargets));
@@ -492,8 +495,15 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
     lb = zeros(size(initPar));
     lb( end - errModelPars : end ) = 1e-9;
     
-    options                 = optimset('TolFun', 0, 'TolX', 1e-9, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Iter' );
-    errModel                = @(pars) eModel(pars, data, scaleLinks, length(conditionTargets), length(scalings), conditionLinks);
+    if ( rescale )
+        fixedScale = nanmax(nanmax(data));
+        fprintf( ' <Rescale: %.5g>\n', fixedScale );
+    else
+        fixedScale = 1;
+    end
+    
+    options                 = optimset('TolFun', 0, 'TolX', 1e-9, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Off' );
+    errModel                = @(pars) eModel(fixedScale, pars, data, scaleLinks, length(conditionTargets), length(scalings), conditionLinks);
     p                       = lsqnonlin( errModel, initPar, lb, 1e25*ones(size(initPar)), options );
     [p, ~, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, lb, 1e25*ones(size(initPar)), options );
     ci                      = nlparci(p,r,'Jacobian',J,'alpha',0.05);
@@ -503,17 +513,17 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
     means    = p(1:numel(means));
     mlb      = ci(:,1);
     mub      = ci(:,2);
-    scalings = [1; p(numel(conditionTargets)+1:end - errModelPars)];
+    scalings = [fixedScale; p(numel(conditionTargets)+1:end - errModelPars)];
 end
 
-function res = model( pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo )
-    scales = [1; pars(Ncond+1:Ncond+Nscale)];
+function res = model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo )
+    scales = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
     res = trafo( scales(scaleLinks) .* pars(conditionLinks) ) - trafo( data );
 end
 
-function res = flexible_model( pars, data, scaleLinks, Ncond, Nscale, conditionLinks, errorModel, trafo )
+function res = flexible_model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, errorModel, trafo )
     fix     = 1e10;
-    scales  = [1; pars(Ncond+1:Ncond+Nscale)];
+    scales  = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
     sigma   = errorModel(pars(Ncond+Nscale+1:end), trafo( pars(conditionLinks) ), trafo( scales(scaleLinks) ));
     
     if ( max( sigma*fix < 1 ) > 0 ) 
