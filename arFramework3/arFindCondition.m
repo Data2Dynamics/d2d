@@ -26,11 +26,11 @@
 %       Returns the same by name, and also filters on the value of il6 in
 %       the experiment.
 %
-% By default arFindCondition is conservative. It will return all conditions 
-% that match the criterion and leave out those that don't match or where
-% insufficient information is available whether they match. For example, if
-% a state does not have the condition specified at all; then it is
-% rejected. To reverse this behaviour, add the flag 'permissive'.
+% By default arFindCondition is permissive. It will return all conditions that
+% match the criterion and include those that don't match or where
+% insufficient information is available whether they match. To reverse this 
+% behaviour, add the flag 'conservative'. This will reject any dataset
+% where the flag is not set.
 %
 % The argument ar is optional. If not specified, the global ar structure is
 % used. 

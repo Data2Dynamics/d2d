@@ -30,11 +30,11 @@
 %       Returns the same by name, and also filters on the value of il6 in
 %       the experiment.
 %
-% By default arFindData is conservative. It will return all conditions that
-% match the criterion and leave out those that don't match or where
-% insufficient information is available whether they match. For example, if
-% a state does not have the condition specified at all; then it is
-% rejected. To reverse this behaviour, add the flag 'permissive'.
+% By default arFindData is permissive. It will return all conditions that
+% match the criterion and include those that don't match or where
+% insufficient information is available whether they match. To reverse this 
+% behaviour, add the flag 'conservative'. This will reject any dataset
+% where the flag is not set.
 %
 % Parameters enclosed by brackets are optional.
 %
@@ -74,7 +74,7 @@ function [olist, names, m] = arFindData( varargin )
         end
     end
     
-    switches = { 'exact', 'verbose', 'names', 'state', 'permissive'};
+    switches = { 'exact', 'verbose', 'names', 'state', 'conservative'};
     extraArgs = [ 0, 0, 0, 1, 0 ];
     description = { ...
     {'', ''} ...
@@ -89,7 +89,7 @@ function [olist, names, m] = arFindData( varargin )
         exact = 1;
     end
     
-    permissive = opts.permissive;
+    permissive = 1-opts.permissive;
     
     returnNames = false;
     if ( opts.names )
