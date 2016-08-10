@@ -30,6 +30,12 @@
 %       Returns the same by name, and also filters on the value of il6 in
 %       the experiment.
 %
+% By default arFindData is conservative. It will return all conditions that
+% match the criterion and leave out those that don't match or where
+% insufficient information is available whether they match. For example, if
+% a state does not have the condition specified at all; then it is
+% rejected. To reverse this behaviour, add the flag 'permissive'.
+%
 % Parameters enclosed by brackets are optional.
 %
 % Returns: List of IDs that correspond to the query and a cell array of the
@@ -68,8 +74,8 @@ function [olist, names, m] = arFindData( varargin )
         end
     end
     
-    switches = { 'exact', 'verbose', 'names', 'state'};
-    extraArgs = [ 0, 0, 0, 1 ];
+    switches = { 'exact', 'verbose', 'names', 'state', 'permissive'};
+    extraArgs = [ 0, 0, 0, 1, 0 ];
     description = { ...
     {'', ''} ...
     {'', ''} ...
@@ -82,6 +88,8 @@ function [olist, names, m] = arFindData( varargin )
     if ( opts.exact )
         exact = 1;
     end
+    
+    permissive = opts.permissive;
     
     returnNames = false;
     if ( opts.names )
@@ -143,34 +151,56 @@ function [olist, names, m] = arFindData( varargin )
     end
     
     % Filter based on condition variables
-    filt = ones(size(olist));
+    filt = permissive * ones(size(olist));
     for a = 1 : length( olist )
         for c = 1 : 2 : length(varargin)
             % Is it in the condition variable list?
             ID = find( strcmp( ar.model(m).data(olist(a)).pold, varargin(c) ) );
-            if ( ~isempty(ID) )
-                val = str2num(ar.model.data(olist(a)).fp{ID}); %#ok
+            
+            % No? Is it in the condition struct?
+            val = '';
+            if ( isempty( ID ) )
+                nFields = length(ar.model(m).data(olist(a)).condition);
+                for jcs = 1 : nFields
+                    if strcmp( ar.model(m).data(olist(a)).condition(jcs).parameter, varargin(c) )
+                        val = ar.model(m).data(olist(a)).condition(jcs).value;
+                    end
+                end
+            else
+                val = ar.model(m).data(olist(a)).fp{ID};
+            end
+            
+            numval = str2num(val); %#ok
+            
+            if ( ~isempty(val) )
                 % Is it a value?
-                if ~isempty(val)
+                if ~isempty(numval)
                     condList(c) = 0;
                     % Does it pass? If so ==> OK
                     chk = varargin{c+1};
+                    
                     if ( ~isnumeric(chk) )
                         chk = str2num( chk ); %#ok
                     end
                     
-                    if ( val ~= chk )
+                    if ( numval ~= chk )
                         filt(a) = 0;
+                    else
+                        filt(a) = 1;
                     end
                 else
                     % It is a string; Does it refer to a parameter?
-                    Q = find(strcmp(ar.pLabel, ar.model.p{ID}));
+                    Q = find(strcmp(ar.pLabel, ar.model.fp{ID}));
                     if ~isempty(Q)
                         condList(c) = 0;
-                        val = ar.p(Q);
-                        if ( val ~= varargin{c+1} )
+                        numval = arGetPars(ar.pLabel{Q},0);
+                        
+                        if ( numval ~= varargin{c+1} )
                             filt(a) = 0;
+                        else
+                            filt(a) = 1;
                         end
+                        
                         if (verbose)
                             disp('Warning: Filtering on open parameter');
                         end
