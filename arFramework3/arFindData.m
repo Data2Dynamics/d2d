@@ -151,9 +151,11 @@ function [olist, names, m] = arFindData( varargin )
     end
     
     % Filter based on condition variables
-    filt = permissive * ones(size(olist));
+    filt = ones(size(olist));
     for a = 1 : length( olist )
         for c = 1 : 2 : length(varargin)
+            checked = false;
+            
             % Is it in the condition variable list?
             ID = find( strcmp( ar.model(m).data(olist(a)).pold, varargin(c) ) );
             
@@ -186,7 +188,7 @@ function [olist, names, m] = arFindData( varargin )
                     if ( numval ~= chk )
                         filt(a) = 0;
                     else
-                        filt(a) = 1;
+                        checked = true;
                     end
                 else
                     % It is a string; Does it refer to a parameter?
@@ -198,7 +200,7 @@ function [olist, names, m] = arFindData( varargin )
                         if ( numval ~= varargin{c+1} )
                             filt(a) = 0;
                         else
-                            filt(a) = 1;
+                            checked = true;
                         end
                         
                         if (verbose)
@@ -206,6 +208,11 @@ function [olist, names, m] = arFindData( varargin )
                         end
                     end
                 end
+            end
+            
+            % Did not match desired condition
+            if ( opts.conservative && (checked == false) )
+                filt(a) = 0;
             end
         end
     end
