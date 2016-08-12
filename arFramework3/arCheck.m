@@ -180,7 +180,7 @@ end
 
 % check if arInitUser.m exists and create the file if necessary
 if exist('arInitUser.m','file')==0
-	fprintf(1,'\n\n%s\n%s\n\n','WARNING: arInitUser.m does not exist!','Creating the file...');
+	fprintf(1,'\n%s\n\n','Welcome to Data 2 Dynamics Software');
 	user = '';
 	while isempty(user)
 		user = input('Please enter your full name (e.g. John Doe)\n-> ','s');
@@ -195,7 +195,7 @@ if exist('arInitUser.m','file')==0
 	fprintf(fid,'\n%s%s%s','ar.config.username = ''',user,''';');
 	fprintf(fid,'\n%s%s%s','ar.config.comment_string = ''//'';');
 	fclose(fid);
-	fprintf(1,'\n%s\n','arInitUser.m has been successfully created!');
+	fprintf(1,'\n%s\n','Initialization successful');
     rehash path
 end
 
