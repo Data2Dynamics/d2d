@@ -69,9 +69,13 @@ struct thread_data_x {
 };
 #endif
 
+int threadStatus[NMAXTHREADS];
+int threadAbortSignal[NMAXTHREADS];
+
 mxArray *armodel;
 mxArray *arthread;
 
+int    done;
 int    fine;
 int    globalsensi;
 int    dynamics;
@@ -111,13 +115,18 @@ struct timeval t1;
 double  mintau;
 int     nruns;
 
+/* Prototype of undocumented MATLAB function */
+#ifdef ALLOW_INTERRUPTS
+extern bool utIsInterruptPending(void);
+#endif
+
 /* Prototypes of private functions */
 #ifdef HAS_PTHREAD
 void *thread_calc(void *threadarg);
 #else
 void thread_calc(int id);
 #endif
-void x_calc(int im, int ic, int sensi, int setSparse);
+void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal);
 void z_calc(int im, int ic, mxArray *arcondition, int sensi);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi);
 
@@ -135,10 +144,11 @@ int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double
 #include "arSimuCalcFunctions.c"
 
 int handle_event(void *cvode_mem, EventData event_data, UserData user_data, N_Vector x, N_Vector *sx, int nps, int neq, int sensi, int sensi_meth );
-int equilibrate(void *cvode_mem, UserData user_data, N_Vector x, realtype t, double *equilibrated, double *returndxdt, double *teq, int neq, int im, int ic );
+int equilibrate(void *cvode_mem, UserData user_data, N_Vector x, realtype t, double *equilibrated, double *returndxdt, double *teq, int neq, int im, int ic, int *abortSignal );
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int nthreads, ithreads, tid;
+
 #ifdef HAS_PTHREAD
     int rc;
     pthread_t threads_x[NMAXTHREADS];
@@ -216,6 +226,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #ifdef HAS_PTHREAD
     /* loop over threads parallel */
     for(ithreads=0; ithreads<nthreads; ++ithreads){
+        threadStatus[ithreads] = 0;
+        threadAbortSignal[ithreads] = 0;
         tid = (int) mxGetScalar(mxGetField(arthread, ithreads, "id"));
         
         thread_data_x_array[tid].id = tid;
@@ -231,7 +243,29 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         }
     }
     
-    /* wait for termination of condition threads */
+    /* wait for termination of condition threads, but make sure program is interruptible */
+    #ifdef ALLOW_INTERRUPTS
+    if (parallel==1) {
+        done = 0;
+        while(done == 0) {
+            done = 1;
+            for(ithreads=0; ithreads<nthreads; ++ithreads){
+                if ( threadStatus[ithreads] == 0 ) {
+                    done = 0;
+                }
+            }
+            if (utIsInterruptPending()) {
+                for(ithreads=0; ithreads<nthreads; ++ithreads){
+                    threadAbortSignal[ithreads] = 1;
+                }
+                mexPrintf( "Interrupt detected => Aborting simulation\n" );
+                done = 1;
+            }
+        }
+    }
+    #endif
+    
+    /* join condition threads */
     if(parallel==1){
         for(ithreads=0; ithreads<nthreads; ++ithreads){
             tid = (int) mxGetScalar(mxGetField(arthread, ithreads, "id"));
@@ -273,7 +307,7 @@ void thread_calc(int id) {
     
     for(in=0; in<n; ++in){
         /* printf("computing thread #%i, task %i/%i (m=%i, c=%i)\n", id, in, n, ms[in], cs[in]); */
-        x_calc(ms[in], cs[in], globalsensi, setSparse);
+        x_calc(ms[in], cs[in], globalsensi, setSparse, &threadStatus[id], &threadAbortSignal[id]);
     }
     
     /* printf("computing thread #%i(done)\n", id); */
@@ -285,7 +319,7 @@ void thread_calc(int id) {
 }
 
 /* calculate dynamics */
-void x_calc(int im, int ic, int sensi, int setSparse) {
+void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal) {
     mxArray    *arcondition;
     mxArray    *ardata;
     
@@ -513,6 +547,7 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
             /* User data structure */
             data = (UserData) malloc(sizeof *data);
             if (data == NULL) {status[0] = 1; return;}
+            data->abort = abortSignal;
             data->t = tstart;
             
             /* Event structure */
@@ -787,7 +822,7 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
                             
                             if ( ts[is] == inf ) {
                                 /* Equilibrate the system */
-                                flag = equilibrate(cvode_mem, data, x, t, equilibrated, returndxdt, teq, neq, im, isim);
+                                flag = equilibrate(cvode_mem, data, x, t, equilibrated, returndxdt, teq, neq, im, isim, abortSignal);
                             } else {
                                 /* Simulate up to the next time point */
                                 flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
@@ -948,6 +983,7 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
             data = (UserData) malloc(sizeof *data);
             if (data == NULL) {status[0] = 1; return;}
             
+            data->abort = abortSignal;
             data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
             data->p = mxGetData(mxGetField(arcondition, ic, "pNum"));
             data->v = mxGetData(mxGetField(arcondition, ic, "vNum"));
@@ -1058,6 +1094,10 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
                     /* (e) */
                     t = t + tau;
                 }
+                
+                /* Terminate simulation when aborted */
+                if ( *abortSignal == 1 )
+                    break;
             }
             
             /* Free memory */
@@ -1103,10 +1143,13 @@ void x_calc(int im, int ic, int sensi, int setSparse) {
     ticks_stop_data[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
     timersub(&t4, &t1, &tdiff);
     ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
+    
+    /* Signal finished simulation */
+    *threadStatus = 1;    
 }
 
 /* Equilibrate the system until the RHS is under a specified threshold */
-int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *equilibrated, double *returndxdt, double *teq, int neq, int im, int ic ) {
+int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *equilibrated, double *returndxdt, double *teq, int neq, int im, int ic, int *abortSignal ) {
     int    i;
     int    step;
     int    flag;
@@ -1122,7 +1165,7 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
     /* Set the time to the last succesful time step */
     time = data->t;
     while( !converged )
-    {
+    {        
         time = time + current_stepsize;
 
         /* Simulate up to next checkpoint */

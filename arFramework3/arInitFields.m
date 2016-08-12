@@ -64,6 +64,8 @@ function ar = arInitFields(ar)
         {'eq_step_factor',              5}, ...                         %   Factor by which the equilibration time is extended when dxdt isn't below eq_tol
         ...                                                             % Constraint based steady states
         {'steady_state_constraint',     1}, ...                         %   Enable system
+        ...
+        {'instantaneous_termination',   1}, ...                         % Poll utIsInterruptPending() to respond to CTRL+C
         };
         
     % Apply the default general settings where no fields are present

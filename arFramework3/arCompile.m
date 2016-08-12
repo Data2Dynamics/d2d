@@ -58,7 +58,6 @@ end
 mexopt = {'-largeArrayDims'}; 
 % mexopt = {'-compatibleArrayDims'}; 
 
-
 arFprintf(1, 'Compiling files...');
 
 usePool = exist('gcp','file')>0 && ~isempty(gcp('nocreate'));
@@ -124,6 +123,12 @@ includesstr{end+1} = ['-I"' pwd '/Compiled/' ar.info.c_version_code '"'];
 includesstr{end+1} = ['-I"' source_dir '/Compiled/' ar.info.c_version_code '"'];
 includesstr{end+1} = ['-I"' ar_path '"'];
 includesstr{end+1} = ['-I/usr/local/include'];
+
+% Allow interrupt hooks
+if ( ar.config.instantaneous_termination )
+    includesstr{end+1} = '-lut';
+    mexopt{end+1} = '-DALLOW_INTERRUPTS';
+end
 
 if(~isempty(compiled_cluster_path))
     includesstr{end+1} = ['-I"' compiled_cluster_path '/' ar.info.c_version_code '"'];

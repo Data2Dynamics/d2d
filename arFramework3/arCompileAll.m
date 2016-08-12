@@ -1456,7 +1456,7 @@ if(~isempty(model.xs))
     fprintf(fid, '  }\n');
 end
 
-fprintf(fid, '\n  return(0);\n}\n\n\n');
+fprintf(fid, '\n  return(*(data->abort));\n}\n\n\n');
 
 % write fxdouble
 fprintf(fid, ' void fxdouble_%s(realtype t, N_Vector x, double *xdot_tmp, void *user_data)\n{\n', condition.fkt);

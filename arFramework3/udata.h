@@ -12,6 +12,7 @@ typedef struct {
 	double *dvdu;
 	double *dvdp;
 	double t;
+    int    *abort;
 	} *UserData;
 
 typedef struct {
