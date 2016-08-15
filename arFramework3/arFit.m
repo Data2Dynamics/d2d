@@ -319,6 +319,17 @@ if(nargout>1 && ar.config.useSensis)
     end
 end
 
+np = sum(ar.qFit==1);
+if ( numel(res) < np )
+    tres = zeros(1,np);
+    tres(1:length(res)) = res;
+    tsres = zeros(np);
+    tsres(1:length(res), 1:np) = sres;
+    
+    res = tres;
+    sres = tsres;
+end
+
 % arNLS boosted by SR1 updates
 function [res, sres, H, ssres] = merit_fkt_sr1(p, pc, ~, sresc, ssresc)
 global ar

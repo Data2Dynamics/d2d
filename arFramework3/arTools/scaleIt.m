@@ -196,6 +196,19 @@ function scaleIt( names, outFile, varargin )
     % out = unitTest()
     
     % Estimate correct scaling factors
+    %if ( opts.prescaleProblem )
+    %    q = fieldnames( out );
+    %    maxi = 0;
+    %    for jq = 1 : length( q )
+    %        maxi = max( [maxi, max( max( cell2mat( out.(q{jq}) ) ) ) ] );
+    %    end
+    %    for jq = 1 : length( q )
+    %        for ji = 1 : length( out.(q{jq}) )
+    %            out.(q{jq}){ji} = out.(q{jq}){ji} / maxi;
+    %        end
+    %    end
+    %end
+    
     [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo, opts.rescale );
        
     % Find unique conditions (unrelated to time this time)
@@ -408,6 +421,8 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
             curScale        = [curScale; scales{jD}(Q{jD})];         %#ok
         end
         
+        curData = curData / nanmax(nanmax(curData));
+        
         % ConditionLinks links the replicates to the "true" IDs (i.e. true conditions, t, cond pairs)
         % ScaleLinks refers to which scale corresponds to which datapoint.
         % Each "condition" needs a 'true' mean
@@ -502,9 +517,10 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
         fixedScale = 1;
     end
     
-    options                 = optimset('TolFun', 0, 'TolX', 1e-9, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Off' );
+    options                 = optimset('TolFun', 0, 'TolX', 1e-11, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Iter' );
     errModel                = @(pars) eModel(fixedScale, pars, data, scaleLinks, length(conditionTargets), length(scalings), conditionLinks);
     p                       = lsqnonlin( errModel, initPar, lb, 1e25*ones(size(initPar)), options );
+    [p, ~, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, lb, 1e25*ones(size(initPar)), options );
     [p, ~, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, lb, 1e25*ones(size(initPar)), options );
     ci                      = nlparci(p,r,'Jacobian',J,'alpha',0.05);
     
