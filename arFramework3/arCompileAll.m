@@ -1438,9 +1438,9 @@ fprintf(fid, ' int fx_%s(realtype t, N_Vector x, N_Vector xdot, void *user_data)
 if(timedebug) 
     fprintf(fid, '  printf("%%g \\t fx\\n", t);\n');
 end
+fprintf(fid, '  UserData data = (UserData) user_data;\n');
 if(~isempty(model.xs))
     fprintf(fid, '  int is;\n');
-    fprintf(fid, '  UserData data = (UserData) user_data;\n');
     fprintf(fid, '  double *qpositivex = data->qpositivex;\n');
     fprintf(fid, '  double *p = data->p;\n');
     fprintf(fid, '  double *u = data->u;\n');
