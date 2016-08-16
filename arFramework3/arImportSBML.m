@@ -46,9 +46,6 @@ m = findRateRules(m);
 if(isfield(m,'event') && ~isempty(m.event))
     error('Conversion of events is not yet supported in D2D!')
 end
-if(isfield(m,'initialAssignment') && ~isempty(m.initialAssignment))
-    error('Conversion of initial assignments is not yet supported in D2D!')
-end
 for i=1:length(m.compartment)
     if(sum(m.compartment(i).size<1e-5)>0)
         warning('Small compartment size exist. Could be rescale the equations because of integration problems.')
@@ -87,6 +84,8 @@ else
     fprintf(fid, 't\t T\t "%s"\t time\t 0\t %i\t\n', 'n/a', tEnd);
 end
 
+comps = {};
+comp_value = [];
 fprintf(fid, '\nCOMPARTMENTS\n');
 for j=1:length(m.compartment)
     if(~m.compartment(j).constant)
@@ -95,6 +94,8 @@ for j=1:length(m.compartment)
     if(m.compartment(j).isSetSize)
         fprintf(fid, '%s\t V\t "%s"\t vol.\t %g\n', sym_check(m.compartment(j).id), 'n/a', ...
             m.compartment(j).size);
+        comps{end+1} = m.compartment(j).id;
+        comp_value(end+1) = m.compartment(j).size;
     else
         fprintf(fid, '%s\t V\t "%s"\t vol.\n', sym_check(m.compartment(j).id), 'n/a');
     end
@@ -156,6 +157,18 @@ if(isfield(m,'raterule'))
                 m.raterule(j).formula = mysubs(m.raterule(j).formula,pat{i},rep{i});
             catch
                 m.raterule(j).formula = regexprep(m.raterule(j).formula,['(^|(\W)',pat{i},'($|\W)'],['$1',rep{i},'$2'],'all');
+            end
+        end
+    end
+end
+
+if(isfield(m,'initialAssignment'))
+    for i=1:length(pat)
+        for j=1:length(m.initialAssignment)
+            try
+                m.initialAssignment(j).math = mysubs(m.initialAssignment(j).math,pat{i},rep{i});
+            catch
+                m.initialAssignment(j).math = regexprep(m.initialAssignment(j).math,['(^|(\W)',pat{i},'($|\W)'],['$1',rep{i},'$2'],'all');
             end
         end
     end
@@ -335,7 +348,6 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                 tmpstr = sym(tmpstr);
             end
             
-            
             % replace compartement volumes
             for jj=1:length(m.compartment)
                 tmpstr = mysubs(tmpstr, m.compartment(jj).id, num2str(m.compartment(jj).size));
@@ -402,6 +414,8 @@ fprintf(fid, '\nDERIVED\n');
 fprintf(fid, '\nCONDITIONS\n');
 
 fprintf(fid, '\nPARAMETERS\n');
+specs = {};
+spec_value = [];
 for j=1:length(m.species)
     if(m.species(j).isSetInitialConcentration)
         ub = 1000;
@@ -410,6 +424,8 @@ for j=1:length(m.species)
         end
         fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
             m.species(j).initialConcentration, m.species(j).constant==0, ub);
+        specs{end+1} = m.species(j).id2;
+        spec_value(end+1) = m.species(j).initialConcentration;
     elseif(m.species(j).isSetInitialAmount)
         comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
         comp_vol = m.compartment(comp_id).size;
@@ -420,8 +436,12 @@ for j=1:length(m.species)
         end
         fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
             initial_conc, m.species(j).constant==0, ub);
+        specs{end+1} = m.species(j).id2;
+        spec_value(end+1) = initial_conc;
     end
 end
+pars = {};
+par_value = [];
 for j=1:length(m.parameter)
     isRule = false;
     for jjj=1:length(m.rule)
@@ -440,6 +460,9 @@ for j=1:length(m.parameter)
             end
             fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.parameter(j).id), ...
                 m.parameter(j).value, m.parameter(j).constant==0, ub);
+            pars{end+1} = m.parameter(j).id;
+            par_value(end+1) = m.parameter(j).value;
+            
         end
     end
 end
@@ -457,6 +480,24 @@ for j=1:length(m.reaction)
                     m.reaction(j).kineticLaw.parameter(jj).value, m.reaction(j).kineticLaw.parameter(jj).constant==0, ub);
             end
         end
+    end
+end
+
+% initial assignments
+for i=1:length(m.initialAssignment)
+    assignment_value = m.initialAssignment(i).math;
+    assignment_value = subs(assignment_value, pars, par_value);
+    assignment_value = subs(assignment_value, specs, spec_value);
+    assignment_value = subs(assignment_value, comps, comp_value);
+    assignment_value = eval(assignment_value);
+    
+    if any(strcmp(m.initialAssignment(i).symbol,{m.parameter.id}))
+        ub = 1000;
+        if assignment_value > ub
+            ub = 10*assignment_value;
+        end
+        fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.initialAssignment(i).symbol), ...
+                    assignment_value, 1, ub);
     end
 end
 
