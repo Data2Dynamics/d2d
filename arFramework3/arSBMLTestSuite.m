@@ -24,20 +24,20 @@ sbml_ver = ['-sbml-' sbml_ver];
 
 d2d_dir = fileparts(which('arInit.m'));
 
-if(~exist([d2d_dir '/sbml-test-cases-2014-10-22.zip'],'file'))
+if(~exist([d2d_dir '/sbml-semantic-test-cases-2016-07-27.zip'],'file'))
     fprintf(1, '\nDownloading SBML test cases...\n');
     if ( exist( 'websave' ) ) %#ok
-        websave([d2d_dir '/sbml-test-cases-2014-10-22.zip'],'http://jaist.dl.sourceforge.net/project/sbml/test-suite/3.1.1/cases-archive/sbml-test-cases-2014-10-22.zip');
+        websave([d2d_dir '/sbml-semantic-test-cases-2016-07-27.zip'],'http://netix.dl.sourceforge.net/project/sbml/test-suite/3.2.0/case-archives/sbml-semantic-test-cases-2016-07-27.zip');
     else
         if ( exist( 'urlwrite' ) ) %#ok
-            urlwrite('http://jaist.dl.sourceforge.net/project/sbml/test-suite/3.1.1/cases-archive/sbml-test-cases-2014-10-22.zip', [d2d_dir '/sbml-test-cases-2014-10-22.zip']);
+            urlwrite('http://netix.dl.sourceforge.net/project/sbml/test-suite/3.2.0/case-archives/sbml-semantic-test-cases-2016-07-27.zip', [d2d_dir '/sbml-semantic-test-cases-2016-07-27.zip']);
         else
-            error( 'Failed to obtain file sbml-test-cases-2014-10-22.zip. Please download manually from http://jaist.dl.sourceforge.net/project/sbml/test-suite/3.1.1/cases-archive/sbml-test-cases-2014-10-22.zip' );
+            error( 'Failed to obtain file sbml-semantic-test-cases-2016-07-27.zip. Please download manually from http://netix.dl.sourceforge.net/project/sbml/test-suite/3.2.0/case-archives/sbml-semantic-test-cases-2016-07-27.zip' );
         end
     end
-    if(~exist([d2d_dir '/sbml-test-cases-2014-10-22'],'dir'))
-        fprintf(1, '\nUnizpping SBML test cases...\n');
-        unzip([d2d_dir '/sbml-test-cases-2014-10-22.zip'],[d2d_dir '/sbml-test-cases-2014-10-22']);
+    if(~exist([d2d_dir '/sbml-semantic-test-cases-2016-07-27.zip'],'dir'))
+        fprintf(1, '\nUnzipping SBML test cases...\n');
+        unzip([d2d_dir '/sbml-semantic-test-cases-2016-07-27.zip'],[d2d_dir '/sbml-semantic-test-cases-2016-07-27']);
     end
 end
 
@@ -46,7 +46,7 @@ if ~exist('TestSuite','dir')
     cd('TestSuite')
 end
 
-modeldir = [d2d_dir '/sbml-test-cases-2014-10-22/cases/semantic/'];
+modeldir = [d2d_dir '/sbml-semantic-test-cases-2016-07-27/cases/semantic/'];
 dirname = dir(modeldir);
 dirname = dirname([dirname.isdir]);
 dirname = dirname(3:end);
@@ -85,7 +85,7 @@ for jm = model_id
     varnames = results.Properties.VariableNames(2:end);
 
     try
-        [m, modelname] = arImportSBML(modelname,tmax);
+        [~, modelname] = arImportSBML(modelname,tmax);
         arLoadModel(modelname)
         arCompileAll
         arSimu(0,1,1);
