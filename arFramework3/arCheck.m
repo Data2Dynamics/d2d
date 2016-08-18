@@ -196,6 +196,7 @@ if exist('arInitUser.m','file')==0
 	fprintf(fid,'\n%s%s%s','ar.config.comment_string = ''//'';');
 	fclose(fid);
 	fprintf(1,'\n%s\n','Initialization successful');
+    fprintf(1,'Please note that you can set additional default options in arInitUser.m\n' );
     rehash path
 end
 
