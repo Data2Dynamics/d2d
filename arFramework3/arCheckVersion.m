@@ -50,6 +50,10 @@ else
     ar.info.revision = [];
 end
 
-if (nargout==1 && exist('gh_data','var'))
-    flag = (~isempty(gh_data) && strcmp(deblank(gh_data.object.sha),ar.info.revision));
+if (nargout==1)
+    if exist('gh_data','var')
+        flag = (~isempty(gh_data) && strcmp(deblank(gh_data.object.sha),ar.info.revision));
+    else
+        flag = false;
+    end     
 end
