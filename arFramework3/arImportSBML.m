@@ -574,7 +574,6 @@ end
 
 
 function str = replaceFunction(str, funstr, C, funmat)
-
 % %% test replace functions
 % clc
 % str = 'k1 + power(k1*2, k2+(7*log(k3))) + 10*p3 + power(k1*2, k2+(7*log(k3))) + 10*p3';
@@ -687,14 +686,7 @@ while(~isempty(funindex))
         error('input output parameter mismatch');
     end
     
-    funtmplate = funmat;
-    
-    % Replace longest names first               %#<JV>
-    [~,I]=sort(cellfun(@length,C), 'descend');  %#<JV>
-    for j=1:length(D)
-        funtmplate = strrep(funtmplate, C{I(j)}, ['(' D{I(j)} ')']); %#<JV> {j}=>I(j)
-    end
-    funtmplate = ['(' funtmplate ')']; %#ok<AGROW>
+    funtmplate = sprintf('((%s)^(%s))',D{1},D{2});
     %     disp(funtmplate)
     
     if(funindex(1)-1>1 && funindex(1)-1+endfunindex<length(str)) % in between
@@ -712,9 +704,9 @@ while(~isempty(funindex))
 end
 % disp(str)
 
-% str = char(sym(str));
+str = char(sym(str));
 
-
+function outstr = pow2mcode(powstr,funname)
 % Replaces power( ... , ...) syntax to matlab syntax (...)^(...)
 %
 %   Examples:
@@ -725,7 +717,6 @@ end
 % powstr2 = strrep(powstr,'power','pow');
 % outstr = pow2mcode(powstr2,'pow')
 
-function outstr = pow2mcode(powstr,funname)
 if(~exist('funname','var') || isempty(funname))
     funname = 'power';
 end
@@ -763,6 +754,8 @@ else
 end
 
 
+
+function [kl,kr] = FindKlammerPaare(str,klammern)
 % Findet in einer Formel (als string) die Paare "Klammer auf" kl und "Klammer zu" kr
 % Bsp: ((...)(...))()
 %  kl = 2     7     1    13
@@ -776,7 +769,6 @@ end
 %     Default: klammern = '()'
 %     oder z.B. '{}'
 
-function [kl,kr] = FindKlammerPaare(str,klammern)
 if(~exist('klammern','var') || isempty(klammern))
     klammern = '()';
 end
@@ -842,11 +834,10 @@ for i=1:length(m.u)
 end
 
 
+function m = AdaptVariableNames(m)
 % The following function will
 %   alter variable names which cannot be handled by the Symbolic Math
 %   function subs()
-
-function m = AdaptVariableNames(m)
 
 for i=1:length(m.species)
     m.species(i).id = sym_check(m.species(i).id);
@@ -875,8 +866,8 @@ end
 
 
 function s = sym_check(s)
-%Replacement if symbolic variable coincides with function. Without
-%replacement subs would not work.
+% Replacement if symbolic variable coincides with function. Without
+% replacement subs would not work.
 keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','I','E'};
 
 issym = strcmp(class(s),'sym'); %#ok<STISA>
