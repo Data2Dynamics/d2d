@@ -48,6 +48,16 @@ if(sum(p>ub | p<lb)>0)
     error('arNLS: parameters inconsistent with bounds');
 end
 
+if size(p,1)>size(p,2)
+    p = p.';
+end
+if size(lb,1)>size(lb,2)
+    lb = lb.';
+end
+if size(ub,1)>size(ub,2)
+    ub = ub.';
+end
+
 % not used
 lambda = [];
 jac = [];
