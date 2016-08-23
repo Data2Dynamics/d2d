@@ -42,7 +42,7 @@ end
 [has_git, is_repo] = arCheckGit(ar_path);
 
 % check if submodules have been pulled from github
-submodules = {'matlab2tikz','https://github.com/matlab2tikz/matlab2tikz/zipball/3a1ee10';...
+submodules = {'matlab2tikz','https://github.com/matlab2tikz/matlab2tikz/zipball/fcb9d86';...
     'parfor_progress','https://github.com/dumbmatter/parfor_progress/zipball/1e94f6d';...
     'plot2svg','https://github.com/jschwizer99/plot2svg/zipball/839a919';...
     'export_fig','https://github.com/altmany/export_fig/zipball/d8131e4';...
@@ -53,7 +53,7 @@ for jsm = 1:length(submodules)
     submodule = submodules{jsm,1};
     submod_dir = [ar_path '/ThirdParty/' submodule];
     url = submodules{jsm,2};
-    if( (exist(submod_dir,'file')==7 && isempty(ls(submod_dir))) || (~exist(submod_dir,'file')) )
+    if( (exist(submod_dir,'dir')==7 && isempty(ls(submod_dir))) || (~exist(submod_dir,'file')) )
         arFprintf(2,'Downloading submodule "%s" from github...',submodule);
         if(has_git && is_repo)
             % fetch submodule via git
@@ -68,12 +68,13 @@ for jsm = 1:length(submodules)
             end
             cd(old_path);
             setenv('LD_LIBRARY_PATH', library_path);
-        elseif(exist('websave','file')==2)
+        else
             % fetch submodule as zip file
-            if(exist(submod_dir,'file')==7)
+            if(exist(submod_dir,'dir'))
                 rmdir(submod_dir);
             end
-            fname = websave([submod_dir '.zip'], url);
+            fname = [submod_dir '.zip'];
+            arDownload(url, fname);
             dirnames = unzip(fname, [ar_path filesep 'ThirdParty']);
             dirnames = unique(cellfun(@fileparts,dirnames,'UniformOutput',false));
             dirname = dirnames{1};
