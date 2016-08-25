@@ -1,18 +1,18 @@
 %  arImportSBML(filename, tEnd)
-% 
+%
 %       tEnd        Default: 100
-% 
+%
 % import SBML model and translate to .def files
-% 
+%
 %   States and parameters consisting of a single character are replaced by
 %   longer symbols.
 %   State- and parameter names which coincide with mathematical functions
 %   in symbolic the Symbolic Toolbox are replaced.
-%   
-% Example: 
+%
+% Example:
 % arImportSBML('BIOMD0000000379')
-% 
-% Example: 
+%
+% Example:
 %  ms = arImportSBML('BIOMD0000000379',100)
 %  [ms, modelname] = arImportSBML('BIOMD0000000379',100)
 %
@@ -112,7 +112,7 @@ if isfield(m,'raterule')
     for i=1:length(raterulespecies)
         israterule = israterule | strcmp(raterulespecies(i),{m.species.id});
     end
-else 
+else
     israterule = false;
 end
 
@@ -235,8 +235,8 @@ if isfield(m,'raterule')
         
         % replace power function
         tmpstr = replacePowerFunction(tmpstr);
-
-        fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.raterule(j).name); 
+        
+        fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.raterule(j).name);
     end
 end
 
@@ -274,14 +274,14 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                         else
                             fprintf(fid, '%2.2f %s', stoichiometry, sym_check(react_spec_name));
                         end
-                    else 
+                    else
                         fprintf(fid, '%s', sym_check(react_spec_name));
                     end
-
+                    
                     if(jj ~= length(m.reaction(j).reactant))
                         fprintf(fid, ' + ');
                     end
-
+                    
                 end
             end
             fprintf(fid, ' \t-> ');
@@ -307,13 +307,13 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                         else
                             fprintf(fid, '%2.2f %s', stoichiometry, sym_check(prod_spec_name));
                         end
-                    else 
+                    else
                         fprintf(fid, '%s', sym_check(prod_spec_name));
                     end
                     if(jj ~= length(m.reaction(j).product))
                         fprintf(fid, ' + ');
                     end
-
+                    
                 end
             end
             
@@ -351,7 +351,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                 tmpfun = m.functionDefinition(jj).math;
                 tmpfun = strrep(tmpfun, 'lambda(', '');
                 tmpfun = tmpfun(1:end-1);
-                tmpfun = replacePowerFunction(tmpfun);
+                tmpfun = replacePowerFunction(tmpfun,false);
                 C = textscan(tmpfun, '%s', 'Whitespace', ',');
                 C = C{1};
                 
@@ -382,7 +382,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             tmpstr = char(tmpstr);
             
             tmpstr = replacePowerFunction(tmpstr);
-
+            
             fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.reaction(j).name);
         end
     end
@@ -478,7 +478,7 @@ for i=1:length(m.initialAssignment)
             ub = 10*assignment_value;
         end
         fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.initialAssignment(i).symbol), ...
-                    assignment_value, 1, ub);
+            assignment_value, 1, ub);
     end
 end
 
@@ -622,14 +622,72 @@ end
 str = char(sym(str));
 
 
-function str = replacePowerFunction(str)
+function str = replacePowerFunction(str, issym)
 % replace power function ('power' and 'pow')
 % str = 'k1 + power(k1*2, k2+(7*log(k3))) + 10*p3 + power(k1*2, k2+(7*log(k3))) + 10*p3';
+%
+% issym:    set to true, when used togehter with symbolic evaluation.
+% Replaces 'power' with '_power'
 
-narginchk(1,1)
+narginchk(1,2)
+if(~exist('issym','var'))
+    issym = true;
+end
 
-str = strrep(str, 'power(', '_power('); % FIXME: use regexp instead
-str = strrep(str, 'pow(', '_power('); % FIXME: use regexp instead
+if issym
+    str = strrep(str, 'power(', '_power('); % FIXME: use regexp instead
+    str = strrep(str, 'pow(', '_power('); % FIXME: use regexp instead
+else
+    C = {'a','b'};
+    funstr = 'power';
+    
+    str = char(str);
+    % disp(str);
+    funindex = strfind(str, [funstr '(']);
+    while(~isempty(funindex))
+        
+        substr = str(funindex(1):end);
+        
+        openindex = strfind(substr, '(');
+        closeindex = strfind(substr, ')');
+        
+        mergedindex = [openindex closeindex];
+        rankingindex = [ones(size(openindex)) -ones(size(closeindex))];
+        
+        [sortedmergedindex, isortedindex] = sort(mergedindex);
+        sortedrankingindex = rankingindex(isortedindex);
+        
+        endfunindex = find(cumsum(sortedrankingindex)==0);
+        if(isempty(endfunindex))
+            error('bracketing error close to function %s', funstr);
+        end
+        endfunindex = sortedmergedindex(endfunindex(1));
+        
+        substr = substr(openindex+1:endfunindex-1);
+        
+        D = textscan(substr, '%s', 'Whitespace', ',');
+        D = D{1};
+        if(length(C)~=length(D))
+            error('input output parameter mismatch');
+        end
+        
+        funtmplate = sprintf('((%s)^(%s))',D{1},D{2});
+        %     disp(funtmplate)
+        
+        if(funindex(1)-1>1 && funindex(1)-1+endfunindex<length(str)) % in between
+            str = [str(1:funindex(1)-1) funtmplate str(funindex(1)+endfunindex:end)];
+        elseif(funindex(1)-1>1) % at begining
+            str = [str(1:funindex(1)-1) funtmplate];
+        elseif(funindex(1)-1+endfunindex<length(str)) % at end
+            str = [funtmplate str(funindex(1)+endfunindex:end)];
+        else % whole string
+            str = funtmplate;
+        end
+        %     disp(str)
+        
+        funindex = strfind(str, funstr);
+    end
+end
 
 
 function m = findRateRules(m)
@@ -803,7 +861,7 @@ c = [];
 if ~isempty(comp_r) && ~isempty(comp_p)
     % educt and product in the same compartment
     if isequal(unique(comp_r),unique(comp_p))
-        c = comp_r{1};    
+        c = comp_r{1};
     end
     % only educt has a compartment
 elseif ~isempty(comp_r) && isempty(comp_p)
