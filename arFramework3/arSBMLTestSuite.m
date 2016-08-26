@@ -23,21 +23,14 @@ end
 sbml_ver = ['-sbml-' sbml_ver];
 
 d2d_dir = fileparts(which('arInit.m'));
-
-if(~exist([d2d_dir '/sbml-semantic-test-cases-2016-07-27.zip'],'file'))
+fname = [d2d_dir '/sbml-semantic-test-cases-2016-07-27.zip'];
+url = 'http://netix.dl.sourceforge.net/project/sbml/test-suite/3.2.0/case-archives/sbml-semantic-test-cases-2016-07-27.zip';
+if(~exist(fname,'file'))
     fprintf(1, '\nDownloading SBML test cases...\n');
-    if ( exist( 'websave' ) ) %#ok
-        websave([d2d_dir '/sbml-semantic-test-cases-2016-07-27.zip'],'http://netix.dl.sourceforge.net/project/sbml/test-suite/3.2.0/case-archives/sbml-semantic-test-cases-2016-07-27.zip');
-    else
-        if ( exist( 'urlwrite' ) ) %#ok
-            urlwrite('http://netix.dl.sourceforge.net/project/sbml/test-suite/3.2.0/case-archives/sbml-semantic-test-cases-2016-07-27.zip', [d2d_dir '/sbml-semantic-test-cases-2016-07-27.zip']);
-        else
-            error( 'Failed to obtain file sbml-semantic-test-cases-2016-07-27.zip. Please download manually from http://netix.dl.sourceforge.net/project/sbml/test-suite/3.2.0/case-archives/sbml-semantic-test-cases-2016-07-27.zip' );
-        end
-    end
-    if(~exist([d2d_dir '/sbml-semantic-test-cases-2016-07-27.zip'],'dir'))
+    arDownload(url,fname)
+    if(~exist(fname(1:end-4),'dir'))
         fprintf(1, '\nUnzipping SBML test cases...\n');
-        unzip([d2d_dir '/sbml-semantic-test-cases-2016-07-27.zip'],[d2d_dir '/sbml-semantic-test-cases-2016-07-27']);
+        unzip(fname,fname(1:end-4));
     end
 end
 
@@ -46,7 +39,7 @@ if ~exist('TestSuite','dir')
     cd('TestSuite')
 end
 
-modeldir = [d2d_dir '/sbml-semantic-test-cases-2016-07-27/cases/semantic/'];
+modeldir = [fname(1:end-4) '/cases/semantic/'];
 dirname = dir(modeldir);
 dirname = dirname([dirname.isdir]);
 dirname = dirname(3:end);
@@ -77,8 +70,8 @@ for jm = model_id
     
     arInit
     ar.config.nFinePoints = nsteps+1;
-    ar.config.atol = 1e-9;%atol;
-    ar.config.rtol = 1e-9;%rtol;
+    ar.config.atol = 1e-9; % atol;
+    ar.config.rtol = 1e-9; % rtol;
     ar.config.checkForNegFluxes = false;
     
     results = readtable([modeldir dirname(jm).name '/' modelnum '-results.csv'],'ReadVariableNames',true,'ReadRowNames',false);
@@ -95,11 +88,7 @@ for jm = model_id
         uNames = intersect(varnames,ar.model.u);
         
         % collect d2d results
-%         if all([m.d2d.species(:).isSetInitialAmount]==1)
-%             d2d_tmp = [ar.model.condition.xFineSimu ar.model.condition.uFineSimu]*0.3;
-%         else
-            d2d_tmp = [ar.model.condition.xFineSimu ar.model.condition.uFineSimu];
-%         end
+        d2d_tmp = [ar.model.condition.xFineSimu ar.model.condition.uFineSimu];
         
         d2d_results = results;
         d2d_results{:,[xNames uNames]} = d2d_tmp;

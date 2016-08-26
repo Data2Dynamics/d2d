@@ -1,18 +1,18 @@
 %  arImportSBML(filename, tEnd)
-% 
+%
 %       tEnd        Default: 100
-% 
+%
 % import SBML model and translate to .def files
-% 
+%
 %   States and parameters consisting of a single character are replaced by
 %   longer symbols.
 %   State- and parameter names which coincide with mathematical functions
 %   in symbolic the Symbolic Toolbox are replaced.
-%   
-% Example: 
+%
+% Example:
 % arImportSBML('BIOMD0000000379')
-% 
-% Example: 
+%
+% Example:
 %  ms = arImportSBML('BIOMD0000000379',100)
 %  [ms, modelname] = arImportSBML('BIOMD0000000379',100)
 %
@@ -112,7 +112,7 @@ if isfield(m,'raterule')
     for i=1:length(raterulespecies)
         israterule = israterule | strcmp(raterulespecies(i),{m.species.id});
     end
-else 
+else
     israterule = false;
 end
 
@@ -176,7 +176,7 @@ end
 
 fprintf(fid, '\nINPUTS\n');
 for j=1:length(m.u)
-    fprintf(fid, '%s\t C\t "%s"\t conc.\t%s\n', sym_check(m.u(j).variable), m.u(j).units, pow2mcode(m.u(j).formula,'power'));
+    fprintf(fid, '%s\t C\t "%s"\t conc.\t%s\n', sym_check(m.u(j).variable), m.u(j).units, sym_check(replacePowerFunction(m.u(j).formula)));
 end
 % treat boundary species as constant inputs
 for j=find([m.species.boundaryCondition] & ~israterule)
@@ -205,7 +205,6 @@ if isfield(m,'raterule')
         end
         
         tmpstr = replacePowerFunction(tmpstr);
-        tmpstr = replacePowerFunction(tmpstr, 'pow');
         
         % replace rules
         tmpstr = sym(tmpstr);
@@ -233,19 +232,11 @@ if isfield(m,'raterule')
             end
         end
         tmpstr = char(tmpstr);
+        
         % replace power function
-        try
-            tmpstr = replacePowerFunction(tmpstr);
-            tmpstr = replacePowerFunction(tmpstr, 'pow');
-        catch
-            %         try
-            tmpstr = pow2mcode(tmpstr);
-            tmpstr = pow2mcode(tmpstr,'pow');
-            %         end
-        end
+        tmpstr = replacePowerFunction(tmpstr);
         
         fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.raterule(j).name);
-        
     end
 end
 
@@ -283,14 +274,14 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                         else
                             fprintf(fid, '%2.2f %s', stoichiometry, sym_check(react_spec_name));
                         end
-                    else 
+                    else
                         fprintf(fid, '%s', sym_check(react_spec_name));
                     end
-
+                    
                     if(jj ~= length(m.reaction(j).reactant))
                         fprintf(fid, ' + ');
                     end
-
+                    
                 end
             end
             fprintf(fid, ' \t-> ');
@@ -316,13 +307,13 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                         else
                             fprintf(fid, '%2.2f %s', stoichiometry, sym_check(prod_spec_name));
                         end
-                    else 
+                    else
                         fprintf(fid, '%s', sym_check(prod_spec_name));
                     end
                     if(jj ~= length(m.reaction(j).product))
                         fprintf(fid, ' + ');
                     end
-
+                    
                 end
             end
             
@@ -360,7 +351,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                 tmpfun = m.functionDefinition(jj).math;
                 tmpfun = strrep(tmpfun, 'lambda(', '');
                 tmpfun = tmpfun(1:end-1);
-                tmpfun = replacePowerFunction(tmpfun);
+                tmpfun = replacePowerFunction(tmpfun,false);
                 C = textscan(tmpfun, '%s', 'Whitespace', ',');
                 C = C{1};
                 
@@ -370,7 +361,6 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             
             % replace power function
             tmpstr = replacePowerFunction(tmpstr);
-            tmpstr = replacePowerFunction(tmpstr, 'pow');
             
             % replace rules
             tmpstr = sym(tmpstr);
@@ -391,16 +381,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             end
             tmpstr = char(tmpstr);
             
-            % replace power function
-            try
-                tmpstr = replacePowerFunction(tmpstr);
-                tmpstr = replacePowerFunction(tmpstr, 'pow');
-            catch
-                %         try
-                tmpstr = pow2mcode(tmpstr);
-                tmpstr = pow2mcode(tmpstr,'pow');
-                %         end
-            end
+            tmpstr = replacePowerFunction(tmpstr);
             
             fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.reaction(j).name);
         end
@@ -497,7 +478,7 @@ for i=1:length(m.initialAssignment)
             ub = 10*assignment_value;
         end
         fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.initialAssignment(i).symbol), ...
-                    assignment_value, 1, ub);
+            assignment_value, 1, ub);
     end
 end
 
@@ -641,157 +622,73 @@ end
 str = char(sym(str));
 
 
-
-function str = replacePowerFunction(str, funstr)
-
-% %% test replace functions
-% clc
+function str = replacePowerFunction(str, issym)
+% replace power function ('power' and 'pow')
 % str = 'k1 + power(k1*2, k2+(7*log(k3))) + 10*p3 + power(k1*2, k2+(7*log(k3))) + 10*p3';
+%
+% issym:    set to true, when used togehter with symbolic evaluation.
+% Replaces 'power' with '_power'
 
-if(nargin<2)
+narginchk(1,2)
+if(~exist('issym','var'))
+    issym = true;
+end
+
+if issym
+    str = strrep(str, 'power(', '_power('); % FIXME: use regexp instead
+    str = strrep(str, 'pow(', '_power('); % FIXME: use regexp instead
+else
+    C = {'a','b'};
     funstr = 'power';
-end
-
-C{1} = 'a';
-C{2} = 'b';
-funmat = 'a^b';
-
-str = char(str);
-% disp(str);
-funindex = strfind(str, [funstr '(']);
-while(~isempty(funindex))
     
-    substr = str(funindex(1):end);
-    
-    openindex = strfind(substr, '(');
-    closeindex = strfind(substr, ')');
-    
-    mergedindex = [openindex closeindex];
-    rankingindex = [ones(size(openindex)) -ones(size(closeindex))];
-    
-    [sortedmergedindex, isortedindex] = sort(mergedindex);
-    sortedrankingindex = rankingindex(isortedindex);
-    
-    endfunindex = find(cumsum(sortedrankingindex)==0);
-    if(isempty(endfunindex))
-        error('bracketing error close to function %s', funstr);
+    str = char(str);
+    % disp(str);
+    funindex = strfind(str, [funstr '(']);
+    while(~isempty(funindex))
+        
+        substr = str(funindex(1):end);
+        
+        openindex = strfind(substr, '(');
+        closeindex = strfind(substr, ')');
+        
+        mergedindex = [openindex closeindex];
+        rankingindex = [ones(size(openindex)) -ones(size(closeindex))];
+        
+        [sortedmergedindex, isortedindex] = sort(mergedindex);
+        sortedrankingindex = rankingindex(isortedindex);
+        
+        endfunindex = find(cumsum(sortedrankingindex)==0);
+        if(isempty(endfunindex))
+            error('bracketing error close to function %s', funstr);
+        end
+        endfunindex = sortedmergedindex(endfunindex(1));
+        
+        substr = substr(openindex+1:endfunindex-1);
+        
+        D = textscan(substr, '%s', 'Whitespace', ',');
+        D = D{1};
+        if(length(C)~=length(D))
+            error('input output parameter mismatch');
+        end
+        
+        funtmplate = sprintf('((%s)^(%s))',D{1},D{2});
+        %     disp(funtmplate)
+        
+        if(funindex(1)-1>1 && funindex(1)-1+endfunindex<length(str)) % in between
+            str = [str(1:funindex(1)-1) funtmplate str(funindex(1)+endfunindex:end)];
+        elseif(funindex(1)-1>1) % at begining
+            str = [str(1:funindex(1)-1) funtmplate];
+        elseif(funindex(1)-1+endfunindex<length(str)) % at end
+            str = [funtmplate str(funindex(1)+endfunindex:end)];
+        else % whole string
+            str = funtmplate;
+        end
+        %     disp(str)
+        
+        funindex = strfind(str, funstr);
     end
-    endfunindex = sortedmergedindex(endfunindex(1));
-    
-    substr = substr(openindex+1:endfunindex-1);
-    
-    D = textscan(substr, '%s', 'Whitespace', ',');
-    D = D{1};
-    if(length(C)~=length(D))
-        error('input output parameter mismatch');
-    end
-    
-    funtmplate = sprintf('((%s)^(%s))',D{1},D{2});
-    %     disp(funtmplate)
-    
-    if(funindex(1)-1>1 && funindex(1)-1+endfunindex<length(str)) % in between
-        str = [str(1:funindex(1)-1) funtmplate str(funindex(1)+endfunindex:end)];
-    elseif(funindex(1)-1>1) % at begining
-        str = [str(1:funindex(1)-1) funtmplate];
-    elseif(funindex(1)-1+endfunindex<length(str)) % at end
-        str = [funtmplate str(funindex(1)+endfunindex:end)];
-    else % whole string
-        str = funtmplate;
-    end
-    %     disp(str)
-    
-    funindex = strfind(str, funstr);
-end
-% disp(str)
-
-str = char(sym(str));
-
-function outstr = pow2mcode(powstr,funname)
-% Replaces power( ... , ...) syntax to matlab syntax (...)^(...)
-%
-%   Examples:
-%
-% powstr = 'k1 + power(power(k1*2, k2+(7*log(k3))),2) + 10*p3 + power(k1*2, k2+(7*log(k3))) + 10*p3';
-% outstr = pow2mcode(powstr)
-%
-% powstr2 = strrep(powstr,'power','pow');
-% outstr = pow2mcode(powstr2,'pow')
-
-if(~exist('funname','var') || isempty(funname))
-    funname = 'power';
 end
 
-powstr = strrep(powstr,' ','');
-outstr = '';
-
-count = 0;
-while strcmp(powstr,outstr)~=1 || count>50
-    count = count+1;
-    if(count>1)
-        powstr = outstr;
-    end
-    outstr = pow2mcode_once(powstr,funname);
-end
-
-function outstr = pow2mcode_once(powstr,funname)
-
-ind = regexp(powstr,[funname,'\('])+length(funname);
-
-[kl,kr] = FindKlammerPaare(powstr,'()');
-[kl,ia] = intersect(kl,ind);
-
-if~isempty(ia)
-    kr = kr(ia);
-    [~,rf] = sort(kr-kl);
-    
-    tmp = powstr(kl(rf(1)):kr(rf(1)));
-    ikomma = strfind(tmp,',');
-    tmp = [tmp(1:ikomma-1),')^(',tmp(ikomma+1:end)];
-    
-    outstr = [powstr(1:kl(rf(1))-length(funname)-1),tmp,powstr(kr(rf(1))+1:end)];
-else
-    outstr = powstr;
-end
-
-
-
-function [kl,kr] = FindKlammerPaare(str,klammern)
-% Findet in einer Formel (als string) die Paare "Klammer auf" kl und "Klammer zu" kr
-% Bsp: ((...)(...))()
-%  kl = 2     7     1    13
-%  kr = 6    11    12    14
-%
-% [kl,kr] = FindKlammerPaare(str)
-%
-% [kl,kr] = FindKlammerPaare(str,klammern)
-%
-%   klammer     String der L�nge 2
-%     Default: klammern = '()'
-%     oder z.B. '{}'
-
-if(~exist('klammern','var') || isempty(klammern))
-    klammern = '()';
-end
-
-indL = strfind(str,klammern(1));
-indR = strfind(str,klammern(2));
-
-if(isempty(indR))
-    kr = [];
-    kl = [];
-else
-    kr = NaN(size(indR));
-    kl = NaN(size(indR));
-    for i = 1:length(indR)
-        kr(i) = indR(i);
-        kl(i) = indL(max(find(indL<indR(i)))); %#ok<MXFND>
-        indL(find(kl(i)==indL)) = []; %#ok<FNDSB>
-    end
-    % sort according to kl
-    tmp = sortrows([kl;kr]')';
-    kl = tmp(1,:);
-    kr = tmp(2,:);
-end
 
 function m = findRateRules(m)
 
@@ -824,8 +721,8 @@ for r=1:length(m.rule)
     end
 end
 
-m.u = m.rule(find(is_input==1)); %#ok<FNDSB>
-m.rule = m.rule(find(is_input~=1)); %#ok<FNDSB>
+m.u = m.rule(is_input==1);
+m.rule = m.rule(is_input~=1);
 
 for i=1:length(m.u)
     %     m.u(i).formula = char(mysubs(sym(m.u(i).formula),'time','t')); % does
@@ -964,7 +861,7 @@ c = [];
 if ~isempty(comp_r) && ~isempty(comp_p)
     % educt and product in the same compartment
     if isequal(unique(comp_r),unique(comp_p))
-        c = comp_r{1};    
+        c = comp_r{1};
     end
     % only educt has a compartment
 elseif ~isempty(comp_r) && isempty(comp_p)
