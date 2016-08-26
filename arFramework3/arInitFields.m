@@ -66,6 +66,7 @@ function ar = arInitFields(ar)
         {'steady_state_constraint',     1}, ...                         %   Enable system
         ...
         {'instantaneous_termination',   1-ispc}, ...                    % Poll utIsInterruptPending() to respond to CTRL+C
+        {'no_optimization',             0}, ...                         % Disable compiler optimization
         };
         
     % Apply the default general settings where no fields are present

@@ -1,4 +1,4 @@
-% Compile CVODES c-functions
+% % Compile CVODES c-functions
 %
 % function arCompile(forceFullCompile, forceCompileLast, debug_mode, source_dir)
 %
@@ -128,6 +128,12 @@ includesstr{end+1} = ['-I/usr/local/include'];
 if ( ar.config.instantaneous_termination )
     includesstr{end+1} = '-lut';
     mexopt{end+1} = '-DALLOW_INTERRUPTS';
+end
+
+% Disable code optimization (for code which takes a long time to compile)
+if ( isfield( ar.config, 'no_optimization' ) && ( ar.config.no_optimization == 1 ) )
+    fprintf( 'Optimization disabled\n' );
+    mexopt{end+1} = 'COMPFLAGS=''-O0''';
 end
 
 if(~isempty(compiled_cluster_path))
