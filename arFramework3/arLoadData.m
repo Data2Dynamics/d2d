@@ -99,6 +99,15 @@ end
 
 if(~exist('extension','var') || isempty(extension))
     extension = 'xls';
+    
+    % auto-select extension if not specified
+    if exist(['Data/' name '.xlsx'],'file')
+        extension = 'xls';
+    elseif exist(['Data/' name '.xls'],'file')
+        extension = 'xls';
+    elseif exist(['Data/' name '.csv'],'file')
+        extension = 'csv';
+    end
 end
 if(~exist('removeEmptyObs','var'))
     removeEmptyObs = false;
