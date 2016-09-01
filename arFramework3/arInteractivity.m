@@ -55,6 +55,7 @@ function interactive = arInteractivity( varargin )
         arInteractivityStruct.arCompareModel.m2             = varargin{7};
         arInteractivityStruct.arCompareModel.plotIDs1       = varargin{8};
         arInteractivityStruct.arCompareModel.plotIDs2       = varargin{9};
+        arInteractivityStruct.arCompareModel.titles         = varargin{10};
         set(gcf,'WindowButtonDownFcn', @(hObject, eventData)arCompareModelFcn2(hObject, eventData) );
     end
 end
@@ -109,11 +110,19 @@ function arCompareModelFcn2(hObject, eventData) %#ok
         
         ar = userData.ar1; %#ok
         plotCurve( userData.m1, userData.plotIDs1{dat} );
-        set(gcf, 'Name', sprintf( '[%s]: %s', userData.ar1.model(userData.m1).name, get(gcf, 'Name') ) );
+        if ( ~isempty( arInteractivityStruct.arCompareModel.titles ) )
+            set(gcf, 'Name', sprintf( '[%s]: %s', arInteractivityStruct.arCompareModel.titles{1}, get(gcf, 'Name') ) );
+        else
+            set(gcf, 'Name', sprintf( '[%s]: %s', userData.ar1.model(userData.m1).name, get(gcf, 'Name') ) );
+        end
         
         ar = userData.ar2; %#ok
         plotCurve( userData.m2, userData.plotIDs2{dat} );
-        set(gcf, 'Name', sprintf( '[%s]: %s', userData.ar2.model(userData.m2).name, get(gcf, 'Name') ) );
+        if ( ~isempty( arInteractivityStruct.arCompareModel.titles ) )
+            set(gcf, 'Name', sprintf( '[%s]: %s', arInteractivityStruct.arCompareModel.titles{2}, get(gcf, 'Name') ) );
+        else
+            set(gcf, 'Name', sprintf( '[%s]: %s', userData.ar2.model(userData.m2).name, get(gcf, 'Name') ) );
+        end
         
         ar = arOld;
     end

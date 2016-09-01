@@ -15,20 +15,18 @@ function [opts, outargin] = argSwitch( switches, extraArgs, description, verbose
 
     for a = 1 : length(switches)
         opts.(lower(switches{a})) = 0;
-        if ( extraArgs(a) == 0 )
-            opts.([lower(switches{a}) '_args']) = {};
-        end
+        opts.([lower(switches{a}) '_args']) = {};
     end
     
     a = 1; soft = 0; outargin = {};
-    if ~isempty( varargin{1} )
+    if ~isempty( varargin )
         % Soft matching, only respond to known arguments, and ignore the
         % others, removing the known ones off the stack
         if strcmp( varargin{1}, 'softmatching' )
             soft = 1;
             varargin = varargin(2:end);
         end
-        while( a <= length( varargin{1} ) )            
+        while( a <= length( varargin{1} ) )
             %if (~ischar(varargin{1}{a}))
             if (iscell( varargin{1}{a}))
                 if ( soft == 0 )

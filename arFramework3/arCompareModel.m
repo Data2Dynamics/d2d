@@ -22,11 +22,12 @@ function arCompareModel(varargin)
     figure('units','normalized','outerposition',[0 0 1 1], 'Name', 'Model comparison. Green means M1 is better.');
 
     % Special switches
-    switches    = { 'relerr', 'absrsq', 'nogrid' };
-    extraArgs   = [ 0, 0, 0 ];
+    switches    = { 'relerr', 'absrsq', 'nogrid', 'titles' };
+    extraArgs   = [ 0, 0, 0, 1 ];
     descriptions = {    { 'Using relative residual', '' }, ...
                         { 'Showing absolute R squared of M1 only', '' }, ...
                         { 'Suppressing grid', '' }, ...
+                        { 'Using custom titles', '' }, ...
                     };
 
     if ( length( varargin ) < 2 )
@@ -65,7 +66,7 @@ function arCompareModel(varargin)
     ar2 = arInitFields(ar2);
 
     % Process additional flags
-    opts = argSwitch( switches, extraArgs, descriptions, varargin );
+    opts = argSwitch( switches, extraArgs, descriptions, 1, varargin );
     
     if ( opts.relerr && opts.absrsq )
         error( 'Incompatible option flags' );
@@ -176,7 +177,7 @@ function arCompareModel(varargin)
     % If the interactivity system is enabled, register the callbacks
     % and provide arInteractivity with the required data.
     if ( arInteractivity )
-        arInteractivity( 'arCompareModel', dataFiles, observables, ar1, m1, ar2, m2, getPlotIDs(ar1.model(m1), dataFiles), getPlotIDs(ar2.model(m2), dataFiles) );
+        arInteractivity( 'arCompareModel', dataFiles, observables, ar1, m1, ar2, m2, getPlotIDs(ar1.model(m1), dataFiles), getPlotIDs(ar2.model(m2), dataFiles), opts.titles_args );
     end
     
     set(gca, 'YTick', 1 : numel(dataFiles) );
@@ -190,7 +191,11 @@ function arCompareModel(varargin)
         set(gca, 'CLim', [0, 1] );
         colormap( flipud(redgreencmap(256, 'Interpolation', 'sigmoid') ) );
     end
-    title( sprintf( '%s - %s', strTrafo(name1), strTrafo(name2) ) );
+    if ( opts.titles )
+        title( sprintf( '%s - %s', strTrafo(opts.titles_args{1}), strTrafo(opts.titles_args{2}) ) );
+    else
+        title( sprintf( '%s - %s', strTrafo(name1), strTrafo(name2) ) );
+    end
     colorbar;
     
     if ( ~opts.nogrid )
@@ -199,7 +204,7 @@ function arCompareModel(varargin)
         end
         for a = 1 : numel(observables)
             line( [a a]+0.5, [-0.5 numel(dataFiles)+0.5], 'Color', [0.15, 0.15, 0.15]) ;
-        end     
+        end
     end
 end
 
@@ -235,44 +240,6 @@ function names = getDataNames(model)
     for a = 1 : length( model.data )
         if ( max( model.data(a).qFit ) == 1 )
             names = union( names, model.data(a).name );
-        end
-    end
-end
-
-function [opts] = argSwitch( switches, extraArgs, description, varargin )
-
-    for a = 1 : length(switches)
-        if ( extraArgs(a) == 0 )
-            opts.(lower(switches{a})) = 0;
-        else
-            opts.(lower(switches{a})) = {};
-        end
-    end
-    
-    a = 1;
-    if ~isempty( varargin{1} )
-        while( a <= length( varargin{1} ) )
-            if ( max( strcmpi( switches, varargin{1}{a} ) ) == 0 )
-                error( 'Invalid switch argument was provided %s', varargin{1}{a} );
-            end
-            if ( extraArgs( strcmpi( switches, varargin{1}{a} ) ) == 0 )
-                opts.(lower(varargin{1}{a})) = 1;
-            else
-                try
-                    opts.(lower(varargin{1}{a})) = varargin{1}{a+1};
-                    a = a + 1;
-                catch
-                    error( 'Did not provide arguments for flag %s', varargin{1}{a} );
-                end
-            end
-            a = a + 1;
-        end
-    end
-    for a = 1 : length( switches )
-        if ( extraArgs(a) == 0 )
-            fprintf( '%s\n', description{a}{2-opts.(lower(switches{a}))} );
-        else
-            fprintf( '%s\n', description{a}{1+isempty(opts.(lower(switches{a})))} );
         end
     end
 end
