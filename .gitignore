@@ -18,6 +18,9 @@ arFramework3/sbml-test-cases-2014-10-22.zip
 
 arFramework3/l1/trdog/trdog.m
 
+arFramework3/Examples/Dream6_L1/Data/simu*
+arFramework3/Examples/Dream6_L1/Results/20*
+
 arFramework3/Examples/ABC_toyModel/Compiled/
 arFramework3/Examples/ABC_toyModel/SBML/
 arFramework3/Examples/ABC_toyModel/arSimuCalc*
@@ -62,6 +65,11 @@ arFramework3/Examples/Dream6/Compiled/
 arFramework3/Examples/Dream6/SBML/
 arFramework3/Examples/Dream6/arSimuCalc*
 arFramework3/Examples/Dream6/arCheckParallel*
+
+arFramework3/Examples/Dream6_L1/Compiled/
+arFramework3/Examples/Dream6_L1/SBML/
+arFramework3/Examples/Dream6_L1/arSimuCalc*
+arFramework3/Examples/Dream6_L1/arCheckParallel*
 
 arFramework3/Examples/Elowitz2000_Repressilator/Compiled/
 arFramework3/Examples/Elowitz2000_Repressilator/SBML/
