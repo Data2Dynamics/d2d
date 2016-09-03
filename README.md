@@ -24,6 +24,8 @@ The Data2Dynamics software package is a collection of numerical methods for quan
 
 * For efficient numerical solution of the dynamics and derivate calculations parallelized numerical solvers are implemented ([read more](https://github.com/Data2Dynamics/d2d/wiki/Parallelization)). In addition some functions take advantage of PARFOR loops that are provided by the MATLAB Distributed Computing Toolbox ([read more](https://github.com/Data2Dynamics/d2d/wiki/Distributed Computing)).
 
+* For identification of cell type-specific parameters, L1 regularization of parameter fold-changes can be used ([read more](https://github.com/Data2Dynamics/d2d/wiki/L1 regularization)).
+
 * The software is open source and free for non-commercial usage.
 
 ## Example Applications
