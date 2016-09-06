@@ -1256,7 +1256,7 @@ if iscell(str)
     str = [str{:}];
 end
 if(~isempty(str))
-    checksum2.update(uint8(str(:)));
+    checksum.update(uint8(str(:)));
 end
 
 
