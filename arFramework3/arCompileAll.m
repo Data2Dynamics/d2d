@@ -585,42 +585,45 @@ else
     ar.model(m).sym.dfvdu = sym(ones(0, length(ar.model(m).sym.u)));
 end
 
-ar.model(m).qdvdx_nonzero = logical(ar.model(m).sym.dfvdx~=0);
-ar.model(m).qdvdu_nonzero = logical(ar.model(m).sym.dfvdu~=0);
-
-tmpsym = ar.model(m).sym.dfvdx;
-tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
-tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
-tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
-
-try
-    ar.model(m).qdvdx_negative = double(tmpsym) < 0;
-catch ERR
-    for i=1:length(tmpsym(:))
-        try 
-            double(tmpsym(i));
-        catch
-            disp('the following expression should be numeric:')
-            tmpsym(i)
+if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
+    ar.model(m).qdvdx_nonzero = logical(ar.model(m).sym.dfvdx~=0);
+    ar.model(m).qdvdu_nonzero = logical(ar.model(m).sym.dfvdu~=0);
+    
+    tmpsym = ar.model(m).sym.dfvdx;
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
+    tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+    
+    try
+        ar.model(m).qdvdx_negative = double(tmpsym) < 0;
+    catch ERR
+        for i=1:length(tmpsym(:))
+            try
+                double(tmpsym(i));
+            catch
+                disp('the following expression should be numeric:')
+                tmpsym(i)
+            end
         end
+        rethrow(ERR)
     end
-    rethrow(ERR)
+    
+    tmpsym = ar.model(m).sym.dfvdu;
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
+    tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+    
+    ar.model(m).qdvdu_negative = double(tmpsym) < 0;
+    
+    tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
+    ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
+    
+    if(length(ar.model(m).x) * log(length(ar.model(m).x)) > ar.model(m).nnz)
+        ar.config.useSparseJac = 1;
+    end
+else
+    arFprintf(2, 'Model m%i too large (%i variables, %i parameters)... skipping check of model structure\n', m, length(ar.model(m).sym.x), length(ar.model(m).p));
 end
-
-tmpsym = ar.model(m).sym.dfvdu;
-tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
-tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
-tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
-
-ar.model(m).qdvdu_negative = double(tmpsym) < 0;
-
-tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
-ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
-
-if(length(ar.model(m).x) * log(length(ar.model(m).x)) > ar.model(m).nnz)
-   ar.config.useSparseJac = 1; 
-end
-
 
 
 
@@ -739,41 +742,32 @@ condition.qdvdu_nonzero = logical(condition.sym.dfvdu~=0);
 condition.qdvdp_nonzero = logical(condition.sym.dfvdp~=0);
 
 % short terms
-condition.dvdx = cell(length(model.vs), length(model.xs));
+condition.sym.dvdx = sym(zeros(length(model.vs), length(model.xs)));
 for j=1:length(model.vs)
     for i=1:length(model.xs)
         if(condition.qdvdx_nonzero(j,i))
-            condition.dvdx{j,i} = sprintf('dvdx[%i]', j + (i-1)*length(model.vs));
-        else
-            condition.dvdx{j,i} = '0';
+            condition.sym.dvdx(j,i) = sym(sprintf('dvdx[%i]', j + (i-1)*length(model.vs)));
         end
     end
 end
-condition.sym.dvdx = sym(condition.dvdx);
 
-condition.dvdu = cell(length(model.vs), length(model.us));
+condition.sym.dvdu = sym(zeros(length(model.vs), length(model.us)));
 for j=1:length(model.vs)
     for i=1:length(model.us)
         if(condition.qdvdu_nonzero(j,i))
-            condition.dvdu{j,i} = sprintf('dvdu[%i]', j + (i-1)*length(model.vs));
-        else
-            condition.dvdu{j,i} = '0';
+            condition.sym.dvdu(j,i) = sym(sprintf('dvdu[%i]', j + (i-1)*length(model.vs)));
         end
     end
 end
-condition.sym.dvdu = sym(condition.dvdu);
 
-condition.dvdp = cell(length(model.vs), length(condition.ps));
+condition.sym.dvdp = sym(zeros(length(model.vs), length(condition.ps)));
 for j=1:length(model.vs)
     for i=1:length(condition.ps)
         if(condition.qdvdp_nonzero(j,i))
-            condition.dvdp{j,i} = sprintf('dvdp[%i]', j + (i-1)*length(model.vs));
-        else
-            condition.dvdp{j,i} = '0';
+            condition.sym.dvdp(j,i) = sym(sprintf('dvdp[%i]', j + (i-1)*length(model.vs)));
         end
     end
 end
-condition.sym.dvdp = sym(condition.dvdp);
 
 % do we have variable volumes?
 if ( ~isempty( symvar( condition.sym.C ) ) )
@@ -1257,15 +1251,14 @@ algs = {'MD2','MD5','SHA-1','SHA-256','SHA-384','SHA-512'};
 if(nargin<2)
     checksum = java.security.MessageDigest.getInstance(algs{2});
 end
-if(iscell(str))
-    for j=1:length(str)
-        checksum = addToCheckSum(str{j}, checksum);
-    end
-else
-    if(~isempty(str))
-        checksum.update(uint8(str(:)));
-    end
+
+if iscell(str) 
+    str = [str{:}];
 end
+if(~isempty(str))
+    checksum2.update(uint8(str(:)));
+end
+
 
 function checkstr = getCheckStr(checksum)
 h = typecast(checksum.digest,'uint8');
