@@ -1,6 +1,7 @@
-%  arImportSBML(filename, tEnd)
+%  arImportSBML(filename, tEnd, overwrite)
 %
 %       tEnd        Default: 100
+%       overwrite   Default: false
 %
 % import SBML model and translate to .def files
 %
@@ -13,24 +14,26 @@
 % arImportSBML('BIOMD0000000379')
 %
 % Example:
-%  ms = arImportSBML('BIOMD0000000379',100)
-%  [ms, modelname] = arImportSBML('BIOMD0000000379',100)
+%  ms = arImportSBML('BIOMD0000000379',100, true)
+%  [ms, modelname] = arImportSBML('BIOMD0000000379',100, true)
 %
 
-function varargout = arImportSBML(filename, tEnd)
+function varargout = arImportSBML(filename, tEnd, overwrite)
 if(~exist('tEnd','var') || isempty(tEnd))
     tEnd = 100;
 end
-
+if(~exist('overwrite','var') || isempty(overwrite))
+    overwrite = false;
+end
 if exist('TranslateSBML','file')~=3
     warning('TranslateSBML not found. Please install libSBML and/or add it to Matlab''s search path. EXIT arImportSBML.m now.')
     return
 end
 
 try
-    m = TranslateSBML([filename '.sbml']);
-catch %#ok<CTCH>
     m = TranslateSBML([filename '.xml']);
+catch %#ok<CTCH>
+    m = TranslateSBML([filename '.sbml']);
 end
 
 mIn = m;
@@ -382,7 +385,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             
             tmpstr = replacePowerFunction(tmpstr);
             
-            fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.reaction(j).name);
+            fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.reaction(j).id);
         end
     end
 end   % end if dynamics specified either raterule or reaction
@@ -524,12 +527,20 @@ fclose(fid);
 if ~isdir('./Models')
     mkdir('Models');
 end
-system(['mv ',new_filename '.def Models']);
+if(overwrite)
+    system(['mv -f ',new_filename '.def Models']);
+else
+    system(['mv ',new_filename '.def Models']);
+end
 
 if ~isdir('./Data')
     mkdir('Data');
 end
-system(['mv ',new_filename '_data.def Data']);
+if(overwrite)
+    system(['mv -f ',new_filename '_data.def Data']);
+else
+    system(['mv ',new_filename '_data.def Data']);
+end
 
 % generate Setup.m
 if(~exist('Setup.m','file'))
