@@ -267,8 +267,6 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                     else
                         stoichiometry = 1;
                     end
-%                     disp(stoichiometry)
-%                     disp(m.reaction(j).reactant(jj).stoichiometry)
                     if stoichiometry > 1
                         if(stoichiometry == uint32(stoichiometry))
                             fprintf(fid, '%i %s', stoichiometry, sym_check(react_spec_name));
@@ -302,9 +300,8 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                     else
                         stoichiometry = 1;
                     end
-%                     disp(m.reaction(j).product(jj).stoichiometry)
-                    if stoichiometry ~= 1
-                        if(stoichiometry == uint32(stoichiometry))
+                    if(stoichiometry~=1)
+                        if(stoichiometry==uint32(stoichiometry))
                             fprintf(fid, '%i %s', stoichiometry, sym_check(prod_spec_name));
                         else
                             fprintf(fid, '%2.2f %s', stoichiometry, sym_check(prod_spec_name));
