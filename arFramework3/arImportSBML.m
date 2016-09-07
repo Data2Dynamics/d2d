@@ -111,7 +111,7 @@ rep = cell(0);
 
 if isfield(m,'raterule')
     raterulespecies = unique({m.raterule.variable});
-    israterule = false(1,length(raterulespecies));
+    israterule = false(1,length(m.species));
     for i=1:length(raterulespecies)
         israterule = israterule | strcmp(raterulespecies(i),{m.species.id});
     end
@@ -201,7 +201,7 @@ if isfield(m,'raterule')
         
         fprintf(fid,'\t -> %s', sym_check(prod_spec_name));
         
-        tmpstr = sym(m.raterule(j).formula);
+        tmpstr = m.raterule(j).formula;
         % repace species names if too short
         for i=1:length(rep)
             tmpstr = mysubs(tmpstr,pat{i},rep{i});
