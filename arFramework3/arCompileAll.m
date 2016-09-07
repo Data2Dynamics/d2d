@@ -282,7 +282,7 @@ for m=1:length(ar.model)
             end
         end
         
-        % assigne conditions
+        % assign conditions
         for c=1:length(ar.model(m).condition)
             ar.model(m).condition(c).p = newp{c};
             ar.model(m).condition(c).pold = newpold{c};
@@ -303,7 +303,7 @@ for m=1:length(ar.model)
 
         if(usePool)
             parfor d=1:length(ar.model(m).data)
-                warning('off','symbolic:mupadmex:MuPADTextWarning');
+                warning('off', 'symbolic:mupadmex:MuPADTextWarning');
                 warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
                 warning('off', 'symbolic:sym:sym:DeprecateExpressions')
 
@@ -349,7 +349,7 @@ for m=1:length(ar.model)
             end
         end
 
-        % assigne data
+        % assign data
         for d=1:length(ar.model(m).data)
             ar.model(m).data(d).p = newp{d};
             ar.model(m).data(d).pold = newpold{d};
@@ -461,7 +461,7 @@ for m=1:length(ar.model)
             end
         end
 
-        % assigne conditions
+        % assign conditions
         for c=1:length(ar.model(m).condition)
             ar.model(m).condition(c).p = newp{c};
             ar.model(m).condition(c).pold = newpold{c};
@@ -1382,17 +1382,20 @@ end
 
 fprintf(fid, '\n  return;\n}\n\n\n');
 
+
 % write dvdx
 fprintf(fid, ' void dvdx_%s(realtype t, N_Vector x, void *user_data)\n{\n', condition.fkt);
 if(timedebug) 
     fprintf(fid, '  printf("%%g \\t dvdx\\n", t);\n');
 end
-if(~isempty(model.xs))
-    fprintf(fid, '  UserData data = (UserData) user_data;\n');
-    fprintf(fid, '  double *p = data->p;\n');
-    fprintf(fid, '  double *u = data->u;\n');
-    fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
-    writeCcode(fid, matlab_version, condition, 'dvdx');
+if(config.useSensis)
+    if(~isempty(model.xs))
+        fprintf(fid, '  UserData data = (UserData) user_data;\n');
+        fprintf(fid, '  double *p = data->p;\n');
+        fprintf(fid, '  double *u = data->u;\n');
+        fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
+        writeCcode(fid, matlab_version, condition, 'dvdx');
+    end
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
@@ -1401,12 +1404,14 @@ fprintf(fid, ' void dvdu_%s(realtype t, N_Vector x, void *user_data)\n{\n', cond
 if(timedebug) 
     fprintf(fid, '  printf("%%g \\t dvdu\\n", t);\n');
 end
-if(~isempty(model.us) && ~isempty(model.xs))
-    fprintf(fid, '  UserData data = (UserData) user_data;\n');
-    fprintf(fid, '  double *p = data->p;\n');
-    fprintf(fid, '  double *u = data->u;\n');
-    fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
-    writeCcode(fid, matlab_version, condition, 'dvdu');
+if(config.useSensis)
+    if(~isempty(model.us) && ~isempty(model.xs))
+        fprintf(fid, '  UserData data = (UserData) user_data;\n');
+        fprintf(fid, '  double *p = data->p;\n');
+        fprintf(fid, '  double *u = data->u;\n');
+        fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
+        writeCcode(fid, matlab_version, condition, 'dvdu');
+    end
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
@@ -1415,13 +1420,15 @@ fprintf(fid, ' void dvdp_%s(realtype t, N_Vector x, void *user_data)\n{\n', cond
 if(timedebug) 
 	fprintf(fid, '  printf("%%g \\t dvdp\\n", t);\n');
 end
-if(~isempty(model.xs))
-    fprintf(fid, '  UserData data = (UserData) user_data;\n');
-    fprintf(fid, '  double *p = data->p;\n');
-    fprintf(fid, '  double *u = data->u;\n');
-    fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
-    if(~isempty(condition.sym.dfvdp))
-        writeCcode(fid, matlab_version, condition, 'dvdp');
+if(config.useSensis)
+    if(~isempty(model.xs))
+        fprintf(fid, '  UserData data = (UserData) user_data;\n');
+        fprintf(fid, '  double *p = data->p;\n');
+        fprintf(fid, '  double *u = data->u;\n');
+        fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
+        if(~isempty(condition.sym.dfvdp))
+            writeCcode(fid, matlab_version, condition, 'dvdp');
+        end
     end
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
