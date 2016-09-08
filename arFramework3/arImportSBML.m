@@ -56,7 +56,8 @@ for i=1:length(m.compartment)
 end
 
 %% model file
-new_filename = strrep(filename,' ','_');
+[~, name] = fileparts(filename);
+new_filename = strrep(name,' ','_');
 new_filename = strrep(new_filename,'-','_');
 fid = fopen([new_filename '.def'], 'w');
 

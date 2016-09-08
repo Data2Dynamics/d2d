@@ -3,6 +3,11 @@
 function arUpdateD2D
 
 global ar
+
+if(isempty(ar))
+    error('please initialize by arInit')
+end
+
 ar_path = ar.info.ar_path;
 [has_git, is_repo] = arCheckGit(ar_path);
 
