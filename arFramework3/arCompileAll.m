@@ -78,7 +78,7 @@ if ( ~legacy_steps )
         ar.config.specialFunc{a}{2} = strrep(ar.config.specialFunc{a}{2}, '%s', '(%s)');
     end
 else
-    ar.config.specialFunc         = [];
+    ar.config.specialFunc = [];
 end
 
 % folders
@@ -784,7 +784,7 @@ condition.sym.C = arSubs(condition.sym.C, condition.sym.p, condition.sym.ps, mat
 condition.sym.fx = (model.N .* condition.sym.C) * transpose(model.sym.vs);
 firstcol = true;
 % Jacobian dfxdx
-if(config.useJacobian)
+if(config.useSensis || config.useJacobian)
     condition.sym.dfxdx = (model.N .* condition.sym.C) * condition.sym.dvdx;
     condition.qdfxdx_nonzero = logical(condition.sym.dfxdx~=0);
     condition.sym.dfxdx_nonzero = sym(zeros(1, nansum(nansum(condition.qdfxdx_nonzero))));
@@ -1388,8 +1388,8 @@ fprintf(fid, ' void dvdx_%s(realtype t, N_Vector x, void *user_data)\n{\n', cond
 if(timedebug) 
     fprintf(fid, '  printf("%%g \\t dvdx\\n", t);\n');
 end
-if(config.useSensis)
-    if(~isempty(model.xs))
+if(~isempty(model.xs))
+    if(config.useSensis || config.useJacobian)
         fprintf(fid, '  UserData data = (UserData) user_data;\n');
         fprintf(fid, '  double *p = data->p;\n');
         fprintf(fid, '  double *u = data->u;\n');
@@ -1404,8 +1404,8 @@ fprintf(fid, ' void dvdu_%s(realtype t, N_Vector x, void *user_data)\n{\n', cond
 if(timedebug) 
     fprintf(fid, '  printf("%%g \\t dvdu\\n", t);\n');
 end
-if(config.useSensis)
-    if(~isempty(model.us) && ~isempty(model.xs))
+if(~isempty(model.us) && ~isempty(model.xs))
+    if(config.useSensis)
         fprintf(fid, '  UserData data = (UserData) user_data;\n');
         fprintf(fid, '  double *p = data->p;\n');
         fprintf(fid, '  double *u = data->u;\n');
@@ -1420,8 +1420,8 @@ fprintf(fid, ' void dvdp_%s(realtype t, N_Vector x, void *user_data)\n{\n', cond
 if(timedebug) 
 	fprintf(fid, '  printf("%%g \\t dvdp\\n", t);\n');
 end
-if(config.useSensis)
-    if(~isempty(model.xs))
+if(~isempty(model.xs))
+    if(config.useSensis)
         fprintf(fid, '  UserData data = (UserData) user_data;\n');
         fprintf(fid, '  double *p = data->p;\n');
         fprintf(fid, '  double *u = data->u;\n');
@@ -1499,7 +1499,7 @@ if(timedebug)
 end
 
 if(~isempty(model.xs))
-    if(config.useJacobian)
+    if(config.useSensis || config.useJacobian)
         fprintf(fid, '  int is;\n');
         fprintf(fid, '  UserData data = (UserData) user_data;\n');
         fprintf(fid, '  double *p = data->p;\n');
@@ -1527,7 +1527,7 @@ if(timedebug)
 end
 
 if(~isempty(model.xs))
-    if(config.useJacobian)
+    if(config.useSensis || config.useJacobian)
         fprintf(fid, '  int is;\n');
         fprintf(fid, '  UserData data = (UserData) user_data;\n');
         fprintf(fid, '  double *p = data->p;\n');
@@ -1727,8 +1727,8 @@ fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write sz
 fprintf(fid, ' void fsz_%s(double t, int nt, int it, int np, double *sz, double *p, double *u, double *x, double *z, double *su, double *sx){\n', condition.fkt);
-if(config.useSensis)
-    if(~isempty(model.zs))
+if(~isempty(model.zs))
+    if(config.useSensis)
         fprintf(fid, '  int jp;\n');
         fprintf(fid, '  for (jp=0; jp<np; jp++) {\n');
         writeCcode(fid, matlab_version, condition, 'fsz1');
@@ -1741,8 +1741,8 @@ fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write dfzdx
 fprintf(fid, ' void dfzdx_%s(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *dfzdxs, double *z, double *p, double *u, double *x){\n', condition.fkt);
-if(config.useSensis)
-    if(~isempty(model.zs))
+if(~isempty(model.zs))
+    if(config.useSensis)
         writeCcode(fid, matlab_version, condition, 'dfzdx');        
         fprintf(fid, '\n');        
     end
