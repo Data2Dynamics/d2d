@@ -55,7 +55,7 @@ function ar = arAddEvent( varargin )
         c = 1 : length( ar.model(m).condition );
     end
 
-    nStates = numel( ar.model.x );
+    nStates = numel( ar.model(m).x );
     nPars   = numel( ar.model(m).condition(c).p );    
     
     if ( length( varargin ) > 3 )

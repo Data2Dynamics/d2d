@@ -167,15 +167,15 @@ function arSteadyState( varargin )
     
     % Copy over any missing condition fields that were introduced after this
     % functionality was set up.
-    ss_condition = compareFields(cSS, ss_condition, knownCopies, ignoreFields);    
+    ss_condition = compareFields(m, cSS, ss_condition, knownCopies, ignoreFields);    
     
     if ( isfield( ar.model(m), 'ss_condition' ) )
-        ar.model.ss_condition(end+1) = ss_condition;
+        ar.model(m).ss_condition(end+1) = ss_condition;
     else
-        ar.model.ss_condition = ss_condition;
+        ar.model(m).ss_condition = ss_condition;
     end
        
-    insertionPoint = length(ar.model.ss_condition);
+    insertionPoint = length(ar.model(m).ss_condition);
     
     arWaitbar(0);
     % Link up the target conditions
@@ -233,13 +233,13 @@ end
 % Copy fields from condition into steady state equilibration condition
 % Knowncopies contains a list of known fields that should be copied, while
 % ignoreFields specifies the list of fields to explicitly ignore.
-function in = compareFields(cID,in,knownCopies,ignoreFields)
+function in = compareFields(m,cID,in,knownCopies,ignoreFields)
 
     global ar;
     global arOutputLevel; %#ok
     global arStrict;
     
-    names = fieldnames(ar.model.condition(cID));
+    names = fieldnames(ar.model(m).condition(cID));
     for jf = 1 : length( names )
         if ~isfield( in, names{jf} )
             if ( max( ismember(ignoreFields, names{jf} ) ) == 0 )
@@ -255,7 +255,7 @@ function in = compareFields(cID,in,knownCopies,ignoreFields)
                     end
                     arFprintf( 3, 'Warning: Blind copy of unknown field: %s\n', names{jf} );
                 end
-                in.(names{jf}) = ar.model.condition(cID).(names{jf});
+                in.(names{jf}) = ar.model(m).condition(cID).(names{jf});
             end
         end
     end
