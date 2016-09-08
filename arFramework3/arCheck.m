@@ -133,8 +133,6 @@ if(exist([ar_path '/sundials-2.6.1'],'dir') == 0)
 end
 
 % write sundials_config.h
-% if(exist([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'],'file') == 0)
-%     fid = fopen([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'], 'W');
 if(exist([ar_path '/sundials-2.6.1/include/sundials/sundials_config.h'],'file') == 0)
     fid = fopen([ar_path '/sundials-2.6.1/include/sundials/sundials_config.h'], 'W');
     if(fid==-1)
