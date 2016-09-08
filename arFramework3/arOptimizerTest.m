@@ -1,3 +1,6 @@
+% This function tries optimization step caluclation strategies using
+% several submethods of arNLSstep 
+% 
 function arOptimizerTest(range, submethod, N)
 
 if(~exist('range','var'))
