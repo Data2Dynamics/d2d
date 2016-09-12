@@ -407,6 +407,9 @@ for jm = 1:nm
                                 ar.model(jm).condition(jc).pNum(ar.model(jm).condition(jc).qLog10 == 1) * log(10));
                         else
                             dxdp = squeeze(ar.model(jm).condition(jc).sxFineSimu(1,qss,:));
+                            if(iscolumn(dxdp)) % transpose dxdp if squeeze returns column vector (sum(qss)==1)
+                                dxdp = dxdp';
+                            end
                         end
                         ddxdtdp = ar.model(jm).condition(jc).ddxdtdp(qss,:);
                         ddxdtdp(:,ar.model(jm).condition(jc).qLog10 == 1) = bsxfun(@times, ... % log trafo

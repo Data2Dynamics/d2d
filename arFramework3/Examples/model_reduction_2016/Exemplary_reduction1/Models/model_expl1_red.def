@@ -1,0 +1,29 @@
+DESCRIPTION
+"2 step model"
+
+PREDICTOR
+t	T	"min"	"time"	0	60
+
+COMPARTMENTS
+cyt	V	"pl"	"vol."	1
+
+STATES
+X_state	C	"nM"	"conc."	cyt	1
+ppX_state	C	"nM"	"conc."	cyt	1
+
+INPUTS
+
+REACTIONS
+X_state	->	ppX_state	CUSTOM "k_1 * X_state"
+
+DERIVED
+        
+OBSERVABLES
+ppX_abs	C	"nM"	"conc."	0	0	"ppX_state"
+        
+ERRORS
+ppX_abs    "0.1"
+
+CONDITIONS
+init_X_state  "1"
+init_ppX_state  "0"
