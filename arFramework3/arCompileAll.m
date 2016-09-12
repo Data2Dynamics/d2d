@@ -615,16 +615,16 @@ if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
     
     ar.model(m).qdvdu_negative = double(tmpsym) < 0;
     
-    tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
-    ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
-    
     if(length(ar.model(m).x) * log(length(ar.model(m).x)) > ar.model(m).nnz)
         ar.config.useSparseJac = 1;
     end
 else
     arFprintf(2, 'Model m%i too large (%i variables, %i parameters)... skipping check of model structure\n', m, length(ar.model(m).sym.x), length(ar.model(m).p));
+    ar.config.useSparseJac = 1;
 end
 
+tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
+ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
 
 
 % Calc Condition
