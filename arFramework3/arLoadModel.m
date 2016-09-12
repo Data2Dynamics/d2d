@@ -694,6 +694,9 @@ if(strcmp(C{1},'OBSERVABLES'))
         arValidateInput( C, 'error', 'observable identifier', 'expression for the error model' );
         ar.model(m).fystd(qy) = C{2};
         C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        if ( isempty( C{1} ) )
+            error( 'Missing field CONDITIONS' );
+        end
     end
     
     if (length(ar.model(m).fystd)<length(ar.model(m).fy) || sum(cellfun(@isempty, ar.model(m).fystd))>0)
