@@ -6,13 +6,13 @@
 % varargin  names of the expected function arguments
 function arValidateInput( C, stage, varargin )
     for a = 1 : length(varargin)
+        if ( iscell(C{a}) )
+            C{a} = C{a}{1};
+        end 
         if ( isempty( C{a} ) )
             format = getFormat(varargin);
             error( 'Missing %s in %s specification. Correct format is: %s.', varargin{a}, upper(stage), format );
-        end
-        if ( iscell(C{a}) )
-            C{a} = C{a}{1};
-        end        
+        end       
         if ( isnan( C{a} ) )
             format = getFormat(varargin);
             error( 'Missing numeric %s parameter in %s specification. Correct format is: %s.', varargin{a}, upper(stage), format );
