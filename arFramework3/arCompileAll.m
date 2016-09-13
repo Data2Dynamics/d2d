@@ -2330,7 +2330,17 @@ function s = mySym( s, specialFunc )
                 s{a,b} = replaceFunctions( s{a,b}, specialFunc, 1 );
             end
         end
-        s = sym(s);
+        tmps = sym(s);
+        if(length(tmps)~=length(s))
+            tmps = sym(zeros(length(s),1));
+            for js=1:length(s)
+                tmp = sym(s(js));
+                if(~isempty(tmp))
+                    tmps(js) = tmp;
+                end
+            end
+        end
+        s = tmps;
     end
     
 % convert sym array to string array
