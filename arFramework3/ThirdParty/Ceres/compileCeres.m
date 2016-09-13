@@ -88,10 +88,11 @@ function compileCeres ()
     excludelist{end+1} = 'bundle_adjustment_test';
     excludelist{end+1} = 'polynomial_test';
     excludelist{end+1} = 'rotation_test';
+    excludelist{end+1} = 'examples';
     
     ex = ones(length(fileListCeres),1);
     
-    for i = 1:12
+    for i = 1:length(excludelist)
         temp    = strfind(fileListCeres, excludelist{i});
         ptemp   = isnan(cellfun(@mean,temp));
         
