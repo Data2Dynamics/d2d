@@ -48,7 +48,7 @@ if ar.config.restartLHS ==1 && isempty(randomseed)
     while ~isempty(indnan) && counter<10
         counter = counter+1;
     
-        fprintf('Repeat function evaluations %i\n', indnan); 
+        fprintf('Repeat function evaluation %i\n', indnan); 
         
         % get new parameters
         ps = arRandomPars(n, randomseed);
@@ -84,12 +84,9 @@ if ar.config.restartLHS ==1 && isempty(randomseed)
         
         indnan = find(isnan(ar.chi2s));
     end
-    ps = ar.ps;
-
-    if(~use_cluster)
-        arChi2s(ps, sensis, silent);
-    else
-        arChi2sCluster(ps, sensis, silent);
+    
+    if(~silent)
+        arPlotChi2s
     end
 else
     if(sum(isnan(ar.chi2s))>0)
