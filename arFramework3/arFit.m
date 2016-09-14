@@ -21,9 +21,12 @@
 %       6 - fmincon
 %       7 - arNLS with SR1 updates
 %       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL—An Adaptive Nonlinear Least-Squares)
-%		9 - TRESNEI (B.Morini, M.Porcelli "TRESNEI, a Matlab trust-region solver for systems 
+%       9 - TRESNEI (B.Morini, M.Porcelli "TRESNEI, a Matlab trust-region solver for systems 
 %       of nonlinear equalities and inequalities")
-%	   10 - Ceres (Sameer Agarwal and Keir Mierle and Others, Google Solver)
+%      10 - Ceres (Sameer Agarwal and Keir Mierle and Others, Google Solver)
+%      11 - repeated runs of fmincon until convergence
+%      12 - fminsearch
+%      13 - particleswarm
 %
 
 function varargout = arFit(varargin)
@@ -246,6 +249,25 @@ elseif(ar.config.optimizer == 11)
         [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
             lsqnonlin(@merit_fkt, pFit, lb, ub, ar.config.optim);
     end
+    
+% fminsearch w/o derivatives
+elseif(ar.config.optimizer == 12)
+    [pFit, ~, exitflag, output] = ...
+        fminsearch(@merit_fkt_chi2, ar.p(ar.qFit==1), ar.config.optim);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];
+    
+% particleswarm
+elseif(ar.config.optimizer == 13)
+    options = optimoptions('particleswarm','FunValCheck','on');
+    options.Display = ar.config.optim.Display;
+    options.MaxIterations = ar.config.optim.MaxIter;
+    [pFit, ~, exitflag, output] = ...
+        particleswarm(@merit_fkt_chi2, length(ar.p(ar.qFit==1)), lb, ub, options);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];
 else
     error('ar.config.optimizer invalid');    
 end
@@ -461,6 +483,23 @@ if(ar.config.useSensis)
     sres = ar.sres(:, ar.qFit==1);
     if(~isempty(ar.sconstr))
         sres = [sres; ar.sconstr(:, ar.qFit==1)];
+    end
+end
+
+% fminsearch and particleswarm
+function chi2 = merit_fkt_chi2(pTrial)
+global ar
+
+try
+    arChi2(false, pTrial);
+    arLogFit(ar);
+    chi2 = sum([ar.res ar.constr].^2);
+catch err
+    if(ar.config.optimizer == 13)
+        % workaround for particleswarm
+        chi2 = 1e23;
+    else
+        rethrow(err);
     end
 end
 
