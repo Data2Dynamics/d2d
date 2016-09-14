@@ -123,44 +123,46 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
         end
     end
     for jt=1:length(t)
-        if(~takeY)
-            cur_t = find(ar.model(m).condition(c).ppl.tstart(:,ix(jx))==t(jt));
-        elseif(takeY)
-            cur_t = find(ar.model(m).data(c).ppl.tstart(:,ix(jx))==t(jt));
-        end
-        if(isempty(cur_t))
+        for jx=1:length(ix)
             if(~takeY)
-                ar.model(m).condition(c).ppl.tstart = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.tstart];
-                ar.model(m).condition(c).ppl.tstart(1,ix(jx)) = t(jt);
-                ar.model(m).condition(c).ppl.xtrial = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1); ar.model(m).condition(c).ppl.xtrial];
-                ar.model(m).condition(c).ppl.xfit = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1); ar.model(m).condition(c).ppl.xfit];
-                ar.model(m).condition(c).ppl.vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1); ar.model(m).condition(c).ppl.vpl ];
-                ar.model(m).condition(c).ppl.ppl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1); ar.model(m).condition(c).ppl.ppl ];
-                ar.model(m).condition(c).ppl.ps = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1, length(ar.p)); ar.model(m).condition(c).ppl.ps];
-                ar.model(m).condition(c).ppl.lb_fit = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.lb_fit];
-                ar.model(m).condition(c).ppl.ub_fit = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.ub_fit];
-                ar.model(m).condition(c).ppl.lb_fit_vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.lb_fit_vpl];
-                ar.model(m).condition(c).ppl.ub_fit_vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.ub_fit_vpl];
-                ar.model(m).condition(c).ppl.kind_high = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.kind_high];
-                ar.model(m).condition(c).ppl.kind_low = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.kind_low];
-                ar.model(m).condition(c).ppl.kind_high_vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.kind_high_vpl];
-                ar.model(m).condition(c).ppl.kind_low_vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.kind_low_vpl];          
-            else
-                ar.model(m).data(c).ppl.tstart = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.tstart];
-                ar.model(m).data(c).ppl.tstart(1,ix(jx)) = t(jt);
-                ar.model(m).data(c).ppl.xtrial = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1); ar.model(m).data(c).ppl.xtrial];
-                ar.model(m).data(c).ppl.xfit = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1); ar.model(m).data(c).ppl.xfit];
-                ar.model(m).data(c).ppl.vpl = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1); ar.model(m).data(c).ppl.vpl ];
-                ar.model(m).data(c).ppl.ppl = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1); ar.model(m).data(c).ppl.ppl ];
-                ar.model(m).data(c).ppl.ps = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1, length(ar.p)); ar.model(m).data(c).ppl.ps];
-                ar.model(m).data(c).ppl.lb_fit = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.lb_fit];
-                ar.model(m).data(c).ppl.ub_fit = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.ub_fit];
-                ar.model(m).data(c).ppl.lb_fit_vpl = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.lb_fit_vpl];
-                ar.model(m).data(c).ppl.ub_fit_vpl = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.ub_fit_vpl];
-                ar.model(m).data(c).ppl.kind_high = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.kind_high];
-                ar.model(m).data(c).ppl.kind_low = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.kind_low];
-                ar.model(m).data(c).ppl.kind_high_vpl = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.kind_high_vpl];
-                ar.model(m).data(c).ppl.kind_low_vpl = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.kind_low_vpl];
+                cur_t = find(ar.model(m).condition(c).ppl.tstart(:,ix(jx))==t(jt));
+            elseif(takeY)
+                cur_t = find(ar.model(m).data(c).ppl.tstart(:,ix(jx))==t(jt));
+            end
+            if(isempty(cur_t))
+                if(~takeY)
+                    ar.model(m).condition(c).ppl.tstart = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.tstart];
+                    ar.model(m).condition(c).ppl.tstart(1,ix(jx)) = t(jt);
+                    ar.model(m).condition(c).ppl.xtrial = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1); ar.model(m).condition(c).ppl.xtrial];
+                    ar.model(m).condition(c).ppl.xfit = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1); ar.model(m).condition(c).ppl.xfit];
+                    ar.model(m).condition(c).ppl.vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1); ar.model(m).condition(c).ppl.vpl ];
+                    ar.model(m).condition(c).ppl.ppl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1); ar.model(m).condition(c).ppl.ppl ];
+                    ar.model(m).condition(c).ppl.ps = [nan(1, size(ar.model(m).condition(c).xExpSimu,2), 2*n+1, length(ar.p)); ar.model(m).condition(c).ppl.ps];
+                    ar.model(m).condition(c).ppl.lb_fit = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.lb_fit];
+                    ar.model(m).condition(c).ppl.ub_fit = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.ub_fit];
+                    ar.model(m).condition(c).ppl.lb_fit_vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.lb_fit_vpl];
+                    ar.model(m).condition(c).ppl.ub_fit_vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.ub_fit_vpl];
+                    ar.model(m).condition(c).ppl.kind_high = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.kind_high];
+                    ar.model(m).condition(c).ppl.kind_low = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.kind_low];
+                    ar.model(m).condition(c).ppl.kind_high_vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.kind_high_vpl];
+                    ar.model(m).condition(c).ppl.kind_low_vpl = [nan(1, size(ar.model(m).condition(c).xExpSimu,2)); ar.model(m).condition(c).ppl.kind_low_vpl];          
+                else
+                    ar.model(m).data(c).ppl.tstart = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.tstart];
+                    ar.model(m).data(c).ppl.tstart(1,ix(jx)) = t(jt);
+                    ar.model(m).data(c).ppl.xtrial = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1); ar.model(m).data(c).ppl.xtrial];
+                    ar.model(m).data(c).ppl.xfit = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1); ar.model(m).data(c).ppl.xfit];
+                    ar.model(m).data(c).ppl.vpl = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1); ar.model(m).data(c).ppl.vpl ];
+                    ar.model(m).data(c).ppl.ppl = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1); ar.model(m).data(c).ppl.ppl ];
+                    ar.model(m).data(c).ppl.ps = [nan(1, size(ar.model(m).data(c).yExpSimu,2), 2*n+1, length(ar.p)); ar.model(m).data(c).ppl.ps];
+                    ar.model(m).data(c).ppl.lb_fit = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.lb_fit];
+                    ar.model(m).data(c).ppl.ub_fit = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.ub_fit];
+                    ar.model(m).data(c).ppl.lb_fit_vpl = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.lb_fit_vpl];
+                    ar.model(m).data(c).ppl.ub_fit_vpl = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.ub_fit_vpl];
+                    ar.model(m).data(c).ppl.kind_high = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.kind_high];
+                    ar.model(m).data(c).ppl.kind_low = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.kind_low];
+                    ar.model(m).data(c).ppl.kind_high_vpl = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.kind_high_vpl];
+                    ar.model(m).data(c).ppl.kind_low_vpl = [nan(1, size(ar.model(m).data(c).yExpSimu,2)); ar.model(m).data(c).ppl.kind_low_vpl];
+                end
             end
         end
     end
