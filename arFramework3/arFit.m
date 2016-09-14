@@ -101,13 +101,16 @@ end
 
 fit = struct([]);
 fit(1).iter_count = 0;
-fit.chi2_hist = nan(1,ar.config.optim.MaxIter);
-fit.constr_hist = nan(1,ar.config.optim.MaxIter);
-fit.opti_hist = nan(1,ar.config.optim.MaxIter);
-fit.p_hist = nan(ar.config.optim.MaxIter,length(ar.p));
-fit.maxstepsize_hist = nan(1,ar.config.optim.MaxIter);
-fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
 fit.fevals = 0;
+
+if(ar.config.logFitting)
+    fit.chi2_hist = nan(1,ar.config.optim.MaxIter);
+    fit.constr_hist = nan(1,ar.config.optim.MaxIter);
+    fit.opti_hist = nan(1,ar.config.optim.MaxIter);
+    fit.p_hist = nan(ar.config.optim.MaxIter,length(ar.p));
+    fit.maxstepsize_hist = nan(1,ar.config.optim.MaxIter);
+    fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
+end
 
 ar = arChi2(ar, true, ar.p(ar.qFit==1));
 chi2_old = ar.chi2fit;
@@ -260,9 +263,19 @@ elseif(ar.config.optimizer == 12)
     
 % particleswarm
 elseif(ar.config.optimizer == 13)
+    matVer = ver('MATLAB');
     options = optimoptions('particleswarm','FunValCheck','on');
-    options.Display = ar.config.optim.Display;
-    options.MaxIterations = ar.config.optim.MaxIter;
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    if(~isempty(ar.config.optim.UseParallel))
+        options.UseParallel = ar.config.optim.UseParallel;
+    end
+    if(str2double(matVer.Version)>=9)
+        options.MaxIterations = ar.config.optim.MaxIter;
+    elseif(~isempty(ar.config.optim.MaxIter))
+        options.MaxIter = ar.config.optim.MaxIter;
+    end
     [pFit, ~, exitflag, output] = ...
         particleswarm(@merit_fkt_chi2, length(ar.p(ar.qFit==1)), lb, ub, options);
     resnorm = merit_fkt(pFit);
@@ -494,13 +507,9 @@ try
     arChi2(false, pTrial);
     arLogFit(ar);
     chi2 = sum([ar.res ar.constr].^2);
-catch err
-    if(ar.config.optimizer == 13)
-        % workaround for particleswarm
-        chi2 = 1e23;
-    else
-        rethrow(err);
-    end
+catch
+    % workaround for particleswarm
+    chi2 = rand(1)*1e23;
 end
 
 % plot fitting
