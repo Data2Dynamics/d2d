@@ -172,22 +172,38 @@ elseif(ar.config.optimizer == 3)
    
 % STRSCNE
 elseif(ar.config.optimizer == 4)
+    
+    if(~isempty(ar.config.optim.Display))
+        silent = strcmp(ar.config.optim.Display,'iter')==0;
+    else
+        silent = 1;
+    end
+    if(~isempty(ar.config.optim.MaxIter))
+        maxiter = ar.config.optim.MaxIter;
+    else
+        maxiter = 1e3;
+    end
+    if(~isempty(ar.config.optim.MaxFunEvals))
+        maxfneval = ar.config.optim.MaxFunEvals;
+    else
+        maxfneval = 100*length(ar.p(ar.qFit==1));
+    end
+    delta = 1;
     warnreset = warning;
     warning('off','MATLAB:rankDeficientMatrix');
-    [pFit, exitflag, output, history] = ...
+    [pFit, exitflag, output] = ...
         STRSCNE(ar.p(ar.qFit==1), @merit_fkt_STRSCNE, [-Inf,0], ...
-        lb, ub, [1000,1000,1,1], @merit_dfkt_STRSCNE);
+        lb, ub, [maxiter,maxfneval,delta,~silent], @merit_dfkt_STRSCNE);
     warning(warnreset);
-    ar.p(ar.qFit==1) = pFit;
-    fit.exitflag = exitflag;
-    fit.output = output;
-    fit.history = history;
-    
-    ar = arChi2(ar, false, ar.p(ar.qFit==1));
-    arFprintf(1,'STRSCNE finished after %i iterations: code %i, total chi2 improvement = %g\n', ...
-        output(1), exitflag, chi2_old - ar.chi2fit);
-    
-    return;
+    resnorm = merit_fkt(pFit);
+    jac = merit_dfkt_STRSCNE(pFit);
+    lambda = [];
+    % convert to lsqnonlin exitflag
+    if(exitflag==1 || exitflag == 2)
+        exitflag = 0;
+    else
+        exitflag = NaN;
+    end
 
 % arNLS
 elseif(ar.config.optimizer == 5)
@@ -490,9 +506,10 @@ arLogFit(ar);
 res = [ar.res ar.constr]';
 
 % derivatives for STRSCNE
-function sres = merit_dfkt_STRSCNE(~)
+function sres = merit_dfkt_STRSCNE(pTrial)
 global ar
 if(ar.config.useSensis)
+    arChi2(ar.config.useSensis, pTrial);
     sres = ar.sres(:, ar.qFit==1);
     if(~isempty(ar.sconstr))
         sres = [sres; ar.sconstr(:, ar.qFit==1)];
