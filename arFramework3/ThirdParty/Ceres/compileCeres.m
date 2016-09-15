@@ -67,6 +67,9 @@ function compileCeres ()
     loc     = strfind( fliplr(cpath), slash);
     cpath   = cpath(1:end-loc+1);
     
+    % copy customized confih.h to ceres-solver/include/ceres/internal/
+    copyfile([cpath slash 'config.h'],[cpath slash 'ceres-solver' slash 'include' slash 'ceres' slash 'internal' slash],'f');
+    
 %% %%%%%%%%%%%%%%%%%%%%  CERES FILE LIST OF CC FILES %%%%%%%%%%%%%%%%%%%%%
     
     fileListCeres    = getAllFiles(strcat(sprintf('%s',cpath),[slash 'ceres-solver']));
