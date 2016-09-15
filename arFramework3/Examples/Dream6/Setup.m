@@ -1,4 +1,3 @@
-clear all
 %% loading model and a wild-type data-set where everything is observed
 disp('arInit')
 arInit;
