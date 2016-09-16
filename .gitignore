@@ -161,3 +161,8 @@ arFramework3/Examples/Washing_and_Injection_Test/SBML/
 arFramework3/Examples/Washing_and_Injection_Test/arSimuCalc*
 arFramework3/Examples/Washing_and_Injection_Test/arCheckParallel*
 
+arFramework3/Examples/model_reduction_2016/Compiled/
+arFramework3/Examples/model_reduction_2016/SBML/
+arFramework3/Examples/model_reduction_2016/arSimuCalc*
+arFramework3/Examples/model_reduction_2016/arCheckParallel*
+
