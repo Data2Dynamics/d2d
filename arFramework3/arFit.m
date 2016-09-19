@@ -27,6 +27,8 @@
 %      11 - repeated runs of fmincon until convergence
 %      12 - fminsearch
 %      13 - particleswarm
+%      14 - simulated annealing
+%      15 - patternsearch
 %
 
 function varargout = arFit(varargin)
@@ -269,34 +271,50 @@ elseif(ar.config.optimizer == 11)
             lsqnonlin(@merit_fkt, pFit, lb, ub, ar.config.optim);
     end
     
-% fminsearch w/o derivatives
+% fminsearch
 elseif(ar.config.optimizer == 12)
     [pFit, ~, exitflag, output] = ...
-        fminsearch(@merit_fkt_chi2, ar.p(ar.qFit==1), ar.config.optim);
+        fminsearch(@merit_fkt_chi2, ar.p(ar.qFit==1)); % ar.config.optim
     resnorm = merit_fkt(pFit);
     lambda = [];
     jac = [];
     
 % particleswarm
 elseif(ar.config.optimizer == 13)
-    matVer = ver('MATLAB');
-    options = optimoptions('particleswarm','FunValCheck','on');
+    options = optimoptions('particleswarm');
     if(~isempty(ar.config.optim.Display))
         options.Display = ar.config.optim.Display;
-    end
-    if(~isempty(ar.config.optim.UseParallel))
-        options.UseParallel = ar.config.optim.UseParallel;
-    end
-    if(str2double(matVer.Version)>=9)
-        options.MaxIterations = ar.config.optim.MaxIter;
-    elseif(~isempty(ar.config.optim.MaxIter))
-        options.MaxIter = ar.config.optim.MaxIter;
     end
     [pFit, ~, exitflag, output] = ...
         particleswarm(@merit_fkt_chi2, length(ar.p(ar.qFit==1)), lb, ub, options);
     resnorm = merit_fkt(pFit);
     lambda = [];
     jac = [];
+    
+% simulated annealing
+elseif(ar.config.optimizer == 14)
+    options = saoptimset('simulannealbnd');
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    [pFit, ~, exitflag, output] = ...
+        simulannealbnd(@merit_fkt_chi2, ar.p(ar.qFit==1), lb, ub, options);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];
+    
+% patternsearch    
+elseif(ar.config.optimizer == 15)
+    options = psoptimset;
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    [pFit, ~, exitflag, output] = ...
+        patternsearch(@merit_fkt_chi2, ar.p(ar.qFit==1), [], [], [], [], lb, ub, [], options);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];
+    
 else
     error('ar.config.optimizer invalid');    
 end
@@ -342,7 +360,6 @@ if(nargout>0 && ~qglobalar)
 else
     varargout = {};
 end
-
 
 
 % lsqnonlin and arNLS
@@ -516,7 +533,7 @@ if(ar.config.useSensis)
     end
 end
 
-% fminsearch and particleswarm
+% fminsearch, particleswarm, simulannealbnd, patternsearch
 function chi2 = merit_fkt_chi2(pTrial)
 global ar
 
