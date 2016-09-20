@@ -29,6 +29,7 @@
 %      13 - particleswarm
 %      14 - simulated annealing
 %      15 - patternsearch
+%      16 - ga (genetic algorithm)
 %
 
 function varargout = arFit(varargin)
@@ -274,7 +275,7 @@ elseif(ar.config.optimizer == 11)
 % fminsearch
 elseif(ar.config.optimizer == 12)
     [pFit, ~, exitflag, output] = ...
-        fminsearch(@merit_fkt_chi2, ar.p(ar.qFit==1)); % ar.config.optim
+        fminsearch(@merit_fkt_chi2, ar.p(ar.qFit==1), ar.config.optim);
     resnorm = merit_fkt(pFit);
     lambda = [];
     jac = [];
@@ -314,6 +315,19 @@ elseif(ar.config.optimizer == 15)
     resnorm = merit_fkt(pFit);
     lambda = [];
     jac = [];
+    
+% ga
+elseif(ar.config.optimizer == 16)
+    options = gaoptimset;
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    [pFit, ~, exitflag, output] = ...
+        ga(@merit_fkt_chi2, sum(ar.qFit==1), [], [], [], [], lb, ub, [], options);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];
+    output.iterations = output.generations;
     
 else
     error('ar.config.optimizer invalid');    
@@ -583,7 +597,7 @@ end
 fit.iter_count = fit.iter_count + 1;
 
 
-function stop = arLogFitDetailed(x,optimValues,state)
+function stop = arLogFitDetailed(~,optimValues,state)
 stop = false;
 global ar
 
