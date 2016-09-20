@@ -60,7 +60,7 @@ function arExport(directory, models)
         copyfile( mx(a).name, directory );
     end
     
-    setupFile = sprintf('%% D2D Model Package\n%%   Model author: %s.\n%%   More information: http://bitbucket.org/d2d-development/d2d-software/wiki/Home\n\n%% Initialize D2D framework\n%% Add extra paths\n%s\narInit;\n', ar.config.username, subPaths );
+    setupFile = sprintf('%% D2D Model Package\n%%   Model author: %s.\n%%   More information: http://data2dynamics.org\n\n%% Initialize D2D framework\n%% Add extra paths\n%s\narInit;\n', ar.config.username, subPaths );
     h = waitbar(0);
     for m = 1 : length( models )
         data = {};

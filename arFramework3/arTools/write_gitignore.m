@@ -17,6 +17,7 @@ lines = {'# This file has been generated using arFramework3/arTools/write_gitign
     'arFramework3/sundials-2.5.0/'
     'arFramework3/sundials-2.6.1/'
     'arFramework3/KLU-1.2.1/'
+    'arFramework3/ThirdParty/Ceres/ceresd2d.mex*'
     '.DS_Store'
     ''
     '*.dat'
