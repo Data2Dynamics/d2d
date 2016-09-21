@@ -59,8 +59,8 @@ descriptions = {    { 'Plotting all Ys', '' }, ...
                     };
 
 if( (nargin > 0) && max( strcmpi( varargin{1}, switches ) ) == 0 )
-    project_name = varargin{1}{1};
-    varargin{1:end-1} = varargin{2:end};
+    project_name = varargin{1};
+    varargin = varargin{2:end};
 else
     project_name = 'Data 2 Dynamics Software -- Modeling Report';
 end
@@ -106,9 +106,9 @@ ar.config.matlabVersion = str2double(matVer.Version);
 
 savePath = [arSave '/Latex'];
 
-if ~isempty( opts.figures )
-    for a = 1 : length( opts.figures )
-        copyfile( [opts.figures{a} '/*.pdf'], [savePath '/' opts.figures{a} '/'] );
+if opts.figures
+    for a = 1 : length( opts.figures_args )
+        copyfile( [opts.figures_args{a} '/*.pdf'], [savePath '/' opts.figures_args{a} '/'] );
     end
 end
 
@@ -135,10 +135,10 @@ if (isfield(ar, 'additionalBib'))
     end
 end
 
-if ~isempty( opts.bibs )
+if ~opts.bibs
     fid = fopen( [savePath '/lib.bib'], 'a' );
-	for a = 1 : length( opts.bibs )
-        txt = strrep(strrep(fileread(opts.bibs{a}), '\', '\\'), '%', '%%');
+	for a = 1 : length( opts.bibs_args )
+        txt = strrep(strrep(fileread(opts.bibs_args{a}), '\', '\\'), '%', '%%');
         fprintf( fid, txt );
 	end
     fclose(fid);
@@ -650,7 +650,7 @@ for jm=1:length(ar.model)
     count = 1;
     for dp=1:length(dynPars)   
         j = dynPars(dp);
-        if ( ~masktest( ar.pLabel{j}, opts.excludedynpars ) )
+        if ( ~masktest( ar.pLabel{j}, opts.excludedynpars_args ) )
             count = count + 1;
             if(ar.qFit(j)==1)
                 if(ar.p(j) - ar.lb(j) < 0.1 || ar.ub(j) - ar.p(j) < 0.1)
@@ -691,9 +691,9 @@ for jm=1:length(ar.model)
     end
     
     %% Additional description via args
-    if ~isempty( opts.texpages )
-        for a = 1 : length( opts.texpages )
-            lp(fid, strrep(strrep(fileread(opts.texpages{a}), '\', '\\'), '%', '%%'));
+    if opts.texpages
+        for a = 1 : length( opts.texpages_args )
+            lp(fid, strrep(strrep(fileread(opts.texpages_args{a}), '\', '\\'), '%', '%%'));
         end
     end  
     
@@ -1998,7 +1998,7 @@ function str = alternate(i)
     end
     
     
-function [opts] = argSwitch( switches, extraArgs, description, varargin )
+function [opts] = targSwitch( switches, extraArgs, description, varargin )
 
     for a = 1 : length(switches)
         if ( extraArgs(a) == 0 )
