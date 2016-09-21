@@ -25,10 +25,10 @@ License
 ////////////////////////// CHANGES IN CERES-SOLVER FOLDER ///////////////////////
 
 To enable compiling of the Ceres cc files without prior building on indivividual 
-systems the Ceres config file config.h had to be manually created and inserted in
-ceres-solver/include/ceres/internal/
+systems the Ceres config file 'config.h' had to be manually created and is automatically 
+copied to ceres-solver/include/ceres/internal/
 
-When updating Ceres to a newer version be aware that this process has to be done 
+When updating Ceres to a newer version be aware that the 'config.h' file has to be adapted 
 manually and possibly further compiling options have to be added, depending on 
 the operating system.
 

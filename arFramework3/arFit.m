@@ -21,9 +21,15 @@
 %       6 - fmincon
 %       7 - arNLS with SR1 updates
 %       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL—An Adaptive Nonlinear Least-Squares)
-%		9 - TRESNEI (B.Morini, M.Porcelli "TRESNEI, a Matlab trust-region solver for systems 
+%       9 - TRESNEI (B.Morini, M.Porcelli "TRESNEI, a Matlab trust-region solver for systems 
 %       of nonlinear equalities and inequalities")
-%	   10 - Ceres (Sameer Agarwal and Keir Mierle and Others, Google Solver)
+%      10 - Ceres (Sameer Agarwal and Keir Mierle and Others, Google Solver)
+%      11 - repeated runs of fmincon until convergence
+%      12 - fminsearch
+%      13 - particleswarm
+%      14 - simulated annealing
+%      15 - patternsearch
+%      16 - ga (genetic algorithm)
 %
 
 function varargout = arFit(varargin)
@@ -98,13 +104,16 @@ end
 
 fit = struct([]);
 fit(1).iter_count = 0;
-fit.chi2_hist = nan(1,ar.config.optim.MaxIter);
-fit.constr_hist = nan(1,ar.config.optim.MaxIter);
-fit.opti_hist = nan(1,ar.config.optim.MaxIter);
-fit.p_hist = nan(ar.config.optim.MaxIter,length(ar.p));
-fit.maxstepsize_hist = nan(1,ar.config.optim.MaxIter);
-fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
 fit.fevals = 0;
+
+if(ar.config.logFitting)
+    fit.chi2_hist = nan(1,ar.config.optim.MaxIter);
+    fit.constr_hist = nan(1,ar.config.optim.MaxIter);
+    fit.opti_hist = nan(1,ar.config.optim.MaxIter);
+    fit.p_hist = nan(ar.config.optim.MaxIter,length(ar.p));
+    fit.maxstepsize_hist = nan(1,ar.config.optim.MaxIter);
+    fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
+end
 
 ar = arChi2(ar, true, ar.p(ar.qFit==1));
 chi2_old = ar.chi2fit;
@@ -166,22 +175,38 @@ elseif(ar.config.optimizer == 3)
    
 % STRSCNE
 elseif(ar.config.optimizer == 4)
+    
+    if(~isempty(ar.config.optim.Display))
+        silent = strcmp(ar.config.optim.Display,'iter')==0;
+    else
+        silent = 1;
+    end
+    if(~isempty(ar.config.optim.MaxIter))
+        maxiter = ar.config.optim.MaxIter;
+    else
+        maxiter = 1e3;
+    end
+    if(~isempty(ar.config.optim.MaxFunEvals))
+        maxfneval = ar.config.optim.MaxFunEvals;
+    else
+        maxfneval = 100*length(ar.p(ar.qFit==1));
+    end
+    delta = 1;
     warnreset = warning;
     warning('off','MATLAB:rankDeficientMatrix');
-    [pFit, exitflag, output, history] = ...
+    [pFit, exitflag, output] = ...
         STRSCNE(ar.p(ar.qFit==1), @merit_fkt_STRSCNE, [-Inf,0], ...
-        lb, ub, [1000,1000,1,1], @merit_dfkt_STRSCNE);
+        lb, ub, [maxiter,maxfneval,delta,~silent], @merit_dfkt_STRSCNE);
     warning(warnreset);
-    ar.p(ar.qFit==1) = pFit;
-    fit.exitflag = exitflag;
-    fit.output = output;
-    fit.history = history;
-    
-    ar = arChi2(ar, false, ar.p(ar.qFit==1));
-    arFprintf(1,'STRSCNE finished after %i iterations: code %i, total chi2 improvement = %g\n', ...
-        output(1), exitflag, chi2_old - ar.chi2fit);
-    
-    return;
+    resnorm = merit_fkt(pFit);
+    jac = merit_dfkt_STRSCNE(pFit);
+    lambda = [];
+    % convert to lsqnonlin exitflag
+    if(exitflag==1 || exitflag == 2)
+        exitflag = 0;
+    else
+        exitflag = NaN;
+    end
 
 % arNLS
 elseif(ar.config.optimizer == 5)
@@ -246,6 +271,64 @@ elseif(ar.config.optimizer == 11)
         [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
             lsqnonlin(@merit_fkt, pFit, lb, ub, ar.config.optim);
     end
+    
+% fminsearch
+elseif(ar.config.optimizer == 12)
+    [pFit, ~, exitflag, output] = ...
+        fminsearch(@merit_fkt_chi2, ar.p(ar.qFit==1), ar.config.optim);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];
+    
+% particleswarm
+elseif(ar.config.optimizer == 13)
+    options = optimoptions('particleswarm');
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    [pFit, ~, exitflag, output] = ...
+        particleswarm(@merit_fkt_chi2, length(ar.p(ar.qFit==1)), lb, ub, options);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];
+    
+% simulated annealing
+elseif(ar.config.optimizer == 14)
+    options = saoptimset('simulannealbnd');
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    [pFit, ~, exitflag, output] = ...
+        simulannealbnd(@merit_fkt_chi2, ar.p(ar.qFit==1), lb, ub, options);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];
+    
+% patternsearch    
+elseif(ar.config.optimizer == 15)
+    options = psoptimset;
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    [pFit, ~, exitflag, output] = ...
+        patternsearch(@merit_fkt_chi2, ar.p(ar.qFit==1), [], [], [], [], lb, ub, [], options);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];
+    
+% ga
+elseif(ar.config.optimizer == 16)
+    options = gaoptimset;
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    [pFit, ~, exitflag, output] = ...
+        ga(@merit_fkt_chi2, sum(ar.qFit==1), [], [], [], [], lb, ub, [], options);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];
+    output.iterations = output.generations;
+    
 else
     error('ar.config.optimizer invalid');    
 end
@@ -291,7 +374,6 @@ if(nargout>0 && ~qglobalar)
 else
     varargout = {};
 end
-
 
 
 % lsqnonlin and arNLS
@@ -455,13 +537,27 @@ arLogFit(ar);
 res = [ar.res ar.constr]';
 
 % derivatives for STRSCNE
-function sres = merit_dfkt_STRSCNE(~)
+function sres = merit_dfkt_STRSCNE(pTrial)
 global ar
 if(ar.config.useSensis)
+    arChi2(ar.config.useSensis, pTrial);
     sres = ar.sres(:, ar.qFit==1);
     if(~isempty(ar.sconstr))
         sres = [sres; ar.sconstr(:, ar.qFit==1)];
     end
+end
+
+% fminsearch, particleswarm, simulannealbnd, patternsearch
+function chi2 = merit_fkt_chi2(pTrial)
+global ar
+
+try
+    arChi2(false, pTrial);
+    arLogFit(ar);
+    chi2 = sum([ar.res ar.constr].^2);
+catch
+    % workaround for particleswarm
+    chi2 = rand(1)*1e23;
 end
 
 % plot fitting
@@ -501,7 +597,7 @@ end
 fit.iter_count = fit.iter_count + 1;
 
 
-function stop = arLogFitDetailed(x,optimValues,state)
+function stop = arLogFitDetailed(~,optimValues,state)
 stop = false;
 global ar
 

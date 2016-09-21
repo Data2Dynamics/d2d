@@ -7,6 +7,7 @@ arFramework3/sundials-2.4.0/
 arFramework3/sundials-2.5.0/
 arFramework3/sundials-2.6.1/
 arFramework3/KLU-1.2.1/
+arFramework3/ThirdParty/Ceres/ceresd2d.mex*
 .DS_Store
 
 *.dat
@@ -160,4 +161,9 @@ arFramework3/Examples/Washing_and_Injection_Test/Compiled/
 arFramework3/Examples/Washing_and_Injection_Test/SBML/
 arFramework3/Examples/Washing_and_Injection_Test/arSimuCalc*
 arFramework3/Examples/Washing_and_Injection_Test/arCheckParallel*
+
+arFramework3/Examples/model_reduction_2016/Compiled/
+arFramework3/Examples/model_reduction_2016/SBML/
+arFramework3/Examples/model_reduction_2016/arSimuCalc*
+arFramework3/Examples/model_reduction_2016/arCheckParallel*
 

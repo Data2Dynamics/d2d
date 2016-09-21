@@ -232,8 +232,8 @@ lp(fid, '\\newcolumntype{K}{>{\\centering\\arraybackslash}X}');
 
 %% Header
 % lp(fid, ['\\title{Data-2-Dynamics Software' ...
-%     '\\footnote{Website: \\href{https://bitbucket.org/d2d-development/d2d-software}' ...
-%     '{\\url{https://bitbucket.org/d2d-development/d2d-software}} \\\\ ', ...
+%     '\\footnote{Website: \\href{http://data2dynamics.org}' ...
+%     '{\\url{http://data2dynamics.org}} \\\\ ', ...
 %     'Reference: \\citet{Raue:2012zt}}'...
 %     ' \\\\ Modeling Report}']);
 
@@ -287,7 +287,7 @@ for jm=1:length(ar.model)
     lp(fid, '\\subsection{Model description}');
     lp(fid, 'The model used in this study is based on a system of Ordinary Differential Equations (ODE). These ordinary differential equations are derived by means of the law of mass-action. ' );
     lp(fid, 'The time evolution of the biochemical compounds is computed by numerically integrating these differential equations. The model contains parameters which are estimated by calibrating the model to data using a Maximum-Likelihood estimation approach. %s', eqText );
-    lp(fid, 'All analyses were performed using the \\emph{Data 2 Dynamics} software package \\cite{raue2015data2dynamics}, which is available from \\href{https://bitbucket.org/d2d-development/d2d-software}{\\url{https://bitbucket.org/d2d-development/d2d-software}}. ');
+    lp(fid, 'All analyses were performed using the \\emph{Data 2 Dynamics} software package \\cite{raue2015data2dynamics}, which is available from \\href{http://data2dynamics.org}{\\url{http://data2dynamics.org}}. ');
     if ( length( ar.model(jm).c ) > 1 )
         lp( fid, 'The model considers multiple compartments (see Table \\ref{compartments}), which are taken into account by considering the relevant compartment volumes in the flux expressions. ' );
     end

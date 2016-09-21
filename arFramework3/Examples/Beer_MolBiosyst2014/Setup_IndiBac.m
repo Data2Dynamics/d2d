@@ -1,4 +1,4 @@
-close all; clear all; clc;
+close all; clc;
 
 % initialize model
 arInit
