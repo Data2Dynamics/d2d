@@ -1,0 +1,31 @@
+DESCRIPTION
+"Simple pulse test"
+
+PREDICTOR
+t               T   min         time	0	200
+
+COMPARTMENTS
+cyt             V   pl          vol.    1
+
+STATES
+junk            C   nmol/l      conc.   cyt     1
+
+INPUTS
+sm1             C   nmol/l      conc.   "smooth1(t, t1, t2)"
+sm2             C   nmol/l      conc.   "smooth2(t, t1, t2)"
+
+REACTIONS
+                ->  junk      CUSTOM	"0"
+
+DERIVED
+
+OBSERVABLES
+smooth1           C  au   conc.   0  0    "sm1"
+smooth2           C  au   conc.   0  0    "sm2"
+                
+ERRORS
+smooth1           "1.0"
+smooth2           "1.0"
+
+CONDITIONS
+init_junk     "0"
