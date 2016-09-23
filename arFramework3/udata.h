@@ -40,25 +40,29 @@ typedef struct {
 
 /* Global memory structure */
 typedef struct {
-	/* ODE integration via CVODES */
-	N_Vector x;
-	N_Vector atolV;
-	N_Vector *atolV_ss;
-	N_Vector atols_ss;
-	N_Vector *sx;
-	EventData event_data;
-	void *cvode_mem;
-	UserData data;
+    /* State vector */
+    N_Vector    x;
     
-    int sensi;
-    int neq;
-    int np;
-    int *threadStatus;
-    double *status;
-
+	/* ODE integration via CVODES */
+	N_Vector    atolV;
+	N_Vector    *atolV_ss;
+	N_Vector    atols_ss;
+	N_Vector    *sx;
+	EventData   event_data;
+	void        *cvode_mem;
+	UserData    data;
+    
+    int         sensi;
+    int         neq;
+    int         np;
+    
 	/* SSA integration */
-	N_Vector x_lb;
-	N_Vector x_ub;
+	N_Vector    x_lb;
+	N_Vector    x_ub;    
+    
+    /* Logging purposes */
+    int         *threadStatus;
+    double      *status;
 } *SimMemory;       
 
 /* Functions defined in udata.h */

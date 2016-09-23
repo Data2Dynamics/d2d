@@ -65,4 +65,6 @@ void simFree( SimMemory sim_mem )
 		N_VDestroy_Serial(sim_mem->x_lb);
 	if ( sim_mem->x_ub )
 		N_VDestroy_Serial(sim_mem->x_ub);
+    
+    free( sim_mem );
 }
