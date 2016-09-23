@@ -1,3 +1,5 @@
+#include <nvector/nvector_serial.h>  /* defs. of serial NVECTOR fcts. and macros  */
+
 #ifndef _MY_UDATA
 #define _MY_UDATA
 
@@ -15,6 +17,7 @@ typedef struct {
     int    *abort;
 	} *UserData;
 
+    
 typedef struct {
    double* t;				/* Time */
    int     i;				/* Current index/iterator */
@@ -34,5 +37,32 @@ typedef struct {
    int     iMS;
    
    } *EventData;
+
+/* Global memory structure */
+typedef struct {
+	/* ODE integration via CVODES */
+	N_Vector x;
+	N_Vector atolV;
+	N_Vector *atolV_ss;
+	N_Vector atols_ss;
+	N_Vector *sx;
+	EventData event_data;
+	void *cvode_mem;
+	UserData data;
+    
+    int sensi;
+    int neq;
+    int np;
+    int *threadStatus;
+    double *status;
+
+	/* SSA integration */
+	N_Vector x_lb;
+	N_Vector x_ub;
+} *SimMemory;       
+
+/* Functions defined in udata.h */
+SimMemory simCreate( int *threadStatus, double* status );
+void simFree( SimMemory sim_mem );
 
 #endif /* _MY_UDATA */

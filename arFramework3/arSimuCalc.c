@@ -144,8 +144,9 @@ int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double
 /* user functions */
 #include "arSimuCalcFunctions.c"
 
-UserData initializeDataCVodes( double tstart, int *abortSignal, int sensi, mxArray *arcondition, double *qpositivex, int ic );
-int allocateMemory( int neq, int nps, int sensi, N_Vector *x, N_Vector **sx, double *status, int *threadStatus );
+void terminate_x_calc( SimMemory sim_mem, double status );
+void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic );
+int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi );
 int applyInitialConditionsODE(UserData data, double tstart, int im, int isim, int sensi, int neq, int nps, N_Vector x, N_Vector* sx, double *returndxdt, double *returnddxdtdp );
 
 int handle_event(void *cvode_mem, EventData event_data, UserData user_data, N_Vector x, N_Vector *sx, int nps, int neq, int sensi, int sensi_meth );
@@ -341,8 +342,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     int nm, nc, id, nd, has_tExp, has_yExp;
     int flag;
     int is, js, ks, ids;
-    int nout, neq, nyout;
-    int nu, np, nps, nv, ny, nnz;
+    int nout, nyout;
+    int nu, nv, ny, nnz;
     
     /* Which condition to simulate */
     int isim;
@@ -362,17 +363,10 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     realtype t;
     double tstart;
     double inf;
-    N_Vector x;
-    N_Vector atolV;
-    N_Vector atols_ss;
-    N_Vector *atolV_ss;
     realtype *atolV_tmp;
-    N_Vector *sx;
     realtype *sxtmp;
     
     /* SSA variables */
-    N_Vector x_lb;
-    N_Vector x_ub;
     double tfin, tau, meantau;
     double r1, r2;
     double alpha0, sumalpha;
@@ -412,21 +406,28 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     double *ticks_start;
     double *ticks_stop_data;
     double *ticks_stop;
+       
+    /* Pointer to centralized container for the heap memory */
+    SimMemory sim_mem = NULL;
+    int np, neq;
     
+    /* Pointers to heap memory (which needs to be cleaned up!) */
+    /* CVODES */
+    N_Vector x = NULL;
+    N_Vector atolV = NULL;
+    N_Vector atols_ss = NULL;
+    N_Vector *atolV_ss = NULL;
+    N_Vector *sx = NULL;
+    
+    /* SSA */
+    N_Vector x_lb = NULL;
+    N_Vector x_ub = NULL;
+       
     int sensi_meth = CV_SIMULTANEOUS; /* CV_SIMULTANEOUS or CV_STAGGERED */
     bool error_corr = TRUE;
-    
-    /* Initialize memory to facilitate easier cleanup */
-    data = NULL;
-    cvode_mem = NULL;
-    event_data = NULL;
-    x = NULL;
-    sx = NULL;
-    
-    /* printf("computing model #%i, condition #%i\n", im, ic); */
     only_sim = 0;
     
-    /* Grab value of infinity (for steady state simulations) */
+    /* Grab value of infinity (used to mark steady state simulations) */
     inf = mxGetInf();
 
     /* check if im in range */
@@ -444,6 +445,10 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     /* check if ic in range */
     nc = (int) mxGetNumberOfElements(arcondition);
     if(nc<=ic) { thr_error("ic > length(ar.model.condition)\n"); *threadStatus = 1; return; }
+    
+    /* Initialize memory to facilitate easier cleanup */
+    status = mxGetData(mxGetField(arcondition, ic, "status"));
+    sim_mem = simCreate( threadStatus, status );
     
     /* Get double handle to store equilibrium value */
     teq = mxGetData(mxGetField(arcondition, ic, "tEq"));
@@ -466,7 +471,6 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             
             /* get MATLAB values */
             qpositivex = mxGetData(mxGetField(armodel, im, "qPositiveX"));
-            status = mxGetData(mxGetField(arcondition, ic, "status"));
             tstart = mxGetScalar(mxGetField(arcondition, ic, "tstart"));
             neq = (int) mxGetNumberOfElements(mxGetField(armodel, im, "xs"));
             nnz = (int) mxGetScalar(mxGetField(armodel, im, "nnz"));
@@ -560,9 +564,20 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 returnddxdtdp = mxGetData(mxGetField(arcondition, ic, "ddxdtdp"));
             }
 
+            /* Allocate heap memory required for simulation */
+            if ( allocateSimMemoryCVODES( sim_mem, neq, np, sensi ) )
+            {
+                /* Generate some local references to avoid having sim_mem-> littered everywhere */
+                x = sim_mem->x;
+                sx = sim_mem->sx;
+                atolV = sim_mem->atolV;
+                atols_ss = sim_mem->atols_ss;
+                atolV_ss = sim_mem->atolV_ss;
+                data = sim_mem->data;
+            } else return;            
+            
             /* User data structure */
-            data = initializeDataCVodes( tstart, abortSignal, sensi, arcondition, qpositivex, ic );
-            if (data == NULL) {status[0] = 1; *threadStatus = 1; return;}
+            initializeDataCVODES( sim_mem, tstart, abortSignal, arcondition, qpositivex, ic );
             
             /* Event structure */
             event_data = (EventData) malloc(sizeof *event_data);
@@ -576,10 +591,9 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             nu = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
             np = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
             nv = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
-            nps = np;
             
             /* If there are no parameters, do not compute sensitivities; otherwise failure at N_VCloneVectorArray_Serial */
-            if (nps==0) sensi = 0;            
+            if (np==0) sensi = 0;            
             
             /* Initialize event list (points where solver needs to be reinitialized) */
             qEvents = 0;
@@ -596,9 +610,9 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 if ( flag < 0 ) { event_data->overrides = 0; };
                 flag = fetch_vector( arcondition, ic, &(event_data->value_B), "modx_B", neq*event_data->n );
                 if ( flag < 0 ) { event_data->overrides = 0; };
-                flag = fetch_vector( arcondition, ic, &(event_data->sensValue_A), "modsx_A", neq*nps*event_data->n );
+                flag = fetch_vector( arcondition, ic, &(event_data->sensValue_A), "modsx_A", neq*np*event_data->n );
                 if ( flag < 0 ) { event_data->overrides = 0; };
-                flag = fetch_vector( arcondition, ic, &(event_data->sensValue_B), "modsx_B", neq*nps*event_data->n );
+                flag = fetch_vector( arcondition, ic, &(event_data->sensValue_B), "modsx_B", neq*np*event_data->n );
                 if ( flag < 0 ) { event_data->overrides = 0; };
             }
             
@@ -621,12 +635,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 equilibrated = NULL;
             }
             
-            /* Allocate memory for x and sx */
-            if ( !allocateMemory( neq, nps, sensi, &x, &sx, status, threadStatus ) )
-                return;
-            
             /* Apply ODE initial conditions */
-            applyInitialConditionsODE( data, tstart, im, isim, sensi, neq, nps, x, sx, returndxdt, returnddxdtdp );
+            applyInitialConditionsODE( data, tstart, im, isim, sensi, neq, np, x, sx, returndxdt, returnddxdtdp );
             
             if(neq>0){
                 /* Create CVODES object */
@@ -644,12 +654,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 /* Maximal internal step size */
                 flag = CVodeSetMaxStep(cvode_mem, cvodes_maxstepsize);
                 if(flag < 0) {status[0] = 19; *threadStatus = 1; return;}
-                
-                /* Use private function to compute error weights */
-                atolV = N_VNew_Serial(neq);
-                if (atolV == NULL) {status[0] = 2; *threadStatus = 1; return;}
-                for (is=0; is<neq; is++) Ith(atolV, is+1) = 0.0;
-		 
+                	 
                 if(cvodes_atolV==1) { 		
                     double tmp_tol = 1.;
                     for(ks=0; ks < neq; ks++) {		    
@@ -709,7 +714,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
 /*                fsu(data, tstart, im, isim);*/
                   
                 if(neq>0){
-                    flag = AR_CVodeSensInit1(cvode_mem, nps, sensi_meth, sensirhs, sx, im, isim);
+                    flag = AR_CVodeSensInit1(cvode_mem, np, sensi_meth, sensirhs, sx, im, isim);
                     if(flag < 0) {status[0] = 10; *threadStatus = 1; return;}
                     
                     /*
@@ -720,23 +725,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
                     if (flag < 0) {status[0] = 13; *threadStatus = 1; return;}
                     
-                    atols_ss = N_VNew_Serial(np);
-                    if (atols_ss == NULL) {*threadStatus = 1; return;}
+                    /* Set error weights */
                     for (is=0; is<np; is++) Ith(atols_ss, is+1) = cvodes_atol;
                     
-                    atolV_ss = N_VCloneVectorArray_Serial(nps, x);
-                    if (atolV_ss == NULL) {status[0] = 9; *threadStatus = 1; return;}
-                    
-                    for(js=0; js < nps; js++) {
-                        atolV_tmp = NV_DATA_S(atolV_ss[js]);
-                        for(ks=0; ks < neq; ks++) {
-                            atolV_tmp[ks] = 0.0;
-                        }
-                    }
-
                     if(cvodes_atolV_Sens==1)
                     { 
-                        for(js=0; js < nps; js++) 
+                        for(js=0; js < np; js++) 
                         {
                             atolV_tmp = NV_DATA_S(atolV_ss[js]);
                             for(ks=0; ks < neq; ks++)
@@ -774,7 +768,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             /* Do we have a startup event? */
             if ( qEvents == 1 ) {
                 if ( event_data->t[event_data->i] == tstart ) {
-                    flag = handle_event( cvode_mem, event_data, data, x, sx, nps, neq, sensi, sensi_meth );
+                    flag = handle_event( cvode_mem, event_data, data, x, sx, np, neq, sensi, sensi_meth );
                     (event_data->i)++;
 
                     if (flag < 0) {status[0] = 16; thr_error("Failed to reinitialize solver at event"); *threadStatus = 1; return;}
@@ -855,7 +849,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                         fsu(data, ts[is], im, isim);
                         fsv(data, ts[is], x, im, isim);
                         
-                        for(js=0; js < nps; js++) {
+                        for(js=0; js < np; js++) {
                             if(neq>0) {
                                 /* Output state sensitivities */
                                 sxtmp = NV_DATA_S(sx[js]);
@@ -879,7 +873,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 } else {
                     /* Store empty output sensitivities in case of an error */
                     if (sensi == 1) {
-                        for(js=0; js < nps; js++) {
+                        for(js=0; js < np; js++) {
                             if(neq>0) {
                                 sxtmp = NV_DATA_S(sx[js]);
                                 for(ks=0; ks < neq; ks++) {
@@ -899,7 +893,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 /* Event handling */
                 if (qEvents==2)
                 {
-                    flag = handle_event(cvode_mem, event_data, data, x, sx, nps, neq, sensi, sensi_meth );
+                    flag = handle_event(cvode_mem, event_data, data, x, sx, np, neq, sensi, sensi_meth );
                     if (flag < 0) {status[0] = 16; thr_error("Failed to reinitialize solver at event"); *threadStatus = 1; return;}
                     
                     qEvents = 1;
@@ -913,9 +907,9 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 N_VDestroy_Serial(x);
                 N_VDestroy_Serial(atolV);
                 if (sensi == 1) {
-                    N_VDestroyVectorArray_Serial(sx, nps);
+                    N_VDestroyVectorArray_Serial(sx, np);
                     N_VDestroy_Serial(atols_ss);
-                    N_VDestroyVectorArray_Serial(atolV_ss, nps);
+                    N_VDestroyVectorArray_Serial(atolV_ss, np);
                 }
                CVodeFree(&cvode_mem);              
             }
@@ -959,23 +953,21 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             }
             
             status = mxGetData(mxGetField(arcondition, ic, "status"));
-            
-            /* User data structure */
-            data = (UserData) malloc(sizeof *data);
-            if (data == NULL) {status[0] = 1; *threadStatus = 1; return;}
+                       
+            /* Allocate state memory and user data memory */
+            if ( allocateSimMemorySSA( sim_mem, nx ) )
+            {
+                /* Make some local pointer copies to facilitate handling */
+                data = sim_mem->data;
+                x = sim_mem->x;
+                x_lb = sim_mem->x_lb;
+                x_ub = sim_mem->x_ub;
+            } else return;
             
             data->abort = abortSignal;
             data->u = mxGetData(mxGetField(arcondition, ic, "uNum"));
             data->p = mxGetData(mxGetField(arcondition, ic, "pNum"));
-            data->v = mxGetData(mxGetField(arcondition, ic, "vNum"));
-            
-            /* State vectors */
-            x = N_VNew_Serial(nx);
-            if (x == NULL) {status[0] = 2; *threadStatus = 1; return;}
-            x_lb = N_VNew_Serial(nx);
-            if (x_lb == NULL) {status[0] = 2; *threadStatus = 1; return;}
-            x_ub = N_VNew_Serial(nx);
-            if (x_ub == NULL) {status[0] = 2; *threadStatus = 1; return;}
+            data->v = mxGetData(mxGetField(arcondition, ic, "vNum"));            
             
             /* nruns loop */
             for (iruns=0; iruns<nruns; iruns++) {
@@ -1283,28 +1275,73 @@ int applyInitialConditionsODE(UserData data, double tstart, int im, int isim, in
     return 1;
 }
 
-/* Allocate memory for the states and sensitivities */
-int allocateMemory( int neq, int nps, int sensi, N_Vector *x, N_Vector **sx, double *status, int *threadStatus )
+/* Allocate memory used by the SUNDIALS solver */
+int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi )
 {
-	(*x) = N_VNew_Serial(neq);
-   if ((*x) == NULL) {return 0;}
+    int is, js, ks;
+    realtype *atolV_tmp;
+    
+    sim_mem->neq = neq;
+    sim_mem->np = np;
+    sim_mem->sensi = sensi;
+    
+    /* Allocate userdata */
+    UserData data = (UserData) malloc(sizeof *data);
+    if (data == NULL) { terminate_x_calc( sim_mem, 1 ); return 0; }
+    
+    if ( neq > 0 ) {
+        (sim_mem->x) = N_VNew_Serial(neq);
+        if (sim_mem->x == NULL) {return 0;}
 
-	if (sensi == 1)
-	{
-		(*sx) = N_VCloneVectorArray_Serial(nps, *x);
-	   if ((*sx) == NULL) {return 0;}
-	}
+        /* Use private function to compute error weights */
+        sim_mem->atolV = N_VNew_Serial(neq);
+        if (sim_mem->atolV == NULL) { terminate_x_calc( sim_mem, 2 ); return 0; }
+        
+        for (is=0; is<neq; is++) 
+            Ith(sim_mem->atolV, is+1) = 0.0;
+        
+        if (sensi == 1) {
+            (sim_mem->sx) = N_VCloneVectorArray_Serial(np, sim_mem->x);
+            if (sim_mem->sx == NULL) { terminate_x_calc( sim_mem, 2 ); return 0; }
 
-	return 1;
+            sim_mem->atols_ss = N_VNew_Serial(np);
+            if (sim_mem->atols_ss == NULL) { terminate_x_calc( sim_mem, 2 ); return 0; }
+            
+            sim_mem->atolV_ss = N_VCloneVectorArray_Serial(np, sim_mem->x);
+            if (sim_mem->atolV_ss == NULL) { terminate_x_calc( sim_mem, 9 ); return 0; }
+                    
+            for(js=0; js < np; js++) {
+                atolV_tmp = NV_DATA_S(sim_mem->atolV_ss[js]);
+                for(ks=0; ks < neq; ks++) {
+                    atolV_tmp[ks] = 0.0;
+                }
+            }
+        }
+    }
+    return 1;
+}
+
+/* Allocate memory for the states and sensitivities */
+int allocateSimMemorySSA( SimMemory sim_mem, int nx )
+{
+    sim_mem->neq = nx;
+    
+    if ( nx > 0 ) {
+        sim_mem->x = N_VNew_Serial(nx);
+        if (sim_mem->x == NULL) { terminate_x_calc( sim_mem, 2 ); return 0; }
+        sim_mem->x_lb = N_VNew_Serial(nx);
+        if (sim_mem->x_lb == NULL) { terminate_x_calc( sim_mem, 2 ); return 0; }
+        sim_mem->x_ub = N_VNew_Serial(nx);
+        if (sim_mem->x_ub == NULL) { terminate_x_calc( sim_mem, 2 ); return 0; }    
+    }
+    
+    return 1;
 }
 
 /* Initialize the UserData structure for use with CVodes */
-UserData initializeDataCVodes( double tstart, int *abortSignal, int sensi, mxArray *arcondition, double *qpositivex, int ic )
+void initializeDataCVodes( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic )
 {
-    UserData data = (UserData) malloc(sizeof *data);
-    
-    if ( data == NULL )
-        return NULL;
+    UserData data = sim_mem->data;
     
 	data->abort = abortSignal;
 	data->t = tstart;
@@ -1317,12 +1354,10 @@ UserData initializeDataCVodes( double tstart, int *abortSignal, int sensi, mxArr
 	data->dvdu = mxGetData(mxGetField(arcondition, ic, "dvduNum"));
 	data->dvdp = mxGetData(mxGetField(arcondition, ic, "dvdpNum"));
 
-	if ( sensi == 1 ) {
+	if ( sim_mem->sensi == 1 ) {
         data->su = mxGetData(mxGetField(arcondition, ic, "suNum"));
         data->sv = mxGetData(mxGetField(arcondition, ic, "svNum"));
     }
-    
-    return data;
 }
 
 /* This function loads a vector/matrix from MATLAB and checks it against desired length */
@@ -1355,6 +1390,26 @@ int fetch_vector( mxArray* arcondition, int ic, double **vector, const char* fie
     } else {
         return -1;
     }
+}
+
+/* Free memory taken up by x_calc */
+void terminate_x_calc( SimMemory sim_mem, double status )
+{
+    /* Something is seriously wrong */
+	if ( sim_mem == NULL )
+    {
+        mexPrintf( "FATAL ERROR: Simulation memory is still null upon terminate_x_calc!" );
+		return;
+    }
+
+	/* Report status to user */
+	sim_mem->status[0] = status;
+    
+	/* Make sure the thread terminates */
+	*(sim_mem->threadStatus) = 1;
+
+    /* Free the memory that was allocated */
+	simFree( sim_mem );
 }
 
 /* This function initializes time point lists */
