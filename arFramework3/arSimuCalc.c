@@ -455,7 +455,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     teq = mxGetData(mxGetField(arcondition, ic, "tEq"));
     
     has_tExp = (int) mxGetScalar(mxGetField(arcondition, ic, "has_tExp"));
-    if(has_tExp == 0 && fine == 0) { *threadStatus = 1; return; }
+    if(has_tExp == 0 && fine == 0) { terminate_x_calc( sim_mem, 0 ); return; }
     
     /* get ar.model(im).data */
     ardata = mxGetField(armodel, im, "data");
@@ -624,15 +624,15 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             if(neq>0){              
                 /* Allocate space for CVODES */
                 flag = AR_CVodeInit(cvode_mem, x, tstart, im, isim);
-                if (flag < 0) {status[0] = 4; *threadStatus = 1; return;}
+                if (flag < 0) {terminate_x_calc( sim_mem, 4 ); return;}
                 
                 /* Number of maximal internal steps */
                 flag = CVodeSetMaxNumSteps(cvode_mem, cvodes_maxsteps);
-                if(flag < 0) {status[0] = 15; *threadStatus = 1; return;}
+                if(flag < 0) {terminate_x_calc( sim_mem, 15 ); return;}
                 
                 /* Maximal internal step size */
                 flag = CVodeSetMaxStep(cvode_mem, cvodes_maxstepsize);
-                if(flag < 0) {status[0] = 19; *threadStatus = 1; return;}
+                if(flag < 0) {terminate_x_calc( sim_mem, 19 ); return;}
                 	 
                 if(cvodes_atolV==1) { 		
                     double tmp_tol = 1.;
@@ -658,11 +658,11 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 } else {                
                     flag = CVodeSStolerances(cvode_mem, RCONST(cvodes_rtol), RCONST(cvodes_atol));
                 }
-                if (flag < 0) {status[0] = 5; *threadStatus = 1; return;}
+                if (flag < 0) {terminate_x_calc( sim_mem, 5 ); return;}
                 
                 /* Attach user data */
                 flag = CVodeSetUserData(cvode_mem, data);
-                if (flag < 0) {status[0] = 6; *threadStatus = 1; return;}
+                if (flag < 0) {terminate_x_calc( sim_mem, 6 ); return;}
                 
                 /* Attach linear solver */
                 if(setSparse == 0){
@@ -672,12 +672,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     /* sparse linear solver KLU */
                     flag = CVKLU(cvode_mem, neq, nnz);
                 }
-                if (flag < 0) {status[0] = 7; *threadStatus = 1; return;}
+                if (flag < 0) {terminate_x_calc( sim_mem, 7 ); return;}
                 
                 /* Jacobian-related settings */
                 if (jacobian == 1) {
                     flag = AR_CVDlsSetDenseJacFn(cvode_mem, im, isim, setSparse);
-                    if (flag < 0) {status[0] = 8; *threadStatus = 1; return;}
+                    if (flag < 0) {terminate_x_calc( sim_mem, 8 ); return;}
                 }
                 
                 /* custom error weight function */
@@ -691,15 +691,15 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             if (sensi == 1) {
                 if(neq>0){
                     flag = AR_CVodeSensInit1(cvode_mem, np, sensi_meth, sensirhs, sx, im, isim);
-                    if(flag < 0) {status[0] = 10; *threadStatus = 1; return;}
+                    if(flag < 0) {terminate_x_calc( sim_mem, 10 ); return;}
                     
                     /*
                         flag = CVodeSensEEtolerances(cvode_mem);
-                        if(flag < 0) {status[0] = 11; return;}
+                        if(flag < 0) {terminate_x_calc( sim_mem, 11 ); return;}
                      */
                     
                     flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
-                    if (flag < 0) {status[0] = 13; *threadStatus = 1; return;}
+                    if (flag < 0) {terminate_x_calc( sim_mem, 13 ); return;}
                     
                     /* Set error weights */
                     for (is=0; is<np; is++) Ith(atols_ss, is+1) = cvodes_atol;
@@ -734,10 +734,10 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                       flag = CVodeSensSStolerances(cvode_mem, RCONST(cvodes_rtol), N_VGetArrayPointer(atols_ss));
                     }
                     
-                    if(flag < 0) {status[0] = 11; *threadStatus = 1; return;}
+                    if(flag < 0) {terminate_x_calc( sim_mem, 11 ); return;}
                     
                     flag = CVodeSetSensErrCon(cvode_mem, error_corr);
-                    if(flag < 0) {status[0] = 13; *threadStatus = 1; return;}
+                    if(flag < 0) {terminate_x_calc( sim_mem, 13 ); return;}
                 }
             }
 
@@ -747,7 +747,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     flag = handle_event( sim_mem, sensi_meth );
                     (event_data->i)++;
 
-                    if (flag < 0) {status[0] = 16; thr_error("Failed to reinitialize solver at event"); *threadStatus = 1; return;}
+                    if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 );  return;}
                 }
             }
             
@@ -819,7 +819,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                         if(ts[is] > tstart) {
                             if(neq>0) {
                                 flag = CVodeGetSens(cvode_mem, &t, sx);
-                                if (flag < 0) {status[0] = 14; *threadStatus = 1; return;}
+                                if (flag < 0) {terminate_x_calc( sim_mem, 14 ); return;}
                             }
                         }
                         fsu(data, ts[is], im, isim);
@@ -870,7 +870,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 if (qEvents==2)
                 {
                     flag = handle_event( sim_mem, sensi_meth );
-                    if (flag < 0) {status[0] = 16; thr_error("Failed to reinitialize solver at event"); *threadStatus = 1; return;}
+                    if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 ); return;}
                     
                     qEvents = 1;
                     (event_data->i)++;
@@ -1262,7 +1262,7 @@ int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi )
         if (sim_mem->cvode_mem == NULL) { terminate_x_calc( sim_mem, 3 ); return 0; }        
         
         (sim_mem->x) = N_VNew_Serial(neq);
-        if (sim_mem->x == NULL) {return 0;}
+        if (sim_mem->x == NULL) {terminate_x_calc( sim_mem, 1 ); return 0; }
 
         /* Use private function to compute error weights */
         sim_mem->atolV = N_VNew_Serial(neq);
@@ -1411,11 +1411,8 @@ void terminate_x_calc( SimMemory sim_mem, double status )
 	/* Make sure the thread terminates */
 	sim_mem->threadStatus[0] = 1;
     
-    mexPrintf("Hey mate" );
-
     /* Free the memory that was allocated */
-/*	simFree( sim_mem ); 
- */
+	simFree( sim_mem );
 }
 
 /* This function initializes time point lists */
