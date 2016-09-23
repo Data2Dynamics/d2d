@@ -127,7 +127,7 @@ void *thread_calc(void *threadarg);
 #else
 void thread_calc(int id);
 #endif
-void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int *rootFinding);
+void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding);
 void z_calc(int im, int ic, mxArray *arcondition, int sensi);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi);
 
@@ -141,13 +141,16 @@ void thr_error( const char* msg );
 int fetch_vector( mxArray* arcondition, int ic, double **vector, const char* fieldname, int desiredLength );
 int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double** timePoints, int* currentIndex, const char* flagFieldName, const char* timePointFieldName );
 
+void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int nout, int offset );
+void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int dim0, int dim1, int dim2, int offset );
+
 /* user functions */
 #include "arSimuCalcFunctions.c"
 
 void terminate_x_calc( SimMemory sim_mem, double status );
 void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic );
 int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi );
-int applyInitialConditionsODE(UserData data, double tstart, int im, int isim, int sensi, int neq, int nps, N_Vector x, N_Vector* sx, double *returndxdt, double *returnddxdtdp );
+int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override );
 int initializeEvents( SimMemory sim_mem, mxArray *arcondition, int ic, double tstart );
 
 int handle_event( SimMemory sim_mem, int sensi_meth );
@@ -321,7 +324,7 @@ void thread_calc(int id) {
     
     for(in=0; in<n; ++in){
         /* printf("computing thread #%i, task %i/%i (m=%i, c=%i)\n", id, in, n, ms[in], cs[in]); */
-        x_calc(ms[in], cs[in], globalsensi, setSparse, &threadStatus[id], &threadAbortSignal[id], &rootFinding);
+        x_calc(ms[in], cs[in], globalsensi, setSparse, &threadStatus[id], &threadAbortSignal[id], rootFinding);
     }
     
     /* printf("computing thread #%i(done)\n", id); */
@@ -333,7 +336,8 @@ void thread_calc(int id) {
 }
 
 /* calculate dynamics */
-void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int *rootFinding) {
+void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding) {
+    mxArray    *x0_override;
     mxArray    *arcondition;
     mxArray    *ardata;
     
@@ -619,7 +623,20 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             }
             
             /* Apply ODE initial conditions */
-            applyInitialConditionsODE( data, tstart, im, isim, sensi, neq, np, x, sx, returndxdt, returnddxdtdp );
+            x0_override = mxGetField(arcondition, ic, "x0_override");
+            if ( !applyInitialConditionsODE( sim_mem, tstart, im, isim, returndxdt, returnddxdtdp, x0_override ) )
+                return;
+            
+            /* Check if we are only simulation dxdt */
+            if ( rootFinding )
+            {
+                /* Copy states */
+                
+                /* Copy state sensitivities */
+                copyStates( x, returnx, qpositivex, neq, nout, 0 );
+                copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 );
+                terminate_x_calc( sim_mem, 0 ); return;
+            }
             
             if(neq>0){              
                 /* Allocate space for CVODES */
@@ -747,7 +764,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     flag = handle_event( sim_mem, sensi_meth );
                     (event_data->i)++;
 
-                    if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 );  return;}
+                    if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 ); return;}
                 }
             }
             
@@ -802,11 +819,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     
                     for(js=0; js < nu; js++) returnu[js*nout+is] = data->u[js];
                     for(js=0; js < nv; js++) returnv[js*nout+is] = data->v[js];
-                    for(js=0; js < neq; js++) {
-                        returnx[js*nout+is] = Ith(x, js+1);
-                        /* set negative values to zeros */
-                        if(qpositivex[js]>0.5 && returnx[js*nout+is]<0.0) returnx[js*nout+is] = 0.0;
-                    }
+                    copyStates( x, returnx, qpositivex, neq, nout, is );
                 } else {
                     for(js=0; js < nu; js++) returnu[js*nout+is] = 0.0;
                     for(js=0; js < nv; js++) returnv[js*nout+is] = 0.0;
@@ -825,22 +838,21 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                         fsu(data, ts[is], im, isim);
                         fsv(data, ts[is], x, im, isim);
                         
-                        for(js=0; js < np; js++) {
-                            if(neq>0) {
-                                /* Output state sensitivities */
-                                sxtmp = NV_DATA_S(sx[js]);
-                                for(ks=0; ks < neq; ks++) {
-                                    returnsx[(js*neq+ks)*nout + is] = sxtmp[ks];
-                                }
-                                
+                        if(neq>0) {
+                            /* Output state sensitivities */
+                            copyNVMatrixToDouble( sx, returnsx, np, neq, nout, is );
+
+                            for(js=0; js < np; js++) {
                                 /* Output flux sensitivities */
                                 csv(ts[is], x, js, sx[js], data, im, ic);
                                 for(ks=0; ks < nv; ks++) {
                                     returnsv[(js*nv+ks)*nout + is] = data->sv[ks];
                                 }      
                             }
+                        }
                             
-                            /* Output input sensitivities */
+                        /* Output input sensitivities */
+                        for(js=0; js < np; js++) {
                             for(ks=0; ks < nu; ks++) {
                                 returnsu[(js*nu+ks)*nout + is] = data->su[(js*nu)+ks];
                             }
@@ -1073,6 +1085,31 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     /* Clean up */
     terminate_x_calc( sim_mem, 0 );
 }
+       
+void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int nout, int offset )
+{
+    int js;
+    
+	for(js=0; js < neq; js++) {
+        returnx[js*nout+offset] = Ith(x, js+1);
+        /* set negative values to zeros */
+        if(qpositivex[js]>0.5 && returnx[js*nout+offset]<0.0) returnx[js*nout+offset] = 0.0;
+	}
+}
+
+/* Copies doubles stored in NVector* array matrix into double array with specified offset */
+void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int dim0, int dim1, int dim2, int offset )
+{
+    int js, ks;
+    realtype* sxtmp;
+    
+	for(js=0; js < dim0; js++) {
+        sxtmp = NV_DATA_S(sx[js]);
+        for(ks=0; ks < dim1; ks++) {
+            returnsx[(js*dim1+ks)*dim2 + offset] = sxtmp[ks];
+        }
+	}
+}
 
 /* Equilibrate the system until the RHS is under a specified threshold */
 int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *equilibrated, double *returndxdt, double *teq, int neq, int im, int ic, int *abortSignal ) {
@@ -1137,9 +1174,6 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
    mexErrMsgTxt crashes on R2013b when called from a thread */
 void thr_error( const char* msg ) {
     printf( msg );
-    #ifdef HAS_PTHREAD
-        if(parallel==1) {pthread_exit(NULL);}
-    #endif
 }
 
 /* Event handler */
@@ -1206,8 +1240,17 @@ int handle_event( SimMemory sim_mem, int sensi_meth )
 }
 
 /* Apply initial conditions for solving using numerical ODE integration */
-int applyInitialConditionsODE(UserData data, double tstart, int im, int isim, int sensi, int neq, int nps, N_Vector x, N_Vector* sx, double *returndxdt, double *returnddxdtdp )
+int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override )
 {
+    int nPoints;
+    UserData data = sim_mem->data;
+    int sensi = sim_mem->sensi;
+    int neq = sim_mem->neq;
+    int nps = sim_mem->np;
+    N_Vector x = sim_mem->x;
+    N_Vector *sx = sim_mem->sx;
+    double *override;
+    
 	int is, js, ks;
 	realtype *sxtmp;
 
@@ -1217,6 +1260,17 @@ int applyInitialConditionsODE(UserData data, double tstart, int im, int isim, in
 	{
 		for (is=0; is<neq; is++) Ith(x, is+1) = 0.0;
 		fx0(x, data, im, isim);
+        
+        /* Override initial condition */
+        if ( x0_override ) {
+            nPoints = (int) mxGetNumberOfElements( x0_override );
+            if ( nPoints > 0 ) {
+                if ( nPoints != neq ) { terminate_x_calc( sim_mem, 21 ); return 0; };
+                override = (double *) mxGetData(x0_override);
+                for (is=0; is<neq; is++) Ith(x, is+1) = override[is];
+            }
+        }
+        
 		fv(data, tstart, x, im, isim);
 		fx(tstart, x, returndxdt, data, im, isim);
 
@@ -1426,7 +1480,7 @@ int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double
 
         if ( timePointField != NULL ) {
              time = (double*) mxGetData( timePointField );
-             *nPoints     = (int) mxGetNumberOfElements( timePointField );
+             *nPoints = (int) mxGetNumberOfElements( timePointField );
 
              /* Move past pre-simulation points */
              ID = 0;

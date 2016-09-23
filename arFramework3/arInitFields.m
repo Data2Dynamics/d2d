@@ -163,6 +163,7 @@ function ar = arInitFields(ar)
     ar.info.arsimucalc_flags{18} = 'malloc EventData';
     ar.info.arsimucalc_flags{19} = 'CVodeSetMaxNumSteps()';
     ar.info.arsimucalc_flags{20} = 'equilibration. Failed to meet tolerance. Does the system have a steady state? Failure occurred ';
+    ar.info.arsimucalc_flags{21} = 'initial condition override. Initial condition override vector has the wrong size';
 
     ar.info.cvodes_flags = cell(1,30);
 

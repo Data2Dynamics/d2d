@@ -5,37 +5,37 @@
 SimMemory simCreate( int *threadStatus, double* status )
 {
     /* If object creation fails, abort! */
-	SimMemory sim_mem = (SimMemory) malloc(sizeof *sim_mem);
+    SimMemory sim_mem = (SimMemory) malloc(sizeof *sim_mem);
 	if ( sim_mem == NULL )
-		return NULL;
+        return NULL;
 
 	/* Initialize all to NULL to facilitate easier cleanup */
     
     /* CVODES */
 	sim_mem->cvode_mem   	= NULL;
-    sim_mem->data           = NULL;
+	sim_mem->data           = NULL;
 	sim_mem->event_data  	= NULL;
 	sim_mem->x           	= NULL;
 	sim_mem->atolV       	= NULL;
-    sim_mem->sx          	= NULL;
+	sim_mem->sx          	= NULL;
 	sim_mem->atols_ss    	= NULL;
 	sim_mem->atolV_ss    	= NULL;
     
-    /* SSA */
-    sim_mem->x_lb           = NULL;
+	/* SSA */
+	sim_mem->x_lb           = NULL;
     sim_mem->x_ub           = NULL;
     
-    sim_mem->neq            = 0;
-    sim_mem->np             = 0;
-    sim_mem->sensi          = 0;
+	sim_mem->neq            = 0;
+	sim_mem->np             = 0;
+	sim_mem->sensi          = 0;
 
 	/* Used for storing errors */
 	sim_mem->status 		= status;
     
-    /* Used for terminating the thread */
+	/* Used for terminating the thread */
 	sim_mem->threadStatus   = threadStatus;
     
-    return sim_mem;
+	return sim_mem;
 }
 
 void simFree( SimMemory sim_mem )
