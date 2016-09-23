@@ -142,7 +142,7 @@ int fetch_vector( mxArray* arcondition, int ic, double **vector, const char* fie
 int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double** timePoints, int* currentIndex, const char* flagFieldName, const char* timePointFieldName );
 
 void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int nout, int offset );
-void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int dim0, int dim1, int dim2, int offset );
+void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, int nout, int offset );
 
 /* user functions */
 #include "arSimuCalcFunctions.c"
@@ -627,14 +627,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             if ( !applyInitialConditionsODE( sim_mem, tstart, im, isim, returndxdt, returnddxdtdp, x0_override ) )
                 return;
             
-            /* Check if we are only simulation dxdt */
+            /* Check if we are only simulating dxdt */
             if ( rootFinding )
             {
-                /* Copy states */
-                
-                /* Copy state sensitivities */
+                /* Copy states and state sensitivities */
                 copyStates( x, returnx, qpositivex, neq, nout, 0 );
-                copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 );
+                if ( sensi ) copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 );
                 terminate_x_calc( sim_mem, 0 ); return;
             }
             
@@ -1098,15 +1096,15 @@ void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int n
 }
 
 /* Copies doubles stored in NVector* array matrix into double array with specified offset */
-void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int dim0, int dim1, int dim2, int offset )
+void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, int nout, int offset )
 {
     int js, ks;
     realtype* sxtmp;
     
-	for(js=0; js < dim0; js++) {
+	for(js=0; js < nps; js++) {
         sxtmp = NV_DATA_S(sx[js]);
-        for(ks=0; ks < dim1; ks++) {
-            returnsx[(js*dim1+ks)*dim2 + offset] = sxtmp[ks];
+        for(ks=0; ks < neq; ks++) {
+            returnsx[(js*neq+ks)*nout + offset] = sxtmp[ks];
         }
 	}
 }
