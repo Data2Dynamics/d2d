@@ -34,6 +34,8 @@ SimMemory simCreate( int *threadStatus, double* status )
     
     /* Used for terminating the thread */
 	sim_mem->threadStatus   = threadStatus;
+    
+    return sim_mem;
 }
 
 void simFree( SimMemory sim_mem )
