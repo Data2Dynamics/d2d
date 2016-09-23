@@ -2,8 +2,9 @@
 % It is expected to throw a warning about the location parameter. However,
 % this is not a problem in the case of this function.
 % 
-% These functions interpolate between 0 and 1. Smooth1 is first order
-% continuous, while smooth2 is second order continuous.
+% These functions interpolate between 0 and 1. The given parameters indicate 
+% the start and end of the transition period. Smooth1 is first order continuous, 
+% while smooth2 is second order continuous.
 
 arInit;
 arLoadModel('smoothies');
