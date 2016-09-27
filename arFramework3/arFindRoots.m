@@ -18,7 +18,7 @@
 function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
 
     global ar;
-    debug = 0;
+    debug = 1;
     tolerance = .01 * ar.config.eq_tol;
     
     if nargin < 1
@@ -37,10 +37,10 @@ function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
     % Determine a reference sensitivity for debugging purposes
     if ( debug )
         arCheckCache(1);
-        arSimu(true, false, true);
-        ar.model(jm).ss_condition(jc).sxFineSimu(end,:,:)
+        arSimu(true, true, true);
+        Sref = squeeze(ar.model(jm).(condis)(jc).sxFineSimu(end,:,:));
+        xref = ar.model(jm).(condis)(jc).xFineSimu(end,:);
     end
-    
     nS = length( ar.model(jm).x );
     
     % Grab initial x0 based on model parameters
@@ -76,11 +76,15 @@ function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
     if ( useConserved )
         xnew = totals + map*xnew.';
     end
-    
+    resnorm 
     % Calculate sensitivities via implicit function theorem
     dfdx = ar.model.N * ar.model(jm).(condis)(jc).dvdxNum;
     dfdp = ar.model.N * ar.model(jm).(condis)(jc).dvdpNum;
-    S    = -pinv(dfdx)*dfdp;
+    C = dfdx( ar.model(jm).pools.usedStates, ar.model(jm).pools.usedStates );
+    D = dfdp( ar.model(jm).pools.usedStates, : );
+    Sref
+    %S    = -pinv(dfdx)*dfdp
+    S = -inv(C)*D
     
     if ( resnorm > tolerance )
         warning( 'Failure to converge when rootfinding for model %d, condition %d', jm, jc );
@@ -88,6 +92,18 @@ function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
     
     % Remove the override after determination
     ar.model(jm).ss_condition(jc).x0_override = [];
+    
+    if ( debug )
+        disp( 'x found by rootfinding' );
+        xnew %#ok
+        disp( 'x found by simulating a long time' );
+        xref %#ok
+        
+        disp( 'S found by rootfinding' );
+        S %#ok
+        disp( 'Sref found by simulating a long time' );
+        Sref %#ok
+    end
 end
 
 % dxdts are squared to generate minimum for small dxdt

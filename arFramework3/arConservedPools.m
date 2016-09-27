@@ -19,11 +19,12 @@ function arConservedPools(jm, showPools)
     end
     
     dependent = null( N.', 'r' );
-    
     IDs = repmat(1:size(dependent,1).', size(dependent,2), 1).';
     groups = zeros( size(IDs) );
     
-    selected = dependent .* repmat(pc.', 1, size(dependent,2))
+    % Account for compartment sizes
+    selected = dependent .* repmat(pc.', 1, size(dependent,2));
+    
     states = zeros( 1, size( dependent, 2 ) );
     for js = 1 : size( dependent, 2 )
         removedState = find( abs(selected) > 0, 1 );
