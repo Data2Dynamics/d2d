@@ -22,7 +22,7 @@ if(~silent)
         n, ar.config.nTasks, ar.config.nCore);
 end
 
-if(ar.config.nParallel>ar.config.nTasks)
+if(n>ar.config.nTasks)
     if(~silent)
         fprintf(1,'less tasks than %i cores, reset requested threads to %i.\n', ...
             ar.config.nCore, ar.config.nTasks);
