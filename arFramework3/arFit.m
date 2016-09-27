@@ -20,7 +20,7 @@
 %       5 - arNLS (additional method choices under ar.config.optimizerStep; see help arNLS)
 %       6 - fmincon
 %       7 - arNLS with SR1 updates
-%       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL—An Adaptive Nonlinear Least-Squares)
+%       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL???An Adaptive Nonlinear Least-Squares)
 %       9 - TRESNEI (B.Morini, M.Porcelli "TRESNEI, a Matlab trust-region solver for systems 
 %       of nonlinear equalities and inequalities")
 %      10 - Ceres (Sameer Agarwal and Keir Mierle and Others, Google Solver)
@@ -30,6 +30,7 @@
 %      14 - simulated annealing
 %      15 - patternsearch
 %      16 - ga (genetic algorithm)
+%      17 - ga hybrid with fminsearch
 %
 
 function varargout = arFit(varargin)
@@ -272,16 +273,64 @@ elseif(ar.config.optimizer == 11)
             lsqnonlin(@merit_fkt, pFit, lb, ub, ar.config.optim);
     end
     
-% fminsearch
+% fminsearchbnd
 elseif(ar.config.optimizer == 12)
+    options = optimset('fminsearch');
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    if(~isempty(ar.config.optim.TolX))
+        options.TolX = ar.config.optim.TolX;
+    end
+    if(~isempty(ar.config.optim.TolFun))
+        options.TolFun = ar.config.optim.TolFun;
+    end    
     [pFit, ~, exitflag, output] = ...
-        fminsearch(@merit_fkt_chi2, ar.p(ar.qFit==1), ar.config.optim);
+        fminsearchbnd(@merit_fkt_chi2, ar.p(ar.qFit==1), lb, ub, options);
     resnorm = merit_fkt(pFit);
     lambda = [];
     jac = [];
-    
-% particleswarm
+
+% patternsearch    
 elseif(ar.config.optimizer == 13)
+    options = psoptimset;
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    [pFit, ~, exitflag, output] = ...
+        patternsearch(@merit_fkt_chi2, ar.p(ar.qFit==1), [], [], [], [], lb, ub, [], options);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];
+
+% patternsearch hybrid
+elseif(ar.config.optimizer == 14)
+    options = psoptimset;
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    [pFit, ~, exitflag, output] = ...
+        patternsearch(@merit_fkt_chi2, ar.p(ar.qFit==1), [], [], [], [], lb, ub, [], options);
+
+    options = optimset('fminsearch');
+    if(~isempty(ar.config.optim.Display))
+        options.Display = ar.config.optim.Display;
+    end
+    if(~isempty(ar.config.optim.TolX))
+        options.TolX = ar.config.optim.TolX;
+    end
+    if(~isempty(ar.config.optim.TolFun))
+        options.TolFun = ar.config.optim.TolFun;
+    end 
+
+    [pFit, ~, exitflag, output] = ...
+        fminsearchbnd(@merit_fkt_chi2, pFit, lb, ub, options);
+    resnorm = merit_fkt(pFit);
+    lambda = [];
+    jac = [];   
+
+% particleswarm
+elseif(ar.config.optimizer == 15)
     options = optimoptions('particleswarm');
     if(~isempty(ar.config.optim.Display))
         options.Display = ar.config.optim.Display;
@@ -293,7 +342,7 @@ elseif(ar.config.optimizer == 13)
     jac = [];
     
 % simulated annealing
-elseif(ar.config.optimizer == 14)
+elseif(ar.config.optimizer == 16)
     options = saoptimset('simulannealbnd');
     if(~isempty(ar.config.optim.Display))
         options.Display = ar.config.optim.Display;
@@ -303,21 +352,9 @@ elseif(ar.config.optimizer == 14)
     resnorm = merit_fkt(pFit);
     lambda = [];
     jac = [];
-    
-% patternsearch    
-elseif(ar.config.optimizer == 15)
-    options = psoptimset;
-    if(~isempty(ar.config.optim.Display))
-        options.Display = ar.config.optim.Display;
-    end
-    [pFit, ~, exitflag, output] = ...
-        patternsearch(@merit_fkt_chi2, ar.p(ar.qFit==1), [], [], [], [], lb, ub, [], options);
-    resnorm = merit_fkt(pFit);
-    lambda = [];
-    jac = [];
-    
+      
 % ga
-elseif(ar.config.optimizer == 16)
+elseif(ar.config.optimizer == 17)
     options = gaoptimset;
     if(~isempty(ar.config.optim.Display))
         options.Display = ar.config.optim.Display;
@@ -328,7 +365,7 @@ elseif(ar.config.optimizer == 16)
     lambda = [];
     jac = [];
     output.iterations = output.generations;
-    
+
 else
     error('ar.config.optimizer invalid');    
 end

@@ -121,7 +121,10 @@ end
 if (exist('TranslateSBML', 'file') == 0)
     addpath([ar_path '/ThirdParty/libsbml'])
 end
-    
+if (exist('fminsearchbnd', 'file') == 0)
+    addpath([ar_path '/ThirdParty/FMINSEARCHBND'])
+end
+
 %% CVODES
 
 % uncompress and expand CVODES
