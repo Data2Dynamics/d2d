@@ -32,9 +32,22 @@ function arConservedPools(jm, showPools)
         selected(:, 1) = [];
     end
     
+    % Mapping from reduced model states to full states
+    mapping = eye(length(ar.model.x));    
+    for js = 1 : length( states )
+        mapping(states(js),:) = groups(:,js);
+    end
+    mapping(:, states) = [];
+    
+    % Matrix to compute totals for respective species
+    totalMapping = zeros(length(ar.model.x));
+    totalMapping(states, :) = dependent.';
+    
     ar.model(jm).pools.dependent = dependent;
     ar.model(jm).pools.others    = groups;
     ar.model(jm).pools.states    = states;
+    ar.model(jm).pools.mapping   = mapping;
+    ar.model(jm).pools.totalMap  = totalMapping;
     
     if ( showPools )
         disp( 'Reparameterized model:' );

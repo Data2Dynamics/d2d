@@ -4,13 +4,14 @@
 %   [xnew, S] arFindRoots( jm, jc, condis )
 %
 % Usage:
-%       jm      - Model number
-%       jc      - Condition number
-%       condis  - Condition (either "condition" or "ss_condition")
+%       jm              - Model number
+%       jc              - Condition number
+%       condis          - Condition (either "condition" or "ss_condition")
+%       useConserved    - Conserve conserved quantities
 %
 % Returns:
-%       xnew    - Determined initial condition
-%       S       - Sensitivities at determined point
+%       xnew            - Determined initial condition
+%       S               - Sensitivities at determined point
 %
 % Note: This is an internal function
 
@@ -48,8 +49,22 @@ function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
     
     if ( useConserved )
         % Get conserved pools (need independent initials eventually)
-        dependent = null(ar.model(jm).N.', 'rational');
-    
+        if ( ~isfield( ar.model(jm), 'pools' ) )
+            arConservedPools(jm);
+        end
+        
+        % Compute total pools
+        totals = ar.model(jm).pools.totalMap * x0.';
+        
+        % Get mapping from states with total pools substituted
+        map = ar.model(jm).pools.mapping;
+        
+        % Compute reduced state vector
+        x0( ar.model(jm).pools.states ) = [];
+                
+        % Set up the objective function for lsqnonlin
+        fn = @(x)meritConserved( x, jm, jc, map, totals );
+    else
         % Set up the objective function for lsqnonlin
         fn = @(x)merit( x, jm, jc );
     end
@@ -57,6 +72,10 @@ function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
     % Estimate initials in steady state
     opts            = optimset('TolFun', tolerance*tolerance, 'Display', 'Off' );
     [xnew, resnorm] = lsqnonlin( fn, x0, 0*x0, [], opts );
+    
+    if ( useConserved )
+        xnew = totals + map*xnew.';
+    end
     
     % Calculate sensitivities via implicit function theorem
     dfdx = ar.model.N * ar.model(jm).(condis)(jc).dvdxNum;
@@ -75,6 +94,15 @@ end
 function res = merit(x0, jm, jc)
     global ar;
     ar.model(jm).ss_condition(jc).x0_override = x0;
+    
+    feval(ar.fkt, ar, true, ar.config.useSensis, true, false, 'ss_condition', 'ss_threads', 1);
+    res = ar.model(jm).ss_condition(jc).dxdt.*ar.model(jm).ss_condition(jc).dxdt;
+end
+
+% dxdts are squared to generate minimum for small dxdt
+function res = meritConserved(x0c, jm, jc, map, totals)
+    global ar;
+    ar.model(jm).ss_condition(jc).x0_override = totals + map*x0c.';
     
     feval(ar.fkt, ar, true, ar.config.useSensis, true, false, 'ss_condition', 'ss_threads', 1);
     res = ar.model(jm).ss_condition(jc).dxdt.*ar.model(jm).ss_condition(jc).dxdt;
