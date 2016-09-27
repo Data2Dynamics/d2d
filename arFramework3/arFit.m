@@ -20,17 +20,17 @@
 %       5 - arNLS (additional method choices under ar.config.optimizerStep; see help arNLS)
 %       6 - fmincon
 %       7 - arNLS with SR1 updates
-%       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL???An Adaptive Nonlinear Least-Squares)
+%       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL--An Adaptive Nonlinear Least-Squares)
 %       9 - TRESNEI (B.Morini, M.Porcelli "TRESNEI, a Matlab trust-region solver for systems 
 %       of nonlinear equalities and inequalities")
 %      10 - Ceres (Sameer Agarwal and Keir Mierle and Others, Google Solver)
 %      11 - repeated runs of fmincon until convergence
-%      12 - fminsearch
-%      13 - particleswarm
-%      14 - simulated annealing
-%      15 - patternsearch
-%      16 - ga (genetic algorithm)
-%      17 - ga hybrid with fminsearch
+%      12 - fminsearchbnd
+%      13 - patternsearch
+%      14 - patternsearch combined with fminsearchbnd
+%      15 - particleswarm
+%      16 - simulated annealing
+%      17 - ga (geneticalgorithm)
 %
 
 function varargout = arFit(varargin)
