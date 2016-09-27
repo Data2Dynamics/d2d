@@ -13,6 +13,7 @@ function arConservedPools(jm, showPools)
     groups = zeros( size(IDs) );
     
     selected = dependent;
+    states = zeros( 1, size( dependent, 2 ) );
     for js = 1 : size( dependent, 2 )
         removedState = find( selected == 1, 1 );
         curCoeff = selected(removedState, 1);

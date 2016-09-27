@@ -99,7 +99,8 @@ function res = merit(x0, jm, jc)
     res = ar.model(jm).ss_condition(jc).dxdt.*ar.model(jm).ss_condition(jc).dxdt;
 end
 
-% dxdts are squared to generate minimum for small dxdt
+% dxdts are squared to generate minimum for small dxdt in the presence of
+% conservation relations
 function res = meritConserved(x0c, jm, jc, map, totals)
     global ar;
     ar.model(jm).ss_condition(jc).x0_override = totals + map*x0c.';
