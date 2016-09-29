@@ -28,7 +28,7 @@ end
 if(~exist('backup_save','var') || isempty(backup_save))
     backup_save = false;
 end
-if(~exist('use_cluster','var'))
+if(~exist('use_cluster','var') || isempty(use_cluster))
     use_cluster = false;
 end
 
