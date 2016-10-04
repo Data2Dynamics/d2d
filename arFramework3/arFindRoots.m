@@ -18,8 +18,8 @@
 function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
 
     global ar;
-    debug = 1;
-    tolerance = .01 * ar.config.eq_tol;
+    debug = 0;
+    tolerance = .00001 * ar.config.eq_tol;
     
     if nargin < 1
         jm = 1;
@@ -76,15 +76,15 @@ function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
     if ( useConserved )
         xnew = totals + map*xnew.';
     end
-    resnorm 
-    % Calculate sensitivities via implicit function theorem
-    dfdx = ar.model.N * ar.model(jm).(condis)(jc).dvdxNum;
-    dfdp = ar.model.N * ar.model(jm).(condis)(jc).dvdpNum;
-    C = dfdx( ar.model(jm).pools.usedStates, ar.model(jm).pools.usedStates );
-    D = dfdp( ar.model(jm).pools.usedStates, : );
-    Sref
-    %S    = -pinv(dfdx)*dfdp
-    S = -inv(C)*D
+    
+    % Calculate sensitivities via implicit function theorem   
+    N       = ar.model(jm).N;
+    dvdx    = (ar.model(jm).pools.mapping.'*ar.model(jm).(condis)(jc).dvdxNum.').';
+    dvdp    = ar.model(jm).(condis)(jc).dvdpNum;
+    dfdx    = N(ar.model(jm).pools.usedStates, :) * dvdx;
+    dfdp    = N(ar.model(jm).pools.usedStates, :) * dvdp;
+    S       = - inv(dfdx) * dfdp;
+    S       = ar.model(jm).pools.mapping*S;
     
     if ( resnorm > tolerance )
         warning( 'Failure to converge when rootfinding for model %d, condition %d', jm, jc );
