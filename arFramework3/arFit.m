@@ -18,13 +18,13 @@
 %       2 - fmincon
 %       4 - STRSCNE (Bellavia et al, A Scaled Trust Region Solver for Constrained Nonlinear Equations)
 %       5 - arNLS (additional method choices under ar.config.optimizerStep; see help arNLS)
-%       6 - fmincon
+%       6 - fmincon_as_lsq
 %       7 - arNLS with SR1 updates
 %       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL--An Adaptive Nonlinear Least-Squares)
 %       9 - TRESNEI (B.Morini, M.Porcelli "TRESNEI, a Matlab trust-region solver for systems 
 %       of nonlinear equalities and inequalities")
 %      10 - Ceres (Sameer Agarwal and Keir Mierle and Others, Google Solver)
-%      11 - repeated runs of fmincon until convergence
+%      11 - lsqnonlin_repeated - repeated runs of lsqnonlin until convergence
 %      12 - fminsearchbnd
 %      13 - patternsearch
 %      14 - patternsearch combined with fminsearchbnd
@@ -309,7 +309,7 @@ elseif(ar.config.optimizer == 14)
     if(~isempty(ar.config.optim.Display))
         options.Display = ar.config.optim.Display;
     end
-    [pFit, ~, exitflag, output] = ...
+    pFit = ...
         patternsearch(@merit_fkt_chi2, ar.p(ar.qFit==1), [], [], [], [], lb, ub, [], options);
 
     options = optimset('fminsearch');
