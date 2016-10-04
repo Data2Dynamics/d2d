@@ -18,7 +18,7 @@
 function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debug)
 
     global ar;
-    tolerance = .00001 * ar.config.eq_tol;
+    tolerance = ar.config.eq_tol;
     
     if nargin < 1
         jm = 1;
@@ -72,7 +72,11 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
     end
 
     % Estimate initials in steady state
-    opts            = optimset('TolFun', tolerance*tolerance, 'Display', 'Off' );
+    if ( debug )
+        opts = optimset('TolX', tolerance / numel(x0), 'TolFun', 0, 'Jacobian', 'Off', 'Display', 'Iter' ); %, 'DerivativeCheck', 'On'
+    else
+        opts = optimset('TolX', tolerance / numel(x0), 'TolFun', 0, 'Jacobian', 'Off', 'Display', 'Off' );
+    end
     [xnew, resnorm] = lsqnonlin( fn, x0, 0*x0, [], opts );
     
     if ( useConserved )
@@ -89,7 +93,7 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
     S       = - inv(dfdx) * dfdp;
     S       = ar.model(jm).pools.mapping*S;
     
-    if ( resnorm > tolerance )
+    if ( resnorm > numel(resnorm)*tolerance )
         warning( 'Failure to converge when rootfinding for model %d, condition %d', jm, jc );
     end
     
@@ -123,7 +127,7 @@ function res = merit(x0, jm, jc)
     ar.model(jm).ss_condition(jc).x0_override = x0;
     
     feval(ar.fkt, ar, true, ar.config.useSensis, true, false, 'ss_condition', 'ss_threads', 1);
-    res = ar.model(jm).ss_condition(jc).dxdt.*ar.model(jm).ss_condition(jc).dxdt;
+    res = ar.model(jm).ss_condition(jc).dxdt;
 end
 
 % dxdts are squared to generate minimum for small dxdt in the presence of
@@ -131,7 +135,7 @@ end
 function res = meritConserved(x0c, jm, jc, map, totals)
     global ar;
     ar.model(jm).ss_condition(jc).x0_override = totals + map*x0c.';
-    
     feval(ar.fkt, ar, true, ar.config.useSensis, true, false, 'ss_condition', 'ss_threads', 1);
-    res = ar.model(jm).ss_condition(jc).dxdt.*ar.model(jm).ss_condition(jc).dxdt;
+    
+    res = -ar.model(jm).ss_condition(jc).dxdt; %.*ar.model(jm).ss_condition(jc).dxdt;
 end

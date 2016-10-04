@@ -1,0 +1,24 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	-30 200
+
+INPUTS
+
+OBSERVABLES         
+obs_S1      C 	au   conc.   0	0  "S1"
+obs_pS1     C 	au   conc.   0	0  "pS1"
+obs_S2      C 	au   conc.   0	0  "S2"
+obs_pS2     C 	au   conc.   0	0  "pS2"
+obs_pS2_pS2 C 	au   conc.   0	0  "pS2_pS2"
+obs_ppS2    C 	au   conc.   0	0  "ppS2"
+
+ERRORS 
+obs_S1      "1"
+obs_pS1     "1"
+obs_S2      "1"
+obs_pS2     "1"
+obs_pS2_pS2 "1"
+obs_ppS2    "1"
+        
+CONDITIONS
