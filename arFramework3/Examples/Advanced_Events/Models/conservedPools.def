@@ -1,0 +1,51 @@
+DESCRIPTION
+"Simple pulse test"
+
+PREDICTOR
+t               T   min         time	-50	200
+
+COMPARTMENTS
+cyt             V   pl          vol.    4
+nuc             V   pl          vol.    .2 
+
+STATES
+S1           C   nmol/l      conc.   cyt     1
+pS1          C   nmol/l      conc.   cyt     1
+S2           C   nmol/l      conc.   cyt     1
+pS2          C   nmol/l      conc.   cyt     1
+pS2_pS2      C   nmol/l      conc.   cyt     1
+ppS2         C   nmol/l      conc.   nuc     1
+
+
+INPUTS
+pulse        C   nmol/l      conc.   "step1(t,0,0,amount)"
+        
+REACTIONS
+S1          ->  pS1             CUSTOM  "basal * S1"
+S1          ->  pS1             CUSTOM  "active1 * S1 * pulse"
+pS1         ->  S1              CUSTOM  "dephospho1 * pS1"
+
+S2          ->  pS2             CUSTOM  "basal * S2"
+pS2         ->  S2              CUSTOM  "dephospho2 * pS2"
+
+pS2 + pS2   ->  pS2_pS2         CUSTOM  "dimer * pS2 * pS2"
+pS2_pS2     ->  pS2 + pS2       CUSTOM  "dissoc * pS2_pS2"
+
+pS2         ->  ppS2            CUSTOM  "active2 * pS2 * pS1"
+ppS2        ->  pS2             CUSTOM  "dephospho3 * ppS2"
+
+DERIVED
+
+OBSERVABLES
+                
+ERRORS
+
+CONDITIONS
+init_S1      "5"
+init_pS1     "0"
+init_S2      "8"
+init_pS2     "0"
+init_pS2_pS2 "0"
+init_ppS2    "0"
+
+
