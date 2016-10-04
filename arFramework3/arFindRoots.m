@@ -15,10 +15,9 @@
 %
 % Note: This is an internal function
 
-function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
+function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debug)
 
     global ar;
-    debug = 0;
     tolerance = .00001 * ar.config.eq_tol;
     
     if nargin < 1
@@ -33,6 +32,10 @@ function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
     if nargin < 4
         useConserved = 1;
     end
+    if nargin < 5
+        debug = 0;
+        failedCheck = 0;
+    end
     
     % Determine a reference sensitivity for debugging purposes
     if ( debug )
@@ -41,7 +44,6 @@ function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
         Sref = squeeze(ar.model(jm).(condis)(jc).sxFineSimu(end,:,:));
         xref = ar.model(jm).(condis)(jc).xFineSimu(end,:);
     end
-    nS = length( ar.model(jm).x );
     
     % Grab initial x0 based on model parameters
     feval(ar.fkt, ar, true, ar.config.useSensis, true, false, 'ss_condition', 'ss_threads', 1);
@@ -76,6 +78,7 @@ function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
     if ( useConserved )
         xnew = totals + map*xnew.';
     end
+    xnew = xnew.';
     
     % Calculate sensitivities via implicit function theorem   
     N       = ar.model(jm).N;
@@ -93,16 +96,24 @@ function [xnew, S] = arFindRoots(jm, jc, condis, useConserved)
     % Remove the override after determination
     ar.model(jm).ss_condition(jc).x0_override = [];
     
-    if ( debug )
+    if ( debug )        
+        error = sum(sum((Sref-S).^2)) + sum((xnew-xref).^2);
         disp( 'x found by rootfinding' );
         xnew %#ok
         disp( 'x found by simulating a long time' );
         xref %#ok
-        
+
         disp( 'S found by rootfinding' );
         S %#ok
         disp( 'Sref found by simulating a long time' );
-        Sref %#ok
+        Sref %#ok                          
+        if ( error > ar.config.eq_tol )
+            failedCheck = 1;
+            
+            error( 'Steady state equilibration is different from rootfinding' );      
+        else
+            disp( 'Test passed' );
+        end
     end
 end
 
