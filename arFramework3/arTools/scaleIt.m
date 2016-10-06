@@ -101,12 +101,12 @@ function scaleIt( names, outFile, varargin )
     end
     
     % Simplest error model
-    errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo);
+    errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo, invTrafo);
     errModelPars    = 0;
     
     if ( opts.twocomponent )
         % Two component error model
-        errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) flexible_model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, @twocomponent, trafo);
+        errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) flexible_model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, @twocomponent);
         errModelPars    = 2;
     end
      
@@ -412,7 +412,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     for jG = 1 : nGroups
         curScale = []; curData = []; curConditions = []; obsjD = [];
         for jD = obsGroups{jG}
-            fprintf('Processing obs group %s', dataFields{jD});
+            fprintf('Processing obs group %s  ', dataFields{jD});
             nData           = cell2mat(out.(dataFields{jD}));        %    Process single observation
             Q{jD}           = find(~isnan( nData ));                 %#ok Fetch points that have data
             curData         = [curData; nData(Q{jD})];               %#ok
@@ -421,7 +421,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
             curScale        = [curScale; scales{jD}(Q{jD})];         %#ok
         end
         
-        curData = curData / nanmax(nanmax(curData));
+        %curData = curData / nanmax(nanmax(curData));
         
         % ConditionLinks links the replicates to the "true" IDs (i.e. true conditions, t, cond pairs)
         % ScaleLinks refers to which scale corresponds to which datapoint.
@@ -435,8 +435,8 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
         % specified in conditionTargets) and scaling (in the order
         % specified in scaleTargets).
         checkDims( data, conds, scaleTargets, conditionTargets );
-        [means, mlb, mub, scalings] = estimateObs( errModel, errModelPars, curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale ); 
-        replicates = curData ./ scalings(scaleLinks);
+        [means, mlb, mub, scalings] = estimateObs( errModel, errModelPars, curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale, trafo ); 
+        replicates = trafo( curData ./ scalings(scaleLinks) );
         
         % To get where these are globally we have to map them back
         % means(conditionLinks) and scalings(scaleLinks) will sort them
@@ -492,24 +492,24 @@ function checkDims( data, condition, scaleTargets, conditionTargets )
     end
 end
 
-function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale )
+function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale, trafo )
 
     % Parameters are [ means_for_each_condition , scalings ]
-    means = zeros(size(conditionTargets));
+    Nmeans = size(conditionTargets,2);
+    means  = zeros(1,Nmeans);
     
     % Obtain initial means from data
     for a = 1 : length( conditionTargets )
         loc = find(conditionLinks==a);
-        means(a) = data(loc(1));
+        means(a) = trafo( data(loc(1)) );
     end
     
     % Set initial scalings
-    scalings = ones(numel(scaleTargets)-1,1);
+    Nscalings = numel(scaleTargets)-1;
+    scalings = ones(Nscalings,1);
     initPar  = [ means.'; scalings; 1e10 * ones( errModelPars, 1) ];
     
-    lb = zeros(size(initPar));
-    lb( end - errModelPars : end ) = 1e-9;
-    
+    lb = [ -1e9 * ones(Nmeans,1); zeros(Nscalings,1); 1e-9*ones(errModelPars,1) ];
     if ( rescale )
         fixedScale = nanmax(nanmax(data));
         fprintf( ' <Rescale: %.5g>\n', fixedScale );
@@ -517,7 +517,7 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
         fixedScale = 1;
     end
     
-    options                 = optimset('TolFun', 0, 'TolX', 1e-11, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Iter' );
+    options                 = optimset('TolFun', 0, 'TolX', 1e-11, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Off' );
     errModel                = @(pars) eModel(fixedScale, pars, data, scaleLinks, length(conditionTargets), length(scalings), conditionLinks);
     p                       = lsqnonlin( errModel, initPar, lb, 1e25*ones(size(initPar)), options );
     [p, ~, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, lb, 1e25*ones(size(initPar)), options );
@@ -527,20 +527,23 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
     fprintf( 'Final objective: %g\n', sum(r.^2) );
     
     means    = p(1:numel(means));
-    mlb      = ci(:,1);
-    mub      = ci(:,2);
+    mlb      = ci(1:numel(means),1);
+    mub      = ci(1:numel(means),2);
     scalings = [fixedScale; p(numel(conditionTargets)+1:end - errModelPars)];
 end
 
-function res = model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo )
+function res = model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo, invTrafo )
     scales = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
-    res = trafo( scales(scaleLinks) .* pars(conditionLinks) ) - trafo( data );
+    %res = trafo( scales(scaleLinks) .* pars(conditionLinks) ) - trafo( data );
+    res = trafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) ) - trafo( data );
 end
 
-function res = flexible_model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, errorModel, trafo )
+% Does not deal with trafos yet
+function res = flexible_model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, errorModel )
     fix     = 1e10;
     scales  = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
-    sigma   = errorModel(pars(Ncond+Nscale+1:end), trafo( pars(conditionLinks) ), trafo( scales(scaleLinks) ));
+    %sigma   = errorModel(pars(Ncond+Nscale+1:end), trafo( pars(conditionLinks) ), trafo( scales(scaleLinks) ));
+    sigma   = errorModel(pars(Ncond+Nscale+1:end), pars(conditionLinks), scales(scaleLinks) );
     
     if ( max( sigma*fix < 1 ) > 0 ) 
         error( 'Sigma term negative :(' );
@@ -567,7 +570,6 @@ function data = readCSV( filename, delimiter )
     
     % Fetch header
     C = textscan(fid, '%s\n',1,'Delimiter','');
-    
     
     % Grab header items
     headers = textscan(C{1}{1}, '%q', 'Delimiter', delimiter);
