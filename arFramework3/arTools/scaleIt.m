@@ -436,7 +436,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
         % specified in scaleTargets).
         checkDims( data, conds, scaleTargets, conditionTargets );
         [means, mlb, mub, scalings] = estimateObs( errModel, errModelPars, curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale ); 
-        replicates = trafo(curData ./ scalings(scaleLinks));
+        replicates = curData ./ scalings(scaleLinks);
         
         % To get where these are globally we have to map them back
         % means(conditionLinks) and scalings(scaleLinks) will sort them
