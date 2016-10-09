@@ -378,13 +378,22 @@ else
         pleGlobals.conf_lb_point(jk) = -Inf;
     else
         kind = find(ps(:,jk)==min(ps(q_chi2good_point,jk)));
-        pleGlobals.conf_lb_point(jk) = interp1(chi2([kind kind-1]), ps([kind kind-1], jk), min(chi2)+pleGlobals.dchi2_point);
+        try
+            pleGlobals.conf_lb_point(jk) = interp1(chi2([kind kind-1]), ps([kind kind-1], jk), min(chi2)+pleGlobals.dchi2_point);
+        catch
+            pleGlobals.conf_lb_point(jk) = NaN;  % e.g. isinf(chi2(kind-1))
+        end
     end
     if(max(ps(q_chi2good_point,jk))==max(ps(~isnan(chi2),jk)))
         pleGlobals.conf_ub_point(jk) = Inf;
     else
         kind = find(ps(:,jk)==max(ps(q_chi2good_point,jk)));
-        pleGlobals.conf_ub_point(jk) = interp1(chi2([kind kind+1]), ps([kind kind+1], jk), min(chi2)+pleGlobals.dchi2_point);
+        try
+            pleGlobals.conf_ub_point(jk) = interp1(chi2([kind kind+1]), ps([kind kind+1], jk), min(chi2)+pleGlobals.dchi2_point);
+        catch
+            pleGlobals.conf_ub_point(jk) = NaN;
+        end
+        
     end
 
     % check ID point-wise

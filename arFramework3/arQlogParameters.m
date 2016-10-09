@@ -25,14 +25,14 @@ if ischar(whichone)
 elseif isnumeric(whichone)
     if length(whichone)>1
         if length(newval)==1
-            newval = ones(size(whichone));
+            newval = newval*ones(size(whichone));
         elseif length(newval)~=length(whichone)
             error('length(newval)~=length(whichone)')
         end
         for i=1:length(whichone)
             arQlogParameters(whichone(i),newval(i));
-            return
         end
+        return
     else
         jp = whichone;
     end

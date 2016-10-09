@@ -25,6 +25,7 @@ for i = jk
         pleGlobals.chi2sinit{i} = pleGlobals.chi2sinit{i}(ikeep);
         pleGlobals.chi2sviolations{i} = pleGlobals.chi2sviolations{i}(ikeep);
         pleGlobals.chi2spriors{i} = pleGlobals.chi2spriors{i}(ikeep);
+        pleGlobals.chi2spriorsAll{i} = pleGlobals.chi2spriorsAll{i}(ikeep);
         pleGlobals.ps{i} = pleGlobals.ps{i}(ikeep,:);
         pleGlobals.psinit{i} = pleGlobals.psinit{i}(ikeep,:);
         pleGlobals.psinitstep{i} = pleGlobals.psinitstep{i}(ikeep,:);
