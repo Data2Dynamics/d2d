@@ -15,6 +15,11 @@
 % setoptim_fkt(p):           set persistent optimal parameter values
 % p_labels:                  cell array of parameter labels
 % stdalpha:                  confidence level in standard deviation [1] = 68%
+% 
+%   Profile Likelihood Exploit works independently of the D2D framework.
+%   This function can be used to apply the method for another tool.
+% 
+%   pleInit is called by arPLEInit
 
 function pleInit(p, q_fit, lb, ub, q_log10, integrate_fkt, merit_fkt, ...
     diffmerit_fkt, fit_fkt, setoptim_fkt, p_labels, alpha, force)

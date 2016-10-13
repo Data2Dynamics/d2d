@@ -6,7 +6,7 @@
 %                       [if omitted, all free parameters are considered]
 %                       alternatively the name of a parameter or a cell of
 %                       names can be provided. If one parameter name is
-%                       provided which is not in ar.pLabel, then the string
+%                       provided which is not in pleGlobals.p_labels, then the string
 %                       is interpreted as a regular expression.
 % samplesize:           number of sampling steps            [100]
 % relchi2stepincrease:  percentage chi^2 increase of a step [0.1]
@@ -14,6 +14,14 @@
 % minstepsize:          minumum size of a step              [1e-6]
 % breakonlb:            stop if hit lb                      [false]
 % breakonub:            stop if hit ub                      [true]
+% 
+% 
+%   The profile likelihood calculation by the functions ple* was intended
+%   as running independent of D2D, i.e. it was intendent to be also used by
+%   other tools. 
+%   
+%   Therefore, the function does not use info in global ar and stores the
+%   results an a separate variable global pleGlobals.
 
 function ple(jk, samplesize, relchi2stepincrease, ...
     maxstepsize, minstepsize, breakonlb, breakonub)
@@ -29,23 +37,21 @@ if(~isfield(pleGlobals, 'showCalculation'))
 end
 
 if(~exist('jk','var'))
-    global ar
-    jk = find(ar.qFit==1);
+    jk = find(pleGlobals.q_fit==1);
 elseif(ischar(jk))
-    global ar
-    tref = strmatch(jk,ar.pLabel,'exact');
+    tref = strmatch(jk,pleGlobals.p_labels,'exact');
     if(isempty(tref))
-        jk = find(~cellfun(@isempty,regexp(ar.pLabel,jk)));
+        jk = find(~cellfun(@isempty,regexp(pleGlobals.p_labels,jk)));
     else 
         jk = tref;
     end
     
     if isempty(jk)
-        disp('Pattern ''',jk,''' not found in ar.pLabel');
+        disp('Pattern ''',jk,''' not found in pleGlobals.p_labels');
         return;
     end
 elseif(iscell(jk)) % cell of pLabels
-    [~,jk] = intersect(ar.pLabel,jk);
+    [~,jk] = intersect(pleGlobals.p_labels,jk);
 elseif(isnumeric(jk))
 else
     error('Argument has to be a string or an array of indices.')
