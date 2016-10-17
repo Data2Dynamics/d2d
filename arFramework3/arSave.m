@@ -97,7 +97,10 @@ if(~withSyms)
     end
 end
 
+warning off MATLAB:Figure:FigureSavedToMATFile
 save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
+warning on MATLAB:Figure:FigureSavedToMATFile
+
 fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
 
 
