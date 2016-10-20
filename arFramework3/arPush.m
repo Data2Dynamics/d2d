@@ -4,7 +4,7 @@
 
 function arPush( reset )
     global ar;
-    global arStack
+    global arStack;
     
     if ~exist( 'reset', 'var' )
         reset = 0;

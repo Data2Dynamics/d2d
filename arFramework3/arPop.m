@@ -4,7 +4,7 @@
 
 function arPop( discard )
     global ar;
-    global arStack
+    global arStack;
     
     if ~exist( 'discard', 'var' )
         discard = 0;
