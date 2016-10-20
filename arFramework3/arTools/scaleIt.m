@@ -36,7 +36,7 @@
 %
 % To do: Log trafo scaling, offsets and two component error model scaling
 
-function scaleIt( names, outFile, varargin )
+function out = scaleIt( names, outFile, varargin )
 
     if ( nargin < 2 )
         help scaleIt;
