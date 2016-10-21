@@ -1,0 +1,17 @@
+DESCRIPTION
+"Zika infections 2015/2016 in Colombia"
+"from Instituto Nacional de Salud Colombia"
+"Boletin epidemiolgico semanal, numero 36 de 2016, p. 106, grafica 98."
+"data extraced via WebPlotDigitizer"
+
+PREDICTOR
+t	T	"days"	"time"	0	400
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+
