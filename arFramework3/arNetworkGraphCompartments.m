@@ -194,12 +194,15 @@ fprintf(fid, '}\n');
 fclose(fid);
 
 %% Render and save
-if(isunix)
-    eval(['!dot -Tpdf ' savePath '.dot -o' savePath '.pdf']);
-    % eval(['!neato -Tpdf ' savePath '.dot -o' savePath '.pdf']);
-    % eval(['!fdp -Tpdf ' savePath '.dot -o' savePath '.pdf']);
-elseif(ismac)
+if(ismac)
     eval(['!/usr/local/bin/dot -Tpdf ' savePath '.dot -o' savePath '.pdf']);
     % eval(['!neato -Tpdf ' savePath '.dot -o' savePath '.pdf']);
     % eval(['!fdp -Tpdf ' savePath '.dot -o' savePath '.pdf']);
+elseif(isunix)
+      eval(['!dot -Tpdf ' savePath '.dot -o' savePath '.pdf']);
+    % eval(['!neato -Tpdf ' savePath '.dot -o' savePath '.pdf']);
+    % eval(['!fdp -Tpdf ' savePath '.dot -o' savePath '.pdf']);
+else
+    fprintf('%s has been saved.\n',[savePath '.dot']);
+    warning('Under windows, dot has to be excecuded by hand to translate the source file to a pdf.')
 end
