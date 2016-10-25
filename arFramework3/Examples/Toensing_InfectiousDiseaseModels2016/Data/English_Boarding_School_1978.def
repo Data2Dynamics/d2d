@@ -1,0 +1,14 @@
+DESCRIPTION
+"infulenza outbreak at an Englisch boarding School in 1978"
+"from Anonymus, Influenza in a boarding school. BMJ 1978; 1: 587."
+
+PREDICTOR
+t	T	"days"	"time"	0	20
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
