@@ -26,7 +26,7 @@
 %                       as subsequent argument
 %   TexPages          - Provide files with custom tex pages (provide cell
 %                       array of files as next argument)
-%   Bibs              - Provide fiels with additional bibliography items
+%   Bibs              - Provide files with additional bibliography items
 %                       (provide cell array of files as next argument)
 %   Figures           - Copy figure directories into tex output dir.
 %                       These can be used in submitted tex files (provide 
@@ -38,7 +38,7 @@ function arMiniReport(varargin)
 
 global ar
 
-warning( 'This report functionality is currently in alpha status. Please use arReport instead.' );
+warning( 'This report functionality is currently in beta status.' );
 
 switches    = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots', 'ExcludeDynPars', 'TexPages', 'Figures', 'OverridePlots', 'Bibs' };
 extraArgs   = [         0,            0,               0,                0,                0,             0,               0,               0,         0,                 1,          1,         1,               1,      1 ];
@@ -60,12 +60,12 @@ descriptions = {    { 'Plotting all Ys', '' }, ...
 
 if( (nargin > 0) && max( strcmpi( varargin{1}, switches ) ) == 0 )
     project_name = varargin{1};
-    varargin = varargin{2:end};
+    varargin = varargin(2:end);
 else
     project_name = 'Data 2 Dynamics Software -- Modeling Report';
 end
 
-opts = argSwitch( switches, extraArgs, descriptions, varargin );
+opts = argSwitch( switches, extraArgs, descriptions, 1, varargin );
 if(isempty(ar))
     error('please initialize by arInit')
 end
@@ -105,6 +105,9 @@ matVer = ver('MATLAB');
 ar.config.matlabVersion = str2double(matVer.Version);
 
 savePath = [arSave '/Latex'];
+if ~exist(savePath, 'dir')
+    mkdir( savePath );
+end
 
 if opts.figures
     for a = 1 : length( opts.figures_args )
@@ -135,7 +138,7 @@ if (isfield(ar, 'additionalBib'))
     end
 end
 
-if ~opts.bibs
+if opts.bibs
     fid = fopen( [savePath '/lib.bib'], 'a' );
 	for a = 1 : length( opts.bibs_args )
         txt = strrep(strrep(fileread(opts.bibs_args{a}), '\', '\\'), '%', '%%');
@@ -623,7 +626,7 @@ for jm=1:length(ar.model)
     lp(fid, 'The model parameters were estimated by maximum likelihood estimation applying the MATLAB lsqnonlin algorithm.');
     end
     
-    N = 50;    
+    N = 51;    
     ntables = ceil(length(ar.p)/N);
 
     lp(fid, 'The model parameters which influence system dynamics are listed in Table \\ref{dynpars}.');
@@ -654,16 +657,16 @@ for jm=1:length(ar.model)
             count = count + 1;
             if(ar.qFit(j)==1)
                 if(ar.p(j) - ar.lb(j) < 0.1 || ar.ub(j) - ar.p(j) < 0.1)
-                    lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.0g} & \\color{red}{%+8.4f} & \\color{red}{%+8.0g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\tabularnewline', ...
+                    lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.4g} & \\color{red}{%+8.4f} & \\color{red}{%+8.4g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\tabularnewline', ...
                         alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                         ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
                 else
-                    lp(fid, '%s\t\t\t%i & %s & {%+8.0g} & {%+8.4f} & {%+8.0g} & %i & %s & %i \\tabularnewline', ...
+                    lp(fid, '%s\t\t\t%i & %s & {%+8.4g} & {%+8.4f} & {%+8.4g} & %i & %s & %i \\tabularnewline', ...
                         alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                         ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
                 end
             else
-                lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.0g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.0g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\tabularnewline', ...
+                lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.4g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.4g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\tabularnewline', ...
                     alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                     ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
             end
@@ -1175,9 +1178,9 @@ for jm=1:length(ar.model)
                         
                         % Avoid ending up with a last table with less than 4 entries, since
                         % this looks silly.
-                        overhang = N-round((length(ar.p)/N))*N;
+                        overhang = Nd-round((length(ar.p)/Nd))*Nd;
                         if ( overhang < 4 )
-                            N = 50;
+                            Nd = 50;
                         end
                         
                         openDataTable( fid, jm, jd, L, headtab, headstr, unitstr );
@@ -1298,16 +1301,16 @@ for j=1:length(ar.p)
     
     if(ar.qFit(j)==1)
         if(ar.p(j) - ar.lb(j) < 0.1 || ar.ub(j) - ar.p(j) < 0.1)
-            lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.0g} & \\color{red}{%+8.4f} & \\color{red}{%+8.0g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\\\', ...
+            lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.4g} & \\color{red}{%+8.4f} & \\color{red}{%+8.4g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\\\', ...
                 alternate(j), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                 ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
         else
-            lp(fid, '%s\t\t\t%i & %s & {%+8.0g} & {%+8.4f} & {%+8.0g} & %i & %s & %i \\\\', ...
+            lp(fid, '%s\t\t\t%i & %s & {%+8.4g} & {%+8.4f} & {%+8.4g} & %i & %s & %i \\\\', ...
                 alternate(j), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                 ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
         end
     else
-        lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.0g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.0g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\\\', ...
+        lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.4g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.4g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\\\', ...
             alternate(j), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
             ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
     end
