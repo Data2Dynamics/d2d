@@ -5,7 +5,7 @@
 %   m:          model index                    
 %   jplot:      plot index                    
 
-function arSimuData(m, jplot, tpoints)
+function arSimuData(m, jplot, tpoints, randomseed)
 
 global ar
 
@@ -15,6 +15,18 @@ end
 
 if ~exist('tpoints','var')
     tpoints = [];
+end
+
+% set random seed
+if(exist('rng','file')~=0)
+    if(exist('randomseed','var') && ~isempty(randomseed))
+        ar.simudata_seed = randomseed;
+        rng(randomseed);
+    else
+        rng('shuffle');
+        rngsettings = rng;
+        ar.simudata_seed = rngsettings.Seed;
+    end
 end
 
 if(~exist('jplot','var') || isempty(jplot))
@@ -60,7 +72,7 @@ tmp_qLog10 = ar.qLog10;
 arLink(true);
 
 ar.p = tmp_p;
-ar.lb = tmp_lb
+ar.lb = tmp_lb;
 ar.ub = tmp_ub;
 ar.qFit = tmp_qFit;
 ar.qLog10 = tmp_qLog10;
