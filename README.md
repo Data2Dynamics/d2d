@@ -26,6 +26,10 @@ The Data2Dynamics software package is a collection of numerical methods for quan
 
 * For identification of cell type-specific parameters, L1 regularization of parameter fold-changes can be used ([read more](https://github.com/Data2Dynamics/d2d/wiki/L1 regularization)).
 
+* L2 regularization and incorporation of prior knowledge by penalized maximum likehood / maximum a posteriori estimation
+
+* Identification of informative experimental designs
+
 * The software is open source and free for non-commercial usage.
 
 ## Example Applications
