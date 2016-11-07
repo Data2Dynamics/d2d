@@ -33,6 +33,8 @@
 %                        tested so far)
 %     logtrafo           Do the scaling in logarithmic space
 %     rescale            Adjust scaling factors s.t. maximum becomes 1
+%     range              Specify range of values to use for independent
+%                        variable
 %
 % To do: Log trafo scaling, offsets and two component error model scaling
 
@@ -45,8 +47,8 @@ function out = scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale' };
-    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 ];
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range' };
+    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
@@ -58,6 +60,7 @@ function out = scaleIt( names, outFile, varargin )
     {'', 'Using two component error model'} ...
     {'', 'Using lognormal error model'} ...
     {'', 'Rescaling result'} ...
+    {'', 'Specified time point range to use'} ...
     };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
@@ -191,6 +194,34 @@ function out = scaleIt( names, outFile, varargin )
             end
         end
     end
+    
+    % Find the time variable
+    timeVar = fieldNames( ismember(fieldNames, timeVars) );
+    if ( numel( timeVar ) > 1 )
+        fprintf( 'Found independent variable column headers: \n');
+        fprintf( '%s\n', timeVar{:} );
+        error( 'Multiple columns whose header matches the independent variable' );
+    end
+    if ( numel( timeVar ) == 0 )
+        error( 'Did not find independent variable' );
+    end
+    
+    % Filter based on time range
+    if ( opts.range )
+        lims = opts.range_args;
+        if numel(lims)>2
+            error( 'Invalid range vector specified. Should be of the form [lb, ub]' );
+        else
+            f = @(x)(x<lims(1))||(x>lims(2));
+            removeMask = find( cellfun(f, out.(timeVar{1})) );
+            for a = 1 : length( fieldNames )
+                if ( isfield( out, fieldNames{a} ) )
+                    out.(fieldNames{a})(removeMask) = [];
+                end
+            end
+        end
+    end
+    
     %fieldNames = fieldnames(out);
     % Uncomment to test with control case
     % out = unitTest()
@@ -320,7 +351,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     fill(ismember(fieldNames, expVar))=1e30;
     timeVar = false(size(fieldNames));
     for a = 1 : length( timeVars )
-        timeVar = timeVar |  ismember(fieldNames, timeVars{a});
+        timeVar = timeVar | ismember(fieldNames, timeVars{a});
     end
     fill(timeVar)=inf;
         

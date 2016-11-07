@@ -291,8 +291,12 @@ for jm=1:length(ar.model)
     lp(fid, 'The model used in this study is based on a system of Ordinary Differential Equations (ODE). These ordinary differential equations are derived by means of the law of mass-action. ' );
     lp(fid, 'The time evolution of the biochemical compounds is computed by numerically integrating these differential equations. The model contains parameters which are estimated by calibrating the model to data using a Maximum-Likelihood estimation approach. %s', eqText );
     lp(fid, 'All analyses were performed using the \\emph{Data 2 Dynamics} software package \\cite{raue2015data2dynamics}, which is available from \\href{http://data2dynamics.org}{\\url{http://data2dynamics.org}}. ');
-    if ( length( ar.model(jm).c ) > 1 )
+    if ( length( ar.model(jm).c ) > 2 )
         lp( fid, 'The model considers multiple compartments (see Table \\ref{compartments}), which are taken into account by considering the relevant compartment volumes in the flux expressions. ' );
+    else
+        if ( length( ar.model(jm).c ) == 2 )
+            lp( fid, 'The model considers two compartments namely %s (vol = %s) and %s (vol = %s), which are taken into account by considering the relevant compartment volumes in the flux expressions. ', ar.model(jm).c{1}, getVolume(jm, 1), ar.model(jm).c{2}, getVolume(jm, 2) );
+        end
     end
     lp(fid, 'The %d dynamic variables used in the model are summarized in Table \\ref{variables}', length(ar.model(jm).x) );
     
@@ -303,23 +307,22 @@ for jm=1:length(ar.model)
     end
     
     %% compartments
-    if ( length( ar.model(jm).c ) > 1 )       
+    if ( length( ar.model(jm).c ) > 2 )       
         lp(fid, '\\begin{table}[h]');
         lp(fid, '\\centering');
         lp(fid, '\\begin{tabular}{@{} *2l @{}}\\toprule');
         lp(fid, '\\titlerowcol \\textbf{Compartment} & \\textbf{Volume}\\tabularnewline\\midrule' );
         for jc = 1 : length( ar.model(jm).c )
-            volP = ar.model(jm).pc{jc};
-            if ( isempty( str2num( volP ) ) ) %#ok
-                volP = num2str( str2num( ar.model(jm).fp{ find( strcmp( ar.model(jm).p, volP ) ) } ) ); %#ok
-            end
+            volP = getVolume(jm, jc);
             lp(fid, '%s%s & %s\\\\', alternate(jc), ar.model(jm).c{jc}, volP );
         end
         lp(fid, '\\botrule\\end{tabular}');
         lp(fid, '\\caption[align=left,justification=justified,singlelinecheck=false]{Model compartments}\\label{compartments}');
         lp(fid, '\\end{table}');
     else
-        lp( fid, 'Concentrations were based on a compartment volume of %f.', ar.model(jm).pc{1} );
+        if ( length( ar.model(jm).c ) == 1 )
+            lp( fid, 'Concentrations were based on a compartment volume of %f.', getVolume(jm, 1) );
+        end
     end
     
     %% species
@@ -405,7 +408,7 @@ for jm=1:length(ar.model)
     %vs = sym('v', [1, size(ar.model(jm).N,2)]);
     %cs = sym(strcat('vol_', ar.model(jm).c));
     
-    lp(fid, '\\noindent The model consists of %d differential equations, which are given by the following equations:', length(ar.model.x) );
+    lp(fid, '\\newpage\\noindent The model consists of %d differential equations, which are given by the following equations:', length(ar.model.x) );
     lp(fid, '{\\footnotesize');
     lp(fid, '\\begin{align}');
     for jx=1:size(ar.model(jm).N, 1) % for every species jx
@@ -695,6 +698,7 @@ for jm=1:length(ar.model)
     
     %% Additional description via args
     if opts.texpages
+        lp(fid, '\\FloatBarrier');
         for a = 1 : length( opts.texpages_args )
             lp(fid, strrep(strrep(fileread(opts.texpages_args{a}), '\', '\\'), '%', '%%'));
         end
@@ -761,32 +765,30 @@ for jm=1:length(ar.model)
             fpSymString{a} = char(sym(ar.model(jm).fp{a}));
         end
 
-        
         %% do we override some of the plots
-        if (~isempty(opts.overrideplots))
-            k = dir( [opts.overrideplots '/*.pdf'] );
+         if opts.overrideplots
+            k = dir( [opts.overrideplots_args '/*.pdf'] );
             if ( ~isempty(k) )
-                copyfile( [opts.overrideplots '/*.pdf'], [savePath '/' opts.overrideplots] );
+                copyfile( [opts.overrideplots_args '/*.pdf'], [savePath '/' opts.overrideplots_args] );
                 for a = 1 : length( k )
                     if ( ~strcmp( k(a).name, '.' ) && ~strcmp( k(a).name, '..' ) )
-                        pdfCrop( [savePath '/' opts.overrideplots '/' k(a).name(1:end-4) ] )
+                        pdfCrop( [savePath '/' opts.overrideplots_args '/' k(a).name(1:end-4) ] )
                     end
                 end
             end
-            k = dir( [opts.overrideplots '/*.tex'] );
+            k = dir( [opts.overrideplots_args '/*.tex'] );
             if ( ~isempty(k) )
-                copyfile( [opts.overrideplots '/*.tex'], [savePath '/' opts.overrideplots] );
+                copyfile( [opts.overrideplots_args '/*.tex'], [savePath '/' opts.overrideplots_args] );
             end
             
             for jplot=1:length(ar.model(jm).plot)
-                if ( exist( [ opts.overrideplots '/' ar.model(jm).plot(jplot).name '.pdf' ], 'file' ) || exist( [ opts.overrideplots '/' ar.model(jm).plot(jplot).name '_Report.tex' ], 'file' ) )
-                    ar.model(jm).plot(jplot).savePath_FigY = [opts.overrideplots '/' ar.model(jm).plot(jplot).name];
+                if ( exist( [ opts.overrideplots_args '/' ar.model(jm).plot(jplot).name '.pdf' ], 'file' ) || exist( [ opts.overrideplots_args '/' ar.model(jm).plot(jplot).name '_Report.tex' ], 'file' ) )
+                    ar.model(jm).plot(jplot).savePath_FigY = [opts.overrideplots_args '/' ar.model(jm).plot(jplot).name];
                     ar.model(jm).plot(jplot).override = 1;
                     fprintf( 'Overridden %s ...', ar.model(jm).plot(jplot).name );
                 end
             end
         end
-        
         for jplot=1:length(ar.model(jm).plot)
             if (ar.model(jm).qPlotYs(jplot)||~opts.omitnonplotted)
                 lp(fid, '\\FloatBarrier');
@@ -2118,3 +2120,11 @@ function wrapped = funcWrap( str, maxLen, newl )
         cChunk = cChunk + 1;
         c = c + 1;
     end
+    
+function volP = getVolume(jm, jc)
+    global ar;
+    
+    volP = ar.model(jm).pc{jc};
+    if ( isempty( str2num( volP ) ) ) %#ok
+        volP = num2str( str2num( ar.model(jm).fp{ find( strcmp( ar.model(jm).p, volP ) ) } ) ); %#ok
+	end

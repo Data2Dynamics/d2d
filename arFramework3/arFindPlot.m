@@ -61,8 +61,8 @@ function [olist names m] = arFindPlot( varargin )
         error( 'Please supply a data name' );
     end
 
-    switches    = { 'verbose', 'names' };
-    extraArgs   = [         0,       0 ];
+    switches    = { 'verbose', 'names', 'exact' };
+    extraArgs   = [         0,       0,       0 ];
     
     opts = argSwitch( switches, extraArgs, varargin );
     
@@ -72,8 +72,14 @@ function [olist names m] = arFindPlot( varargin )
     olist    = [];
     for b = 1 : length( string )
         for a = 1 : length( ar.model(m).plot )
-            if ~isempty( findstr(lower(ar.model(m).plot(a).name), lower(string{b}) ) )
-                olist = union( olist, a );
+            if ~opts.exact
+                if ~isempty( findstr(lower(ar.model(m).plot(a).name), lower(string{b}) ) )
+                    olist = union( olist, a );
+                end
+            else
+                if strcmp(ar.model(m).plot(a).name, string{b})
+                    olist = union( olist, a );
+                end                
             end
         end
     end
