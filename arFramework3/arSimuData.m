@@ -1,9 +1,10 @@
 % Simulate data for current parameter settings
 %
-% arSimuData(m, jplot, tpoints)
+% arSimuData(m, jplot, tpoints, randomseed)
 %   tpoints:    time points for simulation        
 %   m:          model index                    
-%   jplot:      plot index                    
+%   jplot:      plot index
+%   randomseed  random seed for noise generation
 
 function arSimuData(m, jplot, tpoints, randomseed)
 
@@ -35,18 +36,18 @@ end
 
 if(~exist('m','var') || isempty(m))
     for jm=1:length(ar.model)
-        arSimuData(jm, jplot, tpoints);
+        arSimuData(jm, jplot, tpoints, randomseed);
     end
     return
 else % m index provided:
     if(isempty(jplot))
         for jplot=1:length(ar.model(m).plot)
-            arSimuData(m, jplot, tpoints);
+            arSimuData(m, jplot, tpoints, randomseed);
         end
         return
     elseif(length(jplot)>1)
         for jjplot=jplot
-            arSimuData(m, jjplot, tpoints);
+            arSimuData(m, jjplot, tpoints, randomseed);
         end     
         return
     end

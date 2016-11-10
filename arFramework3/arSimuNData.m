@@ -1,11 +1,12 @@
 % Simulate n data points for current parameter settings
 %
-% arSimuNData(npoints, nrep, logtimes, m, d)
+% arSimuNData(npoints, nrep, logtimes, m, d, randomseed)
 %   npoints:    number of time points for simulation        [10]
 %   nrep:       number of repetitions                       [3]
 %   logtimes:   log-distribute time points                  [false]
 %   m:          model index                    
-%   d:          data index                    
+%   d:          data index              
+%   randomseed  random seed for noise generation
 
 function arSimuNData(npoints, nrep, logtimes, m, d, randomseed)
 
