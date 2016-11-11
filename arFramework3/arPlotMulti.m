@@ -659,7 +659,8 @@ if(exist('hbar','var'))
 	close(hbar)
 end
 ar.p = pReset;
-
+arSimu(false, true);
+arSimu(false, false);
 
 
 function [t, y, ystd, tExp, yExp, yExpStd] = getData(jm, jd, jy)
