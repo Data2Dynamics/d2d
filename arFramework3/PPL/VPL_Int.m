@@ -78,12 +78,11 @@ dps = dx_out(2:end);
         grad = 2*res*sres;
         H = 2*(sres')*sres;
         dy_pred = zeros(1,length(ar.p));
-        if(takeY)
         fRHS = ar.ppl.xSim2;
+        if(takeY)            
             dy_pred(ar.qFit==1) = (ar.model(m).data(c).ppl.xSens_tmp + sres(ar.ppl.resi_tmp,:) * xstd )/(abs(step) * xstd^2); %sres(ar.res_mLink==m & ar.res_type==1 & ar.res_dLink==c & ar.res_yLink==jx & ar.res_tLink==it,:)
             grad_y = -sres(ar.ppl.resi_tmp,:);
         else
-            fRHS = ar.ppl.xSim2;
             dy_pred(ar.qFit==1) =(ar.model(m).condition(c).ppl.xSens_tmp + sres(end,:) * xstd) / (abs(step) * xstd^2); 
             grad_y = -sres(end,:);
             if(qLog10)
