@@ -4,6 +4,13 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
         it = NaN;
         Last_pars = [];
         iter = 0;
+        if(takeY)
+            data_cond = 'data';
+            x_y = 'y';
+        else
+            data_cond = 'condition';
+            x_y = 'x';
+        end
         %try
             if(dir==1)
                 lb_corr=[ar.lb(ar.qFit==1) x_orig];
@@ -20,27 +27,9 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
             elseif(x == 4)
                 
                 if(doPPL)
-%                     p_tmp = ar.p(ar.qFit==1);
-%                     chi2_tmp = x_factor;
                     constr_option2=optimoptions('fmincon','Algorithm','interior-point','Display','none','GradConstr','on','GradObj','on','TolCon',1.e-5,'MaxIter',60,'TolFun',0,'TolX',1.e-8,'Hessian','user-supplied','HessFcn',@Corr_Hess,'InitTrustRegionRadius',sqrt(0.1*length(ar.p(ar.qFit==1))),'AlwaysHonorConstraints','none','SubproblemAlgorithm','cg'); %
                     [pFit, chi2, exitflag] = ...
                         fmincon(@ppl_constr_fkt, ar.p(ar.qFit==1), [], [],[], [], ar.lb(ar.qFit==1), ar.ub(ar.qFit==1), @constr_lsq, constr_option2, x);
-                    %exitflag
-                    %                      if(exitflag<0)
-% %                         pFit = p_tmp;
-% %                         chi2 = chi2_tmp;
-% %                     end
-%                         ar.ppl.xFit_tmp = ar.ppl.xFit_tmp + 3*xstd;
-%                         x=3;
-%                         [pFit, chi2, exitflag] = ...
-%                             fmincon(@ppl_constr_fkt, [ar.p(ar.qFit==1) ar.ppl.xFit_tmp], [], [],[], [], lb_corr, ub_corr, @constr_lsq, constr_option2, x);              
-%                         ar.ppl.xFit_tmp = xSim;
-%                         ar.p(ar.qFit==1) = pFit(1:end-1);
-%                         x=4;
-%                         [pFit, chi2, exitflag] = ...
-%                             fmincon(@ppl_constr_fkt, ar.p(ar.qFit==1), [], [],[], [], ar.lb(ar.qFit==1), ar.ub(ar.qFit==1), @constr_lsq, constr_option2, x);                     
-%                 
-%                      end
                 else
                     corr_option=optimoptions('fmincon','Algorithm','trust-region-reflective','DerivativeCheck','off','Display','none','GradObj','on','TolCon',1.e-2,'MaxIter',50,'TolFun',1.e-5,'TolX',1.e-4,'Hessian','user-supplied');%,'OutputFcn',@ppl_corr);
                     [pFit, chi2, exitflag] = ...
@@ -96,22 +85,9 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 end
                 %fprintf('fmincon finished after %i interations: %s\n', ar.fit.output.iterations, outputstr);
             end
-%         catch exception
-%             ar.p=pReset;
-%             if(takeY)
-%                 arLink(true,ar.model(m).data(c).tExp(1),true,jx, c, m,NaN);
-%             end
-%             
-%             fprintf('ERROR IN GOING BACK TO 95 for x=%i (%s)\n', x, exception.message);
-%             ar.ppl.xFit_tmp=NaN;
-%             
-%             return;
-%         en
 
     function [chi2, grad, H] = ppl_corr_fkt(pTrial, x)
-%         if(x~=0 && doPPL)
-%             fprintf('cannot re-optimize ppl=%i setting without constr_method set true \n', doPPL);
-%         end
+
         iter = iter+1;
         if(x==2)
             xExp_tmp=pTrial(end);
@@ -123,27 +99,15 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
             xExp_tmp=ar.ppl.xFit_tmp;
         end
         if (x==1 || ~isequal(pTrial,Last_pars))
-            if(takeY)
-               arLink(true,t_tmp,true,jx, c, m,xExp_tmp,xstd);  
-            else
-                arLink(true,t_tmp);
-            end
+            arLink(true,t_tmp,takeY,jx, c, m,xExp_tmp,xstd);  
             try
                 arChi2(ar.config.useSensis, pTrial,1)
             catch
                 fprintf('arChi2 failed at t= %d and xFit = %d for x=%i, reset xFit! \n', t_tmp, ar.ppl.xFit_tmp, x);
                 if(dir==1)
-                    if(takeY)                  
-                        ar.ppl.xFit_tmp = ar.model(m).data(c).ppl.x_high_vpl(jt, jx);                    
-                    else                 
-                        ar.ppl.xFit_tmp = ar.model(m).condition(c).ppl.x_high_vpl(jt, jx);
-                    end
+                    ar.ppl.xFit_tmp = ar.model(m).(data_cond)(c).ppl.x_high_vpl(jt, jx);                                       
                 else
-                    if(takeY)
-                        ar.ppl.xFit_tmp = ar.model(m).data(c).ppl.x_low_vpl(jt, jx);                    
-                    else
-                        ar.ppl.xFit_tmp = ar.model(m).condition(c).ppl.x_low_vpl(jt, jx);
-                    end
+                    ar.ppl.xFit_tmp = ar.model(m).(data_cond)(c).ppl.x_low_vpl(jt, jx);    
                 end
                 xExp_tmp = ar.ppl.xFit_tmp;
                 arLink(true,t_tmp,true,jx, c, m,xExp_tmp,xstd);  
@@ -152,28 +116,18 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
 
             %res = [ar.res ar.constr];
             res = ar.res;
-
-            if(takeY)
-               [~,it] = min(abs(ar.model(m).data(c).tExp-t_tmp));
-               if(length(find(ar.model(m).data(c).tExp==t_tmp))>1)
-                    it = it+1;               
-               end
-               xSim = ar.model(m).data(c).yExpSimu(it,jx); 
-            else
-                [~,it] = min(abs(ar.model(m).condition(c).tExp-t_tmp));
-                xSim = ar.model(m).condition(c).xExpSimu(it,jx);           
-            end
+            
+           [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp));
+           if(takeY && length(find(ar.model(m).data(c).tExp==t_tmp))>1)
+                it = it+1;               
+           end
+           xSim = ar.model(m).(data_cond)(c).([x_y 'ExpSimu'])(it,jx); 
+            
             if(qLog10)
                 xSim = log10(xSim);
             end
             if(nargout>1 && ar.config.useSensis)
                 sres = ar.sres(:, ar.qFit==1);
-    %             if(takeY && doPPL)
-    %                sres(ar.res_mLink==m & ar.res_type==1 & ar.res_dLink==c & ar.res_yLink==jx & ar.res_tLink==it,:) = [];
-    %             end
-    %             if(~isempty(ar.sconstr))
-    %                 sres = [ar.sres(:, ar.qFit==1); ar.sconstr(:, ar.qFit==1)];
-    %             end
             end
 
             if(~takeY)
@@ -256,31 +210,19 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
         xExp_tmp = ar.ppl.xFit_tmp;
     end
     if ~isequal(pTrial,Last_pars)
-        if(takeY)% && x == 3)
-           arLink(true,t_tmp,true,jx, c, m,xExp_tmp,xstd);  
-        else %if(x == 3)
-            arLink(true,t_tmp);
-        end
+        arLink(true,t_tmp,takeY,jx, c, m,xExp_tmp,xstd);  
         try
             arChi2(ar.config.useSensis, pTrial,1);
         catch
             fprintf('arChi2 failed at t= %d and xFit = %d, reset xFit! \n', t_tmp, ar.ppl.xFit_tmp);
             if(~doPPL)
                 if(dir==1)
-                    if(takeY)                  
-                        ar.ppl.xFit_tmp = ar.model(m).data(c).ppl.x_high_vpl(jt, jx);                    
-                    else                 
-                        ar.ppl.xFit_tmp = ar.model(m).condition(c).ppl.x_high_vpl(jt, jx);
-                    end
+                    ar.ppl.xFit_tmp = ar.model(m).(data_cond)(c).ppl.x_high_vpl(jt, jx);   
                 else
-                    if(takeY)
-                        ar.ppl.xFit_tmp = ar.model(m).data(c).ppl.x_low_vpl(jt, jx);                    
-                    else
-                        ar.ppl.xFit_tmp = ar.model(m).condition(c).ppl.x_low_vpl(jt, jx);
-                    end
+                    ar.ppl.xFit_tmp = ar.model(m).(data_cond)(c).ppl.x_low_vpl(jt, jx);                                       
                 end
                 xExp_tmp = ar.ppl.xFit_tmp;
-                arLink(true,t_tmp,true,jx, c, m,xExp_tmp,xstd);  
+                arLink(true,t_tmp,takeY,jx, c, m,xExp_tmp,xstd);  
                 arChi2(ar.config.useSensis, pTrial,1);
             end
         end
@@ -288,17 +230,13 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
         res = ar.res;
         if(nargout>1 && ar.config.useSensis)
             sres = ar.sres(:, ar.qFit==1);
-        end       
-        if(takeY)
-            [~,it] = min(abs(ar.model(m).data(c).tExp-t_tmp));
-           if(length(find(ar.model(m).data(c).tExp==t_tmp))>1)
-                it = it+1;               
-           end
-            xSim = ar.model(m).data(c).yExpSimu(it,jx);
-        else
-            [~,it] = min(abs(ar.model(m).condition(c).tExp-t_tmp));
-            xSim = ar.model(m).condition(c).xExpSimu(it,jx);
-        end
+        end      
+        [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp));
+       if(takeY && length(find(ar.model(m).(data_cond)(c).tExp==t_tmp))>1)
+            it = it+1;               
+       end
+        xSim = ar.model(m).(data_cond)(c).([x_y 'ExpSimu'])(it,jx);
+    
         if(qLog10)
             xSim = log10(xSim);
         end
@@ -382,16 +320,12 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 arChi2(ar.config.useSensis, xs,1);
             end
             res = ar.res;
-            if(takeY)
-                [~,it] = min(abs(ar.model(m).data(c).tExp-t_tmp));
-               if(length(find(ar.model(m).data(c).tExp==t_tmp))>1)
-                    it = it+1;               
-               end
-                xSim = ar.model(m).data(c).yExpSimu(it,jx);
-            else
-                [~,it] = min(abs(ar.model(m).condition(c).tExp-t_tmp));
-                xSim = ar.model(m).condition(c).xExpSimu(it,jx);
-            end
+            [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp));
+           if(takeY && length(find(ar.model(m).(data_cond)(c).tExp==t_tmp))>1)
+                it = it+1;               
+           end
+            xSim = ar.model(m).(data_cond)(c).([x_y 'ExpSimu'])(it,jx);
+           
             if(qLog10)
                 xSim = log10(xSim);
             end
@@ -485,17 +419,12 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
             end
             %res = [ar.res ar.constr];   
             res = ar.res;
-            if(takeY)
-                [~,it] = min(abs(ar.model(m).data(c).tExp-t_tmp));
-               if(length(find(ar.model(m).data(c).tExp==t_tmp))>1)
-                    it = it+1;               
-               end
-                xSim = ar.model(m).data(c).yExpSimu(it,jx);           
-            else
-                [~,it] = min(abs(ar.model(m).condition(c).tExp-t_tmp));
-                xSim = ar.model(m).condition(c).xExpSimu(it,jx);
-
-            end
+            [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp));
+           if(takeY && length(find(ar.model(m).(data_cond)(c).tExp==t_tmp))>1)
+                it = it+1;               
+           end
+            xSim = ar.model(m).(data_cond)(c).([x_y 'ExpSimu'])(it,jx);          
+           
             if(qLog10)
                 xSim = log10(xSim);
             end
@@ -530,28 +459,6 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
         
         cineq=[];
         GC=[];    
-%         cineq=x_orig-p(end);
-%         GC=zeros(length(p),1);
-%         GC(end)=-1;
-%         if(nargout>1 && ar.config.useSensis)
-%             sres = ar.sres(:, ar.qFit==1);
-%         	if(~takeY)
-%                 sxSim = zeros(1,length(ar.p));
-%                 if(~takeY)              
-%                     sxSim(ar.model(m).condition(c).pLink) = ...
-%                         squeeze(ar.model(m).condition(c).sxExpSimu(it,jx,:))';
-%                     for j10=find(ar.qLog10==1)
-%                         sxSim(j10) = sxSim(j10) * 10.^ar.p(j10) * log(10);
-%                     end
-%                 end
-% 
-%                 if(qLog10)
-%                     sxSim = sxSim / 10^xSim / log(10);
-%                 end
-% 
-%                 sres(end+1,:) = -sxSim(ar.qFit==1) / xstd;
-%             end       
-%         end
         if(takeY)
            sres_tmp = sres(ar.res_mLink==m & ar.res_type==1 & ar.res_dLink==c & ar.res_yLink==jx & ar.res_tLink==it,:);   
            res_tmp = res(ar.res_mLink==m & ar.res_type==1 & ar.res_dLink==c & ar.res_yLink==jx & ar.res_tLink==it);

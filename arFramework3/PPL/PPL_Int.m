@@ -3,25 +3,12 @@ global ar;
 ub_fit = ar.ub(ar.qFit==1);
 lb_fit = ar.lb(ar.qFit==1);
 interval=0.1;
-% if(dir==1)
-%     interval=0.1;
-% else
-%     interval=-0.1;
-% end  
+
 beta = sym('beta');
 p_tmp_ppl = ar.p(ar.qFit==1);
 if(size(p_tmp_ppl,1)>1)
     p_tmp_ppl = p_tmp_ppl';
 end
-% curr_mult = 0;
-% for i=1:10
-%     [fRHS, dps_A, ~] = get_ppl(t_tmp, stepsize, -stepsize/4*(i-1));
-%     curr_mult = ar.model(m).condition(c).ppl.xSens_tmp * dps_A';
-%     if(curr_mult>0)
-%         break;
-%     end
-% end
-% i
 
 [fRHS, dps_A, ~] = get_ppl(t_tmp, stepsize, NaN);
 dx = fRHS+0.;
@@ -72,27 +59,6 @@ else
         dps = 100*dps;
     end
 end
-% if(max(dps_A)==0)
-%     [fRHS, dps_A] = get_ppl(t_tmp, stepsize*2, NaN);
-%     dx = fRHS+0.;
-%     dps = dps_A';
-% end
-
-% ar.p(ar.qFit==1) = p_tmp_ppl + dps_A;
-% 
-% [~, dps_B] = get_ppl(t_tmp, stepsize/2, stepsize/2);
-% ar.p(ar.qFit==1) = p_tmp_ppl + dps_B;
-% 
-% [~, dps_C] = get_ppl(t_tmp, stepsize, stepsize/2);
-% ar.p(ar.qFit==1) = p_tmp_ppl;
-% dps = 1/5*(2*(dps_A + dps_B) + dps_C)';
-% ar.p(ar.qFit==1) = p_tmp_ppl + dps_C;
-% % 
-% [~, dps_D] = get_ppl(t_tmp, stepsize, stepsize);
-% ar.p(ar.qFit==1) = p_tmp_ppl;
-%dps = 1/6*(dps_A + 2*(dps_B+dps_C) + dps_D)';
-
-% dps = dps_C';
 
 dx = [dx; dps];
 
@@ -156,41 +122,7 @@ dx = [dx; dps];
         if(~takeY && ((ar.model(m).condition(c).ppl.xSens_tmp * test_vec' < 0 && dir==1) || (ar.model(m).condition(c).ppl.xSens_tmp * test_vec' > 0 && dir==-1)) ...
                 || takeY && ((ar.model(m).data(c).ppl.xSens_tmp * test_vec' < 0 && dir==1) || (ar.model(m).data(c).ppl.xSens_tmp * test_vec' > 0 && dir==-1)))
             test_vec = -test_vec;
-        end
-        
-%         Borth = sres_y - (sres_y * grad_woy')./norm(grad_woy)*(grad_woy./norm(grad_woy));
-%         Borth = Borth ./ norm(Borth);
-        %test_vec = Borth;
-        
-%         Borth_perpA = (Borth - (Borth * Aorth')./norm(Aorth)*(Aorth./norm(Aorth)));
-%         Aorth_perpB = -(Aorth - (Borth * Aorth')./norm(Borth)*(Borth./norm(Borth)));
-%         
-%         test_vec = Borth_perpA;
-        %test_vec = Borth_perpA / norm(Borth_perpA) + Aorth_perpB / norm(Aorth_perpB);
-        
-%         if((sres_y * test_vec' > 0 && dir==1) || (sres_y * test_vec' < 0 && dir==-1))
-%             test_vec = -test_vec;
-%         end
-        
-%         if(isfield(ar.ppl,'fRHS_ppl'));
-%             fRHS_ppl = ar.ppl.fRHS_ppl;
-%         else
-%             fRHS_ppl = ar.model(m).condition(c).dxdts(it,jx); 
-%         end
-%         if(jt>2)
-%             curve_xFit = (ar.model(m).condition(c).ppl.x_high(jt, jx) - 2*ar.model(m).condition(c).ppl.x_high(jt-1, jx) ...
-%                 + ar.model(m).condition(c).ppl.x_high(jt-2, jx)) / stepsize^2;
-% 
-%             if((curve_xFit>0 && dir ==1) || (curve_xFit<0 && dir==-1))
-%                 if((fRHS_ppl>0 && dir==1) || (fRHS_ppl<0 && dir==-1))
-%                     fRHS_ppl = (xSim - xSim3)/1.e-3;
-%                     %fRHS_ppl = fRHS*1.1;
-%                 else
-%                     fRHS_ppl = (xSim - xSim3)/1.e-3;
-%                     %fRHS_ppl = fRHS*0.9;
-%                 end
-%             end
-%         end                
+        end                     
 
         dy_ppl = zeros(size(ar.p));
         
