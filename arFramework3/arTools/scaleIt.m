@@ -599,7 +599,7 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
         fixedScale = 1;
     end
     
-    options                 = optimset('TolFun', 1e-5, 'TolX', 1e-4, 'MaxIter', 1e2, 'MaxFunevals', 1e3, 'Display', 'Iter', 'Jacobian', 'On' ); % 'DerivativeCheck', 'On'
+    options                 = optimset('TolFun', 1e-5, 'TolX', 1e-4, 'MaxIter', 1e2, 'MaxFunevals', 1e3, 'Display', 'Off', 'Jacobian', 'On' ); % 'DerivativeCheck', 'On'
     tol                     = 1e-7;
     errModel                = @(pars) eModel(fixedScale, pars, data, scaleLinks, length(conditionTargets), length(scalings), conditionLinks);
     
@@ -632,7 +632,6 @@ end
 
 function [res, J] = model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo, invTrafo )
     scales = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
-    %res = trafo( scales(scaleLinks) .* pars(conditionLinks) ) - trafo( data );
     res = trafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) ) - trafo( data );  
     
     % Jacobian if desired
