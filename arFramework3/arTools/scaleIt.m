@@ -99,14 +99,18 @@ function out = scaleIt( names, outFile, varargin )
     % Default mapping
     trafo           = @(x) x;
     invTrafo        = @(x) x;
+    dTrafo          = @(x) 1;
     
     if ( opts.logtrafo )
         trafo       = @(x) log10(x);
         invTrafo    = @(x) 10.^(x);
+        % Transform derivatives
+        dTrafo      = @(x) 1./(x.*log(10));
+        diTrafo     = @(x) 10.^x * log(10);
     end
     
     % Simplest error model
-    errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo, invTrafo);
+    errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo, invTrafo, dTrafo, diTrafo);
     errModelPars    = 0;
     
     if ( opts.twocomponent )
@@ -630,7 +634,7 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
     scalings = [fixedScale; p(numel(conditionTargets)+1:end - errModelPars)];
 end
 
-function [res, J] = model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo, invTrafo )
+function [res, J] = model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo, invTrafo, dTrafo, diTrafo )
     scales = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
     res = trafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) ) - trafo( data );  
     
@@ -638,11 +642,14 @@ function [res, J] = model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, co
     if ( nargout > 1 )
         J = zeros(numel(pars), numel(res));
         
+        dTraf = dTrafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) );
+        % Mean derivatives
         for jC = 1 : Ncond
-            J(jC, 1:numel(scaleLinks))              = (conditionLinks==jC) .* scales(scaleLinks);
+            J(jC, 1:numel(scaleLinks))              = (conditionLinks==jC) .* dTraf .* ( diTrafo(pars(conditionLinks)) .* scales(scaleLinks) );
         end
+        % Scale derivatives
         for jS = 2 : Nscale+1
-            J(jS + Ncond - 1, 1:numel(scaleLinks))  = (scaleLinks==jS) .* pars(conditionLinks);
+            J(jS + Ncond - 1, 1:numel(scaleLinks))  = (scaleLinks==jS) .* dTraf .* invTrafo( pars(conditionLinks) );
         end
         
         J = J.';
