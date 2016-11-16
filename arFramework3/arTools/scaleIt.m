@@ -100,6 +100,7 @@ function out = scaleIt( names, outFile, varargin )
     trafo           = @(x) x;
     invTrafo        = @(x) x;
     dTrafo          = @(x) 1;
+    diTrafo         = @(x) 1;
     
     if ( opts.logtrafo )
         trafo       = @(x) log10(x);
