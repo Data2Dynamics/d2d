@@ -37,7 +37,7 @@
 %                        variable
 %     varanalysis        Show variance analysis
 %
-% To do: Log trafo scaling, offsets and two component error model scaling
+% To do: Offsets
 
 function out = scaleIt( names, outFile, varargin )
 
@@ -48,8 +48,8 @@ function out = scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis' };
-    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 ];
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale' };
+    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
@@ -63,6 +63,7 @@ function out = scaleIt( names, outFile, varargin )
     {'', 'Rescaling result'} ...
     {'', 'Specified time point range to use'} ...
     {'', 'Variance analysis requested'} ...
+    {'', 'Not fitting scales'} ...
     };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
@@ -111,12 +112,12 @@ function out = scaleIt( names, outFile, varargin )
     end
     
     % Simplest error model
-    errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo, invTrafo, dTrafo, diTrafo);
+    errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks) model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks, trafo, invTrafo, dTrafo, diTrafo);
     errModelPars    = 0;
     
     if ( opts.twocomponent )
         % Two component error model
-        errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) flexible_model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, @twocomponent);
+        errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks) flexible_model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks, @twocomponent);
         errModelPars    = 2;
     end
      
@@ -157,8 +158,13 @@ function out = scaleIt( names, outFile, varargin )
                 if ( isExpField )
                     newData     = num2cell(cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})));
                     % +1 is added to make sure that we never overlap even if user starts counting 
-                    % from 0 or 1 inconsistently in different files 
+                    % from 0 or 1 inconsistently in different files
                     expField    = expField + max(cell2mat(data{jD}.(fieldNames{jN}))); % + 1;
+                    
+                    % Force everything to be on the same scale
+                    if ( opts.samescale )
+                        expField = 1;
+                    end
                 end
                 out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
             end
@@ -521,8 +527,8 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
         % specified in conditionTargets) and scaling (in the order
         % specified in scaleTargets).
         checkDims( data, conds, scaleTargets, conditionTargets );
-        [means, mlb, mub, scalings] = estimateObs( errModel, errModelPars, curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale, trafo ); 
-        replicates = trafo( curData ./ scalings(scaleLinks) );
+        [means, mlb, mub, scalings, offsets] = estimateObs( errModel, errModelPars, curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale, trafo ); 
+        replicates = trafo( (curData - offsets) ./ scalings(scaleLinks) );
         
         % To get where these are globally we have to map them back
         % means(conditionLinks) and scalings(scaleLinks) will sort them
@@ -578,7 +584,7 @@ function checkDims( data, condition, scaleTargets, conditionTargets )
     end
 end
 
-function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale, trafo )
+function [means, mlb, mub, scalings, offsets] = estimateObs( eModel, errModelPars, data, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale, trafo )
 
     % Parameters are [ means_for_each_condition , scalings ]
     Nmeans = size(conditionTargets,2);
@@ -590,13 +596,17 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
         means(a) = trafo( data(loc(1)) );
     end
     
-    % Set initial scalings
+    % Set initial scalings   
     Nscalings = numel(scaleTargets)-1;
     scalings = ones(Nscalings,1);
-    %initPar  = [ means.'; scalings; 1e-2 * ones( errModelPars, 1) ];
-    initPar  = [ means.'; scalings; 1e-8 * ones( errModelPars, 1) ];
     
-    lb = [ -1e9 * ones(Nmeans,1); zeros(Nscalings,1); 1e-9*ones(errModelPars,1) ];
+    Noffsets = 0;
+    offsetLinks = ones( size( conditionLinks ) );
+    offsets = 1e-9*ones(Noffsets, 1);
+    
+    initPar  = [ means.'; scalings; offsets; 1e-8 * ones( errModelPars, 1) ];
+    
+    lb = [ -1e9 * ones(Nmeans,1); zeros(Nscalings,1); 1e-15*ones(Noffsets,1); 1e-9*ones(errModelPars,1) ];
     if ( rescale )
         fixedScale = nanmax(nanmax(data));
         fprintf( ' <Rescale: %.5g>\n', fixedScale );
@@ -604,9 +614,9 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
         fixedScale = 1;
     end
     
-    options                 = optimset('TolFun', 1e-5, 'TolX', 1e-4, 'MaxIter', 1e2, 'MaxFunevals', 1e3, 'Display', 'Off', 'Jacobian', 'On' ); % 'DerivativeCheck', 'On'
+    options                 = optimset('TolFun', 1e-6, 'TolX', 1e-4, 'MaxIter', 1e2, 'MaxFunevals', 1e3, 'Display', 'Off', 'Jacobian', 'On', 'DerivativeCheck', 'Off' ); % 
     tol                     = 1e-7;
-    errModel                = @(pars) eModel(fixedScale, pars, data, scaleLinks, length(conditionTargets), length(scalings), conditionLinks);
+    errModel                = @(pars) eModel(fixedScale, pars, data, scaleLinks, length(conditionTargets), length(scalings), Noffsets, conditionLinks, offsetLinks );
     
     if exist('debug', 'var')
         initPar = randn(size(initPar));
@@ -624,7 +634,6 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
         round = round + 1;
     end
     figure;
-    plot(r)
     ci = nlparci(p,r,'Jacobian',J,'alpha',0.05);
     
     fprintf( 'Final objective: %g\n', sum(r.^2) );
@@ -632,33 +641,50 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
     means    = p(1:numel(means));
     mlb      = ci(1:numel(means),1);
     mub      = ci(1:numel(means),2);
-    scalings = [fixedScale; p(numel(conditionTargets)+1:end - errModelPars)];
+    scalings = [fixedScale; p(numel(conditionTargets)+1:end - errModelPars - Noffsets)];
+    
+    if ( Noffsets > 0 )
+        offsets  = p(end-errModelPars-Noffsets+1:end-errModelPars);
+    else
+        offsets  = 0;
+    end
 end
 
-function [res, J] = model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo, invTrafo, dTrafo, diTrafo )
+function [res, J] = model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks, trafo, invTrafo, dTrafo, diTrafo )
     scales = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
-    res = trafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) ) - trafo( data );  
+    if ( Noffsets > 0 )
+        res = trafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) + pars(offsetLinks+Ncond+Nscale) ) - trafo( data );  
+    else
+        res = trafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) ) - trafo( data );  
+    end
     
     % Jacobian if desired
     if ( nargout > 1 )
         J = zeros(numel(pars), numel(res));
         
-        dTraf = dTrafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) );
+        if ( Noffsets > 0 )
+            dTraf = dTrafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) + pars(offsetLinks+Ncond+Nscale) );
+        else
+            dTraf = dTrafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) );
+        end
         % Mean derivatives
         for jC = 1 : Ncond
-            J(jC, 1:numel(scaleLinks))              = (conditionLinks==jC) .* dTraf .* ( diTrafo(pars(conditionLinks)) .* scales(scaleLinks) );
+            J(jC, 1:numel(scaleLinks))                  = (conditionLinks==jC) .* dTraf .* ( diTrafo(pars(conditionLinks)) .* scales(scaleLinks) );
         end
         % Scale derivatives
         for jS = 2 : Nscale+1
-            J(jS + Ncond - 1, 1:numel(scaleLinks))  = (scaleLinks==jS) .* dTraf .* invTrafo( pars(conditionLinks) );
+            J(jS + Ncond - 1, 1:numel(scaleLinks))      = (scaleLinks==jS) .* dTraf .* invTrafo( pars(conditionLinks) );
         end
-        
+        % Offset derivatives
+        for jO = 1 : Noffsets
+            J(jO + Ncond + Nscale, 1:numel(scaleLinks)) = (offsetLinks==jO) .* dTraf;
+        end
         J = J.';
     end
 end
 
 % Does not deal with trafos yet
-function [res, J] = flexible_model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, errorModel )
+function [res, J] = flexible_model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks, errorModel )
     fix     = 50;
     scales  = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
     %sigma   = errorModel(pars(Ncond+Nscale+1:end), trafo( pars(conditionLinks) ), trafo( scales(scaleLinks) ));
