@@ -4,7 +4,11 @@
 %
 % ps:                           parameter values      
 % log_fit_history               [false]
+%                               if true, then the new fits in ar.fit is
+%                               stored in ar.fit_hist 
 % backup_save                   [false]
+%                               if true, ar of the last fit is stored in
+%                               arFits_backup.mat
 % prefunc                       function to be called before fitting (optional)
 % postfunc                      function to be called after fitting (optional)
 % 

@@ -4,6 +4,11 @@ function arGradAndHessian
 
 global ar
 
+if ~isfield(ar,'fit')
+    warning('arGradAndHessian stopped: ar.fit not available. Fit first.');
+    return
+end
+
 ar.fit.beta = nan(1, length(ar.p));
 ar.fit.alpha = nan(length(ar.p));
 
