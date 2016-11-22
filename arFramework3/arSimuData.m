@@ -18,13 +18,17 @@ if ~exist('tpoints','var')
     tpoints = [];
 end
 
+if ~exist('randomseed','var') || isempty(randomseed)
+    randomseed = 'shuffle';
+end
+
 % set random seed
 if(exist('rng','file')~=0)
     if(exist('randomseed','var') && ~isempty(randomseed))
         ar.simudata_seed = randomseed;
         rng(randomseed);
     else
-        rng('shuffle');
+        rng(randomseed);
         rngsettings = rng;
         ar.simudata_seed = rngsettings.Seed;
     end
