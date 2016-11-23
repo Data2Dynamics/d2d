@@ -38,9 +38,9 @@ The Data2Dynamics software package is a collection of numerical methods for quan
 
 The software and the theoretical concepts implemented therein were developed based on Systems Biology applications. Some of the applications are provided as examples and blue prints for new applications:
 
-* [Epo receptor model in BaF3 cells](https://github.com/Data2Dynamics/d2d/wiki/Becker_Science2010) - Becker et al., Science 2010
+* [IL-13 induced JAK2/STAT5 signaling model in MedB-1 cells](https://github.com/Data2Dynamics/d2d/wiki/Raia_CancerResearch2011) - Raia et al., Cancer Research 2010 
 
-* [IL-13 induced JAK2/STAT5 signaling model in MedB-1 cells](https://github.com/Data2Dynamics/d2d/wiki/Raia_CancerResearch2011) - Raia et al., Cancer Research 2010
+* [Epo receptor model in BaF3 cells](https://github.com/Data2Dynamics/d2d/wiki/Becker_Science2010) - Becker et al., Science 2010
 
 * [Epo induced JAK2/STAT5 signaling model in CFU-E cells](https://github.com/Data2Dynamics/d2d/wiki/Bachmann_MSB2011) - Bachmann et al., Molecular Systems Biology 2011
 
