@@ -48,8 +48,8 @@ function out = scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale' };
-    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0 ];
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale' };
+    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
@@ -64,6 +64,7 @@ function out = scaleIt( names, outFile, varargin )
     {'', 'Specified time point range to use'} ...
     {'', 'Variance analysis requested'} ...
     {'', 'Not fitting scales'} ...
+    {'', 'Prescaler specified'} ...
     };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
@@ -257,7 +258,7 @@ function out = scaleIt( names, outFile, varargin )
     %    end
     %end
     
-    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo, opts.rescale );
+    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo, opts.rescale, opts.prescale_args );
        
     % Find unique conditions (unrelated to time this time)
     groupNames = union(fieldNames{ismember(fieldNames, expVar)}, {fieldNames{cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))}});
@@ -400,10 +401,10 @@ function out = unitTest() %#ok
     out.y       = {1,2,3,  2,4,6,  10,20,30     3,6,9,  6,12,18 30,60,90}.';
 end
 
-function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList, trafo, invTrafo, rescale )
+function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList, trafo, invTrafo, rescale, prescale )
     verbose = 1;
     fieldNames = fieldnames(out);
-       
+    
     % Sort by fill
     fill = zeros(1, length(fieldNames));
     for jN = 1 : length( fieldNames )
@@ -447,11 +448,11 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     
     % Determine data fields
     dataFields  = setdiff( fieldNames, union( conditionFields, expVar ) );
-    
+        
     if ~isempty( obsList )
         dataFields = intersect( dataFields, obsList );
     end
-    
+        
     % Assign data fields to common groups
     if ( isempty( obsGroups ) )
         disp( 'No groups specified.' );
@@ -489,7 +490,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     
     expVar = fieldNames(cell2mat(cellfun(@(a)strcmp(a, expVar), fieldNames, 'UniformOutput', false)));
     nObs  = length( dataFields );
-    
+
     % Set up a unique scaling factor for each group
     scales = cell(1, nObs);
     current = 0;
@@ -504,16 +505,17 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     for jG = 1 : nGroups
         curScale = []; curData = []; curConditions = []; obsjD = [];
         for jD = obsGroups{jG}
-            fprintf('Processing obs group %s  ', dataFields{jD});
-            nData           = cell2mat(out.(dataFields{jD}));        %    Process single observation
-            Q{jD}           = find(~isnan( nData ));                 %#ok Fetch points that have data
-            curData         = [curData; nData(Q{jD})];               %#ok
-            curConditions   = [curConditions, jcondition(Q{jD}).'];  %#ok Fetch condition IDs this observable appears in
-            obsjD           = [obsjD; jD*ones(size(Q{jD}))];         %#ok Observable => This is paired with the conditions of observables in the same group, to ensure they get separate means in the estimation process
-            curScale        = [curScale; scales{jD}(Q{jD})];         %#ok
+            fprintf('Processing obs %s', dataFields{jD} );
+            nData  = cell2mat(out.(dataFields{jD}));                % Process single observation
+            if ~isempty( prescale )
+                nData  = prescale( nData );                         % Apply forced prescaling function
+            end
+            Q{jD}           = find(~isnan( nData ));                %#ok Fetch points that have data
+            curData         = [curData; nData(Q{jD})];              %#ok
+            curConditions   = [curConditions, jcondition(Q{jD}).']; %#ok Fetch condition IDs this observable appears in
+            obsjD           = [obsjD; jD*ones(size(Q{jD}))];        %#ok Observable => This is paired with the conditions of observables in the same group, to ensure they get separate means in the estimation process
+            curScale        = [curScale; scales{jD}(Q{jD})];        %#ok
         end
-        
-        %curData = curData / nanmax(nanmax(curData));
         
         % ConditionLinks links the replicates to the "true" IDs (i.e. true conditions, t, cond pairs)
         % ScaleLinks refers to which scale corresponds to which datapoint.
@@ -595,18 +597,13 @@ function [means, mlb, mub, scalings, offsets] = estimateObs( eModel, errModelPar
         loc = find(conditionLinks==a);
         means(a) = trafo( data(loc(1)) );
     end
-    
-    % Set initial scalings   
+
     Nscalings = numel(scaleTargets)-1;
-    scalings = ones(Nscalings,1);
-    
     Noffsets = 0;
     offsetLinks = ones( size( conditionLinks ) );
     offsets = 1e-9*ones(Noffsets, 1);
     
-    initPar  = [ means.'; scalings; offsets; 1e-8 * ones( errModelPars, 1) ];
-    
-    lb = [ -1e9 * ones(Nmeans,1); zeros(Nscalings,1); 1e-15*ones(Noffsets,1); 1e-9*ones(errModelPars,1) ];
+    lb = [ -1e12 * ones(Nmeans,1); zeros(Nscalings,1); 1e-15*ones(Noffsets,1); 1e-15*ones(errModelPars,1) ];
     if ( rescale )
         fixedScale = nanmax(nanmax(data));
         fprintf( ' <Rescale: %.5g>\n', fixedScale );
@@ -614,9 +611,15 @@ function [means, mlb, mub, scalings, offsets] = estimateObs( eModel, errModelPar
         fixedScale = 1;
     end
     
-    options                 = optimset('TolFun', 1e-6, 'TolX', 1e-4, 'MaxIter', 1e2, 'MaxFunevals', 1e3, 'Display', 'Off', 'Jacobian', 'On', 'DerivativeCheck', 'Off' ); % 
-    tol                     = 1e-7;
-    errModel                = @(pars) eModel(fixedScale, pars, data, scaleLinks, length(conditionTargets), length(scalings), Noffsets, conditionLinks, offsetLinks );
+    % Set initial scalings   
+    scalings = fixedScale * ones(Nscalings,1);
+    initPar  = [ means.'; scalings; offsets; 1e-8 * ones( errModelPars, 1) ];
+    
+    fprintf( 'Number of free scaling factors %d\n', Nscalings );    
+    
+    options    = optimset('TolFun', 1e-7, 'TolX', 1e-6, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Iter', 'Jacobian', 'On', 'DerivativeCheck', 'Off' ); % 
+    tol        = 1e-7;
+    errModel   = @(pars) eModel(fixedScale, pars, data, scaleLinks, length(conditionTargets), length(scalings), Noffsets, conditionLinks, offsetLinks );
     
     if exist('debug', 'var')
         initPar = randn(size(initPar));
@@ -624,12 +627,12 @@ function [means, mlb, mub, scalings, offsets] = estimateObs( eModel, errModelPar
         Jfin=findiff(errModel, initPar);
     end
     
-    [p, rn, r, ~, ~, ~, J]  = lsqnonlin( errModel, initPar, lb, 1e25*ones(size(initPar)), options );
+    [p, rn, r, ~, ~, ~, J]  = lsqnonlin( errModel, initPar, lb, 1e125*ones(size(initPar)), options );
     rLast = inf;
     round = 1;
-    while( (rLast - rn)/rn > tol )
+    while( ((rLast - rn)/rn > tol) )
         rLast = rn;
-        [p, rn, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, lb, 1e25*ones(size(initPar)), options );
+        [p, rn, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, lb, 1e125*ones(size(initPar)), options );
         fprintf('Round %d: Difference last and current optimization: %g\n', round, rLast-rn);
         round = round + 1;
     end

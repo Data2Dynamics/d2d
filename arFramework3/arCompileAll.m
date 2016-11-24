@@ -74,7 +74,7 @@ if ( ~legacy_steps )
             {'smooth1',         '(heaviside((%s - %s)/(%s - %s)) - (heaviside((%s - %s)/(%s - %s))*(%s - %s)*(heaviside((%s - %s)/(%s - %s)) - 1))/(%s - %s))^2*((2*heaviside((%s - %s)/(%s - %s))*(%s - %s)*(heaviside((%s - %s)/(%s - %s)) - 1))/(%s - %s) - 2*heaviside((%s - %s)/(%s - %s)) + 3)', [3, 1, 2, 3, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 3, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 3, 3, 1, 2, 3], 'smooth1(t, start, end)' }, ...
             {'smooth2',         '-(heaviside((%s - %s)/(%s - %s)) - (heaviside((%s - %s)/(%s - %s))*(%s - %s)*(heaviside((%s - %s)/(%s - %s)) - 1))/(%s - %s))^3*((heaviside((%s - %s)/(%s - %s)) - (heaviside((%s - %s)/(%s - %s))*(%s - %s)*(heaviside((%s - %s)/(%s - %s)) - 1))/(%s - %s))*((6*heaviside((%s - %s)/(%s - %s))*(%s - %s)*(heaviside((%s - %s)/(%s - %s)) - 1))/(%s - %s) - 6*heaviside((%s - %s)/(%s - %s)) + 15) - 10)', [3, 1, 2, 3, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 3, 3, 1, 2, 3, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 3, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 3, 3, 1, 2, 3], 'smooth2(t, start, end)' }, ...
         };
-        
+    
     % Add brackets for replacement safety
     for a = 1 : size( ar.config.specialFunc, 2 )
         ar.config.specialFunc{a}{2} = strrep(ar.config.specialFunc{a}{2}, '%s', '(%s)');
@@ -933,8 +933,14 @@ function sensBlock = verifyRow( sensBlock, func, location )
             % Attempt to simplify (sometimes this gets rid of dirac
             % functions
             fprintf( 'Dirac detected in derivative => attempting to simplify ...' );
-            jacElem = simplify( sensBlock(1,k) );
-            jacElemStr = char(sensBlock(1,k));
+            try
+                jacElem = simplify( sensBlock(1,k) );
+                jacElemStr = char(jacElem);
+            catch
+                pretty( sensBlock(1,k) );
+                error( 'Sensitivity expression for %s equation contains a non-compilable error (e.g. division by zero)', char(location) );
+            end
+
             if (numel(strfind(jacElemStr, 'dirac(')>0))
                 fprintf( ' [FAILED]\n' );
                 % We failed to resolve the derivatives. Give up, but
