@@ -10,6 +10,17 @@ end
 
 ar_path = fileparts(which('arInit.m'));
 
+% if the path to d2d-folder has been specified with a local path, then turn it to
+% the global path:
+arFolderName = strsplit(ar_path,filesep);
+matpath = path;
+matpath = strsplit(matpath,pathsep);
+if ~isempty(strmatch(arFolderName{end},matpath))
+    warning('It seems that you specified the path to d2d using local paths, e.g. by addpath(''arFramework3). The path is now switch to a gloabl one.')
+    rmpath(arFolderName{end})
+    addpath(ar_path)
+end
+
 warning('off','MATLAB:rmpath:DirNotFound')
 
 % add all subfolders of arFramework3 folder to MATLAB search path
