@@ -30,6 +30,10 @@ if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
 
+if size(ps,2) ~= size(ar.p,2)
+    warning('size(ps,2) does not conicide with size(ar.p,2), return without plotting')
+end
+
 % constants
 linesize = 0.5;
 
@@ -114,7 +118,7 @@ for jp=1:np
                                     hold(g, 'on');
                                     if(isfield(ar.model(jm).data(jd), 'yExp') && jp==np)
                                         
-                                        if( (ar.useFitErrorMatrix == 0 && ar.config.ploterrors~=1) ||...
+                                        if isfield(ar,'useFitErrorMatrix') && ( (ar.useFitErrorMatrix == 0 && ar.config.ploterrors~=1) ||...
                                                 (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
                                             plot(g, tExp, 10.^yExp, markerstyle, Clinesdata{:});
                                         else

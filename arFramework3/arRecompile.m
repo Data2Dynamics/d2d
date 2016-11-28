@@ -33,7 +33,15 @@ emptyObs = zeros(size(ms));
 for m=1:length(ar.model)
     if(isfield(ar.model(m).data,'name'))
         ds{m} = {ar.model(m).data.name};        
-        [uni,ia,ib]= unique(regexprep(ds{m},'_nExpID(\d)+',''));
+        try % new code (unfortunately not tested, sorry)
+            prands = [ar.model(m).data.prand];
+            for ii=1:length(prands)
+                ds{m} = regexprep(ds{m},['_',prands{ii},'(\d)+'],'');
+            end
+        catch            % old code
+            disp('Please check replacement code of random parameters in arRecompile.m')
+            [uni,ia,ib]= unique(regexprep(ds{m},'_nExpID(\d)+',''));  % nExpID should in general be replaced by
+        end
         ds{m} = uni(ib);  % replace zurueck
         ds{m} = ds{m}(sort(ia)); % nur die unique, aber in alter reihenfolge
 
