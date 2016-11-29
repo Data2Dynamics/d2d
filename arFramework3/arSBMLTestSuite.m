@@ -76,7 +76,7 @@ for jm = model_id
     varnames = results.Properties.VariableNames(2:end);
 
     try
-        [~, modelname] = arImportSBML(xml_name,tmax);
+        [~, modelname] = arImportSBML(xml_name,'tEnd',tmax);
         arLoadModel(modelname)
         arCompileAll
         arSimu(0,1,1);
@@ -110,8 +110,8 @@ for jm = model_id
             title(modelnum)
             legend([varnames varnames])
             
-            fprintf(1,'\nPress any key to continue\n\n');
-            pause;
+            %fprintf(1,'\nPress any key to continue\n\n');
+            %pause;
             
             close gcf;
         end
