@@ -1,11 +1,12 @@
 % Simulate data for current parameter settings
 %
-% arSimuData(m, jplot, tpoints)
+% arSimuData(m, jplot, tpoints, randomseed)
 %   tpoints:    time points for simulation        
 %   m:          model index                    
-%   jplot:      plot index                    
+%   jplot:      plot index
+%   randomseed  random seed for noise generation
 
-function arSimuData(m, jplot, tpoints)
+function arSimuData(m, jplot, tpoints, randomseed)
 
 global ar
 
@@ -17,24 +18,40 @@ if ~exist('tpoints','var')
     tpoints = [];
 end
 
+if ~exist('randomseed','var') || isempty(randomseed)
+    randomseed = 'shuffle';
+end
+
+% set random seed
+if(exist('rng','file')~=0)
+    if(exist('randomseed','var') && ~isempty(randomseed))
+        ar.simudata_seed = randomseed;
+        rng(randomseed);
+    else
+        rng(randomseed);
+        rngsettings = rng;
+        ar.simudata_seed = rngsettings.Seed;
+    end
+end
+
 if(~exist('jplot','var') || isempty(jplot))
     jplot = [];
 end
 
 if(~exist('m','var') || isempty(m))
     for jm=1:length(ar.model)
-        arSimuData(jm, jplot, tpoints);
+        arSimuData(jm, jplot, tpoints, randomseed);
     end
     return
 else % m index provided:
     if(isempty(jplot))
         for jplot=1:length(ar.model(m).plot)
-            arSimuData(m, jplot, tpoints);
+            arSimuData(m, jplot, tpoints, randomseed);
         end
         return
     elseif(length(jplot)>1)
         for jjplot=jplot
-            arSimuData(m, jjplot, tpoints);
+            arSimuData(m, jjplot, tpoints, randomseed);
         end     
         return
     end
@@ -60,7 +77,7 @@ tmp_qLog10 = ar.qLog10;
 arLink(true);
 
 ar.p = tmp_p;
-ar.lb = tmp_lb
+ar.lb = tmp_lb;
 ar.ub = tmp_ub;
 ar.qFit = tmp_qFit;
 ar.qLog10 = tmp_qLog10;

@@ -250,16 +250,18 @@ for jj=1:length(indices)
         
         % If the interactivity system is enabled, register the callbacks
         % and provide arInteractivity with the required data.
-        if ( arInteractivity )
-            if (~exist('i_largest_std', 'var')||~i_largest_std)
-                i_largest_std = 1 : length( legendstmp );
+        if ( exist( 'arInteractivity', 'file' ) )
+            if ( arInteractivity )
+                if (~exist('i_largest_std', 'var')|~i_largest_std) %#ok
+                    i_largest_std = 1 : length( legendstmp );
+                end
+                lineLegends.legends = legendstmp;
+                lineLegends.handles = legendstmplines;
+                lineLegends.currentLegend.handles = legendstmplines(i_largest_std);
+                lineLegends.currentLegend.legends = legendstmp(i_largest_std);
+                lineLegends.currentLegend.ID = 1;
+                arInteractivity( 'ple', lineLegends );
             end
-            lineLegends.legends = legendstmp;
-            lineLegends.handles = legendstmplines;
-            lineLegends.currentLegend.handles = legendstmplines(i_largest_std);
-            lineLegends.currentLegend.legends = legendstmp(i_largest_std);
-            lineLegends.currentLegend.ID = 1;
-            arInteractivity( 'ple', lineLegends );
         end
         
         if(xlimtmp2>0)

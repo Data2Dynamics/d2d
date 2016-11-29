@@ -1,6 +1,11 @@
 % generate random parameter samples
 %   - latin hyper cube sampling (ar.config.useLHS = true)
 %   - random sampling from prior
+% 
+%   Only fitted parameters are sampled, i.e. only parameters with
+%       a) qFit==1
+%       b) qError==1 if ar.config.fiterrors==1
+%   
 %
 % ps = arRandomPars(n, randomseed)
 %
@@ -31,14 +36,19 @@ end
 ps = ones(n,1) * ar.p;
 
 if(isfield(ar.config, 'useLHS') && ar.config.useLHS==1) % LHS samples
-    q_select = ar.qFit==1;
+    if ar.config.fiterrors==1
+        q_select = ar.qFit==1;
+    else
+        q_select = ar.qFit==1  & ar.qError~=1;
+    end
+    
     psrand = lhsdesign(n,sum(q_select));
     psrand = psrand .* (ones(n,1)*(ar.ub(q_select) - ar.lb(q_select)));
     psrand = psrand + (ones(n,1)*ar.lb(q_select));
     ps(:,q_select) = psrand;
 elseif(isfield(ar.config, 'useLHS') && ar.config.useLHS==2) % random samples without LHS, prior considered if available
     for jp=1:length(ar.p)
-        if(ar.qFit(jp)==1)
+        if(ar.qFit(jp)==1  && (ar.config.fiterrors~=0 || ar.qError(jp)~=1 ) )  % Error parameters should not be altered if fiterrors==0
             if(ar.type(jp)==0 || ar.type(jp)==2) % uniform prior or uniform with normal bounds
                 ps(:,jp) = ar.lb(jp) + (ar.ub(jp) - ar.lb(jp)) * rand(n,1);
             elseif(ar.type(jp)==1 || ar.type(jp)==3) % normal prior or L1
@@ -52,7 +62,12 @@ elseif(isfield(ar.config, 'useLHS') && ar.config.useLHS==2) % random samples wit
         end
     end
 else % uniformly distributed, i.e. rand within the range [ar.lb, ar.ub]
-    q_select = ar.qFit==1;
+    if ar.config.fiterrors==1
+        q_select = ar.qFit==1;
+    else
+        q_select = ar.qFit==1  & ar.qError~=1;
+    end
+    
     psrand = rand(n,sum(q_select));
     psrand = psrand .* (ones(n,1)*(ar.ub(q_select) - ar.lb(q_select)));
     psrand = psrand + (ones(n,1)*ar.lb(q_select));

@@ -20,6 +20,8 @@
 %                       should make the function return 1 if the condition
 %                       is to be removed. Note that the input to the
 %                       function is a *string* not a number.
+% 'RemoveEmptyConds'    This flag allows you to remove conditions that have
+%                       no data points.
 %       Example:
 %           arLoadData( 'mydata', 1, 'csv', true, 'RemoveConditions', ...
 %           {'input_il6', '0', 'input_dcf', @(dcf)str2num(dcf)>0};
@@ -118,13 +120,14 @@ else
     end
 end
 
-switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions'};
-extraArgs = [ 1, 1, 1, 1];
+switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds'};
+extraArgs = [ 1, 1, 1, 1, 0 ];
 description = { ...
     {'', 'Multiple shooting on'} ...
     {'', 'Ignoring specific conditions'} ...
     {'', 'Ignoring specific observables'} ...
-    {'', 'Split data set into specific conditions'} };
+    {'', 'Split data set into specific conditions'}, ...
+    {'', 'Removing conditions without data'} };
     
 opts = argSwitch( switches, extraArgs, description, 1, varargin );
 
@@ -759,37 +762,44 @@ end
 if(sum(qcond) > 0)
     condi_header = header(qcond);
     if ~isempty(dataCell)
-        [condis, ~, jcondis] = uniqueRowsCA(dataCell(:,qcond));
+        [condis, ind, jcondis] = uniqueRowsCA(dataCell(:,qcond));
     else
-        [condis, ~, jcondis] = unique(data(:,qcond),'rows');
+        [condis, ind, jcondis] = unique(data(:,qcond),'rows');
         condis = mymat2cell(condis);
     end
 
-    if (opts.removeconditions)
+    if (opts.removeconditions || opts.removeemptyconds)
         selected = true(1, size(condis,1));
-        for a = 1 : 2 : length( opts.removeconditions_args )
-            cc = ismember( condi_header, opts.removeconditions_args{a} );
-            if ( sum( cc ) > 0 )
-                values = condis(:,cc);
-                
-                % If the argument is a function handle, we evaluate them
-                % for each element
-                val = opts.removeconditions_args{a+1};
-                if ( isa(val, 'function_handle') )
-                    for jv = 1 : length( values )
-                        accepted(jv) = val(values{jv});
+        if ( opts.removeconditions )
+            for a = 1 : 2 : length( opts.removeconditions_args )
+                cc = ismember( condi_header, opts.removeconditions_args{a} );
+                if ( sum( cc ) > 0 )
+                    values = condis(:,cc);
+
+                    % If the argument is a function handle, we evaluate them
+                    % for each element
+                    val = opts.removeconditions_args{a+1};
+                    if ( isa(val, 'function_handle') )
+                        for jv = 1 : length( values )
+                            accepted(jv) = val(values{jv});
+                        end
+                    else
+                        if (isnumeric(val))
+                            val = num2str(val);
+                        end
+                        if ~ischar(val)
+                            error( 'Filter argument for removecondition is of the wrong type' );
+                        end
+                        accepted = ismember(values, val).';
                     end
-                else
-                    if (isnumeric(val))
-                        val = num2str(val);
-                    end
-                    if ~ischar(val)
-                        error( 'Filter argument for removecondition is of the wrong type' );
-                    end
-                    accepted = ismember(values, val).';
+                    selected = selected & ~accepted;
                 end
-                selected = selected & ~accepted;
             end
+        end
+        if(opts.removeemptyconds)
+            % Find out for which conditions we actually have data
+            hasD = max(~isnan(data(ind,qobs)), [], 2);
+            selected(hasD==0) = false;
         end
         condis = condis(selected,:);
         
@@ -800,7 +810,7 @@ if(sum(qcond) > 0)
         jcondis = mapTo(jcondis);
     end
     
-    % exist if no data left
+    % exit if no data left
     if(size(condis,1)==0)
         return
     end

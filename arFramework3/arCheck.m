@@ -10,6 +10,17 @@ end
 
 ar_path = fileparts(which('arInit.m'));
 
+% if the path to d2d-folder has been specified with a local path, then turn it to
+% the global path:
+arFolderName = strsplit(ar_path,filesep);
+matpath = path;
+matpath = strsplit(matpath,pathsep);
+if ~isempty(strmatch(arFolderName{end},matpath))
+    warning('It seems that you specified the path to d2d using local paths, e.g. by addpath(''arFramework3). The path is now switch to a gloabl one.')
+    rmpath(arFolderName{end})
+    addpath(ar_path)
+end
+
 warning('off','MATLAB:rmpath:DirNotFound')
 
 % add all subfolders of arFramework3 folder to MATLAB search path
@@ -119,9 +130,12 @@ if (exist('compileCeres', 'file') == 0)
     addpath([ar_path '/ThirdParty/Ceres'])
 end
 if (exist('TranslateSBML', 'file') == 0)
-    addpath([ar_path '/ThirdParty/libsbml'])
+    addpath([ar_path '/ThirdParty/libSBML'])
 end
-    
+if (exist('fminsearchbnd', 'file') == 0)
+    addpath([ar_path '/ThirdParty/FMINSEARCHBND'])
+end
+
 %% CVODES
 
 % uncompress and expand CVODES
@@ -133,8 +147,6 @@ if(exist([ar_path '/sundials-2.6.1'],'dir') == 0)
 end
 
 % write sundials_config.h
-% if(exist([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'],'file') == 0)
-%     fid = fopen([ar_path '/sundials-2.5.0/include/sundials/sundials_config.h'], 'W');
 if(exist([ar_path '/sundials-2.6.1/include/sundials/sundials_config.h'],'file') == 0)
     fid = fopen([ar_path '/sundials-2.6.1/include/sundials/sundials_config.h'], 'W');
     if(fid==-1)

@@ -19,12 +19,17 @@ end
 if(has_git)
 	old_dir = pwd;
 	cd(repo_path)
-    if(isunix)
-        is_repo = system('git status >/dev/null 2>&1')==0;
-    else
-        is_repo = system('git status >nul 2>&1')==0;
+    try
+        if(isunix)
+            is_repo = system('git status >/dev/null 2>&1')==0;
+        else
+            is_repo = system('git status >nul 2>&1')==0;
+        end
+        cd(old_dir)
+    catch err
+        cd(old_dir)
+        rethrow(err)
     end
-    cd(old_dir)
 else
 	is_repo = false;
 end

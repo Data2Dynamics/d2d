@@ -4,7 +4,7 @@
 %
 % m:        model index
 % c:        condition index
-% copasi:   copasi compatibility mode
+% copasi:   use amounts as states (this is the SBML standard, hence default = true)
 
 function arExportSBML(m, c, copasi)
 
@@ -18,7 +18,7 @@ if(~exist([cd '/SBML' ], 'dir'))
 end
 
 if(~exist('copasi','var'))
-    copasi = false;
+    copasi = true;
 end
 
 M = TranslateSBML(which('empty.xml'));
@@ -121,11 +121,13 @@ for jx = 1:length(ar.model(m).x)
     M.species(jx).version = 4;
     
     qp = ismember(ar.pLabel, ar.model(m).px0{jx}); %R2013a compatible
-    if(sum(qp)==1)
+    % check if init parameter still exists in condition parameters
+    is_set_cond = sum(ismember(ar.model(m).condition(c).fp, ar.model(m).px0{jx}))==0;
+    if(sum(qp)==1 && ~is_set_cond)
         M.species(jx).initialConcentration = 1;
         Crules{end+1,1} = ar.model(m).x{jx}; %#ok<AGROW>
         Crules{end,2} = ar.pLabel{qp}; %#ok<AGROW>
-    elseif(sum(qp)==0)
+    elseif(sum(qp)==0 || is_set_cond)
         qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx}); %R2013a compatible
         if(sum(qp)==1)
             pvalue = char(sym(ar.model(m).condition(c).fp{qp}));

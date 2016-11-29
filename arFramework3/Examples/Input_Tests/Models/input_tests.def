@@ -14,6 +14,8 @@ Step             C  nM  conc.  "step1(t, pre_step, 50, post_step)"
 TwoStep          C  nM  conc.  "step2(t, pre_step, 25, pre_step+step_size, 50, pre_step+2*step_size )"
 SmoothStep       C  nM  conc.  "smoothstep1(t, pre_step, 50, post_step, smoothness)"
 SmoothTwoStep    C  nM  conc.  "smoothstep2(t, pre_step, 25, pre_step+step_size, 50, pre_step+2*step_size, smoothness)"
+Smooth1          C  nM  conc.  "smooth1(t, 40, 50)"
+Smooth2          C  nM  conc.  "smooth2(t, 40, 50)"
 
 REACTIONS
 

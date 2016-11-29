@@ -1,0 +1,85 @@
+DESCRIPTION
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 25	
+
+INPUTS
+
+OBSERVABLES
+pp1_mrna_obs	 C	 "n/a"	 conc.	 0 0 "pp1_mrna" "pp1_mrna"
+pp2_mrna_obs	 C	 "n/a"	 conc.	 0 0 "pp2_mrna" "pp2_mrna"
+pp3_mrna_obs	 C	 "n/a"	 conc.	 0 0 "pp3_mrna" "pp3_mrna"
+pp4_mrna_obs	 C	 "n/a"	 conc.	 0 0 "pp4_mrna" "pp4_mrna"
+pp5_mrna_obs	 C	 "n/a"	 conc.	 0 0 "pp5_mrna" "pp5_mrna"
+pp6_mrna_obs	 C	 "n/a"	 conc.	 0 0 "pp6_mrna" "pp6_mrna"
+p1_obs           C	 "n/a"	 conc.	 0 0 "p1" "p1"
+p2_obs           C	 "n/a"	 conc.	 0 0 "p2" "p2"
+p3_obs           C	 "n/a"	 conc.	 0 0 "p3" "p3"
+p4_obs           C	 "n/a"	 conc.	 0 0 "p4" "p4"
+p5_obs           C	 "n/a"	 conc.	 0 0 "p5" "p5"
+p6_obs           C	 "n/a"	 conc.	 0 0 "p6" "p6"
+
+ERRORS
+pp1_mrna_obs	 "sqrt(0.05^2 + (0.05*pp1_mrna_obs)^2)"
+pp2_mrna_obs	 "sqrt(0.05^2 + (0.05*pp2_mrna_obs)^2)"
+pp3_mrna_obs	 "sqrt(0.05^2 + (0.05*pp3_mrna_obs)^2)"
+pp4_mrna_obs	 "sqrt(0.05^2 + (0.05*pp4_mrna_obs)^2)"
+pp5_mrna_obs	 "sqrt(0.05^2 + (0.05*pp5_mrna_obs)^2)"
+pp6_mrna_obs	 "sqrt(0.05^2 + (0.05*pp6_mrna_obs)^2)"
+p1_obs           "sqrt(0.05^2 + (0.05*p1_obs)^2)"
+p2_obs           "sqrt(0.05^2 + (0.05*p2_obs)^2)"
+p3_obs           "sqrt(0.05^2 + (0.05*p3_obs)^2)"
+p4_obs           "sqrt(0.05^2 + (0.05*p4_obs)^2)"
+p5_obs           "sqrt(0.05^2 + (0.05*p5_obs)^2)"
+p6_obs           "sqrt(0.05^2 + (0.05*p6_obs)^2)"
+
+
+CONDITIONS
+
+p1_degradation_rate	 "p_degradation_rate * relto_p_degradation_rate"
+p2_degradation_rate	 "p_degradation_rate * relto_p_degradation_rate"
+p3_degradation_rate	 "p_degradation_rate * relto_p_degradation_rate"
+p4_degradation_rate	 "p_degradation_rate * relto_p_degradation_rate"
+p5_degradation_rate	 "p_degradation_rate * relto_p_degradation_rate"
+p6_degradation_rate	 "p_degradation_rate * relto_p_degradation_rate"
+        
+pro1_strength   "pro1_strength*(1-gene1_ko) * relto_pro1_strength"
+rbs1_strength   "rbs1_strength*(1-gene1_ko)*(1+rbs1_ic) * relto_rbs1_strength"
+pro2_strength   "pro2_strength*(1-gene2_ko) * relto_pro2_strength"
+rbs2_strength   "rbs2_strength*(1-gene2_ko)*(1+rbs2_ic) * relto_rbs2_strength"
+pro3_strength   "pro3_strength*(1-gene3_ko) * relto_pro3_strength"
+rbs3_strength   "rbs3_strength*(1-gene3_ko)*(1+rbs3_ic) * relto_rbs3_strength"
+pro4_strength   "pro4_strength*(1-gene4_ko) * relto_pro4_strength"
+rbs4_strength   "rbs4_strength*(1-gene4_ko)*(1+rbs4_ic) * relto_rbs4_strength"
+pro5_strength   "pro5_strength*(1-gene5_ko) * relto_pro5_strength"
+rbs5_strength   "rbs5_strength*(1-gene5_ko)*(1+rbs5_ic) * relto_rbs5_strength"
+pro6_strength   "pro6_strength*(1-gene6_ko) * relto_pro6_strength"
+rbs6_strength   "rbs6_strength*(1-gene6_ko)*(1+rbs6_ic) * relto_rbs6_strength"
+
+pp1_mrna_degradation_rate 	"1 + (4*sirna1_kd)"
+pp2_mrna_degradation_rate 	"1 + (4*sirna2_kd)"
+pp3_mrna_degradation_rate 	"1 + (4*sirna3_kd)"
+pp4_mrna_degradation_rate 	"1 + (4*sirna4_kd)"
+pp5_mrna_degradation_rate 	"1 + (4*sirna5_kd)"
+pp6_mrna_degradation_rate 	"1 + (4*sirna6_kd)"
+
+v1_Kd       "v1_Kd* relto_v1_Kd"
+v1_h        "v1_h * relto_v1_h"
+v2_Kd       "v2_Kd* relto_v2_Kd"
+v2_h        "v2_h * relto_v2_h"
+v3_Kd       "v3_Kd* relto_v3_Kd"
+v3_h        "v3_h * relto_v3_h"
+v4_Kd       "v4_Kd* relto_v4_Kd"
+v4_h        "v4_h * relto_v4_h"
+v5_Kd       "v5_Kd* relto_v5_Kd"
+v5_h        "v5_h * relto_v5_h"
+v6_Kd       "v6_Kd* relto_v6_Kd"
+v6_h        "v6_h * relto_v6_h"
+v7_Kd       "v7_Kd* relto_v7_Kd"
+v7_h        "v7_h * relto_v7_h"
+v8_Kd       "v8_Kd* relto_v8_Kd"
+v8_h        "v8_h * relto_v8_h"
+        
+RANDOM
+
+PARAMETERS

@@ -3,11 +3,16 @@
 function arUpdateD2D
 
 global ar
+
+if(isempty(ar))
+    error('please initialize by arInit')
+end
+
 ar_path = ar.info.ar_path;
 [has_git, is_repo] = arCheckGit(ar_path);
 
 flag = -1;
-if arCheckVersion~=1
+if arCheckVersion(true)~=1
     if(isunix)
         library_path = getenv('LD_LIBRARY_PATH');
         setenv('LD_LIBRARY_PATH', '');

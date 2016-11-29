@@ -67,6 +67,9 @@ function compileCeres ()
     loc     = strfind( fliplr(cpath), slash);
     cpath   = cpath(1:end-loc+1);
     
+    % copy customized confih.h to ceres-solver/include/ceres/internal/
+    copyfile([cpath slash 'config.h'],[cpath slash 'ceres-solver' slash 'include' slash 'ceres' slash 'internal' slash],'f');
+    
 %% %%%%%%%%%%%%%%%%%%%%  CERES FILE LIST OF CC FILES %%%%%%%%%%%%%%%%%%%%%
     
     fileListCeres    = getAllFiles(strcat(sprintf('%s',cpath),[slash 'ceres-solver']));
@@ -88,10 +91,11 @@ function compileCeres ()
     excludelist{end+1} = 'bundle_adjustment_test';
     excludelist{end+1} = 'polynomial_test';
     excludelist{end+1} = 'rotation_test';
+    excludelist{end+1} = 'examples';
     
     ex = ones(length(fileListCeres),1);
     
-    for i = 1:12
+    for i = 1:length(excludelist)
         temp    = strfind(fileListCeres, excludelist{i});
         ptemp   = isnan(cellfun(@mean,temp));
         

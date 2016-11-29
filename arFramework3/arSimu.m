@@ -96,7 +96,8 @@ end
 % propagate parameters
 for m=1:length(ar.model)
     if ( ss_presimulation )
-        for c=1:length(ar.model(m).ss_condition)       
+        for c=1:length(ar.model(m).ss_condition)   
+            ar.model(m).ss_condition(c).x0_override = []; % remove initial condition overrides which may have been used for rootfinding
             ar.model(m).ss_condition(c).status = 0;
             ar.model(m).ss_condition(c).pNum = ar.p(ar.model(m).ss_condition(c).pLink);
             ar.model(m).ss_condition(c).qLog10 = ar.qLog10(ar.model(m).ss_condition(c).pLink);
@@ -140,7 +141,22 @@ if ( ss_presimulation )
     if ( sensi )
         ar = initSteadyStateSensis(ar);
     end
-    feval(ar.fkt, ar, true, ar.config.useSensis && sensi, dynamics, false, 'ss_condition', 'ss_threads');
+    
+    if ( ~isfield( ar.config, 'rootfinding' ) || ( ar.config.rootfinding == 0 ) )
+        % Steady state determination by simulation
+        feval(ar.fkt, ar, true, ar.config.useSensis && sensi, dynamics, false, 'ss_condition', 'ss_threads');
+    else
+        % Steady state determination by rootfinding
+        for m=1:length(ar.model)
+            for c=1:length(ar.model(m).ss_condition)
+                [x, S] = arFindRoots(m, c, 'ss_condition', 1);
+                ar.model(m).ss_condition(c).xFineSimu(end, :) = x;
+                if ( sensi )
+                    ar.model(m).ss_condition(c).sxFineSimu(end, :, :) = S;
+                end
+            end
+        end
+    end
     
     % integration error ?
     for m=1:length(ar.model)

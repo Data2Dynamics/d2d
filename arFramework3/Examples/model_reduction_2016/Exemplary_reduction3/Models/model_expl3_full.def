@@ -1,0 +1,49 @@
+DESCRIPTION
+"Model Reduction Example 3"
+
+PREDICTOR
+t               T   min         time	0	100
+
+COMPARTMENTS
+
+STATES
+X_state         C   "nM"      "conc."    
+pX_state     	C   "nM"      "conc."
+Y_state         C   "nM"      "conc."    
+pY_state     	C   "nM"      "conc."  
+Z_state         C   "nM"      "conc."    
+pZ_state     	C   "nM"      "conc."    
+
+INPUTS
+L              C    ng/ml   conc.   "1"
+
+REACTIONS
+		->	X_state		CUSTOM	"X_prod"
+X_state		->	pX_state	CUSTOM	"k_X * X_state * L"
+pX_state	->	X_state		CUSTOM	"k_dX * pX_state"
+pX_state	->			CUSTOM	"k_Xdeg * pX_state"
+
+Y_state         ->  pY_state            CUSTOM "k_Y*Y_state * pX_state"
+pY_state        ->  Y_state            	CUSTOM "k_dY*pY_state"
+
+Z_state         ->  pZ_state            CUSTOM "k_Z*Z_state * pY_state"
+pZ_state        ->  Z_state            	CUSTOM "k_dZ*pZ_state"
+
+DERIVED
+        
+OBSERVABLES
+pY_au        C   "au"    "conc." 0	0   "pY_state"
+pZ_au        C   "au"    "conc." 0	0   "scale_Z * pZ_state"
+
+ERRORS
+pY_au        "0.05"
+pZ_au        "0.05"
+
+CONDITIONS
+init_X_state	"1"
+init_Y_state	"1"
+init_Z_state	"1"
+
+init_pX_state	"0"
+init_pY_state	"0"
+init_pZ_state	"0"

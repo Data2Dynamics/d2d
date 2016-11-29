@@ -57,9 +57,7 @@ for jm = model_id
     settings = readtable([modeldir modelnum '/' modelnum '-settings.txt'],'Delimiter',':',...
         'ReadVariableNames',false,'ReadRowNames',true);
 
-    xml_name = [modeldir modelnum '/' modelnum sbml_ver '.xml'];
-    copyfile(xml_name, [modelnum sbml_ver '.xml'])
-
+    xml_name = [modeldir modelnum '/' modelnum sbml_ver];
 
     modelname = [modelnum sbml_ver];
     tmax = str2num(char(settings{'duration',:}));
@@ -78,7 +76,7 @@ for jm = model_id
     varnames = results.Properties.VariableNames(2:end);
 
     try
-        [~, modelname] = arImportSBML(modelname,tmax);
+        [~, modelname] = arImportSBML(xml_name,'tEnd',tmax);
         arLoadModel(modelname)
         arCompileAll
         arSimu(0,1,1);
@@ -112,8 +110,8 @@ for jm = model_id
             title(modelnum)
             legend([varnames varnames])
             
-            fprintf(1,'\nPress any key to continue\n\n');
-            pause;
+            %fprintf(1,'\nPress any key to continue\n\n');
+            %pause;
             
             close gcf;
         end

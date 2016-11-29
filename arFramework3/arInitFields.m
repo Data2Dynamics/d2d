@@ -48,7 +48,9 @@ function ar = arInitFields(ar)
         {'atolV',                       false}, ...                     %   Observation scaled tolerances
         {'atolV_Sens',                  false}, ...                     %   Observation scaled tolerances
         {'optimizer',                   1}, ...                         %   Default optimizer
-        {'optimizers',                  {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1', 'NL2SOL','TRESNEI','Ceres', 'lsqnonlin_repeated'} }, ...
+        {'optimizers',                  {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1',...
+                                         'NL2SOL','TRESNEI','Ceres', 'lsqnonlin_repeated', 'fminsearchbnd', 'patternsearch',...
+                                         'patternsearch_hybrid', 'particleswarm', 'simulannealbnd', 'geneticalgorithm'} }, ...
         ...                                                             % CVODES settings
         {'atol',                        1e-6}, ...                      %   Absolute tolerance
         {'rtol',                        1e-6}, ...                      %   Relative tolerance
@@ -62,6 +64,8 @@ function ar = arInitFields(ar)
         {'eq_tol',                      1e-8}, ...                      %   Value below which all components of dxdt have to fall to be considered equilibrated
         {'max_eq_steps',                20}, ...                        %   Maximum number of times the equilibration time is extended
         {'eq_step_factor',              5}, ...                         %   Factor by which the equilibration time is extended when dxdt isn't below eq_tol
+        ...                                                             % Rootfinding based equilibration settings
+        {'rootfinding',                 0},...                          %   Determine steady states by rootfinding rather than simulation
         ...                                                             % Constraint based steady states
         {'steady_state_constraint',     1}, ...                         %   Enable system
         ...
@@ -161,6 +165,7 @@ function ar = arInitFields(ar)
     ar.info.arsimucalc_flags{18} = 'malloc EventData';
     ar.info.arsimucalc_flags{19} = 'CVodeSetMaxNumSteps()';
     ar.info.arsimucalc_flags{20} = 'equilibration. Failed to meet tolerance. Does the system have a steady state? Failure occurred ';
+    ar.info.arsimucalc_flags{21} = 'initial condition override. Initial condition override vector has the wrong size';
 
     ar.info.cvodes_flags = cell(1,30);
 

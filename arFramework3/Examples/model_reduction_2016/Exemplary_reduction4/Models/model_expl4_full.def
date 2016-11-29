@@ -1,0 +1,30 @@
+DESCRIPTION
+"Model Reduction Example 4"
+
+PREDICTOR
+t               T   min         time	0	40
+
+COMPARTMENTS
+
+STATES
+X_state         C   "nM"      "conc."    
+pX_state         C   "nM"      "conc."    
+
+INPUTS
+u_in        C ng/ml conc. "exp(-0.1*t)"	
+
+REACTIONS
+X_state		->	pX_state	CUSTOM	"k_on * u_in * X_state"
+pX_state	->	X_state		CUSTOM	"k_off * pX_state"
+
+DERIVED
+        
+OBSERVABLES
+pX_au        C   "au"    "conc." 0	0   "scale * pX_state"
+
+ERRORS
+pX_au        "0.1"
+
+CONDITIONS
+init_X_state	"1"
+init_pX_state	"0"

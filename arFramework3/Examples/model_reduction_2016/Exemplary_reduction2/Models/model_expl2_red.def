@@ -1,0 +1,31 @@
+DESCRIPTION
+"Model Reduction Example 2"
+
+PREDICTOR
+t               T   min         time	0	100
+
+COMPARTMENTS
+
+STATES
+X_state         C   "nM"      "Conc."    
+pX_state         C   "nM"      "Conc."    
+ppX_state         C   "nM"      "Conc."    
+
+INPUTS
+
+REACTIONS
+X_state	->	pX_state		CUSTOM	"k1 * X_state"	
+pX_state	->	ppX_state		CUSTOM	"k2 * pX_state"
+pX_state        ->  X_state            	CUSTOM "k5*pX_state * ppX_state"
+
+DERIVED
+        
+OBSERVABLES
+X_au        ppX   "au"    "conc." 0	0   "X_state"
+pX_au        ppX   "au"    "conc." 0	0   "pX_state"
+
+ERRORS
+X_au        "0.02"
+pX_au        "0.02"
+
+CONDITIONS

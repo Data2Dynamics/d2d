@@ -496,7 +496,7 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
 
         mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
             sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
-            which('arSimuCalc.c'), objectsstr{:});
+            which('udata.c'), which('arSimuCalc.c'), objectsstr{:});
     else
         % parallel code using POSIX threads (pthread-win32) for Windows type OS
         includesstr{end+1} = ['-I"' ar_path '\pthreads-w32_2.9.1\include"'];
@@ -505,7 +505,7 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
 
         mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
             sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
-            which('arSimuCalc.c'), objectsstr{:});
+            which('udata.c'), which('arSimuCalc.c'), objectsstr{:});
     end
     arFprintf(2, 'compiling and linking %s...done\n', ar.fkt);
 else

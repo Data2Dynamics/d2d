@@ -10,6 +10,10 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
+arSimu(true,false,true) % update exp. time grid, e.g. sxExpSimu
+arSimu(true,true,true) % update fine time grid, e.g. sxFineSimu
+
+
 fcount = 1;
 for jm = 1:length(ar.model)
     nc = length(ar.model(jm).condition);

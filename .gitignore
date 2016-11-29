@@ -7,6 +7,7 @@ arFramework3/sundials-2.4.0/
 arFramework3/sundials-2.5.0/
 arFramework3/sundials-2.6.1/
 arFramework3/KLU-1.2.1/
+arFramework3/ThirdParty/Ceres/ceresd2d.mex*
 .DS_Store
 
 *.dat
@@ -17,6 +18,9 @@ arFramework3/sbml-test-cases-2014-10-22
 arFramework3/sbml-test-cases-2014-10-22.zip
 
 arFramework3/l1/trdog/trdog.m
+
+arFramework3/Examples/Dream6_L1/Data/simu*
+arFramework3/Examples/Dream6_L1/Results/20*
 
 arFramework3/Examples/ABC_toyModel/Compiled/
 arFramework3/Examples/ABC_toyModel/SBML/
@@ -62,6 +66,11 @@ arFramework3/Examples/Dream6/Compiled/
 arFramework3/Examples/Dream6/SBML/
 arFramework3/Examples/Dream6/arSimuCalc*
 arFramework3/Examples/Dream6/arCheckParallel*
+
+arFramework3/Examples/Dream6_L1/Compiled/
+arFramework3/Examples/Dream6_L1/SBML/
+arFramework3/Examples/Dream6_L1/arSimuCalc*
+arFramework3/Examples/Dream6_L1/arCheckParallel*
 
 arFramework3/Examples/Elowitz2000_Repressilator/Compiled/
 arFramework3/Examples/Elowitz2000_Repressilator/SBML/
@@ -152,4 +161,9 @@ arFramework3/Examples/Washing_and_Injection_Test/Compiled/
 arFramework3/Examples/Washing_and_Injection_Test/SBML/
 arFramework3/Examples/Washing_and_Injection_Test/arSimuCalc*
 arFramework3/Examples/Washing_and_Injection_Test/arCheckParallel*
+
+arFramework3/Examples/model_reduction_2016/Compiled/
+arFramework3/Examples/model_reduction_2016/SBML/
+arFramework3/Examples/model_reduction_2016/arSimuCalc*
+arFramework3/Examples/model_reduction_2016/arCheckParallel*
 

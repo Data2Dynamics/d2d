@@ -91,12 +91,22 @@ for jm=m
             ar.model(jm).qPlotXs(jp{jm}) = 1;
             ar.model(jm).qPlotYs(:) = 0;
             ar.model(jm).qPlotVs(:) = 0;
-        case 'xy'
+        case {'xy','yx'}
             ar.model(jm).qPlotXs(jp{jm}) = 1;
             ar.model(jm).qPlotYs(jp{jm}) = 1;
             ar.model(jm).qPlotVs(:) = 0;
             
-        case {'vxy','all','xyv','yxv','on',1,true}
+        case {'xv','vx'}
+            ar.model(jm).qPlotXs(jp{jm}) = 1;
+            ar.model(jm).qPlotYs(jp{jm}) = 0;
+            ar.model(jm).qPlotVs(:) = 1;
+
+        case {'yv','vy'}
+            ar.model(jm).qPlotXs(jp{jm}) = 0;
+            ar.model(jm).qPlotYs(jp{jm}) = 1;
+            ar.model(jm).qPlotVs(:) = 1;
+            
+        case {'vxy','all','xyv','yxv','yvx','xvy','vyx','on',1,true}
             ar.model(jm).qPlotCs(:) = 0;
             ar.model(jm).qPlotXs(jp{jm}) = 1;
             ar.model(jm).qPlotYs(jp{jm}) = 1;

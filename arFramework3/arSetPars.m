@@ -1,16 +1,22 @@
-% set parameter value by label
-%
 % arSetPars(pLabel, p, qFit, qLog10, lb, ub, type, meanp, stdp)
 % 
+% set parameter value and properties by label
+%
 % pLabel	name of the parameter
-% p			value of the  parameter
+% 
+%           Several parameter names can be provided as cell:
+%           - either single values are provided and set for all parameters 
+%           - or the length of the provided values has to coincide with the
+%             number of parameter labels
+% p			value of the  parameter(s)
 % qFit		0=fixed, 1=fitted, 2=constant
 % qLog10	0=normal, 1=log10 parameter values
-% lb		lower parameter bound
-% ub		upper parameter bound
+% lb		lower parameter bound(s)
+% ub		upper parameter bound(s)
 % type		0=box prior, 1=normal prior
-% meanp		mean of normal prior
-% stdp		standard deviation of normal prior
+% meanp		mean of normal prior(s)
+% stdp		standard deviation of normal prior(s)
+% 
 % 
 % Alternative call:
 % arSetPars(arStruct2)

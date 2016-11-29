@@ -395,5 +395,7 @@ end
 if(~exist([cd '/' pleGlobals.savePath], 'dir'))
     mkdir([cd '/' pleGlobals.savePath])
 end
+warning off MATLAB:Figure:FigureSavedToMATFile
 save([pleGlobals.savePath '/results.mat'], 'pleGlobals');
+warning on MATLAB:Figure:FigureSavedToMATFile
 

@@ -1,25 +1,54 @@
-%  arImportSBML(filename, tEnd)
+%  arImportSBML(filename, options)
 %
-%       tEnd        Default: 100
-%
-% import SBML model and translate to .def files
+% Import SBML model and translate to .def files
 %
 %   States and parameters consisting of a single character are replaced by
 %   longer symbols.
 %   State- and parameter names which coincide with mathematical functions
 %   in symbolic the Symbolic Toolbox are replaced.
 %
+% Options which can be specified are:
+%   tEnd                - Final simulation time (default = 100)
+%   compartmentbyname   - Use compartment names as specified in the SBML rather than unique identifier (default = false)
+%   overwrite           - Overwrite def file if it exists (default = false)
+%   keepcompartments    - Reference compartments in reactions rather than numerical values (default = false)
+%
 % Example:
 % arImportSBML('BIOMD0000000379')
 %
 % Example:
-%  ms = arImportSBML('BIOMD0000000379',100)
-%  [ms, modelname] = arImportSBML('BIOMD0000000379',100)
+%  ms = arImportSBML('BIOMD0000000379',100, true)
+%  [ms, modelname] = arImportSBML('BIOMD0000000379',100, true)
 %
 
-function varargout = arImportSBML(filename, tEnd)
-if(~exist('tEnd','var') || isempty(tEnd))
-    tEnd = 100;
+function varargout = arImportSBML(filename, varargin)
+%if(~exist('tEnd','var') || isempty(tEnd))
+%    tEnd = 100;
+%end
+%if(~exist('overwrite','var') || isempty(overwrite))
+%    overwrite = false;
+%end
+
+switches    = {  'tend', 'overwrite', 'keepcompartments', 'compartmentbyname' };
+extraArgs   = [       1,           0,                 0,                   0 ];
+descriptions = {    { 'Specified tEnd', '' }, ...
+                    { 'Overwriting def file', '' }, ...
+                    { 'Keeping symbolic compartment names', '' }, ...
+                    { 'Using compartment names', '' }, ...
+                    };
+                
+% Parse input arguments
+opts = argSwitch( switches, extraArgs, descriptions, 1, varargin );
+overwrite = opts.overwrite;
+
+% Set tEnd
+tEnd = 100;
+if ( opts.tend )
+    if ~isnumeric( opts.tend_args )
+        error( 'Argument specified after tEnd should be numeric' );
+    else
+        tEnd = opts.tend_args;
+    end
 end
 
 if exist('TranslateSBML','file')~=3
@@ -27,10 +56,16 @@ if exist('TranslateSBML','file')~=3
     return
 end
 
+% convert relative to absolute path
+filename = GetFullPath(filename);
+
+% remove extension
+filename = regexprep(filename,'\.(xml|sbml)$','');   
+
 try
-    m = TranslateSBML([filename '.sbml']);
-catch %#ok<CTCH>
     m = TranslateSBML([filename '.xml']);
+catch %#ok<CTCH>
+    m = TranslateSBML([filename '.sbml']);
 end
 
 mIn = m;
@@ -53,7 +88,8 @@ for i=1:length(m.compartment)
 end
 
 %% model file
-new_filename = strrep(filename,' ','_');
+[~, name] = fileparts(filename);
+new_filename = strrep(name,' ','_');
 new_filename = strrep(new_filename,'-','_');
 fid = fopen([new_filename '.def'], 'w');
 
@@ -91,14 +127,33 @@ for j=1:length(m.compartment)
     if(~m.compartment(j).constant)
         error('non-constant compartments are not yet supported in D2D!');
     end
+    units = m.compartment(j).units;
+    if isempty( units )
+        units = 'n/a';
+    end
+    
+    if ( opts.compartmentbyname )
+        compName = m.compartment(j).name;
+        m.compartmentIDtoD2D = @(j)compartmentIDToName(m,j);
+    else
+        compName = m.compartment(j).id;
+        m.compartmentIDtoD2D = @(j) j;
+    end
     if(m.compartment(j).isSetSize)
-        fprintf(fid, '%s\t V\t "%s"\t vol.\t %g\n', sym_check(m.compartment(j).id), 'n/a', ...
-            m.compartment(j).size);
-        comps{end+1} = m.compartment(j).id;
+        if ( opts.keepcompartments )
+            fprintf(fid, '%s\t V\t "%s"\t vol.\t \n', sym_check(compName), units);
+        else
+            fprintf(fid, '%s\t V\t "%s"\t vol.\t %g\n', sym_check(compName), units, m.compartment(j).size);
+        end
+        comps{end+1} = compName;
         comp_value(end+1) = m.compartment(j).size;
     else
-        fprintf(fid, '%s\t V\t "%s"\t vol.\n', sym_check(m.compartment(j).id), 'n/a');
+        fprintf(fid, '%s\t V\t "%s"\t vol.\n', sym_check(compName), 'n/a');
     end
+end
+
+if ( length(unique(comps)) ~= length(comps) )
+    error( 'Duplicate compartment names. Reimport without the flag compartmentbyname.' );
 end
 
 fprintf(fid, '\nSTATES\n');
@@ -108,7 +163,7 @@ rep = cell(0);
 
 if isfield(m,'raterule')
     raterulespecies = unique({m.raterule.variable});
-    israterule = false(1,length(raterulespecies));
+    israterule = false(1,length(m.species));
     for i=1:length(raterulespecies)
         israterule = israterule | strcmp(raterulespecies(i),{m.species.id});
     end
@@ -122,11 +177,11 @@ for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentrat
         rep{end+1} = [m.species(j).id,'_state']; %#ok<AGROW>
         m.species(j).id2 = rep{end};
         fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(rep{end}), 'n/a', ...
-            m.species(j).compartment, m.species(j).name);
+            m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
     else  % standard case
         m.species(j).id2 = m.species(j).id;
         fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), 'n/a', ...
-            m.species(j).compartment, m.species(j).name);
+            m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
     end
 end
 
@@ -198,7 +253,7 @@ if isfield(m,'raterule')
         
         fprintf(fid,'\t -> %s', sym_check(prod_spec_name));
         
-        tmpstr = sym(m.raterule(j).formula);
+        tmpstr = m.raterule(j).formula;
         % repace species names if too short
         for i=1:length(rep)
             tmpstr = mysubs(tmpstr,pat{i},rep{i});
@@ -267,7 +322,6 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                     else
                         stoichiometry = 1;
                     end
-                    
                     if stoichiometry > 1
                         if(stoichiometry == uint32(stoichiometry))
                             fprintf(fid, '%i %s', stoichiometry, sym_check(react_spec_name));
@@ -301,8 +355,8 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                     else
                         stoichiometry = 1;
                     end
-                    if stoichiometry > 1
-                        if(stoichiometry == uint32(stoichiometry))
+                    if(stoichiometry~=1)
+                        if(stoichiometry==uint32(stoichiometry))
                             fprintf(fid, '%i %s', stoichiometry, sym_check(prod_spec_name));
                         else
                             fprintf(fid, '%2.2f %s', stoichiometry, sym_check(prod_spec_name));
@@ -333,16 +387,21 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             
             % divide rates by compartment volume
             reaction_comp = findReactionCompartment(m,j);
+            reaction_comp = m.compartmentIDtoD2D( reaction_comp );
             
-            if ~isempty(reaction_comp) && sum(strcmp(reaction_comp,strsplit(char(tmpstr),'*')))==1
-                tmpstr = [char(tmpstr) '/' sym_check(reaction_comp)];
-                tmpstr = sym(tmpstr);
+            if ~isempty(reaction_comp) %&& sum(strcmp(reaction_comp,strsplit(char(tmpstr),'*')))==1
+                tmpstr = ['(' char(tmpstr) ')/' sym_check(reaction_comp)];
             end
             
-            % replace compartement volumes
-            for jj=1:length(m.compartment)
-                tmpstr = mysubs(tmpstr, m.compartment(jj).id, num2str(m.compartment(jj).size));
-                % tmpstr = mysubs(tmpstr, m.compartment(jj).id, 'vol_para');
+            % replace compartment volumes if requested
+            if (~opts.keepcompartments)
+                for jj=1:length(m.compartment)
+                    tmpstr = mysubs(tmpstr, m.compartmentIDtoD2D( m.compartment(jj).id ), num2str(m.compartment(jj).size));
+                end
+            else
+                for jj=1:length(m.compartment)
+                    tmpstr = mysubs(tmpstr, m.compartmentIDtoD2D( m.compartment(jj).id ), sprintf('vol_%s', m.compartmentIDtoD2D( m.compartment(jj).id ) ));
+                end
             end
             
             % remove functions
@@ -383,7 +442,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             
             tmpstr = replacePowerFunction(tmpstr);
             
-            fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.reaction(j).name);
+            fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.reaction(j).id);
         end
     end
 end   % end if dynamics specified either raterule or reaction
@@ -393,6 +452,12 @@ arWaitbar(-1);
 fprintf(fid, '\nDERIVED\n');
 
 fprintf(fid, '\nCONDITIONS\n');
+% compartments
+if ( opts.keepcompartments )
+    for j = 1 : length( m.compartment )
+        fprintf( fid, 'vol_%s   "%g"\n', m.compartmentIDtoD2D( m.compartment(j).id ), m.compartment(j).size );
+    end
+end
 
 fprintf(fid, '\nPARAMETERS\n');
 specs = {};
@@ -525,12 +590,20 @@ fclose(fid);
 if ~isdir('./Models')
     mkdir('Models');
 end
-system(['mv ',new_filename '.def Models']);
+if(overwrite)
+    system(['mv -f ',new_filename '.def Models']);
+else
+    system(['mv ',new_filename '.def Models']);
+end
 
 if ~isdir('./Data')
     mkdir('Data');
 end
-system(['mv ',new_filename '_data.def Data']);
+if(overwrite)
+    system(['mv -f ',new_filename '_data.def Data']);
+else
+    system(['mv ',new_filename '_data.def Data']);
+end
 
 % generate Setup.m
 if(~exist('Setup.m','file'))
@@ -827,6 +900,13 @@ if ~isempty(intersect(pat,keywords)) || err==1
     end
 end
 
+function c = compartmentIDToName( m, reaction_comp )
+    for jc = 1 : length( m.compartment )
+        if ( strcmp( reaction_comp, m.compartment(jc).id ) )
+            c = m.compartment(jc).name;
+            return;
+        end
+    end
 
 function c = findReactionCompartment(m, j)
 % find compartment of reacting species to convert from SBML rate convention
@@ -857,17 +937,20 @@ if ~isempty(comp_p)
 end
 
 c = [];
-% educt and product exist
-if ~isempty(comp_r) && ~isempty(comp_p)
-    % educt and product in the same compartment
-    if isequal(unique(comp_r),unique(comp_p))
-        c = comp_r{1};
-    end
-    % only educt has a compartment
-elseif ~isempty(comp_r) && isempty(comp_p)
-    c = comp_r{1};
-    % only product has a compartment
-elseif isempty(comp_r) && ~isempty(comp_p)
-    c = comp_p{1};
-end
+% educt and product exist. Have to divide by source volume to get D2D
+% convention.
+c = comp_r{1};
+
+% if ~isempty(comp_r) && ~isempty(comp_p)
+%     % educt and product in the same compartment
+%     if isequal(unique(comp_r),unique(comp_p))
+%         c = comp_r{1};
+%     end
+%     % only educt has a compartment
+% elseif ~isempty(comp_r) && isempty(comp_p)
+%     c = comp_r{1};
+%     % only product has a compartment
+% elseif isempty(comp_r) && ~isempty(comp_p)
+%     c = comp_p{1};
+% end
 

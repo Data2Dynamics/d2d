@@ -70,15 +70,17 @@ if ( ~legacy_steps )
             {'hill_ka',         '%s^%s / (%s^%s + %s^%s)', [1, 3, 2, 3, 1, 3], 'hill_ka(conc, ka, n )' }, ...
             {'hill_kd',         '%s^%s / (%s + %s^%s)', [1, 3, 2, 1, 3], 'hill_kd(conc, kd, n )' }, ...
             {'isnonzero',       '(2*heaviside(%s))-1', 1, 'isnonzero(level)'}, ...
-            {'max2',            '0.5*(%s+%s+abs(%s-%s))', [1,2,1,2], 'max2(a, b)'};
+            {'max2',            '0.5*(%s+%s+abs(%s-%s))', [1,2,1,2], 'max2(a, b)'}, ...
+            {'smooth1',         '(heaviside((%s - %s)/(%s - %s)) - (heaviside((%s - %s)/(%s - %s))*(%s - %s)*(heaviside((%s - %s)/(%s - %s)) - 1))/(%s - %s))^2*((2*heaviside((%s - %s)/(%s - %s))*(%s - %s)*(heaviside((%s - %s)/(%s - %s)) - 1))/(%s - %s) - 2*heaviside((%s - %s)/(%s - %s)) + 3)', [3, 1, 2, 3, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 3, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 3, 3, 1, 2, 3], 'smooth1(t, start, end)' }, ...
+            {'smooth2',         '-(heaviside((%s - %s)/(%s - %s)) - (heaviside((%s - %s)/(%s - %s))*(%s - %s)*(heaviside((%s - %s)/(%s - %s)) - 1))/(%s - %s))^3*((heaviside((%s - %s)/(%s - %s)) - (heaviside((%s - %s)/(%s - %s))*(%s - %s)*(heaviside((%s - %s)/(%s - %s)) - 1))/(%s - %s))*((6*heaviside((%s - %s)/(%s - %s))*(%s - %s)*(heaviside((%s - %s)/(%s - %s)) - 1))/(%s - %s) - 6*heaviside((%s - %s)/(%s - %s)) + 15) - 10)', [3, 1, 2, 3, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 3, 3, 1, 2, 3, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 3, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 3, 3, 1, 2, 3], 'smooth2(t, start, end)' }, ...
         };
-        
+    
     % Add brackets for replacement safety
     for a = 1 : size( ar.config.specialFunc, 2 )
         ar.config.specialFunc{a}{2} = strrep(ar.config.specialFunc{a}{2}, '%s', '(%s)');
     end
 else
-    ar.config.specialFunc         = [];
+    ar.config.specialFunc = [];
 end
 
 % folders
@@ -282,7 +284,7 @@ for m=1:length(ar.model)
             end
         end
         
-        % assigne conditions
+        % assign conditions
         for c=1:length(ar.model(m).condition)
             ar.model(m).condition(c).p = newp{c};
             ar.model(m).condition(c).pold = newpold{c};
@@ -303,7 +305,7 @@ for m=1:length(ar.model)
 
         if(usePool)
             parfor d=1:length(ar.model(m).data)
-                warning('off','symbolic:mupadmex:MuPADTextWarning');
+                warning('off', 'symbolic:mupadmex:MuPADTextWarning');
                 warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
                 warning('off', 'symbolic:sym:sym:DeprecateExpressions')
 
@@ -349,7 +351,7 @@ for m=1:length(ar.model)
             end
         end
 
-        % assigne data
+        % assign data
         for d=1:length(ar.model(m).data)
             ar.model(m).data(d).p = newp{d};
             ar.model(m).data(d).pold = newpold{d};
@@ -461,7 +463,7 @@ for m=1:length(ar.model)
             end
         end
 
-        % assigne conditions
+        % assign conditions
         for c=1:length(ar.model(m).condition)
             ar.model(m).condition(c).p = newp{c};
             ar.model(m).condition(c).pold = newpold{c};
@@ -585,42 +587,47 @@ else
     ar.model(m).sym.dfvdu = sym(ones(0, length(ar.model(m).sym.u)));
 end
 
-ar.model(m).qdvdx_nonzero = logical(ar.model(m).sym.dfvdx~=0);
-ar.model(m).qdvdu_nonzero = logical(ar.model(m).sym.dfvdu~=0);
-
-tmpsym = ar.model(m).sym.dfvdx;
-tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
-tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
-tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
-
-try
-    ar.model(m).qdvdx_negative = double(tmpsym) < 0;
-catch ERR
-    for i=1:length(tmpsym(:))
-        try 
-            double(tmpsym(i));
-        catch
-            disp('the following expression should be numeric:')
-            tmpsym(i)
+if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
+    ar.model(m).qdvdx_nonzero = logical(ar.model(m).sym.dfvdx~=0);
+    ar.model(m).qdvdu_nonzero = logical(ar.model(m).sym.dfvdu~=0);
+    
+    tmpsym = ar.model(m).sym.dfvdx;
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
+    tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+    
+    try
+        ar.model(m).qdvdx_negative = double(tmpsym) < 0;
+    catch ERR
+        for i=1:length(tmpsym(:))
+            try
+                double(tmpsym(i));
+            catch
+                disp('the following expression should be numeric:')
+                tmpsym(i)
+            end
         end
+        rethrow(ERR)
     end
-    rethrow(ERR)
+    
+    tmpsym = ar.model(m).sym.dfvdu;
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
+    tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+    
+    ar.model(m).qdvdu_negative = double(tmpsym) < 0;
+    
+    tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
+    ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
+    if(length(ar.model(m).x) * log(length(ar.model(m).x)) > ar.model(m).nnz)
+        ar.config.useSparseJac = 1;
+    end
+else
+    arFprintf(2, 'Model m%i too large (%i variables, %i parameters)... skipping check of model structure\n', m, length(ar.model(m).sym.x), length(ar.model(m).p));
+    ar.config.useSparseJac = 1;
+    tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
+    ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
 end
-
-tmpsym = ar.model(m).sym.dfvdu;
-tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
-tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
-tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
-
-ar.model(m).qdvdu_negative = double(tmpsym) < 0;
-
-tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
-ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
-
-if(length(ar.model(m).x) * log(length(ar.model(m).x)) > ar.model(m).nnz)
-   ar.config.useSparseJac = 1; 
-end
-
 
 
 
@@ -739,41 +746,32 @@ condition.qdvdu_nonzero = logical(condition.sym.dfvdu~=0);
 condition.qdvdp_nonzero = logical(condition.sym.dfvdp~=0);
 
 % short terms
-condition.dvdx = cell(length(model.vs), length(model.xs));
+condition.sym.dvdx = sym(zeros(length(model.vs), length(model.xs)));
 for j=1:length(model.vs)
     for i=1:length(model.xs)
         if(condition.qdvdx_nonzero(j,i))
-            condition.dvdx{j,i} = sprintf('dvdx[%i]', j + (i-1)*length(model.vs));
-        else
-            condition.dvdx{j,i} = '0';
+            condition.sym.dvdx(j,i) = sym(sprintf('dvdx[%i]', j + (i-1)*length(model.vs)));
         end
     end
 end
-condition.sym.dvdx = sym(condition.dvdx);
 
-condition.dvdu = cell(length(model.vs), length(model.us));
+condition.sym.dvdu = sym(zeros(length(model.vs), length(model.us)));
 for j=1:length(model.vs)
     for i=1:length(model.us)
         if(condition.qdvdu_nonzero(j,i))
-            condition.dvdu{j,i} = sprintf('dvdu[%i]', j + (i-1)*length(model.vs));
-        else
-            condition.dvdu{j,i} = '0';
+            condition.sym.dvdu(j,i) = sym(sprintf('dvdu[%i]', j + (i-1)*length(model.vs)));
         end
     end
 end
-condition.sym.dvdu = sym(condition.dvdu);
 
-condition.dvdp = cell(length(model.vs), length(condition.ps));
+condition.sym.dvdp = sym(zeros(length(model.vs), length(condition.ps)));
 for j=1:length(model.vs)
     for i=1:length(condition.ps)
         if(condition.qdvdp_nonzero(j,i))
-            condition.dvdp{j,i} = sprintf('dvdp[%i]', j + (i-1)*length(model.vs));
-        else
-            condition.dvdp{j,i} = '0';
+            condition.sym.dvdp(j,i) = sym(sprintf('dvdp[%i]', j + (i-1)*length(model.vs)));
         end
     end
 end
-condition.sym.dvdp = sym(condition.dvdp);
 
 % do we have variable volumes?
 if ( ~isempty( symvar( condition.sym.C ) ) )
@@ -790,7 +788,7 @@ condition.sym.C = arSubs(condition.sym.C, condition.sym.p, condition.sym.ps, mat
 condition.sym.fx = (model.N .* condition.sym.C) * transpose(model.sym.vs);
 firstcol = true;
 % Jacobian dfxdx
-if(config.useJacobian)
+if(config.useSensis || config.useJacobian)
     condition.sym.dfxdx = (model.N .* condition.sym.C) * condition.sym.dvdx;
     condition.qdfxdx_nonzero = logical(condition.sym.dfxdx~=0);
     condition.sym.dfxdx_nonzero = sym(zeros(1, nansum(nansum(condition.qdfxdx_nonzero))));
@@ -859,7 +857,7 @@ if(config.useSensis)
         % This function checks whether the inputs were sensible and
         % gives a warning for problematic discontinuities in the sensitivities.
         for j = 1 : length( model.u )
-            verifyRow( condition.sym.dfudp(j,:), condition.sym.fu(j), 'input' );
+            condition.sym.dfudp(j,:) = verifyRow( condition.sym.dfudp(j,:), condition.sym.fu(j), 'input' );
         end
     end
     
@@ -932,19 +930,37 @@ function sensBlock = verifyRow( sensBlock, func, location )
     for k = 1 : size( sensBlock, 2 )
         jacElemStr = char(sensBlock(1,k));
         if (numel(strfind(jacElemStr, 'dirac(')>0))
-            % We failed to resolve the derivatives. Give up, but
-            % let the user know the offending lines.
-            message = {     'UNRESOLVABLE DERIVATIVE FOUND IN SENSITIVITY JACOBIAN\n\n'         , ...
-                            'Equation (in ', char(location), ' section):\n\n', char( func )     , ...
-                            '\n\nSensitivity equation:\n\n', char( sensBlock(1,k) )             , ...
-                            '\n\nThis is likely due to a step function with variable location'  , ...
-                            '\nparameter. Consider changing the equation to a continuous\n'     , ...
-                            'function (e.g. smoothstep1).\n\nSetting corresponding sensitivity ' , ...
-                            'to zero.\n\nThis means the sensitivity solution is now incorrect. ', ...
-                            'Which\nmeans the corresponding parameter cannot be optimized using', ...
-                            ' a\nderivative based optimization algorithm.\n\n'                   , ...
-                            'Hit any key to proceed compiling (at your own risk).'};
-            warning( sprintf( sprintf( '%s', message{:} ) ) );
+            % Attempt to simplify (sometimes this gets rid of dirac
+            % functions
+            fprintf( 'Dirac detected in derivative => attempting to simplify ...' );
+            try
+                jacElem = simplify( sensBlock(1,k) );
+                jacElemStr = char(jacElem);
+            catch
+                pretty( sensBlock(1,k) );
+                error( 'Sensitivity expression for %s equation contains a non-compilable error (e.g. division by zero)', char(location) );
+            end
+
+            if (numel(strfind(jacElemStr, 'dirac(')>0))
+                fprintf( ' [FAILED]\n' );
+                % We failed to resolve the derivatives. Give up, but
+                % let the user know the offending lines.
+                message = {     'UNRESOLVABLE DERIVATIVE FOUND IN SENSITIVITY JACOBIAN\n\n'         , ...
+                                'Equation (in ', char(location), ' section):\n\n', char( func )     , ...
+                                '\n\nSensitivity equation:\n\n', char( sensBlock(1,k) )             , ...
+                                '\n\nThis is likely due to a step function with variable location'  , ...
+                                '\nparameter. Consider changing the equation to a continuous\n'     , ...
+                                'function (e.g. smoothstep1).\n\nSetting corresponding sensitivity ' , ...
+                                'to zero.\n\nThis means the sensitivity solution is now incorrect. ', ...
+                                'Which\nmeans the corresponding parameter cannot be optimized using', ...
+                                ' a\nderivative based optimization algorithm.\n\n'                   , ...
+                                'Hit any key to proceed compiling (at your own risk).'};
+                warning( sprintf( sprintf( '%s', message{:} ) ) );
+            else
+                % This fixed it. Substitute Jacobian entry.
+                fprintf( ' [ OK ]\n' );
+                sensBlock(1,k) = jacElem;
+            end
         end
     end            
 
@@ -1257,15 +1273,14 @@ algs = {'MD2','MD5','SHA-1','SHA-256','SHA-384','SHA-512'};
 if(nargin<2)
     checksum = java.security.MessageDigest.getInstance(algs{2});
 end
-if(iscell(str))
-    for j=1:length(str)
-        checksum = addToCheckSum(str{j}, checksum);
-    end
-else
-    if(~isempty(str))
-        checksum.update(uint8(str(:)));
-    end
+
+if iscell(str) 
+    str = [str{:}];
 end
+if(~isempty(str))
+    checksum.update(uint8(str(:)));
+end
+
 
 function checkstr = getCheckStr(checksum)
 h = typecast(checksum.digest,'uint8');
@@ -1389,17 +1404,20 @@ end
 
 fprintf(fid, '\n  return;\n}\n\n\n');
 
+
 % write dvdx
 fprintf(fid, ' void dvdx_%s(realtype t, N_Vector x, void *user_data)\n{\n', condition.fkt);
 if(timedebug) 
     fprintf(fid, '  printf("%%g \\t dvdx\\n", t);\n');
 end
 if(~isempty(model.xs))
-    fprintf(fid, '  UserData data = (UserData) user_data;\n');
-    fprintf(fid, '  double *p = data->p;\n');
-    fprintf(fid, '  double *u = data->u;\n');
-    fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
-    writeCcode(fid, matlab_version, condition, 'dvdx');
+    if(config.useSensis || config.useJacobian)
+        fprintf(fid, '  UserData data = (UserData) user_data;\n');
+        fprintf(fid, '  double *p = data->p;\n');
+        fprintf(fid, '  double *u = data->u;\n');
+        fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
+        writeCcode(fid, matlab_version, condition, 'dvdx');
+    end
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
@@ -1409,11 +1427,13 @@ if(timedebug)
     fprintf(fid, '  printf("%%g \\t dvdu\\n", t);\n');
 end
 if(~isempty(model.us) && ~isempty(model.xs))
-    fprintf(fid, '  UserData data = (UserData) user_data;\n');
-    fprintf(fid, '  double *p = data->p;\n');
-    fprintf(fid, '  double *u = data->u;\n');
-    fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
-    writeCcode(fid, matlab_version, condition, 'dvdu');
+    if(config.useSensis)
+        fprintf(fid, '  UserData data = (UserData) user_data;\n');
+        fprintf(fid, '  double *p = data->p;\n');
+        fprintf(fid, '  double *u = data->u;\n');
+        fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
+        writeCcode(fid, matlab_version, condition, 'dvdu');
+    end
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
@@ -1423,12 +1443,14 @@ if(timedebug)
 	fprintf(fid, '  printf("%%g \\t dvdp\\n", t);\n');
 end
 if(~isempty(model.xs))
-    fprintf(fid, '  UserData data = (UserData) user_data;\n');
-    fprintf(fid, '  double *p = data->p;\n');
-    fprintf(fid, '  double *u = data->u;\n');
-    fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
-    if(~isempty(condition.sym.dfvdp))
-        writeCcode(fid, matlab_version, condition, 'dvdp');
+    if(config.useSensis)
+        fprintf(fid, '  UserData data = (UserData) user_data;\n');
+        fprintf(fid, '  double *p = data->p;\n');
+        fprintf(fid, '  double *u = data->u;\n');
+        fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
+        if(~isempty(condition.sym.dfvdp))
+            writeCcode(fid, matlab_version, condition, 'dvdp');
+        end
     end
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
@@ -1499,7 +1521,7 @@ if(timedebug)
 end
 
 if(~isempty(model.xs))
-    if(config.useJacobian)
+    if(config.useSensis || config.useJacobian)
         fprintf(fid, '  int is;\n');
         fprintf(fid, '  UserData data = (UserData) user_data;\n');
         fprintf(fid, '  double *p = data->p;\n');
@@ -1527,7 +1549,7 @@ if(timedebug)
 end
 
 if(~isempty(model.xs))
-    if(config.useJacobian)
+    if(config.useSensis || config.useJacobian)
         fprintf(fid, '  int is;\n');
         fprintf(fid, '  UserData data = (UserData) user_data;\n');
         fprintf(fid, '  double *p = data->p;\n');
@@ -1727,8 +1749,8 @@ fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write sz
 fprintf(fid, ' void fsz_%s(double t, int nt, int it, int np, double *sz, double *p, double *u, double *x, double *z, double *su, double *sx){\n', condition.fkt);
-if(config.useSensis)
-    if(~isempty(model.zs))
+if(~isempty(model.zs))
+    if(config.useSensis)
         fprintf(fid, '  int jp;\n');
         fprintf(fid, '  for (jp=0; jp<np; jp++) {\n');
         writeCcode(fid, matlab_version, condition, 'fsz1');
@@ -1741,8 +1763,8 @@ fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write dfzdx
 fprintf(fid, ' void dfzdx_%s(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *dfzdxs, double *z, double *p, double *u, double *x){\n', condition.fkt);
-if(config.useSensis)
-    if(~isempty(model.zs))
+if(~isempty(model.zs))
+    if(config.useSensis)
         writeCcode(fid, matlab_version, condition, 'dfzdx');        
         fprintf(fid, '\n');        
     end

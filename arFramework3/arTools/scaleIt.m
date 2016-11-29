@@ -33,10 +33,13 @@
 %                        tested so far)
 %     logtrafo           Do the scaling in logarithmic space
 %     rescale            Adjust scaling factors s.t. maximum becomes 1
+%     range              Specify range of values to use for independent
+%                        variable
+%     varanalysis        Show variance analysis
 %
-% To do: Log trafo scaling, offsets and two component error model scaling
+% To do: Offsets
 
-function scaleIt( names, outFile, varargin )
+function out = scaleIt( names, outFile, varargin )
 
     if ( nargin < 2 )
         help scaleIt;
@@ -45,8 +48,8 @@ function scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale' };
-    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 ];
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale' };
+    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
@@ -58,6 +61,10 @@ function scaleIt( names, outFile, varargin )
     {'', 'Using two component error model'} ...
     {'', 'Using lognormal error model'} ...
     {'', 'Rescaling result'} ...
+    {'', 'Specified time point range to use'} ...
+    {'', 'Variance analysis requested'} ...
+    {'', 'Not fitting scales'} ...
+    {'', 'Prescaler specified'} ...
     };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
@@ -94,19 +101,24 @@ function scaleIt( names, outFile, varargin )
     % Default mapping
     trafo           = @(x) x;
     invTrafo        = @(x) x;
+    dTrafo          = @(x) 1;
+    diTrafo         = @(x) 1;
     
     if ( opts.logtrafo )
         trafo       = @(x) log10(x);
         invTrafo    = @(x) 10.^(x);
+        % Transform derivatives
+        dTrafo      = @(x) 1./(x.*log(10));
+        diTrafo     = @(x) 10.^x * log(10);
     end
     
     % Simplest error model
-    errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo);
+    errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks) model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks, trafo, invTrafo, dTrafo, diTrafo);
     errModelPars    = 0;
     
     if ( opts.twocomponent )
         % Two component error model
-        errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks) flexible_model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, @twocomponent, trafo);
+        errModel        = @(fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks) flexible_model(fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks, @twocomponent);
         errModelPars    = 2;
     end
      
@@ -147,24 +159,31 @@ function scaleIt( names, outFile, varargin )
                 if ( isExpField )
                     newData     = num2cell(cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})));
                     % +1 is added to make sure that we never overlap even if user starts counting 
-                    % from 0 or 1 inconsistently in different files 
+                    % from 0 or 1 inconsistently in different files
                     expField    = expField + max(cell2mat(data{jD}.(fieldNames{jN}))); % + 1;
+                    
+                    % Force everything to be on the same scale
+                    if ( opts.samescale )
+                        expField = 1;
+                    end
                 end
                 out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
             end
         end
     end
-
+    
     % Dump out things in the ignore mask
     if ~isempty( ignoreMask )
+        fprintf('Filtering following fields:\n');
         K = fieldnames(out);
         for a = 1 : length( K )
             if ~iscell( ignoreMask )
                 ignoreMask = {ignoreMask};
             end
             for b = 1 : length( ignoreMask )
-                if ~isempty( strfind( K{a}, ignoreMask{b} ) )
+                if ~isempty( strfind( K{a}, filterField(ignoreMask{b}) ) )
                     if ( isfield( out, K{a} ) )
+                        fprintf('%s\n', K{a});
                         out = rmfield( out, K{a} );
                         fieldNames = setdiff( fieldNames, K{a} );
                     end
@@ -191,6 +210,36 @@ function scaleIt( names, outFile, varargin )
             end
         end
     end
+    
+    % Find the time variable
+    timeVar = fieldNames( ismember(fieldNames, timeVars) );
+    if ( numel( timeVar ) > 1 )
+        fprintf( 'Found independent variable column headers: \n');
+        fprintf( '%s\n', timeVar{:} );
+        error( 'Multiple columns whose header matches the independent variable' );
+    end
+    if ( numel( timeVar ) == 0 )
+        error( 'Did not find independent variable' );
+    end
+    
+    % Filter based on time range
+    if ( opts.range )
+        lims = opts.range_args;
+        if numel(lims)>2
+            error( 'Invalid range vector specified. Should be of the form [lb, ub]' );
+        else
+            f = @(x)(x<lims(1))||(x>lims(2));
+            removeMask = find( cellfun(f, out.(timeVar{1})) );
+            fprintf( 'Removing %d data points based on specified time range\n', sum(removeMask) );
+            
+            for a = 1 : length( fieldNames )
+                if ( isfield( out, fieldNames{a} ) )
+                    out.(fieldNames{a})(removeMask) = [];
+                end
+            end
+        end
+    end
+    
     %fieldNames = fieldnames(out);
     % Uncomment to test with control case
     % out = unitTest()
@@ -209,7 +258,7 @@ function scaleIt( names, outFile, varargin )
     %    end
     %end
     
-    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo, opts.rescale );
+    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo, opts.rescale, opts.prescale_args );
        
     % Find unique conditions (unrelated to time this time)
     groupNames = union(fieldNames{ismember(fieldNames, expVar)}, {fieldNames{cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))}});
@@ -239,6 +288,10 @@ function scaleIt( names, outFile, varargin )
             plot( time, yRep(I), '.', 'Color', colors(a,:) ); hold on;
         end
         title(dataFields{jD});
+    end
+    
+    if (opts.varanalysis)
+        analyseVariances( out, opts.varanalysis_args, trafo );
     end
         
     % Columns that did not take part in the estimation
@@ -283,6 +336,46 @@ function scaleIt( names, outFile, varargin )
     fclose(fid);
 end
 
+function analyseVariances(out, desiredObs, trafo)
+      
+    for jO = 1 : length( desiredObs )
+        reps = out.([desiredObs{jO} '_scaled']);
+        means = out.([desiredObs{jO} '_mean']);
+        lb = out.([desiredObs{jO} '_lb']);
+        ub = out.([desiredObs{jO} '_ub']);
+    
+        uMeans = unique( means );
+        sdu = zeros( size( uMeans ) );
+        for jM = 1 : length( uMeans )
+            sdu(jM) = std(trafo(reps(uMeans(jM)==means)));
+        end
+        
+        figure;
+        subplot(1,2,1);
+        if ( isfield( out, 'nExpID' ) )
+            [cs, ~, c] = unique(cell2mat(out.nExpID));
+            cols = 'rkbmgyp';
+            for a = 1 : length( cs )
+                cid = (a-1)-length(cols)*floor(a/length(cols)) + 1;
+                plot( trafo(means(c==a)), trafo(reps(c==a))-trafo(means(c==a)), [cols( cid ), '.'] ); hold on;
+            end
+        else
+            plot( trafo(means), trafo(reps)-trafo(means), '.' ); hold on;
+        end
+        ylabel( [ 'Residual of ', escapeChars(desiredObs{jO}) ] );
+        xlabel( [ 'Estimated mean ' escapeChars(desiredObs{jO}) ] );        
+        
+        subplot(1,2,2);
+        plot( means, reps, '.' ); hold on;
+        ylabel( [ 'Replicate ' escapeChars( desiredObs{jO} ) ] );
+        xlabel( [ 'Estimated mean ' escapeChars(desiredObs{jO}) ] );
+    end
+end
+
+function str = escapeChars(str)
+    str = strrep(str, '_', '\_');
+end
+
 function colors = colmap()
     colors = [ ...
             27, 158, 119; ...
@@ -308,10 +401,10 @@ function out = unitTest() %#ok
     out.y       = {1,2,3,  2,4,6,  10,20,30     3,6,9,  6,12,18 30,60,90}.';
 end
 
-function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList, trafo, invTrafo, rescale )
+function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, obsList, trafo, invTrafo, rescale, prescale )
     verbose = 1;
     fieldNames = fieldnames(out);
-       
+    
     % Sort by fill
     fill = zeros(1, length(fieldNames));
     for jN = 1 : length( fieldNames )
@@ -320,7 +413,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     fill(ismember(fieldNames, expVar))=1e30;
     timeVar = false(size(fieldNames));
     for a = 1 : length( timeVars )
-        timeVar = timeVar |  ismember(fieldNames, timeVars{a});
+        timeVar = timeVar | ismember(fieldNames, timeVars{a});
     end
     fill(timeVar)=inf;
         
@@ -355,11 +448,11 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     
     % Determine data fields
     dataFields  = setdiff( fieldNames, union( conditionFields, expVar ) );
-    
+        
     if ~isempty( obsList )
         dataFields = intersect( dataFields, obsList );
     end
-    
+        
     % Assign data fields to common groups
     if ( isempty( obsGroups ) )
         disp( 'No groups specified.' );
@@ -397,7 +490,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     
     expVar = fieldNames(cell2mat(cellfun(@(a)strcmp(a, expVar), fieldNames, 'UniformOutput', false)));
     nObs  = length( dataFields );
-    
+
     % Set up a unique scaling factor for each group
     scales = cell(1, nObs);
     current = 0;
@@ -412,16 +505,17 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     for jG = 1 : nGroups
         curScale = []; curData = []; curConditions = []; obsjD = [];
         for jD = obsGroups{jG}
-            fprintf('Processing obs group %s', dataFields{jD});
-            nData           = cell2mat(out.(dataFields{jD}));        %    Process single observation
-            Q{jD}           = find(~isnan( nData ));                 %#ok Fetch points that have data
-            curData         = [curData; nData(Q{jD})];               %#ok
-            curConditions   = [curConditions, jcondition(Q{jD}).'];  %#ok Fetch condition IDs this observable appears in
-            obsjD           = [obsjD; jD*ones(size(Q{jD}))];         %#ok Observable => This is paired with the conditions of observables in the same group, to ensure they get separate means in the estimation process
-            curScale        = [curScale; scales{jD}(Q{jD})];         %#ok
+            fprintf('Processing obs %s', dataFields{jD} );
+            nData  = cell2mat(out.(dataFields{jD}));                % Process single observation
+            if ~isempty( prescale )
+                nData  = prescale( nData );                         % Apply forced prescaling function
+            end
+            Q{jD}           = find(~isnan( nData ));                %#ok Fetch points that have data
+            curData         = [curData; nData(Q{jD})];              %#ok
+            curConditions   = [curConditions, jcondition(Q{jD}).']; %#ok Fetch condition IDs this observable appears in
+            obsjD           = [obsjD; jD*ones(size(Q{jD}))];        %#ok Observable => This is paired with the conditions of observables in the same group, to ensure they get separate means in the estimation process
+            curScale        = [curScale; scales{jD}(Q{jD})];        %#ok
         end
-        
-        curData = curData / nanmax(nanmax(curData));
         
         % ConditionLinks links the replicates to the "true" IDs (i.e. true conditions, t, cond pairs)
         % ScaleLinks refers to which scale corresponds to which datapoint.
@@ -435,8 +529,8 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
         % specified in conditionTargets) and scaling (in the order
         % specified in scaleTargets).
         checkDims( data, conds, scaleTargets, conditionTargets );
-        [means, mlb, mub, scalings] = estimateObs( errModel, errModelPars, curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale ); 
-        replicates = trafo(curData ./ scalings(scaleLinks));
+        [means, mlb, mub, scalings, offsets] = estimateObs( errModel, errModelPars, curData, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale, trafo ); 
+        replicates = trafo( (curData - offsets) ./ scalings(scaleLinks) );
         
         % To get where these are globally we have to map them back
         % means(conditionLinks) and scalings(scaleLinks) will sort them
@@ -492,24 +586,24 @@ function checkDims( data, condition, scaleTargets, conditionTargets )
     end
 end
 
-function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale )
+function [means, mlb, mub, scalings, offsets] = estimateObs( eModel, errModelPars, data, scaleTargets, scaleLinks, conditionTargets, conditionLinks, rescale, trafo )
 
     % Parameters are [ means_for_each_condition , scalings ]
-    means = zeros(size(conditionTargets));
+    Nmeans = size(conditionTargets,2);
+    means  = zeros(1,Nmeans);
     
     % Obtain initial means from data
     for a = 1 : length( conditionTargets )
         loc = find(conditionLinks==a);
-        means(a) = data(loc(1));
+        means(a) = trafo( data(loc(1)) );
     end
+
+    Nscalings = numel(scaleTargets)-1;
+    Noffsets = 0;
+    offsetLinks = ones( size( conditionLinks ) );
+    offsets = 1e-9*ones(Noffsets, 1);
     
-    % Set initial scalings
-    scalings = ones(numel(scaleTargets)-1,1);
-    initPar  = [ means.'; scalings; 1e10 * ones( errModelPars, 1) ];
-    
-    lb = zeros(size(initPar));
-    lb( end - errModelPars : end ) = 1e-9;
-    
+    lb = [ -1e12 * ones(Nmeans,1); zeros(Nscalings,1); 1e-15*ones(Noffsets,1); 1e-15*ones(errModelPars,1) ];
     if ( rescale )
         fixedScale = nanmax(nanmax(data));
         fprintf( ' <Rescale: %.5g>\n', fixedScale );
@@ -517,40 +611,122 @@ function [means, mlb, mub, scalings] = estimateObs( eModel, errModelPars, data, 
         fixedScale = 1;
     end
     
-    options                 = optimset('TolFun', 0, 'TolX', 1e-11, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Iter' );
-    errModel                = @(pars) eModel(fixedScale, pars, data, scaleLinks, length(conditionTargets), length(scalings), conditionLinks);
-    p                       = lsqnonlin( errModel, initPar, lb, 1e25*ones(size(initPar)), options );
-    [p, ~, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, lb, 1e25*ones(size(initPar)), options );
-    [p, ~, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, lb, 1e25*ones(size(initPar)), options );
-    ci                      = nlparci(p,r,'Jacobian',J,'alpha',0.05);
+    % Set initial scalings   
+    scalings = fixedScale * ones(Nscalings,1);
+    initPar  = [ means.'; scalings; offsets; 1e-8 * ones( errModelPars, 1) ];
+    
+    fprintf( 'Number of free scaling factors %d\n', Nscalings );    
+    
+    options    = optimset('TolFun', 1e-7, 'TolX', 1e-6, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Iter', 'Jacobian', 'On', 'DerivativeCheck', 'Off' ); % 
+    tol        = 1e-7;
+    errModel   = @(pars) eModel(fixedScale, pars, data, scaleLinks, length(conditionTargets), length(scalings), Noffsets, conditionLinks, offsetLinks );
+    
+    if exist('debug', 'var')
+        initPar = randn(size(initPar));
+        [~,J]=errModel(initPar);
+        Jfin=findiff(errModel, initPar);
+    end
+    
+    [p, rn, r, ~, ~, ~, J]  = lsqnonlin( errModel, initPar, lb, 1e125*ones(size(initPar)), options );
+    rLast = inf;
+    round = 1;
+    while( ((rLast - rn)/rn > tol) )
+        rLast = rn;
+        [p, rn, r, ~, ~, ~, J]   = lsqnonlin( errModel, p, lb, 1e125*ones(size(initPar)), options );
+        fprintf('Round %d: Difference last and current optimization: %g\n', round, rLast-rn);
+        round = round + 1;
+    end
+    figure;
+    ci = nlparci(p,r,'Jacobian',J,'alpha',0.05);
     
     fprintf( 'Final objective: %g\n', sum(r.^2) );
     
     means    = p(1:numel(means));
-    mlb      = ci(:,1);
-    mub      = ci(:,2);
-    scalings = [fixedScale; p(numel(conditionTargets)+1:end - errModelPars)];
-end
-
-function res = model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, trafo )
-    scales = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
-    res = trafo( scales(scaleLinks) .* pars(conditionLinks) ) - trafo( data );
-end
-
-function res = flexible_model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, conditionLinks, errorModel, trafo )
-    fix     = 1e10;
-    scales  = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
-    sigma   = errorModel(pars(Ncond+Nscale+1:end), trafo( pars(conditionLinks) ), trafo( scales(scaleLinks) ));
+    mlb      = ci(1:numel(means),1);
+    mub      = ci(1:numel(means),2);
+    scalings = [fixedScale; p(numel(conditionTargets)+1:end - errModelPars - Noffsets)];
     
-    if ( max( sigma*fix < 1 ) > 0 ) 
-        error( 'Sigma term negative :(' );
+    if ( Noffsets > 0 )
+        offsets  = p(end-errModelPars-Noffsets+1:end-errModelPars);
+    else
+        offsets  = 0;
+    end
+end
+
+function [res, J] = model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks, trafo, invTrafo, dTrafo, diTrafo )
+    scales = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
+    if ( Noffsets > 0 )
+        res = trafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) + pars(offsetLinks+Ncond+Nscale) ) - trafo( data );  
+    else
+        res = trafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) ) - trafo( data );  
     end
     
-    res = [ ( scales(scaleLinks) .* pars(conditionLinks) - data ) / (sigma / fix), sqrt( 2 * log( sigma * fix ) ) ];
+    % Jacobian if desired
+    if ( nargout > 1 )
+        J = zeros(numel(pars), numel(res));
+        
+        if ( Noffsets > 0 )
+            dTraf = dTrafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) + pars(offsetLinks+Ncond+Nscale) );
+        else
+            dTraf = dTrafo( scales(scaleLinks) .* invTrafo( pars(conditionLinks) ) );
+        end
+        % Mean derivatives
+        for jC = 1 : Ncond
+            J(jC, 1:numel(scaleLinks))                  = (conditionLinks==jC) .* dTraf .* ( diTrafo(pars(conditionLinks)) .* scales(scaleLinks) );
+        end
+        % Scale derivatives
+        for jS = 2 : Nscale+1
+            J(jS + Ncond - 1, 1:numel(scaleLinks))      = (scaleLinks==jS) .* dTraf .* invTrafo( pars(conditionLinks) );
+        end
+        % Offset derivatives
+        for jO = 1 : Noffsets
+            J(jO + Ncond + Nscale, 1:numel(scaleLinks)) = (offsetLinks==jO) .* dTraf;
+        end
+        J = J.';
+    end
 end
 
-function sigma = twocomponent( noisepars, mus, scales )
-    sigma = sqrt( noisepars(1)*noisepars(1) + noisepars(2)*noisepars(2)*mus.*mus );
+% Does not deal with trafos yet
+function [res, J] = flexible_model( fixedScale, pars, data, scaleLinks, Ncond, Nscale, Noffsets, conditionLinks, offsetLinks, errorModel )
+    fix     = 50;
+    scales  = [fixedScale; pars(Ncond+1:Ncond+Nscale)];
+    %sigma   = errorModel(pars(Ncond+Nscale+1:end), trafo( pars(conditionLinks) ), trafo( scales(scaleLinks) ));
+    [sigma, dsigds, dsigdu, dsigdsig] = errorModel(pars(Ncond+Nscale+1:end), pars(conditionLinks), scales(scaleLinks) );
+    if ( max( (2 * log( sigma ) + fix) < 1 ) > 0 ) 
+        error( 'Sigma term negative' );
+    end
+
+    res = [ ( scales(scaleLinks) .* pars(conditionLinks) - data ) ./ sigma; sqrt( 2 * log( sigma ) + fix ) ];
+    
+    % Jacobian if desired
+    if ( nargout > 1 )
+        J = zeros(numel(pars), numel(res));
+        
+        for jC = 1 : Ncond
+            J(jC, 1:numel(scaleLinks))              = (conditionLinks==jC) .* (scales(scaleLinks) ./ sigma + res(1:numel(scaleLinks)) .* (-1./sigma) .* dsigdu);
+            J(jC, numel(scaleLinks)+1:end)          = (conditionLinks==jC) .* (1./(sigma .* sqrt(2 * log( sigma ) + fix))) .* dsigdu;
+        end
+        for jS = 2 : Nscale+1
+            J(jS + Ncond - 1, 1:numel(scaleLinks))      = (scaleLinks==jS) .* ( pars(conditionLinks) ./ sigma + res(1:numel(scaleLinks)) .* (-1./sigma) .* dsigds );
+            J(jS + Ncond - 1, numel(scaleLinks)+1:end)  = (scaleLinks==jS) .* (1./(sigma .* sqrt(2 * log( sigma ) + fix))) .* dsigds;
+        end      
+
+        for l = 1 : size( dsigdsig, 2 )
+            pIDs = Ncond+Nscale+l;
+            J(pIDs, 1:numel(scaleLinks))     = res(1:numel(scaleLinks)) .* (-1./sigma) .* dsigdsig(:,l);
+            J(pIDs, numel(scaleLinks)+1:end) = (1./(sigma .* sqrt(2 * log( sigma ) + fix))) .* dsigdsig(:,l);
+        end
+        
+        J = J.';
+    end
+end
+
+function [sigma, dsigds, dsigdu, dsigdsig] = twocomponent( noisepars, mus, ~ ) % Last arg scales is not needed
+    sigma    = sqrt( noisepars(1)*noisepars(1) + noisepars(2)*noisepars(2)*mus.*mus );
+    dsigds   = zeros( numel(sigma), 1 );
+    dsigdu   = mus .* noisepars(2)*noisepars(2) ./ sigma;
+    
+    dsigdsig = [ones(numel(mus),1)*noisepars(1)./sigma, noisepars(2).*mus.*mus./sigma];
 end
 
 function data = readCSV( filename, delimiter )
@@ -567,7 +743,6 @@ function data = readCSV( filename, delimiter )
     
     % Fetch header
     C = textscan(fid, '%s\n',1,'Delimiter','');
-    
     
     % Grab header items
     headers = textscan(C{1}{1}, '%q', 'Delimiter', delimiter);

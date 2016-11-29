@@ -26,7 +26,7 @@
 %                       as subsequent argument
 %   TexPages          - Provide files with custom tex pages (provide cell
 %                       array of files as next argument)
-%   Bibs              - Provide fiels with additional bibliography items
+%   Bibs              - Provide files with additional bibliography items
 %                       (provide cell array of files as next argument)
 %   Figures           - Copy figure directories into tex output dir.
 %                       These can be used in submitted tex files (provide 
@@ -38,7 +38,7 @@ function arMiniReport(varargin)
 
 global ar
 
-warning( 'This report functionality is currently in alpha status. Please use arReport instead.' );
+warning( 'This report functionality is currently in beta status.' );
 
 switches    = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots', 'ExcludeDynPars', 'TexPages', 'Figures', 'OverridePlots', 'Bibs' };
 extraArgs   = [         0,            0,               0,                0,                0,             0,               0,               0,         0,                 1,          1,         1,               1,      1 ];
@@ -59,13 +59,13 @@ descriptions = {    { 'Plotting all Ys', '' }, ...
                     };
 
 if( (nargin > 0) && max( strcmpi( varargin{1}, switches ) ) == 0 )
-    project_name = varargin{1}{1};
-    varargin{1:end-1} = varargin{2:end};
+    project_name = varargin{1};
+    varargin = varargin(2:end);
 else
     project_name = 'Data 2 Dynamics Software -- Modeling Report';
 end
 
-opts = argSwitch( switches, extraArgs, descriptions, varargin );
+opts = argSwitch( switches, extraArgs, descriptions, 1, varargin );
 if(isempty(ar))
     error('please initialize by arInit')
 end
@@ -105,10 +105,13 @@ matVer = ver('MATLAB');
 ar.config.matlabVersion = str2double(matVer.Version);
 
 savePath = [arSave '/Latex'];
+if ~exist(savePath, 'dir')
+    mkdir( savePath );
+end
 
-if ~isempty( opts.figures )
-    for a = 1 : length( opts.figures )
-        copyfile( [opts.figures{a} '/*.pdf'], [savePath '/' opts.figures{a} '/'] );
+if opts.figures
+    for a = 1 : length( opts.figures_args )
+        copyfile( [opts.figures_args{a} '/*.pdf'], [savePath '/' opts.figures_args{a} '/'] );
     end
 end
 
@@ -135,10 +138,10 @@ if (isfield(ar, 'additionalBib'))
     end
 end
 
-if ~isempty( opts.bibs )
+if opts.bibs
     fid = fopen( [savePath '/lib.bib'], 'a' );
-	for a = 1 : length( opts.bibs )
-        txt = strrep(strrep(fileread(opts.bibs{a}), '\', '\\'), '%', '%%');
+	for a = 1 : length( opts.bibs_args )
+        txt = strrep(strrep(fileread(opts.bibs_args{a}), '\', '\\'), '%', '%%');
         fprintf( fid, txt );
 	end
     fclose(fid);
@@ -232,8 +235,8 @@ lp(fid, '\\newcolumntype{K}{>{\\centering\\arraybackslash}X}');
 
 %% Header
 % lp(fid, ['\\title{Data-2-Dynamics Software' ...
-%     '\\footnote{Website: \\href{https://bitbucket.org/d2d-development/d2d-software}' ...
-%     '{\\url{https://bitbucket.org/d2d-development/d2d-software}} \\\\ ', ...
+%     '\\footnote{Website: \\href{http://data2dynamics.org}' ...
+%     '{\\url{http://data2dynamics.org}} \\\\ ', ...
 %     'Reference: \\citet{Raue:2012zt}}'...
 %     ' \\\\ Modeling Report}']);
 
@@ -287,9 +290,13 @@ for jm=1:length(ar.model)
     lp(fid, '\\subsection{Model description}');
     lp(fid, 'The model used in this study is based on a system of Ordinary Differential Equations (ODE). These ordinary differential equations are derived by means of the law of mass-action. ' );
     lp(fid, 'The time evolution of the biochemical compounds is computed by numerically integrating these differential equations. The model contains parameters which are estimated by calibrating the model to data using a Maximum-Likelihood estimation approach. %s', eqText );
-    lp(fid, 'All analyses were performed using the \\emph{Data 2 Dynamics} software package \\cite{raue2015data2dynamics}, which is available from \\href{https://bitbucket.org/d2d-development/d2d-software}{\\url{https://bitbucket.org/d2d-development/d2d-software}}. ');
-    if ( length( ar.model(jm).c ) > 1 )
+    lp(fid, 'All analyses were performed using the \\emph{Data 2 Dynamics} software package \\cite{raue2015data2dynamics}, which is available from \\href{http://data2dynamics.org}{\\url{http://data2dynamics.org}}. ');
+    if ( length( ar.model(jm).c ) > 2 )
         lp( fid, 'The model considers multiple compartments (see Table \\ref{compartments}), which are taken into account by considering the relevant compartment volumes in the flux expressions. ' );
+    else
+        if ( length( ar.model(jm).c ) == 2 )
+            lp( fid, 'The model considers two compartments namely %s (vol = %s) and %s (vol = %s), which are taken into account by considering the relevant compartment volumes in the flux expressions. ', ar.model(jm).c{1}, getVolume(jm, 1), ar.model(jm).c{2}, getVolume(jm, 2) );
+        end
     end
     lp(fid, 'The %d dynamic variables used in the model are summarized in Table \\ref{variables}', length(ar.model(jm).x) );
     
@@ -300,23 +307,22 @@ for jm=1:length(ar.model)
     end
     
     %% compartments
-    if ( length( ar.model(jm).c ) > 1 )       
+    if ( length( ar.model(jm).c ) > 2 )       
         lp(fid, '\\begin{table}[h]');
         lp(fid, '\\centering');
         lp(fid, '\\begin{tabular}{@{} *2l @{}}\\toprule');
         lp(fid, '\\titlerowcol \\textbf{Compartment} & \\textbf{Volume}\\tabularnewline\\midrule' );
         for jc = 1 : length( ar.model(jm).c )
-            volP = ar.model(jm).pc{jc};
-            if ( isempty( str2num( volP ) ) ) %#ok
-                volP = num2str( str2num( ar.model(jm).fp{ find( strcmp( ar.model(jm).p, volP ) ) } ) ); %#ok
-            end
+            volP = getVolume(jm, jc);
             lp(fid, '%s%s & %s\\\\', alternate(jc), ar.model(jm).c{jc}, volP );
         end
         lp(fid, '\\botrule\\end{tabular}');
         lp(fid, '\\caption[align=left,justification=justified,singlelinecheck=false]{Model compartments}\\label{compartments}');
         lp(fid, '\\end{table}');
     else
-        lp( fid, 'Concentrations were based on a compartment volume of %f.', ar.model(jm).pc{1} );
+        if ( length( ar.model(jm).c ) == 1 )
+            lp( fid, 'Concentrations were based on a compartment volume of %f.', getVolume(jm, 1) );
+        end
     end
     
     %% species
@@ -402,7 +408,7 @@ for jm=1:length(ar.model)
     %vs = sym('v', [1, size(ar.model(jm).N,2)]);
     %cs = sym(strcat('vol_', ar.model(jm).c));
     
-    lp(fid, '\\noindent The model consists of %d differential equations, which are given by the following equations:', length(ar.model.x) );
+    lp(fid, '\\newpage\\noindent The model consists of %d differential equations, which are given by the following equations:', length(ar.model.x) );
     lp(fid, '{\\footnotesize');
     lp(fid, '\\begin{align}');
     for jx=1:size(ar.model(jm).N, 1) % for every species jx
@@ -623,7 +629,7 @@ for jm=1:length(ar.model)
     lp(fid, 'The model parameters were estimated by maximum likelihood estimation applying the MATLAB lsqnonlin algorithm.');
     end
     
-    N = 50;    
+    N = 51;    
     ntables = ceil(length(ar.p)/N);
 
     lp(fid, 'The model parameters which influence system dynamics are listed in Table \\ref{dynpars}.');
@@ -650,20 +656,20 @@ for jm=1:length(ar.model)
     count = 1;
     for dp=1:length(dynPars)   
         j = dynPars(dp);
-        if ( ~masktest( ar.pLabel{j}, opts.excludedynpars ) )
+        if ( ~masktest( ar.pLabel{j}, opts.excludedynpars_args ) )
             count = count + 1;
             if(ar.qFit(j)==1)
                 if(ar.p(j) - ar.lb(j) < 0.1 || ar.ub(j) - ar.p(j) < 0.1)
-                    lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.0g} & \\color{red}{%+8.4f} & \\color{red}{%+8.0g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\tabularnewline', ...
+                    lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.4g} & \\color{red}{%+8.4f} & \\color{red}{%+8.4g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\tabularnewline', ...
                         alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                         ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
                 else
-                    lp(fid, '%s\t\t\t%i & %s & {%+8.0g} & {%+8.4f} & {%+8.0g} & %i & %s & %i \\tabularnewline', ...
+                    lp(fid, '%s\t\t\t%i & %s & {%+8.4g} & {%+8.4f} & {%+8.4g} & %i & %s & %i \\tabularnewline', ...
                         alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                         ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
                 end
             else
-                lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.0g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.0g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\tabularnewline', ...
+                lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.4g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.4g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\tabularnewline', ...
                     alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                     ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
             end
@@ -691,9 +697,10 @@ for jm=1:length(ar.model)
     end
     
     %% Additional description via args
-    if ~isempty( opts.texpages )
-        for a = 1 : length( opts.texpages )
-            lp(fid, strrep(strrep(fileread(opts.texpages{a}), '\', '\\'), '%', '%%'));
+    if opts.texpages
+        lp(fid, '\\FloatBarrier');
+        for a = 1 : length( opts.texpages_args )
+            lp(fid, strrep(strrep(fileread(opts.texpages_args{a}), '\', '\\'), '%', '%%'));
         end
     end  
     
@@ -758,32 +765,30 @@ for jm=1:length(ar.model)
             fpSymString{a} = char(sym(ar.model(jm).fp{a}));
         end
 
-        
         %% do we override some of the plots
-        if (~isempty(opts.overrideplots))
-            k = dir( [opts.overrideplots '/*.pdf'] );
+         if opts.overrideplots
+            k = dir( [opts.overrideplots_args '/*.pdf'] );
             if ( ~isempty(k) )
-                copyfile( [opts.overrideplots '/*.pdf'], [savePath '/' opts.overrideplots] );
+                copyfile( [opts.overrideplots_args '/*.pdf'], [savePath '/' opts.overrideplots_args] );
                 for a = 1 : length( k )
                     if ( ~strcmp( k(a).name, '.' ) && ~strcmp( k(a).name, '..' ) )
-                        pdfCrop( [savePath '/' opts.overrideplots '/' k(a).name(1:end-4) ] )
+                        pdfCrop( [savePath '/' opts.overrideplots_args '/' k(a).name(1:end-4) ] )
                     end
                 end
             end
-            k = dir( [opts.overrideplots '/*.tex'] );
+            k = dir( [opts.overrideplots_args '/*.tex'] );
             if ( ~isempty(k) )
-                copyfile( [opts.overrideplots '/*.tex'], [savePath '/' opts.overrideplots] );
+                copyfile( [opts.overrideplots_args '/*.tex'], [savePath '/' opts.overrideplots_args] );
             end
             
             for jplot=1:length(ar.model(jm).plot)
-                if ( exist( [ opts.overrideplots '/' ar.model(jm).plot(jplot).name '.pdf' ], 'file' ) || exist( [ opts.overrideplots '/' ar.model(jm).plot(jplot).name '_Report.tex' ], 'file' ) )
-                    ar.model(jm).plot(jplot).savePath_FigY = [opts.overrideplots '/' ar.model(jm).plot(jplot).name];
+                if ( exist( [ opts.overrideplots_args '/' ar.model(jm).plot(jplot).name '.pdf' ], 'file' ) || exist( [ opts.overrideplots_args '/' ar.model(jm).plot(jplot).name '_Report.tex' ], 'file' ) )
+                    ar.model(jm).plot(jplot).savePath_FigY = [opts.overrideplots_args '/' ar.model(jm).plot(jplot).name];
                     ar.model(jm).plot(jplot).override = 1;
                     fprintf( 'Overridden %s ...', ar.model(jm).plot(jplot).name );
                 end
             end
         end
-        
         for jplot=1:length(ar.model(jm).plot)
             if (ar.model(jm).qPlotYs(jplot)||~opts.omitnonplotted)
                 lp(fid, '\\FloatBarrier');
@@ -1175,9 +1180,9 @@ for jm=1:length(ar.model)
                         
                         % Avoid ending up with a last table with less than 4 entries, since
                         % this looks silly.
-                        overhang = N-round((length(ar.p)/N))*N;
+                        overhang = Nd-round((length(ar.p)/Nd))*Nd;
                         if ( overhang < 4 )
-                            N = 50;
+                            Nd = 50;
                         end
                         
                         openDataTable( fid, jm, jd, L, headtab, headstr, unitstr );
@@ -1298,16 +1303,16 @@ for j=1:length(ar.p)
     
     if(ar.qFit(j)==1)
         if(ar.p(j) - ar.lb(j) < 0.1 || ar.ub(j) - ar.p(j) < 0.1)
-            lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.0g} & \\color{red}{%+8.4f} & \\color{red}{%+8.0g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\\\', ...
+            lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.4g} & \\color{red}{%+8.4f} & \\color{red}{%+8.4g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\\\', ...
                 alternate(j), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                 ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
         else
-            lp(fid, '%s\t\t\t%i & %s & {%+8.0g} & {%+8.4f} & {%+8.0g} & %i & %s & %i \\\\', ...
+            lp(fid, '%s\t\t\t%i & %s & {%+8.4g} & {%+8.4f} & {%+8.4g} & %i & %s & %i \\\\', ...
                 alternate(j), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                 ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
         end
     else
-        lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.0g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.0g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\\\', ...
+        lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.4g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.4g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\\\', ...
             alternate(j), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
             ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
     end
@@ -1998,7 +2003,7 @@ function str = alternate(i)
     end
     
     
-function [opts] = argSwitch( switches, extraArgs, description, varargin )
+function [opts] = targSwitch( switches, extraArgs, description, varargin )
 
     for a = 1 : length(switches)
         if ( extraArgs(a) == 0 )
@@ -2115,3 +2120,11 @@ function wrapped = funcWrap( str, maxLen, newl )
         cChunk = cChunk + 1;
         c = c + 1;
     end
+    
+function volP = getVolume(jm, jc)
+    global ar;
+    
+    volP = ar.model(jm).pc{jc};
+    if ( isempty( str2num( volP ) ) ) %#ok
+        volP = num2str( str2num( ar.model(jm).fp{ find( strcmp( ar.model(jm).p, volP ) ) } ) ); %#ok
+	end

@@ -4,9 +4,13 @@
 %
 % flag = 1 : D2D is up-to-date
 
-function flag = arCheckVersion
+function flag = arCheckVersion(silent)
 
 global ar
+
+if(~exist('silent','var'))
+    silent = false;
+end
 
 [has_git, is_repo] = arCheckGit(ar.info.ar_path);
 
@@ -33,11 +37,13 @@ if(has_git && is_repo)
             br      = strfind(gh_data, '"');
             gh_data = gh_data(1:br(1)-1);
         end
-        if(~isempty(gh_data) && ~strcmp(deblank(gh_data),ar.info.revision))
+        if(~isempty(gh_data) && ~strcmp(deblank(gh_data),ar.info.revision)) && ~silent
             warning(update_msg);
         end
     catch
-        warning('Could not connect to github. Version checking cancelled.')
+        if(~silent)
+            warning('Could not connect to github. Version checking cancelled.')
+        end
     end
 else
     ar.info.revision = [];

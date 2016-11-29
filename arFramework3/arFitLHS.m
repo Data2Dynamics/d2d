@@ -6,8 +6,12 @@
 %
 % n:                number of runs      [10]
 % randomseed:                           rng(randomseed)
-% log_fit_history                       [false]
+% log_fit_history                       [false] 
+%                               if true, then the new fits in ar.fit is
+%                               stored in ar.fit_hist 
 % backup_save                           [false]
+%                               if true, ar of the last fit is stored in
+%                               arFits_backup.mat
 % use_cluster                           [false]
 % 
 %   ar.config.restartLHS = 0: Default, non-feasible fits are possible.
@@ -28,7 +32,7 @@ end
 if(~exist('backup_save','var') || isempty(backup_save))
     backup_save = false;
 end
-if(~exist('use_cluster','var'))
+if(~exist('use_cluster','var') || isempty(use_cluster))
     use_cluster = false;
 end
 

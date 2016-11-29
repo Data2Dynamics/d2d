@@ -1,0 +1,14 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	-30 200
+
+INPUTS
+
+OBSERVABLES         
+dummy C 	au   conc.   0	0  "1"
+
+ERRORS 
+dummy "1"
+        
+CONDITIONS

@@ -169,6 +169,7 @@ elseif(jt==5) % qLog10
                 ar.lb(jp) = log10(ar.lb(jp));
             end
             ar.ub(jp) = log10(ar.ub(jp));
+            ar.mean(jp) = log10(ar.mean(jp));
             C{jp,2} = ar.lb(jp);
             C{jp,3} = ar.p(jp);
             C{jp,4} = ar.ub(jp);
@@ -180,6 +181,7 @@ elseif(jt==5) % qLog10
             ar.p(jp) = 10^(ar.p(jp));
             ar.lb(jp) = 10^(ar.lb(jp));
             ar.ub(jp) = 10^(ar.ub(jp));
+            ar.mean(jp) = 10^(ar.mean(jp));
             C{jp,2} = ar.lb(jp);
             C{jp,3} = ar.p(jp);
             C{jp,4} = ar.ub(jp);

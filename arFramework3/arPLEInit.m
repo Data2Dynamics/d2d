@@ -4,6 +4,13 @@
 %   force:              [true] = exising PLEs are deleted
 %   breakon_point:      [false] = calc simultaneous CIs, true = calc pointwise CIs
 %   mode:               [1] = direct step, 2 = progressive step
+% 
+%   The profile likelihood calculation by the functions ple* was intended
+%   as running independent of D2D, i.e. it was intendent to be also used by
+%   other tools. 
+% 
+%   This function extracts info from the global variable ar and calls
+%   pleInit.
 
 function arPLEInit(force, breakon_point, mode)
 
