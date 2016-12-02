@@ -4,7 +4,7 @@
 %
 % m:        model index
 % c:        condition index
-% copasi:   copasi compatibility mode
+% copasi:   use amounts as states (this is the SBML standard, hence default = true)
 
 function arExportSBML(m, c, copasi)
 
@@ -18,7 +18,7 @@ if(~exist([cd '/SBML' ], 'dir'))
 end
 
 if(~exist('copasi','var'))
-    copasi = false;
+    copasi = true;
 end
 
 M = TranslateSBML(which('empty.xml'));

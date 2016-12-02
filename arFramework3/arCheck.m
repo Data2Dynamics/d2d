@@ -130,7 +130,7 @@ if (exist('compileCeres', 'file') == 0)
     addpath([ar_path '/ThirdParty/Ceres'])
 end
 if (exist('TranslateSBML', 'file') == 0)
-    addpath([ar_path '/ThirdParty/libsbml'])
+    addpath([ar_path '/ThirdParty/libSBML'])
 end
 if (exist('fminsearchbnd', 'file') == 0)
     addpath([ar_path '/ThirdParty/FMINSEARCHBND'])
