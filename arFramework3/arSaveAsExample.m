@@ -100,9 +100,9 @@ for m=1:length(ar.model)
         catch            % old code
             disp('Please check replacement code of random parameters in arSaveAsExample.m')
             [uni,ia,ib]= unique(regexprep(ds{m},'_nExpID(\d)+',''));
+            ds{m} = uni(ib);  % replace zurueck
+            ds{m} = ds{m}(sort(ia)); % nur die unique, aber in alter reihenfolge
         end
-        ds{m} = uni(ib);  % replace zurueck
-        ds{m} = ds{m}(sort(ia)); % nur die unique, aber in alter reihenfolge
 
     else
         ds{m} = [];
