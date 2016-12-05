@@ -2,7 +2,7 @@
 % of residuals ar.res in ar.sresFD and of constraints ar.constr in ar.sconstrFD
 %
 % arFiniteDifferences(dp)    
-%   dp:     parameter variation             [1e-3]
+%   dp:     parameter variation             [1e-6]
 
 
 function arFiniteDifferencesGlobal(dp)
