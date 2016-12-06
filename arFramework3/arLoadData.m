@@ -578,7 +578,7 @@ if(~strcmp(extension,'none') && ( ...
         
         warning(warntmp);
         
-        timevar = strtrim(header(1));
+        timevar = Cstr(1,1);
         header = Cstr(1,2:end);
         header = strrep(header,' ',''); % remove spaces which are sometimes in the column header by accident    
         times = data(:,1);
