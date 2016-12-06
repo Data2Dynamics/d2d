@@ -578,6 +578,7 @@ if(~strcmp(extension,'none') && ( ...
         
         warning(warntmp);
         
+        timevar = strtrim(header(1));
         header = Cstr(1,2:end);
         header = strrep(header,' ',''); % remove spaces which are sometimes in the column header by accident    
         times = data(:,1);
@@ -606,11 +607,37 @@ if(~strcmp(extension,'none') && ( ...
         
     elseif(strcmp(extension,'csv'))
         [header, data, dataCell] = arReadCSVHeaderFile(['Data/' name '.csv'], ',', true);
-
+        
+        timevar = strtrim(header(1));
         header = header(2:end);
         times = data(:,1);
         data = data(:,2:end);
         dataCell = dataCell(:,2:end);
+    end
+    
+    % remove time points that we don't want
+    if ( opts.removeconditions )
+        selected = true(1, size(times,1));
+        if ( opts.removeconditions )
+            for a = 1 : 2 : length( opts.removeconditions_args )
+                if ( strcmp( timevar, opts.removeconditions_args{a} ) )
+                    % If the argument is a function handle, we evaluate them
+                    % for each element
+                    val = opts.removeconditions_args{a+1};
+                    if ( isa(val, 'function_handle') )
+                        for jv = 1 : length( times )
+                            accepted(jv) = val(num2str(times(jv)));
+                        end
+                    else
+                        error( 'Filter argument for removecondition is of the wrong type' );
+                    end
+                    selected = selected & ~accepted;
+                end
+            end
+        end
+        times = times(selected);
+        data = data(selected,:);
+        dataCell = dataCell(selected,:);
     end
     
     % random effects
