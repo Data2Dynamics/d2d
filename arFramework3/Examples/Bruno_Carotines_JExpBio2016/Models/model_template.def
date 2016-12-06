@@ -1,0 +1,59 @@
+DESCRIPTION
+"model .def file template"
+
+PREDICTOR
+t	T	"min"	"time"	0	100
+
+COMPARTMENTS
+cyt	V	"pl"	"vol."	1
+
+STATES
+bcar	C	"nM"	"conc."	cyt	1	"beta-carotin" 1
+bcry	C	"nM"	"conc."	cyt	1	"cry" 1
+b10	C	"nM"	"conc."	cyt	1	"beta-10" 1
+bio	C	"nM"	"conc."	cyt	1	"beta-io" 1
+ohb10	C	"nM"	"conc."	cyt	1	"OH-beta-10" 1
+ohbio	C	"nM"	"conc."	cyt	1	"OH-beta-io" 1
+zea	C	"nM"	"conc."	cyt	1	"zea" 1
+
+INPUTS
+//Stim1	C	"nM"	"conc."	"k1*exp(-k2*t)"
+
+REACTIONS
+bcar	->	b10 + bio 	CUSTOM "kb1*bcar"	"ReactionName"
+b10	->	bio 	    	CUSTOM "kb2*b10"	"ReactionName"
+bcry	->	b10 + ohbio 	CUSTOM "kc1*bcry"	"ReactionName"
+bcry	->	bio + ohb10	CUSTOM "kc2*bcry"	"ReactionName"
+ohb10	->	ohbio 	    	CUSTOM "kc4*ohb10"	"ReactionName"
+zea	->	ohb10 + ohbio 	CUSTOM "k5*zea"		"ReactionName"
+
+//ODES
+//"kb1*bcar"	
+//"kb2*b10"	
+//"kc1*bcry"	
+//"kc2*bcry"	
+//"kc4*ohb10"	
+//"k5*zea"	
+
+DERIVED
+        
+OBSERVABLES
+// meaning of the columns:
+// y name	yunit1	yunit2	yunit3	normal.	logploting&logfitting	obs_fun
+obcar	"amount"	"conc."	"1"	0	0	"bcar"	"obcar"
+obcry	"amount"	"conc."	"1"	0	0	"bcry"	"obcry"
+obio	"amount"	"conc."	"1"	0	0	"bio"	"obio"
+ob10	"amount"	"conc."	"1"	0	0	"b10"	"ob10"
+oohb10	"amount"	"conc."	"1"	0	0	"ohb10"	"oohb10"
+ozea	"amount"	"conc."	"1"	0	0	"zea"	"ozea"
+
+        
+ERRORS
+obcar	"1"
+obcry	"1"
+obio	"1"
+ob10	"1"
+oohb10	"1"
+ozea	"1"
+
+CONDITIONS

@@ -69,7 +69,7 @@ function ar = arInitFields(ar)
         ...                                                             % Constraint based steady states
         {'steady_state_constraint',     1}, ...                         %   Enable system
         ...
-        {'instantaneous_termination',   1-ispc}, ...                    % Poll utIsInterruptPending() to respond to CTRL+C
+        {'instantaneous_termination',   1}, ...                    	% Poll utIsInterruptPending() to respond to CTRL+C
         {'no_optimization',             0}, ...                         % Disable compiler optimization
         };
         

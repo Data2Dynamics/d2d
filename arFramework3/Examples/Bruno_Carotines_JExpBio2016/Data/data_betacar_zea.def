@@ -1,0 +1,27 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR
+t	T	"min"	"time"	0	100
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+init_bcar	"init_bcar2"
+init_bcry	"0"
+init_b10	"0"
+init_bio	"0"
+init_ohb10	"0"
+init_ohbio	"0"
+init_zea	"0"
+kb1	"kb1*szea"
+kb2	"kb2*szea"
+kc1	"kc1*szea"
+kc2	"kc2*szea"
+kc4	"kc4*szea"
+k5	"k5*szea"
+
