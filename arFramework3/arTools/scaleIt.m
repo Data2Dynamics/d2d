@@ -164,7 +164,7 @@ function out = scaleIt( names, outFile, varargin )
                     
                     % Force everything to be on the same scale
                     if ( opts.samescale )
-                        expField = 1;
+                        expField = 0;
                     end
                 end
                 out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
