@@ -1,4 +1,11 @@
 % arPlotParameters(nbest, jks)
+% 
+%   Ploting of parameter values ar.ps_sorted, e.g. the different local 
+%   optima found by arFitLHS 
+% 
+% Example:
+% arFitLHS(20)
+% arPlotParameters(10)
 
 function arPlotParameters(nbest, jks)
 
@@ -21,7 +28,11 @@ figure(1)
 
 colors = jet(nbest);
 for jp = nbest:-1:1
-    plot(ps(jp,:), 1:length(jks), 'Color', colors(jp,:))
+    if length(jks)>1
+        plot(ps(jp,:), 1:length(jks), 'Color', colors(jp,:))
+    else
+        plot(ps(jp,:), 1:length(jks), 'o','Color', colors(jp,:))
+    end
     hold on
 end
 hold off
