@@ -1,4 +1,4 @@
-% Fit model parameters to data using lsqnonlin
+    % Fit model parameters to data using lsqnonlin
 %
 % arFit(silent)
 %
@@ -32,6 +32,9 @@
 %      16 - simulated annealing
 %      17 - ga (geneticalgorithm)
 %
+%  Convergence of the optimization algorithm can be stored by setting
+%  ar.config.logFitting = 1. Then interesing variables for each iteration
+%  is stored in ar.fit.optimLog
 
 function varargout = arFit(varargin)
 
@@ -366,56 +369,6 @@ elseif(ar.config.optimizer == 17)
     jac = [];
     output.iterations = output.generations;
 
-% GlobalSearch
-elseif(ar.config.optimizer == 18)
-    options = optimset('fmincon');
-    options.GradObj = 'on';
-    options.GradConstr = 'on';
-    options.TolFun = ar.config.optim.TolFun;
-    options.TolX = ar.config.optim.TolX;
-    options.Display = ar.config.optim.Display;
-    options.MaxIter = ar.config.optim.MaxIter;
-    options.OutputFcn = ar.config.optim.OutputFcn;
-    
-    options.Algorithm = 'interior-point';
-    options.SubproblemAlgorithm = 'cg';
-    % options.Hessian = 'fin-diff-grads';
-    options.Hessian = 'user-supplied';
-    options.HessFcn = @fmincon_hessianfcn;
-    
-    switch options.Algorithm
-        case 'interior-point'
-            myconfun = @confun;
-        case 'trust-region-reflective'
-            myconfun = [];
-    end
-    
-    if ~isfield( ar, 'gs' )
-        ar.gs.stage1 = 20;
-        ar.gs.TolFun = 1e-6;
-        ar.gs.TolX = 1e-6;
-        ar.gs.nTrials = 10*ar.gs.stage1;
-        ar.gs.display = 'iter';
-    end
-
-    problem = createOptimProblem('fmincon', 'objective', @merit_fkt_fmincon, 'x0', ar.p, 'lb', ar.lb, 'ub', ar.ub, 'options', options );
-    gs = GlobalSearch;
-    gs.NumStageOnePoints = ar.gs.stage1;
-    gs.Display = 'iter';
-    gs.TolFun = ar.gs.TolFun;
-    gs.TolX = ar.gs.TolX;
-    gs.NumTrialPoints = ar.gs.nTrials;
-    [pFit,resnorm,exitflag,output,sol] = run(gs,problem);
-    
-    ar.gs.output = output;
-    for a = 1 : length( sol )
-        ar.chi2s(a) = sol(a).Fval;
-        ar.ps(a,:) = sol(a).X;
-    end
-    
-    %resnorm = merit_fkt(pFit);
-    jac = [];
-    fit.grad = [];
 else
     error('ar.config.optimizer invalid');    
 end
@@ -554,7 +507,7 @@ end
 % fmincon
 function [l, g, H] = merit_fkt_fmincon(pTrial)
 global ar
-arChi2(ar.config.useSensis && (nargout>1), pTrial);
+arChi2(ar.config.useSensis, pTrial);
 arLogFit(ar);
 l = sum(ar.res.^2);
 if(nargout>1)
