@@ -35,36 +35,37 @@ ar.config.optim.TolFun = 1e-12;
 % sinlge fit
 arFit;
 
-% multistart fit
-arFitLHS(1000,1122);
-% or load best fit parameters
-% arLoadPars('BestFit_zika_reduced');
-
-% show parameter values
-arPrint;
-
-% plot results of multistart fit
-arPlotFits
-
-% plot observables, internal sates and fluxes
-arQplot('xyv',1);
-arPlot;
-
-% save results
-arSave('SIR_Zika_reduced_Multistart1000')
-
-% likelihood profiles
-arPLEInit
-
-% Set tolerances
-pleGlobals.minstepsize(:) = 1e-5;
-
-% calculate profiles
-ple(find(ar.qFit==1),1e3);
-
-% extend profile suntin they hit the bound
-pleExtend;
-
-% plot profiles
-plePlotMulti;
-
+%% The following code indicates Multi-Start fitting, Profile likelihood calculation and Uncertainty analysis
+% % multistart fit
+% arFitLHS(1000,1122);
+% % or load best fit parameters
+arLoadPars('BestFit_zika_reduced');
+% 
+% % show parameter values
+% arPrint;
+% 
+% % plot results of multistart fit
+% arPlotFits
+% 
+% % plot observables, internal sates and fluxes
+% arQplot('xyv',1);
+% arPlot;
+% 
+% % save results
+% arSave('SIR_Zika_reduced_Multistart1000')
+% 
+% % likelihood profiles
+% arPLEInit
+% 
+% % Set tolerances
+% pleGlobals.minstepsize(:) = 1e-5;
+% 
+% % calculate profiles
+% ple(find(ar.qFit==1),1e3);
+% 
+% % extend profile suntin they hit the bound
+% pleExtend;
+% 
+% % plot profiles
+% plePlotMulti;
+% 
