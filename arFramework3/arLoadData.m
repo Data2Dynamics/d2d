@@ -22,6 +22,9 @@
 %                       function is a *string* not a number.
 % 'RemoveEmptyConds'    This flag allows you to remove conditions that have
 %                       no data points.
+% 'expsplit'            Split of conditions into separate replicates
+%                       based on the column var specified in the next argument
+%
 %       Example:
 %           arLoadData( 'mydata', 1, 'csv', true, 'RemoveConditions', ...
 %           {'input_il6', '0', 'input_dcf', @(dcf)str2num(dcf)>0};
@@ -120,14 +123,15 @@ else
     end
 end
 
-switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds'};
-extraArgs = [ 1, 1, 1, 1, 0 ];
+switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds', 'expsplit'};
+extraArgs = [ 1, 1, 1, 1, 0, 1 ];
 description = { ...
     {'', 'Multiple shooting on'} ...
     {'', 'Ignoring specific conditions'} ...
     {'', 'Ignoring specific observables'} ...
     {'', 'Split data set into specific conditions'}, ...
-    {'', 'Removing conditions without data'} };
+    {'', 'Removing conditions without data'}, ...
+    {'', 'Splitting conditions by specific data column'} };
     
 opts = argSwitch( switches, extraArgs, description, 1, varargin );
 
@@ -512,6 +516,11 @@ while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
     C = textscan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
+if ( opts.expsplit )
+    ar.model(m).data(d).rand_type(end+1) = 0;
+    ar.model(m).data(d).prand{end+1} = opts.expsplit_args;
+end
+
 % PARAMETERS
 if(~isfield(ar, 'pExternLabels'))
     ar.pExternLabels = {};
@@ -578,6 +587,7 @@ if(~strcmp(extension,'none') && ( ...
         
         warning(warntmp);
         
+        timevar = Cstr(1,1);
         header = Cstr(1,2:end);
         header = strrep(header,' ',''); % remove spaces which are sometimes in the column header by accident    
         times = data(:,1);
@@ -606,11 +616,37 @@ if(~strcmp(extension,'none') && ( ...
         
     elseif(strcmp(extension,'csv'))
         [header, data, dataCell] = arReadCSVHeaderFile(['Data/' name '.csv'], ',', true);
-
+        
+        timevar = strtrim(header(1));
         header = header(2:end);
         times = data(:,1);
         data = data(:,2:end);
         dataCell = dataCell(:,2:end);
+    end
+    
+    % remove time points that we don't want
+    if ( opts.removeconditions )
+        selected = true(1, size(times,1));
+        if ( opts.removeconditions )
+            for a = 1 : 2 : length( opts.removeconditions_args )
+                if ( strcmp( timevar, opts.removeconditions_args{a} ) )
+                    % If the argument is a function handle, we evaluate them
+                    % for each element
+                    val = opts.removeconditions_args{a+1};
+                    if ( isa(val, 'function_handle') )
+                        for jv = 1 : length( times )
+                            accepted(jv) = val(num2str(times(jv)));
+                        end
+                    else
+                        error( 'Filter argument for removecondition is of the wrong type' );
+                    end
+                    selected = selected & ~accepted;
+                end
+            end
+        end
+        times = times(selected);
+        data = data(selected,:);
+        dataCell = dataCell(selected,:);
     end
     
     % random effects
@@ -1044,12 +1080,13 @@ for j=1:length(ar.model(m).data(d).y)
         % log-fitting
         if(ar.model(m).data(d).logfitting(j))
             qdatapos = ar.model(m).data(d).yExp(:,j)>0;
+            nancount = length(isnan(ar.model(m).data(d).yExp(:,j)));
             ar.model(m).data(d).yExp(qdatapos,j) = log10(ar.model(m).data(d).yExp(qdatapos,j));
             ar.model(m).data(d).yExp(~qdatapos,j) = nan;
             if(sum(~qdatapos)==0)
                 arFprintf(2, ' for log-fitting');
             else
-                arFprintf(2, ' for log-fitting (%i values <=0 removed)', sum(~qdatapos));
+                arFprintf(2, ' for log-fitting (%i values <=0 removed, %i NaN values removed)', sum(~qdatapos)-nancount, nancount);
             end
         end
         

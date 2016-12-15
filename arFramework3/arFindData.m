@@ -5,6 +5,8 @@
 %   arFindData( (ar), (model no), name, conditions )
 % or
 %   arFindData( (ar), (model no), 'state', statename / number, conditions )
+% or
+%   arFindData( (ar), (model no), 'input', cell array of input strings )
 %
 % Examples of the first usage mode:
 %   arFindData( ar, (model no), 'mydata' )
@@ -29,6 +31,12 @@
 %    arFindData( ar, (model no), 'state', 'SOCS3', 'names', 'il6', 100 )
 %       Returns the same by name, and also filters on the value of il6 in
 %       the experiment.
+%
+% Examples of the third usage mode:
+%    arFindData( ar, (model no), 'input', {'input_dcf * step1(0, 10, 5)'} )
+%       Returns all data IDs that have an input with the function
+%       'input_dcf * step(0, 10, 5)'. Note that the input function is not
+%       parsed and must appear exactly as in the .def file.
 %
 % By default arFindData is permissive. It will return all conditions that
 % match the criterion and include those that don't match or where
@@ -74,9 +82,10 @@ function [olist, names, m] = arFindData( varargin )
         end
     end
     
-    switches = { 'exact', 'verbose', 'names', 'state', 'conservative'};
-    extraArgs = [ 0, 0, 0, 1, 0 ];
+    switches = { 'exact', 'verbose', 'names', 'state', 'conservative', 'input'};
+    extraArgs = [ 0, 0, 0, 1, 0, 1 ];
     description = { ...
+    {'', ''} ...
     {'', ''} ...
     {'', ''} ...
     {'', ''} ...
@@ -207,9 +216,16 @@ function [olist, names, m] = arFindData( varargin )
                     end
                 end
             end
-            
+                        
             % Did not match desired condition
             if ( opts.conservative && (checked == false) )
+                filt(a) = 0;
+            end
+        end
+        
+        % Check whether it has the desired input
+        if ( opts.input )
+            if ( length( intersect( ar.model(m).data(olist(a)).fu, opts.input_args ) ) ~= length(opts.input_args) )
                 filt(a) = 0;
             end
         end

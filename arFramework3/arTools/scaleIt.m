@@ -161,11 +161,6 @@ function out = scaleIt( names, outFile, varargin )
                     % +1 is added to make sure that we never overlap even if user starts counting 
                     % from 0 or 1 inconsistently in different files
                     expField    = expField + max(cell2mat(data{jD}.(fieldNames{jN}))); % + 1;
-                    
-                    % Force everything to be on the same scale
-                    if ( opts.samescale )
-                        expField = 1;
-                    end
                 end
                 out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
             end
@@ -258,7 +253,15 @@ function out = scaleIt( names, outFile, varargin )
     %    end
     %end
     
-    [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo, opts.rescale, opts.prescale_args );
+    % Don't scale individual 
+    if ( opts.samescale )
+        oldExpVar = out.(expVar);
+        out.(expVar)(:) = {1};
+        [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo, opts.rescale, opts.prescale_args );
+        out.(expVar) = oldExpVar;
+    else
+        [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo, opts.rescale, opts.prescale_args );
+    end
        
     % Find unique conditions (unrelated to time this time)
     groupNames = union(fieldNames{ismember(fieldNames, expVar)}, {fieldNames{cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))}});
