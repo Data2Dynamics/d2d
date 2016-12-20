@@ -28,7 +28,7 @@ if(isempty(ar.config.savepath)) % never saved before, ask for name
     else
         ar.config.savepath = ['./Results/' datestr(now, 30) '_noname'];
     end
-    arSaveFull(withSyms);
+    arSaveFull(ar,pleGlobals,withSyms);
     arSaveParOnly(ar, ar.config.savepath, pleGlobals);
 else
     if(exist('name','var')) % saved before, but new name give
@@ -39,7 +39,7 @@ else
                 ar.config.savepath = ['./Results/' datestr(now, 30) '_noname'];
             end
         end
-        arSaveFull(withSyms);
+        arSaveFull(ar,pleGlobals,withSyms);
         arSaveParOnly(ar, ar.config.savepath, pleGlobals);
         
     else
@@ -51,13 +51,13 @@ else
                 ar.config.savepath = ['./Results/' datestr(now, 30) '_' name];
             end
             
-            arSaveFull(withSyms);     
+            arSaveFull(ar,pleGlobals,withSyms);     
             arSaveParOnly(ar, ar.config.savepath, pleGlobals);
         else
             if(~exist(ar.config.savepath, 'dir')) 
                 % saved before, path output requested, 
                 % however save path does not exist anymore
-                arSaveFull(withSyms);
+                arSaveFull(ar,pleGlobals,withSyms);
                 arSaveParOnly(ar, ar.config.savepath, pleGlobals);
             end
         end
@@ -69,9 +69,9 @@ if(nargout>0)
 end
 
 % full save
-function arSaveFull(withSyms)
-global ar
-global pleGlobals  %#ok<NUSED>
+function arSaveFull(ar,pleGlobals,withSyms)
+% global ar
+% global pleGlobals  %#ok<NUSED>
 
 % remove storage-consuming fields in global ar
 % that are non-essential
@@ -96,10 +96,16 @@ if(~withSyms)
         end
     end
 end
+arDoSaving(ar,pleGlobals)
 
-warning off MATLAB:Figure:FigureSavedToMATFile
+% This function does not use ar and pleGlobals as global variables for
+% being able to do manipulations without altering the global variables.
+function arDoSaving(ar,pleGlobals)
+[ar,pleGlobals] = arDeleteGraphicsHandles(ar,pleGlobals);
+
+% warning off MATLAB:Figure:FigureSavedToMATFile
 save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
-warning on MATLAB:Figure:FigureSavedToMATFile
+% warning on MATLAB:Figure:FigureSavedToMATFile
 
 fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
 
@@ -159,3 +165,47 @@ else
     ar.config.ploterrors_matrix = ar2.config.ploterrors_matrix; 
 end
 save([savepath '/workspace_pars_only.mat'],'ar','pleGlobals','-v7.3');
+
+
+
+% This function deletes the graphcis handles in ar and pleGlobals which are
+% since R2014b objects that are displayed when loaded in a workspace.
+% 
+% This function prevents this.
+
+function [ar,pleGlobals] = arDeleteGraphicsHandles(ar,pleGlobals)
+
+if isstruct(ar)
+    for m=1:length(ar.model)
+        for p=1:length(ar.model(m).plot)
+            if isfield(ar.model(m).plot(p),'fighandel_x')
+                if isgraphics(ar.model(m).plot(p).fighandel_x)
+%                     delete(ar.model(m).plot(p).fighandel_x);% this line would close the plot
+                    ar.model(m).plot(p).fighandel_x = [];
+                end
+            end
+            if isfield(ar.model(m).plot(p),'fighandel_v')
+                if isgraphics(ar.model(m).plot(p).fighandel_v)
+%                     delete(ar.model(m).plot(p).fighandel_v);% this line would close the plot
+                    ar.model(m).plot(p).fighandel_v = [];
+                end
+            end
+            if isfield(ar.model(m).plot(p),'fighandel_y')
+                if isgraphics(ar.model(m).plot(p).fighandel_y)
+%                     delete(ar.model(m).plot(p).fighandel_y);  % this line would close the plot
+                    ar.model(m).plot(p).fighandel_y = [];
+                end
+            end
+        end
+    end
+end
+
+if exist('pleGlobals','var') && isstruct(pleGlobals)
+    if isfield(pleGlobals,'fighandel_multi')
+        if isgraphics(pleGlobals.fighandel_multi)
+%             delete(pleGlobals.fighandel_multi);% this line would close the plot
+            pleGlobals.fighandel_multi = [];
+        end
+    end
+end
+
