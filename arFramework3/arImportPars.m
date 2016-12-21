@@ -28,6 +28,19 @@ end
 
 N = 1000;  % Number of output message lines.
 
+% remember old values
+arIn.p = ar.p;
+arIn.lb = ar.lb;
+arIn.ub = ar.ub;
+arIn.qFit = ar.qFit;
+arIn.qLog10 = ar.qLog10;
+arIn.type = ar.type;
+arIn.mean = ar.mean;
+arIn.std = ar.std;
+
+fn = fieldnames(arIn);  % these fields are later checked for changes
+
+
 if(isempty(pattern))
     js = 1:length(ar.p);
 else
@@ -74,18 +87,37 @@ for j=js
             ar.p(ar.p>ar.ub) = ar.ub(ar.p>ar.ub);
         end
         
+        newstr = '';
+        somethingNew = 0;
+        for f=1:length(fn)
+            n_char = length(fn{f})+1;
+            if abs(ar.(fn{f})(j) - arIn.(fn{f})(j))>1e-10
+                if isempty(newstr)
+                    newstr = '   new:';
+                end
+                newstr = sprintf(['%s%',num2str(n_char),'s'],newstr,fn{f});
+                somethingNew = 1;
+            else
+                newstr = sprintf(['%s%',num2str(n_char),'s'],newstr,'');
+            end
+        end
+        if somethingNew == 0
+            newstr = '   nothing changed';
+        end
+    
         if(fixAssigned)
             ar.qFit(j) = 0;
             if(length(ar.p)<=N)
-                arFprintf(1, 'fixed and assigned -> %s\n', ar.pLabel{j});
+                arFprintf(1, 'fixed and assigned -> %s%s\n', ar.pLabel{j},newstr);
             end
         else
             if(length(ar.p)<=N)
-                arFprintf(1, '          assigned -> %s\n', ar.pLabel{j});
+                arFprintf(1, '          assigned -> %22s%s\n', ar.pLabel{j},newstr);
             end
         end
     end
 end
+
 
 nnot = length(ass)-sum(ass);
 if ( nnot > 0 )
