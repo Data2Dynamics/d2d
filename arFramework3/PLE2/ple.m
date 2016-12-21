@@ -460,9 +460,6 @@ end
 %     fprintf('PLE#%i suggesting: %s (point-wise)\n', jk, newIDlables{pleGlobals.IDstatus_point(jk)});
 % end
 
-if(~exist([cd '/' pleGlobals.savePath], 'dir'))
-    mkdir([cd '/' pleGlobals.savePath])
-end
-pleGlobals.finished = 1;
-save([pleGlobals.savePath '/results.mat'], 'pleGlobals');
+pleGlobals.finished = 1;    
+pleSave(pleGlobals)
 

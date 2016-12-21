@@ -104,8 +104,5 @@ saveas(gcf, [pleGlobals.savePath '/lin_relations'], 'fig')
 saveas(gcf, [pleGlobals.savePath '/lin_relations'], 'png')
 
 %% save
-if(~exist([cd '/' pleGlobals.savePath], 'dir'))
-    mkdir([cd '/' pleGlobals.savePath])
-end
-save([pleGlobals.savePath '/results.mat'], 'pleGlobals');
+pleSave(pleGlobals);
 

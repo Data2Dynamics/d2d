@@ -392,10 +392,5 @@ end
 %     fprintf('PLE#%i suggesting: %s (point-wise)\n', jk, newIDlables{pleGlobals.IDstatus_point(jk)});
 % end
 
-if(~exist([cd '/' pleGlobals.savePath], 'dir'))
-    mkdir([cd '/' pleGlobals.savePath])
-end
-warning off MATLAB:Figure:FigureSavedToMATFile
-save([pleGlobals.savePath '/results.mat'], 'pleGlobals');
-warning on MATLAB:Figure:FigureSavedToMATFile
+pleSave(pleGlobals)
 
