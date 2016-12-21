@@ -83,6 +83,7 @@ if(exist(filename_pars,'file'))
     qstr = '';
     chi2str = '';
     errstr = '';
+    lhsstr = '';
     plestr = '';
     
     if(isfield(S.ar,'ndata'))
@@ -127,6 +128,12 @@ if(exist(filename_pars,'file'))
         end
     end
     
+    if(isfield(S.ar,'ps'))
+        if ~isempty(S.ar.ps)
+            lhsstr = [' #LHS=',num2str(size(S.ar.ps,1))];
+        end
+    end
+    
     if(isfield(S,'pleGlobals'))
         if(isfield(S.pleGlobals,'chi2s'))
             nple = sum(~cellfun(@isempty,S.pleGlobals.chi2s));
@@ -134,7 +141,7 @@ if(exist(filename_pars,'file'))
         end
     end
     
-    anno = sprintf('(%s%s%s%s%s%s%s)',chi2str,nstr,pstr,qstr,priorstr,errstr,plestr);
+    anno = sprintf('(%20s%8s%8s%10s%10s%10s%10s%10s)',chi2str,nstr,pstr,qstr,priorstr,errstr,lhsstr,plestr);
 else
     anno = '';
 end
