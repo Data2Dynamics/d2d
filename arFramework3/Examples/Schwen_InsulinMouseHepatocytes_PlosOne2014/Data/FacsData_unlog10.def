@@ -1,0 +1,23 @@
+DESCRIPTION
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 50
+
+INPUTS
+
+OBSERVABLES
+IR1_obs	 C	 "n/a"	 conc.	 0 1 "scale*(IR1 + offset + IR1in)" "IR1_obs"
+IR2_obs	 C	 "n/a"	 conc.	 0 1 "scale*(IR2 + offset + IR2in)" "IR2_obs"
+IRsum_obs	 C	 "n/a"	 conc.	 0 1 "scale*(0.605*(IR1+IR1in) + (1-0.605)*(IR2+IR2in) + offset)" "IRsum_obs"
+
+ERRORS
+IR1_obs		"IR_obs_std"
+IR2_obs		"IR_obs_std"
+IRsum_obs	"IR_obs_std"
+
+
+CONDITIONS
+
+RANDOM
+
+PARAMETERS

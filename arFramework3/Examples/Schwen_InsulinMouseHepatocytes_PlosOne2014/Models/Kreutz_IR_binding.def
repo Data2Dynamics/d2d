@@ -1,0 +1,71 @@
+DESCRIPTION
+"SBML level 3 version 1"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 100
+
+COMPARTMENTS
+ExtracellularMedium	 V	 "n/a"	 vol.	 1
+
+STATES
+Ins	C	 "nM"	 conc.	 ExtracellularMedium	 1	 "Insulin"
+Rec1  	C	 "nM"	 conc.	 ExtracellularMedium	 1	 "Receptors_low"
+Rec2	C	 "nM"	 conc.	 ExtracellularMedium	 1	 "Receptors_high"
+IR1  	C	 "nM"	 conc.	 ExtracellularMedium	 1	 "IR_low"
+IR2	C	 "nM"	 conc.	 ExtracellularMedium	 1	 "IR_high"
+IR1in  	C	 "nM"	 conc.	 ExtracellularMedium	 1	 "IR_low_internalized"
+IR2in	C	 "nM"	 conc.	 ExtracellularMedium	 1	 "IR_high_internalized"
+Uptake1	C	 "nM"	 conc.	 ExtracellularMedium	
+Uptake2	C	 "nM"	 conc.	 ExtracellularMedium	
+InsulinFragments	C	"nM"	conc.	ExtracellularMedium
+BoundUnspec	C	"nM"	conc.	ExtracellularMedium
+
+
+INPUTS
+
+REACTIONS
+Ins + Rec1 	-> IR1 	 CUSTOM "ka1*Ins*Rec1" 	"ka1"
+Ins + Rec2 	-> IR2 	 CUSTOM "ka1*ka2fold*Ins*Rec2" 	"ka2fold"
+
+Ins		->	BoundUnspec	CUSTOM	"kon_unspec  *Ins"
+BoundUnspec	-> 	Ins		CUSTOM	"koff_unspec *BoundUnspec"
+
+IR1 		->	Ins + Rec1  	 CUSTOM "kd1*IR1" 	"kd1"
+IR2 		->	Ins + Rec2  	 CUSTOM "kd1*kd2fold*IR2" 	"kd2fold"
+
+
+IR1		->	IR1in		CUSTOM "kin*IR1"
+IR2		->	IR2in		CUSTOM "kin2*IR2"
+IR1in		->	IR1		CUSTOM "kout*IR1in"
+IR2in		->	IR2		CUSTOM "kout2*IR2in"
+
+//IR1in		->			CUSTOM "kdegIns*IR1in"
+//IR2in		->			CUSTOM "kdegIns2*IR2in"
+//IR1in		->	Ins		CUSTOM "kdegRec*IR1in"
+//IR2in		->	Ins		CUSTOM "kdegRec2*IR2in"
+IR1in		->	InsulinFragments + Rec1 CUSTOM "kout_frag*IR1in"
+IR2in		->	InsulinFragments + Rec2 CUSTOM "kout_frag*IR2in"
+
+		->	Uptake1		CUSTOM " +ka1*Ins*Rec1        -kd1*IR1"
+		->	Uptake2		CUSTOM " +ka1*ka2fold*Ins*Rec2-kd1*kd2fold*IR2"
+
+
+DERIVED
+
+CONDITIONS
+init_IR1 	"0"
+init_IR2	"0"
+init_Rec1	"ini_R1"
+init_Rec2	"ini_R1*ini_R2fold"
+
+init_IR1in 	"0"
+init_IR2in	"0"
+init_Uptake1		"0"
+init_Uptake2		"0"
+init_InsulinFragments	"0"
+
+init_BoundUnspec	"0"
+
+
+PARAMETERS
+

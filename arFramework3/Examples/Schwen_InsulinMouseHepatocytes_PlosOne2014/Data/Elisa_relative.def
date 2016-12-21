@@ -1,0 +1,17 @@
+DESCRIPTION
+
+PREDICTOR 
+time	T	min	time	0	60
+
+INPUTS
+
+OBSERVABLES
+Insulin_obs	C	nM	conc.	0	1	"offset_nExpID + scaleElisa_nExpID*(Ins + fragments * InsulinFragments)/(1+(Ins + fragments * InsulinFragments)/km_nExpID)"
+
+ERRORS
+Insulin_obs	"std"
+
+CONDITIONS
+
+RANDOM
+nExpID	INDEPENDENT
