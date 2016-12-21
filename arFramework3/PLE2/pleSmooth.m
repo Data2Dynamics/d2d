@@ -193,4 +193,9 @@ end
 if(~exist([cd '/' pleGlobals.savePath], 'dir'))
     mkdir([cd '/' pleGlobals.savePath])
 end
+doSave(pleGlobals);
+
+%% don't use the global pleGlobals in this function to prevent that manipulations have effect on the global variable
+function    doSave(pleGlobals)
+pleGlobals.fighandel_multi = [];    % remove handle to
 save([pleGlobals.savePath '/results.mat'], 'pleGlobals');
