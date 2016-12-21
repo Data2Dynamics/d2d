@@ -141,7 +141,7 @@ if(exist(filename_pars,'file'))
         end
     end
     
-    anno = sprintf('(%20s%8s%8s%10s%10s%10s%10s%10s)',chi2str,nstr,pstr,qstr,priorstr,errstr,lhsstr,plestr);
+    anno = sprintf('(%20s%8s%8s%11s%11s%13s%10s%10s)',chi2str,nstr,pstr,qstr,priorstr,errstr,lhsstr,plestr);
 else
     anno = '';
 end
