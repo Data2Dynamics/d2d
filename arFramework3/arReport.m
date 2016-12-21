@@ -28,6 +28,22 @@ if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
 
+% if arChi2 is not called, then ar.model.plot.ndata and ar.model.plot.chi2
+% does not exist.
+for m=1:length(ar.model)
+    for p=1:length(ar.model(m).plot)
+        if ~isfield(ar.model(m).plot(p),'chi2')
+            warning('ar.model(%i).plot(%i).chi2 is not available. Please execute arPlotY before.',m,p);
+            return
+        end
+        if ~isfield(ar.model(m).plot(p),'ndata')
+            warning('ar.model(%i).plot(%i).ndata is not available. Please execute arPlotY before.',m,p);
+            return
+        end
+    end
+end
+
+
 % Fetch MATLAB version
 matVer = ver('MATLAB');
 ar.config.matlabVersion = str2double(matVer.Version);
