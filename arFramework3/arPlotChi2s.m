@@ -1,3 +1,5 @@
+% This function is intended to be used after arChi2LHS
+
 function arPlotChi2s
 
 global ar

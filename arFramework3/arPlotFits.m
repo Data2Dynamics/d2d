@@ -1,4 +1,5 @@
-% Plot start and end of fits
+% Plot start and end of fits.
+% This function is intended to be used after arFitLHS.
 
 function arPlotFits(q_select, i_fits)
 

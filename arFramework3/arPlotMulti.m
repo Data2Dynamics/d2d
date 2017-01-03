@@ -6,6 +6,11 @@
 % ps_weigths            par weights
 % saveToFile            [false]
 % filenameAddition      ['']
+% 
+%   Example
+% arFitLHS(100)
+% arPlotMulti(ar.ps)
+
 
 function arPlotMulti(ps, ps_weigths, saveToFile, filenameAddition)
 
