@@ -1,3 +1,4 @@
+% Calculation of the profile likelihood via integration method
 
 function [xsout, chi2sout] = arProfileODE(jk, gamma, p_range, method)
 

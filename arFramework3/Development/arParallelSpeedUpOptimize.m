@@ -1,3 +1,4 @@
+% 
 function arParallelSpeedUpOptimize(n)
 
 global ar
