@@ -1,3 +1,7 @@
+% arPlotClockTimes
+% 
+%   Show execution times of threads and conditions.
+
 function arPlotClockTimes
 
 global ar
