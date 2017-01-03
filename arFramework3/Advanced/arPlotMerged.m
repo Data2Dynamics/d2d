@@ -1,4 +1,11 @@
-% plot merged
+%   arPlotMerged
+% 
+% Plots are not displayed as automatically assigned in ar.model.plot and
+% not on the scale of observations.
+% Instead, the data is projected to the dynamic variables x and all
+% matching observables are plotted around the model.
+% 
+% Interpretation of the error is sophisticated.
 
 function arPlotMerged(condition_link, reference_condition, saveToFile)
 

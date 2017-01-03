@@ -1,4 +1,5 @@
-% plot scan of likelihood
+% plot one-dimensional cut of likelihood.
+% All other parameter are fixed
 
 function arPlotScan(jks, savetofile)
 

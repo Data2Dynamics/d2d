@@ -1,4 +1,13 @@
-
+%   Histograms of parameter matrices (a row corresponds to one parameter
+%   set)
+% 
+% Example1:
+% arFitLHS(100)
+% arPlotParameterHists(ar.ps)
+% 
+% Example2: Plotting of parameters with failed integrations.
+% arChi2LHS(100)
+% arPlotParameterHists(ar.ps_errors)
 
 function arPlotParameterHists(ps, jks, nbins)
 

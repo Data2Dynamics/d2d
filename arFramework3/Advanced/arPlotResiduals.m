@@ -1,4 +1,4 @@
-% Plot residuals
+% Plot residuals as quantile-quantile plot.
 %
 % arPlotResiduals(saveToFile)
 %

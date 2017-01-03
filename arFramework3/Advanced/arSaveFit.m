@@ -1,3 +1,4 @@
+% ar.fit is appended/copied into an struct array ar.fit_hist for comparing 
 function arSaveFit(name)
 
 global ar

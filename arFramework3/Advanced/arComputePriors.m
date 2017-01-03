@@ -1,3 +1,6 @@
+% Upper and lower bounds are used to define a gaussian prior which has ar.mean
+% at the center.
+% ar.std is set as (ub-lb)/2
 function arComputePriors
 
 global ar

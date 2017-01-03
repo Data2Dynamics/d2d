@@ -1,4 +1,4 @@
-% Plot fit
+% Plot convergence of a single fit
 
 function arPlotFit(index, qp)
 

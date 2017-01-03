@@ -1,3 +1,5 @@
+% If two fits are performed, convergence is compared.
+
 function arCompareFit(indexes, rightalign)
 
 global ar

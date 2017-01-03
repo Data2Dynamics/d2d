@@ -1,5 +1,6 @@
 % merge previous fit sequence into current workspace.
 % WARNING, fit setting have to be the same. This will not be double checked
+% 
 
 function arFitLHSMerge
 

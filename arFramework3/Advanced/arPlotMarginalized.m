@@ -1,4 +1,4 @@
-% plot marginalized
+% plot marginalized after MCMC
 
 function arPlotMarginalized(jks, Nthinning)
 

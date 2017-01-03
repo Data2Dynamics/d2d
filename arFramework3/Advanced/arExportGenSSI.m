@@ -1,4 +1,4 @@
-% Export to GenSSI
+% Export to GenSSI identifiability software
 %
 % arExportGenSSI(m, d)
 
