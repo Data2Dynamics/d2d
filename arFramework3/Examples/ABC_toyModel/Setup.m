@@ -22,7 +22,7 @@ arSetPars('sd_C_au',[],2);
 arFit();
 
 %Calculate prediction bands for the three states
-doPPL(1,1,1:3,linspace(0,100,11),0,1,0.25);
+doPPL(1,1,1,linspace(0,100,11),1);
 
 %plot prediction bands
 ar.config.ploterrors = -1;

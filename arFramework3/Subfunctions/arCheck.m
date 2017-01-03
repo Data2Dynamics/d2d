@@ -44,13 +44,16 @@ if(exist('doPPL','file') == 0)
     addpath([ar_path '/PPL'])
 end
 if(exist('fileChooser','file') == 0)
-    addpath([ar_path '/arTools'])
+    addpath([ar_path '/MatlabTools'])
 end
 if(exist('l1Init','file') == 0)
-    addpath([ar_path '/l1'])
+    addpath([ar_path '/L1'])
 end
 if(exist('arChi2s','file') == 0)
     addpath([ar_path '/Advanced'])
+end
+if(exist('arSimuCalc','file') == 0)
+    addpath([ar_path '/Ccode'])
 end
 if(exist('arChi2Cluster','file') == 0)
     addpath([ar_path '/ClusterFunctions'])
@@ -63,6 +66,15 @@ if(exist('arEvaluate','file') == 0)
 end
 if(exist('arCheck','file') == 0)
     addpath([ar_path '/Subfunctions'])
+end
+if(exist('arToPython','file') == 0)
+    addpath([ar_path '/d2d-presenter'])
+end
+if(exist('chemist','file') == 0)
+    addpath([ar_path '/Latex'])
+end
+if(exist('model_template','file') == 0)
+    addpath([ar_path '/ProjectTemplate'])
 end
 
 

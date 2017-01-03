@@ -32,8 +32,8 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
         else
             ar.model(m).(data_cond)(c).ppl.tstart(:,ix) = repmat(t,1,length(ix));
         end
-        ar.model(m).(data_cond)(c).xFineLB = nan(length(ar.model(m).(data_cond)(c).tFine),size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));
-        ar.model(m).(data_cond)(c).xFineUB = nan(length(ar.model(m).(data_cond)(c).tFine),size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));
+        ar.model(m).(data_cond)(c).([x_y 'FineLB']) = nan(length(ar.model(m).(data_cond)(c).tFine),size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));
+        ar.model(m).(data_cond)(c).([x_y 'FineUB']) = nan(length(ar.model(m).(data_cond)(c).tFine),size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));
 
         ar.model(m).(data_cond)(c).ppl.t = nan(nsteps+1,size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));
         ar.model(m).(data_cond)(c).ppl.x_low = nan(nsteps, size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));
@@ -67,7 +67,9 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
             ar.model(m).(data_cond)(c).ppl.ppl_high(:,ix(jx)) = nan;
             ar.model(m).(data_cond)(c).ppl.vpl_high(:,ix(jx)) = nan;
             ar.model(m).(data_cond)(c).ppl.corr_high(:,ix(jx)) = nan;
-            ar.model(m).(data_cond)(c).ppl.corr_low(:,ix(jx)) = nan;          
+            ar.model(m).(data_cond)(c).ppl.corr_low(:,ix(jx)) = nan; 
+            ar.model(m).(data_cond)(c).([x_y 'FineLB'])(:,ix(jx)) = nan;
+            ar.model(m).(data_cond)(c).([x_y 'FineUB'])(:,ix(jx)) = nan;
         end
     end
     for jt=1:length(t)
