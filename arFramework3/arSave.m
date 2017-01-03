@@ -179,19 +179,19 @@ if isstruct(ar)
     for m=1:length(ar.model)
         for p=1:length(ar.model(m).plot)
             if isfield(ar.model(m).plot(p),'fighandel_x')
-                if isgraphics(ar.model(m).plot(p).fighandel_x)
+                if ~isempty(ar.model(m).plot(p).fighandel_x)
 %                     delete(ar.model(m).plot(p).fighandel_x);% this line would close the plot
                     ar.model(m).plot(p).fighandel_x = [];
                 end
             end
             if isfield(ar.model(m).plot(p),'fighandel_v')
-                if isgraphics(ar.model(m).plot(p).fighandel_v)
+                if ~isempty(ar.model(m).plot(p).fighandel_v)
 %                     delete(ar.model(m).plot(p).fighandel_v);% this line would close the plot
                     ar.model(m).plot(p).fighandel_v = [];
                 end
             end
             if isfield(ar.model(m).plot(p),'fighandel_y')
-                if isgraphics(ar.model(m).plot(p).fighandel_y)
+                if ~isempty(ar.model(m).plot(p).fighandel_y)
 %                     delete(ar.model(m).plot(p).fighandel_y);  % this line would close the plot
                     ar.model(m).plot(p).fighandel_y = [];
                 end
@@ -202,7 +202,7 @@ end
 
 if exist('pleGlobals','var') && isstruct(pleGlobals)
     if isfield(pleGlobals,'fighandel_multi')
-        if isgraphics(pleGlobals.fighandel_multi)
+        if ~isempty(pleGlobals.fighandel_multi)
 %             delete(pleGlobals.fighandel_multi);% this line would close the plot
             pleGlobals.fighandel_multi = [];
         end
