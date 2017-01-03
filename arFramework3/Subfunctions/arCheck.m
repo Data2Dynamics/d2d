@@ -203,14 +203,14 @@ end
 if(ispc)
 %     if(exist(['.\pthreadGC2_',mexext,'.dll'],'file')==0)
     try
-        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadGC2.dll'], ['pthreadGC2.dll']);
+        copyfile([ar_path '\ThirdParty\pthreads-w32_2.9.1\dll\' mexext '\pthreadGC2.dll'], 'pthreadGC2.dll');
     catch ERR  % occurs (and can be ignored), if dll has been copied previously, is still loaded and therefore replacement is blocked by Windows OS
         disp(ERR.message)
     end
 %     end
 %     if(exist(['.\pthreadVC2_',mexext,'.dll'],'file')==0)
     try
-        copyfile([ar_path '\pthreads-w32_2.9.1\dll\' mexext '\pthreadVC2.dll'], ['pthreadVC2.dll']);
+        copyfile([ar_path '\ThirdParty\pthreads-w32_2.9.1\dll\' mexext '\pthreadVC2.dll'], 'pthreadVC2.dll');
     catch ERR  % occurs (and can be ignored), if dll has been copied previously, is still loaded and therefore replacement is blocked by Windows OS
         disp(ERR.message)
     end
