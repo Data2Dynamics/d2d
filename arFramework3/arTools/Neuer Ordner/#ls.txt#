@@ -1,0 +1,17 @@
+git mv arLogNtoN.m arTools/.
+git mv arLRT.m arTools/.
+git mv arMatchHistWithEmpFunction.m arTools/.
+git mv arNLS.m arTools/.
+git mv arNLSstep.m arTools/.
+git mv arNLSTrustTrafo.m arTools/.
+git mv arPathConvert.m arTools/.
+git mv arReadCSVHeaderFile.m arTools/.
+git mv arSetTitle.m arTools/.
+git mv arShowProgressParFor.m arTools/.
+git mv arShowProgressParForTest.m arTools/.
+git mv arSpacedAxisLimits.m arTools/.
+git mv arSubs.m arTools/.
+git mv arSubsRepeated.m arTools/.
+git mv arTextScan.m arTools/.
+git mv arWaitbar.m arTools/.
+

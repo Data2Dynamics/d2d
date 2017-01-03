@@ -1,0 +1,1 @@
+This folder contains helper functions which does NOT use the global variable ar.
