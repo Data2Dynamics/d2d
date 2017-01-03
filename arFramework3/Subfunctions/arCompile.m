@@ -91,8 +91,8 @@ end
 
 ar_path = fileparts(which('arInit.m'));
 % sundials_path = [ar_path filesep '/sundials-2.5.0/' filesep]; % sundials 2.5.0
-sundials_path = [ar_path filesep 'sundials-2.6.1' filesep]; % sundials 2.6.1
-KLU_path = [ar_path filesep 'KLU-1.2.1'  filesep]; % KLU of suitesparse 4.2.1
+sundials_path = [ar_path filesep 'ThirdParty' filesep 'sundials-2.6.1' filesep]; % sundials 2.6.1
+KLU_path = [ar_path filesep 'ThirdParty' filesep 'KLU-1.2.1'  filesep]; % KLU of suitesparse 4.2.1
 compiled_cluster_path = fileparts(which('arClusterCompiledHook.m'));
 
 % compile directory
@@ -122,6 +122,7 @@ includesstr{end+1} = ['-I"' KLU_path 'COLAMD/Source"'];
 includesstr{end+1} = ['-I"' pwd '/Compiled/' ar.info.c_version_code '"'];
 includesstr{end+1} = ['-I"' source_dir '/Compiled/' ar.info.c_version_code '"'];
 includesstr{end+1} = ['-I"' ar_path '"'];
+includesstr{end+1} = ['-I"' ar_path '/Ccode"'];
 includesstr{end+1} = ['-I/usr/local/include'];
 
 % Allow interrupt hooks
@@ -366,7 +367,7 @@ end
 
 if(~exist(objects_inp, 'file') || forceFullCompile)
     mex('-c',verbose{:},mexopt{:},'-outdir',['Compiled/' ar.info.c_version_code '/' mexext '/'], ...
-        includesstr{:}, [ar_path '/arInputFunctionsC.c']);
+        includesstr{:}, which('arInputFunctionsC.c'));
     arFprintf(2, 'compiling input functions...done\n');
 else
     arFprintf(2, 'compiling input functions...skipped\n');

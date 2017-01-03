@@ -52,7 +52,7 @@ end
 if(exist('arChi2s','file') == 0)
     addpath([ar_path '/Advanced'])
 end
-if(exist('arSimuCalc','file') == 0)
+if(exist('arSimuCalc.c','file') == 0)
     addpath([ar_path '/Ccode'])
 end
 if(exist('arChi2Cluster','file') == 0)
@@ -64,16 +64,13 @@ end
 if(exist('arEvaluate','file') == 0)
     addpath([ar_path '/Development'])
 end
-if(exist('arCheck','file') == 0)
-    addpath([ar_path '/Subfunctions'])
-end
 if(exist('arToPython','file') == 0)
     addpath([ar_path '/d2d-presenter'])
 end
-if(exist('chemist','file') == 0)
+if(exist('chemist.sty','file') == 0)
     addpath([ar_path '/Latex'])
 end
-if(exist('model_template','file') == 0)
+if(exist('model_template.def','file') == 0)
     addpath([ar_path '/ProjectTemplate'])
 end
 
@@ -163,22 +160,25 @@ end
 if (exist('fminsearchbnd', 'file') == 0)
     addpath([ar_path '/ThirdParty/FMINSEARCHBND'])
 end
-
+if (exist('STRSCNE', 'file') == 0)
+    addpath([ar_path '/ThirdParty'])
+end
+    
 %% CVODES
 
 % uncompress and expand CVODES
-if(exist([ar_path '/sundials-2.6.1'],'dir') == 0)
+if(exist([ar_path '/ThirdParty/sundials-2.6.1'],'dir') == 0)
     path_backup = cd;
-    cd(ar_path);
+    cd([ar_path '/ThirdParty']);
     untar('sundials-2.6.1.tar');
     cd(path_backup);
 end
 
 % write sundials_config.h
-if(exist([ar_path '/sundials-2.6.1/include/sundials/sundials_config.h'],'file') == 0)
-    fid = fopen([ar_path '/sundials-2.6.1/include/sundials/sundials_config.h'], 'W');
+if(exist([ar_path '/ThirdParty/sundials-2.6.1/include/sundials/sundials_config.h'],'file') == 0)
+    fid = fopen([ar_path '/ThirdParty/sundials-2.6.1/include/sundials/sundials_config.h'], 'W');
     if(fid==-1)
-        error('could not write file %s!', [ar_path '/sundials-2.6.1/include/sundials/sundials_config.h']),
+        error('could not write file %s!', [ar_path '/ThirdParty/sundials-2.6.1/include/sundials/sundials_config.h']),
     end
     fprintf(fid, '#define SUNDIALS_PACKAGE_VERSION "2.6.1"\n');
     fprintf(fid, '#define SUNDIALS_DOUBLE_PRECISION 1\n');
@@ -191,9 +191,9 @@ end
 %% SuiteSparse 4.2.1
 
 % uncompress and expand KLU solver
-if(exist([ar_path '/KLU-1.2.1'],'dir') == 0)
+if(exist([ar_path '/ThirdParty/KLU-1.2.1'],'dir') == 0)
     path_backup = cd;
-    cd(ar_path);
+    cd([ar_path '/ThirdParty']);
     untar('KLU-1.2.1.tar');
     cd(path_backup);
 end

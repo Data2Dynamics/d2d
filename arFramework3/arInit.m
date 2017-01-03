@@ -4,11 +4,7 @@
 % Website: http://www.data2dynamics.org
 % Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de
 % Copyright 2016 D2D Development Team. All rights reserved.
-if(~ispc)
-    ar_path = strrep(which('arInit.m'),'/arInit.m','');
-else
-    ar_path = strrep(which('arInit.m'),'\arInit.m','');
-end
+ar_path = fileparts(which('arInit.m'));
 if(exist('arCheck','file') == 0)
     addpath([ar_path '/Subfunctions'])
 end
