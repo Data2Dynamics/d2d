@@ -38,7 +38,7 @@ warning('on','MATLAB:rmpath:DirNotFound')
 
 % load path of sub-directories
 if(exist('pleInit','file') == 0)
-    addpath([ar_path '/PLE2'])
+    addpath([ar_path '/PLE'])
 end
 if(exist('doPPL','file') == 0)
     addpath([ar_path '/PPL'])
@@ -49,6 +49,22 @@ end
 if(exist('l1Init','file') == 0)
     addpath([ar_path '/l1'])
 end
+if(exist('arChi2s','file') == 0)
+    addpath([ar_path '/Advanced'])
+end
+if(exist('arChi2Cluster','file') == 0)
+    addpath([ar_path '/ClusterFunctions'])
+end
+if(exist('arParseModel','file') == 0)
+    addpath([ar_path '/Deprecated'])
+end
+if(exist('arEvaluate','file') == 0)
+    addpath([ar_path '/Development'])
+end
+if(exist('arCheck','file') == 0)
+    addpath([ar_path '/Subfunctions'])
+end
+
 
 [has_git, is_repo] = arCheckGit(ar_path);
 
