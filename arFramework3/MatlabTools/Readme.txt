@@ -1,1 +1,1 @@
-This folder contains helper functions which does NOT use the global variable ar.
+This folder contains helper functions that do NOT depend on other toolbox functions or global variables.

@@ -1,3 +1,3 @@
-This folder contains well-tested D2D functions that are not frequently used.
+This folder contains functions that are not frequently used, but can be very helpful in certain situations.
 
-Advanced functions under development should be put in development folder.
+Functions under development should be put in development folder.
