@@ -500,8 +500,8 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
             which('udata.c'), which('arSimuCalc.c'), objectsstr{:});
     else
         % parallel code using POSIX threads (pthread-win32) for Windows type OS
-        includesstr{end+1} = ['-I"' ar_path '\pthreads-w32_2.9.1\include"'];
-        includesstr{end+1} = ['-L"' ar_path '\pthreads-w32_2.9.1\lib\' mexext '"'];
+        includesstr{end+1} = ['-I"' ar_path '\ThirdParty\pthreads-w32_2.9.1\include"'];
+        includesstr{end+1} = ['-L"' ar_path '\ThirdParty\pthreads-w32_2.9.1\lib\' mexext '"'];
         includesstr{end+1} = ['-lpthreadVC2'];
 
         mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
