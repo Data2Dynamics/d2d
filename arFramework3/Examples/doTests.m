@@ -82,13 +82,17 @@ function r = pluralize(value)
 end
 
 function doTest( dir )
-    cd(dir);
+    d = pwd;
+    example_folder = strrep(which('arInit'),'arInit.m','Examples');
+    [~,dir] = system(sprintf('find %s -type d -name "%s"',example_folder,dir));
+    dir = strread(dir, '%s', 'delimiter', sprintf('\n'));
+    cd(dir{1});
     
     % Suppress output
     global arOutputLevel;
     arOutputLevel = 0;
     try
-    TestFeature; cd('..');
+    TestFeature; cd(d);
     sprintf('\n');
     
     catch
@@ -99,7 +103,7 @@ function doTest( dir )
         catch ME
             fprintf(getReport(ME));
             arOutputLevel = 0;
-            cd('..');
+            cd(d);
             throw(MException('Testing:failedTest', 'Failed to pass a test. Please resolve the problem before pushing.'));
         end
     end

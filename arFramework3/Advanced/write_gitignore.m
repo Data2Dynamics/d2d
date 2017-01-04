@@ -28,27 +28,20 @@ lines = {'# This file has been generated using arFramework3/Advanced/write_gitig
     ''
     'arFramework3/Examples/Dream6_L1/Data/simu*'
     'arFramework3/Examples/Dream6_L1/Results/20*'
+    ''
+    'arFramework3/Examples/_myOwnExamples/'
     ''};
 
 
 % ignore cases for each example:
 example_folder = strrep(which('arInit'),'arInit.m','Examples');
-if ispc
-    [~,list] = system(sprintf('dir /S/B %sSetup*.m',example_folder));
-else
-    [~,list] = system(sprintf('find %s -type f -name "Setup*.m"',example_folder));
-end
-list = strread(list, '%s', 'delimiter', sprintf('\n'));
-list = cellfun(@fileparts,list,'UniformOutput',false);
-
-folders = unique(list);
-folders = regexp(folders, 'arFramework3/Examples/', 'split');
-folders = vertcat(folders{:});
-folders = folders(:,2);
-
 d = dir(example_folder);
+subfolders = {'Biomodels','ToyModels'};
+
+folders = {d.name};
 folders = folders([d.isdir]);
 folders = setdiff(folders,{'.','..'});
+folders = setdiff(folders,subfolders);
 
 for i=1:length(folders)
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/Compiled/'];
@@ -59,6 +52,24 @@ for i=1:length(folders)
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/pthreadVC2.dll'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/pthreadGC2.dll'];
     lines{end+1} = '';
+end
+
+for j = 1:length(subfolders)
+    d = dir([example_folder '/' subfolders{j}]);
+    folders = {d.name};
+    folders = folders([d.isdir]);
+    folders = setdiff(folders,{'.','..'});
+
+    for i=1:length(folders)
+        lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/Compiled/'];
+        lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/SBML/'];
+        lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/arSimuCalc*'];
+        lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/arCheckParallel*'];
+        lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/Results/20*'];
+        lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/pthreadVC2.dll'];
+        lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/pthreadGC2.dll'];
+        lines{end+1} = '';
+    end
 end
 
 for i=1:length(lines)
