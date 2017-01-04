@@ -8,7 +8,7 @@ fprintf('New .gitignore file will be written in the working directory ...\n\n')
 fid = fopen('.gitignore','w');
 
 % ignore cases independent on examples:
-lines = {'# This file has been generated using arFramework3/MatlabTools/write_gitignore.m'
+lines = {'# This file has been generated using arFramework3/Advanced/write_gitignore.m'
     '#######################################'
     ''
     'syntax: glob'
@@ -23,11 +23,6 @@ lines = {'# This file has been generated using arFramework3/MatlabTools/write_gi
     '.DS_Store'
     ''
     '*.dat'
-    ''
-    'arFramework3/TestSuite'
-    ''
-    'arFramework3/sbml-test-cases-2014-10-22'
-    'arFramework3/sbml-test-cases-2014-10-22.zip'
     ''
     'arFramework3/l1/trdog/trdog.m'
     ''
@@ -60,6 +55,7 @@ for i=1:length(folders)
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/SBML/'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/arSimuCalc*'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/arCheckParallel*'];
+    lines{end+1} = ['arFramework3/Examples/',folders{i},'/Results/20*'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/pthreadVC2.dll'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/pthreadGC2.dll'];
     lines{end+1} = '';
