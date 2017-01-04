@@ -8,7 +8,7 @@ fprintf('New .gitignore file will be written in the working directory ...\n\n')
 fid = fopen('.gitignore','w');
 
 % ignore cases independent on examples:
-lines = {'# This file has been generated using arFramework3/arTools/write_gitignore.m'
+lines = {'# This file has been generated using arFramework3/MatlabTools/write_gitignore.m'
     '#######################################'
     ''
     'syntax: glob'
@@ -16,7 +16,9 @@ lines = {'# This file has been generated using arFramework3/arTools/write_gitign
     'arFramework3/sundials-2.4.0/'
     'arFramework3/sundials-2.5.0/'
     'arFramework3/sundials-2.6.1/'
+    'arFramework3/ThirdParty/sundials-2.6.1/'
     'arFramework3/KLU-1.2.1/'
+    'arFramework3/ThirdParty/KLU-1.2.1/'
     'arFramework3/ThirdParty/Ceres/ceresd2d.mex*'
     '.DS_Store'
     ''
@@ -36,8 +38,20 @@ lines = {'# This file has been generated using arFramework3/arTools/write_gitign
 
 % ignore cases for each example:
 example_folder = strrep(which('arInit'),'arInit.m','Examples');
+if ispc
+    [~,list] = system(sprintf('dir /S/B %sSetup*.m',example_folder));
+else
+    [~,list] = system(sprintf('find %s -type f -name "Setup*.m"',example_folder));
+end
+list = strread(list, '%s', 'delimiter', sprintf('\n'));
+list = cellfun(@fileparts,list,'UniformOutput',false);
+
+folders = unique(list);
+folders = regexp(folders, 'arFramework3/Examples/', 'split');
+folders = vertcat(folders{:});
+folders = folders(:,2);
+
 d = dir(example_folder);
-folders = {d.name};
 folders = folders([d.isdir]);
 folders = setdiff(folders,{'.','..'});
 
@@ -46,6 +60,8 @@ for i=1:length(folders)
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/SBML/'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/arSimuCalc*'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/arCheckParallel*'];
+    lines{end+1} = ['arFramework3/Examples/',folders{i},'/pthreadVC2.dll'];
+    lines{end+1} = ['arFramework3/Examples/',folders{i},'/pthreadGC2.dll'];
     lines{end+1} = '';
 end
 
