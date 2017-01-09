@@ -319,6 +319,22 @@ end
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS'))
     qyindex = ismember(ar.model(m).data(d).y, C{1});
+    y_var_name = setdiff(symvar(ar.model(m).data(d).fy{qyindex}),ar.model(m).data(d).py);
+    reg_string = ['((?<=\W)|^)(',C{1}{1},'|'];
+    for jreg = 1:length(y_var_name)
+        if(jreg<length(y_var_name))
+            reg_string = [reg_string ,y_var_name{jreg},'|'];
+        else
+            reg_string = [reg_string ,y_var_name{jreg},')'];
+        end
+    end
+    reg_string = [reg_string '((?=\W)|$)'];
+    if(~isempty(regexp(C{2}{1},reg_string,'ONCE')) && ar.model(m).data(d).logfitting(qyindex))
+       error(['You are trying to set up a relative error model within a log transformation. \n%s' ...
+           'Comment out this error if you want to proceed anyway. To implement an absolute error in log, \n' ...
+           'you can try the poor mans approach: \nyObs = sd_yObs + 1/2 * (a+sqrt((a)^2)), a = (offset - yObs-sd_yObs) \n' ...
+           ', with hard set offset (on log-scale, e.g. -1 for offset = 0.1)'],C{2}{1})
+    end
     if(sum(qyindex)==1)
         yindex = find(qyindex);
     elseif(sum(qyindex)==0)

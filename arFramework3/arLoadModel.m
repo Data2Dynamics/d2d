@@ -688,10 +688,29 @@ if(strcmp(C{1},'OBSERVABLES'))
     C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
     while(~(strcmp(C{1},'CONDITIONS') || strcmp(C{1},'SUBSTITUTIONS')))
         qy = ismember(ar.model(m).y, C{1}); %R2013a compatible
+        
+        %check and error if observable in log and fystd = rel + abs error
+        y_var_name = setdiff(symvar(ar.model(m).fy{qy}),ar.model(m).py);
+        reg_string = ['((?<=\W)|^)(',C{1}{1},'|'];
+        for jreg = 1:length(y_var_name)
+            if(jreg<length(y_var_name))
+                reg_string = [reg_string ,y_var_name{jreg},'|'];
+            else
+                reg_string = [reg_string ,y_var_name{jreg},')'];
+            end
+        end
+        reg_string = [reg_string '((?=\W)|$)'];
+        if(~isempty(regexp(C{2}{1},reg_string,'ONCE')) && ar.model(m).logfitting(qy))
+            error(['You are trying to set up a relative error model within a log transformation. \n%s' ...
+               'Comment out this error if you want to proceed anyway. To implement an absolute error in log, \n' ...
+               'you can try the poor mans approach: \nyObs = sd_yObs + 1/2 * (a+sqrt((a)^2)), a = (offset - yObs-sd_yObs) \n' ...
+               ', with hard set offset (on log-scale, e.g. -1 for offset = 0.1)'],C{2}{1})        
+        end
         if(sum(qy)~=1)
             error('unknown observable in error specification %s', cell2mat(C{1}));
         end
         arValidateInput( C, 'error', 'observable identifier', 'expression for the error model' );
+        
         ar.model(m).fystd(qy) = C{2};
         C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         if ( isempty( C{1} ) )
