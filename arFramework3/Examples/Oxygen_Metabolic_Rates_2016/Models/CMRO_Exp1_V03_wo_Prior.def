@@ -1,0 +1,39 @@
+DESCRIPTION
+"Model of Cerebral metabolism, H2 O17 production"
+
+PREDICTOR
+t               T   min         time	0	45
+
+COMPARTMENTS
+
+STATES
+MV         C   "muMol"      "conc."    
+A_state     	C   "muMol"      "conc."
+B_state         C   "muMol"      "conc."    
+  
+
+INPUTS
+alpha1              C    ng/ml   conc.   "step2(t, 0, time_delay, alpha_input,15.5,0) + step2(t,0,time_delay,1,15.5,0)*(t-time_delay)*anstieg"
+//alpha2              C    ng/ml   conc.   "step2(t,0,15.5,(((15.5-time_delay)*anstieg+alpha_input)*105-28)/73.5,23.1,0)"
+//alpha2              C    ng/ml   conc.   "step2(t,0,15.5,beta_input,23.1,0)"
+alpha2              C    ng/ml   conc.   "step2(t,0,15.5,beta_input,23.1,0) - step2(t,0,15.5,1,23.1,0)*(t-time_delay)*anstieg2"
+//alpha2              C    ng/ml   conc.   "step2(t,0,15.5,(((15.5-time_delay)*anstieg+alpha_input)*105-28)/73.5,23.1,0) - step2(t,0,15.5,1,23.1,0)*(t-time_delay)*anstieg2"
+
+ODES
+"2*CMRO * A_state - KL * MV + KG * B_state"
+"rho *  (alpha1+alpha2) - rho * A_state "
+"A_state"
+
+DERIVED
+        
+OBSERVABLES
+
+MV_obs        C   "au"    "conc." 0	0   "MV + offset_MV"
+
+ERRORS
+MV_obs        "sd_MV_obs"
+
+CONDITIONS
+init_A_state	"0"
+init_B_state	"0"
+init_MV	"0"
