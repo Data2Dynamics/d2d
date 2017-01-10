@@ -3,7 +3,7 @@
 arInit
 arLoadModel('pnas_jak_stat');
 arLoadData('pnas_data_original');
-arCompileAll(2);
+arCompileAll;
 
 % load best fit parameter values
 arLoadPars('BestFit');
@@ -36,6 +36,6 @@ arPrint;
 
 %Compute prediction bands for tSTAT and plot them in combination with
 %validation profile thresholds for t=0, 10, 20, 30, 50 min
-% doPPL(1,1,1,[0 10 20 30 50],1,2,0.5);
+% doPPL(1,1,1,[0 10 20 30 50],1);
 % ar.config.ploterrors=-1;
 % arPlot2
