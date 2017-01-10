@@ -163,6 +163,8 @@ end
 if (exist('STRSCNE', 'file') == 0)
     addpath([ar_path '/ThirdParty'])
 end
+
+savepath
     
 %% CVODES
 
