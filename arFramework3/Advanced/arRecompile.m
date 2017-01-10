@@ -38,6 +38,7 @@ for m=1:length(ar.model)
             for ii=1:length(prands)
                 ds{m} = regexprep(ds{m},['_',prands{ii},'(\d)+'],'');
             end
+            [uni,ia,ib]= unique(ds{m});  
         catch            % old code
             disp('Please check replacement code of random parameters in arRecompile.m')
             [uni,ia,ib]= unique(regexprep(ds{m},'_nExpID(\d)+',''));  % nExpID should in general be replaced by
@@ -59,6 +60,7 @@ try
     
     arInit
     for m=1:length(ms)
+        fprintf('arLoadModel(%s);\n',ms{m});
         arLoadModel(ms{m});
     end
     
@@ -67,14 +69,17 @@ try
             %         arLoadData_withoutNormalization(ds{m}{d}, 1,[],[],[]);
             if emptyObs(m)
                 disp('There are empty observations ...')
+                fprintf('arLoadData(%s,%i,''xls'', 0);\n',ds{m}{d},m);
                 arLoadData(ds{m}{d},m,'xls', 0);  % there are no empty observations
             else
+                fprintf('arLoadData(%s,%i,''xls'', 1);\n',ds{m}{d},m);
                 arLoadData(ds{m}{d},m,'xls', 1);  % there are empty observations
             end
         end
     end
     
-    arCompileAll(varargin{:})
+    fprintf('arCompile(varargin{:});\n')
+    arCompileAll(varargin{:});
     
     if sameParameterSettings
         arImportPars(arIn); % use same parameter values, lb, ub, qLog10 etc as in the existing model arIn
