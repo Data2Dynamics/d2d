@@ -93,6 +93,14 @@ arFramework3/Examples/Merkle_ToyModel_PCB2016/Results/20*
 arFramework3/Examples/Merkle_ToyModel_PCB2016/pthreadVC2.dll
 arFramework3/Examples/Merkle_ToyModel_PCB2016/pthreadGC2.dll
 
+arFramework3/Examples/Oxygen_Metabolic_Rates_2016/Compiled/
+arFramework3/Examples/Oxygen_Metabolic_Rates_2016/SBML/
+arFramework3/Examples/Oxygen_Metabolic_Rates_2016/arSimuCalc*
+arFramework3/Examples/Oxygen_Metabolic_Rates_2016/arCheckParallel*
+arFramework3/Examples/Oxygen_Metabolic_Rates_2016/Results/20*
+arFramework3/Examples/Oxygen_Metabolic_Rates_2016/pthreadVC2.dll
+arFramework3/Examples/Oxygen_Metabolic_Rates_2016/pthreadGC2.dll
+
 arFramework3/Examples/Raia_CancerResearch2011/Compiled/
 arFramework3/Examples/Raia_CancerResearch2011/SBML/
 arFramework3/Examples/Raia_CancerResearch2011/arSimuCalc*
@@ -132,6 +140,14 @@ arFramework3/Examples/Toensing_InfectiousDisease_Zika_2016/arCheckParallel*
 arFramework3/Examples/Toensing_InfectiousDisease_Zika_2016/Results/20*
 arFramework3/Examples/Toensing_InfectiousDisease_Zika_2016/pthreadVC2.dll
 arFramework3/Examples/Toensing_InfectiousDisease_Zika_2016/pthreadGC2.dll
+
+arFramework3/Examples/model_reduction_2016/Compiled/
+arFramework3/Examples/model_reduction_2016/SBML/
+arFramework3/Examples/model_reduction_2016/arSimuCalc*
+arFramework3/Examples/model_reduction_2016/arCheckParallel*
+arFramework3/Examples/model_reduction_2016/Results/20*
+arFramework3/Examples/model_reduction_2016/pthreadVC2.dll
+arFramework3/Examples/model_reduction_2016/pthreadGC2.dll
 
 arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/Compiled/
 arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/SBML/
