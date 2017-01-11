@@ -2,14 +2,25 @@
 %
 % arPlotPPL
 
-function arPlotPPL(m, c, ix, t, subs_para)
+function arPlotPPL(m, c, ix, t, takeY, subs_para)
 
 global ar
-
+if(ar.ppl.fittederrors)
+    ar.config.fiterrors=0;
+end
 qLog10 = ar.ppl.qLog10;
 
 if(~exist('subs_para','var'))
     subs_para = true;
+end
+
+if(~exist('takeY','var') || isempty(takeY))
+   takeY = true; 
+end
+if(takeY)
+    data_cond = 'data';
+else
+    data_cond = 'condition';
 end
 
 if(length(ix)>1)
@@ -22,13 +33,16 @@ if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
 
-qt = ar.model(m).condition(c).ppl.t == t;
-qx = ar.model(m).condition(c).ppl.ix == ix;
+% qx = ar.model(m).(data_cond)(c).ppl.ix == ix;
+qt = ar.model(m).(data_cond)(c).ppl.tstart(:,ix) == t;
 
-xtrial = squeeze(ar.model(m).condition(c).ppl.xtrial(qt,qx,:));
-xfit = squeeze(ar.model(m).condition(c).ppl.xfit(qt,qx,:));
-ppl = squeeze(ar.model(m).condition(c).ppl.ppl(qt,qx,:));
-ps = squeeze(ar.model(m).condition(c).ppl.ps(qt,qx,:,:));
+xtrial = squeeze(ar.model(m).(data_cond)(c).ppl.xtrial(qt,ix,:));
+xfit = squeeze(ar.model(m).(data_cond)(c).ppl.xfit(qt,ix,:));
+ppl = squeeze(ar.model(m).(data_cond)(c).ppl.vpl(qt,ix,:));
+if(ar.ppl.options.doPPL || sum(isnan(ppl)) == length(ppl))
+    ppl = squeeze(ar.model(m).(data_cond)(c).ppl.ppl(qt,ix,:));
+end
+ps = squeeze(ar.model(m).(data_cond)(c).ppl.ps(qt,ix,:,:));
 
 if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
     ppl = 2*ar.ndata*log(sqrt(2*pi)) + ppl;
@@ -48,7 +62,7 @@ subplot(2,1,1)
 plot(xfit, ppl, 'k')
 hold on
 plot(xtrial, ppl, 'k--')
-plot(xtrial(ceil(length(xtrial)/2)), ar.chi2fit, '*', 'Color', [.5 .5 .5], 'LineWidth', 1, 'MarkerSize', 8)
+plot(xtrial(ceil(length(xtrial)/2)), min(ppl), '*', 'Color', [.5 .5 .5], 'LineWidth', 1, 'MarkerSize', 8)
 plot(xlim, [0 0]+min(ppl)+ar.ppl.dchi2, 'r--')
 text(mean(xlim), min(ppl)+ar.ppl.dchi2, sprintf('%2i%% (ndof = %i)', (1-ar.ppl.alpha_level)*100, ...
     ar.ppl.ndof), 'Color', 'r', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
@@ -113,5 +127,7 @@ else
 end
 grid(g,'on');
 
-
+if(ar.ppl.fittederrors)
+    ar.config.fiterrors=1;
+end
 

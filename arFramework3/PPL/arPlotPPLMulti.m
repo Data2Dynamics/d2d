@@ -2,9 +2,13 @@
 %
 % arPlotPPL
 
-function arPlotPPLMulti(m, c, vpl, filled, dosurf)
+function arPlotPPLMulti(m, c, takeY, vpl, filled, dosurf)
 
 global ar
+
+if(ar.ppl.fittederrors)
+    ar.config.fiterrors=0;
+end
 
 if(~exist('vpl','var'))
     vpl = false;
@@ -18,9 +22,19 @@ end
 if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
-
+if(~exist('takeY','var') || isempty(takeY))
+   takeY = false; 
+end
+if(takeY)
+    data_cond = 'data';
+    x_y = 'y';
+else
+    data_cond = 'condition';
+    x_y = 'x';
+end
 qLog10 = ar.ppl.qLog10;
-[nrows, ncols] = arNtoColsAndRows(length(ar.model(m).condition(c).ppl.ix));
+[nrows, ncols] = arNtoColsAndRows(length(ar.model(m).(data_cond)(c).ppl.ix));
+arChi2
 
 chi2 = ar.chi2fit;
 if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
@@ -29,24 +43,27 @@ elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))
     chi2 = 2*ar.ndata_err*log(sqrt(2*pi)) + chi2;
 end
 
-arSimu(false, true);
-
 figure(1);
 clf;
 
-for jx=1:length(ar.model(m).condition(c).ppl.ix)
-    ix = ar.model(m).condition(c).ppl.ix(jx);
+for jx=1:length(ar.model(m).(data_cond)(c).ppl.ix)
+    ix = ar.model(m).(data_cond)(c).ppl.ix(jx);
     g = subplot(nrows, ncols, jx);
     arSubplotStyle(g)
     
-    t = ar.model(m).condition(c).ppl.t;
-    if(vpl)
-        x = squeeze(ar.model(m).condition(c).ppl.xtrial(:,jx,:));
-    else
-        x = squeeze(ar.model(m).condition(c).ppl.xfit(:,jx,:));
+    t = ar.model(m).(data_cond)(c).ppl.tstart(:,ix);
+    if(sum(isnan(t)) == length(t))
+        continue;
     end
-    ppl = squeeze(ar.model(m).condition(c).ppl.ppl(:,jx,:));
-    
+    if(vpl)
+        x = squeeze(ar.model(m).(data_cond)(c).ppl.xtrial(:,ix,:));
+    else
+        x = squeeze(ar.model(m).(data_cond)(c).ppl.xfit(:,ix,:));
+    end
+    ppl = squeeze(ar.model(m).(data_cond)(c).ppl.ppl(:,ix,:));
+    if(vpl)
+        ppl = squeeze(ar.model(m).(data_cond)(c).ppl.vpl(:,ix,:));
+    end
     if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
         ppl = 2*ar.ndata*log(sqrt(2*pi)) + ppl;
     elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
@@ -57,13 +74,13 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
         x = 10.^x;
     end
     
-    tFine = ar.model(m).condition(c).tFine(ar.model(m).condition(c).tFine>=min(t) & ...
-        ar.model(m).condition(c).tFine<=max(t));
+    tFine = ar.model(m).(data_cond)(c).tFine(ar.model(m).(data_cond)(c).tFine>=min(t) & ...
+        ar.model(m).(data_cond)(c).tFine<=max(t));
     xFine = linspace(min(x(:)), max(x(:)), ar.config.nFinePoints);
     [tgrid, xgrid] = meshgrid(tFine, xFine);
     pplgrid = nan(size(tgrid));
     
-    if(~dosurf || filled)
+%     if(~dosurf || filled)
         method = 'v5cubic';
         for jt=1:length(tFine)
             tdiff = t - tFine(jt);
@@ -72,7 +89,7 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
             
             iback = find(qback,1,'last');
             ifor = find(qfor,1,'first');
-            [~, ifine] = min(abs(ar.model(m).condition(c).tFine - tFine(jt)));
+            [~, ifine] = min(abs(ar.model(m).(data_cond)(c).tFine - tFine(jt)));
             
             qnonnanback = ~isnan(ppl(iback,:));
             qnonnanfor = ~isnan(ppl(ifor,:));
@@ -82,8 +99,8 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
                 
                 xback = x(iback,ceil(length(x)/2));
                 xfor = x(ifor,ceil(length(x)/2));
-                shift = [ar.model(m).condition(c).xFineSimu(ifine,ix)-xback ...
-                    ar.model(m).condition(c).xFineSimu(ifine,ix)-xfor];
+                shift = [ar.model(m).(data_cond)(c).([x_y 'FineSimu'])(ifine,ix)-xback ...
+                    ar.model(m).(data_cond)(c).([x_y 'FineSimu'])(ifine,ix)-xfor];
                 %             shift = [0 0];
                 
                 if(sum(qnonnanback)>1)
@@ -104,7 +121,7 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
                 %             hold on
                 %             plot(xgrid(:,jt), pplback, '--')
                 %             plot(xgrid(:,jt), pplfor, '--')
-                %             plot(ar.model(m).condition(c).xFineSimu(ifine,ix), min(pplgrid(:,jt)), '*')
+                %             plot(ar.model(m).(data_cond)(c).xFineSimu(ifine,ix), min(pplgrid(:,jt)), '*')
                 %             title(sprintf('t=%g', tFine(jt)));
                 %             hold off
                 %             waitforbuttonpress
@@ -112,7 +129,7 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
                 pplgrid(:,jt) = interp1(x(iback,qnonnanback), ppl(iback,qnonnanback), xFine, method);
             end
         end
-    end
+%     end
     
     if(~dosurf)
         Cvals = linspace(chi2, chi2+ar.ppl.dchi2*4, 20);
@@ -123,12 +140,12 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
             colormap(map);
             contourf(tgrid, xgrid, pplgrid, Cvals,'EdgeColor','none');
             h = colorbar;
-            hold(h,'on')
-            plot(h, [-1 2], [0 0]+chi2+ar.ppl.dchi2, 'r')
-            hold(h,'off')
+%             hold(h,'on')
+%             plot(h, [-1 2], [0 0]+chi2+ar.ppl.dchi2, 'r')
+%             hold(h,'off')
             hold on
-            contour(tgrid, xgrid, pplgrid, chi2+ar.ppl.dchi2, 'r')
-            plot(ar.model(m).condition(c).tFine, ar.model(m).condition(c).xFineSimu(:,ix), 'k');
+            contour(tgrid, xgrid, pplgrid, 'r')%, chi2+ar.ppl.dchi2
+            plot(ar.model(m).(data_cond)(c).tFine, ar.model(m).(data_cond)(c).([x_y 'FineSimu'])(:,ix), 'k');
             hold off
             if(~vpl)
                 legend('PPL', 'PCI', 'best fit');
@@ -138,14 +155,14 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
         else
             map = gray;
             colormap(map);
-            plot(ar.model(m).condition(c).tFine, ar.model(m).condition(c).xFineSimu(:,ix), 'k--');
+            plot(ar.model(m).(data_cond)(c).tFine, ar.model(m).(data_cond)(c).([x_y 'FineSimu'])(:,ix), 'k--');
             hold on
             contour(tgrid, xgrid, pplgrid, Cvals);
-            h = colorbar;
-            hold(h,'on')
-            plot(h, [-1 2], [0 0]+chi2+ar.ppl.dchi2, 'r')
-            hold(h,'off')
-            contour(tgrid, xgrid, pplgrid, chi2+ar.ppl.dchi2, 'r')
+%             h = colorbar;
+%             hold(h,'on')
+%             plot(h, [-1 2], [0 0]+chi2+ar.ppl.dchi2, 'r')
+%             hold(h,'off')
+            contour(tgrid, xgrid, pplgrid,'r')%chi2+ar.ppl.dchi2,
             hold off
             if(~vpl)
                 legend('best fit', 'PPL', 'PCI');
@@ -155,9 +172,9 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
         end
     else
         if(filled)
-            xfitfine = ar.model(m).condition(c).xFineSimu(:,ix);
-            plot3(ar.model(m).condition(c).tFine, xfitfine, ...
-                chi2*ones(size(ar.model(m).condition(c).tFine))+0.1, 'k');
+            xfitfine = ar.model(m).(data_cond)(c).([x_y 'FineSimu'])(:,ix);
+            plot3(ar.model(m).(data_cond)(c).tFine, xfitfine, ...
+                chi2*ones(size(ar.model(m).(data_cond)(c).tFine))+0.1, 'k');
             hold on
             
             n = 100;
@@ -169,9 +186,6 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
             caxis([chi2 chi2+ar.ppl.dchi2*2]);
             zlim([chi2 chi2+ar.ppl.dchi2*2]);
             h = colorbar;
-            hold(h,'on')
-            plot(h, [-1 2], [0 0]+chi2+ar.ppl.dchi2, 'r')
-            hold(h,'off')
             contour3(tgrid, xgrid, pplgrid, [chi2+ar.ppl.dchi2 chi2+ar.ppl.dchi2], 'r')
             hold off
             if(~vpl)
@@ -185,20 +199,20 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
             box on
             grid on
         else
-            xfitfine = ar.model(m).condition(c).xFineSimu(:,ix);
-            h(1) = plot3(ar.model(m).condition(c).tFine, xfitfine, ...
-                zeros(size(ar.model(m).condition(c).tFine))+1e-8, 'k--');
+            xfitfine = ar.model(m).(data_cond)(c).([x_y 'FineSimu'])(:,ix);
+            h(1) = plot3(ar.model(m).(data_cond)(c).tFine, xfitfine, ...
+                zeros(size(ar.model(m).(data_cond)(c).tFine))+1e-8, 'k--');
             hold on
             
-%             n = 100;
-%             [ttmp, xtmp] = meshgrid(linspace(min(tFine), max(tFine), n), ...
-%                 linspace(min(xFine), max(xFine), n));
-%             ppltmp = interp2(tgrid, xgrid, pplgrid, ttmp, xtmp);
-%             [~, htmp] = contour3(tgrid, xgrid, pplgrid, [chi2+ar.ppl.dchi2 chi2+ar.ppl.dchi2], 'r');
-%             if(~isempty(htmp))
-%                 h(3) = htmp(1);
-%             end
-%             htmp = plot3(ttmp, xtmp, ppltmp,'k');
+            n = 100;
+            [ttmp, xtmp] = meshgrid(linspace(min(tFine), max(tFine), n), ...
+                linspace(min(xFine), max(xFine), n));
+            ppltmp = interp2(tgrid, xgrid, pplgrid-chi2, ttmp, xtmp);
+            [~, htmp] = contour3(tgrid, xgrid, pplgrid-chi2, 'r');%, [chi2+ar.ppl.dchi2 chi2+ar.ppl.dchi2]
+            if(~isempty(htmp))
+                h(3) = htmp(1);
+            end
+            htmp = plot3(ttmp, xtmp, ppltmp,'k');
             for jt = 1:length(t)
                 htmp = plot3(t(jt)*ones(size(x(jt,:))), x(jt,:), ppl(jt,:)-chi2,'k');
             end
@@ -219,9 +233,11 @@ for jx=1:length(ar.model(m).condition(c).ppl.ix)
     end
 
     title(sprintf('%s', arNameTrafo(ar.model(m).x{ix})));
-    
+    set(gcf,'Color','w')
     xlabel(g, sprintf('%s [%s]', ar.model(m).tUnits{3}, ar.model(m).tUnits{2}));
-    ylabel(sprintf('%s [%s]', ar.model(m).xUnits{jx,3}, ar.model(m).xUnits{jx,2}))
+    ylabel(sprintf('%s [%s]', ar.model(m).xUnits{ix,3}, ar.model(m).xUnits{ix,2}))
 end
 
-
+if(ar.ppl.fittederrors)
+    ar.config.fiterrors=1;
+end

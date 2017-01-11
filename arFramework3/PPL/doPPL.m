@@ -82,7 +82,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     end
 
     % optimizer settings (set only once)
-    if(ar.config.fiterrors==1)
+    if(ar.config.fiterrors && ~ar.ppl.options.onlyProfile)
         ar.config.fiterrors=0;
         ar.ppl.fittederrors=1;
         ar.qFit(strncmp(ar.pLabel,'sd_',3))=2;
@@ -99,13 +99,13 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     dir = ar.ppl.options.dir;
     arChi2();
 
-    ar.ppl.chi2_95 = nansum(ar.res.^2)+ar.ppl.dchi2 + 0.5;
+    ar.ppl.chi2_95 = ar.chi2 + ar.chi2err+ar.ppl.dchi2 + 0.5;
 
     % Initialize PPL struct, set values to NaN that are newly computed
     [t, whichT] = PPL_init(m,c,t,ix,ar.ppl.options.gammas, ar.ppl.options.onlyProfile, ar.ppl.options.whichT,takeY);
 
     pReset = ar.p;
-    chi2start = nansum(ar.res.^2) + 0 ;
+    chi2start = ar.chi2 + ar.chi2err ;
 
     tic;
     
@@ -192,7 +192,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         ar.p = pReset;
 
     end
-    if(ar.config.fiterrors==0 && ar.ppl.fittederrors==1)
+    if(~ar.config.fiterrors && ar.ppl.fittederrors  && ~ar.ppl.options.onlyProfile) 
         ar.config.fiterrors=1;
         ar.qFit(strncmp(ar.pLabel,'sd_',3))=1;
     end
@@ -301,41 +301,49 @@ for ts = 1:length(t)
     
     if(doPPL)
         xfit_tmp = [fliplr(xfit_down) xSim xfit_up];
+        xtrial_tmp = [fliplr(xtrial_down) xSim xtrial_up];
         ppl_tmp = [fliplr(ppl_down) chi2start ppl_up];
-        q_chi2good = ppl_tmp <= chi2start+ar.ppl.dchi2;
-        q_nonnan = ~isnan(ppl_tmp);         
+        vpl_tmp = [fliplr(vpl_down) chi2start vpl_up];
+        fitted_tmp = [fliplr(xfit_down) xSim xfit_up];
+        merit_tmp = [fliplr(ppl_down) chi2start ppl_up];
+        q_chi2good = merit_tmp <= chi2start+ar.ppl.dchi2;
+        q_nonnan = ~isnan(merit_tmp);         
     else
-        xfit_tmp = [fliplr(xtrial_down) xSim xtrial_up];
-        ppl_tmp = [fliplr(vpl_down) chi2start vpl_up];
-        q_chi2good = ppl_tmp <= chi2start+ar.ppl.dchi2;
-        q_nonnan = ~isnan(ppl_tmp); 
+        xfit_tmp = [fliplr(xfit_down) xSim xfit_up];
+        xtrial_tmp = [fliplr(xtrial_down) xSim xtrial_up];
+        ppl_tmp = [fliplr(ppl_down) chi2start ppl_up];
+        vpl_tmp = [fliplr(vpl_down) chi2start vpl_up];
+        fitted_tmp = [fliplr(xtrial_down) xSim xtrial_up];
+        merit_tmp = [fliplr(vpl_down) chi2start vpl_up];
+        q_chi2good = merit_tmp <= chi2start+ar.ppl.dchi2;
+        q_nonnan = ~isnan(merit_tmp); 
     end
 
     % calculate CI point-wise fit
-    lb_tmp = min(xfit_tmp(q_chi2good));
-    ub_tmp = max(xfit_tmp(q_chi2good));
+    lb_tmp = min(fitted_tmp(q_chi2good));
+    ub_tmp = max(fitted_tmp(q_chi2good));
 
-    if(lb_tmp==min(xfit_tmp(q_nonnan)))
+    if(lb_tmp==min(fitted_tmp(q_nonnan)))
         lb_tmp = -Inf;                
         fprintf('No -95 PPL for t=%d\n',t(ts));
     else
-        kind_low_tmp = find(xfit_tmp==lb_tmp);
+        kind_low_tmp = find(fitted_tmp==lb_tmp);
         if(length(kind_low_tmp)>1)
             kind_low_tmp = kind_low_tmp(1);
         end
-        lb_tmp = interp1(ppl_tmp([kind_low_tmp kind_low_tmp-1]), ...
-        xfit_tmp([kind_low_tmp kind_low_tmp-1]), chi2start+ar.ppl.dchi2);
+        lb_tmp = interp1(merit_tmp([kind_low_tmp kind_low_tmp-1]), ...
+        fitted_tmp([kind_low_tmp kind_low_tmp-1]), chi2start+ar.ppl.dchi2);
     end
-    if(ub_tmp==max(xfit_tmp(q_nonnan)))
+    if(ub_tmp==max(fitted_tmp(q_nonnan)))
         ub_tmp = Inf;
         fprintf('No +95 PPL for t=%d\n',t(ts));
     else
-        kind_high_tmp = find(xfit_tmp==ub_tmp);   
+        kind_high_tmp = find(fitted_tmp==ub_tmp);   
         if(length(kind_high_tmp)>1)
             kind_high_tmp = kind_high_tmp(end);
         end
-        ub_tmp = interp1(ppl_tmp([kind_high_tmp kind_high_tmp+1]), ...
-        xfit_tmp([kind_high_tmp kind_high_tmp+1]), chi2start+ar.ppl.dchi2);
+        ub_tmp = interp1(merit_tmp([kind_high_tmp kind_high_tmp+1]), ...
+        fitted_tmp([kind_high_tmp kind_high_tmp+1]), chi2start+ar.ppl.dchi2);
     end        
     
     if ~onlyProfile
@@ -348,10 +356,10 @@ for ts = 1:length(t)
         end
     end
     if(save)
-        ar.model(m).(data_cond)(c).ppl.xtrial(ts_tmp, jx,:) = xfit_tmp;
+        ar.model(m).(data_cond)(c).ppl.xtrial(ts_tmp, jx,:) = xtrial_tmp;
         ar.model(m).(data_cond)(c).ppl.xfit(ts_tmp, jx,:) = xfit_tmp;
         ar.model(m).(data_cond)(c).ppl.ppl(ts_tmp, jx,:) = ppl_tmp;
-        ar.model(m).(data_cond)(c).ppl.vpl(ts_tmp, jx,:) = ppl_tmp;
+        ar.model(m).(data_cond)(c).ppl.vpl(ts_tmp, jx,:) = vpl_tmp;
         ar.model(m).(data_cond)(c).ppl.ps(ts_tmp, jx,:,:) = ps_tmp;
         ar.model(m).(data_cond)(c).ppl.(['lb_fit' ppl_vpl])(ts_tmp, jx) = lb_tmp;
         ar.model(m).(data_cond)(c).ppl.(['ub_fit' ppl_vpl])(ts_tmp, jx) = ub_tmp;
@@ -408,12 +416,12 @@ for j = 1:n
     end
     xfit(j) = xSim;
     if(takeY)
-        ppl(j) = nansum(ar.res.^2) - (xtrial(j)-xfit(j)).^2/xstd.^2;
-        vpl(j) = nansum(ar.res.^2);
+        ppl(j) = ar.chi2 + ar.chi2err - (xtrial(j)-xfit(j)).^2/xstd.^2;
+        vpl(j) = ar.chi2 + ar.chi2err;
         
     else
-        ppl(j) = nansum(ar.res.^2);
-        vpl(j) = nansum(ar.res.^2) + (xtrial(j)-xfit(j)).^2/xstd.^2;
+        ppl(j) = ar.chi2 + ar.chi2err;
+        vpl(j) = ar.chi2 + ar.chi2err + (xtrial(j)-xfit(j)).^2/xstd.^2;
     end
     ps(j,:) = ar.p;
     %ppl(j)
@@ -664,7 +672,8 @@ function ppl_calc(m, c, jx, xFit, p, t, doPPL, takeY, dir, stepsize, xstd, ed_st
                 t_tmp = t_tmp + t_dir*stepsize;
                 [chi2, ar.ppl.xFit_tmp] = PPL_corr(4, x_orig, m, c, jt, jx, xstd, t_tmp, qLog10, dir, takeY, doPPL, chi2);    
             end            
-
+            ar.p(ar.p>ar.ub) = ar.ub(ar.p>ar.ub);
+            ar.p(ar.p<ar.lb) = ar.lb(ar.p<ar.lb);        
             if(sum(isnan(dx))>0)               
                ar.p=pReset;
                if(takeY)

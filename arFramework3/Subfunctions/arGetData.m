@@ -69,13 +69,14 @@ elseif(jtype==2)
     ystd = [];
     %Get data points of model profile likelihood
     if(isfield(ar.model(jm).condition(jc),'ppl') && ~isempty(ar.model(jm).condition(jc).ppl))
-        t_ppl = ar.model(jm).condition(jc).ppl.tstart;
+        trows = size(ar.model(jm).condition(jc).ppl.tstart,1);
+        t_ppl = [nan(trows,length(ar.model(1).qPlotU)) ar.model(jm).condition(jc).ppl.tstart nan(trows,length(ar.model(1).qPlotZ))];
         if(nansum(nansum(~isnan(ar.model(jm).condition(jc).ppl.ub_fit)))>0)
-            y_ppl_ub = ar.model(jm).condition(jc).ppl.ub_fit;
-            y_ppl_lb = ar.model(jm).condition(jc).ppl.lb_fit;
+            y_ppl_ub = [nan(trows,length(ar.model(1).qPlotU)) ar.model(jm).condition(jc).ppl.ub_fit nan(trows,length(ar.model(1).qPlotZ))];
+            y_ppl_lb = [nan(trows,length(ar.model(1).qPlotU)) ar.model(jm).condition(jc).ppl.lb_fit nan(trows,length(ar.model(1).qPlotZ))];
         else
-            y_ppl_ub = ar.model(jm).condition(jc).ppl.ub_fit_vpl;
-            y_ppl_lb = ar.model(jm).condition(jc).ppl.lb_fit_vpl;
+            y_ppl_ub = [nan(trows,length(ar.model(1).qPlotU)) ar.model(jm).condition(jc).ppl.ub_fit_vpl nan(trows,length(ar.model(1).qPlotZ))];
+            y_ppl_lb = [nan(trows,length(ar.model(1).qPlotU)) ar.model(jm).condition(jc).ppl.lb_fit_vpl nan(trows,length(ar.model(1).qPlotZ))];
         end
     end
 elseif(jtype==3)

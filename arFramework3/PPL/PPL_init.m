@@ -34,7 +34,15 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
         end
         ar.model(m).(data_cond)(c).([x_y 'FineLB']) = nan(length(ar.model(m).(data_cond)(c).tFine),size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));
         ar.model(m).(data_cond)(c).([x_y 'FineUB']) = nan(length(ar.model(m).(data_cond)(c).tFine),size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));
-
+        
+        if(isfield(ar.model(m).(data_cond)(c),'zExpSimu'))
+            ar.model(m).(data_cond)(c).('zFineLB') = nan(length(ar.model(m).(data_cond)(c).tFine),size(ar.model(m).(data_cond)(c).('zExpSimu'),2));
+            ar.model(m).(data_cond)(c).('zFineUB') = nan(length(ar.model(m).(data_cond)(c).tFine),size(ar.model(m).(data_cond)(c).('zExpSimu'),2));
+        end
+        if(isfield(ar.model(m).(data_cond)(c),'uExpSimu'))
+            ar.model(m).(data_cond)(c).('uFineLB') = nan(length(ar.model(m).(data_cond)(c).tFine),size(ar.model(m).(data_cond)(c).('uExpSimu'),2));
+            ar.model(m).(data_cond)(c).('uFineUB') = nan(length(ar.model(m).(data_cond)(c).tFine),size(ar.model(m).(data_cond)(c).('uExpSimu'),2));
+        end
         ar.model(m).(data_cond)(c).ppl.t = nan(nsteps+1,size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));
         ar.model(m).(data_cond)(c).ppl.x_low = nan(nsteps, size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));
         ar.model(m).(data_cond)(c).ppl.x_low_vpl = nan(nsteps, size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));

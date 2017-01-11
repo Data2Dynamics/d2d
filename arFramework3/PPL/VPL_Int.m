@@ -26,7 +26,8 @@ end
 dx_A(2:end) = dx_A(2:end).*region_fac_p';
 ar.p(ar.qFit==1)=p_tmp(ar.qFit==1) + dx_A(2:end)'*stepsize/2;
 ar.ppl.xFit_tmp = xFit_tmp + dx_A(1)*stepsize/2;
-
+ar.p(ar.p>ar.ub) = ar.ub(ar.p>ar.ub);
+ar.p(ar.p<ar.lb) = ar.lb(ar.p<ar.lb);        
 [grad, H, dy_pred, xSim, grad_y, fRHS] = get_stuff(t_tmp+stepsize/2,stepsize);
 dx_B = get_int();
 region_fac_p = get_fac(dx_B(2:end));
@@ -36,6 +37,8 @@ end
 dx_B(2:end) = dx_B(2:end).*region_fac_p';
 ar.p(ar.qFit==1)=p_tmp(ar.qFit==1) + dx_B(2:end)'*stepsize;
 ar.ppl.xFit_tmp = xFit_tmp + dx_B(1)*stepsize;
+ar.p(ar.p>ar.ub) = ar.ub(ar.p>ar.ub);
+ar.p(ar.p<ar.lb) = ar.lb(ar.p<ar.lb);        
 [grad, H, dy_pred, xSim, grad_y, fRHS] = get_stuff(t_tmp+stepsize,stepsize);
 dx_C = get_int();
 ar.p(ar.qFit==1)=p_tmp(ar.qFit==1);
