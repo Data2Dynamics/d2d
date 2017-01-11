@@ -4,8 +4,10 @@
 function write_gitignore
 
 fprintf('New .gitignore file will be written in the working directory ...\n\n')
-
-fid = fopen('.gitignore','w');
+ar_path = fileparts(which('arInit.m'));
+nr_slash = strfind(ar_path,'/');
+ar_path = ar_path(1:nr_slash(end));
+fid = fopen([ar_path '.gitignore'],'w');
 
 % ignore cases independent on examples:
 lines = {'# This file has been generated using arFramework3/Advanced/write_gitignore.m'
@@ -79,5 +81,4 @@ end
 
 fclose(fid);
 
-fprintf('\n\n .gitignore has been written. Please check the file by hand.\n');
-fprintf('If approved, replace the old file in the folder arFramework3 by hand.\n\n')
+fprintf('\n\n .gitignore has been written in d2d core folder. Please check the file by hand!\n');
