@@ -216,6 +216,9 @@ end
 
 % call mex function to simulate models
 feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads')
+% arCalcRes_test;  % the test can be performed here or outside of arSimu
+% (see comments in arCalcRes_test.m)
+arCalcRes(sensi)
 
 % integration error ?
 for m=1:length(ar.model)
