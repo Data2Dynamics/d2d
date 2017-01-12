@@ -37,7 +37,7 @@ if ~exist('silent','var') || isempty(silent)
 end
 
 
-global ar
+global ar pleGlobals
 
 if ~isfield(ar,'res_type')
     arCalcMerit(true,ar.p(ar.qFit==1)); %sensi = true ensures that ODE intergation steps are the same as within fitting
@@ -53,6 +53,12 @@ meritvals.chi2_err_addc = sum(ar.res(ar.res_type==2).^2);
 meritvals.chi2_constr   = ar.chi2constr;
 meritvals.chi2_prior    = ar.chi2prior;
 meritvals.chi2_random   = ar.chi2random;
+
+if ~isempty(pleGlobals)
+    meritvals.ple_merit = feval(pleGlobals.merit_fkt);
+else
+    meritvals.ple_merit = [];
+end
 
 meritvals.nres  = length(ar.res(:));
 meritvals.ndata = ar.ndata;
