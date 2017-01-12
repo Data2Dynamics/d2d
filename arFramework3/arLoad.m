@@ -33,9 +33,6 @@ end
 
 Stmpload = load(['./Results/' workspace_name '/workspace.mat']);
 ar = Stmpload.ar;
-if ~isfield(ar.config,'add_c')  % if ar has been created with an old D2D version
-    ar.config.add_c = 50;
-end
 
 % new:
 if(isfield(Stmpload,'pleGlobals'))
