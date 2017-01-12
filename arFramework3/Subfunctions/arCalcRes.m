@@ -26,7 +26,11 @@ end
 global ar
 
 fiterrors_correction_factor = ar.config.fiterrors_correction;
-add_c = 50;
+if isfield(ar.config,'add_c')
+    add_c = ar.config.add_c;
+else
+    add_c = 50;
+end
 
 for m=1:length(ar.model)
     for d=1:length(ar.model(m).data)

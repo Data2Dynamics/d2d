@@ -37,6 +37,7 @@ function ar = arInitFields(ar)
         {'fiterrors_correction_warning',false}, ...                     %   Field for storing whether the user has been warned of the disabled Bessel-like error correction
         {'useFitErrorCorrection',       true}, ...                      %   Use Bessel-like correction when fitting error parameters
         {'useFitErrorMatrix',           false}, ...
+        {'add_c',                       50},...                         % additive constant required in arCalcRes.m for lsqnonlin in case of error-fitting
         ...                                                             % Sampling
         {'useLHS',                      false}, ...                     %   When sampling random parameters use Latin Hypercube Sampling    
         ...                                                             % Optimization options
