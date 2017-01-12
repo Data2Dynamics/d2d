@@ -10,7 +10,7 @@
 %   The function implements this step as previously done in arSimuCalc.c
 %   The respective C-code is still in this function as comment.
 % 
-%   This function also contains the additive constant add_c=50 which is
+%   This function also uses the additive constant ar.config.add_c=50 which is
 %   required for using lsqnonlin in case of fitting errors.
 % 
 %       sensi   should sensitivities sres, sreserr be calculated?
@@ -26,11 +26,6 @@ end
 global ar
 
 fiterrors_correction_factor = ar.config.fiterrors_correction;
-if isfield(ar.config,'add_c')
-    add_c = ar.config.add_c;
-else
-    add_c = 50;
-end
 
 for m=1:length(ar.model)
     for d=1:length(ar.model(m).data)
@@ -73,7 +68,7 @@ for m=1:length(ar.model)
         [ar.model(m).data(d).res, ar.model(m).data(d).chi2]         = fres(ar.model(m).data(d).yExp, ar.model(m).data(d).yExpSimu, ystd, fiterrors_correction_factor);
         
         if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 ) % error residuals are only !=0 if errors are fitted:
-            [ar.model(m).data(d).reserr, ar.model(m).data(d).chi2err]   = fres_error(ystd, add_c);
+            [ar.model(m).data(d).reserr, ar.model(m).data(d).chi2err]   = fres_error(ystd, ar.config.add_c);
         else
             ar.model(m).data(d).reserr = zeros(size(ar.model(m).data(d).res));
             ar.model(m).data(d).chi2err = zeros(size(ar.model(m).data(d).chi2));
