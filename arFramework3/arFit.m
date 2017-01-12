@@ -1,4 +1,4 @@
-    % Fit model parameters to data using lsqnonlin
+% Fit model parameters to data using lsqnonlin (by default)
 %
 % arFit(silent)
 %
@@ -119,6 +119,7 @@ if(ar.config.logFitting)
     fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
 end
 
+% ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
 ar = arChi2(ar, true, ar.p(ar.qFit==1));
 chi2_old = ar.chi2fit;
 
@@ -384,7 +385,7 @@ if removeL1path
 end
 
 ar.p(ar.qFit==1) = pFit;
-ar = arChi2(ar, true, ar.p(ar.qFit==1));
+ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
 
 fit.exitflag = exitflag;
 fit.output = output;
@@ -406,7 +407,7 @@ if(~silent || exitflag < 1)
 end
 
 if(~silent)
-    ar = arChi2(ar, true);
+    ar = arCalcMerit(ar, true);
 end
 
 if(nargout>0 && ~qglobalar)
@@ -428,7 +429,7 @@ else
 end
 sensi = ar.config.useSensis && (~sensiskip || (nargout > 1));
 
-arChi2(sensi, pTrial);
+arCalcMerit(sensi, pTrial);
 arLogFit(ar);
 res = [ar.res ar.constr];
 if(nargout>1 && ar.config.useSensis)
@@ -455,7 +456,7 @@ end
 % arNLS boosted by SR1 updates
 function [res, sres, H, ssres] = merit_fkt_sr1(p, pc, ~, sresc, ssresc)
 global ar
-arChi2(ar.config.useSensis, p);
+arCalcMerit(ar.config.useSensis, p);
 arLogFit(ar);
 res = [ar.res ar.constr];
 if(nargout>1 && ar.config.useSensis)
@@ -507,7 +508,7 @@ end
 % fmincon
 function [l, g, H] = merit_fkt_fmincon(pTrial)
 global ar
-arChi2(ar.config.useSensis, pTrial);
+arCalcMerit(ar.config.useSensis, pTrial);
 arLogFit(ar);
 l = sum(ar.res.^2);
 if(nargout>1)
@@ -524,7 +525,7 @@ end
 % fmincon as lsq
 function [l, g] = merit_fkt_fmincon_lsq(pTrial)
 global ar
-arChi2(ar.config.useSensis, pTrial);
+arCalcMerit(ar.config.useSensis, pTrial);
 arLogFit(ar);
 res = [ar.res ar.constr];
 if(nargout>1 && ar.config.useSensis)
@@ -543,7 +544,7 @@ end
 
 function [c, ceq, gc, gceq] = confun(pTrial)
 global ar
-arChi2(ar.config.useSensis, pTrial);
+arCalcMerit(ar.config.useSensis, pTrial);
 arLogFit(ar);
 % Nonlinear inequality constraints
 c = [];
@@ -560,7 +561,7 @@ end
 
 function hessian = fmincon_hessianfcn(pTrial, lambda)
 global ar
-arChi2(ar.config.useSensis, pTrial);
+arCalcMerit(ar.config.useSensis, pTrial);
 arLogFit(ar);
 H = ar.sres(:, ar.qFit==1)'*ar.sres(:, ar.qFit==1);
 Hconstr = zeros(size(H));
@@ -572,7 +573,7 @@ hessian = H + Hconstr;
 % STRSCNE
 function res = merit_fkt_STRSCNE(pTrial)
 global ar
-arChi2(ar.config.useSensis, pTrial);
+arCalcMerit(ar.config.useSensis, pTrial);
 arLogFit(ar);
 res = [ar.res ar.constr]';
 
@@ -580,7 +581,7 @@ res = [ar.res ar.constr]';
 function sres = merit_dfkt_STRSCNE(pTrial)
 global ar
 if(ar.config.useSensis)
-    arChi2(ar.config.useSensis, pTrial);
+    arCalcMerit(ar.config.useSensis, pTrial);
     sres = ar.sres(:, ar.qFit==1);
     if(~isempty(ar.sconstr))
         sres = [sres; ar.sconstr(:, ar.qFit==1)];
@@ -592,7 +593,7 @@ function chi2 = merit_fkt_chi2(pTrial)
 global ar
 
 try
-    arChi2(false, pTrial);
+    arCalcMerit(false, pTrial);
     arLogFit(ar);
     chi2 = sum([ar.res ar.constr].^2);
 catch
