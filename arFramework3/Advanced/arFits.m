@@ -100,7 +100,7 @@ else
 
 end
 
-arChi2(true,ar.p(ar.qFit==1));
+arCalcMerit(true,ar.p(ar.qFit==1));
 pReset = ar.p;
 chi2Reset = ar.chi2fit + ar.chi2constr;
 
@@ -118,7 +118,7 @@ for j=1:n
     
     tic;
     try
-        arChi2(true,ar.p(ar.qFit==1));
+        arCalcMerit(true,ar.p(ar.qFit==1));
         ar.chi2s_start(dop(j)) = ar.chi2fit;
         ar.chi2sconstr_start(dop(j)) = ar.chi2constr;
         if (exist('prefunc', 'var'))
@@ -202,5 +202,5 @@ else
     fprintf('did not find better fit\n');
     ar.p = pReset;
 end
-arChi2(true,[]);
+arCalcMerit(true,[]);
 

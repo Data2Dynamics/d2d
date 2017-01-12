@@ -119,8 +119,7 @@ if(ar.config.logFitting)
     fit.stepsize_hist = nan(1,ar.config.optim.MaxIter);
 end
 
-% ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
-ar = arChi2(ar, true, ar.p(ar.qFit==1));
+ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
 chi2_old = ar.chi2fit;
 
 if(sum(ar.qFit==1)<=0)

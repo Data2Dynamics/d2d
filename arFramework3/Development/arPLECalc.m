@@ -73,7 +73,7 @@ tic;
 ar.qFit(jk) = 0;
 
 % calculate initial chi^2
-ar = arChi2(ar, true, ar.p(ar.qFit==1));
+ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
 chi2Reset = ar.chi2fit;
 ar.ple.chi2Reset(jk) = chi2Reset;
 
@@ -93,7 +93,7 @@ fprintf('PLE #%i %i errors, %i fit issues, %s elapse time\n', jk, ...
 
 ar.p = pReset;
 ar.qFit(jk) = qFitReset;
-ar = arChi2(ar, true, ar.p(ar.qFit==1));
+ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
 
 if(nargout>0 && ~qglobalar)
     varargout{1} = ar;
@@ -126,12 +126,12 @@ for j=1:n
         arWaitbar(j+n,2*n, sprintf('PLE down for %s', strrep(ar.pLabel{jk},'_','\_')));
     end
    
-    ar = arChi2(ar, true, ar.p(ar.qFit==1));
+    ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
     pTrial = findTrial(jk, pLast, dp, direction);
     
     try
         ar.p = pTrial;
-        ar = arChi2(ar, true, ar.p(ar.qFit==1));
+        ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
         
         while(ar.chi2fit - chi2Last > rel_increase * dchi2)
             dp = dp/2;
@@ -143,7 +143,7 @@ for j=1:n
             pTrial = findTrial(jk, pLast, dp, direction);
             
             ar.p = pTrial;
-            ar = arChi2(ar, true, ar.p(ar.qFit==1));
+            ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
         end
         
         ar = arFit(ar, true);

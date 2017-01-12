@@ -42,7 +42,7 @@ parfor j=1:n
     ar2 = ar1;
     ar2.p = ps(j,:);
     try
-        ar2 = arChi2(ar2, sensis, ar2.p(ar2.qFit==1));
+        ar2 = arCalcMerit(ar2, sensis, ar2.p(ar2.qFit==1));
         timing(j) = ar2.stop/1e6;
         chi2s(j) = ar2.chi2fit;
         chi2sconstr(j) = ar2.chi2constr;
@@ -81,5 +81,5 @@ end
 
 ar.p = pReset;
 try %#ok<TRYNC>
-    arChi2(false, ar.p(ar.qFit==1));
+    arCalcMerit(false, ar.p(ar.qFit==1));
 end

@@ -43,7 +43,7 @@ for j=1:n
     end
     ar.p = ps(j,:);
     try
-        arChi2(sensis,ar.p(ar.qFit==1));
+        arCalcMerit(sensis,ar.p(ar.qFit==1));
         ar.timing(j) = ar.stop/1e6;
         ar.chi2s(j) = ar.chi2fit;
         ar.chi2sconstr(j) = ar.chi2constr;
@@ -68,7 +68,7 @@ end
 
 ar.p = pReset;
 try %#ok<TRYNC>
-    arChi2(false, ar.p(ar.qFit==1));
+    arCalcMerit(false, ar.p(ar.qFit==1));
 end
 
 if(~silent)

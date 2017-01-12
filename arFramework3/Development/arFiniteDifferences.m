@@ -21,7 +21,7 @@ if(~isfield(ar.config,'useFitErrorMatrix'))
 end
 
 pRef = ar.p;
-arChi2(false,[]);
+arCalcMerit(false,[]);
 
 ar.sresFD = ar.res' * ones(1,length(pRef)) + 0;
 ar.sconstrFD = ar.constr' * ones(1,length(pRef)) + 0;
@@ -68,7 +68,7 @@ for jp=1:length(ar.pLabel)
     
     % perturb p(jp)
     ar.p(jp) = ar.p(jp) + dp;
-    arChi2(false,[]);
+    arCalcMerit(false,[]);
     
     for jm=1:length(ar.model)
         for jc=1:length(ar.model(jm).condition)
@@ -105,6 +105,6 @@ for jp=1:length(ar.pLabel)
     
     % reset p
     ar.p = pRef;
-    arChi2(false,[]);
+    arCalcMerit(false,[]);
 end
 arWaitbar(-1);

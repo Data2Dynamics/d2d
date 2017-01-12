@@ -60,7 +60,7 @@ end
 if(ar.p(ar.tuner.index) > ar.ub(ar.tuner.index))
     ar.p(ar.tuner.index) = ar.ub(ar.tuner.index);
 end
-% arChi2(false)
+% arCalcMerit(false)
 arPlot(false, true)
 refresh_textbox(handles)
 updateYLims
@@ -75,7 +75,7 @@ end
 if(ar.p(ar.tuner.index) > ar.ub(ar.tuner.index))
     ar.p(ar.tuner.index) = ar.ub(ar.tuner.index);
 end
-% arChi2(false)
+% arCalcMerit(false)
 arPlot(false, true)
 refresh_textbox(handles)
 updateYLims
@@ -101,7 +101,7 @@ if(~isnan(newval))
     ar.p(ar.tuner.index) = newval;
 end
 set(hObject, 'String', ar.p(ar.tuner.index));
-% arChi2(false)
+% arCalcMerit(false)
 arPlot(false, true)
 updateYLims
 
@@ -187,7 +187,7 @@ end
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
 arFit(true);
-arChi2(false)
+arCalcMerit(false)
 arPlot(false, true)
 refresh_textbox(handles)
 updateYLims
@@ -195,7 +195,7 @@ updateYLims
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
 arFitObs(true);
-arChi2(false)
+arCalcMerit(false)
 arPlot(false, true)
 refresh_textbox(handles)
 updateYLims
@@ -204,7 +204,7 @@ updateYLims
 % --- Executes on button press in pushbutton5.
 function pushbutton5_Callback(hObject, eventdata, handles)
 arFitDyn(true);
-arChi2(false)
+arCalcMerit(false)
 arPlot(false, true)
 refresh_textbox(handles)
 updateYLims
@@ -214,7 +214,7 @@ updateYLims
 function pushbutton10_Callback(hObject, eventdata, handles)
 global ar;
 arFitInit(true);
-arChi2(false)
+arCalcMerit(false)
 arPlot(false, true)
 refresh_textbox(handles)
 updateYLims
@@ -223,7 +223,7 @@ updateYLims
 function pushbutton6_Callback(hObject, eventdata, handles)
 global ar;
 arFitSingle(ar.tuner.index, true);
-arChi2(false)
+arCalcMerit(false)
 arPlot(false, true)
 refresh_textbox(handles)
 updateYLims

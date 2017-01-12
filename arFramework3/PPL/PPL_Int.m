@@ -65,7 +65,7 @@ dx = [dx; dps];
     function [fRHS_ppl, dp, sres_y] = get_ppl(t_get, step, RHS_t)
         if(~isnan(RHS_t))           
             arLink(true,t_tmp+RHS_t); 
-            arChi2(false, ar.p(ar.qFit==1),1);
+            arCalcMerit(false, ar.p(ar.qFit==1),1);
             [~,it] = min(abs(ar.model(m).condition(c).tExp-t_tmp-RHS_t));
             fRHS_ppl = ar.model(m).condition(c).dxdts(it,jx);
         end

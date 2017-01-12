@@ -25,7 +25,7 @@ atolIn = ar.config.atol+0.0;
 rtolIn = ar.config.rtol+0.0;
 
 if(~isfield(ar,'sres'))
-    arChi2
+    arCalcMerit
 end
     
 
@@ -39,7 +39,7 @@ for i=1:length(dtol)
 
     fprintf('atol=%.3e, rtol=%.3e\n',ar.config.atol,ar.config.rtol);
     try
-        arChi2(true,ar.p(ar.qFit==1))
+        arCalcMerit(true,ar.p(ar.qFit==1))
         res(:,i) = ar.res;
         sres(:,:,i)  = ar.sres;
         chi2(i) = ar.chi2fit;

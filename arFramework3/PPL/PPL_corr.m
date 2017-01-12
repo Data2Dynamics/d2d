@@ -101,9 +101,9 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
         if (x==1 || ~isequal(pTrial,Last_pars))
             arLink(true,t_tmp,takeY,jx, c, m,xExp_tmp,xstd);  
             try
-                arChi2(ar.config.useSensis, pTrial,1)
+                arCalcMerit(ar.config.useSensis, pTrial,1)
             catch
-                fprintf('arChi2 failed at t= %d and xFit = %d for x=%i, reset xFit! \n', t_tmp, ar.ppl.xFit_tmp, x);
+                fprintf('arCalcMerit failed at t= %d and xFit = %d for x=%i, reset xFit! \n', t_tmp, ar.ppl.xFit_tmp, x);
                 if(dir==1)
                     ar.ppl.xFit_tmp = ar.model(m).(data_cond)(c).ppl.x_high_vpl(jt, jx);                                       
                 else
@@ -111,7 +111,7 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 end
                 xExp_tmp = ar.ppl.xFit_tmp;
                 arLink(true,t_tmp,true,jx, c, m,xExp_tmp,xstd);  
-                arChi2(ar.config.useSensis, pTrial,1);
+                arCalcMerit(ar.config.useSensis, pTrial,1);
             end
 
             %res = [ar.res ar.constr];
@@ -212,9 +212,9 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
     if ~isequal(pTrial,Last_pars)
         arLink(true,t_tmp,takeY,jx, c, m,xExp_tmp,xstd);  
         try
-            arChi2(ar.config.useSensis, pTrial,1);
+            arCalcMerit(ar.config.useSensis, pTrial,1);
         catch
-            fprintf('arChi2 failed at t= %d and xFit = %d, reset xFit! \n', t_tmp, ar.ppl.xFit_tmp);
+            fprintf('arCalcMerit failed at t= %d and xFit = %d, reset xFit! \n', t_tmp, ar.ppl.xFit_tmp);
             if(~doPPL)
                 if(dir==1)
                     ar.ppl.xFit_tmp = ar.model(m).(data_cond)(c).ppl.x_high_vpl(jt, jx);   
@@ -223,7 +223,7 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 end
                 xExp_tmp = ar.ppl.xFit_tmp;
                 arLink(true,t_tmp,takeY,jx, c, m,xExp_tmp,xstd);  
-                arChi2(ar.config.useSensis, pTrial,1);
+                arCalcMerit(ar.config.useSensis, pTrial,1);
             end
         end
         %res = [ar.res ar.constr];
@@ -315,9 +315,9 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 arLink(true,t_tmp);
             end
             if(x == 3)
-                arChi2(ar.config.useSensis, xs(1:end-1),1);
+                arCalcMerit(ar.config.useSensis, xs(1:end-1),1);
             else
-                arChi2(ar.config.useSensis, xs,1);
+                arCalcMerit(ar.config.useSensis, xs,1);
             end
             res = ar.res;
             [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp));
@@ -413,9 +413,9 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 arLink(true,t_tmp);
             end
             if(x == 3)
-                arChi2(ar.config.useSensis, p(1:end-1),1); 
+                arCalcMerit(ar.config.useSensis, p(1:end-1),1); 
             elseif(x == 4)
-                arChi2(ar.config.useSensis, p,1); 
+                arCalcMerit(ar.config.useSensis, p,1); 
             end
             %res = [ar.res ar.constr];   
             res = ar.res;

@@ -44,7 +44,7 @@ elseif(strcmp(method,'ode23'))
 end
 
 p = ar.p;
-arChi2(true);
+arCalcMerit(true);
 
 if(~isfield(ar,'H0'))
     H0 = ar.sres(:,ar.qFit==1)'*ar.sres(:,ar.qFit==1);
@@ -123,7 +123,7 @@ try
         for j=1:size(xs2,1)
             ar.p = xs2(j,:);
             try
-                arChi2(true);
+                arCalcMerit(true);
                 chi2s(j) = ar.chi2fit;
             catch err_id 
                 chi2s(j) = nan;
@@ -132,7 +132,7 @@ try
     end
     
     ar.p = p;
-    arChi2(true);
+    arCalcMerit(true);
     
     % down
     fprintf('going down\n');
@@ -162,7 +162,7 @@ try
         for j=1:size(xs2d,1)
             ar.p = xs2d(j,:);
             try
-                arChi2(true);
+                arCalcMerit(true);
                 chi2sd(j) = ar.chi2fit;
             catch err_id 
                 chi2sd(j) = nan;
@@ -171,7 +171,7 @@ try
     end
     
     ar.p = p;
-    arChi2(true);
+    arCalcMerit(true);
     
     xsout = [flipud(xs2d); xs2];
     chi2sout = [fliplr(chi2sd) chi2s];
@@ -219,7 +219,7 @@ try
     end
 catch err_id
     ar.p = p;
-    arChi2(true);
+    arCalcMerit(true);
     rethrow(err_id);
 end
 
@@ -228,7 +228,7 @@ end
         
         dp2 = 1;
         dp_tmp = dp;
-        arChi2(true);
+        arCalcMerit(true);
         
         arWaitbar(0);
         
@@ -245,7 +245,7 @@ end
                 rhs_tmp = feval(rhs_fun, xinit(jkx), xinit, false);
                 
                 xtrial = xinit + transpose(rhs_tmp*dp_tmp);
-                arChi2(true, xtrial(1:(end-1)));
+                arCalcMerit(true, xtrial(1:(end-1)));
                 chi2_trial = ar.chi2fit;
                 if(chi2_trial - chi2_tmp > dchi2*dchi2_increase) % reduce step
                     while(chi2_trial - chi2_tmp > dchi2*dchi2_increase)
@@ -254,7 +254,7 @@ end
                             break;
                         end
                         xtrial = xinit + transpose(rhs_tmp*dp_tmp);
-                        arChi2(true, xtrial(1:(end-1)));
+                        arCalcMerit(true, xtrial(1:(end-1)));
                         chi2_trial = ar.chi2fit;
                     end
                 elseif(chi2_trial - chi2_tmp < dchi2*0.5) % increase next step
@@ -281,7 +281,7 @@ end
 
     function [xxstmp, dp2] = reopt(xxstmp, dp2)
         if(n_reopt>0)
-            arChi2(true, xxstmp(1:(end-1)));
+            arCalcMerit(true, xxstmp(1:(end-1)));
             
             qFitReset = ar.qFit;
             ar.qFit(jk) = 0;
@@ -329,7 +329,7 @@ end
 %                     ar.p(qFit) = p_old + deltap';
                     
                     % evaluate objective function
-                    arChi2(true);
+                    arCalcMerit(true);
                     
                     % compare old and new chi^2
                     if(ar.chi2fit < chi2_old) % if decreased, keep the step
@@ -367,7 +367,7 @@ end
         end
         
         if(reeval)
-            arChi2(true, y(1:(end-1)));
+            arCalcMerit(true, y(1:(end-1)));
         end
         
         gdot = zeros(sum(ar.qFit==1),1);
@@ -423,7 +423,7 @@ end
     
 
     function M = profile_ode_dae_lhs(~,y)        
-        arChi2(true, y(1:(end-1)));
+        arCalcMerit(true, y(1:(end-1)));
         
         gdot = zeros(sum(ar.qFit==1),1);
         gdot(jkx) = 1;
@@ -435,7 +435,7 @@ end
 
 
     function dy = profile_ode_dae_rhs(~,y)        
-        arChi2(true, y(1:(end-1)));
+        arCalcMerit(true, y(1:(end-1)));
         
         gdot = zeros(sum(ar.qFit==1),1);
         gdot(jkx) = 1;

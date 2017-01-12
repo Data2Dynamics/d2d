@@ -32,7 +32,7 @@ timing = nan(1,n);
 fun_evals = nan(1,n);
 optim_crit = nan(1,n);
 
-arChi2(true,ar.p(ar.qFit==1));
+arCalcMerit(true,ar.p(ar.qFit==1));
 pReset = ar.p;
 chi2Reset = ar.chi2fit + ar.chi2constr;
 
@@ -71,7 +71,7 @@ parfor j=1:n
     ar2.p = ps(j,:);
     tic;
     try
-        ar2 = arChi2(ar2, true, ar2.p(ar2.qFit==1));
+        ar2 = arCalcMerit(ar2, true, ar2.p(ar2.qFit==1));
         chi2s_start(j) = ar2.chi2fit;
         chi2sconstr_start(j) = ar2.chi2constr;
         ar2 = arFit(ar2, true);
@@ -170,7 +170,7 @@ else
     fprintf('did not find better fit\n');
     ar.p = pReset;
 end
-arChi2(true,ar.p(ar.qFit==1));
+arCalcMerit(true,ar.p(ar.qFit==1));
 
 %% backup save on cluster before transfer
 % Sometime the automatic data transfer from the cluster does not work.

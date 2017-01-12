@@ -72,9 +72,9 @@ if(evalfun)
     end
     try 
         if(silent)
-            arChi2(false, ar.p(ar.qFit==1), dynamics);
+            arCalcMerit(false, ar.p(ar.qFit==1), dynamics);
         else
-            arChi2;
+            arCalcMerit;
         end
     catch err_id
         if(~silent)

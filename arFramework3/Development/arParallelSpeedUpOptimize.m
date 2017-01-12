@@ -28,7 +28,7 @@ if(~isfield(ar.config, 'threads_timings'))
         arWaitbar(j,n, 'optimizing parallel calculations');
         ar.p = ps(j,:);
         try
-            arChi2(sensis, []);
+            arCalcMerit(sensis, []);
             arSaveTimeConditions(j,0);
         catch err_id
             arSaveTimeConditions(j,-1);

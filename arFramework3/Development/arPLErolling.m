@@ -25,7 +25,7 @@ if(~isfield(ar, 'ple'))
     ar.ple.ndof = 1;
 end
 
-arChi2(true);
+arCalcMerit(true);
 
 chi2Reset = ar.chi2fit;
 pReset = ar.p;
@@ -48,7 +48,7 @@ arWaitbar(-1);
 fprintf('PLE #%i %s elapse time\n', jk, secToHMS(toc));
 
 ar.p = pReset;
-arChi2(false);
+arCalcMerit(false);
 
 
 function [chi2s, ps, errors, lambdas] = ple_task(jk, n, direction, chi2Reset, pReset)
@@ -82,7 +82,7 @@ for j=1:n
    
 %     deltap = 1;
 %     while(norm(deltap)>1e-3)
-        arChi2(true);
+        arCalcMerit(true);
         
         qFit = ar.qFit==1;
         
@@ -163,7 +163,7 @@ ar.p = pReset;
 %    
 % %     deltap = 1;
 % %     while(norm(deltap)>1e-3)
-%         arChi2(true);
+%         arCalcMerit(true);
 %         
 %         qFit = ar.qFit==1;
 %         

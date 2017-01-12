@@ -33,7 +33,7 @@ if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
 
-pleInit(ar.p, ar.qFit==1, ar.lb, ar.ub, ar.qLog10, @arPLEIntegrate, @arPLEMerit, ...
+    pleInit(ar.p, ar.qFit==1, ar.lb, ar.ub, ar.qLog10, @arPLEIntegrate, @arPLEMerit, ...
     @arPLEDiffMerit, @arPLEFit, @arPLESetOptim, ar.pLabel, 1-ar.ppl.alpha_level, force);
 
 global pleGlobals;
@@ -81,7 +81,7 @@ ar.ple_errors = [];
 function arPLEIntegrate(p)
 global ar
 try
-    arChi2(false, p(ar.qFit==1));
+    arCalcMerit(false, p(ar.qFit==1));
 catch exception
     if ( ~isfield( ar, 'ple_errors' ) )
         ar.ple_errors = ar.p;
@@ -168,7 +168,7 @@ function arPLESetOptim(p)
 global ar
 global pleGlobals
 ar.p = p + 0;
-arChi2(false);
+arCalcMerit(false);
 pleGlobals.p = p+0;
 pleGlobals.chi2 = arPLEMerit+0;
 

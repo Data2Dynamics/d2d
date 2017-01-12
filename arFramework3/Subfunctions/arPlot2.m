@@ -57,9 +57,9 @@ if(evalfun)
     end
     try
         if(silent)
-            arChi2(false, [], dynamics);
+            arCalcMerit(false, [], dynamics);
         else
-            arChi2;
+            arCalcMerit;
         end
     catch err_id
         if(~silent)

@@ -34,7 +34,7 @@ else
 end
 qLog10 = ar.ppl.qLog10;
 [nrows, ncols] = arNtoColsAndRows(length(ar.model(m).(data_cond)(c).ppl.ix));
-arChi2
+arCalcMerit
 
 chi2 = ar.chi2fit;
 if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)

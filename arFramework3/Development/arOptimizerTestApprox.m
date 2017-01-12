@@ -14,7 +14,7 @@ global ar
 
 p = ar.p + 0;
 
-arChi2(true,[]);
+arCalcMerit(true,[]);
 
 llh = ar.chi2fit + ar.chi2constr;
 res = [ar.res ar.constr];
@@ -49,7 +49,7 @@ for jm = 1:length(ips)
             chi2s_expect{ips(jm)}(j) = llh_expect; %#ok<AGROW>
             
             ar.p = p + dp;
-            arChi2(true,[]);
+            arCalcMerit(true,[]);
             chi2s{ips(jm)}(j) = ar.chi2fit + ar.chi2constr; %#ok<AGROW>
         catch err_id
             disp(err_id.message)
@@ -60,7 +60,7 @@ end
 arWaitbar(-1);
 
 ar.p = p;
-arChi2(true,[]);
+arCalcMerit(true,[]);
 
 %% plot
 

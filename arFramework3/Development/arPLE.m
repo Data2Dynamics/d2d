@@ -60,4 +60,4 @@ fprintf('(%i errors, %i fit issues, %s elapse time)\n', ...
 
 ar.p = pReset;
 ar.qFit(jk) = qFitReset;
-arChi2(false);
+arCalcMerit(false);

@@ -1,15 +1,15 @@
-%  Calculates the time required for arChi2 for
+%  Calculates the time required for arCalcMerit for
 %     ar.config.useSparseJac=0; 
 %   and
 %     ar.config.useSparseJac=1;
 % 
-%   niter       number of calls of arChi2
+%   niter       number of calls of arCalcMerit
 %   ptrial_opt  0   use always ar.p
 %               1   rand between ar.lb and ar.ub
 %               2   randn around -1 with SD=1.
 %               3   parameters provided as argument ptrial_in
 % 
-%   fun_opt  1   arChi2
+%   fun_opt  1   arCalcMerit
 %            2   arFit
 % 
 %   ptrial_in   each row is a parametre vector used for assemssment if
@@ -17,10 +17,10 @@
 % 
 % Useful Examples:
 % [tnormal,tsparse] = arCompareSparse;
-% [tnormal,tsparse] = arCompareSparse(20,1);     % p drawn with rand, arChi2 
-% [tnormal,tsparse] = arCompareSparse(20,2);     % p drawn with randn, arChi2
+% [tnormal,tsparse] = arCompareSparse(20,1);     % p drawn with rand, arCalcMerit 
+% [tnormal,tsparse] = arCompareSparse(20,2);     % p drawn with randn, arCalcMerit
 % [tnormal,tsparse] = arCompareSparse(20,2,2);   % p drawn with randn, arFit 
-% [t0,t1]=arCompareSparse2(10,3,1,ar.fit.p_hist) % following a path from the previous fit, arChi2
+% [t0,t1]=arCompareSparse2(10,3,1,ar.fit.p_hist) % following a path from the previous fit, arCalcMerit
 
 function [tnormal,tsparse] = arCompareSparse(niter,ptrial_opt,fun_opt,ptrial_in)
 if ~exist('niter','var') || isempty(niter)
@@ -33,7 +33,7 @@ if ~exist('ptrial_in','var') || isempty(ptrial_in)
     ptrial_in = [];
 end
 if ~exist('fun_opt','var') || isempty(fun_opt)
-    fun_opt = 1; % arChi2
+    fun_opt = 1; % arCalcMerit
 end
 
 global ar
@@ -75,7 +75,7 @@ try
         switch fun_opt
             case 1
                 tic
-                arChi2(true,ptrial(i,:))
+                arCalcMerit(true,ptrial(i,:))
             case 2
                 ar.p(ar.qFit==1) = ptrial(i,ar.qFit==1);
                 tic
@@ -89,7 +89,7 @@ try
         switch fun_opt
             case 1
                 tic
-                arChi2(true,ptrial(i,:))
+                arCalcMerit(true,ptrial(i,:))
             case 2
                 ar.p(ar.qFit==1) = ptrial(i,ar.qFit==1);
                 tic

@@ -20,7 +20,7 @@ lb = ar.lb + 0;
 ub = ar.ub + 0;
 
 ar.p = p;
-arChi2(true,[]);
+arCalcMerit(true,[]);
 
 llh = ar.chi2fit + ar.chi2constr;
 res = [ar.res ar.constr];
@@ -93,7 +93,7 @@ arWaitbar(0);
                 ps{jm}(j,:) = dptmp; %#ok<AGROW>
                 
                 ar.p(ar.qFit==1) = p(ar.qFit==1) + dptmp;
-                arChi2(true,[]);
+                arCalcMerit(true,[]);
                 
                 chi2s_expect{jm}(j) = llh_expect; %#ok<AGROW>
                 xs{jm}(j) = norm(dptmp); %#ok<AGROW>
@@ -111,7 +111,7 @@ arWaitbar(0);
 arWaitbar(-1);
 
 ar.p = p;
-arChi2(true,[]);
+arCalcMerit(true,[]);
 
 %% plot
 
@@ -183,7 +183,7 @@ global ar
 pRes = ar.p;
 try
     ar.p(ar.qFit==1) = p;
-    arChi2(true,[]);
+    arCalcMerit(true,[]);
     l = ar.chi2fit;
     ar.p = pRes;
 catch 

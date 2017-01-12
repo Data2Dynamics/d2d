@@ -97,7 +97,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     ar.ppl.dchi2 = chi2inv(1-ar.ppl.options.alpha_level, 1);
     ar.ppl.dchi2;
     dir = ar.ppl.options.dir;
-    arChi2();
+    arCalcMerit();
 
     ar.ppl.chi2_95 = ar.chi2 + ar.chi2err+ar.ppl.dchi2 + 0.5;
 
@@ -197,7 +197,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         ar.qFit(strncmp(ar.pLabel,'sd_',3))=1;
     end
     ar.config.SimuPPL=0;
-    arChi2(); 
+    arCalcMerit(); 
     if(~takeY)
         ar.model(m).qPlotXs(ar.model(m).condition(c).dLink(1))=1;        
     else
@@ -247,7 +247,7 @@ for ts = 1:length(t)
    
     [~,it_first] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp));            
     arLink(true, t_tmp, takeY, jx, c, m, ar.model(m).(data_cond)(c).([x_y 'FineSimu'])(it_first,jx), xstd);
-    arChi2(0,[],1);
+    arCalcMerit(0,[],1);
     [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp));
     if(takeY && length(find(ar.model(m).(data_cond)(c).tExp==t_tmp))>1)
         it = it+1;               
@@ -265,7 +265,7 @@ for ts = 1:length(t)
             chi2start, 1, ar.ppl.qLog10, ar.ppl.options.n_start, xstd, npre, ntot, tcount, takeY);    
         % go down        
         ar.p = pReset;  
-        arChi2();       
+        arCalcMerit();       
     else
         xtrial_up = xSim*1.01;
         xfit_up = xSim*1.01;
@@ -295,7 +295,7 @@ for ts = 1:length(t)
     if(takeY)
         arLink(true,0.,true,jx, c, m,NaN);
     end
-    arChi2();
+    arCalcMerit();
     
     ps_tmp = [flipud(ps_down); pReset; ps_up];
     
@@ -408,7 +408,7 @@ for j = 1:n
     end
     arLink(true,t,takeY,ix, c,m,xExp,xstd);
     xtrial(j) = xExp;    
-    arChi2(0, ar.p(ar.qFit==1),1)
+    arCalcMerit(0, ar.p(ar.qFit==1),1)
     if(takeY)
         xSim = ar.model(m).data(c).yExpSimu(it,ix); 
     else
@@ -466,7 +466,7 @@ end
     function [res, sres] = ppl_merit_fkt(pTrial)
         
         arLink(true,t,takeY,ix, c,m,xExp,xstd);
-        arChi2(ar.config.useSensis, pTrial, 1)
+        arCalcMerit(ar.config.useSensis, pTrial, 1)
         
         res = [ar.res ar.constr];
         %res = ar.res;

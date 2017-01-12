@@ -307,7 +307,7 @@ end
 if(ar.p(ip) > ar.ub(ip))
     ar.p(ip) = ar.ub(ip);
 end
-% arChi2(false)
+% arCalcMerit(false)
 myplot(handles, true, true, true);
 refresh_all_p(handles);
 
@@ -326,7 +326,7 @@ if(~isnan(newval))
     ar.p(ip) = newval;
 end
 set(hObject, 'String', ar.p(ip));
-% arChi2(false)
+% arCalcMerit(false)
 myplot(handles, true, true, true);
 
 % --- Executes during object creation, after setting all properties.
@@ -353,7 +353,7 @@ end
 if(ar.p(ip) > ar.ub(ip))
     ar.p(ip) = ar.ub(ip);
 end
-% arChi2(false)
+% arCalcMerit(false)
 myplot(handles, true, true, true);
 refresh_all_p(handles);
 
@@ -386,6 +386,6 @@ function pushbutton10_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global ar;
 arFitSingle(ar.navi.jp(ar.navi.pindex), true);
-%arChi2(false)
+%arCalcMerit(false)
 myplot(handles, true, true, true);
 refresh_all_p(handles);

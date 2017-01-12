@@ -41,7 +41,7 @@ end
 
 if(doPPL_stuff)
     arLink(true,t_tmp+stepsize,takeY,jx, c, m,tmp_xFit,xstd);    
-    arChi2(ar.config.useSensis, p_chi2,1);
+    arCalcMerit(ar.config.useSensis, p_chi2,1);
     [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp-stepsize));
     if(takeY)
         if(length(find(ar.model(m).(data_cond)(c).tExp==t_tmp+stepsize))>1)
@@ -65,13 +65,13 @@ if(doPPL_stuff)
         xSim2 = ar.model(m).(data_cond)(c).xExpSimu(it,jx);
     end
     arLink(true,t_tmp-1.e-3,takeY,jx, c, m,tmp_xFit,xstd);
-    arChi2(false, p_chi2,1);
+    arCalcMerit(false, p_chi2,1);
     [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp+1.e-3));
     xSim3 = ar.model(m).(data_cond)(c).([x_y 'ExpSimu'])(it,jx);
 
     if(~isnan(RHS_t))
         arLink(true,t_tmp+RHS_t,takeY,jx, c, m,tmp_xFit,xstd);
-        arChi2(false, p_chi2,1);
+        arCalcMerit(false, p_chi2,1);
         [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp-RHS_t));
         ar.ppl.fRHS_ppl = ar.model(m).(data_cond)(c).dxdts(it,jx);
     end
@@ -79,9 +79,9 @@ end
 arLink(true,t_tmp,takeY,jx, c, m,tmp_xFit,xstd);
 
 try
-    arChi2(get_sensi, p_chi2,1)
+    arCalcMerit(get_sensi, p_chi2,1)
 catch
-    fprintf('arChi2 doesnt work, exiting for direction %i!\n',dir);
+    fprintf('arCalcMerit doesnt work, exiting for direction %i!\n',dir);
     arLink(true,ar.model(m).(data_cond)(c).tExp(1),takeY,jx, c, m,NaN);
     ar.p = pReset;
     chi2_out=NaN;
