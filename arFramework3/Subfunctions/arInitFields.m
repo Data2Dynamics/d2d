@@ -32,7 +32,7 @@ function ar = arInitFields(ar)
         {'ssa_min_tau',                 1e-3}, ...                      
         {'ssa_runs',                    1}, ...
         ...                                                             % Fit error handling
-        {'fiterrors',                   1}, ...                         %   Fit error models?
+        {'fiterrors',                   0}, ...                         %   Fit error models?
         {'fiterrors_correction',        1}, ...                         %   Field for storing the Bessel-like error correction
         {'fiterrors_correction_warning',false}, ...                     %   Field for storing whether the user has been warned of the disabled Bessel-like error correction
         {'useFitErrorCorrection',       true}, ...                      %   Use Bessel-like correction when fitting error parameters
