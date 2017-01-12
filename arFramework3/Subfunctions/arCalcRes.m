@@ -45,11 +45,11 @@ for m=1:length(ar.model)
             noSD = isnan(ystd);
             ystd(noSD) = ar.model(m).data(d).ystdExpSimu(noSD); % not available => use error model
 
-            systd = zeros(size(ar.model(m).data(d).systdExpSimu)); % if experimental error available => no parameter dependency
-            
+            systd = zeros(size(ar.model(m).data(d).systdExpSimu)); % if experimental error available => no parameter dependency            
             for ip=1:size(systd,3)
                 tmp = zeros(size(ystd)); 
-                tmp(noSD) = ar.model(m).data(d).systdExpSimu(noSD);  
+                syExpSimu = ar.model(m).data(d).systdExpSimu(:,:,ip);
+                tmp(noSD) = syExpSimu(noSD);  
                 systd(:,:,ip) = tmp;               
             end
             
@@ -97,7 +97,7 @@ for m=1:length(ar.model)
             for ip=1:size(ar.model(m).data(d).sres,3)
                 if ar.model(m).data(d).qLog10(ip) > 0.5
                     ar.model(m).data(d).sres(:,:,ip)    = ar.model(m).data(d).sres(:,:,ip).*ar.model(m).data(d).pNum(ip) * log(10);
-                    if ar.config.fiterrors == 1
+                    if (ar.config.fiterrors == 1)  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 )
                         ar.model(m).data(d).sreserr(:,:,ip) = ar.model(m).data(d).sreserr(:,:,ip).*ar.model(m).data(d).pNum(ip) * log(10);
                     end
                     %             for (ip=0; ip < np; ip++) {

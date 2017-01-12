@@ -91,6 +91,8 @@ if(~isfield(ar, 'fevals'))
 end
 ar.fevals = ar.fevals + 1;
 
+fiterrors = ar.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0);
+
 ar.ndata = 0;
 ar.nprior = 0;
 ar.nrandom = 0;
@@ -146,7 +148,7 @@ for jm = 1:nm
         end
     end
 end
-if( (ar.config.useFitErrorMatrix==0 && ar.ndata>0 && ar.config.fiterrors==1 && ar.config.useFitErrorCorrection) ...
+if( (ar.config.useFitErrorMatrix==0 && ar.ndata>0 && fiterrors && ar.config.useFitErrorCorrection) ...
         || (ar.config.useFitErrorMatrix==1 && ar.ndata>0 && sum(sum(ar.config.fiterrors_matrix==1))>0 && ar.config.useFitErrorCorrection) )
     if(ar.ndata-sum(ar.qError~=1 & ar.qFit==1) < sum(ar.qError~=1 & ar.qFit==1))
         ar.config.fiterrors_correction = 1;
@@ -262,8 +264,8 @@ for jm = 1:nm
                     ar.res(resindex:(resindex+length(tmpres(:))-1)) = tmpres;
                     resindex = resindex+length(tmpres(:));
                     
-                    if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1) || ...
-                            (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
+                    if (ar.config.useFitErrorMatrix == 0 && fiterrors) || ...
+                            ((ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1)) 
                         ar.chi2err = ar.chi2err + sum(ar.model(jm).data(jd).chi2err(ar.model(jm).data(jd).qFit==1));
                         tmpreserr = ar.model(jm).data(jd).reserr(:,ar.model(jm).data(jd).qFit==1);
                         ar.res(resindex:(resindex+length(tmpreserr(:))-1)) = tmpreserr;
@@ -279,7 +281,7 @@ for jm = 1:nm
                         ar.sres(sresindex:(sresindex+length(tmpres(:))-1),:) = tmpsres;
                         sresindex = sresindex+length(tmpres(:));
                         
-                        if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1) || ...
+                        if( (ar.config.useFitErrorMatrix == 0 && fiterrors)    || ...
                                 (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
                             tmpsreserr = zeros(length(tmpreserr(:)), np);
                             tmpsreserr(:,ar.model(jm).data(jd).pLink) = reshape(ar.model(jm).data(jd).sreserr(:,ar.model(jm).data(jd).qFit==1,:), ...
@@ -631,7 +633,7 @@ if(isfield(ar.model, 'data'))
     end
 end
 
-if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1) || ...
+if( (ar.config.useFitErrorMatrix == 0 && fiterrors) || ...
         (ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0) )
     ar.chi2fit = ar.chi2 + ar.chi2err;
 else
@@ -671,7 +673,7 @@ end
 
 if(~silent)
     if(ar.ndata>0)
-        if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1)
+        if(ar.config.useFitErrorMatrix==0 && fiterrors)
             arFprintf(1, '-2*log(L) = %g, %i data points, ', ...
                 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
         elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
