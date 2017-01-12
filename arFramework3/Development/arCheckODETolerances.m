@@ -32,10 +32,10 @@ end
 sres = NaN(size(ar.sres,1),size(ar.sres,2),length(dtol));
 res  = NaN(length(ar.res),length(dtol));
 chi2  = NaN(1,length(dtol));
-pleMerrit  = NaN(1,length(dtol));
+pleMerit  = NaN(1,length(dtol));
 for i=1:length(dtol)
     ar.config.atol = atolIn*dtol(i);
-    ar.config.rtol = rtolIn*dtol(i);
+        ar.config.rtol = rtolIn*dtol(i);
 
     fprintf('atol=%.3e, rtol=%.3e\n',ar.config.atol,ar.config.rtol);
     try
