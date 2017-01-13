@@ -74,9 +74,16 @@ meritvals.fiterrors_correction = ar.config.fiterrors_correction;
 
 
 if ar.config.fiterrors == -1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)==0) % if no error parameters fitted
-    meritval = meritvals.chi2_res;
+    meritval = meritvals.chi2_all;
+    if(~silent)
+        arFprintf(1, 'total chi^2 = %g, ', meritvals.chi2_all);
+    end
 else
     meritval = meritvals.loglik;
+    if(~silent)
+        arFprintf(1, '-2*log(L) = %g, %i data points, ', ...
+            meritvals.loglik, meritvals.ndata);
+    end
 end
 
 if nargout>0
@@ -88,17 +95,14 @@ if nargout>1
 end
 
 if(~silent)
-    arFprintf(1, '-2*log(L) = %g, %i data points, ', ...
-        meritvals.loglik, meritvals.ndata);
-    arFprintf(1, '%i free parameters,  ', sum(ar.qFit==1));
-    arFprintf(1, 'total chi^2 = %g, ', meritvals.chi2_all);
-    arFprintf(1, 'data chi^2 = %g', meritvals.chi2_res);
+    arFprintf(1, '%i free parameters, ', sum(ar.qFit==1));
     if(ar.chi2constr ~=0)
         arFprintf(1, ', %g violation of %i constraints', ar.chi2constr, ar.nconstr);
     end
     if(ar.chi2prior ~=0)
         arFprintf(1, ', %g violation of %i prior assumptions', ar.chi2prior, ar.nprior);
     end
+    arFprintf(1, 'data chi^2 = %g', meritvals.chi2_res);
 %     if(sensi)
 %         arFprintf(1, ', first order optimality criterion %g (%i)', ar.firstorderopt, -sum(qred));
 %     end
