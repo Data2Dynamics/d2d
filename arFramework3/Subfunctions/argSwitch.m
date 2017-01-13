@@ -60,7 +60,7 @@ function [opts, outargin] = argSwitch( switches, extraArgs, description, verbose
         for a = 1 : length( switches )
             if ( extraArgs(a) == 0 )
                 if ( ~isempty( description{a}{2-(opts.(lower(switches{a}))>0)} ) )
-                    fprintf( '%s\n', description{a}{2-(opts.(lower(switches{a}))>0)} );
+                    fprintf( '%s\n', description{a}{1+(opts.(lower(switches{a}))>0)} );
                 end
             else
                 if ( ~isempty( description{a}{1+(opts.(lower(switches{a}))>0)} ) )

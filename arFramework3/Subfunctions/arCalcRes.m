@@ -28,85 +28,86 @@ global ar
 fiterrors_correction_factor = ar.config.fiterrors_correction;
 
 for m=1:length(ar.model)
-    for d=1:length(ar.model(m).data)
+    if ( isfield( ar.model(m), 'data' ) )
+        for d=1:length(ar.model(m).data)
 
-        %% this is THE point in D2D where ar.config.fiterrors enters:
-        % ar.config.fiterrors == 0: use exp. errors where available and error
-        % model otherwise.
-        % Fitting of error parameters is exclusively controlled by ar.qFit 
-        if ar.config.fiterrors==0
-            ystd = ar.model(m).data(d).yExpStd;
-            
-            noSD = isnan(ystd);
-            ystd(noSD) = ar.model(m).data(d).ystdExpSimu(noSD); % not available => use error model
+           %% this is THE point in D2D where ar.config.fiterrors enters:
+            % ar.config.fiterrors == 0: use exp. errors where available and error
+            % model otherwise.
+            % Fitting of error parameters is exclusively controlled by ar.qFit 
+            if ar.config.fiterrors==0
+                ystd = ar.model(m).data(d).yExpStd;
 
-            systd = zeros(size(ar.model(m).data(d).systdExpSimu)); % if experimental error available => no parameter dependency            
-            for ip=1:size(systd,3)
-                tmp = zeros(size(ystd)); 
-                syExpSimu = ar.model(m).data(d).systdExpSimu(:,:,ip);
-                tmp(noSD) = syExpSimu(noSD);  
-                systd(:,:,ip) = tmp;               
+                noSD = isnan(ystd);
+                ystd(noSD) = ar.model(m).data(d).ystdExpSimu(noSD); % not available => use error model
+
+                systd = zeros(size(ar.model(m).data(d).systdExpSimu)); % if experimental error available => no parameter dependency            
+                for ip=1:size(systd,3)
+                    tmp = zeros(size(ystd)); 
+                    syExpSimu = ar.model(m).data(d).systdExpSimu(:,:,ip);
+                    tmp(noSD) = syExpSimu(noSD);  
+                    systd(:,:,ip) = tmp;               
+                end
+
+            % ar.config.fiterrors==-1: only use exp. errors
+            elseif ar.config.fiterrors == -1  % ensure that only experimental errors are used
+                ystd = ar.model(m).data(d).yExpStd;
+                systd = zeros(size(ar.model(m).data(d).systdExpSimu));
+
+
+            % ar.config.fiterrors == 1: only use exp. error model (and omit exp.
+            % errors)
+            elseif ar.config.fiterrors == 1 % only error model is used
+                ystd = ar.model(m).data(d).ystdExpSimu;
+                systd = ar.model(m).data(d).systdExpSimu;               
+
+            else
+                error('ar.config.fiterrors = %f is not yet implemented',ar.config.fiterrors);
             end
-            
-        % ar.config.fiterrors==-1: only use exp. errors
-        elseif ar.config.fiterrors == -1  % ensure that only experimental errors are used
-            ystd = ar.model(m).data(d).yExpStd;
-            systd = zeros(size(ar.model(m).data(d).systdExpSimu));
-            
-        
-        % ar.config.fiterrors == 1: only use exp. error model (and omit exp.
-        % errors)
-        elseif ar.config.fiterrors == 1 % only error model is used
-            ystd = ar.model(m).data(d).ystdExpSimu;
-            systd = ar.model(m).data(d).systdExpSimu;               
-        
-        else
-            error('ar.config.fiterrors = %f is not yet implemented',ar.config.fiterrors);
-        end
-        
-        
-        [ar.model(m).data(d).res, ar.model(m).data(d).chi2]         = fres(ar.model(m).data(d).yExp, ar.model(m).data(d).yExpSimu, ystd, fiterrors_correction_factor);
-        
-        if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 ) % error residuals are only !=0 if errors are fitted:
-            [ar.model(m).data(d).reserr, ar.model(m).data(d).chi2err]   = fres_error(ystd, ar.config.add_c);
-        else
-            ar.model(m).data(d).reserr = zeros(size(ar.model(m).data(d).res));
-            ar.model(m).data(d).chi2err = zeros(size(ar.model(m).data(d).chi2));
-        end
 
-        if (sensi == 1) && ar.model(m).data(d).has_yExp 
-            ar.model(m).data(d).sres = fsres(ar.model(m).data(d).syExpSimu, ar.model(m).data(d).yExp, ystd, fiterrors_correction_factor);
-            if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 )
-                [ar.model(m).data(d).sres, ar.model(m).data(d).sreserr] = fsres_error(ar.model(m).data(d).yExp, ar.model(m).data(d).res, ar.model(m).data(d).reserr, ar.model(m).data(d).sres, ystd, systd);
+
+            [ar.model(m).data(d).res, ar.model(m).data(d).chi2]         = fres(ar.model(m).data(d).yExp, ar.model(m).data(d).yExpSimu, ystd, fiterrors_correction_factor);
+
+            if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 ) % error residuals are only !=0 if errors are fitted:
+                [ar.model(m).data(d).reserr, ar.model(m).data(d).chi2err]   = fres_error(ystd, ar.config.add_c);
+            else
+                ar.model(m).data(d).reserr = zeros(size(ar.model(m).data(d).res));
+                ar.model(m).data(d).chi2err = zeros(size(ar.model(m).data(d).chi2));
             end
-        else
-            ar.model(m).data(d).sres(:) = NaN;
-            ar.model(m).data(d).sreserr(:) = NaN;
-        end
-        
 
-        
-        %         /* log trafo of parameters */
-        
-        if sensi && ar.model(m).data(d).has_yExp
-            for ip=1:size(ar.model(m).data(d).sres,3)
-                if ar.model(m).data(d).qLog10(ip) > 0.5
-                    ar.model(m).data(d).sres(:,:,ip)    = ar.model(m).data(d).sres(:,:,ip).*ar.model(m).data(d).pNum(ip) * log(10);
-                    if (ar.config.fiterrors == 1)  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 )
-                        ar.model(m).data(d).sreserr(:,:,ip) = ar.model(m).data(d).sreserr(:,:,ip).*ar.model(m).data(d).pNum(ip) * log(10);
+            if (sensi == 1) && ar.model(m).data(d).has_yExp 
+                ar.model(m).data(d).sres = fsres(ar.model(m).data(d).syExpSimu, ar.model(m).data(d).yExp, ystd, fiterrors_correction_factor);
+                if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 )
+                    [ar.model(m).data(d).sres, ar.model(m).data(d).sreserr] = fsres_error(ar.model(m).data(d).yExp, ar.model(m).data(d).res, ar.model(m).data(d).reserr, ar.model(m).data(d).sres, ystd, systd);
+                end
+            else
+                ar.model(m).data(d).sres(:) = NaN;
+                ar.model(m).data(d).sreserr(:) = NaN;
+            end
+
+
+
+            %         /* log trafo of parameters */
+
+            if sensi && ar.model(m).data(d).has_yExp
+                for ip=1:size(ar.model(m).data(d).sres,3)
+                    if ar.model(m).data(d).qLog10(ip) > 0.5
+                        ar.model(m).data(d).sres(:,:,ip)    = ar.model(m).data(d).sres(:,:,ip).*ar.model(m).data(d).pNum(ip) * log(10);
+                        if (ar.config.fiterrors == 1)  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 )
+                            ar.model(m).data(d).sreserr(:,:,ip) = ar.model(m).data(d).sreserr(:,:,ip).*ar.model(m).data(d).pNum(ip) * log(10);
+                        end
+                        %             for (ip=0; ip < np; ip++) {
+                        %                 if (qlogp[ip] > 0.5) {
+                        %                      for (iy=0; iy<ny; iy++) {
+                        %                          sres[it + (iy*nt) + (ip*nt*ny)] *= p[ip] * log(10.0);
+                        %                          if( (useFitErrorMatrix == 0 && fiterrors == 1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == 1) ) {
+                        %                              sreserr[it + (iy*nt) + (ip*nt*ny)] *= p[ip] * log(10.0);
+                        %                          }
+                        %                      }
                     end
-                    %             for (ip=0; ip < np; ip++) {
-                    %                 if (qlogp[ip] > 0.5) {
-                    %                      for (iy=0; iy<ny; iy++) {
-                    %                          sres[it + (iy*nt) + (ip*nt*ny)] *= p[ip] * log(10.0);
-                    %                          if( (useFitErrorMatrix == 0 && fiterrors == 1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == 1) ) {
-                    %                              sreserr[it + (iy*nt) + (ip*nt*ny)] *= p[ip] * log(10.0);
-                    %                          }
-                    %                      }
                 end
             end
         end
-        
     end
 end
 

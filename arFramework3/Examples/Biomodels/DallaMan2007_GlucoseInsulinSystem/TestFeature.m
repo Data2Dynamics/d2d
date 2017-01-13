@@ -2,7 +2,7 @@ fprintf( 'INTEGRATION TEST FOR SBML IMPORT (Dalla Man 2007)\n' );
 
 fprintf( 2, 'Convert model from SBML... ' );
 arInit;
-arImportSBML('BIOMD0000000379',100);
+arImportSBML('BIOMD0000000379', 'tend', 100);
 fprintf( 'PASSED\n' );
 
 fprintf( 2, 'Compiling model from SBML... ' );
