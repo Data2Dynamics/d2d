@@ -36,6 +36,7 @@
 %     range              Specify range of values to use for independent
 %                        variable
 %     varanalysis        Show variance analysis
+%     appendcolumn       Add a column with a value to the data
 %
 % To do: Offsets
 
@@ -48,7 +49,7 @@ function out = scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale' };
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn' };
     extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
@@ -65,6 +66,7 @@ function out = scaleIt( names, outFile, varargin )
     {'', 'Variance analysis requested'} ...
     {'', 'Not fitting scales'} ...
     {'', 'Prescaler specified'} ...
+    {'', 'Appending a column'} ...
     };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
@@ -261,6 +263,12 @@ function out = scaleIt( names, outFile, varargin )
         out.(expVar) = oldExpVar;
     else
         [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPars, out, expVar, timeVars, inputMask, obsGroups, restrictobs, trafo, invTrafo, opts.rescale, opts.prescale_args );
+    end
+    
+    % Append a column?
+    if ( opts.appendcolumn )
+        out.(opts.appendcolumn_args{1}) = out.(expVar);
+        out.(opts.appendcolumn_args{1})(:) = {opts.appendcolumn_args{2}};
     end
        
     % Find unique conditions (unrelated to time this time)
