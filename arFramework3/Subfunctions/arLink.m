@@ -74,6 +74,24 @@ for m=1:length(ar.model)
         
         % collect time points
         for d=1:length(ar.model(m).data)
+            % Initialize data fields needed in arCalcRes if they don't
+            % exist
+            if(~isfield(ar.model(m).data(d), 'yExp'))
+                ar.model(m).data(d).yExp = [];
+            end
+            if(~isfield(ar.model(m).data(d), 'yExpSimu'))
+                ar.model(m).data(d).yExpSimu = [];
+            end             
+            if(~isfield(ar.model(m).data(d), 'yExpStd'))
+                ar.model(m).data(d).yExpStd = [];
+            end
+            if(~isfield(ar.model(m).data(d), 'systdExpSimu'))
+                ar.model(m).data(d).systdExpSimu = [];
+            end
+            if(~isfield(ar.model(m).data(d), 'ystdExpSimu'))
+                ar.model(m).data(d).ystdExpSimu = [];
+            end
+            
             if(isfield(ar.model(m).data(d), 'tExp'))
                 %delete data point
                 if(dataAdd && d==id && m==im && isfield(ar.model(m).data(d),'ppl'))
