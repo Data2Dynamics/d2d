@@ -1,5 +1,5 @@
 %% Create *.def
-arImportSBML('BIOMD0000000379',100)
+arImportSBML('BIOMD0000000379', 'Tend', 100)
 
 %% Load models & data
 arInit;

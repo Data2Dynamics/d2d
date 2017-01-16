@@ -168,6 +168,7 @@ end
 %  
 %  /* least squares for error model fitting */
 function [reserr,chi2err] = fres_error(ystd, add_c)
+
     reserr = 2.0*log(ystd) + add_c;    
     reserr(isnan(ystd)) = 0;
     

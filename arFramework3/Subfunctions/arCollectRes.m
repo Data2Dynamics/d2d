@@ -90,6 +90,9 @@ useMSextension = false;
 resindex = 1;
 sresindex = 1;
 
+% fit errors?
+fiterrors = ( ar.config.fiterrors == 1  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 ) );
+
 % data
 for jm = 1:nm
     if(isfield(ar.model(jm), 'data'))
@@ -107,7 +110,7 @@ for jm = 1:nm
                     ar.res_type(resindex:(resindex+length(tmpres(:))-1)) = 1;
                     resindex = resindex+length(tmpres(:));
                     
-                    if( ar.config.fiterrors == 1  || (ar.config.fiterrors == 1) )
+                    if( fiterrors )
                         ar.chi2err = ar.chi2err + sum(ar.model(jm).data(jd).chi2err(ar.model(jm).data(jd).qFit==1));
                         tmpreserr = ar.model(jm).data(jd).reserr(:,ar.model(jm).data(jd).qFit==1);
                         ar.res(resindex:(resindex+length(tmpreserr(:))-1)) = tmpreserr;
@@ -124,8 +127,7 @@ for jm = 1:nm
                         ar.sres(sresindex:(sresindex+length(tmpres(:))-1),:) = tmpsres;
                         sresindex = sresindex+length(tmpres(:));
                         
-                        if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1) || ...
-                                (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
+                        if ( fiterrors )
                             tmpsreserr = zeros(length(tmpreserr(:)), np);
                             tmpsreserr(:,ar.model(jm).data(jd).pLink) = reshape(ar.model(jm).data(jd).sreserr(:,ar.model(jm).data(jd).qFit==1,:), ...
                                 length(tmpreserr(:)), sum(ar.model(jm).data(jd).pLink));
