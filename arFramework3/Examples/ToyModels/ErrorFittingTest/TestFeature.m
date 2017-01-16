@@ -1,6 +1,6 @@
 fprintf( 'INTEGRATION TEST FOR ERROR PARAMETER ESTIMATION\n' );
 
-fprintf( 2, 'LINEAR ERRORS' );
+fprintf( 2, 'LINEAR ERRORS... ' );
 arInit;
 arLoadModel('dummy');
 arLoadData('nonlog', 1, 'csv');
@@ -18,7 +18,7 @@ else
     fprintf( 'PASSED\n' );
 end
 
-fprintf( 2, 'LOGARITHMIC ERRORS' );
+fprintf( 2, 'LOGARITHMIC ERRORS... ' );
 arInit;
 arLoadModel('dummy');
 arLoadData('log', 1, 'csv');
@@ -36,7 +36,7 @@ else
     fprintf( 'PASSED\n' );
 end
 
-fprintf( 2, 'TWO-COMPONENT ERROR MODEL' );
+fprintf( 2, 'TWO-COMPONENT ERROR MODEL... ' );
 arInit;
 arLoadModel('dummy');
 arLoadData('nonlog_linear', 1, 'csv');

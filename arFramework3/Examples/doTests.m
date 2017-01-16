@@ -14,6 +14,7 @@ function doTests( varargin )
     
     arOutputLevel = 0;
     arStrict      = 1;
+    warning off;
 
     fprintf(2, 'This collection of tests checks whether specific functions\n');
     fprintf(2, 'in the D2D functions are working correctly. Please run this\n');
@@ -23,7 +24,7 @@ function doTests( varargin )
     tests = {   'Advanced_Events', 'Volume_Estimation', 'Splines', ...
                 'Stoichiometry', 'DallaMan2007_GlucoseInsulinSystem', 'Step_Estimation', 'ErrorFittingTest' };
     
-    dependencies = { {}, {}, {}, {}, {'TranslateSBML'}, {} };
+    dependencies = { {}, {}, {}, {}, {'TranslateSBML'}, {}, {} };
     
     if ( nargin > 0 )
         activeTests = argSwitch( tests, varargin{:} );
@@ -71,6 +72,7 @@ function doTests( varargin )
     fprintf('\n\n----------------\nTesting complete! %d test%s passed, %d test%s failed, %d test%s skipped due to missing dependencies.\n', successes, pluralize(successes), failures, pluralize(failures), skipped, pluralize(skipped) );
     arOutputLevel = 1;
     arStrict = 0;
+    warning on;
 end
 
 function r = pluralize(value)
