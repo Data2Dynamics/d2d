@@ -1,0 +1,19 @@
+DESCRIPTION
+"Error model test"
+
+PREDICTOR
+t               T   min     time	0	11
+
+COMPARTMENTS
+
+STATES
+mean                 C   au      conc.  nuc
+
+INPUTS
+
+REACTIONS
+
+DERIVED
+
+        
+CONDITIONS

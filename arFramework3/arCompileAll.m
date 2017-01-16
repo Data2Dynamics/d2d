@@ -981,7 +981,11 @@ data.sym.p = sym(data.p);
 data.sym.fp = sym(data.fp);
 data.sym.fy = mySym(data.fy, specialFunc);
 data.sym.fy = arSubs(data.sym.fy, data.sym.p, data.sym.fp, matlab_version);
-data.sym.fystd = sym(data.fystd);
+try
+    data.sym.fystd = sym(data.fystd);
+catch
+    error( 'Invalid expression in error model\n%s', [sprintf('%s', data.fystd{:} )] );
+end
 data.sym.fystd = arSubs(data.sym.fystd, data.sym.p, data.sym.fp, matlab_version);
 
 data.sym.fu = mySym(data.fu, specialFunc);

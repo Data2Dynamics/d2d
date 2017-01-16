@@ -319,6 +319,9 @@ end
 C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS'))
     qyindex = ismember(ar.model(m).data(d).y, C{1});
+    if ( qyindex == 0 )
+        error( 'Specified error model for non existent observable %s', C{1}{1} );
+    end
     y_var_name = setdiff(symvar(ar.model(m).data(d).fy{qyindex}),ar.model(m).data(d).py);
     reg_string = ['((?<=\W)|^)(',C{1}{1},'|'];
     for jreg = 1:length(y_var_name)

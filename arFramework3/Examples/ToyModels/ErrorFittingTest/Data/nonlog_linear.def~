@@ -1,0 +1,15 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	0 
+
+INPUTS
+
+OBSERVABLES
+obs 	C   au	conc.	0  0	"mean"
+
+ERRORS    
+sAA	"sd_est_abs + sd_est_rel * "
+        
+CONDITIONS
+

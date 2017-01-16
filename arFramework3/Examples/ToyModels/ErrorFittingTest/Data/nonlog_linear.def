@@ -1,0 +1,15 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	0 
+
+INPUTS
+
+OBSERVABLES
+obs 	C   au	conc.	0  0	"mean"
+
+ERRORS    
+obs	"sqrt( sd_est_abs^2 + sd_est_rel^2 * t^2 )"
+        
+CONDITIONS
+

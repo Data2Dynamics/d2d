@@ -21,7 +21,7 @@ function doTests( varargin )
     fprintf(2, 'to reduce the risk of pushing code that breaks existing\nfunctionality.\n\n' );
 
     tests = {   'Advanced_Events', 'Volume_Estimation', 'Splines', ...
-                'Stoichiometry', 'DallaMan2007_GlucoseInsulinSystem', 'Step_Estimation' };
+                'Stoichiometry', 'DallaMan2007_GlucoseInsulinSystem', 'Step_Estimation', 'ErrorFittingTest' };
     
     dependencies = { {}, {}, {}, {}, {'TranslateSBML'}, {} };
     

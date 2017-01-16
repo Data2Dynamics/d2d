@@ -1,0 +1,15 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	0 
+
+INPUTS
+
+OBSERVABLES
+obs 	C   au	conc.	0 1	"mean"
+
+ERRORS    
+obs	"sd_est"
+        
+CONDITIONS
+
