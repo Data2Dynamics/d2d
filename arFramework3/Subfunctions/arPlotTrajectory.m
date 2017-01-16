@@ -35,7 +35,7 @@ if(~isempty(y_ssa) && ploterrors==1 &&  sum(~isnan(y_ssa))>0)
         for jssa = 1:size(y_ssa_lb, 3)
             tmpx = [t(:); flipud(t(:))];
             tmpy = [y_ssa_ub(:,jy,jssa); flipud(y_ssa_ub(:,jy,jssa))];
-            patch(tmpx, tmpy, tmpx*0-2*eps, 'FaceColor', Clines{2}, 'EdgeColor', 'none', 'FaceAlpha', 0.2)
+            patch(tmpx, tmpy, tmpx*0-2*eps, 'FaceColor', Clines{2}, 'EdgeColor', 'none', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2)
         end
     end
     for jssa = 1:size(y_ssa, 3)
@@ -65,7 +65,7 @@ if(isempty(hy))
         else
             hyss = patch([t_ppl(:,jy) ; flipud(t_ppl(:,jy))], [y_ppl_lb(:,jy); flipud(y_ppl_ub(:,jy))], ones(size([y_ppl_lb(:,jy); y_ppl_ub(:,jy)])));             
         end
-       set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2,'LineStyle','none','Marker','*');
+       set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2,'LineStyle','none','Marker','*');
     end
     if(ploterrors ~= 1)
         set(hy, 'LineWidth', 1.5);
@@ -121,7 +121,7 @@ if(ploterrors ~= 1)
             else
                 hystd = patch(tmpx, tmpy, -2*ones(size(tmpx)), ones(size(tmpy)));               
             end
-            set(hystd, 'FaceColor', Clines{2}, 'EdgeColor', 'none', 'FaceAlpha', 0.2);
+            set(hystd, 'FaceColor', Clines{2}, 'EdgeColor', 'none', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2);
         else
             set(hystd(jy), 'YData', tmpy);
             fastPlot = true;
