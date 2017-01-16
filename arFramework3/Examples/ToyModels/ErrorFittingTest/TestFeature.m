@@ -52,12 +52,10 @@ sd_rel = arGetPars('sd_est_rel',0);
 % These bounds are quite ad-hoc (only to detect big failures, not statistical tweaks)
 if ( (sd_abs > 70) || (sd_abs < 30) )
     error( 'ERROR NOT WITHIN TOLERANCE' );
-else
-    fprintf( 'PASSED\n' );
 end
 
 if ( (sd_rel > 0.18) || (sd_rel < 0.04) )
     error( 'ERROR NOT WITHIN TOLERANCE' );
-else
-    fprintf( 'PASSED\n' );
 end
+
+fprintf( 'PASSED\n' );
