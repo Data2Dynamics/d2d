@@ -91,7 +91,6 @@ int    fiterrors;
 int    cvodes_maxsteps;
 double cvodes_maxstepsize;
 int    cvodes_atolV;
-int    cvodes_atolV_Sens;
 double cvodes_rtol;
 double cvodes_atol;
 double fiterrors_correction;
@@ -206,7 +205,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     setSparse = (int) mxGetScalar(mxGetField(arconfig, 0, "useSparseJac"));
     sensirhs = (int) mxGetScalar(mxGetField(arconfig, 0, "useSensiRHS"));
     cvodes_atolV = (int) mxGetScalar(mxGetField(arconfig, 0, "atolV"));
-    cvodes_atolV_Sens = (int) mxGetScalar(mxGetField(arconfig, 0, "atolV_Sens"));
     cvodes_rtol = mxGetScalar(mxGetField(arconfig, 0, "rtol"));
     cvodes_atol = mxGetScalar(mxGetField(arconfig, 0, "atol"));
     cvodes_maxsteps = (int) mxGetScalar(mxGetField(arconfig, 0, "maxsteps"));
@@ -345,11 +343,11 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     mxArray *dLink;
     double *dLinkints;      
     
-    int nm, nc, id, nd, has_tExp, has_yExp;
+    int nm, nc, id, nd, has_tExp;
     int flag;
     int is, js, ks, ids;
     int nout, nyout;
-    int nu, nv, ny, nnz;
+    int nu, nv, nnz;
     
     /* Which condition to simulate */
     int isim;
@@ -396,15 +394,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     double *returndxdt;
     double *returnddxdtdp;
     double *equilibrated;
-
-    double *y;
-    double *yExp;
-    double *yStd;
-    double *y_scale;
-    double *y_scale_S;
     double *y_max_scale;
-    double *y_max_scale_S;
-
+    
     struct timeval t2;
     struct timeval t3;
     struct timeval t4;
@@ -489,7 +480,6 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 returnv = mxGetData(mxGetField(arcondition, ic, "vFineSimu"));
                 returnx = mxGetData(mxGetField(arcondition, ic, "xFineSimu"));
                 y_max_scale = mxGetData(mxGetField(arcondition, ic, "y_atol"));
-                y_max_scale_S = mxGetData(mxGetField(arcondition, ic, "y_atolS"));
                 if (sensi == 1) {
                     returnsu = mxGetData(mxGetField(arcondition, ic, "suFineSimu"));
                     returnsv = mxGetData(mxGetField(arcondition, ic, "svFineSimu"));
@@ -505,63 +495,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 returnx = mxGetData(mxGetField(arcondition, ic, "xExpSimu"));
                 
                 y_max_scale = mxGetData(mxGetField(arcondition, ic, "y_atol"));
-                y_max_scale_S = mxGetData(mxGetField(arcondition, ic, "y_atolS"));
                 
-                /* Scaling part, take Residuals and y_scale from last iter */
-                if(ardata!=NULL && (cvodes_atolV ==1 || cvodes_atolV_Sens==1) && neq>0){
-                    dLink = mxGetField(arcondition, ic, "dLink");
-                    dLinkints = mxGetData(dLink);
-                    nd = (int) mxGetNumberOfElements(dLink);
-                    /* loop over data */
-                    for(ids=0; ids<nd; ++ids){
-                        id = ((int) dLinkints[ids]) - 1;
-                        has_yExp = (int) mxGetScalar(mxGetField(ardata, id, "has_yExp"));
-                        if(has_yExp == 1) {
-                            y = mxGetData(mxGetField(ardata, id, "yExpSimu"));
-                            ny = (int) mxGetNumberOfElements(mxGetField(ardata, id, "y"));
-                            yExp = mxGetData(mxGetField(ardata, id, "yExp"));
-                            yStd = mxGetData(mxGetField(ardata, id, "ystdExpSimu"));
-                            nyout = (int) mxGetNumberOfElements(mxGetField(ardata, id, "tExp"));
-
-/*                             if( (useFitErrorMatrix == 0 && fiterrors == -1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == -1) ) {*/
-                            if (fiterrors == -1) {
-                                yStd = mxGetData(mxGetField(ardata, id, "yExpStd"));
-                            }
-                            else if (fiterrors == 0) {
-                                /* To Do: Calculation of y_scale has to conincide with handling config.fiterrors in arCalcRes */
-                            }
-
-                            y_scale = mxGetData(mxGetField(ardata, id, "y_scale"));
-                            y_scale_S = mxGetData(mxGetField(ardata, id, "y_scale_S"));
-
-                            for(is=0; is<neq; is++){
-                                for(js=0; js<nyout; js++){
-                                    for(ks=0; ks<ny; ks++){
-			   
-                                        if(!mxIsNaN(yExp[js + (ks*nyout)]) && !mxIsNaN(y[js + (ks*nyout)]) && !mxIsNaN(yStd[js + (ks*nyout)]) && yStd[js + (ks*nyout)]>0.) {
-/*                                             if(useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] != 1) {
-                                                 y_scale_S[js+ks*nyout+is*nyout*ny] = y_scale[js+ks*nyout+is*nyout*ny] * 2* fabs(yExp[js + (ks*nyout)] - y[js + (ks*nyout)]) / pow(yStd[js + (ks*nyout)],2);
-                                             } else {
-*/
-                                                y_scale_S[js+ks*nyout+is*nyout*ny] = y_scale[js+ks*nyout+is*nyout*ny] * 2* fabs(yExp[js + (ks*nyout)] - y[js + (ks*nyout)]) / pow(yStd[js + (ks*nyout)],2) * sqrt(fiterrors_correction);
-/*                                             }*/
-                                        }
-
-                                        if(fabs(y_scale[js+ks*nyout+is*nyout*ny])>y_max_scale[is] && !mxIsNaN(y_scale[js+ks*nyout+is*nyout*ny]))
-                                            y_max_scale[is] = fabs(y_scale[js+ks*nyout+is*nyout*ny]);
-              
-                                        if(fabs(y_scale_S[js+ks*nyout+is*nyout*ny])>y_max_scale_S[is] && !mxIsNaN(y_scale_S[js+ks*nyout+is*nyout*ny]))
-                                            y_max_scale_S[is] = fabs(y_scale_S[js+ks*nyout+is*nyout*ny]);
-                                            /*printf("y_scale old = %f and scale for neq %i, t %i, y %i, thus %i is = %f \n", y_max_scale[is], is, js, ks, js+ks*nout+is*nout*ny, y_scale[js+ks*nout+is*nout*ny]); */
-			  
-                                    }
-                                }
-                            }
-		    
-                        }
-		  
-                    }
-                }
                 if (sensi == 1) {
                     returnsu = mxGetData(mxGetField(arcondition, ic, "suExpSimu"));
                     returnsv = mxGetData(mxGetField(arcondition, ic, "svExpSimu"));
@@ -725,21 +659,21 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     /* Set error weights */
                     for (is=0; is<np; is++) Ith(atols_ss, is+1) = cvodes_atol;
                     
-                    if(cvodes_atolV_Sens==1)
+                    if(cvodes_atolV==1)
                     { 
                         for(js=0; js < np; js++) 
                         {
                             atolV_tmp = NV_DATA_S(atolV_ss[js]);
                             for(ks=0; ks < neq; ks++)
                             {
-                                if(y_max_scale_S[ks]==0. || cvodes_atol/y_max_scale_S[ks]>1) {
+                                if(y_max_scale[ks]==0. || cvodes_atol/y_max_scale[ks]>1) {
                                     atolV_tmp[ks] = 1;
-                                } else if (cvodes_atol/y_max_scale_S[ks]<1e-8) {   
+                                } else if (cvodes_atol/y_max_scale[ks]<1e-8) {   
                                     /* && Ith(atolV, ks+1)==1.e-8){*/
                                     /*printf("atolVS for neq=%i is %d \n", ks+1, atolV_tmp[ks]);*/
                                     atolV_tmp[ks] = 1e-8;			  
-                                }else if(cvodes_atol/y_max_scale_S[ks]>1e-8 && cvodes_atol/y_max_scale_S[ks]<1) {
-                                    atolV_tmp[ks] = cvodes_atol/y_max_scale_S[ks];
+                                }else if(cvodes_atol/y_max_scale[ks]>1e-8 && cvodes_atol/y_max_scale[ks]<1) {
+                                    atolV_tmp[ks] = cvodes_atol/y_max_scale[ks];
                                     /*if(atolV_tmp[ks] < Ith(atolV, ks+1)){
                                          atolV_tmp[ks] = Ith(atolV, ks+1);
                                     }*/
