@@ -64,6 +64,9 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
             ar.model(m).(data_cond)(c).ppl.t(:,ix(jx)) = nan;
             ar.model(m).(data_cond)(c).ppl.x_low(:,ix(jx)) = nan;
             ar.model(m).(data_cond)(c).ppl.x_low_vpl(:,ix(jx)) = nan;
+            if(size(ar.model(m).(data_cond)(c).([x_y 'FineSimu']),2) < ix(jx))
+                error('The state you want to calculate does not exist!')
+            end
             ar.model(m).(data_cond)(c).ppl.x_orig(:,ix(jx)) = ar.model(m).(data_cond)(c).([x_y 'FineSimu'])(:,ix(jx));
             ar.model(m).(data_cond)(c).ppl.x_high(:,ix(jx)) = nan;
             ar.model(m).(data_cond)(c).ppl.x_high_vpl(:,ix(jx)) = nan;

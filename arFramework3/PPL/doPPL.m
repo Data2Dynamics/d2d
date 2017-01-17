@@ -82,9 +82,10 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     end
 
     % optimizer settings (set only once)
-    if(ar.config.fiterrors && ~ar.ppl.options.onlyProfile)
+    if(ar.config.fiterrors~=-1 && ~ar.ppl.options.onlyProfile)
+        ar.ppl.fittederrors=ar.config.fiterrors;
         ar.config.fiterrors=0;
-        ar.ppl.fittederrors=1;
+        ar.ppl.fit_bkp = ar.qFit(strncmp(ar.pLabel,'sd_',3));
         ar.qFit(strncmp(ar.pLabel,'sd_',3))=2;
     end
     if(ar.config.useSensis)
@@ -193,8 +194,8 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
 
     end
     if(~ar.config.fiterrors && ar.ppl.fittederrors  && ~ar.ppl.options.onlyProfile) 
-        ar.config.fiterrors=1;
-        ar.qFit(strncmp(ar.pLabel,'sd_',3))=1;
+        ar.config.fiterrors=ar.ppl.fittederrors;
+        ar.qFit(strncmp(ar.pLabel,'sd_',3))=ar.ppl.fit_bkp;
     end
     ar.config.SimuPPL=0;
     arCalcMerit(); 
