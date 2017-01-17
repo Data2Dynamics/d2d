@@ -47,6 +47,11 @@ function varargout = arChi2(varargin)
 
 global ar
 
+disp('arChi2 is deprecated. Use arGetMerit instead.');
+if ar.config.fiterrors==0
+    warning('For ar.config.fiterrors=0, the results do not coincide with arGetMerit if exp. errors are partly available.')
+end
+
 nargs = nargin;
 % The possiblity providing ar as an argument and to use of qglobalar==0 is
 % obsolete because the gloal "ar" is overwritten anyway in arSimu 
