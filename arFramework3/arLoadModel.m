@@ -689,6 +689,12 @@ if(strcmp(C{1},'OBSERVABLES'))
     while(~(strcmp(C{1},'CONDITIONS') || strcmp(C{1},'SUBSTITUTIONS')))
         qy = ismember(ar.model(m).y, C{1}); %R2013a compatible
         
+        if(sum(qy)<1)
+            error('Unknown observable in error specification %s.', cell2mat(C{1}));
+        elseif sum(qy)>1
+            error('Observable %s seems to occur more than once.', cell2mat(C{1}));            
+        end
+        
         %check and error if observable in log and fystd = rel + abs error
         y_var_name = setdiff(symvar(ar.model(m).fy{qy}),ar.model(m).py);
         reg_string = ['((?<=\W)|^)(',C{1}{1},'|'];
@@ -705,9 +711,6 @@ if(strcmp(C{1},'OBSERVABLES'))
             'Comment out this error if you want to proceed anyway. To implement an absolute error in log, \n' ...
             'you can try the approach: \nyObs = sd_yObs + 1/2 * (a+sqrt((a)^2)), a = (offset - yObs-sd_yObs) \n, with hard set or fitted offset (on log-scale) \n'],C{2}{1})
             error('Revise error model')
-        end
-        if(sum(qy)~=1)
-            error('unknown observable in error specification %s', cell2mat(C{1}));
         end
         arValidateInput( C, 'error', 'observable identifier', 'expression for the error model' );
         
