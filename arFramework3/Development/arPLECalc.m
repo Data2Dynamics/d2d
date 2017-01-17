@@ -74,7 +74,7 @@ ar.qFit(jk) = 0;
 
 % calculate initial chi^2
 ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
-chi2Reset = ar.chi2fit;
+chi2Reset = arGetMerit('chi2fit');
 ar.ple.chi2Reset(jk) = chi2Reset;
 
 [chi2sup, psup, errorsup] = ple_task(ar, jk, n, 1, chi2Reset, pReset);
@@ -132,8 +132,7 @@ for j=1:n
     try
         ar.p = pTrial;
         ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
-        
-        while(ar.chi2fit - chi2Last > rel_increase * dchi2)
+        while(arGetMerit('chi2fit') - chi2Last > rel_increase * dchi2)
             dp = dp/2;
             
             if(dp < dp_min)
@@ -149,7 +148,7 @@ for j=1:n
         ar = arFit(ar, true);
         
         ps(j,:) = ar.p;
-        chi2s(j) = ar.chi2fit;
+        chi2s(j) = arGetMerit('chi2fit');
         errors(j) = ar.fit.exitflag;
     catch errorid
         fprintf('PLE #%i ERROR %s\n', jk, errorid.message); 
@@ -157,7 +156,7 @@ for j=1:n
         break;
     end
     
-    if(ar.chi2fit - chi2Reset > 2*dchi2)
+    if(arGetMerit('chi2fit') - chi2Reset > 2*dchi2)
         if(direction>0)
             fprintf('PLE #%i reached upper confidence limit\n', jk);
         else
@@ -174,7 +173,7 @@ for j=1:n
     end
     
     pLast = ar.p;
-    chi2Last = ar.chi2fit;
+    chi2Last = arGetMerit('chi2fit');
     
     dp = dp * 2;
 end

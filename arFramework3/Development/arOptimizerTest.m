@@ -22,7 +22,7 @@ ub = ar.ub + 0;
 ar.p = p;
 arCalcMerit(true,[]);
 
-llh = ar.chi2fit + ar.chi2constr;
+llh = arGetMerit('chi2fit') + arGetMerit('chi2constr');
 res = [ar.res ar.constr];
 if(~isempty(ar.sconstr))
     sres = [ar.sres(:,ar.qFit==1); ar.sconstr(:,ar.qFit==1)];
@@ -97,7 +97,7 @@ arWaitbar(0);
                 
                 chi2s_expect{jm}(j) = llh_expect; %#ok<AGROW>
                 xs{jm}(j) = norm(dptmp); %#ok<AGROW>
-                chi2s{jm}(j) = ar.chi2fit + ar.chi2constr; %#ok<AGROW>
+                chi2s{jm}(j) = arGetMerit('chi2fit') + arGetMerit('chi2constr'); %#ok<AGROW>
             catch err_id
                 disp(err_id.message)
                 chi2s_expect{jm}(j) = nan; %#ok<AGROW>
@@ -184,7 +184,7 @@ pRes = ar.p;
 try
     ar.p(ar.qFit==1) = p;
     arCalcMerit(true,[]);
-    l = ar.chi2fit;
+    l = arGetMerit('chi2fit');
     ar.p = pRes;
 catch 
     l = nan;

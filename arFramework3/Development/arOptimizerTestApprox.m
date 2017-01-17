@@ -16,7 +16,7 @@ p = ar.p + 0;
 
 arCalcMerit(true,[]);
 
-llh = ar.chi2fit + ar.chi2constr;
+llh = arGetMerit('chi2fit') + arGetMerit('chi2constr');
 res = [ar.res ar.constr];
 sres = [ar.sres; ar.sconstr]; 
 
@@ -50,7 +50,7 @@ for jm = 1:length(ips)
             
             ar.p = p + dp;
             arCalcMerit(true,[]);
-            chi2s{ips(jm)}(j) = ar.chi2fit + ar.chi2constr; %#ok<AGROW>
+            chi2s{ips(jm)}(j) = arGetMerit('chi2fit') + arGetMerit('chi2constr'); %#ok<AGROW>
         catch err_id
             disp(err_id.message)
             chi2s{ips(jm)}(j) = nan; %#ok<AGROW>

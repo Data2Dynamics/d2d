@@ -18,9 +18,9 @@ if(isfield(ar, 'pTrue'))
     ar.p = ar.pTrue;
     
     if(silent)
-        arChi2(false);
+        arCalcMerit(false);
     else
-        arChi2;
+        arCalcMerit;
     end
 else
     ar.pTrue = ar.p;

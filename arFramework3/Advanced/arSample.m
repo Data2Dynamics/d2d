@@ -36,9 +36,9 @@ if(length(parindex)==1)
         arWaitbar(j, N);
         ar.p(parindex) = ar.sampling.ps{1}(j);
         try %#ok<TRYNC>
-            arChi2(false);
+            arCalcMerit(false);
         end 
-        ar.sampling.chi2s(j) = ar.chi2fit;
+        ar.sampling.chi2s(j) = arGetMerit('chi2fit');
     end
 elseif(length(parindex)==2)
     ar.sampling.ps = {makerange(N,parindex(1), mode, range{1}) makerange(N,parindex(2), mode, range{2})};
@@ -48,9 +48,9 @@ elseif(length(parindex)==2)
             arWaitbar(j2+(j1-1)*N, N*N);
             ar.p(parindex) = [ar.sampling.ps{1}(j1) ar.sampling.ps{2}(j2)];
             try %#ok<TRYNC>
-                arChi2(false);
+                arCalcMerit(false);
             end
-            ar.sampling.chi2s(j2,j1) = ar.chi2fit;
+            ar.sampling.chi2s(j2,j1) = arGetMerit('chi2fit');
         end
     end
     dx = ar.sampling.ps{1}(2)-ar.sampling.ps{1}(1);
@@ -64,7 +64,7 @@ else
     error('maximum of three dimensions allowed');
 end
 ar.p = pTrue;
-arChi2(false);
+arCalcMerit(false);
 arWaitbar(-1);
 
 

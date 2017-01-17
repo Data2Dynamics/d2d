@@ -24,7 +24,7 @@ function ar = arInitFields(ar)
         {'nfine_dr_method',             'pchip'}, ...                   %   spline
         {'nfine_dr_plot',               0}, ...                         %   use value > 10 to enable smoothing of DR curves
         {'plot_x_collected',            false}, ...                     %   0 = show seperate subplot for species and inputs, 1 = all in one
-        {'ploterrors',                  0}, ...                         %   Error band plotting options (0=error bands, 1=error bars, -1=confidence bands)
+        {'ploterrors',                  0}, ...                         %   plotting options of error bars: 0=like fitted (error bar if yExpStd available, error band otherwise), 1=only error bars,  2=only error model as error band,  -1=confidence bands, -3: no errors
         {'showFitting',                 0}, ...                         %   Show the fitting process in real time
         {'showLegends',                 true}, ...                      %   Show legends in plots
         {'useSuptitle',                 false}, ...

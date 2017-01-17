@@ -1,6 +1,8 @@
 % scan likelihood
 %
 % arSample(jks, N)
+% 
+
 
 function arScan(jks, N)
 
@@ -35,9 +37,9 @@ for jk=jks
             sprintf('likelihood scan for %s', strrep(ar.pLabel{jk},'_','\_')));
         ar.p(jk) = ps(j);
         try
-            arChi2(false, []);
-            ar.scan.chi2s{jk}(j) = ar.chi2fit;
-            ar.scan.constrs{jk}(j) = ar.chi2constr;
+            arCalcMerit(false, []);
+            ar.scan.chi2s{jk}(j) = arGetMerit;
+%             ar.scan.constrs{jk}(j) = ar.chi2constr;
         catch error_id
             fprintf('%s for %g: %s\n', ar.pLabel{jk}, ps(j), error_id.message);
         end 
@@ -48,6 +50,6 @@ arWaitbar(-1);
 fprintf('mean evaluation time %f sec\n', toc/((N+1)*length(jks)));
 
 ar.p = pReset;
-arChi2(false, []);
+arCalcMerit(false, []);
 
 

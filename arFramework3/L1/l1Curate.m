@@ -96,8 +96,8 @@ for i = section
         arChi2
     end
     L1ps(i,:) = ar.p;
-    L1chi2s(i) = ar.chi2+ar.chi2err-ar.chi2prior;
-    L1chi2fits(i) = ar.chi2./ar.config.fiterrors_correction+ar.chi2err;
+    L1chi2s(i) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
+    L1chi2fits(i) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
 end
 
 % Check if curation was successful

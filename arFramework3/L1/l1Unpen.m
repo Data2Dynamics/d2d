@@ -39,7 +39,7 @@ for i = 1:length(linv)
    try
        arFit(true)
        ps_unpen(i,:) = ar.p;
-       chi2s_unpen(i) = ar.chi2./ar.config.fiterrors_correction+ar.chi2err;
+       chi2s_unpen(i) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
    catch exception
        fprintf('%s\n', exception.message);
    end
@@ -55,7 +55,7 @@ for i = 1:length(linv)
            try
                arFit(true)
                ps_unpen(j,:) = ar.p;
-               chi2s_unpen(j) = ar.chi2./ar.config.fiterrors_correction+ar.chi2err;
+               chi2s_unpen(j) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
            catch exception
                fprintf('%s\n', exception.message);
            end

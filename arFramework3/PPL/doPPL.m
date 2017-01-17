@@ -99,13 +99,13 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     dir = ar.ppl.options.dir;
     arCalcMerit();
 
-    ar.ppl.chi2_95 = ar.chi2 + ar.chi2err+ar.ppl.dchi2 + 0.5;
+    ar.ppl.chi2_95 = arGetMerit('chi2') + arGetMerit('chi2err')+ar.ppl.dchi2 + 0.5;
 
     % Initialize PPL struct, set values to NaN that are newly computed
     [t, whichT] = PPL_init(m,c,t,ix,ar.ppl.options.gammas, ar.ppl.options.onlyProfile, ar.ppl.options.whichT,takeY);
 
     pReset = ar.p;
-    chi2start = ar.chi2 + ar.chi2err ;
+    chi2start = arGetMerit('chi2') + arGetMerit('chi2err') ;
 
     tic;
     
@@ -416,12 +416,12 @@ for j = 1:n
     end
     xfit(j) = xSim;
     if(takeY)
-        ppl(j) = ar.chi2 + ar.chi2err - (xtrial(j)-xfit(j)).^2/xstd.^2;
-        vpl(j) = ar.chi2 + ar.chi2err;
+        ppl(j) = arGetMerit('chi2') + arGetMerit('chi2err') - (xtrial(j)-xfit(j)).^2/xstd.^2;
+        vpl(j) = arGetMerit('chi2') + arGetMerit('chi2err');
         
     else
-        ppl(j) = ar.chi2 + ar.chi2err;
-        vpl(j) = ar.chi2 + ar.chi2err + (xtrial(j)-xfit(j)).^2/xstd.^2;
+        ppl(j) = arGetMerit('chi2') + arGetMerit('chi2err');
+        vpl(j) = arGetMerit('chi2') + arGetMerit('chi2err') + (xtrial(j)-xfit(j)).^2/xstd.^2;
     end
     ps(j,:) = ar.p;
     %ppl(j)

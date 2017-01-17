@@ -36,7 +36,7 @@ qLog10 = ar.ppl.qLog10;
 [nrows, ncols] = arNtoColsAndRows(length(ar.model(m).(data_cond)(c).ppl.ix));
 arCalcMerit
 
-chi2 = ar.chi2fit;
+chi2 = arGetMerit('chi2fit');
 if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
     chi2 = 2*ar.ndata*log(sqrt(2*pi)) + chi2;
 elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)

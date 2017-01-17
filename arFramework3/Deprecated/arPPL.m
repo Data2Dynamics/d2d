@@ -35,7 +35,7 @@ ar.model(m).condition(c).ppl.lb_fit = nan(length(t), length(ix));
 ar.model(m).condition(c).ppl.ub_fit = nan(length(t), length(ix));
 
 pReset = ar.p + 0;
-chi2start = ar.chi2fit + 0;    
+chi2start = arGetMerit('chi2fit') + 0;    
     
 tic;
 
@@ -143,7 +143,7 @@ for j = 1:n
     
     xtrial(j) = xExp;
     xfit(j) = xSim;
-    ppl(j) = ar.chi2fit;
+    ppl(j) = arGetMerit('chi2fit');
     ps(j,:) = ar.p;
     
     if(ppl(j) > chi2start+ar.ppl.dchi2*1.2)

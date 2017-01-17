@@ -61,8 +61,8 @@ while length(uni_gt0) < length(jks)+1 && i < maxiter
         fprintf('%s\n', exception.message);
     end
     ps= [ps(1:toRefine(1),:); ar.p; ps(toRefine(1)+1:end,:)];
-    chi2s = [chi2s(1:toRefine(1)) ar.chi2+ar.chi2err-ar.chi2prior chi2s(toRefine(1)+1:end)];
-    chi2fits = [chi2fits(1:toRefine(1)) ar.chi2./ar.config.fiterrors_correction+ar.chi2err chi2fits(toRefine(1)+1:end)];
+    chi2s = [chi2s(1:toRefine(1)) arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior') chi2s(toRefine(1)+1:end)];
+    chi2fits = [chi2fits(1:toRefine(1)) arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err') chi2fits(toRefine(1)+1:end)];
     
     % Backward implementation
     for i = 1:length(linv);
@@ -77,8 +77,8 @@ while length(uni_gt0) < length(jks)+1 && i < maxiter
                     fprintf('%s\n', exception.message);
                 end
                 ps(j,:) = ar.p;
-                chi2s(j) = ar.chi2+ar.chi2err-ar.chi2prior;
-                chi2fits(j) = ar.chi2./ar.config.fiterrors_correction+ar.chi2err;
+                chi2s(j) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
+                chi2fits(j) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
                 if j == 1
                     break
                 end
@@ -87,8 +87,8 @@ while length(uni_gt0) < length(jks)+1 && i < maxiter
 
         if sum(abs(ps(i,jks)) > 1e-6) == 0;
             ps(i+1:end,:) = repmat(ar.p,size(ps,1)-i,1);
-            chi2s(i+1:end) = ar.chi2+ar.chi2err-ar.chi2prior;
-            chi2fits(i+1:end) = ar.chi2./ar.config.fiterrors_correction+ar.chi2err;
+            chi2s(i+1:end) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
+            chi2fits(i+1:end) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
             break
         end
     end
@@ -121,6 +121,6 @@ catch exception
     fprintf('%s\n', exception.message);
 end
 p = ar.p;
-chi2 = ar.chi2+ar.chi2err-ar.chi2prior;
-chi2fit = ar.chi2./ar.config.fiterrors_correction+ar.chi2err;
+chi2 = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
+chi2fit = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
 

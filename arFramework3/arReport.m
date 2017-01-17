@@ -861,15 +861,16 @@ lp(fid, '\\clearpage\n');
 lp(fid, '\\section{Estimated model parameters} \\label{estimatedparameters}\n');
 
 if(isfield(ar,'ndata') && isfield(ar,'chi2fit') && isfield(ar,'chi2'))
-    if(ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1)
+    [~,merits] = arGetMerit;
+    if(sum(ar.res_type==2)>0)
         lp(fid, 'In total %i parameters are estimated from the experimental data. The best fit yields a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
-            sum(ar.qFit==1), 2*ar.ndata*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
-    elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
-        lp(fid, 'In total %i parameters are estimated from the experimental data. The best fit yields a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
-            sum(ar.qFit==1), 2*ar.ndata_err*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
+            merits.npara, merits.loglik, merits.ndata);
+%     elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+%         lp(fid, 'In total %i parameters are estimated from the experimental data. The best fit yields a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
+%             sum(ar.qFit==1), 2*ar.ndata_err*log(sqrt(2*pi)) + ar.chi2fit, ar.ndata);
     else
         lp(fid, 'In total %i parameters are estimated from the experimental data, yielding a value of the objective function $\\chi^2 = %g$ for a total of %i data points.', ...
-            sum(ar.qFit==1), ar.chi2, ar.ndata);
+            merits.npara, merits.chi2_res, merits.ndata);
     end
 
     lp(fid, 'The model parameters were estimated by maximum likelihood estimation.');

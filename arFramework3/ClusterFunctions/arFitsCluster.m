@@ -34,7 +34,7 @@ optim_crit = nan(1,n);
 
 arCalcMerit(true,ar.p(ar.qFit==1));
 pReset = ar.p;
-chi2Reset = ar.chi2fit + ar.chi2constr;
+chi2Reset = arGetMerit('chi2fit') + arGetMerit('chi2constr');
 
 if(log_fit_history)
     ar.fit_hist = [];

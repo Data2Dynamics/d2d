@@ -1,9 +1,16 @@
 % plot one-dimensional cut of likelihood.
 % All other parameter are fixed
+% 
+% The function is intended to be run after arScan.m
 
 function arPlotScan(jks, savetofile)
 
 global ar
+
+if ~isfield(ar,'scan')
+    warning('ar.scan not available. Run arScan first1')
+    return
+end
 
 if(~exist('jks','var') || isempty(jks))
     jks = find(~cellfun(@isempty, ar.scan.ps));
@@ -37,12 +44,12 @@ for jk=jks
         minchi2 = min([minchi2 min(ar.scan.chi2s{jk})]);
     end
 end
-chi2curr = ar.chi2fit;
-if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
-    chi2curr = 2*ar.ndata*log(sqrt(2*pi)) + chi2curr;
-elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
-    chi2curr = 2*ar.ndata_err*log(sqrt(2*pi)) + chi2curr;
-end
+chi2curr = arGetMerit;
+% if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
+%     chi2curr = 2*ar.ndata*log(sqrt(2*pi)) + chi2curr;
+% elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+%     chi2curr = 2*ar.ndata_err*log(sqrt(2*pi)) + chi2curr;
+% end
 
 for jk=jks
     if(~isempty(ar.scan.ps{jk}))
@@ -52,11 +59,11 @@ for jk=jks
         chi2s = ar.scan.chi2s{jk};
         constrs = ar.scan.constrs{jk};
         
-        if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
-            chi2s = 2*ar.ndata*log(sqrt(2*pi)) + chi2s;
-        elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
-            chi2s = 2*ar.ndata_err*log(sqrt(2*pi)) + chi2s;
-        end
+%         if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
+%             chi2s = 2*ar.ndata*log(sqrt(2*pi)) + chi2s;
+%         elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
+%             chi2s = 2*ar.ndata_err*log(sqrt(2*pi)) + chi2s;
+%         end
         
         if(ar.ndata>0)
             plot(ps, chi2s, 'k-', 'LineWidth', 1)

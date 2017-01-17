@@ -8,7 +8,7 @@ if(~exist('silent','var'))
     silent = true;
 end
 
-arChi2(true);
+arCalcMerit(true);
 
 ar.alpha = ar.sres' * ar.sres;          % (15.5.11)
 ar.hessian = 2 * (ar.alpha);                % (15.5.8)

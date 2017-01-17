@@ -45,8 +45,8 @@ for j=1:n
     try
         arCalcMerit(sensis,ar.p(ar.qFit==1));
         ar.timing(j) = ar.stop/1e6;
-        ar.chi2s(j) = ar.chi2fit;
-        ar.chi2sconstr(j) = ar.chi2constr;
+        ar.chi2s(j) = arGetMerit('chi2fit');
+        ar.chi2sconstr(j) = arGetMerit('chi2constr');
         ar.exitflag(j) = 1;
     catch exception
         ar.timing(j) = ar.stop/1e6;

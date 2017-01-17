@@ -22,7 +22,7 @@ if(~exist('iconstr','var') || isempty(iconstr))
     iconstr = 1:size(ar.sconstr,1);
 end
 
-arChi2(true);
+arCalcMerit(true);
 
 % rows and cols
 np = length(ip);

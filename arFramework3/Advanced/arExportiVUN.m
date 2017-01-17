@@ -120,7 +120,7 @@ for j = 1:pthinning:size(ar.ps,1)
     
     % simuliere
     ar.p = ar.ps(j,:);
-    arChi2(false);
+    arCalcMerit(false);
     arSimu(false,true);
     
     % parameter

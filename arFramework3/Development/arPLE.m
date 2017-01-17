@@ -45,7 +45,7 @@ for j=1:n
         arFit(true);
         
         ar.ple.ps{jk}(j,:) = ar.p;
-        ar.ple.chi2s{jk}(j) = ar.chi2fit;
+        ar.ple.chi2s{jk}(j) = arGetMerit('chi2fit');
         ar.ple.errors{jk}(j) = ar.fit.exitflag;
     catch errorid
         disp(errorid.message);

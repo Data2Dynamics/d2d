@@ -17,7 +17,7 @@ pLabelRelease = {};
 while(~stop)
     pReset = ar.p;
     qFitReset = ar.qFit;
-    chi2Last = ar.chi2;
+    chi2Last = arGetMerit('chi2');
     
     chi2yield = zeros(1,sum(ar.qFit == 0));
     jks = find(ar.qFit == 0);
@@ -28,7 +28,7 @@ while(~stop)
         
         ar.qFit(j) = 1;
         arFit(true);
-        chi2yield(count) = chi2Last - ar.chi2;
+        chi2yield(count) = chi2Last - arGetMerit('chi2');
         
         fprintf('%f\n', chi2yield(count));
         

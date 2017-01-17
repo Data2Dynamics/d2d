@@ -102,7 +102,7 @@ end
 
 arCalcMerit(true,ar.p(ar.qFit==1));
 pReset = ar.p;
-chi2Reset = ar.chi2fit + ar.chi2constr;
+chi2Reset = arGetMerit('chi2fit') + arGetMerit('chi2constr');
 
 if(log_fit_history)
     ar.fit_hist = [];
@@ -119,8 +119,8 @@ for j=1:n
     tic;
     try
         arCalcMerit(true,ar.p(ar.qFit==1));
-        ar.chi2s_start(dop(j)) = ar.chi2fit;
-        ar.chi2sconstr_start(dop(j)) = ar.chi2constr;
+        ar.chi2s_start(dop(j)) = arGetMerit('chi2fit');
+        ar.chi2sconstr_start(dop(j)) = arGetMerit('chi2constr');
         if (exist('prefunc', 'var'))
             try
                 feval( prefunc );
@@ -137,8 +137,8 @@ for j=1:n
             end
         end       
         ar.ps(dop(j),:) = ar.p;
-        ar.chi2s(dop(j)) = ar.chi2fit;
-        ar.chi2sconstr(dop(j)) = ar.chi2constr;
+        ar.chi2s(dop(j)) = arGetMerit('chi2fit');
+        ar.chi2sconstr(dop(j)) = arGetMerit('chi2constr');
         ar.exitflag(dop(j)) = ar.fit.exitflag;
         ar.fun_evals(dop(j)) = ar.fit.fevals;
         ar.iter(dop(j)) = ar.fit.iter;

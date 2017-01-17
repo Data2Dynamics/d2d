@@ -120,7 +120,7 @@ if(ar.config.logFitting)
 end
 
 ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
-chi2_old = ar.chi2fit;
+chi2_old = arGetMerit('chi2fit');
 
 if(sum(ar.qFit==1)<=0)
     error('No parameters are allowed to be fitted. Check ar.qFit.')
@@ -389,12 +389,12 @@ ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
 fit.exitflag = exitflag;
 fit.output = output;
 fit.iter = output.iterations;
-fit.chi2 = ar.chi2fit;
+fit.chi2 = arGetMerit('chi2fit');
 fit.lambda = lambda;
 fit.qFit = ar.qFit;
 fit.res = resnorm;
 fit.sres = full(jac);
-fit.improve = chi2_old - ar.chi2fit;
+fit.improve = chi2_old - fit.chi2;
 if(isfield(ar,'fit') && isfield(ar.fit,'optimLog'))
     fit.optimLog = ar.fit.optimLog;
 end
@@ -619,14 +619,14 @@ global fit
 fit.fevals = fit.fevals + 1;
 
 if(fit.iter_count>0)
-    if((ar.chi2fit+ar.chi2constr) > (fit.chi2_hist(fit.iter_count) + ...
+    if(arGetMerit('chi2all') > (fit.chi2_hist(fit.iter_count) + ...
             fit.constr_hist(fit.iter_count)))
         return;
     end
 end
 
-fit.chi2_hist(fit.iter_count+1) = ar.chi2fit;
-fit.constr_hist(fit.iter_count+1) = ar.chi2constr;
+fit.chi2_hist(fit.iter_count+1)   = arGetMerit('chi2fit');
+fit.constr_hist(fit.iter_count+1) = arGetMerit('chi2constr');
 fit.p_hist(fit.iter_count+1,:) = ar.p;
 fit.opti_hist(fit.iter_count+1,:) = ar.firstorderopt;
 fit.maxstepsize_hist(fit.iter_count+1) = nan;

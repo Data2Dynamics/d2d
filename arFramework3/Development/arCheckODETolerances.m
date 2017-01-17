@@ -6,7 +6,7 @@
 % 
 %   d.res    maximal difference of ar.res
 %   d.sres   maximal difference of ar.sres
-%   d.chi2   maximal difference of ar.chi2fit
+%   d.chi2   maximal difference of arGetMerit('chi2fit')
 % 
 % Example:
 % arCheckODETolerances
@@ -42,7 +42,7 @@ for i=1:length(dtol)
         arCalcMerit(true,ar.p(ar.qFit==1))
         res(:,i) = ar.res;
         sres(:,:,i)  = ar.sres;
-        chi2(i) = ar.chi2fit;
+        chi2(i) = arGetMerit('chi2fit');
         if ~isempty(pleGlobals) && isfield(pleGlobals,'merit_fkt')
             pleMerit(i) = feval(pleGlobals.merit_fkt);
         end
@@ -68,7 +68,7 @@ d.chi2 = max(range(chi2));
 d.pleMerit = max(range(pleMerit));
 
 fprintf('Maximal absolute impact of the tolerances:\n');
-fprintf('%20s\t%25s:\t %e\n','chi2','(ar.chi2fit)',d.chi2);
+fprintf('%20s\t%25s:\t %e\n','chi2','(arGetMerit(''chi2fit''))',d.chi2);
 fprintf('%20s\t%25s:\t %e\n','pleMerit','(pleGlobals.merit_fkt)',d.pleMerit);
 fprintf('%20s\t%25s:\t %e\n','Residuals','(ar.res)',d.res);
 fprintf('%20s\t%25s:\t %e\n','Sensititivites','(ar.sres)',d.sres);

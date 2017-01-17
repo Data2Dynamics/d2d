@@ -50,8 +50,8 @@ chi2s = nan(1,length(linv));
 chi2fits = nan(1,length(linv));
 
 ps(1,:) = ar.p;
-chi2s(1) = ar.chi2+ar.chi2err-ar.chi2prior;
-chi2fits(1) = ar.chi2./ar.config.fiterrors_correction+ar.chi2err;
+chi2s(1) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
+chi2fits(1) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
 for i = 2:length(linv)
     arWaitbar(i, length(linv), sprintf('L1 scan'));
     ar.std(jks) = linv(i) * (1 + gradient * linspace(0,.001,length(jks)));
@@ -63,7 +63,7 @@ for i = 2:length(linv)
         chi2fits_tmp = nan(1,length(jks)+1);
         ps_tmp = nan(length(ar.p),length(jks));
         ps_tmp(:,1) = ar.p;
-        chi2fits_tmp(1) = ar.chi2fit;
+        chi2fits_tmp(1) = arGetMerit('chi2fit');
         qFit = ar.qFit;
 
         for j = 1:length(jks)
@@ -76,7 +76,7 @@ for i = 2:length(linv)
             ar.qFit(mypar(minVal)) = 0;
 
             arFit(true)
-            chi2fits_tmp(j+1) = ar.chi2fit;
+            chi2fits_tmp(j+1) = arGetMerit('chi2fit');
             ps_tmp(:,j+1) = ar.p;
 
             if chi2fits_tmp(j+1)-chi2fits_tmp(j) > 1
@@ -91,13 +91,13 @@ for i = 2:length(linv)
         fprintf('%s\n', exception.message);
     end
     ps(i,:) = ar.p;
-    chi2s(i) = ar.chi2+ar.chi2err-ar.chi2prior;
-    chi2fits(i) = ar.chi2./ar.config.fiterrors_correction+ar.chi2err;
+    chi2s(i) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
+    chi2fits(i) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
     
     if sum(abs(ps(i,jks)) > 1e-6) == 0;
         ps(i+1:end,:) = repmat(ar.p,size(ps,1)-i,1);
-        chi2s(i+1:end) = ar.chi2+ar.chi2err-ar.chi2prior;
-        chi2fits(i+1:end) = ar.chi2./ar.config.fiterrors_correction+ar.chi2err;
+        chi2s(i+1:end) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
+        chi2fits(i+1:end) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
         break
     end
 end

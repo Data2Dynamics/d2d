@@ -29,7 +29,7 @@ for j=1:length(ps);
     arWaitbar(j,N);
     ar.p(jk) = ps(j);
         try
-            arChi2(false);
+            arCalcMerit(false);
             chi2s(j,:) = arPrintChi2(doYs) - bestchi2s;
         catch error_id
             fprintf('%s for %g: %s\n', ar.pLabel{jk}, ps(j), error_id.message);
@@ -38,7 +38,7 @@ end
 arWaitbar(-1);
 
 ar.p = pReset;
-arChi2(false);
+arCalcMerit(false);
 
 stds = std(chi2s,0,1);
 [~, indexes] = sort(stds,2,'descend');

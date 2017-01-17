@@ -27,7 +27,7 @@ end
 
 arCalcMerit(true);
 
-chi2Reset = ar.chi2fit;
+chi2Reset = arGetMerit('chi2fit');
 pReset = ar.p;
 ar.ple.pStart = ar.p;
 
@@ -105,10 +105,10 @@ for j=1:n
 %     end
     
     ps(j,:) = ar.p;
-    chi2s(j) = ar.chi2fit;
+    chi2s(j) = arGetMerit('chi2fit');
     lambdas(j,:) = lambda.upper~=0 | lambda.lower~=0;
         
-    if(ar.chi2fit - chi2Reset > 2*dchi2)
+    if(arGetMerit('chi2fit') - chi2Reset > 2*dchi2)
         fprintf('PLE #%i reached confidence limit\n', jk); 
         break;
     end
@@ -186,10 +186,10 @@ ar.p = pReset;
 % %     end
 %     
 %     ps(j,:) = ar.p;
-%     chi2s(j) = ar.chi2fit;
+%     chi2s(j) = arGetMerit('chi2fit');
 %     lambdas(j,:) = lambda.upper~=0 | lambda.lower~=0;
 %         
-%     if(ar.chi2fit - chi2Reset > 2*dchi2)
+%     if(arGetMerit('chi2fit') - chi2Reset > 2*dchi2)
 %         fprintf('PLE #%i reached confidence limit\n', jk); 
 %         break;
 %     end

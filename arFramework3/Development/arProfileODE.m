@@ -124,7 +124,7 @@ try
             ar.p = xs2(j,:);
             try
                 arCalcMerit(true);
-                chi2s(j) = ar.chi2fit;
+                chi2s(j) = arGetMerit('chi2fit');
             catch err_id 
                 chi2s(j) = nan;
             end
@@ -163,7 +163,7 @@ try
             ar.p = xs2d(j,:);
             try
                 arCalcMerit(true);
-                chi2sd(j) = ar.chi2fit;
+                chi2sd(j) = arGetMerit('chi2fit');
             catch err_id 
                 chi2sd(j) = nan;
             end
@@ -189,9 +189,9 @@ try
         plot(xsout(:,jk), chi2sout, 'x-b')
         legend('reoptimization', 'profile ODE');
         xlim([min(pleGlobals.ps{jk}(:,jk)) max(pleGlobals.ps{jk}(:,jk))])
-        ylim([ar.chi2fit-(0.1*dchi2) ar.chi2fit+2*dchi2]);
+        ylim([arGetMerit('chi2fit')-(0.1*dchi2) arGetMerit('chi2fit')+2*dchi2]);
         plot([ar.p(jk) ar.p(jk)], ylim, 'k--');
-        plot(xlim, [ar.chi2fit+dchi2 ar.chi2fit+dchi2], 'r--');
+        plot(xlim, [arGetMerit('chi2fit')+dchi2 arGetMerit('chi2fit')+dchi2], 'r--');
         hold off
         
         subplot(5,1,[3 4])
@@ -241,12 +241,12 @@ end
                     (~dir_up && x(jk)-xinit(jk) < trange(2)))
                 arWaitbar(ceil((xinit(jk)-x(jk))/trange(2)*100),100);
                 
-                chi2_tmp = ar.chi2fit;
+                chi2_tmp = arGetMerit('chi2fit');
                 rhs_tmp = feval(rhs_fun, xinit(jkx), xinit, false);
                 
                 xtrial = xinit + transpose(rhs_tmp*dp_tmp);
                 arCalcMerit(true, xtrial(1:(end-1)));
-                chi2_trial = ar.chi2fit;
+                chi2_trial = arGetMerit('chi2fit');
                 if(chi2_trial - chi2_tmp > dchi2*dchi2_increase) % reduce step
                     while(chi2_trial - chi2_tmp > dchi2*dchi2_increase)
                         dp_tmp = dp_tmp / step_factor;
@@ -255,7 +255,7 @@ end
                         end
                         xtrial = xinit + transpose(rhs_tmp*dp_tmp);
                         arCalcMerit(true, xtrial(1:(end-1)));
-                        chi2_trial = ar.chi2fit;
+                        chi2_trial = arGetMerit('chi2fit');
                     end
                 elseif(chi2_trial - chi2_tmp < dchi2*0.5) % increase next step
                     dp_tmp = dp_tmp * step_factor;
@@ -303,7 +303,7 @@ end
                     if(refresh==1)
                         % backup old status
                         p_old = ar.p(qFit) + 0;
-                        chi2_old = ar.chi2fit + 0;
+                        chi2_old = arGetMerit('chi2fit') + 0;
                         
                         res = ar.res;
                         sres = ar.sres(:,qFit);
@@ -332,7 +332,7 @@ end
                     arCalcMerit(true);
                     
                     % compare old and new chi^2
-                    if(ar.chi2fit < chi2_old) % if decreased, keep the step
+                    if(arGetMerit('chi2fit') < chi2_old) % if decreased, keep the step
                         iter = iter + 1;
                         
                         refresh = 1;

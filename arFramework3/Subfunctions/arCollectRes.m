@@ -1,9 +1,9 @@
 % Collects all residuals in 
-%   - ar.model.data.res
-%   - ar.model.data.reserr
-%   - prior
-%   - constr
-%   - random
+%   - ar.model.data.res         -> ar.res , ar.type=1
+%   - ar.model.data.reserr      -> ar.res , ar.type=2
+%   - prior                     -> ar.res , ar.type=3
+%   - constr                    -> ar.constr
+%   - random                    -> ar.res , ar.type=4
 % and calculates chi2 values as well as the number of data points
 
 function arCollectRes(sensi)

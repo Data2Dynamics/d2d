@@ -47,9 +47,9 @@ ar.p(ar.qFit==1) = sol;
 ar.fit.message = getMessage(JI);
 
 if(~silent)
-    arChi2;
+    arCalcMerit;
 else
-    arChi2(false);
+    arCalcMerit(false);
 end
 
 
@@ -58,9 +58,9 @@ function z = testfun(x, ~)
 global ar
 
 try
-    arChi2(false, x);
+    arCalcMerit(false, x);
 catch id
     disp(id.message);
     ar.ps_errors(end+1,:) = ar.p;
 end
-z = ar.chi2fit;
+z = arGetMerit('chi2fit');

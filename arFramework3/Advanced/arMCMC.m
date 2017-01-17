@@ -117,16 +117,16 @@ Cmod = 1.1;
 Cfactor = (2.38/sqrt(sum(qFit)))^2 / sum(qFit);
 
 if(~use_sensis)
-    arChi2(false);
+    arCalcMerit(false);
     res_curr = [];
     Sres_curr = [];
 else
-    arChi2(true);
+    arCalcMerit(true);
     res_curr = ar.res;
     Sres_curr = ar.sres(:,qFit);
     CProposalPrior = diag((ar.ub(qFit)-ar.lb(qFit))/2);
 end
-L_curr = ar.chi2fit;
+L_curr = arGetMerit('chi2fit');
 jrungo = -nburnin+1;
     
 % additional functionality
@@ -173,15 +173,15 @@ for jruns = 1:((nruns*nthinning)+nburnin)
         % fprintf('#%i bounds ok\n', jrungo);
         try
             if(~use_sensis)
-                arChi2(false,p_trial);
+                arCalcMerit(false,p_trial);
                 res_trial = [];
                 Sres_trial = [];
             else
-                arChi2(true,p_trial);
+                arCalcMerit(true,p_trial);
                 res_trial = ar.res;
                 Sres_trial = ar.sres(:,qFit);
             end
-            L_trial = ar.chi2fit;
+            L_trial = arGetMerit('chi2fit');
             [mu_trial, covar_trial] = feval(fkt, p_trial, res_trial, Sres_trial);
             Q_trial = mvnpdf(p_trial, mu_curr, covar_curr);
             Q_curr = mvnpdf(p_curr, mu_trial, covar_trial);
@@ -221,15 +221,15 @@ for jruns = 1:((nruns*nthinning)+nburnin)
         if(jtrials==100 && jruns+jindexoffset-1>0)
             p_curr = ar.ps(randi(jruns+jindexoffset-1,1),:);
             if(~use_sensis)
-                arChi2(false,p_curr);
+                arCalcMerit(false,p_curr);
                 res_curr = [];
                 Sres_curr = [];
             else
-                arChi2(true,p_curr);
+                arCalcMerit(true,p_curr);
                 res_curr = ar.res;
                 Sres_curr = ar.sres(:,qFit);
             end
-            L_curr = ar.chi2fit;
+            L_curr = arGetMerit('chi2fit');
             jtrials = 1;
             count_chain_reset = count_chain_reset + 1;
         end

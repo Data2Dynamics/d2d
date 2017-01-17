@@ -18,8 +18,8 @@ ar.chi2sconstr_sorted = ar.chi2sconstr(isorted);
 ar.ps_sorted = ar.ps(isorted,:);
 exitflag = ar.exitflag(isorted);
 
-chi2min = min([chi2s ar.chi2fit]);
-chi2minconstr = min([ar.chi2sconstr_sorted ar.chi2constr]);
+chi2min = min([chi2s arGetMerit('chi2fit')]);
+chi2minconstr = min([ar.chi2sconstr_sorted arGetMerit('chi2constr')]);
 
 h = [];
 semilogy(chi2s - chi2min + 1, '--');

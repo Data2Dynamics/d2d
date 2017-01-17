@@ -191,14 +191,14 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
                 grad = (1+2*(nansum(res.^2)-ar.ppl.chi2_95))*grad_tmp;   
                 H = (1+2*(nansum(res.^2)-ar.ppl.chi2_95))*H + 2*(grad_tmp')*grad_tmp;
             end
-            %grad = (1+2*(ar.chi2fit-ar.ppl.chi2_95))*grad_tmp;            
-            %H = (1+2*(ar.chi2fit-ar.ppl.chi2_95))*H + 2*(grad_tmp')*grad_tmp;
+            %grad = (1+2*(arGetMerit('chi2fit')-ar.ppl.chi2_95))*grad_tmp;            
+            %H = (1+2*(arGetMerit('chi2fit')-ar.ppl.chi2_95))*H + 2*(grad_tmp')*grad_tmp;
         end        
         chi2 = nansum(res.^2);
         if(x==1 || (x==2 && mod(iter,2)==0))  
             chi2 = nansum(res.^2) + (nansum(res.^2)-ar.ppl.chi2_95)^2; 
         end
-        %chi2 = ar.chi2fit + (ar.chi2fit-ar.ppl.chi2_95)^2;    
+        %chi2 = arGetMerit('chi2fit') + (arGetMerit('chi2fit')-ar.ppl.chi2_95)^2;    
     end
 
     function [chi2, grad] = ppl_constr_fkt(pTrial, x)
@@ -466,7 +466,7 @@ function [chi2_out, xSim, exitflag] = PPL_corr(x, x_orig, m, c, jt, jx, xstd, t_
             sres_tmp = sres(end,:);
             res_tmp = res(end);
         end
-        %ceq=ar.chi2fit+(p(end)-xSim)^2/xstd^2-ar.ppl.chi2_95;
+        %ceq=arGetMerit('chi2fit')+(p(end)-xSim)^2/xstd^2-ar.ppl.chi2_95;
         if(x==3)
             ceq= (xSim-p(end))^2./xstd^2 - 0.5;
             grad = 2*res_tmp*sres_tmp;

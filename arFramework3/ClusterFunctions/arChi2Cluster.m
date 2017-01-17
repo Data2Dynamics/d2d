@@ -58,4 +58,4 @@ else
 end
 
 function ar = arChi2ClusterFun(ar, sensi)
-ar = arChi2(ar, sensi);
+ar = arCalcMerit(ar, sensi);
