@@ -40,6 +40,12 @@ global ar
 if ~isfield(ar.config,'restartLHS')
     ar.config.restartLHS = 0;
 end
+if(~isfield(ar.config,'nCVRestart') || isnan(ar.config.nCVRestart))
+    nCV_bkp = NaN;
+    ar.config.nCVRestart = 1;
+else
+    nCV_bkp = ar.config.nCVRestart;
+end
 
 % generate random values
 ps = arRandomPars(n, randomseed);
@@ -49,7 +55,7 @@ if(~use_cluster)
 else
     arFitsCluster(ps, log_fit_history, backup_save);
 end
-
+ar.config.nCVRestart = nCV_bkp;
 if ar.config.restartLHS ==1 && isempty(randomseed)
     indnan = find(isnan(ar.chi2s));
     counter = 1;

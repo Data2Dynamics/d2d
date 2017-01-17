@@ -47,7 +47,6 @@ function ar = arInitFields(ar)
         {'useSparseJac',                false}, ...                     %   Use Sparse Jacobian
         {'useSensiRHS',                 true}, ...                      %   Use sensitivities of RHS during simulation
         {'atolV',                       false}, ...                     %   Observation scaled tolerances
-        {'atolV_Sens',                  false}, ...                     %   Observation scaled tolerances
         {'optimizer',                   1}, ...                         %   Default optimizer
         {'optimizers',                  {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1',...
                                          'NL2SOL','TRESNEI','Ceres', 'lsqnonlin_repeated', 'fminsearchbnd', 'patternsearch',...
@@ -59,7 +58,7 @@ function ar = arInitFields(ar)
         {'maxstepsize',                 Inf}, ...                       %   Maximum stepsize
         {'useEvents',                   0}, ...                         %   Use event system
         {'useMS',                       0}, ...                         %   Use multiple shooting (DEPRECATED)
-        {'nCVRestart',                  10}, ...                        %   Maximum number of automatic restarts
+        {'nCVRestart',                  NaN}, ...                        %   Maximum number of automatic restarts
         ...                                                             % Simulation based equilibration settings
         {'init_eq_step',                100.0}, ...                     %   Simulation time of initial equilibration attempt
         {'eq_tol',                      1e-8}, ...                      %   Value below which all components of dxdt have to fall to be considered equilibrated

@@ -113,8 +113,8 @@ rtol = ar.config.rtol;
 maxsteps = ar.config.maxsteps;
 qPositiveX = cell(1,length(ar.model));
 
-if(~isfield(ar.config, 'nCVRestart'))
-    nCVRestart = 1;
+if(~isfield(ar.config, 'nCVRestart') || isnan(ar.config.nCVRestart))
+    nCVRestart = 10;
 else
     nCVRestart = ar.config.nCVRestart;
 end

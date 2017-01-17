@@ -216,9 +216,6 @@ end
 
 % call mex function to simulate models
 feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads')
-% arCalcRes_test;  % the test can be performed here or outside of arSimu
-% (see comments in arCalcRes_test.m)
-arCalcRes(sensi)
 
 % integration error ?
 for m=1:length(ar.model)
@@ -230,6 +227,23 @@ for m=1:length(ar.model)
             arCheckCache(1); % Invalidate cache so simulations do not get skipped
             error('cvodes failed at %s for model %i, condition %i. Trying arCheckSimu could be an option. ', ...
                 ar.info.cvodes_flags{abs(ar.model(m).condition(c).status)}, m, c);
+        end
+    end
+end
+
+% arCalcRes_test;  % the test can be performed here or outside of arSimu
+% (see comments in arCalcRes_test.m)
+arCalcRes(sensi)
+
+%calculate y_scale_max
+if(ar.config.atolV)
+    for im = 1:length(ar.model)
+        for ic = 1:length(ar.model(im).condition)
+            ar.model(im).condition(ic).atol(:) = 0;
+            for id = ar.model(im).condition(ic).dLink
+                atol_tmp = squeeze(nanmax(nanmax(ar.model(im).data(id).y_scale)));
+                ar.model(im).condition(ic).y_atol = nanmax([ar.model(im).condition(ic).y_atol atol_tmp],2);
+            end
         end
     end
 end
