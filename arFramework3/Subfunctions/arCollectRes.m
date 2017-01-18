@@ -10,6 +10,9 @@ function arCollectRes(sensi)
 
 global ar 
 
+if ~isfield(ar,'ndata_res')
+    arCalcRes(true)
+end
 ar.ndata = ar.ndata_res;
 ar.nprior = 0;
 ar.nrandom = 0;
