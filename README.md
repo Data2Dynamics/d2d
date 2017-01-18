@@ -67,6 +67,7 @@ The software was awarded twice as **best performer** in the *Dialogue for Revers
 * [What are the most important functions?](https://github.com/Data2Dynamics/d2d/wiki/What are the most important functions in d2d%3F)
 * [Optimization algorithms available in the d2d-framework](https://github.com/Data2Dynamics/d2d/wiki/Optimization algorithms available in the d2d-framework)
 * [Objective function, likelhood and chi-square in the d2d framework](https://github.com/Data2Dynamics/d2d/wiki/Objective function, likelhood and chi-square in the d2d framework)
+* [What's the meaning of ar.config.fiterrors?](https://github.com/Data2Dynamics/d2d/wiki/Meaning%20of%20ar.config.fiterrors)
 * [How to set up priors?](https://github.com/Data2Dynamics/d2d/wiki/Priors in the d2d framework)
 * [How to set up steady state constraints?](https://github.com/Data2Dynamics/d2d/wiki/How to set up steady state constraints) 
 * [How do I restart the solver upon a step input?](https://github.com/Data2Dynamics/d2d/wiki/How do I reset the solver upon a step input)
