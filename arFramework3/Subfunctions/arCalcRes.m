@@ -22,8 +22,52 @@ if ~exist('sensi','var') || isempty(sensi)
     sensi = 1;
 end
 
-
 global ar
+
+if(~isfield(ar.config,'useFitErrorCorrection'))
+    ar.config.useFitErrorCorrection = true;
+end
+if(~isfield(ar.config,'useFitErrorMatrix'))
+    ar.config.useFitErrorMatrix = false;
+end
+if ar.config.useFitErrorMatrix==1
+    ar.ndata_err = 0;
+end
+
+ar.ndata_res = 0;
+
+% correction for error fitting
+for jm = 1:length(ar.model)
+    if(isfield(ar.model(jm), 'data'))
+        nd = length(ar.model(jm).data);
+        for jd = 1:nd
+            if(ar.model(jm).data(jd).has_yExp)
+                ar.ndata_res = ar.ndata_res + sum(ar.model(jm).data(jd).ndata(ar.model(jm).data(jd).qFit==1));
+                if(ar.config.useFitErrorMatrix == 1 && ar.config.fiterrors_matrix(jm,jd) == 1)
+                    ar.ndata_err = ar.ndata_err + sum(ar.model(jm).data(jd).ndata(ar.model(jm).data(jd).qFit==1));
+                end
+            end
+        end
+    end
+end
+
+% if error parameter fitted or fixed, then useFitErrorCorrection is
+% evaluated:
+if(  ar.ndata_res>0 && (ar.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0) && ar.config.useFitErrorCorrection  )
+    if(ar.ndata_res -sum(ar.qError~=1 & ar.qFit==1) < sum(ar.qError~=1 & ar.qFit==1))
+        ar.config.fiterrors_correction = 1;
+        if(~ar.config.fiterrors_correction_warning)
+            warning('ar.config.fiterrors_correction_warning : turning off bias correction, not enough data'); %#ok<WNTAG>
+            ar.config.fiterrors_correction_warning = true;
+        end
+    else
+        ar.config.fiterrors_correction = ar.ndata_res/(ar.ndata_res-sum(ar.qError~=1 & ar.qFit==1));
+        ar.config.fiterrors_correction_warning = false;
+    end
+else
+    ar.config.fiterrors_correction = 1;
+end
+
 
 fiterrors_correction_factor = ar.config.fiterrors_correction;
 
@@ -68,7 +112,7 @@ for m=1:length(ar.model)
 
             [ar.model(m).data(d).res, ar.model(m).data(d).chi2]         = fres(ar.model(m).data(d).yExp, ar.model(m).data(d).yExpSimu, ystd, fiterrors_correction_factor);
 
-            if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 ) % error residuals are only !=0 if errors are fitted:
+            if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0 ) % error residuals are only !=0 if errors are fitted:
                 [ar.model(m).data(d).reserr, ar.model(m).data(d).chi2err]   = fres_error(ystd, ar.config.add_c);
             else
                 ar.model(m).data(d).reserr = zeros(size(ar.model(m).data(d).res));
@@ -77,7 +121,7 @@ for m=1:length(ar.model)
 
             if (sensi == 1) && ar.model(m).data(d).has_yExp 
                 ar.model(m).data(d).sres = fsres(ar.model(m).data(d).syExpSimu, ar.model(m).data(d).yExp, ystd, fiterrors_correction_factor);
-                if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 )
+                if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0 )
                     [ar.model(m).data(d).sres, ar.model(m).data(d).sreserr] = fsres_error(ar.model(m).data(d).yExp, ar.model(m).data(d).res, ar.model(m).data(d).reserr, ar.model(m).data(d).sres, ystd, systd);
                 end
             else
@@ -93,7 +137,7 @@ for m=1:length(ar.model)
                 for ip=1:size(ar.model(m).data(d).sres,3)
                     if ar.model(m).data(d).qLog10(ip) > 0.5
                         ar.model(m).data(d).sres(:,:,ip)    = ar.model(m).data(d).sres(:,:,ip).*ar.model(m).data(d).pNum(ip) * log(10);
-                        if (ar.config.fiterrors == 1)  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 )
+                        if (ar.config.fiterrors == 1)  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0 )
                             ar.model(m).data(d).sreserr(:,:,ip) = ar.model(m).data(d).sreserr(:,:,ip).*ar.model(m).data(d).pNum(ip) * log(10);
                         end
                         %             for (ip=0; ip < np; ip++) {

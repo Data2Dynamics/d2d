@@ -13,7 +13,7 @@ figure(1)
 clf;
 
 
-if ar.config.fiterrors == 1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0)
+if ar.config.fiterrors == 1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0)
     chi2s = 2*ar.ndata*log(sqrt(2*pi)) + ar.sampling.chi2s
     chi2curr = 2*ar.ndata*log(sqrt(2*pi)) + arGetMerit('chi2fit');
     ylabeltmp = '-2*log(L)';

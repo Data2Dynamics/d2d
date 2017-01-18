@@ -10,7 +10,7 @@ function arCollectRes(sensi)
 
 global ar 
 
-ar.ndata = 0;
+ar.ndata = ar.ndata_res;
 ar.nprior = 0;
 ar.nrandom = 0;
 ar.nconstr = 0;
@@ -40,52 +40,7 @@ if(~isfield(ar,'sconstr'))
     ar.sconstr = [];
 end
 
-nm = length(ar.model);
 np = length(ar.p);
-
-if(~isfield(ar.config,'useFitErrorCorrection'))
-    ar.config.useFitErrorCorrection = true;
-end
-if(~isfield(ar.config,'useFitErrorMatrix'))
-    ar.config.useFitErrorMatrix = false;
-end
-if ar.config.useFitErrorMatrix==1
-    ar.ndata_err = 0;
-end
-
-
-% correction for error fitting
-for jm = 1:nm
-    if(isfield(ar.model(jm), 'data'))
-        nd = length(ar.model(jm).data);
-        for jd = 1:nd
-            if(ar.model(jm).data(jd).has_yExp)
-                ar.ndata = ar.ndata + sum(ar.model(jm).data(jd).ndata(ar.model(jm).data(jd).qFit==1));
-                if(ar.config.useFitErrorMatrix == 1 && ar.config.fiterrors_matrix(jm,jd) == 1)
-                    ar.ndata_err = ar.ndata_err + sum(ar.model(jm).data(jd).ndata(ar.model(jm).data(jd).qFit==1));
-                end
-            end
-        end
-    end
-end
-
-% The following if statement should NOT depend on ar.qFit(ar.qError==1)
-if(  ar.ndata>0 && (ar.config.fiterrors==1 || ar.config.fiterrors==0) && ar.config.useFitErrorCorrection  )
-    if(ar.ndata -sum(ar.qError~=1 & ar.qFit==1) < sum(ar.qError~=1 & ar.qFit==1))
-        ar.config.fiterrors_correction = 1;
-        if(~ar.config.fiterrors_correction_warning)
-            warning('ar.config.fiterrors_correction_warning : turning off bias correction, not enough data'); %#ok<WNTAG>
-            ar.config.fiterrors_correction_warning = true;
-        end
-    else
-        ar.config.fiterrors_correction = ar.ndata/(ar.ndata-sum(ar.qError~=1 & ar.qFit==1));
-        ar.config.fiterrors_correction_warning = false;
-    end
-else
-    ar.config.fiterrors_correction = 1;
-end
-
-
 
 useMSextension = false;
 
@@ -93,10 +48,10 @@ resindex = 1;
 sresindex = 1;
 
 % fit errors?
-fiterrors = ( ar.config.fiterrors == 1  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 ) );
+fiterrors = ( ar.config.fiterrors == 1  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0 ) );
 
 % data
-for jm = 1:nm
+for jm = 1:length(ar.model)
     if(isfield(ar.model(jm), 'data'))
         nd = length(ar.model(jm).data);
         for jd = 1:nd
@@ -220,7 +175,7 @@ end
 
 % steady state conditions
 qRelativeToInitialValue = true;
-for jm = 1:nm
+for jm = 1:length(ar.model)
     nc = length(ar.model(jm).condition);
     for jc = 1:nc
         if(isfield(ar.model(jm).condition(jc), 'qSteadyState'))
@@ -385,7 +340,7 @@ end
 % % multiple shooting (difference penality)
 % if(isfield(ar,'ms_count_snips'))
 %     ar.ms_violation = 0;
-%     for jm = 1:nm
+%     for jm = 1:length(ar.model)
 %         for jms = 1:size(ar.model(jm).ms_link,1)
 %             tmpres1 = ar.model(jm).condition(ar.model(jm).ms_link(jms,1)).xExpSimu(ar.model(jm).ms_link(jms,4),:);
 %             tmpres2 = ar.model(jm).condition(ar.model(jm).ms_link(jms,2)).xExpSimu(ar.model(jm).ms_link(jms,5),:);
@@ -426,7 +381,7 @@ end
 % % multiple shooting (log ratio penalty)
 % if(isfield(ar,'ms_count_snips'))
 %     ar.ms_violation = [];
-%     for jm = 1:nm
+%     for jm = 1:length(ar.model)
 %         for jms = 1:size(ar.model(jm).ms_link,1)
 %             tmpres1 = ar.model(jm).condition(ar.model(jm).ms_link(jms,1)).xExpSimu(ar.model(jm).ms_link(jms,4),:);
 %             tmpres2 = ar.model(jm).condition(ar.model(jm).ms_link(jms,2)).xExpSimu(ar.model(jm).ms_link(jms,5),:);
@@ -504,7 +459,7 @@ if(isfield(ar.model, 'data') && ~isempty(ar.res))
     end
 
     if(sensi && ~isempty(ar.sres) && sum(sum(isnan(ar.sres(:,ar.qFit==1))))>0)
-        for jm = 1:nm
+        for jm = 1:length(ar.model)
             if(isfield(ar.model(jm), 'data'))
                 nd = length(ar.model(jm).data);
                 for jd = 1:nd

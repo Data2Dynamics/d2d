@@ -93,7 +93,7 @@ end
 
 function chi2 = arPLEMerit
 global ar
-if ar.config.fiterrors == 1 || sum(ar.qFit(ar.qError==1)==1)>0
+if ar.config.fiterrors == 1 || sum(ar.qFit(ar.qError==1)<2)>0
     chi2 = 2*ar.ndata*log(sqrt(2*pi)) + arGetMerit('chi2fit');
 % elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
 %     chi2 = 2*ar.ndata_err*log(sqrt(2*pi)) + arGetMerit('chi2fit');

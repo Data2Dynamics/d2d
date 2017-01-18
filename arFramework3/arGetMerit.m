@@ -174,7 +174,7 @@ switch lower(whichone)  % case insensitive
         if ~isempty(whichone)
             error('arGetMerit.m: whichone=%s is not implemented',whichone)
         else
-            if ar.config.fiterrors == -1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)==0) % if no error parameters fitted
+            if ar.config.fiterrors == -1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)==0) % if no error parameters fitted
                 meritval = meritvals.chi2_all;
                 meritLabel = '\chi^2_{total}';
                 if(~silent)
