@@ -15,9 +15,12 @@ ar_path = fileparts(which('arInit.m'));
 arFolderName = strsplit(ar_path,filesep);
 matpath = path;
 matpath = strsplit(matpath,pathsep);
-if ~isempty(strmatch(arFolderName{end},matpath))
-    warning('It seems that you specified the path to d2d using local paths, e.g. by addpath(''arFramework3). The path is now switch to a gloabl one.')
-    rmpath(arFolderName{end})
+if ~any(strcmp(ar_path,matpath))
+    warning('It seems that you specified the path to d2d using local paths, e.g. by addpath(''arFramework3''). The path is now switch to a gloabl one.')
+    path_id = ~cellfun(@isempty,regexp(matpath,[arFolderName{end} '$']));
+    if(~all(path_id)==0)
+        rmpath(matpath{path_id}) 
+    end
     addpath(ar_path)
 end
 

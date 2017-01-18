@@ -21,7 +21,7 @@ if arCheckVersion(true)~=1
         old_path = pwd;
         
         cd(ar_path)
-        flag = system('git pull');
+        flag = system('git pull origin master');
         cd(old_path)
     end
     if(isunix)

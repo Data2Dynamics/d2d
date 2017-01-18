@@ -98,14 +98,20 @@ function assigne_new_timepoints(tpoints, m, d)
 global ar
 ar.model(m).data(d).tExp = sort(tpoints(:));
 ar.model(m).data(d).yExp = zeros(length(tpoints), length(ar.model(m).data(d).y));
-ar.model(m).data(d).yExpStd = zeros(length(tpoints), length(ar.model(m).data(d).y));
+% ar.model(m).data(d).yExpStd = zeros(length(tpoints),
+% length(ar.model(m).data(d).y)); % don't overwrite exp. errors
 ar.model(m).data(d).yExpSimu = zeros(length(tpoints), length(ar.model(m).data(d).y));
 ar.model(m).data(d).ystdExpSimu = zeros(length(tpoints), length(ar.model(m).data(d).y));
 
 function simulate_data(m, d)
 global ar
+
+yExpStdSimu = ar.model(m).data(d).yExpStd;
+nosd = isnan(ar.model(m).data(d).yExpStd); % don't overwrite exp. errors by the error model
+yExpStdSimu(nosd) = ar.model(m).data(d).ystdExpSimu(nosd);
+
 ar.model(m).data(d).yExp = ar.model(m).data(d).yExpSimu + ...
-    randn(size(ar.model(m).data(d).yExpSimu)) .* ar.model(m).data(d).ystdExpSimu;
-ar.model(m).data(d).yExpStd = ar.model(m).data(d).ystdExpSimu;
+    randn(size(ar.model(m).data(d).yExpSimu)) .* yExpStdSimu;
+
 ar.model(m).data(d).tLim = ar.model(m).data(d).tLimExp;
 ar.model(m).data(d).tLim(2) = round(max(ar.model(m).data(d).tExp)*1.1);
