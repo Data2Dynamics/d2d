@@ -2,7 +2,7 @@
 % as a vector.
 %
 % Usage:
-%   arFindPar( (ar), names, (returnNames), (verbose), (dynamic), (exact) )
+%   arFindPar( (ar), names, (returnNames), (verbose), (dynamic), (exact), (preserve) )
 %
 % Example:
 %   arFindPar( ar, 'degrad' )
@@ -19,7 +19,7 @@
 %       Only returns dynamic parameters and returns them by name
 %
 % The argument ar is optional. If not specified, the global ar structure is
-% used.
+% used. The argument preserve preserves the ordering w.r.t. names.
 %
 % Note: If you wish to print formatted parameter values or get a parameter
 % value, use arGetPars or arPrint instead.
@@ -44,11 +44,11 @@ function olist = arFindPar( varargin )
         string = varargin{1};
     end
 
-    opts = argSwitch( {'names', 'verbose', 'dynamic', 'exact'}, varargin{2:end} );
+    opts = argSwitch( {'names', 'verbose', 'dynamic', 'exact', 'preserve'}, varargin{2:end} );
 
     list = ar.pLabel;
     
-    olist    = [];
+    olist = cell(1, numel(string));
     for b = 1 : length( string )
         for a = 1 : length( list )
             if ( opts.exact )
@@ -62,11 +62,17 @@ function olist = arFindPar( varargin )
             end
             if ~isempty( l )
                 if (~opts.dynamic || ar.qDynamic(a))
-                    olist = union( olist, a );
+                    olist{b} = a;
                 end
             end
         end
     end
+    
+    olist = [ olist{:} ];
+    if ( ~opts.preserve )
+        olist = unique( olist );
+    end
+    
     if ( opts.verbose )
         fprintf('%s\n', ar.pLabel{olist});
     end
