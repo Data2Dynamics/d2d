@@ -32,50 +32,12 @@ The Data2Dynamics software package is a collection of numerical methods for quan
 
 * The software is open source and free for non-commercial usage.
 
-## Example Applications
-
-[Brief summary of all available example models.](https://github.com/Data2Dynamics/d2d/wiki/Example models in D2D)
-
-The software and the theoretical concepts implemented therein were developed based on Systems Biology applications. Some of the applications are provided as examples and blue prints for new applications:
-
-* [IL-13 induced JAK2/STAT5 signaling model in MedB-1 cells](https://github.com/Data2Dynamics/d2d/wiki/Raia_CancerResearch2011) - Raia et al., Cancer Research 2010 
-
-* [Epo receptor model in BaF3 cells](https://github.com/Data2Dynamics/d2d/wiki/Becker_Science2010) - Becker et al., Science 2010
-
-* [Epo induced JAK2/STAT5 signaling model in CFU-E cells](https://github.com/Data2Dynamics/d2d/wiki/Bachmann_MSB2011) - Bachmann et al., Molecular Systems Biology 2011
-
-* [Epo induced JAK2/STAT5 signaling model in CFU-E and H838 cells](https://github.com/Data2Dynamics/d2d/wiki/Merkle_PCB2016) - Merkle et al., PLOS Computational Biology 2016
-
-* [STAT5 activation model in BaF3-EpoR cells](https://github.com/Data2Dynamics/d2d/wiki/Boehm_JProteomeRes2014) - Boehm et al., Journal of proteome research 2014
-
-* [JAK/STAT signaling model](https://github.com/Data2Dynamics/d2d/wiki/Swameye_PNAS2003) - Swameye et al., PNAS 2003
-
-* [Indigoidine synthesis in *E. coli*](https://github.com/Data2Dynamics/d2d/wiki/Beer_MolBioSyst2014) - Beer et al., Molecular BioSystems 2014
-
 The software was awarded twice as **best performer** in the *Dialogue for Reverse Engineering Assessments and Methods* ([DREAM](http://www.the-dream-project.org/)). 2011 in the *Estimation of Model Parameters Challenge* ([DREAM6](http://www.the-dream-project.org/challenges/dream6-estimation-model-parameters-challenge)) and 2012 in the *Network Topology and Parameter Inference Challenge* ([DREAM7](http://www.the-dream-project.org/challenges/network-topology-and-parameter-inference-challenge)). Read more about this in: Steiert B., et al. [Experimental Design for Parameter Estimation of Gene Regulatory Networks](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0040052). PLoS ONE 7(7), e40052, 2012
 
 ## Further topics
-* [Installation and system requirements](https://github.com/Data2Dynamics/d2d/wiki/Installation)
-* [Setting up models](https://github.com/Data2Dynamics/d2d/wiki/Setting up models)
-* [First steps](https://github.com/Data2Dynamics/d2d/wiki/First steps)
-* [Advanced events and pre-equilibration](https://github.com/Data2Dynamics/d2d/wiki/Advanced events and pre-equilibration)
-* [Computation of integration-based prediction bands](https://github.com/Data2Dynamics/d2d/wiki/Computation of integration-based prediction bands)
 
-## Frequently asked questions
-* [How is the architecture of the code and the most important commands?](https://github.com/Data2Dynamics/d2d/wiki/CodeArchitecture)
-* [What are the most important fields of the global variable ar?](https://github.com/Data2Dynamics/d2d/wiki/What are the most important fields of the variable ar%3F)
-* [What are the most important functions?](https://github.com/Data2Dynamics/d2d/wiki/What are the most important functions in d2d%3F)
-* [Optimization algorithms available in the d2d-framework](https://github.com/Data2Dynamics/d2d/wiki/Optimization algorithms available in the d2d-framework)
-* [Objective function, likelhood and chi-square in the d2d framework](https://github.com/Data2Dynamics/d2d/wiki/Objective function, likelhood and chi-square in the d2d framework)
-* [What's the meaning of ar.config.fiterrors?](https://github.com/Data2Dynamics/d2d/wiki/Meaning%20of%20ar.config.fiterrors)
-* [How to set up priors?](https://github.com/Data2Dynamics/d2d/wiki/Priors in the d2d framework)
-* [How to set up steady state constraints?](https://github.com/Data2Dynamics/d2d/wiki/How to set up steady state constraints) 
-* [How do I restart the solver upon a step input?](https://github.com/Data2Dynamics/d2d/wiki/How do I reset the solver upon a step input)
-* [How to deal with integrator tolerances?](https://github.com/Data2Dynamics/d2d/wiki/Integration tolerances and modification possibilities)
-* [How to implement a bolus injection?](https://github.com/Data2Dynamics/d2d/wiki/How to implement a bolus injection) 
-* [How to implement washing and an injection?](https://github.com/Data2Dynamics/d2d/wiki/How to implement washing and bolus injection) 
-* [How to implement a moment ODE model?](https://github.com/Data2Dynamics/d2d/wiki/How to implement a moment ODE model) 
-* [How to run PLE calculations on a Cluster?](https://github.com/Data2Dynamics/d2d/wiki/How to run PLE calculations on a Cluster)
+Please read the [Wiki](https://github.com/Data2Dynamics/d2d/wiki/Home/) if you are interested in details.
+
 
 ## Copyright notice
 Copyright © 2016 D2D development team. All rights reserved. [Copyright text and third party software license information.](https://github.com/Data2Dynamics/d2d/wiki/Copyright)
