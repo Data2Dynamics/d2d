@@ -31,7 +31,7 @@
 %                           compilation much more time intensive (hence it
 %                           is off by default).
 % 'ResamplingResolution'    Number of extra points to interpolate dose
-%                           response (default: 20)
+%                           response (default: 25)
 % 'RefineLog'               Perform the refinement on a log scale
 % 'expsplit'                Split of conditions into separate replicates
 %                           based on the column var specified in the next argument
@@ -147,7 +147,7 @@ opts = argSwitch( switches, extraArgs, description, 1, varargin );
 
 if ( opts.resampledoseresponse )
     if ( ~isnumeric( opts.resamplingresolution_args ) || isempty( opts.resamplingresolution_args ) )
-        opts.resamplingresolution = 20;
+        opts.resamplingresolution = 25;
     else
         opts.resamplingresolution = opts.resamplingresolution_args(1);
     end
@@ -846,14 +846,14 @@ if ( opts.resampledoseresponse )
             % Which columns define the conditions
             conds = qcond & ~responsePar;
 
-            % Grab unique conditions
-            [uniqueCondi, ~, ib] = unique( data( :, qcond & ~responsePar ), 'rows' );
-
+            % Grab unique conditions (note the inclusion of time)
+            [uniqueCondi, ~, ib] = unique( [times data( :, qcond & ~responsePar ) ], 'rows' );
             nConditions = size(uniqueCondi, 1);
 
             % For each unique condition determine the maximum and minimum value
             % of the response parameter
             extraData = NaN(nConditions*resolution, size(data,2));
+            extraTimes = NaN(nConditions*resolution, 1);
             for jui = 1 : length( uniqueCondi )
                 dataChunk = data( ib == jui, responsePar );
                 mi = min( dataChunk );
@@ -868,13 +868,17 @@ if ( opts.resampledoseresponse )
 
                 % Fill extra data with current condition
                 condition = uniqueCondi(jui,:);
-                extraData((jui-1)*resolution+1:jui*resolution, conds) = repmat(condition, resolution, 1);
+                extraData((jui-1)*resolution+1:jui*resolution, conds) = repmat(condition(2:end), resolution, 1);
+                extraTimes((jui-1)*resolution+1:jui*resolution) = repmat(condition(1), resolution, 1);
 
                 % Fill the dependent variable with the new dependent variable
                 % values
                 extraData((jui-1)*resolution+1:jui*resolution, responsePar) = extraPoints;
             end
         end
+        data = [ data ; extraData ];
+        dataCell = [ dataCell; cellfun(@num2str,num2cell(extraData), 'UniformOutput', false) ];
+        times = [ times ; extraTimes ];
     end
 end
 
