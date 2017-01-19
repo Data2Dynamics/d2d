@@ -11,6 +11,10 @@
 % doLegends     [true]
 % dynamics:     [true]
 % hs:           []      custom figure handels
+% 
+% 
+% Doku: 
+% https://github.com/Data2Dynamics/d2d/wiki/Plotting-options-and-the-meaning-of-ar.config.ploterrors
 
 function varargout = arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs)
 
@@ -92,6 +96,8 @@ else
 end
 hsnew = [];
 
+fiterrors = ar.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0);
+
 figcount = 1;
 for jm = 1:length(ar.model)
     ar.model(jm).chi2 = 0;
@@ -123,8 +129,7 @@ for jm = 1:length(ar.model)
                     if(ar.model(jm).data(jd).qFit(jy)==1)
                         chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2(jy);
                         ndata(jy) = ndata(jy) + ar.model(jm).data(jd).ndata(jy);
-                        if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
-                                (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
+                        if fiterrors == 1
                             chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2err(jy);
                         end
                     end
@@ -159,6 +164,9 @@ for jm = 1:length(ar.model)
         
         didPlot = false;
         
+        % jype = 1: data y is plotted
+        % jype = 2: dynamics x is plotted
+        % jype = 3: v is plotted
         if(isfield(ar.model(jm),'data'))
             jtypes = 1:3;
         else
@@ -166,6 +174,11 @@ for jm = 1:length(ar.model)
         end
         
         for jtype = jtypes
+            if jtype ==1
+                plotopt_str = ['_ploterrors' num2str(ar.config.ploterrors) '_fiterrors' num2str(ar.config.fiterrors)];
+            else
+                plotopt_str = '';
+            end
             
             % legends handles and labels
             Clegend = zeros(1,length(dr_times)*length(conditions));
@@ -175,18 +188,10 @@ for jm = 1:length(ar.model)
                 didPlot = true;
                 
                 % setup figure
-                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) ||...
-                        (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
-                    [h, fastPlotTmp] = arRaiseFigure(ar.model(jm).plot(jplot), ...
-                        [fighandel_name{jtype} 'CI'], ['CI-' fig_name{jtype} ar.model(jm).plot(jplot).name], ...
-                        figcount, fastPlot, jtype, hs);
-                    ar.model(jm).plot(jplot).([fighandel_name{jtype} 'CI']) = h;
-                else
-                    [h, fastPlotTmp] = arRaiseFigure(ar.model(jm).plot(jplot), ...
-                        fighandel_name{jtype}, [fig_name{jtype} ar.model(jm).plot(jplot).name], ...
-                        figcount, fastPlot, jtype, hs);
-                    ar.model(jm).plot(jplot).(fighandel_name{jtype}) = h;
-                end
+                [h, fastPlotTmp] = arRaiseFigure(ar.model(jm).plot(jplot), ...
+                    [fighandel_name{jtype} ], [fig_name{jtype} ar.model(jm).plot(jplot).name plotopt_str], ...
+                    figcount, fastPlot, jtype, hs);
+                ar.model(jm).plot(jplot).([fighandel_name{jtype}]) = h;
                 hsnew(end+1) = h; %#ok<AGROW>
                 
                 % plotting
@@ -208,6 +213,11 @@ for jm = 1:length(ar.model)
                         
                         % get data
                         if(qDR)
+                            plotopt = NaN(1,size(ar.model(jm).data(jd).yExpStd,2));
+                            for jy=1:size(ar.model(jm).data(jd).yExpStd,2)
+                                plotopt(jy) = arWhichYplot(jm,ds,[],jy);
+                            end
+                            
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, qFit, yExpHl] = ...
                                 arGetDataDoseResponse(jm, ds, dr_times(jt), ...
                                 ar.model(jm).plot(jplot).dLink, logplotting_xaxis, jtype);
@@ -226,6 +236,11 @@ for jm = 1:length(ar.model)
                             y_ppl_ub = [];
                             y_ppl_lb = [];
                         else
+                            plotopt = NaN(1,size(ar.model(jm).data(jd).yExpStd,2));
+                            for jy=1:size(ar.model(jm).data(jd).yExpStd,2)
+                                plotopt(jy) = arWhichYplot(jm,jd,[],jy);
+                            end
+                            
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, dydt, ...
                                 y_ssa, y_ssa_lb, y_ssa_ub, qFit, t_ppl, y_ppl_ub, y_ppl_lb] = arGetData(jm, jd, jtype);
                             zero_break = [];
@@ -248,19 +263,12 @@ for jm = 1:length(ar.model)
                         end
                         
                         % call arPlotTrajectories
-                        if(ar.config.useFitErrorMatrix==0)
-                            fiterrors = ar.config.fiterrors;
-                            ploterrors = ar.config.ploterrors;
-                        else
-                            fiterrors = ar.config.fiterrors_matrix(jm,jd);
-                            ploterrors = ar.config.ploterrors_matrix(jm,jd);
-                        end
                         [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ...
                             length(dr_times)*length(jcs), ...
                             t, y, ystd, lb, ub, nfine_dr_plot, ...
                             nfine_dr_method, tExp, yExp, yExpHl, yExpStd, ...
                             y_ssa, y_ssa_lb, y_ssa_ub, ...
-                            ploterrors, qUnlog, qLog, qLogPlot, qFit, ...
+                            plotopt, qUnlog, qLog, qLogPlot, qFit, ...
                             zero_break, fastPlotTmp, hys, hystds, hysss, dydt, ...
                             jt==length(dr_times) && jc==jcs(end), qDR, ndata, chi2, ...
                             tUnits, response_parameter, yLabel, yNames, yUnits, ...
@@ -338,18 +346,10 @@ for jm = 1:length(ar.model)
                 
                 % save figure
                 if(saveToFile)
-                    if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) ||...
-                            (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
-                        [ ar.model(jm).plot(jplot).(['savePath_Fig' savepath_name{jtype} 'CI']), ...
-                            ar.model(jm).plot(jplot).nRows, ...
-                            ar.model(jm).plot(jplot).nCols ] = ...
-                            arSaveFigure(h, ar.model(jm).plot(jplot).name, ['/FiguresCI/' savepath_name{jtype}]);
-                    else
-                        [ ar.model(jm).plot(jplot).(['savePath_Fig' savepath_name{jtype}]), ...
-                            ar.model(jm).plot(jplot).nRows, ...
-                            ar.model(jm).plot(jplot).nCols ] = ...
-                            arSaveFigure(h, ar.model(jm).plot(jplot).name, ['/Figures/' savepath_name{jtype}]);
-                    end
+                    [ ar.model(jm).plot(jplot).(['savePath_Fig' savepath_name{jtype} num2str(round(median(plotopt)))]), ...
+                        ar.model(jm).plot(jplot).nRows, ...
+                        ar.model(jm).plot(jplot).nCols ] = ...
+                        arSaveFigure(h, ar.model(jm).plot(jplot).name, ['/Figures/',savepath_name{jtype},plotopt_str]);
                 end
             else
                 if(isfield(ar.model(jm).plot(jplot), fighandel_name{jtype}))

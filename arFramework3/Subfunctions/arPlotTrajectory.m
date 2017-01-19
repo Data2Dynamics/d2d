@@ -1,5 +1,5 @@
 function [hy, hystd, hyss] = arPlotTrajectory(jy, t, y, ystd, lb, ub, tExp, yExp, yExpHl, yExpStd, ...
-    y_ssa, y_ssa_lb, y_ssa_ub, ploterrors, Clines, ClinesExp, qUnlog, qLog, hy, hystd, hyss, dydt, ...
+    y_ssa, y_ssa_lb, y_ssa_ub, plotopt, Clines, ClinesExp, qUnlog, qLog, hy, hystd, hyss, dydt, ...
     qFit, zero_break, t_ppl, y_ppl_ub, y_ppl_lb)
 
 fastPlot = false;
@@ -13,8 +13,10 @@ if(~isempty(qFit))
     end
 end
 
+
+
 % plot ssa
-if(~isempty(y_ssa) && ploterrors==1 &&  sum(~isnan(y_ssa))>0)
+if(~isempty(y_ssa) && any(plotopt(jy)==[3,5]) &&  sum(~isnan(y_ssa))>0)
     if(~isempty(qUnlog) && qUnlog(jy))
         y_ssa = 10.^y_ssa;
     end
@@ -59,7 +61,7 @@ tmpy(isinf(tmpy)) = nan;
 if(isempty(hy))
     hy = plot(t, tmpy, Clines{:});
     %plot data points of model prediction profile likelihood as stars
-    if(~isempty(t_ppl))
+    if(~isempty(t_ppl)  & any(plotopt(jy)==[4,5]))
         if(~isempty(qUnlog) && qUnlog(jy))
             hyss = patch([t_ppl(:,jy) ; flipud(t_ppl(:,jy))], [10.^y_ppl_lb(:,jy); flipud(10.^y_ppl_ub(:,jy))], ones(size([y_ppl_lb(:,jy); y_ppl_ub(:,jy)])));             
         else
@@ -67,7 +69,7 @@ if(isempty(hy))
         end
        set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2,'LineStyle','none','Marker','*');
     end
-    if(ploterrors ~= 1)
+    if(any(plotopt(jy) == [3,5]))
         set(hy, 'LineWidth', 1.5);
     end 
 else
@@ -94,12 +96,12 @@ else
 end
 
 % plot error bands
-if(ploterrors ~= 1)
+if any(plotopt(jy)==[3,4,5])
     tmpx = [t(:); flipud(t(:))];
     tmpy = [];
-    if(ploterrors==0 && ~isempty(ystd))
+    if(any(plotopt(jy)==[3,5]) && ~isempty(ystd))
         tmpy = [y(:,jy) + ystd(:,jy); flipud(y(:,jy) - ystd(:,jy))];
-    elseif(ploterrors==-1 && ~isempty(lb) && ~isempty(ub))
+    elseif(plotopt(jy)==4 && ~isempty(lb) && ~isempty(ub))
         tmpy = [ub(:,jy); flipud(lb(:,jy))];
     end
     if(~isempty(tmpy))
@@ -148,12 +150,12 @@ if(~isempty(yExp) && ~fastPlot)
         yExp = log10(yExp);
         yExpHl = log10(yExpHl);
     end
-    if(ploterrors ~= 1)
+    if(any(plotopt(jy)==[1,3,4]))
         plot(tExp, yExp(:,jy), ClinesExp{:},'MarkerSize',markersize);
         if(sum(~isnan(yExpHl))>0)
             plot(tExp, yExpHl(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',markersize+6);
         end
-    else
+    elseif any(plotopt(jy)==[2,5])
         errorbar(tExp, yExp(:,jy), yExpStd(:,jy), ClinesExp{:},'MarkerSize',markersize);
         if(sum(~isnan(yExpHl))>0)
             errorbar(tExp, yExpHl(:,jy), yExpStd(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',markersize+6);

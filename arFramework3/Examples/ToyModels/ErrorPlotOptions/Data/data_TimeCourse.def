@@ -1,0 +1,19 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR
+t	T	"min"	"time"	0	100
+
+INPUTS
+
+OBSERVABLES
+ySomeErrors	C	"au"	"conc."	0	0			"Stim1"
+yNoErrors	C	"au"	"conc."	0	0			"Stim2"
+yAllErrors	C	"au"	"conc."	0	0			"Stim3"
+
+ERRORS
+ySomeErrors    	"sd_stim1"
+yNoErrors    	"sd_stim2"
+yAllErrors    	"sd_stim3"
+
+CONDITIONS
