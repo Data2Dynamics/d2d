@@ -13,8 +13,6 @@ if(~isempty(qFit))
     end
 end
 
-
-
 % plot ssa
 if(~isempty(y_ssa) && any(plotopt(jy)==[3,5]) &&  sum(~isnan(y_ssa))>0)
     if(~isempty(qUnlog) && qUnlog(jy))

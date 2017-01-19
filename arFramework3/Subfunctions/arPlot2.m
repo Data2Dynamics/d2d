@@ -213,14 +213,21 @@ for jm = 1:length(ar.model)
                         
                         % get data
                         if(qDR)
-                            plotopt = NaN(1,size(ar.model(jm).data(jd).yExpStd,2));
-                            for jy=1:size(ar.model(jm).data(jd).yExpStd,2)
-                                plotopt(jy) = arWhichYplot(jm,ds,[],jy);
-                            end
                             
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, qFit, yExpHl] = ...
                                 arGetDataDoseResponse(jm, ds, dr_times(jt), ...
                                 ar.model(jm).plot(jplot).dLink, logplotting_xaxis, jtype);
+                            
+                            plotopt = NaN(1,size(y,2));
+                            if jtype ==1
+                                for jy=1:size(y,2)
+                                    plotopt(jy) = arWhichYplot(jm,ds,[],jy);
+                                end
+                            else
+                                for jy=1:size(y,2)
+                                    plotopt(jy) = 1;
+                                end
+                            end
                             
                             % TODO
                             t_ppl = [];
@@ -236,13 +243,18 @@ for jm = 1:length(ar.model)
                             y_ppl_ub = [];
                             y_ppl_lb = [];
                         else
-                            plotopt = NaN(1,size(ar.model(jm).data(jd).yExpStd,2));
-                            for jy=1:size(ar.model(jm).data(jd).yExpStd,2)
-                                plotopt(jy) = arWhichYplot(jm,jd,[],jy);
-                            end
-                            
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, dydt, ...
                                 y_ssa, y_ssa_lb, y_ssa_ub, qFit, t_ppl, y_ppl_ub, y_ppl_lb] = arGetData(jm, jd, jtype);
+                            plotopt = NaN(1,size(y,2));
+                            if jtype ==1
+                                for jy=1:size(y,2)
+                                    plotopt(jy) = arWhichYplot(jm,jd,[],jy);
+                                end
+                            else
+                                for jy=1:size(y,2)
+                                    plotopt(jy) = 1;
+                                end
+                            end
                             zero_break = [];
                         end
                         [tUnits, response_parameter, yLabel, yNames, yUnits, iy, ...
@@ -346,10 +358,17 @@ for jm = 1:length(ar.model)
                 
                 % save figure
                 if(saveToFile)
-                    [ ar.model(jm).plot(jplot).(['savePath_Fig' savepath_name{jtype} num2str(round(median(plotopt)))]), ...
+                    if jtype == 1
+                        field = ['savePath_Fig' savepath_name{jtype} num2str(round(median(plotopt)))];
+                        pfad = ['/Figures/',savepath_name{jtype},plotopt_str];
+                    else
+                        field = ['savePath_Fig' savepath_name{jtype}];
+                        pfad = ['/Figures/',savepath_name{jtype}];
+                    end
+                    [ ar.model(jm).plot(jplot).(field), ...
                         ar.model(jm).plot(jplot).nRows, ...
                         ar.model(jm).plot(jplot).nCols ] = ...
-                        arSaveFigure(h, ar.model(jm).plot(jplot).name, ['/Figures/',savepath_name{jtype},plotopt_str]);
+                        arSaveFigure(h, ar.model(jm).plot(jplot).name, pfad);
                 end
             else
                 if(isfield(ar.model(jm).plot(jplot), fighandel_name{jtype}))
