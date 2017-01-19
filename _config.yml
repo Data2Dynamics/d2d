@@ -1,0 +1,8 @@
+title: D2D
+description: a modeling environment tailored to parameter estimation in dynamical systems
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-cayman
+
+gems:
+  - jekyll-mentions

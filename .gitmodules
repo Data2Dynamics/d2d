@@ -1,6 +1,6 @@
 [submodule "arFramework3/ThirdParty/matlab2tikz"]
 	path = arFramework3/ThirdParty/matlab2tikz
-	url = http://github.com/matlab2tikz/matlab2tikz
+	url = https://github.com/matlab2tikz/matlab2tikz
 [submodule "arFramework3/ThirdParty/parfor_progress"]
 	path = arFramework3/ThirdParty/parfor_progress
 	url = https://github.com/dumbmatter/parfor_progress
