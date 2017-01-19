@@ -854,7 +854,8 @@ if ( opts.resampledoseresponse )
             % of the response parameter
             extraData = NaN(nConditions*resolution, size(data,2));
             extraTimes = NaN(nConditions*resolution, 1);
-            for jui = 1 : length( uniqueCondi )
+
+            for jui = 1 : size( uniqueCondi, 1 )
                 dataChunk = data( ib == jui, responsePar );
                 mi = min( dataChunk );
                 ma = max( dataChunk );
