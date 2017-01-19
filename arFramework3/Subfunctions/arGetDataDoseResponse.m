@@ -87,12 +87,31 @@ for jd = ds
                     yExpHl(ccount,:) = yExp(ccount,:);                 %#ok<AGROW>
                 end
             end
-            if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==-1) || ...
-                        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==-1) )
-                yExpStd(ccount,:) = ar.model(jm).data(jd).yExpStd(jt,:); %#ok<AGROW>
-            else
-                yExpStd(ccount,:) = ar.model(jm).data(jd).ystdExpSimu(jt,:); %#ok<AGROW>
+            
+%             if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==-1) || ...
+%                         (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==-1) )
+%                 yExpStd(ccount,:) = ar.model(jm).data(jd).yExpStd(jt,:); %#ok<AGROW>
+%             else
+%                 yExpStd(ccount,:) = ar.model(jm).data(jd).ystdExpSimu(jt,:); %#ok<AGROW>
+%             end
+            
+            if ar.config.fiterrors==-1
+                yExpStd(ccount,:) = ar.model(jm).data(jd).yExpStd(jt,:);
+            elseif any(ar.config.fiterrors == [0,1])
+                yExpStd(ccount,:) = nan*ar.model(jm).data(jd).yExpStd(jt,:);
+                
+                if  ar.config.ploterrors==1 || ar.config.fiterrors==1% error model as error bars only if "ploterrors==1"
+                    if(isfield(ar.model(jm).data(jd),'ystdExpSimu'))
+                        yExpStd(ccount,:) = ar.model(jm).data(jd).ystdExpSimu(jt,:);
+                    end
+                end
+                
+                if ar.config.fiterrors == 0
+                    notnan = ~isnan(ar.model(jm).data(jd).yExpStd(jt,:));
+                    yExpStd(ccount,notnan) = ar.model(jm).data(jd).yExpStd(jt,notnan);
+                end
             end
+            
         else
             tExp = [];
             yExp = [];

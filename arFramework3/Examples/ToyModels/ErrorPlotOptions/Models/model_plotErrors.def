@@ -1,0 +1,38 @@
+DESCRIPTION
+"model .def file template"
+
+PREDICTOR
+t	T	"min"	"time"	0	100
+
+COMPARTMENTS
+cyt	V	"pl"	"vol."	1
+
+STATES
+Prot1	C	"nM"	"conc."	cyt	1	"Protein 1" 1
+Prot2	C	"nM"	"conc."	cyt	1	"Protein 2" 1
+Prot3	C	"nM"	"conc."	cyt	1	"Protein 3" 1
+
+INPUTS
+Stim1	C	"nM"	"conc."	"(1-exp(-t/tau1a))*exp(-t/tau1b)"
+Stim2	C	"nM"	"conc."	"(1-exp(-t/tau2a))*exp(-t/tau2b)"
+Stim3	C	"nM"	"conc."	"(1-exp(-t/tau3a))*exp(-t/tau3b)"
+
+REACTIONS
+	->	Prot1	CUSTOM "k1 * Stim1 * dosis"	"Reaction 1"
+Prot1	->	Prot2	CUSTOM "k2 * Prot1 * Stim2"	"Reaction 2"
+Prot2	->	Prot3 	CUSTOM "k3 * Prot2 * Stim3"	"Reaction 3"
+
+DERIVED
+
+OBSERVABLES
+// meaning of the columns:
+// y name	yunit1	yunit2	yunit3	normal.	logploting&logfitting	obs_fun
+        
+ERRORS
+
+
+
+CONDITIONS
+init_Prot1      "0"
+init_Prot2      "0"
+init_Prot3      "0"

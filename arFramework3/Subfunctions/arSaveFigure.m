@@ -97,6 +97,8 @@ for ia = 1:length(myaxes)
     end
 end
 
+%                 suptitle(sprintf('ploterrors=%d, fiterrors=%d',ar.config.ploterrors,ar.config.fiterrors));
+
 if ( useNewExport )
     if ~isempty( myLegend )
         [indCol, indRow] = min(maxCol);

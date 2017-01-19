@@ -1,3 +1,6 @@
+% jype = 1: data y is plotted
+% jype = 2: dynamics x is plotted
+% jype = 3: v is plotted
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, ...
     yExpHl, dydt, y_ssa, y_ssa_lb, y_ssa_ub, qFit, t_ppl, y_ppl_ub, y_ppl_lb] = arGetData(jm, jd, jtype)
 
@@ -62,7 +65,7 @@ if(jtype==1 && isfield(ar.model(jm), 'data') && isfield(ar.model(jm).data(jd),'t
             y_ppl_lb = ar.model(jm).data(jd).ppl.lb_fit_vpl;
         end
     end
-elseif(jtype==2)
+elseif(jtype==2) % x
     t = ar.model(jm).condition(jc).tFine;
     y = [ar.model(jm).condition(jc).uFineSimu ar.model(jm).condition(jc).xFineSimu ...
         ar.model(jm).condition(jc).zFineSimu];
@@ -79,7 +82,7 @@ elseif(jtype==2)
             y_ppl_lb = [nan(trows,length(ar.model(1).qPlotU)) ar.model(jm).condition(jc).ppl.lb_fit_vpl nan(trows,length(ar.model(1).qPlotZ))];
         end
     end
-elseif(jtype==3)
+elseif(jtype==3) % v
     t = ar.model(jm).condition(jc).tFine;
     y = ar.model(jm).condition(jc).vFineSimu;
     ystd = [];
@@ -95,16 +98,34 @@ if(jtype==1 && isfield(ar.model(jm), 'data') && isfield(ar.model(jm).data(jd), '
         ~isempty(ar.model(jm).data(jd).yExp))
     tExp = ar.model(jm).data(jd).tExp;
     yExp = ar.model(jm).data(jd).yExp;
-    if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==-1) || ...
-                        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==-1) )
+%     if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==-1) || ...
+%                         (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==-1) )
+%         yExpStd = ar.model(jm).data(jd).yExpStd;
+%     else
+%         if(isfield(ar.model(jm).data(jd),'ystdExpSimu'))
+%             yExpStd = ar.model(jm).data(jd).ystdExpSimu;
+%         else
+%             yExpStd = nan;
+%         end
+%     end
+
+    if ar.config.fiterrors==-1 % only exp. errors
         yExpStd = ar.model(jm).data(jd).yExpStd;
-    else
-        if(isfield(ar.model(jm).data(jd),'ystdExpSimu'))
-            yExpStd = ar.model(jm).data(jd).ystdExpSimu;
-        else
-            yExpStd = nan;
+    elseif any(ar.config.fiterrors == [0,1]) 
+        yExpStd = nan*ar.model(jm).data(jd).yExpStd;
+        
+        if  ar.config.ploterrors==1 || ar.config.fiterrors==1% error model as error bars only if "ploterrors==1" 
+            if(isfield(ar.model(jm).data(jd),'ystdExpSimu'))
+                yExpStd = ar.model(jm).data(jd).ystdExpSimu;
+            end
+        end
+        
+        if ar.config.fiterrors == 0 % overwrite by yExpStd if fiterrors==0
+            notnan = ~isnan(ar.model(jm).data(jd).yExpStd);
+            yExpStd(notnan) = ar.model(jm).data(jd).yExpStd(notnan);
         end
     end
+
     if(isfield(ar.model(jm).data(jd),'highlight'))
         hl = ar.model(jm).data(jd).highlight;
     else
