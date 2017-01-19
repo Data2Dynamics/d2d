@@ -62,7 +62,7 @@ function olist = arFindPar( varargin )
             end
             if ~isempty( l )
                 if (~opts.dynamic || ar.qDynamic(a))
-                    olist{b} = a;
+                    olist{b}(end+1) = a;
                 end
             end
         end
