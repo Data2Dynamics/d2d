@@ -866,14 +866,20 @@ if ( opts.resampledoseresponse )
                     ma = log10( max( [ma, 1e-8] ) );
                     extraPoints = 10.^(mi : (ma-mi)/(resolution-1) : ma);
                 end
+                
+                % Fix to make sure the length is correct for the next
+                % assignment. This is ok, since the unique will remove
+                % these points again at a later stage.
+                if ( mi == ma )
+                    extraPoints = repmat( mi, 1, resolution );
+                end
 
                 % Fill extra data with current condition
                 condition = uniqueCondi(jui,:);
                 extraData((jui-1)*resolution+1:jui*resolution, conds) = repmat(condition(2:end), resolution, 1);
                 extraTimes((jui-1)*resolution+1:jui*resolution) = repmat(condition(1), resolution, 1);
 
-                % Fill the dependent variable with the new dependent variable
-                % values
+                % Fill the dependent variable with the new dependent variable values
                 extraData((jui-1)*resolution+1:jui*resolution, responsePar) = extraPoints;
             end
         end
