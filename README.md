@@ -12,25 +12,33 @@
 
 ## Features
 
-The Data2Dynamics software package is a collection of numerical methods for quantitative dynamic modeling and a comprehensive model and data description language. The software facilitates the construction of dynamical models for biochemical reaction networks, but is not limited to this. Its key features are reliable and efficient model calibration and parameter estimation techniques using numerical optimization methods and the assessment of measurement and model uncertainties. To this end various approaches are provided.
+Major purpose: Establishing ODE models based on experimental data. The software is designed for biochemical reaction networks, but is not limited to this. 
 
-* Measurement noise of experimental data can either be explicitly provided or simultaneously estimated with the model dynamics. For the latter approach a parameterized noise model is used.
+Key feature: Reliable and efficient parameter estimation techniques and statistical assessment of parameter-, measurement- and prediction uncertainties.
 
+Some special features:
+
+* The framework can deal with xperimental error bars but also allows fitting of error parameters (error models).
+ 
 * Model inputs can be implemented as parameterized functions or cubic splines and can be estimated together with the model dynamics ([read more](https://github.com/Data2Dynamics/d2d/wiki/Input estimation)).
 
 * For model calibration, i.e. parameter estimation, both stochastic and deterministic numerical optimization algorithms can be used.
 
 * For uncertainty analysis of model parameter and predictions, the profile likelihood approach and Markov chain Monte Carlo sampling approaches are available ([read more](https://github.com/Data2Dynamics/d2d/wiki/Uncertainty analysis)).
 
-* For efficient numerical solution of the dynamics and derivate calculations parallelized numerical solvers are implemented ([read more](https://github.com/Data2Dynamics/d2d/wiki/Parallelization)). In addition some functions take advantage of PARFOR loops that are provided by the MATLAB Distributed Computing Toolbox ([read more](https://github.com/Data2Dynamics/d2d/wiki/Distributed Computing)).
+* Efficient numerical calculation of the dynamics and derivatives in a parallelized manner ([read more](https://github.com/Data2Dynamics/d2d/wiki/Parallelization)). 
 
-* For identification of cell type-specific parameters, L1 regularization of parameter fold-changes can be used ([read more](https://github.com/Data2Dynamics/d2d/wiki/L1 regularization)).
+* L1 regularization of parameter fold-changes can be used ([read more](https://github.com/Data2Dynamics/d2d/wiki/L1 regularization)).
 
-* L2 regularization and incorporation of prior knowledge by penalized maximum likehood / maximum a posteriori estimation
+* L2 regularization and incorporation of prior knowledge 
 
 * Identification of informative experimental designs
 
 * The software is open source and free for non-commercial usage.
+
+A more comprehensive description of features is available [features page](https://github.com/Data2Dynamics/d2d/wiki/Features) in the [Wiki](https://github.com/Data2Dynamics/d2d/wiki/Home).
+
+## Awards
 
 The software was awarded twice as **best performer** in the *Dialogue for Reverse Engineering Assessments and Methods* ([DREAM](http://www.the-dream-project.org/)). 2011 in the *Estimation of Model Parameters Challenge* ([DREAM6](http://www.the-dream-project.org/challenges/dream6-estimation-model-parameters-challenge)) and 2012 in the *Network Topology and Parameter Inference Challenge* ([DREAM7](http://www.the-dream-project.org/challenges/network-topology-and-parameter-inference-challenge)). Read more about this in: Steiert B., et al. [Experimental Design for Parameter Estimation of Gene Regulatory Networks](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0040052). PLoS ONE 7(7), e40052, 2012
 
