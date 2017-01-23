@@ -10,7 +10,7 @@
 
 function basepath = arSave(name, withSyms)
 
-global ar pleGlobals
+global ar
 
 if(~exist('withSyms','var'))
     withSyms = false;
@@ -28,8 +28,8 @@ if(isempty(ar.config.savepath)) % never saved before, ask for name
     else
         ar.config.savepath = ['./Results/' datestr(now, 30) '_noname'];
     end
-    arSaveFull(ar,pleGlobals,withSyms);
-    arSaveParOnly(ar, ar.config.savepath, pleGlobals);
+    arSaveFull(ar,withSyms);
+    arSaveParOnly(ar, ar.config.savepath);
 else
     if(exist('name','var')) % saved before, but new name give
         if(~strcmp(name, 'current'))
@@ -39,8 +39,8 @@ else
                 ar.config.savepath = ['./Results/' datestr(now, 30) '_noname'];
             end
         end
-        arSaveFull(ar,pleGlobals,withSyms);
-        arSaveParOnly(ar, ar.config.savepath, pleGlobals);
+        arSaveFull(ar,withSyms);
+        arSaveParOnly(ar, ar.config.savepath);
         
     else
         if(nargout == 0) % saved before, ask for new name give
@@ -51,14 +51,14 @@ else
                 ar.config.savepath = ['./Results/' datestr(now, 30) '_' name];
             end
             
-            arSaveFull(ar,pleGlobals,withSyms);     
-            arSaveParOnly(ar, ar.config.savepath, pleGlobals);
+            arSaveFull(ar,withSyms);     
+            arSaveParOnly(ar, ar.config.savepath);
         else
             if(~exist(ar.config.savepath, 'dir')) 
                 % saved before, path output requested, 
                 % however save path does not exist anymore
-                arSaveFull(ar,pleGlobals,withSyms);
-                arSaveParOnly(ar, ar.config.savepath, pleGlobals);
+                arSaveFull(ar,withSyms);
+                arSaveParOnly(ar, ar.config.savepath);
             end
         end
     end
@@ -69,9 +69,8 @@ if(nargout>0)
 end
 
 % full save
-function arSaveFull(ar,pleGlobals,withSyms)
+function arSaveFull(ar,withSyms)
 % global ar
-% global pleGlobals  %#ok<NUSED>
 
 % remove storage-consuming fields in global ar
 % that are non-essential
@@ -96,15 +95,15 @@ if(~withSyms)
         end
     end
 end
-arDoSaving(ar,pleGlobals)
+arDoSaving(ar)
 
-% This function does not use ar and pleGlobals as global variables for
+% This function does not use ar as global variables for
 % being able to do manipulations without altering the global variables.
-function arDoSaving(ar,pleGlobals)
-[ar,pleGlobals] = arDeleteGraphicsHandles(ar,pleGlobals);
+function arDoSaving(ar)
+ar = arDeleteGraphicsHandles(ar);
 
 % warning off MATLAB:Figure:FigureSavedToMATFile
-save([ar.config.savepath '/workspace.mat'],'ar','pleGlobals','-v7.3');
+save([ar.config.savepath '/workspace.mat'],'ar','-v7.3');
 % warning on MATLAB:Figure:FigureSavedToMATFile
 
 fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
@@ -112,16 +111,7 @@ fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
 
 
 % save only parameters
-function arSaveParOnly(ar2, savepath, pleGlobals2)
-if nargin>2
-    if(isfield(pleGlobals2,'chi2s'))
-        pleGlobals.chi2s = pleGlobals2.chi2s;
-    else
-        pleGlobals = [];
-    end
-else
-    pleGlobals = [];
-end
+function arSaveParOnly(ar2, savepath)
 ar = struct([]);
 ar(1).pLabel = ar2.pLabel;
 ar.p = ar2.p;
@@ -164,16 +154,16 @@ else
     ar.config.fiterrors_matrix = ar2.config.fiterrors_matrix;
     ar.config.ploterrors_matrix = ar2.config.ploterrors_matrix; 
 end
-save([savepath '/workspace_pars_only.mat'],'ar','pleGlobals','-v7.3');
+save([savepath '/workspace_pars_only.mat'],'ar','-v7.3');
 
 
 
-% This function deletes the graphcis handles in ar and pleGlobals which are
+% This function deletes the graphcis handles in ar which are
 % since R2014b objects that are displayed when loaded in a workspace.
 % 
 % This function prevents this.
 
-function [ar,pleGlobals] = arDeleteGraphicsHandles(ar,pleGlobals)
+function [ar] = arDeleteGraphicsHandles(ar)
 
 if isstruct(ar)
     for m=1:length(ar.model)
@@ -200,12 +190,4 @@ if isstruct(ar)
     end
 end
 
-if exist('pleGlobals','var') && isstruct(pleGlobals)
-    if isfield(pleGlobals,'fighandel_multi')
-        if ~isempty(pleGlobals.fighandel_multi)
-%             delete(pleGlobals.fighandel_multi);% this line would close the plot
-            pleGlobals.fighandel_multi = [];
-        end
-    end
-end
 

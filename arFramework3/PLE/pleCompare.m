@@ -11,7 +11,7 @@ if(nargin==0) || (isempty(ples) || isempty(labels))
         fname = ['./Results/' filenames{j} '/PLE/results.mat'];
         if(exist(fname,'file'))
             tmpple = load(fname);
-            ples{end+1} = tmpple.pleGlobals; %#ok<AGROW>
+            ples{end+1} = tmpple.ar.ple; %#ok<AGROW>
             labels{end+1} = filenames{j}; %#ok<AGROW>
         else
             fprintf('%s does not contains PLE\n', filenames{j});

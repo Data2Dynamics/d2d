@@ -3,7 +3,6 @@
 function arPlotMarginalized(jks, Nthinning)
 
 global ar
-global pleGlobals;
 
 if(~exist('Nthinning','var'))
     Nthinning = 1;
@@ -34,11 +33,11 @@ end
 count = 1;
 for jk=jks
     
-    if(exist('pleGlobals','var') && ~isempty(pleGlobals) && ...
-            isfield(pleGlobals, 'chi2s') && ...
-            ~isempty(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}))
-        chi2s_ple = pleGlobals.chi2s{jk} - pleGlobals.chi2;
-        ps_ple = pleGlobals.ps{jk};
+    if(exist('ar.ple','var') && ~isempty(ar.ple) && ...
+            isfield(ar.ple, 'chi2s') && ...
+            ~isempty(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}))
+        chi2s_ple = ar.ple.chi2s{jk} - ar.ple.chi2;
+        ps_ple = ar.ple.ps{jk};
     else
         chi2s_ple = [];
         ps_ple = [];
@@ -78,11 +77,11 @@ for jk=jks
         hold on
         
         % thresholds
-        if(pleGlobals.plot_point)
-            plot(xlim, transformFromLog([0 0]+min(chi2s_ple)+pleGlobals.dchi2_point)*llhscale, 'r--', 'LineWidth', 1)
+        if(ar.ple.plot_point)
+            plot(xlim, transformFromLog([0 0]+min(chi2s_ple)+ar.ple.dchi2_point)*llhscale, 'r--', 'LineWidth', 1)
         end
-        if(pleGlobals.plot_simu)
-            plot(xlim, transformFromLog([0 0]+min(chi2s_ple)+pleGlobals.dchi2)*llhscale, 'r-.', 'LineWidth', 1)
+        if(ar.ple.plot_simu)
+            plot(xlim, transformFromLog([0 0]+min(chi2s_ple)+ar.ple.dchi2)*llhscale, 'r-.', 'LineWidth', 1)
         end
     end
     
@@ -107,10 +106,10 @@ for jk=jks
         end
         if(~isempty(ps_ple))
             strleg{end+1} = 'profile likelihood';
-            if(pleGlobals.plot_point)
+            if(ar.ple.plot_point)
                 strleg{end+1} = 'profile likelihood threshold (point-wise)';
             end
-            if(pleGlobals.plot_simu)
+            if(ar.ple.plot_simu)
                 strleg{end+1} = 'profile likelihood threshold (simultaneous)';
             end
         end
@@ -130,24 +129,24 @@ end
 
 
 function h = myRaiseFigure(figname)
-global pleGlobals
+global ar
 openfigs = get(0,'Children');
 
 figcolor = [1 1 1];
 
-if(isfield(pleGlobals, 'fighandel_multi') && ~isempty(pleGlobals.fighandel_multi) && ...
-    pleGlobals.fighandel_multi ~= 0 && ...
-    sum(pleGlobals.fighandel_multi==openfigs)>0 && ...
-    strcmp(get(pleGlobals.fighandel_multi, 'Name'), figname))
+if(isfield(ar.ple, 'fighandel_multi') && ~isempty(ar.ple.fighandel_multi) && ...
+    ar.ple.fighandel_multi ~= 0 && ...
+    sum(ar.ple.fighandel_multi==openfigs)>0 && ...
+    strcmp(get(ar.ple.fighandel_multi, 'Name'), figname))
 
-    h = pleGlobals.fighandel_multi;
+    h = ar.ple.fighandel_multi;
     figure(h);
 else
     h = figure('Name', figname, 'NumberTitle','off', ...
         'Units', 'normalized', 'Position', ...
         [0.1 0.1 0.6 0.8]);
     set(h,'Color', figcolor);
-    pleGlobals.fighandel_multi = h;
+    ar.ple.fighandel_multi = h;
 end
 
 

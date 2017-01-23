@@ -70,13 +70,13 @@ arWaitbar(-1);
 
 function p = makerange(N,parindex, mode, range)
 global ar
-global pleGlobals
+global ar
 
 if(mode==1)
     p = linspace(ar.lb(parindex), ar.ub(parindex), N);
 elseif(mode==2)
-    p = linspace(min(pleGlobals.ps{parindex}(:,parindex)), ...
-        max(pleGlobals.ps{parindex}(:,parindex)), N);
+    p = linspace(min(ar.ple.ps{parindex}(:,parindex)), ...
+        max(ar.ple.ps{parindex}(:,parindex)), N);
 elseif(mode==3)
     p = linspace(range(1), range(2), N);
 end

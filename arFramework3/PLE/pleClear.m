@@ -4,4 +4,4 @@
 
 function pleClear
 
-clear global pleGlobals
+clear 

@@ -19,7 +19,7 @@ if(~exist('dtol','var') || isempty(dtol))
     dtol = [.1,1,2];
 end
 
-global ar pleGlobals
+global ar 
 
 atolIn = ar.config.atol+0.0;
 rtolIn = ar.config.rtol+0.0;
@@ -43,8 +43,8 @@ for i=1:length(dtol)
         res(:,i) = ar.res;
         sres(:,:,i)  = ar.sres;
         chi2(i) = arGetMerit('chi2fit');
-        if ~isempty(pleGlobals) && isfield(pleGlobals,'merit_fkt')
-            pleMerit(i) = feval(pleGlobals.merit_fkt);
+        if ~isempty(ar.ple) && isfield(ar.ple,'merit_fkt')
+            pleMerit(i) = feval(ar.ple.merit_fkt);
         end
     catch ERR
         ar.config.atol = atolIn;
@@ -69,7 +69,7 @@ d.pleMerit = max(range(pleMerit));
 
 fprintf('Maximal absolute impact of the tolerances:\n');
 fprintf('%20s\t%25s:\t %e\n','chi2','(arGetMerit(''chi2fit''))',d.chi2);
-fprintf('%20s\t%25s:\t %e\n','pleMerit','(pleGlobals.merit_fkt)',d.pleMerit);
+fprintf('%20s\t%25s:\t %e\n','pleMerit','(ar.ple.merit_fkt)',d.pleMerit);
 fprintf('%20s\t%25s:\t %e\n','Residuals','(ar.res)',d.res);
 fprintf('%20s\t%25s:\t %e\n','Sensititivites','(ar.sres)',d.sres);
 

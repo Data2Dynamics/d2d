@@ -9,12 +9,11 @@
 function arPLEConfidence(jks, n, do_vali, do_refit_obs)
 
 global ar
-global pleGlobals
 
 if(isempty(ar))
 	error('please initialize by arInit')
 end
-if(isempty(pleGlobals))
+if(isempty(ar.ple))
 	error('PLE ERROR: please initialize')
 end
 
@@ -31,7 +30,7 @@ if(~exist('do_refit_obs','var'))
 	do_refit_obs = false;
 end
 
-jks = find(ismember(pleGlobals.p_labels, ar.pLabel(jks))); %R2013a compatible
+jks = find(ismember(ar.ple.p_labels, ar.pLabel(jks))); %R2013a compatible
 
 for jm=1:length(ar.model)
 	for jc = 1:length(ar.model(jm).condition)
@@ -69,27 +68,27 @@ pReset = ar.p;
 hbar = waitbar(0, 'Please wait...');
 
 for j = jks
-	if(j<=length(pleGlobals.chi2s) && ~isempty(pleGlobals.ps{j}))
+	if(j<=length(ar.ple.chi2s) && ~isempty(ar.ple.ps{j}))
 		% all non nans
-		chi2stmp = pleGlobals.chi2s{j}(~isnan(pleGlobals.chi2s{j}));
-		pstmp = pleGlobals.ps{j}(~isnan(pleGlobals.chi2s{j}),:);
+		chi2stmp = ar.ple.chi2s{j}(~isnan(ar.ple.chi2s{j}));
+		pstmp = ar.ple.ps{j}(~isnan(ar.ple.chi2s{j}),:);
 
 %         % cut out bounds
 %         jk = j;
-% 		qCloseToUB = pstmp > ones(length(chi2stmp),1) * (pleGlobals.ub - pleGlobals.dist_thres) & ...
-% 			ones(length(chi2stmp),1) * pleGlobals.q_fit==1;
-% 		qCloseToLB = pstmp < ones(length(chi2stmp),1) * (pleGlobals.lb + pleGlobals.dist_thres) & ...
-% 			ones(length(chi2stmp),1) * pleGlobals.q_fit==1;
+% 		qCloseToUB = pstmp > ones(length(chi2stmp),1) * (ar.ple.ub - ar.ple.dist_thres) & ...
+% 			ones(length(chi2stmp),1) * ar.ple.q_fit==1;
+% 		qCloseToLB = pstmp < ones(length(chi2stmp),1) * (ar.ple.lb + ar.ple.dist_thres) & ...
+% 			ones(length(chi2stmp),1) * ar.ple.q_fit==1;
 % 
 % 		qhitbound = false(size(pstmp));
-% 		qhitbound(:,pleGlobals.q_fit==1) = pleGlobals.gradient{jk}(~isnan(pleGlobals.chi2s{j}),pleGlobals.q_fit==1) > pleGlobals.grad_thres & qCloseToLB(:,pleGlobals.q_fit==1) | ...
-% 			pleGlobals.gradient{jk}(~isnan(pleGlobals.chi2s{j}),pleGlobals.q_fit==1) < -pleGlobals.grad_thres & qCloseToUB(:,pleGlobals.q_fit==1);
+% 		qhitbound(:,ar.ple.q_fit==1) = ar.ple.gradient{jk}(~isnan(ar.ple.chi2s{j}),ar.ple.q_fit==1) > ar.ple.grad_thres & qCloseToLB(:,ar.ple.q_fit==1) | ...
+% 			ar.ple.gradient{jk}(~isnan(ar.ple.chi2s{j}),ar.ple.q_fit==1) < -ar.ple.grad_thres & qCloseToUB(:,ar.ple.q_fit==1);
 % 
 % 		chi2stmp = chi2stmp(sum(qhitbound,2)==0);
 % 		pstmp = pstmp(sum(qhitbound,2)==0,:);
 
 		% cut below point-wise threshold
-		qbelow = chi2stmp < pleGlobals.chi2 + pleGlobals.dchi2_point;
+		qbelow = chi2stmp < ar.ple.chi2 + ar.ple.dchi2_point;
 		chi2stmp = chi2stmp(qbelow);
 		pstmp = pstmp(qbelow,:);
 
@@ -101,7 +100,7 @@ for j = jks
 
 		for jp = 1:size(pstmp,1)
 			hbar = waitbar(((j-1)*size(pstmp,1) + jp)/(size(pstmp,1)*length(jks)), hbar, 'Please wait...');
-            ar.p(ismember(ar.pLabel, pleGlobals.p_labels)) = pstmp(jp,ismember(pleGlobals.p_labels, ar.pLabel)); %R2013a compatible
+            ar.p(ismember(ar.pLabel, ar.ple.p_labels)) = pstmp(jp,ismember(ar.ple.p_labels, ar.pLabel)); %R2013a compatible
 			try
                 arSimu(false, true);
 				arSimu(false, false);

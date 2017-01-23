@@ -1,4 +1,4 @@
-% load model struct and last ple results
+% load model struct 
 %
 % WARNING: 
 % for some reason, after 
@@ -7,7 +7,7 @@
 % > global ar
 % has to be executed. 
 
-function [arout, pleGlobals] = arLoadFilename(filename)
+function arout = arLoadFilename(filename)
 
 arCheck;
 
@@ -19,4 +19,3 @@ S = load(['./Results/' filename '/workspace.mat']);
 arout = S.ar;
 fprintf('workspace loaded from file %s\n', filename);
 
-pleGlobals = pleLoad(arout);

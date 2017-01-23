@@ -55,7 +55,7 @@ arLoadPars('BestFit_zika_intermediate');
 % arPLEInit
 % 
 % % Set tolerances
-% pleGlobals.minstepsize(:) = 1e-5;
+% ar.ple.minstepsize(:) = 1e-5;
 % 
 % % calculate profiles
 % ple(find(ar.qFit==1),1e3);
