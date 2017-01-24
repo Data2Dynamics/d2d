@@ -165,6 +165,11 @@ for m=1:length(ar.model)
             ar.model(m).data(d).tFine = ...
                 linspace(ar.model(m).data(d).tLim(1), ar.model(m).data(d).tLim(2), ar.config.nFinePoints)';
             
+            % Add extra time points if desired
+            if isfield(ar.model(m).data(d), 'tExtra')
+                ar.model(m).data(d).tFine = union(ar.model(m).data(d).tFine, ar.model(m).data(d).tExtra);
+            end
+            
             ar.model(m).condition(ar.model(m).data(d).cLink).tFine = union( ... %R2013a compatible
                 ar.model(m).condition(ar.model(m).data(d).cLink).tFine, ...
                 ar.model(m).data(d).tFine);
@@ -238,6 +243,11 @@ for m=1:length(ar.model)
                 union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tEvents);
         end
         
+        % Add extra time points if desired
+        if isfield(ar.model(m).condition(c), 'tExtra')
+            ar.model(m).conditions(c).tFine = union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tExtra);
+        end
+        
         % link back time points
         for d=1:length(ar.model(m).data)
             if(isfield(ar.model(m).data(d), 'tExp'))
@@ -299,6 +309,11 @@ for m=1:length(ar.model)
             
             ar.model(m).condition(c).tFine = ...
                 union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tEvents);
+        end
+        
+        % Add extra time points if desired
+        if isfield(ar.model(m).condition(c), 'tExtra')
+            ar.model(m).conditions(c).tFine = union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tExtra);
         end
     end
 end
