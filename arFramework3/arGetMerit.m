@@ -178,7 +178,7 @@ switch lower(whichone)  % case insensitive
                 meritval = meritvals.chi2_all;
                 meritLabel = '\chi^2_{total}';
                 if(~silent)
-                    arFprintf(1, 'total chi^2 = %g, ', meritvals.chi2_all);
+                    arFprintf(1, 'total chi^2 = %g, %i data points, ', meritvals.chi2_all, meritvals.ndata);
                 end
             else
                 meritval = meritvals.loglik_all;
