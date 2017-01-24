@@ -445,8 +445,7 @@ if(isfield(ar.model, 'data'))
     end
 end
 
-if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1) || ...
-        (ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0) )
+if fiterrors == 1
     ar.chi2fit = ar.chi2 + ar.chi2err;
 else
     ar.chi2fit = ar.chi2;

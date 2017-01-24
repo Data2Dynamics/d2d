@@ -2,32 +2,39 @@
 %
 % arLoadData(name, m, extension, removeEmptyObs, opts)
 %
-% name                  filename of data definition file
-% m                     target position (int) for model                [last loaded model]
-%                       or: model name (string)
-% extension             data file name-extension: 'xls', 'csv'         ['xls']
-%                       'none' = don't load data                           
-% removeEmptyObs        remove observation without data                [false]
-% opts                  additional option flags
+% name                      filename of data definition file
+% m                         target position (int) for model                [last loaded model]
+%                           or: model name (string)
+% extension                 data file name-extension: 'xls', 'csv'         ['xls']
+%                           'none' = don't load data                           
+% removeEmptyObs            remove observation without data                [false]
+% opts                      additional option flags
 %
 % optional option flags are:
-% 'RemoveConditions'    This flag followed by a list of conditions will
-%                       allow you to filter the data that you load. Note
-%                       that the function takes both values, strings
-%                       or function handles. When you provide a function
-%                       handle, the function will be evaluated for each
-%                       condition value (in this case input_dcf). You
-%                       should make the function return 1 if the condition
-%                       is to be removed. Note that the input to the
-%                       function is a *string* not a number.
-% 'RemoveEmptyConds'    This flag allows you to remove conditions that have
-%                       no data points.
-% 'expsplit'            Split of conditions into separate replicates
-%                       based on the column var specified in the next argument
-%
-%       Example:
-%           arLoadData( 'mydata', 1, 'csv', true, 'RemoveConditions', ...
-%           {'input_il6', '0', 'input_dcf', @(dcf)str2num(dcf)>0};
+% 'RemoveConditions'        This flag followed by a list of conditions will
+%                           allow you to filter the data that you load. Note
+%                           that the function takes both values, strings
+%                           or function handles. When you provide a function
+%                           handle, the function will be evaluated for each
+%                           condition value (in this case input_dcf). You
+%                           should make the function return 1 if the condition
+%                           is to be removed. Note that the input to the
+%                           function is a *string* not a number.
+%                           Example:
+%                            arLoadData( 'mydata', 1, 'csv', true, 'RemoveConditions', ...
+%                            {'input_il6', '0', 'input_dcf', @(dcf)str2num(dcf)>0};
+% 'RemoveEmptyConds'        This flag allows you to remove conditions that have
+%                           no data points.
+% 'ResampleDoseResponse'    This flag allows you to increase the resolution
+%                           of dose responses for plotting purposes. Note
+%                           that this makes model evaluation and
+%                           compilation much more time intensive (hence it
+%                           is off by default).
+% 'ResamplingResolution'    Number of extra points to interpolate dose
+%                           response (default: 25)
+% 'RefineLog'               Perform the refinement on a log scale
+% 'expsplit'                Split of conditions into separate replicates
+%                           based on the column var specified in the next argument
 %
 % 'RemoveObservables'   This can be used to omit observables. Simply pass a
 %                       cell array with names of observables that should be 
@@ -123,17 +130,28 @@ else
     end
 end
 
-switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds', 'expsplit'};
-extraArgs = [ 1, 1, 1, 1, 0, 1 ];
+switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds', 'expsplit', 'resampledoseresponse', 'resamplingresolution', 'refinelog'};
+extraArgs = [ 1, 1, 1, 1, 0, 1, 0, 1, 0 ];
 description = { ...
     {'', 'Multiple shooting on'} ...
     {'', 'Ignoring specific conditions'} ...
     {'', 'Ignoring specific observables'} ...
     {'', 'Split data set into specific conditions'}, ...
     {'', 'Removing conditions without data'}, ...
-    {'', 'Splitting conditions by specific data column'} };
+    {'', 'Splitting conditions by specific data column'}, ...
+    {'', 'Resampling dose response'}, ...
+    {'', 'Resampling with custom resolution'}, ...
+    {'', 'Resampling on log scale'} };
     
 opts = argSwitch( switches, extraArgs, description, 1, varargin );
+
+if ( opts.resampledoseresponse )
+    if ( ~isnumeric( opts.resamplingresolution_args ) || isempty( opts.resamplingresolution_args ) )
+        opts.resamplingresolution = 25;
+    else
+        opts.resamplingresolution = opts.resamplingresolution_args(1);
+    end
+end
 
 if( opts.dppershoot )
     if( opts.dppershoot_args>0 )
@@ -667,7 +685,7 @@ if(~strcmp(extension,'none') && ( ...
         data = data(selected,:);
         dataCell = dataCell(selected,:);
     end
-    
+      
     % random effects
     prand = ar.model(m).data(d).prand;
     if(opts.splitconditions)
@@ -814,6 +832,63 @@ else
     qcond = ismember(header, pcond) | ismember(header, opts.removeconditions_args(1:2:end)); %R2013a compatible
 end
 
+% Refine dose responses if requested
+if ( opts.resampledoseresponse )
+    resolution = opts.resamplingresolution;
+    if ( ar.model(m).data(d).doseresponse == true )
+        responsePar = ismember( header, ar.model(m).data(d).response_parameter );
+        if ( sum( responsePar ) )
+            fprintf( '  => Refining dose response for %s\n', ar.model(m).data(d).response_parameter );
+            if ( sum( responsePar ) > 1 )
+                error( 'Response parameter ambiguous during dose response refinement' );
+            end
+
+            % Which columns define the conditions
+            conds = qcond & ~responsePar;
+
+            % Grab unique conditions (note the inclusion of time)
+            [uniqueCondi, ~, ib] = unique( [times data( :, qcond & ~responsePar ) ], 'rows' );
+            nConditions = size(uniqueCondi, 1);
+
+            % For each unique condition determine the maximum and minimum value
+            % of the response parameter
+            extraData = NaN(nConditions*resolution, size(data,2));
+            extraTimes = NaN(nConditions*resolution, 1);
+
+            for jui = 1 : size( uniqueCondi, 1 )
+                dataChunk = data( ib == jui, responsePar );
+                mi = min( dataChunk );
+                ma = max( dataChunk );
+                extraPoints = mi : (ma-mi)/(resolution-1) : ma;
+
+                if ( opts.refinelog )     
+                    mi = log10( max( [mi, 1e-8] ) );
+                    ma = log10( max( [ma, 1e-8] ) );
+                    extraPoints = 10.^(mi : (ma-mi)/(resolution-1) : ma);
+                end
+                
+                % Fix to make sure the length is correct for the next
+                % assignment. This is ok, since the unique will remove
+                % these points again at a later stage.
+                if ( mi == ma )
+                    extraPoints = repmat( mi, 1, resolution );
+                end
+
+                % Fill extra data with current condition
+                condition = uniqueCondi(jui,:);
+                extraData((jui-1)*resolution+1:jui*resolution, conds) = repmat(condition(2:end), resolution, 1);
+                extraTimes((jui-1)*resolution+1:jui*resolution) = repmat(condition(1), resolution, 1);
+
+                % Fill the dependent variable with the new dependent variable values
+                extraData((jui-1)*resolution+1:jui*resolution, responsePar) = extraPoints;
+            end
+        end
+        data = [ data ; extraData ];
+        dataCell = [ dataCell; cellfun(@num2str,num2cell(extraData), 'UniformOutput', false) ];
+        times = [ times ; extraTimes ];
+    end
+end
+
 if(sum(qcond) > 0)
     condi_header = header(qcond);
     if ~isempty(dataCell)
@@ -869,7 +944,7 @@ if(sum(qcond) > 0)
     if(size(condis,1)==0)
         return
     end
-    
+       
     active_condi = false(size(condis(1,:)));
     tmpcondi = condis(1,:);
     for j1=2:size(condis,1)
@@ -877,7 +952,7 @@ if(sum(qcond) > 0)
             active_condi(j2) = active_condi(j2) | (~strcmp(tmpcondi{j2}, condis{j1,j2}));
         end
     end
-    
+        
     for j=1:size(condis,1)
         
         arFprintf(2, 'local condition #%i:\n', j)

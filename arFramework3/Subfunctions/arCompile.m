@@ -494,10 +494,30 @@ includesstr=strrep(includesstr,'"', '');
 if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
     if(~ispc)
         % parallel code using POSIX threads for Unix type OS
-
-        mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
-            sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
-            which('udata.c'), which('arSimuCalc.c'), objectsstr{:});
+        chunkSize = getChunkSize( objectsstr );
+        chunks = ceil( numel( objectsstr ) / chunkSize );
+        if ( chunks > 1 )
+            % Link files in chunks to avoid exceeding maximum length (used
+            % when there are so many conditions that the command line
+            % becomes too big)
+            fprintf( 'File string too long for command line. Compiling %d libraries first ...\n', chunks );
+            libNames = cell(1, chunks);
+            for a = 1 : chunks
+                fprintf( 'Assembling chunk %d/%d into library\n', a, chunks );
+                libNames{a} = ['Compiled/' c_version_code '/lib_' num2str(a) '_' ar.fkt(end-31:end) '.o '];
+                curChunk = cellfun(@(st)[st, ' '], objectsstr( (a-1)*chunkSize+1 : min(a*chunkSize, numel(objectsstr)) ), 'UniformOutput', false);
+                system(['ld -r ' [ curChunk{:} ] '-o ' libNames{a}]);
+            end
+            
+            fprintf( 'Compiling system\n' );
+            mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
+                sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
+                which('udata.c'), which('arSimuCalc.c'), libNames{:});
+        else 
+            mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
+                sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
+                which('udata.c'), which('arSimuCalc.c'), objectsstr{:});
+        end
     else
         % parallel code using POSIX threads (pthread-win32) for Windows type OS
         includesstr{end+1} = ['-I"' ar_path '\ThirdParty\pthreads-w32_2.9.1\include"'];
@@ -516,3 +536,18 @@ end
 %% refresh file cache
 rehash
 
+function chunkSize = getChunkSize( objectsstr )
+    [~, maxArgSize]=system('getconf ARG_MAX');
+    maxArgSize = str2num(maxArgSize); %#ok
+    if ( isempty( maxArgSize ) )
+        maxArgSize = 262144; 
+    end
+    
+    % Take a chunk size with a reasonably safe margin
+    maxLen = max( cellfun( @numel, objectsstr ) ) + numel(pwd);
+    chunkSize = floor( (0.5 * maxArgSize) / maxLen );
+    
+    % Empirically, the maxfile limit seems to be 500 on my system. Not sure
+    % how to find this number in a platform independent manner.
+    chunkSize = min( [chunkSize, 500] );
+    

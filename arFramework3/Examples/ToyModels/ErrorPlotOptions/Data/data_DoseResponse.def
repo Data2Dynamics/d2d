@@ -1,0 +1,19 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR-DOSERESPONSE dosis
+dosis	T	"M"	"dose"	0	10
+
+INPUTS
+
+OBSERVABLES
+prot1SomeErrors	C	"au"	"conc."	0	0			"Prot1"
+prot2NoErrors	C	"au"	"conc."	0	0			"Prot2"
+prot3AllErrors	C	"au"	"conc."	0	0			"Prot3"
+
+ERRORS
+prot1SomeErrors    	"sd_prot1"
+prot2NoErrors    	"sd_prot2"
+prot3AllErrors    	"sd_prot3"
+
+CONDITIONS

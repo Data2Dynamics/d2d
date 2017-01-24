@@ -13,8 +13,7 @@ if(isempty(ar_fit_cluster)) % new job
     fprintf('arFitCluster sending job...');
     ar_fit_cluster = batch(cluster, @arFitClusterFun, 1, {ar}, ...
         'CaptureDiary', true, ...
-        'CurrentFolder', '.', ...
-        'AttachedFiles', {'arFitPSOFkt'});
+        'CurrentFolder', '.');
     fprintf('done\n');
     
 elseif(isa(ar_fit_cluster,'parallel.job.MJSIndependentJob') || ...
@@ -41,6 +40,9 @@ elseif(isa(ar_fit_cluster,'parallel.job.MJSIndependentJob') || ...
             diary(ar_fit_cluster);
             S = fetchOutputs(ar_fit_cluster);
             ar = S{1};
+            t_onCluster = datenum(ar_fitlhs_cluster.FinishTime([5:20 25:end]),'mmm dd HH:MM:SS YYYY')...
+                    - datenum(ar_fitlhs_cluster.StartTime([5:20 25:end]),'mmm dd HH:MM:SS YYYY');
+                fprintf('total time on cluster %ih %im %is \n',str2num(datestr(t_onCluster,'HH;MM;SS')));
             delete(ar_fit_cluster);
             clear global ar_fit_cluster
         catch err_id

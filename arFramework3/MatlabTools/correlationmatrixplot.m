@@ -17,7 +17,7 @@ clf;
 f.Color = 'w';
 
 colors = redwhiteblue(11);
-[R,p] = corr(A','type',corr_type);
+[R,p] = corrnonnan(A',corr_type);
 R(isnan(R)) = 0;
 p(isnan(p)) = 1;
 

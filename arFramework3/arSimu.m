@@ -231,18 +231,20 @@ for m=1:length(ar.model)
     end
 end
 
-% arCalcRes_test;  % the test can be performed here or outside of arSimu
-% (see comments in arCalcRes_test.m)
-arCalcRes(sensi)
+if(~fine)
+    % arCalcRes_test;  % the test can be performed here or outside of arSimu
+    % (see comments in arCalcRes_test.m)
+    arCalcRes(sensi)
 
-%calculate y_scale_max
-if(ar.config.atolV)
-    for im = 1:length(ar.model)
-        for ic = 1:length(ar.model(im).condition)
-            ar.model(im).condition(ic).atol(:) = 0;
-            for id = ar.model(im).condition(ic).dLink
-                atol_tmp = squeeze(nanmax(nanmax(ar.model(im).data(id).y_scale)));
-                ar.model(im).condition(ic).y_atol = nanmax([ar.model(im).condition(ic).y_atol atol_tmp],2);
+    %calculate y_scale_max
+    if(ar.config.atolV)
+        for im = 1:length(ar.model)
+            for ic = 1:length(ar.model(im).condition)
+                ar.model(im).condition(ic).atol(:) = 0;
+                for id = ar.model(im).condition(ic).dLink
+                    atol_tmp = squeeze(nanmax(nanmax(ar.model(im).data(id).y_scale)));
+                    ar.model(im).condition(ic).y_atol = nanmax([ar.model(im).condition(ic).y_atol atol_tmp],2);
+                end
             end
         end
     end
