@@ -569,7 +569,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 copyStates( x, returnx, qpositivex, neq, nout, 0 );
                 if ( sensi ) copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 );
                 z_calc(im, ic, arcondition, sensi);
-                
+                evaluateObservations(arcondition, im, ic, sensi, has_tExp);
                 terminate_x_calc( sim_mem, 0 ); return;
             }
             
