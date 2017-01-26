@@ -152,6 +152,7 @@ void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, m
 int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi );
 int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override );
 int initializeEvents( SimMemory sim_mem, mxArray *arcondition, int ic, double tstart );
+void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int has_tExp );
 
 int handle_event( SimMemory sim_mem, int sensi_meth );
 int equilibrate(void *cvode_mem, UserData user_data, N_Vector x, realtype t, double *equilibrated, double *returndxdt, double *teq, int neq, int im, int ic, int *abortSignal );
@@ -337,15 +338,12 @@ void thread_calc(int id) {
 /* calculate dynamics */
 void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding) {
     mxArray    *x0_override;
-    mxArray    *arcondition;
-    mxArray    *ardata;
+    mxArray    *arcondition;   
     
-    mxArray *dLink;
-    double *dLinkints;      
-    
-    int nm, nc, id, nd, has_tExp;
+    int has_tExp;
+    int nm, nc;
     int flag;
-    int is, js, ks, ids;
+    int is, js, ks;
     int nout, nyout;
     int nu, nv, nnz;
     
@@ -452,9 +450,6 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     
     has_tExp = (int) mxGetScalar(mxGetField(arcondition, ic, "has_tExp"));
     if(has_tExp == 0 && fine == 0) { terminate_x_calc( sim_mem, 0 ); return; }
-    
-    /* get ar.model(im).data */
-    ardata = mxGetField(armodel, im, "data");
 
     ticks_start = mxGetData(mxGetField(arcondition, ic, "start"));
     ticks_stop = mxGetData(mxGetField(arcondition, ic, "stop"));
@@ -573,6 +568,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 /* Copy states and state sensitivities */
                 copyStates( x, returnx, qpositivex, neq, nout, 0 );
                 if ( sensi ) copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 );
+                z_calc(im, ic, arcondition, sensi);
+                
                 terminate_x_calc( sim_mem, 0 ); return;
             }
             
@@ -995,7 +992,29 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     
     /* printf("computing model #%i, condition #%i (done)\n", im, ic); */
     /* call y_calc */
-    if(ardata!=NULL){
+    evaluateObservations(arcondition, im, ic, sensi, has_tExp);
+
+    gettimeofday(&t4, NULL);
+    timersub(&t2, &t1, &tdiff);
+    ticks_start[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
+    timersub(&t3, &t1, &tdiff);
+    ticks_stop_data[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
+    timersub(&t4, &t1, &tdiff);
+    ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
+    
+    /* Clean up */
+    terminate_x_calc( sim_mem, 0 );
+}
+       
+void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int has_tExp )
+{
+    mxArray *ardata;
+    mxArray *dLink;
+    double  *dLinkints; 
+    int     id, nd, ids;
+            
+    ardata = mxGetField(armodel, im, "data");
+	if(ardata!=NULL){
         dLink = mxGetField(arcondition, ic, "dLink");
         dLinkints = mxGetData(dLink);
         
@@ -1011,19 +1030,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             }
         }
     }
-
-    gettimeofday(&t4, NULL);
-    timersub(&t2, &t1, &tdiff);
-    ticks_start[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
-    timersub(&t3, &t1, &tdiff);
-    ticks_stop_data[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
-    timersub(&t4, &t1, &tdiff);
-    ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
-    
-    /* Clean up */
-    terminate_x_calc( sim_mem, 0 );
 }
-       
+    
 void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int nout, int offset )
 {
     int js;
