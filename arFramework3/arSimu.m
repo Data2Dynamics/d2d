@@ -144,7 +144,7 @@ if ( ss_presimulation )
     
     if ( ~isfield( ar.config, 'rootfinding' ) || ( ar.config.rootfinding == 0 ) )
         % Steady state determination by simulation
-        feval(ar.fkt, ar, true, ar.config.useSensis && sensi, dynamics, false, 'ss_condition', 'ss_threads');
+        feval(ar.fkt, ar, true, ar.config.useSensis && sensi, dynamics, false, 'ss_condition', 'ss_threads', ar.config.skipSim);
     else
         % Steady state determination by rootfinding
         for m=1:length(ar.model)
@@ -215,7 +215,7 @@ if ( ss_presimulation )
 end
 
 % call mex function to simulate models
-feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads')
+feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads', ar.config.skipSim)
 
 % integration error ?
 for m=1:length(ar.model)
