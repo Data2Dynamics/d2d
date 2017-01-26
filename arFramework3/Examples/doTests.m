@@ -22,9 +22,10 @@ function doTests( varargin )
     fprintf(2, 'to reduce the risk of pushing code that breaks existing\nfunctionality.\n\n' );
 
     tests = {   'Advanced_Events', 'Volume_Estimation', 'Splines', ...
-                'Stoichiometry', 'DallaMan2007_GlucoseInsulinSystem', 'Step_Estimation', 'ErrorFittingTest' };
+                'Stoichiometry', 'DallaMan2007_GlucoseInsulinSystem', 'Step_Estimation', ...
+                'ErrorFittingTest', 'Flux_Estimation' };
     
-    dependencies = { {}, {}, {}, {}, {'TranslateSBML'}, {}, {} };
+    dependencies = { {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {} };
     
     if ( nargin > 0 )
         activeTests = argSwitch( tests, varargin{:} );

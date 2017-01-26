@@ -1,0 +1,16 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	0 
+
+INPUTS
+
+OBSERVABLES
+fluxfit 	C   au	conc.	0  0	"Fittedflux"
+
+ERRORS    
+fluxfit	".0001"
+
+        
+CONDITIONS
+
