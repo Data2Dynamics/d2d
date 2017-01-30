@@ -801,8 +801,8 @@ if ( substitutions )
     to          = {};
     ismodelpar  = [];
      
-    % Fetch desired substitutions
-    while(~isempty(C{1}) && ~strcmp(C{1},'CONDITIONS'))
+    % Fetch desired conditions
+    while(~isempty(C{1}) && ~(strcmp(C{1},'PARAMETERS') || strcmp(C{1}, 'RANDOM')))
         arValidateInput( C, 'condition', 'model parameter', 'new expression' );
         from(end+1)         = C{1}; %#ok<AGROW>
         to(end+1)           = C{2}; %#ok<AGROW>
@@ -838,7 +838,7 @@ if ( substitutions )
     end
 else
     % Old code path
-    while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
+    while(~isempty(C{1}) && ~(strcmp(C{1},'PARAMETERS') || strcmp(C{1}, 'RANDOM')))
         arValidateInput( C, 'condition', 'model parameter', 'new expression' );
         qcondpara = ismember(ar.model(m).p, C{1}); %R2013a compatible
         if(sum(qcondpara)>0)
@@ -852,6 +852,23 @@ else
             C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
         end
     end
+end
+
+ar.model(m).prand = {};
+ar.model(m).rand_type = [];
+if ( strcmp(C{1}, 'RANDOM' ) )    
+    C = textscan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
+    while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
+        ar.model(m).prand{end+1} = cell2mat(C{1});
+        if(strcmp(C{2}, 'INDEPENDENT'))
+            ar.model(m).rand_type(end+1) = 0;
+        elseif(strcmp(C{2}, 'NORMAL'))
+            ar.model(m).rand_type(end+1) = 1;
+        else
+            warning('unknown random type %s', cell2mat(C{2}));  %#ok<WNTAG>
+        end
+        C = textscan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
+    end    
 end
     
 % extra conditional parameters

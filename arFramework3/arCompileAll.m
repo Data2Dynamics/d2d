@@ -541,7 +541,7 @@ ar.model(m).sym.zs = mySym(ar.model(m).zs, specialFunc);
 ar.model(m).sym.px0 = sym(ar.model(m).px0);
 ar.model(m).sym.u = mySym(ar.model(m).u, specialFunc);
 ar.model(m).sym.us = mySym(ar.model(m).us, specialFunc);
-ar.model(m).sym.v = mySym(ar.model(m).v, specialFunc);
+ar.model(m).sym.v = mySym(strrep(ar.model(m).v, ' ', '_'), specialFunc);
 ar.model(m).sym.vs = mySym(ar.model(m).vs, specialFunc);
 ar.model(m).sym.fv = mySym(ar.model(m).fv, specialFunc);
 

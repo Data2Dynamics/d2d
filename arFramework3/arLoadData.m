@@ -538,8 +538,13 @@ ar.model(m).data(d).pcond = setdiff(vertcat(varlist{:}), ar.model(m).data(d).p);
 pcond = union(ar.model(m).data(d).p, ar.model(m).data(d).pcond); %R2013a compatible
 
 % RANDOM
-ar.model(m).data(d).prand = {};
-ar.model(m).data(d).rand_type = [];
+if ~isempty( ar.model(m).prand )
+    ar.model(m).data(d).prand = ar.model(m).prand;
+    ar.model(m).data(d).rand_type = ar.model(m).rand_type;    
+else
+    ar.model(m).data(d).prand = {};
+    ar.model(m).data(d).rand_type = [];
+end
 C = textscan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
 while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
     ar.model(m).data(d).prand{end+1} = cell2mat(C{1});
