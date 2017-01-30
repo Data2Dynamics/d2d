@@ -33,8 +33,14 @@
 % 'ResamplingResolution'    Number of extra points to interpolate dose
 %                           response (default: 25)
 % 'RefineLog'               Perform the refinement on a log scale
-% 'expsplit'                Split of conditions into separate replicates
-%                           based on the column var specified in the next argument
+% 'expsplit'                Split replicate specific parameters based on the 
+%                           column identifier specified in the next argument
+%                           Example:
+%                               arLoadData('mRNA/mRNA_pretreatment', 1, 'csv', true, 'expsplit', 'nExpID');
+%                           will recognize parameters with nExpID in the name 
+%                           and replace them with nExpID0, nExpID1 etc. if
+%                           the excel data file has a column named nExpID  
+%                           which specifies these values.
 %
 % 'RemoveObservables'   This can be used to omit observables. Simply pass a
 %                       cell array with names of observables that should be 
