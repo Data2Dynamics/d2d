@@ -9,6 +9,7 @@ function ar = arInitFields(ar)
     ar              = checkForField(ar, 'config');
     ar              = checkForField(ar, 'info');
     ar              = checkForField(ar, 'ppl');
+    ar              = checkForField(ar, 'ple');
     
     % Config options
     defaults = { ...

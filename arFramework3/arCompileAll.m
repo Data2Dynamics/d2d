@@ -27,24 +27,8 @@ end
 
 [~, c_version_code] = arGetVersion;
 if(~strcmp(c_version_code, ar.info.c_version_code))
-    warning('Workspace c-code version (%s) does not match framework c-code version (%s), please rerun setup script or downgrade code version.', ...
+    error('Workspace c-code version (%s) does not match framework c-code version (%s), please rerun setup script or downgrade code version.', ...
         c_version_code, ar.info.c_version_code);
-    userinput = input('Do you want to downgrade? Y/[N]\n','s');
-    if strcmpi(userinput,'y')
-        flag = arChangeVersion(ar.info.c_version_code);
-        if flag
-            fprintf(1,['successfully downgraded to version %s!\n',...
-                'To upgrade to the newest version, \n',... 
-                'run ''arChangeVersion(''current'')''',...
-                ' or ''arUpdateD2D''\n\n'],ar.info.c_version_code);
-            old_ar = ar;
-            arInit;
-            ar = old_ar;
-        else
-            fprintf(1,'downgrade to version %s failed!\n',c_version_code);
-        end
-        return;
-    end
 end
 if(~exist('forcedCompile','var'))
     forcedCompile = false;
