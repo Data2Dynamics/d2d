@@ -556,6 +556,7 @@ ar.model(m).sym.zs = mySym(ar.model(m).zs, specialFunc);
 ar.model(m).sym.px0 = sym(ar.model(m).px0);
 ar.model(m).sym.u = mySym(ar.model(m).u, specialFunc);
 ar.model(m).sym.us = mySym(ar.model(m).us, specialFunc);
+ar.model(m).sym.v = mySym(strrep(ar.model(m).v, ' ', '_'), specialFunc);
 ar.model(m).sym.vs = mySym(ar.model(m).vs, specialFunc);
 ar.model(m).sym.fv = mySym(ar.model(m).fv, specialFunc);
 
@@ -995,6 +996,7 @@ specialFunc = config.specialFunc;
 data.sym.p = sym(data.p);
 data.sym.fp = sym(data.fp);
 data.sym.fy = mySym(data.fy, specialFunc);
+data.sym.fy = arSubs(data.sym.fy, model.sym.v, model.sym.fv);
 data.sym.fy = arSubs(data.sym.fy, data.sym.p, data.sym.fp, matlab_version);
 try
     data.sym.fystd = sym(data.fystd);
@@ -1009,6 +1011,9 @@ data.qfu_nonzero = logical(data.sym.fu ~= 0);
 
 % predictor
 data.sym.fu = arSubs(data.sym.fu, sym(model.t), sym('t'), matlab_version);
+data.sym.fy = arSubs(data.sym.fy, sym(model.t), sym('t'), matlab_version);
+data.sym.fystd = arSubs(data.sym.fystd, sym(model.t), sym('t'), matlab_version);
+
 data.sym.fy = arSubs(data.sym.fy, sym(model.t), sym('t'), matlab_version);
 data.sym.fystd = arSubs(data.sym.fystd, sym(model.t), sym('t'), matlab_version);
 

@@ -1,0 +1,27 @@
+DESCRIPTION
+"Flux example"
+
+PREDICTOR
+t               T   min     time	0	11
+
+COMPARTMENTS
+cyt       V   au     vol.   5
+nuc       V   au     vol.   1
+
+STATES
+AA                 C   au      conc.  nuc
+BB                 C   au      conc.  cyt
+
+INPUTS
+
+
+REACTIONS
+AA -> BB    CUSTOM "k1 * AA" "Fittedflux"
+BB -> AA    CUSTOM "k2 * BB" "Other"
+
+DERIVED
+
+        
+CONDITIONS
+init_AA "1"
+init_BB "0"

@@ -33,8 +33,14 @@
 % 'ResamplingResolution'    Number of extra points to interpolate dose
 %                           response (default: 25)
 % 'RefineLog'               Perform the refinement on a log scale
-% 'expsplit'                Split of conditions into separate replicates
-%                           based on the column var specified in the next argument
+% 'expsplit'                Split replicate specific parameters based on the 
+%                           column identifier specified in the next argument
+%                           Example:
+%                               arLoadData('mRNA/mRNA_pretreatment', 1, 'csv', true, 'expsplit', 'nExpID');
+%                           will recognize parameters with nExpID in the name 
+%                           and replace them with nExpID0, nExpID1 etc. if
+%                           the excel data file has a column named nExpID  
+%                           which specifies these values.
 %
 % 'RemoveObservables'   This can be used to omit observables. Simply pass a
 %                       cell array with names of observables that should be 
@@ -538,8 +544,13 @@ ar.model(m).data(d).pcond = setdiff(vertcat(varlist{:}), ar.model(m).data(d).p);
 pcond = union(ar.model(m).data(d).p, ar.model(m).data(d).pcond); %R2013a compatible
 
 % RANDOM
-ar.model(m).data(d).prand = {};
-ar.model(m).data(d).rand_type = [];
+if ~isempty( ar.model(m).prand )
+    ar.model(m).data(d).prand = ar.model(m).prand;
+    ar.model(m).data(d).rand_type = ar.model(m).rand_type;    
+else
+    ar.model(m).data(d).prand = {};
+    ar.model(m).data(d).rand_type = [];
+end
 C = textscan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
 while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
     ar.model(m).data(d).prand{end+1} = cell2mat(C{1});

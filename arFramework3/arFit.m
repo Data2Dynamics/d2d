@@ -265,14 +265,14 @@ elseif(ar.config.optimizer == 10)
     
 % Repeated optimization with lsqnonlin
 elseif(ar.config.optimizer == 11)
-    [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
+    [pFit, resnorm, res, exitflag, output, lambda, jac] = ...
         lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
     
     % Keep going until we really converged
     resnormOld = inf;
-    while (((resnormOld-resnorm)/resnorm) > 1e-3)
+    while (((resnormOld-resnorm)/resnorm) > 1e-5)
         resnormOld = resnorm;
-        [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
+        [pFit, resnorm, res, exitflag, output, lambda, jac] = ...
             lsqnonlin(@merit_fkt, pFit, lb, ub, ar.config.optim);
     end
     

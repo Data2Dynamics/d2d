@@ -12,6 +12,7 @@ function ar = arInitFields(ar)
     
     % Config options
     defaults = { ...
+        {'skipSim',                     false}, ...                     % Disable simulation (used for fitting steady state models)
         {'checkForNegFluxes',           true}, ...
         {'useParallel',                 true}, ...                      % Parallelization
         {'nCore',                       feature('numCores')}, ...       %   number of available cores
