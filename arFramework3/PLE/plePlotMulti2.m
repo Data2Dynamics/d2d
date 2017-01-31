@@ -7,16 +7,16 @@
 
 function plePlotMulti2(jks, savetofile)
 
-global pleGlobals;
+global ar
 
-if(isempty(pleGlobals))
+if(isempty(ar.ple))
     error('perform ple before usage');
 end
-if(isempty(pleGlobals.ps))
+if(isempty(ar.ple.ps))
     return
 end
 if(~exist('jks','var') || isempty(jks))
-    jks = 1:length(pleGlobals.ps);
+    jks = 1:length(ar.ple.ps);
 end
 if(~exist('savetofile','var'))
     savetofile = false;
@@ -24,14 +24,14 @@ end
 
 sumples = 0;
 for j=jks
-    if(~isempty(pleGlobals.ps{j}))
+    if(~isempty(ar.ple.ps{j}))
         sumples = sumples + 1;
     end
 end
 
-if(pleGlobals.plot_point && ~pleGlobals.plot_simu)
+if(ar.ple.plot_point && ~ar.ple.plot_simu)
     strtitle = sprintf('profile log-likelihood (point-wise)');
-elseif(~pleGlobals.plot_point && pleGlobals.plot_simu)
+elseif(~ar.ple.plot_point && ar.ple.plot_simu)
     strtitle = sprintf('profile log-likelihood (simultaneous)');
 else
     strtitle = sprintf('profile log-likelihood');
@@ -44,25 +44,25 @@ count = 1;
 
 minchi2 = Inf;
 for jk=jks
-    if(~isempty(pleGlobals.ps{jk}))
-        minchi2 = min([minchi2 min(pleGlobals.chi2s{jk})]);
+    if(~isempty(ar.ple.ps{jk}))
+        minchi2 = min([minchi2 min(ar.ple.chi2s{jk})]);
     end
 end
 
 % limits
-dchi2 = pleGlobals.dchi2_point;
-if(pleGlobals.plot_simu)
-    dchi2 = pleGlobals.dchi2;
+dchi2 = ar.ple.dchi2_point;
+if(ar.ple.plot_simu)
+    dchi2 = ar.ple.dchi2;
 end
 
 labels = {};
 
 cs = lines(sumples);
 for jk=jks
-    if(~isempty(pleGlobals.ps{jk}))
+    if(~isempty(ar.ple.ps{jk}))
         
-        ps = pleGlobals.ps{jk};
-        chi2s = pleGlobals.chi2s{jk};
+        ps = ar.ple.ps{jk};
+        chi2s = ar.ple.chi2s{jk};
         
         % profile
         plot(ps(:,jk), chi2s, 'Color', cs(count,:))
@@ -70,68 +70,68 @@ for jk=jks
         
         count = count + 1;
         
-        labels{end+1} = arNameTrafo(pleGlobals.p_labels{jk}); %#ok<AGROW>
+        labels{end+1} = arNameTrafo(ar.ple.p_labels{jk}); %#ok<AGROW>
     end
 end
 
 % thresholds
-if(pleGlobals.plot_point)
-    plot(xlim, [0 0]+minchi2+chi2inv(1-pleGlobals.alpha_level, 1), 'k--')
+if(ar.ple.plot_point)
+    plot(xlim, [0 0]+minchi2+chi2inv(1-ar.ple.alpha_level, 1), 'k--')
 end
-if(pleGlobals.plot_simu)
-    plot(xlim, [0 0]+minchi2+chi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), 'k--')
+if(ar.ple.plot_simu)
+    plot(xlim, [0 0]+minchi2+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), 'k--')
 end
 
 if(count == 1)
-    if(pleGlobals.plot_point && ~pleGlobals.plot_simu)
-        labels{end+1} = sprintf('%2i%% (point-wise)', (1-pleGlobals.alpha_level)*100);
-    elseif(~pleGlobals.plot_point && pleGlobals.plot_simu)
-        labels{end+1} = sprintf('%2i%% (simultaneous)', (1-pleGlobals.alpha_level)*100);
+    if(ar.ple.plot_point && ~ar.ple.plot_simu)
+        labels{end+1} = sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100);
+    elseif(~ar.ple.plot_point && ar.ple.plot_simu)
+        labels{end+1} = sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100);
     else
-        labels{end+1} = sprintf('%2i%% (point-wise)', (1-pleGlobals.alpha_level)*100);
-        labels{end+1} = sprintf('%2i%% (simultaneous)', (1-pleGlobals.alpha_level)*100);
+        labels{end+1} = sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100);
+        labels{end+1} = sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100);
     end
 end
 
 arSubplotStyle(gca);
 
-ylimmax = pleGlobals.chi2+dchi2*1.3;
+ylimmax = ar.ple.merit+dchi2*1.3;
 ylim([minchi2-dchi2*0.1 ylimmax]);
 
 xlabel('log_{10}(parameter value)')
-ylabel(pleGlobals.ylabel)
+ylabel(ar.ple.ylabel)
 
 legend(labels, 'Location','EastOutside');
 
 hold off
 
 % save
-if(savetofile && exist(pleGlobals.savePath, 'dir'))
-    pleGlobals.figPathMulti2{jk} = [pleGlobals.savePath '/multi_plot2'];
-    saveas(gcf, [pleGlobals.savePath '/multi_plot2'], 'fig')
-    print('-depsc2', [pleGlobals.savePath '/multi_plot2']);
+if(savetofile && exist(ar.ple.savePath, 'dir'))
+    ar.ple.figPathMulti2{jk} = [ar.ple.savePath '/multi_plot2'];
+    saveas(gcf, [ar.ple.savePath '/multi_plot2'], 'fig')
+    print('-depsc2', [ar.ple.savePath '/multi_plot2']);
 end
 
 
 function h = myRaiseFigure(figname)
-global pleGlobals
+
 openfigs = get(0,'Children');
 
 figcolor = [1 1 1];
 
-if(isfield(pleGlobals, 'fighandel_multi2') && ~isempty(pleGlobals.fighandel_multi2) && ...
-    pleGlobals.fighandel_multi2 ~= 0 && ...
-    sum(pleGlobals.fighandel_multi2==openfigs)>0 && ...
-    strcmp(get(pleGlobals.fighandel_multi2, 'Name'), figname))
+if(isfield(ar.ple, 'fighandel_multi2') && ~isempty(ar.ple.fighandel_multi2) && ...
+    ar.ple.fighandel_multi2 ~= 0 && ...
+    sum(ar.ple.fighandel_multi2==openfigs)>0 && ...
+    strcmp(get(ar.ple.fighandel_multi2, 'Name'), figname))
 
-    h = pleGlobals.fighandel_multi2;
+    h = ar.ple.fighandel_multi2;
     figure(h);
 else
     h = figure('Name', figname, 'NumberTitle','off', ...
         'Units', 'normalized', 'Position', ...
         [0.1 0.1 0.6 0.8]);
     set(h,'Color', figcolor);
-    pleGlobals.fighandel_multi2 = h;
+    ar.ple.fighandel_multi2 = h;
 end
 
 

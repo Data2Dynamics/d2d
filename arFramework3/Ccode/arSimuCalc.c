@@ -150,6 +150,7 @@ void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, int
 void terminate_x_calc( SimMemory sim_mem, double status );
 void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic );
 int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi );
+int allocateSimMemorySSA( SimMemory sim_mem, int nx );
 int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override );
 int initializeEvents( SimMemory sim_mem, mxArray *arcondition, int ic, double tstart );
 void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int has_tExp );

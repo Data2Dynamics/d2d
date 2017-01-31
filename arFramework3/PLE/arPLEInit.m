@@ -33,50 +33,138 @@ if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
 
-    pleInit(ar.p, ar.qFit==1, ar.lb, ar.ub, ar.qLog10, @arPLEIntegrate, @arPLEMerit, ...
-    @arPLEDiffMerit, @arPLEFit, @arPLESetOptim, ar.pLabel, 1-ar.ppl.alpha_level, force);
+alpha = 0.95;
 
-global pleGlobals;
+%     pleInit(ar.p, ar.qFit==1, ar.lb, ar.ub, ar.qLog10, @arPLEIntegrate, @arPLEMerit, ...
+%     @arPLEDiffMerit, @arPLEFit, @arPLESetOptim, ar.pLabel, 1-ar.ppl.alpha_level, force);
 
-pleGlobals.violations = @arPLEMeritViolations;
-pleGlobals.priors = @arPLEPrior;
-pleGlobals.priorsAll = @arPLEPriorAll;
+%% Beginning of old function pleInit.m
+
+if ~isfield(ar,'ple') || ~isstruct(ar.ple) || force
+    ar.ple = struct('p', ar.p, ...
+        'integrate_fkt', @arPLEIntegrate, ...
+        'merit_fkt', @arPLEMerit, ...
+        'diffmerit_fkt', @arPLEDiffMerit, ...
+        'fit_fkt', @arPLEFit, ...
+        'setoptim_fkt', @arPLESetOptim, ...
+        'initstep_fkt', @pleInitStepDirect, ...  % is overwritten in arPLEInit, if mode is provided
+        'dof', sum(ar.qFit==1), ...
+        'dof_point', 1,... 
+        'attempts', 4',...
+        'showCalculation', true,...
+        'ylabel', '\chi^2_{PL}',...
+        'breakon_point', true,... %false',...
+        'plot_point', true,...
+        'plot_simu', false,... %true',...
+        'dist_thres', 0.01,...
+        'grad_thres', 1,...
+        'closetobound', 0.001,...
+        'allowbetteroptimum', false);
+end
+
+
+% step sizes
+ar.ple.samplesize = 50 * ones(size(ar.ple.p));
+ar.ple.relchi2stepincrease = 0.1 * ones(size(ar.ple.p));
+ar.ple.maxstepsize = (ar.ub-ar.lb)./ar.ple.samplesize;
+ar.ple.minstepsize = ones(size(ar.ple.maxstepsize))*1e-3;
+ar.ple.breakonlb = false(size(ar.ple.p));
+ar.ple.breakonub = false(size(ar.ple.p));
+
+
+ar.ple.alpha_level = 1-alpha;
+ar.ple.dchi2 = chi2inv(1-ar.ple.alpha_level, ar.ple.dof);
+ar.ple.dchi2_point = chi2inv(1-ar.ple.alpha_level, ar.ple.dof_point);
+
+% magic factors
+ar.ple.chi2_strID_ratio = 1e-1;
+ar.ple.svd_threshold = 1e-6; % SVD regulatization threshold (NR: chapter 15.4)
+ar.ple.optimset_tol = 1e-1;
+
+% % labels
+% if(~exist('p_labels', 'var'))
+%     p_labels = {};
+%     for j=1:length(ar.ple.p)
+%         p_labels{j} = sprintf('p%02i', j); %#ok<AGROW>
+%     end
+% end
+% ar.ple.p_labels = p_labels;
+ar.ple.p_labels = ar.pLabel;
+
+ar.ple.conf_lb = nan(1,length(ar.ple.p));
+ar.ple.conf_ub = nan(1,length(ar.ple.p));
+ar.ple.conf_lb_point = nan(1,length(ar.ple.p));
+ar.ple.conf_ub_point = nan(1,length(ar.ple.p));
+ar.ple.conf_rel = nan(1,length(ar.ple.p));
+ar.ple.conf_rel_point = nan(1,length(ar.ple.p));
+
+ar.ple.IDstatus = nan(1,length(ar.ple.p));
+ar.ple.IDstatus_point = nan(1,length(ar.ple.p));
+ar.ple.IDlabel = {'', 'pra.nID', 'str.nID', 'single str.nID'};
+ar.ple.savePath = ['PLE-' datestr(now, 30)];
+
+if(~isfield(ar.ple,'ps') || force)
+    ar.ple.ps = {};
+end
+if(~isfield(ar.ple,'psinit') || force)
+    ar.ple.psinit = {};
+end
+if(~isfield(ar.ple,'psinitstep') || force)
+    ar.ple.psinitstep = {};
+end
+if(~isfield(ar.ple,'chi2s') || force)
+    ar.ple.chi2s = {};
+end
+if(~isfield(ar.ple,'chi2sinit') || force)
+    ar.ple.chi2sinit = {};
+end
+
+ar.ple.finished = 0;
+
+%% End of old function pleInit
+
+
+ar.ple.violations = @arPLEMeritViolations;
+ar.ple.priors = @arPLEPrior;
+ar.ple.priorsAll = @arPLEPriorAll;
 
 if(breakon_point)
-    pleGlobals.breakon_point = true;
-    pleGlobals.plot_simu = false;
+    ar.ple.breakon_point = true;
+    ar.ple.plot_simu = false;
 else
-    pleGlobals.breakon_point = false;
-    pleGlobals.plot_simu = true;
+    ar.ple.breakon_point = false;
+    ar.ple.plot_simu = true;
 end
 
 if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
         (ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0) )
-    pleGlobals.ylabel = '-2 log(PL)';
+    ar.ple.ylabel = '-2 log(PL)';
 end
 
 if(isfield(ar, 'pTrue'))
-    pleGlobals.p_true = ar.pTrue;
+    ar.ple.p_true = ar.pTrue;
 end
 if(mode==1)
-    pleGlobals.initstep_fkt = @pleInitStepDirect;
-    pleGlobals.mode = 1;
+    ar.ple.initstep_fkt = @pleInitStepDirect;
+    ar.ple.mode = 1;
 elseif(mode==2)
-    pleGlobals.initstep_fkt = @pleInitStep;
-    pleGlobals.mode = 2;
+    ar.ple.initstep_fkt = @pleInitStep;
+    ar.ple.mode = 2;
 elseif(mode==3)
-    pleGlobals.initstep_fkt = @pleInitStepLinear;
-    pleGlobals.mode = 3;
+    ar.ple.initstep_fkt = @pleInitStepLinear;
+    ar.ple.mode = 3;
 elseif(mode==4)
-    pleGlobals.initstep_fkt = @pleInitStepComposite;
-    pleGlobals.mode = 4;
+    ar.ple.initstep_fkt = @pleInitStepComposite;
+    ar.ple.mode = 4;
 elseif(mode==5)
-    pleGlobals.initstep_fkt = @pleInitStepDirect2;
-    pleGlobals.mode = 5;
+    ar.ple.initstep_fkt = @pleInitStepDirect2;
+    ar.ple.mode = 5;
 end
 
-pleGlobals.savePath = [arSave '/PLE'];
-ar.ple_errors = [];
+ar.ple.savePath = [arSave '/PLE'];
+ar.ple.errors = [];
+
+
 
 function arPLEIntegrate(p)
 global ar
@@ -84,10 +172,10 @@ try
     arCalcMerit(false, p(ar.qFit==1));
 catch exception
     if ( ~isfield( ar, 'ple_errors' ) )
-        ar.ple_errors = ar.p;
+        ar.ple.errors = ar.p;
     end
-    ar.ple_errors(end+1,:) = ar.p;
-    fprintf('ERROR INTEGRATOR (#%i): %s\n', size(ar.ple_errors,1), exception.message);
+    ar.ple.errors(end+1,:) = ar.p;
+    fprintf('ERROR INTEGRATOR (#%i): %s\n', size(ar.ple.errors,1), exception.message);
     rethrow(exception)  
 end
 
@@ -166,11 +254,8 @@ end
 
 function arPLESetOptim(p)
 global ar
-global pleGlobals
+
 ar.p = p + 0;
 arCalcMerit(false);
-pleGlobals.p = p+0;
-pleGlobals.chi2 = arPLEMerit+0;
-
-
-
+ar.ple.p = p+0;
+ar.ple.merit = arPLEMerit+0;

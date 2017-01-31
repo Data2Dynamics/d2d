@@ -3,7 +3,6 @@
 function arPlotMCMCProfiles(jks, Nthinning)
 
 global ar
-global pleGlobals;
 
 if(~exist('Nthinning','var'))
     Nthinning = 1;
@@ -48,10 +47,10 @@ end
 count = 1;
 for jk=jks
     
-    if(exist('pleGlobals','var') && ~isempty(pleGlobals) && ...
-            ~isempty(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}))
-        chi2s_ple = pleGlobals.chi2s{jk};
-        ps_ple = pleGlobals.ps{jk};
+    if(exist('ar.ple','var') && ~isempty(ar.ple) && ...
+            ~isempty(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}))
+        chi2s_ple = ar.ple.chi2s{jk};
+        ps_ple = ar.ple.ps{jk};
     else
         chi2s_ple = [];
         ps_ple = [];
@@ -86,24 +85,24 @@ for jk=jks
         hold on
         
         % thresholds
-        if(pleGlobals.plot_point)
-            plot(xlim, [0 0]+min(chi2s_ple)+pleGlobals.dchi2_point, 'r--', 'LineWidth', 1)
+        if(ar.ple.plot_point)
+            plot(xlim, [0 0]+min(chi2s_ple)+ar.ple.dchi2_point, 'r--', 'LineWidth', 1)
         end
-        if(pleGlobals.plot_simu)
-            plot(xlim, [0 0]+min(chi2s_ple)+pleGlobals.dchi2, 'r-.', 'LineWidth', 1)
+        if(ar.ple.plot_simu)
+            plot(xlim, [0 0]+min(chi2s_ple)+ar.ple.dchi2, 'r-.', 'LineWidth', 1)
         end
     end
     hold off
 
     xlim([xlimtmp(1)-xlimtmp2*0.05 xlimtmp(2)+xlimtmp2*0.05]);
-    xlabel(['log_{10}(' arNameTrafo(pleGlobals.p_labels{jk}) ')'])
+    xlabel(['log_{10}(' arNameTrafo(ar.ple.p_labels{jk}) ')'])
     ylabel(ystr);
     
     if(~isempty(ps_ple))
-        if(pleGlobals.plot_simu)
-            ylim([min(chi2s_ple) min(chi2s_ple)+1.2*pleGlobals.dchi2])
+        if(ar.ple.plot_simu)
+            ylim([min(chi2s_ple) min(chi2s_ple)+1.2*ar.ple.dchi2])
         else
-            ylim([min(chi2s_ple) min(chi2s_ple)+1.2*pleGlobals.dchi2_point])
+            ylim([min(chi2s_ple) min(chi2s_ple)+1.2*ar.ple.dchi2_point])
         end
     end
     
@@ -114,10 +113,10 @@ for jk=jks
         end
         if(~isempty(ps_ple))
             strleg{end+1} = 'profile likelihood';
-            if(pleGlobals.plot_point)
+            if(ar.ple.plot_point)
                 strleg{end+1} = 'profile likelihood threshold (point-wise)';
             end
-            if(pleGlobals.plot_simu)
+            if(ar.ple.plot_simu)
                 strleg{end+1} = 'profile likelihood threshold (simultaneous)';
             end
         end
@@ -132,24 +131,24 @@ end
 
 
 function h = myRaiseFigure(figname)
-global pleGlobals
+global ar
 openfigs = get(0,'Children');
 
 figcolor = [1 1 1];
 
-if(isfield(pleGlobals, 'fighandel_multi') && ~isempty(pleGlobals.fighandel_multi) && ...
-    pleGlobals.fighandel_multi ~= 0 && ...
-    sum(pleGlobals.fighandel_multi==openfigs)>0 && ...
-    strcmp(get(pleGlobals.fighandel_multi, 'Name'), figname))
+if(isfield(ar.ple, 'fighandel_multi') && ~isempty(ar.ple.fighandel_multi) && ...
+    ar.ple.fighandel_multi ~= 0 && ...
+    sum(ar.ple.fighandel_multi==openfigs)>0 && ...
+    strcmp(get(ar.ple.fighandel_multi, 'Name'), figname))
 
-    h = pleGlobals.fighandel_multi;
+    h = ar.ple.fighandel_multi;
     figure(h);
 else
     h = figure('Name', figname, 'NumberTitle','off', ...
         'Units', 'normalized', 'Position', ...
         [0.1 0.1 0.6 0.8]);
     set(h,'Color', figcolor);
-    pleGlobals.fighandel_multi = h;
+    ar.ple.fighandel_multi = h;
 end
 
 

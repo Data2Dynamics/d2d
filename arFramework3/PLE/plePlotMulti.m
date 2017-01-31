@@ -12,16 +12,16 @@
 
 function plePlotMulti(jks, savetofile, ncols, nrows, show_hit_bound, plot_hit_bound, plot_thresholds)
 
-global pleGlobals;
+global ar
 
-if(isempty(pleGlobals))
+if(isempty(ar.ple))
     error('perform ple before usage');
 end
-if(isempty(pleGlobals.ps))
+if(isempty(ar.ple.ps))
     return
 end
 if(~exist('jks','var') || isempty(jks))
-    jks = 1:length(pleGlobals.ps);
+    jks = 1:length(ar.ple.ps);
 end
 if(~exist('savetofile','var') || isempty(savetofile))
     savetofile = false;
@@ -29,7 +29,7 @@ end
 
 sumples = 0;
 for j=jks
-    if(~isempty(pleGlobals.ps{j}))
+    if(~isempty(ar.ple.ps{j}))
         sumples = sumples + 1;
     end
 end
@@ -42,7 +42,7 @@ if(~exist('nrows', 'var') || isempty(nrows))
     nrows = ceil(sumples/ncols);
 end
 if(~exist('show_hit_bound','var') || isempty(show_hit_bound))
-    show_hit_bound = 1:length(pleGlobals.ps);
+    show_hit_bound = 1:length(ar.ple.ps);
 end
 if(~exist('plot_hit_bound','var') || isempty(plot_hit_bound))
     plot_hit_bound = true;
@@ -51,9 +51,9 @@ if(~exist('plot_thresholds','var') || isempty(plot_thresholds))
     plot_thresholds = true;
 end
 
-if(pleGlobals.plot_point && ~pleGlobals.plot_simu)
+if(ar.ple.plot_point && ~ar.ple.plot_simu)
     strtitle = sprintf('profile log-likelihood (point-wise)');
-elseif(~pleGlobals.plot_point && pleGlobals.plot_simu)
+elseif(~ar.ple.plot_point && ar.ple.plot_simu)
     strtitle = sprintf('profile log-likelihood (simultaneous)');
 else
     strtitle = sprintf('profile log-likelihood');
@@ -62,35 +62,35 @@ end
 h = myRaiseFigure(strtitle);
 set(h, 'Color', [1 1 1]);
 
-if ( isfield( pleGlobals, 'firstID' ) )
-    count = pleGlobals.firstID;
+if ( isfield( ar.ple, 'firstID' ) )
+    count = ar.ple.firstID;
 else
     count = 1;
 end
 
 minchi2 = Inf;
 for jk=jks
-    if(~isempty(pleGlobals.ps{jk}))
-        minchi2 = min([minchi2 min(pleGlobals.chi2s{jk})]);
+    if(~isempty(ar.ple.ps{jk}))
+        minchi2 = min([minchi2 min(ar.ple.chi2s{jk})]);
     end
 end
 
 for jk=jks
-    if(~isempty(pleGlobals.ps{jk}))
+    if(~isempty(ar.ple.ps{jk}))
         g = subplot(nrows,ncols,count);
         arSubplotStyle(g);
         
-        ps = pleGlobals.ps{jk};
-        chi2s = pleGlobals.chi2s{jk};
+        ps = ar.ple.ps{jk};
+        chi2s = ar.ple.chi2s{jk};
         
-        qCloseToUB = ps > ones(length(chi2s),1) * (pleGlobals.ub - pleGlobals.dist_thres) & ...
-            ones(length(chi2s),1) * pleGlobals.q_fit==1;
-        qCloseToLB = ps < ones(length(chi2s),1) * (pleGlobals.lb + pleGlobals.dist_thres) & ...
-            ones(length(chi2s),1) * pleGlobals.q_fit==1;
+        qCloseToUB = ps > ones(length(chi2s),1) * (ar.ub - ar.ple.dist_thres) & ...
+            ones(length(chi2s),1) * ar.qFit==1;
+        qCloseToLB = ps < ones(length(chi2s),1) * (ar.lb + ar.ple.dist_thres) & ...
+            ones(length(chi2s),1) * ar.qFit==1;
      
         qhitbound = false(size(ps));
-        qhitbound(:,pleGlobals.q_fit==1) = pleGlobals.gradient{jk}(:,pleGlobals.q_fit==1) > pleGlobals.grad_thres & qCloseToLB(:,pleGlobals.q_fit==1) | ...
-            pleGlobals.gradient{jk}(:,pleGlobals.q_fit==1) < -pleGlobals.grad_thres & qCloseToUB(:,pleGlobals.q_fit==1);
+        qhitbound(:,ar.qFit==1) = ar.ple.gradient{jk}(:,ar.qFit==1) > ar.ple.grad_thres & qCloseToLB(:,ar.qFit==1) | ...
+            ar.ple.gradient{jk}(:,ar.qFit==1) < -ar.ple.grad_thres & qCloseToUB(:,ar.qFit==1);
         
         % profile
         qplot = true(size(ps,1),1);
@@ -101,13 +101,13 @@ for jk=jks
             plot(ps(qplot,jk), chi2s(qplot), 'k-', 'LineWidth', 1)
         end
         hold on
-        if(isfield(pleGlobals,'chi2spriors'))
-            mod_const = min(chi2s(qplot) - pleGlobals.chi2spriors{jk}(qplot));
-            plot(ps(qplot,jk), pleGlobals.chi2spriors{jk}(qplot) + mod_const, 'b--', 'LineWidth', 1)
+        if(isfield(ar.ple,'chi2spriors'))
+            mod_const = min(chi2s(qplot) - ar.ple.chi2spriors{jk}(qplot));
+            plot(ps(qplot,jk), ar.ple.chi2spriors{jk}(qplot) + mod_const, 'b--', 'LineWidth', 1)
         end
-        if(isfield(pleGlobals,'chi2spriorsAll'))
-            mod_const = min(chi2s(qplot) - pleGlobals.chi2spriorsAll{jk}(qplot));
-            plot(ps(qplot,jk), pleGlobals.chi2spriorsAll{jk}(qplot) + mod_const, 'c--', 'LineWidth', 1)
+        if(isfield(ar.ple,'chi2spriorsAll'))
+            mod_const = min(chi2s(qplot) - ar.ple.chi2spriorsAll{jk}(qplot));
+            plot(ps(qplot,jk), ar.ple.chi2spriorsAll{jk}(qplot) + mod_const, 'c--', 'LineWidth', 1)
         end
         
         % boundary values
@@ -116,12 +116,12 @@ for jk=jks
         end
         
         % limits
-        dchi2 = pleGlobals.dchi2_point;
-        if(pleGlobals.plot_simu)
-            dchi2 = pleGlobals.dchi2;
+        dchi2 = ar.ple.dchi2_point;
+        if(ar.ple.plot_simu)
+            dchi2 = ar.ple.dchi2;
         end
 
-        ylimmax = pleGlobals.chi2+dchi2*1.3;
+        ylimmax = ar.ple.merit+dchi2*1.3;
         if(plot_thresholds)
             ylim([minchi2-dchi2*0.1 ylimmax]);
         end
@@ -140,49 +140,49 @@ for jk=jks
         
         % thresholds
         if(plot_thresholds)
-            if(pleGlobals.plot_point)
-                plot(xlim, [0 0]+minchi2+chi2inv(1-pleGlobals.alpha_level, 1), 'r--')
+            if(ar.ple.plot_point)
+                plot(xlim, [0 0]+minchi2+chi2inv(1-ar.ple.alpha_level, 1), 'r--')
             end
-            if(pleGlobals.plot_simu)
-                plot(xlim, [0 0]+minchi2+chi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), 'r--')
+            if(ar.ple.plot_simu)
+                plot(xlim, [0 0]+minchi2+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), 'r--')
             end
             
             if(count == 1)
-                if(pleGlobals.plot_point && ~pleGlobals.plot_simu)
-                    text(mean(xlim), minchi2+chi2inv(1-pleGlobals.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
+                if(ar.ple.plot_point && ~ar.ple.plot_simu)
+                    text(mean(xlim), minchi2+chi2inv(1-ar.ple.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                         'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
-                elseif(~pleGlobals.plot_point && pleGlobals.plot_simu)
-                    text(mean(xlim), minchi2+chi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), sprintf('%2i%% (simultaneous)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
+                elseif(~ar.ple.plot_point && ar.ple.plot_simu)
+                    text(mean(xlim), minchi2+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                         'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
                 else
-                    text(mean(xlim), minchi2+chi2inv(1-pleGlobals.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
+                    text(mean(xlim), minchi2+chi2inv(1-ar.ple.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                         'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
-                    text(mean(xlim), minchi2+chi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), sprintf('%2i%% (simultaneous)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
+                    text(mean(xlim), minchi2+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                         'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
                 end
             end
         end
         
         % hessian CI
-%         sampletmp = linspace(pleGlobals.conf_lb(1,jk), pleGlobals.conf_ub(1,jk), 100);
-%         assym_chi2 = min(chi2s) + (1/pleGlobals.pstd(jk)^2)*(pleGlobals.p(jk)-sampletmp).^2;
+%         sampletmp = linspace(ar.ple.conf_lb(1,jk), ar.ple.conf_ub(1,jk), 100);
+%         assym_chi2 = min(chi2s) + (1/ar.ple.pstd(jk)^2)*(ar.ple.p(jk)-sampletmp).^2;
 %         if(isreal(sampletmp))
 %             plot(sampletmp, assym_chi2, '-', 'Color', [.5 .5 .5], 'LineWidth', 1)
 %         end
         
         % optimum
-        plot(pleGlobals.p(jk), pleGlobals.chi2, '*', 'Color', [.5 .5 .5], 'LineWidth', 1)
+        plot(ar.ple.p(jk), ar.ple.merit, '*', 'Color', [.5 .5 .5], 'LineWidth', 1)
         hold off
 
-        if ( pleGlobals.q_log10(jk) )
-            xlabel(['log_{10}(' arNameTrafo(pleGlobals.p_labels{jk}) ')']);
+        if ( ar.qLog10(jk) )
+            xlabel(['log_{10}(' arNameTrafo(ar.ple.p_labels{jk}) ')']);
         else
-            xlabel(arNameTrafo(pleGlobals.p_labels{jk}));
+            xlabel(arNameTrafo(ar.ple.p_labels{jk}));
         end
         title(sprintf('parameter #%i', jk));
         
         if(mod(count-1,ncols)==0)
-            ylabel(pleGlobals.ylabel)
+            ylabel(ar.ple.ylabel)
         else
             ylabel('')
             if(plot_thresholds)
@@ -195,11 +195,11 @@ for jk=jks
 end
 
 % save
-if(savetofile && exist(pleGlobals.savePath, 'dir'))
+if(savetofile && exist(ar.ple.savePath, 'dir'))
     name = 'multi_plot';
-    pleGlobals.figPathMulti{jk} = [pleGlobals.savePath '/' name];
+    ar.ple.figPathMulti{jk} = [ar.ple.savePath '/' name];
     set(h,'Renderer','painters')
-    savePath = [pleGlobals.savePath '/' name];
+    savePath = [ar.ple.savePath '/' name];
     saveas(h, savePath, 'fig');
     
     
@@ -234,7 +234,7 @@ if(savetofile && exist(pleGlobals.savePath, 'dir'))
         setenv('LD_LIBRARY_PATH', '');
         
         workingdir = cd;
-        cd(pleGlobals.savePath);
+        cd(ar.ple.savePath);
 
         if(ismac)
             eval(['!/usr/texbin/pdflatex -interaction=nonstopmode ' [arPathConvert(name) '.tex'] ' > log_pdflatex.txt']);
@@ -259,24 +259,25 @@ end
 
 
 function h = myRaiseFigure(figname)
-global pleGlobals
+global ar
+
 openfigs = get(0,'Children');
 
 figcolor = [1 1 1];
 
-if(isfield(pleGlobals, 'fighandel_multi') && ~isempty(pleGlobals.fighandel_multi) && ...
-    pleGlobals.fighandel_multi ~= 0 && ...
-    sum(pleGlobals.fighandel_multi==openfigs)>0 && ...
-    strcmp(get(pleGlobals.fighandel_multi, 'Name'), figname))
+if(isfield(ar.ple, 'fighandel_multi') && ~isempty(ar.ple.fighandel_multi) && ...
+    ar.ple.fighandel_multi ~= 0 && ...
+    sum(ar.ple.fighandel_multi==openfigs)>0 && ...
+    strcmp(get(ar.ple.fighandel_multi, 'Name'), figname))
 
-    h = pleGlobals.fighandel_multi;
+    h = ar.ple.fighandel_multi;
     figure(h);
 else
     h = figure('Name', figname, 'NumberTitle','off', ...
         'Units', 'normalized', 'Position', ...
         [0.1 0.1 0.6 0.8]);
     set(h,'Color', figcolor);
-    pleGlobals.fighandel_multi = h;
+    ar.ple.fighandel_multi = h;
 end
 
 

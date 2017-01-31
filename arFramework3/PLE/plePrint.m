@@ -6,12 +6,12 @@
 
 function plePrint(fid)
 
-global pleGlobals;
+global ar
 
-if(isempty(pleGlobals))
+if(~isfield(ar,'ple') || isempty(ar.ple))
     error('perform ple before usage');
 end
-if(isempty(pleGlobals.ps))
+if(isempty(ar.ple.ps))
     return
 end
 
@@ -19,16 +19,16 @@ if(~exist('fid', 'var'))
     fid = 1;
 end
 
-if(isfield(pleGlobals, 'p_true'))
+if(isfield(ar.ple, 'p_true'))
     spacer = '-----------------------------------------------------------------------------------------------------------------------------------\n';
 else
     spacer = '---------------------------------------------------------------------------------------------------------------\n';
 end
 
 parnamelength = length('Parameter:');
-for j=1:length(pleGlobals.p_labels)
-	if(length(pleGlobals.p_labels{j}) > parnamelength)
-		parnamelength = length(pleGlobals.p_labels{j});
+for j=1:length(ar.ple.p_labels)
+	if(length(ar.ple.p_labels{j}) > parnamelength)
+		parnamelength = length(ar.ple.p_labels{j});
 	end
 end
 partemplate = sprintf('%%%is ', parnamelength);
@@ -38,12 +38,12 @@ coverlength = 2;
 covertemplate = sprintf('%%%is ', coverlength);
 
 %% point-wise
-fprintf(fid, '\nPLE %2i%% point-wise CI:\n', (1-pleGlobals.alpha_level)*100);
+fprintf(fid, '\nPLE %2i%% point-wise CI:\n', (1-ar.ple.alpha_level)*100);
 fprintf(fid, spacer);
 fprintf(fid, '    # ');
 fprintf(fid, partemplate, makestr('Parameter:', parnamelength));
 fprintf(fid, numtemplate, makestr('Value:', numlength));
-if(isfield(pleGlobals, 'p_true'))
+if(isfield(ar.ple, 'p_true'))
     fprintf(fid, numtemplate, makestr('True:', numlength));
 end
 fprintf(fid, numtemplate, makestr('Min:', numlength));
@@ -53,37 +53,37 @@ fprintf(fid, numtemplate, makestr('IDflag:', numlength));
 fprintf(fid, numtemplate, makestr('LowerPL:', numlength));
 fprintf(fid, numtemplate, makestr('UpperPL:', numlength));
 fprintf(fid, numtemplate, makestr('Rel.PL:', numlength));
-if(isfield(pleGlobals, 'p_true'))
+if(isfield(ar.ple, 'p_true'))
     fprintf(fid, '|');
     fprintf(fid, covertemplate, makestr('?:', numlength));
 end
 fprintf(fid, '\n');
 
 fprintf(fid, spacer);
-for j=1:length(pleGlobals.p)
+for j=1:length(ar.ple.p)
     idflag = '';
-    if(pleGlobals.IDstatus_point(j)>1)
-        idflag = pleGlobals.IDlabel{pleGlobals.IDstatus_point(j)};
+    if(ar.ple.IDstatus_point(j)>1)
+        idflag = ar.ple.IDlabel{ar.ple.IDstatus_point(j)};
     end
     
     fprintf(fid, ' %4i ', j);
-    fprintf(fid, partemplate, makestr(pleGlobals.p_labels{j}, parnamelength));
-    fprintf(fid, numtemplate, makestr(pleGlobals.p(j), numlength));
-    if(isfield(pleGlobals, 'p_true'))
-        fprintf(fid, numtemplate, makestr(pleGlobals.p_true(j), numlength));
+    fprintf(fid, partemplate, makestr(ar.ple.p_labels{j}, parnamelength));
+    fprintf(fid, numtemplate, makestr(ar.ple.p(j), numlength));
+    if(isfield(ar.ple, 'p_true'))
+        fprintf(fid, numtemplate, makestr(ar.ple.p_true(j), numlength));
     end
-    if(pleGlobals.q_fit(j))
-        fprintf(fid, numtemplate, makestr(pleGlobals.lb(j), numlength));
-        fprintf(fid, numtemplate, makestr(pleGlobals.ub(j), numlength));
+    if(ar.qFit(j))
+        fprintf(fid, numtemplate, makestr(ar.lb(j), numlength));
+        fprintf(fid, numtemplate, makestr(ar.ub(j), numlength));
         fprintf(fid, '|');
         fprintf(fid, numtemplate, makestr(idflag, numlength));
-        fprintf(fid, numtemplate, makestr(pleGlobals.conf_lb_point(j), numlength));
-        fprintf(fid, numtemplate, makestr(pleGlobals.conf_ub_point(j), numlength));
-        fprintf(fid, numtemplate, makestr(pleGlobals.conf_rel_point(j), numlength));
-        if(isfield(pleGlobals, 'p_true'))
+        fprintf(fid, numtemplate, makestr(ar.ple.conf_lb_point(j), numlength));
+        fprintf(fid, numtemplate, makestr(ar.ple.conf_ub_point(j), numlength));
+        fprintf(fid, numtemplate, makestr(ar.ple.conf_rel_point(j), numlength));
+        if(isfield(ar.ple, 'p_true'))
             fprintf(fid, '|');
             coverage_flag = ' ';
-            if(pleGlobals.cover_point(j))
+            if(ar.ple.cover_point(j))
                 coverage_flag = '*';
             end
             fprintf(fid, covertemplate, makestr(coverage_flag, numlength));
@@ -96,13 +96,13 @@ end
 fprintf(fid, spacer);
 
 %% simultaneous
-if(pleGlobals.plot_simu)
-    fprintf(fid, '\nPLE %2i%% simultaneous CI:\n', (1-pleGlobals.alpha_level)*100);
+if(ar.ple.plot_simu)
+    fprintf(fid, '\nPLE %2i%% simultaneous CI:\n', (1-ar.ple.alpha_level)*100);
     fprintf(fid, spacer);
     fprintf(fid, '    # ');
     fprintf(fid, partemplate, makestr('Parameter:', parnamelength));
     fprintf(fid, numtemplate, makestr('Value:', numlength));
-    if(isfield(pleGlobals, 'p_true'))
+    if(isfield(ar.ple, 'p_true'))
         fprintf(fid, numtemplate, makestr('True:', numlength));
     end
     fprintf(fid, numtemplate, makestr('Min:', numlength));
@@ -112,36 +112,36 @@ if(pleGlobals.plot_simu)
     fprintf(fid, numtemplate, makestr('LowerPL:', numlength));
     fprintf(fid, numtemplate, makestr('UpperPL:', numlength));
     fprintf(fid, numtemplate, makestr('Rel.PL:', numlength));
-    if(isfield(pleGlobals, 'p_true'))
+    if(isfield(ar.ple, 'p_true'))
         fprintf(fid, covertemplate, makestr('?:', numlength));
     end
     fprintf(fid, '\n');
     
     fprintf(fid, spacer);
-    for j=1:length(pleGlobals.p)
+    for j=1:length(ar.ple.p)
         idflag = '';
-        if(pleGlobals.IDstatus(j)>1)
-            idflag = pleGlobals.IDlabel{pleGlobals.IDstatus(j)};
+        if(ar.ple.IDstatus(j)>1)
+            idflag = ar.ple.IDlabel{ar.ple.IDstatus(j)};
         end
         
         fprintf(fid, ' %4i ', j);
-        fprintf(fid, partemplate, makestr(pleGlobals.p_labels{j}, parnamelength));
-        fprintf(fid, numtemplate, makestr(pleGlobals.p(j), numlength));
-        if(isfield(pleGlobals, 'p_true'))
-            fprintf(fid, numtemplate, makestr(pleGlobals.p_true(j), numlength));
+        fprintf(fid, partemplate, makestr(ar.ple.p_labels{j}, parnamelength));
+        fprintf(fid, numtemplate, makestr(ar.ple.p(j), numlength));
+        if(isfield(ar.ple, 'p_true'))
+            fprintf(fid, numtemplate, makestr(ar.ple.p_true(j), numlength));
         end
-        if(pleGlobals.q_fit(j))
-            fprintf(fid, numtemplate, makestr(pleGlobals.lb(j), numlength));
-            fprintf(fid, numtemplate, makestr(pleGlobals.ub(j), numlength));
+        if(ar.qFit(j))
+            fprintf(fid, numtemplate, makestr(ar.lb(j), numlength));
+            fprintf(fid, numtemplate, makestr(ar.ub(j), numlength));
             fprintf(fid, '|');
             fprintf(fid, numtemplate, makestr(idflag, numlength));
-            fprintf(fid, numtemplate, makestr(pleGlobals.conf_lb(j), numlength));
-            fprintf(fid, numtemplate, makestr(pleGlobals.conf_ub(j), numlength));
-            fprintf(fid, numtemplate, makestr(pleGlobals.conf_rel(j), numlength));
-            if(isfield(pleGlobals, 'p_true'))
+            fprintf(fid, numtemplate, makestr(ar.ple.conf_lb(j), numlength));
+            fprintf(fid, numtemplate, makestr(ar.ple.conf_ub(j), numlength));
+            fprintf(fid, numtemplate, makestr(ar.ple.conf_rel(j), numlength));
+            if(isfield(ar.ple, 'p_true'))
                 coverage_flag = ' ';
-                if(pleGlobals.p_true(j) <= pleGlobals.conf_ub(j) && ...
-                        pleGlobals.p_true(j) >= pleGlobals.conf_lb(j))
+                if(ar.ple.p_true(j) <= ar.ple.conf_ub(j) && ...
+                        ar.ple.p_true(j) >= ar.ple.conf_lb(j))
                     coverage_flag = '*';
                 end
                 fprintf(fid, covertemplate, makestr(coverage_flag, numlength));

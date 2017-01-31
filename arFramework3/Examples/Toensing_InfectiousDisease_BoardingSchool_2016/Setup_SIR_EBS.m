@@ -44,8 +44,8 @@ arLoadPars('BestFit_EBS');
 % arPLEInit
 % 
 % % Set tolerances
-% pleGlobals.relchi2stepincrease(5) = 0.01;
-% pleGlobals.minstepsize(:) = 1e-4;
+% ar.ple.relchi2stepincrease(5) = 0.01;
+% ar.ple.minstepsize(:) = 1e-4;
 % 
 % % calculate profiles
 % ple(1:5,200)

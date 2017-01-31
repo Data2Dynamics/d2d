@@ -3,7 +3,6 @@
 function [xsout, chi2sout] = arProfileODE(jk, gamma, p_range, method)
 
 global ar
-global pleGlobals
 
 if(~exist('gamma','var'))
     gamma = 1;
@@ -65,12 +64,12 @@ jkx = find(jkx);
 
 x = [p(ar.qFit==1) 0];
 
-if(isempty(pleGlobals.chi2s{jk}))
+if(isempty(ar.ple.chi2s{jk}))
     p_rangeu = p_range;
     p_ranged = -p_range;
 else
-    p_rangeu = max(pleGlobals.ps{jk}(:,jk)) - pleGlobals.p(jk);
-    p_ranged = min(pleGlobals.ps{jk}(:,jk)) - pleGlobals.p(jk);
+    p_rangeu = max(ar.ple.ps{jk}(:,jk)) - ar.ple.p(jk);
+    p_ranged = min(ar.ple.ps{jk}(:,jk)) - ar.ple.p(jk);
 end
 
 if(doDAE)
@@ -178,17 +177,17 @@ try
     lambdasout = [flipud(lambdasd); lambdas];
     
     tt = toc;
-    fprintf('runtime %f sec (x%f faster than conventional)\n', tt, pleGlobals.timing(jk)/tt);
+    fprintf('runtime %f sec (x%f faster than conventional)\n', tt, ar.ple.timing(jk)/tt);
     
     if(~isempty(xsout))
         figure(1)
         
         subplot(5,1,[1 2])
-        plot(pleGlobals.ps{jk}(:,jk), pleGlobals.chi2s{jk}, 'or--');
+        plot(ar.ple.ps{jk}(:,jk), ar.ple.chi2s{jk}, 'or--');
         hold on
         plot(xsout(:,jk), chi2sout, 'x-b')
         legend('reoptimization', 'profile ODE');
-        xlim([min(pleGlobals.ps{jk}(:,jk)) max(pleGlobals.ps{jk}(:,jk))])
+        xlim([min(ar.ple.ps{jk}(:,jk)) max(ar.ple.ps{jk}(:,jk))])
         ylim([arGetMerit('chi2fit')-(0.1*dchi2) arGetMerit('chi2fit')+2*dchi2]);
         plot([ar.p(jk) ar.p(jk)], ylim, 'k--');
         plot(xlim, [arGetMerit('chi2fit')+dchi2 arGetMerit('chi2fit')+dchi2], 'r--');
@@ -196,20 +195,20 @@ try
         
         subplot(5,1,[3 4])
         q_not_jk = (1:size(xsout,2))~=jk;
-        plot(pleGlobals.ps{jk}(:,jk), bsxfun(@minus, pleGlobals.ps{jk}(:,q_not_jk), pleGlobals.p(q_not_jk)), 'o--');
+        plot(ar.ple.ps{jk}(:,jk), bsxfun(@minus, ar.ple.ps{jk}(:,q_not_jk), ar.ple.p(q_not_jk)), 'o--');
         ylimtmp = ylim;
         hold on
         plot([ar.p(jk) ar.p(jk)], ylim, 'k--');
         plot(xsout(:,jk), bsxfun(@minus, xsout(:,q_not_jk), ar.p(q_not_jk)), 'x-')
         %     plot(xsout(:,jk), xsout(:,q_not_jk), 'x-')
-        xlim([min(pleGlobals.ps{jk}(:,jk)) max(pleGlobals.ps{jk}(:,jk))])
+        xlim([min(ar.ple.ps{jk}(:,jk)) max(ar.ple.ps{jk}(:,jk))])
         hold off
         legend(strrep(ar.pLabel(q_not_jk),'_','\_'))
         ylim(ylimtmp);
         
         subplot(5,1,5)
         plot(xsout(:,jk), lambdasout, 'x-')
-        xlim([min(pleGlobals.ps{jk}(:,jk)) max(pleGlobals.ps{jk}(:,jk))])
+        xlim([min(ar.ple.ps{jk}(:,jk)) max(ar.ple.ps{jk}(:,jk))])
         if(max(lambdasout)-min(lambdasout)>0)
             ylim([min(lambdasout) max(lambdasout)])
         end

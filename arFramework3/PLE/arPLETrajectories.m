@@ -10,12 +10,12 @@
 function arPLETrajectories(jks, n, show_hit_bound, saveToFile)
 
 global ar
-global pleGlobals
+
 
 if(isempty(ar))
     error('please initialize by arInit')
 end
-if(isempty(pleGlobals))
+if(~isfield(ar,'ple') || isempty(ar.ple))
     error('PLE ERROR: please initialize')
 end 
 
@@ -36,9 +36,9 @@ ps = [];
 chi2s = [];
 
 if(ischar(jks))
-    jks = find(ismember(pleGlobals.p_labels, jks)); %R2013a compatible
+    jks = find(ismember(ar.ple.p_labels, jks)); %R2013a compatible
 else
-    jks = find(ismember(pleGlobals.p_labels, ar.pLabel(jks))); %R2013a compatible
+    jks = find(ismember(ar.ple.p_labels, ar.pLabel(jks))); %R2013a compatible
 end
 
 if(length(jks)>2)
@@ -49,29 +49,29 @@ end
 
 % collect
 for j = jks
-    if(j<=length(pleGlobals.ps) && ~isempty(pleGlobals.ps{j}))
+    if(j<=length(ar.ple.ps) && ~isempty(ar.ple.ps{j}))
         if(length(jks)<=2)
             if(j==1)
-                response_str = pleGlobals.p_labels{j};
+                response_str = ar.ple.p_labels{j};
             else
-                response_str = [response_str '_' pleGlobals.p_labels{j}];
+                response_str = [response_str '_' ar.ple.p_labels{j}];
             end
         end
         
         % all non nans
-        chi2stmp = pleGlobals.chi2s{j}(~isnan(pleGlobals.chi2s{j}));
-        pstmp = pleGlobals.ps{j}(~isnan(pleGlobals.chi2s{j}),:);
+        chi2stmp = ar.ple.chi2s{j}(~isnan(ar.ple.chi2s{j}));
+        pstmp = ar.ple.ps{j}(~isnan(ar.ple.chi2s{j}),:);
         
 %         % cut out bounds
 %         jk = j;
-%         qCloseToUB = pstmp > ones(length(chi2stmp),1) * (pleGlobals.ub - pleGlobals.dist_thres) & ...
-%             ones(length(chi2stmp),1) * pleGlobals.q_fit==1;
-%         qCloseToLB = pstmp < ones(length(chi2stmp),1) * (pleGlobals.lb + pleGlobals.dist_thres) & ...
-%             ones(length(chi2stmp),1) * pleGlobals.q_fit==1;
+%         qCloseToUB = pstmp > ones(length(chi2stmp),1) * (ar.ub - ar.ple.dist_thres) & ...
+%             ones(length(chi2stmp),1) * ar.qFit==1;
+%         qCloseToLB = pstmp < ones(length(chi2stmp),1) * (ar.lb + ar.ple.dist_thres) & ...
+%             ones(length(chi2stmp),1) * ar.qFit==1;
 %         
 %         qhitbound = false(size(pstmp));
-%         qhitbound(:,pleGlobals.q_fit==1) = pleGlobals.gradient{jk}(~isnan(pleGlobals.chi2s{j}),pleGlobals.q_fit==1) > pleGlobals.grad_thres & qCloseToLB(:,pleGlobals.q_fit==1) | ...
-%             pleGlobals.gradient{jk}(~isnan(pleGlobals.chi2s{j}),pleGlobals.q_fit==1) < -pleGlobals.grad_thres & qCloseToUB(:,pleGlobals.q_fit==1);
+%         qhitbound(:,ar.qFit==1) = ar.ple.gradient{jk}(~isnan(ar.ple.chi2s{j}),ar.qFit==1) > ar.ple.grad_thres & qCloseToLB(:,ar.qFit==1) | ...
+%             ar.ple.gradient{jk}(~isnan(ar.ple.chi2s{j}),ar.qFit==1) < -ar.ple.grad_thres & qCloseToUB(:,ar.qFit==1);
 %         
 %         if(~show_hit_bound)
 %             chi2stmp = chi2stmp(sum(qhitbound,2)==0);
@@ -79,7 +79,7 @@ for j = jks
 %         end
         
         % cut below threshold
-        qbelow = chi2stmp < pleGlobals.chi2 + pleGlobals.dchi2_point;
+        qbelow = chi2stmp < ar.ple.merit + ar.ple.dchi2_point;
         chi2stmp = chi2stmp(qbelow);
         pstmp = pstmp(qbelow,:);
         
@@ -96,7 +96,7 @@ end
 
 % % weights
 % % minimum chi^2 = 50% alpha, dchi2 = 10%;
-% weigths = (chi2s-pleGlobals.chi2)/pleGlobals.dchi2_point;
+% weigths = (chi2s-ar.ple.merit)/ar.ple.dchi2_point;
 % weigths = -weigths; 
 % weigths = 10.^(weigths);
 % weigths = weigths / max(weigths);
@@ -110,7 +110,7 @@ weigths = ones(size(chi2s));
 
 % plot
 psnew = ones(size(ps,1),1) * ar.p;
-psnew(:,ismember(ar.pLabel, pleGlobals.p_labels)) = ps(:,ismember(pleGlobals.p_labels, ar.pLabel)); %R2013a compatible
+psnew(:,ismember(ar.pLabel, ar.ple.p_labels)) = ps(:,ismember(ar.ple.p_labels, ar.pLabel)); %R2013a compatible
 
 
 ar.ps_trajectories = psnew;

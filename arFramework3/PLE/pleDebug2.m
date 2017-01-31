@@ -1,12 +1,13 @@
 % pleDebug2(figure_number)
 
 function pleDebug2(figure_number)
-global pleGlobals;
 
-if(isempty(pleGlobals))
+global ar
+
+if(isempty(ar.ple))
     error('perform ple before usage');
 end
-if(isempty(pleGlobals.ps))
+if(isempty(ar.ple.ps))
     return
 end
 
@@ -17,18 +18,18 @@ end
 %% Plot Step Statistics
 
 count = 0;
-for jk=1:length(pleGlobals.ps)
-    if(~isempty(pleGlobals.ps{jk}))
+for jk=1:length(ar.ple.ps)
+    if(~isempty(ar.ple.ps{jk}))
         figure(figure_number+count)
         
-        notjk = 1:length(pleGlobals.p);
+        notjk = 1:length(ar.ple.p);
         notjk = notjk~=jk;
         
         subplot(1,1,1)
-        plot(pleGlobals.ps{jk}(:,jk), pleGlobals.ps{jk}(:,notjk), 'x-')
+        plot(ar.ple.ps{jk}(:,jk), ar.ple.ps{jk}(:,notjk), 'x-')
         hold on
-        plot(pleGlobals.ps{jk}(:,jk), pleGlobals.psinit{jk}(:,notjk), 'x--')
-        plot([0 0]+pleGlobals.p(jk), ylim, 'k');
+        plot(ar.ple.ps{jk}(:,jk), ar.ple.psinit{jk}(:,notjk), 'x--')
+        plot([0 0]+ar.ple.p(jk), ylim, 'k');
         hold off
         ylabel('parameters')
         

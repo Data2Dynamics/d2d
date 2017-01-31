@@ -15,21 +15,21 @@
 
 function pleSmooth(jk, quick, point, dr)
 
-global pleGlobals;
+global ar
 
-if(isempty(pleGlobals))
+if(isempty(ar.ple))
     error('PLE ERROR: please initialize')
 end 
-if(~isfield(pleGlobals, 'showCalculation'))
-    pleGlobals.showCalculation = true;
+if(~isfield(ar.ple, 'showCalculation'))
+    ar.ple.showCalculation = true;
 end
 if(~exist('quick','var'))
     quick = false;
 end
 if(nargin<1)
-    fprintf('PLE smoothing for %i parameters ...\n', sum(pleGlobals.q_fit))
-    jindex = find(pleGlobals.q_fit);
-    for j=1:length(pleGlobals.chi2s)
+    fprintf('PLE smoothing for %i parameters ...\n', sum(ar.qFit))
+    jindex = find(ar.qFit);
+    for j=1:length(ar.ple.chi2s)
         pleSmooth(jindex(j))
     end
     return
@@ -49,17 +49,17 @@ end
 
 dchi2 = 0.1;
 
-if(~pleGlobals.q_fit(jk))
-    fprintf('\nPLE#%i smoothing SKIPPED: parameter %s is fixed\n', jk, pleGlobals.p_labels{jk});
+if(~ar.qFit(jk))
+    fprintf('\nPLE#%i smoothing SKIPPED: parameter %s is fixed\n', jk, ar.ple.p_labels{jk});
     return;
-elseif(jk <= length(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}) && pleGlobals.IDstatus(jk)~=4)
-    fprintf('\nPLE#%i smoothing for parameter %s\n', jk, pleGlobals.p_labels{jk});
+elseif(jk <= length(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}) && ar.ple.IDstatus(jk)~=4)
+    fprintf('\nPLE#%i smoothing for parameter %s\n', jk, ar.ple.p_labels{jk});
     
     
-    trialP = zeros(0,length(pleGlobals.p));
+    trialP = zeros(0,length(ar.ple.p));
 
-    n = length(pleGlobals.chi2s{jk});
-    chi2s = pleGlobals.chi2s{jk};
+    n = length(ar.ple.chi2s{jk});
+    chi2s = ar.ple.chi2s{jk};
     [~, globminindex] = min(chi2s);
     
     if ( nargin < 3 )
@@ -92,8 +92,8 @@ elseif(jk <= length(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}) && pleGl
 
         direction = [ones(size(candidateindex_down)) -ones(size(candidateindex_up))];
         candidateindex = [candidateindex_down candidateindex_up];
-        trialP = [trialP; pleGlobals.ps{jk}(candidateindex,:)]; 
-        pleGlobals.local_minima{jk} = trialP;
+        trialP = [trialP; ar.ple.ps{jk}(candidateindex,:)]; 
+        ar.ple.local_minima{jk} = trialP;
 
         if(~quick)
             if(size(trialP,1)>1)
@@ -101,7 +101,7 @@ elseif(jk <= length(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}) && pleGl
                 drawnow;
                 trail_list = cell(1, size(trialP,1));
                 for jp=1:size(trialP,1)
-                    trail_list{jp} = sprintf('%s = %f', pleGlobals.p_labels{jk}, trialP(jp,jk));
+                    trail_list{jp} = sprintf('%s = %f', ar.ple.p_labels{jk}, trialP(jp,jk));
                 end
                 result = stringListChooser(trail_list, 1, true);
                 candidateindex = candidateindex(result);
@@ -120,12 +120,12 @@ elseif(jk <= length(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}) && pleGl
         end
     else
         % Find closest point
-        [~,candidateindex]  = min( abs( pleGlobals.ps{jk}(:,jk) - point ) );
-        trialP              = pleGlobals.ps{jk}(candidateindex,:);
+        [~,candidateindex]  = min( abs( ar.ple.ps{jk}(:,jk) - point ) );
+        trialP              = ar.ple.ps{jk}(candidateindex,:);
         direction           = dr;
     end
     
-    fprintf('trial point: %s = %f\n', pleGlobals.p_labels{jk}, trialP(jk));
+    fprintf('trial point: %s = %f\n', ar.ple.p_labels{jk}, trialP(jk));
     
     if(direction<0)
         ntot = candidateindex;
@@ -137,33 +137,33 @@ elseif(jk <= length(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}) && pleGl
     while(candidateindex+direction<=n && candidateindex+direction>0)
         ncount = ncount + 1;
         arWaitbar(ncount, ntot, sprintf('PLE#%i smoothing for %s', ...
-                jk, strrep(pleGlobals.p_labels{jk},'_', '\_')));
-        pTrail = pleGlobals.ps{jk}(candidateindex,:);
-        pTrail(jk) = pleGlobals.ps{jk}(candidateindex+direction,jk);
+                jk, strrep(ar.ple.p_labels{jk},'_', '\_')));
+        pTrail = ar.ple.ps{jk}(candidateindex,:);
+        pTrail(jk) = ar.ple.ps{jk}(candidateindex+direction,jk);
         
-        feval(pleGlobals.integrate_fkt, pTrail);
-        [p, g] = feval(pleGlobals.fit_fkt, jk);
-        chi2 = feval(pleGlobals.merit_fkt);
+        feval(ar.ple.integrate_fkt, pTrail);
+        [p, g] = feval(ar.ple.fit_fkt, jk);
+        chi2 = feval(ar.ple.merit_fkt);
         
-        if(chi2 < pleGlobals.chi2s{jk}(candidateindex+direction))
+        if(chi2 < ar.ple.chi2s{jk}(candidateindex+direction))
             candidateindex = candidateindex+direction;
-            pleGlobals.ps{jk}(candidateindex,:) = p+0;
-            pleGlobals.chi2s{jk}(candidateindex) = chi2+0;
-            pleGlobals.gradient{jk}(candidateindex,:) = g+0;
-            if(isfield(pleGlobals,'violations'))
-                pleGlobals.chi2sviolations{jk}(candidateindex) = feval(pleGlobals.violations);
+            ar.ple.ps{jk}(candidateindex,:) = p+0;
+            ar.ple.chi2s{jk}(candidateindex) = chi2+0;
+            ar.ple.gradient{jk}(candidateindex,:) = g+0;
+            if(isfield(ar.ple,'violations'))
+                ar.ple.chi2sviolations{jk}(candidateindex) = feval(ar.ple.violations);
             end
-            if(isfield(pleGlobals,'priors'))
-                pleGlobals.chi2spriors{jk}(candidateindex) = feval(pleGlobals.priors, jk);
+            if(isfield(ar.ple,'priors'))
+                ar.ple.chi2spriors{jk}(candidateindex) = feval(ar.ple.priors, jk);
             end
-            if(isfield(pleGlobals,'priorsAll'))
-                pleGlobals.chi2spriorsAll{jk}(candidateindex) = feval(pleGlobals.priorsAll);
+            if(isfield(ar.ple,'priorsAll'))
+                ar.ple.chi2spriorsAll{jk}(candidateindex) = feval(ar.ple.priorsAll);
             end
         else
             break;
         end
         
-        if(pleGlobals.showCalculation)
+        if(ar.ple.showCalculation)
             plePlot(jk);
         end
     end
@@ -173,22 +173,22 @@ elseif(jk <= length(pleGlobals.chi2s) && ~isempty(pleGlobals.chi2s{jk}) && pleGl
 end
 
 % reset parameters
-feval(pleGlobals.integrate_fkt, pleGlobals.p);
+feval(ar.ple.integrate_fkt, ar.ple.p);
 
 
 % define new optimum
-if(exist('chi2s','var') && pleGlobals.chi2-min(pleGlobals.chi2s{jk}) > pleGlobals.optimset_tol)
-    [minchi2, iminchi2] = min(pleGlobals.chi2s{jk});
+if(exist('chi2s','var') && ar.ple.merit-min(ar.ple.chi2s{jk}) > ar.ple.optimset_tol)
+    [minchi2, iminchi2] = min(ar.ple.chi2s{jk});
     fprintf('PLE#%i found better optimum with chi^2 decrease of %e\n', jk, ...
-        pleGlobals.chi2 - minchi2);
+        ar.ple.merit - minchi2);
     
-    if(pleGlobals.allowbetteroptimum)
-        pleGlobals.chi2 = minchi2;
-        pleGlobals.p = pleGlobals.ps{jk}(iminchi2,:);
-        feval(pleGlobals.setoptim_fkt, pleGlobals.ps{jk}(iminchi2,:));
+    if(ar.ple.allowbetteroptimum)
+        ar.ple.merit = minchi2;
+        ar.ple.p = ar.ple.ps{jk}(iminchi2,:);
+        feval(ar.ple.setoptim_fkt, ar.ple.ps{jk}(iminchi2,:));
     end
 end
 
 % save
-pleSave(pleGlobals);
+pleSave(ar.ple);
 
