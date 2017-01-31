@@ -87,13 +87,13 @@ int    ms;
 int    events;
 int    parallel;
 int    sensirhs;
-int    fiterrors;
+/*int    fiterrors;*/
 int    cvodes_maxsteps;
 double cvodes_maxstepsize;
 int    cvodes_atolV;
 double cvodes_rtol;
 double cvodes_atol;
-double fiterrors_correction;
+/*double fiterrors_correction;*/
 /* int useFitErrorMatrix;
  double *fiterrors_matrix;
  mwSize nrows_fiterrors_matrix; */
@@ -210,8 +210,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     cvodes_atol = mxGetScalar(mxGetField(arconfig, 0, "atol"));
     cvodes_maxsteps = (int) mxGetScalar(mxGetField(arconfig, 0, "maxsteps"));
     cvodes_maxstepsize = mxGetScalar(mxGetField(arconfig, 0, "maxstepsize"));
-    fiterrors = (int) mxGetScalar(mxGetField(arconfig, 0, "fiterrors"));
-    fiterrors_correction = (double) mxGetScalar(mxGetField(arconfig, 0, "fiterrors_correction"));
+/*  fiterrors = (int) mxGetScalar(mxGetField(arconfig, 0, "fiterrors"));*/
+/*    fiterrors_correction = (double) mxGetScalar(mxGetField(arconfig, 0, "fiterrors_correction"));*/
 /*     useFitErrorMatrix = (int) mxGetScalar(mxGetField(arconfig, 0, "useFitErrorMatrix"));
      if(useFitErrorMatrix==1){
          fiterrors_matrix = (double *) mxGetData(mxGetField(arconfig, 0, "fiterrors_matrix"));

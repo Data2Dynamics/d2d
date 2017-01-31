@@ -141,8 +141,7 @@ if ( ss_presimulation )
     if ( sensi )
         ar = initSteadyStateSensis(ar);
     end
-    
-    if ( ~isfield( ar.config, 'rootfinding' ) || ( ar.config.rootfinding == 0 ) )
+    if ( ~isfield( ar.config, 'rootfinding' ) || ( ar.config.rootfinding < 0.1 ) )
         % Steady state determination by simulation
         feval(ar.fkt, ar, true, ar.config.useSensis && sensi, dynamics, false, 'ss_condition', 'ss_threads', ar.config.skipSim);
     else

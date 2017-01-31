@@ -56,7 +56,7 @@ function ar = arInitFields(ar)
         {'atol',                        1e-6}, ...                      %   Absolute tolerance
         {'rtol',                        1e-6}, ...                      %   Relative tolerance
         {'maxsteps',                    1000}, ...                      %   Maximum number of steps before timeout
-        {'maxstepsize',                 Inf}, ...                       %   Maximum stepsize
+        {'maxstepsize',                 1e6}, ...                       %   Maximum stepsize
         {'useEvents',                   0}, ...                         %   Use event system
         {'useMS',                       0}, ...                         %   Use multiple shooting (DEPRECATED)
         {'nCVRestart',                  NaN}, ...                        %   Maximum number of automatic restarts
