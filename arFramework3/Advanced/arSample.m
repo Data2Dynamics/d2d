@@ -70,7 +70,6 @@ arWaitbar(-1);
 
 function p = makerange(N,parindex, mode, range)
 global ar
-global ar
 
 if(mode==1)
     p = linspace(ar.lb(parindex), ar.ub(parindex), N);
