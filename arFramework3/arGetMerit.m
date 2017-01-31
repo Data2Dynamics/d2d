@@ -114,7 +114,7 @@ meritvals.chi2_constr   = ar.chi2constr;
 meritvals.chi2_prior    = ar.chi2prior;
 meritvals.chi2_random   = ar.chi2random;
 
-if ~isempty(ar.ple) && isfield(ar.ple,'merit_fkt')    
+if isfield(ar,'ple') && ~isempty(ar.ple) && isfield(ar.ple,'merit_fkt')    
     meritvals.ple_merit = feval(ar.ple.merit_fkt);
 else
     meritvals.ple_merit = [];
@@ -178,7 +178,7 @@ switch lower(whichone)  % case insensitive
                 meritval = meritvals.chi2_all;
                 meritLabel = '\chi^2_{total}';
                 if(~silent)
-                    arFprintf(1, 'total chi^2 = %g, %i data points, ', meritvals.chi2_all, meritvals.ndata);
+                    arFprintf(1, 'total chi^2 = %g, ', meritvals.chi2_all);
                 end
             else
                 meritval = meritvals.loglik_all;
@@ -208,10 +208,10 @@ end
 %% printing at the command line
 if(~silent)
     arFprintf(1, '%i free parameters, ', sum(ar.qFit==1));
-    if(ar.chi2constr ~=0)
+    if(abs(ar.chi2constr) >1e-10)
         arFprintf(1, ', %g violation of %i constraints', ar.chi2constr, ar.nconstr);
     end
-    if(ar.chi2prior ~=0)
+    if(abs(ar.chi2prior) >1e-10)
         arFprintf(1, ', %g violation of %i prior assumptions', ar.chi2prior, ar.nprior);
     end
     arFprintf(1, 'data chi^2 = %g', meritvals.chi2_res);
