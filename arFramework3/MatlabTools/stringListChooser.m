@@ -109,7 +109,8 @@ if(exist(filename_pars,'file'))
     end
     
     if(isfield(S.ar,'chi2fit'))
-        if(S.ar.config.fiterrors == 1)
+        if(isfield(S.ar,'config') && S.ar.config.fiterrors == 1)
+            errstr = 'errors fitted ';
             chi2str = sprintf('-2*log(L)=%g  ', ...
                 2*S.ar.ndata*log(sqrt(2*pi)) + S.ar.chi2fit);
             vals.chi2 = 2*S.ar.ndata*log(sqrt(2*pi)) + S.ar.chi2fit;
@@ -121,27 +122,20 @@ if(exist(filename_pars,'file'))
         vals.chi2 = NaN;
     end
     
-    
-    if(isfield(S.ar,'config'))
-        if(S.ar.config.fiterrors==1)
-            errstr = 'errors fitted';
-        end
-    end
-    
     if(isfield(S.ar,'ps'))
         if ~isempty(S.ar.ps)
-            lhsstr = [' #LHS=',num2str(size(S.ar.ps,1))];
+            lhsstr = [' #LHS=',sprintf('%4i ',size(S.ar.ps,1)) ' '];
         end
     end
     
     if(isfield(S,'ar.ple'))
         if(isfield(S.ar.ple,'chi2s'))
             nple = sum(~cellfun(@isempty,S.ar.ple.chi2s));
-            plestr = [' #PLE=',num2str(nple)];
+            plestr = [' #PLE=',sprintf('%3i ',nple)];
         end
     end
     
-    anno = sprintf('(%20s%8s%8s%11s%11s%13s%10s%10s)',chi2str,nstr,pstr,qstr,priorstr,errstr,lhsstr,plestr);
+    anno = sprintf('(%20s%8s%8s%11s%12s%14s%12s%10s)',chi2str,nstr,pstr,qstr,priorstr,errstr,lhsstr,plestr);
 else
     anno = '';
 end
