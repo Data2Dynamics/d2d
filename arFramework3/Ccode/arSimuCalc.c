@@ -344,7 +344,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     int nm, nc;
     int flag;
     int is, js, ks;
-    int nout, nyout;
+    int nout; /*, nyout;*/
     int nu, nv, nnz;
     
     /* Which condition to simulate */
@@ -1537,7 +1537,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
 */
     
     double *qlogy;
-    double *qlogp;
+    /*double *qlogp;*/
     
     double *p;
     double *u;
@@ -1566,7 +1566,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
     
     ny = (int) mxGetNumberOfElements(mxGetField(ardata, id, "y"));
     qlogy = mxGetData(mxGetField(ardata, id, "logfitting"));
-    qlogp = mxGetData(mxGetField(ardata, id, "qLog10"));
+    /*qlogp = mxGetData(mxGetField(ardata, id, "qLog10"));*/
     p = mxGetData(mxGetField(ardata, id, "pNum"));
     np = (int) mxGetNumberOfElements(mxGetField(ardata, id, "pNum"));
     
