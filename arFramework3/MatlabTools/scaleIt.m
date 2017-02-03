@@ -37,6 +37,7 @@
 %                        variable
 %     varanalysis        Show variance analysis
 %     appendcolumn       Add a column with a value to the data
+%     splitconditions    Provide independent scaling for each individual condition
 %
 % To do: Offsets
 
@@ -49,8 +50,8 @@ function out = scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn' };
-    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1 ];
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn', 'splitconditions' };
+    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
@@ -67,6 +68,7 @@ function out = scaleIt( names, outFile, varargin )
     {'', 'Not fitting scales'} ...
     {'', 'Prescaler specified'} ...
     {'', 'Appending a column'} ...
+    {'', 'Splitting conditions'} ...
     };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
@@ -162,12 +164,26 @@ function out = scaleIt( names, outFile, varargin )
                     newData     = num2cell(cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})));
                     % +1 is added to make sure that we never overlap even if user starts counting 
                     % from 0 or 1 inconsistently in different files
-                    expField    = expField + max(cell2mat(data{jD}.(fieldNames{jN}))); % + 1;
+                    expField    = expField + max(str2num(cell2mat(data{1}.(expVar)))); % + 1;
                 end
                 out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
             end
         end
     end
+    
+    % Merge in the conditions
+    if ( opts.splitconditions )
+        input_fields = {fieldNames{cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false))}, expVar};
+        for ji = 1 : numel( input_fields )
+            Q(:, ji) = cell2mat(out.(input_fields{ji}));
+        end
+        uq = unique(Q, 'rows');
+        F = zeros(size(Q,1), 1);
+        for ju = 1 : size(uq,1)
+            F( min(Q==repmat(uq(ju,:), size(Q,1), 1), [], 2) ) = ju;
+        end
+    end
+    out.(expVar) = num2cell(F);
     
     % Dump out things in the ignore mask
     if ~isempty( ignoreMask )
