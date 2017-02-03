@@ -58,9 +58,11 @@ if(isempty(ar))
 end
 
 args = {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub', 'exact', 'namefit'};
-if ( ismember( js, args ) )
-    varargin = { js, varargin{:} }; %#ok
-    clear js;
+if ( exist( 'js', 'var' ) )
+    if ( ismember( js, args ) )
+        varargin = { js, varargin{:} }; %#ok
+        clear js;
+    end
 end
 opts = argSwitch( args, varargin{:} );
 
