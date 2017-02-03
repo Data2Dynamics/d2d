@@ -5,8 +5,8 @@
 % 
 % print parameter values
 % 
-%   js      Indices of the parameters to be displayed. 'All' refers to all
-%           parameters
+%   js      Indices of the parameters to be displayed. 'All' or omission 
+%           refers to all parameters
 %           (see Example below)
 %
 % optional arguments:
@@ -18,6 +18,7 @@
 %           'observation'               - only show non-dynamic parameters
 %           'error'                     - only show error model parameters
 %           'exact'                     - match names exactly
+%           'namefit'                   - display fitting option close to the name
 %           'closetobound'              - show the parameters near bounds
 %           'lb' followed by value      - only show values above lb
 %           'ub' followed by value      - only show values below lb
@@ -56,7 +57,12 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
-opts = argSwitch( {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub', 'exact'}, varargin{:} );
+args = {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub', 'exact', 'namefit'};
+if ( ismember( js, args ) )
+    varargin = { js, varargin{:} }; %#ok
+    clear js;
+end
+opts = argSwitch( args, varargin{:} );
 
 if(~exist('js','var') || isempty(js))
     js = 1:length(ar.p);
@@ -159,6 +165,9 @@ if nargout>0
 end
 
 maxlabellength = max(cellfun(@length, ar.pLabel(js)));
+if ( opts.namefit )
+    maxlabellength = maxlabellength + 2;
+end
 
 arFprintf(1, 'Parameters: # = free, C = constant, D = dynamic, I = initial value, E = error model\n\n');
 printHead;
@@ -199,8 +208,13 @@ end
         else
             fit_flag = '#';
         end
-        arFprintf(1, outstream, '%s%4i|%s%s%s| %s | %+8.2g   %+8.2g   %+8.2g | %i   %+8.2g | %7i | %s \n', ...
-            fit_flag, j, strdyn, strinit, strerr, arExtendStr(ar.pLabel{j}, maxlabellength), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), pTrans(j), ar.qFit(j), priorStr(j));
+        if ( opts.namefit && (ar.qFit(j) ~= 1) )
+            arFprintf(1, outstream, '%s%4i|%s%s%s| %s | %+8.2g   %+8.2g   %+8.2g | %i   %+8.2g | %7i | %s \n', ...
+                fit_flag, j, strdyn, strinit, strerr, arExtendStr(['(' ar.pLabel{j} ')'], maxlabellength), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), pTrans(j), ar.qFit(j), priorStr(j));
+        else
+            arFprintf(1, outstream, '%s%4i|%s%s%s| %s | %+8.2g   %+8.2g   %+8.2g | %i   %+8.2g | %7i | %s \n', ...
+                fit_flag, j, strdyn, strinit, strerr, arExtendStr(ar.pLabel{j}, maxlabellength), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), pTrans(j), ar.qFit(j), priorStr(j));
+        end
         
     end
 
