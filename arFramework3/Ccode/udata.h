@@ -1,4 +1,5 @@
 #include <nvector/nvector_serial.h>  /* defs. of serial NVECTOR fcts. and macros  */
+#include <cvodes/cvodes.h>           /* prototypes for CVODES fcts. and consts. */
 
 #ifndef _MY_UDATA
 #define _MY_UDATA

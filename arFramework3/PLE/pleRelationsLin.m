@@ -5,36 +5,36 @@
 
 function pleRelationsLin
 
-global pleGlobals;
+global ar
 
-if(isempty(pleGlobals))
+if(~isfield(ar,'ple') || isempty(ar.ple))
     error('perform ple before usage');
 end
-if(isempty(pleGlobals.ps))
+if(isempty(ar.ple.ps))
     return
 end
 
 % Setup k-Matrix
 ps = [];
-for j=1:length(pleGlobals.ps)
-    if(~isempty(pleGlobals.ps{j}))
-        q = ~isnan(pleGlobals.chi2s{j});
-        ps = [ps;pleGlobals.ps{j}(q,pleGlobals.q_fit)];
+for j=1:length(ar.ple.ps)
+    if(~isempty(ar.ple.ps{j}))
+        q = ~isnan(ar.ple.chi2s{j});
+        ps = [ps;ar.ple.ps{j}(q,ar.qFit)];
     end
 end
 
-psstd = (pleGlobals.conf_ub_point(2,:) + pleGlobals.conf_lb_point(2,:))/2;
+psstd = (ar.ple.conf_ub_point(2,:) + ar.ple.conf_lb_point(2,:))/2;
 
 r = eye(size(ps,2));
 for j=1:size(ps,2)-1
     for i=j+1:size(ps,2)
-        q1 = ~isnan(pleGlobals.chi2s{i});
-        q1 = q1 & transpose(pleGlobals.ps{i}(:,i)~=pleGlobals.p(i));
-        a1 = mean((pleGlobals.ps{i}(q1,j) - pleGlobals.p(j))./(pleGlobals.ps{i}(q1,i) - pleGlobals.p(i)));
+        q1 = ~isnan(ar.ple.chi2s{i});
+        q1 = q1 & transpose(ar.ple.ps{i}(:,i)~=ar.ple.p(i));
+        a1 = mean((ar.ple.ps{i}(q1,j) - ar.ple.p(j))./(ar.ple.ps{i}(q1,i) - ar.ple.p(i)));
         
-        q2 = ~isnan(pleGlobals.chi2s{j});
-        q2 = q2 & transpose(pleGlobals.ps{j}(:,j)~=pleGlobals.p(j));
-        a2 = mean((pleGlobals.ps{j}(q2,i) - pleGlobals.p(i))./(pleGlobals.ps{j}(q2,j) - pleGlobals.p(j)));
+        q2 = ~isnan(ar.ple.chi2s{j});
+        q2 = q2 & transpose(ar.ple.ps{j}(:,j)~=ar.ple.p(j));
+        a2 = mean((ar.ple.ps{j}(q2,i) - ar.ple.p(i))./(ar.ple.ps{j}(q2,j) - ar.ple.p(j)));
         
         if(psstd(j)<Inf && psstd(i)<Inf)
             a1 = a1 * (psstd(i)/psstd(j));
@@ -58,22 +58,22 @@ end
 %% Plot
 
 % set relation matrix
-pleGlobals.IDrelations = r.^2;
+ar.ple.IDrelations = r.^2;
 
-tmprel = zeros([size(pleGlobals.IDrelations) 3]);
-for j=1:length(pleGlobals.IDstatus)
-    if(pleGlobals.q_fit(j))
-        if(pleGlobals.IDstatus(j) == 1)
-            tmprel(j,:,2) = pleGlobals.IDrelations(j,:);
-        elseif(pleGlobals.IDstatus(j) == 2)
-            tmprel(j,:,2) = pleGlobals.IDrelations(j,:);
-            tmprel(j,:,1) = pleGlobals.IDrelations(j,:);
-        elseif(pleGlobals.IDstatus(j) == 3)
-            tmprel(j,:,1) = pleGlobals.IDrelations(j,:);
-        elseif(pleGlobals.IDstatus(j) == 4)
-            tmprel(j,:,3) = pleGlobals.IDrelations(j,:);
+tmprel = zeros([size(ar.ple.IDrelations) 3]);
+for j=1:length(ar.ple.IDstatus)
+    if(ar.qFit(j))
+        if(ar.ple.IDstatus(j) == 1)
+            tmprel(j,:,2) = ar.ple.IDrelations(j,:);
+        elseif(ar.ple.IDstatus(j) == 2)
+            tmprel(j,:,2) = ar.ple.IDrelations(j,:);
+            tmprel(j,:,1) = ar.ple.IDrelations(j,:);
+        elseif(ar.ple.IDstatus(j) == 3)
+            tmprel(j,:,1) = ar.ple.IDrelations(j,:);
+        elseif(ar.ple.IDstatus(j) == 4)
+            tmprel(j,:,3) = ar.ple.IDrelations(j,:);
         end
-        if(~isnan(pleGlobals.IDstatus(j)))
+        if(~isnan(ar.ple.IDstatus(j)))
             tmprel(j,j,tmprel(j,j,:)~=0) = 1;
         else
             tmprel(j,j,:) = 1;
@@ -81,28 +81,28 @@ for j=1:length(pleGlobals.IDstatus)
     end
 end
 tmprel(tmprel>1) = 1;
-tmprel(~pleGlobals.q_fit, :, :) = 0.5;
-tmprel(:, ~pleGlobals.q_fit, :) = 0.5;
+tmprel(~ar.qFit, :, :) = 0.5;
+tmprel(:, ~ar.qFit, :) = 0.5;
 
 % sort
-dists = pdist([pleGlobals.IDrelations pleGlobals.IDrelations']);
+dists = pdist([ar.ple.IDrelations ar.ple.IDrelations']);
 links = linkage(dists, 'ward');
 clusters = cluster(links, 'cutoff', 1);
 [csort, csortindex] = sort(clusters);
 
-figure(figure(length(pleGlobals.p)+1))
+figure(figure(length(ar.ple.p)+1))
 image(tmprel(csortindex,csortindex,:));
-set(gca, 'YTick', 1:length(pleGlobals.p))
-set(gca, 'YTickLabel', pleGlobals.p_labels(csortindex))
-set(gca, 'XTick', 1:length(pleGlobals.p))
-set(gca, 'XTickLabel', pleGlobals.p_labels(csortindex))
+set(gca, 'YTick', 1:length(ar.ple.p))
+set(gca, 'YTickLabel', ar.ple.p_labels(csortindex))
+set(gca, 'XTick', 1:length(ar.ple.p))
+set(gca, 'XTickLabel', ar.ple.p_labels(csortindex))
 %rotateticklabel(gca,45)
 title('identifiability and linear parameter relations')
 
 % save
-saveas(gcf, [pleGlobals.savePath '/lin_relations'], 'fig')
-saveas(gcf, [pleGlobals.savePath '/lin_relations'], 'png')
+saveas(gcf, [ar.ple.savePath '/lin_relations'], 'fig')
+saveas(gcf, [ar.ple.savePath '/lin_relations'], 'png')
 
 %% save
-pleSave(pleGlobals);
+pleSave(ar.ple);
 

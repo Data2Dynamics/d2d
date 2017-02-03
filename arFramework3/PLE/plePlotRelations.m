@@ -10,12 +10,12 @@
 
 function plePlotRelations(jks, logplot, jresponse)
 
-global pleGlobals;
+global ar
 
-if(isempty(pleGlobals))
+if(isempty(ar.ple))
     error('perform ple before usage');
 end
-if(isempty(pleGlobals.ps))
+if(isempty(ar.ple.ps))
     return
 end
 
@@ -34,17 +34,17 @@ if(jresponse==0)
     k = [];
     chi2 = [];
     
-    for j=find(pleGlobals.q_fit)
-        if (j<=size(pleGlobals.ps,2))
-            if(~isempty(pleGlobals.ps{j}))
-                k = [k;pleGlobals.ps{j}]; %#ok<AGROW>
-                chi2 = [chi2 pleGlobals.chi2s{j}]; %#ok<AGROW>
+    for j=find(ar.qFit)
+        if (j<=size(ar.ple.ps,2))
+            if(~isempty(ar.ple.ps{j}))
+                k = [k;ar.ple.ps{j}]; %#ok<AGROW>
+                chi2 = [chi2 ar.ple.chi2s{j}]; %#ok<AGROW>
             end
         end
     end
 else
-    k = pleGlobals.ps{jresponse};
-    chi2 = pleGlobals.chi2s{jresponse};
+    k = ar.ple.ps{jresponse};
+    chi2 = ar.ple.chi2s{jresponse};
 end
 
 if(logplot)
@@ -59,18 +59,18 @@ nfarben = 50;
 farben = gray(nfarben);
 farben(end,:) = [1 1 1];
 
-farbenindex = (chi2-min(chi2))./pleGlobals.dchi2;
+farbenindex = (chi2-min(chi2))./ar.ple.dchi2;
 farbenindex = 1+floor(farbenindex*nfarben);
 farbenindex(farbenindex>nfarben) = nfarben;
 
-figure(length(pleGlobals.p)+2)
+figure(length(ar.ple.p)+2)
 
 if(isempty(jks))
-    plotmatrix(k(:,pleGlobals.q_fit))
+    plotmatrix(k(:,ar.qFit))
 elseif(length(jks) == 1)
     hist(k(:,jks), ...
         sum(~isnan(k(:,jks)))/5)
-    xlabel(pleGlobals.p_labels{jks(1)})
+    xlabel(ar.ple.p_labels{jks(1)})
     ylabel('frequency')
 elseif(length(jks) == 2)
     subplot(1,1,1)
@@ -83,8 +83,8 @@ elseif(length(jks) == 2)
         end
     end
     hold off
-    xlabel(pleGlobals.p_labels{jks(1)})
-    ylabel(pleGlobals.p_labels{jks(2)})
+    xlabel(ar.ple.p_labels{jks(1)})
+    ylabel(ar.ple.p_labels{jks(2)})
     grid on
 elseif(length(jks) == 3)
     subplot(1,1,1)
@@ -97,9 +97,9 @@ elseif(length(jks) == 3)
         end
     end
     hold off
-    xlabel(pleGlobals.p_labels{jks(1)})
-    ylabel(pleGlobals.p_labels{jks(2)})
-    zlabel(pleGlobals.p_labels{jks(3)})
+    xlabel(ar.ple.p_labels{jks(1)})
+    ylabel(ar.ple.p_labels{jks(2)})
+    zlabel(ar.ple.p_labels{jks(3)})
     grid on
 elseif(length(jks) > 3)
     plotmatrix(k(:,jks))
@@ -109,11 +109,11 @@ end
 logstr = '';
 if(jresponse==0)
     respstr = '';
-    for j=1:length(pleGlobals.p_labels)
-        respstr = [respstr ' ' pleGlobals.p_labels{j}]; %#ok<AGROW>
+    for j=1:length(ar.ple.p_labels)
+        respstr = [respstr ' ' ar.ple.p_labels{j}]; %#ok<AGROW>
     end
 else
-    respstr = pleGlobals.p_labels{jresponse};
+    respstr = ar.ple.p_labels{jresponse};
 end
 if(logplot)
     logstr = '(logarithmic)';
@@ -121,18 +121,18 @@ end
 title(sprintf('response: %s %s', strrep(respstr, '_','\_'), logstr))
 
 % save
-if(exist(pleGlobals.savePath, 'dir'))
+if(exist(ar.ple.savePath, 'dir'))
     if(isempty(jks) || length(jks) > 3)
-        saveas(gcf, [pleGlobals.savePath '/relation_matrix'], 'fig')
-        saveas(gcf, [pleGlobals.savePath '/relation_matrix'], 'eps')
+        saveas(gcf, [ar.ple.savePath '/relation_matrix'], 'fig')
+        saveas(gcf, [ar.ple.savePath '/relation_matrix'], 'eps')
     elseif(length(jks) == 1)
-        saveas(gcf, [pleGlobals.savePath '/relation_' pleGlobals.p_labels{jks(1)}], 'fig')
-        saveas(gcf, [pleGlobals.savePath '/relation_' pleGlobals.p_labels{jks(1)}], 'eps')
+        saveas(gcf, [ar.ple.savePath '/relation_' ar.ple.p_labels{jks(1)}], 'fig')
+        saveas(gcf, [ar.ple.savePath '/relation_' ar.ple.p_labels{jks(1)}], 'eps')
     elseif(length(jks) == 2)
-        saveas(gcf, [pleGlobals.savePath '/relation_' pleGlobals.p_labels{jks(1)} '_' pleGlobals.p_labels{jks(2)}], 'fig')
-        saveas(gcf, [pleGlobals.savePath '/relation_' pleGlobals.p_labels{jks(1)} '_' pleGlobals.p_labels{jks(2)}], 'eps')
+        saveas(gcf, [ar.ple.savePath '/relation_' ar.ple.p_labels{jks(1)} '_' ar.ple.p_labels{jks(2)}], 'fig')
+        saveas(gcf, [ar.ple.savePath '/relation_' ar.ple.p_labels{jks(1)} '_' ar.ple.p_labels{jks(2)}], 'eps')
     elseif(length(jks) == 3)
-        saveas(gcf, [pleGlobals.savePath '/relation_' pleGlobals.p_labels{jks(1)} '_' pleGlobals.p_labels{jks(2)} '_' pleGlobals.p_labels{jks(3)}], 'fig')
-        saveas(gcf, [pleGlobals.savePath '/relation_' pleGlobals.p_labels{jks(1)} '_' pleGlobals.p_labels{jks(2)} '_' pleGlobals.p_labels{jks(3)}], 'eps')
+        saveas(gcf, [ar.ple.savePath '/relation_' ar.ple.p_labels{jks(1)} '_' ar.ple.p_labels{jks(2)} '_' ar.ple.p_labels{jks(3)}], 'fig')
+        saveas(gcf, [ar.ple.savePath '/relation_' ar.ple.p_labels{jks(1)} '_' ar.ple.p_labels{jks(2)} '_' ar.ple.p_labels{jks(3)}], 'eps')
     end
 end

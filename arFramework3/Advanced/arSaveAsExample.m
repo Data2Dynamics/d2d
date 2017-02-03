@@ -21,7 +21,7 @@ if ~exist('makePlots','var') || isempty(makePlots)
     makePlots = true;
 end
 
-global ar pleGlobals
+global ar 
 
 name = input('Model will be saved as Example. Please enter the name: ','s');
 name = strrep(name,' ','_');
@@ -30,9 +30,9 @@ arSave(name);
 if makePlots
     plePlotMulti([],true);
 end
-if isstruct(pleGlobals) 
-    if ~isempty(pleGlobals.ps)
-        copyfile([pleGlobals.savePath],[ar.config.savepath,filesep,'PLE'])
+if isstruct(ar.ple) 
+    if ~isempty(ar.ple.ps)
+        copyfile([ar.ple.savePath],[ar.config.savepath,filesep,'PLE'])
     end
 end
 

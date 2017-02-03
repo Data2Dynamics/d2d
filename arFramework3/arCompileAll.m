@@ -30,7 +30,6 @@ if(~strcmp(c_version_code, ar.info.c_version_code))
     error('Workspace c-code version (%s) does not match framework c-code version (%s), please rerun setup script or downgrade code version.', ...
         c_version_code, ar.info.c_version_code);
 end
-
 if(~exist('forcedCompile','var'))
     forcedCompile = false;
 end

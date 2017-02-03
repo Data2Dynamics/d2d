@@ -98,31 +98,31 @@ for jk=jks
 end
 
 % save
-if(savetofile && exist(pleGlobals.savePath, 'dir'))
-    pleGlobals.figPathMulti{jk} = [pleGlobals.savePath '/multi_plot'];
-    save([pleGlobals.savePath '/results.mat'], 'pleGlobals');
-    saveas(gcf, [pleGlobals.savePath '/multi_plot'], 'fig')
-    print('-depsc2', [pleGlobals.savePath '/multi_plot']);
+if(savetofile && exist(ar.ple.savePath, 'dir'))
+    ar.ple.figPathMulti{jk} = [ar.ple.savePath '/multi_plot'];
+    save([ar.ple.savePath '/results.mat'], 'ar.ple');
+    saveas(gcf, [ar.ple.savePath '/multi_plot'], 'fig')
+    print('-depsc2', [ar.ple.savePath '/multi_plot']);
 end
 
 
 function h = myRaiseFigure(figname)
-global pleGlobals
+global ar
 openfigs = get(0,'Children');
 
 figcolor = [1 1 1];
 
-if(isfield(pleGlobals, 'fighandel_multi') && ~isempty(pleGlobals.fighandel_multi) && ...
-        pleGlobals.fighandel_multi ~= 0 && ...
-        sum(pleGlobals.fighandel_multi==openfigs)>0 && ...
-        strcmp(get(pleGlobals.fighandel_multi, 'Name'), figname))
+if(isfield(ar.ple, 'fighandel_multi') && ~isempty(ar.ple.fighandel_multi) && ...
+        ar.ple.fighandel_multi ~= 0 && ...
+        sum(ar.ple.fighandel_multi==openfigs)>0 && ...
+        strcmp(get(ar.ple.fighandel_multi, 'Name'), figname))
     
-    h = pleGlobals.fighandel_multi;
+    h = ar.ple.fighandel_multi;
     figure(h);
 else
     h = figure('Name', figname, 'NumberTitle','off', ...
         'Units', 'normalized', 'Position', ...
         [0.1 0.1 0.6 0.8]);
     set(h,'Color', figcolor);
-    pleGlobals.fighandel_multi = h;
+    ar.ple.fighandel_multi = h;
 end

@@ -5,21 +5,21 @@
 
 function pleMOTA
 
-global pleGlobals;
+global ar
 
-if(isempty(pleGlobals))
+if(isempty(ar.ple))
     error('perform ple before usage');
 end
-if(isempty(pleGlobals.ps))
+if(isempty(ar.ple.ps))
     return
 end
 
 % Setup k-Matrix
 ps = [];
-for j=1:length(pleGlobals.ps)
-    if(~isempty(pleGlobals.ps{j}))
-        q = ~isnan(pleGlobals.chi2s{j});
-        ps = [ps;pleGlobals.ps{j}(q,pleGlobals.q_fit)];
+for j=1:length(ar.ple.ps)
+    if(~isempty(ar.ple.ps{j}))
+        q = ~isnan(ar.ple.chi2s{j});
+        ps = [ps;ar.ple.ps{j}(q,ar.qFit)];
     end
 end
     
@@ -39,7 +39,7 @@ responseCut = length(ps(1,:)) - 1;
 
 [S, rSquared] = mota(ps, 0, T1, T2, T3, sampleSize, numOfBootSamp, responseCut);
 h = motaR(ps, S, rSquared);
-pleGlobals.mota_results = makeTable(h);
+ar.ple.mota_results = makeTable(h);
 
 print(h)
 % r2 : multiple-r^2 / coefficient of determination
@@ -56,9 +56,9 @@ print(h)
 % #  : number of same relations found
 
 count = 1;
-for j=1:length(pleGlobals.p)
-    if(pleGlobals.q_fit(j))
-        fprintf('p%i : %s\n', count, pleGlobals.p_labels{j});
+for j=1:length(ar.ple.p)
+    if(ar.qFit(j))
+        fprintf('p%i : %s\n', count, ar.ple.p_labels{j});
         count = count + 1;
     end
 end
@@ -66,36 +66,36 @@ end
 %% Plot
 
 % set relation matrix
-pleGlobals.IDrelations = nan(length(pleGlobals.p));
-pleGlobals.IDrelations(pleGlobals.q_fit,pleGlobals.q_fit) = ...
-    pleGlobals.mota_results(1:sum(pleGlobals.q_fit),1:sum(pleGlobals.q_fit));
+ar.ple.IDrelations = nan(length(ar.ple.p));
+ar.ple.IDrelations(ar.qFit,ar.qFit) = ...
+    ar.ple.mota_results(1:sum(ar.qFit),1:sum(ar.qFit));
 
 % cv influence
-pleGlobals.IDcv = nan(1,length(pleGlobals.p));
-pleGlobals.IDcv(pleGlobals.q_fit) = pleGlobals.mota_results(:,sum(pleGlobals.q_fit)+2);
-% pleGlobals.IDcv(pleGlobals.q_fit) = abs((quantile(ps,0.75) - quantile(ps,0.15))./quantile(ps,0.5));
+ar.ple.IDcv = nan(1,length(ar.ple.p));
+ar.ple.IDcv(ar.qFit) = ar.ple.mota_results(:,sum(ar.qFit)+2);
+% ar.ple.IDcv(ar.qFit) = abs((quantile(ps,0.75) - quantile(ps,0.15))./quantile(ps,0.5));
 
 % r^2
-pleGlobals.IDr2 = nan(1,length(pleGlobals.p));
-pleGlobals.IDr2(pleGlobals.q_fit) = pleGlobals.mota_results(:,sum(pleGlobals.q_fit)+1);
+ar.ple.IDr2 = nan(1,length(ar.ple.p));
+ar.ple.IDr2(ar.qFit) = ar.ple.mota_results(:,sum(ar.qFit)+1);
 
-IDweigthing = pleGlobals.IDr2; 
-% IDweigthing = pleGlobals.IDcv;
+IDweigthing = ar.ple.IDr2; 
+% IDweigthing = ar.ple.IDcv;
 
-tmprel = zeros([size(pleGlobals.IDrelations) 3]);
-for j=1:length(pleGlobals.IDstatus)
-    if(pleGlobals.q_fit(j))
-        if(pleGlobals.IDstatus(j) == 1)
-            tmprel(j,:,2) = pleGlobals.IDrelations(j,:).*IDweigthing(j);
-        elseif(pleGlobals.IDstatus(j) == 2)
-            tmprel(j,:,2) = pleGlobals.IDrelations(j,:).*IDweigthing(j);
-            tmprel(j,:,1) = pleGlobals.IDrelations(j,:).*IDweigthing(j);
-        elseif(pleGlobals.IDstatus(j) == 3)
-            tmprel(j,:,1) = pleGlobals.IDrelations(j,:).*IDweigthing(j);
-        elseif(pleGlobals.IDstatus(j) == 4)
-            tmprel(j,:,3) = pleGlobals.IDrelations(j,:).*IDweigthing(j);
+tmprel = zeros([size(ar.ple.IDrelations) 3]);
+for j=1:length(ar.ple.IDstatus)
+    if(ar.qFit(j))
+        if(ar.ple.IDstatus(j) == 1)
+            tmprel(j,:,2) = ar.ple.IDrelations(j,:).*IDweigthing(j);
+        elseif(ar.ple.IDstatus(j) == 2)
+            tmprel(j,:,2) = ar.ple.IDrelations(j,:).*IDweigthing(j);
+            tmprel(j,:,1) = ar.ple.IDrelations(j,:).*IDweigthing(j);
+        elseif(ar.ple.IDstatus(j) == 3)
+            tmprel(j,:,1) = ar.ple.IDrelations(j,:).*IDweigthing(j);
+        elseif(ar.ple.IDstatus(j) == 4)
+            tmprel(j,:,3) = ar.ple.IDrelations(j,:).*IDweigthing(j);
         end
-        if(~isnan(pleGlobals.IDstatus(j)))
+        if(~isnan(ar.ple.IDstatus(j)))
             tmprel(j,j,tmprel(j,j,:)~=0) = 1;
         else
             tmprel(j,j,:) = 1;
@@ -103,22 +103,22 @@ for j=1:length(pleGlobals.IDstatus)
     end
 end
 tmprel(tmprel>1) = 1;
-tmprel(~pleGlobals.q_fit, :, :) = 0.5;
-tmprel(:, ~pleGlobals.q_fit, :) = 0.5;
+tmprel(~ar.qFit, :, :) = 0.5;
+tmprel(:, ~ar.qFit, :) = 0.5;
 
-figure(figure(length(pleGlobals.p)+1))
+figure(figure(length(ar.ple.p)+1))
 image(tmprel);
-set(gca, 'YTick', 1:length(pleGlobals.p))
-set(gca, 'YTickLabel', pleGlobals.p_labels)
-set(gca, 'XTick', 1:length(pleGlobals.p))
-set(gca, 'XTickLabel', pleGlobals.p_labels)
+set(gca, 'YTick', 1:length(ar.ple.p))
+set(gca, 'YTickLabel', ar.ple.p_labels)
+set(gca, 'XTick', 1:length(ar.ple.p))
+set(gca, 'XTickLabel', ar.ple.p_labels)
 %rotateticklabel(gca,45)
 title('MOTA parameter relations')
 
 % save
-saveas(gcf, [pleGlobals.savePath '/mota_relations'], 'fig')
-saveas(gcf, [pleGlobals.savePath '/mota_relations'], 'png')
+saveas(gcf, [ar.ple.savePath '/mota_relations'], 'fig')
+saveas(gcf, [ar.ple.savePath '/mota_relations'], 'png')
 
 %% save
-pleSave(pleGlobals)
+pleSave(ar.ple)
 

@@ -3,7 +3,6 @@
 function arPlotSample
 
 global ar
-global pleGlobals
 
 if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
@@ -78,14 +77,14 @@ elseif(length(ar.sampling.ps)==2)
             [ar.p(ar.sampling.index(1)) ar.p(ar.sampling.index(2))], 'style', 'k--', 'conf', 0.95)
     end
     
-    if(~isempty(pleGlobals) && ~isempty(pleGlobals.ps{ar.sampling.index(1)}))
-        plot(pleGlobals.ps{ar.sampling.index(1)}(:,ar.sampling.index(1)), ...
-            pleGlobals.ps{ar.sampling.index(1)}(:,ar.sampling.index(2)), ...
+    if(~isempty(ar.ple) && ~isempty(ar.ple.ps{ar.sampling.index(1)}))
+        plot(ar.ple.ps{ar.sampling.index(1)}(:,ar.sampling.index(1)), ...
+            ar.ple.ps{ar.sampling.index(1)}(:,ar.sampling.index(2)), ...
             'k--', 'LineWidth', 1);
     end
-    if(~isempty(pleGlobals) && ~isempty(pleGlobals.ps{ar.sampling.index(2)}))
-        plot(pleGlobals.ps{ar.sampling.index(2)}(:,ar.sampling.index(1)), ...
-            pleGlobals.ps{ar.sampling.index(2)}(:,ar.sampling.index(2)), ...
+    if(~isempty(ar.ple) && ~isempty(ar.ple.ps{ar.sampling.index(2)}))
+        plot(ar.ple.ps{ar.sampling.index(2)}(:,ar.sampling.index(1)), ...
+            ar.ple.ps{ar.sampling.index(2)}(:,ar.sampling.index(2)), ...
             'k--', 'LineWidth', 1);
     end
     

@@ -9,7 +9,6 @@
 function l1CheckOpt(jks)
 
 global ar
-global pleGlobals
 
 if(isempty(ar))
     error('please initialize by arInit')
@@ -31,10 +30,10 @@ ar.qFit(jks(fixed_jks)) = 2;
 
 arPLEInit
 for jk = 1:length(jks)
-    pleGlobals.p = ar.L1ps_unpen(ar.L1final_ind,:);
-    pleGlobals.q_fit(jks) = 1;
-    pleGlobals.q_fit(jks(fixed_jks)) = 0;
-    pleGlobals.q_fit(jks(jk)) = 1;
+    ar.ple.p = ar.L1ps_unpen(ar.L1final_ind,:);
+    ar.ple.q_fit(jks) = 1;
+    ar.ple.q_fit(jks(fixed_jks)) = 0;
+    ar.ple.q_fit(jks(jk)) = 1;
     ar.qFit(jks) = 1;
     ar.qFit(jks(fixed_jks)) = 2;
     ar.qFit(jks(jk)) = 1;
@@ -42,13 +41,13 @@ for jk = 1:length(jks)
 %     arFit(true)
 %     arPLEInit
     
-    do_plotting = pleGlobals.showCalculation;
-    pleGlobals.showCalculation = false;
+    do_plotting = ar.ple.showCalculation;
+    ar.ple.showCalculation = false;
     ple(jks(jk),50,0.1,0.1,0.1)
-    pleGlobals.showCalculation = do_plotting;
+    ar.ple.showCalculation = do_plotting;
     
-    ar.L1psPLE{jks(jk)} = pleGlobals.ps{jks(jk)};
-    ar.L1chi2sPLE{jks(jk)} = pleGlobals.chi2s{jks(jk)};
+    ar.L1psPLE{jks(jk)} = ar.ple.ps{jks(jk)};
+    ar.L1chi2sPLE{jks(jk)} = ar.ple.chi2s{jks(jk)};
     not_profiled = setdiff(jks,jks(jk));
     pleSigns = sign(ar.L1psPLE{jks(jk)}(:,not_profiled));
     exchange_jk = find(max(pleSigns)-min(pleSigns) == 2);

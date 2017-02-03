@@ -793,11 +793,11 @@ end
 %     lp(fid, 'In order to evaluate the identifiability of the model parameters and to assess confidence intervals');
 %     lp(fid, 'the profile likelihood \\cite{Raue:2009ec} was calculated.');
 %     lp(fid, 'The mean calculation time of the profile likelihood per parameter was %s $\\pm$ %s.', ...
-%         secToHMS(mean(S.pleGlobals.timing(S.pleGlobals.q_fit(size(S.pleGlobals.timing))))), ...
-%         secToHMS(std(S.pleGlobals.timing(S.pleGlobals.q_fit(size(S.pleGlobals.timing))))));
+%         secToHMS(mean(S.ar.ple.timing(S.ar.ple.q_fit(size(S.ar.ple.timing))))), ...
+%         secToHMS(std(S.ar.ple.timing(S.ar.ple.q_fit(size(S.ar.ple.timing))))));
 %     
 % 	% Multiplot
-%     if(isfield(S.pleGlobals, 'fighandel_multi'))
+%     if(isfield(S.ar.ple, 'fighandel_multi'))
 %         lp(fid, 'An overview is displayed in Figure \\ref{multi_plot}.');
 %         
 %         sourcestr = [plePath '/multi_plot.eps'];
@@ -812,10 +812,10 @@ end
 %     end
 %     
 %     % Singleplots
-%     if(isfield(S.pleGlobals, 'figPath'))
+%     if(isfield(S.ar.ple, 'figPath'))
 %         count = 0;
-%         for j=1:length(S.pleGlobals.figPath)
-%             if(~isempty(S.pleGlobals.chi2s{j}))
+%         for j=1:length(S.ar.ple.figPath)
+%             if(~isempty(S.ar.ple.chi2s{j}))
 %                 count = count + 1;
 %             end
 %         end
@@ -824,21 +824,21 @@ end
 %         lp(fid, 'Also the functional relations to the remaining parameter are displayed.');
 %         
 %         count = 0;
-%         for j=1:length(S.pleGlobals.figPath)
-%             if(~isempty(S.pleGlobals.chi2s{j}))
+%         for j=1:length(S.ar.ple.figPath)
+%             if(~isempty(S.ar.ple.chi2s{j}))
 %                 lp(fid, '\\clearpage\n');
 %                 count = count + 1;
-%                 targetstr = [savePath '/' S.pleGlobals.p_labels{j} '.pdf'];
-%                 eval(['!ps2pdf  -dEPSCrop ' S.pleGlobals.figPath{j} '.eps ' targetstr]);
+%                 targetstr = [savePath '/' S.ar.ple.p_labels{j} '.pdf'];
+%                 eval(['!ps2pdf  -dEPSCrop ' S.ar.ple.figPath{j} '.eps ' targetstr]);
 %                 
-%                 captiontext = sprintf('\\textbf{Profile likelihood of parameter %s}\\\\', strrep(S.pleGlobals.p_labels{j},'_','\_'));
+%                 captiontext = sprintf('\\textbf{Profile likelihood of parameter %s}\\\\', strrep(S.ar.ple.p_labels{j},'_','\_'));
 %                 captiontext = [captiontext 'Upper panel: The solide line indicates the profile likelihood. '];
 %                 captiontext = [captiontext 'The broken line indicates the threshold to assess confidence intervals. '];
 %                 captiontext = [captiontext 'The asterisk indicate the optimal parameter values. '];
-%                 captiontext = [captiontext sprintf('Lower panel: The functional relations to the other parameters along the profile likelihood of %s are displayed. ', strrep(S.pleGlobals.p_labels{j},'_','\_'))];
+%                 captiontext = [captiontext sprintf('Lower panel: The functional relations to the other parameters along the profile likelihood of %s are displayed. ', strrep(S.ar.ple.p_labels{j},'_','\_'))];
 %                 captiontext = [captiontext 'In the legend the top five parameters showing the strongest variations are given. '];
-%                 captiontext = [captiontext sprintf('The calculation time was %s.', secToHMS(S.pleGlobals.timing(j)))];
-%                 lpfigure(fid, 1, [S.pleGlobals.p_labels{j} '.pdf'], captiontext, sprintf('ple%i',count)); 
+%                 captiontext = [captiontext sprintf('The calculation time was %s.', secToHMS(S.ar.ple.timing(j)))];
+%                 lpfigure(fid, 1, [S.ar.ple.p_labels{j} '.pdf'], captiontext, sprintf('ple%i',count)); 
 %                 
 %                 lp(fid, '\n');
 %             end
@@ -851,9 +851,9 @@ end
 %     
 %     N = 30;
 %     ntables = 0;
-%     for j=1:length(S.pleGlobals.p_labels)
-%         if(S.pleGlobals.q_fit(j))
-%             if(j<=length(S.pleGlobals.chi2s) && ~isempty(S.pleGlobals.chi2s{j}))
+%     for j=1:length(S.ar.ple.p_labels)
+%         if(S.ar.ple.q_fit(j))
+%             if(j<=length(S.ar.ple.chi2s) && ~isempty(S.ar.ple.chi2s{j}))
 %                 ntables = ntables + 1;
 %             end
 %         end
@@ -861,13 +861,13 @@ end
 %     ntables = ceil(ntables/N);
 %     
 %     if(ntables>1)
-%         lp(fid, 'In Table \\ref{conftable1} -- \\ref{conftable%i}, %2i\\%% confidence intervals for the estimated parameter values derived by the profile likelihood \\cite{Raue:2009ec} are given.', ntables, (1-S.pleGlobals.alpha_level)*100);
+%         lp(fid, 'In Table \\ref{conftable1} -- \\ref{conftable%i}, %2i\\%% confidence intervals for the estimated parameter values derived by the profile likelihood \\cite{Raue:2009ec} are given.', ntables, (1-S.ar.ple.alpha_level)*100);
 %     else
-%         lp(fid, 'In Table \\ref{conftable1}, %2i\\%% confidence intervals for the estimated parameter values derived by the profile likelihood \\cite{Raue:2009ec} are given.', (1-S.pleGlobals.alpha_level)*100);
+%         lp(fid, 'In Table \\ref{conftable1}, %2i\\%% confidence intervals for the estimated parameter values derived by the profile likelihood \\cite{Raue:2009ec} are given.', (1-S.ar.ple.alpha_level)*100);
 %     end
 %     
 %     headstr = '\t\t\t & name & $\\hat\\theta$';
-%     if(S.pleGlobals.plot_point && S.pleGlobals.plot_simu)
+%     if(S.ar.ple.plot_point && S.ar.ple.plot_simu)
 %         headstr = [headstr '& $\\sigma^{-}_{ptw}$ & $\\sigma^{+}_{ptw}$'];
 %         headstr = [headstr '& $\\sigma^{-}_{sim}$ & $\\sigma^{+}_{sim}$'];
 %     else
@@ -885,9 +885,9 @@ end
 %     
 %     count = 0;
 %     counttab = 1;
-%     for j=1:length(S.pleGlobals.p_labels)
-%         if(S.pleGlobals.q_fit(j))
-%             if(j<=length(S.pleGlobals.chi2s) && ~isempty(S.pleGlobals.chi2s{j}))
+%     for j=1:length(S.ar.ple.p_labels)
+%         if(S.ar.ple.q_fit(j))
+%             if(j<=length(S.ar.ple.chi2s) && ~isempty(S.ar.ple.chi2s{j}))
 %                 count = count + 1;
 %                 
 %                 if(mod(count,N)==0)
@@ -895,13 +895,13 @@ end
 %                     lp(fid, '\t\t\\end{tabular}}');
 %                     lp(fid, '\t\t\\mycaption{Confidence intervals for the estimated parameter values derived by the profile likelihood}{conftable%i}', counttab);
 %                     lp(fid, '\t\t{$\\hat\\theta$ indicates the estimated optimal parameter value.');
-%                     if(S.pleGlobals.plot_point && S.pleGlobals.plot_simu)
-%                         lp(fid, '\t\t$\\sigma^{-}_{ptw}$ and $\\sigma^{+}_{ptw}$ indicate %i\\%% point-wise confidence intervals.', (1-S.pleGlobals.alpha_level)*100);
-%                         lp(fid, '\t\t$\\sigma^{-}_{sim}$ and $\\sigma^{+}_{sim}$ indicate %i\\%% simultaneous confidence intervals.', (1-S.pleGlobals.alpha_level)*100);
-%                     elseif(S.pleGlobals.plot_point && ~S.pleGlobals.plot_simu)
-%                         lp(fid, '\t\t$\\sigma^{-}$ and $\\sigma^{+}$ indicate %i\\%% point-wise confidence intervals.', (1-S.pleGlobals.alpha_level)*100);
-%                     elseif(~S.pleGlobals.plot_point && S.pleGlobals.plot_simu)
-%                         lp(fid, '\t\t$\\sigma^{-}$ and $\\sigma^{+}$ indicate %i\\%% simultaneous confidence intervals.', (1-S.pleGlobals.alpha_level)*100);
+%                     if(S.ar.ple.plot_point && S.ar.ple.plot_simu)
+%                         lp(fid, '\t\t$\\sigma^{-}_{ptw}$ and $\\sigma^{+}_{ptw}$ indicate %i\\%% point-wise confidence intervals.', (1-S.ar.ple.alpha_level)*100);
+%                         lp(fid, '\t\t$\\sigma^{-}_{sim}$ and $\\sigma^{+}_{sim}$ indicate %i\\%% simultaneous confidence intervals.', (1-S.ar.ple.alpha_level)*100);
+%                     elseif(S.ar.ple.plot_point && ~S.ar.ple.plot_simu)
+%                         lp(fid, '\t\t$\\sigma^{-}$ and $\\sigma^{+}$ indicate %i\\%% point-wise confidence intervals.', (1-S.ar.ple.alpha_level)*100);
+%                     elseif(~S.ar.ple.plot_point && S.ar.ple.plot_simu)
+%                         lp(fid, '\t\t$\\sigma^{-}$ and $\\sigma^{+}$ indicate %i\\%% simultaneous confidence intervals.', (1-S.ar.ple.alpha_level)*100);
 %                     end
 %                     lp(fid, '}');
 %                     lp(fid, '\t\\doendcenter');
@@ -918,12 +918,12 @@ end
 %                 end
 %                 
 %                 lp(fid, '\t\t\t%i & %s & %+8.3f & ', j, ...
-%                     strrep(S.pleGlobals.p_labels{j},'_','\_'), S.pleGlobals.p(j));
-%                 if(S.pleGlobals.plot_point)
-%                     lp(fid, '%+8.3f & %+8.3f &', S.pleGlobals.conf_lb_point(j), S.pleGlobals.conf_ub_point(j));
+%                     strrep(S.ar.ple.p_labels{j},'_','\_'), S.ar.ple.p(j));
+%                 if(S.ar.ple.plot_point)
+%                     lp(fid, '%+8.3f & %+8.3f &', S.ar.ple.conf_lb_point(j), S.ar.ple.conf_ub_point(j));
 %                 end
-%                 if(S.pleGlobals.plot_simu)
-%                     lp(fid, '%+8.3f & %+8.3f', S.pleGlobals.conf_lb(j), S.pleGlobals.conf_ub(j));
+%                 if(S.ar.ple.plot_simu)
+%                     lp(fid, '%+8.3f & %+8.3f', S.ar.ple.conf_lb(j), S.ar.ple.conf_ub(j));
 %                 end
 %                 lp(fid, ' \\\\');
 %             end
@@ -933,13 +933,13 @@ end
 %     lp(fid, '\t\t\\end{tabular}}');
 %     lp(fid, '\t\t\\mycaption{Confidence intervals for the estimated parameter values derived by the profile likelihood}{conftable%i}', counttab);
 %     lp(fid, '\t\t{$\\hat\\theta$ indicates the estimated optimal parameter value.');
-%     if(S.pleGlobals.plot_point && S.pleGlobals.plot_simu)
-%         lp(fid, '\t\t$\\sigma^{-}_{ptw}$ and $\\sigma^{+}_{ptw}$ indicate %i\\%% point-wise confidence intervals.', (1-S.pleGlobals.alpha_level)*100);
-%         lp(fid, '\t\t$\\sigma^{-}_{sim}$ and $\\sigma^{+}_{sim}$ indicate %i\\%% simultaneous confidence intervals.', (1-S.pleGlobals.alpha_level)*100);
-%     elseif(S.pleGlobals.plot_point && ~S.pleGlobals.plot_simu)
-%         lp(fid, '\t\t$\\sigma^{-}$ and $\\sigma^{+}$ indicate %i\\%% point-wise confidence intervals.', (1-S.pleGlobals.alpha_level)*100);
-%     elseif(~S.pleGlobals.plot_point && S.pleGlobals.plot_simu)
-%         lp(fid, '\t\t$\\sigma^{-}$ and $\\sigma^{+}$ indicate %i\\%% simultaneous confidence intervals.', (1-S.pleGlobals.alpha_level)*100);
+%     if(S.ar.ple.plot_point && S.ar.ple.plot_simu)
+%         lp(fid, '\t\t$\\sigma^{-}_{ptw}$ and $\\sigma^{+}_{ptw}$ indicate %i\\%% point-wise confidence intervals.', (1-S.ar.ple.alpha_level)*100);
+%         lp(fid, '\t\t$\\sigma^{-}_{sim}$ and $\\sigma^{+}_{sim}$ indicate %i\\%% simultaneous confidence intervals.', (1-S.ar.ple.alpha_level)*100);
+%     elseif(S.ar.ple.plot_point && ~S.ar.ple.plot_simu)
+%         lp(fid, '\t\t$\\sigma^{-}$ and $\\sigma^{+}$ indicate %i\\%% point-wise confidence intervals.', (1-S.ar.ple.alpha_level)*100);
+%     elseif(~S.ar.ple.plot_point && S.ar.ple.plot_simu)
+%         lp(fid, '\t\t$\\sigma^{-}$ and $\\sigma^{+}$ indicate %i\\%% simultaneous confidence intervals.', (1-S.ar.ple.alpha_level)*100);
 %     end
 %     lp(fid, '}');
 %     lp(fid, '\t\\doendcenter');

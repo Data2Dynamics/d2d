@@ -70,7 +70,7 @@ if ~exist('whichone','var') || isempty(whichone)
 end
 
 
-global ar pleGlobals
+global ar 
 
 if isempty(ar)
     error('global ar is empty, please load a model.');
@@ -114,8 +114,8 @@ meritvals.chi2_constr   = ar.chi2constr;
 meritvals.chi2_prior    = ar.chi2prior;
 meritvals.chi2_random   = ar.chi2random;
 
-if ~isempty(pleGlobals) && isfield(pleGlobals,'merit_fkt')    
-    meritvals.ple_merit = feval(pleGlobals.merit_fkt);
+if ~isempty(ar.ple) && isfield(ar.ple,'merit_fkt')    
+    meritvals.ple_merit = feval(ar.ple.merit_fkt);
 else
     meritvals.ple_merit = [];
 end
