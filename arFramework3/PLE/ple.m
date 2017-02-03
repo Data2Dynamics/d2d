@@ -432,8 +432,8 @@ else
     end
 
     % calulate relative CIs
-    ar.ple.conf_rel = abs((ar.ple.conf_ub - ar.ple.conf_lb)/2*100 ./ ar.ple.p);
-    ar.ple.conf_rel_point = abs((ar.ple.conf_ub_point - ar.ple.conf_lb_point)/2*100 ./ ar.ple.p);
+    ar.ple.conf_rel = abs((ar.ple.conf_ub(:) - ar.ple.conf_lb(:))/2*100 ./ ar.ple.p(:));
+    ar.ple.conf_rel_point = abs((ar.ple.conf_ub_point(:) - ar.ple.conf_lb_point(:))/2*100 ./ ar.ple.p(:));
 
     % calulate coverage
     if(isfield(ar.ple, 'p_true'))

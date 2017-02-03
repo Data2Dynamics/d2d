@@ -20,7 +20,7 @@ beta = [];
 alpha = [];
 
 q_not_jk = 1:length(pLast);
-q_not_jk = q_not_jk~=jk & ar.qFit;
+q_not_jk = q_not_jk(:)~=jk & ar.qFit(:);
 while(true)
     q_hit_lb = pLast+pStep <= ar.lb+ar.ple.minstepsize;
     q_hit_ub = pLast+pStep >= ar.ub-ar.ple.minstepsize;
