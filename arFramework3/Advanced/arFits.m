@@ -188,15 +188,11 @@ arWaitbar(-1);
 if(chi2Reset>min(ar.chi2s + ar.chi2sconstr))
     [chi2min,imin] = min(ar.chi2s + ar.chi2sconstr);
     ar.p = ar.ps(imin,:);
-     if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
-        fprintf('selected best fit #%i with %f (old = %f)\n', ...
-            imin, 2*ar.ndata*log(sqrt(2*pi)) + chi2min, 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
-     elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix == 1))>0)
-        fprintf('selected best fit #%i with %f (old = %f)\n', ...
-            imin, 2*ar.ndata_err*log(sqrt(2*pi)) + chi2min, 2*ar.ndata_err*log(sqrt(2*pi)) + chi2Reset);
+    if ar.config.fiterrors == -1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)==0) % if no error parameters fitted
+        fprintf('selected best fit #%i with %f (old = %f)\n', imin, 2*(ar.ndata+ar.nconstr)*log(sqrt(2*pi)) + chi2min, 2*(ar.ndata+ar.nconstr)*log(sqrt(2*pi)) + chi2Reset);
     else
         fprintf('selected best fit #%i with %f (old = %f)\n', ...
-            imin, chi2min, chi2Reset);
+            imin, 2*ar.ndata*log(sqrt(2*pi)) + chi2min, 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
     end
 else
     fprintf('did not find better fit\n');

@@ -955,7 +955,7 @@ function sensBlock = verifyRow( sensBlock, func, location )
                                 'Which\nmeans the corresponding parameter cannot be optimized using', ...
                                 ' a\nderivative based optimization algorithm.\n\n'                   , ...
                                 'Hit any key to proceed compiling (at your own risk).'};
-                warning( sprintf( sprintf( '%s', message{:} ) ) );
+                warning( sprintf( sprintf( '%s', message{:} ) ) ); %#ok
             else
                 % This fixed it. Substitute Jacobian entry.
                 fprintf( ' [ OK ]\n' );
@@ -977,7 +977,7 @@ end
 specialFunc = config.specialFunc;
 
 % hard code conditions
-data.sym.p = sym(data.p);
+data.sym.p  = sym(data.p);
 data.sym.fp = sym(data.fp);
 data.sym.fy = mySym(data.fy, specialFunc);
 data.sym.fy = arSubs(data.sym.fy, model.sym.v, model.sym.fv);
@@ -985,7 +985,7 @@ data.sym.fy = arSubs(data.sym.fy, data.sym.p, data.sym.fp, matlab_version);
 try
     data.sym.fystd = sym(data.fystd);
 catch
-    error( 'Invalid expression in error model\n%s', [sprintf('%s', data.fystd{:} )] );
+    error( 'Invalid expression in error model\n%s', [sprintf('%s', data.fystd{:} )] ); %#ok
 end
 data.sym.fystd = arSubs(data.sym.fystd, data.sym.p, data.sym.fp, matlab_version);
 
@@ -1006,6 +1006,12 @@ varlist = symvar([data.sym.fy(:); data.sym.fystd(:)]);
 data.pold = data.p;
 othervars = union(union(union(union(model.x, model.u), model.z), data.y), 't');
 data.p = setdiff(union(sym2str(varlist), data.p_condition), othervars); %R2013a compatible
+
+% Union's behaviour is different when first arg is empty. In this case, a
+% flip of the parameter vector is typically required.
+if ( size( data.p, 1 ) ~= 1 )
+    data.p = data.p.';
+end
 
 if(doskip)
     data.ps = {};
@@ -1263,7 +1269,7 @@ function out = mysubsrepeated(in, old, new, matlab_version)
             end
             s = sprintf( 'Substitution recursion limit (5) exceeded!\nSolutions that cannot be obtained by simple substitution are not supported.\nDo you have any cyclic substitutions?\n%s\n', v );
             
-            error( s );
+            error( s ); %#ok
         end        
         
         % No more changes?
@@ -1635,7 +1641,7 @@ if(config.useSensiRHS)
             % Add sensitivity RHS contributions corresponding to the compartment volumes
             if ( isfield( condition.sym, 'dfcdp' ) )
                 for svs = 1 : length(condition.sym.fsx)
-                    sxdot_tmp{svs} = sprintf( 'sxdot_tmp[%d]', svs );
+                    sxdot_tmp{svs} = sprintf( 'sxdot_tmp[%d]', svs ); %#ok
                 end
                 sxdot_tmp = sym(repmat(sxdot_tmp, size(condition.sym.dvdp,2), 1));
                 condition.sym.dfcdp2 = (sxdot_tmp.' + condition.sym.dfcdp);
@@ -2388,7 +2394,7 @@ function str = repSplineDer( str )
     str = sprintf( mask, values );
 
 % Replace variables in the arguments of specific functions
-function str = replaceWithinFunc(str, func, from, to)
+function str = replaceWithinFunc(str, func, from, to) %#ok
     funcs = findFunc( str, func );
     for a = 1 : length( funcs )
         str = strrep(str, funcs(a).func, strrep(funcs(a).func,from,to));
@@ -2401,7 +2407,7 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
     end
 
     str  = char(str);
-    stro = str; replaced = 0;
+    stro = str; replaced = 0; %#ok
     for a = 1 : length( funcTypes )
         funcs = findFunc( str, funcTypes{a}{1} );
         argLayout = funcTypes{a}{3};
@@ -2412,7 +2418,7 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
                         funcTypes{a}{1}, '" in model or data definition file. Expected ', ...
                         num2str(max(argLayout)), ' got ', num2str( length( funcs(b).args ) ), ...
                         '. Valid syntax would be ', funcTypes{a}{4} };
-                error( sprintf( '%s', msg{:} ) );
+                error( sprintf( '%s', msg{:} ) ); %#ok
             else
                 % Determine what the function should be replaced with;
                 % feed the appropriate function arguments and replace it
@@ -2425,7 +2431,7 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
                 catch
                     msg = { 'Failed to replace function ', funcTypes{a}{1}, ...
                         ' in:', funcs(b).func, 'Please expression check for error.' };
-                    error( sprintf( '%s\n', msg{:} ) );
+                    error( sprintf( '%s\n', msg{:} ) ); %#ok
                 end
             end
         end
@@ -2444,18 +2450,17 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
     catch
         msg = { 'Failed to obtain valid expression from: ', ...
                 str, 'Please check expression for error.' };
-        error(sprintf('%s\n', msg{:}))
+        error(sprintf('%s\n', msg{:})); %#ok
         
     end
 
 % Function to scan for specific function name and extract its arguments
 function [f] = findFunc( st, funcName )
     loc     = strfind( st, [funcName '('] );
-    if ( length(loc) > 0 )
+    if ( length(loc) > 0 ) %#ok
         for a = 1 : length( loc )
-            brackets = 1;
-            f(a) = fetchArgs( st(loc(a):end) );
-            f(a).fin = f(a).fin + loc(a)-1;
+            f(a) = fetchArgs( st(loc(a):end) ); %#ok
+            f(a).fin = f(a).fin + loc(a)-1; %#ok
         end
     else
         f = [];
@@ -2470,10 +2475,10 @@ function f = fetchArgs( st )
     while( brackets == 0 )
         cur = cur + 1;
         if ( cur > length( st ) )
-            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) ); %#ok
         end
         if ( brackets < 0 )
-            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) ); %#ok
         end
         if ( st( cur ) == '(' )
             brackets = brackets + 1;
@@ -2483,7 +2488,7 @@ function f = fetchArgs( st )
         end        
     end
     if ( brackets < 0 )
-        error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+        error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) ); %#ok
     end    
     
     f.name = strtrim( st(1:cur-1) );
@@ -2492,7 +2497,7 @@ function f = fetchArgs( st )
     while( brackets > 0 )
         cur = cur + 1;
         if ( cur > length( st ) )
-            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) );
+            error( sprintf( 'Malformed input string for argument fetcher: \n%s', st ) ); %#ok
         end            
         if ( st( cur ) == '(' )
             brackets = brackets + 1;
@@ -2501,7 +2506,7 @@ function f = fetchArgs( st )
             brackets = brackets - 1;
         end
         if ( ( st( cur ) == ',' ) && ( brackets == 1 ) )
-            commas(end+1) = cur;
+            commas(end+1) = cur; %#ok
         end
     end
     

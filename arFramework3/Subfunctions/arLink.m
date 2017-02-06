@@ -332,7 +332,7 @@ for m = 1:length(ar.model)
                     ar.model(m).data(d).yExpSimu = zeros(nt, ny);
                     ar.model(m).data(d).syExpSimu = zeros(nt, ny, np);
                     ar.model(m).data(d).ystdExpSimu = zeros(nt, ny);
-                    if(length(ar.model(m).x)>0)
+                    if(length(ar.model(m).x)>0) %#ok
                         ar.model(m).data(d).y_scale = zeros(nt, ny, length(ar.model(m).x));                       
                     else
                         ar.model(m).data(d).y_scale = zeros(nt, ny, 1);                        

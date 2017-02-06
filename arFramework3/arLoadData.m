@@ -435,6 +435,12 @@ ptmp = union(ar.model(m).px, ar.model(m).pu);
 ar.model(m).data(d).p = union(ptmp, union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
 ar.model(m).data(d).p = union(ar.model(m).data(d).p, ar.model(m).data(d).pystd); %R2013a compatible
 
+% Union's behaviour is different when first arg is empty. In this case, a
+% flip of the parameter vector is typically required.
+if ( size( ar.model(m).data(d).p, 1 ) ~= 1 )
+    ar.model(m).data(d).p = ar.model(m).data(d).p.';
+end
+
 % replace filename
 ar.model(m).data(d).p = strrep(ar.model(m).data(d).p, '_filename', ['_' ar.model(m).data(d).name]);
 ar.model(m).data(d).fy = strrep(ar.model(m).data(d).fy, '_filename', ['_' ar.model(m).data(d).name]);
