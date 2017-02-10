@@ -29,6 +29,7 @@
 %                        scaling factor.
 %     restrictObs        Restrict estimation to list of observables
 %     ignoreMask         Add mask for which data columns to ignore
+%     removeMask         Add mask for which data columns to remove
 %     twocomponent       Use two component error model (warning: poorly
 %                        tested so far)
 %     logtrafo           Do the scaling in logarithmic space
@@ -50,8 +51,8 @@ function out = scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn', 'splitconditions' };
-    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0 ];
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn', 'splitconditions', 'removemask' };
+    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
@@ -69,6 +70,7 @@ function out = scaleIt( names, outFile, varargin )
     {'', 'Prescaler specified'} ...
     {'', 'Appending a column'} ...
     {'', 'Splitting conditions'} ...
+    {'', 'Using removal mask'} ...,
     };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
@@ -101,6 +103,10 @@ function out = scaleIt( names, outFile, varargin )
     if ( opts.ignoremask )
         ignoreMask = opts.ignoremask_args;
     end
+    removeMask = [];
+    if ( opts.removemask )
+        removeMask = opts.removemask_args;
+    end    
     
     % Default mapping
     trafo           = @(x) x;
@@ -164,7 +170,11 @@ function out = scaleIt( names, outFile, varargin )
                     newData     = num2cell(cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})));
                     % +1 is added to make sure that we never overlap even if user starts counting 
                     % from 0 or 1 inconsistently in different files
-                    expField    = expField + max(str2num(cell2mat(data{1}.(expVar)))); % + 1;
+                    if ( isnumeric( cell2mat(data{1}.(expVar)) ) )
+                        expField    = expField + max(cell2mat(data{1}.(expVar))); % + 1;
+                    else
+                        expField    = expField + max(str2num(cell2mat(data{1}.(expVar)))); % + 1;
+                    end
                 end
                 out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
             end
@@ -182,21 +192,28 @@ function out = scaleIt( names, outFile, varargin )
         for ju = 1 : size(uq,1)
             F( min(Q==repmat(uq(ju,:), size(Q,1), 1), [], 2) ) = ju;
         end
+        out.(expVar) = num2cell(F);
     end
-    out.(expVar) = num2cell(F);
     
     % Dump out things in the ignore mask
-    if ~isempty( ignoreMask )
+    if ( ~isempty( ignoreMask ) || ~isempty( removeMask ) )
+        searchpat = union( ignoreMask, removeMask, 'stable' );
         fprintf('Filtering following fields:\n');
         K = fieldnames(out);
         for a = 1 : length( K )
-            if ~iscell( ignoreMask )
-                ignoreMask = {ignoreMask};
+            if ~iscell( searchpat )
+                searchpat = {searchpat};
             end
-            for b = 1 : length( ignoreMask )
-                if ~isempty( strfind( K{a}, filterField(ignoreMask{b}) ) )
+            for b = 1 : length( searchpat )
+                if ~isempty( strfind( K{a}, filterField(searchpat{b}) ) )
                     if ( isfield( out, K{a} ) )
-                        fprintf('%s\n', K{a});
+                        if ( sum(ismember(K{a}, ignoreMask)) )
+                            prt = sprintf('(%s)\n', K{a});
+                            ignore.(K{a}) = out.(K{a});
+                        else
+                            prt = sprintf('[%s]\n', K{a});
+                        end
+                        fprintf( prt );
                         out = rmfield( out, K{a} );
                         fieldNames = setdiff( fieldNames, K{a} );
                     end
@@ -204,6 +221,7 @@ function out = scaleIt( names, outFile, varargin )
             end
         end
     end
+    
     % Put NaN's in the empty fields
     filt = struct;
     for jN = 1 : length( fieldNames )               
@@ -335,7 +353,16 @@ function out = scaleIt( names, outFile, varargin )
         end
     end
     
-    fid = fopen( outFile, 'w' );
+    % Add the columns that were ignored first back
+    if ( exist( 'ignore', 'var' ) )
+        startNames = fieldnames( ignore );
+        fieldNames = { startNames{:} fieldNames{:} }; %#ok
+        for jN = 1 : numel( startNames )
+            out.(startNames{jN}) = ignore.(startNames{jN});
+        end
+    end
+    
+    fid = fopen( outFile, 'w' );   
     fprintf( fid, '%s ', fieldNames{1} );
     for jN = 2 : length( fieldNames )
         fprintf( fid, ', %s', fieldNames{jN} );
@@ -464,7 +491,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     for a = unique(jcondition).'
         if ( sum(jcondition==a) < 2 )
             warnLine = '';
-            ID = find( sum(jcondition==a) );
+            ID = find(jcondition==a,1);
             for jF = 1 :length( conditionFields )
                 warnLine = sprintf( '%s\n%s: %d', warnLine, conditionFields{jF}, out.(conditionFields{jF}){ID} ); %#ok
             end
