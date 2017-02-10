@@ -13,6 +13,9 @@
 % arLoad('NameOfAnExistingResultFolder')
 
 function arLoad(workspace_name)
+if exist('arCheck','file')==0
+    arInit;
+end
 arCheck;
 
 global ar
