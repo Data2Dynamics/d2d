@@ -504,7 +504,7 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
             libNames = cell(1, chunks);
             for a = 1 : chunks
                 fprintf( 'Assembling chunk %d/%d into library\n', a, chunks );
-                libNames{a} = ['Compiled/' c_version_code '/lib_' num2str(a) '_' ar.fkt(end-31:end) '.o '];
+                libNames{a} = fullfile('Compiled', c_version_code, [ 'lib' num2str(a) '_' ar.fkt(end-31:end) '.o' ] );
                 curChunk = cellfun(@(st)[st, ' '], objectsstr( (a-1)*chunkSize+1 : min(a*chunkSize, numel(objectsstr)) ), 'UniformOutput', false);
                 system(['ld -r ' [ curChunk{:} ] '-o ' libNames{a}]);
             end
