@@ -127,6 +127,11 @@ try %#ok<TRYNC>
     ar.ndata = ar2.ndata;
     ar.nprior = ar2.nprior;
 end
+
+if isfield(ar2,'ple')
+    ar.ple.chi2s = ar2.ple.chi2s;  % required for printing how many PLEs have been run
+end
+
 try %#ok<TRYNC>
     ar.ps = ar2.ps;
     ar.ps_errors = ar2.ps_errors;
@@ -145,7 +150,7 @@ try %#ok<TRYNC>
     ar.ps_sorted = ar2.ps_sorted;
     ar.chi2s_start_sorted = ar2.chi2s_start_sorted;
     ar.chi2sconstr_start_sorted = ar2.chi2sconstr_start_sorted;
-    ar.ps_start_sorted = ar2.ps_start_sorted;
+    ar.ps_start_sorted = ar2.ps_start_sorted;    
 end
 if(ar2.config.useFitErrorMatrix == 0)
     ar.config.fiterrors = ar2.config.fiterrors; %#ok<STRNU>
@@ -186,6 +191,11 @@ if isstruct(ar)
                     ar.model(m).plot(p).fighandel_y = [];
                 end
             end
+        end
+    end
+    if isfield(ar,'ple')
+        if isfield(ar.ple,'fighandel_multi')
+            ar.ple.fighandel_multi = [];
         end
     end
 end

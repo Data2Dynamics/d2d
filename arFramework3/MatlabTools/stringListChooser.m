@@ -134,7 +134,7 @@ if(exist(filename_pars,'file'))
         end
     end
     
-    if(isfield(S,'ar.ple'))
+    if(isfield(S.ar,'ple'))
         if(isfield(S.ar.ple,'chi2s'))
             nple = sum(~cellfun(@isempty,S.ar.ple.chi2s));
             plestr = [' #PLE=',num2str(nple)];
