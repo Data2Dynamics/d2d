@@ -242,7 +242,11 @@ if(~fine)
                 ar.model(im).condition(ic).atol(:) = 0;
                 for id = ar.model(im).condition(ic).dLink
                     atol_tmp = squeeze(nanmax(nanmax(ar.model(im).data(id).y_scale)));
-                    ar.model(im).condition(ic).y_atol = nanmax([ar.model(im).condition(ic).y_atol atol_tmp],2);
+                    if(~isequal(size(atol_tmp),size(ar.model(im).condition(ic).y_atol)))
+                       warning('Problems in vector tolerances, did you load an old model?');                        
+                    else
+                        ar.model(im).condition(ic).y_atol = nanmax([ar.model(im).condition(ic).y_atol atol_tmp],2);
+                    end
                 end
             end
         end
