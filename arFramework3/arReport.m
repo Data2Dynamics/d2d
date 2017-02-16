@@ -967,9 +967,9 @@ if ~isempty(ar.ple)
     
     lp(fid, 'In order to evaluate the identifiability of the model parameters and to assess confidence intervals, ');
     lp(fid, 'the profile likelihood \\cite{Raue:2009ec} was calculated.');
-    lp(fid, 'The mean calculation time of the profile likelihood per parameter was %s $\\pm$ %s.', ...
-        secToHMS(mean(ar.ple.timing(ar.ple.q_fit(size(ar.ple.timing))))), ...
-        secToHMS(std(ar.ple.timing(ar.ple.q_fit(size(ar.ple.timing))))));
+%     lp(fid, 'The mean calculation time of the profile likelihood per parameter was %s $\\pm$ %s.', ...
+%         secToHMS(mean(ar.ple.timing(ar.ple.q_fit(size(ar.ple.timing))))), ...
+%         secToHMS(std(ar.ple.timing(ar.ple.q_fit(size(ar.ple.timing))))));
     
     % Multiplot
     if(isfield(ar.ple, 'fighandel_multi'))
@@ -1039,11 +1039,11 @@ if ~isempty(ar.ple)
     N = 30;
     ntables = 0;
     for j=1:length(ar.ple.p_labels)
-        if(ar.ple.q_fit(j))
+%         if(ar.ple.q_fit(j))
             if(j<=length(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{j}))
                 ntables = ntables + 1;
             end
-        end
+%         end
     end
     ntables = ceil(ntables/N);
     
@@ -1073,7 +1073,7 @@ if ~isempty(ar.ple)
     count = 0;
     counttab = 1;
     for j=1:length(ar.ple.p_labels)
-        if(ar.ple.q_fit(j))
+%         if(ar.ple.q_fit(j))
             if(j<=length(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{j}))
                 count = count + 1;
                 
@@ -1114,7 +1114,7 @@ if ~isempty(ar.ple)
                 end
                 lp(fid, ' \\\\');
             end
-        end
+%         end
     end
     lp(fid, '\t\t\t\\botrule');
     lp(fid, '\t\t\\end{tabular}}');
