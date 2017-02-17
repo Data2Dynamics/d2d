@@ -136,7 +136,7 @@ ar.model(m).qPlotX = [];
 ar.model(m).qPositiveX = [];
 C = arTextScan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INPUTS'))
-    if ( strcmp( C{1}, 'REACTIONS' ) )
+    if (strcmp(C{1}, 'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED') || strcmp(C{1},'ODES'))
         error( 'Missing field INPUTS. This section should be specified after STATES and before REACTIONS. See: "Setting up models"' );
     end    
     
@@ -484,6 +484,10 @@ elseif(strcmp(C{1},'ODES'))
     str = arTextScan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
     ode_count = 0;
     while(~strcmp(str{1},'INVARIANTS') && ~strcmp(str{1},'DERIVED'))
+        if ( strcmp(str{1}, 'OBSERVABLES') || strcmp(str{1}, 'CONDITIONS') )
+            error('Missing field DERIVED. This section should be specified after REACTIONS and before OBSERVABLES / CONDITIONS. See: "Setting up models paragraph 1.7"');
+        end
+        
         if(~strcmp(str{1},''))
             ode_count = ode_count + 1;
             ar.model(m).fv{end+1,1} = cell2mat(str{1});

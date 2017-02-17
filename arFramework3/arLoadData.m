@@ -238,7 +238,7 @@ end
 % INPUTS
 str = textscan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(~strcmp(str{1},'INPUTS'))
-    error('parsing data %s for INPUTS', name);
+    error('Field INPUTS missing for data set %s', name);
 end
 C = textscan(fid, '%s %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).fu = ar.model(m).fu;
