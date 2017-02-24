@@ -56,6 +56,9 @@ function ar = arInitFields(ar)
         ...                                                             % CVODES settings
         {'atol',                        1e-6}, ...                      %   Absolute tolerance
         {'rtol',                        1e-6}, ...                      %   Relative tolerance
+        {'maxtol',                      1e-10}, ...                     %   Minimal tolerance used in regulating algorithms
+        {'useTolTrustPar',              0}, ...                         %   Use parallel shrinkage of integration tolerances with optimizer trust region
+        {'useTolSwitching',             0}, ...                         %   Use switch to strict integrator tolerances if trust region step is rejected
         {'maxsteps',                    1000}, ...                      %   Maximum number of steps before timeout
         {'maxstepsize',                 1e6}, ...                       %   Maximum stepsize
         {'useEvents',                   0}, ...                         %   Use event system
