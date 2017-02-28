@@ -12,7 +12,6 @@
 % This function is *very* slow, but will do the job
 
 function copy = arDeepCopy(in)
-
 	if ( isstruct( in ) )
         if ( length( in ) > 1 )
             for s = 1 : length( in )
@@ -20,8 +19,11 @@ function copy = arDeepCopy(in)
             end
         else
             names = fieldnames(in);
-            for a = 1 : length( names )
-                 copy.(names{a}) = arDeepCopy(in.(names{a}));
+            copy = struct;
+            if ~isempty(names)
+                for a = 1 : length( names )
+                    copy.(names{a}) = arDeepCopy(in.(names{a}));
+                end
             end
         end
     else
@@ -29,7 +31,7 @@ function copy = arDeepCopy(in)
             if ( ~isempty( in ) )
                 copy = cell(size(in));
                 for b = 1 : length( in )
-                    copy{b} = arDeepCopy(in{b});
+                        copy{b} = arDeepCopy(in{b});
                 end
             else
                 copy = {};

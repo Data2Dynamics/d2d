@@ -123,9 +123,9 @@ for i = 1:nCVRestart
     try
         if doSimu
             if(qglobalar)  % since ar is overwritten anyway in arSimu, the possiblity to use of qglobalar obsolete
-                arSimu(sensi, ~isfield(ar.model(1), 'data'), dynamics);
+                arSimu(sensi, false, dynamics);
             else
-                ar = arSimu(ar, sensi, ~isfield(ar.model(1), 'data'), dynamics);
+                ar = arSimu(ar, sensi, false, dynamics);
             end
         end
         has_error = false;
@@ -187,9 +187,7 @@ for m=1:length(ar.model)
     end
 end
 
-
 arCollectRes(sensi);
-
 
 % set Inf for errors
 if(has_error)
@@ -198,8 +196,6 @@ if(has_error)
     ar.chi2err = Inf;
     ar.chi2fit = Inf;
 end
-
-
 
 % calculate first order optimality criterion
 if(sensi)

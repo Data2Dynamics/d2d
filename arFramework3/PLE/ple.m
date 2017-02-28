@@ -35,7 +35,7 @@ if(~isfield(ar.ple, 'showCalculation'))
     ar.ple.showCalculation = true;
 end
 
-if(~exist('jk','var'))
+if(~exist('jk','var') || isempty(jk))
     jk = find(ar.qFit==1);
 elseif(ischar(jk))
     tref = strmatch(jk,ar.ple.p_labels,'exact');
@@ -58,27 +58,27 @@ end
 
 ar.ple.finished = 0;
 
-if(exist('samplesize', 'var'))
+if(exist('samplesize', 'var') && ~isempty(samplesize))
     ar.ple.samplesize(jk) = samplesize;
 end
-if(exist('relchi2stepincrease', 'var'))
+if(exist('relchi2stepincrease', 'var') && ~isempty(relchi2stepincrease))
     ar.ple.relchi2stepincrease(jk) = relchi2stepincrease;
 end
-if(exist('maxstepsize', 'var'))
+if(exist('maxstepsize', 'var') && ~isempty(maxstepsize))
     ar.ple.maxstepsize(jk) = maxstepsize;
 end
-if(exist('minstepsize', 'var'))
+if(exist('minstepsize', 'var') && ~isempty(minstepsize))
     ar.ple.minstepsize(jk) = minstepsize;
 end
-if(exist('breakonlb', 'var'))
+if(exist('breakonlb', 'var') && ~isempty(breakonlb))
     ar.ple.breakonlb(jk) = breakonlb;
 end
-if(exist('breakonub', 'var'))
+if(exist('breakonub', 'var') && ~isempty(breakonub))
     ar.ple.breakonub(jk) = breakonub;
 end
 
 if(nargin<1)
-    fprintf('PLE for %i parameters ...\n', sum(ar.qFit))
+    fprintf('PLE for %i parameters ...\n', sum(ar.qFit==1))
     jindex = find(ar.qFit);
     do_plotting = ar.ple.showCalculation;
     ar.ple.showCalculation = false;
@@ -89,10 +89,10 @@ if(nargin<1)
         end
     end
     ar.ple.showCalculation = do_plotting;
-    ar.ple.tmean = mean(ar.ple.timing(ar.qFit));
-    ar.ple.tstd = std(ar.ple.timing(ar.qFit));    
+    ar.ple.tmean = mean(ar.ple.timing(ar.qFit==1));
+    ar.ple.tstd = std(ar.ple.timing(ar.qFit==1));    
     fprintf('\nPLE mean elapsed time for %i parameter: %s +/- %s\n', ...
-        sum(ar.qFit), secToHMS(ar.ple.tmean), secToHMS(ar.ple.tstd));
+        sum(ar.qFit==1), secToHMS(ar.ple.tmean), secToHMS(ar.ple.tstd));
     return
 elseif(length(jk)>1)
     fprintf('PLE for %i parameters ...\n', length(jk))

@@ -725,6 +725,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                             if ( ts[is] == inf ) {
                                 /* Equilibrate the system */
                                 flag = equilibrate(cvode_mem, data, x, t, equilibrated, returndxdt, teq, neq, im, isim, abortSignal);
+                                
+                                if (flag < 0) {thr_error("Failed to equilibrate system"); terminate_x_calc( sim_mem, 20 ); return;}
                             } else {
                                 /* Simulate up to the next time point */
                                 flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
@@ -861,8 +863,6 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 xssaexp = mxGetData(mxGetField(arcondition, ic, "xExpSSA"));
             }
             
-            status = mxGetData(mxGetField(arcondition, ic, "status"));
-                       
             /* Allocate state memory and user data memory */
             if ( allocateSimMemorySSA( sim_mem, nx ) )
             {

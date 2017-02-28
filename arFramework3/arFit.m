@@ -606,7 +606,12 @@ global ar
 stop = false;
 if(strcmp(state, 'iter'))    
     if(ar.config.showFitting)
-        arPlot(false, true, true, true, true);
+        % note that the ~ar.config.useNewPlots is a temporary fix. arPlot2,
+        % which is called when ar.config.useNewPlots is set to 1 does not 
+        % properly redraw -2 log(L) labels when forced to do a fastplot
+        % TO DO: The proper solution would be to make sure that fastplot 
+        % also updates the -2 log(L) text label
+        arPlot(false, ~ar.config.useNewPlots, true, true, true);
         drawnow;
     end
 end
