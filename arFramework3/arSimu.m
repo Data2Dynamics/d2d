@@ -62,17 +62,6 @@ if ( ~dynamics )
     end
 end
 
-% If we are simulating, store the simulation parameters in the cache
-if ( dynamics )
-    if ( fine )
-        ar.cache.fine       = ar.p;
-        ar.cache.fineSensi  = sensi;
-    else
-        ar.cache.exp        = ar.p;
-        ar.cache.expSensi   = sensi;
-    end
-end
-
 if(~isfield(ar,'p'))
     fprintf('ERROR: forgot arLink\n');
 end
@@ -133,13 +122,13 @@ end
 % initialize fine sensitivities
 % this is very important, c code crashes otherwise!
 if(fine && sensi)
-    ar = initFineSensis(ar);
+    ar = initFineSensis(ar, dynamics);
 end
 
 % do we have steady state presimulations?
-if ( ss_presimulation )
+if ( ss_presimulation && dynamics )
     if ( sensi )
-        ar = initSteadyStateSensis(ar);
+        ar = initSteadyStateSensis(ar, dynamics);
     end
     if ( ~isfield( ar.config, 'rootfinding' ) || ( ar.config.rootfinding < 0.1 ) )
         % Steady state determination by simulation
@@ -285,8 +274,21 @@ else
     varargout = {};
 end
 
+% We managed to complete the simulation
+% Note that this has to happen at the end, since otherwise the simulation
+% could have been terminated by the user in the meantime
+if ( dynamics )
+    if ( fine )
+        ar.cache.fine               = ar.p;
+        ar.cache.fineSensi          = sensi;
+    else
+        ar.cache.exp                = ar.p;
+        ar.cache.expSensi           = sensi;
+    end
+end
+
 % (Re-)Initialize arrays for fine sensitivities with zeros
-function ar = initFineSensis(ar)
+function ar = initFineSensis(ar, dynamics)
 
 for m = 1:length(ar.model)
     if(isfield(ar.model(m), 'data'))
@@ -297,29 +299,33 @@ for m = 1:length(ar.model)
                 length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
         end
     end
-    for c = 1:length(ar.model(m).condition)
-        ar.model(m).condition(c).suFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
-            length(ar.model(m).u), length(ar.model(m).condition(c).p));
-        ar.model(m).condition(c).svFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
-            length(ar.model(m).vs), length(ar.model(m).condition(c).p));
-        ar.model(m).condition(c).sxFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
-            length(ar.model(m).x), length(ar.model(m).condition(c).p));
-        ar.model(m).condition(c).szFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
-            length(ar.model(m).z), length(ar.model(m).condition(c).p));
+    if ( dynamics )
+        for c = 1:length(ar.model(m).condition)
+            ar.model(m).condition(c).suFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
+                length(ar.model(m).u), length(ar.model(m).condition(c).p));
+            ar.model(m).condition(c).svFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
+                length(ar.model(m).vs), length(ar.model(m).condition(c).p));
+            ar.model(m).condition(c).sxFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
+                length(ar.model(m).x), length(ar.model(m).condition(c).p));
+            ar.model(m).condition(c).szFineSimu = zeros(length(ar.model(m).condition(c).tFine), ...
+                length(ar.model(m).z), length(ar.model(m).condition(c).p));
+        end
     end
 end
 
-function ar = initSteadyStateSensis(ar)
+function ar = initSteadyStateSensis(ar, dynamics)
 
-for m = 1:length(ar.model)
-    for c = 1:length(ar.model(m).ss_condition)
-        ar.model(m).ss_condition(c).suFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
-            length(ar.model(m).u), length(ar.model(m).ss_condition(c).p));
-        ar.model(m).ss_condition(c).svFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
-            length(ar.model(m).vs), length(ar.model(m).ss_condition(c).p));
-        ar.model(m).ss_condition(c).sxFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
-            length(ar.model(m).x), length(ar.model(m).ss_condition(c).p));       
-        ar.model(m).ss_condition(c).szFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
-            length(ar.model(m).z), length(ar.model(m).ss_condition(c).p));
+if ( dynamics )
+    for m = 1:length(ar.model)
+        for c = 1:length(ar.model(m).ss_condition)
+            ar.model(m).ss_condition(c).suFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
+                length(ar.model(m).u), length(ar.model(m).ss_condition(c).p));
+            ar.model(m).ss_condition(c).svFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
+                length(ar.model(m).vs), length(ar.model(m).ss_condition(c).p));
+            ar.model(m).ss_condition(c).sxFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
+                length(ar.model(m).x), length(ar.model(m).ss_condition(c).p));       
+            ar.model(m).ss_condition(c).szFineSimu = zeros(length(ar.model(m).ss_condition(c).tFine), ...
+                length(ar.model(m).z), length(ar.model(m).ss_condition(c).p));
+        end
     end
 end

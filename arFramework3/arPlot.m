@@ -74,7 +74,7 @@ if(evalfun)
         if(silent)
             arCalcMerit(false, ar.p(ar.qFit==1), dynamics);
         else
-            arCalcMerit;
+            arCalcMerit(false);
         end
     catch err_id
         if(~silent)
