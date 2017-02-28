@@ -21,9 +21,9 @@ if(nargin>2 && ~isempty(xf) && ~isempty(yf))
     end
     scale = arMatchHistWithEmpFunction(centers,N,xf,yf);
     if(~vertical)
-        plot(xf, scale*yf, 'r-', 'LineWidth',2);
+        plot(xf, scale*yf, 'r-', 'LineWidth',1);
     else
-        plot(scale*yf, xf, 'r-', 'LineWidth',2);
+        plot(scale*yf, xf, 'r-', 'LineWidth',1);
     end
     if(qh)
         hold on
