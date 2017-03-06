@@ -3,6 +3,7 @@
 function arCreateProject
 
 name = input('enter new project name: ', 's');
+name = strrep(name,' ','_');
 
 path0 = pwd;
 
