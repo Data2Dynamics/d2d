@@ -275,6 +275,7 @@ elseif(ar.config.optimizer == 11)
         [pFit, resnorm, res, exitflag, output, lambda, jac] = ...
             lsqnonlin(@merit_fkt, pFit, lb, ub, ar.config.optim);
     end
+    resnorm = res;
     
 % fminsearchbnd
 elseif(ar.config.optimizer == 12)
