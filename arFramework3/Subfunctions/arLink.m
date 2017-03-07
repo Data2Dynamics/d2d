@@ -529,8 +529,8 @@ ar.qError = zeros(size(ar.pLabel));
 for m = 1:length(ar.model)
     if(isfield(ar.model(m),'data'))
         for d = 1:length(ar.model(m).data)
-            if(~isempty(ar.model(m).data(d).pystd))
-                qerr = ismember(ar.pLabel, ar.model(m).data(d).pystd); %R2013a compatible
+            if(~isempty(ar.model(m).data(d).fystd))
+                qerr = ismember(ar.pLabel, ar.model(m).data(d).fystd); %R2013a compatible
                 ar.qError(qerr) = 1;
             end
         end
