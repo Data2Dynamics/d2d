@@ -1,0 +1,34 @@
+DESCRIPTION
+"Simple pulse test"
+
+PREDICTOR
+t               T   min         time	0	5
+
+COMPARTMENTS
+cyt             V   pl          vol.    1
+
+STATES
+stateA          C   nmol/l      conc.   cyt     1
+stateB          C   nmol/l      conc.   cyt     1
+
+INPUTS
+pulse           C   nmol/l      conc.   "step1(t,0,1,input_step_nExp)"
+
+REACTIONS
+stateA          ->  stateB      CUSTOM	"pulse * stateA"
+stateB          ->  stateA      CUSTOM  "stateB"
+
+DERIVED
+
+OBSERVABLES
+B_obs           C  au   conc.   0  0    "stateB"
+                
+ERRORS
+B_obs           ".01"
+
+CONDITIONS
+init_stateA     "1"
+init_stateB     "0"
+
+RANDOM
+nExp            INDEPENDENT
