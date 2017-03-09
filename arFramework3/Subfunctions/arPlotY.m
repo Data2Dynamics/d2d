@@ -794,6 +794,7 @@ end
 [tExp,itexp] = sort(tExp);
 yExp = yExp(itexp);
 yExpHl = yExpHl(itexp);
+yExpStd = yExpStd(itexp);
 
 [t,it] = sort(t);
 y = y(it);

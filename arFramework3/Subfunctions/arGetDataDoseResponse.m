@@ -161,6 +161,7 @@ if(~isempty(yExp))
     [tExp,itexp] = sort(tExp);
     yExp = yExp(itexp,:);
     yExpHl = yExpHl(itexp,:);
+    yExpStd = yExpStd(itexp, :);
 else
     data_qFit = [];
 end
