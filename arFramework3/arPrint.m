@@ -53,11 +53,9 @@
 function varargout = arPrint(js, varargin)
 global ar
 
-if(isempty(ar))
-    error('please initialize by arInit')
-end
+args = {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub', 'exact', 'namefit', 'ar'};
+extraArgs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
 
-args = {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub', 'exact', 'namefit'};
 if ( exist( 'js', 'var' ) )
     if ( ~isnumeric( js ) )
         if ( ismember( js, args ) )
@@ -66,10 +64,27 @@ if ( exist( 'js', 'var' ) )
         end
     end
 end
-opts = argSwitch( args, varargin{:} );
+opts = argSwitch( args, extraArgs, {}, 0, varargin );
+
+if ( opts.ar )
+    if ( isstruct( opts.ar_args ) )
+        arC = opts.ar_args;
+    elseif ( iscell( opts.ar_args ) )
+        arC = opts.ar_args{1};
+        arC2 = opts.ar_args(2:end);
+    else
+        error( 'Invalid argument passed to arPrint ''ar''' );
+    end
+else
+    arC = ar;
+end
+
+if(isempty(arC))
+    error('please initialize by arInit')
+end
 
 if(~exist('js','var') || isempty(js))
-    js = 1:length(ar.p);
+    js = 1:length(arC.p);
 elseif(islogical(js))
     js = find(js);
 elseif(isnumeric(js))
@@ -81,12 +96,12 @@ elseif(isnumeric(js))
     end
 elseif(ischar(js))
     if ( strcmp( js, 'all' ) )
-        js = 1:length(ar.p);
+        js = 1:length(arC.p);
     else
         if ( opts.exact )
-            js = find(strcmp(ar.pLabel, js));
+            js = find(strcmp(arC.pLabel, js));
         else
-            js = find(~cellfun(@isempty,regexp(ar.pLabel,js)));
+            js = find(~cellfun(@isempty,regexp(arC.pLabel,js)));
         end
         if isempty(js)
             disp('Pattern not found in ar.pLabel');
@@ -94,7 +109,7 @@ elseif(ischar(js))
         end
     end
 elseif(iscell(js)) % cell of pNames
-    [~,js] = intersect(ar.pLabel,js);
+    [~,js] = intersect(arC.pLabel,js);
 else
     error('Argument has to be a string or an array of indices.')
 end
@@ -108,14 +123,14 @@ else
     end
 end
 
-pTrans = ar.p;
-pTrans(ar.qLog10==1) = 10.^pTrans(ar.qLog10==1);
+pTrans = arC.p;
+pTrans(arC.qLog10==1) = 10.^pTrans(arC.qLog10==1);
  
 % Determine which parameters are close to their bounds
-qFit = ar.qFit == 1;
-ar.qCloseToBound(1:length(ar.qFit)) = 0;
-ar.qCloseToBound(qFit) = (ar.p(qFit) - ar.lb(qFit)) < ar.config.par_close_to_bound*(ar.ub(qFit) - ar.lb(qFit)) | ...
-    (ar.ub(qFit) - ar.p(qFit)) < ar.config.par_close_to_bound*(ar.ub(qFit) - ar.lb(qFit));
+qFit = arC.qFit == 1;
+arC.qCloseToBound(1:length(arC.qFit)) = 0;
+arC.qCloseToBound(qFit) = (arC.p(qFit) - arC.lb(qFit)) < arC.config.par_close_to_bound*(arC.ub(qFit) - arC.lb(qFit)) | ...
+    (arC.ub(qFit) - arC.p(qFit)) < arC.config.par_close_to_bound*(arC.ub(qFit) - arC.lb(qFit));
 
 % Additional options
 if ( nargin > 1 )
@@ -133,34 +148,34 @@ if ( nargin > 1 )
     end    
 
     if ( opts.fixed )
-        js = js( ar.qFit( js ) == 0 );
+        js = js( arC.qFit( js ) == 0 );
     end
     if ( opts.fitted )
-        js = js( ar.qFit( js ) == 1 );
+        js = js( arC.qFit( js ) == 1 );
     end
     if ( opts.constant )
-        js = js( ar.qFit( js ) == 2 );
+        js = js( arC.qFit( js ) == 2 );
     end
     if ( opts.dynamic )
-        js = js( ar.qDynamic( js ) == 1 );
+        js = js( arC.qDynamic( js ) == 1 );
     end
     if ( opts.observation )
-        js = js( ar.qDynamic( js ) == 0 );
+        js = js( arC.qDynamic( js ) == 0 );
     end
     if ( opts.error )
-        js = js( ar.qError( js ) == 1 );
+        js = js( arC.qError( js ) == 1 );
     end    
     if ( opts.initial )
-        js = js( ar.qInitial( js ) == 1 );
+        js = js( arC.qInitial( js ) == 1 );
     end
     if ( opts.ub )
-        js = js( ar.p(js) < opts.ub );
+        js = js( arC.p(js) < opts.ub );
     end
     if ( opts.lb )
-        js = js( ar.p(js) > opts.lb );
+        js = js( arC.p(js) > opts.lb );
     end
     if ( opts.closetobound )
-        js = js( ar.qCloseToBound(js) );
+        js = js( arC.qCloseToBound(js) );
     end
 end
 
@@ -168,15 +183,24 @@ if nargout>0
     varargout{1} = js;
 end
 
-maxlabellength = max(cellfun(@length, ar.pLabel(js)));
+maxlabellength = max(cellfun(@length, arC.pLabel(js)));
 if ( opts.namefit )
     maxlabellength = maxlabellength + 2;
 end
 
 arFprintf(1, 'Parameters: # = free, C = constant, D = dynamic, I = initial value, E = error model\n\n');
+
 printHead;
 for j=1:length(js)
-    printPar(js(j), ar.qCloseToBound(js(j)));
+    printPar(js(j), arC, arC.qCloseToBound(js(j)));
+    if ( exist('arC2', 'var' ) )
+        for jA = 1 : numel( arC2 )
+            ID = arFindPar( arC2{jA}, arC.pLabel{js(j)}, 'exact' );
+            if ( ~isempty( ID ) )
+                printPar(ID, arC2{jA}, arC2{jA}.qCloseToBound(ID));
+            end
+        end
+    end
 	if(mod(j,10)==0 && j<length(js))
 		arFprintf(1, ['     |   | ' arExtendStr('', maxlabellength) ' |                                |              |         |      \n']);
 	end
@@ -188,17 +212,17 @@ end
         arFprintf(1, strhead);
     end
 
-    function printPar(j, qclosetobound)
+    function printPar(j, arC, qclosetobound)
         strdyn = ' ';
-        if(ar.qDynamic(j))
+        if(arC.qDynamic(j))
             strdyn = 'D';
         end
         strerr = ' ';
-        if(ar.qError(j))
+        if(arC.qError(j))
             strerr = 'E';
         end
         strinit = ' ';
-        if(ar.qInitial(j))
+        if(arC.qInitial(j))
             strinit = 'I';
         end
         
@@ -207,62 +231,30 @@ end
         else
             outstream = 1;
         end
-        if(ar.qFit(j)==2)
+        if(arC.qFit(j)==2)
             fit_flag = 'C';
         else
             fit_flag = '#';
         end
-        if ( opts.namefit && (ar.qFit(j) ~= 1) )
+        if ( opts.namefit && (arC.qFit(j) ~= 1) )
             arFprintf(1, outstream, '%s%4i|%s%s%s| %s | %+8.2g   %+8.2g   %+8.2g | %i   %+8.2g | %7i | %s \n', ...
-                fit_flag, j, strdyn, strinit, strerr, arExtendStr(['(' ar.pLabel{j} ')'], maxlabellength), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), pTrans(j), ar.qFit(j), priorStr(j));
+                fit_flag, j, strdyn, strinit, strerr, arExtendStr(['(' arC.pLabel{j} ')'], maxlabellength), arC.lb(j), arC.p(j), arC.ub(j), arC.qLog10(j), pTrans(j), arC.qFit(j), priorStr(j));
         else
             arFprintf(1, outstream, '%s%4i|%s%s%s| %s | %+8.2g   %+8.2g   %+8.2g | %i   %+8.2g | %7i | %s \n', ...
-                fit_flag, j, strdyn, strinit, strerr, arExtendStr(ar.pLabel{j}, maxlabellength), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), pTrans(j), ar.qFit(j), priorStr(j));
+                fit_flag, j, strdyn, strinit, strerr, arExtendStr(arC.pLabel{j}, maxlabellength), arC.lb(j), arC.p(j), arC.ub(j), arC.qLog10(j), pTrans(j), arC.qFit(j), priorStr(j));
         end
         
     end
 
     function str = priorStr(j)
-        if(ar.type(j) == 0)
-            str = sprintf('uniform(%g,%g)', ar.lb(j), ar.ub(j));
-        elseif(ar.type(j) == 1)
-            str = sprintf('normal(%g,%g^2)', ar.mean(j), ar.std(j));
-        elseif(ar.type(j) == 2)
-            str = sprintf('uniform(%g,%g) with soft bounds', ar.lb(j), ar.ub(j));
-        elseif(ar.type(j) == 3)
-            str = sprintf('L1(%g,%g)', ar.mean(j), ar.std(j));
+        if(arC.type(j) == 0)
+            str = sprintf('uniform(%g,%g)', arC.lb(j), arC.ub(j));
+        elseif(arC.type(j) == 1)
+            str = sprintf('normal(%g,%g^2)', arC.mean(j), arC.std(j));
+        elseif(arC.type(j) == 2)
+            str = sprintf('uniform(%g,%g) with soft bounds', arC.lb(j), arC.ub(j));
+        elseif(arC.type(j) == 3)
+            str = sprintf('L1(%g,%g)', arC.mean(j), arC.std(j));
         end
     end
 end
-
-function [opts] = argSwitch( switches, varargin )
-
-    for a = 1 : length(switches)
-        opts.(switches{a}) = 0;
-    end
-
-    a = 1;
-    while (a <= length(varargin))
-        if ( max( strcmp( varargin{a}, switches ) ) == 0 )
-            str = sprintf( 'Legal switch arguments are:\n' );
-            str = [str sprintf( '%s\n', switches{:} ) ];%#ok<AGROW>
-            error( 'Invalid switch argument was provided. Provided %s, %s', varargin{a}, str );
-        else
-            fieldname = varargin{a};
-        end
-        
-        val = 1;
-        if ( length(varargin) > a )
-            if isnumeric( varargin{a+1} )
-                val = varargin{a+1};
-                a = a + 1;
-            end
-        end
-        
-        opts.(fieldname) = val;
-        a = a + 1;
-    end
-end
-
-
-

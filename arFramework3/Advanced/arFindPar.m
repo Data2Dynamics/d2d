@@ -29,13 +29,14 @@ function olist = arFindPar( varargin )
 
     global ar;
     if ( isstruct( varargin{1} ) )
-        arOld = ar;
-        ar = varargin{1};
+        arC = varargin{1};
         if ( length( varargin ) > 1 )
             varargin = varargin(2:end);
         else
             error( 'Insufficient parameters' );
         end
+    else
+        arC = ar;
     end
     
     if ( ~iscell( varargin{1} ) )
@@ -46,7 +47,7 @@ function olist = arFindPar( varargin )
 
     opts = argSwitch( {'names', 'verbose', 'dynamic', 'exact', 'preserve'}, varargin{2:end} );
 
-    list = ar.pLabel;
+    list = arC.pLabel;
     
     olist = cell(1, numel(string));
     for b = 1 : length( string )
@@ -61,7 +62,7 @@ function olist = arFindPar( varargin )
                 l = strfind(lower(list{a}), lower(string{b}) );
             end
             if ~isempty( l )
-                if (~opts.dynamic || ar.qDynamic(a))
+                if (~opts.dynamic || arC.qDynamic(a))
                     olist{b}(end+1) = a;
                 end
             end
@@ -74,15 +75,11 @@ function olist = arFindPar( varargin )
     end
     
     if ( opts.verbose )
-        fprintf('%s\n', ar.pLabel{olist});
+        fprintf('%s\n', arC.pLabel{olist});
     end
     
     if ( opts.names )
-        olist = ar.pLabel(olist);
-    end
-    
-    if ( exist( 'arOld' ) )
-        ar = arOld;
+        olist = arC.pLabel(olist);
     end
 end
 
