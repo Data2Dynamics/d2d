@@ -987,6 +987,7 @@ try
 catch
     error( 'Invalid expression in error model\n%s', [sprintf('%s', data.fystd{:} )] ); %#ok
 end
+data.sym.fystd = arSubs(data.sym.fystd, model.sym.v, model.sym.fv);
 data.sym.fystd = arSubs(data.sym.fystd, data.sym.p, data.sym.fp, matlab_version);
 
 data.sym.fu = mySym(data.fu, specialFunc);
