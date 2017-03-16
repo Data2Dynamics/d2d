@@ -34,6 +34,12 @@ for j=1:length(filesyslist)
     end
 end
 
+%% place "BestFit" always on Top (in order to have sorting according to date)
+[~,~,ia] = intersect(lower('BestFit'),lower(out));
+if ~isempty(ia)
+    out = [out(ia),out(setdiff(1:length(out),ia))];
+end
+
 
 
 function out = findPattern(string, searchpattern, doAnd)
