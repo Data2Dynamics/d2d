@@ -530,9 +530,8 @@ for m = 1:length(ar.model)
     if(isfield(ar.model(m),'data'))
         for d = 1:length(ar.model(m).data)
             if(~isempty(ar.model(m).data(d).fystd))
-                fystd_regexp= regexp(ar.model(m).data(d).fystd,'sd_[a-z_]+','match');
-                qerr =  ismember(ar.pLabel,fystd_regexp{:}); %R2013a compatible
-                %qerr = ismember(ar.pLabel, ar.model(m).data(d).fystd); %R2013a compatible
+                fystd_regexp= regexp(ar.model(m).data(d).fystd,'sd_[a-zA-Z_0-9]+','match');
+                qerr =  ismember(ar.pLabel,[fystd_regexp{:}]); %R2013a compatible
                 ar.qError(qerr) = 1;
             end
         end
