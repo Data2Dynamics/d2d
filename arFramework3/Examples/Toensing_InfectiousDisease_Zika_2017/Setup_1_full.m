@@ -1,6 +1,6 @@
 %initialize framework, load model and data 
 arInit;
-arLoadModel('ZIKA_full');
+arLoadModel('Zika_full');
 arLoadData('Zika_Colombia');
 
 % compile model and data 
@@ -10,8 +10,11 @@ arCompileAll;
 arSetParsPattern('init_',[],1,1,-5,10)
 arSetParsPattern('beta_',[],1,1,-10,5)
 arSetParsPattern('nu_',[],1,1,-10,5)
+arSetParsPattern('gamma_',[],1,1,-10,5)
+arSetPars('mu_v',[],1,1,-10,5)
 arSetPars('sd_rel',-1,1,1,-5,-0.3)
 arSetPars('sd_abs',-1,1,1,-5,2)
+arSetPars('kappa_as',0.8,1,0,0,1)
 
 % set optimizer tolerances
 arSetOptimTol;
@@ -22,7 +25,7 @@ ar.config.rtol  =  1.0000e-09;
 ar.config.maxsteps = 5000;
 ar.config.atolV = 1;
 ar.config.atolV_Sens = 1;
-ar.config.optim.TolFun = 1e-12;
+
 
 % sinlge fit
 arFit;
@@ -50,7 +53,7 @@ arLoadPars('BestFit_zika_full');
 % arPLEInit
 % 
 % % Set tolerances
-% ar.ple.minstepsize(:) = 1e-5;
+% ar.ple.minstepsize(6) = 1e-5;
 % 
 % % calculate profiles
 % ple(find(ar.qFit==1),1e3);

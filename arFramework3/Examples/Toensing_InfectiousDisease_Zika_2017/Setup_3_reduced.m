@@ -1,6 +1,6 @@
 %initialize framework, load model and data 
 arInit;
-arLoadModel('ZIKA_intermediate');
+arLoadModel('Zika_reduced');
 arLoadData('Zika_Colombia');
 
 % compile model and data 
@@ -12,7 +12,6 @@ arSetParsPattern('beta_',[],1,1,-10,5)
 arSetParsPattern('nu_',[],1,1,-10,5)
 arSetPars('sd_rel',-1,1,1,-5,-0.3)
 
-% set prior for kappa_hv
 arSetPars('kappa_hv',2,1,0,0,20)
 ar.type(arFindPar('kappa_hv'))=1;
 ar.mean(arFindPar('kappa_hv'))=5;
@@ -27,16 +26,16 @@ ar.config.rtol  =  1.0000e-09;
 ar.config.maxsteps = 5000;
 ar.config.atolV = 1;
 ar.config.atolV_Sens = 1;
-ar.config.optim.TolFun = 1e-12;
 
 % sinlge fit
 arFit;
+
 
 %% The following code indicates Multi-Start fitting, Profile likelihood calculation and Uncertainty analysis
 % % multistart fit
 % arFitLHS(1000,1122);
 % % or load best fit parameters
-arLoadPars('BestFit_zika_intermediate');
+arLoadPars('BestFit_zika_reduced');
 % 
 % % show parameter values
 % arPrint;
@@ -49,13 +48,10 @@ arLoadPars('BestFit_zika_intermediate');
 % arPlot;
 % 
 % % save results
-% arSave('SIR_Zika_intermediate_Multistart1000')
+% arSave('SIR_Zika_full_Multistart1000')
 % 
 % % likelihood profiles
 % arPLEInit
-% 
-% % Set tolerances
-% ar.ple.minstepsize(:) = 1e-5;
 % 
 % % calculate profiles
 % ple(find(ar.qFit==1),1e3);
@@ -65,3 +61,4 @@ arLoadPars('BestFit_zika_intermediate');
 % 
 % % plot profiles
 % plePlotMulti;
+% 

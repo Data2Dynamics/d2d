@@ -1,0 +1,56 @@
+DESCRIPTION
+'reduced Zika model'
+'vector-borne infection SEIR-SEI model'
+'with asymptomatically infected humans, human-to-human infection and covalescent humans'
+'from Toensing et al., Profile likelihood based analyses of infectious disease models'
+
+
+PREDICTOR
+t	T	"days"	"time"	0	400
+
+COMPARTMENTS
+utopia 	X	"num"	"num"	1
+
+STATES
+S_v      C	"mosquitos"	"num"	utopia	1	"Susceptible mosquitos" 1
+E_v      C	"mosquitos"	"num"	utopia	1	"exposed mosquitos" 1
+I_v      C	"mosquitos"	"num"	utopia	1	"Infected mosquitos" 1
+
+S_h      C	"humans"	"num"	utopia	1	"Susceptible humans" 1
+E_h      C	"humans"	"num"	utopia	1	"exposed humans" 1
+I_hscR   C	"humans"	"num"	utopia	1	"symptomatic infected humans" 1
+I_ha     C	"humans"	"num"	utopia	1	"asymptomatic infected humans" 1
+
+I_h_obs  C	"humans"	"num"	utopia	1	"observed infected humans" 1
+
+INPUTS
+
+REACTIONS
+
+S_h     -> E_h             CUSTOM "S_h * I_v * beta_vh / N_v"
+E_h     -> I_ha            CUSTOM "0.8 * E_h * nu_h"
+E_h     -> I_hscR          CUSTOM "(1 - 0.8) * E_h * nu_h"
+E_h     -> I_h_obs + E_h   CUSTOM "(1 - 0.8) * E_h * nu_h"
+
+S_v    ->  E_v             CUSTOM "beta_hv * S_v * (I_ha + I_hscR) / N_h"
+E_v    ->  I_v             CUSTOM "nu_v * E_v"
+
+
+DERIVED
+N_v    C   "mosquitos"   "num"  "S_v  + I_v + E_v"
+N_h    C   "humans"      "num"  "S_h  + E_h + I_ha + I_hscR"
+        
+
+OBSERVABLES
+Infected_cum	C	"humans"	"num"	0	0	"I_h_obs"
+
+ERRORS
+Infected_cum     "sd_rel * Infected_cum"
+
+CONDITIONS
+init_I_ha    "0.8 * init_I_h"
+init_I_hscR  "(1 - 0.8) * init_I_h"
+init_I_h_obs "(1 - 0.8) * init_I_h"
+init_S_v     "kappa_hv * init_S_h"
+init_I_v     "kappa_hv * init_I_h"
+init_E_v     "kappa_hv * init_E_h"
