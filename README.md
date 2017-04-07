@@ -28,7 +28,7 @@ Some special features:
 
 * Efficient numerical calculation of the dynamics and derivatives in a parallelized manner ([read more](https://github.com/Data2Dynamics/d2d/wiki/Parallelization)). 
 
-* L1 regularization of parameter fold-changes can be used ([read more](https://github.com/Data2Dynamics/d2d/wiki/L1_regularization)).
+* L1 regularization of parameter fold-changes can be used ([read more](https://github.com/Data2Dynamics/d2d/wiki/L1-regularization)).
 
 * L2 regularization and incorporation of prior knowledge 
 
