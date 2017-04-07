@@ -20,15 +20,15 @@ Some special features:
 
 * The framework can deal with xperimental error bars but also allows fitting of error parameters (error models).
  
-* Model inputs can be implemented as parameterized functions or cubic splines and can be estimated together with the model dynamics ([read more](https://github.com/Data2Dynamics/d2d/wiki/Input estimation)).
+* Model inputs can be implemented as parameterized functions or cubic splines and can be estimated together with the model dynamics ([read more](https://github.com/Data2Dynamics/d2d/wiki/Input_estimation)).
 
 * For model calibration, i.e. parameter estimation, both stochastic and deterministic numerical optimization algorithms can be used.
 
-* For uncertainty analysis of model parameter and predictions, the profile likelihood approach and Markov chain Monte Carlo sampling approaches are available ([read more](https://github.com/Data2Dynamics/d2d/wiki/Uncertainty analysis)).
+* For uncertainty analysis of model parameter and predictions, the profile likelihood approach and Markov chain Monte Carlo sampling approaches are available ([read more](https://github.com/Data2Dynamics/d2d/wiki/Uncertainty_analysis)).
 
 * Efficient numerical calculation of the dynamics and derivatives in a parallelized manner ([read more](https://github.com/Data2Dynamics/d2d/wiki/Parallelization)). 
 
-* L1 regularization of parameter fold-changes can be used ([read more](https://github.com/Data2Dynamics/d2d/wiki/L1 regularization)).
+* L1 regularization of parameter fold-changes can be used ([read more](https://github.com/Data2Dynamics/d2d/wiki/L1_regularization)).
 
 * L2 regularization and incorporation of prior knowledge 
 
