@@ -32,7 +32,7 @@ Some special features:
 
 * L2 regularization and incorporation of prior knowledge 
 
-* Identification of informative experimental designs
+* Identification of informative experimental designs 
 
 * The software is open source and free for non-commercial usage.
 
