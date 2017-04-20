@@ -28,7 +28,11 @@ for j = 1:length(chi2s_unpen)
     signifmat(j) = chi2s_unpen(j) - chi2s_unpen(1) - icdf('chi2',.95,parsgt0(1)-parsgt0(j));
 end
 tmp = find(signifmat(1,:) < 0);
-final_ind = tmp(end);
+if ~isempty(tmp)
+    final_ind = tmp(end);
+else
+    final_ind = 1;
+end
 
 ar.p = ps_unpen(final_ind,:);
 ar.type(jks) = 0;
