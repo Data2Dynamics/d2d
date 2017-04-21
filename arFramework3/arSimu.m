@@ -77,9 +77,9 @@ end
 
 ar.stop = 0;
 
-ss_presimulation = 0;
+ss_presimulation = false;
 if ( isfield( ar, 'ss_conditions' ) && ( ar.ss_conditions ) )
-    ss_presimulation = 1;
+    ss_presimulation = true;
 end
 
 % propagate parameters

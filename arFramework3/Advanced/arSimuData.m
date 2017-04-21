@@ -106,9 +106,13 @@ ar.model(m).data(d).ystdExpSimu = zeros(length(tpoints), length(ar.model(m).data
 function simulate_data(m, d)
 global ar
 
-yExpStdSimu = ar.model(m).data(d).yExpStd;
-nosd = isnan(ar.model(m).data(d).yExpStd); % don't overwrite exp. errors by the error model
-yExpStdSimu(nosd) = ar.model(m).data(d).ystdExpSimu(nosd);
+if all(size(ar.model(m).data(d).yExp) == size(ar.model(m).data(d).yExpStd))
+    yExpStdSimu = ar.model(m).data(d).yExpStd;
+    nosd = isnan(ar.model(m).data(d).yExpStd); % don't overwrite exp. errors by the error model
+    yExpStdSimu(nosd) = ar.model(m).data(d).ystdExpSimu(nosd);
+else
+    yExpStdSimu = ar.model(m).data(d).ystdExpSimu;
+end
 
 ar.model(m).data(d).yExp = ar.model(m).data(d).yExpSimu + ...
     randn(size(ar.model(m).data(d).yExpSimu)) .* yExpStdSimu;
