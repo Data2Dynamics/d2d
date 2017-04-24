@@ -8,6 +8,7 @@
 % 
 % Example:
 %   align_position(1:4,{'a','A','a','b'},{'a','b','c','d','A','B'})
+%   align_position(1:6,{'a','b','c','d','A','B'},{'a','A','a','b'})
 % 
 % Example: Calling the function without arguments profides an illustrative example:
 %   align_position

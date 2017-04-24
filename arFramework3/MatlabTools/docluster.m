@@ -1,4 +1,6 @@
 % use a cluster function, row-wise
+%
+% [B, i_sorted] = docluster(A)
 
 function [B, i_sorted] = docluster(A)
 
