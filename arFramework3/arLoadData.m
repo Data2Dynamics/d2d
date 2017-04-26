@@ -46,6 +46,10 @@
 %                       cell array with names of observables that should be 
 %                       ignored in the data.
 %
+% 'IgnoreInputs'        Ignore input overrides. Simply pass a cell array
+%                       with names of inputs that should be ignored (the 
+%                       model default will be used instead).
+%
 % The data file specification is as follows:
 %
 %   In the first column
@@ -136,8 +140,8 @@ else
     end
 end
 
-switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds', 'expsplit', 'resampledoseresponse', 'resamplingresolution', 'refinelog'};
-extraArgs = [ 1, 1, 1, 1, 0, 1, 0, 1, 0 ];
+switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds', 'expsplit', 'resampledoseresponse', 'resamplingresolution', 'refinelog', 'ignoreinputs'};
+extraArgs = [ 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 ];
 description = { ...
     {'', 'Multiple shooting on'} ...
     {'', 'Ignoring specific conditions'} ...
@@ -147,7 +151,8 @@ description = { ...
     {'', 'Splitting conditions by specific data column'}, ...
     {'', 'Resampling dose response'}, ...
     {'', 'Resampling with custom resolution'}, ...
-    {'', 'Resampling on log scale'} };
+    {'', 'Resampling on log scale'}, ...
+    {'', 'Ignoring specific inputs'} };
     
 opts = argSwitch( switches, extraArgs, description, 1, varargin );
 
@@ -247,14 +252,23 @@ while(~strcmp(C{1},'OBSERVABLES'))
     if(sum(qu)~=1)
         error('unknown input %s', cell2mat(C{1}));
     end
-    % Input replacement description
-    ar.model(m).data(d).fu(qu) = C{2};
-    if(~isempty(cell2mat(C{3})))
-        ar.model(m).data(d).uNames(end+1) = C{3};
-    else
-        ar.model(m).data(d).uNames{end+1} = '';
-    end
     
+    % Ignore this replacement?
+    ignoreInput = 0;
+    if (opts.ignoreinputs)
+        if ismember(C{1}, opts.ignoreinputs_args)
+            ignoreInput = 1;
+        end
+    end
+    if ( ~ignoreInput )
+        % Input replacement description
+        ar.model(m).data(d).fu(qu) = C{2};
+        if(~isempty(cell2mat(C{3})))
+            ar.model(m).data(d).uNames(end+1) = C{3};
+        else
+            ar.model(m).data(d).uNames{end+1} = '';
+        end
+    end
     C = textscan(fid, '%s %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
@@ -385,7 +399,7 @@ if (opts.removeobservables)
     end
     for a = 1 : length( opts.removeobservables_args )
         jo = 1;
-        while( jo < length( ar.model(m).data(d).y ) )
+        while( jo <= length( ar.model(m).data(d).y ) )
             jind = ismember( ar.model(m).data(d).y{jo}, opts.removeobservables_args );
             if ( sum(jind) > 0 )
                 warning( '>> Explicitly removing %s!\n', ar.model(m).data(d).y{jo} );
