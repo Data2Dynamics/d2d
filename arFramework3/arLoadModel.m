@@ -517,6 +517,7 @@ ar.model(m).p = union(ar.model(m).px, ar.model(m).pu); %R2013a compatible
 
 % setup rhs
 C = cell(size(ar.model(m).N));
+C_par = cell(size(ar.model(m).N));
 if(length(ar.model(m).c)>1)    
     if(~isfield(ar.model(m),'isAmountBased') || ~ar.model(m).isAmountBased)
         for j=1:size(ar.model(m).N,1) % for every species j
@@ -527,20 +528,26 @@ if(length(ar.model(m).c)>1)
             end
             
             cfaktor = cell(size(qinfluxwitheducts));
+            cfaktor_par = cell(size(qinfluxwitheducts));
             for jj=1:size(ar.model(m).N,2) % for every reaction jj
                 if(qinfluxwitheducts(jj) && eductcompartment(jj)~=ar.model(m).cLink(j))
                     cfaktor{jj} = [ar.model(m).pc{eductcompartment(jj)} '/' ...
                         ar.model(m).pc{ar.model(m).cLink(j)}];
+                    cfaktor_par{jj} = [ar.model(m).c{eductcompartment(jj)} '/' ...
+                        ar.model(m).c{ar.model(m).cLink(j)}];
                 else
                     cfaktor{jj} = '1';
+                    cfaktor_par{jj} = '1';
                 end
             end
             C(j,:) = transpose(cfaktor);
+            C_par(j,:) = transpose(cfaktor_par);
         end
     else
         for j=1:size(ar.model(m).N,1) % for every species j
             for jj=1:size(ar.model(m).N,2) % for every reaction jj
                 C{j,jj} = ['1/' ar.model(m).pc{ar.model(m).cLink(j)}];
+                C_par{j,jj} = ['1/' ar.model(m).c{ar.model(m).cLink(j)}];
             end
         end
     end
@@ -548,10 +555,12 @@ else
     for j=1:size(ar.model(m).N,1) % for every species j
         for jj=1:size(ar.model(m).N,2) % for every reaction jj
             C{j,jj} = '1';
+            C_par{j,jj} = '1';
         end
     end
 end
 ar.model(m).fx = cell(length(ar.model(m).x),1);
+ar.model(m).fx_par = cell(length(ar.model(m).x),1);
 
 % initialize symbolic variables
 % Joep: I have removed this. Not sure if this serves any purpose? Removing
@@ -566,12 +575,15 @@ ar.model(m).fx = cell(length(ar.model(m).x),1);
 %    eval(['syms ' sprintf('%s ',ar.model(m).u{:})]);
 %end
 tmpfx = (sym(ar.model(m).N).*sym(C)) * sym(ar.model(m).fv);
+tmpfx_par = (sym(ar.model(m).N).*sym(C_par)) * sym(ar.model(m).fv);
 
 for j=1:length(ar.model(m).x) % for every species j
     if ~isempty(tmpfx)
         ar.model(m).fx{j} = char(tmpfx(j));
+        ar.model(m).fx_par{j} = char(tmpfx_par(j));
     else
         ar.model(m).fx{j} = char('0');
+        ar.model(m).fx_par{j} = char('0');
     end
 end
 
