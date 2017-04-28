@@ -375,26 +375,46 @@ elseif(ar.config.optimizer == 18)
     [pFit, resnorm, res, exitflag, output, lambda, jac] = ...
         lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
     
+    repeatTol = 1e-5;   % Repetition tolerance
+    pfac = 5e-3;        % Perturbation factor (should make this part of config options)
+    repeatAttempts = 5; % Number of repetition attempts before tolerances are relaxed
+    
     % Keep going until we really converged
     doArNLS = false;
-        
+    bestOptim = inf;
+    
     % Small perturbation attempted?
     perturb = false;
     done = false;
+    attempts = 0;
     while ( ~done )
         resnormOld = resnorm;
         
         % Alternate method
         doArNLS = ~doArNLS;
         if ( doArNLS )
-            [pFit, res, resnorm, exitflag, output, lambda, jac] = ...
+            [pFit, resnorm, res, exitflag, output, lambda, jac] = ...
                 arNLS(@merit_fkt, pFit, lb, ub, ar.config.optim, ar.config.optimizerStep);
         else
             [pFit, resnorm, res, exitflag, output, lambda, jac] = ...
                 lsqnonlin(@merit_fkt, pFit, lb, ub, ar.config.optim);
         end
         
-        if (((resnormOld-resnorm)/resnorm) > 1e-6)
+        if ( resnorm < bestOptim )
+            bestOptim = resnorm;
+            fprintf( 'Last fit is best fit so far: %g\n', bestOptim );
+        else
+            fprintf( 'Current resnorm %g; Best resnorm: %g\n', resnorm, bestOptim );
+        end
+        
+        attempts = attempts + 1;
+        if ( attempts > repeatAttempts )
+            repeatTol = repeatTol * 2;
+        end
+        
+        if (((resnormOld-resnorm)/resnorm) < repeatTol)
+            % After a certain number of optimization attempts, start 
+            % increasing the repetition tolerance   
             if ( perturb )
                 pFit = pFitPrePerturb;
                 res = resPrePerturb;
@@ -417,7 +437,6 @@ elseif(ar.config.optimizer == 18)
                 jacPrePerturb = jac;
                 
                 % Add some random noise
-                pfac = 1e-4; % Perturbation factor (should make this part of config options)
                 pFit(ar.qLog10(ar.qFit==1)==1) = pFit(ar.qLog10(ar.qFit==1)==1) + pfac * randn( 1, numel( pFit(ar.qLog10(ar.qFit==1)==1) ) );
                 pFit(ar.qLog10(ar.qFit==1)==0) = pFit(ar.qLog10(ar.qFit==1)==0) * ( 1 + pfac * randn( 1, numel( pFit(ar.qLog10(ar.qFit==1)==0) ) ) );
                 
@@ -430,7 +449,7 @@ elseif(ar.config.optimizer == 18)
         else
             if ( perturb )
                 % We went down more, next time we can again try the perturbation
-                disp( 'Perturbation successful' );
+                disp( 'Perturbation successful. Continuing minimization process.' );
                 perturb = false;
             end
         end
