@@ -370,6 +370,73 @@ elseif(ar.config.optimizer == 17)
     jac = [];
     output.iterations = output.generations;
 
+% Joep's terrible heuristics
+elseif(ar.config.optimizer == 18)
+    [pFit, resnorm, res, exitflag, output, lambda, jac] = ...
+        lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
+    
+    % Keep going until we really converged
+    doArNLS = false;
+        
+    % Small perturbation attempted?
+    perturb = false;
+    done = false;
+    while ( ~done )
+        resnormOld = resnorm;
+        
+        % Alternate method
+        doArNLS = ~doArNLS;
+        if ( doArNLS )
+            [pFit, res, resnorm, exitflag, output, lambda, jac] = ...
+                arNLS(@merit_fkt, pFit, lb, ub, ar.config.optim, ar.config.optimizerStep);
+        else
+            [pFit, resnorm, res, exitflag, output, lambda, jac] = ...
+                lsqnonlin(@merit_fkt, pFit, lb, ub, ar.config.optim);
+        end
+        
+        if (((resnormOld-resnorm)/resnorm) > 1e-6)
+            if ( perturb )
+                pFit = pFitPrePerturb;
+                res = resPrePerturb;
+                resnorm = resnormPrePerturb;
+                exitflag = exitflagPrePerturb;
+                output = outputPrePerturb;
+                lambda = lambdaPrePerturb;
+                jac = jacPrePerturb;
+
+                done = true;
+                disp( 'Perturbation failed. Reverting to previous values.' );
+            else
+                disp( 'Perturbing ...' );
+                pFitPrePerturb = pFit;
+                resPrePerturb = res;
+                resnormPrePerturb = resnorm;
+                exitflagPrePerturb = exitflag;
+                outputPrePerturb = output;
+                lambdaPrePerturb = lambda;
+                jacPrePerturb = jac;
+                
+                % Add some random noise
+                pfac = 1e-4; % Perturbation factor (should make this part of config options)
+                pFit(ar.qLog10(ar.qFit==1)==1) = pFit(ar.qLog10(ar.qFit==1)==1) + pfac * randn( 1, numel( pFit(ar.qLog10(ar.qFit==1)==1) ) );
+                pFit(ar.qLog10(ar.qFit==1)==0) = pFit(ar.qLog10(ar.qFit==1)==0) * ( 1 + pfac * randn( 1, numel( pFit(ar.qLog10(ar.qFit==1)==0) ) ) );
+                
+                % Enforce bounds
+                pFit( pFit < ar.lb(ar.qFit==1) ) = ar.lb(pFit < ar.lb(ar.qFit==1));
+                pFit( pFit > ar.ub(ar.qFit==1) ) = ar.ub(pFit > ar.ub(ar.qFit==1));
+                
+                perturb = true;
+            end
+        else
+            if ( perturb )
+                % We went down more, next time we can again try the perturbation
+                disp( 'Perturbation successful' );
+                perturb = false;
+            end
+        end
+    end
+    resnorm = res;    
+    
 else
     error('ar.config.optimizer invalid');    
 end
