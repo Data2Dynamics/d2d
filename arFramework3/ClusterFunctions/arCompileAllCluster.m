@@ -6,7 +6,7 @@
 % clusterpath:  execution path on cluster   ['.']
 % pool_size:    additional workers          [ceil(length(cluster.IdleWorkers)/2) or (cluster.NumWorkers-1)]
 
-function varargout = arCompileAllCluster(cluster, clusterpath, pool_size)
+function varargout = arCompileAllCluster(cluster, clusterpath, pool_size, addpath)
 
 global ar
 global ar_compileall_cluster
@@ -16,6 +16,9 @@ if(isempty(ar_compileall_cluster) || strcmp(ar_compileall_cluster.State, 'delete
    
     if(~exist('clusterpath','var') || isempty(clusterpath))
         clusterpath = '.';
+    end
+    if(~exist('addpath','var') || isempty(addpath))
+        addpath = '.';
     end
     if(~exist('pool_size','var') || isempty(pool_size))
         if isfield(cluster,'IdleWorkers') % only exists for certain cluster objects
@@ -29,6 +32,7 @@ if(isempty(ar_compileall_cluster) || strcmp(ar_compileall_cluster.State, 'delete
         {ar}, ...
         'CaptureDiary', true, ...
         'CurrentFolder', clusterpath, ...
+        'AdditionalPaths', {addpath [addpath '/Ccode']}, ...
         'pool', pool_size);
     fprintf('done\n');
     if(nargout>0)
@@ -73,6 +77,7 @@ else
 end
 
 function ar = arCompileAllClusterFun(ar2)
+
 global ar %#ok<REDEF>
 ar = ar2; %#ok<NASGU>
 addpath(ar.info.ar_path); %#ok<NODEF>
