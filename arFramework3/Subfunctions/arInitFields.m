@@ -93,6 +93,15 @@ function ar = arInitFields(ar)
     % Apply the default PPL settings where no fields are present
     ar.ppl = validateFields(ar.ppl, pplDefaults, 'ppl');
     
+    % PLE options
+    pleDefaults = { ...
+        {'alpha',                 0.05}, ... 
+        {'ndof',                     1}, ...
+        };
+            
+    % Apply the default PPL settings where no fields are present
+    ar.ple = validateFields(ar.ple, pleDefaults, 'ple');
+    
     if ~isfield( ar.config, 'useNewPlots' )
         if (isunix)
             ar.config.useNewPlots = false;

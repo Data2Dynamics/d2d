@@ -85,6 +85,8 @@ for j=1:length(jks)
     gs1(j) = subplot(nrows, ncols,j);
     
     plot(ps(:,jk), chi2s, 'k');
+    arSpacedAxisLimits(gs1(j))
+    
     hold on
     if(~isempty(chi2s_scan))
         plot(ps(:,jk), chi2s_scan, 'k--');
@@ -96,12 +98,16 @@ for j=1:length(jks)
     qerrors = ar.ple.errors{jk} < 0;
     plot(ps(qerrors,jk), chi2s(qerrors), 'rs');
     qerrors = ar.ple.errors{jk} > 1;
-    plot(ps(qerrors,jk), chi2s(qerrors), 'x', 'Color', [.5 .5 .5]);
+%     plot(ps(qerrors,jk), chi2s(qerrors), 'x', 'Color', [.5 .5 .5]);
+    plot(ps(qerrors,jk), chi2s(qerrors), 'k.');
     
     % thresholds
     plot(xlim, [0 0]+chi2curr+dchi2, 'r--')
-    text(mean(xlim), chi2curr+dchi2, sprintf('%2i%%', (1-ar.ple.alpha)*100), 'Color', 'r', ...
-        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
+    xlimtmp = xlim;
+    text(xlimtmp(1), chi2curr+dchi2, sprintf(' %2i%%', (1-ar.ple.alpha)*100), 'Color', 'r', ...
+        'HorizontalAlignment', 'left', 'VerticalAlignment', 'bottom')
+    
+    % TODO ub and lb
     
     hold off
     
@@ -114,7 +120,7 @@ for j=1:length(jks)
         ylim([ylimtmp(1)-diff(ylimtmp)*0.1 ylimtmp(2)+diff(ylimtmp)*0.1]);
     end
     
-    arSpacedAxisLimits(gs1(j))
+    
     xtmp = xlim;
     
     if(singleFigure)
