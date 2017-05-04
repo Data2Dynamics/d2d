@@ -1,6 +1,6 @@
 % plot sampling of profile likelihood
 
-function arPlotPLE(jk, singleFigure)
+function arPLEPlot(jk, singleFigure)
 
 global ar
 
@@ -49,35 +49,22 @@ jks = jk;
 gs1 = nan(size(jk));
 for j=1:length(jks)
     jk = jks(j);
+    chi2s = ar.ple.chi2s{jk};
+    if(isfield(ar,'scan'))
+        chi2s_scan = ar.scan.chi2s{jk};
+    else
+        chi2s_scan = [];
+    end
+    chi2curr = ar.ple.chi2Reset(jk);
     
     if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
-        chi2s = 2*ar.ndata*log(sqrt(2*pi)) + ar.ple.chi2s{jk};
-        if(isfield(ar,'scan'))
-            chi2s_scan = 2*ar.ndata*log(sqrt(2*pi)) + ar.scan.chi2s{jk};
-        else
-            chi2s_scan = [];
-        end
-        chi2curr = 2*ar.ndata*log(sqrt(2*pi)) + ar.ple.chi2Reset(jk);
         ylabeltmp = '-2*log(L)';
     elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
-        chi2s = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.ple.chi2s{jk};
-        if(isfield(ar,'scan'))
-            chi2s_scan = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.scan.chi2s{jk};
-        else
-            chi2s_scan = [];
-        end
-        chi2curr = 2*ar.ndata_err*log(sqrt(2*pi)) + ar.ple.chi2Reset(jk);
         ylabeltmp = '-2*log(L)';
     else
-        chi2s = ar.ple.chi2s{jk};
-        if(isfield(ar,'scan'))
-            chi2s_scan = ar.scan.chi2s{jk};
-        else
-            chi2s_scan = [];
-        end
-        chi2curr = ar.ple.chi2Reset(jk);
         ylabeltmp = '\chi^2';
     end
+    
     ps = ar.ple.ps{jk};
     
     dchi2 = chi2inv(1-ar.ple.alpha, ar.ple.ndof);
@@ -107,12 +94,6 @@ for j=1:length(jks)
     text(xlimtmp(1), chi2curr+dchi2, sprintf(' %2i%%', (1-ar.ple.alpha)*100), 'Color', 'r', ...
         'HorizontalAlignment', 'left', 'VerticalAlignment', 'bottom')
     
-    % TODO ub and lb
-    
-    hold off
-    
-    ylabel(ylabeltmp);
-    
     if(sum(~isnan(chi2s))>0)
         % ylimtmp = [min(chi2s) chi2curr+dchi2*1.2];
         ylimtmp = [min(chi2s) max([max(chi2s)+0.1 chi2curr+dchi2])];
@@ -120,8 +101,20 @@ for j=1:length(jks)
         ylim([ylimtmp(1)-diff(ylimtmp)*0.1 ylimtmp(2)+diff(ylimtmp)*0.1]);
     end
     
+    % TODO ub and lb
+    ylimtmp = ylim;
+    if(xlimtmp(1)<ar.lb(jk))
+        patch([xlimtmp(1) ar.lb(jk) ar.lb(jk) xlimtmp(1)], [ylimtmp(1) ylimtmp(1) ylimtmp(2) ylimtmp(2) ], ...
+            ones(1,4), 'FaceColor', [.5 .5 .5], 'EdgeColor', 'none', 'FaceAlpha', .5);
+    end
+    if(xlimtmp(2)>ar.ub(jk))
+        patch([xlimtmp(2) ar.ub(jk) ar.ub(jk) xlimtmp(2)], [ylimtmp(1) ylimtmp(1) ylimtmp(2) ylimtmp(2)], ...
+            ones(1,4), 'FaceColor', [.5 .5 .5], 'EdgeColor', 'none', 'FaceAlpha', .5);
+    end
     
-    xtmp = xlim;
+    hold off
+    
+    ylabel(ylabeltmp);
     
     if(singleFigure)
         subplot(2,1,2);
@@ -147,7 +140,7 @@ for j=1:length(jks)
         hold off
         
         arSpacedAxisLimits(gca)
-        xlim(xtmp);
+        xlim(xlimtmp);
         ylabel('parameter changes');
         ptmp = ar.pLabel(notjk);
         ptmp = strrep(ptmp,'_','\_');
@@ -159,4 +152,4 @@ for j=1:length(jks)
     end
     xlabel(arNameTrafo(ar.pLabel{jk}));
 end
-arSpacedAxisLimits(gs1, [], false, true)
+% arSpacedAxisLimits(gs1, [], false, true)
