@@ -13,9 +13,39 @@
 %   dr         initial search direction (-1 or 1; required when point is 
 %              specified)
 
-function arPLESmooth(jk, quick, point, dr)
+function varargout = arPLESmooth(varargin)
 
 global ar
+
+if(nargin==0)
+    qglobalar = true;
+    jk = find(ar.qFit==1);
+    quick = false;
+else
+    if(isstruct(varargin{1}))
+        qglobalar = false;
+        ar = varargin{1};
+        if(nargin==1)
+            jk = find(ar.qFit==1);
+            quick = false;
+        elseif(nargin==2)
+            jk = varargin{2};
+            quick = false;
+        elseif(nargin==3)
+            jk = varargin{2};
+            quick = varargin{3};
+        end
+    else
+        qglobalar = true;
+        if(nargin==1)
+            jk = varargin{1};
+            quick = false;
+        elseif(nargin==2)
+            jk = varargin{1};
+            quick = varargin{2};
+        end
+    end
+end
 
 if(isempty(ar.ple))
     error('PLE ERROR: please initialize')
@@ -26,14 +56,22 @@ end
 if(nargin<1)
     fprintf('PLE smoothing for %i parameters ...\n', sum(ar.qFit))
     jindex = find(ar.qFit);
-    for j=1:length(ar.ple.chi2s)
-        arPLESmooth(jindex(j))
+    for j=1:length(jindex)
+        if(qglobalar)
+            arPLESmooth(jindex(j));
+        else
+            ar = arPLESmooth(jindex(j));
+        end
     end
     return
 elseif(length(jk)>1)
     fprintf('PLE smoothing for %i parameters ...\n', length(jk))
     for j=1:length(jk)
-        arPLESmooth(jk(j))
+        if(qglobalar)
+            arPLESmooth(jk(j));
+        else
+            ar = arPLESmooth(jk(j));
+        end
     end
     return
 end
@@ -47,18 +85,18 @@ end
 dchi2 = 0.1;
 
 if(~ar.qFit(jk))
-    fprintf('\nPLE#%i smoothing SKIPPED: parameter %s is fixed\n', jk, ar.pLabel{jk});
+    fprintf('PLE#%i smoothing SKIPPED: parameter %s is fixed\n', jk, ar.pLabel{jk});
     return;
 elseif(jk <= length(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}))
-    fprintf('\nPLE#%i smoothing for parameter %s\n', jk, ar.pLabel{jk});
-    
-    
+    fprintf('PLE#%i smoothing for parameter %s\n', jk, ar.pLabel{jk});
+        
     trialP = zeros(0,length(ar.p));
 
     n = length(ar.ple.chi2s{jk});
     chi2s = ar.ple.chi2s{jk};
     [~, globminindex] = min(chi2s);
     
+    hasTrialpoint = true;
     if ( nargin < 3 )
         candidateindex_down = [];
         candidateindex_up = [];
@@ -94,20 +132,17 @@ elseif(jk <= length(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}))
 
         if(~quick)
             if(size(trialP,1)>1)
-                h2 = plePlot(jk, false, true, [], true, false);
-                drawnow;
                 trail_list = cell(1, size(trialP,1));
                 for jp=1:size(trialP,1)
-                    trail_list{jp} = sprintf('%s = %f', ar.pLabel{jk}, trialP(jp,jk));
+                    trail_list{jp} = sprintf('PLE#%i %s = %f', jk, ar.pLabel{jk}, trialP(jp,jk));
                 end
                 result = stringListChooser(trail_list, 1, true);
                 candidateindex = candidateindex(result);
                 trialP = trialP(result,:);
                 direction = direction(result);
-                close(h2);
             elseif(size(trialP,1)==0)
-                fprintf('no trial point\n');
-                return
+                fprintf('PLE#%i no trial point\n', jk);
+                hasTrialpoint = false;
             end
         else
             result = 1;
@@ -122,61 +157,54 @@ elseif(jk <= length(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}))
         direction           = dr;
     end
     
-    fprintf('trial point: %s = %f\n', ar.pLabel{jk}, trialP(jk));
-    
-    if(direction<0)
-        ntot = candidateindex;
-    else
-        ntot = n-candidateindex;
-    end
-    ncount = 0;
-    arWaitbar(0);
-    while(candidateindex+direction<=n && candidateindex+direction>0)
-        ncount = ncount + 1;
-        arWaitbar(ncount, ntot, sprintf('PLE#%i smoothing for %s', ...
-                jk, strrep(ar.pLabel{jk},'_', '\_')));
-        pTrail = ar.ple.ps{jk}(candidateindex,:);
-        pTrail(jk) = ar.ple.ps{jk}(candidateindex+direction,jk);
+    if(hasTrialpoint)
+        fprintf('PLE#%i trial point: %s = %f\n', jk, ar.pLabel{jk}, trialP(jk));
         
-        ar = arCalcMerit(ar, true, pTrail(ar.qFit==1));
-        ar = arFit(ar, true);
-        p = ar.p;
-        chi2 = arGetMerit;
-        
-        if(chi2 < ar.ple.chi2s{jk}(candidateindex+direction))
-            candidateindex = candidateindex+direction;
-            ar.ple.ps{jk}(candidateindex,:) = p+0;
-            ar.ple.chi2s{jk}(candidateindex) = chi2+0;
+        if(direction<0)
+            ntot = candidateindex;
         else
-            break;
+            ntot = n-candidateindex;
         end
-        
-        if(ar.ple.showCalculation)
-            plePlot(jk);
+        ncount = 0;
+        arWaitbar(0);
+        while(candidateindex+direction<=n && candidateindex+direction>0)
+            ncount = ncount + 1;
+            arWaitbar(ncount, ntot, sprintf('PLE#%i smoothing for %s', ...
+                jk, strrep(ar.pLabel{jk},'_', '\_')));
+            pTrail = ar.ple.ps{jk}(candidateindex,:);
+            pTrail(jk) = ar.ple.ps{jk}(candidateindex+direction,jk);
+            
+            ar = arCalcMerit(ar, true, pTrail(ar.qFit==1));
+            ar = arFit(ar, true);
+            p = ar.p;
+            chi2 = arGetMerit;
+            
+            if(chi2 < ar.ple.chi2s{jk}(candidateindex+direction))
+                candidateindex = candidateindex+direction;
+                ar.ple.ps{jk}(candidateindex,:) = p+0;
+                ar.ple.chi2s{jk}(candidateindex) = chi2+0;
+            else
+                break;
+            end
         end
+        arWaitbar(-1);
     end
-    arWaitbar(-1);
-    
-    fprintf('\n');
 end
 
 % reset parameters
-ar = arCalcMerit(ar, true, ar.ple.p(ar.qFit==1));
-
+ar = arCalcMerit(ar, true, ar.ple.pStart(ar.qFit==1));
 
 % define new optimum
-if(exist('chi2s','var') && ar.ple.merit-min(ar.ple.chi2s{jk}) > ar.ple.optimset_tol)
-    [minchi2, iminchi2] = min(ar.ple.chi2s{jk});
+if(exist('chi2s','var') && arGetMerit(true)-min(ar.ple.chi2s{jk}) > 1e-1)
+    minchi2 = min(ar.ple.chi2s{jk});
     fprintf('PLE#%i found better optimum with chi^2 decrease of %e\n', jk, ...
-        ar.ple.merit - minchi2);
-    
-    if(ar.ple.allowbetteroptimum)
-        ar.ple.merit = minchi2;
-        ar.ple.p = ar.ple.ps{jk}(iminchi2,:);
-        feval(ar.ple.setoptim_fkt, ar.ple.ps{jk}(iminchi2,:));
-    end
+        ar.ple.chi2Reset - minchi2);
 end
 
-% save
-pleSave(ar.ple);
+if(nargout>0 && ~qglobalar)
+    varargout{1} = ar;
+else
+    varargout = {};
+end
+
 

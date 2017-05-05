@@ -14,7 +14,8 @@ global ar
 global ar_plecalc_cluster
 
 if(isempty(ar_plecalc_cluster)) % new job
-    if(nargin==0)        error('specify cluster!');
+    if(nargin==0)        
+        error('specify cluster!');
     end
     if(nargout>0)
         error('no job available');
