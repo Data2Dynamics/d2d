@@ -13,7 +13,6 @@
 function varargout = arSimu(varargin)
 
 global ar
-
 if(nargin==0 || ~isstruct(varargin{1}))
     qglobalar = true;
 else
@@ -60,6 +59,11 @@ if ( ~dynamics )
             dynamics = 1;
         end
     end
+    
+    % TODO there is a bug in the section above, sometimes calculations are
+    % missed due to faulty house-keeping. I can't figure it out at the moment,
+    % so I force the calculations here for now.    
+    dynamics = 1;
 end
 
 if(~isfield(ar,'p'))
@@ -279,11 +283,11 @@ end
 % could have been terminated by the user in the meantime
 if ( dynamics )
     if ( fine )
-        ar.cache.fine               = ar.p;
-        ar.cache.fineSensi          = sensi;
+        ar.cache.fine               = ar.p + 0;
+        ar.cache.fineSensi          = sensi + 0;
     else
-        ar.cache.exp                = ar.p;
-        ar.cache.expSensi           = sensi;
+        ar.cache.exp                = ar.p + 0;
+        ar.cache.expSensi           = sensi + 0;
     end
 end
 
