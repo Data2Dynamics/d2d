@@ -101,7 +101,7 @@ for j=1:length(jks)
         ylim([ylimtmp(1)-diff(ylimtmp)*0.1 ylimtmp(2)+diff(ylimtmp)*0.1]);
     end
     
-    % TODO ub and lb
+    % ub and lb
     ylimtmp = ylim;
     if(xlimtmp(1)<ar.lb(jk))
         patch([xlimtmp(1) ar.lb(jk) ar.lb(jk) xlimtmp(1)], [ylimtmp(1) ylimtmp(1) ylimtmp(2) ylimtmp(2) ], ...
@@ -119,12 +119,12 @@ for j=1:length(jks)
     if(singleFigure)
         subplot(2,1,2);
         notjk = 1:length(ar.p);
-        notjk = notjk~=jk & ar.qFit==1;
+        notjk = notjk~=jk & ar.qFit'==1;
         
         stds = std(ar.ple.ps{jk}(~isnan(ar.ple.chi2s{jk}),notjk));
         [~, istds] = sort(stds, 2, 'descend');
         
-        pstmp = ps(:,notjk) - (ones(length(chi2s),1)*ar.ple.pStart(notjk));
+        pstmp = ps(:,notjk) - (ones(length(chi2s),1)*ar.ple.pStart(notjk)');
         nplot = 7;
         
         if(length(istds)>nplot)
@@ -137,9 +137,21 @@ for j=1:length(jks)
             plot(ps(:,jk), pstmp(:,istds((nplot+1):end)), 'Color', [.7 .7 .7]);
         end
         plot([ar.ple.pStart(jk) ar.ple.pStart(jk)], ylim, 'k--')
-        hold off
         
         arSpacedAxisLimits(gca)
+        
+        % ub and lb
+        ylimtmp = ylim;
+        if(xlimtmp(1)<ar.lb(jk))
+            patch([xlimtmp(1) ar.lb(jk) ar.lb(jk) xlimtmp(1)], [ylimtmp(1) ylimtmp(1) ylimtmp(2) ylimtmp(2) ], ...
+                ones(1,4), 'FaceColor', [.5 .5 .5], 'EdgeColor', 'none', 'FaceAlpha', .5);
+        end
+        if(xlimtmp(2)>ar.ub(jk))
+            patch([xlimtmp(2) ar.ub(jk) ar.ub(jk) xlimtmp(2)], [ylimtmp(1) ylimtmp(1) ylimtmp(2) ylimtmp(2)], ...
+                ones(1,4), 'FaceColor', [.5 .5 .5], 'EdgeColor', 'none', 'FaceAlpha', .5);
+        end
+        hold off
+        
         xlim(xlimtmp);
         ylabel('parameter changes');
         ptmp = ar.pLabel(notjk);
