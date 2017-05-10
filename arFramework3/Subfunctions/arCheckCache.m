@@ -65,7 +65,7 @@ function setCacheConfigFields( fields )
     global ar;
 
     for a = 1 : length( fields )
-        ar.cache.(fields{a}) = ar.config.(fields{a});
+        ar.cache.(fields{a}) = ar.config.(fields{a}) + 0;
     end
 end
 
@@ -79,7 +79,7 @@ function valid = checkCacheConfigFields( fields )
     
     for a = 1 : length( fields )
         try
-            if ~isequal( ar.cache.(fields{a}), ar.config.(fields{a}) );
+            if ~isequal( ar.cache.(fields{a}), ar.config.(fields{a}) )
                 ar.cache.valid = 0;
                 valid = 0;
                 return

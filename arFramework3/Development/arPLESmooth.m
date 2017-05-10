@@ -85,8 +85,8 @@ end
 dchi2 = 0.1;
 
 % save original parameters
-pReset = ar.p;
-qFitReset = ar.qFit(jk);
+pReset = ar.p + 0;
+qFitReset = ar.qFit(jk) + 0;
 
 if(~ar.qFit(jk))
     fprintf('PLE#%i smoothing SKIPPED: parameter %s is fixed\n', jk, ar.pLabel{jk});
@@ -164,8 +164,6 @@ elseif(jk <= length(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}))
     if(hasTrialpoint)
         fprintf('PLE#%i trial point: %s = %f\n', jk, ar.pLabel{jk}, trialP(jk));
        
-        ar.qFit(jk) = false;
-        
         if(direction<0)
             ntot = candidateindex;
         else
@@ -181,7 +179,9 @@ elseif(jk <= length(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}))
             pTrail = ar.ple.ps{jk}(candidateindex,:);
             pTrail(jk) = ar.ple.ps{jk}(candidateindex+direction,jk);
             ar = arCalcMerit(ar, true, pTrail(ar.qFit==1));
+            ar.qFit(jk) = false;
             ar = arFit(ar, true);
+            ar.qFit(jk) = true;
             p = ar.p;
             chi2 = arGetMerit(true);
             
@@ -198,9 +198,8 @@ elseif(jk <= length(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}))
 end
 
 % reset parameters
-ar.p = pReset;
 ar.qFit(jk) = qFitReset;
-ar = arCalcMerit(ar, true, ar.ple.pStart(ar.qFit==1));
+ar = arCalcMerit(ar, true, pReset(ar.qFit==1));
 
 % define new optimum
 if(exist('chi2s','var') && arGetMerit(true)-min(ar.ple.chi2s{jk}) > 1e-1)

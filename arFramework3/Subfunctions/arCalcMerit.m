@@ -83,7 +83,7 @@ end
 
 if nargs>=2 && ~isempty(varargin{2})
     pTrial = varargin{2};
-	ar.p(ar.qFit==1) = pTrial;
+	ar.p(ar.qFit==1) = pTrial + 0;
     silent = true;
 else
     silent = false;
@@ -215,7 +215,6 @@ if(sensi)
         ar.firstorderopt = norm(g(~qred));
 %         fprintf('first order optimality criterion %f (%i)\n', ar.firstorderopt, -sum(qred));
     else
-        qred = nan;
         ar.firstorderopt = nan;
     end
 end
