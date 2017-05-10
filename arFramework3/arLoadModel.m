@@ -218,6 +218,7 @@ ar.model(m).fv_source = {};
 ar.model(m).fv_target = {};
 ar.model(m).fv_sourceCoeffs = {};
 ar.model(m).fv_targetCoeffs = {};
+ar.model(m).reversible = [];
 ar.model(m).fv_ma_reverse_pbasename = {};
 ar.model(m).vUnits = {};
 if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
@@ -269,6 +270,8 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         else
             reversible = false;
         end
+        
+        ar.model(m).reversible(end+1) = reversible;
         
         target = {};
         targetCoeffs = [];
@@ -335,24 +338,54 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         ar.model(m).fv_ma_reverse_pbasename{end+1} = '';
         if(~massaction)
             if(reversible)
-                error('reversible reactions for type CUSTOM not allowed.');
-            else
-                ar.model(m).fv(end+1,1) = str{1};
+                warning('Reversible reactions for type CUSTOM in experimental phase. Proceed with caution!');
             end
+            ar.model(m).fv(end+1,1) = str{1};
             
             % check for negative fluxes possible
             if(ar.config.checkForNegFluxes)
-                symtmp = sym(str{1});
-                for j=1:length(source)
-                    subs(symtmp, sym(source{j}), 0);
-                    symtmpsubs = subs(symtmp, sym(source{j}), 0);
-                    if(symtmpsubs~=0)
-                        arFprintf(1, 2, 'Possible negative flux in reaction #%i:\n', length(ar.model(m).fv));
-                        arFprintf(1, 2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
-                        arFprintf(1, 2, 'Source species %s missing ?\n\n', source{j});
-                        arFprintf(1, 2, 'Deactivate this error message with: ar.config.checkForNegFluxes = false;\n\n');
-                        error('Possible negative fluxes in reaction');
+                if (~reversible)
+                    symtmp = sym(str{1});
+                    for j=1:length(source)
+                        symtmpsubs = subs(symtmp, sym(source{j}), 0);
+                        if(symtmpsubs~=0)
+                            arFprintf(1, 2, 'Possible negative flux in reaction #%i:\n', length(ar.model(m).fv));
+                            arFprintf(1, 2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
+                            arFprintf(1, 2, 'Source species %s missing ?\n\n', source{j});
+                            arFprintf(1, 2, 'Deactivate this error message with: ar.config.checkForNegFluxes = false;\n\n');
+                            error('Possible negative fluxes in reaction');
+                        end
                     end
+                else
+                    symtmp = sym(str{1});
+                    for j=1:length(source)
+                        symtmpsubs = subs(symtmp, sym(source{j}), 0);
+                        for k=1:length(target)
+                            symtmpsubs = subs(symtmpsubs, sym(target{k}), 0);
+                        end
+                        
+                        if(symtmpsubs~=0)
+                            arFprintf(1, 2, 'Possible flux in reaction without presence of source #%i:\n', length(ar.model(m).fv));
+                            arFprintf(1, 2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
+                            arFprintf(1, 2, 'Source species %s missing ?\n\n', source{j});
+                            arFprintf(1, 2, 'Deactivate this error message with: ar.config.checkForNegFluxes = false;\n\n');
+                            warning('Possible erroneous fluxes in reaction');
+                        end                        
+                    end
+                    for j=1:length(target)
+                        symtmpsubs = subs(symtmp, sym(target{j}), 0);
+                        for k=1:length(source)
+                            symtmpsubs = subs(symtmpsubs, sym(source{k}), 0);
+                        end
+                        
+                        if(symtmpsubs~=0)
+                            arFprintf(1, 2, 'Possible flux in reaction without presence of product #%i:\n', length(ar.model(m).fv));
+                            arFprintf(1, 2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
+                            arFprintf(1, 2, 'Product species %s missing ?\n\n', target{j});
+                            arFprintf(1, 2, 'Deactivate this error message with: ar.config.checkForNegFluxes = false;\n\n');
+                            warning('Possible erroneous fluxes in reaction');
+                        end                        
+                    end                    
                 end
             end
         else

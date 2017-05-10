@@ -206,7 +206,11 @@ for jv = 1:length(ar.model(m).fv)
         M.reaction(vcount).annotation = '';
         M.reaction(vcount).sboTerm = -1;
         M.reaction(vcount).name = '';
-        M.reaction(vcount).reversible = 0;
+        if ( isfield( ar.model(m), 'reversible' ) )
+            M.reaction(vcount).reversible = ar.model(m).reversible(jv);
+        else
+            M.reaction(vcount).reversible = 0;
+        end
         M.reaction(vcount).fast = -1;
         M.reaction(vcount).isSetFast = 0;
         M.reaction(vcount).level = 2;
