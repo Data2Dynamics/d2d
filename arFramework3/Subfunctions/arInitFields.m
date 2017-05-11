@@ -4,6 +4,15 @@
 % value.
 
 function ar = arInitFields(ar)
+    
+    % Every time you add or remove a field, increment this value by one.
+    arFormatVersion = 1;
+    
+    % Without arguments, just return the version number
+    if ( nargin < 1 )
+        ar = arFormatVersion;
+        return;
+    end
 
     % Add substructures if they don't exist
     ar              = checkForField(ar, 'config');
@@ -49,6 +58,7 @@ function ar = arInitFields(ar)
         {'useSparseJac',                false}, ...                     %   Use Sparse Jacobian
         {'useSensiRHS',                 true}, ...                      %   Use sensitivities of RHS during simulation
         {'atolV',                       false}, ...                     %   Observation scaled tolerances
+        {'atolV_Sens',                  false}, ...                     %   Sensi tolerances?
         {'optimizer',                   1}, ...                         %   Default optimizer
         {'optimizers',                  {'lsqnonlin', 'fmincon', 'PSO', 'STRSCNE', 'arNLS', 'fmincon_as_lsq', 'arNLS_SR1',...
                                          'NL2SOL','TRESNEI','Ceres', 'lsqnonlin_repeated', 'fminsearchbnd', 'patternsearch',...
@@ -77,7 +87,7 @@ function ar = arInitFields(ar)
         {'instantaneous_termination',   1}, ...                    	% Poll utIsInterruptPending() to respond to CTRL+C
         {'no_optimization',             0}, ...                         % Disable compiler optimization
         };
-        
+      
     % Apply the default general settings where no fields are present
     ar.config = validateFields(ar.config, defaults, 'config');
     
@@ -149,10 +159,7 @@ function ar = arInitFields(ar)
         ar.config.optimceres.LinearSolverType = 1;
         ar.config.optimceres.LinearSolvers = {'DENSE_QR','DENSE_NORMAL_CHOLESKY', 'CGNR', 'DENSE_SCHUR', 'SPARSE_SCHUR', 'ITERATIVE_SCHUR'};
         ar.config.optimceres.printLevel = 0;
-    
-  end
-    
-    
+	end
     
     % CVODES flags
     ar.info.arsimucalc_flags = cell(1,30);
@@ -206,6 +213,7 @@ function ar = arInitFields(ar)
     ar.info.cvodes_flags{26} = 'CV_BAD_DKY';
     ar.info.cvodes_flags{27} = 'CV_TOO_CLOSE';
 
+    ar.info.arFormatVersion  = arFormatVersion;
     
 function str = validateFields(str, fields, fieldname)
 

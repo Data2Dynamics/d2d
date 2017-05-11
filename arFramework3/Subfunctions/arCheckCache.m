@@ -9,23 +9,22 @@
 function invalidate = arCheckCache( invalidate )
     global ar;
 
-    fields = {  'useParallel', 'useJacobian', 'useSparseJac', 'useSensiRHS', ...
-                'atolV', 'atolV_Sens', 'rtol', 'atol', 'maxsteps', 'maxstepsize', ...
-                'fiterrors', 'ssa_min_tau', 'ssa_runs', 'useMS', 'useEvents', ...
-                'max_eq_steps', 'init_eq_step', 'eq_step_factor', 'eq_tol', 'sensiSkip' };
-
     if ( nargin < 1 )
         invalidate = 0;
     end
+
+    if ( (~isfield( ar, 'info' )) || (~isfield( ar.info, 'arFormatVersion' )) || ( ar.info.arFormatVersion ~= arInitFields() ) )
+        arFprintf( 0, 'Adding missing fields (updating ar struct from older ar version)\n' );
+        ar = arInitFields(ar);
+    end
     
-    % Check if fields are available in ar.config
-    fields = checkArConfigFields( fields );
+    fields = fieldnames( ar.config );
 
     % Check whether the config settings were the same for the previous
     % simulation
     if ( ~invalidate )
         invalidate = ~checkCacheConfigFields( fields );
-        
+
         % For backward compatibility
         if ( isfield( ar, 'cache' ) )
             if ( ~isfield( ar.cache, 'expSensi' ) )
@@ -42,30 +41,22 @@ function invalidate = arCheckCache( invalidate )
         ar.cache.exp            = nan(size(ar.p));
         ar.cache.fineSensi      = nan;
         ar.cache.expSensi       = nan;
-        
+               
         % Set the cache to the current cache
         setCacheConfigFields( fields );
     end
     
 end
 
-function fields = checkArConfigFields( fields )
-    global ar;
-    
-    remove = zeros(1,length( fields ));
-    for a = 1 : length( fields )
-        if ~isfield( ar.config, fields{a} )
-            remove(a) = 1;
-        end
-    end
-    fields = fields(~remove);
-end
-
 function setCacheConfigFields( fields )
     global ar;
 
     for a = 1 : length( fields )
-        ar.cache.(fields{a}) = ar.config.(fields{a}) + 0;
+        if ( isnumeric( ar.config.(fields{a}) ) )
+            ar.cache.(fields{a}) = ar.config.(fields{a}) + 0;
+        else
+            ar.cache.(fields{a}) = ar.config.(fields{a});
+        end
     end
 end
 
@@ -77,18 +68,19 @@ function valid = checkCacheConfigFields( fields )
         return;
     end
     
+    valid = 1;
     for a = 1 : length( fields )
         try
             if ~isequal( ar.cache.(fields{a}), ar.config.(fields{a}) )
-                ar.cache.valid = 0;
-                valid = 0;
-                return
+                if ( ~( isnan( ar.cache.(fields{a}) ) == isnan( ar.config.(fields{a}) ) ) )
+                    ar.cache.valid = 0;
+                    valid = 0;
+                    return;
+                end
             end
         catch
             valid = 0;
+            return;
         end
     end
-   
-    valid = 1;
-    return;
 end
