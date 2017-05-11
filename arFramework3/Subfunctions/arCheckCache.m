@@ -18,6 +18,11 @@ function invalidate = arCheckCache( invalidate )
         ar = arInitFields(ar);
     end
     
+    % Always resimulate
+    if ( ar.config.useCache == 0 )
+        invalidate = 1;
+    end
+    
     fields = fieldnames( ar.config );
 
     % Check whether the config settings were the same for the previous

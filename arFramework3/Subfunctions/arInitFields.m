@@ -5,8 +5,12 @@
 
 function ar = arInitFields(ar)
     
-    % Every time you add or remove a field, increment this value by one.
-    arFormatVersion = 1;
+    % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    % !!
+    % !!  NOTE: Every time you add or remove a field, increment this value by one.
+    % !! 
+    % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    arFormatVersion = 2;
     
     % Without arguments, just return the version number
     if ( nargin < 1 )
@@ -23,6 +27,7 @@ function ar = arInitFields(ar)
     % Config options
     defaults = { ...
         {'skipSim',                     false}, ...                     % Disable simulation (used for fitting steady state models)
+        {'useCache',                    0}, ...                         % Use caching system (0 = no, 1 = strict (also check tExp, tFine), 2 = sloppy)
         {'checkForNegFluxes',           true}, ...
         {'useParallel',                 true}, ...                      % Parallelization
         {'nCore',                       feature('numCores')}, ...       %   number of available cores

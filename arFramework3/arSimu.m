@@ -46,7 +46,7 @@ end
 if ( ~dynamics )
     % Check cached config settings to see if they are still the same. If
     % not, then cache storage gets cleared forcing resimulation.
-    arCheckCache;
+    dynamics = arCheckCache;
     
     % Check whether dynamic parameters are different from the ones we 
     % simulated last time. If so, we need to resimulate!
@@ -59,11 +59,6 @@ if ( ~dynamics )
             dynamics = 1;
         end
     end
-    
-    % TODO there is a bug in the section above, sometimes calculations are
-    % missed due to faulty house-keeping. I can't figure it out at the moment,
-    % so I force the calculations here for now.    
-    dynamics = 1;
 end
 
 if(~isfield(ar,'p'))
