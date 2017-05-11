@@ -139,6 +139,7 @@ function plotCurve( m, plot )
     ar.model(m).qPlotYs(plot) = 1;
     
     % Plot
+    arSimu(false,true);
     arPlotY(false, 2, true);
     
     % Return user settings
