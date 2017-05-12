@@ -36,6 +36,14 @@ else
     fprintf( 'PASSED\n' );
 end
 
+% Check whether qError detects the error model parameters correctly
+fprintf( 2, 'CHECK WHETHER ar.qError DETECTS ERROR PARS CORRECTLY FOR ONE COMPONENT CASE... ' );
+if ~(numel( intersect( ar.pLabel(ar.qError==1), {'sd_est'} ) ) == 1)
+    error( 'ar.qError INCORRECTLY SPECIFIED! CHECK ARLOADMODEL/ARLOADDATA/ARLINK FOR MISTAKES' );
+else
+    fprintf( 'PASSED\n' );
+end
+
 fprintf( 2, 'TWO-COMPONENT ERROR MODEL... ' );
 arInit;
 arLoadModel('dummy');
@@ -57,5 +65,54 @@ end
 if ( (sd_rel > 0.18) || (sd_rel < 0.04) )
     error( 'ERROR NOT WITHIN TOLERANCE' );
 end
-
 fprintf( 'PASSED\n' );
+
+% Check whether qError detects the error model parameters correctly
+fprintf( 2, 'CHECK WHETHER ar.qError DETECTS ERROR PARS CORRECTLY FOR TWO COMPONENT CASE... ' );
+if ~(numel( intersect( ar.pLabel(ar.qError==1), {'sd_est_abs', 'sd_est_rel'} ) ) == 2)
+    error( 'FAILED!\nar.qError INCORRECTLY SPECIFIED! CHECK ARLOADMODEL/ARLOADDATA/ARLINK FOR MISTAKES' );
+else
+    fprintf( 'PASSED\n' );
+end
+
+fprintf( 2, 'CHECK WHETHER ar.qError DETECTS ERROR PARS CORRECTLY FOR FILENAME BASED CASE... ' );
+arInit;
+arLoadModel('dummyFn');
+arLoadData('fn_nonlog', 1, 'csv');
+arLoadData('fn_nonlog_linear', 1, 'csv');
+arCompileAll;
+
+% Check whether qError detects the error model parameters correctly
+if ( ~(numel( intersect( ar.pLabel(ar.qError==1), {'sd_est_abs_fn_nonlog', 'sd_est_abs_fn_nonlog_linear', 'sd_est_rel_fn_nonlog', 'sd_est_rel_fn_nonlog_linear'} ) ) == 4) ) || (sum(ar.qError==1) ~= 4)
+    error( 'FAILED!\nar.qError INCORRECTLY SPECIFIED! CHECK ARLOADMODEL/ARLOADDATA/ARLINK FOR MISTAKES' );
+else
+    fprintf( 'PASSED\n' );
+end
+
+fprintf( 2, 'CHECK WHETHER D2D CORRECTLY EXCLUDES DYNAMIC AND OBSERVATION PARAMETERS FROM ar.qError... ' );
+arInit;
+arLoadModel('withscale');
+arLoadData('fn_nonlog', 1, 'csv');
+arLoadData('fn_nonlog_linear', 1, 'csv');
+arCompileAll;
+
+% Check whether qError detects the error model parameters correctly
+if ~(numel( intersect( ar.pLabel(ar.qError==1), {'sd_est_abs_fn_nonlog', 'sd_est_abs_fn_nonlog_linear', 'sd_est_rel_fn_nonlog', 'sd_est_rel_fn_nonlog_linear'} ) ) == 4 ) || (sum(ar.qError==1) ~= 4)
+    error( 'FAILED!\nar.qError INCORRECTLY SPECIFIED! CHECK ARLOADMODEL/ARLOADDATA/ARLINK FOR MISTAKES' );
+else
+    fprintf( 'PASSED\n' );
+end
+
+fprintf( 2, 'CHECK WHETHER D2D CORRECTLY HANDLES RANDOMS WITH RESPECT TO ar.qError ... ' );
+arInit;
+arLoadModel('nExpID');
+arLoadData('fn_log', 1, 'csv');
+arCompileAll;
+
+% Check whether qError detects the error model parameters correctly
+if ~(numel( intersect( ar.pLabel(ar.qError==1), {'sd_est_abs_fn_log_nExpID1', 'sd_est_abs_fn_log_nExpID2', 'sd_est_rel_fn_log_nExpID1', 'sd_est_rel_fn_log_nExpID2'} ) ) == 4 ) || (sum(ar.qError==1) ~= 4)
+    error( 'FAILED!\nar.qError INCORRECTLY SPECIFIED! CHECK ARLOADMODEL/ARLOADDATA/ARLINK FOR MISTAKES' );
+else
+    fprintf( 'PASSED\n' );
+end
+

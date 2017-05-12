@@ -1,0 +1,28 @@
+DESCRIPTION
+"Error model test"
+
+PREDICTOR
+t               T   min     time	0	11
+
+COMPARTMENTS
+
+STATES
+mean                 C   au      conc.  nuc
+
+INPUTS
+
+REACTIONS
+mean -> mean        CUSTOM      "k_nExpID * mean"
+
+DERIVED
+
+OBSERVABLES
+obs 	C   au	conc.	0  0	"scale_nExpID * mean"
+
+ERRORS
+obs     "sqrt( mean + k_nExpID + scale_nExpID * scale_nExpID * sd_est_abs_filename_nExpID^2 + sd_est_rel_filename_nExpID^2 * t^2 )"
+    
+CONDITIONS
+
+RANDOM
+nExpID  INDEPENDENT
