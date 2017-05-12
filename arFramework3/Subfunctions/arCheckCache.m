@@ -9,6 +9,12 @@
 function invalidate = arCheckCache( invalidate )
     global ar;
 
+    % Always resimulate
+    if ( ar.config.useCache == 0 )
+        invalidate = 1;
+        return;
+    end
+    
     if ( nargin < 1 )
         invalidate = 0;
     end
@@ -16,11 +22,6 @@ function invalidate = arCheckCache( invalidate )
     if ( (~isfield( ar, 'info' )) || (~isfield( ar.info, 'arFormatVersion' )) || ( ar.info.arFormatVersion ~= arInitFields() ) )
         arFprintf( 0, 'Adding missing fields (updating ar struct from older ar version)\n' );
         ar = arInitFields(ar);
-    end
-    
-    % Always resimulate
-    if ( ar.config.useCache == 0 )
-        invalidate = 1;
     end
     
     fields = fieldnames( ar.config );
