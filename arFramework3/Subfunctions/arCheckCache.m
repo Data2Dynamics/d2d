@@ -12,6 +12,9 @@ function invalidate = arCheckCache( invalidate )
     % Always resimulate
     if ( ar.config.useCache == 0 )
         invalidate = 1;
+        if ( ~isfield( ar, 'cache' ) )
+            setCacheConfigFields( fieldnames( ar.config ) );
+        end
         return;
     end
     

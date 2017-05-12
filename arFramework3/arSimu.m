@@ -50,13 +50,15 @@ if ( ~dynamics )
     
     % Check whether dynamic parameters are different from the ones we 
     % simulated last time. If so, we need to resimulate!
-    if ( fine )
-        if ( ~isequal( ar.cache.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) || ( ar.cache.fineSensi ~= sensi ) )
-            dynamics = 1;
-        end
-    else
-        if ( ~isequal( ar.cache.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) || ( ar.cache.expSensi ~= sensi ) )
-            dynamics = 1;
+    if ( ~dynamics )
+        if ( fine )
+            if ( ~isequal( ar.cache.fine(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) || ( ar.cache.fineSensi ~= sensi ) )
+                dynamics = 1;
+            end
+        else
+            if ( ~isequal( ar.cache.exp(ar.qDynamic==1), ar.p(ar.qDynamic==1) ) || ( ar.cache.expSensi ~= sensi ) )
+                dynamics = 1;
+            end
         end
     end
     
