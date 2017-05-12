@@ -794,21 +794,24 @@ if(~strcmp(extension,'none') && ( ...
                 end
                 
                 if ~isempty(dataCell)
-                    [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
+                    [ar,d,fail] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
                         pcondmod, removeEmptyObs, dpPerShoot, opts);
                 else
-                    [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell, ...
+                    [ar,d,fail] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell, ...
                         pcondmod, removeEmptyObs, dpPerShoot, opts);
                 end
-                if(j < size(randis,1))
-                    d = d + 1;
-                    jplot = jplot + 1;
-                    ar.model(m).plot(jplot).dLink = d;
+                
+                % Only increment if some data was actually set.
+                if (~fail)
+                    if(j < size(randis,1))
+                        d = d + 1;
+                        jplot = jplot + 1;
+                        ar.model(m).plot(jplot).dLink = d;
+                    end
+
+                    % Check whether the user specified any variables with reserved words.
+                    checkReserved(m, d);
                 end
-                
-                % Check whether the user specified any variables with reserved words.
-                checkReserved(m, d);
-                
             else
                 arFprintf(2, 'local random effect #%i: no matching data, skipped\n', j);
             end
@@ -848,11 +851,12 @@ function checkReserved(m, d)
     arCheckReservedWords( ar.model(m).data(d).p, 'parameters' );
     arCheckReservedWords( ar.model(m).data(d).y, 'observable names' );
 
-function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts)
+function [ar,d, fail] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts)
 
 % matVer = ver('MATLAB');
 
 % normalization of columns
+fail = 0;
 nfactor = max(data, [], 1);
 
 qobs = ismember(header, ar.model(m).data(d).y) & sum(~isnan(data),1)>0; %R2013a compatible
@@ -976,6 +980,7 @@ if(sum(qcond) > 0)
     
     % exit if no data left
     if(size(condis,1)==0)
+        fail = 1;
         return
     end
        
