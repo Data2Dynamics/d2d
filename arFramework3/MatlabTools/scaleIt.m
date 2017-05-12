@@ -33,6 +33,9 @@
 %     twocomponent       Use two component error model (warning: poorly
 %                        tested so far)
 %     logtrafo           Do the scaling in logarithmic space
+%     prescale           Prescale all data with a simple factor prior to
+%                        any analysis (with logtrafo, this is done before
+%                        the trafo). Supply either function or value.
 %     rescale            Adjust scaling factors s.t. maximum becomes 1
 %     range              Specify range of values to use for independent
 %                        variable
@@ -106,7 +109,16 @@ function out = scaleIt( names, outFile, varargin )
     removeMask = [];
     if ( opts.removemask )
         removeMask = opts.removemask_args;
-    end    
+    end
+    if ( opts.prescale )
+        if ( isnumeric(opts.prescale_args) )
+            if ( numel(opts.prescale_args) == 1 )
+                opts.prescale_args=@(x)x*opts.prescale_args;
+            else
+                error( 'Only single value or function allowed for prescaling' );
+            end
+        end
+    end
     
     % Default mapping
     trafo           = @(x) x;
@@ -356,33 +368,37 @@ function out = scaleIt( names, outFile, varargin )
     % Add the columns that were ignored first back
     if ( exist( 'ignore', 'var' ) )
         startNames = fieldnames( ignore );
-        fieldNames = { startNames{:} fieldNames{:} }; %#ok
+        fieldNames = { fieldNames{:} startNames{:} }; %#ok
         for jN = 1 : numel( startNames )
             out.(startNames{jN}) = ignore.(startNames{jN});
         end
     end
     
     fid = fopen( outFile, 'w' );   
-    fprintf( fid, '%s ', fieldNames{1} );
+    fprintf( fid, '%s', fieldNames{1} );
     for jN = 2 : length( fieldNames )
-        fprintf( fid, ', %s', fieldNames{jN} );
+        fprintf( fid, ',%s', fieldNames{jN} );
     end
     for jN = 1 : length( stringNames )
-        fprintf( fid, ', %s', stringNames{jN} );
+        fprintf( fid, ',%s', stringNames{jN} );
     end
     fprintf( fid, '\n' );
     for jD = 1 : length( out.(fieldNames{1}) )
-        fprintf( fid, '%d ', out.(fieldNames{1}){jD} );
+        fprintf( fid, '%d', out.(fieldNames{1}){jD} );
         for jN = 2 : length( fieldNames )
             outArray = out.(fieldNames{jN});
             if iscell( outArray )
-                fprintf( fid, ', %d', outArray{jD} );
+                if ( isnumeric( outArray{jD} ) )
+                    fprintf( fid, ',%d', outArray{jD} );
+                else
+                    fprintf( fid, ',%s', outArray{jD} );
+                end
             else
-                fprintf( fid, ', %d', outArray(jD) );
+                fprintf( fid, ',%d', outArray(jD) );
             end
         end
         for jN = 1 : length( stringNames )
-            fprintf( fid, ', %s', filt.(stringNames{jN}){jD} );
+            fprintf( fid, ',%s', filt.(stringNames{jN}){jD} );
         end
         fprintf( fid, '\n' );
     end
