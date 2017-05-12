@@ -811,6 +811,10 @@ if(~strcmp(extension,'none') && ( ...
 
                     % Check whether the user specified any variables with reserved words.
                     checkReserved(m, d);
+                else
+                    % Remove file which failed to provide any data
+                    fprintf(2, 'local random effect #%i: no matching data (%d), removed\n', j ,d);
+                    ar.model.data(d) = [];
                 end
             else
                 arFprintf(2, 'local random effect #%i: no matching data, skipped\n', j);
