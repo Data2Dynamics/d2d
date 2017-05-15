@@ -12,6 +12,9 @@ function basepath = arSave(name, withSyms)
 
 global ar
 
+% Invalidate the cache going into the save
+arCheckCache(1);
+
 if(~exist('withSyms','var'))
     withSyms = false;
 end
@@ -28,7 +31,11 @@ if(isempty(ar.config.savepath)) % never saved before, ask for name
     else
         ar.config.savepath = ['./Results/' datestr(now, 30) '_noname'];
     end
-    arSaveFull(ar,withSyms);
+    if (~ar.config.lightSave)
+        arSaveFull(ar,withSyms);
+    else
+        warning( 'ar.config.lightSave is set to true. Only saving parameter set' );
+    end
     arSaveParOnly(ar, ar.config.savepath);
 else
     if(exist('name','var')) % saved before, but new name give
@@ -39,7 +46,11 @@ else
                 ar.config.savepath = ['./Results/' datestr(now, 30) '_noname'];
             end
         end
-        arSaveFull(ar,withSyms);
+        if (~ar.config.lightSave)
+            arSaveFull(ar,withSyms);
+        else
+            warning( 'ar.config.lightSave is set to true. Only saving parameter set' );
+        end
         arSaveParOnly(ar, ar.config.savepath);
         
     else
@@ -51,13 +62,21 @@ else
                 ar.config.savepath = ['./Results/' datestr(now, 30) '_' name];
             end
             
-            arSaveFull(ar,withSyms);     
+            if (~ar.config.lightSave)
+                arSaveFull(ar,withSyms);
+            else
+              warning( 'ar.config.lightSave is set to true. Only saving parameter set' );
+            end
             arSaveParOnly(ar, ar.config.savepath);
         else
             if(~exist(ar.config.savepath, 'dir')) 
                 % saved before, path output requested, 
                 % however save path does not exist anymore
-                arSaveFull(ar,withSyms);
+                if (~ar.config.lightSave)
+                    arSaveFull(ar,withSyms);
+                else
+                    warning( 'ar.config.lightSave is set to true. Only saving parameter set' );
+                end                
                 arSaveParOnly(ar, ar.config.savepath);
             end
         end
@@ -112,6 +131,11 @@ fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
 
 % save only parameters
 function arSaveParOnly(ar2, savepath)
+% check is dir exists
+if(~exist(ar2.config.savepath, 'dir'))
+    mkdir(ar2.config.savepath)
+end
+
 ar = struct([]);
 ar(1).pLabel = ar2.pLabel;
 ar.p = ar2.p;

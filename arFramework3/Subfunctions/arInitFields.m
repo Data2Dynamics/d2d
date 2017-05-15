@@ -10,7 +10,7 @@ function ar = arInitFields(ar)
     % !!  NOTE: Every time you add or remove a field, increment this value by one.
     % !! 
     % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    arFormatVersion = 2;
+    arFormatVersion = 3;
     
     % Without arguments, just return the version number
     if ( nargin < 1 )
@@ -26,6 +26,7 @@ function ar = arInitFields(ar)
     
     % Config options
     defaults = { ...
+        {'lightSave',                   false}, ...                     % When calling arSave, only save parameter sets by default
         {'skipSim',                     false}, ...                     % Disable simulation (used for fitting steady state models)
         {'useCache',                    0}, ...                         % Use caching system (0 = no, 1 = strict (also check tExp, tFine), 2 = sloppy)
         {'checkForNegFluxes',           true}, ...
