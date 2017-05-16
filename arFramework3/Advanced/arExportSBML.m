@@ -1,12 +1,13 @@
 % export model to SBML using libSBML
 %
-% function arExportSBML(m, c, copasi)
+% function arExportSBML(m, c, copasi, steadystate)
 %
-% m:        model index
-% c:        condition index
-% copasi:   use amounts as states (this is the SBML standard, hence default = true)
+% m:            model index
+% c:            condition index
+% copasi:       use amounts as states (this is the SBML standard, hence default = true)
+% steadystate:  prequilibrate condition as in ar file
 
-function arExportSBML(m, c, copasi)
+function arExportSBML(m, c, copasi, steadystate)
 
 global ar
 
@@ -19,6 +20,10 @@ end
 
 if(~exist('copasi','var'))
     copasi = true;
+end
+
+if (~exist('steadystate','var'))
+    steadystate = true;
 end
 
 M = TranslateSBML(which('empty.xml'));
@@ -58,9 +63,9 @@ if(~isempty(ar.model(m).c))
             qp = ismember(ar.model(m).condition(c).pold, ar.model(m).pc{jc}); %R2013a compatible
             if(sum(qp)==1)
                 pvalue = ar.model(m).condition(c).fp{qp};
-                M.compartment(jc).size = str2double(pvalue);
+                M.compartment(jc).size = str2num(pvalue); %#ok str2num also identifies brackets, in which case str2double simply returns NaN
             else
-                pvalue = str2double(ar.model(m).pc{jc});
+                pvalue = str2num(ar.model(m).pc{jc}); %#ok
                 if(~isnan(pvalue))
                     M.compartment(jc).size = pvalue;
                 else
@@ -93,8 +98,16 @@ end
 
 %% species
 Crules = {};
+
+simulated_ss = 0;
+if ( steadystate )
+    if ( ~isempty( ar.model(m).condition(c).ssLink ) )
+        warning( 'Using simulated steady state values as initial condition (non-parametric)' );
+        x_ss = ar.model(m).ss_condition(ar.model(m).condition(c).ssLink).xFineSimu(end,:);
+        simulated_ss = 1;
+    end
+end
 for jx = 1:length(ar.model(m).x)
-    
     M.species(jx).typecode = 'SBML_SPECIES';
     M.species(jx).metaid = '';
     M.species(jx).notes = '';
@@ -121,29 +134,34 @@ for jx = 1:length(ar.model(m).x)
     M.species(jx).version = 4;
     
     qp = ismember(ar.pLabel, ar.model(m).px0{jx}); %R2013a compatible
-    % check if init parameter still exists in condition parameters
-    is_set_cond = sum(ismember(ar.model(m).condition(c).fp, ar.model(m).px0{jx}))==0;
-    if(sum(qp)==1 && ~is_set_cond)
-        M.species(jx).initialConcentration = 1;
-        Crules{end+1,1} = ar.model(m).x{jx}; %#ok<AGROW>
-        Crules{end,2} = ar.pLabel{qp}; %#ok<AGROW>
-    elseif(sum(qp)==0 || is_set_cond)
-        qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx}); %R2013a compatible
-        if(sum(qp)==1)
-            pvalue = char(sym(ar.model(m).condition(c).fp{qp}));
-            if(~isnan(str2double(pvalue)))
-                pvalue = str2double(pvalue);
-                M.species(jx).initialConcentration = pvalue;
+
+    if ( ~simulated_ss )
+        % check if init parameter still exists in condition parameters
+        is_set_cond = sum(ismember(ar.model(m).condition(c).fp, ar.model(m).px0{jx}))==0;
+        if(sum(qp)==1 && ~is_set_cond)
+            M.species(jx).initialConcentration = 1;
+            Crules{end+1,1} = ar.model(m).x{jx}; %#ok<AGROW>
+            Crules{end,2} = ar.pLabel{qp}; %#ok<AGROW>
+        elseif(sum(qp)==0 || is_set_cond)
+            qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx}); %R2013a compatible
+            if(sum(qp)==1)
+                pvalue = char(sym(ar.model(m).condition(c).fp{qp}));
+                if(~isnan(str2num(pvalue))) %#ok
+                    pvalue = str2num(pvalue); %#ok
+                    M.species(jx).initialConcentration = pvalue;
+                else
+                    Crules{end+1,1} = ar.model(m).x{jx}; %#ok<AGROW>
+                    Crules{end,2} = pvalue; %#ok<AGROW>
+                    M.species(jx).initialConcentration = 1;
+                end
             else
-                Crules{end+1,1} = ar.model(m).x{jx}; %#ok<AGROW>
-                Crules{end,2} = pvalue; %#ok<AGROW>
-                M.species(jx).initialConcentration = 1;
+                error('%s not found', ar.model(m).pc{jc});
             end
         else
             error('%s not found', ar.model(m).pc{jc});
         end
     else
-        error('%s not found', ar.model(m).pc{jc});
+        M.species(jx).initialConcentration = x_ss(jx);
     end
 end
 
@@ -218,7 +236,7 @@ for jv = 1:length(ar.model(m).fv)
         
         if(isfield(ar.model(m),'v') && ~isempty(ar.model(m).v{jv}))
             % replace spaces with underscores
-            M.reaction(vcount).id = strrep(ar.model(m).v{jv},' ','_');
+            M.reaction(vcount).id = sprintf( 'v%d_%s', jv, strrep(ar.model(m).v{jv},' ','_') );
         else
             M.reaction(vcount).id = sprintf('reaction%i', jv);
         end
@@ -340,55 +358,77 @@ for ju = 1:length(ar.model(m).u)
     % replace p with condition specific parameters
     fu = char(subs(fu, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp'));
    
-
-
-    
-    ixfun = cell2mat(cellfun(@(x) strncmp(fu,x,length(x)),funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
+    ixfun = cell2mat(cellfun(@(x) strfind(fu,x), funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
     if any(ixfun)
-        if ~isempty(regexp(fu,'^step1','match')) %simple step functions
-            
-            ixevent = length(M.event) +1;% index of current event
-            
-            %event
-            M.event(ixevent).typecode =  'SBML_EVENT';
-            M.event(ixevent).metaid = '';
-            M.event(ixevent).notes = '';
-            M.event(ixevent).annotation = '';
-            M.event(ixevent).sboTerm = -1;
-            M.event(ixevent).name = ar.model(m).u{ju};
-            M.event(ixevent).id = sprintf('%s_event',ar.model(m).u{ju});
-            M.event(ixevent).useValuesFromTriggerTime = 1;
-            M.event(ixevent).trigger.typecode =  'SBML_TRIGGER';
-            
-            % construct event trigger
-            parts = strsplit(fu,{' ',',',')'});
-            M.event(ixevent).trigger.metaid =  '';
-            M.event(ixevent).trigger.notes =  '';
-            M.event(ixevent).trigger.annotation =  '';
-            M.event(ixevent).trigger.sboTerm =  -1;
-            M.event(ixevent).trigger.math =  sprintf('gt(%s,%s)',ar.model(m).t,parts{3});
-            M.event(ixevent).trigger.level =  2;
-            M.event(ixevent).trigger.version =  4;
-            
-            %         M.event.delay = [1x0 struct];
-            M.event(ixevent).eventAssignment.typecode = 'SBML_EVENT_ASSIGNMENT';
-            M.event(ixevent).eventAssignment.metaid = '';
-            M.event(ixevent).eventAssignment.notes = '';
-            M.event(ixevent).eventAssignment.annotation = '';
-            M.event(ixevent).eventAssignment.sboTerm = -1;
-            M.event(ixevent).eventAssignment.variable = ar.model(m).u{ju};
-            M.event(ixevent).eventAssignment.math = parts{4};
-            M.event(ixevent).eventAssignment.level = 2;
-            M.event(ixevent).eventAssignment.version = 4;
-            
-            M.event(ixevent).level = 2;
-            M.event(ixevent).version = 4;
-            
-            initValue = str2double(parts{2});
-            isConstant = 0;
-            
-        else % all other not supported
-            error('Input function %s not supported.',funs{ixfun})
+        heavisideReplacement = {
+            %{'heaviside', 'if((%s) lt 0.0, 0.0, if((%s) gt 0.0, 1.0, 0.5))', [1, 1], 'heaviside(x)'},...
+            %{'heaviside', 'if((%s) lt 0.0, 0.0, if((%s) gt 0.0, 1.0, 0.5))', [1, 1], 'heaviside(x)'},...
+            {'heaviside', 'piecewise(0, lt((%s), 0), 1)', [1], 'heaviside(x)' }, ...
+        };
+
+        % replace functions first
+        fu = replaceFunctions( fu, ar.config.specialFunc, 0 );
+        % replace heavisides and log their positions
+        [fu, args] = replaceFunctions( fu, heavisideReplacement, 0 );
+        
+        % Determine event triggers in here (to make sure SBML resets the solver)
+        heaviside_timePoints = cell( numel( args.heaviside ), 1 );
+        for jh = 1 : numel( args.heaviside )
+            heaviside_timePoints{jh} = args.heaviside(jh).args{1};
+        end
+        
+        ixrule = length(M.rule) + 1;% index of current rule
+        M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
+        M.rule(ixrule).metaid = '';
+        M.rule(ixrule).notes = '';
+        M.rule(ixrule).annotation = '';
+        M.rule(ixrule).sboTerm = -1;
+        M.rule(ixrule).formula = fu;
+        M.rule(ixrule).variable = ar.model(m).u{ju};
+        M.rule(ixrule).species = '';
+        M.rule(ixrule).compartment = '';
+        M.rule(ixrule).name = '';
+        M.rule(ixrule).units = '';
+        M.rule(ixrule).level = 2;
+        M.rule(ixrule).version = 4;
+        if ( 0 )
+            for jh = 1 : numel( heaviside_timePoints )
+                %event
+                ixevent = length(M.event) +1;% index of current event
+                M.event(ixevent).typecode =  'SBML_EVENT';
+                M.event(ixevent).metaid = '';
+                M.event(ixevent).notes = '';
+                M.event(ixevent).annotation = '';
+                M.event(ixevent).sboTerm = -1;
+                M.event(ixevent).name = ar.model(m).u{ju};
+                M.event(ixevent).id = sprintf('e%d_%s_event', ixevent, ar.model(m).u{ju});
+                M.event(ixevent).useValuesFromTriggerTime = 1;
+                M.event(ixevent).trigger.typecode =  'SBML_TRIGGER';
+
+                % construct event trigger
+                % parts = strsplit(fu,{' ',',',')'});
+                M.event(ixevent).trigger.metaid =  '';
+                M.event(ixevent).trigger.notes =  '';
+                M.event(ixevent).trigger.annotation =  '';
+                M.event(ixevent).trigger.sboTerm =  -1;
+                M.event(ixevent).trigger.math = sprintf('gt(%s)',heaviside_timePoints{jh});
+                M.event(ixevent).trigger.level =  2;
+                M.event(ixevent).trigger.version =  4;
+
+                %         M.event.delay = [1x0 struct];
+                M.event(ixevent).eventAssignment.typecode = 'SBML_EVENT_ASSIGNMENT';
+                M.event(ixevent).eventAssignment.metaid = '';
+                M.event(ixevent).eventAssignment.notes = 'This variable is only used to indicate when events occur so that the solver gets reset appropriately.';
+                M.event(ixevent).eventAssignment.annotation = '';
+                M.event(ixevent).eventAssignment.sboTerm = -1;
+                M.event(ixevent).eventAssignment.variable = 'EventTrigger_dummy'; %ar.model(m).u{ju};
+                M.event(ixevent).eventAssignment.math = '1'; %parts{4};
+                M.event(ixevent).eventAssignment.level = 2;
+                M.event(ixevent).eventAssignment.version = 4;
+
+                M.event(ixevent).level = 2;
+                M.event(ixevent).version = 4;
+            end
         end
     else
         %rule
@@ -409,10 +449,14 @@ for ju = 1:length(ar.model(m).u)
         M.rule(ixrule).level = 2;
         M.rule(ixrule).version = 4;
         
-        initValue = ar.model(m).condition(c).uFineSimu(1,ju);
-        isConstant = isempty(symvar(fu)); %only cases whith explicit numbers
-        
     end
+    
+    initValue = ar.model(m).condition(c).uFineSimu(1,ju);
+    % Technically, in the SBML standard, it cannot be considered constant
+    % if there is a rule that applies to it. Any value other than zero in
+    % this code will fail SBML validation despite being conceptually
+    % correct.
+    isConstant = 0; %isempty(symvar(fu)); %only cases whith explicit numbers    
     
     % generate new parameter for each input species
     jp = length(M.parameter)+1;
@@ -430,8 +474,30 @@ for ju = 1:length(ar.model(m).u)
     M.parameter(jp).version = 4;
     M.parameter(jp).value = initValue;
     
-    
-    
+end
+if ( numel(M.event) > 0 )
+    jx = numel(M.species) + 1;
+    M.species(jx).typecode = 'SBML_SPECIES';
+    M.species(jx).metaid = '';
+    M.species(jx).notes = '';
+    M.species(jx).annotation = '';
+    M.species(jx).sboTerm = -1;
+    M.species(jx).name = '';
+    M.species(jx).id = 'EventTrigger_dummy';
+    M.species(jx).speciesType = '';
+    M.species(jx).compartment = ar.model(m).c{1};
+    M.species(jx).initialAmount = NaN;
+    M.species(jx).substanceUnits = '';
+    M.species(jx).hasOnlySubstanceUnits = 0;
+    M.species(jx).boundaryCondition = 0;
+    M.species(jx).charge = 0;
+    M.species(jx).constant = 0;
+    M.species(jx).isSetInitialAmount = 0;
+    M.species(jx).isSetInitialConcentration = 1;
+    M.species(jx).isSetCharge = 0;
+    M.species(jx).level = 2;
+    M.species(jx).version = 4;
+    M.species(jx).initialConcentration = 0;
 end
 
 % assign time symbol
