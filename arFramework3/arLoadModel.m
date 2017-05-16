@@ -27,6 +27,10 @@ opts = argSwitch( switches, extraArgs, description, 1, varargin );
 if(~exist('Models','dir'))
     error('folder Models/ does not exist')
 end
+if strcmp(strrep(name,' ',''),name)~=1
+    name
+    error('File names should not contain empty spaces. Please remove it.');
+end
 if(~exist(['Models/' name '.def'],'file'))
     error('model definition file %s.def does not exist in folder Models/', name)
 end

@@ -79,6 +79,11 @@ end
 if(~exist('Data','dir'))
     error('folder Data/ does not exist')
 end
+if strcmp(strrep(name,' ',''),name)~=1
+    name
+    error('File names should not contain empty spaces. Please remove it.');
+end
+
 if(~exist(['Data/' name '.def'],'file'))
     if(~exist(['Data/' name '.xls'],'file') && ~exist(['Data/' name '.csv'],'file') && ~exist(['Data/' name '.xlsx'],'file'))
         error('data definition file %s.def does not exist in folder Data/', name)
@@ -447,7 +452,6 @@ end
 % collect parameters needed for OBS
 ptmp = union(ar.model(m).px, ar.model(m).pu);
 ar.model(m).data(d).p = union(ptmp, union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
-ar.model(m).data(d).pystd = setdiff(ar.model(m).data(d).pystd, ar.model(m).data(d).p); %Remove dynamic variables from error model parameters
 ar.model(m).data(d).p = union(ar.model(m).data(d).p, ar.model(m).data(d).pystd); %R2013a compatible
 
 % Union's behaviour is different when first arg is empty. In this case, a
@@ -459,9 +463,7 @@ end
 % replace filename
 ar.model(m).data(d).p = strrep(ar.model(m).data(d).p, '_filename', ['_' ar.model(m).data(d).name]);
 ar.model(m).data(d).fy = strrep(ar.model(m).data(d).fy, '_filename', ['_' ar.model(m).data(d).name]);
-ar.model(m).data(d).py = strrep(ar.model(m).data(d).py, '_filename', ['_' ar.model(m).data(d).name]);
 ar.model(m).data(d).fystd = strrep(ar.model(m).data(d).fystd, '_filename', ['_' ar.model(m).data(d).name]);
-ar.model(m).data(d).pystd = strrep(ar.model(m).data(d).pystd, '_filename', ['_' ar.model(m).data(d).name]);
 for j=1:length(ar.model(m).data(d).py_sep)
     ar.model(m).data(d).py_sep(j).pars = strrep(ar.model(m).data(d).py_sep(j).pars, '_filename', ['_' ar.model(m).data(d).name]);
 end
@@ -794,28 +796,21 @@ if(~strcmp(extension,'none') && ( ...
                 end
                 
                 if ~isempty(dataCell)
-                    [ar,d,fail] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
+                    [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
                         pcondmod, removeEmptyObs, dpPerShoot, opts);
                 else
-                    [ar,d,fail] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell, ...
+                    [ar,d] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell, ...
                         pcondmod, removeEmptyObs, dpPerShoot, opts);
+                end
+                if(j < size(randis,1))
+                    d = d + 1;
+                    jplot = jplot + 1;
+                    ar.model(m).plot(jplot).dLink = d;
                 end
                 
-                % Only increment if some data was actually set.
-                if (~fail)
-                    if(j < size(randis,1))
-                        d = d + 1;
-                        jplot = jplot + 1;
-                        ar.model(m).plot(jplot).dLink = d;
-                    end
-
-                    % Check whether the user specified any variables with reserved words.
-                    checkReserved(m, d);
-                else
-                    % Remove file which failed to provide any data
-                    fprintf(2, 'local random effect #%i: no matching data (%d), removed\n', j ,d);
-                    ar.model.data(d) = [];
-                end
+                % Check whether the user specified any variables with reserved words.
+                checkReserved(m, d);
+                
             else
                 arFprintf(2, 'local random effect #%i: no matching data, skipped\n', j);
             end
@@ -855,12 +850,11 @@ function checkReserved(m, d)
     arCheckReservedWords( ar.model(m).data(d).p, 'parameters' );
     arCheckReservedWords( ar.model(m).data(d).y, 'observable names' );
 
-function [ar,d, fail] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts)
+function [ar,d] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts)
 
 % matVer = ver('MATLAB');
 
 % normalization of columns
-fail = 0;
 nfactor = max(data, [], 1);
 
 qobs = ismember(header, ar.model(m).data(d).y) & sum(~isnan(data),1)>0; %R2013a compatible
@@ -984,7 +978,6 @@ if(sum(qcond) > 0)
     
     % exit if no data left
     if(size(condis,1)==0)
-        fail = 1;
         return
     end
        
