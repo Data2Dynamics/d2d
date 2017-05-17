@@ -113,7 +113,11 @@ for jx = 1:length(ar.model(m).x)
     M.species(jx).notes = '';
     M.species(jx).annotation = '';
     M.species(jx).sboTerm = -1;
-    M.species(jx).name = '';
+    if ( isfield( ar.model(m), 'xNames' ) )
+        M.species(jx).name = ar.model(m).xNames{jx};
+    else
+        M.species(jx).name = '';
+    end
     M.species(jx).id = ar.model(m).x{jx};
     M.species(jx).speciesType = '';
     if(~isempty(ar.model(m).cLink))
@@ -223,7 +227,11 @@ for jv = 1:length(ar.model(m).fv)
         M.reaction(vcount).notes = '';
         M.reaction(vcount).annotation = '';
         M.reaction(vcount).sboTerm = -1;
-        M.reaction(vcount).name = '';
+        if(isfield(ar.model(m),'v') && ~isempty(ar.model(m).v{jv}))
+            M.reaction(vcount).name = ar.model(m).v{jv};
+        else
+            M.reaction(vcount).name = '';
+        end
         if ( isfield( ar.model(m), 'reversible' ) )
             M.reaction(vcount).reversible = ar.model(m).reversible(jv);
         else
@@ -355,125 +363,130 @@ for ju = 1:length(ar.model(m).u)
     
     fu = sym(ar.model(m).condition(c).fu{ju}); % current input
     
-    % replace p with condition specific parameters
-    fu = char(subs(fu, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp'));
-   
-    ixfun = cell2mat(cellfun(@(x) strfind(fu,x), funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
-    if any(ixfun)
-        heavisideReplacement = {
-            %{'heaviside', 'if((%s) lt 0.0, 0.0, if((%s) gt 0.0, 1.0, 0.5))', [1, 1], 'heaviside(x)'},...
-            %{'heaviside', 'if((%s) lt 0.0, 0.0, if((%s) gt 0.0, 1.0, 0.5))', [1, 1], 'heaviside(x)'},...
-            {'heaviside', 'piecewise(0, lt((%s), 0), 1)', [1], 'heaviside(x)' }, ...
-        };
+    isActive = ~(str2double(ar.model(m).condition(c).fu{ju}) == 0);
+    
+    if ( isActive )
+        % replace p with condition specific parameters
+        fu = char(subs(fu, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp'));
 
-        % replace functions first
-        fu = replaceFunctions( fu, ar.config.specialFunc, 0 );
-        % replace heavisides and log their positions
-        [fu, args] = replaceFunctions( fu, heavisideReplacement, 0 );
-        
-        % Determine event triggers in here (to make sure SBML resets the solver)
-        heaviside_timePoints = cell( numel( args.heaviside ), 1 );
-        for jh = 1 : numel( args.heaviside )
-            heaviside_timePoints{jh} = args.heaviside(jh).args{1};
-        end
-        
-        ixrule = length(M.rule) + 1;% index of current rule
-        M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
-        M.rule(ixrule).metaid = '';
-        M.rule(ixrule).notes = '';
-        M.rule(ixrule).annotation = '';
-        M.rule(ixrule).sboTerm = -1;
-        M.rule(ixrule).formula = fu;
-        M.rule(ixrule).variable = ar.model(m).u{ju};
-        M.rule(ixrule).species = '';
-        M.rule(ixrule).compartment = '';
-        M.rule(ixrule).name = '';
-        M.rule(ixrule).units = '';
-        M.rule(ixrule).level = 2;
-        M.rule(ixrule).version = 4;
-        if ( 0 )
-            for jh = 1 : numel( heaviside_timePoints )
-                %event
-                ixevent = length(M.event) +1;% index of current event
-                M.event(ixevent).typecode =  'SBML_EVENT';
-                M.event(ixevent).metaid = '';
-                M.event(ixevent).notes = '';
-                M.event(ixevent).annotation = '';
-                M.event(ixevent).sboTerm = -1;
-                M.event(ixevent).name = ar.model(m).u{ju};
-                M.event(ixevent).id = sprintf('e%d_%s_event', ixevent, ar.model(m).u{ju});
-                M.event(ixevent).useValuesFromTriggerTime = 1;
-                M.event(ixevent).trigger.typecode =  'SBML_TRIGGER';
+        ixfun = cell2mat(cellfun(@(x) strfind(fu,x), funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
+        if any(ixfun)
+            heavisideReplacement = {
+                %{'heaviside', 'if((%s) lt 0.0, 0.0, if((%s) gt 0.0, 1.0, 0.5))', [1, 1], 'heaviside(x)'},...
+                %{'heaviside', 'if((%s) lt 0.0, 0.0, if((%s) gt 0.0, 1.0, 0.5))', [1, 1], 'heaviside(x)'},...
+                {'heaviside', 'piecewise(0, lt((%s), 0), 1)', [1], 'heaviside(x)' }, ...
+            };
 
-                % construct event trigger
-                % parts = strsplit(fu,{' ',',',')'});
-                M.event(ixevent).trigger.metaid =  '';
-                M.event(ixevent).trigger.notes =  '';
-                M.event(ixevent).trigger.annotation =  '';
-                M.event(ixevent).trigger.sboTerm =  -1;
-                M.event(ixevent).trigger.math = sprintf('gt(%s)',heaviside_timePoints{jh});
-                M.event(ixevent).trigger.level =  2;
-                M.event(ixevent).trigger.version =  4;
+            % replace functions first
+            fu = replaceFunctions( fu, ar.config.specialFunc, 0 );
+            % replace heavisides and log their positions
+            [fu, args] = replaceFunctions( fu, heavisideReplacement, 0 );
 
-                %         M.event.delay = [1x0 struct];
-                M.event(ixevent).eventAssignment.typecode = 'SBML_EVENT_ASSIGNMENT';
-                M.event(ixevent).eventAssignment.metaid = '';
-                M.event(ixevent).eventAssignment.notes = 'This variable is only used to indicate when events occur so that the solver gets reset appropriately.';
-                M.event(ixevent).eventAssignment.annotation = '';
-                M.event(ixevent).eventAssignment.sboTerm = -1;
-                M.event(ixevent).eventAssignment.variable = 'EventTrigger_dummy'; %ar.model(m).u{ju};
-                M.event(ixevent).eventAssignment.math = '1'; %parts{4};
-                M.event(ixevent).eventAssignment.level = 2;
-                M.event(ixevent).eventAssignment.version = 4;
-
-                M.event(ixevent).level = 2;
-                M.event(ixevent).version = 4;
+            % Determine event triggers in here (to make sure SBML resets the solver)
+            heaviside_timePoints = cell( numel( args.heaviside ), 1 );
+            for jh = 1 : numel( args.heaviside )
+                heaviside_timePoints{jh} = args.heaviside(jh).args{1};
             end
+
+            ixrule = length(M.rule) + 1;% index of current rule
+            M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
+            M.rule(ixrule).metaid = '';
+            M.rule(ixrule).notes = '';
+            M.rule(ixrule).annotation = '';
+            M.rule(ixrule).sboTerm = -1;
+            M.rule(ixrule).formula = fu;
+            M.rule(ixrule).variable = ar.model(m).u{ju};
+            M.rule(ixrule).species = '';
+            M.rule(ixrule).compartment = '';
+            M.rule(ixrule).name = '';
+            M.rule(ixrule).units = '';
+            M.rule(ixrule).level = 2;
+            M.rule(ixrule).version = 4;
+            if ( 0 )
+                for jh = 1 : numel( heaviside_timePoints )
+                    %event
+                    ixevent = length(M.event) +1;% index of current event
+                    M.event(ixevent).typecode =  'SBML_EVENT';
+                    M.event(ixevent).metaid = '';
+                    M.event(ixevent).notes = '';
+                    M.event(ixevent).annotation = '';
+                    M.event(ixevent).sboTerm = -1;
+                    M.event(ixevent).name = ar.model(m).u{ju};
+                    M.event(ixevent).id = sprintf('e%d_%s_event', ixevent, ar.model(m).u{ju});
+                    M.event(ixevent).useValuesFromTriggerTime = 1;
+                    M.event(ixevent).trigger.typecode =  'SBML_TRIGGER';
+
+                    % construct event trigger
+                    % parts = strsplit(fu,{' ',',',')'});
+                    M.event(ixevent).trigger.metaid =  '';
+                    M.event(ixevent).trigger.notes =  '';
+                    M.event(ixevent).trigger.annotation =  '';
+                    M.event(ixevent).trigger.sboTerm =  -1;
+                    M.event(ixevent).trigger.math = sprintf('gt(%s)',heaviside_timePoints{jh});
+                    M.event(ixevent).trigger.level =  2;
+                    M.event(ixevent).trigger.version =  4;
+
+                    %         M.event.delay = [1x0 struct];
+                    M.event(ixevent).eventAssignment.typecode = 'SBML_EVENT_ASSIGNMENT';
+                    M.event(ixevent).eventAssignment.metaid = '';
+                    M.event(ixevent).eventAssignment.notes = 'This variable is only used to indicate when events occur so that the solver gets reset appropriately.';
+                    M.event(ixevent).eventAssignment.annotation = '';
+                    M.event(ixevent).eventAssignment.sboTerm = -1;
+                    M.event(ixevent).eventAssignment.variable = 'EventTrigger_dummy'; %ar.model(m).u{ju};
+                    M.event(ixevent).eventAssignment.math = '1'; %parts{4};
+                    M.event(ixevent).eventAssignment.level = 2;
+                    M.event(ixevent).eventAssignment.version = 4;
+
+                    M.event(ixevent).level = 2;
+                    M.event(ixevent).version = 4;
+                end
+            end
+        else
+            %rule
+
+            ixrule = length(M.rule) +1;% index of current rule
+
+            M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
+            M.rule(ixrule).metaid = '';
+            M.rule(ixrule).notes = '';
+            M.rule(ixrule).annotation = '';
+            M.rule(ixrule).sboTerm = -1;
+            M.rule(ixrule).formula = fu;
+            M.rule(ixrule).variable = ar.model(m).u{ju};
+            M.rule(ixrule).species = '';
+            M.rule(ixrule).compartment = '';
+            M.rule(ixrule).name = '';
+            M.rule(ixrule).units = '';
+            M.rule(ixrule).level = 2;
+            M.rule(ixrule).version = 4;
+
         end
+    
+        initValue = ar.model(m).condition(c).uFineSimu(1,ju);
+        % Technically, in the SBML standard, it cannot be considered constant
+        % if there is a rule that applies to it. Any value other than zero in
+        % this code will fail SBML validation despite being conceptually
+        % correct.
+        isConstant = 0; %isempty(symvar(fu)); %only cases whith explicit numbers    
+
+        % generate new parameter for each input species
+        jp = length(M.parameter)+1;
+        M.parameter(jp).typecode = 'SBML_PARAMETER';
+        M.parameter(jp).metaid = '';
+        M.parameter(jp).notes = '';
+        M.parameter(jp).annotation = '';
+        M.parameter(jp).sboTerm = -1;
+        M.parameter(jp).name = '';
+        M.parameter(jp).id = ar.model(m).u{ju};
+        M.parameter(jp).units = '';
+        M.parameter(jp).constant = isConstant;
+        M.parameter(jp).isSetValue = 1;
+        M.parameter(jp).level = 2;
+        M.parameter(jp).version = 4;
+        M.parameter(jp).value = initValue;
     else
-        %rule
-        
-        ixrule = length(M.rule) +1;% index of current rule
-        
-        M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
-        M.rule(ixrule).metaid = '';
-        M.rule(ixrule).notes = '';
-        M.rule(ixrule).annotation = '';
-        M.rule(ixrule).sboTerm = -1;
-        M.rule(ixrule).formula = fu;
-        M.rule(ixrule).variable = ar.model(m).u{ju};
-        M.rule(ixrule).species = '';
-        M.rule(ixrule).compartment = '';
-        M.rule(ixrule).name = '';
-        M.rule(ixrule).units = '';
-        M.rule(ixrule).level = 2;
-        M.rule(ixrule).version = 4;
-        
+        fprintf( 'Input %s not used in condition. Omitted from SBML file.\n', ar.model(m).uNames{ju} );
     end
-    
-    initValue = ar.model(m).condition(c).uFineSimu(1,ju);
-    % Technically, in the SBML standard, it cannot be considered constant
-    % if there is a rule that applies to it. Any value other than zero in
-    % this code will fail SBML validation despite being conceptually
-    % correct.
-    isConstant = 0; %isempty(symvar(fu)); %only cases whith explicit numbers    
-    
-    % generate new parameter for each input species
-    jp = length(M.parameter)+1;
-    M.parameter(jp).typecode = 'SBML_PARAMETER';
-    M.parameter(jp).metaid = '';
-    M.parameter(jp).notes = '';
-    M.parameter(jp).annotation = '';
-    M.parameter(jp).sboTerm = -1;
-    M.parameter(jp).name = '';
-    M.parameter(jp).id = ar.model(m).u{ju};
-    M.parameter(jp).units = '';
-    M.parameter(jp).constant = isConstant;
-    M.parameter(jp).isSetValue = 1;
-    M.parameter(jp).level = 2;
-    M.parameter(jp).version = 4;
-    M.parameter(jp).value = initValue;
-    
 end
 if ( numel(M.event) > 0 )
     jx = numel(M.species) + 1;
