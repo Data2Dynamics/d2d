@@ -1,11 +1,12 @@
 % Replace a function call using an output mask.
 
-function str = replaceFunctions(str, funcTypes, checkValidity)
+function [str, arg] = replaceFunctions(str, funcTypes, checkValidity)
 
     if (nargin < 3)
         checkValidity = 0;
     end
 
+    arg = [];
     str  = char(str);
     stro = str; replaced = 0; %#ok
     for a = 1 : length( funcTypes )
@@ -34,6 +35,9 @@ function str = replaceFunctions(str, funcTypes, checkValidity)
                     error( sprintf( '%s\n', msg{:} ) ); %#ok
                 end
             end
+        end
+        if ( nargout > 1 )
+            arg.(funcTypes{a}{1}) = funcs;
         end
     end
     
