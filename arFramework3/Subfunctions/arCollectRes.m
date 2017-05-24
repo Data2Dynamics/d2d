@@ -478,3 +478,16 @@ if(isfield(ar.model, 'data') && ~isempty(ar.res))
     end
 end
 
+
+%% add user-defined residual(s)
+% If you want to modify the objective function by adding residuals, use a
+% user-defined function specified as ar.config.user_residual_fun
+% If this field is available, then the function is called here:
+if isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fun)
+    feval(ar.config.user_residual_fun,resindex); % this function can implement additional residuals added to ar.res
+    if length(ar.res)~=size(ar.sres,1)
+        error('length(ar.res)~=size(ar.sres,1)')
+    end
+end
+
+    ^
