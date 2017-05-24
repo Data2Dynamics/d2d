@@ -489,5 +489,3 @@ if isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fu
         error('length(ar.res)~=size(ar.sres,1)')
     end
 end
-
-    ^
