@@ -34,3 +34,4 @@ hold on
 plot(asinh(dllh_fdiff), 'o')
 hold off
 title('Derivatives asinh(values)')
+legend('User', 'FD')
