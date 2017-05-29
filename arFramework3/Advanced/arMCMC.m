@@ -19,7 +19,7 @@
 % JRSS B 73 (2): 123-214.
 %       4 = Adaptive MCMC
 
-function arMCMC(nruns, nburnin, method, append, nthinning)
+function arMCMC(nruns, nburnin, method, append, nthinning, cScale)
 
 global ar;
 
@@ -103,18 +103,28 @@ elseif(method==4)
     ps_hist = nan(nwindow, sum(ar.qFit == 1));
     ps_hist_index = 1;
     CAdapt = eye(sum(ar.qFit == 1));
+elseif(method==5)
+    mName = 'Fisher based MCMC';
+    fkt = @mcmc_fish;
+    adjust_scaling = false;
+    use_sensis = true;
+    burnin = false; 
 end
 
 if(~burnin)
     nburnin = 0;
 end
 
-svd_threshold = 0; 1e-8; % 0 ist besser!
+svd_threshold = 0; % 0 ist besser!
 
 Cmax = 1e8;
 Cmin = 1e-8;
 Cmod = 1.1;
 Cfactor = (2.38/sqrt(sum(qFit)))^2 / sum(qFit);
+
+if ( ~exist( 'cScale', 'var' ) )
+    cScale = 1.0;
+end
 
 if(~use_sensis)
     arCalcMerit(false);
@@ -131,7 +141,7 @@ jrungo = -nburnin+1;
     
 % additional functionality
 do_chain_resets = false;
-do_reflect_bounds = true;
+do_reflect_bounds = false;
 
 % mcmc
 arWaitbar(0);
@@ -313,6 +323,7 @@ ar.p = pReset;
 
 % MMALA (simplified)
     function [mu, covar] = mcmc_mmala(ptmp, restmp, srestmp)
+        stepSize = cScale;
         beta = - restmp*srestmp;
         alpha = srestmp'*srestmp;
         alpha_dash = alpha + inv(CProposalPrior);
@@ -326,9 +337,9 @@ ar.p = pReset;
         for jj=find(qs)'
             deltap = deltap + transpose((U(:,jj)'*beta'/S(jj,jj))*V(:,jj));
         end
-        mu = ptmp + deltap;
+        mu = ptmp + (stepSize/2) * deltap;
         
-        covar = inv(alpha_dash);
+        covar = stepSize * inv(alpha_dash);
     end
 
 % Adaptive MCMC
@@ -343,7 +354,16 @@ ar.p = pReset;
             covar = CAdapt;
         end
     end
+
+% (Simple) Fisher based
+    function [mu, covar] = mcmc_fish(ptmp, restmp, srestmp)
+        stepSize = cScale;
+        alpha = srestmp'*srestmp;
+        alpha_dash = alpha + inv(CProposalPrior);
+        
+        mu=ptmp;
+        covar=inv(alpha_dash) * stepSize;
+    end
+
 end
-
-
 

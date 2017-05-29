@@ -39,6 +39,12 @@ if(~exist('color','var') || isempty(color))
         colors = [0 0 0; 1 0 0; 1 0 1; 0 0 1];
         colors(3,:) = bsxfun(@rdivide, colors(3,:), ...
             sqrt(sum(colors(3,:).^2,2)));
+    elseif(n==5)
+        colors = [0,0,.17; 1,0,0; 0,0,1; 1,0.1,0.72; 1.*.8,0.82*.8,0];
+    elseif(n==6)
+        colors = [0,0,.17; 1,0,0; 0,0,1; 1,0.1,0.72; 1.*.8,0.82*.8,0; 0,.344,0];
+    elseif(n==7)
+        colors = [0,0,.17; 1,0,0; 0,0,1; 1,0.1,0.72; 1.*.8,0.82*.8,0; 0,.344,0; 0, .7, 0];
     else
         colors = jet(n-1);
         colors = bsxfun(@rdivide, colors, sqrt(sum(colors.^2,2)));
