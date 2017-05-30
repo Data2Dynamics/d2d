@@ -10,6 +10,7 @@
 % only_values:  only load parameter values, not bound and status
 % path:         path to the results folder, default: './Results'
 % pattern:      search pattern for parameter names
+% antipattern:  pattern for parameters to exclude from load
 % 
 % 
 % Examples for loading several parameter sets:
@@ -24,7 +25,7 @@
 % Example:
 %   arLoadPars('20141112T084549_model_fitted',[],[],'../OtherFolder/Results')
 
-function varargout = arLoadPars(filename, fixAssigned, pars_only, pfad, pattern)
+function varargout = arLoadPars(filename, fixAssigned, pars_only, pfad, pattern, antipattern)
 if(~exist('pfad','var') || isempty(pfad))
     pfad = './Results';
 else
@@ -44,6 +45,9 @@ end
 if(~exist('pattern', 'var') || isempty(pattern))
     pattern = [];
 end
+if(~exist('antipattern', 'var' ) || isempty(antipattern))
+    antipattern = [];
+end
 
 if(~exist('filename','var') || isempty(filename))
     [~, filename] = fileChooser(pfad, 1, true);
@@ -61,7 +65,7 @@ end
 
 
 if(~iscell(filename))    
-    ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad, pattern);
+    ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad, pattern, antipattern);
     varargout = cell(0);
 else
     ars = cell(size(filename));
@@ -73,7 +77,7 @@ else
             file = filename{i};
         end
 
-        ars{i} = arLoadParsCore(ar, file, fixAssigned, pars_only, pfad, pattern);
+        ars{i} = arLoadParsCore(ar, file, fixAssigned, pars_only, pfad, pattern, antipattern);
     end
     varargout{1} = ars;
     if nargout>1
@@ -88,7 +92,7 @@ end
 % Invalidate cache so simulations do not get skipped
 arCheckCache(1);
 
-function ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad, pattern)
+function ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad, pattern, antipattern)
 
 if(ischar(filename))
     filename_tmp = filename;
@@ -108,5 +112,5 @@ else
     error('not supported variable type for filename');
 end
 
-ar = arImportPars(S.ar, pars_only, pattern, fixAssigned, ar);
+ar = arImportPars(S.ar, pars_only, pattern, fixAssigned, ar, antipattern);
 

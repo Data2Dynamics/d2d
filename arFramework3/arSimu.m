@@ -133,10 +133,11 @@ end
 
 % do we have steady state presimulations?
 if ( ss_presimulation && dynamics )
-    if ( sensi )
+    rootFinding = isfield( ar.config, 'rootfinding' ) && ( ar.config.rootfinding > 0.1 );
+    if ( sensi || rootFinding )
         ar = initSteadyStateSensis(ar, dynamics);
     end
-    if ( ~isfield( ar.config, 'rootfinding' ) || ( ar.config.rootfinding < 0.1 ) )
+    if ( ~rootFinding )
         % Steady state determination by simulation
         feval(ar.fkt, ar, true, ar.config.useSensis && sensi, dynamics, false, 'ss_condition', 'ss_threads', ar.config.skipSim);
     else
@@ -144,9 +145,9 @@ if ( ss_presimulation && dynamics )
         for m=1:length(ar.model)
             for c=1:length(ar.model(m).ss_condition)
                 [x, S] = arFindRoots(m, c, 'ss_condition', 1);
-                ar.model(m).ss_condition(c).xFineSimu(end, :) = x;
+                ar.model(m).ss_condition(c).xFineSimu(end, :) = x + 0;
                 if ( sensi )
-                    ar.model(m).ss_condition(c).sxFineSimu(end, :, :) = S;
+                    ar.model(m).ss_condition(c).sxFineSimu(end, :, :) = S + 0;
                 end
             end
         end

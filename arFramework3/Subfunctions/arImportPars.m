@@ -9,7 +9,7 @@
 %           global ar
 %           If empty or not provided, then the global ar is used.
 
-function varargout = arImportPars(pStruct, pars_only, pattern, fixAssigned, ar)
+function varargout = arImportPars(pStruct, pars_only, pattern, fixAssigned, ar, antipattern)
 if(~exist('fixAssigned', 'var') || isempty(fixAssigned))
     fixAssigned = false;
 end
@@ -18,6 +18,9 @@ if(~exist('pars_only', 'var') || isempty(pars_only))
 end
 if(~exist('pars_only', 'var') || isempty(pars_only))
     pars_only = false;
+end
+if(~exist('antipattern', 'var') || isempty(antipattern))
+    antipattern = [];
 end
 if(~exist('pattern', 'var') || isempty(pattern))
     pattern = [];
@@ -45,6 +48,9 @@ if(isempty(pattern))
     js = 1:length(ar.p);
 else
     js = find(~cellfun(@isempty,regexp(ar.pLabel, pattern)));
+end
+if(~isempty(antipattern))
+    js(find(~cellfun(@isempty,regexp(ar.pLabel(js), antipattern)))) = [];
 end
 
 ass = zeros(size(ar.p));

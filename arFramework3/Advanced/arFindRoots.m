@@ -73,9 +73,9 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
 
     % Estimate initials in steady state
     if ( debug )
-        opts = optimset('TolX', tolerance / numel(x0), 'TolFun', 0, 'Jacobian', 'Off', 'Display', 'Iter' ); %, 'DerivativeCheck', 'On'
+        opts = optimset('TolX', tolerance / numel(x0), 'TolFun', 0, 'Jacobian', 'Off', 'Display', 'Iter', 'MaxIter', 1e5 ); %, 'DerivativeCheck', 'On'
     else
-        opts = optimset('TolX', tolerance / numel(x0), 'TolFun', 0, 'Jacobian', 'Off', 'Display', 'Off' );
+        opts = optimset('TolX', tolerance / numel(x0), 'TolFun', 0, 'Jacobian', 'Off', 'Display', 'Iter', 'MaxIter', 1e5 );
     end
     [xnew, resnorm] = lsqnonlin( fn, x0, 0*x0, [], opts );
     

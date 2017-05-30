@@ -206,7 +206,7 @@ function out = scaleIt( names, outFile, varargin )
         end
         out.(expVar) = num2cell(F);
     end
-    
+          
     % Dump out things in the ignore mask
     if ( ~isempty( ignoreMask ) || ~isempty( removeMask ) )
         searchpat = union( ignoreMask, removeMask, 'stable' );
@@ -706,7 +706,6 @@ function [means, mlb, mub, scalings, offsets] = estimateObs( eModel, errModelPar
         fprintf('Round %d: Difference last and current optimization: %g\n', round, rLast-rn);
         round = round + 1;
     end
-    figure;
     ci = nlparci(p,r,'Jacobian',J,'alpha',0.05);
     
     fprintf( 'Final objective: %g\n', sum(r.^2) );
