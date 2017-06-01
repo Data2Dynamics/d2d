@@ -23,7 +23,11 @@ if(~exist('copasi','var'))
 end
 
 if (~exist('steadystate','var'))
-    steadystate = true;
+    if ( isfield( ar.model(m), 'ss_condition' ) )
+        steadystate = true;
+    else
+        steadystate = false;
+    end
 end
 
 M = TranslateSBML(which('empty.xml'));
@@ -323,9 +327,17 @@ for jv = 1:length(ar.model(m).fv)
         M.reaction(vcount).kineticLaw.notes = '';
         M.reaction(vcount).kineticLaw.annotation = '';
         M.reaction(vcount).kineticLaw.sboTerm = -1;
+        
+        amountBased = (isfield(ar.model(m),'isAmountBased') && ar.model(m).isAmountBased);
+        if ( ~copasi && amountBased )
+            warning( 'Exporting amount based models is still in the process of being tested' );
+        end
+        
         if(~isempty(ar.model(m).cLink))
             if(~copasi)
                 M.reaction(vcount).kineticLaw.formula = char(ratetemplate);
+            elseif(copasi && amountBased)
+                M.reaction(vcount).kineticLaw.formula = [ char(ratetemplate) ]; %' / (' ar.model(m).c{scomp} ')'
             elseif(~isempty(scomp) && ~isempty(tcomp) && scomp~=tcomp) % multi-compartment reaction
                 M.reaction(vcount).kineticLaw.formula = [ar.model(m).c{scomp} ' * (' char(ratetemplate) ')'];
             else
