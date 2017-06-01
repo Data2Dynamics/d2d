@@ -5,4 +5,5 @@ function arClearConditionConstraints( )
     if isfield( ar, 'conditionconstraints' )
         ar = rmfield( ar, 'conditionconstraints' );
     end
+    ar.sconstr = [];
 end

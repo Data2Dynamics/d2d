@@ -119,58 +119,58 @@ if ( isfield( ar, 'conditionconstraints' ) )
         sd                  = ar.conditionconstraints(jC).sd;
         states1             = ar.conditionconstraints(jC).states1;
         states2             = ar.conditionconstraints(jC).states2;
-        pLink1              = ar.model(m).condition(c1).pLink;
-        pLink2              = ar.model(m).condition(c2).pLink;
-        
+        pLink1              = ar.model(m1).condition(c1).pLink;
+        pLink2              = ar.model(m2).condition(c2).pLink;
+
         nstates             = length(states1);
         npts                = length(tLink1);
         tmpsres             = zeros(npts*nstates, np);
-        
+
         % Fetch simulations
         dynamic1            = ar.model(m1).condition(c1).xExpSimu(tLink1,states1);
         dynamic2            = ar.model(m2).condition(c2).xExpSimu(tLink2,states2);
-        
+
         % Fetch sensitivities w.r.t. p
         sens1               = ar.model(m1).condition(c1).sxExpSimu(tLink1,states1,:);
         sens2               = ar.model(m2).condition(c2).sxExpSimu(tLink2,states2,:);
-        
+
         % Relative?
         if ( relative )            
             sens1           = sens1 ./ ( log(10) * repmat(dynamic1,1,1,size(sens1,3)) );
             sens2           = sens2 ./ ( log(10) * repmat(dynamic2,1,1,size(sens1,3)) );
-            
+
             dynamic1        = log10( dynamic1 );
             dynamic2        = log10( dynamic2 );            
         end
-        
+
         % Determine sensitivities w.r.t. log10(p) for the logtransformed ones
         trafo1              = ar.qLog10( pLink1 ) .* log(10) .* 10.^ar.p( pLink1 );
         trafo2              = ar.qLog10( pLink2 ) .* log(10) .* 10.^ar.p( pLink2 );
-        for a = 1 : length( pLink1 )
+        for a = 1 : sum( pLink1 )
             sens1(:,:,a)    = sens1(:,:,a) .* trafo1(a);
         end
-        for a = 1 : length( pLink2 )
+        for a = 1 : sum( pLink2 )
             sens2(:,:,a)    = sens2(:,:,a) .* trafo2(a);
         end
-        
+
         % Reshape to fit format desired for sres
         sens1               = reshape( sens1, nstates*npts, sum(pLink1));
         sens2               = reshape( sens2, nstates*npts, sum(pLink2));
         tmpsres(:, pLink1)  = tmpsres(:, pLink1) + sens1 / sd;
         tmpsres(:, pLink2)  = tmpsres(:, pLink2) - sens2 / sd;
         tmpres              = (dynamic1 - dynamic2)./sd;
-        
+
         % Store
         %ar.res(resindex:resindex+npts*nstates-1) = tmpres;
         %ar.sres(sresindex:(sresindex+npts*nstates-1),:) = tmpsres;
         %sresindex = sresindex+npts*nstates;
-        
+
         ar.constr(constrindex:constrindex+npts*nstates-1) = tmpres;
         ar.sconstr(sconstrindex:(sconstrindex+npts*nstates-1),:) = tmpsres;
-        
+
         constrindex  = constrindex+npts*nstates;
         sconstrindex = sconstrindex+npts*nstates;
-         
+
         ar.nconstr      = ar.nconstr + length(tmpres);
         ar.chi2constr   = ar.chi2constr + sum(sum(tmpres.^2));        
     end
