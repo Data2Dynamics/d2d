@@ -8,7 +8,8 @@ if(nargin==0) || (isempty(ples) || isempty(labels))
     ples = {};
     labels = {};
     for j=1:length(filenames)
-        fname = ['./Results/' filenames{j} '/PLE/results.mat'];
+%         fname = ['./Results/' filenames{j} '/PLE/results.mat']
+        fname = ['./Results/' filenames{j} '/workspace.mat']
         if(exist(fname,'file'))
             tmpple = load(fname);
             ples{end+1} = tmpple.ar.ple; %#ok<AGROW>
@@ -16,6 +17,7 @@ if(nargin==0) || (isempty(ples) || isempty(labels))
         else
             fprintf('%s does not contains PLE\n', filenames{j});
         end
+        ples{end}.chi2 = min(cellfun(@min,ples{end}.chi2s));
     end
 end
 
@@ -36,8 +38,9 @@ end
 
 pLabels = {};
 for j=1:length(ples)
-    qq = ples{j}.q_fit==1;
-    qq(1:length(ples{j}.ps)) = qq(1:length(ples{j}.ps)) & ~cellfun(@isempty, ples{j}.ps);
+%     qq = ples{j}.q_fit==1;
+%     qq(1:length(ples{j}.ps)) = qq(1:length(ples{j}.ps)) & ~cellfun(@isempty, ples{j}.ps);
+    qq =  ~cellfun(@isempty, ples{j}.ps);
     qq((length(ples{j}.ps)+1):end) = false;
     pLabels = union(pLabels, ples{j}.p_labels(qq)); %R2013a compatible
 end
