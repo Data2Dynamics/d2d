@@ -68,6 +68,22 @@ else
     ar.config.fiterrors_correction = 1;
 end
 
+%% add user-defined residual(s)
+% If you want to modify the objective function by adding residuals, use a
+% user-defined function specified as ar.config.user_residual_fun
+% If this field is available, then the function is called here:
+ar.res_user = struct;
+if isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fun)
+    [ar.res_user.res,ar.res_user.sres,ar.res_user.type] = feval(ar.config.user_residual_fun); % this function can implement additional residuals added to ar.res
+    if length(ar.res_user.res)~=size(ar.res_user.sres,1)
+        error('length(ar.res_user.res)~=size(ar.res_user.sres,1)')
+    end
+else
+    ar.res_user.res = [];
+    ar.res_user.sres = [];
+    ar.res_user.type = [];
+end
+
 
 fiterrors_correction_factor = ar.config.fiterrors_correction;
 

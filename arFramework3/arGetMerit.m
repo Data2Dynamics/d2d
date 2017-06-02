@@ -113,6 +113,7 @@ meritvals.chi2_err_addc = sum(ar.res(ar.res_type==2).^2); % sum of error residua
 meritvals.chi2_constr   = ar.chi2constr;
 meritvals.chi2_prior    = ar.chi2prior;
 meritvals.chi2_random   = ar.chi2random;
+meritvals.chi2          = ar.chi2;
 
 if ~isempty(ar.ple) && isfield(ar.ple,'merit_fkt')    
     meritvals.ple_merit = feval(ar.ple.merit_fkt);
@@ -140,7 +141,7 @@ switch lower(whichone)  % case insensitive
     
     case 'loglik'
         meritval = meritvals.loglik;
-        meritLabel = '-2 log likelihood'
+        meritLabel = '-2 log likelihood';
     
     case {'loglik_all','ll','likelihood','loglik_tot'}
         meritval = meritvals.loglik_all;
