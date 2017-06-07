@@ -42,6 +42,8 @@
 %     varanalysis        Show variance analysis
 %     appendcolumn       Add a column with a value to the data
 %     splitconditions    Provide independent scaling for each individual condition
+%     excludeConditions  Cell array of condition filters (example:
+%                        {{'input_il6'}, {@(t)t>10}}
 %
 % To do: Offsets
 
@@ -54,8 +56,8 @@ function out = scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn', 'splitconditions', 'removemask' };
-    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1 ];
+    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn', 'splitconditions', 'removemask', 'excludeconditions' };
+    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1 ];
     description = { ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
@@ -73,7 +75,8 @@ function out = scaleIt( names, outFile, varargin )
     {'', 'Prescaler specified'} ...
     {'', 'Appending a column'} ...
     {'', 'Splitting conditions'} ...
-    {'', 'Using removal mask'} ...,
+    {'', 'Using removal mask'} ...
+    {'', 'Excluding specific conditions'}, ...
     };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
@@ -281,6 +284,26 @@ function out = scaleIt( names, outFile, varargin )
                 end
             end
         end
+    end
+    if ( opts.excludeconditions )
+        for jec = 1 : numel( opts.excludeconditions_args )
+            rejectionFilter = opts.excludeconditions_args{1};
+            if ( isfield( out, rejectionFilter{1} ) )
+                filterList = cellfun(rejectionFilter{2}, out.(rejectionFilter{1}));
+            end
+            filNames = fieldnames( out );
+            for jf = 1 : numel( filNames )
+                out.(filNames{jf})(filterList) = [];
+                if ( isempty( find( ~cellfun(@isnan, out.(filNames{jf})) ) ) )
+                    warning( 'Filtered all data for %s', filNames{jf} );
+                    out = rmfield( out, filNames{jf} );
+                end
+            end
+        end
+    end
+    
+    if ( isempty(fieldnames(out)) )
+        error( 'No more data to scale. Did you filter it all?' );
     end
     
     %fieldNames = fieldnames(out);
@@ -687,7 +710,7 @@ function [means, mlb, mub, scalings, offsets] = estimateObs( eModel, errModelPar
     
     fprintf( 'Number of free scaling factors %d\n', Nscalings );    
     
-    options    = optimset('TolFun', 1e-7, 'TolX', 1e-6, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Iter', 'Jacobian', 'On', 'DerivativeCheck', 'Off' ); % 
+    options    = optimset('TolFun', 1e-7, 'TolX', 1e-6, 'MaxIter', 1e4, 'MaxFunevals', 1e5, 'Display', 'Off', 'Jacobian', 'On', 'DerivativeCheck', 'Off' ); % 
     tol        = 1e-7;
     errModel   = @(pars) eModel(fixedScale, pars, data, scaleLinks, length(conditionTargets), length(scalings), Noffsets, conditionLinks, offsetLinks );
     
@@ -811,7 +834,11 @@ function data = readCSV( filename, delimiter )
     end
     
     % Fetch header
-    C = textscan(fid, '%s\n',1,'Delimiter','');
+    try
+        C = textscan(fid, '%s\n',1,'Delimiter','');
+    catch
+        error( 'Couldn''t find file %s', filename );
+    end
     
     % Grab header items
     headers = textscan(C{1}{1}, '%q', 'Delimiter', delimiter);
