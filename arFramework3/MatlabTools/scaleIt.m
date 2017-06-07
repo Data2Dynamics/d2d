@@ -28,8 +28,12 @@
 %                        in combination with the observation to indicate the 
 %                        scaling factor.
 %     restrictObs        Restrict estimation to list of observables
-%     ignoreMask         Add mask for which data columns to ignore
-%     removeMask         Add mask for which data columns to remove
+%     ignoreMask         Data columns to ignore. Start element with * to
+%                        indicate that an exact match is not required, only
+%                        a substring which contains the mask
+%     removeMask         Data columns to remove. Start element with * to
+%                        indicate that an exact match is not required, only
+%                        a substring which contains the mask
 %     twocomponent       Use two component error model (warning: poorly
 %                        tested so far)
 %     logtrafo           Do the scaling in logarithmic space
@@ -44,6 +48,9 @@
 %     splitconditions    Provide independent scaling for each individual condition
 %     excludeConditions  Cell array of condition filters (example:
 %                        {{'input_il6'}, {@(t)t>10}}
+%     nofileincrement    Do not assume different files have their own
+%                        scaling factor
+%     samescale          Do not scale any data
 %
 % To do: Offsets
 
@@ -56,9 +63,10 @@ function out = scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn', 'splitconditions', 'removemask', 'excludeconditions' };
-    extraArgs = [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1 ];
+    switches = { 'nofileincrement', 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn', 'splitconditions', 'removemask', 'excludeconditions' };
+    extraArgs = [ 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1 ];
     description = { ...
+    {'', 'Do not increment nExpID for different files'} ...
     {'', 'Custom delimiter specified'} ...
     {'', 'Using custom observation/scaling factor pairing'} ...
     {'', 'Using input mask'} ...
@@ -185,10 +193,12 @@ function out = scaleIt( names, outFile, varargin )
                     newData     = num2cell(cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})));
                     % +1 is added to make sure that we never overlap even if user starts counting 
                     % from 0 or 1 inconsistently in different files
-                    if ( isnumeric( cell2mat(data{1}.(expVar)) ) )
-                        expField    = expField + max(cell2mat(data{1}.(expVar))); % + 1;
-                    else
-                        expField    = expField + max(str2num(cell2mat(data{1}.(expVar)))); % + 1;
+                    if ( ~opts.nofileincrement )
+                        if ( isnumeric( cell2mat(data{1}.(expVar)) ) )
+                            expField    = expField + max(cell2mat(data{1}.(expVar))) + 1;
+                        else
+                            expField    = expField + max(str2num(cell2mat(data{1}.(expVar)))) + 1;
+                        end
                     end
                 end
                 out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
@@ -220,13 +230,19 @@ function out = scaleIt( names, outFile, varargin )
                 searchpat = {searchpat};
             end
             for b = 1 : length( searchpat )
-                if ~isempty( strfind( K{a}, filterField(searchpat{b}) ) )
+                if ( searchpat{b}(1) == '*' )
+                    filterActive = ~isempty( strfind( K{a}, filterField(searchpat{b}(2:end)) ) );
+                else
+                    filterActive = strcmp( K(a), searchpat{b} );
+                end
+                if filterActive
                     if ( isfield( out, K{a} ) )
-                        if ( sum(ismember(K{a}, ignoreMask)) )
-                            prt = sprintf('(%s)\n', K{a});
+                        % Was it an ignore pattern?
+                        if ( sum(ismember(searchpat{b}, ignoreMask)) )
+                            prt = sprintf('Ignored: %s\n', K{a});
                             ignore.(K{a}) = out.(K{a});
                         else
-                            prt = sprintf('[%s]\n', K{a});
+                            prt = sprintf('Removed: %s\n', K{a});
                         end
                         fprintf( prt );
                         out = rmfield( out, K{a} );
@@ -598,7 +614,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
     for jG = 1 : nGroups
         curScale = []; curData = []; curConditions = []; obsjD = [];
         for jD = obsGroups{jG}
-            fprintf('Processing obs %s', dataFields{jD} );
+            fprintf('Processing obs %s\n', dataFields{jD} );
             nData  = cell2mat(out.(dataFields{jD}));                % Process single observation
             if ~isempty( prescale )
                 nData  = prescale( nData );                         % Apply forced prescaling function
