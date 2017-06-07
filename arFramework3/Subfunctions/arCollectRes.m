@@ -119,58 +119,58 @@ if ( isfield( ar, 'conditionconstraints' ) )
         sd                  = ar.conditionconstraints(jC).sd;
         states1             = ar.conditionconstraints(jC).states1;
         states2             = ar.conditionconstraints(jC).states2;
-        pLink1              = ar.model(m).condition(c1).pLink;
-        pLink2              = ar.model(m).condition(c2).pLink;
-        
+        pLink1              = ar.model(m1).condition(c1).pLink;
+        pLink2              = ar.model(m2).condition(c2).pLink;
+
         nstates             = length(states1);
         npts                = length(tLink1);
         tmpsres             = zeros(npts*nstates, np);
-        
+
         % Fetch simulations
         dynamic1            = ar.model(m1).condition(c1).xExpSimu(tLink1,states1);
         dynamic2            = ar.model(m2).condition(c2).xExpSimu(tLink2,states2);
-        
+
         % Fetch sensitivities w.r.t. p
         sens1               = ar.model(m1).condition(c1).sxExpSimu(tLink1,states1,:);
         sens2               = ar.model(m2).condition(c2).sxExpSimu(tLink2,states2,:);
-        
+
         % Relative?
         if ( relative )            
             sens1           = sens1 ./ ( log(10) * repmat(dynamic1,1,1,size(sens1,3)) );
             sens2           = sens2 ./ ( log(10) * repmat(dynamic2,1,1,size(sens1,3)) );
-            
+
             dynamic1        = log10( dynamic1 );
             dynamic2        = log10( dynamic2 );            
         end
-        
+
         % Determine sensitivities w.r.t. log10(p) for the logtransformed ones
         trafo1              = ar.qLog10( pLink1 ) .* log(10) .* 10.^ar.p( pLink1 );
         trafo2              = ar.qLog10( pLink2 ) .* log(10) .* 10.^ar.p( pLink2 );
-        for a = 1 : length( pLink1 )
+        for a = 1 : sum( pLink1 )
             sens1(:,:,a)    = sens1(:,:,a) .* trafo1(a);
         end
-        for a = 1 : length( pLink2 )
+        for a = 1 : sum( pLink2 )
             sens2(:,:,a)    = sens2(:,:,a) .* trafo2(a);
         end
-        
+
         % Reshape to fit format desired for sres
         sens1               = reshape( sens1, nstates*npts, sum(pLink1));
         sens2               = reshape( sens2, nstates*npts, sum(pLink2));
         tmpsres(:, pLink1)  = tmpsres(:, pLink1) + sens1 / sd;
         tmpsres(:, pLink2)  = tmpsres(:, pLink2) - sens2 / sd;
         tmpres              = (dynamic1 - dynamic2)./sd;
-        
+
         % Store
         %ar.res(resindex:resindex+npts*nstates-1) = tmpres;
         %ar.sres(sresindex:(sresindex+npts*nstates-1),:) = tmpsres;
         %sresindex = sresindex+npts*nstates;
-        
+
         ar.constr(constrindex:constrindex+npts*nstates-1) = tmpres;
         ar.sconstr(sconstrindex:(sconstrindex+npts*nstates-1),:) = tmpsres;
-        
+
         constrindex  = constrindex+npts*nstates;
         sconstrindex = sconstrindex+npts*nstates;
-         
+
         ar.nconstr      = ar.nconstr + length(tmpres);
         ar.chi2constr   = ar.chi2constr + sum(sum(tmpres.^2));        
     end
@@ -422,21 +422,7 @@ end
 %     end
 % end
 
-%% user-defined residuals (calculated by ar.config.user_residual_fun)
-for i=1:length(ar.res_user.res)
-    ar.res(resindex) = ar.res_user.res(i);
-    ar.res_type(resindex) = ar.res_user.type(i);
-    resindex = resindex + 1;
-end
-ar.chi2 = ar.chi2 + sum(ar.res_user.res.^2); 
-ar.ndata = ar.ndata + length(ar.res_user.res);
-
-for i=1:size(ar.res_user.sres,1)
-    ar.sres(sresindex,:) = ar.res_user.sres(i,:);
-    sresindex = sresindex + 1;
-end
-
-%% cut off too long arrays
+% cut off too long arrays
 if(isfield(ar.model, 'data'))
     if(~isempty(ar.res))
         if(length(ar.res)>=resindex)
@@ -493,7 +479,13 @@ if(isfield(ar.model, 'data') && ~isempty(ar.res))
 end
 
 
-if length(ar.res_type) ~= length(ar.res)
-    error('arCollectRes.m: length(ar.res_type) ~= length(ar.res)')
+%% add user-defined residual(s)
+% If you want to modify the objective function by adding residuals, use a
+% user-defined function specified as ar.config.user_residual_fun
+% If this field is available, then the function is called here:
+if isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fun)
+    feval(ar.config.user_residual_fun,resindex); % this function can implement additional residuals added to ar.res
+    if length(ar.res)~=size(ar.sres,1)
+        error('length(ar.res)~=size(ar.sres,1)')
+    end
 end
-
