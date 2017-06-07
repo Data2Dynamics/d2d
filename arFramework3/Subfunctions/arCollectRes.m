@@ -422,6 +422,20 @@ end
 %     end
 % end
 
+%% user-defined residuals (calculated by ar.config.user_residual_fun)
+for i=1:length(ar.res_user.res)
+    ar.res(resindex) = ar.res_user.res(i);
+    ar.res_type(resindex) = ar.res_user.type(i);
+    resindex = resindex + 1;
+end
+ar.chi2 = ar.chi2 + sum(ar.res_user.res.^2); 
+ar.ndata = ar.ndata + length(ar.res_user.res);
+
+for i=1:size(ar.res_user.sres,1)
+    ar.sres(sresindex,:) = ar.res_user.sres(i,:);
+    sresindex = sresindex + 1;
+end
+
 % cut off too long arrays
 if(isfield(ar.model, 'data'))
     if(~isempty(ar.res))
@@ -479,13 +493,6 @@ if(isfield(ar.model, 'data') && ~isempty(ar.res))
 end
 
 
-%% add user-defined residual(s)
-% If you want to modify the objective function by adding residuals, use a
-% user-defined function specified as ar.config.user_residual_fun
-% If this field is available, then the function is called here:
-if isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fun)
-    feval(ar.config.user_residual_fun,resindex); % this function can implement additional residuals added to ar.res
-    if length(ar.res)~=size(ar.sres,1)
-        error('length(ar.res)~=size(ar.sres,1)')
-    end
+if length(ar.res_type) ~= length(ar.res)
+    error('arCollectRes.m: length(ar.res_type) ~= length(ar.res)')
 end
