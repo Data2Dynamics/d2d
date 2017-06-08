@@ -67,7 +67,9 @@ else
     elseif ar.config.ploterrors == -1 % prediction conf. bands
         plotopt = 4;
     elseif ar.config.ploterrors == 0  % don't externally control plotting. Instead evaluate ar.config.fiterrors and availability of exp. errors.
-        if sum(isnan(ar.model(m).data(d).yExpStd(it,iy)) )==0  && ar.config.fiterrors~=1  % all exp. errors available && exp. errors used
+        if isempty(ar.model(m).data(d).yExpStd)
+            plotopt = 5;
+        elseif sum(isnan(ar.model(m).data(d).yExpStd(it,iy)) )==0  && ar.config.fiterrors~=1  % all exp. errors available && exp. errors used
             plotopt = 2;
         elseif (ar.config.fiterrors==1 && ar.config.ploterrors==0) || (sum(~isnan(ar.model(m).data(d).yExpStd(it,iy)) & ~isnan(ar.model(m).data(d).yExp(it,iy)))==0   && ar.config.fiterrors~=-1) % no exp. errors available && error model used
             plotopt = 3;

@@ -127,9 +127,16 @@ for m=1:length(ar.model)
 
 
             [ar.model(m).data(d).res, ar.model(m).data(d).chi2]         = fres(ar.model(m).data(d).yExp, ar.model(m).data(d).yExpSimu, ystd, fiterrors_correction_factor);
+            if isempty(ar.model(m).data(d).res)
+                ar.model(m).data(d).chi2 = zeros(1,length(ar.model(m).data(d).fy));
+            end
 
             if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0 ) % error residuals are only !=0 if errors are fitted:
                 [ar.model(m).data(d).reserr, ar.model(m).data(d).chi2err]   = fres_error(ystd, ar.config.add_c);
+                if isempty(ar.model(m).data(d).reserr)
+                    ar.model(m).data(d).chi2err = zeros(1,length(ar.model(m).data(d).fy));
+                end
+                    
             else
                 ar.model(m).data(d).reserr = zeros(size(ar.model(m).data(d).res));
                 ar.model(m).data(d).chi2err = zeros(size(ar.model(m).data(d).chi2));
