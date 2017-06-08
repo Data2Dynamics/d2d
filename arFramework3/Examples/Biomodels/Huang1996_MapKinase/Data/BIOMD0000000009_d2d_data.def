@@ -29,10 +29,6 @@ KKPase_PP_KK_obs	 C	 "n/a"	 conc.	 0 0 "KKPase_PP_KK" "MAPKK-Pase_PP-Mek1"
 KKPase_P_KK_obs	 C	 "n/a"	 conc.	 0 0 "KKPase_P_KK" "MAPKK-Pase_P-Mek1"
 KPase_PP_K_obs	 C	 "n/a"	 conc.	 0 0 "KPase_PP_K" "MAPK-Pase_PP-Erk2"
 KPase_P_K_obs	 C	 "n/a"	 conc.	 0 0 "KPase_P_K" "MAPK-Pase_P-Erk2"
-_obs	 C	 "n/a"	 conc.	 0 0 "" "K_PP_norm"
-_obs	 C	 "n/a"	 conc.	 0 0 "" "KK_PP_norm"
-_obs	 C	 "n/a"	 conc.	 0 0 "" "KKK_P_norm"
-_obs	 C	 "n/a"	 conc.	 0 0 "" "relative maximal K_PP"
 
 ERRORS
 E1_obs	 "sd_E1"
@@ -57,10 +53,6 @@ KKPase_PP_KK_obs	 "sd_KKPase_PP_KK"
 KKPase_P_KK_obs	 "sd_KKPase_P_KK"
 KPase_PP_K_obs	 "sd_KPase_PP_K"
 KPase_P_K_obs	 "sd_KPase_P_K"
-_obs	 "sd_"
-_obs	 "sd_"
-_obs	 "sd_"
-_obs	 "sd_"
 
 CONDITIONS
 
