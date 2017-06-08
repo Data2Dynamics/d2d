@@ -1,4 +1,4 @@
-arImportSBML('BIOMD0000000012',1000)
+arImportSBML('BIOMD0000000012','tend',1000)
 
 %%
 arInit;

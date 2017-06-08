@@ -1,6 +1,6 @@
 %%
 % addpath('E:\clemens\systemBiologie_cvs\Programmieren\Matlab\matlab-pathway\Library\libSBML-5.12.0-matlab')
-arImportSBML('BIOMD0000000533',100)
+arImportSBML('BIOMD0000000533','tend',100)
 
 %%
 arInit;
