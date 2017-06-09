@@ -36,6 +36,8 @@
 function arIdentifiablityTest(delta, nfit, doFittigFirst)
 if ~exist('delta','var') || isempty(delta)
     delta = 1;
+elseif delta<=0
+    error('arIdentifiabilityTest is only reasonable for delta>0')
 end
 if ~exist('nfit','var') || isempty(nfit)
     nfit = 2;
@@ -48,7 +50,7 @@ thresh = 1e-3; % threshold for deciding
 global ar
 
 % res_fun = 'user_residual_fun_IdentifiabiltyTest';
-res_fun = 'user_residual_fun_IdentifiabiltyTest2';
+res_fun = @user_residual_fun_IdentifiabiltyTest2;
 
 if isfield(ar.config,'user_residual_fun')
     tmp = char(ar.config.user_residual_fun);
@@ -73,7 +75,7 @@ ar.IdentifiabilityTest.nBound0 = sum( (ar.p(ar.qFit==1) - ar.lb(ar.qFit==1)) < a
 if doFittigFirst
     disp('Standard fitting ...')
     %     ar.config.optim.Display = 'iter';
-    arFit
+    arFit(true)
     if nfit>1
         arFitLHS(nfit-1)
     end
