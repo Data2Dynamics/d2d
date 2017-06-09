@@ -423,13 +423,15 @@ end
 % end
 
 %% user-defined residuals (calculated by ar.config.user_residual_fun)
-for i=1:length(ar.res_user.res)
-    ar.res(resindex) = ar.res_user.res(i);
-    ar.res_type(resindex) = ar.res_user.type(i);
-    resindex = resindex + 1;
+if isfield(ar.res_user,'res')
+    for i=1:length(ar.res_user.res)
+        ar.res(resindex) = ar.res_user.res(i);
+        ar.res_type(resindex) = ar.res_user.type(i);
+        resindex = resindex + 1;
+    end
+    ar.chi2 = ar.chi2 + sum(ar.res_user.res.^2);
+    ar.ndata = ar.ndata + length(ar.res_user.res);
 end
-ar.chi2 = ar.chi2 + sum(ar.res_user.res.^2); 
-ar.ndata = ar.ndata + length(ar.res_user.res);
 
 for i=1:size(ar.res_user.sres,1)
     ar.sres(sresindex,:) = ar.res_user.sres(i,:);
