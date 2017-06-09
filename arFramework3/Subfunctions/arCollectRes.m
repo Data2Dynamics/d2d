@@ -491,7 +491,12 @@ if(isfield(ar.model, 'data') && ~isempty(ar.res))
                 end
             end
         end
+        
+        if ar.config.fiterrors == -1 % only exp errors
+            warning('ar.config.fiterrors = -1 enforces usage of exp. errors. NaN in res or sres occur if no exp. Errors are in the data. Please check.')
+        end
         error('NaN in derivative of residuals: %i', sum(sum(isnan(ar.sres(:,ar.qFit==1)))));
+        
     end
 end
 

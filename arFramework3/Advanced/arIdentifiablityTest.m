@@ -40,7 +40,7 @@ elseif delta<=0
     error('arIdentifiabilityTest is only reasonable for delta>0')
 end
 if ~exist('nfit','var') || isempty(nfit)
-    nfit = 2;
+    nfit = 5;
 end
 if ~exist('doFittigFirst','var') || isempty(doFittigFirst)
     doFittigFirst = 0;
@@ -84,6 +84,8 @@ end
 ar.IdentifiabilityTest.residual_fun = res_fun;
 ar.config.user_residual_fun = ar.IdentifiabilityTest.residual_fun;
 
+estimatetime = 0;
+tic;
 
 %% without penalty
 ar.IdentifiabilityTest.state = 'off';
@@ -139,6 +141,9 @@ ar.config.user_residual_fun = '';  % residual_fun für IdentifiablityTest wieder 
 %     ar.IdentifiabilityTest.score = NaN;
 % end
 
+
+estimatetime = estimatetime + toc;
+ar.IdentifiabilityTest.timing = estimatetime;  
 
 
 %% Output
