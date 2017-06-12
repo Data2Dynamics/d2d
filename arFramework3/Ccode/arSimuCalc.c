@@ -142,6 +142,7 @@ int fetch_vector( mxArray* arcondition, int ic, double **vector, const char* fie
 int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double** timePoints, int* currentIndex, const char* flagFieldName, const char* timePointFieldName );
 
 void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int nout, int offset );
+void copyResult( double* data, double *returnvec, int nu, int nout, int offset );
 void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, int nout, int offset );
 
 /* user functions */
@@ -570,6 +571,10 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 copyStates( x, returnx, qpositivex, neq, nout, 0 );
                 if ( sensi ) copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 );
                 z_calc(im, ic, arcondition, sensi);
+                fu(data, -1e30, im, isim);
+                fv(data, -1e30, x, im, isim);
+                copyResult( data->u, returnu, nu, nout, 0 );
+                copyResult( data->v, returnv, nv, nout, 0 );
                 evaluateObservations(arcondition, im, ic, sensi, has_tExp);
                 terminate_x_calc( sim_mem, 0 ); return;
             }
@@ -1032,7 +1037,7 @@ void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int 
         }
     }
 }
-    
+
 void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int nout, int offset )
 {
     int js;
@@ -1042,6 +1047,12 @@ void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int n
         /* set negative values to zeros */
         if(qpositivex[js]>0.5 && returnx[js*nout+offset]<0.0) returnx[js*nout+offset] = 0.0;
 	}
+}
+
+void copyResult( double* data, double *returnvec, int nu, int nout, int offset )
+{
+    int js;
+    for(js=0; js < nu; js++) returnvec[js*nout+offset] = data[js];
 }
 
 /* Copies doubles stored in NVector* array matrix into double array with specified offset */
