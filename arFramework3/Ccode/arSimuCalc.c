@@ -342,6 +342,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     mxArray    *x0_override;
     mxArray    *arcondition;   
     
+    int ysensi;
     int has_tExp;
     int nm, nc;
     int flag;
@@ -511,8 +512,9 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             np = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
             nv = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
             
-            /* If there are no parameters, do not compute sensitivities; otherwise failure at N_VCloneVectorArray_Serial */
-            if (np==0) sensi = 0;            
+            /* If there are no parameters, do not compute simulated sensitivities; otherwise failure at N_VCloneVectorArray_Serial */
+            ysensi = sensi;
+            if (np==0) sensi = 0;
             
             /* Allocate heap memory required for simulation */
             if ( allocateSimMemoryCVODES( sim_mem, neq, np, sensi ) )
@@ -570,12 +572,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 /* Copy states and state sensitivities */
                 copyStates( x, returnx, qpositivex, neq, nout, 0 );
                 if ( sensi ) copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 );
-                z_calc(im, ic, arcondition, sensi);
+                z_calc(im, ic, arcondition, ysensi);
                 fu(data, -1e30, im, isim);
                 fv(data, -1e30, x, im, isim);
                 copyResult( data->u, returnu, nu, nout, 0 );
                 copyResult( data->v, returnv, nv, nout, 0 );
-                evaluateObservations(arcondition, im, ic, sensi, has_tExp);
+                evaluateObservations(arcondition, im, ic, ysensi, has_tExp);
                 terminate_x_calc( sim_mem, 0 ); return;
             }
             
@@ -998,7 +1000,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     
     /* printf("computing model #%i, condition #%i (done)\n", im, ic); */
     /* call y_calc */
-    evaluateObservations(arcondition, im, ic, sensi, has_tExp);
+    evaluateObservations(arcondition, im, ic, ysensi, has_tExp);
 
     gettimeofday(&t4, NULL);
     timersub(&t2, &t1, &tdiff);
