@@ -1,0 +1,26 @@
+DESCRIPTION
+"Volume example"
+
+PREDICTOR
+t               T   min     time	0	11
+
+COMPARTMENTS
+cyt       V   au     vol.   
+nuc       V   au     vol.  
+
+STATES
+AA                 C   au      conc.  nuc
+BB                 C   au      conc.  cyt
+
+INPUTS
+
+
+REACTIONS
+
+DERIVED
+
+        
+CONDITIONS
+vol_nuc "5"
+init_AA "3"
+init_BB "8"

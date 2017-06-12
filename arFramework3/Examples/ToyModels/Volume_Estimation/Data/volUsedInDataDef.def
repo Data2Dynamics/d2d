@@ -1,0 +1,17 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	0 
+
+INPUTS
+
+OBSERVABLES
+sAA 	C   au	conc.       0  0	"vol_cyt * AA"
+sBB     C   au	conc.       0  0	"vol_nuc * BB"
+
+ERRORS    
+sAA	".01"
+sBB	".01"
+        
+CONDITIONS
+
