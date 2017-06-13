@@ -170,9 +170,26 @@ if ar.IdentifiabilityTest.nBound0 < ar.IdentifiabilityTest.nBound
     ar.IdentifiabilityTest.message = [ar.IdentifiabilityTest.message, warnmessage];
 end
 
+chi2sort = sort(ar.IdentifiabilityTest.chi2s);
+chi2sort2 = sort(ar.IdentifiabilityTest.chi2s(2:end));
+if minmax(chi2sort)<ar.IdentifiabilityTest.thresh
+    ar.IdentifiabilityTest.message_same = sprintf('All %i optimization runs are in the chi2-range %f.',length(ar.IdentifiabilityTest.chi2s),minmax(chi2sort));
+elseif length(chi2sort2)>2 && minmax(chi2sort2)<ar.IdentifiabilityTest.thresh
+    ar.IdentifiabilityTest.message_same = sprintf('All %i optimization runs with random intial guesses are in the chi2-range %f.',length(ar.IdentifiabilityTest.chi2s)-1,minmax(chi2sort2));    
+elseif sum(chi2sort <(min(chi2sort) + ar.IdentifiabilityTest.thresh)) < length(chi2sort)/2
+    anzsame = sum(chi2sort <(min(chi2sort) + ar.IdentifiabilityTest.thresh));
+    fracsame = anzsame/length(chi2sort);
+    ar.IdentifiabilityTest.message_same = sprintf('Only %i (%.2f%s) optimization runs are in the chi2-range %f. Increasing the number of fits should be considerd. ',anzsame,fracsame*100,'%',ar.IdentifiabilityTest.thresh);        
+else
+    anzsame = sum(chi2sort <(min(chi2sort) + ar.IdentifiabilityTest.thresh));
+    fracsame = anzsame/length(chi2sort);
+    ar.IdentifiabilityTest.message_same = sprintf('%i (%.2f%s) optimization runs are in the chi2-range %f. ',anzsame,fracsame*100,'%',ar.IdentifiabilityTest.thresh);        
+end
+
+disp(' ');
 disp(ar.IdentifiabilityTest.message);
 disp(' ');
-fprintf('%5.4f (increase of merit by penalty before fitting)\n',ar.IdentifiabilityTest.chi2_wPenalty0 - ar.IdentifiabilityTest.chi2_woPenalty0);
+fprintf('%5.4f (increase of merit by penalty, before fitting)\n',ar.IdentifiabilityTest.chi2_wPenalty0 - ar.IdentifiabilityTest.chi2_woPenalty0);
 fprintf('%5.4f (decrease of merit by fitting)\n',ar.IdentifiabilityTest.chi2_wPenalty0-ar.IdentifiabilityTest.chi2_wPenalty);
 fprintf('%5.4f (penalty after fitting)\n',ar.IdentifiabilityTest.penalty);
 fprintf('%5.4f (increase of data-chi2 by penalty)\n',ar.IdentifiabilityTest.dchi2_woPenalty);
@@ -180,7 +197,7 @@ fprintf('%5.4f (total increase of merit by penalty) PRIMARY CRITERION\n',ar.Iden
 fprintf('%5.4f (movement of parameters by penalized fitting)\n',ar.IdentifiabilityTest.euclDist);
 fprintf('%5.4f (movement of parameters rel. to deltaSD)\n',ar.IdentifiabilityTest.euclDist_relTo_deltaSD);
 
-
+fprintf('\n%s\n',ar.IdentifiabilityTest.message_same);
 
 
 function s2 = sortFields(s)
