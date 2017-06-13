@@ -62,6 +62,7 @@ for jm = 1:length(ar.model)
     ar.model(jm).ndata = 0;
     
     for jplot = 1:length(ar.model(jm).plot)
+        isBarGraph = 0;
         if(ar.model(jm).qPlotYs(jplot)==1 && ar.model(jm).plot(jplot).ny>0)
 %             if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
 %                     (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
@@ -101,6 +102,20 @@ for jm = 1:length(ar.model)
                     for jy = 1:ny
                         whichYplot = arWhichYplot(jm,jd,[],jy);
                         [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl] = getData(jm, jd, jy);
+                        
+                        % Display bar for single time point measurements
+                        if ( isfield( ar.config, 'barhack' ) && ( ar.config.barhack == 1 ) )
+                            if ( numel( unique( t ) ) == 1 )
+                                t = [t-0.01, t-0.01, t+0.01, t+0.01];
+                                y = [0; y; y; 0];
+                                ystd = [0; ystd; ystd; 0];
+                                isBarGraph = 1;
+                                
+                                set(gca, 'YGrid', 'on');
+                                set(gca, 'XTick', []);
+                            end
+                        end
+                        
                         if(~fastPlotTmp)
                             g = subplot(nrows,ncols,jy);
                             ar.model(jm).plot(jplot).gy(jy) = g;
@@ -486,8 +501,12 @@ for jm = 1:length(ar.model)
                 end
             end
             
-            % axis & titles
+            if ( isBarGraph )
+                set(gca, 'YGrid', 'on');
+                set(gca, 'XTick', []);                
+            end
             
+            % axis & titles
             if(~fastPlotTmp && exist('suptitle','file')==2 && isfield(ar.config, 'useSuptitle') && ar.config.useSuptitle) % suptitle function is available
                 suptitle(arNameTrafo([ar.model(jm).name,': ',ar.model(jm).plot(jplot).name]))
             end
@@ -503,24 +522,26 @@ for jm = 1:length(ar.model)
                     hold(g, 'off');
                     arSubplotStyle(g);
                     
-                    qxlabel = jy == (nrows-1)*ncols + 1;
-                    if(ny <= (nrows-1)*ncols)
-                        qxlabel = jy == (nrows-2)*ncols + 1;
-                    end
-                    if(qxlabel)
-                        if(~ar.model(jm).plot(jplot).doseresponse)
-                            xlabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).tUnits{3}, ar.model(jm).data(jd).tUnits{2}));
-                        else
-                            if(isfield(ar.model(jm).plot(jplot), 'response_parameter') && ...
-                                    ~isempty(ar.model(jm).plot(jplot).response_parameter))
-                                resppar = ar.model(jm).plot(jplot).response_parameter;
+                    if ( ~isBarGraph )
+                        qxlabel = jy == (nrows-1)*ncols + 1;
+                        if(ny <= (nrows-1)*ncols)
+                            qxlabel = jy == (nrows-2)*ncols + 1;
+                        end
+                        if(qxlabel)
+                            if(~ar.model(jm).plot(jplot).doseresponse)
+                                xlabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).tUnits{3}, ar.model(jm).data(jd).tUnits{2}));
                             else
-                                resppar = arNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter);
-                            end
-                            if(logplotting_xaxis)
-                                xlabel(g, sprintf('log_{10}(%s)', resppar));
-                            else
-                                xlabel(g, sprintf('%s', resppar));
+                                if(isfield(ar.model(jm).plot(jplot), 'response_parameter') && ...
+                                        ~isempty(ar.model(jm).plot(jplot).response_parameter))
+                                    resppar = ar.model(jm).plot(jplot).response_parameter;
+                                else
+                                    resppar = arNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter);
+                                end
+                                if(logplotting_xaxis)
+                                    xlabel(g, sprintf('log_{10}(%s)', resppar));
+                                else
+                                    xlabel(g, sprintf('%s', resppar));
+                                end
                             end
                         end
                     end
