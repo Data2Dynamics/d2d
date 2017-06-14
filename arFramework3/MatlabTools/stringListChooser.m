@@ -102,7 +102,7 @@ if(exist(filename_pars,'file'))
         vals.np = NaN;
     end
     if(isfield(S.ar,'qFit'))
-        qstr = ['#fitted=',sprintf('%3i ',sum(S.ar.qFit==1)),' '];
+        qstr = ['#fitted=',sprintf('%3i ./Results/',sum(S.ar.qFit==1)),' '];
         vals.nfit = sum(S.ar.qFit==1);
     else
         vals.nfit = NaN;
@@ -133,6 +133,23 @@ if(exist(filename_pars,'file'))
             nple = sum(~cellfun(@isempty,S.ar.ple.chi2s));
             plestr = [' #PLE=',sprintf('%3i ',nple)];
         end
+    else
+%         %% too slow:
+%         vars = who('-file',['./Results/',filename_tmp,filesep,'workspace.mat'],'ple*');
+%         if ~isempty(intersect(vars,'pleGlobals'))
+            warning('off','MATLAB:load:variableNotFound'); % faster
+            set(0, 'DefaultFigureVisible', 'off') % required for not displaying figures in the workspace, I found no nicer solution
+            tmp = load(['./Results/',filename_tmp,filesep,'workspace.mat'],'-mat','pleGlobals');
+            set(0, 'DefaultFigureVisible', 'on') % required for not displaying figures in the workspace, I found no nicer solution
+            warning('on','MATLAB:load:variableNotFound');  
+            if isfield(tmp,'pleGlobals');
+                if ~isempty(tmp.pleGlobals)
+                    %                 disp('Old PLE as variable pleGlobals available. Transferred to ar.ple ...');
+                    nple = sum(~cellfun(@isempty,tmp.pleGlobals.chi2s));
+                    plestr = [' # old PLE=',sprintf('%3i ',nple)];
+                end
+            end
+%         end
     end
     
     anno = sprintf('(%20s%8s%8s%11s%12s%14s%12s%10s)',chi2str,nstr,pstr,qstr,priorstr,errstr,lhsstr,plestr);
