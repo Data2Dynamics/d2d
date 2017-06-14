@@ -40,7 +40,7 @@ if(strcmp(ar.config.savepath,['./Results/' workspace_name])~=1)
     ar.config.savepath = ['./Results/' workspace_name];
 end
 
-if ~isfield(ar,'ple') || isempty(ar.ple)
+if ~isfield(ar,'ple') || isempty(ar.ple) || ~isfield(ar.ple,'ps')
     ar.ple = pleLoad(ar); % if an old/deprecated workspace is available
 end
 
