@@ -138,9 +138,9 @@ end
 nnot = length(pStruct.p)-sum(ass);
 if ( nnot > 0 )
     arFprintf(1, 'There were %i more parameters in the loaded struct than in the target model.\n',nnot);
+    arFprintf(1, 'Not assigned from loaded struct are: %s \n',sprintf('%s, ',pStruct.pLabel{~tmp}));
 end
 tmp=ismember(pStruct.pLabel, ar.pLabel);
-arFprintf(1, 'Not assigned from loaded struct are: %s \n',sprintf('%s, ',pStruct.pLabel{~tmp}));
 
 if nargout>0
     varargout{1} = ar;
