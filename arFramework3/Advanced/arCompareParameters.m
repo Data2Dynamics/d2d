@@ -1,6 +1,16 @@
 % arCompareParameters(filenames, onlyCommons, onlyFitted)
+% 
+% params = arCompareParameters
+% 
+% params = 
+%            ps: [136x7 double]         parameters as in ar.p
+%     filenames: {1x7 cell}             workspace names
+%        pLabel: {136x1 cell}           parameter names
+%        qLog10: [136x7 double]         log-scale? ar.qLog10
+%        ps_log: [136x7 double]         all parameters at the log-scale
 
-function arCompareParameters(filenames, onlyCommons, onlyFitted)
+
+function params = arCompareParameters(filenames, onlyCommons, onlyFitted)
 
 if(nargin==0 || isempty(filenames))
     filenames = fileChooserMulti('./Results', true);
@@ -18,6 +28,7 @@ end
 
 pLabel = {};
 p = {};
+qlog = {};
 pLabelCollect = {};
 for j=1:length(filenames)
     fname = ['./Results/' filenames{j} '/workspace_pars_only.mat'];
@@ -25,8 +36,12 @@ for j=1:length(filenames)
         tmp = load(fname);
         if(onlyFitted)
             pLabel{j} = tmp.ar.pLabel(tmp.ar.qFit==1); %#ok<AGROW>
+            p{j} = tmp.ar.p(tmp.ar.qFit==1); %#ok<AGROW>
+            qlog{j} = tmp.ar.qLog10(tmp.ar.qFit==1); %#ok<AGROW>
         else
             pLabel{j} = tmp.ar.pLabel; %#ok<AGROW>
+            p{j} = tmp.ar.p; %#ok<AGROW>
+            qlog{j} = tmp.ar.qLog10; %#ok<AGROW>
         end
         if(onlyCommons)
             if(~isempty(pLabelCollect))
@@ -37,22 +52,30 @@ for j=1:length(filenames)
         else
             pLabelCollect = union(pLabelCollect, pLabel{j});
         end
-        if(onlyFitted)
-            p{j} = tmp.ar.p(tmp.ar.qFit==1); %#ok<AGROW>
-        else
-            p{j} = tmp.ar.p; %#ok<AGROW>
-        end
     end
 end
 
 ps = nan(length(pLabelCollect),length(filenames));
+qlogs = nan(length(pLabelCollect),length(filenames));
 for j=1:length(filenames)
     if(onlyCommons)
         ps(:,j) = p{j}(ismember(pLabel{j}, pLabelCollect));
+        qlogs(:,j) = qlog{j}(ismember(pLabel{j}, pLabelCollect));
     else
         ps(ismember(pLabelCollect, pLabel{j}),j) = p{j};
+        qlogs(ismember(pLabelCollect, pLabel{j}),j) = qlog{j};
     end
 end
+
+if nargout>0
+    params.ps = ps;
+    params.filenames = filenames;
+    params.pLabel = pLabelCollect;
+    params.qLog10 = qlogs;
+    params.ps_log = params.ps; % all parameters on the log-scale
+    params.ps_log(params.qLog10==0) = log10(params.ps(params.qLog10==0));
+end
+
 
 figure(1)
 for j=1:length(filenames)
