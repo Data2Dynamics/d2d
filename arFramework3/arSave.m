@@ -146,6 +146,8 @@ ar.ub = ar2.ub;
 ar.type = ar2.type;
 ar.mean = ar2.mean;
 ar.std = ar2.std;
+ar.fkt = ar2.fkt;
+
 try %#ok<TRYNC>
     ar.chi2fit = ar2.chi2fit;
     ar.ndata = ar2.ndata;
@@ -169,7 +171,7 @@ try %#ok<TRYNC>
     ar.ps_sorted = ar2.ps_sorted;
     ar.chi2s_start_sorted = ar2.chi2s_start_sorted;
     ar.chi2sconstr_start_sorted = ar2.chi2sconstr_start_sorted;
-    ar.ps_start_sorted = ar2.ps_start_sorted;
+    ar.ps_start_sorted = ar2.ps_start_sorted;        
 end
 if(ar2.config.useFitErrorMatrix == 0)
     ar.config.fiterrors = ar2.config.fiterrors; %#ok<STRNU>
