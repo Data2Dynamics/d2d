@@ -6,7 +6,7 @@
 %   forceCompileLast:   only recompile mex-file         [false]
 %   debug_mode:         exclude precompiled objects     [false]
 %   source_dir:         external source directory       []
-% 
+%
 % or
 %
 % arCompile(ar, forceFullCompile, forceCompileLast, debug_mode, source_dir)
@@ -30,20 +30,20 @@ else
     end
 end
 
-global arOutputLevel; 
+global arOutputLevel;
 if isempty( arOutputLevel )
     arOutputLevel = 2;
 end
 
 if ( arOutputLevel > 2 )
-	verbose{1} = '-v';
+    verbose{1} = '-v';
 else
-	verbose = {};
+    verbose = {};
 end
 
 if ( arOutputLevel > 3 )
     if ( ispc )
-        % Full debug output on windows (build a release build, but with 
+        % Full debug output on windows (build a release build, but with
         % debugging symbols. This allows attaching the MSVC debugger)
         % W4        = Warning level 4, produces all relevant warnings
         % Zi        = Put debug info in obj files
@@ -55,8 +55,8 @@ if ( arOutputLevel > 3 )
     end
 end
 
-mexopt = {'-largeArrayDims'}; 
-% mexopt = {'-compatibleArrayDims'}; 
+mexopt = {'-largeArrayDims'};
+% mexopt = {'-compatibleArrayDims'};
 
 arFprintf(1, 'Compiling files...');
 
@@ -132,9 +132,22 @@ if ( ar.config.instantaneous_termination )
 end
 
 % Disable code optimization (for code which takes a long time to compile)
-if ( isfield( ar.config, 'no_optimization' ) && ( ar.config.no_optimization == 1 ) )
-    fprintf( 'Optimization disabled\n' );
-    mexopt{end+1} = 'COMPFLAGS=''-O0''';
+if isfield( ar.config, 'no_optimization' )
+    if ar.config.no_optimization == 1  || ischar(ar.config.no_optimization)
+        
+        if ischar(ar.config.no_optimization)  % interpret the config as compiler flag
+            mexopt{end+1} = ar.config.no_optimization;
+        elseif ispc  % windows
+            mexopt{end+1} = 'COMPFLAGS=/Od';
+        else
+            mexopt{end+1} = 'COMPFLAGS=''-O0''';
+        end
+        
+        fprintf('Optimization disabled\n' );
+        warning('ar.config.no_optimization=1: Please carefully check, whether code-optimization really is switched off, e.g. by debugging below where mex is called.')
+        fprintf('Default options can overwrite the flag set here (type cc = mex.getCompilerConfigurations). In this case change the mexopt file (see cc.MexOpt). \n');
+        fprintf('Microsoft Visual C++ 2013 Professional (C) requires the following flag: %s\n', 'COMPFLAGS=/Od');
+    end
 end
 
 if(~isempty(compiled_cluster_path))
@@ -147,42 +160,42 @@ objectsstr = {};
 
 % source files
 sourcesKLU = {
-'SuiteSparse_config/SuiteSparse_config.c';
-'KLU/Source/klu.c';
-'KLU/Source/klu_analyze.c';
-'KLU/Source/klu_analyze_given.c';
-'KLU/Source/klu_defaults.c';
-'KLU/Source/klu_diagnostics.c';
-'KLU/Source/klu_dump.c';
-'KLU/Source/klu_extract.c';
-'KLU/Source/klu_factor.c';
-'KLU/Source/klu_free_numeric.c';
-'KLU/Source/klu_free_symbolic.c';
-'KLU/Source/klu_kernel.c';
-'KLU/Source/klu_memory.c';
-'KLU/Source/klu_refactor.c';
-'KLU/Source/klu_scale.c';
-'KLU/Source/klu_solve.c';
-'KLU/Source/klu_sort.c';
-'KLU/Source/klu_tsolve.c';
-'AMD/Source/amd_1.c';
-'AMD/Source/amd_2.c';
-'AMD/Source/amd_aat.c';
-'AMD/Source/amd_control.c';
-'AMD/Source/amd_defaults.c';
-'AMD/Source/amd_dump.c';
-'AMD/Source/amd_global.c';
-'AMD/Source/amd_info.c';
-'AMD/Source/amd_order.c';
-'AMD/Source/amd_post_tree.c';
-'AMD/Source/amd_postorder.c';
-'AMD/Source/amd_preprocess.c';
-'AMD/Source/amd_valid.c';
-'BTF/Source/btf_maxtrans.c';
-'BTF/Source/btf_order.c';
-'BTF/Source/btf_strongcomp.c';
-'COLAMD/Source/colamd.c';
-'COLAMD/Source/colamd_global.c';
+    'SuiteSparse_config/SuiteSparse_config.c';
+    'KLU/Source/klu.c';
+    'KLU/Source/klu_analyze.c';
+    'KLU/Source/klu_analyze_given.c';
+    'KLU/Source/klu_defaults.c';
+    'KLU/Source/klu_diagnostics.c';
+    'KLU/Source/klu_dump.c';
+    'KLU/Source/klu_extract.c';
+    'KLU/Source/klu_factor.c';
+    'KLU/Source/klu_free_numeric.c';
+    'KLU/Source/klu_free_symbolic.c';
+    'KLU/Source/klu_kernel.c';
+    'KLU/Source/klu_memory.c';
+    'KLU/Source/klu_refactor.c';
+    'KLU/Source/klu_scale.c';
+    'KLU/Source/klu_solve.c';
+    'KLU/Source/klu_sort.c';
+    'KLU/Source/klu_tsolve.c';
+    'AMD/Source/amd_1.c';
+    'AMD/Source/amd_2.c';
+    'AMD/Source/amd_aat.c';
+    'AMD/Source/amd_control.c';
+    'AMD/Source/amd_defaults.c';
+    'AMD/Source/amd_dump.c';
+    'AMD/Source/amd_global.c';
+    'AMD/Source/amd_info.c';
+    'AMD/Source/amd_order.c';
+    'AMD/Source/amd_post_tree.c';
+    'AMD/Source/amd_postorder.c';
+    'AMD/Source/amd_preprocess.c';
+    'AMD/Source/amd_valid.c';
+    'BTF/Source/btf_maxtrans.c';
+    'BTF/Source/btf_order.c';
+    'BTF/Source/btf_strongcomp.c';
+    'COLAMD/Source/colamd.c';
+    'COLAMD/Source/colamd_global.c';
     };
 sourcesstrKLU = '';
 for j=1:length(sourcesKLU)
@@ -190,42 +203,42 @@ for j=1:length(sourcesKLU)
 end
 
 objectsKLU = {
-'SuiteSparse_config.o';
-'klu.o';
-'klu_analyze.o';
-'klu_analyze_given.o';
-'klu_defaults.o';
-'klu_diagnostics.o';
-'klu_dump.o';
-'klu_extract.o';
-'klu_factor.o';
-'klu_free_numeric.o';
-'klu_free_symbolic.o';
-'klu_kernel.o';
-'klu_memory.o';
-'klu_refactor.o';
-'klu_scale.o';
-'klu_solve.o';
-'klu_sort.o';
-'klu_tsolve.o';
-'amd_1.o';
-'amd_2.o';
-'amd_aat.o';
-'amd_control.o';
-'amd_defaults.o';
-'amd_dump.o';
-'amd_global.o';
-'amd_info.o';
-'amd_order.o';
-'amd_post_tree.o';
-'amd_postorder.o';
-'amd_preprocess.o';
-'amd_valid.o';
-'btf_maxtrans.o';
-'btf_order.o';
-'btf_strongcomp.o';
-'colamd.o';
-'colamd_global.o';
+    'SuiteSparse_config.o';
+    'klu.o';
+    'klu_analyze.o';
+    'klu_analyze_given.o';
+    'klu_defaults.o';
+    'klu_diagnostics.o';
+    'klu_dump.o';
+    'klu_extract.o';
+    'klu_factor.o';
+    'klu_free_numeric.o';
+    'klu_free_symbolic.o';
+    'klu_kernel.o';
+    'klu_memory.o';
+    'klu_refactor.o';
+    'klu_scale.o';
+    'klu_solve.o';
+    'klu_sort.o';
+    'klu_tsolve.o';
+    'amd_1.o';
+    'amd_2.o';
+    'amd_aat.o';
+    'amd_control.o';
+    'amd_defaults.o';
+    'amd_dump.o';
+    'amd_global.o';
+    'amd_info.o';
+    'amd_order.o';
+    'amd_post_tree.o';
+    'amd_postorder.o';
+    'amd_preprocess.o';
+    'amd_valid.o';
+    'btf_maxtrans.o';
+    'btf_order.o';
+    'btf_strongcomp.o';
+    'colamd.o';
+    'colamd_global.o';
     };
 if(ispc)
     objectsKLU = strrep(objectsKLU, '.o', '.obj');
@@ -237,7 +250,7 @@ end
 
 
 % compile
-if(usePool)   
+if(usePool)
     parfor j=1:length(sourcesKLU)
         if(~exist(['Compiled/' c_version_code '/' mexext '/' objectsKLU{j}], 'file') || forceFullCompile)
             mex('-c',verbose{:},mexopt{:}, '-DNTIMER', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
@@ -302,7 +315,7 @@ objects = {
     'cvodes_bandpre.o';
     'cvodes_bbdpre.o';
     'cvodes_direct.o';
-    'cvodes_dense.o';    
+    'cvodes_dense.o';
     'cvodes_klu.o';
     'cvodes_sparse.o';
     'cvodes_diag.o';
@@ -438,9 +451,9 @@ if(isfield(ar.model, 'data'))
     file_dat = {};
     ms = [];
     ds = [];
-
+    
     for jm = 1:length(ar.model)
-        for jd = 1:length(ar.model(jm).data)                       
+        for jd = 1:length(ar.model(jm).data)
             if(~ispc)
                 objects_dat{end+1} = ['./Compiled/' ar.info.c_version_code '/' mexext '/' ar.model(jm).data(jd).fkt '.o']; %#ok<AGROW>
             else
@@ -513,7 +526,7 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
             mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
                 sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
                 which('udata.c'), which('arSimuCalc.c'), libNames{:});
-        else 
+        else
             mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
                 sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
                 which('udata.c'), which('arSimuCalc.c'), objectsstr{:});
@@ -523,7 +536,7 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
         includesstr{end+1} = ['-I"' ar_path '\ThirdParty\pthreads-w32_2.9.1\include"'];
         includesstr{end+1} = ['-L"' ar_path '\ThirdParty\pthreads-w32_2.9.1\lib\' mexext '"'];
         includesstr{end+1} = ['-lpthreadVC2'];
-
+        
         mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
             sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
             which('udata.c'), which('arSimuCalc.c'), objectsstr{:});
@@ -537,17 +550,16 @@ end
 rehash
 
 function chunkSize = getChunkSize( objectsstr )
-    [~, maxArgSize]=system('getconf ARG_MAX');
-    maxArgSize = str2num(maxArgSize); %#ok
-    if ( isempty( maxArgSize ) )
-        maxArgSize = 262144; 
-    end
-    
-    % Take a chunk size with a reasonably safe margin
-    maxLen = max( cellfun( @numel, objectsstr ) ) + numel(pwd);
-    chunkSize = floor( (0.5 * maxArgSize) / maxLen );
-    
-    % Empirically, the maxfile limit seems to be 500 on my system. Not sure
-    % how to find this number in a platform independent manner.
-    chunkSize = min( [chunkSize, 500] );
-    
+[~, maxArgSize]=system('getconf ARG_MAX');
+maxArgSize = str2num(maxArgSize); %#ok
+if ( isempty( maxArgSize ) )
+    maxArgSize = 262144;
+end
+
+% Take a chunk size with a reasonably safe margin
+maxLen = max( cellfun( @numel, objectsstr ) ) + numel(pwd);
+chunkSize = floor( (0.5 * maxArgSize) / maxLen );
+
+% Empirically, the maxfile limit seems to be 500 on my system. Not sure
+% how to find this number in a platform independent manner.
+chunkSize = min( [chunkSize, 500] );
