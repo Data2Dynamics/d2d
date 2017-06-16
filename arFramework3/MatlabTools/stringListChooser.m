@@ -102,7 +102,7 @@ if(exist(filename_pars,'file'))
         vals.np = NaN;
     end
     if(isfield(S.ar,'qFit'))
-        qstr = ['#fitted=',sprintf('%3i ./Results/',sum(S.ar.qFit==1)),' '];
+        qstr = ['#fitted=',sprintf('%3i ',sum(S.ar.qFit==1)),' '];
         vals.nfit = sum(S.ar.qFit==1);
     else
         vals.nfit = NaN;
