@@ -17,7 +17,7 @@ global ar
 if(isempty(ar.ple))
     error('perform ple before usage');
 end
-if(isempty(ar.ple.ps))
+if(~isfield(ar.ple,'ps') || isempty(ar.ple.ps))
     return
 end
 if(~exist('jks','var') || isempty(jks))

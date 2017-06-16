@@ -25,13 +25,15 @@ global ar
 
 name = input('Model will be saved as Example. Please enter the name: ','s');
 name = strrep(name,' ','_');
-arSave(name);
+% arSave(name);
+arSave('current');
+
 
 if makePlots
     plePlotMulti([],true);
 end
 if isstruct(ar.ple) 
-    if ~isempty(ar.ple.ps)
+    if isfield(ar.ple,'ps') && ~isempty(ar.ple.ps)
         copyfile([ar.ple.savePath],[ar.config.savepath,filesep,'PLE'])
     end
 end
