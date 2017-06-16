@@ -73,103 +73,104 @@ end
 
 
 for jm=m
-    if isfield(ar.model(jm).data,'name') 
-        dnames = {ar.model(jm).data.name};
-    else
-        dnames = cell(0);
+    if isfield(ar.model(jm),'data')
+        if isfield(ar.model(jm).data,'name')
+            dnames = {ar.model(jm).data.name};
+        else
+            dnames = cell(0);
+        end
+        switch(lower(type))
+            case 'y'
+                ar.model(jm).qPlotXs(:) = 0;
+                ar.model(jm).qPlotYs(jp{jm}) = 1;
+                ar.model(jm).qPlotVs(:) = 0;
+            case 'v'
+                ar.model(jm).qPlotXs(:) = 0;
+                ar.model(jm).qPlotYs(:) = 0;
+                ar.model(jm).qPlotVs(jp{jm}) = 1;
+            case 'x'
+                ar.model(jm).qPlotXs(jp{jm}) = 1;
+                ar.model(jm).qPlotYs(:) = 0;
+                ar.model(jm).qPlotVs(:) = 0;
+            case {'xy','yx'}
+                ar.model(jm).qPlotXs(jp{jm}) = 1;
+                ar.model(jm).qPlotYs(jp{jm}) = 1;
+                ar.model(jm).qPlotVs(:) = 0;
+                
+            case {'xv','vx'}
+                ar.model(jm).qPlotXs(jp{jm}) = 1;
+                ar.model(jm).qPlotYs(jp{jm}) = 0;
+                ar.model(jm).qPlotVs(:) = 1;
+                
+            case {'yv','vy'}
+                ar.model(jm).qPlotXs(jp{jm}) = 0;
+                ar.model(jm).qPlotYs(jp{jm}) = 1;
+                ar.model(jm).qPlotVs(:) = 1;
+                
+            case {'vxy','all','xyv','yxv','yvx','xvy','vyx','on',1,true}
+                ar.model(jm).qPlotCs(:) = 0;
+                ar.model(jm).qPlotXs(jp{jm}) = 1;
+                ar.model(jm).qPlotYs(jp{jm}) = 1;
+                ar.model(jm).qPlotVs(jp{jm}) = 1;
+                
+            case {0,false,'off'}
+                ar.model(jm).qPlotXs(jp{jm}) = 0;
+                ar.model(jm).qPlotYs(jp{jm}) = 0;
+                ar.model(jm).qPlotVs(jp{jm}) = 0;
+                
+            case {'doseresponse','dr','dose','dose-response'}
+                ar.model(jm).qPlotYs(:) = 0;
+                for p=jp{jm}
+                    if(ar.model(jm).plot(p).doseresponse ==1)
+                        ar.model(jm).qPlotYs(p) = 1;
+                    end
+                end
+                
+            case {'hl','highlighted','highlight'}
+                ar.model(jm).qPlotYs(:) = 0;
+                for p=jp{jm}
+                    for subset=ar.model(jm).plot(p).dLink
+                        if(sum(ar.model(jm).data(subset).highlight(:))>0)
+                            ar.model(jm).qPlotYs(p) = 1;
+                        end
+                    end
+                end
+                
+            case  'qfit0'
+                ar.model(jm).qPlotYs(:) = 0;
+                for p=jp{jm}
+                    for subset=ar.model(jm).plot(p).dLink
+                        if(sum(ar.model(jm).data(subset).qFit==0)>0)
+                            ar.model(jm).qPlotYs(p) = 1;
+                        end
+                    end
+                end
+                
+            case  'qfit1'
+                ar.model(jm).qPlotYs(:) = 0;
+                for p=jp{jm}
+                    for subset=ar.model(jm).plot(p).dLink
+                        if(sum(ar.model(jm).data(subset).qFit==1)>0)
+                            ar.model(jm).qPlotYs(p) = 1;
+                        end
+                    end
+                end
+                
+            case dnames
+                indd = strmatch(type,dnames,'exact');
+                
+                for p=jp{jm}
+                    ind = intersect(indd,ar.model(jm).plot(p).dLink);
+                    if(~isempty(ind))
+                        ar.model(jm).qPlotXs(p) = 1;
+                        ar.model(jm).qPlotYs(p) = 1;
+                    end
+                end
+                
+            otherwise
+                error('')
+        end
     end
-    switch(lower(type))            
-        case 'y'
-            ar.model(jm).qPlotXs(:) = 0;
-            ar.model(jm).qPlotYs(jp{jm}) = 1;
-            ar.model(jm).qPlotVs(:) = 0;
-        case 'v'
-            ar.model(jm).qPlotXs(:) = 0;
-            ar.model(jm).qPlotYs(:) = 0;
-            ar.model(jm).qPlotVs(jp{jm}) = 1;
-        case 'x'
-            ar.model(jm).qPlotXs(jp{jm}) = 1;
-            ar.model(jm).qPlotYs(:) = 0;
-            ar.model(jm).qPlotVs(:) = 0;
-        case {'xy','yx'}
-            ar.model(jm).qPlotXs(jp{jm}) = 1;
-            ar.model(jm).qPlotYs(jp{jm}) = 1;
-            ar.model(jm).qPlotVs(:) = 0;
-            
-        case {'xv','vx'}
-            ar.model(jm).qPlotXs(jp{jm}) = 1;
-            ar.model(jm).qPlotYs(jp{jm}) = 0;
-            ar.model(jm).qPlotVs(:) = 1;
-
-        case {'yv','vy'}
-            ar.model(jm).qPlotXs(jp{jm}) = 0;
-            ar.model(jm).qPlotYs(jp{jm}) = 1;
-            ar.model(jm).qPlotVs(:) = 1;
-            
-        case {'vxy','all','xyv','yxv','yvx','xvy','vyx','on',1,true}
-            ar.model(jm).qPlotCs(:) = 0;
-            ar.model(jm).qPlotXs(jp{jm}) = 1;
-            ar.model(jm).qPlotYs(jp{jm}) = 1;
-            ar.model(jm).qPlotVs(jp{jm}) = 1;
-            
-        case {0,false,'off'}
-            ar.model(jm).qPlotXs(jp{jm}) = 0;
-            ar.model(jm).qPlotYs(jp{jm}) = 0;
-            ar.model(jm).qPlotVs(jp{jm}) = 0;
-            
-        case {'doseresponse','dr','dose','dose-response'}
-            ar.model(jm).qPlotYs(:) = 0;
-            for p=jp{jm}
-                if(ar.model(jm).plot(p).doseresponse ==1)
-                    ar.model(jm).qPlotYs(p) = 1;
-                end
-            end
-            
-        case {'hl','highlighted','highlight'}
-            ar.model(jm).qPlotYs(:) = 0;
-            for p=jp{jm}
-                for subset=ar.model(jm).plot(p).dLink
-                    if(sum(ar.model(jm).data(subset).highlight(:))>0)
-                        ar.model(jm).qPlotYs(p) = 1;
-                    end
-                end
-            end
-                        
-        case  'qfit0'
-            ar.model(jm).qPlotYs(:) = 0;
-            for p=jp{jm}
-                for subset=ar.model(jm).plot(p).dLink
-                    if(sum(ar.model(jm).data(subset).qFit==0)>0)
-                        ar.model(jm).qPlotYs(p) = 1;
-                    end
-                end
-            end
-            
-        case  'qfit1'
-            ar.model(jm).qPlotYs(:) = 0;
-            for p=jp{jm}
-                for subset=ar.model(jm).plot(p).dLink
-                    if(sum(ar.model(jm).data(subset).qFit==1)>0)
-                        ar.model(jm).qPlotYs(p) = 1;
-                    end
-                end
-            end
-            
-        case dnames
-            indd = strmatch(type,dnames,'exact');
-            
-            for p=jp{jm}
-                ind = intersect(indd,ar.model(jm).plot(p).dLink);
-                if(~isempty(ind))
-                    ar.model(jm).qPlotXs(p) = 1;
-                    ar.model(jm).qPlotYs(p) = 1;
-                end
-            end
-            
-        otherwise
-            error('')
-    end
-    
 end
 
 if(isempty(type))

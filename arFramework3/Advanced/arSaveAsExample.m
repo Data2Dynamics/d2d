@@ -92,22 +92,24 @@ copyfile([ar.fkt,'*'],[pfad]);
 ms = {ar.model.name};
 ds = cell(size(ms));
 for m=1:length(ar.model)    
-    if(isfield(ar.model(m).data,'name'))
-        ds{m} = {ar.model(m).data.name};        
-        try % new code (unfortunately not tested, sorry)
-            prands = [ar.model(m).data.prand];
-            for ii=1:length(prands)
-                ds{m} = regexprep(ds{m},['_',prands{ii},'(\d)+'],'');
+    if isfield(ar.model(m),'data')
+        if(isfield(ar.model(m).data,'name'))
+            ds{m} = {ar.model(m).data.name};
+            try % new code (unfortunately not tested, sorry)
+                prands = [ar.model(m).data.prand];
+                for ii=1:length(prands)
+                    ds{m} = regexprep(ds{m},['_',prands{ii},'(\d)+'],'');
+                end
+            catch            % old code
+                disp('Please check replacement code of random parameters in arSaveAsExample.m')
+                [uni,ia,ib]= unique(regexprep(ds{m},'_nExpID(\d)+',''));
+                ds{m} = uni(ib);  % replace zurueck
+                ds{m} = ds{m}(sort(ia)); % nur die unique, aber in alter reihenfolge
             end
-        catch            % old code
-            disp('Please check replacement code of random parameters in arSaveAsExample.m')
-            [uni,ia,ib]= unique(regexprep(ds{m},'_nExpID(\d)+',''));
-            ds{m} = uni(ib);  % replace zurueck
-            ds{m} = ds{m}(sort(ia)); % nur die unique, aber in alter reihenfolge
+            
+        else
+            ds{m} = [];
         end
-
-    else
-        ds{m} = [];
     end
 end
 
@@ -148,9 +150,11 @@ fprintf(fid,'\n\n');
 
 fprintf(fid,'Observables and Errors:\n');
 for m=1:length(ar.model)
-    for d=1:length(ar.model(m).data)
-        for i=1:length(ar.model(m).data(d).fy)
-            fprintf(fid,'%s:\t\tfy=%s\t\tfystd=%s\n',ar.model(m).data(d).yNames{i},ar.model(m).data(d).fy{i},ar.model(m).data(d).fystd{i});
+    if isfield(ar.model(m),'data')
+        for d=1:length(ar.model(m).data)
+            for i=1:length(ar.model(m).data(d).fy)
+                fprintf(fid,'%s:\t\tfy=%s\t\tfystd=%s\n',ar.model(m).data(d).yNames{i},ar.model(m).data(d).fy{i},ar.model(m).data(d).fystd{i});
+            end
         end
     end
 end
