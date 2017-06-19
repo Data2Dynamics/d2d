@@ -1667,7 +1667,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
         /* log trafo of y */
         for (iy=0; iy<ny; iy++) {
             if(qlogy[iy] > 0.5){
-                if(y[it + (iy*nt)]<-cvodes_atol) printf("WARNING, check for concentrations <= 0 !!!\n");
+                if(y[it + (iy*nt)]<-cvodes_atol) printf("WARNING, check for concentrations <= 0 in data %d and observable %d !!!\n", id+1, iy+1);
                 if(fine==0)  y_scale[it + (iy*nt)] = y_scale[it + (iy*nt)] / y[it + (iy*nt)] / log(10.0);
                 y[it + (iy*nt)] = log10(y[it + (iy*nt)]);
             }

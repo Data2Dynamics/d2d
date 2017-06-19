@@ -37,7 +37,6 @@ ar.qFit=ones(size(ar.qFit));
 fprintf( 'PASSED\n' );
 
 fprintf( 2, 'Fitting model... ' );
-arSimu(false,true,true);
 arFit;
 fprintf( 'PASSED\n' );
 
