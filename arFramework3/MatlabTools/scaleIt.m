@@ -51,6 +51,10 @@
 %     nofileincrement    Do not assume different files have their own
 %                        scaling factor
 %     samescale          Do not scale any data
+%     firstoutput        Which field should come first? Note: You may need
+%                        when specifying a different dependent variable and 
+%                        want to use the data in D2D (which requires time to 
+%                        be the first column)
 %
 % To do: Offsets
 
@@ -63,8 +67,8 @@ function out = scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'nofileincrement', 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn', 'splitconditions', 'removemask', 'excludeconditions' };
-    extraArgs = [ 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1 ];
+    switches = { 'nofileincrement', 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn', 'splitconditions', 'removemask', 'excludeconditions', 'firstoutput' };
+    extraArgs = [ 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1 ];
     description = { ...
     {'', 'Do not increment nExpID for different files'} ...
     {'', 'Custom delimiter specified'} ...
@@ -85,6 +89,7 @@ function out = scaleIt( names, outFile, varargin )
     {'', 'Splitting conditions'} ...
     {'', 'Using removal mask'} ...
     {'', 'Excluding specific conditions'}, ...
+    {'', 'Specifying first output'}, ...
     };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
@@ -113,11 +118,11 @@ function out = scaleIt( names, outFile, varargin )
     if ( opts.restrictobs )
         restrictobs = opts.restrictobs_args;
     end
-    ignoreMask = [];
+    ignoreMask = {};
     if ( opts.ignoremask )
         ignoreMask = opts.ignoremask_args;
     end
-    removeMask = [];
+    removeMask = {};
     if ( opts.removemask )
         removeMask = opts.removemask_args;
     end
@@ -155,7 +160,7 @@ function out = scaleIt( names, outFile, varargin )
         errModelPars    = 2;
     end
      
-    % Collect csv files
+    %% Collect csv files
     fieldNames = {};
     for jN = 1 : length( names )
         data{jN} = readCSV( names{jN}, delimiter ); %#ok
@@ -182,6 +187,9 @@ function out = scaleIt( names, outFile, varargin )
         
         out.(fieldNames{jN}) = {};
         for jD = 1 : length( data )
+            dataName = data{jD};
+            
+            
             % Does it have this field?
             if ~isfield( data{jD}, fieldNames{jN} )
                 fNames = fieldnames( data{jD} );
@@ -218,41 +226,8 @@ function out = scaleIt( names, outFile, varargin )
             F( min(Q==repmat(uq(ju,:), size(Q,1), 1), [], 2) ) = ju;
         end
         out.(expVar) = num2cell(F);
-    end
-          
-    % Dump out things in the ignore mask
-    if ( ~isempty( ignoreMask ) || ~isempty( removeMask ) )
-        searchpat = union( ignoreMask, removeMask, 'stable' );
-        fprintf('Filtering following fields:\n');
-        K = fieldnames(out);
-        for a = 1 : length( K )
-            if ~iscell( searchpat )
-                searchpat = {searchpat};
-            end
-            for b = 1 : length( searchpat )
-                if ( searchpat{b}(1) == '*' )
-                    filterActive = ~isempty( strfind( K{a}, filterField(searchpat{b}(2:end)) ) );
-                else
-                    filterActive = strcmp( K(a), searchpat{b} );
-                end
-                if filterActive
-                    if ( isfield( out, K{a} ) )
-                        % Was it an ignore pattern?
-                        if ( sum(ismember(searchpat{b}, ignoreMask)) )
-                            prt = sprintf('Ignored: %s\n', K{a});
-                            ignore.(K{a}) = out.(K{a});
-                        else
-                            prt = sprintf('Removed: %s\n', K{a});
-                        end
-                        fprintf( prt );
-                        out = rmfield( out, K{a} );
-                        fieldNames = setdiff( fieldNames, K{a} );
-                    end
-                end
-            end
-        end
-    end
-    
+    end   
+       
     % Put NaN's in the empty fields
     filt = struct;
     for jN = 1 : length( fieldNames )               
@@ -291,12 +266,12 @@ function out = scaleIt( names, outFile, varargin )
             error( 'Invalid range vector specified. Should be of the form [lb, ub]' );
         else
             f = @(x)(x<lims(1))||(x>lims(2));
-            removeMask = find( cellfun(f, out.(timeVar{1})) );
-            fprintf( 'Removing %d data points based on specified time range\n', sum(removeMask) );
+            removeMaskTime = find( cellfun(f, out.(timeVar{1})) );
+            fprintf( 'Removing %d data points based on specified time range\n', sum(removeMaskTime) );
             
             for a = 1 : length( fieldNames )
                 if ( isfield( out, fieldNames{a} ) )
-                    out.(fieldNames{a})(removeMask) = [];
+                    out.(fieldNames{a})(removeMaskTime) = [];
                 end
             end
         end
@@ -320,7 +295,40 @@ function out = scaleIt( names, outFile, varargin )
     
     if ( isempty(fieldnames(out)) )
         error( 'No more data to scale. Did you filter it all?' );
-    end
+    end   
+    
+    % Dump out things in the ignore mask
+    if ( ~isempty( ignoreMask ) || ~isempty( removeMask ) )
+        searchpat = union( ignoreMask, removeMask, 'stable' );
+        fprintf('Filtering following fields:\n');
+        K = fieldnames(out);
+        for a = 1 : length( K )
+            if ~iscell( searchpat )
+                searchpat = {searchpat};
+            end
+            for b = 1 : length( searchpat )
+                if ( searchpat{b}(1) == '*' )
+                    filterActive = ~isempty( strfind( K{a}, filterField(searchpat{b}(2:end)) ) );
+                else
+                    filterActive = strcmp( K(a), searchpat{b} );
+                end
+                if filterActive
+                    if ( isfield( out, K{a} ) )
+                        % Was it an ignore pattern?
+                        if ( sum(ismember(searchpat{b}, ignoreMask)) )
+                            prt = sprintf('Ignored: %s\n', K{a});
+                            ignore.(K{a}) = out.(K{a});
+                        else
+                            prt = sprintf('Removed: %s\n', K{a});
+                        end
+                        fprintf( prt );
+                        out = rmfield( out, K{a} );
+                        fieldNames = setdiff( fieldNames, K{a} );
+                    end
+                end
+            end
+        end
+    end    
     
     %fieldNames = fieldnames(out);
     % Uncomment to test with control case
@@ -339,6 +347,17 @@ function out = scaleIt( names, outFile, varargin )
     %        end
     %    end
     %end
+    
+    % Set default inputs for unset inputs
+    inputs = fieldNames(cell2mat(cellfun(@(a)~isempty(findstr(a, inputMask)), fieldNames, 'UniformOutput', false)));
+    for a = 1 : numel( inputs )
+        defaultValue = 0;
+        nans = cellfun(@isnan, out.(inputs{a}));
+        if ( sum(nans) > 0 )
+            warning( 'Using default value %g for input %s\n', defaultValue, inputs{a} );
+            out.(inputs{a})(nans) = {defaultValue};
+        end
+    end
     
     % Don't scale individual 
     if ( opts.samescale )
@@ -362,7 +381,7 @@ function out = scaleIt( names, outFile, varargin )
     for jC = 1 : length(groupNames)
         groups( jC, : ) = out.(groupNames{jC}); %#ok<AGROW>
     end
-    [~, ~, groupIDs] = unique( cell2mat( groups ).', 'rows' );
+    [groupData, ~, groupIDs] = unique( cell2mat( groups ).', 'rows' );
     
     % Plot results
     colors = colmap;    
@@ -411,6 +430,11 @@ function out = scaleIt( names, outFile, varargin )
         for jN = 1 : numel( startNames )
             out.(startNames{jN}) = ignore.(startNames{jN});
         end
+    end
+    
+    if ( opts.firstoutput )
+        tColumn = ismember( fieldNames, opts.firstoutput_args{1} );
+        fieldNames = { fieldNames{tColumn} fieldNames{~tColumn} };
     end
     
     fid = fopen( outFile, 'w' );   
@@ -644,7 +668,6 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
         % To get where these are globally we have to map them back
         % means(conditionLinks) and scalings(scaleLinks) will sort them
         % back to the order they were in when they entered this function.
-
         loc = 0;
         for jD = obsGroups{jG}
             % Number of unique points in this dataset
