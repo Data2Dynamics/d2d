@@ -81,7 +81,7 @@ ar.ple.chi2Reset(jk) = chi2Reset;
 [chi2sdown, psdown, errorsdown] = ple_task(ar, jk, n, -1, chi2Reset, pReset);
 
 ar.ple.chi2s{jk} = [fliplr(chi2sdown) chi2Reset chi2sup];
-ar.ple.ps{jk} = [flipud(psdown); pReset'; psup];
+ar.ple.ps{jk} = [flipud(psdown); pReset(:)'; psup];
 ar.ple.errors{jk} = [fliplr(errorsdown) nan errorsup];
 ar.ple.run(jk) = 1;
 
