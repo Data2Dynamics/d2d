@@ -503,6 +503,8 @@ if(isfield(ar.model, 'data'))
 end
 
 includesstr=strrep(includesstr,'"', '');
+objectsstr = unique( objectsstr, 'stable' );
+
 %% compile and link main mex file
 if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
     if(~ispc)

@@ -256,7 +256,7 @@ function out = scaleIt( names, outFile, varargin )
         error( 'Multiple columns whose header matches the independent variable' );
     end
     if ( numel( timeVar ) == 0 )
-        error( 'Did not find independent variable' );
+        error( 'Did not find independent variable %s', timeVars{:} );
     end
     
     % Filter based on time range
