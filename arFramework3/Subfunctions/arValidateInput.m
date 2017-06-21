@@ -11,12 +11,20 @@ function arValidateInput( C, stage, varargin )
         end 
         if ( isempty( C{a} ) )
             format = getFormat(varargin);
-            error( 'Missing %s in %s specification. Correct format is: %s.', varargin{a}, upper(stage), format );
+            error( 'Missing %s in %s specification. Correct format is: %s. Supplied was: %s.', varargin{a}, upper(stage), format, fullString(C) );
         end       
         if ( isnan( C{a} ) )
             format = getFormat(varargin);
-            error( 'Missing numeric %s parameter in %s specification. Correct format is: %s.', varargin{a}, upper(stage), format );
+            error( 'Missing numeric %s parameter in %s specification. Correct format is: %s. Supplied was: %s.', varargin{a}, upper(stage), format, fullString(C) );
         end        
+    end
+end
+
+function str = fullString(C)
+    try
+        str = strcat( C{:} );
+    catch
+        str = '< Failed to obtain line in which error occurs >';
     end
 end
 

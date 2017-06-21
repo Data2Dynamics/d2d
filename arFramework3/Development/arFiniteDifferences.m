@@ -68,7 +68,11 @@ for jp=1:length(ar.pLabel)
     
     % perturb p(jp)
     ar.p(jp) = ar.p(jp) + dp;
-    arCalcMerit(false,[]);
+    try
+        arCalcMerit(false,[]);
+    catch
+        error( 'Failed simulation at %d', jp );
+    end
     
     for jm=1:length(ar.model)
         for jc=1:length(ar.model(jm).condition)
