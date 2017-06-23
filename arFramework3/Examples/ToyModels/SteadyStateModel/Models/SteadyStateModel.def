@@ -1,0 +1,53 @@
+DESCRIPTION
+"Simple equilibration test"
+
+PREDICTOR
+t               T   min         time	0	200
+
+COMPARTMENTS
+cyt             V   pl          vol.    1
+
+STATES
+sA          C   nmol/l      conc.   cyt     1
+sB          C   nmol/l      conc.   cyt     1
+sC          C   nmol/l      conc.   cyt     1
+sD          C   nmol/l      conc.   cyt     1
+sE          C   nmol/l      conc.   cyt     1
+sF          C   nmol/l      conc.   cyt     1
+sG          C   nmol/l      conc.   cyt     1
+sH          C   nmol/l      conc.   cyt     1
+
+INPUTS
+        
+REACTIONS
+sA          -> sB   CUSTOM  "2 * sA"
+sB          -> sA   CUSTOM  "sB"
+            -> sC   CUSTOM  "kpro_C"
+            -> sD   CUSTOM  "kpro_D"
+sC + sD     -> sE   CUSTOM  "(vmax / (kC*kD)) * sC * sD / ( 1 + (sC/kC) + (sD/kD) )"    "flux"
+sE          -> 0    CUSTOM  "kdeg * sE"                                                    
+            -> sF   CUSTOM  "kpro_F"
+            -> sG   CUSTOM  "kpro_G"
+sF + sD     -> sH   CUSTOM  "(vmax / (kF*kD)) * sF * sD / ( 1 + (sF/kF) + (sD/kD) )"    "flux"
+sH          -> 0    CUSTOM  "kdeg * sH"                                                    
+
+
+DERIVED
+
+OBSERVABLES
+A_obs           C  au   conc.   0  0    "sA"
+C_obs           C  au   conc.   0  0    "sC"
+D_obs           C  au   conc.   0  0    "sD"
+E_obs           C  au   conc.   0  0    "sE"
+H_obs           C  au   conc.   0  0    "sH"
+flux_obs        C  au   conc.   0  0    "flux"
+                
+ERRORS
+A_obs           "0.01"
+C_obs           "0.01"
+D_obs           "0.01"
+E_obs           "0.01"
+H_obs           "0.01"
+flux_obs        "0.01"
+
+CONDITIONS
