@@ -1,4 +1,4 @@
-% arIdentifiablityTest(delta, nfit, doFittigFirst)
+% arIdentifiablityTest(radius, nfit, doFittigFirst)
 % 
 %   This function implements a fast procedure to check whether structural
 %   non-identifiablities are present.
@@ -10,11 +10,11 @@
 %   THE MODEL HAS TO BE FITTED FIRST
 %   Local identifiablity is tested around the optimum.
 % 
-%   delta   target radius when pulling
+%   radius   target radius when pulling
 % 
 %   nfit    number of initial guesses/fits (like LHS)
 %           random initial guess is drawn in the ball wir uniformly
-%           distributed radius [0,delta]
+%           distributed radius [0,radius]
 % 
 %   doFittingFirst  if true, then the model is first fitted without penalty
 %           before arIdentifiablityTest is checked. Could be applied, if it
@@ -33,11 +33,11 @@
 % 
 % ckreutz 2.6.17
 
-function arIdentifiablityTest(delta, nfit, doFittigFirst)
-if ~exist('delta','var') || isempty(delta)
-    delta = 1;
-elseif delta<=0
-    error('arIdentifiabilityTest is only reasonable for delta>0')
+function arIdentifiablityTest(radius, nfit, doFittigFirst)
+if ~exist('radius','var') || isempty(radius)
+    radius = 1;
+elseif radius<=0
+    error('arIdentifiabilityTest is only reasonable for radius>0')
 end
 if ~exist('nfit','var') || isempty(nfit)
     nfit = 5;
@@ -63,9 +63,9 @@ end
 ar.IdentifiabilityTest = struct;
 ar.IdentifiabilityTest.n_rescall = 0;
 ar.IdentifiabilityTest.p0 = ar.p + 0.0;
-ar.IdentifiabilityTest.delta = delta;
-% ar.IdentifiabilityTest.deltaSD = 1/icdf('chi2',0.95,1);
-ar.IdentifiabilityTest.deltaSD = ar.IdentifiabilityTest.delta;
+ar.IdentifiabilityTest.radius = radius;
+% ar.IdentifiabilityTest.penaltySD = 1/icdf('chi2',0.95,1);
+ar.IdentifiabilityTest.penaltySD = ar.IdentifiabilityTest.radius;
 ar.IdentifiabilityTest.thresh  = thresh;
 ar.IdentifiabilityTest.nBound0 = sum( (ar.p(ar.qFit==1) - ar.lb(ar.qFit==1)) < ar.config.par_close_to_bound*(ar.ub(ar.qFit==1) - ar.lb(ar.qFit==1)) | ...
     (ar.ub(ar.qFit==1) - ar.p(ar.qFit==1)) < ar.config.par_close_to_bound*(ar.ub(ar.qFit==1) - ar.lb(ar.qFit==1)) ) ;
@@ -98,8 +98,8 @@ ar.IdentifiabilityTest.state = 'on';
 arCalcMerit(true); %% be sure that the residuals are up-to-date, sensi = true ensures that ODE intergation steps are the same as within fitting
 ar.IdentifiabilityTest.chi2_wPenalty0 = arGetMerit(true) + 0.0;
 
-fprintf('\nPulling with delta = %d, deltaSD = %d ... \n\n',ar.IdentifiabilityTest.delta,ar.IdentifiabilityTest.deltaSD)
-ar.IdentifiabilityTest.ps_start = randomParsInBall(nfit,ar.IdentifiabilityTest.delta);
+fprintf('\nPulling with radius = %d, penaltySD = %d ... \n\n',ar.IdentifiabilityTest.radius,ar.IdentifiabilityTest.penaltySD)
+ar.IdentifiabilityTest.ps_start = randomParsInBall(nfit,ar.IdentifiabilityTest.radius);
 ar.IdentifiabilityTest.ps_start(1,:) = ar.p; % the first one is always ar.p
 
 arFits(ar.IdentifiabilityTest.ps_start);
@@ -109,12 +109,12 @@ ar.IdentifiabilityTest.ps = ar.ps;
 ar.IdentifiabilityTest.nBound = sum( (ar.p(ar.qFit==1) - ar.lb(ar.qFit==1)) < ar.config.par_close_to_bound*(ar.ub(ar.qFit==1) - ar.lb(ar.qFit==1)) | ...
     (ar.ub(ar.qFit==1) - ar.p(ar.qFit==1)) < ar.config.par_close_to_bound*(ar.ub(ar.qFit==1) - ar.lb(ar.qFit==1)) ) ;
 
-ar.IdentifiabilityTest.euclDist_relTo_deltaSD = sqrt(sum((ar.p-ar.IdentifiabilityTest.p0).^2))./ar.IdentifiabilityTest.deltaSD;
+ar.IdentifiabilityTest.euclDist_relTo_deltaSD = sqrt(sum((ar.p-ar.IdentifiabilityTest.p0).^2))./ar.IdentifiabilityTest.penaltySD;
 ar.IdentifiabilityTest.euclDist = sqrt(sum((ar.p-ar.IdentifiabilityTest.p0).^2));
 ar.IdentifiabilityTest.p = ar.p + 0.0;
 ar.IdentifiabilityTest.dp = ar.IdentifiabilityTest.p - ar.IdentifiabilityTest.p0;
 [~,rf] = sort(-abs(ar.IdentifiabilityTest.dp));
-anzNI = sum(ar.IdentifiabilityTest.dp>0.1*ar.IdentifiabilityTest.delta);
+anzNI = sum(ar.IdentifiabilityTest.dp>0.1*ar.IdentifiabilityTest.radius);
 ar.IdentifiabilityTest.nonId = ar.pLabel(rf(1:anzNI));
 
 %% after Fitting, with penalty
@@ -129,6 +129,7 @@ arCalcMerit(true,ar.p(ar.qFit==1)); %% be sure that the residuals are up-to-date
 ar.IdentifiabilityTest.chi2_woPenalty = arGetMerit(true) + 0.0;
 
 ar.config.user_residual_fun = '';  % residual_fun für IdentifiablityTest wieder ausschalten
+ar.p = ar.IdentifiabilityTest.p0;
 
 % %% calculate a score
 % if ar.IdentifiabilityTest.dchi2_woPenalty>=-1e-2
@@ -160,12 +161,12 @@ else
     ar.IdentifiabilityTest.message = sprintf('Model seems identifiable.');
 end
 
-if ar.IdentifiabilityTest.euclDist < 0.01*ar.IdentifiabilityTest.delta
-    ar.IdentifiabilityTest.message = sprintf('%s\n Optimal parameters change less than 1%s of delta. Is optimization working?',ar.IdentifiabilityTest.message,'%');
+if ar.IdentifiabilityTest.euclDist < 0.01*ar.IdentifiabilityTest.radius
+    ar.IdentifiabilityTest.message = sprintf('%s\n Optimal parameters change less than 1%s of radius. Is optimization working?',ar.IdentifiabilityTest.message,'%');
 end
 
 if ar.IdentifiabilityTest.nBound0 < ar.IdentifiabilityTest.nBound
-    warnmessage = sprintf(' Warning: Penalization force addional parameters to bounds. Decreas of delta is suggested in this case.\n');
+    warnmessage = sprintf(' Warning: Penalization force addional parameters to bounds. Decreas of radius is suggested in this case.\n');
     warning(warnmessage)
     ar.IdentifiabilityTest.message = [ar.IdentifiabilityTest.message, warnmessage];
 end
@@ -195,7 +196,7 @@ fprintf('%5.4f (penalty after fitting)\n',ar.IdentifiabilityTest.penalty);
 fprintf('%5.4f (increase of data-chi2 by penalty)\n',ar.IdentifiabilityTest.dchi2_woPenalty);
 fprintf('%5.4f (total increase of merit by penalty) PRIMARY CRITERION\n',ar.IdentifiabilityTest.dchi2_total);
 fprintf('%5.4f (movement of parameters by penalized fitting)\n',ar.IdentifiabilityTest.euclDist);
-fprintf('%5.4f (movement of parameters rel. to deltaSD)\n',ar.IdentifiabilityTest.euclDist_relTo_deltaSD);
+fprintf('%5.4f (movement of parameters rel. to penaltySD)\n',ar.IdentifiabilityTest.euclDist_relTo_deltaSD);
 
 fprintf('\n%s\n',ar.IdentifiabilityTest.message_same);
 
@@ -210,7 +211,7 @@ end
 
 
 
-function p0 = randomParsInBall(n,delta)
+function p0 = randomParsInBall(n,R)
 global ar
 nqfit = sum(ar.qFit==1);
 bolfit = ar.qFit==1;
@@ -220,7 +221,7 @@ richtung = rand(n,nqfit);
 for i=1:size(richtung,1)
     richtung(i,:) = richtung(i,:) ./ norm(richtung(i,:),2);
 end
-radius = rand(n,1)*delta;
+radius = rand(n,1)*R;
 
 p0 = ones(n,1)*ar.p;
 p0(:,bolfit) = p0(:,bolfit) + richtung.*(radius*ones(1,nqfit));
@@ -236,21 +237,21 @@ end
 
 function [res_user, sres_user, res_type] = user_residual_fun_IdentifiabiltyTest2
 %   This function penalize the if || ar.p - ar.IdentifiabilityTest.p0 ||_2 
-%   unequal to ar.IdentifiabilityTest.delta
+%   unequal to ar.IdentifiabilityTest.radius
 %
-%   The quadratic difference between || || and delta is penalized, i.e.
-%   residuals || || - delta are used by lsqnonlin.
+%   The quadratic difference between || || and radius is penalized, i.e.
+%   residuals || || - radius are used by lsqnonlin.
 
 global ar
 
 if strcmp(ar.IdentifiabilityTest.state,'on')
     % fprintf('user_residual_fun_IdentifiabiltyTest2 ...\n');
-    res_user = (sqrt(sum((ar.p(ar.qFit==1)-ar.IdentifiabilityTest.p0(ar.qFit==1)).^2)) - ar.IdentifiabilityTest.delta)./ar.IdentifiabilityTest.deltaSD;    
+    res_user = (sqrt(sum((ar.p(ar.qFit==1)-ar.IdentifiabilityTest.p0(ar.qFit==1)).^2)) - ar.IdentifiabilityTest.radius)./ar.IdentifiabilityTest.penaltySD;    
     res_type = 1; % like a data residual
     
     sres_user(1,1:length(ar.p)) = 0;
-    if ar.IdentifiabilityTest.delta>0
-        zaehler = (2 * ar.p(ar.qFit==1) - 2*ar.IdentifiabilityTest.p0(ar.qFit==1))./ar.IdentifiabilityTest.deltaSD;
+    if ar.IdentifiabilityTest.radius>0
+        zaehler = (2 * ar.p(ar.qFit==1) - 2*ar.IdentifiabilityTest.p0(ar.qFit==1))./ar.IdentifiabilityTest.penaltySD;
         nenner = 2* sqrt(  sum(  (ar.p(ar.qFit==1) - ar.IdentifiabilityTest.p0(ar.qFit==1)).^2)  );
         sres_user(1,ar.qFit==1) = zaehler ./ nenner;
         sres_user(isnan(sres_user)) = 0;
