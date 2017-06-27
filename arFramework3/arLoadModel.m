@@ -51,6 +51,7 @@ fid = fopen(['Models/' name '.def'], 'r');
 
 % initial setup
 ar.model(m).name = name;
+ar.model(m).path = [pwd,filesep,'Models',filesep];
 
 % Validate input
 if ( opts.conditions )

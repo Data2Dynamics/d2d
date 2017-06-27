@@ -186,6 +186,8 @@ end
 
 % initial setup
 ar.model(m).data(d).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
+ar.model(m).data(d).path = [pwd,filesep,'Data',filesep];
+
 ar.model(m).data(d).uNames = {};
 
 arFprintf(1, '\nloading data #%i, from file Data/%s.def...', d, name);
