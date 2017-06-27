@@ -38,12 +38,14 @@ function rate = arResponseCurve( name, indep1, indep2, timepoints )
         pLabels = ar.pLabel;
         xLabels = ar.model.x;
         zLabels = ar.model.z;
+        uLabels = ar.model.u;
         pValues = arGetPars( ar.pLabel, 0 );
         xValues = ar.model(m).condition(cond).xFineSimu(tp, :);
         zValues = ar.model(m).condition(cond).zFineSimu(tp, :);
-
-        labels = [ pLabels, xLabels, zLabels ];
-        values = [ pValues, xValues, zValues ];      
+        uValues = ar.model(m).condition(cond).uFineSimu(tp, :);
+        
+        labels = [ pLabels, xLabels, zLabels, uLabels ];
+        values = [ pValues, xValues, zValues, uValues ];      
 
         [~, ~, Iref] = intersect( labels, {indep1, indep2} );
         refValues = values(Iref);
