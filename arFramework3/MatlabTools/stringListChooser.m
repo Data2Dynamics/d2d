@@ -133,7 +133,7 @@ if(exist(filename_pars,'file'))
             nple = sum(~cellfun(@isempty,S.ar.ple.chi2s));
             plestr = [' #PLE=',sprintf('%3i ',nple)];
         end
-    else
+    elseif exist(['./Results/',filename_tmp,filesep,'workspace.mat'],'file')==2
 %         %% too slow:
 %         vars = who('-file',['./Results/',filename_tmp,filesep,'workspace.mat'],'ple*');
 %         if ~isempty(intersect(vars,'pleGlobals'))
@@ -150,7 +150,7 @@ if(exist(filename_pars,'file'))
                 end
             end
 %         end
-    end
+        end
     
     anno = sprintf('(%20s%8s%8s%11s%12s%14s%12s%10s)',chi2str,nstr,pstr,qstr,priorstr,errstr,lhsstr,plestr);
 else
