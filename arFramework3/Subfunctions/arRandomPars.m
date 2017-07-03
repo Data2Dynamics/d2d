@@ -33,7 +33,7 @@ if(exist('rng','file')~=0)
 end
 
 % default matrix
-ps = ones(n,1) * ar.p;
+ps = ones(n,1) * ar.p(:)';
 
 if(isfield(ar.config, 'useLHS') && ar.config.useLHS==1) % LHS samples
     if ar.config.fiterrors==1
@@ -69,7 +69,9 @@ else % uniformly distributed, i.e. rand within the range [ar.lb, ar.ub]
     end
     
     psrand = rand(n,sum(q_select));
-    psrand = psrand .* (ones(n,1)*(ar.ub(q_select) - ar.lb(q_select)));
-    psrand = psrand + (ones(n,1)*ar.lb(q_select));
+    tmpublb = (ar.ub(q_select) - ar.lb(q_select));
+    tmplb = ar.lb(q_select);
+    psrand = psrand .* (ones(n,1) * tmpublb(:)');
+    psrand = psrand + (ones(n,1) * tmplb(:)');
     ps(:,q_select) = psrand;
 end
