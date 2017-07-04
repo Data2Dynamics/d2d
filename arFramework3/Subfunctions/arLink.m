@@ -478,6 +478,8 @@ if(isfield(ar, 'pLabel'))
     type = ar.type;
     meanp = ar.mean;
     stdp = ar.std;
+else 
+    p = [];
 end
 
 % collecting parameters
@@ -627,7 +629,12 @@ end
 if(isfield(ar, 'pExternLabels'))
     arSetPars(ar.pExternLabels, ar.pExtern, ar.qFitExtern, ar.qLog10Extern, ...
         ar.lbExtern, ar.ubExtern);
+    
+    if ~isempty(p) && sum(abs( p-ar.p ))>1e-10
+        warning('arLink overwrites parameter values by the default ar.pExtern defined in the def file.');
+    end
 end
+
 
 
 % assigning first to cells 'tmp' and then in an array of SIMILAR structs is

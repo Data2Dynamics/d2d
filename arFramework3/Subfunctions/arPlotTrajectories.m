@@ -7,9 +7,9 @@ function [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ncount,
 % rows and cols
 ny = length(iy);
 [nrows, ncols] = arNtoColsAndRows(ny);
-if(nrows*ncols==ny && nrows*ncols>0)
-    [nrows, ncols] = arNtoColsAndRows(ny+1);
-end 
+% if(nrows*ncols==ny && nrows*ncols>0)
+%     [nrows, ncols] = arNtoColsAndRows(ny+1);
+% end 
 
 % styles
 Clines = arLineMarkersAndColors(ccount, ncount, [], 'none', '-');

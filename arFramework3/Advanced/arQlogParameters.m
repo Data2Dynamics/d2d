@@ -56,6 +56,34 @@ if(newval == 1)
         end
         ar.ub(jp) = log10(ar.ub(jp));
         ar.mean(jp) = log10(ar.mean(jp));
+        
+        if isfield(ar,'ple')
+            if isfield(ar.ple,'ps')
+                for i=1:length(ar.ple.ps)
+                    ar.ple.ps{i}(:,jp) = log10(ar.ple.ps{i}(:,jp));
+                end
+            end
+            if isfield(ar.ple,'p_true')
+                ar.ple.p_true(jp) = log10(ar.ple.p_true(jp));
+            end
+            if isfield(ar.ple,'p')
+                ar.ple.p(jp) = log10(ar.ple.p(jp));
+            end
+            
+            if isfield(ar.ple,'conf_lb')
+                ar.ple.conf_lb(jp) = log10(ar.ple.conf_lb(jp));
+            end
+            if isfield(ar.ple,'conf_lb_point')
+                ar.ple.conf_lb_point(jp) = log10(ar.ple.conf_lb_point(jp));
+            end
+            if isfield(ar.ple,'conf_ub')
+                ar.ple.conf_ub(jp) = log10(ar.ple.conf_ub(jp));
+            end
+            if isfield(ar.ple,'conf_ub_point')
+                ar.ple.conf_ub_point(jp) = log10(ar.ple.conf_ub_point(jp));
+            end
+        end
+        
     else
         fprintf('Parameter %s is already treated on the log-scale. Nothing changed.\n',ar.pLabel{jp});        
     end
@@ -66,6 +94,33 @@ else
         ar.lb(jp) = 10^(ar.lb(jp));
         ar.ub(jp) = 10^(ar.ub(jp));
         ar.mean(jp) = 10^(ar.mean(jp));
+
+        if isfield(ar,'ple')
+            if isfield(ar.ple,'ps')
+                for i=1:length(ar.ple.ps)
+                    ar.ple.ps{i}(:,jp) = 10.^(ar.ple.ps{i}(:,jp));
+                end
+            end
+            if isfield(ar.ple,'p_true')
+                ar.ple.p_true(jp) = 10^(ar.ple.p_true(jp));
+            end
+            if isfield(ar.ple,'p')
+                ar.ple.p(jp) = 10^(ar.ple.p(jp));
+            end
+            
+            if isfield(ar.ple,'conf_lb')
+                ar.ple.conf_lb(jp) = 10.^(ar.ple.conf_lb(jp));
+            end
+            if isfield(ar.ple,'conf_lb_point')
+                ar.ple.conf_lb_point(jp) = 10.^(ar.ple.conf_lb_point(jp));
+            end
+            if isfield(ar.ple,'conf_ub')
+                ar.ple.conf_ub(jp) = 10.^(ar.ple.conf_ub(jp));
+            end
+            if isfield(ar.ple,'conf_ub_point')
+                ar.ple.conf_ub_point(jp) = 10.^(ar.ple.conf_ub_point(jp));
+            end
+        end
     else
         fprintf('Parameter %s is already treated on the non-logarithmic scale. Nothing changed.\n',ar.pLabel{jp});
     end
