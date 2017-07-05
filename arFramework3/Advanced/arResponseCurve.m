@@ -82,7 +82,7 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         labels = [ pLabels, xLabels, zLabels, uLabels ];
         values = [ pValues, xValues, zValues, uValues ];      
         
-        [~, Iref, ~] = intersect( labels, {indep1, indep2} );
+        [~, ~, Iref] = intersect( {indep1, indep2}, labels, 'stable' );
         refValues = values(Iref);
         
         % Remove the variables we want to scan

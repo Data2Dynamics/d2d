@@ -44,10 +44,12 @@ function arFractionalFlux( species, varargin )
     if opts.tmax
         tLimOld = ar.model(model).tLim(2);
         ar.model(model).tLim(2) = opts.tmax_args;
-        arLink;
-        arSimu(false,true,true);
+        arLink;    
     end
-
+    
+    % Simulate the system
+    arSimu(false,true,true);
+    
     % Fetch required data
     state               = ismember( ar.model(model).x, species );
     stoich              = ar.model(model).N( state, : );
@@ -72,7 +74,7 @@ function arFractionalFlux( species, varargin )
         hold on;
     end
     plot( t, sum(v, 2), 'k--' );
-    legend( union( sanitize( ar.model(model).v(involvedReactions(I)) ), 'Net flux', 'stable' ) );
+    legend( union( sanitize( vNames(I)), 'Net flux', 'stable' ) );
     
     %u = max( median(ar.model(model).condition.vFineSimu)+.4*mad(ar.model(model).condition.vFineSimu) );
     %l = min( median(ar.model(model).condition.vFineSimu)-.4*mad(ar.model(model).condition.vFineSimu) );
