@@ -94,11 +94,25 @@ function resCurveFcn(hObject, eventData) %#ok
                     I = I2;
                 end
                 
-                rot = (360/pi) * (atan2(obj.YData(I+1) - obj.YData(I), log10(obj.XData(I+1)) - log10(obj.XData(I))) + pi);
-                Q = text( obj.XData(I) * 0.94, obj.YData(I), sprintf( '%s = %.3g', arInteractivityStruct.arResponseCurve.responseVar2, dose ), 'Rotation', rot );
-                set( Q, 'Rotation', rot );
+                oldUnits    = get(gca, 'Units');
+                set( gca, 'Units', 'pixels' );
+                xlims       = get(gca, 'XLim');
+                ylims       = get(gca, 'YLim');
+                xP          = get(gca, 'Position');
+                xscale      = (log10(xlims(2))-log10(xlims(1))) / xP(3);
+                yscale      = (ylims(2)-ylims(1)) / xP(4);
+                xpixdiff    = (log10(obj.XData(I+1)) - log10(obj.XData(I-1))) / xscale;
+                ypixdiff    = (obj.YData(I+1) - obj.YData(I-1)) / yscale;
+                rot         = (180/pi) * (atan2(ypixdiff, xpixdiff ) );
+                set( gca, 'Units', oldUnits );
+                
+                Q = text( obj.XData(I), obj.YData(I), sprintf( '%s = %.3g', arInteractivityStruct.arResponseCurve.responseVar2, dose ), 'Rotation', rot );
+                set( Q, 'VerticalAlignment', 'bottom' );
+                set( Q, 'HorizontalAlignment', 'center' );
                 set( Q, 'FontWeight', 'bold' );
                 set( Q, 'FontSize', 12 );
+                set( Q, 'Rotation', rot );
+
             end       
         catch
             error( 'Unknown interactivity error in callback' );
