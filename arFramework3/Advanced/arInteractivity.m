@@ -58,12 +58,50 @@ function interactive = arInteractivity( varargin )
         arInteractivityStruct.arCompareModel.titles         = varargin{10};
         set(gcf,'WindowButtonDownFcn', @(hObject, eventData)arCompareModelFcn2(hObject, eventData) );
     end
+    
+    if strcmp( varargin{1}, 'arResponseCurve' )
+        arInteractivityStruct.arResponseCurve = struct;
+        arInteractivityStruct.arResponseCurve.objects       = varargin{2};
+        arInteractivityStruct.arResponseCurve.doses         = varargin{3};
+        arInteractivityStruct.arResponseCurve.responseVar2  = varargin{4};
+        set(gcf, 'WindowButtonDownFcn', @(hObject, eventData)resCurveFcn(hObject, eventData) );
+    end
 end
 
 function initInteractivity()
     global arInteractivityStruct;
     
     arInteractivityStruct.active = 0;
+end
+
+function resCurveFcn(hObject, eventData) %#ok
+    global arInteractivityStruct;
+
+    if ( ~isempty( arInteractivityStruct ) && arInteractivityStruct.active && isfield( arInteractivityStruct, 'arResponseCurve' ) )
+       % try                      
+            objID = ismember(arInteractivityStruct.arResponseCurve.objects, gco);
+            if sum( objID ) ~= 0
+                dose    = arInteractivityStruct.arResponseCurve.doses(objID);
+                obj     = get(gco);
+                
+                cp      = get(gca, 'CurrentPoint');
+                [C1,I1] = min(abs(obj.YData-cp(1,2)));
+                [C2,I2] = min(abs(obj.XData-cp(1,1)));
+                
+                if ( C1 < C2 )
+                    I = I1;
+                else
+                    I = I2;
+                end
+                
+                rot = (360/pi) * (atan2(obj.YData(I+1) - obj.YData(I), log10(obj.XData(I+1)) - log10(obj.XData(I))) + pi)
+                Q = text( obj.XData(I) * 0.94, obj.YData(I), sprintf( '%s = %.3g', arInteractivityStruct.arResponseCurve.responseVar2, dose ), 'Rotation', rot );
+                set( Q, 'Rotation', rot );
+            end       
+       % catch
+       %     error( 'Unknown interactivity error in callback' );
+       % end
+    end
 end
 
 function pleFcn2(hObject, eventData) %#ok

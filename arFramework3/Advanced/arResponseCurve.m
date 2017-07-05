@@ -134,16 +134,20 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         rate = zeros( numel( responseRange2 ), numel( responseRange1 ) );
         cmap = parula( numel( responseRange2 ) );
 
+        doses = zeros( numel(responseRange2 ) + 1, 1 );
+        plots = zeros( numel(responseRange2 ) + 1, 1 );
         for c1 = 1 : numel( responseRange2 )
             rate(c1,:) = mFunc( responseRange1, responseRange2(c1) );
             if ( ylog )
                 rate(c1,rate(c1,:)<miniTresh) = miniTresh;
             end
-            plot( responseRange1, rate(c1, :), 'Color', cmap(c1, :) );
+            doses(c1) = responseRange2(c1);
+            plots(c1) = plot( responseRange1, rate(c1, :), 'Color', cmap(c1, :) );
         end
         r = mFunc( responseRange1, refValues(2) );
         r(:, r<miniTresh) = miniTresh;
-        plot( responseRange1, r, 'k', 'LineWidth', 2 );
+        doses(end) = refValues(2);
+        plots(end) = plot( responseRange1, r, 'k', 'LineWidth', 2 );
         plot( [refValues(1), refValues(1)], [min(min(rate)), max(max(rate))], 'k--' );
 
         xlabel( indep1 );
@@ -168,6 +172,14 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         colormap(parula);
         ylabel( c, sprintf( 'log_{10}(%s)', indep2 ) );
     
+        % If the interactivity system is enabled, register the callbacks
+        % and provide arInteractivity with the required data.
+        if ( exist( 'arInteractivity', 'file' ) )
+            if ( arInteractivity )
+                arInteractivity( 'arResponseCurve', plots, doses, indep2 );
+            end
+        end        
+        
         if ( nargout == 0 )
             clear rate;
         end
