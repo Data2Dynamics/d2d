@@ -78,7 +78,7 @@ function resCurveFcn(hObject, eventData) %#ok
     global arInteractivityStruct;
 
     if ( ~isempty( arInteractivityStruct ) && arInteractivityStruct.active && isfield( arInteractivityStruct, 'arResponseCurve' ) )
-       % try                      
+        try                      
             objID = ismember(arInteractivityStruct.arResponseCurve.objects, gco);
             if sum( objID ) ~= 0
                 dose    = arInteractivityStruct.arResponseCurve.doses(objID);
@@ -94,13 +94,15 @@ function resCurveFcn(hObject, eventData) %#ok
                     I = I2;
                 end
                 
-                rot = (360/pi) * (atan2(obj.YData(I+1) - obj.YData(I), log10(obj.XData(I+1)) - log10(obj.XData(I))) + pi)
+                rot = (360/pi) * (atan2(obj.YData(I+1) - obj.YData(I), log10(obj.XData(I+1)) - log10(obj.XData(I))) + pi);
                 Q = text( obj.XData(I) * 0.94, obj.YData(I), sprintf( '%s = %.3g', arInteractivityStruct.arResponseCurve.responseVar2, dose ), 'Rotation', rot );
                 set( Q, 'Rotation', rot );
+                set( Q, 'FontWeight', 'bold' );
+                set( Q, 'FontSize', 12 );
             end       
-       % catch
-       %     error( 'Unknown interactivity error in callback' );
-       % end
+        catch
+            error( 'Unknown interactivity error in callback' );
+        end
     end
 end
 
