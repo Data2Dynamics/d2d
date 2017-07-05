@@ -19,6 +19,7 @@
 % NOTE: THIS FUNCTION IS CURRENTLY IN ALPHA STATUS!
 % PLEASE DO NOT EDIT THIS FUNCTION YET. IT IS STILL UNDER ACTIVE DEVELOPMENT.
 % FUNCTION ARGUMENTS ARE LIKELY SUBJECT TO CHANGE IN THE NEAR FUTURE.
+% If you wish to edit it at this point, please contact Joep Vanlier first.
 function rate = arResponseCurve( name, indep1, indep2, varargin )
 
     global ar;
@@ -28,19 +29,29 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
     cond = 1;
     timepoints = 1;
     miniTresh = 1e-16;
+    mRange = 5;
     
-    args = {'timepoints', 'condition', 'model', 'relative'};
-    extraArgs = [1, 1, 1, 0];
+    args = {'timepoints', 'condition', 'model', 'relative', 'range'};
+    extraArgs = [1, 1, 1, 0, 1];
     opts = argSwitch( args, extraArgs, {}, 0, varargin );
 
     if opts.timepoints
         timepoints = opts.timepoints_args;
     end
+    if opts.model
+        model = opts.model_args;
+        if ( ~isnumeric( model ) || ( model > numel( ar.model ) ) )
+            error( 'Invalid argument passed for model' );
+        end
+    end
     if opts.condition
         cond = opts.condition_args;
+        if ( ~isnumeric( cond ) || ( cond > numel( ar.model(model).condition ) ) )
+            error( 'Invalid argument passed for condition' );
+        end    
     end
-    if opts.model
-        m = opts.model_args;
+    if opts.range
+        mRange = opts.range_args;
     end
     
     %figure;
@@ -91,6 +102,9 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
                 limF = limit( limF, products{i}, 0 );
             end
             
+            disp( 'Limit value (verify whether this contains only vmax expression):' );
+            limF
+            
             % Normalize by vmax
             func = func / limF;
             
@@ -114,8 +128,8 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         mFunc = matlabFunction( func, 'vars', {indep1, indep2} );
 
         % Get reference amounts
-        responseRange1 = 10.^[-5 : .1 : 5];
-        responseRange2 = 10.^[-5 : .5 : 5];
+        responseRange1 = 10.^[-mRange : .1 : mRange];
+        responseRange2 = 10.^[-mRange : .5 : mRange];
 
         rate = zeros( numel( responseRange2 ), numel( responseRange1 ) );
         cmap = parula( numel( responseRange2 ) );
