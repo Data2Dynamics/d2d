@@ -343,7 +343,10 @@ for jm = 1:length(ar.model)
 %                     lpos = get(g,'Position');
 %                     delete(g);
                     g = subplot(nrows, ncols, 1);
-                    hl = legend(g, Clegend, Clegendlabel, 'Location', 'SouthWest');
+                    
+                    try % TODO there, is an error here when only some x are selected for plotting
+                        hl = legend(g, Clegend, Clegendlabel, 'Location', 'SouthWest');
+                    end
 %                     lpos2 = get(hl,'Position');
 %                     lpos2(1:2) = lpos(1:2);
 %                     set(hl, 'Position', lpos2);

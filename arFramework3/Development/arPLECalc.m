@@ -59,10 +59,17 @@ if(~isfield(ar, 'ple'))
     ar.ple.alpha = 0.05;
     ar.ple.ndof = 1;
 end
+if(~isfield(ar.ple, 'p_labels'))
+    ar.ple.p_labels = ar.pLabel;
+end
+if(~isfield(ar.ple, 'alpha_level'))
+    ar.ple.alpha_level = ar.ple.alpha;
+end
 
 % save original parameters
 pReset = ar.p;
 ar.ple.pStart = ar.p;
+ar.ple.p = ar.ple.pStart;
 qFitReset = ar.qFit(jk);
 
 fprintf('PLE #%i for %s...\n', jk, ar.pLabel{jk});
