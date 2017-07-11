@@ -346,6 +346,8 @@ for jm = 1:length(ar.model)
                     
                     try % TODO there, is an error here when only some x are selected for plotting
                         hl = legend(g, Clegend, Clegendlabel, 'Location', 'SouthWest');
+                    catch
+                        warning( '<arPlot2> TODO: There is an unfixed error here when only some x are selected for plotting' );
                     end
 %                     lpos2 = get(hl,'Position');
 %                     lpos2(1:2) = lpos(1:2);
