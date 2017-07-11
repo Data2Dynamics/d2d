@@ -64,7 +64,7 @@ if ( ~dynamics )
     
     % TODO there is a bug in the section above, sometimes calculations are
     % missed due to faulty house-keeping. I can't figure it out at the moment,
-    % so I force the calculations here for now.    
+    % so I force the calculations here for now.
     dynamics = 1;
 end
 
@@ -127,8 +127,12 @@ end
 
 % initialize fine sensitivities
 % this is very important, c code crashes otherwise!
-if(fine && sensi)
-    ar = initFineSensis(ar, dynamics);
+if(sensi)
+    if ( fine )
+        ar = initFineSensis(ar, dynamics);
+    else
+        ar = initExpSensis(ar, dynamics);
+    end
 end
 
 % do we have steady state presimulations?
@@ -209,7 +213,9 @@ if ( ss_presimulation && dynamics )
     end
 end
 
+
 % call mex function to simulate models
+%feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads', ar.config.skipSim)
 feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads', ar.config.skipSim)
 
 % integration error ?
@@ -319,6 +325,22 @@ for m = 1:length(ar.model)
         end
     end
 end
+
+function ar = initExpSensis(ar, dynamics)
+
+if ( dynamics )
+    for m = 1:length(ar.model)
+        if(isfield(ar.model(m), 'data'))
+            for d = 1:length(ar.model(m).data)
+                ar.model(m).data(d).syExpSimu = zeros(length(ar.model(m).data(d).tExp), ...
+                    length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+                ar.model(m).data(d).systdFineSimu = zeros(length(ar.model(m).data(d).tExp), ...
+                    length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));            
+            end
+        end
+    end
+end
+
 
 function ar = initSteadyStateSensis(ar, dynamics)
 
