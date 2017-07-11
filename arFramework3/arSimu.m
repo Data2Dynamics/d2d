@@ -332,10 +332,12 @@ if ( dynamics )
     for m = 1:length(ar.model)
         if(isfield(ar.model(m), 'data'))
             for d = 1:length(ar.model(m).data)
-                ar.model(m).data(d).syExpSimu = zeros(length(ar.model(m).data(d).tExp), ...
-                    length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
-                ar.model(m).data(d).systdFineSimu = zeros(length(ar.model(m).data(d).tExp), ...
-                    length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));            
+                if ( ar.model(m).data(d).has_tExp )
+                    ar.model(m).data(d).syExpSimu = zeros(length(ar.model(m).data(d).tExp), ...
+                        length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+                    ar.model(m).data(d).systdFineSimu = zeros(length(ar.model(m).data(d).tExp), ...
+                        length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
+                end
             end
         end
     end
