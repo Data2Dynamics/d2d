@@ -195,7 +195,12 @@ for jk=jks
 end
 
 % save
-if(savetofile && exist(ar.ple.savePath, 'dir'))
+
+if savetofile
+    if ~exist(ar.ple.savePath, 'dir')
+        mkdir(ar.ple.savePath)
+    end
+    
     name = 'multi_plot';
     ar.ple.figPathMulti{jk} = [ar.ple.savePath '/' name];
     set(h,'Renderer','painters')

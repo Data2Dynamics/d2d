@@ -59,7 +59,7 @@ tmpy(isinf(tmpy)) = nan;
 if(isempty(hy))
     hy = plot(t, tmpy, Clines{:});
     %plot data points of model prediction profile likelihood as stars
-    if(~isempty(t_ppl)  & any(plotopt(jy)==[4,5]))
+    if(~isempty(t_ppl) && any(plotopt(jy)==[4,5]))
         if(~isempty(qUnlog) && qUnlog(jy))
             hyss = patch([t_ppl(:,jy) ; flipud(t_ppl(:,jy))], [10.^y_ppl_lb(:,jy); flipud(10.^y_ppl_ub(:,jy))], ones(size([y_ppl_lb(:,jy); y_ppl_ub(:,jy)])));             
         else

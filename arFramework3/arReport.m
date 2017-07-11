@@ -961,8 +961,8 @@ lp(fid, '\t\\end{table}');
 
 %% PLE
 if ~isfield(ar,'ple') || isempty(ar.ple)
-    if(exist(plePath,'dir'))
-        tmp = load([ar.config.savepath 'PlE/results.mat']);
+    if(exist([ar.config.savepath 'PLE'],'dir'))
+        tmp = load([ar.config.savepath 'PLE/results.mat']);
         ar.ple = tmp.pleGlobals;
     else
         ar.ple = [];
@@ -981,11 +981,12 @@ if ~isempty(ar.ple) && isfield(ar.ple,'ps')
 %         secToHMS(std(ar.ple.timing(ar.ple.q_fit(size(ar.ple.timing))))));
     
     % Multiplot
-    if(isfield(ar.ple, 'fighandel_multi'))
-        lp(fid, 'An overview is displayed in Figure \\ref{multi_plot}.');
-        
-        sourcestr = [plePath '/multi_plot.eps'];
-        targetstr = [savePath '/multi_plot.pdf'];
+    sourcestr = [ar.ple.savePath,'/multi_plot.eps'];
+    source_pdf = [ar.ple.savePath,'/multi_plot.pdf'];
+    targetstr = [savePath '/multi_plot.pdf'];
+    if exist(source_pdf,'file')==2 
+        copyfile(source_pdf,targetstr);
+    elseif exist(targetstr,'file')~=2 && exist(sourcestr,'file')==2        
         if(ispc)
             print('-dpdf', targetstr);
         elseif(ismac)
@@ -994,6 +995,11 @@ if ~isempty(ar.ple) && isfield(ar.ple,'ps')
             system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' sourcestr ' ' targetstr]);
         end
         
+    end
+    
+    if(isfield(ar.ple, 'fighandel_multi')  && exist(targetstr,'file')==2)
+        lp(fid, 'An overview is displayed in Figure \\ref{multi_plot}.');
+
         captiontext = '\textbf{Overview of the profile likelihood of the model parameters}\\';
         captiontext = [captiontext 'The solid lines indicate the profile likelihood. '];
         captiontext = [captiontext 'The broken lines indicate the threshold to assess confidence intervals. '];

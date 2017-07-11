@@ -62,6 +62,7 @@ end
 
 ar.IdentifiabilityTest = struct;
 ar.IdentifiabilityTest.n_rescall = 0;
+ar.IdentifiabilityTest.pLabel = ar.pLabel;
 ar.IdentifiabilityTest.p0 = ar.p + 0.0;
 ar.IdentifiabilityTest.radius = radius;
 % ar.IdentifiabilityTest.penaltySD = 1/icdf('chi2',0.95,1);
@@ -114,7 +115,7 @@ ar.IdentifiabilityTest.euclDist = sqrt(sum((ar.p-ar.IdentifiabilityTest.p0).^2))
 ar.IdentifiabilityTest.p = ar.p + 0.0;
 ar.IdentifiabilityTest.dp = ar.IdentifiabilityTest.p - ar.IdentifiabilityTest.p0;
 [~,rf] = sort(-abs(ar.IdentifiabilityTest.dp));
-anzNI = sum(ar.IdentifiabilityTest.dp>0.1*ar.IdentifiabilityTest.radius);
+anzNI = sum(abs(ar.IdentifiabilityTest.dp)>0.1*ar.IdentifiabilityTest.radius);
 ar.IdentifiabilityTest.nonId = ar.pLabel(rf(1:anzNI));
 
 %% after Fitting, with penalty

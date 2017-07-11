@@ -630,7 +630,7 @@ if(isfield(ar, 'pExternLabels'))
     arSetPars(ar.pExternLabels, ar.pExtern, ar.qFitExtern, ar.qLog10Extern, ...
         ar.lbExtern, ar.ubExtern);
     
-    if ~isempty(p) && sum(abs( p-ar.p ))>1e-10
+    if ~isempty(p) && sum(  abs( p-ar.p )>1e-10 & ar.p~=-1)>0
         warning('arLink overwrites parameter values by the default ar.pExtern defined in the def file.');
     end
 end
