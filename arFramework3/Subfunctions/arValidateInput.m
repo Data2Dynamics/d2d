@@ -7,7 +7,15 @@
 function arValidateInput( C, stage, varargin )
     for a = 1 : length(varargin)
         if ( iscell(C{a}) )
-            C{a} = C{a}{1};
+            try
+                C{a} = C{a}{1};
+            catch
+                if isempty( C{1} )
+                    error( 'Did not find data for parsing stage %s. Did you leave a " bracket open?', stage );
+                else
+                    error( 'Malformed input during parsing %s', stage );
+                end
+            end
         end 
         if ( isempty( C{a} ) )
             format = getFormat(varargin);

@@ -643,7 +643,11 @@ end
 % hard code conditions
 specialFunc = config.specialFunc;
 condition.sym.p = sym(condition.p);
-condition.sym.fp = sym(condition.fp);
+try
+    condition.sym.fp = sym(condition.fp);
+catch
+    error( invalidSym( 'Invalid expression in condition transformations', condition.fp, condition.p ) );
+end
 condition.sym.fpx0 = sym(model.px0);
 condition.sym.fpx0 = arSubs(condition.sym.fpx0, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.fv = mySym(model.fv, specialFunc);
@@ -2429,3 +2433,23 @@ function cstr = ccode2(T, matlab_version)
             cstr = strrep( [cstr(1:end-2) ';'], '_assign(t0,', 't0=' );
         end     
     end
+    
+function message = invalidSym( message, symvariable, names )
+    if ( exist( 'names', 'var' ) )
+        for a = 1 : numel( symvariable )
+            try
+                sym(symvariable(a));
+            catch
+                message = sprintf( '%s\n%s -> %s\n', message, names{a}, symvariable{a} );
+            end
+        end
+    else
+        for a = 1 : numel( symvariable )
+            try
+                sym(symvariable(a));
+            catch
+                message = sprintf( '%s\n%s\n', message, symvariable{a} );
+            end
+        end
+    end
+    
