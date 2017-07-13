@@ -47,109 +47,113 @@ function ar = arAddEvent( varargin )
         logCall( 'arAddEvent', varargin{:} );
     end
     
-    m   = varargin{1};
-    c   = varargin{2};
-    tL  = varargin{3};
+    m       = varargin{1};
+    condis  = varargin{2};
+    tL      = varargin{3};
     
-    if ( ischar(c) && strcmpi( c, 'all' ) )
-        c = 1 : length( ar.model(m).condition );
+    if ( ischar(condis) && strcmpi( condis, 'all' ) )
+        condis = 1 : length( ar.model(m).condition );
     end
 
     nStates = numel( ar.model(m).x );
-    nPars   = numel( ar.model(m).condition(c).p );    
     
-    if ( length( varargin ) > 3 )
-        if ischar( varargin{4} )
-            state = find( strcmp(ar.model(m).x, varargin{4}) == 1 );
-        else
-            state = varargin{4};
-        end
-    end
-    
-    stateChanges = 0;
-    if ( length( varargin ) > 4 )
-        stateChanges = 1;
-        A = varargin{5};
-        if ( length( varargin ) > 5 )
-            B = varargin{6};
-        else
-            B = 0;
-        end
-    end
-    
-    manualSensitivity = 0;
-    if ( length( varargin ) > 6 )
-        manualSensitivity = 1;
-        sA = varargin{7};
-        sB = varargin{8};
-        try
-            if ( sum( size(sA) == [1, nStates, nPars] ) < 3 )
-                error( 'Sensitivity matrix A has the wrong dimensions. Should be 1 x nStates x nPars' );
-            end
-            if ( sum( size(sB) == [1, nStates, nPars] ) < 3 )
-                error( 'Sensitivity matrix B has the wrong dimensions. Should be 1 x nStates x nPars' );
-            end
-        catch
-            error( 'Sensitivity matrix has the wrong dimensions. Should be 1 x nStates x nPars' );
-        end
-    end
-       
-    doLink = true;
-    if ( length( varargin ) > 8 )
-        doLink = varargin{9};
-    end    
-    
-    for nt = 1 : length( tL )
-        t = tL(nt);
-        
-        % Insert event
-        [ar.model(m).condition(c).tEvents, ~, i] = union( ar.model(m).condition(c).tEvents, t );
+    for jC = 1 : numel( condis )
+        c = condis(jC);
+        nPars   = numel( ar.model(m).condition(c).p );    
 
-        % Did we actually add a new event, or just modify a modifier?
-        if (length(i) > 0)
-            newEvent = 1;
-        else
-            newEvent = 0;
-        end
-
-        % Determine where the event was inserted
-        I = find( ar.model(m).condition(c).tEvents > t, 1 )-1;
-        if isempty(I)
-            I = length( ar.model(m).condition(c).tEvents );
-        end
-
-        % Insertion
-        modx_A_ins = ones(1, nStates);
-        modx_B_ins = zeros(1, nStates);
-        modsx_A_ins = ones(1, nStates, nPars);
-        modsx_B_ins = zeros(1, nStates, nPars);    
-
-        % Merge mod matrices if required
-        if ( newEvent )
-            ar.model(m).condition(c).modt     = union( ar.model(m).condition(c).modt, t );
-            ar.model(m).condition(c).modx_A   = [ ar.model(m).condition(c).modx_A(1:I-1,:) ; modx_A_ins ; ar.model(m).condition(c).modx_A(I:end,:) ];
-            ar.model(m).condition(c).modx_B   = [ ar.model(m).condition(c).modx_B(1:I-1,:) ; modx_B_ins ; ar.model(m).condition(c).modx_B(I:end,:) ];
-            ar.model(m).condition(c).modsx_A  = [ ar.model(m).condition(c).modsx_A(1:I-1,:,:) ; modsx_A_ins ; ar.model(m).condition(c).modsx_A(I:end,:,:) ];
-            ar.model(m).condition(c).modsx_B  = [ ar.model(m).condition(c).modsx_B(1:I-1,:,:) ; modsx_B_ins ; ar.model(m).condition(c).modsx_B(I:end,:,:) ];        
-        end
-
-        % Ready to add the event
-        if ( stateChanges )
-            ar.model(m).condition(c).modx_A(I,state) = A;
-            ar.model(m).condition(c).modx_B(I,state) = B;
-
-            if ( manualSensitivity )
-                ar.model(m).condition(c).modsx_A(I,:,:) = sA;
-                ar.model(m).condition(c).modsx_B(I,:,:) = sB;
+        if ( length( varargin ) > 3 )
+            if ischar( varargin{4} )
+                state = find( strcmp(ar.model(m).x, varargin{4}) == 1 );
             else
-                % Only the multiplicative part of the sensitivity factors in
-                ar.model(m).condition(c).modsx_A(I,state,:) = A;
+                state = varargin{4};
             end
         end
 
-        % Activate event system for this condition
-        ar.model(m).condition(c).qEvents = 1;
-    
+        stateChanges = 0;
+        if ( length( varargin ) > 4 )
+            stateChanges = 1;
+            A = varargin{5};
+            if ( length( varargin ) > 5 )
+                B = varargin{6};
+            else
+                B = 0;
+            end
+        end
+
+        manualSensitivity = 0;
+        if ( length( varargin ) > 6 )
+            manualSensitivity = 1;
+            sA = varargin{7};
+            sB = varargin{8};
+            try
+                if ( sum( size(sA) == [1, nStates, nPars] ) < 3 )
+                    error( 'Sensitivity matrix A has the wrong dimensions. Should be 1 x nStates x nPars' );
+                end
+                if ( sum( size(sB) == [1, nStates, nPars] ) < 3 )
+                    error( 'Sensitivity matrix B has the wrong dimensions. Should be 1 x nStates x nPars' );
+                end
+            catch
+                error( 'Sensitivity matrix has the wrong dimensions. Should be 1 x nStates x nPars' );
+            end
+        end
+
+        doLink = true;
+        if ( length( varargin ) > 8 )
+            doLink = varargin{9};
+        end    
+
+        for nt = 1 : length( tL )
+            t = tL(nt);
+
+            % Insert event
+            [ar.model(m).condition(c).tEvents, ~, i] = union( ar.model(m).condition(c).tEvents, t );
+
+            % Did we actually add a new event, or just modify a modifier?
+            if (length(i) > 0)
+                newEvent = 1;
+            else
+                newEvent = 0;
+            end
+
+            % Determine where the event was inserted
+            I = find( ar.model(m).condition(c).tEvents > t, 1 )-1;
+            if isempty(I)
+                I = length( ar.model(m).condition(c).tEvents );
+            end
+
+            % Insertion
+            modx_A_ins = ones(1, nStates);
+            modx_B_ins = zeros(1, nStates);
+            modsx_A_ins = ones(1, nStates, nPars);
+            modsx_B_ins = zeros(1, nStates, nPars);    
+
+            % Merge mod matrices if required
+            if ( newEvent )
+                ar.model(m).condition(c).modt     = union( ar.model(m).condition(c).modt, t );
+                ar.model(m).condition(c).modx_A   = [ ar.model(m).condition(c).modx_A(1:I-1,:) ; modx_A_ins ; ar.model(m).condition(c).modx_A(I:end,:) ];
+                ar.model(m).condition(c).modx_B   = [ ar.model(m).condition(c).modx_B(1:I-1,:) ; modx_B_ins ; ar.model(m).condition(c).modx_B(I:end,:) ];
+                ar.model(m).condition(c).modsx_A  = [ ar.model(m).condition(c).modsx_A(1:I-1,:,:) ; modsx_A_ins ; ar.model(m).condition(c).modsx_A(I:end,:,:) ];
+                ar.model(m).condition(c).modsx_B  = [ ar.model(m).condition(c).modsx_B(1:I-1,:,:) ; modsx_B_ins ; ar.model(m).condition(c).modsx_B(I:end,:,:) ];        
+            end
+
+            % Ready to add the event
+            if ( stateChanges )
+                ar.model(m).condition(c).modx_A(I,state) = A;
+                ar.model(m).condition(c).modx_B(I,state) = B;
+
+                if ( manualSensitivity )
+                    ar.model(m).condition(c).modsx_A(I,:,:) = sA;
+                    ar.model(m).condition(c).modsx_B(I,:,:) = sB;
+                else
+                    % Only the multiplicative part of the sensitivity factors in
+                    ar.model(m).condition(c).modsx_A(I,state,:) = A;
+                end
+            end
+
+            % Activate event system for this condition
+            ar.model(m).condition(c).qEvents = 1;
+
+        end
     end
     
     % Activate event handling in general
