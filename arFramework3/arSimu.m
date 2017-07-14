@@ -61,11 +61,6 @@ if ( ~dynamics )
             end
         end
     end
-    
-    % TODO there is a bug in the section above, sometimes calculations are
-    % missed due to faulty house-keeping. I can't figure it out at the moment,
-    % so I force the calculations here for now.
-    dynamics = 1;
 end
 
 if(~isfield(ar,'p'))
