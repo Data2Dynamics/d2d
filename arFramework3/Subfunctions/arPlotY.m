@@ -57,6 +57,7 @@ end
 % end
 
 figcount = 1;
+expPlot = isfield(ar.config, 'debugExp')&&ar.config.debugExp;
 for jm = 1:length(ar.model)
     ar.model(jm).chi2 = 0;
     ar.model(jm).ndata = 0;
@@ -101,7 +102,7 @@ for jm = 1:length(ar.model)
                     
                     for jy = 1:ny
                         whichYplot = arWhichYplot(jm,jd,[],jy);
-                        [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl] = getData(jm, jd, jy);
+                        [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, yExpSimu] = getData(jm, jd, jy);
                         
                         % Display bar for single time point measurements
                         if ( isfield( ar.config, 'barhack' ) && ( ar.config.barhack == 1 ) )
@@ -115,6 +116,7 @@ for jm = 1:length(ar.model)
                                 set(gca, 'XTick', []);
                             end
                         end
+                                           
                         
                         if(~fastPlotTmp)
                             g = subplot(nrows,ncols,jy);
@@ -180,7 +182,10 @@ for jm = 1:length(ar.model)
                                             hold(g,'on');
                                             plot(g, tExp, 10.^yExpHl, ClinesExp{:},'LineWidth',2,'MarkerSize',10);
                                         end
-                                        
+                                                                    
+                                        if ( expPlot )
+                                            plot(g, tExp, 10.^yExpSimu, 'x', ClinesExp{1:2}, 'Markersize', 6);
+                                        end
                                     else
                                         errorbar(g, tExp, 10.^yExp, ...
                                             10.^yExp - 10.^(yExp - yExpStd), 10.^(yExp + yExpStd) - 10.^yExp, ClinesExp{:});
@@ -257,6 +262,9 @@ for jm = 1:length(ar.model)
                                             hold(g,'on');
                                             errorbar(g, tExp, yExpHl, yExpStd, ClinesExp{:},'LineWidth',2,'MarkerSize',10);
                                         end
+                                    end
+                                    if ( expPlot )
+                                        plot(g, tExp, yExpSimu, 'x', ClinesExp{1:2}, 'Markersize', 6);
                                     end
                                 end
                             end
@@ -668,7 +676,7 @@ end
 
 
 
-function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl] = getData(jm, jd, jy)
+function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, yExpSimu] = getData(jm, jd, jy)
 global ar
 
 if(isfield(ar.model(jm).data(jd),'tFine'))
@@ -683,6 +691,7 @@ end
 if(isfield(ar.model(jm).data(jd), 'yExp') && ~isempty(ar.model(jm).data(jd).yExp))
     tExp = ar.model(jm).data(jd).tExp;
     yExp = ar.model(jm).data(jd).yExp(:,jy);
+    yExpSimu = ar.model(jm).data(jd).yExpSimu(:,jy);
     if ar.config.fiterrors==-1
         yExpStd = ar.model(jm).data(jd).yExpStd(:,jy);
     elseif any(ar.config.fiterrors == [0,1])

@@ -1011,7 +1011,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     ticks_stop[0] = ((double) tdiff.tv_usec) + ((double) tdiff.tv_sec * 1e6);
     
     /* Clean up */
-    terminate_x_calc( sim_mem, 0 );
+    terminate_x_calc( sim_mem, *status );
 }
        
 void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int has_tExp )

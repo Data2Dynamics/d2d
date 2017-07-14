@@ -29,6 +29,7 @@ function ar = arInitFields(ar)
         {'lightSave',                   false}, ...                     % When calling arSave, only save parameter sets by default (useful for big models)
         {'skipSim',                     false}, ...                     % Disable simulation (used for fitting steady state models)
         {'barhack',                     false}, ...                     % Display data with only a single time point as bar
+        {'debugExp',                    false}, ...                     % Show crosses with simulation values used for residual calculation in plots
         {'useCache',                    0}, ...                         % Use caching system (0 = no, 1 = strict (also check tExp, tFine), 2 = sloppy)
         {'checkForNegFluxes',           true}, ...
         {'useParallel',                 true}, ...                      % Parallelization
