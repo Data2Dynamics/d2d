@@ -28,11 +28,20 @@
 %
 % Example usage:
 %   arSplitPlot(1, 'myExperiment', 'nobmp', {'input_bmp2', @(x)x==0} )
+%
+% Advanced usage note: It is also possible to specify multiple conditions to one
+% anonymous function. Example:
+%   {{'input_bmp2', 'input_dorso'}, @(bmp,dcf)(bmp>0)||(dcf<0)}
 
 function arSplitPlot( varargin )
     
     global ar;
 
+    if ( nargin < 2 )
+        help arSplitPlot;
+        error( 'Must supply at least two arguments' );
+    end
+    
     if ( isnumeric(varargin{1} ) )
         m = varargin{1};
         varargin = varargin(2:end);
@@ -70,20 +79,41 @@ function arSplitPlot( varargin )
        
     % Filter on condition variables
     ds = [];
+    legid = [];
     str = ar.model(m).plot(plotID).name;
     for d = 1 : numel( dataSets )
         accept = 1;
         for a = 1 : 2 : numel( filterList )
-            if ( d == 1 )
-                str = [ str '_' filterList{a} ' -> ' func2str( filterList{a+1} ) ]; %#ok
+            % We want a cell array, even if it is one (single code path)
+            if ~iscell( filterList{a} )
+                filterList{a} = {filterList{a}};
             end
-            condiVal = arGetCondi( m, dataSets(d), filterList{a} );
-            if ~isempty( condiVal )
-                accept = accept & feval( filterList{a+1}, sym(condiVal) );
+            
+            % Collect variables required for anonymous function
+            filterString = '';
+            condiVals = {};
+            collectedRequired = 1;
+            for jf = 1 : numel( filterList{a} )
+                filterString = [ filterString, ' ', filterList{a}{jf} ]; %#ok
+                condiVal = arGetCondi( m, dataSets(d), filterList{a}{jf} );
+                if ~isempty( condiVal )
+                    condiVals{end+1} = sym(condiVal); %#ok
+                else
+                    collectedRequired = 0;
+                end
+            end
+            if ( collectedRequired )
+                accept = accept & feval( filterList{a+1}, condiVals{:} );
+            else
+                warning( 'Missing condition %s. No filtering will occur for this anonymous function %s -> %s', filterList{a}{jf}, filterString, func2str( filterList{a+1} ) );
+            end
+            if ( d == 1 )
+                str = [ str '_' filterString ' -> ' func2str( filterList{a+1} ) ]; %#ok
             end
         end
         if ( accept )
-            ds = [ ds, dataSets(d) ];
+            legid = [ legid d ]; %#ok
+            ds = [ ds, dataSets(d) ]; %#ok
         end
     end
     
@@ -98,6 +128,14 @@ function arSplitPlot( varargin )
     end
     
     newPlot.dLink = ds;
+    
+    % Update the legend
+    if ( numel(legid) > 1 )
+        newPlot.condition = ar.model(m).plot(plotID).condition(legid);
+    else
+        newPlot.condition = {};
+    end
+    
     ar.model(m).plot(end + 1) = newPlot;
     ar.model(m).qPlotYs(end + 1) = 1;
     ar.model(m).qPlotXs(end + 1) = 0;
