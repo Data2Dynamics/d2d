@@ -103,5 +103,7 @@ function arSplitPlot( varargin )
     ar.model(m).qPlotXs(end + 1) = 0;
     ar.model(m).qPlotVs(end + 1) = 0;
     
+    % Add a field which indicates that this plot is not an 'original' plot
+    ar.model(m).plot(end).origin = plotID;
     fprintf( 'Generated new plot %s (%d) with %d conditions\n', newPlot.name, numel(ar.model(m).plot), numel(ds) );
 end
