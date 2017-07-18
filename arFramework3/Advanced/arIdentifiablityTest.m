@@ -1,4 +1,4 @@
-% arIdentifiablityTest(radius, nfit, doFittigFirst)
+% arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
 % 
 %   This function implements a fast procedure to check whether structural
 %   non-identifiablities are present.
@@ -9,6 +9,8 @@
 % 
 %   THE MODEL HAS TO BE FITTED FIRST
 %   Local identifiablity is tested around the optimum.
+% 
+%   silent   Prevent command-line output ? Default: false
 % 
 %   radius   target radius when pulling
 % 
@@ -29,11 +31,14 @@
 %   arIdentifiablityTest  % default call
 % 
 %   % userdefined:
-%   arIdentifiablityTest(.1,10)  % 10 random initial guess
+%   arIdentifiablityTest([],.1,10)  % 10 random initial guess
 % 
 % ckreutz 2.6.17
 
-function arIdentifiablityTest(radius, nfit, doFittigFirst)
+function arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
+if ~exist('silent','var') || isempty(silent)
+    silent = false;
+end
 if ~exist('radius','var') || isempty(radius)
     radius = 1;
 elseif radius<=0
@@ -46,8 +51,14 @@ if ~exist('doFittigFirst','var') || isempty(doFittigFirst)
     doFittigFirst = 0;
 end
 
+
+
 thresh = 1e-3; % threshold for deciding
 global ar
+
+if ~silent
+    disp('Identifiabilty test started ...');
+end
 
 % res_fun = 'user_residual_fun_IdentifiabiltyTest';
 res_fun = @user_residual_fun_IdentifiabiltyTest2;
@@ -55,7 +66,7 @@ res_fun = @user_residual_fun_IdentifiabiltyTest2;
 if isfield(ar.config,'user_residual_fun')
     tmp = char(ar.config.user_residual_fun);
     if ~isempty(tmp) && strcmp(tmp,res_fun)~=1
-        error('arIdentifiablityTest can not handle user-specific residuals implemented as ar.config.user_residual_fun. Please combine it with user_residual_fun_IdentifiabiltyTest.')
+        error('arIdentifiablityTest can not handle user-specific residuals. Remove it via "ar.config.user_residual_fun = '''';"')
     end
 end
 
@@ -71,10 +82,15 @@ ar.IdentifiabilityTest.thresh  = thresh;
 ar.IdentifiabilityTest.nBound0 = sum( (ar.p(ar.qFit==1) - ar.lb(ar.qFit==1)) < ar.config.par_close_to_bound*(ar.ub(ar.qFit==1) - ar.lb(ar.qFit==1)) | ...
     (ar.ub(ar.qFit==1) - ar.p(ar.qFit==1)) < ar.config.par_close_to_bound*(ar.ub(ar.qFit==1) - ar.lb(ar.qFit==1)) ) ;
 
+ar.IdentifiabilityTest.message = cell(0);
+
+
 %% Berechne objective function without pulling away:
 % try
 if doFittigFirst
-    disp('Standard fitting ...')
+    if ~silent
+        disp('Standard fitting ...')
+    end
     %     ar.config.optim.Display = 'iter';
     arFit(true)
     if nfit>1
@@ -90,21 +106,21 @@ tic;
 
 %% without penalty
 ar.IdentifiabilityTest.state = 'off';
-arCalcMerit(true); %% be sure that the residuals are up-to-date, sensi = true ensures that ODE intergation steps are the same as within fitting
+arCalcMerit(true,ar.p(ar.qFit==1)); %% be sure that the residuals are up-to-date, sensi = true ensures that ODE intergation steps are the same as within fitting
 ar.IdentifiabilityTest.chi2_woPenalty0 = arGetMerit(true) + 0.0;
 
 
 %% before Fitting, with penalty
 ar.IdentifiabilityTest.state = 'on';
-arCalcMerit(true); %% be sure that the residuals are up-to-date, sensi = true ensures that ODE intergation steps are the same as within fitting
+arCalcMerit(true,ar.p(ar.qFit==1)); %% be sure that the residuals are up-to-date, sensi = true ensures that ODE intergation steps are the same as within fitting
 ar.IdentifiabilityTest.chi2_wPenalty0 = arGetMerit(true) + 0.0;
 
-fprintf('\nPulling with radius = %d, penaltySD = %d ... \n\n',ar.IdentifiabilityTest.radius,ar.IdentifiabilityTest.penaltySD)
+ar.IdentifiabilityTest.message{end+1} = sprintf('\nIdentifiability test was performed with radius = %d and penalty-SD = %d. \n\n',ar.IdentifiabilityTest.radius,ar.IdentifiabilityTest.penaltySD);
 ar.IdentifiabilityTest.ps_start = randomParsInBall(nfit,ar.IdentifiabilityTest.radius);
 ar.IdentifiabilityTest.ps_start(1,:) = ar.p; % the first one is always ar.p
 
 arFits(ar.IdentifiabilityTest.ps_start);
-ar.IdentifiabilityTest.chi2s = ar.chi2s;  
+ar.IdentifiabilityTest.chi2s = ar.chi2s;
 ar.IdentifiabilityTest.ps = ar.ps;
 
 ar.IdentifiabilityTest.nBound = sum( (ar.p(ar.qFit==1) - ar.lb(ar.qFit==1)) < ar.config.par_close_to_bound*(ar.ub(ar.qFit==1) - ar.lb(ar.qFit==1)) | ...
@@ -114,12 +130,11 @@ ar.IdentifiabilityTest.euclDist_relTo_deltaSD = sqrt(sum((ar.p-ar.Identifiabilit
 ar.IdentifiabilityTest.euclDist = sqrt(sum((ar.p-ar.IdentifiabilityTest.p0).^2));
 ar.IdentifiabilityTest.p = ar.p + 0.0;
 ar.IdentifiabilityTest.dp = ar.IdentifiabilityTest.p - ar.IdentifiabilityTest.p0;
-[~,rf] = sort(-abs(ar.IdentifiabilityTest.dp));
-anzNI = sum(abs(ar.IdentifiabilityTest.dp)>0.1*ar.IdentifiabilityTest.radius);
-ar.IdentifiabilityTest.nonId = ar.pLabel(rf(1:anzNI));
+[~,ar.IdentifiabilityTest.dp_order] = sort(-abs(ar.IdentifiabilityTest.dp));
+
 
 %% after Fitting, with penalty
-arCalcMerit(true); %% be sure that the residuals are up-to-date, sensi = true ensures that ODE intergation steps are the same as within fitting
+arCalcMerit(true,ar.p(ar.qFit==1)); %% be sure that the residuals are up-to-date, sensi = true ensures that ODE intergation steps are the same as within fitting
 ar.IdentifiabilityTest.chi2_wPenalty = arGetMerit(true) + 0.0;
 
 % ar.IdentifiabilityTest.chi2_ppl = ar.IdentifiabilityTest.chi2_wPenalty - ar.IdentifiabilityTest.penalty;
@@ -144,8 +159,6 @@ ar.p = ar.IdentifiabilityTest.p0;
 % end
 
 
-estimatetime = estimatetime + toc;
-ar.IdentifiabilityTest.timing = estimatetime;  
 
 
 %% Output
@@ -155,51 +168,67 @@ ar.IdentifiabilityTest.dchi2_woPenalty = ar.IdentifiabilityTest.chi2_woPenalty -
 ar.IdentifiabilityTest.dchi2_total = ar.IdentifiabilityTest.chi2_wPenalty - ar.IdentifiabilityTest.chi2_woPenalty0;
 
 ar.IdentifiabilityTest = sortFields(ar.IdentifiabilityTest);
-disp(' ')
-if ar.IdentifiabilityTest.dchi2_total < ar.IdentifiabilityTest.thresh;
-    ar.IdentifiabilityTest.message = 'Model is structurally non-identifiable.';
-else
-    ar.IdentifiabilityTest.message = sprintf('Model seems identifiable.');
-end
 
 if ar.IdentifiabilityTest.euclDist < 0.01*ar.IdentifiabilityTest.radius
-    ar.IdentifiabilityTest.message = sprintf('%s\n Optimal parameters change less than 1%s of radius. Is optimization working?',ar.IdentifiabilityTest.message,'%');
+    ar.IdentifiabilityTest.message{end+1} = sprintf('Optimal parameters change less than 1%s of radius. Is optimization working?\n\n','%');
 end
 
 if ar.IdentifiabilityTest.nBound0 < ar.IdentifiabilityTest.nBound
-    warnmessage = sprintf(' Warning: Penalization force addional parameters to bounds. Decreas of radius is suggested in this case.\n');
+    warnmessage = sprintf(' Warning: Penalization force addional parameters to bounds. Decreasing the radius is suggested in this case.\n\n');
     warning(warnmessage)
-    ar.IdentifiabilityTest.message = [ar.IdentifiabilityTest.message, warnmessage];
+    ar.IdentifiabilityTest.message{end+1} = warnmessage;
 end
 
 chi2sort = sort(ar.IdentifiabilityTest.chi2s);
 chi2sort2 = sort(ar.IdentifiabilityTest.chi2s(2:end));
-if minmax(chi2sort)<ar.IdentifiabilityTest.thresh
-    ar.IdentifiabilityTest.message_same = sprintf('All %i optimization runs are in the chi2-range %f.',length(ar.IdentifiabilityTest.chi2s),minmax(chi2sort));
-elseif length(chi2sort2)>2 && minmax(chi2sort2)<ar.IdentifiabilityTest.thresh
-    ar.IdentifiabilityTest.message_same = sprintf('All %i optimization runs with random intial guesses are in the chi2-range %f.',length(ar.IdentifiabilityTest.chi2s)-1,minmax(chi2sort2));    
+if range(chi2sort)<ar.IdentifiabilityTest.thresh
+    ar.IdentifiabilityTest.message{end+1} = sprintf('All %i optimization runs are in the chi2-range %g.\n\n',length(ar.IdentifiabilityTest.chi2s),range(chi2sort));
+elseif length(chi2sort2)>2 && range(chi2sort2)<ar.IdentifiabilityTest.thresh
+    ar.IdentifiabilityTest.message{end+1} = sprintf('All %i optimization runs with random intial guesses are in the chi2-range %g.\n\n',length(ar.IdentifiabilityTest.chi2s)-1,range(chi2sort2));
 elseif sum(chi2sort <(min(chi2sort) + ar.IdentifiabilityTest.thresh)) < length(chi2sort)/2
     anzsame = sum(chi2sort <(min(chi2sort) + ar.IdentifiabilityTest.thresh));
     fracsame = anzsame/length(chi2sort);
-    ar.IdentifiabilityTest.message_same = sprintf('Only %i (%.2f%s) optimization runs are in the chi2-range %f. Increasing the number of fits should be considerd. ',anzsame,fracsame*100,'%',ar.IdentifiabilityTest.thresh);        
+    ar.IdentifiabilityTest.message{end+1} = sprintf('Only %i optimization runs (%.2f%s) are in the chi2-range %g. Increasing the number of fits should be considerd. \n\n',anzsame,fracsame*100,'%',ar.IdentifiabilityTest.thresh);
 else
     anzsame = sum(chi2sort <(min(chi2sort) + ar.IdentifiabilityTest.thresh));
     fracsame = anzsame/length(chi2sort);
-    ar.IdentifiabilityTest.message_same = sprintf('%i (%.2f%s) optimization runs are in the chi2-range %f. ',anzsame,fracsame*100,'%',ar.IdentifiabilityTest.thresh);        
+    ar.IdentifiabilityTest.message{end+1} = sprintf('%i optimization runs (%.2f%s) are in the chi2-range %g. \n\n',anzsame,fracsame*100,'%',ar.IdentifiabilityTest.thresh);
 end
 
-disp(' ');
-disp(ar.IdentifiabilityTest.message);
-disp(' ');
-fprintf('%5.4f (increase of merit by penalty, before fitting)\n',ar.IdentifiabilityTest.chi2_wPenalty0 - ar.IdentifiabilityTest.chi2_woPenalty0);
-fprintf('%5.4f (decrease of merit by fitting)\n',ar.IdentifiabilityTest.chi2_wPenalty0-ar.IdentifiabilityTest.chi2_wPenalty);
-fprintf('%5.4f (penalty after fitting)\n',ar.IdentifiabilityTest.penalty);
-fprintf('%5.4f (increase of data-chi2 by penalty)\n',ar.IdentifiabilityTest.dchi2_woPenalty);
-fprintf('%5.4f (total increase of merit by penalty) PRIMARY CRITERION\n',ar.IdentifiabilityTest.dchi2_total);
-fprintf('%5.4f (movement of parameters by penalized fitting)\n',ar.IdentifiabilityTest.euclDist);
-fprintf('%5.4f (movement of parameters rel. to penaltySD)\n',ar.IdentifiabilityTest.euclDist_relTo_deltaSD);
+estimatetime = estimatetime + toc;
+ar.IdentifiabilityTest.timing = estimatetime;
 
-fprintf('\n%s\n',ar.IdentifiabilityTest.message_same);
+ar.IdentifiabilityTest.message{end+1} = sprintf('Calculations took %.2f seconds.\n',ar.IdentifiabilityTest.timing);
+if isfield(ar,'ple') && isfield(ar.ple,'timing')
+    ar.IdentifiabilityTest.message{end+1} = sprintf('[Compared to %.2f seconds required for calcuating the likelihood profiles.]\n\n',sum(ar.ple.timing));
+else
+    ar.IdentifiabilityTest.message{end} = sprintf('%s\n',ar.IdentifiabilityTest.message{end});
+end
+
+ar.IdentifiabilityTest.message{end+1} = sprintf('%5.4f (increase of merit by penalty, before fitting)\n',ar.IdentifiabilityTest.chi2_wPenalty0 - ar.IdentifiabilityTest.chi2_woPenalty0);
+ar.IdentifiabilityTest.message{end+1} = sprintf('%5.4f (decrease of merit by fitting)\n',ar.IdentifiabilityTest.chi2_wPenalty0-ar.IdentifiabilityTest.chi2_wPenalty);
+ar.IdentifiabilityTest.message{end+1} = sprintf('%5.4f (movement of parameters by penalized fitting)\n',ar.IdentifiabilityTest.euclDist);
+% ar.IdentifiabilityTest.message{end+1} = sprintf('%5.4f (penalty after fitting)\n',ar.IdentifiabilityTest.penalty);
+% ar.IdentifiabilityTest.message{end+1} = sprintf('%5.4f (increase of data-chi2 by penalty)\n',ar.IdentifiabilityTest.dchi2_woPenalty);
+ar.IdentifiabilityTest.message{end+1} = sprintf('%5.4f (total increase of merit by penalty) PRIMARY CRITERION\n',ar.IdentifiabilityTest.dchi2_total);
+% ar.IdentifiabilityTest.message{end+1} = sprintf('%5.4f (movement of parameters rel. to penaltySD)\n',ar.IdentifiabilityTest.euclDist_relTo_deltaSD);
+
+
+if ar.IdentifiabilityTest.dchi2_total < ar.IdentifiabilityTest.thresh;
+    ar.IdentifiabilityTest.message{end+1} = sprintf('\nModel is structurally non-identifiable.\n\n');
+    anzNI = sum(abs(ar.IdentifiabilityTest.dp)>0.1*ar.IdentifiabilityTest.radius);
+    ar.IdentifiabilityTest.p_nonIdentifiable = ar.pLabel(ar.IdentifiabilityTest.dp_order(1:anzNI));
+else
+    ar.IdentifiabilityTest.p_nonIdentifiable = cell(0);
+    ar.IdentifiabilityTest.message{end+1} = sprintf('\nModel is identifiable.\n\n');
+end
+
+if ~silent
+    disp(' ')
+    for m=1:length(ar.IdentifiabilityTest.message)
+        fprintf('%s',ar.IdentifiabilityTest.message{m});
+    end
+end
 
 
 function s2 = sortFields(s)
