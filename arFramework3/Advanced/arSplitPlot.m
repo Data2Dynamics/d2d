@@ -103,9 +103,19 @@ function arSplitPlot( varargin )
                 end
             end
             if ( collectedRequired )
-                accept = accept & feval( filterList{a+1}, condiVals{:} );
+                try
+                    accept = accept & feval( filterList{a+1}, condiVals{:} );
+                catch
+                    if ( nargin( filterList{a+1} ) > numel( condiVals ) )
+                        error( 'Anonymous function takes more arguments than number of conditions specified %s -> %s', filterString, func2str( filterList{a+1} ) );
+                    end
+                    if ( nargin( filterList{a+1} ) < numel( condiVals ) )
+                        error( 'Anonymous function takes fewer arguments than number of conditions specified %s -> %s', filterString, func2str( filterList{a+1} ) );
+                    end
+                    error( 'Unsuccessfull call to anonymous function %s -> %s', filterString, func2str( filterList{a+1} ) );
+                end
             else
-                warning( 'Missing condition %s. No filtering will occur for this anonymous function %s -> %s', filterList{a}{jf}, filterString, func2str( filterList{a+1} ) );
+                warning( 'Missing condition. No filtering will occur for this anonymous function %s -> %s', filterString, func2str( filterList{a+1} ) );
             end
             if ( d == 1 )
                 str = [ str '_' filterString ' -> ' func2str( filterList{a+1} ) ]; %#ok
