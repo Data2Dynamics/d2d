@@ -52,6 +52,10 @@ function arFractionalFlux( species, varargin )
     
     % Fetch required data
     state               = ismember( ar.model(model).x, species );
+    if sum( state ) == 0
+        str = sprintf('\n%s', ar.model(model).x{:} );
+        error( 'State does not exist. Pick from %s\n', str );
+    end
     stoich              = ar.model(model).N( state, : );
     t                   = ar.model(model).condition(cond).tFine;
     v                   = ar.model(model).condition(cond).vFineSimu;
@@ -129,5 +133,5 @@ function col = qColor( a )
 end
 
 function str = sanitize( str )
-    str = strrep( str, '_', '\_' )
+    str = strrep( str, '_', '\_' );
 end
