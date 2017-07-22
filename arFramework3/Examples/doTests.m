@@ -90,7 +90,7 @@ function doTest( dir )
     if isunix
         command = sprintf('find %s -type d -name "%s"',example_folder,dir);
     else
-        command = sprintf('dir "%s" /AD /b /s | findstr /r "%s$"',example_folder,dir);
+        command = sprintf('dir "%s" /AD /b /s | findstr /r "\\\\%s$"',example_folder,dir);
     end
     [~,dir] = system(command);
     dir = strread(dir, '%s', 'delimiter', sprintf('\n'));

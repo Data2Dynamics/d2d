@@ -26,6 +26,7 @@ function ar = arInitFields(ar)
     
     % Config options
     defaults = { ...
+        {'turboSplines',                false}, ...                     % Faster splines (BETA)
         {'lightSave',                   false}, ...                     % When calling arSave, only save parameter sets by default (useful for big models)
         {'skipSim',                     false}, ...                     % Disable simulation (used for fitting steady state models)
         {'barhack',                     false}, ...                     % Display data with only a single time point as bar

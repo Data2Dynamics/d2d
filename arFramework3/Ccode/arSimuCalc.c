@@ -149,7 +149,7 @@ void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, int
 #include "arSimuCalcFunctions.c"
 
 void terminate_x_calc( SimMemory sim_mem, double status );
-void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic );
+void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines );
 int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi );
 int allocateSimMemorySSA( SimMemory sim_mem, int nx );
 int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override );
@@ -342,6 +342,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     mxArray    *x0_override;
     mxArray    *arcondition;   
     
+    int nsplines;
     int ysensi;
     int has_tExp;
     int nm, nc;
@@ -511,7 +512,11 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             nu = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "uNum"));
             np = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "pNum"));
             nv = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "vNum"));
-            
+            if ( mxGetField(arcondition, ic, "splines") )
+                nsplines = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "splines"));
+            else
+                nsplines = 0;
+
             /* If there are no parameters, do not compute simulated sensitivities; otherwise failure at N_VCloneVectorArray_Serial */
             ysensi = sensi;
             if (np==0) sensi = 0;
@@ -529,10 +534,10 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 event_data = sim_mem->event_data;
                 cvode_mem = sim_mem->cvode_mem;
             } else return;
-            
+   
             /* User data structure */
-            initializeDataCVODES( sim_mem, tstart, abortSignal, arcondition, qpositivex, ic );
-            
+            initializeDataCVODES( sim_mem, tstart, abortSignal, arcondition, qpositivex, ic, nsplines );
+   
             /* Initialize event system */
             qEvents = 0;
             if ( events )
@@ -560,12 +565,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             } else {
                 equilibrated = NULL;
             }
-            
+
             /* Apply ODE initial conditions */
             x0_override = mxGetField(arcondition, ic, "x0_override");
             if ( !applyInitialConditionsODE( sim_mem, tstart, im, isim, returndxdt, returnddxdtdp, x0_override ) )
                 return;
-            
+
             /* Check if we are only simulating dxdt */
             if ( rootFinding )
             {
@@ -1265,7 +1270,7 @@ int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi )
     /* Allocate userdata */
     sim_mem->data = (UserData) malloc(sizeof *sim_mem->data);
     if (sim_mem->data == NULL) { terminate_x_calc( sim_mem, 1 ); return 0; }
-    
+           
     /* Allocate event structure */
     sim_mem->event_data = (EventData) malloc(sizeof *sim_mem->event_data);
     if (sim_mem->event_data == NULL) { terminate_x_calc( sim_mem, 1 ); return 0; }    
@@ -1328,9 +1333,23 @@ int allocateSimMemorySSA( SimMemory sim_mem, int nx )
 }
 
 /* Initialize the UserData structure for use with CVodes */
-void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic )
+void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines )
 {
+    int j;
     UserData data = sim_mem->data;
+    data->splines = NULL;
+    data->nsplines = 0;
+    
+    if ( nsplines > 0 ) {
+        data->splines = (double**) malloc(nsplines * sizeof(double*));
+        data->nsplines = nsplines;
+        
+        // Initialize the pointers
+        for ( j = 0; j < nsplines; j++ )
+            data->splines[j] = NULL;
+        
+        if (data->splines == NULL) { terminate_x_calc( sim_mem, 1 ); return; }   
+    }
     
 	data->abort = abortSignal;
 	data->t = tstart;

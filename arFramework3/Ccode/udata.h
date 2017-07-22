@@ -14,6 +14,8 @@ typedef struct {
 	double *dvdx;
 	double *dvdu;
 	double *dvdp;
+    int    nsplines;
+    double **splines;
 	double t;
     int    *abort;
 	} *UserData;
@@ -64,7 +66,7 @@ typedef struct {
     /* Logging purposes */
     int         *threadStatus;
     double      *status;
-} *SimMemory;       
+} *SimMemory;
 
 /* Functions defined in udata.h */
 SimMemory simCreate( int *threadStatus, double* status );

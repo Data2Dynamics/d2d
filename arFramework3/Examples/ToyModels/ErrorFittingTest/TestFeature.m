@@ -4,7 +4,7 @@ fprintf( 2, 'LINEAR ERRORS... ' );
 arInit;
 arLoadModel('dummy');
 arLoadData('nonlog', 1, 'csv');
-arCompileAll;
+arCompileAll(true);
 ar.config.optimizer = 11;
 arSetPars('init_mean',  5, 0, 0, 0, 1e3);
 arSetPars('sd_est',     5, 1, 0, 0, 1e3);
@@ -22,7 +22,7 @@ fprintf( 2, 'LOGARITHMIC ERRORS... ' );
 arInit;
 arLoadModel('dummy');
 arLoadData('log', 1, 'csv');
-arCompileAll;
+arCompileAll(true);
 ar.config.optimizer = 11;
 arSetPars('init_mean',  .25, 1, 0, 0, 1e3);
 arSetPars('sd_est',     .25, 1, 0, 0, 1e3);
@@ -48,7 +48,7 @@ fprintf( 2, 'TWO-COMPONENT ERROR MODEL... ' );
 arInit;
 arLoadModel('dummy');
 arLoadData('nonlog_linear', 1, 'csv');
-arCompileAll;
+arCompileAll(true);
 ar.config.optimizer = 11;
 arSetPars('init_mean',   5, 0, 0, 0, 1e3);
 arSetPars('sd_est_abs', 50, 1, 0, 0, 1e3);
@@ -80,7 +80,7 @@ arInit;
 arLoadModel('dummyFn');
 arLoadData('fn_nonlog', 1, 'csv');
 arLoadData('fn_nonlog_linear', 1, 'csv');
-arCompileAll;
+arCompileAll(true);
 
 % Check whether qError detects the error model parameters correctly
 if ( ~(numel( intersect( ar.pLabel(ar.qError==1), {'sd_est_abs_fn_nonlog', 'sd_est_abs_fn_nonlog_linear', 'sd_est_rel_fn_nonlog', 'sd_est_rel_fn_nonlog_linear'} ) ) == 4) ) || (sum(ar.qError==1) ~= 4)
@@ -94,7 +94,7 @@ arInit;
 arLoadModel('withscale');
 arLoadData('fn_nonlog', 1, 'csv');
 arLoadData('fn_nonlog_linear', 1, 'csv');
-arCompileAll;
+arCompileAll(true);
 
 % Check whether qError detects the error model parameters correctly
 if ~(numel( intersect( ar.pLabel(ar.qError==1), {'sd_est_abs_fn_nonlog', 'sd_est_abs_fn_nonlog_linear', 'sd_est_rel_fn_nonlog', 'sd_est_rel_fn_nonlog_linear'} ) ) == 4 ) || (sum(ar.qError==1) ~= 4)
@@ -107,7 +107,7 @@ fprintf( 2, 'CHECK WHETHER D2D CORRECTLY HANDLES RANDOMS WITH RESPECT TO ar.qErr
 arInit;
 arLoadModel('nExpID');
 arLoadData('fn_log', 1, 'csv');
-arCompileAll;
+arCompileAll(true);
 
 % Check whether qError detects the error model parameters correctly
 if ~(numel( intersect( ar.pLabel(ar.qError==1), {'sd_est_abs_fn_log_nExpID1', 'sd_est_abs_fn_log_nExpID2', 'sd_est_rel_fn_log_nExpID1', 'sd_est_rel_fn_log_nExpID2'} ) ) == 4 ) || (sum(ar.qError==1) ~= 4)

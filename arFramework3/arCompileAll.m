@@ -228,6 +228,7 @@ for m=1:length(ar.model)
         newp = cell(1,length(ar.model(m).condition));
         newpold = cell(1,length(ar.model(m).condition));
         newpx0 = cell(1,length(ar.model(m).condition));
+        splines = cell(1,length(ar.model(m).condition));
         
         if(usePool)
             csyms = cell(size(ar.model(m).condition));
@@ -241,6 +242,8 @@ for m=1:length(ar.model)
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
+                splines{c} = condition_sym.splines;
+                
                 if(~doskip(c))
                     % header
                     fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W');
@@ -259,13 +262,14 @@ for m=1:length(ar.model)
             for c=1:length(condition)
                 ar.model(m).condition(c).sym = csyms{c};
             end
-        else      
+        else
             for c=1:length(ar.model(m).condition)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
                 ar.model(m).condition(c).sym = condition_sym.sym;
                 newp{c} = condition_sym.p;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
+                splines{c} = condition_sym.splines;
                 if(~doskip(c))
                     % header
                     fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W');
@@ -288,6 +292,7 @@ for m=1:length(ar.model)
             ar.model(m).condition(c).p = newp{c};
             ar.model(m).condition(c).pold = newpold{c};
             ar.model(m).condition(c).px0 = newpx0{c};
+            ar.model(m).condition(c).splines = splines{c};
         end
         
         % skip calc data
@@ -656,8 +661,6 @@ condition.sym.fu = mySym(condition.fu, specialFunc);
 condition.sym.fu = arSubs(condition.sym.fu, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.fz = mySym(model.fz, specialFunc);
 condition.sym.fz = mysubsrepeated(condition.sym.fz, model.sym.z, condition.sym.fz, matlab_version); % Substitute references to derived variables
-
-
 condition.sym.fz = arSubs(condition.sym.fz, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.C = arSubs(model.sym.C, condition.sym.p, condition.sym.fp, matlab_version);
 
@@ -677,6 +680,13 @@ condition.p = setdiff(setdiff(setdiff(setdiff(sym2str(varlist), model.x), model.
 condition.dfxdx_rowVals = [];
 condition.dfxdx_colptrs = [];  
 
+% We cannot skip compilation when we're using the faster splines. The
+% reason is that it is impossible to determine how many splines end up in
+% the derivatives without determining the derivatives.
+if ( config.turboSplines == 1 )
+    doskip = false;
+end
+
 if(doskip)
     condition.ps = {};
     condition.qfu_nonzero = [];
@@ -693,6 +703,7 @@ if(doskip)
     condition.qfsv_nonzero = [];
     condition.sv = {};
     condition.sz = {};    
+    condition.splines = [];
     
     return;
 end
@@ -928,6 +939,12 @@ if(config.useSensis)
     end
 end
 
+if ( config.turboSplines == 1 )
+    condition = uniqueSplines( condition );
+else
+    condition.splines = [];
+end
+
 % This function checks whether any deltas appear in the sensitivity
 % equations. They are incompatible with continuous optimizers
 function sensBlock = verifyRow( sensBlock, func, location )
@@ -967,7 +984,7 @@ function sensBlock = verifyRow( sensBlock, func, location )
             end
         end
     end            
-
+    
 % Calc Data
 function data = arCalcData(config, model, data, m, c, d, doskip, matlab_version)
 
@@ -1286,7 +1303,29 @@ function out = mysubsrepeated(in, old, new, matlab_version)
         k = k + 1;
     end
 
+function condition = uniqueSplines( condition )
+    [fu, nsfu] = repSplines( condition.sym.fu, 0 );
+    condition.sym.fu = sym(fu);
+    
+    [dfudp, nsdfudp] = repSplines( condition.sym.dfudp, nsfu );
+    condition.sym.dfudp = sym(dfudp);
+    
+    condition.splines = zeros( nsfu + nsdfudp, 1 );
 
+function [ strOut, nSplines ] = repSplines( fu, offset )
+    str = char(fu);
+    [~,loc1,loc2] = regexp(str, 'spline(\d*)(\w*)\((\w*),', 'split');
+    
+    loc1(end+1) = numel(str);
+    strOut = str( 1 : loc1(1) );
+    for c = 1 : numel( loc2 )
+        strOut = [ strOut(1:end-1) 'fast' strOut(end) ];
+        strOut = [ strOut str( loc1(c) + 1 : loc2(c) ) ]; %#ok<AGROW>
+        strOut = [ strOut num2str(c+offset-1) ', udata_splines__,' ]; %#ok<AGROW>
+        strOut = [ strOut str( loc2(c) + 1 : loc1(c+1) ) ]; %#ok<AGROW>
+    end
+    nSplines = numel(loc2);
+    
 function checksum = addToCheckSum(str, checksum)
 algs = {'MD2','MD5','SHA-1','SHA-256','SHA-384','SHA-512'};
 if(nargin<2)
@@ -1970,6 +2009,7 @@ end
 cstr = strrep(cstr, 't0', [cvar '[0]']);
 cstr = strrep(cstr, '][0]', ']');
 cstr = strrep(cstr, 'T[', [cvar '[']);
+cstr = strrep(cstr, 'udata_splines__', 'data->splines');
 
 % % debug
 % fprintf('\n\n');

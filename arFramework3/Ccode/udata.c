@@ -40,13 +40,29 @@ SimMemory simCreate( int *threadStatus, double* status )
 
 void simFree( SimMemory sim_mem )
 {
+    int j;
+    
     /* Something is seriously wrong. Anything we free would cause a segfault */
 	if ( sim_mem == NULL )
 		return;
     
 	/* CVODES memory */
 	if ( sim_mem->data )
+    {
+        if ( sim_mem->data->splines )
+        {
+            /* Free spline memory */
+            for ( j = 0; j < sim_mem->data->nsplines; j++ ) {
+                if ( sim_mem->data->splines[j] )
+                    free( sim_mem->data->splines[j] );
+            }
+            free(sim_mem->data->splines);
+            
+            sim_mem->data->splines = NULL;
+        }
+            
 		free(sim_mem->data);
+    }
 	if ( sim_mem->event_data )
 		free(sim_mem->event_data);
 	if ( sim_mem->cvode_mem ) 
