@@ -24,7 +24,9 @@ pRef = ar.p;
 arCalcMerit(false,[]);
 
 ar.sresFD = ar.res' * ones(1,length(pRef)) + 0;
-ar.sconstrFD = ar.constr' * ones(1,length(pRef)) + 0;
+if ( ~isempty( ar.constr ) )
+    ar.sconstrFD = ar.constr' * ones(1,length(pRef)) + 0;
+end
 
 arWaitbar(0);
 for jp=1:length(ar.pLabel)
@@ -105,7 +107,9 @@ for jp=1:length(ar.pLabel)
     end
     
     ar.sresFD(:,jp) = (ar.res' - ar.sresFD(:,jp)) / dp + 0;
-    ar.sconstrFD(:,jp) = (ar.constr' - ar.sconstrFD(:,jp)) / dp + 0;
+    if ( ~isempty( ar.constr ) )
+        ar.sconstrFD(:,jp) = (ar.constr' - ar.sconstrFD(:,jp)) / dp + 0;
+    end
     
     % reset p
     ar.p = pRef;

@@ -1,0 +1,32 @@
+DESCRIPTION
+"Basic model using stoichiometry in the reaction expressions"
+
+PREDICTOR
+t               T   min         time	0	50
+
+COMPARTMENTS
+med             V   pl          vol.    1
+
+STATES
+sA              C   mM          conc.   med     1
+
+INPUTS
+mspline         C   nmol/l      conc.   "monospline10(t, -1.000000e-01, knot1, 0, knot1, 1, knot2, 2, knot3, 4, knot4, 6, knot5, 9, knot6, 13, knot7, 20, knot8, 2.010000e+01, knot8) + monospline10(t, 1.990000e+01, knot9 - knot8, 20, knot9 - knot8, 26, knot10, 70, knot11, 90, knot12, 110, knot13, 120, knot14, 130, knot15, 150, knot16, 1.501000e+02, knot16) + monospline10(t, 1.499000e+02, knot17 - knot16, 150, knot17 - knot16, 160, knot18, 170, knot19, 180, knot20, 1.800100e+02, spline_dummy, 1.800200e+02, spline_dummy, 1.800300e+02, spline_dummy, 1.800400e+02, spline_dummy, 1.800500e+02, spline_dummy) - spline_offset1"    "spline"
+nspline         C   nmol/l      conc.   "spline10(t, -10, sknot1, 0, sknot1, 1, sknot2, 2, sknot3, 4, sknot4, 6, sknot5, 9, sknot6, 13, sknot7, 20, sknot8, 2.010000e+01, sknot8, 0, 0.0) + spline10(t, 1.990000e+01, sknot9 - sknot8, 20, sknot9 - sknot8, 26, sknot10, 70, sknot11, 90, sknot12, 110, sknot13, 120, sknot14, 130, sknot15, 150, sknot16, 1.501000e+02, sknot16, 0, 0.0) + spline10(t, 1.499000e+02, sknot17 - sknot16, 150, sknot17 - sknot16, 160, sknot18, 170, sknot19, 180, sknot20, 200, nspline_dummy, 240, nspline_dummy, 260, nspline_dummy, 280, nspline_dummy, 300, nspline_dummy, 0, 0.0) - spline_offset2"    "spline"
+
+REACTIONS
+            ->  sA          CUSTOM    "0"
+sA          ->              CUSTOM    "kd * sA"
+
+DERIVED
+
+OBSERVABLES
+monospline        C   au  conc.   0  0  "mspline"
+spline            C   au  conc.   0  0  "nspline"
+
+ERRORS
+monospline        ".05"
+spline            ".05"
+
+CONDITIONS
+init_sA     "0"
