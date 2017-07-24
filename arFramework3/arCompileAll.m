@@ -2009,7 +2009,7 @@ end
 cstr = strrep(cstr, 't0', [cvar '[0]']);
 cstr = strrep(cstr, '][0]', ']');
 cstr = strrep(cstr, 'T[', [cvar '[']);
-cstr = strrep(cstr, 'udata_splines__', 'data->splines');
+cstr = strrep(cstr, 'udata_splines__', 'data->splines, data->splineIndices');
 
 % % debug
 % fprintf('\n\n');

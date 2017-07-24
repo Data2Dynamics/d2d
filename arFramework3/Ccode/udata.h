@@ -16,6 +16,7 @@ typedef struct {
 	double *dvdp;
     int    nsplines;
     double **splines;
+    int    *splineIndices;
 	double t;
     int    *abort;
 	} *UserData;

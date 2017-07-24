@@ -19,7 +19,7 @@ else
 end
 fprintf( 2, 'Fitting... ' );
 arFit;
-if ( ar.chi2fit < 2.1e5 )
+if ( ar.chi2fit < 1e6 )
     fprintf('PASSED\n');
 else
     error( 'FAILED, ERROR AFTER FITTING TOO LARGE\n' );
@@ -47,7 +47,7 @@ end
 fprintf('PASSED\n');
 fprintf( 2, 'Fitting... ' );
 arFit;
-if ( ar.chi2fit < 2.1e5 )
+if ( ar.chi2fit < 1e6 )
     fprintf('PASSED\n');
 else
     error( 'FAILED, ERROR AFTER FITTING TOO LARGE\n' );

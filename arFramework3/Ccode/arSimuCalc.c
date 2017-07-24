@@ -1342,9 +1342,10 @@ void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, m
     
     if ( nsplines > 0 ) {
         data->splines = (double**) malloc(nsplines * sizeof(double*));
+        data->splineIndices = (int *) malloc(nsplines * sizeof(int));
         data->nsplines = nsplines;
         
-        // Initialize the pointers
+        /* Initialize the pointers */
         for ( j = 0; j < nsplines; j++ )
             data->splines[j] = NULL;
         

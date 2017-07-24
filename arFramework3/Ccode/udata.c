@@ -57,6 +57,7 @@ void simFree( SimMemory sim_mem )
                     free( sim_mem->data->splines[j] );
             }
             free(sim_mem->data->splines);
+            free(sim_mem->data->splineIndices);
             
             sim_mem->data->splines = NULL;
         }

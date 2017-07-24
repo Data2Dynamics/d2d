@@ -247,6 +247,42 @@ w = y[i] + w * (b[i] + w * (c[i] + w * d[i]));
 return (w);
 }
 
+/* Made sure that index is kept so that we don't have to binary search every time (changed by Joep) */
+double seval_fixed (int n, double u,
+                    double x[], double y[],
+                    double b[], double c[], double d[], int* i_ptr)
+
+{  /* begin function seval() */
+
+    int    i, j, k;
+    double w;
+
+    i = *i_ptr;
+    if (i >= n-1) i = 0;
+    if (i < 0)  i = 0;
+
+    if ((x[i] > u) || (x[i+1] < u))
+      {  /* ---- perform a binary search ---- */
+      i = 0;
+      j = n;
+      do
+        {
+        k = (i + j) / 2;         /* split the domain to search */
+        if (u < x[k])  j = k;    /* move the upper bound */
+        if (u >= x[k]) i = k;    /* move the lower bound */
+        }                        /* there are no more segments to search */
+      while (j > i+1);
+      }
+
+    *i_ptr = i;
+
+    /* ---- Evaluate the spline ---- */
+    w = u - x[i];
+    w = y[i] + w * (b[i] + w * (c[i] + w * d[i]));
+
+return (w);
+}
+
 /* Purpose ...
    -------
    Evaluate the derivative of the cubic spline function

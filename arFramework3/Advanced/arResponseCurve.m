@@ -66,13 +66,13 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         end
         tp = timepoints(ti);
         
-        enzyme = ismember( ar.model.v, name );
-        func = sym( ar.model.fv{enzyme} );
+        enzyme = ismember( ar.model(m).v, name );
+        func = sym( ar.model(m).fv{enzyme} );
 
         pLabels = ar.pLabel;
-        xLabels = ar.model.x;
-        zLabels = ar.model.z;
-        uLabels = ar.model.u;
+        xLabels = ar.model(m).x;
+        zLabels = ar.model(m).z;
+        uLabels = ar.model(m).u;
         
         pValues = arGetPars( ar.pLabel, 0 );
         xValues = ar.model(m).condition(cond).xFineSimu(tp, :) + 0;
@@ -108,14 +108,18 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
             % Normalize by vmax
             func = func / limF;
             
-            rateName = sprintf( 'v_{%s} / v_{%s}^{max}', ar.model.v{enzyme}, ar.model.v{enzyme} );
+            rateName = sprintf( 'v_{%s} / v_{%s}^{max}', ar.model(m).v{enzyme}, ar.model.v{enzyme} );
         else
-            rateName = sprintf( 'v_{%s}', ar.model.v{enzyme} );
+            rateName = sprintf( 'v_{%s}', ar.model(m).v{enzyme} );
         end
         
         % Substitute variables
         func = subs( func, labels, values );
 
+        find( ismember( labels, 'F16BP' ) )
+        values(find( ismember( labels, 'AMP' ) ))
+        values(find( ismember( labels, 'ATP' ) ))
+        
         vars = symvar( func );
         if ( sum( ismember( vars, indep1 ) ) == 0 )
             error( 'Independent variable %s not found in rate equation %s', indep1, char(func) );
@@ -128,8 +132,8 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         mFunc = matlabFunction( func, 'vars', {indep1, indep2} );
 
         % Get reference amounts
-        responseRange1 = 10.^[-mRange : .1 : mRange];
-        responseRange2 = 10.^[-mRange : .5 : mRange];
+        responseRange1 = 10.^[-mRange : .05 : mRange];
+        responseRange2 = 10.^[-mRange : .5  : mRange];
 
         rate = zeros( numel( responseRange2 ), numel( responseRange1 ) );
         cmap = parula( numel( responseRange2 ) );
