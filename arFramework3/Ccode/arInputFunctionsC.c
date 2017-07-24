@@ -824,6 +824,7 @@ int cmonotoneSpline( int n, double x[], double y[], double b[], double c[], doub
             splineCache[cacheID][j+n]   = c[j];
             splineCache[cacheID][j+2*n] = d[j];
         }
+        IDcache[cacheID] = 0;
     }
     else
     {
@@ -855,7 +856,7 @@ double fastspline3(double t, int ID, double **splineCache, int *idCache, double 
     us[2] = p3;
     
     cspline(3, ss, 0, dudt, 0.0, ts, us, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(3, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(3, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -879,7 +880,7 @@ double monofastspline3(double t, int ID, double **splineCache, int *idCache, dou
     us[2] = p3;
 
     cmonotoneSpline( 3, ts, us, b, c, d, ID, splineCache, idCache );
-    uout = seval_fixed(3, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(3, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -909,7 +910,7 @@ double fastspline_pos3(double t, int ID, double **splineCache, int *idCache, dou
     }
     
     cspline(3, ss, 0, dudt, 0.0, ts, uslog, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(3, t, ts, uslog, b, c, d, idCache);
+    uout = seval_fixed(3, t, ts, uslog, b, c, d, &(idCache[ID]));
     
     return(exp(uout));
 }
@@ -935,7 +936,7 @@ double fastspline4(double t, int ID, double **splineCache, int *idCache, double 
     us[3] = p4;
     
     cspline(4, ss, 0, dudt, 0.0, ts, us, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(4, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(4, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -961,7 +962,7 @@ double monofastspline4(double t, int ID, double **splineCache, int *idCache, dou
     us[3] = p4;
 
     cmonotoneSpline( 4, ts, us, b, c, d, ID, splineCache, idCache );
-    uout = seval_fixed(4, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(4, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -993,7 +994,7 @@ double fastspline_pos4(double t, int ID, double **splineCache, int *idCache, dou
     }
     
     cspline(4, ss, 0, dudt, 0.0, ts, uslog, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(4, t, ts, uslog, b, c, d, idCache);
+    uout = seval_fixed(4, t, ts, uslog, b, c, d, &(idCache[ID]));
     
     return(exp(uout));
 }
@@ -1021,7 +1022,7 @@ double fastspline5(double t, int ID, double **splineCache, int *idCache, double 
     us[4] = p5;
     
     cspline(5, ss, 0, dudt, 0.0, ts, us, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(5, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(5, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -1049,7 +1050,7 @@ double monofastspline5(double t, int ID, double **splineCache, int *idCache, dou
     us[4] = p5;
 
     cmonotoneSpline( 5, ts, us, b, c, d, ID, splineCache, idCache );
-    uout = seval_fixed(5, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(5, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -1083,7 +1084,7 @@ double fastspline_pos5(double t, int ID, double **splineCache, int *idCache, dou
     }
     
     cspline(5, ss, 0, dudt, 0.0, ts, uslog, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(5, t, ts, uslog, b, c, d, idCache);
+    uout = seval_fixed(5, t, ts, uslog, b, c, d, &(idCache[ID]));
     
     return(exp(uout));
 }
@@ -1121,7 +1122,7 @@ double fastspline10(double t, int ID, double **splineCache, int *idCache, double
     us[9] = p10;
     
     cspline(10, ss, 0, dudt, 0.0, ts, us, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(10, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(10, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -1159,7 +1160,7 @@ double monofastspline10(double t, int ID, double **splineCache, int *idCache, do
     us[9] = p10;
     
     cmonotoneSpline( 10, ts, us, b, c, d, ID, splineCache, idCache );
-    uout = seval_fixed(10, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(10, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -1203,7 +1204,7 @@ double fastspline_pos10(double t, int ID, double **splineCache, int *idCache, do
     }
     
     cspline(10, ss, 0, dudt, 0.0, ts, uslog, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(10, t, ts, uslog, b, c, d, idCache);
+    uout = seval_fixed(10, t, ts, uslog, b, c, d, &(idCache[ID]));
     
     return(exp(uout));
 }
@@ -1230,7 +1231,7 @@ double Dfastspline3(double t, int ID, double **splineCache, int *idCache, double
     us[id-1] = 1.0;
     
     cspline(3, ss, 0, dudt, 0.0, ts, us, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(3, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(3, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -1256,7 +1257,7 @@ double Dmonofastspline3(double t, int ID, double **splineCache, int *idCache, do
     us[id-1] = 1.0;
     
     cmonotoneSpline( 3, ts, us, b, c, d, ID, splineCache, idCache );
-    uout = seval_fixed(3, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(3, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -1304,7 +1305,7 @@ double Dfastspline4(double t, int ID, double **splineCache, int *idCache, double
     us[id-1] = 1.0;
     
     cspline(4, ss, 0, dudt, 0.0, ts, us, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(4, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(4, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -1332,7 +1333,7 @@ double Dmonofastspline4(double t, int ID, double **splineCache, int *idCache, do
     us[id-1] = 1.0;
     
     cmonotoneSpline( 4, ts, us, b, c, d, ID, splineCache, idCache );
-    uout = seval_fixed(4, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(4, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -1383,7 +1384,7 @@ double Dfastspline5(double t, int ID, double **splineCache, int *idCache, double
     us[id-1] = 1.0;
     
     cspline(5, ss, 0, dudt, 0.0, ts, us, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(5, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(5, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -1413,7 +1414,7 @@ double Dmonofastspline5(double t, int ID, double **splineCache, int *idCache, do
     us[id-1] = 1.0;
     
     cmonotoneSpline( 5, ts, us, b, c, d, ID, splineCache, idCache );
-    uout = seval_fixed(5, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(5, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -1475,7 +1476,7 @@ double Dfastspline10(double t, int ID, double **splineCache, int *idCache, doubl
     us[id-1] = 1.0;
     
     cspline(10, ss, 0, dudt, 0.0, ts, us, b, c, d, ID, splineCache, idCache);
-    uout = seval_fixed(10, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(10, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
@@ -1515,7 +1516,7 @@ double Dmonofastspline10(double t, int ID, double **splineCache, int *idCache, d
     us[id-1] = 1.0;
     
     cmonotoneSpline( 10, ts, us, b, c, d, ID, splineCache, idCache );
-    uout = seval_fixed(10, t, ts, us, b, c, d, idCache);
+    uout = seval_fixed(10, t, ts, us, b, c, d, &(idCache[ID]));
     
     return(uout);
 }
