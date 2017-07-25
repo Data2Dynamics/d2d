@@ -221,7 +221,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     /* In debug mode we have to disable threading, since otherwise the mexPrintf can lead to a race condition which may crash MATLAB */
     if ( debugMode == 1 )
+    {
+        mexPrintf("[DEBUG MODE] ");
         parallel = 0;
+    }
     
 /*  fiterrors = (int) mxGetScalar(mxGetField(arconfig, 0, "fiterrors"));*/
 /*    fiterrors_correction = (double) mxGetScalar(mxGetField(arconfig, 0, "fiterrors_correction"));*/
