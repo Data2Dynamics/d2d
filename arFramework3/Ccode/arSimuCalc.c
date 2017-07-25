@@ -87,6 +87,7 @@ int    ms;
 int    events;
 int    parallel;
 int    sensirhs;
+int    debugMode;
 /*int    fiterrors;*/
 int    cvodes_maxsteps;
 double cvodes_maxstepsize;
@@ -126,7 +127,7 @@ void *thread_calc(void *threadarg);
 #else
 void thread_calc(int id);
 #endif
-void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding);
+void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding, int debugMode);
 void z_calc(int im, int ic, mxArray *arcondition, int sensi);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi);
 
@@ -212,6 +213,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     cvodes_atol = mxGetScalar(mxGetField(arconfig, 0, "atol"));
     cvodes_maxsteps = (int) mxGetScalar(mxGetField(arconfig, 0, "maxsteps"));
     cvodes_maxstepsize = mxGetScalar(mxGetField(arconfig, 0, "maxstepsize"));
+    
+    /* Do we want debug mode? */
+    debugMode = 0;
+    if ( mxGetField(arconfig, 0, "debug" ) )
+        debugMode = (int) mxGetScalar(mxGetField(arconfig, 0, "debug"));
+    
+    /* In debug mode we have to disable threading, since otherwise the mexPrintf can lead to a race condition which may crash MATLAB */
+    if ( debugMode == 1 )
+        parallel = 0;
+    
 /*  fiterrors = (int) mxGetScalar(mxGetField(arconfig, 0, "fiterrors"));*/
 /*    fiterrors_correction = (double) mxGetScalar(mxGetField(arconfig, 0, "fiterrors_correction"));*/
 /*     useFitErrorMatrix = (int) mxGetScalar(mxGetField(arconfig, 0, "useFitErrorMatrix"));
@@ -326,7 +337,7 @@ void thread_calc(int id) {
     
     for(in=0; in<n; ++in){
         /* printf("computing thread #%i, task %i/%i (m=%i, c=%i)\n", id, in, n, ms[in], cs[in]); */
-        x_calc(ms[in], cs[in], globalsensi, setSparse, &threadStatus[id], &threadAbortSignal[id], rootFinding);
+        x_calc(ms[in], cs[in], globalsensi, setSparse, &threadStatus[id], &threadAbortSignal[id], rootFinding, debugMode);
     }
     
     /* printf("computing thread #%i(done)\n", id); */
@@ -337,8 +348,14 @@ void thread_calc(int id) {
 #endif
 }
 
+/* Handle errors. Note that this function is in principle not thread safe! */
+void errorHandler(int error_code, const char *module, const char *func, char *msg, void *eh_data)
+{
+	mexPrintf( "Error code %d in module %s and function %s:\n%s\n", error_code, module, func, msg );
+};
+
 /* calculate dynamics */
-void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding) {
+void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding, int debugMode) {
     mxArray    *x0_override;
     mxArray    *arcondition;   
     
@@ -515,8 +532,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             if ( mxGetField(arcondition, ic, "splines") )
                 nsplines = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "splines"));
             else
-                nsplines = 0;
-
+                nsplines = 0;      
+            
             /* If there are no parameters, do not compute simulated sensitivities; otherwise failure at N_VCloneVectorArray_Serial */
             ysensi = sensi;
             if (np==0) sensi = 0;
@@ -590,6 +607,13 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 /* Allocate space for CVODES */
                 flag = AR_CVodeInit(cvode_mem, x, tstart, im, isim);
                 if (flag < 0) {terminate_x_calc( sim_mem, 4 ); return;}
+                
+                /* Optionally enable more informative debug messages */
+                if ( debugMode == 1 )
+                {
+                    flag = CVodeSetErrHandlerFn(cvode_mem, &errorHandler, NULL);
+                    if (flag < 0) {terminate_x_calc( sim_mem, 4 ); return;}
+                }
                 
                 /* Number of maximal internal steps */
                 flag = CVodeSetMaxNumSteps(cvode_mem, cvodes_maxsteps);
@@ -737,8 +761,17 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                             if ( ts[is] == inf ) {
                                 /* Equilibrate the system */
                                 flag = equilibrate(cvode_mem, data, x, t, equilibrated, returndxdt, teq, neq, im, isim, abortSignal);
-                                
+                                                               
                                 if (flag < 0) {thr_error("Failed to equilibrate system"); terminate_x_calc( sim_mem, 20 ); return;}
+                                
+                                /* Reinitialize the solver and set the time back as though nothing happened! */
+                                /*flag = CVodeReInit(cvode_mem, RCONST(data->t), sim_mem->x);
+                                if (flag>=0) {
+                                    if (sensi==1) {
+                                        flag = CVodeSensReInit(cvode_mem, sensi_meth, sim_mem->sx);
+                                    }
+                                }*/
+                                /*flag = 0;*/
                             } else {
                                 /* Simulate up to the next time point */
                                 flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
@@ -1018,7 +1051,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     /* Clean up */
     terminate_x_calc( sim_mem, *status );
 }
-       
+     
 void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int has_tExp )
 {
     mxArray *ardata;
