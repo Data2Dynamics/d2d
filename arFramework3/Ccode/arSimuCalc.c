@@ -153,7 +153,7 @@ void terminate_x_calc( SimMemory sim_mem, double status );
 void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines );
 int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi );
 int allocateSimMemorySSA( SimMemory sim_mem, int nx );
-int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override );
+int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override, int sensitivitySubset );
 int initializeEvents( SimMemory sim_mem, mxArray *arcondition, int ic, double tstart );
 void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int has_tExp );
 
@@ -382,6 +382,9 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     /* Which condition to simulate */
     int isim;
     
+    /* Do we only want a subset of the sensitivities simulated? */
+    int sensitivitySubset;
+    
     /* Used to override which condition to simulate */
     mxArray *src;    
     double  *isrc;
@@ -453,6 +456,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     int sensi_meth = CV_SIMULTANEOUS; /* CV_SIMULTANEOUS or CV_STAGGERED */
     bool error_corr = TRUE;
     only_sim = 0;
+    
+    sensitivitySubset = 0;
     
     /* Grab value of infinity (used to mark steady state simulations) */
     inf = mxGetInf();
@@ -596,7 +601,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
 
             /* Apply ODE initial conditions */
             x0_override = mxGetField(arcondition, ic, "x0_override");
-            if ( !applyInitialConditionsODE( sim_mem, tstart, im, isim, returndxdt, returnddxdtdp, x0_override ) )
+            if ( !applyInitialConditionsODE( sim_mem, tstart, im, isim, returndxdt, returnddxdtdp, x0_override, sensitivitySubset ) )
                 return;
 
             /* Check if we are only simulating dxdt */
@@ -693,7 +698,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             /* Sensitivity-related settings */
             if (sensi == 1) {
                 if(neq>0){
-                    flag = AR_CVodeSensInit1(cvode_mem, np, sensi_meth, sensirhs, sx, im, isim);
+                    flag = AR_CVodeSensInit1(cvode_mem, np, sensi_meth, sensirhs, sx, im, isim, sensitivitySubset);
                     if(flag < 0) {terminate_x_calc( sim_mem, 10 ); return;}
                     
                     /*
@@ -701,7 +706,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                         if(flag < 0) {terminate_x_calc( sim_mem, 11 ); return;}
                      */
                     
-                    flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
+                    flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);                  /* TO DO : Third argument is parameter list */
                     if (flag < 0) {terminate_x_calc( sim_mem, 13 ); return;}
                     
                     /* Set error weights */
@@ -1252,7 +1257,7 @@ int handle_event( SimMemory sim_mem, int sensi_meth )
 }
 
 /* Apply initial conditions for solving using numerical ODE integration */
-int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override )
+int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override, int sensitivitySubset )
 {
     int nPoints;
     UserData data = sim_mem->data;
@@ -1296,7 +1301,7 @@ int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isi
 					sxtmp[ks] = 0.0;
 				}
 			}
-			for (is=0;is<nps;is++) fsx0(is, sx[is], data, im, isim);
+			for (is=0;is<nps;is++) fsx0(is, sx[is], data, im, isim, sensitivitySubset);
 			fsv(data, tstart, x, im, isim);
 			dfxdp(data, tstart, x, returnddxdtdp, im, isim);
 		}

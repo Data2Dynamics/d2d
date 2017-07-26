@@ -2197,14 +2197,23 @@ fprintf(fid, '  return(-1);\n');
 fprintf(fid, '}\n\n');
 
 % map fsx0
-fprintf(fid, ' void fsx0(int is, N_Vector sx_is, void *user_data, int im, int ic){\n');
+fprintf(fid, ' void fsx0(int is, N_Vector sx_is, void *user_data, int im, int ic, int sensitivitySubset) {\n');
 fprintf(fid, '  UserData data = (UserData) user_data;\n');
+fprintf(fid, '  if ( sensitivitySubset == 0 ) {\n' );
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
-        fprintf(fid, '  if((im==%i) & (ic==%i)) fsx0_%s(is, sx_is, data);\n', ...
+        fprintf(fid, '    if((im==%i) & (ic==%i)) fsx0_%s(is, sx_is, data);\n', ...
             m-1, c-1, ar.model(m).condition(c).fkt);
     end
 end
+fprintf(fid, '  } else {\n' );
+for m=1:length(ar.model)
+    for c=1:length(ar.model(m).condition)
+        fprintf(fid, '    if((im==%i) & (ic==%i)) subfsx0_%s(is, sx_is, data);\n', ...
+            m-1, c-1, ar.model(m).condition(c).fkt);
+    end
+end
+fprintf(fid, '  }\n' );
 fprintf(fid, '}\n\n');
 
 % map flux sensitivities <== csv is here
@@ -2219,15 +2228,24 @@ end
 fprintf(fid, '}\n\n');
 
 % map CVodeSensInit1 to fsx
-fprintf(fid, ' int AR_CVodeSensInit1(void *cvode_mem, int nps, int sensi_meth, int sensirhs, N_Vector *sx, int im, int ic){\n');
+fprintf(fid, ' int AR_CVodeSensInit1(void *cvode_mem, int nps, int sensi_meth, int sensirhs, N_Vector *sx, int im, int ic, int sensitivitySubset){\n');
 if(ar.config.useSensiRHS)
     fprintf(fid, '  if (sensirhs == 1) {\n');
+    fprintf(fid, '    if (sensitivitySubset == 0) {\n');
     for m=1:length(ar.model)
         for c=1:length(ar.model(m).condition)
-            fprintf(fid, '    if((im==%i) & (ic==%i)) return CVodeSensInit1(cvode_mem, nps, sensi_meth, fsx_%s, sx);\n', ...
+            fprintf(fid, '      if((im==%i) & (ic==%i)) return CVodeSensInit1(cvode_mem, nps, sensi_meth, fsx_%s, sx);\n', ...
                 m-1, c-1, ar.model(m).condition(c).fkt);
         end
     end
+    fprintf(fid, '    } else {\n');
+    for m=1:length(ar.model)
+        for c=1:length(ar.model(m).condition)
+            fprintf(fid, '      if((im==%i) & (ic==%i)) return CVodeSensInit1(cvode_mem, nps, sensi_meth, subfsx_%s, sx);\n', ...
+                m-1, c-1, ar.model(m).condition(c).fkt);
+        end
+    end
+    fprintf(fid, '  }\n');
     fprintf(fid, '  } else {\n');
 end
 for m=1:length(ar.model)
