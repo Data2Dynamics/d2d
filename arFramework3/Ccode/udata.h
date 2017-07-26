@@ -21,7 +21,6 @@ typedef struct {
 	double  t;
     int     *abort;
     int32_T *sensIndices;
-    int     sensiCount;
 	} *UserData;
 
     
@@ -62,6 +61,7 @@ typedef struct {
     int         sensi;
     int         neq;
     int         np;
+    int         npSensi;
     
 	/* SSA integration */
 	N_Vector    x_lb;

@@ -73,11 +73,11 @@ void simFree( SimMemory sim_mem )
 	if ( sim_mem->atolV )
 		N_VDestroy_Serial(sim_mem->atolV);
 	if ( sim_mem->sx )
-		N_VDestroyVectorArray_Serial(sim_mem->sx, sim_mem->np);
+		N_VDestroyVectorArray_Serial(sim_mem->sx, sim_mem->npSensi);
 	if ( sim_mem->atols_ss )
 		N_VDestroy_Serial(sim_mem->atols_ss);
 	if ( sim_mem->atolV_ss )
-		N_VDestroyVectorArray_Serial(sim_mem->atolV_ss, sim_mem->np);
+		N_VDestroyVectorArray_Serial(sim_mem->atolV_ss, sim_mem->npSensi);
 
 	/* SSA memory */
 	if ( sim_mem->x_lb )

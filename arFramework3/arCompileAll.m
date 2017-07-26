@@ -1716,7 +1716,8 @@ if(config.useSensiRHS)
     fprintf(fid, '  \tint ip, N_Vector sx, N_Vector sxdot, void *user_data, \n');
     fprintf(fid, '  \tN_Vector tmp1, N_Vector tmp2)\n {\n');
     fprintf(fid, '   UserData data = (UserData) user_data;\n');   
-    fprintf(fid, '   fsx_%s(Ns, t, x, xdot, data->sensIndices[ip], sx, sxdot, user_data, tmp1, tmp2);\n', condition.fkt);
+    fprintf(fid, '   return fsx_%s(Ns, t, x, xdot, data->sensIndices[ip], sx, sxdot, user_data, tmp1, tmp2);\n', condition.fkt);
+    %fprintf(fid, ' return 0;');
     fprintf(fid, ' };\n\n');    
 end
 

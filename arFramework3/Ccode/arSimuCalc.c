@@ -88,6 +88,7 @@ int    events;
 int    parallel;
 int    sensirhs;
 int    debugMode;
+int    sensitivitySubset;
 /*int    fiterrors;*/
 int    cvodes_maxsteps;
 double cvodes_maxstepsize;
@@ -127,7 +128,7 @@ void *thread_calc(void *threadarg);
 #else
 void thread_calc(int id);
 #endif
-void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding, int debugMode);
+void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding, int debugMode, int sensitivitySubset);
 void z_calc(int im, int ic, mxArray *arcondition, int sensi);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi);
 
@@ -145,13 +146,14 @@ int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double
 void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int nout, int offset );
 void copyResult( double* data, double *returnvec, int nu, int nout, int offset );
 void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, int nout, int offset );
+void subCopyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, int nout, int offset, int32_T* targetIdx );
 
 /* user functions */
 #include "arSimuCalcFunctions.c"
 
 void terminate_x_calc( SimMemory sim_mem, double status );
-void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines );
-int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi );
+void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines, int sensitivitySubset );
+int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi, int npSensi );
 int allocateSimMemorySSA( SimMemory sim_mem, int nx );
 int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override, int sensitivitySubset );
 int initializeEvents( SimMemory sim_mem, mxArray *arcondition, int ic, double tstart );
@@ -170,7 +172,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #endif
 
     mxArray    *arconfig;
-
     struct timeval t2, tdiff;
     double *ticks_stop;
     ticks_stop = mxGetData(mxGetField(prhs[0], 0, "stop"));
@@ -218,6 +219,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     debugMode = 0;
     if ( mxGetField(arconfig, 0, "debug" ) )
         debugMode = (int) mxGetScalar(mxGetField(arconfig, 0, "debug"));
+    
+    sensitivitySubset = 0;
+    if ( mxGetField(arconfig, 0, "sensitivitySubset" ) )
+        sensitivitySubset = (int) mxGetScalar(mxGetField(arconfig, 0, "sensitivitySubset"));
     
     /* In debug mode we have to disable threading, since otherwise the mexPrintf can lead to a race condition which may crash MATLAB */
     if ( debugMode == 1 )
@@ -340,7 +345,7 @@ void thread_calc(int id) {
     
     for(in=0; in<n; ++in){
         /* printf("computing thread #%i, task %i/%i (m=%i, c=%i)\n", id, in, n, ms[in], cs[in]); */
-        x_calc(ms[in], cs[in], globalsensi, setSparse, &threadStatus[id], &threadAbortSignal[id], rootFinding, debugMode);
+        x_calc(ms[in], cs[in], globalsensi, setSparse, &threadStatus[id], &threadAbortSignal[id], rootFinding, debugMode, sensitivitySubset);
     }
     
     /* printf("computing thread #%i(done)\n", id); */
@@ -351,13 +356,15 @@ void thread_calc(int id) {
 #endif
 }
 
-/* Handle errors. Note that this function is in principle not thread safe! */
+/* Handle CVODES errors */
+/* CAUTION: this function is NOT thread safe! */
 void errorHandler(int error_code, const char *module, const char *func, char *msg, void *eh_data)
 {
 	mexPrintf( "Error code %d in module %s and function %s:\n%s\n", error_code, module, func, msg );
 };
 
 /* Function which can be used for debugging purposes */
+/* CAUTION: this function is NOT thread safe! */
 void waitForKey()
 {
     mxArray   *junk, *str;
@@ -366,7 +373,7 @@ void waitForKey()
 };
 
 /* calculate dynamics */
-void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding, int debugMode) {
+void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding, int debugMode, int sensitivitySubset) {
     mxArray    *x0_override;
     mxArray    *arcondition;   
     
@@ -375,16 +382,13 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     int has_tExp;
     int nm, nc;
     int flag;
-    int is, js, ks;
+    int is, js, ks, jss;
     int nout; /*, nyout;*/
     int nu, nv, nnz;
     
     /* Which condition to simulate */
     int isim;
-    
-    /* Do we only want a subset of the sensitivities simulated? */
-    int sensitivitySubset;
-    
+       
     /* Used to override which condition to simulate */
     mxArray *src;    
     double  *isrc;
@@ -436,10 +440,13 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     double *ticks_start;
     double *ticks_stop_data;
     double *ticks_stop;
+    
+    /* List of indices which map the sensitivities back to the output ones */
+    int32_T *sensitivityMapping;
        
     /* Pointer to centralized container for the heap memory */
     SimMemory sim_mem = NULL;
-    int np, neq;
+    int np, neq, npSensi;
     
     /* Pointers to heap memory (which needs to be cleaned up!) */
     /* CVODES */
@@ -456,8 +463,6 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     int sensi_meth = CV_SIMULTANEOUS; /* CV_SIMULTANEOUS or CV_STAGGERED */
     bool error_corr = TRUE;
     only_sim = 0;
-    
-    sensitivitySubset = 0;
     
     /* Grab value of infinity (used to mark steady state simulations) */
     inf = mxGetInf();
@@ -536,9 +541,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             }
             
             returndxdt = mxGetData(mxGetField(arcondition, ic, "dxdt"));
-                      
             if (sensi == 1) {
                 returnddxdtdp = mxGetData(mxGetField(arcondition, ic, "ddxdtdp"));
+                
+                /* Obtain indices which map the computed sensitivities back to the output ones */
+                if ( sensitivitySubset == 1 )
+                    sensitivityMapping = (int32_T *) mxGetData(mxGetField(arcondition, ic, "backwardIndices"));
             }
 
             /* Fetch number of inputs, parameters and fluxes */
@@ -550,12 +558,17 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             else
                 nsplines = 0;      
             
+            if ( sensitivitySubset == 1 )
+                npSensi = (int) mxGetNumberOfElements(mxGetField(arcondition, ic, "sensIndices"));
+            else
+                npSensi = np;
+            
             /* If there are no parameters, do not compute simulated sensitivities; otherwise failure at N_VCloneVectorArray_Serial */
             ysensi = sensi;
-            if (np==0) sensi = 0;
+            if (npSensi==0) sensi = 0;
             
             /* Allocate heap memory required for simulation */
-            if ( allocateSimMemoryCVODES( sim_mem, neq, np, sensi ) )
+            if ( allocateSimMemoryCVODES( sim_mem, neq, np, sensi, npSensi ) )
             {
                 /* Generate some local references to avoid having sim_mem-> littered everywhere */
                 x = sim_mem->x;
@@ -567,10 +580,10 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 event_data = sim_mem->event_data;
                 cvode_mem = sim_mem->cvode_mem;
             } else return;
-   
+            
             /* User data structure */
-            initializeDataCVODES( sim_mem, tstart, abortSignal, arcondition, qpositivex, ic, nsplines );
-   
+            initializeDataCVODES( sim_mem, tstart, abortSignal, arcondition, qpositivex, ic, nsplines, sensitivitySubset );
+              
             /* Initialize event system */
             qEvents = 0;
             if ( events )
@@ -611,7 +624,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 if ( neq > 0 )
                 {
                     copyStates( x, returnx, qpositivex, neq, nout, 0 );
-                    if ( sensi ) copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 );
+                    if ( sensi ) copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 ); /* TO DO: Look at what this means for subsensis */
                 }
                 z_calc(im, ic, arcondition, ysensi);
                 fu(data, -1e30, im, isim);
@@ -622,7 +635,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 terminate_x_calc( sim_mem, 0 ); return;
             }
             
-            if(neq>0){              
+            if(neq>0){
                 /* Allocate space for CVODES */
                 flag = AR_CVodeInit(cvode_mem, x, tstart, im, isim);
                 if (flag < 0) {terminate_x_calc( sim_mem, 4 ); return;}
@@ -697,8 +710,9 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             
             /* Sensitivity-related settings */
             if (sensi == 1) {
-                if(neq>0){
-                    flag = AR_CVodeSensInit1(cvode_mem, np, sensi_meth, sensirhs, sx, im, isim, sensitivitySubset);
+                if(neq>0){                    
+                    flag = AR_CVodeSensInit1(cvode_mem, npSensi, sensi_meth, sensirhs, sx, im, isim, sensitivitySubset);
+                     
                     if(flag < 0) {terminate_x_calc( sim_mem, 10 ); return;}
                     
                     /*
@@ -706,15 +720,19 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                         if(flag < 0) {terminate_x_calc( sim_mem, 11 ); return;}
                      */
                     
-                    flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);                  /* TO DO : Third argument is parameter list */
+                    if ( sensitivitySubset == 1 )
+                        flag = CVodeSetSensParams(cvode_mem, NULL, NULL, NULL);                     /* Parameters only need to be specified when sensis are computed */
+                    else
+                        flag = CVodeSetSensParams(cvode_mem, data->p, NULL, NULL);
+                    
                     if (flag < 0) {terminate_x_calc( sim_mem, 13 ); return;}
                     
                     /* Set error weights */
-                    for (is=0; is<np; is++) Ith(atols_ss, is+1) = cvodes_atol;
+                    for (is=0; is<npSensi; is++) Ith(atols_ss, is+1) = cvodes_atol;
                     
                     if(cvodes_atolV==1)
                     { 
-                        for(js=0; js < np; js++) 
+                        for(js=0; js < npSensi; js++)
                         {
                             atolV_tmp = NV_DATA_S(atolV_ss[js]);
                             for(ks=0; ks < neq; ks++)
@@ -735,7 +753,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                                 }			  
                                 /*printf("atolV_ss for neq=%i is %f\n", ks, atolV_tmp[ks]);*/
                             }
-                        }                                       		    
+                        }
                         flag = CVodeSensSVtolerances(cvode_mem, RCONST(cvodes_rtol), atolV_ss);
         		    }else
                     {
@@ -758,10 +776,10 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 ); return;}
                 }
             }
-            
+
             /* loop over output points */
             for (is=0; is < nout; is++) {
-                /* printf("%f x-loop (im=%i ic=%i)\n", ts[is], im, ic); */
+                /*mexPrintf("%f x-loop (im=%i ic=%i)\n", ts[is], im, ic);*/
                 /* only integrate if no errors occured */
                 if(status[0] == 0.0) {
 
@@ -822,6 +840,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 /* Store output sensitivities */
                 if(status[0] == 0.0) {
                     if (sensi == 1) {
+
                         if(ts[is] > tstart) {
                             if(neq>0) {
                                 flag = CVodeGetSens(cvode_mem, &t, sx);
@@ -829,25 +848,58 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                             }
                         }
                         fsu(data, ts[is], im, isim);
-                        fsv(data, ts[is], x, im, isim);
-                        
-                        if(neq>0) {
-                            /* Output state sensitivities */
-                            copyNVMatrixToDouble( sx, returnsx, np, neq, nout, is );
+                        fsv(data, ts[is], x, im, isim);                        
 
-                            for(js=0; js < np; js++) {
-                                /* Output flux sensitivities */
-                                csv(ts[is], x, js, sx[js], data, im, ic);
-                                for(ks=0; ks < nv; ks++) {
-                                    returnsv[(js*nv+ks)*nout + is] = data->sv[ks];
-                                }      
+                        if ( sensitivitySubset == 0 )
+                        {
+                            /*****************************
+                            ** RETURN ALL SENSITIVITIES **
+                            ******************************/
+                            if(neq>0) {
+                                /* Output state sensitivities */
+                                copyNVMatrixToDouble( sx, returnsx, np, neq, nout, is );
+
+                                for(js=0; js < np; js++) {
+                                    /* Output flux sensitivities */
+                                    csv(ts[is], x, js, sx[js], data, im, ic);
+                                    for(ks=0; ks < nv; ks++) {
+                                        returnsv[(js*nv+ks)*nout + is] = data->sv[ks];
+                                    } 
+                                }
                             }
-                        }
-                            
-                        /* Output input sensitivities */
-                        for(js=0; js < np; js++) {
-                            for(ks=0; ks < nu; ks++) {
-                                returnsu[(js*nu+ks)*nout + is] = data->su[(js*nu)+ks];
+
+                            /* Output input sensitivities */
+                            for(js=0; js < np; js++) {
+                                for(ks=0; ks < nu; ks++) {
+                                    returnsu[(js*nu+ks)*nout + is] = data->su[(js*nu)+ks];
+                                }
+                            }
+                        } else {
+                            /********************************************
+                            ** RETURN ONLY SUBSET OF THE SENSITIVITIES **
+                            *********************************************/
+                            if(neq>0) {
+                                
+                                /* Output state sensitivities */
+                                subCopyNVMatrixToDouble( sx, returnsx, np, neq, nout, is, sensitivityMapping );
+                                for(jss=0; jss < np; jss++) {
+                                    js = sensitivityMapping[jss];                                   
+                                    if (js < 0) {
+                                        for(ks=0; ks < nv; ks++) returnsv[(jss*nv+ks)*nout + is] = 0.0;
+                                    } else {
+                                        /* Output flux sensitivities */
+                                        csv(ts[is], x, js, sx[js], data, im, ic);
+                                        for(ks=0; ks < nv; ks++) {
+                                            returnsv[(jss*nv+ks)*nout + is] = data->sv[ks];
+                                        }
+                                    }
+                                }
+                            }
+                            /* Output input sensitivities */
+                            for(js=0; js < np; js++) {
+                                for(ks=0; ks < nu; ks++) {
+                                    returnsu[(js*nu+ks)*nout + is] = data->su[(js*nu)+ks];
+                                }
                             }
                         }
                     }
@@ -1119,6 +1171,29 @@ void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, int
 	}
 }
 
+/* Copies a subset of doubles stored in NVector* array matrix into double array with specified offset */
+void subCopyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, int nout, int offset, int32_T* targetIdx )
+{
+    int js, ks, jss;
+    realtype* sxtmp;
+    
+    for(jss=0; jss < nps; jss++)
+    {
+        js = targetIdx[jss];
+        if ( js < 0 )
+        {
+            for(ks=0; ks < neq; ks++) {
+                returnsx[(jss*neq+ks)*nout + offset] = 0;
+            }            
+        } else {
+            sxtmp = NV_DATA_S(sx[js]);
+            for(ks=0; ks < neq; ks++) {
+                returnsx[(jss*neq+ks)*nout + offset] = sxtmp[ks];
+            }
+        }
+    }
+}
+
 /* Equilibrate the system until the RHS is under a specified threshold */
 int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *equilibrated, double *returndxdt, double *teq, int neq, int im, int ic, int *abortSignal ) {
     int    i;
@@ -1178,15 +1253,6 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
     return flag;
 }
 
-                                /* Reinitialize the solver and set the time back as though nothing happened! */
-                                /*flag = CVodeReInit(cvode_mem, RCONST(data->t), sim_mem->x);
-                                if (flag>=0) {
-                                    if (sensi==1) {
-                                        flag = CVodeSensReInit(cvode_mem, sensi_meth, sim_mem->sx);
-                                    }
-                                }*/
-                                /*flag = 0;*/
-
 /* This function can be used to display errors from the threaded environment 
    mexErrMsgTxt crashes on R2013b when called from a thread */
 void thr_error( const char* msg ) {
@@ -1200,11 +1266,12 @@ int handle_event( SimMemory sim_mem, int sensi_meth )
     int nps     = sim_mem->np;
     int neq     = sim_mem->neq;
     int sensi   = sim_mem->sensi;
+    int32_T* idx;
     
-    void* cvode_mem = sim_mem->cvode_mem;
-    EventData event_data = sim_mem->event_data;
-    N_Vector x = sim_mem->x;
-    N_Vector* sx = sim_mem->sx;
+    void* cvode_mem         = sim_mem->cvode_mem;
+    EventData event_data    = sim_mem->event_data;
+    N_Vector x              = sim_mem->x;
+    N_Vector* sx            = sim_mem->sx;
     
     double A, B;
 	int state, pars, flag, cStep, tStep;
@@ -1231,16 +1298,35 @@ int handle_event( SimMemory sim_mem, int sensi_meth )
         /* printf("t[%d/%d]=%f  A: %f, B: %f\n", cStep, tStep, event_data->t[event_data->i], A, B); */
         /* Override sensitivity equations */
         if (sensi==1) {
-            for (pars=0; pars<nps; pars++) {
-                if (neq>0) {
-                    sxtmp = NV_DATA_S(sx[pars]);
-                    for (state=0; state<neq; state++)
-                    {
-                        A = event_data->sensValue_A[(pars*neq+state)*tStep+cStep];
-                        B = event_data->sensValue_B[(pars*neq+state)*tStep+cStep];
-                        sxtmp[state] = A * sxtmp[state] + B;
+            if ( sim_mem->data->sensIndices == NULL )
+            {
+                /* Simulate with all sensitivities */
+                for (pars=0; pars<nps; pars++) {
+                    if (neq>0) {
+                        sxtmp = NV_DATA_S(sx[pars]);
+                        for (state=0; state<neq; state++)
+                        {
+                            A = event_data->sensValue_A[(pars*neq+state)*tStep+cStep];
+                            B = event_data->sensValue_B[(pars*neq+state)*tStep+cStep];
+                            sxtmp[state] = A * sxtmp[state] + B;
+                        }
                     }
                 }
+            } else
+            {
+                /* Simulate with a subset of the sensitivities */
+                idx = sim_mem->data->sensIndices;
+                for (pars=0; pars<sim_mem->npSensi; pars++) {
+                    if (neq>0) {
+                        sxtmp = NV_DATA_S(sx[pars]);
+                        for (state=0; state<neq; state++)
+                        {
+                            A = event_data->sensValue_A[(idx[pars]*neq+state)*tStep+cStep];
+                            B = event_data->sensValue_B[(idx[pars]*neq+state)*tStep+cStep];
+                            sxtmp[state] = A * sxtmp[state] + B;
+                        }
+                    }
+                }                
             }
         }
 	}
@@ -1294,14 +1380,24 @@ int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isi
 		if (sensi == 1)
 		{
 			fsu(data, tstart, im, isim);
-		
-			for(js=0; js < nps; js++) {
-				sxtmp = NV_DATA_S(sx[js]);
-				for(ks=0; ks < neq; ks++) {
-					sxtmp[ks] = 0.0;
-				}
-			}
-			for (is=0;is<nps;is++) fsx0(is, sx[is], data, im, isim, sensitivitySubset);
+
+            if ( sensitivitySubset == 1 ) {
+    			for(js=0; js < sim_mem->npSensi; js++) {
+    				sxtmp = NV_DATA_S(sx[js]);
+    				for(ks=0; ks < neq; ks++) {
+    					sxtmp[ks] = 0.0;
+    				}
+                }                
+                for (is=0;is<sim_mem->npSensi;is++) fsx0(is, sx[is], data, im, isim, sensitivitySubset);
+            } else {
+    			for(js=0; js < nps; js++) {
+    				sxtmp = NV_DATA_S(sx[js]);
+    				for(ks=0; ks < neq; ks++) {
+    					sxtmp[ks] = 0.0;
+    				}
+                }
+                for (is=0;is<nps;is++) fsx0(is, sx[is], data, im, isim, sensitivitySubset);
+            }
 			fsv(data, tstart, x, im, isim);
 			dfxdp(data, tstart, x, returnddxdtdp, im, isim);
 		}
@@ -1310,13 +1406,14 @@ int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isi
 }
 
 /* Allocate memory used by the SUNDIALS solver */
-int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi )
+int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi, int npSensi )
 {
     int is, js, ks;
     realtype *atolV_tmp;
     
     sim_mem->neq = neq;
     sim_mem->np = np;
+    sim_mem->npSensi = npSensi;
     sim_mem->sensi = sensi;
     
     /* Allocate userdata */
@@ -1343,16 +1440,16 @@ int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi )
             Ith(sim_mem->atolV, is+1) = 0.0;
         
         if (sensi == 1) {
-            (sim_mem->sx) = N_VCloneVectorArray_Serial(np, sim_mem->x);
+            (sim_mem->sx) = N_VCloneVectorArray_Serial(npSensi, sim_mem->x);
             if (sim_mem->sx == NULL) { terminate_x_calc( sim_mem, 2 ); return 0; }
 
-            sim_mem->atols_ss = N_VNew_Serial(np);
+            sim_mem->atols_ss = N_VNew_Serial(npSensi);
             if (sim_mem->atols_ss == NULL) { terminate_x_calc( sim_mem, 2 ); return 0; }
             
-            sim_mem->atolV_ss = N_VCloneVectorArray_Serial(np, sim_mem->x);
+            sim_mem->atolV_ss = N_VCloneVectorArray_Serial(npSensi, sim_mem->x);
             if (sim_mem->atolV_ss == NULL) { terminate_x_calc( sim_mem, 9 ); return 0; }
                     
-            for(js=0; js < np; js++) {
+            for(js=0; js < npSensi; js++) {
                 atolV_tmp = NV_DATA_S(sim_mem->atolV_ss[js]);
                 for(ks=0; ks < neq; ks++) {
                     atolV_tmp[ks] = 0.0;
@@ -1385,7 +1482,7 @@ int allocateSimMemorySSA( SimMemory sim_mem, int nx )
 }
 
 /* Initialize the UserData structure for use with CVodes */
-void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines )
+void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines, int sensitivitySubset )
 {
     int j;
     UserData data = sim_mem->data;
@@ -1403,6 +1500,11 @@ void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, m
         
         if (data->splines == NULL) { terminate_x_calc( sim_mem, 1 ); return; }   
     }
+    
+    if ( sensitivitySubset == 1 )
+        data->sensIndices = (int32_T *) mxGetData(mxGetField(arcondition, ic, "sensIndices"));
+	else
+        data->sensIndices = NULL;
     
 	data->abort = abortSignal;
 	data->t = tstart;

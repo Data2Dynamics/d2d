@@ -63,6 +63,11 @@ if ( ~dynamics )
     end
 end
 
+% Make sure the required fields exist!
+if ( ar.config.sensitivitySubset == 1 )
+    arSubsetSensi;
+end
+
 if(~isfield(ar,'p'))
     fprintf('ERROR: forgot arLink\n');
 end
