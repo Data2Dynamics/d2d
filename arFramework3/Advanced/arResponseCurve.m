@@ -91,8 +91,8 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
 
         if ( opts.relative )
             % Get the vmax of this reaction
-            substrates = ar.model.fv_source{enzyme};
-            products = ar.model.fv_target{enzyme};
+            substrates = ar.model(m).fv_source{enzyme};
+            products = ar.model(m).fv_target{enzyme};
             products = setdiff( products, substrates );
             limF = func;
             for i = 1 : numel( substrates )
@@ -108,7 +108,7 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
             % Normalize by vmax
             func = func / limF;
             
-            rateName = sprintf( 'v_{%s} / v_{%s}^{max}', ar.model(m).v{enzyme}, ar.model.v{enzyme} );
+            rateName = sprintf( 'v_{%s} / v_{%s}^{max}', ar.model(m).v{enzyme}, ar.model(m).v{enzyme} );
         else
             rateName = sprintf( 'v_{%s}', ar.model(m).v{enzyme} );
         end
@@ -155,7 +155,7 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         plot( [refValues(1), refValues(1)], [min(min(rate)), max(max(rate))], 'k--' );
 
         xlabel( indep1 );
-        ylabel( sprintf( '%s flux [%s]', enzyme, ar.model.vUnits{enzyme,2} ) );
+        ylabel( sprintf( '%s flux [%s]', enzyme, ar.model(m).vUnits{enzyme,2} ) );
         if ( ylog )
             ylim( [max([1e-12, min(min(rate))]), max(max(rate))] );
         else
