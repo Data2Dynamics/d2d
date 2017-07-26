@@ -624,7 +624,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 if ( neq > 0 )
                 {
                     copyStates( x, returnx, qpositivex, neq, nout, 0 );
-                    if ( sensi ) copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 ); /* TO DO: Look at what this means for subsensis */
+                    if ( sensi ) copyNVMatrixToDouble( sx, returnsx, npSensi, neq, nout, 0 ); /* TO DO: Look at what this means for subsensis */
                 }
                 z_calc(im, ic, arcondition, ysensi);
                 fu(data, -1e30, im, isim);
