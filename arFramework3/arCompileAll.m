@@ -1388,8 +1388,12 @@ if(config.useSensiRHS)
     fprintf(fid, ' int fsx_%s(int Ns, realtype t, N_Vector x, N_Vector xdot,', condition.fkt);
     fprintf(fid, 'int ip, N_Vector sx, N_Vector sxdot, void *user_data,');
     fprintf(fid, 'N_Vector tmp1, N_Vector tmp2);\n');
+    fprintf(fid, ' int subfsx_%s(int Ns, realtype t, N_Vector x, N_Vector xdot,', condition.fkt);
+    fprintf(fid, 'int ip, N_Vector sx, N_Vector sxdot, void *user_data,');
+    fprintf(fid, 'N_Vector tmp1, N_Vector tmp2);\n');
 end
 fprintf(fid, ' void fsx0_%s(int ip, N_Vector sx0, void *user_data);\n', condition.fkt);
+fprintf(fid, ' void subfsx0_%s(int ip, N_Vector sx0, void *user_data);\n', condition.fkt);
 fprintf(fid, ' void csv_%s(realtype t, N_Vector x, int ip, N_Vector sx, void *user_data);\n', condition.fkt);
 fprintf(fid, ' void dfxdp_%s(realtype t, N_Vector x, double *dfxdp, void *user_data);\n\n', condition.fkt);
 fprintf(fid, ' void fz_%s(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *z, double *p, double *u, double *x);\n', condition.fkt);
@@ -1638,7 +1642,7 @@ end
 fprintf(fid, '\n  return(0);\n}\n\n\n');
 
 % write fsv & fsx
-if(config.useSensiRHS)
+if(config.useSensiRHS)   
     fprintf(fid, ' int fsx_%s(int Ns, realtype t, N_Vector x, N_Vector xdot, \n', condition.fkt);
     fprintf(fid, '  \tint ip, N_Vector sx, N_Vector sxdot, void *user_data, \n');
     fprintf(fid, '  \tN_Vector tmp1, N_Vector tmp2)\n{\n');
@@ -1705,6 +1709,15 @@ if(config.useSensiRHS)
         end
     end
     fprintf(fid, '\n  return(0);\n}\n\n\n');
+    
+    % Function which can be called to get a smaller sensitivity matrix if
+    % not all sensitivities are required.
+    fprintf(fid, ' int subfsx_%s(int Ns, realtype t, N_Vector x, N_Vector xdot, \n', condition.fkt);
+    fprintf(fid, '  \tint ip, N_Vector sx, N_Vector sxdot, void *user_data, \n');
+    fprintf(fid, '  \tN_Vector tmp1, N_Vector tmp2)\n {\n');
+    fprintf(fid, '   UserData data = (UserData) user_data;\n');   
+    fprintf(fid, '   fsx_%s(Ns, t, x, xdot, data->sensIndices[ip], sx, sxdot, user_data, tmp1, tmp2);\n', condition.fkt);
+    fprintf(fid, ' };\n\n');    
 end
 
 % compute flux sensitivity (only for output)
@@ -1748,6 +1761,7 @@ if (ispc)
     % this is to prevent it from breaking my current models.
     fprintf(fid, ' #pragma optimize("", off)\n');
 end
+
 fprintf(fid, ' void fsx0_%s(int ip, N_Vector sx0, void *user_data)\n{\n', condition.fkt);
 if(~isempty(model.xs))
     if(config.useSensis)
@@ -1769,6 +1783,14 @@ if(~isempty(model.xs))
     end
 end
 fprintf(fid, '\n  return;\n}\n\n\n');
+
+% Function which can be called to get a smaller sensitivity matrix if
+% not all sensitivities are required.
+fprintf(fid, ' void subfsx0_%s(int ip, N_Vector sx0, void *user_data)\n {\n', condition.fkt);
+fprintf(fid, '   UserData data = (UserData) user_data;\n');
+fprintf(fid, '   fsx0_%s(data->sensIndices[ip], sx0, user_data);\n', condition.fkt);
+fprintf(fid, ' };\n\n');
+
 if (ispc)
     fprintf(fid, ' #pragma optimize("", on)\n');
 end

@@ -19,6 +19,7 @@ typedef struct {
     int    *splineIndices;
 	double t;
     int    *abort;
+    int    *sensIndices;
 	} *UserData;
 
     
