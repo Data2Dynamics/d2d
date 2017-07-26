@@ -1,25 +1,27 @@
 #include <nvector/nvector_serial.h>  /* defs. of serial NVECTOR fcts. and macros  */
 #include <cvodes/cvodes.h>           /* prototypes for CVODES fcts. and consts. */
+#include <mex.h>
 
 #ifndef _MY_UDATA
 #define _MY_UDATA
 
 typedef struct {
-	double *qpositivex;
-	double *u;
-	double *su;
-	double *p;
-	double *v;
-	double *sv;
-	double *dvdx;
-	double *dvdu;
-	double *dvdp;
-    int    nsplines;
-    double **splines;
-    int    *splineIndices;
-	double t;
-    int    *abort;
-    int    *sensIndices;
+	double  *qpositivex;
+	double  *u;
+	double  *su;
+	double  *p;
+	double  *v;
+	double  *sv;
+	double  *dvdx;
+	double  *dvdu;
+	double  *dvdp;
+    int     nsplines;
+    double  **splines;
+    int     *splineIndices;
+	double  t;
+    int     *abort;
+    int32_T *sensIndices;
+    int     sensiCount;
 	} *UserData;
 
     
