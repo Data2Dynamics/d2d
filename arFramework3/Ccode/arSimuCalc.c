@@ -357,6 +357,14 @@ void errorHandler(int error_code, const char *module, const char *func, char *ms
 	mexPrintf( "Error code %d in module %s and function %s:\n%s\n", error_code, module, func, msg );
 };
 
+/* Function which can be used for debugging purposes */
+void waitForKey()
+{
+    mxArray   *junk, *str;
+    str = mxCreateString("Hit [ENTER] to continue . . .");
+    mexCallMATLAB(1,&junk,1,&str,"input");
+};
+
 /* calculate dynamics */
 void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding, int debugMode) {
     mxArray    *x0_override;
@@ -441,7 +449,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     /* SSA */
     N_Vector x_lb = NULL;
     N_Vector x_ub = NULL;
-       
+    
     int sensi_meth = CV_SIMULTANEOUS; /* CV_SIMULTANEOUS or CV_STAGGERED */
     bool error_corr = TRUE;
     only_sim = 0;
@@ -595,8 +603,11 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             if ( rootFinding )
             {
                 /* Copy states and state sensitivities */
-                copyStates( x, returnx, qpositivex, neq, nout, 0 );
-                if ( sensi ) copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 );
+                if ( neq > 0 )
+                {
+                    copyStates( x, returnx, qpositivex, neq, nout, 0 );
+                    if ( sensi ) copyNVMatrixToDouble( sx, returnsx, np, neq, nout, 0 );
+                }
                 z_calc(im, ic, arcondition, ysensi);
                 fu(data, -1e30, im, isim);
                 fv(data, -1e30, x, im, isim);
@@ -765,16 +776,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                                 /* Equilibrate the system */
                                 flag = equilibrate(cvode_mem, data, x, t, equilibrated, returndxdt, teq, neq, im, isim, abortSignal);
                                                                
-                                if (flag < 0) {thr_error("Failed to equilibrate system"); terminate_x_calc( sim_mem, 20 ); return;}
-                                
-                                /* Reinitialize the solver and set the time back as though nothing happened! */
-                                /*flag = CVodeReInit(cvode_mem, RCONST(data->t), sim_mem->x);
-                                if (flag>=0) {
-                                    if (sensi==1) {
-                                        flag = CVodeSensReInit(cvode_mem, sensi_meth, sim_mem->sx);
-                                    }
-                                }*/
-                                /*flag = 0;*/
+                                if (flag < 0) {thr_error("Failed to equilibrate system"); terminate_x_calc( sim_mem, 20 ); return;}                                
                             } else {
                                 /* Simulate up to the next time point */
                                 flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
@@ -1170,6 +1172,15 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
 
     return flag;
 }
+
+                                /* Reinitialize the solver and set the time back as though nothing happened! */
+                                /*flag = CVodeReInit(cvode_mem, RCONST(data->t), sim_mem->x);
+                                if (flag>=0) {
+                                    if (sensi==1) {
+                                        flag = CVodeSensReInit(cvode_mem, sensi_meth, sim_mem->sx);
+                                    }
+                                }*/
+                                /*flag = 0;*/
 
 /* This function can be used to display errors from the threaded environment 
    mexErrMsgTxt crashes on R2013b when called from a thread */
