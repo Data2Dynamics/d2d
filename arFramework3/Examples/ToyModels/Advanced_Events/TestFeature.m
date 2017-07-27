@@ -1,4 +1,4 @@
-fprintf( 'INTEGRATION TEST FOR EQUILIBRATION\n' );
+fprintf( 2, 'INTEGRATION TEST FOR EQUILIBRATION\n' );
 
 fprintf( 2, 'Loading model for equilibration test... ' );
 arInit;
@@ -35,7 +35,7 @@ fprintf( 'PASSED\n' );
 arFit;
 fprintf( 2, 'Testing fitting with equilibration event... ' );
 if ((norm(ar.model.data(1).res)+norm(ar.model.data(2).res)+norm(ar.model.data(3).res))<0.01)
-    fprintf('PASSED\n');
+    fprintf(2, 'PASSED\n');
 else
     error( 'FINAL ERROR TOO LARGE' );
 end
@@ -45,7 +45,7 @@ arSetPars('k_deg', -1);
 arSimu(false,false,true);
 fprintf( 2, 'Testing correct parameters with equilibration event... ' );
 if ((norm(ar.model.data(1).res)+norm(ar.model.data(2).res)+norm(ar.model.data(3).res))<0.01)
-    fprintf('PASSED\n');
+    fprintf(2, 'PASSED\n');
 else
     error( 'FINAL ERROR TOO LARGE' );
 end

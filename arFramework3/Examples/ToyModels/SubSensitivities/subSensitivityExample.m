@@ -74,4 +74,4 @@ sres_with = ar.sres;
 fprintf( 'Time with subsensitivities: %g\n', q );
 
 % Verify that sres is the same
-fprintf( 'Sum of squares difference in sensitivities %g', sum( sum( (sres_with(:, ar.qFit==1) - sres_without(:, ar.qFit==1)).^2 ) ) )
+fprintf( 'Sum of squares difference in sensitivities %g\n', sum( sum( (sres_with(:, ar.qFit==1) - sres_without(:, ar.qFit==1)).^2 ) ) );
