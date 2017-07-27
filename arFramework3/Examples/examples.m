@@ -17,7 +17,7 @@
 % structured as follows:
 %
 % ToyModels/
-%   .SubSensitivities
+%   SubSensitivities
 %       This toymodel demonstrates how to use subsensitivities. For large
 %       models, evaluating the sensitivity equations can become
 %       prohibitively expensive. In such cases, one might opt for
@@ -47,31 +47,31 @@
 %         your model whether this is slower or faster than simulated steady
 %         states)
 %   Intercondition_constraints
-%       -  This example shows how to use regularization between conditions.
-%          It shows how to add a constraint between two conditions such
-%          that two conditions will get the same simulation if they do not
-%          require to be different for the data.
+%       This example shows how to use regularization between conditions.
+%       It shows how to add a constraint between two conditions such
+%       that two conditions will get the same simulation if they do not
+%       require to be different for the data.
 %   LongSplines
-%       - This example shows how to string together splines in order to
-%         use a long driving input with more than 10 points.
+%       This example shows how to string together splines in order to
+%       use a long driving input with more than 10 points.
 %   TurboSplines
-%       - This example shows how to activate the turbosplines system which
-%         caches the spline coefficients for use in the RHS. This system
-%         is much faster to evaluate but (slightly) slower to compile.
+%       This example shows how to activate the turbosplines system which
+%       caches the spline coefficients for use in the RHS. This system
+%       is much faster to evaluate but (slightly) slower to compile.
 %   Volume_Estimation
-%       - This example shows an example how to estimate the volume of
-%         compartments along with the rest of the problem
+%       This example shows an example how to estimate the volume of
+%       compartments along with the rest of the problem
 %   Splines
-%       - This example shows the use of various types of cubic splines.
+%       This example shows the use of various types of cubic splines.
 %   SteadyStateModel
-%       - This example shows how to fit a steady state model and skip the
-%         dynamic simulation.
+%       This example shows how to fit a steady state model and skip the
+%       dynamic simulation.
 %   Flux_Estimation
-%       - This example shows how to use fluxes in the obsevation function
+%       This example shows how to use fluxes in the obsevation function
 %   Bolus_Injection_Test
-%       - This model shows how to simulate a bolus injection
+%       This model shows how to simulate a bolus injection
 %   Washing_and_Injection_Test
-%       - This model shows how to simulate a bolus injection and washing
-%         experiment
+%       This model shows how to simulate a bolus injection and washing
+%       experiment
 
 help examples
