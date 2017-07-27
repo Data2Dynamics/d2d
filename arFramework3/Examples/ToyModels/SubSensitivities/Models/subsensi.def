@@ -1,0 +1,40 @@
+DESCRIPTION
+"Simple pulse test"
+
+PREDICTOR
+t               T   min         time	-50	200
+
+COMPARTMENTS
+cyt             V   pl          vol.    1
+
+STATES
+stateA          C   nmol/l      conc.   cyt     1
+stateB          C   nmol/l      conc.   cyt     1
+stateC          C   nmol/l      conc.   cyt     1
+stateD          C   nmol/l      conc.   cyt     1
+
+INPUTS
+basal_inhibitor X   on/off      boolean "input_bas_inh"
+pulse           C   nmol/l      conc.   "step1(t,0,0,amount)"
+        
+REACTIONS
+                ->  stateA      CUSTOM	"pulse"
+                ->  stateA      CUSTOM	"k_basal * (1-0.5*basal_inhibitor)"
+stateA          ->              CUSTOM  "k_degA * stateA"
+                ->  stateB      CUSTOM  "k_b * stateA / ( 1 + k_inh * stateD )"
+stateB          ->              CUSTOM  "k_degB * stateB"
+                ->  stateC      CUSTOM  "k_C * stateB^hill / ( ka_C + stateB^hill )"
+stateC          ->  0           CUSTOM  "k_degC * stateC"
+                ->  stateD      CUSTOM  "k_D * stateC"
+stateD          ->  0           CUSTOM  "k_degD * stateD"
+
+DERIVED
+
+OBSERVABLES
+                
+ERRORS
+
+CONDITIONS
+init_stateA     "0"
+init_stateC     "0"
+init_stateD     "0"

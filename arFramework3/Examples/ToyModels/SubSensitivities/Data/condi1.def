@@ -1,0 +1,19 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	-30 200
+
+INPUTS
+
+OBSERVABLES
+B_obs         C 	au   conc.   0	0   "stateB"
+C_obs         C 	au   conc.   0	0   "stateC"
+D_obs         C 	au   conc.   0	0   "stateD"
+
+ERRORS 
+B_obs         "sd_b"
+C_obs         "sd_c"
+D_obs         "sd_d"
+        
+CONDITIONS
+k_degD "0.01 * k_degD"
