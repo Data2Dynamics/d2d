@@ -192,7 +192,7 @@ function arSteadyState( varargin )
         L = find( isnan(map) );
         if ~isempty( L )
             warning( 'Certain parameters in target condition not present in steady state reference!' );
-            warning( 'The following sensitivities will *not* take the equilibration into account:' );
+            warning( 'The following sensitivities will be initialized with zero:' );
             arFprintf(1, '%s\n', ar.model(m).condition(cTarget(a)).p{L} );
             ar.model(m).condition(cTarget(a)).ssUnmapped = L;
             map(L) = 1;
