@@ -197,12 +197,16 @@ if ( ss_presimulation && dynamics )
                     ar.model(m).condition(targetConditions(a)).modsx_B(1,:,:) = ...
                         SSsens(:,:,ar.model(m).condition(targetConditions(a)).ssParLink) + 0;
                     
-                    % Certain sensitivities are not mappable from SS to target
-                    % do not tamper with these.
+                    % Certain state sensitivities are not mappable from SS
+                    % to target. If set, these should have an initial
+                    % condition of zero for the sensitivities, since they
+                    % do not exist in the reference state
                     if ~isempty( ar.model(m).condition(targetConditions(a)).ssUnmapped )
-                        ar.model(m).condition(targetConditions(a)).modsx_A(1,:,ar.model(m).condition(targetConditions(a)).ssUnmapped) = 1;
+                        ar.model(m).condition(targetConditions(a)).modsx_A(1,:,ar.model(m).condition(targetConditions(a)).ssUnmapped) = 0;
                         ar.model(m).condition(targetConditions(a)).modsx_B(1,:,ar.model(m).condition(targetConditions(a)).ssUnmapped) = 0;
                     end
+                    % Sensitivities which are explicitly ignored are not
+                    % affected
                     if ~isempty( ssIgnore )
                         ar.model(m).condition(targetConditions(a)).modsx_A(1,ssIgnore,:) = 1;
                         ar.model(m).condition(targetConditions(a)).modsx_B(1,ssIgnore,:) = 0;
