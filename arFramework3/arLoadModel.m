@@ -350,7 +350,15 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             % check for negative fluxes possible
             if(ar.config.checkForNegFluxes)
                 if (~reversible)
-                    symtmp = sym(str{1});
+                    try
+                        symtmp = sym(str{1});
+                    catch
+                        if ( iscell( str{1} ) )
+                            error( 'Parsing error in REACTIONS at %s in model %d', str{1}{:}, m );
+                        else
+                            error( 'Parsing error in REACTIONS at %s in model %d', str{1}, m );
+                        end
+                    end
                     for j=1:length(source)
                         symtmpsubs = subs(symtmp, sym(source{j}), 0);
                         if(symtmpsubs~=0)
