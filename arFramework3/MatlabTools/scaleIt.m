@@ -47,7 +47,7 @@
 %     appendcolumn       Add a column with a value to the data
 %     splitconditions    Provide independent scaling for each individual condition
 %     excludeConditions  Cell array of condition filters (example:
-%                        {{'input_il6'}, {@(t)t>10}}
+%                        {{'input_il6', @(t)t>10}}
 %     nofileincrement    Do not assume different files have their own
 %                        scaling factor
 %     samescale          Do not scale any data
@@ -203,9 +203,9 @@ function out = scaleIt( names, outFile, varargin )
                     % from 0 or 1 inconsistently in different files
                     if ( ~opts.nofileincrement )
                         if ( isnumeric( cell2mat(data{1}.(expVar)) ) )
-                            expField    = expField + max(cell2mat(data{1}.(expVar))) + 1;
+                            expField    = expField + max(cell2mat(data{1}.(expVar))) + 2;
                         else
-                            expField    = expField + max(str2num(cell2mat(data{1}.(expVar)))) + 1;
+                            expField    = expField + max(str2num(cell2mat(data{1}.(expVar)))) + 2;
                         end
                     end
                 end
