@@ -46,8 +46,15 @@ else
         'and note that the model will be loaded to the next free index position by default.']);
 end
 
+preprocessor = 1;
 arFprintf(1, 'loading model #%i, from file Models/%s.def...\n', m, name);
-fid = fopen(['Models/' name '.def'], 'r');
+if ( ~preprocessor )
+    fid = fopen(['Models/' name '.def'], 'r');
+else
+    % Run the model preprocessor
+    fid.str = fileread(['Models/' name '.def']);
+    fid.pos = 1;
+end
 
 % initial setup
 ar.model(m).name = name;
@@ -67,7 +74,7 @@ end
 matVer = ver('MATLAB');
 
 % DESCRIPTION
-str = textscan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
+[str, fid] = arTextScan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(isempty(strfind(str{1},'DESCRIPTION')))
     error('parsing model %s for DESCRIPTION', ar.model(m).name);
 end
@@ -82,15 +89,15 @@ else
 end
 
 % read comments
-str = textscan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
+[str, fid] = arTextScan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).description = {};
 while(~strcmp(str{1},'PREDICTOR'))
     ar.model(m).description(end+1,1) = str{1};
-    str = textscan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
+    [str, fid] = arTextScan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
 end
 
 % PREDICTOR
-C = arTextScan(fid, '%s %q %q %q %n %n\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %q %q %q %n %n\n',1, 'CommentStyle', ar.config.comment_string);
 arValidateInput( C, 'predictor', 'identifier for independent variable', 'unit type', 'unit', 'label for plotting' );
 ar.model(m).t = cell2mat(C{1});
 ar.model(m).tUnits(1) = C{2};
@@ -109,7 +116,7 @@ ar.model(m).c = {};
 ar.model(m).cUnits = {};
 ar.model(m).pc = {};
 ar.model(m).px = {};
-C = arTextScan(fid, '%s %q %q %q %f\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %q %q %q %f\n',1, 'CommentStyle', ar.config.comment_string);
 if(~strcmp(C{1},'COMPARTMENTS'))
     error('currently only one PREDICTOR allowed');
 end
@@ -128,7 +135,7 @@ while(~strcmp(C{1},'STATES'))
             ar.model(m).pc(end+1) = {num2str(C{5})};
         end
     end
-    C = arTextScan(fid, '%s %q %q %q %f\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %q %q %q %f\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 % STATES
@@ -139,7 +146,7 @@ ar.model(m).xUnits = {};
 ar.model(m).cLink = [];
 ar.model(m).qPlotX = [];
 ar.model(m).qPositiveX = [];
-C = arTextScan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INPUTS'))
     if ( strcmp( C{1}, 'REACTIONS' ) )
         error( 'Missing field INPUTS. This section should be specified after STATES and before REACTIONS. See: "Setting up models"' );
@@ -181,7 +188,7 @@ while(~strcmp(C{1},'INPUTS'))
         ar.model(m).qPositiveX(end+1) = C{8};
     end
     ar.model(m).px0(end+1) = {['init_' cell2mat(C{1})]};
-    C = arTextScan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 % INPUTS
@@ -189,7 +196,7 @@ ar.model(m).u = {};
 ar.model(m).uUnits = {};
 ar.model(m).fu = {};
 ar.model(m).uNames = {};
-C = arTextScan(fid, '%s %q %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %q %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'REACTIONS') && ~strcmp(C{1},'REACTIONS-AMOUNTBASED') && ~strcmp(C{1},'ODES'))
     if(~strcmp(C{1},''))
         arValidateInput( C, 'input', 'unique input name', 'unit type (i.e. C)', 'unit (i.e. "units/cell")', 'plain text label for plots ("conc.")', 'input function' );
@@ -207,7 +214,7 @@ while(~strcmp(C{1},'REACTIONS') && ~strcmp(C{1},'REACTIONS-AMOUNTBASED') && ~str
             ar.model(m).uNames{end+1} = '';
         end
     end
-    C = arTextScan(fid, '%s %q %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %q %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 ar.model(m).qPlotU = ones(size(ar.model(m).u));
 
@@ -237,7 +244,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
     %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
     
     % Read single line (easier to trace errors back to their line)
-    [ line, remainder ] = readLine( fid, ar.config.comment_string );
+    [ line, remainder, fid ] = readLine( fid, ar.config.comment_string );
     %str = textscan(line, '%s', 1);
     [str, remainder] = grabtoken( remainder, '%s', 1 );
     while(~strcmp(str{1},'INVARIANTS') && ~strcmp(str{1},'DERIVED'))
@@ -521,13 +528,13 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
         % No string left? Grab a new one
         if isempty( remainder )
-            [ line, remainder ] = readLine( fid, ar.config.comment_string );
+            [ line, remainder, fid ] = readLine( fid, ar.config.comment_string );
         end
         [str, remainder] = grabtoken( remainder, '%s', 1 );
     end
 elseif(strcmp(C{1},'ODES'))
     ar.model(m).isReactionBased = false;
-    str = arTextScan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
+    [str, fid] = arTextScan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
     ode_count = 0;
     while(~strcmp(str{1},'INVARIANTS') && ~strcmp(str{1},'DERIVED'))
         if(~strcmp(str{1},''))
@@ -538,7 +545,7 @@ elseif(strcmp(C{1},'ODES'))
             ar.model(m).vUnits{end,2} = [ar.model(m).xUnits{ode_count,2} '/' ar.model(m).tUnits{2}];
             ar.model(m).vUnits{end,3} = [ar.model(m).xUnits{ode_count,3} '/' ar.model(m).tUnits{3}];
         end
-        str = arTextScan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
+        [str, fid] = arTextScan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
     end
     if(ode_count ~= length(ar.model(m).x))
         error('number of ODES ~= number of variables');
@@ -644,7 +651,7 @@ derivedVariablesInRates = 0;
 ar.model(m).z = {};
 ar.model(m).zUnits = {};
 ar.model(m).fz = {};
-C = arTextScan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1},'OBSERVABLES'))
     if(~strcmp(C{1},''))
         arValidateInput( C, 'derived', 'unique identifier', 'unit type (i.e. C)', 'unit (i.e. "units/cell")', 'plain text label for plots ("conc.")', 'derived function expression' );
@@ -676,7 +683,7 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1
         ar.model(m).zUnits(end,3) = C{4};
         ar.model(m).fz(end+1,1) = C{5};
     end
-    C = arTextScan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 % Perform (repeated) derived substitutions
@@ -707,7 +714,7 @@ if(strcmp(C{1},'OBSERVABLES'))
     ar.model(m).logfitting = [];
     ar.model(m).logplotting = [];
     ar.model(m).fy = {};
-    C = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
     while(~strcmp(C{1},'ERRORS'))
         if ( strcmp( C{1}, 'CONDITIONS' ) || strcmp( C{1}, 'SUBSTITUTIONS' ) )
             error( 'When OBSERVABLES section is specified; ERRORS section must also be specified.' );
@@ -726,7 +733,7 @@ if(strcmp(C{1},'OBSERVABLES'))
         else
             ar.model(m).yNames(end+1) = ar.model(m).y(end);
         end
-        C = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+        [C, fid] = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
         if(sum(ismember(ar.model(m).x, ar.model(m).y{end}))>0) %R2013a compatible
             error('%s already defined in STATES', ar.model(m).y{end});
         end
@@ -747,7 +754,7 @@ if(strcmp(C{1},'OBSERVABLES'))
     
     % ERRORS
     ar.model(m).fystd = cell(size(ar.model(m).fy));
-    C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
     while(~(strcmp(C{1},'CONDITIONS') || strcmp(C{1},'SUBSTITUTIONS')))
         qy = ismember(ar.model(m).y, C{1}); %R2013a compatible
         
@@ -777,7 +784,7 @@ if(strcmp(C{1},'OBSERVABLES'))
         arValidateInput( C, 'error', 'observable identifier', 'expression for the error model' );
         
         ar.model(m).fystd(qy) = C{2};
-        C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         if ( isempty( C{1} ) )
             error( 'Missing field CONDITIONS' );
         end
@@ -805,9 +812,9 @@ end
 substitutions = 0;
 if ( strcmp(C{1},'SUBSTITUTIONS') )
     if(str2double(matVer.Version)>=8.4)
-        C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
     else
-        C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
+        [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
     end
     
     % Substitutions
@@ -822,9 +829,9 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
         ismodelpar(end+1)   = sum(ismember(ar.model(m).p, C{1})); %#ok<AGROW>
 
         if(str2double(matVer.Version)>=8.4)
-            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+            [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         else
-            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+            [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
         end
         
         if ( ~strcmp(C{1},'CONDITIONS') )
@@ -847,9 +854,9 @@ end
 
 % CONDITIONS
 if(str2double(matVer.Version)>=8.4)
-    C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 else
-    C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
+    [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
 end
 ar.model(m).fp = transpose(ar.model(m).p);
 
@@ -867,9 +874,9 @@ if ( substitutions )
         ismodelpar(end+1)   = sum(ismember(ar.model(m).p, C{1})); %#ok<AGROW>
 
         if(str2double(matVer.Version)>=8.4)
-            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+            [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         else
-            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+            [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
         end
     end
     
@@ -905,9 +912,9 @@ else
             warning('unknown parameter in conditions: %s (did you mean to place it under SUBSTITUTIONS?)', cell2mat(C{1})); %#ok<WNTAG>
         end
         if(str2double(matVer.Version)>=8.4)
-            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+            [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         else
-            C = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+            [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
         end
     end
 end
@@ -915,7 +922,7 @@ end
 ar.model(m).prand = {};
 ar.model(m).rand_type = [];
 if ( strcmp(C{1}, 'RANDOM' ) )    
-    C = textscan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
     while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
         ar.model(m).prand{end+1} = cell2mat(C{1});
         if(strcmp(C{2}, 'INDEPENDENT'))
@@ -925,7 +932,7 @@ if ( strcmp(C{1}, 'RANDOM' ) )
         else
             warning('unknown random type %s', cell2mat(C{2}));  %#ok<WNTAG>
         end
-        C = textscan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
+        [C, fid] = arTextScan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
     end    
 end
     
@@ -942,7 +949,7 @@ if(~isfield(ar, 'pExternLabels'))
     ar.lbExtern = [];
     ar.ubExtern = [];
 end
-C = arTextScan(fid, '%s %f %n %n %f %f\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %f %n %n %f %f\n',1, 'CommentStyle', ar.config.comment_string);
 
 while(~isempty(C{1}))
     ar.pExternLabels(end+1) = C{1};
@@ -951,10 +958,12 @@ while(~isempty(C{1}))
     ar.qLog10Extern(end+1) = C{4};
     ar.lbExtern(end+1) = C{5};
     ar.ubExtern(end+1) = C{6};
-    C = arTextScan(fid, '%s %f %n %n %f %f\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %f %n %n %f %f\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
-fclose(fid);
+if ~isstruct( fid )
+    fclose(fid);
+end
 
 % Check whether the user specified any variables with reserved words. This
 % would be problematic later.
@@ -995,10 +1004,10 @@ ar = orderfields(ar);
 ar.model = orderfields(ar.model);
 
 
-function [ line, remainder ] = readLine( fid, commentStyle )
+function [ line, remainder, fid ] = readLine( fid, commentStyle )
     line = '';
     while ( isempty(line) )
-        line = arTextScan(fid, '%[^\n]' ); 
+        [line, fid] = arTextScan(fid, '%[^\n]' ); 
         line = strtrim(line{1}{1});
         Q = strfind( line, commentStyle );
         if ( ~isempty(Q) )

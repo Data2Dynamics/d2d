@@ -14,7 +14,7 @@ function [C, fid] = arTextScan( fid, varargin )
             end
             
             % Grab string and advance position
-            tmp = fid.str( fid.pos : nl );
+            tmp = fid.str( fid.pos : nl-1 );
             fid.pos = nl + 1;
 
             C = textscan(tmp, varargin{:} );
