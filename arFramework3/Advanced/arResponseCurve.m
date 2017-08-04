@@ -58,7 +58,11 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
     hold on;
     NX = ceil(sqrt(numel(timepoints)));
     NY = ceil(numel(timepoints)/NX);
-    arSimu(false, true, true);
+    try
+        arSimu(false, true, true);
+    catch
+        disp( 'Simulation failure' );
+    end
     for ti = 1 : numel( timepoints )
         
         if ( numel( timepoints ) > 1 )
