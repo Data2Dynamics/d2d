@@ -16,3 +16,20 @@ if ( sum( ismember( ar.model.x, {'stateB', 'stateC', 'stateE', 'stateG', 'stateK
 else
     error( 'FAILED\n');
 end
+
+fprintf( 2, 'Loading data... ' );
+arLoadData('PreProcData');
+fprintf( 'PASSED\n' );
+
+fprintf( 2, 'Checking if correct observables have been included... ' );
+if ( sum( ismember( ar.model.data.y, {'dataA', 'dataD', 'dataF', 'dataH', 'dataI', 'dataJ', 'dataL', 'dataO', 'dataR'} ) ) == 9 ) 
+    fprintf( 'PASSED\n' );
+else
+    error( 'FAILED\n');
+end
+fprintf( 2, 'Checking if correct observables have been excluded... ' );
+if ( sum( ismember( ar.model.data.y, {'dataB', 'dataC', 'dataE', 'dataG', 'dataK', 'dataM', 'dataN', 'dataP', 'dataQ'} ) ) == 0 )
+    fprintf( 'PASSED\n' );
+else
+    error( 'FAILED\n');
+end

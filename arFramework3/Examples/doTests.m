@@ -36,6 +36,7 @@ function doTests( varargin )
     successes = 0;
     failures = 0;
     skipped = 0;
+    fails = zeros( numel( tests ), 1 );
     
     % These tests require lsqnonlin
     if ( license('checkout', 'Optimization_Toolbox') )
@@ -61,6 +62,7 @@ function doTests( varargin )
                     doTest( tests{a} );
                     successes = successes + 1;
                 catch
+                    fails(a) = 1;
                     failures = failures + 1;
                     fprintf( '\n\n' );
                 end 
@@ -71,6 +73,11 @@ function doTests( varargin )
     end
    
     fprintf('\n\n----------------\nTesting complete! %d test%s passed, %d test%s failed, %d test%s skipped due to missing dependencies.\n', successes, pluralize(successes), failures, pluralize(failures), skipped, pluralize(skipped) );
+    if ( failures > 0 )
+        str = sprintf( '%s ', tests{fails==1} );
+        fprintf( 2, 'The following tests failed: %s\n\n********************************************************************************\n* PLEASE DO *NOT* COMMIT your changes to the master branch before fixing your  *\n* changes in such a way that all tests succeed.                                *\n********************************************************************************\n\n', str );
+    end
+    
     arOutputLevel = 1;
     arStrict = 0;
     warning on;

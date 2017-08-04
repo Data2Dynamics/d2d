@@ -1,0 +1,132 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	0 200
+
+INPUTS
+
+OBSERVABLES
+#define SHOULDBETHERE
+
+#ifdef SHOULDBETHERE
+    dataA    C   nM          conc.   0 0 "dumdum"
+#else
+    dataB    C   nM          conc.   0 0 "dumdum"
+#end
+#ifdef SHOULDNOTBETHERE
+    dataC    C   nM          conc.   0 0 "dumdum"
+#else
+    dataD    C   nM          conc.   0 0 "dumdum"
+#endif
+
+// Note the //
+//#define NOTDEFINED
+#ifdef NOTDEFINED
+    dataE    C   nM          conc.   0 0 "dumdum"
+#else
+    dataF    C   nM          conc.   0 0 "dumdum"
+#end
+
+#define TEST
+#undef TEST
+#ifdef NOTDEFINED2
+    dataG    C   nM          conc.   0 0 "dumdum"
+#else
+    dataH    C   nM          conc.   0 0 "dumdum"
+#end
+
+// Note the //
+//#ifdef NOTDEFINED3
+    dataI    C   nM          conc.   0 0 "dumdum"
+//#else
+    dataJ    C   nM          conc.   0 0 "dumdum"
+//#end
+
+#define NESTED2
+#define NESTED1
+
+#ifdef NESTED1
+    #ifdef NESTED2
+        #ifdef NESTED3
+            dataK    C   nM          conc.   0 0 "dumdum"
+        #else
+            dataL    C   nM          conc.   0 0 "dumdum"
+        #end
+    #else
+        dataM    C   nM          conc.   0 0 "dumdum"
+    #end
+#else
+    dataN    C   nM          conc.   0 0 "dumdum"
+#end
+
+#define J
+#ifdef  J dataO    C   nM          conc.   0 0 "dumdum"  #else dataP    C   nM          conc.   0 0 "dumdum" #endif
+#ifndef J dataQ    C   nM          conc.   0 0 "dumdum"  #else dataR    C   nM          conc.   0 0 "dumdum" #endif
+
+ERRORS
+#define SHOULDBETHERE
+
+#ifdef SHOULDBETHERE
+    dataA    "dumdum"
+#else
+    dataB    "dumdum"
+#end
+#ifdef SHOULDNOTBETHERE
+    dataC    "dumdum"
+#else
+    dataD    "dumdum"
+#endif
+
+// Note the //
+//#define NOTDEFINED
+#ifdef NOTDEFINED
+    dataE    "dumdum"
+#else
+    dataF    "dumdum"
+#end
+
+#define TEST
+#undef TEST
+#ifdef NOTDEFINED2
+    dataG    "dumdum"
+#else
+    dataH    "dumdum"
+#end
+
+// Note the //
+//#ifdef NOTDEFINED3
+    dataI    "dumdum"
+//#else
+    dataJ    "dumdum"
+//#end
+
+#define NESTED2
+#define NESTED1
+
+#ifdef NESTED1
+    #ifdef NESTED2
+        #ifdef NESTED3
+            dataK    "dumdum"
+        #else
+            dataL    "dumdum"
+        #end
+    #else
+        dataM    "dumdum"
+    #end
+#else
+    dataN    "dumdum"
+#end
+
+#define J
+#ifdef  J dataO    "dumdum"  #else dataP    "dumdum" #endif
+#ifndef J dataQ    "dumdum"  #else dataR    "dumdum" #endif
+
+        
+CONDITIONS
+
+
+
+
+
+
+
