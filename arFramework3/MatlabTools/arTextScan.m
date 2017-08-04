@@ -34,9 +34,7 @@ function [C, fid] = arTextScan( fid, varargin )
         end
     end
     
-    if ~isempty(tmp)
-        C = textscan(tmp, varargin{:} );
-    else
+    if isempty(tmp)
         C = textscan(' ', varargin{:} );
     end
     

@@ -191,10 +191,22 @@ ar.model(m).data(d).path = [pwd,filesep,'Data',filesep];
 ar.model(m).data(d).uNames = {};
 
 arFprintf(1, '\nloading data #%i, from file Data/%s.def...', d, name);
-fid = fopen(['Data/' name '.def'], 'r');
+
+% Disable this if you are having problems because of the preprocessor
+preprocessor = 1;
+arFprintf(1, 'loading model #%i, from file Models/%s.def...\n', m, name);
+if ( ~preprocessor )
+    fid = fopen(['Data/' name '.def'], 'r');
+else
+    % Load into a struct
+    fid.str = fileread(['Data/' name '.def']);
+    fid.pos = 1;
+    
+    fid = arPreProcessor(fid);
+end
 
 % DESCRIPTION
-str = textscan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
+[str, fid] = arTextScan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(~strcmp(str{1},'DESCRIPTION'))
     error('parsing data %s for DESCRIPTION', name);
 end
@@ -209,17 +221,17 @@ else
 end
 
 % read comments
-str = textscan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
+[str, fid] = arTextScan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).description = {};
 while(~strcmp(str{1},'PREDICTOR') && ~strcmp(str{1},'PREDICTOR-DOSERESPONSE'))
     ar.model(m).data(d).description(end+1,1) = str{1}; %#ok<*AGROW>
-    str = textscan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
+    [str, fid] = arTextScan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
 end
 
 % PREDICTOR
 if(strcmp(str{1},'PREDICTOR-DOSERESPONSE'))
     ar.model(m).data(d).doseresponse = true;
-    str = textscan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
+    [str, fid] = arTextScan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
     ar.model(m).data(d).response_parameter = cell2mat(str{1});
     arFprintf(2, 'dose-response to %s\n', ar.model(m).data(d).response_parameter);
 else
@@ -227,32 +239,20 @@ else
     ar.model(m).data(d).response_parameter = '';
     arFprintf(2, '\n');
 end
-C = textscan(fid, '%s %s %q %q %n %n %n %n\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %s %q %q %n %n %n %n\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).t = cell2mat(C{1});
 ar.model(m).data(d).tUnits(1) = C{2};
 ar.model(m).data(d).tUnits(2) = C{3};
 ar.model(m).data(d).tUnits(3) = C{4};
-ar.model(m).data(d).tLim = [C{5} C{6}];
-ar.model(m).data(d).tLimExp = [C{7} C{8}];
-if(isnan(ar.model(m).tLim(1)))
-    ar.model(m).tLim(1) = 0;
-end
-if(isnan(ar.model(m).tLim(2)))
-    ar.model(m).tLim(2) = 10;
-end
-if(isnan(ar.model(m).data(d).tLimExp(1)))
-    ar.model(m).data(d).tLimExp(1) = ar.model(m).tLim(1);
-end
-if(isnan(ar.model(m).data(d).tLimExp(2)))
-    ar.model(m).data(d).tLimExp(2) = ar.model(m).tLim(2);
-end
+ar.model(m).data(d).tLim = [checkNum(C{5}, 0) checkNum(C{6}, 10)];
+ar.model(m).data(d).tLimExp = [checkNum(C{7}, ar.model(m).tLim(1)), checkNum(C{8}, ar.model(m).tLim(2))];
 
 % INPUTS
-str = textscan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
+[str, fid] = arTextScan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(~strcmp(str{1},'INPUTS'))
     error('parsing data %s for INPUTS', name);
 end
-C = textscan(fid, '%s %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).fu = ar.model(m).fu;
 while(~strcmp(C{1},'OBSERVABLES'))
     qu = ismember(ar.model(m).u, C{1}); %R2013a compatible
@@ -276,7 +276,7 @@ while(~strcmp(C{1},'OBSERVABLES'))
             ar.model(m).data(d).uNames{end+1} = '';
         end
     end
-    C = textscan(fid, '%s %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 % input parameters
@@ -302,7 +302,7 @@ else
     ar.model(m).data(d).fy = {};
 end
 
-C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'ERRORS'))
     qyindex = ismember(ar.model(m).data(d).y, C{1});
     if(sum(qyindex)==1)
@@ -326,7 +326,7 @@ while(~strcmp(C{1},'ERRORS'))
     else
         ar.model(m).data(d).yNames(yindex) = ar.model(m).data(d).y(yindex);
     end
-    C = textscan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
     if(sum(ismember(ar.model(m).x, ar.model(m).data(d).y{yindex}))>0) %R2013a compatible
         error('%s already defined in STATES', ar.model(m).data(d).y{yindex});
     end
@@ -361,7 +361,7 @@ if(isfield(ar.model(m),'y'))
 else
     ar.model(m).data(d).fystd = cell(0);
 end
-C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS'))
     qyindex = ismember(ar.model(m).data(d).y, C{1});
     if ( qyindex == 0 )
@@ -392,7 +392,7 @@ while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CON
         error('multiple matches for %s', cell2mat(C{1}))
     end
     ar.model(m).data(d).fystd(yindex) = C{2};
-    C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 if(length(ar.model(m).data(d).fystd)<length(ar.model(m).data(d).fy))
@@ -478,9 +478,9 @@ substitutions = 0;
 matVer = ver('MATLAB');
 if ( strcmp(C{1},'SUBSTITUTIONS') )
     if(str2double(matVer.Version)>=8.4)
-        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
     else
-        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
+        [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16);
     end    
     
     % Substitutions
@@ -495,9 +495,9 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
         ismodelpar(end+1)   = sum(ismember(ar.model(m).p, C{1})); %#OK<AGROW>
 
         if(str2double(matVer.Version)>=8.4)
-            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+            [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         else
-            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+            [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
         end
     end
 
@@ -514,7 +514,7 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
 end
 
 % CONDITIONS
-C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);    
+[C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);    
 ar.model(m).data(d).fp = transpose(ar.model(m).data(d).p);
 ptmp = ar.model(m).p;
 qcondparamodel = ismember(ar.model(m).data(d).p, strrep(ptmp, '_filename', ['_' ar.model(m).data(d).name])); %R2013a compatible
@@ -534,9 +534,9 @@ if ( substitutions == 1 )
         ismodelpar(end+1)   = sum(ismember(ar.model(m).data(d).p, C{1})); %#OK<AGROW>
         
         if(str2double(matVer.Version)>=8.4)
-            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+            [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         else
-            C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
+            [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string, 'BufSize', 2^16-1);
         end
     end    
     
@@ -562,7 +562,7 @@ else
         else
             warning('unknown parameter in conditions %s', cell2mat(C{1}));
         end
-        C = textscan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
     end
 end
 
@@ -581,7 +581,7 @@ else
     ar.model(m).data(d).prand = {};
     ar.model(m).data(d).rand_type = [];
 end
-C = textscan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
 while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
     ar.model(m).data(d).prand{end+1} = cell2mat(C{1});
     if(strcmp(C{2}, 'INDEPENDENT'))
@@ -591,7 +591,7 @@ while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
     else
         warning('unknown random type %s', cell2mat(C{2}));  %#ok<WNTAG>
     end
-    C = textscan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 if ( opts.expsplit )
@@ -608,7 +608,7 @@ if(~isfield(ar, 'pExternLabels'))
     ar.lbExtern = [];
     ar.ubExtern = [];
 end
-C = textscan(fid, '%s %f %n %n %n %n\n',1, 'CommentStyle', ar.config.comment_string);
+[C, fid] = arTextScan(fid, '%s %f %n %n %n %n\n',1, 'CommentStyle', ar.config.comment_string);
 while(~isempty(C{1}))
     ar.pExternLabels(end+1) = C{1};
     ar.pExtern(end+1) = C{2};
@@ -616,7 +616,7 @@ while(~isempty(C{1}))
     ar.qLog10Extern(end+1) = C{4};
     ar.lbExtern(end+1) = C{5};
     ar.ubExtern(end+1) = C{6};
-    C = textscan(fid, '%s %f %n %n %n %n\n',1, 'CommentStyle', ar.config.comment_string);
+    [C, fid] = arTextScan(fid, '%s %f %n %n %n %n\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
 % plot setup
@@ -639,7 +639,9 @@ ar.model(m).plot(end).ny = length(ar.model(m).data(d).y);
 ar.model(m).plot(end).condition = {};
 jplot = length(ar.model(m).plot);
 
-fclose(fid);
+if ( ~isstruct( fid ) )
+    fclose(fid);
+end
 
 % XLS file
 if(~strcmp(extension,'none') && ( ...
@@ -1258,3 +1260,7 @@ for j=1:length(ar.model(m).data(d).y)
     arFprintf(1, '\n');
 end
 
+function num = checkNum( num, defaultValue )
+    if ( ~isnumeric( num ) || isempty( num ) || isnan( num ) )
+        num = defaultValue;
+    end

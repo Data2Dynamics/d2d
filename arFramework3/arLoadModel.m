@@ -106,13 +106,7 @@ ar.model(m).t = cell2mat(C{1});
 ar.model(m).tUnits(1) = C{2};
 ar.model(m).tUnits(2) = C{3};
 ar.model(m).tUnits(3) = C{4};
-ar.model(m).tLim = [C{5} C{6}];
-if(isnan(ar.model(m).tLim(1)))
-    ar.model(m).tLim(1) = 0;
-end
-if(isnan(ar.model(m).tLim(2)))
-    ar.model(m).tLim(2) = 10;
-end
+ar.model(m).tLim = [checkNum(C{5}, 0) checkNum(C{6}, 10)];
 
 % COMPARTMENTS
 ar.model(m).c = {};
@@ -171,7 +165,7 @@ while(~strcmp(C{1},'INPUTS'))
     if(~isempty(ar.model(m).c))
         qcomp = ismember(ar.model(m).c, C{5}); %R2013a compatible
         if(sum(qcomp)~=1)
-            error('unknown compartement %s', cell2mat(C{5}));
+            error('unknown compartment %s', cell2mat(C{5}));
         end
         ar.model(m).cLink(end+1) = find(qcomp);
     end
@@ -1030,3 +1024,7 @@ function [str, remainder] = grabtoken( inputString, varargin )
 	[str, pos] = textscan(inputString, varargin{:});
 	remainder = inputString(pos+1:end);    
 
+function num = checkNum( num, defaultValue )
+    if ( ~isnumeric( num ) || isempty( num ) || isnan( num ) )
+        num = defaultValue;
+    end
