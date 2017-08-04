@@ -1,0 +1,81 @@
+DESCRIPTION
+"Test the preprocessor that handles defines"
+
+PREDICTOR
+min               T   min         time	-1000	1500
+
+COMPARTMENTS
+cyt               V   pl          vol.
+
+STATES
+
+#define SHOULDBETHERE
+
+#ifdef SHOULDBETHERE
+    stateA    C   nM          conc.   cyt     1
+#else
+    stateB    C   nM          conc.   cyt     1
+#end
+#ifdef SHOULDNOTBETHERE
+    stateC    C   nM          conc.   cyt     1
+#else
+    stateD    C   nM          conc.   cyt     1
+#endif
+
+// Note the //
+//#define NOTDEFINED
+#ifdef NOTDEFINED
+    stateE    C   nM          conc.   cyt     1
+#else
+    stateF    C   nM          conc.   cyt     1
+#end
+
+#define TEST
+#undef TEST
+#ifdef NOTDEFINED2
+    stateG    C   nM          conc.   cyt     1
+#else
+    stateH    C   nM          conc.   cyt     1
+#end
+
+// Note the //
+//#ifdef NOTDEFINED3
+    stateI    C   nM          conc.   cyt     1
+//#else
+    stateJ    C   nM          conc.   cyt     1
+//#end
+
+#define NESTED2
+#define NESTED1
+
+#ifdef NESTED1
+    #ifdef NESTED2
+        #ifdef NESTED3
+            stateK    C   nM          conc.   cyt     1
+        #else
+            stateL    C   nM          conc.   cyt     1
+        #end
+    #else
+        stateM    C   nM          conc.   cyt     1
+    #end
+#else
+    stateN    C   nM          conc.   cyt     1
+#end
+
+#define J
+#ifdef  J stateO    C   nM          conc.   cyt     1 #else stateP    C   nM          conc.   cyt     1 #endif
+#ifndef J stateQ    C   nM          conc.   cyt     1 #else stateR    C   nM          conc.   cyt     1 #endif
+
+INPUTS
+
+REACTIONS
+
+DERIVED
+
+OBSERVABLES
+
+ERRORS
+
+SUBSTITUTIONS
+
+CONDITIONS 
