@@ -18,11 +18,11 @@ function [C, fid] = arTextScan( fid, varargin )
                 nl = numel( fid.str ) + 1;
             end
             
-            % Grab string and advance position
+            % Grab string and advance line
             tmp = fid.str( fid.pos : nl-1 );
-            fid.pos = nl + 1;
-
-            C = textscan(tmp, varargin{:});
+            [C, position] = textscan(tmp, varargin{:});
+            
+            fid.pos = min( [nl + 1, fid.pos + position] );
             fid.nlines = fid.nlines + 1;
         end
     else

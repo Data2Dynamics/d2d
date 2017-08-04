@@ -78,7 +78,7 @@ function doTests( varargin )
         fprintf( 2, 'The following tests failed: %s\n\n********************************************************************************\n* PLEASE DO *NOT* COMMIT your changes to the master branch before fixing your  *\n* changes in such a way that all tests succeed.                                *\n********************************************************************************\n\n', str );
     end
     
-    arOutputLevel = 1;
+    arOutputLevel = 2;
     arStrict = 0;
     warning on;
 end
