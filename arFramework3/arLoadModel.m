@@ -46,14 +46,17 @@ else
         'and note that the model will be loaded to the next free index position by default.']);
 end
 
+% Disable this if you are having problems because of the preprocessor
 preprocessor = 1;
 arFprintf(1, 'loading model #%i, from file Models/%s.def...\n', m, name);
 if ( ~preprocessor )
     fid = fopen(['Models/' name '.def'], 'r');
 else
-    % Run the model preprocessor
+    % Load into a struct
     fid.str = fileread(['Models/' name '.def']);
     fid.pos = 1;
+    
+    fid = arPreProcessor(fid);
 end
 
 % initial setup
@@ -128,7 +131,7 @@ while(~strcmp(C{1},'STATES'))
         ar.model(m).cUnits(end,2) = C{3};
         ar.model(m).cUnits(end,3) = C{4};
         
-        if(isnan(C{5}))
+        if(isempty(C{5})||isnan(C{5}))
             ar.model(m).px(end+1) = {['vol_' cell2mat(C{1})]};
             ar.model(m).pc(end+1) = {['vol_' cell2mat(C{1})]};
         else
@@ -1026,3 +1029,4 @@ function [str, remainder] = grabtoken( inputString, varargin )
 
 	[str, pos] = textscan(inputString, varargin{:});
 	remainder = inputString(pos+1:end);    
+

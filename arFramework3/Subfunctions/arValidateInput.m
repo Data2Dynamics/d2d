@@ -13,7 +13,13 @@ function arValidateInput( C, stage, varargin )
                 if isempty( C{1} )
                     error( 'Did not find data for parsing stage %s. Did you leave a " bracket open?', stage );
                 else
-                    error( 'Malformed input during parsing %s', stage );
+                    try
+                        str = sprintf( '%s ', C{1} );
+                    catch
+                        str = '';
+                    end
+                    
+                    error( 'Malformed input during parsing %s at %s', stage, str );
                 end
             end
         end 

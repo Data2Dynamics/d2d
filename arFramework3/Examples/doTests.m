@@ -23,9 +23,9 @@ function doTests( varargin )
 
     tests = {   'SubSensitivities', 'Advanced_Events', 'Volume_Estimation', 'Splines', ...
                 'Stoichiometry', 'DallaMan2007_GlucoseInsulinSystem', 'Step_Estimation', ...
-                'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines' };
+                'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines', 'PreProcessorTest' };
     
-    dependencies = { {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {} };
+    dependencies = { {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {}, {} };
     
     if ( nargin > 0 )
         activeTests = argSwitch( tests, varargin{:} );
