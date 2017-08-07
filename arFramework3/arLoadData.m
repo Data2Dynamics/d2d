@@ -199,6 +199,7 @@ if ( ~preprocessor )
     fid = fopen(['Data/' name '.def'], 'r');
 else
     % Load into a struct
+    fid.fn  = ['Data/' name '.def'];
     fid.str = fileread(['Data/' name '.def']);
     fid.pos = 1;
     
@@ -208,16 +209,16 @@ end
 % DESCRIPTION
 [str, fid] = arTextScan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(~strcmp(str{1},'DESCRIPTION'))
-    error('parsing data %s for DESCRIPTION', name);
+    arParsingError( fid, 'parsing data %s for DESCRIPTION', name);
 end
 
 % check version
 if(strcmp(str{1},'DESCRIPTION'))
     % def_version = 1;
 elseif(strcmp(str{1},'DESCRIPTION-V2'))
-    error('DESCRIPTION-V2 not supported yet');
+    arParsingError( fid, 'DESCRIPTION-V2 not supported yet');
 else
-    error('invalid version identifier: %s', cell2mat(str{1}));
+    arParsingError( fid, 'invalid version identifier: %s', cell2mat(str{1}));
 end
 
 % read comments
@@ -240,6 +241,7 @@ else
     arFprintf(2, '\n');
 end
 [C, fid] = arTextScan(fid, '%s %s %q %q %n %n %n %n\n',1, 'CommentStyle', ar.config.comment_string);
+
 ar.model(m).data(d).t = cell2mat(C{1});
 ar.model(m).data(d).tUnits(1) = C{2};
 ar.model(m).data(d).tUnits(2) = C{3};
@@ -250,14 +252,14 @@ ar.model(m).data(d).tLimExp = [checkNum(C{7}, ar.model(m).tLim(1)), checkNum(C{8
 % INPUTS
 [str, fid] = arTextScan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(~strcmp(str{1},'INPUTS'))
-    error('parsing data %s for INPUTS', name);
+    arParsingError( fid, 'parsing data %s for INPUTS', name);
 end
 [C, fid] = arTextScan(fid, '%s %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).fu = ar.model(m).fu;
 while(~strcmp(C{1},'OBSERVABLES'))
     qu = ismember(ar.model(m).u, C{1}); %R2013a compatible
     if(sum(qu)~=1)
-        error('unknown input %s', cell2mat(C{1}));
+        arParsingError( fid, 'unknown input %s', cell2mat(C{1}));
     end
     
     % Ignore this replacement?
@@ -310,7 +312,7 @@ while(~strcmp(C{1},'ERRORS'))
     elseif(sum(qyindex)==0)
         yindex = length(ar.model(m).data(d).y) + 1;
     else
-        error('multiple matches for %s', cell2mat(C{1}))
+        arParsingError( fid, 'multiple matches for %s', cell2mat(C{1}))
     end
     
     ar.model(m).data(d).y(yindex) = C{1};
@@ -328,16 +330,16 @@ while(~strcmp(C{1},'ERRORS'))
     end
     [C, fid] = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
     if(sum(ismember(ar.model(m).x, ar.model(m).data(d).y{yindex}))>0) %R2013a compatible
-        error('%s already defined in STATES', ar.model(m).data(d).y{yindex});
+        arParsingError( fid, '%s already defined in STATES', ar.model(m).data(d).y{yindex});
     end
     if(sum(ismember(ar.model(m).u, ar.model(m).data(d).y{end}))>0) %R2013a compatible
-        error('%s already defined in INPUTS', ar.model(m).data(d).y{end});
+        arParsingError( fid, '%s already defined in INPUTS', ar.model(m).data(d).y{end});
     end
     if(sum(ismember(ar.model(m).z, ar.model(m).data(d).y{end}))>0) %R2013a compatible
-        error('%s already defined in DERIVED', ar.model(m).data(d).y{end});
+        arParsingError( fid, '%s already defined in DERIVED', ar.model(m).data(d).y{end});
     end
     if(sum(ismember(ar.model(m).p, ar.model(m).data(d).y{end}))>0) %R2013a compatible
-        error('%s already defined as parameter', ar.model(m).data(d).y{end});
+        arParsingError( fid, '%s already defined as parameter', ar.model(m).data(d).y{end});
     end
 end
 
@@ -345,7 +347,7 @@ end
 varlist = cellfun(@symvar, ar.model(m).data(d).fy, 'UniformOutput', false);
 ar.model(m).data(d).py = setdiff(setdiff(vertcat(varlist{:}), union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z)), {ar.model(m).t, ''}); %R2013a compatible
 if(isempty(ar.model(m).data(d).fy))
-    error('No OBSERVABLE specified. Specify an OBSERVABLE in the model or data definition file. See "Defining the OBSERVABLES".');
+    arParsingError( fid, 'No OBSERVABLE specified. Specify an OBSERVABLE in the model or data definition file. See "Defining the OBSERVABLES".');
 end
 for j=1:length(ar.model(m).data(d).fy)
     varlist = symvar(ar.model(m).data(d).fy{j});
@@ -365,7 +367,7 @@ end
 while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS'))
     qyindex = ismember(ar.model(m).data(d).y, C{1});
     if ( qyindex == 0 )
-        error( 'Specified error model for non existent observable %s', C{1}{1} );
+        arParsingError( fid,  'Specified error model for non existent observable %s', C{1}{1} );
     end
     y_var_name = setdiff(symvar(ar.model(m).data(d).fy{qyindex}),ar.model(m).data(d).py);
     reg_string = ['((?<=\W)|^)(',C{1}{1},'|'];
@@ -381,7 +383,7 @@ while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CON
        warning(['You are trying to set up a relative error model within a log transformation. \n%s' ...
         'Comment out this error if you want to proceed anyway. To implement an absolute error in log, \n' ...
         'you can try the approach: \nyObs = sd_yObs + 1/2 * (a+sqrt((a)^2)), a = (offset - yObs-sd_yObs) \n, with hard set or fitted offset (on log-scale) \n'],C{2}{1})
-        error('Revise error model')
+        arParsingError( fid, 'Revise error model')
     end
     if(sum(qyindex)==1)
         yindex = find(qyindex);
@@ -389,14 +391,18 @@ while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CON
         yindex = length(ar.model(m).data(d).y) + 1;
         warning('Specified error without specifying observation function (%s in %s). Proceed with caution!', C{1}{1}, ar.model(m).data(d).name);
     else
-        error('multiple matches for %s', cell2mat(C{1}))
+        arParsingError( fid, 'multiple matches for %s', cell2mat(C{1}))
     end
     ar.model(m).data(d).fystd(yindex) = C{2};
     [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+    
+    if ( isempty( C{1} ) )
+        arParsingError( fid, 'Unexpected end of file after error model (did you forget CONDITIONS?)')
+    end
 end
 
 if(length(ar.model(m).data(d).fystd)<length(ar.model(m).data(d).fy))
-    error('some observables do not have an error model defined');
+    arParsingError( fid, 'some observables do not have an error model defined');
 end
 
 % Drop certain observables
@@ -440,13 +446,13 @@ end
 
 % DERIVED
 if(strcmp(C{1},'DERIVED'))
-    error(['There is no need for a section DERIVED in data definition file! ' ...
+    arParsingError( fid, ['There is no need for a section DERIVED in data definition file! ' ...
         'Please remove and see usage in: ' ...
         'https://github.com/Data2Dynamics/d2d/wiki/Setting%20up%20models']);
 end
 % INVARIANTS
 if(strcmp(C{1},'INVARIANTS'))
-    error(['Section INVARIANTS in data definition file is deprecated! ' ...
+    arParsingError( fid, ['Section INVARIANTS in data definition file is deprecated! ' ...
         'Please remove and see usage in: ' ...
         'https://github.com/Data2Dynamics/d2d/wiki/Setting%20up%20models']);
 end
@@ -503,7 +509,7 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
 
     if ( sum(ismodelpar) > 0 )
         s = sprintf( '%s\n', fromSubs{ismodelpar>0} );
-        error( 'Cannot substitute model parameters. These following parameters belong under CONDITIONS:\n%s', s );
+        arParsingError( fid,  'Cannot substitute model parameters. These following parameters belong under CONDITIONS:\n%s', s );
     end
 
     % Perform selfsubstitutions
@@ -624,7 +630,7 @@ if(isfield(ar.model(m).data(d), 'response_parameter') && ...
         ~isempty(ar.model(m).data(d).response_parameter))
     if(sum(ismember(ar.model(m).data(d).p ,ar.model(m).data(d).response_parameter))==0 && ... %R2013a compatible
             sum(ismember(ar.model(m).data(d).pcond ,ar.model(m).data(d).response_parameter))==0) %R2013a compatible
-        error('invalid response parameter %s', ar.model(m).data(d).response_parameter);
+        arParsingError( fid, 'invalid response parameter %s', ar.model(m).data(d).response_parameter);
     end
 end
 if(~isfield(ar.model(m), 'plot'))
@@ -718,7 +724,7 @@ if(~strcmp(extension,'none') && ( ...
                             accepted(jv) = val(num2str(times(jv)));
                         end
                     else
-                        error( 'Filter argument for removecondition is of the wrong type' );
+                        arParsingError( fid,  'Filter argument for removecondition is of the wrong type' );
                     end
                     selected = selected & ~accepted;
                 end
@@ -803,10 +809,10 @@ if(~strcmp(extension,'none') && ( ...
                 end
                 
                 if ~isempty(dataCell)
-                    [ar,d,fail] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
+                    [ar,d,fail] = setConditions(fid, ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
                         pcondmod, removeEmptyObs, dpPerShoot, opts);
                 else
-                    [ar,d,fail] = setConditions(ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell, ...
+                    [ar,d,fail] = setConditions(fid, ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell, ...
                         pcondmod, removeEmptyObs, dpPerShoot, opts);
                 end
                 
@@ -831,7 +837,7 @@ if(~strcmp(extension,'none') && ( ...
             end
         end
     else
-        ar = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts);
+        ar = setConditions(fid, ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts);
         
         % Check whether the user specified any variables with reserved words.
         checkReserved(m, d);
@@ -865,7 +871,7 @@ function checkReserved(m, d)
     arCheckReservedWords( ar.model(m).data(d).p, 'parameters' );
     arCheckReservedWords( ar.model(m).data(d).y, 'observable names' );
 
-function [ar,d, fail] = setConditions(ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts)
+function [ar,d, fail] = setConditions(fid, ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts)
 
 % matVer = ver('MATLAB');
 
@@ -892,7 +898,7 @@ if ( opts.resampledoseresponse )
         if ( sum( responsePar ) )
             fprintf( '  => Refining dose response for %s\n', ar.model(m).data(d).response_parameter );
             if ( sum( responsePar ) > 1 )
-                error( 'Response parameter ambiguous during dose response refinement' );
+                arParsingError( fid,  'Response parameter ambiguous during dose response refinement' );
             end
 
             % Which columns define the conditions
@@ -970,7 +976,7 @@ if(sum(qcond) > 0)
                             val = num2str(val);
                         end
                         if ~ischar(val)
-                            error( 'Filter argument for removecondition is of the wrong type' );
+                            arParsingError( fid,  'Filter argument for removecondition is of the wrong type' );
                         end
                         accepted = ismember(values, val).';
                     end
@@ -1090,7 +1096,7 @@ if(sum(qcond) > 0)
         end
         
         qvals = jcondis == j;
-        ar = setValues(ar, m, d, header, nfactor, data(qvals,:), times(qvals));
+        ar = setValues(fid, ar, m, d, header, nfactor, data(qvals,:), times(qvals));
         ar.model(m).data(d).tLim(2) = round(max(times)*1.1);
         
         if(dpPerShoot~=0)
@@ -1134,7 +1140,7 @@ else
         ar.model(m).data(d).py_sep = ar.model(m).data(d).py_sep(qhasdata);
     end
     
-    ar = setValues(ar, m, d, header, nfactor, data, times);
+    ar = setValues(fid, ar, m, d, header, nfactor, data, times);
     ar.model(m).data(d).tLim(2) = round(max(times)*1.1);
     
     if(dpPerShoot~=0)
@@ -1203,7 +1209,7 @@ for j=1:nints
 end
 
 
-function ar = setValues(ar, m, d, header, nfactor, data, times)
+function ar = setValues(fid, ar, m, d, header, nfactor, data, times)
 ar.model(m).data(d).tExp = times;
 ar.model(m).data(d).yExp = nan(length(times), length(ar.model(m).data(d).y));
 ar.model(m).data(d).yExpStd = nan(length(times), length(ar.model(m).data(d).y));
@@ -1248,13 +1254,13 @@ for j=1:length(ar.model(m).data(d).y)
                 arFprintf(2, ' normalized');
             end
         elseif(sum(qstd)>1)
-            error('multiple std colums for observable %s', ar.model(m).data(d).y{j})
+            arParsingError( fid, 'multiple std colums for observable %s', ar.model(m).data(d).y{j})
         end
         
     elseif(sum(q)==0)
         arFprintf(2, '*\t%20s -> not assigned', ar.model(m).data(d).y{j});
     else
-        error('multiple data colums for observable %s', ar.model(m).data(d).y{j})
+        arParsingError( fid, 'multiple data colums for observable %s', ar.model(m).data(d).y{j})
     end
     
     arFprintf(1, '\n');

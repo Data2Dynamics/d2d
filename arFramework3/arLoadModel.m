@@ -53,6 +53,7 @@ if ( ~preprocessor )
     fid = fopen(['Models/' name '.def'], 'r');
 else
     % Load into a struct
+    fid.fn  = ['Models/' name '.def'];
     fid.str = fileread(['Models/' name '.def']);
     fid.pos = 1;
     
@@ -79,16 +80,16 @@ matVer = ver('MATLAB');
 % DESCRIPTION
 [str, fid] = arTextScan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(isempty(strfind(str{1},'DESCRIPTION')))
-    error('parsing model %s for DESCRIPTION', ar.model(m).name);
+    arParsingError( fid, 'parsing model %s for DESCRIPTION', ar.model(m).name);
 end
 
 % check version
 if(strcmp(str{1},'DESCRIPTION'))
     % def_version = 1;
 elseif(strcmp(str{1},'DESCRIPTION-V2'))
-    error('DESCRIPTION-V2 not supported yet');
+    arParsingError( fid, 'DESCRIPTION-V2 not supported yet');
 else
-    error('invalid version identifier: %s', cell2mat(str{1}));
+    arParsingError( fid, 'invalid version identifier: %s', cell2mat(str{1}));
 end
 
 % read comments
@@ -115,7 +116,7 @@ ar.model(m).pc = {};
 ar.model(m).px = {};
 [C, fid] = arTextScan(fid, '%s %q %q %q %f\n',1, 'CommentStyle', ar.config.comment_string);
 if(~strcmp(C{1},'COMPARTMENTS'))
-    error('currently only one PREDICTOR allowed');
+    arParsingError( fid, 'currently only one PREDICTOR allowed');
 end
 while(~strcmp(C{1},'STATES'))
     if(~strcmp(C{1},'COMPARTMENTS'))
@@ -146,16 +147,16 @@ ar.model(m).qPositiveX = [];
 [C, fid] = arTextScan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INPUTS'))
     if ( strcmp( C{1}, 'REACTIONS' ) )
-        error( 'Missing field INPUTS. This section should be specified after STATES and before REACTIONS. See: "Setting up models"' );
+        arParsingError( fid,  'Missing field INPUTS. This section should be specified after STATES and before REACTIONS. See: "Setting up models"' );
     end    
     
     arValidateInput( C, 'state', 'unique identifier', 'unit type (i.e. C)', 'unit (i.e. nM)', 'label for plots (i.e. "conc.")' );
     
     if(length(cell2mat(C{1}))<2)
-        error('STATE names need to be longer than 1');
+        arParsingError( fid, 'STATE names need to be longer than 1');
     end
     if(isempty(symvar(sym(C{1}))))
-        error('STATE name ''%s'' is reserved by MATLAB. Please rename!',cell2mat(C{1}));
+        arParsingError( fid, 'STATE name ''%s'' is reserved by MATLAB. Please rename!',cell2mat(C{1}));
     end
     
     ar.model(m).x(end+1) = C{1};
@@ -165,7 +166,7 @@ while(~strcmp(C{1},'INPUTS'))
     if(~isempty(ar.model(m).c))
         qcomp = ismember(ar.model(m).c, C{5}); %R2013a compatible
         if(sum(qcomp)~=1)
-            error('unknown compartment %s', cell2mat(C{5}));
+            arParsingError( fid, 'unknown compartment %s', cell2mat(C{5}));
         end
         ar.model(m).cLink(end+1) = find(qcomp);
     end
@@ -198,7 +199,7 @@ while(~strcmp(C{1},'REACTIONS') && ~strcmp(C{1},'REACTIONS-AMOUNTBASED') && ~str
     if(~strcmp(C{1},''))
         arValidateInput( C, 'input', 'unique input name', 'unit type (i.e. C)', 'unit (i.e. "units/cell")', 'plain text label for plots ("conc.")', 'input function' );
         if(sum(ismember(ar.model(m).x, C{1}))>0) %R2013a compatible
-            error('input %s already defined in STATES', cell2mat(C{1}));
+            arParsingError( fid, 'input %s already defined in STATES', cell2mat(C{1}));
         end
         ar.model(m).u(end+1) = C{1};
         ar.model(m).uUnits(end+1,1) = C{2};
@@ -249,7 +250,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         sourceCoeffs = [];
 
         if ( strcmp(str{1}, 'OBSERVABLES') || strcmp(str{1}, 'CONDITIONS') )
-            error('Missing field DERIVED. This section should be specified after REACTIONS and before OBSERVABLES / CONDITIONS. See: "Setting up models paragraph 1.7"');
+            arParsingError( fid, 'Missing field DERIVED. This section should be specified after REACTIONS and before OBSERVABLES / CONDITIONS. See: "Setting up models paragraph 1.7"');
         end
         nextValue = 1;
         while(~strcmp(str{1},'->') && ~strcmp(str{1},'<->'))
@@ -266,11 +267,11 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             %str = textscan(fid, '%s',1, 'CommentStyle', ar.config.comment_string);
             [str, remainder] = grabtoken( remainder, '%s', 1 );
             if ( isempty(str{1}) )
-                error('incomplete reaction definition in reaction %i: %s', vcount, line)
+                arParsingError( fid, 'incomplete reaction definition in reaction %i: %s', vcount, line)
             end
         end
         if(sum(~ismember(source, ar.model(m).x)) > 0) %R2013a compatible
-            error('%s\nundefined source species in reaction %i: %s', line, vcount, ...
+            arParsingError( fid, '%s\nundefined source species in reaction %i: %s', line, vcount, ...
                 source{~ismember(source, ar.model(m).x)}) %R2013a compatible
         end
         
@@ -302,11 +303,11 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             [str, remainder] = grabtoken(remainder, '%s', 1);
             
             if ( isempty( str{1} ) )
-                error('missing keyword CUSTOM, MASSACTION or MASSACTIONKD before reaction rate expression');
+                arParsingError( fid, 'missing keyword CUSTOM, MASSACTION or MASSACTIONKD before reaction rate expression');
             end
         end
         if(sum(~ismember(target, ar.model(m).x)) > 0) %R2013a compatible
-            error('undefined target species in reaction %i: %s', vcount, ...
+            arParsingError( fid, 'undefined target species in reaction %i: %s', vcount, ...
                 target{~ismember(target, ar.model(m).x)}) %R2013a compatible
         end
         
@@ -316,7 +317,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         elseif(~isempty(target))
             ix = find(ismember(ar.model(m).x, target{1})); %R2013a compatible
         else
-            error('reaction with empty N');
+            arParsingError( fid, 'reaction with empty N');
         end
         ar.model(m).vUnits{end+1,1} = [ar.model(m).xUnits{ix,1} '/' ar.model(m).tUnits{1}];
         ar.model(m).vUnits{end,2} = [ar.model(m).xUnits{ix,2} '/' ar.model(m).tUnits{2}];
@@ -358,9 +359,9 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                         symtmp = sym(str{1});
                     catch
                         if ( iscell( str{1} ) )
-                            error( 'Parsing error in REACTIONS at %s in model %d', str{1}{:}, m );
+                            arParsingError( fid,  'Parsing error in REACTIONS at %s in model %d', str{1}{:}, m );
                         else
-                            error( 'Parsing error in REACTIONS at %s in model %d', str{1}, m );
+                            arParsingError( fid,  'Parsing error in REACTIONS at %s in model %d', str{1}, m );
                         end
                     end
                     for j=1:length(source)
@@ -370,7 +371,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                             arFprintf(1, 2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
                             arFprintf(1, 2, 'Source species %s missing ?\n\n', source{j});
                             arFprintf(1, 2, 'Deactivate this error message with: ar.config.checkForNegFluxes = false;\n\n');
-                            error('Possible negative fluxes in reaction');
+                            arParsingError( fid, 'Possible negative fluxes in reaction');
                         end
                     end
                 else
@@ -453,11 +454,11 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         if(~isempty(ar.model(m).c) && ~ar.model(m).isAmountBased)
             for j=1:size(ar.model(m).N,2)
                 if(length(unique(ar.model(m).cLink(ar.model(m).N(:,j)>0)))>1)
-                    error('efflux from different compartments in reaction %s', ...
+                    arParsingError( fid, 'efflux from different compartments in reaction %s', ...
                         ar.model(m).fv{end});
                 end
                 if(length(unique(ar.model(m).cLink(ar.model(m).N(:,j)<0)))>1)
-                    error('influx from different compartments in reaction %s', ...
+                    arParsingError( fid, 'influx from different compartments in reaction %s', ...
                         ar.model(m).fv{end});
                 end
             end
@@ -485,7 +486,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             elseif(~isempty(source))
                 ix = find(ismember(ar.model(m).x, source{1})); %R2013a compatible
             else
-                error('reaction with empty N');
+                arParsingError( fid, 'reaction with empty N');
             end
             ar.model(m).vUnits{end+1,1} = [ar.model(m).xUnits{ix,1} '/' ar.model(m).tUnits{1}];
             ar.model(m).vUnits{end,2} = [ar.model(m).xUnits{ix,2} '/' ar.model(m).tUnits{2}];
@@ -509,11 +510,11 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             if(~isempty(ar.model(m).c))
                 for j=1:size(ar.model(m).N,2)
                     if(length(unique(ar.model(m).cLink(ar.model(m).N(:,j)>0)))>1)
-                        error('efflux from different compartments in reaction %s', ...
+                        arParsingError( fid, 'efflux from different compartments in reaction %s', ...
                             ar.model(m).fv{end});
                     end
                     if(length(unique(ar.model(m).cLink(ar.model(m).N(:,j)<0)))>1)
-                        error('influx from different compartments in reaction %s', ...
+                        arParsingError( fid, 'influx from different compartments in reaction %s', ...
                             ar.model(m).fv{end});
                     end
                 end
@@ -545,7 +546,7 @@ elseif(strcmp(C{1},'ODES'))
         [str, fid] = arTextScan(fid, '%q\n',1, 'CommentStyle', ar.config.comment_string);
     end
     if(ode_count ~= length(ar.model(m).x))
-        error('number of ODES ~= number of variables');
+        arParsingError( fid, 'number of ODES ~= number of variables');
     end
     ar.model(m).N = eye(length(ar.model(m).x));
 end
@@ -640,7 +641,7 @@ end
 
 % DERIVED (previously INVARIANTS)
 if(strcmp(str{1},'INVARIANTS'))
-    error(['Section INVARIANTS in model definition file is deprecated! ' ...
+    arParsingError( fid, ['Section INVARIANTS in model definition file is deprecated! ' ...
         'Please replace by DERIVED and see usage in: ' ...
         'https://github.com/Data2Dynamics/d2d/wiki/Setting%20up%20models']);
 end
@@ -653,10 +654,10 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1
     if(~strcmp(C{1},''))
         arValidateInput( C, 'derived', 'unique identifier', 'unit type (i.e. C)', 'unit (i.e. "units/cell")', 'plain text label for plots ("conc.")', 'derived function expression' );
         if(sum(ismember(ar.model(m).x, C{1}))>0) %R2013a compatible
-            error('derived variable %s already defined in STATES', cell2mat(C{1}));
+            arParsingError( fid, 'derived variable %s already defined in STATES', cell2mat(C{1}));
         end
         if(sum(ismember(ar.model(m).u, C{1}))>0) %R2013a compatible
-            error('derived variable %s already defined in INPUTS', cell2mat(C{1}));
+            arParsingError( fid, 'derived variable %s already defined in INPUTS', cell2mat(C{1}));
         end
         % Found derived variable in parameter list. See if it is used in
         % either the inputs or the reaction equations. If the former, fail
@@ -671,7 +672,7 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1
                 fail = fail | max( ismember( inputVariables{ju}, C{1} ) );
             end
             if ( fail )
-                error('derived variable %s already defined as parameter in INPUT section', cell2mat(C{1}));
+                arParsingError( fid, 'derived variable %s already defined as parameter in INPUT section', cell2mat(C{1}));
             end
         end
         ar.model(m).z(end+1) = C{1};
@@ -714,7 +715,7 @@ if(strcmp(C{1},'OBSERVABLES'))
     [C, fid] = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
     while(~strcmp(C{1},'ERRORS'))
         if ( strcmp( C{1}, 'CONDITIONS' ) || strcmp( C{1}, 'SUBSTITUTIONS' ) )
-            error( 'When OBSERVABLES section is specified; ERRORS section must also be specified.' );
+            arParsingError( fid,  'When OBSERVABLES section is specified; ERRORS section must also be specified.' );
         end
         arValidateInput( C, 'observable', 'unique identifier', 'unit type (i.e. C)', 'unit (i.e. "units/cell")', 'plain text label for plots ("conc.")', 'indicator whether data should be scaled to 1 (0 or 1)', 'Indicator whether date should be treated in log-space (0 or 1)', 'Mathematical expression for observable' );
         ar.model(m).y(end+1) = C{1};
@@ -732,16 +733,16 @@ if(strcmp(C{1},'OBSERVABLES'))
         end
         [C, fid] = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
         if(sum(ismember(ar.model(m).x, ar.model(m).y{end}))>0) %R2013a compatible
-            error('%s already defined in STATES', ar.model(m).y{end});
+            arParsingError( fid, '%s already defined in STATES', ar.model(m).y{end});
         end
         if(sum(ismember(ar.model(m).u, ar.model(m).y{end}))>0) %R2013a compatible
-            error('%s already defined in INPUTS', ar.model(m).y{end});
+            arParsingError( fid, '%s already defined in INPUTS', ar.model(m).y{end});
         end
         if(sum(ismember(ar.model(m).z, ar.model(m).y{end}))>0) %R2013a compatible
-            error('%s already defined in DERIVED', ar.model(m).y{end});
+            arParsingError( fid, '%s already defined in DERIVED', ar.model(m).y{end});
         end
         if(sum(ismember(ar.model(m).p, ar.model(m).y{end}))>0) %R2013a compatible
-            error('%s already defined as parameter', ar.model(m).y{end});
+            arParsingError( fid, '%s already defined as parameter', ar.model(m).y{end});
         end
     end
     
@@ -756,9 +757,9 @@ if(strcmp(C{1},'OBSERVABLES'))
         qy = ismember(ar.model(m).y, C{1}); %R2013a compatible
         
         if(sum(qy)<1)
-            error('Unknown observable in error specification %s.', cell2mat(C{1}));
+            arParsingError( fid, 'Unknown observable in error specification %s.', cell2mat(C{1}));
         elseif sum(qy)>1
-            error('Observable %s seems to occur more than once.', cell2mat(C{1}));            
+            arParsingError( fid, 'Observable %s seems to occur more than once.', cell2mat(C{1}));            
         end
         
         %check and error if observable in log and fystd = rel + abs error
@@ -776,14 +777,14 @@ if(strcmp(C{1},'OBSERVABLES'))
             warning(['You are trying to set up a relative error model within a log transformation. \n%s' ...
             'Comment out this error if you want to proceed anyway. To implement an absolute error in log, \n' ...
             'you can try the approach: \nyObs = sd_yObs + 1/2 * (a+sqrt((a)^2)), a = (offset - yObs-sd_yObs) \n, with hard set or fitted offset (on log-scale) \n'],C{2}{1})
-            error('Revise error model')
+            arParsingError( fid, 'Revise error model')
         end
         arValidateInput( C, 'error', 'observable identifier', 'expression for the error model' );
         
         ar.model(m).fystd(qy) = C{2};
         [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
         if ( isempty( C{1} ) )
-            error( 'Missing field CONDITIONS' );
+            arParsingError( fid,  'Missing field CONDITIONS' );
         end
     end
     
@@ -793,7 +794,7 @@ if(strcmp(C{1},'OBSERVABLES'))
             diffErr = union( ar.model(m).y( length(ar.model(m).fystd) + 1 : end ), diffErr );
         end
         
-        error('Some observables do not have an error model defined. Observable(s) without error model: %s\n', sprintf( '%s ', diffErr{:} ) );
+        arParsingError( fid, 'Some observables do not have an error model defined. Observable(s) without error model: %s\n', sprintf( '%s ', diffErr{:} ) );
     end
     
     % error parameters
@@ -838,7 +839,7 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
 
     if ( sum(ismodelpar) > 0 )
         s = sprintf( '%s\n', fromSubs{ismodelpar>0} );
-        error( 'Cannot substitute model parameters. These following parameters belong under CONDITIONS:\n%s', s );
+        arParsingError( fid,  'Cannot substitute model parameters. These following parameters belong under CONDITIONS:\n%s', s );
     end
 
     % Perform selfsubstitutions

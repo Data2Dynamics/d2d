@@ -18,11 +18,16 @@ function fid = preprocess(fid)
     done = 0;
     directives = { '#ifdef', '#ifndef', '#else', '#endif', '#define', '#def', '#undefine', '#undef', '#end' };
     outStr = [];
+    
+    % Find newlines
+    newlines = regexp(fid.str, '\n|\r\n|\r');
+    newlines = [newlines numel(fid.str)];
     while( ~done )
-        [line, fid] = arTextScan(fid, '%[^\n]', 'CommentStyle', ar.config.comment_string );
-        if ~isempty( line{1} )
-            line = line{1}{1};
-
+        %[line, fid] = arTextScan(fid, '%[^\n]', 'CommentStyle', ar.config.comment_string );
+        nl = newlines( find( newlines > fid.pos, 1 ) );
+        
+        line = fid.str( fid.pos : nl );
+        if ( fid.pos < numel(fid.str) )
             outLine = [];
 
             % Find whitespace in line
@@ -90,19 +95,23 @@ function fid = preprocess(fid)
                           ( numel( intersect( activeDefines, mustBeInactive ) ) == 0 );
                       
             end
-            outStr = sprintf( '%s%s\n', outStr, outLine );
+            outStr = sprintf( '%s%s', outStr, outLine );
         else
             done = 1;
-        end       
+        end
+        
+        % Move position
+        if ~isempty( nl )
+            fid.pos = nl + 1;
+        end
     end
     
     fid.str = outStr;
 
     % Reset position
     fid.pos = 1;
-    
-    
-    
+    fid.nlines = 0;
+        
 % This function is used by the preprocessor to parse a block of code
 % It takes a line, a character position pointer (cur) w.r.t. line, a white space
 % position counter (a), a list of whitespace locations (ws) and an outLine (output) 
@@ -140,7 +149,7 @@ function [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, 
         if ( writing )
             outLine = [outLine block]; %#ok
         else
-            outLine = [outLine repmat( ' ', 1, numel( block ) )]; %#ok
+            outLine = [outLine regexprep(block, '\S', ' ')]; %#ok
         end
         a = a + 1;
     end

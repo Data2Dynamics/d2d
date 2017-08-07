@@ -1,7 +1,7 @@
 % Read a line and parse it. Make sure the entire line is read.
 function [C, fid] = arTextScan( fid, varargin )
 
-    tmp = ''; C{1} = {}; nlines = 0;
+    tmp = ''; C{1} = {};
     if ( isstruct( fid ) )
         
         if ~isfield( fid, 'nlines' )
@@ -19,7 +19,7 @@ function [C, fid] = arTextScan( fid, varargin )
             end
             
             % Grab string and advance line
-            tmp = fid.str( fid.pos : nl-1 );
+            tmp = fid.str( fid.pos : nl - 1 );
             [C, position] = textscan(tmp, varargin{:});
             
             fid.pos = min( [nl + 1, fid.pos + position] );
