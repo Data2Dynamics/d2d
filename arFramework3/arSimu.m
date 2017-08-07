@@ -64,7 +64,7 @@ if ( ~dynamics )
 end
 
 % Make sure the required fields exist!
-if ( ar.config.sensitivitySubset == 1 )
+if ( isfield( ar.config, 'sensitivitySubset' ) && ( ar.config.sensitivitySubset == 1 ) )
     arSubsetSensi;
 end
 
