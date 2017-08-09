@@ -5,9 +5,11 @@
 % to more strongly weight a specific dataset. This data should be removed
 % again before any rigorous statistical analysis
 %
+% You can remove the data again with arClearInterpolatedData.
+%
 % Usage:
 %
-%   function arInterpolateData( m, ds, obs, tmin, tmax )
+%   function arInterpolateData( m, ds, obs, 'tmin', tmin, 'tmax', tmax, 'steps', steps, .... )
 %
 %    m        - Model index
 %    ds       - Data indices, find using arFindData
@@ -20,8 +22,7 @@
 %    plot       - Show interpolation
 %    plotOnly   - Only plot the interpolant. Do not add the data
 %    modfactor  - Multiply estimated noise (single component noise model)
-%                 with a factor (default = 1)
-%   
+%                 with a factor (default = 1)   
 
 function arInterpolateData( m, ds, obs, varargin )  
 

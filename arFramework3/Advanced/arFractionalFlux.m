@@ -68,8 +68,8 @@ function arFractionalFlux( species, varargin )
 
     variables = {};
     for jR = 1 : numel( involvedReactions )
-        variables = union( variables, symvar( ar.model.fv{involvedReactions(jR)} ) );
-        [~, involvedStates] = intersect( ar.model.x, variables );
+        variables = union( variables, symvar( ar.model(model).fv{involvedReactions(jR)} ) );
+        [~, involvedStates] = intersect( ar.model(model).x, variables );
     end
 
     ax(1) = subplot(2,2,1);
