@@ -45,6 +45,10 @@ function arPop( discard )
         ar.type         = arStack.type(N,:);       
         ar.mean         = arStack.mean(N,:);
         ar.std          = arStack.std(N,:);
+        
+        if ~isempty( arStack.name{N} )
+            fprintf( 'Switched to %s\n', arStack.name{N} );
+        end
     end
 
     arStack.p(N,:)      = [];
@@ -55,6 +59,7 @@ function arPop( discard )
     arStack.type(N,:)   = [];
     arStack.mean(N,:)   = [];
     arStack.std(N,:)    = [];
+    arStack.name{N}     = [];
     
     arStack.N   = arStack.N - 1;
 end

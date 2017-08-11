@@ -11,8 +11,14 @@ function arPush( reset )
     else
         if ( ~isnumeric( reset ) && strcmpi( reset, 'discard' ) )
             reset = 1;
+        elseif ( ~isnumeric( reset ) )
+            name = reset;
         end
     end    
+    
+    if ~exist( 'name', 'var' )
+        name = '';
+    end
     
     % Do we have a compatible stack?
     valid = true;
@@ -45,6 +51,7 @@ function arPush( reset )
     arStack.type(N,:)     = ar.type;       
     arStack.mean(N,:)     = ar.mean;
     arStack.std(N,:)      = ar.std;
+    arStack.name{N}       = name;
 end
 
 function newStack()
