@@ -46,7 +46,7 @@ elseif(ischar(jk))
     end
     
     if isempty(jk)
-        disp('Pattern ''',jk,''' not found in ar.ple.p_labels');
+        disp(['Pattern ''',jk,''' not found in ar.ple.p_labels']);
         return;
     end
 elseif(iscell(jk)) % cell of pLabels
