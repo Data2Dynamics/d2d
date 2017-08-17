@@ -6,11 +6,17 @@ function arPop( discard )
     global ar;
     global arStack;
     
+    silent = 0;
     if ~exist( 'discard', 'var' )
         discard = 0;
     else
-        if ( ~isnumeric( discard ) && strcmpi( discard, 'discard' ) )
-            discard = 1;
+        if ( ~isnumeric( discard ) )
+            if strcmpi( discard, 'discard' )
+                discard = 1;
+            end
+            if strcmpi( discard, 'silent' )
+                silent = 1;
+            end
         end
     end
     
@@ -47,7 +53,9 @@ function arPop( discard )
         ar.std          = arStack.std(N,:);
         
         if ~isempty( arStack.name{N} )
-            fprintf( 'Switched to %s\n', arStack.name{N} );
+            if ( ~silent )
+                fprintf( 'Switched to %s\n', arStack.name{N} );
+            end
         end
     end
 
