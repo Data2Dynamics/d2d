@@ -120,11 +120,15 @@ function [out, outL, L2, t] = arParameterScan(parameter, inRange, predictions, v
     pv2 = trafo( ar.qLog10(IDs(1)), scanInLog, L2 );
 
     try
-        changed = sum( abs( arScanParameters.pv1 - pv1 ) + abs( arScanParameters.pv2 - pv2 ) + abs( arScanParameters.m - m ) + abs( arScanParameters.c - c ) ) > 0;
+        dpv1 = abs( arScanParameters.pv1 - pv1 );
+        dpv2 = abs( arScanParameters.pv2 - pv2 );
+        dm = abs( arScanParameters.m - m );
+        dc = abs( arScanParameters.c - c );
+        changed = ( dpv1 + dpv2 + dm + dc ) > 0;
     catch
         changed = 1;
     end
-    
+       
     % Calculations
     if ( changed )
         predictionsFine = cell( numel( L1 ), numel( L2 ) );
@@ -148,10 +152,10 @@ function [out, outL, L2, t] = arParameterScan(parameter, inRange, predictions, v
                 arPop('silent');
             end
         end
-        arScanParameters.pv1                = pv1;
-        arScanParameters.pv2                = pv2;
-        arScanParameters.m                  = m;
-        arScanParameters.c                  = c;
+        arScanParameters.pv1                = pv1 + 0;
+        arScanParameters.pv2                = pv2 + 0;
+        arScanParameters.m                  = m + 0;
+        arScanParameters.c                  = c + 0;
         arScanParameters.predictionsFine    = predictionsFine;
         arScanParameters.predictionsExp     = predictionsExp;
     else

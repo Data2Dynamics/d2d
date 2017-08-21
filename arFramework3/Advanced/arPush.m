@@ -43,14 +43,14 @@ function arPush( reset )
     % Push parameter set onto the stack
     arStack.N             = arStack.N + 1;
     N                     = arStack.N;
-    arStack.p(N,:)        = ar.p;
-    arStack.qFit(N,:)     = ar.qFit;
-    arStack.qLog10(N,:)   = ar.qLog10;
-    arStack.lb(N,:)       = ar.lb;
-    arStack.ub(N,:)       = ar.ub;
-    arStack.type(N,:)     = ar.type;       
-    arStack.mean(N,:)     = ar.mean;
-    arStack.std(N,:)      = ar.std;
+    arStack.p(N,:)        = ar.p + 0;
+    arStack.qFit(N,:)     = ar.qFit + 0;
+    arStack.qLog10(N,:)   = ar.qLog10 + 0;
+    arStack.lb(N,:)       = ar.lb + 0;
+    arStack.ub(N,:)       = ar.ub + 0;
+    arStack.type(N,:)     = ar.type + 0;       
+    arStack.mean(N,:)     = ar.mean + 0;
+    arStack.std(N,:)      = ar.std + 0;
     arStack.name{N}       = name;
 end
 

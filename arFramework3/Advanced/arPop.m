@@ -13,6 +13,8 @@ function arPop( discard )
         if ( ~isnumeric( discard ) )
             if strcmpi( discard, 'discard' )
                 discard = 1;
+            else
+                discard = 0;
             end
             if strcmpi( discard, 'silent' )
                 silent = 1;
