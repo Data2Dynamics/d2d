@@ -6,14 +6,17 @@ function arPush( reset )
     global ar;
     global arStack;
     
-    if ~exist( 'reset', 'var' )
-        reset = 0;
-    else
-        if ( ~isnumeric( reset ) && strcmpi( reset, 'discard' ) )
-            reset = 1;
-        elseif ( ~isnumeric( reset ) )
-            name = reset;
+    if exist( 'reset', 'var' )
+        if ( ~isnumeric( reset ) )
+            if strcmpi( reset, 'discard' )
+                reset = 1;
+            else
+                name = reset;
+                reset = 0;
+            end
         end
+    else
+        reset = 0;
     end    
     
     if ~exist( 'name', 'var' )

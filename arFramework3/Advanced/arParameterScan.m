@@ -120,8 +120,8 @@ function [out, outL, L2, t] = arParameterScan(parameter, inRange, predictions, v
     pv2 = trafo( ar.qLog10(IDs(1)), scanInLog, L2 );
 
     try
-        dpv1 = abs( arScanParameters.pv1 - pv1 );
-        dpv2 = abs( arScanParameters.pv2 - pv2 );
+        dpv1 = sum( abs( arScanParameters.pv1 - pv1 ) );
+        dpv2 = sum( abs( arScanParameters.pv2 - pv2 ) );
         dm = abs( arScanParameters.m - m );
         dc = abs( arScanParameters.c - c );
         changed = ( dpv1 + dpv2 + dm + dc ) > 0;
