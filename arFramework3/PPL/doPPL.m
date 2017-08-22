@@ -407,8 +407,9 @@ for j = 1:n
         fprintf('ERROR PPL: going to lower bound (%s)\n', exception.message);
         break;
     end
-    arLink(true,t,takeY,ix, c,m,xExp,xstd);
+    
     xtrial(j) = xExp;    
+    arLink(true,t,takeY,ix, c,m,xExp,xstd);
     arCalcMerit(0, ar.p(ar.qFit==1),1)
     if(takeY)
         xSim = ar.model(m).data(c).yExpSimu(it,ix); 

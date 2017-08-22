@@ -1,0 +1,16 @@
+DESCRIPTION
+"RTK multi-cellline standard"
+
+PREDICTOR
+t	T	"min"	"time"	0	240
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+
+RANDOM
+Cellline   INDEPENDENT

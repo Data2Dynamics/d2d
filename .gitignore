@@ -16,6 +16,8 @@ arFramework3/ThirdParty/Ceres/ceresd2d.mex*
 
 arFramework3/l1/trdog/trdog.m
 
+arFramework3/Subfunctions/snls.m
+
 arFramework3/Examples/Dream6_L1/Data/simu*
 arFramework3/Examples/Dream6_L1/Results/20*
 
@@ -108,6 +110,14 @@ arFramework3/Examples/Raia_CancerResearch2011/arCheckParallel*
 arFramework3/Examples/Raia_CancerResearch2011/Results/20*
 arFramework3/Examples/Raia_CancerResearch2011/pthreadVC2.dll
 arFramework3/Examples/Raia_CancerResearch2011/pthreadGC2.dll
+
+arFramework3/Examples/Reelin_2017/Compiled/
+arFramework3/Examples/Reelin_2017/SBML/
+arFramework3/Examples/Reelin_2017/arSimuCalc*
+arFramework3/Examples/Reelin_2017/arCheckParallel*
+arFramework3/Examples/Reelin_2017/Results/20*
+arFramework3/Examples/Reelin_2017/pthreadVC2.dll
+arFramework3/Examples/Reelin_2017/pthreadGC2.dll
 
 arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/Compiled/
 arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/SBML/
@@ -301,3 +311,18 @@ arFramework3/Examples/ToyModels/model_reduction_2016/Results/20*
 arFramework3/Examples/ToyModels/model_reduction_2016/pthreadVC2.dll
 arFramework3/Examples/ToyModels/model_reduction_2016/pthreadGC2.dll
 
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_finalModel/Compiled/
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_finalModel/SBML/
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_finalModel/arSimuCalc*
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_finalModel/arCheckParallel*
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_finalModel/Results/20*
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_finalModel/pthreadVC2.dll
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_finalModel/pthreadGC2.dll
+
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_final_forBDT/Compiled/
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_final_forBDT/SBML/
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_final_forBDT/arSimuCalc*
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_final_forBDT/arCheckParallel*
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_final_forBDT/Results/20*
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_final_forBDT/pthreadVC2.dll
+arFramework3/Examples/Hass_npjSysBio2017/PanRTK_final_forBDT/pthreadGC2.dll
