@@ -48,7 +48,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     end
 
     if(~isfield(ar.ppl,'xstd_auto'))
-        ar.ppl.xstd_auto = 0;
+        ar.ppl.xstd_auto = 1;
     end
     confirm_options = PPL_options(options);
     fprintf(confirm_options)
@@ -132,15 +132,15 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     for jx = 1:length(ix)
         if(ar.ppl.xstd_auto)    
             if(ar.config.fiterrors~= -1 && takeY && ~isnan(ar.model(m).data(c).ystdFineSimu(1,ix(jx))))
-                xstd = ar.model(m).data(c).ystdFineSimu(1,ix(jx));
+                ar.ppl.options.xstd = ar.model(m).data(c).ystdFineSimu(1,ix(jx));
             elseif(ar.config.fiterrors==-1 && takeY)
                 [~,it_first] = min(abs(ar.model(m).data(c).tExp-t(whichT))); 
                  if(~isnan(ar.model(m).data(c).yExpStd(it_first,ix(jx))))
-                     xstd = ar.model(m).data(c).yExpStd(it_first,ix(jx));
+                     ar.ppl.options.xstd = ar.model(m).data(c).yExpStd(it_first,ix(jx));
                  end
             elseif(~takeY)
                 arSimu(0,1,1);
-                xstd = max(ar.model(m).condition(c).xFineSimu(:,ix(jx)))/10;
+                ar.ppl.options.xstd = max(ar.model(m).condition(c).xFineSimu(:,ix(jx)))/10;
             end
 
         end
@@ -193,7 +193,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         ar.p = pReset;
 
     end
-    if(~ar.config.fiterrors && ar.ppl.fittederrors  && ~ar.ppl.options.onlyProfile) 
+    if(isfield(ar.ppl,'fittederrors') && ~ar.config.fiterrors && ar.ppl.fittederrors  && ~ar.ppl.options.onlyProfile) 
         ar.config.fiterrors=ar.ppl.fittederrors;
         ar.qFit(strncmp(ar.pLabel,'sd_',3))=ar.ppl.fit_bkp;
     end
