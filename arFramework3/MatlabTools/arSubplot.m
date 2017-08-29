@@ -11,7 +11,7 @@
 % as a drop in replacement in functions which only deal with a single
 % figure.
 
-function arSubplot(m, n, id, name, varargin)
+function ax = arSubplot(m, n, id, name, varargin)
     global arSubplotMgr;
     
     if ~isstruct( arSubplotMgr )
@@ -44,6 +44,8 @@ function arSubplot(m, n, id, name, varargin)
             arSubplotMgr.(name).axes(id) = subplot( m, n, id, varargin{:} );
         end
     end
+    
+    ax = arSubplotMgr.(name).axes(id);
 end
 
 function newPlot( name, m, n, id, varargin )

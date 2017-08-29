@@ -31,8 +31,8 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
     miniTresh = 1e-16;
     mRange = 5;
     
-    args = {'timepoints', 'condition', 'model', 'relative', 'range'};
-    extraArgs = [1, 1, 1, 0, 1];
+    args = {'timepoints', 'condition', 'model', 'relative', 'range', 'noclear', 'hold', 'custom'};
+    extraArgs = [1, 1, 1, 0, 1, 0, 0, 1];
     opts = argSwitch( args, extraArgs, {}, 0, varargin );
 
     if opts.timepoints
@@ -54,7 +54,10 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         mRange = opts.range_args;
     end
     
-    %figure;
+    arSubplot(1,1,1); 
+    if ( (~opts.noclear) && (~opts.hold) )
+        cla;
+    end
     hold on;
     NX = ceil(sqrt(numel(timepoints)));
     NY = ceil(numel(timepoints)/NX);
@@ -88,6 +91,13 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         
         [~, ~, Iref] = intersect( {indep1, indep2}, labels, 'stable' );
         refValues = values(Iref);
+        
+        % Overrides
+        if ( opts.custom )
+            for a = 1 : 2 : numel( opts.custom_args )
+                values( strcmp( labels, opts.custom_args{a} ) ) = opts.custom_args{a+1};
+            end
+        end
         
         % Remove the variables we want to scan
         [labels, I] = setdiff( labels, {indep1, indep2} );

@@ -37,6 +37,9 @@ end
 function str = fullString(C)
     try
         str = strcat( C{:} );
+        if ( isempty( str ) )
+            str = '';
+        end
     catch
         str = '< Failed to obtain line in which error occurs >';
     end
