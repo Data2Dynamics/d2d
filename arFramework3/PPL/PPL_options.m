@@ -160,7 +160,7 @@ while i <= nargin
   else
     ar.ppl.options.(deblank(Names(j,:))) = arg;
     if(strcmp(deblank(Names(j,:)),'xstd'))
-        ar.ppl.xstd_auto = 1;
+        ar.ppl.xstd_auto = 0;
     end
     expectval = 0;
       
