@@ -74,7 +74,7 @@
 
 int spline (int n, int end1, int end2,
             double slope1, double slope2,
-            double x[], double y[],
+            const double x[], const double y[],
             double b[], double c[], double d[])
 {  /* begin procedure spline() */
 
@@ -216,8 +216,8 @@ return 0;
 
 */
 
-double seval (int n, double u,
-              double x[], double y[],
+double seval (const int n, double u,
+              const double x[], const double y[],
               double b[], double c[], double d[])
 
 {  /* begin function seval() */
@@ -248,8 +248,8 @@ return (w);
 }
 
 /* Made sure that index is kept so that we don't have to binary search every time (changed by Joep) */
-double seval_fixed (int n, double u,
-                    double x[], double y[],
+double seval_fixed (const int n, double u,
+                    const double x[], const double y[],
                     double b[], double c[], double d[], int* i_ptr)
 
 {  /* begin function seval() */
@@ -314,7 +314,7 @@ return (w);
 */
 
 double deriv (int n, double u,
-              double x[],
+              const double x[],
               double b[], double c[], double d[])
 {  /* begin function deriv() */
 
@@ -378,7 +378,7 @@ return (w);
 */
 
 double sinteg (int n, double u,
-              double x[], double y[],
+              const double x[], const double y[],
               double b[], double c[], double d[])
 {  /* begin function sinteg() */
 

@@ -1,0 +1,30 @@
+DESCRIPTION
+"Basic model using stoichiometry in the reaction expressions"
+
+PREDICTOR
+t               T   min         time	0	50
+
+COMPARTMENTS
+med             V   pl          vol.    1
+
+STATES
+sA              C   mM          conc.   med     1
+
+INPUTS
+spline          C   nmol/l      conc.   "inputSpline(t, 10, [0, 1, 2, 4, 6, 9, 13, 20, 26, 37], [1e-5, 1e-5, 23, 24, 6, 6, 6, 5, 6, 4])"    "spline"
+poo          C   nmol/l      conc.   "5"    "tester"
+
+REACTIONS
+            ->  sA          CUSTOM    "0 + poo"
+sA          ->              CUSTOM    "kd * sA"
+
+DERIVED
+
+OBSERVABLES
+data            C   au  conc.   0  0  "spline"
+
+ERRORS
+data            "1"
+
+CONDITIONS
+init_sA     "0"

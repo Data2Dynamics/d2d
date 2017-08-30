@@ -103,7 +103,7 @@ function arSteadyState( varargin )
     origin                          = ar.model(m).condition(cSS);
     ss_condition.src                = cSS;
     
-    knownCopies = { 'fkt', 'checkstr', 'p', 'pLink', 'y_atol', 'y_atolS', 'dzdx', 'splines' };
+    knownCopies = { 'fkt', 'checkstr', 'p', 'pLink', 'y_atol', 'y_atolS', 'dzdx', 'splines', 'constVars' };
     ignoreFields = { 'fu', 'fp', 'sym', 'px0', 'tExp', 'pold', 'uExpSimu', 'suExpSimu', ...
                      'vExpSimu', 'svExpSimu', 'sxExpSimu', 'xExpSimu', 'zExpSimu', ...
                      'szExpSimu', 'ssRelative', 'stdSteadyState', 'ssUnmapped', 'ssParLink' };

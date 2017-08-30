@@ -229,6 +229,7 @@ for m=1:length(ar.model)
         newpold = cell(1,length(ar.model(m).condition));
         newpx0 = cell(1,length(ar.model(m).condition));
         splines = cell(1,length(ar.model(m).condition));
+        constVars = cell(1, length(ar.model(m).condition));
         
         if(usePool)
             csyms = cell(size(ar.model(m).condition));
@@ -243,6 +244,7 @@ for m=1:length(ar.model)
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
                 splines{c} = condition_sym.splines;
+                constVars{c} = condition_sym.constVars;
                 
                 if(~doskip(c))
                     % header
@@ -270,6 +272,8 @@ for m=1:length(ar.model)
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
                 splines{c} = condition_sym.splines;
+                constVars{c} = condition_sym.constVars;
+                
                 if(~doskip(c))
                     % header
                     fid_odeH = fopen([source_dir '/Compiled/' c_version_code '/' condition(c).fkt '_tmp.h'], 'W');
@@ -293,6 +297,7 @@ for m=1:length(ar.model)
             ar.model(m).condition(c).pold = newpold{c};
             ar.model(m).condition(c).px0 = newpx0{c};
             ar.model(m).condition(c).splines = splines{c};
+            ar.model(m).condition(c).constVars = constVars{c};
         end
         
         % skip calc data
@@ -704,6 +709,7 @@ if(doskip)
     condition.sv = {};
     condition.sz = {};    
     condition.splines = [];
+    condition.constVars = '';
     
     return;
 end
@@ -939,11 +945,53 @@ if(config.useSensis)
     end
 end
 
+% We need room for the spline coefficients if we use turbosplines
 if ( config.turboSplines == 1 )
     condition = uniqueSplines( condition );
 else
     condition.splines = [];
 end
+
+% Replace inline arrays (e.g. [3,4,2,5,2] with variable names, declaring
+% the array elsewhere as a static const (used for the fixed input spline)
+[ condition.sym.fu, constVars ] = replaceFixedArrays( char(condition.sym.fu), 0, c );
+condition.sym.fu = sym( condition.sym.fu );
+condition.constVars = sprintf( '%s;\n', constVars{:} );
+
+% Replaces arrays with static variables
+% And outputs a list of the new static variables created.
+function [ finalStr, static_variables ] = replaceFixedArrays( str, offset, condiID )
+    finalStr = str;
+    [strOut, values] = findArrays( str );
+    static_variables = cell( 1, numel( values ) );
+    for a = 1 : numel( strOut )
+        vString = sprintf('%.25e, ', values{a});
+        vString = vString(1:end-2);
+        static_variables{a} = sprintf( 'static const double static_chunk_%d_%d[%d] = { %s }', condiID, a + offset, numel( values{a} ), vString );
+        finalStr = strrep( finalStr, strOut{a}, sprintf( 'static_chunk_%d_%d', condiID, a + offset ) );
+    end
+
+% Grab arrays from string ([1,2,3,...5,6,7])
+function [strOut, values] = findArrays( str )
+    loc1 = regexp( str, '\[([ ()0123456789.,^*-+/]+)[,]([ ()0123456789.,^*-+/]+)\]' );
+    loc2 = regexp( str, '\]' );
+    a = 1;
+    strOut = cell( 1, numel(loc1) );
+    values = cell( 1, numel(loc1) );
+    for i = 1 : numel( loc1 )
+        strOut{a} = str( loc1(i) : loc2(i) );
+        values{a} = arrayVal( str( loc1(i) + 1 : loc2(i) - 1 ) );
+        a = a + 1;
+    end
+
+% Grab values from flat array and force them to doubles
+function vals = arrayVal( str )
+    spl = strsplit( str, ',' );
+    try
+        vals = cellfun( @str2num, spl );
+    catch
+        error( 'Found a malformed array: [%s]. Only numeric values are allowed!', str )
+    end
 
 % This function checks whether any deltas appear in the sensitivity
 % equations. They are incompatible with continuous optimizers
@@ -1303,6 +1351,7 @@ function out = mysubsrepeated(in, old, new, matlab_version)
         k = k + 1;
     end
 
+% Allocate room for the persistent spline coefficients
 function condition = uniqueSplines( condition )
     [fu, nsfu] = repSplines( condition.sym.fu, 0 );
     condition.sym.fu = sym(fu);
@@ -1310,8 +1359,15 @@ function condition = uniqueSplines( condition )
     [dfudp, nsdfudp] = repSplines( condition.sym.dfudp, nsfu );
     condition.sym.dfudp = sym(dfudp);
     
-    condition.splines = zeros( nsfu + nsdfudp, 1 );
+    [condition.sym.fu, nsfuI] = repInput( condition.sym.fu, nsfu + nsdfudp );
+    
+    condition.splines = zeros( nsfu + nsdfudp + nsfuI, 1 );
 
+% Find the used splines. Replace them with fast splines and store the
+% number of spline coefficients required.
+% This function makes the following replacement:
+%   [mono/pos]splineN(double t, double t1, double p1 ... => [mono/pos]fastsplineN(double t, #, udata_splines__, double t1, double p1
+% where udata_splines__ is later replaced by double **splineCache, int *idCache (after symbolic parsing) and # contains the spline index
 function [ strOut, nSplines ] = repSplines( fu, offset )
     str = char(fu);
     [~,loc1,loc2] = regexp(str, 'spline(\d*)(\w*)\((\w*),', 'split');
@@ -1325,6 +1381,22 @@ function [ strOut, nSplines ] = repSplines( fu, offset )
         strOut = [ strOut str( loc2(c) + 1 : loc1(c+1) ) ]; %#ok<AGROW>
     end
     nSplines = numel(loc2);
+
+% This function replaces instances of inputFunction
+function [ strOut, nInput ] = repInput( fu, offset )
+    str = char(fu);
+    [~,loc1,loc2] = regexp(str, 'inputFunction(\d*)(\w*)\((\w*),', 'split');
+    loc1(end+1) = numel(str);
+    strOut = str( 1 : loc1(1) );
+    for c = 1 : numel( loc2 )
+        strOut = strOut(1:end);
+        strOut = [ strOut str( loc1(c) + 1 : loc2(c) ) ]; %#ok<AGROW>
+        strOut = [ strOut num2str(c+offset-1) ', udata_splines__,' ]; %#ok<AGROW>
+        strOut = [ strOut str( loc2(c) + 1 : loc1(c+1) ) ]; %#ok<AGROW>
+    end
+    nInput = numel(loc2);
+    
+
     
 function checksum = addToCheckSum(str, checksum)
 algs = {'MD2','MD5','SHA-1','SHA-256','SHA-384','SHA-512'};
@@ -1424,6 +1496,9 @@ fprintf(fid, '#include <math.h>\n');
 fprintf(fid, '#include <mex.h>\n');
 fprintf(fid, '#include <arInputFunctionsC.h>\n');
 fprintf(fid,'\n\n\n');
+
+% write const vars
+fprintf(fid, '%s\n\n', condition.constVars);
 
 % write fu
 fprintf(fid, ' void fu_%s(void *user_data, double t)\n{\n', condition.fkt);

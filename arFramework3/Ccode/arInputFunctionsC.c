@@ -15,6 +15,31 @@ double dirac(double t) {
     return 0.0;
 }
 
+/* Spline with fixed time points and coefficients */
+double inputfastSpline( double t, int ID, double **splineCache, int *idCache, const int n, const double ts[], const double us[])
+{
+    double uout;
+    double b[MAX_LONG_SPLINE];
+    double c[MAX_LONG_SPLINE];
+    double d[MAX_LONG_SPLINE];
+    
+    cmonotoneSpline( n, ts, us, b, c, d, ID, splineCache, idCache );
+    uout = seval_fixed( n, t, ts, us, b, c, d, &(idCache[ID]));    
+}
+
+/* Spline with fixed time points and coefficients */
+double inputSpline( double t, const int n, const double ts[], const double us[])
+{
+    double uout;
+    
+    double b[MAX_LONG_SPLINE];
+    double c[MAX_LONG_SPLINE];
+    double d[MAX_LONG_SPLINE];
+ 
+    longMonotoneSpline( n, ts, us, b, c, d );
+    uout = seval( n, t, ts, us, b, c, d );
+}
+
 double step1(double t, double u1, double t1, double u2) {
     if(t <= t1) {
         return(u1);
