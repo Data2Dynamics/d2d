@@ -45,7 +45,7 @@ global ar
 if (nargin == 0) && (nargout == 0)
   fprintf('          Gammas: [ vector of correction strengths {1/stepsize} ]\n');
   fprintf('        stepsize: [ integration step size {tFine} ]\n');
-  fprintf('     onlyProfile: [ true | {false} ]\n');
+  fprintf('     onlyProfile: [ {true} | false ]\n');
   fprintf('            tEnd: [ Alternative integration endpoint ]\n'); 
   fprintf('    rel_increase: [ %% of x increase in profile calculation {0.15} ]\n');
   fprintf('        ed_steps: [ {true} | false ]\n');
@@ -80,7 +80,7 @@ Names = [
 
 %Set some default options
 if(~isfield(ar.ppl,'options'))
-    ar.ppl.options.onlyProfile = false;
+    ar.ppl.options.onlyProfile = true;
     ar.ppl.options.rel_increase = 0.15;
     ar.ppl.options.ed_steps = true;
     ar.ppl.options.fineInt = true;

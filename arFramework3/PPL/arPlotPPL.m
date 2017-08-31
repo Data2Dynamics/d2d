@@ -5,9 +5,6 @@
 function arPlotPPL(m, c, ix, t, takeY, subs_para)
 
 global ar
-if(ar.ppl.fittederrors)
-    ar.config.fiterrors=0;
-end
 qLog10 = ar.ppl.qLog10;
 
 if(~exist('subs_para','var'))
@@ -126,8 +123,4 @@ else
     xlabel(arNameTrafo(ar.model(m).x{ix}))
 end
 grid(g,'on');
-
-if(ar.ppl.fittederrors)
-    ar.config.fiterrors=1;
-end
 

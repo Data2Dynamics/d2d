@@ -88,9 +88,9 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
             cur_t = find(ar.model(m).(data_cond)(c).ppl.tstart(:,ix(jx))==t(jt));
             
             if(isempty(cur_t))
-                if(size(ar.model(m).(data_cond)(c).ppl.tstart,1)>=jt)
-                    ar.model(m).(data_cond)(c).ppl.tstart(jt,ix(jx)) = t(jt);
-                else                
+%                 if(size(ar.model(m).(data_cond)(c).ppl.tstart,1)>=jt)
+%                     ar.model(m).(data_cond)(c).ppl.tstart(jt,ix(jx)) = t(jt);
+%                 else                
                     ar.model(m).(data_cond)(c).ppl.tstart = [ar.model(m).(data_cond)(c).ppl.tstart; nan(1, size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2))];
                     ar.model(m).(data_cond)(c).ppl.tstart(end,ix(jx)) = t(jt);
                     ar.model(m).(data_cond)(c).ppl.xtrial = [ar.model(m).(data_cond)(c).ppl.xtrial; nan(1, size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2), 2*n+1)];
@@ -106,11 +106,11 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
                     ar.model(m).(data_cond)(c).ppl.kind_low = [ar.model(m).(data_cond)(c).ppl.kind_low; nan(1, size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2))];
                     ar.model(m).(data_cond)(c).ppl.kind_high_vpl = [ar.model(m).(data_cond)(c).ppl.kind_high_vpl; nan(1, size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2))];
                     ar.model(m).(data_cond)(c).ppl.kind_low_vpl = [ar.model(m).(data_cond)(c).ppl.kind_low_vpl; nan(1, size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2))];
-                end
+%                 end
             end
         end
     end
 
-    whichT = find(ar.model(m).(data_cond)(c).ppl.tstart(:,ix(1)) == t(whichT));
-    t = ar.model(m).(data_cond)(c).ppl.tstart(:,ix(1));
+%     whichT = find(ar.model(m).(data_cond)(c).ppl.tstart(:,ix(1)) == t(whichT));
+%     t = ar.model(m).(data_cond)(c).ppl.tstart(:,ix(1));
 end

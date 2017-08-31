@@ -6,10 +6,6 @@ function arPlotPPLMulti(m, c, takeY, vpl, filled, dosurf)
 
 global ar
 
-if(ar.ppl.fittederrors)
-    ar.config.fiterrors=0;
-end
-
 if(~exist('vpl','var'))
     vpl = false;
 end
@@ -81,7 +77,7 @@ for jx=1:length(ar.model(m).(data_cond)(c).ppl.ix)
     pplgrid = nan(size(tgrid));
     
 %     if(~dosurf || filled)
-        method = 'v5cubic';
+        method = 'spline';
         for jt=1:length(tFine)
             tdiff = t - tFine(jt);
             qback = tdiff<=0;
@@ -236,8 +232,4 @@ for jx=1:length(ar.model(m).(data_cond)(c).ppl.ix)
     set(gcf,'Color','w')
     xlabel(g, sprintf('%s [%s]', ar.model(m).tUnits{3}, ar.model(m).tUnits{2}));
     ylabel(sprintf('%s [%s]', ar.model(m).xUnits{ix,3}, ar.model(m).xUnits{ix,2}))
-end
-
-if(ar.ppl.fittederrors)
-    ar.config.fiterrors=1;
 end

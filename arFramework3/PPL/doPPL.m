@@ -47,7 +47,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         end
     end
 
-    if(~isfield(ar.ppl,'xstd_auto'))
+    if(~isfield(ar.ppl,'xstd_auto') || isempty(ar.ppl.xstd_auto))
         ar.ppl.xstd_auto = 1;
     end
     confirm_options = PPL_options(options);
@@ -82,19 +82,11 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     end
 
     % optimizer settings (set only once)
-    if(ar.config.fiterrors~=-1 && ~ar.ppl.options.onlyProfile)
-        ar.ppl.fittederrors=ar.config.fiterrors;
-        ar.config.fiterrors=0;
-        ar.ppl.fit_bkp = ar.qFit(strncmp(ar.pLabel,'sd_',3));
-        ar.qFit(strncmp(ar.pLabel,'sd_',3))=2;
-    end
-    if(ar.config.useSensis)
-        ar.config.optim.Jacobian = 'on';
-    else
-        ar.config.optim.Jacobian = 'off';
-    end
-    ar.config.optim.Algorithm = 'trust-region-reflective';
-
+    ar.ppl.fittederrors=ar.config.fiterrors;
+    ar.config.fiterrors=0;
+    ar.ppl.fit_bkp = ar.qFit(strncmp(ar.pLabel,'sd_',3));
+    ar.qFit(strncmp(ar.pLabel,'sd_',3))=2;
+   
     ar.ppl.dchi2 = chi2inv(1-ar.ppl.options.alpha_level, 1);
     ar.ppl.dchi2;
     dir = ar.ppl.options.dir;
@@ -130,16 +122,15 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     end
     
     for jx = 1:length(ix)
-        if(ar.ppl.xstd_auto)    
-            if(ar.config.fiterrors~= -1 && takeY && ~isnan(ar.model(m).data(c).ystdFineSimu(1,ix(jx))))
-                ar.ppl.options.xstd = ar.model(m).data(c).ystdFineSimu(1,ix(jx));
-            elseif(ar.config.fiterrors==-1 && takeY)
+        if(ar.ppl.xstd_auto)  
+            if(takeY)
                 [~,it_first] = min(abs(ar.model(m).data(c).tExp-t(whichT))); 
                  if(~isnan(ar.model(m).data(c).yExpStd(it_first,ix(jx))))
                      ar.ppl.options.xstd = ar.model(m).data(c).yExpStd(it_first,ix(jx));
+                 elseif(ar.config.fiterrors~= -1 && takeY && ~isnan(ar.model(m).data(c).ystdFineSimu(1,ix(jx))))
+                    ar.ppl.options.xstd = ar.model(m).data(c).ystdFineSimu(1,ix(jx));
                  end
             elseif(~takeY)
-                arSimu(0,1,1);
                 ar.ppl.options.xstd = max(ar.model(m).condition(c).xFineSimu(:,ix(jx)))/10;
             end
 
@@ -193,7 +184,8 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         ar.p = pReset;
 
     end
-    if(isfield(ar.ppl,'fittederrors') && ~ar.config.fiterrors && ar.ppl.fittederrors  && ~ar.ppl.options.onlyProfile) 
+    %if(isfield(ar.ppl,'fittederrors') && ~ar.config.fiterrors && ar.ppl.fittederrors  && ~ar.ppl.options.onlyProfile) 
+    if(isfield(ar.ppl,'fittederrors'))
         ar.config.fiterrors=ar.ppl.fittederrors;
         ar.qFit(strncmp(ar.pLabel,'sd_',3))=ar.ppl.fit_bkp;
     end
@@ -236,6 +228,9 @@ ntot = ar.ppl.options.n_start;
 tcount = 1;
 for ts = 1:length(t)
     t_tmp = t(ts);
+    if(isnan(t_tmp))
+        continue;
+    end
     %if(save)
     ts_tmp = find(ar.model(m).(data_cond)(c).ppl.tstart(:,jx) == t_tmp);
     if(ts == whichT && save)
@@ -243,6 +238,7 @@ for ts = 1:length(t)
     end
     if(save && ((doPPL && ~isnan(ar.model(m).(data_cond)(c).ppl.ub_fit(ts_tmp,jx))) ...
             || (~doPPL && ~isnan(ar.model(m).(data_cond)(c).ppl.ub_fit_vpl(ts_tmp,jx)))))
+       fprintf('The prediction profile you want to compute for t=%d and state %d already exists. If you want to overwrite them, delete the value at ar.model.data/condition.ppl.ub_fit(_vpl) \n',t_tmp,jx)
        continue; 
     end            
    
@@ -325,7 +321,8 @@ for ts = 1:length(t)
     ub_tmp = max(fitted_tmp(q_chi2good));
 
     if(lb_tmp==min(fitted_tmp(q_nonnan)))
-        lb_tmp = -Inf;                
+        lb_tmp = -Inf;             
+        kind_low_tmp = -Inf;
         fprintf('No -95 PPL for t=%d\n',t(ts));
     else
         kind_low_tmp = find(fitted_tmp==lb_tmp);
@@ -337,6 +334,7 @@ for ts = 1:length(t)
     end
     if(ub_tmp==max(fitted_tmp(q_nonnan)))
         ub_tmp = Inf;
+        kind_high_tmp = Inf;
         fprintf('No +95 PPL for t=%d\n',t(ts));
     else
         kind_high_tmp = find(fitted_tmp==ub_tmp);   
@@ -348,6 +346,13 @@ for ts = 1:length(t)
     end        
     
     if ~onlyProfile
+        if((dir==1 && isinf(ub_tmp)) || (dir==-1 && isinf(lb_tmp)))
+            fprintf('ERROR: no bound found at t=%d \n', t_tmp);
+            if(takeY)
+                arLink(true,0.,true,ix(jx), c, m,NaN);
+            end
+            break;
+        end
         if(dir==1)        
             xFit = ub_tmp;
             ps = ps_tmp(kind_high_tmp,:);
@@ -401,15 +406,19 @@ for j = 1:n
     end
     
     xExp = xExp + direction*dx;
+    arLink(true,t,takeY,ix, c,m,xExp,xstd);
+    
     try
         arPPLFit;
     catch exception
         fprintf('ERROR PPL: going to lower bound (%s)\n', exception.message);
+        if(takeY)
+            arLink(true,0.,true,ix(jx), c, m,NaN);
+        end
         break;
     end
     
     xtrial(j) = xExp;    
-    arLink(true,t,takeY,ix, c,m,xExp,xstd);
     arCalcMerit(0, ar.p(ar.qFit==1),1)
     if(takeY)
         xSim = ar.model(m).data(c).yExpSimu(it,ix); 

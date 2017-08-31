@@ -65,7 +65,7 @@ if(isempty(hy))
         else
             hyss = patch([t_ppl(:,jy) ; flipud(t_ppl(:,jy))], [y_ppl_lb(:,jy); flipud(y_ppl_ub(:,jy))], ones(size([y_ppl_lb(:,jy); y_ppl_ub(:,jy)])));             
         end
-       set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2,'LineStyle','none','Marker','*');
+       set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2,'LineStyle','none','Marker','*','MarkerEdgeColor',Clines{2},'MarkerSize',5);
     end
     if(any(plotopt(jy) == [3,5]))
         set(hy, 'LineWidth', 1.5);
@@ -141,6 +141,7 @@ else
 end
 if(~isempty(yExp) && ~fastPlot)
     if(~isempty(qUnlog) && qUnlog(jy))
+        yExpStd(:,jy) = 10.^(yExp(:,jy)+yExpStd(:,jy))-10.^(yExp(:,jy));
         yExp = 10.^yExp;
         yExpHl = 10.^yExpHl;
     end
