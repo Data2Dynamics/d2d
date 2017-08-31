@@ -16,19 +16,19 @@ double dirac(double t) {
 }
 
 /* Spline with fixed time points and coefficients */
-double inputfastSpline( double t, int ID, double **splineCache, int *idCache, const int n, const double ts[], const double us[])
+double inputfastspline( double t, int ID, double **splineCache, int *idCache, const int n, const double ts[], const double us[])
 {
     double uout;
     double b[MAX_LONG_SPLINE];
     double c[MAX_LONG_SPLINE];
     double d[MAX_LONG_SPLINE];
     
-    cmonotoneSpline( n, ts, us, b, c, d, ID, splineCache, idCache );
+    clongmonotoneSpline( n, ts, us, b, c, d, ID, splineCache, idCache );
     uout = seval_fixed( n, t, ts, us, b, c, d, &(idCache[ID]));    
 }
 
 /* Spline with fixed time points and coefficients */
-double inputSpline( double t, const int n, const double ts[], const double us[])
+double inputspline( double t, const int n, const double ts[], const double us[])
 {
     double uout;
     
@@ -843,6 +843,34 @@ int cmonotoneSpline( int n, double x[], double y[], double b[], double c[], doub
     {
         splineCache[cacheID] = (double*) malloc(3 * n * sizeof(double));
         monotoneSpline(n, x, y, b, c, d);
+        for ( j = 0; j < n; j++ )
+        {
+            splineCache[cacheID][j]     = b[j];
+            splineCache[cacheID][j+n]   = c[j];
+            splineCache[cacheID][j+2*n] = d[j];
+        }
+        IDcache[cacheID] = 0;
+    }
+    else
+    {
+        for ( j = 0; j < n; j++ )
+        {
+            b[j] = splineCache[cacheID][j];
+            c[j] = splineCache[cacheID][j+n];
+            d[j] = splineCache[cacheID][j+2*n];
+        }        
+    } 
+}
+
+int clongmonotoneSpline( int n, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache )
+{
+    int j;
+    
+    /* Nothing in the cache? Allocate memory and fill (free-ing is handled in arSimuCalc.c) */
+    if ( splineCache[cacheID] == NULL )
+    {
+        splineCache[cacheID] = (double*) malloc(3 * n * sizeof(double));
+        longMonotoneSpline(n, x, y, b, c, d);
         for ( j = 0; j < n; j++ )
         {
             splineCache[cacheID][j]     = b[j];

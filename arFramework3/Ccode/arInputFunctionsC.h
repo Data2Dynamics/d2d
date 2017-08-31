@@ -11,8 +11,8 @@ double step2(double t, double u1, double t1, double u2, double t2, double u3);
 double dstep2(double t, double u1, double t1, double u2, double t2, double u3, int p_index);
 
 /* Spline which optionally allows for caching */
-double inputSpline( double t, const int n, const double ts[], const double us[]);
-double inputfastSpline( double t, int ID, double **splineCache, int *idCache, const int n, const double ts[], const double us[]);
+double inputspline( double t, const int n, const double ts[], const double us[]);
+double inputfastspline( double t, int ID, double **splineCache, int *idCache, const int n, const double ts[], const double us[]);
 
 int cspline(int n, int end1, int end2, double slope1, double slope2, double x[], double y[], double b[], double c[], double d[], double **splineCache, int *idCache, int cacheID);
 int cmonotoneSpline( int n, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache );
