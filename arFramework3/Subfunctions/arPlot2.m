@@ -253,6 +253,9 @@ for jm = 1:length(ar.model)
                             else
                                 for jy=1:size(y,2)
                                     plotopt(jy) = 1;
+                                    if(~isempty(t_ppl))
+                                        plotopt(jy) = 4;
+                                    end
                                 end
                             end
                             zero_break = [];
