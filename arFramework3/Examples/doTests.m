@@ -26,7 +26,7 @@ function doTests( varargin )
                 'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines', ...
                 'ResponseCurve', 'PreProcessorTest' };
     
-    dependencies = { {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {}, {} };
+    dependencies = { {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {}, {}, {} };
     
     if ( nargin > 0 )
         activeTests = argSwitch( tests, varargin{:} );

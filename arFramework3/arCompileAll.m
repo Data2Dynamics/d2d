@@ -1361,13 +1361,13 @@ function out = mysubsrepeated(in, old, new, matlab_version)
 % Allocate room for the persistent spline coefficients
 function condition = uniqueSplines( condition )
     [fu, nsfu] = repSplines( condition.sym.fu, 0 );
-    condition.sym.fu = sym(fu);
     
     [dfudp, nsdfudp] = repSplines( condition.sym.dfudp, nsfu );
     condition.sym.dfudp = sym(dfudp);
     
-    [condition.sym.fu, nsfuI] = repInput( condition.sym.fu, nsfu + nsdfudp );
-    
+    [fu, nsfuI] = repInput( fu, nsfu + nsdfudp );
+
+    condition.sym.fu = sym(fu);    
     condition.splines = zeros( nsfu + nsdfudp + nsfuI, 1 );
 
 % Find the used splines. Replace them with fast splines and store the
@@ -2578,7 +2578,7 @@ function str = replaceDerivative( str )
 function str = repSplineDer( str )
 
     % Pattern that matches the derivatives D([#], func)(args)
-    pattern = 'D[\(][\[](\d+)[\]][\,](\s*)(\w*)[\)][\(]([\[\]\^\/\*\+\-\.\s,\w\d]*)[\)]';
+    pattern = 'D[\(][\[](\d+)[\]][\,]\s(\w*)[\)][\(]([\[\]\^\/\*\+\-\.\s,\w\d]*)[\)]';
     
     % Compute the mask for the printf
     % Performs regexprep which transforms D([#], name)(args) => Dname(args, %d)
