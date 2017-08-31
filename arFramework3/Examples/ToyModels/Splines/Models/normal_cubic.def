@@ -1,5 +1,5 @@
 DESCRIPTION
-"Basic model using stoichiometry in the reaction expressions"
+"Basic model normal cubic spline"
 
 PREDICTOR
 t               T   min         time	0	50

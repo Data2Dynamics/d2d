@@ -1,0 +1,37 @@
+DESCRIPTION
+"Basic model using a response surface"
+"The LUT_bilinear corresponds to a response curve. The first two parameters contain the response variables and should be specified in the range 0 to 1."
+"Anything outside the range 0 to 1 will be clamped. NX and NY contain the dimensions of the response surface. The final array represents the data for the curve."
+"The data has to be in the following form:   Y(1,1), Y(2,1), Y(N,1), Y(1,2), Y(2,2), Y(N,2), ... Y(N,N)"
+
+PREDICTOR
+t               T   min         time	-0.1    1.1
+
+COMPARTMENTS
+med             V   pl          vol.    1
+
+STATES
+sA              C   mM          conc.   med     1
+sB              C   mM          conc.   med     1
+
+INPUTS
+
+REACTIONS
+            ->  sA          CUSTOM    "kd * LUT_bilinear(t, parameter, 5, 5, [1,2,3,4,5, 2,3,4,5,6, 3,4,5,6,7, 4,5,6,7,8, 5,6,7,8,9])"
+sA          ->              CUSTOM    "kd * sA"
+            ->  sB          CUSTOM    "kd * LUT_bilinear(t^2, parameter^3, 5, 5, [1,2,3,4,5, 2,3,4,5,6, 3,4,5,6,7, 4,5,6,7,8, 5,6,7,8,9])"
+sB          ->              CUSTOM    "kd * sB"
+
+DERIVED
+
+OBSERVABLES
+datasA            C   au  conc.   0  0  "sA"
+datasB            C   au  conc.   0  0  "sB"
+
+ERRORS
+datasA           "1"
+datasB           "1"
+
+CONDITIONS
+init_sA     "0"
+init_sB     "0"

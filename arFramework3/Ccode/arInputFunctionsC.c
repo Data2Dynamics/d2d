@@ -15,6 +15,59 @@ double dirac(double t) {
     return 0.0;
 }
 
+/* Helper function for clamped 2D array access */
+double getData2D( const int NX, const int NY, const double data[], int x, int y )
+{
+    /* Prevent exceeding the data range */
+    x = x < NX ? x : NX - 1;
+    y = y < NY ? y : NY - 1;
+    x = x > 0 ? x : 0;
+    y = y > 0 ? y : 0;
+
+    return data[ x + NX * y ];
+}
+
+/* Bilinear LUT */
+double LUT_bilinear( double x, double y, int NX, int NY, const double data[] )
+{
+    double xmi = floor( x * (NX-1) );
+    double xma = ceil( x * (NX-1) );
+    double ymi = floor( y * (NY-1) );
+    double yma = ceil( y * (NY-1) );
+    double dx = x * (NX-1) - xmi;
+    double dy = y * (NY-1) - ymi;
+    
+    double y1 = ( 1 - dx ) * getData2D( NX, NY, data, xmi, ymi ) + dx * getData2D( NX, NY, data, xma, ymi );
+    double y2 = ( 1 - dx ) * getData2D( NX, NY, data, xmi, yma ) + dx * getData2D( NX, NY, data, xma, yma );
+    
+    double out = ( 1 - dy ) * y1 + dy * y2;
+    
+    return out;
+}
+
+/* Derivatives of the bilinear LUT */
+double DLUT_bilinear( double x, double y, int NX, int NY, const double data[], int deriv )
+{
+    double xmi = floor( x * (NX-1) );
+    double xma = ceil( x * (NX-1) );
+    double ymi = floor( y * (NY-1) );
+    double yma = ceil( y * (NY-1) );
+    
+    double dx = x * (NX-1) - xmi;
+    double dy = y * (NY-1) - ymi;
+    
+    double fxmiymi = getData2D( NX, NY, data, xmi, ymi );
+    double fxmiyma = getData2D( NX, NY, data, xmi, yma );
+    double fxmaymi = getData2D( NX, NY, data, xma, ymi );
+    double fxmayma = getData2D( NX, NY, data, xma, yma );
+        
+    /* Derivative w.r.t. x (1) or y (2)? */
+    if ( deriv == 1 )
+        return (fxmaymi*(NX - 1) - fxmiymi*(NX - 1))*(ymi - y*(NY - 1) + 1) - (fxmayma*(NX - 1) - fxmiyma*(NX - 1))*(ymi - y*(NY - 1));
+    else
+        return (fxmaymi*(xmi - x*(NX - 1)) - fxmiymi*(xmi - x*(NX - 1) + 1))*(NY - 1) - (fxmayma*(xmi - x*(NX - 1)) - fxmiyma*(xmi - x*(NX - 1) + 1))*(NY - 1);
+}
+
 /* Spline with fixed time points and coefficients */
 double inputfastspline( double t, int ID, double **splineCache, int *idCache, const int n, const double ts[], const double us[])
 {

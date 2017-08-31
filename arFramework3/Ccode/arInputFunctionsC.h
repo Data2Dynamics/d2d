@@ -4,6 +4,9 @@
 double heaviside(double t);
 double dirac(double t);
 
+double LUT_bilinear( double x, double y, int NX, int NY, const double data[] );
+double DLUT_bilinear( double x, double y, int NX, int NY, const double data[], int deriv );
+
 double step1(double t, double u1, double t1, double u2);
 double dstep1(double t, double u1, double t1, double u2, int p_index);
 

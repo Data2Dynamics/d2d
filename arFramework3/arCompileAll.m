@@ -669,6 +669,17 @@ condition.sym.fz = mysubsrepeated(condition.sym.fz, model.sym.z, condition.sym.f
 condition.sym.fz = arSubs(condition.sym.fz, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.C = arSubs(model.sym.C, condition.sym.p, condition.sym.fp, matlab_version);
 
+% Replace inline arrays (e.g. [3,4,2,5,2] with variable names, declaring
+% the array elsewhere as a static const (used for the fixed input spline)
+[ condition.sym.fu, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fu), 0, c );
+condition.sym.fu = sym( condition.sym.fu );
+condition.constVars = sprintf( '%s;\n', constVars{:} );
+
+[ condition.sym.fv, constVars, cVars2 ] = replaceFixedArrays( char(condition.sym.fv), numel(constVars), c );
+cVars = union( cVars, cVars2 );
+condition.sym.fv = sym( condition.sym.fv );
+condition.constVars = sprintf( '%s;\n%s\n', condition.constVars, sprintf( '%s;\n', constVars{:} ) );
+
 % predictor
 condition.sym.fv = arSubs(condition.sym.fv, sym(model.t), sym('t'), matlab_version);
 condition.sym.fu = arSubs(condition.sym.fu, sym(model.t), sym('t'), matlab_version);
@@ -681,7 +692,7 @@ condition.px0 = sym2str(varlist);
 % remaining parameters
 varlist = union( symvar([condition.sym.fv(:); condition.sym.fu(:); condition.sym.fz(:); condition.sym.fpx0(:)]), symvar( condition.sym.C ) );
 condition.pold = condition.p;
-condition.p = setdiff(setdiff(setdiff(setdiff(sym2str(varlist), model.x), model.u), model.z), 't');
+condition.p = setdiff(setdiff(setdiff(setdiff(setdiff(sym2str(varlist), model.x), model.u), model.z), 't'), cVars);
 condition.dfxdx_rowVals = [];
 condition.dfxdx_colptrs = [];  
 
@@ -952,21 +963,17 @@ else
     condition.splines = [];
 end
 
-% Replace inline arrays (e.g. [3,4,2,5,2] with variable names, declaring
-% the array elsewhere as a static const (used for the fixed input spline)
-[ condition.sym.fu, constVars ] = replaceFixedArrays( char(condition.sym.fu), 0, c );
-condition.sym.fu = sym( condition.sym.fu );
-condition.constVars = sprintf( '%s;\n', constVars{:} );
-
 % Replaces arrays with static variables
 % And outputs a list of the new static variables created.
-function [ finalStr, static_variables ] = replaceFixedArrays( str, offset, condiID )
+function [ finalStr, static_variables, cvars ] = replaceFixedArrays( str, offset, condiID )
     finalStr = str;
     [strOut, values] = findArrays( str );
     static_variables = cell( 1, numel( values ) );
+    cvars = cell( 1, numel( values ) );
     for a = 1 : numel( strOut )
         vString = sprintf('%.25e, ', values{a});
         vString = vString(1:end-2);
+        cvars{a} = sprintf( 'static_chunk_%d_%d', condiID, a + offset );
         static_variables{a} = sprintf( 'static const double static_chunk_%d_%d[%d] = { %s }', condiID, a + offset, numel( values{a} ), vString );
         finalStr = strrep( finalStr, strOut{a}, sprintf( 'static_chunk_%d_%d', condiID, a + offset ) );
     end
@@ -974,7 +981,7 @@ function [ finalStr, static_variables ] = replaceFixedArrays( str, offset, condi
 % Grab arrays from string ([1,2,3,...5,6,7])
 function [strOut, values] = findArrays( str )
     loc1 = regexp( str, '\[([ ()0123456789.,^*-+/]+)[,]([ ()0123456789.,^*-+/]+)\]' );
-    loc2 = regexp( str, '\]' );
+    loc2 = regexp( str, '([ ()0123456789.,^*-+/]+)[,]([ ()0123456789.,^*-+/]+)\]', 'end' );
     a = 1;
     strOut = cell( 1, numel(loc1) );
     values = cell( 1, numel(loc1) );
@@ -2535,12 +2542,43 @@ for j=1:length(b);
     a{j} = char(b(j));
 end
     
+% This function maps matlab symbolic toolbox derivatives to derivatives we
+% can use in C
+%
+%  D([#], name)(args) => Dname(args, %d)
+%  diff(name(args), args(#)) => Dname(args, #)
+function str = replaceDerivative( str )
+    % Pattern that matches the derivatives D([#], func)(args)
+    pattern = 'D[\(][\[](\d+)[\]][\,](\s*)(\w*)[\)][\(]([\[\]\^\/\*\+\-\.\s,\w\d]*)[\)]';
+    
+    % Performs regexprep which transforms D([#], name)(args) => Dname(args, %d)
+    str = regexprep(str, pattern,'D$3($4,$1)');
+    
+    % Pattern which matches the other derivative structure
+    pattern2 = 'diff[\(](\w+)[\(]([\[\]\^\/\*\+\-\.\s,\w\d]*)[\)][,](\s*)([\[\]\w]*)[\)]';
+    
+    % Performs regexprep which transforms diff(name(args), args(#)) => Dname(args, #)
+    [~,~,~,total,matches]=regexp(str, pattern2);
+    
+    for jm = 1 : numel(matches)
+        indep = matches{jm}{4};
+        variables = strtrim(strsplit(matches{jm}{2}, ','));
+        
+        % Find which variable we're deriving w.r.t. to
+        ID = find(strcmp(variables, indep));
+        
+        % Write the new string
+        fNew = sprintf( 'D%s(%s, %d)', matches{jm}{1}, matches{jm}{2}, ID );
+        
+        str = strrep( str, total{jm}, fNew );
+    end
+
 % Safely map derivatives to the appropriate C functions
 %   pattern replaces D([#], func)(args) to Dfunc(args, floor(#/2)) 
 function str = repSplineDer( str )
 
     % Pattern that matches the derivatives D([#], func)(args)
-    pattern = 'D[\(][\[](\d+)[\]][\,]\s(\w*)[\)][\(]([\[\]\-\.\s,\w]*)[\)]';
+    pattern = 'D[\(][\[](\d+)[\]][\,](\s*)(\w*)[\)][\(]([\[\]\^\/\*\+\-\.\s,\w\d]*)[\)]';
     
     % Compute the mask for the printf
     % Performs regexprep which transforms D([#], name)(args) => Dname(args, %d)
@@ -2570,6 +2608,8 @@ function cstr = ccode2(T, matlab_version)
         cstr = '';
         return;
     end
+    
+    T = sym( replaceDerivative( char(T) ) );
 
     % R2015b compatibility fix
     if(matlab_version>=8.6)

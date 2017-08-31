@@ -313,7 +313,7 @@ for m=1:length(ar.model)
         
         % Add extra time points if desired
         if isfield(ar.model(m).condition(c), 'tExtra')
-            ar.model(m).conditions(c).tFine = union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tExtra);
+            ar.model(m).condition(c).tFine = union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tExtra);
         end
     end
 end
