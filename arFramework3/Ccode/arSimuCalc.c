@@ -51,14 +51,14 @@ void timersub(struct timeval* tvp, struct timeval* uvp, struct timeval* vvp)
 
 /* Prototypes for the debug printer */
 #ifndef MACRO_DEBUGPRINT
-    void debugPrint( int debugMode, int level, const char* format, ... ); */
+    void debugPrint( int debugMode, int level, const char* format, ... );
 #else
     /* Macro for the debug printer */
-    #define DEBUGPRINT0(DBGMODE, LVL, STR) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR ); } }
-    #define DEBUGPRINT1(DBGMODE, LVL, STR, ARG1) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1 ); } }
-    #define DEBUGPRINT2(DBGMODE, LVL, STR, ARG1, ARG2) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1, ARG2 ); } }
-    #define DEBUGPRINT3(DBGMODE, LVL, STR, ARG1, ARG2, ARG3) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1, ARG2, ARG3 ); } }
-    #define DEBUGPRINT4(DBGMODE, LVL, STR, ARG1, ARG2, ARG3, ARG4) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1, ARG2, ARG3, ARG4 ); } }
+    #define DEBUGPRINT0(DBGMODE, LVL, STR) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR ); mexEvalString("drawnow;"); } }
+    #define DEBUGPRINT1(DBGMODE, LVL, STR, ARG1) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1 ); mexEvalString("drawnow;"); } }
+    #define DEBUGPRINT2(DBGMODE, LVL, STR, ARG1, ARG2) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1, ARG2 ); mexEvalString("drawnow;"); } }
+    #define DEBUGPRINT3(DBGMODE, LVL, STR, ARG1, ARG2, ARG3) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1, ARG2, ARG3 ); mexEvalString("drawnow;"); } }
+    #define DEBUGPRINT4(DBGMODE, LVL, STR, ARG1, ARG2, ARG3, ARG4) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1, ARG2, ARG3, ARG4 ); mexEvalString("drawnow;"); } }
 #endif
             
 #include <cvodes/cvodes.h>           /* prototypes for CVODES fcts. and consts. */
