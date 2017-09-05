@@ -119,6 +119,9 @@ while i <= nargin
       end
       if ~isempty(val)
         ar.ppl.options.(deblank(Names(j,:))) = val;
+        if(strcmp(deblank(Names(j,:)),'xstd'))
+            ar.ppl.xstd_auto = 0;
+        end
       end
     end
   end

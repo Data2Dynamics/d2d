@@ -92,13 +92,13 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     dir = ar.ppl.options.dir;
     arCalcMerit();
 
-    ar.ppl.chi2_95 = arGetMerit('chi2') + arGetMerit('chi2err')+ar.ppl.dchi2 + 0.5;
+    ar.ppl.chi2_95 = arGetMerit('chi2')+ar.ppl.dchi2 + 0.5;
 
     % Initialize PPL struct, set values to NaN that are newly computed
     [t, whichT] = PPL_init(m,c,t,ix,ar.ppl.options.gammas, ar.ppl.options.onlyProfile, ar.ppl.options.whichT,takeY);
 
     pReset = ar.p;
-    chi2start = arGetMerit('chi2') + arGetMerit('chi2err') ;
+    chi2start = arGetMerit('chi2');
 
     tic;
     
@@ -122,6 +122,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     end
     
     for jx = 1:length(ix)
+        arSimu(false, true, true);
         if(ar.ppl.xstd_auto)  
             if(takeY)
                 [~,it_first] = min(abs(ar.model(m).data(c).tExp-t(whichT))); 
@@ -134,6 +135,10 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
                 ar.ppl.options.xstd = max(ar.model(m).condition(c).xFineSimu(:,ix(jx)))/10;
             end
 
+        end
+        if(isnan(ar.ppl.options.xstd) || ar.ppl.options.xstd == 0)
+            ar.ppl.options.xstd = 0.1;
+            warning('The standard deviation for the prediction profile likelihood could not be set! Check your measurement errors or set the option "xstd" appropriately! \n')
         end
         xstart_ppl(m, c, ix(jx), t, ar.ppl.options.doPPL, ar.ppl.options.xstd, pReset, chi2start, whichT, takeY, true, 1, [], ar.ppl.options.onlyProfile);
         if(ar.ppl.options.onlyProfile)
@@ -191,6 +196,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     end
     ar.config.SimuPPL=0;
     arCalcMerit(); 
+    arWaitbar(-1);
     if(~takeY)
         ar.model(m).qPlotXs(ar.model(m).condition(c).dLink(1))=1;        
     else
@@ -319,31 +325,40 @@ for ts = 1:length(t)
     % calculate CI point-wise fit
     lb_tmp = min(fitted_tmp(q_chi2good));
     ub_tmp = max(fitted_tmp(q_chi2good));
+    find_tmp = find(merit_tmp > chi2start+ar.ppl.dchi2);
 
-    if(lb_tmp==min(fitted_tmp(q_nonnan)))
+    if(sum(find_tmp<ntot+1)==0)
         lb_tmp = -Inf;             
-        kind_low_tmp = -Inf;
+        kind_low_tmp = -Inf;                
         fprintf('No -95 PPL for t=%d\n',t(ts));
     else
-        kind_low_tmp = find(fitted_tmp==lb_tmp);
+        if(lb_tmp==min(fitted_tmp(q_nonnan)))
+            warning(['Multiple likelihood values are assigned to the same model fit. ' ...
+                     'check model uncertainty and fits, or set more strict integrator tolerances!'])
+        end
+        kind_low_tmp = min(find(q_chi2good==1));
         if(length(kind_low_tmp)>1)
             kind_low_tmp = kind_low_tmp(1);
         end
         lb_tmp = interp1(merit_tmp([kind_low_tmp kind_low_tmp-1]), ...
         fitted_tmp([kind_low_tmp kind_low_tmp-1]), chi2start+ar.ppl.dchi2);
     end
-    if(ub_tmp==max(fitted_tmp(q_nonnan)))
+    if(sum(find_tmp>ntot)==0)
         ub_tmp = Inf;
-        kind_high_tmp = Inf;
+        kind_high_tmp = Inf;        
         fprintf('No +95 PPL for t=%d\n',t(ts));
     else
-        kind_high_tmp = find(fitted_tmp==ub_tmp);   
+        if(ub_tmp==max(fitted_tmp(q_nonnan)))
+            warning(['Multiple likelihood values are assigned to the same model fit. ' ...
+                     'check model uncertainty and fits, or set more strict integrator tolerances!'])
+        end
+        kind_high_tmp = max(find(q_chi2good==1));   
         if(length(kind_high_tmp)>1)
             kind_high_tmp = kind_high_tmp(end);
         end
         ub_tmp = interp1(merit_tmp([kind_high_tmp kind_high_tmp+1]), ...
         fitted_tmp([kind_high_tmp kind_high_tmp+1]), chi2start+ar.ppl.dchi2);
-    end        
+    end      
     
     if ~onlyProfile
         if((dir==1 && isinf(ub_tmp)) || (dir==-1 && isinf(lb_tmp)))
@@ -413,7 +428,7 @@ for j = 1:n
     catch exception
         fprintf('ERROR PPL: going to lower bound (%s)\n', exception.message);
         if(takeY)
-            arLink(true,0.,true,ix(jx), c, m,NaN);
+            arLink(true,0.,true,ix, c, m,NaN);
         end
         break;
     end
@@ -427,17 +442,18 @@ for j = 1:n
     end
     xfit(j) = xSim;
     if(takeY)
-        ppl(j) = arGetMerit('chi2') + arGetMerit('chi2err') - (xtrial(j)-xfit(j)).^2/xstd.^2;
-        vpl(j) = arGetMerit('chi2') + arGetMerit('chi2err');
+        ppl(j) = arGetMerit('chi2') - (xtrial(j)-xfit(j)).^2/xstd.^2;
+        vpl(j) = arGetMerit('chi2');
         
     else
-        ppl(j) = arGetMerit('chi2') + arGetMerit('chi2err');
-        vpl(j) = arGetMerit('chi2') + arGetMerit('chi2err') + (xtrial(j)-xfit(j)).^2/xstd.^2;
+        ppl(j) = arGetMerit('chi2');
+        vpl(j) = arGetMerit('chi2') + (xtrial(j)-xfit(j)).^2/xstd.^2;
     end
     ps(j,:) = ar.p;
     %ppl(j)
     %xtrial(j)
     if((doPPL && ppl(j) > chi2start+ar.ppl.dchi2*1.2) || (~doPPL && vpl(j) > chi2start+ar.ppl.dchi2*1.2))
+        arWaitbar(-1);
         break
     end
 end
