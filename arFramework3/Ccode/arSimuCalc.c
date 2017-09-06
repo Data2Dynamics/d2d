@@ -158,7 +158,6 @@ int ewt(N_Vector y, N_Vector w, void *user_data);
 void thr_error( const char* msg );
 int fetch_vector( mxArray* arcondition, int ic, double **vector, const char* fieldname, int desiredLength );
 int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double** timePoints, int* currentIndex, const char* flagFieldName, const char* timePointFieldName );
-
 void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int nout, int offset );
 void copyResult( double* data, double *returnvec, int nu, int nout, int offset );
 void copyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, int nout, int offset );
@@ -167,6 +166,7 @@ void subCopyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, 
 /* user functions */
 #include "arSimuCalcFunctions.c"
 
+void storeIntegrationInfo( SimMemory sim_mem, mxArray *arcondition, int ic );
 void terminate_x_calc( SimMemory sim_mem, double status );
 void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines, int sensitivitySubset );
 int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi, int npSensi );
@@ -392,7 +392,7 @@ void waitForKey()
 /* calculate dynamics */
 void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding, int debugMode, int sensitivitySubset) {
     mxArray    *x0_override;
-    mxArray    *arcondition;   
+    mxArray    *arcondition;
     
     int nsplines;
     int ysensi;
@@ -986,7 +986,11 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     (event_data->i)++;
                 }
               DEBUGPRINT0( debugMode, 6, "Going into next iteration cycle\n" );
-            } /* End of simulation loop */           
+            } /* End of simulation loop */
+            
+            /* Store number of iteration steps */
+            storeIntegrationInfo( sim_mem, arcondition, ic );
+            
             /**** end of CVODES ****/
         } else {
             /**** begin of SSA ****/
@@ -1172,6 +1176,26 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     /* Clean up */
     terminate_x_calc( sim_mem, *status );
 }
+
+/* Store some information regarding the integration */
+void storeIntegrationInfo( SimMemory sim_mem, mxArray *arcondition, int ic )
+{
+    mxArray *stepField;
+    int64_T* stepData;
+    long int nsteps;
+    
+    if ( sim_mem && ( sim_mem->cvode_mem ) )
+       CVodeGetNumSteps( sim_mem->cvode_mem, &nsteps );
+    else
+        nsteps = -1;
+            
+    stepField = mxGetField( arcondition, ic, "stepsTaken" );
+    if ( stepField )
+    {
+        stepData = (int64_T*)mxGetData( stepField );
+        stepData[0] = (int64_T) nsteps;
+    }
+}     
      
 void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int has_tExp )
 {

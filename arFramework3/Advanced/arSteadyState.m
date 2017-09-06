@@ -148,6 +148,7 @@ function arSteadyState( varargin )
     ss_condition.start              = 0;
     ss_condition.stop               = 0;
     ss_condition.stop_data          = 0;
+    ss_condition.stepsTaken         = int64(0);
     ss_condition.dxdt               = zeros(size(origin.dxdt));
     
     if ( isfield( origin, 'dxdts' ) )

@@ -56,6 +56,7 @@ end
 
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
+        ar.model(m).condition(c).stepsTaken = int64(0);
         if(~isfield(ar.model(m).condition(c), 'tEvents'))
             ar.model(m).condition(c).tEvents = [];
         end
