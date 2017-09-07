@@ -457,9 +457,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     double *ticks_start;
     double *ticks_stop_data;
     double *ticks_stop;
-    
-    DEBUGPRINT0( debugMode, 4, "Entry point x_calc\n" );
-    
+       
     /* List of indices which map the sensitivities back to the output ones */
     int32_T *sensitivityMapping;
        
@@ -482,6 +480,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     int sensi_meth = CV_SIMULTANEOUS; /* CV_SIMULTANEOUS or CV_STAGGERED */
     bool error_corr = TRUE;
     only_sim = 0;
+    
+    DEBUGPRINT0( debugMode, 4, "Entry point x_calc\n" );
     
     /* Grab value of infinity (used to mark steady state simulations) */
     inf = mxGetInf();
@@ -698,8 +698,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 if(flag < 0) {terminate_x_calc( sim_mem, 19 ); return;}
                 	 
                 if(cvodes_atolV==1) { 	
-                    DEBUGPRINT0( debugMode, 4, "Setting atolV\n" );
                     double tmp_tol = 1.;
+                    DEBUGPRINT0( debugMode, 4, "Setting atolV\n" );
                     for(ks=0; ks < neq; ks++) {		    
                         if(y_max_scale[ks]==0 || cvodes_atol/y_max_scale[ks]>1){
                             Ith(atolV, ks+1) = 1;
