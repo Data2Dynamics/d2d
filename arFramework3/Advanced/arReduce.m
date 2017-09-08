@@ -33,6 +33,11 @@ function arReduce( m )
         fprintf( '%d: %s\n', i, sprintf( '%s ', ar.model(m).x{abs(ar.model(m).pools.dependent(:,i))>0} ) );
     end
     
+    if ( isempty( ar.model(m).pools.states ) )
+        warning( 'Nothing to reduce (No conserved moieties / dfdx already full rank)' );
+        ar.model(m).reducedForm = 0;
+    end
+    
     while( ~isempty( ar.model(m).pools.states ) )
         % Add replacement rule for where the state appears in equations
         [removedState, removalStruct] = genReplacementRule( m, 1 );
