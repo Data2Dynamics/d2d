@@ -142,8 +142,13 @@ if ( ss_presimulation && dynamics )
         ar = initSteadyStateSensis(ar, dynamics);
     end
     if ( ~rootFinding )
-        % Steady state determination by simulation
-        feval(ar.fkt, ar, true, ar.config.useSensis && sensi, dynamics, false, 'ss_condition', 'ss_threads', ar.config.skipSim);
+        if ( isfield( ar.config, 'turboSSSensi' ) && ( ar.config.turboSSSensi == 1 ) )
+            % Steady state determination by simulation without sensitivities and then determining them via implicit func theorem (only valid when conserved moieties have been removed from the model)
+            fastSteadyState( m, sensi, dynamics );
+        else
+            % Steady state determination by full simulation
+            feval(ar.fkt, ar, true, ar.config.useSensis && sensi, dynamics, false, 'ss_condition', 'ss_threads', ar.config.skipSim);
+        end
     else
         % Steady state determination by rootfinding
         for m=1:length(ar.model)
@@ -364,3 +369,28 @@ if ( dynamics )
         end
     end
 end
+
+function fastSteadyState( m, sensi, dynamics )
+    global ar;
+
+    % Steady state determination by simulation
+    feval(ar.fkt, ar, true, false, dynamics, false, 'ss_condition', 'ss_threads', ar.config.skipSim);
+	if ( ar.config.useSensis && sensi )
+        for c = 1 : length(ar.model(m).ss_condition)
+            method = 1;
+            dfdx = ar.model.N*ar.model(m).ss_condition(c).dvdxNum;
+            dfdp = ar.model.N*ar.model(m).ss_condition(c).dvdpNum;                    
+            if ( method == 1 )
+                [S, r] = linsolve(-dfdx,dfdp); % For invertibility, model may not have conserved moieties
+                        
+                if ( r < eps(1) )
+                    warning( 'Model has conserved moieties. Results may be inaccurate. Unless you know what you are doing, please turn ar.config.turboSSSensi off by invoking ar.config.turboSSSensi = 0;' );
+                end                        
+            else
+                dfdx    = ar.model(m).pools.mapping.' * dfdx;
+                S       = - dfdx.' \ dfdp;
+                S       = ar.model(m).pools.mapping*S;
+            end
+            ar.model(m).ss_condition(c).sxFineSimu(end,:,:) = S;
+        end
+	end
