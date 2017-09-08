@@ -625,6 +625,8 @@ ar.model(m).fx_par = cell(length(ar.model(m).x),1);
 %if(~isempty(ar.model(m).u))
 %    eval(['syms ' sprintf('%s ',ar.model(m).u{:})]);
 %end
+ar.model(m).Cm = C;
+ar.model(m).Cm_par = C_par;
 tmpfx = (sym(ar.model(m).N).*sym(C)) * sym(ar.model(m).fv);
 tmpfx_par = (sym(ar.model(m).N).*sym(C_par)) * sym(ar.model(m).fv);
 

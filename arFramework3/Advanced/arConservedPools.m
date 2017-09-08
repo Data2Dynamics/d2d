@@ -11,19 +11,14 @@ function arConservedPools(jm, showPools)
     pc = pc(ar.model(jm).cLink);
     N  = ar.model(jm).N;
     
-    C = ones(nx, nx);
-    for js1 = 1 : nx
-        for js2 = 1 : nx
-            C(js1,js2) = C(js1,js2) * (pc(js1)/pc(js2));
-        end
-    end
-    
     dependent = null( N.', 'r' );
-    IDs = repmat(1:size(dependent,1).', size(dependent,2), 1).';
+    IDs = repmat(1:size(dependent,1), size(dependent,2), 1).';
     groups = zeros( size(IDs) );
     
     % Account for compartment sizes
-    selected = dependent .* repmat(pc.', 1, size(dependent,2));
+    % selected = dependent .* repmat(pc.', 1, size(dependent,2));
+    dependent = dependent .* repmat(pc.', 1, size(dependent,2));
+    selected = dependent;
     
     states = zeros( 1, size( dependent, 2 ) );
     for js = 1 : size( dependent, 2 )

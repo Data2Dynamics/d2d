@@ -14,10 +14,10 @@ if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
         else
             out = subs(in, old(:), new(:), 0);
         end
-    catch
+    catch ME
         % Failure to substitute, provide some info that might help debug
         % the problem; try them one by one and output those that failed
-        s{1} = sprintf( 'Error: Model substitution failure in %s: \n\nThe following substitutions failed:\n', char( in ) );
+        s{1} = sprintf( 'Error: Model substitution failure in %s (%s): \n\nThe following substitutions failed:\n', char( in ), ME.message );
         for a = 1 : length( old )
             try
                 if(matlab_version>=8.1)

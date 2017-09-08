@@ -108,6 +108,11 @@ c_version_code = ar.info.c_version_code;
 for m=1:length(ar.model)
     arFprintf(2, '\n');
     
+    % Have we reduced the model?
+    if isfield( ar.model(m), 'reducedForm' )
+        checksum_global = addToCheckSum(ar.model(m).reducedForm, checksum_global);
+    end
+    
     matVer = ver('MATLAB');
     matlab_version = str2double(matVer.Version);    
     
@@ -402,7 +407,7 @@ for m=1:length(ar.model)
         for c=1:length(ar.model(m).condition)
             doskip(c) = ~forcedCompile && exist([source_dir '/Compiled/' ar.info.c_version_code '/' ar.model(m).condition(c).fkt '.c'],'file');
         end
-        
+
         % calc conditions
         config = ar.config;
         model.name = ar.model(m).name;
@@ -419,6 +424,10 @@ for m=1:length(ar.model)
         model.vs = ar.model(m).vs;
         model.zs = ar.model(m).zs;
         model.N = ar.model(m).N;
+        if isfield( ar.model(m), 'removedStates' )
+            arFprintf( 2, 'Dealing with reduced model ...\n' );
+            model.removedStates = ar.model(m).removedStates;
+        end
         condition = ar.model(m).condition;
         newp = cell(1,length(ar.model(m).condition));
         newpold = cell(1,length(ar.model(m).condition));
@@ -658,6 +667,28 @@ try
 catch
     error( invalidSym( 'Invalid expression in condition transformations', condition.fp, condition.p ) );
 end
+
+% Were model reductions applied? Make sure to transfer the initial
+% conditions correctly
+if isfield( model, 'removedStates' )
+    % Substitute current state initials into total pool
+    for jp = 1 : numel( model.removedStates )
+        totalPool = subs( model.removedStates(jp).totalPoolStates, condition.sym.p.', condition.sym.fp );
+        totalPool_str = char( totalPool );
+
+        % Remove the original initial condition parameters
+        condition.fp( strcmp( condition.p, model.removedStates(jp).initial ) ) = [];
+        condition.p(  strcmp( condition.p, model.removedStates(jp).initial ) ) = [];
+
+        % Remove the original initial condition parameters
+        condition.sym.fp( find( condition.sym.p == model.removedStates(jp).sym.initial ) ) = []; %#ok
+        condition.sym.p(  find( condition.sym.p == model.removedStates(jp).sym.initial ) ) = []; %#ok
+
+        condition.fp{ strcmp( condition.p, model.removedStates(jp).totalVariable ) }             = totalPool_str;
+        condition.sym.fp( find( condition.sym.p == model.removedStates(jp).sym.totalVariable ) ) = totalPool; %#ok
+    end
+end
+
 condition.sym.fpx0 = sym(model.px0);
 condition.sym.fpx0 = arSubs(condition.sym.fpx0, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.fv = mySym(model.fv, specialFunc);
