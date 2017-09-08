@@ -20,6 +20,9 @@ function arReduce( m )
     if isfield( ar.model(m), 'condition' )
         error( 'This function should be called before loading any data' );
     end
+    if isfield( ar.model(m), 'data' )
+        error( 'This function should be called before loading any data' );
+    end    
     if isfield( ar.model(m), 'reducedForm' )
         error( 'This model has already been reduced' );
     end
@@ -49,6 +52,13 @@ function arReduce( m )
         ar.model(m).px{end+1}   = removalStruct.totalVariable;
         ar.model(m).p{end+1}    = removalStruct.totalVariable;
         ar.model(m).fp{end+1}   = removalStruct.totalVariable;
+        
+        % Since unions are typically used in the code to merge the parameters
+        % and this sorts them, we need to make sure we keep our parameters
+        % sorted
+        [ar.model(m).p, I]      = sort( ar.model(m).p );
+        ar.model(m).fp          = ar.model(m).fp(I);
+        
         ar.model(m).z{end+1}    = removalStruct.p;
         ar.model(m).fz{end+1}   = removalStruct.fp;
         
