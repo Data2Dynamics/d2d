@@ -1,7 +1,7 @@
 #include <math.h>
 #include "spline.c"
 #include "monotone.c"
-#include "arInputFunctions.h"
+#include "arInputFunctionsC.h"
 
 /* general input functions */
 double heaviside(double t) {
@@ -860,7 +860,7 @@ double Dspline_pos10(double t, double t1, double p1, double t2, double p2, doubl
 /* This version caches the spline in a userdata struct so that the coefficients don't have to be determined every RHS evaluation */
 
 /* Function which can cache the computed spline */
-int cspline(int n, int end1, int end2, double slope1, double slope2, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache)
+int cspline(int n, int end1, int end2, double slope1, double slope2, const double x[], const double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache)
 {
     int j;
     
@@ -888,7 +888,7 @@ int cspline(int n, int end1, int end2, double slope1, double slope2, double x[],
     }
 }
 
-int cmonotoneSpline( int n, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache )
+int cmonotoneSpline( int n, const double x[], const double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache )
 {
     int j;
     
@@ -916,7 +916,7 @@ int cmonotoneSpline( int n, double x[], double y[], double b[], double c[], doub
     } 
 }
 
-int clongmonotoneSpline( int n, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache )
+int clongmonotoneSpline( int n, const double x[], const double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache )
 {
     int j;
     

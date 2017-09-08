@@ -21,9 +21,9 @@ double dstep2(double t, double u1, double t1, double u2, double t2, double u3, i
 double inputspline( double t, const int n, const double ts[], const double us[]);
 double inputfastspline( double t, int ID, double **splineCache, int *idCache, const int n, const double ts[], const double us[]);
 
-int cspline(int n, int end1, int end2, double slope1, double slope2, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache);
-int cmonotoneSpline( int n, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache );
-int clongmonotoneSpline( int n, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache );
+int cspline(int n, int end1, int end2, double slope1, double slope2, const double x[], const double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache);
+int cmonotoneSpline( int n, const double x[], const double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache );
+int clongmonotoneSpline( int n, const double x[], const double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache );
 
 /* splines */
 double spline3(double t, double t1, double p1, double t2, double p2, double t3, double p3, int ss, double dudt);
