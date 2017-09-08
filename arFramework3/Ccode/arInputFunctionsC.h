@@ -1,3 +1,6 @@
+#ifndef _ARINPUTFUNCTIONS_C_
+#define _ARINPUTFUNCTIONS_C_
+
 #include <math.h>
 
 /* general input functions */
@@ -6,6 +9,7 @@ double dirac(double t);
 
 double LUT_bilinear( double x, double y, int NX, int NY, const double data[] );
 double DLUT_bilinear( double x, double y, int NX, int NY, const double data[], int deriv );
+double getData2D( const int NX, const int NY, const double data[], int x, int y );
 
 double step1(double t, double u1, double t1, double u2);
 double dstep1(double t, double u1, double t1, double u2, int p_index);
@@ -17,8 +21,9 @@ double dstep2(double t, double u1, double t1, double u2, double t2, double u3, i
 double inputspline( double t, const int n, const double ts[], const double us[]);
 double inputfastspline( double t, int ID, double **splineCache, int *idCache, const int n, const double ts[], const double us[]);
 
-int cspline(int n, int end1, int end2, double slope1, double slope2, double x[], double y[], double b[], double c[], double d[], double **splineCache, int *idCache, int cacheID);
-int cmonotoneSpline( int n, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache );
+int cspline(int n, int end1, int end2, double slope1, double slope2, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache);
+int cmonotoneSpline( int n, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache );
+int clongmonotoneSpline( int n, double x[], double y[], double b[], double c[], double d[], int cacheID, double **splineCache, int *IDcache );
 
 /* splines */
 double spline3(double t, double t1, double p1, double t2, double p2, double t3, double p3, int ss, double dudt);
@@ -96,3 +101,5 @@ double mmenten_alt(double x, double klin, double ksat);
 
 double hill_kd(double x, double h, double kd);
 double hill_ka(double x, double h, double ka);
+
+#endif

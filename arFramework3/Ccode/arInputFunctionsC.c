@@ -1,6 +1,7 @@
 #include <math.h>
 #include "spline.c"
 #include "monotone.c"
+#include "arInputFunctions.h"
 
 /* general input functions */
 double heaviside(double t) {
