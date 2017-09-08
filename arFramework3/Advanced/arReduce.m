@@ -131,7 +131,6 @@ function [removedState, removalStruct] = genReplacementRule( m, selected )
     % conditions later
     poolIDs = find(abs(ar.model(m).pools.dependent(:,selected))>0);
     totalPoolStates = '';
-    size(ar.model(m).pools.dependent)
     for js = 1 : numel( poolIDs )
         totalPoolStates = sprintf( '%s + %g * init_%s', totalPoolStates, ar.model(m).pools.dependent(poolIDs(js), selected), ar.model(m).x{poolIDs(js)}  );
     end

@@ -229,6 +229,10 @@ for m=1:length(ar.model)
         model.vs = ar.model(m).vs;
         model.zs = ar.model(m).zs;
         model.N = ar.model(m).N;
+        if isfield( ar.model(m), 'removedStates' )
+            arFprintf( 2, 'Dealing with reduced model ...\n' );
+            model.removedStates = ar.model(m).removedStates;
+        end
         condition = ar.model(m).condition;
         newp = cell(1,length(ar.model(m).condition));
         newpold = cell(1,length(ar.model(m).condition));
