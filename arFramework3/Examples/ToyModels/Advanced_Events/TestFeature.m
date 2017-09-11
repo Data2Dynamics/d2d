@@ -1,5 +1,7 @@
 function TestFeature()
 
+global ar;
+
 fprintf( 2, 'INTEGRATION TEST FOR EQUILIBRATION\n' );
 
 fprintf( 2, 'Loading model for equilibration test... ' );

@@ -1,5 +1,7 @@
 function TestFeature()
 
+global ar;
+
 fprintf( 2, 'INTEGRATION TEST FOR BI-LINEAR LOOKUP TABLE (LUT)\n' );
 fprintf( 2, 'Loading model for LUT test... ' );
 

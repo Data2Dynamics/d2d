@@ -1,5 +1,7 @@
 function TestFeature()
 
+global ar;
+
 % This file tests optimization of models with complex step functions
 % It is expected to throw a warning about the location parameter. Since
 % we are not optimizing over the location parameter, this is ok though.

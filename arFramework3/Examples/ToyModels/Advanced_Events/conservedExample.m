@@ -11,6 +11,8 @@ arCompileAll(true);
 ar.p(3) = 2;
 arSteadyState(1,arFindCondition('steadystate', 'exact'), arFindCondition('nonsteadystate', 'exact'));
 
+ar.config.optim.Display='off';
+
 %% Do not equilibrate prior to simulation
 arSimu(true,true,true); arChi2(true);
 

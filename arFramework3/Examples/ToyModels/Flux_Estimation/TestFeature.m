@@ -1,5 +1,7 @@
 function TestFeature()
 
+global ar;
+
 fprintf( 'INTEGRATION TEST FOR FLUX FITTING\n' );
 
 arInit;
