@@ -7,6 +7,7 @@ function fid = preprocess(fid)
     
     % List of definitions that have been defined
     activeDefines = {};
+    namedDefines = struct;
        
     % Defines that are relevant for the current codepiece
     defineStack = {};
@@ -36,11 +37,11 @@ function fid = preprocess(fid)
             ws = regexp(line, '\s');
             ws = [ws numel(line)+1];
             while ( a <= numel( ws ) )
-                [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, writing, directives );
+                [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, writing, directives, namedDefines );
 
                 % Preprocessor directives!
                 if strcmpi( parseBlock, '#ifdef' )
-                    [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives ); % Parse, but never write stuff that belongs to the precompiler directive
+                    [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives, namedDefines ); % Parse, but never write stuff that belongs to the precompiler directive
                     if isempty( parseBlock )
                         error( '#ifdef without condition on line %d: %s', fid.nlines, line );
                     end
@@ -49,7 +50,7 @@ function fid = preprocess(fid)
                 end
                 % Preprocessor directives!
                 if strcmpi( parseBlock, '#ifndef' )
-                    [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives ); % Parse, but never write stuff that belongs to the precompiler directive
+                    [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives, namedDefines ); % Parse, but never write stuff that belongs to the precompiler directive
                     if isempty( parseBlock )
                         error( '#ifndef without condition on line %d: %s', fid.nlines, line );
                     end
@@ -65,18 +66,25 @@ function fid = preprocess(fid)
                 end
 
                 if strcmpi( parseBlock, '#define' ) || strcmpi( parseBlock, '#def' )
-                    [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives ); % Parse, but never write stuff that belongs to the precompiler directive
+                    [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives, namedDefines ); % Parse, but never write stuff that belongs to the precompiler directive
+                    [cur, outLine, parseBlock2, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives, namedDefines ); % Parse, but never write stuff that belongs to the precompiler directive
                     if isempty( parseBlock )
                         error( '#ifdef without condition on line %d: %s', fid.nlines, line );
                     end
                     activeDefines = union( activeDefines, parseBlock );
+                    if ( parseBlock2 )
+                        namedDefines.(parseBlock) = parseBlock2;
+                    end
                 end
                 if strcmpi( parseBlock, '#undefine' ) || strcmpi( parseBlock, '#undef' )
-                    [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives ); % Parse, but never write stuff that belongs to the precompiler directive
+                    [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives, namedDefines ); % Parse, but never write stuff that belongs to the precompiler directive
                     if isempty( parseBlock )
                         error( '#ifdef without condition on line %d: %s', fid.nlines, line );
                     end
                     activeDefines = setdiff( activeDefines, parseBlock );
+                    if isfield( namedDefines, parseBlock )
+                        namedDefines = rmfield( namedDefines, parseBlock );
+                    end
                 end            
 
                 % Which defines have to be active for the current code block?
@@ -119,7 +127,7 @@ function fid = preprocess(fid)
 % output has to be written to the outline or not (depends on defines
 % currently active). Directives contains a list of valid preprocessor
 % directives, which will not be streamed to the output.
-function [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, writing, directives )
+function [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, writing, directives, namedDefines )
 
     % This will remove the leading and trailing whitespace. Note
     % that for the output we wish to preserve this whitespace. The
@@ -143,6 +151,14 @@ function [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, 
                     writing = 0;
                 end
             else
+                % Is it a defined quantity?
+                names = fieldnames( namedDefines );
+                if ~isempty( names )
+                    matches = strcmp( parseBlock, names );
+                    if sum( matches ) > 0
+                        block = strrep( block, parseBlock, namedDefines.(parseBlock) );
+                    end
+                end
             end
         end
         

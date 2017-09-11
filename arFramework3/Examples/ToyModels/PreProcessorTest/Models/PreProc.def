@@ -8,7 +8,6 @@ COMPARTMENTS
 cyt               V   pl          vol.
 
 STATES
-
 #define SHOULDBETHERE
 
 #ifdef SHOULDBETHERE
@@ -65,6 +64,13 @@ STATES
 #define J
 #ifdef  J stateO    C   nM          conc.   cyt     1 #else stateP    C   nM          conc.   cyt     1 #endif
 #ifndef J stateQ    C   nM          conc.   cyt     1 #else stateR    C   nM          conc.   cyt     1 #endif
+
+#define PARA1 potato
+#define PARA2 motato
+#undefine PARA2
+
+PARA1    C   nM          conc.   cyt     1
+PARA2    C   nM          conc.   cyt     1
 
 INPUTS
 

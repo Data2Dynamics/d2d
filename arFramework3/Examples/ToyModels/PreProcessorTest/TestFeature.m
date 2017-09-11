@@ -21,6 +21,19 @@ else
     error( 'FAILED\n');
 end
 
+fprintf( 2, 'Checking if named defines work (includes)...' );
+if ( sum( ismember( ar.model.x, {'potato', 'PARA2'} ) ) == 2 ) 
+    fprintf( 'PASSED\n' );
+else
+    error( 'FAILED\n');
+end
+fprintf( 2, 'Checking if named defines work (excludes)...' );
+if ( sum( ismember( ar.model.x, {'PARA1'} ) ) == 0 ) 
+    fprintf( 'PASSED\n' );
+else
+    error( 'FAILED\n');
+end
+
 fprintf( 2, 'Loading data... ' );
 arLoadData('PreProcData');
 fprintf( 'PASSED\n' );
