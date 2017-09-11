@@ -30,10 +30,17 @@ function arReduce( m )
     
     % Fetch the conserved pools
     arConservedPools(m);
+    
+    % Are we dealing with symbolic compartments?
+    if ( ar.model(m).pools.isSymbolic )
+        always = @isAlways;
+    else
+        always = @(x)x;
+    end
        
     fprintf( 'Pools available for reduction:\n' );
     for i = 1 : size(ar.model(m).pools.dependent, 2)
-        fprintf( '%d: %s\n', i, sprintf( '%s ', ar.model(m).x{abs(ar.model(m).pools.dependent(:,i))>0} ) );
+        fprintf( '%d: %s\n', i, sprintf( '%s ', ar.model(m).x{always(abs(ar.model(m).pools.dependent(:,i))>0)} ) );
     end
     
     if ( isempty( ar.model(m).pools.states ) )
@@ -43,7 +50,7 @@ function arReduce( m )
     
     while( ~isempty( ar.model(m).pools.states ) )
         % Add replacement rule for where the state appears in equations
-        [removedState, removalStruct] = genReplacementRule( m, 1 );
+        [removedState, removalStruct] = genReplacementRule( m, 1, always );
         if isfield( ar.model(m), 'removedStates' )
             ar.model(m).removedStates(end+1) = removalStruct;
         else
@@ -95,7 +102,7 @@ function arReduce( m )
     % We've completed the iterative reductions, we can now look for the new
     % states in the new model. This is not necessary, but useful if we are
     % to diagnose problems at a later stage.
-    findNewStates(m);
+    %findNewStates(m);
       
     % Regenerate equations
     tmpfx = (sym(ar.model(m).N).*sym(ar.model(m).Cm)) * sym(ar.model(m).fv);
@@ -113,36 +120,49 @@ function arReduce( m )
 end
 
 % Generate replacement rules
-function [removedState, removalStruct] = genReplacementRule( m, selected )
+function [removedState, removalStruct] = genReplacementRule( m, selected, always )
     global ar;
     
     removedState = ar.model(m).pools.states(selected);
     p = ar.model(m).x{ removedState };
     
     % Make unique variable which holds the total pool size
-    totalVariable = [ '__total_', ar.model(m).x{abs(ar.model(m).pools.dependent(:,selected))>0} ];
+    totalVariable = [ '__total_', ar.model(m).x{always(abs(ar.model(m).pools.dependent(:,selected))>0)} ];
     otherStates = {};
     
     % The total has to be divided by the stoichiometric contribution to the
     % total pool of the state we are removing (the conservation relations are 
     % stored in ar.model(m).pools.dependent)
-    fp = sprintf( '%g * %s', 1 / ar.model(m).pools.dependent(removedState, selected), totalVariable );
+    if ( ~isnumeric( ar.model(m).pools.dependent(removedState, selected) ) )
+        fp = sprintf( '(%s) * %s', char(1 / ar.model(m).pools.dependent(removedState, selected)), totalVariable );
+    else
+        fp = sprintf( '%g * %s', 1 / ar.model(m).pools.dependent(removedState, selected), totalVariable );
+    end
     
     % Grab the other variables involved in this pool. These are stored in 
     % ar.model(m).pools.others; along with their respective stoichiometry.
     other = find( abs( ar.model(m).pools.others( :, selected ) ) > 0 );
     for js = 1 : numel( other )
-        fp = sprintf( '%s + %g * %s', fp, ar.model(m).pools.others(other(js), selected), ar.model(m).x{other(js)}  );
+        if ( ~isnumeric( ar.model(m).pools.others(other(js), selected) ) )
+            fp = sprintf( '%s + %s * %s', fp, char( ar.model(m).pools.others(other(js), selected) ), ar.model(m).x{other(js)} );
+        else
+            fp = sprintf( '%s + %g * %s', fp, ar.model(m).pools.others(other(js), selected), ar.model(m).x{other(js)}  );
+        end
+        
         otherStates{end+1} = { ar.model(m).pools.others(other(js)), ar.model(m).x{other(js)} }; %#ok
     end
     
     % Determine which initial conditions will contribute to this total pool
     % such that we can compute the value for this parameter in each of the
     % conditions later
-    poolIDs = find(abs(ar.model(m).pools.dependent(:,selected))>0);
+    poolIDs = find(always(abs(ar.model(m).pools.dependent(:,selected))>0));
     totalPoolStates = '';
     for js = 1 : numel( poolIDs )
-        totalPoolStates = sprintf( '%s + %g * init_%s', totalPoolStates, ar.model(m).pools.dependent(poolIDs(js), selected), ar.model(m).x{poolIDs(js)}  );
+        if ( ~isnumeric( ar.model(m).pools.dependent(poolIDs(js), selected) ) )
+            totalPoolStates = sprintf( '%s + %s * init_%s', totalPoolStates, char( ar.model(m).pools.dependent(poolIDs(js), selected) ), ar.model(m).x{poolIDs(js)}  );
+        else
+            totalPoolStates = sprintf( '%s + %g * init_%s', totalPoolStates, ar.model(m).pools.dependent(poolIDs(js), selected), ar.model(m).x{poolIDs(js)}  );
+        end
     end
     
     % Store the fetched and generated results

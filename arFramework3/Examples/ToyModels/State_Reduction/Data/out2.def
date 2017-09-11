@@ -1,0 +1,41 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	-50	200
+
+INPUTS
+
+OBSERVABLES
+stateA_obs 		C   au	conc.	0  0	"stateA"
+stateB_obs 		C   au	conc.	0  0	"stateB"
+stateC_obs 		C   au	conc.	0  0	"stateC"
+stateD_obs 		C   au	conc.	0  0	"stateD"
+stateE_obs 		C   au	conc.	0  0	"stateE"
+stateF_obs 		C   au	conc.	0  0	"stateF"
+stateG_obs 		C   au	conc.	0  0	"stateG"
+stateH_obs 		C   au	conc.	0  0	"stateH"
+
+donor_obs		C   au	conc.	0  0	"donor"
+Pdonor_obs		C   au	conc.	0  0	"Pdonor"
+Pparticle_obs	C   au	conc.	0  0	"Pparticle"
+
+ERRORS    
+stateA_obs 		".1"
+stateB_obs 		".1"
+stateC_obs 		".1"
+stateD_obs 		".1"
+stateE_obs 		".1"
+stateF_obs 		".1"
+stateG_obs 		".1"
+stateH_obs 		".1"
+
+donor_obs		".1"
+Pdonor_obs		".1"
+Pparticle_obs	".1"
+
+CONDITIONS
+init_donor      "init_donor / 3"
+init_Pdonor     "init_Pdonor * 10 * 1.25"
+init_Pparticle  "init_Pparticle / 10"
+k_lp            "k_lp / 3"
+k_basal         "k_basal * 4"
