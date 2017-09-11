@@ -1,3 +1,5 @@
+function TestFeature()
+
 fprintf( 2, 'Testing splines (normal)... ' );
 arInit;
 arLoadModel('monotone_longer');

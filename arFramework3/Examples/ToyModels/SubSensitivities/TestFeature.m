@@ -1,3 +1,5 @@
+function TestFeature()
+
 fprintf( 2, 'INTEGRATION TEST FOR SUBSENSITIVITIES\n' );
 
 fprintf( 2, 'Loading model for subsensitivity test... ' );

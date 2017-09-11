@@ -1,3 +1,5 @@
+function TestFeature()
+
 fprintf( 'INTEGRATION TEST FOR VOLUME FITTING\n' );
 
 arInit;

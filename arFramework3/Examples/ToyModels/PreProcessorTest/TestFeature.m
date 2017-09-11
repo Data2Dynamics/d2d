@@ -1,3 +1,5 @@
+function TestFeature()
+
 arInit;
 fprintf( 'INTEGRATION TEST FOR THE PREPROCESSOR\n' );
 fprintf( 2, 'Loading model... ' );

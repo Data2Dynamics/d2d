@@ -1,3 +1,5 @@
+function TestFeature()
+
 fprintf( 'INTEGRATION TEST FOR FLUX FITTING\n' );
 
 arInit;

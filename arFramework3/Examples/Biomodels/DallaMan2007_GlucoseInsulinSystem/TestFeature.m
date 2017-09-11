@@ -1,3 +1,5 @@
+function TestFeature()
+
 fprintf( 'INTEGRATION TEST FOR SBML IMPORT (Dalla Man 2007)\n' );
 
 fprintf( 2, 'Convert model from SBML... ' );

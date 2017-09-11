@@ -1,3 +1,5 @@
+function TestFeature()
+
 fprintf( 2, 'INTEGRATION TEST FOR AUTOMATIC MODEL STATE REDUCTION\n' );
 
 fprintf( 2, 'Loading and compiling model (no reduction) ... ' );

@@ -1,3 +1,5 @@
+function TestFeature()
+
 fprintf( 'INTEGRATION TEST FOR NON-UNITY STOICHIOMETRY\n' );
 
 arInit;

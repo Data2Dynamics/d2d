@@ -1,3 +1,5 @@
+function TestFeature()
+
 fprintf( 'INTEGRATION TEST FOR ERROR PARAMETER ESTIMATION\n' );
 
 fprintf( 2, 'LINEAR ERRORS... ' );
