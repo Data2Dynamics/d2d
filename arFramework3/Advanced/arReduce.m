@@ -1,15 +1,27 @@
 %
 % arReduce(m)
 %
-%   m - Model index
+%   m - Model index (optional, default = 1)
 %
 %   This function automatically reduces the model by removing one state for
 %   every conserved moiety. It needs to be called right after arLoadModel if 
 %   this method is to be used. Before loading data and before compilation!
 %
-%   NOTE: This function is still under active development and not ready for
-%   use!
+%   arInit;
+%   arLoadModel(mymodel);
+%   arReduce;
+%   arLoadData etc.
 %
+%   Note: arReduce will not change the model parameters. Internally, it
+%   reformulates to a formulation using 1 total pool and N-1 states per
+%   conserved moieties; but the model parameters will remain the same. The
+%   mapping from independent initials to totals is done internally (i.e. 
+%   you will *not* end up with a formulation in terms of totals).
+%
+%   States which are removed are placed in the derived variables (ar.model.z),
+%   such that they can still be used in observation functions.
+%
+
 function arReduce( m )
     global ar;
     
