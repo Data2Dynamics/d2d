@@ -72,6 +72,36 @@ STATES
 PARA1    C   nM          conc.   cyt     1
 PARA2    C   nM          conc.   cyt     1
 
+#ifdef BLAH
+#define SHOULD_NOT_BE_DEFINED
+#else
+#define SHOULD_BE_DEFINED
+#endif
+
+#define BLAH
+#ifdef BLAH
+#define SHOULD_BE_DEFINED2
+#else
+#define SHOULD_NOT_BE_DEFINED2
+#endif
+
+#ifdef SHOULD_BE_DEFINED
+stateS    C   nM          conc.   cyt     1
+#endif
+
+#ifdef SHOULD_BE_DEFINED2
+stateT    C   nM          conc.   cyt     1
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED
+stateU    C   nM          conc.   cyt     1
+#endif
+
+#ifdef SHOULD_NOT_BE_DEFINED2
+stateV    C   nM          conc.   cyt     1
+#endif
+
+
 INPUTS
 
 REACTIONS

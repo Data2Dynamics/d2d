@@ -71,9 +71,13 @@ function fid = preprocess(fid)
                     if isempty( parseBlock )
                         error( '#ifdef without condition on line %d: %s', fid.nlines, line );
                     end
-                    activeDefines = union( activeDefines, parseBlock );
-                    if ( parseBlock2 )
-                        namedDefines.(parseBlock) = parseBlock2;
+                    
+                    % Is this being parsed or not? Defines can be conditional!
+                    if ( writing )
+                        activeDefines = union( activeDefines, parseBlock );
+                        if ( parseBlock2 )
+                            namedDefines.(parseBlock) = parseBlock2;
+                        end
                     end
                 end
                 if strcmpi( parseBlock, '#undefine' ) || strcmpi( parseBlock, '#undef' )
@@ -81,9 +85,13 @@ function fid = preprocess(fid)
                     if isempty( parseBlock )
                         error( '#ifdef without condition on line %d: %s', fid.nlines, line );
                     end
-                    activeDefines = setdiff( activeDefines, parseBlock );
-                    if isfield( namedDefines, parseBlock )
-                        namedDefines = rmfield( namedDefines, parseBlock );
+                    
+                    % Is this being parsed or not? Defines can be conditional!
+                    if ( writing )
+                        activeDefines = setdiff( activeDefines, parseBlock );
+                        if isfield( namedDefines, parseBlock )
+                            namedDefines = rmfield( namedDefines, parseBlock );
+                        end
                     end
                 end            
 
@@ -151,12 +159,11 @@ function [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, 
                     writing = 0;
                 end
             else
-                % Is it a defined quantity?
+                % Replace defined identifiers
                 names = fieldnames( namedDefines );
                 if ~isempty( names )
-                    matches = strcmp( parseBlock, names );
-                    if sum( matches ) > 0
-                        block = strrep( block, parseBlock, namedDefines.(parseBlock) );
+                    for b = 1 : numel( names )
+                        block = regexprep( block, ['(\W*)', names{b} '(\W*)'], ['$1' namedDefines.(names{b}) '$2'] );
                     end
                 end
             end
