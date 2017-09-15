@@ -1986,7 +1986,7 @@ if(~isempty(model.xs))
             fprintf(fid, '  double *dvdu = data->dvdu;\n');
             fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
             writeCcode(fid, matlab_version, condition, 'dfxdp');
-            fprintf(fid, '  for (is=0; is<%i; is++) {\n', numel(condition.sym.dfxdp0));
+            fprintf(fid, '  for (is=0; is<%i; is++) {\n', numel(condition.sym.dfxdp));
             fprintf(fid, '    if(mxIsNaN(dfxdp[is])) dfxdp[is] = 0.0;\n');
             fprintf(fid, '  }\n');
         end
