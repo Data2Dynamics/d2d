@@ -957,19 +957,27 @@ if(config.useSensis)
         condition.sym.fsx0 = sym(ones(0, length(condition.sym.ps)));
     end
     
-    % steady state sensitivities
+    % partial derivative right hand side w.r.t. parameters (keeping x fixed)
     if(isfield(condition.sym, 'dfudp'))
-        condition.sym.dfxdp = (model.N .* condition.sym.C) * (condition.sym.dvdp + ...
+        condition.sym.dfxdp = (model.N .* condition.sym.C) * (condition.sym.dvdp + condition.sym.dvdu * condition.sym.dfudp);
+    else
+        condition.sym.dfxdp = (model.N .* condition.sym.C) * (condition.sym.dvdp);
+    end
+    
+    % initial sensitivities used for steady state constraints (total derivative at initial condition)
+    if(isfield(condition.sym, 'dfudp'))
+        condition.sym.dfxdp0 = (model.N .* condition.sym.C) * (condition.sym.dvdp + ...
             condition.sym.dvdx*condition.sym.fsx0 + ...
             condition.sym.dvdu * condition.sym.dfudp);
     else
-        condition.sym.dfxdp = (model.N .* condition.sym.C) * (condition.sym.dvdp + ...
+        condition.sym.dfxdp0 = (model.N .* condition.sym.C) * (condition.sym.dvdp + ...
             condition.sym.dvdx*condition.sym.fsx0);
     end
 
     % Add variable volume terms here
     if (isfield(condition.sym, 'dfcdp'))
-        condition.sym.dfxdp = condition.sym.dfxdp + condition.sym.dfcdp;
+        condition.sym.dfxdp0 = condition.sym.dfxdp0 + condition.sym.dfcdp;
+        condition.sym.dfxdp  = condition.sym.dfxdp  + condition.sym.dfcdp;
     end
     
     % derivatives fz
@@ -1495,6 +1503,7 @@ fprintf(fid, ' void fx0_%s(N_Vector x0, void *user_data);\n', condition.fkt);
 fprintf(fid, ' int dfxdx_%s(long int N, realtype t, N_Vector x,', condition.fkt); % sundials 2.5.0
 fprintf(fid, 'N_Vector fx, DlsMat J, void *user_data,');
 fprintf(fid, 'N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);\n');
+fprintf(fid, ' int dfxdx_out_%s(realtype t, N_Vector x, realtype* J, void *user_data);', condition.fkt); % sundials 2.5.0
 fprintf(fid, ' int dfxdx_sparse_%s(realtype t, N_Vector x,', condition.fkt); % sundials 2.6.1 with KLU/SuperLU
 fprintf(fid, 'N_Vector fx, SlsMat J, void *user_data,'); %DlsMat for Dense solver
 fprintf(fid, 'N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);\n');
@@ -1509,6 +1518,7 @@ end
 fprintf(fid, ' void fsx0_%s(int ip, N_Vector sx0, void *user_data);\n', condition.fkt);
 fprintf(fid, ' void subfsx0_%s(int ip, N_Vector sx0, void *user_data);\n', condition.fkt);
 fprintf(fid, ' void csv_%s(realtype t, N_Vector x, int ip, N_Vector sx, void *user_data);\n', condition.fkt);
+fprintf(fid, ' void dfxdp0_%s(realtype t, N_Vector x, double *dfxdp0, void *user_data);\n\n', condition.fkt);
 fprintf(fid, ' void dfxdp_%s(realtype t, N_Vector x, double *dfxdp, void *user_data);\n\n', condition.fkt);
 fprintf(fid, ' void fz_%s(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *z, double *p, double *u, double *x);\n', condition.fkt);
 fprintf(fid, ' void fsz_%s(double t, int nt, int it, int np, double *sz, double *p, double *u, double *x, double *z, double *su, double *sx);\n\n', condition.fkt);
@@ -1719,6 +1729,27 @@ if(~isempty(model.xs))
 end
 fprintf(fid, '\n  return(0);\n}\n\n\n');
 
+% Write dfxdx output function
+fprintf(fid, ' int dfxdx_out_%s(realtype t, N_Vector x, realtype* J, void *user_data) {\n', condition.fkt); % sundials 2.5.0
+if(~isempty(model.xs))
+    if(config.useSensis || config.useJacobian)
+        fprintf(fid, '  int is;\n');
+        fprintf(fid, '  UserData data = (UserData) user_data;\n');
+        fprintf(fid, '  double *p = data->p;\n');
+        fprintf(fid, '  double *u = data->u;\n');
+        fprintf(fid, '  double *dvdx = data->dvdx;\n');
+        fprintf(fid, '  dvdx_%s(t, x, data);\n', condition.fkt);
+        fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(model.xs)^2);
+        fprintf(fid, '    J[is] = 0.0;\n');
+        fprintf(fid, '  }\n');
+        writeCcode(fid, matlab_version, condition, 'dfxdx_out');
+        fprintf(fid, '  for (is=0; is<%i; is++) {\n', length(model.xs)^2);
+        fprintf(fid, '    if(mxIsNaN(J[is])) J[is] = 0.0;\n');
+        fprintf(fid, '  }\n');
+    end
+end
+fprintf(fid, '\n  return(0);\n}\n\n\n');
+
 % write sparse dfxdx SPARSE (KLU)
 fprintf(fid, ' int dfxdx_sparse_%s(realtype t, N_Vector x, \n', condition.fkt); % sundials 2.6.1 with KLU
 fprintf(fid, '  \tN_Vector fx, SlsMat J, void *user_data, \n');
@@ -1913,7 +1944,32 @@ if (ispc)
     fprintf(fid, ' #pragma optimize("", on)\n');
 end
 
-% write dfxdp
+% write dfxdp0 (total derivative at initial condition)
+fprintf(fid, ' void dfxdp0_%s(realtype t, N_Vector x, double *dfxdp0, void *user_data)\n{\n', condition.fkt);
+if(timedebug) 
+	fprintf(fid, '  printf("%%g \\t dfxdp0\\n", t);\n');
+end
+if(~isempty(model.xs))
+    if(config.useSensis)
+        if(~isempty(condition.sym.dfxdp0))
+            fprintf(fid, '  int is;\n');
+            fprintf(fid, '  UserData data = (UserData) user_data;\n');
+            fprintf(fid, '  double *p = data->p;\n');
+            fprintf(fid, '  double *u = data->u;\n');
+            fprintf(fid, '  double *dvdp = data->dvdp;\n');
+            fprintf(fid, '  double *dvdx = data->dvdx;\n');
+            fprintf(fid, '  double *dvdu = data->dvdu;\n');
+            fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
+            writeCcode(fid, matlab_version, condition, 'dfxdp0');
+            fprintf(fid, '  for (is=0; is<%i; is++) {\n', numel(condition.sym.dfxdp0));
+            fprintf(fid, '    if(mxIsNaN(dfxdp0[is])) dfxdp0[is] = 0.0;\n');
+            fprintf(fid, '  }\n');
+        end
+    end
+end
+fprintf(fid, '\n  return;\n}\n\n\n');
+
+% write dfxdp (partial derivative w.r.t. p and keeping x constant)
 fprintf(fid, ' void dfxdp_%s(realtype t, N_Vector x, double *dfxdp, void *user_data)\n{\n', condition.fkt);
 if(timedebug) 
 	fprintf(fid, '  printf("%%g \\t dfxdp\\n", t);\n');
@@ -1930,7 +1986,7 @@ if(~isempty(model.xs))
             fprintf(fid, '  double *dvdu = data->dvdu;\n');
             fprintf(fid, '  double *x_tmp = N_VGetArrayPointer(x);\n');
             writeCcode(fid, matlab_version, condition, 'dfxdp');
-            fprintf(fid, '  for (is=0; is<%i; is++) {\n', numel(condition.sym.dfxdp));
+            fprintf(fid, '  for (is=0; is<%i; is++) {\n', numel(condition.sym.dfxdp0));
             fprintf(fid, '    if(mxIsNaN(dfxdp[is])) dfxdp[is] = 0.0;\n');
             fprintf(fid, '  }\n');
         end
@@ -2085,6 +2141,9 @@ elseif(strcmp(svar,'dfxdx'))
 elseif(strcmp(svar,'dfxdx_sparse'))
     cstr = ccode2(cond_data.sym.dfxdx_nonzero(:), matlab_version);    
     cvar =  'J->data';
+elseif(strcmp(svar,'dfxdx_out'))
+    cstr = ccode2(cond_data.sym.dfxdx(:), matlab_version);
+    cvar =  'J';
 elseif(strcmp(svar,'fsv1'))
     cstr = ccode2(cond_data.sym.fsv1, matlab_version);
     cvar =  'sv';
@@ -2139,6 +2198,9 @@ elseif(strcmp(svar,'fsy'))
 elseif(strcmp(svar,'fsystd'))
     cstr = ccode2(cond_data.sym.fsystd(:), matlab_version);
     cvar =  'systd';
+elseif(strcmp(svar,'dfxdp0'))
+    cstr = ccode2(cond_data.sym.dfxdp0(:), matlab_version);
+    cvar =  'dfxdp0';
 elseif(strcmp(svar,'dfxdp'))
     cstr = ccode2(cond_data.sym.dfxdp(:), matlab_version);
     cvar =  'dfxdp';
@@ -2314,6 +2376,16 @@ end
 fprintf(fid, '  return(-1);\n');
 fprintf(fid, '}\n\n');
 
+% map dfxdx output function
+fprintf(fid, ' void getdfxdx(int im, int ic, realtype t, N_Vector x, realtype *J, void *user_data){\n');
+for m=1:length(ar.model)
+    for c=1:length(ar.model(m).condition)
+        fprintf(fid, '  if((im==%i) & (ic==%i)) { dfxdx_out_%s(t, x, J, user_data); return; }\n', ...   
+            m-1, c-1, ar.model(m).condition(c).fkt);
+    end
+end
+fprintf(fid, '\n}\n\n');
+
 % map fsx0
 fprintf(fid, ' void fsx0(int is, N_Vector sx_is, void *user_data, int im, int ic, int sensitivitySubset) {\n');
 fprintf(fid, '  UserData data = (UserData) user_data;\n');
@@ -2422,6 +2494,17 @@ for m=1:length(ar.model)
 end
 fprintf(fid, '}\n\n');
 
+% map dfxdp0
+fprintf(fid, ' void dfxdp0(void *user_data, double t, N_Vector x, double *dfxdp0, int im, int ic){\n');
+fprintf(fid, '  UserData data = (UserData) user_data;\n');
+for m=1:length(ar.model)
+	for c=1:length(ar.model(m).condition)
+		fprintf(fid, '  if((im==%i) & (ic==%i)) dfxdp0_%s(t, x, dfxdp0, data);\n', ...
+			m-1, c-1, ar.model(m).condition(c).fkt);
+	end
+end
+fprintf(fid, '}\n\n');
+
 % map dfxdp
 fprintf(fid, ' void dfxdp(void *user_data, double t, N_Vector x, double *dfxdp, int im, int ic){\n');
 fprintf(fid, '  UserData data = (UserData) user_data;\n');
@@ -2432,7 +2515,6 @@ for m=1:length(ar.model)
 	end
 end
 fprintf(fid, '}\n\n');
-
 
 % map fz
 fprintf(fid, 'void fz(double t, int nt, int it, int nz, int nx, int nu, int iruns, double *z, double *p, double *u, double *x, int im, int ic){\n');

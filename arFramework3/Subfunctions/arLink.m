@@ -370,6 +370,8 @@ for m = 1:length(ar.model)
         
         ar.model(m).condition(c).uNum = zeros(1, nu);
         ar.model(m).condition(c).vNum = zeros(1, nv);
+        ar.model(m).condition(c).dfdxNum = zeros(nx, nx);
+        ar.model(m).condition(c).dfdpNum = zeros(nx, np);
         ar.model(m).condition(c).dvdxNum = zeros(nv, nx);
         ar.model(m).condition(c).dvduNum = zeros(nv, nu);
         ar.model(m).condition(c).dvdpNum = zeros(nv, np);

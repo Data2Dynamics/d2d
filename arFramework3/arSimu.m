@@ -374,23 +374,25 @@ function fastSteadyState( m, sensi, dynamics )
     global ar;
 
     % Steady state determination by simulation
+    %                 fine  sensi  dynamics  ssa    which condition field
     feval(ar.fkt, ar, true, false, dynamics, false, 'ss_condition', 'ss_threads', ar.config.skipSim);
 	if ( ar.config.useSensis && sensi )
         for c = 1 : length(ar.model(m).ss_condition)
             method = 2;
-            dfdx = ar.model(m).N*ar.model(m).ss_condition(c).dvdxNum + 0;
-            dfdp = ar.model(m).N*ar.model(m).ss_condition(c).dvdpNum + 0;
+            dfdx = ar.model(m).ss_condition(c).dfdxNum + 0;
+            dfdp = ar.model(m).ss_condition(c).dfdpNum + 0;
+            
+            %ar.model(m).ss_condition(c).dfdpNum - ar.model(m).ss_condition(c).ddxdtdp
+            
             if ( method == 1 )
-                [S, r] = linsolve(-dfdx,dfdp); % For invertibility, model may not have conserved moieties
+                [Sx, r] = linsolve(-dfdx,dfdp); % For invertibility, model may not have conserved moieties
                         
                 if ( r < eps(1) )
                     warning( 'Model has conserved moieties or has not been sufficiently equilibrated. Fast equilibration result may be unreliable. Unless you know what you are doing, turn ar.config.turboSSSensi off by invoking ar.config.turboSSSensi = 0 or reduce the model prior to compilation (see help arReduce)' );
                 end
             else
-                %dfdx    = ar.model(m).pools.mapping.' * dfdx;
-                S       = pinv(-dfdx)*dfdp; %dfdx.' \ dfdp;
-                %S       = ar.model(m).pools.mapping*S;
+                Sx = pinv(-dfdx)*dfdp; %dfdx.' \ dfdp;
             end
-            ar.model(m).ss_condition(c).sxFineSimu(end,:,:) = S + 0;
+            ar.model(m).ss_condition(c).sxFineSimu(end,:,:) = Sx + 0;
         end
 	end

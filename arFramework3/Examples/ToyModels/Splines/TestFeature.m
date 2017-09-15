@@ -26,7 +26,7 @@ arInit;
 arLoadModel('positive_cubic');
 arLoadData('test', 1, 'csv');
 arLoadData('positive_cubic', 1, 'csv');
-arCompileAll(2);
+arCompileAll(true);
 fprintf( 'PASSED\n' );
 fprintf( 2, 'Simulating and validating model with positive cubic spline... ' );
 arDisableData('positive_cubic');
@@ -43,7 +43,7 @@ arInit;
 arLoadModel('monotone');
 arLoadData('test', 1, 'csv');
 arLoadData('monotone', 1, 'csv');
-arCompileAll(2);
+arCompileAll(true);
 fprintf( 'PASSED\n' );
 
 fprintf( 2, 'Simulating and validating model with cubic spline... ' );

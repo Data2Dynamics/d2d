@@ -54,11 +54,11 @@ void timersub(struct timeval* tvp, struct timeval* uvp, struct timeval* vvp)
     void debugPrint( int debugMode, int level, const char* format, ... );
 #else
     /* Macro for the debug printer */
-    #define DEBUGPRINT0(DBGMODE, LVL, STR) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR ); mexEvalString("drawnow;"); } }
-    #define DEBUGPRINT1(DBGMODE, LVL, STR, ARG1) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1 ); mexEvalString("drawnow;"); } }
-    #define DEBUGPRINT2(DBGMODE, LVL, STR, ARG1, ARG2) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1, ARG2 ); mexEvalString("drawnow;"); } }
-    #define DEBUGPRINT3(DBGMODE, LVL, STR, ARG1, ARG2, ARG3) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1, ARG2, ARG3 ); mexEvalString("drawnow;"); } }
-    #define DEBUGPRINT4(DBGMODE, LVL, STR, ARG1, ARG2, ARG3, ARG4) { if ( DBGMODE > LVL ) { mexPrintf( "[D] " ); mexPrintf( STR, ARG1, ARG2, ARG3, ARG4 ); mexEvalString("drawnow;"); } }
+    #define DEBUGPRINT0(DBGMODE, LVL, STR) { if ( DBGMODE > LVL ) { mexPrintf( " [D] " ); mexPrintf( STR ); mexEvalString("drawnow;"); } }
+    #define DEBUGPRINT1(DBGMODE, LVL, STR, ARG1) { if ( DBGMODE > LVL ) { mexPrintf( " [D] " ); mexPrintf( STR, ARG1 ); mexEvalString("drawnow;"); } }
+    #define DEBUGPRINT2(DBGMODE, LVL, STR, ARG1, ARG2) { if ( DBGMODE > LVL ) { mexPrintf( " [D] " ); mexPrintf( STR, ARG1, ARG2 ); mexEvalString("drawnow;"); } }
+    #define DEBUGPRINT3(DBGMODE, LVL, STR, ARG1, ARG2, ARG3) { if ( DBGMODE > LVL ) { mexPrintf( " [D] " ); mexPrintf( STR, ARG1, ARG2, ARG3 ); mexEvalString("drawnow;"); } }
+    #define DEBUGPRINT4(DBGMODE, LVL, STR, ARG1, ARG2, ARG3, ARG4) { if ( DBGMODE > LVL ) { mexPrintf( " [D] " ); mexPrintf( STR, ARG1, ARG2, ARG3, ARG4 ); mexEvalString("drawnow;"); } }
 #endif
             
 #include <cvodes/cvodes.h>           /* prototypes for CVODES fcts. and consts. */
@@ -171,7 +171,7 @@ void terminate_x_calc( SimMemory sim_mem, double status );
 void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines, int sensitivitySubset );
 int allocateSimMemoryCVODES( SimMemory sim_mem, int neq, int np, int sensi, int npSensi );
 int allocateSimMemorySSA( SimMemory sim_mem, int nx );
-int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override, int sensitivitySubset );
+int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returndfdp0, mxArray *x0_override, int sensitivitySubset );
 int initializeEvents( SimMemory sim_mem, mxArray *arcondition, int ic, double tstart );
 void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int has_tExp );
 
@@ -446,7 +446,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     double *returnx;
     double *returnsx;
     double *returndxdt;
-    double *returnddxdtdp;
+    double *returndfdp0;
     double *equilibrated;
     double *y_max_scale;
     
@@ -510,7 +510,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     teq = mxGetData(mxGetField(arcondition, ic, "tEq"));
     
     has_tExp = (int) mxGetScalar(mxGetField(arcondition, ic, "has_tExp"));
-    if(has_tExp == 0 && fine == 0) { terminate_x_calc( sim_mem, 0 ); return; }
+    if(has_tExp == 0 && fine == 0) { terminate_x_calc( sim_mem, 0 ); DEBUGPRINT0( debugMode, 4, "Terminated simulation since tExp simulation was requested (fine = 0) and there are no experimental points.\n" ); return; }
 
     ticks_start = mxGetData(mxGetField(arcondition, ic, "start"));
     ticks_stop = mxGetData(mxGetField(arcondition, ic, "stop"));
@@ -525,6 +525,9 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     if(dynamics == 1) {
         if(ssa == 0) {
             /**** begin of CVODES ****/
+            /* NOTE: ic refers to the target condition in the target ar.model(#).condition(#) structure         */
+            /* isim refers to the condition that is actually simulated. In most cases these will be the same    */
+            /* but for steady state simulation, isim is redirected using the ar.model(#).condition(#).src field */
             
             /* get MATLAB values */
             qpositivex = mxGetData(mxGetField(armodel, im, "qPositiveX"));
@@ -567,8 +570,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             
             returndxdt = mxGetData(mxGetField(arcondition, ic, "dxdt"));
             if (sensi == 1) {
+                returndfdp0 = mxGetData(mxGetField(arcondition, ic, "ddxdtdp"));
                 DEBUGPRINT0( debugMode, 4, "Sensitivities enabled\n" );
-                returnddxdtdp = mxGetData(mxGetField(arcondition, ic, "ddxdtdp"));
                 
                 /* Obtain indices which map the computed sensitivities back to the output ones */
                 if ( sensitivitySubset == 1 )
@@ -648,7 +651,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
 
             /* Apply ODE initial conditions */
             x0_override = mxGetField(arcondition, ic, "x0_override");
-            if ( !applyInitialConditionsODE( sim_mem, tstart, im, isim, returndxdt, returnddxdtdp, x0_override, sensitivitySubset ) )
+            if ( !applyInitialConditionsODE( sim_mem, tstart, im, isim, returndxdt, returndfdp0, x0_override, sensitivitySubset ) )
                 return;
 
             /* Check if we are only simulating dxdt */
@@ -752,10 +755,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                  */
             }
             
+            /********************************/
             /* Sensitivity-related settings */
+            /********************************/
             if (sensi == 1) {
                 DEBUGPRINT0( debugMode, 4, "Initializing sensitivities\n" );
-                if(neq>0){                    
+                if(neq>0){
                     flag = AR_CVodeSensInit1(cvode_mem, npSensi, sensi_meth, sensirhs, sx, im, isim, sensitivitySubset);
                      
                     if(flag < 0) {terminate_x_calc( sim_mem, 10 ); return;}
@@ -786,7 +791,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                                     atolV_tmp[ks] = 1;
                                 } else if (cvodes_atol/y_max_scale[ks]<1e-8) {   
                                     /* && Ith(atolV, ks+1)==1.e-8){*/
-                                    /*printf("atolVS for neq=%i is %d \n", ks+1, atolV_tmp[ks]);*/
+                                    /*printf("atolVS for neq=%i is %d \n", ks+1, atolV_tmp[ks]);*/ /*}*/
                                     atolV_tmp[ks] = 1e-8;			  
                                 }else if(cvodes_atol/y_max_scale[ks]>1e-8 && cvodes_atol/y_max_scale[ks]<1) {
                                     atolV_tmp[ks] = cvodes_atol/y_max_scale[ks];
@@ -823,9 +828,11 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 }
             }
 
-            /* loop over output points */
+            /********************************/
+            /* loop over output points      */
+            /********************************/
             DEBUGPRINT0( debugMode, 4, "Starting main calculation loop\n" );
-            for (is=0; is < nout; is++) {
+            for (is=0; is < nout; is++) {               
                 /*mexPrintf("%f x-loop (im=%i ic=%i)\n", ts[is], im, ic);*/
                 DEBUGPRINT3( debugMode, 7, "%f x-loop (im=%i ic=%i)\n", ts[is], im, ic );
                 /* only integrate if no errors occured */
@@ -845,9 +852,11 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                             
                             if ( ts[is] == inf ) {
                                 /* Equilibrate the system */
-                                DEBUGPRINT0( debugMode, 4, "Equilibrating the system..." );
+                                DEBUGPRINT1( debugMode, 4, "Equilibrating the system (t=%g)...\n", data->t );
                                 flag = equilibrate(cvode_mem, data, x, t, equilibrated, returndxdt, teq, neq, im, isim, abortSignal);
-                                DEBUGPRINT0( debugMode, 4, "[ OK ]\n" );                      
+                                DEBUGPRINT1( debugMode, 4, "[ OK ] (teq=%g)\n", teq[0] );
+                                CVodeGetCurrentTime( cvode_mem, &(data->t) );
+                                
                                 if (flag < 0) {thr_error("Failed to equilibrate system"); terminate_x_calc( sim_mem, 20 ); return;}                                
                             } else {
                                 /* Simulate up to the next time point */
@@ -876,8 +885,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 /* Store time step results */
                 DEBUGPRINT0( debugMode, 6, "Storing results\n" );
                 if(status[0] == 0.0) {
-                    fu(data, ts[is], im, isim);
-                    fv(data, ts[is], x, im, isim);
+                    fu(data, data->t, im, isim);
+                    fv(data, data->t, x, im, isim);
                     
                     for(js=0; js < nu; js++) returnu[js*nout+is] = data->u[js];
                     for(js=0; js < nv; js++) returnv[js*nout+is] = data->v[js];
@@ -898,8 +907,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                                 if (flag < 0) {terminate_x_calc( sim_mem, 14 ); return;}
                             }
                         }
-                        fsu(data, ts[is], im, isim);
-                        fsv(data, ts[is], x, im, isim);                        
+                        fsu(data, data->t, im, isim);
+                        fsv(data, data->t, x, im, isim);                        
 
                         if ( sensitivitySubset == 0 )
                         {
@@ -912,7 +921,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
 
                                 for(js=0; js < np; js++) {
                                     /* Output flux sensitivities */
-                                    csv(ts[is], x, js, sx[js], data, im, ic);
+                                    csv(data->t, x, js, sx[js], data, im, ic);
                                     for(ks=0; ks < nv; ks++) {
                                         returnsv[(js*nv+ks)*nout + is] = data->sv[ks];
                                     } 
@@ -939,7 +948,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                                         for(ks=0; ks < nv; ks++) returnsv[(jss*nv+ks)*nout + is] = 0.0;
                                     } else {
                                         /* Output flux sensitivities */
-                                        csv(ts[is], x, js, sx[js], data, im, ic);
+                                        csv(data->t, x, js, sx[js], data, im, ic);
                                         for(ks=0; ks < nv; ks++) {
                                             returnsv[(jss*nv+ks)*nout + is] = data->sv[ks];
                                         }
@@ -987,6 +996,19 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 }
               DEBUGPRINT0( debugMode, 6, "Going into next iteration cycle\n" );
             } /* End of simulation loop */
+            
+            /* Store dfxdx */
+            {
+                double *dfdx, *dfdp;
+                CVodeGetCurrentTime( cvode_mem, &t );
+                DEBUGPRINT1( debugMode, 6, "Storing final dfdx and dfdp at %g\n", t );
+                dfdx = mxGetData(mxGetField(arcondition, ic, "dfdxNum"));
+                dfdp = mxGetData(mxGetField(arcondition, ic, "dfdpNum"));
+                
+                fsv(data, t, x, im, isim);                             /* Updates dvdp, dvdu, dvdx */
+                getdfxdx(im, isim, t, x, dfdx, data);                  /* Updates dvdx and stores dfxdx */
+                dfxdp(data, t, x, dfdp, im, isim);                     /* Stores dfxdp. Needs dvdp, dvdx and dvdu to be up to date */
+            }
             
             /* Store number of iteration steps */
             storeIntegrationInfo( sim_mem, arcondition, ic );
@@ -1293,6 +1315,7 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
    
     /* Set the time to the last succesful time step */
     time = data->t;
+    DEBUGPRINT1( debugMode, 8, "Going into equilibration at time %g\n", time );
     while( !converged )
     {        
         time = time + current_stepsize;
@@ -1301,6 +1324,8 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
         CVodeSetStopTime(cvode_mem, RCONST(time));
         flag = CVode(cvode_mem, RCONST(time), x, &t, CV_NORMAL);
 
+        DEBUGPRINT3( debugMode, 8, "Equilibrating ... (Step %d, current time: %g, target time %g)\n", step, t, time );
+        
         /* Abort on integration failure */
         if ( flag < 0 )
         {
@@ -1426,7 +1451,7 @@ int handle_event( SimMemory sim_mem, int sensi_meth )
 }
 
 /* Apply initial conditions for solving using numerical ODE integration */
-int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returnddxdtdp, mxArray *x0_override, int sensitivitySubset )
+int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isim, double *returndxdt, double *returndfdp0, mxArray *x0_override, int sensitivitySubset )
 {
     int nPoints;
     UserData data = sim_mem->data;
@@ -1482,7 +1507,7 @@ int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isi
                 for (is=0;is<nps;is++) fsx0(is, sx[is], data, im, isim, sensitivitySubset);
             }
 			fsv(data, tstart, x, im, isim);
-			dfxdp(data, tstart, x, returnddxdtdp, im, isim);
+			dfxdp0(data, tstart, x, returndfdp0, im, isim);
 		}
 	}
     return 1;

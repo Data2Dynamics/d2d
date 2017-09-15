@@ -117,6 +117,8 @@ function arSteadyState( varargin )
     ss_condition.suNum              = zeros(size(origin.suNum));
     ss_condition.svNum              = zeros(size(origin.svNum));
     ss_condition.dvdxNum            = zeros(size(origin.dvdxNum));
+    ss_condition.dfdxNum            = zeros(size(origin.dfdxNum));
+    ss_condition.dfdpNum            = zeros(size(origin.dfdpNum));
     ss_condition.dvduNum            = zeros(size(origin.dvduNum));
     ss_condition.dvdpNum            = zeros(size(origin.dvdpNum));
     ss_condition.svNum              = zeros(size(origin.svNum));    
@@ -157,7 +159,7 @@ function arSteadyState( varargin )
     if ( isfield( origin, 'dzdx' ) )
         ss_condition.dzdx               = zeros(size(origin.dzdx));
     end
-    ss_condition.ddxdtdp            = zeros(size(origin.ddxdtdp));    
+    ss_condition.ddxdtdp            = zeros(size(origin.ddxdtdp));
     ss_condition.ssLink             = cTarget;
     
     % Which states to map to the target condition (default = all)
