@@ -55,6 +55,10 @@ function ar = arAddEvent( varargin )
         condis = 1 : length( ar.model(m).condition );
     end
 
+    if isempty( condis )
+        error( 'Attempted to call arAddEvent with an empty list for the conditions to apply the event to' );
+    end
+    
     nStates = numel( ar.model(m).x );
     
     for jC = 1 : numel( condis )
