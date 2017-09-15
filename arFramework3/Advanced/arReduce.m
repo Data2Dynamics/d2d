@@ -45,7 +45,7 @@ function arReduce( m )
     
     % Are we dealing with symbolic compartments?
     if ( ar.model(m).pools.isSymbolic )
-        always = @isAlways;
+        always = @(x)condAlways(x);     
     else
         always = @(x)x;
     end
@@ -94,6 +94,22 @@ function arReduce( m )
         ar.model(m).Cm( removedState, : )      = [];
         ar.model(m).Cm_par( removedState, : )  = [];
 
+        name = ar.model(m).x( removedState );
+        for i = 1 : numel( ar.model(m).fv_source )
+            idx = find( strcmp( ar.model(m).fv_source{i}, name ) );
+            if ~isempty( idx )
+                ar.model(m).fv_source{i}(idx) = [];
+                ar.model(m).fv_sourceCoeffs{i}(idx)=[];
+            end
+        end
+        for i = 1 : numel( ar.model(m).fv_target )
+            idx = find( strcmp( ar.model(m).fv_target{i}, name ) );
+            if ~isempty( idx )
+                ar.model(m).fv_target{i}(idx) = [];
+                ar.model(m).fv_targetCoeffs{i}(idx)=[];
+            end
+        end        
+        
         % Remove the states from the initial conditions
         ar.model(m).px0( removedState )        = [];
         ar.model(m).zUnits( end + 1, : )       = ar.model(m).xUnits( removedState, : );
@@ -208,5 +224,11 @@ function findNewStates(m)
                 ar.model(m).removedStates(jrs).stateIDs = newStateID;
             end
         end
+    end
+end
+
+function x = condAlways(x)
+    if ~islogical(x)
+        x = isAlways(x);
     end
 end

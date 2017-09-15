@@ -16,7 +16,7 @@ function arConservedPools(jm, showPools)
     catch
         pc = sym(ar.model.pc);
         assume( pc > 0 );
-        always = @isAlways;
+        always = @(x)condAlways(x);
         wantSyms = 1;
     end
     
@@ -92,4 +92,11 @@ function arConservedPools(jm, showPools)
             end
             fprintf( '%s = total_%d %s\n', ar.model(jm).x{states(jg)}, jg, c );
         end
+    end 
+end
+
+function x = condAlways(x)
+    if ~islogical(x)
+        x = isAlways(x);
     end
+end
