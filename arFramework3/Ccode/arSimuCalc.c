@@ -672,6 +672,17 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 DEBUGPRINT0( debugMode, 4, "Copying u and v to outputs\n" );
                 copyResult( data->u, returnu, nu, nout, 0 );
                 copyResult( data->v, returnv, nv, nout, 0 );
+                
+                {
+                    double *dfdx;
+                    double *dfdp;
+                    dfdx = mxGetData(mxGetField(arcondition, ic, "dfdxNum"));
+                    dfdp = mxGetData(mxGetField(arcondition, ic, "dfdpNum"));
+                    fsv(data, t, x, im, isim);                             /* Updates dvdp, dvdu, dvdx */
+                    getdfxdx(im, isim, t, x, dfdx, data);                  /* Updates dvdx and stores dfxdx */
+                    dfxdp(data, t, x, dfdp, im, isim);                     /* Stores dfxdp. Needs dvdp, dvdx and dvdu to be up to date */                
+                }
+                
                 DEBUGPRINT0( debugMode, 4, "Evaluating observations\n" );
                 evaluateObservations(arcondition, im, ic, ysensi, has_tExp);
                 DEBUGPRINT0( debugMode, 4, "Terminating ...\n" );
