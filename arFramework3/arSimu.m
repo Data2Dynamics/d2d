@@ -377,21 +377,20 @@ function fastSteadyState( m, sensi, dynamics )
     %                 fine  sensi  dynamics  ssa    which condition field
     feval(ar.fkt, ar, true, false, dynamics, false, 'ss_condition', 'ss_threads', ar.config.skipSim);
 	if ( ar.config.useSensis && sensi )
-        for c = 1 : length(ar.model(m).ss_condition)
-            method = 2;
+        for c = 1 : numel(ar.model(m).ss_condition)
+            method = 1;
             dfdx = ar.model(m).ss_condition(c).dfdxNum + 0;
             dfdp = ar.model(m).ss_condition(c).dfdpNum + 0;
             
-            %ar.model(m).ss_condition(c).dfdpNum - ar.model(m).ss_condition(c).ddxdtdp
-            
-            if ( method == 1 )
+            if ( method == 2 )
                 [Sx, r] = linsolve(-dfdx,dfdp); % For invertibility, model may not have conserved moieties
                         
                 if ( r < eps(1) )
                     warning( 'Model has conserved moieties or has not been sufficiently equilibrated. Fast equilibration result may be unreliable. Unless you know what you are doing, turn ar.config.turboSSSensi off by invoking ar.config.turboSSSensi = 0 or reduce the model prior to compilation (see help arReduce)' );
                 end
             else
-                Sx = pinv(-dfdx)*dfdp; %dfdx.' \ dfdp;
+                Sx = pinv(-dfdx)*dfdp;
+                %Sx = dfdx.' \ dfdp;
             end
             ar.model(m).ss_condition(c).sxFineSimu(end,:,:) = Sx + 0;
         end

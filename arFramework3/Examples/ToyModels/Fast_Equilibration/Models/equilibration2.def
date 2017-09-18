@@ -1,0 +1,67 @@
+DESCRIPTION
+"Simple pulse test"
+
+PREDICTOR
+t               T   min         time	-50	200
+
+COMPARTMENTS
+cyt             V   pl          vol.    1
+nuc             V   pl          vol.   
+
+STATES
+stateA          C   nmol/l      conc.   cyt     1
+stateB          C   nmol/l      conc.   cyt     1
+stateC          C   nmol/l      conc.   cyt     1       // Unphosphorylated
+stateD          C   nmol/l      conc.   cyt     1       // Phosphorylated
+stateE          C   nmol/l      conc.   nuc     1       // Phosphorylated
+stateF          C   nmol/l      conc.   cyt     1       // Phosphorylated
+stateG          C   nmol/l      conc.   cyt     1       // Phosphorylated
+stateH          C   nmol/l      conc.   cyt     1       // Unphosphorylated
+
+donor           C   nmol/l      conc.   cyt     1       // Phosphate carrier
+Pdonor          C   nmol/l      conc.   cyt     1       // Phosphorylated phosphate carrier
+Pparticle       C   nmol/l      conc    cyt     1
+
+INPUTS
+basal_inhibitor X   on/off      boolean "input_bas_inh"
+pulse           C   nmol/l      conc.   "step1(t,0,0,amount)"
+        
+REACTIONS-AMOUNTBASED
+// Not conserved
+                ->  stateA                  CUSTOM	"pulse"
+                ->  stateA                  CUSTOM	"k_basal * (1-0.5*basal_inhibitor)"
+stateA          ->                          CUSTOM  "k_deg * stateA"
+                ->  stateB                  CUSTOM  "k_b * stateA + k_dm"
+stateB          ->                          CUSTOM  "k_deg * stateB"
+
+// Pool 1
+stateC + Pdonor ->  stateD + donor          CUSTOM  "k_dm^n_k * Pdonor * stateA * stateC / ( 1 + k_lp ) * (1+pulse)"
+stateD + donor  ->  stateC + Pdonor         CUSTOM  ".2*k_kke^n_n * donor * stateC * stateD / ( 1 + k_lp2 )"
+stateD          ->  stateE                  CUSTOM  "k_dm2^n_o * stateC * stateD / ( 1 + k_lp3 )"
+stateE          ->  stateD                  CUSTOM  ".5*k_dm2^n_o * stateC * stateE / ( 1 + k_lp3 )"
+stateF + donor  ->  stateC + Pdonor         CUSTOM  ".1*k_kke2^n_p * donor * stateC * stateF / ( 1 + k_lp4 )"
+stateC + Pdonor ->  stateF + donor          CUSTOM  "k_rev * stateC * Pdonor"
+
+// Pool 2
+stateG + 2 Pdonor  ->  2 stateH + 2 donor   CUSTOM  "k*stateG*Pdonor"
+2 stateH + 2 donor ->  stateG + 2 Pdonor    CUSTOM  ".1*k*stateH*donor"
+
+// Pool which donates something to both pools
+Pdonor              ->  donor + Pparticle   CUSTOM  "k_dephospho * Pdonor"
+donor + Pparticle   ->  Pdonor              CUSTOM  "k_phospho * donor * Pparticle"
+
+DERIVED
+
+OBSERVABLES
+                
+ERRORS
+
+CONDITIONS
+init_stateA     "1"
+init_stateB     "2"
+init_stateC     "3"
+init_stateD     "4"
+init_stateE     "5"
+init_stateF     "6"
+init_stateG     "7"
+init_stateH     "8"

@@ -50,9 +50,9 @@ function arReduce( m )
         always = @(x)x;
     end
        
-    fprintf( 'Pools available for reduction:\n' );
+    arFprintf( 2, 'Pools available for reduction:\n' );
     for i = 1 : size(ar.model(m).pools.dependent, 2)
-        fprintf( '%d: %s\n', i, sprintf( '%s ', ar.model(m).x{always(abs(ar.model(m).pools.dependent(:,i))>0)} ) );
+        arFprintf( 2, '%d: %s\n', i, sprintf( '%s ', ar.model(m).x{always(abs(ar.model(m).pools.dependent(:,i))>0)} ) );
     end
     
     if ( isempty( ar.model(m).pools.states ) )
