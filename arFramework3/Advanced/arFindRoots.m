@@ -17,7 +17,7 @@
 %
 % Note: This is an internal function
 
-function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debug, x0i)
+function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debug, x0i, newtonRaphson)
 
     global ar;
     tolerance = ar.config.eq_tol;
@@ -37,6 +37,9 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
     if nargin < 5
         debug = 0;
         failedCheck = 0;
+    end
+    if nargin < 7
+        newtonRaphson = 1;
     end
     
     if ( ar.model(jm).reducedForm )
@@ -87,11 +90,15 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
         opts = optimset('TolX', tolerance, 'TolFun', tolerance, 'Jacobian', 'On', 'Display', 'Off', 'MaxIter', 1e5 );
     end
     
-    if nargin < 6
+    if ( nargin < 6 ) || ( isempty( x0i ) )
         x0i = x0;
     end
     
-    [xnew, resnorm] = lsqnonlin( fn, x0, x0i, [], opts );
+    if newtonRaphson
+        [xnew, resnorm] = NewtonRaphson( fn, x0, [], [], tolerance );
+    else
+        [xnew, resnorm] = lsqnonlin( fn, x0, x0i, [], opts );
+    end
     
     if ( useConserved )
         xnew = totals + map*xnew.';
@@ -150,7 +157,7 @@ function [res, J] = merit(x0, jm, jc)
     res = ar.model(jm).ss_condition(jc).dxdt + 0;
     
     if ( nargout > 1 )
-        J = ar.model(jm).ss_condition(jc).dfdxNum;
+        J = ar.model(jm).ss_condition(jc).dfdxNum + 0;
     end
 end
 
@@ -162,4 +169,17 @@ function res = meritConserved(x0c, jm, jc, map, totals)
     feval(ar.fkt, ar, true, ar.config.useSensis, true, false, 'ss_condition', 'ss_threads', 1);
     
     res = ar.model(jm).ss_condition(jc).dxdt + 0;
+end
+
+function [x, res] = NewtonRaphson( func, initial, lb, ub, xtol )   
+    lastX = inf(size(initial));
+    x = initial;
+    i = 1;
+    while( max( abs( lastX - x ) ) > xtol )
+        lastX = x;
+        [f,J] = func( x );
+        %fprintf( 'Iteration %d; function value: %g\n', i, sum(f.^2) );
+        x = x - (pinv(J) * f.').';
+    end
+    res = sum(f.^2);
 end
