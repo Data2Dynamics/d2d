@@ -78,7 +78,9 @@ double inputfastspline( double t, int ID, double **splineCache, int *idCache, co
     double d[MAX_LONG_SPLINE];
     
     clongmonotoneSpline( n, ts, us, b, c, d, ID, splineCache, idCache );
-    uout = seval_fixed( n, t, ts, us, b, c, d, &(idCache[ID]));    
+    uout = seval_fixed( n, t, ts, us, b, c, d, &(idCache[ID]));
+    
+    return uout;
 }
 
 /* Spline with fixed time points and coefficients */
@@ -92,6 +94,8 @@ double inputspline( double t, const int n, const double ts[], const double us[])
  
     longMonotoneSpline( n, ts, us, b, c, d );
     uout = seval( n, t, ts, us, b, c, d );
+    
+    return uout;
 }
 
 double step1(double t, double u1, double t1, double u2) {
