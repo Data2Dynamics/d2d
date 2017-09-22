@@ -84,13 +84,6 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
         % Set up the objective function for lsqnonlin
         fn = @(x)merit( x, jm, jc );
     end
-
-    % Estimate initials in steady state
-    if ( debug )
-        opts = optimset('TolX', tolerance, 'TolFun', tolerance, 'Jacobian', 'On', 'Display', 'Iter', 'MaxIter', 1e5 ); %, 'DerivativeCheck', 'On'
-    else
-        opts = optimset('TolX', tolerance, 'TolFun', tolerance, 'Jacobian', 'On', 'Display', 'Off', 'MaxIter', 1e5 );
-    end
     
     if ( nargin < 6 ) || ( isempty( x0i ) )
         x0i = x0;
@@ -114,6 +107,13 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
             end
         end
     else
+        % Estimate initials in steady state
+        if ( debug )
+            opts = optimset('TolX', tolerance, 'TolFun', tolerance, 'Jacobian', 'On', 'Display', 'Iter', 'MaxIter', 1e5 ); %, 'DerivativeCheck', 'On'
+        else
+            opts = optimset('TolX', tolerance, 'TolFun', tolerance, 'Jacobian', 'On', 'Display', 'Off', 'MaxIter', 1e5 );
+        end        
+        
         xnew = lsqnonlin( fn, x0, x0i, [], opts );
         maxDiff = max(abs(fn(xnew)));
     end
