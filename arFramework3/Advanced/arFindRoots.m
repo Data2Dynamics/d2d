@@ -41,11 +41,13 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
     if nargin < 7
         newtonRaphson = 1;
     end
-    
+
+    % No need to incur the loss in speed when the model has been adequately
+    % reduced
     if ( ar.model(jm).reducedForm )
         useConserved = 0;
     end
-    
+       
     % Determine a reference sensitivity for debugging purposes
     if ( debug )
         arCheckCache(1);
@@ -94,10 +96,26 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
         x0i = x0;
     end
     
+    % Use Newton Raphson or lsqnonlin (former is typically much faster)? 
     if newtonRaphson
-        [xnew, resnorm] = NewtonRaphson( fn, x0, [], [], tolerance );
+        if ( useConserved )
+            % Have we not removed our conserved moieties, then go the slow route
+            [xnew, maxDiff] = NewtonRaphson( fn, x0, [], [], tolerance );
+        else
+            % Have we reduced the model, then we can rootfind faster
+            
+            % Have we compiled with rootfinding capabilities, then use the direct method inside the C-file
+            if ( isfield( ar.config, 'C_rootfinding' ) && ( ar.config.C_rootfinding == 1 ) )
+                feval(ar.fkt, ar, true, ar.config.useSensis, true, false, 'ss_condition', 'ss_threads', 2);
+                xnew = ar.model(jm).ss_condition(jc).xFineSimu(end,:);
+                maxDiff = max(abs(fn(xnew)));
+            else
+                [xnew, maxDiff] = NewtonRaphson( fn, x0, [], [], tolerance );
+            end
+        end
     else
-        [xnew, resnorm] = lsqnonlin( fn, x0, x0i, [], opts );
+        xnew = lsqnonlin( fn, x0, x0i, [], opts );
+        maxDiff = max(abs(fn(xnew)));
     end
     
     if ( useConserved )
@@ -120,7 +138,7 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
         S       = pinv(-dfdx)*dfdp;
     end
     
-    if ( resnorm > numel(resnorm)*tolerance )
+    if ( maxDiff > tolerance )
         warning( 'Failure to converge when rootfinding for model %d, condition %d', jm, jc );
     end
     
@@ -171,7 +189,7 @@ function res = meritConserved(x0c, jm, jc, map, totals)
     res = ar.model(jm).ss_condition(jc).dxdt + 0;
 end
 
-function [x, res] = NewtonRaphson( func, initial, lb, ub, xtol )   
+function [x, maxDiff] = NewtonRaphson( func, initial, lb, ub, xtol )   
     lastX = inf(size(initial));
     x = initial;
     i = 1;
@@ -181,5 +199,5 @@ function [x, res] = NewtonRaphson( func, initial, lb, ub, xtol )
         %fprintf( 'Iteration %d; function value: %g\n', i, sum(f.^2) );
         x = x - (pinv(J) * f.').';
     end
-    res = sum(f.^2);
+    maxDiff = max(abs(f));
 end

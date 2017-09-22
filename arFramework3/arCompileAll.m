@@ -513,7 +513,7 @@ writeSimuCalcFunctions(debug_mode);
 
 % compile
 if ( forcedCompile == 2 )
-    arCompile(false, true, false, source_dir);
+    arCompile(2, true, false, source_dir);
 else
     arCompile(forcedCompile, false, false, source_dir);
 end

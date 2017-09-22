@@ -11,6 +11,7 @@
 #include <string.h>
 #include <math.h>
 #include <mex.h>
+#include "inverseC.h"
 #ifndef MACRO_DEBUGPRINT
 #include <stdarg.h>
 #endif
@@ -655,20 +656,38 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 return;
 
             /* Check if we are only simulating dxdt */
-            if ( rootFinding )
+            if ( rootFinding > 0 )
             {
+                double tEq = t; /*-1e30;*/
+                
                 DEBUGPRINT0( debugMode, 4, "Rootfinding mode\n" );
+                
+                if ( rootFinding == 2 )
+                {
+                    #ifdef ROOT_FINDING
+                        solveSS( debugMode, arcondition, im, ic, isim, tEq, x, data, eq_tol );
+                        DEBUGPRINT0( debugMode, 4, "Root finding terminated\n" );
+                    #else
+                        DEBUGPRINT0( debugMode, 4, "Mex file was compiled without rootfinding ...\n" );
+                        terminate_x_calc( sim_mem, 0 ); return;
+                    #endif
+                }
+                
                 /* Copy states and state sensitivities */
                 if ( neq > 0 )
                 {
+                    DEBUGPRINT0( debugMode, 4, "Copying states\n" );
                     copyStates( x, returnx, qpositivex, neq, nout, 0 );
+                    DEBUGPRINT0( debugMode, 4, "Copying sensis\n" );
+                    DEBUGPRINT4( debugMode, 4, "sx: %d, npSensi: %d, neq: %d, nout: %d\n", sx, npSensi, neq, nout );
                     if ( sensi ) copyNVMatrixToDouble( sx, returnsx, npSensi, neq, nout, 0 ); /* TO DO: Look at what this means for subsensis */
                 }
+                DEBUGPRINT0( debugMode, 4, "Calculating z\n" );
                 z_calc(im, ic, arcondition, ysensi);
                 DEBUGPRINT0( debugMode, 6, "Calculating fu\n" );
-                fu(data, -1e30, im, isim);
+                fu(data, tEq, im, isim);
                 DEBUGPRINT0( debugMode, 6, "Calculating fv\n" );
-                fv(data, -1e30, x, im, isim);
+                fv(data, tEq, x, im, isim);
                 DEBUGPRINT0( debugMode, 4, "Copying u and v to outputs\n" );
                 copyResult( data->u, returnu, nu, nout, 0 );
                 copyResult( data->v, returnv, nv, nout, 0 );
@@ -678,9 +697,9 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     double *dfdp;
                     dfdx = mxGetData(mxGetField(arcondition, ic, "dfdxNum"));
                     dfdp = mxGetData(mxGetField(arcondition, ic, "dfdpNum"));
-                    fsv(data, t, x, im, isim);                             /* Updates dvdp, dvdu, dvdx */
+                    fsv(data, tEq, x, im, isim);                           /* Updates dvdp, dvdu, dvdx */
                     getdfxdx(im, isim, t, x, dfdx, data);                  /* Updates dvdx and stores dfxdx */
-                    dfxdp(data, t, x, dfdp, im, isim);                     /* Stores dfxdp. Needs dvdp, dvdx and dvdu to be up to date */                
+                    dfxdp(data, tEq, x, dfdp, im, isim);                   /* Stores dfxdp. Needs dvdp, dvdx and dvdu to be up to date */                
                 }
                 
                 DEBUGPRINT0( debugMode, 4, "Evaluating observations\n" );

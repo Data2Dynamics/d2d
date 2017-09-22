@@ -15,6 +15,15 @@
 
 function arCompile(varargin)
 
+enableRootfinding = 0;
+
+includeBLAS = 0;
+includeLAPACK = 0;
+if ( enableRootfinding )
+    includeBLAS     = 1;
+    includeLAPACK   = 1;
+end
+
 if(nargin==0 || ~isstruct(varargin{1}))
     global ar %#ok<TLEV>
     
@@ -56,7 +65,16 @@ if ( arOutputLevel > 3 )
 end
 
 mexopt = {'-largeArrayDims'};
-% mexopt = {'-compatibleArrayDims'};
+if ( includeBLAS )
+    mexopt{end+1} = '-lblas';
+end
+if ( includeLAPACK )
+    mexopt{end+1} = '-llapack';
+end
+if ( enableRootfinding )
+    mexopt{end+1} = '-DROOT_FINDING';
+    ar.config.C_rootfinding = 1;
+end
 
 arFprintf(1, 'Compiling files...');
 
@@ -252,7 +270,7 @@ end
 % compile
 if(usePool)
     parfor j=1:length(sourcesKLU)
-        if(~exist(['Compiled/' c_version_code '/' mexext '/' objectsKLU{j}], 'file') || forceFullCompile)
+        if(~exist(['Compiled/' c_version_code '/' mexext '/' objectsKLU{j}], 'file') || (forceFullCompile==1))
             mex('-c',verbose{:},mexopt{:}, '-DNTIMER', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [KLU_path sourcesKLU{j}]); %#ok<PFBNS>
             arFprintf(2, 'compiling KLU(%s)...done\n', objectsKLU{j});
@@ -262,7 +280,7 @@ if(usePool)
     end
 else
     for j=1:length(sourcesKLU)
-        if(~exist(['Compiled/' c_version_code '/' mexext '/' objectsKLU{j}], 'file') || forceFullCompile)
+        if(~exist(['Compiled/' c_version_code '/' mexext '/' objectsKLU{j}], 'file') || (forceFullCompile==1))
             mex('-c',verbose{:},mexopt{:}, '-DNTIMER', '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [KLU_path sourcesKLU{j}]);
             arFprintf(2, 'compiling KLU(%s)...done\n', objectsKLU{j});
@@ -340,6 +358,9 @@ objects = {
     'nvector_serial.o';
     'arInputFunctionsC.o';
     };
+if ( enableRootfinding )
+    objects{end+1} = 'inverseC.o';
+end
 if(ispc)
     objects = strrep(objects, '.o', '.obj');
 end
@@ -351,7 +372,7 @@ end
 % compile
 if(usePool)
     parfor j=1:length(sources)
-        if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file') || forceFullCompile)
+        if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file') || (forceFullCompile==1))
             mex('-c',verbose{:},mexopt{:}, '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [sundials_path sources{j}]); %#ok<PFBNS>
             arFprintf(2, 'compiling CVODES(%s)...done\n', objects{j});
@@ -361,7 +382,7 @@ if(usePool)
     end
 else
     for j=1:length(sources)
-        if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file') || forceFullCompile)
+        if(~exist(['Compiled/' c_version_code '/' mexext '/' objects{j}], 'file') || (forceFullCompile==1))
             mex('-c',verbose{:},mexopt{:}, '-outdir', ['Compiled/' c_version_code '/' mexext '/'], ...
                 includesstr{:}, [sundials_path sources{j}]);
             arFprintf(2, 'compiling CVODES(%s)...done\n', objects{j});
@@ -385,6 +406,17 @@ if(~exist(objects_inp, 'file') || forceFullCompile)
 else
     arFprintf(2, 'compiling input functions...skipped\n');
 end
+
+if ( enableRootfinding )
+    if(~exist(objects_inp, 'file') || forceFullCompile)
+        mex('-c',verbose{:},mexopt{:},'-outdir',['Compiled/' ar.info.c_version_code '/' mexext '/'], ...
+            includesstr{:}, which('inverseC.c'));
+        arFprintf(2, 'compiling rootfinding functions...done\n');
+    else
+        arFprintf(2, 'compiling rootfinding functions...skipped\n');
+    end
+end
+
 
 % TODO I don't know why this gives a link error ... ?
 % if(~debug_mode)
