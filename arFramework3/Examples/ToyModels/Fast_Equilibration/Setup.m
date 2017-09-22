@@ -1,7 +1,7 @@
 % Example demonstrating the use of the fast sensitivity system
 
 arInit;
-
+ar.config.fastEquilibration = 1;
 arLoadModel('equilibration2');
 
 % This step is important if you have conserved moieties!
@@ -38,7 +38,7 @@ arSteadyState(1, 1, 1, -1e7);
 arSteadyState(1, 2, [2,3], -1e7);
 
 % Compare performance
-comparePerformance = 0;
+comparePerformance = 1;
 ar.config.rtol=1e-9; 
 ar.config.atol=1e-9;
 if comparePerformance

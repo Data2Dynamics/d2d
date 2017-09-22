@@ -15,15 +15,6 @@
 
 function arCompile(varargin)
 
-enableRootfinding = 0;
-
-includeBLAS = 0;
-includeLAPACK = 0;
-if ( enableRootfinding )
-    includeBLAS     = 1;
-    includeLAPACK   = 1;
-end
-
 if(nargin==0 || ~isstruct(varargin{1}))
     global ar %#ok<TLEV>
     
@@ -37,6 +28,18 @@ else
     else
         varargin = {};
     end
+end
+
+enableRootfinding = 0;
+if ( isfield( ar.config, 'fastEquilibration' ) )
+    enableRootfinding = ar.config.fastEquilibration;
+end
+
+includeBLAS = 0;
+includeLAPACK = 0;
+if ( enableRootfinding )
+    includeBLAS     = 1;
+    includeLAPACK   = 1;
 end
 
 global arOutputLevel;

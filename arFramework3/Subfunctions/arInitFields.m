@@ -26,7 +26,8 @@ function ar = arInitFields(ar)
     
     % Config options
     defaults = { ...
-        {'turboSplines',                false}, ...                     % Faster splines (BETA)
+        {'fastEquilibration',           false}, ...                     % Faster equilibration (BETA).
+        {'turboSplines',                false}, ...                     % Faster splines (BETA).
         {'turboSSSensi',                false}, ...                     % Faster equilibration (BETA). Toggle with arFastSensis. DO NOT TOGGLE BY HAND.
         {'sensitivitySubset',           0}, ...                         % Only compute subset of sensitivities when certain qFit's are 0 (BETA)
         {'lightSave',                   false}, ...                     % When calling arSave, only save parameter sets by default (useful for big models)

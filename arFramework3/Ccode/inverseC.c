@@ -79,7 +79,7 @@ double solveSS( int debugMode, mxArray *arcondition, int im, int ic, int isim, d
     
     /* Perform Newton Raphson until convergence or abort */
     i = 0;
-    while( ( (maxAbs-lastMax) > tol ) && ( i < iterationLimit ) )
+    while( ( maxAbs > tol ) && ( i < iterationLimit ) )
     {
         DEBUGPRINT3( debugMode, 9, "Rootfinding iteration %d: Maximum absolute dx: %g (tolerance = %g)\n", i, maxAbs, tol );
         fx( t, x, f, user_data, im, isim );                           /* Compute RHS and store in f */
