@@ -17,6 +17,8 @@
 %       Shows the names of the parameters it is returning
 %   arFindPar( ar, {'degrad', 'pro'}, 'dynamic', 'names' )
 %       Only returns dynamic parameters and returns them by name
+%   arFindPar( ar, {'degrad', 'pro'}, 'initial', 'names' )
+%       Only returns initials and returns them by name
 %
 % The argument ar is optional. If not specified, the global ar structure is
 % used. The argument preserve preserves the ordering w.r.t. names.
