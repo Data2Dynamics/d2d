@@ -45,7 +45,7 @@ function olist = arFindPar( varargin )
         string = varargin{1};
     end
 
-    opts = argSwitch( {'names', 'verbose', 'dynamic', 'exact', 'preserve'}, varargin{2:end} );
+    opts = argSwitch( {'names', 'verbose', 'dynamic', 'initial', 'exact', 'preserve'}, varargin{2:end} );
 
     list = arC.pLabel;
     
@@ -65,6 +65,9 @@ function olist = arFindPar( varargin )
                 if (~opts.dynamic || arC.qDynamic(a))
                     olist{b}(end+1) = a;
                 end
+                if (~opts.initial || arC.qInitial(a))
+                    olist{b}(end+1) = a;
+                end                
             end
         end
     end
