@@ -64,12 +64,9 @@ function olist = arFindPar( varargin )
                 l = strfind(lower(list{a}), lower(string{b}) );
             end
             if ~isempty( l )
-                if (~opts.dynamic || arC.qDynamic(a))
+                if (~opts.dynamic || arC.qDynamic(a)) && ((~opts.initial || arC.qInitial(a)))
                     olist{b}(end+1) = a;
-                end
-                if (~opts.initial || arC.qInitial(a))
-                    olist{b}(end+1) = a;
-                end                
+                end            
             end
         end
     end
