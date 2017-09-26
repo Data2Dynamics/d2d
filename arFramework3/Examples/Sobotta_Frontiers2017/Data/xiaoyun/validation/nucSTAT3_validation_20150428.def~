@@ -1,0 +1,18 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	-15	30
+
+INPUTS
+Ruxolitinib  "step1(t,0,0,input_rux1) * exp(-(t-0)*rux_degrade) + step1(t,0,480,input_rux2) * exp(-(t-480)*rux_degrade) + step1(t,0,960,input_rux2) * exp(-(t-960)*rux_degrade) + 0*isTriple + 0*DMSO"
+
+OBSERVABLES
+nucSTAT3         C   au   conc.   0	1   "scale_ntstat3_filename_nExpID*ntSTAT3+offset_ntstat3_filename_nExpID"
+
+ERRORS 
+nucSTAT3         "sd_ntstat3_validation_filename_nExpID"
+        
+CONDITIONS
+
+RANDOM
+nExpID	   INDEPENDENT

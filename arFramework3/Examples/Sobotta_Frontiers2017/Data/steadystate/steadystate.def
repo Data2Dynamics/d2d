@@ -1,0 +1,23 @@
+DESCRIPTION
+"Steady state simulation"
+        
+PREDICTOR
+t               T   min     time	-1000 2000
+
+INPUTS
+Ruxolitinib     "0"
+Stattic         "0"
+IL6             "0"
+
+OBSERVABLES
+
+ERRORS    
+        
+CONDITIONS
+input_il6 "0"
+
+// This file serves as steady state equilibration condition
+// Make sure these parameters don't make it into the model
+offset_socs3_qpcr_steadystate_steadystate   "0"
+scale_socs3_qpcr_steadystate_steadystate    "1"
+sd_socs3_qpcr_steadystate_steadystate       "1"

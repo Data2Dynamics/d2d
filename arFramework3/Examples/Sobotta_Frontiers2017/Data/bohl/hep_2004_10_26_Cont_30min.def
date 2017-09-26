@@ -1,0 +1,16 @@
+DESCRIPTION
+"Experimenter: Sebastian Bohl"
+"Date: 2004-10-26"
+"Cells: primary hepatocytes"
+"Treatment: IL6 40ng/ml constant"
+
+PREDICTOR
+t               T   min     time	0	40
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+                
+CONDITIONS

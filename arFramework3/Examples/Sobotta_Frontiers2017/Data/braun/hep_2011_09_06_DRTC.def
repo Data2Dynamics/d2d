@@ -1,0 +1,16 @@
+DESCRIPTION
+"Experimenter: Svantje Braun"
+"Date: 2011-09-06"
+"Cells: primary hepatocytes"
+"Treatment: IL6 0.5-5-50-500 ng/ml DRTC"
+
+PREDICTOR
+t               T   min     time	0	70
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+        
+CONDITIONS

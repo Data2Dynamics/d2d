@@ -1,0 +1,16 @@
+DESCRIPTION
+"File for triple treatment planning"
+        
+PREDICTOR
+t               T   min     time	-60	1450
+
+INPUTS
+Ruxolitinib  "step1(t,0,loc_rux1,input_rux1) * exp(-(t-loc_rux1)*rux_degrade) + step1(t,0,loc_rux2,input_rux2) * exp(-(t-loc_rux2)*rux_degrade) + step1(t,0,loc_rux3,input_rux3) * exp(-(t-loc_rux3)*rux_degrade) + + step1(t,0,loc_rux4,input_rux4) * exp(-(t-loc_rux4)*rux_degrade)"
+IL6          "step1(t,0,0,var_il6)"
+//siRNA        "step1(t,0,0,siRNA_strength)"
+
+OBSERVABLES
+        
+ERRORS    
+        
+CONDITIONS

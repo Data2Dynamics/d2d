@@ -1,0 +1,18 @@
+DESCRIPTION
+"Experimenter: Sebastian Bohl"
+"Date: 2009-10-14"
+"Cells: primary hepatocytes"
+"Treatment: IL6 40ng/ml = 1nmol"
+"values normalized by HPRT"
+"biological replicates"
+        
+PREDICTOR
+t               T   min     time	0	130
+
+INPUTS
+
+OBSERVABLES
+        
+ERRORS 
+        
+CONDITIONS

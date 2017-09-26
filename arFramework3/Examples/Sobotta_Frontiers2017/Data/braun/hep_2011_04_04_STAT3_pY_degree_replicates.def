@@ -1,0 +1,20 @@
+DESCRIPTION
+"Experimenter: Svantje Braun, Martin Boehm"
+"Date: 2013-08-14"
+"Cells: primary hepatocytes"
+"Treatment: IL6 dose 40ng/ml"
+"mass spectrometry"
+"Data received 2013_08_14"
+        
+PREDICTOR
+t               T   min     time	0	20
+
+INPUTS
+
+OBSERVABLES
+pSTAT3_ms      N   "%" "rel. conc." 0  0   "100*pSTAT3rel"
+
+ERRORS        
+pSTAT3_ms       "sd_pSTAT3_ms"       
+        
+CONDITIONS

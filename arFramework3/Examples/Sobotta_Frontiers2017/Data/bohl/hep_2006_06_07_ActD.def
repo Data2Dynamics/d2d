@@ -1,0 +1,18 @@
+DESCRIPTION
+"Experimenter: Sebastian Bohl"
+"Date: 2006-06-07"
+"Cells: primary hepatocytes"
+"Treatment: IL6 80ng/ml constant + 3 different Act-D treatment"
+
+PREDICTOR
+t               T   min     time	-10	100
+
+INPUTS
+ActD    "step2(t,0,0,actd_level1,30,actd_level2)"
+        
+OBSERVABLES
+        
+ERRORS
+        
+CONDITIONS
+input_il6         "80"

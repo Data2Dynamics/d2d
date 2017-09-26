@@ -1,0 +1,14 @@
+DESCRIPTION
+        
+PREDICTOR-DOSERESPONSE input_il6
+t               T   min     time	-60	1450
+
+INPUTS
+Ruxolitinib  "step1(t,0,loc1,input_rux1) * exp(-(t-loc1)*rux_degrade) + step1(t,0,(480-loc1),input_rux2) * exp(-(t-480-loc1)*rux_degrade) + step1(t,0,(960-loc1),input_rux3) * exp(-(t-960-loc1)*rux_degrade)"
+
+OBSERVABLES
+        
+ERRORS    
+        
+CONDITIONS
+

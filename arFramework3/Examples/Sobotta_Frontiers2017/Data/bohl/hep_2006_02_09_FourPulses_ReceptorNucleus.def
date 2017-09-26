@@ -1,0 +1,17 @@
+DESCRIPTION
+"Experimenter: Sebastian Bohl"
+"Date: 2006-02-09"
+"Cells: primary hepatocytes"
+"Treatment: IL6 80ng/ml 6-12-24-90min pulses"
+
+PREDICTOR
+t               T   min     time	0	100
+
+INPUTS
+IL6     "step1(t,80,il6_loc,0)"
+
+OBSERVABLES
+        
+ERRORS
+        
+CONDITIONS

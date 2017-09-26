@@ -1,0 +1,5 @@
+This model was developed in D2D ( https://github.com/Data2Dynamics/d2d ). In the original model, states are pre-equilibrated based on parameters describing the total pools or production and degradation rates of certain moieties (total STAT3, gp130 production/degradation). Since this functionality is absent in the SBML standard, we have provided pre-equilibrated concentrations based on the optimal parameter set in the SBML file. For the original model (including all of the data), please download D2D.
+
+The simulation were checked to be in exact accordance with the D2D version of the model.
+
+For questions or comments/suggestions regarding this model, please contact Joep Vanlier.

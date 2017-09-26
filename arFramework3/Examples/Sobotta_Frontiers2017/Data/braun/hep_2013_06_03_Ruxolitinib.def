@@ -1,0 +1,16 @@
+DESCRIPTION
+"Experimenter: Svantje Braun"
+"Date: 2013-06-03"
+"Cells: primary hepatocytes"
+"Treatment: IL6 dose 40ng/ml, Ruxolitinib 0-5000nM"
+        
+PREDICTOR-DOSERESPONSE input_ruxolitinib
+t               T   min     time	-60	50
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS    
+        
+CONDITIONS

@@ -1,0 +1,1714 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
+  <model metaid="arFramework3" id="il6_model">
+    <listOfCompartments>
+      <compartment id="cyt" spatialDimensions="3" size="12.67" constant="true"/>
+      <compartment id="nuc" spatialDimensions="3" size="0.5" constant="true"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="JAK1_gp130" name="Unphosphorylated receptor" compartment="cyt" initialConcentration="0.555214703828664" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="pJAK1_gp130" name="Phosphorylated JAK1 receptor" compartment="cyt" initialConcentration="0.000488088299181085" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="pJAK1_pgp130" name="Active receptor" compartment="cyt" initialConcentration="0.00317810552352697" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="STAT3" name="Unphosphorylated cytoplasmic STAT3" compartment="cyt" initialConcentration="28.925968233862" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="tpSTAT3" name="Phosphorylated STAT3" compartment="cyt" initialConcentration="0.832161673943926" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSTAT3" name="Unphosphorylated nuclear STAT3" compartment="nuc" initialConcentration="25.8698324790905" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSOCS3RNA1" name="SOCS3 transcriptional delay" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSOCS3RNA2" name="SOCS3 transcriptional delay" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSOCS3RNA3" name="SOCS3 transcriptional delay" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSOCS3RNA4" name="SOCS3 transcriptional delay" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSOCS3RNA5" name="SOCS3 transcriptional delay" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="SOCS3RNA" name="SOCS3 mRNA" compartment="cyt" initialConcentration="0.000111649083183703" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="SOCS3" name="SOCS3 protein" compartment="cyt" initialConcentration="0.0256011491229785" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nIL33RNA1" name="IL33 transcriptional delay" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nIL33RNA2" name="IL33 transcriptional delay" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nIL33RNA3" name="IL33 transcriptional delay" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nIL33RNA4" name="IL33 transcriptional delay" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nIL33RNA5" name="IL33 transcriptional delay" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nCXCL10RNA1" name="CXCL10 transcriptional delay" compartment="nuc" initialConcentration="1.48032862915973e-13" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nCXCL10RNA2" name="CXCL10 transcriptional delay" compartment="nuc" initialConcentration="1.48032862915973e-13" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nCXCL10RNA3" name="CXCL10 transcriptional delay" compartment="nuc" initialConcentration="1.48032862915973e-13" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nFGGRNA1" name="FGG transcriptional delay" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nFGGRNA2" name="FGG transcriptional delay" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nFGGRNA3" name="FGG transcriptional delay" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nFGGRNA4" name="FGG transcriptional delay" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nFGGRNA5" name="FGG transcriptional delay" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nHPRNA1" name="HP transcriptional delay" compartment="nuc" initialConcentration="0.00794628661966941" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nHPXRNA1" name="HPX transcriptional delay" compartment="nuc" initialConcentration="7.07807375550963" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="CXCL10RNA" name="CXCL10 mRNA" compartment="cyt" initialConcentration="5.84497954016129e-15" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="FGGRNA" name="FGG mRNA" compartment="cyt" initialConcentration="3.17241502859336e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="HAMPRNA" name="HAMP mRNA" compartment="cyt" initialConcentration="0.0088558311260624" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="IL33RNA" name="IL33 mRNA" compartment="cyt" initialConcentration="0.0291134861434416" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="APCSRNA" name="APCS mRNA" compartment="cyt" initialConcentration="9.14111159969428e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="HPRNA" name="HP mRNA" compartment="cyt" initialConcentration="0.000313833399730219" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="HPXRNA" name="HPX mRNA" compartment="cyt" initialConcentration="0.279057842468573" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="apcsrna_des" value="0.00105944596359852" constant="true"/>
+      <parameter id="apcsrna_hill" value="4.23276387057303" constant="true"/>
+      <parameter id="apcsrna_ka" value="50.0940402219363" constant="true"/>
+      <parameter id="apcsrna_pro" value="0.00139460830546476" constant="true"/>
+      <parameter id="cxcl10rna_delay" value="0.0452293661748665" constant="true"/>
+      <parameter id="cxcl10rna_des" value="0.0452052665410998" constant="true"/>
+      <parameter id="cxcl10rna_hill" value="9.74950044400693" constant="true"/>
+      <parameter id="cxcl10rna_ka" value="142.757154950191" constant="true"/>
+      <parameter id="cxcl10rna_pro" value="5.68608875671638" constant="true"/>
+      <parameter id="f_pstat3_imp" value="4.97118591633696" constant="true"/>
+      <parameter id="fggrna_delay" value="0.120779262192917" constant="true"/>
+      <parameter id="fggrna_des" value="0.00770737484858441" constant="true"/>
+      <parameter id="fggrna_hill" value="3.93695191003628" constant="true"/>
+      <parameter id="fggrna_ka" value="49.1555791548272" constant="true"/>
+      <parameter id="fggrna_pro" value="0.235605753799674" constant="true"/>
+      <parameter id="gp130_act_jak1" value="0.536999685608035" constant="true"/>
+      <parameter id="gp130_deg" value="0.00380769499987503" constant="true"/>
+      <parameter id="gp130_pro" value="0.0024048090188292" constant="true"/>
+      <parameter id="hamprna_des" value="0.000212368487363527" constant="true"/>
+      <parameter id="hamprna_hill" value="3.25698024603785" constant="true"/>
+      <parameter id="hamprna_ka" value="47.320527880784" constant="true"/>
+      <parameter id="hamprna_pro" value="0.00302893472780248" constant="true"/>
+      <parameter id="hprna_delay" value="0.00363889653704127" constant="true"/>
+      <parameter id="hprna_des" value="0.00363603589106781" constant="true"/>
+      <parameter id="hprna_hill" value="2.80607285286785" constant="true"/>
+      <parameter id="hprna_ka" value="49.2844982877542" constant="true"/>
+      <parameter id="hprna_pro" value="0.10179726649316" constant="true"/>
+      <parameter id="hpxrna_delay" value="0.000372610688837591" constant="true"/>
+      <parameter id="hpxrna_des" value="0.000372966267324503" constant="true"/>
+      <parameter id="hpxrna_hill" value="1.31085746068484" constant="true"/>
+      <parameter id="hpxrna_pro" value="0.00023674176667103" constant="true"/>
+      <parameter id="il33rna_delay" value="0.134323387459761" constant="true"/>
+      <parameter id="il33rna_des" value="0.00109588169788454" constant="true"/>
+      <parameter id="il33rna_hill" value="1.76118734732687" constant="true"/>
+      <parameter id="il33rna_pro" value="3.43136965007846e-05" constant="true"/>
+      <parameter id="input_rux1" value="500" constant="true"/>
+      <parameter id="input_rux2" value="187" constant="true"/>
+      <parameter id="input_rux3" value="187" constant="true"/>
+      <parameter id="input_rux4" value="0" constant="true"/>
+      <parameter id="jak1_act_basal" value="0.00431295825104157" constant="true"/>
+      <parameter id="jak1_act_il6" value="0.009075950890566" constant="true"/>
+      <parameter id="jak1_gp130_dea" value="0.0781686412907726" constant="true"/>
+      <parameter id="jak1_inh_ruxolitinib" value="0.00602314686368812" constant="true"/>
+      <parameter id="loc_rux1" value="0" constant="true"/>
+      <parameter id="loc_rux2" value="480" constant="true"/>
+      <parameter id="loc_rux3" value="960" constant="true"/>
+      <parameter id="loc_rux4" value="1440" constant="true"/>
+      <parameter id="rux_degrade" value="0.000970640678908111" constant="true"/>
+      <parameter id="scale_apcs_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1" value="458.233435667488" constant="true"/>
+      <parameter id="scale_cxcl10_qpcr_braun_calibration_hep_2011_06_06_qPCR_140109_IL6DR_1h_CXCL10" value="275.243893334016" constant="true"/>
+      <parameter id="scale_fgg_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1" value="22.8775641330228" constant="true"/>
+      <parameter id="scale_hamp_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1" value="3.94026183251109" constant="true"/>
+      <parameter id="scale_hp_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1" value="17.614684604694" constant="true"/>
+      <parameter id="scale_hpx_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1" value="1.25383079579579" constant="true"/>
+      <parameter id="scale_il33_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1" value="1.4666791348047" constant="true"/>
+      <parameter id="scale_pgp130_wb_bohl_hep_2005_07_26_Pulse5min" value="7.91984491015843" constant="true"/>
+      <parameter id="scale_socs3_qpcr_braun_hep_2013_07_08_qPCR_Socs3_Stat3" value="62.0532495981734" constant="true"/>
+      <parameter id="socs3_assoc" value="0.0193431053114474" constant="true"/>
+      <parameter id="socs3_des" value="0.448649426570848" constant="true"/>
+      <parameter id="socs3_pro" value="1.69780340390334" constant="true"/>
+      <parameter id="socs3rna_delay" value="0.303942466148802" constant="true"/>
+      <parameter id="socs3rna_des" value="0.303904943507411" constant="true"/>
+      <parameter id="socs3rna_hill" value="1.71329655203901" constant="true"/>
+      <parameter id="socs3rna_pro" value="0.00170007562435021" constant="true"/>
+      <parameter id="stat3_act_gp130" value="0.411551346855518" constant="true"/>
+      <parameter id="stat3_exp" value="1.97083305689239" constant="true"/>
+      <parameter id="stat3_imp" value="0.0593610691509748" constant="true"/>
+      <parameter id="stat3_inh_socs3" value="0.618867945822336" constant="true"/>
+      <parameter id="stat3_inh_stattic" value="0.100364040238578" constant="true"/>
+      <parameter id="var_il6" value="40" constant="true"/>
+      <parameter id="IL6" value="0" constant="false"/>
+      <parameter id="ActD" value="0" constant="false"/>
+      <parameter id="Stattic" value="0" constant="false"/>
+      <parameter id="Ruxolitinib" value="0" constant="false"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule variable="IL6">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <cn type="integer"> 0 </cn>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> var_il6 </ci>
+                <cn type="integer"> 0 </cn>
+              </apply>
+              <piecewise>
+                <piece>
+                  <cn type="integer"> 0 </cn>
+                  <apply>
+                    <lt/>
+                    <apply>
+                      <minus/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                      <cn type="integer"> 0 </cn>
+                    </apply>
+                    <cn type="integer"> 0 </cn>
+                  </apply>
+                </piece>
+                <otherwise>
+                  <cn type="integer"> 1 </cn>
+                </otherwise>
+              </piecewise>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="ActD">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <cn type="integer"> 0 </cn>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <cn type="integer"> 0 </cn>
+                <cn type="integer"> 0 </cn>
+              </apply>
+              <piecewise>
+                <piece>
+                  <cn type="integer"> 0 </cn>
+                  <apply>
+                    <lt/>
+                    <apply>
+                      <minus/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                      <cn type="integer"> -10 </cn>
+                    </apply>
+                    <cn type="integer"> 0 </cn>
+                  </apply>
+                </piece>
+                <otherwise>
+                  <cn type="integer"> 1 </cn>
+                </otherwise>
+              </piecewise>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="Stattic">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <cn type="integer"> 0 </cn>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <cn type="integer"> 0 </cn>
+                <cn type="integer"> 0 </cn>
+              </apply>
+              <piecewise>
+                <piece>
+                  <cn type="integer"> 0 </cn>
+                  <apply>
+                    <lt/>
+                    <apply>
+                      <minus/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                      <cn type="integer"> -60 </cn>
+                    </apply>
+                    <cn type="integer"> 0 </cn>
+                  </apply>
+                </piece>
+                <otherwise>
+                  <cn type="integer"> 1 </cn>
+                </otherwise>
+              </piecewise>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule variable="Ruxolitinib">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <exp/>
+                <apply>
+                  <times/>
+                  <ci> rux_degrade </ci>
+                  <apply>
+                    <minus/>
+                    <ci> loc_rux1 </ci>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 0 </cn>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <ci> input_rux1 </ci>
+                    <cn type="integer"> 0 </cn>
+                  </apply>
+                  <piecewise>
+                    <piece>
+                      <cn type="integer"> 0 </cn>
+                      <apply>
+                        <lt/>
+                        <apply>
+                          <minus/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                          <ci> loc_rux1 </ci>
+                        </apply>
+                        <cn type="integer"> 0 </cn>
+                      </apply>
+                    </piece>
+                    <otherwise>
+                      <cn type="integer"> 1 </cn>
+                    </otherwise>
+                  </piecewise>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <exp/>
+                <apply>
+                  <times/>
+                  <ci> rux_degrade </ci>
+                  <apply>
+                    <minus/>
+                    <ci> loc_rux2 </ci>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 0 </cn>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <ci> input_rux2 </ci>
+                    <cn type="integer"> 0 </cn>
+                  </apply>
+                  <piecewise>
+                    <piece>
+                      <cn type="integer"> 0 </cn>
+                      <apply>
+                        <lt/>
+                        <apply>
+                          <minus/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                          <ci> loc_rux2 </ci>
+                        </apply>
+                        <cn type="integer"> 0 </cn>
+                      </apply>
+                    </piece>
+                    <otherwise>
+                      <cn type="integer"> 1 </cn>
+                    </otherwise>
+                  </piecewise>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <exp/>
+                <apply>
+                  <times/>
+                  <ci> rux_degrade </ci>
+                  <apply>
+                    <minus/>
+                    <ci> loc_rux3 </ci>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 0 </cn>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <ci> input_rux3 </ci>
+                    <cn type="integer"> 0 </cn>
+                  </apply>
+                  <piecewise>
+                    <piece>
+                      <cn type="integer"> 0 </cn>
+                      <apply>
+                        <lt/>
+                        <apply>
+                          <minus/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                          <ci> loc_rux3 </ci>
+                        </apply>
+                        <cn type="integer"> 0 </cn>
+                      </apply>
+                    </piece>
+                    <otherwise>
+                      <cn type="integer"> 1 </cn>
+                    </otherwise>
+                  </piecewise>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <exp/>
+                <apply>
+                  <times/>
+                  <ci> rux_degrade </ci>
+                  <apply>
+                    <minus/>
+                    <ci> loc_rux4 </ci>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 0 </cn>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <ci> input_rux4 </ci>
+                    <cn type="integer"> 0 </cn>
+                  </apply>
+                  <piecewise>
+                    <piece>
+                      <cn type="integer"> 0 </cn>
+                      <apply>
+                        <lt/>
+                        <apply>
+                          <minus/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                          <ci> loc_rux4 </ci>
+                        </apply>
+                        <cn type="integer"> 0 </cn>
+                      </apply>
+                    </piece>
+                    <otherwise>
+                      <cn type="integer"> 1 </cn>
+                    </otherwise>
+                  </piecewise>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="v1_Receptor_production" name="Receptor production" reversible="false">
+        <listOfProducts>
+          <speciesReference species="JAK1_gp130" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <apply>
+                <minus/>
+                <ci> gp130_pro </ci>
+              </apply>
+              <apply>
+                <minus/>
+                <ci> ActD </ci>
+                <cn type="integer"> 1 </cn>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v2_Receptor_degradation" name="Receptor degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="JAK1_gp130" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> JAK1_gp130 </ci>
+              <ci> gp130_deg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v3_Receptor_degradation" name="Receptor degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pJAK1_pgp130" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> gp130_deg </ci>
+              <ci> pJAK1_pgp130 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v4_Receptor_degradation" name="Receptor degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pJAK1_gp130" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> gp130_deg </ci>
+              <ci> pJAK1_gp130 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v5_Activation_of_the_JAK1_receptor" name="Activation of the JAK1 receptor" reversible="false">
+        <listOfReactants>
+          <speciesReference species="JAK1_gp130" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pJAK1_gp130" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> JAK1_gp130 </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <divide/>
+                      <ci> jak1_act_basal </ci>
+                      <ci> scale_pgp130_wb_bohl_hep_2005_07_26_Pulse5min </ci>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> IL6 </ci>
+                        <ci> jak1_act_il6 </ci>
+                      </apply>
+                      <ci> scale_pgp130_wb_bohl_hep_2005_07_26_Pulse5min </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> Ruxolitinib </ci>
+                    <ci> jak1_inh_ruxolitinib </ci>
+                  </apply>
+                  <cn type="integer"> 1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v6_Activation_of_the_gp130_subunit" name="Activation of the gp130 subunit" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pJAK1_gp130" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pJAK1_pgp130" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> gp130_act_jak1 </ci>
+                  <ci> pJAK1_gp130 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> Ruxolitinib </ci>
+                    <ci> jak1_inh_ruxolitinib </ci>
+                  </apply>
+                  <cn type="integer"> 1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v7_Receptor_dephosphorylation" name="Receptor dephosphorylation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pJAK1_gp130" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="JAK1_gp130" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> jak1_gp130_dea </ci>
+              <ci> pJAK1_gp130 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v8_Receptor_dephosphorylation" name="Receptor dephosphorylation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pJAK1_pgp130" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="JAK1_gp130" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> jak1_gp130_dea </ci>
+              <ci> pJAK1_pgp130 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v9_SOCS3_mediated_degradation" name="SOCS3 mediated degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="JAK1_gp130" stoichiometry="1"/>
+          <speciesReference species="SOCS3" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> JAK1_gp130 </ci>
+              <ci> SOCS3 </ci>
+              <ci> socs3_assoc </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v10_SOCS3_mediated_degradation" name="SOCS3 mediated degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pJAK1_gp130" stoichiometry="1"/>
+          <speciesReference species="SOCS3" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> SOCS3 </ci>
+              <ci> pJAK1_gp130 </ci>
+              <ci> socs3_assoc </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v11_SOCS3_mediated_degradation" name="SOCS3 mediated degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pJAK1_pgp130" stoichiometry="1"/>
+          <speciesReference species="SOCS3" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> SOCS3 </ci>
+              <ci> pJAK1_pgp130 </ci>
+              <ci> socs3_assoc </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v12_Import_of_unphosphorylated_STAT3" name="Import of unphosphorylated STAT3" reversible="false">
+        <listOfReactants>
+          <speciesReference species="STAT3" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nSTAT3" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> STAT3 </ci>
+              <ci> stat3_imp </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v13_Export_of_unphosphorylated_STAT3" name="Export of unphosphorylated STAT3" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nSTAT3" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="STAT3" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> nSTAT3 </ci>
+              <ci> stat3_exp </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v14_STAT3_phosphorylation_and_dimerization" name="STAT3 phosphorylation and dimerization" reversible="false">
+        <listOfReactants>
+          <speciesReference species="STAT3" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tpSTAT3" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="SOCS3"/>
+          <modifierSpeciesReference species="pJAK1_pgp130"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> STAT3 </ci>
+                  <ci> pJAK1_pgp130 </ci>
+                  <ci> stat3_act_gp130 </ci>
+                  <ci> scale_pgp130_wb_bohl_hep_2005_07_26_Pulse5min </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> SOCS3 </ci>
+                      <ci> stat3_inh_socs3 </ci>
+                    </apply>
+                    <cn type="integer"> 1 </cn>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> Stattic </ci>
+                      <ci> stat3_inh_stattic </ci>
+                    </apply>
+                    <cn type="integer"> 1 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v15_STAT3_import_and_deactivation" name="STAT3 import and deactivation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tpSTAT3" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nSTAT3" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> stat3_imp </ci>
+              <ci> tpSTAT3 </ci>
+              <apply>
+                <plus/>
+                <ci> f_pstat3_imp </ci>
+                <cn type="integer"> 1 </cn>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v16_Initiation_of_SOCS3_mRNA_transcription" name="Initiation of SOCS3 mRNA transcription" reversible="false">
+        <listOfProducts>
+          <speciesReference species="nSOCS3RNA1" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="tpSTAT3"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> socs3rna_pro </ci>
+                    <apply>
+                      <minus/>
+                      <ci> ActD </ci>
+                      <cn type="integer"> 1 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <times/>
+                        <cn> 25.34 </cn>
+                        <ci> stat3_imp </ci>
+                        <ci> tpSTAT3 </ci>
+                        <apply>
+                          <plus/>
+                          <ci> f_pstat3_imp </ci>
+                          <cn type="integer"> 1 </cn>
+                        </apply>
+                      </apply>
+                      <ci> socs3rna_hill </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> scale_socs3_qpcr_braun_hep_2013_07_08_qPCR_Socs3_Stat3 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction name="SOCS3 transcriptional delay SOCS#" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nSOCS3RNA1" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nSOCS3RNA2" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> nSOCS3RNA1 </ci>
+              <ci> socs3rna_delay </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v18_SOCS3_transcriptional_delay" name="SOCS3 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nSOCS3RNA2" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nSOCS3RNA3" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> nSOCS3RNA2 </ci>
+              <ci> socs3rna_delay </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v19_SOCS3_transcriptional_delay" name="SOCS3 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nSOCS3RNA3" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nSOCS3RNA4" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> nSOCS3RNA3 </ci>
+              <ci> socs3rna_delay </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v20_SOCS3_transcriptional_delay" name="SOCS3 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nSOCS3RNA4" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nSOCS3RNA5" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> nSOCS3RNA4 </ci>
+              <ci> socs3rna_delay </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v21_SOCS3_transcriptional_delay" name="SOCS3 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nSOCS3RNA5" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SOCS3RNA" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> nSOCS3RNA5 </ci>
+              <ci> socs3rna_delay </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v22_SOCS3_mRNA_degradation" name="SOCS3 mRNA degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="SOCS3RNA" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> SOCS3RNA </ci>
+              <ci> socs3rna_des </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v23_SOCS3_mRNA_translation" name="SOCS3 mRNA translation" reversible="false">
+        <listOfProducts>
+          <speciesReference species="SOCS3" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="SOCS3RNA"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> SOCS3RNA </ci>
+              <ci> socs3_pro </ci>
+              <ci> scale_socs3_qpcr_braun_hep_2013_07_08_qPCR_Socs3_Stat3 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v24_SOCS3_degradation" name="SOCS3 degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="SOCS3" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> SOCS3 </ci>
+              <ci> socs3_des </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v25_Initiation_of_CXCL10_mRNA_transcription" name="Initiation of CXCL10 mRNA transcription" reversible="false">
+        <listOfProducts>
+          <speciesReference species="nCXCL10RNA1" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="tpSTAT3"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> cxcl10rna_pro </ci>
+                    <apply>
+                      <minus/>
+                      <ci> ActD </ci>
+                      <cn type="integer"> 1 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> scale_cxcl10_qpcr_braun_calibration_hep_2011_06_06_qPCR_140109_IL6DR_1h_CXCL10 </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <cn> 0.0394632991318074 </cn>
+                          <ci> cxcl10rna_ka </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> stat3_imp </ci>
+                          <ci> tpSTAT3 </ci>
+                          <apply>
+                            <plus/>
+                            <ci> f_pstat3_imp </ci>
+                            <cn type="integer"> 1 </cn>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <ci> cxcl10rna_hill </ci>
+                    </apply>
+                    <cn type="integer"> 1 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v26_Initiation_of_FGG_mRNA_transcription" name="Initiation of FGG mRNA transcription" reversible="false">
+        <listOfProducts>
+          <speciesReference species="nFGGRNA1" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="tpSTAT3"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> fggrna_pro </ci>
+                    <apply>
+                      <minus/>
+                      <ci> ActD </ci>
+                      <cn type="integer"> 1 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> scale_fgg_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1 </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <cn> 0.0394632991318074 </cn>
+                          <ci> fggrna_ka </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> stat3_imp </ci>
+                          <ci> tpSTAT3 </ci>
+                          <apply>
+                            <plus/>
+                            <ci> f_pstat3_imp </ci>
+                            <cn type="integer"> 1 </cn>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <ci> fggrna_hill </ci>
+                    </apply>
+                    <cn type="integer"> 1 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v27_Initiation_of_HAMP_mRNA_transcription" name="Initiation of HAMP mRNA transcription" reversible="false">
+        <listOfProducts>
+          <speciesReference species="HAMPRNA" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="tpSTAT3"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> hamprna_pro </ci>
+                    <apply>
+                      <minus/>
+                      <ci> ActD </ci>
+                      <cn type="integer"> 1 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> scale_hamp_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1 </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <cn> 0.0394632991318074 </cn>
+                          <ci> hamprna_ka </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> stat3_imp </ci>
+                          <ci> tpSTAT3 </ci>
+                          <apply>
+                            <plus/>
+                            <ci> f_pstat3_imp </ci>
+                            <cn type="integer"> 1 </cn>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <ci> hamprna_hill </ci>
+                    </apply>
+                    <cn type="integer"> 1 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v28_Initiation_of_APCS_mRNA_transcription" name="Initiation of APCS mRNA transcription" reversible="false">
+        <listOfProducts>
+          <speciesReference species="APCSRNA" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="tpSTAT3"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> apcsrna_pro </ci>
+                    <apply>
+                      <minus/>
+                      <ci> ActD </ci>
+                      <cn type="integer"> 1 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> scale_apcs_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1 </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <cn> 0.0394632991318074 </cn>
+                          <ci> apcsrna_ka </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> stat3_imp </ci>
+                          <ci> tpSTAT3 </ci>
+                          <apply>
+                            <plus/>
+                            <ci> f_pstat3_imp </ci>
+                            <cn type="integer"> 1 </cn>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <ci> apcsrna_hill </ci>
+                    </apply>
+                    <cn type="integer"> 1 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v29_Initiation_of_HP_mRNA_transcription" name="Initiation of HP mRNA transcription" reversible="false">
+        <listOfProducts>
+          <speciesReference species="nHPRNA1" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="tpSTAT3"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> hprna_pro </ci>
+                    <apply>
+                      <minus/>
+                      <ci> ActD </ci>
+                      <cn type="integer"> 1 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> scale_hp_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1 </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <cn> 0.0394632991318074 </cn>
+                          <ci> hprna_ka </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> stat3_imp </ci>
+                          <ci> tpSTAT3 </ci>
+                          <apply>
+                            <plus/>
+                            <ci> f_pstat3_imp </ci>
+                            <cn type="integer"> 1 </cn>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <ci> hprna_hill </ci>
+                    </apply>
+                    <cn type="integer"> 1 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v30_Initiation_of_HPX_mRNA_transcription" name="Initiation of HPX mRNA transcription" reversible="false">
+        <listOfProducts>
+          <speciesReference species="nHPXRNA1" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="tpSTAT3"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> hpxrna_pro </ci>
+                    <apply>
+                      <minus/>
+                      <ci> ActD </ci>
+                      <cn type="integer"> 1 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <times/>
+                        <cn> 25.34 </cn>
+                        <ci> stat3_imp </ci>
+                        <ci> tpSTAT3 </ci>
+                        <apply>
+                          <plus/>
+                          <ci> f_pstat3_imp </ci>
+                          <cn type="integer"> 1 </cn>
+                        </apply>
+                      </apply>
+                      <ci> hpxrna_hill </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> scale_hpx_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v31_CXCL10_transcriptional_delay" name="CXCL10 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nCXCL10RNA1" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nCXCL10RNA2" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> cxcl10rna_delay </ci>
+              <ci> nCXCL10RNA1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v32_CXCL10_transcriptional_delay" name="CXCL10 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nCXCL10RNA2" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nCXCL10RNA3" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> cxcl10rna_delay </ci>
+              <ci> nCXCL10RNA2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v33_CXCL10_transcriptional_delay" name="CXCL10 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nCXCL10RNA3" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CXCL10RNA" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> cxcl10rna_delay </ci>
+              <ci> nCXCL10RNA3 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v34_HPX_transcriptional_delay" name="HPX transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nHPXRNA1" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="HPXRNA" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> hpxrna_delay </ci>
+              <ci> nHPXRNA1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v35_HP_transcriptional_delay" name="HP transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nHPRNA1" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="HPRNA" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> hprna_delay </ci>
+              <ci> nHPRNA1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v36_FGG_transcriptional_delay" name="FGG transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nFGGRNA1" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nFGGRNA2" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> fggrna_delay </ci>
+              <ci> nFGGRNA1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v37_FGG_transcriptional_delay" name="FGG transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nFGGRNA2" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nFGGRNA3" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> fggrna_delay </ci>
+              <ci> nFGGRNA2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v38_FGG_transcriptional_delay" name="FGG transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nFGGRNA3" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nFGGRNA4" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> fggrna_delay </ci>
+              <ci> nFGGRNA3 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v39_FGG_transcriptional_delay" name="FGG transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nFGGRNA4" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nFGGRNA5" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> fggrna_delay </ci>
+              <ci> nFGGRNA4 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v40_FGG_transcriptional_delay" name="FGG transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nFGGRNA5" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FGGRNA" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> fggrna_delay </ci>
+              <ci> nFGGRNA5 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v41_Initiation_of_IL33_mRNA_transcription" name="Initiation of IL33 mRNA transcription" reversible="false">
+        <listOfProducts>
+          <speciesReference species="nIL33RNA1" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="tpSTAT3"/>
+        </listOfModifiers>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> il33rna_pro </ci>
+                    <apply>
+                      <minus/>
+                      <ci> ActD </ci>
+                      <cn type="integer"> 1 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <times/>
+                        <cn> 25.34 </cn>
+                        <ci> stat3_imp </ci>
+                        <ci> tpSTAT3 </ci>
+                        <apply>
+                          <plus/>
+                          <ci> f_pstat3_imp </ci>
+                          <cn type="integer"> 1 </cn>
+                        </apply>
+                      </apply>
+                      <ci> il33rna_hill </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> scale_il33_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v42_IL33_transcriptional_delay" name="IL33 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nIL33RNA1" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nIL33RNA2" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> il33rna_delay </ci>
+              <ci> nIL33RNA1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v43_IL33_transcriptional_delay" name="IL33 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nIL33RNA2" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nIL33RNA3" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> il33rna_delay </ci>
+              <ci> nIL33RNA2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v44_IL33_transcriptional_delay" name="IL33 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nIL33RNA3" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nIL33RNA4" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> il33rna_delay </ci>
+              <ci> nIL33RNA3 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v45_IL33_transcriptional_delay" name="IL33 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nIL33RNA4" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nIL33RNA5" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> il33rna_delay </ci>
+              <ci> nIL33RNA4 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v46_IL33_transcriptional_delay" name="IL33 transcriptional delay" reversible="false">
+        <listOfReactants>
+          <speciesReference species="nIL33RNA5" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IL33RNA" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> nuc </ci>
+              <ci> il33rna_delay </ci>
+              <ci> nIL33RNA5 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v47_CXCL10_mRNA_degradation" name="CXCL10 mRNA degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="CXCL10RNA" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> CXCL10RNA </ci>
+              <ci> cxcl10rna_des </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v48_FGG_mRNA_degradation" name="FGG mRNA degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="FGGRNA" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> FGGRNA </ci>
+              <ci> fggrna_des </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v49_HAMP_mRNA_degradation" name="HAMP mRNA degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="HAMPRNA" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> HAMPRNA </ci>
+              <ci> hamprna_des </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v50_IL33_mRNA_degradation" name="IL33 mRNA degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IL33RNA" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> IL33RNA </ci>
+              <ci> il33rna_des </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v51_APCS_mRNA_degradation" name="APCS mRNA degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="APCSRNA" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> APCSRNA </ci>
+              <ci> apcsrna_des </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v52_HP_mRNA_degradation" name="HP mRNA degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="HPRNA" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> HPRNA </ci>
+              <ci> hprna_des </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v53_HPX_mRNA_degradation" name="HPX mRNA degradation" reversible="false">
+        <listOfReactants>
+          <speciesReference species="HPXRNA" stoichiometry="1"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> cyt </ci>
+              <ci> HPXRNA </ci>
+              <ci> hpxrna_des </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

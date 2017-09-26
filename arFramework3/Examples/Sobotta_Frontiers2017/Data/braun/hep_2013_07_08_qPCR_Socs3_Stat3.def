@@ -1,0 +1,17 @@
+DESCRIPTION
+"Experimenter: Svantje Braun"
+"Date: 2013-07-08"
+"Cells: primary hepatocytes"
+"Treatment: IL6 dose response 40ng/ml = 1nmol"
+"values normalized by HPRT"
+        
+PREDICTOR
+t               T   min     time	0	130
+
+INPUTS
+
+OBSERVABLES
+        
+ERRORS        
+        
+CONDITIONS

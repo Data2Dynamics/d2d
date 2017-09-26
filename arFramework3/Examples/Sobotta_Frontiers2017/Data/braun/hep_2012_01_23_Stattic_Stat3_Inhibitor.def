@@ -1,0 +1,16 @@
+DESCRIPTION
+"Experimenter: Svantje Braun"
+"Date: 2012-01-23"
+"Cells: primary hepatocytes"
+"Treatment: IL6 dose response 0.0005-500 40ng/ml = 1nmol, Stattic 40mumol/l"
+        
+PREDICTOR-DOSERESPONSE input_il6
+t               T   min     time	-60	70
+
+INPUTS
+
+OBSERVABLES
+        
+ERRORS        
+        
+CONDITIONS

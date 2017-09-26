@@ -1,0 +1,36 @@
+DESCRIPTION
+"Experimenter: Xiaoyun Huang"
+"Cells: primary hepatocytes"
+"Treatment: 0, 40 and 100ng/ml IL6 constant"
+
+PREDICTOR
+t T min time -60 3000
+
+INPUTS
+CXCL10_background     "monospline10(t, -200.0, CXCL10_knot1_1, 0.0, CXCL10_knot2_1, 30.0, CXCL10_knot3_1, 60.0, CXCL10_knot4_1, 180.0, CXCL10_knot5_1, 360.0, CXCL10_knot6_1, 1440.0, CXCL10_knot7_1, 1500.0, CXCL10_knot8_1, 1600.0, CXCL10_knot9_1, 2000.0, CXCL10_knot10_1)" "Monotonic spline describing CXCL10 background of replicate 1"
+APCS_background       "monospline10(t, -200.0, APCS_knot1_1,  0.0, APCS_knot2_1, 30.0, APCS_knot3_1, 60.0, APCS_knot4_1, 180.0, APCS_knot5_1, 360.0, APCS_knot6_1, 1440.0, APCS_knot7_1, 1500.0, APCS_knot8_1, 1600.0, APCS_knot9_1, 2000.0, APCS_knot10_1)"                    "Monotonic spline describing APCS background of replicate 1"
+FGG_background        "monospline10(t, -200.0, FGG_knot1_1, 0.0, FGG_knot2_1, 30.0, FGG_knot3_1, 60.0, FGG_knot4_1, 180.0, FGG_knot5_1, 360.0, FGG_knot6_1, 1440.0, FGG_knot7_1, 1500.0, FGG_knot8_1, 1600.0, FGG_knot9_1, 2000.0, FGG_knot10_1)"                               "Monotonic spline describing FGG background of replicate 1"
+HP_background         "monospline10(t, -200.0, HP_knot1_1, 0.0, HP_knot2_1, 30.0, HP_knot3_1, 60.0, HP_knot4_1, 180.0, HP_knot5_1, 360.0, HP_knot6_1, 1440.0, HP_knot7_1, 1500.0, HP_knot8_1, 1600.0, HP_knot9_1, 2000.0, HP_knot10_1)"                                         "Monotonic spline describing HP background of replicate 1"
+HPX_background        "monospline10(t, -200.0, HPX_knot1_1, 0.0, HPX_knot2_1, 30.0, HPX_knot3_1, 60.0, HPX_knot4_1, 180.0, HPX_knot5_1, 360.0, HPX_knot6_1, 1440.0, HPX_knot7_1, 1500.0, HPX_knot8_1, 1600.0, HPX_knot9_1, 2000.0, HPX_knot10_1)"                               "Monotonic spline describing HPX background of replicate 1"
+IL33_background       "monospline10(t, -200.0, IL33_knot1_1, 0.0, IL33_knot2_1, 30.0, IL33_knot3_1, 60.0, IL33_knot4_1, 180.0, IL33_knot5_1, 360.0, IL33_knot6_1, 1440.0, IL33_knot7_1, 1500.0, IL33_knot8_1, 1600.0, IL33_knot9_1, 2000.0, IL33_knot10_1)"                     "Monotonic spline describing IL33 background of replicate 1"
+HAMP_background       "monospline10(t, -200.0, HAMP_knot1_1, 0.0, HAMP_knot2_1, 30.0, HAMP_knot3_1, 60.0, HAMP_knot4_1, 180.0, HAMP_knot5_1, 360.0, HAMP_knot6_1, 1440.0, HAMP_knot7_1, 1500.0, HAMP_knot8_1, 1600.0, HAMP_knot9_1, 2000.0, HAMP_knot10_1)"                     "Monotonic spline describing HAMP background of replicate 1"
+
+OBSERVABLES
+CXCL10_mrna   C   au	conc.	 0  1	"scale_cxcl10_qpcr_tc_1 * CXCL10RNA + offset_cxcl10_qpcr_tc + CXCL10_background"
+APCS_mrna     C   au	conc.	 0  1	"scale_apcs_qpcr_tc_1   * APCSRNA   + offset_apcs_qpcr_tc   + APCS_background"
+FGG_mrna      C   au	conc.	 0  1	"scale_fgg_qpcr_tc_1    * FGGRNA    + offset_fgg_qpcr_tc    + FGG_background"
+HP_mrna       C   au	conc.	 0  1	"scale_hp_qpcr_tc_1     * HPRNA     + offset_hp_qpcr_tc     + HP_background"
+HPX_mrna      C   au	conc.	 0  1	"scale_hpx_qpcr_tc_1    * HPXRNA    + offset_hpx_qpcr_tc    + HPX_background"
+IL33_mrna     C   au	conc.	 0  1	"scale_il33_qpcr_tc_1   * IL33RNA   + offset_il33_qpcr_tc   + IL33_background"
+HAMP_mrna     C   au	conc.	 0  1	"scale_hamp_qpcr_tc_1   * HAMPRNA   + offset_hamp_qpcr_tc   + HAMP_background"
+
+ERRORS
+CXCL10_mrna     "sd_cxcl10_qpcr_tc_1"
+APCS_mrna       "sd_apcs_qpcr_tc_1"
+FGG_mrna        "sd_fgg_qpcr_tc_1"
+HP_mrna         "sd_hp_qpcr_tc_1"
+HPX_mrna        "sd_hpx_qpcr_tc_1"
+IL33_mrna       "sd_il33_qpcr_tc_1"
+HAMP_mrna       "sd_hamp_qpcr_tc_1"
+
+CONDITIONS

@@ -1,0 +1,303 @@
+DESCRIPTION
+"IL6 induced STAT3 activation with SOCS3 feedback."
+
+PREDICTOR
+t               T   min         time	0	200
+
+COMPARTMENTS
+cyt             V   pl          vol.
+nuc             V   pl          vol.
+
+STATES
+JAK1_gp130              C   nmol/l      conc.   cyt     1   "Unphosphorylated receptor"
+pJAK1_gp130             C   au          conc.   cyt     1   "Phosphorylated JAK1 receptor"
+pJAK1_pgp130            C   au          conc.   cyt     1   "Active receptor"
+
+STAT3                   C   nmol/l      conc.   cyt     1   "Unphosphorylated cytoplasmic STAT3"
+tpSTAT3                 C   nmol/l      conc.   cyt     1   "Phosphorylated STAT3"
+nSTAT3                  C   nmol/l      conc.   nuc     1   "Unphosphorylated nuclear STAT3"
+        
+nSOCS3RNA1              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+nSOCS3RNA2              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+nSOCS3RNA3              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+nSOCS3RNA4              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+nSOCS3RNA5              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+SOCS3RNA                C   au          conc.   cyt     1   "SOCS3 mRNA"
+SOCS3                   C   nmol/l      conc.   cyt     1   "SOCS3 protein"
+
+nIL33RNA1               C   au          conc.   nuc     0   "IL33 transcriptional delay"
+nIL33RNA2               C   au          conc.   nuc     0   "IL33 transcriptional delay"
+nIL33RNA3               C   au          conc.   nuc     0   "IL33 transcriptional delay"
+nIL33RNA4               C   au          conc.   nuc     0   "IL33 transcriptional delay"
+nIL33RNA5               C   au          conc.   nuc     0   "IL33 transcriptional delay"
+
+nCXCL10RNA1             C   au          conc.   nuc     0   "CXCL10 transcriptional delay"
+nCXCL10RNA2             C   au          conc.   nuc     0   "CXCL10 transcriptional delay"
+nCXCL10RNA3             C   au          conc.   nuc     0   "CXCL10 transcriptional delay"
+
+nFGGRNA1                C   au          conc.   nuc     0   "FGG transcriptional delay"
+nFGGRNA2                C   au          conc.   nuc     0   "FGG transcriptional delay"
+nFGGRNA3                C   au          conc.   nuc     0   "FGG transcriptional delay"
+nFGGRNA4                C   au          conc.   nuc     0   "FGG transcriptional delay"
+nFGGRNA5                C   au          conc.   nuc     0   "FGG transcriptional delay"
+
+nHPRNA1                 C   au          conc.   nuc     0   "HP transcriptional delay"
+nHPXRNA1                C   au          conc.   nuc     0   "HPX transcriptional delay"
+
+CXCL10RNA               C   au          conc.   cyt     1   "CXCL10 mRNA"
+FGGRNA                  C   au          conc.   cyt     1   "FGG mRNA"
+HAMPRNA                 C   au          conc.   cyt     1   "HAMP mRNA"
+IL33RNA                 C   au          conc.   cyt     1   "IL33 mRNA"
+APCSRNA                 C   au          conc.   cyt     1   "APCS mRNA"
+HPRNA                   C   au          conc.   cyt     1   "HP mRNA"
+HPXRNA                  C   au          conc.   cyt     1   "HPX mRNA"
+         
+INPUTS
+IL6                     C   ng/ml   conc.   "step1(t,0,0,input_il6)"                                        "Interleukin 6"
+ActD                    X   on/off  boolean "step1(t,0,-10,input_actd)"                                     "Actinomycin D"
+Stattic                 C   mumol/l conc.   "step1(t,0,-60,input_stattic)"                                  "Stattic"
+Ruxolitinib             C   nmol/l  conc.   "step1(t,0,-60,input_ruxolitinib) * exp(-(t+60)*rux_degrade)"   "Ruxolitinib"
+
+CXCL10_background       C   nmol/l  conc.   "0"                                                             "CXCL10 background mRNA level"
+APCS_background         C   nmol/l  conc.   "0"                                                             "APCS background mRNA level"
+FGG_background          C   nmol/l  conc.   "0"                                                             "FGG background mRNA level"
+HP_background           C   nmol/l  conc.   "0"                                                             "HP background mRNA level"
+HPX_background          C   nmol/l  conc.   "0"                                                             "HPX background mRNA level"
+IL33_background         C   nmol/l  conc.   "0"                                                             "IL33 background mRNA level"
+HAMP_background         C   nmol/l  conc.   "0"                                                             "HAMP background mRNA level"
+
+REACTIONS
+                     ->  JAK1_gp130           CUSTOM    "gp130_pro * (1 - ActD)"                                                                                                                                            "Receptor production"
+JAK1_gp130           ->                       CUSTOM    "gp130_deg * JAK1_gp130"                                                                                                                                            "Receptor degradation"
+pJAK1_pgp130         ->                       CUSTOM    "gp130_deg * pJAK1_pgp130"                                                                                                                                          "Receptor degradation"
+pJAK1_gp130          ->                       CUSTOM    "gp130_deg * pJAK1_gp130"                                                                                                                                           "Receptor degradation"
+
+JAK1_gp130           ->  pJAK1_gp130          CUSTOM	"(jak1_act_basal + jak1_act_il6 * IL6) * JAK1_gp130 / (1 + jak1_inh_ruxolitinib * Ruxolitinib)"                                                                     "Activation of the JAK1 receptor"
+pJAK1_gp130          ->  pJAK1_pgp130         CUSTOM    "gp130_act_jak1 * pJAK1_gp130 / (1 + jak1_inh_ruxolitinib * Ruxolitinib)"                                                                                           "Activation of the gp130 subunit"
+
+pJAK1_gp130          ->  JAK1_gp130           CUSTOM    "jak1_gp130_dea * pJAK1_gp130"                                                                                                                                      "Receptor dephosphorylation"
+pJAK1_pgp130         ->  JAK1_gp130           CUSTOM	"jak1_gp130_dea * pJAK1_pgp130"                                                                                                                                     "Receptor dephosphorylation"
+
+JAK1_gp130 + SOCS3   ->                       CUSTOM    "socs3_assoc * JAK1_gp130 * SOCS3"                                                                                                                                  "SOCS3 mediated degradation"
+pJAK1_gp130 + SOCS3  ->                       CUSTOM    "socs3_assoc * pJAK1_gp130 * SOCS3"                                                                                                                                 "SOCS3 mediated degradation"
+pJAK1_pgp130 + SOCS3 ->                       CUSTOM    "socs3_assoc * pJAK1_pgp130 * SOCS3"                                                                                                                                "SOCS3 mediated degradation"
+
+// Nuclear exchange of STAT3
+STAT3               ->  nSTAT3                CUSTOM    "stat3_imp * STAT3"                                                                                                                                                 "Import of unphosphorylated STAT3"
+nSTAT3              ->  STAT3                 CUSTOM	"stat3_exp * nSTAT3"                                                                                                                                                "Export of unphosphorylated STAT3"
+
+STAT3               ->  tpSTAT3               CUSTOM    "stat3_act_gp130 * STAT3 * pJAK1_pgp130 / (1 + stat3_inh_socs3 * SOCS3) / (1 + stat3_inh_stattic * Stattic)"                                                        "STAT3 phosphorylation and dimerization"
+
+// QSS solution for npSTAT3 was (pstat3_imp*stat3_dea)/(pstat3_imp+stat3_dea) * tpSTAT3
+// As deactivation rate goes to infinity, this approaches alpha * pstat3_imp * tpSTAT3
+tpSTAT3             ->  nSTAT3                CUSTOM    "stat3_imp * ( 1 + f_pstat3_imp ) * tpSTAT3"                                                                                                                        "STAT3 import and deactivation"
+
+// pSTAT3 is given by pSTAT3_imp / (pSTAT3_imp + stat3_dea)
+// Since stat3_dea >> pSTAT3_imp ==> very small, asymptotically linearly dependent on p_imp, with unknown scale
+// Unknown scale will be same for all conditions and absorbed by dynamic parameter.
+0                   ->  nSOCS3RNA1            CUSTOM	"socs3rna_pro * ( ( (vol_cyt/vol_nuc) * tpSTAT3 * stat3_imp * ( 1 + f_pstat3_imp ) )^socs3rna_hill ) * (1 - ActD)"                                                  "Initiation of SOCS3 mRNA transcription"
+nSOCS3RNA1          ->  nSOCS3RNA2            CUSTOM    "socs3rna_delay * nSOCS3RNA1"                                                                                                                                       "SOCS3 transcriptional delay SOCS#"
+nSOCS3RNA2          ->  nSOCS3RNA3            CUSTOM    "socs3rna_delay * nSOCS3RNA2"                                                                                                                                       "SOCS3 transcriptional delay"
+nSOCS3RNA3          ->  nSOCS3RNA4            CUSTOM    "socs3rna_delay * nSOCS3RNA3"                                                                                                                                       "SOCS3 transcriptional delay"
+nSOCS3RNA4          ->  nSOCS3RNA5            CUSTOM    "socs3rna_delay * nSOCS3RNA4"                                                                                                                                       "SOCS3 transcriptional delay"
+nSOCS3RNA5          ->  SOCS3RNA              CUSTOM	"socs3rna_delay * nSOCS3RNA5"                                                                                                                                       "SOCS3 transcriptional delay"
+SOCS3RNA            ->  0                     CUSTOM	"socs3rna_des * SOCS3RNA"                                                                                                                                           "SOCS3 mRNA degradation"
+0                   ->  SOCS3                 CUSTOM	"socs3_pro * SOCS3RNA"                                                                                                                                              "SOCS3 mRNA translation"
+SOCS3               ->  0                     CUSTOM	"socs3_des * SOCS3"                                                                                                                                                 "SOCS3 degradation"
+
+0                   ->  nCXCL10RNA1           CUSTOM	"cxcl10rna_pro / (1 + (cxcl10rna_ka / ( (vol_cyt/vol_nuc) * tpSTAT3 * stat3_imp * ( 1 + f_pstat3_imp ) ) )^cxcl10rna_hill) * (1 - ActD)"                            "Initiation of CXCL10 mRNA transcription"
+0                   ->  nFGGRNA1              CUSTOM	"fggrna_pro    / (1 + (fggrna_ka    / ( (vol_cyt/vol_nuc) * tpSTAT3 * stat3_imp * ( 1 + f_pstat3_imp ) ) )^fggrna_hill)    * (1 - ActD)"                            "Initiation of FGG mRNA transcription"
+0                   ->  HAMPRNA               CUSTOM	"hamprna_pro   / (1 + (hamprna_ka   / ( (vol_cyt/vol_nuc) * tpSTAT3 * stat3_imp * ( 1 + f_pstat3_imp ) ) )^hamprna_hill)   * (1 - ActD)"                            "Initiation of HAMP mRNA transcription"
+0                   ->  APCSRNA               CUSTOM	"apcsrna_pro   / (1 + (apcsrna_ka   / ( (vol_cyt/vol_nuc) * tpSTAT3 * stat3_imp * ( 1 + f_pstat3_imp ) ) )^apcsrna_hill)   * (1 - ActD)"                            "Initiation of APCS mRNA transcription"
+0                   ->  nHPRNA1               CUSTOM	"hprna_pro     / (1 + (hprna_ka     / ( (vol_cyt/vol_nuc) * tpSTAT3 * stat3_imp * ( 1 + f_pstat3_imp ) ) )^hprna_hill)     * (1 - ActD)"                            "Initiation of HP mRNA transcription"
+0                   ->  nHPXRNA1              CUSTOM	"hpxrna_pro * ( ( (vol_cyt/vol_nuc) * tpSTAT3 * stat3_imp * ( 1 + f_pstat3_imp ) )^hpxrna_hill ) * (1 - ActD)"                                                      "Initiation of HPX mRNA transcription"
+
+nCXCL10RNA1         ->  nCXCL10RNA2           CUSTOM    "cxcl10rna_delay * nCXCL10RNA1"                                                                                                                                     "CXCL10 transcriptional delay"
+nCXCL10RNA2         ->  nCXCL10RNA3           CUSTOM    "cxcl10rna_delay * nCXCL10RNA2"                                                                                                                                     "CXCL10 transcriptional delay"
+nCXCL10RNA3         ->  CXCL10RNA             CUSTOM	"cxcl10rna_delay * nCXCL10RNA3"                                                                                                                                     "CXCL10 transcriptional delay"
+
+nHPXRNA1            ->  HPXRNA                CUSTOM    "hpxrna_delay * nHPXRNA1"                                                                                                                                           "HPX transcriptional delay"
+nHPRNA1             ->  HPRNA                 CUSTOM	"hprna_delay * nHPRNA1"                                                                                                                                             "HP transcriptional delay"
+
+nFGGRNA1            ->  nFGGRNA2              CUSTOM    "fggrna_delay * nFGGRNA1"                                                                                                                                           "FGG transcriptional delay"
+nFGGRNA2            ->  nFGGRNA3              CUSTOM    "fggrna_delay * nFGGRNA2"                                                                                                                                           "FGG transcriptional delay"
+nFGGRNA3            ->  nFGGRNA4              CUSTOM    "fggrna_delay * nFGGRNA3"                                                                                                                                           "FGG transcriptional delay"
+nFGGRNA4            ->  nFGGRNA5              CUSTOM    "fggrna_delay * nFGGRNA4"                                                                                                                                           "FGG transcriptional delay"
+nFGGRNA5            ->  FGGRNA                CUSTOM	"fggrna_delay * nFGGRNA5"                                                                                                                                           "FGG transcriptional delay"
+
+//0                   ->  nIL33RNA1             CUSTOM	"il33rna_pro   / (1 + (il33rna_ka   / ( (vol_cyt/vol_nuc) * tpSTAT3 * stat3_imp * ( 1 + f_pstat3_imp ) ) )^il33rna_hill)   * (1 - ActD)"                            "Initiation of IL33 mRNA transcription"
+0                   ->  nIL33RNA1             CUSTOM	"il33rna_pro * ( ( (vol_cyt/vol_nuc) * tpSTAT3 * stat3_imp * ( 1 + f_pstat3_imp ) )^il33rna_hill ) * (1 - ActD)"                                                    "Initiation of IL33 mRNA transcription"
+nIL33RNA1           ->  nIL33RNA2             CUSTOM    "il33rna_delay * nIL33RNA1"                                                                                                                                         "IL33 transcriptional delay"
+nIL33RNA2           ->  nIL33RNA3             CUSTOM    "il33rna_delay * nIL33RNA2"                                                                                                                                         "IL33 transcriptional delay"
+nIL33RNA3           ->  nIL33RNA4             CUSTOM    "il33rna_delay * nIL33RNA3"                                                                                                                                         "IL33 transcriptional delay"
+nIL33RNA4           ->  nIL33RNA5             CUSTOM    "il33rna_delay * nIL33RNA4"                                                                                                                                         "IL33 transcriptional delay"
+nIL33RNA5           ->  IL33RNA               CUSTOM	"il33rna_delay * nIL33RNA5"                                                                                                                                         "IL33 transcriptional delay"
+
+CXCL10RNA           ->  0                     CUSTOM    "cxcl10rna_des * CXCL10RNA"                                                                                                                                         "CXCL10 mRNA degradation"
+FGGRNA              ->  0                     CUSTOM    "fggrna_des * FGGRNA"                                                                                                                                               "FGG mRNA degradation"
+HAMPRNA             ->  0                     CUSTOM    "hamprna_des * HAMPRNA"                                                                                                                                             "HAMP mRNA degradation"
+IL33RNA             ->  0                     CUSTOM    "il33rna_des * IL33RNA"                                                                                                                                             "IL33 mRNA degradation"
+APCSRNA             ->  0                     CUSTOM    "apcsrna_des * APCSRNA"                                                                                                                                             "APCS mRNA degradation"
+HPRNA               ->  0                     CUSTOM    "hprna_des * HPRNA"                                                                                                                                                 "HP mRNA degradation"
+HPXRNA              ->  0                     CUSTOM    "hpxrna_des * HPXRNA"                                                                                                                                               "HPX mRNA degradation"
+       
+DERIVED
+// STAT3 deactivation rate is much larger than import rate of phosphorylated STAT3
+// STAT3_dea >> pSTAT3_imp
+// Therefore npSTAT3 very close to zero and follows cytoplasmic phosphorylated STAT3
+//
+// tpSTAT3 stands for total pSTAT3; which is pSTAT3 + Vn/Vc * npSTAT3; 
+// However, npSTAT3 is a negligibly small fraction, therefore pSTAT3 is approximately tpSTAT3
+//
+// - npSTAT3 is originally given by (vol_cyt/vol_nuc) * tpSTAT3 * pstat3_imp / (pstat3_imp+stat3_dea).
+//   for large stat3_dea it approaches (vol_cyt/vol_nuc) * tpSTAT3 * pstat3_imp / stat3_dea
+//   since we never observe npSTAT3 unscaled; it makes more sense to define the observation 
+//   without the stat3_dea to avoid numerical issues. One should note that because of this
+//   npSTAT3 is arbitrarily scaled however.
+// - pSTAT3 is originally given by tpSTAT3 * stat3_dea / (pstat3_imp+stat3_dea)"
+//   for large stat3_dea, this becomes tpSTAT3
+//
+// Summarizing:
+//      npSTAT3 ==> (vol_cyt/vol_nuc) * tpSTAT3 * pstat3_imp
+//      note the absence of stat3_dea. This parameter is omitted because A. the scale of 
+//      npSTAT3 is non-identifiable and B. datasets involving npSTAT3 contain a scaling parameter.
+//      pSTAT3 ==> tpSTAT3
+//      In ntSTAT3, npSTAT3 is not incorporated; neither is npSTAT3 'subtracted' from ctSTAT3
+tJAK1               C   nmol/l      conc.   "JAK1_gp130 + pJAK1_gp130 + pJAK1_pgp130"
+pJAK1               C   nmol/l      conc.   "pJAK1_gp130 + pJAK1_pgp130"
+pgp130              C   nmol/l      conc.   "pJAK1_pgp130"
+tSOCS3              C   nmol/l      conc.   "SOCS3"
+
+npSTAT3             C   au          conc.   "(vol_cyt/vol_nuc) * tpSTAT3 * stat3_imp * ( 1 + f_pstat3_imp )"
+pSTAT3              C   nmol/l      conc.   "tpSTAT3"
+pSTAT3rel           C   %           rel.    "pSTAT3 / (STAT3 + pSTAT3)"
+tSTAT3              C   nmol/l      conc.   "(vol_cyt * STAT3 + vol_cyt * pSTAT3 + vol_nuc * nSTAT3)/(vol_cyt+vol_nuc)"
+ctSTAT3             C   nmol/l      conc.   "STAT3 + pSTAT3"
+ntSTAT3             C   nmol/l      conc.   "nSTAT3"
+
+OBSERVABLES
+pJAK1_wb        C	au      conc.   1	1   "offset_pjak1_wb_filename + scale_pjak1_wb_filename * pJAK1"           "pJAK1 Western blot"
+pgp130_wb       C	au      conc.   1	1   "offset_pgp130_wb_filename + scale_pgp130_wb_filename * pgp130"        "pgp130 Western blot"
+pSTAT3_wb       C	au      conc.   1	1   "offset_pstat3_wb_filename + scale_pstat3_wb_filename * pSTAT3"        "pSTAT3 Western blot"
+pSTAT3_lumi     C 	au      conc.   1	1   "offset_pstat3_lumi_filename + scale_pstat3_lumi_filename * pSTAT3"    "pSTAT3"
+npSTAT3_wb      C 	au      conc.   1	1   "offset_npstat3_wb_filename + scale_npstat3_wb_filename * npSTAT3"     "pSTAT3 Western blot"
+SOCS3_wb        C	au      conc.   1	1   "offset_socs3_wb_filename + scale_socs3_wb_filename * tSOCS3"          "SOCS3 Western blot"
+SOCS3_qpcr      C	au      conc.   1	1   "offset_socs3_qpcr_filename + scale_socs3_qpcr_filename * SOCS3RNA"    "SOCS3 qPCR"
+ntSTAT3_ratio   C 	au      conc.   0	1   "ntSTAT3 / (STAT3 + pSTAT3)"                                           "Total nuclear STAT3"
+JAK1_gp130_abs  C 	nmol/l  conc.   0	1   "tJAK1"                                                                "JAK1 molecules per cell"
+ctSTAT3_abs     C 	nmol/l  conc.   0	1   "ctSTAT3"                                                              "Cytoplasmic STAT3 molecules per cell"
+SOCS3_abs       C	nmol/l  conc.   0	1   "tSOCS3"                                                               "SOCS3 molecules per cell"
+
+CXCL10_qpcr     C	au      conc.   1	1   "offset_cxcl10_qpcr_filename + scale_cxcl10_qpcr_filename * CXCL10RNA" "CXCL10 qPCR"
+FGG_qpcr        C	au      conc.   1	1   "offset_fgg_qpcr_filename    + scale_fgg_qpcr_filename    * FGGRNA"    "FGG qPCR"
+HAMP_qpcr       C	au      conc.   1	1   "offset_hamp_qpcr_filename   + scale_hamp_qpcr_filename   * HAMPRNA"   "HAMP qPCR"
+IL33_qpcr       C	au      conc.   1	1   "offset_il33_qpcr_filename   + scale_il33_qpcr_filename   * IL33RNA"   "IL33 qPCR"
+APCS_qpcr       C	au      conc.   1	1   "offset_apcs_qpcr_filename   + scale_apcs_qpcr_filename   * APCSRNA"   "APCS qPCR"
+HP_qpcr         C	au      conc.   1	1   "offset_hp_qpcr_filename     + scale_hp_qpcr_filename     * HPRNA"     "HP qPCR"
+HPX_qpcr        C	au      conc.   1	1   "offset_hpx_qpcr_filename    + scale_hpx_qpcr_filename    * HPXRNA"    "HPX qPCR"
+
+ERRORS
+pJAK1_wb                        "sd_pjak1_wb_filename"
+pgp130_wb                       "sd_pgp130_wb_filename"
+pSTAT3_wb                       "sd_pstat3_wb_filename"
+pSTAT3_lumi                     "sd_pstat3_lumi_filename"        
+npSTAT3_wb                      "sd_npstat3_wb_filename"        
+SOCS3_wb                        "sd_socs3_wb_filename"
+SOCS3_qpcr                      "sd_socs3_qpcr_filename"
+ntSTAT3_ratio                   "sd_ntstat3_ratio_filename"
+JAK1_gp130_abs                  "sd_JAK1_gp130_abs"
+ctSTAT3_abs                     "sd_ctSTAT3_abs"
+SOCS3_abs                       "sd_SOCS3_abs"
+
+CXCL10_qpcr                     "sd_cxcl10_qpcr"
+FGG_qpcr                        "sd_fgg_qpcr"
+HAMP_qpcr                       "sd_hamp_qpcr"
+IL33_qpcr                       "sd_il33_qpcr"
+APCS_qpcr                       "sd_apcs_qpcr"
+HP_qpcr                         "sd_hp_qpcr"
+HPX_qpcr                        "sd_hpx_qpcr"
+
+CONDITIONS
+vol_cyt                         "12.67"
+vol_nuc                         "0.5"
+
+// No initials for unconserved moieities
+init_SOCS3RNA                   "0"
+init_nSOCS3RNA1                 "0"
+init_nSOCS3RNA2                 "0"
+init_nSOCS3RNA3                 "0"
+init_nSOCS3RNA4                 "0"
+init_nSOCS3RNA5                 "0"
+init_SOCS3                      "0"
+
+init_CXCL10RNA                  "0"
+init_FGGRNA                     "0"
+init_HAMPRNA                    "0"
+init_IL33RNA                    "0"
+init_APCSRNA                    "0"
+init_HPRNA                      "0"
+init_HPXRNA                     "0"
+
+init_nCXCL10RNA1                  "0"
+init_nFGGRNA1                     "0"
+init_nIL33RNA1                    "0"
+init_nHPRNA1                      "0"
+init_nHPXRNA1                     "0"
+
+init_nCXCL10RNA2                  "0"
+init_nFGGRNA2                     "0"
+init_nIL33RNA2                    "0"
+
+init_nCXCL10RNA3                  "0"
+init_nFGGRNA3                     "0"
+init_nIL33RNA3                    "0"
+
+init_nFGGRNA4                     "0"
+init_nIL33RNA4                    "0"
+
+init_nFGGRNA5                     "0"
+init_nIL33RNA5                    "0"
+
+init_nIL33RNA1                  "0"
+init_nIL33RNA2                  "0"
+init_nIL33RNA3                  "0"
+init_nIL33RNA4                  "0"
+init_nIL33RNA5                  "0"
+
+// inputs
+input_il6                       "40"
+input_actd                      "0"
+input_stattic                   "0"
+input_ruxolitinib               "0"
+        
+// No initials for the receptor module
+init_JAK1_gp130                 "gp130_pro/gp130_deg"
+init_pJAK1_gp130                "0"
+init_pJAK1_pgp130               "0"
+
+// Note that total is not total STAT3 in absolute concentration; but some measure of the pool, which is estimated based on data anyway
+init_STAT3                      "0"
+init_tpSTAT3                    "0"
+init_nSTAT3                     "total_STAT3"
+
+// Reparameterization to scaled SOCS3RNA
+socs3rna_pro                   "socs3rna_pro / scale_socs3_qpcr_braun_hep_2013_07_08_qPCR_Socs3_Stat3"
+socs3_pro                      "socs3_pro * scale_socs3_qpcr_braun_hep_2013_07_08_qPCR_Socs3_Stat3"
+
+// Decoupling dynamics from scale for APP genes
+apcsrna_pro                    "apcsrna_pro / scale_apcs_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1"
+cxcl10rna_pro                  "cxcl10rna_pro / scale_cxcl10_qpcr_braun_calibration_hep_2011_06_06_qPCR_140109_IL6DR_1h_CXCL10"
+fggrna_pro                     "fggrna_pro / scale_fgg_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1"
+hamprna_pro                    "hamprna_pro / scale_hamp_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1"
+hprna_pro                      "hprna_pro / scale_hp_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1"
+hpxrna_pro                     "hpxrna_pro / scale_hpx_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1"
+il33rna_pro                    "il33rna_pro / scale_il33_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1"
+
+// Reparameterization to scaled active receptor (active fraction is below a detectable depletion)
+jak1_act_basal                 "jak1_act_basal / scale_pgp130_wb_bohl_hep_2005_07_26_Pulse5min"
+jak1_act_il6                   "jak1_act_il6 / scale_pgp130_wb_bohl_hep_2005_07_26_Pulse5min"
+stat3_act_gp130                "stat3_act_gp130 * scale_pgp130_wb_bohl_hep_2005_07_26_Pulse5min"
+scale_pstat3_wb_filename       "scale_pstat3_wb_filename / total_STAT3"
+scale_pstat3_lumi_filename     "scale_pstat3_lumi_filename / total_STAT3"
+scale_npstat3_wb_filename      "scale_npstat3_wb_filename / total_STAT3"
+

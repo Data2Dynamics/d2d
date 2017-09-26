@@ -1,0 +1,16 @@
+DESCRIPTION
+"Experimenter: Sebastian Bohl"
+"Date: 2007-04-04"
+"Cells: primary hepatocytes"
+"Treatment: IL6 dose response"
+
+PREDICTOR-DOSERESPONSE input_il6
+t               T   min     time	0	35
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+        
+CONDITIONS
