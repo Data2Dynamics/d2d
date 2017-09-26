@@ -13,7 +13,7 @@
 
 % which_lig = which ligand to be plotted, same as for BDT_bootstrap
 
-function plot_Conf(struct, folder, which_lig) % [hae, naive] = 
+function [hae, naive] = plot_Conf(struct, folder, which_lig) % [hae, naive] = 
 global bdt_figures
 
 if(~exist('struct','var') || isempty(struct))

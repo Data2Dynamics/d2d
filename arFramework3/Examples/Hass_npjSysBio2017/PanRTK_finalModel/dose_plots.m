@@ -107,7 +107,10 @@ for ip = which
         for i=1:length(h2)
             if(strcmp(h2(i).Type,'axes'))
                 title = strrep(h2(i).Title.String,'\_au','');
-                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title));
+                if(isempty(title))
+                    continue
+                end
+                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title{1}));
                 if(strcmp(title,'pIGF1R'))
                     h2(i).Title.String = strrep(h2(i).Title.String,'pIGF1R','pIGF-1R');
                 elseif(strcmp(title,'pErbB2'))
@@ -149,7 +152,10 @@ for ip = which
         for i=1:length(h2)
             if(strcmp(h2(i).Type,'axes'))
                 title = strrep(h2(i).Title.String,'\','');
-                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title));
+                if(isempty(title))
+                    continue
+                end
+                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title{1}));
                 if(strcmp(title,'pIGF1R'))
                     h2(i).Title.String = strrep(h2(i).Title.String,'pIGF1R','pIGF-1R');
                 elseif(strcmp(title,'pErbB2'))
@@ -189,7 +195,10 @@ for ip = which
         for i=1:length(h2)
             if(strcmp(h2(i).Type,'axes'))
                 title = strrep(h2(i).Title.String,'\','');
-                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title));
+                if(isempty(title))
+                    continue
+                end
+                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title{1}));
                 if(strcmp(title,'pIGF1R'))
                     h2(i).Title.String = strrep(h2(i).Title.String,'pIGF1R','pIGF-1R');
                 elseif(strcmp(title,'pErbB2'))
@@ -229,7 +238,10 @@ for ip = which
         for i=1:length(h2)
             if(strcmp(h2(i).Type,'axes'))
                 title = strrep(h2(i).Title.String,'\','');
-                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title));
+                if(isempty(title))
+                    continue
+                end
+                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title{1}));
                 if(strcmp(title,'pIGF1R'))
                     h2(i).Title.String = strrep(h2(i).Title.String,'pIGF1R','pIGF-1R');
                 elseif(strcmp(title,'pErbB2'))
@@ -269,7 +281,10 @@ for ip = which
         for i=1:length(h2)
             if(strcmp(h2(i).Type,'axes'))
                 title = strrep(h2(i).Title.String,'\','');
-                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title));
+                if(isempty(title))
+                    continue
+                end
+                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title{1}));
                 if(strcmp(title,'pIGF1R'))
                     h2(i).Title.String = strrep(h2(i).Title.String,'pIGF1R','pIGF-1R');
                 elseif(strcmp(title,'pErbB2'))
@@ -313,7 +328,10 @@ for ip = which
         for i=1:length(h2)
             if(strcmp(h2(i).Type,'axes'))
                 title = strrep(h2(i).Title.String,'\','');
-                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title));
+                if(isempty(title))
+                    continue
+                end
+                yindex = find(strcmp(strrep(ar.model(1).data(1).yNames,'_au',''),title{1}));
                 if(strcmp(title,'pIGF1R'))
                     h2(i).Title.String = strrep(h2(i).Title.String,'pIGF1R','pIGF-1R');
                 elseif(strcmp(title,'pErbB2'))

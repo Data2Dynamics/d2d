@@ -19,47 +19,38 @@ dose_BTC            C	"au"	"conc."	cyt	1
 EGFR            C	"au"	"conc."	cyt	1
 EGFR_EGF        C	"au"	"conc."	cyt	1
 EGFR_BTC        C	"au"	"conc."	cyt	1
-//EGFRd            C	"au"	"conc."	cyt	1
 pEGFRd           C	"au"	"conc."	cyt	1
 pEGFRi           C	"au"	"conc."	cyt	1
 pEGFRi_ph           C	"au"	"conc."	cyt	1
 EGFRi           C	"au"	"conc."	cyt	1
 
 ErbB2           C	"au"	"conc."	cyt	1
-//ErbB2d           C	"au"	"conc."	cyt	1
 pErbB2          C	"au"	"conc."	cyt	1
 pErbB2i           C	"au"	"conc."	cyt	1
 ErbB2i           C	"au"	"conc."	cyt	1
 pErbB2i_ph           C	"au"	"conc."	cyt	1
 
-//ErbB12          C	"au"	"conc."	cyt	1
 pErbB12          C	"au"	"conc."	cyt	1
 pErbB12i          C	"au"	"conc."	cyt	1
 pErbB12i_ph          C	"au"	"conc."	cyt	1
 
 ErbB3           C	"au"	"conc."	cyt	1
 ErbB3_HRG       C	"au"	"conc."	cyt	1
-//ErbB3d           C	"au"	"conc."	cyt	1
-//pErbB3          C	"au"	"conc."	cyt	1
 pErbB3d          C	"au"	"conc."	cyt	1
 pErbB3i           C	"au"	"conc."	cyt	1
 pErbB3i_ph           C	"au"	"conc."	cyt	1
 ErbB3i           C	"au"	"conc."	cyt	1
 
-//ErbB13          C	"au"	"conc."	cyt	1
 pErbB13          C	"au"	"conc."	cyt	1
 pErbB13i          C	"au"	"conc."	cyt	1
 pErbB13i_ph          C	"au"	"conc."	cyt	1
 
-//ErbB32          C	"au"	"conc."	cyt	1
 pErbB32          C	"au"	"conc."	cyt	1
 pErbB32i          C	"au"	"conc."	cyt	1
 pErbB32i_ph          C	"au"	"conc."	cyt	1
 
 IGF1R           C	"au"	"conc."	cyt	1
 IGF1R_IGF1      C	"au"	"conc."	cyt	1
-//IGF1Rd           C	"au"	"conc."	cyt	1
-//pIGF1R          C	"au"	"conc."	cyt	1  
 pIGF1Rd          C	"au"	"conc."	cyt	1   
 pIGF1Ri           C	"au"	"conc."	cyt	1
 pIGF1Ri_ph           C	"au"	"conc."	cyt	1
@@ -101,7 +92,6 @@ REACTIONS
 // RECEPTORS
 
 // Production
-//                ->  RTKph            CUSTOM  "RTKph_prod"
                 ->  EGFR                CUSTOM  "EGFR_prod"
                 ->  ErbB2               CUSTOM  "ErbB2_prod"
                 ->  ErbB3               CUSTOM  "ErbB3_prod"
@@ -130,25 +120,19 @@ EGFR_BTC + EGFR_BTC         -> pEGFRd    CUSTOM  "EGFR_BTC_dimerize * EGFR_BTC^2
 //EGFRd         -> EGFR_EGF + EGFR_EGF    CUSTOM  "EGFR_split * EGFRd"
 
 ErbB2 + ErbB2         -> pErbB2    CUSTOM  "ErbB2_dimerize * ErbB2^2"
-//ErbB2d         -> ErbB2 + ErbB2    CUSTOM  "ErbB2_split * ErbB2d"
 
 ErbB3_HRG + ErbB3_HRG         -> pErbB3d    CUSTOM  "ErbB3_dimerize * ErbB3_HRG^2"
-//ErbB3d         -> ErbB3_HRG + ErbB3_HRG    CUSTOM  "ErbB3_split * ErbB3d"
 
 IGF1R_IGF1 + IGF1R_IGF1         -> pIGF1Rd    CUSTOM  "IGF1R_dimerize * IGF1R_IGF1^2"
-//IGF1Rd         -> IGF1R_IGF1 + IGF1R_IGF1    CUSTOM  "IGF1R_split * IGF1Rd"
 
 EGFR_EGF + ErbB2         -> pErbB12   CUSTOM  "EGFR_ErbB2_dimerize * EGFR_EGF * ErbB2"
 EGFR_BTC + ErbB2         -> pErbB12   CUSTOM  "EGFR_ErbB2_BTC_dimerize * EGFR_BTC * ErbB2"
-//ErbB12         -> EGFR_EGF + ErbB2    CUSTOM  "ErbB12_split * ErbB12"
 
 EGFR_EGF + ErbB3_HRG         -> pErbB13   CUSTOM  "EGFR_ErbB3_dimerize * EGFR_EGF * ErbB3_HRG"
 EGFR_BTC + ErbB3_HRG         -> pErbB13   CUSTOM  "EGFR_ErbB3_BTC_dimerize * EGFR_BTC * ErbB3_HRG"
 EGFR_BTC + ErbB3         -> pErbB13   CUSTOM  "EGFR_ErbB3_dimerize_noHRG * EGFR_BTC * ErbB3"
-//ErbB13         -> EGFR_EGF + ErbB3_HRG    CUSTOM  "ErbB13_split * ErbB13"
 
 ErbB2 + ErbB3_HRG         -> pErbB32   CUSTOM  "ErbB2_ErbB3_dimerize * ErbB2 * ErbB3_HRG"
-//ErbB32         -> ErbB2 + ErbB3_HRG    CUSTOM  "ErbB32_split * ErbB32"
 
 Met_HGF + Met_HGF         -> pMetd   CUSTOM  "Met_dimerize * Met_HGF^2"
 
@@ -173,100 +157,65 @@ Met  + EGFR         -> pMetEGFR  CUSTOM  "Met_EGFR_basal_act * Met * EGFR"
 
 // Phosphorylation  
 //EGFR homodimers         
-//EGFRd        -> pEGFRd         CUSTOM "EGFR_activation * EGFRd"
-//pEGFRd        -> EGFR + EGFR          CUSTOM "pEGFR_dephosphorylation * pEGFRd"
 pEGFRd               ->  pEGFRi      CUSTOM  "pEGFR_internalize * pEGFRd"
-
 pEGFRi       ->                      CUSTOM  "pEGFR_degradation * pEGFRi"
 pEGFRi + RTKph   ->  pEGFRi_ph      CUSTOM  "pEGFR_phosphatase_binding * pEGFRi * RTKph"
 pEGFRi_ph      ->  EGFRi + EGFRi + RTKph       CUSTOM  "pEGFRi_dephosph * pEGFRi_ph"
-//EGFRdi          ->      EGFRi + EGFRi       CUSTOM  "EGFRdi_split * EGFRdi"
-
-//EGFRdi          ->  EGFR + EGFR           CUSTOM  "EGFR_recycle * EGFRdi"
 EGFRi           ->  EGFR            CUSTOM  "EGFR_basal_recycle * EGFRi"
 
 //ErbB2 homodimers
-//ErbB2d              ->  pErbB2   CUSTOM  "ErbB2_activate * ErbB2d"
-//pErbB2       ->   ErbB2 + ErbB2       CUSTOM  "pErbB2_dephosphorylation * pErbB2"
 pErbB2          ->  pErbB2i     CUSTOM  "pErbB2_internalize * pErbB2"
 pErbB2i + RTKph         ->  pErbB2i_ph      CUSTOM  "pErbB2i_phosphatase * pErbB2i * RTKph"
 pErbB2i_ph         ->  ErbB2i + ErbB2i + RTKph      CUSTOM  "pErbB2i_dephosph * pErbB2i_ph"
-//ErbB2di          ->      ErbB2d       CUSTOM  "ErbB2d_recycle * ErbB2di"
-//ErbB2di          ->      ErbB2i + ErbB2i       CUSTOM  "ErbB2di_split * ErbB2di"
 pErbB2i       ->                  CUSTOM  "pErbB2_degradation * pErbB2i"
 ErbB2i          ->      ErbB2       CUSTOM  "ErbB2_recycle * ErbB2i"
 
 //ErbB3 homodimers
-//ErbB3d        -> pErbB3d         CUSTOM "ErbB3_activation * ErbB3d"
-//pErbB3d        -> ErbB3 + ErbB3          CUSTOM "pErbB3_dephosphorylation * pErbB3d"
 pErbB3d               ->  pErbB3i      CUSTOM  "pErbB3_internalize * pErbB3d"
-
 pErbB3i       ->                      CUSTOM  "pErbB3_degradation * pErbB3i"
 pErbB3i + RTKph      ->  pErbB3i_ph       CUSTOM  "pErbB3i_phosphatase * pErbB3i * RTKph"
 pErbB3i_ph      ->  ErbB3i + ErbB3i + RTKph       CUSTOM  "pErbB3i_dephosph * pErbB3i_ph"
-//ErbB3di          ->      ErbB3i + ErbB3i       CUSTOM  "ErbB3di_split * ErbB3di"
-
-//ErbB3di          ->  ErbB3d           CUSTOM  "ErbB3_recycle * ErbB3di"
 ErbB3i           ->  ErbB3            CUSTOM  "ErbB3_basal_recycle * ErbB3i"
 
 //IGF1R homodimers
-//IGF1Rd        -> pIGF1Rd         CUSTOM "IGF1R_activation * IGF1Rd"
-//pIGF1Rd        -> IGF1R + IGF1R          CUSTOM "pIGF1R_dephosphorylation * pIGF1Rd"
 pIGF1Rd               ->  pIGF1Ri      CUSTOM  "pIGF1R_internalize * pIGF1Rd"
-
 pIGF1Ri       ->                      CUSTOM  "pIGF1R_degradation * pIGF1Ri"
 pIGF1Ri + RTKph      ->  pIGF1Ri_ph       CUSTOM  "pIGF1Ri_phosphatase * pIGF1Ri * RTKph"
 pIGF1Ri_ph      ->  IGF1Ri + IGF1Ri + RTKph       CUSTOM  "pIGF1Ri_dephosph * pIGF1Ri_ph"
-
-//IGF1Rdi          ->      IGF1Ri + IGF1Ri       CUSTOM  "IGF1Rdi_split * IGF1Rdi"
-
-//IGF1Rdi          ->  IGF1Rd           CUSTOM  "IGF1R_recycle * IGF1Rdi"
 IGF1Ri           ->  IGF1R            CUSTOM  "IGF1R_basal_recycle * IGF1Ri"
 
 //EGFR-ErbB2 heterodimers
-//ErbB12        -> pErbB12         CUSTOM "ErbB12_activation * ErbB12"
-//pErbB12        -> ErbB2 + EGFR          CUSTOM "pErbB12_dephosphorylation * pErbB12"
 pErbB12               ->  pErbB12i      CUSTOM  "pErbB12_internalize * pErbB12"
-
 pErbB12i       ->                      CUSTOM  "pErbB12_degradation * pErbB12i"
 pErbB12i + RTKph      ->  pErbB12i_ph       CUSTOM  "pErbB12i_phosphatase * pErbB12i * RTKph"
 pErbB12i_ph      ->  ErbB2i + EGFRi + RTKph       CUSTOM  "pErbB12i_dephosph * pErbB12i_ph"
-//ErbB12i          ->      ErbB2i + EGFRi       CUSTOM  "ErbB12i_split * ErbB12i"
-//ErbB12i          ->  ErbB12           CUSTOM  "ErbB12_recycle * ErbB12i"
 
 //ErbB2 - ErbB3 heterodimers
-//ErbB32        -> pErbB32         CUSTOM "ErbB32_activation * ErbB32"
-//pErbB32        -> ErbB3 + ErbB2          CUSTOM "pErbB32_dephosphorylation * pErbB32"
 pErbB32               ->  pErbB32i      CUSTOM  "pErbB32_internalize * pErbB32"
-
 pErbB32i       ->                      CUSTOM  "pErbB32_degradation * pErbB32i"
 pErbB32i + RTKph      ->  pErbB32i_ph       CUSTOM  "pErbB32i_phosphatase * pErbB32i * RTKph"
 pErbB32i_ph      ->  ErbB3i + ErbB2i + RTKph       CUSTOM  "pErbB32i_dephosph * pErbB32i_ph"
-//ErbB32i          ->      ErbB2i + ErbB3i       CUSTOM  "ErbB32i_split * ErbB32i"
-//ErbB32i          ->  ErbB32           CUSTOM  "ErbB32_recycle * ErbB32i"
 
 //EGFR-ErbB3 heterodimers
-//ErbB13        -> pErbB13         CUSTOM "ErbB13_activation * ErbB13"
-//pErbB13        -> ErbB3 + EGFR          CUSTOM "pErbB13_dephosphorylation * pErbB13"
 pErbB13               ->  pErbB13i      CUSTOM  "pErbB13_internalize * pErbB13"
-
 pErbB13i       ->                      CUSTOM  "pErbB13_degradation * pErbB13i"
 pErbB13i + RTKph      ->  pErbB13i_ph      CUSTOM  "pErbB13i_phosphatase * pErbB13i * RTKph"
 pErbB13i_ph     ->  ErbB3i + EGFRi + RTKph      CUSTOM  "pErbB13i_dephosph * pErbB13i_ph"
-//ErbB13i          ->      ErbB3i + EGFRi       CUSTOM  "ErbB13i_split * ErbB13i"
-//ErbB13i          ->  ErbB13           CUSTOM  "ErbB13_recycle * ErbB13i"
 
+//MET homodimers
 pMetd               ->  pMeti      CUSTOM  "pMet_internalize * pMetd"
 pMeti       ->                      CUSTOM  "pMet_degradation * pMeti"
 pMeti + RTKph      ->  pMeti_ph       CUSTOM  "pMeti_phosphatase * pMeti * RTKph"
 pMeti_ph      ->  Meti + Meti + RTKph       CUSTOM  "pMeti_dephosph * pMeti_ph"
 Meti        ->      Met                 CUSTOM  "Met_recycle * Meti"
 
+//MET-ErbB3 heterodimers
 pMetErbB3               ->  pMetErbB3i      CUSTOM  "pMetErbB3_internalize * pMetErbB3"
 pMetErbB3i       ->                      CUSTOM  "pMetErbB3_degradation * pMetErbB3i"
 pMetErbB3i + RTKph      ->  pMetErbB3i_ph       CUSTOM  "pMetErbB3i_phosphatase * pMetErbB3i * RTKph"
 pMetErbB3i_ph      ->  Meti + ErbB3i + RTKph       CUSTOM  "pMetErbB3i_dephosph * pMetErbB3i_ph"
 
+//MET-EGFR heterodimers
 pMetEGFR               ->  pMetEGFRi      CUSTOM  "pMetEGFR_internalize * pMetEGFR"
 pMetEGFRi       ->                      CUSTOM  "pMetEGFR_degradation * pMetEGFRi"
 pMetEGFRi + RTKph      ->  pMetEGFRi_ph       CUSTOM  "pMetEGFRi_phosphatase * pMetEGFRi * RTKph"
@@ -275,15 +224,15 @@ pMetEGFRi_ph      ->  Meti + EGFRi + RTKph       CUSTOM  "pMetEGFRi_dephosph * p
 // DOWNSTREAM
 
 // ERK branch 
-MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pEGFR * MEK * pEGFRd / (1 + feedback_pERK * pERK + feedback_pAKT*init_pAKT)"
-MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pErbB12 * MEK * pErbB12 / (1 + feedback_pERK * pERK + feedback_pAKT*init_pAKT)"
-MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pErbB13 * MEK * pErbB13 / (1 + feedback_pERK * pERK + feedback_pAKT*init_pAKT)"
-MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pErbB32 * MEK * pErbB32 / (1 + feedback_pERK * pERK + feedback_pAKT*init_pAKT)"
-MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pMetd * MEK * pMetd / (1 + feedback_pERK * pERK + feedback_pAKT*init_pAKT)"
-MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pMetEGFR * MEK * pMetEGFR / (1 + feedback_pERK * pERK + feedback_pAKT*init_pAKT)"
-MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pIGF1R * MEK * pIGF1Rd / (1 + feedback_pERK * pERK + feedback_pAKT*init_pAKT)"
-MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pMetErbB3 * MEK * pMetErbB3 / (1 + feedback_pERK * pERK + feedback_pAKT*init_pAKT)"
-MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pIGF1R * MEK_internIGF1R_effect * MEK * pIGF1Ri / (1 + feedback_pERK * pERK + feedback_pAKT*init_pAKT)"
+MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pEGFR * MEK * pEGFRd / (1 + feedback_pERK * pERK + feedback_pAKT*pAKT)"
+MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pErbB12 * MEK * pErbB12 / (1 + feedback_pERK * pERK + feedback_pAKT*pAKT)"
+MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pErbB13 * MEK * pErbB13 / (1 + feedback_pERK * pERK + feedback_pAKT*pAKT)"
+MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pErbB32 * MEK * pErbB32 / (1 + feedback_pERK * pERK + feedback_pAKT*pAKT)"
+MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pMetd * MEK * pMetd / (1 + feedback_pERK * pERK + feedback_pAKT*pAKT)"
+MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pMetEGFR * MEK * pMetEGFR / (1 + feedback_pERK * pERK + feedback_pAKT*pAKT)"
+MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pIGF1R * MEK * pIGF1Rd / (1 + feedback_pERK * pERK + feedback_pAKT*pAKT)"
+MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pMetErbB3 * MEK * pMetErbB3 / (1 + feedback_pERK * pERK + feedback_pAKT*pAKT)"
+MEK         -> pMEK         CUSTOM "MEK_phosphorylation_pIGF1R * MEK_internIGF1R_effect * MEK * pIGF1Ri / (1 + feedback_pERK * pERK + feedback_pAKT*pAKT)"
 pMEK        -> MEK          CUSTOM "pMEK_dephosphorylation * pMEK"
 
 ERK         -> pERK         CUSTOM "ERK_phosphorylation_pMEK * ERK * pMEK"

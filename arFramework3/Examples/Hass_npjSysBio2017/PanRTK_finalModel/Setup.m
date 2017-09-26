@@ -44,14 +44,9 @@ ar.config.maxsteps=1.e4;
 
 arSetPars({'init_EGFR_EGF','init_ErbB3_HRG','init_IGF1R_IGF1','init_Met_HGF','init_EGFR_BTC'},zeros(1,5),ones(1,5)*2,zeros(1,5),ones(1,5)*-5,ones(1,5)*3);
 arSetParsPattern('sd_FACS_',-1.2,2,1,-5,3);
-arSetPars({'scale_EGF','scale_HRG','scale_IGF1','scale_HGF'},ones(1,4),ones(1,4),ones(1,4),ones(1,4),ones(1,4)*6);
 arSetPars({'EGF_kD','HRG_kD','IGF1_kD','HGF_kD'},[log10(1) log10(0.05) log10(0.3) log10(0.3)],ones(1,4)*2,ones(1,4),ones(1,4)*-5,ones(1,4)*3);
 %Load pars of best fit and do the plotting
 arLoadPars('Final_Model')
 arSave('Model_Final')
 arCalcMerit
 dose_plots(1)
-
-% %Perform random RNA validation measurements?
-% load('../PanRTK_final_forBDT/CTG_output_struct.mat')
-% evaluate_CellLines(100)
