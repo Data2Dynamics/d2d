@@ -658,9 +658,9 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             /* Check if we are only simulating dxdt */
             if ( rootFinding > 0 )
             {
-                double tEq = t; /*-1e30;*/
+                double tEq = tstart; /*-1e30;*/
                 
-                DEBUGPRINT0( debugMode, 4, "Rootfinding mode\n" );
+                DEBUGPRINT1( debugMode, 4, "Rootfinding mode at t=%g\n", tEq );
                 
                 if ( rootFinding == 2 )
                 {

@@ -30,7 +30,16 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
     end
     if nargin < 3
         condis = 'ss_condition';
-    end
+        threads = 'ss_threads';
+    else
+        if strcmp( condis, 'ss_condition' )
+            threads = 'ss_threads';
+        elseif strcmp( condis, 'condition' )
+            threads = 'threads';
+        else
+            error( 'Condis has to be either condition or ss_condition' );
+        end        
+    end  
     if nargin < 4
         useConserved = 1;
     end
@@ -57,8 +66,8 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
     end
     
     % Grab initial x0 based on model parameters
-    feval(ar.fkt, ar, true, ar.config.useSensis, true, false, 'ss_condition', 'ss_threads', 1);
-    x0 = ar.model(jm).ss_condition(jc).xFineSimu(1,:);    
+    feval(ar.fkt, ar, true, ar.config.useSensis, true, false, condis, threads, 1);
+    x0 = ar.model(jm).(condis)(jc).xFineSimu(1,:);    
     
     if ( useConserved )
         warning('Custom:moieties','Model has not been reduced to its minimal form. Rootfinding with conserved moieties currently produces incorrect steady states when compartments are present. Please consider reducing the model first with arReduce (type help arReduce)')
@@ -79,10 +88,10 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
         x0( ar.model(jm).pools.states ) = [];
                 
         % Set up the objective function for lsqnonlin
-        fn = @(x)meritConserved( x, jm, jc, map, totals );
+        fn = @(x)meritConserved( x, jm, jc, map, totals, condis, threads );
     else
         % Set up the objective function for lsqnonlin
-        fn = @(x)merit( x, jm, jc );
+        fn = @(x)merit( x, jm, jc, condis, threads );
     end
     
     if ( nargin < 6 ) || ( isempty( x0i ) )
@@ -93,17 +102,18 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
     if newtonRaphson
         if ( useConserved )
             % Have we not removed our conserved moieties, then go the slow route
-            [xnew, maxDiff] = NewtonRaphson( fn, x0, [], [], tolerance );
+            [xnew, maxDiff] = NewtonRaphson( fn, x0i, [], [], tolerance );
         else
             % Have we reduced the model, then we can rootfind faster
-            
-            % Have we compiled with rootfinding capabilities, then use the direct method inside the C-file
             if ( isfield( ar.config, 'C_rootfinding' ) && ( ar.config.C_rootfinding == 1 ) )
-                feval(ar.fkt, ar, true, ar.config.useSensis, true, false, 'ss_condition', 'ss_threads', 2);
-                xnew = ar.model(jm).ss_condition(jc).xFineSimu(end,:);
+                % Have we compiled with rootfinding capabilities, then use the direct method inside the C-file
+                ar.model(jm).(condis)(jc).x0_override = x0i;
+                feval(ar.fkt, ar, true, ar.config.useSensis, true, false, condis, threads, 2);
+                xnew = ar.model(jm).(condis)(jc).xFineSimu(end,:);
                 maxDiff = max(abs(fn(xnew)));
             else
-                [xnew, maxDiff] = NewtonRaphson( fn, x0, [], [], tolerance );
+                % Otherwise use the MATLAB implementation
+                [xnew, maxDiff] = NewtonRaphson( fn, x0i, [], [], tolerance );
             end
         end
     else
@@ -143,10 +153,10 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
     end
     
     % Remove the override after determination
-    ar.model(jm).ss_condition(jc).x0_override = [];
+    ar.model(jm).(condis)(jc).x0_override = [];
     
     if ( debug )        
-        error = sum(sum((Sref-S).^2)) + sum((xnew-xref).^2);
+        totalError = sum(sum((Sref-S).^2)) + sum((xnew-xref).^2);
         disp( 'x found by rootfinding' );
         xnew %#ok
         disp( 'x found by simulating a long time' );
@@ -156,7 +166,7 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
         S %#ok
         disp( 'Sref found by simulating a long time' );
         Sref %#ok                          
-        if ( error > ar.config.eq_tol )
+        if ( totalError > ar.config.eq_tol )
             failedCheck = 1;
             
             error( 'Steady state equilibration is different from rootfinding' );      
@@ -167,26 +177,26 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
 end
 
 % dxdts are squared to generate minimum for small dxdt
-function [res, J] = merit(x0, jm, jc)
+function [res, J] = merit(x0, jm, jc, condis, threads)
     global ar;
-    ar.model(jm).ss_condition(jc).x0_override = x0;
+    ar.model(jm).(condis)(jc).x0_override = x0;
     
-    feval(ar.fkt, ar, true, ar.config.useSensis, true, false, 'ss_condition', 'ss_threads', 1);
-    res = ar.model(jm).ss_condition(jc).dxdt + 0;
+    feval(ar.fkt, ar, true, ar.config.useSensis, true, false, condis, threads, 1);
+    res = ar.model(jm).(condis)(jc).dxdt + 0;
     
     if ( nargout > 1 )
-        J = ar.model(jm).ss_condition(jc).dfdxNum + 0;
+        J = ar.model(jm).(condis)(jc).dfdxNum + 0;
     end
 end
 
 % dxdts are squared to generate minimum for small dxdt in the presence of
 % conservation relations
-function res = meritConserved(x0c, jm, jc, map, totals)
+function res = meritConserved(x0c, jm, jc, map, totals, condis, threads)
     global ar;
-    ar.model(jm).ss_condition(jc).x0_override = totals + map*x0c.';
-    feval(ar.fkt, ar, true, ar.config.useSensis, true, false, 'ss_condition', 'ss_threads', 1);
+    ar.model(jm).(condis)(jc).x0_override = totals + map*x0c.';
+    feval(ar.fkt, ar, true, ar.config.useSensis, true, false, condis, threads, 1);
     
-    res = ar.model(jm).ss_condition(jc).dxdt + 0;
+    res = ar.model(jm).(condis)(jc).dxdt + 0;
 end
 
 function [x, maxDiff] = NewtonRaphson( func, initial, lb, ub, xtol )   

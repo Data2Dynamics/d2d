@@ -1,10 +1,15 @@
 % Example demonstrating the use of the fast sensitivity system
 
 arInit;
+
+% This flag makes sure that the model is compiled with root finding
+% capabilities.
 ar.config.fastEquilibration = 1;
+
 arLoadModel('equilibration2');
 
-% This step is important if you have conserved moieties!
+% If you want to use fast equilibration, this step is important if you have 
+% conserved moieties! This is to ensure that dfdx is full rank.
 arReduce;
 
 % Load the data
@@ -28,7 +33,7 @@ arFastSensis;
 
 % Don't fit the standard deviation
 ar.qFit(end)=0;
-ar.p(6)=0
+ar.p(6)=0;
 
 %% Equilibrate condition 1 and use that as initial value for condition 1
 %  Equilibrate condition 2 and use that as initial condition for 2 and 3
@@ -42,7 +47,10 @@ comparePerformance = 1;
 ar.config.rtol=1e-9; 
 ar.config.atol=1e-9;
 if comparePerformance
-    ar.config.turboSSSensi=0;
+    % This is the default 'slow' equilibration procedure
+    ar.config.rootfinding = 0;
+    ar.config.turboSSSensi = 0;
+    disp( 'Normal equilbration' );
     tic
         % Set the parameters to wrong values
         ar.p = -ones(size(ar.p));
@@ -50,7 +58,11 @@ if comparePerformance
         arFit;
     toc
 
-    ar.config.turboSSSensi=1;
+    % This simulates the system but computes the steady state sensitivities
+    % implicitly (requires full rank dfdx i.e. no conserved moieties)
+    ar.config.rootfinding = 0;
+    ar.config.turboSSSensi = 1;
+    disp( 'Simulate core ODEs only for equilibration, implicitly calculate sensitivities' );
     tic
         % Set the parameters to wrong values
         ar.p = -ones(size(ar.p));

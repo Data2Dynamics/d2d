@@ -26,7 +26,7 @@ function ar = arInitFields(ar)
     
     % Config options
     defaults = { ...
-        {'fastEquilibration',           false}, ...                     % Faster equilibration (BETA).
+        {'fastEquilibration',           false}, ...                     % Faster equilibration (BETA). Set to 1 before compiling if you want to enable rootfinding from within C.
         {'turboSplines',                false}, ...                     % Faster splines (BETA).
         {'turboSSSensi',                false}, ...                     % Faster equilibration (BETA). Toggle with arFastSensis. DO NOT TOGGLE BY HAND.
         {'sensitivitySubset',           0}, ...                         % Only compute subset of sensitivities when certain qFit's are 0 (BETA)

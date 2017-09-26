@@ -136,6 +136,13 @@ if(sensi)
 end
 
 % do we have steady state presimulations?
+% options for steady state simulation:
+%   1. Full simulation of everything (slow)
+%       turboSSSensi = 0, rootFinding = 0
+%   2. Fast simulation (simulate system without sensitivities, then determine sensis with implicit func theorem) (REQUIRES REDUCED SYSTEM)
+%       turboSSSensi = 1, rootFinding = 0
+%   3. Rootfinding; no guarantee that the determined steady state is the steady state the system would equilibrate to when multiple steady states exist (REQUIRES REDUCED SYSTEM)
+%       rootFinding = 1
 if ( ss_presimulation && dynamics )
     rootFinding = isfield( ar.config, 'rootfinding' ) && ( ar.config.rootfinding > 0.1 );
     if ( sensi || rootFinding )
