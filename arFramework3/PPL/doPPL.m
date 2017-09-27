@@ -84,9 +84,9 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     % optimizer settings (set only once)
     ar.ppl.fittederrors=ar.config.fiterrors;
     ar.config.fiterrors=0;
-    ar.ppl.fit_bkp = ar.qFit(strncmp(ar.pLabel,'sd_',3));
-    ar.qFit(strncmp(ar.pLabel,'sd_',3))=2;
-   
+    ar.ppl.fit_bkp = ar.qFit(ar.qError==1);
+    ar.qFit(ar.qError==1)=2;
+    
     ar.ppl.dchi2 = chi2inv(1-ar.ppl.options.alpha_level, 1);
     ar.ppl.dchi2;
     dir = ar.ppl.options.dir;
@@ -192,7 +192,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     %if(isfield(ar.ppl,'fittederrors') && ~ar.config.fiterrors && ar.ppl.fittederrors  && ~ar.ppl.options.onlyProfile) 
     if(isfield(ar.ppl,'fittederrors'))
         ar.config.fiterrors=ar.ppl.fittederrors;
-        ar.qFit(strncmp(ar.pLabel,'sd_',3))=ar.ppl.fit_bkp;
+        ar.qFit(ar.qError==1)=ar.ppl.fit_bkp;
     end
     ar.config.SimuPPL=0;
     arCalcMerit(); 

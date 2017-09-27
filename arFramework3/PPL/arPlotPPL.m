@@ -2,7 +2,7 @@
 %
 % arPlotPPL
 
-function arPlotPPL(m, c, ix, t, takeY, subs_para)
+function arPlotPPL(m, c, ix, t_vec, takeY, subs_para)
 
 global ar
 qLog10 = ar.ppl.qLog10;
@@ -20,15 +20,17 @@ else
     data_cond = 'condition';
 end
 
-if(length(ix)>1)
+if(length(ix)~=1)
     error('length of ix must be = 1');
 end
-if(length(t)>1)
-    error('length of t must be = 1');
-end
+% if(length(t)>1)
+%     error('length of t must be = 1');
+% end
 if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
+
+for t = t_vec
 
 % qx = ar.model(m).(data_cond)(c).ppl.ix == ix;
 qt = ar.model(m).(data_cond)(c).ppl.tstart(:,ix) == t;
@@ -52,7 +54,7 @@ zeichen = {'-', '--', '-.'};
 ps_label_count = 5;
 ps_var_min_label = 1e-2;
 
-figure(1);
+figure;
 
 subplot(2,1,1)
 
@@ -124,3 +126,4 @@ else
 end
 grid(g,'on');
 
+end
