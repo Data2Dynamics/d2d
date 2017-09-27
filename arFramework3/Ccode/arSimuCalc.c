@@ -660,6 +660,9 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             {
                 double tEq = tstart; /*-1e30;*/
                 
+                /* No equations. Terminate now. */
+                if ( neq == 0 ) { terminate_x_calc( sim_mem, 0 ); return; };
+                
                 DEBUGPRINT1( debugMode, 4, "Rootfinding mode at t=%g\n", tEq );
                 
                 if ( rootFinding == 2 )
