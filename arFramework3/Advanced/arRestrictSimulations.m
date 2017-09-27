@@ -50,7 +50,7 @@ function arRestrictSimulations( varargin )
     % simulate the system anymore. Make sure we simulate it here to make
     % sure that the simulation doesn't contain old simulation results
     if ( enable )
-        arSimu(false); arChi2(false);
+        arSimu(false); arCalcMerit(false);
     end
 end
 
