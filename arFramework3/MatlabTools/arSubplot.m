@@ -10,6 +10,9 @@
 % function that called it. This is so that this function can simply be used
 % as a drop in replacement in functions which only deal with a single
 % figure.
+%
+% If m is left empty ([]), then it will automatically look for a nice plot
+% placement. m then needs to contain the number of plots desired.
 
 function ax = arSubplot(m, n, id, name, varargin)
     global arSubplotMgr;
@@ -21,8 +24,23 @@ function ax = arSubplot(m, n, id, name, varargin)
         stack = dbstack;
         name = strrep( stack(end).file, '.', '___' );
     end
+    if ~exist( 'm', 'var' )
+        error( 'Please specify number of plots' );
+    end
+    if ~exist( 'n', 'var' )
+        error( 'Please specify number of plots' );
+    end
+    if ~exist( 'id', 'var' )
+        error( 'Please specify plot index' );
+    end
     
-    if ~isfield( arSubplotMgr, name )
+    
+    % Automatically decide on the layout
+    if ( isempty( m ) )
+        [m, n] = fd( n );
+    end
+    
+    if ~isfield( arSubplotMgr, name ) || ~isfield( arSubplotMgr.(name), 'fig' )
         arSubplotMgr.(name) = struct;
         clf;
         newPlot(name, m, n, id, varargin{:} );
@@ -56,4 +74,31 @@ function newPlot( name, m, n, id, varargin )
     arSubplotMgr.(name).fig      = gcf;
     arSubplotMgr.(name).axes     = nan( m * n, 1 );
     arSubplotMgr.(name).axes(id) = subplot( m, n, id, varargin{:} );
+end
+
+function [n, m] = fd( num )
+    nx = ceil( sqrt( num ) );
+    ny = ceil( num / nx );
+
+    % Test adjacent ones for a better 'fit' (full use of subplots)
+    % Don't test too far from the square layout, since this would make
+    % poor use of screen space.
+    mnx = max( [ floor( nx / 1.5 ), 2 ] );
+    mxx = ceil( nx * 1.5 );
+    testRange = mnx:mxx;
+    
+    % Sort by the one closest to an equal distribution along X and Y
+    [~, i] = sort( abs( testRange - nx ) );
+    testRange = testRange(i);
+    
+    % Try to find a nice 'natural' break
+    for nxc = testRange
+        if ceil( num / nxc ) == ( num / nxc )
+            n = nxc;
+            m = num / nxc;
+            return
+        end
+    end
+    n = nx;
+    m = ny;
 end
