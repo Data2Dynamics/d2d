@@ -14,6 +14,8 @@ if(isempty(ar))
     error('please initialize by arInit')
 end 
 
+new_ts = true;
+
 if ~exist('tpoints','var')
     tpoints = [];
 end
@@ -59,12 +61,13 @@ end
 
 ds = ar.model(m).plot(jplot).dLink;
 if(isempty(tpoints))
+    new_ts = false;
     tpoints = ar.model(m).data(ds(1)).tExp;
 end
 
 % set time point and clear arrays
 for d=ds
-    assigne_new_timepoints(tpoints, m, d);
+    assigne_new_timepoints(tpoints, m, d, new_ts);
 end
 
 % remember existing parameters
@@ -94,12 +97,13 @@ end
 arLink(true);
 
 
-function assigne_new_timepoints(tpoints, m, d)
+function assigne_new_timepoints(tpoints, m, d, new_ts)
 global ar
 ar.model(m).data(d).tExp = sort(tpoints(:));
 ar.model(m).data(d).yExp = zeros(length(tpoints), length(ar.model(m).data(d).y));
-% ar.model(m).data(d).yExpStd = zeros(length(tpoints),
-% length(ar.model(m).data(d).y)); % don't overwrite exp. errors
+if(new_ts)
+    ar.model(m).data(d).yExpStd = NaN(length(tpoints), length(ar.model(m).data(d).y));
+end
 ar.model(m).data(d).yExpSimu = zeros(length(tpoints), length(ar.model(m).data(d).y));
 ar.model(m).data(d).ystdExpSimu = zeros(length(tpoints), length(ar.model(m).data(d).y));
 
