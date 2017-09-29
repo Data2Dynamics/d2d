@@ -520,9 +520,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     gettimeofday(&t2, NULL);
     
     DEBUGPRINT0( debugMode, 4, "Starting dynamic section\n" );
-    
-    DEBUGPRINT3( debugMode, 4, "np: %d npSensi: %d neq: %d\n", np, npSensi, neq );
-    
+       
     if(dynamics == 1) {
         if(ssa == 0) {
             /**** begin of CVODES ****/
@@ -614,6 +612,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 event_data = sim_mem->event_data;
                 cvode_mem = sim_mem->cvode_mem;
             } else return;
+            
+            DEBUGPRINT3( debugMode, 4, "np: %d npSensi: %d neq: %d\n", np, npSensi, neq );
             
             /* User data structure */
             DEBUGPRINT0( debugMode, 4, "Initialize CVODES data\n" );

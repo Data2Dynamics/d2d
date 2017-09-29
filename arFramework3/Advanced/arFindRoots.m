@@ -21,6 +21,7 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
 
     global ar;
     tolerance = ar.config.eq_tol;
+    maxiter = 100;
     
     if nargin < 1
         jm = 1;
@@ -66,7 +67,8 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
     end
     
     % Grab initial x0 based on model parameters
-    feval(ar.fkt, ar, true, ar.config.useSensis, true, false, condis, threads, 1);
+    sensi = false;
+    feval(ar.fkt, ar, true, sensi, true, false, condis, threads, 1);
     x0 = ar.model(jm).(condis)(jc).xFineSimu(1,:);    
     
     if ( useConserved )
@@ -102,18 +104,18 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
     if newtonRaphson
         if ( useConserved )
             % Have we not removed our conserved moieties, then go the slow route
-            [xnew, maxDiff] = NewtonRaphson( fn, x0i, [], [], tolerance );
+            [xnew, maxDiff] = NewtonRaphson( fn, x0i, [], [], tolerance, maxiter );
         else
             % Have we reduced the model, then we can rootfind faster
             if ( isfield( ar.config, 'C_rootfinding' ) && ( ar.config.C_rootfinding == 1 ) )
                 % Have we compiled with rootfinding capabilities, then use the direct method inside the C-file
                 ar.model(jm).(condis)(jc).x0_override = x0i;
-                feval(ar.fkt, ar, true, ar.config.useSensis, true, false, condis, threads, 2);
+                feval(ar.fkt, ar, true, sensi, true, false, condis, threads, 2);
                 xnew = ar.model(jm).(condis)(jc).xFineSimu(end,:);
                 maxDiff = max(abs(fn(xnew)));
             else
                 % Otherwise use the MATLAB implementation
-                [xnew, maxDiff] = NewtonRaphson( fn, x0i, [], [], tolerance );
+                [xnew, maxDiff] = NewtonRaphson( fn, x0i, [], [], tolerance, maxiter );
             end
         end
     else
@@ -150,6 +152,9 @@ function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debu
     
     if ( maxDiff > tolerance )
         warning( 'Failure to converge when rootfinding for model %d, condition %d', jm, jc );
+        
+        % Trash the solution
+        xnew = xnew * 0;
     end
     
     % Remove the override after determination
@@ -181,7 +186,8 @@ function [res, J] = merit(x0, jm, jc, condis, threads)
     global ar;
     ar.model(jm).(condis)(jc).x0_override = x0;
     
-    feval(ar.fkt, ar, true, ar.config.useSensis, true, false, condis, threads, 1);
+    sensi = false;
+    feval(ar.fkt, ar, true, sensi, true, false, condis, threads, 1);
     res = ar.model(jm).(condis)(jc).dxdt + 0;
     
     if ( nargout > 1 )
@@ -194,20 +200,33 @@ end
 function res = meritConserved(x0c, jm, jc, map, totals, condis, threads)
     global ar;
     ar.model(jm).(condis)(jc).x0_override = totals + map*x0c.';
-    feval(ar.fkt, ar, true, ar.config.useSensis, true, false, condis, threads, 1);
+    sensi = false;
+    feval(ar.fkt, ar, true, sensi, true, false, condis, threads, 1);
     
     res = ar.model(jm).(condis)(jc).dxdt + 0;
 end
 
-function [x, maxDiff] = NewtonRaphson( func, initial, lb, ub, xtol )   
+function [x, maxDiff] = NewtonRaphson( func, initial, lb, ub, xtol, maxiter )   
     lastX = inf(size(initial));
     x = initial;
     i = 1;
-    while( max( abs( lastX - x ) ) > xtol )
+    while( ( max( abs( lastX - x ) ) > xtol ) && ( i < maxiter ) )
         lastX = x;
         [f,J] = func( x );
-        %fprintf( 'Iteration %d; function value: %g\n', i, sum(f.^2) );
-        x = x - (pinv(J) * f.').';
+        fval = sum(f.^2);
+        
+        %fprintf( 'Iteration %d; function value: %g\n', i, fval );
+        %if ( fval > 1e15 )
+        %    fprintf( 'WARNING problematic RHS: ');
+        %    global ar;
+        %    fprintf( '%s ', ar.model.x{ find( abs(f) > 1e10 ) } )
+        %end
+        %x = x - (pinv(J)*f.').';
+        
+        ndir = (J\f.').';
+        x = x - ndir;
+
+        i = i + 1;
     end
     maxDiff = max(abs(f));
 end
