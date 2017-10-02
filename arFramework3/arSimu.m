@@ -231,8 +231,11 @@ end
 
 
 % call mex function to simulate models
-%feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads', ar.config.skipSim)
-feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads', ar.config.skipSim)
+if ( isfield( ar.config, 'onlySS' ) && ( ar.config.onlySS == 1 ) )
+    feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads', 1)
+else
+    feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads', ar.config.skipSim)
+end
 
 % integration error ?
 for m=1:length(ar.model)
