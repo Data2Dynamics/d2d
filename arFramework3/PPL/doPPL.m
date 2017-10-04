@@ -140,7 +140,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
             ar.ppl.options.xstd = 0.1;
             warning('The standard deviation for the prediction profile likelihood could not be set! Check your measurement errors or set the option "xstd" appropriately! \n')
         end
-        xstart_ppl(m, c, ix(jx), t, ar.ppl.options.doPPL, ar.ppl.options.xstd, pReset, chi2start, whichT, takeY, true, 1, [], ar.ppl.options.onlyProfile);
+        xstart_ppl(m, c, ix(jx), t, ar.ppl.options.doPPL, ar.ppl.options.xstd, pReset, chi2start, whichT, takeY, true, 0, [], ar.ppl.options.onlyProfile);
         if(ar.ppl.options.onlyProfile)
             if(takeY)
                 arLink(true,0.,true,ix(jx), c, m,NaN);
@@ -327,7 +327,7 @@ for ts = 1:length(t)
     ub_tmp = max(fitted_tmp(q_chi2good));
     find_tmp = find(merit_tmp > chi2start+ar.ppl.dchi2);
 
-    if(sum(find_tmp<ntot+1)==0)
+    if(length(vpl_down)==1 || sum(find_tmp<length(vpl_down)+1)==0 || (~save && dir==1))
         lb_tmp = -Inf;             
         kind_low_tmp = -Inf;                
         fprintf('No -95 PPL for t=%d\n',t(ts));
@@ -343,7 +343,7 @@ for ts = 1:length(t)
         lb_tmp = interp1(merit_tmp([kind_low_tmp kind_low_tmp-1]), ...
         fitted_tmp([kind_low_tmp kind_low_tmp-1]), chi2start+ar.ppl.dchi2);
     end
-    if(sum(find_tmp>ntot)==0)
+    if(length(vpl_up)==1 || sum(find_tmp>length(vpl_down)+1)==0 || (~save && dir==-1))
         ub_tmp = Inf;
         kind_high_tmp = Inf;        
         fprintf('No +95 PPL for t=%d\n',t(ts));
@@ -385,9 +385,29 @@ for ts = 1:length(t)
         ar.model(m).(data_cond)(c).ppl.(['lb_fit' ppl_vpl])(ts_tmp, jx) = lb_tmp;
         ar.model(m).(data_cond)(c).ppl.(['ub_fit' ppl_vpl])(ts_tmp, jx) = ub_tmp;
         ar.model(m).(data_cond)(c).ppl.(['kind_high' ppl_vpl])(ts_tmp, jx) = kind_high_tmp;
-        ar.model(m).(data_cond)(c).ppl.(['kind_low' ppl_vpl])(ts_tmp, jx) = kind_low_tmp;
+        ar.model(m).(data_cond)(c).ppl.(['kind_low' ppl_vpl])(ts_tmp, jx) = kind_low_tmp;                
     end
 end
+%write LB/UB in ar struct
+    if(save && onlyProfile && dir==0)        
+        struct_vec = {'FineUB','FineLB'};
+        low_high_vec = {'ub_fit','lb_fit'};
+        for ilh=1:2
+            struct_string = struct_vec{ilh};
+            ppl_string = [low_high_vec{ilh} ppl_vpl];
+            if(takeY)
+                struct_string = ['y' struct_string];
+            else
+                struct_string = ['x' struct_string];
+            end            
+        
+            ar.model(m).(data_cond)(c).(struct_string)(ar.model(m).(data_cond)(c).tFine<=max(ar.model(m).(data_cond)(c).ppl.tstart(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)))),jx) = ...
+                    interp1(ar.model(m).(data_cond)(c).ppl.tstart(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx))),...
+                    ar.model(m).(data_cond)(c).ppl.(ppl_string)(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)),jx),...
+                    ar.model(m).(data_cond)(c).tFine(ar.model(m).(data_cond)(c).tFine<=max(ar.model(m).(data_cond)(c).ppl.tstart(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx))))),...
+                    'pchip',NaN); 
+        end
+    end
 end
 
 
@@ -574,8 +594,8 @@ function ppl_calc(m, c, jx, xFit, p, t, doPPL, takeY, dir, stepsize, xstd, ed_st
         gamma_tmp = ar.model(m).condition(c).ppl.gamma(jx);
     end    
     nsteps=ar.ppl.nsteps;
-    ar.p=squeeze(p);
-    if(size(ar.p,2)~=1)
+    ar.p=squeeze(p)';
+    if(size(ar.p,1)~=1)
         ar.p=ar.p';
     end
     tcount = 1;
@@ -742,7 +762,7 @@ function ppl_calc(m, c, jx, xFit, p, t, doPPL, takeY, dir, stepsize, xstd, ed_st
                 fprintf('Try to restart at t=%d diff in chi2 is %d \n',t_tmp,abs(chi2 - ar.ppl.chi2_95 + 0.5));
                 ar.p = pReset;
                 arLink(true,0.,takeY,jx, c, m,NaN);
-                [ar.ppl.xFit_tmp, ar.p] = xstart_ppl(m, c, jx, t_tmp, doPPL, xstd, pReset, chi2start, 10, takeY, false, dir, ar.ppl.xFit_tmp);                
+                [ar.ppl.xFit_tmp, ar.p] = xstart_ppl(m, c, jx, t_tmp, doPPL, xstd, pReset, chi2start, 10, takeY, false, dir, ar.ppl.xFit_tmp, false);                
                 chi2 = PPL_chi2(t_tmp,false, m, c, jx, takeY, qLog10, doPPL, stepsize, ar.ppl.xFit_tmp, xstd);               
                 if((chi2 - ar.ppl.chi2_95 + 0.5) > 0.2 || (chi2 - ar.ppl.chi2_95 + 0.5) < -0.2 )
                     fprintf('Check the Profile at t=%d for inconsistencies, diff in chi2 is %d \n',t_tmp,abs(chi2 - ar.ppl.chi2_95 + 0.5));
@@ -766,7 +786,8 @@ function ppl_calc(m, c, jx, xFit, p, t, doPPL, takeY, dir, stepsize, xstd, ed_st
 
         if(t_dir==-1 && jt>1)
             jt=jt-2;
-        elseif(t_dir==-1 && jt<=1)
+        end
+        if(t_dir==-1 && (jt<=1 || t_tmp<ar.model(m).tLim(1)))
             fprintf('Backward integration stopped because lower time bound hit, proceeding with normal integration \n');
             break
         end

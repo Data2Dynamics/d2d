@@ -33,26 +33,27 @@ function chi2 = PPL_doSim_calc(chi2_orig, x_orig, m, c, jt, jx, xstd, t_tmp, qLo
         chi2=PPL_corr(x_corr, x_orig, m, c, jt, jx, xstd, t_tmp, qLog10, dir, takeY, doPPL, chi2);
     
         %chi2
-        if((chi2 - ar.ppl.chi2_95 + 0.5) > 0.2 || (chi2 - ar.ppl.chi2_95 + 0.5) < -0.2 )
-            x_fit = [x_fit; ar.ppl.xFit_tmp-x_orig];
-            y_fit = [y_fit; chi2];
-            ft_ = fittype('A*X^3+B*X^2+C*X+D',...
-                 'dependent',{'y'},'independent',{'X'},...
-                 'coefficients',{'A', 'B', 'C', 'D'});
-            cf = fit(x_fit, y_fit, ft_, 'Lower', [-Inf -Inf -Inf chi2_best*0.95], 'Upper', [Inf Inf Inf chi2_best*1.05],'StartPoint',[0 1 0 chi2_best], 'Robust', 'off');
-            cf.D = cf.D -ar.ppl.chi2_95 + 0.5 ;
-            find_y = fzero(cf,x_fit(end));
-            ar.ppl.xFit_tmp = x_orig + find_y;
-            chi2=PPL_corr(x_corr, x_orig, m, c, jt, jx, xstd, t_tmp, qLog10, dir, takeY, doPPL, chi2);
-    
-            if((chi2 - ar.ppl.chi2_95 + 0.5) > 0.2 || (chi2 - ar.ppl.chi2_95 + 0.5) < -0.2 )
-                x_fit = [x_fit; ar.ppl.xFit_tmp-x_orig];
-                y_fit = [y_fit; chi2];
-                [sort_y, ind_y] = sort(y_fit);
-                ar.ppl.xFit_tmp = x_orig + dir*feval(cf,ar.ppl.chi2_95-0.5);
-                
-                chi2=PPL_corr(x_corr, x_orig, m, c, jt, jx, xstd, t_tmp, qLog10, dir, takeY, doPPL, chi2);
-            end
-        end
+%         if((chi2 - ar.ppl.chi2_95 + 0.5) > 0.2 || (chi2 - ar.ppl.chi2_95 + 0.5) < -0.2 )
+%             x_fit = [x_fit; ar.ppl.xFit_tmp-x_orig];
+%             y_fit = [y_fit; chi2];
+% %             ft_ = fittype('A*X^3+B*X^2+C*X+D',...
+% %                  'dependent',{'y'},'independent',{'X'},...
+% %                  'coefficients',{'A', 'B', 'C', 'D'});
+%             ft_ = fittype({'x^3','x^2','x','1'},'dependent',{'y'});
+%             cf = fit(x_fit, y_fit, ft_, 'Lower', [-Inf -Inf -Inf chi2_best*0.95], 'Upper', [Inf Inf Inf chi2_best*1.05],'StartPoint',[0 1 0 chi2_best], 'Robust', 'off');
+%             cf.D = cf.D -ar.ppl.chi2_95 + 0.5 ;
+%             find_y = fzero(cf,x_fit(end));
+%             ar.ppl.xFit_tmp = x_orig + find_y;
+%             chi2=PPL_corr(x_corr, x_orig, m, c, jt, jx, xstd, t_tmp, qLog10, dir, takeY, doPPL, chi2);
+%     
+%             if((chi2 - ar.ppl.chi2_95 + 0.5) > 0.2 || (chi2 - ar.ppl.chi2_95 + 0.5) < -0.2 )
+%                 x_fit = [x_fit; ar.ppl.xFit_tmp-x_orig];
+%                 y_fit = [y_fit; chi2];
+%                 [sort_y, ind_y] = sort(y_fit);
+%                 ar.ppl.xFit_tmp = x_orig + dir*feval(cf,ar.ppl.chi2_95-0.5);
+%                 
+%                 chi2=PPL_corr(x_corr, x_orig, m, c, jt, jx, xstd, t_tmp, qLog10, dir, takeY, doPPL, chi2);
+%             end
+%         end
     end
 end
