@@ -1,6 +1,6 @@
 % Work in progress, do not use
 
-function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz)
+function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weight, showConstraints)
 
     global ar;
     
@@ -24,6 +24,12 @@ function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz)
     if ~exist( 'logy', 'var' )
         logz = ones( size( zl ) );
     end
+    if ~exist( 'weight', 'var' )
+        weight = 10;
+    end
+    if ~exist( 'showConstraints', 'var' )
+        showConstraints = 0;
+    end
     
     % Enforce logical
     logx = logx == 1;
@@ -42,14 +48,13 @@ function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz)
     zl(logz) = log10(zl(logz));
     zu(logz) = log10(zu(logz));
     
-    w = 0.1;
-    res_fun = @()residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, w, logx, logz);
+    res_fun = @()residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, weight, logx, logz, showConstraints);
     ar.config.user_residual_fun = res_fun;
     
 end
 
 % This function places a soft bound on concentrations
-function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, w, logx, logz)
+function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, w, logx, logz, debug)
 
     global ar
     
@@ -77,7 +82,7 @@ function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m
     
 	% Transform the sentivities of the ones that have to be penalized in
 	% log (note that this has to be done before the states are transformed,
-	% since we need the untransformed states for this.
+	% since we need the untransformed states for this).
     %   dlog10(y(p))/dp = (1/(y(p)*log(10))) dy(p)/dp
     sxss(logx, :) = sxss(logx, :) .* repmat( 1 ./ (xss(logx) * log(10)), np, 1 ).';
     if ( ~isempty( zl ) )
@@ -110,6 +115,25 @@ function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m
         res_user    = [ xlower, xupper ];
     end
     
+    tot = sum( res_user );
+    if ( isnan( tot ) || isinf( tot ) )
+        xs = isinf(xlower) | isnan(xupper);
+        zs = isinf(zlower) | isnan(zupper);
+        ix = find(x_active); iz = find(z_active);
+        xstr = sprintf( '%s ', ar.model.x{ix(xs)} );
+        zstr = sprintf( '%s ', ar.model.z{iz(zs)} );
+        fprintf( 'Infinity found in residuals: %s, %s', xstr, zstr );
+    end
+    
+    if ( debug )
+        xs = (xss < xl) | (xss > xu);
+        zs = (zss < zl) | (zss > zu);
+        ix = find(x_active); iz = find(z_active);
+        xstr = sprintf( '%s ', ar.model.x{ix(xs)} );
+        zstr = sprintf( '%s ', ar.model.z{iz(zs)} );
+        fprintf( 'Active bounds: %s, %s', xstr, zstr );
+    end
+    
     % Compute the sensitivities
     sxlower     = - repmat( (xss < xl), np, 1 ).' .* sxss * w;
     sxupper     =   repmat( (xss > xu), np, 1 ).' .* sxss * w;
@@ -124,6 +148,7 @@ function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m
     else
         assembled   = [ sxlower; sxupper ];
     end
+    
     res_type    = ones(size(res_user)); % Treat the constraint like data
     
     sres_user   = zeros( size(assembled, 1), numel(ar.p) );

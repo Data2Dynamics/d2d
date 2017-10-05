@@ -1207,8 +1207,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
         
         /* call z_calc */
         DEBUGPRINT0( debugMode, 5, "Calling z-calc\n" );
-        if ( only_sim == 0 )
-            z_calc(im, ic, arcondition, sensi);
+
+        z_calc(im, ic, arcondition, sensi);
     }
 
     gettimeofday(&t3, NULL);
