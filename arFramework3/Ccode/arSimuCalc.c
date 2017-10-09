@@ -146,7 +146,7 @@ void *thread_calc(void *threadarg);
 void thread_calc(int id);
 #endif
 void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *abortSignal, int rootFinding, int debugMode, int sensitivitySubset);
-void z_calc(int im, int ic, mxArray *arcondition, int sensi);
+void z_calc(int im, int ic, int isim, mxArray *arcondition, int sensi);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi);
 
 void y_checkNaN(int nt, int ny, int it, double *y, double *yexp, double *ystd);
@@ -176,7 +176,7 @@ int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isi
 int initializeEvents( SimMemory sim_mem, mxArray *arcondition, int ic, double tstart );
 void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int has_tExp );
 
-int handle_event( SimMemory sim_mem, int sensi_meth );
+int handle_event( SimMemory sim_mem, int sensi_meth, int reinitSolver );
 int equilibrate(void *cvode_mem, UserData user_data, N_Vector x, realtype t, double *equilibrated, double *returndxdt, double *teq, int neq, int im, int ic, int *abortSignal );
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
@@ -655,6 +655,17 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             if ( !applyInitialConditionsODE( sim_mem, tstart, im, isim, returndxdt, returndfdp0, x0_override, sensitivitySubset ) )
                 return;
 
+            /* Do we have a startup event? */
+            if ( qEvents == 1 ) {
+                DEBUGPRINT0( debugMode, 4, "Handling startup event\n" );
+                if ( event_data->t[event_data->i] == tstart ) {
+                    flag = handle_event( sim_mem, sensi_meth, 0 );
+                    (event_data->i)++;
+
+                    if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 ); return;}
+                }
+            }            
+            
             /* Check if we are only simulating dxdt */
             if ( rootFinding > 0 )
             {
@@ -686,7 +697,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     if ( sensi ) copyNVMatrixToDouble( sx, returnsx, npSensi, neq, nout, 0 ); /* TO DO: Look at what this means for subsensis */
                 }
                 DEBUGPRINT0( debugMode, 4, "Calculating z\n" );
-                z_calc(im, ic, arcondition, ysensi);
+                z_calc(im, ic, isim, arcondition, ysensi);
                 DEBUGPRINT0( debugMode, 6, "Calculating fu\n" );
                 fu(data, tEq, im, isim);
                 DEBUGPRINT0( debugMode, 6, "Calculating fv\n" );
@@ -850,17 +861,6 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 }
             }
 
-            /* Do we have a startup event? */
-            if ( qEvents == 1 ) {
-                DEBUGPRINT0( debugMode, 4, "Handling startup event\n" );
-                if ( event_data->t[event_data->i] == tstart ) {
-                    flag = handle_event( sim_mem, sensi_meth );
-                    (event_data->i)++;
-
-                    if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 ); return;}
-                }
-            }
-
             /********************************/
             /* loop over output points      */
             /********************************/
@@ -1021,7 +1021,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 if (qEvents==2)
                 {
                     DEBUGPRINT0( debugMode, 6, "Handling event + reinitializing the solver\n" );
-                    flag = handle_event( sim_mem, sensi_meth );
+                    flag = handle_event( sim_mem, sensi_meth, 1 );
                     if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 ); return;}
                     
                     qEvents = 1;
@@ -1208,7 +1208,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
         /* call z_calc */
         DEBUGPRINT0( debugMode, 5, "Calling z-calc\n" );
 
-        z_calc(im, ic, arcondition, sensi);
+        z_calc(im, ic, isim, arcondition, sensi);
     }
 
     gettimeofday(&t3, NULL);
@@ -1402,7 +1402,7 @@ void thr_error( const char* msg ) {
 
 /* Event handler */
 /* Put functions that are supposed to be evaluated on events here */
-int handle_event( SimMemory sim_mem, int sensi_meth )
+int handle_event( SimMemory sim_mem, int sensi_meth, int reinitSolver )
 {
     int nps     = sim_mem->np;
     int neq     = sim_mem->neq;
@@ -1473,10 +1473,13 @@ int handle_event( SimMemory sim_mem, int sensi_meth )
 	}
 
     /* Reinitialize the solver */
-    flag = CVodeReInit(cvode_mem, RCONST(event_data->t[event_data->i]), x);
-    if (flag>=0) {
-        if (sensi==1) {
-            flag = CVodeSensReInit(cvode_mem, sensi_meth, sx);
+    if ( reinitSolver == 1 )
+    {
+        flag = CVodeReInit(cvode_mem, RCONST(event_data->t[event_data->i]), x);
+        if (flag>=0) {
+            if (sensi==1) {
+                flag = CVodeSensReInit(cvode_mem, sensi_meth, sx);
+            }
         }
     }
         
@@ -1775,7 +1778,7 @@ int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double
 }
 
 /* calculate derived variables */
-void z_calc(int im, int ic, mxArray *arcondition, int sensi) {
+void z_calc(int im, int ic, int isim, mxArray *arcondition, int sensi) {
     
     /* printf("computing model #%i, condition #%i, derived variables\n", im, ic); */
     
@@ -1829,12 +1832,12 @@ void z_calc(int im, int ic, mxArray *arcondition, int sensi) {
     for (it=0; it < nt; it++) {
         /* printf("%f y-loop (im=%i id=%i)\n", t[it], im, id); */
         
-        fz(t[it], nt, it, 0, 0, 0, 0, z, p, u, x, im, ic);
+        fz(t[it], nt, it, 0, 0, 0, 0, z, p, u, x, im, isim);
 	if( fine == 0 ) {
-	  dfzdx(t[it], nt, it, 0, nx, 0, 0, dzdx, z, p, u, x, im, ic);
+	  dfzdx(t[it], nt, it, 0, nx, 0, 0, dzdx, z, p, u, x, im, isim);
 	}
         if (sensi == 1) {
-            fsz(t[it], nt, it, np, sz, p, u, x, z, su, sx, im, ic);
+            fsz(t[it], nt, it, np, sz, p, u, x, z, su, sx, im, isim);
         }
     }
     
