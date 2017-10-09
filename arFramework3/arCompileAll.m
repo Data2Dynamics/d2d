@@ -117,7 +117,7 @@ for m=1:length(ar.model)
     matlab_version = str2double(matVer.Version);    
     
     % calc model
-    arCalcModel(m, matlab_version);
+    arCalcModel(m, matlab_version, ar.config.networkgraph);
     
     % extract conditions
     ar.model(m).condition = [];
@@ -320,6 +320,7 @@ for m=1:length(ar.model)
         data = ar.model(m).data;
         newp = cell(1,length(ar.model(m).data));
         newpold = cell(1,length(ar.model(m).data));
+        constVars = cell(1, length(ar.model(m).data));
 
         if(usePool)
             parfor d=1:length(ar.model(m).data)
@@ -331,6 +332,8 @@ for m=1:length(ar.model)
                 data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
                 newp{d} = data_sym.p;
                 newpold{d} = data_sym.pold;
+                constVars{d} = data_sym.constVars;
+                
                 if(~doskip(d))
                     % header
                     fid_obsH = fopen([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.h'], 'W');
@@ -352,6 +355,8 @@ for m=1:length(ar.model)
                 data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
                 newp{d} = data_sym.p;
                 newpold{d} = data_sym.pold;
+                constVars{d} = data_sym.constVars;
+                
                 if(~doskip(d))
                     % header
                     fid_obsH = fopen([source_dir '/Compiled/' c_version_code '/' data(d).fkt '_tmp.h'], 'W');
@@ -373,6 +378,7 @@ for m=1:length(ar.model)
         for d=1:length(ar.model(m).data)
             ar.model(m).data(d).p = newp{d};
             ar.model(m).data(d).pold = newpold{d};
+            ar.model(m).data(d).constVars = constVars{d};
         end
     else
         qdynparas = ismember(ar.model(m).p, ar.model(m).px) | ... %R2013a compatible
@@ -528,7 +534,7 @@ warning(warnreset);
 
 
 % Calc Model
-function arCalcModel(m, matlab_version)
+function arCalcModel(m, matlab_version, checkModel)
 global ar
 
 arFprintf(2, 'calculating model m%i, %s...\n', m, ar.model(m).name);
@@ -614,31 +620,32 @@ if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
     ar.model(m).qdvdx_nonzero = logical(ar.model(m).sym.dfvdx~=0);
     ar.model(m).qdvdu_nonzero = logical(ar.model(m).sym.dfvdu~=0);
     
-    tmpsym = ar.model(m).sym.dfvdx;
-    tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
-    tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
-    tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
-    
-    try
-        ar.model(m).qdvdx_negative = double(tmpsym) < 0;
-    catch ERR
-        for i=1:length(tmpsym(:))
-            try
-                double(tmpsym(i));
-            catch
-                disp('the following expression should be numeric:')
-                tmpsym(i)
+    if ( checkModel )
+        tmpsym = ar.model(m).sym.dfvdx;
+        tmpsym = arSubs(tmpsym, ar.model(m).sym.x,  rand(size(ar.model(m).sym.x)), matlab_version);
+        tmpsym = arSubs(tmpsym, ar.model(m).sym.u,  rand(size(ar.model(m).sym.u)), matlab_version);
+        tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+
+        try
+            ar.model(m).qdvdx_negative = double(tmpsym) < 0;
+        catch ERR
+            for i=1:length(tmpsym(:))
+                try
+                    double(tmpsym(i));
+                catch
+                    warning('Failed to check dfvdx due to use of symbolic function:')
+                    tmpsym(i)
+                end
             end
         end
-        rethrow(ERR)
+    
+        tmpsym = ar.model(m).sym.dfvdu;
+        tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
+        tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
+        tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+
+        ar.model(m).qdvdu_negative = double(tmpsym) < 0;
     end
-    
-    tmpsym = ar.model(m).sym.dfvdu;
-    tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
-    tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
-    tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
-    
-    ar.model(m).qdvdu_negative = double(tmpsym) < 0;
     
     tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
     ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
@@ -706,14 +713,13 @@ condition.sym.C = arSubs(model.sym.C, condition.sym.p, condition.sym.fp, matlab_
 
 % Replace inline arrays (e.g. [3,4,2,5,2] with variable names, declaring
 % the array elsewhere as a static const (used for the fixed input spline)
-[ condition.sym.fu, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fu), 0, c );
+[ condition.sym.fu, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fu), {}, {}, c, 'condi' );
 condition.sym.fu = sym( condition.sym.fu );
-condition.constVars = sprintf( '%s;\n', constVars{:} );
 
-[ condition.sym.fv, constVars, cVars2 ] = replaceFixedArrays( char(condition.sym.fv), numel(constVars), c );
-cVars = union( cVars, cVars2 );
+[ condition.sym.fv, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fv), constVars, cVars, c, 'condi' );
 condition.sym.fv = sym( condition.sym.fv );
-condition.constVars = sprintf( '%s;\n%s\n', condition.constVars, sprintf( '%s;\n', constVars{:} ) );
+
+condition.constVars = sprintf( '%s;\n', constVars{:} );
 
 % predictor
 condition.sym.fv = arSubs(condition.sym.fv, sym(model.t), sym('t'), matlab_version);
@@ -1008,23 +1014,26 @@ end
 
 % Replaces arrays with static variables
 % And outputs a list of the new static variables created.
-function [ finalStr, static_variables, cvars ] = replaceFixedArrays( str, offset, condiID )
+function [ finalStr, static_variables, cvars ] = replaceFixedArrays( str, static_variables, cvars, condiID, name )
+
+    idx = numel(cvars);
     finalStr = str;
     [strOut, values] = findArrays( str );
-    static_variables = cell( 1, numel( values ) );
-    cvars = cell( 1, numel( values ) );
+        
+    % Generate static variables for all the const arrays
     for a = 1 : numel( strOut )
+        idx = idx + 1;
         vString = sprintf('%.25e, ', values{a});
         vString = vString(1:end-2);
-        cvars{a} = sprintf( 'static_chunk_%d_%d', condiID, a + offset );
-        static_variables{a} = sprintf( 'static const double static_chunk_%d_%d[%d] = { %s }', condiID, a + offset, numel( values{a} ), vString );
-        finalStr = strrep( finalStr, strOut{a}, sprintf( 'static_chunk_%d_%d', condiID, a + offset ) );
+        cvars{end+1} = sprintf( 'static_chunk_%s_%d_%d', name, condiID, idx ); %#ok
+        static_variables{end+1} = sprintf( 'static const double static_chunk_%s_%d_%d[%d] = { %s }', name, condiID, idx, numel( values{a} ), vString ); %#ok
+        finalStr = strrep( finalStr, strOut{a}, sprintf( 'static_chunk_%s_%d_%d', name, condiID, idx ) );
     end
 
 % Grab arrays from string ([1,2,3,...5,6,7])
 function [strOut, values] = findArrays( str )
-    loc1 = regexp( str, '\[([ ()0123456789.,^*-+/]+)[,]([ ()0123456789.,^*-+/]+)\]' );
-    loc2 = regexp( str, '([ ()0123456789.,^*-+/]+)[,]([ ()0123456789.,^*-+/]+)\]', 'end' );
+    loc1 = regexp( str, '\[([ ()0123456789\.\,\^\*\-\+\/]+)[,]([ ()0123456789\.\,\^\*\-\+\/]+)\]' );
+    loc2 = regexp( str, '([ ()0123456789\.\,\^\*\-\+\/]+)[,]([ ()0123456789\.\,\^\*\-\+\/]+)\]', 'end' );
     a = 1;
     strOut = cell( 1, numel(loc1) );
     values = cell( 1, numel(loc1) );
@@ -1098,6 +1107,14 @@ specialFunc = config.specialFunc;
 % hard code conditions
 data.sym.p  = sym(data.p);
 data.sym.fp = sym(data.fp);
+
+% Replace inline arrays (e.g. [3,4,2,5,2] with variable names, declaring
+% the array elsewhere as a static const (used for the fixed input spline)
+for jy = 1 : numel( data.fy )
+    [ data.fy{jy}, constVars, cVars ] = replaceFixedArrays( data.fy{jy}, {}, {}, c, 'data' );
+end
+data.constVars = sprintf( '%s;\n', constVars{:} );
+
 data.sym.fy = mySym(data.fy, specialFunc);
 data.sym.fy = arSubs(data.sym.fy, model.sym.v, model.sym.fv);
 data.sym.fy = arSubs(data.sym.fy, data.sym.p, data.sym.fp, matlab_version);
@@ -1125,7 +1142,7 @@ data.sym.fystd = arSubs(data.sym.fystd, sym(model.t), sym('t'), matlab_version);
 varlist = symvar([data.sym.fy(:); data.sym.fystd(:)]);
 data.pold = data.p;
 othervars = union(union(union(union(model.x, model.u), model.z), data.y), 't');
-data.p = setdiff(union(sym2str(varlist), data.p_condition), othervars); %R2013a compatible
+data.p = setdiff( setdiff(union(sym2str(varlist), data.p_condition), othervars), cVars); %R2013a compatible
 
 % Union's behaviour is different when first arg is empty. In this case, a
 % flip of the parameter vector is typically required.
@@ -2077,6 +2094,9 @@ fprintf(fid, '#include <mex.h>\n');
 fprintf(fid, '#include <arInputFunctionsC.h>\n');
 fprintf(fid,'\n\n\n');
 
+% write const vars
+fprintf(fid, '%s\n\n', data.constVars);
+
 % write y
 fprintf(fid, ' void fy_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int nz, int iruns, double *y, double *p, double *u, double *x, double *z){\n', data.fkt);
 writeCcode(fid, matlab_version, data, 'fy');
@@ -2659,6 +2679,24 @@ for j=1:length(b);
     a{j} = char(b(j));
 end
     
+function strG = quickScan( str )
+    c = 1;
+    depth = 0;
+    while ( c < numel( str ) )
+        if ( str(c) == '(' )
+            depth = depth + 1;
+        end
+        if ( str(c) == ')' )
+            depth = depth - 1;
+            if ( depth < 0 )
+                strG = str(1:c);
+                return
+            end
+        end
+        c = c + 1;
+    end
+    strG = str;
+    
 % This function maps matlab symbolic toolbox derivatives to derivatives we
 % can use in C
 %
@@ -2666,27 +2704,44 @@ end
 %  diff(name(args), args(#)) => Dname(args, #)
 function str = replaceDerivative( str )
     % Pattern that matches the derivatives D([#], func)(args)
-    pattern = 'D[\(][\[](\d+)[\]][\,](\s*)(\w*)[\)][\(]([\[\]\^\/\*\+\-\.\s,\w\d]*)[\)]';
+    pattern = 'D[\(][\[](\d+)[\]][\,](\s*)(\w*)[\)][\(]';
     
-    % Performs regexprep which transforms D([#], name)(args) => Dname(args, %d)
-    str = regexprep(str, pattern,'D$3($4,$1)');
+    % Transform D([#], name)(args) => Dname(args, %d)
+    % We need to explicitly match up the brackets, since regexps can't do
+    % this reliably, we have to loop over it.
+    [tokens,startloc,endloc] = regexp( str, pattern, 'tokens' );
     
+    % Generate replacement blocks
+    oldString = cell( 1, numel( startloc ) );
+    to = cell( 1, numel( startloc ) );
+    for i = 1 : numel( startloc )
+        call = str(startloc(i):endloc(i));
+        block = quickScan( str(endloc(i)+1:end) );
+        oldString{i} = [ call block ];
+        to{i} = sprintf( 'D%s(%s, %s)', tokens{i}{3}, block(1:end-1), tokens{i}{1} );
+    end
+    
+    % Perform the replacements
+    for i = 1 : numel( oldString )
+        str = strrep( str, oldString{i}, to{i} );
+    end
+        
     % Pattern which matches the other derivative structure
-    pattern2 = 'diff[\(](\w+)[\(]([\[\]\^\/\*\+\-\.\s,\w\d]*)[\)][,](\s*)([\[\]\w]*)[\)]';
-    
+    pattern2 = 'diff[\(](\w+)[\(]([\[\]\(\)\^\/\*\+\-\.\s,\w\d]*)[\)][,](\s)([\[\]\w]*)[\)]';
+        
     % Performs regexprep which transforms diff(name(args), args(#)) => Dname(args, #)
     [~,~,~,total,matches]=regexp(str, pattern2);
-    
+
     for jm = 1 : numel(matches)
         indep = matches{jm}{4};
         variables = strtrim(strsplit(matches{jm}{2}, ','));
-        
+
         % Find which variable we're deriving w.r.t. to
         ID = find(strcmp(variables, indep));
-        
+
         % Write the new string
         fNew = sprintf( 'D%s(%s, %d)', matches{jm}{1}, matches{jm}{2}, ID );
-        
+
         str = strrep( str, total{jm}, fNew );
     end
 
@@ -2726,7 +2781,12 @@ function cstr = ccode2(T, matlab_version)
         return;
     end
     
-    T = sym( replaceDerivative( char(T) ) );
+    try
+        T = sym( replaceDerivative( char(T) ) );
+    catch
+        char(T)
+        error('Failure attempting to replace derivatives in');
+    end
 
     % R2015b compatibility fix
     if(matlab_version>=8.6)
