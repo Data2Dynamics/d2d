@@ -4,6 +4,7 @@
 % Website: http://www.data2dynamics.org
 % Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de
 % Copyright 2016 D2D Development Team. All rights reserved.
+arCleanMemory;
 ar_path = fileparts(which('arInit.m'));
 if(exist('arCheck','file') == 0)
     addpath([ar_path '/Subfunctions'])
