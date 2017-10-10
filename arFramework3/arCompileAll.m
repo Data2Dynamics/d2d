@@ -1116,14 +1116,14 @@ end
 data.constVars = sprintf( '%s;\n', constVars{:} );
 
 data.sym.fy = mySym(data.fy, specialFunc);
-data.sym.fy = arSubs(data.sym.fy, model.sym.v, model.sym.fv);
+data.sym.fy = arSubs(data.sym.fy, model.sym.v, model.sym.fv, matlab_version);
 data.sym.fy = arSubs(data.sym.fy, data.sym.p, data.sym.fp, matlab_version);
 try
     data.sym.fystd = sym(data.fystd);
 catch
     error( 'Invalid expression in error model\n%s', [sprintf('%s', data.fystd{:} )] ); %#ok
 end
-data.sym.fystd = arSubs(data.sym.fystd, model.sym.v, model.sym.fv);
+data.sym.fystd = arSubs(data.sym.fystd, model.sym.v, model.sym.fv, matlab_version);
 data.sym.fystd = arSubs(data.sym.fystd, data.sym.p, data.sym.fp, matlab_version);
 
 data.sym.fu = mySym(data.fu, specialFunc);
