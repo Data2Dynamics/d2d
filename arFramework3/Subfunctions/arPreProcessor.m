@@ -23,6 +23,7 @@ function fid = preprocess(fid)
     % Find newlines
     newlines = regexp(fid.str, '\n|\r\n|\r');
     newlines = [newlines numel(fid.str)];
+    statusChange = 1;
     while( ~done )
         %[line, fid] = arTextScan(fid, '%[^\n]', 'CommentStyle', ar.config.comment_string );
         nl = newlines( find( newlines > fid.pos, 1 ) );
@@ -47,6 +48,7 @@ function fid = preprocess(fid)
                     end
                     defineStack{end+1} = parseBlock;
                     defineRequirement(end+1) = 1;           %  1 indicates that the define must be active for this block to be transcribed
+                    statusChange = 1;
                 end
                 % Preprocessor directives!
                 if strcmpi( parseBlock, '#ifndef' )
@@ -56,13 +58,16 @@ function fid = preprocess(fid)
                     end
                     defineStack{end+1} = parseBlock;
                     defineRequirement(end+1) = -1;          %  -1 indicates that the define may not be active for this block to be transcribed
+                    statusChange = 1;
                 end            
                 if strcmpi( parseBlock, '#else' )
                     defineRequirement(end) = -1 * defineRequirement(end);   % Else inverts the criterion
+                    statusChange = 1;
                 end
                 if ( strcmpi( parseBlock, '#endif' ) || ( strcmpi( parseBlock, '#end' ) ) )
                     defineStack(end) = [];
                     defineRequirement(end) = [];
+                    statusChange = 1;
                 end
 
                 if strcmpi( parseBlock, '#define' ) || strcmpi( parseBlock, '#def' )
@@ -78,6 +83,7 @@ function fid = preprocess(fid)
                         if ( parseBlock2 )
                             namedDefines.(parseBlock) = parseBlock2;
                         end
+                        statusChange = 1;
                     end
                 end
                 if strcmpi( parseBlock, '#undefine' ) || strcmpi( parseBlock, '#undef' )
@@ -92,24 +98,28 @@ function fid = preprocess(fid)
                         if isfield( namedDefines, parseBlock )
                             namedDefines = rmfield( namedDefines, parseBlock );
                         end
+                        statusChange = 1;
                     end
                 end            
 
-                % Which defines have to be active for the current code block?
-                mustBeActive = defineStack((defineRequirement == 1));
-                mustBeInactive = defineStack((defineRequirement == -1));
+                if ( statusChange )
+                    statusChange = 0;
+                    
+                    % Which defines have to be active for the current code block?
+                    mustBeActive = defineStack((defineRequirement == 1));
+                    mustBeInactive = defineStack((defineRequirement == -1));
 
-                % Any incompatible defines? (Unreachable code)
-                inco = intersect( mustBeActive, mustBeInactive );
-                if ( numel( inco ) > 0 )
-                    incomp = sprintf( '%s ', inco{:} );
-                    error( 'Incompatible #define / #undefine %s at line %d: %s', incomp, fid.nlines, line );
+                    % Any incompatible defines? (Unreachable code)
+                    inco = intersect( mustBeActive, mustBeInactive );
+                    if ( numel( inco ) > 0 )
+                        incomp = sprintf( '%s ', inco{:} );
+                        error( 'Incompatible #define / #undefine %s at line %d: %s', incomp, fid.nlines, line );
+                    end
+
+                    % Are we going to transcribe where we are?
+                    writing = ( numel( intersect( activeDefines, mustBeActive ) ) == numel( mustBeActive ) ) && ... 
+                              ( numel( intersect( activeDefines, mustBeInactive ) ) == 0 );
                 end
-
-                % Are we going to transcribe where we are?
-                writing = ( numel( intersect( activeDefines, mustBeActive ) ) == numel( mustBeActive ) ) && ...
-                          ( numel( intersect( activeDefines, mustBeInactive ) ) == 0 );
-                      
             end
             outStr = sprintf( '%s%s', outStr, outLine );
         else
