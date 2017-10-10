@@ -28,12 +28,12 @@ for i=1:length(fields)
     lig = TCGA_Matrices.(fields{i});
     for j=1:length(ligands)
         outcome = TCGA_Matrices.([strrep(fields{i},'TCGA_','') '_' ligands{j}]);
-%         outcome_prob = TCGA_Matrices.([strrep(fields{i},'TCGA_','') '_' ligands{j} '_Prob']);        
         neg=lig(5+j,strcmp(outcome,'0'));
-        pos=lig(5+j,strcmp(outcome,'1'));       
-        
-        [h, p_val] = ttest2(neg,pos,'Alpha',0.05);
-%        p_val
+        pos=lig(5+j,strcmp(outcome,'1')); 
+        t_pos = log10(sinh(pos)); t_pos(isinf(t_pos))=320;
+        t_neg = log10(sinh(neg)); t_neg(isinf(t_neg))=320;
+        [h, p_val] = ttest2(t_neg,t_pos); 
+
         if(length(neg)<length(pos))
            neg = [neg NaN(1,length(pos)-length(neg))]; 
         else
@@ -67,14 +67,11 @@ for i=1:length(fields)
         YLim_tmp=get(gca,'YLim');   
         text2 ='-fold';
         if(h)
-            if((p_val>0.01 || (ifig==1 && j==1)))
+            if(p_val>0.01)
                 text2 = [text2 '(*)'];
-            elseif(ifig~=2 && j~=1)
+            elseif(p_val<0.01)
                 text2 = [text2 '(**)'];
             end
-        end
-        if(ifig==2 && j==1)
-            text2 = [text2 '(**)'];
         end
         text(.7,YLim_tmp(2)-0.5,[num2str(round(2^(nanmean(log2(pos+1))-nanmean(log2(neg+1))),1)) text2])
         

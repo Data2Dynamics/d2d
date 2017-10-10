@@ -54,10 +54,18 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     fprintf(confirm_options)
     ar.ppl.n = ar.ppl.options.n_start;
     if(~isfield(ar.ppl.options,'tEnd'))
-        if(takeY)
-           ar.ppl.options.tEnd = ar.model(m).data(c).tFine(end);
+        if(ar.ppl.options.backward)
+            if(takeY)
+                ar.ppl.options.tEnd = ar.model(m).data(c).tFine(1);
+            else
+                ar.ppl.options.tEnd = ar.model(m).condition(c).tFine(1); 
+            end
         else
-           ar.ppl.options.tEnd = ar.model(m).condition(c).tFine(end); 
+            if(takeY)
+               ar.ppl.options.tEnd = ar.model(m).data(c).tFine(end);
+            else
+               ar.ppl.options.tEnd = ar.model(m).condition(c).tFine(end); 
+            end
         end
     end
 
@@ -129,7 +137,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
                  if(~isnan(ar.model(m).data(c).yExpStd(it_first,ix(jx))))
                      ar.ppl.options.xstd = ar.model(m).data(c).yExpStd(it_first,ix(jx));
                  elseif(ar.config.fiterrors~= -1 && takeY && ~isnan(ar.model(m).data(c).ystdFineSimu(1,ix(jx))))
-                    ar.ppl.options.xstd = ar.model(m).data(c).ystdFineSimu(1,ix(jx));
+                    ar.ppl.options.xstd = ar.model(m).data(c).ystdFineSimu(it_first,ix(jx));
                  end
             elseif(~takeY)
                 ar.ppl.options.xstd = max(ar.model(m).condition(c).xFineSimu(:,ix(jx)))/10;
@@ -196,7 +204,8 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     end
     ar.config.SimuPPL=0;
     arCalcMerit(); 
-    arWaitbar(-1);
+    warning('Prediction profile plotting is enabled. To return to normal plots type ar.config.ploterrors = 0;');
+    ar.config.ploterrors = -1;
     if(~takeY)
         ar.model(m).qPlotXs(ar.model(m).condition(c).dLink(1))=1;        
     else
@@ -206,6 +215,7 @@ end
 
 function [xFit, ps] = xstart_ppl(m, c, jx, t, doPPL, xstd, pReset, chi2start, whichT, takeY, save, dir, xFit, onlyProfile)
 global ar;
+arWaitbar(0);
 
 if(~exist('dir','var'))
     dir = 0;
@@ -229,7 +239,6 @@ if(~doPPL)
 else
     ppl_vpl = '';
 end
-arWaitbar(0);
 ntot = ar.ppl.options.n_start;
 tcount = 1;
 for ts = 1:length(t)
@@ -389,7 +398,7 @@ for ts = 1:length(t)
     end
 end
 %write LB/UB in ar struct
-    if(save && onlyProfile && dir==0)        
+    if(save && onlyProfile && dir==0 && length(t)>1)        
         struct_vec = {'FineUB','FineLB'};
         low_high_vec = {'ub_fit','lb_fit'};
         for ilh=1:2
@@ -400,12 +409,11 @@ end
             else
                 struct_string = ['x' struct_string];
             end            
-        
             ar.model(m).(data_cond)(c).(struct_string)(ar.model(m).(data_cond)(c).tFine<=max(ar.model(m).(data_cond)(c).ppl.tstart(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)))),jx) = ...
-                    interp1(ar.model(m).(data_cond)(c).ppl.tstart(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx))),...
-                    ar.model(m).(data_cond)(c).ppl.(ppl_string)(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)),jx),...
-                    ar.model(m).(data_cond)(c).tFine(ar.model(m).(data_cond)(c).tFine<=max(ar.model(m).(data_cond)(c).ppl.tstart(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx))))),...
-                    'pchip',NaN); 
+                        interp1(ar.model(m).(data_cond)(c).ppl.tstart(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx))),...
+                        ar.model(m).(data_cond)(c).ppl.(ppl_string)(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)),jx),...
+                        ar.model(m).(data_cond)(c).tFine(ar.model(m).(data_cond)(c).tFine<=max(ar.model(m).(data_cond)(c).ppl.tstart(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx))))),...
+                        'pchip',NaN);            
         end
     end
 end
@@ -428,7 +436,6 @@ if(takeY)
 else
     xLabel = myNameTrafo(ar.model(m).x{ix});    
 end
-
 xExp = xSim;
 for j = 1:n
     if(toc>tcount)
@@ -473,7 +480,6 @@ for j = 1:n
     %ppl(j)
     %xtrial(j)
     if((doPPL && ppl(j) > chi2start+ar.ppl.dchi2*1.2) || (~doPPL && vpl(j) > chi2start+ar.ppl.dchi2*1.2))
-        arWaitbar(-1);
         break
     end
 end
@@ -787,11 +793,14 @@ function ppl_calc(m, c, jx, xFit, p, t, doPPL, takeY, dir, stepsize, xstd, ed_st
         if(t_dir==-1 && jt>1)
             jt=jt-2;
         end
-        if(t_dir==-1 && (jt<=1 || t_tmp<ar.model(m).tLim(1)))
+        if(t_dir==-1 && (jt<=1 || t_tmp<ar.model(m).tLim(1) || t_tmp<ar.ppl.options.tEnd))
             fprintf('Backward integration stopped because lower time bound hit, proceeding with normal integration \n');
             break
         end
-
+        if(t_dir == 1 && t_tmp > ar.ppl.options.tEnd)
+           fprintf('Hit upper time threshold \n');
+           break
+        end
     end
     %write LB/UB in ar struct
     if(dir==1)
