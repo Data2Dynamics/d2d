@@ -7,14 +7,14 @@ function arCleanMemory(clearallcompiled)
         clearallcompiled = 0;
     end
 
-    fprintf( 'Clearing old D2D mex files from memory ' );
+    arFprintf( 2, 'Clearing old D2D mex files from memory ' );
     for jm = 1 : numel( loaded_mexfiles )
         [direc, mexName] = fileparts(loaded_mexfiles{jm});
 
         % Is it one of our files? Then clear it from memory!
         if ( ~isempty( strfind(mexName, 'arSimuCalcFun') ) || (clearallcompiled) )
             try
-                fprintf( '.' );
+                arFprintf( 2, '.' );
                 oldDir = pwd;
                 cd( direc );
                 clear( mexName );
@@ -24,6 +24,6 @@ function arCleanMemory(clearallcompiled)
             end
         end
     end
-    fprintf( ' [OK]\n' );
+    arFprintf( 2, ' [OK]\n' );
     
 end
