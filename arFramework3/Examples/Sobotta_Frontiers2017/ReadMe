@@ -1,0 +1,13 @@
+This folder contains the model corresponding to the publication:
+"Model Based Targeting of IL-6-Induced Inflammatory Responses in Cultured Primary Hepatocytes to Improve Application of the JAK Inhibitor Ruxolitinib" in Frontiers in Physiology.
+See: https://doi.org/10.3389/fphys.2017.00775
+
+Setup_IL6_Core only compiles the core model against its data. This is quite time intensive.
+Setup_IL6_ExpDesign compiles the model suitable for experiment design. Here multiple boluses of Ruxolitinib and IL-6 can be applied.
+Setup_IL6_Full compiles the full model including the APP gene submodules. This is very time intensive.
+
+doSensitivityAnalysis performs a sensitivity analysis on the model and is meant to be run with the ExpDesign model.
+saveAllFigs reproduces all figures from the paper and is meant to be run with the full model. Warning: this is extremely time intensive.
+
+Some of the analysis results were too big for the repository. These can be found at: sysbio.uni-freiburg.de/jvanlier/hidden_IL6_343249/IL6_Model_BigFiles.zip
+If you put these files in a subdirectory BigFiles, the larger analysis should also display.
