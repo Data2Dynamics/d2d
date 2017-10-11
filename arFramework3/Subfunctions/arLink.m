@@ -245,8 +245,13 @@ for m=1:length(ar.model)
         end
         
         % Add extra time points if desired
-        if isfield(ar.model(m).condition(c), 'tExtra')
-            ar.model(m).condition(c).tFine = union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tExtra);
+        for c = 1 : length( ar.model(m).condition )
+            if isfield(ar.model(m).condition(c), 'tExtra')
+                ar.model(m).condition(c).tFine = union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tExtra);
+                size(ar.model(m).condition(c).tFine)
+                size(ar.model(m).condition(c).tExtra)
+                size(ar.model(m).condition(c).tFine)
+            end
         end
         
         % link back time points
@@ -313,8 +318,10 @@ for m=1:length(ar.model)
         end
         
         % Add extra time points if desired
-        if isfield(ar.model(m).condition(c), 'tExtra')
-            ar.model(m).condition(c).tFine = union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tExtra);
+        for c = 1 : length( ar.model(m).condition )
+            if isfield(ar.model(m).condition(c), 'tExtra')
+                ar.model(m).condition(c).tFine = union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tExtra);
+            end
         end
     end
 end
