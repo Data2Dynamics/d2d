@@ -34,5 +34,15 @@ ar.config.maxsteps = 1000;
 ar.config.fiterrors = 1;
 arLoadPars( 'finalized_model' );
 
+ar.p(arFindPar('var_il6')) = log10(40);
+ar.qLog10(arFindPar('loc_rux')) = 0;
+ar.ub(arFindPar('loc_rux')) = 5000;
+ar.p(arFindPar('loc_rux1')) = 0;
+ar.p(arFindPar('loc_rux2')) = 480;
+ar.p(arFindPar('loc_rux3')) = 960;
+ar.p(arFindPar('input_rux1')) = log10(500);
+ar.p(arFindPar('input_rux2')) = log10(187);
+ar.p(arFindPar('input_rux3')) = log10(187);
+
 fn = 'il6_experiment_design';
 save(fn, 'ar');

@@ -1,122 +1,211 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
   <model metaid="arFramework3" id="il6_model">
+	 <listOfUnitDefinitions>
+		<unitDefinition name="pL" id="pL">
+			<listOfUnits>
+				<unit kind="litre" scale="-12"/>
+			</listOfUnits>
+		</unitDefinition>
+      <unitDefinition id="min">
+        <listOfUnits>
+          <unit scale="0" exponent="1" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+		<unitDefinition name="nmol" id="nmol">
+			<listOfUnits>
+				<unit kind="mole" scale="-9" exponent="1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="nmolperL" id="nmolperL">
+			<listOfUnits>
+				<unit kind="mole" scale="-9" exponent="1"/>
+				<unit kind="litre" scale="0" exponent="-1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="nmolperLmin" id="nmolperLmin">
+			<listOfUnits>
+				<unit kind="mole" scale="-9" exponent="1"/>
+				<unit kind="litre" scale="0" exponent="-1"/>
+				<unit kind="second" multiplier="60" scale="0" exponent="-1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="ngpermL" id="ngpermL">
+			<listOfUnits>
+				<unit kind="gram" scale="-9" exponent="1"/>
+				<unit kind="litre" scale="-3" exponent="-1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="permin" id="permin">
+			<listOfUnits>
+				<unit kind="second" multiplier="60" scale="0" exponent="-1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="perminnmolperL" id="perminnmolperL">
+			<listOfUnits>
+				<unit kind="litre" scale="0" exponent="1"/>
+				<unit kind="mole" scale="-9" exponent="-1"/>
+				<unit kind="second" multiplier="60" scale="0" exponent="-1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="perminngpermL" id="perminngpermL">
+			<listOfUnits>
+				<unit kind="litre" scale="-3" exponent="1"/>
+				<unit kind="gram" scale="-9" exponent="-1"/>
+				<unit kind="second" multiplier="60" scale="0" exponent="-1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="umol" id="umol">
+			<listOfUnits>
+				<unit kind="mole" scale="-6" exponent="1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="perumolperL" id="perumolperL">
+			<listOfUnits>
+				<unit kind="litre" scale="0" exponent="1"/>
+				<unit kind="mole" scale="-6" exponent="-1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="pernmolperL" id="pernmolperL">
+			<listOfUnits>
+				<unit kind="litre" scale="0" exponent="1"/>
+				<unit kind="mole" scale="-9" exponent="-1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="au" id="au">
+			<listOfUnits>
+				<unit kind="dimensionless" scale="1" exponent="1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="auperL" id="auperL">
+			<listOfUnits>
+				<unit kind="dimensionless" scale="1" exponent="1"/>
+				<unit kind="litre" scale="0" exponent="-1"/>
+			</listOfUnits>
+		</unitDefinition>
+		<unitDefinition name="aupermin" id="aupermin">
+			<listOfUnits>
+				<unit kind="dimensionless" scale="0" exponent="1"/>
+				<unit kind="second" multiplier="60" scale="0" exponent="-1"/>
+			</listOfUnits>
+		</unitDefinition>
+	 </listOfUnitDefinitions>
     <listOfCompartments>
-      <compartment id="cyt" spatialDimensions="3" size="12.67" constant="true"/>
-      <compartment id="nuc" spatialDimensions="3" size="0.5" constant="true"/>
+      <compartment id="cyt" units="pL" spatialDimensions="3" size="12.67" constant="true"/>
+      <compartment id="nuc" units="pL" spatialDimensions="3" size="0.5" constant="true"/>
     </listOfCompartments>
     <listOfSpecies>
-      <species id="JAK1_gp130" name="Unphosphorylated receptor" compartment="cyt" initialConcentration="0.555214703828664" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="pJAK1_gp130" name="Phosphorylated JAK1 receptor" compartment="cyt" initialConcentration="0.000488088299181085" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="pJAK1_pgp130" name="Active receptor" compartment="cyt" initialConcentration="0.00317810552352697" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="STAT3" name="Unphosphorylated cytoplasmic STAT3" compartment="cyt" initialConcentration="28.925968233862" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="tpSTAT3" name="Phosphorylated STAT3" compartment="cyt" initialConcentration="0.832161673943926" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nSTAT3" name="Unphosphorylated nuclear STAT3" compartment="nuc" initialConcentration="25.8698324790905" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nSOCS3RNA1" name="SOCS3 transcriptional delay" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nSOCS3RNA2" name="SOCS3 transcriptional delay" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nSOCS3RNA3" name="SOCS3 transcriptional delay" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nSOCS3RNA4" name="SOCS3 transcriptional delay" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nSOCS3RNA5" name="SOCS3 transcriptional delay" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="SOCS3RNA" name="SOCS3 mRNA" compartment="cyt" initialConcentration="0.000111649083183703" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="SOCS3" name="SOCS3 protein" compartment="cyt" initialConcentration="0.0256011491229785" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nIL33RNA1" name="IL33 transcriptional delay" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nIL33RNA2" name="IL33 transcriptional delay" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nIL33RNA3" name="IL33 transcriptional delay" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nIL33RNA4" name="IL33 transcriptional delay" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nIL33RNA5" name="IL33 transcriptional delay" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nCXCL10RNA1" name="CXCL10 transcriptional delay" compartment="nuc" initialConcentration="1.48032862915973e-13" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nCXCL10RNA2" name="CXCL10 transcriptional delay" compartment="nuc" initialConcentration="1.48032862915973e-13" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nCXCL10RNA3" name="CXCL10 transcriptional delay" compartment="nuc" initialConcentration="1.48032862915973e-13" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nFGGRNA1" name="FGG transcriptional delay" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nFGGRNA2" name="FGG transcriptional delay" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nFGGRNA3" name="FGG transcriptional delay" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nFGGRNA4" name="FGG transcriptional delay" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nFGGRNA5" name="FGG transcriptional delay" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nHPRNA1" name="HP transcriptional delay" compartment="nuc" initialConcentration="0.00794628661966941" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="nHPXRNA1" name="HPX transcriptional delay" compartment="nuc" initialConcentration="7.07807375550963" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="CXCL10RNA" name="CXCL10 mRNA" compartment="cyt" initialConcentration="5.84497954016129e-15" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="FGGRNA" name="FGG mRNA" compartment="cyt" initialConcentration="3.17241502859336e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="HAMPRNA" name="HAMP mRNA" compartment="cyt" initialConcentration="0.0088558311260624" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="IL33RNA" name="IL33 mRNA" compartment="cyt" initialConcentration="0.0291134861434416" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="APCSRNA" name="APCS mRNA" compartment="cyt" initialConcentration="9.14111159969428e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="HPRNA" name="HP mRNA" compartment="cyt" initialConcentration="0.000313833399730219" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
-      <species id="HPXRNA" name="HPX mRNA" compartment="cyt" initialConcentration="0.279057842468573" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="JAK1_gp130" name="Unphosphorylated receptor" substanceUnits="nmol" compartment="cyt" initialConcentration="0.555214703828664" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="pJAK1_gp130" name="Phosphorylated JAK1 receptor" substanceUnits="nmol" compartment="cyt" initialConcentration="0.000488088299181085" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="pJAK1_pgp130" name="Active receptor" substanceUnits="nmol" compartment="cyt" initialConcentration="0.00317810552352697" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="STAT3" name="Unphosphorylated cytoplasmic STAT3" substanceUnits="nmol" compartment="cyt" initialConcentration="28.925968233862" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="tpSTAT3" name="Phosphorylated STAT3" substanceUnits="nmol" compartment="cyt" initialConcentration="0.832161673943926" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSTAT3" name="Unphosphorylated nuclear STAT3" substanceUnits="nmol" compartment="nuc" initialConcentration="25.8698324790905" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSOCS3RNA1" name="SOCS3 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSOCS3RNA2" name="SOCS3 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSOCS3RNA3" name="SOCS3 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSOCS3RNA4" name="SOCS3 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nSOCS3RNA5" name="SOCS3 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="0.00282883849585856" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="SOCS3RNA" name="SOCS3 mRNA" compartment="cyt" substanceUnits="au" initialConcentration="0.000111649083183703" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="SOCS3" name="SOCS3 protein" compartment="cyt" substanceUnits="nmol" initialConcentration="0.0256011491229785" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nIL33RNA1" name="IL33 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nIL33RNA2" name="IL33 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nIL33RNA3" name="IL33 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nIL33RNA4" name="IL33 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nIL33RNA5" name="IL33 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="0.00601884086902185" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nCXCL10RNA1" name="CXCL10 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="1.48032862915973e-13" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nCXCL10RNA2" name="CXCL10 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="1.48032862915973e-13" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nCXCL10RNA3" name="CXCL10 transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="1.48032862915973e-13" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nFGGRNA1" name="FGG transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nFGGRNA2" name="FGG transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nFGGRNA3" name="FGG transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nFGGRNA4" name="FGG transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nFGGRNA5" name="FGG transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="5.12992148634642e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nHPRNA1" name="HP transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="0.013168555780255" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="nHPXRNA1" name="HPX transcriptional delay" substanceUnits="au" compartment="nuc" initialConcentration="7.07807375550963" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="CXCL10RNA" name="CXCL10 mRNA" substanceUnits="au" compartment="cyt" initialConcentration="5.84497954016129e-15" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="FGGRNA" name="FGG mRNA" substanceUnits="au" compartment="cyt" initialConcentration="3.17241502859336e-05" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="HAMPRNA" name="HAMP mRNA" substanceUnits="au" compartment="cyt" initialConcentration="0.0088558311260624" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="IL33RNA" name="IL33 mRNA" substanceUnits="au" compartment="cyt" initialConcentration="0.0291134861434416" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="APCSRNA" name="APCS mRNA" substanceUnits="au" compartment="cyt" initialConcentration="9.14111159969428e-07" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="HPRNA" name="HP mRNA" substanceUnits="au" compartment="cyt" initialConcentration="5.137013558932577e-04" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
+      <species id="HPXRNA" name="HPX mRNA" substanceUnits="au" compartment="cyt" initialConcentration="0.279057842468573" hasOnlySubstanceUnits="false" boundaryCondition="false" constant="false"/>
     </listOfSpecies>
     <listOfParameters>
-      <parameter id="apcsrna_des" value="0.00105944596359852" constant="true"/>
-      <parameter id="apcsrna_hill" value="4.23276387057303" constant="true"/>
-      <parameter id="apcsrna_ka" value="50.0940402219363" constant="true"/>
-      <parameter id="apcsrna_pro" value="0.00139460830546476" constant="true"/>
-      <parameter id="cxcl10rna_delay" value="0.0452293661748665" constant="true"/>
-      <parameter id="cxcl10rna_des" value="0.0452052665410998" constant="true"/>
-      <parameter id="cxcl10rna_hill" value="9.74950044400693" constant="true"/>
-      <parameter id="cxcl10rna_ka" value="142.757154950191" constant="true"/>
-      <parameter id="cxcl10rna_pro" value="5.68608875671638" constant="true"/>
-      <parameter id="f_pstat3_imp" value="4.97118591633696" constant="true"/>
-      <parameter id="fggrna_delay" value="0.120779262192917" constant="true"/>
-      <parameter id="fggrna_des" value="0.00770737484858441" constant="true"/>
-      <parameter id="fggrna_hill" value="3.93695191003628" constant="true"/>
-      <parameter id="fggrna_ka" value="49.1555791548272" constant="true"/>
-      <parameter id="fggrna_pro" value="0.235605753799674" constant="true"/>
-      <parameter id="gp130_act_jak1" value="0.536999685608035" constant="true"/>
-      <parameter id="gp130_deg" value="0.00380769499987503" constant="true"/>
-      <parameter id="gp130_pro" value="0.0024048090188292" constant="true"/>
-      <parameter id="hamprna_des" value="0.000212368487363527" constant="true"/>
-      <parameter id="hamprna_hill" value="3.25698024603785" constant="true"/>
-      <parameter id="hamprna_ka" value="47.320527880784" constant="true"/>
-      <parameter id="hamprna_pro" value="0.00302893472780248" constant="true"/>
-      <parameter id="hprna_delay" value="0.00363889653704127" constant="true"/>
-      <parameter id="hprna_des" value="0.00363603589106781" constant="true"/>
-      <parameter id="hprna_hill" value="2.80607285286785" constant="true"/>
-      <parameter id="hprna_ka" value="49.2844982877542" constant="true"/>
-      <parameter id="hprna_pro" value="0.10179726649316" constant="true"/>
-      <parameter id="hpxrna_delay" value="0.000372610688837591" constant="true"/>
-      <parameter id="hpxrna_des" value="0.000372966267324503" constant="true"/>
-      <parameter id="hpxrna_hill" value="1.31085746068484" constant="true"/>
-      <parameter id="hpxrna_pro" value="0.00023674176667103" constant="true"/>
-      <parameter id="il33rna_delay" value="0.134323387459761" constant="true"/>
-      <parameter id="il33rna_des" value="0.00109588169788454" constant="true"/>
-      <parameter id="il33rna_hill" value="1.76118734732687" constant="true"/>
-      <parameter id="il33rna_pro" value="3.43136965007846e-05" constant="true"/>
-      <parameter id="input_rux1" value="500" constant="true"/>
-      <parameter id="input_rux2" value="187" constant="true"/>
-      <parameter id="input_rux3" value="187" constant="true"/>
-      <parameter id="input_rux4" value="0" constant="true"/>
-      <parameter id="jak1_act_basal" value="0.00431295825104157" constant="true"/>
-      <parameter id="jak1_act_il6" value="0.009075950890566" constant="true"/>
-      <parameter id="jak1_gp130_dea" value="0.0781686412907726" constant="true"/>
-      <parameter id="jak1_inh_ruxolitinib" value="0.00602314686368812" constant="true"/>
-      <parameter id="loc_rux1" value="0" constant="true"/>
-      <parameter id="loc_rux2" value="480" constant="true"/>
-      <parameter id="loc_rux3" value="960" constant="true"/>
-      <parameter id="loc_rux4" value="1440" constant="true"/>
-      <parameter id="rux_degrade" value="0.000970640678908111" constant="true"/>
-      <parameter id="scale_apcs_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1" value="458.233435667488" constant="true"/>
-      <parameter id="scale_cxcl10_qpcr_braun_calibration_hep_2011_06_06_qPCR_140109_IL6DR_1h_CXCL10" value="275.243893334016" constant="true"/>
-      <parameter id="scale_fgg_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1" value="22.8775641330228" constant="true"/>
-      <parameter id="scale_hamp_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1" value="3.94026183251109" constant="true"/>
-      <parameter id="scale_hp_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1" value="17.614684604694" constant="true"/>
-      <parameter id="scale_hpx_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1" value="1.25383079579579" constant="true"/>
-      <parameter id="scale_il33_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1" value="1.4666791348047" constant="true"/>
-      <parameter id="scale_pgp130_wb_bohl_hep_2005_07_26_Pulse5min" value="7.91984491015843" constant="true"/>
-      <parameter id="scale_socs3_qpcr_braun_hep_2013_07_08_qPCR_Socs3_Stat3" value="62.0532495981734" constant="true"/>
-      <parameter id="socs3_assoc" value="0.0193431053114474" constant="true"/>
-      <parameter id="socs3_des" value="0.448649426570848" constant="true"/>
-      <parameter id="socs3_pro" value="1.69780340390334" constant="true"/>
-      <parameter id="socs3rna_delay" value="0.303942466148802" constant="true"/>
-      <parameter id="socs3rna_des" value="0.303904943507411" constant="true"/>
-      <parameter id="socs3rna_hill" value="1.71329655203901" constant="true"/>
-      <parameter id="socs3rna_pro" value="0.00170007562435021" constant="true"/>
-      <parameter id="stat3_act_gp130" value="0.411551346855518" constant="true"/>
-      <parameter id="stat3_exp" value="1.97083305689239" constant="true"/>
-      <parameter id="stat3_imp" value="0.0593610691509748" constant="true"/>
-      <parameter id="stat3_inh_socs3" value="0.618867945822336" constant="true"/>
-      <parameter id="stat3_inh_stattic" value="0.100364040238578" constant="true"/>
-      <parameter id="var_il6" value="40" constant="true"/>
-      <parameter id="IL6" value="0" constant="false"/>
-      <parameter id="ActD" value="0" constant="false"/>
-      <parameter id="Stattic" value="0" constant="false"/>
-      <parameter id="Ruxolitinib" value="0" constant="false"/>
+      <parameter id="apcsrna_des" 			units="permin" value="0.00105944596359852" constant="true"/>
+      <parameter id="apcsrna_hill" 			units="dimensionless" value="4.23276387057303" constant="true"/>
+      <parameter id="apcsrna_ka" 			units="nmolperLmin" value="50.0940402219363" constant="true"/>
+      <parameter id="apcsrna_pro" 			units="aupermin" value="0.00139460830546476" constant="true"/>
+      <parameter id="cxcl10rna_delay" 		units="permin" value="0.0452293661748665" constant="true"/>
+      <parameter id="cxcl10rna_des" 		units="permin" value="0.0452052665410998" constant="true"/>
+      <parameter id="cxcl10rna_hill" 		units="dimensionless" value="9.74950044400693" constant="true"/>
+      <parameter id="cxcl10rna_ka" 			units="nmolperLmin"	value="142.757154950191" constant="true"/>
+      <parameter id="cxcl10rna_pro" 		units="aupermin" value="5.68608875671638" constant="true"/>
+      <parameter id="f_pstat3_imp" 			units="dimensionless"		value="4.97118591633696" constant="true"/>
+      <parameter id="fggrna_delay" 			units="permin" value="0.120779262192917" constant="true"/>
+      <parameter id="fggrna_des" 			units="permin" value="0.00770737484858441" constant="true"/>
+      <parameter id="fggrna_hill" 			units="dimensionless" value="3.93695191003628" constant="true"/>
+      <parameter id="fggrna_ka" 				units="nmolperLmin" value="49.1555791548272" constant="true"/>
+      <parameter id="fggrna_pro" 			units="aupermin" value="0.235605753799674" constant="true"/>
+      <parameter id="gp130_act_jak1" 		units="permin"	value="0.536999685608035" constant="true"/>
+      <parameter id="gp130_deg" 				units="permin" value="0.00380769499987503" constant="true"/>
+      <parameter id="gp130_pro" 				units="nmolperLmin"	value="0.0024048090188292" constant="true"/>
+      <parameter id="hamprna_des" 			units="permin" value="0.000212368487363527" constant="true"/>
+      <parameter id="hamprna_hill" 			units="dimensionless" value="3.25698024603785" constant="true"/>
+      <parameter id="hamprna_ka" 			units="nmolperLmin" value="47.320527880784" constant="true"/>
+      <parameter id="hamprna_pro" 			units="aupermin" value="0.00302893472780248" constant="true"/>
+      <parameter id="hprna_delay" 			units="permin" value="0.001184548779388" constant="true"/>
+      <parameter id="hprna_des" 				units="permin" value="0.001198322667931" constant="true"/>
+      <parameter id="hprna_hill" 			units="dimensionless" value="2.816310716994441" constant="true"/>
+      <parameter id="hprna_ka" 				units="nmolperLmin" value="50.469915426936367" constant="true"/>
+      <parameter id="hprna_pro" 				units="aupermin" value="0.059837093427115" constant="true"/>
+      <parameter id="hpxrna_delay" 			units="permin" value="0.000372610688837591" constant="true"/>
+      <parameter id="hpxrna_des" 			units="permin" value="0.000372966267324503" constant="true"/>
+      <parameter id="hpxrna_hill" 			units="dimensionless" value="1.31085746068484" constant="true"/>
+      <parameter id="hpxrna_pro" 			value="0.00023674176667103" constant="true"/>
+      <parameter id="il33rna_delay" 		units="permin" value="0.134323387459761" constant="true"/>
+      <parameter id="il33rna_des" 			units="permin" value="0.00109588169788454" constant="true"/>
+      <parameter id="il33rna_hill" 			units="dimensionless" value="1.76118734732687" constant="true"/>
+      <parameter id="il33rna_pro" 			value="3.43136965007846e-05" constant="true"/>
+      <parameter id="input_rux1" 			units="nmolperL"	value="500" constant="true"/>
+      <parameter id="input_rux2" 			units="nmolperL"	value="187" constant="true"/>
+      <parameter id="input_rux3" 			units="nmolperL"	value="187" constant="true"/>
+      <parameter id="input_rux4" 			units="nmolperL"	value="0" constant="true"/>
+      <parameter id="jak1_act_basal" 		units="permin"	value="0.00431295825104157" constant="true"/>
+      <parameter id="jak1_act_il6" 			units="perminngpermL"	value="0.009075950890566" constant="true"/>
+      <parameter id="jak1_gp130_dea" 		units="permin" value="0.0781686412907726" constant="true"/>
+      <parameter id="jak1_inh_ruxolitinib" 	units="pernmolperL"	 value="0.00602314686368812" constant="true"/>
+      <parameter id="loc_rux1" 				units="min" value="0" constant="true"/>
+      <parameter id="loc_rux2" 				units="min" value="480" constant="true"/>
+      <parameter id="loc_rux3" 				units="min" value="960" constant="true"/>
+      <parameter id="loc_rux4" 				units="min" value="1440" constant="true"/>
+      <parameter id="rux_degrade" 			units="permin" value="0.000970640678908111" constant="true"/>
+      <parameter id="scale_apcs_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1" units="dimensionless" value="458.233435667488" constant="true"/>
+      <parameter id="scale_cxcl10_qpcr_braun_calibration_hep_2011_06_06_qPCR_140109_IL6DR_1h_CXCL10" units="dimensionless" value="275.243893334016" constant="true"/>
+      <parameter id="scale_fgg_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1" units="dimensionless" value="22.8775641330228" constant="true"/>
+      <parameter id="scale_hamp_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1" units="dimensionless" value="3.94026183251109" constant="true"/>
+      <parameter id="scale_hp_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1" units="dimensionless" value="17.614684604694" constant="true"/>
+      <parameter id="scale_hpx_qpcr_braun_calibration_hep_2014_01_27_IL6DR_24h_Replicate1" units="dimensionless" value="1.25383079579579" constant="true"/>
+      <parameter id="scale_il33_qpcr_braun_calibration_hep_2014_01_13_IL6DR_6h_Replicate1" units="dimensionless" value="1.4666791348047" constant="true"/>
+      <parameter id="scale_pgp130_wb_bohl_hep_2005_07_26_Pulse5min" units="dimensionless" value="7.91984491015843" constant="true"/>
+      <parameter id="scale_socs3_qpcr_braun_hep_2013_07_08_qPCR_Socs3_Stat3" units="dimensionless" value="62.0532495981734" constant="true"/>
+      <parameter id="socs3_assoc" 			units="perminnmolperL"	value="0.0193431053114474" constant="true"/>
+      <parameter id="socs3_des" 				units="permin" value="0.448649426570848" constant="true"/>
+      <parameter id="socs3_pro" 				units="permin"	value="1.69780340390334" constant="true"/>
+      <parameter id="socs3rna_delay" 		units="permin"	value="0.303942466148802" constant="true"/>
+      <parameter id="socs3rna_des" 			units="permin" value="0.303904943507411" constant="true"/>
+      <parameter id="socs3rna_hill" 		units="dimensionless"	value="1.71329655203901" constant="true"/>
+      <parameter id="socs3rna_pro" 			value="0.00170007562435021" constant="true"/>
+      <parameter id="stat3_act_gp130" 		units="perminnmolperL"	value="0.411551346855518" constant="true"/>
+      <parameter id="stat3_exp" 				units="permin"	value="1.97083305689239" constant="true"/>
+      <parameter id="stat3_imp" 				units="permin"	value="0.0593610691509748" constant="true"/>
+      <parameter id="stat3_inh_socs3" 		units="pernmolperL"	value="0.618867945822336" constant="true"/>
+      <parameter id="stat3_inh_stattic" 	units="perumolperL"	value="0.100364040238578" constant="true"/>
+      <parameter id="var_il6" 				units="dimensionless"	value="40" constant="true"/>
+      <parameter id="IL6" 						units="ngpermL"	value="0" constant="false"/>
+      <parameter id="ActD" 					units="dimensionless"	value="0" constant="false"/>
+      <parameter id="Stattic" 				units="umol"	value="0" constant="false"/>
+      <parameter id="Ruxolitinib" 			units="nmolperL"	value="0" constant="false"/>
     </listOfParameters>
     <listOfRules>
       <assignmentRule variable="IL6">
@@ -796,7 +885,7 @@
           </math>
         </kineticLaw>
       </reaction>
-      <reaction name="SOCS3 transcriptional delay SOCS#" reversible="false">
+      <reaction id="v17_SOCS3_transcriptional_delay" name="SOCS3 transcriptional delay SOCS3" reversible="false">
         <listOfReactants>
           <speciesReference species="nSOCS3RNA1" stoichiometry="1"/>
         </listOfReactants>

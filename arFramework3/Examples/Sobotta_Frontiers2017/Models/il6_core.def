@@ -50,16 +50,9 @@ pJAK1_pgp130 + SOCS3 ->                       CUSTOM    "socs3_assoc * pJAK1_pgp
 // Nuclear exchange of STAT3
 STAT3               ->  nSTAT3                CUSTOM   "stat3_imp * STAT3"                                                                                                                                                 "Import of unphosphorylated STAT3"
 nSTAT3              ->  STAT3                 CUSTOM	"stat3_exp * nSTAT3"                                                                                                                                               "Export of unphosphorylated STAT3"
-
 STAT3               ->  tpSTAT3               CUSTOM   "stat3_act_gp130 * STAT3 * pJAK1_pgp130 / (1 + stat3_inh_socs3 * SOCS3) / (1 + stat3_inh_stattic * Stattic)"                                                        "STAT3 phosphorylation and dimerization"
-
-// QSS solution for npSTAT3 was (pstat3_imp*stat3_dea)/(pstat3_imp+stat3_dea) * tpSTAT3
-// As deactivation rate goes to infinity, this approaches alpha * pstat3_imp * tpSTAT3
 tpSTAT3             ->  nSTAT3                CUSTOM   "stat3_imp * ( 1 + f_pstat3_imp ) * tpSTAT3"                                                                                                                        "STAT3 import and deactivation"
 
-// pSTAT3 is given by pSTAT3_imp / (pSTAT3_imp + stat3_dea)
-// Since stat3_dea >> pSTAT3_imp ==> very small, approximately linearly dependent on p_imp, with unknown scale
-// Unknown scale will be same for all conditions and absorbed by dynamic parameter.
 0                   ->  nSOCS3RNA1            CUSTOM	"socs3rna_pro * ( ( (vol_cyt/vol_nuc) * tpSTAT3 * stat3_imp * ( 1 + f_pstat3_imp ) )^socs3rna_hill ) * (1 - ActD)"                                                 "Initiation of SOCS3 mRNA transcription"
 nSOCS3RNA1          ->  nSOCS3RNA2            CUSTOM   "socs3rna_delay * nSOCS3RNA1"                                                                                                                                       "Transcriptional delay"
 nSOCS3RNA2          ->  nSOCS3RNA3            CUSTOM   "socs3rna_delay * nSOCS3RNA2"                                                                                                                                       "Transcriptional delay"
