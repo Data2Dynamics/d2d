@@ -248,9 +248,6 @@ for m=1:length(ar.model)
         for c = 1 : length( ar.model(m).condition )
             if isfield(ar.model(m).condition(c), 'tExtra')
                 ar.model(m).condition(c).tFine = union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tExtra);
-                size(ar.model(m).condition(c).tFine)
-                size(ar.model(m).condition(c).tExtra)
-                size(ar.model(m).condition(c).tFine)
             end
         end
         
