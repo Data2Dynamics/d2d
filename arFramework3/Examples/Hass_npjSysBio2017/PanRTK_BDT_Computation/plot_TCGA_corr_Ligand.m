@@ -12,7 +12,7 @@
 % https://de.mathworks.com/matlabcentral/fileexchange/23661-violin-plots-for-plotting-multiple-distributions--distributionplot-m-
 
 
-function plot_TCGA_corr_Ligand()
+function plot_TCGA_corr_Ligand(run_regression)
 global TCGA_Matrices;
 fields = fieldnames(TCGA_Matrices);
 
@@ -26,14 +26,16 @@ for i=1:length(fields)
     end
     ifig = ifig+1;
     lig = TCGA_Matrices.(fields{i});
-    for j=1:length(ligands)
+    for j=1:length(ligands)   
         outcome = TCGA_Matrices.([strrep(fields{i},'TCGA_','') '_' ligands{j}]);
-        neg=lig(5+j,strcmp(outcome,'0'));
-        pos=lig(5+j,strcmp(outcome,'1')); 
-        t_pos = log10(sinh(pos)); t_pos(isinf(t_pos))=320;
-        t_neg = log10(sinh(neg)); t_neg(isinf(t_neg))=320;
-        [h, p_val] = ttest2(t_neg,t_pos); 
-
+        if(~run_regression)
+            outcome = str2double(outcome);
+        end
+        neg=lig(5+j,outcome==0);
+        pos=lig(5+j,outcome==1); 
+       
+        [h, p_val] = ttest2(log2(neg+1),log2(pos+1));
+        
         if(length(neg)<length(pos))
            neg = [neg NaN(1,length(pos)-length(neg))]; 
         else

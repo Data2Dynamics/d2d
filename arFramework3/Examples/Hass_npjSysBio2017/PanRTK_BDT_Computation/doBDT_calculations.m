@@ -37,47 +37,16 @@ bdt.([which_Structs{i} '_Matrix'])((bdt.([which_Structs{i} '_Matrix'])(:,nr_entr
 bdt.([which_Structs{i} '_Matrix_bkp']) = bdt.([which_Structs{i} '_Matrix']);
 
 
-bdt_figures.([which_Structs{i} '_EGF_resp_' strrep(num2str(perc_testing),'.','_')]) = BDT_bootstrap_cluster('EGF',do_model,500,perc_testing);
-bdt_figures.([which_Structs{i} '_HRG_resp_' strrep(num2str(perc_testing),'.','_')]) = BDT_bootstrap_cluster('HRG',do_model,500,perc_testing);
-bdt_figures.([which_Structs{i} '_HGF_resp_' strrep(num2str(perc_testing),'.','_')]) = BDT_bootstrap_cluster('HGF',do_model,500,perc_testing);
+bdt_figures.([which_Structs{i} '_EGF_resp_' strrep(num2str(perc_testing),'.','_')]) = BDT_bootstrap_cluster('EGF',do_model,500,perc_testing,0);
+bdt_figures.([which_Structs{i} '_HRG_resp_' strrep(num2str(perc_testing),'.','_')]) = BDT_bootstrap_cluster('HRG',do_model,500,perc_testing,0);
+bdt_figures.([which_Structs{i} '_HGF_resp_' strrep(num2str(perc_testing),'.','_')]) = BDT_bootstrap_cluster('HGF',do_model,500,perc_testing,0);
 
-% bdt_figures.([which_Structs{i} '_IGF_resp']) = BDT_bootstrap_cluster('IGF1',do_model,500,0.4);
-%continue;
+% with mutation information, all ligands combined
 
-% Cellular response to EGF, HRG, HGF without mutation information
+bdt_figures.([which_Structs{i} '_mut_wHGF_' strrep(num2str(perc_testing),'.','_')]) = BDT_bootstrap_cluster('ALL',do_model,500,perc_testing,0);
 
-% bdt.([which_Structs{i} '_Matrix'])(:,nr_entries-2:nr_entries) = NaN;
-% bdt_figures.([which_Structs{i} '_nomut_wHGF']) = BDT_bootstrap_cluster('ALL',do_model,500,0.4);
-% 
-% %reset
-% bdt.([which_Structs{i} '_Matrix']) = bdt.([which_Structs{i} '_Matrix_bkp']);
-
-% continue;
-% with mutation information, w/HGF
-
-bdt_figures.([which_Structs{i} '_mut_wHGF_' strrep(num2str(perc_testing),'.','_')]) = BDT_bootstrap_cluster('ALL',do_model,500,perc_testing);
-
-% %Delete everything except AKT/ERK
-% if(do_model==1)
-%     bdt.([which_Structs{i} '_Matrix'])(:,4:nr_entries-2) = NaN;
-%     bdt_figures.([which_Structs{i} '_mut_woHGF_onlyDown']) = BDT_bootstrap_cluster('ALL',do_model,500,0.4);
-% end
-%reset
 bdt.([which_Structs{i} '_Matrix']) = bdt.([which_Structs{i} '_Matrix_bkp']);
 
 continue;
-% % without PI3K cells
-% bdt.([which_Structs{i} '_Matrix'])(bdt.([which_Structs{i} '_Matrix'])(:,nr_entries)==1,:) = NaN;
-% bdt_figures.([which_Structs{i} '_noPI3K_wHGF']) = BDT_bootstrap_cluster('ALL',do_model,500,0.4);
-% 
-% %reset
-% bdt.([which_Structs{i} '_Matrix']) = bdt.([which_Structs{i} '_Matrix_bkp']);
-% 
-% % without RAS cells
-% bdt.([which_Structs{i} '_Matrix'])(bdt.([which_Structs{i} '_Matrix'])(:,nr_entries-1)==1,:) = NaN;
-% bdt_figures.([which_Structs{i} '_noRAS_wHGF']) = BDT_bootstrap_cluster('ALL',do_model,500,0.4);
-% 
-% %reset
-% bdt.([which_Structs{i} '_Matrix']) = bdt.([which_Structs{i} '_Matrix_bkp']);
 
 end

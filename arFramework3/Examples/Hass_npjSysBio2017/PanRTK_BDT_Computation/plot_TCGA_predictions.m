@@ -17,11 +17,26 @@ for i = 1:length(indications)
         name_tmp = [indications{i} '_' ligands{j}];
         bdt_name_tmp = ['TCGA_' indications{i}];
         if(strcmp(ligands{j},'HRG'))
-            [TCGA_Matrices.(name_tmp), TCGA_Matrices.([name_tmp '_Prob'])] = predict(a,bdt.(bdt_name_tmp)(bdt.(bdt_name_tmp)(:,bdt.nr_model+1)==1 & sum(bdt.(bdt_name_tmp)(:,bdt.nr_model+2:bdt.nr_model+4),2)==0,1:bdt.nr_model));
-        elseif(strcmp(ligands{j},'EGF'))
-            [TCGA_Matrices.(name_tmp), TCGA_Matrices.([name_tmp '_Prob'])] = predict(a,bdt.(bdt_name_tmp)(bdt.(bdt_name_tmp)(:,bdt.nr_model+1)==0 & bdt.(bdt_name_tmp)(:,bdt.nr_model+4)==1,1:bdt.nr_model));       
+            if(~run_regression)
+                [TCGA_Matrices.(name_tmp), TCGA_Matrices.([name_tmp '_Prob'])] = predict(a,bdt.(bdt_name_tmp)(bdt.(bdt_name_tmp)(:,bdt.nr_model+1)==1 & sum(bdt.(bdt_name_tmp)(:,bdt.nr_model+2:bdt.nr_model+4),2)==0,1:bdt.nr_model));            
+            else
+                TCGA_Matrices.([name_tmp '_Prob']) = predict(mdl_model,bdt.(bdt_name_tmp)(bdt.(bdt_name_tmp)(:,bdt.nr_model+1)==1 & sum(bdt.(bdt_name_tmp)(:,bdt.nr_model+2:bdt.nr_model+4),2)==0,1:bdt.nr_model));
+            end
+        elseif(strcmp(ligands{j},'EGF'))            
+            if(~run_regression)
+                [TCGA_Matrices.(name_tmp), TCGA_Matrices.([name_tmp '_Prob'])] = predict(a,bdt.(bdt_name_tmp)(bdt.(bdt_name_tmp)(:,bdt.nr_model+1)==0 & bdt.(bdt_name_tmp)(:,bdt.nr_model+4)==1,1:bdt.nr_model)); 
+            else
+                TCGA_Matrices.([name_tmp '_Prob']) = predict(mdl_model,bdt.(bdt_name_tmp)(bdt.(bdt_name_tmp)(:,bdt.nr_model+1)==0 & bdt.(bdt_name_tmp)(:,bdt.nr_model+4)==1,1:bdt.nr_model));
+            end
         elseif(strcmp(ligands{j},'HGF'))
-            [TCGA_Matrices.(name_tmp), TCGA_Matrices.([name_tmp '_Prob'])] = predict(a,bdt.(bdt_name_tmp)(bdt.(bdt_name_tmp)(:,bdt.nr_model+2)==1,1:bdt.nr_model));      
+            if(~run_regression)
+                [TCGA_Matrices.(name_tmp), TCGA_Matrices.([name_tmp '_Prob'])] = predict(a,bdt.(bdt_name_tmp)(bdt.(bdt_name_tmp)(:,bdt.nr_model+2)==1,1:bdt.nr_model));  
+            else
+                TCGA_Matrices.([name_tmp '_Prob']) = predict(mdl_model,bdt.(bdt_name_tmp)(bdt.(bdt_name_tmp)(:,bdt.nr_model+2)==1,1:bdt.nr_model));
+            end
+        end
+        if(run_regression)
+            TCGA_Matrices.(name_tmp) = double(TCGA_Matrices.([name_tmp '_Prob'])>opt_thresh);
         end
     end
 end
@@ -38,7 +53,11 @@ for j = 1:length(ligands)
     vec_tmp = [];
     for i = 1:length(indications)
         name_tmp = [indications{i} '_' ligands{j}];
-        vec_tmp = [vec_tmp  sum(str2double(TCGA_Matrices.(name_tmp)))/length(TCGA_Matrices.(name_tmp))];
+        if(~run_regression)
+            vec_tmp = [vec_tmp  sum(str2double(TCGA_Matrices.(name_tmp)))/length(TCGA_Matrices.(name_tmp))];
+        else
+            vec_tmp = [vec_tmp  sum(TCGA_Matrices.(name_tmp))/length(TCGA_Matrices.(name_tmp))];
+        end
     end
     bar(1:length(indications),vec_tmp);
     title([ligands{j} ' stimulation'])
