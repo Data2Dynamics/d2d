@@ -10,9 +10,9 @@
 %  Also, TCGA predictions and correlations to ligands can be calculated
 
 %Load BDT matrices directly or from model folder?
-%load('BDT_plus_TCGA_data.mat')
+load('BDT_plus_TCGA_data.mat')
 %Load from model folder (calculate in PanRTK_final_forBDT folder)
-load('../PanRTK_final_forBDT/BDT_matrices_new.mat')
+%load('../PanRTK_final_forBDT/BDT_matrices_new.mat')
 global bdt
 global bdt_figures
 
