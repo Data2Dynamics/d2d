@@ -326,3 +326,11 @@ arFramework3/Examples/Hass_npjSysBio2017/PanRTK_final_forBDT/arCheckParallel*
 arFramework3/Examples/Hass_npjSysBio2017/PanRTK_final_forBDT/Results/20*
 arFramework3/Examples/Hass_npjSysBio2017/PanRTK_final_forBDT/pthreadVC2.dll
 arFramework3/Examples/Hass_npjSysBio2017/PanRTK_final_forBDT/pthreadGC2.dll
+
+arFramework3/Examples/Hass_Reelin_PONE2017/Compiled/
+arFramework3/Examples/Hass_Reelin_PONE2017/SBML/
+arFramework3/Examples/Hass_Reelin_PONE2017/arSimuCalc*
+arFramework3/Examples/Hass_Reelin_PONE2017/arCheckParallel*
+arFramework3/Examples/Hass_Reelin_PONE2017/Results/20*
+arFramework3/Examples/Hass_Reelin_PONE2017/pthreadVC2.dll
+arFramework3/Examples/Hass_Reelin_PONE2017/pthreadGC2.dll
