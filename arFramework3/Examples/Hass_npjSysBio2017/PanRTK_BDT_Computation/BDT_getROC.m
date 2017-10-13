@@ -8,21 +8,27 @@
 %
 % part of BDT_bootstrap script to obtain prediction Matrix and ROC curve
 % for tree 'b' with testing data having features X and outcome Y
+%
+% ConfusionMatrix has architecture (0 = no growth, 1 = growth)
+% ROWS=TRUE VALUES / COLS= PRED VALUES
+%    0    1
+% 0 TN   FP
+% 1 FN   TP
 
 function [xVal, yVal, auc, confMat, bdt_classes, predClass] = BDT_getROC(b,X_test,Y_test)
 
 %get the predictions
 [predClass, ClassScore] = b.predict(X_test);
 if(iscell(predClass))
-    confMat = confusionmat(Y_test, str2double(predClass));
-    bdt_classes = unique(str2double(predClass));
+    [confMat,bdt_classes] = confusionmat(Y_test, str2double(predClass),'order',[0 1]);
     predClass = str2double(predClass);
 else
-    confMat = confusionmat(Y_test, predClass);
-    bdt_classes = unique(predClass);
-
+    [confMat,bdt_classes] = confusionmat(Y_test, predClass,'order',[0 1]);   
 end
-Y_names = unique(Y_test);%[-1 0 1];
+
+%This part is currently not needed, enables to plot ROC curves
+
+Y_names = unique(Y_test);
 if(iscell(b.ClassNames))
     [Class_sort, I_class] = sort(str2double(b.ClassNames));    
     col_names = Class_sort;   
@@ -55,19 +61,6 @@ for j = 1:size(ClassScore,2)
     if(j==1)
         xVal = xVal_tmp;
         yVal = yVal_tmp;
-        auc = auc_tmp;
-    else
-        if(length(xVal_tmp)~=size(xVal,1))
-            if(length(xVal_tmp)<size(xVal,1))
-               xVal_tmp = [xVal_tmp;NaN(size(xVal,1)-length(xVal_tmp),1)];
-               yVal_tmp = [yVal_tmp;NaN(size(xVal,1)-length(yVal_tmp),1)];
-            else
-               xVal = [xVal;NaN(length(xVal_tmp)-size(xVal,1),size(xVal,2))];
-               yVal = [yVal;NaN(length(yVal_tmp)-size(yVal,1),size(yVal,2))];
-            end
-        end
-        xVal(:,j)=xVal_tmp;
-        yVal(:,j)=yVal_tmp;
-        auc(j) = auc_tmp;
+        auc = auc_tmp;    
     end
 end
