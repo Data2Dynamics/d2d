@@ -43,8 +43,8 @@ for i = 1:length(list_ligands)
     efficiency(1,i) = plot_Conf(['MODEL_' lig_str],save_folder,list_ligands{i});
     
     %Store MPV of all trained BDTs in BDT_plots struct
-    BDT_plots.(['RNA_' list_ligands{i}]) = (bdt_figures.(['RNA_' lig_str])(1).testing(1).MPV(:,1,1) + bdt_figures.(['RNA_' lig_str])(1).testing(1).MPV(:,1,2))./2;
-    BDT_plots.(['MODEL_' list_ligands{i}]) = (bdt_figures.(['MODEL_' lig_str])(1).testing(1).MPV(:,1,1) + bdt_figures.(['MODEL_' lig_str])(1).testing(1).MPV(:,1,2))./2;
+    BDT_plots.(['RNA_' list_ligands{i}]) = (bdt_figures.(['RNA_' lig_str])(1).testing(end).MPV(:,1,1) + bdt_figures.(['RNA_' lig_str])(1).testing(end).MPV(:,1,2))./2;
+    BDT_plots.(['MODEL_' list_ligands{i}]) = (bdt_figures.(['MODEL_' lig_str])(1).testing(end).MPV(:,1,1) + bdt_figures.(['MODEL_' lig_str])(1).testing(end).MPV(:,1,2))./2;
     hold off
     for j=1:length(bdt_figures.(['MODEL_' lig_str]))
         %-0.5 to get it distributed around random prediction

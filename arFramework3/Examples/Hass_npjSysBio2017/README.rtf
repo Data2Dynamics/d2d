@@ -24,19 +24,10 @@ With running Setup, the model sensitivities are calculated and model is compiled
 Plots for all cell lines as they are shown in the paper supplement (Figs. 3, S12-S41) can be generated.\
 \
 
-\b (2) PanRTK_final_forBDT\
+\b (2) PanRTK_BDT_Computation\
 \
 
-\b0 Here, the model parameters of 
-\b (1) 
-\b0 are loaded for dummy data sets and model features such as area under curve (AUC), quasi steady-state and fold-change can be simulated for arbitrary cell lines and are stored for further machine learning (Fig. 5, S5-S6).\
-Also, the TCGA data ({\field{\*\fldinst{HYPERLINK "https://cancergenome.nih.gov/"}}{\fldrslt https://cancergenome.nih.gov/}}) is taken to simulate model response for patients of breast cancer, CRC, lung cancer and ovarian cancer.\
-\
-
-\b (3) PanRTK_BDT_Computation\
-\
-
-\b0 Finally, the machine learning algorithm employing Bagged Decision Trees (BDT) is used in this folder to train and test (Fig. 4) (a) the receptor surface values + ligand condition and PI3K/RAS mutations or (b) model features generated in 
+\b0 Here, the machine learning algorithm employing Bagged Decision Trees (BDT) is used in this folder to train and test (Fig. 4) (a) the receptor surface values + ligand condition and PI3K/RAS mutations or (b) model features generated in 
 \b (2)
 \b0  to evaluate prediction efficiency given a cell viability assay of 58 cell lines, measured via CellTiter-Glo\'ae at the three day time point (Fig. S1).\
 The prediction capabilities are shown for each ligand (EGF,HRG,HGF,IGF-1) independently or in combination (Fig. 5, S7). In addition, the trained decision tree is applied on the clinical data set to predict ligand-dependence of tumors as well as to correlate ligand expression in the tumor microenvironment with prediction growth response (Fig. 6, S9).\
