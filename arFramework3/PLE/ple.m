@@ -28,7 +28,7 @@ function ple(jk, samplesize, relchi2stepincrease, ...
 
 global ar
 
-if(isempty(ar.ple))
+if(~isfield(ar,'ple') || isempty(ar.ple))
     error('PLE ERROR: please initialize')
 end 
 if(~isfield(ar.ple, 'showCalculation'))
@@ -111,7 +111,7 @@ elseif(length(jk)>1)
         length(jk), secToHMS(ar.ple.tmean), secToHMS(ar.ple.tstd));
     return
 end
-if(~ar.qFit(jk))
+if(ar.qFit(jk)~=1)
     fprintf('\nPLE#%i SKIPPED: parameter %s is fixed\n', jk, ar.ple.p_labels{jk});
     return
 else
