@@ -21,7 +21,7 @@ ApoER2_Dab1_released      C	 au      conc.	 DefaultCompartment	 1	 "ApoER2_Dab1_
 SFK             C	 au 	 conc.	 DefaultCompartment	 1	 "SFK"
 
 INPUTS
-Reelin_step              C    ng/ml   conc.   "step1(t, 0, 0, Reelin_input)"
+Reelin_step              C    ng/ml   conc.   "step1(t, 0, 0, Reelin_input)*exp(-0.1*t/(Reelin_input*1.e3+1.e-8))"
 
 
 REACTIONS-AMOUNTBASED

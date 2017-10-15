@@ -1,0 +1,86 @@
+DESCRIPTION
+"Initial Reelin Model"
+
+PREDICTOR
+t	 T	 min	 time	 -30	 240	
+
+COMPARTMENTS
+DefaultCompartment	 V	 "n/a"	 vol.	 1
+
+STATES
+ApoER2              C	 au 	 conc.	 DefaultCompartment	 1	 "ApoER2"
+pApoER2             C	 au      conc.	 DefaultCompartment	 1	 "pApoER2"
+
+pbApoER2            C	 au      conc.	 DefaultCompartment	 1	 "pbApoER2"
+
+cDab1                C	 au      conc.	 DefaultCompartment	 1	 "cDab1"
+ApoER2_re_Dab1      C	 au      conc.	 DefaultCompartment	 1	 "ApoER2_re_Dab1"
+pApoER2_re_Dab1     C	 au      conc.	 DefaultCompartment	 1	 "pApoER2_re_Dab1"
+
+SFK_Int             C	 au 	 conc.	 DefaultCompartment	 1	 "SFK_Int"
+pSFK_Int            C	 au 	 conc.	 DefaultCompartment	 1	 "pSFK_Int"
+SFK_Inh             C	 au 	 conc.	 DefaultCompartment	 1	 "SFK_Inh"
+
+INPUTS
+Reelin_step              C    ng/ml   conc.   "step1(t, 0, 0, Reelin_input)*exp(-0.1*t/(Reelin_input*1.e3+1.e-8))"
+
+REACTIONS-AMOUNTBASED
+                ->  ApoER2          CUSTOM  "ApoER2_prod"                               "v_ApoER2_prod"
+ApoER2 + cDab1        ->  ApoER2_re_Dab1         CUSTOM  "ApoER2_activation * cDab1 * ApoER2 * Reelin_step"       "v_ApoER2_act"
+ApoER2          ->  pbApoER2        CUSTOM  "ApoER2_basal_activation * ApoER2"          "v_ApoER2_basal_act"
+
+                ->  cDab1            CUSTOM  "ApoER2_prod"                                 "v_Dab1_prod"
+cDab1 + pbApoER2 ->  ApoER2_re_Dab1  CUSTOM	"Dab1_Apo_bas_activation * cDab1 * pbApoER2" "v_Dab1_Apo_bas_act"
+
+ApoER2_re_Dab1  ->  pApoER2_re_Dab1 CUSTOM	"Dab1_phosph * ApoER2_re_Dab1"              "v_ApoER2_re_Dab1ivation"
+ApoER2_re_Dab1  ->  pApoER2_re_Dab1 CUSTOM	"Dab1_SFK_phosph * ApoER2_re_Dab1 * pSFK_Int"   "v_Dab1_SFK_activation"
+pApoER2_re_Dab1 ->                  CUSTOM  "Dab1_SFK_degrad * pApoER2_re_Dab1 * pSFK_Int"  "v_Dab1_SFK_degrad"
+pApoER2_re_Dab1 ->  ApoER2_re_Dab1  CUSTOM  "Dab1_dephosph * pApoER2_re_Dab1"           "v_Dab1_deactivation"
+
+SFK_Int         ->  pSFK_Int        CUSTOM  "SFK_activation * SFK_ratio * SFK_Int * pApoER2_re_Dab1 * (1-Inh*SFK_inhibition_ratio)"    "v_SFK_activation"
+pSFK_Int        ->  SFK_Int         CUSTOM  "SFK_activation * pSFK_Int"                   "v_SFK_deactivation"
+SFK_Int         ->  SFK_Inh			CUSTOM	"SFK_activation * SFK_ratio * Inh * SFK_Int * SFK_inhibition_ratio"                 "v_SFK_Inhib"
+SFK_Inh         ->  SFK_Int			CUSTOM	"SFK_activation * SFK_Inh"                     "v_SFK_deInhib"
+
+DERIVED
+
+OBSERVABLES
+Dab1      C 	au  conc.   0	1  "scale_Dab1_Exp * (cDab1 + ApoER2_re_Dab1 + pApoER2_re_Dab1) + offset_Dab1_Exp"
+
+pDab1     C 	au  conc.   0   1   "scale_pDab1_Exp * (pApoER2_re_Dab1) + offset_pDab1_Exp"
+
+pAkt      C 	au  conc.   0	1   "scale_pAkt_Exp * (pApoER2_re_Dab1) + offset_pAkt_Exp"
+
+pSFK      C 	au  conc.   0	1   "scale_pSFK_Exp * (pSFK_Int + perc_mes * SFK_Inh) + offset_pSFK_Exp"
+
+tSFK      C     au	conc.	0	1	"scale_tSFK_Exp * (pSFK_Int + SFK_Int + SFK_Inh) + offset_tSFK_Exp"
+
+tApoER2   C 	au  conc.   0	1   "scale_tApo__Exp * (ApoER2 + pApoER2 + pbApoER2 + ApoER2_re_Dab1 + pApoER2_re_Dab1) + offset_tApo_Exp"
+
+ERRORS
+pAkt    "sd_pAkt"
+
+pDab1   "sd_pDab1"
+
+Dab1    "sd_Dab1"
+
+pSFK    "sd_pSFK"
+
+tApoER2    "sd_tApoER2"
+
+tSFK    "sd_tSFK"
+
+CONDITIONS
+init_SFK_Inh	"0"
+init_pApoER2    "0"
+init_ApoER2     "init_cDab1"
+init_ApoER2_re_Dab1  "1"
+
+init_SFK_Int  "init_pSFK_Int*(Dab1_SFK_degrad*init_pSFK_Int + Dab1_dephosph)/(SFK_ratio*Dab1_SFK_phosph*(Dab1_phosph + init_pSFK_Int))"
+init_pApoER2_re_Dab1  "Dab1_SFK_phosph*(Dab1_phosph + init_pSFK_Int)/(Dab1_SFK_degrad*init_pSFK_Int + Dab1_dephosph)"
+Dab1_Apo_bas_activation  "Dab1_SFK_degrad*Dab1_SFK_phosph*init_pSFK_Int*(Dab1_phosph + init_pSFK_Int)/(init_cDab1*init_pbApoER2*(Dab1_SFK_degrad*init_pSFK_Int + Dab1_dephosph))"
+ApoER2_prod  "Dab1_SFK_degrad*Dab1_SFK_phosph*init_pSFK_Int*(Dab1_phosph + init_pSFK_Int)/(Dab1_SFK_degrad*init_pSFK_Int + Dab1_dephosph)"
+ApoER2_basal_activation  "Dab1_SFK_degrad*Dab1_SFK_phosph*init_pSFK_Int*(Dab1_phosph + init_pSFK_Int)/(init_cDab1*(Dab1_SFK_degrad*init_pSFK_Int + Dab1_dephosph))"
+
+	
+PARAMETERS
