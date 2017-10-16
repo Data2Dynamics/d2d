@@ -520,7 +520,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     gettimeofday(&t2, NULL);
     
     DEBUGPRINT0( debugMode, 4, "Starting dynamic section\n" );
-       
+    
     if(dynamics == 1) {
         if(ssa == 0) {
             /**** begin of CVODES ****/
@@ -911,13 +911,14 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                             }
 
                             status[0] = flag;
-                        }
+                        } else data->t = ts[is];
                     }
                 }
                 
                 /* Store time step results */
-                DEBUGPRINT0( debugMode, 6, "Storing results\n" );
+                DEBUGPRINT1( debugMode, 11, "Status: %g\n", status[0] );
                 if(status[0] == 0.0) {
+                    DEBUGPRINT0( debugMode, 11, "Storing results\n" );
                     fu(data, data->t, im, isim);
                     fv(data, data->t, x, im, isim);
                     
