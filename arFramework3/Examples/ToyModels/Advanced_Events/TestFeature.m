@@ -23,7 +23,7 @@ ar.qFit(end)=0;
 % Set the parameters to wrong values
 arSetPars('k_basal', 0);
 arSetPars('k_deg', -2);
-fprintf( 'PASSED\n' );
+fprintf( 2, 'PASSED\n' );
 
 fprintf( 2, 'Setting equilibration events... ' );
 
