@@ -131,143 +131,77 @@ for jm = 1:length(ar.model)
                             end
                             
                             if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                                % plot ssa
-                                if isfield(ar.model(jm).data(jd), 'yFineSSA')
-                                    if(isfield(ar.model(jm).data(jd), 'yFineSSA_lb'))
-                                        for jssa = 1:size(ar.model(jm).data(jd).yFineSSA_lb, 3)
-                                            tmpx = [t(:); flipud(t(:))];
-                                            tmpy = [10.^ar.model(jm).data(jd).yFineSSA_ub(:,jy,jssa); ...
-                                                flipud(10.^ar.model(jm).data(jd).yFineSSA_lb(:,jy,jssa))];
-                                            patch(tmpx, tmpy, tmpx*0-2*eps, 'EdgeColor', Clines{2}*0.2+0.8, 'FaceColor', Clines{2}*0.2+0.8)
-%                                              patch(tmpx, tmpy, tmpx*0-2*eps, 'EdgeColor', Clines{2}*0.4+0.6, 'FaceColor', Clines{2}*0.4+0.6)
-                                            hold(g, 'on');
-                                        end
-                                    end
-                                    for jssa = 1:size(ar.model(jm).data(jd).yFineSSA, 3)
-                                        plot(t, 10.^ar.model(jm).data(jd).yFineSSA(:,jy,jssa), 'Color', Clines{2}*0.4+0.6)
-                                        hold(g, 'on');                                        
-                                    end
-                                    if(size(ar.model(jm).data(jd).yFineSSA,3)>1)
-                                        plot(t, 10.^mean(ar.model(jm).data(jd).yFineSSA(:,jy,:),3), '--', 'Color', Clines{2})
+                                trafo = @(x)10.^x;
+                            else
+                                trafo = @(x)x;
+                            end
+                                
+                            % plot ssa
+                            if isfield(ar.model(jm).data(jd), 'yFineSSA') % && ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==1) || ...
+%                                         (isfield(ar.model(jm).data(jd), 'yFineSSA') && ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==1) )
+                                if(isfield(ar.model(jm).data(jd), 'yFineSSA_lb'))
+                                    for jssa = 1:size(ar.model(jm).data(jd).yFineSSA_lb, 3)
+                                        tmpx = [t(:); flipud(t(:))];
+                                        tmpy = trafo([ar.model(jm).data(jd).yFineSSA_ub(:,jy,jssa); ...
+                                            flipud(ar.model(jm).data(jd).yFineSSA_lb(:,jy,jssa))]);
+                                        patch(tmpx, tmpy, tmpx*0-2*eps, 'EdgeColor', Clines{2}*0.2+0.8, 'FaceColor', Clines{2}*0.2+0.8)
+                                        hold(g, 'on');
+
                                     end
                                 end
-                                
-                                ar.model(jm).data(jd).plot.y(jy) = plot(g, t, 10.^y, Clines{:});
+                                for jssa = 1:size(ar.model(jm).data(jd).yFineSSA, 3)
+                                    plot(t, trafo(ar.model(jm).data(jd).yFineSSA(:,jy,jssa)), 'Color', Clines{2}*0.4+0.6)
+                                    hold(g, 'on');
+                                end
+                                if(size(ar.model(jm).data(jd).yFineSSA,3)>1)
+                                    plot(t, trafo(mean(ar.model(jm).data(jd).yFineSSA(:,jy,:),3)), '--', 'Color', Clines{2})
+                                end
+                            end
+
+                            tmpx = t;
+                            tmpy = trafo(y);
+                            qfinite = ~isinf(tmpy);
+                            if(sum(qfinite)>0)
+                                ar.model(jm).data(jd).plot.y(jy) = plot(g, tmpx(qfinite), tmpy(qfinite), Clines{:});
                                 cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
-                                hold(g, 'on');
-                                if any(whichYplot==3:5)% ( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
-%                                     (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
-                                    tmpx = [t(:); flipud(t(:))];
-                                    if any(whichYplot==[3,5])% ( (ar.config.useFitErrorMatrix==0 && ar.config.ploterrors==0) || ...
-%                                             (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==0) )
-                                        tmpy = [10.^(y + ystd); flipud(10.^(y - ystd))];
-                                    elseif whichYplot==4 && ~isempty(ub)% ( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==-1) || ...
-%                                             (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==-1) )
-                                        tmpy = [10.^ub; flipud(10.^lb)];
-                                    else 
-                                        tmpy = NaN(size(tmpx));
-                                    end
-                                    ltmp = patch(tmpx, tmpy, -2*ones(size(tmpx)), ones(size(tmpx)));
+                            end
+                            hold(g, 'on');
+                            if any(whichYplot==3:5)
+                                tmpx = [t(:); flipud(t(:))];
+                                if any(whichYplot==[3,5])
+                                    tmpy = trafo([y + ystd; flipud(y - ystd)]);
+                                elseif whichYplot==4 && ~isempty(ub)
+                                    tmpy = trafo([ub; flipud(lb)]);
+                                else
+                                    tmpy = NaN(size(tmpx));
+                                end
+                                qfinite = ~isinf(tmpy);
+                                if(sum(qfinite)>0)
+                                    ltmp = patch(tmpx(qfinite), tmpy(qfinite), -2*ones(size(tmpx(qfinite))), ones(size(tmpy(qfinite))));
                                     set(ltmp, 'FaceColor', Clines{2}*0.1+0.9, 'EdgeColor', Clines{2}*0.1+0.9);
-                                    ltmp2 = patch(tmpx, tmpy, -ones(size(tmpx)), ones(size(tmpx)));
+                                    ltmp2 = patch(tmpx(qfinite), tmpy(qfinite), -ones(size(tmpx(qfinite))), ones(size(tmpy(qfinite))));
                                     set(ltmp2, 'LineStyle', '--', 'FaceColor', 'none', 'EdgeColor', Clines{2}*0.3+0.7);
                                     ar.model(jm).data(jd).plot.ystd(jy) = ltmp;
                                     ar.model(jm).data(jd).plot.ystd2(jy) = ltmp2;
                                 end
+                            end
 
-                                
-                                if(isfield(ar.model(jm).data(jd), 'yExp'))
-                                    if any(whichYplot == [1,3,4])% ( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
-%                                             (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
-                                        plot(g, tExp, 10.^yExp, ClinesExp{:});
-                                        if(sum(~isnan(yExpHl))>0)
-                                            hold(g,'on');
-                                            plot(g, tExp, 10.^yExpHl, ClinesExp{:},'LineWidth',2,'MarkerSize',10);
-                                        end
-                                                                    
-                                        if ( expPlot )
-                                            plot(g, tExp, 10.^yExpSimu, 'x', ClinesExp{1:2}, 'Markersize', 6);
-                                        end
-                                    else
-                                        errorbar(g, tExp, 10.^yExp, ...
-                                            10.^yExp - 10.^(yExp - yExpStd), 10.^(yExp + yExpStd) - 10.^yExp, ClinesExp{:});
-                                        if(sum(~isnan(yExpHl))>0)
-                                            hold(g,'on');
-                                            errorbar(g, tExp, 10.^yExpHl, ...
-                                                10.^yExp - 10.^(yExp - yExpStd), 10.^(yExp + yExpStd) - 10.^yExp, ClinesExp{:},'LineWidth',2,'MarkerSize',10);
-                                        end
+                            if(isfield(ar.model(jm).data(jd), 'yExp'))
+                                if any(whichYplot==[1,3,4])
+                                    plot(g, tExp, trafo(yExp), ClinesExp{:});
+                                    if(sum(~isnan(yExpHl))>0)
+                                        hold(g,'on');
+                                        plot(g, tExp, trafo(yExpHl), ClinesExp{:},'LineWidth',2,'MarkerSize',10);
+                                    end
+                                else
+                                    errorbar(g, tExp, trafo(yExp), trafo(yExp) - trafo(yExp - yExpStd), trafo(yExp + yExpStd) - trafo(yExp), ClinesExp{:});
+                                    if(sum(~isnan(yExpHl))>0)
+                                        hold(g,'on');
+                                        errorbar(g, tExp, trafo(yExpHl), trafo(yExp) - trafo(yExp - yExpStd), trafo(yExp + yExpStd) - trafo(yExp), ClinesExp{:},'LineWidth',2,'MarkerSize',10);
                                     end
                                 end
-                            else
-                                % plot ssa
-                                if isfield(ar.model(jm).data(jd), 'yFineSSA') % && ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==1) || ...
-%                                         (isfield(ar.model(jm).data(jd), 'yFineSSA') && ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==1) )
-                                    if(isfield(ar.model(jm).data(jd), 'yFineSSA_lb'))
-                                        for jssa = 1:size(ar.model(jm).data(jd).yFineSSA_lb, 3)
-                                            tmpx = [t(:); flipud(t(:))];
-                                            tmpy = [ar.model(jm).data(jd).yFineSSA_ub(:,jy,jssa); ...
-                                                flipud(ar.model(jm).data(jd).yFineSSA_lb(:,jy,jssa))];
-                                            patch(tmpx, tmpy, tmpx*0-2*eps, 'EdgeColor', Clines{2}*0.2+0.8, 'FaceColor', Clines{2}*0.2+0.8)
-                                            hold(g, 'on');
-                                            
-                                        end
-                                    end
-                                    for jssa = 1:size(ar.model(jm).data(jd).yFineSSA, 3)
-                                        plot(t, ar.model(jm).data(jd).yFineSSA(:,jy,jssa), 'Color', Clines{2}*0.4+0.6)
-                                        hold(g, 'on');
-                                    end
-                                    if(size(ar.model(jm).data(jd).yFineSSA,3)>1)
-                                        plot(t, mean(ar.model(jm).data(jd).yFineSSA(:,jy,:),3), '--', 'Color', Clines{2})
-                                    end
-                                end
-                                
-                                tmpx = t;
-                                tmpy = y;
-                                qfinite = ~isinf(tmpy);
-                                if(sum(qfinite)>0)
-                                    ar.model(jm).data(jd).plot.y(jy) = plot(g, tmpx(qfinite), tmpy(qfinite), Clines{:});
-                                    cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy);
-                                end
-                                hold(g, 'on');
-                                if any(whichYplot==3:5) % ( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
-%                                         (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
-                                    tmpx = [t(:); flipud(t(:))];
-                                    if any(whichYplot==[3,5])% ( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==0) || ...
-%                                             (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==0) )
-                                        tmpy = [y + ystd; flipud(y - ystd)];
-                                    else % ( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==-1) || ...
-%                                             (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==-1) )
-                                        tmpy = [ub; flipud(lb)];
-                                    end
-                                    qfinite = ~isinf(tmpy);
-                                    if(sum(qfinite)>0)
-                                        ltmp = patch(tmpx(qfinite), tmpy(qfinite), -2*ones(size(tmpx(qfinite))), ones(size(tmpy(qfinite))));
-                                        set(ltmp, 'FaceColor', Clines{2}*0.1+0.9, 'EdgeColor', Clines{2}*0.1+0.9);
-                                        ltmp2 = patch(tmpx(qfinite), tmpy(qfinite), -ones(size(tmpx(qfinite))), ones(size(tmpy(qfinite))));
-                                        set(ltmp2, 'LineStyle', '--', 'FaceColor', 'none', 'EdgeColor', Clines{2}*0.3+0.7);
-                                        ar.model(jm).data(jd).plot.ystd(jy) = ltmp;
-                                        ar.model(jm).data(jd).plot.ystd2(jy) = ltmp2;
-                                    end
-                                end
-                                
-                                if(isfield(ar.model(jm).data(jd), 'yExp'))
-                                    if any(whichYplot==[1,3,4]) % ( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors ~= 1) || ...
-%                                             (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
-                                        plot(g, tExp, yExp, ClinesExp{:});
-                                        if(sum(~isnan(yExpHl))>0)
-                                            hold(g,'on');
-                                            plot(g, tExp, yExpHl, ClinesExp{:},'LineWidth',2,'MarkerSize',10);
-                                        end
-                                    else
-                                        errorbar(g, tExp, yExp, yExpStd, ClinesExp{:});
-                                        if(sum(~isnan(yExpHl))>0)
-                                            hold(g,'on');
-                                            errorbar(g, tExp, yExpHl, yExpStd, ClinesExp{:},'LineWidth',2,'MarkerSize',10);
-                                        end
-                                    end
-                                    if ( expPlot )
-                                        plot(g, tExp, yExpSimu, 'x', ClinesExp{1:2}, 'Markersize', 6);
-                                    end
+                                if ( expPlot )
+                                    plot(g, tExp, trafo(yExpSimu), 'x', ClinesExp{1:2}, 'Markersize', 6);
                                 end
                             end
                         else
