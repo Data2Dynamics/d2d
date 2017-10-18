@@ -67,8 +67,8 @@ function out = scaleIt( names, outFile, varargin )
 
     % Load options
     verbose = 0;
-    switches = { 'nofileincrement', 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn', 'splitconditions', 'removemask', 'excludeconditions', 'firstoutput' };
-    extraArgs = [ 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1 ];
+    switches = { 'nofileincrement', 'delimiter', 'obsgroups', 'inputmask', 'depvar', 'expid', 'restrictobs', 'ignoremask', 'twocomponent', 'logtrafo', 'rescale', 'range', 'varanalysis', 'samescale', 'prescale', 'appendcolumn', 'splitconditions', 'removemask', 'excludeconditions', 'firstoutput', 'dlfudge' };
+    extraArgs = [ 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0 ];
     description = { ...
     {'', 'Do not increment nExpID for different files'} ...
     {'', 'Custom delimiter specified'} ...
@@ -90,6 +90,7 @@ function out = scaleIt( names, outFile, varargin )
     {'', 'Using removal mask'} ...
     {'', 'Excluding specific conditions'}, ...
     {'', 'Specifying first output'}, ...
+    {'', 'Using detection limit fudge (not recommended)'}, ...
     };
     opts = argSwitch( switches, extraArgs, description, verbose, varargin );
     
@@ -247,7 +248,7 @@ function out = scaleIt( names, outFile, varargin )
             end
         end
     end
-    
+       
     % Find the time variable
     timeVar = fieldNames( ismember(fieldNames, timeVars) );
     if ( numel( timeVar ) > 1 )
@@ -356,6 +357,20 @@ function out = scaleIt( names, outFile, varargin )
         if ( sum(nans) > 0 )
             warning( 'Using default value %g for input %s\n', defaultValue, inputs{a} );
             out.(inputs{a})(nans) = {defaultValue};
+        end
+    end
+
+    % Set values below the detection limit to DL/2
+    if ( opts.dlfudge )
+        % Find zeroes
+        fNames = fieldnames( out );
+        variablesOfInterest = setdiff(fNames(cell2mat(cellfun(@(a)isempty(findstr(a, inputMask)), fNames, 'UniformOutput', false))), timeVar);
+        
+        for i = 1 : numel( variablesOfInterest )
+            predictionBDL = cellfun(@(x)x==0, out.(variablesOfInterest{i}));
+            values = out.(variablesOfInterest{i});
+            minimal = min( [ values{ ~predictionBDL } ] );           
+            out.(variablesOfInterest{i})(predictionBDL) = {minimal / 2};
         end
     end
     
@@ -575,7 +590,7 @@ function [ out, dataFields, fieldNames ] = estimateScaling( errModel, errModelPa
                 warnLine = sprintf( '%s\n%s: %d', warnLine, conditionFields{jF}, out.(conditionFields{jF}){ID} ); %#ok
             end
             warning( 'Found condition with very few data points:\n%s\n', warnLine );
-            pause;
+            %pause;
         end
     end    
     
