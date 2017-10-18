@@ -128,6 +128,7 @@ for jm = 1:length(ar.model)
                         if(~fastPlotTmp)
                             g = subplot(nrows,ncols,jy);
                             ar.model(jm).plot(jplot).gy(jy) = g;
+                            plotResFuncSpecificElements( g, t, jm, jd, jy, trafo );
                             
                             if(~isfield(ar.model(jm).data(jd),'qFit') || ar.model(jm).data(jd).qFit(jy))
                                 ClinesExp{6} = '*';
@@ -321,6 +322,7 @@ for jm = 1:length(ar.model)
                             if(~fastPlotTmp)
                                 g = subplot(nrows,ncols,jy);
                                 ar.model(jm).plot(jplot).gy(jy) = g;
+                                plotResFuncSpecificElements( g, t, jm, jd, jy, trafo );
                                 
                                 if(data_qFit)
                                     ClinesExp{6} = '*';
@@ -550,7 +552,16 @@ for jm = 1:length(ar.model)
     
 end
 
-
+function plotResFuncSpecificElements( g, t, jm, jd, jy, trafo )
+    global ar;
+    if( isfield(ar.model(jm).data(jd), 'resfunction') )
+        if ( isstruct( ar.model(jm).data(jd).resfunction ) )
+            if ( strcmp( ar.model(jm).data(jd).resfunction.type, 'DetectionLimit' ) )
+                plot(g, [min(t), max(t)], trafo([ar.model(jm).data(jd).resfunction.LoD(jy), ar.model(jm).data(jd).resfunction.LoD(jy)]), '--' );
+                hold(g, 'on' );
+            end
+        end
+    end
 
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, yExpSimu] = getData(jm, jd, jy)
 global ar
