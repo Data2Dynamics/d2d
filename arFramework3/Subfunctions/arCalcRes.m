@@ -125,37 +125,66 @@ for m=1:length(ar.model)
                 error('ar.config.fiterrors = %f is not yet implemented',ar.config.fiterrors);
             end
 
-
-            [ar.model(m).data(d).res, ar.model(m).data(d).chi2]         = fres(ar.model(m).data(d).yExp, ar.model(m).data(d).yExpSimu, ystd, fiterrors_correction_factor);
-            if isempty(ar.model(m).data(d).res)
-                ar.model(m).data(d).chi2 = zeros(1,length(ar.model(m).data(d).fy));
-            end
-
-            if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0 ) % error residuals are only !=0 if errors are fitted:
-                [ar.model(m).data(d).reserr, ar.model(m).data(d).chi2err]   = fres_error(ystd, ar.config.add_c);
-                if isempty(ar.model(m).data(d).reserr)
-                    ar.model(m).data(d).chi2err = zeros(1,length(ar.model(m).data(d).fy));
+            errorFitting = ( ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0 );  % error residuals are only !=0 if errors are fitted:
+            if ( isfield( ar.model(m).data(d), 'resfunction' ) && isstruct( ar.model(m).data(d).resfunction ) && ar.model(m).data(d).resfunction.active )
+                % TO DO: This could be handled in a cleaner manner by having everything go over the anonymous function
+                % approach. Should test how much of a speed penalty this incurs however.
+                fres_fun = ar.model(m).data(d).resfunction.fres_fun;
+                fres_error_fun = ar.model(m).data(d).resfunction.fres_error_fun;
+                fsres_fun = ar.model(m).data(d).resfunction.fsres_fun;
+                fsres_error_fun = ar.model(m).data(d).resfunction.fsres_error_fun;
+                [ar.model(m).data(d).res, ar.model(m).data(d).chi2] = fres_fun(ar.model(m).data(d).yExp, ar.model(m).data(d).yExpSimu, ystd, fiterrors_correction_factor);
+                if isempty(ar.model(m).data(d).res)
+                    ar.model(m).data(d).chi2 = zeros(1,length(ar.model(m).data(d).fy));
                 end
-                    
-            else
-                ar.model(m).data(d).reserr = zeros(size(ar.model(m).data(d).res));
-                ar.model(m).data(d).chi2err = zeros(size(ar.model(m).data(d).chi2));
-            end
+                
+                if ( errorFitting )
+                    [ar.model(m).data(d).reserr, ar.model(m).data(d).chi2err] = fres_error_fun(ar.model(m).data(d).yExp, ystd, ar.config.add_c);
+                    if isempty(ar.model(m).data(d).reserr)
+                        ar.model(m).data(d).chi2err = zeros(1,length(ar.model(m).data(d).fy));
+                    end
+                else
+                    ar.model(m).data(d).reserr  = zeros(size(ar.model(m).data(d).res));
+                    ar.model(m).data(d).chi2err = zeros(size(ar.model(m).data(d).chi2));
+                end
 
-            if (sensi == 1) && ar.model(m).data(d).has_yExp 
-                ar.model(m).data(d).sres = fsres(ar.model(m).data(d).syExpSimu, ar.model(m).data(d).yExp, ystd, fiterrors_correction_factor);
-                if (ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0 )
-                    [ar.model(m).data(d).sres, ar.model(m).data(d).sreserr] = fsres_error(ar.model(m).data(d).yExp, ar.model(m).data(d).res, ar.model(m).data(d).reserr, ar.model(m).data(d).sres, ystd, systd);
+                if (sensi == 1) && ar.model(m).data(d).has_yExp
+                    ar.model(m).data(d).sres = fsres_fun(ar.model(m).data(d).yExp, ar.model(m).data(d).yExpSimu, ar.model(m).data(d).syExpSimu, ystd, systd, ar.model(m).data(d).res, ar.model(m).data(d).reserr, ar.config.add_c, fiterrors_correction_factor);
+                    if ( errorFitting )
+                        [ar.model(m).data(d).sres, ar.model(m).data(d).sreserr] = fsres_error_fun(ar.model(m).data(d).yExp, ar.model(m).data(d).yExpSimu, ar.model(m).data(d).syExpSimu, ystd, systd, ar.model(m).data(d).res, ar.model(m).data(d).reserr, ar.config.add_c, fiterrors_correction_factor, ar.model(m).data(d).sres);
+                    end
+                else
+                    ar.model(m).data(d).sres(:)    = NaN;
+                    ar.model(m).data(d).sreserr(:) = NaN;
                 end
             else
-                ar.model(m).data(d).sres(:) = NaN;
-                ar.model(m).data(d).sreserr(:) = NaN;
+                [ar.model(m).data(d).res, ar.model(m).data(d).chi2] = fres(ar.model(m).data(d).yExp, ar.model(m).data(d).yExpSimu, ystd, fiterrors_correction_factor);
+                if isempty(ar.model(m).data(d).res)
+                    ar.model(m).data(d).chi2 = zeros(1,length(ar.model(m).data(d).fy));
+                end
+                
+                if ( errorFitting )
+                    [ar.model(m).data(d).reserr, ar.model(m).data(d).chi2err] = fres_error(ystd, ar.config.add_c);
+                    if isempty(ar.model(m).data(d).reserr)
+                        ar.model(m).data(d).chi2err = zeros(1,length(ar.model(m).data(d).fy));
+                    end
+                else
+                    ar.model(m).data(d).reserr  = zeros(size(ar.model(m).data(d).res));
+                    ar.model(m).data(d).chi2err = zeros(size(ar.model(m).data(d).chi2));
+                end
+
+                if (sensi == 1) && ar.model(m).data(d).has_yExp 
+                    ar.model(m).data(d).sres = fsres(ar.model(m).data(d).syExpSimu, ar.model(m).data(d).yExp, ystd, fiterrors_correction_factor);
+                    if ( errorFitting )
+                        [ar.model(m).data(d).sres, ar.model(m).data(d).sreserr] = fsres_error(ar.model(m).data(d).yExp, ar.model(m).data(d).res, ar.model(m).data(d).reserr, ar.model(m).data(d).sres, ystd, systd);
+                    end
+                else
+                    ar.model(m).data(d).sres(:)    = NaN;
+                    ar.model(m).data(d).sreserr(:) = NaN;
+                end
             end
-
-
 
             %         /* log trafo of parameters */
-
             if sensi && ar.model(m).data(d).has_yExp
                 for ip=1:size(ar.model(m).data(d).sres,3)
                     if ar.model(m).data(d).qLog10(ip) > 0.5
@@ -186,6 +215,7 @@ function [res,chi2] = fres(yexp, y, ystd, fiterrors_correction_factor)
     res(isnan(res)) = 0;
     chi2 = sum(res.^2,1);
 end
+
 %  void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2, double fiterrors_correction_factor) {
 %      int iy;
 %      
