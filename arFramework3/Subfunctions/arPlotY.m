@@ -57,6 +57,8 @@ end
 % end
 
 figcount = 1;
+% Set ar.config.debugExp to 1 to mark points on the simulation curve with
+% the values that are actually used in the likelihood calculation.
 expPlot = isfield(ar.config, 'debugExp')&&ar.config.debugExp;
 for jm = 1:length(ar.model)
     ar.model(jm).chi2 = 0;
@@ -616,7 +618,7 @@ for jm = 1:length(ar.model)
 %                                     (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
                                titstr{2} = sprintf('-2 log(L)_{%i} = %g', ndata(jy), 2*ndata(jy)*log(sqrt(2*pi)) + chi2(jy));
                             else
-                               titstr{2} = sprintf('chi^2_{%i} = %g', ndata(jy), chi2(jy));
+                               titstr{2} = sprintf('\\chi^2_{%i} = %g', ndata(jy), chi2(jy));
                             end
                        end
                     end
