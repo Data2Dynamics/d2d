@@ -85,6 +85,7 @@ for jm = 1:length(ar.model)
             chi2 = zeros(1,ar.model(jm).plot(jplot).ny);
             ndata = zeros(1,ar.model(jm).plot(jplot).ny);   
             if(~ar.model(jm).plot(jplot).doseresponse)
+              %% Time courses
                 cclegendstyles = zeros(1,length(ar.model(jm).plot(jplot).dLink));
                 
                 for jd = ar.model(jm).plot(jplot).dLink
@@ -119,7 +120,11 @@ for jm = 1:length(ar.model)
                             end
                         end
                                            
-                        
+                        if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
+                            trafo = @(x)10.^x;
+                        else
+                            trafo = @(x)x;
+                        end
                         if(~fastPlotTmp)
                             g = subplot(nrows,ncols,jy);
                             ar.model(jm).plot(jplot).gy(jy) = g;
@@ -128,12 +133,6 @@ for jm = 1:length(ar.model)
                                 ClinesExp{6} = '*';
                             else
                                 ClinesExp{6} = 'o';
-                            end
-                            
-                            if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                                trafo = @(x)10.^x;
-                            else
-                                trafo = @(x)x;
                             end
                                 
                             % plot ssa
@@ -205,25 +204,15 @@ for jm = 1:length(ar.model)
                                 end
                             end
                         else
-                            if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                                set(ar.model(jm).data(jd).plot.y(jy), 'YData', 10.^y);
-                                if any(whichYplot==[3,5])% ( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors ~= -1 && ar.config.ploterrors ~= 1) || ...
-%                                         (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)~=-1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
-                                    set(ar.model(jm).data(jd).plot.ystd(jy), 'YData', [10.^(y + ystd); flipud(10.^(y - ystd))]);
-                                    set(ar.model(jm).data(jd).plot.ystd2(jy), 'YData', [10.^(y + ystd); flipud(10.^(y - ystd))]);
-                                end
-                            else
-                                tmpy = y;
+                            tmpy = trafo(y);
+                            qfinite = ~isinf(tmpy);
+                            set(ar.model(jm).data(jd).plot.y(jy), 'YData', tmpy(qfinite));
+                            if any(whichYplot==[3,5])
+                                tmpy = trafo([y + ystd; flipud(y - ystd)]);
                                 qfinite = ~isinf(tmpy);
-                                set(ar.model(jm).data(jd).plot.y(jy), 'YData', tmpy(qfinite));
-                                if any(whichYplot==[3,5]) % ( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors ~= -1 && ar.config.ploterrors ~= 1) || ...
-%                                         (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)~=-1 && ar.config.ploterrors_matrix(jm,jd)~=1) )
-                                    tmpy = [y + ystd; flipud(y - ystd)];
-                                    qfinite = ~isinf(tmpy);
-                                    if(sum(qfinite)>0)
-                                        set(ar.model(jm).data(jd).plot.ystd(jy), 'YData', tmpy(qfinite));
-                                        set(ar.model(jm).data(jd).plot.ystd2(jy), 'YData', tmpy(qfinite));
-                                    end
+                                if(sum(qfinite)>0)
+                                    set(ar.model(jm).data(jd).plot.ystd(jy),  'YData', tmpy(qfinite));
+                                    set(ar.model(jm).data(jd).plot.ystd2(jy), 'YData', tmpy(qfinite));
                                 end
                             end
                         end
@@ -241,6 +230,7 @@ for jm = 1:length(ar.model)
                     ccount = ccount + 1;
                 end
             else
+              %% Dose responses
                 times = [];
                 for jd = ar.model(jm).plot(jplot).dLink
                     times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
