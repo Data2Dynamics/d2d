@@ -1,0 +1,17 @@
+DESCRIPTION
+"Epo binding described by a Michealis-Menten function"
+
+PREDICTOR
+t               T   min         time	0	100
+
+COMPARTMENTS
+
+STATES
+
+INPUTS
+
+REACTIONS
+        
+DERIVED
+
+CONDITIONS

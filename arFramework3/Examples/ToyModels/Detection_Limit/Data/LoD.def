@@ -1,0 +1,32 @@
+DESCRIPTION
+        
+PREDICTOR
+t               T   min     time	0 
+
+INPUTS
+
+OBSERVABLES
+obs_A 	C   au	conc.	0  0	"stateA"
+obs_B	C   au	conc.	0  0	"stateB"
+obs_C 	C   au	conc.	0  0	"stateC"
+obs_D 	C   au	conc.	0  1	"stateD"
+obs_E 	C   au	conc.	0  1	"stateE"
+obs_F 	C   au	conc.	0  1	"stateF"
+obs_G 	C   au	conc.	0  0	"stateG"
+obs_H 	C   au	conc.	0  0	"stateH"
+obs_I 	C   au	conc.	0  0	"stateI"
+
+ERRORS    
+obs_A	"sd_A"
+obs_B   "sd_B"
+obs_C	"sd_C"
+obs_D	"sd_D"
+obs_E	"sd_E"
+obs_F   "sd_F"
+obs_G	"1"
+obs_H	"1"
+obs_I   "1"
+
+        
+CONDITIONS
+
