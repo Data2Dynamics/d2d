@@ -1,0 +1,27 @@
+DESCRIPTION
+"JAK-STAT Model"
+
+PREDICTOR
+t               T   min         time	0	100
+
+COMPARTMENTS
+
+STATES
+A_state           C   "nM"      "conc."    
+B_state           C   "nM"      "conc."    
+
+INPUTS
+
+REACTIONS
+-> A_state            CUSTOM "2.7183 * p1"
+
+DERIVED
+        
+OBSERVABLES
+B_au        C   "au"  "conc."   0   0   "3.1416 * B_state"
+
+ERRORS
+B_au       "sd_B_au"
+
+CONDITIONS
+init_A_state "1"
