@@ -229,6 +229,9 @@ for m=1:length(ar.model)
         model.vs = ar.model(m).vs;
         model.zs = ar.model(m).zs;
         model.N = ar.model(m).N;
+        model.dvdx = ar.model(m).sym.dvdx;
+        model.dvdu = ar.model(m).sym.dvdu;
+        
         if isfield( ar.model(m), 'removedStates' )
             arFprintf( 2, 'Dealing with reduced model ...\n' );
             model.removedStates = ar.model(m).removedStates;
@@ -572,6 +575,7 @@ ar.model(m).sym.us = mySym(ar.model(m).us, specialFunc);
 ar.model(m).sym.v = mySym(strrep(strrep(ar.model(m).v, ' ', '_'),'.','_'), specialFunc);
 ar.model(m).sym.vs = mySym(ar.model(m).vs, specialFunc);
 ar.model(m).sym.fv = mySym(ar.model(m).fv, specialFunc);
+[ ar.model(m).sym.dvdx, ar.model(m).sym.dvdu ] = cacheShortTerms( ar.model(m) );
 
 % compartment volumes
 if(~isempty(ar.model(m).pc)) 
@@ -627,7 +631,7 @@ if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
         tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
 
         try
-            ar.model(m).qdvdx_negative = double(tmpsym) < 0;
+            ar.model(m).q_negative = double(tmpsym) < 0;
         catch ERR
             for i=1:length(tmpsym(:))
                 try
@@ -819,23 +823,10 @@ condition.qdvdu_nonzero = logical(condition.sym.dfvdu~=0);
 condition.qdvdp_nonzero = logical(condition.sym.dfvdp~=0);
 
 % short terms
-condition.sym.dvdx = sym(zeros(length(model.vs), length(model.xs)));
-for j=1:length(model.vs)
-    for i=1:length(model.xs)
-        if(condition.qdvdx_nonzero(j,i))
-            condition.sym.dvdx(j,i) = sym(sprintf('dvdx[%i]', j + (i-1)*length(model.vs)));
-        end
-    end
-end
-
-condition.sym.dvdu = sym(zeros(length(model.vs), length(model.us)));
-for j=1:length(model.vs)
-    for i=1:length(model.us)
-        if(condition.qdvdu_nonzero(j,i))
-            condition.sym.dvdu(j,i) = sym(sprintf('dvdu[%i]', j + (i-1)*length(model.vs)));
-        end
-    end
-end
+condition.sym.dvdx = model.dvdx;
+condition.sym.dvdx(~condition.qdvdx_nonzero) = 0;
+condition.sym.dvdu = model.dvdu;
+condition.sym.dvdu(~condition.qdvdu_nonzero) = 0;
 
 condition.sym.dvdp = sym(zeros(length(model.vs), length(condition.ps)));
 for j=1:length(model.vs)
@@ -1410,7 +1401,7 @@ function out = mysubsrepeated(in, old, new, matlab_version)
         end        
         
         % No more changes?
-        if ( min( min( arrayfun( @isequal, out, in ) ) ) == 1 )
+        if ( isequal( out, in ) == 1 )
             done = true;
         else
             in = out;
@@ -2674,10 +2665,22 @@ function s = mySym( s, specialFunc )
     
 % convert sym array to string array
 function a = sym2str(b)
-a = cell(size(b));
-for j=1:length(b);
-    a{j} = char(b(j));
-end
+    nonzeros = logical(b~=0);
+    a = cell(size(b));
+    for j=1:length(b)
+        if ( nonzeros(j) )
+            a{j} = char(b(j));
+        else
+            a{j} = '0';
+        end
+    end
+    
+% convert sym array to string array
+function a = sym2str_old(b)
+    a = cell(size(b));
+    for j=1:length(b)
+        a{j} = char(b(j));
+    end
     
 function strG = quickScan( str )
     c = 1;
@@ -2826,3 +2829,19 @@ function message = invalidSym( message, symvariable, names )
         end
     end
     
+    
+function [ dvdx, dvdu ] = cacheShortTerms( model )
+    dvdx = sym(zeros(length(model.vs), length(model.xs)));
+    for j=1:length(model.vs)
+        for i=1:length(model.xs)
+            dvdx(j,i) = sym(sprintf('dvdx[%i]', j + (i-1)*length(model.vs)));
+        end
+    end
+
+    dvdu = sym(zeros(length(model.vs), length(model.us)));
+    for j=1:length(model.vs)
+        for i=1:length(model.us)
+            dvdu(j,i) = sym(sprintf('dvdu[%i]', j + (i-1)*length(model.vs)));
+        end
+    end
+
