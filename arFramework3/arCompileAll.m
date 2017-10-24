@@ -929,9 +929,9 @@ if(config.useSensis)
                 
         % This function checks whether the inputs were sensible and
         % gives a warning for problematic discontinuities in the sensitivities.
-        for j = 1 : length( model.u )
-            condition.sym.dfudp(j,:) = verifyRow( condition.sym.dfudp(j,:), condition.sym.fu(j), 'input' );
-        end
+        % for j = 1 : length( model.u )
+        %     condition.sym.dfudp(j,:) = verifyRow( condition.sym.dfudp(j,:), condition.sym.fu(j), 'input' );
+        % end
     end
     
 	% sx
@@ -1410,7 +1410,7 @@ function out = mysubsrepeated(in, old, new, matlab_version)
         end        
         
         % No more changes?
-        if ( isempty( setdiff(out,in) ) )
+        if ( min( min( arrayfun( @isequal, out, in ) ) ) == 1 )
             done = true;
         else
             in = out;
