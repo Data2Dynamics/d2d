@@ -10,7 +10,11 @@ end
 if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
     try
         if(matlab_version>=8.1)
-            out = subs(in, old(:), new(:));
+            if size(old,1) ~= size(new,1)
+                new = new.';
+            end
+            subset = logical(old~=new);
+            out = subs(in, old(subset), new(subset));
         else
             out = subs(in, old(:), new(:), 0);
         end
