@@ -437,6 +437,8 @@ for m=1:length(ar.model)
         model.vs = ar.model(m).vs;
         model.zs = ar.model(m).zs;
         model.N = ar.model(m).N;
+        model.dvdx = ar.model(m).sym.dvdx;
+        model.dvdu = ar.model(m).sym.dvdu;
         if isfield( ar.model(m), 'removedStates' )
             arFprintf( 2, 'Dealing with reduced model ...\n' );
             model.removedStates = ar.model(m).removedStates;
