@@ -78,6 +78,9 @@ if ( enableRootfinding )
     mexopt{end+1} = '-DROOT_FINDING';
     ar.config.C_rootfinding = 1;
 end
+if isfield( ar.config, 'defines' )
+    mexopt = union( mexopt, ar.config.defines );
+end
 
 arFprintf(1, 'Compiling files...');
 
