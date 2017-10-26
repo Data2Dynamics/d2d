@@ -133,6 +133,9 @@ lb(ar.type==2) = lb(ar.type==2) - 1;
 ub = ub(ar.qFit==1);
 lb = lb(ar.qFit==1);
 
+% Make a backup of the parameters before we start
+arPush('arFit');
+
 % lsqnonlin
 if(ar.config.optimizer == 1)    
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
@@ -502,6 +505,9 @@ else
     varargout = {};
 end
 
+% Discard the parameter set again without taking its values
+arPop(1);
+
 
 % lsqnonlin and arNLS
 function [res, sres] = merit_fkt(pTrial)
@@ -513,7 +519,7 @@ if ( isfield( ar.config, 'sensiSkip' ) )
 else
     sensiskip = false;
 end
-sensi = ar.config.useSensis && (~sensiskip || (nargout > 1));
+sensi = ar.config.useSensis;% && (~sensiskip || (nargout > 1));
 
 arCalcMerit(sensi, pTrial);
 arLogFit(ar);
