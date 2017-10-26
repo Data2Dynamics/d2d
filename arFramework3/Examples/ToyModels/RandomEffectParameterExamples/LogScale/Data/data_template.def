@@ -1,0 +1,20 @@
+DESCRIPTION
+"This data definition file implementing patient-specific parameter which is penalized according to the normal distribution at the log-scale with a standard deviation given by parameter patientID_sd.
+The mean is given in the data file."
+
+PREDICTOR
+t	T	"min"	"time"	0	100
+
+INPUTS
+
+OBSERVABLES
+mean_patientID	C   "au"  "conc."   0   0 	"log10(patient_ID)"
+
+ERRORS
+mean_patientID	"patientID_sd"
+
+CONDITIONS
+k3	"k3*patient_ID"
+
+RANDOM
+patient_ID	INDEPENDENT
