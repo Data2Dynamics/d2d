@@ -42,7 +42,7 @@ function arPush( reset )
         disp( 'Starting new stack' );
         newStack();
     end
-    
+       
     % Push parameter set onto the stack
     arStack.N             = arStack.N + 1;
     N                     = arStack.N;
@@ -55,6 +55,10 @@ function arPush( reset )
     arStack.mean(N,:)     = ar.mean + 0;
     arStack.std(N,:)      = ar.std + 0;
     arStack.name{N}       = name;
+    
+    if isfield( ar.config, 'continuousSaving' )
+        save( ar.config.continuousSaving, 'arStack' );
+    end    
 end
 
 function newStack()
