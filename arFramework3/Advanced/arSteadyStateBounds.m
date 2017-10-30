@@ -1,6 +1,6 @@
 % Work in progress, do not use
 
-function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weight, showConstraints)
+function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz, showConstraints)
 
     global ar;
     
@@ -24,8 +24,11 @@ function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weight, showConst
     if ~exist( 'logy', 'var' )
         logz = ones( size( zl ) );
     end
-    if ~exist( 'weight', 'var' )
-        weight = 10;
+    if ~exist( 'weightx', 'var' )
+        weightx = 10 * ones( size(xl) );
+    end
+    if ~exist( 'weightz', 'var' )
+        weightz = 10 * ones( size(zl) );
     end
     if ~exist( 'showConstraints', 'var' )
         showConstraints = 0;
@@ -48,13 +51,13 @@ function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weight, showConst
     zl(logz) = log10(zl(logz));
     zu(logz) = log10(zu(logz));
     
-    res_fun = @()residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, weight, logx, logz, showConstraints);
+    res_fun = @()residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, weightx, weightz, logx, logz, showConstraints);
     ar.config.user_residual_fun = res_fun;
     
 end
 
 % This function places a soft bound on concentrations
-function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, w, logx, logz, debug)
+function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, wx, wz, logx, logz, debug)
 
     global ar
     
@@ -100,13 +103,15 @@ function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m
     xu          = xu(x_active);
     zl          = zl(z_active);
     zu          = zu(z_active);
+    wx          = wx(x_active);
+    wz          = wz(z_active);
     
     % Compute the residual
-    xlower      = (xss < xl) .* (xl - xss) * w;
-    xupper      = (xss > xu) .* (xss - xu) * w;
+    xlower      = (xss < xl) .* (xl - xss) .* wx;
+    xupper      = (xss > xu) .* (xss - xu) .* wx;
     if ( ~isempty( zl ) )
-        zlower      = (zss < zl) .* (zl - zss) * w;
-        zupper      = (zss > zu) .* (zss - zu) * w;
+        zlower      = (zss < zl) .* (zl - zss) .* wz;
+        zupper      = (zss > zu) .* (zss - zu) .* wz;
     end
 
     if ( ~isempty( zl ) )
@@ -135,11 +140,11 @@ function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m
     end
     
     % Compute the sensitivities
-    sxlower     = - repmat( (xss < xl), np, 1 ).' .* sxss * w;
-    sxupper     =   repmat( (xss > xu), np, 1 ).' .* sxss * w;
+    sxlower     = - repmat( (xss < xl) .* wx, np, 1 ).' .* sxss;
+    sxupper     =   repmat( (xss > xu) .* wx, np, 1 ).' .* sxss;
     if ( ~isempty( zl ) )
-        szlower     = - repmat( (zss < zl), np, 1 ).' .* szss * w;
-        szupper     =   repmat( (zss > zu), np, 1 ).' .* szss * w;    
+        szlower     = - repmat( (zss < zl) .* wz, np, 1 ).' .* szss;
+        szupper     =   repmat( (zss > zu) .* wz, np, 1 ).' .* szss;    
     end
     
     % Sres with respect to all inner parameters

@@ -40,7 +40,7 @@ function ax = arSubplot(m, n, id, name, varargin)
         [m, n] = fd( n );
     end
     
-    if ~isfield( arSubplotMgr, name ) || ~isfield( arSubplotMgr.(name), 'fig' )
+    if ~isfield( arSubplotMgr, name ) || ~isfield( arSubplotMgr.(name), 'fig' ) || ( ~isvalid( arSubplotMgr.(name).fig ) )
         arSubplotMgr.(name) = struct;
         clf;
         newPlot(name, m, n, id, varargin{:} );
