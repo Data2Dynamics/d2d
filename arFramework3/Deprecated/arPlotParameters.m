@@ -9,6 +9,8 @@
 
 function arPlotParameters(nbest, jks)
 
+error('arPlotParameters is deprecated. Use arPlotParameterPatterns instead.');
+
 global ar
 
 if(~exist('nbest','var') || isempty(nbest))
