@@ -118,13 +118,13 @@ for j=1:length(jks)
     
     if(singleFigure)
         subplot(2,1,2);
-        notjk = 1:length(ar.p);
-        notjk = notjk~=jk & ar.qFit'==1;
+        notjk = (1:length(ar.p));
+        notjk = notjk~=jk & ar.qFit==1;
         
         stds = std(ar.ple.ps{jk}(~isnan(ar.ple.chi2s{jk}),notjk));
         [~, istds] = sort(stds, 2, 'descend');
         
-        pstmp = ps(:,notjk) - (ones(length(chi2s),1)*ar.ple.pStart(notjk)');
+        pstmp = ps(:,notjk) - (ones(length(chi2s),1)*ar.ple.pStart(notjk));
         nplot = 7;
         
         if(length(istds)>nplot)
