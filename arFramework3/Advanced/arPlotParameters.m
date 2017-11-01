@@ -12,7 +12,7 @@ function arPlotParameters(nbest, jks)
 global ar
 
 if(~exist('nbest','var') || isempty(nbest))
-    nbest = size(ar.ps_sorted,1);
+    nbest = sum(~isnan(ar.ps_sorted(:,1)));
 end
 if(~exist('jks','var'))
     jks = 1:length(ar.p);

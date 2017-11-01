@@ -287,7 +287,8 @@ for jm = 1:length(ar.model)
                             zero_break, fastPlotTmp, hys, hystds, hysss, dydt, ...
                             jt==length(dr_times) && jc==jcs(end), qDR, ndata, chi2, ...
                             tUnits, response_parameter, yLabel, yNames, yUnits, ...
-                            fiterrors, logplotting_xaxis, iy, t_ppl, y_ppl_ub, y_ppl_lb);
+                            fiterrors, logplotting_xaxis, iy, t_ppl, y_ppl_ub, y_ppl_lb, ...
+                            ar.config.atol);
         
                         % save handels
                         if(jd~=0)
@@ -349,13 +350,13 @@ for jm = 1:length(ar.model)
                     
                     try % TODO there, is an error here when only some x are selected for plotting
                         hl = legend(g, Clegend, Clegendlabel, 'Location', 'SouthWest');
+                        %                     lpos2 = get(hl,'Position');
+                        %                     lpos2(1:2) = lpos(1:2);
+                        %                     set(hl, 'Position', lpos2);
+                        box(hl,'off');
                     catch
                         warning( '<arPlot2> TODO: There is an unfixed error here when only some x are selected for plotting' );
                     end
-%                     lpos2 = get(hl,'Position');
-%                     lpos2(1:2) = lpos(1:2);
-%                     set(hl, 'Position', lpos2);
-                    box(hl,'off');
                 end
                 
                 % optional suptitle

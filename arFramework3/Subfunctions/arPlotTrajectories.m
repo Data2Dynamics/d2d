@@ -2,7 +2,7 @@ function [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ncount,
     nfine_dr_method, tExp, yExp, yExpHl, yExpStd, y_ssa, y_ssa_lb, y_ssa_ub, ...
     plotopt, qUnlog, qLog, qLogPlot, qFit, zero_break, fastPlotTmp, hys, hystds, hysss, dydt, isLast, qDR, ...
     ndata, chi2, tUnits, response_parameter, yLabel, yNames, yUnits, fiterrors, ...
-    logplotting_xaxis, iy, t_ppl, y_ppl_ub, y_ppl_lb)
+    logplotting_xaxis, iy, t_ppl, y_ppl_ub, y_ppl_lb, atol)
 
 % rows and cols
 ny = length(iy);
@@ -115,7 +115,7 @@ for jys = 1:length(iy)
                 end
             end
             
-            arSpacedAxisLimits(g);
+            arSpacedAxisLimits(g, [], [], [], atol);
             hold(g, 'off');
         end
     else
