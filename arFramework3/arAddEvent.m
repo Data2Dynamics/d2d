@@ -157,6 +157,18 @@ function ar = arAddEvent( varargin )
             % Activate event system for this condition
             ar.model(m).condition(c).qEvents = 1;
 
+            % Add the point to the tExtra list so that the plots look good
+            % (otherwise the plot interpolation might jump over the event
+            % point which looks weird and worries users)
+            if ( isfield( ar.model(m).condition(c), 'dLink' ) )
+                for jd = 1 : numel( ar.model(m).condition(c).dLink )
+                    if isfield( ar.model(m).data(jd), 'tExtra' )
+                        ar.model(m).data(jd).tExtra = union(ar.model(m).data(jd).tExtra, [t, t - 1e-6 * t]);
+                    else
+                        ar.model(m).data(jd).tExtra = [t, t - 1e-6 * t];
+                    end
+                end
+            end
         end
     end
     
