@@ -167,6 +167,9 @@ void subCopyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, 
 /* user functions */
 #include "arSimuCalcFunctions.c"
 
+void storeSimulation( UserData data, int im, int isim, int is, int nu, int nv, int neq, int nout, N_Vector x, double *returnx, double *returnu, double *returnv, double *qpositivex );
+void storeSensitivities( UserData data, int im, int ic, int isim, int is, int np, int nu, int nv, int neq, int nout, N_Vector x, N_Vector *sx, double *returnsx, double *returnsu, double *returnsv, int sensitivitySubset, int32_T *sensitivityMapping );
+
 void storeIntegrationInfo( SimMemory sim_mem, mxArray *arcondition, int ic );
 void terminate_x_calc( SimMemory sim_mem, double status );
 void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines, int sensitivitySubset );
@@ -914,28 +917,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                         } else data->t = ts[is];
                     }
                 }
-                
-                /* Event handling */
-                if (qEvents==2)
-                {
-                    DEBUGPRINT0( debugMode, 6, "Handling event + reinitializing the solver\n" );
-                    flag = handle_event( sim_mem, sensi_meth, 1 );
-                    if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 ); return;}
-                    
-                    qEvents = 1;
-                    (event_data->i)++;
-                }                
-                
+                                
                 /* Store time step results */
                 DEBUGPRINT1( debugMode, 11, "Status: %g\n", status[0] );
                 if(status[0] == 0.0) {
                     DEBUGPRINT0( debugMode, 11, "Storing results\n" );
-                    fu(data, data->t, im, isim);
-                    fv(data, data->t, x, im, isim);
-                    
-                    for(js=0; js < nu; js++) returnu[js*nout+is] = data->u[js];
-                    for(js=0; js < nv; js++) returnv[js*nout+is] = data->v[js];
-                    copyStates( x, returnx, qpositivex, neq, nout, is );
+                    storeSimulation( data, im, isim, is, nu, nv, neq, nout, x, returnx, returnu, returnv, qpositivex );
                 } else {
                     for(js=0; js < nu; js++) returnu[js*nout+is] = 0.0;
                     for(js=0; js < nv; js++) returnv[js*nout+is] = 0.0;
@@ -952,61 +939,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                                 if (flag < 0) {terminate_x_calc( sim_mem, 14 ); return;}
                             }
                         }
-                        fsu(data, data->t, im, isim);
-                        fsv(data, data->t, x, im, isim);                        
-
-                        if ( sensitivitySubset == 0 )
-                        {
-                            /*****************************
-                            ** RETURN ALL SENSITIVITIES **
-                            ******************************/
-                            if(neq>0) {
-                                /* Output state sensitivities */
-                                copyNVMatrixToDouble( sx, returnsx, np, neq, nout, is );
-
-                                for(js=0; js < np; js++) {
-                                    /* Output flux sensitivities */
-                                    csv(data->t, x, js, sx[js], data, im, ic);
-                                    for(ks=0; ks < nv; ks++) {
-                                        returnsv[(js*nv+ks)*nout + is] = data->sv[ks];
-                                    } 
-                                }
-                            }
-
-                            /* Output input sensitivities */
-                            for(js=0; js < np; js++) {
-                                for(ks=0; ks < nu; ks++) {
-                                    returnsu[(js*nu+ks)*nout + is] = data->su[(js*nu)+ks];
-                                }
-                            }
-                        } else {
-                            /********************************************
-                            ** RETURN ONLY SUBSET OF THE SENSITIVITIES **
-                            *********************************************/
-                            if(neq>0) {
-                                
-                                /* Output state sensitivities */
-                                subCopyNVMatrixToDouble( sx, returnsx, np, neq, nout, is, sensitivityMapping );
-                                for(jss=0; jss < np; jss++) {
-                                    js = sensitivityMapping[jss];                                   
-                                    if (js < 0) {
-                                        for(ks=0; ks < nv; ks++) returnsv[(jss*nv+ks)*nout + is] = 0.0;
-                                    } else {
-                                        /* Output flux sensitivities */
-                                        csv(data->t, x, js, sx[js], data, im, ic);
-                                        for(ks=0; ks < nv; ks++) {
-                                            returnsv[(jss*nv+ks)*nout + is] = data->sv[ks];
-                                        }
-                                    }
-                                }
-                            }
-                            /* Output input sensitivities */
-                            for(js=0; js < np; js++) {
-                                for(ks=0; ks < nu; ks++) {
-                                    returnsu[(js*nu+ks)*nout + is] = data->su[(js*nu)+ks];
-                                }
-                            }
-                        }
+                        storeSensitivities( data, im, ic, isim, is, np, nu, nv, neq, nout, x, sx, returnsx, returnsu, returnsv, sensitivitySubset, sensitivityMapping );
                     }
                 } else {
                     /* Store empty output sensitivities in case of an error */
@@ -1027,6 +960,21 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                             }                            
                         }
                     }
+                }
+                
+                /* Event handling */
+                if (qEvents==2)
+                {
+                    DEBUGPRINT0( debugMode, 6, "Handling event + reinitializing the solver\n" );
+                    flag = handle_event( sim_mem, sensi_meth, 1 );
+                    if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 ); return;}
+                    
+                    storeSimulation( data, im, isim, is, nu, nv, neq, nout, x, returnx, returnu, returnv, qpositivex );
+                    if ( sensi == 1 )
+                        storeSensitivities( data, im, ic, isim, is, np, nu, nv, neq, nout, x, sx, returnsx, returnsu, returnsv, sensitivitySubset, sensitivityMapping );
+                    
+                    qEvents = 1;
+                    (event_data->i)++;
                 }
                 
               DEBUGPRINT0( debugMode, 6, "Going into next iteration cycle\n" );
@@ -1232,6 +1180,78 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
     
     /* Clean up */
     terminate_x_calc( sim_mem, *status );
+}
+
+void storeSimulation( UserData data, int im, int isim, int is, int nu, int nv, int neq, int nout, N_Vector x, double *returnx, double *returnu, double *returnv, double *qpositivex )
+{
+    int js;
+    fu(data, data->t, im, isim);
+    fv(data, data->t, x, im, isim);
+                    
+    for(js=0; js < nu; js++) returnu[js*nout+is] = data->u[js];
+    for(js=0; js < nv; js++) returnv[js*nout+is] = data->v[js];
+    copyStates( x, returnx, qpositivex, neq, nout, is );
+}
+
+void storeSensitivities( UserData data, int im, int ic, int isim, int is, int np, int nu, int nv, int neq, int nout, N_Vector x, N_Vector *sx, double *returnsx, double *returnsu, double *returnsv, int sensitivitySubset, int32_T *sensitivityMapping )
+{
+    int js, jss, ks;
+    
+    fsu(data, data->t, im, isim);
+    fsv(data, data->t, x, im, isim);                        
+
+    if ( sensitivitySubset == 0 )
+    {
+        /*****************************
+        ** RETURN ALL SENSITIVITIES **
+        ******************************/
+        if(neq>0) {
+            /* Output state sensitivities */
+            copyNVMatrixToDouble( sx, returnsx, np, neq, nout, is );
+
+            for(js=0; js < np; js++) {
+                /* Output flux sensitivities */
+                csv(data->t, x, js, sx[js], data, im, ic); /* TODO: Check whether this should be isim */
+                for(ks=0; ks < nv; ks++) {
+                    returnsv[(js*nv+ks)*nout + is] = data->sv[ks];
+                } 
+            }
+        }
+
+        /* Output input sensitivities */
+        for(js=0; js < np; js++) {
+            for(ks=0; ks < nu; ks++) {
+                returnsu[(js*nu+ks)*nout + is] = data->su[(js*nu)+ks];
+            }
+        }
+    } else {
+        /********************************************
+        ** RETURN ONLY SUBSET OF THE SENSITIVITIES **
+        *********************************************/
+        if(neq>0) {
+
+            /* Output state sensitivities */
+            subCopyNVMatrixToDouble( sx, returnsx, np, neq, nout, is, sensitivityMapping );
+            for(jss=0; jss < np; jss++) {
+                js = sensitivityMapping[jss];                                   
+                if (js < 0) {
+                    for(ks=0; ks < nv; ks++) returnsv[(jss*nv+ks)*nout + is] = 0.0;
+                } else {
+                    /* Output flux sensitivities */
+                    csv(data->t, x, js, sx[js], data, im, ic); /* TODO: Check whether this should be isim */
+                    for(ks=0; ks < nv; ks++) {
+                        returnsv[(jss*nv+ks)*nout + is] = data->sv[ks];
+                    }
+                }
+            }
+        }
+        /* Output input sensitivities */
+        for(js=0; js < np; js++) {
+            for(ks=0; ks < nu; ks++) {
+                returnsu[(js*nu+ks)*nout + is] = data->su[(js*nu)+ks];
+            }
+        }
+    }   
 }
 
 /* Store some information regarding the integration */
