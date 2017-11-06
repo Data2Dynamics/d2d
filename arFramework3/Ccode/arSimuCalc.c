@@ -915,6 +915,17 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     }
                 }
                 
+                /* Event handling */
+                if (qEvents==2)
+                {
+                    DEBUGPRINT0( debugMode, 6, "Handling event + reinitializing the solver\n" );
+                    flag = handle_event( sim_mem, sensi_meth, 1 );
+                    if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 ); return;}
+                    
+                    qEvents = 1;
+                    (event_data->i)++;
+                }                
+                
                 /* Store time step results */
                 DEBUGPRINT1( debugMode, 11, "Status: %g\n", status[0] );
                 if(status[0] == 0.0) {
@@ -1018,16 +1029,6 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     }
                 }
                 
-                /* Event handling */
-                if (qEvents==2)
-                {
-                    DEBUGPRINT0( debugMode, 6, "Handling event + reinitializing the solver\n" );
-                    flag = handle_event( sim_mem, sensi_meth, 1 );
-                    if (flag < 0) {thr_error("Failed to reinitialize solver at event"); terminate_x_calc( sim_mem, 16 ); return;}
-                    
-                    qEvents = 1;
-                    (event_data->i)++;
-                }
               DEBUGPRINT0( debugMode, 6, "Going into next iteration cycle\n" );
             } /* End of simulation loop */
             
