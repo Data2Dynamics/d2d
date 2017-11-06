@@ -1,7 +1,7 @@
 function [def_version_code, c_version_code] = arGetVersion
 
 def_version_code = 3;
-c_version_code = 'code_171106b';
+c_version_code = 'code_171106c';
 
 % Please note that if you add configuration flags that pertain to the C
 % solver, please also add your configuration flag to arCheckCache, to make

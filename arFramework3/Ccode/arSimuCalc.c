@@ -168,7 +168,7 @@ void subCopyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, 
 #include "arSimuCalcFunctions.c"
 
 void storeSimulation( UserData data, int im, int isim, int is, int nu, int nv, int neq, int nout, N_Vector x, double *returnx, double *returnu, double *returnv, double *qpositivex );
-void storeSensitivities( UserData data, int im, int ic, int isim, int is, int np, int nu, int nv, int neq, int nout, N_Vector x, N_Vector *sx, double *returnsx, double *returnsu, double *returnsv, int sensitivitySubset, int32_T *sensitivityMapping );
+void storeSensitivities( UserData data, int im, int isim, int is, int np, int nu, int nv, int neq, int nout, N_Vector x, N_Vector *sx, double *returnsx, double *returnsu, double *returnsv, int sensitivitySubset, int32_T *sensitivityMapping );
 
 void storeIntegrationInfo( SimMemory sim_mem, mxArray *arcondition, int ic );
 void terminate_x_calc( SimMemory sim_mem, double status );
@@ -939,7 +939,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                                 if (flag < 0) {terminate_x_calc( sim_mem, 14 ); return;}
                             }
                         }
-                        storeSensitivities( data, im, ic, isim, is, np, nu, nv, neq, nout, x, sx, returnsx, returnsu, returnsv, sensitivitySubset, sensitivityMapping );
+                        storeSensitivities( data, im, isim, is, np, nu, nv, neq, nout, x, sx, returnsx, returnsu, returnsv, sensitivitySubset, sensitivityMapping );
                     }
                 } else {
                     /* Store empty output sensitivities in case of an error */
@@ -971,7 +971,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     
                     storeSimulation( data, im, isim, is, nu, nv, neq, nout, x, returnx, returnu, returnv, qpositivex );
                     if ( sensi == 1 )
-                        storeSensitivities( data, im, ic, isim, is, np, nu, nv, neq, nout, x, sx, returnsx, returnsu, returnsv, sensitivitySubset, sensitivityMapping );
+                        storeSensitivities( data, im, isim, is, np, nu, nv, neq, nout, x, sx, returnsx, returnsu, returnsv, sensitivitySubset, sensitivityMapping );
                     
                     qEvents = 1;
                     (event_data->i)++;
@@ -1193,7 +1193,7 @@ void storeSimulation( UserData data, int im, int isim, int is, int nu, int nv, i
     copyStates( x, returnx, qpositivex, neq, nout, is );
 }
 
-void storeSensitivities( UserData data, int im, int ic, int isim, int is, int np, int nu, int nv, int neq, int nout, N_Vector x, N_Vector *sx, double *returnsx, double *returnsu, double *returnsv, int sensitivitySubset, int32_T *sensitivityMapping )
+void storeSensitivities( UserData data, int im, int isim, int is, int np, int nu, int nv, int neq, int nout, N_Vector x, N_Vector *sx, double *returnsx, double *returnsu, double *returnsv, int sensitivitySubset, int32_T *sensitivityMapping )
 {
     int js, jss, ks;
     
@@ -1211,7 +1211,7 @@ void storeSensitivities( UserData data, int im, int ic, int isim, int is, int np
 
             for(js=0; js < np; js++) {
                 /* Output flux sensitivities */
-                csv(data->t, x, js, sx[js], data, im, ic); /* TODO: Check whether this should be isim */
+                csv(data->t, x, js, sx[js], data, im, isim);
                 for(ks=0; ks < nv; ks++) {
                     returnsv[(js*nv+ks)*nout + is] = data->sv[ks];
                 } 
@@ -1238,7 +1238,7 @@ void storeSensitivities( UserData data, int im, int ic, int isim, int is, int np
                     for(ks=0; ks < nv; ks++) returnsv[(jss*nv+ks)*nout + is] = 0.0;
                 } else {
                     /* Output flux sensitivities */
-                    csv(data->t, x, js, sx[js], data, im, ic); /* TODO: Check whether this should be isim */
+                    csv(data->t, x, js, sx[js], data, im, isim);
                     for(ks=0; ks < nv; ks++) {
                         returnsv[(jss*nv+ks)*nout + is] = data->sv[ks];
                     }
