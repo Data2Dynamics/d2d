@@ -161,7 +161,7 @@ function ar = arAddEvent( varargin )
             % (otherwise the plot interpolation might jump over the event
             % point which looks weird and worries users)
             if ( isfield( ar.model(m).condition(c), 'dLink' ) )
-                for jd = 1 : numel( ar.model(m).condition(c).dLink )
+                for jd = ar.model(m).condition(c).dLink
                     if isfield( ar.model(m).data(jd), 'tExtra' )
                         ar.model(m).data(jd).tExtra = union(ar.model(m).data(jd).tExtra, [t, t - 1e-6 * t]);
                     else
