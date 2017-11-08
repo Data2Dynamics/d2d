@@ -983,7 +983,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             /* Store dfxdx */
             {
                 double *dfdx, *dfdp;
-                CVodeGetCurrentTime( cvode_mem, &t );
+                if(cvode_mem>0) CVodeGetCurrentTime( cvode_mem, &t );
                 DEBUGPRINT1( debugMode, 6, "Storing final dfdx and dfdp at %g\n", t );
                 dfdx = mxGetData(mxGetField(arcondition, ic, "dfdxNum"));
                 dfdp = mxGetData(mxGetField(arcondition, ic, "dfdpNum"));
