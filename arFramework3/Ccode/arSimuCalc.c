@@ -169,7 +169,7 @@ void subCopyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, 
 
 void storeSimulation( UserData data, int im, int isim, int is, int nu, int nv, int neq, int nout, N_Vector x, double *returnx, double *returnu, double *returnv, double *qpositivex );
 void storeSensitivities( UserData data, int im, int isim, int is, int np, int nu, int nv, int neq, int nout, N_Vector x, N_Vector *sx, double *returnsx, double *returnsu, double *returnsv, int sensitivitySubset, int32_T *sensitivityMapping );
-
+void findRoots( SimMemory sim_mem, mxArray *arcondition, int im, int ic, int isim, double tstart, double eq_tol, int neq, int nu, int nv, int nout, double* returnx, double* returnu, double* returnv, double* qpositivex, double* returnsx, int sensi, int ysensi, int npSensi, int has_tExp );
 void storeIntegrationInfo( SimMemory sim_mem, mxArray *arcondition, int ic );
 void terminate_x_calc( SimMemory sim_mem, double status );
 void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines, int sensitivitySubset );
@@ -251,13 +251,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         parallel = 0;
     }
     
-/*  fiterrors = (int) mxGetScalar(mxGetField(arconfig, 0, "fiterrors"));*/
-/*    fiterrors_correction = (double) mxGetScalar(mxGetField(arconfig, 0, "fiterrors_correction"));*/
-/*     useFitErrorMatrix = (int) mxGetScalar(mxGetField(arconfig, 0, "useFitErrorMatrix"));
-     if(useFitErrorMatrix==1){
-         fiterrors_matrix = (double *) mxGetData(mxGetField(arconfig, 0, "fiterrors_matrix"));
-         nrows_fiterrors_matrix = mxGetM(mxGetField(arconfig, 0, "fiterrors_matrix"));
-     }*/
     mintau = mxGetScalar(mxGetField(arconfig, 0, "ssa_min_tau"));
     nruns = (int) mxGetScalar(mxGetField(arconfig, 0, "ssa_runs"));
     ms = (int) mxGetScalar(mxGetField(arconfig, 0, "useMS"));
@@ -273,16 +266,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         
     /* threads */
     arthread = mxGetField(arconfig, 0, threads_name);
-    /*nthreads = (int) mxGetScalar(mxGetField(arconfig, 0, "nThreads"));*/
     nthreads = (int) mxGetNumberOfElements(arthread);
     
 #ifdef HAS_PTHREAD
     if(NMAXTHREADS<nthreads) mexErrMsgTxt("ERROR at NMAXTHREADS < nthreads");
 #endif
-    
-    /* printf("%i threads (%i fine, %i sensi, %i jacobian, %g rtol, %g atol, %i maxsteps)\n", nthreads, fine,
-            sensi, jacobian, cvodes_rtol, cvodes_atol, cvodes_maxsteps); */
-    
+        
 #ifdef HAS_PTHREAD
     /* loop over threads parallel */
     for(ithreads=0; ithreads<nthreads; ++ithreads){
@@ -634,8 +623,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             if (ms==1) 
                 qMS = init_list(arcondition, ic, tstart, &(event_data->nMS), &(event_data->tMS), &(event_data->iMS), "qMS", "tMS");
             
-            /* Override which condition to simulate */
-            /* This is used for equilibration purposes */
+            /* Override which condition to simulate. For normal conditions isim is equal to ic (both are condition indices) */
+            /* For steady state simulations, isim is equal to another condition, since the index which indicates the location in ar.ss_conditions differs from the condition referenced in ar.conditions */
             src = mxGetField(arcondition, ic, "src");
             if (src == NULL) {
                 only_sim    = 0;
@@ -672,57 +661,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             /* Check if we are only simulating dxdt */
             if ( rootFinding > 0 )
             {
-                double tEq = tstart; /*-1e30;*/
-                
-                /* No equations. Terminate now. */
-                if ( neq == 0 ) { terminate_x_calc( sim_mem, 0 ); return; };
-                
-                DEBUGPRINT1( debugMode, 4, "Rootfinding mode at t=%g\n", tEq );
-                
-                if ( rootFinding == 2 )
-                {
-                    #ifdef ROOT_FINDING
-                        solveSS( debugMode, arcondition, im, ic, isim, tEq, x, data, eq_tol );
-                        DEBUGPRINT0( debugMode, 4, "Root finding terminated\n" );
-                    #else
-                        DEBUGPRINT0( debugMode, 4, "Mex file was compiled without rootfinding ...\n" );
-                        terminate_x_calc( sim_mem, 0 ); return;
-                    #endif
-                }
-                
-                /* Copy states and state sensitivities */
-                if ( neq > 0 )
-                {
-                    DEBUGPRINT0( debugMode, 4, "Copying states\n" );
-                    copyStates( x, returnx, qpositivex, neq, nout, 0 );
-                    DEBUGPRINT0( debugMode, 4, "Copying sensis\n" );
-                    DEBUGPRINT4( debugMode, 4, "sx: %d, npSensi: %d, neq: %d, nout: %d\n", sx, npSensi, neq, nout );
-                    if ( sensi ) copyNVMatrixToDouble( sx, returnsx, npSensi, neq, nout, 0 ); /* TO DO: Look at what this means for subsensis */
-                }
-                DEBUGPRINT0( debugMode, 4, "Calculating z\n" );
-                z_calc(im, ic, isim, arcondition, ysensi);
-                DEBUGPRINT0( debugMode, 6, "Calculating fu\n" );
-                fu(data, tEq, im, isim);
-                DEBUGPRINT0( debugMode, 6, "Calculating fv\n" );
-                fv(data, tEq, x, im, isim);
-                DEBUGPRINT0( debugMode, 4, "Copying u and v to outputs\n" );
-                copyResult( data->u, returnu, nu, nout, 0 );
-                copyResult( data->v, returnv, nv, nout, 0 );
-                
-                {
-                    double *dfdx;
-                    double *dfdp;
-                    dfdx = mxGetData(mxGetField(arcondition, ic, "dfdxNum"));
-                    dfdp = mxGetData(mxGetField(arcondition, ic, "dfdpNum"));
-                    fsv(data, tEq, x, im, isim);                           /* Updates dvdp, dvdu, dvdx */
-                    getdfxdx(im, isim, t, x, dfdx, data);                  /* Updates dvdx and stores dfxdx */
-                    dfxdp(data, tEq, x, dfdp, im, isim);                   /* Stores dfxdp. Needs dvdp, dvdx and dvdu to be up to date */                
-                }
-                
-                DEBUGPRINT0( debugMode, 4, "Evaluating observations\n" );
-                evaluateObservations(arcondition, im, ic, ysensi, has_tExp);
-                DEBUGPRINT0( debugMode, 4, "Terminating ...\n" );
-                terminate_x_calc( sim_mem, 0 ); return;
+                findRoots( sim_mem, arcondition, im, ic, isim, tstart, eq_tol, neq, nu, nv, nout, returnx, returnu, returnv, qpositivex, returnsx, sensi, ysensi, npSensi, has_tExp );
+                return;
             }
             
             if(neq>0){
@@ -983,7 +923,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             /* Store dfxdx */
             {
                 double *dfdx, *dfdp;
-                if(cvode_mem>0) CVodeGetCurrentTime( cvode_mem, &t );
+                if( cvode_mem != NULL ) CVodeGetCurrentTime( cvode_mem, &t );
                 DEBUGPRINT1( debugMode, 6, "Storing final dfdx and dfdp at %g\n", t );
                 dfdx = mxGetData(mxGetField(arcondition, ic, "dfdxNum"));
                 dfdp = mxGetData(mxGetField(arcondition, ic, "dfdpNum"));
@@ -1252,6 +1192,65 @@ void storeSensitivities( UserData data, int im, int isim, int is, int np, int nu
             }
         }
     }   
+}
+
+/* Root finding procedures */
+/* Two rootfinding procedures have been implemented */
+/* The first is to simply apply the initial condition, store intermediate arrays and terminate immediately. In this case, the rootfinding is handled on the MATLAB side */
+/* The second case is to do rootfinding within C++ (rootFinding = 2) */
+void findRoots( SimMemory sim_mem, mxArray *arcondition, int im, int ic, int isim, double tstart, double eq_tol, int neq, int nu, int nv, int nout, double* returnx, double* returnu, double* returnv, double* qpositivex, double* returnsx, int sensi, int ysensi, int npSensi, int has_tExp )
+{                
+    double tEq = tstart;
+    UserData data = sim_mem->data;
+
+    /* No equations. Terminate now. */
+    if ( neq == 0 ) { terminate_x_calc( sim_mem, 0 ); return; };
+
+    DEBUGPRINT1( debugMode, 4, "Rootfinding mode at t=%g\n", tEq );
+
+    if ( rootFinding == 2 )
+    {
+        #ifdef ROOT_FINDING
+            solveSS( debugMode, arcondition, im, ic, isim, tEq, sim_mem->x, data, eq_tol );
+            DEBUGPRINT0( debugMode, 4, "Root finding terminated\n" );
+        #else
+            DEBUGPRINT0( debugMode, 4, "Mex file was compiled without rootfinding ...\n" );
+            terminate_x_calc( sim_mem, 0 ); return;
+        #endif
+    }
+
+    /* Copy states and state sensitivities */
+    if ( neq > 0 )
+    {
+        DEBUGPRINT0( debugMode, 4, "Copying states\n" );
+        copyStates( sim_mem->x, returnx, qpositivex, neq, nout, 0 );
+        DEBUGPRINT0( debugMode, 4, "Copying sensis\n" );
+        DEBUGPRINT4( debugMode, 4, "sx: %d, npSensi: %d, neq: %d, nout: %d\n", sim_mem->sx, npSensi, neq, nout );
+        if ( sensi ) copyNVMatrixToDouble( sim_mem->sx, returnsx, npSensi, neq, nout, 0 ); /* TO DO: Look at what this means for subsensis */
+    }
+    DEBUGPRINT0( debugMode, 4, "Calculating z\n" );
+    z_calc(im, ic, isim, arcondition, ysensi);
+    DEBUGPRINT0( debugMode, 6, "Calculating fu\n" );
+    fu(data, tEq, im, isim);
+    DEBUGPRINT0( debugMode, 6, "Calculating fv\n" );
+    fv(data, tEq, sim_mem->x, im, isim);
+    DEBUGPRINT0( debugMode, 4, "Copying u and v to outputs\n" );
+    copyResult( data->u, returnu, nu, nout, 0 );
+    copyResult( data->v, returnv, nv, nout, 0 );
+
+    {
+        double *dfdx, *dfdp;
+        dfdx = mxGetData(mxGetField(arcondition, ic, "dfdxNum"));
+        dfdp = mxGetData(mxGetField(arcondition, ic, "dfdpNum"));
+        fsv(data, tEq, sim_mem->x, im, isim);                  /* Updates dvdp, dvdu, dvdx */
+        getdfxdx(im, isim, tEq, sim_mem->x, dfdx, data);       /* Updates dvdx and stores dfxdx */
+        dfxdp(data, tEq, sim_mem->x, dfdp, im, isim);          /* Stores dfxdp. Needs dvdp, dvdx and dvdu to be up to date */                
+    }
+
+    DEBUGPRINT0( debugMode, 4, "Evaluating observations\n" );
+    evaluateObservations(arcondition, im, ic, ysensi, has_tExp);
+    DEBUGPRINT0( debugMode, 4, "Terminating ...\n" );
+    terminate_x_calc( sim_mem, 0 );
 }
 
 /* Store some information regarding the integration */
