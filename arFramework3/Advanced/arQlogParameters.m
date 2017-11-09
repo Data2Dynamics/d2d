@@ -60,7 +60,9 @@ if(newval == 1)
         if isfield(ar,'ple')
             if isfield(ar.ple,'ps')
                 for i=1:length(ar.ple.ps)
-                    ar.ple.ps{i}(:,jp) = log10(ar.ple.ps{i}(:,jp));
+                    if ~isempty(ar.ple.ps{i})
+                        ar.ple.ps{i}(:,jp) = log10(ar.ple.ps{i}(:,jp));
+                    end
                 end
             end
             if isfield(ar.ple,'p_true')
@@ -98,7 +100,9 @@ else
         if isfield(ar,'ple')
             if isfield(ar.ple,'ps')
                 for i=1:length(ar.ple.ps)
-                    ar.ple.ps{i}(:,jp) = 10.^(ar.ple.ps{i}(:,jp));
+                    if ~isempty(ar.ple.ps{i})
+                        ar.ple.ps{i}(:,jp) = 10.^(ar.ple.ps{i}(:,jp));
+                    end
                 end
             end
             if isfield(ar.ple,'p_true')

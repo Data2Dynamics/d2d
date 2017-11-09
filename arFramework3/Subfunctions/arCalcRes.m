@@ -270,7 +270,7 @@ function [reserr,chi2err] = fres_error(ystd, add_c)
     reserr(isnan(ystd)) = 0;
     
     if(sum(reserr(:) < 0)>0)
-        error('arCalcRes/fres_error: error residual too small.');
+        error('arCalcRes/fres_error: error residual too small. Errors are almost zero. ');
     else 
         reserr = sqrt(reserr);
         chi2err = sum(reserr.^2,1) - add_c*sum(abs(reserr)>0,1);  
