@@ -112,10 +112,6 @@ double cvodes_maxstepsize;
 int    cvodes_atolV;
 double cvodes_rtol;
 double cvodes_atol;
-/*double fiterrors_correction;*/
-/* int useFitErrorMatrix;
- double *fiterrors_matrix;
- mwSize nrows_fiterrors_matrix; */
 
 /* Name of the substructure with conditions we're currently evaluating */
 char condition_name[MXSTRING];
@@ -150,10 +146,6 @@ void z_calc(int im, int ic, int isim, mxArray *arcondition, int sensi);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi);
 
 void y_checkNaN(int nt, int ny, int it, double *y, double *yexp, double *ystd);
-/* void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2, double fiterrors_correction_factor);
- void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd, double fiterrors_correction_factor);
- void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2);
- void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr); */
 
 int ewt(N_Vector y, N_Vector w, void *user_data);
 void thr_error( const char* msg );
@@ -1901,25 +1893,13 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
     double *sz;
     double *y_scale;
     double *dzdx;
-    
-/*   double *chi2;
-     double *chi2err;
-    
-     double fiterrors_correction_factor;
-     
-     if(useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] != 1) {
-         fiterrors_correction_factor = 1;
-     } else {
-         fiterrors_correction_factor = fiterrors_correction;
-     }*/
-    
+        
     /* MATLAB values */
     ic = (int) mxGetScalar(mxGetField(ardata, id, "cLink")) - 1;
     has_yExp = (int) mxGetScalar(mxGetField(ardata, id, "has_yExp"));
     
     ny = (int) mxGetNumberOfElements(mxGetField(ardata, id, "y"));
     qlogy = mxGetData(mxGetField(ardata, id, "logfitting"));
-    /*qlogp = mxGetData(mxGetField(ardata, id, "qLog10"));*/
     p = mxGetData(mxGetField(ardata, id, "pNum"));
     np = (int) mxGetNumberOfElements(mxGetField(ardata, id, "pNum"));
     
@@ -1971,24 +1951,6 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
         
         if (has_yExp == 1) {
             yexp = mxGetData(mxGetField(ardata, id, "yExp"));
-/*          if( (useFitErrorMatrix == 0 && fiterrors == -1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == -1) ) {
-                 ystd = mxGetData(mxGetField(ardata, id, "yExpStd"));
-            }
-            res = mxGetData(mxGetField(ardata, id, "res"));
-            reserr = mxGetData(mxGetField(ardata, id, "reserr"));
-            if (sensi == 1) {
-                sres = mxGetData(mxGetField(ardata, id, "sres"));
-                sreserr = mxGetData(mxGetField(ardata, id, "sreserr"));
-            }
-            chi2 = mxGetData(mxGetField(ardata, id, "chi2"));
-            chi2err = mxGetData(mxGetField(ardata, id, "chi2err"));
-            for(iy=0; iy<ny; iy++) {
-                chi2[iy] = 0.0;
-                if( (useFitErrorMatrix == 0 && fiterrors == 1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == 1) ) {
-                    chi2err[iy] = 0.0;
-                }
-            }
- */
         }
     }
     
@@ -2012,9 +1974,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
             }
         }
         
-/*         if( (useFitErrorMatrix == 0 && fiterrors != -1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] != -1) ) {*/
-            fystd(t[it], nt, it, ntlink, itlink, ystd, y, p, u, x, z, im, id);
-/*         }*/
+        fystd(t[it], nt, it, ntlink, itlink, ystd, y, p, u, x, z, im, id);
 
         if (sensi == 1) {
             fsy(t[it], nt, it, ntlink, itlink, sy, p, u, x, z, su, sx, sz, im, id);
@@ -2031,36 +1991,12 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
                 }
             }
             
-/*             if( (useFitErrorMatrix == 0 && fiterrors != -1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] != -1) ) {*/
-                fsystd(t[it], nt, it, ntlink, itlink, systd, p, y, u, x, z, sy, su, sx, sz, im, id);
-/*             }*/
+            fsystd(t[it], nt, it, ntlink, itlink, systd, p, y, u, x, z, sy, su, sx, sz, im, id);
         }
         
         if ((has_yExp == 1) & (fine == 0)) {
             y_checkNaN(nt, ny, it, y, yexp, ystd);
-/*           fres(nt, ny, it, res, y, yexp, ystd, chi2, fiterrors_correction_factor);
-             if(sensi == 1) fsres(nt, ny, np, it, sres, sy, yexp, ystd, fiterrors_correction_factor);
-             
-             if( (useFitErrorMatrix == 0 && fiterrors == 1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == 1) ) {
-                 fres_error(nt, ny, it, reserr, res, y, yexp, ystd, chi2err);
-                 if (sensi == 1) fsres_error(nt, ny, np, it, sres, sreserr, sy, systd, y, yexp, ystd, res, reserr);
-             }*/
         }
-         /* log trafo of parameters */
-/*         
-         if ((sensi == 1) & (has_yExp == 1) & (fine == 0)) {
-             for (ip=0; ip < np; ip++) {
-                 if (qlogp[ip] > 0.5) {
-                     for (iy=0; iy<ny; iy++) {
-                         sres[it + (iy*nt) + (ip*nt*ny)] *= p[ip] * log(10.0);
-                         if( (useFitErrorMatrix == 0 && fiterrors == 1) || (useFitErrorMatrix == 1 && fiterrors_matrix[id*nrows_fiterrors_matrix+im] == 1) ) {
-                             sreserr[it + (iy*nt) + (ip*nt*ny)] *= p[ip] * log(10.0);
-                         }
-                     }
-                 }
-             }
-         }
-*/      
     }
     
     /* printf("computing model #%i, data #%i (done)\n", im, id); */
@@ -2095,115 +2031,3 @@ void y_checkNaN(int nt, int ny, int it, double *y, double *yexp, double *ystd) {
     }
 }
 
-/* standard least squares */
-/*
-void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2, double fiterrors_correction_factor) {
-    int iy;
-    
-    for(iy=0; iy<ny; iy++){
-        res[it + (iy*nt)] = (yexp[it + (iy*nt)] - y[it + (iy*nt)]) / ystd[it + (iy*nt)] * sqrt(fiterrors_correction_factor);
-*/
-        /* in case of missing data (nan) */
-/*
-        if(mxIsNaN(yexp[it + (iy*nt)])) {
-            res[it + (iy*nt)] = 0.0;
-            y[it + (iy*nt)] = yexp[it + (iy*nt)];
-            ystd[it + (iy*nt)] = yexp[it + (iy*nt)];
-        }
-*/
-        /* in case of Inf data after log10(0) */
-/*
-        if(mxIsInf(yexp[it + (iy*nt)])) {
-            res[it + (iy*nt)] = 0.0;
-        }
-        chi2[iy] += pow(res[it + (iy*nt)], 2);
-    }
-}
-*/
-/*
-void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd, double fiterrors_correction_factor) {
-    int iy, ip;
-    
-    for(iy=0; iy<ny; iy++){
-        for(ip=0; ip<np; ip++){
-            sres[it + (iy*nt) + (ip*nt*ny)] = - sy[it + (iy*nt) + (ip*nt*ny)] / ystd[it + (iy*nt)] * sqrt(fiterrors_correction_factor);
-*/
-            /* in case of missing data (nan) */
-/*
-            if(mxIsNaN(yexp[it + (iy*nt)])) {
-                sres[it + (iy*nt) + (ip*nt*ny)] = 0.0;
-            }
-*/
-            /* in case of Inf data after log10(0) */
-/*
-            if(mxIsInf(yexp[it + (iy*nt)])) {
-                sres[it + (iy*nt) + (ip*nt*ny)] = 0.0;
-            }
-        }
-    }
-}
-*/
-
-/* least squares for error model fitting */
-/*
-void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2err) {
-    int iy;
-    
-    double add_c = 50.0;
-    
-    for(iy=0; iy<ny; iy++){
-        reserr[it + (iy*nt)] = 2.0*log(ystd[it + (iy*nt)]);
-        if(mxIsNaN(yexp[it + (iy*nt)])) {
-            reserr[it + (iy*nt)] = 0.0;
-            y[it + (iy*nt)] = yexp[it + (iy*nt)];
-            ystd[it + (iy*nt)] = yexp[it + (iy*nt)];
-        } else {
-            reserr[it + (iy*nt)] += add_c;
- */
-            /* 2*log(ystd) + add_c > 0 */
-/*
-            if(reserr[it + (iy*nt)] < 0) {
-                printf("ERROR error model < 1e-10 not allowed\n");
-                return;
-            }
-            reserr[it + (iy*nt)] = sqrt(reserr[it + (iy*nt)]);
-            chi2err[iy] += pow(reserr[it + (iy*nt)], 2) - add_c;
-        }
-    }
-}
-*/
-/*
-void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr) {
-    int iy, ip;
-    
-    for(iy=0; iy<ny; iy++){
-        for(ip=0; ip<np; ip++){
-            sres[it + (iy*nt) + (ip*nt*ny)] -= systd[it + (iy*nt) + (ip*nt*ny)] * res[it + (iy*nt)] / ystd[it + (iy*nt)];
-            sreserr[it + (iy*nt) + (ip*nt*ny)] = systd[it + (iy*nt) + (ip*nt*ny)] / (reserr[it + (iy*nt)] * ystd[it + (iy*nt)]);
-            if(mxIsNaN(yexp[it + (iy*nt)])) {
-                sres[it + (iy*nt) + (ip*nt*ny)] = 0.0;
-                sreserr[it + (iy*nt) + (ip*nt*ny)] = 0.0;
-            }
-        }
-    }
-}
-*/
-
-/* custom error weight function */
-/*
-int ewt(N_Vector y, N_Vector w, void *user_data)
-{
-  int i;
-  realtype yy, ww;
-  
-  for (i=1; i<=NV_LENGTH_S(y); i++) {
-    yy = Ith(y,i);
-    ww = cvodes_rtol * ABS(yy) + cvodes_atol;  
-    if (ww <= 0.0) return (-1);
-    Ith(w,i) = 1.0/ww;
-    printf("%e ", ww);
-  }
-  printf("\n");
-  return(0);
-} 
-*/
