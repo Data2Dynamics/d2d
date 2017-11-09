@@ -112,6 +112,10 @@ double cvodes_maxstepsize;
 int    cvodes_atolV;
 double cvodes_rtol;
 double cvodes_atol;
+/*double fiterrors_correction;*/
+/* int useFitErrorMatrix;
+ double *fiterrors_matrix;
+ mwSize nrows_fiterrors_matrix; */
 
 /* Name of the substructure with conditions we're currently evaluating */
 char condition_name[MXSTRING];
@@ -146,6 +150,10 @@ void z_calc(int im, int ic, int isim, mxArray *arcondition, int sensi);
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi);
 
 void y_checkNaN(int nt, int ny, int it, double *y, double *yexp, double *ystd);
+/* void fres(int nt, int ny, int it, double *res, double *y, double *yexp, double *ystd, double *chi2, double fiterrors_correction_factor);
+ void fsres(int nt, int ny, int np, int it, double *sres, double *sy, double *yexp, double *ystd, double fiterrors_correction_factor);
+ void fres_error(int nt, int ny, int it, double *reserr, double *res, double *y, double *yexp, double *ystd, double *chi2);
+ void fsres_error(int nt, int ny, int np, int it, double *sres, double *sreserr, double *sy, double *systd, double *y, double *yexp, double *ystd, double *res, double *reserr); */
 
 int ewt(N_Vector y, N_Vector w, void *user_data);
 void thr_error( const char* msg );
@@ -1871,18 +1879,11 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
     double *y;
     double *ystd;
     double *yexp;
-/*   double *res;
-     double *reserr;
-*/
     
     double *sy;
     double *systd;
-/*   double *sres;
-     double *sreserr;
-*/
     
     double *qlogy;
-    /*double *qlogp;*/
     
     double *p;
     double *u;
@@ -1893,13 +1894,15 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
     double *sz;
     double *y_scale;
     double *dzdx;
-        
+    
+    
     /* MATLAB values */
     ic = (int) mxGetScalar(mxGetField(ardata, id, "cLink")) - 1;
     has_yExp = (int) mxGetScalar(mxGetField(ardata, id, "has_yExp"));
     
     ny = (int) mxGetNumberOfElements(mxGetField(ardata, id, "y"));
     qlogy = mxGetData(mxGetField(ardata, id, "logfitting"));
+    /*qlogp = mxGetData(mxGetField(ardata, id, "qLog10"));*/
     p = mxGetData(mxGetField(ardata, id, "pNum"));
     np = (int) mxGetNumberOfElements(mxGetField(ardata, id, "pNum"));
     
@@ -1974,7 +1977,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
             }
         }
         
-        fystd(t[it], nt, it, ntlink, itlink, ystd, y, p, u, x, z, im, id);
+            fystd(t[it], nt, it, ntlink, itlink, ystd, y, p, u, x, z, im, id);
 
         if (sensi == 1) {
             fsy(t[it], nt, it, ntlink, itlink, sy, p, u, x, z, su, sx, sz, im, id);
@@ -1997,6 +2000,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
         if ((has_yExp == 1) & (fine == 0)) {
             y_checkNaN(nt, ny, it, y, yexp, ystd);
         }
+     
     }
     
     /* printf("computing model #%i, data #%i (done)\n", im, id); */
