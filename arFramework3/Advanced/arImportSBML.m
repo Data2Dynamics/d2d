@@ -17,8 +17,8 @@
 % arImportSBML('BIOMD0000000379')
 %
 % Example:
-%  ms = arImportSBML('BIOMD0000000379',100, true)
-%  [ms, modelname] = arImportSBML('BIOMD0000000379',100, true)
+%  ms = arImportSBML('BIOMD0000000379','tend',100)
+%  [ms, modelname] = arImportSBML('BIOMD0000000379','tend',100, 'compartmentbyname',1)
 %
 
 function varargout = arImportSBML(filename, varargin)
@@ -592,18 +592,32 @@ if ~isdir('./Models')
     mkdir('Models');
 end
 if(overwrite)
-    system(['mv -f ',new_filename '.def Models']);
+    movefile([new_filename '.def'],'Models','f');
+%     system(['mv -f ',new_filename '.def Models']);
 else
-    system(['mv ',new_filename '.def Models']);
+    dest = ['Models',filesep,new_filename '.def'];
+    if exist(dest,'file')==0
+        movefile([new_filename '.def'],'Models');
+    else
+        fprintf('%s already exists. Either use option ''overwrite'',1 or move the files by hand.\n',dest);
+    end
+%     system(['mv ',new_filename '.def Models']);
 end
 
 if ~isdir('./Data')
     mkdir('Data');
 end
-if(overwrite)
-    system(['mv -f ',new_filename '_data.def Data']);
+if(overwrite)    
+    movefile([new_filename '_data.def'],'Data','f');
+%     system(['mv -f ',new_filename '_data.def Data']);
 else
-    system(['mv ',new_filename '_data.def Data']);
+    dest = ['Data',filesep,new_filename '_data.def'];
+    if exist(dest,'file')==0
+        movefile([new_filename '_data.def'],'Data');
+    else
+        fprintf('%s already exists. Either use option ''overwrite'',1 or move the files by hand.\n',dest);
+    end
+%     system(['mv ',new_filename '_data.def Data']);
 end
 
 % generate Setup.m
