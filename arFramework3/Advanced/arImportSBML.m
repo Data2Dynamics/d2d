@@ -262,7 +262,8 @@ if isfield(m,'raterule')
         tmpstr = replacePowerFunction(tmpstr);
         
         % replace rules
-        tmpstr = sym(tmpstr);
+        
+        tmpstr = evalin(symengine,tmpstr);
         findrule = true;
         count = 0;
         while(findrule  && count<100)
@@ -870,11 +871,26 @@ keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','
 
 issym = strcmp(class(s),'sym'); %#ok<STISA>
 if(~issym)
-    s = sym(s);
+    s = evalin(symengine,s);
 end
+
+issym = strcmp(class(pat),'sym'); %#ok<STISA>
+if(~issym)
+    pat_sym = evalin(symengine,pat);
+else
+    pat_sym = pat;
+end
+
+issym = strcmp(class(rep),'sym'); %#ok<STISA>
+if(~issym)
+    rep_sym = evalin(symengine,rep);
+else
+    rep_sym = rep;
+end
+
 if isempty(intersect(pat,keywords))
     try
-        s = char(subs(s,pat,rep));
+        s = char(subs(s,pat_sym,rep_sym));
         err=0;
     catch lasterr
         disp(lasterr)
