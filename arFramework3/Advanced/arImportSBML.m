@@ -599,7 +599,7 @@ else
     if exist(dest,'file')==0
         movefile([new_filename '.def'],'Models');
     else
-        fprintf('%s already exists. Either use option ''overwrite'',1 or move the files by hand.\n',dest);
+        fprintf('%s already exists. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
     end
 %     system(['mv ',new_filename '.def Models']);
 end
@@ -615,7 +615,7 @@ else
     if exist(dest,'file')==0
         movefile([new_filename '_data.def'],'Data');
     else
-        fprintf('%s already exists. Either use option ''overwrite'',1 or move the files by hand.\n',dest);
+        fprintf('%s already exists. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
     end
 %     system(['mv ',new_filename '_data.def Data']);
 end
