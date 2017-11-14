@@ -37,7 +37,12 @@ function [opts, outargin] = argSwitch( switches, extraArgs, description, verbose
             end
             if ( max( strcmpi( switches, varargin{1}{a} ) ) == 0 )
                 if ( soft == 0 )
-                    error( sprintf( 'Invalid switch argument was provided "%s". Valid arguments are %s\n', varargin{1}{a}, sprintf( '''%s'' ', switches{:} ) ) ); %#ok
+                    try
+                        txt = string(varargin{1}{a});
+                    catch
+                        txt = varargin{1}{a};
+                    end
+                    error( sprintf( 'Invalid switch argument was provided "%s". Valid arguments are %s\nDid you try passing an extra argument for a parameter which only takes a flag? Note that some boolean arguments are specified by merely specifying the flag.\n', txt, sprintf( '''%s'' ', switches{:} ) ) ); %#ok
                 else
                     outargin{end+1} = varargin{1}{a};
                 end
