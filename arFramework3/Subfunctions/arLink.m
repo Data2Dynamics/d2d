@@ -166,6 +166,11 @@ for m=1:length(ar.model)
             ar.model(m).data(d).tFine = ...
                 linspace(ar.model(m).data(d).tLim(1), ar.model(m).data(d).tLim(2), ar.config.nFinePoints)';
             
+            % Add experimental time points as well
+            if(isfield(ar.model(m).data(d), 'tExp'))
+                ar.model(m).data(d).tFine = union(ar.model(m).data(d).tFine, ar.model(m).data(d).tExp);
+            end
+            
             % Add extra time points if desired
             if isfield(ar.model(m).data(d), 'tExtra')
                 ar.model(m).data(d).tFine = union(ar.model(m).data(d).tFine, ar.model(m).data(d).tExtra);
@@ -242,6 +247,13 @@ for m=1:length(ar.model)
             
             ar.model(m).condition(c).tFine = ...
                 union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tEvents);
+        end
+        
+        % Add tExp to tFine (if it exists)
+        for c = 1 : length( ar.model(m).condition )
+            if isfield(ar.model(m).condition(c), 'tExp')
+                ar.model(m).condition(c).tFine = union(ar.model(m).condition(c).tFine, ar.model(m).condition(c).tExp);
+            end
         end
         
         % Add extra time points if desired
