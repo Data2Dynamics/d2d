@@ -198,8 +198,8 @@ function ar = arInitFields(ar)
     ar.info.arsimucalc_flags{17} = 'CVodeSensReInit()';
     ar.info.arsimucalc_flags{18} = 'malloc EventData';
     ar.info.arsimucalc_flags{19} = 'CVodeSetMaxNumSteps()';
-    ar.info.arsimucalc_flags{20} = 'equilibration. Failed to meet tolerance. Does the system have a steady state? Failure occurred ';
-    ar.info.arsimucalc_flags{21} = 'initial condition override. Initial condition override vector has the wrong size';
+    ar.info.arsimucalc_flags{20} = sprintf('equilibration. Failed to meet tolerance.\nDoes the system have a steady state? Failure occurred');
+    ar.info.arsimucalc_flags{21} = sprintf('initial condition override.\nInitial condition override vector has the wrong size');
 
     ar.info.cvodes_flags = cell(1,30);
 
