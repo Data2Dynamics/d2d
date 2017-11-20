@@ -87,7 +87,6 @@ function arInterpolateData( m, ds, obs, varargin )
 
                 if ( (opts.plot == 1) || (opts.plotonly == 1) )
                     subplot(NX, NY, jd);
-
                     plot( t, y, '.' ); hold on;
                     plot( tReq, yN, 'r.' );
                     title( strrep( ar.model(m).data(ds(jd)).name, '_', '\_' ) );
@@ -137,22 +136,43 @@ function [t, y, tReq, yN] = generateData( m, d, obs, steps, tmin, tmax, modfacto
     
     % Determine rough estimate of the noise on the data
     yRes = [];
-    ys = [];
     for a = 1 : numel( tUnique )
-        sum(t==tUnique(a))
         yC          = y(t == tUnique(a));
         yMean(a)    = nanmean(yC); %#ok
-        yRes        = [yRes; yC - yMean(a)]; %#ok
+        if ( ~isnan( yMean(a) ) )
+            yRes        = [yRes; yC - yMean(a)]; %#ok
+        end
     end
-    stdest = std( yRes ) * modfactor;
-    
-    tReq = min(t) : (max(t)-min(t))/(steps-1) : max(t);
-    tReq = setdiff( tReq, t );
+    nans = find( isnan( yMean ) );
+    yMean(nans) = [];
+    tUnique(nans) = [];  
+    stdest = nanstd( yRes ) * modfactor;
     
     % Restrict to desired time range
-    tReq = tReq( (tReq > tmin) & (tReq < tmax) );
-
+    tR = t( (t > tmin) & (t < tmax) );  
+    tReq = min(tR) : (max(tR)-min(tR))/(steps-1) : max(tR);
+    if ( numel( tUnique ) == 1 )
+        error( 'Only one datapoint in interpolation range.');
+    end
+    
+    % Make sure the tReq's don't fall on points where there is actually
+    % data. Shift those points in between the existing ones.
+    tUq = tUnique + 0;
+    for a = 1 : numel( tReq )
+        idx = find(ismember(tUq, tReq(a)));
+        if ~isempty( idx )
+            if ( idx == 1 )
+                tReq(a) = mean( tUq(idx:idx+1) );
+            else
+                tReq(a) = mean( tUq(idx-1:idx) );
+            end
+            tUq = union( tUq, tReq(a) );
+        end
+    end
+    tReq = setdiff( tReq, tUnique );
+    
     yN = zeros( numel( tReq ), 1 );
+    
     for a = 1 : numel( tReq )
         ID_end = find( tUnique > tReq(a), 1 );
         y2 = yMean(ID_end);
@@ -161,6 +181,6 @@ function [t, y, tReq, yN] = generateData( m, d, obs, steps, tmin, tmax, modfacto
         t1 = tUnique(ID_end-1);
         yN(a) = ( (y2 - y1) / (t2 - t1) ) * ( tReq(a) - t1 ) + y1;
     end
-    
+
     yN = yN + stdest*randn(size(yN));
 end
