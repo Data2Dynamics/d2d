@@ -140,7 +140,7 @@ arPush('arFit');
 if(ar.config.optimizer == 1)    
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
-    
+    pFit(1) = pFit(1) + log(-1);
 % fmincon
 elseif(ar.config.optimizer == 2)
     options = optimset('fmincon');
@@ -461,6 +461,18 @@ elseif(ar.config.optimizer == 18)
     
 else
     error('ar.config.optimizer invalid');    
+end
+
+if ~isreal(pFit)  % if parameters are complex numbers, throw warning once
+    persistent didwarn
+    if isempty(didwarn)
+        didwarn = 0;
+    else
+        didwarn = 1;
+    end
+    if didwarn ==0
+        warning('D2D:ImaginaryPfit','Parameters are imaginary. This can occur due to imaginary gradients. If this is not intended, more stringent ODE tolerances and/or usage of ar.model.qPositiveX might be a solution.')
+    end
 end
 
 if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
