@@ -140,7 +140,6 @@ arPush('arFit');
 if(ar.config.optimizer == 1)    
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
-    pFit(1) = pFit(1) + log(-1);
 % fmincon
 elseif(ar.config.optimizer == 2)
     options = optimset('fmincon');
