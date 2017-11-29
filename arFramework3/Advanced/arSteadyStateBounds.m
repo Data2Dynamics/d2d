@@ -3,7 +3,6 @@
 function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz, showConstraints)
 
     global ar;
-    
     if ( ( numel( xl ) ~= numel( ar.model(m).x ) ) || ( numel( xu ) ~= numel( ar.model(m).x ) ) )
         error( 'Bound vectors need to be the number of states in length!' );
     end
@@ -34,6 +33,9 @@ function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz,
         showConstraints = 0;
     end
     
+    serializeVector = @(x)sprintf('%g ', x);
+    fprintf( 'arSteadyStateBounds(%d, %d, [%s], [%s], [%s], [%s], [%s], [%s], [%s], [%s], %d)', m, c, serializeVector(xl), serializeVector(xu), serializeVector(zl), serializeVector(zu), serializeVector(logx), serializeVector(logz), serializeVector(weightx), serializeVector(weightz), showConstraints );   
+    
     % Enforce logical
     logx = logx == 1;
     logz = logz == 1;
@@ -51,13 +53,13 @@ function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz,
     zl(logz) = log10(zl(logz));
     zu(logz) = log10(zu(logz));
     
-    res_fun = @()residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, weightx, weightz, logx, logz, showConstraints);
+    res_fun = @()residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, weightx, weightz, logx, logz);
     ar.config.user_residual_fun = res_fun;
-    
+    ar.config.show_ss_constraints = showConstraints;
 end
 
 % This function places a soft bound on concentrations
-function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, wx, wz, logx, logz, debug)
+function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, wx, wz, logx, logz)
 
     global ar
     
@@ -130,7 +132,7 @@ function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m
         fprintf( 'Infinity found in residuals: %s, %s', xstr, zstr );
     end
     
-    if ( debug )
+    if ( ar.config.show_ss_constraints )
         xs = (xss < xl) | (xss > xu);
         zs = (zss < zl) | (zss > zu);
         ix = find(x_active); iz = find(z_active);
