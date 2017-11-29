@@ -63,12 +63,12 @@ end
 % res_fun = 'user_residual_fun_IdentifiabiltyTest';
 res_fun = @user_residual_fun_IdentifiabiltyTest2;
 
-if isfield(ar.config,'user_residual_fun')
-    tmp = char(ar.config.user_residual_fun);
-    if ~isempty(tmp) && strcmp(tmp,res_fun)~=1
-        error('arIdentifiablityTest can not handle user-specific residuals. Remove it via "ar.config.user_residual_fun = '''';"')
-    end
-end
+%if isfield(ar.config,'user_residual_fun')
+%    tmp = char(ar.config.user_residual_fun);
+%    if ~isempty(tmp) && strcmp(tmp,res_fun)~=1
+%        error('arIdentifiablityTest can not handle user-specific residuals. Remove it via "ar.config.user_residual_fun = '''';"')
+%    end
+%end
 
 
 ar.IdentifiabilityTest = struct;
@@ -99,7 +99,7 @@ if doFittigFirst
     %     arPrint
 end
 ar.IdentifiabilityTest.residual_fun = res_fun;
-ar.config.user_residual_fun = ar.IdentifiabilityTest.residual_fun;
+arAddCustomResidual( 'IdentifiabilityTest', ar.IdentifiabilityTest.residual_fun, 1 );
 
 estimatetime = 0;
 tic;
@@ -144,7 +144,7 @@ ar.IdentifiabilityTest.state = 'off';
 arCalcMerit(true,ar.p(ar.qFit==1)); %% be sure that the residuals are up-to-date, sensi = true ensures that ODE intergation steps are the same as within fitting
 ar.IdentifiabilityTest.chi2_woPenalty = arGetMerit(true) + 0.0;
 
-ar.config.user_residual_fun = '';  % residual_fun für IdentifiablityTest wieder ausschalten
+arRemoveCustomResidual( 'IdentifiabilityTest' );
 ar.p = ar.IdentifiabilityTest.p0;
 
 % %% calculate a score
@@ -288,7 +288,7 @@ if strcmp(ar.IdentifiabilityTest.state,'on')
     end
     
     ar.IdentifiabilityTest.n_rescall = ar.IdentifiabilityTest.n_rescall+1;
-else % Die Anzahl Datenpkt soll in beiden Fällen gleich sein.
+else % Die Anzahl Datenpkt soll in beiden Fï¿½llen gleich sein.
     res_user = 0;
     sres_user = zeros(1,length(ar.p));
     res_type = 1;
