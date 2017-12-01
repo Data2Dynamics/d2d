@@ -34,7 +34,7 @@ function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz,
     end
     
     serializeVector = @(x)sprintf('%g ', x);
-    fprintf( 'arSteadyStateBounds(%d, %d, [%s], [%s], [%s], [%s], [%s], [%s], [%s], [%s], %d)', m, c, serializeVector(xl), serializeVector(xu), serializeVector(zl), serializeVector(zu), serializeVector(logx), serializeVector(logz), serializeVector(weightx), serializeVector(weightz), showConstraints );   
+    fprintf( 'arSteadyStateBounds(%d, %d, [%s], [%s], [%s], [%s], [%s], [%s], [%s], [%s], %d)\n', m, c, serializeVector(xl), serializeVector(xu), serializeVector(zl), serializeVector(zu), serializeVector(logx), serializeVector(logz), serializeVector(weightx), serializeVector(weightz), showConstraints );   
     
     % Enforce logical
     logx = logx == 1;
@@ -54,7 +54,7 @@ function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz,
     zu(logz) = log10(zu(logz));
     
     res_fun = @()residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, weightx, weightz, logx, logz);
-    ar.config.user_residual_fun = res_fun;
+    arAddCustomResidual( 'SteadyStateBounds', res_fun, 1 );
     ar.config.show_ss_constraints = showConstraints;
 end
 
@@ -138,7 +138,7 @@ function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m
         ix = find(x_active); iz = find(z_active);
         xstr = sprintf( '%s ', ar.model.x{ix(xs)} );
         zstr = sprintf( '%s ', ar.model.z{iz(zs)} );
-        fprintf( 'Active bounds: %s, %s', xstr, zstr );
+        fprintf( 'Active bounds: %s, %s\n', xstr, zstr );
     end
     
     % Compute the sensitivities
