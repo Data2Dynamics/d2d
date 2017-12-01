@@ -1,6 +1,6 @@
 % This function can be used to constrain steady state solutions.
 %
-% It applies a quadratic penalty when the variables leave a certain range.
+% It applies a quadratic penalty when model states or derived variables leave a certain range.
 %       (x-ub)^2        if x > ub
 %       (x-lb)^2        if x < lb
 %       0               otherwise
@@ -13,13 +13,12 @@
 %   xl              - Lower bound states
 %   xu              - Upper bound states
 %   zl              - Lower bound derived variables
-%   zu              - Upper bound variables
+%   zu              - Upper bound derived variables
 %   logx            - Treat x in logarithmic space
 %   logz            - Treat z in logarithmic space
 %   weightx         - Weight(s) for the penalty on the states (inverse of SD)
 %   weightz         - Weight(s) for the penalty on the derived variables
 %   showConstraints - Show when the constraints are active
-
 
 function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz, showConstraints)
 
