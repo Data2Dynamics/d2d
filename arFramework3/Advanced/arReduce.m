@@ -21,6 +21,10 @@
 %   States which are removed are placed in the derived variables (ar.model.z),
 %   such that they can still be used in observation functions.
 %
+%   This functionality can be used to greatly speed up models that use 
+%   pre-equilibrated steady states. In this case, simulation of the
+%   sensitivity equations can be avoided when equilibrating the model.
+%   This rapid equilibration can be toggled via the command arFastSensis.
 
 function arReduce( m )
     global ar;
