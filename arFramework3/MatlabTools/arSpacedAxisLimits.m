@@ -1,6 +1,32 @@
+% arSpacedAxisLimits(g, overplot, doX, doY, minYrange)
+%
+% g: empty -> gca
+%    axis handle
+%    vector of axis handles
+%    figure handle -> get children axis handles
+%
+% overplot: how much space around elements in figure in % (default is 0.1)
+%
+% doX: boolean -> consider x-axis? (default is true)
+%      vector -> vector for [xmin xmax], overrides overplot functionality
+%
+% doY: boolean -> consider y-axis? (default is true)
+%      vector -> vector for [ymin ymax], overrides overplot functionality
+% 
+% minYrange: minimum y-range, overrides overplot functionality
+
 function arSpacedAxisLimits(g, overplot, doX, doY, minYrange)
 if(~exist('g','var'))
     g = gca;
+end
+if(isa(g,'matlab.ui.Figure'))
+    h = g;
+    g = [];
+    for j=1:length(h.Children)
+        if(isa(h.Children(j),'matlab.graphics.axis.Axes'))
+            g(end+1) = h.Children(j); %#ok<AGROW>
+        end
+    end
 end
 if(~exist('overplot','var') || isempty(overplot))
     overplot = 0.1;
@@ -11,6 +37,9 @@ end
 if(~exist('doY','var') || isempty(doY))
     doY = true;
 end
+
+overplotx = overplot;
+overploty = overplot;
 
 if(length(g)==1)
     [xmin, xmax, ymin, ymax] = axisLimits(g);
@@ -36,6 +65,19 @@ else
     end
 end
 
+if(length(doX)>1)
+    xmin = doX(1);
+    xmax = doX(2);
+    doX = true;
+    overplotx = 0;
+end
+if(length(doY)>1)
+    ymin = doY(1);
+    ymax = doY(2);
+    doY = true;
+    overploty = 0;
+end
+
 for j=1:length(g)
     % x-axis
     if(~strcmp(get(g(j), 'XScale'), 'linear'))
@@ -48,9 +90,9 @@ for j=1:length(g)
     end
     if(~isnan(xrange) && doX)
         if(strcmp(get(g(j), 'XScale'), 'linear'))
-            xlim(g(j), [xmin-(xrange*overplot) xmax+(xrange*overplot)]);
+            xlim(g(j), [xmin-(xrange*overplotx) xmax+(xrange*overplotx)]);
         else
-            xlim(g(j), 10.^[xmin-(xrange*overplot) xmax+(xrange*overplot)]);
+            xlim(g(j), 10.^[xmin-(xrange*overplotx) xmax+(xrange*overplotx)]);
         end
     end
     
@@ -68,12 +110,12 @@ for j=1:length(g)
     end
     if(~isnan(yrange) && doY)
         if(strcmp(get(g(j), 'YScale'), 'linear'))
-            if(ymin-(yrange*overplot) < ymax+(yrange*overplot))
-                ylim(g(j), [ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+            if(ymin-(yrange*overploty) < ymax+(yrange*overploty))
+                ylim(g(j), [ymin-(yrange*overploty) ymax+(yrange*overploty)]);
             end
         else
-            if(ymin-(yrange*overplot) < ymax+(yrange*overplot))
-                ylim(g(j), 10.^[ymin-(yrange*overplot) ymax+(yrange*overplot)]);
+            if(ymin-(yrange*overploty) < ymax+(yrange*overploty))
+                ylim(g(j), 10.^[ymin-(yrange*overploty) ymax+(yrange*overploty)]);
             end
         end
     end
