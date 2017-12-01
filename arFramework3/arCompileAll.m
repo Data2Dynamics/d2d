@@ -685,25 +685,9 @@ catch
     error( invalidSym( 'Invalid expression in condition transformations', condition.fp, condition.p ) );
 end
 
-% Were model reductions applied? Make sure to transfer the initial
-% conditions correctly
+% Were model reductions applied? Make sure to transfer the initial conditions correctly
 if isfield( model, 'removedStates' )
-    % Substitute current state initials into total pool
-    for jp = 1 : numel( model.removedStates )
-        totalPool = subs( model.removedStates(jp).totalPoolStates, condition.sym.p.', condition.sym.fp );
-        totalPool_str = char( totalPool );
-
-        % Remove the original initial condition parameters
-        condition.fp( strcmp( condition.p, model.removedStates(jp).initial ) ) = [];
-        condition.p(  strcmp( condition.p, model.removedStates(jp).initial ) ) = [];
-
-        % Remove the original initial condition parameters
-        condition.sym.fp( find( condition.sym.p == model.removedStates(jp).sym.initial ) ) = []; %#ok
-        condition.sym.p(  find( condition.sym.p == model.removedStates(jp).sym.initial ) ) = []; %#ok
-
-        condition.fp{ strcmp( condition.p, model.removedStates(jp).totalVariable ) }             = totalPool_str;
-        condition.sym.fp( find( condition.sym.p == model.removedStates(jp).sym.totalVariable ) ) = totalPool; %#ok
-    end
+    condition = addPoolSubstitutions( condition, model.removedStates );
 end
 
 condition.sym.fpx0 = sym(model.px0);
@@ -998,6 +982,11 @@ if(config.useSensis)
     end
 end
 
+% Also generate second order equations (for second order steady state
+% sensitivities)
+%condition.sym.d2fxdxdp = jacobian(condition.sym.dfxdx, condition.p);
+%condition.sym.d2fxdpdq = jacobian(condition.sym.dfxdp, condition.p);
+
 % We need room for the spline coefficients if we use turbosplines
 if ( config.turboSplines == 1 )
     condition = uniqueSplines( condition );
@@ -1100,6 +1089,11 @@ specialFunc = config.specialFunc;
 % hard code conditions
 data.sym.p  = sym(data.p);
 data.sym.fp = sym(data.fp);
+
+% Were model reductions applied? Make sure to transfer the initial conditions correctly
+if isfield( model, 'removedStates' )
+    data = addPoolSubstitutions( data, model.removedStates );
+end
 
 % Replace inline arrays (e.g. [3,4,2,5,2] with variable names, declaring
 % the array elsewhere as a static const (used for the fixed input spline)
@@ -1380,6 +1374,26 @@ if(config.useSensis)
         data.sym.fsystd = [];
     end
 end
+
+function condition = addPoolSubstitutions( condition, removedStates )
+    
+    % Substitute current state initials into total pool
+    for jp = 1 : numel( removedStates )
+        totalPool = subs( removedStates(jp).totalPoolStates, condition.sym.p.', condition.sym.fp );
+        totalPool_str = char( totalPool );
+
+        % Remove the original initial condition parameters
+        condition.fp( strcmp( condition.p, removedStates(jp).initial ) ) = [];
+        condition.p(  strcmp( condition.p, removedStates(jp).initial ) ) = [];
+
+        % Remove the original initial condition parameters
+        condition.sym.fp( find( condition.sym.p == removedStates(jp).sym.initial ) ) = []; %#ok
+        condition.sym.p(  find( condition.sym.p == removedStates(jp).sym.initial ) ) = []; %#ok
+
+        condition.fp{ strcmp( condition.p, removedStates(jp).totalVariable ) }             = totalPool_str;
+        condition.sym.fp( find( condition.sym.p == removedStates(jp).sym.totalVariable ) ) = totalPool; %#ok
+    end
+
 
 % substitute until no more changes (for self-substitutions of derived
 % variables)
