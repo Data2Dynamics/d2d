@@ -18,7 +18,7 @@
 %
 % Example:
 %  ms = arImportSBML('BIOMD0000000379','tend',100)
-%  [ms, modelname] = arImportSBML('BIOMD0000000379','tend',100, 'compartmentbyname',1)
+%  [ms, modelname] = arImportSBML('BIOMD0000000379','tend', 100, 'compartmentbyname')
 %
 
 function varargout = arImportSBML(filename, varargin)
@@ -339,7 +339,11 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                     
                 end
             end
-            fprintf(fid, ' \t-> ');
+            if m.reaction(j).reversible
+                fprintf(fid, ' \t<-> ');
+            else
+                fprintf(fid, ' \t-> ');
+            end
             for jj=1:length(m.reaction(j).product)
                 % check if product is boundary species
                 product_id = strcmp(m.reaction(j).product(jj).species,{m.species.id});
