@@ -38,7 +38,12 @@ function [opts, outargin] = argSwitch( switches, extraArgs, description, verbose
             if ( max( strcmpi( switches, varargin{1}{a} ) ) == 0 )
                 if ( soft == 0 )
                     try
-                        txt = string(varargin{1}{a});
+                        if ( isnumeric(varargin{1}{a}) )
+                            txt = sprintf('%d ', varargin{1}{a});
+                            txt = ['[', txt(1:end-1), ']'];
+                        else
+                            txt = class(varargin{1}{a});
+                        end
                     catch
                         txt = varargin{1}{a};
                     end
@@ -53,7 +58,6 @@ function [opts, outargin] = argSwitch( switches, extraArgs, description, verbose
                         opts.([lower(varargin{1}{a}) '_args']) = varargin{1}{a+1};
                         a = a + 1;
                     catch
-                        varargin{1}{a}
                         error( 'Did not provide arguments for flag %s', varargin{1}{a} );
                     end
                 end
