@@ -1,0 +1,220 @@
+DESCRIPTION
+"by Philippe Lucarelli"
+"complex vs stats comparison"
+"Complex_Formation_ppSmad new data added from martin and all the datasets to 100%"
+"only 2 koff rates"
+"MS ratios"
+"Parameters to remove single complexes"
+"Gene expression"
+
+"model reduction after model selection"
+
+"S2S4S4, ppS2ppS2ppS3, ppS2S4S4 and ppS2ppS3S4 necessary to describe all the data"
+
+PREDICTOR
+// name, type, unit, string for plotting, lower limit for plotting, upper limit for plotting
+
+t               T   min     time	0	600
+
+COMPARTMENTS
+// name, type, unit, string for plotting, value 
+//compartments defined
+
+cell     V   pl      vol.   13.17
+
+STATES
+TGFb                    C   nmol/l      conc.     cell
+Rec                     C   nmol/l      conc.     cell
+TGFb_pRec               C   nmol/l      conc.     cell
+
+S2                      C   nmol/l      conc.     cell
+S3                      C   nmol/l      conc.     cell
+S4                      C   nmol/l      conc.     cell
+S2_S4_S4                C   nmol/l      conc.     cell
+
+// Homotrimere:
+ppS2_ppS2_ppS2          C   nmol/l      conc.     cell
+ppS3_ppS3_ppS3          C   nmol/l      conc.     cell
+S4_S4_S4                C   nmol/l      conc.     cell
+
+pS2                     C   nmol/l      conc.     cell
+pS3                     C   nmol/l      conc.     cell
+ppS2                    C   nmol/l      conc.     cell
+ppS3                    C   nmol/l      conc.     cell
+
+ppS2_ppS2_S4            C   nmol/l      conc.     cell
+ppS2_ppS2_ppS3          C   nmol/l      conc.     cell
+ppS2_ppS3_ppS3          C   nmol/l      conc.     cell
+ppS3_ppS3_S4            C   nmol/l      conc.     cell
+ppS2_ppS3_S4            C   nmol/l      conc.     cell
+            
+ppS3_S4_S4              C   nmol/l      conc.     cell        
+ppS2_S4_S4              C   nmol/l      conc.     cell
+
+
+
+
+
+geneA                   C   nmol/l      conc.     cell
+geneB                   C   nmol/l      conc.     cell
+geneC                   C   nmol/l      conc.     cell
+geneD                   C   nmol/l      conc.     cell
+geneE                   C   nmol/l      conc.     cell
+geneF                   C   nmol/l      conc.     cell
+geneG                   C   nmol/l      conc.     cell
+geneH                   C   nmol/l      conc.     cell
+geneI                   C   nmol/l      conc.     cell
+geneJ                   C   nmol/l      conc.     cell
+geneK                   C   nmol/l      conc.     cell
+geneL                   C   nmol/l      conc.     cell
+
+
+
+
+INPUTS
+
+
+REACTIONS
+
+TGFb + Rec                  -> TGFb_pRec            CUSTOM  "Rec_act * TGFb * Rec"
+TGFb_pRec                   ->                      CUSTOM  "pRec_degind * TGFb_pRec"
+
+// Bekannter unphos. heterotrimer:
+S2 + S4 + S4                -> S2_S4_S4            CUSTOM  "(k_on_u) * S2 * S4 * S4"
+S2_S4_S4                    -> S2 + S4 + S4        CUSTOM  "kdiss_SS * S2_S4_S4"
+
+
+// Homo-Trimere:
+ppS2 + ppS2 + ppS2          -> ppS2_ppS2_ppS2      CUSTOM  "(khomo2) * ppS2 * ppS2 * ppS2"
+ppS2_ppS2_ppS2                -> pS2 + ppS2 + ppS2   CUSTOM  "3 * S_dephosphos * ppS2_ppS2_ppS2"
+
+ppS3 + ppS3 + ppS3          -> ppS3_ppS3_ppS3      CUSTOM  "(khomo3) * ppS3 * ppS3 * ppS3"
+ppS3_ppS3_ppS3                -> pS3 + ppS3 + ppS3   CUSTOM  "3 * S_dephosphos * ppS3_ppS3_ppS3"
+
+S4 + S4 + S4                -> S4_S4_S4            CUSTOM  "(khomo4) * S4 * S4 * S4"
+S4_S4_S4                    -> S4 + S4 + S4        CUSTOM  "kdiss_SS * S4_S4_S4"
+
+
+// phos. der Monomere:
+S2                          -> ppS2                 CUSTOM "S_phos * TGFb_pRec * S2"
+ppS2                        -> pS2                  CUSTOM "S_dephosphos * ppS2"
+pS2                         -> S2                   CUSTOM "S_dephos * pS2"
+
+S3                          -> ppS3                 CUSTOM "S_phos * TGFb_pRec * S3"
+ppS3                        -> pS3                  CUSTOM "S_dephosphos * ppS3"
+pS3                         -> S3                   CUSTOM "S_dephos * pS3"
+
+// Heterotrimere:
+ppS2 + ppS2 + ppS3          -> ppS2_ppS2_ppS3       CUSTOM  "k_223 * ppS2 * ppS2 * ppS3"
+ppS2_ppS2_ppS3              -> pS2 + ppS2 + ppS3    CUSTOM  "2 * S_dephosphos * ppS2_ppS2_ppS3"
+ppS2_ppS2_ppS3              -> ppS2 + ppS2 + pS3    CUSTOM  "S_dephosphos * ppS2_ppS2_ppS3"
+
+ppS2 + ppS2 + S4            -> ppS2_ppS2_S4         CUSTOM  "k_224 * ppS2 * ppS2 * S4"
+ppS2_ppS2_S4                -> pS2 + ppS2 + S4      CUSTOM  "2 * S_dephosphos * ppS2_ppS2_S4"
+
+ppS2 + ppS3 + ppS3          -> ppS2_ppS3_ppS3       CUSTOM  "k_233 * ppS2 * ppS3 * ppS3"
+ppS2_ppS3_ppS3              -> pS2 + ppS3 + ppS3    CUSTOM  "S_dephosphos * ppS2_ppS3_ppS3"
+ppS2_ppS3_ppS3              -> ppS2 + pS3 + ppS3    CUSTOM  "2 * S_dephosphos * ppS2_ppS3_ppS3"
+
+ppS3 + ppS3 + S4            -> ppS3_ppS3_S4         CUSTOM  "k_334 * ppS3 * ppS3 * S4"
+ppS3_ppS3_S4                -> pS3 + ppS3 + S4      CUSTOM  "2 * S_dephosphos * ppS3_ppS3_S4"
+
+ppS2 + S4 + S4              -> ppS2_S4_S4           CUSTOM  "k_244 * ppS2 * S4 * S4"
+ppS2_S4_S4                  -> pS2 + S4 + S4        CUSTOM  "S_dephosphos * ppS2_S4_S4"
+
+ppS3 + S4 + S4              -> ppS3_S4_S4           CUSTOM  "k_344 * ppS3 * S4 * S4"
+ppS3_S4_S4                  -> pS3 + S4 + S4        CUSTOM  "S_dephosphos * ppS3_S4_S4"
+
+ppS2 + ppS3 + S4            -> ppS2_ppS3_S4         CUSTOM  "k_234 * ppS2 * ppS3 * S4"
+ppS2_ppS3_S4                -> pS2 + ppS3 + S4      CUSTOM  "S_dephosphos * ppS2_ppS3_S4"
+ppS2_ppS3_S4                -> ppS2 + pS3 + S4      CUSTOM  "S_dephosphos * ppS2_ppS3_S4"
+
+
+//gene expression setup
+
+                            -> geneA                        CUSTOM  "(geneA_turn +  geneA_act1 * (ppS2_ppS3_S4) +  geneA_act2 * (ppS2_S4_S4)+ geneA_act3 * (ppS2_ppS3_ppS3)) / (1 +  geneA_inh1 * (ppS2_ppS3_S4)+ geneA_inh2 * ( ppS2_S4_S4) + geneA_inh3 * (ppS2_ppS3_ppS3))"
+geneA                       ->                              CUSTOM  "geneA_turn *geneA"  
+
+                            -> geneB                        CUSTOM  "(geneB_turn +  geneB_act1 * (ppS2_ppS3_S4) + geneB_act2 * (ppS2_S4_S4)+ geneB_act3 * (ppS2_ppS3_ppS3)) / (1+  geneB_inh1 * (ppS2_ppS3_S4)+  geneB_inh2 * ( ppS2_S4_S4)  + geneB_inh3 * (ppS2_ppS3_ppS3))"
+geneB                       ->                              CUSTOM  "geneB_turn *geneB"  
+
+                            -> geneC                        CUSTOM  "(geneC_turn+  geneC_act1 * (ppS2_ppS3_S4)  + geneC_act2 * (ppS2_S4_S4)+  geneC_act3 * (ppS2_ppS3_ppS3)) / (1+  geneC_inh1 * (ppS2_ppS3_S4)+  geneC_inh2 * ( ppS2_S4_S4)  + geneC_inh3 * (ppS2_ppS3_ppS3))"
+geneC                       ->                              CUSTOM  "geneC_turn *geneC"  
+
+                            -> geneD                        CUSTOM  "(geneD_turn +  geneD_act1 * (ppS2_ppS3_S4) + geneD_act2 * (ppS2_S4_S4)+  geneD_act3 * (ppS2_ppS3_ppS3)) / (1+  geneD_inh1 * (ppS2_ppS3_S4)+  geneD_inh2 * ( ppS2_S4_S4)  + geneD_inh3 * (ppS2_ppS3_ppS3))"
+geneD                       ->                              CUSTOM  "geneD_turn *geneD"  
+
+                            -> geneE                        CUSTOM  "(geneE_turn+  geneE_act1 * (ppS2_ppS3_S4)  + geneE_act2 * (ppS2_S4_S4)+  geneE_act3 * (ppS2_ppS3_ppS3)) / (1+  geneE_inh1 * (ppS2_ppS3_S4)+  geneE_inh2 * ( ppS2_S4_S4)  + geneE_inh3 * (ppS2_ppS3_ppS3))"
+geneE                       ->                              CUSTOM  "geneE_turn *geneE"  
+
+                            -> geneF                        CUSTOM  "(geneF_turn+  geneF_act1 * (ppS2_ppS3_S4)  + geneF_act2 * (ppS2_S4_S4)+  geneF_act3 * (ppS2_ppS3_ppS3)) / (1+  geneF_inh1 * (ppS2_ppS3_S4)+  geneF_inh2 * ( ppS2_S4_S4) + geneF_inh3 * (ppS2_ppS3_ppS3))"
+geneF                       ->                              CUSTOM  "geneF_turn *geneF"  
+
+                            -> geneG                        CUSTOM  "(geneG_turn +  geneG_act1 * (ppS2_ppS3_S4) + geneG_act2 * (ppS2_S4_S4)+  geneG_act3 * (ppS2_ppS3_ppS3)) / (1+  geneG_inh1 * (ppS2_ppS3_S4)+  geneG_inh2 * ( ppS2_S4_S4) + geneG_inh3 * (ppS2_ppS3_ppS3))"
+geneG                       ->                              CUSTOM  "geneG_turn *geneG"  
+
+                            -> geneH                        CUSTOM  "(geneH_turn +  geneH_act1 * (ppS2_ppS3_S4) + geneH_act2 * (ppS2_S4_S4)+  geneH_act3 * (ppS2_ppS3_ppS3)) / (1+  geneH_inh1 * (ppS2_ppS3_S4)+  geneH_inh2 * ( ppS2_S4_S4)  + geneH_inh3 * (ppS2_ppS3_ppS3))"
+geneH                       ->                              CUSTOM  "geneH_turn *geneH"  
+
+                            -> geneI                        CUSTOM  "(geneI_turn +  geneI_act1 * (ppS2_ppS3_S4) + geneI_act2 * (ppS2_S4_S4)+  geneI_act3 * (ppS2_ppS3_ppS3)) / (1+  geneI_inh1 * (ppS2_ppS3_S4)+  geneI_inh2 * ( ppS2_S4_S4) + geneI_inh3 * (ppS2_ppS3_ppS3))"
+geneI                       ->                              CUSTOM  "geneI_turn *geneI"  
+
+                            -> geneJ                        CUSTOM  "(geneJ_turn+  geneJ_act1 * (ppS2_ppS3_S4)  + geneJ_act2 * (ppS2_S4_S4)+  geneJ_act3 * (ppS2_ppS3_ppS3)) / (1+  geneJ_inh1 * (ppS2_ppS3_S4)+  geneJ_inh2 * ( ppS2_S4_S4) + geneJ_inh3 * (ppS2_ppS3_ppS3))"
+geneJ                       ->                              CUSTOM  "geneJ_turn *geneJ"  
+
+                            -> geneK                        CUSTOM  "(geneK_turn+  geneK_act1 * (ppS2_ppS3_S4) + geneK_act2 * (ppS2_S4_S4)+  geneK_act3 * (ppS2_ppS3_ppS3)) / (1+  geneK_inh1 * (ppS2_ppS3_S4)+  geneK_inh2 * ( ppS2_S4_S4)  + geneK_inh3 * (ppS2_ppS3_ppS3))"
+geneK                       ->                              CUSTOM  "geneK_turn *geneK"  
+
+                            -> geneL                        CUSTOM  "(geneL_turn+  geneL_act1 * (ppS2_ppS3_S4)  + geneL_act2 * (ppS2_S4_S4)+ geneL_act3 * (ppS2_ppS3_ppS3)) / (1+  geneL_inh1 * (ppS2_ppS3_S4)+  geneL_inh2 * ( ppS2_S4_S4)  + geneL_inh3 * (ppS2_ppS3_ppS3))"
+geneL                       ->                              CUSTOM  "geneL_turn *geneL"  
+
+
+
+
+
+DERIVED
+
+
+CONDITIONS
+
+init_TGFb               "0"
+init_TGFb_pRec          "0"
+
+init_pS2                "0"
+init_pS3                "0"
+init_ppS2               "0"
+init_ppS3               "0"
+
+init_ppS2_ppS2_ppS3     "0"
+init_ppS2_ppS2_S4       "0"
+init_ppS2_ppS3_ppS3     "0"
+init_ppS3_ppS3_S4       "0"
+init_ppS2_S4_S4         "0"
+init_ppS3_S4_S4         "0"
+init_ppS2_ppS3_S4       "0"
+init_S2_S4_S4           "0"
+init_S4_S4_S4           "0"
+
+// Homotrimere:
+init_ppS2_ppS2_ppS2          "0"
+init_ppS3_ppS3_ppS3          "0"
+
+
+
+init_S2             "S2tot"
+init_S3             "S3tot"
+init_S4             "S4tot"
+
+init_geneA	"1"
+init_geneB	"1"
+init_geneC	"1"
+init_geneD	"1"
+init_geneE	"1"
+init_geneF	"1"
+init_geneG	"1"
+init_geneH	"1"
+init_geneI	"1"
+init_geneJ	"1"
+init_geneK	"1"
+init_geneL	"1"
+

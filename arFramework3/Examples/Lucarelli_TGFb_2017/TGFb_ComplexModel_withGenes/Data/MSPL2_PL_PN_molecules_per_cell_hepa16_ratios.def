@@ -1,0 +1,24 @@
+DESCRIPTION
+
+PREDICTOR
+
+time	        T	   min	 time	    0		600
+
+INPUTS
+
+OBSERVABLES
+                                          
+S23IP_tS2	 C	 nmol/l	 conc.	 0	 0	 "(S2 + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2) + 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4)/((S3 + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4)+(S2 + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4)) * 100 "
+S23IP_tS3	 C	 nmol/l	 conc.	 0	 0	 "(S3 + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4)/((S3 + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4)+(S2 + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4)) * 100 "
+
+ERRORS
+
+S23IP_tS2	 "1"
+S23IP_tS3	 "1"
+
+
+CONDITIONS
+
+RANDOM
+
+nExpID	   INDEPENDENT

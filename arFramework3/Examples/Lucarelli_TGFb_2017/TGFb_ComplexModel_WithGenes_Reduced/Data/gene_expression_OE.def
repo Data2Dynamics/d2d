@@ -1,0 +1,54 @@
+DESCRIPTION
+
+PREDICTOR
+
+time	        T	   min	 time	    0		600
+
+INPUTS
+
+OBSERVABLES
+
+
+Ski         C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneA" 
+Skil        C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneB" 
+Dnmt3a      C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneC" 
+Sox4        C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneD" 
+Jun         C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneE" 
+Smad7       C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneF" 
+Klf10       C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneG" 
+Bmp4        C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneH" 
+Cxcl15      C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneI" 
+Dusp5       C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneJ" 
+Tgfa        C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneK" 
+Pdk4        C	 nmol/l	 conc.	 0	 1	 "1e-6 + geneL" 
+
+
+
+
+
+
+
+ERRORS
+
+Ski         "sd_Ski_nExpID"
+Skil        "sd_Skil_nExpID"
+Dnmt3a      "sd_Dnmt3a_nExpID"
+Sox4        "sd_Sox4_nExpID"
+Jun         "sd_Jun_nExpID"
+Smad7       "sd_Smad7_nExpID"
+Klf10       "sd_Klf10_nExpID"
+Bmp4        "sd_Bmp4_nExpID"
+Cxcl15      "sd_Cxcl15_nExpID"
+Dusp5       "sd_Dusp5_nExpID"
+Tgfa        "sd_Tgfa_nExpID"
+Pdk4        "sd_Pdk4_nExpID"
+
+
+
+
+
+CONDITIONS
+
+RANDOM
+
+nExpID	   INDEPENDENT
