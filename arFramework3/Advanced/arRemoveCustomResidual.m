@@ -22,6 +22,9 @@ function arRemoveCustomResidual( name )
 
     if strcmp( name, 'all' )
         ar.config.user_residual_fun = [];
+        
+        % The objective function changed, so invalidate the cache!
+        arCheckCache(1);
         return;
     end
     
@@ -33,4 +36,7 @@ function arRemoveCustomResidual( name )
         ar.config.user_residual_fun.qFit(idx) = [];
         ar.config.user_residual_fun.name(idx) = [];
     end
+    
+    % The objective function changed, so invalidate the cache!
+    arCheckCache(1);
 end

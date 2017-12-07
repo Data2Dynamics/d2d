@@ -59,4 +59,7 @@ function arAddCustomResidual( name, fn, overwrite )
     ar.config.user_residual_fun.fn{idx}     = fn;
     ar.config.user_residual_fun.qFit(idx)   = 1;
     ar.config.user_residual_fun.name{idx}   = name;
+    
+    % The objective function changed, so invalidate the cache!
+    arCheckCache(1);
 end
