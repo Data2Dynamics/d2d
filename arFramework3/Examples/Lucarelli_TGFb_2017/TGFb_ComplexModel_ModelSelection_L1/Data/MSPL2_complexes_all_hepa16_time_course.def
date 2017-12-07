@@ -1,0 +1,93 @@
+DESCRIPTION
+
+PREDICTOR
+
+time	    T	  min	 time	  0		300
+
+INPUTS
+
+OBSERVABLES
+
+
+S2IP_tS2	 C	 ratio	 conc.	 0	 0	 " ( ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 ) / ( ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + ppS2_ppS3_S4 )  +  ( 2 * S2_S4_S4 + ppS2_ppS2_S4 + 2 * ppS2_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+S2IP_tS3   C	 ratio	 conc.	 0	 0	 " ( ( ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + ppS2_ppS3_S4 ) / ( ( S2  +  S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + ppS2_ppS3_S4 )  +  ( 2 * S2_S4_S4 + ppS2_ppS2_S4 + 2 * ppS2_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+S2IP_tS4   C	 ratio	 conc.	 0	 0	 " ( ( ppS2_ppS2_S4 + 2 * ppS2_S4_S4 + ppS2_ppS3_S4 ) / ( ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + ppS2_ppS3_S4 )  +  ( 2 * S2_S4_S4 + ppS2_ppS2_S4 + 2 * ppS2_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+
+S3IP_tS2	 C	 ratio	 conc.	 0	 0  " ( ( 2 * ppS2_ppS2_ppS3 + ppS2_ppS3_ppS3 + ppS2_ppS3_S4 ) / ( ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 )  +  ( 2 * ppS2_ppS2_ppS3 + ppS2_ppS3_ppS3 + ppS2_ppS3_S4 )  +  ( ppS3_ppS3_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+S3IP_tS3	 C	 ratio	 conc.	 0	 0  " ( ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) / ( ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 )  +  ( 2 * ppS2_ppS2_ppS3 + ppS2_ppS3_ppS3 + ppS2_ppS3_S4 )  +  ( ppS3_ppS3_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+S3IP_tS4	 C	 ratio	 conc.	 0	 0  " ( ( ppS3_ppS3_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 ) / ( ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 )  +  ( 2 * ppS2_ppS2_ppS3 + ppS2_ppS3_ppS3 + ppS2_ppS3_S4 )  +  ( ppS3_ppS3_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+
+S4IP_tS2	 C	 ratio	 conc.	 0	 0 " ( ( S2_S4_S4 + 2 * ppS2_ppS2_S4 + ppS2_S4_S4 + ppS2_ppS3_S4 ) / ( ( ( S4 + 3 * S4_S4_S4 )  + 2 * S2_S4_S4 + ppS2_ppS2_S4 + ppS3_ppS3_S4 + 2 * ppS2_S4_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 )  +  ( S2_S4_S4 + 2 * ppS2_ppS2_S4 + ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+S4IP_tS3	 C	 ratio	 conc.	 0	 0 " ( ( 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) / ( ( ( S4 + 3 * S4_S4_S4 )  + 2 * S2_S4_S4 + ppS2_ppS2_S4 + ppS3_ppS3_S4 + 2 * ppS2_S4_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 )  +  ( S2_S4_S4 + 2 * ppS2_ppS2_S4 + ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+S4IP_tS4	 C	 ratio	 conc.	 0	 0 " ( ( ( S4 + 3 * S4_S4_S4 )  + 2 * S2_S4_S4 + ppS2_ppS2_S4 + ppS3_ppS3_S4 + 2 * ppS2_S4_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 ) / ( ( ( S4 + 3 * S4_S4_S4 )  + 2 * S2_S4_S4 + ppS2_ppS2_S4 + ppS3_ppS3_S4 + 2 * ppS2_S4_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 )  +  ( S2_S4_S4 + 2 * ppS2_ppS2_S4 + ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+
+S23IP_tS2	 C	 ratio	 conc.	 0	 0 " ( ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 ) / ( ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 )  +  ( 2 * S2_S4_S4 +  ppS2_ppS2_S4 + 2 * ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( ppS3_ppS3_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+S23IP_tS3	 C	 ratio	 conc.	 0	 0 " ( ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) / ( ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 )  +  ( 2 * S2_S4_S4 + ppS2_ppS2_S4 + 2 * ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( ppS3_ppS3_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+S23IP_tS4	 C	 ratio	 conc.	 0	 0 " ( ( ( 2 * S2_S4_S4 + ppS2_ppS2_S4 + 2 * ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( ppS3_ppS3_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 ) ) / ( ( S2  +  S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 )  +  ( 2 * S2_S4_S4 + ppS2_ppS2_S4 + 2 * ppS2_S4_S4 + ppS2_ppS3_S4 )  +  ( ppS3_ppS3_S4 + 2 * ppS3_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+
+S2IP_S2	   C	 ratio	 conc.	 0	 0	 " ( ( S2  + S2_S4_S4 ) / ( ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+S2IP_pS2   C	 ratio	 conc.	 0	 0	 " ( ( pS2 ) / ( ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+S2IP_ppS2  C	 ratio	 conc.	 0	 0	 " ( ((ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 ) / ( ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 ) ) )  * 100"
+
+S3IP_S2		 C	 ratio	 conc.	 0	 0	 " ( ( 0 ) / ( 2 * ppS2_ppS2_ppS3 + ppS2_ppS3_ppS3 + ppS2_ppS3_S4 ) )  * 100"
+S3IP_pS2	 C	 ratio	 conc.	 0	 0	 " ( ( 0 ) / ( 2 * ppS2_ppS2_ppS3 + ppS2_ppS3_ppS3 + ppS2_ppS3_S4 ) )  * 100"
+S3IP_ppS2	 C	 ratio	 conc.	 0	 0	 " ( ( 2 * ppS2_ppS2_ppS3 + ppS2_ppS3_ppS3 + ppS2_ppS3_S4 ) / ( 2 * ppS2_ppS2_ppS3 + ppS2_ppS3_ppS3 + ppS2_ppS3_S4 ) )  * 100"	
+
+S23IP_S2	 C	 ratio	 conc.	 0	 0	 " ( ( S2  + S2_S4_S4 ) / ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 ) )  * 100"
+S23IP_pS2	 C	 ratio	 conc.	 0	 0	 " ( ( pS2 ) / ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 ) )  * 100"
+S23IP_ppS2	 C	 ratio	 conc.	 0	 0	 " ( ((ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 ) / ( S2  + S2_S4_S4 + pS2 +(ppS2+3*ppS2_ppS2_ppS2)+ 2 * ppS2_ppS2_ppS3 + 2 * ppS2_ppS2_S4 + ppS2_ppS3_ppS3 + ppS2_S4_S4 + ppS2_ppS3_S4 ) )  * 100"
+	
+S2IP_S3	   C	 ratio	 conc.	 0	 0	 " ( ( 0 ) / ( ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + ppS2_ppS3_S4 ) )  * 100"
+S2IP_pS3	 C	 ratio	 conc.	 0	 0	 " ( ( 0 ) / ( ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + ppS2_ppS3_S4 ) )  * 100"
+S2IP_ppS3	 C	 ratio	 conc.	 0	 0	 " ( ( ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + ppS2_ppS3_S4 ) / ( ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + ppS2_ppS3_S4 ) )  * 100"
+	
+//S3IP_S3	   C	 ratio	 conc.	 0	 0	 " ( ( S3 ) / ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) )  * 100"
+//S3IP_pS3	 C	 ratio	 conc.	 0	 0	 " ( ( pS3 ) / ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) )  * 100"
+//S3IP_ppS3	 C	 ratio	 conc.	 0	 0	 " ( ((ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) / ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) )  * 100"
+
+S23IP_S3	 C	 ratio	 conc.	 0	 0	 " ( ( S3 ) / ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) )  * 100"
+S23IP_pS3	 C	 ratio	 conc.	 0	 0	 " ( ( pS3 ) / ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) )  * 100"
+S23IP_ppS3	 C	 ratio	 conc.	 0	 0	 " ( ((ppS3+3*ppS3_ppS3_ppS3)+ ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) / ( S3  + pS3 +(ppS3+3*ppS3_ppS3_ppS3) + ppS2_ppS2_ppS3 + 2 * ppS2_ppS3_ppS3 + 2 * ppS3_ppS3_S4 + ppS3_S4_S4 + ppS2_ppS3_S4 ) )  * 100"
+
+
+ERRORS
+
+S2IP_tS2	 "5"
+S2IP_tS3	 "5"
+S2IP_tS4	 "5"
+S3IP_tS2	 "5"
+S3IP_tS3	 "5"
+S3IP_tS4	 "5"
+S4IP_tS2	 "5"
+S4IP_tS3	 "5"
+S4IP_tS4	 "5"
+S23IP_tS2	 "5"
+S23IP_tS3	 "5"
+S23IP_tS4	 "5"
+
+S2IP_S2   "5"
+S2IP_pS2   "5"
+S2IP_ppS2  "5"
+S3IP_S2   "5"
+S3IP_pS2   "5"
+S3IP_ppS2  "5"
+S23IP_S2   "5"
+S23IP_pS2  "5"
+S23IP_ppS2  "5"
+
+S2IP_S3   "5"
+S2IP_pS3   "5"
+S2IP_ppS3  "5"
+//S3IP_S3  "5"
+//S3IP_pS3  "5"
+//S3IP_ppS3 "5"
+S23IP_S3   "5"
+S23IP_pS3  "5"
+S23IP_ppS3  "5"
+
+
+CONDITIONS
+
+RANDOM
+nExpID	  INDEPENDENT
+

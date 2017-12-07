@@ -1,0 +1,22 @@
+DESCRIPTION
+
+PREDICTOR
+
+time	        T	   min	 time	    0		600
+
+INPUTS
+
+OBSERVABLES
+                                          
+TGFbR	 C	 nmol/l	 conc.	 0	 0	 "(Rec + TGFb_pRec)"
+
+ERRORS
+
+TGFbR       "0.092"
+
+
+CONDITIONS
+
+RANDOM
+
+nExpID	   INDEPENDENT
