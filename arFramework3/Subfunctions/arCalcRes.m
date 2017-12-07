@@ -79,14 +79,22 @@ ar.res_user.type = [];
 if isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fun)
     for jr = 1 : numel( ar.config.user_residual_fun.qFit )
         if ar.config.user_residual_fun.qFit(jr)
-            [tempres,tempsres,temptype] = feval( ar.config.user_residual_fun.fn{jr} );
-            if length(tempres)~=size(tempsres,1)
-                error( 'Length of residual %s (res) does not match the length of its residual sensitivities (sres)', ar.config.user_residual_fun.name(jr) );
-            end
+            if ( sensi )
+                [tempres,temptype,tempsres] = feval( ar.config.user_residual_fun.fn{jr} );
+                
+                if length(tempres)~=size(tempsres,1)
+                    error( 'Length of residual %s (res) does not match the length of its residual sensitivities (sres)', ar.config.user_residual_fun.name(jr) );
+                end
             
-            ar.res_user.res = [ar.res_user.res, tempres];
-            ar.res_user.sres = [ar.res_user.sres; tempsres];
-            ar.res_user.type = [ar.res_user.type, temptype];
+                ar.res_user.res = [ar.res_user.res, tempres];
+                ar.res_user.sres = [ar.res_user.sres; tempsres];
+                ar.res_user.type = [ar.res_user.type, temptype];
+            else
+                [tempres,temptype] = feval( ar.config.user_residual_fun.fn{jr} );
+                
+                ar.res_user.res = [ar.res_user.res, tempres];
+                ar.res_user.type = [ar.res_user.type, temptype];
+            end
         end
     end
 end

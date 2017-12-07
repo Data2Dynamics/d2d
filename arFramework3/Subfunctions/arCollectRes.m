@@ -432,9 +432,11 @@ if isfield(ar.res_user,'res')
     ar.chi2 = ar.chi2 + sum(ar.res_user.res.^2);
     ar.ndata = ar.ndata + length(ar.res_user.res);
 
-    for i=1:size(ar.res_user.sres,1)
-        ar.sres(sresindex,:) = ar.res_user.sres(i,:);
-        sresindex = sresindex + 1;
+    if ( sensi )
+        for i=1:size(ar.res_user.sres,1)
+            ar.sres(sresindex,:) = ar.res_user.sres(i,:);
+            sresindex = sresindex + 1;
+        end
     end
 end
 
