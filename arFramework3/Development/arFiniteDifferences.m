@@ -74,6 +74,7 @@ for jp=1:length(ar.pLabel)
     try
         arCalcMerit(false,[]);
     catch
+        arPop;
         error( 'Failed simulation at %d', jp );
     end
     
