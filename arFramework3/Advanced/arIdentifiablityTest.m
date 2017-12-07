@@ -1,4 +1,4 @@
-% arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
+arInit% arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
 % 
 %   This function implements a fast procedure to check whether structural
 %   non-identifiablities are present.
@@ -265,7 +265,7 @@ for i=1:size(p0,1)
 end
 
 
-function [res_user, sres_user, res_type] = user_residual_fun_IdentifiabiltyTest2
+function [res_user, res_type, sres_user] = user_residual_fun_IdentifiabiltyTest2
 %   This function penalize the if || ar.p - ar.IdentifiabilityTest.p0 ||_2 
 %   unequal to ar.IdentifiabilityTest.radius
 %

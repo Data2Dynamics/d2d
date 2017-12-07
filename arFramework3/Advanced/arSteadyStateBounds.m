@@ -19,8 +19,9 @@
 %   weightx         - Weight(s) for the penalty on the states (inverse of SD)
 %   weightz         - Weight(s) for the penalty on the derived variables
 %   showConstraints - Show when the constraints are active
+%   name            - Use a custom name for the constraint
 
-function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz, showConstraints)
+function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz, showConstraints, name)
 
     global ar;
     if ( ( numel( xl ) ~= numel( ar.model(m).x ) ) || ( numel( xu ) ~= numel( ar.model(m).x ) ) )
@@ -73,18 +74,22 @@ function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz,
     zl(logz) = log10(zl(logz));
     zu(logz) = log10(zu(logz));
     
+    if ~exist( 'name', 'var' )
+        name = 'SteadyStateBounds';
+    end
+    
     res_fun = @()residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, weightx, weightz, logx, logz);
-    arAddCustomResidual( 'SteadyStateBounds', res_fun, 1 );
+    arAddCustomResidual( name, res_fun, 1 );
     ar.config.show_ss_constraints = showConstraints;
 end
 
 % This function places a soft bound on concentrations
-function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, wx, wz, logx, logz)
+function [res_user, res_type, sres_user] = residual_concentrationConstraintsL2(m, c, xl, xu, zl, zu, wx, wz, logx, logz)
 
     global ar
     
-    x_active    = ( ~( isnan( xl ) | isnan( xu ) ) );
-    z_active    = ( ~( isnan( zl ) | isnan( zu ) ) );
+    x_active    = ( ( ~( isnan( xl ) | isnan( xu ) ) ) & ( ~isnan(wx) ) );
+    z_active    = ( ( ~( isnan( zl ) | isnan( zu ) ) ) & ( ~isnan(wz) ) );
     nx          = sum(x_active);
     nz          = sum(z_active);
     logx        = logx(x_active);
@@ -97,6 +102,13 @@ function [res_user, sres_user, res_type] = residual_concentrationConstraintsL2(m
     sxss        = squeeze(ar.model(m).ss_condition(c).sxFineSimu(end,x_active,:));
     szss        = squeeze(ar.model(m).ss_condition(c).szFineSimu(end,z_active,:));
     log10s      = ar.qFit(ar.model(m).ss_condition(c).pLink)==1;
+    
+    if ( size(sxss, 2)==1 )
+        sxss = sxss.';
+    end
+    if ( size(szss, 2)==1 )
+        szss = szss.';
+    end
     
     % Transform the state and derived variable sensitivities in case they
     % are specified in log10 parameters
