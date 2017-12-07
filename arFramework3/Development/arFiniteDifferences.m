@@ -69,6 +69,7 @@ for jp=1:length(ar.pLabel)
     end
     
     % perturb p(jp)
+    arPush('arFiniteDifferences');
     ar.p(jp) = ar.p(jp) + dp;
     try
         arCalcMerit(false,[]);
@@ -112,7 +113,7 @@ for jp=1:length(ar.pLabel)
     end
     
     % reset p
-    ar.p = pRef;
+    arPop;
     arCalcMerit(false,[]);
 end
 arWaitbar(-1);
