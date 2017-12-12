@@ -110,6 +110,8 @@ function doTest( dir )
     arOutputLevel = 0;
     try
     TestFeature; cd(d);
+    arClearCFiles;
+    drawnow;
     sprintf('\n');
     
     catch
