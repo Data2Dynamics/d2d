@@ -1040,7 +1040,6 @@ function [strOut, values] = findArrays( str )
     for i = 1 : numel( loc1 )
         curValues = arrayVal( str( loc1(i) + 1 : loc2(i) - 1 ) );
         if ~isempty( curValues )
-            disp('Added to strOut');
             strOut{a} = str( loc1(i) : loc2(i) );
             values{a} = curValues;
             a = a + 1;
@@ -1055,6 +1054,11 @@ function vals = arrayVal( str )
     spl = strsplit( str, ',' );
     try
         vals = cellfun( @str2num, spl );
+        
+        % Not actually an array! Do not replace!
+        if ( numel( vals ) == 1 )
+            vals = [];
+        end
     catch
         vals = [];
         %error( 'Found a malformed array: [%s]. Only numeric values are allowed!', str )
