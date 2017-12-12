@@ -1014,16 +1014,41 @@ function [ finalStr, static_variables, cvars ] = replaceFixedArrays( str, static
 
 % Grab arrays from string ([1,2,3,...5,6,7])
 function [strOut, values] = findArrays( str )
-    loc1 = regexp( str, '\[([ ()0123456789\.\,\^\*\-\+\/]+)[,]([ ()0123456789\.\,\^\*\-\+\/]+)\]' );
-    loc2 = regexp( str, '([ ()0123456789\.\,\^\*\-\+\/]+)[,]([ ()0123456789\.\,\^\*\-\+\/]+)\]', 'end' );
+    %loc1 = regexp( str, '\[([ ()0123456789\.\,\^\*\-\+\/]+)[,]([ ()0123456789\.\,\^\*\-\+\/]+)\]' );
+    %loc2 = regexp( str, '([ ()0123456789\.\,\^\*\-\+\/]+)[,]([ ()0123456789\.\,\^\*\-\+\/]+)\]', 'end' );
+    
+    % This is less robust than the regular expression based system, but
+    % orders of magnitude faster.
+    loc1 = str=='[';
+    loc2 = str==']';
+       
+    % Encode brackets so we can find closed pairs
+    empty = zeros(numel(str), 1);
+    empty(loc1) =  1;
+    empty(loc2) = -1;
+    nz = find(abs(empty)>0);
+    brackets = empty(nz);
+    dbrackets = diff(brackets);
+    % Brackets with a derivative of -2 are closed lowest level brackets
+    L = find( dbrackets == -2 );
+    loc1 = nz(L);
+    loc2 = nz(L+1);
+    
     a = 1;
     strOut = cell( 1, numel(loc1) );
     values = cell( 1, numel(loc1) );
     for i = 1 : numel( loc1 )
-        strOut{a} = str( loc1(i) : loc2(i) );
-        values{a} = arrayVal( str( loc1(i) + 1 : loc2(i) - 1 ) );
-        a = a + 1;
+        curValues = arrayVal( str( loc1(i) + 1 : loc2(i) - 1 ) );
+        if ~isempty( curValues )
+            disp('Added to strOut');
+            strOut{a} = str( loc1(i) : loc2(i) );
+            values{a} = curValues;
+            a = a + 1;
+        end
     end
+    strOut = strOut(1:a-1);
+    values = values(1:a-1);
+    
 
 % Grab values from flat array and force them to doubles
 function vals = arrayVal( str )
@@ -1031,7 +1056,8 @@ function vals = arrayVal( str )
     try
         vals = cellfun( @str2num, spl );
     catch
-        error( 'Found a malformed array: [%s]. Only numeric values are allowed!', str )
+        vals = [];
+        %error( 'Found a malformed array: [%s]. Only numeric values are allowed!', str )
     end
 
 % This function checks whether any deltas appear in the sensitivity
