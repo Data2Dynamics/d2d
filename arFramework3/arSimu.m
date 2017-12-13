@@ -404,5 +404,11 @@ function fastSteadyState( m, sensi, dynamics )
                 %Sx = dfdx.' \ dfdp;
             end
             ar.model(m).ss_condition(c).sxFineSimu(end,:,:) = Sx + 0;
+            
+            % Compute flux sensitivities
+            dvdp = ar.model(m).ss_condition(c).dvdpNum;
+            dvdx = ar.model(m).ss_condition(c).dvdxNum;
+            Sv = dvdx * Sx + dvdp;
+            ar.model(m).ss_condition(c).svFineSimu(end,:,:) = Sv + 0;
         end
 	end
