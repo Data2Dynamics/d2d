@@ -52,16 +52,25 @@ for d = 1 : numel( ar.model.ss_condition )
     ar.config.turboSSSensi=1;
     arCalcMerit;
     sxEq = reshape(ar.model.ss_condition(d).sxFineSimu(end,:,:), 1, numel(ar.model.ss_condition(d).sxFineSimu(end,:,:))) + 0;
+    svEq = reshape(ar.model.ss_condition(d).svFineSimu(end,:,:), 1, numel(ar.model.ss_condition(d).svFineSimu(end,:,:))) + 0;
 
     ar.config.turboSSSensi=0;
     arCalcMerit;
     subplot(numel(ar.model.ss_condition), 1, d);
     sxTrue = reshape(ar.model.ss_condition(d).sxFineSimu(end,:,:), 1, numel(ar.model.ss_condition(d).sxFineSimu(end,:,:))) + 0;        
+    svTrue = reshape(ar.model.ss_condition(d).svFineSimu(end,:,:), 1, numel(ar.model.ss_condition(d).svFineSimu(end,:,:))) + 0;
 end
 
 fail = sum( (((sxEq-sxTrue)./(sxTrue))>rtol) & ((sxEq-sxTrue)>atol) );
 if ( fail )
-    error( 'Failure: Sensitivity difference is too large' );
+    error( 'Failure: State sensitivity difference is too large' );
+else
+    fprintf( 2, '[ OK ]\n' );
+end
+
+fail = sum( (((svEq-svTrue)./(svTrue))>rtol) & ((svEq-svTrue)>atol) );
+if ( fail )
+    error( 'Failure: Flux sensitivity difference is too large' );
 else
     fprintf( 2, '[ OK ]\n' );
 end
@@ -88,16 +97,23 @@ for d = 1 : numel( ar.model.ss_condition )
     ar.config.turboSSSensi=1;
     arCalcMerit;
     sxEq = reshape(ar.model.ss_condition(d).sxFineSimu(end,:,:), 1, numel(ar.model.ss_condition(d).sxFineSimu(end,:,:))) + 0;
+    svEq = reshape(ar.model.ss_condition(d).svFineSimu(end,:,:), 1, numel(ar.model.ss_condition(d).svFineSimu(end,:,:))) + 0;
 
     ar.config.turboSSSensi=0;
     arCalcMerit;
     subplot(numel(ar.model.ss_condition), 1, d);
-    sxTrue = reshape(ar.model.ss_condition(d).sxFineSimu(end,:,:), 1, numel(ar.model.ss_condition(d).sxFineSimu(end,:,:))) + 0;        
+    sxTrue = reshape(ar.model.ss_condition(d).sxFineSimu(end,:,:), 1, numel(ar.model.ss_condition(d).sxFineSimu(end,:,:))) + 0;
+    svTrue = reshape(ar.model.ss_condition(d).svFineSimu(end,:,:), 1, numel(ar.model.ss_condition(d).svFineSimu(end,:,:))) + 0;
 end
 
 fail = sum( (((sxEq-sxTrue)./(sxTrue))>rtol) & ((sxEq-sxTrue)>atol) );
 if ( fail )
     error( 'Failure: Sensitivity difference is too large' );
+end
+
+fail = sum( (((svEq-svTrue)./(svTrue))>rtol) & ((svEq-svTrue)>atol) );
+if ( fail )
+    error( 'Failure: Flux sensitivity difference is too large' );
 else
     fprintf( 2, '[ OK ]\n' );
 end
@@ -141,8 +157,6 @@ fprintf( 2, 'Testing whether sensitivities of solution obtained with rootfinding
 fail = sum( (((sxEq-sxTrue)./(sxTrue))>rtol) & ((sxEq-sxTrue)>atol) );
 if ( fail )
     error( 'Failure: Sensitivity difference is too large between simulated and rootfinding in MATLAB' );
-else
-    fprintf( 2, '[ OK ]\n' );
 end
 
 fprintf( 2, 'Testing whether sensitivities of solution obtained with rootfinding in C are identical to those with simulation ... ' );
