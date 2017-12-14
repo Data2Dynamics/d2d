@@ -218,6 +218,7 @@ if ( ss_presimulation && dynamics )
                         ar.model(m).condition(targetConditions(a)).modsx_A(1,:,ar.model(m).condition(targetConditions(a)).ssUnmapped) = 0;
                         ar.model(m).condition(targetConditions(a)).modsx_B(1,:,ar.model(m).condition(targetConditions(a)).ssUnmapped) = 0;
                     end
+                    
                     % Sensitivities which are explicitly ignored are not
                     % affected
                     if ~isempty( ssIgnore )
@@ -233,6 +234,8 @@ end
 
 % call mex function to simulate models
 if ( isfield( ar.config, 'onlySS' ) && ( ar.config.onlySS == 1 ) )
+    % Even if we only simulate steady states, we still need to propagate
+    % the initial sensi to the observables.
     feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads', 1)
 else
     feval(ar.fkt, ar, fine, ar.config.useSensis && sensi, dynamics, false, 'condition', 'threads', ar.config.skipSim)
@@ -361,6 +364,16 @@ if ( dynamics )
             end
         end
     end
+end
+
+if ( isfield( ar.config, 'onlySS' ) && ( ar.config.onlySS == 1 ) )
+	for m=1:length(ar.model)
+        for c=1:length(ar.model(m).condition)
+            ar.model(m).condition(c).sxExpSimu = zeros( size( ar.model(m).condition(c).sxExpSimu ) );
+            ar.model(m).condition(c).svExpSimu = zeros( size( ar.model(m).condition(c).svExpSimu ) );
+            ar.model(m).condition(c).szExpSimu = zeros( size( ar.model(m).condition(c).szExpSimu ) );
+        end
+	end
 end
 
 
