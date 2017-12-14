@@ -1,6 +1,6 @@
-%   [meritval, meritvals. meritLabel] = arGetMerit
-%   [meritval, meritvals. meritLabel] = arGetMerit(silent)
-%   [meritval, meritvals. meritLabel] = arGetMerit(whichone)
+%   [meritval, meritvals, meritLabel] = arGetMerit
+%   [meritval, meritvals, meritLabel] = arGetMerit(silent)
+%   [meritval, meritvals, meritLabel] = arGetMerit(whichone)
 % 
 %   silent      false/true, default: false
 %   whichone    character indicating which merit should be calculated

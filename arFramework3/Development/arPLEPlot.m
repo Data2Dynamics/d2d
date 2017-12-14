@@ -1,6 +1,6 @@
 % plot sampling of profile likelihood
 
-function arPLEPlot(jk, singleFigure)
+function arPLEPlot(jk, singleFigure, do_relative)
 
 global ar
 
@@ -13,6 +13,9 @@ if(~exist('singleFigure','var') || isempty(singleFigure))
     else
         singleFigure = false;
     end
+end
+if(~exist('do_relative','var'))
+    do_relative = false;
 end
 
 % iterate over jk in single figures
@@ -46,6 +49,8 @@ clf;
 
 jks = jk;
 
+[~, ~, ylabeltmp] = arGetMerit(true);
+
 gs1 = nan(size(jk));
 for j=1:length(jks)
     jk = jks(j);
@@ -57,12 +62,9 @@ for j=1:length(jks)
     end
     chi2curr = ar.ple.chi2Reset(jk);
     
-    if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
-        ylabeltmp = '-2*log(L)';
-    elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
-        ylabeltmp = '-2*log(L)';
-    else
-        ylabeltmp = '\chi^2';
+    if(do_relative)
+        chi2curr = chi2curr - ar.ple.chi2Reset(jk);
+        chi2s = chi2s - ar.ple.chi2Reset(jk);
     end
     
     ps = ar.ple.ps{jk};

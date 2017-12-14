@@ -76,6 +76,9 @@ fprintf('PLE #%i for %s...\n', jk, ar.pLabel{jk});
 arWaitbar(0);
 tic;
 
+dp_min = 1e-6;
+dp_max = 1;
+
 % fix parameter of interest
 ar.qFit(jk) = 0;
 
@@ -84,8 +87,8 @@ ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
 chi2Reset = arGetMerit(true);
 ar.ple.chi2Reset(jk) = chi2Reset;
 
-[chi2sup, psup, errorsup] = ple_task(ar, jk, n, 1, chi2Reset, pReset);
-[chi2sdown, psdown, errorsdown] = ple_task(ar, jk, n, -1, chi2Reset, pReset);
+[chi2sup, psup, errorsup] = ple_task(ar, jk, n, 1, chi2Reset, pReset, dp_min, dp_max);
+[chi2sdown, psdown, errorsdown] = ple_task(ar, jk, n, -1, chi2Reset, pReset, dp_min, dp_max);
 
 ar.ple.chi2s{jk} = [fliplr(chi2sdown) chi2Reset chi2sup];
 ar.ple.ps{jk} = [flipud(psdown); pReset(:)'; psup];
@@ -110,7 +113,7 @@ end
 
 
 
-function [chi2s, ps, errors] = ple_task(ar, jk, n, direction, chi2Reset, pReset)
+function [chi2s, ps, errors] = ple_task(ar, jk, n, direction, chi2Reset, pReset, dp_min, dp_max)
 
 chi2s = nan(1,n);
 ps = nan(n,length(pReset));
@@ -120,7 +123,6 @@ dchi2 = chi2inv(1-ar.ple.alpha, ar.ple.ndof);
 rel_increase = 0.5;
 
 dp = 0.1;
-dp_min = 1e-6;
 ar.p = pReset;
 
 chi2Last = chi2Reset;
@@ -182,7 +184,9 @@ for j=1:n
     pLast = ar.p;
     chi2Last = arGetMerit(true);
     
-    dp = dp * 2;
+    if(dp * 2 < dp_max)
+        dp = dp * 2;
+    end
 end
 
 ar.p = pReset;

@@ -52,10 +52,17 @@ h = figure(1);
 set(h, 'Color', [1 1 1]);
 
 % limits
-dchi2 = ples{1}.dchi2_point;
-if(ples{1}.plot_simu)
-    dchi2 = ples{1}.dchi2;
+if(isfield(ples{1}, 'dchi2_point'))
+    dchi2 = ples{1}.dchi2_point;
+    if(ples{1}.plot_simu)
+        dchi2 = ples{1}.dchi2;
+    end
+elseif(isfield(ples{1}, 'alpha') && isfield(ples{1}, 'ndof'))
+    dchi2 = chi2inv(1-ples{1}.alpha, ples{1}.ndof);
+else
+    error('no information on dchi2, alpha or ndof');
 end
+
 
 colors = lines(length(ples));
 hs = nan(1,length(ples));
@@ -69,19 +76,14 @@ for j=1:length(pLabels)
        %  
         if(~isempty(qj) && size(ples{jple}.ps,2)>=qj && ~isempty(ples{jple}.ps{qj}))
             % profile
-            if(length(ples)==2 && jple==2)
-                lw = 1;
-                marker = 'o';
-            else
-                lw = 2;
-                marker = '.';
-            end
+            lw = 1;
+            marker = '-.';
             hs(jple) = plot(ples{jple}.ps{qj}(:,qj), (ples{jple}.chi2s{qj} - ples{jple}.chi2)/dchi2, marker,'Color', colors(jple,:), ...
                 'LineWidth', lw);
             hold on
             
             % optimum
-            plot(ples{jple}.p(qj), (ples{jple}.chi2 - ples{jple}.chi2)/ples{jple}.dchi2, '*', 'Color', colors(jple,:))
+            plot(ples{jple}.p(qj), (ples{jple}.chi2 - ples{jple}.chi2)/dchi2, '*', 'Color', colors(jple,:))
             xvals = [xvals; ples{jple}.ps{qj}(:,qj)]; %#ok<AGROW>
         end
     end
