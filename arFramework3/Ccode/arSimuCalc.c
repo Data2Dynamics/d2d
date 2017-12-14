@@ -169,7 +169,7 @@ void subCopyNVMatrixToDouble( N_Vector* sx, double *returnsx, int nps, int neq, 
 
 void storeSimulation( UserData data, int im, int isim, int is, int nu, int nv, int neq, int nout, N_Vector x, double *returnx, double *returnu, double *returnv, double *qpositivex );
 void storeSensitivities( UserData data, int im, int isim, int is, int np, int nu, int nv, int neq, int nout, N_Vector x, N_Vector *sx, double *returnsx, double *returnsu, double *returnsv, int sensitivitySubset, int32_T *sensitivityMapping );
-void findRoots( SimMemory sim_mem, mxArray *arcondition, int im, int ic, int isim, double tstart, double eq_tol, int neq, int nu, int nv, int nout, double* returnx, double* returnu, double* returnv, double* qpositivex, double* returnsx, int sensi, int ysensi, int npSensi, int has_tExp );
+void findRoots( SimMemory sim_mem, mxArray *arcondition, int im, int ic, int isim, double tstart, double eq_tol, int neq, int nu, int nv, int nout, double* returnx, double* returnu, double* returnv, double* qpositivex, double* returnsx, double* returnsu, double* returnsv, int sensi, int ysensi, int npSensi, int has_tExp );
 void storeIntegrationInfo( SimMemory sim_mem, mxArray *arcondition, int ic );
 void terminate_x_calc( SimMemory sim_mem, double status );
 void initializeDataCVODES( SimMemory sim_mem, double tstart, int *abortSignal, mxArray *arcondition, double *qpositivex, int ic, int nsplines, int sensitivitySubset );
@@ -661,7 +661,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             /* Check if we are only simulating dxdt */
             if ( rootFinding > 0 )
             {
-                findRoots( sim_mem, arcondition, im, ic, isim, tstart, eq_tol, neq, nu, nv, nout, returnx, returnu, returnv, qpositivex, returnsx, sensi, ysensi, npSensi, has_tExp );
+                findRoots( sim_mem, arcondition, im, ic, isim, tstart, eq_tol, neq, nu, nv, nout, returnx, returnu, returnv, qpositivex, returnsx, returnsu, returnsv, sensi, ysensi, npSensi, has_tExp );
                 return;
             }
             
@@ -1154,7 +1154,7 @@ void storeSensitivities( UserData data, int im, int isim, int is, int np, int nu
                 csv(data->t, x, js, sx[js], data, im, isim);
                 for(ks=0; ks < nv; ks++) {
                     returnsv[(js*nv+ks)*nout + is] = data->sv[ks];
-                } 
+                }
             }
         }
 
@@ -1198,7 +1198,7 @@ void storeSensitivities( UserData data, int im, int isim, int is, int np, int nu
 /* Two rootfinding procedures have been implemented */
 /* The first is to simply apply the initial condition, store intermediate arrays and terminate immediately. In this case, the rootfinding is handled on the MATLAB side */
 /* The second case is to do rootfinding within C++ (rootFinding = 2) */
-void findRoots( SimMemory sim_mem, mxArray *arcondition, int im, int ic, int isim, double tstart, double eq_tol, int neq, int nu, int nv, int nout, double* returnx, double* returnu, double* returnv, double* qpositivex, double* returnsx, int sensi, int ysensi, int npSensi, int has_tExp )
+void findRoots( SimMemory sim_mem, mxArray *arcondition, int im, int ic, int isim, double tstart, double eq_tol, int neq, int nu, int nv, int nout, double* returnx, double* returnu, double* returnv, double* qpositivex, double* returnsx, double* returnsu, double* returnsv, int sensi, int ysensi, int npSensi, int has_tExp )
 {                
     double tEq = tstart;
     UserData data = sim_mem->data;
@@ -1226,7 +1226,8 @@ void findRoots( SimMemory sim_mem, mxArray *arcondition, int im, int ic, int isi
         copyStates( sim_mem->x, returnx, qpositivex, neq, nout, 0 );
         DEBUGPRINT0( debugMode, 4, "Copying sensis\n" );
         DEBUGPRINT4( debugMode, 4, "sx: %d, npSensi: %d, neq: %d, nout: %d\n", sim_mem->sx, npSensi, neq, nout );
-        if ( sensi ) copyNVMatrixToDouble( sim_mem->sx, returnsx, npSensi, neq, nout, 0 ); /* TO DO: Look at what this means for subsensis */
+        //if ( sensi ) copyNVMatrixToDouble( sim_mem->sx, returnsx, npSensi, neq, nout, 0 ); /* TO DO: Look at what this means for subsensis */
+        if ( sensi ) storeSensitivities( data, im, isim, 0, npSensi, nu, nv, neq, nout, sim_mem->x, sim_mem->sx, returnsx, returnsu, returnsv, 0, NULL );
     }
     DEBUGPRINT0( debugMode, 4, "Calculating z\n" );
     z_calc(im, ic, isim, arcondition, ysensi);
