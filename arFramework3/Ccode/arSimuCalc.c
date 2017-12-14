@@ -1226,7 +1226,7 @@ void findRoots( SimMemory sim_mem, mxArray *arcondition, int im, int ic, int isi
         copyStates( sim_mem->x, returnx, qpositivex, neq, nout, 0 );
         DEBUGPRINT0( debugMode, 4, "Copying sensis\n" );
         DEBUGPRINT4( debugMode, 4, "sx: %d, npSensi: %d, neq: %d, nout: %d\n", sim_mem->sx, npSensi, neq, nout );
-        //if ( sensi ) copyNVMatrixToDouble( sim_mem->sx, returnsx, npSensi, neq, nout, 0 ); /* TO DO: Look at what this means for subsensis */
+        /*if ( sensi ) copyNVMatrixToDouble( sim_mem->sx, returnsx, npSensi, neq, nout, 0 );*/
         if ( sensi ) storeSensitivities( data, im, isim, 0, npSensi, nu, nv, neq, nout, sim_mem->x, sim_mem->sx, returnsx, returnsu, returnsv, 0, NULL );
     }
     DEBUGPRINT0( debugMode, 4, "Calculating z\n" );
