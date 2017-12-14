@@ -549,11 +549,15 @@ np = sum(ar.qFit==1);
 if ( numel(res) < np )
     tres = zeros(1,np);
     tres(1:length(res)) = res;
-    tsres = zeros(np);
-    tsres(1:length(res), 1:np) = sres;
+    if (nargout>1 && ar.config.useSensis)
+        tsres = zeros(np);
+        tsres(1:length(res), 1:np) = sres;
+    end
     
     res = tres;
-    sres = tsres;
+    if (nargout>1 && ar.config.useSensis)
+        sres = tsres;
+    end
 end
 
 % arNLS boosted by SR1 updates
