@@ -7,16 +7,21 @@
 % Remove custom residuals
 
 
-function arRemoveCustomResidual( name )
+function arRemoveCustomResidual( name, silent )
     global ar;
 
     if ( nargin < 1 )
         name = '<no name specified>';
     end
+    if ( nargin < 2 )
+        silent = 0;
+    end
     
     % If it doesn't exist, create the structure
     if ( ~isfield( ar.config, 'user_residual_fun' ) || ( isempty( ar.config.user_residual_fun ) ) )
-        warning( 'There are no custom residuals specified' );
+        if ~silent
+            warning( 'There are no custom residuals specified' );
+        end
         return;
     end
 
@@ -30,7 +35,9 @@ function arRemoveCustomResidual( name )
     
     idx = find( strcmp( ar.config.user_residual_fun.name, name ) );
     if isempty( idx )
-        warning( 'Did not find residual with name %s. Custom residuals currently specified are:\n%s\n > No residuals were removed!', name, sprintf( '%s\n', ar.config.user_residual_fun.name{:} ) );
+        if ~silent
+            warning( 'Did not find residual with name %s. Custom residuals currently specified are:\n%s\n > No residuals were removed!', name, sprintf( '%s\n', ar.config.user_residual_fun.name{:} ) );
+        end
     else
         ar.config.user_residual_fun.fn(idx) = [];
         ar.config.user_residual_fun.qFit(idx) = [];
