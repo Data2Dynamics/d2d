@@ -42,7 +42,8 @@ function ax = arSubplot(m, n, id, name, varargin)
     
     if ~isfield( arSubplotMgr, name ) || ~isfield( arSubplotMgr.(name), 'fig' ) || ( ~isvalid( arSubplotMgr.(name).fig ) )
         arSubplotMgr.(name) = struct;
-        clf;
+        figure;
+        set(gcf, 'Name', name);
         newPlot(name, m, n, id, varargin{:} );
     else
         % Make figure current
