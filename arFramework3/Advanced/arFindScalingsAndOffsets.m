@@ -18,6 +18,13 @@
 %   observation-parameter yprop.p_indobs(ip) is scale in observation
 %   function fy{iy} in model m and data-struct d.  
 % 
+%       0   indicates no scaleing parameter
+%       1   indicates a classical scaling, e.g. off + scale*x, scale*y,
+%           scale*u, ...
+%       2   indicates a scaling with other parameter relationships, i.e.
+%           scale/init*x  [defined as being a classical scale after setting
+%           all other parameters equals to one.
+% 
 %   3) abserr{m}{d}(ip,iy) is a logical indicating whether
 %   error-parameter  yprop.p_inderr(ip) is absolute error in error model
 %   function fystd{iy} in model m and data-struct d. 
@@ -98,6 +105,9 @@ for m=1:length(ar.model)
     
             for ip=inter %1:length(os_names)
                 deriv = diff(evalin(symengine,fy),os_names{ip});
+                otherp = setdiff(ar.model(m).data(d).p,os_names{ip});
+                deriv_otherp = [];
+                
                 if deriv==sym1
                     off{m}{d}(ip,iy) = 1;
                     scale{m}{d}(ip,iy) = 0;                    
@@ -110,6 +120,25 @@ for m=1:length(ar.model)
                     % now searching for scaling parameters.
                     % The derivative w.r. to x, u or z has to be zero or one!
                     scale{m}{d}(ip,iy) = checkLinear(deriv,u,x,z);                
+
+                    if scale{m}{d}(ip,iy)==0
+                        if isempty(deriv_otherp)
+                            deriv_otherp = deriv;
+                            for ii=1:length(otherp)
+                                deriv_otherp = subs(deriv_otherp,otherp{ii},1);
+                            end
+                        end
+                        
+                        % now searching for scaling parameters after removing
+                        % other parameters (to be able to find something like
+                        % "scale/init * x"
+                        % After setting all other parameters to zero, the derivative w.r. to x, u or z has to be zero or one!
+                        deriv_otherp
+                        tmp = checkLinear(deriv_otherp,u,x,z)
+                        if tmp==1
+                            scale{m}{d}(ip,iy) = 2;
+                        end
+                    end
                 end                                
             end
             
@@ -138,12 +167,8 @@ for m=1:length(ar.model)
         isoff = isoff + sum(off{m}{d}==1,2)';
         isscale = isscale + sum(scale{m}{d}==1,2)';
         
-        try
         isrel = isrel + sum(relerr{m}{d}==1,2)';
         isabs = isabs + sum(abserr{m}{d}==1,2)';
-        catch
-            isrel
-        end
     end
 end
 
@@ -204,7 +229,7 @@ else
 end
 
 if sum(~isonex & ~iszerox)>0 || sum(~isonez & ~iszeroz)>0 || sum(~isoneu & ~iszerou)>0  || sum(~isoney & ~iszeroy)>0
-    % other derivative => no scaling
+    % other derivative => no scaling    
     isFaktor=0;
 elseif sum(isonex)>0 || sum(isonez)>0 || sum(isoneu)>0 || sum(isoney)>0
     isFaktor=1;
