@@ -1,0 +1,76 @@
+DESCRIPTION
+"JAK-STAT Model"
+
+PREDICTOR
+t               T   min         time	0	80
+
+COMPARTMENTS
+cyt             V   "pl"      "vol."        1.4
+nuc             V   "pl"      "vol."        0.45
+
+STATES
+STAT            C   "nM"      "conc."    cyt
+pSTAT           C   "nM"      "conc."    cyt
+pSTAT_pSTAT     C   "nM"      "conc."    cyt
+npSTAT_npSTAT   C   "nM"      "conc."    nuc
+nSTAT1          C   "nM"      "conc."    nuc
+nSTAT2          C   "nM"      "conc."    nuc
+nSTAT3          C   "nM"      "conc."    nuc
+nSTAT4          C   "nM"      "conc."    nuc
+nSTAT5          C   "nM"      "conc."    nuc
+nSTAT6          C   "nM"      "conc."    nuc
+nSTAT7          C   "nM"      "conc."    nuc
+nSTAT8          C   "nM"      "conc."    nuc
+nSTAT9          C   "nM"      "conc."    nuc
+nSTAT10          C   "nM"      "conc."    nuc
+
+INPUTS
+pEpoR           C   "au"      "conc."   "interpolateLinear( t, 16, [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30, 40, 50, 60], [1.713000e-02, 1.450000e-01, 2.442000e-01, 7.659000e-01,      1, 8.605000e-01, 7.829000e-01, 5.705000e-01, 6.217000e-01, 3.310000e-01, 3.388000e-01, 3.116000e-01, 5.062000e-02, 2.504000e-02, 1.163000e-02, 4.243000e-02])"
+
+REACTIONS
+STAT             ->  pSTAT            CUSTOM "p1 * pEpoR * STAT"
+pSTAT + pSTAT    ->  pSTAT_pSTAT      CUSTOM "p2 * pSTAT^2"
+pSTAT_pSTAT      ->  npSTAT_npSTAT    CUSTOM "p3 * pSTAT_pSTAT"
+
+// dissociation, delay and export 
+npSTAT_npSTAT    ->  nSTAT1 + nSTAT1  CUSTOM "p4 * npSTAT_npSTAT" // test
+nSTAT1           ->  nSTAT2           CUSTOM "p4 * nSTAT1"
+nSTAT2           ->  nSTAT3           CUSTOM "p4 * nSTAT2"
+nSTAT3           ->  nSTAT4           CUSTOM "p4 * nSTAT3"
+nSTAT4           ->  nSTAT5           CUSTOM "p4 * nSTAT4"
+nSTAT5           ->  nSTAT6           CUSTOM "p4 * nSTAT5"
+nSTAT6           ->  nSTAT7           CUSTOM "p4 * nSTAT6"
+nSTAT7           ->  nSTAT8           CUSTOM "p4 * nSTAT7"
+nSTAT8           ->  nSTAT9           CUSTOM "p4 * nSTAT8"
+nSTAT9           ->  nSTAT10          CUSTOM "p4 * nSTAT9"
+nSTAT10          ->  STAT             CUSTOM "p4 * nSTAT10"
+
+
+DERIVED
+tSTAT           C   "nM"  "conc."    "STAT + pSTAT + 2*pSTAT_pSTAT"
+tpSTAT          C   "nM"  "conc."    "pSTAT + 2*pSTAT_pSTAT"
+        
+OBSERVABLES
+tSTAT_au        C   "au"  "conc."   1   0   "scale_tSTAT * tSTAT"
+pSTAT_au        C   "au"  "conc."   1   0   "scale_pSTAT * tpSTAT"
+pEpoR_au        C   "au"  "conc."   1   0   "pEpoR"
+
+ERRORS
+tSTAT_au       "sd_tSTAT_au"
+pSTAT_au       "sd_pSTAT_au"
+pEpoR_au       "sd_pEpoR_au"
+
+CONDITIONS
+init_pSTAT           "0"
+init_pSTAT_pSTAT     "0"
+init_npSTAT_npSTAT   "0"
+init_nSTAT1          "0"
+init_nSTAT2          "0"
+init_nSTAT3          "0"
+init_nSTAT4          "0"
+init_nSTAT5          "0"
+init_nSTAT6          "0"
+init_nSTAT7          "0"
+init_nSTAT8          "0"
+init_nSTAT9          "0"
+init_nSTAT10         "0"
