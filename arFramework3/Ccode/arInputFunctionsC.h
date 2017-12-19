@@ -93,9 +93,10 @@ double Dfastspline10(double t, int ID, double **splineCache, int *idCache, doubl
 double Dfastspline_pos10(double t, int ID, double **splineCache, int *idCache, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, int ss, double dudt, int id);
 double Dmonofastspline10(double t, int ID, double **splineCache, int *idCache, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, int id);
 
+/* A special spline implementation where coefficients are given directly */
+double splineFixCoeffs( double t, int n, const double time[], const double data[] );
 
 /* custom rate laws */
-
 double mmenten(double x, double vmax, double km);
 double mmenten_alt(double x, double klin, double ksat);
 

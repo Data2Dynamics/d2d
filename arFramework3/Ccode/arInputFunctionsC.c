@@ -83,6 +83,44 @@ double inputfastspline( double t, int ID, double **splineCache, int *idCache, co
     return uout;
 }
 
+/* Fixed coefficient cubic spline */
+double splineFixCoeffs( double t, int n, const double time[], const double data[] )
+{
+    double *deriv2;
+    double val;
+    
+    int max             = n-1;
+    int min             = 0;
+    int cur             = max/2;
+
+    double a, b, h, tmp;
+
+    /* Out of bounds? */
+    if ( t >= time[ max ] )
+        return data[ n-1 ];
+    else if ( t <= time[ min ] )
+        return data[ 0 ];
+
+    /* Where are we? */
+    while ( min != max - 1 )
+    {
+        if ( time[ cur ] <= t )
+            min = cur;
+        else
+            max = cur;
+
+        cur = min + ( max - min ) / 2;
+    }
+
+    deriv2 = &data[n];
+    h = time[max] - time[min];
+    a = ( time[ max ] - t ) / h;
+    b = ( t - time[ min ] ) / h;
+    val = a * data[ min ] + b * data[ max ] + ( ( a * a * a - a ) * deriv2[ min ] + ( b * b * b - b ) * deriv2[ max ] ) * ( h * h ) / 6.0;
+    
+    return val;
+}
+
 /* Spline with fixed time points and coefficients */
 double inputspline( double t, const int n, const double ts[], const double us[])
 {
