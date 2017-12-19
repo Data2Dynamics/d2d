@@ -95,6 +95,7 @@ double Dmonofastspline10(double t, int ID, double **splineCache, int *idCache, d
 
 /* A special spline implementation where coefficients are given directly */
 double splineFixCoeffs( double t, int n, const double time[], const double data[] );
+double interpolateLinear( double t, int n, const double time[], const double data[] );
 
 /* custom rate laws */
 double mmenten(double x, double vmax, double km);

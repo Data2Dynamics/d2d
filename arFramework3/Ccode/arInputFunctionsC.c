@@ -83,6 +83,38 @@ double inputfastspline( double t, int ID, double **splineCache, int *idCache, co
     return uout;
 }
 
+double interpolateLinear( double t, int n, const double time[], const double data[] )
+{
+    double *deriv2;
+    double val;
+    
+    int max             = n-1;
+    int min             = 0;
+    int cur             = max/2;
+
+    double a, b, h, tmp;
+
+    /* Out of bounds? */
+    if ( t >= time[ max ] )
+        return data[ n-1 ];
+    else if ( t <= time[ min ] )
+        return data[ 0 ];
+
+    /* Where are we? */
+    while ( min != max - 1 )
+    {
+        if ( time[ cur ] <= t )
+            min = cur;
+        else
+            max = cur;
+
+        cur = min + ( max - min ) / 2;
+    }
+
+    val = data[min] + ( t - time[min] ) * ( data[max] - data[min] ) / ( time[max] - time[min] );
+    return val;
+}
+
 /* Fixed coefficient cubic spline */
 double splineFixCoeffs( double t, int n, const double time[], const double data[] )
 {
