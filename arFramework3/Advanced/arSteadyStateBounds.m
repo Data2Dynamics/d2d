@@ -99,31 +99,34 @@ function [res_user, res_type, sres_user] = residual_concentrationConstraintsL2(m
     pLink       = ar.model(m).ss_condition(c).pLink;
     xss         = ar.model(m).ss_condition(c).xFineSimu(end,x_active);
     zss         = ar.model(m).ss_condition(c).zFineSimu(end,z_active);
-    sxss        = squeeze(ar.model(m).ss_condition(c).sxFineSimu(end,x_active,:));
-    szss        = squeeze(ar.model(m).ss_condition(c).szFineSimu(end,z_active,:));
-    log10s      = ar.qFit(ar.model(m).ss_condition(c).pLink)==1;
     
-    if ( size(sxss, 2)==1 )
-        sxss = sxss.';
-    end
-    if ( size(szss, 2)==1 )
-        szss = szss.';
-    end
-    
-    % Transform the state and derived variable sensitivities in case they
-    % are specified in log10 parameters
-    sxss(:,log10s) = sxss(:,log10s) .* repmat( ar.model(m).ss_condition(c).pNum(log10s) * log(10), nx, 1 );
-    if ( ~isempty( zl ) )
-        szss(:,log10s) = szss(:,log10s) .* repmat( ar.model(m).ss_condition(c).pNum(log10s) * log(10), nz, 1 );
-    end
-    
-	% Transform the sentivities of the ones that have to be penalized in
-	% log (note that this has to be done before the states are transformed,
-	% since we need the untransformed states for this).
-    %   dlog10(y(p))/dp = (1/(y(p)*log(10))) dy(p)/dp
-    sxss(logx, :) = sxss(logx, :) .* repmat( 1 ./ (xss(logx) * log(10)), np, 1 ).';
-    if ( ~isempty( zl ) )
-        szss(logz, :) = szss(logz, :) .* repmat( 1 ./ (zss(logz) * log(10)), np, 1 ).';    
+    if ( nargout > 2 )
+        sxss        = squeeze(ar.model(m).ss_condition(c).sxFineSimu(end,x_active,:));
+        szss        = squeeze(ar.model(m).ss_condition(c).szFineSimu(end,z_active,:));
+        log10s      = ar.qFit(ar.model(m).ss_condition(c).pLink)==1;
+
+        if ( size(sxss, 2)==1 )
+            sxss = sxss.';
+        end
+        if ( size(szss, 2)==1 )
+            szss = szss.';
+        end
+
+        % Transform the state and derived variable sensitivities in case they
+        % are specified in log10 parameters
+        sxss(:,log10s) = sxss(:,log10s) .* repmat( ar.model(m).ss_condition(c).pNum(log10s) * log(10), nx, 1 );
+        if ( ~isempty( zl ) )
+            szss(:,log10s) = szss(:,log10s) .* repmat( ar.model(m).ss_condition(c).pNum(log10s) * log(10), nz, 1 );
+        end
+
+        % Transform the sentivities of the ones that have to be penalized in
+        % log (note that this has to be done before the states are transformed,
+        % since we need the untransformed states for this).
+        %   dlog10(y(p))/dp = (1/(y(p)*log(10))) dy(p)/dp
+        sxss(logx, :) = sxss(logx, :) .* repmat( 1 ./ (xss(logx) * log(10)), np, 1 ).';
+        if ( ~isempty( zl ) )
+            szss(logz, :) = szss(logz, :) .* repmat( 1 ./ (zss(logz) * log(10)), np, 1 ).';    
+        end
     end
     
     % Transform the states if they are to be penalized in log10
@@ -173,24 +176,26 @@ function [res_user, res_type, sres_user] = residual_concentrationConstraintsL2(m
         fprintf( 'Active bounds: %s, %s\n', xstr, zstr );
     end
     
-    % Compute the sensitivities
-    sxlower     = - repmat( (xss < xl) .* wx, np, 1 ).' .* sxss;
-    sxupper     =   repmat( (xss > xu) .* wx, np, 1 ).' .* sxss;
-    if ( ~isempty( zl ) )
-        szlower     = - repmat( (zss < zl) .* wz, np, 1 ).' .* szss;
-        szupper     =   repmat( (zss > zu) .* wz, np, 1 ).' .* szss;    
-    end
-    
-    % Sres with respect to all inner parameters
-    if ( ~isempty( zl ) )
-        assembled   = [ sxlower; sxupper; szlower; szupper ];
-    else
-        assembled   = [ sxlower; sxupper ];
-    end
-    
     res_type    = ones(size(res_user)); % Treat the constraint like data
     
-    sres_user   = zeros( size(assembled, 1), numel(ar.p) );
+    if ( nargout > 2 )
+        % Compute the sensitivities
+        sxlower     = - repmat( (xss < xl) .* wx, np, 1 ).' .* sxss;
+        sxupper     =   repmat( (xss > xu) .* wx, np, 1 ).' .* sxss;
+        if ( ~isempty( zl ) )
+            szlower     = - repmat( (zss < zl) .* wz, np, 1 ).' .* szss;
+            szupper     =   repmat( (zss > zu) .* wz, np, 1 ).' .* szss;    
+        end
+
+        % Sres with respect to all inner parameters
+        if ( ~isempty( zl ) )
+            assembled   = [ sxlower; sxupper; szlower; szupper ];
+        else
+            assembled   = [ sxlower; sxupper ];
+        end
+    
+        sres_user   = zeros( size(assembled, 1), numel(ar.p) );
        
-    sres_user( :, pLink ) = assembled;
+        sres_user( :, pLink ) = assembled;
+    end
 end
