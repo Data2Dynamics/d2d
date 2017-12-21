@@ -161,6 +161,8 @@ for i = 1:nCVRestart
                                 arFprintf(1, 'Integration error, restarting %d / %d with 5%% increased precision.\n',i,nCVRestart)
                                 error_printed = 1;
                             end
+                        else
+                            error( error_id.message );
                         end
                     end
                 end
