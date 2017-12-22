@@ -73,8 +73,9 @@ function fid = preprocess(fid)
                 if strcmpi( parseBlock, '#define' ) || strcmpi( parseBlock, '#def' )
                     [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives, namedDefines ); % Parse, but never write stuff that belongs to the precompiler directive
                     [cur, outLine, parseBlock2, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives, namedDefines ); % Parse, but never write stuff that belongs to the precompiler directive
-                    if isempty( parseBlock )
-                        error( '#ifdef without condition on line %d: %s', fid.nlines, line );
+                    
+                    if ~isempty( parseBlock2 )
+                        parseBlock2 = strip(line(ws(a-2):end));
                     end
                     
                     % Is this being parsed or not? Defines can be conditional!
