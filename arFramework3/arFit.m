@@ -619,13 +619,13 @@ arCalcMerit(ar.config.useSensis, pTrial);
 arLogFit(ar);
 l = sum(ar.res.^2);
 if(nargout>1)
-    g = ar.res*ar.sres(:, ar.qFit==1);
+    g = 2*ar.res*ar.sres(:, ar.qFit==1);
 end
 if(nargout>2)
     type3_ind = ar.type == 3;
     type3_ind = type3_ind(ar.qFit==1);
     
-    H = ar.sres(:, ar.qFit==1)'*ar.sres(:, ar.qFit==1);
+    H = 2*ar.sres(:, ar.qFit==1)'*ar.sres(:, ar.qFit==1);
     H(type3_ind,type3_ind) = H(type3_ind,type3_ind) .* ~eye(sum(type3_ind));
 end
 
