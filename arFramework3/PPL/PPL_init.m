@@ -1,5 +1,63 @@
-function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
+function t = PPL_init(m,c,t,ix,takeY)
     global ar;
+    
+    %Set ppl config and options
+    ar.ppl.qLog10=0;
+
+    if(~isfield(ar.ppl,'xstd_auto') || isempty(ar.ppl.xstd_auto))
+        ar.ppl.xstd_auto = 1;
+    end
+
+    ar.ppl.n = ar.ppl.options.n_steps_profile;
+    if(~isfield(ar.ppl.options,'tEnd'))
+        if(ar.ppl.options.backward)
+            if(takeY)
+                ar.ppl.options.tEnd = ar.model(m).data(c).tFine(1);
+            else
+                ar.ppl.options.tEnd = ar.model(m).condition(c).tFine(1); 
+            end
+        else
+            if(takeY)
+               ar.ppl.options.tEnd = ar.model(m).data(c).tFine(end);
+            else
+               ar.ppl.options.tEnd = ar.model(m).condition(c).tFine(end); 
+            end
+        end
+    end
+
+    if(~isfield(ar.ppl.options,'stepsize'))
+        if(takeY)
+            ar.ppl.options.stepsize = 1/(size(ar.model(m).data(c).tFine,1)/(ar.model(m).data(c).tLim(end)-ar.model(m).data(c).tLim(1)));
+        else
+            ar.ppl.options.stepsize = 1/(size(ar.model(m).condition(c).tFine,1)/(ar.model(m).condition(c).tFine(end)-ar.model(m).condition(c).tstart));
+        end
+    end
+    ar.ppl.nsteps=abs(floor((ar.ppl.options.tEnd-t(ar.ppl.options.whichT)) / ar.ppl.options.stepsize));
+
+    %Set correction strength
+    if(~isfield(ar.ppl.options,'gammas'))
+        ar.ppl.options.gammas = ones(size(ix))*1./ar.ppl.options.stepsize;
+    end
+    if(length(ar.ppl.options.gammas) == 1)
+        ar.ppl.options.gammas = repmat(ar.ppl.options.gammas(1),1,length(ix));
+    end
+    if(length(ar.ppl.options.gammas) ~= length(ix))
+        error('Argument gammas has an incorrect length');
+    end   
+    
+    % optimizer settings (set only once)
+    ar.ppl.fittederrors=ar.config.fiterrors;
+    ar.config.fiterrors=0;
+    ar.ppl.fit_bkp = ar.qFit(ar.qError==1);
+    ar.qFit(ar.qError==1)=2;
+    
+    ar.ppl.dchi2 = chi2inv(1-ar.ppl.options.alpha_level, 1);
+    ar.ppl.dchi2;
+    arCalcMerit();
+
+    ar.ppl.chi2_95 = arGetMerit('chi2')+ar.ppl.dchi2 + 0.5;
+
+    
     n = ar.ppl.n;
     nsteps = ar.ppl.nsteps;
     %Set vars distinguishing different setups
@@ -59,7 +117,7 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
         ar.model(m).(data_cond)(c).ppl.corr_low = nan(nsteps, size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));    
     end
     arSimu(false, true, true);
-    if(~onlyProfile)
+    if(~ar.ppl.options.onlyProfile)
         for jx=1:length(ix)
             ar.model(m).(data_cond)(c).ppl.t(:,ix(jx)) = nan;
             ar.model(m).(data_cond)(c).ppl.x_low(:,ix(jx)) = nan;
@@ -72,7 +130,7 @@ function [t, whichT] = PPL_init(m,c,t,ix,gammas, onlyProfile, whichT,takeY)
             ar.model(m).(data_cond)(c).ppl.x_high_vpl(:,ix(jx)) = nan;
             ar.model(m).(data_cond)(c).ppl.ps_low(:,ix(jx)) = nan;
             ar.model(m).(data_cond)(c).ppl.ps_high(:,ix(jx)) = nan;
-            ar.model(m).(data_cond)(c).ppl.gamma(ix(jx)) = gammas(jx);
+            ar.model(m).(data_cond)(c).ppl.gamma(ix(jx)) = ar.ppl.options.gammas(jx);
             ar.model(m).(data_cond)(c).ppl.ppl_low(:,ix(jx)) = nan;
             ar.model(m).(data_cond)(c).ppl.vpl_low(:,ix(jx)) = nan;
             ar.model(m).(data_cond)(c).ppl.ppl_high(:,ix(jx)) = nan;

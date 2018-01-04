@@ -5,16 +5,10 @@
 %   PPL_int.m
 %   VPL_int.m
 
-function [chi2_out, xSim, xSim2, xSim3, it] = PPL_chi2(t_tmp, doPPL_stuff, m, c, jx, takeY, qLog10, doPPL, stepsize, tmp_xFit, xstd, varargin)
+function [chi2_out, xSim, it] = PPL_chi2(t_tmp, doPPL_stuff, m, c, jx, takeY, qLog10, stepsize, tmp_xFit, xstd, varargin)
 
 global ar;
-xSim2=NaN;
-xSim3=NaN;
-RHS_t = NaN;
 pReset = ar.p;
-if(~exist('doPPL_stuff','var'))
-    doPPL_stuff = false;
-end
 if(takeY)
     data_cond = 'data';
     x_y = 'y';
@@ -25,18 +19,11 @@ end
 p_chi2 = ar.p(ar.qFit==1);
 if(~isempty(varargin)>0)
     if(length(varargin{1})>1)
-        p_chi2 = varargin{1};
-    else
-        RHS_t =  varargin{1};
+        p_chi2 = varargin{1};   
     end
 end
 if(size(p_chi2,1)~=1)
     p_chi2 = p_chi2';
-end
-if(nargout>2)
-    get_sensi=true;
-else
-    get_sensi=true;
 end
 
 if(doPPL_stuff)
@@ -47,9 +34,8 @@ if(doPPL_stuff)
         if(length(find(ar.model(m).(data_cond)(c).tExp==t_tmp+stepsize))>1)
             it = it+1;
         end
-        ar.model(m).(data_cond)(c).ppl.xSens_tmp = -ar.sres(ar.ppl.resi_tmp,ar.qFit==1) * xstd;
+        ar.model(m).(data_cond)(c).ppl.xSens_tmp = -ar.sres(ar.ppl.resi_tmp,ar.qFit==1) * xstd;  
         xSim2 = ar.model(m).(data_cond)(c).yExpSimu(it,jx);
-        
     else
         sxSim = zeros(1,length(ar.p));
         sxSim(ar.model(m).(data_cond)(c).pLink) = ...
@@ -64,24 +50,14 @@ if(doPPL_stuff)
         ar.model(m).(data_cond)(c).ppl.xSens_tmp = sxSim(ar.qFit==1);
         xSim2 = ar.model(m).(data_cond)(c).xExpSimu(it,jx);
     end
-    arLink(true,t_tmp-1.e-3,takeY,jx, c, m,tmp_xFit,xstd);
-    arCalcMerit(false, p_chi2,1);
-    [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp+1.e-3));
-    xSim3 = ar.model(m).(data_cond)(c).([x_y 'ExpSimu'])(it,jx);
-
-    if(~isnan(RHS_t))
-        arLink(true,t_tmp+RHS_t,takeY,jx, c, m,tmp_xFit,xstd);
-        arCalcMerit(false, p_chi2,1);
-        [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp-RHS_t));
-        ar.ppl.fRHS_ppl = ar.model(m).(data_cond)(c).dxdts(it,jx);
-    end
 end
+
 arLink(true,t_tmp,takeY,jx, c, m,tmp_xFit,xstd);
 
 try
-    arCalcMerit(get_sensi, p_chi2,1)
+    arCalcMerit(ar.config.useSensis, p_chi2,1)
 catch
-    fprintf('arCalcMerit doesnt work, exiting for direction %i!\n',dir);
+    fprintf('arCalcMerit doesnt work, exiting!\n');
     arLink(true,ar.model(m).(data_cond)(c).tExp(1),takeY,jx, c, m,NaN);
     ar.p = pReset;
     chi2_out=NaN;
@@ -103,11 +79,9 @@ if(doPPL_stuff)
     ar.ppl.xSim2 = (xSim2 - xSim)/abs(stepsize);
 end
 
-res = ar.res;
-if(~takeY && ~doPPL)
-    res(end+1) = (tmp_xFit-ar.model(m).condition(c).xExpSimu(it,jx))/xstd;
-elseif(takeY && doPPL)
-    res(ar.ppl.resi_tmp) = [];
+if(~takeY)
+    chi2_out = arGetMerit('chi2') + ((tmp_xFit-xSim)/xstd).^2;
+else
+    chi2_out = arGetMerit('chi2');
 end
-chi2_out = nansum(res.^2);
 

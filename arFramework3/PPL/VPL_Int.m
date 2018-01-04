@@ -1,22 +1,23 @@
-function [dps, dx_out, gamma_tmp] = VPL_Int(t_tmp, m, c, jx, takeY, qLog10, stepsize, xFit_tmp, xstd, gamma_tmp, fineInt)
+function [dps, dx_out, gamma_tmp] = VPL_Int(t_tmp, m, c, jx, takeY, qLog10, stepsize, xFit_tmp, xstd, gamma_tmp, fineInt, t_dir)
 global ar;
 gamma_norm = stepsize*4;
 p_tmp = ar.p;
 [grad, H, dy_pred, xSim, grad_y, fRHS] = get_stuff(t_tmp,stepsize);
 dx_0 = get_int();
-region_fac_p = get_fac(dx_0(2:end));
-if(max(region_fac_p) < 0.1)
-    region_fac_p = zeros(1,length(dx_0(2:end)));
-end       
+region_fac_p = get_fac(dx_0(2:end));       
 dx_0(2:end) = dx_0(2:end).*region_fac_p';
-if((min(region_fac_p)==1 && max(abs(dx_0(2:end)'*stepsize))<0.2) || ~fineInt)
-    dx_out = dx_0;
-    dps = dx_0(2:end);
-    return;
-else
+
+%Just do Euler integration
+%if((min(region_fac_p)==1 && max(abs(dx_0(2:end)'*stepsize))<0.2) || ~fineInt)
+dx_out = dx_0;
+dps = dx_0(2:end);
+return;
+
+%Uncomment if statement and comment out return to obtain RK4 integration
+%else
    ar.p(ar.qFit==1)=ar.p(ar.qFit==1) + dx_0(2:end)'*stepsize/2;
    ar.ppl.xFit_tmp = ar.ppl.xFit_tmp + dx_0(1)*stepsize/2;
-end
+%end
 [grad, H, dy_pred, xSim, grad_y, fRHS] = get_stuff(t_tmp+stepsize/2,stepsize);
 dx_A = get_int();
 region_fac_p = get_fac(dx_A(2:end));
@@ -52,7 +53,9 @@ dx_out = 1/6*(dx_0+2*(dx_A+dx_B)+dx_C);
 dps = dx_out(2:end);
 
     function [grad, H, dy_pred, xSim, grad_y, fRHS] = get_stuff(t_get, step)
-        [chi2, xSim, xSim2, xSim3, it] = PPL_chi2(t_get, true, m, c, jx, takeY, qLog10, false, step, ar.ppl.xFit_tmp, xstd);
+        %The PPL_chi2 function computes the required sensitivities and
+        %values of RHS. resi_tmp is set in arLink
+        [~, xSim, it] = PPL_chi2(t_get, true, m, c, jx, takeY, qLog10, step, ar.ppl.xFit_tmp, xstd);
         res = ar.res;
         if(~takeY)
            res(end+1) = (ar.ppl.xFit_tmp - xSim).^2 ./ xstd.^2; 
@@ -100,44 +103,67 @@ dps = dx_out(2:end);
         Mty(1,1)=1;
         Mty(2:end,1)=0;
         Mty(1,2:end)=0;
-        Mty(2:end,2:end)=H + diag(ones(length(ar.p(ar.qFit==1)),1))*1.e-4;                          
-        %magic formula                
+        Mty(2:end,2:end)=H;% + diag(ones(length(ar.p(ar.qFit==1)),1))*1.e-4;   
         if((takeY && ar.model(m).data(c).logfitting(jx)==1) || qLog10)
             Mty(2:end, 2:end) = Mty(2:end, 2:end) + (ar.ppl.xFit_tmp - xSim)*log(10)*H;
-            dx_woGamma = pinv(Mty(2:end,2:end),1.e-6)*((ar.ppl.xFit_tmp-xSim)*2.*dy_pred' - 2*(ar.ppl.xFit_tmp - xSim)./xstd./(10.^xSim)*grad_y'*fRHS);            
+        end
+        %magic formula                
+        if((takeY && ar.model(m).data(c).logfitting(jx)==1) || qLog10)
+            dx_woGamma = pinv(Mty,1.e-6)*[fRHS;(ar.ppl.xFit_tmp-xSim)*2.*dy_pred' - 2*(ar.ppl.xFit_tmp - xSim)./xstd./(10.^xSim)*grad_y'*fRHS];            
         else
-            dx_woGamma = pinv(Mty(2:end,2:end),1.e-6)*((ar.ppl.xFit_tmp-xSim)*2.*dy_pred');
-        end        
+            dx_woGamma = pinv(Mty,1.e-6)*[fRHS;(ar.ppl.xFit_tmp-xSim)*2.*dy_pred'];
+        end             
         dx_Gamma = pinv(Mty(2:end,2:end),1.e-6)*(- gamma_tmp.*grad');
-        
-        if(norm(dx_woGamma) / norm(dx_Gamma) < 2)
-            gamma_tmp = gamma_tmp/2;            
+       
+        %Check if integration without gamma correction is sufficient
+        region_fac_tmp = get_fac(dx_woGamma(2:end));    
+        [chi2, ~] = PPL_chi2(t_tmp + t_dir*stepsize,false, m, c, jx, takeY, qLog10, stepsize, ar.ppl.xFit_tmp + dx_woGamma(1)*stepsize , xstd,ar.p(ar.qFit==1)+stepsize*dx_woGamma(2:end)'*region_fac_tmp);
+        if((chi2 - ar.ppl.chi2_95 + 0.5) < 0.2 && (chi2 - ar.ppl.chi2_95 + 0.5) > -0.2)
+            dxs = dx_woGamma;
+            return;
         end
-        
-        if(norm(dx_woGamma) / norm(dx_Gamma) > 4)% && gamma_tmp < gamma_norm)
-            gamma_tmp = 2*gamma_tmp;
-            if(gamma_tmp > gamma_norm)
-                gamma_tmp = gamma_norm;
-            end
-        end
+        %Gamma control via norm of Delta p vectors
+%         if(norm(dx_woGamma(2:end)) / norm(dx_Gamma) < 2)
+%             gamma_tmp = gamma_tmp/2;            
+%         end
+%         
+%         if(norm(dx_woGamma(2:end)) / norm(dx_Gamma) > 4)% && gamma_tmp < gamma_norm)
+%             gamma_tmp = 2*gamma_tmp;
+%             if(gamma_tmp > gamma_norm)
+%                 gamma_tmp = gamma_norm;
+%             end
+%         end
         if((takeY && ar.model(m).data(c).logfitting(jx)==1) || qLog10)
             dxs=pinv(Mty,1.e-6)*[fRHS;((ar.ppl.xFit_tmp-xSim)*2.*dy_pred' - 2*(ar.ppl.xFit_tmp - xSim)./xstd./(10.^xSim)*grad_y'*fRHS - gamma_tmp.*grad')];            
         else
             dxs=pinv(Mty,1.e-6)*[fRHS;((ar.ppl.xFit_tmp-xSim)*2.*dy_pred' - gamma_tmp.*grad')];
         end
+        
+        %Adapt gamma correction factor
+        region_fac_tmp = get_fac(dxs(2:end));                       
+        [chi2_sec, ~] = PPL_chi2(t_tmp + t_dir*stepsize,false, m, c, jx, takeY, qLog10, stepsize, ar.ppl.xFit_tmp + dxs(1)*stepsize , xstd,ar.p(ar.qFit==1)+stepsize*dxs(2:end)'*region_fac_tmp);
+        if((chi2_sec - ar.ppl.chi2_95 + 0.5) > 0.2 || (chi2_sec - ar.ppl.chi2_95 + 0.5) < -0.2)
+            if(abs(chi2-ar.ppl.chi2_95 + 0.5)<abs(chi2_sec-ar.ppl.chi2_95 + 0.5) && gamma_tmp>0.2)
+                gamma_tmp = gamma_tmp/2;  
+            elseif(gamma_tmp<5)
+                gamma_tmp = gamma_tmp*2;  
+            end
+        end
     end
 
     function region_fac_p = get_fac(dp_tmp)
-        region_fac_p=ones(1,length(dp_tmp));
+        region_fac_p=1;
             
         if(sum(ar.p(ar.qFit==1) + dp_tmp'*stepsize > ar.ub(ar.qFit==1))>0 || (sum(ar.p(ar.qFit==1) + dp_tmp'*stepsize < ar.lb(ar.qFit==1))>0))
-               region_fac_p = min(abs((ar.p(ar.qFit==1) - ar.ub(ar.qFit==1))./ (2*dp_tmp'*stepsize)));          
-                still_bad = abs((ar.p(ar.qFit==1) - ar.lb(ar.qFit==1)) ./ (2*dp_tmp'.*region_fac_p*stepsize)) < region_fac_p;
-           if(sum( still_bad > 0))
-                region_low = abs( (ar.p(ar.qFit==1) - ar.lb(ar.qFit==1)) ./ (2*dp_tmp'*stepsize));
-                region_fac_p = min(region_low);
-                
-           end
+            dps_ub = dp_tmp;
+            dps_ub(dp_tmp<0) = 0;
+            region_fac_p = min((ar.ub(ar.qFit==1)- ar.p(ar.qFit==1))./ (dps_ub'*stepsize));
+            dps_lb = dp_tmp;
+            dps_lb(dp_tmp>0) = 0;
+            region_fac_p = min([region_fac_p,(ar.p(ar.qFit==1) - ar.lb(ar.qFit==1))./ (abs(dps_lb)'*stepsize)]);       
+        end
+        if(region_fac_p < 0.1)
+            region_fac_p = 0;
         end
     end
 
