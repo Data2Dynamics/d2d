@@ -537,9 +537,9 @@ arWaitbar(-1);
 [a,b] = isSBML_Model(M);
 if(a == 1)
     if(~copasi)
-        OutputSBML(M, ['SBML/' ar.model(m).name 'cond_' c '_l2v4.xml']);
+        OutputSBML(M, ['SBML/' ar.model(m).name '_cond_' num2str(c) '_l2v4.xml']);
     else
-        OutputSBML(M, ['SBML/' ar.model(m).name 'cond_' c  '_copasi_l2v4.xml']);
+        OutputSBML(M, ['SBML/' ar.model(m).name '_cond_' num2str(c)  '_copasi_l2v4.xml']);
     end
 else
     error('%s', b);
