@@ -241,7 +241,7 @@ for jv = 1:length(ar.model(m).fv)
         else
             M.reaction(vcount).reversible = 0;
         end
-        M.reaction(vcount).fast = -1;
+        M.reaction(vcount).fast = 0;%-1;
         M.reaction(vcount).isSetFast = 0;
         M.reaction(vcount).level = 2;
         M.reaction(vcount).version = 4;
@@ -253,6 +253,8 @@ for jv = 1:length(ar.model(m).fv)
             M.reaction(vcount).id = sprintf('reaction%i', jv);
         end
         
+        %set empty struct for reactant
+        M.reaction(vcount).reactant = F.reaction(1).reactant;
         scount = 1;
         scomp = [];
         for jsource = find(ar.model(m).N(:,jv)<0)'
@@ -265,7 +267,7 @@ for jv = 1:length(ar.model(m).fv)
             M.reaction(vcount).reactant(scount).id = '';
             M.reaction(vcount).reactant(scount).name = '';
             M.reaction(vcount).reactant(scount).stoichiometry = abs(ar.model(m).N(jsource,jv));
-            M.reaction(vcount).reactant(scount).stoichiometryMath = F.reaction.reactant.stoichiometryMath;
+            M.reaction(vcount).reactant(scount).stoichiometryMath = F.reaction(2).reactant.stoichiometryMath;
             M.reaction(vcount).reactant(scount).level = 2;
             M.reaction(vcount).reactant(scount).version = 4;
             scount = scount + 1;
@@ -277,6 +279,8 @@ for jv = 1:length(ar.model(m).fv)
             end
         end
         
+        %set empty struct for product
+        M.reaction(vcount).product = F.reaction(1).product;
         scount = 1;
         tcomp = [];
         for jsource = find(ar.model(m).N(:,jv)>0)'
@@ -289,7 +293,7 @@ for jv = 1:length(ar.model(m).fv)
             M.reaction(vcount).product(scount).id = '';
             M.reaction(vcount).product(scount).name = '';
             M.reaction(vcount).product(scount).stoichiometry = abs(ar.model(m).N(jsource,jv));
-            M.reaction(vcount).product(scount).stoichiometryMath = F.reaction.reactant.stoichiometryMath;
+            M.reaction(vcount).product(scount).stoichiometryMath = F.reaction(2).reactant.stoichiometryMath;
             M.reaction(vcount).product(scount).level = 2;
             M.reaction(vcount).product(scount).version = 4;
             scount = scount + 1;
@@ -305,7 +309,7 @@ for jv = 1:length(ar.model(m).fv)
         vars = setdiff(vars, sym(ar.model(m).x(ar.model(m).N(:,jv)<0))); %R2013a compatible
         vars = setdiff(vars, sym(ar.model(m).condition(c).p)); %R2013a compatible
         vars = setdiff(vars, sym(ar.model(m).u)); %R2013a compatible
-        
+        M.reaction(vcount).modifier = F.reaction(1).modifier;
         if(~isempty(vars))
             for jmod = 1:length(vars);
                 M.reaction(vcount).modifier(jmod).typecode = 'SBML_MODIFIER_SPECIES_REFERENCE';
@@ -352,8 +356,8 @@ for jv = 1:length(ar.model(m).fv)
         else
             M.reaction(vcount).kineticLaw.formula = char(ratetemplate);
         end
-        M.reaction(vcount).kineticLaw.math = '';
-        M.reaction(vcount).kineticLaw.parameter = F.reaction.kineticLaw.parameter;
+        M.reaction(vcount).kineticLaw.math = M.reaction(vcount).kineticLaw.formula;
+        M.reaction(vcount).kineticLaw.parameter = F.reaction(1).kineticLaw.parameter;
         M.reaction(vcount).kineticLaw.level = 2;
         M.reaction(vcount).kineticLaw.version = 4;
         
@@ -533,9 +537,9 @@ arWaitbar(-1);
 [a,b] = isSBML_Model(M);
 if(a == 1)
     if(~copasi)
-        OutputSBML(M, ['SBML/' ar.model(m).name '_l2v4.xml']);
+        OutputSBML(M, ['SBML/' ar.model(m).name 'cond_' c '_l2v4.xml']);
     else
-        OutputSBML(M, ['SBML/' ar.model(m).name '_copasi_l2v4.xml']);
+        OutputSBML(M, ['SBML/' ar.model(m).name 'cond_' c  '_copasi_l2v4.xml']);
     end
 else
     error('%s', b);
