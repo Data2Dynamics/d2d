@@ -9,7 +9,6 @@ DefaultCompartment	 V	 "n/a"	 vol.	 1
 
 STATES
 ApoER2              C	 au 	 conc.	 DefaultCompartment	 1	 "ApoER2"
-pApoER2             C	 au      conc.	 DefaultCompartment	 1	 "pApoER2"
 
 pbApoER2            C	 au      conc.	 DefaultCompartment	 1	 "pbApoER2"
 
@@ -55,7 +54,7 @@ pSFK      C 	au  conc.   0	1   "scale_pSFK_Exp * (pSFK_Int + perc_mes * SFK_Inh)
 
 tSFK      C     au	conc.	0	1	"scale_tSFK_Exp * (pSFK_Int + SFK_Int + SFK_Inh) + offset_tSFK_Exp"
 
-tApoER2   C 	au  conc.   0	1   "scale_tApo__Exp * (ApoER2 + pApoER2 + pbApoER2 + ApoER2_re_Dab1 + pApoER2_re_Dab1) + offset_tApo_Exp"
+tApoER2   C 	au  conc.   0	1   "scale_tApo__Exp * (ApoER2 + pbApoER2 + ApoER2_re_Dab1 + pApoER2_re_Dab1) + offset_tApo_Exp"
 
 ERRORS
 pAkt    "sd_pAkt"
@@ -72,7 +71,6 @@ tSFK    "sd_tSFK"
 
 CONDITIONS
 init_SFK_Inh	"0"
-init_pApoER2    "0"
 init_ApoER2     "init_cDab1"
 init_ApoER2_re_Dab1  "1"
 
