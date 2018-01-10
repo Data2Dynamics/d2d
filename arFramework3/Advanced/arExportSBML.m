@@ -7,7 +7,7 @@
 % copasi:       use amounts as states (this is the SBML standard, hence default = true)
 % steadystate:  prequilibrate condition as in ar file
 
-function arExportSBML(m, c, copasi, steadystate)
+function arExportSBML(m, c, copasi, data, steadystate)
 
 global ar
 
@@ -20,6 +20,10 @@ end
 
 if(~exist('copasi','var'))
     copasi = true;
+end
+
+if(~exist('data','var'))
+    data = 1;
 end
 
 if (~exist('steadystate','var'))
@@ -530,17 +534,30 @@ if ( numel(M.event) > 0 )
 end
 
 % assign time symbol
-M.time_symbol = ar.model(m).t;
+%M.time_symbol = ar.model(m).t;
+
+M.unitDefinition = F.unitDefinition;
+if(strcmp(ar.model(m).tUnits{2},'h'))
+    M.unitDefinition(1).unit(1).multiplier = 3600;
+elseif(strcmp(ar.model(m).tUnits{2},'s') || strcmp(ar.model(m).tUnits{2},'sec'))
+    M.unitDefinition(1).unit(1).multiplier = 1;
+end
 
 arWaitbar(-1);
 
 [a,b] = isSBML_Model(M);
 if(a == 1)
-    if(~copasi)
-        OutputSBML(M, ['SBML/' ar.model(m).name '_cond_' num2str(c) '_l2v4.xml']);
-    else
-        OutputSBML(M, ['SBML/' ar.model(m).name '_cond_' num2str(c)  '_copasi_l2v4.xml']);
+%     if(~copasi)
+%         OutputSBML(M, ['SBML/' ar.model(m).name '_cond_' num2str(c) '_l2v4.xml']);
+%     else
+%         OutputSBML(M, ['SBML/' ar.model(m).name '_cond_' num2str(c)  '_copasi_l2v4.xml']);
+%     end
+    
+%mine!
+    if(~exist('./Benchmark_paper/SBML', 'dir'))
+        mkdir('./Benchmark_paper/SBML')
     end
+    OutputSBML(M, ['Benchmark_paper/SBML/' ar.model(m).name '_data_' num2str(data) '_l2v4.xml']);
 else
     error('%s', b);
 end

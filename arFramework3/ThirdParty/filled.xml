@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
     <model metaid="arFramework3" id="model_1">
+        <listOfUnitDefinitions>
+          <unitDefinition id="time" name="time">
+            <listOfUnits>
+              <unit kind="second" exponent="1" scale="0" multiplier="60"/>
+            </listOfUnits>
+          </unitDefinition>
+        </listOfUnitDefinitions>
         <listOfCompartments>
             <compartment id="compartment_1" size="10"></compartment>
         </listOfCompartments>
