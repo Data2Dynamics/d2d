@@ -7,7 +7,7 @@
 % copasi:       use amounts as states (this is the SBML standard, hence default = true)
 % steadystate:  prequilibrate condition as in ar file
 
-function arExportSBML(m, c, copasi, data, steadystate)
+function arExportSBML(m, c, copasi, steadystate)
 
 global ar
 
@@ -20,10 +20,6 @@ end
 
 if(~exist('copasi','var'))
     copasi = true;
-end
-
-if(~exist('data','var'))
-    data = 1;
 end
 
 if (~exist('steadystate','var'))
@@ -384,6 +380,10 @@ for ju = 1:length(ar.model(m).u)
     fu = sym(ar.model(m).condition(c).fu{ju}); % current input
     
     isActive = ~(str2double(ar.model(m).condition(c).fu{ju}) == 0);
+    if(contains(ar.model(m).fu{ju},'spline'))
+        warning('Spline functions are not supported as d2d export, yet!\n')
+       isActive = false; 
+    end
     
     if ( isActive )
         % replace p with condition specific parameters
@@ -547,17 +547,11 @@ arWaitbar(-1);
 
 [a,b] = isSBML_Model(M);
 if(a == 1)
-%     if(~copasi)
-%         OutputSBML(M, ['SBML/' ar.model(m).name '_cond_' num2str(c) '_l2v4.xml']);
-%     else
-%         OutputSBML(M, ['SBML/' ar.model(m).name '_cond_' num2str(c)  '_copasi_l2v4.xml']);
-%     end
-    
-%mine!
-    if(~exist('./Benchmark_paper/SBML', 'dir'))
-        mkdir('./Benchmark_paper/SBML')
+    if(~copasi)
+        OutputSBML(M, ['SBML/' ar.model(m).name '_cond_' num2str(c) '_l2v4.xml']);
+    else
+        OutputSBML(M, ['SBML/' ar.model(m).name '_cond_' num2str(c)  '_copasi_l2v4.xml']);
     end
-    OutputSBML(M, ['Benchmark_paper/SBML/' ar.model(m).name '_data_' num2str(data) '_l2v4.xml']);
 else
     error('%s', b);
 end
