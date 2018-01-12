@@ -1128,7 +1128,7 @@ end
 
 % Replace inline arrays (e.g. [3,4,2,5,2] with variable names, declaring
 % the array elsewhere as a static const (used for the fixed input spline)
-constVars = {};
+constVars = {}; cVars = [];
 for jy = 1 : numel( data.fy )
     [ data.fy{jy}, constVars, cVars ] = replaceFixedArrays( data.fy{jy}, constVars, {}, c, 'data' );
 end
