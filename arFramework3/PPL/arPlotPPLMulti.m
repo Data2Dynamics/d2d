@@ -31,7 +31,7 @@ end
 qLog10 = ar.ppl.qLog10;
 [nrows, ncols] = arNtoColsAndRows(length(ar.model(m).(data_cond)(c).ppl.ix));
 arCalcMerit
-
+arSimu(false,true,true)
 chi2 = arGetMerit('chi2fit');
 if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
     chi2 = 2*ar.ndata*log(sqrt(2*pi)) + chi2;
@@ -72,11 +72,12 @@ for jx=1:length(ar.model(m).(data_cond)(c).ppl.ix)
     
     tFine = ar.model(m).(data_cond)(c).tFine(ar.model(m).(data_cond)(c).tFine>=min(t) & ...
         ar.model(m).(data_cond)(c).tFine<=max(t));
+    %tFine = ar.model(m).(data_cond)(c).tFine;
     xFine = linspace(min(x(:)), max(x(:)), ar.config.nFinePoints);
     [tgrid, xgrid] = meshgrid(tFine, xFine);
     pplgrid = nan(size(tgrid));
     
-%     if(~dosurf || filled)
+     %if(~dosurf || filled)
         method = 'spline';
         for jt=1:length(tFine)
             tdiff = t - tFine(jt);
@@ -112,7 +113,6 @@ for jx=1:length(ar.model(m).(data_cond)(c).ppl.ix)
                     weigth(1) = 1;
                 end
                 pplgrid(:,jt) = weigth(1)*pplback + weigth(2)*pplfor;
-                
                 %             plot(xgrid(:,jt), pplgrid(:,jt))
                 %             hold on
                 %             plot(xgrid(:,jt), pplback, '--')
@@ -125,7 +125,7 @@ for jx=1:length(ar.model(m).(data_cond)(c).ppl.ix)
                 pplgrid(:,jt) = interp1(x(iback,qnonnanback), ppl(iback,qnonnanback), xFine, method);
             end
         end
-%     end
+     %end
     
     if(~dosurf)
         Cvals = linspace(chi2, chi2+ar.ppl.dchi2*4, 20);
@@ -204,16 +204,17 @@ for jx=1:length(ar.model(m).(data_cond)(c).ppl.ix)
             [ttmp, xtmp] = meshgrid(linspace(min(tFine), max(tFine), n), ...
                 linspace(min(xFine), max(xFine), n));
             ppltmp = interp2(tgrid, xgrid, pplgrid-chi2, ttmp, xtmp);
-            [~, htmp] = contour3(tgrid, xgrid, pplgrid-chi2, 'r');%, [chi2+ar.ppl.dchi2 chi2+ar.ppl.dchi2]
+            %[~, htmp] = contour3(tgrid, xgrid, pplgrid-chi2, 'r');%, [chi2+ar.ppl.dchi2 chi2+ar.ppl.dchi2]
+            [~, htmp] = contour3(tgrid, xgrid, pplgrid-chi2, [ar.ppl.dchi2 ar.ppl.dchi2], 'r');
             if(~isempty(htmp))
                 h(3) = htmp(1);
             end
-            htmp = plot3(ttmp, xtmp, ppltmp,'k');
+            %htmp = plot3(ttmp, xtmp, ppltmp,'k');
             for jt = 1:length(t)
                 htmp = plot3(t(jt)*ones(size(x(jt,:))), x(jt,:), ppl(jt,:)-chi2,'k');
             end
             h(2) = htmp(1);
-            zlim([0 ar.ppl.dchi2]);
+            zlim([0 ar.ppl.dchi2+1]);
             hold off
             if(~vpl)
                 legend(h, {'best fit', 'PCI', 'PPL'});

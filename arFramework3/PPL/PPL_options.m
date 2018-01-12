@@ -31,7 +31,7 @@ global ar
 % (? confidence bands and is based on prediction profiles of Clemens paper
 % (default is false ? validation profiles))
 %
-% n_start : total steps in computation of full profile per side (default is 100)
+% n_steps_profile : total steps in computation of full profile per side (default is 100)
 %
 % whichT : which entry of the provided time-vector is taken as starting
 % point for integration
@@ -45,17 +45,19 @@ global ar
 if (nargin == 0) && (nargout == 0)
   fprintf('          Gammas: [ vector of correction strengths {1/stepsize} ]\n');
   fprintf('        stepsize: [ integration step size {tFine} ]\n');
-  fprintf('     onlyProfile: [ {true} | false ]\n');
+  fprintf(['     onlyProfile: [ only Profiles for time vector {true} ' ...
+           '| Integration: false ]\n']);
   fprintf('            tEnd: [ Alternative integration endpoint ]\n'); 
   fprintf('    rel_increase: [ %% of x increase in profile calculation {0.15} ]\n');
-  fprintf('        ed_steps: [ {true} | false ]\n');
-  fprintf('         fineInt: [ {true} | false ]\n');  
-  fprintf('        backward: [ true | {false} ]\n');
+  fprintf(['        ed_steps: [ Integration {true} | or parallel to initial trajectory: ' ...
+           'false ]\n']);
+  fprintf('         fineInt: [ Correction cycle after each step {true} | false ]\n');  
+  fprintf('        backward: [ Integrate backwards in time: true | {false} ]\n');
   fprintf('            xstd: [ standard dev of auxiliary data point {0.1} ]\n');
   fprintf('           doPPL: [ true = prediction or false = validation profiles {false} ]\n');
-  fprintf('         n_start: [ steps of profile {100} ]\n');
+  fprintf('         n_steps_profile: [ steps of profile in each direction {100} ]\n');
   fprintf('          whichT: [ seed for integration (in time vector) {1} ]\n');
-  fprintf('             dir: [ only upper/lower profile? {0} ]\n');
+  fprintf('             dir: [ only upper(1)/lower(-1) profile? {0} ]\n');
   fprintf('     alpha_level: [ Confidence level {0.05} ]\n');
   fprintf('\n');
   return;
@@ -72,7 +74,7 @@ Names = [
     'backward        '
     'xstd            '
     'doPPL           '
-    'n_start         ' 
+    'n_steps_profile         ' 
     'whichT          '
     'dir             '
     'alpha_level     '
@@ -87,7 +89,7 @@ if(~isfield(ar.ppl,'options'))
     ar.ppl.options.backward = false;
     ar.ppl.options.xstd = 0.1;
     ar.ppl.options.doPPL = false;
-    ar.ppl.options.n_start = 100;
+    ar.ppl.options.n_steps_profile = 100;
     ar.ppl.options.whichT = 1;
     ar.ppl.options.dir = 0;
     ar.ppl.options.alpha_level = 0.05;
