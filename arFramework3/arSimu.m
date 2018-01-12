@@ -174,7 +174,7 @@ if ( ss_presimulation && dynamics )
         for c=1:length(ar.model(m).ss_condition)
             if(ar.model(m).ss_condition(c).status>0)
                 arCheckCache(1); % Invalidate cache so simulations do not get skipped
-                nonEq = sprintf('%s ', ar.model.x{find(abs(ar.model.ss_condition.dxdt)>1e-6)});
+                nonEq = sprintf('%s ', ar.model.x{find(abs(ar.model.ss_condition(c).dxdt)>1e-6)});
                 error('arSimuCalc failed at %s for model %i, condition %i during pre-equilibration %i.\nStates which failed to equilibrate:\n%s', ar.info.arsimucalc_flags{ar.model(m).ss_condition(c).status}, m, ar.model(m).ss_condition(c).src, c, nonEq);
             elseif(ar.model(m).ss_condition(c).status<0)
                 arCheckCache(1); % Invalidate cache so simulations do not get skipped
