@@ -366,6 +366,9 @@ for m = 1:length(ar.model)
                         ar.model(m).data(d).has_yExp = false;
                     end
                     ar.model(m).data(d).has_tExp = true;
+                else
+                    ar.model(m).data(d).has_tExp = false;
+                    ar.model(m).data(d).has_yExp = false;
                 end
             else
                 ar.model(m).data(d).has_tExp = false;
