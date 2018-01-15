@@ -1273,31 +1273,42 @@ void storeIntegrationInfo( SimMemory sim_mem, mxArray *arcondition, int ic )
         stepData[0] = (int64_T) nsteps;
     }
 }     
-     
+
+int safeGetToggle( mxArray *data, int idx, const char *fieldName )
+{
+    mxArray *field = mxGetField(data, idx, fieldName);
+    if ( !field || ( mxIsEmpty(field) ) ) {
+        return 0;
+	} else {
+        return (int) mxGetScalar(field);
+	}
+}
+
 void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int has_tExp )
 {
     mxArray *ardata;
     mxArray *dLink;
     double  *dLinkints; 
     int     id, nd, ids;
-            
+   
+    DEBUGPRINT1( debugMode, 4, "Evaluating observations for condition %d\n", ic );
     ardata = mxGetField(armodel, im, "data");
 	if(ardata!=NULL){
         dLink = mxGetField(arcondition, ic, "dLink");
         dLinkints = mxGetData(dLink);
-        
         nd = (int) mxGetNumberOfElements(dLink);
-        
         /* loop over data */
         for(ids=0; ids<nd; ++ids){
             id = ((int) dLinkints[ids]) - 1;
-            has_tExp = (int) mxGetScalar(mxGetField(ardata, id, "has_tExp"));
-            
+            DEBUGPRINT2( debugMode, 4, "Evaluating data with idx %d for condition %d\n", id, ic );            
+            has_tExp = safeGetToggle(ardata, id, "has_tExp");
+                        
             if((has_tExp == 1) | (fine == 1)) {
                 y_calc(im, id, ardata, arcondition, sensi);
             }
         }
     }
+    DEBUGPRINT1( debugMode, 4, "Finished evaluating observations for condition %d\n", ic );
 }
 
 void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int nout, int offset )
@@ -1899,7 +1910,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
     
     /* MATLAB values */
     ic = (int) mxGetScalar(mxGetField(ardata, id, "cLink")) - 1;
-    has_yExp = (int) mxGetScalar(mxGetField(ardata, id, "has_yExp"));
+    has_yExp = safeGetToggle(ardata, id, "has_yExp");
     
     ny = (int) mxGetNumberOfElements(mxGetField(ardata, id, "y"));
     qlogy = mxGetData(mxGetField(ardata, id, "logfitting"));
