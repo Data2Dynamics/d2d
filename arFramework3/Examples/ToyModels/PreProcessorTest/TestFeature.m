@@ -9,13 +9,13 @@ arLoadModel('PreProc');
 fprintf( 'PASSED\n' );
 
 fprintf( 2, 'Checking if correct states have been included... ' );
-if ( sum( ismember( ar.model.x, {'stateA', 'stateD', 'stateF', 'stateH', 'stateI', 'stateJ', 'stateL', 'stateO', 'stateR', 'stateS', 'stateT'} ) ) == 11 ) 
+if ( sum( ismember( ar.model.x, {'stateA', 'stateD', 'stateF', 'stateH', 'stateI', 'stateJ', 'stateL', 'stateO', 'stateR', 'stateS', 'stateT', 'stateW', 'NESTER2', 'NESTEE3', 'stateZ' } ) ) == 15 ) 
     fprintf( 'PASSED\n' );
 else
     error( 'FAILED\n');
 end
 fprintf( 2, 'Checking if correct states have been excluded... ' );
-if ( sum( ismember( ar.model.x, {'stateB', 'stateC', 'stateE', 'stateG', 'stateK', 'stateM', 'stateN', 'stateP', 'stateQ', 'stateU', 'stateV'} ) ) == 0 )
+if ( sum( ismember( ar.model.x, {'stateB', 'stateC', 'stateE', 'stateG', 'stateK', 'stateM', 'stateN', 'stateP', 'stateQ', 'stateU', 'stateV', 'stateX', 'stateY'} ) ) == 0 )
     fprintf( 'PASSED\n' );
 else
     error( 'FAILED\n');
@@ -50,3 +50,4 @@ if ( sum( ismember( ar.model.data.y, {'dataB', 'dataC', 'dataE', 'dataG', 'dataK
 else
     error( 'FAILED\n');
 end
+

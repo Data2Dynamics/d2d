@@ -101,6 +101,23 @@ stateU    C   nM          conc.   cyt     1
 stateV    C   nM          conc.   cyt     1
 #endif
 
+#define NESTER stateW
+#define NESTEE NESTER
+NESTEE    C   nM          conc.   cyt     1         // state W should be defined
+
+#define NESTER2 stateX
+#define NESTEE2 NESTER2
+#undefine NESTER2
+NESTEE2   C   nM          conc.   cyt     1         // Should be NESTER2 after compilation
+
+#define NESTER3 stateY
+#define NESTEE3 NESTER3
+#undefine NESTEE3
+NESTEE3   C   nM          conc.   cyt     1         // Should be NESTEE3 after compilation
+
+#define NESTEE4 NESTER4
+#define NESTER4 stateZ
+NESTEE4    C   nM          conc.   cyt     1         // state Z should be defined
 
 INPUTS
 
