@@ -119,7 +119,13 @@ NESTEE3   C   nM          conc.   cyt     1         // Should be NESTEE3 after c
 #define NESTER4 stateZ
 NESTEE4    C   nM          conc.   cyt     1         // state Z should be defined
 
+#define FUNC1 ( this*is*a*test )
+#define FUNC2 ( f*a+p*b )
+#define FUNC3 ( FUNC2 / ( 1 + pp * FUNC2 ) )
+#define FUNC4 ( FUNC1 + FUNC3 )
+
 INPUTS
+TestInput                     C   ng/ml   conc.   "FUNC4"
 
 REACTIONS
 

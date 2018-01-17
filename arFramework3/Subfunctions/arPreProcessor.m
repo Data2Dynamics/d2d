@@ -76,6 +76,7 @@ function fid = preprocess(fid)
                     
                     if ~isempty( parseBlock2 )
                         parseBlock2 = strip(line(ws(a-2):end));
+                        a = a + numel( parseBlock2 );
                     end
                     
                     % Is this being parsed or not? Defines can be conditional!
