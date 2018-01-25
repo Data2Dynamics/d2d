@@ -6,6 +6,7 @@ function testFeature;
     compile = 1;
 
     if ( compile )
+        arClearCFiles;
         arInit
         arLoadModel('fieldtest');
         arLoadData('fieldtest');
