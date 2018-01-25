@@ -238,6 +238,7 @@ for m=1:length(ar.model)
         end
         condition = ar.model(m).condition;
         newp = cell(1,length(ar.model(m).condition));
+        newfp = cell(1,length(ar.model(m).condition));
         newpold = cell(1,length(ar.model(m).condition));
         newpx0 = cell(1,length(ar.model(m).condition));
         splines = cell(1,length(ar.model(m).condition));
@@ -253,6 +254,7 @@ for m=1:length(ar.model)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
                 csyms{c} = condition_sym.sym;
                 newp{c} = condition_sym.p;
+                newfp{c} = condition_sym.fp;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
                 splines{c} = condition_sym.splines;
@@ -281,6 +283,7 @@ for m=1:length(ar.model)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
                 ar.model(m).condition(c).sym = condition_sym.sym;
                 newp{c} = condition_sym.p;
+                newfp{c} = condition_sym.fp;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
                 splines{c} = condition_sym.splines;
@@ -306,6 +309,7 @@ for m=1:length(ar.model)
         % assign conditions
         for c=1:length(ar.model(m).condition)
             ar.model(m).condition(c).p = newp{c};
+            ar.model(m).condition(c).fp = newfp{c};
             ar.model(m).condition(c).pold = newpold{c};
             ar.model(m).condition(c).px0 = newpx0{c};
             ar.model(m).condition(c).splines = splines{c};
@@ -322,6 +326,7 @@ for m=1:length(ar.model)
         % calc data
         data = ar.model(m).data;
         newp = cell(1,length(ar.model(m).data));
+        newfp = cell(1,length(ar.model(m).data));
         newpold = cell(1,length(ar.model(m).data));
         constVars = cell(1, length(ar.model(m).data));
 
@@ -334,6 +339,7 @@ for m=1:length(ar.model)
                 c = data(d).cLink;
                 data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
                 newp{d} = data_sym.p;
+                newfp{d} = data_sym.fp;
                 newpold{d} = data_sym.pold;
                 constVars{d} = data_sym.constVars;
                 
@@ -357,6 +363,7 @@ for m=1:length(ar.model)
                 c = data(d).cLink;
                 data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
                 newp{d} = data_sym.p;
+                newfp{d} = data_sym.fp;
                 newpold{d} = data_sym.pold;
                 constVars{d} = data_sym.constVars;
                 
@@ -380,6 +387,7 @@ for m=1:length(ar.model)
         % assign data
         for d=1:length(ar.model(m).data)
             ar.model(m).data(d).p = newp{d};
+            ar.model(m).data(d).fp = newfp{d};
             ar.model(m).data(d).pold = newpold{d};
             ar.model(m).data(d).constVars = constVars{d};
         end
@@ -445,6 +453,7 @@ for m=1:length(ar.model)
         end
         condition = ar.model(m).condition;
         newp = cell(1,length(ar.model(m).condition));
+        newfp = cell(1,length(ar.model(m).condition));
         newpold = cell(1,length(ar.model(m).condition));
         newpx0 = cell(1,length(ar.model(m).condition));
         
@@ -456,6 +465,7 @@ for m=1:length(ar.model)
 
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
                 newp{c} = condition_sym.p;
+                newfp{c} = condition_sym.fp;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
                 if(~doskip(c))
@@ -477,6 +487,7 @@ for m=1:length(ar.model)
             for c=1:length(ar.model(m).condition)
                 condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
                 newp{c} = condition_sym.p;
+                newfp{c} = condition_sym.fp;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
                 if(~doskip(c))
@@ -499,6 +510,7 @@ for m=1:length(ar.model)
         % assign conditions
         for c=1:length(ar.model(m).condition)
             ar.model(m).condition(c).p = newp{c};
+            ar.model(m).condition(c).fp = newfp{c};
             ar.model(m).condition(c).pold = newpold{c};
             ar.model(m).condition(c).px0 = newpx0{c};
         end
