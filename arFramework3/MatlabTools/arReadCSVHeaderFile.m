@@ -8,6 +8,7 @@ else
     strquoted = '%s';
 end
 
+arFprintf( 6, 'Reading CSV file ' );
 C = textscan(fid,'%s\n',1,'Delimiter','');
 C = textscan(C{1}{1},strquoted,'Delimiter',delimiter);
 C = C{1};
@@ -33,5 +34,6 @@ while(~isempty(C{1}))
     C = textscan(fid,'%s\n',1,'Delimiter','');
     rcount = rcount + 1;
 end
+arFprintf( 6, '[ OK ]\n' );
 
 fclose(fid);

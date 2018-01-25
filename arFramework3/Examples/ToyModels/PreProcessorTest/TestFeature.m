@@ -51,3 +51,9 @@ else
     error( 'FAILED\n');
 end
 
+fprintf( 2, 'Checking if define blocks meant for replacement are parsing correctly... ' );
+if ( strcmp(ar.model(end).fu{1}, '( ( this*is*a*test ) + ( ( f*a+p*b ) / ( 1 + pp * ( f*a+p*b ) ) ) )') )
+    fprintf( 'PASSED\n' );
+else
+    error( 'FAILED\n');
+end
