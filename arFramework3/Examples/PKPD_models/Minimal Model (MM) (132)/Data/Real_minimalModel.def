@@ -1,0 +1,18 @@
+DESCRIPTION
+"data def mod 132"
+
+PREDICTOR
+T    T  "min"     "time"	0	100
+
+INPUTS
+
+OBSERVABLES
+DV      C   "mg/dl"    "conc." 0	0   "GLU"
+
+ERRORS
+DV    "ERROR_abs"
+
+CONDITIONS
+
+RANDOM
+
