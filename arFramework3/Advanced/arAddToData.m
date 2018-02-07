@@ -35,6 +35,9 @@ function arAddToData( m, d, obs, tExpNew, yExpNew, type, delayLink )
     if ( nargin < 6 )
         error( 'Please specify an identifier for the new data' );
     end
+    if ( type == 0 )
+        error( 'Type == 0 is not allowed, since this would not allow the system to identify this added data later' );
+    end
     if ( numel( tExpNew ) ~= numel( yExpNew ) )
         error( 'Dimensions of tExp and yExp must be the same' );
     end
