@@ -2,12 +2,12 @@
 %
 % Usage:
 %
-%   function arClearInterpolatedData( m, ds )
+%   function arClearAddedData( m, ds, idx )
 %
 %    m        - Model index
 %    ds       - Data indices, find using arFindData ('all' also works)
 %    idx      - Identifier of the data to clear (integer or 'all')
-
+%
 function arClearAddedData( m, ds, idx )  
 
     global ar;
