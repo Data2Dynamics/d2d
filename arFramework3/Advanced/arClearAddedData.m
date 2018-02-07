@@ -1,14 +1,14 @@
-% Remove datapoints which were added with arInterpolateData
+% Remove datapoints which were added with arAddToData
 %
 % Usage:
 %
-%   function arClearInterpolatedData( m, ds, obs, tmin, tmax )
+%   function arClearInterpolatedData( m, ds )
 %
 %    m        - Model index
 %    ds       - Data indices, find using arFindData ('all' also works)
-%
+%    idx      - Identifier of the data to clear (integer or 'all')
 
-function arClearInterpolatedData( m, ds )  
+function arClearAddedData( m, ds, idx )  
 
     global ar;
 
@@ -17,6 +17,9 @@ function arClearInterpolatedData( m, ds )
     end
     if nargin < 2
         ds = 'all';
+    end
+    if nargin < 3
+        idx = 'all';
     end
     
     all = 0;
@@ -30,10 +33,14 @@ function arClearInterpolatedData( m, ds )
     for jd = 1 : numel( ds )
         if ( ~isfield( ar.model(m).data(ds(jd)), 'addedData' ) )
             if ~all
-                warning( 'Data %d does not have interpolated data', ds(jd) );
+                warning( 'Data %d does not have interpolated data with idx %d', ds(jd), idx );
             end
         else
-            interps = sum(ar.model(m).data(ds(jd)).addedData == 1, 2) > 0;
+            if ( idx == 'all' )
+                interps = sum(ar.model(m).data(ds(jd)).addedData > 0, 2) > 0;
+            else
+                interps = sum(ar.model(m).data(ds(jd)).addedData == idx, 2) > 0;
+            end
             
             if sum( interps ) > 0
                 ar.model(m).data(ds(jd)).yExp(interps, :)    = [];
@@ -43,7 +50,7 @@ function arClearInterpolatedData( m, ds )
                 fprintf( 'Deleted %d points from data ID %d\n', sum(interps), ds(jd) );
             else
                 if ~all
-                    warning( 'Data %d does not have interpolated data', ds(jd) );
+                    warning( 'Data %d does not have interpolated data with idx %d', ds(jd), idx );
                 end
             end
         end
