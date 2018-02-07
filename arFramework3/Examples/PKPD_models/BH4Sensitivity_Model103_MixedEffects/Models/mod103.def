@@ -1,0 +1,31 @@
+DESCRIPTION
+"model 103 (DDmore)"
+
+
+PREDICTOR
+TIME             TIME   "min"     "time"	0	10
+
+COMPARTMENTS
+        
+STATES
+dep        C   "pM"  "conc."
+PD         C   "pM"  "conc."
+
+INPUTS
+
+ODES
+"-KDE*dep"
+"Kout-Kout*(1+Slop*dep)*PD"
+
+DERIVED
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+//DDmore: init_dep = 0, makes no sense
+init_dep       "1"
+init_PD        "1"
+
+

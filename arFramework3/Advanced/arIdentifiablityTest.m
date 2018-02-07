@@ -1,4 +1,4 @@
-arInit% arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
+% arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
 % 
 %   This function implements a fast procedure to check whether structural
 %   non-identifiablities are present.
@@ -35,7 +35,7 @@ arInit% arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
 % 
 % ckreutz 2.6.17
 
-function arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
+function isidentifiable = arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
 if ~exist('silent','var') || isempty(silent)
     silent = false;
 end
@@ -218,9 +218,11 @@ if ar.IdentifiabilityTest.dchi2_total < ar.IdentifiabilityTest.thresh;
     ar.IdentifiabilityTest.message{end+1} = sprintf('\nModel is structurally non-identifiable.\n\n');
     anzNI = sum(abs(ar.IdentifiabilityTest.dp)>0.1*ar.IdentifiabilityTest.radius);
     ar.IdentifiabilityTest.p_nonIdentifiable = ar.pLabel(ar.IdentifiabilityTest.dp_order(1:anzNI));
+    isidentifiable = 0;
 else
     ar.IdentifiabilityTest.p_nonIdentifiable = cell(0);
     ar.IdentifiabilityTest.message{end+1} = sprintf('\nModel is identifiable.\n\n');
+    isidentifiable = 1;
 end
 
 if ~silent

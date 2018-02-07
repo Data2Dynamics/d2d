@@ -1,0 +1,20 @@
+DESCRIPTION
+"data def mod 112"
+
+PREDICTOR
+T    T  "min"     "time"	0	100
+
+INPUTS
+
+OBSERVABLES
+DV      C   "mg/dl"    "conc." 0	0   "GLUC"
+
+
+ERRORS
+DV    "GLUC*ERROR_prop"
+
+
+CONDITIONS
+
+RANDOM
+

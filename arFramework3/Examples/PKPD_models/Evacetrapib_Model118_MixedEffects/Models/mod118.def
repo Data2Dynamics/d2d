@@ -1,0 +1,33 @@
+DESCRIPTION
+"model 118 (DDMoRe)"
+
+
+PREDICTOR
+TIME             TIME   "min"     "time"	0	10
+
+COMPARTMENTS
+        
+STATES
+A1          C   "pM"  "conc."
+C2          C   "pM"  "conc."
+C3          C   "pM"  "conc."
+
+
+INPUTS
+
+ODES
+"- 0.3 * A1"
+"1000/V2*(0.3 * A1 - QQ/V2 * C2*V2/1000 + QQ/V3 * C3*V3/1000 - CL/V2 * C2*V2/1000 * ((1+bDOSE*DDI) * (1+bCGCL*(CGCL-93.4047))))"
+"1000/V3*(QQ/V2 * C2*V2/1000 - QQ/V3 * C3*V3/1000)"
+
+DERIVED
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+init_A1     "DDI"
+init_C2     "0"
+init_C3     "0"
+

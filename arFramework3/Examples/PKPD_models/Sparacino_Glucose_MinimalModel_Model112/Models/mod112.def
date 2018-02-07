@@ -1,0 +1,29 @@
+DESCRIPTION
+"model 112 (DDmore)"
+
+
+PREDICTOR
+T       T      "min"    "time"	 0	 100
+
+COMPARTMENTS
+        
+STATES
+GLUC       C   "mg/dl"  "conc."
+XX       C   "\mu U/ml"  "conc."
+
+INPUTS
+//blabla    "inputspline(T, number of knots, TIME list, other list)", for number of knots, TIME list and other list see SplineTextGeneration112
+sINS    C   "au"    conc    "inputspline(T, 25, [-1, 0, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 40, 60, 80, 100, 120, 140, 160, 180, 210, 240, 300, 301], [8, 8, 39, 62, 69, 62, 61, 52, 48, 38, 29, 27, 25, 14, 10, 8, 7, 8, 8, 7, 7, 7, 7, 7, 7])"    "spline"
+
+ODES
+//Gb = 82, Ib = 7, glucose/insulin concentration in steady state
+"-(SG + XX)*GLUC + SG*82"
+"-P2 * (XX - SI*(sINS-7))"
+
+DERIVED
+
+CONDITIONS
+init_GLUC   "G0"
+init_XX   "0"
+
+
