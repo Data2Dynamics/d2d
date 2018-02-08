@@ -25,6 +25,13 @@
 %     Method:
 %       Pre-equilibration can be applied by using arSteadyState.
 %       Invoke: help arSteadyState for more information on how to set this up
+%     Note:
+%       In many systems, it is possible to calculate sensitivities faster
+%       using the implicit function theorem. Enable this functionality by
+%       calling arFastSensis. For this, the model jacobian must be full  
+%       rank (no conserved pools may exist in the model). One can ensure 
+%       this by invoking arReduce after loading the model but prior to 
+%       loading data.
 %
 % CONSTRAINT BASED STEADY STATES
 %   Steady state imposition by means of penalized optimization.
