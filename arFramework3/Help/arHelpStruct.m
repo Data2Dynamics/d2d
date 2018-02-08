@@ -89,3 +89,5 @@
 %     - Plots               Contains information on how the plots are
 %                           linked to the data
 %
+
+help arHelpStruct;

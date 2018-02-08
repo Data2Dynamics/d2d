@@ -43,6 +43,9 @@ warning('on','MATLAB:rmpath:DirNotFound')
 if(exist('pleInit','file') == 0)
     addpath([ar_path '/PLE'])
 end
+if(exist('arHelpStruct','file') == 0)
+    addpath([ar_path '/Help'])
+end
 if(exist('doPPL','file') == 0)
     addpath([ar_path '/PPL'])
 end

@@ -68,3 +68,5 @@
 %     "gif_amp_trans*(1-exp(-t/gif_timescale_sust))*exp(-t/(gif_timescale_trans)) + gif_amp_sust*(1-exp(-t/gif_timescale_sust))"
 %       The function has three parameters, two amplitudes (gif_amp_trans and gif_amp_sust) and two time scales (gif_timescale_trans 
 %       and gif_timescale_sust), that encode the transient and sustained parts.
+
+help arhelpInputs

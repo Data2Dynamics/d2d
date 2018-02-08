@@ -52,3 +52,5 @@
 %   of the data not as variance! An example for this usage can be found in 
 %   the example application /Example/Swameye_PNAS2003.
 %
+
+help arHelpObservables;
