@@ -103,7 +103,7 @@ if any(ar.type==3)
     
     removeL1path = true;
     ar_path = fileparts(which('arInit.m'));
-    addpath([ar_path '/l1/trdog'])
+    addpath([ar_path '/L1/trdog'])
 end
 
 fit = struct([]);
@@ -481,7 +481,7 @@ if(isfield(ar, 'ms_count_snips') && ar.ms_count_snips>0)
 end
 
 if removeL1path
-    rmpath([ar_path '/l1/trdog'])
+    rmpath([ar_path '/L1/trdog'])
 end
 
 ar.p(ar.qFit==1) = pFit;

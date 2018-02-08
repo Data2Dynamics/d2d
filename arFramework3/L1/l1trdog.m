@@ -1,7 +1,7 @@
 function l1trdog
 
-checksum_orig = 'B7367382AFBDBAE745D195ADDCAF7AA4'; % trdog.m from Mathworks
-checksum_l1   = '67AF8E95E14AF615DFAB379CA542FD6C'; % Modified trdog.m
+checksum_orig = {'B7367382AFBDBAE745D195ADDCAF7AA4','C4919D5DCE5CD616FC7A0F84B42EE804'}; % trdog.m from Mathworks
+checksum_l1   = {'67AF8E95E14AF615DFAB379CA542FD6C','f311e0c5dd8243c8e90166b03d48f17e'}; % Modified trdog.m
 
 trpath = which('trdog','-all');
 ar_path = fileparts(which('arInit.m'));
@@ -9,10 +9,10 @@ ar_path = fileparts(which('arInit.m'));
 trd_orig = 0;
 trd_l1   = 0;
 for i = 1:length(trpath)
-    if strcmp(md5(trpath{i}),checksum_orig)
+    if any(strcmpi(md5(trpath{i}),checksum_orig))
         % found original trdog.m
         trd_orig = i;
-    elseif strcmp(md5(trpath{i}),checksum_l1)
+    elseif strcmpi(md5(trpath{i}),checksum_l1)
         % found modified trdog.m
         trd_l1 = i;
     end
