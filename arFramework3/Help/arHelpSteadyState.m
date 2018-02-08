@@ -45,3 +45,5 @@
 %         ar.model(jm).condition(jc).stdSteadyState(:) = std_val;
 %       Note: You can find the condition using arShowDataConditionStructure.
 %
+
+help arHelpSteadyState
