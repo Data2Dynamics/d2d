@@ -237,6 +237,9 @@ try
                 plePlot(jk);
             end
         end
+        if(isfield(ar.ple, 'continuousSave') && ar.ple.continuousSave)
+            pleSave(ar.ple);
+        end
             
         if(feval(ar.ple.merit_fkt) > ar.ple.merit+dchi2*1.2)
             break
@@ -307,6 +310,9 @@ try
             try 
                 plePlot(jk);
             end
+        end
+        if(isfield(ar.ple, 'continuousSave') && ar.ple.continuousSave)
+            pleSave(ar.ple);
         end
             
         if(feval(ar.ple.merit_fkt) > ar.ple.merit+dchi2*1.2)

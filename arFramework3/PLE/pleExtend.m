@@ -81,7 +81,7 @@ warning('off', 'MATLAB:nearlySingularMatrix');
 ar.ple.conf_labels = {'Hessian', 'PLE'};
 
 %% Algorithm
-
+ar.ple.finished = 0;
 if(~ar.ple.breakon_point)
     dchi2 = ar.ple.dchi2;
 else
@@ -155,6 +155,9 @@ if(samplesize>0)
 
                 if(ar.ple.showCalculation)
                     plePlot(jk);
+                end
+                if(isfield(ar.ple, 'continuousSave') && ar.ple.continuousSave)
+                    pleSave(ar.ple);
                 end
 
                 if(feval(ar.ple.merit_fkt) > ar.ple.merit+dchi2*1.2)
@@ -236,6 +239,9 @@ else
 
                 if(ar.ple.showCalculation)
                     plePlot(jk);
+                end
+                if(isfield(ar.ple, 'continuousSave') && ar.ple.continuousSave)
+                    pleSave(ar.ple);
                 end
 
                 if(feval(ar.ple.merit_fkt) > ar.ple.merit+dchi2*1.2)
@@ -391,6 +397,6 @@ end
 % else
 %     fprintf('PLE#%i suggesting: %s (point-wise)\n', jk, newIDlables{ar.ple.IDstatus_point(jk)});
 % end
-
+ar.ple.finished = 1;
 pleSave(ar.ple)
 
