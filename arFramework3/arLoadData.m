@@ -368,6 +368,7 @@ for j=1:length(ar.model(m).data(d).fy)
     
     % exclude parameters form model definition
     ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).px);
+    ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).pu);
 end
 
 % ERRORS
@@ -459,6 +460,7 @@ for j=1:length(ar.model(m).data(d).fystd)
     
     % exclude parameters form model definition
     ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).px);
+    ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).pu);
 end
 
 % DERIVED
