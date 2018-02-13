@@ -90,6 +90,7 @@ function ar = arInitFields(ar)
         ...                                                             % Simulation based equilibration settings
         {'init_eq_step',                100.0}, ...                     %   Simulation time of initial equilibration attempt
         {'eq_tol',                      1e-8}, ...                      %   Value below which all components of dxdt have to fall to be considered equilibrated
+        {'eq_rtol',                     1e-8}, ...                      %   Relative value below which all components of dxdt have to fall to be considered equilibrated
         {'max_eq_steps',                20}, ...                        %   Maximum number of times the equilibration time is extended
         {'eq_step_factor',              5}, ...                         %   Factor by which the equilibration time is extended when dxdt isn't below eq_tol
         ...                                                             % Rootfinding based equilibration settings

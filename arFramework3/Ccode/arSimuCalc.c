@@ -128,6 +128,7 @@ int    max_eq_steps;          /* Maximal equilibration steps */
 double init_eq_step;          /* Initial equilibration stepsize attempt */
 double eq_step_factor;        /* Factor with which to increase the time at each equilibration step */
 double eq_tol;                /* Absolute tolerance for equilibration */
+double eq_rtol;               /* Relative tolerance for equilibration */
 
 struct timeval t1;
 
@@ -259,6 +260,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     init_eq_step = (double) mxGetScalar(mxGetField(arconfig, 0, "init_eq_step"));
     eq_step_factor = (double) mxGetScalar(mxGetField(arconfig, 0, "eq_step_factor"));
     eq_tol = (double) mxGetScalar(mxGetField(arconfig, 0, "eq_tol"));
+    if ( mxGetField(arconfig, 0, "eq_rtol") )
+    {
+        eq_rtol = (double) mxGetScalar(mxGetField(arconfig, 0, "eq_rtol"));
+    } else {
+        eq_rtol = 0.0;
+    }
+        
 
     DEBUGPRINT0( debugMode, 2, "Loaded configuration\n" );
     
@@ -1405,10 +1413,10 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
         if ( equilibrated )
         {
             for (i=0; i<neq; i++)
-                converged = (converged && ( (equilibrated[i] < 0.1) || ( fabs(returndxdt[i])<eq_tol ) ) );
+                converged = ( converged && ( (equilibrated[i] < 0.1) || ( (fabs(returndxdt[i])<eq_tol) || (fabs(returndxdt[i]) < fabs(eq_rtol * Ith(x, i+1))) ) ) );
         } else {
             for (i=0; i<neq; i++)
-                converged = (converged && fabs(returndxdt[i])<eq_tol );
+                converged = ( converged && ( (fabs(returndxdt[i])<eq_tol) || (fabs(returndxdt[i]) < fabs(eq_rtol * Ith(x, i+1))) ) );
         }
         
         /* Oh no, we didn't make it! Terminate anyway. */
