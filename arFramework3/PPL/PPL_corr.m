@@ -73,7 +73,7 @@ function [chi2_out, xSim, exitflag] = PPL_corr(m, c, jx, xstd, t_tmp, qLog10, ta
                 if(qLog10)
                         xSim = log10(xSim);
                 end	
-                res(end+1) = (xExp-xSim)/xstd;
+                res(end+1) = (xExp_tmp-xSim)/xstd;
 
                 if(nargout>1 && ar.config.useSensis)
 
