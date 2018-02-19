@@ -117,7 +117,7 @@ function t = PPL_init(m,c,t,ix,takeY)
         ar.model(m).(data_cond)(c).ppl.corr_low = nan(nsteps, size(ar.model(m).(data_cond)(c).([x_y 'ExpSimu']),2));    
     end
     arSimu(false, true, true);
-    if(~ar.ppl.options.onlyProfile)
+    if(~ar.ppl.options.integrate)
         for jx=1:length(ix)
             ar.model(m).(data_cond)(c).ppl.t(:,ix(jx)) = nan;
             ar.model(m).(data_cond)(c).ppl.x_low(:,ix(jx)) = nan;

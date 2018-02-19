@@ -1,4 +1,4 @@
-function [xFit, ps] = xstart_ppl(m, c, jx, t, doPPL, xstd, pReset, chi2start, whichT, takeY, save, dir, xFit, onlyProfile)
+function [xFit, ps] = xstart_ppl(m, c, jx, t, doPPL, xstd, pReset, chi2start, whichT, takeY, save, dir, xFit, integrate)
 global ar;
 arWaitbar(0);
 
@@ -9,8 +9,8 @@ if(~exist('xFit','var'))
     xFit = 1.;
     save = true;
 end
-if(~exist('onlyProfile','var'))
-    onlyProfile = false;
+if(~exist('integrate','var'))
+    integrate = false;
 end
 if(takeY)
     data_cond = 'data';
@@ -158,7 +158,7 @@ for ts = 1:length(t)
         fitted_tmp([kind_high_tmp kind_high_tmp+1]), chi2start+ar.ppl.dchi2);
     end      
     
-    if ~onlyProfile
+    if ~integrate
         if((dir==1 && isinf(ub_tmp)) || (dir==-1 && isinf(lb_tmp)))
             fprintf('ERROR: no bound found at t=%d \n', t_tmp);
             if(takeY)
@@ -187,7 +187,7 @@ for ts = 1:length(t)
     end
 end
 %write LB/UB in ar struct
-    if(save && onlyProfile && dir==0 && length(t)>1)        
+    if(save && integrate && dir==0 && length(t)>1)        
         struct_vec = {'FineUB','FineLB'};
         low_high_vec = {'ub_fit','lb_fit'};
         for ilh=1:2

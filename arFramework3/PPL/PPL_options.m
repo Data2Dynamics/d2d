@@ -2,13 +2,13 @@ function options = PPL_options(varargin)
 global ar
 % Set options for calculation of prediction profile likelihood
 
+% Integration : Don't integrate prediction/validation confidence line over
+% time, just compute profiles for specified t (default is false)
+%
 % gammas : vector of correction strengths for computation of integration
 % steps for the vector of states ix (default is 0.1 for all ix)
 %
 % stepsize : Integration steps in time, e.g. 1, 0.5 ... (default is tFine stepsize)
-%
-% onlyProfile : Don't integrate prediction/validation confidence line over
-% time, just compute profiles for specified t (default is false)
 %
 % tEnd : optional stopping time for the confidence band integration
 % (default is tLim(end))
@@ -43,10 +43,10 @@ global ar
 % Helge Hass, 2014 (helge.hass@fdm.uni-freiburg.de)
 
 if (nargin == 0) && (nargout == 0)
-  fprintf('          Gammas: [ vector of correction strengths {1/stepsize} ]\n');
-  fprintf('        stepsize: [ integration step size {tFine} ]\n');
-  fprintf(['     onlyProfile: [ only Profiles for time vector {true} ' ...
+  fprintf(['     Integrate: [ only Profiles for time vector {true} or ' ...
            '| Integration: false ]\n']);
+  fprintf('          Gamma_factor: [ vector of correction strengths {1/stepsize} ]\n');
+  fprintf('        stepsize: [ integration step size {tFine} ]\n');  
   fprintf('            tEnd: [ Alternative integration endpoint ]\n'); 
   fprintf('    rel_increase: [ %% of x increase in profile calculation {0.15} ]\n');
   fprintf(['        ed_steps: [ Integration {true} | or parallel to initial trajectory: ' ...
@@ -66,7 +66,7 @@ end
 Names = [
     'gammas          '
     'stepsize        '
-    'onlyProfile     '
+    'integrate       '
     'tEnd            '
     'rel_increase    '
     'ed_steps        '             
@@ -74,7 +74,7 @@ Names = [
     'backward        '
     'xstd            '
     'doPPL           '
-    'n_steps_profile         ' 
+    'n_steps_profile ' 
     'whichT          '
     'dir             '
     'alpha_level     '
@@ -82,7 +82,7 @@ Names = [
 
 %Set some default options
 if(~isfield(ar.ppl,'options'))
-    ar.ppl.options.onlyProfile = true;
+    ar.ppl.options.integrate = true;
     ar.ppl.options.rel_increase = 0.15;
     ar.ppl.options.ed_steps = true;
     ar.ppl.options.fineInt = true;

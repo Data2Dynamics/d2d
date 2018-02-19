@@ -21,7 +21,7 @@
 function doPPL(m, c, ix, t, takeY, options) % model, condition, states of interest, 
 
     global ar
-    
+    ar.config.optim.Jacobian = 'on';
     if nargin < 6
       options = [];
     end
@@ -29,12 +29,10 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         fprintf('Please specify the model, condition/data index, which states should be integrated \n, the time points and if an observation or internal state should be used. \n');
         return;  
     end
-
     if(~exist('takeY','var') || isempty(takeY))
         takeY = true;
         error('Not specified whether PBs on observation or internal state should be calculated. \n');
     end
-
     if(~exist('ix','var') || isempty(ix))
         fprintf('No specific state given, thus all are taken!\n');
         if(takeY)
@@ -43,6 +41,15 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
             ix = 1:length(ar.model(m).xNames);
         end
     end
+    
+    %fill temporary struct
+    ppl_general_struct = struct;
+    ppl_general_struct.m = m;
+    ppl_general_struct.c = c;
+    ppl_general_struct.ix = ix;
+    ppl_general_struct.t = t;
+    ppl_general_struct.takeY = takeY;
+    
     confirm_options = PPL_options(options);
     fprintf(confirm_options)
     % Initialize PPL struct, set values to NaN that are newly computed
@@ -74,7 +81,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         ppl_vpl = '';
     end
     
-    if(ar.ppl.options.doPPL && ~ar.ppl.options.onlyProfile)
+    if(ar.ppl.options.doPPL && ~ar.ppl.options.integrate)
         warning('Integration of confidence bands are not maintained and are not robust yet. Try approximating them by prediction bands with narrowing measurement error. \n')
         return;
     end 
@@ -102,10 +109,10 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         end
         
         %Run prediction profile likelihood for given time points
-        xstart_ppl(m, c, ix(jx), t, ar.ppl.options.doPPL, ar.ppl.options.xstd, pReset, chi2start, whichT, takeY, true, 0, [], ar.ppl.options.onlyProfile);
+        xstart_ppl(m, c, ix(jx), t, ar.ppl.options.doPPL, ar.ppl.options.xstd, pReset, chi2start, whichT, takeY, true, 0, [], ar.ppl.options.integrate);
         
         %Without integration, stop calculation here
-        if(ar.ppl.options.onlyProfile)
+        if(ar.ppl.options.integrate)
             if(takeY)
                 arLink(true,0.,true,ix(jx), c, m,NaN);
             end
