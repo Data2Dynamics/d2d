@@ -32,6 +32,12 @@ else
 end
 qLog10 = ar.ppl.qLog10;
 
+% optimizer settings (set only once)
+fittederrors=ar.config.fiterrors;
+ar.config.fiterrors=0;
+fit_bkp = ar.qFit(ar.qError==1);
+ar.qFit(ar.qError==1)=2;
+
 if(~isfield(ar.model(m).(data_cond)(c),'ppl'))
     error('There is no ppl calculated!\n');
 end
@@ -245,3 +251,6 @@ for ix=xs_withPPL
     xlabel(g, sprintf('%s [%s]', ar.model(m).tUnits{3}, ar.model(m).tUnits{2}));
     ylabel(sprintf('%s [%s]', ar.model(m).xUnits{ix,3}, ar.model(m).xUnits{ix,2}))
 end
+
+ar.config.fiterrors=fittederrors;
+ar.qFit(ar.qError==1)=fit_bkp;
