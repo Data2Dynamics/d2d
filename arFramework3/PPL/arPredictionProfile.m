@@ -1,4 +1,5 @@
-function [xFit, ps] = xstart_ppl(m, c, jx, t, doPPL, xstd, pReset, chi2start, whichT, takeY, save, dir, xFit, integrate)
+function [xFit, ps] = arPredictionProfile(t, general_struct, save, dir, xFit)
+
 global ar;
 arWaitbar(0);
 
@@ -9,37 +10,37 @@ if(~exist('xFit','var'))
     xFit = 1.;
     save = true;
 end
-if(~exist('integrate','var'))
-    integrate = false;
-end
-if(takeY)
-    data_cond = 'data';
-    x_y = 'y';
-else
-    data_cond = 'condition';
-    x_y = 'x';
-end
-if(~doPPL)
-    ppl_vpl = '_vpl';
-else
-    ppl_vpl = '';
-end
-ntot = ar.ppl.options.n_steps_profile;
-tcount = 1;
+
+%fill temporary variables
+pReset = ar.p;
+data_cond = general_struct.data_cond;
+x_y = general_struct.x_y;
+ppl_vpl = general_struct.ppl_vpl;
+m=general_struct.m;
+c=general_struct.c; 
+jx=general_struct.jx; 
+takeY=general_struct.takeY;
+chi2start = general_struct.chi2start;
+
+integrate = ar.ppl.options.integrate;
+xstd = ar.ppl.options.xstd;
+doPPL=ar.ppl.options.doPPL;
+
 for ts = 1:length(t)
     t_tmp = t(ts);
     if(isnan(t_tmp))
         continue;
     end
     %if(save)
-    ts_tmp = find(ar.model(m).(data_cond)(c).ppl.tstart(:,jx) == t_tmp);
-    if(ts == whichT && save)
-        ar.model(m).(data_cond)(c).ppl.t(1,jx) = t(ts);
-    end
+    ts_tmp = find(ar.model(m).(data_cond)(c).ppl.ts_profile(:,jx) == t_tmp);
     %Skip calculation if it already exists
-    if(save && ((doPPL && ~isnan(ar.model(m).(data_cond)(c).ppl.ub_fit(ts_tmp,jx))) ...
-            || (~doPPL && ~isnan(ar.model(m).(data_cond)(c).ppl.ub_fit_vpl(ts_tmp,jx)))))
+    if(save && ((doPPL && ~isnan(ar.model(m).(data_cond)(c).ppl.ppl_ub_threshold_profile(ts_tmp,jx))) ...
+            || (~doPPL && ~isnan(ar.model(m).(data_cond)(c).ppl.vpl_ub_threshold_profile(ts_tmp,jx)))) ...
+            && ~(ts == ar.ppl.options.whichT && ar.model(m).(data_cond)(c).ppl.([ppl_vpl 'ub_threshold_profile'])(ts_tmp, jx) ~= ar.model(m).(data_cond)(c).ppl.band.(['xs_' ppl_vpl 'upperBand'])(1, jx))) 
+        %last line to recalculate profile if starting time for integration is changed
+        
        fprintf('The prediction profile you want to compute for t=%d and state %d already exists. If you want to overwrite them, delete the value at ar.model.data/condition.ppl.ub_fit(_vpl) \n',t_tmp,jx)
+
        continue; 
     end            
    
@@ -59,9 +60,8 @@ for ts = 1:length(t)
     fprintf('Calculating PPL for t=%d and state x=%i \n',t(ts),jx);
     % go up
     if(save || dir==1)
-        npre = 0;
-        [xtrial_up, xfit_up, ppl_up, vpl_up, ps_up, tcount] = ppl(m, c, jx, it, t_tmp, doPPL, xSim, ...
-            chi2start, 1, ar.ppl.qLog10, ntot, xstd, npre, tcount, takeY);    
+        [xtrial_up, xfit_up, ppl_up, vpl_up, ps_up] = ppl(general_struct, it, t_tmp, xSim, ...
+            1);    
                
         ar.p = pReset;  
         arCalcMerit();       
@@ -71,15 +71,11 @@ for ts = 1:length(t)
         ppl_up = chi2start+0.1;
         vpl_up = chi2start+0.1;
         ps_up = ar.p;
-        tcount = 1;
     end
     % go down 
     if(save || dir==-1)
-        if(dir==-1)
-            npre = 0;
-        end
-        [xtrial_down, xfit_down, ppl_down, vpl_down, ps_down, tcount] = ppl(m, c, jx, it, t_tmp, doPPL, xSim, ...
-            chi2start, -1, ar.ppl.qLog10, ntot, xstd, npre, tcount, takeY);
+        [xtrial_down, xfit_down, ppl_down, vpl_down, ps_down] = ppl(general_struct, it, t_tmp, xSim, ...
+            -1);
         % reset parameters
         ar.p = pReset;
     else
@@ -88,7 +84,6 @@ for ts = 1:length(t)
         ppl_down = chi2start+0.1;
         vpl_down = chi2start+0.1;
         ps_down = ar.p;
-        tcount = 1;
         ar.p = pReset;
     end
     
@@ -134,7 +129,7 @@ for ts = 1:length(t)
             warning(['Multiple likelihood values are assigned to the same model fit. ' ...
                      'check model uncertainty and fits, or set more strict integrator tolerances!'])
         end
-        kind_low_tmp = min(find(q_chi2good==1));
+        kind_low_tmp = find(q_chi2good==1,1,'first');
         if(length(kind_low_tmp)>1)
             kind_low_tmp = kind_low_tmp(1);
         end
@@ -150,7 +145,7 @@ for ts = 1:length(t)
             warning(['Multiple likelihood values are assigned to the same model fit. ' ...
                      'check model uncertainty and fits, or set more strict integrator tolerances!'])
         end
-        kind_high_tmp = max(find(q_chi2good==1));   
+        kind_high_tmp = find(q_chi2good==1,1,'last');   
         if(length(kind_high_tmp)>1)
             kind_high_tmp = kind_high_tmp(end);
         end
@@ -158,11 +153,11 @@ for ts = 1:length(t)
         fitted_tmp([kind_high_tmp kind_high_tmp+1]), chi2start+ar.ppl.dchi2);
     end      
     
-    if ~integrate
+    if integrate && ~save
         if((dir==1 && isinf(ub_tmp)) || (dir==-1 && isinf(lb_tmp)))
             fprintf('ERROR: no bound found at t=%d \n', t_tmp);
             if(takeY)
-                arLink(true,0.,true,ix(jx), c, m,NaN);
+                arLink(true,0.,true,jx, c, m,NaN);
             end
             break;
         end
@@ -175,42 +170,68 @@ for ts = 1:length(t)
         end
     end
     if(save)
-        ar.model(m).(data_cond)(c).ppl.xtrial(ts_tmp, jx,:) = xtrial_tmp;
-        ar.model(m).(data_cond)(c).ppl.xfit(ts_tmp, jx,:) = xfit_tmp;
-        ar.model(m).(data_cond)(c).ppl.ppl(ts_tmp, jx,:) = ppl_tmp;
-        ar.model(m).(data_cond)(c).ppl.vpl(ts_tmp, jx,:) = vpl_tmp;
-        ar.model(m).(data_cond)(c).ppl.ps(ts_tmp, jx,:,:) = ps_tmp;
-        ar.model(m).(data_cond)(c).ppl.(['lb_fit' ppl_vpl])(ts_tmp, jx) = lb_tmp;
-        ar.model(m).(data_cond)(c).ppl.(['ub_fit' ppl_vpl])(ts_tmp, jx) = ub_tmp;
-        ar.model(m).(data_cond)(c).ppl.(['kind_high' ppl_vpl])(ts_tmp, jx) = kind_high_tmp;
-        ar.model(m).(data_cond)(c).ppl.(['kind_low' ppl_vpl])(ts_tmp, jx) = kind_low_tmp;                
+        ar.model(m).(data_cond)(c).ppl.xtrial_profile(ts_tmp, jx,:) = xtrial_tmp;
+        ar.model(m).(data_cond)(c).ppl.xfit_profile(ts_tmp, jx,:) = xfit_tmp;
+        ar.model(m).(data_cond)(c).ppl.ppl_likelihood_profile(ts_tmp, jx,:) = ppl_tmp;
+        ar.model(m).(data_cond)(c).ppl.vpl_likelihood_profile(ts_tmp, jx,:) = vpl_tmp;
+        ar.model(m).(data_cond)(c).ppl.ps_profile(ts_tmp, jx,:,:) = ps_tmp;
+        ar.model(m).(data_cond)(c).ppl.([ppl_vpl 'lb_threshold_profile'])(ts_tmp, jx) = lb_tmp;
+        ar.model(m).(data_cond)(c).ppl.([ppl_vpl 'ub_threshold_profile'])(ts_tmp, jx) = ub_tmp;       
+        if(ts == ar.ppl.options.whichT && integrate)
+            ar.model(m).(data_cond)(c).ppl.band.tFine_band(1,jx) = t(ts);
+            for dir = [-1 1]
+                if(dir == 1)
+                    high_low = 'upperBand';
+                    xFit = ub_tmp;
+                    ps = ps_tmp(kind_high_tmp,:);
+                else
+                    high_low = 'lowerBand';
+                    xFit = lb_tmp;
+                    ps = ps_tmp(kind_low_tmp,:);     
+                end           
+                ar.model(m).(data_cond)(c).ppl.band.(['xs_' ppl_vpl high_low])(1, jx) = xFit;  
+                ar.model(m).(data_cond)(c).ppl.band.(['ps_' high_low])(1, jx,:) = ps; 
+            end
+        end
     end
 end
 %write LB/UB in ar struct
-    if(save && integrate && dir==0 && length(t)>1)        
+    if(save && ~integrate && dir==0 && length(t)>1)        
         struct_vec = {'FineUB','FineLB'};
-        low_high_vec = {'ub_fit','lb_fit'};
+        low_high_vec = {'ub','lb'};
         for ilh=1:2
             struct_string = struct_vec{ilh};
-            ppl_string = [low_high_vec{ilh} ppl_vpl];
+            ppl_string = [ppl_vpl low_high_vec{ilh} '_threshold_profile'];
             if(takeY)
                 struct_string = ['y' struct_string];
             else
                 struct_string = ['x' struct_string];
             end            
-            ar.model(m).(data_cond)(c).(struct_string)(ar.model(m).(data_cond)(c).tFine<=max(ar.model(m).(data_cond)(c).ppl.tstart(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)))),jx) = ...
-                        interp1(ar.model(m).(data_cond)(c).ppl.tstart(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)),jx),...
-                        ar.model(m).(data_cond)(c).ppl.(ppl_string)(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)),jx),...
-                        ar.model(m).(data_cond)(c).tFine(ar.model(m).(data_cond)(c).tFine<=max(ar.model(m).(data_cond)(c).ppl.tstart(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx))))),...
-                        'pchip',NaN);            
+            %Update with
+            ar.model(m).(data_cond)(c).(struct_string)(1:length(ar.model(m).(data_cond)(c).tFine),jx) = ...
+                interp1(ar.model(m).(data_cond)(c).ppl.ts_profile(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)),jx),...
+                ar.model(m).(data_cond)(c).ppl.(ppl_string)(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)),jx),...
+                ar.model(m).(data_cond)(c).tFine,'pchip',NaN);   
+            
         end
     end
 end
 
 
-function [xtrial, xfit, ppl, vpl, ps, tcount] = ppl(m, c, ix, it, t, doPPL, xSim,  chi2start, direction, qLog10, n, xstd, npre, tcount, takeY)
+function [xtrial, xfit, ppl, vpl, ps] = ppl(general_struct, it, t, xSim, direction)
 
 global ar
+
+m=general_struct.m;
+c=general_struct.c; 
+ix=general_struct.jx; 
+takeY=general_struct.takeY;
+chi2start = general_struct.chi2start;
+qLog10 = ar.ppl.qLog10;
+xstd = ar.ppl.options.xstd;
+doPPL=ar.ppl.options.doPPL;
+n = ar.ppl.options.n_steps_profile;
+tcount = 1;
 
 xtrial = nan(1,n);
 xfit = nan(1,n);
@@ -229,9 +250,9 @@ xExp = xSim;
 for j = 1:n
     if(toc>tcount)
         if(direction>0)
-            arWaitbar((j+npre), n, sprintf('PPL (up) for %s at t=%g %i/%i', xLabel, t, j, n));
+            arWaitbar((j), n, sprintf('PPL (up) for %s at t=%g %i/%i', xLabel, t, j, n));
         else
-            arWaitbar((j+npre), n, sprintf('PPL (down) for %s at t=%g %i/%i', xLabel, t, j, n));
+            arWaitbar((j), n, sprintf('PPL (down) for %s at t=%g %i/%i', xLabel, t, j, n));
         end
         tcount = tcount + 0.5; % update every half second
     end

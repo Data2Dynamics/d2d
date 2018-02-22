@@ -2,11 +2,10 @@ function options = PPL_options(varargin)
 global ar
 % Set options for calculation of prediction profile likelihood
 
-% Integration : Don't integrate prediction/validation confidence line over
-% time, just compute profiles for specified t (default is false)
+% Integration : Integrate prediction/validation confidence line over
+% time, or just compute profiles for specified t (default is false)
 %
-% gammas : vector of correction strengths for computation of integration
-% steps for the vector of states ix (default is 0.1 for all ix)
+% gamma : correction strength for computation of integration steps (default is 1)
 %
 % stepsize : Integration steps in time, e.g. 1, 0.5 ... (default is tFine stepsize)
 %
@@ -43,9 +42,9 @@ global ar
 % Helge Hass, 2014 (helge.hass@fdm.uni-freiburg.de)
 
 if (nargin == 0) && (nargout == 0)
-  fprintf(['     Integrate: [ only Profiles for time vector {true} or ' ...
-           '| Integration: false ]\n']);
-  fprintf('          Gamma_factor: [ vector of correction strengths {1/stepsize} ]\n');
+  fprintf(['     Integrate: [ Integrate prediction profiles (true) or ' ...
+           '| no integration: {false} ]\n']);
+  fprintf('          Gamma_factor: [ correction strength {1} ]\n');
   fprintf('        stepsize: [ integration step size {tFine} ]\n');  
   fprintf('            tEnd: [ Alternative integration endpoint ]\n'); 
   fprintf('    rel_increase: [ %% of x increase in profile calculation {0.15} ]\n');
@@ -53,18 +52,18 @@ if (nargin == 0) && (nargout == 0)
            'false ]\n']);
   fprintf('         fineInt: [ Correction cycle after each step {true} | false ]\n');  
   fprintf('        backward: [ Integrate backwards in time: true | {false} ]\n');
-  fprintf('            xstd: [ standard dev of auxiliary data point {0.1} ]\n');
+  fprintf('            xstd: [ standard dev of auxiliary data point {auto calculation} ]\n');
   fprintf('           doPPL: [ true = prediction or false = validation profiles {false} ]\n');
-  fprintf('         n_steps_profile: [ steps of profile in each direction {100} ]\n');
+  fprintf('         n_steps_profile: [ steps of profile in each direction {50} ]\n');
   fprintf('          whichT: [ seed for integration (in time vector) {1} ]\n');
-  fprintf('             dir: [ only upper(1)/lower(-1) profile? {0} ]\n');
+  fprintf('             dir: [ only upper(1)/lower(-1) profile or both {0}? ]\n');
   fprintf('     alpha_level: [ Confidence level {0.05} ]\n');
   fprintf('\n');
   return;
 end
 
 Names = [
-    'gammas          '
+    'gamma           '
     'stepsize        '
     'integrate       '
     'tEnd            '
@@ -82,17 +81,18 @@ Names = [
 
 %Set some default options
 if(~isfield(ar.ppl,'options'))
-    ar.ppl.options.integrate = true;
+    ar.ppl.options.integrate = false;
     ar.ppl.options.rel_increase = 0.15;
     ar.ppl.options.ed_steps = true;
     ar.ppl.options.fineInt = true;
     ar.ppl.options.backward = false;
     ar.ppl.options.xstd = 0.1;
     ar.ppl.options.doPPL = false;
-    ar.ppl.options.n_steps_profile = 100;
+    ar.ppl.options.n_steps_profile = 50;
     ar.ppl.options.whichT = 1;
     ar.ppl.options.dir = 0;
     ar.ppl.options.alpha_level = 0.05;
+    ar.ppl.options.gamma = 1;
 end
 
 m = size(Names,1);

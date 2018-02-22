@@ -18,7 +18,7 @@
 %
 % Helge Hass, 2014 (helge.hass@fdm.uni-freiburg.de)
 
-function doPPL(m, c, ix, t, takeY, options) % model, condition, states of interest, 
+function arPPL(m, c, ix, t, takeY, options) % model, condition, states of interest, 
 
     global ar
     ar.config.optim.Jacobian = 'on';
@@ -42,53 +42,61 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         end
     end
     
+    % optimizer settings (set only once)
+    fittederrors=ar.config.fiterrors;
+    ar.config.fiterrors=0;
+    fit_bkp = ar.qFit(ar.qError==1);
+    ar.qFit(ar.qError==1)=2;
+    
     %fill temporary struct
     ppl_general_struct = struct;
     ppl_general_struct.m = m;
     ppl_general_struct.c = c;
-    ppl_general_struct.ix = ix;
     ppl_general_struct.t = t;
     ppl_general_struct.takeY = takeY;
+    ppl_general_struct.x_vector = ix;
     
     confirm_options = PPL_options(options);
     fprintf(confirm_options)
     % Initialize PPL struct, set values to NaN that are newly computed
-    t = PPL_init(m,c,t,ix,takeY);
+    t = PPL_init(ppl_general_struct);
     whichT = ar.ppl.options.whichT;
     dir = ar.ppl.options.dir;
     
-    pReset = ar.p;
-    chi2start = arGetMerit('chi2');
+    ppl_general_struct.pReset = ar.p;
+    ppl_general_struct.chi2start = arGetMerit('chi2');
 
     tic;
     
     %Set vars distinguishing different setups
     if(takeY)
         data_cond = 'data';
+        x_y = 'y';
     else
         data_cond = 'condition';
+        x_y = 'x';
     end
-
-    if(dir==1)
-        high_low = '_high';
-    elseif(dir==-1)
-        high_low = '_low';
-    end
+    ppl_general_struct.data_cond = data_cond;
+    ppl_general_struct.x_y = x_y;
+    
 
     if(~ar.ppl.options.doPPL)
-        ppl_vpl = '_vpl';
+        ppl_vpl = 'vpl_';
     else
-        ppl_vpl = '';
+        ppl_vpl = 'ppl_';
     end
-    
-    if(ar.ppl.options.doPPL && ~ar.ppl.options.integrate)
-        warning('Integration of confidence bands are not maintained and are not robust yet. Try approximating them by prediction bands with narrowing measurement error. \n')
-        return;
+    ppl_general_struct.ppl_vpl = ppl_vpl;
+    if(ar.ppl.options.doPPL && ar.ppl.options.integrate)       
+        %reset config fields 
+        ar.config.fiterrors=fittederrors;
+        ar.qFit(ar.qError==1)=fit_bkp;
+        error('Integration of confidence bands are not maintained and are not robust yet. Try approximating them by prediction bands with narrowing measurement error. \n')
     end 
     
     %loop over states
     for jx = 1:length(ix)
         arSimu(false, true, true);
+        ppl_general_struct.jx = ix(jx);
         %try to set standard dev of data point appropriately
         if(ar.ppl.xstd_auto)  
             if(takeY)
@@ -101,7 +109,7 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
             elseif(~takeY)
                 ar.ppl.options.xstd = max(ar.model(m).condition(c).xFineSimu(:,ix(jx)))/10;
             end
-            warning('Standard deviation of the auxiliary data point was set to %.2f, reset it manually if a different value is desired! \n',ar.ppl.options.xstd)
+            warning('Standard deviation of the auxiliary data point was set to %.2e, reset it manually if a different value is desired! \n',ar.ppl.options.xstd)
         end
         if(isnan(ar.ppl.options.xstd) || ar.ppl.options.xstd == 0)
             ar.ppl.options.xstd = 0.1;
@@ -109,14 +117,14 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         end
         
         %Run prediction profile likelihood for given time points
-        xstart_ppl(m, c, ix(jx), t, ar.ppl.options.doPPL, ar.ppl.options.xstd, pReset, chi2start, whichT, takeY, true, 0, [], ar.ppl.options.integrate);
+        arPredictionProfile(t, ppl_general_struct, true, 0, []);
         
         %Without integration, stop calculation here
-        if(ar.ppl.options.integrate)
+        if(~ar.ppl.options.integrate)
             if(takeY)
                 arLink(true,0.,true,ix(jx), c, m,NaN);
             end
-            ar.p = pReset;
+            ar.p = ppl_general_struct.pReset;
             if(jx==length(ix))
                 arWaitbar(-1);
                 toc;
@@ -125,32 +133,20 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         end
         
         %Start integration function  
-        if(ar.model(m).(data_cond)(c).ppl.(['lb_fit' ppl_vpl])(whichT,ix(jx))==-Inf || ar.model(m).(data_cond)(c).ppl.(['ub_fit' ppl_vpl])(whichT,ix(jx))==Inf)
+        if(ar.model(m).(data_cond)(c).ppl.([ppl_vpl 'lb_threshold_profile'])(whichT,ix(jx))==-Inf || ar.model(m).(data_cond)(c).ppl.([ppl_vpl 'ub_threshold_profile'])(whichT,ix(jx))==Inf)
             fprintf('Starting points for Profile at t=%d not defined, check PPL computation!', t(whichT));
             if(takeY)
                 arLink(true,0.,true,ix(jx), c, m,NaN);
             end
-            ar.p = pReset;
+            ar.p = ppl_general_struct.pReset;
             break;
         else    
-            for dir_tmp = [-1 1]
-                if(dir_tmp == -1)
-                    high_low_tmp = '_low';
-                    ub_lb = 'lb';
-                else
-                    high_low_tmp = '_high';
-                    ub_lb = 'ub';
+            if(dir==0)
+                for dir_tmp = [-1 1]                   
+                    arIntegratePredBand(ppl_general_struct, dir_tmp);
                 end
-                if(~isnan(ar.model(m).(data_cond)(c).ppl.(['kind' high_low_tmp ppl_vpl])(whichT, ix(jx))))
-                    ar.model(m).(data_cond)(c).ppl.(['x' high_low_tmp ppl_vpl])(1, ix(jx))=ar.model(m).(data_cond)(c).ppl.([ub_lb '_fit' ppl_vpl])(whichT,ix(jx));
-                    ar.model(m).(data_cond)(c).ppl.(['ps' high_low_tmp])(1, ix(jx),:)=squeeze(ar.model(m).(data_cond)(c).ppl.ps(whichT,ix(jx),ar.model(m).(data_cond)(c).ppl.(['kind' high_low_tmp ppl_vpl])(whichT, ix(jx)),:));
-                end
-                if(dir==0)
-                    ppl_calc(m, c, ix(jx), ar.model(m).(data_cond)(c).ppl.(['x' high_low_tmp ppl_vpl])(1, ix(jx)), ar.model(m).(data_cond)(c).ppl.(['ps' high_low_tmp])(1, ix(jx),:), t(whichT), ar.ppl.options.doPPL, takeY, dir_tmp, ar.ppl.options.stepsize, ar.ppl.options.xstd, ar.ppl.options.ed_steps, pReset, chi2start, ar.ppl.options.backward, ar.ppl.options.fineInt);
-                end
-            end
-            if(dir~=0)
-                ppl_calc(m, c, ix(jx), ar.model(m).(data_cond)(c).ppl.(['x' high_low ppl_vpl])(1, ix(jx)), ar.model(m).(data_cond)(c).ppl.(['ps' high_low])(1, ix(jx),:), t(whichT), ar.ppl.options.doPPL, takeY, dir, ar.ppl.options.stepsize, ar.ppl.options.xstd, ar.ppl.options.ed_steps, pReset, chi2start, ar.ppl.options.backward, ar.ppl.options.fineInt);
+            else
+                arIntegratePredBand(ppl_general_struct, dir);
             end
         end
         %End of integration
@@ -159,14 +155,13 @@ function doPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         if(takeY)
             arLink(true,0.,true,ix(jx), c, m,NaN);
         end
-        ar.p = pReset;
+        ar.p = ppl_general_struct.pReset;
 
     end
     %reset config fields 
-    if(isfield(ar.ppl,'fittederrors'))
-        ar.config.fiterrors=ar.ppl.fittederrors;
-        ar.qFit(ar.qError==1)=ar.ppl.fit_bkp;
-    end
+    ar.config.fiterrors=fittederrors;
+    ar.qFit(ar.qError==1)=fit_bkp;
+    
     arCalcMerit(); 
     warning('Prediction profile plotting is enabled. To return to normal plots type ar.config.ploterrors = 0;');
     ar.config.ploterrors = -1;

@@ -146,16 +146,16 @@ for m=1:length(ar.model)
                     resi = 0;
                     for m_res=1:im-1
                         for d_res=1:length(ar.model(m_res).data)
-                            resi = resi + sum(sum(~isnan(ar.model(m_res).data(d_res).yExp)));
+                            resi = resi + numel(ar.model(m_res).data(d_res).yExp);
                         end
                     end
                     for d_res = 1:id-1
-                        resi = resi + sum(sum(~isnan(ar.model(im).data(d_res).yExp)));
+                        resi = resi + numel(ar.model(im).data(d_res).yExp);
                     end
                     for x_res = 1:ix-1
-                        resi = resi + sum(~isnan(ar.model(im).data(id).yExp(:,x_res)));
+                        resi = resi + numel(ar.model(im).data(id).yExp(:,x_res));
                     end
-                    ar.ppl.resi_tmp = resi + sum(~isnan(ar.model(im).data(id).yExp(1:ar.model(m).data(d).ppl.Added,ix)));
+                    ar.ppl.resi_tmp = resi + numel(ar.model(im).data(id).yExp(1:ar.model(m).data(d).ppl.Added,ix));
                     
                     if(add_sec)
                         ar.ppl.resi2_tmp = resi + sum(~isnan(ar.model(im).data(id).yExp(1:ar.model(m).data(d).ppl.Added2,ix)));
