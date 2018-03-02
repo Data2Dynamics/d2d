@@ -54,6 +54,7 @@ if(~isempty(antipattern))
 end
 
 ass = zeros(size(ar.p));
+different = zeros(size(ar.p));
 for j=js
     qi = ismember(pStruct.pLabel, ar.pLabel{j});
     
@@ -89,6 +90,7 @@ for j=js
             end
             
             % check bound
+            different = (ar.p<ar.lb) | (ar.p>ar.ub);
             ar.p(ar.p<ar.lb) = ar.lb(ar.p<ar.lb);
             ar.p(ar.p>ar.ub) = ar.ub(ar.p>ar.ub);
         end
@@ -109,6 +111,9 @@ for j=js
         end
         if somethingNew == 0
             newstr = '   nothing changed';
+        end
+        if ( different(j) )
+            newstr = sprintf( '%s (clamped against parameter bound)', newstr );
         end
     
         if(fixAssigned)
