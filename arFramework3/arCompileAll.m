@@ -1195,7 +1195,7 @@ if(doskip)
 end
 
 % make short strings
-data.ps = cell(length(data.p));
+data.ps = cell(size(data.p));
 for j=1:length(data.p)
     data.ps{j} = sprintf('p[%i]',j);
 end
