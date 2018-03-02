@@ -36,6 +36,6 @@ arPrint;
 
 %Compute prediction bands for tSTAT and plot them in combination with
 %validation profile thresholds for t=0, 10, 20, 30, 50 min
-% doPPL(1,1,1,[0 10 20 30 50],1);
-% ar.config.ploterrors=-1;
+% PPL_options('Integrate',true)
+% arPPL(1,1,1,[0 10 20 30 50],1);
 % arPlot2

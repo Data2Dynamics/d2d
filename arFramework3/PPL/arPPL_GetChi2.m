@@ -1,22 +1,25 @@
-%  [chi2_out, xSim, xSim2, xSim3, it] = PPL_chi2(t_tmp, doPPL_stuff, m, c, jx, takeY, qLog10, doPPL, stepsize, tmp_xFit, xstd, varargin)
+%  [chi2_out, xSim, it, xSens_tmp, xSim2_out] = arPPL_GetChi2(t_tmp, doPPL_stuff, general_struct, stepsize, tmp_xFit, varargin)
 % 
 % used by 
-%   doPPL.m
-%   PPL_int.m
-%   VPL_int.m
+%   arIntegratePredBand.m
+%   arPPL.m
 
-function [chi2_out, xSim, it] = PPL_chi2(t_tmp, doPPL_stuff, m, c, jx, takeY, qLog10, stepsize, tmp_xFit, xstd, varargin)
+function [chi2_out, xSim, it, xSens_tmp, xSim2_out] = arPPL_GetChi2(t_tmp, doPPL_stuff, general_struct, stepsize, tmp_xFit, varargin)
 
 global ar;
+
+%fill temporary variables
 pReset = ar.p;
-if(takeY)
-    data_cond = 'data';
-    x_y = 'y';
-else
-    data_cond = 'condition';
-    x_y = 'x';
-end
+data_cond = general_struct.data_cond;
+x_y = general_struct.x_y;
+m=general_struct.m;
+c=general_struct.c; 
+jx=general_struct.jx; 
+takeY=general_struct.takeY; 
+qLog10=ar.ppl.qLog10;
 p_chi2 = ar.p(ar.qFit==1);
+xstd = ar.ppl.options.xstd;
+
 if(~isempty(varargin)>0)
     if(length(varargin{1})>1)
         p_chi2 = varargin{1};   
@@ -34,7 +37,7 @@ if(doPPL_stuff)
         if(length(find(ar.model(m).(data_cond)(c).tExp==t_tmp+stepsize))>1)
             it = it+1;
         end
-        ar.model(m).(data_cond)(c).ppl.xSens_tmp = -ar.sres(ar.ppl.resi_tmp,ar.qFit==1) * xstd;  
+        xSens_tmp = -ar.sres(ar.ppl.resi_tmp,ar.qFit==1) * xstd;  
         xSim2 = ar.model(m).(data_cond)(c).yExpSimu(it,jx);
     else
         sxSim = zeros(1,length(ar.p));
@@ -47,7 +50,7 @@ if(doPPL_stuff)
         if(qLog10)
             sxSim = sxSim / 10^xSim / log(10);
         end
-        ar.model(m).(data_cond)(c).ppl.xSens_tmp = sxSim(ar.qFit==1);
+        xSens_tmp = sxSim(ar.qFit==1);
         xSim2 = ar.model(m).(data_cond)(c).xExpSimu(it,jx);
     end
 end
@@ -72,11 +75,10 @@ xSim = ar.model(m).(data_cond)(c).([x_y 'ExpSimu'])(it,jx);
 
 if(qLog10)
     xSim = log10(xSim);
-    %x_orig=log10(x_orig);
 end
 
 if(doPPL_stuff)
-    ar.ppl.xSim2 = (xSim2 - xSim)/abs(stepsize);
+    xSim2_out = (xSim2 - xSim)/abs(stepsize);
 end
 
 if(~takeY)

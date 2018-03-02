@@ -2,7 +2,7 @@
 %
 % arPPL
 
-function arPPL(m, c, ix, t, xstd)
+function arPPL_old(m, c, ix, t, xstd)
 
 global ar
 

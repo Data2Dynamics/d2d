@@ -4,6 +4,10 @@ if(~exist('sorted','var'))
     sorted = false;
 end
 
+if(istable(d))
+    d = table2cell(d);
+end
+
 [ud, ~, jd] = unique(d);
 
 maxlength = max(cellfun(@length, d));

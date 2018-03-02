@@ -1,6 +1,8 @@
 % plot prediction profile likelihood
 %
 % arPlotPPL
+% 
+% Set likelihood threshold with ar.ppl.options.alpha_level
 
 function arPlotPPL(m, c, ix, t_vec, takeY, subs_para)
 
@@ -14,6 +16,7 @@ end
 if(~exist('takeY','var') || isempty(takeY))
    takeY = true; 
 end
+
 if(takeY)
     data_cond = 'data';
 else
@@ -21,27 +24,33 @@ else
 end
 
 if(length(ix)~=1)
-    error('length of ix must be = 1');
+    error('length of ix must be = 1 \n');
 end
-% if(length(t)>1)
-%     error('length of t must be = 1');
-% end
+
+if(~isfield(ar.model(m).(data_cond)(c),'ppl') || isempty(ar.model(m).(data_cond)(c)))
+    error('There is no ppl calculated!\n');
+end
+
 if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
 
 for t = t_vec
+    qt = ar.model(m).(data_cond)(c).ppl.ts_profile(:,ix) == t;
+    if(~any(qt))
+        fprintf('Could not find time point %.1f \n',t)
+        fprintf('The calculated time points are \n')
+        ar.model(m).(data_cond)(c).ppl.ts_profile(:,ix)
+        return;
+    end
 
-% qx = ar.model(m).(data_cond)(c).ppl.ix == ix;
-qt = ar.model(m).(data_cond)(c).ppl.tstart(:,ix) == t;
-
-xtrial = squeeze(ar.model(m).(data_cond)(c).ppl.xtrial(qt,ix,:));
-xfit = squeeze(ar.model(m).(data_cond)(c).ppl.xfit(qt,ix,:));
-ppl = squeeze(ar.model(m).(data_cond)(c).ppl.vpl(qt,ix,:));
+xtrial = squeeze(ar.model(m).(data_cond)(c).ppl.xtrial_profile(qt,ix,:));
+xfit = squeeze(ar.model(m).(data_cond)(c).ppl.xfit_profile(qt,ix,:));
+ppl = squeeze(ar.model(m).(data_cond)(c).ppl.vpl_likelihood_profile(qt,ix,:));
 if(ar.ppl.options.doPPL || sum(isnan(ppl)) == length(ppl))
-    ppl = squeeze(ar.model(m).(data_cond)(c).ppl.ppl(qt,ix,:));
+    ppl = squeeze(ar.model(m).(data_cond)(c).ppl.ppl_likelihood_profile(qt,ix,:));
 end
-ps = squeeze(ar.model(m).(data_cond)(c).ppl.ps(qt,ix,:,:));
+ps = squeeze(ar.model(m).(data_cond)(c).ppl.ps_profile(qt,ix,:,:));
 
 if(ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1)
     ppl = 2*ar.ndata*log(sqrt(2*pi)) + ppl;
@@ -64,7 +73,7 @@ plot(xtrial, ppl, 'k--')
 plot(xtrial(ceil(length(xtrial)/2)), min(ppl), '*', 'Color', [.5 .5 .5], 'LineWidth', 1, 'MarkerSize', 8)
 plot(xlim, [0 0]+min(ppl)+ar.ppl.dchi2, 'r--')
 text(mean(xlim), min(ppl)+ar.ppl.dchi2, sprintf('%2i%% (ndof = %i)', (1-ar.ppl.alpha_level)*100, ...
-    ar.ppl.ndof), 'Color', 'r', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
+    1), 'Color', 'r', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
 hold off
 legend('PPL','VPL');
 title(sprintf('%s (m=%i, c=%i, t=%g)', arNameTrafo(ar.model(m).x{ix}), m, c, t));

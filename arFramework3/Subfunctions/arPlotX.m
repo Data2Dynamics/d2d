@@ -122,8 +122,8 @@ for jm = 1:length(ar.model)
                                 ar.model(jm).condition(jc).plot.u(ju,jc) = ltmp;
                             end
                             hold(g, 'on');
-                            if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
-                                    (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
+                            if((~isempty(uub) && ~isempty(ulb)) && ((ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                                    (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1)) )
                                 tmpx = [t(:); flipud(t(:))];
                                 tmpy = [uub(:,ju); flipud(ulb(:,ju))];
                                 ltmp = patch(tmpx, tmpy, tmpx*0-2*eps, 'r');
@@ -211,7 +211,7 @@ for jm = 1:length(ar.model)
                                 ar.model(jm).condition(jc).plot.xss(jx,jc) = ltmp;
                             end
                             
-                            if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                            if((~isempty(xub) && ~isempty(xlb)) && (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
                                     (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                                 tmpx = [t(:); flipud(t(:))];
                                 tmpy = [xub(:,jx); flipud(xlb(:,jx))];
@@ -297,7 +297,7 @@ for jm = 1:length(ar.model)
                             end
                             hold(g, 'on');
                             
-                            if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                            if((~isempty(zub) && ~isempty(zlb)) && (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
                                     (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                                 tmpx = [t(:); flipud(t(:))];
                                 tmpy = [zub(:,jz); flipud(zlb(:,jz))];
@@ -396,7 +396,7 @@ for jm = 1:length(ar.model)
                                 end
                                 ar.model(jm).data(jd).plot.u(ju,jt,jc) = ltmp;
                                 hold(g, 'on');
-                                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                                if((~isempty(ub) && ~isempty(lb)) && (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
                                         (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                                     tmpx = [t(:); flipud(t(:))];
                                     tmpy = [ub(:); flipud(lb(:))];
@@ -455,7 +455,7 @@ for jm = 1:length(ar.model)
                                 end
                                 ar.model(jm).data(jd).plot.x(jx,jt,jc) = ltmp;
                                 hold(g, 'on');
-                                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                                if((~isempty(ub) && ~isempty(lb)) && (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
                                         (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                                     tmpx = [t(:); flipud(t(:))];
                                     tmpy = [ub(:); flipud(lb(:))];
@@ -514,7 +514,7 @@ for jm = 1:length(ar.model)
                                 end
                                 ar.model(jm).data(jd).plot.z(jz,jt,jc) = ltmp;
                                 hold(g, 'on');
-                                if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
+                                if((~isempty(ub) && ~isempty(lb)) && (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
                                         (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
                                     tmpx = [t(:); flipud(t(:))];
                                     tmpy = [ub(:); flipud(lb(:))];
