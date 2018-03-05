@@ -2,7 +2,7 @@
 % or return base path of last arSave
 %
 % basepath = arSave(name, withSyms)
-% 
+%
 % Special case:
 % arSave('current')
 % saves to the current repository (i.e. current value of ar.config.savepath)
@@ -65,18 +65,18 @@ else
             if (~ar.config.lightSave)
                 arSaveFull(ar,withSyms);
             else
-              warning( 'ar.config.lightSave is set to true. Only saving parameter set' );
+                warning( 'ar.config.lightSave is set to true. Only saving parameter set' );
             end
             arSaveParOnly(ar, ar.config.savepath);
         else
-            if(~exist(ar.config.savepath, 'dir')) 
-                % saved before, path output requested, 
+            if(~exist(ar.config.savepath, 'dir'))
+                % saved before, path output requested,
                 % however save path does not exist anymore
                 if (~ar.config.lightSave)
                     arSaveFull(ar,withSyms);
                 else
                     warning( 'ar.config.lightSave is set to true. Only saving parameter set' );
-                end                
+                end
                 arSaveParOnly(ar, ar.config.savepath);
             end
         end
@@ -171,49 +171,17 @@ try %#ok<TRYNC>
     ar.ps_sorted = ar2.ps_sorted;
     ar.chi2s_start_sorted = ar2.chi2s_start_sorted;
     ar.chi2sconstr_start_sorted = ar2.chi2sconstr_start_sorted;
-    ar.ps_start_sorted = ar2.ps_start_sorted;        
+    ar.ps_start_sorted = ar2.ps_start_sorted;
 end
 if(ar2.config.useFitErrorMatrix == 0)
     ar.config.fiterrors = ar2.config.fiterrors; %#ok<STRNU>
 else
     ar.config.useFitErrorMatrix = true;
     ar.config.fiterrors_matrix = ar2.config.fiterrors_matrix;
-    ar.config.ploterrors_matrix = ar2.config.ploterrors_matrix; 
+    ar.config.ploterrors_matrix = ar2.config.ploterrors_matrix;
 end
 save([savepath '/workspace_pars_only.mat'],'ar','-v7.3');
 
 
-
-% This function deletes the graphcis handles in ar which are
-% since R2014b objects that are displayed when loaded in a workspace.
-% 
-% This function prevents this.
-
-function [ar] = arDeleteGraphicsHandles(ar)
-
-if isstruct(ar)
-    for m=1:length(ar.model)
-        for p=1:length(ar.model(m).plot)
-            if isfield(ar.model(m).plot(p),'fighandel_x')
-                if ~isempty(ar.model(m).plot(p).fighandel_x)
-%                     delete(ar.model(m).plot(p).fighandel_x);% this line would close the plot
-                    ar.model(m).plot(p).fighandel_x = [];
-                end
-            end
-            if isfield(ar.model(m).plot(p),'fighandel_v')
-                if ~isempty(ar.model(m).plot(p).fighandel_v)
-%                     delete(ar.model(m).plot(p).fighandel_v);% this line would close the plot
-                    ar.model(m).plot(p).fighandel_v = [];
-                end
-            end
-            if isfield(ar.model(m).plot(p),'fighandel_y')
-                if ~isempty(ar.model(m).plot(p).fighandel_y)
-%                     delete(ar.model(m).plot(p).fighandel_y);  % this line would close the plot
-                    ar.model(m).plot(p).fighandel_y = [];
-                end
-            end
-        end
-    end
-end
 
 
