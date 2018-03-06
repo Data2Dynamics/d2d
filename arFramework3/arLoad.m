@@ -46,6 +46,24 @@ end
 
 fprintf('workspace loaded from file %s\n', workspace_name);
 
+% Check if the mex file is in the working directory, if not try to copy it
+% from the savefolder
+fkt = which(ar.fkt);
+
+if isempty(fkt)
+    disp([ar.fkt ' not found. Try to copy it from the savefolder...'])
+    files = dir([ar.config.savepath '/' ar.fkt '.*']);
+    cf_succeed = 0;
+    for idf = 1:length(files)
+        copyfile([ar.config.savepath '/' files.name ] , pwd)
+        disp(['Copied ' files.name ' from ' ar.config.savepath ' to the working directory.'])
+        cf_succeed = 1;
+    end
+    if ~cf_succeed
+        disp([ar.fkt ' not found in ' ar.config.savepath])
+    end
+end
+
 % Make sure we have all the necessary fields
 ar=arInitFields(ar);
 
