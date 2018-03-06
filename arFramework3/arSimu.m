@@ -278,32 +278,6 @@ if(~fine)
     end
 end
 
-% manually transform sensitivities from normal to log10 for fine time points
-if(fine && sensi && ar.config.useSensis)
-    for m=1:length(ar.model)
-        for c=1:length(ar.model(m).condition)
-            for j=find(ar.qLog10(ar.model(m).condition(c).pLink)==1)
-                ar.model(m).condition(c).suFineSimu(:,:,j) = ar.model(m).condition(c).suFineSimu(:,:,j) * ...
-                    ar.model(m).condition(c).pNum(j) * log(10);
-                ar.model(m).condition(c).sxFineSimu(:,:,j) = ar.model(m).condition(c).sxFineSimu(:,:,j) * ...
-                    ar.model(m).condition(c).pNum(j) * log(10);
-                ar.model(m).condition(c).szFineSimu(:,:,j) = ar.model(m).condition(c).szFineSimu(:,:,j) * ...
-                    ar.model(m).condition(c).pNum(j) * log(10);
-            end
-        end
-        if(isfield(ar.model(m), 'data'))
-            for d=1:length(ar.model(m).data)
-                for j=find(ar.qLog10(ar.model(m).data(d).pLink)==1)
-                    ar.model(m).data(d).syFineSimu(:,:,j) = ar.model(m).data(d).syFineSimu(:,:,j) * ...
-                        ar.model(m).data(d).pNum(j) * log(10);
-                    ar.model(m).data(d).systdFineSimu(:,:,j) = ar.model(m).data(d).systdFineSimu(:,:,j) * ...
-                        ar.model(m).data(d).pNum(j) * log(10);
-                end
-            end
-        end
-    end
-end
-
 if(nargout>0 && ~qglobalar)
     varargout{1} = ar;
 else
@@ -358,7 +332,7 @@ if ( dynamics )
                 if ( ar.model(m).data(d).has_tExp )
                     ar.model(m).data(d).syExpSimu = zeros(length(ar.model(m).data(d).tExp), ...
                         length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
-                    ar.model(m).data(d).systdFineSimu = zeros(length(ar.model(m).data(d).tExp), ...
+                    ar.model(m).data(d).systdExpSimu = zeros(length(ar.model(m).data(d).tExp), ...
                         length(ar.model(m).data(d).y), length(ar.model(m).data(d).p));
                 end
             end
@@ -372,6 +346,7 @@ if ( isfield( ar.config, 'onlySS' ) && ( ar.config.onlySS == 1 ) )
             ar.model(m).condition(c).sxExpSimu = zeros( size( ar.model(m).condition(c).sxExpSimu ) );
             ar.model(m).condition(c).svExpSimu = zeros( size( ar.model(m).condition(c).svExpSimu ) );
             ar.model(m).condition(c).szExpSimu = zeros( size( ar.model(m).condition(c).szExpSimu ) );
+            ar.model(m).condition(c).suExpSimu = zeros( size( ar.model(m).condition(c).suExpSimu ) );
         end
 	end
 end

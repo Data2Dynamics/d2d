@@ -78,11 +78,12 @@ dps = dx_out(2:end);
         %                 end
             if(~takeY)        
                 sxSim = zeros(1,length(ar.p));
+                sx_tmp = arTrafoParameters(ar.model(m).condition(c).sxExpSimu,m,c,false);
                 sxSim(ar.model(m).condition(c).pLink) = ...
-                    squeeze(ar.model(m).condition(c).sxExpSimu(it,jx,:))';
-                for j=find(ar.qLog10==1)
-                    sxSim(j) = sxSim(j) * 10.^ar.p(j) * log(10);
-                end
+                    squeeze(sx_tmp(it,jx,:))';
+%                 for j=find(ar.qLog10==1)
+%                     sxSim(j) = sxSim(j) * 10.^ar.p(j) * log(10);
+%                 end
 
                 if(qLog10)
                     sxSim = sxSim / 10^xSim / log(10);

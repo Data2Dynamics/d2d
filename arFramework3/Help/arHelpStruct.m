@@ -48,13 +48,9 @@
 %         pLink             Which external parameters are used in this
 %                           condition?
 %         sxExpSimu         Model state sensitivities for fitting [nExp,nState,nPars]
-%                               These sensitivities are always specified in
-%                               linear parameter space.
+%                               These sensitivities are specified in linear space.
 %         sxFineSimu        Fine model state sensitivities  [nFine,nStates,nPars]
-%                               When parameters are being fitted in
-%                               logspace, these sentivities are specified
-%                               with respect to logspace.
-%                               Note: dx/dlog10(p) = dx/dp * ln(10) * 10^log10(p)
+%                               These sensitivities are specified in linear space.
 %
 %     - ss_condition        Steady state conditions used for equilibration
 %                           (mostly analogous to condition)
@@ -81,10 +77,10 @@
 %         syExpSimu         Observable state sensitivities for fitting [nExp,nState,nPars]
 %                               When fitting in logspace, these are specified in log10(y).
 %                               Note: dlog10(y)/dp = (dy/dp) / (y*ln(10)) [This is performed in arSimuCalc.c]
-%                               These sensitivities are specified in *linear parameter space*.
+%                               Also, the sensitivities are specified in linear space wrt the parameters.
 %         syFineSimu        Fine model state sensitivities  [nFine,nStates,nPars]
 %                               When fitting in logspace, these are specified in log10(y).
-%                               When parameters are fitted in logspace, these sentivities are specified in *logspace*.
+%                               Also, the sensitivities are specified in linear space wrt the parameters.
 %
 %     - Plots               Contains information on how the plots are
 %                           linked to the data

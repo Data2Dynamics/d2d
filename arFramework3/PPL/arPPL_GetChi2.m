@@ -41,11 +41,12 @@ if(doPPL_stuff)
         xSim2 = ar.model(m).(data_cond)(c).yExpSimu(it,jx);
     else
         sxSim = zeros(1,length(ar.p));
+        sx_tmp = arTrafoParameters(ar.model(m).(data_cond)(c).sxExpSimu,m,c,general_struct.takeY);
         sxSim(ar.model(m).(data_cond)(c).pLink) = ...
-            squeeze(ar.model(m).(data_cond)(c).sxExpSimu(it,jx,:))';
-        for j10=find(ar.qLog10==1)
-            sxSim(j10) = sxSim(j10) * 10.^ar.p(j10) * log(10);
-        end
+            squeeze(sx_tmp(it,jx,:))';
+%         for j10=find(ar.qLog10==1)
+%             sxSim(j10) = sxSim(j10) * 10.^ar.p(j10) * log(10);
+%         end
         
         if(qLog10)
             sxSim = sxSim / 10^xSim / log(10);
