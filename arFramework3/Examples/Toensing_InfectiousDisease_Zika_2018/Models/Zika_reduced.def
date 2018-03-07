@@ -2,7 +2,7 @@ DESCRIPTION
 'reduced Zika model'
 'vector-borne infection SEIR-SEI model'
 'with asymptomatically infected humans, human-to-human infection and covalescent humans'
-'from Toensing et al., Profile likelihood based analyses of infectious disease models'
+'from Toensing et al., Profile likelihood based analyses of infectious disease models, Statistical Methods in Medical Research, 2018'
 
 
 PREDICTOR
