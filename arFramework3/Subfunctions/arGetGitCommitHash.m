@@ -1,7 +1,7 @@
 % Get the hash of the git commit for saving in ar.info.gitCommitHash
 %
 % The D2d version used to build the ar struct can be obtained by
-% https://github.com/Data2Dynamics/d2d/commit/hash
+% https://github.com/Data2Dynamics/d2d/tree/hash
 % where 'hash' has to be replaced by the string saved in ar.info.gitCommitHash
 %
 % commit_hash = arGetGitVersion(repo_path)
@@ -20,8 +20,10 @@ try
     else
         [~, commit_hash] = system('git rev-parse HEAD 2>nul');
     end
-catch
+catch err
     commit_hash = '';
+    warning('Error in fetching git commit hash. No git version set. Error meassage:')
+    err
 end
 
 cd(old_dir)
