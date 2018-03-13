@@ -4,13 +4,17 @@
 %   forcedCompile:                                      [false]
 %   debug_mode:         exclude precompiled objects     [false]
 %   source_dir:         source directory                []
-
+%   simplifyEquations:  simplify equations              [0]
+%                        0 - Do not simplify
+%                        1 - Only simplify fz
+%                        2 - Simplify fz and fv (slow!)
+%
 % See https://github.com/Data2Dynamics/d2d/wiki/First%20steps 
 % for description of work flow. 
 %
 % Copyright Andreas Raue 2013 (andreas.raue@fdm.uni-freiburg.de)
 
-function arCompileAll(forcedCompile, debug_mode, source_dir)
+function arCompileAll(forcedCompile, debug_mode, source_dir, simplifyEquations)
 
 % turn off warning message for custom c functions
 
@@ -38,6 +42,13 @@ if(~exist('debug_mode','var'))
 end
 if(~exist('source_dir','var'))
     source_dir = cd;
+else
+    if ( isempty(source_dir) )
+        source_dir = cd;
+    end
+end
+if(~exist('simplifyEquations', 'var'))
+    simplifyEquations = 0;
 end
 if (isfield(ar.config, 'legacy_steps'))
     legacy_steps = ar.config.legacy_steps;
@@ -251,7 +262,7 @@ for m=1:length(ar.model)
                 warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
                 warning('off', 'symbolic:sym:sym:DeprecateExpressions')
                 
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version, simplifyEquations);
                 csyms{c} = condition_sym.sym;
                 newp{c} = condition_sym.p;
                 newfp{c} = condition_sym.fp;
@@ -280,7 +291,7 @@ for m=1:length(ar.model)
             end
         else
             for c=1:length(ar.model(m).condition)
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version, simplifyEquations);
                 ar.model(m).condition(c).sym = condition_sym.sym;
                 newp{c} = condition_sym.p;
                 newfp{c} = condition_sym.fp;
@@ -463,7 +474,7 @@ for m=1:length(ar.model)
                 warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
                 warning('off', 'symbolic:sym:sym:DeprecateExpressions')
 
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version, simplifyEquations);
                 newp{c} = condition_sym.p;
                 newfp{c} = condition_sym.fp;
                 newpold{c} = condition_sym.pold;
@@ -485,7 +496,7 @@ for m=1:length(ar.model)
             end
         else        
             for c=1:length(ar.model(m).condition)
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version, simplifyEquations);
                 newp{c} = condition_sym.p;
                 newfp{c} = condition_sym.fp;
                 newpold{c} = condition_sym.pold;
@@ -680,7 +691,7 @@ end
 
 
 % Calc Condition
-function condition = arCalcCondition(config, model, condition, m, c, doskip, matlab_version)
+function condition = arCalcCondition(config, model, condition, m, c, doskip, matlab_version, simplifyEquations)
 
 if(doskip)
     arFprintf(2, 'calculating condition m%i c%i, %s...skipped\n', m, c, model.name);
@@ -768,6 +779,14 @@ if(doskip)
     
     return;
 end
+
+if (simplifyEquations > 0)
+    condition.sym.fz = simplify( condition.sym.fz );
+end
+if (simplifyEquations > 1)
+    condition.sym.fv = simplify( condition.sym.fv );
+end
+
 
 % make short strings
 condition.ps = {};
