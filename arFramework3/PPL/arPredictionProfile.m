@@ -348,13 +348,13 @@ end
             res(end+1) = (xExp-xSim)/xstd;
         
             if(nargout>1 && ar.config.useSensis)
-            
+                sx_tmp = arTrafoParameters(ar.model(m).condition(c).sxExpSimu,m,c,false);
                 sxSim = zeros(1,length(ar.p));           
                 sxSim(ar.model(m).condition(c).pLink) = ...
-                        squeeze(ar.model(m).condition(c).sxExpSimu(it,ix,:))';
-                for j10=find(ar.qLog10==1)
-                    sxSim(j10) = sxSim(j10) * 10.^ar.p(j10) * log(10);
-                end
+                        squeeze(sx_tmp(it,ix,:))';
+%                 for j10=find(ar.qLog10==1)
+%                     sxSim(j10) = sxSim(j10) * 10.^ar.p(j10) * log(10);
+%                 end
                 if(qLog10)
                     sxSim = sxSim / 10^xSim / log(10);
                 end

@@ -27,6 +27,9 @@ for jm = 1:length(ar.model)
         [nrows, ncols] = arNtoColsAndRows(nu+nx+nz);
         
         np = length(ar.model(jm).condition(jc).p);
+        suFine = arTrafoParameters(ar.model(jm).condition(jc).suFineSimu,jm,jc,false);
+        sxFine = arTrafoParameters(ar.model(jm).condition(jc).sxFineSimu,jm,jc,false);
+        szFine = arTrafoParameters(ar.model(jm).condition(jc).szFineSimu,jm,jc,false);
         for ju = 1:nu
             g = subplot(nrows,ncols,ju);
             arSubplotStyle(g);
@@ -35,7 +38,7 @@ for jm = 1:length(ar.model)
             
             for jp = 1:np
                 linestyle = arLineMarkersAndColors(jp, np, [], 'none');
-                ltmp = plot(g, ar.model(jm).condition(jc).tFine, ar.model(jm).condition(jc).suFineSimu(:,ju,jp), linestyle{:});
+                ltmp = plot(g, ar.model(jm).condition(jc).tFine, squeeze(suFine(:,ju,jp)), linestyle{:});
                 legendhandle(jp) = ltmp;
                 hold(g, 'on');
                 % plot(g, ar.model(jm).condition(jc).tExp, squeeze(ar.model(jm).condition(jc).suExpSimu(:,ju,jp)), 'o');
@@ -57,7 +60,7 @@ for jm = 1:length(ar.model)
             
             for jp = 1:np
                 linestyle = arLineMarkersAndColors(jp, np, [], 'none');
-                plot(g, ar.model(jm).condition(jc).tFine, squeeze(ar.model(jm).condition(jc).sxFineSimu(:,jx,jp)), linestyle{:});
+                plot(g, ar.model(jm).condition(jc).tFine, squeeze(sxFine(:,jx,jp)), linestyle{:});
                 hold(g, 'on');
                 % plot(g, ar.model(jm).condition(jc).tExp, squeeze(ar.model(jm).condition(jc).sxExpSimu(:,jx,jp)), 'o');
                 if(isfield(ar.model(jm).condition(jc), 'sxExpSimuFD'))
@@ -80,7 +83,7 @@ for jm = 1:length(ar.model)
             
             for jp = 1:np
                 linestyle = arLineMarkersAndColors(jp, np, [], 'none');
-                plot(g, ar.model(jm).condition(jc).tFine, squeeze(ar.model(jm).condition(jc).szFineSimu(:,jz,jp)), linestyle{:});
+                plot(g, ar.model(jm).condition(jc).tFine, squeeze(szFine(:,jz,jp)), linestyle{:});
                 hold(g, 'on');
                 % plot(g, ar.model(jm).condition(jc).tExp, squeeze(ar.model(jm).condition(jc).szExpSimu(:,jz,jp)), 'o');
                 if(isfield(ar.model(jm).condition(jc), 'szExpSimuFD'))

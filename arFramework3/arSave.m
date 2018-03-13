@@ -116,6 +116,19 @@ if(~withSyms)
 end
 arDoSaving(ar)
 
+% Copy mex file to the save folder
+if ~isfield(ar.config, 'saveMexFile')
+    ar.config.saveMexFile = true;
+end
+if ar.config.saveMexFile
+    fkt = which(ar.fkt);
+    [~, fkt_name, fkt_extension] = fileparts(fkt);
+    
+    if ~isempty(fkt) && ~exist([ar.config.savepath '/' fkt_name fkt_extension],'file')
+        copyfile(fkt , ar.config.savepath)
+    end
+end
+
 % This function does not use ar as global variables for
 % being able to do manipulations without altering the global variables.
 function arDoSaving(ar)

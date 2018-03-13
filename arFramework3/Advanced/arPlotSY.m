@@ -16,6 +16,9 @@ for jm = 1:length(ar.model)
     for jd = 1:nd
         myRaiseFigure(jm, ['SY: ' ar.model(jm).data(jd).name ' - ' ar.model(jm).data(jd).checkstr], fcount);
         
+        %Get and transform sySimu
+        syFine = arTrafoParameters(ar.model(jm).data(jd).syFineSimu,jm,jd,true);
+        
         % rows and cols
         ny = size(ar.model(jm).data(jd).y, 2);
         [nrows, ncols] = arNtoColsAndRows(ny);
@@ -29,7 +32,7 @@ for jm = 1:length(ar.model)
             
             for jp = 1:np
                 linestyle = arLineMarkersAndColors(jp, np, [], 'none');
-                ltmp = plot(g, ar.model(jm).data(jd).tFine, ar.model(jm).data(jd).syFineSimu(:,jy,jp), linestyle{:});
+                ltmp = plot(g, ar.model(jm).data(jd).tFine, syFine(:,jy,jp), linestyle{:});
                 legendhandle(jp) = ltmp;
                 hold(g, 'on');
                 if(isfield(ar.model(jm).data(jd), 'syExpSimuFD'))

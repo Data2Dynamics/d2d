@@ -24,21 +24,7 @@ if ~any(strcmp(ar_path,matpath))
     addpath(ar_path)
 end
 
-warning('off','MATLAB:rmpath:DirNotFound')
-
 % add all subfolders of arFramework3 folder to MATLAB search path
-if(exist([ar_path,'/PM'], 'dir'))
-    rmpath(genpath( [ar_path,'/PM']))
-    arFprintf(2, 'arCheck.m: rm PM from matlab path\n');
-end
-
-% removes Examples folder and subfolders of arFramework3 from the MATLAB
-% serach path to avoid loading data from those examples for accidentially
-% identical file names
-rmpath(genpath([ar_path '/Examples']))
-
-warning('on','MATLAB:rmpath:DirNotFound')
-
 % load path of sub-directories
 if(exist('pleInit','file') == 0)
     addpath([ar_path '/PLE'])
@@ -79,6 +65,23 @@ end
 if(exist('model_template.def','file') == 0)
     addpath([ar_path '/ProjectTemplate'])
 end
+
+warning('off','MATLAB:rmpath:DirNotFound')
+
+% removes Examples folder and subfolders of arFramework3 from the MATLAB
+% search path to avoid loading data from those examples for accidentially
+% identical file names
+ids_Examples = strfindcell(matpath,[ar_path '/Examples']);
+rmpath(strjoin(matpath(ids_Examples),':'));
+
+% removes PM folder and subfolders of arFramework3
+if(exist([ar_path,'/PM'], 'dir'))
+    ids_PM = strfindcell(matpath,[ar_path '/PM']);
+    rmpath(strjoin(matpath(ids_PM),':'));
+    arFprintf(2, 'arCheck.m: rm PM from matlab path\n');
+end
+
+warning('on','MATLAB:rmpath:DirNotFound')
 
 
 [has_git, is_repo] = arCheckGit(ar_path);

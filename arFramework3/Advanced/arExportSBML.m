@@ -231,7 +231,7 @@ for jv = 1:length(ar.model(m).fv)
         M.reaction(vcount).notes = '';
         M.reaction(vcount).annotation = '';
         M.reaction(vcount).sboTerm = -1;
-        if(isfield(ar.model(m),'v') && ~isempty(ar.model(m).v{jv}))
+        if(isfield(ar.model(m),'v') && length(ar.model(m).v)>=jv && ~isempty(ar.model(m).v{jv}))
             M.reaction(vcount).name = ar.model(m).v{jv};
         else
             M.reaction(vcount).name = '';

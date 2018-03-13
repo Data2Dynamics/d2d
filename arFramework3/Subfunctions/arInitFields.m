@@ -10,7 +10,7 @@ function ar = arInitFields(ar)
     % !!  NOTE: Every time you add or remove a field, increment this value by one.
     % !! 
     % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    arFormatVersion = 3;
+    arFormatVersion = 4;
     
     % Without arguments, just return the version number
     if ( nargin < 1 )
@@ -31,6 +31,7 @@ function ar = arInitFields(ar)
         {'turboSSSensi',                false}, ...                     % Faster equilibration (BETA). Toggle with arFastSensis. DO NOT TOGGLE BY HAND.
         {'sensitivitySubset',           0}, ...                         % Only compute subset of sensitivities when certain qFit's are 0 (BETA)
         {'lightSave',                   false}, ...                     % When calling arSave, only save parameter sets by default (useful for big models)
+        {'saveMexFile',                true}, ...                      % When calling arSave, the arSimuCalc mex file is copied to the savefolder
         {'skipSim',                     false}, ...                     % Disable simulation (used for fitting steady state models)
         {'barhack',                     false}, ...                     % Display data with only a single time point as bar
         {'networkgraph',                false}, ...                     % Enable network graph plotting features (disabled by default since they slow compilation)

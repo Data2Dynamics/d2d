@@ -2,7 +2,7 @@ DESCRIPTION
 'full Zika model'
 'vector-borne infection SEIR-SEI model'
 'with asymptomatically infected humans, human-to-human infection and covalescent humans'
-'from Toensing et al., Profile likelihood based analyses of infectious disease models'
+'from Toensing et al., Profile likelihood based analyses of infectious disease models, Statistical Methods in Medical Research, 2018'
 
 
 PREDICTOR
@@ -64,6 +64,3 @@ init_I_hs    "(1 -kappa_as) * init_I_h"
 init_I_h_obs "(1 -kappa_as) * init_I_h"
 init_R_h     "0"
 init_I_hc    "0"
-init_S_v     "kappa_hv * init_S_h"
-init_I_v     "kappa_hv * init_I_h"
-init_E_v     "kappa_hv * init_E_h"

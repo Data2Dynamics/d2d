@@ -143,15 +143,8 @@ if ( isfield( ar, 'conditionconstraints' ) )
             dynamic2        = log10( dynamic2 );            
         end
 
-        % Determine sensitivities w.r.t. log10(p) for the logtransformed ones
-        trafo1              = ar.qLog10( pLink1 ) .* log(10) .* 10.^ar.p( pLink1 );
-        trafo2              = ar.qLog10( pLink2 ) .* log(10) .* 10.^ar.p( pLink2 );
-        for a = 1 : sum( pLink1 )
-            sens1(:,:,a)    = sens1(:,:,a) .* trafo1(a);
-        end
-        for a = 1 : sum( pLink2 )
-            sens2(:,:,a)    = sens2(:,:,a) .* trafo2(a);
-        end
+        sens1               = arTrafoParameters(sens1,m1,c1,false);
+        sens2               = arTrafoParameters(sens2,m2,c2,false);
 
         % Reshape to fit format desired for sres
         sens1               = reshape( sens1, nstates*npts, sum(pLink1));
@@ -209,9 +202,7 @@ for jm = 1:length(ar.model)
                             if(iscolumn(dxdp)) % transpose dxdp if squeeze returns column vector (sum(qss)==1)
                                 dxdp = dxdp';
                             end
-                            dxdp(:,ar.model(jm).condition(jc).qLog10 == 1) = bsxfun(@times, ... % log trafo
-                                dxdp(:,ar.model(jm).condition(jc).qLog10 == 1), ...
-                                ar.model(jm).condition(jc).pNum(ar.model(jm).condition(jc).qLog10 == 1) * log(10));
+                            dxdp = arTrafoParameters(dxdp,jm,jc,false);
                         else
                             dxdp = squeeze(ar.model(jm).condition(jc).sxFineSimu(1,qss,:));
                             if(iscolumn(dxdp)) % transpose dxdp if squeeze returns column vector (sum(qss)==1)
@@ -219,9 +210,7 @@ for jm = 1:length(ar.model)
                             end
                         end
                         ddxdtdp = ar.model(jm).condition(jc).ddxdtdp(qss,:);
-                        ddxdtdp(:,ar.model(jm).condition(jc).qLog10 == 1) = bsxfun(@times, ... % log trafo
-                            ddxdtdp(:,ar.model(jm).condition(jc).qLog10 == 1), ...
-                            ar.model(jm).condition(jc).pNum(ar.model(jm).condition(jc).qLog10 == 1) * log(10));
+                        ddxdtdp = arTrafoParameters(ddxdtdp,jm,jc,false);
                         
                         tmptmpsconstr = bsxfun(@rdivide,ddxdtdp,x') - bsxfun(@times,bsxfun(@rdivide,dxdt,x.^2)', dxdp);
                         tmpsconstr(:,ar.model(jm).condition(jc).pLink) = tmptmpsconstr(validconstr,:);
@@ -241,9 +230,7 @@ for jm = 1:length(ar.model)
                     if(ar.config.useSensis && sensi)
                         tmpsconstr = zeros(length(tmpconstr(:)), np);
                         ddxdtdp = ar.model(jm).condition(jc).ddxdtdp(qss,:);
-                        ddxdtdp(:,ar.model(jm).condition(jc).qLog10 == 1) = bsxfun(@times, ... % log trafo
-                            ddxdtdp(:,ar.model(jm).condition(jc).qLog10 == 1), ...
-                            ar.model(jm).condition(jc).pNum(ar.model(jm).condition(jc).qLog10 == 1) * log(10));
+                        ddxdtdp = arTrafoParameters(ddxdtdp,jm,jc,false);
                         ddxdtdp = bsxfun(@rdivide, ddxdtdp, ar.model(jm).condition(jc).stdSteadyState(qss)');
                         
                         tmpsconstr(:,ar.model(jm).condition(jc).pLink) = ddxdtdp;
