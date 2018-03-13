@@ -823,10 +823,14 @@ condition.qdvdp_nonzero = logical(condition.sym.dfvdp~=0);
 
 % short terms
 condition.sym.dvdx = model.dvdx;
-condition.sym.dvdx(~condition.qdvdx_nonzero) = 0;
+if ~isempty(condition.qdvdx_nonzero)
+    condition.sym.dvdx(~condition.qdvdx_nonzero) = 0;
+end
 condition.sym.dvdu = model.dvdu;
-condition.sym.dvdu(~condition.qdvdu_nonzero) = 0;
-
+if ~isempty(condition.qdvdu_nonzero)
+    condition.sym.dvdu(~condition.qdvdu_nonzero) = 0;
+end
+    
 condition.sym.dvdp = sym(zeros(length(model.vs), length(condition.ps)));
 for j=1:length(model.vs)
     for i=1:length(condition.ps)
@@ -2905,4 +2909,3 @@ function [ dvdx, dvdu ] = cacheShortTerms( model )
             dvdu(j,i) = sym(sprintf('dvdu[%i]', j + (i-1)*length(model.vs)));
         end
     end
-
