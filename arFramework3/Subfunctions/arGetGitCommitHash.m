@@ -20,10 +20,11 @@ try
     else
         [~, commit_hash] = system('git rev-parse HEAD 2>nul');
     end
-catch err
+    commit_hash(commit_hash<30) = [];  % removes line breaks 
+catch ME
     commit_hash = '';
     warning('Error in fetching git commit hash. No git version set. Error meassage:')
-    err
+    fprintf(getReport(ME));
 end
 
 cd(old_dir)
