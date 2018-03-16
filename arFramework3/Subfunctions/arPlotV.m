@@ -202,10 +202,11 @@ for jm = 1:length(ar.model)
                             hold(g, 'off');
                             if(isempty(ar.model(jm).v{jv}))
                                 title(g, sprintf('v_{%i}', jv));
+                                fprintf('v%i: %s\n', jv, ar.model(jm).fv{jv});
                             else
                                 title(g,arNameTrafo(ar.model(jm).v{jv}));
+                                fprintf('%s: %s\n', ar.model(jm).v{jv}, ar.model(jm).fv{jv});
                             end
-                            fprintf('v%i: %s\n', jv, ar.model(jm).fv{jv});
                             % title(g, sprintf('v_{%i}: %s', jv, arNameTrafo(ar.model(jm).fv{jv})));
                             
                             if(countv == (nrows-1)*ncols + 1)
