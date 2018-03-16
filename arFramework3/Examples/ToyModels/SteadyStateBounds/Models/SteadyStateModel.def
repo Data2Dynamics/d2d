@@ -1,0 +1,90 @@
+DESCRIPTION
+"Simple equilibration test"
+
+PREDICTOR
+t               T   min         time	0	200
+
+COMPARTMENTS
+cyt             V   pl          vol.    1
+
+STATES
+sA          C   nmol/l      conc.   cyt     1
+sB          C   nmol/l      conc.   cyt     1
+sC          C   nmol/l      conc.   cyt     1
+sD          C   nmol/l      conc.   cyt     1
+sE          C   nmol/l      conc.   cyt     1
+sF          C   nmol/l      conc.   cyt     1
+sG          C   nmol/l      conc.   cyt     1
+sH          C   nmol/l      conc.   cyt     1
+sI          C   nmol/l      conc.   cyt     1
+sJ          C   nmol/l      conc.   cyt     1
+sK          C   nmol/l      conc.   cyt     1
+sL          C   nmol/l      conc.   cyt     1
+sM          C   nmol/l      conc.   cyt     1
+sN          C   nmol/l      conc.   cyt     1
+sO          C   nmol/l      conc.   cyt     1
+
+INPUTS
+        
+REACTIONS
+            -> sA   CUSTOM  "kpA"
+sA          -> 0    CUSTOM  "kdA * sA"
+            -> sB   CUSTOM  "kpB"
+sB          -> 0    CUSTOM  "kdB * sB"
+            -> sC   CUSTOM  "kpC"
+sC          -> 0    CUSTOM  "kdC * sC"
+            -> sD   CUSTOM  "kpD"
+sD          -> 0    CUSTOM  "kdD * sD"
+            -> sE   CUSTOM  "kpE"
+sE          -> 0    CUSTOM  "kdE * sE"
+            -> sF   CUSTOM  "kpF"
+sF          -> 0    CUSTOM  "kdF * sF"
+            -> sG   CUSTOM  "kpG"
+sG          -> 0    CUSTOM  "kdG * sG"
+            -> sH   CUSTOM  "kpH"
+sH          -> 0    CUSTOM  "kdH * sH"
+            -> sI   CUSTOM  "kpI"
+sI          -> 0    CUSTOM  "kdI * sI"
+            -> sJ   CUSTOM  "kpJ"
+sJ          -> 0    CUSTOM  "kdJ * sJ"
+            -> sK   CUSTOM  "kpK"
+sK          -> 0    CUSTOM  "kdK * sK"
+            -> sL   CUSTOM  "kpL"
+sL          -> 0    CUSTOM  "kdL * sL"
+            -> sM   CUSTOM  "kpM"
+sM          -> 0    CUSTOM  "kdM * sM"
+            -> sN   CUSTOM  "kpN"
+sN          -> 0    CUSTOM  "kdN * sN"
+            -> sO   CUSTOM  "kpO + symmetrybreaker"
+sO          -> 0    CUSTOM  "kdO * sO"
+
+DERIVED
+zJ               C   nmol/l      conc.   "sJ"
+zK               C   nmol/l      conc.   "sK"
+zL               C   nmol/l      conc.   "sL"
+zM               C   nmol/l      conc.   "sM"
+zN               C   nmol/l      conc.   "sN"
+zO               C   nmol/l      conc.   "sO"
+
+OBSERVABLES
+A_obs           C  au   conc.   0  0    "sA"
+                
+ERRORS
+A_obs           "0.01"
+
+CONDITIONS
+init_sA "0"
+init_sB "0"
+init_sC "0"
+init_sD "0"
+init_sE "0"
+init_sF "0"
+init_sG "0"
+init_sH "0"
+init_sI "0"
+init_sJ "0"
+init_sK "0"
+init_sL "0"
+init_sM "0"
+init_sN "0"
+init_sO "0"

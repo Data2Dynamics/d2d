@@ -25,9 +25,9 @@ function doTests( varargin )
                 'Stoichiometry', 'DallaMan2007_GlucoseInsulinSystem', 'Step_Estimation', ...
                 'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines', ...
                 'ResponseCurve', 'PreProcessorTest', 'State_Reduction', 'Fast_Equilibration', ... 
-                'Predictor_Test', 'FieldTester' };
+                'Predictor_Test', 'FieldTester', 'SteadyStateBounds' };
     
-    dependencies = { {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} };
+    dependencies = { {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} };
     
     if ( nargin > 0 )
         activeTests = argSwitch( tests, varargin{:} );
@@ -155,4 +155,5 @@ function [opts] = argSwitch( switches, varargin )
         opts.(fieldname) = val;
         a = a + 1;
     end
+    
 end
