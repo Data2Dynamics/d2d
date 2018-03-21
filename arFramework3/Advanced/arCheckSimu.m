@@ -62,11 +62,15 @@ if(~inok)
     ok(whichp) = 0;
     for i=1:length(whichp)
         try
-            ar.p(whichp(i)) = -1;
-            fprintf(['Testing %12s\t = -1: '],ar.pLabel{whichp(i)});
+            if ar.qLog10(whichp(i))
+                ar.p(whichp(i)) = -1;
+            else
+                ar.p(whichp(i)) = 0.1;
+            end
+            fprintf('Testing %12s\t = %g: ',ar.pLabel{whichp(i)},ar.p(whichp(i)));
             arSimu(varargin{:})
             fprintf(' -> Integration is now feasible! This parameter seems to cause integration problems. \n')
-
+            
             ar.p = pIn + 0.0; % +0.0 because of MATLAB bug in some releases
             ok(whichp(i))=1;
         catch
