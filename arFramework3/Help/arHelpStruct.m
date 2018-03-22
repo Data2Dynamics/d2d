@@ -1,7 +1,6 @@
 %
 % The ar struct contains most of the data used for all model analyses
 %
-%   Model - Model
 %     - res                 Residual
 %     - sres                Sensitivity of the residual (here the observables and parameters are specified in whatever space they are fitted (log or not))
 %     - constr              Constraint based residuals
@@ -29,6 +28,9 @@
 %     - p                   Parameter values (note that depending on qLog10 they are in logspace or not)
 %     - type                Type of prior (0=box, 1=normal, 2=uniform with normal bounds, 3=L1 prior)
 %
+%   - config - Substructure with configuration flags, for more information see e.g. 'edit arInitFields.m'   
+%
+%   - model - Model structure with subfields:
 %     - condition           Experimental conditions
 %         dLink             Index to which data this condition belongs
 %         tExp              Time points used in fitting
@@ -48,9 +50,9 @@
 %         pLink             Which external parameters are used in this
 %                           condition?
 %         sxExpSimu         Model state sensitivities for fitting [nExp,nState,nPars]
-%                               These sensitivities are specified in linear space.
+%                             These sensitivities are specified in linear space.
 %         sxFineSimu        Fine model state sensitivities  [nFine,nStates,nPars]
-%                               These sensitivities are specified in linear space.
+%                             These sensitivities are specified in linear space.
 %
 %     - ss_condition        Steady state conditions used for equilibration
 %                           (mostly analogous to condition)
@@ -75,15 +77,15 @@
 %                           to ansure positivity.
 %         sreserr           Sensitivities of reserr.
 %         syExpSimu         Observable state sensitivities for fitting [nExp,nState,nPars]
-%                               When fitting in logspace, these are specified in log10(y).
-%                               Note: dlog10(y)/dp = (dy/dp) / (y*ln(10)) [This is performed in arSimuCalc.c]
-%                               Also, the sensitivities are specified in linear space wrt the parameters.
+%                             When fitting in logspace, these are specified in log10(y).
+%                             Note: dlog10(y)/dp = (dy/dp) / (y*ln(10)) [This is performed in arSimuCalc.c]
+%                             Also, the sensitivities are specified in linear space wrt the parameters.
 %         syFineSimu        Fine model state sensitivities  [nFine,nStates,nPars]
-%                               When fitting in logspace, these are specified in log10(y).
-%                               Also, the sensitivities are specified in linear space wrt the parameters.
+%                             When fitting in logspace, these are specified in log10(y).
+%                             Also, the sensitivities are specified in linear space wrt the parameters.
 %
-%     - Plots               Contains information on how the plots are
-%                           linked to the data
-%
+%     - plots               Contains information on how the plots are
+%                             linked to the data.
+
 
 help arHelpStruct;
