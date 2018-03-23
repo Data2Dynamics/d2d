@@ -282,13 +282,14 @@ function out = scaleIt( names, outFile, varargin )
             rejectionFilter = opts.excludeconditions_args{1};
             if ( isfield( out, rejectionFilter{1} ) )
                 filterList = cellfun(rejectionFilter{2}, out.(rejectionFilter{1}));
-            end
-            filNames = fieldnames( out );
-            for jf = 1 : numel( filNames )
-                out.(filNames{jf})(filterList) = [];
-                if ( isempty( find( ~cellfun(@isnan, out.(filNames{jf})) ) ) )
-                    warning( 'Filtered all data for %s', filNames{jf} );
-                    out = rmfield( out, filNames{jf} );
+
+                filNames = fieldnames( out );
+                for jf = 1 : numel( filNames )
+                    out.(filNames{jf})(filterList) = [];
+                    if ( isempty( find( ~cellfun(@isnan, out.(filNames{jf})) ) ) )
+                        warning( 'Filtered all data for %s', filNames{jf} );
+                        out = rmfield( out, filNames{jf} );
+                    end
                 end
             end
         end
@@ -774,7 +775,17 @@ function [means, mlb, mub, scalings, offsets] = estimateObs( eModel, errModelPar
         Jfin=findiff(errModel, initPar);
     end
     
-    [p, rn, r, ~, ~, ~, J]  = lsqnonlin( errModel, initPar, lb, 1e125*ones(size(initPar)), options );
+    try
+        [p, rn, r, ~, ~, ~, J]  = lsqnonlin( errModel, initPar, lb, 1e125*ones(size(initPar)), options );
+    catch
+        disp( 'Initial parameters' );
+        initPar
+        disp( 'Lower bound' );
+        lb
+        disp( 'Data' );
+        data
+        error( 'Failure trying to optimize on data' );
+    end
     rLast = inf;
     round = 1;
     while( ((rLast - rn)/rn > tol) )
