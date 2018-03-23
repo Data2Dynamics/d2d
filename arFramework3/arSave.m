@@ -144,7 +144,7 @@ fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
 
 % save only parameters
 function arSaveParOnly(ar2, savepath)
-% check is dir exists
+% check if dir exists
 if(~exist(ar2.config.savepath, 'dir'))
     mkdir(ar2.config.savepath)
 end
@@ -193,6 +193,17 @@ else
     ar.config.fiterrors_matrix = ar2.config.fiterrors_matrix;
     ar.config.ploterrors_matrix = ar2.config.ploterrors_matrix;
 end
+
+if(isfield(ar2,'ple'))
+    if (isfield(ar2.ple,'chi2s'))
+        ar.ple.chi2s = ar2.ple.chi2s; % For readParameterAnnotation in fkt stringListChooser.m
+    else
+        ar.ple = [];    
+    end
+else
+    ar.ple = [];
+end
+
 save([savepath '/workspace_pars_only.mat'],'ar','-v7.3');
 
 
