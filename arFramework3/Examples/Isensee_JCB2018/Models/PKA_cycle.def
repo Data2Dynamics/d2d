@@ -1,0 +1,146 @@
+DESCRIPTION
+"Model of PKA cycle"
+
+PREDICTOR
+t               T   min         time	0	10
+
+COMPARTMENTS
+cyt             V   pl          vol.    1
+nuc             V   pl          vol.    1
+
+STATES
+AC                          C   mumol/l      conc.   cyt     1    "AC"
+pAC                         C   mumol/l      conc.   cyt     1    "pAC"
+AC_Fsk                      C   mumol/l      conc.   cyt     1    "AC:Fsk"
+pAC_Fsk                     C   mumol/l      conc.   cyt     1    "pAC:Fsk"
+cAMP                        C   mumol/l      conc.   cyt     1    "cAMP"
+Csub                        C   mumol/l      conc.   cyt     1    "C"
+Csub_H89                    C   mumol/l      conc.   cyt     1    "C:H89"
+RII_C_2                     C   mumol/l      conc.   cyt     1    "RII_2:C_2"
+RIIp_C_2                    C   mumol/l      conc.   cyt     1    "pRII_2:C_2"
+RIIp_cAMP_C_2               C   mumol/l      conc.   cyt     1    "pRII_2:C_2:cAMP_4"
+RIIp_cAMP_2                 C   mumol/l      conc.   cyt     1    "pRII_2:cAMP_4"
+Sp8_Br_cAMPS                C   mumol/l      conc.   cyt     1    "Sp8-Br-cAMPS"
+Rp8_Br_cAMPS                C   mumol/l      conc.   cyt     1    "Rp-8-Br-cAMPS"
+Rp8_pCPT_cAMPS              C   mumol/l      conc.   cyt     1    "Rp-8-pCPT-cAMPS"
+Rp_cAMPS                    C   mumol/l      conc.   cyt     1    "Rp-cAMPS"
+RIIp_Rp8_Br_cAMPS_C_2       C   mumol/l      conc.   cyt     1    "pRII_2:C_2:Rp-8-Br-cAMPS_4"
+RIIp_Rp8_pCPT_cAMPS_C_2     C   mumol/l      conc.   cyt     1    "pRII_2:C_2:Rp-8-pCPT-cAMPS_4"
+RIIp_Rp_cAMPS_C_2           C   mumol/l      conc.   cyt     1    "pRII_2:C_2:Rp-cAMPS_4"
+RIIp_Sp8_Br_cAMPS_C_2       C   mumol/l      conc.   cyt     1    "pRII_2:C_2:Sp-8-Br-cAMPS_4"
+RIIp_Sp8_Br_cAMPS_2         C   mumol/l      conc.   cyt     1    "pRII_2:Sp-8-Br-cAMPS_4"
+RIIp_2                      C   mumol/l      conc.   cyt     1    "pRII_2"
+RII_2                       C   mumol/l      conc.   cyt     1    "RII_2"
+IBMX                        C   mumol/l      conc.   cyt     1    "IBMX"
+PDE                         C   mumol/l      conc.   cyt     1    "PDE"
+pPDE                        C   mumol/l      conc.   cyt     1    "pPDE"
+
+INPUTS
+Fsk                   C  nM  conc.  "step1(t,0,Fsk_time,Fsk_level)"
+IBMXex                C  nM  conc.  "step1(t,0,IBMX_time,IBMX_level)"
+DMSO                  C  nM  conc.  "step1(t,0,DMSO_time,DMSO_level)"
+H89                   C  nM  conc.  "step1(t,0,H89_time,H89_level)"
+Sp8_Br_cAMPS_AM       C  nM  conc.  "step1(t,0,Sp8_Br_cAMPS_AM_time,Sp8_Br_cAMPS_AM_level)"
+Rp8_Br_cAMPS_pAB      C  nM  conc.  "step1(t,0,Rp8_Br_cAMPS_pAB_time,Rp8_Br_cAMPS_pAB_level)"
+Rp8_pCPT_cAMPS_pAB    C  nM  conc.  "step1(t,0,Rp8_pCPT_cAMPS_pAB_time,Rp8_pCPT_cAMPS_pAB_level)"
+Rp_cAMPS_pAB          C  nM  conc.  "step1(t,0,Rp_cAMPS_pAB_time,Rp_cAMPS_pAB_level)"
+fourABnOH             C  nM  conc.  "step1(t,0,fourABnOH_time,fourABnOH_level)"
+
+REACTIONS
+                            -> Sp8_Br_cAMPS                     CUSTOM    "ki_Sp8_Br_cAMPS_AM   *(xi_i_Sp8_Br_cAMPS_AM   *Sp8_Br_cAMPS_AM    - Sp8_Br_cAMPS  )"
+                            -> Rp8_Br_cAMPS                     CUSTOM    "ki_Rp8_Br_cAMPS_pAB  *(xi_i_Rp8_Br_cAMPS_pAB  *Rp8_Br_cAMPS_pAB   - Rp8_Br_cAMPS  )"
+                            -> Rp8_pCPT_cAMPS                   CUSTOM    "ki_Rp8_pCPT_cAMPS_pAB*(xi_i_Rp8_pCPT_cAMPS_pAB*Rp8_pCPT_cAMPS_pAB - Rp8_pCPT_cAMPS)"
+                            -> Rp_cAMPS                         CUSTOM    "ki_Rp_cAMPS_pAB      *(xi_i_Rp_cAMPS_pAB      *Rp_cAMPS_pAB       - Rp_cAMPS      )"
+
+                            -> IBMX                             CUSTOM    "ki_IBMX*(IBMXex-IBMX)"
+
+AC                          -> AC_Fsk                           CUSTOM    "kf_Fsk*AC*Fsk"
+AC_Fsk                      -> AC                               CUSTOM    "KD_Fsk*kf_Fsk*AC_Fsk"
+
+pAC                         -> pAC_Fsk                          CUSTOM    "kf_Fsk*pAC*Fsk"
+pAC_Fsk                     -> pAC                              CUSTOM    "KD_Fsk*kf_Fsk*pAC_Fsk"
+
+AC                          -> pAC                              CUSTOM    "kp_AC*AC*Csub"
+AC_Fsk                      -> pAC_Fsk                          CUSTOM    "kp_AC*AC_Fsk*Csub"
+
+pAC                         -> AC                               CUSTOM    "kdp_AC*pAC"
+pAC_Fsk                     -> AC_Fsk                           CUSTOM    "kdp_AC*pAC_Fsk"
+
+                            -> cAMP                             CUSTOM    "ks_AC_cAMP*(AC+xi_pAC*pAC)"
+                            -> cAMP                             CUSTOM    "ks_AC_cAMP*xi_AC_cAMP_Fsk*(AC_Fsk+xi_pAC*pAC_Fsk)"
+cAMP                        ->                                  CUSTOM    "kdeg_cAMP_free*KD_IBMX/(KD_IBMX+IBMX)*(PDE+xi_pPDE*pPDE)*cAMP"
+
+RII_C_2                     -> RII_2  + Csub                    CUSTOM    "kf_RII_C_2__RII_2 *RII_C_2"
+RII_2  + Csub               -> RII_C_2                          CUSTOM    "kf_RII_2__RII_C_2 *RII_2*Csub"
+
+RIIp_C_2                    -> RIIp_2 + Csub                    CUSTOM    "kf_RII_C_2__RII_2 *xi_kf_RII_C_2__RII_2 *RIIp_C_2"
+RIIp_2 + Csub               -> RIIp_C_2                         CUSTOM    "kf_RII_2__RII_C_2 *xi_kf_RII_2__RII_C_2 *RIIp_2*Csub"
+
+RIIp_2                      -> RII_2                            CUSTOM    "kf_RIIp_2__RII_2   *RIIp_2"
+
+RII_C_2                     -> RIIp_C_2                         CUSTOM    "kf_RII_C_2__RIIp_C_2 *RII_C_2"
+RIIp_C_2                    -> RII_C_2                          CUSTOM    "kf_RIIp_C_2__RII_C_2 *RIIp_C_2"
+
+RIIp_C_2                    -> RIIp_cAMP_C_2                    CUSTOM    "kf_cAMP*cAMP*RIIp_C_2"
+RIIp_cAMP_C_2               -> RIIp_C_2                         CUSTOM    "kf_cAMP*KD_cAMP*RIIp_cAMP_C_2"
+RIIp_cAMP_C_2               -> RIIp_C_2                         CUSTOM    "kdeg_cAMP*KD_IBMX/(KD_IBMX+IBMX)*(PDE+xi_pPDE*pPDE)*RIIp_cAMP_C_2"
+
+RIIp_cAMP_C_2               -> RIIp_cAMP_2 + Csub               CUSTOM    "kf_RIIp_cAMP_C_2__RIIp_2*RIIp_cAMP_C_2"
+RIIp_cAMP_2                 -> RIIp_2                           CUSTOM    "kf_cAMP*KD_cAMP*RIIp_cAMP_2"
+RIIp_cAMP_2                 -> RIIp_2                           CUSTOM    "kdeg_cAMP*KD_IBMX/(KD_IBMX+IBMX)*(PDE+xi_pPDE*pPDE)*RIIp_cAMP_2"
+
+RIIp_C_2                    -> RIIp_Rp8_Br_cAMPS_C_2            CUSTOM    "kf_cAMP*xi_b_Rp8_Br_cAMPS*Rp8_Br_cAMPS*RIIp_C_2"
+RIIp_Rp8_Br_cAMPS_C_2       -> RIIp_C_2                         CUSTOM    "kf_cAMP*xi_b_Rp8_Br_cAMPS*KD_cAMP*xi_KD_Rp8_Br_cAMPS*RIIp_Rp8_Br_cAMPS_C_2"
+
+RIIp_C_2                    -> RIIp_Rp8_pCPT_cAMPS_C_2          CUSTOM    "kf_cAMP*xi_b_Rp8_pCPT_cAMPS*Rp8_pCPT_cAMPS*RIIp_C_2"
+RIIp_Rp8_pCPT_cAMPS_C_2     -> RIIp_C_2                         CUSTOM    "kf_cAMP*xi_b_Rp8_pCPT_cAMPS*KD_cAMP*xi_KD_Rp8_pCPT_cAMPS*RIIp_Rp8_pCPT_cAMPS_C_2"
+
+RIIp_C_2                    -> RIIp_Rp_cAMPS_C_2                CUSTOM    "kf_cAMP*xi_b_Rp_cAMPS*Rp_cAMPS*RIIp_C_2"
+RIIp_Rp_cAMPS_C_2           -> RIIp_C_2                         CUSTOM    "kf_cAMP*xi_b_Rp_cAMPS*KD_cAMP*xi_KD_Rp_cAMPS*RIIp_Rp_cAMPS_C_2"
+
+RIIp_C_2                    -> RIIp_Sp8_Br_cAMPS_C_2            CUSTOM    "kf_cAMP*xi_b_Sp8_Br_cAMPS*Sp8_Br_cAMPS*RIIp_C_2"
+RIIp_Sp8_Br_cAMPS_C_2       -> RIIp_C_2                         CUSTOM    "kf_cAMP*xi_b_Sp8_Br_cAMPS*KD_cAMP*xi_KD_Sp8_Br_cAMPS*RIIp_Sp8_Br_cAMPS_C_2"
+RIIp_Sp8_Br_cAMPS_C_2       -> RIIp_Sp8_Br_cAMPS_2 + Csub       CUSTOM    "kf_RIIp_cAMP_C_2__RIIp_2*RIIp_Sp8_Br_cAMPS_C_2"
+RIIp_Sp8_Br_cAMPS_2         -> RIIp_2                           CUSTOM    "kf_cAMP*xi_b_Sp8_Br_cAMPS*KD_cAMP*xi_KD_Sp8_Br_cAMPS*RIIp_Sp8_Br_cAMPS_2"
+
+Csub                        -> Csub_H89                         CUSTOM    "kf_H89*H89*Csub"
+Csub_H89                    -> Csub                             CUSTOM    "kf_H89*KD_H89*Csub_H89"
+
+PDE                         -> pPDE                             CUSTOM    "kf_PDE_Csub*Csub*PDE"
+pPDE                        -> PDE                              CUSTOM    "kf_PDE_Csub*KD_PDE_Csub*pPDE"
+
+DERIVED
+pRII             C   mumol/l      conc.   "2*(RIIp_Sp8_Br_cAMPS_2 + RIIp_cAMP_2 + RIIp_2) + 2*rel_open*(RIIp_C_2 + RIIp_Rp8_Br_cAMPS_C_2 + RIIp_Rp8_pCPT_cAMPS_C_2 + RIIp_Rp_cAMPS_C_2) + 2*(rel_open + xi_rel_open*(1-rel_open))*(RIIp_cAMP_C_2 + RIIp_Sp8_Br_cAMPS_C_2)"
+pRII_western     C   mumol/l      conc.   "2*(RIIp_Sp8_Br_cAMPS_2 + RIIp_cAMP_2 + RIIp_2) + 2*         (RIIp_C_2 + RIIp_Rp8_Br_cAMPS_C_2 + RIIp_Rp8_pCPT_cAMPS_C_2 + RIIp_Rp_cAMPS_C_2) + 2*                                      (RIIp_cAMP_C_2 + RIIp_Sp8_Br_cAMPS_C_2)"
+Calpha           C   mumol/l      conc.   "2*(Csub + Csub_H89)                            + 2*rel_open*(RIIp_C_2 + RIIp_Rp8_Br_cAMPS_C_2 + RIIp_Rp8_pCPT_cAMPS_C_2 + RIIp_Rp_cAMPS_C_2) + 2*(rel_open + xi_rel_open*(1-rel_open))*(RIIp_cAMP_C_2 + RIIp_Sp8_Br_cAMPS_C_2)"
+
+OBSERVABLES
+        
+ERRORS
+        
+CONDITIONS
+init_AC                          "AC_total"
+init_pAC                         "0"
+init_AC_Fsk                      "0"
+init_pAC_Fsk                     "0"
+init_cAMP                        "0"
+init_Csub                        "0"
+init_Csub_H89                    "0"
+init_RII_C_2                     "0"
+init_RIIp_C_2                    "RII2_total"
+init_RIIp_cAMP_C_2               "0"
+init_RIIp_cAMP_2                 "0"
+init_Sp8_Br_cAMPS                "0"
+init_Rp8_Br_cAMPS                "0"
+init_Rp8_pCPT_cAMPS              "0"
+init_Rp_cAMPS                    "0"
+init_RIIp_Rp8_Br_cAMPS_C_2       "0"
+init_RIIp_Rp8_pCPT_cAMPS_C_2     "0"
+init_RIIp_Rp_cAMPS_C_2           "0"
+init_RIIp_Sp8_Br_cAMPS_C_2       "0"
+init_RIIp_Sp8_Br_cAMPS_2         "0"
+init_RIIp_2                      "0"
+init_RII_2                       "0"
+init_IBMX                        "0"
+init_PDE                         "PDE_total"
+init_pPDE                        "0"

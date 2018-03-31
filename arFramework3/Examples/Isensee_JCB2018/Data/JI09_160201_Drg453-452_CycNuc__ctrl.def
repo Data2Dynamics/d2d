@@ -1,0 +1,20 @@
+DESCRIPTION
+"Experimenter: Joerg Isensee"
+"Date: "
+"Cells: "
+"Treatment: ctrl"
+
+PREDICTOR
+t               T   h     time	0	120
+
+INPUTS
+
+OBSERVABLES
+Caplha_JI09_160201_Drg452_CycNuc                  C	au   conc.   0	0   "s_Calpha_JI09_160201_Drg453_452_CycNuc*(s_Calpha_global*Calpha+b_Calpha_global)"
+Caplha_JI09_160201_Drg453_CycNuc                  C	au   conc.   0	0   "s_Calpha_JI09_160201_Drg453_452_CycNuc*(s_Calpha_global*Calpha+b_Calpha_global)"
+
+ERRORS
+Caplha_JI09_160201_Drg452_CycNuc     "s_Calpha_JI09_160201_Drg453_452_CycNuc*s_Calpha_global*sigma_Calpha"
+Caplha_JI09_160201_Drg453_CycNuc     "s_Calpha_JI09_160201_Drg453_452_CycNuc*s_Calpha_global*sigma_Calpha"
+
+CONDITIONS

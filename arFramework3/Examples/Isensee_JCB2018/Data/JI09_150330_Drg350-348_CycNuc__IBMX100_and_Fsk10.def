@@ -1,0 +1,23 @@
+DESCRIPTION
+"Experimenter: Joerg Isensee"
+"Date: "
+"Cells: "
+"Treatment: IBMX(100)/Fsk(10)"
+
+PREDICTOR
+t               T   h     time	0	120
+
+INPUTS
+
+OBSERVABLES
+pRII_JI09_150330_Drg348_CycNuc                  C	au   conc.   0	0   "s_pRII_JI09_150330_Drg350_348_CycNuc*(s_pRII_global*pRII+b_pRII_global)"
+pRII_JI09_150330_Drg349_CycNuc                  C	au   conc.   0	0   "s_pRII_JI09_150330_Drg350_348_CycNuc*(s_pRII_global*pRII+b_pRII_global)"
+pRII_JI09_150330_Drg350_CycNuc                  C	au   conc.   0	0   "s_pRII_JI09_150330_Drg350_348_CycNuc*(s_pRII_global*pRII+b_pRII_global)"
+
+ERRORS
+pRII_JI09_150330_Drg348_CycNuc     "s_pRII_JI09_150330_Drg350_348_CycNuc*s_pRII_global*sigma_pRII"        
+pRII_JI09_150330_Drg349_CycNuc     "s_pRII_JI09_150330_Drg350_348_CycNuc*s_pRII_global*sigma_pRII"        
+pRII_JI09_150330_Drg350_CycNuc     "s_pRII_JI09_150330_Drg350_348_CycNuc*s_pRII_global*sigma_pRII"        
+
+CONDITIONS
+

@@ -1,0 +1,23 @@
+DESCRIPTION
+"Experimenter: Joerg Isensee"
+"Date: "
+"Cells: "
+"Treatment: Rp8-pCPT-cAMPS-pAB(10)/ctrl"
+
+PREDICTOR-DOSERESPONSE  Rp8_pCPT_cAMPS_pAB_time
+t               T   h     time	0	120
+
+INPUTS
+
+OBSERVABLES
+pRII_JI09_150302_Drg343_CycNuc                  C	au   conc.   0	0   "s_pRII_JI09_150302_Drg345_343_CycNuc*(s_pRII_global*pRII+b_pRII_global)"
+pRII_JI09_150302_Drg344_CycNuc                  C	au   conc.   0	0   "s_pRII_JI09_150302_Drg345_343_CycNuc*(s_pRII_global*pRII+b_pRII_global)"
+pRII_JI09_150302_Drg345_CycNuc                  C	au   conc.   0	0   "s_pRII_JI09_150302_Drg345_343_CycNuc*(s_pRII_global*pRII+b_pRII_global)"
+
+ERRORS
+pRII_JI09_150302_Drg343_CycNuc     "s_pRII_JI09_150302_Drg345_343_CycNuc*s_pRII_global*sigma_pRII"        
+pRII_JI09_150302_Drg344_CycNuc     "s_pRII_JI09_150302_Drg345_343_CycNuc*s_pRII_global*sigma_pRII"        
+pRII_JI09_150302_Drg345_CycNuc     "s_pRII_JI09_150302_Drg345_343_CycNuc*s_pRII_global*sigma_pRII"        
+
+CONDITIONS
+

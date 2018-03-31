@@ -1,0 +1,23 @@
+DESCRIPTION
+"Experimenter: Joerg Isensee"
+"Date: "
+"Cells: "
+"Treatment: 4-ABnOH/ctrl"
+
+PREDICTOR-DOSERESPONSE  fourABnOH_level
+t               T   h     time	0	120
+
+INPUTS
+
+OBSERVABLES
+pRII_JI09_150330_Drg351_CycNuc                  C	au   conc.   0	0   "s_pRII_JI09_150330_Drg353_351_CycNuc*(s_pRII_global*pRII+b_pRII_global)"
+pRII_JI09_150330_Drg352_CycNuc                  C	au   conc.   0	0   "s_pRII_JI09_150330_Drg353_351_CycNuc*(s_pRII_global*pRII+b_pRII_global)"
+pRII_JI09_150330_Drg353_CycNuc                  C	au   conc.   0	0   "s_pRII_JI09_150330_Drg353_351_CycNuc*(s_pRII_global*pRII+b_pRII_global)"
+
+ERRORS
+pRII_JI09_150330_Drg351_CycNuc     "s_pRII_JI09_150330_Drg353_351_CycNuc*s_pRII_global*sigma_pRII"        
+pRII_JI09_150330_Drg352_CycNuc     "s_pRII_JI09_150330_Drg353_351_CycNuc*s_pRII_global*sigma_pRII"        
+pRII_JI09_150330_Drg353_CycNuc     "s_pRII_JI09_150330_Drg353_351_CycNuc*s_pRII_global*sigma_pRII"        
+
+CONDITIONS
+
