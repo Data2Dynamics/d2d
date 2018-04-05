@@ -7,6 +7,8 @@
 % 		name 			- Name of the flux
 %		indep1          - Independent variable 1 (x-axis)
 % 		indep2          - Independent variable 2
+%       range1          - Specify range for variable 1 manually
+%       range2          - Specify range for variable 2 manually
 % Variable arguments:
 %		timepoints      - Simulation time point to use for values of the other states (default is initial condition)
 %		model           - Which model to use for reference species
@@ -23,7 +25,7 @@
 function rate = arResponseCurve( name, indep1, indep2, varargin )
 
     global ar;
-    
+    warning('off', 'symbolic:sym:sym:DeprecateExpressions');
     ylog = 0;
     m = 1;
     cond = 1;
@@ -31,8 +33,8 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
     miniTresh = 1e-16;
     mRange = 5;
     
-    args = {'timepoints', 'condition', 'model', 'relative', 'range', 'noclear', 'hold', 'custom'};
-    extraArgs = [1, 1, 1, 0, 1, 0, 0, 1];
+    args = {'timepoints', 'condition', 'model', 'relative', 'range', 'noclear', 'hold', 'custom', 'range1', 'range2'};
+    extraArgs = [1, 1, 1, 0, 1, 0, 0, 1, 1, 1];
     opts = argSwitch( args, extraArgs, {}, 0, varargin );
 
     if opts.timepoints
@@ -74,8 +76,11 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         tp = timepoints(ti);
         
         enzyme = ismember( ar.model(m).v, name );
-        func = sym( ar.model(m).fv{enzyme} );
-
+        
+        fvsym = sym( ar.model(m).fv{enzyme} );
+        func = subs( fvsym, ar.model(m).condition(cond).pold, ar.model(m).condition(cond).fp.' );
+        func = simplify( func );
+        
         pLabels = ar.pLabel;
         xLabels = ar.model(m).x;
         zLabels = ar.model(m).z;
@@ -87,7 +92,7 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         uValues = ar.model(m).condition(cond).uFineSimu(tp, :) + 0;
         
         labels = [ pLabels, xLabels, zLabels, uLabels ];
-        values = [ pValues, xValues, zValues, uValues ];      
+        values = [ pValues, xValues, zValues, uValues ];
         
         [~, ~, Iref] = intersect( {indep1, indep2}, labels, 'stable' );
         refValues = values(Iref);
@@ -117,7 +122,6 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
             end
             
             disp( 'Limit value (verify whether this contains only vmax expression):' );
-            limF
             
             % Normalize by vmax
             func = func / limF;
@@ -129,10 +133,6 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         
         % Substitute variables
         func = subs( func, labels, values );
-
-        find( ismember( labels, 'F16BP' ) )
-        values(find( ismember( labels, 'AMP' ) ))
-        values(find( ismember( labels, 'ATP' ) ))
         
         vars = symvar( func );
         if ( sum( ismember( vars, indep1 ) ) == 0 )
@@ -146,8 +146,16 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         mFunc = matlabFunction( func, 'vars', {indep1, indep2} );
 
         % Get reference amounts
-        responseRange1 = 10.^[-mRange : .05 : mRange];
-        responseRange2 = 10.^[-mRange : .5  : mRange];
+        if ( opts.range1 )
+            responseRange1 = opts.range1_args;
+        else
+            responseRange1 = 10.^[-mRange : .05 : mRange]; %#ok
+        end
+        if ( opts.range2 )
+            responseRange2 = opts.range2_args;
+        else
+            responseRange2 = 10.^[-mRange : .5  : mRange]; %#ok
+        end
 
         rate = zeros( numel( responseRange2 ), numel( responseRange1 ) );
         cmap = parula( numel( responseRange2 ) );
@@ -183,8 +191,7 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         else
             ylabel( sprintf( '%s', rateName ) );
         end
-        nX = 5;
-        set( gca, 'XTick', 10.^[min(log10(responseRange1)) : (max(log10(responseRange1)) - min(log10(responseRange1))) / nX : max(log10(responseRange1))] );
+        
         set( gca, 'CLim', [min(log10(responseRange2)), max(log10(responseRange2))] );
         c = colorbar;
         colormap(parula);
@@ -202,4 +209,6 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
             clear rate;
         end
     end
+    
+    warning('on', 'symbolic:sym:sym:DeprecateExpressions');
 end

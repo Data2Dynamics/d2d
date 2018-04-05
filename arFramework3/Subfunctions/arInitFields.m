@@ -10,7 +10,7 @@ function ar = arInitFields(ar)
     % !!  NOTE: Every time you add or remove a field, increment this value by one.
     % !! 
     % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    arFormatVersion = 3;
+    arFormatVersion = 4;
     
     % Without arguments, just return the version number
     if ( nargin < 1 )
@@ -31,6 +31,7 @@ function ar = arInitFields(ar)
         {'turboSSSensi',                false}, ...                     % Faster equilibration (BETA). Toggle with arFastSensis. DO NOT TOGGLE BY HAND.
         {'sensitivitySubset',           0}, ...                         % Only compute subset of sensitivities when certain qFit's are 0 (BETA)
         {'lightSave',                   false}, ...                     % When calling arSave, only save parameter sets by default (useful for big models)
+        {'saveMexFile',                true}, ...                      % When calling arSave, the arSimuCalc mex file is copied to the savefolder
         {'skipSim',                     false}, ...                     % Disable simulation (used for fitting steady state models)
         {'barhack',                     false}, ...                     % Display data with only a single time point as bar
         {'networkgraph',                false}, ...                     % Enable network graph plotting features (disabled by default since they slow compilation)
@@ -90,6 +91,7 @@ function ar = arInitFields(ar)
         ...                                                             % Simulation based equilibration settings
         {'init_eq_step',                100.0}, ...                     %   Simulation time of initial equilibration attempt
         {'eq_tol',                      1e-8}, ...                      %   Value below which all components of dxdt have to fall to be considered equilibrated
+        {'eq_rtol',                     1e-8}, ...                      %   Relative value below which all components of dxdt have to fall to be considered equilibrated
         {'max_eq_steps',                20}, ...                        %   Maximum number of times the equilibration time is extended
         {'eq_step_factor',              5}, ...                         %   Factor by which the equilibration time is extended when dxdt isn't below eq_tol
         ...                                                             % Rootfinding based equilibration settings
@@ -107,10 +109,7 @@ function ar = arInitFields(ar)
     % PPL options
     pplDefaults = { ...
         {'alpha_level',           0.05}, ... 
-        {'ndof',                     1}, ...
-        {'qLog10',                   1}, ...
-        {'rel_increase',           0.2}, ...
-        {'n',                      300}, ...
+        {'qLog10',                   0}, ...
         };
             
     % Apply the default PPL settings where no fields are present

@@ -1,4 +1,5 @@
 % This function can be used to constrain steady state solutions.
+% Added residual can be removed by calling arRemoveCustomResidual('SteadyStateBounds')
 %
 % It applies a quadratic penalty when model states or derived variables leave a certain range.
 %       (x-ub)^2        if x > ub
@@ -10,10 +11,10 @@
 %
 %   m               - Model index
 %   c               - Condition index
-%   xl              - Lower bound states
-%   xu              - Upper bound states
-%   zl              - Lower bound derived variables
-%   zu              - Upper bound derived variables
+%   xl              - Lower bound states (isnan indicates no bound)
+%   xu              - Upper bound states (isnan indicates no bound)
+%   zl              - Lower bound derived variables (isnan indicates no bound)
+%   zu              - Upper bound derived variables (isnan indicates no bound)
 %   logx            - Treat x in logarithmic space
 %   logz            - Treat z in logarithmic space
 %   weightx         - Weight(s) for the penalty on the states (inverse of SD)
@@ -103,7 +104,7 @@ function [res_user, res_type, sres_user] = residual_concentrationConstraintsL2(m
     if ( nargout > 2 )
         sxss        = squeeze(ar.model(m).ss_condition(c).sxFineSimu(end,x_active,:));
         szss        = squeeze(ar.model(m).ss_condition(c).szFineSimu(end,z_active,:));
-        log10s      = ar.qFit(ar.model(m).ss_condition(c).pLink)==1;
+        log10s      = ar.qLog10(ar.model(m).ss_condition(c).pLink)==1;
 
         if ( size(sxss, 2)==1 )
             sxss = sxss.';
@@ -167,13 +168,32 @@ function [res_user, res_type, sres_user] = residual_concentrationConstraintsL2(m
         fprintf( 'Infinity found in residuals: %s, %s', xstr, zstr );
     end
     
-    if ( ar.config.show_ss_constraints )
+    if ( ar.config.show_ss_constraints == 1 )
         xs = (xss < xl) | (xss > xu);
         zs = (zss < zl) | (zss > zu);
         ix = find(x_active); iz = find(z_active);
         xstr = sprintf( '%s ', ar.model.x{ix(xs)} );
         zstr = sprintf( '%s ', ar.model.z{iz(zs)} );
         fprintf( 'Active bounds: %s, %s\n', xstr, zstr );
+    end
+    if ( ar.config.show_ss_constraints == 2 )
+        xs = (xss < xl) | (xss > xu);
+        zs = (zss < zl) | (zss > zu);
+        ix = find(x_active); iz = find(z_active);
+        for j = 1 : numel( ix )
+            if ( xs( j ) )
+                fprintf( 2, '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.x{ix(j)}, xss(j), xl(j), xu(j) );
+            else
+                fprintf( '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.x{ix(j)}, xss(j), xl(j), xu(j) );
+            end
+        end
+        for j = 1 : numel( iz )
+            if ( zs( j ) )
+                fprintf( 2, '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.z{iz(j)}, zss(j), zl(j), zu(j) );
+            else
+                fprintf( '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.z{iz(j)}, zss(j), zl(j), zu(j) );
+            end
+        end
     end
     
     res_type    = ones(size(res_user)); % Treat the constraint like data

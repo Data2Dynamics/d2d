@@ -1,0 +1,47 @@
+DESCRIPTION
+"model 127 (DDMoRe)"
+
+
+PREDICTOR
+TIME             TIME   "min"     "time"	0	10
+
+COMPARTMENTS
+        
+STATES
+dep             C   "au"  "conc."
+central         C   "au"  "conc."
+perph           C   "au"  "conc."
+pSmad           C   "au"  "conc."
+TS              C   "mg"  "conc."
+INH1            C   "au"  "conc."
+INH2            C   "au"  "conc."
+
+INPUTS
+
+ODES
+//see DDmore
+"-(8*24)*dep"
+"(8*24)*dep + (1.28*24)/1.29*perph - (1.28*24)/0.443*central - 0.551/0.443*central"
+"(1.28*24)/0.443*central - (1.28*24)/1.29*perph"
+"(2.24*24*100)*(1-(((central/0.443+10^-4)^1.4)/((central/0.443+10^-4)^1.4+0.79^1.4))) - 2.24*24*pSmad"
+"(Kgrw1*TS)/((1+((Kgrw1*TS)/Kgrw0)^20)^(1/20))*(1-INH2)" //here is an error in the model on DDmore, check the corresponding paper
+"3/MSPT*((100-pSmad+10^-5)/100 - INH1)"
+"3/MSPT*(INH1 - INH2)"
+
+DERIVED
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+init_dep        "p_ID_AMT"
+init_central    "0"
+init_perph      "0"
+init_pSmad      "100"
+init_TS         "TS0"
+init_INH1       "0"
+init_INH2       "0"
+
+
+

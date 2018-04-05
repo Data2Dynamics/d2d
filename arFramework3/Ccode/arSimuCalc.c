@@ -128,6 +128,7 @@ int    max_eq_steps;          /* Maximal equilibration steps */
 double init_eq_step;          /* Initial equilibration stepsize attempt */
 double eq_step_factor;        /* Factor with which to increase the time at each equilibration step */
 double eq_tol;                /* Absolute tolerance for equilibration */
+double eq_rtol;               /* Relative tolerance for equilibration */
 
 struct timeval t1;
 
@@ -259,6 +260,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     init_eq_step = (double) mxGetScalar(mxGetField(arconfig, 0, "init_eq_step"));
     eq_step_factor = (double) mxGetScalar(mxGetField(arconfig, 0, "eq_step_factor"));
     eq_tol = (double) mxGetScalar(mxGetField(arconfig, 0, "eq_tol"));
+    if ( mxGetField(arconfig, 0, "eq_rtol") )
+    {
+        eq_rtol = (double) mxGetScalar(mxGetField(arconfig, 0, "eq_rtol"));
+    } else {
+        eq_rtol = 0.0;
+    }
+        
 
     DEBUGPRINT0( debugMode, 2, "Loaded configuration\n" );
     
@@ -1273,31 +1281,42 @@ void storeIntegrationInfo( SimMemory sim_mem, mxArray *arcondition, int ic )
         stepData[0] = (int64_T) nsteps;
     }
 }     
-     
+
+int safeGetToggle( mxArray *data, int idx, const char *fieldName )
+{
+    mxArray *field = mxGetField(data, idx, fieldName);
+    if ( !field || ( mxIsEmpty(field) ) ) {
+        return 0;
+	} else {
+        return (int) mxGetScalar(field);
+	}
+}
+
 void evaluateObservations( mxArray *arcondition, int im, int ic, int sensi, int has_tExp )
 {
     mxArray *ardata;
     mxArray *dLink;
     double  *dLinkints; 
     int     id, nd, ids;
-            
+   
+    DEBUGPRINT1( debugMode, 4, "Evaluating observations for condition %d\n", ic );
     ardata = mxGetField(armodel, im, "data");
 	if(ardata!=NULL){
         dLink = mxGetField(arcondition, ic, "dLink");
         dLinkints = mxGetData(dLink);
-        
         nd = (int) mxGetNumberOfElements(dLink);
-        
         /* loop over data */
         for(ids=0; ids<nd; ++ids){
             id = ((int) dLinkints[ids]) - 1;
-            has_tExp = (int) mxGetScalar(mxGetField(ardata, id, "has_tExp"));
-            
+            DEBUGPRINT2( debugMode, 4, "Evaluating data with idx %d for condition %d\n", id, ic );            
+            has_tExp = safeGetToggle(ardata, id, "has_tExp");
+                        
             if((has_tExp == 1) | (fine == 1)) {
                 y_calc(im, id, ardata, arcondition, sensi);
             }
         }
     }
+    DEBUGPRINT1( debugMode, 4, "Finished evaluating observations for condition %d\n", ic );
 }
 
 void copyStates( N_Vector x, double *returnx, double *qpositivex, int neq, int nout, int offset )
@@ -1394,10 +1413,10 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
         if ( equilibrated )
         {
             for (i=0; i<neq; i++)
-                converged = (converged && ( (equilibrated[i] < 0.1) || ( fabs(returndxdt[i])<eq_tol ) ) );
+                converged = ( converged && ( (equilibrated[i] < 0.1) || ( (fabs(returndxdt[i])<eq_tol) || (fabs(returndxdt[i]) < fabs(eq_rtol * Ith(x, i+1))) ) ) );
         } else {
             for (i=0; i<neq; i++)
-                converged = (converged && fabs(returndxdt[i])<eq_tol );
+                converged = ( converged && ( (fabs(returndxdt[i])<eq_tol) || (fabs(returndxdt[i]) < fabs(eq_rtol * Ith(x, i+1))) ) );
         }
         
         /* Oh no, we didn't make it! Terminate anyway. */
@@ -1899,7 +1918,7 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
     
     /* MATLAB values */
     ic = (int) mxGetScalar(mxGetField(ardata, id, "cLink")) - 1;
-    has_yExp = (int) mxGetScalar(mxGetField(ardata, id, "has_yExp"));
+    has_yExp = safeGetToggle(ardata, id, "has_yExp");
     
     ny = (int) mxGetNumberOfElements(mxGetField(ardata, id, "y"));
     qlogy = mxGetData(mxGetField(ardata, id, "logfitting"));

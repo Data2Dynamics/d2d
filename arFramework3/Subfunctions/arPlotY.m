@@ -109,12 +109,14 @@ for jm = 1:length(ar.model)
                         
                         % Display bar for single time point measurements
                         if ( isfield( ar.config, 'barhack' ) && ( ar.config.barhack == 1 ) )
-                            if ( numel( unique( t ) ) == 1 )
+                            if ( numel( unique( t(~isnan(t)) ) ) == 1 )
+                                t = t(~isnan(t));
+                                y = nanmean(y);
+                                ystd = nanmean(ystd);
                                 t = [t-0.01, t-0.01, t+0.01, t+0.01];
                                 y = [0; y; y; 0];
                                 ystd = [0; ystd; ystd; 0];
                                 isBarGraph = 1;
-                                
                                 set(gca, 'YGrid', 'on');
                                 set(gca, 'XTick', []);
                             end

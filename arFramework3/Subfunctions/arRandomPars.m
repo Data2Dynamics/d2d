@@ -35,6 +35,25 @@ end
 % default matrix
 ps = ones(n,1) * ar.p(:)';
 
+lb = ar.lb;
+ub = ar.ub;
+
+% Use different bounds for initial guesses?
+if isfield( ar, 'fitlb' )
+    if ( numel( ar.fitlb ) ~= numel( ar.lb ) )
+        error( 'ar.fitlb not the same size as ar.lb' );
+    end
+    lb = ar.fitlb;
+    disp( 'Using alternate lower bounds' );
+end
+if isfield( ar, 'fitub' )
+    if ( numel( ar.fitub ) ~= numel( ar.ub ) )
+        error( 'ar.fitub not the same size as ar.ub' );
+    end
+    ub = ar.fitub;
+    disp( 'Using alternate upper bounds' );
+end
+
 if(isfield(ar.config, 'useLHS') && ar.config.useLHS==1) % LHS samples
     if ar.config.fiterrors==1
         q_select = ar.qFit==1;
@@ -43,18 +62,18 @@ if(isfield(ar.config, 'useLHS') && ar.config.useLHS==1) % LHS samples
     end
     
     psrand = lhsdesign(n,sum(q_select));
-    psrand = psrand .* (ones(n,1)*(ar.ub(q_select) - ar.lb(q_select)));
-    psrand = psrand + (ones(n,1)*ar.lb(q_select));
+    psrand = psrand .* (ones(n,1)*(ub(q_select) - lb(q_select)));
+    psrand = psrand + (ones(n,1)*lb(q_select));
     ps(:,q_select) = psrand;
 elseif(isfield(ar.config, 'useLHS') && ar.config.useLHS==2) % random samples without LHS, prior considered if available
     for jp=1:length(ar.p)
         if(ar.qFit(jp)==1  && (ar.config.fiterrors~=0 || ar.qError(jp)~=1 ) )  % Error parameters should not be altered if fiterrors==0
             if(ar.type(jp)==0 || ar.type(jp)==2) % uniform prior or uniform with normal bounds
-                ps(:,jp) = ar.lb(jp) + (ar.ub(jp) - ar.lb(jp)) * rand(n,1);
+                ps(:,jp) = lb(jp) + (ub(jp) - lb(jp)) * rand(n,1);
             elseif(ar.type(jp)==1 || ar.type(jp)==3) % normal prior or L1
                 psrand = ar.mean(jp) + ar.std(jp) * randn(n,1);
-                psrand(psrand>ar.ub(jp)) = ar.ub(jp);
-                psrand(psrand<ar.lb(jp)) = ar.lb(jp);
+                psrand(psrand>ub(jp)) = ub(jp);
+                psrand(psrand<lb(jp)) = lb(jp);
                 ps(:,jp) = psrand;
             else
                 error('unsupported prior type');
@@ -69,8 +88,8 @@ else % uniformly distributed, i.e. rand within the range [ar.lb, ar.ub]
     end
     
     psrand = rand(n,sum(q_select));
-    tmpublb = (ar.ub(q_select) - ar.lb(q_select));
-    tmplb = ar.lb(q_select);
+    tmpublb = (ub(q_select) - lb(q_select));
+    tmplb = lb(q_select);
     psrand = psrand .* (ones(n,1) * tmpublb(:)');
     psrand = psrand + (ones(n,1) * tmplb(:)');
     ps(:,q_select) = psrand;

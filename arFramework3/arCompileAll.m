@@ -4,13 +4,17 @@
 %   forcedCompile:                                      [false]
 %   debug_mode:         exclude precompiled objects     [false]
 %   source_dir:         source directory                []
-
+%   simplifyEquations:  simplify equations              [0]
+%                        0 - Do not simplify
+%                        1 - Only simplify fz
+%                        2 - Simplify fz and fv (slow!)
+%
 % See https://github.com/Data2Dynamics/d2d/wiki/First%20steps 
 % for description of work flow. 
 %
 % Copyright Andreas Raue 2013 (andreas.raue@fdm.uni-freiburg.de)
 
-function arCompileAll(forcedCompile, debug_mode, source_dir)
+function arCompileAll(forcedCompile, debug_mode, source_dir, simplifyEquations)
 
 % turn off warning message for custom c functions
 
@@ -38,6 +42,13 @@ if(~exist('debug_mode','var'))
 end
 if(~exist('source_dir','var'))
     source_dir = cd;
+else
+    if ( isempty(source_dir) )
+        source_dir = cd;
+    end
+end
+if(~exist('simplifyEquations', 'var'))
+    simplifyEquations = 0;
 end
 if (isfield(ar.config, 'legacy_steps'))
     legacy_steps = ar.config.legacy_steps;
@@ -238,6 +249,7 @@ for m=1:length(ar.model)
         end
         condition = ar.model(m).condition;
         newp = cell(1,length(ar.model(m).condition));
+        newfp = cell(1,length(ar.model(m).condition));
         newpold = cell(1,length(ar.model(m).condition));
         newpx0 = cell(1,length(ar.model(m).condition));
         splines = cell(1,length(ar.model(m).condition));
@@ -250,9 +262,10 @@ for m=1:length(ar.model)
                 warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
                 warning('off', 'symbolic:sym:sym:DeprecateExpressions')
                 
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version, simplifyEquations);
                 csyms{c} = condition_sym.sym;
                 newp{c} = condition_sym.p;
+                newfp{c} = condition_sym.fp;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
                 splines{c} = condition_sym.splines;
@@ -278,9 +291,10 @@ for m=1:length(ar.model)
             end
         else
             for c=1:length(ar.model(m).condition)
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version, simplifyEquations);
                 ar.model(m).condition(c).sym = condition_sym.sym;
                 newp{c} = condition_sym.p;
+                newfp{c} = condition_sym.fp;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
                 splines{c} = condition_sym.splines;
@@ -306,6 +320,7 @@ for m=1:length(ar.model)
         % assign conditions
         for c=1:length(ar.model(m).condition)
             ar.model(m).condition(c).p = newp{c};
+            ar.model(m).condition(c).fp = newfp{c};
             ar.model(m).condition(c).pold = newpold{c};
             ar.model(m).condition(c).px0 = newpx0{c};
             ar.model(m).condition(c).splines = splines{c};
@@ -322,6 +337,7 @@ for m=1:length(ar.model)
         % calc data
         data = ar.model(m).data;
         newp = cell(1,length(ar.model(m).data));
+        newfp = cell(1,length(ar.model(m).data));
         newpold = cell(1,length(ar.model(m).data));
         constVars = cell(1, length(ar.model(m).data));
 
@@ -334,6 +350,7 @@ for m=1:length(ar.model)
                 c = data(d).cLink;
                 data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
                 newp{d} = data_sym.p;
+                newfp{d} = data_sym.fp;
                 newpold{d} = data_sym.pold;
                 constVars{d} = data_sym.constVars;
                 
@@ -357,6 +374,7 @@ for m=1:length(ar.model)
                 c = data(d).cLink;
                 data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
                 newp{d} = data_sym.p;
+                newfp{d} = data_sym.fp;
                 newpold{d} = data_sym.pold;
                 constVars{d} = data_sym.constVars;
                 
@@ -380,6 +398,7 @@ for m=1:length(ar.model)
         % assign data
         for d=1:length(ar.model(m).data)
             ar.model(m).data(d).p = newp{d};
+            ar.model(m).data(d).fp = newfp{d};
             ar.model(m).data(d).pold = newpold{d};
             ar.model(m).data(d).constVars = constVars{d};
         end
@@ -445,6 +464,7 @@ for m=1:length(ar.model)
         end
         condition = ar.model(m).condition;
         newp = cell(1,length(ar.model(m).condition));
+        newfp = cell(1,length(ar.model(m).condition));
         newpold = cell(1,length(ar.model(m).condition));
         newpx0 = cell(1,length(ar.model(m).condition));
         
@@ -454,8 +474,9 @@ for m=1:length(ar.model)
                 warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
                 warning('off', 'symbolic:sym:sym:DeprecateExpressions')
 
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version, simplifyEquations);
                 newp{c} = condition_sym.p;
+                newfp{c} = condition_sym.fp;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
                 if(~doskip(c))
@@ -475,8 +496,9 @@ for m=1:length(ar.model)
             end
         else        
             for c=1:length(ar.model(m).condition)
-                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version);
+                condition_sym = arCalcCondition(config, model, condition(c), m, c, doskip(c), matlab_version, simplifyEquations);
                 newp{c} = condition_sym.p;
+                newfp{c} = condition_sym.fp;
                 newpold{c} = condition_sym.pold;
                 newpx0{c} = condition_sym.px0;
                 if(~doskip(c))
@@ -499,6 +521,7 @@ for m=1:length(ar.model)
         % assign conditions
         for c=1:length(ar.model(m).condition)
             ar.model(m).condition(c).p = newp{c};
+            ar.model(m).condition(c).fp = newfp{c};
             ar.model(m).condition(c).pold = newpold{c};
             ar.model(m).condition(c).px0 = newpx0{c};
         end
@@ -668,7 +691,7 @@ end
 
 
 % Calc Condition
-function condition = arCalcCondition(config, model, condition, m, c, doskip, matlab_version)
+function condition = arCalcCondition(config, model, condition, m, c, doskip, matlab_version, simplifyEquations)
 
 if(doskip)
     arFprintf(2, 'calculating condition m%i c%i, %s...skipped\n', m, c, model.name);
@@ -703,7 +726,8 @@ condition.sym.C = arSubs(model.sym.C, condition.sym.p, condition.sym.fp, matlab_
 
 % Replace inline arrays (e.g. [3,4,2,5,2] with variable names, declaring
 % the array elsewhere as a static const (used for the fixed input spline)
-[ condition.sym.fu, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fu), {}, {}, c, 'condi' );
+constVars = {};
+[ condition.sym.fu, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fu), constVars, {}, c, 'condi' );
 condition.sym.fu = sym( condition.sym.fu );
 
 [ condition.sym.fv, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fv), constVars, cVars, c, 'condi' );
@@ -755,6 +779,14 @@ if(doskip)
     
     return;
 end
+
+if (simplifyEquations > 0)
+    condition.sym.fz = simplify( condition.sym.fz );
+end
+if (simplifyEquations > 1)
+    condition.sym.fv = simplify( condition.sym.fv );
+end
+
 
 % make short strings
 condition.ps = {};
@@ -810,10 +842,14 @@ condition.qdvdp_nonzero = logical(condition.sym.dfvdp~=0);
 
 % short terms
 condition.sym.dvdx = model.dvdx;
-condition.sym.dvdx(~condition.qdvdx_nonzero) = 0;
+if ~isempty(condition.qdvdx_nonzero)
+    condition.sym.dvdx(~condition.qdvdx_nonzero) = 0;
+end
 condition.sym.dvdu = model.dvdu;
-condition.sym.dvdu(~condition.qdvdu_nonzero) = 0;
-
+if ~isempty(condition.qdvdu_nonzero)
+    condition.sym.dvdu(~condition.qdvdu_nonzero) = 0;
+end
+    
 condition.sym.dvdp = sym(zeros(length(model.vs), length(condition.ps)));
 for j=1:length(model.vs)
     for i=1:length(condition.ps)
@@ -1127,8 +1163,9 @@ end
 
 % Replace inline arrays (e.g. [3,4,2,5,2] with variable names, declaring
 % the array elsewhere as a static const (used for the fixed input spline)
+constVars = {}; cVars = [];
 for jy = 1 : numel( data.fy )
-    [ data.fy{jy}, constVars, cVars ] = replaceFixedArrays( data.fy{jy}, {}, {}, c, 'data' );
+    [ data.fy{jy}, constVars, cVars ] = replaceFixedArrays( data.fy{jy}, constVars, {}, c, 'data' );
 end
 data.constVars = sprintf( '%s;\n', constVars{:} );
 
@@ -1181,6 +1218,7 @@ if(doskip)
 end
 
 % make short strings
+data.ps = cell(size(data.p));
 for j=1:length(data.p)
     data.ps{j} = sprintf('p[%i]',j);
 end
@@ -2890,4 +2928,3 @@ function [ dvdx, dvdu ] = cacheShortTerms( model )
             dvdu(j,i) = sym(sprintf('dvdu[%i]', j + (i-1)*length(model.vs)));
         end
     end
-

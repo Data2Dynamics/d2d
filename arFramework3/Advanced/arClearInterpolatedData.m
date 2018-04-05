@@ -12,11 +12,14 @@ function arClearInterpolatedData( m, ds )
 
     global ar;
 
+    if nargin < 1
+        m = 1;
+    end
     if nargin < 2
-        help arClearInterpolatedData;
-        error( 'Function needs at least 2 arguments.' );
+        ds = 'all';
     end
     
+    all = 0;
     if ~isnumeric( ds )
         if strcmp( ds, 'all' )
             ds = 1 : numel( ar.model(m).data );
@@ -25,22 +28,22 @@ function arClearInterpolatedData( m, ds )
     end
     
     for jd = 1 : numel( ds )
-        if ( ~isfield( ar.model(m).data(ds(jd)), 'interpolatedData' ) )
+        if ( ~isfield( ar.model(m).data(ds(jd)), 'addedData' ) )
             if ~all
-                warning( 'Data %d does not have interpolated data' );
+                warning( 'Data %d does not have interpolated data', ds(jd) );
             end
         else
-            interps = sum(ar.model(m).data(ds(jd)).interpolatedData, 2) > 0;
+            interps = sum(ar.model(m).data(ds(jd)).addedData == 1, 2) > 0;
             
             if sum( interps ) > 0
                 ar.model(m).data(ds(jd)).yExp(interps, :)    = [];
                 ar.model(m).data(ds(jd)).yExpStd(interps, :) = [];
                 ar.model(m).data(ds(jd)).tExp(interps)       = [];
-                ar.model(m).data(ds(jd)).interpolatedData    = [];
+                ar.model(m).data(ds(jd)).addedData(interps)  = [];
                 fprintf( 'Deleted %d points from data ID %d\n', sum(interps), ds(jd) );
             else
                 if ~all
-                    warning( 'Data %d does not have interpolated data' );
+                    warning( 'Data %d does not have interpolated data', ds(jd) );
                 end
             end
         end

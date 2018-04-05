@@ -96,7 +96,7 @@ function arInterpolateData( m, ds, obs, varargin )
                     ylabel( strrep( obs{jo}, '_', '\_' ) );
                 end
                 if ( ~opts.plotonly )
-                    addToData( m, ds(jd), obsID, tReq, yN )
+                    arAddToData( m, ds(jd), obsID, tReq, yN, 1 );
                 end
             end
         end
@@ -106,24 +106,6 @@ function arInterpolateData( m, ds, obs, varargin )
     if ( ~opts.plotonly )
         arLink;
     end
-end
-
-% Function which adds the data points to the arStruct
-function addToData( m, d, obs, tExpNew, yExpNew )
-    global ar;
-    
-    nExps = numel( yExpNew );
-    nans = nan( nExps, numel( ar.model(m).data(d).y ) );
-    nData = nans;
-    nData(:, obs) = yExpNew;
-
-    if ~isfield( ar.model(m).data(d), 'interpolatedData' )
-        ar.model(m).data(d).interpolatedData = [];
-    end
-    ar.model(m).data(d).interpolatedData( size( ar.model(m).data(d).yExp, 1 ) + 1 : size( ar.model(m).data(d).yExp, 1 ) + size( nData, 1 ), : ) = 1;
-    ar.model(m).data(d).yExp = [ ar.model(m).data(d).yExp; nData ];
-    ar.model(m).data(d).tExp = [ ar.model(m).data(d).tExp; tExpNew.' ];
-    ar.model(m).data(d).yExpStd = [ ar.model(m).data(d).yExpStd; nans ];
 end
 
 % Function which generates the data points

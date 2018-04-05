@@ -2,7 +2,7 @@
 %clear all, close all
 arInit;
 %State if the initial or final model is to be loaded
-load_final = 0;
+load_final = 1;
 
 if(load_final)
     arLoadModel('model_Reelin_FINAL');

@@ -13,6 +13,7 @@ arCompileAll();
 %arSetPars('init_A_star.ate',0,1,1,-3,3);
 %arSetPars('p1',log10(0.05),1,1,-3,3);
 %arSetPars('p2',log10(0.1),1,1,-3,3);
+%arSimuData
 
 %Take error 0.1 of data def
 ar.config.fiterrors = -1;
@@ -21,9 +22,9 @@ arSetPars('sd_C_au',[],2);
 
 arFit();
 
-%Calculate prediction bands for the three states
-doPPL(1,1,1,linspace(0,100,11),1);
-
-%plot prediction bands
-ar.config.ploterrors = -1;
-arPlot2
+% %Calculate prediction bands for a state
+% PPL_options('Integrate',true,'Stepsize',0.5)
+% arPPL(1,1,1,linspace(0,100,11),1);
+% 
+% %plot prediction bands
+% arPlot2

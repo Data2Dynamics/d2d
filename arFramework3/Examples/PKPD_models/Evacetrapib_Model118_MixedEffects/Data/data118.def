@@ -1,0 +1,44 @@
+DESCRIPTION
+"data def mod 118"
+
+PREDICTOR
+TIME               T   min     time	0	10
+
+INPUTS
+
+
+OBSERVABLES
+DV      C   "pM"    "conc." 0	0   "C2"
+mean_p_ID_DDIxxx	C   "au"  "conc."   0   0 	"log(p_ID_DDIxxx)"
+mean_p_ID_CGCLxxx	C   "au"  "conc."   0   0 	"log(p_ID_CGCLxxx)"
+mean_p_ID_CL        C   "au"  "conc."   0   0 	"log(p_ID_CL)"
+mean_p_ID_V2        C   "au"  "conc."   0   0 	"log(p_ID_V2)"
+mean_p_ID_Q         C   "au"  "conc."   0   0 	"log(p_ID_Q)"
+
+
+ERRORS
+DV    "ERROR_prop*C2"
+mean_p_ID_DDIxxx	"pID_DDIxxx_sd"
+mean_p_ID_CGCLxxx	"pID_CGCLxxx_sd"
+mean_p_ID_CL    	"pID_CL_sd"
+mean_p_ID_V2    	"pID_V2_sd"
+mean_p_ID_Q      	"pID_Q_sd"
+
+
+CONDITIONS
+DDI 	"p_ID_DDIxxx"
+CGCL    "p_ID_CGCLxxx"
+CL      "CL*p_ID_CL"
+V2      "V2*p_ID_V2"
+QQ      "QQ*p_ID_Q"
+// => the individual parameters p_ID_... scatter around 0
+// the population mean is described by a population parameter
+
+
+RANDOM
+p_ID_DDIxxx 	INDEPENDENT
+p_ID_CGCLxxx 	INDEPENDENT
+p_ID_CL     	INDEPENDENT
+p_ID_V2      	INDEPENDENT
+p_ID_Q      	INDEPENDENT
+

@@ -21,6 +21,7 @@ for jm = 1:length(ar.model)
         [nrows, ncols] = arNtoColsAndRows(ny);
         
         np = length(ar.model(jm).data(jd).p);
+        systdFineSimu = arTrafoParameters(ar.model(jm).data(jd).systdFineSimu,jm,jd,true);
         for jy = 1:ny
             g = subplot(nrows,ncols,jy);
             arSubplotStyle(g);
@@ -29,7 +30,7 @@ for jm = 1:length(ar.model)
             
             for jp = 1:np
                 linestyle = arLineMarkersAndColors(jp, np, [], 'none');
-                ltmp = plot(g, ar.model(jm).data(jd).tFine, ar.model(jm).data(jd).systdFineSimu(:,jy,jp), linestyle{:});
+                ltmp = plot(g, ar.model(jm).data(jd).tFine, systdFineSimu(:,jy,jp), linestyle{:});
                 legendhandle(jp) = ltmp;
                 hold(g, 'on');
                 if(isfield(ar.model(jm).data(jd), 'systdExpSimuFD'))

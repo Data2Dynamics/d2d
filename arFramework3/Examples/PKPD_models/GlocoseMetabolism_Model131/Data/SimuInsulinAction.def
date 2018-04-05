@@ -1,0 +1,18 @@
+DESCRIPTION
+"data def mod 132"
+
+PREDICTOR
+T    T  "min"     "time"	0	100
+
+INPUTS
+
+OBSERVABLES
+DV      C   "au"    "conc." 0	0   "tra"
+
+ERRORS
+DV    "sqrt(ERROR_abs^2+tra^2*ERROR_prop^2)" // effectiv "ERROR_abs" (ERROR_prop = 0)
+
+CONDITIONS
+
+RANDOM
+

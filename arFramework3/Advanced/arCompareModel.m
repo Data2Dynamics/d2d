@@ -18,7 +18,24 @@
 % by invoking "arInteractivity on".
 
 function arCompareModel(varargin)
-    
+
+if(nargin==0)
+    filenames = fileChooserMulti('./Results', true); 
+    if length(filenames)>2
+       error('Error: Comparison of more than two models is not supported.') 
+    end
+    for j=1:length(filenames)
+        fname = ['./Results/' filenames{j} '/workspace.mat'];
+        if(exist(fname,'file'))
+            S=load(fname);
+            varargin{2*(j-1)+1} = S.ar;
+            varargin{2*(j-1)+2} = 1; % only working for model 1
+        else
+            error('Error: No workspace found in %s',fname) 
+        end    
+    end
+end
+
     figure('units','normalized','outerposition',[0 0 1 1], 'Name', 'Model comparison. Green means M1 is better.');
 
     % Special switches
@@ -103,8 +120,7 @@ function arCompareModel(varargin)
                     if ( ~opts.absrsq )
                         if ( ~opts.relerr )
                             % Use change in chi2 as measure
-                            if( (ar1.config.useFitErrorMatrix == 0 && ar1.config.fiterrors == 1) || ...
-                                    (ar1.config.useFitErrorMatrix==1 && ar1.config.fiterrors_matrix(m1,I1(c))==1) )
+                            if( ar1.config.fiterrors==1 || sum(ar1.qFit(ar1.qError==1)==1)>0 ) 
                                 changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + ar1.model(m1).data(I1(c)).chi2err(b);
                             end
                             changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + ar1.model(m1).data(I1(c)).chi2(b);
@@ -128,8 +144,7 @@ function arCompareModel(varargin)
 
                     if( ar2.model(m2).data(I2(c)).qFit(b) == 1 ) 
                         if ( ~opts.relerr )
-                            if( (ar2.config.useFitErrorMatrix == 0 && ar2.config.fiterrors == 1) || ...
-                                    (ar2.config.useFitErrorMatrix==1 && ar2.config.fiterrors_matrix(m2,I2(c))==1) )
+                            if( ar2.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0) ) 
                                 changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) - ar2.model(m2).data(I2(c)).chi2err(b);
                             end
                             changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) - ar2.model(m2).data(I2(c)).chi2(b);
@@ -182,8 +197,8 @@ function arCompareModel(varargin)
     
     set(gca, 'YTick', 1 : numel(dataFiles) );
     set(gca, 'XTick', 1 : numel(observables) );
-    set(gca, 'YTickLabel', dataFiles );
-    set(gca, 'XTickLabel', observables );
+    set(gca, 'YTickLabel', arNameTrafo(dataFiles) );
+    set(gca, 'XTickLabel', arNameTrafo(observables) );
     if ( ~opts.absrsq )
         set(gca, 'CLim', [-change, change] );
         colormap( redgreencmap(256, 'Interpolation', 'sigmoid') );
@@ -192,9 +207,9 @@ function arCompareModel(varargin)
         colormap( flipud(redgreencmap(256, 'Interpolation', 'sigmoid') ) );
     end
     if ( opts.titles )
-        title( sprintf( '%s - %s', strTrafo(opts.titles_args{1}), strTrafo(opts.titles_args{2}) ) );
+        title( sprintf( '%s - %s', arNameTrafo(opts.titles_args{1}), arNameTrafo(opts.titles_args{2}) ) );
     else
-        title( sprintf( '%s - %s', strTrafo(name1), strTrafo(name2) ) );
+        title( sprintf( '%s - %s', arNameTrafo(name1), arNameTrafo(name2) ) );
     end
     colorbar;
     
@@ -222,10 +237,6 @@ function plotIDs = getPlotIDs(model, dataFiles)
             end
         end
     end
-end
-
-function str = strTrafo( str )
-    str = strrep( str, '_', '\_');
 end
 
 function names = getObsNames(model)

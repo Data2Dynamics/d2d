@@ -71,6 +71,8 @@ function arLoadData(name, m, extension, removeEmptyObs, varargin)
 
 global ar
 
+arFprintf( 3, 'Parsing input arguments...\n' );
+
 if(isempty(ar))
     error('please initialize by arInit')
 end
@@ -145,8 +147,8 @@ else
     end
 end
 
-switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds', 'expsplit', 'resampledoseresponse', 'resamplingresolution', 'refinelog', 'ignoreinputs'};
-extraArgs = [ 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 ];
+switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds', 'expsplit', 'resampledoseresponse', 'resamplingresolution', 'refinelog', 'ignoreinputs', 'detectionlimit'};
+extraArgs = [ 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1 ];
 description = { ...
     {'', 'Multiple shooting on'} ...
     {'', 'Ignoring specific conditions'} ...
@@ -157,7 +159,8 @@ description = { ...
     {'', 'Resampling dose response'}, ...
     {'', 'Resampling with custom resolution'}, ...
     {'', 'Resampling on log scale'}, ...
-    {'', 'Ignoring specific inputs'} };
+    {'', 'Ignoring specific inputs'}, ...
+    {'', 'Working with detection limit'}};
     
 opts = argSwitch( switches, extraArgs, description, 1, varargin );
 
@@ -202,11 +205,13 @@ else
     fid.fn  = ['Data/' name '.def'];
     fid.str = fileread(['Data/' name '.def']);
     fid.pos = 1;
-    
+    arFprintf( 3, 'Running preprocessor...' );
     fid = arPreProcessor(fid);
+    arFprintf( 3, ' [ OK ]\n' );
 end
 
 % DESCRIPTION
+arFprintf( 3, 'Start parsing...' );
 [str, fid] = arTextScan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(~strcmp(str{1},'DESCRIPTION'))
     arParsingError( fid, 'parsing data %s for DESCRIPTION', name);
@@ -222,14 +227,17 @@ else
 end
 
 % read comments
+arFprintf( 3, '[ OK ]\nReading description' );
 [str, fid] = arTextScan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).description = {};
 while(~strcmp(str{1},'PREDICTOR') && ~strcmp(str{1},'PREDICTOR-DOSERESPONSE'))
+    arFprintf( 3, '.' );
     ar.model(m).data(d).description(end+1,1) = str{1}; %#ok<*AGROW>
     [str, fid] = arTextScan(fid, '%q', 1, 'CommentStyle', ar.config.comment_string);
 end
 
 % PREDICTOR
+arFprintf( 3, '[ OK ]\nReading predictor...\n' );
 if(strcmp(str{1},'PREDICTOR-DOSERESPONSE'))
     ar.model(m).data(d).doseresponse = true;
     [str, fid] = arTextScan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
@@ -250,6 +258,7 @@ ar.model(m).data(d).tLim = [checkNum(C{5}, 0) checkNum(C{6}, 10)];
 ar.model(m).data(d).tLimExp = [checkNum(C{7}, ar.model(m).tLim(1)), checkNum(C{8}, ar.model(m).tLim(2))];
 
 % INPUTS
+arFprintf( 3, 'Reading inputs...' );
 [str, fid] = arTextScan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);
 if(~strcmp(str{1},'INPUTS'))
     arParsingError( fid, 'parsing data %s for INPUTS', name);
@@ -257,6 +266,7 @@ end
 [C, fid] = arTextScan(fid, '%s %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 ar.model(m).data(d).fu = ar.model(m).fu;
 while(~strcmp(C{1},'OBSERVABLES'))
+    arFprintf( 3, '.' );
     qu = ismember(ar.model(m).u, C{1}); %R2013a compatible
     if(sum(qu)~=1)
         arParsingError( fid, 'unknown input %s', cell2mat(C{1}));
@@ -286,6 +296,7 @@ varlist = cellfun(@symvar, ar.model(m).data(d).fu, 'UniformOutput', false);
 ar.model(m).data(d).pu = setdiff(vertcat(varlist{:}), {ar.model(m).t, ''}); %R2013a compatible
 
 % OBSERVABLES
+arFprintf( 3, '[ OK ]\nReading observables' );
 if(isfield(ar.model(m),'y'))
     ar.model(m).data(d).y = ar.model(m).y;
     ar.model(m).data(d).yNames = ar.model(m).yNames;
@@ -306,6 +317,7 @@ end
 
 [C, fid] = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'ERRORS'))
+    arFprintf( 3, '.' );
     qyindex = ismember(ar.model(m).data(d).y, C{1});
     if(sum(qyindex)==1)
         yindex = find(qyindex);
@@ -344,6 +356,7 @@ while(~strcmp(C{1},'ERRORS'))
 end
 
 % observation parameters
+arFprintf( 3, '[ OK ]\nComputing observation parameters...' );
 varlist = cellfun(@symvar, ar.model(m).data(d).fy, 'UniformOutput', false);
 ar.model(m).data(d).py = setdiff(setdiff(vertcat(varlist{:}), union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z)), {ar.model(m).t, ''}); %R2013a compatible
 if(isempty(ar.model(m).data(d).fy))
@@ -355,9 +368,11 @@ for j=1:length(ar.model(m).data(d).fy)
     
     % exclude parameters form model definition
     ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).px);
+    ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).pu);
 end
 
 % ERRORS
+arFprintf( 3, '[ OK ]\nReading error models' );
 if(isfield(ar.model(m),'y'))
     ar.model(m).data(d).fystd = ar.model(m).fystd;
 else
@@ -365,6 +380,7 @@ else
 end
 [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
 while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS'))
+    arFprintf( 3, '.' );
     qyindex = ismember(ar.model(m).data(d).y, C{1});
     if ( qyindex == 0 )
         arParsingError( fid,  'Specified error model for non existent observable %s', C{1}{1} );
@@ -407,6 +423,7 @@ end
 
 % Drop certain observables
 if (opts.removeobservables)
+    arFprintf( 3, '[ OK ]\nDropping specific observables...\n' );
     if ischar( opts.removeobservables_args )
         opts.removeobservables_args = {opts.removeobservables_args};
     end
@@ -432,6 +449,7 @@ if (opts.removeobservables)
 end
 
 % error parameters
+arFprintf( 3, 'Compute error parameters...' );
 varlist = cellfun(@symvar, ar.model(m).data(d).fystd, 'UniformOutput', false);
 ar.model(m).data(d).pystd = setdiff(vertcat(varlist{:}), union(union(union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z), ... %R2013a compatible
     ar.model(m).data(d).y), ar.model(m).t));
@@ -442,6 +460,7 @@ for j=1:length(ar.model(m).data(d).fystd)
     
     % exclude parameters form model definition
     ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).px);
+    ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).pu);
 end
 
 % DERIVED
@@ -483,6 +502,7 @@ end
 substitutions = 0;
 matVer = ver('MATLAB');
 if ( strcmp(C{1},'SUBSTITUTIONS') )
+    arFprintf( 3, '[ OK ]\nReading substitutions' );
     if(str2double(matVer.Version)>=8.4)
         [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
     else
@@ -496,6 +516,7 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
 
     % Fetch desired substitutions
     while(~isempty(C{1}) && ~strcmp(C{1},'CONDITIONS'))
+        arFprintf( 3, '.' );
         fromSubs(end+1)     = C{1}; %#OK<AGROW>
         toSubs(end+1)       = C{2}; %#OK<AGROW>
         ismodelpar(end+1)   = sum(ismember(ar.model(m).p, C{1})); %#OK<AGROW>
@@ -513,13 +534,16 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
     end
 
     % Perform selfsubstitutions
+    arFprintf( 3, '[ OK ]\nPerforming self substitutions...' );
     if ( ~isempty(fromSubs) )
         substitutions = 1;
         toSubs = arSubsRepeated( toSubs, fromSubs, toSubs, str2double(matVer.Version) );
     end
+    arFprintf( 3, '[ OK ]\n' );
 end
 
 % CONDITIONS
+arFprintf( 3, 'Reading conditions' );
 [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);    
 ar.model(m).data(d).fp = transpose(ar.model(m).data(d).p);
 ptmp = ar.model(m).p;
@@ -535,6 +559,7 @@ if ( substitutions == 1 )
     
     % Fetch desired substitutions
     while(~isempty(C{1}) && ~strcmp(C{1},'RANDOM'))
+        arFprintf( 3, '.' );
         from(end+1)         = C{1}; %#OK<AGROW>
         to(end+1)           = C{2}; %#OK<AGROW>
         ismodelpar(end+1)   = sum(ismember(ar.model(m).data(d).p, C{1})); %#OK<AGROW>
@@ -561,6 +586,7 @@ if ( substitutions == 1 )
 else
     % old code path
     while(~isempty(C{1}) && ~strcmp(C{1},'RANDOM'))
+        arFprintf( 3, '.' );
         qcondpara = ismember(ar.model(m).data(d).p, C{1}); %R2013a compatible
         if(sum(qcondpara)>0)
             ar.model(m).data(d).fp{qcondpara} = ['(' cell2mat(C{2}) ')'];
@@ -580,6 +606,7 @@ ar.model(m).data(d).pcond = setdiff(vertcat(varlist{:}), ar.model(m).data(d).p);
 pcond = union(ar.model(m).data(d).p, ar.model(m).data(d).pcond); %R2013a compatible
 
 % RANDOM
+arFprintf( 3, '[ OK ]\nReading randoms' );
 if ~isempty( ar.model(m).prand )
     ar.model(m).data(d).prand = ar.model(m).prand;
     ar.model(m).data(d).rand_type = ar.model(m).rand_type;    
@@ -589,6 +616,7 @@ else
 end
 [C, fid] = arTextScan(fid, '%s %s\n',1, 'CommentStyle', ar.config.comment_string);
 while(~isempty(C{1}) && ~strcmp(C{1},'PARAMETERS'))
+    arFprintf( 3, '.' );
     ar.model(m).data(d).prand{end+1} = cell2mat(C{1});
     if(strcmp(C{2}, 'INDEPENDENT'))
         ar.model(m).data(d).rand_type(end+1) = 0;
@@ -606,6 +634,7 @@ if ( opts.expsplit )
 end
 
 % PARAMETERS
+arFprintf( 3, '[ OK ]\nReading parameters...' );
 if(~isfield(ar, 'pExternLabels'))
     ar.pExternLabels = {};
     ar.pExtern = [];
@@ -626,6 +655,7 @@ while(~isempty(C{1}))
 end
 
 % plot setup
+arFprintf( 3, '[ OK ]\nPlot setup...' );
 if(isfield(ar.model(m).data(d), 'response_parameter') && ...
         ~isempty(ar.model(m).data(d).response_parameter))
     if(sum(ismember(ar.model(m).data(d).p ,ar.model(m).data(d).response_parameter))==0 && ... %R2013a compatible
@@ -650,6 +680,7 @@ if ( ~isstruct( fid ) )
 end
 
 % XLS file
+arFprintf( 3, 'Read def file [ OK ]\n' );
 if(~strcmp(extension,'none') && ( ...
     (exist(['Data/' name '.xlsx'],'file') && strcmp(extension,'xls')) ||...
     (exist(['Data/' name '.xls'],'file') && strcmp(extension,'xls')) || ...
@@ -661,11 +692,13 @@ if(~strcmp(extension,'none') && ( ...
         warntmp = warning;
         warning('off','all')
         
+        arFprintf( 3, '[ OK ]\nBegin reading data (xls) ...' );
         if (exist(['Data/' name '.xls'],'file'))      
             [data, Cstr] = xlsread(['Data/' name '.xls']);
         elseif (exist(['Data/' name '.xlsx'],'file'))      
             [data, Cstr] = xlsread(['Data/' name '.xlsx']);
         end
+        arFprintf( 3, '[ OK ]\n' );
         
         if(length(data(1,:))>length(Cstr(1,:)))
             data = data(:,1:length(Cstr(1,:)));
@@ -701,7 +734,9 @@ if(~strcmp(extension,'none') && ( ...
         end
         
     elseif(strcmp(extension,'csv'))
+        arFprintf( 3, '[ OK ]\nBegin reading data (csv) ...' );
         [header, data, dataCell] = arReadCSVHeaderFile(['Data/' name '.csv'], ',', true);
+        arFprintf( 3, '[ OK ]\n' );
         
         timevar = strtrim(header(1));
         header = header(2:end);
@@ -712,6 +747,7 @@ if(~strcmp(extension,'none') && ( ...
     
     % remove time points that we don't want
     if ( opts.removeconditions )
+        arFprintf( 3, 'Removing undesired time points...' );
         selected = true(1, size(times,1));
         if ( opts.removeconditions )
             for a = 1 : 2 : length( opts.removeconditions_args )
@@ -736,6 +772,7 @@ if(~strcmp(extension,'none') && ( ...
     end
       
     % random effects
+    arFprintf( 3, 'Processing random effects...' );
     prand = ar.model(m).data(d).prand;
     if(opts.splitconditions)
         prand = union(prand, opts.splitconditions_args);
@@ -808,6 +845,7 @@ if(~strcmp(extension,'none') && ( ...
                     end
                 end
                 
+                arFprintf( 4, 'Setting conditions ...\n' );
                 if ~isempty(dataCell)
                     [ar,d,fail] = setConditions(fid, ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell(qvals,:), ...
                         pcondmod, removeEmptyObs, dpPerShoot, opts);
@@ -815,6 +853,7 @@ if(~strcmp(extension,'none') && ( ...
                     [ar,d,fail] = setConditions(fid, ar, m, d, jplot, header, times(qvals), data(qvals,:), dataCell, ...
                         pcondmod, removeEmptyObs, dpPerShoot, opts);
                 end
+                arFprintf( 4, 'Condition set ... [ OK ]\n' );
                 
                 % Only increment if some data was actually set.
                 if (~fail)
@@ -837,7 +876,9 @@ if(~strcmp(extension,'none') && ( ...
             end
         end
     else
+        arFprintf( 4, 'Setting conditions ...\n' );
         ar = setConditions(fid, ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts);
+        arFprintf( 4, 'Condition set ... [ OK ]\n' );
         
         % Check whether the user specified any variables with reserved words.
         checkReserved(m, d);

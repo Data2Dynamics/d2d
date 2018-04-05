@@ -76,6 +76,7 @@ function fid = preprocess(fid)
                     
                     if ~isempty( parseBlock2 )
                         parseBlock2 = strip(line(ws(a-2):end));
+                        a = a + numel( parseBlock2 );
                     end
                     
                     % Is this being parsed or not? Defines can be conditional!
@@ -137,8 +138,8 @@ function fid = preprocess(fid)
 
     % Reset position
     fid.pos = 1;
-    fid.nlines = 0;
-        
+    fid.nlines = 0;    
+    
 % This function is used by the preprocessor to parse a block of code
 % It takes a line, a character position pointer (cur) w.r.t. line, a white space
 % position counter (a), a list of whitespace locations (ws) and an outLine (output) 
@@ -171,10 +172,29 @@ function [cur, outLine, parseBlock, a] = getParseBlock( line, cur, ws, outLine, 
                 end
             else
                 % Replace defined identifiers
+                % Make sure long names get replaced first
                 names = fieldnames( namedDefines );
-                if ~isempty( names )
-                    for b = 1 : numel( names )
-                        block = regexprep( block, ['(\W*)', names{b} '(\W*)'], ['$1' namedDefines.(names{b}) '$2'] );
+                [~,I] = sort(cellfun(@length, names), 'descend');
+                names = names(I);
+                escapedNames = strcat( '\<', names, '\>' );
+                
+                done = false;
+                iter = 0;
+                while ( ~done )
+                    newblock = block;
+                    if ~isempty( names )
+                        for b = 1 : numel( names )
+                            newblock = regexprep( newblock, escapedNames{b}, namedDefines.(names{b}) );
+                        end
+                    end
+                    if ( strcmp( newblock, block ) )
+                        done = true;
+                    else
+                        block = newblock;
+                    end
+                    iter = iter + 1;
+                    if ( iter > 100 )
+                        error( 'Failure to run preprocessor. Do you have a recursive #define?' );
                     end
                 end
             end

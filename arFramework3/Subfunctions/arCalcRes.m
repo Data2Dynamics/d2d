@@ -198,14 +198,12 @@ for m=1:length(ar.model)
                 end
             end
 
-            %         /* log trafo of parameters */
+%                     /* log trafo of parameters */
             if sensi && ar.model(m).data(d).has_yExp
-                for ip=1:size(ar.model(m).data(d).sres,3)
-                    if ar.model(m).data(d).qLog10(ip) > 0.5
-                        ar.model(m).data(d).sres(:,:,ip)    = ar.model(m).data(d).sres(:,:,ip).*ar.model(m).data(d).pNum(ip) * log(10);
-                        if (ar.config.fiterrors == 1)  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0 )
-                            ar.model(m).data(d).sreserr(:,:,ip) = ar.model(m).data(d).sreserr(:,:,ip).*ar.model(m).data(d).pNum(ip) * log(10);
-                        end
+                ar.model(m).data(d).sres = arTrafoParameters(ar.model(m).data(d).sres,m,d,true);
+                if (ar.config.fiterrors == 1)  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0 )
+                    ar.model(m).data(d).sreserr = arTrafoParameters(ar.model(m).data(d).sreserr,m,d,true);
+                end
                         %             for (ip=0; ip < np; ip++) {
                         %                 if (qlogp[ip] > 0.5) {
                         %                      for (iy=0; iy<ny; iy++) {
@@ -214,8 +212,8 @@ for m=1:length(ar.model)
                         %                              sreserr[it + (iy*nt) + (ip*nt*ny)] *= p[ip] * log(10.0);
                         %                          }
                         %                      }
-                    end
-                end
+%                     end
+%                 end
             end
         end
     end

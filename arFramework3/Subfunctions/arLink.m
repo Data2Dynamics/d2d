@@ -146,16 +146,16 @@ for m=1:length(ar.model)
                     resi = 0;
                     for m_res=1:im-1
                         for d_res=1:length(ar.model(m_res).data)
-                            resi = resi + sum(sum(~isnan(ar.model(m_res).data(d_res).yExp)));
+                            resi = resi + numel(ar.model(m_res).data(d_res).yExp);
                         end
                     end
                     for d_res = 1:id-1
-                        resi = resi + sum(sum(~isnan(ar.model(im).data(d_res).yExp)));
+                        resi = resi + numel(ar.model(im).data(d_res).yExp);
                     end
                     for x_res = 1:ix-1
-                        resi = resi + sum(~isnan(ar.model(im).data(id).yExp(:,x_res)));
+                        resi = resi + numel(ar.model(im).data(id).yExp(:,x_res));
                     end
-                    ar.ppl.resi_tmp = resi + sum(~isnan(ar.model(im).data(id).yExp(1:ar.model(m).data(d).ppl.Added,ix)));
+                    ar.ppl.resi_tmp = resi + numel(ar.model(im).data(id).yExp(1:ar.model(m).data(d).ppl.Added,ix));
                     
                     if(add_sec)
                         ar.ppl.resi2_tmp = resi + sum(~isnan(ar.model(im).data(id).yExp(1:ar.model(m).data(d).ppl.Added2,ix)));
@@ -366,6 +366,9 @@ for m = 1:length(ar.model)
                         ar.model(m).data(d).has_yExp = false;
                     end
                     ar.model(m).data(d).has_tExp = true;
+                else
+                    ar.model(m).data(d).has_tExp = false;
+                    ar.model(m).data(d).has_yExp = false;
                 end
             else
                 ar.model(m).data(d).has_tExp = false;
@@ -576,6 +579,16 @@ ar.type = zeros(size(ar.pLabel));
 ar.mean = zeros(size(ar.pLabel));
 ar.std = zeros(size(ar.pLabel));
 
+% overwrite with externally defined parameters
+if(isfield(ar, 'pExternLabels'))
+    arSetPars(ar.pExternLabels, ar.pExtern, ar.qFitExtern, ar.qLog10Extern, ...
+        ar.lbExtern, ar.ubExtern);
+    
+    if ~isempty(p) && sum(  abs( p-ar.p )>1e-10 & ar.p~=-1)>0
+        warning('arLink overwrites parameter values by the default ar.pExtern defined in the def file.');
+    end
+end
+
 % link back parameters
 for m = 1:length(ar.model)
     for c = 1:length(ar.model(m).condition)
@@ -617,7 +630,8 @@ populate_threads( 'ss_threads', 'ss_condition', 'nssTasks');
 ar.config.nThreads = length(ar.config.threads);
 ar.config.nssThreads = length(ar.config.ss_threads);
 
-% reset values
+% overwrite with previous parameters if they already exist when arLink is
+% called
 if(exist('plabel','var'))
     arSetPars(plabel, p, qfit, qlog10, lb, ub, type, meanp, stdp);
 end
@@ -644,15 +658,6 @@ for jm=1:length(ar.model)
     end
 end
 
-% set external parameters
-if(isfield(ar, 'pExternLabels'))
-    arSetPars(ar.pExternLabels, ar.pExtern, ar.qFitExtern, ar.qLog10Extern, ...
-        ar.lbExtern, ar.ubExtern);
-    
-    if ~isempty(p) && sum(  abs( p-ar.p )>1e-10 & ar.p~=-1)>0
-        warning('arLink overwrites parameter values by the default ar.pExtern defined in the def file.');
-    end
-end
 
 
 

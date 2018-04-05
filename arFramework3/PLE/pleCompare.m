@@ -17,7 +17,7 @@ if(nargin==0) || (isempty(ples) || isempty(labels))
         else
             fprintf('%s does not contains PLE\n', filenames{j});
         end
-        ples{end}.chi2 = min(cellfun(@min,ples{end}.chi2s));
+        ples{end}.chi2 = min(cell2mat(cellfun(@min,ples{end}.chi2s, 'UniformOutput', false)));
     end
 end
 

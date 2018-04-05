@@ -1,0 +1,36 @@
+DESCRIPTION
+"DDmore model 103, all individuals with at least 5 mesurements"
+
+PREDICTOR
+TIME               T   min     time	0	10
+
+INPUTS
+
+
+OBSERVABLES
+DV      C   "pM"    "conc." 0	0   "PD"
+mean_pID_KDE	C   "au"  "conc."   0   0 	"log(p_ID_KDE)"
+mean_pID_Kout	C   "au"  "conc."   0   0 	"log(p_ID_Kout)"
+mean_pID_Slop   C   "au"  "conc."   0   0 	"log(p_ID_Slop)"
+
+
+ERRORS
+DV    "sqrt(ERROR_add^2 + ERROR_prop^2*PD^2)"
+mean_pID_KDE	"pID_KDE_sd"
+mean_pID_Kout	"pID_Kout_sd"
+mean_pID_Slop	"pID_Slop_sd"
+
+
+CONDITIONS
+KDE 	"KDE*p_ID_KDE"
+Kout	"Kout*p_ID_Kout"
+Slop	"Slop*p_ID_Slop"
+// => the individual parameters p_ID_... scatter around 0
+// the population mean is described by a population parameter
+
+
+RANDOM
+p_ID_KDE	INDEPENDENT
+p_ID_Kout	INDEPENDENT
+p_ID_Slop	INDEPENDENT
+
