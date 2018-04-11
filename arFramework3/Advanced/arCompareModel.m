@@ -144,7 +144,7 @@ end
 
                     if( ar2.model(m2).data(I2(c)).qFit(b) == 1 ) 
                         if ( ~opts.relerr )
-                            if( ar2.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0) ) 
+                            if( ar2.config.fiterrors==1 || (ar2.config.fiterrors==0 && sum(ar2.qFit(ar2.qError==1)<2)>0) ) 
                                 changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) - ar2.model(m2).data(I2(c)).chi2err(b);
                             end
                             changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) - ar2.model(m2).data(I2(c)).chi2(b);

@@ -1,0 +1,29 @@
+DESCRIPTION
+"Experimenter: Jšrg Isensee"
+"Date: "
+"Cells: "
+"Treatment: ctrl"
+
+PREDICTOR
+t               T   h     time	0	120
+
+INPUTS
+
+OBSERVABLES
+pRII_JI09_160126_CycNuc_WesternBlot_r1                  C	au   conc.   0	0   "s_pRII_Western*pRII_western"
+pRII_JI09_160126_CycNuc_WesternBlot_r2                  C	au   conc.   0	0   "s_pRII_Western*pRII_western"
+pRII_JI09_160126_CycNuc_WesternBlot_r3                  C	au   conc.   0	0   "s_pRII_Western*pRII_western"
+pRII_JI09_160126_CycNuc_WesternBlot_r4                  C	au   conc.   0	0   "s_pRII_Western*pRII_western"
+pRII_JI09_160126_CycNuc_WesternBlot_r5                  C	au   conc.   0	0   "s_pRII_Western*pRII_western"
+pRII_JI09_160126_CycNuc_WesternBlot_r6                  C	au   conc.   0	0   "s_pRII_Western*pRII_western"
+
+ERRORS
+pRII_JI09_160126_CycNuc_WesternBlot_r1     "s_pRII_Western*sigma_pRII_Western"        
+pRII_JI09_160126_CycNuc_WesternBlot_r2     "s_pRII_Western*sigma_pRII_Western"        
+pRII_JI09_160126_CycNuc_WesternBlot_r3     "s_pRII_Western*sigma_pRII_Western"        
+pRII_JI09_160126_CycNuc_WesternBlot_r4     "s_pRII_Western*sigma_pRII_Western"        
+pRII_JI09_160126_CycNuc_WesternBlot_r5     "s_pRII_Western*sigma_pRII_Western"        
+pRII_JI09_160126_CycNuc_WesternBlot_r6     "s_pRII_Western*sigma_pRII_Western"        
+
+CONDITIONS
+

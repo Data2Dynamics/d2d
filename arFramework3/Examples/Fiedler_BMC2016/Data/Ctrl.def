@@ -1,0 +1,25 @@
+DESCRIPTION
+"Experimenter: Sebastian Raeth"
+"Date: "
+"Cells: "
+"Treatment: Ctrl"
+
+PREDICTOR
+t               T   h     time	0	10
+
+INPUTS
+
+OBSERVABLES
+pMek_20140430_gel1  C	au   conc.   0	0   "s_pMek_20140430_gel1*pMEK"
+pErk_20140430_gel1  C	au   conc.   0	0   "s_pErk_20140430_gel1*pERK"
+pMek_20140505_gel1  C	au   conc.   0	0   "s_pMek_20140505_gel1*pMEK"
+pErk_20140505_gel1  C	au   conc.   0	0   "s_pErk_20140505_gel1*pERK"
+
+ERRORS
+pMek_20140430_gel1     "s_pMek_20140430_gel1*sigma_pMek"
+pErk_20140430_gel1     "s_pErk_20140430_gel1*sigma_pErk"
+pMek_20140505_gel1     "s_pMek_20140505_gel1*sigma_pMek"
+pErk_20140505_gel1     "s_pErk_20140505_gel1*sigma_pErk"
+
+CONDITIONS
+

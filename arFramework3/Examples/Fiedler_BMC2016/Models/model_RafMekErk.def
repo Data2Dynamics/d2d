@@ -1,0 +1,41 @@
+DESCRIPTION
+
+PREDICTOR
+t               T   h         time	0	10
+
+COMPARTMENTS
+cyt             V   pl          vol.    1
+
+STATES
+RAF     C   mumol/l      conc.   cyt     1    "RAF"
+pRAF    C   mumol/l      conc.   cyt     1    "pRAF"
+MEK     C   mumol/l      conc.   cyt     1    "MEK"
+pMEK    C   mumol/l      conc.   cyt     1    "pMEK"
+ERK     C   mumol/l      conc.   cyt     1    "ERK"
+pERK    C   mumol/l      conc.   cyt     1    "pERK"
+
+INPUTS
+k1max    C  nM  conc.  "k10+k11*(1-exp(-t/tau1))*exp(-t/tau2)"
+
+REACTIONS
+RAF  -> pRAF       CUSTOM    "k1max*K_1/(K_1+pERK)*RAF"
+pRAF -> RAF        CUSTOM    "k2*pRAF"
+MEK  -> pMEK       CUSTOM    "k3*K_2*pRAF/(K_2+Sorafenib)*MEK"
+pMEK -> MEK        CUSTOM    "k4*pMEK"
+ERK  -> pERK       CUSTOM    "k5*K_3*pMEK/(K_3+UO126)*ERK"
+pERK -> ERK        CUSTOM    "k6*pERK"
+
+DERIVED
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+init_RAF   "RAF_total - (K_1^(1/2)*(K_1*k2^2*k4^2*k6^2 + K_1*k4^2*k6^2*k10^2 + 2*K_1*k2*k4^2*k6^2*k10 + K_1*RAF_total^2*k3^2*k6^2*k10^2 + 2*K_1*RAF_total*k3*k4*k6^2*k10^2 + K_1*MEK_total^2*RAF_total^2*k3^2*k5^2*k10^2 + 2*K_1*MEK_total*RAF_total^2*k3^2*k5*k6*k10^2 + 2*K_1*RAF_total*k2*k3*k4*k6^2*k10 + 2*K_1*MEK_total*RAF_total*k3*k4*k5*k6*k10^2 + 4*ERK_total*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10 + 2*K_1*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10)^(1/2) - K_1*k2*k4*k6 - K_1*k4*k6*k10 + K_1*RAF_total*k3*k6*k10 + K_1*MEK_total*RAF_total*k3*k5*k10)/(k3*(2*K_1*k2*k6 + 2*K_1*k6*k10) + MEK_total*k3*k5*(2*K_1*k10 + k2*(2*ERK_total + 2*K_1)))"
+init_pRAF  "            (K_1^(1/2)*(K_1*k2^2*k4^2*k6^2 + K_1*k4^2*k6^2*k10^2 + 2*K_1*k2*k4^2*k6^2*k10 + K_1*RAF_total^2*k3^2*k6^2*k10^2 + 2*K_1*RAF_total*k3*k4*k6^2*k10^2 + K_1*MEK_total^2*RAF_total^2*k3^2*k5^2*k10^2 + 2*K_1*MEK_total*RAF_total^2*k3^2*k5*k6*k10^2 + 2*K_1*RAF_total*k2*k3*k4*k6^2*k10 + 2*K_1*MEK_total*RAF_total*k3*k4*k5*k6*k10^2 + 4*ERK_total*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10 + 2*K_1*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10)^(1/2) - K_1*k2*k4*k6 - K_1*k4*k6*k10 + K_1*RAF_total*k3*k6*k10 + K_1*MEK_total*RAF_total*k3*k5*k10)/(k3*(2*K_1*k2*k6 + 2*K_1*k6*k10) + MEK_total*k3*k5*(2*K_1*k10 + k2*(2*ERK_total + 2*K_1)))"
+init_MEK   "MEK_total - (K_1*k2*k4*k6 - K_1^(1/2)*(K_1*k2^2*k4^2*k6^2 + K_1*k4^2*k6^2*k10^2 + 2*K_1*k2*k4^2*k6^2*k10 + K_1*RAF_total^2*k3^2*k6^2*k10^2 + 2*K_1*RAF_total*k3*k4*k6^2*k10^2 + K_1*MEK_total^2*RAF_total^2*k3^2*k5^2*k10^2 + 2*K_1*MEK_total*RAF_total^2*k3^2*k5*k6*k10^2 + 2*K_1*RAF_total*k2*k3*k4*k6^2*k10 + 2*K_1*MEK_total*RAF_total*k3*k4*k5*k6*k10^2 + 4*ERK_total*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10 + 2*K_1*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10)^(1/2) + K_1*k4*k6*k10 + K_1*RAF_total*k3*k6*k10 - K_1*MEK_total*RAF_total*k3*k5*k10)/(k5*(2*K_1*k4*k10 + k2*k4*(2*ERK_total + 2*K_1) + 2*K_1*RAF_total*k3*k10))"
+init_pMEK  "          - (K_1*k2*k4*k6 - K_1^(1/2)*(K_1*k2^2*k4^2*k6^2 + K_1*k4^2*k6^2*k10^2 + 2*K_1*k2*k4^2*k6^2*k10 + K_1*RAF_total^2*k3^2*k6^2*k10^2 + 2*K_1*RAF_total*k3*k4*k6^2*k10^2 + K_1*MEK_total^2*RAF_total^2*k3^2*k5^2*k10^2 + 2*K_1*MEK_total*RAF_total^2*k3^2*k5*k6*k10^2 + 2*K_1*RAF_total*k2*k3*k4*k6^2*k10 + 2*K_1*MEK_total*RAF_total*k3*k4*k5*k6*k10^2 + 4*ERK_total*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10 + 2*K_1*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10)^(1/2) + K_1*k4*k6*k10 + K_1*RAF_total*k3*k6*k10 - K_1*MEK_total*RAF_total*k3*k5*k10)/(k5*(2*K_1*k4*k10 + k2*k4*(2*ERK_total + 2*K_1) + 2*K_1*RAF_total*k3*k10))"
+init_ERK   "ERK_total - (K_1*k2*k4*k6 - K_1^(1/2)*(K_1*k2^2*k4^2*k6^2 + K_1*k4^2*k6^2*k10^2 + 2*K_1*k2*k4^2*k6^2*k10 + K_1*RAF_total^2*k3^2*k6^2*k10^2 + 2*K_1*RAF_total*k3*k4*k6^2*k10^2 + K_1*MEK_total^2*RAF_total^2*k3^2*k5^2*k10^2 + 2*K_1*MEK_total*RAF_total^2*k3^2*k5*k6*k10^2 + 2*K_1*RAF_total*k2*k3*k4*k6^2*k10 + 2*K_1*MEK_total*RAF_total*k3*k4*k5*k6*k10^2 + 4*ERK_total*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10 + 2*K_1*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10)^(1/2) + K_1*k4*k6*k10 + K_1*RAF_total*k3*k6*k10 + K_1*MEK_total*RAF_total*k3*k5*k10)/(2*k2*k4*k6)"
+init_pERK  "          - (K_1*k2*k4*k6 - K_1^(1/2)*(K_1*k2^2*k4^2*k6^2 + K_1*k4^2*k6^2*k10^2 + 2*K_1*k2*k4^2*k6^2*k10 + K_1*RAF_total^2*k3^2*k6^2*k10^2 + 2*K_1*RAF_total*k3*k4*k6^2*k10^2 + K_1*MEK_total^2*RAF_total^2*k3^2*k5^2*k10^2 + 2*K_1*MEK_total*RAF_total^2*k3^2*k5*k6*k10^2 + 2*K_1*RAF_total*k2*k3*k4*k6^2*k10 + 2*K_1*MEK_total*RAF_total*k3*k4*k5*k6*k10^2 + 4*ERK_total*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10 + 2*K_1*MEK_total*RAF_total*k2*k3*k4*k5*k6*k10)^(1/2) + K_1*k4*k6*k10 + K_1*RAF_total*k3*k6*k10 + K_1*MEK_total*RAF_total*k3*k5*k10)/(2*k2*k4*k6)"
+ 

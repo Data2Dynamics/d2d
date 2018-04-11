@@ -43,7 +43,15 @@ elseif(length(ar.model(m).(is_datacond)(c).pNum)==1 && ar.model(m).(is_datacond)
 end
 
 if(strcmp(trafo,'log10'))
-    in_matrix(which_cells) = bsxfun(@times,tmp_matrix,pars_trafo*log(10));
+    try
+        in_matrix(which_cells) = bsxfun(@times,tmp_matrix,pars_trafo*log(10));
+    catch
+        tmp = tmp_matrix;
+        for j=1:length(pars_trafo)
+            tmp(:,:,j) = tmp(:,:,j) * pars_trafo(j)*log(10);
+        end
+        in_matrix(which_cells) = tmp;
+    end
 else
     warning('arTrafoParameters: Trying automatic transformation, cross-check or implement manual trafo! \n')
     syms f_trafo(x_trafo)
