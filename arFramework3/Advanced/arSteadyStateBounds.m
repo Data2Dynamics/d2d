@@ -182,16 +182,16 @@ function [res_user, res_type, sres_user] = residual_concentrationConstraintsL2(m
         ix = find(x_active); iz = find(z_active);
         for j = 1 : numel( ix )
             if ( xs( j ) )
-                fprintf( 2, '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.x{ix(j)}, xss(j), xl(j), xu(j) );
+                fprintf( 2, '%s: %.3g, Bounds: [%.3g, %.3g]: %.3g\n', ar.model.x{ix(j)}, xss(j), xl(j), xu(j), max(xlower(j), xupper(j)) );
             else
-                fprintf( '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.x{ix(j)}, xss(j), xl(j), xu(j) );
+                fprintf( '%s: %.3g, Bounds: [%.3g, %.3g]: %.3g\n', ar.model.x{ix(j)}, xss(j), xl(j), xu(j), max(xlower(j), xupper(j)) );
             end
         end
         for j = 1 : numel( iz )
             if ( zs( j ) )
-                fprintf( 2, '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.z{iz(j)}, zss(j), zl(j), zu(j) );
+                fprintf( 2, '%s: %.3g, Bounds: [%.3g, %.3g]: %.3g\n', ar.model.z{iz(j)}, zss(j), zl(j), zu(j), max(zlower(j), zupper(j)) );
             else
-                fprintf( '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.z{iz(j)}, zss(j), zl(j), zu(j) );
+                fprintf( '%s: %.3g, Bounds: [%.3g, %.3g]: %.3g\n', ar.model.z{iz(j)}, zss(j), zl(j), zu(j), max(zlower(j), zupper(j)) );
             end
         end
     end
