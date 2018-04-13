@@ -29,6 +29,7 @@ for e=1:length(ext)
     end
 end
 mexfiles = files(ind);
+mexfiles = mexfiles(~cellfun(@isempty,regexp(mexfiles,'^arSimuCalcFun')));
 
 for i=1:length(mexfiles)
     [dummy,name] = fileparts(mexfiles{i});
