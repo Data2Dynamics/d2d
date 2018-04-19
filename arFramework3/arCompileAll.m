@@ -2814,7 +2814,7 @@ function str = replaceDerivative( str )
     end
         
     % Pattern which matches the other derivative structure
-    pattern2 = 'diff[\(](\w+)[\(]([\[\]\(\)\^\/\*\+\-\.\s,\w\d]*)[\)][,](\s)([\[\]\w]*)[\)]';
+    pattern2 = 'diff[\(]([\w\(\)]+)[\(]([\[\]\(\)\^\/\*\+\-\.\s,\w\d]*)[\)][,](\s)([\[\]\w]*)[\)]';
         
     % Performs regexprep which transforms diff(name(args), args(#)) => Dname(args, #)
     [~,~,~,total,matches]=regexp(str, pattern2);
@@ -2837,7 +2837,7 @@ function str = replaceDerivative( str )
 function str = repSplineDer( str )
 
     % Pattern that matches the derivatives D([#], func)(args)
-    pattern = 'D[\(][\[](\d+)[\]][\,]\s(\w*)[\)][\(]([\[\]\^\/\*\+\-\.\s,\w\d]*)[\)]';
+    pattern = 'D[\(][\[](\d+)[\]][\,]\s([\w\(\)]*)[\)][\(]([\[\]\^\/\*\+\-\.\s,\w\d]*)[\)]';
     
     % Compute the mask for the printf
     % Performs regexprep which transforms D([#], name)(args) => Dname(args, %d)
