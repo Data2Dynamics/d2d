@@ -372,7 +372,7 @@ elseif(ar.config.optimizer == 17)
     jac = [];
     output.iterations = output.generations;
 
-% Joep's terrible heuristics
+% Repeated optimization alternating between 1 and 5
 elseif(ar.config.optimizer == 18)
     [pFit, resnorm, res, exitflag, output, lambda, jac] = ...
         lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
@@ -411,12 +411,12 @@ elseif(ar.config.optimizer == 18)
         
         attempts = attempts + 1;
         if ( attempts > repeatAttempts )
-            repeatTol = repeatTol * 2;
+            repeatTol = repeatTol * 10;
         end
         
+        % We're not getting better
         if (((resnormOld-resnorm)/resnorm) < repeatTol)
-            % After a certain number of optimization attempts, start 
-            % increasing the repetition tolerance   
+            % Have we tried perturbing the parameters?
             if ( perturb )
                 pFit = pFitPrePerturb;
                 res = resPrePerturb;
@@ -457,7 +457,6 @@ elseif(ar.config.optimizer == 18)
         end
     end
     resnorm = res;    
-    
 else
     error('ar.config.optimizer invalid');    
 end
