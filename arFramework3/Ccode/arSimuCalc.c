@@ -649,11 +649,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             } else {
                 equilibrated = NULL;
             }
-
+	    DEBUGPRINT0( debugMode, 4, "Apply initial conditions \n" );
             /* Apply ODE initial conditions */
             x0_override = mxGetField(arcondition, ic, "x0_override");
             if ( !applyInitialConditionsODE( sim_mem, tstart, im, isim, returndxdt, returndfdp0, x0_override, sensitivitySubset ) )
-                return;
+	        return;
+	   
 
             /* Do we have a startup event? */
             if ( qEvents == 1 ) {
@@ -1165,7 +1166,7 @@ void storeSensitivities( UserData data, int im, int isim, int is, int np, int nu
                 }
             }
         }
-
+	DEBUGPRINT2( debugMode, 6, "Storing fu sensitivities, filling %g with %g\n", (js*nu+ks)*nout + is, (js*nu)+ks);
         /* Output input sensitivities */
         for(js=0; js < np; js++) {
             for(ks=0; ks < nu; ks++) {
@@ -1564,6 +1565,7 @@ int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isi
 
 		if (sensi == 1)
 		{
+		  DEBUGPRINT0( debugMode, 8, "Initialize fsu \n");
 			fsu(data, tstart, im, isim);
 
             if ( sensitivitySubset == 1 ) {
@@ -1991,9 +1993,13 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
         /* log trafo of y */
         for (iy=0; iy<ny; iy++) {
             if(qlogy[iy] > 0.5){
-                if(y[it + (iy*nt)]<-cvodes_atol) printf("WARNING, check for concentrations <= 0 in data %d and observable %d !!!\n", id+1, iy+1);
+                if(y[it + (iy*nt)]<-cvodes_atol){ 
+                    printf("WARNING, check for concentrations <= 0 in data %d and observable %d !!!\n", id+1, iy+1);
+                }else{
+                    y[it + (iy*nt)] = log10(y[it + (iy*nt)]);
+                }
                 if(fine==0)  y_scale[it + (iy*nt)] = y_scale[it + (iy*nt)] / y[it + (iy*nt)] / log(10.0);
-                y[it + (iy*nt)] = log10(y[it + (iy*nt)]);
+                
             }
         }
         
