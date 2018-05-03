@@ -440,7 +440,7 @@ elseif(ar.config.optimizer == 18)
                 
                 % Add some random noise
                 pFit(ar.qLog10(ar.qFit==1)==1) = pFit(ar.qLog10(ar.qFit==1)==1) + pfac * randn( 1, numel( pFit(ar.qLog10(ar.qFit==1)==1) ) );
-                pFit(ar.qLog10(ar.qFit==1)==0) = pFit(ar.qLog10(ar.qFit==1)==0) * ( 1 + pfac * randn( 1, numel( pFit(ar.qLog10(ar.qFit==1)==0) ) ) );
+                pFit(ar.qLog10(ar.qFit==1)==0) = pFit(ar.qLog10(ar.qFit==1)==0) .* ( 1 + pfac * randn( 1, numel( pFit(ar.qLog10(ar.qFit==1)==0) ) ) );
                 
                 % Enforce bounds
                 pFit( pFit < ar.lb(ar.qFit==1) ) = ar.lb(pFit < ar.lb(ar.qFit==1));
