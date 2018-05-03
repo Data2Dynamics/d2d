@@ -727,11 +727,17 @@ condition.sym.C = arSubs(model.sym.C, condition.sym.p, condition.sym.fp, matlab_
 % Replace inline arrays (e.g. [3,4,2,5,2] with variable names, declaring
 % the array elsewhere as a static const (used for the fixed input spline)
 constVars = {};
-[ condition.sym.fu, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fu), constVars, {}, c, 'condi' );
-condition.sym.fu = sym( condition.sym.fu );
+cVars = {};
+for i=1:length(condition.sym.fu)
+    [ tmp, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fu(i)), constVars, cVars, c, 'condi' );
+    condition.sym.fu(i) = sym( tmp );
+end
 
-[ condition.sym.fv, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fv), constVars, cVars, c, 'condi' );
-condition.sym.fv = sym( condition.sym.fv );
+
+for i=1:length(condition.sym.fv)
+    [ tmp, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fv(i)), constVars, cVars, c, 'condi' );
+    condition.sym.fv(i) = sym( tmp );
+end
 
 condition.constVars = sprintf( '%s;\n', constVars{:} );
 
