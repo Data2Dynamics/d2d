@@ -18,7 +18,7 @@ for i = 1:length(trpath)
     end
 end
 
-if strcmp(md5(trpath{1}),checksum_l1)
+if sum(strcmpi(md5(trpath{1}),checksum_l1))==1
     % All good
     return
 end
@@ -169,10 +169,11 @@ if trd_orig > 0 && trd_l1 == 0
     Ninsert = Ninsert + length(text{4}) + length(keypos{3}) - length(keypos{2});
     A_new = [A_new(1:poskey(3)+Ninsert-1) text{5} A_new(poskey(3)+Ninsert:end)];
     
-    if ~isequal(exist([ar_path '/l1/trdog'], 'dir'),7)
-        mkdir([ar_path '/l1'],'trdog')
+    if ~isequal(exist([ar_path '/L1/trdog'], 'dir'),7)
+        mkdir([ar_path '/L1'],'trdog')
     end
-    fileID = fopen([ar_path '/l1/trdog/trdog.m'],'w');
+    fileID = fopen([ar_path '/L1/trdog/trdog.m'],'w');
+    addpath([ar_path '/L1/trdog']);
     fwrite(fileID,A_new,'char');
     fclose(fileID);
     

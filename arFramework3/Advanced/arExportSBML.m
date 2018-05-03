@@ -388,7 +388,9 @@ for ju = 1:length(ar.model(m).u)
     if ( isActive )
         % replace p with condition specific parameters
         fu = char(subs(fu, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp'));
-
+        
+        % replace time parameters with 'time'
+        fu = char(subs(fu, ar.model(m).t, 'time'));
         ixfun = cell2mat(cellfun(@(x) strfind(fu,x), funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
         if any(ixfun)
             heavisideReplacement = {

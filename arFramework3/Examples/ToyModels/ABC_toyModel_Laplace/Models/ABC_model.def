@@ -20,13 +20,13 @@ B_state    ->  C_state      CUSTOM "p2*B_state"
 DERIVED
         
 OBSERVABLES
-C_au        C   "au"  "conc."   0   0   "C_state"
-B_au        C   "au"    "conc." 0   0   "B_state"
+C_au        C   "au"  "conc."   0   1   "C_state + 1.e-8"
+B_au        C   "au"    "conc." 0   1   "B_state + 1.e-8"
 
 ERRORS
 C_au       "sd_C_au"
 B_au        "sd_B_au"
 
 CONDITIONS
-init_B_state     	"0"
-init_C_state   	"0"
+init_B_state     	"1.e-8"
+init_C_state   	"1.e-8"

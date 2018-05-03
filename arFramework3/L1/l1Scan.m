@@ -7,6 +7,16 @@ function l1Scan(jks, linv, gradient)
 
 global ar
 
+%Check for trdog
+checksum_l1   = {'67AF8E95E14AF615DFAB379CA542FD6C','f311e0c5dd8243c8e90166b03d48f17e'}; % Modified trdog.m
+trpath = which('trdog','-all');
+if sum(strcmpi(md5(trpath{1}),checksum_l1))==1
+    % All good
+else
+    warning('Found an outdated trdog, updating...! \n');
+    l1trdog
+end
+
 if(isempty(ar))
     error('please initialize by arInit')
 end
@@ -103,3 +113,12 @@ ar.L1chi2fits = chi2fits;
 ar.config.optimizer = optim;
 ar.config.optim.MaxIter = maxiter;
 
+function md5hash = md5(filename)
+
+mddigest   = java.security.MessageDigest.getInstance('MD5'); 
+filestream = java.io.FileInputStream(java.io.File(filename)); 
+digestream = java.security.DigestInputStream(filestream,mddigest);
+
+while(digestream.read() ~= -1) end
+
+md5hash=reshape(dec2hex(typecast(mddigest.digest(),'uint8'))',1,[]);

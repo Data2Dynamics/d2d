@@ -7,7 +7,9 @@
 
 \f0\fs24 \cf0 README:\
 \
-This example introduces a Laplace distribution for the error model ( {\field{\*\fldinst{HYPERLINK "https://en.wikipedia.org/wiki/Laplace_distribution"}}{\fldrslt https://en.wikipedia.org/wiki/Laplace_distribution}} ). You cannot perform the usual fitting with the .m files in this folder!!\
+This example introduces a Laplace distribution for the error model ( {\field{\*\fldinst{HYPERLINK "https://en.wikipedia.org/wiki/Laplace_distribution"}}{\fldrslt https://en.wikipedia.org/wiki/Laplace_distribution}} ). \
+To start, rename the files arCalcRes_laplace.m, arFit_laplace.m, arGetMerit_laplace.m and arPLEInit_laplace.m by deleting the '_laplace' addon.\
+Beware that you cannot perform the usual fitting with the .m files in this folder, and after renaming you must not have this folder in your MATLAB paths!!\
 \
 Thus, the likelihood function and its sensitivities are different from the usual Gaussian error model and are calculated in the function arCalcRes.m in this folder.\
 Also, -Log likelihood instead of -2log likelihood is used in this case, and the altered objective function is computed in arGetMerit.m\

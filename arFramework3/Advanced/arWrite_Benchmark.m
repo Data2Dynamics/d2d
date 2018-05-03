@@ -44,6 +44,10 @@ global ar
     end
     General_string{end,2} = est_errors;
     
+    if(strcmp(est_errors,'yes'))
+       General_string{end,3} = 'Check sheet Parameters_noErrorModel for values with fixed errors'; 
+    end
+    
     General_string{end+1,1} = 'log-scale of observations';
     General_string{end,2} = log_fit;
     
