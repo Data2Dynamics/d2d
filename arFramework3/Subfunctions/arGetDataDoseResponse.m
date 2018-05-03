@@ -2,6 +2,7 @@ function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl
     arGetDataDoseResponse(jm, ds, ttime, dLink, logplotting_xaxis, jtype)
 global ar
 
+tExp = [];
 zero_break = [];
 data_qFit = true;
 
@@ -157,6 +158,19 @@ for jd = ds
     end
 end
 
+if isempty( tExp )
+    t = [];
+    y = [];
+    ystd = [];
+    yExp = [];
+    yExpStd = [];
+    lb = []; 
+    ub = [];
+    zero_break = [];
+    data_qFit = [];
+    yExpHl = [];
+    return
+end
 if(~isempty(yExp))
     [tExp,itexp] = sort(tExp);
     yExp = yExp(itexp,:);

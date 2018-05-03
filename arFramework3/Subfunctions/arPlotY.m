@@ -288,6 +288,7 @@ for jm = 1:length(ar.model)
                             
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
                                 getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
+                            
                             if(length(unique(t))==1)
                                 t = [t-0.1; t+0.1];
                                 y = [y; y]; %#ok<AGROW>
@@ -309,7 +310,7 @@ for jm = 1:length(ar.model)
                                 end
                                 t = tf;
                             end
-                           
+
                             if any(whichYplot==[3]) % ( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==0) || ...
 %                                     (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==0) )
                                 lb = y(:) - ystd(:);
@@ -325,15 +326,22 @@ for jm = 1:length(ar.model)
                                 g = subplot(nrows,ncols,jy);
                                 ar.model(jm).plot(jplot).gy(jy) = g;
                                 plotResFuncSpecificElements( g, t, jm, jd, jy, trafo, Clines{2} );
-                                
+
                                 if(data_qFit)
                                     ClinesExp{6} = '*';
                                 else
                                     ClinesExp{6} = 'o';
                                 end
-                                
+
                                 qfinite = ~isinf(t) & ~isinf(y);
-                                ar.model(jm).data(jd).plot.y(jy,jt,jc) = plot(g, t(qfinite), trafo(y(qfinite)), Clines{:});
+
+                                cplot = plot(g, t(qfinite), trafo(y(qfinite)), Clines{:});
+                                if ~isempty( cplot )
+                                    ar.model(jm).data(jd).plot.y(jy,jt,jc) = cplot;
+                                else
+                                    % Do a dummy plot so we have something for the legend
+                                    ar.model(jm).data(jd).plot.y(jy,jt,jc) = plot(g, [NaN NaN], [NaN NaN], Clines{:});
+                                end
                                 cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy,jt,jc);
                                 hold(g, 'on');
 
@@ -365,23 +373,23 @@ for jm = 1:length(ar.model)
                                         end
                                     end
                                 end
-                                
+
                                 if(~isempty(zero_break))
                                     plot([zero_break zero_break], ylim, 'k--');
                                 end
                             else
                                 ytmp = trafo(y);
-								qfinite = ~isinf(t) & ~isinf(ytmp);
+                                qfinite = ~isinf(t) & ~isinf(ytmp);
                                 set(ar.model(jm).data(jd).plot.y(jy,jt,jc), 'YData', ytmp(qfinite));
                                 if any(whichYplot==4) && ~isempty(ub)
                                     tmpx = [t(:); flipud(t(:))];
-									tmpy = trafo([ub; flipud(lb)]);
+                                    tmpy = trafo([ub; flipud(lb)]);
                                     qfinite = ~isinf(tmpy) & ~isinf(tmpx);
                                     if(sum(qfinite)>0)
                                         set(ar.model(jm).data(jd).plot.ystd(jy,jt,jc),  'YData', tmpy(qfinite));
                                         set(ar.model(jm).data(jd).plot.ystd2(jy,jt,jc), 'YData', tmpy(qfinite));
                                     end
-                                end
+                                end                           
                             end
                         end
                         ccount = ccount + 1;
@@ -627,7 +635,7 @@ function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl
     getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
 global ar
 
-
+tExp = [];
 zero_break = [];
 data_qFit = true;
 
@@ -708,6 +716,20 @@ for jd = ds
                 
         ccount = ccount + 1;
     end
+end
+
+if isempty( tExp )
+    t = [];
+    y = [];
+    ystd = [];
+    yExp = [];
+    yExpStd = [];
+    lb = []; 
+    ub = [];
+    zero_break = [];
+    data_qFit = [];
+    yExpHl = [];
+    return
 end
 
 [tExp,itexp] = sort(tExp);

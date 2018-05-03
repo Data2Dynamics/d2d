@@ -46,6 +46,16 @@ if(~isempty(y_ssa) && any(plotopt(jy)==[3,5]) &&  sum(~isnan(y_ssa))>0)
     end
 end
 
+% Fallback for no data
+if isempty(y)
+    hy = plot(NaN, NaN, Clines{:});
+    hyss = patch([0 0 0], [0 0 0], ones(1,3));
+    set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2,'LineStyle','none','Marker','*','MarkerEdgeColor',Clines{2},'MarkerSize',5);
+    hystd = patch([0 0 0], [0 0 0], -2*ones(1,3), ones(1,3));
+    set(hystd, 'FaceColor', Clines{2}, 'EdgeColor', 'none', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2);
+    return;
+end
+
 % plot trajectory
 tmpy = y(:,jy);
 if(~isempty(qUnlog) && qUnlog(jy))
