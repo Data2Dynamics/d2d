@@ -1,0 +1,13 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR
+t	T	"h"	"time"	-10	100
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
