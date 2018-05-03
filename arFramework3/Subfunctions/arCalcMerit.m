@@ -1,3 +1,6 @@
+% This function updates the objective functions used for fitting for the
+% currently chosen parameters.
+% 
 % This function calls
 %   - arSimu which in turn calls arCalcRes
 %   - arCollectRes
