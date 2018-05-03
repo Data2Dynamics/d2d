@@ -12,6 +12,7 @@
 % This function is *very* slow, but will do the job
 
 function copy = arDeepCopy(in)
+
 	if ( isstruct( in ) )
         if ( length( in ) > 1 )
             for s = 1 : length( in )
@@ -20,10 +21,12 @@ function copy = arDeepCopy(in)
         else
             names = fieldnames(in);
             copy = struct;
-            if ~isempty(names)
+            if ~isempty(names) && numel(in)>0
                 for a = 1 : length( names )
                     copy.(names{a}) = arDeepCopy(in.(names{a}));
                 end
+            elseif ~isempty(names) && numel(in)==0
+                copy = in;
             end
         end
     else
