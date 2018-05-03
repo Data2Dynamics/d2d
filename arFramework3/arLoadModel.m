@@ -366,6 +366,8 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                     end
                     for j=1:length(source)
                         symtmpsubs = subs(symtmp, sym(source{j}), 0);
+                        sva = symvar(symtmp);
+                        symtmpsubs = subs(symtmpsubs, sva, rand(1, numel(sva)) );
                         if(symtmpsubs~=0)
                             arFprintf(1, 2, 'Possible negative flux in reaction #%i:\n', length(ar.model(m).fv));
                             arFprintf(1, 2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
@@ -381,6 +383,8 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                         for k=1:length(target)
                             symtmpsubs = subs(symtmpsubs, sym(target{k}), 0);
                         end
+                        sva = symvar(symtmp);
+                        symtmpsubs = subs(symtmpsubs, sva, rand(1, numel(sva)) );
                         
                         if(symtmpsubs~=0)
                             arFprintf(1, 2, 'Possible flux in reaction without presence of source #%i:\n', length(ar.model(m).fv));
@@ -699,6 +703,11 @@ if ( derivedVariablesInRates )
     end
     arFprintf(2, '=> Substituting derived variables in reaction equation.\n' );
 end
+
+% Simplify equations
+%if ( simplifyEquations )
+    
+%end
 
 
 ar.model(m).qPlotZ = ones(size(ar.model(m).z));
