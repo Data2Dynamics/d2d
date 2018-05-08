@@ -293,7 +293,10 @@ for jm = 1:length(ar.model)
                             end
                             qLogPlot = ar.model(jm).data(jd).logplotting;
                         else
-                            trafo = @(x) x;
+                            trafos = cell(1, size(ar.model(jm).data(jd).y, 2));
+                            for jy = 1 : size(ar.model(jm).data(jd).y, 2)
+                                trafos{jy} = @(x) x;
+                            end
                             qLogPlot = false(size(yLabel));
                         end
                         
