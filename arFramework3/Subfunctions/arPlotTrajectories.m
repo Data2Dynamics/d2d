@@ -1,7 +1,7 @@
 function [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ncount, t, y, ystd, lb, ub, nfine_dr_plot, ...
     nfine_dr_method, tExp, yExp, yExpHl, yExpStd, y_ssa, y_ssa_lb, y_ssa_ub, ...
-    plotopt, trafos, qLogPlot, qFit, zero_break, fastPlotTmp, hys, hystds, hysss, dydt, isLast, qDR, ...
-    ndata, chi2, tUnits, response_parameter, yLabel, yNames, yUnits, fiterrors, ...
+    plotopt, trafos, qFit, zero_break, fastPlotTmp, hys, hystds, hysss, dydt, isLast, qDR, ...
+    ndata, chi2, tUnits, response_parameter, titles, yNames, yLabel, fiterrors, ...
     logplotting_xaxis, iy, t_ppl, y_ppl_ub, y_ppl_lb, atol)
 
 % rows and cols
@@ -84,21 +84,13 @@ for jys = 1:length(iy)
                     end
                 end
             end
-            yunitetmp = '';
-            if(~isempty(yUnits{jy,2}))
-                yunitetmp = sprintf(' [%s]', yUnits{jy,2});
-            end
-            if(qLogPlot(jy))
-                ylabel(g, sprintf('log_{10}(%s)%s', yUnits{jy,3}, yunitetmp));
-            else
-                ylabel(g, sprintf('%s%s', yUnits{jy,3}, yunitetmp));
-            end
+            ylabel( yLabel{jy} );
             
             % title
-            if(~isempty(yNames) && ~isempty(yNames{jy}) && ~strcmp(yNames{jy}, yLabel{jy}))
-                titstr = [arNameTrafo(yNames{jy}) ' (' arNameTrafo(yLabel{jy}) ')'];
+            if(~isempty(yNames) && ~isempty(yNames{jy}) && ~strcmp(yNames{jy}, titles{jy}))
+                titstr = [arNameTrafo(yNames{jy}) ' (' arNameTrafo(titles{jy}) ')'];
             else
-                titstr = arNameTrafo(yLabel{jy});
+                titstr = arNameTrafo(titles{jy});
             end
             title(g, titstr);
             

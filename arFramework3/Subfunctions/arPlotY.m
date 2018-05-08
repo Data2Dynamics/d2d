@@ -112,7 +112,7 @@ for jm = 1:length(ar.model)
                         [], 'none', 'none');
                     
                     % Handle data transformations
-                    trafos = arGetPlotYTrafo(jm, jd, jplot);
+                    [trafos, yLegends] = arGetPlotYTrafo(jm, jd, jplot);
                     for jy = 1:ny
                         trafo = trafos{jy};
                         
@@ -291,7 +291,7 @@ for jm = 1:length(ar.model)
                             [], 'none', 'none');
                         
                         % Fetch data transformations
-                        trafos = arGetPlotYTrafo(jm, jd, jplot);
+                        [trafos, yLegends] = arGetPlotYTrafo(jm, jd, jplot);
                         for jy = 1:ny
                             trafo = trafos{jy};
                             whichYplot = arWhichYplot(jm,jd,[],jy);
@@ -446,11 +446,7 @@ for jm = 1:length(ar.model)
                             end
                         end
                     end
-                    if(ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))
-                        ylabel(g, sprintf('log_{10}(%s) [%s]', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2}));
-                    else
-                        ylabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2}));
-                    end
+                    ylabel(yLegends{jy});
                     
                     if(doLegends && jy == ny && (~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                         hl = [];
