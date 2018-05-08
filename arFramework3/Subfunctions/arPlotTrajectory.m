@@ -126,8 +126,8 @@ else
     markersize = 6;
 end
 if(~isempty(yExp) && ~fastPlot)
-    yExpU(:,jy)     = trafo(yExp(:,jy)+yExpStd(:,jy)) - trafo(yExp);
-    yExpL(:,jy)     = trafo(yExp(:,jy)-yExpStd(:,jy)) - trafo(yExp);
+    yExpU(:,jy)     = trafo(yExp(:,jy)+yExpStd(:,jy)) - trafo(yExp(:,jy));
+    yExpL(:,jy)     = trafo(yExp(:,jy)-yExpStd(:,jy)) - trafo(yExp(:,jy));
     yExp            = trafo(yExp);
     yExpHl          = trafo(yExpHl);
     
