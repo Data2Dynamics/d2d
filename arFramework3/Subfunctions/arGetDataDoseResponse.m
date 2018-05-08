@@ -1,5 +1,5 @@
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
-    arGetDataDoseResponse(jm, ds, ttime, dLink, logplotting_xaxis, jtype)
+    arGetDataDoseResponse(jm, ds, ttime, dLink, logplotting_xaxis, jtype, xtrafo)
 global ar
 
 tExp = [];
@@ -26,12 +26,17 @@ for jd = ds
     jc = ar.model(jm).data(jd).cLink;
     
     for jt = find(qt')
+        % Grab values
+        curvals = str2double(ar.model(jm).data(jd).condition(jcondi).value);
+        if ~isempty( xtrafo )
+            curvals = xtrafo( curvals );
+        end
         
         % collect x axis values
         if(logplotting_xaxis)
-            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
+            t(ccount,1) = log10(curvals); %#ok<AGROW>
         else
-            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(jcondi).value); %#ok<AGROW>
+            t(ccount,1) = curvals; %#ok<AGROW>
         end
         
         % calculatte zero break

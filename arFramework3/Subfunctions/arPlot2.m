@@ -106,6 +106,18 @@ for jm = 1:length(ar.model)
     for jplot = 1:length(ar.model(jm).plot)
         qDR = ar.model(jm).plot(jplot).doseresponse;
         
+        % Grab user specified transformations
+        if(isfield(ar.model(jm).plot(jplot), 'xtrafo'))
+            xtrafo = ar.model(jm).plot(jplot).xtrafo;
+        else
+            xtrafo = [];
+        end
+        if isfield( ar.model(jm).plot(jplot), 'ytrafo' )
+            ytrafo = ar.model(jm).plot(jplot).ytrafo;
+        else
+            ytrafo = @(x)x;
+        end  
+        
         % log 10 dose response axis
         if(isfield(ar.model(jm).plot(jplot), 'doseresponselog10xaxis'))
             logplotting_xaxis = ar.model(jm).plot(jplot).doseresponselog10xaxis;
@@ -216,7 +228,7 @@ for jm = 1:length(ar.model)
                             
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, qFit, yExpHl] = ...
                                 arGetDataDoseResponse(jm, ds, dr_times(jt), ...
-                                ar.model(jm).plot(jplot).dLink, logplotting_xaxis, jtype);
+                                ar.model(jm).plot(jplot).dLink, logplotting_xaxis, jtype, xtrafo);
                             
                             plotopt = NaN(1,size(y,2));
                             if jtype ==1
@@ -264,16 +276,24 @@ for jm = 1:length(ar.model)
                             hys, hystds, hysss] = ...
                             arGetInfo(jm, jd, jtype, linehandle_name{jtype});
                         
-                        % log10 plotting
+                        % Plotting of observables
                         if(jtype==1)
-                            qUnlog = ar.model(jm).data(jd).logfitting & ...
-                                ~ar.model(jm).data(jd).logplotting;
-                            qLog = ~ar.model(jm).data(jd).logfitting & ...
-                                ar.model(jm).data(jd).logplotting;
+                            % Central point where the transformations are handled.
+                            trafos = cell(1, size(ar.model(jm).data(jd).y, 2));
+                            for jy = 1 : size(ar.model(jm).data(jd).y, 2)
+                                if(ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))
+                                    trafos{jy} = @(x) log10(ytrafo(10.^x));
+                                elseif(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
+                                    trafos{jy} = @(x) ytrafo(10.^x);
+                                elseif(~ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))                                
+                                    trafos{jy} = @(x) log10(ytrafo(x));
+                                elseif(~ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
+                                    trafos{jy} = ytrafo;
+                                end
+                            end
                             qLogPlot = ar.model(jm).data(jd).logplotting;
                         else
-                            qUnlog = false(size(yLabel));
-                            qLog = false(size(yLabel));
+                            trafo = @(x) x;
                             qLogPlot = false(size(yLabel));
                         end
                         
@@ -283,7 +303,7 @@ for jm = 1:length(ar.model)
                             t, y, ystd, lb, ub, nfine_dr_plot, ...
                             nfine_dr_method, tExp, yExp, yExpHl, yExpStd, ...
                             y_ssa, y_ssa_lb, y_ssa_ub, ...
-                            plotopt, qUnlog, qLog, qLogPlot, qFit, ...
+                            plotopt, trafos, qLogPlot, qFit, ...
                             zero_break, fastPlotTmp, hys, hystds, hysss, dydt, ...
                             jt==length(dr_times) && jc==jcs(end), qDR, ndata, chi2, ...
                             tUnits, response_parameter, yLabel, yNames, yUnits, ...
