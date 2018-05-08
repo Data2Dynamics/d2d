@@ -65,6 +65,20 @@ for jm = 1:length(ar.model)
     ar.model(jm).ndata = 0;
     
     for jplot = 1:length(ar.model(jm).plot)
+        
+        % Grab user specified transformations
+        if isfield( ar.model(jm).plot(jplot), 'xtrafo' )
+            xtrafo = ar.model(jm).plot(jplot).xtrafo;
+        else
+            xtrafo = [];
+        end
+        if isfield( ar.model(jm).plot(jplot), 'ytrafo' )
+            ytrafo = ar.model(jm).plot(jplot).ytrafo;
+        else
+            % Unit transformation. This allows us to stick to only a single code path.
+            ytrafo = @(x)x;
+        end
+        
         isBarGraph = 0;
         if(ar.model(jm).qPlotYs(jplot)==1 && ar.model(jm).plot(jplot).ny>0)
 %             if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
@@ -121,12 +135,18 @@ for jm = 1:length(ar.model)
                                 set(gca, 'XTick', []);
                             end
                         end
-                                           
-                        if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                            trafo = @(x)10.^x;
-                        else
-                            trafo = @(x)x;
+                        
+                        % Handle all the data transformation cases.
+                        if(ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))
+                            trafo = @(x) log10(ytrafo(10.^x));
+                        elseif(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
+                            trafo = @(x) ytrafo(10.^x);
+                        elseif(~ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))                                
+                            trafo = @(x) log10(ytrafo(x));
+                        elseif(~ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
+                            trafo = ytrafo;
                         end
+                        
                         if(~fastPlotTmp)
                             g = subplot(nrows,ncols,jy);
                             ar.model(jm).plot(jplot).gy(jy) = g;
@@ -234,7 +254,7 @@ for jm = 1:length(ar.model)
                 end
             else
               %% Dose responses
-                times = [];
+                times = [];          
                 for jd = ar.model(jm).plot(jplot).dLink
                     times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
                     ny = size(ar.model(jm).data(jd).y, 2);
@@ -287,7 +307,7 @@ for jm = 1:length(ar.model)
                             whichYplot = arWhichYplot(jm,jd,[],jy);
                             
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
-                                getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
+                                getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis, xtrafo);
                             
                             if(length(unique(t))==1)
                                 t = [t-0.1; t+0.1];
@@ -317,11 +337,17 @@ for jm = 1:length(ar.model)
                                 ub = y(:) + ystd(:);
                             end
 
-                            if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                                trafo = @(x)10.^x;
-                            else
-                                trafo = @(x)x;
+                            % Handle all the data transformation cases.
+                            if(ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))
+                                trafo = @(x) log10(ytrafo(10.^x));
+                            elseif(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
+                                trafo = @(x) ytrafo(10.^x);
+                            elseif(~ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))                                
+                                trafo = @(x) log10(ytrafo(x));
+                            elseif(~ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
+                                trafo = ytrafo;
                             end
+                            
                             if(~fastPlotTmp)
                                 g = subplot(nrows,ncols,jy);
                                 ar.model(jm).plot(jplot).gy(jy) = g;
@@ -632,7 +658,7 @@ end
 
 
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
-    getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
+    getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis, xtrafo)
 global ar
 
 tExp = [];
@@ -649,10 +675,15 @@ for jd = ds
         end
     end
     for jt = find(qt')
+        curvals = str2double(ar.model(jm).data(jd).condition(jcondi).value);
+        if ~isempty( xtrafo )
+            curvals = xtrafo( curvals );
+        end
+        
         if(logplotting_xaxis)
-            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
+            t(ccount,1) = log10(curvals); %#ok<AGROW>
         else
-            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(jcondi).value); %#ok<AGROW>
+            t(ccount,1) = curvals; %#ok<AGROW>
         end
         if(isinf(t(ccount,1)))
             doses = [];
