@@ -72,12 +72,6 @@ for jm = 1:length(ar.model)
         else
             xtrafo = [];
         end
-        if isfield( ar.model(jm).plot(jplot), 'ytrafo' )
-            ytrafo = ar.model(jm).plot(jplot).ytrafo;
-        else
-            % Unit transformation. This allows us to stick to only a single code path.
-            ytrafo = @(x)x;
-        end
         
         isBarGraph = 0;
         if(ar.model(jm).qPlotYs(jplot)==1 && ar.model(jm).plot(jplot).ny>0)
@@ -117,7 +111,11 @@ for jm = 1:length(ar.model)
                         length(ar.model(jm).plot(jplot).dLink), ...
                         [], 'none', 'none');
                     
+                    % Handle data transformations
+                    trafos = arGetPlotYTrafo(jm, jd, jplot);
                     for jy = 1:ny
+                        trafo = trafos{jy};
+                        
                         whichYplot = arWhichYplot(jm,jd,[],jy);
                         [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, yExpSimu] = getData(jm, jd, jy);
                         
@@ -134,17 +132,6 @@ for jm = 1:length(ar.model)
                                 set(gca, 'YGrid', 'on');
                                 set(gca, 'XTick', []);
                             end
-                        end
-                        
-                        % Handle all the data transformation cases.
-                        if(ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))
-                            trafo = @(x) log10(ytrafo(10.^x));
-                        elseif(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                            trafo = @(x) ytrafo(10.^x);
-                        elseif(~ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))                                
-                            trafo = @(x) log10(ytrafo(x));
-                        elseif(~ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                            trafo = ytrafo;
                         end
                         
                         if(~fastPlotTmp)
@@ -303,7 +290,10 @@ for jm = 1:length(ar.model)
                             length(times)*length(jcs), ...
                             [], 'none', 'none');
                         
+                        % Fetch data transformations
+                        trafos = arGetPlotYTrafo(jm, jd, jplot);
                         for jy = 1:ny
+                            trafo = trafos{jy};
                             whichYplot = arWhichYplot(jm,jd,[],jy);
                             
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
@@ -335,17 +325,6 @@ for jm = 1:length(ar.model)
 %                                     (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==0) )
                                 lb = y(:) - ystd(:);
                                 ub = y(:) + ystd(:);
-                            end
-
-                            % Handle all the data transformation cases.
-                            if(ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))
-                                trafo = @(x) log10(ytrafo(10.^x));
-                            elseif(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                                trafo = @(x) ytrafo(10.^x);
-                            elseif(~ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))                                
-                                trafo = @(x) log10(ytrafo(x));
-                            elseif(~ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                                trafo = ytrafo;
                             end
                             
                             if(~fastPlotTmp)

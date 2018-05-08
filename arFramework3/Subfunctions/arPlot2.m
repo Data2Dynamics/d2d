@@ -112,11 +112,6 @@ for jm = 1:length(ar.model)
         else
             xtrafo = [];
         end
-        if isfield( ar.model(jm).plot(jplot), 'ytrafo' )
-            ytrafo = ar.model(jm).plot(jplot).ytrafo;
-        else
-            ytrafo = @(x)x;
-        end  
         
         % log 10 dose response axis
         if(isfield(ar.model(jm).plot(jplot), 'doseresponselog10xaxis'))
@@ -279,18 +274,7 @@ for jm = 1:length(ar.model)
                         % Plotting of observables
                         if(jtype==1)
                             % Central point where the transformations are handled.
-                            trafos = cell(1, size(ar.model(jm).data(jd).y, 2));
-                            for jy = 1 : size(ar.model(jm).data(jd).y, 2)
-                                if(ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))
-                                    trafos{jy} = @(x) log10(ytrafo(10.^x));
-                                elseif(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                                    trafos{jy} = @(x) ytrafo(10.^x);
-                                elseif(~ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))                                
-                                    trafos{jy} = @(x) log10(ytrafo(x));
-                                elseif(~ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                                    trafos{jy} = ytrafo;
-                                end
-                            end
+                            trafos = arGetPlotYTrafo(jm, jd, jplot);
                             qLogPlot = ar.model(jm).data(jd).logplotting;
                         else
                             trafos = cell(1, numel(iy));
