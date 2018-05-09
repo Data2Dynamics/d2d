@@ -19,6 +19,7 @@
 function [trafos, ylegend] = arGetPlotYTrafo(jm, jd, jplot)
     global ar;
 
+    % Do we have an additional transformation?
     if isfield( ar.model(jm).plot(jplot), 'ytrafo' )
         ytrafo = ar.model(jm).plot(jplot).ytrafo;
         
@@ -33,7 +34,7 @@ function [trafos, ylegend] = arGetPlotYTrafo(jm, jd, jplot)
         ytrafo = @(x)x;
         trafod = 0;
     end
-        
+    
     % Handle all the data transformation cases.
     trafos = cell(1, size(ar.model(jm).data(jd).y, 2));
     ylegend = cell(1, size(ar.model(jm).data(jd).y, 2));
@@ -57,6 +58,7 @@ function [trafos, ylegend] = arGetPlotYTrafo(jm, jd, jplot)
             yunittmp = sprintf(' [%s]', unitName);
         end
         
+        % Here we handle the 'regular' log10 transformations
         if(ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))
             trafos{jy} = @(x) log10(ytrafo(10.^x));
             ylegend{jy} = sprintf('log_{10}(%s)%s', obsName, yunittmp);

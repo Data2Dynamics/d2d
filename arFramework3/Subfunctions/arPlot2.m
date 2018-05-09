@@ -105,20 +105,9 @@ for jm = 1:length(ar.model)
     
     for jplot = 1:length(ar.model(jm).plot)
         qDR = ar.model(jm).plot(jplot).doseresponse;
-        
-        % Grab user specified transformations
-        if(isfield(ar.model(jm).plot(jplot), 'xtrafo'))
-            xtrafo = ar.model(jm).plot(jplot).xtrafo;
-        else
-            xtrafo = [];
-        end
-        
-        % log 10 dose response axis
-        if(isfield(ar.model(jm).plot(jplot), 'doseresponselog10xaxis'))
-            logplotting_xaxis = ar.model(jm).plot(jplot).doseresponselog10xaxis;
-        else
-            logplotting_xaxis = true;
-        end
+
+        % Determine transformation of the independent axis
+        [xtrafo, xLabel] = arGetPlotXTrafo(jm, jplot);
         
         % chi^2, ndata and dr_times
         chi2 = zeros(1,ar.model(jm).plot(jplot).ny);
@@ -223,7 +212,7 @@ for jm = 1:length(ar.model)
                             
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, qFit, yExpHl] = ...
                                 arGetDataDoseResponse(jm, ds, dr_times(jt), ...
-                                ar.model(jm).plot(jplot).dLink, logplotting_xaxis, jtype, xtrafo);
+                                ar.model(jm).plot(jplot).dLink, jtype, xtrafo);                            
                             
                             plotopt = NaN(1,size(y,2));
                             if jtype ==1
@@ -267,10 +256,11 @@ for jm = 1:length(ar.model)
                             end
                             zero_break = [];
                         end
+                        
                         [tUnits, response_parameter, titles, yNames, yLabel, iy, ...
                             hys, hystds, hysss] = ...
                             arGetInfo(jm, jd, jtype, linehandle_name{jtype});
-                        
+
                         % Plotting of observables
                         if(jtype==1)
                             % Central point where the transformations are handled.
@@ -287,12 +277,10 @@ for jm = 1:length(ar.model)
                             length(dr_times)*length(jcs), ...
                             t, y, ystd, lb, ub, nfine_dr_plot, ...
                             nfine_dr_method, tExp, yExp, yExpHl, yExpStd, ...
-                            y_ssa, y_ssa_lb, y_ssa_ub, ...
-                            plotopt, trafos, qFit, ...
-                            zero_break, fastPlotTmp, hys, hystds, hysss, dydt, ...
-                            jt==length(dr_times) && jc==jcs(end), qDR, ndata, chi2, ...
-                            tUnits, response_parameter, titles, yNames, yLabel, ...
-                            fiterrors, logplotting_xaxis, iy, t_ppl, y_ppl_ub, y_ppl_lb, ...
+                            y_ssa, y_ssa_lb, y_ssa_ub, plotopt, trafos, qFit, zero_break, ...
+                            fastPlotTmp, hys, hystds, hysss, dydt, ...
+                            jt==length(dr_times) && jc==jcs(end), ndata, chi2, ...
+                            titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, ...
                             ar.config.atol);
         
                         % save handels

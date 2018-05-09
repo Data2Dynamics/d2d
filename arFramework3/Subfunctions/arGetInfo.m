@@ -100,3 +100,8 @@ else
         hysss = [];
     end
 end
+
+% Make sure that the handle direction is never ambiguous
+hys = hys(:);
+hystds = hystds(:);
+hysss = hysss(:);

@@ -1,8 +1,7 @@
 function [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ncount, t, y, ystd, lb, ub, nfine_dr_plot, ...
     nfine_dr_method, tExp, yExp, yExpHl, yExpStd, y_ssa, y_ssa_lb, y_ssa_ub, ...
-    plotopt, trafos, qFit, zero_break, fastPlotTmp, hys, hystds, hysss, dydt, isLast, qDR, ...
-    ndata, chi2, tUnits, response_parameter, titles, yNames, yLabel, fiterrors, ...
-    logplotting_xaxis, iy, t_ppl, y_ppl_ub, y_ppl_lb, atol)
+    plotopt, trafos, qFit, zero_break, fastPlotTmp, hys, hystds, hysss, dydt, isLast, ...
+    ndata, chi2, titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, atol)
 
 % rows and cols
 ny = length(iy);
@@ -51,7 +50,7 @@ for jys = 1:length(iy)
         [hy, hystd, hyss] = arPlotTrajectory(jy, t, y, ystd, lb, ub, ...
             tExp, yExp, yExpHl, yExpStd, ...
             y_ssa, y_ssa_lb, y_ssa_ub, ...
-            plotopt, Clines, ClinesExp, trafos{jy}, ...
+            plotopt, Clines, ClinesExp, trafos{jys}, ...
             [], [], [], dydt, qFit, zero_break, t_ppl, y_ppl_ub, y_ppl_lb);
         
         % save handles for fast plotting
@@ -74,17 +73,18 @@ for jys = 1:length(iy)
                 qxlabel = jys == (nrows-2)*ncols + 1;
             end
             if(qxlabel)
-                if(~qDR)
-                    xlabel(g, sprintf('%s [%s]', tUnits{3}, tUnits{2}));
-                else
-                    if(logplotting_xaxis)
-                        xlabel(g, sprintf('log_{10}(%s)', arNameTrafo(response_parameter)));
-                    else
-                        xlabel(g, sprintf('%s', arNameTrafo(response_parameter)));
-                    end
-                end
+                xlabel( xLabel );
+                %if(~qDR)
+                %    xlabel(g, sprintf('%s [%s]', tUnits{3}, tUnits{2}));
+                %else
+                %    if(logplotting_xaxis)
+                %        xlabel(g, sprintf('log_{10}(%s)', arNameTrafo(response_parameter)));
+                %    else
+                %        xlabel(g, sprintf('%s', arNameTrafo(response_parameter)));
+                %    end
+                %end
             end
-            ylabel( yLabel{jy} );
+            ylabel( yLabel{jys} );
             
             % title
             if(~isempty(yNames) && ~isempty(yNames{jy}) && ~strcmp(yNames{jy}, titles{jy}))
