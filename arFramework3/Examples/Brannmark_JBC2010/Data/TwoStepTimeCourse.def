@@ -1,0 +1,19 @@
+DESCRIPTION
+"Experimenter:"
+"Date: "
+"Cells: "
+"Treatment: 2-Step Time response"
+
+PREDICTOR
+t               T   h     time	0	10
+
+INPUTS
+
+OBSERVABLES
+IRS1_P  	C	au   conc.   0	0   "kY2Step*IRSiP"
+
+ERRORS
+IRS1_P    	"sigmaY2Step"
+
+CONDITIONS
+
