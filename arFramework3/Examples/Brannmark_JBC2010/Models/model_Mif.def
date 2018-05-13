@@ -1,21 +1,21 @@
 DESCRIPTION
 
 PREDICTOR
-t               T   h         time	0	10
+t               T   min       time	0	10
 
 COMPARTMENTS
 cyt             V   pl          vol.    1
 
 STATES
-IR      C   mumol/l      conc.   cyt     1    "IR"
-IRins   C   mumol/l      conc.   cyt     1    "IRins"
-IRp     C   mumol/l      conc.   cyt     1    "IRp"
-IRiP    C   mumol/l      conc.   cyt     1    "IRiP"
-IRi     C   mumol/l      conc.   cyt     1    "IRi"
-IRS     C   mumol/l      conc.   cyt     1    "IRS"
-IRSiP   C   mumol/l      conc.   cyt     1    "IRSiP"
-XX      C   mumol/l      conc.   cyt     1    "X"
-XXp     C   mumol/l      conc.   cyt     1    "Xp"
+IR      C   nM      conc.   cyt     1    "IR"
+IRins   C   nM      conc.   cyt     1    "IRins"
+IRp     C   nM      conc.   cyt     1    "IRp"
+IRiP    C   nM      conc.   cyt     1    "IRiP"
+IRi     C   nM      conc.   cyt     1    "IRi"
+IRS     C   nM      conc.   cyt     1    "IRS"
+IRSiP   C   nM      conc.   cyt     1    "IRSiP"
+XX      C   nM      conc.   cyt     1    "X"
+XXp     C   nM      conc.   cyt     1    "Xp"
 
 INPUTS
 insulin    C  nM  conc.  "step1(t,0,insulin_time_1,insulin_dose_1)+step1(t,0,insulin_time_2,insulin_dose_2)"

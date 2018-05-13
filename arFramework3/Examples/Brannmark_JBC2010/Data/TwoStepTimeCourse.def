@@ -5,12 +5,12 @@ DESCRIPTION
 "Treatment: 2-Step Time response"
 
 PREDICTOR
-t               T   h     time	0	10
+t               T   min   time	0	10
 
 INPUTS
 
 OBSERVABLES
-IRS1_P  	C	au   conc.   0	0   "kY2Step*IRSiP"
+IRS1_P  	C	au   conc.   0	0   "k_IRSiP_2Step*IRSiP"
 
 ERRORS
 IRS1_P    	"sigmaY2Step"

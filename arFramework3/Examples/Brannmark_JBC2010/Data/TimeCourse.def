@@ -5,13 +5,13 @@ DESCRIPTION
 "Treatment: Time response"
 
 PREDICTOR
-t               T   h     time	0	10
+t               T   min   time	0	10
 
 INPUTS
 
 OBSERVABLES
-IR1_P 	C	au   conc.   0	0   "kY1*(IRp+IRiP)"
-IRS1_P  	C	au   conc.   0	0   "kY2*IRSiP"
+IR1_P   C	au   conc.   0	0   "k_IRP_1Step*(IRp+IRiP)"
+IRS1_P  C	au   conc.   0	0   "k_IRSiP_1Step*IRSiP"
 
 ERRORS
 IR1_P     	"sigmaY1TimR"

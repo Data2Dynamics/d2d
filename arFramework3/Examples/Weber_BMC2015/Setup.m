@@ -1,15 +1,11 @@
-clear all;
-close all;
-clc;
-
-% Remark: This routine runs the parameter estimation for the model of PKD
-% and CERT interactions at the trans-Golgi network of mammalian cells
-% introduced in the publication
+% This routine runs the parameter estimation for the model of PKD and CERT
+% interactions at the trans-Golgi network of mammalian cells introduced in
+% the publication
 %
-%   Patrick Weber, Mariana Hornjik, Monilola A Olayioye, Angelika Hausser
-%   and Nicole E Radde, A computational model of PKD and CERT interactions
-%   at the trans-Golgi network of mammalian cells. BMC Systems Biology,
-%   20159:9, doi: 10.1186/s12918-015-0147-1
+%   Weber, P., Hornjik. M., Olayioye, M. A., Hausser, A., and Radde, N. E.
+%   (2015) A computational model of PKD and CERT interactions at the
+%   trans-Golgi network of mammalian cells. BMC Systems Biology, 20159:9.
+%   doi: 10.1186/s12918-015-0147-1
 %
 % The original publication contains observables which are normalized to a
 % specific time point, e.g. yPKDpN24(t) = PKDDAGa(t)/PKDDAGa(t=24h), which
@@ -17,6 +13,10 @@ clc;
 % introduce scaling constants for these variables and the set the
 % measurement at the respective reference point to one. The resulting
 % estimation problem is similar to the original one but not identical.
+
+clear all;
+close all;
+clc;
 
 %% Compile model
 arInit
@@ -92,7 +92,7 @@ arSetPars('std_yPI4K3BpRN24',[]   ,[],[],-2,2)
 arSetPars('std_yCERTpRN24'  ,[]   ,[],[],-2,2)
 
 %% Parameter optimization
-arFitLHS(1000)
+arFitLHS(200)
 arPlotChi2s
 
 %% Visualization
