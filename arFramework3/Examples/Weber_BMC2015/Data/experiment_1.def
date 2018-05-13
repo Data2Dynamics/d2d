@@ -1,0 +1,17 @@
+DESCRIPTION
+"Experimenter: "
+"Date: "
+"Cells: "
+"Treatment: (t=0h) ectopical expression of PI4KIII, (t=24h) activation of PKD with PdBu (1 muM)"
+
+PREDICTOR
+t               T   h     time	0	30
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+
