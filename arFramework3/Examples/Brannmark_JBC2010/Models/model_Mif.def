@@ -1,0 +1,51 @@
+DESCRIPTION
+
+PREDICTOR
+t               T   min       time	0	10
+
+COMPARTMENTS
+cyt             V   pl          vol.    1
+
+STATES
+IR      C   nM      conc.   cyt     1    "IR"
+IRins   C   nM      conc.   cyt     1    "IRins"
+IRp     C   nM      conc.   cyt     1    "IRp"
+IRiP    C   nM      conc.   cyt     1    "IRiP"
+IRi     C   nM      conc.   cyt     1    "IRi"
+IRS     C   nM      conc.   cyt     1    "IRS"
+IRSiP   C   nM      conc.   cyt     1    "IRSiP"
+XX      C   nM      conc.   cyt     1    "X"
+XXp     C   nM      conc.   cyt     1    "Xp"
+
+INPUTS
+insulin    C  nM  conc.  "step1(t,0,insulin_time_1,insulin_dose_1)+step1(t,0,insulin_time_2,insulin_dose_2)"
+
+REACTIONS
+IR    -> IRins       CUSTOM    "k1a*insulin*IR+k1aBasic*IR"
+IRins -> IR          CUSTOM    "k1b*IRins"
+IRins -> IRp         CUSTOM    "k1c*IRins"
+IRp   -> IRiP        CUSTOM    "k1d*IRp"
+IRiP  -> IRi         CUSTOM    "(k1e+k1f*XXp/(1+XXp))*IRiP"
+IRp   -> IR          CUSTOM    "k1g*IRp"
+IRi   -> IR          CUSTOM    "k1r*IRi"
+IRS   -> IRSiP       CUSTOM    "k21*(IRp+k22*IRiP)*IRS"
+IRSiP -> IRS         CUSTOM    "km2*IRSiP"
+XX    -> XXp         CUSTOM    "k3*XX*IRSiP"
+XXp   -> XX          CUSTOM    "km3*XXp"
+
+DERIVED
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+init_IR     "10"
+init_IRins  "0"
+init_IRp    "0"
+init_IRiP   "0"
+init_IRi    "0"
+init_IRS    "10"
+init_IRSiP  "0"
+init_XX     "10"
+init_XXp    "0"
