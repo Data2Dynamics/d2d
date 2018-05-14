@@ -1,0 +1,17 @@
+DESCRIPTION
+"Experimenter: "
+"Date: "
+"Cells: "
+"Treatment: (t=0h) ectopical expression of CERT, (t=24h) inhibition of PKD via kb-NB142-70 (10 muM)"
+
+PREDICTOR
+t               T   h     time	0	30
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+

@@ -1,0 +1,80 @@
+DESCRIPTION
+trans-Golgi network model A including PKD, PI4K3B and CERT.
+Features a positive feedback mechanism between CERT and PKD.
+
+PREDICTOR
+t               T   h         time	0	10
+
+COMPARTMENTS
+cyt             V   pl          vol.    1
+
+STATES
+PKD        C   muM      conc.   cyt     1    "PKD"
+PKDDAGa    C   muM      conc.   cyt     1    "PKD_p:DAG"
+PI4K3B     C   muM      conc.   cyt     1    "PI4KIII\beta"
+PI4K3Ba    C   muM      conc.   cyt     1    "PI4KIII\beta_p"
+CERTERa    C   muM      conc.   cyt     1    "CERT_{a,ER}"
+CERT       C   muM      conc.   cyt     1    "CERT_{p,ER}"
+CERTTGNa   C   muM      conc.   cyt     1    "CERT_{a,TGN}"
+
+INPUTS
+u2    C  flag  conc.  "step1(t,0,0               ,Ect_Expr_PKD_flag      )"
+u3    C  flag  conc.  "step1(t,0,0               ,Ect_Expr_PI4K3beta_flag)"
+u4    C  flag  conc.  "step1(t,0,0               ,Ect_Expr_CERT_flag     )"
+u5    C  muM   conc.  "step1(t,0,PdBu_time       ,PdBu_dose              )"
+u6    C  muM   conc.  "step1(t,0,kb_NB142_70_time,kb_NB142_70_dose       )"
+
+REACTIONS
+PKD      -> PKDDAGa      CUSTOM    "p11*PKD*((p31*CERTERa*(PI4K3Ba/(PI4K3Ba+m31)))/((p31*CERTERa*(PI4K3Ba/(PI4K3Ba+m31)))+m11))"
+PKD      -> PKDDAGa      CUSTOM    "p12*PKD*(1+pu5*u5)"   
+PKDDAGa  -> PKD          CUSTOM    "p13*PKDDAGa*(1+pu6*u6)"
+         -> PKD          CUSTOM    "s12"
+         -> PKD          CUSTOM    "pu2*u2"
+PKD      ->              CUSTOM    "a11*PKD"
+PKDDAGa  ->              CUSTOM    "a12*PKDDAGa"
+PI4K3Ba  -> PI4K3B       CUSTOM    "p21*PI4K3Ba"
+PI4K3B   -> PI4K3Ba      CUSTOM    "p22*PI4K3B*(PKDDAGa/(PKDDAGa+m22))"
+         -> PI4K3B       CUSTOM    "s21"
+         -> PI4K3B       CUSTOM    "pu3*u3"
+PI4K3B   ->              CUSTOM    "a21*PI4K3B"
+PI4K3Ba  ->              CUSTOM    "a22*PI4K3Ba"
+CERTERa  -> CERTTGNa     CUSTOM    "p31*CERTERa*(PI4K3Ba/(PI4K3Ba+m31))"
+CERT     -> CERTERa      CUSTOM    "p32*CERT"
+CERTTGNa -> CERT         CUSTOM    "p33*CERTTGNa*(PKDDAGa/(PKDDAGa+m33))"
+         -> CERTERa      CUSTOM    "s31"
+         -> CERTERa      CUSTOM    "pu4*u4"
+CERTERa  ->              CUSTOM    "a31*CERTERa"
+CERT     ->              CUSTOM    "a32*CERT"
+CERTTGNa ->              CUSTOM    "a33*CERTTGNa"
+
+DERIVED
+
+OBSERVABLES
+yPKDt         C  au   conc.   0	0   "PKD+PKDDAGa"
+yPI4K3Bt      C  au   conc.   0	0   "PI4K3Ba+PI4K3B"
+yCERTt        C  au   conc.   0	0   "CERTERa+CERTTGNa+CERT"
+yPKDpN0       C  au   conc.   0	0   "scale_yPKDpN0*PKDDAGa"
+yPKDpN24      C  au   conc.   0	0   "scale_yPKDpN24*PKDDAGa"
+yPKDpN25      C  au   conc.   0	0   "scale_yPKDpN25*PKDDAGa"
+yPI4K3BpRN24  C  au   conc.   0	0   "scale_yPI4K3BpRN24*PI4K3Ba/(PI4K3Ba+PI4K3B)"
+yCERTpRN24    C  au   conc.   0	0   "scale_yCERTpRN24*CERT/(CERTERa+CERTTGNa+CERT)"
+
+ERRORS
+yPKDt         "std_yPKDt"
+yPI4K3Bt      "std_yPI4K3Bt"
+yCERTt        "std_yCERTt"
+yPKDpN0       "std_yPKDpN0"
+yPKDpN24      "std_yPKDpN24"
+yPKDpN25      "std_yPKDpN25"
+yPI4K3BpRN24  "std_yPI4K3BpRN24"
+yCERTpRN24    "std_yCERTpRN24"
+
+CONDITIONS
+init_PKD         "0"
+init_PKDDAGa     "0"
+init_PI4K3B      "0"
+init_PI4K3Ba     "0"
+init_CERTERa     "0"
+init_CERT        "0"
+init_CERTTGNa    "0"
+ 
