@@ -26,6 +26,4 @@ ar.p(5:end) = log10([ ...
     ]);
 
 ar.lb(:) = -10;
-ar.config.maxsteps = 1e6;
-arFitLHS(100)
 arPlot
