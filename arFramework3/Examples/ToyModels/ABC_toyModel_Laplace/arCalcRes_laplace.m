@@ -217,10 +217,8 @@ end
 %  /* Sensitivities for Laplace distribution */
 function sres = fsres(sy, yexp, ystd, res, fiterrors_correction_factor)
 sres = NaN(size(sy));
-res_tmp = abs(res)./res;
-res_tmp(isnan(res_tmp)) = 0;
     for ip=1:size(sy,3)
-        sres(:,:,ip) = - sy(:,:,ip) .*res_tmp  ./ ystd * fiterrors_correction_factor;
+        sres(:,:,ip) = - sy(:,:,ip) .*sign(res)  ./ ystd * fiterrors_correction_factor;
         tmp = sres(:,:,ip);
         tmp(isnan(yexp)) = 0;
         tmp(isinf(yexp)) = 0;

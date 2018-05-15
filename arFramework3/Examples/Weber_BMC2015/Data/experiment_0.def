@@ -1,0 +1,17 @@
+DESCRIPTION
+"Experimenter: "
+"Date: "
+"Cells: "
+"Treatment: Control"
+
+PREDICTOR
+t               T   h     time	0	30
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+

@@ -43,7 +43,12 @@ function arRemoveCustomResidual( name, silent )
         ar.config.user_residual_fun.qFit(idx) = [];
         ar.config.user_residual_fun.name(idx) = [];
     end
-    
+       
     % The objective function changed, so invalidate the cache!
     arCheckCache(1);
+    
+    % Make sure that sres and res are recomputed explicitly
+    ar.res = [];
+    ar.sres = [];
+    ar.res_type = [];
 end

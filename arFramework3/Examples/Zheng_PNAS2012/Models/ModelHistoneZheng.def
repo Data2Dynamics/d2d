@@ -1,0 +1,170 @@
+DESCRIPTION
+"Histone Model"
+
+PREDICTOR
+t               T   h         time	-10	25
+
+COMPARTMENTS
+
+STATES
+K27me0K36me0	C   "nM"      "conc." 
+K27me0K36me1	C   "nM"      "conc." 
+K27me1K36me0	C   "nM"      "conc." 
+K27me0K36me2	C   "nM"      "conc." 
+K27me1K36me1	C   "nM"      "conc." 
+K27me2K36me0	C   "nM"      "conc." 
+K27me0K36me3	C   "nM"      "conc." 
+K27me1K36me2	C   "nM"      "conc." 
+K27me2K36me1	C   "nM"      "conc." 
+K27me3K36me0	C   "nM"      "conc." 
+K27me1K36me3	C   "nM"      "conc." 
+K27me2K36me2	C   "nM"      "conc." 
+K27me3K36me1	C   "nM"      "conc." 
+K27me2K36me3	C   "nM"      "conc." 
+K27me3K36me2	C   "nM"      "conc." 
+
+
+
+INPUTS
+inflow           C   nmol/l      conc.   "step1(t,inflowp,0,0)"
+
+REACTIONS
+			 -> K27me0K36me0 CUSTOM "inflow"
+K27me0K36me0 -> K27me0K36me1 CUSTOM "k00_01*K27me0K36me0"
+K27me0K36me1 -> K27me0K36me0 CUSTOM "k01_00*K27me0K36me1"
+
+K27me0K36me0 -> K27me1K36me0 CUSTOM "k00_10*K27me0K36me0"
+K27me1K36me0 -> K27me0K36me0 CUSTOM "k10_00*K27me1K36me0"
+
+K27me1K36me0 -> K27me1K36me1 CUSTOM "k10_11*K27me1K36me0"
+K27me1K36me1 -> K27me1K36me0 CUSTOM "k11_10*K27me1K36me1"
+
+K27me0K36me1 -> K27me1K36me1 CUSTOM "k01_11*K27me0K36me1"
+K27me1K36me1 -> K27me0K36me1 CUSTOM "k11_01*K27me1K36me1"
+
+K27me0K36me1 -> K27me0K36me2 CUSTOM "k01_02*K27me0K36me1"
+K27me0K36me2 -> K27me0K36me1 CUSTOM "k02_01*K27me0K36me2"
+
+K27me1K36me0 -> K27me2K36me0 CUSTOM "k10_20*K27me1K36me0"
+K27me2K36me0 -> K27me1K36me0 CUSTOM "k20_10*K27me2K36me0"
+
+K27me0K36me2 -> K27me1K36me2 CUSTOM "k02_12*K27me0K36me2"
+K27me1K36me2 -> K27me0K36me2 CUSTOM "k12_02*K27me1K36me2"
+
+K27me2K36me0 -> K27me2K36me1 CUSTOM "k20_21*K27me2K36me0"
+K27me2K36me1 -> K27me2K36me0 CUSTOM "k21_20*K27me2K36me1"
+
+K27me0K36me2 -> K27me0K36me3 CUSTOM "k02_03*K27me0K36me2"
+K27me0K36me3 -> K27me0K36me2 CUSTOM "k03_02*K27me0K36me3"
+
+K27me2K36me0 -> K27me3K36me0 CUSTOM "k20_30*K27me2K36me0"
+K27me3K36me0 -> K27me2K36me0 CUSTOM "k30_20*K27me3K36me0"
+
+K27me1K36me1 -> K27me1K36me2 CUSTOM "k11_12*K27me1K36me1"
+K27me1K36me2 -> K27me1K36me1 CUSTOM "k12_11*K27me1K36me2"
+
+K27me1K36me1 -> K27me2K36me1 CUSTOM "k11_21*K27me1K36me1"
+K27me2K36me1 -> K27me1K36me1 CUSTOM "k21_11*K27me2K36me1"
+
+K27me1K36me2 -> K27me2K36me2 CUSTOM "k12_22*K27me1K36me2"
+K27me2K36me2 -> K27me1K36me2 CUSTOM "k22_12*K27me2K36me2"
+
+K27me2K36me1 -> K27me2K36me2 CUSTOM "k21_22*K27me2K36me1"
+K27me2K36me2 -> K27me2K36me1 CUSTOM "k22_21*K27me2K36me2"
+
+K27me2K36me2 -> K27me2K36me3 CUSTOM "k22_23*K27me2K36me2"
+K27me2K36me3 -> K27me2K36me2 CUSTOM "k23_22*K27me2K36me3"
+
+K27me2K36me2 -> K27me3K36me2 CUSTOM "k22_32*K27me2K36me2"
+K27me3K36me2 -> K27me2K36me2 CUSTOM "k32_22*K27me3K36me2"
+
+K27me3K36me0 -> K27me3K36me1 CUSTOM "k30_31*K27me3K36me0"
+K27me3K36me1 -> K27me3K36me0 CUSTOM "k31_30*K27me3K36me1"
+
+K27me0K36me3 -> K27me1K36me3 CUSTOM "k03_13*K27me0K36me3"
+K27me1K36me3 -> K27me0K36me3 CUSTOM "k13_03*K27me1K36me3"
+
+K27me1K36me2 -> K27me1K36me3 CUSTOM "k12_13*K27me1K36me2"
+K27me1K36me3 -> K27me1K36me2 CUSTOM "k13_12*K27me1K36me3"
+
+K27me2K36me1 -> K27me3K36me1 CUSTOM "k21_31*K27me2K36me1"
+K27me3K36me1 -> K27me2K36me1 CUSTOM "k31_21*K27me3K36me1"
+
+K27me3K36me1 -> K27me3K36me2 CUSTOM "k31_32*K27me3K36me1"
+K27me3K36me2 -> K27me3K36me1 CUSTOM "k32_31*K27me3K36me2"
+
+K27me1K36me3 -> K27me2K36me3 CUSTOM "k13_23*K27me1K36me3"
+K27me2K36me3 -> K27me1K36me3 CUSTOM "k23_13*K27me2K36me3"
+
+K27me0K36me0 -> 			 CUSTOM "K27me0K36me0*inflow"
+K27me0K36me1 -> 			 CUSTOM "K27me0K36me1*inflow"
+K27me1K36me0 -> 			 CUSTOM "K27me1K36me0*inflow"
+K27me0K36me2 -> 			 CUSTOM "K27me0K36me2*inflow"
+K27me1K36me1 -> 			 CUSTOM "K27me1K36me1*inflow"
+K27me2K36me0 -> 			 CUSTOM "K27me2K36me0*inflow"
+K27me0K36me3 -> 			 CUSTOM "K27me0K36me3*inflow"
+K27me1K36me2 -> 			 CUSTOM "K27me1K36me2*inflow"
+K27me2K36me1 -> 			 CUSTOM "K27me2K36me1*inflow"
+K27me3K36me0 -> 			 CUSTOM "K27me3K36me0*inflow"
+K27me1K36me3 -> 			 CUSTOM "K27me1K36me3*inflow"
+K27me2K36me2 -> 			 CUSTOM "K27me2K36me2*inflow"
+K27me3K36me1 -> 			 CUSTOM "K27me3K36me1*inflow"
+K27me2K36me3 -> 			 CUSTOM "K27me2K36me3*inflow"
+K27me3K36me2 -> 			 CUSTOM "K27me3K36me2*inflow"
+
+
+DERIVED
+        
+OBSERVABLES
+K27me0K36me0_obs C   "au"    "conc."	  0   0   "K27me0K36me0/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me0K36me1_obs C   "au"    "conc."	  0   0   "K27me0K36me1/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me1K36me0_obs C   "au"    "conc."	  0   0   "K27me1K36me0/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me0K36me2_obs C   "au"    "conc."	  0   0   "K27me0K36me2/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me1K36me1_obs C   "au"    "conc."	  0   0   "K27me1K36me1/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me2K36me0_obs C   "au"    "conc."	  0   0   "K27me2K36me0/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me0K36me3_obs C   "au"    "conc."	  0   0   "K27me0K36me3/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me1K36me2_obs C   "au"    "conc."	  0   0   "K27me1K36me2/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me2K36me1_obs C   "au"    "conc."	  0   0   "K27me2K36me1/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me3K36me0_obs C   "au"    "conc."	  0   0   "K27me3K36me0/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me1K36me3_obs C   "au"    "conc."	  0   0   "K27me1K36me3/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me2K36me2_obs C   "au"    "conc."	  0   0   "K27me2K36me2/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me3K36me1_obs C   "au"    "conc."	  0   0   "K27me3K36me1/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me2K36me3_obs C   "au"    "conc."	  0   0   "K27me2K36me3/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+K27me3K36me2_obs C   "au"    "conc."	  0   0   "K27me3K36me2/(K27me0K36me0+K27me0K36me1+K27me1K36me0+K27me0K36me2+K27me1K36me1+K27me2K36me0+K27me0K36me3+K27me1K36me2+K27me2K36me1+K27me3K36me0+K27me1K36me3+K27me2K36me2+K27me3K36me1+K27me2K36me3+K27me3K36me2)"
+
+
+
+ERRORS
+K27me0K36me0_obs  "noise"
+K27me0K36me1_obs  "noise"
+K27me1K36me0_obs  "noise"
+K27me0K36me2_obs  "noise"
+K27me1K36me1_obs  "noise"
+K27me2K36me0_obs  "noise"
+K27me0K36me3_obs  "noise"
+K27me1K36me2_obs  "noise"
+K27me2K36me1_obs  "noise"
+K27me3K36me0_obs  "noise"
+K27me1K36me3_obs  "noise"
+K27me2K36me2_obs  "noise"
+K27me3K36me1_obs  "noise"
+K27me2K36me3_obs  "noise"
+K27me3K36me2_obs  "noise"
+
+
+CONDITIONS
+init_K27me0K36me0   	"0"
+init_K27me0K36me1   	"0"
+init_K27me1K36me0   	"0"
+init_K27me0K36me2   	"0"
+init_K27me1K36me1   	"0"
+init_K27me2K36me0   	"0"
+init_K27me0K36me3   	"0"
+init_K27me1K36me2   	"0"
+init_K27me2K36me1   	"0"
+init_K27me3K36me0   	"0"
+init_K27me1K36me3   	"0"
+init_K27me2K36me2   	"0"
+init_K27me3K36me1   	"0"
+init_K27me2K36me3   	"0"
+init_K27me3K36me2   	"0"

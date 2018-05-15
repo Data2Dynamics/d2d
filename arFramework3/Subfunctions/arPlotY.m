@@ -65,6 +65,7 @@ for jm = 1:length(ar.model)
     ar.model(jm).ndata = 0;
     
     for jplot = 1:length(ar.model(jm).plot)
+               
         isBarGraph = 0;
         if(ar.model(jm).qPlotYs(jplot)==1 && ar.model(jm).plot(jplot).ny>0)
 %             if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
@@ -74,11 +75,8 @@ for jm = 1:length(ar.model)
 %                 [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['Y: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
 %             end
             
-            if(isfield(ar.model(jm).plot(jplot), 'doseresponselog10xaxis'))
-                logplotting_xaxis = ar.model(jm).plot(jplot).doseresponselog10xaxis;
-            else
-                logplotting_xaxis = true;
-            end
+            % Determine transformation of the independent axis
+            [xtrafo, xLabel] = arGetPlotXTrafo(jm, jplot);
             
             % plotting
             ccount = 1;
@@ -103,7 +101,11 @@ for jm = 1:length(ar.model)
                         length(ar.model(jm).plot(jplot).dLink), ...
                         [], 'none', 'none');
                     
+                    % Handle data transformations
+                    [trafos, yLegends] = arGetPlotYTrafo(jm, jd, jplot);
                     for jy = 1:ny
+                        trafo = trafos{jy};
+                        
                         whichYplot = arWhichYplot(jm,jd,[],jy);
                         [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, yExpSimu] = getData(jm, jd, jy);
                         
@@ -121,12 +123,7 @@ for jm = 1:length(ar.model)
                                 set(gca, 'XTick', []);
                             end
                         end
-                                           
-                        if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                            trafo = @(x)10.^x;
-                        else
-                            trafo = @(x)x;
-                        end
+                        
                         if(~fastPlotTmp)
                             g = subplot(nrows,ncols,jy);
                             ar.model(jm).plot(jplot).gy(jy) = g;
@@ -234,7 +231,7 @@ for jm = 1:length(ar.model)
                 end
             else
               %% Dose responses
-                times = [];
+                times = [];          
                 for jd = ar.model(jm).plot(jplot).dLink
                     times = union(times, ar.model(jm).data(jd).tExp); %R2013a compatible
                     ny = size(ar.model(jm).data(jd).y, 2);
@@ -283,11 +280,15 @@ for jm = 1:length(ar.model)
                             length(times)*length(jcs), ...
                             [], 'none', 'none');
                         
+                        % Fetch data transformations
+                        [trafos, yLegends] = arGetPlotYTrafo(jm, jd, jplot);
                         for jy = 1:ny
+                            trafo = trafos{jy};
                             whichYplot = arWhichYplot(jm,jd,[],jy);
                             
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
-                                getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, logplotting_xaxis);
+                                getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, xtrafo);
+                            
                             if(length(unique(t))==1)
                                 t = [t-0.1; t+0.1];
                                 y = [y; y]; %#ok<AGROW>
@@ -309,31 +310,33 @@ for jm = 1:length(ar.model)
                                 end
                                 t = tf;
                             end
-                           
+
                             if any(whichYplot==[3]) % ( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors==0) || ...
 %                                     (ar.config.useFitErrorMatrix==1 && ar.config.ploterrors_matrix(jm,jd)==0) )
                                 lb = y(:) - ystd(:);
                                 ub = y(:) + ystd(:);
                             end
-
-                            if(ar.model(jm).data(jd).logfitting(jy) && ~ar.model(jm).data(jd).logplotting(jy))
-                                trafo = @(x)10.^x;
-                            else
-                                trafo = @(x)x;
-                            end
+                            
                             if(~fastPlotTmp)
                                 g = subplot(nrows,ncols,jy);
                                 ar.model(jm).plot(jplot).gy(jy) = g;
                                 plotResFuncSpecificElements( g, t, jm, jd, jy, trafo, Clines{2} );
-                                
+
                                 if(data_qFit)
                                     ClinesExp{6} = '*';
                                 else
                                     ClinesExp{6} = 'o';
                                 end
-                                
+
                                 qfinite = ~isinf(t) & ~isinf(y);
-                                ar.model(jm).data(jd).plot.y(jy,jt,jc) = plot(g, t(qfinite), trafo(y(qfinite)), Clines{:});
+
+                                cplot = plot(g, t(qfinite), trafo(y(qfinite)), Clines{:});
+                                if ~isempty( cplot )
+                                    ar.model(jm).data(jd).plot.y(jy,jt,jc) = cplot;
+                                else
+                                    % Do a dummy plot so we have something for the legend
+                                    ar.model(jm).data(jd).plot.y(jy,jt,jc) = plot(g, [NaN NaN], [NaN NaN], Clines{:});
+                                end
                                 cclegendstyles(ccount) = ar.model(jm).data(jd).plot.y(jy,jt,jc);
                                 hold(g, 'on');
 
@@ -365,23 +368,23 @@ for jm = 1:length(ar.model)
                                         end
                                     end
                                 end
-                                
+
                                 if(~isempty(zero_break))
                                     plot([zero_break zero_break], ylim, 'k--');
                                 end
                             else
                                 ytmp = trafo(y);
-								qfinite = ~isinf(t) & ~isinf(ytmp);
+                                qfinite = ~isinf(t) & ~isinf(ytmp);
                                 set(ar.model(jm).data(jd).plot.y(jy,jt,jc), 'YData', ytmp(qfinite));
                                 if any(whichYplot==4) && ~isempty(ub)
                                     tmpx = [t(:); flipud(t(:))];
-									tmpy = trafo([ub; flipud(lb)]);
+                                    tmpy = trafo([ub; flipud(lb)]);
                                     qfinite = ~isinf(tmpy) & ~isinf(tmpx);
                                     if(sum(qfinite)>0)
                                         set(ar.model(jm).data(jd).plot.ystd(jy,jt,jc),  'YData', tmpy(qfinite));
                                         set(ar.model(jm).data(jd).plot.ystd2(jy,jt,jc), 'YData', tmpy(qfinite));
                                     end
-                                end
+                                end                           
                             end
                         end
                         ccount = ccount + 1;
@@ -416,28 +419,10 @@ for jm = 1:length(ar.model)
                             qxlabel = jy == (nrows-2)*ncols + 1;
                         end
                         if(qxlabel)
-                            if(~ar.model(jm).plot(jplot).doseresponse)
-                                xlabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).tUnits{3}, ar.model(jm).data(jd).tUnits{2}));
-                            else
-                                if(isfield(ar.model(jm).plot(jplot), 'response_parameter') && ...
-                                        ~isempty(ar.model(jm).plot(jplot).response_parameter))
-                                    resppar = ar.model(jm).plot(jplot).response_parameter;
-                                else
-                                    resppar = arNameTrafo(ar.model(jm).data(jd).condition(jcondi).parameter);
-                                end
-                                if(logplotting_xaxis)
-                                    xlabel(g, sprintf('log_{10}(%s)', resppar));
-                                else
-                                    xlabel(g, sprintf('%s', resppar));
-                                end
-                            end
+                            xlabel( xLabel );
                         end
                     end
-                    if(ar.model(jm).data(jd).logfitting(jy) && ar.model(jm).data(jd).logplotting(jy))
-                        ylabel(g, sprintf('log_{10}(%s) [%s]', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2}));
-                    else
-                        ylabel(g, sprintf('%s [%s]', ar.model(jm).data(jd).yUnits{jy,3}, ar.model(jm).data(jd).yUnits{jy,2}));
-                    end
+                    ylabel(yLegends{jy});
                     
                     if(doLegends && jy == ny && (~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                         hl = [];
@@ -624,10 +609,10 @@ end
 
 
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
-    getDataDoseResponse(jm, jy, ds, ttime, dLink, logplotting_xaxis)
+    getDataDoseResponse(jm, jy, ds, ttime, dLink, xtrafo)
 global ar
 
-
+tExp = [];
 zero_break = [];
 data_qFit = true;
 
@@ -641,20 +626,15 @@ for jd = ds
         end
     end
     for jt = find(qt')
-        if(logplotting_xaxis)
-            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
-        else
-            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(jcondi).value); %#ok<AGROW>
-        end
+        curvals = xtrafo( str2double(ar.model(jm).data(jd).condition(jcondi).value) );
+        
+        t(ccount,1) = curvals; %#ok<AGROW>
+        
         if(isinf(t(ccount,1)))
             doses = [];
             for jd2 = dLink
-                if(logplotting_xaxis)
-                    if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
-                        doses(end+1) = log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
-                    end
-                else
-                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(jcondi).value); %#ok<AGROW>
+                if(~isinf(xtrafo(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
+                    doses(end+1) = xtrafo(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
                 end
             end
 			doses = unique(doses); %R2013a compatible
@@ -708,6 +688,20 @@ for jd = ds
                 
         ccount = ccount + 1;
     end
+end
+
+if isempty( tExp )
+    t = [];
+    y = [];
+    ystd = [];
+    yExp = [];
+    yExpStd = [];
+    lb = []; 
+    ub = [];
+    zero_break = [];
+    data_qFit = [];
+    yExpHl = [];
+    return
 end
 
 [tExp,itexp] = sort(tExp);
