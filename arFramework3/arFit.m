@@ -140,6 +140,46 @@ arPush('arFit');
 if(ar.config.optimizer == 1)    
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
+% eSS via Link to MEIGO
+elseif(ar.config.optimizer == 31)
+    ar.config.optimizers{31} = 'eSS_MEIGO';
+    
+    if(~isempty(ar.config.optim.Display))
+        silent = strcmp(ar.config.optim.Display,'iter')==0;
+    else
+        silent = 1;
+    end
+    
+    
+    problem.f = @merit_fkt_eSS;
+    problem.x_0 = ar.p(ar.qFit==1);
+    problem.x_L = lb;
+    problem.x_U = ub;
+    
+    if(~isempty(ar.config.optim.MaxIter))
+        maxiter = ar.config.optim.MaxIter;
+    else
+        maxiter = 1e3;
+    end
+    
+    opts.local.solver = 'lsqnonlin';
+    opts.maxeval = maxiter;
+    opts.iterprint = ~strcmp(ar.config.optim.Display,'off');
+    opts.local.iterprint = ~strcmp(ar.config.optim.Display,'off');
+    
+    Results = MEIGO(problem,opts,'ESS');
+    
+    pFit = Results.xbest;
+    resnorm = merit_fkt(pFit);
+    exitflag = Results.end_crit;
+    output.iterations = NaN;
+    output.funcCount = Results.numeval;
+    output.firstorderopt= NaN;
+    output.message = 'You used enhanced scatter search (eSS). There is no other output-message.';
+    lambda = NaN;
+    jac = [];
+    
+% TODO: Automatically delete the automatically generated file  called ess_report.mat
 % fmincon
 elseif(ar.config.optimizer == 2)
     options = optimset('fmincon');
@@ -519,6 +559,47 @@ end
 % Discard the parameter set again without taking its values
 arPop(1);
 
+% eSS - under development 
+function [J,G,res,sres] = merit_fkt_eSS(pTrial)
+global ar
+
+% Only compute sensis when requested
+if ( isfield( ar.config, 'sensiSkip' ) )
+    sensiskip = ar.config.sensiSkip;
+else
+    sensiskip = false;
+end
+sensi = ar.config.useSensis;% && (~sensiskip || (nargout > 1));
+
+arCalcMerit(sensi, pTrial);
+J = arGetMerit(true);
+G = 0;
+arLogFit(ar);
+res = [ar.res ar.constr];
+if(nargout>1 && ar.config.useSensis)
+    sres = [];
+    if(~isempty(ar.sres))
+        sres = ar.sres(:, ar.qFit==1);
+    end
+    if(~isempty(ar.sconstr))
+        sres = [sres; ar.sconstr(:, ar.qFit==1)];
+    end
+end
+
+np = sum(ar.qFit==1);
+if ( numel(res) < np )
+    tres = zeros(1,np);
+    tres(1:length(res)) = res;
+    if (nargout>1 && ar.config.useSensis)
+        tsres = zeros(np);
+        tsres(1:length(res), 1:np) = sres;
+    end
+    
+    res = tres;
+    if (nargout>1 && ar.config.useSensis)
+        sres = tsres;
+    end
+end
 
 % lsqnonlin and arNLS
 function [res, sres] = merit_fkt(pTrial)
