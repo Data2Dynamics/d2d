@@ -31,6 +31,9 @@
 %      15 - particleswarm
 %      16 - simulated annealing
 %      17 - ga (geneticalgorithm)
+%      18 - Repeated optimization alternating between 1 and 5 (Joep's heuristics)
+%      19 - enhanced Scatter Search (eSS) Egea et al. "Dynamic Optimization of Nonlinear Processes with an Enhanced Scatter Search Method"
+%           link to MEIGO toolbox needed: https://bitbucket.org/jrbanga_/meigo64
 %
 %  Convergence of the optimization algorithm can be stored by setting
 %  ar.config.logFitting = 1. Then interesing variables for each iteration
@@ -140,46 +143,7 @@ arPush('arFit');
 if(ar.config.optimizer == 1)    
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
-% eSS via Link to MEIGO
-elseif(ar.config.optimizer == 31)
-    ar.config.optimizers{31} = 'eSS_MEIGO';
-    
-    if(~isempty(ar.config.optim.Display))
-        silent = strcmp(ar.config.optim.Display,'iter')==0;
-    else
-        silent = 1;
-    end
-    
-    
-    problem.f = @merit_fkt_eSS;
-    problem.x_0 = ar.p(ar.qFit==1);
-    problem.x_L = lb;
-    problem.x_U = ub;
-    
-    if(~isempty(ar.config.optim.MaxIter))
-        maxiter = ar.config.optim.MaxIter;
-    else
-        maxiter = 1e3;
-    end
-    
-    opts.local.solver = 'lsqnonlin';
-    opts.maxeval = maxiter;
-    opts.iterprint = ~strcmp(ar.config.optim.Display,'off');
-    opts.local.iterprint = ~strcmp(ar.config.optim.Display,'off');
-    
-    Results = MEIGO(problem,opts,'ESS');
-    
-    pFit = Results.xbest;
-    resnorm = merit_fkt(pFit);
-    exitflag = Results.end_crit;
-    output.iterations = NaN;
-    output.funcCount = Results.numeval;
-    output.firstorderopt= NaN;
-    output.message = 'You used enhanced scatter search (eSS). There is no other output-message.';
-    lambda = NaN;
-    jac = [];
-    
-% TODO: Automatically delete the automatically generated file  called ess_report.mat
+
 % fmincon
 elseif(ar.config.optimizer == 2)
     options = optimset('fmincon');
@@ -497,6 +461,47 @@ elseif(ar.config.optimizer == 18)
         end
     end
     resnorm = res;    
+
+% eSS via Link to MEIGO
+elseif(ar.config.optimizer == 19)
+    ar.config.optimizers{19} = 'eSS_MEIGO';
+    
+    if(~isempty(ar.config.optim.Display))
+        silent = strcmp(ar.config.optim.Display,'iter')==0;
+    else
+        silent = 1;
+    end
+    
+    
+    problem.f = @merit_fkt_eSS;
+    problem.x_0 = ar.p(ar.qFit==1);
+    problem.x_L = lb;
+    problem.x_U = ub;
+    
+    if(~isempty(ar.config.optim.MaxIter))
+        maxiter = ar.config.optim.MaxIter;
+    else
+        maxiter = 1e3;
+    end
+    
+    opts.local.solver = 'lsqnonlin';
+    opts.maxeval = maxiter;
+    opts.iterprint = ~strcmp(ar.config.optim.Display,'off');
+    opts.local.iterprint = ~strcmp(ar.config.optim.Display,'off');
+    
+    Results = MEIGO(problem,opts,'ESS');
+    
+    pFit = Results.xbest;
+    resnorm = merit_fkt(pFit);
+    exitflag = Results.end_crit;
+    output.iterations = NaN;
+    output.funcCount = Results.numeval;
+    output.firstorderopt= NaN;
+    output.message = 'You used enhanced scatter search (eSS). There is no other output-message.';
+    lambda = NaN;
+    jac = [];
+    
+% TODO: Automatically delete the automatically generated file  called ess_report.mat
 else
     error('ar.config.optimizer invalid');    
 end
