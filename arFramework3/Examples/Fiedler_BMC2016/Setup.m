@@ -12,32 +12,13 @@ arCompileAll;
 
 %% Set pre-equilibration
 arSteadyState(1,arFindCondition(ar,'Ctrl'),1);
-arSimu(true,true,true);
 
 %% Parameter settings
-arSetPars('RAF_total',0,0);
-arSetPars('MEK_total',0,0);
-arSetPars('ERK_total',0,0);
-
-arSetPars('k10',[],[],[],-5,5);
-arSetPars('k11',[],[],[],-5,5);
-arSetPars('k2' ,[],[],[],-5,5);
-arSetPars('k3' ,[],[],[],-5,5);
-arSetPars('k4' ,[],[],[],-5,5);
-arSetPars('k5' ,[],[],[],-5,5);
-arSetPars('k6' ,[],[],[],-5,5);
-
-arSetPars('tau1',[],[],[],-8,8);
-arSetPars('tau2',[],[],[],-8,8);
-
-%% Parameter optimization
-arFitLHS(100)
-arPlotChi2s
+arLoadPars('bestFit')
 
 %% Visualization
 arSimu(true,true,true);
-%arPlot;
-
+arPrint
 figure;
 
 maxMEK = max([max(ar.model.data(1).yFineSimu(:,1)/arGetPars('s_pMek_20140430_gel1',0)),...

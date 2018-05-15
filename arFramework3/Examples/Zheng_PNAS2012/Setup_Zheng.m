@@ -6,5 +6,6 @@ arCompileAll;
 
 arFindInputs;
 arSteadyState(1,1,1,-1e7)
-arFit
+arLoadPars('bestFit')
+arPrint
 arPlot
