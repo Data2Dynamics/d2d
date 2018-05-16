@@ -1,0 +1,20 @@
+DESCRIPTION
+"Experiment 11"
+
+PREDICTOR
+t	T	"min"	"time"	0	3600
+
+INPUTS
+
+OBSERVABLES
+pEGFR_tot	C	au	conc.	0	0	"pEGFR_tot_abs"
+pAkt_tot	C	au	conc.	0	0	"pAkt_tot_abs"
+pS6_tot	C	au	conc.	0	0	"pS6_tot_abs"
+
+ERRORS
+pEGFR_tot	"sd_pEGFR_tot"
+pAkt_tot	"sd_pAkt_tot"
+pS6_tot	"sd_pS6_tot"
+
+CONDITIONS
+
