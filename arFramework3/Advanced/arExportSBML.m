@@ -236,7 +236,7 @@ for jv = 1:length(ar.model(m).fv)
         else
             M.reaction(vcount).name = '';
         end
-        if ( isfield( ar.model(m), 'reversible' ) )
+        if ( isfield( ar.model(m), 'reversible' ) && ~isempty(ar.model(m).reversible))
             M.reaction(vcount).reversible = ar.model(m).reversible(jv);
         else
             M.reaction(vcount).reversible = 0;
