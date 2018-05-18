@@ -1,7 +1,6 @@
 % Shaping the dose response of IL6 induced target gene transcription
 global ar;
 
-addpath('Helper');
 arInit;
 modelname = 'il6_core';
 arLoadModel(modelname);
@@ -95,6 +94,7 @@ arLoadData('steadystate/steadystate',1,'csv',true)
 
 %% compile
 arCompileAll(true);
+addpath('Helper');
 
 % Tight equilibration tolerances
 ar.config.eq_tol=1e-10;
@@ -117,5 +117,8 @@ ar.config.maxsteps = 1000;
 ar.config.fiterrors = 1;
 
 arLoadPars('finalized_model');
+%Set parameters to be estimated
+ar.qFit(:) = 1;
+ar.qFit([166]) = 0;
 arCalcMerit; arGetMerit;
-save(modelname, 'ar');
+%save(modelname, 'ar');
