@@ -34,8 +34,9 @@ M = TranslateSBML(which('empty.xml'));
 F = TranslateSBML(which('filled.xml'));
 
 M.id = ar.model(m).name;
-M.notes = ar.model(m).description{1};
-
+if(~isempty(ar.model(m).description))
+    M.notes = ar.model(m).description{1};
+end
 %% compartements
 if(~isempty(ar.model(m).c))
     for jc = 1:length(ar.model(m).c)

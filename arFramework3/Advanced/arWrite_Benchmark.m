@@ -111,7 +111,7 @@ global ar
     
     %Go through differing parameter trafos (num>1)
     Conditions_string(2,3:length(tmp_par)+2) = tmp_par;
-    Conditions_string(3:length(ar.model(im).data)+2,3:length(tmp_par)+2) = strrep(strrep(par_trafo(num>1,:)','(',''),')','');
+    Conditions_string(3:length(ar.model(im).data)+2,3:length(tmp_par)+2) = par_trafo(num>1,:)';%strrep(strrep(par_trafo(num>1,:)','(',''),')','');
     
     Conditions_string(2,end+1:end+3) = {'nTimePoints','nDataPoints','chi2 value'};
     for jd= 1:length(ar.model(im).data)
@@ -124,7 +124,7 @@ global ar
     Conditions_string(end+2,1) = {'General transformations'};
     
     Conditions_string(end+1:size(Conditions_string,1)+sum(istrafo),2) = ar.model(im).condition(jc).pold(istrafo)';   
-    Conditions_string(size(Conditions_string,1)-sum(istrafo)+1:size(Conditions_string,1),3) = strrep(strrep(ar.model(im).condition(jc).fp(istrafo),'(',''),')','');        
+    Conditions_string(size(Conditions_string,1)-sum(istrafo)+1:size(Conditions_string,1),3) = ar.model(im).condition(jc).fp(istrafo);%strrep(strrep(ar.model(im).condition(jc).fp(istrafo),'(',''),')','');        
    
     xlwrite('./Benchmark_paper/General_info.xlsx',Conditions_string,'Experimental conditions');
    
@@ -148,10 +148,11 @@ global ar
             tmp_ode2 = tmp_ode;
             for j = 1:length(ar.model(im).condition(jc).pold)
                 regPar = sprintf('(?<=\\W)%s(?=\\W)|^%s$|(?<=\\W)%s$|^%s(?=\\W)',ar.model(im).condition(jc).pold{j},ar.model(im).condition(jc).pold{j},ar.model(im).condition(jc).pold{j},ar.model(im).condition(jc).pold{j});
-                tmp_ode2 = regexprep(tmp_ode2,regPar, strrep(strrep(ar.model(im).condition(jc).fp{j},'(',''),')',''));           
+                %tmp_ode2 = regexprep(tmp_ode2,regPar, strrep(strrep(ar.model(im).condition(jc).fp{j},'(',''),')',''));  
+                tmp_ode2 = regexprep(tmp_ode2,regPar, ar.model(im).condition(jc).fp{j});
             end
             for i = 1:length(ar.model(im).x)
-                ode_string{i+2,1} = ['d' ar.model(im).x{i} '/dt'];           
+                ode_string{i+2,1} = ['d' ar.model(im).x{i} '/dt'];                
                 ode_string{i+2,2} = char(sym(tmp_ode2{i}));                
             end
             
@@ -232,7 +233,8 @@ global ar
 
         for i = find(tmp)
            init_string{end+1,1} = ar.model(im).condition(jc).pold{i};
-           init_string{end,2} = strrep(strrep(ar.model(im).condition(jc).fp{i},'(',''),')','');
+           %init_string{end,2} = strrep(strrep(ar.model(im).condition(jc).fp{i},'(',''),')','');
+           init_string{end,2} = ar.model(im).condition(jc).fp{i};
         end
 
         xlwrite(file_name,init_string,'Initials');
