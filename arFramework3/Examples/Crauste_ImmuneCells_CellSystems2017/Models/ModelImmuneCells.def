@@ -15,12 +15,19 @@ Pathogen        C   "number" "number"
  
 INPUTS
 
-ODES
-"-mu_N*Naive-delta_NE*Pathogen*Naive"
-"delta_NE*Pathogen*Naive + (rho_E*Pathogen - mu_EE*EarlyEffector - delta_EL)*EarlyEffector"
-"delta_EL*EarlyEffector - (mu_LL*LateEffector + mu_LE*EarlyEffector + delta_LM)*LateEffector"
-"delta_LM*LateEffector"
-"(rho_P*Pathogen - mu_PE*EarlyEffector - mu_PL*LateEffector - mu_P)*Pathogen"
+REACTIONS
+Naive           ->                  CUSTOM "mu_N*Naive"
+Naive           ->  EarlyEffector   CUSTOM "delta_NE*Pathogen*Naive"
+                ->  EarlyEffector   CUSTOM "rho_E*Pathogen*EarlyEffector"
+EarlyEffector   ->                  CUSTOM "mu_EE*EarlyEffector*EarlyEffector"
+EarlyEffector   ->  LateEffector    CUSTOM "delta_EL*EarlyEffector"
+LateEffector    ->                  CUSTOM "mu_LL*LateEffector*LateEffector"
+LateEffector    ->                  CUSTOM "mu_LE*EarlyEffector*LateEffector"
+LateEffector    ->  Memory          CUSTOM "delta_LM*LateEffector"
+                ->  Pathogen        CUSTOM "rho_P*Pathogen*Pathogen"
+Pathogen        ->                  CUSTOM "mu_PE*EarlyEffector*Pathogen"
+Pathogen        ->                  CUSTOM "mu_PL*LateEffector*Pathogen"
+Pathogen        ->                  CUSTOM "mu_P*Pathogen"
        
 DERIVED
 
