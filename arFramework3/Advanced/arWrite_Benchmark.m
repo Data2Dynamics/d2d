@@ -78,22 +78,36 @@ global ar
     % Conditions
     Conditions_string = {'Conditions','';'','exp condition'};   
 %     tmp_par = {};
-    par_trafo = {};
+    max_fp = 1;
+    max_id = 1;
+    for jc = 1:length(ar.model(im).condition)
+        if(length(ar.model(im).condition(jc).fp)>max_fp)
+           max_fp = length(ar.model(im).condition(jc).fp);
+           max_id = jc;
+        end
+    end
+    par_trafo = cell(max_fp,length(ar.model(im).data));
     %Collect parameter trafos
     for jd= 1:length(ar.model(im).data)
         jc = ar.model(im).data(jd).cLink;
        Conditions_string{jd+2,1} = ['Data file ' num2str(jd)];
        Conditions_string{jd+2,2} = num2str(jc);
        %append parameter trafos in each data struct
-       par_trafo = [par_trafo ar.model(im).condition(jc).fp];
+       par_trafo(1:length(ar.model(im).condition(jc).fp),jd) = ar.model(im).condition(jc).fp;
     end
     
     %get differences in parameter trafos
     for i = 1:size(par_trafo,1)
+        ids_empty = cellfun(@isempty,par_trafo(i,:));
+        if(any(ids_empty))
+            for ie = find(ids_empty==1)
+                par_trafo{i,ie} = '';
+            end
+        end
         num(i) = length(unique(par_trafo(i,:)));
-        istrafo(i) = num(i)==1 & ~strcmp(ar.model(1).condition(1).fp{i},ar.model(1).condition(1).pold{i});
+        istrafo(i) = num(i)==1 & ~strcmp(ar.model(1).condition(max_id).fp{i},ar.model(1).condition(max_id).pold{i});
     end   
-    tmp_par = ar.model(1).condition(1).pold(num>1);
+    tmp_par = ar.model(1).condition(max_id).pold(num>1);
     
     %Go through differing parameter trafos (num>1)
     Conditions_string(2,3:length(tmp_par)+2) = tmp_par;
