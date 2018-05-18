@@ -236,12 +236,12 @@ for jv = 1:length(ar.model(m).fv)
         M.reaction(vcount).notes = '';
         M.reaction(vcount).annotation = '';
         M.reaction(vcount).sboTerm = -1;
-        if(isfield(ar.model(m),'v') && ~isempty(ar.model(m).v{jv}))
+        if(isfield(ar.model(m),'v') && ~isempty(ar.model(m).v))
             M.reaction(vcount).name = ar.model(m).v{jv};
         else
             M.reaction(vcount).name = '';
         end
-        if ( isfield( ar.model(m), 'reversible' ) )
+        if ( isfield( ar.model(m), 'reversible' ) && ~isempty(ar.model(m).reversible))
             M.reaction(vcount).reversible = ar.model(m).reversible(jv);
         else
             M.reaction(vcount).reversible = 0;
@@ -251,7 +251,7 @@ for jv = 1:length(ar.model(m).fv)
         M.reaction(vcount).level = 2;
         M.reaction(vcount).version = 4;
         
-        if(isfield(ar.model(m),'v') && ~isempty(ar.model(m).v{jv}))
+        if(isfield(ar.model(m),'v') && ~isempty(ar.model(m).v))
             % replace spaces with underscores
             M.reaction(vcount).id = sprintf( 'v%d_%s', jv, strrep(ar.model(m).v{jv},' ','_') );
         else
