@@ -14,7 +14,6 @@
 % measurement at the respective reference point to one. The resulting
 % estimation problem is similar to the original one but not identical.
 
-clear all;
 close all;
 clc;
 

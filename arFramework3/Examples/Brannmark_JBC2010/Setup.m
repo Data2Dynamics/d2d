@@ -7,7 +7,6 @@
 %   Modeling Framework. J. Biol. Chem., 285(26):20171-20179.
 %   doi: 10.1074/jbc.M110.106849
 
-clear all;
 close all;
 clc;
 
