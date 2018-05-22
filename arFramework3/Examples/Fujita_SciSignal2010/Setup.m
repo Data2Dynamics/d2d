@@ -50,7 +50,7 @@ arPrint;     % display parameter values
 % arPlotChi2s; % waterfall plot
 
 %% Check paper parameters
-arLoadPars('ParamsFujita2010')
+% arLoadPars('ParamsFujita2010')
 
 %% Visualization of fit
 arSimu(false,true,true) % do not compute sensitivities
