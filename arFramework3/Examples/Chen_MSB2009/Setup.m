@@ -38,6 +38,7 @@ ax5 = subplot(2,3,5); hold all;
 axis square
 ax6 = subplot(2,3,6); hold all;
 axis square
+legp = []; legl = {};
 
 for n = 1:4
     plot(ax1,ar.model.condition(n).tFine,ar.model.condition(n).zFineSimu(:,1),'-','Color',col_sim(n,:),'LineWidth',1.5);hold on;
@@ -46,8 +47,13 @@ for n = 1:4
     plot(ax2,ar.model.condition(n).tFine,ar.model.condition(n).zFineSimu(:,2),'-','Color',col_sim(n,:),'LineWidth',1.5);hold on;
     errorbar(ax5,ar.model.data(n).tExp,ar.model.data(n).yExp(:,2),ar.model.data(n).yExpStd(:,2),'o--','Color',col_sim(n,:),'LineWidth',1.2);
 
-    plot(ax3,ar.model.condition(n).tFine,ar.model.condition(n).zFineSimu(:,3),'-','Color',col_sim(n,:),'LineWidth',1.5);hold on;
-    errorbar(ax6,ar.model.data(n).tExp,ar.model.data(n).yExp(:,3),ar.model.data(n).yExpStd(:,3),'o--','Color',col_sim(n,:),'LineWidth',1.2);
+    legp(n) = plot(ax3,ar.model.condition(n).tFine,ar.model.condition(n).zFineSimu(:,3),'-','Color',col_sim(n,:),'LineWidth',1.5);hold on;
+    legl{n} = [ar.model.data(n).fu{1} ' ('  num2str(ar.model.condition(n).uNum(1)) '), ' ...
+               ar.model.data(n).fu{2} ' ('  num2str(ar.model.condition(n).uNum(2)) '), ' ...
+               ar.model.data(n).fu{3} ' ('  num2str(ar.model.condition(n).uNum(3)) '), ' ...
+               ar.model.data(n).fu{4} ' ('  num2str(ar.model.condition(n).uNum(4)) ')' ];
+           
+	errorbar(ax6,ar.model.data(n).tExp,ar.model.data(n).yExp(:,3),ar.model.data(n).yExpStd(:,3),'o--','Color',col_sim(n,:),'LineWidth',1.2);
 end
 time_label = [0:10:60];
 
@@ -78,3 +84,5 @@ title(ax3,'pAkt - Model')
 title(ax4,'pErbB1 - Data')
 title(ax5,'pErk - Data')
 title(ax6,'pAkt - Data')
+
+legend(legp,legl,'Position',[0.2 0.45 1 0.1]);
