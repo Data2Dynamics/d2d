@@ -19,7 +19,6 @@ arCompileAll;
 arShowDataConditionStructure;
 
 %% Parameter settings
-load all.mat
 arLoadPars('ParamsChen2009')
 
 %% Visualization of fit
