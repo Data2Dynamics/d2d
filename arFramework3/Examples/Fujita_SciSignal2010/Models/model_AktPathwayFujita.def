@@ -1,0 +1,62 @@
+DESCRIPTION
+"Fujita2010_Akt_Signalling_EGF (Model 1)"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 100	
+
+COMPARTMENTS
+Cell	 V	 "n/a"	 vol.	 1
+
+STATES
+EGFR	 C	 "n/a"	 conc.	 Cell	 1	 "EGFR"
+pEGFR	 C	 "n/a"	 conc.	 Cell	 1	 "pEGFR"
+pEGFR_Akt	 C	 "n/a"	 conc.	 Cell	 1	 "pEGFR_Akt"
+Akt	 C	 "n/a"	 conc.	 Cell	 1	 "Akt"
+pAkt	 C	 "n/a"	 conc.	 Cell	 1	 "pAkt"
+S6	 C	 "n/a"	 conc.	 Cell	 1	 "S6"
+pAkt_S6	 C	 "n/a"	 conc.	 Cell	 1	 "pAkt_S6"
+pS6	 C	 "n/a"	 conc.	 Cell	 1	 "pS6"
+EGF_EGFR	 C	 "n/a"	 conc.	 Cell	 1	 "EGF_EGFR"
+
+INPUTS
+EGF_conc_step	C	"n/a"	conc.	"EGF_conc_step"
+EGF_conc_impulse	C	"n/a"	conc.	"EGF_conc_impulse"
+EGF_conc_ramp	C	"n/a"	conc.	"EGF_conc_ramp"
+pulse_time	C	"n/a"	conc.	"pulse_time"
+ramp_time	C	"n/a"	conc.	"ramp_time"
+
+REACTIONS
+EGFR 	<-> EGF_EGFR 	 CUSTOM "EGF*EGFR*reaction_1_k1 - EGF_EGFR*reaction_1_k2" 	"reaction_1"
+pEGFR + Akt 	<-> pEGFR_Akt 	 CUSTOM "Akt*pEGFR*reaction_2_k1 - pEGFR_Akt*reaction_2_k2" 	"reaction_2"
+pEGFR_Akt 	-> pEGFR + pAkt 	 CUSTOM "pEGFR_Akt*reaction_3_k1" 	"reaction_3"
+pEGFR 	->  	 CUSTOM "pEGFR*reaction_4_k1" 	"reaction_4"
+pAkt + S6 	<-> pAkt_S6 	 CUSTOM "S6*pAkt*reaction_5_k1 - pAkt_S6*reaction_5_k2" 	"reaction_5"
+pAkt_S6 	-> pAkt + pS6 	 CUSTOM "pAkt_S6*reaction_6_k1" 	"reaction_6"
+pAkt 	-> Akt 	 CUSTOM "pAkt*reaction_7_k1" 	"reaction_7"
+pS6 	-> S6 	 CUSTOM "pS6*reaction_8_k1" 	"reaction_8"
+EGF_EGFR 	-> pEGFR 	 CUSTOM "EGF_EGFR*reaction_9_k1" 	"reaction_9"
+EGFR 	->  	 CUSTOM "EGFR*EGFR_turnover" 	"reaction_10"
+ 	-> EGFR 	 CUSTOM "EGFR_turnover*pro_EGFR" 	"reaction_11"
+
+DERIVED
+pro_EGFR	 C	 "n/a"	 conc.	"init_pro_EGFR"
+EGF	 C	 "n/a"	 conc.	"EGF_conc_step+step1(t,0,pulse_time,EGF_conc_impulse)+EGF_conc_ramp*t/ramp_time"
+pEGFR_tot_abs	C	"n/a"	conc.	"scaleFactor_pEGFR*(pEGFR + pEGFR_Akt)"
+pAkt_tot_abs	C	"n/a"	conc.	"scaleFactor_pAkt*(pAkt + pAkt_S6)"
+pS6_tot_abs	C	"n/a"	conc.	"scaleFactor_pS6*pS6"
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+init_pro_EGFR	"6.8190e+04"
+init_EGFR	"init_EGFR"
+init_EGF_EGFR	"0"
+init_pEGFR	"0"
+init_Akt	"init_AKT"
+init_pEGFR_Akt	"0"
+init_pAkt	"0"
+init_S6	"init_S6"
+init_pAkt_S6	"0"
+init_pS6	"0"

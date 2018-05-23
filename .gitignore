@@ -574,3 +574,20 @@ arFramework3/Examples/ToyModels/model_reduction_2016/Results/20*
 arFramework3/Examples/ToyModels/model_reduction_2016/pthreadVC2.dll
 arFramework3/Examples/ToyModels/model_reduction_2016/pthreadGC2.dll
 
+arFramework3/Examples/Chen_MSB2009/Compiled/
+arFramework3/Examples/Chen_MSB2009/SBML/
+arFramework3/Examples/Chen_MSB2009/arSimuCalc*
+arFramework3/Examples/Chen_MSB2009/arCheckParallel*
+arFramework3/Examples/Chen_MSB2009/Results/20*
+arFramework3/Examples/Chen_MSB2009/pthreadVC2.dll
+arFramework3/Examples/Chen_MSB2009/pthreadGC2.dll
+arFramework3/Examples/Chen_MSB2009/*.mat
+
+arFramework3/Examples/Fujita_SciSignal2010/Compiled/
+arFramework3/Examples/Fujita_SciSignal2010/SBML/
+arFramework3/Examples/Fujita_SciSignal2010/arSimuCalc*
+arFramework3/Examples/Fujita_SciSignal2010/arCheckParallel*
+arFramework3/Examples/Fujita_SciSignal2010/Results/20*
+arFramework3/Examples/Fujita_SciSignal2010/pthreadVC2.dll
+arFramework3/Examples/Fujita_SciSignal2010/pthreadGC2.dll
+arFramework3/Examples/Fujita_SciSignal2010/*.mat
