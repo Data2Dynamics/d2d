@@ -1,4 +1,18 @@
+% arCompileAllSetups
+% 
+% setup_files = arCompileAllSetups(recursive)
+% 
+%       recursive   should Setup files be search recursively starting form
+%                   the current directory?
+%                   Default: true
+% 
+%   This function searches Setup files and executes the basic commands arInit,
+%   arLoadModel, arLoadData and arCompileAll to quickly compile serveral
+%   example models.
+% 
+% One possibility to start it in the background (under linux):
 % nohup matlab -nosplash < arCompileAllSetups_call.m > nohup.out &
+% 
 
 
 function setup_files = arCompileAllSetups(recursive)
@@ -63,6 +77,7 @@ for i=1:length(setup_files)
                         str = strtrim(str{1});
                     end
                 end
+                did_compile = false;
                 if ~isempty(str) && ischar(str)
                     if ~isempty(regexp(str,'arInit'))
                         fprintf(fidlog,'%s\n',str);
@@ -75,9 +90,13 @@ for i=1:length(setup_files)
                                 eval(str);
                     elseif ~isempty(regexp(str,'arCompileAll'))
                         fprintf(fidlog,'%s\n',str);
+                        did_compile = true;
                                 eval(str);
                     else
                         
+                    end
+                    if did_compile
+                        eval('arSave(''arCompileAllSetups'');')
                     end
                 else
                     fprintf('Empty string str{1}= %s\n',str{1});
