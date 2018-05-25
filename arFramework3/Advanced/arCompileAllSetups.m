@@ -20,6 +20,7 @@ if ~exist('recursive','var') || isempty(recursive)
     recursive = true;
 end
 
+testmode = false; % for code improvement
 
 if recursive
     all_files = list_files_recursive;
@@ -54,7 +55,7 @@ fprintf(fidlog,'\n\n');
 
 % create parallel pool if not yet existing:
 p = gcp('nocreate');
-if isempty(p)
+if isempty(p) && ~testmode
     parpool('local')
 end
 
@@ -68,38 +69,43 @@ for i=1:length(setup_files)
     try
         fid = fopen([name,ext], 'r');
         while (~feof(fid))
-            [str, fid] = arTextScan(fid, '%s\n', 1, 'CommentStyle', '%');
+%             [str, fid] = arTextScan(fid, '%s', 'Delimiter', '', 'CommentStyle', '%');
+            str = fgets(fid);
+            %             disp(str);
             
-            if ~isempty(str) && iscell(str)                
-                if iscell(str)
-                    str = strtrim(str{1});
-                    if iscell(str)
-                        str = strtrim(str{1});
-                    end
-                end
+            if ~isempty(str) && ischar(str)                
+                str = strtrim(str);
                 did_compile = false;
                 if ~isempty(str) && ischar(str)
-                    if ~isempty(regexp(str,'arInit'))
+                    if ~isempty(regexp(str,'^arInit'))
                         fprintf(fidlog,'%s\n',str);
-                                eval(str);
-                    elseif ~isempty(regexp(str,'arLoadModel\('))
+                        if ~testmode
+                            eval(str);
+                        end
+                    elseif ~isempty(regexp(str,'^arLoadModel\('))
                         fprintf(fidlog,'%s\n',str);
-                                eval(str);
-                    elseif ~isempty(regexp(str,'arLoadData\('))
+                        if ~testmode
+                            eval(str);
+                        end
+                    elseif ~isempty(regexp(str,'^arLoadData\('))
                         fprintf(fidlog,'%s\n',str);
-                                eval(str);
-                    elseif ~isempty(regexp(str,'arCompileAll'))
+                        if ~testmode
+                            eval(str);
+                        end
+                    elseif ~isempty(regexp(str,'^arCompileAll'))
                         fprintf(fidlog,'%s\n',str);
                         did_compile = true;
-                                eval(str);
+                        if ~testmode
+                            eval(str);
+                        end
                     else
                         
                     end
                     if did_compile
-                        eval('arSave(''arCompileAllSetups'');')
+                        if ~testmode
+                            eval('arSave(''arCompileAllSetups'');')
+                        end
                     end
-                else
-                    fprintf('Empty string str{1}= %s\n',str{1});
                 end
             end
         end
