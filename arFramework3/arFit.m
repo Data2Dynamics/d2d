@@ -34,6 +34,10 @@
 %      18 - Repeated optimization alternating between 1 and 5 (Joep's heuristics)
 %      19 - enhanced Scatter Search (eSS) Egea et al. "Dynamic Optimization of Nonlinear Processes with an Enhanced Scatter Search Method"
 %           link to MEIGO toolbox needed: https://bitbucket.org/jrbanga_/meigo64
+% 
+%   ar.fit contains information about the latest fit. It also consist of
+%   ar.fit.check which contains information (e.g. checksums) to uniquely
+%   identify/discriminate the same/different fit settings.
 %
 %  Convergence of the optimization algorithm can be stored by setting
 %  ar.config.logFitting = 1. Then interesing variables for each iteration
@@ -42,7 +46,6 @@
 function varargout = arFit(varargin)
 
 global ar
-global fit
 
 if(nargin==0)
     qglobalar = true;
@@ -66,6 +69,16 @@ else
         silent = false;
     end
 end
+
+global fit
+fit = struct;
+fit.check = struct;
+[~,fit.check.folder]=fileparts(pwd);
+fit.check.fkt = ar.fkt;                         % checksum for model properties
+fit.check.checkstr_parameters = arChecksumPara; % checksum for parameter properties
+fit.check.checkstr_fitting = arChecksumFitting; % checksum for fit and integration settings
+fit.check.checkstr_data = arChecksumData;       % checksum for data properties
+fit.check.pstart = ar.p; % initial guess
 
 if(~isfield(ar.config, 'optimizer'))
     ar.config.optimizer = 1;
@@ -109,7 +122,6 @@ if any(ar.type==3)
     addpath([ar_path '/L1/trdog'])
 end
 
-fit = struct([]);
 fit(1).iter_count = 0;
 fit.fevals = 0;
 
