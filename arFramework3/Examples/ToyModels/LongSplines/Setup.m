@@ -12,7 +12,4 @@ arLoadModel('monotone_longer');
 arLoadData('test2', 1, 'csv');
 ar.model(1).data(1).tExtra=ar.model(1).data(1).tExp;
 arCompileAll;
-arFit;
-arPlot;
-title('Monotone spline (monotone between spline knots)');
 

@@ -24,11 +24,3 @@ arSetPars('before', 0.1, 1, 0, 0, 100);
 arSetPars('after', 5, 1, 0, 0, 100);
 arSetPars('degrad', .1  , 1, 0, 0, 100);
 
-arSimu(true,true,true); arChi2(true);
-arPlotY; title('Pre-optimization (hit any key) ');  
-pause;
-arFit;
-arSimu(true,true,true); arChi2(true);
-arPlotY;
-
-

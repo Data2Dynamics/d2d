@@ -49,4 +49,3 @@ arSetPars({'EGF_kD','HRG_kD','IGF1_kD','HGF_kD'},[log10(1) log10(0.05) log10(0.3
 arLoadPars('Final_Model')
 arSave('Model_Final')
 arCalcMerit
-dose_plots(1)

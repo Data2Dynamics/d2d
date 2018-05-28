@@ -9,11 +9,3 @@ arLoadModel('test');
 arLoadData('test', [], 'csv');
 arCompileAll(true);
 
-arPlot;
-title('Before fitting');
-
-ar.qFit=ones(size(ar.qFit));
-arFit;
-
-arPlot;
-title('After fitting');
