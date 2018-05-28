@@ -372,7 +372,11 @@ for m=1:length(ar.model)
         else
             for d=1:length(ar.model(m).data)
                 c = data(d).cLink;
-                data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
+                try
+                    data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
+                catch
+                    data(d)
+                end
                 newp{d} = data_sym.p;
                 newfp{d} = data_sym.fp;
                 newpold{d} = data_sym.pold;
@@ -546,7 +550,10 @@ ar.fkt = ['arSimuCalcFun_' ar.checkstr];
 writeSimuCalcFunctions(debug_mode);
 
 % compile
-if ( forcedCompile == 2 )
+if ~forcedCompile && exist([pwd,filesep,ar.fkt,'.',mexext],'file')
+    % do nothing
+    fprintf('%s is already available: compiling skipped.\n',[ar.fkt,'.',mexext]);
+elseif ( forcedCompile == 2 )
     arCompile(2, true, false, source_dir);
 else
     arCompile(forcedCompile, false, false, source_dir);
