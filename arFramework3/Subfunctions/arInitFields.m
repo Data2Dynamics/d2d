@@ -10,7 +10,7 @@ function ar = arInitFields(ar)
     % !!  NOTE: Every time you add or remove a field, increment this value by one.
     % !! 
     % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    arFormatVersion = 4;
+    arFormatVersion = 5;
     
     % Without arguments, just return the version number
     if ( nargin < 1 )
@@ -44,6 +44,7 @@ function ar = arInitFields(ar)
         {'nMaxThreads',                 64}, ...
         ...                                                             % Plotting
         {'savepath',                    []}, ...                        %   field for saving the output path
+        {'backup_modelAndData',         true},...                       %   makes copies of model and data files corresponding for each value of ar.checkstr
         {'nFinePoints',                 300}, ...                       %   number of fine time points for plotting
         {'par_close_to_bound',          0.01}, ...                      %   notify if parameter within 1% of bound (relative to ub-lb)
         {'nfine_dr_method',             'pchip'}, ...                   %   spline

@@ -567,26 +567,33 @@ else
 end
 
 % copy model and data backup files:
-if ~isdir('./Models/Backup')
-    mkdir('./Models/Backup');
-end
-if ~isdir(['./Models/Backup/',ar.checkstr])
-    mkdir('./Models/Backup/',ar.checkstr);
-end
-if ~isdir('./Data/Backup')
-    mkdir('./Data/Backup');
-end
-if ~isdir(['./Data/Backup/',ar.checkstr])
-    mkdir('./Data/Backup/',ar.checkstr);
-end
-for i=1:length(ar.setup.datafiles)
-    for j=1:length(ar.setup.datafiles{i})
-        copyfile(['./Data/',ar.setup.datafiles{i}{j}],['./Data/Backup/',ar.checkstr,'/',ar.setup.datafiles{i}{j}]);
+if isfield(ar.config,'backup_modelAndData') && ar.config.backup_modelAndData
+    if ~isdir('./Models/Backup')
+        mkdir('./Models/Backup');
     end
-end
-for i=1:length(ar.setup.modelfiles)
-    if ~isempty(ar.setup.modelfiles{i})
-        copyfile(['./Models/',ar.setup.modelfiles{i}],['./Models/Backup/',ar.checkstr,'/',ar.setup.modelfiles{i}]);
+    if ~isdir(['./Models/Backup/',ar.checkstr])
+        mkdir('./Models/Backup/',ar.checkstr);
+    end
+    if ~isdir('./Data/Backup')
+        mkdir('./Data/Backup');
+    end
+    if ~isdir(['./Data/Backup/',ar.checkstr])
+        mkdir('./Data/Backup/',ar.checkstr);
+    end
+    
+    ar.setup.backup_data_folder = cell(size(ar.setup.datafiles));
+    for i=1:length(ar.setup.datafiles)
+        for j=1:length(ar.setup.datafiles{i})
+            ar.setup.backup_data_folder{i}{j} = fullfile(pwd,['/Data/Backup/',ar.checkstr,'/']);% fullfile to prevent mixing of \ and /
+            copyfile(['./Data/',ar.setup.datafiles{i}{j}],[ar.setup.backup_data_folder{i}{j},ar.setup.datafiles{i}{j}]);
+        end
+    end
+    ar.setup.backup_model_folder = cell(size(ar.setup.modelfiles));
+    for i=1:length(ar.setup.modelfiles)
+        if ~isempty(ar.setup.modelfiles{i})
+            ar.setup.backup_model_folder{i} = fullfile(pwd,['/Models/Backup/',ar.checkstr,'/']);  % fullfile to prevent mixing of \ and /
+            copyfile(['./Models/',ar.setup.modelfiles{i}],[ar.setup.backup_model_folder{i},ar.setup.modelfiles{i}]);
+        end
     end
 end
 
