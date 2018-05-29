@@ -5,6 +5,9 @@
 % name      filename of model definition file
 % m         model index for the model to go into
 %
+% 'ModelPath'            Path to the data files.
+%                       Default: DataPath = 'Data/'
+% 
 % Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
 
 function arLoadModel(name, m, varargin)
@@ -17,23 +20,32 @@ end
 
 
 % custom
-switches = { 'conditions' };
-extraArgs = [ 1 ];
+switches = { 'conditions', 'modelpath' };
+extraArgs = [ 1, 1 ];
 description = { ...
-    {'', 'Specified extra conditions'} };
+    {'', 'Specified extra conditions'}, {'', 'Path to the model definition files'} };
     
 opts = argSwitch( switches, extraArgs, description, 1, varargin );
+if isempty(opts.modelpath_args)
+    ModelPath = 'Models/';
+else
+    ModelPath = strtrim(opts.modelpath_args);
+    if ModelPath(end)~='/' && ModelPath(end)~='\'
+        ModelPath = [ModelPath,'/'];
+    end
+end
+
 
 % load model from mat-file
-if(~exist('Models','dir'))
-    error('folder Models/ does not exist')
+if(~exist(ModelPath,'dir'))
+    error('folder %s does not exist',ModelPath)
 end
 if strcmp(strrep(name,' ',''),name)~=1
     name
     error('File names should not contain empty spaces. Please remove it.');
 end
-if(~exist(['Models/' name '.def'],'file'))
-    error('model definition file %s.def does not exist in folder Models/', name)
+if(~exist([ModelPath,  name '.def'],'file'))
+    error('model definition file %s.def does not exist in folder %s', name, ModelPath)
 end
 
 if(~exist('m','var')) || isempty(m)
@@ -49,19 +61,19 @@ end
 
 % remember the function call
 ar.setup.commands{end+1} = mfilename; % this file name
-ar.setup.arguments{end+1} = {name,[],varargin{:}}; % argument m is deprecated and is therefore set as empty
+ar.setup.arguments{end+1} = {name, [],varargin{:}}; % argument m is deprecated and is therefore set as empty
 ar.setup.datafiles{end+1} = {};
-ar.setup.modelfiles{end+1} = [name,'.def'];
+ar.setup.modelfiles{end+1} = [ModelPath, name,'.def'];
 
 % Disable this if you are having problems because of the preprocessor
 preprocessor = 1;
-arFprintf(1, 'loading model #%i, from file Models/%s.def...\n', m, name);
+arFprintf(1, 'loading model #%i, from file %s%s.def...\n', m, ModelPath, name);
 if ( ~preprocessor )
-    fid = fopen(['Models/' name '.def'], 'r');
+    fid = fopen([ModelPath,  name '.def'], 'r');
 else
     % Load into a struct
-    fid.fn  = ['Models/' name '.def'];
-    fid.str = fileread(['Models/' name '.def']);
+    fid.fn  = [ModelPath,  name '.def'];
+    fid.str = fileread([ModelPath,  name '.def']);
     fid.pos = 1;
     
     fid = arPreProcessor(fid);
@@ -69,7 +81,7 @@ end
 
 % initial setup
 ar.model(m).name = name;
-ar.model(m).path = [pwd,filesep,'Models',filesep];
+ar.model(m).path = [pwd,filesep,ModelPath];
 
 % Validate input
 if ( opts.conditions )

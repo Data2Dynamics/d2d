@@ -33,7 +33,16 @@ if isfield(ar,'setup')  % only availabel in higher verions
     try
         for i=1:length(arIn.setup.commands)
             if ~isempty(arIn.setup.arguments{i}) && iscell(arIn.setup.arguments{i})
-                feval(arIn.setup.commands{i},arIn.setup.arguments{i}{:}); % function call
+                if ~isempty(strfind(arIn.setup.commands{i},'arLoadData'))
+                    args = {'DataPath',arIn.setup.backup_data_folder{i}{1}};
+                    fprintf('arLoadData from backup folder %s\n',args{2});
+                elseif ~isempty(strfind(arIn.setup.commands{i},'arLoadModel'))
+                    args = {'ModelPath',arIn.setup.backup_model_folder{i}};
+                    fprintf('arLoadModel from backup folder %s\n',args{2});
+                else
+                    args = cell(0);
+                end
+                feval(arIn.setup.commands{i},arIn.setup.arguments{i}{:},args{:}); % function call
             else
                 eval(arIn.setup.commands{i})  % no function call
             end
