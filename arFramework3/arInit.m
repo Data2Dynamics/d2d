@@ -58,6 +58,8 @@ ar.setup.commands = cell(0);
 ar.setup.arguments = cell(0);
 ar.setup.commands{end+1} = mfilename; % this file name
 ar.setup.arguments{end+1} = cell(0); % arInit has no arguments
+ar.setup.modelfiles = {''};% model files to be read 
+ar.setup.datafiles = {''}; % data files to be read 
 
 
 ar = orderfields(ar);

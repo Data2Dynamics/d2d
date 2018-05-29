@@ -150,6 +150,8 @@ end
 % remember the function call
 ar.setup.commands{end+1} = mfilename; % this file name
 ar.setup.arguments{end+1} = {name,m,extension, removeEmptyObs, varargin{:}}; % 
+ar.setup.datafiles{end+1} = {[name,'.def'],[name,'.',extension]};
+ar.setup.modelfiles{end+1} = '';
 
 
 switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds', 'expsplit', 'resampledoseresponse', 'resamplingresolution', 'refinelog', 'ignoreinputs', 'detectionlimit'};

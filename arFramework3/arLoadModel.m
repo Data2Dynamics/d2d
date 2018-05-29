@@ -50,8 +50,8 @@ end
 % remember the function call
 ar.setup.commands{end+1} = mfilename; % this file name
 ar.setup.arguments{end+1} = {name,[],varargin{:}}; % argument m is deprecated and is therefore set as empty
-
-
+ar.setup.datafiles{end+1} = {};
+ar.setup.modelfiles{end+1} = [name,'.def'];
 
 % Disable this if you are having problems because of the preprocessor
 preprocessor = 1;

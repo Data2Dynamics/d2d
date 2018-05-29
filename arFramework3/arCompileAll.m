@@ -59,6 +59,8 @@ end
 % remember the function call
 ar.setup.commands{end+1} = mfilename; % this file name
 ar.setup.arguments{end+1} = {forcedCompile, debug_mode, source_dir, simplifyEquations}; % 
+ar.setup.datafiles{end+1} = {};
+ar.setup.modelfiles{end+1} = '';
 
 
 if(isfield(ar,'checkstr'))
@@ -563,6 +565,31 @@ elseif ( forcedCompile == 2 )
 else
     arCompile(forcedCompile, false, false, source_dir);
 end
+
+% copy model and data backup files:
+if ~isdir('./Models/Backup')
+    mkdir('./Models/Backup');
+end
+if ~isdir(['./Models/Backup/',ar.checkstr])
+    mkdir('./Models/Backup/',ar.checkstr);
+end
+if ~isdir('./Data/Backup')
+    mkdir('./Data/Backup');
+end
+if ~isdir(['./Data/Backup/',ar.checkstr])
+    mkdir('./Data/Backup/',ar.checkstr);
+end
+for i=1:length(ar.setup.datafiles)
+    for j=1:length(ar.setup.datafiles{i})
+        copyfile(['./Data/',ar.setup.datafiles{i}{j}],['./Data/Backup/',ar.checkstr,'/',ar.setup.datafiles{i}{j}]);
+    end
+end
+for i=1:length(ar.setup.modelfiles)
+    if ~isempty(ar.setup.modelfiles{i})
+        copyfile(['./Models/',ar.setup.modelfiles{i}],['./Models/Backup/',ar.checkstr,'/',ar.setup.modelfiles{i}]);
+    end
+end
+
 
 % link
 arLink;
