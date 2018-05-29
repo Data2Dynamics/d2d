@@ -147,6 +147,11 @@ else
     end
 end
 
+% remember the function call
+ar.setup.commands{end+1} = mfilename; % this file name
+ar.setup.arguments{end+1} = {name,m,extension, removeEmptyObs, varargin{:}}; % 
+
+
 switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds', 'expsplit', 'resampledoseresponse', 'resamplingresolution', 'refinelog', 'ignoreinputs', 'detectionlimit'};
 extraArgs = [ 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1 ];
 description = { ...

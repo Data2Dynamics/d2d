@@ -56,6 +56,11 @@ else
     legacy_steps = 0;
 end
 
+% remember the function call
+ar.setup.commands{end+1} = mfilename; % this file name
+ar.setup.arguments{end+1} = {forcedCompile, debug_mode, source_dir, simplifyEquations}; % 
+
+
 if(isfield(ar,'checkstr'))
     prepareBecauseOfRepeatedCompilation;
 end

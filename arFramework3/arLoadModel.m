@@ -15,6 +15,7 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
+
 % custom
 switches = { 'conditions' };
 extraArgs = [ 1 ];
@@ -35,7 +36,7 @@ if(~exist(['Models/' name '.def'],'file'))
     error('model definition file %s.def does not exist in folder Models/', name)
 end
 
-if(~exist('m','var'))
+if(~exist('m','var')) || isempty(m)
     if(isfield(ar, 'model'))
         m = length(ar.model) + 1;
     else
@@ -45,6 +46,12 @@ else
     error(['Usage arLoadModel(name, m) is deprecated. Please use arLoadModel(name) ' ...
         'and note that the model will be loaded to the next free index position by default.']);
 end
+
+% remember the function call
+ar.setup.commands{end+1} = mfilename; % this file name
+ar.setup.arguments{end+1} = {name,[],varargin{:}}; % argument m is deprecated and is therefore set as empty
+
+
 
 % Disable this if you are having problems because of the preprocessor
 preprocessor = 1;
