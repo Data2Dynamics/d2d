@@ -212,7 +212,25 @@ for jm = 1:length(ar.model)
                             
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, qFit, yExpHl] = ...
                                 arGetDataDoseResponse(jm, ds, dr_times(jt), ...
-                                ar.model(jm).plot(jplot).dLink, jtype, xtrafo);                            
+                                ar.model(jm).plot(jplot).dLink, jtype, xtrafo);      
+                            
+                            %Smoothen dose response curves
+                            y_new = NaN(ar.config.nFinePoints,size(y,2));
+                            ystd_new = NaN(ar.config.nFinePoints,size(ystd,2));
+                            [t_red, its] = unique(t);
+                            t = linspace(min(t),max(t),ar.config.nFinePoints);
+                            
+                            for iyC = 1:size(y,2)
+                                y_red = y(its,iyC);
+                                ystd_red = ystd(its,iyC);
+                                
+                                y_new(:,iyC) = pchip(t_red,y_red,t);
+                                ystd_new(:,iyC) = pchip(t_red,ystd_red,t);
+                                                            
+                            end
+                            y = y_new;
+                            ystd = ystd_new;
+                            %End smoothing
                             
                             plotopt = NaN(1,size(y,2));
                             if jtype ==1
