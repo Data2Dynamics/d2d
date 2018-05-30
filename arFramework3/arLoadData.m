@@ -1,4 +1,4 @@
-datafiles% Load data set to next free slot
+% Load data set to next free slot
 %
 % arLoadData(name, m, extension, removeEmptyObs, opts)
 %
