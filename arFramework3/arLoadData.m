@@ -707,7 +707,7 @@ if(~strcmp(extension,'none') && ( ...
     dataFound = true;
 
     % read from file
-    if(contains(extension,'xls'))
+    if(~isempty(strfind(extension,'xls')))
         warntmp = warning;
         warning('off','all')
         
