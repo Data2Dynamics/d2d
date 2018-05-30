@@ -181,11 +181,6 @@ else
     end
 end
 
-% remember the function call
-ar.setup.commands{end+1} = mfilename; % this file name
-ar.setup.arguments{end+1} = {name,m,extension, removeEmptyObs, varargin{:}}; % 
-ar.setup.datafiles{end+1} = {[DataPath,name,'.def'],[DataPath,name,'.',extension]};
-ar.setup.modelfiles{end+1} = '';
 
 %%
 if ( opts.resampledoseresponse )
@@ -709,6 +704,7 @@ if(~strcmp(extension,'none') && ( ...
     (exist([DataPath, name '.xls'],'file') && strcmp(extension,'xls')) || ...
     (exist([DataPath, name '.csv'],'file') && strcmp(extension,'csv'))))
     arFprintf(2, 'loading data #%i, from file %s%s.%s...\n', d, DataPath, name, extension);
+    dataFound = true;
 
     % read from file
     if(strcmp(extension,'xls'))
@@ -907,14 +903,31 @@ if(~strcmp(extension,'none') && ( ...
         checkReserved(m, d);
     end
 else
+    dataFound = false;
     warning('Cannot find data file corresponding to %s', name);
     ar.model(m).data(d).condition = [];
 end
 
+
+% remember the function call
+ar.setup.commands{end+1} = mfilename; % this file name
+ar.setup.arguments{end+1} = {name,m,extension, removeEmptyObs, varargin{:}}; % 
+if dataFound
+    ar.setup.datafiles{end+1} = {[DataPath,name,'.def'],[DataPath,name,'.',extension]};
+else
+    ar.setup.datafiles{end+1} = {[DataPath,name,'.def'],''};
+end
+ar.setup.modelfiles{end+1} = '';
+
+% sort fields
 ar = orderfields(ar);
 ar.model = orderfields(ar.model);
 ar.model(m).data = orderfields(ar.model(m).data);
 ar.model(m).plot = orderfields(ar.model(m).plot);
+
+
+
+
 
 function checkReserved(m, d)
     global ar;
@@ -1211,6 +1224,8 @@ else
         [ar,d] = doMS(ar,m,d,jplot,dpPerShoot);
     end
 end
+
+
 
 
 function C = mymat2cell(D)

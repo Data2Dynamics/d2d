@@ -588,7 +588,7 @@ if isfield(ar.config,'backup_modelAndData') && ar.config.backup_modelAndData
             [~,file,ext] = fileparts(ar.setup.datafiles{i}{j});
             source = ar.setup.datafiles{i}{j};
             target = [ar.setup.backup_data_folder{i}{j},file,ext];
-            if strcmp(source,target)~=1
+            if ~isempty(source) && ~isempty(target) && strcmp(source,target)~=1
                 copyfile(source,target);
             end
         end
@@ -600,7 +600,7 @@ if isfield(ar.config,'backup_modelAndData') && ar.config.backup_modelAndData
             [~,file,ext] = fileparts(ar.setup.modelfiles{i});
             source = ar.setup.modelfiles{i};
             target = [ar.setup.backup_model_folder{i},file,ext];
-            if strcmp(source,target)~=1
+            if ~isempty(source) && ~isempty(target) && strcmp(source,target)~=1
                 copyfile(source,target);
             end
         end
