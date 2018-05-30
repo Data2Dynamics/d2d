@@ -1,4 +1,4 @@
-% Load data set to next free slot
+datafiles% Load data set to next free slot
 %
 % arLoadData(name, m, extension, removeEmptyObs, opts)
 %
@@ -165,7 +165,7 @@ if(~exist('extension','var') || isempty(extension))
     
     % auto-select extension if not specified
     if exist([DataPath, name '.xlsx'],'file')
-        extension = 'xls';
+        extension = 'xlsx';
     elseif exist([DataPath, name '.xls'],'file')
         extension = 'xls';
     elseif exist([DataPath, name '.csv'],'file')
@@ -700,14 +700,14 @@ end
 % XLS file
 arFprintf( 3, 'Read def file [ OK ]\n' );
 if(~strcmp(extension,'none') && ( ...
-    (exist([DataPath, name '.xlsx'],'file') && strcmp(extension,'xls')) ||...
+    (exist([DataPath, name '.xlsx'],'file') && strcmp(extension,'xlsx')) ||...
     (exist([DataPath, name '.xls'],'file') && strcmp(extension,'xls')) || ...
     (exist([DataPath, name '.csv'],'file') && strcmp(extension,'csv'))))
     arFprintf(2, 'loading data #%i, from file %s%s.%s...\n', d, DataPath, name, extension);
     dataFound = true;
 
     % read from file
-    if(strcmp(extension,'xls'))
+    if(contains(extension,'xls'))
         warntmp = warning;
         warning('off','all')
         
