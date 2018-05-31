@@ -34,10 +34,18 @@ if isfield(ar,'setup')  % only availabel in higher verions
         for i=1:length(arIn.setup.commands)
             if ~isempty(arIn.setup.arguments{i}) && iscell(arIn.setup.arguments{i})
                 if ~isempty(strfind(arIn.setup.commands{i},'arLoadData'))
-                    args = {'DataPath',arIn.setup.backup_data_folder{i}{1}};
+                    if isdir(arIn.setup.backup_data_folder{i}{1}) % global path exist
+                        args = {'DataPath',arIn.setup.backup_data_folder{i}{1}};
+                    else % use the local path
+                        args = {'DataPath',arIn.setup.backup_data_folder_local{i}{1}};
+                    end                        
                     fprintf('arLoadData from backup folder %s\n',args{2});
                 elseif ~isempty(strfind(arIn.setup.commands{i},'arLoadModel'))
-                    args = {'ModelPath',arIn.setup.backup_model_folder{i}};
+                    if isdir(arIn.setup.backup_model_folder{i})
+                        args = {'ModelPath',arIn.setup.backup_model_folder{i}};
+                    else % use the local path
+                        args = {'ModelPath',arIn.setup.backup_model_folder_local{i}};
+                    end
                     fprintf('arLoadModel from backup folder %s\n',args{2});
                 else
                     args = cell(0);

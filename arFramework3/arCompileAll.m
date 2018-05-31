@@ -585,6 +585,7 @@ if isfield(ar.config,'backup_modelAndData') && ar.config.backup_modelAndData
     for i=1:length(ar.setup.datafiles)
         for j=1:length(ar.setup.datafiles{i})
             ar.setup.backup_data_folder{i}{j} = fullfile(pwd,['/Data/Backup/',ar.checkstr,'/']);% fullfile to prevent mixing of \ and /
+            ar.setup.backup_data_folder_local{i}{j} = ['./Data/Backup/',ar.checkstr,'/'];
             [~,file,ext] = fileparts(ar.setup.datafiles{i}{j});
             source = ar.setup.datafiles{i}{j};
             target = [ar.setup.backup_data_folder{i}{j},file,ext];
@@ -597,6 +598,7 @@ if isfield(ar.config,'backup_modelAndData') && ar.config.backup_modelAndData
     for i=1:length(ar.setup.modelfiles)
         if ~isempty(ar.setup.modelfiles{i})
             ar.setup.backup_model_folder{i} = fullfile(pwd,['/Models/Backup/',ar.checkstr,'/']);  % fullfile to prevent mixing of \ and /
+            ar.setup.backup_model_folder_local{i} = ['./Models/Backup/',ar.checkstr,'/'];
             [~,file,ext] = fileparts(ar.setup.modelfiles{i});
             source = ar.setup.modelfiles{i};
             target = [ar.setup.backup_model_folder{i},file,ext];
