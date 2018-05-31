@@ -736,7 +736,7 @@ if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
     
     
     tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
-    ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
+    ar.model(m).nnz = sum(sum(logical(tmpzeros~=0),'omitnan'),'omitnan') + sum(sum(logical(tmpzeros~=0),'omitnan')==0,'omitnan');
     if(length(ar.model(m).x) * log(length(ar.model(m).x)) > ar.model(m).nnz)
         ar.config.useSparseJac = 1;
     end
@@ -744,7 +744,7 @@ else
     arFprintf(2, 'Model m%i too large (%i variables, %i parameters)... skipping check of model structure\n', m, length(ar.model(m).sym.x), length(ar.model(m).p));
     ar.config.useSparseJac = 1;
     tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
-    ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
+    ar.model(m).nnz = sum(sum(logical(tmpzeros~=0),'omitnan'),'omitnan') + sum(sum(logical(tmpzeros~=0),'omitnan')==0,'omitnan');
 end
 
 
@@ -942,7 +942,7 @@ firstcol = true;
 if(config.useSensis || config.useJacobian)
     condition.sym.dfxdx = (model.N .* condition.sym.C) * condition.sym.dvdx;
     condition.qdfxdx_nonzero = logical(condition.sym.dfxdx~=0);
-    condition.sym.dfxdx_nonzero = sym(zeros(1, nansum(nansum(condition.qdfxdx_nonzero))));
+    condition.sym.dfxdx_nonzero = sym(zeros(1, sum(sum(condition.qdfxdx_nonzero,'omitnan'),'omitnan')));
     for j=1:length(model.xs)
         for i=1:length(model.xs)
             if(i==1)

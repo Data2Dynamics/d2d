@@ -116,8 +116,8 @@ global ar
     Conditions_string(2,end+1:end+3) = {'nTimePoints','nDataPoints','chi2 value'};
     for jd= 1:length(ar.model(im).data)
         Conditions_string{jd+2,end-2} = length(ar.model(im).data(jd).tExp);
-        Conditions_string{jd+2,end-1} = nansum(ar.model(im).data(jd).ndata);
-        Conditions_string{jd+2,end} = nansum(ar.model(im).data(jd).chi2);
+        Conditions_string{jd+2,end-1} = sum(ar.model(im).data(jd).ndata,'omitnan');
+        Conditions_string{jd+2,end} = sum(ar.model(im).data(jd).chi2,'omitnan');
     end
     %This part writes out the constants (num==1 means same parameter trafo
     %in every condition)

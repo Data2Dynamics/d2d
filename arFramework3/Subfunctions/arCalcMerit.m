@@ -238,6 +238,9 @@ if ~silent
     arGetMerit
 end
 
+function y = range(x, dim)
+y = max(x, dim) - min(x, dim);
+
 function c = my_equals(a,b)
 c = a(:)==b(:);
 c = c';
