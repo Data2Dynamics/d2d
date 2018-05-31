@@ -18,6 +18,11 @@ for m=1:length(ar.model)
         end
     end
     
+    for c=1:length(ar.model(m).condition)
+        if isfield(ar.model(m).condition(c),'tEvents')
+            checksum = arAddToCheckSum(ar.model(m).condition(c).tEvents,checksum);
+        end            
+    end
 end
 
 h = typecast(checksum.digest,'uint8');
