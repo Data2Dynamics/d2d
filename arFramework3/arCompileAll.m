@@ -725,14 +725,15 @@ if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
                 end
             end
         end
-    
-        tmpsym = ar.model(m).sym.dfvdu;
-        tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
-        tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
-        tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
-
-        ar.model(m).qdvdu_negative = double(tmpsym) < 0;
     end
+    
+    tmpsym = ar.model(m).sym.dfvdu;
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
+    tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+    
+    ar.model(m).qdvdu_negative = double(tmpsym) < 0;
+    
     
     tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
     ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);
