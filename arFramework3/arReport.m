@@ -307,23 +307,29 @@ for jm=1:length(ar.model)
             lp(fid, '\\\\');
             
             % modifiers
-            mod_pos = getModifierStr(jm,jv,false,'x',sources,targets);
-            mod_posu = getModifierStr(jm,jv,false,'u',sources,targets);
-            if(~isempty(mod_posu))
-                if(~isempty(mod_pos))
-                    mod_pos = [mod_pos ', ' mod_posu];
-                else
-                    mod_pos = mod_posu;
+            try
+                mod_pos = getModifierStr(jm,jv,false,'x',sources,targets);
+                mod_posu = getModifierStr(jm,jv,false,'u',sources,targets);
+                if(~isempty(mod_posu))
+                    if(~isempty(mod_pos))
+                        mod_pos = [mod_pos ', ' mod_posu];
+                    else
+                        mod_pos = mod_posu;
+                    end
                 end
-            end
-            mod_neg = getModifierStr(jm,jv,true,'x',sources,targets);
-            mod_negu = getModifierStr(jm,jv,true,'u',sources,targets);
-            if(~isempty(mod_negu))
-                if(~isempty(mod_neg))
-                    mod_neg = [mod_neg ', ' mod_negu];
-                else
-                    mod_neg = mod_negu;
+                mod_neg = getModifierStr(jm,jv,true,'x',sources,targets);
+                mod_negu = getModifierStr(jm,jv,true,'u',sources,targets);
+                if(~isempty(mod_negu))
+                    if(~isempty(mod_neg))
+                        mod_neg = [mod_neg ', ' mod_negu];
+                    else
+                        mod_neg = mod_negu;
+                    end
                 end
+            catch err_id
+                warning(err_id.message);
+                mod_neg = '';
+                mod_pos = '';
             end
             
             % chem reaction
