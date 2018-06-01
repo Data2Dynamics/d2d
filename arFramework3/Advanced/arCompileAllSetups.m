@@ -1,10 +1,11 @@
 % arCompileAllSetups
 %
-% setup_files = arCompileAllSetups(recursive)
+% setup_files = arCompileAllSetups(max_depth)
 %
-%       recursive   should Setup files be search recursively starting form
-%                   the current directory?
-%                   Default: true
+%       max_depth   If larger than 0, then the setup files be search
+%                   recursively starting form the current directory.
+%                   Default: Inf (recursively evaluates all setups found in
+%                   deeper folders)
 %
 %       mode        'normal' (default: whole setup file)
 %                   'core' only the most important commands, i.e. arInit,
@@ -17,11 +18,16 @@
 % One possibility to start it in the background (under linux):
 % nohup matlab -nosplash < arCompileAllSetups_call.m > nohup.out &
 %
+% 
+%   Examples
+%   arCompileAllSetups(2) % evaluates all Setups which are in pwd and 1 or
+%                         % two folders deeper. This option might be
+%                         % reasonable if executed in the folder
+%                         % ....d2d/arFramework/Examples   
 
-
-function setup_files = arCompileAllSetups(recursive,mode)
-if ~exist('recursive','var') || isempty(recursive)
-    recursive = true;
+function setup_files = arCompileAllSetups(max_depth, mode)
+if ~exist('max_depth','var') || isempty(max_depth)
+    max_depth = Inf;
 end
 if ~exist('mode','var') || isempty(mode)
     mode = 'normal';
@@ -29,8 +35,8 @@ end
 
 testmode = false; % for code improvement
 
-if recursive
-    all_files = list_files_recursive;
+if max_depth>0
+    all_files = list_files_recursive(max_depth);
 else
     d = dir;
     files = {d.name};
