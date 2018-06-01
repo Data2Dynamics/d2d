@@ -72,7 +72,9 @@ end
 
 function applyCore(fun,result_suffix,workspace_pattern,varargin)
 global ar
-arLoadLatest(workspace_pattern)
-fprintf('Evaluating %s for workspace %s ... \n',char(fun),ar.config.savepath);
-feval(fun,varargin{:})
-arSave(result_suffix)
+status = arLoadLatest(workspace_pattern);
+if status
+    fprintf('Evaluating %s for workspace %s ... \n',char(fun),ar.config.savepath);
+    feval(fun,varargin{:})
+    arSave(result_suffix)
+end

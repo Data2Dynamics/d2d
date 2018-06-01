@@ -15,7 +15,7 @@
 % 
 % arLoadLatest('PLE');
 
-function arLoadLatest(pattern)
+function status = arLoadLatest(pattern)
 if ~exist('pattern','var') || isempty(pattern)
     pattern = [];
 end
@@ -51,6 +51,8 @@ end
 if ~isempty(dates)
     [~,rf] = sort(datenum(dates)); % sorting according to date  
     arLoad(folders{rf(end)});
+    status = true;
 else
+    status = false;
     disp('No proper workspace found.')
 end
