@@ -29,6 +29,14 @@ folders = names([d.isdir]);
 folders = folders(3:end); % remove . and ..
 dates = dates(3:end); % remove . and ..
 
+% only folders which contain workspace.mat
+ok = false(size(folders));
+for i=1:length(folders)
+    ok(i) = exist(['Results',filesep,folders{i},filesep,'workspace.mat'],'file');
+end
+
+folders = folders(ok);
+dates = dates(ok);
 
 if ~isempty(pattern)
     ind = find(~cellfun(@isempty,regexp(folders,pattern)));
@@ -40,8 +48,9 @@ if ~isempty(pattern)
     dates = dates(ind);
 end
 
-[~,rf] = sort(datenum(dates));
-
-arLoad(folders{rf(end)});
-
-
+if ~isempty(dates)
+    [~,rf] = sort(datenum(dates)); % sorting according to date  
+    arLoad(folders{rf(end)});
+else
+    disp('No proper workspace found.')
+end
