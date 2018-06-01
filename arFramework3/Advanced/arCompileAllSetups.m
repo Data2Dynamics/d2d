@@ -68,6 +68,9 @@ end
 
 pfad = pwd;
 
+pause_state = pause('query');
+pause('off');
+
 for i=1:length(setup_files)
     fprintf(fidlog,'%s will be executed ...\n\n' ,setup_files{i});
     [pathstr,name,ext] = fileparts(setup_files{i});
@@ -131,6 +134,7 @@ for i=1:length(setup_files)
                 error('mode %s is not implemented.',model)
         end  % switch mode
     catch ERR
+        pause(pause_state);
         warning('\n%s failed !!!!!!!!! \n\n' ,setup_files{i});
         disp(lasterror);
         fprintf(fidlog,'\n%s failed !!!!!!!!! \n\n' ,setup_files{i});
@@ -140,6 +144,8 @@ end
 
 fclose(fidlog);
 cd(pfad)
+pause(pause_state);
+
 
 
 function doEvalSetup(fun_setup)
