@@ -26,6 +26,10 @@ dates = {d.date};
 dates = dates([d.isdir]);
 folders = names([d.isdir]);
 
+folders = folders(3:end); % remove . and ..
+dates = dates(3:end); % remove . and ..
+
+
 if ~isempty(pattern)
     ind = find(~cellfun(@isempty,regexp(folders,pattern)));
     if isempty(ind)
