@@ -76,7 +76,7 @@ for i=1:length(setup_files)
     try
         switch mode
             case 'normal' % every line
-                eval(name);
+                doEvalSetup(name);
                 if ~testmode
                     eval(sprintf('arSave(''arCompileAllSetups_%s'');',mode));
                 end
@@ -140,6 +140,14 @@ end
 
 fclose(fidlog);
 cd(pfad)
+
+
+function doEvalSetup(fun_setup)
+% evaluation of the setup has to be hidden in a fucntion to not overwrite
+% local variables and to prevent clearing the workspace by potential clear
+% all commands
+
+feval(fun_setup);
 
 
 
