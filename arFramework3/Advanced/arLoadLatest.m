@@ -15,7 +15,7 @@
 % 
 % arLoadLatest('PLE');
 
-function status = arLoadLatest(pattern)
+function varargout = arLoadLatest(pattern)
 if ~exist('pattern','var') || isempty(pattern)
     pattern = [];
 end
@@ -55,4 +55,8 @@ if ~isempty(dates)
 else
     status = false;
     disp('No proper workspace found.')
+end
+
+if nargout>0
+    varargout{1} = status;
 end
