@@ -57,9 +57,9 @@ global ar
 if isfield(ar, 'mc3')
 
     if isfield(ar.mc3, 'nruns')
-        nruns = ar.mc3.nthinning;
+        nruns = ar.mc3.nruns;
     else
-        nruns = 1;
+        nruns = 10000;
     end
     
     if isfield(ar.mc3, 'nburnin')
