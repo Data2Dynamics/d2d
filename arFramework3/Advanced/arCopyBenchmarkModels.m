@@ -80,6 +80,20 @@ for i=1:length(models)
                 delete([target_path,filesep,models{i},filesep,'SetupH838.m']);
                 delete([target_path,filesep,models{i},filesep,'SetupSens.m']);
             end
+            if strcmp(models{i},'Lucarelli_TGFb_2017')==1  % just keep reduced model with genes
+                rmdir([target_path,filesep,models{i},filesep,'TGFb_ComplexModel_ModelSelection_L1'],'s');
+                rmdir([target_path,filesep,models{i},filesep,'TGFb_ComplexModel_withGenes'],'s');
+                movefile([target_path,filesep,models{i},filesep,'TGFb_ComplexModel_WithGenes_Reduced',filesep,'*'],...
+                    [target_path,filesep,models{i},filesep,'.']);
+                rmdir([target_path,filesep,models{i},filesep,'TGFb_ComplexModel_WithGenes_Reduced'],'s');
+            end
+            if strcmp(models{i},'Sobotta_Frontiers2017')==1  % just keep Setup_Core.m
+                delete([target_path,filesep,models{i},filesep,'Setup_IL6_ExpDesign.m']);
+                delete([target_path,filesep,models{i},filesep,'Setup_IL6_Full.m']);
+            end
+            if strcmp(models{i},'Swameye_PNAS2003')==1  % just keep Setup.m
+                delete([target_path,filesep,models{i},filesep,'Setup2003.m']);                
+            end
     end
 end
 
