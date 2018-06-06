@@ -162,8 +162,13 @@ if isfield(ar, 'mc3')
         LengthOfAcceptanceTestChain = ar.mc3.LengthOfAcceptanceTestChain;
     else
         LengthOfAcceptanceTestChain          = 25;
-    end    
+    end
     
+    if isfield(ar.mc3, 'DecayParameter')
+        DecayParameter = ar.mc3.DecayParameter;
+    else
+        DecayParameter = 0.51;
+    end    
 
 end
    
@@ -183,16 +188,8 @@ end
 %     );
 
 % Read out given variables and overwrite struct varibales if given
-if nargin > 4
-	exchange_method = varargin{5};
-end
 if nargin > 3
-    if varargin{4}>0
-	    nthinning = varargin{4};
-    else
-        nthinning = 1;
-        disp('Thinning option given is not possible! No thinning used. Please specify integer bigger than 0!');
-    end
+	exchange_method = varargin{4};
 end
 if nargin > 2
 	method = varargin{3};
@@ -585,7 +582,7 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
             % Using stationary covariance (Haario et al. 2001)
             % Initialize parameters:
             %MemoryLength = 1;  % Number of steps for which almost no adaptation is made in the beginning
-            DecayParameter = 0.51; % Control parameter for decay of Covariance Adaptation, (0<p<1), higher values mean fast decay 
+             % Control parameter for decay of Covariance Adaptation, (0<p<1), higher values mean fast decay 
 %             i = max(jruns+1,MemoryLength);
 % 
 %             Gamma = 1/(i^DecayParameter);
