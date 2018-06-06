@@ -68,6 +68,7 @@ for i=1:length(folders)
         rethrow(ERR)
     end
 end
+cd(pw)
 
 
 function applyCore(fun,result_suffix,workspace_pattern,varargin)
