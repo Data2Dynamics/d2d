@@ -301,7 +301,7 @@ for jm=1:length(ar.model)
     lp(fid, 'The %d dynamic variables used in the model are summarized in Table \\ref{variables}', length(ar.model(jm).x) );
     
     if ( length( ar.model(jm).u ) > 0 ) %#ok
-        lp(fid, ', while the %i external inputs variables are summarized in Table \\ref{inputs}.', sum(~strcmp(ar.model.fu, '0')));
+        lp(fid, ', while the %i external inputs variables are summarized in Table \\ref{inputs}.', sum(~strcmp(ar.model(jm).fu, '0')));
     else
         lp(fid, '.', length(ar.model(jm).u));
     end
@@ -348,11 +348,15 @@ for jm=1:length(ar.model)
             end
             
             x0 = ar.model(jm).px0{jx};
-            x0 = char(sym(ar.model(jm).fp{strcmp(ar.model(jm).p, x0)}));
+            x0 = char(arSym(ar.model(jm).fp{strcmp(ar.model(jm).p, x0)}));
             if ~strcmp( headerChunk, '' )
                 lp(fid, '%s%s & %s [%s] & %s & %s%s & %s\\\\', alternate(jx), strrep(ar.model(jm).x{jx}, '_', '\_'), ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}, ar.model(jm).c{ar.model(jm).cLink(jx)}, strrep(x0, '_', '\_'), asterisk, ar.model(jm).xNames{jx} );
             else
-                lp(fid, '%s%s & %s [%s] & %s & %s%s\\\\', alternate(jx), strrep(ar.model(jm).x{jx}, '_', '\_'), ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}, ar.model(jm).c{ar.model(jm).cLink(jx)}, strrep(x0, '_', '\_'), asterisk );
+                if isempty(ar.model(jm).c)
+                    lp(fid, '%s%s & %s [%s] & %s & %s%s\\\\', alternate(jx), strrep(ar.model(jm).x{jx}, '_', '\_'), ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}, '', strrep(x0, '_', '\_'), asterisk );
+                else
+                    lp(fid, '%s%s & %s [%s] & %s & %s%s\\\\', alternate(jx), strrep(ar.model(jm).x{jx}, '_', '\_'), ar.model(jm).xUnits{jx,3}, ar.model(jm).xUnits{jx,2}, ar.model(jm).c{ar.model(jm).cLink(jx)}, strrep(x0, '_', '\_'), asterisk );
+                end
             end
         end
         lp(fid, '\\end{tabular}');
@@ -377,7 +381,7 @@ for jm=1:length(ar.model)
         end        
         
         % Find the non-empty inputs
-        us = find(~strcmp(ar.model.fu,'0'));
+        us = find(~strcmp(ar.model(jm).fu,'0'));
         
         if ~isempty(us)
             lp(fid, '\\begin{table}');
@@ -408,7 +412,7 @@ for jm=1:length(ar.model)
     %vs = sym('v', [1, size(ar.model(jm).N,2)]);
     %cs = sym(strcat('vol_', ar.model(jm).c));
     
-    lp(fid, '\\newpage\\noindent The model consists of %d differential equations, which are given by the following equations:', length(ar.model.x) );
+    lp(fid, '\\newpage\\noindent The model consists of %d differential equations, which are given by the following equations:', length(ar.model(jm).x) );
     lp(fid, '{\\footnotesize');
     lp(fid, '\\begin{align}');
     for jx=1:size(ar.model(jm).N, 1) % for every species jx
@@ -587,20 +591,20 @@ for jm=1:length(ar.model)
                 skip = 1;
             end            
             
-            if ( ~skip )
-                if(ccount==length(ar.model(jm).fp) || mod(ccount,N)==0)
-                    lp(fid, '\t%s & \\rightarrow %s ', myFormulas(PTI(ar.model(jm).p{jp},pti), jm), ...
-                        myFormulas(PTI(ar.model(jm).fp{jp},pti), jm));
-                else
-                    lp(fid, '\t%s & \\rightarrow %s \\\\', myFormulas(PTI(ar.model(jm).p{jp},pti), jm), ...
-                        myFormulas(PTI(ar.model(jm).fp{jp},pti), jm));
-                end
-                if(mod(ccount,N)==0 && ccount<length(ar.model(jm).fp))
-                    lp(fid, '\\end{align}\n');
-                    lp(fid, '\\begin{align}');
-                end
-                ccount = ccount + 1;
-            end
+%             if ( ~skip )
+%                 if(ccount==length(ar.model(jm).fp) || mod(ccount,N)==0)
+%                     lp(fid, '\t%s & \\rightarrow %s ', myFormulas(PTI(ar.model(jm).p{jp},pti), jm), ...
+%                         myFormulas(PTI(ar.model(jm).fp{jp},pti), jm));
+%                 else
+%                     lp(fid, '\t%s & \\rightarrow %s \\\\', myFormulas(PTI(ar.model(jm).p{jp},pti), jm), ...
+%                         myFormulas(PTI(ar.model(jm).fp{jp},pti), jm));
+%                 end
+%                 if(mod(ccount,N)==0 && ccount<length(ar.model(jm).fp))
+%                     lp(fid, '\\end{align}\n');
+%                     lp(fid, '\\begin{align}');
+%                 end
+%                 ccount = ccount + 1;
+%             end
         end
         if(ccount>1 && jp==length(ar.model(jm).fp))
             lp(fid, '\\end{align}}\n\n');
@@ -762,7 +766,7 @@ for jm=1:length(ar.model)
         
         % Cache the target replacement, since syms are expensive!
         for a = 1 : length( ar.model(jm).fp )
-            fpSymString{a} = char(sym(ar.model(jm).fp{a}));
+            fpSymString{a} = char(arSym(ar.model(jm).fp{a}));
         end
 
         %% do we override some of the plots
@@ -1139,7 +1143,7 @@ for jm=1:length(ar.model)
                         lp(fid, '\t%s', tail);
                         endFlexbox(fid, box);
 
-                        lp(fid, '\t\\mycaptionof{Model parameters modified for experiment %s. Different columns indicate different conditions.}{%s_conditiontrafo}{}', strrep(arNameTrafo(ar.model(jm).plot(jplot).name), '\_', ' '), ar.model(jm).plot(jplot).name );
+                        lp(fid, '\t\\mycaptionof{Model parameters modified for experiment %s. Different rows indicate different conditions.}{%s_conditiontrafo}{}', strrep(arNameTrafo(ar.model(jm).plot(jplot).name), '\_', ' '), ar.model(jm).plot(jplot).name );
                         lp(fid, '\\end{statictable}\\');
                     end
 
@@ -1188,7 +1192,10 @@ for jm=1:length(ar.model)
                         openDataTable( fid, jm, jd, L, headtab, headstr, unitstr );
 
                         s = 0;
+
+                        NAs = false;
                         for jd2 = ar.model(jm).plot(jplot).dLink
+                            NAs = NAs || sum(isnan(ar.model(jm).data(jd2).yExpStd(:)))>0;
                             for j=1:length(ar.model(jm).data(jd2).tExp)
                                 fprintf(fid, '%s%s ', alternate(s), sprintf('%g', ar.model(jm).data(jd2).tExp(j)));
 
@@ -1215,11 +1222,11 @@ for jm=1:length(ar.model)
                                     end
                                 end
                                 fprintf(fid, '\\\\\n'); 
-                                
+                                                                
                                 % Are we going over the page limit?
                                 s = s + 1;
                                 if ( s > Nd )
-                                    closeDataTable( fid, jplot, jm, jd, L, headtab );
+                                    closeDataTable( fid, jplot, jm, jd, L, headtab, NAs );
                                     L = L + 1;
                                     s = 0;
                                     openDataTable( fid, jm, jd, L, headtab, headstr, unitstr );
@@ -1227,7 +1234,7 @@ for jm=1:length(ar.model)
                             end
                         end
 
-                        closeDataTable( fid, jplot, jm, jd, L, headtab );
+                        closeDataTable( fid, jplot, jm, jd, L, headtab, NAs );
                     end
 
              %       if(ccount>1 && jp==length(ar.model(jm).data(jd).fp))
@@ -1610,7 +1617,7 @@ end
 sshortlist = sym(shortlist);
 
 str = replaceFunctions(str, ar.config.specialFunc);
-strsym = sym(str);
+strsym = arSym(str);
 sstrsym = mysubs(strsym, svarlist, sshortlist);
 
 str = latex(sstrsym);
@@ -1652,7 +1659,7 @@ function openDataTable( fid, jm, jd, L, headtab, headstr, unitstr )
 	lp(fid, '\t\t\t %s \\\\', unitstr);
 	lp(fid, '\t\t\t\\midrule');
 
-function closeDataTable( fid, jplot, jm, jd, L, headtab )
+function closeDataTable( fid, jplot, jm, jd, L, headtab, NAs )
     global ar;
 
     lp(fid, '\t\t\t\\botrule');
@@ -1661,7 +1668,11 @@ function closeDataTable( fid, jplot, jm, jd, L, headtab )
         box = sprintf('datamod%s',latexIdentifier(jd+1000*jm+10000*L)) ;
         endFlexbox( fid,  box );
     end
-	lp(fid, '\t\t\\mycaption{Experimental data for the experiment %s. NM indicates variables that were not measured.}{%s_data}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name);
+    if NAs % table contains NaNs:
+        lp(fid, '\t\t\\mycaption{Experimental data for the experiment %s. NA indicates data points that are not available, i.e. not measured.}{%s_data}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name);
+    else
+        lp(fid, '\t\t\\mycaption{Experimental data for the experiment %s. }{%s_data}{}', arNameTrafo(ar.model(jm).plot(jplot).name), ar.model(jm).plot(jplot).name);
+    end
 	lp(fid, '\t\\doendcenter');
 	lp(fid, '\t\\end{table}');
 
@@ -1787,7 +1798,7 @@ function f = fetchArgs( st )
     
 function fprintnumtab(fid, num)
 if isnan( num )
-    fprintf(fid, '& NM ');
+    fprintf(fid, '& NA ');
 else
     fprintf(fid, '& %s ', sprintf('%g', num));
 end
@@ -1795,7 +1806,7 @@ end
 % better subs
 function out = mysubs(in, old, new)
 global ar
-if(~isnumeric(in) && ~isempty(old) && ~isempty(findsym(in)))
+if(~isnumeric(in) && ~isempty(old) && ~isempty(char(symvar(in))))
     if(ar.config.matlabVersion>=8.1)
         out = subs(in, old(:), new(:));
     else
@@ -1883,8 +1894,8 @@ function [condTrans, names] = conditionSpecificParameters( jplot, jm, fpSymStrin
 
         % Setup list of observational
         % parameters (could be optimized)
-        obsParameters = strrep(ar.model(jm).data(jd2).py, 'filename', stripRandom( jd2 ) );
-        obsParameters = [ obsParameters ; strrep(ar.model(jm).data(jd2).pystd, 'filename', stripRandom( jd2 ) ) ];                              
+        obsParameters = strrep(ar.model(jm).data(jd2).py, 'filename', stripRandom( jm, jd2 ) );
+        obsParameters = [ obsParameters ; strrep(ar.model(jm).data(jd2).pystd, 'filename', stripRandom( jm, jd2 ) ) ];                              
 
         for jpp = 1 : length( ar.model(jm).data(jd2).pold )
             skip = 0;
@@ -1923,7 +1934,7 @@ function [condTrans, names] = conditionSpecificParameters( jplot, jm, fpSymStrin
                         % the precached model sym strings
                         mainModelReplacement = fpSymString{replacementID};
 
-                        expression = char( sym( strrep( ar.model(jm).data(jd2).fp{jpp}, ar.model(jm).data(jd2).name, 'filename' ) ) );
+                        expression = char( arSym( strrep( ar.model(jm).data(jd2).fp{jpp}, ar.model(jm).data(jd2).name, 'filename' ) ) );
                         if ( strcmp( mainModelReplacement, expression ) )
                             skip = 1;
                         end
@@ -1941,16 +1952,25 @@ function [condTrans, names] = conditionSpecificParameters( jplot, jm, fpSymStrin
         end
     end
 
+    %% make empty cells a cell of empty strings 
+    vars = fieldnames(condTrans);
+    for jv=1:length(vars)
+        for j=1:length(condTrans.(vars{jv}))
+            if isempty(condTrans.(vars{jv}){j})
+                condTrans.(vars{jv}){j} = '';
+            end
+        end
+    end
+    
     % Remove the transforms that are the same as in
     % the main model
-    vars = fieldnames(condTrans);
     for jv = 1 : length( vars )
         localReplacement = unique(condTrans.(vars{jv}));
         if ( length(localReplacement) == 1 )
             replacementID = find(strcmp( ar.model(jm).p, names.(vars{jv}) ));
             if ( ~isempty(replacementID) )
                 mainModelReplacement = fpSymString{replacementID};
-                if ( strcmp( mainModelReplacement, char(sym(localReplacement)) ) )
+                if ( strcmp( mainModelReplacement, char(arSym(localReplacement)) ) )
                     condTrans = rmfield( condTrans, vars{jv} );
                 end
             end
@@ -1969,12 +1989,12 @@ function str = repFunc( str, funcName )
     
     str = sprintf( mask );
     
-function str = stripRandom( jd2 )
+function str = stripRandom( m, jd2 )
     global ar;
-    str = ar.model.data(jd2).name;
-    if ( isfield( ar.model.data(jd2), 'fprand' ) && isfield( ar.model.data(jd2), 'prand' ) )
-        for a = 1 : length( ar.model.data(jd2).prand )
-            str = strrep(str, [ '_', ar.model.data(jd2).prand{a}, ar.model.data(jd2).fprand(a) ], '' );
+    str = ar.model(m).data(jd2).name;
+    if ( isfield( ar.model(m).data(jd2), 'fprand' ) && isfield( ar.model(m).data(jd2), 'prand' ) )
+        for a = 1 : length( ar.model(m).data(jd2).prand )
+            str = strrep(str, [ '_', ar.model(m).data(jd2).prand{a}, ar.model(m).data(jd2).fprand(a) ], '' );
         end
     end
     
@@ -1984,7 +2004,10 @@ function str = PTI( str, pti )
     
     if ( pti == 1 )
         %fileList    = {ar.model.plot.name};
-        fileList    = unique({ar.model.data.name});
+        fileList = cell(0);
+        for jm=1:length(ar.model)
+            fileList    = unique(union(fileList,unique({ar.model(jm).data.name})));
+        end
         for a = 1 : length( fileList )
             str = strrep( str, fileList{a}, num2str(a) );
         end
