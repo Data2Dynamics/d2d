@@ -44,6 +44,9 @@ end
 if(exist('arChi2s','file') == 0)
     addpath([ar_path '/Advanced'])
 end
+if(exist('arMC3','file') == 0)
+    addpath([ar_path '/MCMC'])
+end
 if(exist('arSimuCalc.c','file') == 0)
     addpath([ar_path '/Ccode'])
 end
