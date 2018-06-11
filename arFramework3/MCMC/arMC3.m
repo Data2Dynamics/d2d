@@ -95,7 +95,7 @@ if isfield(ar, 'mc3')
     if isfield(ar.mc3, 'UseScaling')
         UseScaling = ar.mc3.UseScaling;
     else
-        UseScaling = 0;
+        UseScaling = 1;
     end
     
     if isfield(ar.mc3, 'TemperatureExponent')
@@ -600,18 +600,18 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
 %              feval(fkt, para_curr(chID,:), Cfactor(chID),accept_rate(chID),max_accept,min_accept,parasHistory(:,:,chID),parasHistory_index, nwindow);
 %              mcmc_mmala_chol(ptmp, restmp, srestmp,InvProposalPriorTemp, RegularizationThresholdTemp)
 
-             ParameterNumber = length(para_curr(chID,:));
+             %ParameterNumber = length(para_curr(chID,:));
 
-            [~,qq] = cholcov(covar_currUSED(:,:,chID),0);
-            if qq ~= 0
-               covar_currUSED(:,:,chID) = covar_currUSED(:,:,chID) + RegularizationThreshold*eye(ParameterNumber);
-               covar_currUSED(:,:,chID) = (covar_currUSED(:,:,chID)+covar_currUSED(:,:,chID)')/2;
-               [~,qq] = cholcov(covar_currUSED(:,:,chID),0);
-               if qq ~= 0
-                  covar_currUSED(:,:,chID) = covar_currUSED(:,:,chID) + max(max(covar_currUSED(:,:,chID)))/1000*eye(ParameterNumber);
-                  covar_currUSED(:,:,chID) = (covar_currUSED(:,:,chID)+covar_currUSED(:,:,chID)')/2;
-               end
-            end
+%             [~,qq] = cholcov(covar_currUSED(:,:,chID),0);
+%             if qq ~= 0
+%                covar_currUSED(:,:,chID) = covar_currUSED(:,:,chID) + RegularizationThreshold*eye(ParameterNumber);
+%                covar_currUSED(:,:,chID) = (covar_currUSED(:,:,chID)+covar_currUSED(:,:,chID)')/2;
+%                [~,qq] = cholcov(covar_currUSED(:,:,chID),0);
+%                if qq ~= 0
+%                   covar_currUSED(:,:,chID) = covar_currUSED(:,:,chID) + max(max(covar_currUSED(:,:,chID)))/1000*eye(ParameterNumber);
+%                   covar_currUSED(:,:,chID) = (covar_currUSED(:,:,chID)+covar_currUSED(:,:,chID)')/2;
+%                end
+%             end
            end
         else
             covar_currUSED(:,:,chID) = covar_curr(:,:,chID);
