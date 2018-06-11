@@ -11,6 +11,8 @@
 
 function arPlotCorrelations(varargin)
 
+global ar
+
 if nargin > 1
     ParaVector = varargin{2};    
 else 
@@ -22,8 +24,6 @@ if nargin > 0
 else
     ParaPerFigure = 10;
 end
-
-global ar
 
 
 NumberOfFigures = ceil(length(ParaVector)/ParaPerFigure);
@@ -38,7 +38,7 @@ for FigureNumber = 1:NumberOfFigures
     NumberOfColumns = length(FigureParaVector)+1;
     NumberOfRows = length(FigureParaVector);
 
-    figure('Name',sprintf('2D Correlations - Figure %d / %d',FigureNumber,NumberOfFigures),'NumberTitle','off', 'Position', [10 300 2000 1000])
+    figure('Name',sprintf('2D Correlations - Figure %d / %d',FigureNumber,NumberOfFigures),'NumberTitle','off')
     % Plot parameter distribution
     for paraindex=FigureParaVector
         hold on
@@ -74,6 +74,7 @@ for FigureNumber = 1:NumberOfFigures
 
         end
     end      
+    set(gcf, 'Position', get(0, 'Screensize'));
 end
 
 end
