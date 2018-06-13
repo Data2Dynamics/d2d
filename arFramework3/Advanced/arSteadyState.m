@@ -97,6 +97,8 @@ function arSteadyState( varargin )
         
     nStates = numel( ar.model(m).x );    
     
+    fprintf('Setting up steady state for model %d\n', m);
+    
     % Set up the steady state condition
     % Note that the explicit manual copy is intentional since in R2013
     % structure copies tend to be shallow copies.
@@ -222,7 +224,7 @@ function arSteadyState( varargin )
     % Show steady state count (to prevent users from forgetting arClearEvents)
     cnt = 0;
     for a = 1 : length( ar.model )
-        cnt = cnt + length(ar.model(m).ss_condition);
+        cnt = cnt + length(ar.model(a).ss_condition);
     end
     arFprintf(1, 'Number of steady state equilibrations: %d\n', cnt );
     
