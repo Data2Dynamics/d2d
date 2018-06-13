@@ -37,6 +37,7 @@ optim_krit = ar.optim_crit(isorted);
 dchi2 = chi2inv(0.95, 1);
 
 figure(1); clf;
+pos1 = get(gcf,'Position');
 nsub = sum([ar.ndata>0 ar.nconstr>0]);
 if(nsub==2)
     nsub = 3;
@@ -95,7 +96,6 @@ legend([h h2], 'converged fits', 'initial objective function value', 'Location',
 
 
 figure(2); clf;
-
 subplot(2,2,1);
 hist(ar.timing, 50);
 xlabel('time / sec / fit');
@@ -117,6 +117,7 @@ semilogy(optim_krit, 'o--');
 xlabel('run index (sorted by likelihood)');
 ylabel('gradient length');
 title('first order optimality criterion');
+set(gcf,'Position',get(gcf,'Position')+[pos1(3),0,0,0]); %shift horizontal position by the horizontal width of the 1st figure
 
 %% scatter plots
 
