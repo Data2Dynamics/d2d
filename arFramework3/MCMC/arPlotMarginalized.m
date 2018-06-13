@@ -33,10 +33,10 @@ end
 count = 1;
 for jk=jks
     
-    if(exist('ar.ple','var') && ~isempty(ar.ple) && ...
+    if(isfield(ar,'ple') && ~isempty(ar.ple) && ...
             isfield(ar.ple, 'chi2s') && ...
             ~isempty(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}))
-        chi2s_ple = ar.ple.chi2s{jk} - ar.ple.chi2;
+        chi2s_ple = ar.ple.chi2s{jk};
         ps_ple = ar.ple.ps{jk};
     else
         chi2s_ple = [];

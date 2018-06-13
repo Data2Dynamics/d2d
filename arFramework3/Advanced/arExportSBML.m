@@ -30,6 +30,8 @@ if (~exist('steadystate','var'))
     end
 end
 
+Crules = {};
+
 M = TranslateSBML(which('empty.xml'));
 F = TranslateSBML(which('filled.xml'));
 
@@ -69,6 +71,12 @@ if(~isempty(ar.model(m).c))
             if(sum(qp)==1)
                 pvalue = ar.model(m).condition(c).fp{qp};
                 M.compartment(jc).size = str2num(pvalue); %#ok str2num also identifies brackets, in which case str2double simply returns NaN
+                if(~isnan(str2num(pvalue)))
+                    M.compartment(jc).size = pvalue;
+                else
+                    M.compartment(jc).size = 1;
+                    warning('Compartment %s is a variable expression %s. This case is currently not handled. Setting volume to unity.', ar.model(m).pc{jc}, pvalue);
+                end
             else
                 pvalue = str2num(ar.model(m).pc{jc}); %#ok
                 if(~isnan(pvalue))
@@ -102,8 +110,6 @@ else
 end
 
 %% species
-Crules = {};
-
 simulated_ss = 0;
 if ( steadystate )
     if ( ~isempty( ar.model(m).condition(c).ssLink ) )
@@ -272,7 +278,7 @@ for jv = 1:length(ar.model(m).fv)
             M.reaction(vcount).reactant(scount).level = 2;
             M.reaction(vcount).reactant(scount).version = 4;
             scount = scount + 1;
-            if(~isempty(scomp) && scomp~=ar.model.cLink(jsource))
+            if(~isempty(scomp) && scomp~=ar.model(m).cLink(jsource))
                 error('influx from different compartments in reaction %i', jv);
             end
             if(~isempty(ar.model(m).cLink))
@@ -298,7 +304,7 @@ for jv = 1:length(ar.model(m).fv)
             M.reaction(vcount).product(scount).level = 2;
             M.reaction(vcount).product(scount).version = 4;
             scount = scount + 1;
-            if(~isempty(tcomp) && tcomp~=ar.model.cLink(jsource))
+            if(~isempty(tcomp) && tcomp~=ar.model(m).cLink(jsource))
                 error('efflux to different compartments in reaction %i', jv);
             end
             if(~isempty(ar.model(m).cLink))

@@ -322,14 +322,14 @@ function sets = scanObservables( m, state, verbose )
             dataset = ar.model(m).data(a).name;
             for c = 1 : length( matches )
                 % Match against observable
-                if max(strcmp(strsplit(ar.model(m).data(a).fy{b}, {'(',')','/','*','^','+','-',' '}), ar.model(m).z{matches(c)} ));
+                if max(strcmp(strsplit(ar.model(m).data(a).fy{b}, {'(',')','/','*','^','+','-',' '}), ar.model(m).z{matches(c)} ))
                     matched = 1;
                     if( verbose )
                         fprintf('%s in %s\n', ar.model(m).z{matches(c)}, dataset);
                     end
                 end
             end
-            if( max(strcmp(strsplit(ar.model(m).data(a).fy{b}, {'(',')','/','*','^','+','-',' '}), stateString )) );
+            if( max(strcmp(strsplit(ar.model(m).data(a).fy{b}, {'(',')','/','*','^','+','-',' '}), stateString )) )
                 matched = 1;
                 if (verbose)
                     fprintf('%s in %s\n', stateString, dataset);
