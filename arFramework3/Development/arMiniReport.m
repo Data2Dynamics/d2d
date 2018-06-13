@@ -8,6 +8,7 @@
 % Option flags are:
 %   PlotAll           - Plot all Ys
 %   PlotFitted        - Plot only those observables that are fitted.
+%   NoExperiments     - Don't export any of the experiments.
 %   OmitNonFitted     - Omit plotting the graph and displaying data for
 %                       datasets that were not fitted (still shows condition
 %                       data however. Useful for steady states)
@@ -40,8 +41,8 @@ global ar
 
 warning( 'This report functionality is currently in beta status.' );
 
-switches    = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots', 'ExcludeDynPars', 'TexPages', 'Figures', 'OverridePlots', 'Bibs' };
-extraArgs   = [         0,            0,               0,                0,                0,             0,               0,               0,         0,                 1,          1,         1,               1,      1 ];
+switches    = { 'PlotAll', 'PlotFitted', 'OmitNonFitted', 'OmitNonPlotted', 'OmitLikelihood', 'KeepRandoms', 'KeepFilenames', 'AlternateFont', 'TexPlots', 'ExcludeDynPars', 'TexPages', 'Figures', 'OverridePlots', 'Bibs', 'FluxNames', 'NoExperiments' };
+extraArgs   = [         0,            0,               0,                0,                0,             0,               0,               0,         0,                 1,          1,         1,               1,      1,           0,               0 ];
 descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Plotting all fitted Ys', '' }, ...
                     { 'Omitting non fitted Ys from report', '' }, ...
@@ -56,6 +57,8 @@ descriptions = {    { 'Plotting all Ys', '' }, ...
                     { 'Including figure directories', '' }, ...
                     { 'Including custom plots', '' }, ...
                     { 'Including custom bibliography items', '' }, ...
+                    { 'Including flux names instead of indices', '' }, ...
+                    { 'Omitting experiments', '' } , ...
                     };
 
 if( (nargin > 0) && max( strcmpi( varargin{1}, switches ) ) == 0 )
@@ -301,7 +304,7 @@ for jm=1:length(ar.model)
     lp(fid, 'The %d dynamic variables used in the model are summarized in Table \\ref{variables}', length(ar.model(jm).x) );
     
     if ( length( ar.model(jm).u ) > 0 ) %#ok
-        lp(fid, ', while the %i external inputs variables are summarized in Table \\ref{inputs}.', sum(~strcmp(ar.model.fu, '0')));
+        lp(fid, ', while the %i external inputs variables are summarized in Table \\ref{inputs}.', sum(~strcmp(ar.model(jm).fu, '0')));
     else
         lp(fid, '.', length(ar.model(jm).u));
     end
@@ -377,7 +380,7 @@ for jm=1:length(ar.model)
         end        
         
         % Find the non-empty inputs
-        us = find(~strcmp(ar.model.fu,'0'));
+        us = find(~strcmp(ar.model(jm).fu,'0'));
         
         if ~isempty(us)
             lp(fid, '\\begin{table}');
@@ -406,9 +409,8 @@ for jm=1:length(ar.model)
     
     %% reactions
     %vs = sym('v', [1, size(ar.model(jm).N,2)]);
-    %cs = sym(strcat('vol_', ar.model(jm).c));
-    
-    lp(fid, '\\newpage\\noindent The model consists of %d differential equations, which are given by the following equations:', length(ar.model.x) );
+    %cs = sym(strcat('vol_', ar.model(jm).c));    
+    lp(fid, '\\newpage\\noindent The model consists of %d differential equations, which are given by the following equations:', length(ar.model(jm).x) );
     lp(fid, '{\\footnotesize');
     lp(fid, '\\begin{align}');
     for jx=1:size(ar.model(jm).N, 1) % for every species jx
@@ -422,20 +424,26 @@ for jm=1:length(ar.model)
         end
         f = 0;
         for jv = find(ar.model(jm).N(jx,:))
+            if ( opts.fluxnames )
+                fname = ar.model(jm).v{jv};
+            else
+                fname = sprintf( '%i', jv );
+            end
+            
             if(abs(ar.model(jm).N(jx,jv))~=1)
                 
-                strtmp = [strtmp sprintf(' %+i \\cdot v_{%i}', ar.model(jm).N(jx,jv), jv)]; %#ok<*AGROW>
+                strtmp = [strtmp sprintf(' %+i \\cdot v_{%s}', ar.model(jm).N(jx,jv), fname)]; %#ok<*AGROW>
                 f = 1;
             elseif(ar.model(jm).N(jx,jv)==1)
                 if ( f == 0 )
-                    strtmp = [strtmp sprintf(' v_{%i}', jv)];
+                    strtmp = [strtmp sprintf(' v_{%s}', fname)];
                 else
-                    strtmp = [strtmp sprintf(' + v_{%i}', jv)];
+                    strtmp = [strtmp sprintf(' + v_{%s}', fname)];
                 end
                 f = 1;
             elseif(ar.model(jm).N(jx,jv)==-1)
                 
-                strtmp = [strtmp sprintf(' - v_{%i}', jv)];
+                strtmp = [strtmp sprintf(' - v_{%s}', fname)];
                 f = 1;
             end
             if(~isempty(ar.model(jm).c) && qinfluxwitheducts(jv) && eductcompartment(jv)~=ar.model(jm).cLink(jx))
@@ -488,10 +496,16 @@ for jm=1:length(ar.model)
     lp(fid, '\\begin{tabular}{@{} *5l @{}}\\toprule');
     lp(fid, '\\titlerowcol \\textbf{Flux} & \\textbf{Equation} %s\\tabularnewline\\midrule', headerChunk );
     for jv = 1 : length( ar.model(jm).fv )
-        if ~strcmp( headerChunk, '' )
-            lp(fid, '%s$v_{%d}$ & $%s$ & %s\\\\', alternate(jv), jv, myFormulas(ar.model(jm).fv{jv}, jm), ar.model(jm).v{jv} );
+        if ( opts.fluxnames )
+            fname = ar.model(jm).v{jv};
         else
-            lp(fid, '%s$v_{%d}$ & $%s$\\\\', alternate(jv), jv, myFormulas(ar.model(jm).fv{jv}, jm) );
+            fname = sprintf( '%i', jv );
+        end
+        
+        if ~strcmp( headerChunk, '' )
+            lp(fid, '%s$v_{%s}$ & $%s$ & %s\\\\', alternate(jv), fname, myFormulas(ar.model(jm).fv{jv}, jm), ar.model(jm).v{jv} );
+        else
+            lp(fid, '%s$v_{%s}$ & $%s$\\\\', alternate(jv), fname, myFormulas(ar.model(jm).fv{jv}, jm) );
         end
     end
     lp(fid, '\\end{tabular}');
@@ -575,7 +589,7 @@ for jm=1:length(ar.model)
             skip = 0;
             if ( usesPreEquilibration == 2 )
                 % This parameter is an initial condition and equilibrated
-                if ( max( strcmp( ar.model(jm).p{jp}, strcat( 'init_', ar.model.x(preEq) ) ) ) )
+                if ( max( strcmp( ar.model(jm).p{jp}, strcat( 'init_', ar.model(jm).x(preEq) ) ) ) )
                     % It's zero, so not relevant.
                     if (str2num(ar.model(jm).fp{jp}) == 0) %#ok
                         skip = 1;
@@ -589,11 +603,11 @@ for jm=1:length(ar.model)
             
             if ( ~skip )
                 if(ccount==length(ar.model(jm).fp) || mod(ccount,N)==0)
-                    lp(fid, '\t%s & \\rightarrow %s ', myFormulas(PTI(ar.model(jm).p{jp},pti), jm), ...
-                        myFormulas(PTI(ar.model(jm).fp{jp},pti), jm));
+                    lp(fid, '\t%s & \\rightarrow %s ', myFormulas(PTI(jm, ar.model(jm).p{jp},pti), jm), ...
+                        myFormulas(PTI(jm, ar.model(jm).fp{jp},pti), jm));
                 else
-                    lp(fid, '\t%s & \\rightarrow %s \\\\', myFormulas(PTI(ar.model(jm).p{jp},pti), jm), ...
-                        myFormulas(PTI(ar.model(jm).fp{jp},pti), jm));
+                    lp(fid, '\t%s & \\rightarrow %s \\\\', myFormulas(PTI(jm, ar.model(jm).p{jp},pti), jm), ...
+                        myFormulas(PTI(jm, ar.model(jm).fp{jp},pti), jm));
                 end
                 if(mod(ccount,N)==0 && ccount<length(ar.model(jm).fp))
                     lp(fid, '\\end{align}\n');
@@ -661,16 +675,16 @@ for jm=1:length(ar.model)
             if(ar.qFit(j)==1)
                 if(ar.p(j) - ar.lb(j) < 0.1 || ar.ub(j) - ar.p(j) < 0.1)
                     lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.4g} & \\color{red}{%+8.4f} & \\color{red}{%+8.4g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\tabularnewline', ...
-                        alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
+                        alternate(dp), j, strrep(PTI(jm, ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                         ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
                 else
                     lp(fid, '%s\t\t\t%i & %s & {%+8.4g} & {%+8.4f} & {%+8.4g} & %i & %s & %i \\tabularnewline', ...
-                        alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
+                        alternate(dp), j, strrep(PTI(jm, ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                         ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
                 end
             else
                 lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.4g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.4g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\tabularnewline', ...
-                    alternate(dp), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
+                    alternate(dp), j, strrep(PTI(jm, ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                     ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
             end
         end
@@ -705,7 +719,7 @@ for jm=1:length(ar.model)
     end  
     
     %% Experiments
-    if ( 1 )
+    if ( opts.noexperiments == 0 )
         lp(fid, '\\FloatBarrier');
         lp(fid, '\\clearpage\n');
         lp(fid, '\\section{Experiments}\n');
@@ -1007,7 +1021,7 @@ for jm=1:length(ar.model)
                             sk = find(qmod);
                             for ky = 1 : length( sk )
                                 jy = sk(ky);
-                                strtmp = myFormulas(PTI(ar.model(jm).data(jd).fy{jy}, pti), jm);
+                                strtmp = myFormulas(PTI(jm, ar.model(jm).data(jd).fy{jy}, pti), jm);
                                 if(isfield(ar.model(jm).data(jd),'logfitting') && ar.model(jm).data(jd).logfitting(jy))
                                     strtmp = ['\mathrm{log}_{10}(' strtmp ')'];
                                 end            
@@ -1038,7 +1052,7 @@ for jm=1:length(ar.model)
                             sk = find(qadd);
                             for ky = 1 : length( sk )
                                 jy = sk(ky);
-                                strtmp = myFormulas(PTI(ar.model(jm).data(jd).fy{jy}, pti), jm);
+                                strtmp = myFormulas(PTI(jm, ar.model(jm).data(jd).fy{jy}, pti), jm);
                                 if(isfield(ar.model(jm).data(jd),'logfitting') && ar.model(jm).data(jd).logfitting(jy))
                                     strtmp = ['\mathrm{log}_{10}(' strtmp ')'];
                                 end
@@ -1075,10 +1089,10 @@ for jm=1:length(ar.model)
                             row{q} = '';
                             var{q} = '';
                             if (length( unique(condTrans.(vars{jv})) ) == 1 )
-                                variableName = strrep(PTI(names.(vars{jv}), pti),'_','\_');
-                                PTI(names.(vars{jv}),pti)
+                                variableName = strrep(PTI(jm, names.(vars{jv}), pti),'_','\_');
+                                PTI(jm, names.(vars{jv}),pti)
                                 str{q} = variableName;
-                                formula = myFormulas(PTI(condTrans.(vars{jv}){1}, pti), jm);
+                                formula = myFormulas(PTI(jm, condTrans.(vars{jv}){1}, pti), jm);
                                 str{q} = sprintf('%s & \\multicolumn{%d}{c}{$%s$}', str{q}, length(condTrans.(vars{1})), formula );
                                 var{q} = variableName;
                                 row{q} = strcat( row{q}, formula, 'Q Q ' );
@@ -1090,12 +1104,12 @@ for jm=1:length(ar.model)
                             row{q} = '';    
                             var{q} = '';
                             if ~(length( unique(condTrans.(vars{jv})) ) == 1 )
-                                variableName = strrep(PTI(names.(vars{jv}),pti),'_','\_');
-                                PTI(names.(vars{jv}),pti)
+                                variableName = strrep(PTI(jm, names.(vars{jv}),pti),'_','\_');
+                                PTI(jm, names.(vars{jv}),pti)
                                 str{q} = variableName;
                                 var{q} = variableName;
                                 for jdls = 1 : length(ar.model(jm).plot(jplot).dLink)
-                                    formula = myFormulas(PTI(condTrans.(vars{jv}){jdls}, pti), jm);
+                                    formula = myFormulas(PTI(jm, condTrans.(vars{jv}){jdls}, pti), jm);
                                     str{q} = sprintf( '%s & $%s$', str{q}, formula );
                                     row{q} = strcat( row{q}, formula, 'Q Q ' );
                                 end
@@ -1304,16 +1318,16 @@ for j=1:length(ar.p)
     if(ar.qFit(j)==1)
         if(ar.p(j) - ar.lb(j) < 0.1 || ar.ub(j) - ar.p(j) < 0.1)
             lp(fid, '%s\t\t\t\\color{red}{%i} & \\color{red}{%s} & \\color{red}{%+8.4g} & \\color{red}{%+8.4f} & \\color{red}{%+8.4g} & \\color{red}{%i} & \\color{red}{%s} & \\color{red}{%i} \\\\', ...
-                alternate(j), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
+                alternate(j), j, strrep(PTI(jm, ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                 ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
         else
             lp(fid, '%s\t\t\t%i & %s & {%+8.4g} & {%+8.4f} & {%+8.4g} & %i & %s & %i \\\\', ...
-                alternate(j), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
+                alternate(j), j, strrep(PTI(jm, ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
                 ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
         end
     else
         lp(fid, '%s\t\t\t\\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%+8.4g} & \\color{mygray}{%+8.4f} & \\color{mygray}{%+8.4g} & \\color{mygray}{%i} & \\color{mygray}{%s} & \\color{mygray}{%i} \\\\', ...
-            alternate(j), j, strrep(PTI(ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
+            alternate(j), j, strrep(PTI(jm, ar.pLabel{j},pti),'_','\_'), ar.lb(j), ar.p(j), ar.ub(j), ar.qLog10(j), ...
             ['$' strrep(sprintf('%+5.2e',pTrans(j)), 'e', '\cdot 10^{') '}$'], ar.qFit(j));
     end
 end
@@ -1883,8 +1897,8 @@ function [condTrans, names] = conditionSpecificParameters( jplot, jm, fpSymStrin
 
         % Setup list of observational
         % parameters (could be optimized)
-        obsParameters = strrep(ar.model(jm).data(jd2).py, 'filename', stripRandom( jd2 ) );
-        obsParameters = [ obsParameters ; strrep(ar.model(jm).data(jd2).pystd, 'filename', stripRandom( jd2 ) ) ];                              
+        obsParameters = strrep(ar.model(jm).data(jd2).py, 'filename', stripRandom( jm, jd2 ) );
+        obsParameters = [ obsParameters ; strrep(ar.model(jm).data(jd2).pystd, 'filename', stripRandom( jm, jd2 ) ) ];                              
 
         for jpp = 1 : length( ar.model(jm).data(jd2).pold )
             skip = 0;
@@ -1969,22 +1983,22 @@ function str = repFunc( str, funcName )
     
     str = sprintf( mask );
     
-function str = stripRandom( jd2 )
+function str = stripRandom( jm, jd2 )
     global ar;
-    str = ar.model.data(jd2).name;
-    if ( isfield( ar.model.data(jd2), 'fprand' ) && isfield( ar.model.data(jd2), 'prand' ) )
-        for a = 1 : length( ar.model.data(jd2).prand )
-            str = strrep(str, [ '_', ar.model.data(jd2).prand{a}, ar.model.data(jd2).fprand(a) ], '' );
+    str = ar.model(jm).data(jd2).name;
+    if ( isfield( ar.model(jm).data(jd2), 'fprand' ) && isfield( ar.model(jm).data(jd2), 'prand' ) )
+        for a = 1 : length( ar.model(jm).data(jd2).prand )
+            str = strrep(str, [ '_', ar.model(jm).data(jd2).prand{a}, ar.model(jm).data(jd2).fprand(a) ], '' );
         end
     end
     
 % Function which makes a hash of all the file identifiers
-function str = PTI( str, pti )
+function str = PTI(jm,  str, pti )
     global ar;
     
     if ( pti == 1 )
         %fileList    = {ar.model.plot.name};
-        fileList    = unique({ar.model.data.name});
+        fileList    = unique({ar.model(jm).data.name});
         for a = 1 : length( fileList )
             str = strrep( str, fileList{a}, num2str(a) );
         end
