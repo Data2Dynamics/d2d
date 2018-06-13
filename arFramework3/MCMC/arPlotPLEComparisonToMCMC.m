@@ -85,7 +85,9 @@ for FigureNumber = 1:NumberOfFigures
           
         subplot(NumberOfRows,NumberOfColumns,i+floor((i-1)/NumberOfColumns)*NumberOfColumns)       % add first plot in 2 x 1 grid
 
-        h1 = histogram(ar.ps(:,paraindex));
+        %h1 = histogram(ar.ps(:,paraindex));
+        h1 = histogram(ar.ps(:,paraindex),100);
+        set(h1, 'FaceColor','none');
         
         %         % Log Scale of Histogram to make it comparable to PLE
         if LogScale == true
@@ -93,6 +95,13 @@ for FigureNumber = 1:NumberOfFigures
             limsy=get(gca,'YLim');
             set(gca,'Ylim',[.7 limsy(2)]);     
         end
+        
+        if ar.qLog10(paraindex) == 1
+            xlabel(['log_{10}(' arNameTrafo(ar.pLabel{paraindex}) ')'])
+        else
+            xlabel([ arNameTrafo(ar.pLabel{paraindex})])
+        end
+        ylabel('posterior PDF');
         
         % Bayesian confidence interval 95 %
         if BayesianCredibleInterval == true
@@ -167,9 +176,16 @@ for FigureNumber = 1:NumberOfFigures
             end
             xlim(xlimtmp);
         end
+        
+        
+        if ar.qLog10(paraindex) == 1
+            xlabel(['log_{10}(' arNameTrafo(ar.pLabel{paraindex}) ')'])
+        else
+            xlabel([ arNameTrafo(ar.pLabel{paraindex})])
+        end
+        ylabel(ar.ple.ylabel)
 
-        %%%%%%%%%%%%%%% Plot recalculated Thresholds from
-        %%%%%%%%%%%%%%% Coverage tests!!!!
+
 
         % thresholds
 
