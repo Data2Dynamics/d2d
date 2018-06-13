@@ -26,7 +26,7 @@ lines = {'# This file has been generated using arFramework3/Advanced/write_gitig
     ''
     '*.dat'
     ''
-    'arFramework3/l1/trdog/trdog.m'
+    'arFramework3/L1/trdog/trdog.m'
     'arFramework3/Subfunctions/snls.m'
     ''
     'arFramework3/Examples/Dream6_L1/Data/simu*'

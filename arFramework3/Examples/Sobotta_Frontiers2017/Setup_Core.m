@@ -1,7 +1,6 @@
 % Shaping the dose response of IL6 induced target gene transcription
 global ar;
 
-addpath('Helper');
 arInit;
 modelname = 'il6_core';
 arLoadModel(modelname);
@@ -94,7 +93,8 @@ end
 arLoadData('steadystate/steadystate',1,'csv',true)
 
 %% compile
-arCompileAll(true);
+arCompileAll;
+addpath('Helper');
 
 % Tight equilibration tolerances
 ar.config.eq_tol=1e-10;
@@ -117,5 +117,11 @@ ar.config.maxsteps = 1000;
 ar.config.fiterrors = 1;
 
 arLoadPars('finalized_model');
+%Set parameters to be estimated
+ar.qFit(:) = 1;
+arSetPars('scale_socs3_qpcr_braun_hep_2013_07_08_qPCR_Socs3_Stat3',[],0,1)
+hill_loc = find(strcmp(ar.pLabel,'socs3rna_hill'));
+arSetPars('socs3rna_hill',10.^ar.p(hill_loc),1,0,1,3)
+arSetPars({'scale_pjak1_wb_bohl_hep_2009_07_07_DRTC','scale_pstat3_wb_bohl_hep_2009_07_07_DRTC','offset_pstat3_lumi_braun_hep_2012_05_02_Stattic_Stat3_Inhibitor_60','offset_pstat3_wb_bohl_hep_2005_02_14_DoseResponse_T15min','offset_pstat3_wb_bohl_hep_2005_07_26_Pulse5min','offset_pstat3_wb_braun_hep_2011_09_06_DRTC','offset_pstat3_wb_braun_hep_2012_05_02_Stattic_Stat3_Inhibitor_40','offset_pstat3_wb_braun_hep_2012_05_02_Stattic_Stat3_Inhibitor_60','offset_pstat3_wb_braun_hep_2013_06_17_Ruxolitinib'},zeros(1,9),zeros(1,9),zeros(1,9),ones(1,9)*-5,ones(1,9)*3);
 arCalcMerit; arGetMerit;
-save(modelname, 'ar');
+%save(modelname, 'ar');

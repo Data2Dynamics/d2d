@@ -199,7 +199,7 @@ function [olist, names, m] = arFindData( varargin )
                     end
                 else
                     % It is a string; Does it refer to a parameter?
-                    Q = find(strcmp(ar.pLabel, ar.model.fp{ID}));
+                    Q = find(strcmp(ar.pLabel, ar.model(m).fp{ID}));
                     if ~isempty(Q)
                         condList(c) = 0;
                         numval = arGetPars(ar.pLabel{Q},0);
@@ -325,7 +325,7 @@ function sets = scanObservables( m, state, verbose )
                 if max(strcmp(strsplit(ar.model(m).data(a).fy{b}, {'(',')','/','*','^','+','-',' '}), ar.model(m).z{matches(c)} ))
                     matched = 1;
                     if( verbose )
-                        fprintf('%s in %s\n', ar.model.z{matches(c)}, dataset);
+                        fprintf('%s in %s\n', ar.model(m).z{matches(c)}, dataset);
                     end
                 end
             end

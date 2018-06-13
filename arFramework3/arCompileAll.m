@@ -56,6 +56,13 @@ else
     legacy_steps = 0;
 end
 
+% remember the function call
+ar.setup.commands{end+1} = mfilename; % this file name
+ar.setup.arguments{end+1} = {forcedCompile, debug_mode, source_dir, simplifyEquations}; % 
+ar.setup.datafiles{end+1} = {};
+ar.setup.modelfiles{end+1} = '';
+
+
 if(isfield(ar,'checkstr'))
     prepareBecauseOfRepeatedCompilation;
 end
@@ -372,7 +379,11 @@ for m=1:length(ar.model)
         else
             for d=1:length(ar.model(m).data)
                 c = data(d).cLink;
-                data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
+                try
+                    data_sym = arCalcData(config, model, data(d), m, c, d, doskip(d), matlab_version);
+                catch
+                    data(d)
+                end
                 newp{d} = data_sym.p;
                 newfp{d} = data_sym.fp;
                 newpold{d} = data_sym.pold;
@@ -546,11 +557,58 @@ ar.fkt = ['arSimuCalcFun_' ar.checkstr];
 writeSimuCalcFunctions(debug_mode);
 
 % compile
-if ( forcedCompile == 2 )
+if ~forcedCompile && exist([pwd,filesep,ar.fkt,'.',mexext],'file')
+    % do nothing
+    fprintf('%s is already available: compiling skipped.\n',[ar.fkt,'.',mexext]);
+elseif ( forcedCompile == 2 )
     arCompile(2, true, false, source_dir);
 else
     arCompile(forcedCompile, false, false, source_dir);
 end
+
+% copy model and data backup files:
+if isfield(ar.config,'backup_modelAndData') && ar.config.backup_modelAndData
+    if ~isdir('./Models/Backup')
+        mkdir('./Models/Backup');
+    end
+    if ~isdir(['./Models/Backup/',ar.checkstr])
+        mkdir('./Models/Backup/',ar.checkstr);
+    end
+    if ~isdir('./Data/Backup')
+        mkdir('./Data/Backup');
+    end
+    if ~isdir(['./Data/Backup/',ar.checkstr])
+        mkdir('./Data/Backup/',ar.checkstr);
+    end
+    
+    ar.setup.backup_data_folder = cell(size(ar.setup.datafiles));
+    for i=1:length(ar.setup.datafiles)
+        for j=1:length(ar.setup.datafiles{i})
+            ar.setup.backup_data_folder{i}{j} = fullfile(pwd,['/Data/Backup/',ar.checkstr,'/']);% fullfile to prevent mixing of \ and /
+            ar.setup.backup_data_folder_local{i}{j} = ['./Data/Backup/',ar.checkstr,'/'];
+            [~,file,ext] = fileparts(ar.setup.datafiles{i}{j});
+            source = ar.setup.datafiles{i}{j};
+            target = [ar.setup.backup_data_folder{i}{j},file,ext];
+            if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
+                copyfile(source,target);
+            end
+        end
+    end
+    ar.setup.backup_model_folder = cell(size(ar.setup.modelfiles));
+    for i=1:length(ar.setup.modelfiles)
+        if ~isempty(ar.setup.modelfiles{i})
+            ar.setup.backup_model_folder{i} = fullfile(pwd,['/Models/Backup/',ar.checkstr,'/']);  % fullfile to prevent mixing of \ and /
+            ar.setup.backup_model_folder_local{i} = ['./Models/Backup/',ar.checkstr,'/'];
+            [~,file,ext] = fileparts(ar.setup.modelfiles{i});
+            source = ar.setup.modelfiles{i};
+            target = [ar.setup.backup_model_folder{i},file,ext];
+            if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
+                copyfile(source,target);
+            end
+        end
+    end
+end
+
 
 % link
 arLink;
@@ -667,14 +725,15 @@ if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
                 end
             end
         end
-    
-        tmpsym = ar.model(m).sym.dfvdu;
-        tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
-        tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
-        tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
-
-        ar.model(m).qdvdu_negative = double(tmpsym) < 0;
     end
+    
+    tmpsym = ar.model(m).sym.dfvdu;
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
+    tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
+    tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+    
+    ar.model(m).qdvdu_negative = double(tmpsym) < 0;
+    
     
     tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
     ar.model(m).nnz = nansum(nansum(logical(tmpzeros~=0))) + nansum(nansum(logical(tmpzeros~=0))==0);

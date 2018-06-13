@@ -49,6 +49,10 @@
 % 'IgnoreInputs'        Ignore input overrides. Simply pass a cell array
 %                       with names of inputs that should be ignored (the 
 %                       model default will be used instead).
+% 
+% 'DataPath'            Path to the data files.
+%                       Default: DataPath = 'Data/'
+% 
 %
 % The data file specification is as follows:
 %
@@ -77,25 +81,55 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
+switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions',...
+    'removeemptyconds', 'expsplit', 'resampledoseresponse', 'resamplingresolution',...
+    'refinelog', 'ignoreinputs', 'detectionlimit', 'datapath'};
+extraArgs = [ 1, 1, 1, 1, ...
+    0, 1, 0, 1, ...
+    0, 1, 1, 1 ];
+description = { ...
+    {'', 'Multiple shooting on'} ...
+    {'', 'Ignoring specific conditions'} ...
+    {'', 'Ignoring specific observables'} ...
+    {'', 'Split data set into specific conditions'}, ...
+    {'', 'Removing conditions without data'}, ...
+    {'', 'Splitting conditions by specific data column'}, ...
+    {'', 'Resampling dose response'}, ...
+    {'', 'Resampling with custom resolution'}, ...
+    {'', 'Resampling on log scale'}, ...
+    {'', 'Ignoring specific inputs'}, ...
+    {'', 'Working with detection limit'}, ...
+    {'', 'Path to the data files'}};
+    
+opts = argSwitch( switches, extraArgs, description, 1, varargin );
+if isempty(opts.datapath_args)
+    DataPath = 'Data/';
+else
+    DataPath = opts.datapath_args;
+    if DataPath(end)~='/' && DataPath(end)~='\'
+        DataPath = [DataPath,'/'];
+    end
+end
+
+
 % load model from mat-file
-if(~exist('Data','dir'))
-    error('folder Data/ does not exist')
+if(~exist(DataPath,'dir'))
+    error('folder %s does not exist',DataPath)
 end
 if strcmp(strrep(name,' ',''),name)~=1
     name
     error('File names should not contain empty spaces. Please remove it.');
 end
-
-if(~exist(['Data/' name '.def'],'file'))
-    if(~exist(['Data/' name '.xls'],'file') && ~exist(['Data/' name '.csv'],'file') && ~exist(['Data/' name '.xlsx'],'file'))
-        error('data definition file %s.def does not exist in folder Data/', name)
+if(~exist([DataPath, name, '.def'],'file'))
+    if(~exist([DataPath, name '.xls'],'file') && ~exist([DataPath, name '.csv'],'file') && ~exist([DataPath, name '.xlsx'],'file'))
+        error('data definition file %s.def does not exist in folder %s', name,DataPath)
     else
-        arFprintf(1, '\ncreating generic .def file for Data/%s ...\n', name);
-        copyfile(which('data_template.def'),['./Data/' name '.def']);
+        arFprintf(1, '\ncreating generic .def file for %s/%s ...\n', DataPath, name);
+        copyfile(which('data_template.def'),[DataPath, name, '.def']);
     end
 else
-    if(~exist(['Data/' name '.xls'],'file') && ~exist(['Data/' name '.csv'],'file') && ~exist(['Data/' name '.xlsx'],'file'))
-        warning('data file corresponding to %s.def does not exist in folder Data/', name)
+    if(~exist([DataPath, name '.xls'],'file') && ~exist([DataPath, name '.csv'],'file') && ~exist([DataPath, name '.xlsx'],'file'))
+        warning('data file corresponding to %s.def does not exist in folder %s/', DataPath, name)
     end
 end
     
@@ -130,11 +164,11 @@ if(~exist('extension','var') || isempty(extension))
     extension = 'xls';
     
     % auto-select extension if not specified
-    if exist(['Data/' name '.xlsx'],'file')
+    if exist([DataPath, name '.xlsx'],'file')
+        extension = 'xlsx';
+    elseif exist([DataPath, name '.xls'],'file')
         extension = 'xls';
-    elseif exist(['Data/' name '.xls'],'file')
-        extension = 'xls';
-    elseif exist(['Data/' name '.csv'],'file')
+    elseif exist([DataPath, name '.csv'],'file')
         extension = 'csv';
     end
 end
@@ -147,23 +181,8 @@ else
     end
 end
 
-switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions', 'removeemptyconds', 'expsplit', 'resampledoseresponse', 'resamplingresolution', 'refinelog', 'ignoreinputs', 'detectionlimit'};
-extraArgs = [ 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1 ];
-description = { ...
-    {'', 'Multiple shooting on'} ...
-    {'', 'Ignoring specific conditions'} ...
-    {'', 'Ignoring specific observables'} ...
-    {'', 'Split data set into specific conditions'}, ...
-    {'', 'Removing conditions without data'}, ...
-    {'', 'Splitting conditions by specific data column'}, ...
-    {'', 'Resampling dose response'}, ...
-    {'', 'Resampling with custom resolution'}, ...
-    {'', 'Resampling on log scale'}, ...
-    {'', 'Ignoring specific inputs'}, ...
-    {'', 'Working with detection limit'}};
-    
-opts = argSwitch( switches, extraArgs, description, 1, varargin );
 
+%%
 if ( opts.resampledoseresponse )
     if ( ~isnumeric( opts.resamplingresolution_args ) || isempty( opts.resamplingresolution_args ) )
         opts.resamplingresolution = 25;
@@ -189,21 +208,20 @@ end
 
 % initial setup
 ar.model(m).data(d).name = strrep(strrep(strrep(strrep(name,'=','_'),'.',''),'-','_'),'/','_');
-ar.model(m).data(d).path = [pwd,filesep,'Data',filesep];
+ar.model(m).data(d).path = [pwd,filesep,DataPath];
 
 ar.model(m).data(d).uNames = {};
 
-arFprintf(1, '\nloading data #%i, from file Data/%s.def...', d, name);
+arFprintf(1, '\nloading data #%i, from file %s%s.def...', d, DataPath, name);
 
 % Disable this if you are having problems because of the preprocessor
 preprocessor = 1;
-arFprintf(1, 'loading model #%i, from file Models/%s.def...\n', m, name);
 if ( ~preprocessor )
-    fid = fopen(['Data/' name '.def'], 'r');
+    fid = fopen([DataPath, name, '.def'], 'r');
 else
     % Load into a struct
-    fid.fn  = ['Data/' name '.def'];
-    fid.str = fileread(['Data/' name '.def']);
+    fid.fn  = [DataPath name '.def'];
+    fid.str = fileread([DataPath name '.def']);
     fid.pos = 1;
     arFprintf( 3, 'Running preprocessor...' );
     fid = arPreProcessor(fid);
@@ -682,21 +700,22 @@ end
 % XLS file
 arFprintf( 3, 'Read def file [ OK ]\n' );
 if(~strcmp(extension,'none') && ( ...
-    (exist(['Data/' name '.xlsx'],'file') && strcmp(extension,'xls')) ||...
-    (exist(['Data/' name '.xls'],'file') && strcmp(extension,'xls')) || ...
-    (exist(['Data/' name '.csv'],'file') && strcmp(extension,'csv'))))
-    arFprintf(2, 'loading data #%i, from file Data/%s.%s...\n', d, name, extension);
+    (exist([DataPath, name '.xlsx'],'file') && strcmp(extension,'xlsx')) ||...
+    (exist([DataPath, name '.xls'],'file') && strcmp(extension,'xls')) || ...
+    (exist([DataPath, name '.csv'],'file') && strcmp(extension,'csv'))))
+    arFprintf(2, 'loading data #%i, from file %s%s.%s...\n', d, DataPath, name, extension);
+    dataFound = true;
 
     % read from file
-    if(strcmp(extension,'xls'))
+    if(~isempty(strfind(extension,'xls')))
         warntmp = warning;
         warning('off','all')
         
         arFprintf( 3, '[ OK ]\nBegin reading data (xls) ...' );
-        if (exist(['Data/' name '.xls'],'file'))      
-            [data, Cstr] = xlsread(['Data/' name '.xls']);
-        elseif (exist(['Data/' name '.xlsx'],'file'))      
-            [data, Cstr] = xlsread(['Data/' name '.xlsx']);
+        if (exist([DataPath, name '.xls'],'file'))      
+            [data, Cstr] = xlsread([DataPath, name '.xls']);
+        elseif (exist([DataPath, name '.xlsx'],'file'))      
+            [data, Cstr] = xlsread([DataPath, name '.xlsx']);
         end
         arFprintf( 3, '[ OK ]\n' );
         
@@ -735,7 +754,7 @@ if(~strcmp(extension,'none') && ( ...
         
     elseif(strcmp(extension,'csv'))
         arFprintf( 3, '[ OK ]\nBegin reading data (csv) ...' );
-        [header, data, dataCell] = arReadCSVHeaderFile(['Data/' name '.csv'], ',', true);
+        [header, data, dataCell] = arReadCSVHeaderFile([DataPath, name '.csv'], ',', true);
         arFprintf( 3, '[ OK ]\n' );
         
         timevar = strtrim(header(1));
@@ -884,14 +903,31 @@ if(~strcmp(extension,'none') && ( ...
         checkReserved(m, d);
     end
 else
+    dataFound = false;
     warning('Cannot find data file corresponding to %s', name);
     ar.model(m).data(d).condition = [];
 end
 
+
+% remember the function call
+ar.setup.commands{end+1} = mfilename; % this file name
+ar.setup.arguments{end+1} = {name,m,extension, removeEmptyObs, varargin{:}}; % 
+if dataFound
+    ar.setup.datafiles{end+1} = {[DataPath,name,'.def'],[DataPath,name,'.',extension]};
+else
+    ar.setup.datafiles{end+1} = {[DataPath,name,'.def'],''};
+end
+ar.setup.modelfiles{end+1} = '';
+
+% sort fields
 ar = orderfields(ar);
 ar.model = orderfields(ar.model);
 ar.model(m).data = orderfields(ar.model(m).data);
 ar.model(m).plot = orderfields(ar.model(m).plot);
+
+
+
+
 
 function checkReserved(m, d)
     global ar;
@@ -1188,6 +1224,8 @@ else
         [ar,d] = doMS(ar,m,d,jplot,dpPerShoot);
     end
 end
+
+
 
 
 function C = mymat2cell(D)

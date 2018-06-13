@@ -31,6 +31,13 @@
 %      15 - particleswarm
 %      16 - simulated annealing
 %      17 - ga (geneticalgorithm)
+%      18 - Repeated optimization alternating between 1 and 5 (Joep's heuristics)
+%      19 - enhanced Scatter Search (eSS) Egea et al. "Dynamic Optimization of Nonlinear Processes with an Enhanced Scatter Search Method"
+%           link to MEIGO toolbox needed: https://bitbucket.org/jrbanga_/meigo64
+% 
+%   ar.fit contains information about the latest fit. It also consist of
+%   ar.fit.checksums which contains information (e.g. checksums) to uniquely
+%   identify/discriminate the same/different fit settings.
 %
 %  Convergence of the optimization algorithm can be stored by setting
 %  ar.config.logFitting = 1. Then interesing variables for each iteration
@@ -39,7 +46,6 @@
 function varargout = arFit(varargin)
 
 global ar
-global fit
 
 if(nargin==0)
     qglobalar = true;
@@ -63,6 +69,16 @@ else
         silent = false;
     end
 end
+
+global fit
+fit = struct;
+fit.checksums = struct;
+[~,fit.checksums.folder]=fileparts(pwd);
+fit.checksums.fkt = ar.fkt;                         % checksum for model properties
+fit.checksums.checkstr_parameters = arChecksumPara; % checksum for parameter properties
+fit.checksums.checkstr_fitting = arChecksumFitting; % checksum for fit and integration settings
+fit.checksums.checkstr_data = arChecksumData;       % checksum for data properties
+fit.checksums.pstart = ar.p; % initial guess
 
 if(~isfield(ar.config, 'optimizer'))
     ar.config.optimizer = 1;
@@ -106,7 +122,6 @@ if any(ar.type==3)
     addpath([ar_path '/L1/trdog'])
 end
 
-fit = struct([]);
 fit(1).iter_count = 0;
 fit.fevals = 0;
 
@@ -140,6 +155,7 @@ arPush('arFit');
 if(ar.config.optimizer == 1)    
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         lsqnonlin(@merit_fkt, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
+
 % fmincon
 elseif(ar.config.optimizer == 2)
     options = optimset('fmincon');
@@ -457,6 +473,47 @@ elseif(ar.config.optimizer == 18)
         end
     end
     resnorm = res;    
+
+% eSS via Link to MEIGO
+elseif(ar.config.optimizer == 19)
+    ar.config.optimizers{19} = 'eSS_MEIGO';
+    
+    if(~isempty(ar.config.optim.Display))
+        silent = strcmp(ar.config.optim.Display,'iter')==0;
+    else
+        silent = 1;
+    end
+    
+    
+    problem.f = @merit_fkt_eSS;
+    problem.x_0 = ar.p(ar.qFit==1);
+    problem.x_L = lb;
+    problem.x_U = ub;
+    
+    if(~isempty(ar.config.optim.MaxIter))
+        maxiter = ar.config.optim.MaxIter;
+    else
+        maxiter = 1e3;
+    end
+    
+    opts.local.solver = 'lsqnonlin';
+    opts.maxeval = maxiter;
+    opts.iterprint = ~strcmp(ar.config.optim.Display,'off');
+    opts.local.iterprint = ~strcmp(ar.config.optim.Display,'off');
+    
+    Results = MEIGO(problem,opts,'ESS');
+    
+    pFit = Results.xbest;
+    resnorm = merit_fkt(pFit);
+    exitflag = Results.end_crit;
+    output.iterations = NaN;
+    output.funcCount = Results.numeval;
+    output.firstorderopt= NaN;
+    output.message = 'You used enhanced scatter search (eSS). There is no other output-message.';
+    lambda = NaN;
+    jac = [];
+    
+% TODO: Automatically delete the automatically generated file  called ess_report.mat
 else
     error('ar.config.optimizer invalid');    
 end
@@ -518,6 +575,47 @@ end
 % Discard the parameter set again without taking its values
 arPop(1);
 
+% eSS - under development 
+function [J,G,res,sres] = merit_fkt_eSS(pTrial)
+global ar
+
+% Only compute sensis when requested
+if ( isfield( ar.config, 'sensiSkip' ) )
+    sensiskip = ar.config.sensiSkip;
+else
+    sensiskip = false;
+end
+sensi = ar.config.useSensis;% && (~sensiskip || (nargout > 1));
+
+arCalcMerit(sensi, pTrial);
+J = arGetMerit(true);
+G = 0;
+arLogFit(ar);
+res = [ar.res ar.constr];
+if(nargout>1 && ar.config.useSensis)
+    sres = [];
+    if(~isempty(ar.sres))
+        sres = ar.sres(:, ar.qFit==1);
+    end
+    if(~isempty(ar.sconstr))
+        sres = [sres; ar.sconstr(:, ar.qFit==1)];
+    end
+end
+
+np = sum(ar.qFit==1);
+if ( numel(res) < np )
+    tres = zeros(1,np);
+    tres(1:length(res)) = res;
+    if (nargout>1 && ar.config.useSensis)
+        tsres = zeros(np);
+        tsres(1:length(res), 1:np) = sres;
+    end
+    
+    res = tres;
+    if (nargout>1 && ar.config.useSensis)
+        sres = tsres;
+    end
+end
 
 % lsqnonlin and arNLS
 function [res, sres] = merit_fkt(pTrial)

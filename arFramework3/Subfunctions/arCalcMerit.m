@@ -214,7 +214,7 @@ if(sensi)
     end
     g = -2*res*sres; % gradient
     if(~isempty(g))
-        onbound = [ar.p(ar.qFit==1)==ar.ub(ar.qFit==1); ar.p(ar.qFit==1)==ar.lb(ar.qFit==1)];
+        onbound = [my_equals(ar.p(ar.qFit==1),ar.ub(ar.qFit==1)); my_equals(ar.p(ar.qFit==1),ar.lb(ar.qFit==1))];
         exbounds = [g>0; g<0];
         qred = sum(onbound(:) & exbounds(:),1)>0;
         ar.firstorderopt = norm(g(~qred));
@@ -238,3 +238,6 @@ if ~silent
     arGetMerit
 end
 
+function c = my_equals(a,b)
+c = a(:)==b(:);
+c = c';

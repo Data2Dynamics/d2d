@@ -1,0 +1,51 @@
+DESCRIPTION
+"Immune Cells "
+
+PREDICTOR
+t               T   h         time	0 28
+
+COMPARTMENTS
+
+STATES
+Naive           C   "number" "number"
+EarlyEffector   C   "number" "number"
+LateEffector    C   "number" "number"
+Memory          C   "number" "number"
+Pathogen        C   "number" "number"
+ 
+INPUTS
+
+REACTIONS
+Naive           ->                  CUSTOM "mu_N*Naive"
+Naive           ->  EarlyEffector   CUSTOM "delta_NE*Pathogen*Naive"
+                ->  EarlyEffector   CUSTOM "rho_E*Pathogen*EarlyEffector"
+EarlyEffector   ->                  CUSTOM "mu_EE*EarlyEffector*EarlyEffector"
+EarlyEffector   ->  LateEffector    CUSTOM "delta_EL*EarlyEffector"
+LateEffector    ->                  CUSTOM "mu_LL*LateEffector*LateEffector"
+LateEffector    ->                  CUSTOM "mu_LE*EarlyEffector*LateEffector"
+LateEffector    ->  Memory          CUSTOM "delta_LM*LateEffector"
+                ->  Pathogen        CUSTOM "rho_P*Pathogen*Pathogen"
+Pathogen        ->                  CUSTOM "mu_PE*EarlyEffector*Pathogen"
+Pathogen        ->                  CUSTOM "mu_PL*LateEffector*Pathogen"
+Pathogen        ->                  CUSTOM "mu_P*Pathogen"
+       
+DERIVED
+
+OBSERVABLES
+Naive_obs           C   "number" "number" 0 0 "Naive"
+EarlyEffector_obs   C   "number" "number" 0 0 "EarlyEffector"
+LateEffector_obs    C   "number" "number" 0 0 "LateEffector"
+Memory_obs          C   "number" "number" 0 0 "Memory"
+
+ERRORS
+Naive_obs           "Naive_obs_std"
+EarlyEffector_obs   "EarlyEffector_obs_std"
+LateEffector_obs    "LateEffector_obs_std"
+Memory_obs          "Memory_obs_std"
+
+CONDITIONS
+init_Naive           "8090"
+init_EarlyEffector   "0"
+init_LateEffector    "0"
+init_Memory          "0"
+init_Pathogen        "1"

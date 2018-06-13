@@ -78,26 +78,40 @@ global ar
     % Conditions
     Conditions_string = {'Conditions','';'','exp condition'};   
 %     tmp_par = {};
-    par_trafo = {};
+    max_fp = 1;
+    max_id = 1;
+    for jc = 1:length(ar.model(im).condition)
+        if(length(ar.model(im).condition(jc).fp)>max_fp)
+           max_fp = length(ar.model(im).condition(jc).fp);
+           max_id = jc;
+        end
+    end
+    par_trafo = cell(max_fp,length(ar.model(im).data));
     %Collect parameter trafos
     for jd= 1:length(ar.model(im).data)
         jc = ar.model(im).data(jd).cLink;
        Conditions_string{jd+2,1} = ['Data file ' num2str(jd)];
        Conditions_string{jd+2,2} = num2str(jc);
        %append parameter trafos in each data struct
-       par_trafo = [par_trafo ar.model(im).condition(jc).fp];
+       par_trafo(1:length(ar.model(im).condition(jc).fp),jd) = ar.model(im).condition(jc).fp;
     end
     
     %get differences in parameter trafos
     for i = 1:size(par_trafo,1)
+        ids_empty = cellfun(@isempty,par_trafo(i,:));
+        if(any(ids_empty))
+            for ie = find(ids_empty==1)
+                par_trafo{i,ie} = '';
+            end
+        end
         num(i) = length(unique(par_trafo(i,:)));
-        istrafo(i) = num(i)==1 & ~strcmp(ar.model(1).condition(1).fp{i},ar.model(1).condition(1).pold{i});
+        istrafo(i) = num(i)==1 & ~strcmp(ar.model(1).condition(max_id).fp{i},ar.model(1).condition(max_id).pold{i});
     end   
-    tmp_par = ar.model(1).condition(1).pold(num>1);
+    tmp_par = ar.model(1).condition(max_id).pold(num>1);
     
     %Go through differing parameter trafos (num>1)
     Conditions_string(2,3:length(tmp_par)+2) = tmp_par;
-    Conditions_string(3:length(ar.model(im).data)+2,3:length(tmp_par)+2) = strrep(strrep(par_trafo(num>1,:)','(',''),')','');
+    Conditions_string(3:length(ar.model(im).data)+2,3:length(tmp_par)+2) = par_trafo(num>1,:)';%strrep(strrep(par_trafo(num>1,:)','(',''),')','');
     
     Conditions_string(2,end+1:end+3) = {'nTimePoints','nDataPoints','chi2 value'};
     for jd= 1:length(ar.model(im).data)
@@ -110,7 +124,7 @@ global ar
     Conditions_string(end+2,1) = {'General transformations'};
     
     Conditions_string(end+1:size(Conditions_string,1)+sum(istrafo),2) = ar.model(im).condition(jc).pold(istrafo)';   
-    Conditions_string(size(Conditions_string,1)-sum(istrafo)+1:size(Conditions_string,1),3) = strrep(strrep(ar.model(im).condition(jc).fp(istrafo),'(',''),')','');        
+    Conditions_string(size(Conditions_string,1)-sum(istrafo)+1:size(Conditions_string,1),3) = ar.model(im).condition(jc).fp(istrafo);%strrep(strrep(ar.model(im).condition(jc).fp(istrafo),'(',''),')','');        
    
     xlwrite('./Benchmark_paper/General_info.xlsx',Conditions_string,'Experimental conditions');
    
@@ -134,10 +148,11 @@ global ar
             tmp_ode2 = tmp_ode;
             for j = 1:length(ar.model(im).condition(jc).pold)
                 regPar = sprintf('(?<=\\W)%s(?=\\W)|^%s$|(?<=\\W)%s$|^%s(?=\\W)',ar.model(im).condition(jc).pold{j},ar.model(im).condition(jc).pold{j},ar.model(im).condition(jc).pold{j},ar.model(im).condition(jc).pold{j});
-                tmp_ode2 = regexprep(tmp_ode2,regPar, strrep(strrep(ar.model(im).condition(jc).fp{j},'(',''),')',''));           
+                %tmp_ode2 = regexprep(tmp_ode2,regPar, strrep(strrep(ar.model(im).condition(jc).fp{j},'(',''),')',''));  
+                tmp_ode2 = regexprep(tmp_ode2,regPar, ar.model(im).condition(jc).fp{j});
             end
             for i = 1:length(ar.model(im).x)
-                ode_string{i+2,1} = ['d' ar.model(im).x{i} '/dt'];           
+                ode_string{i+2,1} = ['d' ar.model(im).x{i} '/dt'];                
                 ode_string{i+2,2} = char(sym(tmp_ode2{i}));                
             end
             
@@ -218,7 +233,8 @@ global ar
 
         for i = find(tmp)
            init_string{end+1,1} = ar.model(im).condition(jc).pold{i};
-           init_string{end,2} = strrep(strrep(ar.model(im).condition(jc).fp{i},'(',''),')','');
+           %init_string{end,2} = strrep(strrep(ar.model(im).condition(jc).fp{i},'(',''),')','');
+           init_string{end,2} = ar.model(im).condition(jc).fp{i};
         end
 
         xlwrite(file_name,init_string,'Initials');

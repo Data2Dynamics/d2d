@@ -10,7 +10,7 @@ function ar = arInitFields(ar)
     % !!  NOTE: Every time you add or remove a field, increment this value by one.
     % !! 
     % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    arFormatVersion = 4;
+    arFormatVersion = 5;
     
     % Without arguments, just return the version number
     if ( nargin < 1 )
@@ -23,6 +23,8 @@ function ar = arInitFields(ar)
     ar              = checkForField(ar, 'info');
     ar              = checkForField(ar, 'ppl');
     ar              = checkForField(ar, 'ple');
+    ar              = checkForField(ar, 'mc3');
+
     
     % Config options
     defaults = { ...
@@ -44,6 +46,7 @@ function ar = arInitFields(ar)
         {'nMaxThreads',                 64}, ...
         ...                                                             % Plotting
         {'savepath',                    []}, ...                        %   field for saving the output path
+        {'backup_modelAndData',         true},...                       %   makes copies of model and data files corresponding for each value of ar.checkstr
         {'nFinePoints',                 300}, ...                       %   number of fine time points for plotting
         {'par_close_to_bound',          0.01}, ...                      %   notify if parameter within 1% of bound (relative to ub-lb)
         {'nfine_dr_method',             'pchip'}, ...                   %   spline
@@ -100,7 +103,7 @@ function ar = arInitFields(ar)
         {'steady_state_constraint',     1}, ...                         %   Enable system
         ...
         {'instantaneous_termination',   1}, ...                    	% Poll utIsInterruptPending() to respond to CTRL+C
-        {'no_optimization',             0}, ...                         % Disable compiler optimization
+        {'no_optimization',             0}, ...                         % Disable compiler optimization                                                         
         };
       
     % Apply the default general settings where no fields are present
@@ -171,7 +174,34 @@ function ar = arInitFields(ar)
         ar.config.optimceres.LinearSolverType = 1;
         ar.config.optimceres.LinearSolvers = {'DENSE_QR','DENSE_NORMAL_CHOLESKY', 'CGNR', 'DENSE_SCHUR', 'SPARSE_SCHUR', 'ITERATIVE_SCHUR'};
         ar.config.optimceres.printLevel = 0;
-	end
+    end
+    
+    
+    
+    % MC3 options
+    mc3Defaults = { ... 
+        {'nruns',                     10000}, ... 
+        {'nburnin',                   0}, ...
+        {'method',                    4}, ...
+        {'exchange_method',           0}, ... 
+        {'nthinning',                 1}, ...
+        {'NumberOfChains',            1}, ...
+        {'ManualScalingFactor',       1}, ...
+        {'UseScaling',                1}, ... 
+        {'TemperatureExponent',       1}, ...
+        {'RegularizationThreshold',   1e-8}, ... 
+        {'min_accept',                0.4}, ...
+        {'max_accept',                0.7}, ... 
+        {'Cmax',                      1e8}, ...
+        {'Cmin',                      1e-15}, ...
+        {'Cmod',                      1.01}, ...
+        {'LengthOfAcceptanceTestChain', 25}, ...
+        {'DecayParameter', 0.51}, ...
+        };
+            
+    % Apply the default MC3 settings where no fields are present
+    ar.mc3 = validateFields(ar.mc3, mc3Defaults, 'mc3');
+    
     
     % CVODES flags
     ar.info.arsimucalc_flags = cell(1,30);

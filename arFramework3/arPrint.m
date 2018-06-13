@@ -129,8 +129,13 @@ pTrans(arC.qLog10==1) = 10.^pTrans(arC.qLog10==1);
 % Determine which parameters are close to their bounds
 qFit = arC.qFit == 1;
 arC.qCloseToBound(1:length(arC.qFit)) = 0;
-arC.qCloseToBound(qFit) = (arC.p(qFit) - arC.lb(qFit)) < arC.config.par_close_to_bound*(arC.ub(qFit) - arC.lb(qFit)) | ...
-    (arC.ub(qFit) - arC.p(qFit)) < arC.config.par_close_to_bound*(arC.ub(qFit) - arC.lb(qFit));
+
+ptmp = arC.p(qFit);
+lbtmp = arC.lb(qFit);
+ubtmp = arC.ub(qFit);
+
+arC.qCloseToBound(qFit) = (ptmp(:) - lbtmp(:)) < arC.config.par_close_to_bound*(ubtmp(:) - lbtmp(:)) | ...
+    (ubtmp(:) - ptmp(:)) < arC.config.par_close_to_bound*(ubtmp(:) - lbtmp(:));
 
 % Additional options
 if ( nargin > 1 )
