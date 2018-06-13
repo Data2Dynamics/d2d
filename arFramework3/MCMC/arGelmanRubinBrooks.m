@@ -7,7 +7,7 @@
 % each other using the Gelamn Rubin Brooks test.
 %
 % function arGelmanRubinBrooks(ps1,ps2)
-% Please insert two different ar.ps parameters to compare
+% Please insert two different ar.ps parameter samples to compare
 % the chains
 
 function [Rp,V] = arGelmanRubinBrooks(d1,d2)
