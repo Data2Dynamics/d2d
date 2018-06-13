@@ -298,3 +298,6 @@ end
 
 ar.IdentifiabilityTest.res = res_user;
 ar.IdentifiabilityTest.sres = sres_user;
+
+function y = range(x)
+y = max(x) - min(x)
