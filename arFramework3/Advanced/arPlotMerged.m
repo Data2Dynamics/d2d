@@ -197,7 +197,7 @@ for jp=find(ar.model(jm).qPlotYs)
                         elseif(strcmp(fname,'u'))
                             xFineSimu = ar.model(jm).condition(jc).uFineSimu(:,jx);
                         end
-                        xrange(jx) = max([xrange(jx) range(xFineSimu)]);
+                        xrange(jx) = max([xrange(jx) arRange(xFineSimu)]);
                     else
                         collect_cs_dr{jx} = union(collect_cs_dr{jx}, ar.model(jm).data(jd).cLink);
                     end
@@ -358,6 +358,3 @@ else
     ar.model(m).plot_merged(jplot).fighandel_y = h;
 end
 clf;
-
-function y = range(x)
-y = max(x) - min(x)

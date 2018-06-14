@@ -185,7 +185,7 @@ end
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
         if(isfield(ar.model(m).condition(c), 'xExpSimu'))
-            if(sum((min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) ./ range(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),1) < -ar.config.rtol) & (min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) < -ar.config.atol)) > 0)
+            if(sum((min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) ./ arRange(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),1) < -ar.config.rtol) & (min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) < -ar.config.atol)) > 0)
                 arFprintf(1, 'Negative state in model %d condition %d detected that is defined as positive! Double-check model definition!\nPlot negative states by calling ar.model(%d).qPositiveX(:) = 0; with subsequent arPlot call.\n',m,c,m)
             end
         end
@@ -237,9 +237,6 @@ end
 if ~silent
     arGetMerit
 end
-
-function y = range(x, dim)
-y = max(x, [], dim) - min(x, [], dim);
 
 function c = my_equals(a,b)
 c = a(:)==b(:);
