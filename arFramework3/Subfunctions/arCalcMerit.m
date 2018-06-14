@@ -239,7 +239,7 @@ if ~silent
 end
 
 function y = range(x, dim)
-y = max(x, dim) - min(x, dim);
+y = max(x, [], dim) - min(x, [], dim);
 
 function c = my_equals(a,b)
 c = a(:)==b(:);
