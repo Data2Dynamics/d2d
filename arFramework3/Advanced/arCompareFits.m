@@ -1,4 +1,7 @@
-function arCompareFits(filenames, sortindex)
+% checksums = arCompareFits
+% 
+%   
+function varargout = arCompareFits(filenames, sortindex)
 
 if(nargin==0)
     filenames = fileChooserMulti('./Results', true);
@@ -21,6 +24,7 @@ timing = [];
 exitflag = {};
 arWaitbar(0);
 jcount = 0;
+checksums = struct;
 for j=1:length(filenames)
     arWaitbar(j,length(filenames));
     fname = ['./Results/' filenames{j} '/workspace.mat'];
@@ -45,6 +49,11 @@ for j=1:length(filenames)
             exitflag{jcount} = tmpple.ar.exitflag; %#ok<AGROW>
             
             minchi2 = min([minchi2 min(tmpple.ar.chi2s)]);
+            
+            checksums.parameters{jcount} = arChecksumPara(tmpple.ar);
+            checksums.fitting{jcount} = arChecksumFitting(tmpple.ar);
+            checksums.data{jcount} = arChecksumData(tmpple.ar);
+            checksums.fkt{jcount} = tmpple.ar.fkt;
         end
     else
         fprintf('%s does not contain workspace\n', filenames{j});
@@ -160,4 +169,8 @@ if(~isempty(chi2sconstr))
     legend(h, strrep(labels, '_', '\_'), 'Location','NorthWest');
     xlabel('run index (sorted by likelihood)');
     ylabel('constraint violation');
+end
+
+if nargout>0
+    varargout{1} = checksums;
 end

@@ -9,9 +9,16 @@ end
 
 if(zeigen)
     maxlen = max(cellfun(@length,liste));
+    anno = cell(1,length(liste));
     for j=1:length(liste)
-        [anno,vals{j}] = readParameterAnnotation(liste{j});  % vals contains npara, nfitted, chi2, ... and is useful when working with a breakpoint
-        fprintf(['#%3i : %-',num2str(maxlen),'s  %s\n'], j, liste{j}, anno);
+        % the headers are the same and should be generated at the same place where anno is generated, overwriting is no problem
+        [anno{j},vals{j},header] = readParameterAnnotation(liste{j});  % vals contains npara, nfitted, chi2, ... and is useful when working with a breakpoint
+    end        
+     
+    maxlen2 = max(cellfun(@length,anno));
+    fprintf(['         %',sprintf('%i',maxlen),'s%s\n'],' ', header(1:min(length(header),maxlen2)));
+    for j=1:length(anno)
+        fprintf(['#%3i : %-',num2str(maxlen),'s  %s\n'], j, liste{j}, anno{j});
     end
 end
 
@@ -70,68 +77,92 @@ while(isnan(out))
     end
 end
 
-function [anno,vals] = readParameterAnnotation(filename_tmp)
+function [anno,vals,header] = readParameterAnnotation(filename_tmp)
 filename_pars = ['./Results/' filename_tmp '/workspace_pars_only.mat'];
 vals = struct;
 
 if(exist(filename_pars,'file'))
     S = load(filename_pars);
     
-    nstr = '';
-    priorstr = '';
-    pstr = '';
-    qstr = '';
-    chi2str = '';
-    errstr = '';
-    lhsstr = '';
-    plestr = '';
+    if isfield(S.ar,'checkstrs')
+        checkstr = S.ar.checkstrs;
+    else
+        checkstr = struct;
+        checkstr.data = '';
+        checkstr.para = '';
+        checkstr.fitting = '';
+        checkstr.fkt = '';
+    end
     
+    nstrH = '   N ';
     if(isfield(S.ar,'ndata'))
-        nstr = ['N=',sprintf('%4i ',S.ar.ndata),' '];
+        nstr = sprintf('%4i  ',S.ar.ndata);
         vals.N = S.ar.ndata;
     else
+        nstr = sprintf('%4s  ','NA');
         vals.N = NaN;
     end
+    priorstrH = '#prior ';
     if(isfield(S.ar,'nprior'))
-        priorstr = ['#prior=',sprintf('%3i ',S.ar.nprior),' '];
+        priorstr = sprintf('%6i ',S.ar.nprior);
+    else
+        priorstr = sprintf('%6s ','NA');        
     end
+    pstrH = '   #p ';
     if(isfield(S.ar,'p'))
-        pstr = ['#p=',sprintf('%3i ',length(S.ar.p)),' '];
+        pstr = sprintf('%4i ',length(S.ar.p));
         vals.np = length(S.ar.p);
     else
+        pstr = sprintf('%4s ','NA');
         vals.np = NaN;
     end
+    qstrH = '#fitted ';
     if(isfield(S.ar,'qFit'))
-        qstr = ['#fitted=',sprintf('%3i ',sum(S.ar.qFit==1)),' '];
+        qstr = sprintf('%6i ',sum(S.ar.qFit==1));
         vals.nfit = sum(S.ar.qFit==1);
     else
+        qstr = sprintf('%6s ','NA');
         vals.nfit = NaN;
     end
     
+    errstrH = 'fitterrors';
+    if isfield(S.ar,'config') && isfield(S.ar.config,'fiterrors')
+        errstr = sprintf('%8i',S.ar.config.fiterrors);
+    else
+        errstr = sprintf('%8s','NA');
+    end
+
+    chi2strH = sprintf('       Merit-fkt ');
+    chi2str  = sprintf('       %9s  ','NA');
     if(isfield(S.ar,'chi2fit'))
         if(isfield(S.ar,'config') && S.ar.config.fiterrors == 1)
-            errstr = 'errors fitted ';
-            chi2str = sprintf('-2*log(L)=%g  ', ...
+            chi2str = sprintf('-2*LL=%10g  ', ...
                 2*S.ar.ndata*log(sqrt(2*pi)) + S.ar.chi2fit);
             vals.chi2 = 2*S.ar.ndata*log(sqrt(2*pi)) + S.ar.chi2fit;
         else
-            chi2str = sprintf('chi^2=%g  ', S.ar.chi2fit);
+            chi2str = sprintf(' chi2=%10g  ', S.ar.chi2fit);
             vals.chi2 =  S.ar.chi2fit;
         end
     else
         vals.chi2 = NaN;
     end
     
+    lhsstrH = ' #LHS';
+    lhsstr = sprintf('%7s','NA');
     if(isfield(S.ar,'ps'))
         if ~isempty(S.ar.ps)
-            lhsstr = [' #LHS=',sprintf('%4i ',size(S.ar.ps,1)) ' '];
+            lhsstr = sprintf('%7i',size(S.ar.ps,1));
+        else
+            lhsstr = sprintf('%7i',0);
         end
     end
     
+    plestrH = ' #PLE';
+    plestr = sprintf('%5i',0); % default
     if(isfield(S.ar,'ple'))
         if(isfield(S.ar.ple,'chi2s'))
             nple = sum(~cellfun(@isempty,S.ar.ple.chi2s));
-            plestr = [' #PLE=',sprintf('%3i ',nple)];
+            plestr = sprintf('%5i',nple);
         end
     elseif exist(['./Results/',filename_tmp,filesep,'workspace_pars_only.mat'],'file')==2
         % %% too slow:
@@ -146,13 +177,14 @@ if(exist(filename_pars,'file'))
             if ~isempty(tmp.pleGlobals)
                 % disp('Old PLE as variable pleGlobals available. Transferred to ar.ple ...');
                 nple = sum(~cellfun(@isempty,tmp.pleGlobals.chi2s));
-                plestr = [' # old PLE=',sprintf('%3i ',nple)];
+                plestr = sprintf('(%3i)',nple);
             end
         end
-        % end
     end
     
-    anno = sprintf('(%20s%8s%8s%11s%12s%14s%12s%10s)',chi2str,nstr,pstr,qstr,priorstr,errstr,lhsstr,plestr);
+    anno = sprintf('%s%s%s%s%s%s%s%s  %s  %s  %s  %s',chi2str,nstr,pstr,qstr,priorstr,errstr,lhsstr,plestr,checkstr.para, checkstr.data, checkstr.fitting, checkstr.fkt);
+    header = sprintf('%s%s%s%s%s%s%s%s%34s%34s%34s%34s',chi2strH,nstrH,pstrH,qstrH,priorstrH,errstrH,lhsstrH,plestrH,'parameter-settings', 'data-settings', 'fit-setting', 'setup-setting');
 else
     anno = '';
+    header = '';
 end

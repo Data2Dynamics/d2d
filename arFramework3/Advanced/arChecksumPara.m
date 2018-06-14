@@ -4,15 +4,17 @@
 % frequently (e.g. during fitting) and the initial guess should be treated
 % separately.
 
-function checkstr = arChecksumPara
-
+function checkstr = arChecksumPara(arStruct)
 global ar
-
+if nargin==0
+    arStruct = ar;
+end
+    
 checkfields = {'qLog10','qFit','lb','ub','type','mean','std'}; % p is stored separately
 
 checksum = [];
 for i=1:length(checkfields)
-    val = ar.(checkfields{i});
+    val = arStruct.(checkfields{i});
     checksum = arAddToCheckSum(val,checksum);
 end
 
