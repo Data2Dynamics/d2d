@@ -126,10 +126,13 @@ if(exist(filename_pars,'file'))
     end
     
     errstrH = 'fitterrors';
-    if isfield(S.ar,'config') && isfield(S.ar.config,'fiterrors')
-        errstr = sprintf('%8i',S.ar.config.fiterrors);
+    if isfield(S.ar,'config') && isfield(S.ar.config,'fiterrors')        
+        errstr = sprintf('%9i',S.ar.config.fiterrors);
+        if isfield(S.ar.config,'useFitErrorCorrection') && S.ar.config.useFitErrorCorrection
+            errstr(1:6) = ' BessC';
+        end
     else
-        errstr = sprintf('%8s','NA');
+        errstr = sprintf('%9s','NA');
     end
 
     chi2strH = sprintf('       Merit-fkt ');
@@ -148,12 +151,12 @@ if(exist(filename_pars,'file'))
     end
     
     lhsstrH = ' #LHS';
-    lhsstr = sprintf('%7s','NA');
+    lhsstr = sprintf('%6s','NA');
     if(isfield(S.ar,'ps'))
         if ~isempty(S.ar.ps)
-            lhsstr = sprintf('%7i',size(S.ar.ps,1));
+            lhsstr = sprintf('%6i',size(S.ar.ps,1));
         else
-            lhsstr = sprintf('%7i',0);
+            lhsstr = sprintf('%6i',0);
         end
     end
     

@@ -78,10 +78,15 @@ end
 if isfield(arIn,'config')
     if isfield(arIn.config,'useFitErrorMatrix') && arIn.config.useFitErrorMatrix == 0
         ar.config.fiterrors = arIn.config.fiterrors; % #ok<STRNU>
+        ar.config.useFitErrorCorrection = arIn.config.useFitErrorCorrection;        
     elseif isfield(arIn.config,'fiterrors_matrix')
         ar.config.useFitErrorMatrix = true;
         ar.config.fiterrors_matrix = arIn.config.fiterrors_matrix;
         ar.config.ploterrors_matrix = arIn.config.ploterrors_matrix;
+        ar.config.useFitErrorCorrection = arIn.config.useFitErrorCorrection;        
+    elseif isfield(ar.config,'fiterrors')  % the usual case
+        ar.config.fiterrors = arIn.config.fiterrors;        
+        ar.config.useFitErrorCorrection = arIn.config.useFitErrorCorrection;        
     end
 end
 
