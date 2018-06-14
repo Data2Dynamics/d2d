@@ -148,7 +148,7 @@ if(~isempty(chi2sconstr))
         end
         C = arLineMarkersAndColors(j,length(chi2sconstr),[],'no',[]);
         colors(j,:) = C{6}; %#ok<AGROW>
-        h(j) = semilogy(chi2sconstr_sorted, '-', C{:});
+        h(j) = plot(chi2sconstr_sorted, '-', C{:});
         hold on
         if(~iscell(exit_sorted))
             qexit1 = exit_sorted>0;
@@ -158,17 +158,21 @@ if(~isempty(chi2sconstr))
             qexit2 = true(size(exit_sorted));
         end
         C = arLineMarkersAndColors(j,length(chi2s),[],'o','none');
-        semilogy(find(qexit1), chi2sconstr_sorted(qexit1), C{:}, ...
+        plot(find(qexit1), chi2sconstr_sorted(qexit1), C{:}, ...
             'MarkerFaceColor','w', ...
             'MarkerSize',4);
         C = arLineMarkersAndColors(j,length(chi2s),[],'x','none');
-        semilogy(find(qexit2), chi2sconstr_sorted(qexit2), C{:}, ...
+        plot(find(qexit2), chi2sconstr_sorted(qexit2), C{:}, ...
             'MarkerSize',6);
     end
     hold off
     legend(h, strrep(labels, '_', '\_'), 'Location','NorthWest');
     xlabel('run index (sorted by likelihood)');
     ylabel('constraint violation');
+    yl = get(gca,'YLim');
+    if yl(2)-yl(1)>1000
+        set(gca,'YScale','log');
+    end
 end
 
 if nargout>0
