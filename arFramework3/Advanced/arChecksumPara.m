@@ -14,8 +14,10 @@ checkfields = {'qLog10','qFit','lb','ub','type','mean','std'}; % p is stored sep
 
 checksum = [];
 for i=1:length(checkfields)
-    val = arStruct.(checkfields{i});
-    checksum = arAddToCheckSum(val,checksum);
+    if isfield(arStruct,checkfields{i})
+        val = arStruct.(checkfields{i});
+        checksum = arAddToCheckSum(val,checksum);
+    end
 end
 
 h = typecast(checksum.digest,'uint8');

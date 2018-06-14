@@ -1,21 +1,21 @@
 %   arSaveParOnly(ar)
-% 
+%
 %   arSaveParOnly(ar, savepath, filename)
-% 
-% 
+%
+%
 % This function is called by arSave or can be used independently of arSave.
 % It extracts the important fields from the ar struct and saves it as
 % workspace in savepath/workspace
 % save only parameters
-% 
+%
 %   savepath        Default: ar.config.savepath
-% 
+%
 %   filename        Default: 'workspace_pars_only.mat'
-% 
+%
 %   Please note, that the global ar is not used here. Instead, ar is
 %   provided as a variable because the variable ar is is required for
 %   storing the compressed version.
-% 
+%
 
 function arSaveParOnly(arIn, savepath, filename)
 if ~exist('savepath','var') || isempty(savepath)
@@ -40,9 +40,15 @@ ar.qLog10 = arIn.qLog10;
 ar.qFit = arIn.qFit;
 ar.lb = arIn.lb;
 ar.ub = arIn.ub;
-ar.type = arIn.type;
-ar.mean = arIn.mean;
-ar.std = arIn.std;
+if isfield(arIn,'') % not available in older versions
+    ar.type = arIn.type;
+end
+if isfield(arIn,'') % not available in older versions
+    ar.mean = arIn.mean;
+end
+if isfield(arIn,'') % not available in older versions
+    ar.std = arIn.std;
+end
 if isfield(arIn,'fkt') % not available in older versions
     ar.fkt = arIn.fkt;
 end
@@ -78,15 +84,17 @@ end
 if isfield(arIn,'config')
     if isfield(arIn.config,'useFitErrorMatrix') && arIn.config.useFitErrorMatrix == 0
         ar.config.fiterrors = arIn.config.fiterrors; % #ok<STRNU>
-        ar.config.useFitErrorCorrection = arIn.config.useFitErrorCorrection;        
+        ar.config.useFitErrorCorrection = arIn.config.useFitErrorCorrection;
     elseif isfield(arIn.config,'fiterrors_matrix')
         ar.config.useFitErrorMatrix = true;
         ar.config.fiterrors_matrix = arIn.config.fiterrors_matrix;
         ar.config.ploterrors_matrix = arIn.config.ploterrors_matrix;
-        ar.config.useFitErrorCorrection = arIn.config.useFitErrorCorrection;        
-    elseif isfield(ar.config,'fiterrors')  % the usual case
-        ar.config.fiterrors = arIn.config.fiterrors;        
-        ar.config.useFitErrorCorrection = arIn.config.useFitErrorCorrection;        
+        ar.config.useFitErrorCorrection = arIn.config.useFitErrorCorrection;
+    elseif isfield(arIn.config,'fiterrors')  % the usual case
+        ar.config.fiterrors = arIn.config.fiterrors;
+        if isfield(arIn.config,'useFitErrorCorrection')
+            ar.config.useFitErrorCorrection = arIn.config.useFitErrorCorrection;
+        end
     end
 end
 
@@ -94,7 +102,7 @@ if(isfield(arIn,'ple'))
     if (isfield(arIn.ple,'chi2s'))
         ar.ple.chi2s = arIn.ple.chi2s; % For readParameterAnnotation in fkt stringListChooser.m
     else
-        ar.ple = [];    
+        ar.ple = [];
     end
 else
     ar.ple = [];
