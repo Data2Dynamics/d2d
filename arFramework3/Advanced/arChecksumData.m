@@ -9,11 +9,13 @@ checkfields = {'yExp','yExpStd','qFit','qLog10','logfitting','normalize','tExp',
 
 checksum = [];
 for m=1:length(ar.model)
-    for d=1:length(ar.model(m).data)
-        for i=1:length(checkfields)
-            if isfield(ar.model(m).data(d),checkfields{i})
-                val = ar.model(m).data(d).(checkfields{i});
-                checksum = arAddToCheckSum(val,checksum);
+    if isfield( ar.model(m), 'data' )
+        for d=1:length(ar.model(m).data)
+            for i=1:length(checkfields)
+                if isfield(ar.model(m).data(d),checkfields{i})
+                    val = ar.model(m).data(d).(checkfields{i});
+                    checksum = arAddToCheckSum(val,checksum);
+                end
             end
         end
     end
