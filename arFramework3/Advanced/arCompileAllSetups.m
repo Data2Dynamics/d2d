@@ -1,10 +1,11 @@
 % arCompileAllSetups
 %
-% setup_files = arCompileAllSetups(recursive)
+% setup_files = arCompileAllSetups(max_depth)
 %
-%       recursive   should Setup files be search recursively starting form
-%                   the current directory?
-%                   Default: true
+%       max_depth   If larger than 0, then the setup files be search
+%                   recursively starting form the current directory.
+%                   Default: Inf (recursively evaluates all setups found in
+%                   deeper folders)
 %
 %       mode        'normal' (default: whole setup file)
 %                   'core' only the most important commands, i.e. arInit,
@@ -17,11 +18,16 @@
 % One possibility to start it in the background (under linux):
 % nohup matlab -nosplash < arCompileAllSetups_call.m > nohup.out &
 %
+% 
+%   Examples
+%   arCompileAllSetups(2) % evaluates all Setups which are in pwd and 1 or
+%                         % two folders deeper. This option might be
+%                         % reasonable if executed in the folder
+%                         % ....d2d/arFramework/Examples   
 
-
-function setup_files = arCompileAllSetups(recursive,mode)
-if ~exist('recursive','var') || isempty(recursive)
-    recursive = true;
+function setup_files = arCompileAllSetups(max_depth, mode)
+if ~exist('max_depth','var') || isempty(max_depth)
+    max_depth = Inf;
 end
 if ~exist('mode','var') || isempty(mode)
     mode = 'normal';
@@ -29,8 +35,8 @@ end
 
 testmode = false; % for code improvement
 
-if recursive
-    all_files = list_files_recursive;
+if max_depth>0
+    all_files = list_files_recursive(max_depth);
 else
     d = dir;
     files = {d.name};
@@ -68,6 +74,9 @@ end
 
 pfad = pwd;
 
+pause_state = pause('query');
+pause('off');
+
 for i=1:length(setup_files)
     fprintf(fidlog,'%s will be executed ...\n\n' ,setup_files{i});
     [pathstr,name,ext] = fileparts(setup_files{i});
@@ -76,7 +85,7 @@ for i=1:length(setup_files)
     try
         switch mode
             case 'normal' % every line
-                eval(name);
+                doEvalSetup(name);
                 if ~testmode
                     eval(sprintf('arSave(''arCompileAllSetups_%s'');',mode));
                 end
@@ -131,6 +140,7 @@ for i=1:length(setup_files)
                 error('mode %s is not implemented.',model)
         end  % switch mode
     catch ERR
+        pause(pause_state);
         warning('\n%s failed !!!!!!!!! \n\n' ,setup_files{i});
         disp(lasterror);
         fprintf(fidlog,'\n%s failed !!!!!!!!! \n\n' ,setup_files{i});
@@ -140,6 +150,16 @@ end
 
 fclose(fidlog);
 cd(pfad)
+pause(pause_state);
+
+
+
+function doEvalSetup(fun_setup)
+% evaluation of the setup has to be hidden in a fucntion to not overwrite
+% local variables and to prevent clearing the workspace by potential clear
+% all commands
+
+feval(fun_setup);
 
 
 

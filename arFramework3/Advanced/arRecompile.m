@@ -34,10 +34,18 @@ if isfield(ar,'setup')  % only availabel in higher verions
         for i=1:length(arIn.setup.commands)
             if ~isempty(arIn.setup.arguments{i}) && iscell(arIn.setup.arguments{i})
                 if ~isempty(strfind(arIn.setup.commands{i},'arLoadData'))
-                    args = {'DataPath',arIn.setup.backup_data_folder{i}{1}};
+                    if isdir(arIn.setup.backup_data_folder{i}{1}) % global path exist
+                        args = {'DataPath',arIn.setup.backup_data_folder{i}{1}};
+                    else % use the local path
+                        args = {'DataPath',arIn.setup.backup_data_folder_local{i}{1}};
+                    end                        
                     fprintf('arLoadData from backup folder %s\n',args{2});
                 elseif ~isempty(strfind(arIn.setup.commands{i},'arLoadModel'))
-                    args = {'ModelPath',arIn.setup.backup_model_folder{i}};
+                    if isdir(arIn.setup.backup_model_folder{i})
+                        args = {'ModelPath',arIn.setup.backup_model_folder{i}};
+                    else % use the local path
+                        args = {'ModelPath',arIn.setup.backup_model_folder_local{i}};
+                    end
                     fprintf('arLoadModel from backup folder %s\n',args{2});
                 else
                     args = cell(0);
@@ -101,13 +109,15 @@ else  % setup commands are not stored/not available, e.g. because of older code 
         for m=1:length(ds)
             for d=1:length(ds{m})
                 %         arLoadData_withoutNormalization(ds{m}{d}, 1,[],[],[]);
+                
+                ext = [];
                 if emptyObs(m)
                     disp('There are empty observations ...')
-                    fprintf('arLoadData(%s,%i,''xls'', 0);\n',ds{m}{d},m);
-                    arLoadData(ds{m}{d},m,'xls', 0);  % there are no empty observations
+                    fprintf('arLoadData(%s,%i,[], 0);\n',ds{m}{d},m);
+                    arLoadData(ds{m}{d},m,ext, 0);  % there are no empty observations
                 else
-                    fprintf('arLoadData(%s,%i,''xls'', 1);\n',ds{m}{d},m);
-                    arLoadData(ds{m}{d},m,'xls', 1);  % there are empty observations
+                    fprintf('arLoadData(%s,%i,[], 1);\n',ds{m}{d},m);
+                    arLoadData(ds{m}{d},m,ext, 1);  % there are empty observations
                 end
             end
         end

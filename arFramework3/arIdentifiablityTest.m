@@ -181,10 +181,10 @@ end
 
 chi2sort = sort(ar.IdentifiabilityTest.chi2s);
 chi2sort2 = sort(ar.IdentifiabilityTest.chi2s(2:end));
-if range(chi2sort)<ar.IdentifiabilityTest.thresh
-    ar.IdentifiabilityTest.message{end+1} = sprintf('All %i optimization runs are in the chi2-range %g.\n\n',length(ar.IdentifiabilityTest.chi2s),range(chi2sort));
-elseif length(chi2sort2)>2 && range(chi2sort2)<ar.IdentifiabilityTest.thresh
-    ar.IdentifiabilityTest.message{end+1} = sprintf('All %i optimization runs with random intial guesses are in the chi2-range %g.\n\n',length(ar.IdentifiabilityTest.chi2s)-1,range(chi2sort2));
+if arRange(chi2sort)<ar.IdentifiabilityTest.thresh
+    ar.IdentifiabilityTest.message{end+1} = sprintf('All %i optimization runs are in the chi2-range %g.\n\n',length(ar.IdentifiabilityTest.chi2s),arRange(chi2sort));
+elseif length(chi2sort2)>2 && arRange(chi2sort2)<ar.IdentifiabilityTest.thresh
+    ar.IdentifiabilityTest.message{end+1} = sprintf('All %i optimization runs with random intial guesses are in the chi2-range %g.\n\n',length(ar.IdentifiabilityTest.chi2s)-1,arRange(chi2sort2));
 elseif sum(chi2sort <(min(chi2sort) + ar.IdentifiabilityTest.thresh)) < length(chi2sort)/2
     anzsame = sum(chi2sort <(min(chi2sort) + ar.IdentifiabilityTest.thresh));
     fracsame = anzsame/length(chi2sort);

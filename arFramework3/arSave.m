@@ -15,6 +15,9 @@ global ar
 % Invalidate the cache going into the save
 arCheckCache(1);
 
+% update checkstrs:
+ar = arUpdateCheckstr(ar);
+
 if(~exist('withSyms','var'))
     withSyms = false;
 end
@@ -39,7 +42,7 @@ if(isempty(ar.config.savepath)) % never saved before, ask for name
     arSaveParOnly(ar, ar.config.savepath);
 else
     if(exist('name','var')) % saved before, but new name give
-        if(~strcmp(name, 'current'))
+        if(~strcmpi(strtrim(name), 'current'))
             if(~isempty(name))
                 ar.config.savepath = ['./Results/' datestr(now, 30) '_' name];
             else
@@ -142,69 +145,6 @@ fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);
 
 
 
-% save only parameters
-function arSaveParOnly(ar2, savepath)
-% check if dir exists
-if(~exist(ar2.config.savepath, 'dir'))
-    mkdir(ar2.config.savepath)
-end
-
-ar = struct([]);
-ar(1).pLabel = ar2.pLabel;
-ar.p = ar2.p;
-ar.qLog10 = ar2.qLog10;
-ar.qFit = ar2.qFit;
-ar.lb = ar2.lb;
-ar.ub = ar2.ub;
-ar.type = ar2.type;
-ar.mean = ar2.mean;
-ar.std = ar2.std;
-ar.fkt = ar2.fkt;
-
-try %#ok<TRYNC>
-    ar.chi2fit = ar2.chi2fit;
-    ar.ndata = ar2.ndata;
-    ar.nprior = ar2.nprior;
-end
-try %#ok<TRYNC>
-    ar.ps = ar2.ps;
-    ar.ps_errors = ar2.ps_errors;
-    ar.chi2s = ar2.chi2s;
-    ar.chi2sconstr = ar2.chi2sconstr;
-    ar.timing = ar2.timing;
-    ar.exitflag = ar2.exitflag;
-    ar.fun_evals = ar2.fun_evals;
-    ar.ps_start = ar2.ps_start;
-    ar.chi2s_start = ar2.chi2s_start;
-    ar.chi2sconstr_start = ar2.chi2sconstr_start;
-    ar.optim_crit = ar2.optim_crit;
-    
-    ar.chi2s_sorted = ar2.chi2s_sorted;
-    ar.chi2sconstr_sorted = ar2.chi2sconstr_sorted;
-    ar.ps_sorted = ar2.ps_sorted;
-    ar.chi2s_start_sorted = ar2.chi2s_start_sorted;
-    ar.chi2sconstr_start_sorted = ar2.chi2sconstr_start_sorted;
-    ar.ps_start_sorted = ar2.ps_start_sorted;
-end
-if(ar2.config.useFitErrorMatrix == 0)
-    ar.config.fiterrors = ar2.config.fiterrors; %#ok<STRNU>
-else
-    ar.config.useFitErrorMatrix = true;
-    ar.config.fiterrors_matrix = ar2.config.fiterrors_matrix;
-    ar.config.ploterrors_matrix = ar2.config.ploterrors_matrix;
-end
-
-if(isfield(ar2,'ple'))
-    if (isfield(ar2.ple,'chi2s'))
-        ar.ple.chi2s = ar2.ple.chi2s; % For readParameterAnnotation in fkt stringListChooser.m
-    else
-        ar.ple = [];    
-    end
-else
-    ar.ple = [];
-end
-
-save([savepath '/workspace_pars_only.mat'],'ar','-v7.3');
 
 
 

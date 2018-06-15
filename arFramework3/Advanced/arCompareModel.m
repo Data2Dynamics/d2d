@@ -126,12 +126,12 @@ end
                             changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + ar1.model(m1).data(I1(c)).chi2(b);
                         else
                             % Use (residual1-residual2)/(residual1) as change measure
-                            changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + nansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
-                            totalErr( a, obsIndex )     = totalErr( a, obsIndex ) + nansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
+                            changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + sum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2,'omitnan');
+                            totalErr( a, obsIndex )     = totalErr( a, obsIndex ) + sum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2,'omitnan');
                         end
                     else
                         % Compute R^2 of M1 instead
-                        changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + nansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
+                        changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + sum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2,'omitnan');
                         allData{ a, obsIndex }      = [ allData{ a, obsIndex }; ar1.model(m1).data(I1(c)).yExp(:,b) ];
                     end
                 end
@@ -170,7 +170,7 @@ end
     if ( opts.absrsq )
         for a = 1 : size( allData, 1 )
             for b = 1 : size( allData, 2 )
-                totalErr( a, b ) = nansum( ( allData{a,b} - nanmean(allData{a,b}) ).^2 );
+                totalErr( a, b ) = sum( ( allData{a,b} - nanmean(allData{a,b}) ).^2 ,'omitnan');
             end
         end
         

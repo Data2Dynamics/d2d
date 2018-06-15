@@ -221,15 +221,14 @@ for jm = 1:length(ar.model)
                             t = linspace(min(t),max(t),ar.config.nFinePoints);
                             
                             for iyC = 1:size(y,2)
-                                y_red = y(its,iyC);
-                                if(~isempty(ystd))
-                                    ystd_red = ystd(its,iyC);
-                                end
-                                
+                                y_red = y(its,iyC);                                
                                 y_new(:,iyC) = pchip(t_red,y_red,t);
-                                if(~isempty(ystd))
+                                
+                                if(~isempty(ystd) && size(ystd,2) == size(y,2))
+                                    ystd_red = ystd(its,iyC);
                                     ystd_new(:,iyC) = pchip(t_red,ystd_red,t);
-                                end          
+                                end
+                                                            
                             end
                             y = y_new;
                             if(~isempty(ystd))

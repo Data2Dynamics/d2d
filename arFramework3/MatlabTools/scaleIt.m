@@ -365,7 +365,7 @@ function out = scaleIt( names, outFile, varargin )
     if ( opts.dlfudge )
         % Find zeroes
         fNames = fieldnames( out );
-        variablesOfInterest = setdiff(fNames(cell2mat(cellfun(@(a)isempty(findstr(a, inputMask)), fNames, 'UniformOutput', false))), timeVar);
+        variablesOfInterest = setdiff( setdiff(fNames(cell2mat(cellfun(@(a)isempty(findstr(a, inputMask)), fNames, 'UniformOutput', false))), timeVar ), expVar );
         
         for i = 1 : numel( variablesOfInterest )
             predictionBDL = cellfun(@(x)x==0, out.(variablesOfInterest{i}));

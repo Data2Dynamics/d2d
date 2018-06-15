@@ -44,6 +44,9 @@ end
 if(exist('arChi2s','file') == 0)
     addpath([ar_path '/Advanced'])
 end
+if(exist('arMC3','file') == 0)
+    addpath([ar_path '/MCMC'])
+end
 if(exist('arSimuCalc.c','file') == 0)
     addpath([ar_path '/Ccode'])
 end
@@ -143,7 +146,9 @@ if(exist('export_fig','file') == 0)
     addpath([ar_path '/ThirdParty/export_fig'])
 end
 if(exist('plot2svg','file') == 0)
-    addpath([ar_path '/ThirdParty/plot2svg/src'])
+    if exist([ar_path '/ThirdParty/plot2svg/src'],'dir')
+        addpath([ar_path '/ThirdParty/plot2svg/src'])
+    end
 end
 if(exist('matlab2tikz','file') == 0)
     addpath([ar_path '/ThirdParty/matlab2tikz/src'])
