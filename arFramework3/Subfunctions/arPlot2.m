@@ -222,14 +222,19 @@ for jm = 1:length(ar.model)
                             
                             for iyC = 1:size(y,2)
                                 y_red = y(its,iyC);
-                                ystd_red = ystd(its,iyC);
+                                if(~isempty(ystd))
+                                    ystd_red = ystd(its,iyC);
+                                end
                                 
                                 y_new(:,iyC) = pchip(t_red,y_red,t);
-                                ystd_new(:,iyC) = pchip(t_red,ystd_red,t);
-                                                            
+                                if(~isempty(ystd))
+                                    ystd_new(:,iyC) = pchip(t_red,ystd_red,t);
+                                end          
                             end
                             y = y_new;
-                            ystd = ystd_new;
+                            if(~isempty(ystd))
+                                ystd = ystd_new;
+                            end
                             %End smoothing
                             
                             plotopt = NaN(1,size(y,2));
