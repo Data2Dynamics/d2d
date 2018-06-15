@@ -109,13 +109,15 @@ else  % setup commands are not stored/not available, e.g. because of older code 
         for m=1:length(ds)
             for d=1:length(ds{m})
                 %         arLoadData_withoutNormalization(ds{m}{d}, 1,[],[],[]);
+                
+                ext = [];
                 if emptyObs(m)
                     disp('There are empty observations ...')
-                    fprintf('arLoadData(%s,%i,''xls'', 0);\n',ds{m}{d},m);
-                    arLoadData(ds{m}{d},m,'xls', 0);  % there are no empty observations
+                    fprintf('arLoadData(%s,%i,[], 0);\n',ds{m}{d},m);
+                    arLoadData(ds{m}{d},m,ext, 0);  % there are no empty observations
                 else
-                    fprintf('arLoadData(%s,%i,''xls'', 1);\n',ds{m}{d},m);
-                    arLoadData(ds{m}{d},m,'xls', 1);  % there are empty observations
+                    fprintf('arLoadData(%s,%i,[], 1);\n',ds{m}{d},m);
+                    arLoadData(ds{m}{d},m,ext, 1);  % there are empty observations
                 end
             end
         end
