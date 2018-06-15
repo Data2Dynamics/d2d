@@ -572,14 +572,46 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
                 which('udata.c'), which('arSimuCalc.c'), objectsstr{:});
         end
     else
+        chunkSize = getChunkSize( objectsstr );
+        chunks = ceil( numel( objectsstr ) / chunkSize );
+        
         % parallel code using POSIX threads (pthread-win32) for Windows type OS
         includesstr{end+1} = ['-I"' ar_path '\ThirdParty\pthreads-w32_2.9.1\include"'];
         includesstr{end+1} = ['-L"' ar_path '\ThirdParty\pthreads-w32_2.9.1\lib\' mexext '"'];
         includesstr{end+1} = ['-lpthreadVC2'];
         
-        mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
+        if ( chunks > 1 )
+            cCfg = mex.getCompilerConfigurations('C');
+            libloc = [cCfg.Location, '/VC/bin']; % Add directory containing lib.exe to the path (this could be further generalized)
+
+            curEnv = getenv('path');
+            if ( isempty( strfind( curEnv, libloc ) ) )
+                setenv( 'path', [curEnv ';' libloc] );
+            end
+
+            chunkSize = getChunkSize( objectsstr, 7000 ); % 8192 letter limit in Command and do not want to use powershell -.-
+            chunks = ceil( numel( objectsstr ) / chunkSize );
+            
+            % Link files in chunks to avoid exceeding maximum length (used
+            % when there are so many conditions that the command lib becomes too big)
+            fprintf( 'File string too long for command line. Compiling %d libraries first ...\n', chunks );
+            libNames = cell(1, chunks);
+
+            for a = 1 : chunks
+               fprintf( 'Assembling chunk %d/%d into library\n', a, chunks );
+               libNames{a} = fullfile('Compiled', c_version_code, [ 'lib' num2str(a) '_' ar.fkt(end-31:end) '.lib' ] );
+               curChunk = cellfun(@(st)[st, ' '], objectsstr( (a-1)*chunkSize+1 : min(a*chunkSize, numel(objectsstr)) ), 'UniformOutput', false);               
+               system(['vcvars32 & lib /out:' libNames{a} ' ' [ curChunk{:} ] ] );
+            end
+            fprintf( 'Linking chunks\n' );
+            mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
+                           sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
+                           which('udata.c'), which('arSimuCalc.c'), libNames{:});
+        else
+            mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
             sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
             which('udata.c'), which('arSimuCalc.c'), objectsstr{:});
+        end
     end
     arFprintf(2, 'compiling and linking %s...done\n', ar.fkt);
 else
@@ -589,11 +621,15 @@ end
 %% refresh file cache
 rehash
 
-function chunkSize = getChunkSize( objectsstr )
-[~, maxArgSize]=system('getconf ARG_MAX');
-maxArgSize = str2num(maxArgSize); %#ok
-if ( isempty( maxArgSize ) )
-    maxArgSize = 262144;
+function chunkSize = getChunkSize( objectsstr, altmax )
+if ( nargin < 2 )
+    [~, maxArgSize]=system('getconf ARG_MAX');
+    maxArgSize = str2num(maxArgSize); %#ok
+    if ( isempty( maxArgSize ) )
+        maxArgSize = 121071; % Limit is 131071 for windows, but need to have some buffer. %262144;
+    end
+else
+    maxArgSize = altmax;
 end
 
 % Take a chunk size with a reasonably safe margin

@@ -58,11 +58,11 @@ if  ar.ndata_res>0 && (ar.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(
         ar.config.fiterrors_correction = 1;
         if(~ar.config.fiterrors_correction_warning)
             warning('ar.config.fiterrors_correction_warning : turning off bias correction, not enough data'); %#ok<WNTAG>
-            ar.config.fiterrors_correction_warning = false;
+            ar.config.fiterrors_correction_warning = true;
         end
     else
         ar.config.fiterrors_correction = ar.ndata_res/(ar.ndata_res-sum(ar.qError~=1 & ar.qFit==1));
-        ar.config.fiterrors_correction_warning = true;
+        ar.config.fiterrors_correction_warning = false;
     end
 else
     ar.config.fiterrors_correction = 1;
