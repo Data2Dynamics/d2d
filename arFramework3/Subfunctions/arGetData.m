@@ -57,7 +57,7 @@ if(jtype==1 && isfield(ar.model(jm), 'data') && isfield(ar.model(jm).data(jd),'t
     %Get data points of model profile likelihood
      if(isfield(ar.model(jm).data(jd),'ppl') && ~isempty(ar.model(jm).data(jd).ppl))
         t_ppl = ar.model(jm).data(jd).ppl.ts_profile;
-        if(sum(sum(~isnan(ar.model(jm).data(jd).ppl.ppl_ub_threshold_profile),'omitnan')>0,'omitnan'))
+        if(arnansum(arnansum(~isnan(ar.model(jm).data(jd).ppl.ppl_ub_threshold_profile))>0))
             y_ppl_ub = ar.model(jm).data(jd).ppl.ppl_ub_threshold_profile;
             y_ppl_lb = ar.model(jm).data(jd).ppl.ppl_lb_threshold_profile;
         else
@@ -74,7 +74,7 @@ elseif(jtype==2) % x
     if(isfield(ar.model(jm).condition(jc),'ppl') && ~isempty(ar.model(jm).condition(jc).ppl))
         trows = size(ar.model(jm).condition(jc).ppl.ts_profile,1);
         t_ppl = [nan(trows,length(ar.model(1).qPlotU)) ar.model(jm).condition(jc).ppl.ts_profile nan(trows,length(ar.model(1).qPlotZ))];
-        if(sum(sum(~isnan(ar.model(jm).condition(jc).ppl.ppl_ub_threshold_profile),'omitnan'),'omitnan')>0)
+        if(arnansum(arnansum(~isnan(ar.model(jm).condition(jc).ppl.ppl_ub_threshold_profile)))>0)
             y_ppl_ub = [nan(trows,length(ar.model(1).qPlotU)) ar.model(jm).condition(jc).ppl.ppl_ub_threshold_profile nan(trows,length(ar.model(1).qPlotZ))];
             y_ppl_lb = [nan(trows,length(ar.model(1).qPlotU)) ar.model(jm).condition(jc).ppl.ppl_lb_threshold_profile nan(trows,length(ar.model(1).qPlotZ))];
         else

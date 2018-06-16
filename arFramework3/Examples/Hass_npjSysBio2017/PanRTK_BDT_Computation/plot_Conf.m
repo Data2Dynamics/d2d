@@ -132,8 +132,8 @@ for i=1:length(struct_tmp)
             end
             Max_Cs = max(length(bdt_figures.(struct_tmp{i})(j).testing(plot_id).Y_unique),length(bdt_figures.(struct_tmp{i})(j).testing(plot_id).bdt_class));
             if(Max_Cs>1)                
-                bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_col_normed(:,:,j) = C_mat_tmp./(repmat(sum(C_mat_tmp,1,'omitnan'),length_conf,1));
-                bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_row_normed(:,:,j) = C_mat_tmp./(repmat(sum(C_mat_tmp,2,'omitnan'),1,length_conf));
+                bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_col_normed(:,:,j) = C_mat_tmp./(repmat(arnansum(C_mat_tmp,1),length_conf,1));
+                bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_row_normed(:,:,j) = C_mat_tmp./(repmat(arnansum(C_mat_tmp,2),1,length_conf));
                 
                 bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_Matrix(:,:,j) = C_mat_tmp;
             elseif(Max_Cs==1)
@@ -161,8 +161,8 @@ for i=1:length(struct_tmp)
             %the header)
             mean_PV = bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_col_mean(k,k);
             std_PV = bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_col_std(k,k);
-            mean_FDR = sum(bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_col_mean(is_negative,k,:),1,'omitnan');
-            std_FDR = sum(bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_col_std(is_negative,k,:).^2,1,'omitnan');
+            mean_FDR = arnansum(bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_col_mean(is_negative,k,:),1);
+            std_FDR = arnansum(bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_col_std(is_negative,k,:).^2,1);
             mean_recall = bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_row_mean(k,k);
             std_recall = bdt_figures.(struct_tmp{i})(1).testing(plot_id).conf_row_std(k,k);
 

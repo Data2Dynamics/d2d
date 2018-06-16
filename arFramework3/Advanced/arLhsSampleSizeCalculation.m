@@ -373,7 +373,7 @@ if(nargout>1)
     else    %numerisch
         for i=1:length(l)
             if(~isnan(l(i)))
-                anz(i) = sum(l(i)==df,'omitnan');
+                anz(i) = arnansum(l(i)==df);
             else
                 anz(i) = sum(isnan(df));
             end            

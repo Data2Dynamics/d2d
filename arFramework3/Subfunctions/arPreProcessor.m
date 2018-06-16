@@ -75,7 +75,7 @@ function fid = preprocess(fid)
                     [cur, outLine, parseBlock2, a] = getParseBlock( line, cur, ws, outLine, a, 0, directives, namedDefines ); % Parse, but never write stuff that belongs to the precompiler directive
                     
                     if ~isempty( parseBlock2 )
-                        parseBlock2 = strip(line(ws(a-2):end));
+                        parseBlock2 = arStrip(line(ws(a-2):end));
                         a = a + numel( parseBlock2 );
                     end
                     
