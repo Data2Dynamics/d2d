@@ -97,12 +97,12 @@ weights = abs(weights);
 
 %calc weightedMean : each dataPoint is multiplied by the corresponding weight, the sum is divided
 %by the sum of the weights
-sumWeights = sum(weights,1,'omitnan');
-weightedMean = sum(weights.*data,1,'omitnan')./sumWeights;
+sumWeights = arnansum(weights,1);
+weightedMean = arnansum(weights.*data,1)./sumWeights;
 
 %---calc weightedStd---
 squareDiffs = (data-repmat(weightedMean,numRows,1)).^2;
-weightedSSQ = sum(squareDiffs.*weights,1,'omitnan');
+weightedSSQ = arnansum(squareDiffs.*weights,1);
 
 
 switch sw
