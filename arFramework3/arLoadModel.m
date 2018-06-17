@@ -18,6 +18,9 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
+% Name for a state which is added to a stateless model to make sure that
+% the required fields in the c-code aren't empty.
+NOSTATE = '___dummy___';
 
 % custom
 switches = { 'conditions', 'modelpath' };
@@ -206,6 +209,21 @@ while(~strcmp(C{1},'INPUTS'))
     end
     ar.model(m).px0(end+1) = {['init_' cell2mat(C{1})]};
     [C, fid] = arTextScan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
+end
+
+% Workaround for models that only use observation functions
+if ( isempty( ar.model(m).x ) )
+	ar.model(m).x(end+1) = {NOSTATE};
+    ar.model(m).xUnits(end+1,1) = {'NA'};
+    ar.model(m).xUnits(end,2) = {'NA'};
+    ar.model(m).xUnits(end,3) = {'NA'};
+    ar.model(m).cLink(end+1) = 0;
+    ar.model(m).qPlotX(end+1) = 0;
+    ar.model(m).xNames(end+1) = {NOSTATE};
+    ar.model(m).qPositiveX(end+1) = 0;
+    ar.model(m).px0(end+1) = {['init_' NOSTATE]};
+    
+    warning( 'D2D does not support models without state variables or equations. Adding species to model.' );
 end
 
 % INPUTS
@@ -581,6 +599,7 @@ if(isempty(ar.model(m).fv))
     ar.model(m).vUnits{end+1,1} = '-';
     ar.model(m).vUnits{end,2}   = '-';
     ar.model(m).vUnits{end,3}   = '-';
+    
     ar.model(m).N(1:length(ar.model(m).x),1) = 0;
 end
 
@@ -894,12 +913,17 @@ else
 end
 ar.model(m).fp = transpose(ar.model(m).p);
 
+% Remove init of empty model
+if numel( ar.model(m).x ) == 1 && strcmp( ar.model(m).x, NOSTATE )
+    ar.model(m).fp{ strcmp( ar.model(m).p, ['init_' NOSTATE ] ) } = '0';
+end
+
 if ( substitutions )
 	% Conditions
     from        = {};
     to          = {};
     ismodelpar  = [];
-     
+    
     % Fetch desired conditions
     while(~isempty(C{1}) && ~(strcmp(C{1},'PARAMETERS') || strcmp(C{1}, 'RANDOM')))
         arValidateInput( C, 'condition', 'model parameter', 'new expression' );
