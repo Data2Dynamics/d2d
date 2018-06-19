@@ -10,7 +10,7 @@ function ar = arInitFields(ar)
     % !!  NOTE: Every time you add or remove a field, increment this value by one.
     % !! 
     % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    arFormatVersion = 5;
+    arFormatVersion = 6;
     
     % Without arguments, just return the version number
     if ( nargin < 1 )
@@ -256,6 +256,10 @@ function ar = arInitFields(ar)
     ar.info.cvodes_flags{27} = 'CV_TOO_CLOSE';
 
     ar.info.arFormatVersion  = arFormatVersion;
+    
+    ar.info.path = pwd;
+    [~,ar.info.name] = fileparts(ar.info.path);
+
 
     if isfield(ar,'checkstrs') && isfield(ar.checkstrs,'total')
         old = ar.checkstrs.total;
