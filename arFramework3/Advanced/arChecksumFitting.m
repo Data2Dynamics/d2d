@@ -1,7 +1,23 @@
-function checkstr = arChecksumFitting(arStruct)
-if nargin==0
-    global ar
+%   arStruct        if instead of the global ar, the checksum should be
+%                   evaluated for another struct, then it is provided as
+%                   first argument
+% 
+%  saveEvaluatedFields  Default: false
+%                   if true, then a workspace is saved in folder Checksums
+%                   containing the field which are evaluated for
+%                   calculationg the checksum
+
+function checkstr = arChecksumFitting(arStruct, saveEvaluatedFields)
+global ar
+if ~exist('arStruct','var') || isempty(arStruct)
     arStruct = ar;
+end
+if ~exist('saveEvaluatedFields','var') || isempty(saveEvaluatedFields)
+    saveEvaluatedFields = false;
+end
+
+if saveEvaluatedFields
+    arCopy = struct;
 end
 
 if ~isfield(arStruct,'config')
@@ -21,6 +37,10 @@ checkstr = checkstr(:)';
 
 clear checksum
 
+
+if saveEvaluatedFields
+    arSaveChecksumCopy(a,'fitting',checkstr);
+end
 
 
 
@@ -52,4 +72,5 @@ fnoptim = setdiff(fieldnames(arStruct.config.optim),{'Display','DerivativeCheck'
 for i=1:length(fnoptim)
     a.config.optim.(fnoptim{i}) = arStruct.config.optim.(fnoptim{i});
 end
+
 

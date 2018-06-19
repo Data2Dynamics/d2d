@@ -65,7 +65,7 @@ if isempty(fkt)
 end
 
 % Make sure we have all the necessary fields
-ar=arInitFields(ar);
+ar = arInitFields(ar);
 
 
 

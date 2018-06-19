@@ -1,8 +1,12 @@
-%   [all_files,all_folders] = list_files_recursive(max_depth)
+%   [all_files,all_folders] = list_files_recursive(max_depth,mode)
 % 
 %   This function can be used to list all filenames recursively from the
 %   working directory (incl. the path)
 % 
+% 
+%   mode            can be used to speed up:
+%                   if 'files', then only files will be searched
+%                   if 'folders' then only folders will be searched
 % 
 %   all_files       all filenames including path
 %   all_folders     all foldernames including path
@@ -25,9 +29,19 @@
 % [~,f]=list_files_recursive(1) % all folders in pwd and one subfolder deeper
 
 
-function [all_files,all_folders] = list_files_recursive(max_depth)
+function [all_files,all_folders] = list_files_recursive(max_depth,mode)
 if ~exist('max_depth','var') || isempty(max_depth)
     max_depth = Inf;
+end
+if ~exist('mode','var') || isempty(mode)
+    mode = 0;
+elseif strcmpi(mode,'files') % has no effect in the current implementation
+    mode = 1;
+elseif strcmpi(mode,'folders')
+    mode = 2;
+else
+    mode
+    error('mode invalid')
 end
 
 
@@ -45,9 +59,11 @@ while ~isempty(check_folders)
     depth = length(strfind(tmpfolder,filesep)) - depth_pwd;
 
     if depth <= max_depth
-        all_files = union(all_files,files);
+        if mode~=2
+            all_files = union(all_files,files);
+        end
         all_folders = union(all_folders,folders);
-        
+            
         check_folders = setdiff(union(check_folders,folders),tmpfolder);
     else
         check_folders = setdiff(check_folders,tmpfolder);        
