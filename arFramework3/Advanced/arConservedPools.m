@@ -24,8 +24,10 @@ function arConservedPools(jm, showPools)
     N  = ar.model(jm).N;
     
     dependent = null( N.', 'r' );
+    [~,i]=sort(sum(dependent),'descend');
+    dependent = dependent(:, i);
+    
     IDs = repmat(1:size(dependent,1), size(dependent,2), 1).';
-
     groups = zeros( size(IDs) );
     if ( wantSyms )
         groups = sym(groups);
