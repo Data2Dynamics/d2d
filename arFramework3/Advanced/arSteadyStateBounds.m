@@ -172,8 +172,8 @@ function [res_user, res_type, sres_user] = residual_concentrationConstraintsL2(m
         xs = (xss < xl) | (xss > xu);
         zs = (zss < zl) | (zss > zu);
         ix = find(x_active); iz = find(z_active);
-        xstr = sprintf( '%s ', ar.model.x{ix(xs)} );
-        zstr = sprintf( '%s ', ar.model.z{iz(zs)} );
+        xstr = sprintf( '%s ', ar.model(m).x{ix(xs)} );
+        zstr = sprintf( '%s ', ar.model(m).z{iz(zs)} );
         fprintf( 'Active bounds: %s, %s\n', xstr, zstr );
     end
     if ( ar.config.show_ss_constraints == 2 )
