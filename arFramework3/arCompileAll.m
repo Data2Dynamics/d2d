@@ -129,6 +129,11 @@ for m=1:length(ar.model)
     % Have we reduced the model?
     if isfield( ar.model(m), 'reducedForm' )
         checksum_global = addToCheckSum(ar.model(m).reducedForm, checksum_global);
+        
+        % Store whether we express the model in totals or not
+        for jt = 1 : numel( ar.model(m).removedStates )
+            checksum_global = addToCheckSum(ar.model(m).removedStates(jt).expressInTotal, checksum_global);
+        end
     end
     
     matVer = ver('MATLAB');
@@ -154,6 +159,13 @@ for m=1:length(ar.model)
             checksum_cond = addToCheckSum(ar.model(m).z, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).fz, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).data(d).fp(qdynparas), checksum_cond);
+            if isfield( ar.model(m), 'reducedForm' )
+                % Store whether we express the model in totals or not
+                for jt = 1 : numel( ar.model(m).removedStates )
+                    checksum_cond = addToCheckSum(ar.model(m).removedStates(jt).expressInTotal, checksum_cond);
+                end
+            end
+            
             checkstr_cond = getCheckStr(checksum_cond);
             
             % data checksum
@@ -426,6 +438,13 @@ for m=1:length(ar.model)
         checksum_cond = addToCheckSum(ar.model(m).z, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).fz, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).fp, checksum_cond);
+        
+        if isfield( ar.model(m), 'reducedForm' )
+            % Store whether we express the model in totals or not
+            for jt = 1 : numel( ar.model(m).removedStates )
+                checksum_cond = addToCheckSum(ar.model(m).removedStates(jt).expressInTotal, checksum_cond);
+            end
+        end
         
         % append condition
         cindex = 1;
@@ -1509,7 +1528,7 @@ if(config.useSensis)
 end
 
 function condition = addPoolSubstitutions( condition, removedStates )
-    
+
     % Substitute current state initials into total pool
     for jp = 1 : numel( removedStates )
         totalPool = subs( removedStates(jp).totalPoolStates, condition.sym.p.', condition.sym.fp );
@@ -1523,10 +1542,11 @@ function condition = addPoolSubstitutions( condition, removedStates )
         condition.sym.fp( find( condition.sym.p == removedStates(jp).sym.initial ) ) = []; %#ok
         condition.sym.p(  find( condition.sym.p == removedStates(jp).sym.initial ) ) = []; %#ok
 
-        condition.fp{ strcmp( condition.p, removedStates(jp).totalVariable ) }             = totalPool_str;
-        condition.sym.fp( find( condition.sym.p == removedStates(jp).sym.totalVariable ) ) = totalPool; %#ok
+        if ( removedStates(jp).expressInTotal == 0 )
+            condition.fp{ strcmp( condition.p, removedStates(jp).totalVariable ) }             = totalPool_str;
+            condition.sym.fp( find( condition.sym.p == removedStates(jp).sym.totalVariable ) ) = totalPool; %#ok
+        end
     end
-
 
 % substitute until no more changes (for self-substitutions of derived
 % variables)

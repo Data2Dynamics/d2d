@@ -26,11 +26,14 @@
 %   sensitivity equations can be avoided when equilibrating the model.
 %   This rapid equilibration can be toggled via the command arFastSensis.
 
-function arReduce( m )
+function arReduce( m, keepTotals )
     global ar;
     
     if ( nargin < 1 )
         m = 1;
+    end
+    if ( nargin < 2 )
+        keepTotals = 0;
     end
     
     if isfield( ar.model(m), 'condition' )
@@ -66,7 +69,7 @@ function arReduce( m )
     
     while( ~isempty( ar.model(m).pools.states ) )
         % Add replacement rule for where the state appears in equations
-        [removedState, removalStruct] = genReplacementRule( m, 1, always );
+        [removedState, removalStruct] = genReplacementRule( m, 1, always, keepTotals );
         if isfield( ar.model(m), 'removedStates' )
             ar.model(m).removedStates(end+1) = removalStruct;
         else
@@ -152,7 +155,7 @@ function arReduce( m )
 end
 
 % Generate replacement rules
-function [removedState, removalStruct] = genReplacementRule( m, selected, always )
+function [removedState, removalStruct] = genReplacementRule( m, selected, always, keepTotals )
     global ar;
     
     removedState = ar.model(m).pools.states(selected);
@@ -198,6 +201,7 @@ function [removedState, removalStruct] = genReplacementRule( m, selected, always
     end
     
     % Store the fetched and generated results
+    removalStruct.expressInTotal = keepTotals;
     removalStruct.p = p;
     removalStruct.fp = fp;
     removalStruct.initial = ['init_' p];
