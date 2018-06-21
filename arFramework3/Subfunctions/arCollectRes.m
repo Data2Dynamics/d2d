@@ -6,10 +6,13 @@
 %   - random                    -> ar.res , ar.type=4
 % and calculates chi2 values as well as the number of data points
 
-function arCollectRes(sensi)
+function arCollectRes(sensi, debugres)
 
 global ar 
 
+if ( nargin < 2 )
+    debugres = 0;
+end
 if ~isfield(ar,'ndata_res')
     arCalcRes(true)
 end
@@ -68,13 +71,28 @@ for jm = 1:length(ar.model)
                     tmpres = ar.model(jm).data(jd).res(:,ar.model(jm).data(jd).qFit==1);
                     ar.res(resindex:(resindex+length(tmpres(:))-1)) = tmpres;
                     ar.res_type(resindex:(resindex+length(tmpres(:))-1)) = 1;
+                    
+                    if ( debugres )
+                        for jr = 1 : numel( tmpres )
+                            ar.resinfo(resindex + jr - 1).type = 'data';
+                            ar.resinfo(resindex + jr - 1).m = jm;
+                            ar.resinfo(resindex + jr - 1).d = jd;
+                        end
+                    end
                     resindex = resindex+length(tmpres(:));
                     
-                    if( fiterrors )
+                    if( fiterrors )                        
                         ar.chi2err = ar.chi2err + sum(ar.model(jm).data(jd).chi2err(ar.model(jm).data(jd).qFit==1));
                         tmpreserr = ar.model(jm).data(jd).reserr(:,ar.model(jm).data(jd).qFit==1);
                         ar.res(resindex:(resindex+length(tmpreserr(:))-1)) = tmpreserr;
                         ar.res_type(resindex:(resindex+length(tmpreserr(:))-1)) = 2;
+                        if ( debugres )
+                            for jr = 1 : numel( tmpreserr )
+                                ar.resinfo(resindex + jr - 1).type = 'error model';
+                                ar.resinfo(resindex + jr - 1).m = jm;
+                                ar.resinfo(resindex + jr - 1).d = jd;
+                            end
+                        end
                         resindex = resindex+length(tmpreserr(:));
                     end
                     
@@ -253,6 +271,10 @@ for jp=1:np
         tmpres = (ar.mean(jp)-ar.p(jp))./ar.std(jp);
         ar.res(resindex) = tmpres;
         ar.res_type(resindex) = 3; 
+        if ( debugres )
+            ar.resinfo(resindex).type = 'normal prior';
+            ar.resinfo(resindex).m = jp;
+        end
         resindex = resindex+1;
         if(ar.config.useSensis && sensi)
             tmpsres = zeros(size(ar.p));
@@ -274,6 +296,10 @@ for jp=1:np
         end
         ar.res(resindex) = tmpres;
         ar.res_type(resindex) = 3; 
+        if ( debugres )
+            ar.resinfo(resindex).type = 'uniform with normal bounds';
+            ar.resinfo(resindex).m = jp;
+        end
         resindex = resindex+1;
         if(ar.config.useSensis && sensi)
             tmpsres = zeros(size(ar.p));
@@ -288,7 +314,11 @@ for jp=1:np
     elseif(ar.type(jp) == 3 && ~isinf(ar.std(jp))) % L1 prior
         tmpres = sqrt(abs((ar.mean(jp)-ar.p(jp))./ar.std(jp)));
         ar.res(resindex) = tmpres;
-        ar.res_type(resindex) = 3; 
+        ar.res_type(resindex) = 3;
+        if ( debugres )
+            ar.resinfo(resindex).type = 'L1 prior';
+            ar.resinfo(resindex).m = jp;
+        end
         resindex = resindex+1;
         if(ar.config.useSensis && sensi)
             tmpsres = zeros(size(ar.p));
@@ -414,6 +444,9 @@ if isfield(ar.res_user,'res')
     for i=1:length(ar.res_user.res)
         ar.res(resindex) = ar.res_user.res(i);
         ar.res_type(resindex) = ar.res_user.type(i);
+        if ( debugres )
+            ar.resinfo(resindex).type = 'user residual';
+        end
         resindex = resindex + 1;
     end
     ar.chi2 = ar.chi2 + sum(ar.res_user.res.^2);
