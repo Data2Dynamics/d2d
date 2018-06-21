@@ -16,7 +16,7 @@ global ar
 arCheckCache(1);
 
 % update checkstrs:
-ar = arUpdateCheckstr(ar);
+ar = arUpdateCheckstr(ar, true);
 
 if(~exist('withSyms','var'))
     withSyms = false;
