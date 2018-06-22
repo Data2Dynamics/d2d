@@ -10,9 +10,10 @@ end
 if(zeigen)
     maxlen = max(cellfun(@length,liste));
     anno = cell(1,length(liste));
+    checkstr_version = cell(1,length(liste));
     for j=1:length(liste)
         % the headers are the same and should be generated at the same place where anno is generated, overwriting is no problem
-        [anno{j},vals{j},header] = readParameterAnnotation(liste{j});  % vals contains npara, nfitted, chi2, ... and is useful when working with a breakpoint
+        [anno{j},vals{j},header,checkstr_version{j}] = readParameterAnnotation(liste{j});  % vals contains npara, nfitted, chi2, ... and is useful when working with a breakpoint
     end        
      
     maxlen2 = max(cellfun(@length,anno));
@@ -20,9 +21,14 @@ if(zeigen)
     for j=1:length(anno)
         fprintf(['#%3i : %-',num2str(maxlen),'s  %s\n'], j, liste{j}, anno{j});
     end
+    
+    if sum(~cellfun(@isempty,checkstr_version))==0 || length(unique(checkstr_version))>1
+        fprintf('Absent or several versions of checksums detected: Execute ''arUpdateResultWorkspaces'' for updating.\n');
+    end
 end
 
 out = -1;
+
 if(default~=0) % force input
     while(out<1 || out>length(liste))
         out = numberChooser2(sprintf('Please choose (1-%i) ', length(liste)), default, liste);
@@ -77,10 +83,11 @@ while(isnan(out))
     end
 end
 
-function [anno,vals,header] = readParameterAnnotation(filename_tmp)
+function [anno,vals,header,checkstr_version] = readParameterAnnotation(filename_tmp)
 filename_pars = ['./Results/' filename_tmp '/workspace_pars_only.mat'];
 vals = struct;
 
+checkstr_version = ''; % default in case reading is not possible
 if(exist(filename_pars,'file'))
     S = load(filename_pars);
     
@@ -162,12 +169,7 @@ if(exist(filename_pars,'file'))
     
     plestrH = ' #PLE';
     plestr = sprintf('%5i',0); % default
-    if(isfield(S.ar,'ple'))
-        if(isfield(S.ar.ple,'chi2s'))
-            nple = sum(~cellfun(@isempty,S.ar.ple.chi2s));
-            plestr = sprintf('%5i',nple);
-        end
-    elseif exist(['./Results/',filename_tmp,filesep,'workspace_pars_only.mat'],'file')==2
+    if exist(['./Results/',filename_tmp,filesep,'workspace_pars_only.mat'],'file')==2
         % %% too slow:
         % vars = who('-file',['./Results/',filename_tmp,filesep,'workspace.mat'],'ple*');
         % if ~isempty(intersect(vars,'pleGlobals'))
@@ -176,12 +178,18 @@ if(exist(filename_pars,'file'))
         tmp = load(['./Results/',filename_tmp,filesep,'workspace_pars_only.mat'],'-mat','pleGlobals');
         set(0, 'DefaultFigureVisible', 'on') % required for not displaying figures in the workspace, I found no nicer solution
         warning('on','MATLAB:load:variableNotFound');
-        if isfield(tmp,'pleGlobals');
-            if ~isempty(tmp.pleGlobals)
-                % disp('Old PLE as variable pleGlobals available. Transferred to ar.ple ...');
-                nple = sum(~cellfun(@isempty,tmp.pleGlobals.chi2s));
-                plestr = sprintf('(%3i)',nple);
-            end
+        
+        if isfield(S,'ar') && isfield(S.ar,'checkstrs') && isfield(S.ar.checkstrs,'version')
+            checkstr_version = S.ar.checkstrs.version;
+        end
+        
+        if isfield(tmp,'pleGlobals') && ~isempty(tmp.pleGlobals)
+            % disp('Old PLE as variable pleGlobals available. Transferred to ar.ple ...');
+            nple = sum(~cellfun(@isempty,tmp.pleGlobals.chi2s));
+            plestr = sprintf('(%3i)',nple);
+        elseif(isfield(S.ar,'ple') && isfield(S.ar.ple,'chi2s'))
+            nple = sum(~cellfun(@isempty,S.ar.ple.chi2s));
+            plestr = sprintf('%5i',nple);            
         end
     end
     

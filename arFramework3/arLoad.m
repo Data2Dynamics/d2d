@@ -51,16 +51,16 @@ fprintf('workspace loaded from file %s\n', workspace_name);
 fkt = which(ar.fkt);
 
 if isempty(fkt)
-    disp([ar.fkt ' not found. Try to copy it from the savefolder...'])
+    fprintf([ar.fkt ' not found. Try to copy it from the savefolder... '])
     files = dir([ar.config.savepath '/' ar.fkt '.*']);
     cf_succeed = 0;
     for idf = 1:length(files)
         copyfile([ar.config.savepath '/' files.name ] , pwd)
-        disp(['Copied ' files.name ' from ' ar.config.savepath ' to the working directory.'])
+        fprintf(' done.\n')
         cf_succeed = 1;
     end
     if ~cf_succeed
-        disp([ar.fkt ' not found in ' ar.config.savepath])
+        fprintf(' NOT found. Please compile via Setup or ''arRecompile''.\n')
     end
 end
 
