@@ -9,6 +9,11 @@
 %               '5'
 %               The five benchmark models used in Kreutz et al, 2016)
 % 
+%               The (starting characters of) model names can also be
+%               specified, e.g.:
+%               arCopyBenchmarkModels('Becker')
+%               arCopyBenchmarkModels('Swa')
+% 
 % 
 %   target_path     Default: pwd
 
@@ -23,10 +28,7 @@ if ~exist('target_path','var') || isempty(target_path)
     target_path = pwd;
 end
 
-
-switch lower(subset)
-    case {'20',''} % default
-        models = {
+models20 = {
             'Bachmann_MSB2011',...
             'Becker_Science2010',...
             'Beer_MolBiosyst2014',...
@@ -47,6 +49,11 @@ switch lower(subset)
             'Swameye_PNAS2003',...
             'Weber_BMC2015',...
             'Zheng_PNAS2012'};
+
+
+switch lower(subset)
+    case {'20',''} % default
+        models = models20;
     case '5'
         models = {
             'Bachmann_MSB2011',...
@@ -55,7 +62,12 @@ switch lower(subset)
             'Raia_CancerResearch2011',...
             'Swameye_PNAS2003'};        
     otherwise
-        error('Subset unknown');
+        ind = strmatch(lower(subset),lower(models20));
+        if ~isempty(ind)
+            models = models20(ind);
+        else
+            error('Subset unknown');
+        end
 end
 
 DoCopy(models, target_path, subset);
