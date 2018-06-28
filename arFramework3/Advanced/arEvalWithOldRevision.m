@@ -21,7 +21,6 @@ global ar
 if ~exist('fun','var') || isempty(fun)
     fun = @fitLHS; % This function is defined below (as template/default).
 end
-
 if ~exist('shas','var') || isempty(shas)
     shas = {'0bfcb5facea85773a262fe417a213e93b6681dfe',...  % 27.6.18
         'c949d75ad3a00ee92248cfaffb6060d5c01889e8',... % 31.5.18, before statistics toolbox was removed
@@ -42,6 +41,12 @@ end
 if ~exist('dorecompile','var') || isempty(dorecompile)
     dorecompile = false;
 end
+
+% % The following functions should be from the latest ar-version:
+global arLatest
+arLatest = struct;
+arLatest.arDeepCopy = @arDeepCopy;
+arLatest.arDeepCopy = @arRecompile;
 
 rev0 = ar.info.revision;
 fkt0 = ar.fkt;
@@ -78,9 +83,9 @@ for s=1:length(shas)
             disp('Setup will be executed ...')
             Setup;
             close all % setup often raise figures
-        elseif exist('arRecompile','file')
+        elseif isfield(ar,'setup') %
             disp('arRecompile will be executed ...')
-            arRecompile;
+            feval(arLatest.arRecompile);
         else
             setupfile = input('Please specify Setup file: ','s');
             eval(setupfile);
@@ -151,15 +156,26 @@ end
 
 function res = fitLHS
 global ar
+% global arLatest
 
-load ps_start3
+if ~exist('ps_start.mat','file')
+    error('In this implementation, ps_start is loaded from workspace. Please create this workspace, e.g. via ps_start=arRandomPars(100);save ps_start ps_start')
+end
+load ps_start3  % ps_start is loaded from workspace and has to be saved before
 
 arFits(ps_start);
 
 res = struct;
 res.revision = ar.info.revision;
 res.fkt = ar.fkt;
-res.ar = arDeepCopy(ar);
+
+%%%%%%%%
+% it is impossible to use arDeepCopy from the latest version with changing paths (which would be ugly) since arDeepCopy calls itself which always point to the function uppermost in teh path
+% res.ar = feval(arLatest.arDeepCopy,ar); % only uses this fuction for the first call (not within arDeepCopy itself)
+res.ar = ar;
+res.ar.p = res.ar.p+0.0; 
+%%%%%%%%
+
 res.ps = ar.ps;
 res.chi2s = ar.chi2s;
 res.ps_start = ar.ps_start;
