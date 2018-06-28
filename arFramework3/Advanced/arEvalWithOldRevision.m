@@ -50,7 +50,7 @@ result = cell(size(shas));
 if dorecompile
     if exist([fkt0,'.',mexext],'file')
         % backup and remove ar.fkt (otherwise compilation might be skipped)
-        munlock([fkt0,'.',mexext]) % to prevent blocking the function because "in use"
+        my_munlock([fkt0,'.',mexext]) % to prevent blocking the function because "in use"
         movefile([fkt0,'.',mexext],[fkt0,'_backup.',mexext]);
     end
 end
@@ -71,8 +71,8 @@ for s=1:length(shas)
     %% recompilation?
     if dorecompile 
         if exist([ar.fkt,'_revision_',shas{s},'.',mexext],'file') % usually the combi of ar.fkt and shas ist not yet available before Setup
-            munlock([ar.fkt,'_revision_',shas{s},'.',mexext]);
-            munlock([ar.fkt,'.',mexext])
+            my_munlock([ar.fkt,'_revision_',shas{s},'.',mexext]);
+            my_munlock([ar.fkt,'.',mexext])
             copyfile([ar.fkt,'_revision_',shas{s},'.',mexext],[ar.fkt,'.',mexext]);
         elseif exist('Setup.m','file')
             disp('Setup will be executed ...')
@@ -88,8 +88,8 @@ for s=1:length(shas)
         end
         
         if exist([ar.fkt,'.',mexext],'file')
-            munlock([ar.fkt,'.',mexext])
-            munlock([ar.fkt,'_revision_',shas{s},'.',mexext])
+            my_munlock([ar.fkt,'.',mexext])
+            my_munlock([ar.fkt,'_revision_',shas{s},'.',mexext])
             copyfile([ar.fkt,'.',mexext],[ar.fkt,'_revision_',shas{s},'.',mexext]);  % make a copy for all revisions
         else
             error('%s not found. Check whether this function is (unintendedly) somewhere else in the Matlab path',[ar.fkt,'.',mexext]);
@@ -107,11 +107,11 @@ for s=1:length(shas)
         rmpath(tmp_paths);
         arRemoveOldRevisionPaths % to be sure
         ar.info.revision = rev0;
-        ar.fkt = fkt0;
-                
         if dorecompile % remove mex-file because you cannot see the revision (a copy incl. revision ID is made above)
             delete([ar.fkt,'.',mexext]);
         end
+        ar.fkt = fkt0;
+
             
         fprintf('Fit with revision %s finished.\n',shas{s});
     
@@ -163,6 +163,10 @@ res.ar = arDeepCopy(ar);
 res.ps = ar.ps;
 res.chi2s = ar.chi2s;
 res.ps_start = ar.ps_start;
+end
 
-
+function my_munlock(file)
+try
+    munlock(file)
+end
 end
