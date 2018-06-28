@@ -4,8 +4,13 @@
 % 
 %   Attention: This function does not recompile using the old revision. It
 %   uses/requires existing mex file as specified via ar.fkt
+% 
+%   If you want to compare Revision including recompilation, use
+%   arEvalWithOldRevision.m e.g. via
+%   arEvalWithOldRevision(@arFitLHS,'25b298f0957ddafbccf04d805593ef02355bb3dc',true)
 %
 % Example:
+% arFitWithOldRevision('c949d75ad3a00ee92248cfaffb6060d5c01889e8')
 
 
 function chi2 = arFitWithOldRevision(sha,varargin)

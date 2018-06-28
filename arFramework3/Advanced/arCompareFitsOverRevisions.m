@@ -6,7 +6,13 @@
 % 
 %   p0      initial guess for the parameters
 % 
-% [pfit,chi2s] = arCompareFitsOverRevisions
+% [pfit,chi2s,chi2new] = arCompareFitsOverRevisions
+% 
+%   pfit    fitted parameters
+%   
+%   chi2s   chi2fit according to the different revisions
+% 
+%   chi2new arGetMerit using the current revision (given by global ar)
 % 
 % 
 % This function can be used to compare fit results over several D2D
@@ -18,7 +24,7 @@
 % Example:
 % [pfit,chi2s] = arCompareFitsOverRevisions
 
-function [pfit,chi2s] = arCompareFitsOverRevisions(shas,p0)
+function [pfit,chi2s,chi2new] = arCompareFitsOverRevisions(shas,p0)
 
 if ~exist('shas','var') || isempty(shas)
     shas = {'0bfcb5facea85773a262fe417a213e93b6681dfe',...  % 27.6.18
@@ -62,4 +68,12 @@ for i=1:length(shas)
     pfit{i} = ar.p;    
     chi2s
 end
+
+chi2new = NaN(size(chi2s)); % Objective function according to the current (given by the input) code.
+for i=1:length(pfit)
+    ar.p = pfit{i};
+    arCalcMerit;
+    chi2new(i) = arGetMerit(true);
+end
+
 

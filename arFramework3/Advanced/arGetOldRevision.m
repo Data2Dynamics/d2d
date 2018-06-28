@@ -69,23 +69,23 @@ if ~exist([revision_path,filesep,'d2d-',sha],'dir') % revision not yet available
                 disp('Could not remove folder Examples');
             end
             
-            try
-                rmdir([revision_path,filesep,'d2d-',sha,filesep,'arFramework3',filesep,'ThirdParty'],'s');
-            catch
-                disp('Could not remove folder ThirdParty ');
-            end
-            
-            try
-                rmdir([revision_path,filesep,'d2d-',sha,filesep,'arFramework3',filesep,'pthreads*'],'s');
-            catch
-                disp('Could not remove folder pthreads* ');
-            end
-            
-            try
-                delete([revision_path,filesep,'d2d-',sha,filesep,'arFramework3',filesep,'*.tar']);
-            catch
-                disp('Could not remove files *.tar');
-            end
+%             try
+%                 rmdir([revision_path,filesep,'d2d-',sha,filesep,'arFramework3',filesep,'ThirdParty'],'s');
+%             catch
+%                 disp('Could not remove folder ThirdParty ');
+%             end
+%             
+%             try
+%                 rmdir([revision_path,filesep,'d2d-',sha,filesep,'arFramework3',filesep,'pthreads*'],'s');
+%             catch
+%                 disp('Could not remove folder pthreads* ');
+%             end
+%             
+%             try
+%                 delete([revision_path,filesep,'d2d-',sha,filesep,'arFramework3',filesep,'*.tar']);
+%             catch
+%                 disp('Could not remove files *.tar');
+%             end
             
             try
                 delete([sha(1:7),'.zip']);
