@@ -1,4 +1,4 @@
-% arFindInputs
+% totalEvents = arFindInputs
 %
 % Usage: 
 %    arFindInputs;
@@ -22,7 +22,7 @@
 % events for a specific condition, manually set ar.model(#).condition(#).qEvents
 % to 1.
 
-function arFindInputs( verbose )
+function totalEvents = arFindInputs( verbose )
 
     global ar;
     global arOutputLevel;
