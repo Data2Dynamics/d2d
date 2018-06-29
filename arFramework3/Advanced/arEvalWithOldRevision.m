@@ -22,8 +22,8 @@ if ~exist('fun','var') || isempty(fun)
     fun = @fitLHS; % This function is defined below (as template/default).
 end
 if ~exist('shas','var') || isempty(shas)
-    shas = {'0bfcb5facea85773a262fe417a213e93b6681dfe',...  % 27.6.18
-        'c949d75ad3a00ee92248cfaffb6060d5c01889e8',... % 31.5.18, before statistics toolbox was removed
+    shas = {'0bfcb5facea85773a262fe417a213e93b6681dfe',...  % Swameye BETTER, 27.6.18
+        'c949d75ad3a00ee92248cfaffb6060d5c01889e8',... % Swameye BETTER, 31.5.18, before statistics toolbox was removed
         '8e5009ccbc51f5b6fce6db89c06ae9f60d738454',... % 6.3.18  new field for saving the arSimuCalc mex file
         '0e130ed7c9aa87902086b49ecf158ae7265c409b',... % 13.2.18,  Added relative tolerance to equilibration as well. Equilibration is c…
         '7182eff7eb6f723da7b45da5470a37fd13c9e1de',... % 20.11.2017  Included more descriptive message when equilibration fails
@@ -46,11 +46,11 @@ end
 global arLatest
 arLatest = struct;
 arLatest.arDeepCopy = @arDeepCopy;
-arLatest.arDeepCopy = @arRecompile;
+arLatest.arRecompile = @arRecompile;
 
 rev0 = ar.info.revision;
 fkt0 = ar.fkt;
-    
+
 result = cell(size(shas));
 if dorecompile
     if exist([fkt0,'.',mexext],'file')
@@ -60,87 +60,95 @@ if dorecompile
     end
 end
 
-for s=1:length(shas)
-    arRemoveOldRevisionPaths        
+try
     
-    revision_path = arGetOldRevision(shas{s});
     
-    %% set path to old revision:
-    addpath([revision_path,filesep,'d2d-',shas{s},filesep,'arFramework3']);
-    ar_path = fileparts(which('arInit.m'));
-    fprintf('ar_path is now %s \n.',ar_path);
-    
-    tmp_paths = genpath(ar_path);
-    addpath(tmp_paths);
-    
-    %% recompilation?
-    if dorecompile 
-        if exist([ar.fkt,'_revision_',shas{s},'.',mexext],'file') % usually the combi of ar.fkt and shas ist not yet available before Setup
-            my_munlock([ar.fkt,'_revision_',shas{s},'.',mexext]);
-            my_munlock([ar.fkt,'.',mexext])
-            copyfile([ar.fkt,'_revision_',shas{s},'.',mexext],[ar.fkt,'.',mexext]);
-        elseif exist('Setup.m','file')
-            disp('Setup will be executed ...')
-            Setup;
-            close all % setup often raise figures
-        elseif isfield(ar,'setup') %
-            disp('arRecompile will be executed ...')
-            feval(arLatest.arRecompile);
-        else
-            setupfile = input('Please specify Setup file: ','s');
-            eval(setupfile);
-            close all % setup often raise figures
+    for s=1:length(shas)
+        arRemoveOldRevisionPaths
+        
+        revision_path = arGetOldRevision(shas{s});
+        
+        %% set path to old revision:
+        addpath([revision_path,filesep,'d2d-',shas{s},filesep,'arFramework3']);
+        ar_path = fileparts(which('arInit.m'));
+        fprintf('ar_path is now %s \n.',ar_path);
+        
+        tmp_paths = genpath(ar_path);
+        addpath(tmp_paths);
+        
+        %% recompilation?
+        if dorecompile
+            if exist([ar.fkt,'_revision_',shas{s},'.',mexext],'file') % usually the combi of ar.fkt and shas ist not yet available before Setup
+                my_munlock([ar.fkt,'_revision_',shas{s},'.',mexext]);
+                my_munlock([ar.fkt,'.',mexext])
+                copyfile([ar.fkt,'_revision_',shas{s},'.',mexext],[ar.fkt,'.',mexext]);
+            elseif exist('Setup.m','file')
+                disp('Setup will be executed ...')
+                Setup;
+                close all % setup often raise figures
+            elseif isfield(ar,'setup') %
+                disp('arRecompile will be executed ...')
+                feval(arLatest.arRecompile);
+            else
+                setupfile = input('Please specify Setup file: ','s');
+                eval(setupfile);
+                close all % setup often raise figures
+            end
+            
+            if exist([ar.fkt,'.',mexext],'file')
+                my_munlock([ar.fkt,'.',mexext])
+                my_munlock([ar.fkt,'_revision_',shas{s},'.',mexext])
+                copyfile([ar.fkt,'.',mexext],[ar.fkt,'_revision_',shas{s},'.',mexext]);  % make a copy for all revisions
+            else
+                error('%s not found. Check whether this function is (unintendedly) somewhere else in the Matlab path',[ar.fkt,'.',mexext]);
+            end
         end
         
-        if exist([ar.fkt,'.',mexext],'file')
-            my_munlock([ar.fkt,'.',mexext])
-            my_munlock([ar.fkt,'_revision_',shas{s},'.',mexext])
-            copyfile([ar.fkt,'.',mexext],[ar.fkt,'_revision_',shas{s},'.',mexext]);  % make a copy for all revisions
-        else
-            error('%s not found. Check whether this function is (unintendedly) somewhere else in the Matlab path',[ar.fkt,'.',mexext]);
+        
+        %% evaluating the function
+        try
+            arCheckCache( true ) % just to be sure
+            ar.info.revision = shas{s};
+            
+            result{s} = feval(fun,varargin{:});
+            
+            rmpath(tmp_paths);
+            arRemoveOldRevisionPaths % to be sure
+            ar.info.revision = rev0;
+            if dorecompile % remove mex-file because you cannot see the revision (a copy incl. revision ID is made above)
+                delete([ar.fkt,'.',mexext]);
+            end
+            ar.fkt = fkt0;
+            
+            
+            fprintf('Fit with revision %s finished.\n',shas{s});
+            
+        catch ERR
+            ar.fkt
+            fprintf('Fit sequence %i, fit number %i could not be refitted. Maybe the mex file does not run on this system.\n');
+            
+            rethrow(ERR)
         end
     end
     
     
-    %% evaluating the function
-    try
-        arCheckCache( true ) % just to be sure        
-        ar.info.revision = shas{s};
-        
-        result{s} = feval(fun,varargin{:});        
-
-        rmpath(tmp_paths);
-        arRemoveOldRevisionPaths % to be sure
-        ar.info.revision = rev0;
-        if dorecompile % remove mex-file because you cannot see the revision (a copy incl. revision ID is made above)
-            delete([ar.fkt,'.',mexext]);
-        end
-        ar.fkt = fkt0;
-
-            
-        fprintf('Fit with revision %s finished.\n',shas{s});
+catch ERR
+    %%%%%%%%%%%%%%
+    % reset revision:
+    rmpath(tmp_paths);
+    arRemoveOldRevisionPaths % to be sure
     
-    catch ERR
-        ar.fkt
-        fprintf('Fit sequence %i, fit number %i could not be refitted. Maybe the mex file does not run on this system.\n');
-
-        %%%%%%%%%%%%%%
-        % reset revision:
-        rmpath(tmp_paths);
-        arRemoveOldRevisionPaths % to be sure
-                
-        ar.info.revision = rev0;
-        ar.fkt = fkt0;
-        if dorecompile
-            if exist([fkt0,'_backup.',mexext],'var')
-                movefile([fkt0,'_backup.',mexext],[fkt0,'.',mexext]);
-            end
+    ar.info.revision = rev0;
+    ar.fkt = fkt0;
+    if dorecompile
+        if exist([fkt0,'_backup.',mexext],'var')
+            movefile([fkt0,'_backup.',mexext],[fkt0,'.',mexext]);
         end
-        %%%%%%%%%%%%%%
-        rethrow(ERR)
-    end                
+    end
+    %%%%%%%%%%%%%%
+    
+    rethrow(ERR)
 end
-
 %%%%%%%%%%%%%%
 % reset revision:
 ar.info.revision = rev0;
@@ -161,7 +169,7 @@ global ar
 if ~exist('ps_start.mat','file')
     error('In this implementation, ps_start is loaded from workspace. Please create this workspace, e.g. via ps_start=arRandomPars(100);save ps_start ps_start')
 end
-load ps_start3  % ps_start is loaded from workspace and has to be saved before
+load ps_start  % ps_start is loaded from workspace and has to be saved before
 
 arFits(ps_start);
 
@@ -173,7 +181,7 @@ res.fkt = ar.fkt;
 % it is impossible to use arDeepCopy from the latest version with changing paths (which would be ugly) since arDeepCopy calls itself which always point to the function uppermost in teh path
 % res.ar = feval(arLatest.arDeepCopy,ar); % only uses this fuction for the first call (not within arDeepCopy itself)
 res.ar = ar;
-res.ar.p = res.ar.p+0.0; 
+res.ar.p = res.ar.p+0.0;
 %%%%%%%%
 
 res.ps = ar.ps;
