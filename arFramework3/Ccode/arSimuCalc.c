@@ -842,7 +842,16 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                                 DEBUGPRINT1( debugMode, 4, "[ OK ] (teq=%g)\n", teq[0] );
                                 CVodeGetCurrentTime( cvode_mem, &(data->t) );
                                 
-                                if (flag < 0) {thr_error("Failed to equilibrate system"); terminate_x_calc( sim_mem, 20 ); return;}                                
+                                if (flag < 0) {
+                                    thr_error("Failed to equilibrate system");
+                                    if ( flag == 20 )
+                                    {
+                                        terminate_x_calc( sim_mem, 20 );
+                                    } else {
+                                        terminate_x_calc( sim_mem, 21 - flag ); 
+                                    }
+                                    return;
+                                }
                             } else {
                                 /* Simulate up to the next time point */
                                 flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
@@ -1405,6 +1414,7 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
         if ( flag < 0 )
         {
             converged = true;
+            return flag;
         }
 
         /* Store dxdt */
