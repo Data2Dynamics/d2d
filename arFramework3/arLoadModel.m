@@ -177,7 +177,7 @@ while(~strcmp(C{1},'INPUTS'))
     if(length(cell2mat(C{1}))<2)
         arParsingError( fid, 'STATE names need to be longer than 1');
     end
-    if(isempty(symvar(sym(C{1}))))
+    if(isempty(symvar(arMyStr2Sym(C{1}))))
         arParsingError( fid, 'STATE name ''%s'' is reserved by MATLAB. Please rename!',cell2mat(C{1}));
     end
     
@@ -393,7 +393,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             if(ar.config.checkForNegFluxes)
                 if (~reversible)
                     try
-                        symtmp = sym(str{1});
+                        symtmp = arMyStr2Sym(str{1});
                     catch
                         if ( iscell( str{1} ) )
                             arParsingError( fid,  'Parsing error in REACTIONS at %s in model %d', str{1}{:}, m );
@@ -402,7 +402,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                         end
                     end
                     for j=1:length(source)
-                        symtmpsubs = subs(symtmp, sym(source{j}), 0);
+                        symtmpsubs = subs(symtmp, arMyStr2Sym(source{j}), 0);
                         sva = symvar(symtmp);
                         symtmpsubs = subs(symtmpsubs, sva, rand(1, numel(sva)) );
                         if(symtmpsubs~=0)
@@ -414,11 +414,11 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                         end
                     end
                 else
-                    symtmp = sym(str{1});
+                    symtmp = arMyStr2Sym(str{1});
                     for j=1:length(source)
-                        symtmpsubs = subs(symtmp, sym(source{j}), 0);
+                        symtmpsubs = subs(symtmp, arMyStr2Sym(source{j}), 0);
                         for k=1:length(target)
-                            symtmpsubs = subs(symtmpsubs, sym(target{k}), 0);
+                            symtmpsubs = subs(symtmpsubs, arMyStr2Sym(target{k}), 0);
                         end
                         sva = symvar(symtmp);
                         symtmpsubs = subs(symtmpsubs, sva, rand(1, numel(sva)) );
@@ -432,9 +432,9 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                         end                        
                     end
                     for j=1:length(target)
-                        symtmpsubs = subs(symtmp, sym(target{j}), 0);
+                        symtmpsubs = subs(symtmp, arMyStr2Sym(target{j}), 0);
                         for k=1:length(source)
-                            symtmpsubs = subs(symtmpsubs, sym(source{k}), 0);
+                            symtmpsubs = subs(symtmpsubs, arMyStr2Sym(source{k}), 0);
                         end
                         
                         if(symtmpsubs~=0)
@@ -675,8 +675,8 @@ ar.model(m).fx_par = cell(length(ar.model(m).x),1);
 %end
 ar.model(m).Cm = C;
 ar.model(m).Cm_par = C_par;
-tmpfx = (sym(ar.model(m).N).*sym(C)) * sym(ar.model(m).fv);
-tmpfx_par = (sym(ar.model(m).N).*sym(C_par)) * sym(ar.model(m).fv);
+tmpfx = (arMyStr2Sym(ar.model(m).N).* arMyStr2Sym(C)) * arMyStr2Sym(ar.model(m).fv);
+tmpfx_par = (arMyStr2Sym(ar.model(m).N).* arMyStr2Sym(C_par)) * arMyStr2Sym(ar.model(m).fv);
 
 for j=1:length(ar.model(m).x) % for every species j
     if ~isempty(tmpfx)
@@ -737,7 +737,7 @@ end
 % Perform (repeated) derived substitutions
 if ( derivedVariablesInRates )
     for a = 1 : length( ar.model(m).fv )
-        ar.model(m).fv{a} = char( arSubsRepeated(sym(ar.model(m).fv{a}), ar.model(m).z, ar.model(m).fz, matVer.Version) );
+        ar.model(m).fv{a} = char( arSubsRepeated(arMyStr2Sym(ar.model(m).fv{a}), ar.model(m).z, ar.model(m).fz, matVer.Version) );
     end
     arFprintf(2, '=> Substituting derived variables in reaction equation.\n' );
 end
