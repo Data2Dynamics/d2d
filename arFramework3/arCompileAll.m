@@ -259,6 +259,7 @@ for m=1:length(ar.model)
         model.vs = ar.model(m).vs;
         model.zs = ar.model(m).zs;
         model.N = ar.model(m).N;
+        
         model.dvdx = ar.model(m).sym.dvdx;
         model.dvdu = ar.model(m).sym.dvdu;
         
@@ -671,7 +672,7 @@ ar.model(m).sym.x = mySym(ar.model(m).x, specialFunc);
 ar.model(m).sym.xs = mySym(ar.model(m).xs, specialFunc);
 ar.model(m).sym.z = mySym(ar.model(m).z, specialFunc);
 ar.model(m).sym.zs = mySym(ar.model(m).zs, specialFunc);
-ar.model(m).sym.px0 = sym(ar.model(m).px0);
+ar.model(m).sym.px0 = arMyStr2Sym(ar.model(m).px0);
 ar.model(m).sym.u = mySym(ar.model(m).u, specialFunc);
 ar.model(m).sym.us = mySym(ar.model(m).us, specialFunc);
 ar.model(m).sym.v = mySym(strrep(strrep(ar.model(m).v, ' ', '_'),'.','_'), specialFunc);
@@ -682,8 +683,8 @@ ar.model(m).sym.fv = mySym(ar.model(m).fv, specialFunc);
 % compartment volumes
 if(~isempty(ar.model(m).pc)) 
     % make syms
-    ar.model(m).sym.pc = sym(ar.model(m).pc);
-    ar.model(m).sym.C = sym(ones(size(ar.model(m).N)));
+    ar.model(m).sym.pc = arMyStr2Sym(ar.model(m).pc);
+    ar.model(m).sym.C = arMyStr2Sym(ones(size(ar.model(m).N)));
     
     if(~isfield(ar.model(m),'isAmountBased') || ~ar.model(m).isAmountBased)
         for j=1:size(ar.model(m).N,1) % for every species j
@@ -693,7 +694,7 @@ if(~isempty(ar.model(m).pc))
 				eductcompartment(jj) = unique(ar.model(m).cLink(ar.model(m).N(:,jj)<0)); %R2013a compatible
             end
             
-            cfaktor = sym(ones(size(qinfluxwitheducts)));
+            cfaktor = arMyStr2Sym(ones(size(qinfluxwitheducts)));
             for jj=find(qinfluxwitheducts & eductcompartment~=ar.model(m).cLink(j))
                 cfaktor(jj) = ar.model(m).sym.pc(eductcompartment(jj)) / ...
                     ar.model(m).sym.pc(ar.model(m).cLink(j));
@@ -706,7 +707,7 @@ if(~isempty(ar.model(m).pc))
         end
     end
 else
-    ar.model(m).sym.C = sym(ones(size(ar.model(m).N)));
+    ar.model(m).sym.C = arMyStr2Sym(ones(size(ar.model(m).N)));
 end
 
 % derivatives
@@ -715,11 +716,11 @@ if(~isempty(ar.model(m).sym.fv))
     if(~isempty(ar.model(m).sym.us))
         ar.model(m).sym.dfvdu = myJacobian(ar.model(m).sym.fv, ar.model(m).sym.u);
     else
-        ar.model(m).sym.dfvdu = sym(ones(length(ar.model(m).sym.fv), 0));
+        ar.model(m).sym.dfvdu = arMyStr2Sym(ones(length(ar.model(m).sym.fv), 0));
     end
 else
-    ar.model(m).sym.dfvdx = sym(ones(0, length(ar.model(m).sym.x)));
-    ar.model(m).sym.dfvdu = sym(ones(0, length(ar.model(m).sym.u)));
+    ar.model(m).sym.dfvdx = arMyStr2Sym(ones(0, length(ar.model(m).sym.x)));
+    ar.model(m).sym.dfvdu = arMyStr2Sym(ones(0, length(ar.model(m).sym.u)));
 end
 
 if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
@@ -730,7 +731,7 @@ if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
         tmpsym = ar.model(m).sym.dfvdx;
         tmpsym = arSubs(tmpsym, ar.model(m).sym.x,  rand(size(ar.model(m).sym.x)), matlab_version);
         tmpsym = arSubs(tmpsym, ar.model(m).sym.u,  rand(size(ar.model(m).sym.u)), matlab_version);
-        tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+        tmpsym = arSubs(tmpsym, arMyStr2Sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
 
         try
             ar.model(m).q_negative = double(tmpsym) < 0;
@@ -749,7 +750,7 @@ if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
     tmpsym = ar.model(m).sym.dfvdu;
     tmpsym = arSubs(tmpsym, ar.model(m).sym.x, rand(size(ar.model(m).sym.x)), matlab_version);
     tmpsym = arSubs(tmpsym, ar.model(m).sym.u, rand(size(ar.model(m).sym.u)), matlab_version);
-    tmpsym = arSubs(tmpsym, sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
+    tmpsym = arSubs(tmpsym, arMyStr2Sym(ar.model(m).p), rand(size(ar.model(m).p)), matlab_version);
     
     ar.model(m).qdvdu_negative = double(tmpsym) < 0;
     
@@ -779,9 +780,9 @@ end
 
 % hard code conditions
 specialFunc = config.specialFunc;
-condition.sym.p = sym(condition.p);
+condition.sym.p = arMyStr2Sym(condition.p);
 try
-    condition.sym.fp = sym(condition.fp);
+    condition.sym.fp = arMyStr2Sym(condition.fp);
 catch
     error( invalidSym( 'Invalid expression in condition transformations', condition.fp, condition.p ) );
 end
@@ -791,7 +792,7 @@ if isfield( model, 'removedStates' )
     condition = addPoolSubstitutions( condition, model.removedStates );
 end
 
-condition.sym.fpx0 = sym(model.px0);
+condition.sym.fpx0 = arMyStr2Sym(model.px0);
 condition.sym.fpx0 = arSubs(condition.sym.fpx0, condition.sym.p, condition.sym.fp, matlab_version);
 condition.sym.fv = mySym(model.fv, specialFunc);
 condition.sym.fv = arSubs(condition.sym.fv, condition.sym.p, condition.sym.fp, matlab_version);
@@ -808,21 +809,21 @@ constVars = {};
 cVars = {};
 for i=1:length(condition.sym.fu)
     [ tmp, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fu(i)), constVars, cVars, c, 'condi' );
-    condition.sym.fu(i) = sym( tmp );
+    condition.sym.fu(i) = arMyStr2Sym( tmp );
 end
 
 
 for i=1:length(condition.sym.fv)
     [ tmp, constVars, cVars ] = replaceFixedArrays( char(condition.sym.fv(i)), constVars, cVars, c, 'condi' );
-    condition.sym.fv(i) = sym( tmp );
+    condition.sym.fv(i) = arMyStr2Sym( tmp );
 end
 
 condition.constVars = sprintf( '%s;\n', constVars{:} );
 
 % predictor
-condition.sym.fv = arSubs(condition.sym.fv, sym(model.t), sym('t'), matlab_version);
-condition.sym.fu = arSubs(condition.sym.fu, sym(model.t), sym('t'), matlab_version);
-condition.sym.fz = arSubs(condition.sym.fz, sym(model.t), sym('t'), matlab_version);
+condition.sym.fv = arSubs(condition.sym.fv, arMyStr2Sym(model.t), arMyStr2Sym('t'), matlab_version);
+condition.sym.fu = arSubs(condition.sym.fu, arMyStr2Sym(model.t), arMyStr2Sym('t'), matlab_version);
+condition.sym.fz = arSubs(condition.sym.fz, arMyStr2Sym(model.t), arMyStr2Sym('t'), matlab_version);
 
 % remaining initial conditions
 varlist = symvar(condition.sym.fpx0);
@@ -879,9 +880,9 @@ for j=1:length(condition.p)
 end
 
 % make syms
-condition.sym.p = sym(condition.p);
-condition.sym.ps = sym(condition.ps);
-condition.sym.px0s = arSubs(sym(condition.px0), ...
+condition.sym.p = arMyStr2Sym(condition.p);
+condition.sym.ps = arMyStr2Sym(condition.ps);
+condition.sym.px0s = arSubs(arMyStr2Sym(condition.px0), ...
     condition.sym.p, condition.sym.ps, matlab_version);
 
 % make syms
@@ -901,7 +902,7 @@ condition.sym.fpx0 = arSubs(condition.sym.fpx0, condition.sym.p, condition.sym.p
 condition.qfu_nonzero = logical(condition.sym.fu ~= 0);
 if(~isempty(model.sym.us))
     condition.sym.fv = arSubs(condition.sym.fv, model.sym.us(~condition.qfu_nonzero), ...
-        sym(zeros(1,sum(~condition.qfu_nonzero))), matlab_version);
+        arMyStr2Sym(zeros(1,sum(~condition.qfu_nonzero))), matlab_version);
 end
 
 % derivatives
@@ -910,13 +911,13 @@ if(~isempty(condition.sym.fv))
     if(~isempty(model.sym.us))
         condition.sym.dfvdu = myJacobian(condition.sym.fv, model.sym.us);
     else
-        condition.sym.dfvdu = sym(ones(length(condition.sym.fv), 0));
+        condition.sym.dfvdu = arMyStr2Sym(ones(length(condition.sym.fv), 0));
     end
     condition.sym.dfvdp = myJacobian(condition.sym.fv, condition.sym.ps);
 else
-    condition.sym.dfvdx = sym(ones(0, length(model.sym.xs)));
-    condition.sym.dfvdu = sym(ones(0, length(model.sym.us)));
-    condition.sym.dfvdp = sym(ones(0, length(condition.sym.ps)));
+    condition.sym.dfvdx = arMyStr2Sym(ones(0, length(model.sym.xs)));
+    condition.sym.dfvdu = arMyStr2Sym(ones(0, length(model.sym.us)));
+    condition.sym.dfvdp = arMyStr2Sym(ones(0, length(condition.sym.ps)));
 end
 
 % flux signs
@@ -934,11 +935,11 @@ if ~isempty(condition.qdvdu_nonzero)
     condition.sym.dvdu(~condition.qdvdu_nonzero) = 0;
 end
     
-condition.sym.dvdp = sym(zeros(length(model.vs), length(condition.ps)));
+condition.sym.dvdp = arMyStr2Sym(zeros(length(model.vs), length(condition.ps)));
 for j=1:length(model.vs)
     for i=1:length(condition.ps)
         if(condition.qdvdp_nonzero(j,i))
-            condition.sym.dvdp(j,i) = sym(sprintf('dvdp[%i]', j + (i-1)*length(model.vs)));
+            condition.sym.dvdp(j,i) = arMyStr2Sym(sprintf('dvdp[%i]', j + (i-1)*length(model.vs)));
         end
     end
 end
@@ -961,7 +962,7 @@ firstcol = true;
 if(config.useSensis || config.useJacobian)
     condition.sym.dfxdx = (model.N .* condition.sym.C) * condition.sym.dvdx;
     condition.qdfxdx_nonzero = logical(condition.sym.dfxdx~=0);
-    condition.sym.dfxdx_nonzero = sym(zeros(1, arnansum(arnansum(condition.qdfxdx_nonzero))));
+    condition.sym.dfxdx_nonzero = arMyStr2Sym(zeros(1, arnansum(arnansum(condition.qdfxdx_nonzero))));
     for j=1:length(model.xs)
         for i=1:length(model.xs)
             if(i==1)
@@ -980,7 +981,7 @@ if(config.useSensis || config.useJacobian)
             end
             if(firstcol && i==length(model.xs) && ( size(condition.sym.dfxdx_nonzero, 2) > 0) )
                 condition.dfxdx_rowVals = [condition.dfxdx_rowVals i-1];
-                condition.sym.dfxdx_nonzero(length(condition.dfxdx_rowVals)) = 'RCONST(0.0)';
+                condition.sym.dfxdx_nonzero(length(condition.dfxdx_rowVals)) = str2sym('RCONST(0.0)');
                 condition.dfxdx_colptrs = [condition.dfxdx_colptrs length(condition.dfxdx_rowVals)-1];
                 firstcol = false;
             end
@@ -1010,7 +1011,7 @@ if(config.useSensis)
             condition.sym.dfudp = ...
                 myJacobian(condition.sym.fu, condition.sym.ps);
         else
-            condition.sym.dfudp = sym(ones(0,length(condition.sym.ps)));
+            condition.sym.dfudp = arMyStr2Sym(ones(0,length(condition.sym.ps)));
         end
         
         % Replace spline derivatives
@@ -1019,7 +1020,7 @@ if(config.useSensis)
                 for j2 = 1 : length( condition.sym.dfudp(j,:) )
                     ustr = char(condition.sym.dfudp(j, j2));
                     ustr = repSplineDer( ustr );
-                    condition.sym.dfudp(j,j2) = sym(ustr);
+                    condition.sym.dfudp(j,j2) = arMyStr2Sym(ustr);
                 end
             end
         end
@@ -1036,7 +1037,7 @@ if(config.useSensis)
     for j=1:length(model.xs)
         condition.sx{j} = sprintf('sx[%i]', j);
     end
-	condition.sym.sx = sym(condition.sx);
+	condition.sym.sx = arMyStr2Sym(condition.sx);
     
     condition.sym.fsv1 = condition.sym.dvdx * condition.sym.sx + ...
         condition.sym.dvdu * condition.sym.su;
@@ -1047,7 +1048,7 @@ if(config.useSensis)
     for j=1:length(model.vs)
         condition.sv{j} = sprintf('sv[%i]', j);
     end
-    condition.sym.sv = sym(condition.sv);
+    condition.sym.sv = arMyStr2Sym(condition.sv);
     
     if(config.useSensiRHS)
         condition.sym.fsx = (model.N .* condition.sym.C) * condition.sym.sv;
@@ -1057,7 +1058,7 @@ if(config.useSensis)
     if(~isempty(condition.sym.fpx0))
         condition.sym.fsx0 = myJacobian(condition.sym.fpx0, condition.sym.ps);
     else
-        condition.sym.fsx0 = sym(ones(0, length(condition.sym.ps)));
+        condition.sym.fsx0 = arMyStr2Sym(ones(0, length(condition.sym.ps)));
     end
     
     % partial derivative right hand side w.r.t. parameters (keeping x fixed)
@@ -1091,7 +1092,7 @@ if(config.useSensis)
     for j=1:length(model.zs)
         condition.sz{j,1} = sprintf('sz[%i]', j);
     end
-    condition.sym.sz = sym(condition.sz);
+    condition.sym.sz = arMyStr2Sym(condition.sz);
     
     condition.sym.fsz1 = condition.sym.dfzdx * condition.sym.sx;
     if(isfield(condition.sym, 'dfudp'))
@@ -1237,8 +1238,8 @@ end
 specialFunc = config.specialFunc;
 
 % hard code conditions
-data.sym.p  = sym(data.p);
-data.sym.fp = sym(data.fp);
+data.sym.p  = arMyStr2Sym(data.p);
+data.sym.fp = arMyStr2Sym(data.fp);
 
 % Were model reductions applied? Make sure to transfer the initial conditions correctly
 if isfield( model, 'removedStates' )
@@ -1257,7 +1258,7 @@ data.sym.fy = mySym(data.fy, specialFunc);
 data.sym.fy = arSubs(data.sym.fy, model.sym.v, model.sym.fv, matlab_version);
 data.sym.fy = arSubs(data.sym.fy, data.sym.p, data.sym.fp, matlab_version);
 try
-    data.sym.fystd = sym(data.fystd);
+    data.sym.fystd = arMyStr2Sym(data.fystd);
 catch
     error( 'Invalid expression in error model\n%s', [sprintf('%s', data.fystd{:} )] ); %#ok
 end
@@ -1269,12 +1270,12 @@ data.sym.fu = arSubs(data.sym.fu, data.sym.p, data.sym.fp, matlab_version);
 data.qfu_nonzero = logical(data.sym.fu ~= 0);
 
 % predictor
-data.sym.fu = arSubs(data.sym.fu, sym(model.t), sym('t'), matlab_version);
-data.sym.fy = arSubs(data.sym.fy, sym(model.t), sym('t'), matlab_version);
-data.sym.fystd = arSubs(data.sym.fystd, sym(model.t), sym('t'), matlab_version);
+data.sym.fu = arSubs(data.sym.fu, arMyStr2Sym(model.t), arMyStr2Sym('t'), matlab_version);
+data.sym.fy = arSubs(data.sym.fy, arMyStr2Sym(model.t), arMyStr2Sym('t'), matlab_version);
+data.sym.fystd = arSubs(data.sym.fystd, arMyStr2Sym(model.t), arMyStr2Sym('t'), matlab_version);
 
-data.sym.fy = arSubs(data.sym.fy, sym(model.t), sym('t'), matlab_version);
-data.sym.fystd = arSubs(data.sym.fystd, sym(model.t), sym('t'), matlab_version);
+data.sym.fy = arSubs(data.sym.fy, arMyStr2Sym(model.t), arMyStr2Sym('t'), matlab_version);
+data.sym.fystd = arSubs(data.sym.fystd, arMyStr2Sym(model.t), arMyStr2Sym('t'), matlab_version);
 
 % remaining parameters
 varlist = symvar([data.sym.fy(:); data.sym.fystd(:)]);
@@ -1312,10 +1313,10 @@ for j=1:length(data.y)
 end
 
 % make syms
-data.sym.p = sym(data.p);
-data.sym.ps = sym(data.ps);
-data.sym.y = sym(data.y);
-data.sym.ys = sym(data.ys);
+data.sym.p = arMyStr2Sym(data.p);
+data.sym.ps = arMyStr2Sym(data.ps);
+data.sym.y = arMyStr2Sym(data.y);
+data.sym.ys = arMyStr2Sym(data.ys);
 
 % substitute
 data.sym.fy = arSubs(data.sym.fy, ...
@@ -1343,7 +1344,7 @@ if(~isempty(data.sym.fy))
     if(~isempty(model.sym.us))
         data.sym.dfydu = myJacobian(data.sym.fy, model.sym.us);
     else
-        data.sym.dfydu = sym(ones(length(data.y), 0));
+        data.sym.dfydu = arMyStr2Sym(ones(length(data.y), 0));
     end
     if(~isempty(model.x))
         data.sym.dfydx = myJacobian(data.sym.fy, model.sym.xs);
@@ -1373,7 +1374,7 @@ if(~isempty(data.sym.fystd))
     if(~isempty(model.sym.us))
         data.sym.dfystddu = myJacobian(data.sym.fystd, model.sym.us);
     else
-        data.sym.dfystddu = sym(ones(length(data.y), 0));
+        data.sym.dfystddu = arMyStr2Sym(ones(length(data.y), 0));
     end
     if(~isempty(model.x))
         data.sym.dfystddx = myJacobian(data.sym.fystd, model.sym.xs);
@@ -1407,11 +1408,11 @@ for j=1:length(model.zs)
         data.dfzdx{j,i} = sprintf('dfzdx[%i]', j + (i-1)*length(model.zs));
     end
 end
-data.sym.dfzdx = sym(data.dfzdx);
+data.sym.dfzdx = arMyStr2Sym(data.dfzdx);
 
 % calculate y_scale
 if(isempty(data.sym.dfydx) && isempty(data.sym.dfydz))
-    data.sym.y_scale = sym(zeros(length(data.sym.fy)));
+    data.sym.y_scale = arMyStr2Sym(zeros(length(data.sym.fy)));
 else
     if(~isempty(data.sym.dfydx))
         data.sym.y_scale = data.sym.dfydx;    
@@ -1435,7 +1436,7 @@ if(config.useSensis)
             data.sx{j,i} = sprintf('sx[%i]', j + (i-1)*length(model.xs));
         end
     end
-    data.sym.sx = sym(data.sx);
+    data.sym.sx = arMyStr2Sym(data.sx);
     
     % su
     data.su = cell(length(model.us), length(data.p_condition));
@@ -1448,7 +1449,7 @@ if(config.useSensis)
             end
         end
     end
-    data.sym.su = sym(data.su);
+    data.sym.su = arMyStr2Sym(data.su);
     
     % sz
     data.sz = cell(length(model.zs), length(data.p_condition));
@@ -1457,7 +1458,7 @@ if(config.useSensis)
             data.sz{j,i} = sprintf('sz[%i]', j + (i-1)*length(model.zs));
         end
     end
-    data.sym.sz = sym(data.sz);
+    data.sym.sz = arMyStr2Sym(data.sz);
     
     % sy sensitivities
     data.sy = {};
@@ -1466,7 +1467,7 @@ if(config.useSensis)
             data.sy{j,i} = sprintf('sy[%i]', j + (i-1)*length(data.sym.fy));
         end
     end
-	data.sym.sy = sym(data.sy);
+	data.sym.sy = arMyStr2Sym(data.sy);
     
     % parameters that appear in conditions
     if(~isempty(data.p_condition))
@@ -1583,11 +1584,11 @@ function condition = uniqueSplines( condition )
     [fu, nsfu] = repSplines( condition.sym.fu, 0 );
     
     [dfudp, nsdfudp] = repSplines( condition.sym.dfudp, nsfu );
-    condition.sym.dfudp = sym(dfudp);
+    condition.sym.dfudp = arMyStr2Sym(dfudp);
     
     [fu, nsfuI] = repInput( fu, nsfu + nsdfudp );
 
-    condition.sym.fu = sym(fu);    
+    condition.sym.fu = arMyStr2Sym(fu);    
     condition.splines = zeros( nsfu + nsdfudp + nsfuI, 1 );
 
 % Find the used splines. Replace them with fast splines and store the
@@ -1733,7 +1734,7 @@ fprintf(fid, '%s\n\n', condition.constVars);
 fprintf(fid, ' void fu_%s(void *user_data, double t)\n{\n', condition.fkt);
 if(timedebug) 
     fprintf(fid, '  printf("%%g \\t fu\\n", t);\n'); 
-end;
+end
 if(~isempty(model.us))
     fprintf(fid, '  UserData data = (UserData) user_data;\n');
     fprintf(fid, '  double *p = data->p;\n');
@@ -2016,7 +2017,7 @@ if(config.useSensiRHS)
                 for svs = 1 : length(condition.sym.fsx)
                     sxdot_tmp{svs} = sprintf( 'sxdot_tmp[%d]', svs ); %#ok
                 end
-                sxdot_tmp = sym(repmat(sxdot_tmp, size(condition.sym.dvdp,2), 1));
+                sxdot_tmp = arMyStr2Sym(repmat(sxdot_tmp, size(condition.sym.dvdp,2), 1));
                 condition.sym.dfcdp2 = (sxdot_tmp.' + condition.sym.dfcdp);
                 
                 fprintf(fid, '  switch (ip) {\n');
@@ -2813,23 +2814,23 @@ if(~isempty(F))
     if(~isempty(x))
         J = jacobian(F,x);
     else
-        J = sym(NaN(length(F),0));
+        J = arMyStr2Sym(NaN(length(F),0));
     end
 else
-    J = sym(NaN(0,length(x)));
+    J = arMyStr2Sym(NaN(0,length(x)));
 end
 
 % Replace special functions before converting to symbolic expression
 function s = mySym( s, specialFunc )
     if ( isempty( specialFunc ) )
-        s = sym(s);
+        s = arMyStr2Sym(s);
     else
         for a = 1 : size( s, 1 )
             for b = 1 : size( s, 2 )
                 s{a,b} = replaceFunctions( s{a,b}, specialFunc, 1 );
             end
         end
-        s = sym(s);
+        s = arMyStr2Sym(s);
     end
     
 % convert sym array to string array
@@ -2954,7 +2955,7 @@ function cstr = ccode2(T, matlab_version)
     end
     
     try
-        T = sym( replaceDerivative( char(T) ) );
+        T = arMyStr2Sym( replaceDerivative( char(T) ) );
     catch
         char(T)
         error('Failure attempting to replace derivatives in');
@@ -2983,7 +2984,7 @@ function message = invalidSym( message, symvariable, names )
     if ( exist( 'names', 'var' ) )
         for a = 1 : numel( symvariable )
             try
-                sym(symvariable(a));
+                arMyStr2Sym(symvariable(a));
             catch
                 message = sprintf( '%s\n%s -> %s\n', message, names{a}, symvariable{a} );
             end
@@ -2991,7 +2992,7 @@ function message = invalidSym( message, symvariable, names )
     else
         for a = 1 : numel( symvariable )
             try
-                sym(symvariable(a));
+                arMyStr2Sym(symvariable(a));
             catch
                 message = sprintf( '%s\n%s\n', message, symvariable{a} );
             end
@@ -3003,13 +3004,13 @@ function [ dvdx, dvdu ] = cacheShortTerms( model )
     dvdx = sym(zeros(length(model.vs), length(model.xs)));
     for j=1:length(model.vs)
         for i=1:length(model.xs)
-            dvdx(j,i) = sym(sprintf('dvdx[%i]', j + (i-1)*length(model.vs)));
+            dvdx(j,i) = arMyStr2Sym(sprintf('dvdx[%i]', j + (i-1)*length(model.vs)));
         end
     end
 
-    dvdu = sym(zeros(length(model.vs), length(model.us)));
+    dvdu = arMyStr2Sym(zeros(length(model.vs), length(model.us)));
     for j=1:length(model.vs)
         for i=1:length(model.us)
-            dvdu(j,i) = sym(sprintf('dvdu[%i]', j + (i-1)*length(model.vs)));
+            dvdu(j,i) = arMyStr2Sym(sprintf('dvdu[%i]', j + (i-1)*length(model.vs)));
         end
     end
