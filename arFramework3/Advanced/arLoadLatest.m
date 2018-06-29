@@ -42,6 +42,9 @@ if ~isempty(pattern)
     ind = find(~cellfun(@isempty,regexp(folders,pattern)));
     if isempty(ind)
         warning('Pattern ''%s'' does not match to any workspace in folder Results => nothing loaded.',pattern);
+        if nargout>0
+            varargout{1} = false;
+        end
         return
     end
     folders = folders(ind);

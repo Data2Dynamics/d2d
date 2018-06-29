@@ -263,7 +263,7 @@ function ar = arInitFields(ar)
 
     if isfield(ar,'checkstrs') && isfield(ar.checkstrs,'total')
         old = ar.checkstrs.total;
-        arUpdateCheckstr  % calculates checksums
+        arUpdateCheckstr;  % calculates checksums
         if strcmp(old,ar.checkstrs.total)~=1
             warning('The checksums in the results folder seems outdated. Call ''arUpdateResultWorkspaces'' to updated your workspaces.')
         end

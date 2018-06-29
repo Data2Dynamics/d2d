@@ -1,0 +1,343 @@
+DESCRIPTION
+"Multi-scale model of the DNA damage response pathway."
+"The model consists of two modules."
+"The first module describes the how cell progess in the cell cycle and receive DNA damage."
+"The damage is induced by chemotherapy drugs."
+"The second module describes the DNA damage response pathway."
+"Signaling is triggered by damages cells and feeds bach to cell cycle arrest, repair and apoptosis."
+
+PREDICTOR
+t	T	"h"	"Time"	0	75
+
+COMPARTMENTS
+
+STATES
+Space                   N	"#"     "Number of cells"
+Cells                   N	"#"     "Number of cells"
+Cells_Cycle_S           N	"#"     "Number of cells"
+Cells_Cycle_G2          N	"#"     "Number of cells"
+Cells_SSBDamage_S       N	"#"     "Number of cells"
+Cells_DSBDamage_S       N	"#"     "Number of cells"
+Cells_DSBDamage_G2      N	"#"     "Number of cells"
+Cells_Apo               N	"#"     "Number of cells"
+Cells_Apo1              N	"#"     "Number of cells"
+Cells_Apo2              N	"#"     "Number of cells"
+Cells_Apo3              N	"#"     "Number of cells"
+Cells_Apo4              N	"#"     "Number of cells"
+Cells_Apo_ReOx          N	"#"     "Number of cells"
+Cells_Dead              N	"#"     "Number of cells"
+
+pATR_S              C    "au"    "Signal"
+pATR_G2             C    "au"    "Signal"
+
+pChk1_S             C    "au"    "Signal"
+pChk1_G2            C    "au"    "Signal"
+
+pATM_S              C    "au"    "Signal"
+pATM_G2             C    "au"    "Signal"
+
+pChk2_S             C    "au"    "Signal"
+pChk2_G2            C    "au"    "Signal"
+
+pDNAPK_S            C    "au"    "Signal"
+pDNAPK_G2           C    "au"    "Signal"
+
+pp53_S              C    "au"    "Signal"
+pp53_G2             C    "au"    "Signal"
+
+yH2AX_S             C    "au"    "Signal"
+yH2AX_G2            C    "au"    "Signal"
+
+p21_mRNA_S          C    "au"    "Signal"
+p21_S               C    "au"    "Signal"
+
+p21_mRNA_G2         C    "au"    "Signal"
+p21_G2              C    "au"    "Signal"
+
+Wip1_mRNA_S         C    "au"    "Signal"
+Wip1_S              C    "au"    "Signal"
+
+Wip1_mRNA_G2        C    "au"    "Signal"
+Wip1_G2             C    "au"    "Signal"
+
+INPUTS
+
+REACTIONS
+// proliferation
+Cells + Space       ->  Cells_Cycle_S     CUSTOM "kt/init_Space * Cells * Space / (1 + Chk1i_MK8776_level * k_pro_inh_chk1_mk8776) / (1 + ATMi_CP466722_level * k_pro_inh_atmi_cp466722) / (1 + ATMi_KU60019_level * k_pro_inh_atmi_ku60019) / (1 + ATRi_VE821_level * k_pro_inh_atri_ve821) / (1 + ATRi_VE822_level * k_pro_inh_atri_ve822) / (1 + DNAPKi_NU7441_level * k_pro_inh_dnapki_nu7441) / (1 + DNAPKi_KU60648_level * k_pro_inh_dnapki_ku6048)"
+Cells_Cycle_S       ->  Cells_Cycle_G2    CUSTOM "kt * cc_s_g2_rel * Cells_Cycle_S"
+Cells_Cycle_G2      ->  Cells + Cells     CUSTOM "kt * cc_g2_g1_rel * Cells_Cycle_G2"
+
+// apoptosis
+Cells_Apo               ->  Cells_Apo1                      CUSTOM "k_death_delay * Cells_Apo"
+Cells_Apo1              ->  Cells_Apo2                      CUSTOM "k_death_delay * Cells_Apo1"
+Cells_Apo2              ->  Cells_Apo3                      CUSTOM "k_death_delay * Cells_Apo2"
+Cells_Apo3              ->  Cells_Apo4                      CUSTOM "k_death_delay * Cells_Apo3"
+Cells_Apo4              ->  Cells_Dead                      CUSTOM "k_death * Cells_Apo4"
+
+// doxorubicin apoptosis via reactive oxigen species
+Cells                   ->  Cells_Apo_ReOx                  CUSTOM  "hill_ka(Dox_level, k_dox_kd, k_dox_hill) * k_dox_apo * Cells"
+Cells_Cycle_S           ->  Cells_Apo_ReOx                  CUSTOM  "hill_ka(Dox_level, k_dox_kd, k_dox_hill) * k_dox_apo * Cells_Cycle_S"
+Cells_Cycle_G2          ->  Cells_Apo_ReOx                  CUSTOM  "hill_ka(Dox_level, k_dox_kd, k_dox_hill) * k_dox_apo * Cells_Cycle_G2"
+Cells_SSBDamage_S       ->  Cells_Apo_ReOx                  CUSTOM  "hill_ka(Dox_level, k_dox_kd, k_dox_hill) * k_dox_apo * Cells_SSBDamage_S"
+Cells_DSBDamage_S       ->  Cells_Apo_ReOx                  CUSTOM  "hill_ka(Dox_level, k_dox_kd, k_dox_hill) * k_dox_apo * Cells_DSBDamage_S"
+Cells_DSBDamage_G2      ->  Cells_Apo_ReOx                  CUSTOM  "hill_ka(Dox_level, k_dox_kd, k_dox_hill) * k_dox_apo * Cells_DSBDamage_G2"
+Cells_Apo               ->  Cells_Apo_ReOx                  CUSTOM  "hill_ka(Dox_level, k_dox_kd, k_dox_hill) * k_dox_apo * Cells_Apo"
+Cells_Apo1              ->  Cells_Apo_ReOx                  CUSTOM  "hill_ka(Dox_level, k_dox_kd, k_dox_hill) * k_dox_apo * Cells_Apo1"
+Cells_Apo2              ->  Cells_Apo_ReOx                  CUSTOM  "hill_ka(Dox_level, k_dox_kd, k_dox_hill) * k_dox_apo * Cells_Apo2"
+Cells_Apo3              ->  Cells_Apo_ReOx                  CUSTOM  "hill_ka(Dox_level, k_dox_kd, k_dox_hill) * k_dox_apo * Cells_Apo3"
+Cells_Apo4              ->  Cells_Apo_ReOx                  CUSTOM  "hill_ka(Dox_level, k_dox_kd, k_dox_hill) * k_dox_apo * Cells_Apo4"
+Cells_Apo_ReOx          ->  Cells_Dead                      CUSTOM  "k_death_reox * Cells_Apo_ReOx"
+
+// lysis
+Cells_Dead              ->  Space                           CUSTOM "k_lyse * Cells_Dead"
+
+// drug induced damage
+Cells_Cycle_S           ->  Cells_SSBDamage_S               CUSTOM "k_damage_gem_ssb * Cells_Cycle_S * Gem_level"
+Cells_Cycle_G2          ->  Cells_DSBDamage_G2              CUSTOM "k_damage_dox_dsb * Cells_Cycle_G2 * Dox_level"
+Cells_Cycle_S           ->  Cells_SSBDamage_S               CUSTOM "k_damage_sn38_ssb * Cells_Cycle_S * SN38_level"
+
+// single to double strand breaks
+Cells_SSBDamage_S       ->  Cells_DSBDamage_S               CUSTOM "(k_ssb_to_dsb + k_ssb_to_dsb_sn38*isnonzero(SN38_level)) * Cells_SSBDamage_S"
+
+// repair
+Cells_SSBDamage_S       -> Cells_Cycle_S                    CUSTOM "k_rep_s * Cells_SSBDamage_S * pATR_S / (1 + ATRi_VE822_level * k_rep_s_inh_atri_ve822) / (1 + ATRi_VE821_level * k_rep_s_inh_atri_ve821)"
+Cells_DSBDamage_S       -> Cells_Cycle_S                    CUSTOM "k_rep_nhej * Cells_DSBDamage_S * pDNAPK_S / (k_rep_nhej_sat + Cells_DSBDamage_S) / (1 + DNAPKi_NU7441_level * k_rep_nhej_inh_dnapki_nu7441) / (1 + DNAPKi_KU60648_level * k_rep_nhej_inh_dnapki_ku6048)"
+Cells_DSBDamage_G2      -> Cells_Cycle_G2                   CUSTOM "k_rep_nhej * Cells_DSBDamage_G2 * pDNAPK_G2 / (k_rep_nhej_sat + Cells_DSBDamage_G2) / (1 + DNAPKi_NU7441_level * k_rep_nhej_inh_dnapki_nu7441) / (1 + DNAPKi_KU60648_level * k_rep_nhej_inh_dnapki_ku6048)"
+Cells_DSBDamage_G2      -> Cells_Cycle_G2                   CUSTOM "k_rep_hr * Cells_DSBDamage_G2 * pATM_G2 * pATR_G2 / (1 + ATRi_VE822_level * k_rep_hr_inh_atri_ve822) / (1 + ATRi_VE821_level * k_rep_hr_inh_atri_ve821) / (1 + ATMi_CP466722_level * k_rep_hr_inh_atmi_cp466722) / (1 + ATMi_KU60019_level * k_rep_hr_inh_atmi_ku60019)"
+
+// damage induced apoptosis
+Cells_SSBDamage_S       ->  Cells_Apo                       CUSTOM "k_apo_ssb * Cells_SSBDamage_S * pp53_S"
+Cells_DSBDamage_S       ->  Cells_Apo                       CUSTOM "k_apo_dsb_s * Cells_DSBDamage_S * pp53_S"
+Cells_DSBDamage_G2      ->  Cells_Apo                       CUSTOM "k_apo_dsb_g2 * Cells_DSBDamage_G2 * pp53_G2"
+
+// cell cycle arrest inhibition and induced apoptosis
+Cells_SSBDamage_S       ->	Cells_Apo + Cells_Apo           CUSTOM "kt_apo * Cells_SSBDamage_S / (1 + k_cyc_arr_chk1 * pChk1_S / (1 + Chk1i_MK8776_level * k_cyc_arr_chk1_inh_chk1i_mk8776))"
+Cells_DSBDamage_S       ->	Cells_Apo + Cells_Apo           CUSTOM "kt_apo * Cells_DSBDamage_S / (1 + k_cyc_arr_chk1 * pChk1_S / (1 + Chk1i_MK8776_level * k_cyc_arr_chk1_inh_chk1i_mk8776))"
+Cells_DSBDamage_G2      ->	Cells_Apo + Cells_Apo           CUSTOM "kt_apo * Cells_DSBDamage_G2 / (1 + k_cyc_arr_chk2 * pChk2_G2)"
+
+// survival
+Cells                   ->  Cells_Apo                       CUSTOM "(k_sur_inh_chk1_mk8776 * Chk1i_MK8776_level + k_sur_inh_atri_ve822 * ATRi_VE822_level + k_sur_inh_atri_ve821 * ATRi_VE821_level + k_sur_inh_dnapki_nu7441 * DNAPKi_NU7441_level + k_sur_inh_dnapki_ku6048 * DNAPKi_KU60648_level + ATMi_CP466722_level * k_sur_inh_atmi_cp466722 + ATMi_KU60019_level * k_sur_inh_atmi_ku60019) * Cells"
+Cells_Cycle_S           ->  Cells_Apo                       CUSTOM "(k_sur_inh_chk1_mk8776 * Chk1i_MK8776_level + k_sur_inh_atri_ve822 * ATRi_VE822_level + k_sur_inh_atri_ve821 * ATRi_VE821_level + k_sur_inh_dnapki_nu7441 * DNAPKi_NU7441_level + k_sur_inh_dnapki_ku6048 * DNAPKi_KU60648_level + ATMi_CP466722_level * k_sur_inh_atmi_cp466722 + ATMi_KU60019_level * k_sur_inh_atmi_ku60019) * Cells_Cycle_S"
+Cells_Cycle_G2          ->  Cells_Apo                       CUSTOM "(k_sur_inh_chk1_mk8776 * Chk1i_MK8776_level + k_sur_inh_atri_ve822 * ATRi_VE822_level + k_sur_inh_atri_ve821 * ATRi_VE821_level + k_sur_inh_dnapki_nu7441 * DNAPKi_NU7441_level + k_sur_inh_dnapki_ku6048 * DNAPKi_KU60648_level + ATMi_CP466722_level * k_sur_inh_atmi_cp466722 + ATMi_KU60019_level * k_sur_inh_atmi_ku60019) * Cells_Cycle_G2"
+Cells_SSBDamage_S       ->  Cells_Apo                       CUSTOM "(k_sur_inh_chk1_mk8776 * Chk1i_MK8776_level + k_sur_inh_atri_ve822 * ATRi_VE822_level + k_sur_inh_atri_ve821 * ATRi_VE821_level + k_sur_inh_dnapki_nu7441 * DNAPKi_NU7441_level + k_sur_inh_dnapki_ku6048 * DNAPKi_KU60648_level + ATMi_CP466722_level * k_sur_inh_atmi_cp466722 + ATMi_KU60019_level * k_sur_inh_atmi_ku60019) * Cells_SSBDamage_S"
+Cells_DSBDamage_S       ->  Cells_Apo                       CUSTOM "(k_sur_inh_chk1_mk8776 * Chk1i_MK8776_level + k_sur_inh_atri_ve822 * ATRi_VE822_level + k_sur_inh_atri_ve821 * ATRi_VE821_level + k_sur_inh_dnapki_nu7441 * DNAPKi_NU7441_level + k_sur_inh_dnapki_ku6048 * DNAPKi_KU60648_level + ATMi_CP466722_level * k_sur_inh_atmi_cp466722 + ATMi_KU60019_level * k_sur_inh_atmi_ku60019) * Cells_DSBDamage_S"
+Cells_DSBDamage_G2      ->  Cells_Apo                       CUSTOM "(k_sur_inh_chk1_mk8776 * Chk1i_MK8776_level + k_sur_inh_atri_ve822 * ATRi_VE822_level + k_sur_inh_atri_ve821 * ATRi_VE821_level + k_sur_inh_dnapki_nu7441 * DNAPKi_NU7441_level + k_sur_inh_dnapki_ku6048 * DNAPKi_KU60648_level + ATMi_CP466722_level * k_sur_inh_atmi_cp466722 + ATMi_KU60019_level * k_sur_inh_atmi_ku60019) * Cells_DSBDamage_G2"
+
+//// DDRP S PHASE ////
+
+                          ->  pATR_S                            CUSTOM "p_atr_act_ssb * (tATR - pATR_S) * Cells_SSBDamage_S/(Cells + Cells_Cycle_S + Cells_Cycle_G2 + Cells_SSBDamage_S + Cells_DSBDamage_S + Cells_DSBDamage_G2 + Cells_Apo + Cells_Apo1 + Cells_Apo2 + Cells_Apo3 + Cells_Apo4 + Cells_Apo_ReOx)"
+                          ->  pATR_S                            CUSTOM "p_atr_act_atm * (tATR - pATR_S) * pATM_S / (1 + p_inh_atmi_cp466722 * ATMi_CP466722_level) / (1 + ATMi_KU60019_level * p_inh_atmi_ku60019)"
+pATR_S                    ->                                    CUSTOM "p_atr_dea * pATR_S"
+
+                          ->  pChk1_S                           CUSTOM "p_chk1_act * (tChk1 - pChk1_S) * pATR_S / (1 + p_inh_chk1_mk8776 * Chk1i_MK8776_level) / (1 + p_inh_atri_ve822 * ATRi_VE822_level) / (1 + p_inh_atri_ve821 * ATRi_VE821_level)"
+pChk1_S                   ->                                    CUSTOM "p_chk1_dea * pChk1_S"
+pChk1_S                   ->                                    CUSTOM "p_chk1_dea_wip1 * pChk1_S * Wip1_S"
+
+                          ->  pATM_S                            CUSTOM "p_atm_act_dsb * (tATM - pATM_S) * Cells_DSBDamage_S/(Cells + Cells_Cycle_S + Cells_Cycle_G2 + Cells_SSBDamage_S + Cells_DSBDamage_S + Cells_DSBDamage_G2 + Cells_Apo + Cells_Apo1 + Cells_Apo2 + Cells_Apo3 + Cells_Apo4 + Cells_Apo_ReOx) / (1 + p_inh_atmi_cp466722 * ATMi_CP466722_level) / (1 + ATMi_KU60019_level * p_inh_atmi_ku60019)"
+pATM_S                    ->                                    CUSTOM "p_atm_dea * pATM_S"
+
+                          ->  pChk2_S                           CUSTOM "p_chk2_act * (tChk2 - pChk2_S) * pATM_S / (1 + p_inh_atmi_cp466722 * ATMi_CP466722_level) / (1 + ATMi_KU60019_level * p_inh_atmi_ku60019)"
+pChk2_S                   ->                                    CUSTOM "p_chk2_dea * pChk2_S"
+pChk2_S                   ->                                    CUSTOM "p_chk2_dea_wip1 * pChk2_S * Wip1_S"
+
+                          ->  pDNAPK_S                          CUSTOM "p_dnapk_act * (tDNAPK - pDNAPK_S) * Cells_DSBDamage_S/(Cells + Cells_Cycle_S + Cells_Cycle_G2 + Cells_SSBDamage_S + Cells_DSBDamage_S + Cells_DSBDamage_G2 + Cells_Apo + Cells_Apo1 + Cells_Apo2 + Cells_Apo3 + Cells_Apo4 + Cells_Apo_ReOx) / (1 + p_inh_dnapki_nu7441 * DNAPKi_NU7441_level) / (1 + p_inh_dnapki_ku6048 * DNAPKi_KU60648_level)"
+pDNAPK_S                  ->                                    CUSTOM "p_dnapk_dea * pDNAPK_S"
+pDNAPK_S                  ->                                    CUSTOM "p_dnapk_dea_wip1 * pDNAPK_S * Wip1_S"
+ 
+                          ->  pp53_S                            CUSTOM "p_p53_act_atr * (tp53 - pp53_S) * pATR_S / (1 + p_inh_atri_ve822 * ATRi_VE822_level) / (1 + p_inh_atri_ve821 * ATRi_VE821_level)"
+                          ->  pp53_S                            CUSTOM "p_p53_act_chk1 * (tp53 - pp53_S) * pChk1_S / (1 + Chk1i_MK8776_level * p_p53_act_chk1_inh_chk1i_mk8776)"
+                          ->  pp53_S                            CUSTOM "p_p53_act_atm * (tp53 - pp53_S) * pATM_S / (1 + p_inh_atmi_cp466722 * ATMi_CP466722_level) / (1 + ATMi_KU60019_level * p_inh_atmi_ku60019)"
+                          ->  pp53_S                            CUSTOM "p_p53_act_chk2 * (tp53 - pp53_S) * pChk2_S"
+pp53_S                    ->                                    CUSTOM "p_p53_dea * pp53_S"
+ 
+                          ->  p21_mRNA_S                       CUSTOM "p_p21_mrna_exp * p_p21_mrna_turn * pp53_S / (1 + p_mrna_exp_inh_dox * hill_ka(Dox_level, p_mrna_exp_inh_dox_kd, p_mrna_exp_inh_dox_hill))"
+p21_mRNA_S                ->                                   CUSTOM "p_p21_mrna_turn * p21_mRNA_S"
+                          ->  p21_S                            CUSTOM "p_p21_exp * p_p21_turn * p21_mRNA_S"
+p21_S                     ->                                   CUSTOM "p_p21_turn * p21_S"
+ 
+                          ->  Wip1_mRNA_S                      CUSTOM "p_wip1_mrna_exp * p_wip1_mrna_turn * pp53_S / (1 + p_mrna_exp_inh_dox * hill_ka(Dox_level, p_mrna_exp_inh_dox_kd, p_mrna_exp_inh_dox_hill))"
+Wip1_mRNA_S               ->                                   CUSTOM "p_wip1_mrna_turn * Wip1_mRNA_S"
+                          ->  Wip1_S                           CUSTOM "p_wip1_exp * p_wip1_turn * Wip1_mRNA_S"
+Wip1_S                    ->                                   CUSTOM "p_wip1_turn * Wip1_S"
+
+                          ->  yH2AX_S                          CUSTOM "p_h2ax_act_atm * pATM_S * (tH2AX - yH2AX_S) / (1 + ATMi_CP466722_level * p_h2ax_act_atm_inh_atmi_cp466722) / (1 + ATMi_KU60019_level * p_h2ax_act_atm_inh_atmi_ku60019)"
+                          ->  yH2AX_S                          CUSTOM "p_h2ax_act_atr * pATR_S * (tH2AX - yH2AX_S) / (1 + ATRi_VE821_level * p_h2ax_act_atr_inh_atri_ve821) / (1 + ATRi_VE822_level * p_h2ax_act_atr_inh_atri_ve822)"
+                          ->  yH2AX_S                          CUSTOM "p_h2ax_act_dnapk * pDNAPK_S * (tH2AX - yH2AX_S) / (1 + DNAPKi_NU7441_level * p_h2ax_act_dnapk_inh_dnapki_nu7441) / (1 + DNAPKi_KU60648_level * p_h2ax_act_dnapk_inh_dnapki_ku6048)"
+yH2AX_S                   ->                                   CUSTOM "p_h2ax_dea * yH2AX_S"
+ 
+//// DDRP G2 PHASE ////
+
+                          ->  pATR_G2                           CUSTOM "p_atr_act_atm * (tATR - pATR_G2) * pATM_G2 / (1 + p_inh_atmi_cp466722 * ATMi_CP466722_level) / (1 + ATMi_KU60019_level * p_inh_atmi_ku60019)"
+pATR_G2                   ->                                    CUSTOM "p_atr_dea * pATR_G2"
+
+                          ->  pChk1_G2                          CUSTOM "p_chk1_act * (tChk1 - pChk1_G2) * pATR_G2 / (1 + p_inh_chk1_mk8776 * Chk1i_MK8776_level) / (1 + p_inh_atri_ve822 * ATRi_VE822_level) / (1 + p_inh_atri_ve821 * ATRi_VE821_level)"
+pChk1_G2                  ->                                    CUSTOM "p_chk1_dea * pChk1_G2"
+pChk1_G2                  ->                                    CUSTOM "p_chk1_dea_wip1 * pChk1_G2 * Wip1_G2"
+
+                          ->  pATM_G2                           CUSTOM "p_atm_act_dsb * (tATM - pATM_G2) * Cells_DSBDamage_G2/(Cells + Cells_Cycle_G2 + Cells_Cycle_G2 + Cells_SSBDamage_S + Cells_DSBDamage_S + Cells_DSBDamage_G2 + Cells_Apo + Cells_Apo1 + Cells_Apo2 + Cells_Apo3 + Cells_Apo4 + Cells_Apo_ReOx) / (1 + p_inh_atmi_cp466722 * ATMi_CP466722_level) / (1 + ATMi_KU60019_level * p_inh_atmi_ku60019)"
+pATM_G2                   ->                                    CUSTOM "p_atm_dea * pATM_G2"
+
+                          ->  pChk2_G2                          CUSTOM "p_chk2_act * (tChk2 - pChk2_G2) * pATM_G2 / (1 + p_inh_atmi_cp466722 * ATMi_CP466722_level) / (1 + ATMi_KU60019_level * p_inh_atmi_ku60019)"
+pChk2_G2                  ->                                    CUSTOM "p_chk2_dea * pChk2_G2"
+pChk2_G2                  ->                                    CUSTOM "p_chk2_dea_wip1 * pChk2_G2 * Wip1_G2"
+
+                          ->  pDNAPK_G2                         CUSTOM "p_dnapk_act * (tDNAPK - pDNAPK_G2) * Cells_DSBDamage_G2/(Cells + Cells_Cycle_G2 + Cells_Cycle_G2 + Cells_SSBDamage_S + Cells_DSBDamage_S + Cells_DSBDamage_G2 + Cells_Apo + Cells_Apo1 + Cells_Apo2 + Cells_Apo3 + Cells_Apo4 + Cells_Apo_ReOx) / (1 + p_inh_dnapki_nu7441 * DNAPKi_NU7441_level) / (1 + p_inh_dnapki_ku6048 * DNAPKi_KU60648_level)"
+pDNAPK_G2                 ->                                    CUSTOM "p_dnapk_dea * pDNAPK_G2"
+pDNAPK_G2                 ->                                    CUSTOM "p_dnapk_dea_wip1 * pDNAPK_G2 * Wip1_G2"
+ 
+                          ->  pp53_G2                           CUSTOM "p_p53_act_atr * (tp53 - pp53_G2) * pATR_G2 / (1 + p_inh_atri_ve822 * ATRi_VE822_level) / (1 + p_inh_atri_ve821 * ATRi_VE821_level)"
+                          ->  pp53_G2                           CUSTOM "p_p53_act_chk1 * (tp53 - pp53_G2) * pChk1_G2 / (1 + Chk1i_MK8776_level * p_p53_act_chk1_inh_chk1i_mk8776)"
+                          ->  pp53_G2                           CUSTOM "p_p53_act_atm * (tp53 - pp53_G2) * pATM_G2 / (1 + p_inh_atmi_cp466722 * ATMi_CP466722_level) / (1 + ATMi_KU60019_level * p_inh_atmi_ku60019)"
+                          ->  pp53_G2                           CUSTOM "p_p53_act_chk2 * (tp53 - pp53_G2) * pChk2_G2"
+pp53_G2                   ->                                    CUSTOM "p_p53_dea * pp53_G2"
+ 
+                          ->  p21_mRNA_G2                       CUSTOM "p_p21_mrna_exp * p_p21_mrna_turn * pp53_G2 / (1 + p_mrna_exp_inh_dox * hill_ka(Dox_level, p_mrna_exp_inh_dox_kd, p_mrna_exp_inh_dox_hill))"
+p21_mRNA_G2               ->                                    CUSTOM "p_p21_mrna_turn * p21_mRNA_G2"
+                          ->  p21_G2                            CUSTOM "p_p21_exp * p_p21_turn * p21_mRNA_G2"
+p21_G2                    ->                                    CUSTOM "p_p21_turn * p21_G2"
+ 
+                          ->  Wip1_mRNA_G2                      CUSTOM "p_wip1_mrna_exp * p_wip1_mrna_turn * pp53_G2 / (1 + p_mrna_exp_inh_dox * hill_ka(Dox_level, p_mrna_exp_inh_dox_kd, p_mrna_exp_inh_dox_hill))"
+Wip1_mRNA_G2              ->                                    CUSTOM "p_wip1_mrna_turn * Wip1_mRNA_G2"
+                          ->  Wip1_G2                           CUSTOM "p_wip1_exp * p_wip1_turn * Wip1_mRNA_G2"
+Wip1_G2                   ->                                    CUSTOM "p_wip1_turn * Wip1_G2"
+
+                          ->  yH2AX_G2                          CUSTOM "p_h2ax_act_atm * pATM_G2 * (tH2AX - yH2AX_G2) / (1 + ATMi_CP466722_level * p_h2ax_act_atm_inh_atmi_cp466722) / (1 + ATMi_KU60019_level * p_h2ax_act_atm_inh_atmi_ku60019)"
+                          ->  yH2AX_G2                          CUSTOM "p_h2ax_act_atr * pATR_G2 * (tH2AX - yH2AX_G2) / (1 + ATRi_VE821_level * p_h2ax_act_atr_inh_atri_ve821) / (1 + ATRi_VE822_level * p_h2ax_act_atr_inh_atri_ve822)"
+                          ->  yH2AX_G2                          CUSTOM "p_h2ax_act_dnapk * pDNAPK_G2 * (tH2AX - yH2AX_G2) / (1 + DNAPKi_NU7441_level * p_h2ax_act_dnapk_inh_dnapki_nu7441) / (1 + DNAPKi_KU60648_level * p_h2ax_act_dnapk_inh_dnapki_ku6048)"
+yH2AX_G2                  ->                                    CUSTOM "p_h2ax_dea * yH2AX_G2"
+
+DERIVED
+tCells          N	"#"     "cells"     "Cells + Cells_Cycle_S + Cells_Cycle_G2 + Cells_SSBDamage_S + Cells_DSBDamage_S + Cells_DSBDamage_G2 + Cells_Apo + Cells_Apo1 + Cells_Apo2 + Cells_Apo3 + Cells_Apo4 + Cells_Apo_ReOx"
+tCellsCasp      N   "#"     "cells"     "Cells_Apo4 + Cells_Apo_ReOx"
+
+pctCells_G1         N	"%"         "faction"   "100 * Cells / (Cells + Cells_Cycle_S + Cells_Cycle_G2 + Cells_SSBDamage_S + Cells_DSBDamage_S + Cells_DSBDamage_G2 + 1e-3)"
+pctCells_Cycle_S    N	"%"         "faction"   "100 * (Cells_Cycle_S + Cells_SSBDamage_S + Cells_DSBDamage_S) / (Cells + Cells_Cycle_S + Cells_Cycle_G2 + Cells_SSBDamage_S + Cells_DSBDamage_S + Cells_DSBDamage_G2 + 1e-3)"
+pctCells_Cycle_G2   N	"%"         "faction"   "100 * (Cells_Cycle_G2 + Cells_DSBDamage_G2) / (Cells + Cells_Cycle_S + Cells_Cycle_G2 + Cells_SSBDamage_S + Cells_DSBDamage_S + Cells_DSBDamage_G2 + 1e-3)"
+pctCellsDamaged     N	"%"         "faction"   "100 * (Cells_SSBDamage_S + Cells_DSBDamage_S + Cells_DSBDamage_G2) / (Cells + Cells_Cycle_S + Cells_Cycle_G2 + Cells_SSBDamage_S + Cells_DSBDamage_S + Cells_DSBDamage_G2 + 1e-3)"
+
+tpATM           C   "au"    "Signal"      "pATM_S + pATM_G2"
+tpDNAPK         C   "au"    "Signal"      "pDNAPK_S + pDNAPK_G2"
+tpChk1          C   "au"    "Signal"      "pChk1_S + pChk1_G2"
+tpChk2          C   "au"    "Signal"      "pChk2_S + pChk2_G2"
+tpp53           C   "au"    "Signal"      "pp53_S + pp53_G2"
+tp21            C   "au"    "Signal"      "p21_S + p21_G2"
+tp21_mRNA       C   "au"    "Signal"      "p21_mRNA_S + p21_mRNA_G2"
+tWip1_mRNA      C   "au"    "Signal"      "Wip1_mRNA_S + Wip1_mRNA_G2"
+tyH2AX          C   "au"    "Signal"      "yH2AX_S + yH2AX_G2"
+
+OBSERVABLES
+Cells_count         N	 "#"	"Number of cells"    0	0	"tCells"
+CellsCasp_count     N	 "#"	"Number of cells"    0	0	"tCellsCasp"
+
+pATM_au             C   "au"	"Signal"         0	0	"scale_patm_au * tpATM"
+pDNAPK_au           C   "au"	"Signal"         0	0	"scale_pdnapk_au * tpDNAPK"
+pChk1_au            C   "au"	"Signal"         0	0	"scale_pchk1_au * tpChk1"
+pChk2_au            C   "au"	"Signal"         0	0	"scale_pchk2_au * tpChk2"
+tp53_au             C   "au"	"Signal"         0	0	"scale_tp53_au * tpp53"
+pp53_au             C   "au"	"Signal"         0	0	"scale_pp53_au * tpp53"
+tp21_au             C   "au"	"Signal"         0	0	"scale_tp21_au * tp21"
+yH2AX_au            C   "au"	"Signal"         0	0	"scale_yh2ax_au * tyH2AX"
+p21_mRNA_fold       C   "au"    "Fold change"    0  0   "1 + scale_p21_mRNA_fold * tp21_mRNA"
+Wip1_mRNA_fold      C   "au"    "Fold change"    0  0   "1 + scale_wip1_mRNA_fold * tWip1_mRNA"
+
+ERRORS
+Cells_count         "sd_count_abs"
+CellsCasp_count     "sd_count_casp_abs"
+
+pATM_au             "sd_patm_au"
+pDNAPK_au           "sd_pdnapk_au"
+pChk1_au            "sd_pchk1_au"
+pChk2_au            "sd_pchk2_au"
+tp53_au             "sd_tp53_au"
+pp53_au             "sd_pp53_au"
+tp21_au             "sd_tp21_au"
+yH2AX_au            "sd_yh2ax_au"
+p21_mRNA_fold       "sd_p21_mRNA_fold"
+Wip1_mRNA_fold      "sd_wip1_mRNA_fold"
+
+CONDITIONS
+cc_s_g2_rel             "(((init_Cells*(1-init_Cells_Cycle_G2_rel)*(1-init_Cells_Cycle_S_rel))*((init_Cells*(1-init_Cells_Cycle_G2_rel)*(1-init_Cells_Cycle_S_rel)) + (init_Cells*init_Cells_Cycle_S_rel) + 2*(init_Cells*(1-init_Cells_Cycle_S_rel)*init_Cells_Cycle_G2_rel))) / ((init_Cells*init_Cells_Cycle_S_rel)*((init_Cells*(1-init_Cells_Cycle_G2_rel)*(1-init_Cells_Cycle_S_rel)) + 2*(init_Cells*init_Cells_Cycle_S_rel) + 2*(init_Cells*(1-init_Cells_Cycle_S_rel)*init_Cells_Cycle_G2_rel))))"
+cc_g2_g1_rel            "(((init_Cells*(1-init_Cells_Cycle_G2_rel)*(1-init_Cells_Cycle_S_rel))*((init_Cells*(1-init_Cells_Cycle_G2_rel)*(1-init_Cells_Cycle_S_rel)) + (init_Cells*init_Cells_Cycle_S_rel) + (init_Cells*(1-init_Cells_Cycle_S_rel)*init_Cells_Cycle_G2_rel))) / ((init_Cells*(1-init_Cells_Cycle_G2_rel)*(1-init_Cells_Cycle_S_rel))*(init_Cells*(1-init_Cells_Cycle_S_rel)*init_Cells_Cycle_G2_rel) + 2*(init_Cells*init_Cells_Cycle_S_rel)*(init_Cells*(1-init_Cells_Cycle_S_rel)*init_Cells_Cycle_G2_rel) + 2*(init_Cells*(1-init_Cells_Cycle_S_rel)*init_Cells_Cycle_G2_rel)^2))"
+init_Cells              "init_Cells*(1-init_Cells_Cycle_G2_rel)*(1-init_Cells_Cycle_S_rel)"
+init_Cells_Cycle_S      "init_Cells*init_Cells_Cycle_S_rel"
+init_Cells_Cycle_G2     "init_Cells*(1-init_Cells_Cycle_S_rel)*init_Cells_Cycle_G2_rel"
+
+init_Cells_Apo              "0"
+init_Cells_Apo1             "0"
+init_Cells_Apo2             "0"
+init_Cells_Apo3             "0"
+init_Cells_Apo4             "0"
+init_Cells_Dead             "0"
+init_Cells_SSBDamage_S      "0"
+init_Cells_DSBDamage_S      "0"
+init_Cells_DSBDamage_G2     "0"
+init_Cells_Apo_ReOx         "0"
+
+Gem_level                   "0"
+Dox_level                   "0"
+SN38_level                  "0"
+
+ATRi_VE821_level            "0"
+ATRi_VE822_level            "0"
+Chk1i_MK8776_level          "0"
+DNAPKi_NU7441_level         "0"
+DNAPKi_KU60648_level        "0"
+ATMi_CP466722_level         "0"
+ATMi_KU60019_level          "0"
+
+tATR                          "1"
+init_pATR_S                   "0"
+init_pATR_G2                  "0"
+
+tChk1                         "1"
+init_pChk1_S                  "0"
+init_pChk1_G2                 "0"
+
+tATM                          "1"
+init_pATM_S                   "0"
+init_pATM_G2                  "0"
+
+tChk2                         "1"
+init_pChk2_S                  "0"
+init_pChk2_G2                 "0"
+
+tDNAPK                        "1"
+init_pDNAPK_S                 "0"
+init_pDNAPK_G2                "0"
+
+tp53                          "1"
+init_pp53_S                   "0"
+init_pp53_G2                  "0"
+
+tH2AX                         "1"
+init_yH2AX_S                  "0"
+init_yH2AX_G2                 "0"
+
+init_p21_mRNA_S               "0"
+init_p21_S                    "0"
+
+init_p21_mRNA_G2              "0"
+init_p21_G2                   "0"
+
+p_p21_mrna_exp                "1"
+p_p21_exp                     "1"
+
+init_Wip1_mRNA_S              "0"
+init_Wip1_S                   "0"
+
+init_Wip1_mRNA_G2             "0"
+init_Wip1_G2                  "0"
+
+p_wip1_mrna_exp               "1"
+p_wip1_exp                    "1"
+
+p_atm_dea                     "1/24"
+p_atr_dea                     "1/24"
+p_chk1_dea                    "1/24"
+p_chk2_dea                    "1/24"
+p_dnapk_dea                   "1/24"
+p_p53_dea                     "1/24"
+
+k_dox_hill                    "6"
+p_mrna_exp_inh_dox_hill       "6"

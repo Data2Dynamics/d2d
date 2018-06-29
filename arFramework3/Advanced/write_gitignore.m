@@ -5,7 +5,7 @@ function write_gitignore
 
 fprintf('New .gitignore file will be written in the working directory ...\n\n')
 ar_path = fileparts(which('arInit.m'));
-nr_slash = strfind(ar_path,'/');
+nr_slash = strfind(ar_path,filesep);
 ar_path = ar_path(1:nr_slash(end));
 fid = fopen([ar_path '.gitignore'],'w');
 
@@ -25,6 +25,10 @@ lines = {'# This file has been generated using arFramework3/Advanced/write_gitig
     '.DS_Store'
     ''
     '*.dat'
+    '*.asv'
+    '*~'
+    ''
+    'arFramework3/Advanced/OldRevisons'
     ''
     'arFramework3/L1/trdog/trdog.m'
     'arFramework3/Subfunctions/snls.m'
@@ -48,13 +52,15 @@ folders = setdiff(folders,subfolders);
 
 for i=1:length(folders)
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/Compiled/'];
+    lines{end+1} = ['arFramework3/Examples/',folders{i},'/Data/Backup/'];
+    lines{end+1} = ['arFramework3/Examples/',folders{i},'/Models/Backup/'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/SBML/'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/arSimuCalc*'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/arCheckParallel*'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/Results/20*'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/pthreadVC2.dll'];
     lines{end+1} = ['arFramework3/Examples/',folders{i},'/pthreadGC2.dll'];
-    lines{end+1} = '';
+lines{end+1} = '';
 end
 
 for j = 1:length(subfolders)
@@ -65,6 +71,8 @@ for j = 1:length(subfolders)
 
     for i=1:length(folders)
         lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/Compiled/'];
+        lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/Data/Backup/'];
+        lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/Models/Backup/'];
         lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/SBML/'];
         lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/arSimuCalc*'];
         lines{end+1} = ['arFramework3/Examples/',subfolders{j},'/',folders{i},'/arCheckParallel*'];

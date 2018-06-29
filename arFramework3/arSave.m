@@ -25,6 +25,7 @@ if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
 
+
 if(isempty(ar.config.savepath)) % never saved before, ask for name
     if(~exist('name','var'))
         name = input('enter new repository name addition: ', 's');

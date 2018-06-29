@@ -40,12 +40,10 @@ end
 checksum = arAddToCheckSum(arStruct.checkstrs.data);
 checksum = arAddToCheckSum(arStruct.checkstrs.fitting,checksum);
 checksum = arAddToCheckSum(arStruct.checkstrs.para,checksum);
-checksum = arAddToCheckSum(arStruct.checkstrs.fkt,checksum);
+arStruct.checkstrs.total = arAddToCheckSum(arStruct.checkstrs.fkt,checksum,true);
+clear checksum
 
-h = typecast(checksum.digest,'uint8');
-checkstr = dec2hex(h)';
-arStruct.checkstrs.total = checkstr(:)';
-arStruct.checkstrs.version = '20180619'; % This number should be changed if the way checksums are calculated change and old/new ones are not comparable
+arStruct.checkstrs.version = '20180622'; % This number should be changed if the way checksums are calculated change and old/new ones are not comparable
 
 if useglobal
     ar = arStruct;

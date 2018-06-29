@@ -13,6 +13,10 @@ arFramework3/ThirdParty/Ceres/ceresd2d.mex*
 .DS_Store
 
 *.dat
+*.asv
+*~
+
+arFramework3/Advanced/OldRevisons
 
 arFramework3/L1/trdog/trdog.m
 arFramework3/Subfunctions/snls.m
@@ -23,6 +27,8 @@ arFramework3/Examples/Dream6_L1/Results/20*
 arFramework3/Examples/_myOwnExamples/
 
 arFramework3/Examples/Bachmann_MSB2011/Compiled/
+arFramework3/Examples/Bachmann_MSB2011/Data/Backup/
+arFramework3/Examples/Bachmann_MSB2011/Models/Backup/
 arFramework3/Examples/Bachmann_MSB2011/SBML/
 arFramework3/Examples/Bachmann_MSB2011/arSimuCalc*
 arFramework3/Examples/Bachmann_MSB2011/arCheckParallel*
@@ -30,15 +36,9 @@ arFramework3/Examples/Bachmann_MSB2011/Results/20*
 arFramework3/Examples/Bachmann_MSB2011/pthreadVC2.dll
 arFramework3/Examples/Bachmann_MSB2011/pthreadGC2.dll
 
-arFramework3/Examples/Becker_Benchmark/Compiled/
-arFramework3/Examples/Becker_Benchmark/SBML/
-arFramework3/Examples/Becker_Benchmark/arSimuCalc*
-arFramework3/Examples/Becker_Benchmark/arCheckParallel*
-arFramework3/Examples/Becker_Benchmark/Results/20*
-arFramework3/Examples/Becker_Benchmark/pthreadVC2.dll
-arFramework3/Examples/Becker_Benchmark/pthreadGC2.dll
-
 arFramework3/Examples/Becker_Science2010/Compiled/
+arFramework3/Examples/Becker_Science2010/Data/Backup/
+arFramework3/Examples/Becker_Science2010/Models/Backup/
 arFramework3/Examples/Becker_Science2010/SBML/
 arFramework3/Examples/Becker_Science2010/arSimuCalc*
 arFramework3/Examples/Becker_Science2010/arCheckParallel*
@@ -47,6 +47,8 @@ arFramework3/Examples/Becker_Science2010/pthreadVC2.dll
 arFramework3/Examples/Becker_Science2010/pthreadGC2.dll
 
 arFramework3/Examples/Beer_MolBiosyst2014/Compiled/
+arFramework3/Examples/Beer_MolBiosyst2014/Data/Backup/
+arFramework3/Examples/Beer_MolBiosyst2014/Models/Backup/
 arFramework3/Examples/Beer_MolBiosyst2014/SBML/
 arFramework3/Examples/Beer_MolBiosyst2014/arSimuCalc*
 arFramework3/Examples/Beer_MolBiosyst2014/arCheckParallel*
@@ -55,6 +57,8 @@ arFramework3/Examples/Beer_MolBiosyst2014/pthreadVC2.dll
 arFramework3/Examples/Beer_MolBiosyst2014/pthreadGC2.dll
 
 arFramework3/Examples/Boehm_JProteomeRes2014/Compiled/
+arFramework3/Examples/Boehm_JProteomeRes2014/Data/Backup/
+arFramework3/Examples/Boehm_JProteomeRes2014/Models/Backup/
 arFramework3/Examples/Boehm_JProteomeRes2014/SBML/
 arFramework3/Examples/Boehm_JProteomeRes2014/arSimuCalc*
 arFramework3/Examples/Boehm_JProteomeRes2014/arCheckParallel*
@@ -63,6 +67,8 @@ arFramework3/Examples/Boehm_JProteomeRes2014/pthreadVC2.dll
 arFramework3/Examples/Boehm_JProteomeRes2014/pthreadGC2.dll
 
 arFramework3/Examples/Brannmark_JBC2010/Compiled/
+arFramework3/Examples/Brannmark_JBC2010/Data/Backup/
+arFramework3/Examples/Brannmark_JBC2010/Models/Backup/
 arFramework3/Examples/Brannmark_JBC2010/SBML/
 arFramework3/Examples/Brannmark_JBC2010/arSimuCalc*
 arFramework3/Examples/Brannmark_JBC2010/arCheckParallel*
@@ -71,6 +77,8 @@ arFramework3/Examples/Brannmark_JBC2010/pthreadVC2.dll
 arFramework3/Examples/Brannmark_JBC2010/pthreadGC2.dll
 
 arFramework3/Examples/Bruno_Carotines_JExpBio2016/Compiled/
+arFramework3/Examples/Bruno_Carotines_JExpBio2016/Data/Backup/
+arFramework3/Examples/Bruno_Carotines_JExpBio2016/Models/Backup/
 arFramework3/Examples/Bruno_Carotines_JExpBio2016/SBML/
 arFramework3/Examples/Bruno_Carotines_JExpBio2016/arSimuCalc*
 arFramework3/Examples/Bruno_Carotines_JExpBio2016/arCheckParallel*
@@ -78,7 +86,19 @@ arFramework3/Examples/Bruno_Carotines_JExpBio2016/Results/20*
 arFramework3/Examples/Bruno_Carotines_JExpBio2016/pthreadVC2.dll
 arFramework3/Examples/Bruno_Carotines_JExpBio2016/pthreadGC2.dll
 
+arFramework3/Examples/Chen_MSB2009/Compiled/
+arFramework3/Examples/Chen_MSB2009/Data/Backup/
+arFramework3/Examples/Chen_MSB2009/Models/Backup/
+arFramework3/Examples/Chen_MSB2009/SBML/
+arFramework3/Examples/Chen_MSB2009/arSimuCalc*
+arFramework3/Examples/Chen_MSB2009/arCheckParallel*
+arFramework3/Examples/Chen_MSB2009/Results/20*
+arFramework3/Examples/Chen_MSB2009/pthreadVC2.dll
+arFramework3/Examples/Chen_MSB2009/pthreadGC2.dll
+
 arFramework3/Examples/Crauste_ImmuneCells_CellSystems2017/Compiled/
+arFramework3/Examples/Crauste_ImmuneCells_CellSystems2017/Data/Backup/
+arFramework3/Examples/Crauste_ImmuneCells_CellSystems2017/Models/Backup/
 arFramework3/Examples/Crauste_ImmuneCells_CellSystems2017/SBML/
 arFramework3/Examples/Crauste_ImmuneCells_CellSystems2017/arSimuCalc*
 arFramework3/Examples/Crauste_ImmuneCells_CellSystems2017/arCheckParallel*
@@ -87,6 +107,8 @@ arFramework3/Examples/Crauste_ImmuneCells_CellSystems2017/pthreadVC2.dll
 arFramework3/Examples/Crauste_ImmuneCells_CellSystems2017/pthreadGC2.dll
 
 arFramework3/Examples/Dream6/Compiled/
+arFramework3/Examples/Dream6/Data/Backup/
+arFramework3/Examples/Dream6/Models/Backup/
 arFramework3/Examples/Dream6/SBML/
 arFramework3/Examples/Dream6/arSimuCalc*
 arFramework3/Examples/Dream6/arCheckParallel*
@@ -95,6 +117,8 @@ arFramework3/Examples/Dream6/pthreadVC2.dll
 arFramework3/Examples/Dream6/pthreadGC2.dll
 
 arFramework3/Examples/Dream6_L1/Compiled/
+arFramework3/Examples/Dream6_L1/Data/Backup/
+arFramework3/Examples/Dream6_L1/Models/Backup/
 arFramework3/Examples/Dream6_L1/SBML/
 arFramework3/Examples/Dream6_L1/arSimuCalc*
 arFramework3/Examples/Dream6_L1/arCheckParallel*
@@ -103,6 +127,8 @@ arFramework3/Examples/Dream6_L1/pthreadVC2.dll
 arFramework3/Examples/Dream6_L1/pthreadGC2.dll
 
 arFramework3/Examples/Fiedler_BMC2016/Compiled/
+arFramework3/Examples/Fiedler_BMC2016/Data/Backup/
+arFramework3/Examples/Fiedler_BMC2016/Models/Backup/
 arFramework3/Examples/Fiedler_BMC2016/SBML/
 arFramework3/Examples/Fiedler_BMC2016/arSimuCalc*
 arFramework3/Examples/Fiedler_BMC2016/arCheckParallel*
@@ -110,7 +136,19 @@ arFramework3/Examples/Fiedler_BMC2016/Results/20*
 arFramework3/Examples/Fiedler_BMC2016/pthreadVC2.dll
 arFramework3/Examples/Fiedler_BMC2016/pthreadGC2.dll
 
+arFramework3/Examples/Fujita_SciSignal2010/Compiled/
+arFramework3/Examples/Fujita_SciSignal2010/Data/Backup/
+arFramework3/Examples/Fujita_SciSignal2010/Models/Backup/
+arFramework3/Examples/Fujita_SciSignal2010/SBML/
+arFramework3/Examples/Fujita_SciSignal2010/arSimuCalc*
+arFramework3/Examples/Fujita_SciSignal2010/arCheckParallel*
+arFramework3/Examples/Fujita_SciSignal2010/Results/20*
+arFramework3/Examples/Fujita_SciSignal2010/pthreadVC2.dll
+arFramework3/Examples/Fujita_SciSignal2010/pthreadGC2.dll
+
 arFramework3/Examples/Hass_npjSysBio2017/Compiled/
+arFramework3/Examples/Hass_npjSysBio2017/Data/Backup/
+arFramework3/Examples/Hass_npjSysBio2017/Models/Backup/
 arFramework3/Examples/Hass_npjSysBio2017/SBML/
 arFramework3/Examples/Hass_npjSysBio2017/arSimuCalc*
 arFramework3/Examples/Hass_npjSysBio2017/arCheckParallel*
@@ -118,23 +156,9 @@ arFramework3/Examples/Hass_npjSysBio2017/Results/20*
 arFramework3/Examples/Hass_npjSysBio2017/pthreadVC2.dll
 arFramework3/Examples/Hass_npjSysBio2017/pthreadGC2.dll
 
-arFramework3/Examples/Hass_npjSysBio2017_mine/Compiled/
-arFramework3/Examples/Hass_npjSysBio2017_mine/SBML/
-arFramework3/Examples/Hass_npjSysBio2017_mine/arSimuCalc*
-arFramework3/Examples/Hass_npjSysBio2017_mine/arCheckParallel*
-arFramework3/Examples/Hass_npjSysBio2017_mine/Results/20*
-arFramework3/Examples/Hass_npjSysBio2017_mine/pthreadVC2.dll
-arFramework3/Examples/Hass_npjSysBio2017_mine/pthreadGC2.dll
-
-arFramework3/Examples/Hass_npjSysBio2017_old/Compiled/
-arFramework3/Examples/Hass_npjSysBio2017_old/SBML/
-arFramework3/Examples/Hass_npjSysBio2017_old/arSimuCalc*
-arFramework3/Examples/Hass_npjSysBio2017_old/arCheckParallel*
-arFramework3/Examples/Hass_npjSysBio2017_old/Results/20*
-arFramework3/Examples/Hass_npjSysBio2017_old/pthreadVC2.dll
-arFramework3/Examples/Hass_npjSysBio2017_old/pthreadGC2.dll
-
 arFramework3/Examples/Isensee_JCB2018/Compiled/
+arFramework3/Examples/Isensee_JCB2018/Data/Backup/
+arFramework3/Examples/Isensee_JCB2018/Models/Backup/
 arFramework3/Examples/Isensee_JCB2018/SBML/
 arFramework3/Examples/Isensee_JCB2018/arSimuCalc*
 arFramework3/Examples/Isensee_JCB2018/arCheckParallel*
@@ -143,6 +167,8 @@ arFramework3/Examples/Isensee_JCB2018/pthreadVC2.dll
 arFramework3/Examples/Isensee_JCB2018/pthreadGC2.dll
 
 arFramework3/Examples/Lucarelli_TGFb_2017/Compiled/
+arFramework3/Examples/Lucarelli_TGFb_2017/Data/Backup/
+arFramework3/Examples/Lucarelli_TGFb_2017/Models/Backup/
 arFramework3/Examples/Lucarelli_TGFb_2017/SBML/
 arFramework3/Examples/Lucarelli_TGFb_2017/arSimuCalc*
 arFramework3/Examples/Lucarelli_TGFb_2017/arCheckParallel*
@@ -151,6 +177,8 @@ arFramework3/Examples/Lucarelli_TGFb_2017/pthreadVC2.dll
 arFramework3/Examples/Lucarelli_TGFb_2017/pthreadGC2.dll
 
 arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/Compiled/
+arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/Data/Backup/
+arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/Models/Backup/
 arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/SBML/
 arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/arSimuCalc*
 arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/arCheckParallel*
@@ -159,6 +187,8 @@ arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/pthreadVC2.dll
 arFramework3/Examples/Merkle_JAK2STAT5_PCB2016/pthreadGC2.dll
 
 arFramework3/Examples/Merkle_ToyModel_PCB2016/Compiled/
+arFramework3/Examples/Merkle_ToyModel_PCB2016/Data/Backup/
+arFramework3/Examples/Merkle_ToyModel_PCB2016/Models/Backup/
 arFramework3/Examples/Merkle_ToyModel_PCB2016/SBML/
 arFramework3/Examples/Merkle_ToyModel_PCB2016/arSimuCalc*
 arFramework3/Examples/Merkle_ToyModel_PCB2016/arCheckParallel*
@@ -167,6 +197,8 @@ arFramework3/Examples/Merkle_ToyModel_PCB2016/pthreadVC2.dll
 arFramework3/Examples/Merkle_ToyModel_PCB2016/pthreadGC2.dll
 
 arFramework3/Examples/Oxygen_Metabolic_Rates_2016/Compiled/
+arFramework3/Examples/Oxygen_Metabolic_Rates_2016/Data/Backup/
+arFramework3/Examples/Oxygen_Metabolic_Rates_2016/Models/Backup/
 arFramework3/Examples/Oxygen_Metabolic_Rates_2016/SBML/
 arFramework3/Examples/Oxygen_Metabolic_Rates_2016/arSimuCalc*
 arFramework3/Examples/Oxygen_Metabolic_Rates_2016/arCheckParallel*
@@ -175,6 +207,8 @@ arFramework3/Examples/Oxygen_Metabolic_Rates_2016/pthreadVC2.dll
 arFramework3/Examples/Oxygen_Metabolic_Rates_2016/pthreadGC2.dll
 
 arFramework3/Examples/PKPD_models/Compiled/
+arFramework3/Examples/PKPD_models/Data/Backup/
+arFramework3/Examples/PKPD_models/Models/Backup/
 arFramework3/Examples/PKPD_models/SBML/
 arFramework3/Examples/PKPD_models/arSimuCalc*
 arFramework3/Examples/PKPD_models/arCheckParallel*
@@ -183,6 +217,8 @@ arFramework3/Examples/PKPD_models/pthreadVC2.dll
 arFramework3/Examples/PKPD_models/pthreadGC2.dll
 
 arFramework3/Examples/Raia_CancerResearch2011/Compiled/
+arFramework3/Examples/Raia_CancerResearch2011/Data/Backup/
+arFramework3/Examples/Raia_CancerResearch2011/Models/Backup/
 arFramework3/Examples/Raia_CancerResearch2011/SBML/
 arFramework3/Examples/Raia_CancerResearch2011/arSimuCalc*
 arFramework3/Examples/Raia_CancerResearch2011/arCheckParallel*
@@ -191,6 +227,8 @@ arFramework3/Examples/Raia_CancerResearch2011/pthreadVC2.dll
 arFramework3/Examples/Raia_CancerResearch2011/pthreadGC2.dll
 
 arFramework3/Examples/Reelin_PONE2017/Compiled/
+arFramework3/Examples/Reelin_PONE2017/Data/Backup/
+arFramework3/Examples/Reelin_PONE2017/Models/Backup/
 arFramework3/Examples/Reelin_PONE2017/SBML/
 arFramework3/Examples/Reelin_PONE2017/arSimuCalc*
 arFramework3/Examples/Reelin_PONE2017/arCheckParallel*
@@ -199,6 +237,8 @@ arFramework3/Examples/Reelin_PONE2017/pthreadVC2.dll
 arFramework3/Examples/Reelin_PONE2017/pthreadGC2.dll
 
 arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/Compiled/
+arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/Data/Backup/
+arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/Models/Backup/
 arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/SBML/
 arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/arSimuCalc*
 arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/arCheckParallel*
@@ -207,6 +247,8 @@ arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/pthreadVC2.dll
 arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/pthreadGC2.dll
 
 arFramework3/Examples/Sobotta_Frontiers2017/Compiled/
+arFramework3/Examples/Sobotta_Frontiers2017/Data/Backup/
+arFramework3/Examples/Sobotta_Frontiers2017/Models/Backup/
 arFramework3/Examples/Sobotta_Frontiers2017/SBML/
 arFramework3/Examples/Sobotta_Frontiers2017/arSimuCalc*
 arFramework3/Examples/Sobotta_Frontiers2017/arCheckParallel*
@@ -215,6 +257,8 @@ arFramework3/Examples/Sobotta_Frontiers2017/pthreadVC2.dll
 arFramework3/Examples/Sobotta_Frontiers2017/pthreadGC2.dll
 
 arFramework3/Examples/Swameye_PNAS2003/Compiled/
+arFramework3/Examples/Swameye_PNAS2003/Data/Backup/
+arFramework3/Examples/Swameye_PNAS2003/Models/Backup/
 arFramework3/Examples/Swameye_PNAS2003/SBML/
 arFramework3/Examples/Swameye_PNAS2003/arSimuCalc*
 arFramework3/Examples/Swameye_PNAS2003/arCheckParallel*
@@ -223,6 +267,8 @@ arFramework3/Examples/Swameye_PNAS2003/pthreadVC2.dll
 arFramework3/Examples/Swameye_PNAS2003/pthreadGC2.dll
 
 arFramework3/Examples/Toensing_InfectiousDisease_BoardingSchool_2018/Compiled/
+arFramework3/Examples/Toensing_InfectiousDisease_BoardingSchool_2018/Data/Backup/
+arFramework3/Examples/Toensing_InfectiousDisease_BoardingSchool_2018/Models/Backup/
 arFramework3/Examples/Toensing_InfectiousDisease_BoardingSchool_2018/SBML/
 arFramework3/Examples/Toensing_InfectiousDisease_BoardingSchool_2018/arSimuCalc*
 arFramework3/Examples/Toensing_InfectiousDisease_BoardingSchool_2018/arCheckParallel*
@@ -230,23 +276,9 @@ arFramework3/Examples/Toensing_InfectiousDisease_BoardingSchool_2018/Results/20*
 arFramework3/Examples/Toensing_InfectiousDisease_BoardingSchool_2018/pthreadVC2.dll
 arFramework3/Examples/Toensing_InfectiousDisease_BoardingSchool_2018/pthreadGC2.dll
 
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2016/Compiled/
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2016/SBML/
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2016/arSimuCalc*
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2016/arCheckParallel*
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2016/Results/20*
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2016/pthreadVC2.dll
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2016/pthreadGC2.dll
-
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2017/Compiled/
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2017/SBML/
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2017/arSimuCalc*
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2017/arCheckParallel*
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2017/Results/20*
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2017/pthreadVC2.dll
-arFramework3/Examples/Toensing_InfectiousDisease_Zika_2017/pthreadGC2.dll
-
 arFramework3/Examples/Toensing_InfectiousDisease_Zika_2018/Compiled/
+arFramework3/Examples/Toensing_InfectiousDisease_Zika_2018/Data/Backup/
+arFramework3/Examples/Toensing_InfectiousDisease_Zika_2018/Models/Backup/
 arFramework3/Examples/Toensing_InfectiousDisease_Zika_2018/SBML/
 arFramework3/Examples/Toensing_InfectiousDisease_Zika_2018/arSimuCalc*
 arFramework3/Examples/Toensing_InfectiousDisease_Zika_2018/arCheckParallel*
@@ -255,6 +287,8 @@ arFramework3/Examples/Toensing_InfectiousDisease_Zika_2018/pthreadVC2.dll
 arFramework3/Examples/Toensing_InfectiousDisease_Zika_2018/pthreadGC2.dll
 
 arFramework3/Examples/Weber_BMC2015/Compiled/
+arFramework3/Examples/Weber_BMC2015/Data/Backup/
+arFramework3/Examples/Weber_BMC2015/Models/Backup/
 arFramework3/Examples/Weber_BMC2015/SBML/
 arFramework3/Examples/Weber_BMC2015/arSimuCalc*
 arFramework3/Examples/Weber_BMC2015/arCheckParallel*
@@ -263,6 +297,8 @@ arFramework3/Examples/Weber_BMC2015/pthreadVC2.dll
 arFramework3/Examples/Weber_BMC2015/pthreadGC2.dll
 
 arFramework3/Examples/Zheng_PNAS2012/Compiled/
+arFramework3/Examples/Zheng_PNAS2012/Data/Backup/
+arFramework3/Examples/Zheng_PNAS2012/Models/Backup/
 arFramework3/Examples/Zheng_PNAS2012/SBML/
 arFramework3/Examples/Zheng_PNAS2012/arSimuCalc*
 arFramework3/Examples/Zheng_PNAS2012/arCheckParallel*
@@ -270,15 +306,9 @@ arFramework3/Examples/Zheng_PNAS2012/Results/20*
 arFramework3/Examples/Zheng_PNAS2012/pthreadVC2.dll
 arFramework3/Examples/Zheng_PNAS2012/pthreadGC2.dll
 
-arFramework3/Examples/model_reduction_2016/Compiled/
-arFramework3/Examples/model_reduction_2016/SBML/
-arFramework3/Examples/model_reduction_2016/arSimuCalc*
-arFramework3/Examples/model_reduction_2016/arCheckParallel*
-arFramework3/Examples/model_reduction_2016/Results/20*
-arFramework3/Examples/model_reduction_2016/pthreadVC2.dll
-arFramework3/Examples/model_reduction_2016/pthreadGC2.dll
-
 arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/Compiled/
+arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/Data/Backup/
+arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/Models/Backup/
 arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/SBML/
 arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/arSimuCalc*
 arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/arCheckParallel*
@@ -287,6 +317,8 @@ arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/pthreadVC2.dll
 arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/pthreadGC2.dll
 
 arFramework3/Examples/Biomodels/Elowitz2000_Repressilator/Compiled/
+arFramework3/Examples/Biomodels/Elowitz2000_Repressilator/Data/Backup/
+arFramework3/Examples/Biomodels/Elowitz2000_Repressilator/Models/Backup/
 arFramework3/Examples/Biomodels/Elowitz2000_Repressilator/SBML/
 arFramework3/Examples/Biomodels/Elowitz2000_Repressilator/arSimuCalc*
 arFramework3/Examples/Biomodels/Elowitz2000_Repressilator/arCheckParallel*
@@ -295,6 +327,8 @@ arFramework3/Examples/Biomodels/Elowitz2000_Repressilator/pthreadVC2.dll
 arFramework3/Examples/Biomodels/Elowitz2000_Repressilator/pthreadGC2.dll
 
 arFramework3/Examples/Biomodels/Fribourg2014_ImmuneResponseH1N1/Compiled/
+arFramework3/Examples/Biomodels/Fribourg2014_ImmuneResponseH1N1/Data/Backup/
+arFramework3/Examples/Biomodels/Fribourg2014_ImmuneResponseH1N1/Models/Backup/
 arFramework3/Examples/Biomodels/Fribourg2014_ImmuneResponseH1N1/SBML/
 arFramework3/Examples/Biomodels/Fribourg2014_ImmuneResponseH1N1/arSimuCalc*
 arFramework3/Examples/Biomodels/Fribourg2014_ImmuneResponseH1N1/arCheckParallel*
@@ -303,6 +337,8 @@ arFramework3/Examples/Biomodels/Fribourg2014_ImmuneResponseH1N1/pthreadVC2.dll
 arFramework3/Examples/Biomodels/Fribourg2014_ImmuneResponseH1N1/pthreadGC2.dll
 
 arFramework3/Examples/Biomodels/Huang1996_MapKinase/Compiled/
+arFramework3/Examples/Biomodels/Huang1996_MapKinase/Data/Backup/
+arFramework3/Examples/Biomodels/Huang1996_MapKinase/Models/Backup/
 arFramework3/Examples/Biomodels/Huang1996_MapKinase/SBML/
 arFramework3/Examples/Biomodels/Huang1996_MapKinase/arSimuCalc*
 arFramework3/Examples/Biomodels/Huang1996_MapKinase/arCheckParallel*
@@ -311,6 +347,8 @@ arFramework3/Examples/Biomodels/Huang1996_MapKinase/pthreadVC2.dll
 arFramework3/Examples/Biomodels/Huang1996_MapKinase/pthreadGC2.dll
 
 arFramework3/Examples/Biomodels/Kholodenko1999_EGFRsignaling/Compiled/
+arFramework3/Examples/Biomodels/Kholodenko1999_EGFRsignaling/Data/Backup/
+arFramework3/Examples/Biomodels/Kholodenko1999_EGFRsignaling/Models/Backup/
 arFramework3/Examples/Biomodels/Kholodenko1999_EGFRsignaling/SBML/
 arFramework3/Examples/Biomodels/Kholodenko1999_EGFRsignaling/arSimuCalc*
 arFramework3/Examples/Biomodels/Kholodenko1999_EGFRsignaling/arCheckParallel*
@@ -319,6 +357,8 @@ arFramework3/Examples/Biomodels/Kholodenko1999_EGFRsignaling/pthreadVC2.dll
 arFramework3/Examples/Biomodels/Kholodenko1999_EGFRsignaling/pthreadGC2.dll
 
 arFramework3/Examples/Biomodels/Restif2007_VaccinationInvasion/Compiled/
+arFramework3/Examples/Biomodels/Restif2007_VaccinationInvasion/Data/Backup/
+arFramework3/Examples/Biomodels/Restif2007_VaccinationInvasion/Models/Backup/
 arFramework3/Examples/Biomodels/Restif2007_VaccinationInvasion/SBML/
 arFramework3/Examples/Biomodels/Restif2007_VaccinationInvasion/arSimuCalc*
 arFramework3/Examples/Biomodels/Restif2007_VaccinationInvasion/arCheckParallel*
@@ -327,6 +367,8 @@ arFramework3/Examples/Biomodels/Restif2007_VaccinationInvasion/pthreadVC2.dll
 arFramework3/Examples/Biomodels/Restif2007_VaccinationInvasion/pthreadGC2.dll
 
 arFramework3/Examples/Biomodels/Steckmann2012_Fibrillogenesis/Compiled/
+arFramework3/Examples/Biomodels/Steckmann2012_Fibrillogenesis/Data/Backup/
+arFramework3/Examples/Biomodels/Steckmann2012_Fibrillogenesis/Models/Backup/
 arFramework3/Examples/Biomodels/Steckmann2012_Fibrillogenesis/SBML/
 arFramework3/Examples/Biomodels/Steckmann2012_Fibrillogenesis/arSimuCalc*
 arFramework3/Examples/Biomodels/Steckmann2012_Fibrillogenesis/arCheckParallel*
@@ -335,6 +377,8 @@ arFramework3/Examples/Biomodels/Steckmann2012_Fibrillogenesis/pthreadVC2.dll
 arFramework3/Examples/Biomodels/Steckmann2012_Fibrillogenesis/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/ABC_toyModel/Compiled/
+arFramework3/Examples/ToyModels/ABC_toyModel/Data/Backup/
+arFramework3/Examples/ToyModels/ABC_toyModel/Models/Backup/
 arFramework3/Examples/ToyModels/ABC_toyModel/SBML/
 arFramework3/Examples/ToyModels/ABC_toyModel/arSimuCalc*
 arFramework3/Examples/ToyModels/ABC_toyModel/arCheckParallel*
@@ -343,6 +387,8 @@ arFramework3/Examples/ToyModels/ABC_toyModel/pthreadVC2.dll
 arFramework3/Examples/ToyModels/ABC_toyModel/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/ABC_toyModel_Laplace/Compiled/
+arFramework3/Examples/ToyModels/ABC_toyModel_Laplace/Data/Backup/
+arFramework3/Examples/ToyModels/ABC_toyModel_Laplace/Models/Backup/
 arFramework3/Examples/ToyModels/ABC_toyModel_Laplace/SBML/
 arFramework3/Examples/ToyModels/ABC_toyModel_Laplace/arSimuCalc*
 arFramework3/Examples/ToyModels/ABC_toyModel_Laplace/arCheckParallel*
@@ -351,6 +397,8 @@ arFramework3/Examples/ToyModels/ABC_toyModel_Laplace/pthreadVC2.dll
 arFramework3/Examples/ToyModels/ABC_toyModel_Laplace/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Advanced_Events/Compiled/
+arFramework3/Examples/ToyModels/Advanced_Events/Data/Backup/
+arFramework3/Examples/ToyModels/Advanced_Events/Models/Backup/
 arFramework3/Examples/ToyModels/Advanced_Events/SBML/
 arFramework3/Examples/ToyModels/Advanced_Events/arSimuCalc*
 arFramework3/Examples/ToyModels/Advanced_Events/arCheckParallel*
@@ -359,6 +407,8 @@ arFramework3/Examples/ToyModels/Advanced_Events/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Advanced_Events/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Bolus_Injection_Test/Compiled/
+arFramework3/Examples/ToyModels/Bolus_Injection_Test/Data/Backup/
+arFramework3/Examples/ToyModels/Bolus_Injection_Test/Models/Backup/
 arFramework3/Examples/ToyModels/Bolus_Injection_Test/SBML/
 arFramework3/Examples/ToyModels/Bolus_Injection_Test/arSimuCalc*
 arFramework3/Examples/ToyModels/Bolus_Injection_Test/arCheckParallel*
@@ -367,6 +417,8 @@ arFramework3/Examples/ToyModels/Bolus_Injection_Test/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Bolus_Injection_Test/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Detection_Limit/Compiled/
+arFramework3/Examples/ToyModels/Detection_Limit/Data/Backup/
+arFramework3/Examples/ToyModels/Detection_Limit/Models/Backup/
 arFramework3/Examples/ToyModels/Detection_Limit/SBML/
 arFramework3/Examples/ToyModels/Detection_Limit/arSimuCalc*
 arFramework3/Examples/ToyModels/Detection_Limit/arCheckParallel*
@@ -375,6 +427,8 @@ arFramework3/Examples/ToyModels/Detection_Limit/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Detection_Limit/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/ErrorFittingTest/Compiled/
+arFramework3/Examples/ToyModels/ErrorFittingTest/Data/Backup/
+arFramework3/Examples/ToyModels/ErrorFittingTest/Models/Backup/
 arFramework3/Examples/ToyModels/ErrorFittingTest/SBML/
 arFramework3/Examples/ToyModels/ErrorFittingTest/arSimuCalc*
 arFramework3/Examples/ToyModels/ErrorFittingTest/arCheckParallel*
@@ -383,6 +437,8 @@ arFramework3/Examples/ToyModels/ErrorFittingTest/pthreadVC2.dll
 arFramework3/Examples/ToyModels/ErrorFittingTest/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/ErrorPlotOptions/Compiled/
+arFramework3/Examples/ToyModels/ErrorPlotOptions/Data/Backup/
+arFramework3/Examples/ToyModels/ErrorPlotOptions/Models/Backup/
 arFramework3/Examples/ToyModels/ErrorPlotOptions/SBML/
 arFramework3/Examples/ToyModels/ErrorPlotOptions/arSimuCalc*
 arFramework3/Examples/ToyModels/ErrorPlotOptions/arCheckParallel*
@@ -391,6 +447,8 @@ arFramework3/Examples/ToyModels/ErrorPlotOptions/pthreadVC2.dll
 arFramework3/Examples/ToyModels/ErrorPlotOptions/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Event_Test/Compiled/
+arFramework3/Examples/ToyModels/Event_Test/Data/Backup/
+arFramework3/Examples/ToyModels/Event_Test/Models/Backup/
 arFramework3/Examples/ToyModels/Event_Test/SBML/
 arFramework3/Examples/ToyModels/Event_Test/arSimuCalc*
 arFramework3/Examples/ToyModels/Event_Test/arCheckParallel*
@@ -399,6 +457,8 @@ arFramework3/Examples/ToyModels/Event_Test/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Event_Test/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Fast_Equilibration/Compiled/
+arFramework3/Examples/ToyModels/Fast_Equilibration/Data/Backup/
+arFramework3/Examples/ToyModels/Fast_Equilibration/Models/Backup/
 arFramework3/Examples/ToyModels/Fast_Equilibration/SBML/
 arFramework3/Examples/ToyModels/Fast_Equilibration/arSimuCalc*
 arFramework3/Examples/ToyModels/Fast_Equilibration/arCheckParallel*
@@ -407,6 +467,8 @@ arFramework3/Examples/ToyModels/Fast_Equilibration/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Fast_Equilibration/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/FieldTester/Compiled/
+arFramework3/Examples/ToyModels/FieldTester/Data/Backup/
+arFramework3/Examples/ToyModels/FieldTester/Models/Backup/
 arFramework3/Examples/ToyModels/FieldTester/SBML/
 arFramework3/Examples/ToyModels/FieldTester/arSimuCalc*
 arFramework3/Examples/ToyModels/FieldTester/arCheckParallel*
@@ -415,6 +477,8 @@ arFramework3/Examples/ToyModels/FieldTester/pthreadVC2.dll
 arFramework3/Examples/ToyModels/FieldTester/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Flux_Estimation/Compiled/
+arFramework3/Examples/ToyModels/Flux_Estimation/Data/Backup/
+arFramework3/Examples/ToyModels/Flux_Estimation/Models/Backup/
 arFramework3/Examples/ToyModels/Flux_Estimation/SBML/
 arFramework3/Examples/ToyModels/Flux_Estimation/arSimuCalc*
 arFramework3/Examples/ToyModels/Flux_Estimation/arCheckParallel*
@@ -423,6 +487,8 @@ arFramework3/Examples/ToyModels/Flux_Estimation/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Flux_Estimation/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Input_Tests/Compiled/
+arFramework3/Examples/ToyModels/Input_Tests/Data/Backup/
+arFramework3/Examples/ToyModels/Input_Tests/Models/Backup/
 arFramework3/Examples/ToyModels/Input_Tests/SBML/
 arFramework3/Examples/ToyModels/Input_Tests/arSimuCalc*
 arFramework3/Examples/ToyModels/Input_Tests/arCheckParallel*
@@ -431,6 +497,8 @@ arFramework3/Examples/ToyModels/Input_Tests/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Input_Tests/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Intercondition_constraints/Compiled/
+arFramework3/Examples/ToyModels/Intercondition_constraints/Data/Backup/
+arFramework3/Examples/ToyModels/Intercondition_constraints/Models/Backup/
 arFramework3/Examples/ToyModels/Intercondition_constraints/SBML/
 arFramework3/Examples/ToyModels/Intercondition_constraints/arSimuCalc*
 arFramework3/Examples/ToyModels/Intercondition_constraints/arCheckParallel*
@@ -439,6 +507,8 @@ arFramework3/Examples/ToyModels/Intercondition_constraints/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Intercondition_constraints/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/LongSplines/Compiled/
+arFramework3/Examples/ToyModels/LongSplines/Data/Backup/
+arFramework3/Examples/ToyModels/LongSplines/Models/Backup/
 arFramework3/Examples/ToyModels/LongSplines/SBML/
 arFramework3/Examples/ToyModels/LongSplines/arSimuCalc*
 arFramework3/Examples/ToyModels/LongSplines/arCheckParallel*
@@ -447,6 +517,8 @@ arFramework3/Examples/ToyModels/LongSplines/pthreadVC2.dll
 arFramework3/Examples/ToyModels/LongSplines/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/MultiCondition_Test/Compiled/
+arFramework3/Examples/ToyModels/MultiCondition_Test/Data/Backup/
+arFramework3/Examples/ToyModels/MultiCondition_Test/Models/Backup/
 arFramework3/Examples/ToyModels/MultiCondition_Test/SBML/
 arFramework3/Examples/ToyModels/MultiCondition_Test/arSimuCalc*
 arFramework3/Examples/ToyModels/MultiCondition_Test/arCheckParallel*
@@ -455,6 +527,8 @@ arFramework3/Examples/ToyModels/MultiCondition_Test/pthreadVC2.dll
 arFramework3/Examples/ToyModels/MultiCondition_Test/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/PreProcessorTest/Compiled/
+arFramework3/Examples/ToyModels/PreProcessorTest/Data/Backup/
+arFramework3/Examples/ToyModels/PreProcessorTest/Models/Backup/
 arFramework3/Examples/ToyModels/PreProcessorTest/SBML/
 arFramework3/Examples/ToyModels/PreProcessorTest/arSimuCalc*
 arFramework3/Examples/ToyModels/PreProcessorTest/arCheckParallel*
@@ -463,6 +537,8 @@ arFramework3/Examples/ToyModels/PreProcessorTest/pthreadVC2.dll
 arFramework3/Examples/ToyModels/PreProcessorTest/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Predictor_Test/Compiled/
+arFramework3/Examples/ToyModels/Predictor_Test/Data/Backup/
+arFramework3/Examples/ToyModels/Predictor_Test/Models/Backup/
 arFramework3/Examples/ToyModels/Predictor_Test/SBML/
 arFramework3/Examples/ToyModels/Predictor_Test/arSimuCalc*
 arFramework3/Examples/ToyModels/Predictor_Test/arCheckParallel*
@@ -471,6 +547,8 @@ arFramework3/Examples/ToyModels/Predictor_Test/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Predictor_Test/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/RandomEffectParameterExamples/Compiled/
+arFramework3/Examples/ToyModels/RandomEffectParameterExamples/Data/Backup/
+arFramework3/Examples/ToyModels/RandomEffectParameterExamples/Models/Backup/
 arFramework3/Examples/ToyModels/RandomEffectParameterExamples/SBML/
 arFramework3/Examples/ToyModels/RandomEffectParameterExamples/arSimuCalc*
 arFramework3/Examples/ToyModels/RandomEffectParameterExamples/arCheckParallel*
@@ -479,6 +557,8 @@ arFramework3/Examples/ToyModels/RandomEffectParameterExamples/pthreadVC2.dll
 arFramework3/Examples/ToyModels/RandomEffectParameterExamples/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/ResponseCurve/Compiled/
+arFramework3/Examples/ToyModels/ResponseCurve/Data/Backup/
+arFramework3/Examples/ToyModels/ResponseCurve/Models/Backup/
 arFramework3/Examples/ToyModels/ResponseCurve/SBML/
 arFramework3/Examples/ToyModels/ResponseCurve/arSimuCalc*
 arFramework3/Examples/ToyModels/ResponseCurve/arCheckParallel*
@@ -487,6 +567,8 @@ arFramework3/Examples/ToyModels/ResponseCurve/pthreadVC2.dll
 arFramework3/Examples/ToyModels/ResponseCurve/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Splines/Compiled/
+arFramework3/Examples/ToyModels/Splines/Data/Backup/
+arFramework3/Examples/ToyModels/Splines/Models/Backup/
 arFramework3/Examples/ToyModels/Splines/SBML/
 arFramework3/Examples/ToyModels/Splines/arSimuCalc*
 arFramework3/Examples/ToyModels/Splines/arCheckParallel*
@@ -495,6 +577,8 @@ arFramework3/Examples/ToyModels/Splines/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Splines/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/State_Reduction/Compiled/
+arFramework3/Examples/ToyModels/State_Reduction/Data/Backup/
+arFramework3/Examples/ToyModels/State_Reduction/Models/Backup/
 arFramework3/Examples/ToyModels/State_Reduction/SBML/
 arFramework3/Examples/ToyModels/State_Reduction/arSimuCalc*
 arFramework3/Examples/ToyModels/State_Reduction/arCheckParallel*
@@ -503,6 +587,8 @@ arFramework3/Examples/ToyModels/State_Reduction/pthreadVC2.dll
 arFramework3/Examples/ToyModels/State_Reduction/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/SteadyStateBounds/Compiled/
+arFramework3/Examples/ToyModels/SteadyStateBounds/Data/Backup/
+arFramework3/Examples/ToyModels/SteadyStateBounds/Models/Backup/
 arFramework3/Examples/ToyModels/SteadyStateBounds/SBML/
 arFramework3/Examples/ToyModels/SteadyStateBounds/arSimuCalc*
 arFramework3/Examples/ToyModels/SteadyStateBounds/arCheckParallel*
@@ -511,6 +597,8 @@ arFramework3/Examples/ToyModels/SteadyStateBounds/pthreadVC2.dll
 arFramework3/Examples/ToyModels/SteadyStateBounds/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/SteadyStateModel/Compiled/
+arFramework3/Examples/ToyModels/SteadyStateModel/Data/Backup/
+arFramework3/Examples/ToyModels/SteadyStateModel/Models/Backup/
 arFramework3/Examples/ToyModels/SteadyStateModel/SBML/
 arFramework3/Examples/ToyModels/SteadyStateModel/arSimuCalc*
 arFramework3/Examples/ToyModels/SteadyStateModel/arCheckParallel*
@@ -519,6 +607,8 @@ arFramework3/Examples/ToyModels/SteadyStateModel/pthreadVC2.dll
 arFramework3/Examples/ToyModels/SteadyStateModel/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Step_Estimation/Compiled/
+arFramework3/Examples/ToyModels/Step_Estimation/Data/Backup/
+arFramework3/Examples/ToyModels/Step_Estimation/Models/Backup/
 arFramework3/Examples/ToyModels/Step_Estimation/SBML/
 arFramework3/Examples/ToyModels/Step_Estimation/arSimuCalc*
 arFramework3/Examples/ToyModels/Step_Estimation/arCheckParallel*
@@ -527,6 +617,8 @@ arFramework3/Examples/ToyModels/Step_Estimation/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Step_Estimation/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Stoichiometry/Compiled/
+arFramework3/Examples/ToyModels/Stoichiometry/Data/Backup/
+arFramework3/Examples/ToyModels/Stoichiometry/Models/Backup/
 arFramework3/Examples/ToyModels/Stoichiometry/SBML/
 arFramework3/Examples/ToyModels/Stoichiometry/arSimuCalc*
 arFramework3/Examples/ToyModels/Stoichiometry/arCheckParallel*
@@ -535,6 +627,8 @@ arFramework3/Examples/ToyModels/Stoichiometry/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Stoichiometry/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/SubSensitivities/Compiled/
+arFramework3/Examples/ToyModels/SubSensitivities/Data/Backup/
+arFramework3/Examples/ToyModels/SubSensitivities/Models/Backup/
 arFramework3/Examples/ToyModels/SubSensitivities/SBML/
 arFramework3/Examples/ToyModels/SubSensitivities/arSimuCalc*
 arFramework3/Examples/ToyModels/SubSensitivities/arCheckParallel*
@@ -543,6 +637,8 @@ arFramework3/Examples/ToyModels/SubSensitivities/pthreadVC2.dll
 arFramework3/Examples/ToyModels/SubSensitivities/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/TurboSplines/Compiled/
+arFramework3/Examples/ToyModels/TurboSplines/Data/Backup/
+arFramework3/Examples/ToyModels/TurboSplines/Models/Backup/
 arFramework3/Examples/ToyModels/TurboSplines/SBML/
 arFramework3/Examples/ToyModels/TurboSplines/arSimuCalc*
 arFramework3/Examples/ToyModels/TurboSplines/arCheckParallel*
@@ -551,6 +647,8 @@ arFramework3/Examples/ToyModels/TurboSplines/pthreadVC2.dll
 arFramework3/Examples/ToyModels/TurboSplines/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Volume_Estimation/Compiled/
+arFramework3/Examples/ToyModels/Volume_Estimation/Data/Backup/
+arFramework3/Examples/ToyModels/Volume_Estimation/Models/Backup/
 arFramework3/Examples/ToyModels/Volume_Estimation/SBML/
 arFramework3/Examples/ToyModels/Volume_Estimation/arSimuCalc*
 arFramework3/Examples/ToyModels/Volume_Estimation/arCheckParallel*
@@ -559,6 +657,8 @@ arFramework3/Examples/ToyModels/Volume_Estimation/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Volume_Estimation/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Washing_and_Injection_Test/Compiled/
+arFramework3/Examples/ToyModels/Washing_and_Injection_Test/Data/Backup/
+arFramework3/Examples/ToyModels/Washing_and_Injection_Test/Models/Backup/
 arFramework3/Examples/ToyModels/Washing_and_Injection_Test/SBML/
 arFramework3/Examples/ToyModels/Washing_and_Injection_Test/arSimuCalc*
 arFramework3/Examples/ToyModels/Washing_and_Injection_Test/arCheckParallel*
@@ -567,6 +667,8 @@ arFramework3/Examples/ToyModels/Washing_and_Injection_Test/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Washing_and_Injection_Test/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/model_reduction_2016/Compiled/
+arFramework3/Examples/ToyModels/model_reduction_2016/Data/Backup/
+arFramework3/Examples/ToyModels/model_reduction_2016/Models/Backup/
 arFramework3/Examples/ToyModels/model_reduction_2016/SBML/
 arFramework3/Examples/ToyModels/model_reduction_2016/arSimuCalc*
 arFramework3/Examples/ToyModels/model_reduction_2016/arCheckParallel*
@@ -574,20 +676,3 @@ arFramework3/Examples/ToyModels/model_reduction_2016/Results/20*
 arFramework3/Examples/ToyModels/model_reduction_2016/pthreadVC2.dll
 arFramework3/Examples/ToyModels/model_reduction_2016/pthreadGC2.dll
 
-arFramework3/Examples/Chen_MSB2009/Compiled/
-arFramework3/Examples/Chen_MSB2009/SBML/
-arFramework3/Examples/Chen_MSB2009/arSimuCalc*
-arFramework3/Examples/Chen_MSB2009/arCheckParallel*
-arFramework3/Examples/Chen_MSB2009/Results/20*
-arFramework3/Examples/Chen_MSB2009/pthreadVC2.dll
-arFramework3/Examples/Chen_MSB2009/pthreadGC2.dll
-arFramework3/Examples/Chen_MSB2009/*.mat
-
-arFramework3/Examples/Fujita_SciSignal2010/Compiled/
-arFramework3/Examples/Fujita_SciSignal2010/SBML/
-arFramework3/Examples/Fujita_SciSignal2010/arSimuCalc*
-arFramework3/Examples/Fujita_SciSignal2010/arCheckParallel*
-arFramework3/Examples/Fujita_SciSignal2010/Results/20*
-arFramework3/Examples/Fujita_SciSignal2010/pthreadVC2.dll
-arFramework3/Examples/Fujita_SciSignal2010/pthreadGC2.dll
-arFramework3/Examples/Fujita_SciSignal2010/*.mat

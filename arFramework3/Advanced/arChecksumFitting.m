@@ -51,6 +51,7 @@ end
 function a = initCheckFields(arStruct)
 
 a = struct;
+a.config = struct;
 
 % fields to be checkt in arStruct.config
 fn = intersect(fieldnames(arStruct.config),{'add_c','atol','atolV','atolV_Sens','eq_rtol','eq_step_factor','eq_tol', ...
@@ -59,10 +60,10 @@ fn = intersect(fieldnames(arStruct.config),{'add_c','atol','atolV','atolV_Sens',
     'rtol','sensiSkip','sensitivitySubset','skipSim','ssa_min_tau','ssa_runs',...
     'steady_state_constraint','turboSSSensi','turboSplines','useEvents','useFitErrorCorrection',...
     'useFitErrorMatrix','useJacobian','useMS','useSensiRHS','useSensis','useSparseJac',...
-    'useTolSwitching','useTolTrustPar','optimizerStep'});
+    'useTolSwitching','useTolTrustPar','optimizerStep','user_residual_fun'});
 
 for i=1:length(fn)
-    a.(fn{i}) = arStruct.config.(fn{i});
+    a.config.(fn{i}) = arStruct.config.(fn{i});
 end
 
 

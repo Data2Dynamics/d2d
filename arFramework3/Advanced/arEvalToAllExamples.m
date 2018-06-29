@@ -42,6 +42,10 @@
 % 
 % Example:
 % arEvalToAllExamples('arFitLHS','LHS100',[],1,100);
+% arEvalToAllExamples('arUpdateResultWorkspaces','none',[],2);
+% 
+% addpath(pwd); % add path to the working dir to find the user-function
+% arEvalToAllExamples(@userfun,'none',[],2);
 
 
 function varargout = arEvalToAllExamples(fun, result_suffix, workspace_pattern, depth, varargin)
