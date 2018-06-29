@@ -73,6 +73,10 @@ elseif ischar(val)
     checksum = arAddToCheckSum_core(val,checksum);
 elseif islogical(val)
     checksum = arAddToCheckSum_core(num2str(val),checksum);
+elseif isa(val, 'function_handle');
+    % Technically, the function it is pointing to should also be
+    % checksummed, but this is not so trivial
+    checksum = arAddToCheckSum_core(char(val),checksum);
 else
     class(val)
     error('arAddToCheckSum.m: Type not yet implemented. Please do it.');
