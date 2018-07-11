@@ -981,7 +981,7 @@ if(config.useSensis || config.useJacobian)
             end
             if(firstcol && i==length(model.xs) && ( size(condition.sym.dfxdx_nonzero, 2) > 0) )
                 condition.dfxdx_rowVals = [condition.dfxdx_rowVals i-1];
-                condition.sym.dfxdx_nonzero(length(condition.dfxdx_rowVals)) = str2sym('RCONST(0.0)');
+                condition.sym.dfxdx_nonzero(length(condition.dfxdx_rowVals)) = arMyStr2Sym('RCONST(0.0)');
                 condition.dfxdx_colptrs = [condition.dfxdx_colptrs length(condition.dfxdx_rowVals)-1];
                 firstcol = false;
             end
