@@ -17,7 +17,7 @@ arLoadData('Reelin_DR', 1);
 arLoadData('Reelin_EC50', 1);
 
 arCompileAll;
-
+arFindInputs;
 %Set wide bounds for scaling parameters
 arSetPars(ar.pLabel(strncmp('scale',ar.pLabel,5)),ones(1,150)*1,ones(1,150),ones(1,150),ones(1,150)*(-5),ones(1,150)*5);
 %Non log bounds for inhibition ratio [0,1]

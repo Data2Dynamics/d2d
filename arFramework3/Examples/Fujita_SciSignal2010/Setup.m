@@ -12,7 +12,7 @@ end
 
 % Compile model
 arCompileAll;
-
+arFindInputs;
 %% Constraint parameters
 ar.lb = -8 * ones(size(ar.lb)); % lower parameter bounds
 ar.ub =  8 * ones(size(ar.ub)); % upper parameter bounds

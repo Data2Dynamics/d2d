@@ -24,7 +24,7 @@ arSimu(true,true,true);
 
 %% Set parameters
 arLoadPars('bestFit')
-
+arFindInputs;
 %% Visualization
 arSimu(true,true,true);
 arPlot;
