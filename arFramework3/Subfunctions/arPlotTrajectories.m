@@ -1,7 +1,12 @@
 function [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ncount, t, y, ystd, lb, ub, nfine_dr_plot, ...
     nfine_dr_method, tExp, yExp, yExpHl, yExpStd, y_ssa, y_ssa_lb, y_ssa_ub, ...
     plotopt, trafos, qFit, zero_break, fastPlotTmp, hys, hystds, hysss, dydt, isLast, ...
-    ndata, chi2, titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, atol)
+    ndata, chi2, titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, atol, colors)
+
+
+if(~exist('colors','var') || isempty(colors))
+    colors = [];
+end
 
 % rows and cols
 ny = length(iy);
@@ -11,8 +16,8 @@ ny = length(iy);
 % end 
 
 % styles
-Clines = arLineMarkersAndColors(ccount, ncount, [], 'none', '-');
-ClinesExp = arLineMarkersAndColors(ccount, ncount, [], 'none', 'none');
+Clines = arLineMarkersAndColors(ccount, ncount, colors, 'none', '-');
+ClinesExp = arLineMarkersAndColors(ccount, ncount, colors, 'none', 'none');
 
 for jys = 1:length(iy)
     jy = iy(jys);
