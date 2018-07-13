@@ -13,12 +13,16 @@
 % arLoad('NameOfAnExistingResultFolder')
 
 function arLoad(workspace_name)
+if ~exist('Results','dir')
+    error('No results folder exist. arLoad can only be executed in a D2D working directory.')
+end
 if exist('arCheck','file')==0
     arInit;
 end
 arCheck;
 
 global ar
+
 
 % set the two variables also as global in the command line workspace:
 evalin('base','clear ar');  
