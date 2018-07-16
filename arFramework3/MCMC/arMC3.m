@@ -212,13 +212,21 @@ if exchange_method == 0 && NumberOfChains >1
     disp( '         Use ar.mc3.exchange_method to choose a exchange method.');
 end
 
+if exchange_method ==1
+    if NumberOfChains == 1
+        NumberOfChains = 10;
+        disp( 'Warning: Number of Chains is set to 10 because exchange method was choosen!');
+        disp( '         Please set Number of Chains manually in ar.mc3.');
+    end
+end
+
 
 beta = linspace(1,1/NumberOfChains,NumberOfChains).^TemperatureExponent;    % Scaling of Temperature regime based on 
 
 
 paraReset            = repmat( ar.p, 1, 1, NumberOfChains );               % Parameter Reset vector with current parameter value for all chains
-qFitGlobal           = ar.qFit==1;                                   % Logical variable - true for fitted parameters, false for fixed as specified in Global model input
-ResidualType         = ar.res_type;                                  % Type of the residual: 1 (Data point residual),2 (Residuals of fitted errors, 3 (Prior), 4 (Random Effects)
+qFitGlobal           = ar.qFit==1;                                         % Logical variable - true for fitted parameters, false for fixed as specified in Global model input
+ResidualType         = ar.res_type;                                        % Type of the residual: 1 (Data point residual),2 (Residuals of fitted errors, 3 (Prior), 4 (Random Effects)
 locs = 1:sum((qFitGlobal));
 
 
@@ -251,7 +259,7 @@ ub = ar.ub(qFitGlobal);
 
 
 
-% Check if Error Correction Fit is enables, if so disable it because this
+% Check if Error Correction Fit is enabled, if so disable it because this
 % is not used in Bayesian Setting
 if isfield( ar, 'useFitErrorCorrection' )
     fitErr = ar.useFitErrorCorrection;
@@ -461,6 +469,7 @@ tic;
 count_chain_reset = 0;
 jthin = 1;
 jcount = 1;
+
 for jruns = 1:floor(((nruns*nthinning)+nburnin))
     
     % For each chain
@@ -595,23 +604,6 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
              CovarianceAdaptationFactor(chID) = CovarianceAdaptationFactor(chID)+((accept_rate(chID))-0.234)*((jruns+1)^(-DecayParameter));
              % Adjust covariance matrix (propsed and current
              covar_currUSED(:,:,chID) = exp(CovarianceAdaptationFactor(chID))*covar_curr(:,:,chID);
-
-             % Regularization of proposal covariance
-%              feval(fkt, para_curr(chID,:), Cfactor(chID),accept_rate(chID),max_accept,min_accept,parasHistory(:,:,chID),parasHistory_index, nwindow);
-%              mcmc_mmala_chol(ptmp, restmp, srestmp,InvProposalPriorTemp, RegularizationThresholdTemp)
-
-             %ParameterNumber = length(para_curr(chID,:));
-
-%             [~,qq] = cholcov(covar_currUSED(:,:,chID),0);
-%             if qq ~= 0
-%                covar_currUSED(:,:,chID) = covar_currUSED(:,:,chID) + RegularizationThreshold*eye(ParameterNumber);
-%                covar_currUSED(:,:,chID) = (covar_currUSED(:,:,chID)+covar_currUSED(:,:,chID)')/2;
-%                [~,qq] = cholcov(covar_currUSED(:,:,chID),0);
-%                if qq ~= 0
-%                   covar_currUSED(:,:,chID) = covar_currUSED(:,:,chID) + max(max(covar_currUSED(:,:,chID)))/1000*eye(ParameterNumber);
-%                   covar_currUSED(:,:,chID) = (covar_currUSED(:,:,chID)+covar_currUSED(:,:,chID)')/2;
-%                end
-%             end
            end
         else
             covar_currUSED(:,:,chID) = covar_curr(:,:,chID);
@@ -639,30 +631,7 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
         i_accepts = 1;
     end 
 
-%     % Save Samples
-%     if(jrungo>0)
-%         jthin = jthin + 1;
-%         if(jthin > nthinning)
-%             ar.ps(jcount+jindexoffset,:,:) = paraReset;
-%             ar.ps(jcount+jindexoffset,qFitGlobal,:) = para_curr.';
-%             ar.ps_trial(jcount+jindexoffset,:,:) = paraReset;
-%             ar.ps_trial(jcount+jindexoffset,qFitGlobal,:) = para_proposal.';
-%             ar.chi2s(jcount+jindexoffset,:) = LogPosterior_curr;
-%             ar.chi2s_trial(jcount+jindexoffset,:) = LogPosterior_proposal;
-%             ar.Q_trial(jcount+jindexoffset,:) = ProbProposalGivenCurr;
-%             ar.Q_curr(jcount+jindexoffset,:)  = ProbCurrGivenProposal;
-%             ar.acceptance(jcount+jindexoffset,:) = accept_rate;
-%             if ( exchange_method > 0 )
-%                 ar.exchange(jcount+jindexoffset,:) = exchange_rate;
-%             end
-%             jthin = 1;
-%             jcount = jcount + 1;
-%         end
-%     end
-%     jrungo = jrungo + 1;
-    
-    
-    
+ 
     
     % Perform chain exchange
     if ( exchange_method > 0 )
@@ -701,11 +670,6 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
                LogPosterior_curr([k1,k2]) = LogPosterior_curr([k2,k1]);
             end
       
-
-%             [ exaccept ] = feval( ex_fkt, fkt );
-%             exchanges(:,i_accepts) = exaccept;
-%             save_samples( );
-%             jrungo = jrungo + 1;
         end
     end
     
@@ -781,31 +745,21 @@ end
     
 % Adaptive MCMC
     function [mu, covar] = mcmc_adaptive(ptmp, CfactorTempo,AcceptRateTemp,max_accept,min_accept,ps_histTemp,ps_hist_index, nwindow)
-%         fprintf('%i/%i %e\n', sum(isnan(ps_hist(:,1))), nwindow, Cfactor);
        if((isnan(AcceptRateTemp) || AcceptRateTemp > max_accept || AcceptRateTemp < min_accept) ...
                 && (sum(isnan(ps_histTemp(:,1)))==0))% || jrungo<=0))
             mu = ptmp;            
             if(sum(isnan(ps_histTemp(:,1))) == 0)
-                % muAdapt = mean(ps_hist);
                 covar = cov(ps_histTemp(:,:))* CfactorTempo;
             else
                 covar = eye(length(ptmp)) * CfactorTempo;
             end            
         else
             if(ps_hist_index == nwindow && sum(isnan(ps_histTemp(:,1)))==0)
-                % muAdapt = mean(ps_hist);
                 covar = cov(ps_histTemp(:,:))* CfactorTempo;
-%                 figure(1)
-%                 plot(ps_hist(:,1),'x-');
-%                 figure(2)
-%                 imagesc(CAdapt);
-%                 colorbar
             else
                 covar = eye(length(ptmp)) * CfactorTempo;
             end
             mu = ptmp;
-            % mu = muAdapt;
-%             covar = CAdapt(:,:,chID);
         end
     end
     
