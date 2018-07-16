@@ -231,7 +231,6 @@ function ar = arInitFields(ar)
     ar.info.arsimucalc_flags{21} = sprintf('initial condition override.\nInitial condition override vector has the wrong size');
 
     ar.info.cvodes_flags = cell(1,30);
-
     ar.info.cvodes_flags{1} = 'CV_TOO_MUCH_WORK';
     ar.info.cvodes_flags{2} = 'CV_TOO_MUCH_ACC';
     ar.info.cvodes_flags{3} = 'CV_ERR_FAILURE';
@@ -255,6 +254,10 @@ function ar = arInitFields(ar)
     ar.info.cvodes_flags{26} = 'CV_BAD_DKY';
     ar.info.cvodes_flags{27} = 'CV_TOO_CLOSE';
 
+    for je = 1 : numel( ar.info.cvodes_flags )
+        ar.info.arsimucalc_flags{21+je} = sprintf('equilibration failure: %s', ar.info.cvodes_flags{je});
+    end
+    
     ar.info.arFormatVersion  = arFormatVersion;
     
     ar.info.path = pwd;

@@ -114,7 +114,11 @@ for jm = 1:length(ar.model)
                             if ( numel( unique( t(~isnan(t)) ) ) == 1 )
                                 t = t(~isnan(t));
                                 y = nanmean(y);
-                                ystd = nanmean(ystd);
+                                if ( ~isempty( yExpStd ) )
+                                    ystd = nanmean( yExpStd );
+                                else
+                                    ystd = nanmean(ystd);
+                                end
                                 t = [t-0.01, t-0.01, t+0.01, t+0.01];
                                 y = [0; y; y; 0];
                                 ystd = [0; ystd; ystd; 0];

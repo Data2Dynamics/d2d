@@ -9,9 +9,9 @@ end
 
 done = false;
 
-old = sym(old);
-new = sym(new);
-in  = sym(in);
+old = arMyStr2Sym(old);
+new = arMyStr2Sym(new);
+in  = arMyStr2Sym(in);
 
 k = 0; orig = in;
 while ( ~done )

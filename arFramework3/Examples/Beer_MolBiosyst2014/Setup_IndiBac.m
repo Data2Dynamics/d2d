@@ -20,7 +20,7 @@ ar.config.maxsteps = 1e5;
 
 % load parameters from best fit
 arLoadPars('BestFit')
-
+arFindInputs;
 % plot data sets shown in publication
 ar.model.qPlotYs([1, 2, 8, 14]) = 1; 
 

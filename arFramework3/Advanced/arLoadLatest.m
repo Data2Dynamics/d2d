@@ -19,6 +19,9 @@ function varargout = arLoadLatest(pattern)
 if ~exist('pattern','var') || isempty(pattern)
     pattern = [];
 end
+if ~exist('Results','dir')
+    error('No results folder exist. arLoadLatest can only be executed in a D2D working directory.')
+end
 
 d = dir('Results');
 names = {d.name};
@@ -42,6 +45,9 @@ if ~isempty(pattern)
     ind = find(~cellfun(@isempty,regexp(folders,pattern)));
     if isempty(ind)
         warning('Pattern ''%s'' does not match to any workspace in folder Results => nothing loaded.',pattern);
+        if nargout>0
+            varargout{1} = false;
+        end
         return
     end
     folders = folders(ind);

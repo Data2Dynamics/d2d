@@ -65,7 +65,7 @@ arSimu(true,true,true);
 %% Parameter settings
 % Load best fit
 arLoadPars('BestFit');
-
+arFindInputs;
 %% Model settings
 % (here for model selected in Isensee et al., JCB, 2018)
 model_options.partial_import = 0;

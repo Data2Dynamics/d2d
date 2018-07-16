@@ -5,6 +5,9 @@
 % filename:     source file name
 
 function values = arLoadParsSingle(filename, parameternames)
+if ~exist('Results','dir')
+    error('No results folder exist. arLoadParsSingle can only be executed in a D2D working directory.')
+end
 
 filename_tmp = filename;
 filename = ['./Results/' filename '/workspace.mat'];

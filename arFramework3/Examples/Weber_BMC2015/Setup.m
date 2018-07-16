@@ -38,7 +38,7 @@ arSteadyState(1,arFindCondition(ar,'experiment_0'),1:length(ar.model.condition))
 % are set as they are condensed in a single replicate.
 
 arLoadPars('bestFit')
-
+arFindInputs;
 %% Visualization
 arSimu(true,true,true);
 arPlot;
