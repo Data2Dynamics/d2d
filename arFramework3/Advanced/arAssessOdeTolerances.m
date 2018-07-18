@@ -10,12 +10,12 @@
 % for i=1:length(tols)
 %     ar.config.rtol=tols(i);
 %     ar.config.atol=tols(i);
-%     arFindOdeTolerances
+%     arAssessOdeTolerances
 %     res{i} = ar.opti_tols;
 %     title(['atol = rtol = ',num2str(ar.config.atol)])
 % end
 
-function arFindOdeTolerances
+function arAssessOdeTolerances
 
 global ar
 
