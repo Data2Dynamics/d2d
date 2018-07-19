@@ -2922,11 +2922,11 @@ function str = replaceDerivative( str )
 %   pattern replaces D([#], func)(args) to Dfunc(args, floor(#/2)) 
 function str = repSplineDer( str )
 
-    % Pattern that matches the derivatives D([#], func)(args)
+    % Pattern that matches the derivatives D([#], func
     pattern = 'D[\(][\[](\d+)[\]][\,]\s([\w\(\)]*)[\)]'; %[\(]([\(\)\[\]\^\/\*\+\-\.\s,\w\d]*)[\)]
     
-    % Compute the mask for the printf
-    % Performs regexprep which transforms D([#], name)(args) => Dname(args, %d)
+    % Grab the arguments # and func and store them in chunks. Locs refers
+    % to the location where the D(... term starts.
     [chunks, locs] = regexp(str, pattern, 'tokens');
     
     % Did we find a derivative?
@@ -2940,21 +2940,29 @@ function str = repSplineDer( str )
             
             % Find nearest matching closing bracket from current opening bracket
             startargs = find(depth(locs(j)+1:end)==depth(locs(j)),1) + locs(j);       % This will find the closing bracket of D( ...
-            close = find(depth(startargs+1:end)==depth(startargs),1) + startargs;   % Closing bracket of the arguments
-            from = str(locs(j):close);
+            close = find(depth(startargs+1:end)==depth(startargs),1) + startargs;     % Closing bracket of the arguments
+            from = str(locs(j):close);                                                % From will now contain the entire derivative term
             
-            % Now the derivative IDs are computed with another
-            % regexprep (divided by two and floored).
+            func = chunks{j}{2};                                                      % This contains the function name, for future reference. 
+                                                                                      % We may want to pattern match this with spline in the future.
+            
             % Note: This is only valid for the spline functions (where derivative number is argument number / 2)!
-            func = chunks{j}{2};
-            values = chunks{j}{1};
-            values = floor( str2num(values) / 2 );
+            values = chunks{j}{1};                                                    % Contains the argment w.r.t. which it is derived
+            values = floor( str2num(values) / 2 );                                    % Spline knots are given in pairs (time, y), hence the division by two.
+            
+            % Add the value w.r.t. which to derive the input function as a
+            % final argument to the function.
             to = [ from( 1:end-1 ) ', ' num2str(values) ')' ];
+            
+            % Replace D([#], name) => Dname(args, 
             to = regexprep(to, pattern,'D$2');
             
             fromStr{j} = from;
             toStr{j} = to;            
         end
+        
+        % Perform all the replacements (separate step since otherwise the
+        % locations of the substrings change).
         for j = 1 : numel( chunks )
             str = strrep( str, fromStr{j}, toStr{j} );
         end
