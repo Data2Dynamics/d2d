@@ -2917,25 +2917,48 @@ function str = replaceDerivative( str )
 
         str = strrep( str, total{jm}, fNew );
     end
-
+    
 % Safely map derivatives to the appropriate C functions
 %   pattern replaces D([#], func)(args) to Dfunc(args, floor(#/2)) 
 function str = repSplineDer( str )
 
     % Pattern that matches the derivatives D([#], func)(args)
-    pattern = 'D[\(][\[](\d+)[\]][\,]\s([\w\(\)]*)[\)][\(]([\[\]\^\/\*\+\-\.\s,\w\d]*)[\)]';
+    pattern = 'D[\(][\[](\d+)[\]][\,]\s([\w\(\)]*)[\)]'; %[\(]([\(\)\[\]\^\/\*\+\-\.\s,\w\d]*)[\)]
     
     % Compute the mask for the printf
     % Performs regexprep which transforms D([#], name)(args) => Dname(args, %d)
-    mask = regexprep(str, pattern,'D$2($3,%d)');
+    [chunks, locs] = regexp(str, pattern, 'tokens');
     
-    % Now the derivative IDs are computed with another
-    % regexprep (divided by two and floored)
-    chunks = regexp(str, pattern, 'match');
-    values = regexprep(chunks, pattern, '$1');
-    values = floor( cellfun(@str2num, values) / 2 );
-
-    str = sprintf( mask, values );  
+    % Did we find a derivative?
+    % Parse it in blocks
+    if ( numel(chunks) > 0 )
+        fromStr = cell( 1, numel( chunks ) );
+        toStr = cell( 1, numel( chunks ) );
+        for j = 1 : numel( chunks )
+            % Scan from start to closing bracket
+            depth = cumsum((str == '(') - (str == ')'));
+            
+            % Find nearest matching closing bracket from current opening bracket
+            startargs = find(depth(locs(j)+1:end)==depth(locs(j)),1) + locs(j);       % This will find the closing bracket of D( ...
+            close = find(depth(startargs+1:end)==depth(startargs),1) + startargs;   % Closing bracket of the arguments
+            from = str(locs(j):close);
+            
+            % Now the derivative IDs are computed with another
+            % regexprep (divided by two and floored).
+            % Note: This is only valid for the spline functions (where derivative number is argument number / 2)!
+            func = chunks{j}{2};
+            values = chunks{j}{1};
+            values = floor( str2num(values) / 2 );
+            to = [ from( 1:end-1 ) ', ' num2str(values) ')' ];
+            to = regexprep(to, pattern,'D$2');
+            
+            fromStr{j} = from;
+            toStr{j} = to;            
+        end
+        for j = 1 : numel( chunks )
+            str = strrep( str, fromStr{j}, toStr{j} );
+        end
+    end
 
 function prepareBecauseOfRepeatedCompilation
     global ar
