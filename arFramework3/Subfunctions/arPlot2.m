@@ -11,7 +11,10 @@
 % doLegends     [true]
 % dynamics:     [true]
 % hs:           []      custom figure handels
-% 
+%
+% individual colors per plot can be used by setting ar.model.plot(i).colors,
+% e.g. by ar.model.plot(i).colors = hsv(n)
+%
 % 
 % Doku: 
 % https://github.com/Data2Dynamics/d2d/wiki/Plotting-options-and-the-meaning-of-ar.config.ploterrors
@@ -294,6 +297,12 @@ for jm = 1:length(ar.model)
                             end
                         end
                         
+                        if(isfield(ar.model(jm).plot(jplot), 'colors') && ~isempty(ar.model(jm).plot(jplot).colors))
+                            colors = ar.model(jm).plot(jplot).colors(ccount,:);
+                        else
+                            colors = [];
+                        end
+                        
                         % call arPlotTrajectories
                         [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ...
                             length(dr_times)*length(jcs), ...
@@ -303,7 +312,7 @@ for jm = 1:length(ar.model)
                             fastPlotTmp, hys, hystds, hysss, dydt, ...
                             jt==length(dr_times) && jc==jcs(end), ndata, chi2, ...
                             titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, ...
-                            ar.config.atol);
+                            ar.config.atol, colors);
         
                         % save handels
                         if(jd~=0)

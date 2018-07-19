@@ -19,6 +19,9 @@ function varargout = arLoadLatest(pattern)
 if ~exist('pattern','var') || isempty(pattern)
     pattern = [];
 end
+if ~exist('Results','dir')
+    error('No results folder exist. arLoadLatest can only be executed in a D2D working directory.')
+end
 
 d = dir('Results');
 names = {d.name};
