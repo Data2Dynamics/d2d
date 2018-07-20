@@ -17,7 +17,9 @@ end
             out = sym(zeros(size_s));
             for i = 1:size_s(1)
                 for j = 1:size_s(2)
-                    out(i,j) = evalin(symengine,s{i,j});
+                    if ~strcmp(s{i,j}, 'matrix([])')
+                        out(i,j) = evalin(symengine,s{i,j});
+                    end
                 end
             end
         else
