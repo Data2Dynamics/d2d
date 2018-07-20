@@ -7,8 +7,7 @@ persistent matver % keeping the value from the last call
 if isempty(matver)
     matver = ver('MATLAB');  % calling this function every time is too time-consuming
 end
-
-    if(double(matver.Version) >= 9.4)
+    if(double(string(matver.Version)) >= 9.4)
         if(isa(s,'double'))
             out = sym(s);
         elseif(isa(s,'char'))
