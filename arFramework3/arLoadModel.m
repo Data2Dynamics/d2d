@@ -390,7 +390,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             ar.model(m).fv(end+1,1) = str{1};
             
             % check for negative fluxes possible
-            if(ar.config.checkForNegFluxes)
+            if(ar.config.checkForNegFluxes==1)
                 if (~reversible)
                     try
                         symtmp = arMyStr2Sym(str{1});
@@ -405,7 +405,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                         symtmpsubs = subs(symtmp, arMyStr2Sym(source{j}), 0);
                         sva = symvar(symtmp);
                         symtmpsubs = subs(symtmpsubs, sva, rand(1, numel(sva)) );
-                        if(symtmpsubs~=0)
+                        if(symtmpsubs~=0)                           
                             arFprintf(1, 2, 'Possible negative flux in reaction #%i:\n', length(ar.model(m).fv));
                             arFprintf(1, 2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
                             arFprintf(1, 2, 'Source species %s missing ?\n\n', source{j});
@@ -1061,6 +1061,9 @@ arCheckReservedWords( ar.model(m).c, 'compartments' );
 ar = orderfields(ar);
 ar.model = orderfields(ar.model);
 
+if ( ar.config.checkForNegFluxes==2 )
+    arCheckForNegFluxes(m, fid);
+end
 
 function [ line, remainder, fid ] = readLine( fid, commentStyle )
     line = '';
