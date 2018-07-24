@@ -19,11 +19,7 @@ pS6	 C	 "n/a"	 conc.	 Cell	 1	 "pS6"
 EGF_EGFR	 C	 "n/a"	 conc.	 Cell	 1	 "EGF_EGFR"
 
 INPUTS
-EGF_conc_step	C	"n/a"	conc.	"EGF_conc_step"
-EGF_conc_impulse	C	"n/a"	conc.	"EGF_conc_impulse"
-EGF_conc_ramp	C	"n/a"	conc.	"EGF_conc_ramp"
-pulse_time	C	"n/a"	conc.	"pulse_time"
-ramp_time	C	"n/a"	conc.	"ramp_time"
+EGF	 C	 "n/a"	 conc.	"EGF_conc_step+step1(t,0,pulse_time,EGF_conc_impulse)+EGF_conc_ramp*t/ramp_time"
 
 REACTIONS
 EGFR 	<-> EGF_EGFR 	 CUSTOM "EGF*EGFR*reaction_1_k1 - EGF_EGFR*reaction_1_k2" 	"reaction_1"
@@ -40,7 +36,6 @@ EGFR 	->  	 CUSTOM "EGFR*EGFR_turnover" 	"reaction_10"
 
 DERIVED
 pro_EGFR	 C	 "n/a"	 conc.	"init_pro_EGFR"
-EGF	 C	 "n/a"	 conc.	"EGF_conc_step+step1(t,0,pulse_time,EGF_conc_impulse)+EGF_conc_ramp*t/ramp_time"
 pEGFR_tot_abs	C	"n/a"	conc.	"scaleFactor_pEGFR*(pEGFR + pEGFR_Akt)"
 pAkt_tot_abs	C	"n/a"	conc.	"scaleFactor_pAkt*(pAkt + pAkt_S6)"
 pS6_tot_abs	C	"n/a"	conc.	"scaleFactor_pS6*pS6"
