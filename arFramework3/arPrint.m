@@ -54,7 +54,7 @@ function varargout = arPrint(js, varargin)
 global ar
 
 args = {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub', 'exact', 'namefit', 'ar'};
-extraArgs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+extraArgs = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1];
 
 if ( exist( 'js', 'var' ) )
     if ( ~isnumeric( js ) )
@@ -174,10 +174,10 @@ if ( nargin > 1 )
         js = js( arC.qInitial( js ) == 1 );
     end
     if ( opts.ub )
-        js = js( arC.p(js) < opts.ub );
+        js = js( arC.p(js) < opts.ub_args );
     end
     if ( opts.lb )
-        js = js( arC.p(js) > opts.lb );
+        js = js( arC.p(js) > opts.lb_args );
     end
     if ( opts.closetobound )
         js = js( arC.qCloseToBound(js) );
