@@ -18,7 +18,8 @@
 %           'observation'               - only show non-dynamic parameters
 %           'error'                     - only show error model parameters
 %           'exact'                     - match names exactly
-%           'namefit'                   - display fitting option close to the name
+%           'namefit'                   - put parameter between brackets
+%                                         when it is not being fitted
 %           'closetobound'              - show the parameters near bounds
 %           'lb' followed by value      - only show values above lb
 %           'ub' followed by value      - only show values below lb
