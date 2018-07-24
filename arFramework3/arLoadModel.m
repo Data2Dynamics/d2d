@@ -734,6 +734,14 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1
     [C, fid] = arTextScan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
+% Perform (repeated) self-substitutions
+if numel( ar.model(m).fz ) > 0
+    for a = 1 : numel( ar.model(m).fz )
+        ar.model(m).fz{a} = char( arSubsRepeated(arMyStr2Sym(ar.model(m).fz{a}), ar.model(m).z, ar.model(m).fz, matVer.Version) );
+    end
+    arFprintf(2, '=> Self-substituting derived variables.\n' );
+end
+
 % Perform (repeated) derived substitutions
 if ( derivedVariablesInRates )
     for a = 1 : length( ar.model(m).fv )
