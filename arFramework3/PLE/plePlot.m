@@ -41,8 +41,10 @@ if(~exist('plot_hit_bound','var'))
     plot_hit_bound = true;
 end
 
-if(~exist(ar.ple.savePath, 'dir'))
-    mkdir('.', ar.ple.savePath)
+if ( savetofile )
+    if(~exist(ar.ple.savePath, 'dir'))
+        mkdir('.', ar.ple.savePath)
+    end
 end
 
 farben = lines(length(ar.ple.p_labels));
