@@ -192,7 +192,7 @@ for jk=jks
         else
             xlabel(arNameTrafo(ar.ple.p_labels{jk}));
         end
-        title(sprintf('parameter #%i', jk));
+        title(sprintf('parameter #%i', find(strcmp(ar.pLabel, ar.ple.p_labels{jk}))));
         
         if(mod(count-1,ncols)==0)
             ylabel(ar.ple.ylabel)

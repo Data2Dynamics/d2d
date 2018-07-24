@@ -72,7 +72,7 @@ count = 0;
 for jj=1:length(indices)
     jk = indices(jj);
     if(~isempty(ar.ple.ps{jk}))
-        h = myRaiseFigure(jk, sprintf('PLE#%i %s', jk, ar.ple.p_labels{jk}), count);
+        h = myRaiseFigure(jk, sprintf('PLE#%i %s', find(strcmp(ar.pLabel, ar.ple.p_labels{jk})), ar.ple.p_labels{jk}), count);
         set(h, 'Color', [1 1 1]);
         
         g = subplot(5,1,[1 2 3]);
