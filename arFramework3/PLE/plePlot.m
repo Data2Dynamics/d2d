@@ -10,7 +10,7 @@
 % plot_hit_bound    plot hitting boundary of parameters             [true]
 % 
 %   h   handle to figure object
-function varargout = plePlot(indices, savetofile, subs_para, para_index, show_hit_bound, plot_hit_bound)
+function varargout = plePlot(indices_ar, savetofile, subs_para, para_index, show_hit_bound, plot_hit_bound)
 
 global ar
 
@@ -21,13 +21,25 @@ if(isempty(ar.ple.ps))
     return
 end
 
-if(~exist('indices','var') || isempty(indices))
-    indices = 1:length(ar.ple.ps);
-elseif ischar(indices)
-    indices = strmatch(indices,ar.ple.p_labels,'exact');
-elseif ischar(indices)
-    [~,indices] = intersect(ar.ple.p_labels,indices);
+% Indices are specified w.r.t. current model
+if(~exist('indices_ar','var') || isempty(indices_ar))
+    indices_ar = 1:length(ar.p);
+elseif ischar(indices_ar)
+    indices_ar = strmatch(indices_ar,ar.pLabel,'exact');
+elseif iscell(indices_ar)
+    [~,indices_ar] = intersect(ar.pLabel,indices_ar);
 end
+
+% Map PLE to current ar struct
+[pleToP, map] = ismember(ar.pLabel, ar.ple.p_labels);
+pToPLE = ismember(ar.ple.p_labels, ar.pLabel);
+indices = map(indices_ar);
+indices = indices(indices>0);
+lb(pToPLE) = ar.lb(pleToP);
+ub(pToPLE) = ar.ub(pleToP);
+qFit(pToPLE) = ar.qFit(pleToP);
+qLog10(pToPLE) = ar.qLog10(pleToP);
+
 if(~exist('savetofile','var'))
     savetofile = false;
 end
@@ -69,14 +81,14 @@ for jj=1:length(indices)
         ps = ar.ple.ps{jk};
         chi2s = ar.ple.chi2s{jk};
         
-        qCloseToUB = ps > ones(length(chi2s),1) * (ar.ub - ar.ple.dist_thres) & ...
-            ones(length(chi2s),1) * ar.qFit==1;
-        qCloseToLB = ps < ones(length(chi2s),1) * (ar.lb + ar.ple.dist_thres) & ...
-            ones(length(chi2s),1) * ar.qFit==1;
+        qCloseToUB = ps > ones(length(chi2s),1) * (ub - ar.ple.dist_thres) & ...
+            ones(length(chi2s),1) * qFit==1;
+        qCloseToLB = ps < ones(length(chi2s),1) * (lb + ar.ple.dist_thres) & ...
+            ones(length(chi2s),1) * qFit==1;
 
         qhitbound = false(size(ps));
-        qhitbound(:,ar.qFit==1) = ar.ple.gradient{jk}(:,ar.qFit==1) > ar.ple.grad_thres & qCloseToLB(:,ar.qFit==1) | ...
-            ar.ple.gradient{jk}(:,ar.qFit==1) < -ar.ple.grad_thres & qCloseToUB(:,ar.qFit==1);
+        qhitbound(:,qFit==1) = ar.ple.gradient{jk}(:,qFit==1) > ar.ple.grad_thres & qCloseToLB(:,qFit==1) | ...
+            ar.ple.gradient{jk}(:,qFit==1) < -ar.ple.grad_thres & qCloseToUB(:,qFit==1);
         
         % profile
         if(show_hit_bound)
@@ -191,7 +203,7 @@ for jj=1:length(indices)
         if(~exist('para_index','var') || isempty(para_index))
             notjk = 1:length(ar.ple.p);
             notjk = notjk~=jk;
-            notjk = notjk & ar.qFit==1;
+            notjk = notjk & qFit==1;
         else
             notjk = zeros(size(ar.ple.p));
             notjk(para_index) = 1;
@@ -205,8 +217,8 @@ for jj=1:length(indices)
         arSubplotStyle(g);
         
         if(subs_para==2)
-            ps(:,notjk) = bsxfun(@minus,ps(:,notjk),ar.lb(notjk));
-            ps(:,notjk) = bsxfun(@rdivide,ps(:,notjk),ar.ub(notjk)-ar.lb(notjk));
+            ps(:,notjk) = bsxfun(@minus,ps(:,notjk),lb(notjk));
+            ps(:,notjk) = bsxfun(@rdivide,ps(:,notjk),ub(notjk)-lb(notjk));
         end
         
         ccount = 1;
@@ -271,7 +283,7 @@ for jj=1:length(indices)
             xlim(xlimtmp);
         end
         ylabel({'change of';'other parameters'})
-        if(ar.qLog10(jk))
+        if(qLog10(jk))
             xlabel(['log_{10}(' arNameTrafo(ar.ple.p_labels{jk}) ')'])
         else
             xlabel(arNameTrafo(ar.ple.p_labels{jk}))
