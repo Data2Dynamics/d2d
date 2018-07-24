@@ -1,4 +1,4 @@
-% Old version of the Swameye 2003 model with linear interpolation
+% Old version of the Swameye 2003 model with linear interpolation. T
 
 % Load models & data
 arInit
