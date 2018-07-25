@@ -39,6 +39,7 @@ lb(pToPLE) = ar.lb(pleToP);
 ub(pToPLE) = ar.ub(pleToP);
 qFit(pToPLE) = ar.qFit(pleToP);
 qLog10(pToPLE) = ar.qLog10(pleToP);
+jks(jks>numel(ar.ple.ps)) = [];
 
 sumples = 0;
 for j=jks
