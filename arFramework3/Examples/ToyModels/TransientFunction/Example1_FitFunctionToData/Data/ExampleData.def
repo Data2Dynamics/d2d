@@ -1,0 +1,16 @@
+DESCRIPTION
+
+PREDICTOR
+time        T   min time    0	600
+
+INPUTS
+
+OBSERVABLES
+        
+ERRORS
+
+CONDITIONS
+
+RANDOM
+nExpID	  INDEPENDENT
+

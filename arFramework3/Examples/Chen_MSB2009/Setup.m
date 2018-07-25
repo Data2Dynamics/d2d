@@ -14,4 +14,4 @@ arCompileAll;
 
 %% Parameter settings
 arLoadPars('ParamsChen2009')
-
+ar.config.maxsteps = 5.e4;

@@ -1,4 +1,4 @@
-% Load models & data
+% Load models & data from the D2D-version of the Swameye model
 
 arInit
 arLoadModel('pnas_jak_stat');

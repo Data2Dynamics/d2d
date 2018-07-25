@@ -9,7 +9,7 @@ if isempty(matver)
 end
     % The explicit cast to string is necessary for MATLAB R2017a at least,
     % otherwise double will convert the string on a char by char basis.
-    if(double(string(matver.Version)) >= 9.4)
+    if(str2double(matver.Version) >= 9.4)
         if(isa(s,'double'))
             out = sym(s);
         elseif(isa(s,'char'))
