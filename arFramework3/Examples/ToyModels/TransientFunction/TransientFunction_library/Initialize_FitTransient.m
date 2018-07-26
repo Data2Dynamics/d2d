@@ -1,13 +1,13 @@
 function Initialize_FitTransient
 global ar
 
-ar.fit_transient.indp.signum    = strmatch('signum',ar.pLabel,'exact');
-ar.fit_transient.indp.amp_sust  = strmatch('amp_sust',ar.pLabel,'exact');
-ar.fit_transient.indp.amp_trans = strmatch('amp_trans',ar.pLabel,'exact');
-ar.fit_transient.indp.offset    = strmatch('offset',ar.pLabel,'exact');
-ar.fit_transient.indp.timescale_sust = strmatch('timescale_sust',ar.pLabel,'exact');
-ar.fit_transient.indp.timescale_trans = strmatch('timescale_trans',ar.pLabel,'exact');
-ar.fit_transient.indp.sd = strmatch('sd_Signal_au',ar.pLabel,'exact');
+ar.fit_transient.indp.signum    = strmatch('signum_TF',ar.pLabel);
+ar.fit_transient.indp.amp_sust  = strmatch('amp_sust',ar.pLabel);
+ar.fit_transient.indp.amp_trans = strmatch('amp_trans',ar.pLabel);
+ar.fit_transient.indp.offset    = strmatch('offset_TF',ar.pLabel);
+ar.fit_transient.indp.timescale_sust = strmatch('timescale_sust',ar.pLabel);
+ar.fit_transient.indp.timescale_trans = strmatch('timescale_trans',ar.pLabel);
+ar.fit_transient.indp.sd = strmatch('sd_TF',ar.pLabel);
 
 notSignum = setdiff(1:length(ar.pLabel),ar.fit_transient.indp.signum);
 %  = setdiff(1:length(ar.pLabel),ar.fit_transient.indp.signum);
