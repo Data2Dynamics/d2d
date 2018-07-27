@@ -29,7 +29,8 @@ for im = imodel
         Exp_Data(:,3:2:end) = ar.model(im).data(id).ystdExpSimu;
         Sim_Data = [ar.model(im).data(id).tExp ar.model(im).data(id).yExpSimu];
 
-        out_name = ['./Benchmark_paper/Data/' ar.model(im).name '_m' num2str(im) '_data' num2str(id) '.xlsx'];
+        %out_name = ['./Benchmark_paper/Data/' ar.model(im).name '_m' num2str(im) '_data' num2str(id) '.xlsx'];
+        out_name = ['./Benchmark_paper/Data/' 'model' num2str(im) '_data' num2str(id) '.xlsx'];
 
         if(~exist('./Benchmark_paper', 'dir'))
             mkdir('./Benchmark_paper')
@@ -49,31 +50,43 @@ for im = imodel
         ar.model(im).data(id).yExpStd(isnan(ar.model(im).data(id).yExpStd)) = ar.model(im).data(id).ystdExpSimu(isnan(ar.model(im).data(id).yExpStd));
     end
 end   
- 
+    p_backup = ar.p;
     %Do simulations without error model
     bkp_errorPars = ar.qFit(~cellfun(@isempty,strfind(ar.pLabel,'sd_')));
     bkp_fiterror = ar.config.fiterrors;
     arSetParsPattern('sd_',[],0)
     ar.config.fiterrors=-1;
-    arFit
+    
+    if(contains(pwd,'Chen'))
+    	arSimu(false,false,true);
+    else
+        arFit
+    end
+    chi2Val = arGetMerit;
+    
+    Chi2_string = {'Chi2 without Error model',chi2Val};    
+    xlwrite(['./Benchmark_paper/General_info.xlsx'],Chi2_string,'General Info','A8:B8');
     
     % Write parameter values to the general info file
-    General_string = {'Chi2 without Error model';ar.chi2};
-    General_string(end+2,1:2) = {'Parameter values';'parameter'};
-    General_string(end+1,2:5) = {'value','lower boundary','upper boundary','analysis at log-scale'};
+    General_string(1,1:6) = {'parameter','value','lower boundary','upper boundary','analysis at log-scale','estimated'};    
     
     for i = find(~ar.qError)
-        General_string{i+4,1} = ar.pLabel{i}; 
-        General_string{i+4,2} = ar.p(i);
-        General_string{i+4,3} = ar.lb(i);
-        General_string{i+4,4} = ar.ub(i);
-        General_string{i+4,5} = ar.qLog10(i);
+        General_string{end+1,1} = ar.pLabel{i}; 
+        General_string{end,2} = ar.p(i);
+        General_string{end,3} = ar.lb(i);
+        General_string{end,4} = ar.ub(i);
+        General_string{end,5} = ar.qLog10(i);
+        if(ar.qFit(i) == 1)
+            General_string{end,6} = 'yes';
+        else
+            General_string{end,6} = 'fixed';
+        end
     end   
-    xlwrite('./Benchmark_paper/General_info.xlsx',General_string,'Parameters_noErrorModel');
+    xlwrite(['./Benchmark_paper/General_info.xlsx'],General_string,'Parameters_noErrorModel');
     
 for im = imodel    
     for id = 1:length(ar.model(im).data)
-        out_name = ['./Benchmark_paper/Data/' ar.model(im).name '_m' num2str(im) '_data' num2str(id) '.xlsx'];
+        out_name = ['./Benchmark_paper/Data/' 'model' num2str(im) '_data' num2str(id) '.xlsx'];
         XLS_Sim = [{'time'}, ar.model(im).data(id).yNames];
         Sim_Data = [ar.model(im).data(id).tExp ar.model(im).data(id).yExpSimu];
 
@@ -86,4 +99,4 @@ end
 %Reset error model
 ar.config.fiterrors=bkp_fiterror;
 ar.qFit(~cellfun(@isempty,strfind(ar.pLabel,'sd_'))) = bkp_errorPars;
-arFit
+ar.p = p_backup;

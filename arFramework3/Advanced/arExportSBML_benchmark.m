@@ -7,10 +7,11 @@
 % copasi:       use amounts as states (this is the SBML standard, hence default = true)
 % steadystate:  prequilibrate condition as in ar file
 
-function arExportSBML(m, c, copasi, data, steadystate)
+function arExportSBML_benchmark(m, d, copasi, steadystate)
 
 global ar
 
+c = ar.model(m).data(d).cLink;
 % simulate once for initial values
 arSimu(0,1,0)
 
@@ -110,7 +111,7 @@ Crules = {};
 
 simulated_ss = 0;
 if ( steadystate )
-    if ( ~isempty( ar.model(m).condition(c).ssLink ) )
+    if (isfield(ar.model(m).condition(c),'ssLink') && ~isempty( ar.model(m).condition(c).ssLink ) )
         warning( 'Using simulated steady state values as initial condition (non-parametric)' );
         x_ss = ar.model(m).ss_condition(ar.model(m).condition(c).ssLink).xFineSimu(end,:);
         simulated_ss = 1;
@@ -179,21 +180,49 @@ for jx = 1:length(ar.model(m).x)
 end
 
 %% parameters
-for jp = 1:length(ar.model(m).condition(c).p)
-    M.parameter(jp).typecode = 'SBML_PARAMETER';
-    M.parameter(jp).metaid = '';
-    M.parameter(jp).notes = '';
-    M.parameter(jp).annotation = '';
-    M.parameter(jp).sboTerm = -1;
-    M.parameter(jp).name = '';
-    M.parameter(jp).id = ar.model(m).condition(c).p{jp};
-    M.parameter(jp).units = '';
-    M.parameter(jp).constant = 1;
-    M.parameter(jp).isSetValue = 1;
-    M.parameter(jp).level = 2;
-    M.parameter(jp).version = 4;
+% for jp = 1:length(ar.model(m).condition(c).p)
+%     M.parameter(jp).typecode = 'SBML_PARAMETER';
+%     M.parameter(jp).metaid = '';
+%     M.parameter(jp).notes = '';
+%     M.parameter(jp).annotation = '';
+%     M.parameter(jp).sboTerm = -1;
+%     M.parameter(jp).name = '';
+%     M.parameter(jp).id = ar.model(m).condition(c).p{jp};
+%     M.parameter(jp).units = '';
+%     M.parameter(jp).constant = 1;
+%     M.parameter(jp).isSetValue = 1;
+%     M.parameter(jp).level = 2;
+%     M.parameter(jp).version = 4;
+%     
+%     qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp}); %R2013a compatible
+%     if(sum(qp)==1)
+%         pvalue = ar.p(qp);
+%         if(ar.qLog10(qp) == 1)
+%             pvalue = 10^pvalue;
+%         end
+%     else
+%         pvalue = 1;
+%     end
+%     M.parameter(jp).value = pvalue;
+% end
+
+for id = 1:length(ar.model(m).data(d).p)
+    %id_tmp = id+length(ar.model(m).condition(c).p);
+    id_tmp = id;
+    M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
+    M.parameter(id_tmp).metaid = '';
+    M.parameter(id_tmp).notes = '';
+    M.parameter(id_tmp).annotation = '';
+    M.parameter(id_tmp).sboTerm = -1;
+    M.parameter(id_tmp).name = '';
+    M.parameter(id_tmp).id = ar.model(m).data(d).p{id};
+    M.parameter(id_tmp).units = '';
+    M.parameter(id_tmp).constant = 1;
+    M.parameter(id_tmp).isSetValue = 1;
+    M.parameter(id_tmp).level = 2;
+    M.parameter(id_tmp).version = 4;
     
-    qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp}); %R2013a compatible
+    qp = ismember(ar.pLabel, ar.model(m).data(d).p{id}); %R2013a compatible
     if(sum(qp)==1)
         pvalue = ar.p(qp);
         if(ar.qLog10(qp) == 1)
@@ -202,7 +231,59 @@ for jp = 1:length(ar.model(m).condition(c).p)
     else
         pvalue = 1;
     end
-    M.parameter(jp).value = pvalue;
+    M.parameter(id_tmp).value = pvalue;
+end
+
+% for id = 1:length(ar.model(m).data(d).pu)
+%     already = {};
+%     for i_already = 1:length(M.parameter)
+%         already{end+1} = M.parameter.id;
+%     end
+%     if(any(contains(already,ar.model(m).data(d).pu{id})))
+%         sprintf('Found %s \n',ar.model(m).data(d).pu{id}) %Debugging
+%         continue;
+%     end
+%     id_tmp = length(M.parameter)+1;
+%     M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
+%     M.parameter(id_tmp).metaid = '';
+%     M.parameter(id_tmp).notes = '';
+%     M.parameter(id_tmp).annotation = '';
+%     M.parameter(id_tmp).sboTerm = -1;
+%     M.parameter(id_tmp).name = '';
+%     M.parameter(id_tmp).id = ar.model(m).data(d).pu{id};
+%     M.parameter(id_tmp).units = '';
+%     M.parameter(id_tmp).constant = 1;
+%     M.parameter(id_tmp).isSetValue = 1;
+%     M.parameter(id_tmp).level = 2;
+%     M.parameter(id_tmp).version = 4;
+%     
+%     qp = ismember(ar.pLabel, ar.model(m).data(d).pu{id}); %R2013a compatible
+%     if(sum(qp)==1)
+%         pvalue = ar.p(qp);
+%         if(ar.qLog10(qp) == 1)
+%             pvalue = 10^pvalue;
+%         end
+%     else
+%         pvalue = 1;
+%     end
+%     M.parameter(id_tmp).value = pvalue;
+% end
+
+for iY = 1:length(ar.model(m).data(d).y)
+    id_tmp = length(M.parameter)+1;
+    M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
+    M.parameter(id_tmp).metaid = '';
+    M.parameter(id_tmp).notes = '';
+    M.parameter(id_tmp).annotation = '';
+    M.parameter(id_tmp).sboTerm = -1;
+    M.parameter(id_tmp).name = '';
+    M.parameter(id_tmp).id = ar.model(m).data(d).y{iY};
+    M.parameter(id_tmp).units = '';
+    M.parameter(id_tmp).constant = 0;
+    M.parameter(id_tmp).isSetValue = 1;
+    M.parameter(id_tmp).level = 2;
+    M.parameter(id_tmp).version = 4;    
+    M.parameter(id_tmp).value = 1;
 end
 
 %% rules
@@ -408,6 +489,7 @@ for ju = 1:length(ar.model(m).u)
             % replace functions first
             fu = replaceFunctions( fu, ar.config.specialFunc, 0 );
             % replace heavisides and log their positions
+            fu = subs(sym(strrep(fu, 'heaviside', '_potato_')), sym('_potato_'), 'heaviside');
             [fu, args] = replaceFunctions( fu, heavisideReplacement, 0 );
 
             % Determine event triggers in here (to make sure SBML resets the solver)
@@ -551,6 +633,36 @@ elseif(strcmp(ar.model(m).tUnits{2},'s') || strcmp(ar.model(m).tUnits{2},'sec'))
     M.unitDefinition(1).unit(1).multiplier = 1;
 end
 
+
+%% Observables as assignment rules
+
+for id = 1:length(ar.model(m).data(d).fy)
+    ixrule = length(M.rule) + 1;% index of current rule
+    M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
+    M.rule(ixrule).metaid = '';
+    M.rule(ixrule).notes = '';
+    M.rule(ixrule).annotation = '';
+    M.rule(ixrule).sboTerm = -1;
+    rule_tmp = ar.model(m).data(d).fy{id};
+    if(~isempty(ar.model(m).z))       
+        rule_tmp = subs(rule_tmp,ar.model(m).z,ar.model(m).fz');
+    end
+    rule_tmp = subs(rule_tmp,ar.model(m).data(d).pold,ar.model(m).data(d).fp');
+    
+    rule_tmp = char(rule_tmp);
+    if(ar.model(m).data(d).logfitting(id)==1)
+        rule_tmp = ['log10(' rule_tmp ')'];
+    end
+    M.rule(ixrule).formula = rule_tmp;
+    M.rule(ixrule).variable = ar.model(m).data(d).y{id};
+    M.rule(ixrule).species = '';
+    M.rule(ixrule).compartment = '';
+    M.rule(ixrule).name = '';
+    M.rule(ixrule).units = '';
+    M.rule(ixrule).level = 2;
+    M.rule(ixrule).version = 4;
+end
+
 arWaitbar(-1);
 
 [a,b] = isSBML_Model(M);
@@ -565,7 +677,7 @@ if(a == 1)
     if(~exist('./Benchmark_paper/SBML', 'dir'))
         mkdir('./Benchmark_paper/SBML')
     end
-    OutputSBML(M, ['Benchmark_paper/SBML/' ar.model(m).name '_data_' num2str(data) '_l2v4.xml']);
+    OutputSBML(M, ['Benchmark_paper/SBML/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
 else
     error('%s', b);
 end
