@@ -1,5 +1,9 @@
 %Testing x,y,z Fine Simus and sx, sy, sz Exp Simus for all Benchmark models
 %published at XXX
+fprintf( 2, 'REGRESSION TEST FOR DOSE RESPONSE PREDICTOR FITTING\n' );
+
+fprintf( 2, 'Loading model for dose response fitting ... ' );
+
 arInit;
 
 list_examples = {'Becker_Science2010';'Bachmann_MSB2011';'Beer_MolBiosyst2014';'Boehm_JProteomeRes2014';'Bruno_Carotines_JExpBio2016';'TGFb_ComplexModel_WithGenes_Reduced'; ...

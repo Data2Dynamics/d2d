@@ -45,6 +45,9 @@ end
 if(~isfield(ar,'sconstr'))
     ar.sconstr = [];
 end
+if(~isfield(ar,'L1subtype'))
+    ar.L1subtype = ones(size(ar.p));
+end
 
 np = length(ar.p);
 
@@ -311,22 +314,85 @@ for jp=1:np
         ar.nprior = ar.nprior + 1;
         ar.chi2 = ar.chi2 + tmpres^2;
         ar.chi2prior = ar.chi2prior + tmpres^2;
-    elseif(ar.type(jp) == 3 && ~isinf(ar.std(jp))) % L1 prior
-        tmpres = sqrt(abs((ar.mean(jp)-ar.p(jp))./ar.std(jp)));
-        ar.res(resindex) = tmpres;
-        ar.res_type(resindex) = 3;
-        if ( debugres )
-            ar.resinfo(resindex).type = 'L1 prior';
-            ar.resinfo(resindex).m = jp;
+    elseif(ar.type(jp) == 3 && ~isinf(ar.std(jp)) ) % Lasso and Adaptions
+        
+        threshTo0 = 1e-10;
+        switch ar.L1subtype(jp)
+            case 1 % L1
+                tmpres = sqrt(abs(ar.mean(jp)-ar.p(jp))./abs(ar.std(jp)));
+                if(ar.config.useSensis && sensi)
+                    tmpsres = zeros(size(ar.p));
+                    if abs(ar.mean(jp) - ar.p(jp)) > threshTo0
+                        tmpsres(jp) = sign(ar.p(jp) - ar.mean(jp)) ...
+                            .* 0.5./sqrt(abs(ar.mean(jp) - ar.p(jp))...
+                            .*ar.std(jp));
+                    elseif abs(2*ar.res(notpriors)*ar.sres(notpriors,jp)) < ...
+                            (1./ar.std(jp))
+                        ar.sres(:,jp) = 0;
+                    end
+                end
+            case 2 % Adaptive Lasso
+                tmpres = sqrt(ar.lnuweights(jp).*abs(ar.mean(jp)-ar.p(jp))...
+                    ./abs(ar.std(jp)));
+                if(ar.config.useSensis && sensi)
+                    tmpsres = zeros(size(ar.p));
+                    if abs(ar.mean(jp) - ar.p(jp)) > threshTo0
+                        tmpsres(jp) = ar.lnuweights(jp).*sign(ar.p(jp) - ar.mean(jp)) ...
+                            .* 0.5./sqrt(abs(ar.mean(jp) - ar.p(jp))...
+                            .*ar.std(jp));
+                    elseif abs(2*ar.res(notpriors)*ar.sres(notpriors,jp)) < ...
+                            (1./ar.std(jp)* ar.lnuweights(jp))
+                        ar.sres(:,jp) = 0;
+                    end
+                end
+            case 3 % Lq
+                tmpres = sqrt(abs(ar.mean(jp)-ar.p(jp))...
+                    .^(ar.expo(jp))./abs(ar.std(jp)));
+                if(ar.config.useSensis && sensi)
+                    tmpsres = zeros(size(ar.p));
+                    if abs(ar.mean(jp) - ar.p(jp)) > threshTo0
+                        tmpsres(jp) = sign(ar.p(jp) - ar.mean(jp)) ...
+                            .* 0.5.*(ar.expo(jp)) .* sqrt(abs(ar.mean(jp) - ar.p(jp))...
+                            .^(ar.expo(jp)-2) ./ar.std(jp));
+                    elseif abs(2*ar.res(notpriors)*ar.sres(notpriors,jp)) < ...
+                            (1./ar.std(jp)* ar.expo(jp) ...
+                            * threshTo0 .^(ar.expo(jp)-1))
+                        ar.sres(:,jp) = 0;
+                    end
+                end
+            case 4 % Elastic Net
+                tmpres = sqrt(ar.alpha(jp) ./ ar.std(jp)) ...
+                    .* (ar.mean(jp)-ar.p(jp));
+                % quadratic contribution
+                ar.res(resindex) = tmpres;
+                resindex = resindex + 1;
+                tmpres = sqrt((1-ar.alpha(jp)) ./ ar.std(jp) ...
+                    .* abs(ar.mean(jp)-ar.p(jp)));
+                % L1 contribution
+                if(ar.config.useSensis && sensi)
+                    tmpsres = zeros(size(ar.p));
+                    tmpsres(jp) = sqrt(ar.alpha(jp)./ar.std(jp));
+                    ar.sres(sresindex,:) = tmpsres;
+                    sresindex = sresindex + 1;
+                    % quadratic sensitivities are just constants
+                    
+                    tmpsres = zeros(size(ar.p));
+                    if abs(ar.mean(jp) - ar.p(jp)) > threshTo0
+                        tmpsres(jp) = sign(ar.p(jp) - ar.mean(jp)) .* 0.5 ...
+                            .* sqrt((1-ar.alpha(jp)) ./ ar.std(jp) ...
+                            ./ abs(ar.p(jp) - ar.mean(jp)));                        
+                    elseif abs(2*ar.res(notpriors)*ar.sres(notpriors,jp)) < ...
+                            (1-ar.alpha(jp)) ./ ar.std(jp)
+                        ar.sres(:,jp) = 0;
+                    end
+                end
+                    
         end
+        
+        ar.res(resindex) = tmpres;
+        ar.res_type(resindex) = 3; 
         resindex = resindex+1;
         if(ar.config.useSensis && sensi)
-            tmpsres = zeros(size(ar.p));
-            if abs(ar.mean(jp) - ar.p(jp)) > 1e-10
-                tmpsres(jp) = sign(ar.p(jp)-ar.mean(jp)) ./ (2*ar.std(jp).*sqrt(abs((ar.mean(jp)-ar.p(jp))./ar.std(jp))));
-            elseif abs(2*ar.res(notpriors)*ar.sres(notpriors,jp)) < 1/ar.std(jp)
-                ar.sres(:,jp) = 0;
-            end
             ar.sres(sresindex,:) = tmpsres;
             sresindex = sresindex+1;
         end
@@ -337,12 +403,62 @@ for jp=1:np
     end
 end
 
+% grouped priors
+
+if any(ar.type == 5)
+    
+    indsp = 1:np;
+    
+    for g = ar.grplas.groups
+        
+%         w = ar.grplas.weights(g);
+        gind = indsp((ar.grplas.grouping == g) & (ar.type == 5) );
+        % indices of parameters grouped as g and marked as group lasso
+        
+%         tmpsum = sqrt(sum((ar.mean(gind) - ar.p(gind)).^2 ...
+%            ./(ar.std(gind).^2), 2));
+        
+        tmpsum = sqrt(...
+              (ar.mean(gind) - ar.p(gind))./ar.std(gind) ...
+            * ar.grplas.A(gind,gind)...
+            * ((ar.mean(gind) - ar.p(gind))./ar.std(gind))');
+        
+        
+        
+        tmpres = sqrt(tmpsum);
+        ar.res(resindex) = tmpres;
+        ar.res_type(resindex) = 3;
+        resindex = resindex + 1;
+        
+        if(ar.config.useSensis && sensi)
+            tmpsres = zeros(size(ar.p));
+            bA = (ar.mean(gind) - ar.p(gind)) ./ (ar.std(gind).^2) ...
+                * (ar.grplas.A(gind,gind) + ar.grplas.A(gind,gind)');
+            if tmpsum > 1e-10
+                tmpsres(gind) = - 1/4 * bA * (tmpsum .^ (-3/2));
+            else
+                Aii = diag(ar.grplas.A(gind,gind));
+                exc = abs(2*ar.res(notpriors)...
+                    * ar.sres(notpriors,gind)) < sqrt(Aii)' ./ ar.std(gind);
+                ar.sres(:,gind(exc)) = 0;
+            end
+            ar.sres(sresindex,:) = tmpsres;
+            sresindex = sresindex+1;
+        end
+        ar.ndata = ar.ndata + 1;
+        ar.nprior = ar.nprior + 1;
+        ar.chi2 = ar.chi2 + tmpres^2;
+        ar.chi2prior = ar.chi2prior + tmpres^2;
+    end
+    
+end
+
 % random effects
 if(isfield(ar, 'random'))
     for j=1:length(ar.random)
         [tmpres, tmpsres] = arRandomEffect(ar.p(ar.random{j}));
         ar.res(resindex) = tmpres;
-        ar.res_type(resindex) = 4; 
+        ar.res_type(resindex) = 5; 
         resindex = resindex+1;
         if(ar.config.useSensis && sensi)
             tmpsres2 = zeros(size(ar.p));
@@ -518,7 +634,7 @@ if(isfield(ar.model, 'data') && ~isempty(ar.res))
             warning('ar.config.fiterrors = -1 enforces usage of exp. errors. NaN in res or sres occur if no exp. Errors are in the data. Please check.')
         end
         arDebugResidual;
-        error('%i NaNs in derivative of residuals (ar.sres).', sum(sum(isnan(ar.sres(:,ar.qFit==1)))));
+        error('NaN in derivative of residuals: %i', sum(sum(isnan(ar.sres(:,ar.qFit==1)))));
     end
 end
 
