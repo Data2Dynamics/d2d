@@ -1,6 +1,6 @@
 % Plot L1 scan summary
 
-function l1Plot(eraseStr)
+function grplasPlot(eraseStr)
 
 global ar
 
@@ -8,29 +8,34 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
-if(~exist('jks','var') || isempty(jks))
-    if(~isfield(ar,'L1jks') || isempty(ar.L1jks))
-        error('please initialize by l1Init, run l1Scan, l1Unpen, and l1SelectOpt')
-    end
+
+if(~isfield(ar,'grplas'))
+    error('please initialize by grplasInit')
 end
 
-jks = ar.L1jks;
+if(~isfield(ar.grplas,'jks') || isempty(ar.grplas.jks))
+    error('please initialize by grplasInit, run grplasScan, and grplasUnpen')
+end
+
+
+jks = ar.grplas.jks;
 linv = ar.linv;
-ps = ar.L1ps;
-chi2s_unpen = ar.L1chi2s_unpen;
-chi2s_lam0 = ar.L1lam0chi2s;
-final_ind = ar.L1final_ind;
-parsgt0 = ar.L1parsgt0;
-signifmat = ar.L1signifmat;
-
-
+ps = ar.grplas.ps;
+chi2s_unpen = ar.grplas.chi2s_unpen;
+chi2s_lam0 = ar.grplas.lam0chi2s;
+final_ind = ar.grplas.final_ind;
+parsgt0 = ar.grplas.parsgt0;
+signifmat = ar.grplas.signifmat;
 
 l = arNameTrafo(ar.pLabel(jks));
 
-if (exist('eraseStr','var') && ~isempty(eraseStr) && ischar(eraseStr))
-    for i = 1:length(l)
-        l{i} = erase(l{i},eraseStr);
-    end
+for i = 1:length(jks)
+   l{i} = strcat(l{i}, sprintf(' (G%i)',...
+       ar.grplas.grouping(jks(i))));
+   if (exist('eraseStr','var') && ~isempty(eraseStr) && ischar(eraseStr))
+       l{i} = erase(l{i},eraseStr);
+   end
+       
 end
 
 figure
@@ -53,17 +58,18 @@ set(gca,'YDir','reverse')
 box on
 mypos = get(gca,'Pos');
 hold on
-
-% [row,col] = find(abs(ps(:,jks)) > ar.L1thresh);
+% 
+% [row,col] = find(abs(ps(:,jks)) > ar.grplas.thresh);
 % parbar = zeros(1,length(jks));
 % for i = 1:length(jks)
 %     myind = col == i;
 %     if sum(myind) > 0
 %         parbar(i) = max(row(myind));
 %     end
+%     
 % end
 
-rc = abs(ps(:,jks)) > ar.L1thresh;
+rc = abs(ps(:,jks)) > ar.grplas.thresh;
 for i = 1:length(jks)
     begin = NaN;
     for j = 1:(length(linv)-1)
@@ -122,61 +128,16 @@ for i = 1:length(steppars)
     chi2s_unpenstep = chi2s_unpenstep([1:steppars(i)-1+i steppars(i)+i steppars(i)+i:end]);
     signifmatstep = signifmatstep([1:steppars(i)-1+i steppars(i)+i steppars(i)+i:end]);
     linvlogstep = linvlogstep([1:steppars(i)-1+i steppars(i)+i-1 steppars(i)+i:end]);
-
 end
-
-switch ar.L1subtype(jks(1))
-    case 2
-        yyaxis right
-        plot(linvlog,ar.gamma,'+')
-        hold on
-        ylabel('Adapt. Lasso Exponent')
-        ylim([-0.05, 1.05])
-        yyaxis left
-    case 3
-        yyaxis right
-        plot(linvlog,ar.nu,'+')
-        hold on
-        ylabel('L_q Exponent')
-        ylim([-0.05, 1.05])
-        yyaxis left
-    case 4
-        yyaxis right
-        plot(linvlog,ar.alpharange,'+')
-        hold on
-        ylabel('Elasticity')
-        ylim([-0.05, 1.05])
-        yyaxis left
-end
-
 plot(linvlogstep+.5*ltick,parsgt0step)
 hold on
 plot([linvlog(final_ind) linvlog(final_ind)]+.5*ltick,get(gca,'YLim'),'k:')
-ylabel('No. of cell-type specific parameters')
-
-
 xlabel('log_{10}(\lambda)')
-
+ylabel('No. of cell-type specific parameters')
 xlim(myxlim)
 
 subplot(2,2,3)
-% maxy = max(max(chi2s_unpenstep-chi2s_lam0+1,1-(signifmatstep-chi2s_unpenstep+chi2s_lam0)));
-% miny = min(min(chi2s_unpenstep-chi2s_lam0+1,1-(signifmatstep-chi2s_unpenstep+chi2s_lam0)));
-% a = semilogy(linvlogstep+.5*ltick,chi2s_unpenstep-chi2s_unpenstep(1)+1);
-% hold on
-% 
-% set(gca,'YLim',[min(.4,miny) 10^ceil(log10(maxy))])
-% 
-% xlabel('log_{10}(\lambda)')
-% ylabel('Likelihood ratio')
-% myylim = get(gca,'YLim');
-% b = plot(linvlogstep,1-(signifmatstep-chi2s_unpenstep+chi2s_lam0),'r--');
-% c = plot([linvlog(final_ind) linvlog(final_ind)]+.5*ltick,myylim,'k:');
-% xlim(myxlim)
-% box on
-% legend([a b c],{'Test statistic D + 1','Statistical threshold','Parsimonious model'})
-
-if strcmpi(ar.L1seltype,'LRT')
+if strcmpi(ar.grplas.seltype,'LRT')
     maxy = max(max(chi2s_unpenstep-chi2s_lam0+1,1-(signifmatstep-chi2s_unpenstep+chi2s_lam0)));
     a = semilogy(linvlogstep+.5*ltick,chi2s_unpenstep-chi2s_lam0+1);
     hold on
@@ -190,7 +151,7 @@ if strcmpi(ar.L1seltype,'LRT')
     box on
     legend([a b c],{'Test statistic D + 1','Statistical threshold','Parsimonious model'})
     hold off
-elseif strcmpi(ar.L1seltype,'BIC')
+elseif strcmpi(ar.grplas.seltype,'BIC')
     maxy = max(signifmatstep);
     miny = min(signifmatstep);
     extension= 0.1 * ((maxy) - (miny));

@@ -1,8 +1,10 @@
-% L1 scan
+% Group Lasso Calculating unpenalized solutions with a given subset of 
+%   parameters fixed to 0
+
 % jks    relative parameters to be investigated by L1 regularization
 % linv   width, i.e. inverse slope of L1 penalty (Inf = no penalty; small values = large penalty)
 
-function l1Unpen(jks)
+function grplasUnpen(jks)
 
 global ar
 
@@ -10,12 +12,17 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
+if(~isfield(ar,'grplas'))
+    error('please initialize by grplasInit')
+end
+
 if(~exist('jks','var') || isempty(jks))
-    jks = find(ar.type == 3);
+    jks = find(ar.type == 5);
     if(isempty(jks))
-        error('please initialize by l1Init and run l1scan')
+        error('please initialize by grplasInit and run grplasScan')
     end
 end
+
 
 if(~isfield(ar,'linv') || isempty(ar.linv))
     error('please initialize by l1Init and run l1scan')
@@ -23,7 +30,8 @@ end
 
 linv = ar.linv;
 
-ps = ar.L1ps;
+ps = ar.grplas.ps;
+
 
 ps_unpen = nan(length(linv),length(ar.p));
 chi2s_unpen = nan(1,length(linv));
@@ -35,8 +43,9 @@ for i = 1:length(linv)
    ar.p = ps(i,:);
    ar.type(jks) = 0;
    ar.qFit(jks) = 1;
-   excl = jks(abs(ps(i,jks)) <= ar.L1thresh);
+   excl = jks(abs(ps(i,jks)) <= ar.grplas.thresh);
    ar.qFit(excl) = 2;
+%    ar.p(excl) = 0;
    try
        arFit(true)
        ps_unpen(i,:) = ar.p;
@@ -48,8 +57,8 @@ for i = 1:length(linv)
    j = i;
    if j == 1
 
-       if (chi2s_unpen(j) < ar.L1lam0chi2s && isempty(excl))
-           ar.L1lam0chi2s = chi2s_unpen(j);
+       if (chi2s_unpen(j) < ar.grplas.lam0chi2s && isempty(excl))
+           ar.grplas.lam0chi2s = chi2s_unpen(j);
        end
            
    else
@@ -57,7 +66,7 @@ for i = 1:length(linv)
            j = j-1;
            ar.type(jks) = 0;
            ar.qFit(jks) = 1;
-           ar.qFit(jks(abs(ps(j,jks)) <= ar.L1thresh)) = 2;
+           ar.qFit(jks(abs(ps(j,jks)) <= ar.grplas.thresh)) = 2;
 
            try
                arFit(true)
@@ -68,8 +77,8 @@ for i = 1:length(linv)
            end
 
            if j == 1
-               if sum(abs(ps(j,jks)) <= ar.L1thresh) == 0
-                    ar.L1lam0chi2s = chi2s_unpen(j);
+               if sum(abs(ps(j,jks)) <= ar.grplas.thresh) == 0
+                    ar.grplas.lam0chi2s = chi2s_unpen(j);
                end
                break
            end
@@ -81,6 +90,6 @@ end
 
 arWaitbar(-1);
 
-ar.L1jks = jks;
-ar.L1ps_unpen = ps_unpen;
-ar.L1chi2s_unpen = chi2s_unpen;
+ar.grplas.jks = jks;
+ar.grplas.ps_unpen = ps_unpen;
+ar.grplas.chi2s_unpen = chi2s_unpen;

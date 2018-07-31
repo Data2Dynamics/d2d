@@ -1,3 +1,5 @@
+%% DEPRECATED
+
 % L1 scan
 % jks       relative parameters to be investigated by L1 regularization
 % linv      width, i.e. inverse slope of L1 penalty (Inf = no penalty; small values = large penalty)

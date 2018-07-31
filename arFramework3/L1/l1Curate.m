@@ -1,3 +1,4 @@
+%% DEPRECATED
 % L1 curation
 % Remove linearly dependent parameters
 % jks        all L1 parameters
