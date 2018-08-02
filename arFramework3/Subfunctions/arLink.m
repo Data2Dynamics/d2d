@@ -557,6 +557,7 @@ for m = 1:length(ar.model)
                 %fystd_regexp= regexp(ar.model(m).data(d).fystd,'sd_[a-zA-Z_0-9]+','match');
                 %qerr =  ismember(ar.pLabel,[fystd_regexp{:}]); %R2013a compatible
                 qerr = ismember(ar.pLabel, ar.model(m).data(d).pystd);
+                qerr = union(qerr,ismember(ar.pLabel, arSubs(arSym(ar.model(m).data(d).pystd),arSym(ar.model(m).data(d).pold),arSym(ar.model(m).data(d).fp))));
                 ar.qError(qerr) = 1;
             end
         end

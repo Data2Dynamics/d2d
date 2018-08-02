@@ -39,7 +39,7 @@ try
         s = reshape(s,size(str)); % required e.g. for arSym(ones(0,10))
     else
         if ischar(str)
-            s = arChar2Sym(str);
+            s = arSym(str);
         elseif iscell(str)
 %             try
 %                 try

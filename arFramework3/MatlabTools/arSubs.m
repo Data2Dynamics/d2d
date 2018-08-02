@@ -1,6 +1,12 @@
 % better subs
 
 function out = arSubs(in, old, new, matlab_version)
+if ischar(old)
+    error('Variable ''old'' should be symbolic.');
+end
+if ischar(new)
+    error('Variable ''new'' should be symbolic.');
+end
 
 if(nargin<4)
     matVer = ver('MATLAB');

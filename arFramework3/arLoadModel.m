@@ -765,16 +765,20 @@ ar.model(m).px = union(ar.model(m).px, ar.model(m).pz); %R2013a compatible
 ar.model(m).p = union(ar.model(m).p, ar.model(m).pz); %R2013a compatible
 
 
-if(strcmp(C{1},'OBSERVABLES'))
-    
-    % OBSERVABLES
-    ar.model(m).y = {};
-    ar.model(m).yNames = {};
-    ar.model(m).yUnits = {};
-    ar.model(m).normalize = [];
-    ar.model(m).logfitting = [];
-    ar.model(m).logplotting = [];
-    ar.model(m).fy = {};
+% OBSERVABLES
+% The following initialization should be done in any case. Otherwise
+% problems occur if a model without obeservables is followed by a model
+% with observables.
+ar.model(m).y = {};
+ar.model(m).yNames = {};
+ar.model(m).yUnits = {};
+ar.model(m).normalize = [];
+ar.model(m).logfitting = [];
+ar.model(m).logplotting = [];
+ar.model(m).fy = {};
+ar.model(m).fystd = {};
+
+if(strcmp(C{1},'OBSERVABLES'))    
     [C, fid] = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
     while(~strcmp(C{1},'ERRORS'))
         if ( strcmp( C{1}, 'CONDITIONS' ) || strcmp( C{1}, 'SUBSTITUTIONS' ) )

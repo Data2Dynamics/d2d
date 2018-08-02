@@ -143,37 +143,41 @@ end
 % Check, wether data is the same:
 different = false;
 for m=1:length(ar.model)
-    if(length(ar.model(m).data) ~= length(arIn.model(m).data))
-        fprintf('length(ar.model(m).data): %i\nlength(arIn.model(m).data): %i\n', length(ar.model(m).data), length(arIn.model(m).data));
-        
-        onlyAr = setdiff({ar.model(m).data.name},{arIn.model(m).data.name});
-        onlyArIn = setdiff({arIn.model(m).data.name},{ar.model(m).data.name});
-        
-        if ~isempty(onlyAr)
-            fprintf('data names only in the recompiled ar:\n');
-            fprintf('%s, ',onlyAr{:});
-            fprintf('\n');
+    if (~isfield(ar.model(m),'data') && ~isfield(arIn.model(m),'data'))
+        % do nothing
+    else
+        if (length(ar.model(m).data) ~= length(arIn.model(m).data))
+            fprintf('length(ar.model(m).data): %i\nlength(arIn.model(m).data): %i\n', length(ar.model(m).data), length(arIn.model(m).data));
+            
+            onlyAr = setdiff({ar.model(m).data.name},{arIn.model(m).data.name});
+            onlyArIn = setdiff({arIn.model(m).data.name},{ar.model(m).data.name});
+            
+            if ~isempty(onlyAr)
+                fprintf('data names only in the recompiled ar:\n');
+                fprintf('%s, ',onlyAr{:});
+                fprintf('\n');
+            end
+            if ~isempty(onlyArIn)
+                fprintf('data names only in the previous variable:\n');
+                fprintf('%s, ',onlyArIn{:});
+                fprintf('\n');
+            end
+            warning('Number of data structs is different for ar.model(%i)\nTherefore, data cannot be taken over!\n',m);
+            break
         end
-        if ~isempty(onlyArIn)
-            fprintf('data names only in the previous variable:\n');
-            fprintf('%s, ',onlyArIn{:});
-            fprintf('\n');
-        end
-        warning('Number of data structs is different for ar.model(%i)\nTherefore, data cannot be taken over!\n',m);
-        break
-    end
-    for d=1:length(ar.model(m).data)
-        if max(abs(ar.model(m).data(d).yExp-arIn.model(m).data(d).yExp))>1e-10
-            different = true;
-            break;
-        end
-        if max(abs(ar.model(m).data(d).yExpStd-arIn.model(m).data(d).yExpStd))>1e-10
-            different = true;
-            break;
-        end
-        if max(abs(ar.model(m).data(d).tExp-arIn.model(m).data(d).tExp))>1e-10
-            different = true;
-            break;
+        for d=1:length(ar.model(m).data)
+            if max(abs(ar.model(m).data(d).yExp-arIn.model(m).data(d).yExp))>1e-10
+                different = true;
+                break;
+            end
+            if max(abs(ar.model(m).data(d).yExpStd-arIn.model(m).data(d).yExpStd))>1e-10
+                different = true;
+                break;
+            end
+            if max(abs(ar.model(m).data(d).tExp-arIn.model(m).data(d).tExp))>1e-10
+                different = true;
+                break;
+            end
         end
     end
 end
