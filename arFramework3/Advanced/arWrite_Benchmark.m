@@ -10,11 +10,29 @@ global ar
     %% General csv sheets
     
     %General Infos
-    chi2Val = arGetMerit;
+    [~,chi2Val] = arGetMerit;
     
     model_nameStr = strsplit(pwd,'/');
+    
+    %Set Model names manually
+    if(strcmp(model_nameStr{end},"Beer_MolBiosyst2014"))
+        model_name = "Beer_MolBioSystems2014";
+    elseif(strcmp(model_nameStr{end},"TGFb_ComplexModel_WithGenes_Reduced"))
+        model_name = "Lucarelli_CellSystems2017";
+    elseif(strcmp(model_nameStr{end},"Merkle_JAK2STAT5_PCB2016"))
+        model_name = "Merkle_PCB2016";
+    elseif(strcmp(model_nameStr{end},"Reelin_PONE2017"))
+        model_name = "Hass_PONE2017";
+    elseif(strcmp(model_nameStr{end},"Schwen_InsulinMouseHepatocytes_PlosOne2014"))
+        model_name = "Schwen_PONE2014";
+    elseif(strcmp(model_nameStr{end},"Crauste_ImmuneCells_CellSystems2017"))
+        model_name = "Crauste_CellSystems2017";    
+    else
+        model_name = model_nameStr{end};
+    end
+    
     General_string = {'Model:'; ''; 'FACTS'};
-    General_string(1,2) = model_nameStr(end);
+    General_string{1,2} = model_name;
     sum_cond = 0;
     for im = 1:length(ar.model)
        sum_cond = sum_cond + length(ar.model(im).condition); 
@@ -22,12 +40,15 @@ global ar
     tmp = sprintf('The model contains %i data points %i free parameters and %i experimental conditions',ar.ndata,sum(ar.qFit==1),sum_cond);
     General_string{end+1,1} = tmp;
     General_string{end+1,1} = 'Errors are assumend as additive Gaussian errors';
-    if ar.config.fiterrors == -1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)==0)
-        General_string(end+2,1:2) = {'Chi2 value of the model is ', chi2Val};
+    if ar.config.fiterrors == -1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)==0)
+        General_string(end+2,1:2) = {'Chi2 value of the model is ', chi2Val.chi2_all};
+        General_string(end+3,1:2)={'Compartments','size'};
     else
-        General_string(end+2,1:2) = {'Likelihood value of the model is ', chi2Val};
+        General_string(end+2,1:2) = {'Likelihood value of the model is ', chi2Val.loglik_all};
+        General_string(end+1,1:2) = {'Chi2 value of the model is ', chi2Val.chi2_res + chi2Val.chi2_prior + chi2Val.chi2_constr};
+        General_string(end+2,1:2)={'Compartments','size'};
     end
-    General_string(end+3,1:2)={'Compartments','size'};
+    
     for im = 1:length(ar.model)
         for i = 1:length(ar.model(im).c)
             General_string = [General_string; {ar.model(im).c{i}, str2num(ar.model(im).pc{i})}];
@@ -43,20 +64,28 @@ global ar
         end
     end
     General_string{end,2} = splinestr;
-    General_string{end+1,1} = 'Estimated error parameters';
-    est_errors = 'no';
+    %General_string{end+1,1} = 'Estimated error parameters';
+    est_errors(1:length(ar.model(im).data)) = false;
     log_fit = 'no';
     for im = 1:length(ar.model)   
         for id = 1:length(ar.model(im).data)
-            if(sum(sum(isnan(ar.model(im).data(id).yExpStd)))>sum(sum(isnan(ar.model(im).data(id).yExp))) && sum(sum(isnan(ar.model(im).data(id).yExp)))<(length(ar.model(im).data(id).tExp)*size(ar.model(im).data(id).yExp,2)))
-               est_errors = 'yes';     
+            %if(sum(sum(isnan(ar.model(im).data(id).yExpStd)))>sum(sum(isnan(ar.model(im).data(id).yExp))) && sum(sum(isnan(ar.model(im).data(id).yExp)))<(length(ar.model(im).data(id).tExp)*size(ar.model(im).data(id).yExp,2)))
+            if(sum(isnan(ar.model(im).data(id).yExpStd) & ~isnan(ar.model(im).data(id).yExp))>0)
+                est_errors(id) = true;    
             end
             if(sum(ar.model(im).data(id).logfitting)>0)
                log_fit = 'yes'; 
             end
         end
     end
-    General_string{end,2} = est_errors;
+    if(all(est_errors==false))
+        est_error_string = 'none';
+    elseif(any(est_errors == false))
+        est_error_string = 'mix of fixed and estimated';
+    elseif(all(est_errors==true))
+        est_error_string = 'all';
+    end
+    %General_string{end,2} = est_error_string;
     
     if(strcmp(est_errors,'yes'))
        %General_string{end,3} = 'Check sheet Parameters_noErrorModel for values with fixed errors'; 
@@ -78,16 +107,9 @@ global ar
      % Parameter values
     General_string = {};
     General_string(1,1:6) = {'parameter','value','lower boundary','upper boundary','analysis at log-scale','estimated'};
-    est_errors = true;  
-    for im = 1:length(ar.model)
-        for id = 1:length(ar.model(im).data)
-            if(sum(sum(isnan(ar.model(im).data(id).yExpStd)))>sum(sum(isnan(ar.model(im).data(id).yExp))) && sum(sum(isnan(ar.model(im).data(id).yExp)))<(length(ar.model(im).data(id).tExp)*size(ar.model(im).data(id).yExp,2)))
-                est_errors = false;     
-            end
-        end
-    end
+    
     for i = 1:length(ar.p)
-        if(ar.qError(i) == 1 && (ar.config.fiterrors == -1 || (ar.p(i) == -1 && ar.qFit(i)~=1) || ~est_errors))
+        if(ar.qError(i) == 1 && (ar.config.fiterrors == -1 || (ar.p(i) == -1 && ar.qFit(i)~=1) || strcmp(est_error_string,'none')))
             continue;
         end
         General_string{end+1,1} = ar.pLabel{i}; 
@@ -144,18 +166,20 @@ global ar
             num(i) = length(unique(par_trafo(i,:)));
             istrafo(i) = num(i)==1 & ~strcmp(ar.model(im).condition(max_id).fp{i},ar.model(im).condition(max_id).pold{i});
         end   
-        if(length(ar.model(im).condition)==1)
-            tmp_par = ar.model(im).condition(max_id).pold(num>=1);
-        else
+        
+      %Comment out if for 1 condition models, all trafos should be printed
+%         if(length(ar.model(im).condition)==1)
+%             tmp_par = ar.model(im).condition(max_id).pold(num>=1);
+%         else
             tmp_par = ar.model(im).condition(max_id).pold(num>1);
-        end
+%         end
         %Go through differing parameter trafos (num>1)
         Conditions_string(end-length(ar.model(im).data),6:length(tmp_par)+5) = tmp_par;
-        if(length(ar.model(im).condition)==1)
-            Conditions_string(end-(length(ar.model(im).data)-1):end,6:length(tmp_par)+5) = par_trafo(num>=1,:)';
-        else
+%         if(length(ar.model(im).condition)==1)
+%             Conditions_string(end-(length(ar.model(im).data)-1):end,6:length(tmp_par)+5) = par_trafo(num>=1,:)';
+%         else
             Conditions_string(end-(length(ar.model(im).data)-1):end,6:length(tmp_par)+5) = par_trafo(num>1,:)';%strrep(strrep(par_trafo(num>1,:)','(',''),')','');
-        end
+%         end
     end
     
     %This part writes out the constants (num==1 means same parameter trafo

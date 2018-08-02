@@ -17,6 +17,10 @@
         <listOfParameters>
             <parameter id="parameter_1" value="1"></parameter>
         </listOfParameters>
+        <listOfRules>
+            <assignmentRule variable="experimental_data">        
+            </assignmentRule>
+        </listOfRules>
         <listOfReactions>  
             <reaction id="reaction_1" reversible="false">
                 <kineticLaw>
@@ -44,5 +48,11 @@
                 </kineticLaw>
             </reaction>
         </listOfReactions>
+        <listOfEvents>
+            <event id="event_1" name="event_1">
+                <trigger>
+                </trigger>
+            </event>
+        </listOfEvents>
     </model>
 </sbml>

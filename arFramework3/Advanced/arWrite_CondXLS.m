@@ -22,14 +22,20 @@ for im = imodel
         %tmp_C = NaN(length(ar.model(im).data(id).tExp),length(tmp_par));
 
         for iy = 1:length(ar.model(im).data(id).yNames)
-            XLS_Data = [XLS_Data, ar.model(im).data(id).yNames(iy), [ar.model(im).data(id).yNames{iy} '_std']];           
+            XLS_Data = [XLS_Data, ar.model(im).data(id).yNames(iy), [ar.model(im).data(id).yNames{iy} '_std'], [ar.model(im).data(id).yNames{iy} '_ExpError']];           
         end
         XLS_Sim = [{'time'}, ar.model(im).data(id).yNames];
-        Exp_Data = [ar.model(im).data(id).tExp ar.model(im).data(id).yExp(:,[1;1]*(1:size(ar.model(im).data(id).yExp,2)))];
-        Exp_Data(:,3:2:end) = ar.model(im).data(id).ystdExpSimu;
+        Exp_Data = [ar.model(im).data(id).tExp ar.model(im).data(id).yExp(:,[1;1;1]*(1:size(ar.model(im).data(id).yExp,2)))];
+        
+        %Prefer Exp Errors, only set model errors for empty ones
+        Exp_Data(:,3:3:end) = NaN;
+        Exp_Data(:,4:3:end) = ar.model(im).data(id).yExpStd;
+        
+        tmp_stdSimu = ar.model(im).data(id).ystdExpSimu;
+        tmp_stdSimu(~isnan(ar.model(im).data(id).yExpStd)) = NaN;
+        Exp_Data(:,3:3:end) = tmp_stdSimu;
         Sim_Data = [ar.model(im).data(id).tExp ar.model(im).data(id).yExpSimu];
 
-        %out_name = ['./Benchmark_paper/Data/' ar.model(im).name '_m' num2str(im) '_data' num2str(id) '.xlsx'];
         out_name = ['./Benchmark_paper/Data/' 'model' num2str(im) '_data' num2str(id) '.xlsx'];
 
         if(~exist('./Benchmark_paper', 'dir'))
@@ -45,11 +51,15 @@ for im = imodel
         xlwrite(out_name,XLS_Sim,'Simulation');
         xlwrite(out_name,Sim_Data,'Simulation','A2');
         
-        %Prepare for simu without error model, copy estimated uncertainties
+%         %Prepare for simu without error model, copy estimated uncertainties
         ar.model(im).data(id).yExpStd_cp = ar.model(im).data(id).yExpStd;
         ar.model(im).data(id).yExpStd(isnan(ar.model(im).data(id).yExpStd)) = ar.model(im).data(id).ystdExpSimu(isnan(ar.model(im).data(id).yExpStd));
     end
-end   
+end 
+
+%Don't do fitting without error model, and separate sheets for pars/simulations
+return;
+
     p_backup = ar.p;
     %Do simulations without error model
     bkp_errorPars = ar.qFit(~cellfun(@isempty,strfind(ar.pLabel,'sd_')));
@@ -67,6 +77,7 @@ end
     Chi2_string = {'Chi2 without Error model',chi2Val};    
     xlwrite(['./Benchmark_paper/General_info.xlsx'],Chi2_string,'General Info','A8:B8');
     
+%     return;
     % Write parameter values to the general info file
     General_string(1,1:6) = {'parameter','value','lower boundary','upper boundary','analysis at log-scale','estimated'};    
     
