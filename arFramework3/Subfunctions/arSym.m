@@ -11,25 +11,17 @@
 %   starting from R2018a.
 
 
-% The performance of verLessThan compared to version.m was compared using
-% the following commands: [Result = alost the same speed]
-% tic
-% for i=1:1000
-%     tmp = verLessThan('matlab','9.4');
-% end
-% toc
-%
-% tic
-% for i=1:1000
-%     v = version;
-%     tmp = str2num(v(1:3))<9.4;
-% end
-% toc
 
 function s = arSym(str)
 
+persistent ver % checking the version every time is extremely time-consuming.
+if isempty(ver)
+    ver = version;
+    ver = str2num(ver(1:3));
+end
+
 try
-    if verLessThan('matlab','9.4')
+    if ver < 9.4
         ws=warning('query','symbolic:sym:sym:DeprecateExpressions');
         warning('off','symbolic:sym:sym:DeprecateExpressions');
         s = sym(str);
@@ -39,7 +31,7 @@ try
         s = reshape(s,size(str)); % required e.g. for arSym(ones(0,10))
     else
         if ischar(str)
-            s = arSym(str);
+            s = str2sym(str);
         elseif iscell(str)
 %             try
 %                 try
