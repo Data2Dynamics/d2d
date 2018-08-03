@@ -1,13 +1,17 @@
 % export model to SBML using libSBML
 %
-% function arExportSBML(m, c, copasi, steadystate)
+% function arExportSBML_benchmark(m, d, steadystate)
 %
 % m:            model index
-% c:            condition index
-% copasi:       use amounts as states (this is the SBML standard, hence default = true)
+% d:            data index
 % steadystate:  prequilibrate condition as in ar file
+%
+%%% Differences to arExportSBML: %%%
+% Observation functions are written out via assignment rules. If the
+% observation function is log-transformed in ar, the log trafo will be
+% written into SBML as well.
 
-function arExportSBML_benchmark(m, d, copasi, steadystate)
+function arExportSBML_benchmark(m, d, steadystate)
 
 global ar
 
@@ -19,9 +23,7 @@ if(~exist([cd '/SBML' ], 'dir'))
     mkdir([cd '/SBML' ])
 end
 
-if(~exist('copasi','var'))
-    copasi = true;
-end
+copasi = true;
 
 if(~exist('data','var'))
     data = 1;
@@ -434,7 +436,7 @@ for ju = 1:length(ar.model(m).u)
     isActive = ~(str2double(ar.model(m).condition(c).fu{ju}) == 0);
     if(contains(ar.model(m).fu{ju},'spline'))
         warning('Spline functions are not supported as d2d export, yet!\n')
-       isActive = false; 
+        isActive = false; 
     end
     
     if ( isActive )
@@ -559,16 +561,14 @@ for ju = 1:length(ar.model(m).u)
         M.parameter(jp).level = 2;
         M.parameter(jp).version = 4;
         M.parameter(jp).value = initValue;
-    else
-        fprintf( 'Input %s not used in condition or is a spline. Omitted from SBML file.\n', ar.model(m).uNames{ju} );
-        if(contains(ar.model(m).fu{ju},'spline_pos'))% && exist('pp_swameye.mat','file')==2)
-            fprintf('Found spline! Proceeding with export \n')
-            %load('pp_swameye.mat')
+    elseif(contains(ar.model(m).fu{ju},'spline_pos'))      
             
             %Getting spline parameters and calculate spline in MATLAB
             nr_ts = strsplit(ar.model.fu{1},'spline_pos');
             nr_ts = strsplit(nr_ts{2},'(');
             nr_ts = str2double(nr_ts{1});
+            fprintf('Found cubic interpolation spline with %i anchors! Proceeding with export \n',nr_ts)
+            warning('The spline will be re-fitted via a MATLAB function! The result might diverge slightly from the C function implemented in D2D and thus lead to different results when loading the SBML file! \n')
             spline_split = strsplit(ar.model(m).condition(c).fu{ju}, ',');
             spline_times = NaN(1,nr_ts);
             for it = 1:length(spline_times)
@@ -684,9 +684,9 @@ for ju = 1:length(ar.model(m).u)
                 end
                 
             end
-            
+        else
+            fprintf( 'Input %s not used in condition or is a not supported spline. Omitted from SBML file.\n', ar.model(m).uNames{ju} );            
         end
-    end
 end
 if ( numel(M.event) > 0 )
     jx = numel(M.species) + 1;
