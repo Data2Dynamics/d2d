@@ -112,7 +112,11 @@ global ar
         if(ar.qError(i) == 1 && (ar.config.fiterrors == -1 || (ar.p(i) == -1 && ar.qFit(i)~=1) || strcmp(est_error_string,'none')))
             continue;
         end
-        General_string{end+1,1} = ar.pLabel{i}; 
+        if ar.qLog10(i)
+            General_string{end+1,1} = ['log10(' ar.pLabel{i} ')']; 
+        else
+            General_string{end+1,1} = ar.pLabel{i}; 
+        end
         General_string{end,2} = ar.p(i);
         General_string{end,3} = ar.lb(i);
         General_string{end,4} = ar.ub(i);
