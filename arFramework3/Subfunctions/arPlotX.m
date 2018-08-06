@@ -77,8 +77,7 @@ for jm = 1:length(ar.model)
             ccount = 1;
             if(~ar.model(jm).plot(jplot).doseresponse)
                 % rows and cols
-                [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRowsX(jm);
-                
+                [ncols, nrows, nu, nx, ~, iu, ix, iz] = myColsAndRowsX(jm);                
                 if(plot_x_collected)
                     cclegendstyles = zeros(1, length(ar.model(jm).u) + length(ar.model(jm).x) + length(ar.model(jm).z));
                 else
@@ -109,7 +108,7 @@ for jm = 1:length(ar.model)
                                 g = subplot(nrows,ncols,countu);
                             end
                             ar.model(jm).plot(jplot).gu(ju) = g;
-                            arSubplotStyle(g);
+                            arSubplotStyle(g,max(12-floor(sqrt(nrows*ncols)),5));
                             ltmp = plot(g, t, u(:,ju), Clines{:}, 'LineWidth', linesize);
                             if(plot_x_collected)
                                 cclegendstyles(countu) = ltmp;
@@ -154,7 +153,7 @@ for jm = 1:length(ar.model)
                                 g = subplot(nrows,ncols,countx+nu);
                             end
                             ar.model(jm).plot(jplot).gx(jx) = g;
-                            arSubplotStyle(g);
+                            arSubplotStyle(g,max(12-floor(sqrt(nrows*ncols)),5));
                             
                             % plot ssa
                             if(isfield(ar.model(jm).condition(jc), 'xFineSSA'))
@@ -249,7 +248,8 @@ for jm = 1:length(ar.model)
                                 g = subplot(nrows,ncols,countz+nu+nx);
                             end
                             ar.model(jm).plot(jplot).gz(jz) = g;
-                            arSubplotStyle(g);
+                            arSubplotStyle(g,max(12-floor(sqrt(nrows*ncols)),5));
+
                             
                             % plot ssa
                             if(isfield(ar.model(jm).condition(jc), 'zFineSSA'))
@@ -387,7 +387,7 @@ for jm = 1:length(ar.model)
                                     g = subplot(nrows,ncols,countu);
                                 end
                                 ar.model(jm).plot(jplot).gu(ju) = g;
-                                arSubplotStyle(g);
+                                arSubplotStyle(g,max(12-floor(sqrt(nrows*ncols)),5));
                                 ltmp = plot(g, t, u, Clines{:}, 'LineWidth', linesize);
                                 if(plot_x_collected)
                                     cclegendstyles(countu) = ltmp;
@@ -446,7 +446,7 @@ for jm = 1:length(ar.model)
                                     g = subplot(nrows,ncols,countx+nu);
                                 end
                                 ar.model(jm).plot(jplot).gx(jx) = g;
-                                arSubplotStyle(g);
+                                arSubplotStyle(g,max(12-floor(sqrt(nrows*ncols)),5));
                                 ltmp = plot(g, t, x, Clines{:}, 'LineWidth', linesize);
                                 if(plot_x_collected)
                                     cclegendstyles(countu+countx) = ltmp;
@@ -505,7 +505,7 @@ for jm = 1:length(ar.model)
                                     g = subplot(nrows,ncols,countz+nu+nx);
                                 end
                                 ar.model(jm).plot(jplot).gz(jz) = g;
-                                arSubplotStyle(g);
+                                arSubplotStyle(g,max(12-floor(sqrt(nrows*ncols)),5));
                                 ltmp = plot(g, t, z, Clines{:}, 'LineWidth', linesize);
                                 if(plot_x_collected)
                                     cclegendstyles(countu+countx+countz) = ltmp;
