@@ -758,11 +758,11 @@ if length(ar.model(m).sym.x)<100 && length(ar.model(m).p)<500
     tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
     ar.model(m).nnz = arnansum(arnansum(logical(tmpzeros~=0))) + arnansum(arnansum(logical(tmpzeros~=0))==0);
     if(length(ar.model(m).x) * log(length(ar.model(m).x)) > ar.model(m).nnz)
-        ar.config.useSparseJac = 1;
+    elseif ( ar.config.useSparseJac == 1 )
+        ar.config.useSparseJac = 0;
     end
 else
     arFprintf(2, 'Model m%i too large (%i variables, %i parameters)... skipping check of model structure\n', m, length(ar.model(m).sym.x), length(ar.model(m).p));
-    ar.config.useSparseJac = 1;
     tmpzeros = (ar.model(m).N .* ar.model(m).sym.C) * ar.model(m).sym.dfvdx;
     ar.model(m).nnz = arnansum(arnansum(logical(tmpzeros~=0))) + arnansum(arnansum(logical(tmpzeros~=0))==0);
 end
