@@ -1,16 +1,21 @@
 % export model to SBML using libSBML
 %
-% function arExportSBML(m, c, copasi, steadystate)
+% function arExportSBML_benchmark(m, d, steadystate)
 %
 % m:            model index
-% c:            condition index
-% copasi:       use amounts as states (this is the SBML standard, hence default = true)
+% d:            data index
 % steadystate:  prequilibrate condition as in ar file
+%
+%%% Differences to arExportSBML: %%%
+% Observation functions are written out via assignment rules. If the
+% observation function is log-transformed in ar, the log trafo will be
+% written into SBML as well.
 
-function arExportSBML(m, c, copasi, data, steadystate)
+function arExportSBML_benchmark(m, d, steadystate)
 
 global ar
 
+c = ar.model(m).data(d).cLink;
 % simulate once for initial values
 arSimu(0,1,0)
 
@@ -18,9 +23,7 @@ if(~exist([cd '/SBML' ], 'dir'))
     mkdir([cd '/SBML' ])
 end
 
-if(~exist('copasi','var'))
-    copasi = true;
-end
+copasi = true;
 
 if(~exist('data','var'))
     data = 1;
@@ -110,7 +113,7 @@ Crules = {};
 
 simulated_ss = 0;
 if ( steadystate )
-    if ( ~isempty( ar.model(m).condition(c).ssLink ) )
+    if (isfield(ar.model(m).condition(c),'ssLink') && ~isempty( ar.model(m).condition(c).ssLink ) )
         warning( 'Using simulated steady state values as initial condition (non-parametric)' );
         x_ss = ar.model(m).ss_condition(ar.model(m).condition(c).ssLink).xFineSimu(end,:);
         simulated_ss = 1;
@@ -129,7 +132,7 @@ for jx = 1:length(ar.model(m).x)
     end
     M.species(jx).id = ar.model(m).x{jx};
     M.species(jx).speciesType = '';
-    if(~isempty(ar.model(m).cLink))
+    if(length(ar.model(m).cLink)>=jx && ~isempty(ar.model(m).cLink(jx)) && ar.model(m).cLink(jx)~=0)
         M.species(jx).compartment = ar.model(m).c{ar.model(m).cLink(jx)};
     else
         M.species(jx).compartment = 'default';
@@ -179,21 +182,49 @@ for jx = 1:length(ar.model(m).x)
 end
 
 %% parameters
-for jp = 1:length(ar.model(m).condition(c).p)
-    M.parameter(jp).typecode = 'SBML_PARAMETER';
-    M.parameter(jp).metaid = '';
-    M.parameter(jp).notes = '';
-    M.parameter(jp).annotation = '';
-    M.parameter(jp).sboTerm = -1;
-    M.parameter(jp).name = '';
-    M.parameter(jp).id = ar.model(m).condition(c).p{jp};
-    M.parameter(jp).units = '';
-    M.parameter(jp).constant = 1;
-    M.parameter(jp).isSetValue = 1;
-    M.parameter(jp).level = 2;
-    M.parameter(jp).version = 4;
+% for jp = 1:length(ar.model(m).condition(c).p)
+%     M.parameter(jp).typecode = 'SBML_PARAMETER';
+%     M.parameter(jp).metaid = '';
+%     M.parameter(jp).notes = '';
+%     M.parameter(jp).annotation = '';
+%     M.parameter(jp).sboTerm = -1;
+%     M.parameter(jp).name = '';
+%     M.parameter(jp).id = ar.model(m).condition(c).p{jp};
+%     M.parameter(jp).units = '';
+%     M.parameter(jp).constant = 1;
+%     M.parameter(jp).isSetValue = 1;
+%     M.parameter(jp).level = 2;
+%     M.parameter(jp).version = 4;
+%     
+%     qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp}); %R2013a compatible
+%     if(sum(qp)==1)
+%         pvalue = ar.p(qp);
+%         if(ar.qLog10(qp) == 1)
+%             pvalue = 10^pvalue;
+%         end
+%     else
+%         pvalue = 1;
+%     end
+%     M.parameter(jp).value = pvalue;
+% end
+
+for id = 1:length(ar.model(m).data(d).p)
+    %id_tmp = id+length(ar.model(m).condition(c).p);
+    id_tmp = id;
+    M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
+    M.parameter(id_tmp).metaid = '';
+    M.parameter(id_tmp).notes = '';
+    M.parameter(id_tmp).annotation = '';
+    M.parameter(id_tmp).sboTerm = -1;
+    M.parameter(id_tmp).name = '';
+    M.parameter(id_tmp).id = ar.model(m).data(d).p{id};
+    M.parameter(id_tmp).units = '';
+    M.parameter(id_tmp).constant = 1;
+    M.parameter(id_tmp).isSetValue = 1;
+    M.parameter(id_tmp).level = 2;
+    M.parameter(id_tmp).version = 4;
     
-    qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp}); %R2013a compatible
+    qp = ismember(ar.pLabel, ar.model(m).data(d).p{id}); %R2013a compatible
     if(sum(qp)==1)
         pvalue = ar.p(qp);
         if(ar.qLog10(qp) == 1)
@@ -202,7 +233,24 @@ for jp = 1:length(ar.model(m).condition(c).p)
     else
         pvalue = 1;
     end
-    M.parameter(jp).value = pvalue;
+    M.parameter(id_tmp).value = pvalue;
+end
+
+for iY = 1:length(ar.model(m).data(d).y)
+    id_tmp = length(M.parameter)+1;
+    M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
+    M.parameter(id_tmp).metaid = '';
+    M.parameter(id_tmp).notes = '';
+    M.parameter(id_tmp).annotation = '';
+    M.parameter(id_tmp).sboTerm = -1;
+    M.parameter(id_tmp).name = '';
+    M.parameter(id_tmp).id = ar.model(m).data(d).y{iY};
+    M.parameter(id_tmp).units = '';
+    M.parameter(id_tmp).constant = 0;
+    M.parameter(id_tmp).isSetValue = 1;
+    M.parameter(id_tmp).level = 2;
+    M.parameter(id_tmp).version = 4;    
+    M.parameter(id_tmp).value = 0;
 end
 
 %% rules
@@ -237,7 +285,7 @@ for jv = 1:length(ar.model(m).fv)
         M.reaction(vcount).notes = '';
         M.reaction(vcount).annotation = '';
         M.reaction(vcount).sboTerm = -1;
-        if(isfield(ar.model(m),'v') && ~isempty(ar.model(m).v))
+        if(isfield(ar.model(m),'v') && length(ar.model(m).v)>=jv && ~isempty(ar.model(m).v))
             M.reaction(vcount).name = ar.model(m).v{jv};
         else
             M.reaction(vcount).name = '';
@@ -277,7 +325,7 @@ for jv = 1:length(ar.model(m).fv)
             M.reaction(vcount).reactant(scount).level = 2;
             M.reaction(vcount).reactant(scount).version = 4;
             scount = scount + 1;
-            if(~isempty(scomp) && scomp~=ar.model.cLink(jsource))
+            if(~isempty(scomp) && scomp~=ar.model(m).cLink(jsource))
                 error('influx from different compartments in reaction %i', jv);
             end
             if(~isempty(ar.model(m).cLink))
@@ -303,7 +351,7 @@ for jv = 1:length(ar.model(m).fv)
             M.reaction(vcount).product(scount).level = 2;
             M.reaction(vcount).product(scount).version = 4;
             scount = scount + 1;
-            if(~isempty(tcomp) && tcomp~=ar.model.cLink(jsource))
+            if(~isempty(tcomp) && tcomp~=ar.model(m).cLink(jsource))
                 error('efflux to different compartments in reaction %i', jv);
             end
             if(~isempty(ar.model(m).cLink))
@@ -388,7 +436,7 @@ for ju = 1:length(ar.model(m).u)
     isActive = ~(str2double(ar.model(m).condition(c).fu{ju}) == 0);
     if(contains(ar.model(m).fu{ju},'spline'))
         warning('Spline functions are not supported as d2d export, yet!\n')
-       isActive = false; 
+        isActive = false; 
     end
     
     if ( isActive )
@@ -408,6 +456,7 @@ for ju = 1:length(ar.model(m).u)
             % replace functions first
             fu = replaceFunctions( fu, ar.config.specialFunc, 0 );
             % replace heavisides and log their positions
+            fu = subs(sym(strrep(fu, 'heaviside', '_potato_')), sym('_potato_'), 'heaviside');
             [fu, args] = replaceFunctions( fu, heavisideReplacement, 0 );
 
             % Determine event triggers in here (to make sure SBML resets the solver)
@@ -512,9 +561,132 @@ for ju = 1:length(ar.model(m).u)
         M.parameter(jp).level = 2;
         M.parameter(jp).version = 4;
         M.parameter(jp).value = initValue;
-    else
-        fprintf( 'Input %s not used in condition. Omitted from SBML file.\n', ar.model(m).uNames{ju} );
-    end
+    elseif(contains(ar.model(m).fu{ju},'spline_pos'))      
+            
+            %Getting spline parameters and calculate spline in MATLAB
+            nr_ts = strsplit(ar.model.fu{1},'spline_pos');
+            nr_ts = strsplit(nr_ts{2},'(');
+            nr_ts = str2double(nr_ts{1});
+            fprintf('Found cubic interpolation spline with %i anchors! Proceeding with export \n',nr_ts)
+            warning('The spline will be re-fitted via a MATLAB function! The result might diverge slightly from the C function implemented in D2D and thus lead to different results when loading the SBML file! \n')
+            spline_split = strsplit(ar.model(m).condition(c).fu{ju}, ',');
+            spline_times = NaN(1,nr_ts);
+            for it = 1:length(spline_times)
+                spline_times(it) = str2double(spline_split{it*2});
+            end
+            par_spline = NaN(1,nr_ts);
+            nr_spline = 1;
+            for ipu = find(ismember(ar.pLabel,ar.model(m).data(d).pu))
+                if ar.qLog10(ipu)
+                    par_spline(nr_spline) = 10.^(ar.p(ipu));
+                else
+                    par_spline(nr_spline) = ar.p(ipu);
+                end
+                nr_spline = nr_spline + 1;
+            end
+            par_spline = log(par_spline);           
+            pp = csape(spline_times,par_spline,'complete'); %MATLAB solution, nearly as C
+            
+            %pp.coefs %Coefficient matrix Anchor * nPars  f(x)=a(x?x1)^3+b(x?x1)^2+c(x?x1)+d?.
+            %spline_timePoints = pp.breaks; %Anchor points
+            
+            %Define spline parameters
+            for js = 1:(size(pp.coefs,2)+2)
+                isConstant = 0;    
+
+                % generate new parameter for each input species
+                jp = length(M.parameter)+1;
+                M.parameter(jp).typecode = 'SBML_PARAMETER';
+                M.parameter(jp).metaid = '';
+                M.parameter(jp).notes = '';
+                M.parameter(jp).annotation = '';
+                M.parameter(jp).sboTerm = -1;
+                M.parameter(jp).name = '';
+                if(js == 1)
+                    M.parameter(jp).id = ar.model(m).u{ju};
+                elseif(js == 2)
+                    M.parameter(jp).id = 'spline_t_0';
+                else
+                    M.parameter(jp).id = char(62+js);
+                end
+                M.parameter(jp).units = '';
+                M.parameter(jp).constant = isConstant;
+                M.parameter(jp).isSetValue = 1;
+                
+                M.parameter(jp).level = 2;
+                M.parameter(jp).version = 4;
+                if(js == 1)
+                    M.parameter(jp).value = ar.model(m).condition(c).uFineSimu(1,ju);
+                else
+                    M.parameter(jp).value = 0;
+                end
+            end
+            
+            ixrule = length(M.rule) + 1;% index of current rule
+            M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
+            M.rule(ixrule).metaid = '';
+            M.rule(ixrule).notes = '';
+            M.rule(ixrule).annotation = '';
+            M.rule(ixrule).sboTerm = -1;
+            M.rule(ixrule).formula = 'exp(A * (time-spline_t_0)^3 + B * (time-spline_t_0)^2 + C * (time-spline_t_0) + D)';
+            M.rule(ixrule).variable = ar.model(m).u{ju};
+            M.rule(ixrule).species = '';
+            M.rule(ixrule).compartment = '';
+            M.rule(ixrule).name = '';
+            M.rule(ixrule).units = '';
+            M.rule(ixrule).level = 2;
+            M.rule(ixrule).version = 4;
+            
+            for jh = 1 : (numel(spline_times)-1)
+                %event
+                ixevent = length(M.event) +1;% index of current event
+                M.event(ixevent).typecode =  'SBML_EVENT';
+                M.event(ixevent).metaid = '';
+                M.event(ixevent).notes = '';
+                M.event(ixevent).annotation = '';
+                M.event(ixevent).sboTerm = -1;
+                M.event(ixevent).name = sprintf('t_%i_event', spline_times(jh));
+                M.event(ixevent).id = sprintf('t_%i_event', spline_times(jh));
+                M.event(ixevent).useValuesFromTriggerTime = 1;
+                M.event(ixevent).level = 2;
+                M.event(ixevent).version = 4;
+                M.event(ixevent).delay = F.event(1).delay;
+                
+                % construct event trigger
+                % parts = strsplit(fu,{' ',',',')'});
+                M.event(ixevent).trigger.typecode =  'SBML_TRIGGER';
+                M.event(ixevent).trigger.metaid =  '';
+                M.event(ixevent).trigger.notes =  '';
+                M.event(ixevent).trigger.annotation =  '';
+                M.event(ixevent).trigger.sboTerm =  -1;
+                %M.event(ixevent).trigger.math = sprintf('time gt(%s)',num2str(spline_times(jh)));
+                M.event(ixevent).trigger.math = sprintf('gt(time,%i)',spline_times(jh));
+                M.event(ixevent).trigger.level =  2;
+                M.event(ixevent).trigger.version =  4;
+                
+                %Assign parameters to spline window
+                for js = 1:(size(pp.coefs,2)+1)
+                    M.event(ixevent).eventAssignment(js).typecode = 'SBML_EVENT_ASSIGNMENT';
+                    M.event(ixevent).eventAssignment(js).metaid = '';
+                    M.event(ixevent).eventAssignment(js).notes = '';
+                    M.event(ixevent).eventAssignment(js).annotation = '';
+                    M.event(ixevent).eventAssignment(js).sboTerm = -1;
+                    if(js == 1)
+                        M.event(ixevent).eventAssignment(js).variable = 'spline_t_0';                   
+                        M.event(ixevent).eventAssignment(js).math = mat2str(pp.breaks(jh)); 
+                    else
+                        M.event(ixevent).eventAssignment(js).variable = char(63+js);                   
+                        M.event(ixevent).eventAssignment(js).math = mat2str(pp.coefs(jh,js-1)); 
+                    end
+                    
+                    M.event(ixevent).eventAssignment(js).level = 2;
+                    M.event(ixevent).eventAssignment(js).version = 4;
+                end
+                
+            end
+        else
+            fprintf( 'Input %s not used in condition or is a not supported spline. Omitted from SBML file.\n', ar.model(m).uNames{ju} );            
+        end
 end
 if ( numel(M.event) > 0 )
     jx = numel(M.species) + 1;
@@ -551,6 +723,36 @@ elseif(strcmp(ar.model(m).tUnits{2},'s') || strcmp(ar.model(m).tUnits{2},'sec'))
     M.unitDefinition(1).unit(1).multiplier = 1;
 end
 
+
+%% Observables as assignment rules
+
+for id = 1:length(ar.model(m).data(d).fy)
+    ixrule = length(M.rule) + 1;% index of current rule
+    M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
+    M.rule(ixrule).metaid = '';
+    M.rule(ixrule).notes = '';
+    M.rule(ixrule).annotation = '';
+    M.rule(ixrule).sboTerm = -1;
+    rule_tmp = ar.model(m).data(d).fy{id};
+    if(~isempty(ar.model(m).z))       
+        rule_tmp = subs(rule_tmp,ar.model(m).z,ar.model(m).fz');
+    end
+    rule_tmp = subs(rule_tmp,ar.model(m).data(d).pold,ar.model(m).data(d).fp');
+    
+    rule_tmp = char(rule_tmp);
+    if(ar.model(m).data(d).logfitting(id)==1)
+        rule_tmp = ['log10(' rule_tmp ')'];
+    end
+    M.rule(ixrule).formula = rule_tmp;
+    M.rule(ixrule).variable = ar.model(m).data(d).y{id};
+    M.rule(ixrule).species = '';
+    M.rule(ixrule).compartment = '';
+    M.rule(ixrule).name = '';
+    M.rule(ixrule).units = '';
+    M.rule(ixrule).level = 2;
+    M.rule(ixrule).version = 4;
+end
+
 arWaitbar(-1);
 
 [a,b] = isSBML_Model(M);
@@ -565,7 +767,7 @@ if(a == 1)
     if(~exist('./Benchmark_paper/SBML', 'dir'))
         mkdir('./Benchmark_paper/SBML')
     end
-    OutputSBML(M, ['Benchmark_paper/SBML/' ar.model(m).name '_data_' num2str(data) '_l2v4.xml']);
+    OutputSBML(M, ['Benchmark_paper/SBML/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
 else
     error('%s', b);
 end

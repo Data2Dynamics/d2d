@@ -3,7 +3,7 @@
 % linv      width, i.e. inverse slope of L1 penalty (Inf = no penalty; small values = large penalty)
 % gradient  use a small gradient on L1 penalty ([-1 0 1]; default = 0)
 
-function l1Scan(jks, linv, gradient, lks, OptimizerSteps)
+function l1Seq(jks, linv, gradient, lks,sorting)
 
 global ar
 
@@ -30,10 +30,6 @@ if(~exist('jks','var') || isempty(jks))
     end
 end
 
-if (exist('linv','var') && ~isempty(linv))
-    ar.linv = linv;
-end
-
 if(~exist('lks','var') || isempty(lks))
 %     linv = logspace(-4,4,49);
 %     linv = [linv Inf];
@@ -41,15 +37,20 @@ if(~exist('lks','var') || isempty(lks))
     lks = 1:length(ar.linv);
 end
 
-
+if (exist('linv','var') && ~isempty(linv))
+    ar.linv = linv;
+end
 
 if(~exist('gradient','var') || isempty(gradient))
     gradient = 0;
 end
 
-if(~exist('OptimizerSteps','var') || isempty(OptimizerSteps))
-    OptimizerSteps = [1000 20];
+if(~exist('sorting','var') || isempty(sorting))
+    sorting = ones(size(lks));
+else
+    sorting = sorting * ones(size(lks));
 end
+
 
 jks = sort(jks);
 optim = ar.config.optimizer;
@@ -79,17 +80,24 @@ else
     chi2fits = ar.L1chi2fits;
 end
 
+chi2slam0 = ar.L1lam0chi2s;
+% reference value for the discrepancy to the full model
+
+
+
+
+chi2fits(:) = chi2slam0;
+
+
+
+
 counter = 0;
 
-% ps(lks(1),:) = ar.p;
-% chi2s(lks(1)) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
-% chi2fits(lks(1)) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
+
+
 for i = lks
     
-    counter = counter + 1;
-    
     ar.std(jks) = ar.linv(i) * (1 + gradient * linspace(0,.001,length(jks)));
-    
     switch ar.L1subtype(jks(1))
         case 1
             s = sprintf('L_1 scan');
@@ -104,52 +112,67 @@ for i = lks
             s = sprintf('%g x L_1 + %g x L_2 scan',1-ar.alpharange(i),ar.alpharange(i));
     end
     
-    arWaitbar(counter, length(lks), s);
-    
     if i > 1
         ar.p = ps(i-1,:);
     end
-    try
-        for o = 1:length(OptimizerSteps)
-            if OptimizerSteps(o) > 0
-                ar.config.optimizer = o;
-                ar.config.optim.MaxIter = OptimizerSteps(o);
-                arFit(true)
-            end
-        end
-    catch exception
-        fprintf('%s\n', exception.message);
-    end
+    
+    arFit(true);
+    
     ps(i,:) = ar.p;
-    chi2s(i) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
-    chi2fits(i) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
     
-%     % Backward implementation
-%     j = i;
-%     if j > 1
-%         while chi2fits(j) < max(chi2fits(1:j-1))-1e-3
-%             j = j-1;
-%             ar.std(jks) = linv(j) * (1 + gradient * linspace(0,.001,length(jks)));
-%             try
-%                 ar.config.optimizer = 1;
-%                 ar.config.optim.MaxIter = 1000;
-%                 arFit(true)
-%                 ar.config.optimizer = 2;
-%                 ar.config.optim.MaxIter = 20;
-%                 arFit(true)
-%             catch exception
-%                 fprintf('%s\n', exception.message);
-%             end
-%             ps(j,:) = ar.p;
-%             chi2s(j) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
-%             chi2fits(j) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
-%             if j == 1
-%                 break
-%             end
-%         end
-%     end
+    switch sorting(i) 
+        case 1
+            [~,p_sI] = sort(abs(ar.p(jks)-ar.mean(jks)));
+        case 2
+            p_sI = 1:length(jks);
+    end
+    % CASE 1 : the algorithm starts setting those values whose modulus
+    % is closest to the mean value (e.g. 0)
+    % CASE 2 : no sorting
     
-    if sum(abs(ps(i,jks)) > ar.L1thresh) == 0
+    for j = jks(p_sI)
+        
+        counter = counter + 1;
+        
+        if ar.qFit(j) == 2
+            % parameter already set to its mean value
+            continue;
+        end
+        
+        ar.type(jks) = 0;
+        arWaitbar(counter, length(lks)*length(jks),...
+            sprintf('Sequential %s',s));
+        
+                
+        ar.type(j) = 3;
+        
+        try
+            ar.config.optimizer = 1;
+            ar.config.optim.MaxIter = 1000;
+            arFit(true)
+            ar.config.optimizer = 2;
+            ar.config.optim.MaxIter = 20;
+            arFit(true)
+        catch exception
+            fprintf('%s\n', exception.message);
+        end
+        
+        if abs(ar.p(j)-ar.mean(j)) < ar.L1thresh
+            ar.qFit(j) = 2;
+        end
+        
+        
+        ps(i,j) = ar.p(j);
+  
+        
+    end
+        
+        
+    
+    
+
+    
+    if sum(ar.qFit(jks) == 1) == 0
         ps(i+1:end,:) = repmat(ar.p,size(ps,1)-i,1);
         chi2s(i+1:end) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
         chi2fits(i+1:end) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
@@ -159,8 +182,10 @@ end
 
 arWaitbar(-1);
 
+
+
 ar.L1ps = ps;
-ar.L1chi2s = chi2s;
+ar.L1chi2s_unpen = chi2s;
 ar.L1chi2fits = chi2fits;
 
 ar.config.optimizer = optim;

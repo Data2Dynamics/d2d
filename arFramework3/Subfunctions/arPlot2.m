@@ -227,7 +227,7 @@ for jm = 1:length(ar.model)
                                 y_red = y(its,iyC);                                
                                 y_new(:,iyC) = pchip(t_red,y_red,t);
                                 
-                                if(~isempty(ystd) && size(ystd,2) == size(y,2))
+                                if(~isempty(ystd) && sum(isnan(ystd(its,iyC)))<length(ystd(its,iyC)) && size(ystd,2) == size(y,2))
                                     ystd_red = ystd(its,iyC);
                                     ystd_new(:,iyC) = pchip(t_red,ystd_red,t);
                                 end

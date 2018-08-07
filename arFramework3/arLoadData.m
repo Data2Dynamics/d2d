@@ -663,6 +663,8 @@ if(~isfield(ar, 'pExternLabels'))
 end
 [C, fid] = arTextScan(fid, '%s %f %n %n %n %n\n',1, 'CommentStyle', ar.config.comment_string);
 while(~isempty(C{1}))
+    % Why is this info stored at the level of ar? Then it is overwritten if
+    % the same info is in another data file!
     ar.pExternLabels(end+1) = C{1};
     ar.pExtern(end+1) = C{2};
     ar.qFitExtern(end+1) = C{3};

@@ -11,6 +11,7 @@ arLoadData('experimentaldata3',1,'csv');
 arLoadData('experimentaldata4',1,'csv');
 
 arCompileAll;
+arFindInputs
 
 %% Parameter settings
 arLoadPars('ParamsChen2009')

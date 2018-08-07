@@ -46,6 +46,7 @@
 function varargout = arFit(varargin)
 
 global ar
+global fit
 
 if(nargin==0)
     qglobalar = true;
@@ -70,7 +71,7 @@ else
     end
 end
 
-global fit
+
 fit = struct;
 fit.checksums = struct;
 [~,fit.checksums.folder]=fileparts(pwd);
@@ -111,7 +112,7 @@ else
 end
 
 removeL1path = false;
-if any(ar.type==3)
+if (any(ar.type==3) || any(ar.type==5))
     if(~isfield(ar.config, 'l1trdog'))
         ar.config.l1trdog = 1;
         l1trdog(); % Modify trdog for L1 regularization
@@ -721,6 +722,7 @@ end
 if(nargout>2)
     type3_ind = ar.type == 3;
     type3_ind = type3_ind(ar.qFit==1);
+    type5_ind = (ar.type == 5 ) & (ar.qFit == 1);
     
     H = 2*ar.sres(:, ar.qFit==1)'*ar.sres(:, ar.qFit==1);
     H(type3_ind,type3_ind) = H(type3_ind,type3_ind) .* ~eye(sum(type3_ind));

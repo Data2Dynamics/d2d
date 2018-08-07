@@ -260,7 +260,44 @@ end
         elseif(arC.type(j) == 2)
             str = sprintf('uniform(%g,%g) with soft bounds', arC.lb(j), arC.ub(j));
         elseif(arC.type(j) == 3)
-            str = sprintf('L1(%g,%g)', arC.mean(j), arC.std(j));
+            switch arC.L1subtype(j)
+                case 1
+                    str = sprintf('L1(%g,%g)',arC.mean(j),ar.std(j));
+                case 2
+                    if (isfield(arC,'lnuweights') && ~isempty(arC.lnuweights))
+                        if (isfield(arC,'gamma') && ~isempty(arC.gamma)...
+                                && arC.gamma(j) > 0 )
+                            
+                            coeff = sprintf(' x %g (=|OLS|^-%g)', arC.lnuweights(j),...
+                                arC.gamma(j));
+                        elseif arC.lnuweights(j) ~= 1
+                            coeff = sprintf(' x %g', arC.lnuweights(j));
+                        else
+                            coeff = '';
+                        end
+                    else
+                        coeff = '';
+                    end
+                    str = sprintf('L1(%g,%g)%s', arC.mean(j), arC.std(j), coeff);
+                case 3
+                                       
+                    if (isfield(arC, 'expo') && ~isempty(arC.expo))
+                        expo = sprintf('%g', arC.expo(j));
+                    else
+                        expo = '1';
+                    end
+                    str = sprintf('L%s(%g,%g)', expo, arC.mean(j), arC.std(j));
+                case 4
+                    if (isfield(arC, 'alpha') && ~isempty(arC.alpha))
+                        str = sprintf('(%g x L1 + %g x L2)(%g,%g)',...
+                            1-arC.alpha(j),arC.alpha(j),arC.mean(j),arC.std(j));
+                    else
+                        str = sprintf('L1(%g,%g)',arC.mean(j),ar.std(j));
+                    end
+            end
+        elseif(arC.type(j) == 5)
+            str = sprintf('GroupLasso(%g,%g,G%d)', arC.mean(j), arC.std(j), arC.grplas.grouping(j));
+            
         end
     end
 end

@@ -139,7 +139,12 @@ function arDoSaving(ar)
 ar = arDeleteGraphicsHandles(ar);
 
 % warning off MATLAB:Figure:FigureSavedToMATFile
-save([ar.config.savepath '/workspace.mat'],'ar','-v7.3');
+w = whos('ar');
+if w.bytes>1e9;
+    save([ar.config.savepath '/workspace.mat'],'ar','-v7.3'); % can be 100x larger than -v7 (e.g. for the Chen model)
+else
+    save([ar.config.savepath '/workspace.mat'],'ar','-v7');
+end
 % warning on MATLAB:Figure:FigureSavedToMATFile
 
 fprintf('workspace saved to file %s\n', [ar.config.savepath '/workspace.mat']);

@@ -1,10 +1,16 @@
 %Calculate chi2 value without Bessel correction
 ar.config.useFitErrorCorrection = false;
-arCalcMerit  
-for i = 1:length(ar.model)
-    arWrite_Benchmark(i)
+ar.config.fiterrors = 1;
+if(contains(pwd,'Chen'))
+    arSimu(false,false,true);
+else
+    arFit
+    arCalcMerit
+end
+arWrite_Benchmark
+for i = 1:length(ar.model)   
     for j = 1:length(ar.model(i).data)
-        arExportSBML_benchmark(i,ar.model(i).data(j).cLink,1,j);       
+        arExportSBML_benchmark(i,j,1);       
     end
 end
 arWrite_CondXLS

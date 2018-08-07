@@ -8,21 +8,21 @@ COMPARTMENTS
 STATES
 
 INPUTS
-Signal_trans  C   au   conc  "isTreated*signum_nExpID * amp_trans_nExpID*(1-exp(-t/timescale_sust_nExpID))*exp(-t/(timescale_sust_nExpID+timescale_trans_nExpID))"
-Signal_sus    C   au   conc  "isTreated*signum_nExpID * amp_sust_nExpID*(1-exp(-t/(timescale_sust_nExpID+timescale_trans_nExpID)))"
+Signal_trans  C   au   conc  "isTreated*signum_TF_nExpID * amp_trans_nExpID*(1-exp(-t/timescale_sust_nExpID))*exp(-t/(timescale_sust_nExpID+timescale_trans_nExpID))"
+Signal_sus    C   au   conc  "isTreated*signum_TF_nExpID * amp_sust_nExpID*(1-exp(-t/(timescale_sust_nExpID+timescale_trans_nExpID)))"
 
 REACTIONS
 
 DERIVED
 
 OBSERVABLES
-Signal_au                   C 	au     conc   0    0   "offset_nExpID + Signal_sus + Signal_trans"
+Signal_au                   C 	au     conc   0    0   "offset_TF_nExpID + Signal_sus + Signal_trans"
         
 ERRORS
 // the following error model assumes the same error for each expriment:
-//Signal_au           "sd_Signal"
+//Signal_au           "sd_TF"
 // the following error model assumes the individual errors for each expriment:
-Signal_au           "sd_Signal_nExpID"
+Signal_au           "sd_TF_nExpID"
 
 
 CONDITIONS

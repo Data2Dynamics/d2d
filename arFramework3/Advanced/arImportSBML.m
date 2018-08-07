@@ -81,7 +81,9 @@ m = findRateRules(m);
 if(isfield(m,'event') && ~isempty(m.event))
     error('Conversion of events is not yet supported in D2D!')
 end
+csizes = NaN(size(m.compartment));
 for i=1:length(m.compartment)
+    csizes(i) = m.compartment(i).size;
     if(sum(m.compartment(i).size<1e-5)>0)
         warning('Small compartment size exist. Could be rescale the equations because of integration problems.')
     end
@@ -391,7 +393,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             end
             
             % divide rates by compartment volume
-            reaction_comp = findReactionCompartment(m,j);
+            reaction_comp = findReactionCompartment(m,j, csizes);
             reaction_comp = m.compartmentIDtoD2D( reaction_comp );
             
             if ~isempty(reaction_comp) %&& sum(strcmp(reaction_comp,strsplit(char(tmpstr),'*')))==1
@@ -626,12 +628,22 @@ end
 
 % generate Setup.m
 if(~exist('Setup.m','file'))
+    fprintf('Generate a standard template for loading and compiling the model (Setup.m) ...\n')
     fid = fopen('Setup.m','w');
     fprintf(fid, 'arInit;\n');
     fprintf(fid, 'arLoadModel(''%s'');\n',new_filename);
     fprintf(fid, 'arLoadData(''%s'');\n',[new_filename '_data']);
     fprintf(fid, 'arCompileAll;\n');
+else
+    fprintf('Setup.m already available in the working directory.\n')
 end
+
+fprintf('Model- and data definition files created.\n');
+fprintf('If loading via Setup.m does not work, try to solve issues by adapting the def files by hand.\n');
+fprintf('The following issues might occur:\n')
+fprintf(' - In SBML, compartements are often used as a kind of annotation and not for considering volume factors. Then compartement (should) have the same volumes. In D2D, a reaction of compounds located in different compartements might cause an error.\n');
+fprintf(' - Non-standard function, e.g. something like "stepfunction()", which are not available in C have to be replaced or implemented properly.\n')
+fprintf(' - The time axis (termed "PREDICTOR") might not assigned properly. Replace the respective variables properly.\n')
 
 % assign returns
 if nargout > 0
@@ -942,7 +954,7 @@ function c = compartmentIDToName( m, reaction_comp )
         end
     end
 
-function c = findReactionCompartment(m, j)
+function c = findReactionCompartment(m, j, csizes)
 % find compartment of reacting species to convert from SBML rate convention
 % (particle flux) to d2d (concentration flux).
 
@@ -961,16 +973,23 @@ end
 % check educt and product compartements for consistency
 if ~isempty(comp_r)
     if length(unique(comp_r))~=1
-        error('more than one educt compartment');
+        if length(unique(csizes))==1
+            warning('Reactants originate from more than one compartment. Such a model definition is in general not reasonable but does not matter in this case because all compartments have the same size.');
+        else
+            error('Reactants originate from more than one compartment. Such a model definition is in general not reasonable.');            
+        end
     end
 end
 if ~isempty(comp_p)
     if length(unique(comp_p))~=1
-        error('more than one product compartment');
+        if length(unique(csizes))==1
+            warning('Products are in more than one compartment. Such a model definition is in general not reasonable but does not matter in this case because all compartments have the same size.');
+        else
+            error('Products are in more than one compartment. Such a model definition is not reasonable.');
+        end
     end
 end
 
-c = [];
 % educt and product exist. Have to divide by source volume to get D2D
 % convention.
 c = comp_r{1};
