@@ -38,10 +38,10 @@ LateEffector_obs    C   "number" "number" 0 0 "LateEffector"
 Memory_obs          C   "number" "number" 0 0 "Memory"
 
 ERRORS
-Naive_obs           "Naive_obs_std"
-EarlyEffector_obs   "EarlyEffector_obs_std"
-LateEffector_obs    "LateEffector_obs_std"
-Memory_obs          "Memory_obs_std"
+Naive_obs           "1"
+EarlyEffector_obs   "1"
+LateEffector_obs    "1"
+Memory_obs          "1"
 
 CONDITIONS
 init_Naive           "8090"
