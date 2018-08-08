@@ -1,3 +1,14 @@
+% File to export human-readable formats of a model
+% Generates a general-info file with fact sheet, parameters, raw ODEs,
+% parameter transformations (including initials) and experimental conditions
+%
+% Plus for every data entry in the struct, a file with finalized ODEs, with
+% all transformations applied, is written out, together with the initial
+% values and all observation functions and possible log transform
+%
+% For corresponding output of data and model simulations, see
+% arWrite_CondXLS
+
 function arWrite_Benchmark
 global ar
     if(~exist('./Benchmark_paper', 'dir'))
@@ -27,6 +38,8 @@ global ar
         model_name = "Schwen_PONE2014";
     elseif(strcmp(model_nameStr{end},"Crauste_ImmuneCells_CellSystems2017"))
         model_name = "Crauste_CellSystems2017";    
+    elseif(strcmp(model_nameStr{end},"Bruno_Carotines_JExpBio2016"))
+        model_name = "Bruno_JExpBio2016";
     else
         model_name = model_nameStr{end};
     end
@@ -37,7 +50,7 @@ global ar
     for im = 1:length(ar.model)
        sum_cond = sum_cond + length(ar.model(im).condition); 
     end
-    tmp = sprintf('The model contains %i data points %i free parameters and %i experimental conditions',ar.ndata,sum(ar.qFit==1),sum_cond);
+    tmp = sprintf('The model contains %i data points, %i free parameters and %i experimental conditions',ar.ndata,sum(ar.qFit==1),sum_cond);
     General_string{end+1,1} = tmp;
     General_string{end+1,1} = 'Errors are assumend as additive Gaussian errors';
     if ar.config.fiterrors == -1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)==0)
@@ -60,14 +73,14 @@ global ar
     splinestr = 'no';
     for im = 1:length(ar.model)        
         if(contains(ar.model(im).fu,'spline'))
-            splinestr = 'yes';        
+            splinestr = 'yes';
         end
     end
     General_string{end,2} = splinestr;
     %General_string{end+1,1} = 'Estimated error parameters';
     est_errors(1:length(ar.model(im).data)) = false;
     log_fit = 'no';
-    for im = 1:length(ar.model)   
+    for im = 1:length(ar.model)
         for id = 1:length(ar.model(im).data)
             %if(sum(sum(isnan(ar.model(im).data(id).yExpStd)))>sum(sum(isnan(ar.model(im).data(id).yExp))) && sum(sum(isnan(ar.model(im).data(id).yExp)))<(length(ar.model(im).data(id).tExp)*size(ar.model(im).data(id).yExp,2)))
             if(sum(isnan(ar.model(im).data(id).yExpStd) & ~isnan(ar.model(im).data(id).yExp))>0)
@@ -133,19 +146,36 @@ global ar
     % Conditions
     Conditions_string = {'Conditions'};    
     
+    
     for im = 1:length(ar.model)
-        max_fp = 1;
-        max_id = 1;
         for jc = 1:length(ar.model(im).condition)
-            if(length(ar.model(im).condition(jc).fp)>max_fp)
-               max_fp = length(ar.model(im).condition(jc).fp);
-               max_id = jc;
+            if(jc==1)
+                pold_tmp = ar.model(im).condition(jc).pold;
+                continue;
+            end
+            not_inList = ~ismember(ar.model(im).condition(jc).pold,pold_tmp);
+            if(~isempty(not_inList) && sum(not_inList)>0)
+                pold_tmp(end+1:end+sum(not_inList)) = ar.model(im).condition(jc).pold(not_inList);
+            end
+        end
+        
+        %loop over data to get condition values
+        for jd= 1:length(ar.model(im).data)
+            cond_tmp = cell(2,length(ar.model(im).data(jd).condition));
+            for jc = 1:length(ar.model(im).data(jd).condition)
+               cond_tmp{1,jc} =  ar.model(im).data(jd).condition(jc).parameter;
+               cond_tmp{2,jc} =  ar.model(im).data(jd).condition(jc).value;
+            end
+            cond_notIn = ~ismember(cond_tmp(1,:),pold_tmp);
+            if(~isempty(cond_notIn) && sum(cond_notIn)>0)
+                pold_tmp(end+1:end+sum(cond_notIn)) = cond_tmp(1,cond_notIn);
             end
         end
     
-        par_trafo = cell(max_fp,length(ar.model(im).data));
+        par_trafo = cell(length(pold_tmp),length(ar.model(im).data));
+        num_cols = 6;
         %Collect parameter trafos
-        Conditions_string(end+2,1:6) = {['Model file ' num2str(im)],'','exp condition','nTimePoints','nDataPoints','chi2 value'}; 
+        Conditions_string(end+2,1:num_cols) = {['Model file ' num2str(im)],'','exp condition','nTimePoints','nDataPoints','chi2 value'}; 
         for jd= 1:length(ar.model(im).data)
            jc = ar.model(im).data(jd).cLink;          
            Conditions_string{end+1,2} = ['Data file ' num2str(jd)];
@@ -155,11 +185,22 @@ global ar
            Conditions_string{end,6} = arnansum(ar.model(im).data(jd).chi2);
 
            %append parameter trafos in each data struct
-           par_trafo(1:length(ar.model(im).condition(jc).fp),jd) = regexprep(regexprep(ar.model(im).condition(jc).fp,'^(',''),')$','');
+           par_trafo(ismember(pold_tmp,ar.model(im).condition(jc).pold),jd) = regexprep(regexprep(ar.model(im).condition(jc).fp,'^(',''),')$','');
+           
+           %Append condition values
+           cond_tmp = cell(2,length(ar.model(im).data(jd).condition));
+            for jc = 1:length(ar.model(im).data(jd).condition)
+               cond_tmp{1,jc} =  ar.model(im).data(jd).condition(jc).parameter;
+               cond_tmp{2,jc} =  ar.model(im).data(jd).condition(jc).value;
+            end
+            [which_cond,which_pold] = ismember(cond_tmp(1,:),pold_tmp);
+            par_trafo(which_pold,jd) = cond_tmp(2,which_cond);
+            
         end
         
         %get differences in parameter trafos
-        num = [];
+        num = zeros(1,size(par_trafo,1));
+        istrafo = false(1,size(par_trafo,1));
         for i = 1:size(par_trafo,1)
             ids_empty = cellfun(@isempty,par_trafo(i,:));
             if(any(ids_empty))
@@ -168,36 +209,64 @@ global ar
                 end
             end
             num(i) = length(unique(par_trafo(i,:)));
-            istrafo(i) = num(i)==1 & ~strcmp(ar.model(im).condition(max_id).fp{i},ar.model(im).condition(max_id).pold{i});
+            istrafo(i) = num(i)==1 & ~strcmp(par_trafo{i,1},pold_tmp{i});
         end   
         
       %Comment out if for 1 condition models, all trafos should be printed
 %         if(length(ar.model(im).condition)==1)
 %             tmp_par = ar.model(im).condition(max_id).pold(num>=1);
 %         else
-            tmp_par = ar.model(im).condition(max_id).pold(num>1);
+            tmp_par = pold_tmp(num>1);
 %         end
         %Go through differing parameter trafos (num>1)
-        Conditions_string(end-length(ar.model(im).data),6:length(tmp_par)+5) = tmp_par;
+        Conditions_string(end-length(ar.model(im).data),(num_cols+1):length(tmp_par)+num_cols) = tmp_par;
 %         if(length(ar.model(im).condition)==1)
 %             Conditions_string(end-(length(ar.model(im).data)-1):end,6:length(tmp_par)+5) = par_trafo(num>=1,:)';
 %         else
-            Conditions_string(end-(length(ar.model(im).data)-1):end,6:length(tmp_par)+5) = par_trafo(num>1,:)';%strrep(strrep(par_trafo(num>1,:)','(',''),')','');
+            Conditions_string(end-(length(ar.model(im).data)-1):end,(num_cols+1):length(tmp_par)+num_cols) = par_trafo(num>1,:)';%strrep(strrep(par_trafo(num>1,:)','(',''),')','');
 %         end
+
+        if(im == 1)
+            Conditions_string_tmp = cell(1,2);
+            Conditions_string_tmp(1,1) = {'General transformations'};
+            Conditions_string_tmp(end+1,1:2) = {'Parameter','Replacement'};
+        end
+        if(sum(istrafo)>0)
+            Conditions_string_tmp(end+1:size(Conditions_string_tmp,1)+sum(istrafo),1) = pold_tmp(istrafo)';   
+            Conditions_string_tmp(size(Conditions_string_tmp,1)-sum(istrafo)+1:size(Conditions_string_tmp,1),2) = par_trafo(istrafo,1);%strrep(strrep(ar.model(im).condition(jc).fp(istrafo),'(',''),')','');        
+        end
+        for us = 1:length(ar.model(im).u)
+            Conditions_string_tmp{end+1,1} = ar.model(im).u{us};
+            Conditions_string_tmp{end,2} = ar.model(im).fu{us};
+        end
+        
     end
     
     %This part writes out the constants (num==1 means same parameter trafo
     %in every condition)
-    %Commented out for now!
+    if(size(Conditions_string_tmp,1)>2)
+        Conditions_string(end+3:size(Conditions_string,1)+size(Conditions_string_tmp,1)+2,1:2) = Conditions_string_tmp;
+    end
     
-%     Conditions_string(end+2,1) = {'General transformations'};
-%     Conditions_string(end+1,1:2) = {'Parameter','Replacement'};
-%     Conditions_string(end+1:size(Conditions_string,1)+sum(istrafo),1) = ar.model(im).condition(jc).pold(istrafo)';   
-%     Conditions_string(size(Conditions_string,1)-sum(istrafo)+1:size(Conditions_string,1),2) = ar.model(im).condition(jc).fp(istrafo);%strrep(strrep(ar.model(im).condition(jc).fp(istrafo),'(',''),')','');        
-%    
+    
     xlwrite(['./Benchmark_paper/General_info.xlsx'],Conditions_string,'Experimental conditions');
    
     
+    % Write out RAW ODEs, to see parameter trafos and dependencies
+    rawODE_string = {'ODE equations'};
+    for im = 1:length(ar.model)
+        rawODE_string{end+2,1} = ['Model ' num2str(im)];
+        tmp_ode = ar.model(im).fx;
+        for i = 1:length(ar.model(im).x)
+            rawODE_string{end+1,1} = ['d' ar.model(im).x{i} '/dt'];                
+            rawODE_string{end,2} = char(sym(tmp_ode{i}));                
+        end
+    end
+    
+    xlwrite(['./Benchmark_paper/General_info.xlsx'],rawODE_string,'Raw ODEs');   
+    
+    
+%     return;
     %% Data specific csv files
     
     %ODE equations
@@ -211,7 +280,7 @@ global ar
                 tmp_ode = ar.model(im).fx;
                 for j = 1:length(ar.model(im).u)
                     regPar = sprintf('(?<=\\W)%s(?=\\W)|^%s$|(?<=\\W)%s$|^%s(?=\\W)',ar.model(im).u{j},ar.model(im).u{j},ar.model(im).u{j},ar.model(im).u{j});
-                    tmp_ode = regexprep(tmp_ode,regPar, ar.model(im).fu{j});    
+                    tmp_ode = regexprep(tmp_ode,regPar, ['(' ar.model(im).fu{j} ')']);    
                 end
 
                 ode_string = {'ODE equations'; ''};

@@ -1,3 +1,12 @@
+% File to export human-readable formats of a model
+% For every data entry in the struct, the measurements are written out in a
+% single file, together with the model value at these time points
+% 
+% Regarding the data, experimental errors as well as the uncertainties
+% estimated via error model are stored
+%
+% For the corresponding ODE and parameter output, see arWrite_Benchmark
+
 function arWrite_CondXLS(imodel)
 global ar
 if(~exist('imodel','var') || isempty(imodel))
