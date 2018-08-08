@@ -2,11 +2,14 @@
 % restriction, e.g. if many data points are available. Then boundfactor can
 % be set to >1.
 
-function Initialize_FitTransient(boundfactor)
+function Initialize_FitTransient2(boundfactor,ms)
+global ar
 if ~exist('boundfactor','var') || isempty(boundfactor)
     boundfactor = 1;  % standard bounds, designed for experimetnal data    
 end
-global ar
+if ~exist('ms','var') || isempty(ms)
+    ms = 1:length(ar.model);  % standard bounds, designed for experimetnal data    
+end
 
 ar.fit_transient = struct;
 
@@ -19,16 +22,18 @@ ar.fit_transient.indp.timescale_sust = strmatch('timescale_sust',ar.pLabel);
 ar.fit_transient.indp.timescale_trans = strmatch('timescale_trans',ar.pLabel);
 ar.fit_transient.indp.sd = strmatch('sd_TF',ar.pLabel);
 
-ar.fit_transient.indp.all = [ar.fit_transient.indp.amp_sust,...
+ar.fit_transient.indp.all = [ar.fit_transient.indp.toffset,...
+    ar.fit_transient.indp.amp_sust,...
     ar.fit_transient.indp.amp_trans,...
     ar.fit_transient.indp.offset,...
     ar.fit_transient.indp.timescale_sust,...
     ar.fit_transient.indp.timescale_trans,...
     ar.fit_transient.indp.sd ,...
     ar.fit_transient.indp.signum];
+ar.fit_transient.indp.all = ar.fit_transient.indp.all(:)';
 
-
-if length(ar.fit_transient.indp.signum) ~= length(ar.fit_transient.indp.offset) || ...
+if length(ar.fit_transient.indp.signum) ~= length(ar.fit_transient.indp.toffset) || ...
+   length(ar.fit_transient.indp.signum) ~= length(ar.fit_transient.indp.offset) || ...
    length(ar.fit_transient.indp.signum) ~= length(ar.fit_transient.indp.amp_sust) || ...
    length(ar.fit_transient.indp.signum) ~= length(ar.fit_transient.indp.amp_trans) || ...
    length(ar.fit_transient.indp.signum) ~= length(ar.fit_transient.indp.timescale_sust) || ...
@@ -50,11 +55,11 @@ for i=1:length(pnames)
     ar.fit_transient.(pnames{i}).yexp = [];
     ar.fit_transient.(pnames{i}).ystd = [];
 end
-for m=1:length(ar.model)
+for m=ms
     for d=1:length(ar.model(m).data)
         vars = symvar(arSym(ar.model(m).data(d).fp));
         if length(ar.model(m).data(d).y)>1
-            error('Not yet implemented.')
+            error('Model%i, data%i has multiple observations which is not yet implemented.',m,d)
         end
         
         [~,found] = intersect(psym,vars);
@@ -64,23 +69,23 @@ for m=1:length(ar.model)
             ar.fit_transient.(pnames{found(i)}).t    = [ar.fit_transient.(pnames{found(i)}).t;ar.model(m).data(d).tExp];
             ar.fit_transient.(pnames{found(i)}).yexp = [ar.fit_transient.(pnames{found(i)}).yexp;ar.model(m).data(d).yExp];
             ar.fit_transient.(pnames{found(i)}).ystd = [ar.fit_transient.(pnames{found(i)}).ystd;ar.model(m).data(d).yExpStd];
+            ar.fit_transient.(pnames{found(i)}).ind_arp = found;
         end
     end
 end
-
-
 
 % signums are constants and non-log:
 ar.qFit(ar.fit_transient.indp.signum) = 2;
 ar.qLog10(ar.fit_transient.indp.signum) = 0;
 
-ar.qLog10(ar.fit_transient.indp.amp_sust) = 0;
-ar.qLog10(ar.fit_transient.indp.amp_trans) = 0;
+ar.qLog10(ar.fit_transient.indp.toffset) = 0;
+ar.qLog10(ar.fit_transient.indp.amp_sust) = 1;
+ar.qLog10(ar.fit_transient.indp.amp_trans) = 1;
 ar.qLog10(ar.fit_transient.indp.offset) = 0;  % often, negative offsets required
 ar.qLog10(ar.fit_transient.indp.sd) = 1;
 
 
-for m=1:length(ar.model)
+for m=ms
     for d=1:length(ar.model(m).data)
         if sum(ar.model(m).data(d).logfitting~=0)>0
             error('The transient function is design for non-log fitting. If log-trans required, do it before/do it by hand.')       
@@ -91,21 +96,67 @@ for m=1:length(ar.model)
 end
 
 
-[ar.fit_transient.bounds,ar.fit_transient.boundsNeg] = DefaultLbUbTransient;
+[ar.fit_transient.bounds,ar.fit_transient.boundsNeg] = DefaultLbUbTransient2;
 
-
-ind = ar.fit_transient.indp.all;
+ind = setdiff(ar.fit_transient.indp.all,ar.fit_transient.indp.signum);
 for i=1:length(ind)
     if ar.qLog10(ind(i))==1
         ar.fit_transient.bounds.lb(ind(i)) = ar.fit_transient.bounds.lb(ind(i))-log10(boundfactor);
         ar.fit_transient.bounds.ub(ind(i)) = ar.fit_transient.bounds.ub(ind(i))+log10(boundfactor);
         ar.fit_transient.boundsNeg.lb(ind(i)) = ar.fit_transient.boundsNeg.lb(ind(i))-log10(boundfactor);
         ar.fit_transient.boundsNeg.ub(ind(i)) = ar.fit_transient.boundsNeg.ub(ind(i))+log10(boundfactor);
-    else
-        ar.fit_transient.bounds.lb(ind(i)) = ar.fit_transient.bounds.lb(ind(i))/boundfactor;
-        ar.fit_transient.bounds.ub(ind(i)) = ar.fit_transient.bounds.ub(ind(i))*boundfactor;
-        ar.fit_transient.boundsNeg.lb(ind(i)) = ar.fit_transient.boundsNeg.lb(ind(i))/boundfactor;
-        ar.fit_transient.boundsNeg.ub(ind(i)) = ar.fit_transient.boundsNeg.ub(ind(i))*boundfactor;
+    
+    else % nonlog
+        if ar.fit_transient.bounds.lb(ind(i))>0
+            ar.fit_transient.bounds.lb(ind(i)) = ar.fit_transient.bounds.lb(ind(i))/boundfactor;
+        else
+            ar.fit_transient.bounds.lb(ind(i)) = ar.fit_transient.bounds.lb(ind(i))*boundfactor;
+        end
+        if ar.fit_transient.bounds.ub(ind(i))>0
+            ar.fit_transient.bounds.ub(ind(i)) = ar.fit_transient.bounds.ub(ind(i))*boundfactor;
+        else
+            ar.fit_transient.bounds.ub(ind(i)) = ar.fit_transient.bounds.ub(ind(i))/boundfactor;
+        end
+        
+        if ar.fit_transient.boundsNeg.lb(ind(i))>0
+            ar.fit_transient.boundsNeg.lb(ind(i)) = ar.fit_transient.boundsNeg.lb(ind(i))/boundfactor;
+        else
+            ar.fit_transient.boundsNeg.lb(ind(i)) = ar.fit_transient.boundsNeg.lb(ind(i))*boundfactor;
+        end
+        if ar.fit_transient.boundsNeg.ub(ind(i))>0
+            ar.fit_transient.boundsNeg.ub(ind(i)) = ar.fit_transient.boundsNeg.ub(ind(i))*boundfactor;
+        else
+            ar.fit_transient.boundsNeg.ub(ind(i)) = ar.fit_transient.boundsNeg.ub(ind(i))/boundfactor;
+        end            
     end
+    
+    ar.lb(ind(i)) = ar.fit_transient.bounds.lb(ind(i));  % use bounds for positive sign as default
+    ar.ub(ind(i)) = ar.fit_transient.bounds.ub(ind(i));
 end
 
+ind = ar.fit_transient.indp.offset;
+for i=1:length(ind)
+    ar.p(ind(i)) = mean([ar.fit_transient.bounds.lb(ind(i)),ar.fit_transient.bounds.ub(ind(i))]);
+end
+ind = ar.fit_transient.indp.timescale_sust;
+for i=1:length(ind)
+    ar.p(ind(i)) = mean([ar.fit_transient.bounds.lb(ind(i)),ar.fit_transient.bounds.ub(ind(i))]);
+end
+ind = ar.fit_transient.indp.timescale_trans;
+for i=1:length(ind)
+    ar.p(ind(i)) = mean([ar.fit_transient.bounds.lb(ind(i)),ar.fit_transient.bounds.ub(ind(i))]);
+end
+ind = ar.fit_transient.indp.amp_sust;
+for i=1:length(ind)
+    ar.p(ind(i)) = 0.5*ar.fit_transient.bounds.lb(ind(i))+0.5*ar.fit_transient.bounds.ub(ind(i));  % more towards upper bound
+end
+ind = ar.fit_transient.indp.amp_trans;
+for i=1:length(ind)
+    ar.p(ind(i)) = 0.1*ar.fit_transient.bounds.lb(ind(i))+0.9*ar.fit_transient.bounds.ub(ind(i));  % more towards upper bound
+end
+ind = ar.fit_transient.indp.sd;
+for i=1:length(ind)
+    ar.p(ind(i)) = 0.1*ar.fit_transient.bounds.lb(ind(i))+0.9*ar.fit_transient.bounds.ub(ind(i));  % more towards upper bound
+end
+
+ar.p(ar.fit_transient.indp.toffset) = 0; % 
