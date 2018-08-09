@@ -8,7 +8,7 @@ function l1Seq(jks, linv, gradient, lks,sorting)
 global ar
 
 %Check for trdog
-checksum_l1   = {'67AF8E95E14AF615DFAB379CA542FD6C','f311e0c5dd8243c8e90166b03d48f17e','6BBE213BEC28A0C59A8DEDCF65CF7649'}; % Modified trdog.m
+checksum_l1   = {'6BBE213BEC28A0C59A8DEDCF65CF7649'}; % Modified trdog.m
 trpath = which('trdog','-all');
 if sum(strcmpi(md5(trpath{1}),checksum_l1))==1
     % All good
