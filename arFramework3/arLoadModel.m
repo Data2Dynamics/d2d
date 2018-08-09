@@ -595,7 +595,12 @@ ar.model(m).qPlotV = ones(1,length(ar.model(m).fv));
 if(isempty(ar.model(m).fv))
     ar.model(m).isReactionBased = false;
     ar.model(m).fv{end+1} = '0';
+    ar.model(m).reversible(end+1) = 0;
     ar.model(m).fv_ma_reverse_pbasename{end+1} = '';
+    ar.model(m).fv_source{end+1} = {};
+    ar.model(m).fv_target{end+1} = {};
+    ar.model(m).fv_sourceCoeffs{end+1} = [];
+    ar.model(m).fv_targetCoeffs{end+1} = [];
     ar.model(m).vUnits{end+1,1} = '-';
     ar.model(m).vUnits{end,2}   = '-';
     ar.model(m).vUnits{end,3}   = '-';
