@@ -63,6 +63,7 @@ end
 
 pw = pwd;
 out = cell(1,length(nargout));
+useDir = 0;
 for i=1:length(folders)
     try
         cd(folders{i});
@@ -72,14 +73,20 @@ for i=1:length(folders)
             switch nargout
                 case 1
                     tmp = applyCore(fun,result_suffix,workspace_pattern,varargin{:});
-                    out{1}{i}.folder = folders{i};
-                    out{1}{i}.result = tmp;
+                    if ~isempty(tmp)
+                        useDir = useDir+1;
+                        out{1}{useDir}.folder = folders{i};
+                        out{1}{useDir}.result = tmp;
+                    end
                 case 2
                     [tmp1,tmp2] = applyCore(fun,result_suffix,workspace_pattern,varargin{:});
-                    out{1}{i}.folder = folders{i};
-                    out{1}{i}.result = tmp1;
-                    out{2}{i}.folder = folders{i};
-                    out{2}{i}.result = tmp2;
+                    if ~isempty(tmp1)
+                        useDir = useDir+1;
+                        out{1}{useDir}.folder = folders{i};
+                        out{1}{useDir}.result = tmp1;
+                        out{2}{useDir}.folder = folders{i};
+                        out{2}{useDir}.result = tmp2;
+                    end
                 otherwise
                     applyCore(fun,result_suffix,workspace_pattern,varargin{:});
             end
