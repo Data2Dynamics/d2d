@@ -731,37 +731,39 @@ for jm=1:length(ar.model)
             
             fields = fieldnames(ar.model(jm).plot(jplot));
             fields = fields(strmatch('savePath_FigY',fields));
-            if ischar(fields)
-                fields = {fields};
-            end
-            savepathfield = fields{1};
-            
-            if(~isempty(fields) && ~isempty(ar.model(jm).plot(jplot).(savepathfield)))                
-%             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigY') && ~isempty(ar.model(jm).plot(jplot).savePath_FigY))
-                lp(fid, 'The model observables and the experimental data is shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
-                captiontext = sprintf('\\textbf{%s observables and experimental data for the experiment.} ', arNameTrafo(ar.model(jm).plot(jplot).name));
-                captiontext = [captiontext 'The observables are displayed as solid lines. '];
-                captiontext = [captiontext 'The error model that describes the measurement noise ' ...
-                    'is indicated by shades.'];
-                if(exist([ar.model(jm).plot(jplot).(savepathfield) '_Report.tex'],'file')==2)
-                    copyfile([ar.model(jm).plot(jplot).(savepathfield) '_Report.tex'], ...
-                    [savePath '/' ar.model(jm).plot(jplot).name '_y.tex']);
-                    lpfigurePGF(fid, [ar.model(jm).plot(jplot).name '_y.tex'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
-                else
-                    copyfile([ar.model(jm).plot(jplot).(savepathfield) '.pdf'], ...
-                    [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
-                    lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
+            if ~isempty(fields)
+                if ischar(fields)
+                    fields = {fields};
                 end
-            end
-            
-            lp(fid, '\\noindent The agreement of the model observables and the experimental data, given in Table \\ref{%s_data}, ', ar.model(jm).plot(jplot).name);
-            if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1) || ...
-                    (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
-                lp(fid, 'yields a value of the objective function $-2 \\log(L) = %g$ for %i data points in this data set.', ...
-                    2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
-            else
-                lp(fid, 'yields a value of the objective function $\\chi^2 = %g$ for %i data points in this data set.', ...
-                    ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
+                savepathfield = fields{1};
+
+                if(~isempty(fields) && ~isempty(ar.model(jm).plot(jplot).(savepathfield)))                
+    %             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigY') && ~isempty(ar.model(jm).plot(jplot).savePath_FigY))
+                    lp(fid, 'The model observables and the experimental data is shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
+                    captiontext = sprintf('\\textbf{%s observables and experimental data for the experiment.} ', arNameTrafo(ar.model(jm).plot(jplot).name));
+                    captiontext = [captiontext 'The observables are displayed as solid lines. '];
+                    captiontext = [captiontext 'The error model that describes the measurement noise ' ...
+                        'is indicated by shades.'];
+                    if(exist([ar.model(jm).plot(jplot).(savepathfield) '_Report.tex'],'file')==2)
+                        copyfile([ar.model(jm).plot(jplot).(savepathfield) '_Report.tex'], ...
+                        [savePath '/' ar.model(jm).plot(jplot).name '_y.tex']);
+                        lpfigurePGF(fid, [ar.model(jm).plot(jplot).name '_y.tex'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
+                    else
+                        copyfile([ar.model(jm).plot(jplot).(savepathfield) '.pdf'], ...
+                        [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
+                        lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
+                    end
+                end
+
+                lp(fid, '\\noindent The agreement of the model observables and the experimental data, given in Table \\ref{%s_data}, ', ar.model(jm).plot(jplot).name);
+                if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1) || ...
+                        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
+                    lp(fid, 'yields a value of the objective function $-2 \\log(L) = %g$ for %i data points in this data set.', ...
+                        2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
+                else
+                    lp(fid, 'yields a value of the objective function $\\chi^2 = %g$ for %i data points in this data set.', ...
+                        ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
+                end
             end
             
             %% experimental data

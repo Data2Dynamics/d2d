@@ -88,7 +88,7 @@ for j = jks
 % 		pstmp = pstmp(sum(qhitbound,2)==0,:);
 
 		% cut below point-wise threshold
-		qbelow = chi2stmp < ar.ple.chi2 + ar.ple.dchi2_point;
+		qbelow = chi2stmp < ar.ple.merit + ar.ple.dchi2_point;
 		chi2stmp = chi2stmp(qbelow);
 		pstmp = pstmp(qbelow,:);
 
