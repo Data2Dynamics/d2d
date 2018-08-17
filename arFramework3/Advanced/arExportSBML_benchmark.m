@@ -587,6 +587,10 @@ for ju = 1:length(ar.model(m).u)
             par_spline = log(par_spline);           
             pp = csape(spline_times,par_spline,'complete'); %MATLAB solution, nearly as C
             
+            if(exist('pp_swameye_Aug18.mat','file')==2)
+                load('pp_swameye_Aug18.mat');
+                warning('Detected Swameye Export, loaded Spline Parameters');
+            end
             %pp.coefs %Coefficient matrix Anchor * nPars  f(x)=a(x?x1)^3+b(x?x1)^2+c(x?x1)+d?.
             %spline_timePoints = pp.breaks; %Anchor points
             
