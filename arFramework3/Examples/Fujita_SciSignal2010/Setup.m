@@ -28,3 +28,4 @@ ar.config.optim.PrecondBandWidth = inf;
 ar.config.optim.Display          = 'iter';
 ar.config.optim.MaxIter          = 1e4;
 
+arLoadPars('ParamsFujita2010')
