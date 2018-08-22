@@ -680,8 +680,8 @@ for jm=1:length(ar.model)
                         if(sum(qdyn)>0)
                             qalreadyset = true;
                             for jd4 = ar.model(jm).plot(jplot).dLink
-                                qalreadyset = qalreadyset && isequal(sym(ar.model(jm).fp{qdyn}), ...
-                                    sym(ar.model(jm).data(jd4).fp{jp}));
+                                qalreadyset = qalreadyset && isequal(arSym(ar.model(jm).fp{qdyn}), ...
+                                    arSym(ar.model(jm).data(jd4).fp{jp}));
                             end
                         else
                             qalreadyset = false;
@@ -1250,14 +1250,14 @@ function str = myFormulas(str, jm)
 global ar
 
 varlist = symvar(str)';
-svarlist = sym(varlist);
+svarlist = arSym(varlist);
 shortlist = {};
 for j=1:length(varlist)
     shortlist{j} = sprintf('vj%ijv', j);
 end
-sshortlist = sym(shortlist);
+sshortlist = arSym(shortlist);
 
-strsym = sym(str);
+strsym = arSym(str);
 sstrsym = subs(strsym, svarlist, sshortlist);
 
 str = latex(sstrsym);

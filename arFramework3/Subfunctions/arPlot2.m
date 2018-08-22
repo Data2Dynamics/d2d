@@ -267,14 +267,14 @@ for jm = 1:length(ar.model)
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, dydt, ...
                                 y_ssa, y_ssa_lb, y_ssa_ub, qFit, t_ppl, y_ppl_ub, y_ppl_lb] = arGetData(jm, jd, jtype);
                             plotopt = NaN(1,size(y,2));
-                            if jtype ==1
+                            if jtype ==1 % only for observables y
                                 for jy=1:size(y,2)
                                     plotopt(jy) = arWhichYplot(jm,jd,[],jy);
                                 end
                             else
                                 for jy=1:size(y,2)
                                     plotopt(jy) = 1;
-                                    if(~isempty(t_ppl))
+                                    if ar.config.ploterrors == -1 || (~isempty(t_ppl))
                                         plotopt(jy) = 4;
                                     end
                                 end
