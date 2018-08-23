@@ -466,5 +466,5 @@ end
 % end
 
 ar.ple.finished = 1;    
-pleSave(ar.ple)
+pleSave(ar)
 
