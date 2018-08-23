@@ -1,5 +1,8 @@
 function  varargout  = arRegularize( reltos, lambdamin, lambdamax, varargin )
-%ARREGULARIZE Regularizes a given system ar
+%ARREGULARIZE Regularizes a given system
+% To obtain reltos of dynamic parameters between e.g. two cell lines, run
+% l1_PrintDynPars. The output can be parsed into the CONDITIONS sectino of
+% the model.def file
 %
 %
 % [runtime,parsimonious_model] = ARREGULARIZE(RELTOS,LAMBDAMIN,LAMBAMAX)
