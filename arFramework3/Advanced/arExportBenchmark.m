@@ -1,7 +1,7 @@
 %Calculate chi2 value without Bessel correction
 ar.config.useFitErrorCorrection = false;
 if(contains(pwd,'Chen'))
-    arSimu(false,false,true);
+    arCalcMerit
 else
     arFit
     arCalcMerit
