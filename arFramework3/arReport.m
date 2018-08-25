@@ -307,27 +307,32 @@ for jm=1:length(ar.model)
             lp(fid, '\\\\');
             
             % modifiers
-            try
-                mod_pos = getModifierStr(jm,jv,false,'x',sources,targets);
-                mod_posu = getModifierStr(jm,jv,false,'u',sources,targets);
-                if(~isempty(mod_posu))
-                    if(~isempty(mod_pos))
-                        mod_pos = [mod_pos ', ' mod_posu];
-                    else
-                        mod_pos = mod_posu;
+            if isfield(ar.model(jm),'qdvdx_negative') && isfield(ar.model(jm),'qdvdu_negative')
+                try
+                    mod_pos = getModifierStr(jm,jv,false,'x',sources,targets);
+                    mod_posu = getModifierStr(jm,jv,false,'u',sources,targets);
+                    if(~isempty(mod_posu))
+                        if(~isempty(mod_pos))
+                            mod_pos = [mod_pos ', ' mod_posu];
+                        else
+                            mod_pos = mod_posu;
+                        end
                     end
-                end
-                mod_neg = getModifierStr(jm,jv,true,'x',sources,targets);
-                mod_negu = getModifierStr(jm,jv,true,'u',sources,targets);
-                if(~isempty(mod_negu))
-                    if(~isempty(mod_neg))
-                        mod_neg = [mod_neg ', ' mod_negu];
-                    else
-                        mod_neg = mod_negu;
+                    mod_neg = getModifierStr(jm,jv,true,'x',sources,targets);
+                    mod_negu = getModifierStr(jm,jv,true,'u',sources,targets);
+                    if(~isempty(mod_negu))
+                        if(~isempty(mod_neg))
+                            mod_neg = [mod_neg ', ' mod_negu];
+                        else
+                            mod_neg = mod_negu;
+                        end
                     end
+                catch err_id
+                    warning(err_id.message);
+                    mod_neg = '';
+                    mod_pos = '';
                 end
-            catch err_id
-                warning(err_id.message);
+            else
                 mod_neg = '';
                 mod_pos = '';
             end
@@ -878,7 +883,7 @@ lp(fid, '\\clearpage\n');
 lp(fid, '\\section{Estimated model parameters} \\label{estimatedparameters}\n');
 
 if(isfield(ar,'ndata') && isfield(ar,'chi2fit') && isfield(ar,'chi2'))
-    [~,merits] = arGetMerit;
+    [~,merits] = arGetMerit(true);
     if(sum(ar.res_type==2)>0)
         lp(fid, 'In total %i parameters are estimated from the experimental data. The best fit yields a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
             merits.npara, merits.loglik, merits.ndata);
