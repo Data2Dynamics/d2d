@@ -1,0 +1,51 @@
+DESCRIPTION
+
+PREDICTOR
+t               T   s         time	0	10
+
+COMPARTMENTS
+membrane             V   pl          vol.    1
+
+STATES
+IPR_O     C   prob     conc.   membrane     1    "O"
+IPR_R     C   prob     conc.   membrane     1    "R"
+IPR_I1    C   prob     conc.   membrane     1    "I_1"
+IPR_S     C   prob     conc.   membrane     1    "S"
+IPR_A     C   prob     conc.   membrane     1    "A"
+IPR_I2    C   prob     conc.   membrane     1    "I_2"
+
+INPUTS
+
+REACTIONS
+IPR_O  -> IPR_R       CUSTOM    "((k_2+l_4*Ca)/(1+Ca/L5))*IPR_O"
+IPR_R  -> IPR_O       CUSTOM    "((k2*L3+l4*Ca)/(L3+Ca*(1+L3/L1)))*IP3*IPR_R"
+
+IPR_R  -> IPR_I1      CUSTOM    "((k1*L1+l2)*Ca)/(L1+Ca*(1+L1/L3))*IPR_R"
+IPR_I1 -> IPR_R       CUSTOM    "(k_1+l_2)*IPR_I1"
+
+IPR_O  -> IPR_A       CUSTOM    "(((k4*L5+l6)*Ca)/(L5+Ca))*IPR_O"
+IPR_A  -> IPR_O       CUSTOM    "((L1*(k_4+l_6))/(L1+Ca))*IPR_A"
+
+IPR_A  -> IPR_I2      CUSTOM    "(((k1*L1+l2)*Ca)/(L1+Ca))*IPR_A"
+IPR_I2 -> IPR_A       CUSTOM    "(k_1+l_2)*IPR_I2"
+
+IPR_O  -> IPR_S       CUSTOM    "(k3*L5/(L5+Ca))*IPR_O"
+IPR_S  -> IPR_O       CUSTOM    "k_3*IPR_S"
+
+DERIVED
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+init_IPR_O   "0"
+init_IPR_R   "1"
+init_IPR_I1  "0"
+init_IPR_S   "0"
+init_IPR_A   "0"
+init_IPR_I2  "0"
+
+L1  "(k_1/k1)/(l_2/l2)"
+L3  "(k_2/k2)/(l_4/l4)"
+L5  "(k_4/k4)/(l_6/l6)"

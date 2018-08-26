@@ -1,0 +1,19 @@
+DESCRIPTION
+"Experimenter: "
+"Date: "
+"Cells: "
+"Treatment: Ca^{2+} / IP3"
+
+PREDICTOR
+t               T   h     time	0	10
+
+INPUTS
+
+OBSERVABLES
+open_probability  C	au   conc.   0	0   "(0.1*IPR_O+0.9*IPR_A)^4"
+
+ERRORS
+open_probability     "sigma"
+
+CONDITIONS
+
