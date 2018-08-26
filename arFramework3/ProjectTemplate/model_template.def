@@ -28,6 +28,7 @@ Prot1_wb	C	"au"	"conc."	 0	0			"scale_prot1 * Prot1"
 Prot2_wb	C	"au"	"conc."	 0	0			"scale_prot2 * Prot2"
         
 ERRORS
+Prot1_wb    "sd_prot1"
 Prot2_wb    "sd_prot2"
 
 CONDITIONS
