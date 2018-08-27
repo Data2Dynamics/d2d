@@ -35,8 +35,10 @@ IPR_S  -> IPR_O       CUSTOM    "k_3*IPR_S"
 DERIVED
 
 OBSERVABLES
+open_probability  C	au   conc.   0	0   "(0.1*IPR_O+0.9*IPR_A)^4"
 
 ERRORS
+open_probability     "sigma"
 
 CONDITIONS
 init_IPR_O   "0"
