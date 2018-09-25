@@ -204,5 +204,5 @@ if(exist('chi2s','var') && ar.ple.merit-min(ar.ple.chi2s{jk}) > ar.ple.optimset_
 end
 
 % save
-pleSave(ar.ple);
+pleSave(ar);
 

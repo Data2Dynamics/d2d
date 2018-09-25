@@ -104,5 +104,5 @@ saveas(gcf, [ar.ple.savePath '/lin_relations'], 'fig')
 saveas(gcf, [ar.ple.savePath '/lin_relations'], 'png')
 
 %% save
-pleSave(ar.ple);
+pleSave(ar);
 
