@@ -40,13 +40,13 @@ ar.qLog10 = arIn.qLog10;
 ar.qFit = arIn.qFit;
 ar.lb = arIn.lb;
 ar.ub = arIn.ub;
-if isfield(arIn,'') % not available in older versions
+if isfield(arIn,'type') % not available in older versions
     ar.type = arIn.type;
 end
-if isfield(arIn,'') % not available in older versions
+if isfield(arIn,'mean') % not available in older versions
     ar.mean = arIn.mean;
 end
-if isfield(arIn,'') % not available in older versions
+if isfield(arIn,'std') % not available in older versions
     ar.std = arIn.std;
 end
 if isfield(arIn,'fkt') % not available in older versions
