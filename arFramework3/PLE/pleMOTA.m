@@ -120,5 +120,5 @@ saveas(gcf, [ar.ple.savePath '/mota_relations'], 'fig')
 saveas(gcf, [ar.ple.savePath '/mota_relations'], 'png')
 
 %% save
-pleSave(ar.ple)
+pleSave(ar)
 
