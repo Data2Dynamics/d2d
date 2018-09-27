@@ -1414,6 +1414,8 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
         if ( flag < 0 )
         {
             converged = true;
+            CVodeGetCurrentTime(cvode_mem, teq);
+            DEBUGPRINT1( debugMode, 8, "Equilibration terminated due to error. Teq = %g\n", teq );
             return flag;
         }
 
@@ -1433,6 +1435,7 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
         /* Oh no, we didn't make it! Terminate anyway. */
         if ( step > max_eq_steps )
         {
+            DEBUGPRINT0( debugMode, 8, "Equilibration terminated due to too long equilibration time\n" );
             flag = 20;
             converged = true;
         }
