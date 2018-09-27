@@ -83,7 +83,7 @@ function cplot = plotGroup( model, ss_condition, field, namefield, styles, NX, N
             pidx    = pidx + 1;
             if ( pidx > nStyles )
                 pidx = 1;
-                legend( cellfun( @(x)strrep(x, '_', '\_' ), names( size( sims, 2 )-nStyles+1:size( sims, 2 ) ), 'UniformOutput', false ) );
+                legend( cellfun( @(x)strrep(x, '_', '\_' ), names(a-nStyles+1:a), 'UniformOutput', false ) );
             end
         end
         legend( cellfun( @(x)strrep(x, '_', '\_' ), names( size( sims, 2 )-nStyles+1:size( sims, 2 ) ), 'UniformOutput', false ) );
