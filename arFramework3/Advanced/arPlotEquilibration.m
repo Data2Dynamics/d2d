@@ -86,6 +86,6 @@ function cplot = plotGroup( model, ss_condition, field, namefield, styles, NX, N
                 legend( cellfun( @(x)strrep(x, '_', '\_' ), names(a-nStyles+1:a), 'UniformOutput', false ) );
             end
         end
-        legend( cellfun( @(x)strrep(x, '_', '\_' ), names( size( sims, 2 )-nStyles+1:size( sims, 2 ) ), 'UniformOutput', false ) );
+        legend( cellfun( @(x)strrep(x, '_', '\_' ), names( size( sims, 2 )-pidx+2:size( sims, 2 ) ), 'UniformOutput', false ) );
     end
 end
