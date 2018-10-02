@@ -101,7 +101,7 @@ if isfield(ar, 'mc3')
     if isfield(ar.mc3, 'TemperatureExponent')
         TemperatureExponent = ar.mc3.TemperatureExponent;
     else
-       TemperatureExponent = 1;
+       TemperatureExponent = 4;
     end  
 
     if isfield(ar.mc3, 'RegularizationThreshold')
@@ -638,6 +638,7 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
         if ( NumberOfChains > 1 )
             
             
+            
             SwapProbForward = zeros(length(LogPosterior_curr));
             
             for index1 = 2:NumberOfChains
@@ -665,9 +666,13 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
             % Update chain states and run statistics
             ProposedSwaps(k1,k2) = ProposedSwaps(k1,k2) + 1;
             if rand <= ProbAccSwap
-               AcceptedSwaps(k1,k2)   = AcceptedSwaps(k1,k2) + 1;                          
+               AcceptedSwaps(k1,k2)   = AcceptedSwaps(k1,k2) + 1; 
+               temp_para_storage = para_curr([k1,k2],:);
                para_curr([k1,k2],:) = para_curr([k2,k1],:);
+               para_curr([k2,k1],:) = temp_para_storage;
+               temp_log_storage = LogPosterior_curr([k1,k2]);
                LogPosterior_curr([k1,k2]) = LogPosterior_curr([k2,k1]);
+               LogPosterior_curr([k2,k1]) = temp_log_storage;
             end
       
         end
@@ -697,6 +702,26 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
     end
     jrungo = jrungo + 1;   
     
+    
+    % If wanted print after every i-th iteration (especially usefull for
+    % runs on cluster without window showing you where you are at in the
+    % calculations)
+    if isfield( ar.mc3, 'DiaryFlag' )
+       if ar.mc3.DiaryFlag == 1
+       		diary off
+   		    global N;
+       		delete( [num2str(N) 'test_diary.txt' ] );
+       		diary ( [num2str(N) 'test_diary.txt' ]);
+       end
+    end
+    if isfield( ar.mc3, 'PrintFlag' )
+       if ar.mc3.PrintFlag == 1
+           measure = mod(jrungo,10000);
+           if measure == 0
+               fprintf('\n Currently at run %.0f \n Time Elapsed: %s ',jrungo, secToHMS(toc)); 
+           end
+       end
+    end   
     
 end
 
@@ -794,7 +819,7 @@ end
           alpha_dash = alpha_dash_k;     
        end
         
-        mu = ptmp + (1/2)*mldivide(alpha_dash,Gradient')';
+        mu = ptmp + mvnrnd(0, 1)*(1/2)*mldivide(alpha_dash,Gradient')';
         covar = inv(alpha_dash);
         covar = 0.5*(covar+covar');
         
@@ -827,7 +852,7 @@ end
 
         deltap = zeros(size(Gradient));
         for jj=find(qs)'
-            deltap = deltap + transpose((U(:,jj)'*Gradient'/S(jj,jj))*V(:,jj));
+            deltap = deltap + mvnrnd(0,1)* transpose((U(:,jj)'*Gradient'/S(jj,jj))*V(:,jj));
         end
         mu      = ptmp + 0.1*(1/2)*deltap;
         covar   = inv(alpha_dash);              
