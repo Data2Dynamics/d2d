@@ -108,7 +108,7 @@ end
 
         % Verify that we have the same experimental data
         for c = 1 : length( I1 )
-            if ( nanmax( nanmax(ar1.model(m1).data(I1(c)).yExp - ar1.model(m1).data(I2(c)).yExp) ) > 0 )
+            if ( nanmax( nanmax(ar1.model(m1).data(I1(c)).yExp - ar2.model(m2).data(I2(c)).yExp) ) > 0 )
                 warning( 'Problem finding corresponding dataset for %s\n', dataFiles{a} );
             end
             
