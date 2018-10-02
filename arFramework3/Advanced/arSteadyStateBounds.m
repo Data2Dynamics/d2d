@@ -163,8 +163,8 @@ function [res_user, res_type, sres_user] = residual_concentrationConstraintsL2(m
         xs = isinf(xlower) | isnan(xupper);
         zs = isinf(zlower) | isnan(zupper);
         ix = find(x_active); iz = find(z_active);
-        xstr = sprintf( '%s ', ar.model.x{ix(xs)} );
-        zstr = sprintf( '%s ', ar.model.z{iz(zs)} );
+        xstr = sprintf( '%s ', ar.model(m).x{ix(xs)} );
+        zstr = sprintf( '%s ', ar.model(m).z{iz(zs)} );
         fprintf( 'Infinity found in residuals: %s, %s', xstr, zstr );
     end
     
