@@ -398,5 +398,5 @@ end
 %     fprintf('PLE#%i suggesting: %s (point-wise)\n', jk, newIDlables{ar.ple.IDstatus_point(jk)});
 % end
 ar.ple.finished = 1;
-pleSave(ar.ple)
+pleSave(ar)
 

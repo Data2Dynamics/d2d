@@ -137,8 +137,7 @@ else
     ar.ple.plot_simu = true;
 end
 
-if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
-        (ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0) )
+if ar.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(ar.qFit==1 & ar.qError==1)>0)
     ar.ple.ylabel = '-2 log(PL)';
 end
 

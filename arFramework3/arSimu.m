@@ -177,10 +177,10 @@ if ( ss_presimulation && dynamics )
             if(ar.model(m).ss_condition(c).status>0)
                 arCheckCache(1); % Invalidate cache so simulations do not get skipped
                 nonEq = sprintf('%s ', ar.model(m).x{find(abs(ar.model(m).ss_condition(c).dxdt)>ar.config.eq_tol)});
-                error('arSimuCalc failed at %s for model %i, condition %i during pre-equilibration %i.\nStates which failed to equilibrate:\n%s', ar.info.arsimucalc_flags{ar.model(m).ss_condition(c).status}, m, ar.model(m).ss_condition(c).src, c, nonEq);
+                error('arSimuCalc failed at %s for model %i, condition %i during pre-equilibration %i.\nStates which failed to equilibrate:\n%s.\nCan attempt debugging using arPlotEquilibration.\n', ar.info.arsimucalc_flags{ar.model(m).ss_condition(c).status}, m, ar.model(m).ss_condition(c).src, c, nonEq);
             elseif(ar.model(m).ss_condition(c).status<0)
                 arCheckCache(1); % Invalidate cache so simulations do not get skipped
-                error('cvodes failed at %s for model %i, condition %i during pre-equilibration %i', ...
+                error('cvodes failed at %s for model %i, condition %i during pre-equilibration %i\nCan attempt debugging using arPlotEquilibration.\n', ...
                     ar.info.cvodes_flags{abs(ar.model(m).ss_condition(c).status)}, m, ar.model(m).ss_condition(c).src, c);
             end
         end

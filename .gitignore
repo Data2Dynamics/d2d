@@ -26,6 +26,16 @@ arFramework3/Examples/Dream6_L1/Results/20*
 
 arFramework3/Examples/_myOwnExamples/
 
+arFramework3/Examples/Alkan_DDRP_SciSignal2018/Compiled/
+arFramework3/Examples/Alkan_DDRP_SciSignal2018/Data/Backup/
+arFramework3/Examples/Alkan_DDRP_SciSignal2018/Models/Backup/
+arFramework3/Examples/Alkan_DDRP_SciSignal2018/SBML/
+arFramework3/Examples/Alkan_DDRP_SciSignal2018/arSimuCalc*
+arFramework3/Examples/Alkan_DDRP_SciSignal2018/arCheckParallel*
+arFramework3/Examples/Alkan_DDRP_SciSignal2018/Results/20*
+arFramework3/Examples/Alkan_DDRP_SciSignal2018/pthreadVC2.dll
+arFramework3/Examples/Alkan_DDRP_SciSignal2018/pthreadGC2.dll
+
 arFramework3/Examples/Bachmann_MSB2011/Compiled/
 arFramework3/Examples/Bachmann_MSB2011/Data/Backup/
 arFramework3/Examples/Bachmann_MSB2011/Models/Backup/
@@ -246,6 +256,16 @@ arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/Results/20*
 arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/pthreadVC2.dll
 arFramework3/Examples/Schwen_InsulinMouseHepatocytes_PlosOne2014/pthreadGC2.dll
 
+arFramework3/Examples/Sneyd_PNAS2002/Compiled/
+arFramework3/Examples/Sneyd_PNAS2002/Data/Backup/
+arFramework3/Examples/Sneyd_PNAS2002/Models/Backup/
+arFramework3/Examples/Sneyd_PNAS2002/SBML/
+arFramework3/Examples/Sneyd_PNAS2002/arSimuCalc*
+arFramework3/Examples/Sneyd_PNAS2002/arCheckParallel*
+arFramework3/Examples/Sneyd_PNAS2002/Results/20*
+arFramework3/Examples/Sneyd_PNAS2002/pthreadVC2.dll
+arFramework3/Examples/Sneyd_PNAS2002/pthreadGC2.dll
+
 arFramework3/Examples/Sobotta_Frontiers2017/Compiled/
 arFramework3/Examples/Sobotta_Frontiers2017/Data/Backup/
 arFramework3/Examples/Sobotta_Frontiers2017/Models/Backup/
@@ -305,6 +325,16 @@ arFramework3/Examples/Zheng_PNAS2012/arCheckParallel*
 arFramework3/Examples/Zheng_PNAS2012/Results/20*
 arFramework3/Examples/Zheng_PNAS2012/pthreadVC2.dll
 arFramework3/Examples/Zheng_PNAS2012/pthreadGC2.dll
+
+arFramework3/Examples/model_reduction_2016/Compiled/
+arFramework3/Examples/model_reduction_2016/Data/Backup/
+arFramework3/Examples/model_reduction_2016/Models/Backup/
+arFramework3/Examples/model_reduction_2016/SBML/
+arFramework3/Examples/model_reduction_2016/arSimuCalc*
+arFramework3/Examples/model_reduction_2016/arCheckParallel*
+arFramework3/Examples/model_reduction_2016/Results/20*
+arFramework3/Examples/model_reduction_2016/pthreadVC2.dll
+arFramework3/Examples/model_reduction_2016/pthreadGC2.dll
 
 arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/Compiled/
 arFramework3/Examples/Biomodels/DallaMan2007_GlucoseInsulinSystem/Data/Backup/
@@ -405,6 +435,16 @@ arFramework3/Examples/ToyModels/Advanced_Events/arCheckParallel*
 arFramework3/Examples/ToyModels/Advanced_Events/Results/20*
 arFramework3/Examples/ToyModels/Advanced_Events/pthreadVC2.dll
 arFramework3/Examples/ToyModels/Advanced_Events/pthreadGC2.dll
+
+arFramework3/Examples/ToyModels/Benchmark_Simu_Test/Compiled/
+arFramework3/Examples/ToyModels/Benchmark_Simu_Test/Data/Backup/
+arFramework3/Examples/ToyModels/Benchmark_Simu_Test/Models/Backup/
+arFramework3/Examples/ToyModels/Benchmark_Simu_Test/SBML/
+arFramework3/Examples/ToyModels/Benchmark_Simu_Test/arSimuCalc*
+arFramework3/Examples/ToyModels/Benchmark_Simu_Test/arCheckParallel*
+arFramework3/Examples/ToyModels/Benchmark_Simu_Test/Results/20*
+arFramework3/Examples/ToyModels/Benchmark_Simu_Test/pthreadVC2.dll
+arFramework3/Examples/ToyModels/Benchmark_Simu_Test/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/Bolus_Injection_Test/Compiled/
 arFramework3/Examples/ToyModels/Bolus_Injection_Test/Data/Backup/
@@ -566,6 +606,16 @@ arFramework3/Examples/ToyModels/ResponseCurve/Results/20*
 arFramework3/Examples/ToyModels/ResponseCurve/pthreadVC2.dll
 arFramework3/Examples/ToyModels/ResponseCurve/pthreadGC2.dll
 
+arFramework3/Examples/ToyModels/SD_Test/Compiled/
+arFramework3/Examples/ToyModels/SD_Test/Data/Backup/
+arFramework3/Examples/ToyModels/SD_Test/Models/Backup/
+arFramework3/Examples/ToyModels/SD_Test/SBML/
+arFramework3/Examples/ToyModels/SD_Test/arSimuCalc*
+arFramework3/Examples/ToyModels/SD_Test/arCheckParallel*
+arFramework3/Examples/ToyModels/SD_Test/Results/20*
+arFramework3/Examples/ToyModels/SD_Test/pthreadVC2.dll
+arFramework3/Examples/ToyModels/SD_Test/pthreadGC2.dll
+
 arFramework3/Examples/ToyModels/Splines/Compiled/
 arFramework3/Examples/ToyModels/Splines/Data/Backup/
 arFramework3/Examples/ToyModels/Splines/Models/Backup/
@@ -635,6 +685,16 @@ arFramework3/Examples/ToyModels/SubSensitivities/arCheckParallel*
 arFramework3/Examples/ToyModels/SubSensitivities/Results/20*
 arFramework3/Examples/ToyModels/SubSensitivities/pthreadVC2.dll
 arFramework3/Examples/ToyModels/SubSensitivities/pthreadGC2.dll
+
+arFramework3/Examples/ToyModels/TransientFunction/Compiled/
+arFramework3/Examples/ToyModels/TransientFunction/Data/Backup/
+arFramework3/Examples/ToyModels/TransientFunction/Models/Backup/
+arFramework3/Examples/ToyModels/TransientFunction/SBML/
+arFramework3/Examples/ToyModels/TransientFunction/arSimuCalc*
+arFramework3/Examples/ToyModels/TransientFunction/arCheckParallel*
+arFramework3/Examples/ToyModels/TransientFunction/Results/20*
+arFramework3/Examples/ToyModels/TransientFunction/pthreadVC2.dll
+arFramework3/Examples/ToyModels/TransientFunction/pthreadGC2.dll
 
 arFramework3/Examples/ToyModels/TurboSplines/Compiled/
 arFramework3/Examples/ToyModels/TurboSplines/Data/Backup/

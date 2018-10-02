@@ -34,7 +34,9 @@ if makePlots
 end
 if isstruct(ar.ple) 
     if isfield(ar.ple,'ps') && ~isempty(ar.ple.ps)
-        copyfile([ar.ple.savePath],[ar.config.savepath,filesep,'PLE'])
+        try
+            copyfile([ar.ple.savePath],[ar.config.savepath,filesep,'PLE'])
+        end
     end
 end
 

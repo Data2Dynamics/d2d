@@ -24,13 +24,12 @@ OBSERVABLES
 // meaning of the columns:
 // y name	yunit1	yunit2	yunit3	normal.	logploting&logfitting	obs_fun
 
-Prot1_wb	C	"au"	"conc."	1	1			"scale_prot1 * Prot1"
-Prot2_wb	C	"au"	"conc."	1	1			"scale_prot2 * Prot2"
+Prot1_wb	C	"au"	"conc."	 0	0			"scale_prot1 * Prot1"
+Prot2_wb	C	"au"	"conc."	 0	0			"scale_prot2 * Prot2"
         
 ERRORS
 Prot1_wb    "sd_prot1"
 Prot2_wb    "sd_prot2"
 
 CONDITIONS
-init_Prot1      "1"
 init_Prot2      "0"

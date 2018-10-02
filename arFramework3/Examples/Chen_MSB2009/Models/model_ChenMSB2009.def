@@ -508,19 +508,23 @@ c555	 C	 "n/a"	 conc.	 cyt	 1	 "(EGF:ErbB1:ATP::EGF:ErbB1_h:ATP)-FullActive"
 c556	 C	 "n/a"	 conc.	 cyt	 1	 "(EGF:ErbB1:Inh::EGF:ErbB1_h:ATP)-HalfActive"
 c557	 C	 "n/a"	 conc.	 cyt	 1	 "2(EGF:ErbB1_h:ATP)-FullActive"
 c558	 C	 "n/a"	 conc.	 cyt	 1	 "(EGF:ErbB1:ATP::EGF:ErbB1_h:Inh)-HalfActive"
+//c1    EGF:medium
+//c515  HRG:Endosomes
+//c285  Inhib
+//c514  HRG:medium
 
 INPUTS
 c1	 C	 "n/a"	 conc.	"c1"
 c515	 C	 "n/a"	 conc.	"c515"
 c285	 C	 "n/a"	 conc.	"c285"
 c514	 C	 "n/a"	 conc.	"c514"
-Step10Mio	C	"n/a"	conc.	"step1(t,0,1800,10000000)"
-Step33	C	"n/a"	conc.	"step1(t,0,1800,0.0033)"
-Step0	C	"n/a"	conc.	"step1(t, 0, 1800, 0)"
-Step1	C	"n/a"	conc.	"step1(t, 0, 1800, 1)"
-StepMini	C	"n/a"	conc.	"step1(t, 0, 1800, 0.000000018704)"
-Step5	C	"n/a"	conc.	"step1(t, 0, 1800, 0.00005)"
-StepGrml	C	"n/a"	conc.	"step1(t, 0, 1800, 0.00005)"
+Step10Mio	C	"n/a"	conc.	"step2(t, 0, 1799.99, 10000000, 1800, 0) *sin((pi/2)*(t-1799.99)/(1800-1799.99)) + step1(t,0,1800, 10000000)"
+Step33	C	"n/a"	conc.	"step2(t, 0, 1799.99, 0.0033, 1800, 0) *sin((pi/2)*(t-1799.99)/(1800-1799.99)) + step1(t,0,1800, 0.0033)"
+Step0	C	"n/a"	conc.	"0"
+Step1	C	"n/a"	conc.	"step2(t, 0, 1799.99, 1, 1800, 0) *sin((pi/2)*(t-1799.99)/(1800-1799.99)) + step1(t,0,1800, 1)"
+StepMini	C	"n/a"	conc.	"step2(t, 0, 1799.99, 0.000000018704, 1800, 0) *sin((pi/2)*(t-1799.99)/(1800-1799.99)) + step1(t,0,1800, 0.000000018704)"
+Step5	C	"n/a"	conc.	"step2(t, 0, 1799.99, 0.00005, 1800, 0) *sin((pi/2)*(t-1799.99)/(1800-1799.99)) + step1(t,0,1800, 0.00005)"
+StepLate	C	"n/a"	conc.	"step2(t, 0, 2659.99, 0.0150356, 2660, 0) *sin((pi/2)*(t-2659.99)/(2660-2659.99)) + step1(t,0,2660, 0.0150356)"
 
 REACTIONS
 c2 	<-> c3 	 CUSTOM "c1*c2*Step10Mio - c3* Step33" 	"v1"
@@ -1277,7 +1281,7 @@ c497 + c45 	<-> c472 	 CUSTOM "c45*c497*k114 - c472*kd114" 	"v765"
 c497 + c72 	<-> c484 	 CUSTOM "c72*c497*k114 - c484*kd114" 	"v766"
 c485 + c497 	<-> c472 	 CUSTOM "c485*c497*k115 - c472*kd115" 	"v767"
 c485 + c497 	<-> c484 	 CUSTOM "c485*c497*k115 - c484*kd115" 	"v768"
-c60 	<-> c520 	 CUSTOM "c60*StepGrml - c520*kd116" 	"v769"
+c60 	<-> c520 	 CUSTOM "c60*StepLate - c520*kd116" 	"v769"
 c521 + c488 	<-> c522 	 CUSTOM "c488*c521*k117 - c522*kd117" 	"v770"
 c521 + c490 	<-> c523 	 CUSTOM "c490*c521*k117 - c523*kd117" 	"v771"
 c521 + c409 	<-> c411 	 CUSTOM "c409*c521*k117 - c411*kd117" 	"v772"

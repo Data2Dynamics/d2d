@@ -35,7 +35,6 @@ EGFR 	->  	 CUSTOM "EGFR*EGFR_turnover" 	"reaction_10"
  	-> EGFR 	 CUSTOM "EGFR_turnover*pro_EGFR" 	"reaction_11"
 
 DERIVED
-pro_EGFR	 C	 "n/a"	 conc.	"init_pro_EGFR"
 pEGFR_tot_abs	C	"n/a"	conc.	"scaleFactor_pEGFR*(pEGFR + pEGFR_Akt)"
 pAkt_tot_abs	C	"n/a"	conc.	"scaleFactor_pAkt*(pAkt + pAkt_S6)"
 pS6_tot_abs	C	"n/a"	conc.	"scaleFactor_pS6*pS6"
@@ -45,13 +44,10 @@ OBSERVABLES
 ERRORS
 
 CONDITIONS
-init_pro_EGFR	"6.8190e+04"
-init_EGFR	"init_EGFR"
+pro_EGFR	"6.8190e+04"
 init_EGF_EGFR	"0"
 init_pEGFR	"0"
-init_Akt	"init_AKT"
 init_pEGFR_Akt	"0"
 init_pAkt	"0"
-init_S6	"init_S6"
 init_pAkt_S6	"0"
 init_pS6	"0"

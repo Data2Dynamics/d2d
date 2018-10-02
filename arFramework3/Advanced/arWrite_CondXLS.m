@@ -13,27 +13,22 @@ if(~exist('imodel','var') || isempty(imodel))
     imodel = 1:length(ar.model);
 end
 
-for im = imodel
-%     %old code to include conditions in data file
-%     tmp_par = {};
-%     for jc= 1:length(ar.model(im).condition)
-%             tmp_id = ar.model(im).condition(jc).dLink(1);
-% 
-%             for jd=1:length(ar.model(im).data(tmp_id).condition)
-%                 if(sum(strcmp(ar.model(im).data(tmp_id).condition(jd).parameter,tmp_par))==0)
-%                     tmp_par = [tmp_par ar.model(im).data(tmp_id).condition(jd).parameter];
-%                 end
-%             end
-%     end
+for im = imodel  
 
     for id = 1:length(ar.model(im).data)
-        XLS_Data = {'time'};%, tmp_par{:}};
+        if(strcmp(ar.model(im).data(id).t,'t'))
+           time_par = 'time';
+        else
+           time_par = ar.model(im).data(id).t;
+        end
+        
+        XLS_Data = {time_par};%, tmp_par{:}};
         %tmp_C = NaN(length(ar.model(im).data(id).tExp),length(tmp_par));
 
-        for iy = 1:length(ar.model(im).data(id).yNames)
-            XLS_Data = [XLS_Data, ar.model(im).data(id).yNames(iy), [ar.model(im).data(id).yNames{iy} '_std'], [ar.model(im).data(id).yNames{iy} '_ExpError']];           
+        for iy = 1:length(ar.model(im).data(id).y)
+            XLS_Data = [XLS_Data, ar.model(im).data(id).y(iy), [ar.model(im).data(id).y{iy} '_std'], [ar.model(im).data(id).y{iy} '_ExpError']];           
         end
-        XLS_Sim = [{'time'}, ar.model(im).data(id).yNames];
+        XLS_Sim = [{time_par}, ar.model(im).data(id).y];
         Exp_Data = [ar.model(im).data(id).tExp ar.model(im).data(id).yExp(:,[1;1;1]*(1:size(ar.model(im).data(id).yExp,2)))];
         
         %Prefer Exp Errors, only set model errors for empty ones
@@ -111,7 +106,7 @@ return;
 for im = imodel    
     for id = 1:length(ar.model(im).data)
         out_name = ['./Benchmark_paper/Data/' 'model' num2str(im) '_data' num2str(id) '.xlsx'];
-        XLS_Sim = [{'time'}, ar.model(im).data(id).yNames];
+        XLS_Sim = [{'time'}, ar.model(im).data(id).y];
         Sim_Data = [ar.model(im).data(id).tExp ar.model(im).data(id).yExpSimu];
 
         xlwrite(out_name,XLS_Sim,'Simulation_noErrorModel');

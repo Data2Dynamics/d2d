@@ -225,8 +225,9 @@ for jm = 1:length(ar.model)
                         if(isfield(ar.model(jm).data(jd),'qFit') && ar.model(jm).data(jd).qFit(jy)==1 && ~isempty(ar.model(jm).data(jd).chi2))
                             chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2(jy);
                             ndata(jy) = ndata(jy) + ar.model(jm).data(jd).ndata(jy);
-                            if ar.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0) % ( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
-%                                     (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
+                            if any(whichYplot==[3,5]) % error model present
+%                             if ar.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0) % ( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
+% %                                     (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
                                 chi2(jy) = chi2(jy) + ar.model(jm).data(jd).chi2err(jy);
                             end
                         end
@@ -288,8 +289,8 @@ for jm = 1:length(ar.model)
                         [trafos, yLegends] = arGetPlotYTrafo(jm, jd, jplot);
                         for jy = 1:ny
                             trafo = trafos{jy};
-                            whichYplot = arWhichYplot(jm,jd,[],jy);
                             
+                            whichYplot = arWhichYplot(jm,jd,[],jy);                            
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
                                 getDataDoseResponse(jm, jy, ds, times(jt), ar.model(jm).plot(jplot).dLink, xtrafo);
                             
@@ -481,7 +482,7 @@ for jm = 1:length(ar.model)
                 if(~opts.hidell)
                     if(isfield(ar.model(jm).data(jd), 'yExp'))
                         if(ndata(jy)>0)
-                            if any(whichYplot==[2,5]) % ( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
+                            if any(whichYplot==[3,5]) % ( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
 %                                     (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
                                titstr{2} = sprintf('-2 log(L)_{%i} = %g', ndata(jy), 2*ndata(jy)*log(sqrt(2*pi)) + chi2(jy));
                             else

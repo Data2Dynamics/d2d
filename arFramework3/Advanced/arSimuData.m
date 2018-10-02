@@ -62,7 +62,15 @@ end
 ds = ar.model(m).plot(jplot).dLink;
 if(isempty(tpoints))
     new_ts = false;
-    tpoints = ar.model(m).data(ds(1)).tExp;
+    for d = ds
+        tpoints{d} = ar.model(m).data(d).tExp;
+    end
+else
+    tmp_tpoints = tpoints;
+    clear tpoints;
+    for d = ds
+        tpoints{d} = tmp_tpoints;
+    end
 end
 
 % set time point and clear arrays
@@ -99,13 +107,13 @@ arLink(true);
 
 function assigne_new_timepoints(tpoints, m, d, new_ts)
 global ar
-ar.model(m).data(d).tExp = sort(tpoints(:));
-ar.model(m).data(d).yExp = zeros(length(tpoints), length(ar.model(m).data(d).y));
+ar.model(m).data(d).tExp = sort(tpoints{d}(:));
+ar.model(m).data(d).yExp = zeros(length(tpoints{d}), length(ar.model(m).data(d).y));
 if(new_ts)
-    ar.model(m).data(d).yExpStd = NaN(length(tpoints), length(ar.model(m).data(d).y));
+    ar.model(m).data(d).yExpStd = NaN(length(tpoints{d}), length(ar.model(m).data(d).y));
 end
-ar.model(m).data(d).yExpSimu = zeros(length(tpoints), length(ar.model(m).data(d).y));
-ar.model(m).data(d).ystdExpSimu = zeros(length(tpoints), length(ar.model(m).data(d).y));
+ar.model(m).data(d).yExpSimu = zeros(length(tpoints{d}), length(ar.model(m).data(d).y));
+ar.model(m).data(d).ystdExpSimu = zeros(length(tpoints{d}), length(ar.model(m).data(d).y));
 
 function simulate_data(m, d)
 global ar
