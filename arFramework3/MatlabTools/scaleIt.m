@@ -279,7 +279,7 @@ function out = scaleIt( names, outFile, varargin )
     end
     if ( opts.excludeconditions )
         for jec = 1 : numel( opts.excludeconditions_args )
-            rejectionFilter = opts.excludeconditions_args{1};
+            rejectionFilter = opts.excludeconditions_args{jec};
             if ( isfield( out, rejectionFilter{1} ) )
                 filterList = cellfun(rejectionFilter{2}, out.(rejectionFilter{1}));
 

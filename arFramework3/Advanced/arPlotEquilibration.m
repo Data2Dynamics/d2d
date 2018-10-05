@@ -9,7 +9,7 @@
 %       ss_condition    - Steady state condition to plot
 %
 
-function arPlotEquilibration( model, ss_condition )
+function arPlotEquilibration( model, ss_condition, N )
 
     global ar;
     tStart = ar.model(model).ss_condition(ss_condition).tstart;
@@ -18,7 +18,9 @@ function arPlotEquilibration( model, ss_condition )
     ar.model(model).ss_condition(ss_condition).tstop = tEnd;
     
     % Number of time points to show
-    N = 1000;
+    if ( nargin < 3 )
+        N = 1000;
+    end
     ts = tStart : ( tEnd - tStart ) / ( N - 1 ) : tEnd;
     ar.model(model).ss_condition(ss_condition).tFine = ts;
     
@@ -30,15 +32,17 @@ function arPlotEquilibration( model, ss_condition )
     ar.model(model).ss_condition(ss_condition).xFineSimu = zeros(N, size(ar.model(model).ss_condition(ss_condition).xFineSimu,2));
     ar.model(model).ss_condition(ss_condition).zFineSimu = zeros(N, size(ar.model(model).ss_condition(ss_condition).zFineSimu,2));
     
-    [~, nu, np] = size(ar.model(model).ss_condition(ss_condition).suFineSimu);
-    ar.model(model).ss_condition(ss_condition).suFineSimu = zeros(N, nu, np);
-    [~, nv, np] = size(ar.model(model).ss_condition(ss_condition).svFineSimu);
-    ar.model(model).ss_condition(ss_condition).svFineSimu = zeros(N, nv, np);
-    [~, nx, np] = size(ar.model(model).ss_condition(ss_condition).sxFineSimu);
-    ar.model(model).ss_condition(ss_condition).sxFineSimu = zeros(N, nx, np);
-    [~, nz, np] = size(ar.model(model).ss_condition(ss_condition).szFineSimu);
-    ar.model(model).ss_condition(ss_condition).szFineSimu = zeros(N, nz, np);
+    np = numel( ar.model(model).ss_condition(ss_condition).pNum );
+    nx = numel( ar.model(model).x );
+    nv = numel( ar.model(model).v );
+    nz = numel( ar.model(model).z );
+    nu = numel( ar.model(model).u );
     
+    ar.model(model).ss_condition(ss_condition).suFineSimu = zeros(N, nu, np);
+    ar.model(model).ss_condition(ss_condition).svFineSimu = zeros(N, nv, np);
+    ar.model(model).ss_condition(ss_condition).sxFineSimu = zeros(N, nx, np);
+    ar.model(model).ss_condition(ss_condition).szFineSimu = zeros(N, nz, np);
+       
     ar.stop = 0;
     ar.model(model).ss_condition(ss_condition).status = 0;
     ar.model(model).ss_condition(ss_condition).stop = 0;
