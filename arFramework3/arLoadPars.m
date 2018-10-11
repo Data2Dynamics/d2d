@@ -33,10 +33,6 @@ else
         pfad = pfad(1:end-1);
     end
 end
-if ~exist(pfad,'dir')
-    error('Folder %s does not exist.',pfad);
-end
-
 
 global ar
 
@@ -64,6 +60,9 @@ elseif(strcmp(filename,'end'))
 elseif(strcmp(filename,'all'))
     filename = fileList(pfad);
 elseif ischar(filename)
+    if ~exist(pfad,'dir')
+        error('Folder %s does not exist.',pfad);
+    end
     [~,filename]=fileparts(filename);    % remove path
 end
 
