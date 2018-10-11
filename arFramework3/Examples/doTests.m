@@ -14,7 +14,8 @@
 %     'Stoichiometry', 'DallaMan2007_GlucoseInsulinSystem', 'Step_Estimation', 
 %     'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines', 
 %     'ResponseCurve', 'PreProcessorTest', 'State_Reduction', 'Fast_Equilibration',  
-%     'Predictor_Test', 'FieldTester', 'SteadyStateBounds', 'Benchmark_Simu_Test'
+%     'Predictor_Test', 'FieldTester', 'SteadyStateBounds', 'DataFilterTest', 
+%     'Benchmark_Simu_Test'
 function doTests( varargin )
     global ar;
     global arOutputLevel;
@@ -29,7 +30,7 @@ function doTests( varargin )
     fprintf(2, 'routine before pushing any changes to internal functions in D2D\n' );
     fprintf(2, 'to reduce the risk of pushing code that breaks existing\nfunctionality.\n\n' );
 
-    tests = {   'SubSensitivities', 'Advanced_Events', 'Volume_Estimation', 'Splines', ...
+    tests = {   'SubSensitivities', 'Advanced_Events', 'Volume_Estimation', 'Splines', 'DataFilterTest', ...
                 'Stoichiometry', 'DallaMan2007_GlucoseInsulinSystem', 'Step_Estimation', ...
                 'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines', ...
                 'ResponseCurve', 'PreProcessorTest', 'State_Reduction', 'Fast_Equilibration', ... 
