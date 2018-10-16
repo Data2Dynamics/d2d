@@ -47,6 +47,24 @@ function arPlotEquilibration( model, ss_condition, N )
     ar.model(model).ss_condition(ss_condition).status = 0;
     ar.model(model).ss_condition(ss_condition).stop = 0;
     
+    % propagate parameters
+    arCheckCache(1);
+    ar.stop = 0;
+    for m=1:length(ar.model)
+        for c=1:length(ar.model(m).ss_condition)   
+            ar.model(m).ss_condition(c).x0_override = []; % remove initial condition overrides which may have been used for rootfinding
+            ar.model(m).ss_condition(c).status = 0;
+            ar.model(m).ss_condition(c).pNum = ar.p(ar.model(m).ss_condition(c).pLink);
+            ar.model(m).ss_condition(c).qLog10 = ar.qLog10(ar.model(m).ss_condition(c).pLink);
+            ar.model(m).ss_condition(c).pNum(ar.model(m).ss_condition(c).qLog10 == 1) = ...
+                10.^ar.model(m).ss_condition(c).pNum(ar.model(m).ss_condition(c).qLog10 == 1);
+            ar.model(m).ss_condition(c).pNum
+            ar.model(m).ss_condition(c).start = 0;
+            ar.model(m).ss_condition(c).stop = 0;
+            ar.model(m).ss_condition(c).stop_data = 0;
+        end
+    end
+
     % Simulate the system
     feval(ar.fkt, ar, true, false, 1, false, 'ss_condition', 'ss_threads', 0);
     
