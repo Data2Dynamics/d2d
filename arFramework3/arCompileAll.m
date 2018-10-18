@@ -127,7 +127,7 @@ for m=1:length(ar.model)
     arFprintf(2, '\n');
     
     % Have we reduced the model?
-    if isfield( ar.model(m), 'reducedForm' )
+    if isfield( ar.model(m), 'reducedForm' ) && ( ar.model(m).reducedForm == 1 )
         checksum_global = addToCheckSum(ar.model(m).reducedForm, checksum_global);
         
         % Store whether we express the model in totals or not
@@ -159,7 +159,7 @@ for m=1:length(ar.model)
             checksum_cond = addToCheckSum(ar.model(m).z, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).fz, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).data(d).fp(qdynparas), checksum_cond);
-            if isfield( ar.model(m), 'reducedForm' )
+            if isfield( ar.model(m), 'reducedForm' ) && ( ar.model(m).reducedForm == 1 )
                 % Store whether we express the model in totals or not
                 for jt = 1 : numel( ar.model(m).removedStates )
                     checksum_cond = addToCheckSum(ar.model(m).removedStates(jt).expressInTotal, checksum_cond);
@@ -440,7 +440,7 @@ for m=1:length(ar.model)
         checksum_cond = addToCheckSum(ar.model(m).fz, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).fp, checksum_cond);
         
-        if isfield( ar.model(m), 'reducedForm' )
+        if isfield( ar.model(m), 'reducedForm' ) && ( ar.model(m).reducedForm == 1 )
             % Store whether we express the model in totals or not
             for jt = 1 : numel( ar.model(m).removedStates )
                 checksum_cond = addToCheckSum(ar.model(m).removedStates(jt).expressInTotal, checksum_cond);
@@ -489,7 +489,7 @@ for m=1:length(ar.model)
         model.N = ar.model(m).N;
         model.dvdx = ar.model(m).sym.dvdx;
         model.dvdu = ar.model(m).sym.dvdu;
-        if isfield( ar.model(m), 'removedStates' )
+        if isfield( ar.model(m), 'removedStates' ) && ( ar.model(m).reducedForm == 1 )
             arFprintf( 2, 'Dealing with reduced model ...\n' );
             model.removedStates = ar.model(m).removedStates;
         end
@@ -788,7 +788,7 @@ catch
 end
 
 % Were model reductions applied? Make sure to transfer the initial conditions correctly
-if isfield( model, 'removedStates' )
+if isfield( model, 'removedStates' ) && ( ar.model(m).reducedForm == 1 )
     condition = addPoolSubstitutions( condition, model.removedStates );
 end
 
@@ -1242,7 +1242,7 @@ data.sym.p  = arMyStr2Sym(data.p);
 data.sym.fp = arMyStr2Sym(data.fp);
 
 % Were model reductions applied? Make sure to transfer the initial conditions correctly
-if isfield( model, 'removedStates' )
+if isfield( model, 'removedStates' ) && ( ar.model(m).reducedForm == 1 )
     data = addPoolSubstitutions( data, model.removedStates );
 end
 
