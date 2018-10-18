@@ -574,7 +574,19 @@ end
 
 fprintf(fid, '\nINPUTS\n');
 
-if isfield(m.species,'id2')
+if isfield(m,'rule') && ~isempty(m.rule(1).formula) % look for observation functions
+    fprintf(fid, '\nOBSERVABLES\n');
+    for j=1:length(m.rule)
+        fprintf(fid, '%s \t C\t "%s"\t "conc."\t 0 0 "%s" "%s"\n', sym_check(m.rule(j).variable), 'n/a', ...
+            m.rule(j).formula, m.rule(j).variable);
+    end
+    
+    fprintf(fid, '\nERRORS\n');
+    for j=1:length(m.rule)
+        fprintf(fid, '%s\t "sigma_%s"\n', sym_check(m.rule(j).variable), sym_check(m.rule(j).variable));
+    end
+    
+elseif isfield(m.species,'id2')%old behavior
     fprintf(fid, '\nOBSERVABLES\n');
     for j=1:length(m.species)
         fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.species(j).id2), 'n/a', ...
@@ -585,7 +597,9 @@ if isfield(m.species,'id2')
     for j=1:length(m.species)
         fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.species(j).id2), sym_check(m.species(j).id2));
     end
+    warning('No real observation functions defined!')
 end
+
 
 fprintf(fid, '\nCONDITIONS\n');
 
@@ -992,8 +1006,14 @@ end
 
 % educt and product exist. Have to divide by source volume to get D2D
 % convention.
-c = comp_r{1};
+% c = comp_r{1};
 
+if isempty(comp_r) && ~isempty(comp_p)
+     c = comp_p{1};
+else
+    c = comp_r{1};
+end
+% 
 % if ~isempty(comp_r) && ~isempty(comp_p)
 %     % educt and product in the same compartment
 %     if isequal(unique(comp_r),unique(comp_p))
