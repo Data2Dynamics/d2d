@@ -575,6 +575,7 @@ end
 fprintf(fid, '\nINPUTS\n');
 
 % TODO: Access parameter name list. Where to implement and how?
+% TODO: Access Units from model. 
 
 if isfield(m,'rule') && ~isempty(m.rule(1).formula) % look for observation functions
     for j = 1:length(m.rule)
@@ -586,6 +587,8 @@ if isfield(m,'rule') && ~isempty(m.rule(1).formula) % look for observation funct
             obsname{j} = split_obs{2};
         elseif iserr(j)
             obsname{j} = split_err{2};
+        else
+            obsname{j} = '';
         end
     end
     [~,B,C] = unique(obsname);
@@ -594,15 +597,17 @@ if isfield(m,'rule') && ~isempty(m.rule(1).formula) % look for observation funct
     
     fprintf(fid, '\nOBSERVABLES\n');
     for j=1:length(B)
-        idx = find((B(j) == C) & isobs');
+        idx = find((j == C) & isobs');
+        if ~isempty(idx)
         fprintf(fid, '%s \t C\t "%s"\t "conc."\t 0 0 "%s" "%s"\n', sym_check(m.rule(idx).variable), 'n/a', ...
             m.rule(idx).formula, m.rule(idx).name); 
+        end
     end
     
     fprintf(fid, '\nERRORS\n');
     for j=1:length(B)
-        idxobs = find((B(j) == C) & isobs');
-        idxerr = find((B(j) == C) & iserr');
+        idxobs = find((j == C) & isobs');
+        idxerr = find((j == C) & iserr');
         if (length(idxobs) == 1) && (length(idxerr) == 1)
             fprintf(fid, '%s\t "%s"\n', sym_check(m.rule(idxobs).variable), sym_check(m.rule(idxerr).formula));
         else
