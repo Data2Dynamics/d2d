@@ -574,18 +574,41 @@ end
 
 fprintf(fid, '\nINPUTS\n');
 
+% TODO: Access parameter name list. Where to implement and how?
+
 if isfield(m,'rule') && ~isempty(m.rule(1).formula) % look for observation functions
+    for j = 1:length(m.rule)
+        split_err = strsplit(m.rule(j).variable,'sigma_');
+        split_obs = strsplit(m.rule(j).variable,'observable_');
+        isobs(j) = length(split_obs) == 2;
+        iserr(j) = length(split_err) == 2;
+        if isobs(j)
+            obsname{j} = split_obs{2};
+        elseif iserr(j)
+            obsname{j} = split_err{2};
+        end
+    end
+    [~,B,C] = unique(obsname);
+    jsobs = find(isobs);
+    jserr = find(iserr);
+    
     fprintf(fid, '\nOBSERVABLES\n');
-    for j=1:length(m.rule)
-        fprintf(fid, '%s \t C\t "%s"\t "conc."\t 0 0 "%s" "%s"\n', sym_check(m.rule(j).variable), 'n/a', ...
-            m.rule(j).formula, m.rule(j).variable);
+    for j=1:length(B)
+        idx = find((B(j) == C) & isobs');
+        fprintf(fid, '%s \t C\t "%s"\t "conc."\t 0 0 "%s" "%s"\n', sym_check(m.rule(idx).variable), 'n/a', ...
+            m.rule(idx).formula, m.rule(idx).name); 
     end
     
     fprintf(fid, '\nERRORS\n');
-    for j=1:length(m.rule)
-        fprintf(fid, '%s\t "sigma_%s"\n', sym_check(m.rule(j).variable), sym_check(m.rule(j).variable));
+    for j=1:length(B)
+        idxobs = find((B(j) == C) & isobs');
+        idxerr = find((B(j) == C) & iserr');
+        if (length(idxobs) == 1) && (length(idxerr) == 1)
+            fprintf(fid, '%s\t "%s"\n', sym_check(m.rule(idxobs).variable), sym_check(m.rule(idxerr).formula));
+        else
+            warning('Double check error model functions in data.def. Something might have gone wrong.')
+        end
     end
-    
 elseif isfield(m.species,'id2')%old behavior
     fprintf(fid, '\nOBSERVABLES\n');
     for j=1:length(m.species)
@@ -600,11 +623,9 @@ elseif isfield(m.species,'id2')%old behavior
     warning('No real observation functions defined!')
 end
 
-
 fprintf(fid, '\nCONDITIONS\n');
 
 fprintf(fid, '\nPARAMETERS\n');
-
 
 fclose(fid);
 
