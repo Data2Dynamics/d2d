@@ -181,7 +181,7 @@ function out = scaleIt( names, outFile, varargin )
     fieldNames = union( fieldNames, expVar );
     
     % Match up the headers
-    expField = 0;
+    expField = 0; lastMaxExpID = 0;
     for jN = 1 : length( fieldNames )
         % Is this the field indicating the experimental replicate number?
         isExpField = strcmp( fieldNames{jN}, expVar );
@@ -190,28 +190,37 @@ function out = scaleIt( names, outFile, varargin )
         for jD = 1 : length( data )
             dataName = data{jD};
             
-            
+            % Is this the experimental idx field?
+            if ( isExpField )
+                % Does this dataset have it?
+                if isfield( data{jD}, fieldNames{jN} )
+                    newData = num2cell(cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})));
+                else
+                    % Generate a new one for this one
+                    fNames = fieldnames( data{jD} );
+                    newData = num2cell( expField * ones( numel( data{jD}.(fNames{1})), 1 ) );
+                    expField = expField + 1;
+                end
+                
+                % +1 is added to make sure that we never overlap even if user starts counting 
+                % from 0 or 1 inconsistently in different files
+                if ( ~opts.nofileincrement )              
+                    if ( isnumeric( cell2mat(data{jD}.(expVar)) ) )
+                        lastMaxExpID = max(cell2mat(data{jD}.(expVar))) + 1;
+                    else
+                        lastMaxExpID = max(str2num(cell2mat(data{jD}.(expVar)))) + 1;
+                    end
+                    expField = expField + lastMaxExpID;
+                end
             % Does it have this field?
-            if ~isfield( data{jD}, fieldNames{jN} )
+            elseif ~isfield( data{jD}, fieldNames{jN} )
+                % Generate NaN's for this one
                 fNames = fieldnames( data{jD} );
-                dud = num2cell( NaN( numel( data{jD}.(fNames{1})), 1 ) );
-                out.(fieldNames{jN}) = [ out.(fieldNames{jN}); dud ];
+                newData = num2cell( NaN( numel( data{jD}.(fNames{1})), 1 ) );
             else
                 newData = data{jD}.(fieldNames{jN});
-                if ( isExpField )
-                    newData     = num2cell(cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})));
-                    % +1 is added to make sure that we never overlap even if user starts counting 
-                    % from 0 or 1 inconsistently in different files
-                    if ( ~opts.nofileincrement )
-                        if ( isnumeric( cell2mat(data{1}.(expVar)) ) )
-                            expField    = expField + max(cell2mat(data{1}.(expVar))) + 2;
-                        else
-                            expField    = expField + max(str2num(cell2mat(data{1}.(expVar)))) + 2;
-                        end
-                    end
-                end
-                out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
             end
+            out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
         end
     end
     
