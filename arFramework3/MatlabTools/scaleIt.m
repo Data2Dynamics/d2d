@@ -181,36 +181,32 @@ function out = scaleIt( names, outFile, varargin )
     fieldNames = union( fieldNames, expVar );
     
     % Match up the headers
-    expField = 0; lastMaxExpID = 0;
+    expField = 0;
     for jN = 1 : length( fieldNames )
         % Is this the field indicating the experimental replicate number?
         isExpField = strcmp( fieldNames{jN}, expVar );
         
         out.(fieldNames{jN}) = {};
-        for jD = 1 : length( data )
-            dataName = data{jD};
-            
+        for jD = 1 : length( data )            
             % Is this the experimental idx field?
             if ( isExpField )
                 % Does this dataset have it?
                 if isfield( data{jD}, fieldNames{jN} )
-                    newData = num2cell(cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})));
+                    if ( isnumeric(data{jD}.(fieldNames{jN}){1}) )
+                        newData = num2cell( cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})) );
+                    else
+                        newData = num2cell( cellfun(@(x)str2num(x)+expField, data{jD}.(fieldNames{jN})) );
+                    end
                 else
                     % Generate a new one for this one
                     fNames = fieldnames( data{jD} );
                     newData = num2cell( expField * ones( numel( data{jD}.(fNames{1})), 1 ) );
-                    expField = expField + 1;
                 end
                 
                 % +1 is added to make sure that we never overlap even if user starts counting 
                 % from 0 or 1 inconsistently in different files
                 if ( ~opts.nofileincrement )              
-                    if ( isnumeric( cell2mat(data{jD}.(expVar)) ) )
-                        lastMaxExpID = max(cell2mat(data{jD}.(expVar))) + 1;
-                    else
-                        lastMaxExpID = max(str2num(cell2mat(data{jD}.(expVar)))) + 1;
-                    end
-                    expField = expField + lastMaxExpID;
+                    expField = max(cell2mat(newData)) + 1;
                 end
             % Does it have this field?
             elseif ~isfield( data{jD}, fieldNames{jN} )
