@@ -305,6 +305,9 @@ ar.chi2s_trial = nan(nruns,NumberOfChains);
 ar.acceptance = nan(nruns,NumberOfChains);
 ar.exchange = nan(nruns,NumberOfChains);
 
+if UseScaling==1
+    ar.scalefactor = nan(nruns,NumberOfChains);
+end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -696,6 +699,11 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
                 ar.AcceptedSwaps = AcceptedSwaps;
                 ar.ProposedSwaps = ProposedSwaps;
             end
+            if UseScaling ==1
+                ar.scalefactor(jcount+jindexoffset,:)=CovarianceAdaptationFactor;
+            end
+            
+            
             jthin = 1;
             jcount = jcount + 1;
         end
@@ -742,9 +750,12 @@ mcmc.chi2s_trial= ar.chi2s_trial;
 mcmc.acceptance = ar.acceptance;
 mcmc.MethodName = mName;
 if ( exchange_method > 0 )
-mcmc.exchange   = ar.exchange;
-mcmc.AcceptedSwaps = ar.AcceptedSwaps;
-mcmc.ProposedSwaps = ar.ProposedSwaps;
+    mcmc.exchange   = ar.exchange;
+    mcmc.AcceptedSwaps = ar.AcceptedSwaps;
+    mcmc.ProposedSwaps = ar.ProposedSwaps;
+end
+if UseScaling==1
+   mcmc.scalefactor = ar.scalefactor;
 end
 
 fprintf('\n%8.0f bound violations observed (for all chains)\nThis is %3.0f percent of all iterations.\n\n', NumberOfBoundViolations,100*NumberOfBoundViolations/(nruns*NumberOfChains));
