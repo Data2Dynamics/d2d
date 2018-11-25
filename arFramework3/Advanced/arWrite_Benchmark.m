@@ -52,12 +52,12 @@ global ar
     end
     tmp = sprintf('The model contains %i data points, %i free parameters and %i experimental conditions',ar.ndata,sum(ar.qFit==1),sum_cond);
     General_string{end+1,1} = tmp;
-    General_string{end+1,1} = 'Errors are assumend as additive Gaussian errors';
+    General_string{end+1,1} = 'Errors are assumed as additive Gaussian errors';
     if ar.config.fiterrors == -1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)==0)
         General_string(end+2,1:2) = {'Chi2 value of the model is ', chi2Val.chi2_all};
         General_string(end+3,1:2)={'Compartments','size'};
     else
-        General_string(end+2,1:2) = {'Likelihood value of the model is ', chi2Val.loglik_all};
+        General_string(end+2,1:2) = {'Log-likelihood value of the model is ', chi2Val.loglik_all};
         General_string(end+1,1:2) = {'Chi2 value of the model is ', chi2Val.chi2_res + chi2Val.chi2_prior + chi2Val.chi2_constr};
         General_string(end+2,1:2)={'Compartments','size'};
     end
