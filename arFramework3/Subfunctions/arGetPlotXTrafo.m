@@ -22,7 +22,11 @@ function [xtrafo, xlegend] = arGetPlotXTrafo(jm, jplot)
     % Not a dose response
     if ( ar.model(jm).plot(jplot).doseresponse == 0 )
         xtrafo = @(x)x;
-        tUnits = ar.model(jm).data(jd).tUnits;
+        if jd==0 % not plotting data
+            tUnits = ar.model(jm).tUnits;            
+        else
+            tUnits = ar.model(jm).data(jd).tUnits;
+        end
         xlegend = sprintf('%s [%s]', tUnits{3}, tUnits{2});
         return;
     end
