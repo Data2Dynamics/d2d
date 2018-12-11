@@ -132,7 +132,7 @@ meritvals.npara = sum(ar.qFit==1);
 
 meritvals.fiterrors = ar.config.fiterrors;
 meritvals.fiterrors_correction = ar.config.fiterrors_correction;
-
+meritvals.useFitErrorCorrection = ar.config.useFitErrorCorrection;
 
 %% meritval
 switch lower(whichone)  % case insensitive
