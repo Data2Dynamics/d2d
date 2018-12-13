@@ -1,15 +1,17 @@
-% function arAddCustomResidual( name, fn, overwrite )
-% Arguments:
-%    name           - Name of the residual
-%    fn             - Function handle of the residual
-%    overwrite      - Should an existing function handle with the same name
-%                     be overwritten?
+% function arAddCustomResidual(name, fn, overwrite )
+% 
+% Adds a custom residual. Custom residuals must be specified with a 
+% name and a function handle.
 %
-% Adds a custom residual. Custom residuals must be specified with and name, function handle.
+%    name           Name of the residual
+%    fn             Function handle of the residual
+%    overwrite      Should an existing function handle with the same name
+%                   be overwritten?
+%
 %
 
-function arAddCustomResidual( name, fn, overwrite )
-    global ar;
+function arAddCustomResidual(name, fn, overwrite )
+    global ar
     
     % If it doesn't exist, create the structure
     if ( ~isfield( ar.config, 'user_residual_fun' ) || isempty( ar.config.user_residual_fun ) )

@@ -1,27 +1,41 @@
+% ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
+%
 % Add solver re-initialization point
 %
-% Usage:
-%   arAddEvent((ar), model, condition, time point )
+%   ar            ar struct, if not specified the global one is modified
+%   model         index of model
+%   conditions    indicies of conditions in which the event is set, 'all' -> all conditions
+%   timepoints    timepoints when a event is added
+%   statename     string, neccessary when the concentration of a state is changed
+%   A             change value of state with "statename" to Ax+B where x represents 
+%   B             the old state variable before the event.
+%   sA            sensitivity matrix
+%   sB            sensitivity matrix
+%
+% Output variable
+%   ar            ar struct, if only local ar should be changed
 %
 % Adds an event to a condition. Event is added for a specific condition at
 % a specific time point. If you wish to see how the conditions are set up,
-% you can use the command 'arShowDataConditionStructure'. Specifying 'All'
+% you can use the command 'arShowDataConditionStructure'. Specifying 'all'
 % for the conditions sets the event for all model conditions.
 %
 % If a change at the event is required, also specify a state name, and a
 % change. Event changes are of the form Ax+B; where x represents the old
 % state variable before the event.
 %
-%  arAddEvent((ar), model, condition, time point, (state name), (A), (B))
-%
 % Advanced use:
-% If one wishes to set the entire state vector and sensitivity vector, it 
-% is also possible to supply a (1 x nStates) vector for A and B; and a
-% (1 x nStates x nParameter) matrix for sA and sB. Note that no checks are
-% made whether the supplied sensitivity matrix is consistent with the state
-% change!
+%  If one wishes to set the entire state vector and sensitivity vector, it 
+%  is also possible to supply a (1 x nStates) vector for A and B; and a
+%  (1 x nStates x nParameter) matrix for sA and sB. Note that no checks are
+%  made whether the supplied sensitivity matrix is consistent with the state
+%  change!
 %
-% arAddEvent((ar), model, condition, time point, (state name), (A), (B), (sA), (sB))
+% Example usages:
+%   arAddEvent(ar, model, condition, timepoint ) 
+%   arAddEvent(model, condition, timepoint )  
+%   arAddEvent(model, condition, timepoint , statename, A, B) 
+%   arAddEvent(model, condition, timepoint , statename, A, B, sA, sB) 
 %
 % Note:
 %    arAddEvent invokes arLink; if this is undesirable, pass an extra
@@ -37,6 +51,9 @@ function ar = arAddEvent( varargin )
     if ( isstruct(varargin{1}) )
         ar = varargin{1};
         varargin = varargin(2:end);
+    end
+    if isempty(varargin{1})
+        error('First variable has to be an ar struct of a model index m.')
     end
 
     % If we were called from a high level event function, since the higher

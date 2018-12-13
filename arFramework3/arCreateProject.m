@@ -1,4 +1,6 @@
-% create D2D file structure and template .def files
+% arCreateProject()
+% 
+%    create D2D file structure and template .def files
 
 function arCreateProject
 
