@@ -1,36 +1,40 @@
-% load model parameters and parameter setting from .mat
+% [ars,ps] = arLoadPars([filename], [fixAssigned], [pars_only], [result_path], [pattern], [antipattern])
+%
+% load model parameters and parameter setting from filename.mat
 % and reconcile with current parameters
 %
-% arLoadPars(filename, fixAssigned, only_values, path, pattern)
-%
-% filename:     source file name
-%               or number according to the filelist
-%               or a previously created global variable ar
-% fixAssigned:  fix the assigned parameters
-% only_values:  only load parameter values, not bound and status
-% path:         path to the results folder, default: './Results'
-% pattern:      search pattern for parameter names
-% antipattern:  pattern for parameters to exclude from load
+%   filename      source file name
+%                 or number according to the filelist
+%                 or a previously created global variable ar
+%                 or uses fileChooser to allow user selection []
+%   fixAssigned   fix the assigned parameters [false]
+%   pars_only     only load parameter values, not bound and status [false]
+%   result_path   path to the results folder ['./Results']
+%   pattern       search pattern within parameter names []
+%   antipattern   pattern for parameters to exclude from load []
 % 
+%   ars           cell array of workspaces with loaded parameters (optional output)
+%   ps            array of parameter sets (optional output)
+%  
+% Examples 
+%   loading several parameter sets:
+%       ars = arLoadPars({2,5});
+%       [ars,ps] = arLoadPars({'Result1','ResultNr2'});
+%   loading all parameter sets:
+%       ars = arLoadPars('all');
+%       [ars,ps] = arLoadPars('all');
+%       arFits(ps)
+%   loading from different source folder:
+%       arLoadPars('20141112T084549_model_fitted',[],[],'../OtherFolder/Results')
 % 
-% Examples for loading several parameter sets:
-%   ars = arLoadPars({2,5});
-%   [ars,ps] = arLoadPars({'Result1','ResultNr2'});
-% 
-% Examples for loading all parameter sets:
-%   ars = arLoadPars('all');
-%   [ars,ps] = arLoadPars('all');
-%   arFits(ps)
-% 
-% Example:
-%   arLoadPars('20141112T084549_model_fitted',[],[],'../OtherFolder/Results')
+% see also arLoadParsSingle arImportPars
 
-function varargout = arLoadPars(filename, fixAssigned, pars_only, pfad, pattern, antipattern)
-if(~exist('pfad','var') || isempty(pfad))
-    pfad = './Results';
+function varargout = arLoadPars(filename, fixAssigned, pars_only, result_path, pattern, antipattern)
+if(~exist('pfad','var') || isempty(result_path))
+    result_path = './Results';
 else
-    if(strcmp(pfad(end),filesep)==1)
-        pfad = pfad(1:end-1);
+    if(strcmp(result_path(end),filesep)==1)
+        result_path = result_path(1:end-1);
     end
 end
 
@@ -50,37 +54,37 @@ if(~exist('antipattern', 'var' ) || isempty(antipattern))
 end
 
 if(~exist('filename','var') || isempty(filename))
-    [~, filename] = fileChooser(pfad, 1, true);
+    [~, filename] = fileChooser(result_path, 1, true);
 elseif(isnumeric(filename)) % filename is the file-number
-    [~, ~, file_list] = fileChooser(pfad, 1, -1);    
+    [~, ~, file_list] = fileChooser(result_path, 1, -1);    
     filename = file_list{filename};
 elseif(strcmp(filename,'end'))
-    filelist = fileList(pfad);
+    filelist = fileList(result_path);
     filename = filelist{end};
 elseif(strcmp(filename,'all'))
-    filename = fileList(pfad);
+    filename = fileList(result_path);
 elseif ischar(filename)
-    if ~exist(pfad,'dir')
-        error('Folder %s does not exist.',pfad);
+    if ~exist(result_path,'dir')
+        error('Folder %s does not exist.',result_path);
     end
     [~,filename]=fileparts(filename);    % remove path
 end
 
 
 if(~iscell(filename))    
-    ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, pfad, pattern, antipattern);
+    ar = arLoadParsCore(ar, filename, fixAssigned, pars_only, result_path, pattern, antipattern);
     varargout = cell(0);
 else
     ars = cell(size(filename));
     for i=1:length(filename)
         if(isnumeric(filename{i}))
-            [~, ~, file_list] = fileChooser(pfad, 1, -1);
+            [~, ~, file_list] = fileChooser(result_path, 1, -1);
             file = file_list{filename{i}};
         else
             file = filename{i};
         end
 
-        ars{i} = arLoadParsCore(ar, file, fixAssigned, pars_only, pfad, pattern, antipattern);
+        ars{i} = arLoadParsCore(ar, file, fixAssigned, pars_only, result_path, pattern, antipattern);
     end
     varargout{1} = ars;
     if nargout>1

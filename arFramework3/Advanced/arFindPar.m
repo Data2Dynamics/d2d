@@ -1,31 +1,41 @@
-% Finds parameter(s) in the ar structure and returns their indices 
-% as a vector.
+% olist = arFindPar([ar], identifier, [varargin])
 %
-% Usage:
-%   arFindPar( (ar), names, (returnNames), (verbose), (dynamic), (exact), (preserve) )
+% Finds parameter(s) in the ar structure and returns their indices as a sorted vector.
+% 
+% ar            ar struct. Default is global [ar] struct.
+% identifier    string or cell array of parameter names to be printed
+% varargin      one or multiple optional strings, you can use to turn on the 
+%               following options:
+% 'names'       returns parameter names instead of indices
+% 'verbose'     prints the parameter names to command window
+% 'dynamic'     select only the dynamic parameters
+% 'initial'     select only parameters contributing to initial values of states
+% 'exact'       searches for exact match instead of seraching for pattern
+% 'preserve'    output is kept in order of the input identifiers instead of
+%               sorting it by indices.
 %
-% Example:
-%   arFindPar( ar, 'degrad' )
-%       Returns all parameter IDs containing "degrad" in the name
-%   arFindPar( ar, 'degrad', 'exact' )
-%       Returns the parameter ID corresponding to the parameter named degrad
-%   arFindPar( ar, {'degrad', 'pro'} )
-%       Returns all parameter IDs whose name contains "degrad" or "pro"
-%   arFindPar( ar, {'degrad', 'pro'}, 'names' )
-%       Returns names of the parameters whose name contains "degrad" or "pro"
-%   arFindPar( ar, {'degrad', 'pro'}, 'verbose' )
-%       Shows the names of the parameters it is returning
-%   arFindPar( ar, {'degrad', 'pro'}, 'dynamic', 'names' )
-%       Only returns dynamic parameters and returns them by name
-%   arFindPar( ar, {'degrad', 'pro'}, 'initial', 'names' )
-%       Only returns initials and returns them by name
-%
-% The argument ar is optional. If not specified, the global ar structure is
-% used. The argument preserve preserves the ordering w.r.t. names.
+% olist         list of indices/names in a (un)sorted order.
+% 
+% Examples
+%   Return all parameter IDs containing "degrad" in the name
+%       arFindPar( ar, 'degrad' )
+%   Return the parameter ID corresponding to the parameter named degrad
+%       arFindPar( ar, 'degrad', 'exact' )
+%   Return all parameter IDs whose name contains "degrad" or "pro"     
+%       arFindPar( ar, {'degrad', 'pro'} )
+%   Return names of the parameters whose name contains "degrad" or "pro"
+%       arFindPar( ar, {'degrad', 'pro'}, 'names' )
+%   Show the names of the parameters it is returning
+%       arFindPar( ar, {'degrad', 'pro'}, 'verbose' )
+%   Return dynamic parameters only and returns them by name
+%       arFindPar( ar, {'degrad', 'pro'}, 'dynamic', 'names' )
+%   Return initials only and returns them by name
+%       arFindPar( ar, {'degrad', 'pro'}, 'initial', 'names' )
 %
 % Note: If you wish to print formatted parameter values or get a parameter
 % value, use arGetPars or arPrint instead.
-%
+% 
+% See also  arGetPars arPrint
 
 function olist = arFindPar( varargin )
 

@@ -1,28 +1,33 @@
-% arSetPars(pLabel, p, qFit, qLog10, lb, ub, type, meanp, stdp)
-% 
-% set parameter value and properties by label
+% arSetPars(pLabel, [p], [qFit], [qLog10], [lb], [ub], [type], [meanp], [stdp])
+% arSetPars(arStruct2) % Alternative call
 %
-% pLabel	name of the parameter
-% 
-%           Several parameter names can be provided as cell:
-%           - either single values are provided and set for all parameters 
-%           - or the length of the provided values has to coincide with the
+% set parameter value and properties of parameter identified by plabel
+%
+% arStruct2 information about parameter is taken from provided arStruct2
+% pLabel    name of the parameter or several parameter names can be
+%           provided as cell array.
+%           The following properties can be changed, by providing:
+%           - either single values and setting it for all parameters 
+%           - or an array of values that has to coincide with the
 %             number of parameter labels
-% p			value of the  parameter(s)
-% qFit		0=fixed, 1=fitted, 2=constant
-% qLog10	0=normal, 1=log10 parameter values
-% lb		lower parameter bound(s)
-% ub		upper parameter bound(s)
-% type		0=box prior, 1=normal prior
-% meanp		mean of normal prior(s)
-% stdp		standard deviation of normal prior(s)
+%           - or an empty array [] that leaves this property unchanged.
+% p         value of the  parameter(s)
+% qFit      0=fixed, 1=fitted, 2=constant
+% qLog10    0=normal, 1=log10 parameter values
+% lb        lower parameter bound(s)
+% ub        upper parameter bound(s)
+% type      0=box prior, 1=normal prior
+% meanp     mean of normal prior(s)
+% stdp      standard deviation of normal prior(s)
+%
+% Example
+%   arSetPars('init_A',2)
+%       sets parameter init_A to value 2 leaving the other properties unchanged
+%   arSetPars('init_A',0,1,1,-2,2,0)
+%       sets parameter init_A to value 0 on log10 scale and fits it within
+%       bounds [-2,2].
 % 
-% 
-% Alternative call:
-% arSetPars(arStruct2)
-% 
-%   In this case, the respective argumens are taken from the provided
-%   ar-struct.
+% see also arSetParsPattern
 
 function arSetPars(pLabel_or_ar, p, qFit, qLog10, lb, ub, type, meanp, stdp)
 

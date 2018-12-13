@@ -1,4 +1,10 @@
+% arSetOptimTol([tolFun],[tolX])
+% 
 % Set optimization tolerances
+%
+% tolFun    [1e-6]
+% tolX      [1e-6]
+% 
 % MATLAB optimization routines terminate when the relative change of the
 % log-likelihood is less than a given threshold. For likelhood-ratio tests
 % however only absolute differences are meaningful. As the likelihood
@@ -6,11 +12,6 @@
 % not recommended.
 % This functions adjusts the tolerances accordingly and should be called
 % once before fitting.
-%
-% arSetOptimTol(tolFun,tolX)
-%
-% tolFun    [1e-6]
-% tolX      [1e-6]
 
 function arSetOptimTol(tolFun,tolX)
 

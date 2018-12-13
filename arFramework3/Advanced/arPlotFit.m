@@ -1,4 +1,12 @@
-% Plot convergence of a single fit
+% arPlotFit([index], [qp])
+% 
+% plots convergence of a single fit
+%  
+% index     which fit shall be visualized [current]
+% qp        which parameters shall be visualized [ar.qFit==1]
+% 
+% A figure is created with 8 subplots visualizing the development of the likelihood
+% and selected parameters during the optimization.
 
 function arPlotFit(index, qp)
 

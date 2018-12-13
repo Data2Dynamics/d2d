@@ -1,9 +1,13 @@
-function arMergeFits
-% useful if several workspaces e.g. from arFitClusterLHS with randomseed were
-% saved
-% select workspaces to be compared and check overall performance
-% e.g. by arPlotChi2
+% arMergeFits
+%
+% arMergeFits merges fits from different workspaces which are selected via
+% fileChooser. This is useful if several workspaces e.g. from arFitClusterLHS 
+% with different randomseeds were saved select workspaces to be compared and 
+% check overall performance e.g. by arPlotChi2 or arPlotfits
+% 
+% see also arPlotChi2 arPlotfits
 
+function arMergeFits
 
 global ar
 
