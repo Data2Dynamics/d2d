@@ -65,7 +65,21 @@ for jk=jks
     xlim([1 size(ps,1)]);
     title(arNameTrafo(ar.pLabel{jk}))
     
+    
+%     if(ar.xlimtmp2(count)>0)
+%         ylim([ar.xlimtmp(count,1)-ar.xlimtmp2(count)*0.05 ar.xlimtmp(count,2)+ar.xlimtmp2(count)*0.05]);
+%     end
+%     xlim([1 size(ps,1)]);
+%     title(arNameTrafo(ar.pLabel{jk}))
+%     
+%      ar.xlimtmp(count,:) = xlimtmp;
+%      ar.xlimtmp2(count) = xlimtmp2;
+     
     count = count + 1;
+    
+    
+    
+    
 end
 
 

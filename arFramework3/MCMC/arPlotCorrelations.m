@@ -39,6 +39,7 @@ for FigureNumber = 1:NumberOfFigures
     NumberOfRows = length(FigureParaVector);
 
     figure('Name',sprintf('2D Correlations - Figure %d / %d',FigureNumber,NumberOfFigures),'NumberTitle','off')
+    set(gcf, 'Position', get(0, 'Screensize'));
     % Plot parameter distribution
     for paraindex=FigureParaVector
         hold on
@@ -46,16 +47,24 @@ for FigureNumber = 1:NumberOfFigures
         if i ~=1
             subplot(NumberOfRows,NumberOfColumns,1+(i-1)*NumberOfColumns)
             histogram(ar.ps(:,paraindex))
-            line([ar.p(paraindex), ar.p(paraindex)], ylim, 'LineWidth', 2, 'Color', 'r');
-            title(ar.pLabel{paraindex});
-            ax{i} = gca; % current axes
+            set(gca,'XTickLabel',[],'YTickLabel',[]);
+            set(gca,'xaxisLocation','top')
             camroll(90)
+            xlabel(ar.pLabel{paraindex},'FontSize', 8,'Interpreter', 'none');
+            %line([ar.p(paraindex), ar.p(paraindex)], ylim, 'LineWidth', 2, 'Color', 'r');
+            %title(ar.pLabel{paraindex});
+            ax{i} = gca; % current axes
+
         end
         subplot(NumberOfRows,NumberOfColumns,1+i+(i-1)*NumberOfColumns)
         histogram(ar.ps(:,paraindex))
-        line([ar.p(paraindex), ar.p(paraindex)], ylim, 'LineWidth', 2, 'Color', 'r');
-        title(ar.pLabel{paraindex});
+        set(gca,'XTickLabel',[],'YTickLabel',[]);
+        set(gca,'xaxisLocation','top')
+        xlabel(ar.pLabel{paraindex},'FontSize', 8,'Interpreter', 'none');
+        %line([ar.p(paraindex), ar.p(paraindex)], ylim, 'LineWidth', 2, 'Color', 'r');
+        %title(ar.pLabel{paraindex});
         ax{i} = gca; % current axes
+
     % Plot 2D-correlations
         for CorrelationIndex=FigureParaVector(1:i-1)
             k = find(CorrelationIndex==FigureParaVector);
@@ -64,17 +73,25 @@ for FigureNumber = 1:NumberOfFigures
             subplot(NumberOfRows,NumberOfColumns,1+k+(i-1)*NumberOfColumns)
             [N,C]= hist3([ar.ps(:,paraindex),ar.ps(:,CorrelationIndex)],[80 80]);
             imagesc([C{2}(1),C{2}(80)],[C{1}(1),C{1}(80)],log(N));
+            set(gca,'XTickLabel',[],'YTickLabel',[]);
             set(gca,'YDir','normal')
+            
             hold on             
-            title(sprintf('R = %0.2f',R(2)));
+            %title(sprintf('R = %0.2f',R(2)));
+            set(gca,'xaxisLocation','top')
+            if (abs(R(2)) > 0.5)
+                xlabel(sprintf('R = %0.2f',R(2)),'FontSize', 8,'Interpreter', 'none','color',[1 0 0]);
+            else
+                xlabel(sprintf('R = %0.2f',R(2)),'FontSize', 8,'Interpreter', 'none');
+            end
 
 
-           xlim(ax{k}.XLim);
-           ylim(ax{i}.XLim);
+            xlim(ax{k}.XLim);
+            ylim(ax{i}.XLim);
 
         end
-    end      
-    set(gcf, 'Position', get(0, 'Screensize'));
+    end   
+    set(findall(gcf,'-property','FontSize'),'FontSize',14)
 end
 
 end

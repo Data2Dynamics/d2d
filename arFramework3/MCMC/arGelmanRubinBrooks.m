@@ -21,7 +21,8 @@ else
   n = n1;
 end
 
-m1 = mean(d1); m2 = mean(d2);
+m1 = mean(d1); 
+m2 = mean(d2);
 m = mean([m1;m2]);
 
 
