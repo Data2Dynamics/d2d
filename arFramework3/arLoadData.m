@@ -497,7 +497,7 @@ end
 % collect parameters needed for OBS
 ptmp = union(ar.model(m).px, ar.model(m).pu);
 ar.model(m).data(d).p = union(ptmp, union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
-ar.model(m).data(d).pystd = setdiff(ar.model(m).data(d).pystd, ar.model(m).data(d).p); %Remove dynamic variables from error model parameters
+ar.model(m).data(d).pystd = setdiff(ar.model(m).data(d).pystd, ar.model(m).data(d).p); %Remove dynamic variables from error model parameters, e.g. scaling parameters if sd propto scale*x.
 ar.model(m).data(d).p = union(ar.model(m).data(d).p, ar.model(m).data(d).pystd); %R2013a compatible
 
 % Union's behaviour is different when first arg is empty. In this case, a

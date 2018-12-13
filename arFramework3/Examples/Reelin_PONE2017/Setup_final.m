@@ -43,6 +43,10 @@ else
     arLoadPars('Initial_BestFit')
 end
 
+%Fix observational parameters without corresponding data
+arSetPars({'offset_tApo_ExpEC50R','offset_tApo_ExpReelin_DR','offset_tApo_ExpReelin_Inh','offset_tApo_ExponlyInh','offset_tSFK_ExpEC50R','offset_tSFK_ExpReelin_DR','offset_tSFK_ExpReelin_Inh','offset_tSFK_ExponlyInh','scale_tApo__ExpEC50R','scale_tApo__ExpReelin_DR','scale_tApo__ExpReelin_Inh','scale_tApo__ExponlyInh','scale_tSFK_ExpEC50R','scale_tSFK_ExpReelin_DR','scale_tSFK_ExpReelin_Inh','scale_tSFK_ExponlyInh',},zeros(1,16),ones(1,16)*2,zeros(1,16),ones(1,16)*-5,ones(1,16)*3)
+arSetPars('offset_tSFK_ExpReelinStim',[],2,1,-3,3)
+
 %No log plotting
 ar.model(1).qPlotYs(:) = 1;
 for i = 1:length(ar.model(1).data)

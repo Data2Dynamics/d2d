@@ -1,31 +1,35 @@
+% function arReduce( (m), (keepTotals) )
 %
-% arReduce(m)
+% This function automatically reduces the model by removing one state for
+% every conserved moiety. It needs to be called right after arLoadModel if 
+% this method is to be used. Before loading data and before compilation!
 %
-%   m - Model index (optional, default = 1)
+%   m               Model index                     [1]
+%   keepTotals      Express model in totals?        [0]
 %
-%   This function automatically reduces the model by removing one state for
-%   every conserved moiety. It needs to be called right after arLoadModel if 
-%   this method is to be used. Before loading data and before compilation!
-%
+% Example(s):
 %   arInit;
 %   arLoadModel(mymodel);
 %   arReduce;
 %   arLoadData etc.
+%   arCompileAll;
 %
-%   Note: arReduce will not change the model parameters. Internally, it
-%   reformulates to a formulation using 1 total pool and N-1 states per
-%   conserved moieties; but the model parameters will remain the same. The
-%   mapping from independent initials to totals is done internally (i.e. 
-%   you will *not* end up with a formulation in terms of totals).
+% Note: arReduce will not change the model parameters. Internally, it
+% reformulates to a formulation using 1 total pool and N-1 states per
+% conserved moieties; but the model parameters will remain the same. The
+% mapping from independent initials to totals is done internally (i.e. 
+% by default you will *not* end up with a formulation in terms of totals).
 %
-%   States which are removed are placed in the derived variables (ar.model.z),
-%   such that they can still be used in observation functions.
+% States which are removed are placed in the derived variables (ar.model.z),
+% such that they can still be used in observation functions.
 %
-%   This functionality can be used to greatly speed up models that use 
-%   pre-equilibrated steady states. In this case, simulation of the
-%   sensitivity equations can be avoided when equilibrating the model.
-%   This rapid equilibration can be toggled via the command arFastSensis.
-
+% This functionality can be used to greatly speed up models that use 
+% pre-equilibrated steady states. In this case, simulation of the
+% sensitivity equations can be avoided when equilibrating the model.
+% This rapid equilibration can be toggled via the command arFastSensis.
+%
+% See also: arSteadyState, arFastSensis
+%
 function arReduce( m, keepTotals )
     global ar;
     

@@ -1,0 +1,38 @@
+DESCRIPTION
+"Borghans1997 - Calcium Oscillation - Model 3"
+
+PREDICTOR
+t	 T	 "n/a"	 time	 0	 10	
+
+COMPARTMENTS
+extracellular	 V	 "n/a"	 vol.	 1
+cytosol	 V	 "n/a"	 vol.	 1
+intravesicular	 V	 "n/a"	 vol.	 1
+
+STATES
+Z_state	 C	 "n/a"	 conc.	 cytosol	 1	 "Ca^{2+} in cytosol"
+Y_state	 C	 "n/a"	 conc.	 intravesicular	 1	 "Ca^{2+} in Ca^{2+}-sensitive pool"
+A_state	 C	 "n/a"	 conc.	 cytosol	 1	 "IP_3 concentration"
+
+INPUTS
+
+REACTIONS
+ 	-> Z_state 	 CUSTOM "v0+v1*beta_par"
+Z_state 	-> Y_state 	 CUSTOM "Vm2*Z_state^2/(K2^2+Z_state^2)"
+Y_state 	-> Z_state 	 CUSTOM "Vm3*A_state^4*Y_state^2*Z_state^4/((Ka^4+A_state^4)*(Ky^2+Y_state^2)*(Kz^4+Z_state^4))"
+Y_state 	-> Z_state 	 CUSTOM "Kf*Y_state"
+Z_state 	->  	 CUSTOM "K_par*Z_state"
+ 	-> A_state 	 CUSTOM "beta_par*Vp"
+A_state 	->  	 CUSTOM "Vd*A_state^2*Z_state^n_par/((Kp^2+A_state^2)*(Kd^n_par+Z_state^n_par))"
+A_state 	->  	 CUSTOM "epsilon_par*A_state"
+
+DERIVED
+
+OBSERVABLES
+Ca  C	au   conc.   1	1   "scale*Z_state+offset"
+
+ERRORS
+Ca     "sigma"
+
+CONDITIONS
+

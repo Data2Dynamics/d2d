@@ -1,27 +1,40 @@
-% This function can be used to constrain steady state solutions.
-% Added residual can be removed by calling arRemoveCustomResidual('SteadyStateBounds')
+% arSteadyStateBounds(m, c, xl, xu, zl, zu, [logx], [logz], [weightx], [weightz], [showConstraints])
 %
-% It applies a quadratic penalty when model states or derived variables leave a certain range.
+% This function can be used to constrain steady state solutions by a quadratic penalty.
+%
+%   m               Model index
+%   c               Condition index
+%   xl              Vector of lower bounds for states
+%                   (nan indicates no bound)
+%   xu              Vector of upper bounds for states
+%                   (nan indicates no bound)
+%   zl              Vector of lower bounds for derived variables 
+%                   (nan indicates no bound)
+%   zu              Vector of upper bounds for derived variables
+%                   (nan indicates no bound)
+%   logx            Vector of booleans whether to treat x in        [true]
+%                   logarithmic space
+%   logz            Vector of booleans whether to treat z in        [true]
+%                   logarithmic space
+%   weightx         Vector of weight(s) for the penalty on          [10]
+%                   the states (inverse of SD)
+%   weightz         Vector of weight(s) for the penalty on          [10]
+%                   the derived variables.
+%   showConstraints Show when the constraints are active.           [0]
+%   name            Use a custom name for the constraint.           ['SteadyStateBounds']
+%
+% This function applies a quadratic penalty when model states or derived 
+% variables leave a certain range.
 %       (x-ub)^2        if x > ub
 %       (x-lb)^2        if x < lb
 %       0               otherwise
 %
-% Usage:
-%   arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz, showConstraints)
+% Examples:
+%   arSteadyStateBounds(1, 1, [1,2,3], [2,3,4], [3,4,5], [4,5,6])
 %
-%   m               - Model index
-%   c               - Condition index
-%   xl              - Lower bound states (isnan indicates no bound)
-%   xu              - Upper bound states (isnan indicates no bound)
-%   zl              - Lower bound derived variables (isnan indicates no bound)
-%   zu              - Upper bound derived variables (isnan indicates no bound)
-%   logx            - Treat x in logarithmic space
-%   logz            - Treat z in logarithmic space
-%   weightx         - Weight(s) for the penalty on the states (inverse of SD)
-%   weightz         - Weight(s) for the penalty on the derived variables
-%   showConstraints - Show when the constraints are active
-%   name            - Use a custom name for the constraint
-
+% Hint: Added residual can be removed by calling: arRemoveCustomResidual('SteadyStateBounds')
+%
+% See also arRemoveCustomResidual
 function arSteadyStateBounds(m, c, xl, xu, zl, zu, logx, logz, weightx, weightz, showConstraints, name)
 
     global ar;
