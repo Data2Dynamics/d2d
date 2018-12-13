@@ -1,5 +1,17 @@
-% plot mcmc chains
-
+% arPlotMCMCChains(jks, Nthinning, plot_trials)
+% 
+% Plots mcmc chains, saved in ar.ps parameter-wise after sampling them
+% with arMC3()
+% 
+%   jks            parameters, which are plotted               [all]   
+%   Nthinning      thinning rate for plotting                  [1]
+%   plot_trials    Plot MCMC chains of trial points 
+%                  instead of accepted points                  [false]
+% 
+% Example:
+%       arPlotMCMCChains([1 2 35],10)
+%
+% See also arMC3, arPlotMarginalized
 function arPlotMCMCChains(jks, Nthinning, plot_trials)
 
 global ar

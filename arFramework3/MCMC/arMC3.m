@@ -1,50 +1,59 @@
+% [mcmc] = arMC3([nruns], [nburnin],[method],[exchange_method])
+% 
 % MCMC sampler with multiple sampling methods and Parallel Tempering
 %
-% function arMCMC(nruns, nburnin, method, exchange)
-%
-%   nruns 
-%               Number of runs
-%   nburnin
-%               Number of Burn-In iterations to be discarded (only for
-%              adaptive MCMC)
-%   method for proposal density:
-%           1 = N(0,1)
-%           2 = N(0,c) scaled
-%           3 = Adaptive MCMC
-%           4 = Fisher based (default)
-%           5 = Simplified mMALA SVD
-%           6 = Simplified mMALA Cholesky
-%   exchange
-%           0 = only one chain - no exchange method (default)
-%           1 = Parallel Tempering using equal energy exchange method
+%   nruns           Number of runs                               [10000]
+%   nburnin         Number of Burn-In iterations to be discarded [0]
+%   method for proposal density:                                 [4]
+%                   1 = N(0,1)
+%                   2 = N(0,c) scaled
+%                   3 = Adaptive MCMC
+%                   4 = Fisher based (default)
+%                   5 = Simplified mMALA SVD
+%                   6 = Simplified mMALA Cholesky
+%   exchange_method                                              [0]
+%                   0 = single chain - no exchanges (default)
+%                   1 = Parallel Tempering using equal energy exchange method
 %  
-%  all (further) settings are set in ar.mc3 (nruns, nburnin, method, exchange
-%  are overwritten if provided directly to arMC3)
+%   all (further) options are set in ar.mc3 (nruns, nburnin, method,
+%            exchange_method are overwritten if provided directly to arMC3)
 % 
-% Important settings include:
+%   Important settings in ar.mc3 include:
 %
-%   ar.mc3.UseScaling:
+%   ar.mc3.UseScaling:                                           [0]
 %           1 = use Adaptation of proposal distribution to optimize
-%           acceptance probability (default)
+%           acceptance probability
 %           0 = no adaptation used
 %
-%   ar.mc3.NumberOfChains
+%   ar.mc3.NumberOfChains                                        [10]
 %           Sets the number of chains used for parallel tempering exchange
 %           method, if used.
 %
-%  Use arPlotMarginalized to show marginalized parameters
-%  Further visualization and analysis function can be found in
-%  arFramework\MCMC\
+%   mcmc        struct containing output
+%         mcmc.ps                     mcmc chain
+%         mcmc.ps_trial               trial points for each chain point
+%         mcmc.chi2s                  posterior value at chain points
+%         mcmc.chi2s_trial            posterior value at trial points
+%         mcmc.acceptance             acceptance rate up to chain point
+%         mcmc.MethodName             string of used method
+%         mcmc.FracBoundViolations    frac. of bound violations of prop. points
+% 
+%         Optional if exchanges are used
+%         mcmc.exchange               exchange rate up to chain point
+%         mcmc.AcceptedSwaps          matrix of accepted swaps between chains
+%         mcmc.ProposedSwaps          matrix of proposed swaps between chains
+%         mcmc.beta                   inverse temperatures used for chains
+% 
+%         Optional if scaling is used
+%         mcmc.scalefactor            scalefactor at each chain point
+% 
+%         Optional if burnin is used
+%         mcmc.acceptance_burnin      accep. rate during burnin
+%         mcmc.scalefactor_burnin     scalefactor during burnin
 %
+%   See also arPlotMarginalized, arPlotMCMCChains, arGeweke,
+%           arGelmanRubinBrooks
 %
-% MC^3 Sampler (contact: franz-georg.wieland@mars.uni-freiburg.de)
-% based on previous code by Joep Vanlier
-%               and code by Benjamin Ballnus in PESTO
-% inspired by code by M. Girolami 
-%
-
-
-
 %  Normal Distributions
 %   optimal acceptance rate ~23% (for multi-variate normal distributions),
 %   see in:
@@ -61,6 +70,12 @@
 %   LANGEVIN ALGORITHM IN HIGH DIMENSIONS
 %   Natesh S. Pillai, Andrew M. Stuart and Alexandre H. Thiery
 %   Ann. Appl. Probab. 22 (6): 2320-2356
+%
+% PESTO
+%   Paul Stapor et. al (2018)
+%   "PESTO: Parameter EStimation TOolbox"
+%   Bioinformatics 34 (4): 705–707
+%   https://doi.org/10.1093/bioinformatics/btx676 
 
 function mcmc = arMC3(varargin)
 
@@ -77,7 +92,6 @@ global ar
 % Manual Scaling of Covariance Matrix to account for higher dimensions
 
 if isfield(ar, 'mc3')
-
     if isfield(ar.mc3, 'nruns')
         nruns = ar.mc3.nruns;
     else
@@ -143,19 +157,7 @@ if isfield(ar, 'mc3')
     else
        max_accept = 0.7;
     end  
-%     
-%     if isfield(ar.mc3, 'refresh_rate')
-%         refresh_rate = ar.mc3.refresh_rate;
-%     else
-%         refresh_rate = 500;
-%     end  
-% 
-%     if isfield(ar.mc3, 'show')
-%         show = ar.mc3.show;
-%     else
-%         show = 0;
-%     end
-    
+   
     if isfield(ar.mc3, 'Cmax')
         Cmax = ar.mc3.Cmax;
     else
@@ -180,11 +182,11 @@ if isfield(ar, 'mc3')
        NumberOfChains = 1;
     end    
     
-    if isfield(ar.mc3, 'LengthOfAcceptanceTestChain')
-        LengthOfAcceptanceTestChain = ar.mc3.LengthOfAcceptanceTestChain;
-    else
-        LengthOfAcceptanceTestChain          = 25;
-    end
+%     if isfield(ar.mc3, 'LengthOfAcceptanceTestChain')
+%         LengthOfAcceptanceTestChain = ar.mc3.LengthOfAcceptanceTestChain;
+%     else
+%         LengthOfAcceptanceTestChain          = 25;
+%     end
     
     if isfield(ar.mc3, 'DecayParameter')
         DecayParameter = ar.mc3.DecayParameter;
@@ -199,15 +201,6 @@ end
 %% END
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-% % Set defaults
-% [nruns, nburnin, method, exchange_method] = deal( ...
-%     10000,...                % nruns         Number of runs
-%     0,...                   % nburnin       Number of burn-in runs
-%     5,...                   % method
-%     0 ...                   % exchange      Choice of exchange function
-%     );
 
 % Read out given variables and overwrite struct varibales if given
 if nargin > 3
@@ -242,7 +235,6 @@ if exchange_method ==1
     end
 end
 
-
 beta = linspace(1,1/NumberOfChains,NumberOfChains).^TemperatureExponent;    % Scaling of Temperature regime based on 
 ar.beta = beta;
 
@@ -250,7 +242,6 @@ paraReset            = repmat( ar.p, 1, 1, NumberOfChains );               % Par
 qFitGlobal           = ar.qFit==1;                                         % Logical variable - true for fitted parameters, false for fixed as specified in Global model input
 ResidualType         = ar.res_type;                                        % Type of the residual: 1 (Data point residual),2 (Residuals of fitted errors, 3 (Prior), 4 (Random Effects)
 locs = 1:sum((qFitGlobal));
-
 
 
 % Define nwindow as 50 times number of fitted parameters
@@ -264,10 +255,6 @@ ar.mc3.nwindow = nwindow;
 % Initialize storing variables
 parasHistory = nan(nwindow, sum(qFitGlobal), NumberOfChains);
 parasHistory_index = 1;
-
-
-
-
 
 ProbProposalGivenCurr = 1e-30.*ones(NumberOfChains,1);
 ProbCurrGivenProposal = 1e-30.*ones(NumberOfChains,1);
@@ -300,22 +287,6 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 para_curr = repmat( ar.p(qFitGlobal), NumberOfChains, 1 );
-
-% % initial values for chains
-% if (isfield(ar,'mcmc'))
-%     if (isfield(ar.mcmc,'p'))
-%         % Multiple initial parameter vector supplied
-%         para_curr = ar.mcmc.p(:,qFitGlobal);
-%     else
-%         if ( NumberOfChains > 1 )
-%             disp( 'Warning: All chains starting from same parameter vector' );
-%         end
-%         para_curr = repmat( ar.p(qFitGlobal), NumberOfChains, 1 );
-%     end
-% else
-%     para_curr = repmat( ar.p(qFitGlobal), NumberOfChains, 1 );
-% end    
-
 
 jindexoffset = 0;
 ar.ps = nan(nruns, length(ar.p), NumberOfChains);
@@ -384,7 +355,6 @@ switch method
         adjust_scaling = false;
         use_sensis = true;
         burnin = true;
-
 end
 
 %% Exchange Method
@@ -402,8 +372,6 @@ end
 %     temp   = ones( 1, n_chains );
 %     ex_fkt = @exchange_PHS;
 % end
-
-
 
 if(~burnin)
     nburnin = 0;
@@ -438,11 +406,7 @@ ProposedSwaps              = zeros(NumberOfChains);
 AcceptedSwaps              = zeros(NumberOfChains);
 
 
-CovarianceAdaptationFactor = -4*ones(NumberOfChains,1); % Initialize at -4
-
-
-
-
+ProposalStepSizeAdaptationFactor = -4*ones(NumberOfChains,1); % Initialize at -4
 
 if(~use_sensis)
     for chID = 1 : NumberOfChains
@@ -474,7 +438,7 @@ else
         TemperedSRes_curr((ResidualType<=2),:)               = sqrt(beta(chID)) *ar.sres((ResidualType<=2),qFitGlobal);
 
         %[ LogPosterior_proposal(chID), LogPrior_proposal(chID), res_trial, Sres_trial ] = heatResiduals( beta(chID), ar.chi2fit, ar.chi2prior, ResidualType,qFitGlobal, ar.res, ar.sres(:,qFitGlobal) );
-        [  mu_curr(chID,:), covar_curr(:,:,chID)] =   feval(fkt, para_curr(chID,:), TemperedRes_curr, TemperedSRes_curr, InvProposalPrior, RegularizationThreshold,exp(CovarianceAdaptationFactor(chID))^2,UseScaling);       
+        [  mu_curr(chID,:), covar_curr(:,:,chID)] =   feval(fkt, para_curr(chID,:), TemperedRes_curr, TemperedSRes_curr, InvProposalPrior, RegularizationThreshold,exp(ProposalStepSizeAdaptationFactor(chID))^2,UseScaling);       
 %         arCalcMerit(true,para_curr(chID,:));
 %         [ LogPosterior_curr(chID), LogPrior_curr(chID), res_curr, Sres_curr ] = heatResiduals( beta(chID), ar.chi2fit, ar.chi2prior, ResidualType,qFitGlobal, ar.res, ar.sres(:,qFitGlobal) );
 %         [ mu_curr(chID,:), covar_curr(:,:,chID) ] = feval(fkt, para_curr(chID,:), res_curr, Sres_curr, InvProposalPrior, RegularizationThreshold);
@@ -503,12 +467,6 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
     
     % For each chain
     for chID = 1 : NumberOfChains
-        %para_proposal(chID,:)          = para_curr(chID,:);
-        %mu_proposal(chID,:)            = mu_curr(chID,:);
-        %covar_proposal(:,:,chID)       = covar_curr(:,:,chID);
-        
-        % Calculate and update Acceptance Rate
-%         accept_rate(chID) = sum(accepts(chID,:))/LengthOfAcceptanceTestChain; 
         NumAccepts = sum(~isnan(accepts(chID,:)));
         if (NumAccepts>20)
             accept_rate(chID) = nansum(accepts(chID,:))/sum(~isnan(accepts(chID,:)));
@@ -565,10 +523,8 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
                     TemperedSRes_proposal = ar.sres(:,qFitGlobal);
                     TemperedSRes_proposal((ResidualType<=2),:)               = sqrt(beta(chID)) *ar.sres((ResidualType<=2),qFitGlobal);
 
-                    %[ LogPosterior_proposal(chID), LogPrior_proposal(chID), res_trial, Sres_trial ] = heatResiduals( beta(chID), ar.chi2fit, ar.chi2prior, ResidualType,qFitGlobal, ar.res, ar.sres(:,qFitGlobal) );
-          
-                    
-                    [ mu_proposal(chID,locs), covar_proposal(locs,locs,chID)] =   feval(fkt, para_proposal(chID,locs), TemperedRes_proposal, TemperedSRes_proposal, InvProposalPrior, RegularizationThreshold,exp(CovarianceAdaptationFactor(chID))^2,UseScaling);
+                    %[ LogPosterior_proposal(chID), LogPrior_proposal(chID), res_trial, Sres_trial ] = heatResiduals( beta(chID), ar.chi2fit, ar.chi2prior, ResidualType,qFitGlobal, ar.res, ar.sres(:,qFitGlobal) );                   
+                    [ mu_proposal(chID,locs), covar_proposal(locs,locs,chID)] =   feval(fkt, para_proposal(chID,locs), TemperedRes_proposal, TemperedSRes_proposal, InvProposalPrior, RegularizationThreshold,exp(ProposalStepSizeAdaptationFactor(chID))^2,UseScaling);
                 end
                 
                 ProbProposalGivenCurr(chID)  = mvnpdf(para_proposal(chID,locs), mu_curr(chID,locs), covar_curr(locs,locs,chID));
@@ -634,25 +590,15 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
             % Initialize parameters:
             %MemoryLength = 1;  % Number of steps for which almost no adaptation is made in the beginning
              % Control parameter for decay of Covariance Adaptation, (0<p<1), higher values mean fast decay 
-%             i = max(jruns+1,MemoryLength);
-% 
-%             Gamma = 1/(i^DecayParameter);
-% 
-%             % Adaptation
-%             mu_curr(chID,:) = (1-Gamma)*mu_curr(chID,:) + Gamma*para_curr(chID,:);
-%             covar_curr(:,:,chID)  = (1-Gamma)*covar_curr(:,:,chID)+ Gamma*(para_curr(chID,:)-mu_curr(chID,:))*(para_curr(chID,:)-mu_curr(chID,:))';         
            if isnan(accept_rate(chID))
            else
-             CovarianceAdaptationFactor(chID) = CovarianceAdaptationFactor(chID)+((accept_rate(chID))-0.234)*((jruns+1)^(-DecayParameter));
+             ProposalStepSizeAdaptationFactor(chID) = ProposalStepSizeAdaptationFactor(chID)+((accept_rate(chID))-0.234)*((jruns+1)^(-DecayParameter));
              % Adjust covariance matrix (propsed and current
-             covar_currUSED(:,:,chID) = exp(CovarianceAdaptationFactor(chID))*covar_curr(:,:,chID);
+             covar_currUSED(:,:,chID) = exp(ProposalStepSizeAdaptationFactor(chID))*covar_curr(:,:,chID);
            end
         else
             covar_currUSED(:,:,chID) = covar_curr(:,:,chID);
-        end                
-
-        
-        
+        end                      
         
         % adjust scaling during burn-in (OLD SCALING ADJUSTMENT)
         if(jrungo<=0 && adjust_scaling)
@@ -663,17 +609,15 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
             end
         end
 
-    end
-    
+    end    
             
     % Save acceptance rate and scalefactor during burnin
     if(jrungo<=0)
          ar.acceptance_burnin(jruns,:) = accept_rate;
          if UseScaling ==1
-              ar.scalefactor_burnin(jruns,:) = CovarianceAdaptationFactor;
+              ar.scalefactor_burnin(jruns,:) = ProposalStepSizeAdaptationFactor;
          end
     end
-    
     
     % reset acceptance rate if burn-in was used after the burn-in phase
     % save burn-in accepts as accepts_burnin in ar struct
@@ -687,14 +631,6 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
         end
     end
     i_accepts = i_accepts + 1;
-    
-    
-%     % Failsafe if accepts is too small
-%     if(i_accepts>length(accepts))
-%         i_accepts = 1;
-%     end 
-
- 
     
     % Perform chain exchange after burn-in is done
     if(jrungo>0)
@@ -769,7 +705,7 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
                 ar.ProposedSwaps = ProposedSwaps;
             end
             if UseScaling ==1
-                ar.scalefactor(jcount+jindexoffset,:)=CovarianceAdaptationFactor;
+                ar.scalefactor(jcount+jindexoffset,:)=ProposalStepSizeAdaptationFactor;
             end
            
             
@@ -783,14 +719,6 @@ for jruns = 1:floor(((nruns*nthinning)+nburnin))
     % If wanted print after every i-th iteration (especially usefull for
     % runs on cluster without window showing you where you are at in the
     % calculations)
-    if isfield( ar.mc3, 'DiaryFlag' )
-       if ar.mc3.DiaryFlag == 1
-       		diary off
-   		    global N;
-       		delete( [num2str(N) 'test_diary.txt' ] );
-       		diary ( [num2str(N) 'test_diary.txt' ]);
-       end
-    end
     if isfield( ar.mc3, 'PrintFlag' )
        if ar.mc3.PrintFlag == 1
            measure = mod(jrungo,10000);
@@ -833,6 +761,7 @@ if nburnin > 0
         mcmc.scalefactor_burnin = ar.scalefactor_burnin;
    end
 end
+mcmc.FractionOfBoundViolations = 100*NumberOfBoundViolations/(nruns*NumberOfChains);
 
 fprintf('\n%8.0f bound violations observed (for all chains)\nThis is %3.0f percent of all iterations.\n\n', NumberOfBoundViolations,100*NumberOfBoundViolations/(nruns*NumberOfChains));
 end

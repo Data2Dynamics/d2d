@@ -1,5 +1,15 @@
-% plot marginalized after MCMC
-
+% arPlotMarginalized([jks], [Nthinning])
+% 
+% Plots marginalized posterior of parameters in ar.ps after sampling them
+% with arMC3()
+% 
+%   jks            parameters, which are plotted               [all]   
+%   Nthinning      thinning rate for plotting                  [1]
+% 
+% Example:
+%       arPlotMarginalized([1 2 35],10)
+%
+% See also arMC3, arPlotMCMCChains
 function arPlotMarginalized(jks, Nthinning)
 
 global ar
