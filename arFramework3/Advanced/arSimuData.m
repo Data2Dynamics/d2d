@@ -1,9 +1,12 @@
+% arSimuData([m], [jplot], [tpoints], [randomseed])
+%
 % Simulate data for current parameter settings
 %
-% arSimuData(m, jplot, tpoints, randomseed)
-%   tpoints:    time points for simulation        
-%   m:          model index                    
-%   jplot:      plot index
+%   m           model index   
+%   jplot       plot index
+%   tpoints     vector of time points for simulation (same for all data files) 
+%               OR struct array of vectors to specify tpoints for each data
+%               file individually  [currently used tpoints if not specified]
 %   randomseed  random seed for noise generation
 
 function arSimuData(m, jplot, tpoints, randomseed)
