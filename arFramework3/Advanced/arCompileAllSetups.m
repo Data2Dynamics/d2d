@@ -1,24 +1,22 @@
-% arCompileAllSetups
+% setup_files = arCompileAllSetups(max_depth, mode)
 %
-% setup_files = arCompileAllSetups(max_depth)
+% This function searches Setup files and executes the basic commands arInit,
+% arLoadModel, arLoadData and arCompileAll to quickly compile serveral
+% example models.
 %
 %       max_depth   If larger than 0, then the setup files be search
 %                   recursively starting form the current directory.
 %                   Default: Inf (recursively evaluates all setups found in
 %                   deeper folders)
-%
 %       mode        'normal' (default: whole setup file)
 %                   'core' only the most important commands, i.e. arInit,
 %                   arLoadModel, arLoadData, arCompileAll
 %
-%   This function searches Setup files and executes the basic commands arInit,
-%   arLoadModel, arLoadData and arCompileAll to quickly compile serveral
-%   example models.
+%      setup_files  array of found setup files
 %
 % One possibility to start it in the background (under linux):
 % nohup matlab -nosplash < arCompileAllSetups_call.m > nohup.out &
 %
-% 
 %   Examples
 %   arCompileAllSetups(2) % evaluates all Setups which are in pwd and 1 or
 %                         % two folders deeper. This option might be

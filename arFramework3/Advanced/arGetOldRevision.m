@@ -1,21 +1,20 @@
-% arGetOldRevision
+% revision_path = arGetOldRevision(sha)
 %
-%   Download the D2D revision specified by ar.info.revision
-%
-% arGetOldRevision(sha)
+% Download the D2D revision specified by ar.info.revision
 %
 %   sha     ID of the different commits/revisions on github
-%           Examples:
-%           7182eff7eb6f723da7b45da5470a37fd13c9e1de
+%           (eg '7182eff7eb6f723da7b45da5470a37fd13c9e1de')
 %           see commit pages at github
-% 
 %           the commit sha is stored in ar.info.revision
+%           [ar.info.revision]
 %
-%   This function download an old D2D revision. The target folder is
-%   .../arFramework3/Advanced/OldRevisions/
+%   revision_path: path where to find OldRevisions
 %
-%   For using an older revisions, set your Matlab paths properly, e.g. via
-%   addpath()
+% This function downloads an old D2D revision. The target folder is
+% .../arFramework3/Advanced/OldRevisions/
+%
+% For using an older revisions, set your Matlab paths properly, e.g. via
+% addpath()
 
 function revision_path = arGetOldRevision(sha)
 global ar

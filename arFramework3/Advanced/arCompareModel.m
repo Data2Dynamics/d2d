@@ -1,17 +1,19 @@
+% arCompareModel(varargin)
+%
 % Simple helper function to determine for which datasets two models predict 
 % differences
-%
-% Usage:
-%   arCompareModel(ar1, m1, ar2, m2, (flags))
-%       where ar1 and ar2 refer to ar structs and m1 and m2 to model indices.
-%   arCompareModel(m1, m2, (flags))
-%       where the default ar struct is used, and two models within are
-%       compared
 %
 % Optional flags:
 %   'relerr'    - Use relative errors instead of chi2 change
 %   'absrsq'    - Show R^2 per dataset for Model 1 instead of differences
 %   'nogrid'    - Don't draw the grid
+%
+% Examples:
+%   arCompareModel(ar1, m1, ar2, m2, (flags))
+%       where ar1 and ar2 refer to ar structs and m1 and m2 to model indices.
+%   arCompareModel(m1, m2, (flags))
+%       where the default ar struct is used, and two models within are
+%       compared
 %
 % Note: If interactivity mode is on, you can click the matrix to see the 
 % curves corresponding to the different models. Activate interactivity mode 

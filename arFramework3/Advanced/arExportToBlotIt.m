@@ -1,3 +1,16 @@
+% arExportToBlotIt
+%
+% Exports current arStruct to csv to use for BlotIt in R
+% i.e. Experiment;Condition;time;name;value
+%
+% Example:
+%      arExportToBlotIt     (-> AllObservables_ForBlotIt.csv)
+%      dat <- read.csv("AllObservables_ForBlotIt.csv",sep=";",dec=".")
+%      result=alignME(data=dat, model="ys-sj",errmodel="sigmaR",fixed=ys~Condition, latent=sj~1, error=sigmaR~1,log=TRUE,normalize=T)
+%      write.table(result,file="BlotIt_result.csv",quote=F,sep=";", row.names=FALSE,append=TRUE)
+%
+% https://github.com/dkaschek/blotIt2/blob/master/R/blotIt2.R
+
 function arExportToBlotIt
 
 global ar

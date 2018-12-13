@@ -1,6 +1,6 @@
-% export model to SBML using libSBML
-%
 % function arExportSBML_benchmark(m, d, steadystate)
+%
+% export model to SBML using libSBML
 %
 % m:            model index
 % d:            data index

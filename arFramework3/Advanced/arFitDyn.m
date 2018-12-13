@@ -1,6 +1,8 @@
-% Fit only dynamical model parameters
-%
 % arFitDyn(silent)
+%
+% Fit only dynamic model parameters
+%
+%   silent - boolean, suppress output [false]
 
 function arFitDyn(silent)
 global ar

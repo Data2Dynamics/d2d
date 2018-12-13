@@ -1,3 +1,12 @@
+% arAddCompilationFlag( flag )
+%
+% adds flag to ar.config.defines
+%
+% flag - string, name of status
+%
+% arAddCompilationFlat('1')
+% arAddCompilationFlat('Log10')
+
 function arAddCompilationFlag( flag )
 
 	global ar;

@@ -1,6 +1,6 @@
-% export model to SBML using libSBML
+% function arExportSBML(m, c, [copasi, steadystate])
 %
-% function arExportSBML(m, c, copasi, steadystate)
+% export model to SBML using libSBML
 %
 % m:            model index
 % c:            condition index

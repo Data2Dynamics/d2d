@@ -1,6 +1,13 @@
+% arFitLHSMerge
+%
 % merge previous fit sequence into current workspace.
 % WARNING, fit setting have to be the same. This will not be double checked
 % 
+% arFitLHS(10)
+% arSave('Fit1')
+% arFitLHS(90)
+% arFitLHSMerge
+% -> arStruct with 100 fits
 
 function arFitLHSMerge
 

@@ -1,28 +1,19 @@
-% arCompareFitsOverRevisions
-% 
-% arCompareFitsOverRevisions(shas,p0)
-% 
-%   shas    IDs specifying the commit
-% 
-%   p0      initial guess for the parameters
-% 
-% [pfit,chi2s,chi2new] = arCompareFitsOverRevisions
-% 
-%   pfit    fitted parameters
-%   
-%   chi2s   chi2fit according to the different revisions
-% 
-%   chi2new arGetMerit using the current revision (given by global ar)
-% 
+% [pfit,chi2s,chi2new] = arCompareFitsOverRevisions([shas],[p0])
 % 
 % This function can be used to compare fit results over several D2D
 % version. 
 % Note that for the first time, this function is applied, the commits are
 % downloaded via arGetOldRevision which takes time.
-% 
+%
+%   shas    IDs specifying the commit
+%   p0      initial guess for the parameters
+%
+%   pfit    fitted parameters
+%   chi2s   chi2fit according to the different revisions
+%   chi2new arGetMerit using the current revision (given by global ar) 
 % 
 % Example:
-% [pfit,chi2s] = arCompareFitsOverRevisions
+%   [pfit,chi2s] = arCompareFitsOverRevisions
 
 function [pfit,chi2s,chi2new] = arCompareFitsOverRevisions(shas,p0)
 

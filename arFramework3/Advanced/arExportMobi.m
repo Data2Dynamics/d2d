@@ -1,9 +1,10 @@
-% export model to SBML Mobi/PKsim compatible
-%
 % function arExportSBML(m, c)
+%
+% export model to SBML Mobi/PKsim compatible
 %
 % m:    model index
 % c:    condition index
+%
 
 function arExportMobi(m, c, organ)
 

@@ -1,7 +1,11 @@
+% arExportGenSSI(m, d)
+%
 % Export to GenSSI identifiability software
 %
-% arExportGenSSI(m, d)
-
+%   m - Model index
+%   d - Data index (you can find this index with arFindData) (ar.model(m).data(d))
+% 
+% arExportGenSSI(1,1)
 
 function arExportGenSSI(m, d)
 

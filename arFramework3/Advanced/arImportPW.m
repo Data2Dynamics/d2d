@@ -1,4 +1,8 @@
+% arImportPW(filename)
+%
 % import PW model and translate
+%
+%   filename - name of def file
 
 function arImportPW(filename)
 

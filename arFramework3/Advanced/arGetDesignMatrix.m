@@ -1,11 +1,12 @@
-% [X,Xall,annoX] = arGetDesignMatrix
+% [X,Xall,annoX] = arGetDesignMatrix([xtype])
 % 
-%  Sensitivity-Matrix of the observations as e.g. used in the definition of
-%  sloppiness extracted from ar.model.data.syExpSimu
+% Sensitivity-Matrix of the observations as e.g. used in the definition of
+% sloppiness extracted from ar.model.data.syExpSimu
 %  
-%  Dimension: ndata x n_qFit
-%  Corresponds to the design matrix X in the linear case
-%   H == X'*X;
+% Dimension: ndata x n_qFit
+% Corresponds to the design matrix X in the linear case H == X'*X;
+%
+%   xtype   type of sensitivities, eg 'sres', 'sreslog', 'sy' ['sy']
 % 
 %   X       only data points with ar.model.data.qFit==1
 %   Xall    all data 
@@ -16,8 +17,8 @@
 %           annoX.iy    observable index
 %           annoX.dop   find(ar.qFit==1)
 % 
-%   Attention: The sensitivities have to be calculated first by arSimu for
-%   the current parameter vector.
+% Attention: The sensitivities have to be calculated first by arSimu for
+% the current parameter vector.
 
 function [X,Xall,annoX] = arGetDesignMatrix(xtype)
 if(~exist('xtype','var') || isempty(xtype))

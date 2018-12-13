@@ -1,4 +1,19 @@
+% arInterpolateData( m, ds, obs, varargin )  
+%
 % Function to interpolate data
+%
+%    m        - Model index
+%    ds       - Data indices, find using arFindData
+%    obs      - string of observable
+%   
+% Optional arguments :
+%    tmin       - Minimal time to interpolate (default = -inf)
+%    tmax       - Maximal time to interpolate (default = inf)
+%    steps      - Number of steps to use (default = 50)
+%    plot       - Show interpolation
+%    plotOnly   - Only plot the interpolant. Do not add the data
+%    modfactor  - Multiply estimated noise (single component noise model)
+%                 with a factor (default = 1)   
 %
 % This function aids in finding a good fit in the early stages of model
 % development. It linearly interpolates between points data to force the model 
@@ -7,22 +22,9 @@
 %
 % You can remove the data again with arClearInterpolatedData.
 %
-% Usage:
-%
-%   function arInterpolateData( m, ds, obs, 'tmin', tmin, 'tmax', tmax, 'steps', steps, .... )
-%
-%    m        - Model index
-%    ds       - Data indices, find using arFindData
-%    obs      - Observable
-%   
-%   Optional arguments :
-%    tmin       - Minimal time to interpolate (default = -inf)
-%    tmax       - Maximal time to interpolate (default = inf)
-%    steps      - Number of steps to use (default = 50)
-%    plot       - Show interpolation
-%    plotOnly   - Only plot the interpolant. Do not add the data
-%    modfactor  - Multiply estimated noise (single component noise model)
-%                 with a factor (default = 1)   
+% Example:
+%   arInterpolateData(1,1,'Epo_ext_cpm')
+%   arInterpolateData(1,1,'Epo_ext_cpm','tmin',0,'tmax',10,'steps',10,'plotOnly')
 
 function arInterpolateData( m, ds, obs, varargin )  
 

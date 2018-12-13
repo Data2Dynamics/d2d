@@ -1,11 +1,9 @@
+% arExportModelToDaniel(whichone,m,d,prefix)
+%
 % Function to export data to different modelling framework (dMod)
 % See: https://github.com/dkaschek/dMod
-%
-% arExportModelToDaniel(whichone,m,d,prefix)
 % 
-%   whichone        Which kind of file
-%                   character or cell of characters
-% 
+%   whichone    Which kind of file, character or cell of characters
 %               model       stoichometric matrix of the ODEs' righ-hand side
 %               dataConditions the condition replacements specified in
 %                           a data set (ar.model.data.pold and

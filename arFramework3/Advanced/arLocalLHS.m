@@ -1,15 +1,20 @@
-% arLocalLHS(nfit, dp, randomseed)
+% arLocalLHS(nfit, [dp], [randomseed])
 % 
-%   Local LHS fitting with nfit inintial guesses in the region ar.p +/- dp.
+% Local LHS fitting with nfit inintial guesses in the region ar.p +/- dp.
 % 
-%   This funciton might be usefull to check convergence of optimization.
-%   The original minim should be found repeatedly.
-% 
+%   nfit        number of fits
+%   dp          bounds/distance of optimal parameter set [0.01]
+%   randomseed  which seed, rng(randomseed) []
+%
+% This funciton might be usefull to check convergence of optimization.
+% The original minimum should be found repeatedly.
 % 
 % Example:
 % arFit
 % arLocalLHS(100)
 % plot(sort(ar.chi2s),'.');
+%
+% See also arFitLHS
 
 function arLocalLHS(nfit, dp, randomseed)
 if(~exist('dp','var') || isempty(dp))

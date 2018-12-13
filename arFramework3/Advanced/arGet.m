@@ -1,21 +1,22 @@
-% data = arGet(fields, m, dset, sig, struct)
+% data = arGet(fields, [m, dset, sig, struct])
 %
-%   Returns data from ar struct according to a cell of field names
+% Returns data from ar struct according to a cell of field names
 % 
-%   data    cell array containing all fields specified in fields
 %   fields  single string or cell array of strings
 %   m       optional model count (default = 1)
 %   dset    optional dataset(!) count (default = 1)
 %   sig     optional chop ot to sig significant digits (default = false)
 %   struct  optional struct (with ar structure) (default = global ar)
 %
+%   data    cell array containing all fields specified in fields
+%
 % Examples:
 %   arGet('model.data.yFineSimu', 2, 3) 
-% returns a 1x1 cell with
+%   returns a 1x1 cell with
 %   x{1} = ar.model(2).data(3).yFineSimu
 %
 %   arGet({'p', 'model.fy'})
-% returns a 1x2 cell with
+%   returns a 1x2 cell with
 %   x{1} = ar.p, x{2} = ar.model(1).fy
 %
 % for convenience:

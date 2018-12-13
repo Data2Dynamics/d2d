@@ -1,3 +1,5 @@
+% arAssessOdeTolerances
+%
 % This function uses the Minimum-Merger Idea for assessing ODE tolerances.
 % Bad tolerances yields a jittery curve between two parameter points.
 % 

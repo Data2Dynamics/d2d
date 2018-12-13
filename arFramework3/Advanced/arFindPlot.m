@@ -1,8 +1,18 @@
+% [olist names m] = arFindPlot( varargin )
+%
 % Finds plots in the ar structure and returns their plot indices 
 % as a vector.
 %
-% Usage:
-%   arFindPlot( (ar), (model no), name, (flags) )
+% Possible inputs:
+%   ar    arStruct
+%   m     model number
+%   name  name of output plot
+%   flags 
+%
+% Outputs:
+%   olist     List of IDs that correspond to the query
+%   names     cell array of the plot names which match the search criterion.
+%   m         model number
 %
 % Examples of the first usage mode:
 %   arFindPlot( ar, (model no), 'myplot' )
@@ -17,8 +27,6 @@
 %
 % Parameters enclosed by brackets are optional.
 %
-% Returns: List of IDs that correspond to the query and a cell array of the
-% plot names which match the search criterion.
 
 function [olist names m] = arFindPlot( varargin )
 

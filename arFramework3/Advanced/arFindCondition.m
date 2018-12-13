@@ -1,5 +1,17 @@
+% [olist] = arFindCondition( varargin )
+%
 % Finds conditions in the ar structure and returns their condition indices 
 % as a vector. Also checks for the specific condition parameters.
+%
+% Possible inputs:
+%   ar - arStruct
+%   m - model index
+%   name       - model specifiers like ('state',statename) or 
+%                ('input',cell of input strings)
+%   conditions - conditions
+%
+% Outputs:
+%   olist - List of IDs that correspond to the query
 %
 % Usage:
 %   arFindCondition( ar, (model no), name, conditions )

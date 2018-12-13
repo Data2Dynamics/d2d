@@ -1,12 +1,12 @@
+% arClearInterpolatedData( m, ds )  
+%
 % Remove datapoints which were added with arInterpolateData
-%
-% Usage:
-%
-%   function arClearInterpolatedData( m, ds, obs, tmin, tmax )
 %
 %    m        - Model index
 %    ds       - Data indices, find using arFindData ('all' also works)
 %
+% Example:
+%   arClearInterpolatedData(1,'all')
 
 function arClearInterpolatedData( m, ds )  
 

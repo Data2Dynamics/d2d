@@ -1,15 +1,23 @@
+% arAddToData( m, d, obs, tExpNew, yExpNew, type, delayLink )
 % Function which adds the data points to the arStruct
 %
 % Usage:
 %   m           - Model idx
 %   d           - Data idx (find with arFindData)
 %   obs         - Observable idx or name to add data for
-%   tExp        - New time points to add
-%   yExp        - y values associated with observable obs for the new timepoints
+%   tExpNew     - New time points to add
+%   yExpNew     - y values associated with observable obs for the new timepoints
 %   type        - Type identifier (integer which helps identify added data)
 %                   1 is reserved for interpolated data from arInterpolateData
 %   delayLink   - If set to 1, the model will not be relinked and arLink
 %                 will have to be invoked.
+%
+% Examples:
+%   arAddToData(1,1,1,[0,10,20,30],[1,0.8,0.6,0.4])
+%   adds ar.model(1).data(1).tExp = [ar.model(1).data(1).tExp;[0,10,20,30]];
+%   adds ar.model(1).data(1).yExp = [ar.model(1).data(1).yExp;[1,0.8,0.6,0.4]];
+%   arAddToData(1,1,'pSTAT5A_rel',[0],[10])
+
 function arAddToData( m, d, obs, tExpNew, yExpNew, type, delayLink )
     global ar;
 

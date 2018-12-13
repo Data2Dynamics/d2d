@@ -1,7 +1,4 @@
-% totalEvents = arFindInputs
-%
-% Usage: 
-%    arFindInputs;
+% totalEvents = arFindInputs( verbose )
 %
 % Finds keywords step1 and step2 in the input functions and adds the time
 % points they correspond to as events in the ar structure.
@@ -55,7 +52,7 @@ function totalEvents = arFindInputs( verbose )
             events = [];
             stepLocations = {};
             % Find the event time points
-            for b = 1 : length( ar.model(m).condition(a).fu );
+            for b = 1 : length( ar.model(m).condition(a).fu )
                 step1 = findstr(ar.model(m).condition(a).fu{b}, 'step1'); %#ok
                 step2 = findstr(ar.model(m).condition(a).fu{b}, 'step2'); %#ok
 

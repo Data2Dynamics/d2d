@@ -1,6 +1,6 @@
-% export model to SBML
-%
 % function arExportSBML_l2_v4(m, c)
+%
+% export model to SBML
 %
 % m:    model index
 % c:    condition index

@@ -1,12 +1,17 @@
-% arCompareWithBiobaseSimulation(file)
+% pass = arCompareWithBiobaseSimulation(file, [silent])
 % 
-%  Reads the download of Biobase -> Actions -> BioModels Online Simulation
-%  and compares with ar.model(1).condition(1).xFineSimu
+% Reads the download of Biobase -> Actions -> BioModels Online Simulation
+% and compares with ar.model(1).condition(1).xFineSimu
+%
+%   file   - file from database simulation, eg 'SIMU*.dat'
+%   silent - boolean for plotting (ar and biomodels in same plot) [false]
+%
+%   pass   - boolean, if relative difference <rtol, pass = 1 
 % 
-%  Be sure that xFineSimu has been simulated for the current parameters,
-%  e.g. by calling
-%       arQplot('x');
-%       arPlot
+% Be sure that xFineSimu has been simulated for the current parameters,
+% e.g. by calling
+%      arQplot('x');
+%      arPlot
 % 
 % Example:
 %   arQplot('x');

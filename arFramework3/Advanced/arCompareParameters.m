@@ -1,14 +1,20 @@
-% arCompareParameters(filenames, onlyCommons, onlyFitted)
+% params = arCompareParameters(filenames, onlyCommons, onlyFitted)
+%
+% plot and output parameter labels, values, logs of given Result/filenames
+% to compare parameter values from different runs
+%
+%   filenames   - cell array of folder names (folder names from arSave('best'))
+%   onlyCommons - just output parameters which have the same name [false]
+%   onlyFitted  - just output parameters with ar.qFit==1 [false]
 % 
-% params = arCompareParameters
-% 
-% params = 
+%   params = 
 %            ps: [136x7 double]         parameters as in ar.p
 %     filenames: {1x7 cell}             workspace names
 %        pLabel: {136x1 cell}           parameter names
 %        qLog10: [136x7 double]         log-scale? ar.qLog10
 %        ps_log: [136x7 double]         all parameters at the log-scale
-
+%
+% par = arCompareParameters({'FitLHS10','FitLHS30'})
 
 function params = arCompareParameters(filenames, onlyCommons, onlyFitted)
 

@@ -1,3 +1,5 @@
+% arDeleteObsoleteMexfkt
+%
 % This function deletes the mex-binaries in the basic folder which do not
 % occur in any workspace in the results folder as ar.fkt
 %

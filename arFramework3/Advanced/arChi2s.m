@@ -1,8 +1,17 @@
+% arChi2s(ps, sensis, silent)
+%
 % Compute chi^2 for multiple parameter sets
 %
-% arChi2s(ps, sensis)
+% ps:        parameter values   
+% sensis:    Calculate sensitivities [false]
+% silent:    Output written in console [false]
 %
-% ps:        parameter values      
+% Calcs arCalcMerit for the given parameter sets
+%
+% Example:
+% arChi2s(ar.ps)
+%
+% See also arChi2, arCalcMerit
 
 function arChi2s(ps, sensis, silent)
 

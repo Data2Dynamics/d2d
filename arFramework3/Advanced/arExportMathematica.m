@@ -1,7 +1,10 @@
-% Export to Mathematica
-%
 % arExportMathematica(m, d)
 %
+% Export to Mathematica
+%
+%   m - Model index
+%   d - Data index (you can find this index with arFindData) (ar.model(m).data(d))
+% 
 % ----------------------------------
 % System: list of two lists.
 % First, a list of derivatives of variables like {x1'[t] == k2*x2[t]+u1[t],

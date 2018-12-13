@@ -1,9 +1,11 @@
+% name = arGenerateConditionData( name, [varargin] )
+%
 % Generate a dummy datafile for a specific condition
-% Input arguments:
+% 
 %       name        Name of the dummy data
-%       varargin    condition variables (none = defaults)
+%       varargin    condition variables [none]
 
-function name = generateConditionData( name, varargin )
+function name = arGenerateConditionData( name, varargin )
     fid = fopen( sprintf( 'Data/%s.csv', name ), 'w' );
     fprintf( fid, 't, dummy\n' );
     fprintf( fid, '0, 0\n');

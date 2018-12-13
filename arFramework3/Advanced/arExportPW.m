@@ -1,9 +1,9 @@
-% export model to PottersWheel
-%
 % function arExportPW(m, c)
 %
-% m:    model index
-% c:    condition index
+% export model to PottersWheel
+%
+%   m:    model index
+%   c:    condition index
 
 function arExportPW(m, c)
 

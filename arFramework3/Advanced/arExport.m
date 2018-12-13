@@ -1,4 +1,9 @@
+% arExport(directory, [models])
+%
 % Function used to package model file(s) and imported data for distribution.
+%
+%   Directory     target directory for the package
+%   Models        model indices
 %
 % Traverses the ar structure to see which data sets and model files are  
 % actually used and packs those into the directory specified by the user.
@@ -7,14 +12,9 @@
 % and event information) and a little script that compiles the model and 
 % loads the ar struct with the parameters and events.
 %
-% Function arExport(directory, (models))
-%
-% Directory     target directory for the package
-% Models        model indices (optional)
-%
 % Example:
 %    arExport( 'potato' );
-%           puts all the files into the subdirectory potato.
+%    puts all the files into the subdirectory potato.
 
 function arExport(directory, models)
 

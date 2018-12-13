@@ -1,4 +1,13 @@
+% arClearCFiles(doRemoveMex)
+% 
 % clear compiled c-files
+%
+% doRemoveMex - boolean if also clearing arSimuCalcFun* files [true]
+% 
+% clears complete 'Compiled' folder
+%
+% Example:
+%   arClearCFiles
 
 function arClearCFiles(doRemoveMex)
 
