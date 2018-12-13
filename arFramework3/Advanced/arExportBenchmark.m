@@ -1,10 +1,21 @@
 %Calculate chi2 value without Bessel correction
 ar.config.useFitErrorCorrection = false;
-arCalcMerit  
-for i = 1:length(ar.model)
-    arWrite_Benchmark(i)
+if(contains(pwd,'Chen'))
+    arCalcMerit
+else
+    arFit
+    arCalcMerit
+end
+
+%This file writes out the General info and Model-specific XLS files
+arWrite_Benchmark
+
+for i = 1:length(ar.model)   
     for j = 1:length(ar.model(i).data)
-        arExportSBML_benchmark(i,ar.model(i).data(j).cLink,1,j);       
+%           Export SBML files
+        arExportSBML_benchmark(i,j,1);       
     end
 end
+
+% Export data values, uncertainties and model simulations
 arWrite_CondXLS

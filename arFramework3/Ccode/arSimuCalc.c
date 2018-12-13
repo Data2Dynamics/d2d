@@ -649,11 +649,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             } else {
                 equilibrated = NULL;
             }
-
+	    DEBUGPRINT0( debugMode, 4, "Apply initial conditions \n" );
             /* Apply ODE initial conditions */
             x0_override = mxGetField(arcondition, ic, "x0_override");
             if ( !applyInitialConditionsODE( sim_mem, tstart, im, isim, returndxdt, returndfdp0, x0_override, sensitivitySubset ) )
-                return;
+	        return;
+	   
 
             /* Do we have a startup event? */
             if ( qEvents == 1 ) {
@@ -841,7 +842,16 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                                 DEBUGPRINT1( debugMode, 4, "[ OK ] (teq=%g)\n", teq[0] );
                                 CVodeGetCurrentTime( cvode_mem, &(data->t) );
                                 
-                                if (flag < 0) {thr_error("Failed to equilibrate system"); terminate_x_calc( sim_mem, 20 ); return;}                                
+                                if (flag < 0) {
+                                    thr_error("Failed to equilibrate system");
+                                    if ( flag == 20 )
+                                    {
+                                        terminate_x_calc( sim_mem, 20 );
+                                    } else {
+                                        terminate_x_calc( sim_mem, 21 - flag ); 
+                                    }
+                                    return;
+                                }
                             } else {
                                 /* Simulate up to the next time point */
                                 flag = CVode(cvode_mem, RCONST(ts[is]), x, &t, CV_NORMAL);
@@ -1165,7 +1175,7 @@ void storeSensitivities( UserData data, int im, int isim, int is, int np, int nu
                 }
             }
         }
-
+	DEBUGPRINT2( debugMode, 6, "Storing fu sensitivities, filling %g with %g\n", (js*nu+ks)*nout + is, (js*nu)+ks);
         /* Output input sensitivities */
         for(js=0; js < np; js++) {
             for(ks=0; ks < nu; ks++) {
@@ -1404,6 +1414,9 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
         if ( flag < 0 )
         {
             converged = true;
+            CVodeGetCurrentTime(cvode_mem, teq);
+            DEBUGPRINT1( debugMode, 8, "Equilibration terminated due to error. Teq = %g\n", teq );
+            return flag;
         }
 
         /* Store dxdt */
@@ -1422,6 +1435,7 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
         /* Oh no, we didn't make it! Terminate anyway. */
         if ( step > max_eq_steps )
         {
+            DEBUGPRINT0( debugMode, 8, "Equilibration terminated due to too long equilibration time\n" );
             flag = 20;
             converged = true;
         }
@@ -1564,6 +1578,7 @@ int applyInitialConditionsODE( SimMemory sim_mem, double tstart, int im, int isi
 
 		if (sensi == 1)
 		{
+		  DEBUGPRINT0( debugMode, 8, "Initialize fsu \n");
 			fsu(data, tstart, im, isim);
 
             if ( sensitivitySubset == 1 ) {
@@ -1991,9 +2006,13 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
         /* log trafo of y */
         for (iy=0; iy<ny; iy++) {
             if(qlogy[iy] > 0.5){
-                if(y[it + (iy*nt)]<-cvodes_atol) printf("WARNING, check for concentrations <= 0 in data %d and observable %d !!!\n", id+1, iy+1);
+                if(y[it + (iy*nt)]<-cvodes_atol){ 
+                    printf("WARNING, check for concentrations <= 0 in data %d and observable %d !!!\n", id+1, iy+1);
+                }else{
+                    y[it + (iy*nt)] = log10(y[it + (iy*nt)]);
+                }
                 if(fine==0)  y_scale[it + (iy*nt)] = y_scale[it + (iy*nt)] / y[it + (iy*nt)] / log(10.0);
-                y[it + (iy*nt)] = log10(y[it + (iy*nt)]);
+                
             }
         }
         

@@ -187,31 +187,36 @@ function out = scaleIt( names, outFile, varargin )
         isExpField = strcmp( fieldNames{jN}, expVar );
         
         out.(fieldNames{jN}) = {};
-        for jD = 1 : length( data )
-            dataName = data{jD};
-            
-            
+        for jD = 1 : length( data )            
+            % Is this the experimental idx field?
+            if ( isExpField )
+                % Does this dataset have it?
+                if isfield( data{jD}, fieldNames{jN} )
+                    if ( isnumeric(data{jD}.(fieldNames{jN}){1}) )
+                        newData = num2cell( cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})) );
+                    else
+                        newData = num2cell( cellfun(@(x)str2num(x)+expField, data{jD}.(fieldNames{jN})) );
+                    end
+                else
+                    % Generate a new one for this one
+                    fNames = fieldnames( data{jD} );
+                    newData = num2cell( expField * ones( numel( data{jD}.(fNames{1})), 1 ) );
+                end
+                
+                % +1 is added to make sure that we never overlap even if user starts counting 
+                % from 0 or 1 inconsistently in different files
+                if ( ~opts.nofileincrement )              
+                    expField = max(cell2mat(newData)) + 1;
+                end
             % Does it have this field?
-            if ~isfield( data{jD}, fieldNames{jN} )
+            elseif ~isfield( data{jD}, fieldNames{jN} )
+                % Generate NaN's for this one
                 fNames = fieldnames( data{jD} );
-                dud = num2cell( NaN( numel( data{jD}.(fNames{1})), 1 ) );
-                out.(fieldNames{jN}) = [ out.(fieldNames{jN}); dud ];
+                newData = num2cell( NaN( numel( data{jD}.(fNames{1})), 1 ) );
             else
                 newData = data{jD}.(fieldNames{jN});
-                if ( isExpField )
-                    newData     = num2cell(cellfun(@(a)plus(a,expField), data{jD}.(fieldNames{jN})));
-                    % +1 is added to make sure that we never overlap even if user starts counting 
-                    % from 0 or 1 inconsistently in different files
-                    if ( ~opts.nofileincrement )
-                        if ( isnumeric( cell2mat(data{1}.(expVar)) ) )
-                            expField    = expField + max(cell2mat(data{1}.(expVar))) + 2;
-                        else
-                            expField    = expField + max(str2num(cell2mat(data{1}.(expVar)))) + 2;
-                        end
-                    end
-                end
-                out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
             end
+            out.(fieldNames{jN}) = [ out.(fieldNames{jN}); newData ];
         end
     end
     
@@ -279,7 +284,7 @@ function out = scaleIt( names, outFile, varargin )
     end
     if ( opts.excludeconditions )
         for jec = 1 : numel( opts.excludeconditions_args )
-            rejectionFilter = opts.excludeconditions_args{1};
+            rejectionFilter = opts.excludeconditions_args{jec};
             if ( isfield( out, rejectionFilter{1} ) )
                 filterList = cellfun(rejectionFilter{2}, out.(rejectionFilter{1}));
 
@@ -365,7 +370,7 @@ function out = scaleIt( names, outFile, varargin )
     if ( opts.dlfudge )
         % Find zeroes
         fNames = fieldnames( out );
-        variablesOfInterest = setdiff(fNames(cell2mat(cellfun(@(a)isempty(findstr(a, inputMask)), fNames, 'UniformOutput', false))), timeVar);
+        variablesOfInterest = setdiff( setdiff(fNames(cell2mat(cellfun(@(a)isempty(findstr(a, inputMask)), fNames, 'UniformOutput', false))), timeVar ), expVar );
         
         for i = 1 : numel( variablesOfInterest )
             predictionBDL = cellfun(@(x)x==0, out.(variablesOfInterest{i}));

@@ -18,7 +18,7 @@ else
     
     file_list = fileList(filepath, searchpattern,[],1);
     if(length(file_list)==0)  %#ok<ISMT>
-        error('No matching files found!');
+        error('No ''Results'' folder found! Switch your path to D2D working directory.');
     end
     
     out = stringListChooser(file_list, default, zeigen);

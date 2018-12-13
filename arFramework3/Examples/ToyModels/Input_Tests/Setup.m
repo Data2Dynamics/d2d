@@ -1,4 +1,4 @@
-close all; clear all; clearvars -global;
+% close all; clear all; clearvars -global;
 % Load models & data
 
 arInit;

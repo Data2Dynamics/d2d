@@ -51,8 +51,8 @@ arLoadData('CFUE/RNA_validation',1);
 arLoadData('H838EpoR_L1/qRTPCR_TC_Cish-SOCS3_long',2);
 
 arCompileAll;
-
-ar.config.optim.Display = 'iter';
+arFindInputs;
+%ar.config.optim.Display = 'iter';
 ar.model(1).qPlotYs(:) = 1;
 ar.model(2).qPlotYs(:) = 1;
 

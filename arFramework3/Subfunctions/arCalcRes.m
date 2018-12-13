@@ -128,7 +128,6 @@ for m=1:length(ar.model)
                 ystd = ar.model(m).data(d).yExpStd;
                 systd = zeros(size(ar.model(m).data(d).systdExpSimu));
 
-
             % ar.config.fiterrors == 1: only use exp. error model (and omit exp.
             % errors)
             elseif ar.config.fiterrors == 1 % only error model is used
@@ -178,7 +177,11 @@ for m=1:length(ar.model)
                 end
                 
                 if ( errorFitting )
-                    [ar.model(m).data(d).reserr, ar.model(m).data(d).chi2err] = fres_error(ystd, ar.config.add_c);
+                    try
+                        [ar.model(m).data(d).reserr, ar.model(m).data(d).chi2err] = fres_error(ystd, ar.config.add_c);
+                    catch ME
+                        error( 'Error in %s: %s', ar.model(m).data(d).name, ME.message );
+                    end
                     if isempty(ar.model(m).data(d).reserr)
                         ar.model(m).data(d).chi2err = zeros(1,length(ar.model(m).data(d).fy));
                     end

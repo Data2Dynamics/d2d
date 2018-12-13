@@ -1,5 +1,5 @@
 function [hy, hystd, hyss] = arPlotTrajectory(jy, t, y, ystd, lb, ub, tExp, yExp, yExpHl, yExpStd, ...
-    y_ssa, y_ssa_lb, y_ssa_ub, plotopt, Clines, ClinesExp, qUnlog, qLog, hy, hystd, hyss, dydt, ...
+    y_ssa, y_ssa_lb, y_ssa_ub, plotopt, Clines, ClinesExp, trafo, hy, hystd, hyss, dydt, ...
     qFit, zero_break, t_ppl, y_ppl_ub, y_ppl_lb)
 
 fastPlot = false;
@@ -15,23 +15,12 @@ end
 
 % plot ssa
 if(~isempty(y_ssa) && any(plotopt(jy)==[3,5]) &&  sum(~isnan(y_ssa))>0)
-    if(~isempty(qUnlog) && qUnlog(jy))
-        y_ssa = 10.^y_ssa;
-    end
-    if(~isempty(qLog) && qLog(jy))
-        y_ssa = log10(y_ssa);
-    end
+    y_ssa = trafo(y_ssa);
     
     % create patch around ssa simulation
     if(~isempty(y_ssa_lb))
-        if(~isempty(qUnlog) && qUnlog(jy))
-            y_ssa_lb = 10.^y_ssa_lb;
-            y_ssa_ub = 10.^y_ssa_ub;
-        end
-        if(~isempty(qLog) && qLog(jy))
-            y_ssa_lb = log10(y_ssa_lb);
-            y_ssa_ub = log10(y_ssa_ub);
-        end
+        y_ssa_lb = trafo(y_ssa_lb);
+        y_ssa_ub = trafo(y_ssa_ub);
         for jssa = 1:size(y_ssa_lb, 3)
             tmpx = [t(:); flipud(t(:))];
             tmpy = [y_ssa_ub(:,jy,jssa); flipud(y_ssa_ub(:,jy,jssa))];
@@ -46,26 +35,27 @@ if(~isempty(y_ssa) && any(plotopt(jy)==[3,5]) &&  sum(~isnan(y_ssa))>0)
     end
 end
 
+% Fallback for no data
+if isempty(y)
+    hy = plot(NaN, NaN, Clines{:});
+    hyss = patch([0 0 0], [0 0 0], ones(1,3));
+    set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2,'LineStyle','none','Marker','*','MarkerEdgeColor',Clines{2},'MarkerSize',5);
+    hystd = patch([0 0 0], [0 0 0], -2*ones(1,3), ones(1,3));
+    set(hystd, 'FaceColor', Clines{2}, 'EdgeColor', 'none', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2);
+    return;
+end
+
 % plot trajectory
 tmpy = y(:,jy);
-if(~isempty(qUnlog) && qUnlog(jy))
-    tmpy = 10.^tmpy;
-end
-if(~isempty(qLog) && qLog(jy))
-    tmpy = log10(tmpy);
-end
+tmpy = trafo(tmpy);
 isInfWarn = sum(isinf(tmpy))>0;
 tmpy(isinf(tmpy)) = nan;
 if(isempty(hy))
     hy = plot(t, tmpy, Clines{:});
     %plot data points of model prediction profile likelihood as stars
     if(~isempty(t_ppl) && any(plotopt(jy)==[4,5]))
-        if(~isempty(qUnlog) && qUnlog(jy))
-            hyss = patch([t_ppl(:,jy) ; flipud(t_ppl(:,jy))], [10.^y_ppl_lb(:,jy); flipud(10.^y_ppl_ub(:,jy))], ones(size([y_ppl_lb(:,jy); y_ppl_ub(:,jy)])));             
-        else
-            hyss = patch([t_ppl(:,jy) ; flipud(t_ppl(:,jy))], [y_ppl_lb(:,jy); flipud(y_ppl_ub(:,jy))], ones(size([y_ppl_lb(:,jy); y_ppl_ub(:,jy)])));             
-        end
-       set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2,'LineStyle','none','Marker','*','MarkerEdgeColor',Clines{2},'MarkerSize',5);
+        hyss = patch([t_ppl(:,jy) ; flipud(t_ppl(:,jy))], [trafo(y_ppl_lb(:,jy)); flipud(trafo(y_ppl_ub(:,jy)))], ones(size([y_ppl_lb(:,jy); y_ppl_ub(:,jy)])));             
+        set(hyss, 'FaceColor', 'none', 'EdgeColor', 'Black', 'FaceAlpha', 0.2, 'EdgeAlpha', 0.2,'LineStyle','none','Marker','*','MarkerEdgeColor',Clines{2},'MarkerSize',5);
     end
     if(any(plotopt(jy) == [3,5]))
         set(hy, 'LineWidth', 1.5);
@@ -103,12 +93,8 @@ if any(plotopt(jy)==[3,4,5])
         tmpy = [ub(:,jy); flipud(lb(:,jy))];
     end
     if(~isempty(tmpy))
-        if(~isempty(qUnlog) && qUnlog(jy))
-            tmpy = 10.^tmpy;
-        end
-        if(~isempty(qLog) && qLog(jy))
-            tmpy = log10(tmpy);
-        end
+        tmpy = trafo(tmpy);
+        
         isInfWarn = isInfWarn || sum(isinf(tmpy))>0;
         tmpy(isinf(tmpy)) = nan;
         qnan = isnan(tmpy);
@@ -140,24 +126,20 @@ else
     markersize = 6;
 end
 if(~isempty(yExp) && ~fastPlot)
-    if(~isempty(qUnlog) && qUnlog(jy))
-        yExpStd(:,jy) = 10.^(yExp(:,jy)+yExpStd(:,jy))-10.^(yExp(:,jy));
-        yExp = 10.^yExp;
-        yExpHl = 10.^yExpHl;
-    end
-    if(~isempty(qLog) && qLog(jy))
-        yExp = log10(yExp);
-        yExpHl = log10(yExpHl);
-    end
+    yExpU(:,jy)     = trafo(yExp(:,jy)+yExpStd(:,jy)) - trafo(yExp(:,jy));
+    yExpL(:,jy)     = trafo(yExp(:,jy)-yExpStd(:,jy)) - trafo(yExp(:,jy));
+    yExp            = trafo(yExp);
+    yExpHl          = trafo(yExpHl);
+    
     if(any(plotopt(jy)==[1,3,4]))
         plot(tExp, yExp(:,jy), ClinesExp{:},'MarkerSize',markersize);
         if(sum(~isnan(yExpHl))>0)
             plot(tExp, yExpHl(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',markersize+6);
         end
     elseif any(plotopt(jy)==[2,5])
-        errorbar(tExp, yExp(:,jy), yExpStd(:,jy), ClinesExp{:},'MarkerSize',markersize);
+        errorbar(tExp, yExp(:,jy), yExpL(:,jy), yExpU(:,jy), ClinesExp{:},'MarkerSize',markersize);
         if(sum(~isnan(yExpHl))>0)
-            errorbar(tExp, yExpHl(:,jy), yExpStd(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',markersize+6);
+            errorbar(tExp, yExpHl(:,jy), yExpL(:,jy), yExpU(:,jy), ClinesExp{:},'LineWidth',2,'MarkerSize',markersize+6);
         end
     end
 end

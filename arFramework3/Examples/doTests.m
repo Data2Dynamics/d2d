@@ -7,6 +7,15 @@
 %       doTests                                             - Performs all tests
 %       doTests('Volume_Fitting_Test', 'Splines')           - Perform specified two tests
 %
+% If you also wish to run the long tests, call doTests('long')
+%
+% The available tests are:
+%     'SubSensitivities', 'Advanced_Events', 'Volume_Estimation', 'Splines', 
+%     'Stoichiometry', 'DallaMan2007_GlucoseInsulinSystem', 'Step_Estimation', 
+%     'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines', 
+%     'ResponseCurve', 'PreProcessorTest', 'State_Reduction', 'Fast_Equilibration',  
+%     'Predictor_Test', 'FieldTester', 'SteadyStateBounds', 'DataFilterTest', 
+%     'Benchmark_Simu_Test'
 function doTests( varargin )
     global ar;
     global arOutputLevel;
@@ -21,20 +30,28 @@ function doTests( varargin )
     fprintf(2, 'routine before pushing any changes to internal functions in D2D\n' );
     fprintf(2, 'to reduce the risk of pushing code that breaks existing\nfunctionality.\n\n' );
 
-    tests = {   'SubSensitivities', 'Advanced_Events', 'Volume_Estimation', 'Splines', ...
+    tests = {   'SubSensitivities', 'Advanced_Events', 'Volume_Estimation', 'Splines', 'DataFilterTest', ...
                 'Stoichiometry', 'DallaMan2007_GlucoseInsulinSystem', 'Step_Estimation', ...
                 'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines', ...
                 'ResponseCurve', 'PreProcessorTest', 'State_Reduction', 'Fast_Equilibration', ... 
-                'Predictor_Test', 'FieldTester', 'SteadyStateBounds' };
+                'Predictor_Test', 'FieldTester', 'SteadyStateBounds', 'SD_Test', 'Benchmark_Simu_Test' };
+            
+    longtests = { 'Benchmark_Simu_Test' };
     
-    dependencies = { {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} };
+    dependencies = { {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} };
     
-    if ( nargin > 0 )
-        activeTests = argSwitch( tests, varargin{:} );
-    else
+    if ( nargin > 0 && strcmp( varargin{1}, 'long' ) )
+        varargin = setdiff( varargin, 'long' );
         activeTests = argSwitch( tests, tests{:} );
-    end
+    else
+        shortTests = setdiff( tests, longtests );
+        activeTests = argSwitch( tests, shortTests{:} );
+    end    
     
+    if ( numel(varargin) > 0 )
+        activeTests = argSwitch( tests, varargin{:} );
+    end
+    activeTests
     successes = 0;
     failures = 0;
     skipped = 0;

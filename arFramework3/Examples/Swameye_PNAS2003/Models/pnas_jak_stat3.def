@@ -1,5 +1,5 @@
 DESCRIPTION
-"JAK-STAT Model"
+"Adapted JAK-STAT Model: This model differes from pnas_jak_stat.def by the following aspects: 10 subsequent steps (instead of 5) for implementing a delay-behaviour. Offsets were removed from the OBSERVATIONS. The spline was replaces by linear interpolation, and reparametrizaiton was removed."
 
 PREDICTOR
 t               T   min         time	0	80

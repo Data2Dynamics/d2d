@@ -137,8 +137,7 @@ else
     ar.ple.plot_simu = true;
 end
 
-if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors == 1) || ...
-        (ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0) )
+if ar.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(ar.qFit==1 & ar.qError==1)>0)
     ar.ple.ylabel = '-2 log(PL)';
 end
 
@@ -202,7 +201,29 @@ global ar
 if(ar.type(jk)==1)
     chi2 = ((ar.mean(jk)-ar.p(jk))./ar.std(jk))^2;
 elseif(ar.type(jk)==3)
-    chi2 = abs((ar.mean(jk)-ar.p(jk))./ar.std(jk));
+    try
+        switch ar.L1subtype(jk)
+            case 1
+                chi2 = abs((ar.mean(jk)-ar.p(jk))./ar.std(jk));
+            case 2
+                chi2 = abs(ar.lnuweights(jk).*(ar.mean(jk)-ar.p(jk))./ar.std(jk));
+            case 3
+                chi2 = abs((ar.mean(jk)-ar.p(jk)).^ar.expo(jk)./ar.std(jk));
+            case 4
+                chi2 = abs((ar.mean(jk)-ar.p(jk))./ar.std(jk).*(1-ar.alpha(jk))) ...
+                    + ar.alpha(jk)./ar.std(jk) .* (ar.mean(jk) - ar.p(jk)).^ 2;
+        end
+    catch ME
+        if strcmpi(ME.identifier,'MATLAB:UndefinedFunction')
+            fprintf('Please provide a subtype and the corresponding parameters')
+        end
+        chi2 = 0;
+    end
+elseif(ar.type(jk)==5)
+    bk = (ar.grplas.grouping == ar.grplas.grouping(jk) & ar.type == 5);
+    chi2 = sqrt(((ar.mean(bk)-ar.p(bk))./ar.std(bk)) ...
+        * ar.grplas.A(bk,bk) ...
+        * ((ar.mean(bk)-ar.p(bk))./ar.std(bk))');
 else
     chi2 = 0;
 end
@@ -212,10 +233,42 @@ global ar
 type1 = find(ar.type==1);
 chi21 = ((ar.mean(type1)-ar.p(type1))./ar.std(type1)).^2;
 
-type3 = find(ar.type==3);
-chi23 = abs((ar.mean(type3)-ar.p(type3))./ar.std(type3));
+chi23 = 0;
+t3st1 = (ar.type == 3 & ar.L1subtype == 1);
+t3st2 = (ar.type == 3 & ar.L1subtype == 2);
+t3st3 = (ar.type == 3 & ar.L1subtype == 3);
+t3st4 = (ar.type == 3 & ar.L1subtype == 4);
+if any(t3st1)
+    chi23(t3st1) = abs((ar.mean(t3st1)-ar.p(t3st1))./ar.std(t3st1));
+end
+if any(t3st2)
+    chi23(t3st2) = abs(ar.lnuweights(t3st2).*(ar.mean(t3st2)-ar.p(t3st2))./ar.std(t3st2));
+end
+if any(t3st3)
+    chi23(t3st3) = abs((ar.mean(t3st3)-ar.p(t3st3)).^ar.expo(t3st3)./ar.std(t3st3));
+end
 
-chi2all = sum(chi21) + sum(chi23);
+if any(t3st4)
+    chi23(t3st4) = ar.alpha(t3st4) ./ ar.std(t3st4) ...
+        .* abs(ar.mean(t3st4) - ar.p(t3st4)) + (1-ar.alpha(t3st4)) ./ ar.std(t3st4) ...
+        .* (ar.mean(t3st4) - ar.p(t3st4)) .^ 2;
+end
+
+if any(ar.type == 5)
+    chi25 = zeros(size(ar.grplas.groups));
+    
+    for i = 1:length(ar.grplas.groups)
+        bk = (ar.grplas.grouping == ar.grplas.groups(i) & ar.type == 5);
+        chi25(i) = sqrt(((ar.mean(bk)-ar.p(bk))./ar.std(bk)) ...
+            * ar.grplas.A(bk,bk) ...
+            * ((ar.mean(bk)-ar.p(bk))./ar.std(bk))');
+    end
+else
+    chi25 = 0;
+end
+
+
+chi2all = sum(chi21) + sum(chi23) + sum(chi25);
     
 
 function [beta, alpha] = arPLEDiffMerit

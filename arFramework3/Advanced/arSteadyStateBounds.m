@@ -163,8 +163,8 @@ function [res_user, res_type, sres_user] = residual_concentrationConstraintsL2(m
         xs = isinf(xlower) | isnan(xupper);
         zs = isinf(zlower) | isnan(zupper);
         ix = find(x_active); iz = find(z_active);
-        xstr = sprintf( '%s ', ar.model.x{ix(xs)} );
-        zstr = sprintf( '%s ', ar.model.z{iz(zs)} );
+        xstr = sprintf( '%s ', ar.model(m).x{ix(xs)} );
+        zstr = sprintf( '%s ', ar.model(m).z{iz(zs)} );
         fprintf( 'Infinity found in residuals: %s, %s', xstr, zstr );
     end
     
@@ -172,8 +172,8 @@ function [res_user, res_type, sres_user] = residual_concentrationConstraintsL2(m
         xs = (xss < xl) | (xss > xu);
         zs = (zss < zl) | (zss > zu);
         ix = find(x_active); iz = find(z_active);
-        xstr = sprintf( '%s ', ar.model.x{ix(xs)} );
-        zstr = sprintf( '%s ', ar.model.z{iz(zs)} );
+        xstr = sprintf( '%s ', ar.model(m).x{ix(xs)} );
+        zstr = sprintf( '%s ', ar.model(m).z{iz(zs)} );
         fprintf( 'Active bounds: %s, %s\n', xstr, zstr );
     end
     if ( ar.config.show_ss_constraints == 2 )
@@ -182,16 +182,16 @@ function [res_user, res_type, sres_user] = residual_concentrationConstraintsL2(m
         ix = find(x_active); iz = find(z_active);
         for j = 1 : numel( ix )
             if ( xs( j ) )
-                fprintf( 2, '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.x{ix(j)}, xss(j), xl(j), xu(j) );
+                fprintf( 2, '%s: %.3g, Bounds: [%.3g, %.3g]: %.3g\n', ar.model(m).x{ix(j)}, xss(j), xl(j), xu(j), max(xlower(j), xupper(j)) );
             else
-                fprintf( '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.x{ix(j)}, xss(j), xl(j), xu(j) );
+                fprintf( '%s: %.3g, Bounds: [%.3g, %.3g]: %.3g\n', ar.model(m).x{ix(j)}, xss(j), xl(j), xu(j), max(xlower(j), xupper(j)) );
             end
         end
         for j = 1 : numel( iz )
             if ( zs( j ) )
-                fprintf( 2, '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.z{iz(j)}, zss(j), zl(j), zu(j) );
+                fprintf( 2, '%s: %.3g, Bounds: [%.3g, %.3g]: %.3g\n', ar.model(m).z{iz(j)}, zss(j), zl(j), zu(j), max(zlower(j), zupper(j)) );
             else
-                fprintf( '%s: %.3g, Bounds: [%.3g, %.3g]\n', ar.model.z{iz(j)}, zss(j), zl(j), zu(j) );
+                fprintf( '%s: %.3g, Bounds: [%.3g, %.3g]: %.3g\n', ar.model(m).z{iz(j)}, zss(j), zl(j), zu(j), max(zlower(j), zupper(j)) );
             end
         end
     end

@@ -1,6 +1,16 @@
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
-    arGetDataDoseResponse(jm, ds, ttime, dLink, logplotting_xaxis, jtype)
+    arGetDataDoseResponse(jm, ds, ttime, dLink, jtype, xtrafo)
 global ar
+
+tExp = [];
+t = [];
+y = [];
+ystd = [];
+yExp = [];
+yExpStd = [];
+lb = []; 
+ub = [];
+yExpHl = [];
 
 zero_break = [];
 data_qFit = true;
@@ -25,25 +35,18 @@ for jd = ds
     jc = ar.model(jm).data(jd).cLink;
     
     for jt = find(qt')
+        % Grab values
+        curvals = xtrafo( str2double(ar.model(jm).data(jd).condition(jcondi).value) );
         
         % collect x axis values
-        if(logplotting_xaxis)
-            t(ccount,1) = log10(str2double(ar.model(jm).data(jd).condition(jcondi).value)); %#ok<AGROW>
-        else
-            t(ccount,1) = str2double(ar.model(jm).data(jd).condition(jcondi).value); %#ok<AGROW>
-        end
+        t(ccount,1) = curvals; %#ok<AGROW>
         
         % calculatte zero break
         if(isinf(t(ccount,1)))
             doses = [];
             for jd2 = dLink
-                if(logplotting_xaxis)
-                    if(~isinf(log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
-                        doses(end+1) = ...
-                            log10(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
-                    end
-                else
-                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(jcondi).value); %#ok<AGROW>
+                if(~isinf(xtrafo(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
+                    doses(end+1) = xtrafo(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
                 end
             end
             doses = unique(doses); %R2013a compatible

@@ -108,7 +108,7 @@ end
 
         % Verify that we have the same experimental data
         for c = 1 : length( I1 )
-            if ( nanmax( nanmax(ar1.model(m1).data(I1(c)).yExp - ar1.model(m1).data(I2(c)).yExp) ) > 0 )
+            if ( nanmax( nanmax(ar1.model(m1).data(I1(c)).yExp - ar2.model(m2).data(I2(c)).yExp) ) > 0 )
                 warning( 'Problem finding corresponding dataset for %s\n', dataFiles{a} );
             end
             
@@ -126,12 +126,12 @@ end
                             changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + ar1.model(m1).data(I1(c)).chi2(b);
                         else
                             % Use (residual1-residual2)/(residual1) as change measure
-                            changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + nansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
-                            totalErr( a, obsIndex )     = totalErr( a, obsIndex ) + nansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
+                            changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + arnansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
+                            totalErr( a, obsIndex )     = totalErr( a, obsIndex ) + arnansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
                         end
                     else
                         % Compute R^2 of M1 instead
-                        changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + nansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
+                        changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + arnansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
                         allData{ a, obsIndex }      = [ allData{ a, obsIndex }; ar1.model(m1).data(I1(c)).yExp(:,b) ];
                     end
                 end
@@ -144,7 +144,7 @@ end
 
                     if( ar2.model(m2).data(I2(c)).qFit(b) == 1 ) 
                         if ( ~opts.relerr )
-                            if( ar2.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0) ) 
+                            if( ar2.config.fiterrors==1 || (ar2.config.fiterrors==0 && sum(ar2.qFit(ar2.qError==1)<2)>0) ) 
                                 changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) - ar2.model(m2).data(I2(c)).chi2err(b);
                             end
                             changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) - ar2.model(m2).data(I2(c)).chi2(b);
@@ -170,7 +170,7 @@ end
     if ( opts.absrsq )
         for a = 1 : size( allData, 1 )
             for b = 1 : size( allData, 2 )
-                totalErr( a, b ) = nansum( ( allData{a,b} - nanmean(allData{a,b}) ).^2 );
+                totalErr( a, b ) = arnansum( ( allData{a,b} - nanmean(allData{a,b}) ).^2);
             end
         end
         

@@ -8,9 +8,3 @@ arLoadModel('BIOMD0000000379');
 arLoadData('BIOMD0000000379_data');
 arCompileAll;
 
-%% Check
-arQplot('x')
-arPlot
-
-arCompareWithBiobaseSimulation('SIMU1448030646732.dat');
-

@@ -11,7 +11,10 @@
 % doLegends     [true]
 % dynamics:     [true]
 % hs:           []      custom figure handels
-% 
+%
+% individual colors per plot can be used by setting ar.model.plot(i).colors,
+% e.g. by ar.model.plot(i).colors = hsv(n)
+%
 % 
 % Doku: 
 % https://github.com/Data2Dynamics/d2d/wiki/Plotting-options-and-the-meaning-of-ar.config.ploterrors
@@ -105,13 +108,9 @@ for jm = 1:length(ar.model)
     
     for jplot = 1:length(ar.model(jm).plot)
         qDR = ar.model(jm).plot(jplot).doseresponse;
-        
-        % log 10 dose response axis
-        if(isfield(ar.model(jm).plot(jplot), 'doseresponselog10xaxis'))
-            logplotting_xaxis = ar.model(jm).plot(jplot).doseresponselog10xaxis;
-        else
-            logplotting_xaxis = true;
-        end
+
+        % Determine transformation of the independent axis
+        [xtrafo, xLabel] = arGetPlotXTrafo(jm, jplot);
         
         % chi^2, ndata and dr_times
         chi2 = zeros(1,ar.model(jm).plot(jplot).ny);
@@ -216,7 +215,29 @@ for jm = 1:length(ar.model)
                             
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, qFit, yExpHl] = ...
                                 arGetDataDoseResponse(jm, ds, dr_times(jt), ...
-                                ar.model(jm).plot(jplot).dLink, logplotting_xaxis, jtype);
+                                ar.model(jm).plot(jplot).dLink, jtype, xtrafo);      
+                            
+                            %Smoothen dose response curves
+                            y_new = NaN(ar.config.nFinePoints,size(y,2));
+                            ystd_new = NaN(ar.config.nFinePoints,size(ystd,2));
+                            [t_red, its] = unique(t);
+                            t = linspace(min(t),max(t),ar.config.nFinePoints);
+                            
+                            for iyC = 1:size(y,2)
+                                y_red = y(its,iyC);                                
+                                y_new(:,iyC) = pchip(t_red,y_red,t);
+                                
+                                if(~isempty(ystd) && sum(isnan(ystd(its,iyC)))<length(ystd(its,iyC)) && size(ystd,2) == size(y,2))
+                                    ystd_red = ystd(its,iyC);
+                                    ystd_new(:,iyC) = pchip(t_red,ystd_red,t);
+                                end
+                                                            
+                            end
+                            y = y_new;
+                            if(~isempty(ystd))
+                                ystd = ystd_new;
+                            end
+                            %End smoothing
                             
                             plotopt = NaN(1,size(y,2));
                             if jtype ==1
@@ -246,35 +267,40 @@ for jm = 1:length(ar.model)
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, dydt, ...
                                 y_ssa, y_ssa_lb, y_ssa_ub, qFit, t_ppl, y_ppl_ub, y_ppl_lb] = arGetData(jm, jd, jtype);
                             plotopt = NaN(1,size(y,2));
-                            if jtype ==1
+                            if jtype ==1 % only for observables y
                                 for jy=1:size(y,2)
                                     plotopt(jy) = arWhichYplot(jm,jd,[],jy);
                                 end
                             else
                                 for jy=1:size(y,2)
                                     plotopt(jy) = 1;
-                                    if(~isempty(t_ppl))
+                                    if ar.config.ploterrors == -1 || (~isempty(t_ppl))
                                         plotopt(jy) = 4;
                                     end
                                 end
                             end
                             zero_break = [];
                         end
-                        [tUnits, response_parameter, yLabel, yNames, yUnits, iy, ...
+                        
+                        [tUnits, response_parameter, titles, yNames, yLabel, iy, ...
                             hys, hystds, hysss] = ...
                             arGetInfo(jm, jd, jtype, linehandle_name{jtype});
-                        
-                        % log10 plotting
+
+                        % Plotting of observables
                         if(jtype==1)
-                            qUnlog = ar.model(jm).data(jd).logfitting & ...
-                                ~ar.model(jm).data(jd).logplotting;
-                            qLog = ~ar.model(jm).data(jd).logfitting & ...
-                                ar.model(jm).data(jd).logplotting;
-                            qLogPlot = ar.model(jm).data(jd).logplotting;
+                            % Central point where the transformations are handled.
+                            [trafos, yLabel] = arGetPlotYTrafo(jm, jd, jplot);
                         else
-                            qUnlog = false(size(yLabel));
-                            qLog = false(size(yLabel));
-                            qLogPlot = false(size(yLabel));
+                            trafos = cell(1, numel(iy));
+                            for jy = 1 : numel(iy)
+                                trafos{jy} = @(x) x;
+                            end
+                        end
+                        
+                        if(isfield(ar.model(jm).plot(jplot), 'colors') && ~isempty(ar.model(jm).plot(jplot).colors))
+                            colors = ar.model(jm).plot(jplot).colors(ccount,:);
+                        else
+                            colors = [];
                         end
                         
                         % call arPlotTrajectories
@@ -282,13 +308,11 @@ for jm = 1:length(ar.model)
                             length(dr_times)*length(jcs), ...
                             t, y, ystd, lb, ub, nfine_dr_plot, ...
                             nfine_dr_method, tExp, yExp, yExpHl, yExpStd, ...
-                            y_ssa, y_ssa_lb, y_ssa_ub, ...
-                            plotopt, qUnlog, qLog, qLogPlot, qFit, ...
-                            zero_break, fastPlotTmp, hys, hystds, hysss, dydt, ...
-                            jt==length(dr_times) && jc==jcs(end), qDR, ndata, chi2, ...
-                            tUnits, response_parameter, yLabel, yNames, yUnits, ...
-                            fiterrors, logplotting_xaxis, iy, t_ppl, y_ppl_ub, y_ppl_lb, ...
-                            ar.config.atol);
+                            y_ssa, y_ssa_lb, y_ssa_ub, plotopt, trafos, qFit, zero_break, ...
+                            fastPlotTmp, hys, hystds, hysss, dydt, ...
+                            jt==length(dr_times) && jc==jcs(end), ndata, chi2, ...
+                            titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, ...
+                            ar.config.atol, colors);
         
                         % save handels
                         if(jd~=0)

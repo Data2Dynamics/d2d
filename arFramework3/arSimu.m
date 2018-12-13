@@ -151,7 +151,9 @@ if ( ss_presimulation && dynamics )
     if ( ~rootFinding )
         if ( isfield( ar.config, 'turboSSSensi' ) && ( ar.config.turboSSSensi == 1 ) )
             % Steady state determination by simulation without sensitivities and then determining them via implicit func theorem (only valid when conserved moieties have been removed from the model)
-            fastSteadyState( m, sensi, dynamics );
+            for m=1:length(ar.model)
+                fastSteadyState( m, sensi, dynamics );
+            end
         else
             % Steady state determination by full simulation
             feval(ar.fkt, ar, true, ar.config.useSensis && sensi, dynamics, false, 'ss_condition', 'ss_threads', ar.config.skipSim);
@@ -174,11 +176,11 @@ if ( ss_presimulation && dynamics )
         for c=1:length(ar.model(m).ss_condition)
             if(ar.model(m).ss_condition(c).status>0)
                 arCheckCache(1); % Invalidate cache so simulations do not get skipped
-                nonEq = sprintf('%s ', ar.model.x{find(abs(ar.model.ss_condition(c).dxdt)>ar.config.eq_tol)});
-                error('arSimuCalc failed at %s for model %i, condition %i during pre-equilibration %i.\nStates which failed to equilibrate:\n%s', ar.info.arsimucalc_flags{ar.model(m).ss_condition(c).status}, m, ar.model(m).ss_condition(c).src, c, nonEq);
+                nonEq = sprintf('%s ', ar.model(m).x{find(abs(ar.model(m).ss_condition(c).dxdt)>ar.config.eq_tol)});
+                error('arSimuCalc failed at %s for model %i, condition %i during pre-equilibration %i.\nStates which failed to equilibrate:\n%s.\nCan attempt debugging using arPlotEquilibration.\n', ar.info.arsimucalc_flags{ar.model(m).ss_condition(c).status}, m, ar.model(m).ss_condition(c).src, c, nonEq);
             elseif(ar.model(m).ss_condition(c).status<0)
                 arCheckCache(1); % Invalidate cache so simulations do not get skipped
-                error('cvodes failed at %s for model %i, condition %i during pre-equilibration %i', ...
+                error('cvodes failed at %s for model %i, condition %i during pre-equilibration %i\nCan attempt debugging using arPlotEquilibration.\n', ...
                     ar.info.cvodes_flags{abs(ar.model(m).ss_condition(c).status)}, m, ar.model(m).ss_condition(c).src, c);
             end
         end
@@ -343,10 +345,12 @@ end
 if ( isfield( ar.config, 'onlySS' ) && ( ar.config.onlySS == 1 ) )
 	for m=1:length(ar.model)
         for c=1:length(ar.model(m).condition)
-            ar.model(m).condition(c).sxExpSimu = zeros( size( ar.model(m).condition(c).sxExpSimu ) );
-            ar.model(m).condition(c).svExpSimu = zeros( size( ar.model(m).condition(c).svExpSimu ) );
-            ar.model(m).condition(c).szExpSimu = zeros( size( ar.model(m).condition(c).szExpSimu ) );
-            ar.model(m).condition(c).suExpSimu = zeros( size( ar.model(m).condition(c).suExpSimu ) );
+            if ( isfield( ar.model(m).condition(c), 'sxExpSimu' ) )
+                ar.model(m).condition(c).sxExpSimu = zeros( size( ar.model(m).condition(c).sxExpSimu ) );
+                ar.model(m).condition(c).svExpSimu = zeros( size( ar.model(m).condition(c).svExpSimu ) );
+                ar.model(m).condition(c).szExpSimu = zeros( size( ar.model(m).condition(c).szExpSimu ) );
+                ar.model(m).condition(c).suExpSimu = zeros( size( ar.model(m).condition(c).suExpSimu ) );
+            end
         end
 	end
 end
@@ -384,9 +388,9 @@ function fastSteadyState( m, sensi, dynamics )
             if ( method == 2 )
                 [Sx, r] = linsolve(-dfdx,dfdp); % For invertibility, model may not have conserved moieties
                         
-                if ( r < eps(1) )
-                    warning( 'Model has conserved moieties or has not been sufficiently equilibrated. Fast equilibration result may be unreliable. Unless you know what you are doing, turn ar.config.turboSSSensi off by invoking ar.config.turboSSSensi = 0 or reduce the model prior to compilation (see help arReduce)' );
-                end
+                %if ( r < eps(1) )
+                %    error( 'Model has conserved moieties or has not been sufficiently equilibrated. Fast equilibration result may be unreliable. Unless you know what you are doing, turn ar.config.turboSSSensi off by invoking ar.config.turboSSSensi = 0 or reduce the model prior to compilation (see help arReduce)' );
+                %end
             else
                 Sx = pinv(-dfdx)*dfdp;
                 %Sx = dfdx.' \ dfdp;

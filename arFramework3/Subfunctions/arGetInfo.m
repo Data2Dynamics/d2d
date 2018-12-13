@@ -1,4 +1,4 @@
-function [tUnits, response_parameter, yLabel, yNames, yUnits, iy, ...
+function [tUnits, response_parameter, titles, yNames, yLabel, iy, ...
     hys, hystds, hysss] = arGetInfo(jm, jd, jtype, linehandle_name)
 global ar
 
@@ -11,7 +11,7 @@ else
 end
 
 if(jtype==1)
-    yLabel = ar.model(jm).data(jd).y;
+    titles = ar.model(jm).data(jd).y;
     if(isfield(ar.model(jm).data(jd), 'yNames'))
         yNames = ar.model(jm).data(jd).yNames;
     else
@@ -21,7 +21,7 @@ if(jtype==1)
     iy = 1:length(ar.model(jm).data(jd).y);
     
 elseif(jtype==2)
-    yLabel = [ar.model(jm).u ar.model(jm).x ar.model(jm).z];
+    titles = [ar.model(jm).u ar.model(jm).x ar.model(jm).z];
     if(isfield(ar.model(jm), 'xNames'))
         yNames = [ar.model(jm).u ar.model(jm).xNames ar.model(jm).z];
     else
@@ -31,7 +31,7 @@ elseif(jtype==2)
     iy = find([ar.model(jm).qPlotU ar.model(jm).qPlotX ar.model(jm).qPlotZ]);
     
 elseif(jtype==3)
-    yLabel = strrep(strrep(ar.model(jm).vs, '[', '_{'), ']', '}');
+    titles = strrep(strrep(ar.model(jm).vs, '[', '_{'), ']', '}');
     if(isfield(ar.model(jm), 'v'))
         yNames = ar.model(jm).v;
     else
@@ -39,9 +39,19 @@ elseif(jtype==3)
     end
     yUnits = ar.model(jm).vUnits;
     iy = find([ar.model(jm).qPlotV]);
-    
 end
 
+yLabel = cell( 1, numel(iy) );
+for jy = 1 : numel( iy )
+    yunitetmp = '';
+    if(~isempty(yUnits{jy,2}))
+        yunitetmp = sprintf(' [%s]', yUnits{jy,2});
+    end
+    % Some observations may be plotted in log, but those get a special
+    % legend from arGetPlotYTrafo.
+    yLabel{jy} = sprintf('%s%s', yUnits{jy,3}, yunitetmp);
+end
+    
 % get handels
 if(jd~=0)
     if(isfield(ar.model(jm).data(jd), 'plot') && ...
@@ -90,3 +100,8 @@ else
         hysss = [];
     end
 end
+
+% Make sure that the handle direction is never ambiguous
+hys = hys(:);
+hystds = hystds(:);
+hysss = hysss(:);

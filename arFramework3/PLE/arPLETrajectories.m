@@ -35,10 +35,18 @@ end
 ps = [];
 chi2s = [];
 
+if ~isfield( ar.ple, 'p_labels' )
+    error( 'No ple struct available in ar.ple. Did you perform profile likelihood?' );
+end
+
 if(ischar(jks))
     jks = find(ismember(ar.ple.p_labels, jks)); %R2013a compatible
 else
     jks = find(ismember(ar.ple.p_labels, ar.pLabel(jks))); %R2013a compatible
+end
+
+if ( isempty( jks ) )
+    error( 'No profiled parameter selected' );
 end
 
 if(length(jks)>2)

@@ -199,7 +199,7 @@ function [olist, names, m] = arFindData( varargin )
                     end
                 else
                     % It is a string; Does it refer to a parameter?
-                    Q = find(strcmp(ar.pLabel, ar.model.fp{ID}));
+                    Q = find(strcmp(ar.pLabel, ar.model(m).fp{ID}));
                     if ~isempty(Q)
                         condList(c) = 0;
                         numval = arGetPars(ar.pLabel{Q},0);
@@ -274,21 +274,21 @@ function sets = scanObservables( m, state, verbose )
     
     % Convert choice to numeric state number and see whether it exists
     if ( ischar( state ) )
-        stateID = find(strcmp(ar.model.x,state));
+        stateID = find(strcmp(ar.model(m).x,state));
         
         if ( isempty( stateID ) )
-            stateID = find( strcmp( ar.model.z, state ) );
+            stateID = find( strcmp( ar.model(m).z, state ) );
             if ( isempty( stateID ) )
                 fprintf('Model states:\n');
-                fprintf('%s\n', ar.model.x{:});
+                fprintf('%s\n', ar.model(m).x{:});
                 fprintf('Model derived variables:\n');
-                fprintf('%s\n', ar.model.z{:});
+                fprintf('%s\n', ar.model(m).z{:});
                 error( 'Specified state or derived variable does not exist. Check capitalization?' );
             else
-                stateString = ar.model.z{stateID};
+                stateString = ar.model(m).z{stateID};
             end
         else
-            stateString = ar.model.x{stateID};
+            stateString = ar.model(m).x{stateID};
         end
     end
     
@@ -322,14 +322,14 @@ function sets = scanObservables( m, state, verbose )
             dataset = ar.model(m).data(a).name;
             for c = 1 : length( matches )
                 % Match against observable
-                if max(strcmp(strsplit(ar.model(m).data(a).fy{b}, {'(',')','/','*','^','+','-',' '}), ar.model.z{matches(c)} ));
+                if max(strcmp(strsplit(ar.model(m).data(a).fy{b}, {'(',')','/','*','^','+','-',' '}), ar.model(m).z{matches(c)} ))
                     matched = 1;
                     if( verbose )
-                        fprintf('%s in %s\n', ar.model.z{matches(c)}, dataset);
+                        fprintf('%s in %s\n', ar.model(m).z{matches(c)}, dataset);
                     end
                 end
             end
-            if( max(strcmp(strsplit(ar.model(m).data(a).fy{b}, {'(',')','/','*','^','+','-',' '}), stateString )) );
+            if( max(strcmp(strsplit(ar.model(m).data(a).fy{b}, {'(',')','/','*','^','+','-',' '}), stateString )) )
                 matched = 1;
                 if (verbose)
                     fprintf('%s in %s\n', stateString, dataset);

@@ -1,0 +1,17 @@
+DESCRIPTION
+"Experimenter: "
+"Date: "
+"Cells: "
+"Treatment: Ca^{2+} / IP3"
+
+PREDICTOR
+t               T   h     time	0	10
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+

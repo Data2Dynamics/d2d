@@ -1,3 +1,6 @@
+% This function updates the objective functions used for fitting for the
+% currently chosen parameters.
+% 
 % This function calls
 %   - arSimu which in turn calls arCalcRes
 %   - arCollectRes
@@ -182,7 +185,7 @@ end
 for m=1:length(ar.model)
     for c=1:length(ar.model(m).condition)
         if(isfield(ar.model(m).condition(c), 'xExpSimu'))
-            if(sum((min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) ./ range(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),1) < -ar.config.rtol) & (min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) < -ar.config.atol)) > 0)
+            if(sum((min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) ./ arRange(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),1) < -ar.config.rtol) & (min(ar.model(m).condition(c).xExpSimu(:,qPositiveX{m}==1),[],1) < -ar.config.atol)) > 0)
                 arFprintf(1, 'Negative state in model %d condition %d detected that is defined as positive! Double-check model definition!\nPlot negative states by calling ar.model(%d).qPositiveX(:) = 0; with subsequent arPlot call.\n',m,c,m)
             end
         end
@@ -211,7 +214,7 @@ if(sensi)
     end
     g = -2*res*sres; % gradient
     if(~isempty(g))
-        onbound = [ar.p(ar.qFit==1)==ar.ub(ar.qFit==1); ar.p(ar.qFit==1)==ar.lb(ar.qFit==1)];
+        onbound = [my_equals(ar.p(ar.qFit==1),ar.ub(ar.qFit==1)); my_equals(ar.p(ar.qFit==1),ar.lb(ar.qFit==1))];
         exbounds = [g>0; g<0];
         qred = sum(onbound(:) & exbounds(:),1)>0;
         ar.firstorderopt = norm(g(~qred));
@@ -235,3 +238,6 @@ if ~silent
     arGetMerit
 end
 
+function c = my_equals(a,b)
+c = a(:)==b(:);
+c = c';

@@ -125,10 +125,12 @@ function PLEs = loadSingle( PLEs, directory, doFilterProfile )
             N = 1 : numel( chi2s );
         end
         fprintf( 'Found profile for %s\n', curPLE.p_labels{filled(b)} );
-        PLEs = copyVectors(  PLEs, curPLE, {'chi2s', 'chi2sinit', 'chi2spriors', 'chi2spriorsAll', 'chi2sviolations'}, filled(b), loc(b), N );
+        PLEs = copyVectors(  PLEs, curPLE, {'chi2s', 'chi2sinit', 'chi2spriors', 'chi2spriorsAll', 'chi2sviolations', 'IDstatus'}, filled(b), loc(b), N );
         PLEs = copyMatrices( PLEs, curPLE, {'psinit', 'ps', 'gradient', 'psinitstep'}, filled(b), loc(b), N );
         PLEs = copyScalars(  PLEs, curPLE, {'estimatetime', 'fittime', 'timing', 'conf_lb', 'conf_ub', 'conf_lb_point', 'conf_ub_point'}, filled(b), loc(b) );
-        PLEs = copySingle(   PLEs, curPLE, {'plot_point', 'plot_simu', 'dist_thres', 'grad_thres', 'dchi2_point', 'merit', 'alpha_level', 'p', 'p_labels', 'ylabel'} );
+        PLEs = copySingle(   PLEs, curPLE, {'breakon_point', 'dchi2', 'chi2_strID_ratio', 'initstep_fkt', 'minstepsize', 'breakonlb', 'breakonub', 'maxstepsize', ...
+                                            'plot_point', 'plot_simu', 'dist_thres', 'grad_thres', 'dchi2_point', 'merit', 'alpha_level', 'p', 'p_labels', 'ylabel', ...
+                                            'integrate_fkt', 'fit_fkt', 'setoptim_fkt', 'merit_fkt', 'optimset_tol', 'allowbetteroptimum', 'savePath', 'relchi2stepincrease'} );
         PLEs.plot_point = curPLE.plot_point;
     end
 end

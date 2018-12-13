@@ -21,11 +21,25 @@ if(~isfield(ar.ple,'ps') || isempty(ar.ple.ps))
     return
 end
 if(~exist('jks','var') || isempty(jks))
-    jks = 1:length(ar.ple.ps);
+    jks = 1:length(ar.p);
 end
 if(~exist('savetofile','var') || isempty(savetofile))
     savetofile = false;
 end
+
+% Map PLE to current ar struct
+if(ischar(jks))
+    jks = find(ismember(ar.ple.p_labels, jks)); %R2013a compatible
+else
+    jks = find(ismember(ar.ple.p_labels, ar.pLabel(jks))); %R2013a compatible
+end
+pleToP = ismember(ar.pLabel, ar.ple.p_labels);
+pToPLE = ismember(ar.ple.p_labels, ar.pLabel);
+lb(pToPLE) = ar.lb(pleToP);
+ub(pToPLE) = ar.ub(pleToP);
+qFit(pToPLE) = ar.qFit(pleToP);
+qLog10(pToPLE) = ar.qLog10(pleToP);
+jks(jks>numel(ar.ple.ps)) = [];
 
 sumples = 0;
 for j=jks
@@ -83,14 +97,14 @@ for jk=jks
         ps = ar.ple.ps{jk};
         chi2s = ar.ple.chi2s{jk};
         
-        qCloseToUB = ps > ones(length(chi2s),1) * (ar.ub - ar.ple.dist_thres) & ...
-            ones(length(chi2s),1) * ar.qFit==1;
-        qCloseToLB = ps < ones(length(chi2s),1) * (ar.lb + ar.ple.dist_thres) & ...
-            ones(length(chi2s),1) * ar.qFit==1;
+        qCloseToUB = ps > ones(length(chi2s),1) * (ub - ar.ple.dist_thres) & ...
+            ones(length(chi2s),1) * qFit==1;
+        qCloseToLB = ps < ones(length(chi2s),1) * (lb + ar.ple.dist_thres) & ...
+            ones(length(chi2s),1) * qFit==1;
      
         qhitbound = false(size(ps));
-        qhitbound(:,ar.qFit==1) = ar.ple.gradient{jk}(:,ar.qFit==1) > ar.ple.grad_thres & qCloseToLB(:,ar.qFit==1) | ...
-            ar.ple.gradient{jk}(:,ar.qFit==1) < -ar.ple.grad_thres & qCloseToUB(:,ar.qFit==1);
+        qhitbound(:,qFit==1) = ar.ple.gradient{jk}(:,qFit==1) > ar.ple.grad_thres & qCloseToLB(:,qFit==1) | ...
+            ar.ple.gradient{jk}(:,qFit==1) < -ar.ple.grad_thres & qCloseToUB(:,qFit==1);
         
         % profile
         qplot = true(size(ps,1),1);
@@ -174,12 +188,12 @@ for jk=jks
         plot(ar.ple.p(jk), ar.ple.merit, '*', 'Color', [.5 .5 .5], 'LineWidth', 1)
         hold off
 
-        if ( ar.qLog10(jk) )
+        if ( qLog10(jk) )
             xlabel(['log_{10}(' arNameTrafo(ar.ple.p_labels{jk}) ')']);
         else
             xlabel(arNameTrafo(ar.ple.p_labels{jk}));
         end
-        title(sprintf('parameter #%i', jk));
+        title(sprintf('parameter #%i', find(strcmp(ar.pLabel, ar.ple.p_labels{jk}))));
         
         if(mod(count-1,ncols)==0)
             ylabel(ar.ple.ylabel)

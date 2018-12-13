@@ -45,7 +45,7 @@ function [str, arg] = replaceFunctions(str, funcTypes, checkValidity)
     % simplify it
     try
         if (checkValidity)
-            str = char( sym( str ) );
+            str = char( arMyStr2Sym( str ) );
         end
         % Enable for input function debug purposes
         % if ( replaced > 0 )

@@ -18,7 +18,8 @@
 %           'observation'               - only show non-dynamic parameters
 %           'error'                     - only show error model parameters
 %           'exact'                     - match names exactly
-%           'namefit'                   - display fitting option close to the name
+%           'namefit'                   - put parameter between brackets
+%                                         when it is not being fitted
 %           'closetobound'              - show the parameters near bounds
 %           'lb' followed by value      - only show values above lb
 %           'ub' followed by value      - only show values below lb
@@ -54,7 +55,7 @@ function varargout = arPrint(js, varargin)
 global ar
 
 args = {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub', 'exact', 'namefit', 'ar'};
-extraArgs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+extraArgs = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1];
 
 if ( exist( 'js', 'var' ) )
     if ( ~isnumeric( js ) )
@@ -129,8 +130,13 @@ pTrans(arC.qLog10==1) = 10.^pTrans(arC.qLog10==1);
 % Determine which parameters are close to their bounds
 qFit = arC.qFit == 1;
 arC.qCloseToBound(1:length(arC.qFit)) = 0;
-arC.qCloseToBound(qFit) = (arC.p(qFit) - arC.lb(qFit)) < arC.config.par_close_to_bound*(arC.ub(qFit) - arC.lb(qFit)) | ...
-    (arC.ub(qFit) - arC.p(qFit)) < arC.config.par_close_to_bound*(arC.ub(qFit) - arC.lb(qFit));
+
+ptmp = arC.p(qFit);
+lbtmp = arC.lb(qFit);
+ubtmp = arC.ub(qFit);
+
+arC.qCloseToBound(qFit) = (ptmp(:) - lbtmp(:)) < arC.config.par_close_to_bound*(ubtmp(:) - lbtmp(:)) | ...
+    (ubtmp(:) - ptmp(:)) < arC.config.par_close_to_bound*(ubtmp(:) - lbtmp(:));
 
 % Additional options
 if ( nargin > 1 )
@@ -169,10 +175,10 @@ if ( nargin > 1 )
         js = js( arC.qInitial( js ) == 1 );
     end
     if ( opts.ub )
-        js = js( arC.p(js) < opts.ub );
+        js = js( arC.p(js) < opts.ub_args );
     end
     if ( opts.lb )
-        js = js( arC.p(js) > opts.lb );
+        js = js( arC.p(js) > opts.lb_args );
     end
     if ( opts.closetobound )
         js = js( arC.qCloseToBound(js) );
@@ -254,7 +260,44 @@ end
         elseif(arC.type(j) == 2)
             str = sprintf('uniform(%g,%g) with soft bounds', arC.lb(j), arC.ub(j));
         elseif(arC.type(j) == 3)
-            str = sprintf('L1(%g,%g)', arC.mean(j), arC.std(j));
+            switch arC.L1subtype(j)
+                case 1
+                    str = sprintf('L1(%g,%g)',arC.mean(j),ar.std(j));
+                case 2
+                    if (isfield(arC,'lnuweights') && ~isempty(arC.lnuweights))
+                        if (isfield(arC,'gamma') && ~isempty(arC.gamma)...
+                                && arC.gamma(j) > 0 )
+                            
+                            coeff = sprintf(' x %g (=|OLS|^-%g)', arC.lnuweights(j),...
+                                arC.gamma(j));
+                        elseif arC.lnuweights(j) ~= 1
+                            coeff = sprintf(' x %g', arC.lnuweights(j));
+                        else
+                            coeff = '';
+                        end
+                    else
+                        coeff = '';
+                    end
+                    str = sprintf('L1(%g,%g)%s', arC.mean(j), arC.std(j), coeff);
+                case 3
+                                       
+                    if (isfield(arC, 'expo') && ~isempty(arC.expo))
+                        expo = sprintf('%g', arC.expo(j));
+                    else
+                        expo = '1';
+                    end
+                    str = sprintf('L%s(%g,%g)', expo, arC.mean(j), arC.std(j));
+                case 4
+                    if (isfield(arC, 'alpha') && ~isempty(arC.alpha))
+                        str = sprintf('(%g x L1 + %g x L2)(%g,%g)',...
+                            1-arC.alpha(j),arC.alpha(j),arC.mean(j),arC.std(j));
+                    else
+                        str = sprintf('L1(%g,%g)',arC.mean(j),ar.std(j));
+                    end
+            end
+        elseif(arC.type(j) == 5)
+            str = sprintf('GroupLasso(%g,%g,G%d)', arC.mean(j), arC.std(j), arC.grplas.grouping(j));
+            
         end
     end
 end

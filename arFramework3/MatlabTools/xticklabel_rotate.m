@@ -78,6 +78,11 @@ if isempty(get(gca,'XTickLabel')),
     error('xticklabel_rotate : can not process, either xticklabel_rotate has already been run or XTickLabel field has been erased')  ;
 end
 
+if ~exist('rot','var') || isempty(rot)
+    rot = 90 ;
+end
+
+
 % if no XTickLabel AND no XTick are defined use the current XTickLabel
 %if nargin < 3 & (~exist('XTick') | isempty(XTick)),
 % Modified with forum comment by "Nathan Pust" allow the current text labels to be used and property value pairs to be changed for those labels
@@ -95,17 +100,17 @@ varargin = varargin(2:length(varargin));
 end
 
 % if no XTick is defined use the current XTick
-if (~exist('XTick') | isempty(XTick)),
+if ~exist('XTick','var') || isempty(XTick)
     XTick = get(gca,'XTick')        ; % use current XTick 
 end
 
 %Make XTick a column vector
 XTick = XTick(:);
 
-if ~exist('xTickLabels'),
+if ~exist('xTickLabels','var')
 	% Define the xtickLabels 
 	% If XtickLabel is passed as a cell array then use the text
-	if (length(varargin)>0) & (iscell(varargin{1})),
+	if (length(varargin)>0) && (iscell(varargin{1}))
         xTickLabels = varargin{1};
         varargin = varargin(2:length(varargin));
 	else
@@ -113,16 +118,13 @@ if ~exist('xTickLabels'),
 	end
 end    
 
-if length(XTick) ~= length(xTickLabels),
+if length(XTick) ~= length(xTickLabels)
     error('xticklabel_rotate : must have same number of elements in "XTick" and "XTickLabel"')  ;
 end
 
 %Set the Xtick locations and set XTicklabel to an empty string
 set(gca,'XTick',XTick,'XTickLabel','')
 
-if nargin < 2,
-    rot = 90 ;
-end
 
 % Determine the location of the labels based on the position
 % of the xlabel

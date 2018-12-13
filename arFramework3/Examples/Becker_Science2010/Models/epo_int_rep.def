@@ -22,7 +22,7 @@ Epo_EpoR        ->  Epo + EpoR      CUSTOM "koff * Epo_EpoR"
                 ->  EpoR            CUSTOM "kt * init_EpoR"
 EpoR            ->                  CUSTOM "kt * EpoR"
 Epo_EpoR        ->  Epo_EpoR_i      CUSTOM "ke * Epo_EpoR"
-Epo_EpoR_i      ->  EpoR Epo        CUSTOM "kex * Epo_EpoR_i"
+Epo_EpoR_i      ->  EpoR + Epo        CUSTOM "kex * Epo_EpoR_i"
 Epo_EpoR_i      ->  dEpo_i          CUSTOM "kdi * Epo_EpoR_i"
 Epo_EpoR_i      ->  dEpo_e          CUSTOM "kde * Epo_EpoR_i"
 

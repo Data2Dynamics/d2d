@@ -1,5 +1,5 @@
 DESCRIPTION
-"JAK-STAT Model"
+"JAK-STAT Model: This model is the D2D-version of the Swameye model published in PNAS in 2003. Compared to the published model, the delay is implemented via the chain-trick with 5 compartements. Error parameters for the observations are introduced (which are by default, i.e. in case of ar.config.fiterrors=0 overwritten by the exp. errors and therefore not used."
 
 PREDICTOR
 t               T   min         time	0	80

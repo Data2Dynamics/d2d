@@ -1,5 +1,3 @@
-% Load models & data
-clear all;
 arInit
 
 arLoadModel('ABC_model');
@@ -20,11 +18,3 @@ ar.config.fiterrors = -1;
 arSetPars('sd_B_au',[],2);
 arSetPars('sd_C_au',[],2);
 
-arFit();
-
-% %Calculate prediction bands for a state
-% PPL_options('Integrate',true,'Stepsize',0.5)
-% arPPL(1,1,1,linspace(0,100,11),1);
-% 
-% %plot prediction bands
-% arPlot2

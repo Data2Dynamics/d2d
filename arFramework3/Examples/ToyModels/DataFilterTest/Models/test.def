@@ -1,0 +1,30 @@
+DESCRIPTION
+
+PREDICTOR
+t                       T   min         time	0       200
+
+COMPARTMENTS
+cyt                     V   pl          vol. 1
+
+STATES
+
+INPUTS
+
+REACTIONS
+
+DERIVED
+
+OBSERVABLES
+yMeas       C   au               conc.   0	0   "k * input_A + 0 * input_B"
+xMeas       C   au               conc.   0	0   "k * input_A"
+zMeas       C   au               conc.   0	0   "a - k * input_A"
+
+ERRORS
+yMeas           "1"
+xMeas           "1"
+zMeas           "1"
+
+CONDITIONS
+
+RANDOM
+nExpID INDEPENDENT

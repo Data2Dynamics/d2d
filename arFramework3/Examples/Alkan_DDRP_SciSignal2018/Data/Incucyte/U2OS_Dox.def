@@ -1,0 +1,14 @@
+DESCRIPTION
+"U2OS cell incubated with different concentrations of Doxorubicin."
+"Measured is the total number of cells per well as well as the number of Casp3/7 positive cells."
+
+PREDICTOR
+t	T	"h"	"Time"	0	70
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS

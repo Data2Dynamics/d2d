@@ -5,6 +5,9 @@
 % name      filename of model definition file
 % m         model index for the model to go into
 %
+% 'ModelPath'            Path to the data files.
+%                       Default: DataPath = 'Data/'
+% 
 % Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
 
 function arLoadModel(name, m, varargin)
@@ -15,27 +18,40 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
+% Name for a state which is added to a stateless model to make sure that
+% the required fields in the c-code aren't empty.
+NOSTATE = '___dummy___';
+
 % custom
-switches = { 'conditions' };
-extraArgs = [ 1 ];
+switches = { 'conditions', 'modelpath' };
+extraArgs = [ 1, 1 ];
 description = { ...
-    {'', 'Specified extra conditions'} };
+    {'', 'Specified extra conditions'}, {'', 'Path to the model definition files'} };
     
 opts = argSwitch( switches, extraArgs, description, 1, varargin );
+if isempty(opts.modelpath_args)
+    ModelPath = 'Models/';
+else
+    ModelPath = strtrim(opts.modelpath_args);
+    if ModelPath(end)~='/' && ModelPath(end)~='\'
+        ModelPath = [ModelPath,'/'];
+    end
+end
+
 
 % load model from mat-file
-if(~exist('Models','dir'))
-    error('folder Models/ does not exist')
+if(~exist(ModelPath,'dir'))
+    error('folder %s does not exist',ModelPath)
 end
 if strcmp(strrep(name,' ',''),name)~=1
     name
     error('File names should not contain empty spaces. Please remove it.');
 end
-if(~exist(['Models/' name '.def'],'file'))
-    error('model definition file %s.def does not exist in folder Models/', name)
+if(~exist([ModelPath,  name '.def'],'file'))
+    error('model definition file %s.def does not exist in folder %s', name, ModelPath)
 end
 
-if(~exist('m','var'))
+if(~exist('m','var')) || isempty(m)
     if(isfield(ar, 'model'))
         m = length(ar.model) + 1;
     else
@@ -46,15 +62,21 @@ else
         'and note that the model will be loaded to the next free index position by default.']);
 end
 
+% remember the function call
+ar.setup.commands{end+1} = mfilename; % this file name
+ar.setup.arguments{end+1} = {name, [],varargin{:}}; % argument m is deprecated and is therefore set as empty
+ar.setup.datafiles{end+1} = {};
+ar.setup.modelfiles{end+1} = [ModelPath, name,'.def'];
+
 % Disable this if you are having problems because of the preprocessor
 preprocessor = 1;
-arFprintf(1, 'loading model #%i, from file Models/%s.def...\n', m, name);
+arFprintf(1, 'loading model #%i, from file %s%s.def...\n', m, ModelPath, name);
 if ( ~preprocessor )
-    fid = fopen(['Models/' name '.def'], 'r');
+    fid = fopen([ModelPath,  name '.def'], 'r');
 else
     % Load into a struct
-    fid.fn  = ['Models/' name '.def'];
-    fid.str = fileread(['Models/' name '.def']);
+    fid.fn  = [ModelPath,  name '.def'];
+    fid.str = fileread([ModelPath,  name '.def']);
     fid.pos = 1;
     
     fid = arPreProcessor(fid);
@@ -62,7 +84,7 @@ end
 
 % initial setup
 ar.model(m).name = name;
-ar.model(m).path = [pwd,filesep,'Models',filesep];
+ar.model(m).path = [pwd,filesep,ModelPath];
 
 % Validate input
 if ( opts.conditions )
@@ -155,7 +177,7 @@ while(~strcmp(C{1},'INPUTS'))
     if(length(cell2mat(C{1}))<2)
         arParsingError( fid, 'STATE names need to be longer than 1');
     end
-    if(isempty(symvar(sym(C{1}))))
+    if(isempty(symvar(arMyStr2Sym(C{1}))))
         arParsingError( fid, 'STATE name ''%s'' is reserved by MATLAB. Please rename!',cell2mat(C{1}));
     end
     
@@ -187,6 +209,21 @@ while(~strcmp(C{1},'INPUTS'))
     end
     ar.model(m).px0(end+1) = {['init_' cell2mat(C{1})]};
     [C, fid] = arTextScan(fid, '%s %q %q %q %s %n %q %n\n',1, 'CommentStyle', ar.config.comment_string);
+end
+
+% Workaround for models that only use observation functions
+if ( isempty( ar.model(m).x ) )
+	ar.model(m).x(end+1) = {NOSTATE};
+    ar.model(m).xUnits(end+1,1) = {'NA'};
+    ar.model(m).xUnits(end,2) = {'NA'};
+    ar.model(m).xUnits(end,3) = {'NA'};
+    ar.model(m).cLink(end+1) = 0;
+    ar.model(m).qPlotX(end+1) = 0;
+    ar.model(m).xNames(end+1) = {NOSTATE};
+    ar.model(m).qPositiveX(end+1) = 0;
+    ar.model(m).px0(end+1) = {['init_' NOSTATE]};
+    
+    warning( 'D2D does not support models without state variables or equations. Adding species to model.' );
 end
 
 % INPUTS
@@ -353,10 +390,10 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
             ar.model(m).fv(end+1,1) = str{1};
             
             % check for negative fluxes possible
-            if(ar.config.checkForNegFluxes)
+            if(ar.config.checkForNegFluxes==1)
                 if (~reversible)
                     try
-                        symtmp = sym(str{1});
+                        symtmp = arMyStr2Sym(str{1});
                     catch
                         if ( iscell( str{1} ) )
                             arParsingError( fid,  'Parsing error in REACTIONS at %s in model %d', str{1}{:}, m );
@@ -365,8 +402,10 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                         end
                     end
                     for j=1:length(source)
-                        symtmpsubs = subs(symtmp, sym(source{j}), 0);
-                        if(symtmpsubs~=0)
+                        symtmpsubs = subs(symtmp, arMyStr2Sym(source{j}), 0);
+                        sva = symvar(symtmp);
+                        symtmpsubs = subs(symtmpsubs, sva, rand(1, numel(sva)) );
+                        if(symtmpsubs~=0)                           
                             arFprintf(1, 2, 'Possible negative flux in reaction #%i:\n', length(ar.model(m).fv));
                             arFprintf(1, 2, '%s : %s\n', arAssembleReactionStr(source, target, false, sourceCoeffs, targetCoeffs), cell2mat(str{1}));
                             arFprintf(1, 2, 'Source species %s missing ?\n\n', source{j});
@@ -375,12 +414,14 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                         end
                     end
                 else
-                    symtmp = sym(str{1});
+                    symtmp = arMyStr2Sym(str{1});
                     for j=1:length(source)
-                        symtmpsubs = subs(symtmp, sym(source{j}), 0);
+                        symtmpsubs = subs(symtmp, arMyStr2Sym(source{j}), 0);
                         for k=1:length(target)
-                            symtmpsubs = subs(symtmpsubs, sym(target{k}), 0);
+                            symtmpsubs = subs(symtmpsubs, arMyStr2Sym(target{k}), 0);
                         end
+                        sva = symvar(symtmp);
+                        symtmpsubs = subs(symtmpsubs, sva, rand(1, numel(sva)) );
                         
                         if(symtmpsubs~=0)
                             arFprintf(1, 2, 'Possible flux in reaction without presence of source #%i:\n', length(ar.model(m).fv));
@@ -391,9 +432,9 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
                         end                        
                     end
                     for j=1:length(target)
-                        symtmpsubs = subs(symtmp, sym(target{j}), 0);
+                        symtmpsubs = subs(symtmp, arMyStr2Sym(target{j}), 0);
                         for k=1:length(source)
-                            symtmpsubs = subs(symtmpsubs, sym(source{k}), 0);
+                            symtmpsubs = subs(symtmpsubs, arMyStr2Sym(source{k}), 0);
                         end
                         
                         if(symtmpsubs~=0)
@@ -554,10 +595,16 @@ ar.model(m).qPlotV = ones(1,length(ar.model(m).fv));
 if(isempty(ar.model(m).fv))
     ar.model(m).isReactionBased = false;
     ar.model(m).fv{end+1} = '0';
+    ar.model(m).reversible(end+1) = 0;
     ar.model(m).fv_ma_reverse_pbasename{end+1} = '';
+    ar.model(m).fv_source{end+1} = {};
+    ar.model(m).fv_target{end+1} = {};
+    ar.model(m).fv_sourceCoeffs{end+1} = [];
+    ar.model(m).fv_targetCoeffs{end+1} = [];
     ar.model(m).vUnits{end+1,1} = '-';
     ar.model(m).vUnits{end,2}   = '-';
     ar.model(m).vUnits{end,3}   = '-';
+    
     ar.model(m).N(1:length(ar.model(m).x),1) = 0;
 end
 
@@ -633,8 +680,8 @@ ar.model(m).fx_par = cell(length(ar.model(m).x),1);
 %end
 ar.model(m).Cm = C;
 ar.model(m).Cm_par = C_par;
-tmpfx = (sym(ar.model(m).N).*sym(C)) * sym(ar.model(m).fv);
-tmpfx_par = (sym(ar.model(m).N).*sym(C_par)) * sym(ar.model(m).fv);
+tmpfx = (arMyStr2Sym(ar.model(m).N).* arMyStr2Sym(C)) * arMyStr2Sym(ar.model(m).fv);
+tmpfx_par = (arMyStr2Sym(ar.model(m).N).* arMyStr2Sym(C_par)) * arMyStr2Sym(ar.model(m).fv);
 
 for j=1:length(ar.model(m).x) % for every species j
     if ~isempty(tmpfx)
@@ -692,13 +739,26 @@ while(~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1
     [C, fid] = arTextScan(fid, '%s %q %q %q %q\n',1, 'CommentStyle', ar.config.comment_string);
 end
 
+% Perform (repeated) self-substitutions
+if numel( ar.model(m).fz ) > 0
+    for a = 1 : numel( ar.model(m).fz )
+        ar.model(m).fz{a} = char( arSubsRepeated(arMyStr2Sym(ar.model(m).fz{a}), ar.model(m).z, ar.model(m).fz, matVer.Version) );
+    end
+    arFprintf(2, '=> Self-substituting derived variables.\n' );
+end
+
 % Perform (repeated) derived substitutions
 if ( derivedVariablesInRates )
     for a = 1 : length( ar.model(m).fv )
-        ar.model(m).fv{a} = char( arSubsRepeated(sym(ar.model(m).fv{a}), ar.model(m).z, ar.model(m).fz, matVer.Version) );
+        ar.model(m).fv{a} = char( arSubsRepeated(arMyStr2Sym(ar.model(m).fv{a}), ar.model(m).z, ar.model(m).fz, matVer.Version) );
     end
     arFprintf(2, '=> Substituting derived variables in reaction equation.\n' );
 end
+
+% Simplify equations
+%if ( simplifyEquations )
+    
+%end
 
 
 ar.model(m).qPlotZ = ones(size(ar.model(m).z));
@@ -710,16 +770,20 @@ ar.model(m).px = union(ar.model(m).px, ar.model(m).pz); %R2013a compatible
 ar.model(m).p = union(ar.model(m).p, ar.model(m).pz); %R2013a compatible
 
 
-if(strcmp(C{1},'OBSERVABLES'))
-    
-    % OBSERVABLES
-    ar.model(m).y = {};
-    ar.model(m).yNames = {};
-    ar.model(m).yUnits = {};
-    ar.model(m).normalize = [];
-    ar.model(m).logfitting = [];
-    ar.model(m).logplotting = [];
-    ar.model(m).fy = {};
+% OBSERVABLES
+% The following initialization should be done in any case. Otherwise
+% problems occur if a model without obeservables is followed by a model
+% with observables.
+ar.model(m).y = {};
+ar.model(m).yNames = {};
+ar.model(m).yUnits = {};
+ar.model(m).normalize = [];
+ar.model(m).logfitting = [];
+ar.model(m).logplotting = [];
+ar.model(m).fy = {};
+ar.model(m).fystd = {};
+
+if(strcmp(C{1},'OBSERVABLES'))    
     [C, fid] = arTextScan(fid, '%s %q %q %q %n %n %q %q\n',1, 'CommentStyle', ar.config.comment_string);
     while(~strcmp(C{1},'ERRORS'))
         if ( strcmp( C{1}, 'CONDITIONS' ) || strcmp( C{1}, 'SUBSTITUTIONS' ) )
@@ -866,12 +930,17 @@ else
 end
 ar.model(m).fp = transpose(ar.model(m).p);
 
+% Remove init of empty model
+if numel( ar.model(m).x ) == 1 && strcmp( ar.model(m).x, NOSTATE )
+    ar.model(m).fp{ strcmp( ar.model(m).p, ['init_' NOSTATE ] ) } = '0';
+end
+
 if ( substitutions )
 	% Conditions
     from        = {};
     to          = {};
     ismodelpar  = [];
-     
+    
     % Fetch desired conditions
     while(~isempty(C{1}) && ~(strcmp(C{1},'PARAMETERS') || strcmp(C{1}, 'RANDOM')))
         arValidateInput( C, 'condition', 'model parameter', 'new expression' );
@@ -1009,6 +1078,9 @@ arCheckReservedWords( ar.model(m).c, 'compartments' );
 ar = orderfields(ar);
 ar.model = orderfields(ar.model);
 
+if ( ar.config.checkForNegFluxes==2 )
+    arCheckForNegFluxes(m, fid);
+end
 
 function [ line, remainder, fid ] = readLine( fid, commentStyle )
     line = '';

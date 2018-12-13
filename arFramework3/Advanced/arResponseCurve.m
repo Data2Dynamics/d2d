@@ -176,7 +176,7 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         plots(end) = plot( responseRange1, r, 'k', 'LineWidth', 2 );
         plot( [refValues(1), refValues(1)], [min(min(rate)), max(max(rate))], 'k--' );
 
-        xlabel( indep1 );
+        xlabel( strrep( indep1, '_', '\_' ) );
         ylabel( sprintf( '%s flux [%s]', enzyme, ar.model(m).vUnits{enzyme,2} ) );
         if ( ylog )
             ylim( [max([1e-12, min(min(rate))]), max(max(rate))] );
@@ -195,7 +195,7 @@ function rate = arResponseCurve( name, indep1, indep2, varargin )
         set( gca, 'CLim', [min(log10(responseRange2)), max(log10(responseRange2))] );
         c = colorbar;
         colormap(parula);
-        ylabel( c, sprintf( 'log_{10}(%s)', indep2 ) );
+        ylabel( c, sprintf( 'log_{10}(%s)', strrep(indep2, '_', '\_') ) );
     
         % If the interactivity system is enabled, register the callbacks
         % and provide arInteractivity with the required data.

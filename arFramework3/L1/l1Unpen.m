@@ -17,11 +17,11 @@ if(~exist('jks','var') || isempty(jks))
     end
 end
 
-if(~isfield(ar,'L1linv') || isempty(ar.L1linv))
+if(~isfield(ar,'linv') || isempty(ar.linv))
     error('please initialize by l1Init and run l1scan')
 end
 
-linv = ar.L1linv;
+linv = ar.linv;
 
 ps = ar.L1ps;
 
@@ -31,11 +31,12 @@ chi2s_unpen = nan(1,length(linv));
 arWaitbar(0);
 
 for i = 1:length(linv)
-   arWaitbar(i, length(linv), sprintf('L1 unpenalized solution'));
+   arWaitbar(i, length(linv), sprintf('Unpenalized solution'));
    ar.p = ps(i,:);
    ar.type(jks) = 0;
    ar.qFit(jks) = 1;
-   ar.qFit(jks(abs(ps(i,jks)) <= 1e-6)) = 2;
+   excl = jks(abs(ps(i,jks)) <= ar.L1thresh);
+   ar.qFit(excl) = 2;
    try
        arFit(true)
        ps_unpen(i,:) = ar.p;
@@ -45,12 +46,18 @@ for i = 1:length(linv)
    end
 
    j = i;
-   if j > 1
+   if j == 1
+
+       if (chi2s_unpen(j) < ar.L1lam0chi2s && isempty(excl))
+           ar.L1lam0chi2s = chi2s_unpen(j);
+       end
+           
+   else
        while chi2s_unpen(j) < max(chi2s_unpen(1:j-1))-1e-3
            j = j-1;
            ar.type(jks) = 0;
            ar.qFit(jks) = 1;
-           ar.qFit(jks(abs(ps(j,jks)) <= 1e-6)) = 2;
+           ar.qFit(jks(abs(ps(j,jks)) <= ar.L1thresh)) = 2;
 
            try
                arFit(true)
@@ -61,6 +68,9 @@ for i = 1:length(linv)
            end
 
            if j == 1
+               if sum(abs(ps(j,jks)) <= ar.L1thresh) == 0
+                    ar.L1lam0chi2s = chi2s_unpen(j);
+               end
                break
            end
        end

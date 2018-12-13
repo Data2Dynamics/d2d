@@ -1,3 +1,4 @@
+%% DEPRECATED
 % L1 check optimum
 % After most parsimoneous model is found, do single PLE for each non-specific
 % parameter included in the fitted set to check if others cross 0 at

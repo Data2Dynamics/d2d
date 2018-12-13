@@ -307,23 +307,34 @@ for jm=1:length(ar.model)
             lp(fid, '\\\\');
             
             % modifiers
-            mod_pos = getModifierStr(jm,jv,false,'x',sources,targets);
-            mod_posu = getModifierStr(jm,jv,false,'u',sources,targets);
-            if(~isempty(mod_posu))
-                if(~isempty(mod_pos))
-                    mod_pos = [mod_pos ', ' mod_posu];
-                else
-                    mod_pos = mod_posu;
+            if isfield(ar.model(jm),'qdvdx_negative') && isfield(ar.model(jm),'qdvdu_negative')
+                try
+                    mod_pos = getModifierStr(jm,jv,false,'x',sources,targets);
+                    mod_posu = getModifierStr(jm,jv,false,'u',sources,targets);
+                    if(~isempty(mod_posu))
+                        if(~isempty(mod_pos))
+                            mod_pos = [mod_pos ', ' mod_posu];
+                        else
+                            mod_pos = mod_posu;
+                        end
+                    end
+                    mod_neg = getModifierStr(jm,jv,true,'x',sources,targets);
+                    mod_negu = getModifierStr(jm,jv,true,'u',sources,targets);
+                    if(~isempty(mod_negu))
+                        if(~isempty(mod_neg))
+                            mod_neg = [mod_neg ', ' mod_negu];
+                        else
+                            mod_neg = mod_negu;
+                        end
+                    end
+                catch err_id
+                    warning(err_id.message);
+                    mod_neg = '';
+                    mod_pos = '';
                 end
-            end
-            mod_neg = getModifierStr(jm,jv,true,'x',sources,targets);
-            mod_negu = getModifierStr(jm,jv,true,'u',sources,targets);
-            if(~isempty(mod_negu))
-                if(~isempty(mod_neg))
-                    mod_neg = [mod_neg ', ' mod_negu];
-                else
-                    mod_neg = mod_negu;
-                end
+            else
+                mod_neg = '';
+                mod_pos = '';
             end
             
             % chem reaction
@@ -674,8 +685,8 @@ for jm=1:length(ar.model)
                         if(sum(qdyn)>0)
                             qalreadyset = true;
                             for jd4 = ar.model(jm).plot(jplot).dLink
-                                qalreadyset = qalreadyset && isequal(sym(ar.model(jm).fp{qdyn}), ...
-                                    sym(ar.model(jm).data(jd4).fp{jp}));
+                                qalreadyset = qalreadyset && isequal(arSym(ar.model(jm).fp{qdyn}), ...
+                                    arSym(ar.model(jm).data(jd4).fp{jp}));
                             end
                         else
                             qalreadyset = false;
@@ -725,37 +736,39 @@ for jm=1:length(ar.model)
             
             fields = fieldnames(ar.model(jm).plot(jplot));
             fields = fields(strmatch('savePath_FigY',fields));
-            if ischar(fields)
-                fields = {fields};
-            end
-            savepathfield = fields{1};
-            
-            if(~isempty(fields) && ~isempty(ar.model(jm).plot(jplot).(savepathfield)))                
-%             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigY') && ~isempty(ar.model(jm).plot(jplot).savePath_FigY))
-                lp(fid, 'The model observables and the experimental data is shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
-                captiontext = sprintf('\\textbf{%s observables and experimental data for the experiment.} ', arNameTrafo(ar.model(jm).plot(jplot).name));
-                captiontext = [captiontext 'The observables are displayed as solid lines. '];
-                captiontext = [captiontext 'The error model that describes the measurement noise ' ...
-                    'is indicated by shades.'];
-                if(exist([ar.model(jm).plot(jplot).(savepathfield) '_Report.tex'],'file')==2)
-                    copyfile([ar.model(jm).plot(jplot).(savepathfield) '_Report.tex'], ...
-                    [savePath '/' ar.model(jm).plot(jplot).name '_y.tex']);
-                    lpfigurePGF(fid, [ar.model(jm).plot(jplot).name '_y.tex'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
-                else
-                    copyfile([ar.model(jm).plot(jplot).(savepathfield) '.pdf'], ...
-                    [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
-                    lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
+            if ~isempty(fields)
+                if ischar(fields)
+                    fields = {fields};
                 end
-            end
-            
-            lp(fid, '\\noindent The agreement of the model observables and the experimental data, given in Table \\ref{%s_data}, ', ar.model(jm).plot(jplot).name);
-            if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1) || ...
-                    (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
-                lp(fid, 'yields a value of the objective function $-2 \\log(L) = %g$ for %i data points in this data set.', ...
-                    2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
-            else
-                lp(fid, 'yields a value of the objective function $\\chi^2 = %g$ for %i data points in this data set.', ...
-                    ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
+                savepathfield = fields{1};
+
+                if(~isempty(fields) && ~isempty(ar.model(jm).plot(jplot).(savepathfield)))                
+    %             if(isfield(ar.model(jm).plot(jplot), 'savePath_FigY') && ~isempty(ar.model(jm).plot(jplot).savePath_FigY))
+                    lp(fid, 'The model observables and the experimental data is shown in Figure \\ref{%s}.', [ar.model(jm).plot(jplot).name '_y']);
+                    captiontext = sprintf('\\textbf{%s observables and experimental data for the experiment.} ', arNameTrafo(ar.model(jm).plot(jplot).name));
+                    captiontext = [captiontext 'The observables are displayed as solid lines. '];
+                    captiontext = [captiontext 'The error model that describes the measurement noise ' ...
+                        'is indicated by shades.'];
+                    if(exist([ar.model(jm).plot(jplot).(savepathfield) '_Report.tex'],'file')==2)
+                        copyfile([ar.model(jm).plot(jplot).(savepathfield) '_Report.tex'], ...
+                        [savePath '/' ar.model(jm).plot(jplot).name '_y.tex']);
+                        lpfigurePGF(fid, [ar.model(jm).plot(jplot).name '_y.tex'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
+                    else
+                        copyfile([ar.model(jm).plot(jplot).(savepathfield) '.pdf'], ...
+                        [savePath '/' ar.model(jm).plot(jplot).name '_y.pdf']);
+                        lpfigure(fid, 1, [ar.model(jm).plot(jplot).name '_y.pdf'], captiontext, [ar.model(jm).plot(jplot).name '_y']);
+                    end
+                end
+
+                lp(fid, '\\noindent The agreement of the model observables and the experimental data, given in Table \\ref{%s_data}, ', ar.model(jm).plot(jplot).name);
+                if( (ar.config.useFitErrorMatrix == 0 && ar.config.fiterrors == 1) || ...
+                        (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
+                    lp(fid, 'yields a value of the objective function $-2 \\log(L) = %g$ for %i data points in this data set.', ...
+                        2*ar.model(jm).plot(jplot).ndata*log(sqrt(2*pi)) + ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
+                else
+                    lp(fid, 'yields a value of the objective function $\\chi^2 = %g$ for %i data points in this data set.', ...
+                        ar.model(jm).plot(jplot).chi2, ar.model(jm).plot(jplot).ndata);
+                end
             end
             
             %% experimental data
@@ -870,7 +883,7 @@ lp(fid, '\\clearpage\n');
 lp(fid, '\\section{Estimated model parameters} \\label{estimatedparameters}\n');
 
 if(isfield(ar,'ndata') && isfield(ar,'chi2fit') && isfield(ar,'chi2'))
-    [~,merits] = arGetMerit;
+    [~,merits] = arGetMerit(true);
     if(sum(ar.res_type==2)>0)
         lp(fid, 'In total %i parameters are estimated from the experimental data. The best fit yields a value of the objective function $-2 \\log(L) = %g$ for a total of %i data points.', ...
             merits.npara, merits.loglik, merits.ndata);
@@ -1242,14 +1255,14 @@ function str = myFormulas(str, jm)
 global ar
 
 varlist = symvar(str)';
-svarlist = sym(varlist);
+svarlist = arSym(varlist);
 shortlist = {};
 for j=1:length(varlist)
     shortlist{j} = sprintf('vj%ijv', j);
 end
-sshortlist = sym(shortlist);
+sshortlist = arSym(shortlist);
 
-strsym = sym(str);
+strsym = arSym(str);
 sstrsym = subs(strsym, svarlist, sshortlist);
 
 str = latex(sstrsym);

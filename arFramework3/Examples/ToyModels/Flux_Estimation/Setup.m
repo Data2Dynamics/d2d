@@ -5,10 +5,3 @@ arLoadModel('test');
 arLoadData('test', [], 'csv');
 arCompileAll(true);
 
-arPlot;
-title('Before fitting (press any key)');
-ar.model.v
-pause;
-arFit;
-arPlot;
-title('After fitting');

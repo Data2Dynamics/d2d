@@ -13,12 +13,16 @@
 % arLoad('NameOfAnExistingResultFolder')
 
 function arLoad(workspace_name)
+if ~exist('Results','dir')
+    error('No results folder exist. arLoad can only be executed in a D2D working directory.')
+end
 if exist('arCheck','file')==0
     arInit;
 end
 arCheck;
 
 global ar
+
 
 % set the two variables also as global in the command line workspace:
 evalin('base','clear ar');  
@@ -51,21 +55,21 @@ fprintf('workspace loaded from file %s\n', workspace_name);
 fkt = which(ar.fkt);
 
 if isempty(fkt)
-    disp([ar.fkt ' not found. Try to copy it from the savefolder...'])
+    fprintf([ar.fkt ' not found. Try to copy it from the savefolder... '])
     files = dir([ar.config.savepath '/' ar.fkt '.*']);
     cf_succeed = 0;
     for idf = 1:length(files)
         copyfile([ar.config.savepath '/' files.name ] , pwd)
-        disp(['Copied ' files.name ' from ' ar.config.savepath ' to the working directory.'])
+        fprintf(' done.\n')
         cf_succeed = 1;
     end
     if ~cf_succeed
-        disp([ar.fkt ' not found in ' ar.config.savepath])
+        fprintf(' NOT found. Please compile via Setup or ''arRecompile''.\n')
     end
 end
 
 % Make sure we have all the necessary fields
-ar=arInitFields(ar);
+ar = arInitFields(ar);
 
 
 
