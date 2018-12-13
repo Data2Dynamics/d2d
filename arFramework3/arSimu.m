@@ -1,14 +1,22 @@
-% Simulate for current parameter settings
+%varargout = arSimu(varargin)
 %
-% arSimu(sensi, fine, dynamics)
-%   sensi:          calculate sensitivities         [true]
-%   fine:           fine grid for plotting          [false]
-%   dynamics:       evaluate dynamics               [true]
+% arSimu simulates model dynamics and steady states for current parameter 
+% settings
+%
+%   arSimu
+%   arSimu([sensi], [fine], [dynamics])
+%   ar = arSimu(ar, --)
 % 
-% or
+%   sensi       logical indicating whether to calculate sensitivities     [true]
+%   fine        logical indicating whether to use fine grid for plotting  [false]
+%   dynamics    logical indicating wheter to evaluate dynamics, if not 
+%               simulate only steady states                               [true]
+%   ar          (optional) d2d model/data structure
 %
-% ar = arSimu(ar, sensi, fine, dynamics)
-%   ar:             d2d model/data structure
+% Examples
+%    arSimu(ar)    
+%
+% See also arPlot
 
 function varargout = arSimu(varargin)
 
