@@ -1,14 +1,31 @@
-% Add steady state pre-simulation
+% arSteadyState(model, conditionSS, conditionAffected, [states], [tstart] )
 %
-% Usage:
-%   arSteadyState(model, conditionSS, conditionAffected, (states), (tstart) )
+% Add steady state pre-simulation. Pre-equilibrates the model before 
+% simulation.
 %
-%   Adds a pre-equilibration to a number of conditions. ConditionSS refers
-%   to the condition used for equilibration to steady state (source).
-%   Events beloning to the steady state simulation condition are ignored
-%   when equilibrating. Input functions will behave as they were for the
-%   source condition. In many cases, it is therefore desirable to use a
-%   steady state condition with no inputs.
+%   model               Model index
+%   conditionSS         Condition indices to be used as reference for steady 
+%                       state simulation.
+%   conditionAffected   Conditions indices that require equilibration   ['all']
+%                       using the condition specified in conditionSS.
+%                       Specify 'all' when all conditions have to be
+%                       equilibrated.
+%   states              Cell array of state names to be omitted from    {}
+%                       equilibration.
+%   tstart              Starting time point for equilibration.          [0]
+%
+%   ar.config.eq_tol        Absolute equilibration tolerance.           [1e-8]
+%   ar.config.eq_rtol       Relative equilibration tolerance.           []
+%   ar.config.useEvents     Enable event system (required).             [1]
+%   ar.config.turboSSSensi  Enable faster equilibration (requires       [0]
+%                           model without conserved moieties).
+%
+% Adds a pre-equilibration to a number of conditions. ConditionSS refers
+% to the condition used for equilibration to steady state (source).
+% Events beloning to the steady state simulation condition are ignored
+% when equilibrating. Input functions will behave as they were for the
+% source condition. In many cases, it is therefore desirable to use a
+% steady state condition with no inputs.
 %
 % For the target conditions, note that any event occuring immediately at
 % the start of the simulation will be overwritten by the event that
@@ -16,28 +33,39 @@
 % upon start is required (for example, concentration = 2*steadystate), 
 % consider adding time points before the desired event.
 %
-% Advanced use:
-%   By default, all values of a steady state equilibration are copied into 
-%   the destination initial condition. In some cases, this is undesirable.
-%   If you wish to omit states; supply a cell array of state names that are
-%   to be omitted from the equilibration.
+% By default, all values of a steady state equilibration are copied into 
+% the destination initial condition. In some cases, this is undesirable.
+% If you wish to omit states; supply a cell array of state names that are
+% to be omitted from the equilibration.
 %
-%   The optional argument tstart refers to the starting timepoint of the 
-%   steady state simulation.
+% Warning: arSteadyState invokes arLink.
+% Warning: arSteadyState is currently only supported for deterministic simulations
+% Warning: Steady state simulations will not check whether a stable steady state
+%          exists. If this is not the case, pre-equilibration will fail and
+%          an error will be thrown.
+% Hint:    If you wish to see how the conditions are set up, you can use 
+%          the command 'arShowDataConditionStructure'.
+% Hint:    To clear arSteadyState's changes to the model, invoke
+%          "arClearEvents". Note that this also clears other events.
+% Hint:    You can find condition indices using arFindCondition.
 %
-% Hint: If you wish to see how the conditions are set up, you can use 
-% the command 'arShowDataConditionStructure'
+% Example(s)
+%   arSteadyState(1, 1, 1, -1e7);     % Use condition 1 as reference for
+%                                       condition 1.
+%   arSteadyState(1, 2, [2,3], -1e7); % Use condition 2 as reference for
+%                                       conditions 2 an 3.
 %
-% Hint: To clear arSteadyState's changes to the model, invoke
-% "arClearEvents". Note that this also clears other events.
+%   arSteadyState(1, 1, 1, {'stateA'}); % Exclude stateA from equilibration.
 %
-% Notes:
-%    arSteadyState invokes arLink
-%    arSteadyState is currently only supported for deterministic
-%    simulations
-%    Steady state simulations will not check whether a stable steady state
-%    exists. If this is not the case, pre-equilibration will fail and
-%    an error will be thrown
+%   arLoadModel( "model" );         % Load a model
+%   arReduce;                       % Reduce the model
+%   arCompileAll;                   % Compile it
+%   arFastSensis;                   % Enable fast sensitivities
+%   arSteadyState(1, 1, 1, -1e7);   % Define a steady state for model 1,
+%                                   % condition 1 using condition 1 for 
+%                                   % equilibration
+%
+% See also arClearEvents, arReduce, arFastSensis, arFindCondition, arLink, arSteadyStateBounds, arShowDataConditionStructure
 
 function arSteadyState( varargin )
 
