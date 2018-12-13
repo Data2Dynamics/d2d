@@ -1,20 +1,15 @@
-% Plot contributions of the different fluxes to a state
+% arFractionalFlux( species, [varargin] )
 %
-% Usage:
-%   fractionalFlux( species, varargs )
-% Where:
-%   species refers to a model state (e.g. 'ATP')
-
-% Optional arguments:
-%   tmax        specify maximum time to plot
-%   condition   specify which condition to plot
-%   model       specify which model to plot
+% Plot contributions of the different fluxes to a state.
 %
-% NOTE: THIS FUNCTION IS CURRENTLY IN ALPHA STATUS!
-% PLEASE DO NOT EDIT THIS FUNCTION YET. IT IS STILL UNDER ACTIVE DEVELOPMENT.
-% FUNCTION ARGUMENTS ARE LIKELY SUBJECT TO CHANGE IN THE NEAR FUTURE.
-% If you wish to edit it at this point, please contact Joep Vanlier first.
-
+%   species     Refers to a model state (e.g. 'ATP').
+%   tmax        Specify 'tmax' followed by value to set maximum time to 
+%               plot.
+%   condition   Specify 'condition' followed by index to specify which 
+%               condition to plot.
+%   model       Specify 'model' followed by index to specify which model to
+%               plot.
+%
 function arFractionalFlux( species, varargin )
 
     global ar;

@@ -1,10 +1,20 @@
-% can be used to merge plot of two data sets
+% arMergePlot(jm, index_name1, index_name2, label_name1, label_name2, new_condition_name)
 % 
-% usage (here jm=1 is the model index):
+% Can be used to merge plots of two data sets.
 % 
-% arLoadData('data1', jm);
-% arLoadData('data2', jm);
-% arMergePlot(jm, 'data1', 'data2', 'label for data1', 'label for data2', 'new condition name');
+%   jm                  Model index
+%   index_name1         Name of data 1
+%   index_name2         Name of data 2
+%   label_name1         Label for data 1
+%   label_name2         Label for data 2
+%   new_condition_name  Name for new plot
+% 
+% Example:
+%   arLoadData('data1', jm);
+%   arLoadData('data2', jm);
+%   arMergePlot(jm, 'data1', 'data2', 'label for data1', 'label for data2', 'new condition name');
+%
+% See also: arMergePlotMulti, arSplitPlot
 
 function arMergePlot(jm, index_name1, index_name2, label_name1, label_name2, new_condition_name)
 
