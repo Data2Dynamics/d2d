@@ -1,16 +1,26 @@
+% hs = arPlot([saveToFile], [fastPlot], [silent], [evalfun], [doLegends], [dynamics], [hs])
+%
 % Plot models and datasets
 %
-% hs = arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs)
+% saveToFile    Save plot to file               [false]
+% fastPlot      Do fast plotting                [false]
+% silent        Plot without printing text      [false]
+% evalfun       Evaluate function               [true]  (DEPRECATED)
+% doLegends     Print the legends               [true]
+% dynamics      Simulate dynamics               [true]
+% hs            Plot to custom figure handles   []
 %
-% hs: figure handles;
+% arPlot simulates the model without sensitivities and subsequently 
+% plots all the enabled observables, states/derived variables and
+% fluxes. Which observables/states and fluxes are plotted can be set 
+% with arPlotter. 
 %
-% saveToFile    [false]
-% fastPlot      [false]
-% silent        [false]
-% evalfun       [true]  (deprecated)
-% doLegends     [true]
-% dynamics:     [true]
-% hs:           []      custom figure handels
+% Note: arPlot2 also plots model simulations using different rendering code.
+% Note: For observables, axis transformations can be set in 
+%       ar.model(jm).plot(jplot).xtrafo and ar.model(jm).plot(jplot).ytrafo
+%       by specifying single input/output anonymous functions here.
+%
+% See also arPlotter, arPlot2, arPlotY, arPlotX, arPlotV.
 
 function varargout = arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs)
 

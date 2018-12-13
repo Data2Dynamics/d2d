@@ -1,3 +1,16 @@
+% arConservedPools(jm, [showPools])
+%
+% Determine conserved pools in model and store results in the arStruct.
+%
+%   jm          Model index
+%   showPools   Display the results         [0]
+%
+% Use integer nullspace to determine conserved moieties in the dynamical
+% model and store these in ar.model(jm).pools. This function is used by 
+% arReduce and not intended to be used by the end user.
+%
+% See also arReduce
+
 function arConservedPools(jm, showPools)
     
     global ar;
