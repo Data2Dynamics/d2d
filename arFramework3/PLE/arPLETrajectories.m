@@ -1,16 +1,24 @@
-% plot trajectories of ple
+% arPLETrajectories([jks], [n], [show_hit_bound], [saveToFile])
 %
-% arPLETrajectories(jks, n, show_hit_bound, saveToFile)
+% Plot trajectories of ple
 %
-% jks               par response, indices or parameter name         [all]
-% n                 trajectories per parameter                      [10] (0=all)
-% show_hit_bound    show hitting boundary of parameters             [false]
-% saveToFile                                                        [false]
+%   jks               parameter index or vector of par indices [all if not specified]
+%                     or alternatively the name of a parameter or a cell of
+%                     names can be provided
+%   n                 trajectories per parameter (0=all) [10] 
+%   show_hit_bound    show hitting boundary of parameters  [false]
+%   saveToFile        [false]
+%
+% Plot trajectories for all parameter vectors that were compatible with the
+% the confidence intervals determined by ple. pleTrajectories are plotted
+% for all variables that were selected for regular plotting, e.g. in
+% arPlotter.
+%
+% See also: ple, arPlotter
 
 function arPLETrajectories(jks, n, show_hit_bound, saveToFile)
 
 global ar
-
 
 if(isempty(ar))
     error('please initialize by arInit')

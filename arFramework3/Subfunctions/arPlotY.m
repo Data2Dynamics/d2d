@@ -1,28 +1,41 @@
-% Plot models Y
+% arPlotY([saveToFile], [fastPlot], [doLegends], [flags]);
 %
-% arPlotY(saveToFile, fastPlot, doLegends, flags);
+% Plot models and datasets
 %
-% saveToFile    [false]
-% fastPlot      [false]
-% doLegends     [true]
-% flags         [none]
-% 
-%   After clicking the subplot of interest, the following command provides
-%   annotation of the displayed plot:
-%   get(gca,'UserData') 
-% 
-%   ar.model(jm).data(jd).highlight(jt,jy) can be used to highlight data points
+% saveToFile    Save plot to file               [false]
+% fastPlot      Do fast plotting                [false]
+% doLegends     Print the legends               [true]
+% flags         Optional flags:                 [none]
+%                   'hideLL' - Hides the likelihood
 %
-% Flags allow you to customize the plot. HideLL, hides the -log(L) value,
-% while nameOnly makes sure either the name or observable variable is used 
-% as title, but not both.
-% 
+% arPlotY plots all the enabled observables. Which conditions are plotted 
+% can be set with arPlotter. 
+%
+% ar.config.fiterror     0: Data is plotted as fitted (default).
+%                       -1: Plot prediction bands as calculated by PPL.
+%                       -2: Do not plot errors
+% ar.config.fiterrors   -1: Only experimental error bars used for fitting.
+%                        0: Use experimental errors by default and revert
+%                           to the error model for data points that have no
+%                           experimental error specified (default).
+%                        1: Only the error model is used for fitting.
+%                           Experimental errors specified in the data sheet
+%                           are ignored.
+% ar.config.ploterrors   0: Observables are plotted as fitted (default).
+%                        1: Data uncertainty is plotted as error bar.
+%                        2: Only error bands are plotted.
+%
+% Note: For observables, axis transformations can be set in 
+%       ar.model(jm).plot(jplot).xtrafo and ar.model(jm).plot(jplot).ytrafo
+%       by specifying single input/output anonymous functions here.
+% Note: After clicking the subplot of interest, the following command provides
+%       annotation of the displayed plot: get(gca,'UserData').
+% Note: ar.model(jm).data(jd).highlight(jt,jy) can be used to highlight data 
+%       points.
 % Note: fastplot = 2 suppresses closing the figure and plots a new figure 
-% for each plot.
-% 
-% 
-% Doku: 
-% https://github.com/Data2Dynamics/d2d/wiki/Plotting-options-and-the-meaning-of-ar.config.ploterrors
+%       for each plot.
+%
+% See also arPlotter, arPlot, arPlot2, arPlotX, arPlotV.
 
 function arPlotY(saveToFile, fastPlot, doLegends, varargin)
 

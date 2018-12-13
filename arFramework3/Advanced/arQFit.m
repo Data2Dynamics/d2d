@@ -1,22 +1,51 @@
+% arQFit(opt,val)
+% 
+% This function can be used to set qFit (either for parameters or for data
+% points) 
+% 
+%   opt     option or keyword
+%           0: switch off everything
+%           1: switch on everything
+%           'string': The string indicates a parameter name or (if not
+%           found) a name of a data set.
+%           'hl': this keyword denots that data points which are
+%           'highlighted' by arHighlightY
+%   
+%   val     value 
+%           0: switch off fitting
+%           1: switch on fitting
+% 
+% ar.qFit controls which parameters are fitted. ar.model.data.qFit controls
+% which data points are used for fitting. arQfit provides some convenient
+% actions to change these flags.
+% 
+% ar.pLabel is evaluated for the parameter names, ar.model.data.name as
+% names of data sets.
+% 
+% Examples:
+%   
 % arQFit(1)
 % arQFit(0)
-% arQFit([],1)  % equivalent to arQFit(1)
-% arQFit([],0)  % equivalent to arQFit(0)
+% arQFit([],1)      % equivalent to arQFit(1)
+% arQFit([],0)      % equivalent to arQFit(0)
 % arQFit('data',1)  % all data sets are fitted
 % arQFit('data',0)  % no data sets are fitted
 % arQfit(1:10,0)
 % arQfit('para_name',1)
-% arQfit('data_name',1)  change qFit of a data set, works only if parameter
+% arQfit('data_name',1)  % change qFit of a data set, works only if parameter
 %                        names does not match
-% arQfit('y_name',1)     change qFit of an observalbe, works only if parameter
+% arQfit('y_name',1)     % change qFit of an observalbe, works only if parameter
 %                        names and data names does not match
 %
 % arQfit('hl',1) set qFit=1 for the highlighted data points
+% 
+% See also arHighlightY
+
 
 function arQFit(opt,val)
 global ar
 
-if(~exist('val','var'))
+if(~exist('val','var') || isempty('val'))
     val = [];
 end
 if opt==0

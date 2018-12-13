@@ -1,20 +1,26 @@
-%   This script evaluatees a specific function using a defined D2D version.
-%   The D2D revision is specified via the commit's shas (which only works if
-%   D2D is used in combination with git).
-%
-%   dorecompile     Default: false
-%
+% result = arEvalWithOldRevision([fun], [shas], [dorecompile], [varargin])
+% 
+% This script evaluates a specific function using a defined D2D version
+% specified via the commit's shas (which only works if D2D is used in
+% combination with git).  
+% 
+%   fun             the funtion to be evaluated (string or handle) by feval
+%   shas            string or cell of strings indicating the revision hash
+%                   The shas/hashes are found on github or shown via "git log"
+%   dorecompile     [false]
 %                   With this option, the function does not recompile using
 %                   the old revision. It uses/requires existing mex file as
 %                   specified via ar.fkt
-%
-%                   true    if Setup.m is available, it is called.
+%                   true:  if Setup.m is available, it is called.
+%                   Otherwise: arRecompile is tried.
+%   varargin        These arguments are passed to fun via
+%                   feval(fun,varargin{:})
 % 
-%                   Otherwise, arRecompile is tried.
+%   result          result = cell(size(shas)) containing the results of the
+%                   function calls for old revisions
 % 
-%   Old revision paths can be removed via    arRemoveOldRevisionPaths
-% 
-%   The example function fitLHS is included below.
+% Old revision paths can be removed via arRemoveOldRevisionPaths.
+% The example function fitLHS is included below.
 %
 % Example:
 % result = arEvalWithOldRevision; % Default shas without recompilation
@@ -75,6 +81,9 @@ try
     
     
     for s=1:length(shas)
+        if length(shas{s})~=40
+            error('Proper revision sha-hashs have a length 40.')
+        end
         arRemoveOldRevisionPaths
         
         revision_path = arGetOldRevision(shas{s});

@@ -1,16 +1,15 @@
-% Initialize Profile Likelihood Exploit
+% arPLEInit([force], [breakon_point], [mode])
 %
-% arPLEInit(force, breakon_point, mode)
-%   force:              [true] = exising PLEs are deleted
-%   breakon_point:      [false] = calc simultaneous CIs, true = calc pointwise CIs
-%   mode:               [1] = direct step, 2 = progressive step
+% Initialize Profile Likelihood Exploit
+%   force           exising PLEs are deleted  [true]
+%   breakon_point   calc simultaneous (false) or pointwise (true) CIs  [true]
+%   mode            direct (1) or progressive (2) step  [1]
 % 
-%   The profile likelihood calculation by the functions ple* was intended
-%   as running independent of D2D, i.e. it was intendent to be also used by
-%   other tools. 
-% 
-%   This function extracts info from the global variable ar and calls
-%   pleInit.
+% The profile likelihood calculation by the functions ple* was intended
+% as running independent of D2D, i.e. it was intended to be also used by
+% other tools. 
+%
+% See also: ple
 
 function arPLEInit(force, breakon_point, mode)
 

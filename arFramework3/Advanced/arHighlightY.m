@@ -1,9 +1,18 @@
-% arHighlightY(jm,jd,jy,jt)
-%   sets the highlight flag ar.model(jm).data(jd).highlight(jt,jy) = 1
-%   This flag is used by arPlotY to highlight data points.
+% arHighlightY([jm], [jd], [jy], [jt])
+% 
+% Sets the highlight flag ar.model(jm).data(jd).highlight(jt,jy)=1
+% This flag is used by arPlotY to highlight data points.
+% 
+%   jm      model index, i.e. ar.model(jm)
+%   jd      data index, i.e. ar.model.data(jd)
+%   jy      observable index, i.e. ar.model.data.yExp(:,jy)
+%   jt      time point index, i.e. ar.model.data.yExp(jt,:)
+% 
+% Examples:
 % 
 % arHighlightY      sets all highlight flags to zero.
 % arHighlightY(0)   sets all highlight flags to zero.
+
 
 function arHighlightY(jm,jd,jy,jt)
 global ar

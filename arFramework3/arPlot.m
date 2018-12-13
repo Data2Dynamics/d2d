@@ -1,16 +1,39 @@
+% hs = arPlot([saveToFile], [fastPlot], [silent], [evalfun], [doLegends], [dynamics], [hs])
+%
 % Plot models and datasets
 %
-% hs = arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs)
+% saveToFile    Save plot to file               [false]
+% fastPlot      Do fast plotting                [false]
+% silent        Plot without printing text      [false]
+% evalfun       Evaluate function               [true]  (DEPRECATED)
+% doLegends     Print the legends               [true]
+% dynamics      Simulate dynamics               [true]
+% hs            Plot to custom figure handles   []
 %
-% hs: figure handles;
+% ar.config.fiterror     0: Data is plotted as fitted (default).
+%                       -1: Plot prediction bands as calculated by PPL.
+%                       -2: Do not plot errors
+% ar.config.fiterrors   -1: Only experimental error bars used for fitting.
+%                        0: Use experimental errors by default and revert
+%                           to the error model for data points that have no
+%                           experimental error specified (default).
+%                        1: Only the error model is used for fitting.
+%                           Experimental errors specified in the data sheet
+%                           are ignored.
+% ar.config.ploterrors   0: Observables are plotted as fitted (default).
+%                        1: Data uncertainty is plotted as error bar.
+%                        2: Only error bands are plotted.
 %
-% saveToFile    [false]
-% fastPlot      [false]
-% silent        [false]
-% evalfun       [true]  (deprecated)
-% doLegends     [true]
-% dynamics:     [true]
-% hs:           []      custom figure handels
+% arPlot simulates the model without sensitivities and subsequently 
+% plots all the enabled observables, states/derived variables and
+% fluxes. Which conditions are plotted can be set with arPlotter. 
+%
+% Note: arPlot2 also plots model simulations using different rendering code.
+% Note: For observables, axis transformations can be set in 
+%       ar.model(jm).plot(jplot).xtrafo and ar.model(jm).plot(jplot).ytrafo
+%       by specifying single input/output anonymous functions here.
+%
+% See also arPlotter, arPlot2, arPlotY, arPlotX, arPlotV.
 
 function varargout = arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs)
 

@@ -1,5 +1,8 @@
+% arRemoveSplitPlots()
+%
 % Removes all run time generated plots (i.e. generated with arSplitPlot) from the model
 %
+% See also arSplitPlot
 function arRemoveSplitPlots()
     global ar;
     

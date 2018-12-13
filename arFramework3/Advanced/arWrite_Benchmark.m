@@ -1,3 +1,7 @@
+% arWrite_Benchmark
+% 
+% Export function used in Hass et al, 2018.
+% 
 % File to export human-readable formats of a model
 % Generates a general-info file with fact sheet, parameters, raw ODEs,
 % parameter transformations (including initials) and experimental conditions
@@ -8,6 +12,14 @@
 %
 % For corresponding output of data and model simulations, see
 % arWrite_CondXLS
+% 
+% See also arCopyBenchmarkModels
+% 
+% References: 
+% Helge Hass, Carolin Loos, Elba Raimundez Alvarez, Jens
+% Timmer, Jan Hasenauer, Clemens Kreutz, Benchmark Problems for Dynamic
+% Modeling of Intracellular Processes doi: https://doi.org/10.1101/404590  
+
 
 function arWrite_Benchmark
 global ar

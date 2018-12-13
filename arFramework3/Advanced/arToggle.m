@@ -1,4 +1,14 @@
-% arToggle( parameter mask, value, qFit, qLog10, lb, ub, type, meanp, stdp)
+% arToggle( parameter mask, value, [qFit], [qLog10], [lb], [ub], [type], [meanp], [stdp])
+%
+%   mask         Parameter mask
+%   value		 value of the  parameter
+%   qFit         0=fixed, 1=fitted, 2=constant          [unchanged]
+%   qLog10       0=normal, 1=log10 parameter values     [unchanged]
+%   lb           lower parameter bound                  [unchanged]
+%   ub           upper parameter bound                  [unchanged]
+%   type         0=box prior, 1=normal prior            [unchanged]
+%   meanp		 mean of normal prior                   [unchanged]
+%   stdp         standard deviation of normal prior     [unchanged]
 %
 % Function to quicky and non-destructively try new parameters without losing 
 % the old values and parameter fitting settings.
@@ -13,16 +23,6 @@
 % backup is cleared. Manually clearing the toggle cache can be done by
 % invoking arToggle( 'clear' ). This destroys the parameter backup and a
 % next call to arToggle will store the current ones as the backup.
-%
-% The remaining syntax is analogous to arSetPars; namely:
-%  p			    value of the  parameter
-%  qFit         0=fixed, 1=fitted, 2=constant
-%  qLog10       0=normal, 1=log10 parameter values
-%  lb           lower parameter bound
-%  ub           upper parameter bound
-%  type         0=box prior, 1=normal prior
-%  meanp		    mean of normal prior
-%  stdp         standard deviation of normal prior
 %
 % Examples
 %   arToggle( '_act_', 0, 2, 0 );
@@ -45,7 +45,9 @@
 %   arToggle( )
 %       Restores parameters to 0 (note the cache clear and setPars).
 %
-%  See also: arLoadPars, arSetPars and arSetParsPattern
+% Hint: arToggle has been superseded by arPush/arPop.
+%
+% See also arPush, arPop, arLoadPars, arSetPars and arSetParsPattern
 %
 
 function arToggle( ID, varargin )

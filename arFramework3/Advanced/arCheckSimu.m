@@ -1,22 +1,26 @@
-% ok = arCheckSimu(whichp, varargin)
+% ok = arCheckSimu([whichp], varargin)
 % 
 % This function checks whether arSimu is feasible for the current
 % parameters. If not, the outcome is checked if parameter
 % components are set to -1. 
 % 
-%   whichp  specifies which parameters should be tested, i.e. set to -1
-%           default: whichp = find(ar.qDynamic)
+%   whichp      specifies which parameters should be tested, i.e. set to -1
+%               default: whichp = find(ar.qDynamic)
+%   varargin    Arguments passed to arSimu
 % 
-%   varargin Arguments passed to arSimu
+%   ok          1: Indicates that integration is feasible for ar.p
 % 
-%   ok      1: Integration is feasible for ar.p
-%           [0,1,0,1,1,NaN,1]: zero indicates non-feasibility of integration
-%           if parameter is set to -1
-%           one indicates that feasibitly
-%           NaN indicates that the parameter was not checked
+%               [0,1,0,1,1,NaN,1]: zero indicates non-feasibility of integration
+%                   if parameter is set to -1
+%                   one indicates that feasibitly
+%                   NaN indicates that the parameter was not checked
 % 
 % The function is desired to find out which parameters are responsible for
 % convergence failure during ODE integration.
+% 
+% Example
+% 
+% arCheckSimu
 
 
 function ok = arCheckSimu(whichp, varargin)
@@ -87,7 +91,7 @@ if(~inok)
     end
 else
     if nargout==0
-        fprintf('Integration with the initial parameters (ar.p), feasible => Checking the parameters for causing intergration problems omitted.');
+        fprintf('Integration with ar.p is feasible => Checking the parameters for causing intergration problems omitted.');
     end
     ok = true;
 end

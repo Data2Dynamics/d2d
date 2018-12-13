@@ -1,21 +1,34 @@
-% arCopyBenchmarkModels(subset,target_path)
+% arCopyBenchmarkModels([subset], [target_path])
 % 
 %   Copies a specific set of example models (benchmarks) to a local folder.
-%   
 % 
-%   subset      Default: '20'
-%               The benchmark models published in Hass et al, 2018)
+%   subset      ['20'] default value corresponding to the
+%               Benchmark models published in Hass et al, 2018
 % 
 %               '5'
-%               The five benchmark models used in Kreutz et al, 2016)
+%               The five benchmark models used in Kreutz et al, 2016
 % 
 %               The (starting characters of) model names can also be
 %               specified, e.g.:
 %               arCopyBenchmarkModels('Becker')
 %               arCopyBenchmarkModels('Swa')
 % 
-% 
 %   target_path     Default: pwd
+% 
+% Examples
+% arCopyBenchmarkModels              % 20 default benchmark models
+% arCopyBenchmarkModels('Bachmann')  % only the Bachmann model
+% arCopyBenchmarkModels('Ra')        % only the Raia model (abbreviation Ra only fits for Raia)
+% 
+% 
+% Reference:  
+% Helge Hass, Carolin Loos, Elba Raimundez Alvarez, Jens
+% Timmer, Jan Hasenauer, Clemens Kreutz, Benchmark Problems for Dynamic
+% Modeling of Intracellular Processes doi: https://doi.org/10.1101/404590  
+% 
+% C. Kreutz
+% New Concepts for Evaluating the Performance of Computational Methods.
+% IFAC-PapersOnLine (2016) 49(26): 63-70.
 
 function arCopyBenchmarkModels(subset,target_path)
 if ~exist('subset','var') || isempty(subset)

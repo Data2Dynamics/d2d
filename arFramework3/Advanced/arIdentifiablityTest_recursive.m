@@ -1,11 +1,18 @@
 % arIdentifiablityTest_recursive(varargin)
 % 
-%   This function iteratively applies arIdentifiabilityTest while fixing
-%   the non-identifiability with largest dp (most flat direction). For each
-%   non-identifiability, the related parameters are detemined via
-%   L1-penalization. 
-%   This step, however, currently only works for parameters without priors
-%   (i.e. ar.type=0)
+% arIdentifiablityTest_recursive iteratively applies arIdentifiabilityTest while fixing
+% the non-identifiability with largest dp (most flat direction). 
+% 
+%   varargin      these arguments are passed to arIdentifiablityTest.m
+% 
+% For each non-identifiability, the related parameters are detemined via
+% L1-penalization. This step, however, currently only works for parameters without priors
+% (i.e. ar.type=0)
+% 
+% See also arIdentifiablityTest
+% 
+% References: C. Kreutz, An easy and efficient approach for testing
+% identifiability of parameters. Bioinformatics, 2018, 34(11), 1913-1921. 
 
 function arIdentifiablityTest_recursive(varargin)
 

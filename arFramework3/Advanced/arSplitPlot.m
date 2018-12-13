@@ -1,21 +1,20 @@
-% Split off a set of conditions for a separate plot
+% arSplitPlot( [m], name, [title], filter )
+%
+% Split off a set of conditions for a separate plot.
 %
 % Sometimes there are simply too many conditions in a single plot. This
 % function can split these into separate plots.
 %
-% Usage:
-%   arSplitPlot( (m), name, (title), filter )
+%   m           Model index                                             [1]
+%   name        Name of the plot (needs to match exactly)
+%   title       Title of the new plot                                   [same as input]
+%   filter      Cell array of filters for the conditions we wish to
+%               extract for the new plot. The format of the filter is as 
+%               follows:
+%               { condition name 1, anonymous function 1, condition name 2, anonymous function 2 }
 %
-%   m           -   Model number (default: 1)
-%   name        -   Name of the plot (needs to match exactly)
-%   title       -   Title of the new plot
-%   filter      -   Cell array of filters for the conditions we wish to
-%                   extract for the new plot
-%
-% The format of the filter is as follows
-%   { condition name 1, anonymous function 1, condition name 2, anonymous function 2 }
-%
-% The anonymous function will be evaluated with the condition listed in
+% This function splits off a set of conditions for a separate plot. The 
+% anonymous function will be evaluated with the condition listed in
 % condition name for each dataset in the original source plot. If it
 % evaluates to true for all conditions, the data will be copied to the new 
 % plot. Otherwise, the data will be ignored.
@@ -26,13 +25,13 @@
 %
 % Note that arguments between brackets are optional
 %
-% Example usage:
+% Example(s):
 %   arSplitPlot(1, 'myExperiment', 'nobmp', {'input_bmp2', @(x)x==0} )
 %
-% Advanced usage note: It is also possible to specify multiple conditions to one
-% anonymous function. Example:
-%   {{'input_bmp2', 'input_dorso'}, @(bmp,dcf)(bmp>0)||(dcf<0)}
-
+% It is also possible to specify multiple conditions to one anonymous function.
+%   arSplitPlot(1, 'myExperiment', 'nobmp,negdorso', {{'input_bmp2', 'input_dorso'}, @(bmp,dcf)(bmp>0)||(dcf<0)} )
+%
+% See also arPlot, arMergePlot, arMergePlotMulti
 function arSplitPlot( varargin )
     
     global ar;

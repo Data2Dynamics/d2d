@@ -1,52 +1,39 @@
-% arEvalToAllExamples(fun)
+% arEvalToAllExamples(fun, [result_suffix], [workspace_pattern], [depth], [varargin])
 % 
-% arEvalToAllExamples(fun, [], [], [], varargin)
-% 
-% arEvalToAllExamples(fun, result_suffix, workspace_pattern, depth, varargin)
-% 
-% 
-%   Loads recursively the latest result workspaces and applies the function
-%   fun. 
-% 
-%   The function checks whether a folder is a D2D working folder by
-%   checking existance of the folders 'Results' and 'Models'.
-% 
-% 
+% Loads recursively the latest result workspaces and applies function fun. 
 % 
 %   fun             a D2D or user-defined function 
-% 
-%   result_suffix   used as argument for arSave after fun is finished
-% 
-%               If result_suffix = 'current' then the loaded workspace is
-%               used
-% 
-%               result_suffix = 'none' means NO SAVING at all.
+%   result_suffix   ['arEvalToAllExamples']
+%                   used as argument for arSave after fun is finished
+%                   If result_suffix = 'current' then the loaded workspace used
+%                   'none' keyword indicating NO SAVING at all.
 % 
 %   workspace_pattern   used as argument for arLoadLatest to load a
 %                       workspace
 % 
-%   depth       folder depth for which the fucntion should work.
+%   depth       [Inf]
+%               folder depth for which the fucntion should work.
 %               The argument depth is given to list_files_recursive(depth).
-% 
-%               depth=0 applies fun to models in the current folder (but
+%               Inf: means working recursively through all folders
+%               0: applies fun to models in the current folder (but
 %               not in subfolder), e.g. to workspaces in ModelAuthorYear/Results/*
-% 
-%               depth=1 applies fun in the current folder and in all
+%               1: applies fun in the current folder and in all
 %               existing subfolders (but not in subsubfolder)
-% 
-%               depth = Inf means working recursively through all folders
-%               (default)
 % 
 %   vargin      additional arguments passed to fun
 % 
 % 
-% Example:
+% The function checks whether a folder is a D2D working folder by
+% checking existance of the folders 'Results' and 'Models'.
+% 
+% Examples:
 % arEvalToAllExamples('arFitLHS','LHS100',[],1,100);
 % arEvalToAllExamples('arUpdateResultWorkspaces','none',[],2);
 % 
 % addpath(pwd); % add path to the working dir to find the user-function
 % arEvalToAllExamples(@userfun,'none',[],2);
-
+% 
+% See also arEvaluate, arEvalWithOldRevision
 
 function varargout = arEvalToAllExamples(fun, result_suffix, workspace_pattern, depth, varargin)
 if ~exist('depth','var') || isempty(depth)

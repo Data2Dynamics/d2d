@@ -1,12 +1,12 @@
+% arFastSensis()
 %
-%   arFastSensis
+% Enables or disables fast sensitivity computation. For the computation
+% of fast sensitivities, the RHS must be full rank. For this, the model
+% has to be reduced to a form where there are no more conserved moieties.
+% Use arReduce after model loading, but before data loading to accomplish
+% this.
 %
-%   Enables or disables fast sensitivity computation. For the computation
-%   of fast sensitivities, the RHS must be full rank. For this, the model
-%   has to be reduced to a form where there are no more conserved moieties.
-%   Use arReduce after model loading, but before data loading to accomplish
-%   this.
-%
+% See also arSteadyState, arReduce
 
 function arFastSensis()
 

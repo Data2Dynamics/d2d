@@ -1,10 +1,13 @@
-% Profile Likelihood Exploit
+% pleExtend([i], [samplesize])
+% 
+% Profile Likelihood Exploit. 
+% Extend existing profile in one direction of parameter axis.
 %
-% pleExtend(i, samplesize)
+%   i                     parameter index or vector of par indices [all if not specified]
+%   samplesize            number of sampling steps [100]
+%                         (use negative numbers to extend profiles to the left)
 %
-% i:                    i'th parameter, see pwInfo
-%                       [if omitted, all free parameters are considered]
-% samplesize:           number of sampling steps            [100]
+% See also: arPLEInit, ple
 
 function pleExtend(jk, samplesize)
 

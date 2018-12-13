@@ -1,4 +1,18 @@
-% Removes some fields from ar to save memory
+% arIn = arCompress([dumpsyms])
+% 
+% Removes some fields from ar to save memory. This function is called by
+% arSave.
+% 
+%   dumpsyms    [0]
+%               1: some symbolic variables are also removed
+% 
+% Examples
+% arSimu(true,true,true)              % calculate sensitivities in fine grid
+% ar.model(1).condition(1).sxFineSimu % show sensitivities
+% arCompress                          % compression removes them
+% ar.model(1).condition(1).sxFineSimu % check removal
+% 
+% See also arSave
 
 function arIn = arCompress( dumpsyms )
 

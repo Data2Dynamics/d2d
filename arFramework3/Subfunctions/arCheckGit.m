@@ -1,6 +1,14 @@
+% [has_git, is_repo] = arCheckGit(repo_path)
+% 
 % Check if git is available on system and if d2d is installed as a valid git repository
 %
-% [has_git, is_repo] = arCheckGit(repo_path)
+%   repo_path   the path where D2D is located as e.g. stored in ar.info.ar_path
+%   has_git     logical indicating whether git is available
+%   is_repo     logical indicating whether D2D is downloaded via git
+% 
+% The shell command "git status" is called.
+% 
+% See also arCheckVersion, arUpdateD2D
 
 function [has_git, is_repo] = arCheckGit(repo_path)
 

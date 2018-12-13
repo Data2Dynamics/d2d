@@ -1,28 +1,35 @@
-% Fit model parameters to data using lsqnonlin (by default)
+% [ar_out] = arFit([ar_in],[silent])
 %
-% arFit(silent)
+% Fit model parameters to data using lsqnonlin (by default) or other
+% optimizers
+% 
+%   arFit
+%   arFit(silent)
+%   arFit(ar_in)
+%   ar_out = arFit(ar_in,silent)
 %
-% lsqnonlin.m exit flag description:
-%       1  LSQNONLIN converged to a solution X.
-%       2  Change in X smaller than the specified tolerance.
-%       3  Change in the residual smaller than the specified tolerance.
-%       4  Magnitude search direction smaller than the specified tolerance.
-%       0  Maximum number of function evaluations or of iterations reached.
-%      -1  Algorithm terminated by the output function.
-%      -2  Bounds are inconsistent.
-%      -4  Line search cannot sufficiently decrease the residual along the
-%           current search direction.
+%   silent  if 'true', no output will be printed into the command line
+%           [false]
+%   ar_in   optionally, an ar struct can be used independentely from the 
+%           global ar struct. It can also be passed through without 
+%           imparing the global ar struct
 %
-% Select different optimizers by editing ar.config.optimizer
+%   ar_out  if ar_in is provided, results are stored in ar_out. Otherwise
+%           it is written to the global ar
+% 
+%   Select different optimizers by editing ar.config.optimizer
 %       1 - lsqnonlin (default)
 %       2 - fmincon
-%       4 - STRSCNE (Bellavia et al, A Scaled Trust Region Solver for Constrained Nonlinear Equations)
-%       5 - arNLS (additional method choices under ar.config.optimizerStep; see help arNLS)
+%       4 - STRSCNE (Bellavia et al, A Scaled Trust Region Solver for 
+%           Constrained Nonlinear Equations)
+%       5 - arNLS (additional method choices under ar.config.optimizerStep;
+%           see help arNLS)
 %       6 - fmincon_as_lsq
 %       7 - arNLS with SR1 updates
-%       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL--An Adaptive Nonlinear Least-Squares)
-%       9 - TRESNEI (B.Morini, M.Porcelli "TRESNEI, a Matlab trust-region solver for systems 
-%       of nonlinear equalities and inequalities")
+%       8 - NL2SOL (Denis et al, Algorithm 573:  NL2SOL--An Adaptive
+%           Nonlinear Least-Squares)
+%       9 - TRESNEI (B.Morini, M.Porcelli "TRESNEI, a Matlab trust-region 
+%           solver for systems of nonlinear equalities and inequalities")
 %      10 - Ceres (Sameer Agarwal and Keir Mierle and Others, Google Solver)
 %      11 - lsqnonlin_repeated - repeated runs of lsqnonlin until convergence
 %      12 - fminsearchbnd
@@ -32,16 +39,41 @@
 %      16 - simulated annealing
 %      17 - ga (geneticalgorithm)
 %      18 - Repeated optimization alternating between 1 and 5 (Joep's heuristics)
-%      19 - enhanced Scatter Search (eSS) Egea et al. "Dynamic Optimization of Nonlinear Processes with an Enhanced Scatter Search Method"
+%      19 - enhanced Scatter Search (eSS) Egea et al. "Dynamic Optimization 
+%           of Nonlinear Processes with an Enhanced Scatter Search Method"
 %           link to MEIGO toolbox needed: https://bitbucket.org/jrbanga_/meigo64
+%
+%   lsqnonlin.m exit flag description:
+%       1  LSQNONLIN converged to a solution X.
+%       2  Change in X smaller than the specified tolerance.
+%       3  Change in the residual smaller than the specified tolerance.
+%       4  Magnitude search direction smaller than the specified tolerance.
+%       0  Maximum number of function evaluations or of iterations reached.
+%      -1  Algorithm terminated by the output function.
+%      -2  Bounds are inconsistent.
+%      -4  Line search cannot sufficiently decrease the residual along the
+%           current search direction.
 % 
 %   ar.fit contains information about the latest fit. It also consist of
 %   ar.fit.checksums which contains information (e.g. checksums) to uniquely
 %   identify/discriminate the same/different fit settings.
 %
-%  Convergence of the optimization algorithm can be stored by setting
-%  ar.config.logFitting = 1. Then interesing variables for each iteration
-%  is stored in ar.fit.optimLog
+%   ar.config.showFitting   (off by default)
+%   Convergence of the optimization algorithm can be stored by setting
+%   ar.config.logFitting = 1. Then interesing variables for each iteration
+%   is stored in ar.fit.optimLog. (All this does *not* refer to fitting on 
+%   the logarithmic scale, but only to storing the results)
+%
+%   ar.config.optimizerStep   (0 by default)
+%   sets submethod in arNLS, see arNLS for more detail
+%
+%   ar.config.showFitting   (off by default)
+%   if the to 'true', trajectories in the plos are updates during
+%   optimization. (not recommended, slow and buggy)
+%
+% See also arFitLHS, arFits, arNLS, arFitObs, arFitDyn, arFitSingle,
+% arFitSome
+
 
 function varargout = arFit(varargin)
 
