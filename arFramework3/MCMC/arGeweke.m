@@ -1,8 +1,25 @@
+% [z,p] = arGeweke([a],[b],[chain]) 
+%
+% Performs Geweke test on chain and returns test values
+%
+%   a       Bound for lower fraction of chain       [0.1]
+%   b       Bound for upper fraction of chain       [0.5]
+%   chain   sample of MCMC chain analysed           [ar.ps]
+%
+%   z       Z-values of Geweke test
+%   p       p-Values of Geweke test
+%
+% See also arGewekePlot
+%
 % Code based on published code by Marko Laine (2006): MCMC toolbox for Matlab
 % http://helios.fmi.fi/~lainema/mcmc/#sec-2
-% Returns test value z and p value.
 %
-% function arGeweke(a, b, chain)
+% See:
+% Stephen P. Brooks and Gareth O. Roberts.
+% Assessing convergence of Markov chain Monte Carlo algorithms.
+% Statistics and Computing, 8:319--335, 1998.
+
+
 
 function [z,p]=arGeweke(varargin)
 %GEWEKE Geweke's MCMC convergence diagnostic
