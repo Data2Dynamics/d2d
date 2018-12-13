@@ -1,17 +1,20 @@
-% fit sequence
+%function arFits(ps, [log_fit_history], [backup_save], [prefunc], [postfunc])
 %
-% arFits(ps, log_fit_history, backup_save)
+% Performs a fitting sequence using arFit
 %
-% ps:                           parameter values      
-% log_fit_history               [false]
-%                               if true, then the new fits in ar.fit is
-%                               stored in ar.fit_hist 
-% backup_save                   [false]
-%                               if true, ar of the last fit is stored in
-%                               arFits_backup.mat
-% prefunc                       function to be called before fitting (optional)
-% postfunc                      function to be called after fitting (optional)
+%   ps                  matrix of parameter values for fitting sequence
+%   log_fit_history     if true, details of all individuals fits from 
+%                       ar.fit are stored in ar.fit_hist 
+%                       [false]
+%   backup_save         if true, ar struct with the fitting sequence is 
+%                       stored in arFits_backup.mat
+%                       [false]
+%   prefunc             function to be called before each fitting
+%   postfunc            function to be called after each fitting
 % 
+% Performs a fitting sequence of the provided matrix of initial values for 
+% the parameter values using arFit. ps has to have the right dimensions 
+% (rows: number of fits, columns: number of fitted parameters).
 % if 
 %   1) ps has the same size as ar.ps or is larger  AND
 %   2) contains rows with only NaN, then this fits corresponding to NaN
@@ -19,6 +22,7 @@
 %   This enables overwriting fits where integration was not feasible (e.g. in arFitLHS)
 %   and adding new fits.
 % 
+%
 % Examples:
 % % 1) Standard call:
 % ps = ones(100,1)*ar.p;
@@ -36,6 +40,8 @@
 % ps3(5,:) = ar.ps_start(5,:);
 % arFits(ps3)
 % 
+% See also arFit, arFitLHS, arChi2LHS
+
 function arFits(ps, log_fit_history, backup_save, prefunc, postfunc)
 
 global ar
@@ -199,4 +205,3 @@ else
     ar.p = pReset;
 end
 arCalcMerit(true,[]);
-

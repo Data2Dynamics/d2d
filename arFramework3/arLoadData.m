@@ -1,60 +1,62 @@
-% Load data set to next free slot
-%
 % arLoadData(name, m, extension, removeEmptyObs, opts)
 %
-% name                      filename of data definition file
-% m                         target position (int) for model                [last loaded model]
-%                           or: model name (string)
-% extension                 data file name-extension: 'xls', 'csv'         ['xls']
-%                           'none' = don't load data                           
-% removeEmptyObs            remove observation without data                [false]
-% opts                      additional option flags
+% Load data set to next free slot
 %
-% optional option flags are:
-% 'RemoveConditions'        This flag followed by a list of conditions will
-%                           allow you to filter the data that you load. Note
-%                           that the function takes both values, strings
-%                           or function handles. When you provide a function
-%                           handle, the function will be evaluated for each
-%                           condition value (in this case input_dcf). You
-%                           should make the function return 1 if the condition
-%                           is to be removed. Note that the input to the
-%                           function is a *string* not a number.
-%                           Example:
-%                            arLoadData( 'mydata', 1, 'csv', true, 'RemoveConditions', ...
-%                            {'input_il6', '0', 'input_dcf', @(dcf)str2num(dcf)>0};
-% 'RemoveEmptyConds'        This flag allows you to remove conditions that have
-%                           no data points.
-% 'ResampleDoseResponse'    This flag allows you to increase the resolution
-%                           of dose responses for plotting purposes. Note
-%                           that this makes model evaluation and
-%                           compilation much more time intensive (hence it
-%                           is off by default).
-% 'ResamplingResolution'    Number of extra points to interpolate dose
-%                           response (default: 25)
-% 'RefineLog'               Perform the refinement on a log scale
-% 'expsplit'                Split replicate specific parameters based on the 
-%                           column identifier specified in the next argument
-%                           Example:
+%   name                      filename of data definition file
+%   m                         target position (int) for modelor: model 
+%                             name (string)
+%                             [last loaded model]
+%   extension                 data file name-extension: 'xls', 'csv',         
+%                             'none' = don't load data
+%                             ['xls']
+%   removeEmptyObs            remove observation without data
+%                             [false]
+%   opts                      additional option flags
+%
+%   optional option flags are:
+%   'RemoveConditions'        This flag followed by a list of conditions will
+%                             allow you to filter the data that you load. Note
+%                             that the function takes both values, strings
+%                             or function handles. When you provide a function
+%                             handle, the function will be evaluated for each
+%                             condition value (in this case input_dcf). You
+%                             should make the function return 1 if the condition
+%                             is to be removed. Note that the input to the
+%                             function is a *string* not a number.
+%                             Example:
+%                               arLoadData( 'mydata', 1, 'csv', true, 'RemoveConditions', ...
+%                               {'input_il6', '0', 'input_dcf', @(dcf)str2num(dcf)>0};
+%   'RemoveEmptyConds'        This flag allows you to remove conditions that have
+%                             no data points.
+%   'ResampleDoseResponse'    This flag allows you to increase the resolution
+%                             of dose responses for plotting purposes. Note
+%                             that this makes model evaluation and
+%                             compilation much more time intensive (hence it
+%                             is off by default).
+%   'ResamplingResolution'    Number of extra points to interpolate dose
+%                             response (default: 25)
+%   'RefineLog'               Perform the refinement on a log scale
+%   'expsplit'                Split replicate specific parameters based on the 
+%                             column identifier specified in the next argument
+%                             Example:
 %                               arLoadData('mRNA/mRNA_pretreatment', 1, 'csv', true, 'expsplit', 'nExpID');
-%                           will recognize parameters with nExpID in the name 
-%                           and replace them with nExpID0, nExpID1 etc. if
-%                           the excel data file has a column named nExpID  
-%                           which specifies these values.
+%                               will recognize parameters with nExpID in the name 
+%                               and replace them with nExpID0, nExpID1 etc. if
+%                               the excel data file has a column named nExpID  
+%                               which specifies these values.
 %
-% 'RemoveObservables'   This can be used to omit observables. Simply pass a
-%                       cell array with names of observables that should be 
-%                       ignored in the data.
+%   'RemoveObservables'       This can be used to omit observables. Simply pass a
+%                             cell array with names of observables that should be 
+%                             ignored in the data.
 %
-% 'IgnoreInputs'        Ignore input overrides. Simply pass a cell array
-%                       with names of inputs that should be ignored (the 
-%                       model default will be used instead).
+%   'IgnoreInputs'            Ignore input overrides. Simply pass a cell array
+%                             with names of inputs that should be ignored (the 
+%                             model default will be used instead).
 % 
-% 'DataPath'            Path to the data files.
-%                       Default: DataPath = 'Data/'
+%   'DataPath'                Path to the data files.
+%                             Default: DataPath = 'Data/'
 % 
-%
-% The data file specification is as follows:
+%   The data file specification is as follows:
 %
 %   In the first column
 %   1)    Measurement time points (are allowed to occur multiple times).
@@ -69,7 +71,32 @@
 %         observables, the suffixes "_rel" and "_au" refer to relative
 %         phosphorylation and arbitrary units.
 %
-% Copyright Andreas Raue 2011 (andreas.raue@fdm.uni-freiburg.de)
+%   Defining the measurement noise in the data sheet:
+%   Instead of using a parametrized function for the measurement noise, 
+%   the amount of noise can be put value in the data sheet with column 
+%   header same as the observable name but with the addition _std 
+%   (e.g. tSTAT5_au_std and pSTAT5_au_std). These values will be 
+%   interpreted as standard deviation of the data not as variance!
+%
+%   The following flags controll how the experimental noise enters 
+%   calculations and how it is plotted:
+%   ar.config.fiterror     0: Data is plotted as fitted (ar.config.fiterors).
+%                         -1: Plot prediction bands as calculated by PPL.
+%                         -2: Do not plot errors
+%   ar.config.fiterrors   -1: Only experimental error bars used for fitting.
+%                          0: Use experimental errors by default and revert
+%                             to the error model for data points that have no
+%                             experimental error specified.
+%                          1: Only the error model is used for fitting.
+%                             Experimental errors specified in the data sheet
+%                             are ignored.
+%   ar.config.ploterrors   0: Observables are plotted as fitted.
+%                          1: Data uncertainty is plotted as error bar.
+%                          2: Only error bands are plotted.   
+%
+% See wiki page about loading data: https://github.com/Data2Dynamics/d2d/wiki/Setting%20up%20models#2-data-definition-file
+%
+% See also arInit, arLoadModel 
 
 function arLoadData(name, m, extension, removeEmptyObs, varargin)
 
