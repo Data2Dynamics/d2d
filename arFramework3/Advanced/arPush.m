@@ -1,6 +1,32 @@
-% Push parameter set
+% arPush( [name/reset] )
 %
-% arPush pushes a parameter set onto the stack
+% Push parameter set onto the stack.
+%
+%   name/reset  Name of the parameter / option stack.   [0]
+%               Specify 1 to reset the stack.
+%
+% arPush pushes a parameter set onto the stack. The stack is a list of
+% parameters that are kept for use later. The stack contains the values
+% stored in ar.p, qFit, qLog10, lb, ub, type, mean and std. arPop takes the
+% last parameter set from the stack and removes it from the stack.
+% The stack is kept in a last in, first out format.
+%
+% Example(s):
+%   arPush('try a new fit');
+%   ar.qFit(113) = 0;
+%   arFit;
+%   arPop;      % Undoes the fit and undoes setting qFit 113 to zero
+%
+%   arPush('test1');
+%   arPush('test2');
+%   arPop();     % Brings the state back to test2
+%   arPop();     % Brings the state back to test1
+%
+%   arPush('test1');
+%   arPop('discard');   % Drops the last one from the stack but doesn't
+%                       % bring the state back to test1.
+%
+% See also arPop
 
 function arPush( reset )
     global ar;

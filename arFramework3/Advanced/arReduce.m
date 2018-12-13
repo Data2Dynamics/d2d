@@ -1,4 +1,4 @@
-% function arReduce( (m), (keepTotals) )
+% function arReduce( [m], [keepTotals] )
 %
 % This function automatically reduces the model by removing one state for
 % every conserved moiety. It needs to be called right after arLoadModel if 
