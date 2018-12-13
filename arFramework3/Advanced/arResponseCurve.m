@@ -1,27 +1,36 @@
-% Show rate response curve w.r.t. two variables of a model.
+% rate = arResponseCurve( name, indep1, indep2, varargin )
 %
-% Usage:
-%		arResponseCurve( name, indep1, indep2, varargs )
+% Show instantaneous response curve w.r.t. two variables of a model.
 %
-% Arguments:
-% 		name 			- Name of the flux
-%		indep1          - Independent variable 1 (x-axis)
-% 		indep2          - Independent variable 2
-%       range1          - Specify range for variable 1 manually
-%       range2          - Specify range for variable 2 manually
-% Variable arguments:
-%		timepoints      - Simulation time point to use for values of the other states (default is initial condition)
-%		model           - Which model to use for reference species
-%		condition       - Which model condition to use for reference species
-%		relative        - Divide rate by rate which is obtained by taking
-%                         the limit of the substrates -> infinity and 
-%                         products -> 0 (for enzymes this'd typically be vmax)
-%       
+%   name 			Name of the flux.
+%	indep1          Independent variable 1 (x-axis).
+% 	indep2          Independent variable 2.
+%   range1          Specify range for variable 1 manually.
+%   range2          Specify range for variable 2 manually.
 %
-% NOTE: THIS FUNCTION IS CURRENTLY IN ALPHA STATUS!
-% PLEASE DO NOT EDIT THIS FUNCTION YET. IT IS STILL UNDER ACTIVE DEVELOPMENT.
-% FUNCTION ARGUMENTS ARE LIKELY SUBJECT TO CHANGE IN THE NEAR FUTURE.
-% If you wish to edit it at this point, please contact Joep Vanlier first.
+% This function can be used to probe how a specific flux expression depends
+% on two variables. The flux is evaluated for specific values for the
+% variables specified by indep1 and indep2 over the ranges range1 and
+% range2. For all the variables that are not specified, state and parameter
+% values are taken from a reference condition (1 by default, but can be
+% changed by optional arguments) at a reference time point (initial by 
+% default). This function is primarily intended for enzymes, where it can
+% show how the rate depends on the specific states or parameters.
+%
+%   Optional arguments:
+%   'timepoints'    Specify simulation time point to use for values of the 
+%                   other states (default is initial condition).
+%	'model'         Followed by value which specifies which model to use 
+%                   for reference species.
+%	'condition'     Followed by index which indicates the condition that
+%                   should be used to obtain reference values for 
+%                   species that are not sampled.
+%	'relative'      Divide rate by rate which is obtained by taking
+%                   the limit of the substrates to infinity and 
+%                   products to 0 (for enzymes this'd typically be vmax)
+%
+% See also arFractionalFlux
+
 function rate = arResponseCurve( name, indep1, indep2, varargin )
 
     global ar;
