@@ -1,9 +1,14 @@
-% Plot models V
+% function arPlotV([saveToFile], [fastPlot])
 %
-% arPlotV(saveToFile, fastPlot)
+% Plot model flux trajectories
 %
-% saveToFile    [false]
-% fastPlot      [false]
+%   saveToFile    Save plot to file     [false]
+%   fastPlot      Plot fast?            [false]
+%
+% This function plots the fluxes for those conditions where flux plotting
+% is enabled (this can be set with arPlotter).
+%
+% See also arPlotter, arPlot, arPlotX, arPlotY, arPlot2
 
 function arPlotV(saveToFile, fastPlot)
 

@@ -1,21 +1,20 @@
+% [trafos, ylegend] = arGetPlotYTrafo(jm, jd, jplot)
+%
 % This function fetches the transformation function for an observable prior to plotting.
-%
-%   Usage:
-%     trafos = arGetYTrafo(jm, jplot)
 %     
-%     jm    - Model index
-%     jd    - Data index
-%     jplot - Plot index
+%   jm        Model index
+%   jd        Data index
+%   jplot     Plot index
 %       
-%   Returns:
-%     List of anonymous functions containing the respective transformations
-%     Legend for the y-axes
+% This function returns a list of anonymous functions containing the 
+% transformations for the y-axis and the respective legends.
 %
-%   Uses:
-%     ar.model(jm).plot(jplot).ytrafo       - custom trafo
-%     ar.model(jm).data(#).logfitting(jy)   - log10 fitting of specific observables
-%     ar.model(jm).data(3).logplotting(jy)  - log10 plotting of specific observables
-
+% This function uses the information in the fields:
+%   ar.model(jm).plot(jplot).ytrafo       - custom trafo
+%   ar.model(jm).data(#).logfitting(jy)   - log10 fitting of specific observables
+%   ar.model(jm).data(3).logplotting(jy)  - log10 plotting of specific observables
+%
+%  Note: This function is not intended to be used by the end user.
 function [trafos, ylegend] = arGetPlotYTrafo(jm, jd, jplot)
     global ar;
 

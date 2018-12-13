@@ -10,10 +10,23 @@
 % dynamics      Simulate dynamics               [true]
 % hs            Plot to custom figure handles   []
 %
+% ar.config.fiterror     0: Data is plotted as fitted (default).
+%                       -1: Plot prediction bands as calculated by PPL.
+%                       -2: Do not plot errors
+% ar.config.fiterrors   -1: Only experimental error bars used for fitting.
+%                        0: Use experimental errors by default and revert
+%                           to the error model for data points that have no
+%                           experimental error specified (default).
+%                        1: Only the error model is used for fitting.
+%                           Experimental errors specified in the data sheet
+%                           are ignored.
+% ar.config.ploterrors   0: Observables are plotted as fitted (default).
+%                        1: Data uncertainty is plotted as error bar.
+%                        2: Only error bands are plotted.
+%
 % arPlot simulates the model without sensitivities and subsequently 
 % plots all the enabled observables, states/derived variables and
-% fluxes. Which observables/states and fluxes are plotted can be set 
-% with arPlotter. 
+% fluxes. Which conditions are plotted can be set with arPlotter. 
 %
 % Note: arPlot2 also plots model simulations using different rendering code.
 % Note: For observables, axis transformations can be set in 
