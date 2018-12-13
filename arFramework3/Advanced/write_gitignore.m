@@ -1,6 +1,9 @@
+% write_gitignore
+% 
 % This function can be used to automatically update .gitignore if the set
 % of examples has changed.
 % The function automatically detects all folder in arFramework3/Examples/
+
 function write_gitignore
 
 fprintf('New .gitignore file will be written in the working directory ...\n\n')

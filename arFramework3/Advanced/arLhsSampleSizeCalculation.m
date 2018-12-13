@@ -1,8 +1,88 @@
-function varargout = arLhsSampleSizeCalculation
+% varargout = arLhsSampleSizeCalculation
+% 
+%   This is an implementation of several approaches for estimating the
+%   number of different "species" (different optima in our setting) from a
+%   finite sample of species/optima which is then used for caluclating the
+%   required samples size (number of fits) reuqired to observe the globoal
+%   optimum in 90% of cases.
+% 
+% varargout   Detail result struct containing the outcomes of all sample
+%             size and population size calculation approaches (see example
+%             below).
+% 
+% See also arFitLHS
+% 
+% Example:
+% arFitLHS(50)
+% out = arLhsSampleSizeCalculation
+% ---------------------------------------------------------------------------------------------
+%     N=   50 (=100%) fits performed (0% exit because of optimset.MaxIter). 
+%     N=   50 (100.0%) without integration-error, i.e. ~isnan(chi2).
+%     N=   50 (100.0%) used.
+% 
+%        Maxima observed: 3 (3 jumps within sorted chi2 are larger than 0.01)
+%                thereof: 1 once, 0 twice, 0 three times, 0 four times.
+% 
+%       Estimates for the real number of maxima:
+%             jackknife1: 3.98  	(75.3769% observed)
+%             jackknife2: 4.94  	(60.7287% observed)
+%                 medial: 3  	(100% observed)
+%                  chao1: Inf  	(0% observed)
+%                  chao2: 3  	(100% observed)
+%                  ichao: Inf  	(0% observed)
+%              bootstrap: 3.36417  	(89.1751% observed)
+%    n_bootstrap_iterate: 3.41477  	(87.8537% observed)
+% 
+%    Note: A large number of optima can be erroneously suggested, 
+%    if optimization does not work or the fits did not converge.
+% 
+%    For observing the global minimum in 99% of cases,
+%    iterative bootstrap suggests a sample size of N=181 (integration-errors are accounted).
+%    Increase the sample size by running arFitLHS(131,[],[],true) or improve optimization.
+% --------------------------------------------------------------------------------------------
+% out = 
+%   struct with fields:
+% 
+%                          chi2s: [1×50 double]
+%                       exitflag: [1×50 double]
+%                   dchi2_thresh: 0.0100
+%                      chi2noNaN: [1×50 double]
+%                           pUse: 1
+%                       chi2used: [1×50 double]
+%                          index: [1×50 double]
+%                       pUsedNaN: 1
+%                          Nused: 50
+%                   grenzenNoNaN: [4×1 double]
+%                     nseenNoNaN: 3
+%                        grenzen: [4×1 double]
+%                          nseen: 3
+%                              D: 3
+%                             f1: 1
+%                             f2: 0
+%                             f3: 0
+%                             f4: 0
+%                              N: 50
+%                     jackknife1: 3.9800
+%                     jackknife2: 4.9400
+%                          chao1: Inf
+%                          chao2: 3
+%                      bootstrap: 3.3642
+%                          ichao: Inf
+%                         medial: 3
+%                             Ns: [10 15 23 33 49 73 110 160 240 350]
+%                          Nsadj: [10 15 23 33 49 73 110 160 240 350]
+%                            Ns0: [0 10 15 23 33 49 73 110 160 240 350]
+%                         Ns0adj: [0 10 15 23 33 49 73 110 160 240 350]
+%            p_bootstrap_iterate: 0.8785
+%            n_bootstrap_iterate: 3.4148
+%         N_bootstrap_iterate_99: 180.6531
+%     N_bootstrap_iterate_99_NaN: 180.6531
+%      bootstrap_iterate_counter: 2
 
+function varargout = arLhsSampleSizeCalculation
 global ar
 
-if(~isfield(ar,'chi2s') || sum( ~isnan(ar.chi2s))==0 || sum( ~isnan(ar.chi2s))<=50)
+if(~isfield(ar,'chi2s') || sum( ~isnan(ar.chi2s))==0 || sum( ~isnan(ar.chi2s))<50)
     fprintf('> arLhsSampleSizeCalculation ... stopped.\n')
     fprintf('> Less than 50 LHS fits available.\n')
     fprintf('> If sample size calculation is intended, a sufficient number of fits has to be executed.\n')
@@ -63,12 +143,12 @@ for i=1:length(fns)
 end
 
 
-if(dat.p_bootstrap_iterate<0.99)
+if(dat.p_bootstrap_iterate<0.9)
     fprintf('\n   Note: A large number of optima can be erroneously suggested, \n   if optimization does not work or the fits did not converge.\n');
     
-    fprintf('\n   For observing the global minimum in 99%s of cases,\n','%');
-    fprintf('   iterative bootstrap suggests a sample size of N=%g (integration-errors are accounted).\n',ceil(dat.N_bootstrap_iterate_99_NaN));
-    fprintf('   Increase the sample size by running arFitLHS(%g,[],[],true) or improve optimization.\n',ceil(dat.N_bootstrap_iterate_99_NaN-dat.Nused));
+    fprintf('\n   For observing the global minimum in 90%s of cases,\n','%');
+    fprintf('   iterative bootstrap suggests a sample size of N=%g (integration-errors are accounted).\n',ceil(dat.N_bootstrap_iterate_90_NaN));
+    fprintf('   Increase the sample size by running arFitLHS(%g,[],[],true) or improve optimization.\n',ceil(dat.N_bootstrap_iterate_90_NaN-dat.Nused));
 end
 disp('--------------------------------------------------------------------------------------------')
 
@@ -172,6 +252,8 @@ dat.p_bootstrap_iterate = mom_pest;
 dat.n_bootstrap_iterate = (dat.D/mom_pest);
 dat.N_bootstrap_iterate_99 = 10.^(interp1([0;momp],log10(dat.Ns0+1),.99,'linear','extrap'))-1;
 dat.N_bootstrap_iterate_99_NaN = dat.N_bootstrap_iterate_99/length(dat.chi2noNaN)*length(dat.chi2s);
+dat.N_bootstrap_iterate_90 = 10.^(interp1([0;momp],log10(dat.Ns0+1),.9,'linear','extrap'))-1;
+dat.N_bootstrap_iterate_90_NaN = dat.N_bootstrap_iterate_90/length(dat.chi2noNaN)*length(dat.chi2s);
 dat.bootstrap_iterate_counter = counter;
 
 

@@ -1,4 +1,10 @@
-% update D2D to current revision on github
+% arUpdateD2D
+% 
+% update D2D to current revision on github by calling 
+% "git pull origin master" in case git is available.
+% 
+% See also arCheckGit, arCheckVersion
+
 
 function arUpdateD2D
 

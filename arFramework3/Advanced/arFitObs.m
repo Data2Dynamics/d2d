@@ -1,6 +1,22 @@
-% Fit only observational model parameters
+% arFitObs([silent])
+% 
+% Fit only observational model parameters.
+% 
+%   silent      [false]  logical passed to arFit
+% 
+% Observation parameters are defined in this function as non-dynamic
+% parameters which means that it might also comparise parameters of error
+% models. 
+% 
+% This function is called by arTuner if the respective buttons are
+% pressed.
 %
-% arFitObs(silent)
+% Example:
+% ar.p(:) = -1; % set all parameters to -1
+% arFitObs
+% arPrint
+% 
+% see also arFit, arTuner
 
 function arFitObs(silent)
 global ar
