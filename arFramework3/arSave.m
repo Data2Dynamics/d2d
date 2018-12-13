@@ -1,12 +1,34 @@
-% save model struct and last ple results
-% or return base path of last arSave
+% arSave(name, [withSyms])
+% 
+% arSave saves the current workspace, i.e. model struct and last ple results
+% to repository, or return base path of last arSave.
 %
-% basepath = arSave(name, withSyms)
+%   arSave
+%   arSave(name)
+%   arSave(name, withSyms)
+%   basepath = arSave(--)
 %
-% Special case:
-% arSave('current')
-% saves to the current repository (i.e. current value of ar.config.savepath)
-
+%   name      char indicating the directory name where to save the
+%             workspace - if left empty or set to 'current', current path 
+%             in ar.config.savepath is used
+%   withSyms  optional logical indicating wheter symbols in the ar struct 
+%             shall be saved or not. withSyms true needs the symbolic 
+%             toolbox. Inclusion of symbols can be memory intensive [false]
+% 
+%   basepath  (optional) base path of last arSave to name
+% 
+% Example
+%    Load ABC model and data, compile model and save ar struct to 
+%    repository:  
+%    arLoadModel('ABC_model');
+%    arLoadData('ABC_data_BCobs'); 
+%    arCompileAll();  
+%    Save workspace to the current repository with path in ar.config.savepath% 
+%    arSave('current')
+%    Save workspace to the new repository with name 'ABC_test'
+%    arSave('ABC_test') 
+% 
+% See also arSaveParOnly
 
 function basepath = arSave(name, withSyms)
 

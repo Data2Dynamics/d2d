@@ -1,16 +1,21 @@
 % arLoad(workspace_name)
 % 
-% load model struct and last ple results
+% arLoad loads a model struct with latest ple results from the repository
 % 
-%   workspace_name    either 
-%                 - the name of the result folder 
-%                 - ar.config.savepath
-%                 - or the number as displayed by arLoad without argument
-%   Examples:
-% arLoad
-% arLoad(1)
-% arLoad(ar.config.savepath)
-% arLoad('NameOfAnExistingResultFolder')
+%   workspace_name    name of the result folder or
+%                     ar.config.savepath or
+%                     an integer selected from the list displayed by 
+%                     call arLoad
+%
+% Examples
+%    Load workspace from current/last path at ar.config.savepath
+%    arLoad
+%    arLoad(1)
+%    arLoad(ar.config.savepath)
+%    Load a struct from an existing folder
+%    arLoad('NameOfAnExistingResultFolder')
+%
+% See also arLoadLatest, arLoadData, arLoadFilename 
 
 function arLoad(workspace_name)
 if ~exist('Results','dir')
