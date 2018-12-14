@@ -1,3 +1,15 @@
+% [used, m] = arFindParameterUse(idx, [verbose] )
+%
+% Find data sets and conditions in which a certain parameter is used
+%
+%    idx            index of parameter
+%    verbose  [0]   boolean, specifies if output is displayed
+%
+%    used           boolean, if parameter ar.p(idx) is used at all
+%    m              struct, with fields
+%                           ci: list with all conditions containing the parameter ar.p(idx)
+%                           di contains list with all data containing the parameter ar.p(idx)
+
 function [used, m] = arFindParameterUse( idx, verbose )
 
     if ( nargin < 2 )

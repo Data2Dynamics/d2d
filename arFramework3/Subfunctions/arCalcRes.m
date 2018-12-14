@@ -1,21 +1,20 @@
-% arCalcRes(sensi)
+% arCalcRes([sensi])
 % 
-%   This function performs calculation of residuals (res and reserr) for
-%   the individual data sets including their derivatives sres, sreserr
+%   sensi    [1]  boolean, should sensitivities sres, sreserr be calculated?
+%
+% This function performs calculation of residuals (res and reserr) for
+% the individual data sets including their derivatives sres, sreserr.
+% Additionally, the chi2 value for the individual data sets is calculated.
 % 
-%   In this function, there is the major evaluation of ar.config.fiterrors
-%   i.e. here the decision is made whether reserr has to be calculated and
-%   whether experimental errors or errors from the error model are taken.
+% In this function, there is the major evaluation of ar.config.fiterrors
+% i.e. here the decision is made whether reserr has to be calculated and
+% whether experimental errors or errors from the error model are taken.
 % 
-%   The function implements this step as previously done in arSimuCalc.c
-%   The respective C-code is still in this function as comment.
+% The function implements this step as previously done in arSimuCalc.c
+% The respective C-code is still in this function as comment.
 % 
-%   This function also uses the additive constant ar.config.add_c=50 which is
-%   required for using lsqnonlin in case of fitting errors.
-% 
-%       sensi   should sensitivities sres, sreserr be calculated?
-%               Default: sensi=1
-
+% This function also uses the additive constant ar.config.add_c=50 which is
+% required for using lsqnonlin in case of fitting errors.
 
 function arCalcRes(sensi)
 if ~exist('sensi','var') || isempty(sensi)

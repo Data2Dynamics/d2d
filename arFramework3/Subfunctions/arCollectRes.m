@@ -1,10 +1,23 @@
-% Collects all residuals in 
+% arCollectRes(sensi, [debugres])
+%
+% Collects all residuals, sres and chi2 of the individual data sets and 
+% calculates the number of data points. Additional the priors, constr,
+% random effects and user defined residuals are collected.
+% 
+%   sensi          boolean, collect sensitivities
+%   debugres  [0]  boolean, fill ar.resinfo with 
+%                  additional information 
+%
+% Function collects residuals and chi2 calculated by arCalcRes(true)
+% from the data structs to the top level of the ar struct  
 %   - ar.model.data.res         -> ar.res , ar.type=1
 %   - ar.model.data.reserr      -> ar.res , ar.type=2
 %   - prior                     -> ar.res , ar.type=3
 %   - constr                    -> ar.constr
 %   - random                    -> ar.res , ar.type=4
-% and calculates chi2 values as well as the number of data points
+%   - ar.model.data.sres        -> ar.sres 
+%   - ar.model.data.chi2        -> ar.chi2
+
 
 function arCollectRes(sensi, debugres)
 
