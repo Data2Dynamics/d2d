@@ -1,19 +1,18 @@
-% arLoadLatest
+% status = arLoadLatest([pattern])
 % 
-%  Loads the most recent workspace 
+%  Loads the most recent workspace. With the regular expression "pattern"
+%  the most recent workspace which fits to the regular experession
+%  specified by pattern is loaded.
 % 
-% arLoadLatest(pattern)
+%     pattern          optional regular experession 
 % 
-%   loads the most recent workspace which fits to the regular experession
-%   specified by pattern
-% 
-% 
-% 
+%     status           optional boolean, specifies if a workspace was found and loaded 
+%
 % Examples:
 % 
-% arLoadLatest
+%   arLoadLatest
 % 
-% arLoadLatest('PLE');
+%   arLoadLatest('PLE');
 
 function varargout = arLoadLatest(pattern)
 if ~exist('pattern','var') || isempty(pattern)
