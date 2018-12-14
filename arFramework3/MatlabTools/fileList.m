@@ -1,6 +1,23 @@
-% Dateiliste erstellen
+% out = fileList(filepath, searchpattern, doAnd, onlyFolders)
+%
+% Create a list with files containing a searchpattern 
+%
+%    filpath               string with path to the destination folder
+%    searchpattern  [{}]   string or cell array, with a list of searchpatterns                       
+%    doAnd          [0]    boolean, defines how multiple searchpatterns are
+%                          handled. doAnd=1: list only files containing all
+%                                   searchpatterns
+%                                   doAnd=0; list files containing one of
+%                                             the searchpatterns
+%    onlyFolders    [0]    boolean, specifies if only folders and no files
+%                          are listed
+%
+%    out                   cell array, with strings of the found file names
+%
+% Examples:
+%     resultfolderscontainingPLEs = fileList('Results', 'PLE', 1, 1) 
 
-function out = fileList(filepath, searchpattern, doAnd, onlyFolders)
+function out = fileList(filepath, [searchpattern], [doAnd], [onlyFolders])
 
 if(~exist('searchpattern', 'var')  || isempty(searchpattern))
     searchpattern = {};

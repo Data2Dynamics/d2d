@@ -1,4 +1,13 @@
+% pleCompare([ples], [labels], [savetofile])
+% 
 % Compare profile likelihoods of two runs
+%
+%    ples              cell array with ple structs to compare, 
+%                      if is empty fileChooser is opened
+%    labels            cell array with labels for the ples,
+%                      if is empty fileChooser is opened
+%    savetofile  [0]   boolean, specifies if plot with results is saved to
+%                      [ples{end}.savePath '/ple_compare']. 
 
 function pleCompare(ples, labels, savetofile)
 

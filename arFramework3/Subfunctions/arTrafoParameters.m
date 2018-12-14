@@ -1,3 +1,31 @@
+% in_matrix = arTrafoParameters(in_matrix,m,c,isdata,[trafo])
+%
+% Transforms derivatives with respect to the parameters when the parameter
+% itself is transformed, e.g. to log10 scale
+%
+% Input variables:
+%    in_matrix        matrix with derivatives wrt to the parameters in linear space
+%    m                index of the model
+%    c                index of the condition/data (depening on boolean isdata)
+%    isdata           boolean, specifies if the derivatives are in a conditions 
+%                     or in a data stuct. This is important since only the
+%                     derivatives of the paramters in
+%                     ar.model(m).condition(c).pLink / ar.model(m).data(c).pLink 
+%                     are evaluated. 
+%    trafo   [log10]  specifies the trafo, up to now only log10 supported
+% 
+% Output variables:
+%    in_matrix      transformed derivatives
+%
+% Examples: 
+%
+%   syExpSimu_trafo = arTrafoParameters(ar.model(idm).data(idd).syExpSimu,idm,idd,true);
+%
+%       % The derivatives in ar.model(idm).data(idd).syExpSimu are wrt parameters in  
+%       % linear space. The resulting syExpSimu_trafo contains the derivatives 
+%       % wrt parameters in log10 space for all parameters with ar.qLog10=1.
+%   
+
 function in_matrix = arTrafoParameters(in_matrix,m,c,isdata,trafo)
 global ar
 

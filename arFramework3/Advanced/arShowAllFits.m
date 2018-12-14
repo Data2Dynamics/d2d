@@ -1,3 +1,8 @@
+% arShowAllFits()
+%
+% Show successively all plots. Next plot occurs after a key press.
+% After the function call all qPlotYs, qPlotXs and qPlotVs are zero
+
 function arShowAllFits
 
 global ar

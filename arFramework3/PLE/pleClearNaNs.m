@@ -1,9 +1,9 @@
-% Remove NaNs in ar.ple
-% Useful when calculation stopped and ple shall be extended
+% pleClearNaNs([jk]) 
+% 
+% Remove NaNs in ar.ple. Useful when calculation stopped and ple shall be extended
 %
-% pleClearNaNs([i])
-%
-% i:                    i'th parameter, see pwInfo
+%   jk   [1:length(ar.ple.chi2s)]     remove NaN in ar.ple(jk)
+
 
 function pleClearNaNs(jk)
 

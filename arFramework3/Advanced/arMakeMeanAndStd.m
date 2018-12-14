@@ -1,6 +1,11 @@
-% converts data from repeated measurements to mean and mean error data
+% arMakeMeanAndStd([m], [d])
 %
-% function arMakeMeanAndStd(m, d)
+% Converts data from repeated measurements to mean and mean error data
+%
+%    m        index of model, default: loop over all models structs 
+%    d        index of data, default: loop over all data structs
+% 
+% Attention: The original repeated measurements data are deleted.
 
 function arMakeMeanAndStd(m, d)
 
