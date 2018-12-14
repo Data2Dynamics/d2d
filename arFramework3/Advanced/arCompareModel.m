@@ -125,9 +125,11 @@ end
                             end
                             changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + ar1.model(m1).data(I1(c)).chi2(b);
                         else
-                            % Use (residual1-residual2)/(residual1) as change measure
-                            changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + arnansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
-                            totalErr( a, obsIndex )     = totalErr( a, obsIndex ) + arnansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
+                            % Use (residual1-residual2)/(residual1) as change measure                            
+                            if ( ~isempty( ar1.model(m1).data(I1(c)).yExpSimu ) )
+                                changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + arnansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
+                                totalErr( a, obsIndex )     = totalErr( a, obsIndex ) + arnansum((ar1.model(m1).data(I1(c)).yExpSimu(:,b)-ar1.model(m1).data(I1(c)).yExp(:,b)).^2);
+                            end
                         end
                     else
                         % Compute R^2 of M1 instead
@@ -149,7 +151,9 @@ end
                             end
                             changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) - ar2.model(m2).data(I2(c)).chi2(b);
                         else
-                            changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) - sum((ar2.model(m2).data(I2(c)).yExpSimu(:,b)-ar2.model(m2).data(I2(c)).yExp(:,b)).^2);
+                            if ( ~isempty( ar2.model(m2).data(I2(c)).yExpSimu ) )
+                                changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) - sum((ar2.model(m2).data(I2(c)).yExpSimu(:,b)-ar2.model(m2).data(I2(c)).yExp(:,b)).^2);
+                            end
                         end
                     end
                 end

@@ -640,6 +640,8 @@ for jd = ds
             for jd2 = dLink
                 if(~isinf(xtrafo(str2double(ar.model(jm).data(jd2).condition(jcondi).value))))
                     doses(end+1) = xtrafo(str2double(ar.model(jm).data(jd2).condition(jcondi).value)); %#ok<AGROW>
+                else
+                    doses(end+1) = str2double(ar.model(jm).data(jd2).condition(jcondi).value); %#ok<AGROW>
                 end
             end
 			doses = unique(doses); %R2013a compatible

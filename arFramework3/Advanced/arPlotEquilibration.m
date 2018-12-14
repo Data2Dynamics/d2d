@@ -66,7 +66,8 @@ function arPlotEquilibration( model, ss_condition, N )
     end
 
     % Simulate the system
-    feval(ar.fkt, ar, true, false, 1, false, 'ss_condition', 'ss_threads', 0);
+    sensi = false;
+    feval(ar.fkt, ar, true, sensi, 1, false, 'ss_condition', 'ss_threads', 0);
     
     styles = { 'k', 'r', 'b', 'm', 'k--', 'r--', 'b--', 'm--', 'k-.', 'r-.', 'b-.', 'm-.' };
     styles = { 'k', 'r', 'b', 'k--', 'r--', 'b--' };
