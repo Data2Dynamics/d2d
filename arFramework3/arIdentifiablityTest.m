@@ -1,4 +1,4 @@
-% arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
+% isidentifiable = arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
 % 
 %   This function implements a fast procedure to check whether structural
 %   non-identifiablities are present.
@@ -10,30 +10,23 @@
 %   THE MODEL HAS TO BE FITTED FIRST
 %   Local identifiablity is tested around the optimum.
 % 
-%   silent   Prevent command-line output ? Default: false
-% 
-%   radius   target radius when pulling
-% 
-%   nfit    number of initial guesses/fits (like LHS)
-%           random initial guess is drawn in the ball wir uniformly
-%           distributed radius [0,radius]
-% 
-%   doFittingFirst  if true, then the model is first fitted without penalty
-%           before arIdentifiablityTest is checked. Could be applied, if it
-%           is unknown whether the parameters were already fitted.
-%           If true, arFit is called then arFitLHS(nfit-1)
-% 
-% 
-%   Example
-% 
-% 
+%   silent      Prevent command-line output ? Default: false
+%   radius      target radius when pulling
+%   nfit        number of initial guesses/fits (like LHS)
+%               random initial guess is drawn in the ball wir uniformly
+%               distributed radius [0,radius]
+%   doFitting   First  if true, then the model is first fitted without
+%               penalty before arIdentifiablityTest is checked. Could be
+%               applied, if it is unknown whether the parameters were
+%               already fitted. If true, arFit is called then
+%               arFitLHS(nfit-1) 
+% Example(s)
+%
 %   arLoad(2)
 %   arIdentifiablityTest  % default call
 % 
 %   % userdefined:
 %   arIdentifiablityTest([],.1,10)  % 10 random initial guess
-% 
-% ckreutz 2.6.17
 
 function isidentifiable = arIdentifiablityTest(silent, radius, nfit, doFittigFirst)
 if ~exist('silent','var') || isempty(silent)
