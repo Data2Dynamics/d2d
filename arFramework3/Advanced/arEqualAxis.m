@@ -1,6 +1,7 @@
-% makes y axis equal for the same observable names
-% across different open windows
-% using min and max over all axis
+% arEqualAxis
+%
+% makes y axis equal for the same observable names across different open 
+% windows using min and max over all axis
 
 function arEqualAxis
 

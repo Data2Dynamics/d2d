@@ -1,5 +1,19 @@
+% [olist, names, m] = arFindData( varargin )
+%
 % Finds datasets in the ar structure and returns their data indices 
 % as a vector. Also checks for the specific condition parameters.
+%
+% Possible Inputs:
+%   ar         - arStruct
+%   m          - model index
+%   name       - model specifiers like ('state',statename) or 
+%                ('input',cell of input strings)
+%   conditions - conditions
+%
+% Outputs:
+%   olist - List of IDs that correspond to the query
+%   names - cell array of the data names which match the search criterion
+%   m     - model index
 %
 % Usage:
 %   arFindData( (ar), (model no), name, conditions )
@@ -7,6 +21,9 @@
 %   arFindData( (ar), (model no), 'state', statename / number, conditions )
 % or
 %   arFindData( (ar), (model no), 'input', cell array of input strings )
+%
+% Note that the condition specifiers always have to come at the end. After 
+% the names and verbose flags.
 %
 % Examples of the first usage mode:
 %   arFindData( ar, (model no), 'mydata' )

@@ -1,25 +1,19 @@
-%   arRecompile
-%   arRecompile(sameParameterSettings)
-%   arRecompile(sameParameterSettings,varargin)
+% arRecompile([sameParameterSettings],[varargin])
 %
-%   This function can be used if the global variable 'ar' is available
-%   instead of calling the a setup-routine. The function loads the model(s)
-%   and data sets and compiles everything.
+% This function can be used if the global variable 'ar' is available
+% instead of calling a setup-routine. The function loads the model(s)
+% and data sets and compiles everything.
 %
-%   Model properties cannot be completely taken over!
-%   Only model parameters, bounds, qFit, qLog10 etc are taken over by
-%   default using arImportPars.m
-%   Alternatively set argument sameParameterSettings=false
+% sameParameterSettings     [true] If true, parameter info like (ar.p, ar.lb,...)
+%                           will be conserved by calling arImportPars to copy parameter infos.
+% varargin                  These arguments are handed over to arCompile
 %
-%   sameParameterSettings   Should parameter Info like (ar.p, ar.lb, ...
-%                           be conserved?
-%                           Default: true
-%                           If true, then arImportPars is called to copy
-%                           parameter infos.
+% Note that model properties cannot be completely taken over! Only model 
+% parameters, bounds, qFit, qLog10 etc are taken over by default using arImportPars.m
+% Alternatively set argument sameParameterSettings to false.
 %
-%   varargin                These arguments are handed over to arCompile
-%
-%
+% see also arCompile 
+
 function arRecompile(sameParameterSettings, varargin)
 if ~exist('sameParameterSettings','var') || isempty(sameParameterSettings)
     sameParameterSettings = true;
@@ -27,7 +21,7 @@ end
 
 global ar
 
-if isfield(ar,'setup')  % only availabel in higher verions
+if isfield(ar,'setup')  % only available in higher verions
     arIn = arDeepCopy(ar);
     
     try

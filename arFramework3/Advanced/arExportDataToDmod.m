@@ -1,4 +1,13 @@
+% arExportDatatoDmod(m,d)
+%
 % Function to export data to different modelling framework (dMod)
+%
+% m - number of model
+% d - number of dataset in ar.model(m).data(d)
+%
+% Example
+%   arExportDatatoDmod(1,1)
+%
 % See: https://github.com/dkaschek/dMod
 
 function arExportDatatoDmod(m,d)

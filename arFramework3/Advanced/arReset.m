@@ -1,6 +1,14 @@
-% Reset parameter settings to simulated values
+% arReset([silent])
+% 
+% Reset parameters ar.p=ar.pTrue and updates the merrit
+% function accordingly by calling arCalcMerit
 %
-% arReset(silent)
+%   silent  [false]    Indicates whether output at the command line should
+%                      be prevented
+%           false:     no output
+%           true: arCalcMerit prints to the command line
+% 
+% See also arCalcMerit, arEvaluate
 
 function arReset(silent)
 

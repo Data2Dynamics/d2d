@@ -1,9 +1,18 @@
-% Initialize and clear workspace of framework
+% arInit
+% 
+% Initialize and clear workspace of a new D2D project
+% 
+% Has to be called before defining a model and data in a script
 %
-% Data-2-Dynamics Software
-% Website: http://www.data2dynamics.org
-% Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de
-% Copyright 2016 D2D Development Team. All rights reserved.
+% Example:
+%   arInit;
+%   arLoadModel('model1');
+%   arLoadData('dataset1');
+%   arCompileAll;
+%   arFit;
+%
+% See also arLoadModel, arLoadData, arReset
+
 ar_path = fileparts(which('arInit.m'));
 if(exist('arCheck','file') == 0)
     addpath([ar_path '/Subfunctions'])

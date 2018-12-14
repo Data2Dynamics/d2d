@@ -1,21 +1,23 @@
-% arQplot(type, m, subset)
+% arQplot(type, [m], [subset])
+% arQplot % alternative usage - see example 7)
 % 
-% type          'y' only plots y, i.e. created by arPlotY 
-%               'x' only plots x, i.e. created by arPlotX
-%               'xy' only plots x AND y
-%               0   all qPlot?s varialbes are set to zero, i.e. not plots are opened
+% this function sets the model states and observables that are to be plotted.
+%
+% type      0 all qPlots variables are set to zero, i.e. no plots are opened
+%           'y' only plots y, i.e. plots created by arPlotY 
+%           'x' only plots x, i.e. plots created by arPlotX
+%           'xy' plots x AND y
+%           'doseresponse'/'dose-response'/'dr'/'dose' only dose response data
+%           'qfit1'/'qfit0' only data that is used / not used for fitting
+%           'data_def_name' x and y of this specifc data set matching by ar.model.data.name
 % 
+% m         which models are plotted. Default behaviour: [1:length(ar.model)]
 % 
-% m             which models are plotted
-%               Default: m = 1:length(ar.model)
-% 
-% subset        subset of plots
-%               meaning depends on the type of plots:
-%               'c': subset == which c [ar.model.condition(c)]
-%               'highlighted': subset == d [ar.model.data(d)]
-% 
-%               in all other cases:
-%               plots containing data of data set [ar.model.data(subset)]
+% subset    subset of plots. The meaning depends on the type of plots:
+%           'c': subset == which c [ar.model.condition(c)]
+%           'highlighted': subset == d [ar.model.data(d)]
+%           in all other cases:
+%           plots containing data of data set [ar.model.data(subset)]
 % 
 % Examples:
 % 1) Reset qPlotXs, qPlotYs etc to zero:
@@ -32,12 +34,13 @@
 % 4) Only data, not used for fitting:
 % arQplot('qfit0')
 % 
-% 5) Only data, used for fitting:
-% arQplot('qfit1')
-% 
-% 6) x and y of a specifc data set, indicated by ar.model.data.name
+% 5) x and y of a specifc data set, indicated by ar.model.data.name
 % arQplot('data_def_name')
-
+%
+% 6) display information about what is currently plotted in cammand window
+% arQplot
+%
+% see also arPlot
 
 function arQplot(type, m, subset)
 global ar

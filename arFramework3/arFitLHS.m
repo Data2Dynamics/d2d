@@ -1,22 +1,63 @@
-% fit sequence using 
-%   - latin hyper cube sampling (ar.config.useLHS = true)
-%   - random sampling from prior
+% arFitLHS([n], [randomseed], [log_fit_history], [backup_save], [use_cluster])
 %
-% arFitLHS(n, randomseed, log_fit_history, backup_save, use_cluster)
+% Multi-Start optimization fit sequence using random sampling from prios 
+% or latin hyper cube sampling 
 %
-% n:                number of runs      [10]
-% randomseed:                           rng(randomseed)
-% log_fit_history                       [false] 
-%                               if true, then the new fits in ar.fit is
-%                               stored in ar.fit_hist 
-% backup_save                           [false]
-%                               if true, ar of the last fit is stored in
-%                               arFits_backup.mat
-% use_cluster                           [false]
+%   n                       number of fits	[10]
+%   randomseed              random seed used for initial guesses
+%                           which enters rng(randomseed), if empty a random
+%                           random seed it used (i.e. rng('shuffling'))
+%                           []  (if left empty, seed is internally chosen)
+%   log_fit_history         if true, details of all individuals fits from ar.fit
+%                           are stored in ar.fit_hist 
+%                           [false]
+%   backup_save             if true, ar struct with the fitting sequence is 
+%                           stored in arFits_backup.mat
+%                           [false]
+%   use_cluster             option to use the function on Matlab Distributed 
+%                           Compute Server (MDCS), but *not* on bwHPC Custers
+%                           [false]
+%
+%   ar.config.useLHS        if true, latin hyper cube (LHS) sampling is used 
+%                           for drawing the inital guesses. Otherwise,
+%                           random samples are drawn randomly from the
+%                           priors or box contraints
+%                           [false]
+%   ar.config.restartLHS    if set to 1 and integration is not feasible, the 
+%                           fit is restarted with a new random initial guess.
+%                           If set to 0, non-feasible fits are possible.
+%                           [0]
+%
+% This function draws initial guesses from the parameter space, either 
+% using 'latin hyper cube sampling' (LHS) or 'random sampling' for a given 
+% number of multi start fits. A random seed can either be choosen directely,
+% or it is set internally if argument is left empty. Afterwards, the fit 
+% sequence is started using arFit and the best fit of this sequence is used 
+% as new best fit (i.e. in ar.p). Results of the seuqence are available in 
+% ar.ps, ar.ps_start, ar.chi2s, ar.chi2s_start, etc.. If log_fit_history is 
+% set to 'true', detailed results of each fit are logged and stored in 
+% ar.fit_hist  Results (i.e. waterfall plots) can be plotted afterwards 
+% using arPlotFits or arPlotChi2s. Additionally results from 
+% arLhsSampleSizeCalculation are shown after the fit sequence if more than 
+% 50 fits were initiated.
+%
+% Examples:
+%
+%     arFitLHS(25)
 % 
-%   ar.config.restartLHS = 0: Default, non-feasible fits are possible.
-%   ar.config.restartLHS = 1: If integration is not feasible, the fit is
-%                             restarted with a new random initial guess.
+%     25 fits are performed (initil guesses drawn randomly with internally set 
+%     random seed).
+% 
+%     ar.config.useLHS = 0;
+%     arFitLHS(100,1337,[],1)
+%     arPlotChi2s;
+% 
+%     100 fits from latin hyper cube sampling are drawn with the random seed 
+%     '1337' and the resulting ar struct is stored in arFits_backup.mat. 
+%     Afterwards, the waterfall plot is 
+% 
+% See also arFit, arLhsSampleSizeCalculation, arPlotFits, arPlotChi2s, arChi2LHS
+
 
 function arFitLHS(n, randomseed, log_fit_history, backup_save, use_cluster)
 

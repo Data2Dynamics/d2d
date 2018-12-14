@@ -1,11 +1,6 @@
-%  arImportSBML(filename, options)
+% varargout = arImportSBML(filename, varargin)
 %
 % Import SBML model and translate to .def files
-%
-%   States and parameters consisting of a single character are replaced by
-%   longer symbols.
-%   State- and parameter names which coincide with mathematical functions
-%   in symbolic the Symbolic Toolbox are replaced.
 %
 % Options which can be specified are:
 %   tEnd                - Final simulation time (default = 100)
@@ -13,13 +8,22 @@
 %   overwrite           - Overwrite def file if it exists (default = false)
 %   keepcompartments    - Reference compartments in reactions rather than numerical values (default = false)
 %
+% Optional Outputs:
+%   ms   - struct with typical sbml fields
+%   name - name of sbml file
+%
+% States and parameters consisting of a single character are replaced by
+% longer symbols.
+% State- and parameter names which coincide with mathematical functions
+% in symbolic the Symbolic Toolbox are replaced.
+%
 % Example:
 % arImportSBML('BIOMD0000000379')
 %
 % Example:
 %  ms = arImportSBML('BIOMD0000000379','tend',100)
 %  [ms, modelname] = arImportSBML('BIOMD0000000379','tend', 100, 'compartmentbyname')
-%
+
 
 function varargout = arImportSBML(filename, varargin)
 %if(~exist('tEnd','var') || isempty(tEnd))

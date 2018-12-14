@@ -1,67 +1,60 @@
-%   arPrint
-%   arPrint(3:4)
-%   arPrint('sd')
-%   arPrint({'para1','para2'})
+% [index] = arPrint([whichones],[keywords])
 % 
-% print parameter values
+% arPrint returns parameters with its properties (names, values, bounds, priors, flags).
 % 
-%   js      Indices of the parameters to be displayed. 'All' or omission 
-%           refers to all parameters
-%           (see Example below)
-%
-% optional arguments:
-%           'initial'                   - only show initial conditions
-%           'fitted'                    - only show fitted parameters
-%           'constant'                  - only show constants
-%           'fixed'                     - only show fixed parameters
-%           'dynamic'                   - only show dynamic parameters
-%           'observation'               - only show non-dynamic parameters
-%           'error'                     - only show error model parameters
-%           'exact'                     - match names exactly
-%           'namefit'                   - put parameter between brackets
-%                                         when it is not being fitted
-%           'closetobound'              - show the parameters near bounds
-%           'lb' followed by value      - only show values above lb
-%           'ub' followed by value      - only show values below lb
-%           Combinations of these flags are possible
+%   whichones   Parameters to be displayed. Can be specified by index, 
+%               pattern or keywords defined below (except for 'exact' which 
+%               always needs the argument whichones). By default all
+%               parameters are displayed. ['all'] 
+%                       
+%   keywords    List of optional keywords 
+% 
+%               'closetobound'  display only parameters near bounds [0]
+%               'initial'       display only initial parameters [0]
+%               'fixed'         display only fixed parameters [0]
+%               'fitted'        display only fitted parameters [0]
+%               'dynamic'       display only dynamic parameters [0]
+%               'constant'      display only constants [0]
+%               'observation'   display only non-dynamic parameters [0]
+%               'error'         display only error model parameters [0]
+%               'lb', x         display only parameters with value above lb
+%                               defined in x [1] 
+%               'ub', y         display only parameters with value below ub 
+%                               defined in y [1]
+%               'exact'         display only parameters matching exactly to 
+%                               the pattern defined in whichones [0]
+%               'namefit'       display non-fitted parameters in brackets [0]
+%               'ar', myar      display parameters of model defined in myar [1]
+%                                
+%               Combinations of these keywords are possible
+% 
+%   index       optional output specifying selected parameter indices     
 % 
 % Examples:
-% arPrint('turn')
-%            name                      lb       value       ub          10^value        fitted   prior
-% #  22|DI | geneA_turn              |       -5      -0.41         +3 | 1      +0.39 |       1 | uniform(-5,3) 
-% #  31|DI | geneB_turn              |       -5       -2.7         +3 | 1    +0.0022 |       1 | uniform(-5,3) 
-% #  40|DI | geneC_turn              |       -5      -0.91         +3 | 1      +0.12 |       1 | uniform(-5,3) 
-%      |   |                         |                                |              |         |      
-% #  49|DI | geneD_turn              |       -5       -2.1         +3 | 1     +0.008 |       1 | uniform(-5,3) 
-% #  58|DI | geneE_turn              |       -5       -2.5         +3 | 1     +0.003 |       1 | uniform(-5,3) 
-% 
-% arPrint(15:17)
-% Parameters: # = free, C = constant, D = dynamic, I = initial value, E = error model
-% 
-% Example:
-%            name                      lb       value       ub          10^value        fitted   prior
-% #  15|D  | geneA_deg1              |       -2         -2         +3 | 1      +0.01 |       1 | uniform(-2,3) 
-% #  16|D  | geneA_deg2              |       -2      +0.36         +3 | 1       +2.3 |       1 | uniform(-2,3) 
-% #  17|D  | geneA_deg3              |       -2       -1.2         +3 | 1     +0.063 |       1 | uniform(-2,3) 
-%
-% Other examples:
-% arPrint(1:4, 'constant')                  - Show the constants among the
-%                                             first four parameters
-% arPrint('all', 'fitted', 'dynamic')       - Show all fitted dynamic parameters
-% arPrint('gene', 'observation')            - Show all observation parameters
-%                                             containing the string "gene" in the name
+%   arPrint
+%   arPrint(15:17)                            - Specify by index
+%   arPrint('turn')                           - Specify by pattern
+%   arPrint('initial')                        - Specify by keyword
+%   arPrint({'para1','para2'})                - Specify parameters para1 and para2 
+%   arPrint(1:4, 'constant')                  - Show the constants among the
+%                                               first four parameters
+%   arPrint('all', 'fitted', 'dynamic')       - Show all fitted dynamic parameters
+%   arPrint('gene', 'observation')            - Show all observation parameters
+%                                               containing the string "gene" in the name
+
 
 function varargout = arPrint(js, varargin)
 global ar
 
 args = {'closetobound', 'initial', 'fixed', 'fitted', 'dynamic', 'constant', 'observation', 'error', 'lb', 'ub', 'exact', 'namefit', 'ar'};
 extraArgs = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1];
-
+narg = nargin;
 if ( exist( 'js', 'var' ) )
     if ( ~isnumeric( js ) )
         if ( ismember( js, args ) )
             varargin = { js, varargin{:} }; %#ok
-            clear js;
+            js = []; %clear js
+            narg = 2;
         end
     end
 end
@@ -139,7 +132,7 @@ arC.qCloseToBound(qFit) = (ptmp(:) - lbtmp(:)) < arC.config.par_close_to_bound*(
     (ubtmp(:) - ptmp(:)) < arC.config.par_close_to_bound*(ubtmp(:) - lbtmp(:));
 
 % Additional options
-if ( nargin > 1 )
+if ( narg > 1 )
     if ( opts.constant && opts.fitted )
         error( 'Incompatible flag constant and fitted' );
     end
@@ -181,7 +174,7 @@ if ( nargin > 1 )
         js = js( arC.p(js) > opts.lb_args );
     end
     if ( opts.closetobound )
-        js = js( arC.qCloseToBound(js) );
+        js = js( arC.qCloseToBound(js) == 1 );
     end
 end
 

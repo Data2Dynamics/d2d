@@ -1,9 +1,13 @@
-% get parameter value by label
+% p = arGetPars(pLabel, [qLog10])
 %
-% p = arGetPars(pLabel, qLog10)
+% Get parameter value by matching label to ar.pLabel
 % 
 % pLabel	name of the parameter
-% qLog10	0=normal, 1=log10 parameter values
+% qLog10	logical to get log10 of parameter value [false]
+%
+% p         parameter value
+%
+% See also arGetParsPattern arPrint
 
 function p = arGetPars(pLabel, qLog10)
 

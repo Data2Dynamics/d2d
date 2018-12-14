@@ -1,20 +1,21 @@
+% [xnew, S, failedCheck] = arFindRoots([jm, jc, condis, useConserved, debug, x0i, newtonRaphson])
+%
 % Attempts to find initial conditions such that the rhs for a specific
 % condition equals the null vector.
 %
-%   [xnew, S] arFindRoots( jm, jc, condis )
-%
-% Usage:
-%       jm              - Model number
-%       jc              - Condition number
-%       condis          - Condition (either "condition" or "ss_condition")
-%       useConserved    - Conserve conserved quantities
-%       debug           - Provide debugging information
-%       x0i             - Provide custom initial guess for x0
-%
-% Returns:
-%       xnew            - Determined initial condition
-%       S               - Sensitivities at determined point
-%
+% Inputs:
+%     jm [1]                        - Model number
+%     jc [1]                        - Condition number
+%     condis ['ss_condition']       - Condition (either "condition" or "ss_condition")
+%     useConserved [1]              - Conserve conserved quantities
+%     debug [0]                     - Provide debugging information
+%     x0i [reduced xFineSimu(1,:)]  - Provide custom initial guess for x0
+%     newtonRaphson [1]             - boolean if to use newtonRaphson instead of lsqnonlin
+% Outputs:
+%     xnew            - Determined initial condition
+%     S               - Sensitivities at determined point
+%     failedCheck     - boolean if totalError > ar.config.eq_tol
+% 
 % Note: This is an internal function
 
 function [xnew, S, failedCheck] = arFindRoots(jm, jc, condis, useConserved, debug, x0i, newtonRaphson)

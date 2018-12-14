@@ -1,4 +1,4 @@
-% [same,d1,d2] = arCompare(ar1,ar2,pattern,opt)
+% [same,d1,d2] = arCompare(ar1,ar2,pattern,silent)
 % 
 %   Comparison of two ar structs/objects
 % 
@@ -11,6 +11,7 @@
 %             structs often only differ by ar.fevals, ar.info, ...
 %   silent    [false]
 % 
+%   same    boolean, true if same, false if any char is different
 %   d1,d2   the differences, the structures are similar to 'ar' but not equal
 %           since the fields can have different type and should indicate
 %           the kind of difference.   

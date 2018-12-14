@@ -1,27 +1,27 @@
+% ple([i], [samplesize], [relchi2stepincrease], [maxstepsize], [minstepsize], [breakonbounds])
+% 
 % Profile Likelihood Exploit
 %
-% ple([i, samplesize, relchi2stepincrease, maxstepsize, minstepsize, breakonbounds])
+%   i                     parameter index or vector of par indices [all if not specified]
+%                         alternatively the name of a parameter or a cell of
+%                         names can be provided. If one parameter name is
+%                         provided which is not in ar.ple.p_labels, then the string
+%                         is interpreted as a regular expression.
+%   samplesize            number of sampling steps            [100]
+%   relchi2stepincrease   percentage chi^2 increase of a step [0.1]
+%   maxstepsize           maximum size of a step              [0.2 * p_jk]
+%   minstepsize           minumum size of a step              [1e-6]
+%   breakonlb             stop if hit lb                      [false]
+%   breakonub             stop if hit ub                      [true]
+% 
+% The profile likelihood calculation by the functions ple* was intended
+% as running independent of D2D, i.e. it was intended to be also used by
+% other tools. Therefore, the function does not use info in global ar and stores the
+% results an a separate variable.
 %
-% i:                    i'th parameter, see pwInfo
-%                       [if omitted, all free parameters are considered]
-%                       alternatively the name of a parameter or a cell of
-%                       names can be provided. If one parameter name is
-%                       provided which is not in ar.ple.p_labels, then the string
-%                       is interpreted as a regular expression.
-% samplesize:           number of sampling steps            [100]
-% relchi2stepincrease:  percentage chi^2 increase of a step [0.1]
-% maxstepsize:          maximum size of a step              [0.2 * p_jk]
-% minstepsize:          minumum size of a step              [1e-6]
-% breakonlb:            stop if hit lb                      [false]
-% breakonub:            stop if hit ub                      [true]
-% 
-% 
-%   The profile likelihood calculation by the functions ple* was intended
-%   as running independent of D2D, i.e. it was intendent to be also used by
-%   other tools. 
-%   
-%   Therefore, the function does not use info in global ar and stores the
-%   results an a separate variable .
+% Before usage, workspace has to be initialized.
+%
+% See also: arPLEInit, pleExtend
 
 function ple(jk, samplesize, relchi2stepincrease, ...
     maxstepsize, minstepsize, breakonlb, breakonub)

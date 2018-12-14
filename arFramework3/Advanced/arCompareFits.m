@@ -1,33 +1,55 @@
-% checksums = arCompareFits
+% checksums = arCompareFits([names], [sortindex])
+% 
+% This function compares the results of several multi-start optimization
+% runs stores in D2D workspaces.
+% 
+% arCompareFits     
+%               without arguments opens the fileChoser
+% 
+%   names       cell of strings indicating the workspace
+%               []      all workspaces in folder ./Results 
+%   sortindex   [-1] no sorting (default)
+%               sorting is applied otherwise
+%   
+% The workspaces are loaded and three plots are generated which are helpful
+% for assessing convergence of optimization algorithms
+% 
+% Examples
+%   arCompareFits  %opens fileChooser
+% 
+%   arCompareFits([]) % loading all workspaces in results folder
 % 
 %   
-function varargout = arCompareFits(filenames, sortindex)
+function varargout = arCompareFits(names, sortindex)
 
 if(nargin==0)
-    filenames = fileChooserMulti('./Results', true);
+    names = fileChooserMulti('./Results', true);
 end
 if(~exist('sortindex','var'))
     sortindex = -1;
 end
-if(~iscell(filenames))
+if(~iscell(names))
     filelist = fileList('./Results');
-    filenames = filelist(filenames);
+    names = filelist(names);
 end
+
 
 minchi2 = Inf;
 chi2s = {};
 chi2sconstr = {};
 optim_krit = {};
 labels = {};
+warning('timing, fevals are not initialized properly (see filling of these arrays below). Check/improve!')
 fevals = [];
 timing = [];
 exitflag = {};
 arWaitbar(0);
 jcount = 0;
 checksums = struct;
-for j=1:length(filenames)
-    arWaitbar(j,length(filenames));
-    fname = ['./Results/' filenames{j} '/workspace.mat'];
+for j=1:length(names)
+    arWaitbar(j,length(names));
+    fname = ['./Results/' names{j} '/workspace.mat'];
+    labels{j} = '';
     if(exist(fname,'file'))
         tmpple = load(fname);
         if(isfield(tmpple.ar, 'chi2s'))
@@ -38,7 +60,7 @@ for j=1:length(filenames)
             else
                 chi2sconstr{jcount} = nan(size(tmpple.ar.chi2s)); %#ok<AGROW>
             end
-            labels{jcount} = filenames{j}; %#ok<AGROW>
+            labels{jcount} = names{j}; %#ok<AGROW>
             if(isfield(tmpple.ar, 'optim_crit'))
                 optim_krit{jcount} = tmpple.ar.optim_crit; %#ok<AGROW>
             else
@@ -56,7 +78,7 @@ for j=1:length(filenames)
             checksums.fkt{jcount} = tmpple.ar.fkt;
         end
     else
-        fprintf('%s does not contain workspace\n', filenames{j});
+        fprintf('%s does not contain workspace\n', names{j});
     end
 end
 arWaitbar(-1);

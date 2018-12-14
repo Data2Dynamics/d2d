@@ -1,10 +1,23 @@
+% arSetPrior( par, type, mean, std )
+%
 % Function to set a prior on a parameter
 %
-% arSetPrior( par, type of prior, mean, std )
-%   par     - parameter or name/mask
-%   type    - bounds/normal/soft bounds/L1
-%   mean    - mean
-%   std     - std
+%   par     parameter name or number (position in ar.p)
+%   type    type of prior as number or string:
+%           0 or 'bounds'
+%           1 or 'normal'/'gaussian'/'quadratic'
+%           2 or 'normal bounds'/'soft bounds'
+%           3 or 'L1'/'lasso'
+%   mean    mean value (center of prior)
+%   std     std value of prior
+%     
+% Examples:
+% 
+% arSetPrior('kon', 2, 1.1, 0.2)
+% 
+% arSetPrior(7, 'soft bounds', -3, 0.2)
+% 
+% See also arPrint, arSetPars, arSetParsPattern
 
 function arSetPrior( par, type, mean, std )
     global ar;

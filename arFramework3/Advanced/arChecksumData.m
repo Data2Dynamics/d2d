@@ -1,13 +1,13 @@
-% checkstr = arChecksumData(arStruct,saveEvaluatedFields)
+% checkstr = arChecksumData([arStruct],[saveEvaluatedFields])
 % 
 % This function runs over all ar.model.data and creates a checksum from all
 % data-related fields (and ar.model.data.checkstr)
 % 
-%   arStruct        if instead of the global ar, the checksum should be
+%  arStruct         if instead of the global ar, the checksum should be
 %                   evaluated for another struct, then it is provided as
 %                   first argument
 % 
-%  saveEvaluatedFields  Default: false
+%  saveEvaluatedFields  [false]
 %                   if true, then a workspace is saved in folder Checksums
 %                   containing the field which are evaluated for
 %                   calculationg the checksum

@@ -1,14 +1,18 @@
-
-% Plot models X
+% arPlotX([saveToFile], [fastPlot])
 %
-% arPlotX(saveToFile, fastPlot)
+% Plot model state trajectories.
 %
-% saveToFile    [false]
-% fastPlot      [false]
+%   saveToFile    Save plot to file     [false]
+%   fastPlot      Rapid plot?           [false]
 % 
-%   After clicking the subplot of interest, the following command provides
-%   annotation of the displayed plot:
-%   get(gca,'UserData') 
+% arPlotX plots all the states/derived variables for those datasets where
+% they are enabled for plotting. Which conditions are plotted can be set 
+% with arPlotter.
+%
+% Note: After clicking the subplot of interest, the following command provides
+% annotation of the displayed plot: get(gca,'UserData') 
+%
+% See also arPlot, arPlotter, arPlot2, arPlotY, arPlotV.
 
 function arPlotX(saveToFile, fastPlot)
 

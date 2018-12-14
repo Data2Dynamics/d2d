@@ -1,8 +1,17 @@
-% check D2D version and compare with current revision on github
+% flag = arCheckVersion([silent])
+% 
+% check D2D version via "git rev-parse HEAD" and compares with current
+% revision on github 
 %
-% flag = arCheckVersion
-%
-% flag = 1 : D2D is up-to-date
+%   silent  [false]: Warning or message is thrown or shown  
+%           true: No command line output
+%   flag    true: D2D is up-to-date
+%           true: newer version available
+% 
+% Example: 
+% flag=arCheckVersion(true)
+% 
+% See also arCheckGit, arUpdateD2D
 
 function flag = arCheckVersion(silent)
 

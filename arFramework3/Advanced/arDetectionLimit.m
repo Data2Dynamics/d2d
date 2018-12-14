@@ -1,17 +1,22 @@
+% arDetectionLimit( m, d, LoD, [LL] )
+%
 % Specify a detection limit for a specific model m and dataset d.
-%
-% Detection limits are implemented by including a term corresponding to the
-% likelihood integrated up to the detection limit for those values.
-%
-%   function arDetectionLimit( m, d, LoD )
 %
 %   m       -   Model index
 %   d       -   Data index (you can find this index with arFindData)
 %   LoD     -   Level of detection (vector of length ny, where ny is the
 %               number of observables in this dataset). Set to -inf 
 %               for observables that are not hampered by a detection limit.
-%   LL      -   Lower limit of data censoring (optional; default = -inf)
+%   LL      -   Lower limit of data censoring [-inf])
 %
+% Detection limits are implemented by including a term corresponding to the
+% likelihood integrated up to the detection limit for those values.
+%
+% Example:
+%   arDetectionLimit( 1,1,[-inf,5,-inf])
+%   if observable has a lower detection limit of 5
+%
+
 function arDetectionLimit( m, d, LoD, LL )
     global ar;
     

@@ -1,4 +1,4 @@
-%   arUpdateResultWorkspaces
+% arUpdateResultWorkspaces
 % 
 % This function loads all available workspaces in ./Results and saves it to
 % update information saved to the latest version. The old workspaces are

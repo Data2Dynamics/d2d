@@ -1,4 +1,9 @@
-% This function is intended to be used after arChi2LHS
+% arPlotChi2s
+%
+% This function creates one figure and plots information about chi2s and 
+% runtime of the multistart. It is intended to be used after arChi2LHS.
+% 
+% see also arPlotFits arChi2LHS arFitLHS
 
 function arPlotChi2s
 

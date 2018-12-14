@@ -2,7 +2,14 @@
 % 
 % This function evaluates the impace of ar.config.useEvents at the level of
 % residuals, xExpSimu and yExpSimu
-% 
+%
+%   delta = 
+%                 res: [1x1428 double]
+%          res_maxabs: 14.6769
+%     xExpSimu_maxabs: 0.7119
+%            xExpSimu: {{1x109 cell}}
+%     yExpSimu_maxabs: 1.2539e+03
+%            yExpSimu: {{1x123 cell}}    
 % 
 % Example:
 % delta = arCompareUseEvents
@@ -15,15 +22,7 @@
 %   yExpSimu:  14.676856
 %   residuals: 14.676856
 % useEvents flag has a strong impact => useEvents=1 strongly suggested.
-% 
-% delta = 
-% 
-%                 res: [1x1428 double]
-%          res_maxabs: 14.6769
-%     xExpSimu_maxabs: 0.7119
-%            xExpSimu: {{1x109 cell}}
-%     yExpSimu_maxabs: 1.2539e+03
-%            yExpSimu: {{1x123 cell}}           
+%        
 
 function delta = arCompareUseEvents
 

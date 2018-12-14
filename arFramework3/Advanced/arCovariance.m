@@ -1,4 +1,8 @@
+% arCovariance(silent)
+%
 % calculate covariance matrix from sensitivities
+%
+%   silent - boolean if not plotting covariances [true]
 
 function arCovariance(silent)
 

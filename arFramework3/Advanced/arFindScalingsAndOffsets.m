@@ -1,10 +1,11 @@
+% yprop = arFindScalingsAndOffsets
+%
 % This function automatically detects, which parameters are scaling factors
 % (pure factors), offsets (pure additive), absolut- and relative error
 % parameters.
 % 
 % For this purpose, the forumals in fy and fystd are derived. For large
 % models, the function might be slow.
-%
 % 
 %   1) offset{m}{d}(ip,iy) is a logical indicating whether
 %   observation-parameter yprop.p_indobs(ip) is offset in observation

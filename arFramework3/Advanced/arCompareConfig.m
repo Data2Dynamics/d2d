@@ -1,19 +1,15 @@
-% delta = arCompareConfig
-% 
-%   config_field    which configuration of ar.config should be altered.
-%                   It works also if serveral struct levels are specified.
-% 
-%                   Examples: 'useEvents', 'optimizer', 'optim.Maxiter'...
-% 
-%    config_vals    Either specified as numeric array or as cells
-% 
-%    userFun        An optional user-defined function which is applied
-%                   after configs are altered. This function can change
-%                   global ar.
+% delta = arCompareConfig(config_field,config_vals,user_fun)
 % 
 % This function evaluates the impace of ar.config.useEvents at the level of
 % residuals, xExpSimu and yExpSimu
 % 
+%   config_field   which configuration of ar.config should be altered.
+%                  It works also if serveral struct levels are specified.
+%                  Examples: 'useEvents', 'optimizer', 'optim.Maxiter'...
+%   config_vals    Either specified as numeric array or as cells
+%   userFun        An optional user-defined function which is applied
+%                  after configs are altered. This function can change
+%                  global ar.
 % 
 % Example:
 % delta = arCompareConfig('useEvents',[0,1])

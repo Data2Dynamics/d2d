@@ -1,12 +1,14 @@
+% tar = arDisableData( varargin )
+%
 % Function which can be used to disable datasets by name or reference ar
 % structure
 % 
-% Usage:
-%   function ar = arDisableData( (ar), data, (verbose) )
+% Optional inputs:
+%   ar   - arStruct
+%   data - either cell array of strings referring to the datasets to disable,
+%          or the keyword 'all', or a reference ar structure
 %
-%   The variable "data" either contains a cell array of strings referring 
-%   to the datasets to disable, the keyword 'all' or a reference ar
-%   structure.
+%   tar - output arStruct
 %
 %   Note: arFindData may be used to find the names of datasets more easily
 %

@@ -1,13 +1,15 @@
+% arClearAddedData( m, ds, idx )  
 % Remove datapoints which were added with arAddToData
-%
-% Usage:
-%
-%   function arClearAddedData( m, ds, idx )
 %
 %    m        - Model index
 %    ds       - Data indices, find using arFindData ('all' also works)
 %    idx      - Identifier of the data to clear (integer or 'all')
 %
+% Example
+%   arClearAddedData(1,'all',1)
+%
+% See also arAddToData
+
 function arClearAddedData( m, ds, idx )  
 
     global ar;

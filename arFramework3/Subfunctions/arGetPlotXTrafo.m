@@ -1,19 +1,15 @@
-% This function fetches the independent variable transformation function for an observable prior to plotting.
-%
-%   Usage:
-%     trafos = arGetXTrafo(jm, jplot)
+% [xtrafo, xlegend] = arGetPlotXTrafo(jm, jplot)
+% 
+% This function fetches the variable transformation function for an 
+% observable prior to plotting.
 %     
-%     jm    - Model index
-%     jplot - Plot index
+%   jm      Model index
+%   jplot   Plot index
 %       
-%   Returns:
-%     Anonymous function containing the respective transformation
-%     Legend for the x-axes
+%  This function returns an anonymous function containing the respective 
+%  transformation and legend for the x-axis.
 %
-%   Uses:
-%     ar.model(jm).plot(jplot).doseresponselog10axis       - log10?
-%     ar.model(jm).plot(jplot).xtrafo                      - custom xtransform
-
+%  Note: This function is not intended to be used by the end user.
 function [xtrafo, xlegend] = arGetPlotXTrafo(jm, jplot)
     global ar;
 
@@ -22,7 +18,11 @@ function [xtrafo, xlegend] = arGetPlotXTrafo(jm, jplot)
     % Not a dose response
     if ( ar.model(jm).plot(jplot).doseresponse == 0 )
         xtrafo = @(x)x;
-        tUnits = ar.model(jm).data(jd).tUnits;
+        if jd==0 % not plotting data
+            tUnits = ar.model(jm).tUnits;            
+        else
+            tUnits = ar.model(jm).data(jd).tUnits;
+        end
         xlegend = sprintf('%s [%s]', tUnits{3}, tUnits{2});
         return;
     end

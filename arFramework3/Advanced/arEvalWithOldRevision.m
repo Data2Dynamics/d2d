@@ -1,15 +1,26 @@
-%   This script evaluatees a specific function using a defined D2D version.
-%   The D2D revision is specified via the commit's shas (which only works if
-%   D2D is used in combination with git).
-%
-%   dorecompile     Default: false
-%
+% result = arEvalWithOldRevision([fun], [shas], [dorecompile], [varargin])
+% 
+% This script evaluates a specific function using a defined D2D version
+% specified via the commit's shas (which only works if D2D is used in
+% combination with git).  
+% 
+%   fun             the funtion to be evaluated (string or handle) by feval
+%   shas            string or cell of strings indicating the revision hash
+%                   The shas/hashes are found on github or shown via "git log"
+%   dorecompile     [false]
 %                   With this option, the function does not recompile using
 %                   the old revision. It uses/requires existing mex file as
 %                   specified via ar.fkt
-%
-%                   true    if Setup.m is available, it is called.
-%                   Otherwise, arRecompile is tried.
+%                   true:  if Setup.m is available, it is called.
+%                   Otherwise: arRecompile is tried.
+%   varargin        These arguments are passed to fun via
+%                   feval(fun,varargin{:})
+% 
+%   result          result = cell(size(shas)) containing the results of the
+%                   function calls for old revisions
+% 
+% Old revision paths can be removed via arRemoveOldRevisionPaths.
+% The example function fitLHS is included below.
 %
 % Example:
 % result = arEvalWithOldRevision; % Default shas without recompilation
@@ -22,7 +33,8 @@ if ~exist('fun','var') || isempty(fun)
     fun = @fitLHS; % This function is defined below (as template/default).
 end
 if ~exist('shas','var') || isempty(shas)
-    shas = {'0bfcb5facea85773a262fe417a213e93b6681dfe',...  % Swameye BETTER, 27.6.18
+    shas = {'a8d38121f4b77824c8bc7a9a36bfb1eba714ef46',... % 2.7.18: after R2018 was implemented 
+        '0bfcb5facea85773a262fe417a213e93b6681dfe',...  % Swameye BETTER, 27.6.18
         'c949d75ad3a00ee92248cfaffb6060d5c01889e8',... % Swameye BETTER, 31.5.18, before statistics toolbox was removed
         '8e5009ccbc51f5b6fce6db89c06ae9f60d738454',... % 6.3.18  new field for saving the arSimuCalc mex file
         '0e130ed7c9aa87902086b49ecf158ae7265c409b',... % 13.2.18,  Added relative tolerance to equilibration as well. Equilibration is c…
@@ -56,7 +68,12 @@ if dorecompile
     if exist([fkt0,'.',mexext],'file')
         % backup and remove ar.fkt (otherwise compilation might be skipped)
         my_munlock([fkt0,'.',mexext]) % to prevent blocking the function because "in use"
-        movefile([fkt0,'.',mexext],[fkt0,'_backup.',mexext]);
+        try
+            movefile([fkt0,'.',mexext],[fkt0,'_backup.',mexext]);
+        catch ERR
+            [fkt0,'.',mexext]
+            rethrow(ERR)
+        end
     end
 end
 
@@ -64,6 +81,9 @@ try
     
     
     for s=1:length(shas)
+        if length(shas{s})~=40
+            error('Proper revision sha-hashs have a length 40.')
+        end
         arRemoveOldRevisionPaths
         
         revision_path = arGetOldRevision(shas{s});

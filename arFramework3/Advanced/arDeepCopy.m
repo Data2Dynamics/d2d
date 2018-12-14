@@ -1,4 +1,9 @@
+% copy = arDeepCopy(in)
+%
 % Recursively deepcopy a structure to avoid MATLAB's shallow copying behaviour
+%
+% in   - arStruct
+% copy - arStruct
 %
 % Sometimes you really wish to compare subfields of two ar structures; one of which
 % you are currently still simulating with. What can happen is that MATLAB makes a shallow 
@@ -8,8 +13,10 @@
 %
 %   Deeply copies: substructures, cell arrays, matrices, numbers, strings and logicals
 %   Does not deepcopy: matlab handles (such as figures)
+%   This function is *very* slow, but will do the job
 %
-% This function is *very* slow, but will do the job
+% Example
+%   arModel = arDeepCopy(ar)
 
 function copy = arDeepCopy(in)
 

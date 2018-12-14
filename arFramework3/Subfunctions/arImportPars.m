@@ -1,13 +1,18 @@
-% arImportPars(pStruct)
-% arImportPars(pStruct, pars_only, pattern, fixAssigned)
-% arImportPars(pStruct, pars_only, pattern, fixAssigned, ar)
+% ar_out = arImportPars(pStruct, pars_only, pattern, fixAssigned, ar, antipattern)
 % 
+% Used by arLoadPars
 % 
-%   Used by arLoadPars
+% pStruct       struct containing all the parameter information
+% pars_only     only import the parameter values, ignoring the rest of parameter settings [false]
+% pattern       only import parameter information of parameters containing pattern []
+% fixAssigned   fix the assigned parameters [false]
+% ar            if empty [] saved to global ar (default behaviour)
+%               else use the provided ar struct
+% antipattern   pattern for parameters to exclude from import []
 % 
-%   ar      ar-Struct if the parameters should not be imported into the
-%           global ar
-%           If empty or not provided, then the global ar is used.
+% ar_out        yields ar struct with imported parameters
+% 
+% see also arLoadPars
 
 function varargout = arImportPars(pStruct, pars_only, pattern, fixAssigned, ar, antipattern)
 if(~exist('fixAssigned', 'var') || isempty(fixAssigned))

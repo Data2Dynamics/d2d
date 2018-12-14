@@ -1,8 +1,10 @@
-% set parameter value by label
-%
-% arSetParsPattern(pattern, ... see arSetPars.m)
+% arSetParsPattern(pattern, options)
 % 
 % pattern	pattern of the parameter name
+% options   works in the same manner as arSetPars. See there for more
+%           information
+% 
+% see also arSetPars
 
 function arSetParsPattern(varargin)
 

@@ -1,5 +1,17 @@
-% Plot start and end of fits.
-% This function is intended to be used after arFitLHS.
+% arPlotFits(q_select, i_fits)
+% 
+% Plot results of multistart optimization. This function is intended to be used after arFitLHS or arFits.
+% 
+% q_select  [ar.qFit == 1]     which parameters are plotted against each other.
+% i_fits    [1:size(ar.ps,1)]  which fits are analyzed 
+% 
+% This function plots three figures visualizing results of multistart
+% optimization:
+% figure 1: overview about likelihood values before and after the
+% multistart optimization. Waterfall plot.
+% figure 2: histogram of run time, histogram of function evaluations and
+% plot of gradient length.
+% figure 3: scatter plots of parameter values (q_select) in the i_fits.
 
 function arPlotFits(q_select, i_fits)
 

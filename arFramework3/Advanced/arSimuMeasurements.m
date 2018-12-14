@@ -1,21 +1,24 @@
-% arSimuMeasurements
-% 
-% arSimuMeasurements(preserveZeros,varargin)
+% arSimuMeasurements([preserveZeros], varargin)
 % 
 % Simulates data like arSimuData, but preserves availablity of data as in the
 % original data files. In other words, if NaN (or 0) is in
 % ar.model.data.yExpRaw, then this is NOT replaced by a random number.
 % 
-% Like for arSimu, the simulated data has the "right" std.dev, i.e. the
-% noise level is given by the prespecified exp. error or by the error
-% model.
-% 
 %   preserveZeros   default: 1 (zeros are preserved)
 %                   alternative: 0
 % 
 %   varargin        arguments passed to arSimu
+% 
+% Like for arSimu, the simulated data has the "right" std.dev, i.e. the
+% noise level is given by the prespecified exp. error or by the error
+% model.
+% 
+% Example:
+% arSimuMeasurements
+% 
+% See also arSimuData
 
-function arSimuMeasurements(preserveZeros,varargin)
+function arSimuMeasurements(preserveZeros, varargin)
 if ~exist('preserveZeros','var') || isempty(preserveZeros)
     preserveZeros = 1;
 end

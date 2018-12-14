@@ -1,22 +1,20 @@
+% PLE = arMergeProfiles( directory, [forceLoad], [filterProfile] )
 %
-% arMergeProfiles( directory, forceLoad )
+%  merge profiles from various runs
 %
-%   Merge profiles from various runs
+%  directory        Should point to results directory. Typically, the profiles 
+%                   will be subdirectories in this directory; each with a subdirectory /PLE/
+%  forceLoad        Force reload of the model [false]
+%  filterProfile    Smoothen profile? [false]
 %
-%   Arguments:
-%     - Directory
-%         Should point to results directory. Typically, the profiles will be
-%         subdirectories in this directory; each with a subdirectory /PLE/
-%     - forceLoad
-%         Force reload of the model
-%     - filterProfile
-%         Smoothen profile? (default: 0 (off))
+%  PLE              Yields the merged PLE struct as the optional output. If
+%                   no output is demanded, merged ple struct is saved to ar.ple
 %
 %  If no model is loaded, an incompatible model is loaded or forceLoad is
 %  set to one, arMergeProfiles will attempt to load a model. For this, it
 %  will look one directory up from Directory for a mat file named
 %  arStruct.mat
-% 
+
 function vargout = arMergeProfiles( directory, forceLoad, filterProfile )
 
     global ar;

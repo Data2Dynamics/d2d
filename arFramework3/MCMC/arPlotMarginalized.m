@@ -1,5 +1,15 @@
-% plot marginalized after MCMC
-
+% arPlotMarginalized([jks], [Nthinning])
+% 
+% Plots marginalized posterior of parameters in ar.ps after sampling them
+% with arMC3()
+% 
+%   jks            parameters, which are plotted               [all]   
+%   Nthinning      thinning rate for plotting                  [1]
+% 
+% Example:
+%       arPlotMarginalized([1 2 35],10)
+%
+% See also arMC3, arPlotMCMCChains
 function arPlotMarginalized(jks, Nthinning)
 
 global ar
@@ -102,12 +112,12 @@ for jk=jks
     if(count == 1)
         strleg = {};
         if(~isempty(ps_mcmc))
-            strleg{end+1} = sprintf('marginalized MCMC samples (%i)', size(ps_mcmc,1));
+            strleg{end+1} = sprintf('marginalized MCMC (%i)', size(ps_mcmc,1));
         end
         if(~isempty(ps_ple))
-            strleg{end+1} = 'profile likelihood';
+            strleg{end+1} = 'profile posterior (PP)';
             if(ar.ple.plot_point)
-                strleg{end+1} = 'profile likelihood threshold (point-wise)';
+                strleg{end+1} = 'PP threshold';
             end
             if(ar.ple.plot_simu)
                 strleg{end+1} = 'profile likelihood threshold (simultaneous)';
@@ -119,7 +129,7 @@ for jk=jks
             end
         end
         if(~isempty(strleg))
-            legend(strleg);
+            legend(strleg,'Location','northoutside');
         end
     end
     

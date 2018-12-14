@@ -1,7 +1,11 @@
+% arDisturb([strength])
+%
 % Disturb model parameters
 %
-% arDisturb(strength)
-%   strength:	pval+randn(0,strength)     [1]
+%   strength - factor of disturbing (ar.p+randn(0,strength)) [0.1]
+%
+% Example:
+%    arDisturb(1)
 
 function arDisturb(strength)
 

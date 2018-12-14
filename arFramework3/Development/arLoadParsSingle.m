@@ -1,8 +1,16 @@
-% load specific model parameters from .mat
+% values = arLoadParsSingle(filename, parameternames)
 %
-% values = arLoadPars(filename, parameternames)
+% get specific model parameters from pwd/Results/filename/workspace.mat
 %
-% filename:     source file name
+% filename          source file name. This is a folder in the Results
+%                   folder
+% parameternames    cell array of parameternames that are searched
+% 
+% values            array of parameter values corresponding.
+% 
+% Note: The ar struct is not affected by this function call.
+%
+% see also arLoadPars
 
 function values = arLoadParsSingle(filename, parameternames)
 if ~exist('Results','dir')

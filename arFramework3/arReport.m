@@ -1,10 +1,13 @@
-% create report
+% arReport([project_name],[fullODEs])
 % 
-% Example: Standard call
-% arReport
+% creates a pdf-report of the ar struct using LaTeX
 % 
-% Example: If the ODEs in their final state should be included, use:
-% arReport('',1)
+% project_name  string that names the document 
+%               ['Data2Dynamics Software -- Modeling Report']
+% fullODEs      option to include ODEs in their final state. [false]
+% 
+% Example
+%   arReport('myReport',true)
 
 function arReport(project_name,fullODEs)
 if ~exist('project_name','var') || isempty(project_name)

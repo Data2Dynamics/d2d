@@ -1,8 +1,13 @@
-%   arStruct        if instead of the global ar, the checksum should be
+% checkstr = arChecksumFitting([arStruct], [saveEvaluatedFields])
+%
+% This function runs over all config properties like 'add_c','atol','atolV'
+% etc. and calculates a checksum.
+%
+%  arStruct         if instead of the global ar, the checksum should be
 %                   evaluated for another struct, then it is provided as
 %                   first argument
 % 
-%  saveEvaluatedFields  Default: false
+%  saveEvaluatedFields  [false]
 %                   if true, then a workspace is saved in folder Checksums
 %                   containing the field which are evaluated for
 %                   calculationg the checksum

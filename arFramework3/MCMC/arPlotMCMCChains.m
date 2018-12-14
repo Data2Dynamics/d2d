@@ -1,5 +1,17 @@
-% plot mcmc chains
-
+% arPlotMCMCChains(jks, Nthinning, plot_trials)
+% 
+% Plots mcmc chains, saved in ar.ps parameter-wise after sampling them
+% with arMC3()
+% 
+%   jks            parameters, which are plotted               [all]   
+%   Nthinning      thinning rate for plotting                  [1]
+%   plot_trials    Plot MCMC chains of trial points 
+%                  instead of accepted points                  [false]
+% 
+% Example:
+%       arPlotMCMCChains([1 2 35],10)
+%
+% See also arMC3, arPlotMarginalized
 function arPlotMCMCChains(jks, Nthinning, plot_trials)
 
 global ar
@@ -65,7 +77,21 @@ for jk=jks
     xlim([1 size(ps,1)]);
     title(arNameTrafo(ar.pLabel{jk}))
     
+    
+%     if(ar.xlimtmp2(count)>0)
+%         ylim([ar.xlimtmp(count,1)-ar.xlimtmp2(count)*0.05 ar.xlimtmp(count,2)+ar.xlimtmp2(count)*0.05]);
+%     end
+%     xlim([1 size(ps,1)]);
+%     title(arNameTrafo(ar.pLabel{jk}))
+%     
+%      ar.xlimtmp(count,:) = xlimtmp;
+%      ar.xlimtmp2(count) = xlimtmp2;
+     
     count = count + 1;
+    
+    
+    
+    
 end
 
 

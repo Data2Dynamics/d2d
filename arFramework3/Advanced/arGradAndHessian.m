@@ -1,3 +1,5 @@
+% arGradAndHessian
+%
 % calculate gradients and hessian from sensitivities
 
 function arGradAndHessian

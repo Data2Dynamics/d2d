@@ -1,11 +1,12 @@
-% Plot Trajectories in 3D 
+% arPlot3D([m], [c], [ix])
 %
-% function arPlot3D(m, c, ix)
+% Plot Trajectories in 3D. 
 %
-% m:    model number            [1]
-% c:    condition number        [1]
-% ix:   index of x of length 3  [1 2 3]
-
+%   m    Model index                                                [1]
+%   c    Condition index                                            [1]
+%   ix   State indices (length 3)                                   [1 2 3]
+%        Refers to indices reflecting the states in ar.model(m).x
+%
 function arPlot3D(m, c, ix)
 
 global ar;

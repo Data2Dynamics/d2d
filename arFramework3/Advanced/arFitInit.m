@@ -1,6 +1,8 @@
-% Fit only initial values parameters
-%
 % arFitInit(silent)
+%
+% Fit only initial value parameters (ar.qInitial=1 && ar.qFit==1)
+%
+%   silent - boolean to suppress output [false]
 
 function arFitInit(silent)
 global ar

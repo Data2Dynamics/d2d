@@ -1,21 +1,19 @@
-% checkstr = arChecksumPara
+% checkstr = arChecksumPara([arStruct],[saveEvaluatedFields])
 % 
-% checkstr = arChecksumPara(arStruct,saveEvaluatedFields)
-% 
-%     This function runs over all parameters and parameter properties like
-%     bounds, ar.qFit, ar.qLog10, ar.mean, ar.std and calculates a checksum.
-%     The parameters ar.p are NOT used for the checksum since ar.p changes
-%     frequently (e.g. during fitting) and the initial guess should be treated
-%     separately.
+% This function runs over all parameters and parameter properties like
+% bounds, ar.qFit, ar.qLog10, ar.mean, ar.std and calculates a checksum.
+% The parameters ar.p are NOT used for the checksum since ar.p changes
+% frequently (e.g. during fitting) and the initial guess should be treated
+% separately.
 % 
 %   arStruct        if instead of the global ar, the checksum should be
 %                   evaluated for another struct, then it is provided as
-%                   first argument
-% 
-%  saveEvaluatedFields  Default: false
+%                   first argument 
+%   saveEvaluatedFields  [false]
 %                   if true, then a workspace is saved in folder Checksums
 %                   containing the field which are evaluated for
 %                   calculationg the checksum
+%      
 
 function checkstr = arChecksumPara(arStruct,saveEvaluatedFields)
 global ar

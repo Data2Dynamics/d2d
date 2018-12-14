@@ -1,6 +1,18 @@
+% arFitSingle(j, [silent])
+% 
 % Fit single parameter
 %
-% arFitSingle(j, silent)
+%   silent  [false]  argument passed to arFit which might suppress output
+%                    at the command line
+% 
+% Example:
+% 
+% ar.p(:) = -1; % set all parameters to -1
+% arFitSingle(3)
+% arPrint
+% 
+% See also arFitSome
+
 
 function arFitSingle(j, silent)
 global ar

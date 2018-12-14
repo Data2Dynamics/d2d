@@ -1,5 +1,9 @@
+% arCompareFit(indexes, rightalign)
+% 
 % If two fits are performed, convergence is compared.
-
+% 
+%   indexes         
+%   rightalign      
 function arCompareFit(indexes, rightalign)
 
 global ar
@@ -13,17 +17,17 @@ end
 
 minchi2 = Inf;
 for j=1:length(indexes)
-    minchi2 = min([minchi2 ar.fit_hist(j).hist.chi2_hist]);
+    minchi2 = min([minchi2 ar.fit_hist(indexes(j)).hist.chi2_hist]);
 end
 
 minconstr = Inf;
 for j=1:length(indexes)
-    minconstr = min([minconstr ar.fit_hist(j).hist.constr_hist]);
+    minconstr = min([minconstr ar.fit_hist(indexes(j)).hist.constr_hist]);
 end
 
 minchi2constr = Inf;
 for j=1:length(indexes)
-    chi2constr = ar.fit_hist(j).hist.chi2_hist + ar.fit_hist(j).hist.constr_hist;
+    chi2constr = ar.fit_hist(indexes(j)).hist.chi2_hist + ar.fit_hist(indexes(j)).hist.constr_hist;
     minchi2constr = min([minchi2constr chi2constr]);
 end
 
@@ -42,16 +46,16 @@ if(ar.ndata>0)
     h = [];
     labels = {};
     for j=1:length(indexes)
-        C = arLineMarkersAndColors(j,length(indexes),[],markerstyle,'-');
-        qnonnan = ~isnan(ar.fit_hist(j).hist.chi2_hist);
+        C = arLineMarkersAndColors(indexes(j),length(indexes),[],markerstyle,'-');
+        qnonnan = ~isnan(ar.fit_hist(indexes(j)).hist.chi2_hist);
         if(~rightalign)
             xs = 1:sum(qnonnan);
         else
             xs = (1:sum(qnonnan)) -1-sum(qnonnan);
         end
         if(sum(qnonnan)>0)
-            h(end+1) = semilogy(xs, ar.fit_hist(j).hist.chi2_hist(qnonnan) + 1 - minchi2, C{:}); %#ok<AGROW>
-            labels{end+1} = ar.fit_hist(j).name; %#ok<AGROW>
+            h(end+1) = semilogy(xs, ar.fit_hist(indexes(j)).hist.chi2_hist(qnonnan) + 1 - minchi2, C{:}); %#ok<AGROW>
+            labels{end+1} = ar.fit_hist(indexes(j)).name; %#ok<AGROW>
         end
         hold on
     end
@@ -72,15 +76,15 @@ if(ar.nconstr>0)
     subplot(1,nsub,isub);
     
     for j=1:length(indexes)
-        C = arLineMarkersAndColors(j,length(indexes),[],markerstyle,'-');
-        qnonnan = ~isnan(ar.fit_hist(j).hist.constr_hist);
+        C = arLineMarkersAndColors(indexes(j),length(indexes),[],markerstyle,'-');
+        qnonnan = ~isnan(ar.fit_hist(indexes(j)).hist.constr_hist);
         if(~rightalign)
             xs = 1:sum(qnonnan);
         else
             xs = (1:sum(qnonnan)) -1-sum(qnonnan);
         end
         if(sum(qnonnan)>0)
-            semilogy(xs, ar.fit_hist(j).hist.constr_hist(qnonnan) + 1 - minconstr, C{:});
+            semilogy(xs, ar.fit_hist(indexes(j)).hist.constr_hist(qnonnan) + 1 - minconstr, C{:});
         end
         hold on
     end
@@ -98,8 +102,8 @@ if(ar.ndata>0 && ar.nconstr>0)
     subplot(1,nsub,isub);
     
     for j=1:length(indexes)
-        chi2constr = ar.fit_hist(j).hist.chi2_hist + ar.fit_hist(j).hist.constr_hist;
-        C = arLineMarkersAndColors(j,length(indexes),[],markerstyle,'-');
+        chi2constr = ar.fit_hist(indexes(j)).hist.chi2_hist + ar.fit_hist(indexes(j)).hist.constr_hist;
+        C = arLineMarkersAndColors(indexes(j),length(indexes),[],markerstyle,'-');
         qnonnan = ~isnan(chi2constr);
         if(~rightalign)
             xs = 1:sum(qnonnan);
