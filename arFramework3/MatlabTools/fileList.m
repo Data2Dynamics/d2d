@@ -1,4 +1,4 @@
-% out = fileList(filepath, searchpattern, doAnd, onlyFolders)
+% out = fileList(filepath, [searchpattern], [doAnd], [onlyFolders])
 %
 % Create a list with files containing a searchpattern 
 %
@@ -17,7 +17,7 @@
 % Examples:
 %     resultfolderscontainingPLEs = fileList('Results', 'PLE', 1, 1) 
 
-function out = fileList(filepath, [searchpattern], [doAnd], [onlyFolders])
+function out = fileList(filepath, searchpattern, doAnd, onlyFolders)
 
 if(~exist('searchpattern', 'var')  || isempty(searchpattern))
     searchpattern = {};
