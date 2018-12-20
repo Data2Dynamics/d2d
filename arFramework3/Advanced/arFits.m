@@ -135,7 +135,7 @@ for j=1:n
         arCalcMerit(true,ar.p(ar.qFit==1));
         ar.chi2s_start(dop(j)) = arGetMerit('chi2fit');
         ar.chi2sconstr_start(dop(j)) = arGetMerit('chi2constr');
-        if (exist('prefunc', 'var'))
+        if ~isempty(prefunc)
             try
                 feval( prefunc );
             catch
@@ -143,7 +143,7 @@ for j=1:n
             end
         end
         arFit(true);
-        if (exist('postfunc', 'var'))
+        if ~isempty(postfunc)
             try
                 feval( postfunc );
             catch
