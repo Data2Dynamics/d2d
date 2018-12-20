@@ -1,8 +1,9 @@
-%function arFits(ps, [log_fit_history], [backup_save], [prefunc], [postfunc])
+% arFits(ps, [log_fit_history], [backup_save], [prefunc], [postfunc])
 %
-% Performs a fitting sequence using arFit
+% Performing a multistart fit sequence with given initial guesses using arFit
 %
 %   ps                  matrix of parameter values for fitting sequence
+%                       [nfit x np]
 %   log_fit_history     if true, details of all individuals fits from 
 %                       ar.fit are stored in ar.fit_hist 
 %                       [false]
@@ -46,12 +47,19 @@ function arFits(ps, log_fit_history, backup_save, prefunc, postfunc)
 
 global ar
 
-if(~exist('log_fit_history','var'))
+if(~exist('log_fit_history','var') || isempty(log_fit_history))
     log_fit_history = false;
 end
-if(~exist('backup_save','var'))
+if(~exist('backup_save','var') || isempty(backup_save))
     backup_save = false;
 end
+if(~exist('prefunc','var') || isempty(prefunc))
+    prefunc = [];
+end
+if(~exist('postfunc','var') || isempty(postfunc))
+    postfunc = [];
+end
+
 if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
