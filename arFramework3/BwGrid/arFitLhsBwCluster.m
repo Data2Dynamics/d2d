@@ -1,4 +1,4 @@
-% arFitLhsBwCluster(Nfit,nfit)
+% collectfun = arFitLhsBwCluster(Nfit,nfit)
 %
 % arFitLhsBwCluster performs arFitLHS on the BwGrid by automatically
 % generating scripts (startup, moab, matlab) and calling them.
@@ -6,6 +6,10 @@
 %   Nfit    total number of fits as used by arFitLHS(Nfit)
 %   nfit    number of fits on an individual core
 %           (usually something between  1 and 10)
+% 
+%   collectfun  the function including path which collects the results,
+%               this file can be executed via run(collectfun) if the
+%               analyses are finished.
 %
 % The number of cores in a node is by default 5 as specified in
 % arClusterConfig.m. The number of nodes is calculated from Nfit and nfit
@@ -20,9 +24,13 @@
 %     m_20181221T154020_D13811_results  % follow the advice (wait and collect the results using the automatically written function
 %     results                           % contains the results
 % 
+% Example2: 
+% collectfun = arFitLhsBwCluster(1000,10)
+% run(collectfun)
+% 
 % See also arClusterConfig, arFitLHS
 
-function arFitLhsBwCluster(Nfit,nfit)
+function collectfun = arFitLhsBwCluster(Nfit,nfit)
 
 fprintf('arFitLhsBwCluster.m: Generating bwGrid config ...\n');
 conf = arClusterConfig;
@@ -49,11 +57,11 @@ fprintf('arFitLhsBwCluster.m: Starting job in background ...\n');
 system(sprintf('bash %s\n',conf.file_startup));
 
 fprintf('arFitLhsBwCluster.m: Write matlab file for collecting results ...\n');
-WriteClusterMatlabResultCollection(conf)
+collectfun = WriteClusterMatlabResultCollection(conf);
 fprintf('Call %s manually after the analysis is finished!\n',conf.file_matlab_results);
 
 
-function WriteClusterMatlabResultCollection(conf)
+function collectfun = WriteClusterMatlabResultCollection(conf)
 
 mcode = {
     ['cd ',conf.pwd], ...
@@ -96,6 +104,7 @@ for i=1:length(mcode)
 end
 fclose(fid);
 
+collectfun = [conf.pwd,filesep,conf.file_matlab_results];
 
 
 % The following variables are available in matlab (provided by moab file)
