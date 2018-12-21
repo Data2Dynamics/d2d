@@ -1,7 +1,12 @@
-% check systems setup
-% addpath and configure sundials
+% docontinue = arCheck
+% 
+% arCheck checks the system's setup, sets Matlab paths via addpath and
+% configure sundials 
+% 
+%   docontinue      true if the function is finished, false otherwise
 
 function docontinue = arCheck
+docontinue = false;
 
 symbtool = ver('symbolic');
 if(~isempty(symbtool) && verLessThan('symbolic', '5.5'))
@@ -67,6 +72,9 @@ if(exist('chemist.sty','file') == 0)
 end
 if(exist('model_template.def','file') == 0)
     addpath([ar_path '/ProjectTemplate'])
+end
+if(exist('arFitLhsBwCluster.m','file') == 0)
+    addpath([ar_path '/BwGrid']);
 end
 
 warning('off','MATLAB:rmpath:DirNotFound')
