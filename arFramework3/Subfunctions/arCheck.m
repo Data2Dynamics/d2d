@@ -73,7 +73,7 @@ end
 if(exist('model_template.def','file') == 0)
     addpath([ar_path '/ProjectTemplate'])
 end
-if(exist('arFitLhsBwCluster.m','file') == 0)
+if(exist('arFitLhsBwCluster','file') == 0)
     addpath([ar_path '/BwGrid']);
 end
 
