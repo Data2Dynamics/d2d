@@ -8,7 +8,7 @@
 % conf = arClusterConfig
 % arWriteClusterMoab(conf)
 % 
-% See also arClusterConfig
+% See also arClusterConfig, arFitLhsBwCluster
 
 function arWriteClusterMoab(conf)
 if isnumeric(conf.arg1)

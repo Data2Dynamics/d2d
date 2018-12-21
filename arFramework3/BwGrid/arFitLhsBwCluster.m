@@ -10,7 +10,16 @@
 % The number of cores in a node is by default 5 as specified in
 % arClusterConfig.m. The number of nodes is calculated from Nfit and nfit
 % (and 5 cores per node).
-%
+% 
+% Example:
+%     arLoadLatest                      % load some workspace
+%     arFitLhsBwCluster(1000,10)        % LHS1000 with 10 Fits per core
+% 
+%     "Call m_20181221T154020_D13811_results.m manually after the analysis is finished!"
+% 
+%     m_20181221T154020_D13811_results  % follow the advice (wait and collect the results using the automatically written function
+%     results                           % contains the results
+% 
 % See also arClusterConfig, arFitLHS
 
 function arFitLhsBwCluster(Nfit,nfit)
@@ -34,7 +43,7 @@ save(conf.file_ar_workspace,'ar');
 fprintf('arFitLhsBwCluster.m: Writing matlab file %s ...\n',conf.file_matlab);
 % nfit = ceil(Nfit/(conf.n_calls*conf.n_inNode));
 fprintf('%i fits will be performed on %i nodes and with %i cores at each node.\n',nfit,conf.n_calls,conf.n_inNode);
-WriteClusterMatlabFile(conf,nfit,Nfit)
+WriteClusterMatlabFile(conf,nfit,Nfit); 
 
 fprintf('arFitLhsBwCluster.m: Starting job in background ...\n');
 system(sprintf('bash %s\n',conf.file_startup));

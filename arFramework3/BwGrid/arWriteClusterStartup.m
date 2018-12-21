@@ -1,7 +1,13 @@
 % arWriteClusterStartup(conf)
 % 
 % arWriteClusterStartup writes the startup file required on the bwGrid for
-% calling moab several times 
+% calling moab several times.
+% 
+% Example:
+% conf = arClusterConfig;
+% arWriteClusterStartup(conf)
+% 
+% See also arFitLhsBwCluster, arClusterConfig
 
 function arWriteClusterStartup(conf)
 
