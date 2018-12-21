@@ -16,16 +16,16 @@
 % arClusterConfig.m. The number of nodes is calculated from Nfit and fitsPerCore
 % (and 5 cores per node).
 % 
-% Example:
+% Example 1:
 %     arLoadLatest                      % load some workspace
-%     arFitLhsBwCluster(1000,10)        % LHS1000 with 10 Fits per core
+%     arFitLhsBwCluster(1000,10)        % arFitLHS(1000) with 10 Fits per core
 % 
 %     "Call m_20181221T154020_D13811_results.m manually after the analysis is finished!"
 % 
-%     m_20181221T154020_D13811_results  % follow the advice (wait and collect the results using the automatically written function
-%     results                           % contains the results
+%     m_20181221T154020_D13811_results  % follow the advice (wait and collect the results using the automatically written function)
+%     results                           % a struct containing the results
 % 
-% Example2: 
+% Example 2: 
 % collectfun = arFitLhsBwCluster(1000)
 % run(collectfun)
 % 
@@ -36,6 +36,7 @@ if ~exist('fitsPerCore','var') || isempty(fitsPerCore)
     fitsPerCore = 10;
 end
 
+%% configuration
 fprintf('arFitLhsBwCluster.m: Generating bwGrid config ...\n');
 conf = arClusterConfig;
 if (fitsPerCore*conf.n_inNode>Nfit)
@@ -43,33 +44,49 @@ if (fitsPerCore*conf.n_inNode>Nfit)
 end
 conf.n_calls = ceil((Nfit/conf.n_inNode)/fitsPerCore);
 
+%% writing the startup bash-script:
 fprintf('arFitLhsBwCluster.m: Writing startup file %s ...\n',conf.file_startup);
 arWriteClusterStartup(conf);
 
+%% writing the moab file:
 fprintf('arFitLhsBwCluster.m: Writing moab file %s ...\n',conf.file_moab);
 arWriteClusterMoab(conf);
 
+%% saving global ar in a workspace:
 global ar
 save(conf.file_ar_workspace,'ar');
 
+%% Writing matlab code for LHS:
 fprintf('arFitLhsBwCluster.m: Writing matlab file %s ...\n',conf.file_matlab);
-% fitsPerCore = ceil(Nfit/(conf.n_calls*conf.n_inNode));
 fprintf('%i fits will be performed on %i nodes and with %i cores at each node.\n',fitsPerCore,conf.n_calls,conf.n_inNode);
 WriteClusterMatlabFile(conf,fitsPerCore,Nfit); 
 
+%% starting calculation by calling the startup script:
 fprintf('arFitLhsBwCluster.m: Starting job in background ...\n');
 system(sprintf('bash %s\n',conf.file_startup));
 
+%% Writing the function for collecting results:
 fprintf('arFitLhsBwCluster.m: Write matlab file for collecting results ...\n');
 collectfun = WriteClusterMatlabResultCollection(conf);
-fprintf('Call %s manually after the analysis is finished!\n',conf.file_matlab_results);
+
+fprintf('-> Call %s manually after the analysis is finished!\n',conf.file_matlab_results);
+fprintf('The collected results are then stored in variable ''results''.\n');
 
 
+% collectfun = WriteClusterMatlabResultCollection(conf)
+% 
+% WriteClusterMatlabResultCollection writes the function for collecting the
+% results in workspaces and put them into variable results.
+% 
+%   conf    Output of arClusterConfig.m
 function collectfun = WriteClusterMatlabResultCollection(conf)
 
 mcode = {
+    'function results = collectfun',...
+    'olddir = pwd;',...
     ['cd ',conf.pwd], ...
-    ['matFiles = dir([''',conf.save_path,''',''/result*.mat'']);'], ...
+    ['load(''',conf.file_ar_workspace,''',''ar'');'],...    
+    ['matFiles = dir([''',conf.save_path,''',filesep,''result*.mat'']);'], ...
     'matFiles = {matFiles.name};',...
     'fprintf(''%i result workspaced will be collected ...\n'',length(matFiles));', ...
     'results = struct;', ...
@@ -99,7 +116,14 @@ mcode = {
     '    end', ...
     'end', ...
     '', ...
-    ['save([''',conf.name,''',''_results.mat''], ''results'');'], ...
+    'for f=1:length(fn)', ...
+    '   ar.(fn{f}) = results.(fn{f});',...
+    'end',...
+    ['save(''',conf.file_ar_workspace,''',''ar'');'],...    
+    '',...
+    ['save(''',conf.name,'_results.mat'', ''results'');'], ...
+    ['disp(''',conf.name,'_results.mat is written and ',conf.file_ar_workspace,'.mat is updated.'')'],...
+    'cd(olddir)',...
     };
 
 fid = fopen(conf.file_matlab_results,'w');
@@ -111,13 +135,23 @@ fclose(fid);
 collectfun = [conf.pwd,filesep,conf.file_matlab_results];
 
 
+% WriteClusterMatlabFile(conf,fitsPerCore,Nfit)
+% 
+% WriteClusterMatlabFile writes the matlab code for performing LHS
+% 
+%   conf            Output of arClusterConfig.m
+%   fitsPerCore     the number of fits per core
+%   Nfit            total number of fits
+% 
 % The following variables are available in matlab (provided by moab file)
 % icall     call/node number
 % iInNode   for parallelization within a node
 % arg1      further argument (if required
 %
 % Nfit denotes the total LHS size (total number of fits), fitsPerCore the number
-% of fits within one call
+% of fits within one call.
+% 
+% The model must be loaded first.
 function WriteClusterMatlabFile(conf,fitsPerCore,Nfit)
 
 mcode = {
@@ -164,8 +198,6 @@ mcode = {
     '',...
     'save(result.file,''result'');',...
     };
-
-
 
 fid = fopen(conf.file_matlab,'w');
 for i=1:length(mcode)

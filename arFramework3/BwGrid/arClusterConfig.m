@@ -4,6 +4,8 @@
 % the moab file
 
 function conf = arClusterConfig(name)
+global ar
+
 datum = datestr(now,30);
 conf = struct;
 
@@ -28,7 +30,6 @@ conf.file_moab = [conf.name,'.moab'];
 conf.file_startup = [conf.name,'.sh'];
 
 conf.d2dpath = fileparts(which('arInit.m'));
-
 
 conf.n_inNode = 5; % default, can be overwritten (I guess that the optimal number depends on how many conditions are in the model and how many cores are available on a node)
 conf.n_calls = 10; % default, can be overwritten, coincides with the number of nodes
