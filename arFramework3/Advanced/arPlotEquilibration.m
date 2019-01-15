@@ -3,18 +3,25 @@
 %   equilibration was successful. It is primarily meant for debugging
 %   purposes.
 %
-%   function arPlotEquilibration( model, ss_condition )
+%   function arPlotEquilibration( model, ss_condition, [N] )
 %   
 %       model           - Model index
 %       ss_condition    - Steady state condition to plot
+%       N               - Number of time points to show
 %
 
 function arPlotEquilibration( model, ss_condition, N )
 
+    if ( nargin < 2 )
+        help arPlotEquilibration;
+        return;
+    end
+
     global ar;
+    oldss = arDeepCopy( ar.model(model).ss_condition(ss_condition) );
+    
     tStart = ar.model(model).ss_condition(ss_condition).tstart;
     tEnd = ar.model(model).ss_condition(ss_condition).tEq;
-        
     ar.model(model).ss_condition(ss_condition).tstop = tEnd;
     
     % Number of time points to show
@@ -23,8 +30,6 @@ function arPlotEquilibration( model, ss_condition, N )
     end
     ts = tStart : ( tEnd - tStart ) / ( N - 1 ) : tEnd;
     ar.model(model).ss_condition(ss_condition).tFine = ts;
-    
-    oldss = arDeepCopy( ar.model(model).ss_condition(ss_condition) );
     
     % Prepare data
     ar.model(model).ss_condition(ss_condition).uFineSimu = zeros(N, size(ar.model(model).ss_condition(ss_condition).uFineSimu,2));
@@ -68,7 +73,7 @@ function arPlotEquilibration( model, ss_condition, N )
     % Simulate the system
     sensi = false;
     feval(ar.fkt, ar, true, sensi, 1, false, 'ss_condition', 'ss_threads', 0);
-    
+
     styles = { 'k', 'r', 'b', 'm', 'k--', 'r--', 'b--', 'm--', 'k-.', 'r-.', 'b-.', 'm-.' };
     styles = { 'k', 'r', 'b', 'k--', 'r--', 'b--' };
     nStyles = numel(styles);
@@ -81,8 +86,9 @@ function arPlotEquilibration( model, ss_condition, N )
     cplot = plotGroup( model, ss_condition, 'xFineSimu', 'x', styles, NX, NY, cplot );
     cplot = plotGroup( model, ss_condition, 'zFineSimu', 'z', styles, NX, NY, cplot );
     cplot = plotGroup( model, ss_condition, 'vFineSimu', 'v', styles, NX, NY, cplot );
- 
-    ar.model(model).ss_condition(ss_condition) = oldss;
+    
+    ar.model(model).ss_condition(ss_condition) = arDeepCopy(oldss);
+    arCheckCache(1);
 end
 
 function cplot = plotGroup( model, ss_condition, field, namefield, styles, NX, NY, cplot )
