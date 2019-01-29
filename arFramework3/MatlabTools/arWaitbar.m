@@ -11,6 +11,11 @@ if ~isfield(arWaitbarGlobal,'showWindow')
     arWaitbarGlobal.showWindow = 1;
 end
 
+global ar;
+if ( isfield( ar, 'config' ) && isfield( ar.config, 'noWaitBar' ) && ar.config.noWaitBar == 1 )
+    return;
+end
+
 % suppress waitbar
 if ( arOutputLevel < 2 )
     return;
