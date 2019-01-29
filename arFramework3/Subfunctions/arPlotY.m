@@ -83,7 +83,7 @@ for jm = 1:length(ar.model)
         if(ar.model(jm).qPlotYs(jplot)==1 && ar.model(jm).plot(jplot).ny>0)
 %             if( (ar.config.useFitErrorMatrix == 0 && ar.config.ploterrors == -1) || ...
 %                     (ar.config.useFitErrorMatrix == 1 && ar.config.ploterrors_matrix(jm,ar.model(jm).plot(jplot).dLink(1))==-1) )
-                [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['Y: ploterrors' num2str(ar.config.ploterrors) ar.model(jm).plot(jplot).name], figcount, fastPlot);
+                [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['Y: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
 %             else
 %                 [h, fastPlotTmp] = myRaiseFigure(jm, jplot, ['Y: ' ar.model(jm).plot(jplot).name], figcount, fastPlot);
 %             end
