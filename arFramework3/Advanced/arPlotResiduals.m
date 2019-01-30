@@ -1,8 +1,9 @@
-% Plot residuals as quantile-quantile plot.
-%
 % arPlotResiduals(saveToFile)
+% 
+% Plot residuals as quantile-quantile plot and 
+% autocorrelation (res_{i} versus res_{i+1})
 %
-% saveToFile    [false]
+%   saveToFile    [false]
 
 function arPlotResiduals(saveToFile)
 

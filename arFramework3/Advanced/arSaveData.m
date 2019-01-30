@@ -1,9 +1,12 @@
-% Save Data sets
+% arSaveData(m, jplot)
 %
-% arSaveModel(m, d)
+% Save data sets corresponding to the plot with index jplot to csv file
+% into the subfolder /Data
 %
-% m         position of model			
-% jplot     position of plot
+%   m      [1:length(ar.model)]           position of model			
+%   jplot  [1:length(ar.model(m).plot)]   position of plot
+%
+% The data file is saved to ['./Data/' ar.model(m).plot(jplot).name '.csv']
 
 function arSaveData(m, jplot)
 
