@@ -1,14 +1,36 @@
-% res = arPlotSloppiness(whichplot)
+% [res] = arPlotSloppiness([whichplot],[xtype])
 % 
+% Assess the sloppines of a fit by analysing the Hessian eigenvalues and
+% compares it to the profile likelihood-based confidence intervals
+%
+%   whichplot   1   Plots sensitivity matrices X, transposed X' and Hessian 
+%                   matrix H=X'X 
+%               
+%               2   [default] Plots eigenvalue Spectrum (and profile 
+%                   likelihood-based confidence intervals, if likelihood 
+%                   profiles are available)
 %   
-%   whichplot   1  X, X', H=X'X
-%               2 (default) EV Spectrum and CI from PL
+%   xtype       'sy'    default raw output form ar.model.data.syExpSimu
+%               'sres'  use ar.sres, i.e. includiung entried of potential 
+%               priors, constraints, errors and on the log scale, if
+%               fitting on the log scale is performed
+%   
+%   res	        result struct with 
+%               X       sensitivitiy matrix X
+%               H       Hessian matrix H
+%               eigen   Hessian eigenvalues 
+%               ev      eigen vectors
+%               nonID   non identifiable parameters based on PL CI (logical)
+%               dop     fitted / used parameters, i.e. ar.qFit==1 (logical)
 % 
-%   
-%   xtype       'sy' default ar.model.data.syExpSimu
-%               'sres': ar.sres
-%   
-%   res         result struct
+% Note that, here, the spectrum of eigenvalues is not normalized, like in 
+% the publications
+%
+% References: 
+%   Gutenkunst et al., PLoS Comp. Biol. 3, e189 (2007)
+%   Toensing at al., PHYSICAL REVIEW E 90, 023303 (2014)
+%    Hass et ak., Bioinformatics, btz020, (2019)
+   
 
 function res = arPlotSloppiness(whichplot,xtype)
 if(~exist('whichplot','var') || isempty(whichplot))

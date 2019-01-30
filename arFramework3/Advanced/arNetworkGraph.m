@@ -1,7 +1,13 @@
-% write .dot graphics file and compile to pdf
+% arNetworkGraph([m])
 %
-% arNetworkGraph(m)
-% m:	model index
+% writes network graph as a .dot graphics file and compile to pdf 
+%
+% m:	model index (default: all models within the current loaded project)
+%
+% Note: graphviz package hase to be installed. Homepage: https://graphviz.gitlab.io
+% Under windows, dot has to be excecuded by hand to translate the source file to a pdf.
+%
+% See also: arNetworkGraphCompartments
 
 function arNetworkGraph(m)
 

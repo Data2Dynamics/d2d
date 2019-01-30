@@ -1,4 +1,12 @@
-% create presentation
+% arPresentation([doEquations])
+%
+% Writes a modeling report of teh current project as a latex presentation, 
+% similar to arReport
+%
+% doEquations       1   including slides with ODEs, etc. 
+%                   2   do not print equations
+%
+% See also arReport, arMiniReport
 
 function arPresentation(doEquations)
 

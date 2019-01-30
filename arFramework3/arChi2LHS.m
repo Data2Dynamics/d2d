@@ -1,14 +1,24 @@
-% chi2 sequence using latin hyper cube sampling
-%   - latin hyper cube sampling (ar.config.useLHS = true)
-%   - random sampling from prior
-%
-% arChi2LHS(n, sensis, randomseed, silent, use_cluster)
+% arChi2LHS([n], [sensis], [randomseed], [silent], [use_cluster])
+% 
+% Performs a chi2 sequence (without fitting)
+%   - using random sampling from prior (ar.config.useLHS = 0 [default])
+%   - using latin hyper cube sampling (ar.config.useLHS = 1)
+% and returns the likelihood values.
 %
 % n:            number of runs          [10]
 % sensis:       use sensitivities       [false]
 % randomseed:                           rng(randomseed)
 % silent:       no output               [false]
 % use_cluster:                          [false]
+% 
+% Creates as waterfall plot for the initial guesses of e.g. the multistart
+% optimisation procedure. Can be used, for example, to check which areas of
+% the parameter search space are close to the optimum or far off.
+% 
+% Example: 
+%   arChi2LHS(100,[],1337) 
+% 
+% See also arChi2, arFitLHS, arScanChi2, arSample
 
 function arChi2LHS(n, sensis, randomseed, silent, use_cluster)
 

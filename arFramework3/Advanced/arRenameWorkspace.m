@@ -1,6 +1,23 @@
-% Rename an existing saved workspace
+% arRenameWorkspace([old_name],[new_name])
+% 
+% Rename an existing saved workspace folder
+% 
+% old_name      name of the existing workspace which should be renamed (string)
+% new_name      new name of the workspace
 %
-% arRenameWorkspace(old_name,new_name)
+% By [default], old_name and new_name can be left empty and the workspace
+% to be renamed can be choosen from a list. The new name can be set in the
+% command line afterwards.
+% Note: The original time stamp will not be touched in any case
+%
+% Examples:
+%   arRenameWorkspace
+%        let's you choose from the list of saved workspaces
+%
+%   arRenameWorkspace('20190130T130300_LHS1000','Bestfit') 
+%        renames the workspace to '20190130T130300_Bestfit'
+%   
+% See also: arRemoveWorkspace, arSave, arLoad
 
 function arRenameWorkspace(old_name,new_name)
 
@@ -47,6 +64,7 @@ end
 
 ar = ar_tmp;
 clear ar_tmp;
+
 
 
 function arSaveParOnly(ar, savepath) %#ok<INUSL>

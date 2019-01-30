@@ -1,9 +1,10 @@
-% Remove workspace folder of your choice
+% arRemoveWorkspace
 %
-% Data-2-Dynamics Software
-% Website: https://github.com/Data2Dynamics/d2d/wiki/Home
-% Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de
-% Copyright 2013 D2D Development Team. All rights reserved.
+% Removes a workspace folder of your choice. Let's you choose from the list
+% of saved workspace folders
+%
+% See also: arRenameWorkspace, arSave, arLoad
+
 
 function arRemoveWorkspace
 arCheck;

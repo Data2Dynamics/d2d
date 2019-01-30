@@ -1,11 +1,20 @@
-% [group,variable,trsf] = arReadSymmetryDetectionOutput(fileResult) 
+% (group,variable,trsf) = arReadSymmetryDetectionOutput(fileResult) 
 % 
-%   Reads the output of Benjamin Mertk's Symmetry-Detection-Tool.
-%   This tool has to be called externally (e.g. via command line).
+% Reads the output of Benjamin Merkt's Symmetry-Detection-Tool.
+% The tool has to be called externally (e.g. via command line).
 % 
+% fileResult:   file name of results from Symmetry-Detection-Tool
+%
+% group:        group
+% variable:     variable   
+% trsf:         transformation
+%
 % Example:
-% 
 % [group,variable,trsf] = arReadSymmetryDetectionOutput('jak2_stat5_feedbacks__model.csv_result.txt')
+%
+% Link to Benjamin Merkt's Symmetry Setection Tool: http://omnibus.uni-freiburg.de/~bm1031/symmetryDetection.zip
+%
+% See also: arCalcParameterUnitsViaSymmetries
 
 function  [group,variable,trsf] = arReadSymmetryDetectionOutput(fileResult)
 

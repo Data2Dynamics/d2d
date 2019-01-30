@@ -1,4 +1,14 @@
-% ar.fit is appended/copied into an struct array ar.fit_hist for comparing 
+% function arSaveFit([name])
+% 
+% Saves fit history from last fit into ar.fit_hist for comparing
+%
+% name:     Name can be provided, otherwise it will be asked for 
+%           (will be stored in ar.fit_hist(j).name)
+%
+% Note: ar.fit_hist will automatically appended if multiple fits will be
+% saved
+
+
 function arSaveFit(name)
 
 global ar
