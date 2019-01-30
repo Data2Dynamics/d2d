@@ -1,5 +1,10 @@
+% arCleanMemory([clearallcompiled])
+%
 % Mex files can sometimes leave a huge amount of memory resident.
 % This function removes the ones we keep resident, when possible.
+% 
+% clearallcompiled [false] if true deletes not self-made files also
+
 function arCleanMemory(clearallcompiled)
 
     [~, loaded_mexfiles] = inmem('-completenames');

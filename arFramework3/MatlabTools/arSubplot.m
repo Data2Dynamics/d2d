@@ -1,4 +1,4 @@
-% function arSubplot(m, n, id, name, varargin)
+% function arSubplot(m, n, id, [name], [varargin])
 %
 % A little subplot manager that prevents you from having to keep track of
 % the plot handles. This routine works just like subplot, except that it 
@@ -13,6 +13,7 @@
 %
 % If m is left empty ([]), then it will automatically look for a nice plot
 % placement. m then needs to contain the number of plots desired.
+%
 
 function ax = arSubplot(m, n, id, name, varargin)
     global arSubplotMgr;

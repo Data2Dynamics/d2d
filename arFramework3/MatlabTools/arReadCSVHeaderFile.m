@@ -1,3 +1,12 @@
+% [header, data, dataCell] = arReadCSVHeaderFile(filename, delimiter, [quoted])
+%
+% Reads in CSV
+%
+% quoted [false] if true also quoted text (delimiters, white-space) can be
+%                read in
+% 
+% [header, data] = arReadCSVHeaderFile('Test.csv',';',true)
+
 function [header, data, dataCell] = arReadCSVHeaderFile(filename, delimiter, quoted)
 
 fid = fopen(filename, 'r');

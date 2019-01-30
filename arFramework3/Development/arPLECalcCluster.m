@@ -1,6 +1,6 @@
 % profile likelilhood calculation on cluster
 %
-% job = arPLECalcCluster(cluster, clusterpath, pool_size, jk, n)
+% job = arPLECalcCluster(cluster, [clusterpath, pool_size, jk, n])
 %
 % cluster:          MATLAB cluster object       (see help parcluster)
 % clusterpath:      execution path on cluster   ['.']

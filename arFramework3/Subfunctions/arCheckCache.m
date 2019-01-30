@@ -1,8 +1,8 @@
+% function upToDate = arCheckCache( invalidate )
 % This function checks whether any of the integration settings changed. It
 % is used in arSimu to determine whether sensitivity equations should be
 % simulated or not.
 %
-% function upToDate = arCheckCache( invalidate )
 % Set invalidate to 1 to invalidate the current cache. This forces
 % resimulation of the sensitivities on the next simulation.
 

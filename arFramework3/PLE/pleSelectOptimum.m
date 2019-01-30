@@ -2,8 +2,8 @@
 % 
 % select best optima, based on the profile likelihood
 % 
-%   better  empty if no better fit found
-% 
+%   jks     parameters   [1:length(ar.ple.ps)]
+%   better  empty, if no better fit found
 %           otherwise struct with fields
 % 
 %       better.chi2old  chi2 from the fit, i.e. before the profiles are examined

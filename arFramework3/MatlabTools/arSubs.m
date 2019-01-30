@@ -1,4 +1,15 @@
-% better subs
+% out = arSubs(in, old, new, matlab_version)
+% Better Symbolic substitution than subs.
+% 
+% in    symbolic expression
+% old   sym/str variable to be replaced
+% new   sym/num variable with which to replace
+%
+% Example:
+%       subs(cos(a)+sin(b),{a,b},{sym('alpha'),2}) returns
+%       cos(alpha)+sin(2)
+%
+% See also SUBS, SYM
 
 function out = arSubs(in, old, new, matlab_version)
 if ischar(old)

@@ -1,7 +1,7 @@
 % Calculate sensitivities for fitting by finite difference approximations 
 % of residuals ar.res in ar.sresFD and of constraints ar.constr in ar.sconstrFD
 %
-% arFiniteDifferences(dp)    
+% arFiniteDifferences([dp])    
 %   dp:     parameter variation             [1e-6]
 
 

@@ -1,3 +1,11 @@
+% [] = arGetInfo(jm, jd, jtype, linehandle_name)
+%
+% Get information of data (t, names, labels, values)
+%
+% jype = 1: get info of obersables y
+% jype = 2: get info of states x
+% jype = 3: get info of v
+
 function [tUnits, response_parameter, titles, yNames, yLabel, iy, ...
     hys, hystds, hysss] = arGetInfo(jm, jd, jtype, linehandle_name)
 global ar

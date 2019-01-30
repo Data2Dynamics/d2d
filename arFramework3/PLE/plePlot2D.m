@@ -1,6 +1,6 @@
 % Plot 2D log-Likelihood for arFitNonLin
 %
-% plePlot2D(jk1, jk2, figure_number, nsteps, nlevels)
+% plePlot2D(jk1, jk2, [figure_number, nsteps, nlevels])
 %
 % figure_number     [1]
 % nsteps            [100]

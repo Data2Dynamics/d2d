@@ -1,3 +1,4 @@
+% argout = arDeleteGraphicsHandles(ar2)
 % This function deletes the graphcis handles in ar which are
 % since R2014b objects that are displayed when loaded in a workspace.
 %

@@ -1,4 +1,9 @@
+% arPlotMCMCChainACFs([jks, Nthinning, maxlag])
 % plot mcmc ACF
+%
+% jks       [find(ar.qFit==1)]
+% Nthinning [10]
+% maxlag    [50]
 
 function arPlotMCMCChainACFs(jks, Nthinning, maxlag)
 

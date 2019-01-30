@@ -1,6 +1,6 @@
+% arCompileAll(forcedCompile, debug_mode, ext_source_dir)
 % Compile c- and mex-files for models, conditions and data sets
 %
-% arCompileAll(forcedCompile, debug_mode, ext_source_dir)
 %   forcedCompile:                                      [false]
 %   debug_mode:         exclude precompiled objects     [false]
 %   source_dir:         source directory                []
@@ -788,7 +788,7 @@ catch
 end
 
 % Were model reductions applied? Make sure to transfer the initial conditions correctly
-if isfield( model, 'removedStates' ) % && ( ar.model(m).reducedForm == 1 )
+if isfield( model, 'removedStates' ) && ( ar.model(m).reducedForm == 1 )
     condition = addPoolSubstitutions( condition, model.removedStates );
 end
 
@@ -1242,7 +1242,7 @@ data.sym.p  = arMyStr2Sym(data.p);
 data.sym.fp = arMyStr2Sym(data.fp);
 
 % Were model reductions applied? Make sure to transfer the initial conditions correctly
-if isfield( model, 'removedStates' ) % && ( ar.model(m).reducedForm == 1 )
+if isfield( model, 'removedStates' ) && ( ar.model(m).reducedForm == 1 )
     data = addPoolSubstitutions( data, model.removedStates );
 end
 

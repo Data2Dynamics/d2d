@@ -1,4 +1,6 @@
+% [C, fid] = arTextScan( fid, varargin )
 % Read a line and parse it. Make sure the entire line is read.
+
 function [C, fid] = arTextScan( fid, varargin )
 
     tmp = ''; C{1} = {};

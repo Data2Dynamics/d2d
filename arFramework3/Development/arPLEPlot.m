@@ -1,4 +1,10 @@
+% arPLEPlot([(jk, singleFigure, do_relative])
 % plot sampling of profile likelihood
+%
+% jk:               parameter index or indices          [all ple calcs]
+% singleFigure:     if true, error in code!             [false]
+%                                                       [true if jk==1]
+% do_relative:      chi2s = chi2s - ar.ple.chi2Reset    [false]
 
 function arPLEPlot(jk, singleFigure, do_relative)
 

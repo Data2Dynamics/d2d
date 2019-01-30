@@ -1,3 +1,4 @@
+% arCheckReservedWords( strings, useLocation, offendingString )
 % Checks whether a word reserved by the symbolic toolbox exists in a string
 
 function arCheckReservedWords( strings, useLocation, offendingString )

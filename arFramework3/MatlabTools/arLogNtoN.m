@@ -1,9 +1,10 @@
+% [mu, sigma] = arLogNtoN(mu_logn, sigma_logn)
+%
 % converts mean and sd of a log-normal distribution
 % to mean and sd of the corresponding normal distribution
 %	
 % TODO small errors for log10 !!!
-%
-% [mu, sigma] = arLogNtoN(mu_logn, sigma_logn)
+
 
 function [mu, sigma] = arLogNtoN(mu_logn, sigma_logn)
 

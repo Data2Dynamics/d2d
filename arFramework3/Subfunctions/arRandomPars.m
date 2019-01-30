@@ -1,3 +1,4 @@
+% ps = arRandomPars([n, randomseed])
 % generate random parameter samples
 %   - latin hyper cube sampling (ar.config.useLHS = true)
 %   - random sampling from prior
@@ -6,8 +7,6 @@
 %       a) qFit==1
 %       b) qError==1 if ar.config.fiterrors==1
 %   
-%
-% ps = arRandomPars(n, randomseed)
 %
 % n:                number of runs      [10]
 % randomseed:                           rng(randomseed)

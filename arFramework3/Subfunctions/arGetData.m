@@ -1,6 +1,10 @@
+% [] = arGetData(jm, jd, jtype)
+% Get Data entries of ar.model(jm).data(jd) as array and plot
+%
 % jype = 1: data y is plotted
 % jype = 2: dynamics x is plotted
 % jype = 3: v is plotted
+
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, ...
     yExpHl, dydt, y_ssa, y_ssa_lb, y_ssa_ub, qFit, t_ppl, y_ppl_ub, y_ppl_lb] = arGetData(jm, jd, jtype)
 

@@ -1,4 +1,5 @@
 % pleDebug(figure_number)
+% plots ple chi2s and step statistics
 
 function pleDebug(figure_number)
 

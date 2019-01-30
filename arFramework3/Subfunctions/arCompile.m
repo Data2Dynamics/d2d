@@ -1,13 +1,12 @@
-% % Compile CVODES c-functions
-%
-% function arCompile(forceFullCompile, forceCompileLast, debug_mode, source_dir)
+% function arCompile([forceFullCompile, forceCompileLast, debug_mode, source_dir])
+% Compile CVODES c-functions
 %
 %   forceFullCompile:   recompile all objects files     [false]
 %   forceCompileLast:   only recompile mex-file         [false]
 %   debug_mode:         exclude precompiled objects     [false]
 %   source_dir:         external source directory       []
 %
-% or
+% OR
 %
 % arCompile(ar, forceFullCompile, forceCompileLast, debug_mode, source_dir)
 %   ar:                 d2d model/data structure

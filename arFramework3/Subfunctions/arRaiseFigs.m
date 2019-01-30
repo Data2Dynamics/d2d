@@ -1,3 +1,6 @@
+% arRaiseFigs
+% Show figures whose fighandel is on (ar.model.plot.fighandel_xyv)
+
 function arRaiseFigs
 
 global ar

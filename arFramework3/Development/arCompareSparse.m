@@ -1,18 +1,16 @@
-%  Calculates the time required for arCalcMerit for
-%     ar.config.useSparseJac=0; 
-%   and
-%     ar.config.useSparseJac=1;
+% [tnormal,tsparse] = arCompareSparse([niter,ptrial_opt,fun_opt,ptrial_in])
+%  Calculates the time required for arCalcMerit for ar.config.useSparseJac=0 and =1;
 % 
-%   niter       number of calls of arCalcMerit
-%   ptrial_opt  0   use always ar.p
+%   niter       number of calls of arCalcMerit                       [100]
+%   ptrial_opt  0   use always ar.p                                    [1]
 %               1   rand between ar.lb and ar.ub
 %               2   randn around -1 with SD=1.
 %               3   parameters provided as argument ptrial_in
 % 
-%   fun_opt  1   arCalcMerit
+%   fun_opt  1   arCalcMerit                                           [1]
 %            2   arFit
 % 
-%   ptrial_in   each row is a parametre vector used for assemssment if
+%   ptrial_in   each row is a parametre vector used for assemssment if  []
 %               ptrial_opt==3
 % 
 % Useful Examples:

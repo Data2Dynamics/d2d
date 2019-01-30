@@ -1,4 +1,8 @@
+% arPlotMCMCProfiles(jks, Nthinning)
 % plot mcmc profiles
+%
+% jks       [find(ar.qFit==1)]
+% Nthinning [1]
 
 function arPlotMCMCProfiles(jks, Nthinning)
 

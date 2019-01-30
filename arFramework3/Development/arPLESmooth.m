@@ -1,13 +1,9 @@
 % Smoothen jumps to local optima
 %
-% Usage: 
-%   function arPLESmooth(jk, quick, point, dr)
+% arPLESmooth([jk, quick, point, dr])
 % 
-% Mandatory parameter:
-%   jk         parameter to smoothen
-%
-% Optional parameters
-%   quick      skip selection and pick the first trial point (default = 0) 
+%   jk:        parameter index or indices          [all fit parameters]
+%   quick      skip selection and pick the first trial point        [0] 
 %   point      provide custom parameter value to start at (closest point
 %              will be chosen)
 %   dr         initial search direction (-1 or 1; required when point is 

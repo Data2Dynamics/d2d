@@ -1,4 +1,10 @@
-% save plots
+% arSavePlots([doXs, doVs, doLegends])
+% saves plots 
+% calls arPlot wtih save=true arPlot(true,false,true,false)
+%
+% doXs [false]      Save states also?
+% doVs [false]     
+% doLegends [true]
 
 function arSavePlots(doXs, doVs, doLegends)
 

@@ -1,6 +1,5 @@
+% arLinReg(b, labels, y, x, y_est, covar)
 % calculate regression statistics for linear models
-%
-%
 %
 % after Backhaus, Erichson, Plinke, Weiber "Multivariate Analysemethoden",
 % Springer 2006 (11. Auflage)

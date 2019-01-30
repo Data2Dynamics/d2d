@@ -1,3 +1,6 @@
+% arFitPrint
+% Prints exitflag, optimizer, iterations of fit
+
 function arFitPrint
 
 global ar

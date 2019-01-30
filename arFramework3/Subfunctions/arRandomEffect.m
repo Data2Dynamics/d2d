@@ -1,3 +1,4 @@
+% [tmpres, tmpsres] = arRandomEffect(p)
 % random effect function, implemention a normal distribution assumption
 % with variable mean and std
 

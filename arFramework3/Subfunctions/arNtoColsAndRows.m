@@ -1,10 +1,11 @@
-% [nrows, ncols] = arNtoColsAndRows(n, rowstocols)
+% [nrows, ncols] = arNtoColsAndRows(n, [rowstocols])
+% Calcs number of rows/cols for a certain ratio, eg for subplot input
 %
-%   usage:
+% rowstocols    ratio of rows/cols [0.4]
+%
+% Example:
 %   [nrows, ncols] = arNtoColsAndRows(n);
 %   subplot(nrows, ncols, j);
-%
-
 
 function [nrows, ncols] = arNtoColsAndRows(n, rowstocols)
 

@@ -1,3 +1,4 @@
+% arCheckNegConc
 % Check for negative concentrations
 
 function arCheckNegConc()

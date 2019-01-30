@@ -1,4 +1,16 @@
-% substitute until no more changes (for self-substitutions of derived variables)
+% out = arSubsRepeated(in, old, new, matlab_version)
+% Better Symbolic substitution. Substitute until no more changes.
+% (for self-substitutions of derived variables)
+% 
+% in    symbolic expression
+% old   sym/str variable to be replaced
+% new   sym/num variable with which to replace
+%
+% Example:
+%       subs(cos(a)+sin(b),{a,b},{sym('alpha'),2}) returns
+%       cos(alpha)+sin(2)
+%
+% See also ARSUBS, SUBS, SYM
 
 function out = arSubsRepeated(in, old, new, matlab_version)
 

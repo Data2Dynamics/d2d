@@ -1,4 +1,4 @@
-% arError
+% arParsingError
 function arParsingError( fid, varargin )
 
     if isstruct(fid)

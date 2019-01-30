@@ -1,5 +1,5 @@
-% waitbar with time estimation
 % arWaitbar(j, n, text)
+% waitbar with time estimation
 
 function arWaitbar(j, n, text)
 
@@ -9,11 +9,6 @@ global arOutputLevel;
 % disable waitbar window and use command line output instead
 if ~isfield(arWaitbarGlobal,'showWindow')
     arWaitbarGlobal.showWindow = 1;
-end
-
-global ar;
-if ( isfield( ar, 'config' ) && isfield( ar.config, 'noWaitBar' ) && ar.config.noWaitBar == 1 )
-    return;
 end
 
 % suppress waitbar

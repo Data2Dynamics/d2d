@@ -1,3 +1,6 @@
+% arCheckForNegFluxes(m, fid)
+% Check if reactions have negative flux
+
 function arCheckForNegFluxes(m, fid)
     global  ar;
     

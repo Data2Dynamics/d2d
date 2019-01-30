@@ -1,7 +1,6 @@
+% data_aligned = align_position(data, dataLabels, refLabels, matching_dimensions)
+%
 % aligns <data> according to labels <dataLabels> and <refLabels>
-%
-%    data_aligned = align_position(data, dataLabels, refLabels, matching_dimensions)
-%
 % such that <data_aligned> will have length(refLabels).
 % For 2D data, looks for matching dimensions,
 % unless <matching_dimensions> is specified.

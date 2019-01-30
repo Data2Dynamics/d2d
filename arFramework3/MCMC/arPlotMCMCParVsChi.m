@@ -1,4 +1,10 @@
+% arPlotMCMCParVsChi([jks, Nthinning, popt, chi2opt])
 % plot mcmc chains
+%
+% jks       [find(ar.qFit==1)]
+% Nthinning [1]
+% popt      [] parameters to be plotted against chi2opt
+% chi2opt   [] chi2 to be plotted in dependency to popt
 
 function arPlotMCMCParVsChi(jks, Nthinning, popt, chi2opt)
 

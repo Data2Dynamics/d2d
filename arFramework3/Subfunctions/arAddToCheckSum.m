@@ -1,20 +1,10 @@
-% checksum = arAddToCheckSum(val)
-% 
-%   val       any variable (handling of many classes are implemented)
-% 
-% 
-% checksum = arAddToCheckSum(val, checksumIn)
-% 
-%   checksumIn    input of a previous checksum is updated (has to be in the MD5
-%               format, i.e. not char)
-% 
-% checksum = arAddToCheckSum(val, checksum, convertToChar)
-%       
-%   convertToChar       default: false
-% 
-% 
-% 
-%   This function updates a checksum according to the variable val
+% checksum = arAddToCheckSum(val, [checksum], [convertToChar])
+% This function updates a checksum according to the variable val
+%
+% val           any variable (handling of many classes are implemented) 
+% checksum      input of a previous checksum is updated (has to be in the MD5
+%               format, i.e. not char)  
+% convertToChar default: false
 % 
 %   checksum is an instance of class
 %   java.security.MessageDigest.getInstance 

@@ -1,3 +1,4 @@
+% val = arGetCondi( m, d, condition_variable )
 % Get the value of a condition in a particular dataset
 %
 % Usage:

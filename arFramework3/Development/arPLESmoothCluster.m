@@ -1,11 +1,11 @@
 % smooth profile likelilhood calculation on cluster
 %
-% job = arPLESmoothCluster(cluster, clusterpath, pool_size, jk)
+% job = arPLESmoothCluster(cluster, [clusterpath, pool_size, jk])
 %
 % cluster:          MATLAB cluster object       (see help parcluster)
 % clusterpath:      execution path on cluster   ['.']
 % pool_size:        additional workers          [ceil(length(cluster.IdleWorkers)/2) or (cluster.NumWorkers-1)]
-% jk:               parameter index or indices          [all fit parameters]
+% jk:               parameter index or indices  [all fit parameters]
 
 function varargout = arPLESmoothCluster(cluster, clusterpath, pool_size, jk)
 

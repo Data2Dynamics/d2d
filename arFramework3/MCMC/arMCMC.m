@@ -1,13 +1,16 @@
 % mcmc sampler
 %
-% function arMCMC(nruns, nburnin, method, append, nthinning)
+% function arMCMC([nruns, nburnin, method, append, nthinning])
 %
-%   nruns
+%   nruns       [1000]
+%   nburnin     [0]
 %   method for proposal density:
-%       1 = N(0,1)
-%       2 = N(0,c) scaled
-%       3 = MMALA
-%       4 = Adaptive MCMC
+%               1 = N(0,1)
+%               2 = N(0,c) scaled
+%               3 = MMALA
+%               4 = Adaptive MCMC
+%   append      [false]
+%   nthinning   [1]
 %
 % optimal acceptance rate ~23% (for multi-variate normal distributions), see in:
 % Roberts, G.O.; Gelman, A.; Gilks, W.R. (1997).

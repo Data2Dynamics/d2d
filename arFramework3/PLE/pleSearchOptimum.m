@@ -1,4 +1,7 @@
+% pleSearchOptimum(jks)
 % search for better optima, based on down-jump of the profile likelihood
+%
+% jks  parameters   [1:length(ar.ple.ps)]
 
 function pleSearchOptimum(jks)
 

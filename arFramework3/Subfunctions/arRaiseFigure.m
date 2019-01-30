@@ -1,3 +1,6 @@
+%[h, fastPlotTmp] = arRaiseFigure(base, fieldname, figname, ...
+%    [figcount, fastPlot, level, hcustom])
+
 function [h, fastPlotTmp] = arRaiseFigure(base, fieldname, figname, ...
     figcount, fastPlot, level, hcustom)
 

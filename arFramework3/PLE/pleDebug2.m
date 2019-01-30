@@ -1,4 +1,5 @@
 % pleDebug2(figure_number)
+% plots ple parameters
 
 function pleDebug2(figure_number)
 

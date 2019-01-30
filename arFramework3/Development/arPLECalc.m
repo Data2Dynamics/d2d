@@ -1,9 +1,8 @@
+% arPLECalc([jk, n])
 % profile likelilhood calculation
 %
-%   arPLE_direct(jk, n)
-%
-%   jk: parameter index or indices
-%   n:  number of ple steps up and down
+% jk:               parameter index or indices          [all fit parameters]
+% n:                number of ple steps up and down     [50]
 
 function varargout = arPLECalc(varargin)
 

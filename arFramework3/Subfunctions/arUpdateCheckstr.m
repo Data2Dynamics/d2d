@@ -1,8 +1,4 @@
-% arUpdateCheckstr;
-% 
-% ar = arUpdateCheckstr(ar)
-% 
-% ar = arUpdateCheckstr(ar,dosave)
+% ar = arUpdateCheckstr([ar,dosave])
 % 
 %   dosave      Default: false
 %               If true, then the fields used to create the checksum are

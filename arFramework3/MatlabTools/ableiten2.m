@@ -1,4 +1,5 @@
-%% Berechnet die zweite Ableitung
+% out = ableiten2(in, dx)
+% Berechnet die zweite Ableitung
 
 function out = ableiten2(in, dx)
 xsize = length(in);

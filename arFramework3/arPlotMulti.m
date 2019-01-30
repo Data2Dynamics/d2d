@@ -1,13 +1,12 @@
+% arPlotMulti(ps, [ps_weigths, saveToFile, filenameAddition])
 % Plot models and datasets
 %
-% arPlotMulti(ps, ps_weigths, saveToFile, filenameAddition)
-%
 % ps                    par values
-% ps_weigths            par weights
+% ps_weigths            par weights [ones]
 % saveToFile            [false]
 % filenameAddition      ['']
 % 
-%   Example
+%   Example:
 % arFitLHS(100)
 % arPlotMulti(ar.ps)
 

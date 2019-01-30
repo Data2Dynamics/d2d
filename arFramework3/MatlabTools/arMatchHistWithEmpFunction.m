@@ -1,3 +1,4 @@
+% scale = arMatchHistWithEmpFunction(xh,nh,xf,yf)
 % Match empirical function data with histogram
 
 function scale = arMatchHistWithEmpFunction(xh,nh,xf,yf)

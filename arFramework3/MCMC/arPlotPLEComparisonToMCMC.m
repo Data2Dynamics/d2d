@@ -1,9 +1,9 @@
-% function arPlotPLEComparisonToMCMC(ParaPerFigure,ParaVector,BayesianCredibleInterval,LogScale)
+% arPlotPLEComparisonToMCMC([ParaPerFigure,ParaVector,BayesianCredibleInterval,LogScale])
 %
-%  NumberOfPlottedParametersPerFigure (16)
-%            Number of parameters that are plotted into same figure 
+%  ParaPerFigure [16]
+%       Number of parameters that are plotted into same figure 
 %
-%  ParaVector
+%  ParaVector [find(ar.qFit==1)]
 %       Give parameter vector to only plot correlations of certain
 %       parameters, e.g. ParaVector = [ 1 2 3 4 6 9 112 114]
 %

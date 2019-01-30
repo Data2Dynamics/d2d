@@ -1,10 +1,13 @@
-% TS = arEstimateTimeScales(opt,doplot)
+% TS = arEstimateTimeScales([opt,doplot])
 % 
 %   Estimates the (maximal, i.e. slowest) time scale of the dynamics using
 %   the transient function.
 %   The time scale is the decrease to 1/e.
 % 
 % upper bound for TS ist set to ar.model(m).tLim(2)*10
+%
+%  opt    ['']     use data '' or use simu 'x'
+%  doplot [false]
 % 
 % Examples:
 % 

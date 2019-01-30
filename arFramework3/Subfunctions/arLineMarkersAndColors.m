@@ -1,6 +1,5 @@
+% C = arLineMarkersAndColors([j,n,color,markerstyle,linestyle])
 % create line styles and color
-%
-% C = arLineMarkersAndColors(j,n,color,markerstyle,linestyle)
 
 function C = arLineMarkersAndColors(j,n,color,markerstyle,linestyle)
 

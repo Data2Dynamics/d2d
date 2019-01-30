@@ -1,3 +1,10 @@
+% [] = arGetDataDoseResponse(jm, ds, ttime, dLink, jtype, xtrafo)
+% Get Data entries of ar.model(jm).data(ds).conditions at time ttime as array and plot
+%
+% jtype = 1: data y is plotted
+% jtype = 2: dynamics x is plotted
+% jtype = 3: v is plotted
+
 function [t, y, ystd, tExp, yExp, yExpStd, lb, ub, zero_break, data_qFit, yExpHl] = ...
     arGetDataDoseResponse(jm, ds, ttime, dLink, jtype, xtrafo)
 global ar

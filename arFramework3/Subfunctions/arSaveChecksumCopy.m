@@ -1,3 +1,5 @@
+% arSaveChecksumCopy(arCopy,type,checkstr)
+%
 % This function saves a struct into Folder 'Checksums'. The struct should
 % contain all fields which are evaluated for creating the checksum.
 % 

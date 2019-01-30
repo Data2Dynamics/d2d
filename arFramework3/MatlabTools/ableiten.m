@@ -1,4 +1,5 @@
-%% Berechnet die erste Ableitung
+% out = ableiten(in, dx)
+% Berechnet die erste Ableitung
 
 function out = ableiten(in, dx)
 out = in*0;

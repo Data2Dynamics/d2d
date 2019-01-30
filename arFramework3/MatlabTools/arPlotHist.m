@@ -1,3 +1,7 @@
+% [N, centers] = arPlotHist(data, edges, xf, yf, vertical)
+% Plots Histogram and shows scaling of empirical data xf,yf
+
+
 function [N, centers] = arPlotHist(data, edges, xf, yf, vertical)
 
 if(~exist('vertical','var'))

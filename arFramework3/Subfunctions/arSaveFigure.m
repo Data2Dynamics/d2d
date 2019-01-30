@@ -1,3 +1,6 @@
+% [ savePath, nRows, nCols ] = arSaveFigure(h, name, subdir)
+% Saves graphic object h to [arSave subdir '/' name]
+
 function [ savePath, nRows, nCols ] = arSaveFigure(h, name, subdir)
 
 global ar

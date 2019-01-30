@@ -1,10 +1,16 @@
-% Code based on published code by Marko Laine (2006): MCMC toolbox for Matlab
-% http://helios.fmi.fi/~lainema/mcmc/#sec-2
+% function arGewekePlot([a,b,chain])
 % Plots Geweke's diagnostic for increasing number o
 %
-% function arGewekePlot(a,b,chain)
+%   a       Bound for lower fraction of chain       [0.1]
+%   b       Bound for upper fraction of chain       [0.5]
+%   chain   sample of MCMC chain analysed           [ar.ps]
+%
+% See also ARGEWEKE
+%
+% Code based on published code by Marko Laine (2006): MCMC toolbox for Matlab
+% http://helios.fmi.fi/~lainema/mcmc/#sec-2
 
-function zz=arGewekePlot(varagin)
+function zz=arGewekePlot(varargin)
 %GEWEKEPLOT Plot Geweke's diagnostic
 % gewekeplot(chain) plots Geweke's diagnostic for increasing number of 
 % iterations. See arGeweke.m
