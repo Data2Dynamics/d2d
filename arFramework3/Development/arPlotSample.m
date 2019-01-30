@@ -1,4 +1,8 @@
-% plot sampling of likelihood
+% arPlotSample
+% 
+% plot sampling of likelihood, run after arSample
+% 
+% See also arSample
 
 function arPlotSample
 

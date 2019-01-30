@@ -1,14 +1,13 @@
-% py_struct = arToPython(struct)
+% py_struct = arToPython([struct])
 %
 %   Converts the ar struct to a python friendly structure.
-%   
+%
+%       struct      is the input struct              [ar]
+%       py_struct   new python compatible ar struct
+% 
 %   Essentially converts mxn cells to a 1xm cell containing m 1xn cells. 
 %   There might still be data types unsupported for python import, 
 %   but afaik none of them are used in the ar struct as of now.
-%
-%   py_struct   new python compatible ar struct
-%   struct      optional struct (default = global ar)
-
 
 function py_struct = arToPython(struct)
 

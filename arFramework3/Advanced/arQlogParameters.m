@@ -1,18 +1,23 @@
 % arQlogParameters(whichone,newval)
 % 
-%   This function can be used to change ar.qLog10
-%   The parameter values (ar.p), upper and lower bounds (ar.lb, ar.ub) are
-%   updated accordingly.
+% This function can be used to change ar.qLog10
+% The parameter values (ar.p), upper and lower bounds (ar.lb, ar.ub) are updated accordingly.
 % 
+%   whichone    specify which parameters to (back)log transform
+%                   1) string that identifies the parameter
+%                   2) vector of parameter indices to be transformed
+%   newval      specify whether log transformation(newval = 1) or back
+%               transformation(newval = 0)
+%                   1) number 0 or 1. All parameters of whichone will be
+%                      transformed accordingly.
+%                   2) vector containing 0s and 1s with same length as
+%                      whichone
 % 
-%   Examples:
-% arQlogParameters(1,1) % log-trsf of the first parameters (if not already done)
-% 
-% arQlogParameters(1,0) % inverse log-trsf of the first parameters (if not already done)
-% 
-% arQlogParameters('init_Epo',1) % log-trsf of parameter 'init_Epo' (if not already done)
-% 
-% arQlogParameters([1,3,4],1) % log-trsf of the parameters 1, 3, 4 (if not already done)
+% Examples:
+% 1) arQlogParameters(1,1) % log-trsf of the first parameter (if not already done)
+% 2) arQlogParameters(1,0) % inverse log-trsf of the first parameter (if not already done)
+% 3) arQlogParameters('init_Epo',1) % log-trsf of parameter 'init_Epo' (if not already done)
+% 4) arQlogParameters([1,3,4],1) % log-trsf of the parameters 1, 3, 4 (if not already done)
 
 function arQlogParameters(whichone,newval)
 global ar

@@ -1,21 +1,18 @@
-% arExportMatlab(m)
+% arExportMatlab([m])
 % 
-%   m       model index, default: 1
+% This function writes two matlab files
+%   1) one file representing the ODE system which can be called by ode15s
+%   2) a file for integrating the odes via ode15s
 % 
-%   This function writes two matlab files
-%       1) one file representing the ODE system which can be called by
-%       ode15s
-%       2) a file for integrating the odes via ode15s
+%   m   model index [1]
 % 
 % The function has been tested for Raia, Becker, Bachmann, Boehm.
 % Swameye does not work because the c-function for splines occuring in the
 % ODEs is not available.
 % 
 % Examples:
-%   arExportMatlab  % ar.model(1) is exported
-% 
-%   arExportMatlab(1:length(ar.model)) % all models are exported
-% 
+%   1) arExportMatlab  % ar.model(1) is exported
+%   2) arExportMatlab(1:length(ar.model)) % all models are exported
 
 function arExportMatlab(m)
 
