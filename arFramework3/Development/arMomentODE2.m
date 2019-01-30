@@ -1,8 +1,8 @@
-% calculate moment ODEs
+% function arMomentODE2(m)
 %
-% arMomentODE2(m)
+% Calculate moment ODEs up to the nth moment and prints them.
 %
-% calculate up to 2nd moment
+%   m       - model index
 %
 % A Moment Closure Method for Stochastic Reaction Networks
 % Chang Hyeong Lee,	Kyeong-Hun Kim,	Pilwon Kim, February 25, 2009
@@ -40,7 +40,6 @@ for jx = 1:length(x)
 end
 
 dxdt = sym(zeros(size(x)));
-
 for ji = 1:length(x)
     for jk = 1:length(fv)
         tmp = sym(0);

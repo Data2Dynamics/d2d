@@ -1,9 +1,10 @@
-% calculate moment ODEs
+% function arMomentODE(m, n)
 %
-% arMomentODE(m, n)
+% Calculate moment ODEs up to the nth moment and prints them.
 %
-% calculate up to n'th moment
-
+%   m       - model index
+%   n       - maximum moment
+%
 
 function arMomentODE(m, n)
 
