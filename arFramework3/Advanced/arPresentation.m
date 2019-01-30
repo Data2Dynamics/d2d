@@ -962,17 +962,7 @@ fprintf('done\n');
 
 %% pdflatex
 
-if(isunix)
-    fprintf('pdflatex, file %s...', fname);
-    cd(savePath);
-    eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
-    eval(['!bibtex ' fnamebib ' > log_bibtex.txt']);
-    eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
-    eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
-    cd('../../..');
-    copyfile([savePath '/' 'presentation.pdf'], [savePath '/' sprintf('presentation_%s.pdf', datestr(now,30))])
-    fprintf('done\n');
-elseif(ismac)
+if(ismac)
     fprintf('pdflatex, file %s...', fname);
     cd(savePath);
     eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
@@ -982,7 +972,18 @@ elseif(ismac)
     cd('../../..');
     copyfile([savePath '/' 'presentation.pdf'], [savePath '/' sprintf('presentation_%s.pdf', datestr(now,30))])
     fprintf('done\n');
+elseif(isunix)
+    fprintf('pdflatex, file %s...', fname);
+    cd(savePath);
+    eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
+    eval(['!bibtex ' fnamebib ' > log_bibtex.txt']);
+    eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
+    eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
+    cd('../../..');
+    copyfile([savePath '/' 'presentation.pdf'], [savePath '/' sprintf('presentation_%s.pdf', datestr(now,30))])
+    fprintf('done\n');
 end
+
 
 function lp(varargin)
 if(nargin>2)
@@ -1013,7 +1014,7 @@ hmstimestr = sprintf('%02i:%02i:%05.2f', hours, minutes, seconds);
 function str = myFormulas(str, jm)
 global ar
 
-str = latex(sym(str));
+str = latex(str2sym(str));
 
 if(verLessThan('symbolic', '4.9')) % maple
 	str = strrep(str, '\,', ' \cdot ');
