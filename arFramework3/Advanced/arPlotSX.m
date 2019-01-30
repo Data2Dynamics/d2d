@@ -1,6 +1,11 @@
-% Plot X models sensitivities
+% function arPlotSX
 %
-% arPlotSX
+% Plot state sensitivities of the model state variables. If parameters are 
+% being specified/fitted in logspace (as set in ar.qLog10), then these
+% sensitivities will also be shown in that space. If finite differences 
+% have been computed, these will also be plotted.
+%
+% See also arPlotSY, arPlotSYSTD
 
 function arPlotSX
 
@@ -12,7 +17,6 @@ end
 
 arSimu(true,false,true) % update exp. time grid, e.g. sxExpSimu
 arSimu(true,true,true) % update fine time grid, e.g. sxFineSimu
-
 
 fcount = 1;
 for jm = 1:length(ar.model)
@@ -43,7 +47,7 @@ for jm = 1:length(ar.model)
                 hold(g, 'on');
                 % plot(g, ar.model(jm).condition(jc).tExp, squeeze(ar.model(jm).condition(jc).suExpSimu(:,ju,jp)), 'o');
                 if(isfield(ar.model(jm).condition(jc), 'suExpSimuFD'))
-                    plot(g, ar.model(jm).condition(jc).tExp, ar.model(jm).condition(jc).suExpSimuFD(:,ju,jp), linestyle{2:3}, 'Marker', '*');
+                    plot(g, ar.model(jm).condition(jc).tExp, ar.model(jm).condition(jc).suExpSimuFD(:,ju,jp), linestyle{1:2}, 'LineStyle', 'none', 'Marker', '*');
                 end
             end
             hold(g, 'off');
@@ -64,7 +68,7 @@ for jm = 1:length(ar.model)
                 hold(g, 'on');
                 % plot(g, ar.model(jm).condition(jc).tExp, squeeze(ar.model(jm).condition(jc).sxExpSimu(:,jx,jp)), 'o');
                 if(isfield(ar.model(jm).condition(jc), 'sxExpSimuFD'))
-                    plot(g, ar.model(jm).condition(jc).tExp, ar.model(jm).condition(jc).sxExpSimuFD(:,jx,jp), linestyle{:}, 'Marker', '*');
+                    plot(g, ar.model(jm).condition(jc).tExp, ar.model(jm).condition(jc).sxExpSimuFD(:,jx,jp), linestyle{1:2}, 'LineStyle', 'none', 'Marker', '*');
                 end
             end
             hold(g, 'off');
@@ -87,7 +91,7 @@ for jm = 1:length(ar.model)
                 hold(g, 'on');
                 % plot(g, ar.model(jm).condition(jc).tExp, squeeze(ar.model(jm).condition(jc).szExpSimu(:,jz,jp)), 'o');
                 if(isfield(ar.model(jm).condition(jc), 'szExpSimuFD'))
-                    plot(g, ar.model(jm).condition(jc).tExp, ar.model(jm).condition(jc).szExpSimuFD(:,jz,jp), linestyle{:}, 'Marker', '*');
+                    plot(g, ar.model(jm).condition(jc).tExp, ar.model(jm).condition(jc).szExpSimuFD(:,jz,jp), linestyle{1:2}, 'LineStyle', 'none', 'Marker', '*');
                 end
             end
             hold(g, 'off');

@@ -1,14 +1,20 @@
-% Plot Y models sensitivities
+% function arPlotSY
 %
-% arPlotSY
+% Plot observable sensitivities of the model state variables. If parameters 
+% are being specified/fitted in logspace (as set in ar.qLog10), then these
+% sensitivities will also be shown in that space. If finite differences 
+% have been computed, these will also be plotted.
+%
+% See also arPlotSX, arPlotSYSTD
 
 function arPlotSY
 
 global ar
-
 if(isempty(ar))
     error('please initialize by arInit')
 end
+
+arSimu(true,true,true) % update fine time grid, e.g. sxFineSimu
 
 fcount = 1;
 for jm = 1:length(ar.model)

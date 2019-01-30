@@ -1,6 +1,6 @@
-% arLoadData(name, m, extension, removeEmptyObs, opts)
+% arLoadData(name, [m], [extension], [removeEmptyObs], [opts])
 %
-% Load data set to next free slot
+% Load data set to next free slot(s)
 %
 %   name                      filename of data definition file
 %   m                         target position (int) for modelor: model 
@@ -13,7 +13,7 @@
 %                             [false]
 %   opts                      additional option flags
 %
-%   optional option flags are:
+%   Optional option flags are:
 %   'RemoveConditions'        This flag followed by a list of conditions will
 %                             allow you to filter the data that you load. Note
 %                             that the function takes both values, strings

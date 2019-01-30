@@ -1,15 +1,29 @@
-% Function used to control some additional interactivity enhancement
-% callbacks. Since these may slow down the plots on some systems, they are
-% off by default. Activate them by calling "interactivity on".
+% arInteractivity([opts])
 %
-% Note that interactivity has to be on when the plot is created for the
-% callbacks to be registered. This is to keep the profile low when
-% interactivity is not desired.
+%   Function used to control some additional interactivity enhancement
+%   callbacks. Since these may slow down the plots on some systems, they are
+%   off by default. Activate them by calling "interactivity on".
 %
-% Currently supported interactive modes:
-%   plePlot =>  Click on the individual parameter curves to change legend
-%               entries.
-
+%   Note that interactivity has to be on when the plot is created for the
+%   callbacks to be registered. This is to keep the profile low when
+%   interactivity is not desired.
+%
+%   Specify the name of an interactivity mode to activate it.
+%
+%   Currently supported interactive modes:
+%     plePlot           Click on the individual parameter curves to change
+%                       legend entries.
+%     arCompareModel    Clicking shows the model plots in the
+%                       arCompareModel grid.
+%     arResponseCurve   Click on the curve to add a little label with the
+%                       relevant value.
+%     off               Disable all arInteractivity options.
+%     on                Enable all arInteractivity options.
+%
+%   Example:
+%       arInteractivity on
+%
+%   See also plePlot, arCompareModel, arResponseCurve
 
 function interactive = arInteractivity( varargin )
 

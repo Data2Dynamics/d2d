@@ -8,7 +8,7 @@
 % This function plots the fluxes for those conditions where flux plotting
 % is enabled (this can be set with arPlotter).
 %
-% See also arPlotter, arPlot, arPlotX, arPlotY, arPlot2
+% See also arPlotter, arPlot, arPlotX, arPlotY, arPlot2.
 
 function arPlotV(saveToFile, fastPlot)
 

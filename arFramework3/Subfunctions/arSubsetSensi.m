@@ -1,3 +1,5 @@
+% arSubsetSensi
+%
 % This function needs to be called before simulating with the sensitivity
 % subset option activated. It prepares some data structures required for
 % determining which sensitivities to simulate.

@@ -1,13 +1,12 @@
-% Plot model equilibration
-%   This function plots the model pre-equilibration up to the point where
-%   equilibration was successful. It is primarily meant for debugging
-%   purposes.
+% function arPlotEquilibration( model, ss_condition, [N] )
 %
-%   function arPlotEquilibration( model, ss_condition, [N] )
+% This function plots the model pre-equilibration up to the point where
+% equilibration was successful. It is primarily meant for debugging
+% purposes.
 %   
-%       model           - Model index
-%       ss_condition    - Steady state condition to plot
-%       N               - Number of time points to show
+%   model           - Model index
+%   ss_condition    - Steady state condition to plot
+%   [N]             - Number of time points to show
 %
 
 function arPlotEquilibration( model, ss_condition, N )
