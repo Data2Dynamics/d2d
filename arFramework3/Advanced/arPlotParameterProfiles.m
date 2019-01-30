@@ -28,7 +28,7 @@ figure(1); clf;
 dchi2 = chi2inv(0.95, 1);
 
 [nrows, ncols] = arNtoColsAndRows(length(jks));
-ncols
+
 count = 1;
 for j=jks
     g = subplot(nrows,ncols,count);
