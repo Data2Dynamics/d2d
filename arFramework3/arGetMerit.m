@@ -1,22 +1,20 @@
-%   [meritval, meritvals, meritLabel] = arGetMerit
-%   [meritval, meritvals, meritLabel] = arGetMerit(silent)
-%   [meritval, meritvals, meritLabel] = arGetMerit(whichone)
+%   [meritval, meritvals, meritLabel] = arGetMerit([silent])
+%   [meritval, meritvals, meritLabel] = arGetMerit([whichone])
 % 
-%   silent      false/true, default: false
-%   whichone    character indicating which merit should be calculated
-%               default: '' (then the optimization merit is calculated)
-%               'lsqnonlin'
-%               'loglik_all': the total likelihood incl. ar.chi2constr
-%               'loglik': the likelihood except ar.chi2constr
-%               'chi2fit': total chi2 except chi2constr
-%               'chi2_all': the total chi2 incl. chi2constr
+%   This function prints different loss/objective functions which can
+%   be used for optimization/parameter estimation. 
+% 
+%   silent      logical or numeric         [false]
+%   whichone    string indicating which merit should be calculated  ['']
+%               '' (default)    the optimization merit is calculated
+%               'lsqnonlin'     residuals used by lsqnonlin
+%               'loglik_all'    the total loss (likelihood), e.g. incl. ar.chi2constr
+%               'loglik'        the likelihood except ar.chi2constr
+%               'chi2fit'       total chi2 except ar.chi2constr
+%               'chi2_all'      the total chi2 incl. ar.chi2constr
 % 
 %               The argument whichone can be used to keep the old
 %               terminology.
-% 
-% 
-%   This function prints different merits/objective functions which can
-%   be used for optimization/parameter estimation.
 % 
 %   ATTENTION: arCalcMerit, arSimu, ... are NOT called automatically (only
 %   if ar.res_type is missing). To update residuals and merits this has to
@@ -32,25 +30,60 @@
 %       meritLabel  name/label of meritval as it can be used for plot
 %       labels
 % 
-%   See: 
-%   https://github.com/Data2Dynamics/d2d/wiki/Objective%20function,%20likelhood%20and%20chi-square%20in%20the%20d2d%20framework
+% Example 1: Printing merit at the command line:
+% >> arGetMerit
+% -2*log(L) = -258.491, 85 data points, 16 free parameters, , 92.8272 violation of 1 prior assumptionsdata chi^2 = 83.9998
 % 
+% Example 2: Value of objective function currently used for optimization: 
+% >> objfun = arGetMerit
+% -2*log(L) = -258.491, 85 data points, 16 free parameters, , 92.8272 violation of 1 prior assumptionsdata chi^2 = 83.9998
+% objfun =
+%  -258.4913
 % 
-%   Example 1: Printing merit at the command line:
-%   arGetMerit
+% Example 3: Value of objective function currently used for optimization
+% and other merits and merit terms:
+% >> [meritval, allmerits] = arGetMerit
+% -2*log(L) = -258.491, 85 data points, 16 free parameters, , 92.8272 violation of 1 prior assumptionsdata chi^2 = 83.9998
+% meritval =
+%  -258.4913
+% allmerits = 
+%   struct with fields:
 % 
-%   Example 2: Value of objective function currently used for optimization: 
-%   objfun = arGetMerit
+%                    loglik: -258.4913
+%                loglik_all: -258.4913
+%                 lsqnonlin: 3.7853e+03
+%                  chi2_all: -414.7108
+%                  chi2_res: 83.9998
+%                  chi2_err: -591.5378
+%             chi2_err_addc: 3.6085e+03
+%               chi2_constr: 0
+%                chi2_prior: 92.8272
+%               chi2_random: 0
+%                      chi2: 176.8270
+%                 ple_merit: []
+%                      nres: 169
+%                     ndata: 85
+%                      nerr: 84
+%                   nconstr: 0
+%                    nprior: 1
+%                     npara: 16
+%                 fiterrors: 0
+%      fiterrors_correction: 1.1667
+%     useFitErrorCorrection: 1
 % 
-%   Example 3: Value of objective function currently used for optimization
-%   and other merits and merit terms:
-%   [meritval, allmerits] = arGetMerit
+% Example 4: silent:
+% >> meritval = arGetMerit(true)
+% meritval =
+%  -258.4913
 % 
-%   Example 4: silent:
-%   meritval = arGetMerit(true);
+% Example 5: Special merit value:
+% >> chi2prior = arGetMerit('chi2prior')
+% chi2prior =
+%    92.8272
 % 
-%   Example 5: Special merit value:
-%   chi2prior = arGetMerit('chi2prior');
+% See https://github.com/Data2Dynamics/d2d/wiki/Objective%20function,%20likelhood%20and%20chi-square%20in%20the%20d2d%20framework
+% 
+% See also arCalcMerit, arCollectRes
 
 function varargout = arGetMerit(arg1)
 if nargin==1

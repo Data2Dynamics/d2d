@@ -1,3 +1,27 @@
+% set_optTols
+% 
+% Adaptation of integration tolerance during optimization depending on
+% scaling of the states in the observables.
+% 
+% This function modifies Matlabs snls.m to choose integration accuracies
+% depending on scaling parameters. A new function snls is created which
+% might serve as an alternative to matlab's snls. 
+% 
+% Matlab's function is used to satisfy for potential copyright conflicts.
+% 
+% To better understand how snls is modified, compare both versions, e.g. by
+% a diff.
+% 
+% If you want to return to matlab's original code, the created function has
+% to be removed or the matlab search path has to be chosen properly.
+% 
+% See also l1trdog
+% 
+% Example:
+% which('snls','-all')
+% set_optTols
+% which('snls','-all')
+
 function set_optTols
 
 checksum_snls   = 'e626595261d4e4aa5eb8b93f3504478c'; % Modified snls.m

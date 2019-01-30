@@ -1,3 +1,5 @@
+% l1Init(jks, means, lbs, ubs, linv, thresh, type, range, user_estim,refit)
+%
 % Initialization of L1 scan
 % jks    relative parameters to be investigated by L1 regularization
 
@@ -5,21 +7,15 @@ function l1Init(jks, means, lbs, ubs, linv, thresh, type, range, user_estim,refi
 
 global ar
 
-
-
 if(isempty(ar))
     error('please initialize by arInit')
 end
-
-
 
 if(~exist('jks','var') || isempty(jks))
     arPrint
     fprintf('\n')
     error('please specify L1 parameters from above')
 end
-
-
 
 if(~exist('means','var') || isempty(means))
     means = zeros(size(jks));

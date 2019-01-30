@@ -1,17 +1,24 @@
-% Smoothen jumps to local optima
-%
-% Usage: 
-%   function pleSmooth(jk, quick, point, dr)
+% pleSmooth(jk, [quick], [point], [dr])
 % 
-% Mandatory parameter:
-%   jk         parameter to smoothen
+% Smoothen jumps (peaks) in a likelihood profile which might occure because
+% of local optima. Removing these peaks is performed by repeating
+% optimization by other initial guesses (for the non-profiled parameters).
 %
-% Optional parameters
-%   quick      skip selection and pick the first trial point (default = 0) 
+%   jk         parameter index for the profile to be smoothend
+%   quick      skip selection and pick the first trial point 
+%              [default = 0]
 %   point      provide custom parameter value to start at (closest point
 %              will be chosen)
 %   dr         initial search direction (-1 or 1; required when point is 
 %              specified)
+% 
+% Sometimes it is reasonable to call pleSmooth repeatedly to eliminate all
+% peaks.
+% 
+% Example:
+% arPLEInit
+% ple(1)
+% pleSmooth
 
 function pleSmooth(jk, quick, point, dr)
 
