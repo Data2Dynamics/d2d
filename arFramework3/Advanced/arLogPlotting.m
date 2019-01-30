@@ -1,6 +1,10 @@
-% toggle log-plotting option
+% arLogPlotting(logplotting) 
+% 
+% Set the log-plotting option of all plots 
+% 
+%  logplotting     Boolean, false: plot on linear scale, 
+%                           true:  plot on log-scale
 %
-% arLogPlotting(logplotting)
 
 function arLogPlotting(logplotting)
 global ar

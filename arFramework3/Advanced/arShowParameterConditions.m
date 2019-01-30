@@ -1,3 +1,13 @@
+% arShowParameterConditions([m],[d])
+%
+%  Shows the substitutions defined in the CONDITIONS section of the
+%  specified model file, data file and the condition with the index d
+%
+%   m     [1]     Index of the model
+%   d     [1]     Index of the data set and index of the condition
+%
+% See also: arShowDataConditionStructure
+
 function arShowParameterConditions(m,d)
 
 global ar
