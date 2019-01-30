@@ -1,7 +1,27 @@
-% Link models, inputs and data sets
+% function arLink([silent], [tExpAdd], [dataAdd], [ix], [id], [im], [newData], [yStd], [add_sec])
+%
+% Link models, inputs and data sets. Has to be called whenever the
+% linkage of experimental data to model, events or desired output time points 
+% are changed.
+%
+%   silent      Do not show linking output.
+%   tExpAdd     Manually add experimental time point (used by arPPL).
+%   dataAdd     Data point to add (used by arPPL).
+%   ix          Model state data point pertains to (used by arPPL).
+%   id          Data index (used by arPPL).
+%   im          Model index (used by arPPL).
+%   newData     Data point to add (used by arPPL).
+%   yStd        Standard deviation of new data point (used by arPPL).
+%   add_sec     Are we adding a second data point (used by arPPL).
 %
 % arLink(silent, tExpAdd)
+%
 
+% TO DO: Refactor tExpAdd and so forth to *NOT* specifically store things
+% in ppl substruct but use the general addition mechanism. Current
+% implementation entangles arLink (a critical core function) to
+% implementational details of one algorithm which is bad. Use arAddData
+% instead.
 
 function arLink(silent, tExpAdd, dataAdd, ix, id, im, newData, yStd, add_sec)
 

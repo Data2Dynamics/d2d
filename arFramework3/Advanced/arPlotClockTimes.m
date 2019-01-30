@@ -1,12 +1,13 @@
 % arPlotClockTimes
 % 
-%   Show execution times of threads and conditions.
+% Show execution times of threads and conditions and allows checking for a
+% ballanced load of the CPU
 
 function arPlotClockTimes
 
 global ar
 
-figure(1)
+figure
 
 c = 1e-3;
 

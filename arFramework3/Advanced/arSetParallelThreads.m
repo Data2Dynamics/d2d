@@ -1,8 +1,17 @@
-% set how many parallel thread n should be executed
+% arSetParallelThreads([n],[silent])
 %
-% arSetParallelThreads(n)
+% Set how many parallel threads of the machine should be used
 %
-% n default = number of cores of machine
+% n         number of threads (default = 2*number of cores of machine)
+% silent    if 'true' supresses output (default = 'false', output is printed)
+%
+% Example:
+%   arSetParallelThreads
+%   >> requesting 8 thread(s) for 23 task(s) on 4 core(s).
+%
+%   arSetParallelThreads(1)
+%   >> requesting 1 thread(s) for 23 task(s) on 4 core(s).
+
 
 function arSetParallelThreads(n, silent)
 

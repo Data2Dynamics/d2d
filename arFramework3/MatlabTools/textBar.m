@@ -1,4 +1,12 @@
-% function textBar(labels, y, ax, col, lb, ub)
+% function textBar(labels, y, [ax], [col], [lb], [ub])
+%
+% Generates a bar diagram with text labels.
+%
+%   labels      cell array of labels
+%   y           bar height
+%   col         color
+%   lb          lower bound of the figure
+%   ub          upper bound of the figure
 
 function textBar(labels, y, ax, col, lb, ub)
 

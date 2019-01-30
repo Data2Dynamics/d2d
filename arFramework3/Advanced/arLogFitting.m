@@ -1,7 +1,8 @@
-% toggle log-fitting option
-%
 % arLogFitting(logfitting)
-
+%
+% Set log-fitting for plotting.
+%
+%   logfitting      Enable logfitting?
 function arLogFitting(logfitting)
 global ar
 

@@ -1,7 +1,14 @@
-% write .dot graphics file and compile to pdf
+% arNetworkGraphCompartments([m])
 %
-% arNetworkGraph(m)
-% m:	model index
+% writes network graph with respect to the defined compartments as a .dot 
+% graphics file and compile to pdf 
+%
+% m:	model index (default: all models within the current loaded project)
+%
+% Note: graphviz package hase to be installed. Homepage: https://graphviz.gitlab.io
+% Under windows, dot has to be excecuded by hand to translate the source file to a pdf.
+%
+% See also: arNetworkGraph
 
 function arNetworkGraphCompartments(m)
 
@@ -28,7 +35,7 @@ if(~exist(savePath, 'dir'))
     mkdir(savePath)
 end
 
-savePath = [savePath sprintf('/%s', ar.model(m).name)];
+savePath = [savePath sprintf('/%s', ar.model(m).name) '_Compartments'];
 
 fid = fopen([savePath '.dot'], 'w');
 

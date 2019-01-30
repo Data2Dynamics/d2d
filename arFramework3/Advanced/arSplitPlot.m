@@ -23,7 +23,7 @@
 % string in case a string comparison is desired. For numeric values, they
 % can simply be compared directly.
 %
-% Note that arguments between brackets are optional
+% Note: Split plots can be removed with arRemoveSplitPlots.
 %
 % Example(s):
 %   arSplitPlot(1, 'myExperiment', 'nobmp', {'input_bmp2', @(x)x==0} )
@@ -31,7 +31,7 @@
 % It is also possible to specify multiple conditions to one anonymous function.
 %   arSplitPlot(1, 'myExperiment', 'nobmp,negdorso', {{'input_bmp2', 'input_dorso'}, @(bmp,dcf)(bmp>0)||(dcf<0)} )
 %
-% See also arPlot, arMergePlot, arMergePlotMulti
+% See also arRemoveSplitPlots, arPlot, arMergePlot, arMergePlotMulti
 function arSplitPlot( varargin )
     
     global ar;

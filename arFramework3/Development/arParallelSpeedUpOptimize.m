@@ -1,9 +1,19 @@
-% 
+% arParallelSpeedUpOptimize([n])
+%
+% Compares runtimes for sequential, default and optimized calls of the
+% conditions for optimization
+%
+% n:    numer of runs (number of test values in the parameter search space 
+%       (generaded by latin hyper cube sampling *no fitting* ) [default = 100]
+%
+% See also arParallelSpeedUpTest
+
+
 function arParallelSpeedUpOptimize(n)
 
 global ar
 
-if(~exist('nruns','var'))
+if(~exist('n','var'))
     n = 100;
 end
 sensis = false;

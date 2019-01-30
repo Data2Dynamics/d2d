@@ -1,4 +1,4 @@
-% arSplitDataConditions( (ar), model, dataIDs, verbose )
+% arSplitDataConditions( [ar], model, dataIDs, verbose )
 %
 % In the D2D system, conditions are typically used by multiple data files.
 % When using the event system, this can be a problem; since one may want to
@@ -9,10 +9,8 @@
 % allows the user to set separate events for these newly created
 % conditions.
 %
-% Usage:
-%   arSplitDataConditions( model, dataIDs, verbose )
-%
 % Input arguments:
+%   [ar]        ar model struct
 %   model       model number (typically 1)
 %   dataIDs     data IDs (hint: you can find these using arFindData)
 %   verbose     show what changes are made to the struct (1 is debug output on)  
@@ -21,6 +19,8 @@
 %   You should invoke this command *before* adding events. Otherwise, 
 %   events will be copied along with the new conditions which can result 
 %   in undefined behaviour.
+%
+% See also arFindData, arAddEvent
 
 function arSplitDataConditions( varargin )
 

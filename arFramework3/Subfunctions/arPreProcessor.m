@@ -1,5 +1,49 @@
-% This function will apply a preprocessor on a file. This will look for
-% #define/#undefine/#ifdef/#ifndef/#else blocks.
+% function fid = preprocess(fid)
+%
+% The preprocessor can be used to incorporate basic compile time logic by 
+% defining or un-defining labels using #define and #undefine. Code blocks 
+% can then be bracketed by #ifdef, #else, #endif statements in order to 
+% selectively activate/deactivate specific parts of the model. 
+% 
+% This function will apply the preprocessor on a file. This will look for
+% #define/#undefine/#ifdef/#ifndef/#else blocks. The result is a file where
+% defined names have been replaced by their definitions and blocks guarded
+% by ifdef's or ifndef's are conditionally kept or discarded based on the
+% state of that flag at the location of parsing.
+%
+%   fid     Handle to be preprocessed.
+%
+% Examples:
+% #define HAS_HILL
+% 
+% #ifdef HAS_HILL
+%     // This code will be evaluated
+% #else
+%     // This code will not be evaluated
+% #end
+% 
+% #undefine HAS_HILL
+% 
+% #ifdef HAS_HILL
+%     // This code will not be evaluated
+% #else
+%     // This code will be evaluated
+% #end
+% 
+% #ifndef HAS_HILL
+%     // This code will be evaluated
+% #else
+%     // This code will not be evaluated
+% #end
+% 
+% //#define TEST
+% #ifdef TEST
+%     // This code will not be evaluated
+% #end
+% 
+% #define VOLUME 5
+% // Any instances of VOLUME after this define will be replaced by 5
+%
 
 function fid = preprocess(fid)
 

@@ -1,28 +1,12 @@
+% arPlotter
+%
+%   Opens arPlotter GUI window which can be used to enable/disable data,
+%   toggle logfitting and logplotting and control which figures are
+%   plotted.
+%
+% See also: arSubPlotter, arTuner
+
 function varargout = arPlotter(varargin)
-% ARPLOTTER MATLAB code for arPlotter.fig
-%      ARPLOTTER, by itself, creates a new ARPLOTTER or raises the existing
-%      singleton*.
-%
-%      H = ARPLOTTER returns the handle to a new ARPLOTTER or the handle to
-%      the existing singleton*.
-%
-%      ARPLOTTER('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in ARPLOTTER.M with the given input arguments.
-%
-%      ARPLOTTER('Property','Value',...) creates a new ARPLOTTER or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before arPlotter_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to arPlotter_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
-
-% Edit the above text to modify the response to help arPlotter
-
-% Last Modified by GUIDE v2.5 21-Aug-2015 17:38:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;

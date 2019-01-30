@@ -1,17 +1,15 @@
-% arPrintSteadyState
+% arPrintSteadyState( [models], [mode] )
 %
 % Prints information about the steady state pre-equilibrations present in
 % the model.
 %
-% Usage:
-%    arPrintSteadyState( (model), (mode) )
-%
-% Optional argument:
-%    Model refers to the model number in the ar structure. If omitted, all
-%    models are traversed.
-%    Mode refers to the display mode (0 = full, 1 = only condition numbers, 
-%    2 = only errors). Note that mode can only be specified if the model
-%    has been specified explicitly
+%    models     refers to the model IDs in the ar structure [1:length(ar.model)]
+%    mode       refers to the display mode  [0]
+%               0 = full 
+%               1 = only condition numbers 
+%               2 = only errors
+% 
+% Note that mode can only be specified if the model has been specified explicitly
 
 function arPrintSteadyState( models, mode )
 

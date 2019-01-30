@@ -1,4 +1,9 @@
-% File to export human-readable formats of a model
+% arWrite_CondXLS([imodel])
+%
+% Export to human-readable formats of a model
+%
+% imodel:   Model index 
+%
 % For every data entry in the struct, the measurements are written out in a
 % single file, together with the model value at these time points
 % 
@@ -6,6 +11,10 @@
 % estimated via error model are stored
 %
 % For the corresponding ODE and parameter output, see arWrite_Benchmark
+%
+% Note: Requires xlwrite, see https://de.mathworks.com/matlabcentral/fileexchange/37560-xlwrite-export-data-to-excel-from-matlab-on-mac-win
+%
+% See also: arWrite_Benchmark
 
 function arWrite_CondXLS(imodel)
 global ar

@@ -1,4 +1,14 @@
-% arCheckParallelSpeedUp(nmax, nrep, sensi, randomseed)
+% arParallelSpeedUpTest(nmax, nrep, sensi, randomseed)
+%
+% Check speedup gained by using multiple threads in parallel
+%
+% nmax:         maximal number of threads used for test (default: machine maximum)
+% nrep:         number of repetitions/fits used for test (default: nrep=100)
+% sensi:        use sensitivities (default: sensi='false')
+% randomseed:   seed used for generation fo intial vaules (optional)
+%
+% See also: arParallelSpeedUpOptimize
+
 
 function arParallelSpeedUpTest(nmax, nrep, sensi, randomseed)
 

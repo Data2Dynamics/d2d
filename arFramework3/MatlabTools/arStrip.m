@@ -1,3 +1,8 @@
+% str = arStrip(str)
+%
+% Strips preceding and trailing whitespaces from a string.
+%
+%   str      string
 function str = arStrip(str)
     spaces = ~isspace(str);
     start = find( spaces, 1 );

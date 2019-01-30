@@ -1,3 +1,21 @@
+% arScanChi2s(jk, [N], [doYs])
+% 
+% Plots change of chi2 when changing parameter between lower and
+% upper bound.
+% 
+%   jk      index of one parameter
+%   N       number of steps between lower and upper bound [100]
+%   doYs    indidicate contributions to changes in chi2 per observable [false]
+% 
+% From the interval [ar.lb(jk), ar.ub(jk)], N equally spaced points are
+% drawn for ar.p(jk) and the likelihood is evaluated with the rest of the 
+% parameters held constant. The change in chi2 is then plotted over 
+% the interval, indicating contributions to the changes per data set. 
+% If doYs = true, the contributions are also split up per observable AND per data set.
+% This function is useful to determine relationships between parameters and data sets.
+% 
+% See also arPlotChi2s
+
 function arScanChi2s(jk, N, doYs)
 
 global ar
@@ -65,7 +83,3 @@ else
     ylabel('chi^2 increase');
 end
 xlabel(strrep(ar.pLabel{jk},'_','\_'))
-
-
-
-

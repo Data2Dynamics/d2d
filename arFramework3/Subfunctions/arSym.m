@@ -1,16 +1,16 @@
-% s = arSym(str)
+% [s] = arSym(str)
 %
-%   This function implements the functionality of sym() in a
-%   version-independent manner.
+% This function implements the functionality of sym() in a
+% version-independent manner.
 % 
-%   This function converts a string into a symbolic variable.
-%   It is required to support matlab's deprecated functionality
-%   of using sym.m with arbitrary strings.
+% This function converts a string into a symbolic expression.
+% It is required to support matlab's deprecated functionality
+% of using sym.m with arbitrary strings.
 %
-%   Example: sym('a+b') worked before R2018a but was replaced by str2sym('a+b')
-%   starting from R2018a.
-
-
+% Example: sym('a+b') worked before R2018a but was replaced by str2sym('a+b')
+% starting from R2018a.
+%
+%   str     string to convert to symbolic expression
 
 function s = arSym(str)
 

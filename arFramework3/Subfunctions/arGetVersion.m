@@ -1,3 +1,11 @@
+% [def_version_code, c_version_code] = arGetVersion
+%
+% Returns the version of the definition file and c version of the code.
+% Note that whenever changes are made in the C file, this version number
+% needs to be updated to trigger a recompile on other models.
+%
+%   def_version_code    Def format version
+%   c_version_code      C version of the code
 function [def_version_code, c_version_code] = arGetVersion
 
 def_version_code = 3;
