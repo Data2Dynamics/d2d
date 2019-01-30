@@ -1,3 +1,20 @@
+% [chi2_out, xSim, exitflag] = arPPL_Chi2Corr(general_struct, t_tmp)
+% 
+%   This function performs one optimization for the calculation of PPLs.
+% 
+% general_struct    PPL result struct
+% t_tmp             The time point where the profile is calculated, passed
+%                   to arLink
+% 
+% chi2_out    Loss function VPL or PPL depending on general_struct.takeY
+%             if  takeY: chi2_out = arGetMerit('chi2') + ((xExp_tmp-xSim)/xstd).^2;
+%             if ~takeY: chi2_out = arGetMerit('chi2');
+% xSim        model prediction
+% exitflag    the optimization exitflag from lsqnonlin
+% 
+% Written by Helge, tried to be documented by Clemens.
+
+
 function [chi2_out, xSim, exitflag] = arPPL_Chi2Corr(general_struct, t_tmp)
         global ar;
         %Set temporal variables

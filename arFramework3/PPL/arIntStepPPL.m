@@ -1,6 +1,22 @@
+% [dps, dx_out, gamma_tmp] = arIntStepPPL(t_tmp, general_struct, stepsize, gamma_tmp)
+% 
+% t_tmp
+% ppl_general_struct    PPL result struct
+%                       model index, condition index etc are taken from
+%                       this struct
+% stepsize
+% gamma_tmp
+% 
+% dps
+% dx_out
+% gamma_tmp
+% 
+% This function calls arPPL_GetChi2
+% 
+% Written by Helge, tried to be documented by Clemens.
+
 function [dps, dx_out, gamma_tmp] = arIntStepPPL(t_tmp, general_struct, stepsize, gamma_tmp)
 global ar;
-
 
 m=general_struct.m;
 c=general_struct.c;

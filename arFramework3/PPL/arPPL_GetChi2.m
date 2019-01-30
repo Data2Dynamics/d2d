@@ -1,8 +1,24 @@
-%  [chi2_out, xSim, it, xSens_tmp, xSim2_out] = arPPL_GetChi2(t_tmp, doPPL_stuff, general_struct, stepsize, tmp_xFit, varargin)
+% [chi2_out, xSim, it, xSens_tmp, xSim2_out] = arPPL_GetChi2(t_tmp, doPPL_stuff, general_struct, stepsize, tmp_xFit, varargin)
 % 
 % used by 
-%   arIntegratePredBand.m
-%   arPPL.m
+%   arIntegratePredBand.m, arPPL.m, arIntStepPPL.m
+% 
+% t_tmp             time point of the prediction where the PPL is
+%                   calculated, passed to arLink
+% doPPL_stuff
+% general_struct
+% stepsize          for times
+% tmp_xFit
+% varargin
+% 
+% chi2_out  
+% xSim      
+% it        
+% xSens_tmp 
+% xSim2_out 
+% 
+% 
+% Written by Helge, tried to be documented by Clemens.
 
 function [chi2_out, xSim, it, xSens_tmp, xSim2_out] = arPPL_GetChi2(t_tmp, doPPL_stuff, general_struct, stepsize, tmp_xFit, varargin)
 

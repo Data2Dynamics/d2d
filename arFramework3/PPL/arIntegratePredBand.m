@@ -1,3 +1,12 @@
+% arIntegratePredBand(general_struct, dir)
+% 
+% ppl_general_struct    PPL result struct
+% dir               direction
+%                   dir=1 => uncertainty in upper direction
+%                   otherwise => uncertainty in lower direction
+% 
+% Written by Helge, tried to be documented by Clemens.
+
 function arIntegratePredBand(general_struct, dir)
     global ar
         

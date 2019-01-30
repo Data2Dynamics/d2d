@@ -1,13 +1,21 @@
-%Set ppl config and options
+% t = PPL_init(ppl_general_struct)
+% 
+% Set ppl config and options which is stored in ar.ppl. This function is
+% called by arPPL.m
+% 
+% ppl_general_struct    PPL result struct
+% 
+% Written by Helge, tried to be documented by Clemens.
+
     
 function t = PPL_init(ppl_general_struct)
     
     global ar;
     
     %Set temporal variables
-    m =ppl_general_struct.m;
+    m = ppl_general_struct.m;
     c = ppl_general_struct.c;
-    t =ppl_general_struct.t;
+    t = ppl_general_struct.t;
     takeY = ppl_general_struct.takeY;
     ix = ppl_general_struct.x_vector;
     ar.ppl.qLog10=0;

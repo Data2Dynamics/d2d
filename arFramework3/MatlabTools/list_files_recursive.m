@@ -5,14 +5,16 @@
 % 
 % 
 %   mode            can be used to speed up:
-%                   if 'files', then only files will be searched
-%                   if 'folders' then only folders will be searched
+%                   if 1 or 'files', then only files will be searched
+%                   if 2 or 'folders' then only folders will be searched
+%                   default: 0 [this means both]
 % 
 %   all_files       all filenames including path
 %   all_folders     all foldernames including path
 % 
 % 
-%   max_depth the maximal depth, the current directory has depth 0
+%   max_depth       the maximal depth, the current directory has depth 0
+%                   default: Inf
 % 
 % 
 % Examples:

@@ -1,21 +1,27 @@
-%   arSaveParOnly(ar)
-%
-%   arSaveParOnly(ar, savepath, filename)
-%
+%   arSaveParOnly(ar, [savepath], [filename])
 %
 % This function is called by arSave or can be used independently of arSave.
 % It extracts the important fields from the ar struct and saves it as
 % workspace in savepath/workspace
 % save only parameters
+% 
+%   ar              global ar struct
 %
-%   savepath        Default: ar.config.savepath
+%   savepath        [ar.config.savepath]
+%                   e.g. './Results/20180702T113829_FirstFit'
 %
-%   filename        Default: 'workspace_pars_only.mat'
+%   filename        ['workspace_pars_only.mat']
 %
 %   Please note, that the global ar is not used here. Instead, ar is
 %   provided as a variable because the variable ar is is required for
 %   storing the compressed version.
+% 
+% Example: 
+% arSaveParOnly(ar,'testfolder','testfile'); 
+% tmp = load(['testfolder',filesep,'testfile.mat']);
+% arLoadPars(tmp.ar)
 %
+    % See also arSave, arLoadPars
 
 function arSaveParOnly(arIn, savepath, filename)
 if ~exist('savepath','var') || isempty(savepath)
