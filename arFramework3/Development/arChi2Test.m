@@ -1,7 +1,4 @@
-% arChi2Test
-% 
-% tests model to data compliance, i.e. the goodness of fit.
-% The p-value is saved to ar.pval
+% chi^2 test for model to data compliance
 
 function arChi2Test
 global ar

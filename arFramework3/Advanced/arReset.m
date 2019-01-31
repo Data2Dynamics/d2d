@@ -3,10 +3,10 @@
 % Reset parameters ar.p=ar.pTrue and updates the merrit
 % function accordingly by calling arCalcMerit
 %
-%   silent  A logical variable that indicates whether output at the command line 
-%           should be prevented [false]
-%               false: no output
-%               true:  arCalcMerit prints to the command line
+%   silent  [false]    Indicates whether output at the command line should
+%                      be prevented
+%           false:     no output
+%           true: arCalcMerit prints to the command line
 % 
 % See also arCalcMerit, arEvaluate
 

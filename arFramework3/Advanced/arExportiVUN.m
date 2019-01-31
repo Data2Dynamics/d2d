@@ -1,13 +1,4 @@
-% arExportiVUN(m, [pthinning])
-% 
-% creates folder iVUN where iVUN-readable files are saved to.
-% 
-%   m           model ID
-%   pthinning   use only every pthinning-th parameter set of ar.ps. 
-%               default behavior: use every fit [1]
-% 
-% Reference:
-% iVUN - http://www.bioinformatics.org/ivun/
+% aka iVUN
 
 function arExportiVUN(m, pthinning)
 

@@ -1,19 +1,18 @@
-% [d,res,sres] = arCheckODETolerances([dtol])
+% d = arCheckODETolerances(dtol)
 % 
-% This function assess the accuracy of ODE intergration by multiplication
-% of atol and rtol with the factors provided as dtol.
+%   This function assess the accuracy of ODE intergration by multiplication
+%   of atol and rtol with the factors provided as dtol.
+%   Default: dtol = 0.1,1,2
 % 
-%   dtol    tolerances will be multiplied with dtol and [0.1,1,2]
-% 
-%   d       result struct containing results with fields:
-%               d.res, d.sres, d.chi2, d.pleMerit    
-%               which is the maximal difference in these scores
-%   res     maximal difference of ar.res
-%   sres    maximal difference of ar.sres
+%   d.res    maximal difference of ar.res
+%   d.sres   maximal difference of ar.sres
+%   d.chi2   maximal difference of arGetMerit('chi2fit')
 % 
 % Example:
-% 1) arCheckODETolerances
-% 2) arCheckODETolerances(logspace(-2,2,5))
+% arCheckODETolerances
+% 
+% Example:
+% arCheckODETolerances(logspace(-2,2,5))
 
 function [d,res,sres] = arCheckODETolerances(dtol)
 if(~exist('dtol','var') || isempty(dtol))

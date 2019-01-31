@@ -1,22 +1,10 @@
-% arSample([N], [parindex], [mode], [range])
-% 
-% Samples the likelihood in parameter space in directions of parindex.
-% 
-%   N           number of sampling steps within the range       [100]
-%   parindex    vector of indices of parameters to sample. 
-%               Maximal length is three.                        [1]
-%   mode        1 for ub to lb                                  [1]
-%               2 for range of PLE
-%               3 for user defined range
-%   range       give the range where to sample (mode = 3): 
-%               range is a cell array of vectors with length two indicating 
-%               lower and upper bound per parameter in parindex. [{[] [] []}]
-% 
-% Results are stored in ar.sampling.
-% For three parameters (parindex) and N = 100, this leads to 10^6 merit function
-% evaluations.
-% 
-% See also arPlotChi2s arScan arScanChi2s
+% sample likelihood
+%
+% arSample(N, parindex, mode, range)
+%
+% mode: 1 for ub to lb (default)
+%       2 for PLE range
+%       3 for user range
 
 function arSample(N, parindex, mode, range)
 
@@ -81,6 +69,7 @@ arWaitbar(-1);
 
 
 function p = makerange(N,parindex, mode, range)
+global ar
 global ar
 
 if(mode==1)

@@ -1,9 +1,8 @@
-% arResample([m], [d])
-% 
-% Resample data in ar.model(m).data(d) for current parameter settings
-% 
-%   m      index of model to resample data.              [all models]
-%   d      index of data to resample data.               [all data]
+% Resample data for current parameter settings
+%
+% arResample(m, d)
+%   m:          model index                    
+%   d:          data index                    
 
 function arResample(m, d)
 

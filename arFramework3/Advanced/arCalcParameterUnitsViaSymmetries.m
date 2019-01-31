@@ -1,23 +1,8 @@
-% [units,erg] = arCalcParameterUnitsViaSymmetries([m])
-% 
-% uses the symmetry detection tool to calculate units of parameters
-% 
-%   m       model index     [1]
-% 
-%   units   cell array of units
-%   erg     result struct containing all kinds of results ('ergebnisse').
-%           see at the end of function
-% 
+% [units,erg] = arCalcParameterUnitsViaSymmetries(m)
+%
 % Example:
 % [units,erg] = arCalcParameterUnitsViaSymmetries;
 % feval(erg.showResult)
-% 
-% References:
-% 1) SymmetryDetectionTool at Benjamin Merkt's website (was online 01/2018):
-%       https://www.bcf.uni-freiburg.de/people/details/merkt
-% 2) Publication: https://www.ncbi.nlm.nih.gov/pubmed/26274260
-% 
-% See also arExportModelToDaniel arReadSymmetryDetectionOutput
 
 function [units,erg] = arCalcParameterUnitsViaSymmetries(m)
 if(~exist('m','var') || isempty(m))
@@ -31,7 +16,7 @@ filenames = arExportModelToDaniel({'model','obsCalcUnits'});
 warning(' The tool currently is only able to calculate the concentration units. Time units are negleted. Parameters without concentration dimension do not occur in the output');
 
 
-python_string = sprintf('python /Users/lukasrefisch/d2d/symmetryDetection/symmetryDetection.py %s %s',filenames{1},filenames{2},' -t --notPretty');
+python_string = sprintf('python symmetryDetection.py %s %s',filenames{1},filenames{2},' -t --notPretty');
 disp(python_string)
 system(python_string);
 

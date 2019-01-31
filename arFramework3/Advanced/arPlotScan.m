@@ -1,13 +1,7 @@
-% arPlotScan([jks], [savetofile])
-% 
-% plot one-dimensional cut of likelihood. All other parameter are fixed.
-%
-%   jks           Parameter indices for which to plot                 [All for which arScan was run]   
-%   savetofile    Logical to indicate whether figures shall be saved  [false]
+% plot one-dimensional cut of likelihood.
+% All other parameter are fixed
 % 
 % The function is intended to be run after arScan.m
-% 
-% See also arScan
 
 function arPlotScan(jks, savetofile)
 

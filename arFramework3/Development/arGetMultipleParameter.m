@@ -1,20 +1,8 @@
-% function [ parameter ] = arGetMultipleParameter([n], [pl])
-%
-% After multi-start fitting this function chooses the best resulting fits.
-% 
-%   pl          logical, that indicates whether plots should be produced [false]
-%   n           1) integer n>1 chooses the n best fits according to ar.chi2s
-%               2) 0<n<1 interprets n as a quantile and chooses those fits that
-%                  are within the thresholds
-% 
-%   parameter   the parameter sets that are chosen by the above criterion.
-% 
-% If pl is set to true, arPlotMulti is called and plots the observables of
-% these parameter sets.
-% 
-% See also arPlotMulti arFitLHS arFits
-
 function [ parameter ] = arGetMultipleParameter(n, pl)
+%
+%
+% pl   [false]
+% n    10
 
 global ar
 

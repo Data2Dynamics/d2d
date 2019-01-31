@@ -1,26 +1,18 @@
-% arScan([jks], [N])
+% scan likelihood
+%
+% arSample(jks, N)
 % 
-% Plots change of chi2 when changing parameter between lower and
-% upper bound.
-% 
-%   jk      index of one parameter                        [find(ar.qFit==1)]
-%   N       number of steps between lower and upper bound [100]
-% 
-% From the interval [ar.lb(jk), ar.ub(jk)], N equally spaced points are
-% drawn for ar.p(jk) and the likelihood is evaluated with the rest of the 
-% parameters held constant. Results (ps and chi2s) are saved to ar.scan.
-% 
-% See also arScanChi2s arSample arPlotScan
+
 
 function arScan(jks, N)
 
 global ar
 
-if(~exist('jks','var') || isempty(jks))
-    jks = find(ar.qFit==1);
-end
 if(~exist('N','var'))
     N = 100;
+end
+if(~exist('jks','var') || isempty(jks))
+    jks = find(ar.qFit==1);
 end
 
 pReset = ar.p;
@@ -59,3 +51,5 @@ fprintf('mean evaluation time %f sec\n', toc/((N+1)*length(jks)));
 
 ar.p = pReset;
 arCalcMerit(false, []);
+
+
