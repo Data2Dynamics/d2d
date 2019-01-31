@@ -1,5 +1,15 @@
-% Select most parsimoneous model found by L1 regularization
-% jks    relative parameters to be investigated by L1 regularization
+% l1SelectOpt([jks], [method])
+% 
+% Select most parsimoneous model found by L1 regularization, i.e. the
+% chosen penalization strength.
+% 
+% jks       [ar.L1jks]
+%           indices of the fold-factor parameters to be investigated by L1
+%           regularization 
+% method    ['LRT'] is default
+%           'BIC' is a possible alternative
+%           The method used for definining the most parsimonious model
+%           
 
 function l1SelectOpt(jks,method)
 
@@ -30,8 +40,7 @@ parsgt0lam0 = length(jks);
 
 signifmat = nan(1,length(chi2s_unpen));
 
-if strcmpi(method,'LRT')
-    
+if strcmpi(method,'LRT')    
     for j = 1:length(chi2s_unpen)
         signifmat(j) = chi2s_unpen(j) - chi2s_lam0 - icdf('chi2',.95,parsgt0lam0-parsgt0(j));
     end
@@ -46,6 +55,8 @@ elseif strcmpi(method,'BIC')
     estpars = sum(ar.type ~= 5) + parsgt0';
     signifmat = log(ar.ndata) * estpars + chi2s_unpen;
     [~, final_ind]  = min(signifmat);
+else
+    error('method %s is not implemented.',method);
 end
     
 

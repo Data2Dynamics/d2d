@@ -1,5 +1,16 @@
-% Select most parsimoneous model found by L1 regularization
-% jks    relative parameters to be investigated by L1 regularization
+% grplasSelectOpt([jks], [method])
+% 
+% Select most parsimoneous model found by group-lasso, i.e. the
+% chosen penalization strength.
+% 
+% jks       [ar.L1jks]
+%           indices of the fold-factor parameters to be investigated by L1
+%           regularization 
+% method    ['LRT'] is default
+%           'BIC' is a possible alternative
+%           The method used for definining the most parsimonious model
+%           
+% See also l1SelectOpt
 
 function grplasSelectOpt(jks,method)
 
@@ -36,7 +47,6 @@ parsgt0lam0 = length(jks);
 
 signifmat = [];
 
-
 if strcmpi(method,'LRT')
     
     for j = 1:length(chi2s_unpen)
@@ -55,9 +65,6 @@ elseif strcmpi(method,'BIC')
     [~, final_ind]  = min(signifmat);
 end
     
-
-
-
 ar.p = ps_unpen(final_ind,:);
 ar.type(jks) = 0;
 ar.qFit(jks) = 1;

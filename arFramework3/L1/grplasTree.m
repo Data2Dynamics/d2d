@@ -1,6 +1,8 @@
+% grplasTree
+% 
 % Plot L1 scan summary
 
-function grplasTree(jks)
+function grplasTree
 
 global ar
 
@@ -8,10 +10,8 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
-if(~exist('jks','var') || isempty(jks))
-    if(~isfield(ar.grplas,'jks') || isempty(ar.grplas.jks))
-        error('please initialize by grplasInit, run grplasScan, grplasUnpen, and grplasSelectOpt')
-    end
+if(~isfield(ar.grplas,'jks') || isempty(ar.grplas.jks))
+    error('please initialize by grplasInit, run grplasScan, grplasUnpen, and grplasSelectOpt')
 end
 
 jks = ar.grplas.jks;

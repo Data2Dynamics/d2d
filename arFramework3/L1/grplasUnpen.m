@@ -1,8 +1,11 @@
+% grplasUnpen([jks])
+% 
 % Group Lasso Calculating unpenalized solutions with a given subset of 
 %   parameters fixed to 0
-
-% jks    relative parameters to be investigated by L1 regularization
-% linv   width, i.e. inverse slope of L1 penalty (Inf = no penalty; small values = large penalty)
+% 
+% jks             indices of the fold-factor parameters to be investigated by L1
+%                 regularization 
+%                 [find(ar.type == 5)] is default
 
 function grplasUnpen(jks)
 
@@ -22,7 +25,6 @@ if(~exist('jks','var') || isempty(jks))
         error('please initialize by grplasInit and run grplasScan')
     end
 end
-
 
 if(~isfield(ar,'linv') || isempty(ar.linv))
     error('please initialize by l1Init and run l1scan')

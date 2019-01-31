@@ -1,9 +1,19 @@
 %% DEPRECATED
-
-% L1 scan
-% jks       relative parameters to be investigated by L1 regularization
-% linv      width, i.e. inverse slope of L1 penalty (Inf = no penalty; small values = large penalty)
-% gradient  use a small gradient on L1 penalty ([-1 0 1]; default = 0)
+% l1ScanGrad(jks, [linv], [gradient], [lks], [OptimizerSteps])
+% 
+% Deprecated version of the major function for performing an L1 scan.
+% 
+% jks             indices of the fold-factor parameters to be investigated by L1
+%                 regularization 
+% linv            width, i.e. inverse slope of L1 penalty 
+%                 (Inf = no penalty; small values = large penalty) 
+%                 if provided, it overwrites ar.linv
+%                 [ar.linv] is default
+% gradient        use a small gradient on L1 penalty 
+%                 Possible values: -1, 0, 1 
+%                 [0] is default
+% 
+% See also l1Scan
 
 function l1ScanGrad(jks, linv, gradient)
 

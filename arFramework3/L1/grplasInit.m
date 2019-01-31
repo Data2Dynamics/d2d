@@ -1,10 +1,15 @@
-function grplasInit( jks, means, lbs, ubs, linv, grouping, weights, thresh, refit )
-%GRPLASINIT Necessary initialization for Group Lasso scanning routine
+% GRPLASINIT Necessary initialization for Group Lasso scanning routine
 %   Sets the relevant properties of global ar
+% 
+% grplasInit(jks, [means], [lbs], [ubs], linv, grouping, [weights], [thresh], [refit] )
+% 
 %   jks     parameter indices that shall be penalized
-%   means   mean values of penalized parameters (def. 0)
-%   lbs     lower bounds (def. -5)
-%   ubs     upper bounds (def. +5)
+%   means   mean values of penalized parameters 
+%           [0]
+%   lbs     lower bounds 
+%           [-5]
+%   ubs     upper bounds 
+%           [+5]
 %   linv    inverse penalization strength vector to be scanned over
 %   grouping determines the collection of parameters:
 %           - integer vector in the size of jks: manual setting of groups
@@ -16,7 +21,8 @@ function grplasInit( jks, means, lbs, ubs, linv, grouping, weights, thresh, refi
 %           - 'groupX' : with X integer, clusters X subsequent parameters
 %           together. For jks = [1 2 3 4] and grouping = 'group2', group 1
 %           contains #1 and #2, group 2 contains number #3 and #4.
-%   weights determines the weights applied to each group:
+%   weights [1]
+%           determines the weights applied to each group:
 %           - 1x1 float: same weight for all groups
 %           - length(jks) float array: sets a specific weight for each
 %           parameter
@@ -26,12 +32,21 @@ function grplasInit( jks, means, lbs, ubs, linv, grouping, weights, thresh, refi
 %           - [GL GL] size matrix with GL length of some group will assign
 %           this matrix to each group of size GL. Other groups will have
 %           the identity.
-%   thresh  determines the threshold epsilon below which a parameter is
-%   considered to be equal to zero
+%   thresh  [1e-6]
+%           determines the threshold epsilon below which a parameter is
+%           considered to be equal to zero
+%   refit   [true]
+%           This flag indicates whether the model is fitted prior to
+%           the analysis.
+%           Refit is required if there are priors for the scanned
+%           parameters since these priors are overwritten (temporarily)
+%           for the analysis by L1-priors
+% 
+% See also l1Init, grplasScan
 
+
+function grplasInit( jks, means, lbs, ubs, linv, grouping, weights, thresh, refit )
 global ar
-
-
 
 if(isempty(ar))
     error('please initialize by arInit')
@@ -46,7 +61,7 @@ if(~exist('jks','var') || isempty(jks))
 end
 
 if(~exist('linv','var') || isempty(linv))
-    warning('please specify lambda scan range already in grplasInit')
+    error('please specify lambda scan range already in grplasInit')
 else
     ar.linv = linv;
 end
@@ -104,9 +119,6 @@ ar.std(jks) = Inf;
 grplasSetGrouping(grouping,jks,weights);
 
 ar.grplas.thresh = thresh;
-
-
-
 
 end
 

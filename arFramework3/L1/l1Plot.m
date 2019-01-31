@@ -1,4 +1,9 @@
+% l1Plot([eraseStr])
+% 
 % Plot L1 scan summary
+% 
+% eraseStr      An optional string to be erased from parameter names
+%               i.e. from ar.pLabel
 
 function l1Plot(eraseStr)
 
@@ -8,10 +13,8 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
-if(~exist('jks','var') || isempty(jks))
-    if(~isfield(ar,'L1jks') || isempty(ar.L1jks))
-        error('please initialize by l1Init, run l1Scan, l1Unpen, and l1SelectOpt')
-    end
+if(~isfield(ar,'L1jks') || isempty(ar.L1jks))
+    error('please initialize by l1Init, run l1Scan, l1Unpen, and l1SelectOpt')
 end
 
 jks = ar.L1jks;
@@ -22,8 +25,6 @@ chi2s_lam0 = ar.L1lam0chi2s;
 final_ind = ar.L1final_ind;
 parsgt0 = ar.L1parsgt0;
 signifmat = ar.L1signifmat;
-
-
 
 l = arNameTrafo(ar.pLabel(jks));
 

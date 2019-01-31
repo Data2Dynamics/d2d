@@ -1,9 +1,21 @@
+% l1_PrintDynPars([m],[cell_string],[omit])
+% 
+% This function prints possible transformations for replacements for
+% cell-specific fold-factors to the matlab cmd line,
+% 
+% m             [1] is default
+%               Model where parameters have to be substituted
+% cell_string   ['is_other'] is default
+%               identifier of e.g. different cell-lines
+% omit          [{}] is default    
+% 
 % Substitute all parameters that are fitted to L1-conform parameters
 % Substitution also holds for parameter transformations formulated in the
 % CONDITIONS section of the .def file
-%
-% m: Model where parameters have to be substituted
-% cell_string: identifier of e.g. different cell-lines
+% 
+% To obtain reltos of dynamic parameters between e.g. two cell lines, the
+% output of l1_PrintDynParscan can be parsed into the CONDITIONS section of
+% the model-def file.
 
 function l1_PrintDynPars(m,cell_string,omit)
 global ar
@@ -33,7 +45,7 @@ L1_pars(~isnan(del_L1)) = [];
 [found_SS,found_cells] = setdiff(ar.model(m).p,ar.model(m).fp);
 del_SS = [];
 for iSS = 1:length(found_cells)
-    tmp_regexp = fprintf('^(%s\)$',ar.model(m).p{found_cells(iSS)});
+   tmp_regexp = fprintf('^(%s\)$',ar.model(m).p{found_cells(iSS)});
    if(contains(ar.model(m).fp{found_cells(iSS)},['relto_' ar.model(m).p{found_cells(iSS)}]) || ~isempty(regexp(ar.model.fp{found_cells(iSS)},'^(\d+\)$','ONCE')) || ~isempty(regexp(ar.model.fp{found_cells(iSS)},tmp_regexp,'ONCE')))
        del_SS(end+1) = iSS;
    end

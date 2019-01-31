@@ -1,11 +1,14 @@
 %% DEPRECATED
+% l1CheckOpt(jks)
+% 
 % L1 check optimum
 % After most parsimoneous model is found, do single PLE for each non-specific
 % parameter included in the fitted set to check if others cross 0 at
 % re-optimization. If so, this parameter could also be cell-type specific.
-% jks       relative parameters to be investigated by L1 regularization
-% linv      width, i.e. inverse slope of L1 penalty (Inf = no penalty; small values = large penalty)
-% gradient  use a small gradient on L1 penalty ([-1 0 1]; default = 0)
+% 
+% jks             [ar.L1jks]
+%                 indices of the fold-factor parameters to be investigated by L1
+%                 regularization 
 
 function l1CheckOpt(jks)
 

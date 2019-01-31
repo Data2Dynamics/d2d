@@ -1,7 +1,18 @@
-% L1 scan
-% jks       relative parameters to be investigated by L1 regularization
-% linv      width, i.e. inverse slope of L1 penalty (Inf = no penalty; small values = large penalty)
-% gradient  use a small gradient on L1 penalty ([-1 0 1]; default = 0)
+% l1Seq(jks, linv, gradient, lks,sorting)
+% 
+% L1 scan by a slightly different procedure as l1Scan.m
+% 
+% jks             indices of the fold-factor parameters to be investigated by L1
+%                 regularization 
+%                 [find(ar.type == 3)] is default
+% linv            width, i.e. inverse slope of L1 penalty 
+%                 (Inf = no penalty; small values = large penalty) 
+%                 if provided, it overwrites ar.linv
+% gradient        use a small gradient on L1 penalty 
+%                 Possible values: -1, 0, 1 
+%                 [0] is default
+% 
+% See also l1Scan
 
 function l1Seq(jks, linv, gradient, lks,sorting)
 
@@ -20,8 +31,6 @@ end
 if(isempty(ar))
     error('please initialize by arInit')
 end
-
-
 
 if(~exist('jks','var') || isempty(jks))
     jks = find(ar.type == 3);

@@ -1,6 +1,9 @@
-% Plot L1 scan summary
+% l1Tree
+% 
+% Plot of the L1 scan estimates
+% 
 
-function l1Tree(jks)
+function l1Tree
 
 global ar
 
@@ -8,10 +11,8 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
-if(~exist('jks','var') || isempty(jks))
-    if(~isfield(ar,'L1jks') || isempty(ar.L1jks))
-        error('please initialize by l1Init, run l1Scan, l1Unpen, and l1SelectOpt')
-    end
+if(~isfield(ar,'L1jks') || isempty(ar.L1jks))
+    error('please initialize by l1Init, run l1Scan, l1Unpen, and l1SelectOpt')
 end
 
 jks = ar.L1jks;

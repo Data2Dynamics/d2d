@@ -1,4 +1,11 @@
+% l1Plot([eraseStr])
+% 
 % Plot L1 scan summary
+% 
+% eraseStr      An optional string to be erased from parameter names
+%               i.e. from ar.pLabel
+%
+% See also l1Plot
 
 function grplasPlot(eraseStr)
 
@@ -8,7 +15,6 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
-
 if(~isfield(ar,'grplas'))
     error('please initialize by grplasInit')
 end
@@ -16,7 +22,6 @@ end
 if(~isfield(ar.grplas,'jks') || isempty(ar.grplas.jks))
     error('please initialize by grplasInit, run grplasScan, and grplasUnpen')
 end
-
 
 jks = ar.grplas.jks;
 linv = ar.linv;
@@ -89,8 +94,8 @@ for i = 1:length(jks)
     end
 end
 
-x = 1:size(im_cdata,1);
-
+% x = 1:size(im_cdata,1);
+% 
 % hb = barh(x(parbar>0),linvlog(parbar(parbar>0))+.5*ltick,...
 %     'FaceColor','none','BarWidth',1,'BaseValue',linvlog(1)-.5*ltick);
 

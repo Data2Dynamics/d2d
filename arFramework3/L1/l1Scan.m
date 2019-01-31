@@ -1,9 +1,10 @@
-% l1Scan(jks, [linv], gradient, lks, OptimizerSteps)
+% l1Scan([jks], [linv], [gradient], [lks], [OptimizerSteps])
 % 
 % The major function for performing an L1 scan.
 % 
-% jks             relative parameters to be investigated by L1
+% jks             indices of the fold-factor parameters to be investigated by L1
 %                 regularization 
+%                 [find(ar.type == 3)] is default 
 % linv            width, i.e. inverse slope of L1 penalty 
 %                 (Inf = no penalty; small values = large penalty) 
 %                 if provided, it overwrites ar.linv
@@ -11,11 +12,18 @@
 % gradient        use a small gradient on L1 penalty 
 %                 Possible values: -1, 0, 1 
 %                 [0] is default
+% lks             [lks = 1:length(ar.linv)]
+%                 lambda indices to be analyzed, a subset of ar.linv can be
+%                 chosen. Depending on the regularization type, it also
+%                 represents the indices of ar.gamma or ar.alpharange or
+%                 ar.nu
 % OptimizerSteps  Number of optimization iteration overwriting
 %                 ar.config.optim.Maxiter
 %                 The length of this vector controls the number of
 %                 optimization restarts which are done.
 %                 [1000 20] is default
+% 
+% See also arRegularize, l1Seq
 
 function l1Scan(jks, linv, gradient, lks, OptimizerSteps)
 

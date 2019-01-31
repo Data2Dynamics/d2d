@@ -1,7 +1,23 @@
-function grplasSetGrouping( grouping, jks, weights )
 %GRPLASSETGROUPING Assigns a grouping to ar
 %   Detailed explanation goes here
+% 
+% grplasSetGrouping([grouping], [jks], weights )
+% 
+% grouping      Definition of the parameters groups which are
+%               zero/non-zero simultaneously:
+%               [ones(size(jks))] is default and means all jks are in one group
+%               Alternatively a cell array of parameter names can be used.
+%               Alternative call: 'alt...' (not yet documented).
+%               Alternative call: 'group...' (not yet documented).
+% 
+% jks           indices of the fold-factor parameters to be investigated by L1
+%               regularization 
+%               [find(ar.type == 5)] is default 
+% 
+% weights       Scalar, vector or matrix defining group weights
+%               [1] 
 
+function grplasSetGrouping( grouping, jks, weights )
 global ar
 
 if(~exist('jks','var') || isempty(jks))

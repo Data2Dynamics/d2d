@@ -1,6 +1,11 @@
-% L1 scan
-% jks    relative parameters to be investigated by L1 regularization
-% linv   width, i.e. inverse slope of L1 penalty (Inf = no penalty; small values = large penalty)
+% l1Unpen([jks])
+% 
+% Calculation of the estimated parameters in the unpenalized setting using
+% the penalized estimates as starting points.
+% 
+% jks             indices of the fold-factor parameters to be investigated by L1
+%                 regularization 
+%                 [find(ar.type == 3)] is default
 
 function l1Unpen(jks)
 

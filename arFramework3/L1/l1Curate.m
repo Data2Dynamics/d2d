@@ -1,16 +1,28 @@
 %% DEPRECATED
+% l1Curate([jks], parrem, parcomp, (direction), [section], [check], [gradient], [refit])
+% 
 % L1 curation
 % Remove linearly dependent parameters
-% jks        all L1 parameters
+% 
+% jks        [ar.L1jks]
+%            indices of the fold-factor parameters to be investigated by L1
+%            regularization 
 % parrem     parameter to be removed
-% parcomp    parameter to compensate for removed parameter
+% parcomp    []
+%            parameter to compensate for removed parameter
 % direction  define whether parrem and parcomp positively or negatively connected
-% section    indices to be removed
-% check      check whether curation was successful
-% gradient   specify gradient in L1
-% refit      refit dynamics or just evaluation curation (default: false)
+%            Required, if parcomp is NOT empty
+% section    [1:length(ar.L1linv)]
+%            indices to be removed
+% check      [true]
+%            flag indicating whether a check for successful curation should
+%            be performed
+% gradient   [0]
+%            specify gradient in L1
+% refit      [false]
+%            refit dynamics or just evaluation curation (default: false)
 
-function l1Curate(l1pars, parrem, parcomp, direction, section, check, gradient, refit)
+function l1Curate(jks, parrem, parcomp, direction, section, check, gradient, refit)
 
 global ar
 
@@ -27,11 +39,11 @@ if(~isfield(ar,'L1pcur'))
     ar.L1seccur = {};
 end
 
-if(~exist('l1pars','var') || isempty(l1pars))
+if(~exist('jks','var') || isempty(jks))
     if(~isfield(ar,'L1jks') || isempty(ar.L1jks))
         error('No L1 parameters specified and none present in ar.L1jks.')
     else
-        l1pars = ar.L1jks;
+        jks = ar.L1jks;
     end
 end
 
@@ -71,8 +83,8 @@ L1chi2s = ar.L1chi2s;
 L1chi2fits = ar.L1chi2fits;
 linv = ar.L1linv;
 
-ar.type(l1pars) = 3;
-ar.qFit(l1pars) = 1;
+ar.type(jks) = 3;
+ar.qFit(jks) = 1;
 
 if ~isempty(parcomp)
     L1ps(section,parcomp) = L1ps(section,parcomp)+repmat(direction.*L1ps(section,parrem),1,length(parcomp));
@@ -87,13 +99,13 @@ for i = section
             end
         end
     end
-    ar.std(l1pars) = linv(i) * (1 + gradient * linspace(0,.001,length(l1pars)));
+    ar.std(jks) = linv(i) * (1 + gradient * linspace(0,.001,length(jks)));
     ar.p = L1ps(i,:);
     arChi2
     if refit
         ar.qFit(parrem) = 2;
         arFit
-        ar.qFit(l1pars) = 1;
+        ar.qFit(jks) = 1;
         arChi2
     end
     L1ps(i,:) = ar.p;

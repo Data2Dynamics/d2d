@@ -1,21 +1,11 @@
-function  varargout  = arRegularize( reltos, lambdamin, lambdamax, varargin )
-%ARREGULARIZE Regularizes a given system
+%ARREGULARIZE The major analysis function for regularization of a given system.
+% 
 % To obtain reltos of dynamic parameters between e.g. two cell lines, run
 % l1_PrintDynPars. The output can be parsed into the CONDITIONS sectino of
 % the model.def file
 %
+% [runtime,parsimonious_model] = ARREGULARIZE(RELTOS,LAMBDAMIN,LAMBAMAX, VARARGIN)
 %
-% [runtime,parsimonious_model] = ARREGULARIZE(RELTOS,LAMBDAMIN,LAMBAMAX)
-% Returns 
-%   runtime     nan: if the regularization fails
-%   (optional)  float > 0 if regularization successful, indicating the run 
-%               time in seconds
-%
-%   parsimonious_model: indices of the final model which are left free
-%   (optional)  for optimization (ar.qFit == 1)
-%
-%
-% Takes
 %   reltos      -either char that is included exactly in all fold-change
 %               labels (ar.pLabel), e.g. 'relto' or 'fc'
 %               -or a vector indicating the indices of ar.p that should be
@@ -35,100 +25,110 @@ function  varargout  = arRegularize( reltos, lambdamin, lambdamax, varargin )
 %               4 * 6 + 1 = 25 log steps, arRegularize('relto',0,4,25) does
 %               the same.
 % 
-% Name,Value options:
+% varargin: Name,Value options, e.g.:
+%       'LambdaScale': {'lin','log'}, determines whether the penalty strength
+%                   are chosen as linspace(lambdamin, lambdamax) or as
+%                   logspace(lambdamin,lambdamax). Default: 'log'
 % 
-%   'LambdaScale': {'lin','log'}, determines whether the penalty strength
-%               are chosen as linspace(lambdamin, lambdamax) or as
-%               logspace(lambdamin,lambdamax). Default: 'log'
+%       'IncludePriored': true or false (def.): determines whether other
+%                   parameter priors for fold-changes (!) are overwridden
+% 
+%       'ReleaseFixed': true or false(def.): determines whether parameters that
+%                   are fixed for fits should be released to be fitted during
+%                   regularization
+% 
+%       'Type'      'l1' (Def.) for original l1-penalization,
+%                   'lq' for lq penalization
+%                   'al', 'adaptive', 'adaptive-GW' for Adaptive (Group) Lasso
+%                       penalty: 'adaptive-GW' uses group-wise weights, whereas
+%                       'adaptive' and 'al' yield parameter-wise weights. For
+%                       ungrouped regularization, there is no difference
+%                   'en' for Elastic Net
+% 
+%       'Deform'    Float, Def. 0.2: Deviation of standard l1, indicates
+%                   adaptivity gamma, elasticity alpha or 1-q for lq penalties.
+%                   'Type','weighted' sets Deform to -1, so the weights
+%                   provided as 'Weights' are conserved
+% 
+%       'Sequential' {'none','sorted',lexicographic'}. Default: 'none'. For
+%                   simultaneous scans, provide 'none', for sequential scan
+%                   with parameters tested against zero with ascending modulus,
+%                   try 'sorted', for sequential scan with order as is, use
+%                   'lexicographic'.
+% 
+%       'Weights'   'OLS' or numeric array. Default: 1. If 'Type' is provided 
+%                   as Adaptive(Group) Lasso, then 'Weights' is set to 'OLS'
+% 
+%       'GroupAlign' numeric vector or string. Default: 'none'
+%                   vector: should have the length of the relto-vector,
+%                       indicates group numbers for each index
+%                       Ex.: [1 2 1 1 2] -> parameters with indices            
+%                       l1pars(1), l1pars(3), l1pars(4) belong to the first
+%                       group. parameters with indices l1pars(2) and l1pars(5)
+%                       belong to the second group.
+%                   'altX', 'groupX','single' assign group numbers as follows:
+%                       for 'altX', every X-th parameter belongs to the same
+%                       group; for 'groupX', X subsequent parameters are
+%                       grouped together; 'single' provides one-parameter
+%                       groups (actually original l1, it's better not to use
+%                       this option except for testing purposes)
+%                       Ex.: 'alt3' -> groupalign = [1 2 3 1 2 3 1 2 3 ...],
+%                       'group3' -> groupalign = [1 1 1 2 2 2 3 3 3 ...],
+%                       'single' -> groupalign = 1:length(l1pars)
+%                   'n:m' with n,m integer or end-integer. Then, the group 
+%                       labels (ar.pLabel) are split at the character '_'. 
+%                       Then the substrings with indices n:m are collected an
+%                       parameters having the same results are grouped
+%                       together.
+%                       Example: ar.pLabel =
+%                       {'relto_A_0_CL_1', 'relto_A_0_CL_2', 
+%                        'relto_k_1_CL_1', 'relto_k_1_CL_2',
+%                        'relto_k_2_CL_1', 'relto_k_2_CL_2'};
+%                        'GroupAlign','2:3' OR 'GroupAlign','alt2' groups by
+%                        the strings 'A_0','k_1','k_2' (3 groups),
+%                        whereas 'GroupAlign','4:5' OR
+%                        'GroupAlign','end-1:end', OR 'GroupAlign','group2'
+%                        would group by 'CL_1','CL_2' (2 groups).
+% 
+%       'Test'      {'LRT','BIC'}, Def. 'LRT'. Determines whether Likelihood
+%                   Ratio Test or Bayesian Information Criterion are used to
+%                   find the parsimonious model
+% 
+%       'Means'     array compatible with relto-vector length, or 'keep'.
+%                   Default: 0. Sets the target value/mean value of the
+%                   penalization. 'keep' does not change a mean value provided
+%                   beforehand
+% 
+%       'UpperBounds', 'LowerBounds': 'keep' (def.) or array compatible with
+%                   relto-vector length. Sets parameter constraints for
+%                   fold-changes. Behaves like 'Means'
+% 
+%       'Gradient'  float. Default: 0. Adds a gradient to the optimization, see
+%                   l1 functions for further explanation.
+% 
+%       'Threshold' positive float. Default: 1e-6. Determines epsilon > 0 below
+%                   which a fold-change is considered as zero when shrinking
+%                   the model
+% 
+%       'OptimizerSteps' array containing at position i, how many steps the
+%                   optimization with ar.config.optimizer = i shall do at most.
+%                   Default [1000 20] (1000 steps lsqnonlin, 20 steps fmincon)
+% 
+%       'doPlot','doTree': true, false. Def.: 'doPlot',true,'doTree',false.
+%                   Determines whether l1/grplasPlot and/or l1/grplasTree are
+%                   called
+% 
+%   runtime     nan: if the regularization fails
+%   (optional)  float > 0 if regularization successful, indicating the run 
+%               time in seconds
 %
-%   'IncludePriored': true or false (def.): determines whether other
-%               parameter priors for fold-changes (!) are overwridden
+%   parsimonious_model: indices of the final model which are left free
+%   (optional)  for optimization (ar.qFit == 1)
 %
-%   'ReleaseFixed': true or false(def.): determines whether parameters that
-%               are fixed for fits should be released to be fitted during
-%               regularization
-%
-%   'Type'      'l1' (Def.) for original l1-penalization,
-%               'lq' for lq penalization
-%               'al', 'adaptive', 'adaptive-GW' for Adaptive (Group) Lasso
-%                   penalty: 'adaptive-GW' uses group-wise weights, whereas
-%                   'adaptive' and 'al' yield parameter-wise weights. For
-%                   ungrouped regularization, there is no difference
-%               'en' for Elastic Net
-%
-%   'Deform'    Float, Def. 0.2: Deviation of standard l1, indicates
-%               adaptivity gamma, elasticity alpha or 1-q for lq penalties.
-%               'Type','weighted' sets Deform to -1, so the weights
-%               provided as 'Weights' are conserved
-%
-%   'Sequential' {'none','sorted',lexicographic'}. Default: 'none'. For
-%               simultaneous scans, provide 'none', for sequential scan
-%               with parameters tested against zero with ascending modulus,
-%               try 'sorted', for sequential scan with order as is, use
-%               'lexicographic'.
-%  
-%   'Weights'   'OLS' or numeric array. Default: 1. If 'Type' is provided 
-%               as Adaptive(Group) Lasso, then 'Weights' is set to 'OLS'
-%
-%   'GroupAlign' numeric vector or string. Default: 'none'
-%               vector: should have the length of the relto-vector,
-%                   indicates group numbers for each index
-%                   Ex.: [1 2 1 1 2] -> parameters with indices            
-%                   l1pars(1), l1pars(3), l1pars(4) belong to the first
-%                   group. parameters with indices l1pars(2) and l1pars(5)
-%                   belong to the second group.
-%               'altX', 'groupX','single' assign group numbers as follows:
-%                   for 'altX', every X-th parameter belongs to the same
-%                   group; for 'groupX', X subsequent parameters are
-%                   grouped together; 'single' provides one-parameter
-%                   groups (actually original l1, it's better not to use
-%                   this option except for testing purposes)
-%                   Ex.: 'alt3' -> groupalign = [1 2 3 1 2 3 1 2 3 ...],
-%                   'group3' -> groupalign = [1 1 1 2 2 2 3 3 3 ...],
-%                   'single' -> groupalign = 1:length(l1pars)
-%               'n:m' with n,m integer or end-integer. Then, the group 
-%                   labels (ar.pLabel) are split at the character '_'. 
-%                   Then the substrings with indices n:m are collected an
-%                   parameters having the same results are grouped
-%                   together.
-%                   Example: ar.pLabel =
-%                   {'relto_A_0_CL_1', 'relto_A_0_CL_2', 
-%                    'relto_k_1_CL_1', 'relto_k_1_CL_2',
-%                    'relto_k_2_CL_1', 'relto_k_2_CL_2'};
-%                    'GroupAlign','2:3' OR 'GroupAlign','alt2' groups by
-%                    the strings 'A_0','k_1','k_2' (3 groups),
-%                    whereas 'GroupAlign','4:5' OR
-%                    'GroupAlign','end-1:end', OR 'GroupAlign','group2'
-%                    would group by 'CL_1','CL_2' (2 groups).
-%
-%   'Test'      {'LRT','BIC'}, Def. 'LRT'. Determines whether Likelihood
-%               Ratio Test or Bayesian Information Criterion are used to
-%               find the parsimonious model
-%   
-%   'Means'     array compatible with relto-vector length, or 'keep'.
-%               Default: 0. Sets the target value/mean value of the
-%               penalization. 'keep' does not change a mean value provided
-%               beforehand
-%                                                                          
-%   'UpperBounds', 'LowerBounds': 'keep' (def.) or array compatible with
-%               relto-vector length. Sets parameter constraints for
-%               fold-changes. Behaves like 'Means'
-%
-%   'Gradient'  float. Default: 0. Adds a gradient to the optimization, see
-%               l1 functions for further explanation.
-%   
-%   'Threshold' positive float. Default: 1e-6. Determines epsilon > 0 below
-%               which a fold-change is considered as zero when shrinking
-%               the model
-%
-%   'OptimizerSteps' array containing at position i, how many steps the
-%               optimization with ar.config.optimizer = i shall do at most.
-%               Default [1000 20] (1000 steps lsqnonlin, 20 steps fmincon)
-%               
-%   'doPlot','doTree': true, false. Def.: 'doPlot',true,'doTree',false.
-%               Determines whether l1/grplasPlot and/or l1/grplasTree are
-%               called
+% 
+% See also l1Init, l1Scan, l1Seq
 
+function  varargout  = arRegularize( reltos, lambdamin, lambdamax, varargin )
 switch nargout
     case 0
         varargout = {};
@@ -138,7 +138,6 @@ switch nargout
         varargout = {nan,[]};
 end
 
-
 global ar;
 
 if(isempty(ar))
@@ -146,11 +145,7 @@ if(isempty(ar))
     return
 end
 
-
-
-
 %% Parsing input
-
 p = inputParser;
 
 validType = {'l1','lq','adaptive','elasticnet','AL','EN',...
@@ -173,7 +168,6 @@ checkGroupAlign = @(x) ischar(x) || ...
 checkLambdaScale = @(x) any(validatestring(x,validLambdaScale));
 checkSequential = @(x) any(validatestring(x,validSequential));
 checkTest = @(x) any(validatestring(x,validTest));
-
 
 addRequired(p,'Reltos',checkReltos)
 addRequired(p,'LambdaMin',checkNumericScalar)
@@ -216,11 +210,7 @@ elseif strcmpi(type,'weighted')
     type = 'AL';
 end
 
-
-
 %% Determining the range of penalty strength
-
-
 try
     
     lammin = p.Results.LambdaMin;
@@ -264,7 +254,6 @@ catch ME
 end
 
 %% Determining parameters to be penalized
-
 try
     if ischar(p.Results.Reltos)
         l1pars = arPrint(p.Results.Reltos);
@@ -306,8 +295,6 @@ catch ME
 end
 
 %% Determining Means, Upper and Lower Bonds
-
-
 try
     % 'keep' (def.) takes the existing properties of ar with respect to
     % means, upper and lower bounds
@@ -332,9 +319,6 @@ catch ME
     fprintf('%s\n',ME.message)
     return
 end
-
-
-
 
 if strcmpi(groupalign,'none')
     % Parameter-Wise
@@ -396,8 +380,6 @@ if strcmpi(groupalign,'none')
     end
     
     %% Actual Scan
-    
-  
     try
         fprintf('Starting %s-Regularization,\n',type)
         fprintf('Penalizing %i fold-changes,\n',length(l1pars))
@@ -448,9 +430,6 @@ if strcmpi(groupalign,'none')
         fprintf('%s\n',ME.message)
         return
     end
-
-  
-    
     
 else
     % Group Lasso Scans
