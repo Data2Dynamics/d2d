@@ -1,6 +1,6 @@
-% fit sequence on MATLAB cluster
+% arFitsCluster(ps, [log_fit_history, backup_save])
 %
-% arFitsCluster(ps, log_fit_history, backup_save)
+% fit sequence on MATLAB cluster
 %
 % ps:                           parameter values      
 % log_fit_history               [false]

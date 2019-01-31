@@ -1,16 +1,16 @@
+% job = arFitLHSCluster(cluster, [clusterpath, pool_size, n, randomseed, log_fit_history, backup_save])
+%
 % fit sequence using 
 %   - latin hyper cube sampling (ar.config.useLHS = true)
 %   - random sampling from prior
 % run on MATLAB cluster
-%
-% job = arFitLHSCluster(cluster, clusterpath, pool_size, n, randomseed, log_fit_history, backup_save)
 %
 % cluster:          MATLAB cluster object       (see help parcluster)
 % clusterpath:      execution path on cluster   ['.']
 % pool_size:        additional workers          [ceil(length(cluster.IdleWorkers)/2)]
 % n:                number of runs              [10]
 %                   OR: initial parameter matrix !
-% randomseed:                                   rng(randomseed)
+% randomseed:                                   [rng(randomseed)]
 % log_fit_history                               [false]
 % backup_save                                   [false]
 

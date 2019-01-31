@@ -1,3 +1,8 @@
+% arClusterSummary(c)
+% Summarizes cluster job (Times, tasks,...)
+%
+% cluster:      MATLAB cluster object       (see help parcluster)
+
 function arClusterSummary(c)
 
 fprintf('%s: %i workers, %i busy, %i idle\n', ...

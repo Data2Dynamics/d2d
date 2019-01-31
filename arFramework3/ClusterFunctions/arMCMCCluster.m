@@ -1,6 +1,6 @@
 % send a single mcmc run to a matlab cluster worker
 %
-% job = arMCMCCluster(cluster, nruns, nburnin, method, append, nthinning)
+% job = arMCMCCluster(cluster, [nruns, nburnin, method, append, nthinning])
 %
 % cluster:      MATLAB cluster object   (see help parcluster)
 

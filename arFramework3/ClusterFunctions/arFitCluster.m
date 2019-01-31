@@ -1,6 +1,6 @@
-% send a single fit to a matlab cluster worker
-%
 % job = arFitCluster(cluster)
+%
+% send a single fit to a matlab cluster worker
 %
 % cluster:      MATLAB cluster object   (see help parcluster)
 

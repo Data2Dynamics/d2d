@@ -1,3 +1,8 @@
+% varargout = arClusterCommand(cluster, command, [folder])
+% Prints out information on your cluster calculation (job, id, parallel,..)
+%
+% cluster:      MATLAB cluster object       (see help parcluster)
+
 function varargout = arClusterCommand(cluster, command, folder)
 
 global ar_command_cluster

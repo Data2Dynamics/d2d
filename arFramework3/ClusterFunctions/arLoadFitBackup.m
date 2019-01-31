@@ -1,9 +1,7 @@
+% arLoadFitBackup([n])
 % loads existing backups of arFits function and saves them to one workspace (arFitsCluster_backup.mat)
 %
-% arLoadFitBackup(n)
-%
-% n:    number of fits
-% 
+% n:    number of fits   [size(ps,1)]
 
 function arLoadFitBackup(n)
 

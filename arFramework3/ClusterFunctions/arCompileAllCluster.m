@@ -1,6 +1,5 @@
-% compile on a matlab cluster worker
-%
 % job = arCompileAllCluster(cluster, clusterpath, pool_size)
+% compile on a matlab cluster worker
 %
 % cluster:      MATLAB cluster object       (see help parcluster)
 % clusterpath:  execution path on cluster   ['.']

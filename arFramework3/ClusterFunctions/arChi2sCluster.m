@@ -1,8 +1,9 @@
 % Compute chi^2 for multiple parameter sets on MATLAB cluster
 %
-% arChi2sCluster(ps, sensis)
+% arChi2sCluster(ps, [sensis])
 %
-% ps:        parameter values      
+% ps:        parameter values
+% sensis:    if true, calc sensitivities [false]
 
 function arChi2sCluster(ps, sensis, silent)
 

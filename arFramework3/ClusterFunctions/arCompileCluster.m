@@ -1,3 +1,6 @@
+% arCompileCluster
+% compile on a matlab cluster worker
+
 function arCompileCluster
 
 global ar
