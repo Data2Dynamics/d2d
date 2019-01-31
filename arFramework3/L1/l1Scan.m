@@ -1,27 +1,39 @@
-% L1 scan
-% jks       relative parameters to be investigated by L1 regularization
-% linv      width, i.e. inverse slope of L1 penalty (Inf = no penalty; small values = large penalty)
-% gradient  use a small gradient on L1 penalty ([-1 0 1]; default = 0)
+% l1Scan(jks, [linv], gradient, lks, OptimizerSteps)
+% 
+% The major function for performing an L1 scan.
+% 
+% jks             relative parameters to be investigated by L1
+%                 regularization 
+% linv            width, i.e. inverse slope of L1 penalty 
+%                 (Inf = no penalty; small values = large penalty) 
+%                 if provided, it overwrites ar.linv
+%                 [ar.linv] is default
+% gradient        use a small gradient on L1 penalty 
+%                 Possible values: -1, 0, 1 
+%                 [0] is default
+% OptimizerSteps  Number of optimization iteration overwriting
+%                 ar.config.optim.Maxiter
+%                 The length of this vector controls the number of
+%                 optimization restarts which are done.
+%                 [1000 20] is default
 
 function l1Scan(jks, linv, gradient, lks, OptimizerSteps)
 
 global ar
 
-%Check for trdog
+% Check for trdog
 checksum_l1   = {'6BBE213BEC28A0C59A8DEDCF65CF7649'}; % Modified trdog.m
 trpath = which('trdog','-all');
 if sum(strcmpi(md5(trpath{1}),checksum_l1))==1
     % All good
 else
-    warning('Found an outdated trdog, updating...! \n');
+    warning('Found an outdated trdog. The trdog function is now updated by calling l1trdog! \n');
     l1trdog
 end
 
 if(isempty(ar))
     error('please initialize by arInit')
 end
-
-
 
 if(~exist('jks','var') || isempty(jks))
     jks = find(ar.type == 3);
@@ -40,8 +52,6 @@ if(~exist('lks','var') || isempty(lks))
 %     linv = linv(end:-1:1);
     lks = 1:length(ar.linv);
 end
-
-
 
 if(~exist('gradient','var') || isempty(gradient))
     gradient = 0;

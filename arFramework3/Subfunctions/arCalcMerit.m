@@ -1,67 +1,64 @@
-% This function updates the objective functions used for fitting for the
-% currently chosen parameters.
+% [ar2] = arCalcMerit([sensi], [pTrial], [dynamics], [doSimu])
+% [ar2] = arCalcMerit([ar], [sensi], [pTrial], [dynamics], [doSimu])
+% 
+% This function updates the fields representing objective functions (and
+% parts of it) used for fitting for the currently chosen parameters.
+% 
+%   sensi          propagate sensitivities         [false]
+%                  this argument is passed to arSimu
+%   pTrial         trial parameter of fitting
+%   dynamics       force evaluation of dynamics    [false]
+%   doSimu         should arSimu be called         [true]
+%   ar             d2d model/data structure
+% 
+%   ar2            d2d model/data structure with updated objective functions
+% 
+% This function replaces arChi2 and is called by arFit. The fact that the
+% function accepts serval calls is because of historical developments. It
+% is not beautiful but required to not break compatibility. 
 % 
 % This function calls
 %   - arSimu which in turn calls arCalcRes
 %   - arCollectRes
 % 
-% This function replaces arChi2 and is called by arFit
-% 
-% Example: (call of arFit)
-% ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
-% 
-%-----------------------------------------
-%
-%   Detailed description: 
-%   (taken from arChi2):
-% 
-% arCalcMerit(sensi, pTrial, dynamics, doSimu)
-%   sensi:          propagate sensitivities         [false]
-%                   this argument is passed to arSimu
-%   pTrial:         trial parameter of fitting
-%   dynamics:       force evaluation of dynamics    [false]
-%   doSimu          should arSimu be called         [true]
-% 
-% or
-%
-% ar = arCalcMerit(ar, sensi, pTrial, dynamics)
-%   ar:             d2d model/data structure
-% 
 % Possible calls:
-% arCalcMerit        then:
+% >> arCalcMerit        then:
 %               qglobalar = true
 %               sensi = true
 % 
-% arCalcMerit(ar)    here, the global ar is overwritten by the argument
+% >> arCalcMerit(ar)    here, the global ar is overwritten by the argument
 %               qglobalar = false
 %               sensi = true
 % 
-% arCalcMerit(ar,sensi)
-% arCalcMerit(sensi)
+% >> arCalcMerit(ar,sensi)
+% >> arCalcMerit(sensi)
 %               like arCalcMerit, but sensi can be set 
 % 
-% arCalcMerit(ar,sensi,ptrial)
-% arCalcMerit(sensi,ptrial)
+% >> arCalcMerit(ar,sensi,ptrial)
+% >> arCalcMerit(sensi,ptrial)
 %               like arCalcMerit(ar,sensi), but 
 %               silent = true
 %               ar.p is set to ptrial
 %               this is the only possiblity to set 'silent' to true
 % 
-% arCalcMerit(sensi,ptrial,dynamics)
-% arCalcMerit(ar,sensi,ptrial,dynamics)
+% >> arCalcMerit(sensi,ptrial,dynamics)
+% >> arCalcMerit(ar,sensi,ptrial,dynamics)
 %               dynamics is passed to arSimu, otherwise arSimu is called
 %               without this argument, i.e. with its default 
 %               
-% arCalcMerit(sensi,ptrial,dynamics,doSimu)
-% arCalcMerit(ar,sensi,ptrial,dynamics,doSimu)
+% >> arCalcMerit(sensi,ptrial,dynamics,doSimu)
+% >> arCalcMerit(ar,sensi,ptrial,dynamics,doSimu)
 %           doSimu  can be set to false, then the residuals are calculated
 %           without updating the model trajectories (e.g. if ar.qFit or ar.
 %           model.data.qFit) has been changed.
-
+% 
+% Example (call used by arFit)
+% ar = arCalcMerit(ar, true, ar.p(ar.qFit==1));
+% 
+% See also arGetMerit, arChi2
 
 
 function varargout = arCalcMerit(varargin)
-
 
 global ar
 
@@ -71,7 +68,7 @@ nargs = nargin;
 % Implementation due to backwards compability:
 if nargs>0 && isstruct(varargin{1})
     ar = varargin{1};
-    varargin = varargin(2:end);
+    varargin = varargin(2:end);  % changing the meaning of varargin is not nicely implemented
     nargs = nargs-1;    
     qglobalar = false;
 else
@@ -108,7 +105,6 @@ if(~isfield(ar, 'fevals'))
     ar.fevals = 0; 
 end
 ar.fevals = ar.fevals + 1;
-
 
 
 atol = ar.config.atol;

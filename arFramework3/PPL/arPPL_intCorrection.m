@@ -1,3 +1,14 @@
+% chi2 = arPPL_intCorrection(general_struct, t_tmp, dir)
+% 
+%   This function is used by arIntegratePredBand.m
+% 
+% general_struct    PPL result struct
+% t_tmp             The time point of the prediction, passed later to arLink
+% dir               direction, either 1 or -1
+% 
+% 
+% Written by Helge, tried to be documented by Clemens.
+
 function chi2 = arPPL_intCorrection(general_struct, t_tmp, dir)
     global ar;
     

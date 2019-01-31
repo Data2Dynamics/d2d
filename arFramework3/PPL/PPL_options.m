@@ -1,46 +1,73 @@
-function options = PPL_options(varargin)
-global ar
-% Set options for calculation of prediction profile likelihood
-
-% Integration : Integrate prediction/validation confidence line over
-% time, or just compute profiles for specified t (default is false)
+% options = PPL_options(varargin)
+% 
+% Set options for calculation of prediction profile likelihood. This
+% function is called by arPPL. The options are stored in ar.ppl.options
+% 
+%   varargin        pairs optionname, optionvalue
+%                   The option names are case INsensitive. 
+% 
+% The following options are available:
+% 
+%   Integration     Integrate prediction/validation confidence line over
+%                   time, or just compute profiles for specified t 
+%                   [false]
 %
-% gamma : correction strength for computation of integration steps (default is 1)
+%   gamma           correction strength for computation of integration
+%                   [1]
 %
-% stepsize : Integration steps in time, e.g. 1, 0.5 ... (default is tFine stepsize)
+%   stepsize        Integration steps in time, e.g. 1, 0.5 ... 
+%                   [default is tFine stepsize]
 %
-% tEnd : optional stopping time for the confidence band integration
-% (default is tLim(end))
+%   tEnd            optional stopping time for the confidence band integration
+%                   [default is tLim(end)]
 %
-% rel_increase : increase of xTrial in computation of full profile for t's
-% (default is 0.15)
+%   rel_increase    increase of xTrial in computation of full profile for t's
+%                   [default is 0.15]
 %
-% ed_steps : take integration steps or go parallel to orginial state solution (default is true)
+%   ed_steps        take integration steps or go parallel to orginial state
+%                   solution 
+%                   [true] 
 %
-% fineInt : do precise integration with a correction cycle at every
-% integration step (default is true)
+%   fineInt         do precise integration with a correction cycle at every
+%                   integration step 
+%                   [true]
 %
-% backward : perform integration backwards in time (default is false)
+%   backward        perform integration backwards in time 
+%                   [false]
 %
-% xstd : standard deviation of additional data point. If profile on data
-% and ar.config.fiterrors=1, the fitted errors of the respective data is
-% used (default is 0.1)
+%   xstd            standard deviation of additional data point. If profile
+%                   on data and ar.config.fiterrors=1, the fitted errors of
+%                   the respective data is used 
+%                   [0.1]
 %
-% doPPL : integrate prediction bands without assumed error on measurements
-% (? confidence bands and is based on prediction profiles of Clemens paper
-% (default is false ? validation profiles))
+%   doPPL           integrate prediction bands without assumed error on measurements
+%                   (? confidence bands and is based on prediction profiles
+%                   of Clemens paper (default is false ? validation profiles)) 
 %
-% n_steps_profile : total steps in computation of full profile per side (default is 100)
+% n_steps_profile   total steps in computation of full profile per side 
+%                   [100]
 %
-% whichT : which entry of the provided time-vector is taken as starting
-% point for integration
+% whichT            which entry of the provided time-vector is taken as
+%                   starting point for integration 
 %
-% dir : 1 for only upper CI profile, -1 for lower, 0 for both (default is 0)
+% dir               1 for only upper CI profile
+%                   -1 for lower, 0 for both 
+%                   [default is 0]
 %
-% alpha_level : Confidence level for profile (default 0.05)
+% alpha_level       Confidence level for profile 
+%                   [default 0.05]
 %
 % Helge Hass, 2014 (helge.hass@fdm.uni-freiburg.de)
+% Written by Helge, tried to be documented by Clemens.
+% 
+% See also arPPL
+% 
+% Example:
+% options = PPL_options('alpha_level',.02,'tend',10)
+% ar.ppl.options
 
+function options = PPL_options(varargin)
+global ar
 if (nargin == 0) && (nargout == 0)
   fprintf(['     Integrate: [ Integrate prediction profiles (true) or ' ...
            '| no integration: {false} ]\n']);
@@ -62,7 +89,8 @@ if (nargin == 0) && (nargout == 0)
   return;
 end
 
-Names = [
+% all possible option names:
+Names = [  
     'gamma           '
     'stepsize        '
     'integrate       '
@@ -146,7 +174,7 @@ while i <= nargin
     lowArg = lower(arg);
     j = strmatch(lowArg,names);
     if isempty(j)                       % if no matches
-      error(message('Could not find option %s', arg));
+      error('Could not find option %s', arg);
     elseif length(j) > 1                % if more than one match
       % Check for any exact matches (in case any names are subsets of others)
       k = strmatch(lowArg,names,'exact');

@@ -1,30 +1,26 @@
-%   plotopt = arWhichYplot(m,d)
-%   plotopt = arWhichYplot(m,d,it,iy)
+% plotopt = arWhichYplot(m,d,[it],[iy])
 %
+% This function determines the way of plotting data by evaluating
+%   - ar.config.ploterrors
+%   - ar.config.fiterrors
+%   - ar.model.data.yExpStd
+% 
 %   m   model index
 %   d   data index
 %   it  data time index [ default: 1:size(ar.model.data.yExpStd,1) ]
 %   iy  data observable index [ default: 1:size(ar.model.data.yExpStd,2) ]
 %
-%
-% This function evaluates
-%   - ar.config.ploterrors
-%   - ar.config.fiterrors
-%   - ar.model.data.yExpStd
-% and determines the way of plotting data.
+%   plotopt     A flag indicating how to plot:
+%       0 means plotting nothing
+%       1 means plotting only data points
+%       2 means plotting data and errorbars
+%       3 means plotting data and error model
+%       4 means plotting data and prediction bands
+%       5 means plotting data, errorbars and error model
 %
 % The function replaces multiple complex logical operations.
 %
-%
-%   plotopt = 0 means plotting nothing
-%   plotopt = 1 means plotting only data points
-%   plotopt = 2 means plotting data and errorbars
-%   plotopt = 3 means plotting data and error model
-%   plotopt = 4 means plotting data and prediction bands
-%   plotopt = 5 means plotting data, errorbars and error model
-%
-% Doku:
-% https://github.com/Data2Dynamics/d2d/wiki/Plotting-options-and-the-meaning-of-ar.config.ploterrors
+% See https://github.com/Data2Dynamics/d2d/wiki/Plotting-options-and-the-meaning-of-ar.config.ploterrors
 
 
 function plotopt = arWhichYplot(m,d,it,iy)

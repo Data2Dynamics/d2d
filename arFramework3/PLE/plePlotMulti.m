@@ -1,14 +1,17 @@
-% Plot compact profile Likelihoods
-%
 % plePlotMulti(jks, savetofile, ncols, nrows, show_hit_bound, plot_hit_bound, plot_thresholds)
 %
-% indices           plot only parameters jks                        [all]
+% Plot multiple profile Likelihoods in subplots
+%
+% jks               parameter indices to be plotted                 [1:length(ar.p)]
 % savetofile        save plot                                       [false]
 % ncols
 % nrows
 % show_hit_bound    index show hitting boundary of parameters       [all]
 % plot_hit_bound    highlight hitting boundary of parameters        [true]
 % plot_thresholds   plot confidence threshold                       [true]
+% 
+% See also arPLEInit, ple, plePlot, arPlotMulti2
+
 
 function plePlotMulti(jks, savetofile, ncols, nrows, show_hit_bound, plot_hit_bound, plot_thresholds)
 

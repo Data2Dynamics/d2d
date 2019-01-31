@@ -1,3 +1,26 @@
+% l1trdog
+% 
+% Adaptation of optimization for performing l1-penalization.
+% 
+% This function modifies Matlabs trdog.m to choose integration accuracies
+% depending on scaling parameters. A new function trdog is created which
+% might serve as an alternative to matlab's trdog. 
+% 
+% Matlab's function is used to satisfy for potential copyright conflicts.
+% 
+% To better understand how trdog is modified, compare both versions, e.g. by
+% a diff.
+% 
+% If you want to return to matlab's original code, the created function has
+% to be removed or the matlab search path has to be chosen properly.
+% 
+% See also set_optTols
+% 
+% Example:
+% which('trdog','-all')
+% l1trdog
+% which('trdog','-all')
+
 function l1trdog
 
 checksum_orig = {'B7367382AFBDBAE745D195ADDCAF7AA4','C4919D5DCE5CD616FC7A0F84B42EE804'}; % trdog.m from Mathworks

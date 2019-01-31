@@ -1,3 +1,7 @@
+% arShowDataConditionStructure
+%
+% Shows the conditions for the individual data sets in ar.model.data
+
 function arShowDataConditionStructure
 
 global ar

@@ -1,4 +1,15 @@
-% Calls arPlotTrajectory, changes a few labels, axes, colors
+% [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ncount, t, y, ystd, lb, ub, nfine_dr_plot, ...
+%     nfine_dr_method, tExp, yExp, yExpHl, yExpStd, y_ssa, y_ssa_lb, y_ssa_ub, ...
+%     plotopt, trafos, qFit, zero_break, fastPlotTmp, hys, hystds, hysss, dydt, isLast, ...
+%     ndata, chi2, titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, atol, colors)
+% 
+% This function is called for plotting, e.g. by arPlot2 and it calles
+% arPlotTrajectory
+% 
+% The arguments are not described. It would be good to improve the code for
+% not using so many arguments, e.g. by using a struct.
+% 
+% See also arPlot2, arPlotTrajectory
 
 function [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ncount, t, y, ystd, lb, ub, nfine_dr_plot, ...
     nfine_dr_method, tExp, yExp, yExpHl, yExpStd, y_ssa, y_ssa_lb, y_ssa_ub, ...

@@ -1,9 +1,11 @@
-% Plot compact profile Likelihoods
+% plePlotMult2i([jks], [savetofile])
 %
-% plePlotMult2i(jks, savetofile)
+% Plot multiple profile Likelihoods in subplots
 %
-% indices           plot only parameters jks                        [all]
+% jks               parameter indices to be plotted                 [1:length(ar.ple.ps)]
 % savetofile        save plot                                       [false]
+% 
+% See also arPLEInit, ple, plePlot, arPlotMulti
 
 function plePlotMulti2(jks, savetofile)
 

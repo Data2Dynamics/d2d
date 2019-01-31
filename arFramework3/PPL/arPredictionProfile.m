@@ -1,3 +1,7 @@
+% 
+% ppl_general_struct    PPL result struct
+% 
+% Written by Helge, tried to be documented by Clemens.
 function [xFit, ps] = arPredictionProfile(t, general_struct, save, dir, xFit)
 
 global ar;

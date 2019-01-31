@@ -1,3 +1,10 @@
+% arPrintChi2([doYs], [onesided])
+%
+% Print chi2 values for single data sets. 
+%
+%   doYs       [false]    Show also different observables and some statistics 
+%   onesided   [false]    Use onesided chi2 test
+
 function varargout = arPrintChi2(doYs, onesided)
 
 if(~exist('doYs','var'))

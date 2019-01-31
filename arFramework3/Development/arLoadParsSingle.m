@@ -1,8 +1,9 @@
-% values = arLoadParsSingle(filename, parameternames)
+% values = arLoadParsSingle(resultFolder, parameternames)
 %
-% get specific model parameters from pwd/Results/filename/workspace.mat
+% get specific model parameters from pwd/Results/resultFolder/workspace_pars_only.mat
+% of (if not existing) from pwd/Results/resultFolder/workspace.mat
 %
-% filename          source file name. This is a folder in the Results
+% resultFolder      source file name. This is a folder in the Results
 %                   folder
 % parameternames    cell array of parameternames that are searched
 % 
@@ -12,13 +13,13 @@
 %
 % see also arLoadPars
 
-function values = arLoadParsSingle(filename, parameternames)
+function values = arLoadParsSingle(resultFolder, parameternames)
 if ~exist('Results','dir')
     error('No results folder exist. arLoadParsSingle can only be executed in a D2D working directory.')
 end
 
-filename_tmp = filename;
-filename = ['./Results/' filename '/workspace.mat'];
+filename_tmp = resultFolder;
+filename = ['./Results/' resultFolder '/workspace.mat'];
 filename_pars = ['./Results/' filename_tmp '/workspace_pars_only.mat'];
 
 if(exist(filename_pars,'file'))

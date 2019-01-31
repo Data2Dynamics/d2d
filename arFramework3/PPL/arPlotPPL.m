@@ -1,8 +1,32 @@
-% plot prediction profile likelihood
-%
-% arPlotPPL
+% arPlotPPL(m, c, ix, t_vec, takeY, [subs_para])
 % 
-% Set likelihood threshold with ar.ppl.options.alpha_level
+% plot prediction profile likelihood
+% 
+%   m   model index 
+%   c	condition or data index, depending on takeY. 
+%   ix  Vector of states used for CI profile. See ar.model(m).xNames or
+%       ar.model(m).data(c).yNames for the assignment
+%   t   Vector of times where full Profile is computed (e.g. as comparison
+%       to integrated profile), whichT flag is the vector index for
+%       starting time of integration.  
+% takeY [true] 
+%       if takeY==true: an observation ar.model.data.y is used for profile
+%       integration (data struct) 
+%       if takeY==false: a ar.model.condition.x is used 
+% subs_para     [true]
+%       This flag can be used to control whether paramters are shifted to
+%       zero. Shifting is performed if subs_para=0
+% 
+% The likelihood threshold can be altered via ar.ppl.options.alpha_level
+% 
+% Written by Helge, tried to be documented by Clemens.
+% 
+% See also arPPL
+% 
+% Example:
+% >> arPPL(1,1,1,10,false)
+% >> ar.ppl
+% >> arPlotPPL(1,1,1,10,false)
 
 function arPlotPPL(m, c, ix, t_vec, takeY, subs_para)
 

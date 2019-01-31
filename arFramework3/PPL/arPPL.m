@@ -1,28 +1,37 @@
-% calculate prediction bands via profile likelihood
+% arPPL(m, c, [ix], t, [takeY], [options])
 % 
-% m: model to be used
-%
-% c: condition or data, respectively. Check ar.model(m).data(c).condition
-% and ar.model(m).condition(c).dLink for explicit condition
-%
-% ix: Vector of states used for CI profile. See ar.model(m).xNames or
-% ar.model(m).data(c).yNames for the assignment
-%
-% t: Vector of times where full Profile is computed (e.g. as comparison to
-% integrated profile), whichT flag is the vector index for starting time of
-% integration.
-%
-% takeY: =true ? observation is used for profile integration (data struct), otherwise condition is used (default is true)
-%
-% options: provide an option struct (type PPL_options for help)
+% Major function for calculating prediction bands via profile likelihood
+% for a dynamic variable or observable in a specific condition at specified
+% time points. 
+% 
+%   m   model index 
+%   c	condition or data index, depending on takeY. 
+%       Check ar.model(m).data(c).condition
+%       and ar.model(m).condition(c).dLink for explicit condition
+%   ix  Vector of states used for CI profile. See ar.model(m).xNames or
+%       ar.model(m).data(c).yNames for the assignment
+%   t   Vector of times where full Profile is computed (e.g. as comparison
+%       to integrated profile), whichT flag is the vector index for
+%       starting time of integration.  
+% takeY [true] 
+%       if takeY==true: an observation ar.model.data.y is used for profile
+%       integration (data struct) 
+%       if takeY==false: a ar.model.condition.x is used 
+% options option struct (type PPL_options for help)
 %
 % Helge Hass, 2014 (helge.hass@fdm.uni-freiburg.de)
+% Tried to be documented by Clemens.
+% 
+% Example:
+% >> arPPL(1,1,1,10,false)
+% >> ar.ppl
+% >> arPlotPPL(1,1,1,10,false)
 
 function arPPL(m, c, ix, t, takeY, options) % model, condition, states of interest, 
 
     global ar
     ar.config.optim.Jacobian = 'on';
-    if nargin < 6
+    if(~exist('options','var') || isempty(options))
       options = [];
     end
     if nargin < 2

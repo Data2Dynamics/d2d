@@ -1,7 +1,15 @@
+% ar = arInitFields(ar)
+% 
 % This function checks whether all the required fields in the ar structure
 % are present. If some are missing, which occurs when the ar struct was 
 % saved with a previous version of D2D, they will be set to the default 
 % value.
+% 
+%   ar  model struct which is used as global variable in D2D.
+% 
+% If the functionality of D2D is extended an new fields of global ar are
+% introduced, the variable arFormatVersion in this function should be
+% incremented.
 
 function ar = arInitFields(ar)
     

@@ -1,8 +1,23 @@
-% plot prediction profile likelihood
-%
-% arPlotPPLMulti
+% arPlotPPLMulti(m, c, [takeY], [vpl], [filled], [dosurf])
+% 
+% plots prediction uncertainty as a surface calculated by multiple
+% likelihood profiles.
+% 
+%   m       model index 
+%   c       condition or data index, depending on takeY. 
+%   takeY   [false]
+%           indicates whether data predictions (false) or predictions of
+%           the dynamic variables (true) ar.model.condition.x are predicted
+%   vpl     [false]
+%           indicates whether VPL or PPL is plotted
+%   filled  [false]
+%           If false a contour plot is generated (only contour lines)
+%           If true, a coutourF plot is made (surf plus contour lines)
+%   dosurf  [false]
 % 
 % Set likelihood threshold with ar.ppl.options.alpha_level
+% 
+% Written by Helge, tried to be documented by Clemens.
 
 function arPlotPPLMulti(m, c, takeY, vpl, filled, dosurf)
 

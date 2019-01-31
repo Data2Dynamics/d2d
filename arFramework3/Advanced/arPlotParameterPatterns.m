@@ -1,6 +1,20 @@
-% Plot parameter sets from optimization run
+% arPlotParameterPatterns(ps, [jks], [doCenter]) 
 %
-% arPlotParameterPatterns(ps, jks, doCenter)
+% Plot parameter sets in ps as patterns together with ar.p 
+%
+%   ps        []                  Parameter matrix  (a row corresponds to one parameter set)
+%   jks       [1:length(ar.p)]    Only ps(:,jks) is plotted
+%   doCenter  [false]             Center relative to bounds
+%
+% Example1:
+% arFitLHS(100)
+% arPlotParameterPatterns(ar.ps)
+% 
+% Example2: Plotting of parameters with failed integrations.
+% arChi2LHS(100)
+% arPlotParameterPatterns(ar.ps_errors)
+%
+% See also: arPlotParameterHists and arPlotParameterProfiles
 
 function arPlotParameterPatterns(ps, jks, doCenter)
 
@@ -50,7 +64,7 @@ if(isfield(ar, 'pTrue'))
     hlabel{end+1} = 'true value';
 end
 hold off
-title(sprintf('parameter differences between %i best fits', nbest));
+title(sprintf('parameter differences between %i parameter sets', nbest));
 if(doCenter)
     xlabel('parameter values (centered for bounds)')
 else

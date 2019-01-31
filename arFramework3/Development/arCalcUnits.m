@@ -1,6 +1,14 @@
-function punits = arCalcUnits(m)
+% punits = arCalcUnits(m)
+%
+% Calculates the units of the parameters depending on the specified units
+% of the internal states, inputs and observables. 
+%
+%   m      [1]      Index of model
+%
+% Output:
+%   punits      Cell array with calculated parameter units  
 
-clc
+function punits = arCalcUnits(m)
 
 global ar
 
@@ -87,12 +95,13 @@ end
 
 %% setup flux equations for unit solver
 fv = ar.model(m).fv;
-fv = sym(fv);
-fv = subs(fv, sym(known_vars), sym(known_units));
+
+fv = arMyStr2Sym(fv);
+fv = subs(fv, arMyStr2Sym(known_vars), arMyStr2Sym(known_units));
 for jv = 1:length(fv)
     xs = ar.model(m).fv;%union(ar.model(m).fv_source{jv}, ar.model(m).fv_target{jv});
-    xs = subs(xs,sym(known_vars), sym(known_units));
-    fv(jv) = fv(jv) * sym(ar.model(m).tUnits{1}) / sym(xs(1)) - 1;
+    xs = subs(arMyStr2Sym(xs),arMyStr2Sym(known_vars), arMyStr2Sym(known_units));
+    fv(jv) = fv(jv) * arMyStr2Sym(ar.model(m).tUnits{1}) / arMyStr2Sym(xs(1)) - 1;
 end
 
 for i=1:length(fv)
@@ -140,13 +149,19 @@ function punits = unit_solver(fv, px)
 
 psolved = {};
 punits = {};
-px = sym(px);
+px = arMyStr2Sym(px);
 
 for j=1:length(px)
     fvtmp = findasym(fv, px(j));
     
     S = solve(fvtmp, px(j));  % die u sind nicht durch u Unit ersetzt, wenn mehr Gl. als unbekannte muss man evlt. die Anzahl Gl. reduzieren
-    fprintf('[%s] = %s\n',char(px(j)),char(S));
+    if isempty(S)
+        S_str = '';
+    else
+        S_str = char(S);
+    end
+    fprintf('[%s] = %s\n',char(px(j)),S_str);
+    punits{end+1} = S_str;
 end
 
 

@@ -1,4 +1,19 @@
-% arPlotParameterProfiles(jks)
+% arPlotParameterProfiles([jks])
+%
+% Plots the values of ar.ps(:,jks) versus ar.chi2s(:,jks) relative to the
+% best fit.
+%
+%   jks         [find(ar.qDynamic==1 & ar.qFit==1)]      Index of parameters to be plotted
+%
+%
+%  To analyse the results of arFitLHS or arChi2LHS
+%
+% Example:
+% arFitLHS(100)
+% arPlotParameterProfiles([1 2 4])  % plot distribution of parameters ar.p([1 2 4])
+%
+% See also: arPlotParameterPatterns and arPlotParameterHists
+
 
 function arPlotParameterProfiles(jks)
 
@@ -26,8 +41,14 @@ for j=jks
     plot(xlim, [0 0], 'k--');
     plot(xlim, log10([dchi2 dchi2]), 'k:');
     hold off
-    count = count + 1;
     title(arNameTrafo(ar.pLabel{j}));
+    if mod(count,ncols) == 1
+        ylabel('log10(\Deltachi2)')
+    end
+    if count > (nrows-1) * ncols
+        xlabel('log10(p)')
+    end
+    count = count + 1;
     arSpacedAxisLimits;
 end
 
