@@ -1022,7 +1022,7 @@ hmstimestr = sprintf('%02i:%02i:%05.2f', hours, minutes, seconds);
 function str = myFormulas(str, jm)
 global ar
 
-str = latex(str2sym(str));
+str = latex(arMyStr2Sym(str));
 
 if(verLessThan('symbolic', '4.9')) % maple
 	str = strrep(str, '\,', ' \cdot ');
