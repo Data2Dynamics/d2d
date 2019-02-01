@@ -2,7 +2,7 @@
 % 
 % Remove a plot from a specific model
 % 
-% m         Model numer
+% m         Model number
 % ps        Plot IDs (0 indicates last plot)
 % force     Force deletion of plot. By default, the function will not
 %           remove plots that are associated by a def file (i.e. not

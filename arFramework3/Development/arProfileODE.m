@@ -1,4 +1,16 @@
+% [xsout, chi2sout] = arProfileODE(jk, [gamma], p_range, [method])
+% 
 % Calculation of the profile likelihood via integration method
+% 
+%   jk        Parameter indices
+%   gamma     scaling of residual vector [1]
+%   p_range   double, that gives distance for which profile is calculated,
+%             i.e. ple is computed for [ar.p-range, ar.p+range]
+%   method    used integration method ['ode23']
+%             other common choices include 'euler', 'ode15s', 'ode45', 'ode113'
+% 
+%   xsout     matrix of all parameter values from calculated profile
+%   chi2sout  chi2 values for calculated profile
 
 function [xsout, chi2sout] = arProfileODE(jk, gamma, p_range, method)
 

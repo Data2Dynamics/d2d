@@ -127,7 +127,7 @@ for m=1:length(ar.model)
     arFprintf(2, '\n');
     
     % Have we reduced the model?
-    if isfield( ar.model(m), 'reducedForm' ) && ( ar.model(m).reducedForm == 1 )
+    if isfield( ar.model(m), 'reducedForm' )
         checksum_global = addToCheckSum(ar.model(m).reducedForm, checksum_global);
         
         % Store whether we express the model in totals or not
@@ -788,7 +788,8 @@ catch
 end
 
 % Were model reductions applied? Make sure to transfer the initial conditions correctly
-if isfield( model, 'removedStates' ) && ( ar.model(m).reducedForm == 1 )
+%clc
+if isfield( model, 'removedStates' ) %&& ~isempty( model.removedStates )
     condition = addPoolSubstitutions( condition, model.removedStates );
 end
 
@@ -1242,7 +1243,7 @@ data.sym.p  = arMyStr2Sym(data.p);
 data.sym.fp = arMyStr2Sym(data.fp);
 
 % Were model reductions applied? Make sure to transfer the initial conditions correctly
-if isfield( model, 'removedStates' ) && ( ar.model(m).reducedForm == 1 )
+if isfield( model, 'removedStates' )
     data = addPoolSubstitutions( data, model.removedStates );
 end
 

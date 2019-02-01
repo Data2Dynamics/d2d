@@ -1,18 +1,17 @@
-%   arSimilarityScore
+% SSout = arSimilarityScore( [m], [cond], [thresh] )
 %
-%   Usage:
-%       arSimilarityScore( m, cond, thresh )
-%
-%   Inputs:
-%       m       - Model index
-%       c       - Condition index (or 'all')
-%       thresh  - R^2 threshold for when to show the group
-%
+%       m        Model index                                [1]
+%       c        Condition index (or 'all')                 ['all']
+%       thresh   R^2 threshold for when to show the group   [0.99]
+% 
+%       SSout    matrix of SimmilarityScores
+% 
 %   Computes the R^2 between predictions after performing linear regression 
 %   between each pair. High R^2 indicates potential for model reduction. 
 %   When multiple conditions are passed, the minimum is returned (states 
 %   have to be the same over all conditions for the model reduction to make 
 %   sense).
+%   Creates a plot (imagesc) of Similarity scores.
 
 function SSout = arSimilarityScore( m, cond, thresh )
     global ar;

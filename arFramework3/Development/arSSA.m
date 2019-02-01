@@ -1,11 +1,14 @@
+% arSSA([nruns],[scaling])
+% 
 % Stochastic Simulation Algorithm (SSA)
-% see in Gillespie, The Journal of Physical Chemistry, 1977, 81(25)
-%
-% arSSA(nruns,scaling)
-%
-% nruns:    number of runs                          [10]
-% scaling:  rescaling factor from species           [{ones}]
-%           concentration to number of molecules
+% 
+%   nruns:    number of runs                   [10]
+%   scaling:  rescaling factor from species    [{ones(1,length(ar.model(m).x))}]
+%             concentration to number of molecules
+% 
+% Reference: 
+% Stochastic Simulation Algorithm (SSA)
+% Gillespie, The Journal of Physical Chemistry, 1977, 81(25)
     
 function arSSA(nruns, scaling)
 

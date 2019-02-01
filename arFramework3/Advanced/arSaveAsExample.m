@@ -1,10 +1,11 @@
-%   arSaveAsExample
-% 
-%   arSaveAsExample(makePlots)
-%         makePlots     Default: true (new plots are made for x, y, and profiles
-%                       false: No (new) plots are generated and saved
+% arSaveAsExample([makePlots])
 % 
 %  Function for copying the current model to arFramwork3/Examples
+% 
+%       makePlots   logical that decides whether to produce plots [true]
+%                       true: new plots are made for x, y, and profiles
+%                       false: no (new) plots are generated and saved
+% 
 %  If your current model exhibts interesting features or problems, use this
 %  function to copy it to the examples folder.
 % 
@@ -15,6 +16,8 @@
 %       *.def and *.xls of the loaded models and data
 %       d2d workspaces saved with arSave
 %       plots
+% 
+% See also arSave
 
 function arSaveAsExample(makePlots)
 if ~exist('makePlots','var') || isempty(makePlots)
