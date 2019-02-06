@@ -9,7 +9,7 @@ arLoadModel('PreProc');
 fprintf( 'PASSED\n' );
 
 fprintf( 2, 'Checking if correct states have been included... ' );
-if ( sum( ismember( ar.model.x, {'stateA', 'stateD', 'stateF', 'stateH', 'stateI', 'stateJ', 'stateL', 'stateO', 'stateR', 'stateS', 'stateT', 'stateW', 'NESTER2', 'NESTEE3', 'stateZ' } ) ) == 15 ) 
+if ( sum( ismember( ar.model.x, {'stateA', 'stateD', 'stateF', 'stateH', 'stateI', 'stateJ', 'stateL', 'stateO', 'stateR', 'stateS', 'stateT', 'stateW', 'NESTER2', 'NESTEE3', 'stateZ', 'stateAfterComment' } ) ) == 16 ) 
     fprintf( 'PASSED\n' );
 else
     error( 'FAILED\n');

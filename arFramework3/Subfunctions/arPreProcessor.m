@@ -65,6 +65,7 @@ function fid = preprocess(fid)
     outStr = [];
     
     % Find newlines
+    fid.str = regexprep(fid.str, '\/\/[^\n]+\n', '');
     newlines = regexp(fid.str, '\n|\r\n|\r');
     newlines = [newlines numel(fid.str)];
     statusChange = 1;

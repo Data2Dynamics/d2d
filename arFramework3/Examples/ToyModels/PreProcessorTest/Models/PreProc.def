@@ -65,6 +65,9 @@ STATES
 #ifdef  J stateO    C   nM          conc.   cyt     1 #else stateP    C   nM          conc.   cyt     1 #endif
 #ifndef J stateQ    C   nM          conc.   cyt     1 #else stateR    C   nM          conc.   cyt     1 #endif
 
+// #define SOCS3INH ()
+stateAfterComment     C   nM          conc.   cyt     1
+
 #define PARA1 potato
 #define PARA2 motato
 #undefine PARA2
