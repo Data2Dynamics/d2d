@@ -68,6 +68,9 @@ STATES
 // #define SOCS3INH ()
 stateAfterComment     C   nM          conc.   cyt     1
 
+stateCommentA C   nM          conc.   cyt     1 // heyheyhey
+stateCommentB C   nM          conc.   cyt     1
+
 #define PARA1 potato
 #define PARA2 motato
 #undefine PARA2
