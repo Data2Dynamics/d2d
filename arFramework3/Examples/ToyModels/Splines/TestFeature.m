@@ -13,7 +13,6 @@ arCompileAll(true);
 fprintf( 'PASSED\n' );
 
 fprintf( 2, 'Simulating and validating model with cubic spline... ' );
-arDisableData('normal_cubic');
 arFit;    
 if ( norm(ar.model.data(arFindData('normal_cubic')).res) < 3e-3 )
     fprintf('PASSED\n');
@@ -29,7 +28,6 @@ arLoadData('positive_cubic', 1, 'csv');
 arCompileAll(true);
 fprintf( 'PASSED\n' );
 fprintf( 2, 'Simulating and validating model with positive cubic spline... ' );
-arDisableData('positive_cubic');
 arFit;    
 if ( norm(ar.model.data(arFindData('positive_cubic')).res) < 3e-3 )
     fprintf('PASSED\n');
@@ -47,7 +45,6 @@ arCompileAll(true);
 fprintf( 'PASSED\n' );
 
 fprintf( 2, 'Simulating and validating model with cubic spline... ' );
-arDisableData('monotone');
 arFit;    
 if ( norm(ar.model.data(arFindData('monotone')).res) < 3e-3 )
     fprintf('PASSED\n');
