@@ -1,6 +1,7 @@
 % data_aligned = align_position(data, dataLabels, refLabels, matching_dimensions)
 %
-% aligns <data> according to labels <dataLabels> and <refLabels>
+% aligns <data> according to labels <dataLabels> and <refLabels>, if
+% omitted, index positions will be returned
 % such that <data_aligned> will have length(refLabels).
 % For 2D data, looks for matching dimensions,
 % unless <matching_dimensions> is specified.
@@ -18,6 +19,10 @@ if(nargin==0)
     dataLabels = {'B' 'A' 'D' 'G'};
     refLabels = {'A' 'F' 'C' 'D' 'G' 'M' 'B'};
     data = rand(length(refLabels),length(dataLabels));
+end
+
+if(isempty(data))
+    data = 1:length(dataLabels);
 end
 
 if(~isvector(dataLabels))

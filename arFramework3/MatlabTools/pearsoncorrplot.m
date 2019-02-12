@@ -1,6 +1,9 @@
 % plot correlation of two variables x and y
 
-function pearsoncorrplot(x,y,l,s,~,sy, N)
+function [pval, pval2] = pearsoncorrplot(x,y,l,s,~,sy, N)
+
+pval = nan;
+pval2 = nan;
 
 if(~exist('s','var') || isempty(s))
     s = 6;
@@ -76,7 +79,7 @@ if(isvector(y))
     if(length(y)>2)
         [corrval,pval] = corr(x, y);
         [corrval2,pval2] = corr(x, y, 'type', 'Spearman');
-        text(0.01,1, sprintf('Pearson %4.2f (p-val %4.2g)\nSpearman %4.2f (p-val %4.2g)', ...
+        text(0.01,1, sprintf('Pearson %4.2f (p-val %.2g)\nSpearman %4.2f (p-val %.2g)', ...
             corrval, pval, corrval2, pval2), 'Units', 'normalized', ...
             'VerticalAlignment', 'top');
     end
@@ -92,3 +95,7 @@ end
 
 % adjust axis
 arSpacedAxisLimits
+
+xlabel('Prediction');
+ylabel('Outcome');
+

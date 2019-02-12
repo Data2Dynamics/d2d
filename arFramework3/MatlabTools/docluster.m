@@ -9,10 +9,11 @@ function [B, i_sorted] = docluster(A)
 % B = A(i_sorted,:);
 
 % tree = linkage(A,'average');
-% tree = linkage(A,'ward','euclidean','savememory','on');
-tree = linkage(A,'single',{@euclidean_nonnan});
+tree = linkage(A,'ward','euclidean','savememory','on');
+% tree = linkage(A,'single',{@euclidean_nonnan});
 if(size(A,1)<500)
-    D = pdist(A, @euclidean_nonnan);
+    D = pdist(A, 'euclidean');
+%     D = pdist(A, @euclidean_nonnan);
     try
         leafOrder = optimalleaforder(tree,D);
     catch err_id
