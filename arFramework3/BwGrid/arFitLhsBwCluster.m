@@ -8,9 +8,13 @@
 %                  (usually something between  1 and 10)
 %                  [10]  Default value
 % 
-%   collectfun  the function including path which collects the results,
-%               this file can be executed via run(collectfun) if the
-%               analyses are finished.
+%   collectfun     the function including path which collects the results,
+%                  this file can be executed via run(collectfun) if the
+%                  analyses are finished.
+%
+%   queue          queue to use on the cluster. Choose between 'standard'
+%                  and 'best', or leave empty for 'bestplus'.
+%                  ['bestplus'] Default value
 %
 % The number of cores in a node is by default 5 as specified in
 % arClusterConfig.m. The number of nodes is calculated from Nfit and fitsPerCore
@@ -31,10 +35,19 @@
 % 
 % See also arClusterConfig, arFitLHS
 
-function collectfun = arFitLhsBwCluster(Nfit,fitsPerCore)
+function collectfun = arFitLhsBwCluster(Nfit,fitsPerCore, queue)
 if ~exist('fitsPerCore','var') || isempty(fitsPerCore)
     fitsPerCore = 10;
 end
+
+if ~exist('queue','var') || isempty(queue)
+    queue = 'bestplus';
+end
+
+if sum(strcmp(queue,{'standard','best','bestplus'})) ~= 1
+    error('Queue specification invalid. Leave empty for bestplus or use standard/best');
+end
+
 
 %% configuration
 fprintf('arFitLhsBwCluster.m: Generating bwGrid config ...\n');
@@ -43,6 +56,7 @@ if (fitsPerCore*conf.n_inNode>Nfit)
     error('For %i cores per node, and a total of %i fits, it''s not meaninful to make %i fits on each core.',conf.n_inNode,Nfit,fitsPerCore);
 end
 conf.n_calls = ceil((Nfit/conf.n_inNode)/fitsPerCore);
+conf.qu = queue;
 
 %% writing the startup bash-script:
 fprintf('arFitLhsBwCluster.m: Writing startup file %s ...\n',conf.file_startup);
@@ -54,6 +68,7 @@ arWriteClusterMoab(conf);
 
 %% saving global ar in a workspace:
 global ar
+conf.arsavepath = ar.config.savepath;
 save(conf.file_ar_workspace,'ar');
 
 %% Writing matlab code for LHS:
@@ -71,7 +86,10 @@ collectfun = WriteClusterMatlabResultCollection(conf);
 
 fprintf('-> Call %s manually after the analysis is finished!\n',conf.file_matlab_results);
 fprintf('The collected results are then stored in variable ''results''.\n');
-
+if ~isempty(conf.arsavepath)
+    fprintf(['ar struct in' conf.arsavepath ' will be updated with LHS results after running results function.\n']);
+    fprintf(['ar.p is NOT updated with results from LHS fit. This has to be done manually.\n']);
+end
 
 % collectfun = WriteClusterMatlabResultCollection(conf)
 % 
@@ -80,6 +98,15 @@ fprintf('The collected results are then stored in variable ''results''.\n');
 % 
 %   conf    Output of arClusterConfig.m
 function collectfun = WriteClusterMatlabResultCollection(conf)
+
+if isempty(conf.arsavepath)
+    savemcode = ['save(''',conf.file_ar_workspace,''',''ar'',''-append'');'];
+    savemcodemsg = ['disp(''',conf.name,'_results.mat is written and ',conf.file_ar_workspace,' is updated.'')'];
+else
+    % if possible, write results in ar.config.savepath 
+    savemcode = ['save(''',conf.file_ar_workspace,''',''ar'',''-append''); save(''' conf.arsavepath '/workspace.mat'',''ar'',''-append'')'];
+    savemcodemsg = ['disp(''',conf.name,'_results.mat is written and ar struct in ' conf.arsavepath ' is updated.'')'];
+end
 
 mcode = {
     'function results = collectfun',...
@@ -119,10 +146,10 @@ mcode = {
     'for f=1:length(fn)', ...
     '   ar.(fn{f}) = results.(fn{f});',...
     'end',...
-    ['save(''',conf.file_ar_workspace,''',''ar'',''-append'');'],...    
+    savemcode,...    
     '',...
     ['save(''',conf.name,'_results.mat'', ''results'');'], ...
-    ['disp(''',conf.name,'_results.mat is written and ',conf.file_ar_workspace,' is updated.'')'],...
+    savemcodemsg,...
     'cd(olddir)',...
     };
 

@@ -22,7 +22,7 @@ fid = fopen(conf.file_moab,'w');
 fprintf(fid,'%s\n','#!/bin/sh');
 fprintf(fid,'%s\n','########## Begin MOAB/Slurm header ##########');
 fprintf(fid,'%s\n',['#MOAB -N ',conf.name]);
-fprintf(fid,'%s\n','#MOAB -l nodes=1:ppn=16:bestplus');
+fprintf(fid,'%s\n',['#MOAB -l nodes=1:ppn=16:' conf.qu]);
 fprintf(fid,'%s\n','#MOAB -l walltime=02:00:00:00');
 fprintf(fid,'%s\n','#MOAB -j oe');
 fprintf(fid,'%s\n','#MOAB -m a');

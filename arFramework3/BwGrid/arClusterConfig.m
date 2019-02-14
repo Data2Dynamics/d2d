@@ -1,3 +1,4 @@
+
 % conf = arClusterConfig([name])
 % 
 % arClusterConfig creates a struct containing configs and infos for writting
@@ -15,7 +16,7 @@ else
     name = [name,'_'];
 end
 
-checksum = arAddToCheckSum(randn);
+checksum = arAddToCheckSum(randn + datestr(now, 'HHMMSSddmmyyyy')); %add datestr for unique checksums
 h = typecast(checksum.digest,'uint8');
 checkstr = dec2hex(h)';
 checkstr = checkstr(1,1:6); % keep it short
