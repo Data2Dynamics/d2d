@@ -63,6 +63,7 @@ if(size(y,1)>2)
         
         X = linspace(min(x)-(max(x)-min(x))*0.1, max(x)+(max(x)-min(x))*0.1, 50);
         [Y,DELTA] = polyconf(P,X,S, 'alpha', 1-0.68, 'mu', mu);
+        yfit = polyconf(P,x,S, 'alpha', 1-0.68, 'mu', mu);
         
         plot3(X,Y,zeros(size(X))-1,'Color', colors(j,:));
         patch([X, fliplr(X)], [Y+DELTA, fliplr(Y-DELTA)], zeros(size([X, fliplr(X)]))-1, ...
@@ -79,8 +80,13 @@ if(isvector(y))
     if(length(y)>2)
         [corrval,pval] = corr(x, y);
         [corrval2,pval2] = corr(x, y, 'type', 'Spearman');
-        text(0.01,1, sprintf('Pearson %4.2f (p-val %.2g)\nSpearman %4.2f (p-val %.2g)', ...
-            corrval, pval, corrval2, pval2), 'Units', 'normalized', ...
+        
+        TSS = sum((y(:)-mean(y(:))).^2);
+        RSS_PLS = sum((y(:)-yfit(:)).^2);
+        rsquaredPLS = 1 - RSS_PLS/TSS;
+        
+        text(0.01,1, sprintf('Pearson: %4.2f (p-val: %.2g)\nSpearmam: %4.2f (p-val: %.2g)\nR^2: %4.2f', ...
+            corrval, pval, corrval2, pval2, rsquaredPLS), 'Units', 'normalized', ...
             'VerticalAlignment', 'top');
     end
     
