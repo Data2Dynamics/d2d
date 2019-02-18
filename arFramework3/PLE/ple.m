@@ -1,4 +1,4 @@
-% ple([i], [samplesize], [relchi2stepincrease], [maxstepsize], [minstepsize], [breakonbpleounds], [doLeftRightBranch])
+% ple([i], [samplesize], [relchi2stepincrease], [maxstepsize], [minstepsize], [breakonbounds], [doLeftRightBranch])
 % 
 % Profile Likelihood Exploit
 %
