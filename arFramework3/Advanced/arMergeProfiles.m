@@ -1,4 +1,4 @@
-% PLE = arMergeProfiles( directory, [forceLoad], [filterProfile] )
+% PLE = arMergeProfiles(directory, [forceLoad], [filterProfile], [appendProfiles])
 %
 %  merge profiles from various runs
 %
@@ -10,34 +10,44 @@
 %  PLE              Yields the merged PLE struct as the optional output. If
 %                   no output is demanded, merged ple struct is saved to ar.ple
 %
+%  appendProfiles   Append profiles of the same parameter in different workspaces instead of
+%                   replacing them  [false]
+%
 %  If no model is loaded, an incompatible model is loaded or forceLoad is
 %  set to one, arMergeProfiles will attempt to load a model. For this, it
 %  will look one directory up from Directory for a mat file named
 %  arStruct.mat
 
-function vargout = arMergeProfiles( directory, forceLoad, filterProfile )
+function vargout = arMergeProfiles( directory, forceLoad, filterProfile, appendProfiles)
 
     global ar;
     s = dir(directory);
 
-    if ( ~exist( 'forceLoad', 'var' ) )
+    if ( ~exist( 'forceLoad', 'var' ) || isempty(forceLoad))
         forceLoad = 0;
     end
-    if ( ~exist( 'filterProfile', 'var' ) )
+    if ( ~exist( 'filterProfile', 'var' ) || isempty(filterProfile))
         filterProfile = 0;
     end
+    
+    if ( ~exist( 'appendProfiles', 'var' ) )
+        appendProfiles = false;
+    end    
     
     if isempty( ar ) || forceLoad
         load( [ directory '/../arStruct.mat' ] );
     end
     
+    
     % Assemble ple struct
     PLEs = ar.ple;
+    PLEs.donePars = {};
     for a = 1 : length( s )
         if ( ~strcmp( s(a).name, '.' ) && ~strcmp( s(a).name, '..' ) )
             path = [ directory '/' s(a).name ];
             if ( isdir( path ) )
-                PLEs = loadSingle( PLEs, path, filterProfile );
+                path
+                PLEs = loadSingle( PLEs, path, filterProfile, appendProfiles);
             end
         end
     end
@@ -84,10 +94,10 @@ function success = tryArLoad( PLEs, directory )
     end
 end
 
-function PLEs = loadSingle( PLEs, directory, doFilterProfile )   
+function PLEs = loadSingle( PLEs, directory, doFilterProfile, doAppendProfiles)   
     global ar;
     strict = 0;
-    
+        
     pleLoc = [ directory '/PLE/results.mat' ];
     
     % Check whether a PLE is stored for this profile
@@ -123,14 +133,34 @@ function PLEs = loadSingle( PLEs, directory, doFilterProfile )
             N = 1 : numel( chi2s );
         end
         fprintf( 'Found profile for %s\n', curPLE.p_labels{filled(b)} );
-        PLEs = copyVectors(  PLEs, curPLE, {'chi2s', 'chi2sinit', 'chi2spriors', 'chi2spriorsAll', 'chi2sviolations', 'IDstatus'}, filled(b), loc(b), N );
-        PLEs = copyMatrices( PLEs, curPLE, {'psinit', 'ps', 'gradient', 'psinitstep'}, filled(b), loc(b), N );
-        PLEs = copyScalars(  PLEs, curPLE, {'estimatetime', 'fittime', 'timing', 'conf_lb', 'conf_ub', 'conf_lb_point', 'conf_ub_point'}, filled(b), loc(b) );
-        PLEs = copySingle(   PLEs, curPLE, {'breakon_point', 'dchi2', 'chi2_strID_ratio', 'initstep_fkt', 'minstepsize', 'breakonlb', 'breakonub', 'maxstepsize', ...
-                                            'plot_point', 'plot_simu', 'dist_thres', 'grad_thres', 'dchi2_point', 'merit', 'alpha_level', 'p', 'p_labels', 'ylabel', ...
-                                            'integrate_fkt', 'fit_fkt', 'setoptim_fkt', 'merit_fkt', 'optimset_tol', 'allowbetteroptimum', 'savePath', 'relchi2stepincrease'} );
-        PLEs.plot_point = curPLE.plot_point;
+        
+        appending = false;
+        if sum(strcmp(PLEs.donePars, curPLE.p_labels{filled(b)})) ~= 0 && doAppendProfiles
+            appending = true;
+            fprintf('Combining profiles...\n')
+        end
+        PLEs.donePars{end + 1} = curPLE.p_labels{filled(b)};
+        
+        if appending
+            PLEs = appendVectors(  PLEs, curPLE, {'chi2s', 'chi2sinit', 'chi2spriors', 'chi2spriorsAll', 'chi2sviolations', 'IDstatus'}, filled(b), loc(b), N );
+            PLEs = appendMatrices( PLEs, curPLE, {'psinit', 'ps', 'gradient', 'psinitstep'}, filled(b), loc(b), N );
+            PLEs = copyScalars(  PLEs, curPLE, {'estimatetime', 'fittime', 'timing', 'conf_lb', 'conf_ub', 'conf_lb_point', 'conf_ub_point'}, filled(b), loc(b) );
+            PLEs = copySingle(   PLEs, curPLE, {'breakon_point', 'dchi2', 'chi2_strID_ratio', 'initstep_fkt', 'minstepsize', 'breakonlb', 'breakonub', 'maxstepsize', ...
+                'plot_point', 'plot_simu', 'dist_thres', 'grad_thres', 'dchi2_point', 'merit', 'alpha_level', 'p', 'p_labels', 'ylabel', ...
+                'integrate_fkt', 'fit_fkt', 'setoptim_fkt', 'merit_fkt', 'optimset_tol', 'allowbetteroptimum', 'savePath', 'relchi2stepincrease'} );
+            PLEs.plot_point = curPLE.plot_point;
+        else
+            PLEs = copyVectors(  PLEs, curPLE, {'chi2s', 'chi2sinit', 'chi2spriors', 'chi2spriorsAll', 'chi2sviolations', 'IDstatus'}, filled(b), loc(b), N );
+            PLEs = copyMatrices( PLEs, curPLE, {'psinit', 'ps', 'gradient', 'psinitstep'}, filled(b), loc(b), N );
+            PLEs = copyScalars(  PLEs, curPLE, {'estimatetime', 'fittime', 'timing', 'conf_lb', 'conf_ub', 'conf_lb_point', 'conf_ub_point'}, filled(b), loc(b) );
+            PLEs = copySingle(   PLEs, curPLE, {'breakon_point', 'dchi2', 'chi2_strID_ratio', 'initstep_fkt', 'minstepsize', 'breakonlb', 'breakonub', 'maxstepsize', ...
+                'plot_point', 'plot_simu', 'dist_thres', 'grad_thres', 'dchi2_point', 'merit', 'alpha_level', 'p', 'p_labels', 'ylabel', ...
+                'integrate_fkt', 'fit_fkt', 'setoptim_fkt', 'merit_fkt', 'optimset_tol', 'allowbetteroptimum', 'savePath', 'relchi2stepincrease'} );
+            PLEs.plot_point = curPLE.plot_point;
+        end
+        
     end
+%    pars_history
 end
 
 function PLEs = copyVectors( PLEs, curPLE, names, ID, ID_target, N )
@@ -163,6 +193,24 @@ end
 function PLEs = copySingle( PLEs, curPLE, names )
     for j = 1 : length( names )
         PLEs.(names{j}) = curPLE.(names{j});
+    end
+end
+
+function PLEs = appendVectors( PLEs, curPLE, names, ID, ID_target, N )
+    for j = 1 : length( names )
+        try
+            PLEs.(names{j}){ID_target}(end+1:end+length(N)) = curPLE.(names{j}){ID}(N) + 0;
+        catch
+        end
+    end
+end
+
+function PLEs = appendMatrices( PLEs, curPLE, names, ID, ID_target, N )
+    for j = 1 : length( names )
+        try
+            PLEs.(names{j}){ID_target}(end+1:end+length(N),:) = curPLE.(names{j}){ID}(N,:) + 0;
+        catch
+        end
     end
 end
 
