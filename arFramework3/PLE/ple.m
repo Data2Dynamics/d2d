@@ -1,4 +1,4 @@
-% ple([i], [samplesize], [relchi2stepincrease], [maxstepsize], [minstepsize], [breakonbounds])
+% ple([i], [samplesize], [relchi2stepincrease], [maxstepsize], [minstepsize], [breakonbpleounds], [doLeftRightBranch])
 % 
 % Profile Likelihood Exploit
 %
@@ -13,6 +13,7 @@
 %   minstepsize           minumum size of a step              [1e-6]
 %   breakonlb             stop if hit lb                      [false]
 %   breakonub             stop if hit ub                      [true]
+%   doLeftRightBranch     calculate left/right branch         [true true]
 % 
 % The profile likelihood calculation by the functions ple* was intended
 % as running independent of D2D, i.e. it was intended to be also used by
@@ -24,7 +25,7 @@
 % See also: arPLEInit, pleExtend
 
 function ple(jk, samplesize, relchi2stepincrease, ...
-    maxstepsize, minstepsize, breakonlb, breakonub)
+    maxstepsize, minstepsize, breakonlb, breakonub, doLeftRightBranch)
 
 global ar
 
@@ -34,6 +35,11 @@ end
 if(~isfield(ar.ple, 'showCalculation'))
     ar.ple.showCalculation = true;
 end
+if(~exist('doLeftRightBranch','var') || isempty(doLeftRightBranch))
+    doLeftRightBranch = [true true];
+end
+
+disp(doLeftRightBranch)
 
 if(~exist('jk','var') || isempty(jk))
     jk = find(ar.qFit==1);
@@ -184,6 +190,7 @@ fittime = 0;
 arWaitbar(0);
 
 try
+    if doLeftRightBranch(2)
     for j=1:ar.ple.samplesize(jk)
         jindex = (ar.ple.samplesize(jk)+1) + j;
         arWaitbar(j, ar.ple.samplesize(jk), sprintf('PLE#%i estimating upper confidence bound for %s', ...
@@ -245,6 +252,7 @@ try
             break
         end
     end
+    end
 catch exception
     fprintf('ERROR PLE: going to upper bound (%s)\n', exception.message);
 end
@@ -259,6 +267,7 @@ last.dy = NaN(1,ar.ple.samplesize(jk));
 
 arWaitbar(0);
 try
+    if doLeftRightBranch(1)
     for j=1:ar.ple.samplesize(jk)
         jindex = (ar.ple.samplesize(jk)+1) - j;
         arWaitbar(j, ar.ple.samplesize(jk), sprintf('PLE#%i estimating lower confidence bound for %s', ...
@@ -318,6 +327,7 @@ try
         if(feval(ar.ple.merit_fkt) > ar.ple.merit+dchi2*1.2)
             break
         end
+    end
     end
 catch exception
     fprintf('ERROR PLE: going to lower bound (%s)\n', exception.message);
