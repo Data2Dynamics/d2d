@@ -52,6 +52,9 @@ end
 %% configuration
 fprintf('arFitLhsBwCluster.m: Generating bwGrid config ...\n');
 conf = arClusterConfig;
+if ~isfolder(conf.save_path)
+    mkdir(conf.save_path);
+end
 if (fitsPerCore*conf.n_inNode>Nfit)
     error('For %i cores per node, and a total of %i fits, it''s not meaninful to make %i fits on each core.',conf.n_inNode,Nfit,fitsPerCore);
 end
