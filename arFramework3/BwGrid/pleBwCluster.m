@@ -14,6 +14,10 @@
 % arClusterConfig.m. The number of nodes is calculated from the number of pars
 % (and 5 cores per node).
 % 
+% IMPORTANT: The fields estimatetime, fittime, timing, conf_lb, conf_ub, conf_lb_point and
+%            conf_ub_point of ar.ple may not be correct (overwritten by values from the 
+%            calculation of the right branch).
+%
 % Example 1:
 %     arLoadLatest                          % load some workspace
 %     pleBwCluster(1:4, 'best')             % calc. profiles of first 4 pars on best
@@ -97,6 +101,7 @@ fprintf('-> Call %s manually after the analysis is finished!\n',conf.file_matlab
 if ~isempty(conf.arsavepath)
     fprintf(['ar struct in' conf.arsavepath ' will be updated with PLE results after running results function.\n']);
 end
+fprintf('\n \n*************************************************\nIMPORTANT: The fields estimatetime, fittime, timing, conf_lb, conf_ub, conf_lb_point and conf_ub_point of ar.ple may not be correct (overwritten by values from the calculation of the right branch).\n*************************************************\n');
 end
 
 % collectfun = WriteClusterMatlabResultCollection(conf)
