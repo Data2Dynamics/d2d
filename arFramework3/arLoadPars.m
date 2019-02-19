@@ -38,7 +38,7 @@
 % See also arLoadParsSingle, arImportPars
 
 function varargout = arLoadPars(resultFolder, fixAssigned, pars_only, result_path, pattern, antipattern)
-if(~exist('pfad','var') || isempty(result_path))
+if(~exist('result_path','var') || isempty(result_path))
     result_path = './Results';
 else
     if(strcmp(result_path(end),filesep)==1)
@@ -110,12 +110,13 @@ arCheckCache(1);
 function ar = arLoadParsCore(ar, resultFolder, fixAssigned, pars_only, pfad, pattern, antipattern)
 
 if(ischar(resultFolder))    
-    resultFolder = [pfad,'/' resultFolder '/workspace.mat'];
-    filename_pars = [pfad,'/' resultFolder '/workspace_pars_only.mat'];
-    if(exist(filename_pars,'file'))
-        S = load(filename_pars);
+    filename_pars = [pfad,'/' resultFolder '/workspace.mat'];
+    filename_pars_only = [pfad,'/' resultFolder '/workspace_pars_only.mat'];
+    
+    if(exist(filename_pars_only,'file'))
+        S = load(filename_pars_only);
     else
-        S = load(resultFolder);
+        S = load(filename_pars);
     end
     arFprintf(1, 'parameters loaded from file %s:\n', resultFolder);
 elseif(isstruct(resultFolder))
