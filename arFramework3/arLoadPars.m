@@ -113,10 +113,10 @@ if(ischar(resultFolder))
     filename_pars = [pfad,'/' resultFolder '/workspace.mat'];
     filename_pars_only = [pfad,'/' resultFolder '/workspace_pars_only.mat'];
     
-    if(exist(filename_pars,'file'))
-        S = load(filename_pars);
-    else
+    if(exist(filename_pars_only,'file'))
         S = load(filename_pars_only);
+    else
+        S = load(filename_pars);
     end
     arFprintf(1, 'parameters loaded from file %s:\n', resultFolder);
 elseif(isstruct(resultFolder))
