@@ -39,8 +39,6 @@ if(~exist('doLeftRightBranch','var') || isempty(doLeftRightBranch))
     doLeftRightBranch = [true true];
 end
 
-disp(doLeftRightBranch)
-
 if(~exist('jk','var') || isempty(jk))
     jk = find(ar.qFit==1);
 elseif(ischar(jk))
