@@ -1,4 +1,4 @@
-% collectfun = arFitLhsBwCluster(Nfit,fitsPerCore)
+% collectfun = arFitLhsBwCluster(Nfit, [fitsPerCore], [queue])
 %
 % arFitLhsBwCluster performs arFitLHS on the BwGrid by automatically
 % generating scripts (startup, moab, matlab) and calling them.
