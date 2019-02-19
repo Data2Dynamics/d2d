@@ -46,7 +46,7 @@ fprintf(fid,'%s\n',['for iInNode in {1..',num2str(conf.n_inNode),'}    ']);
 fprintf(fid,'%s\n','do');
 % conf.arg1 is a placeholder/template for further arguments passed to
 % matlab:
-fprintf(fid,'%s\n',['( matlab -nodisplay -r "icall=$1; iInNode=$iInNode; arg1=',conf.arg1,'; ',strrep(conf.file_matlab,'.m',''),'" > ${1}_${iInNode}.log ) &']);
+fprintf(fid,'%s\n',['( matlab -nodisplay -r "icall=$1; iInNode=$iInNode; arg1=',conf.arg1,'; ',strrep(conf.file_matlab,'.m',''),'" &> ${1}_${iInNode}.log ) &']);
 fprintf(fid,'%s\n','    sleep 2');
 fprintf(fid,'%s\n','done');
 fprintf(fid,'%s\n','');
