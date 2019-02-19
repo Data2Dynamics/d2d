@@ -32,9 +32,6 @@
 % arMergeProfiles
 
 function collectfun = pleBwCluster(pars, queue)
-% if ~exist('jobsPerCore','var') || isempty(jobsPerCore)
-%     jobsPerCore = 10;
-% end
 global ar
 
 if(~isfield(ar,'ple') || isempty(ar.ple))
