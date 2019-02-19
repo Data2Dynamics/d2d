@@ -41,9 +41,4 @@ conf.arg1 = '1234'; % placeholder for arguments/variables passed to the matlab f
 conf.pwd = pwd;
 conf.save_path = [pwd,filesep,conf.name,'_results'];
 
-    if ~isfolder(conf.save_path)
-        mkdir(conf.save_path);
-    end
-
-
 
