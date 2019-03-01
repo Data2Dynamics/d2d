@@ -23,7 +23,7 @@ fprintf(fid,'%s\n','#!/bin/sh');
 fprintf(fid,'%s\n','########## Begin MOAB/Slurm header ##########');
 fprintf(fid,'%s\n',['#MOAB -N ',conf.name]);
 fprintf(fid,'%s\n',['#MOAB -l nodes=1:ppn=16:' conf.qu]);
-fprintf(fid,'%s\n',['#MOAB -l walltime=' conf.walltime']);
+fprintf(fid,'%s\n',['#MOAB -l walltime=' conf.walltime]);
 fprintf(fid,'%s\n','#MOAB -j oe');
 fprintf(fid,'%s\n','#MOAB -m a');
 fprintf(fid,'%s\n','########### End MOAB header ##########');

@@ -38,7 +38,7 @@
 % See also arClusterConfig, arWriteClusterStartup, arWriteClusterMoab, ple,
 % arMergeProfiles
 
-function collectfun = pleBwCluster(pars, queue)
+function collectfun = pleBwCluster(pars, queue, walltime)
 global ar
 
 if(~isfield(ar,'ple') || isempty(ar.ple))

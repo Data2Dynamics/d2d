@@ -38,7 +38,7 @@
 % 
 % See also arClusterConfig, arFitLHS
 
-function collectfun = arFitLhsBwCluster(Nfit,fitsPerCore, queue)
+function collectfun = arFitLhsBwCluster(Nfit,fitsPerCore, queue, walltime)
 if ~exist('fitsPerCore','var') || isempty(fitsPerCore)
     fitsPerCore = 10;
 end
