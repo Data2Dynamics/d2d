@@ -1,4 +1,4 @@
-% collectfun = arFitLhsBwCluster(Nfit, [fitsPerCore], [queue])
+% collectfun = arFitLhsBwCluster(Nfit, [fitsPerCore], [queue], [walltime])
 %
 % arFitLhsBwCluster performs arFitLHS on the BwGrid by automatically
 % generating scripts (startup, moab, matlab) and calling them.
@@ -15,6 +15,9 @@
 %   queue          queue to use on the cluster. Choose between 'standard'
 %                  and 'best', or leave empty for 'bestplus'.
 %                  ['bestplus'] Default value
+%
+%   walltime       string containing walltime for jobs on cluster
+%                  ['02:00:00:00'] Default value
 %
 % The number of cores in a node is by default 5 as specified in
 % arClusterConfig.m. The number of nodes is calculated from Nfit and fitsPerCore
@@ -44,10 +47,13 @@ if ~exist('queue','var') || isempty(queue)
     queue = 'bestplus';
 end
 
+if ~exist('walltime','var') || isempty(walltime)
+    walltime = '02:00:00:00';
+end
+
 if sum(strcmp(queue,{'standard','best','bestplus'})) ~= 1
     error('Queue specification invalid. Leave empty for bestplus or use standard/best');
 end
-
 
 %% configuration
 fprintf('arFitLhsBwCluster.m: Generating bwGrid config ...\n');
@@ -60,6 +66,7 @@ if (fitsPerCore*conf.n_inNode>Nfit)
 end
 conf.n_calls = ceil((Nfit/conf.n_inNode)/fitsPerCore);
 conf.qu = queue;
+conf.walltime = walltime
 
 %% writing the startup bash-script:
 fprintf('arFitLhsBwCluster.m: Writing startup file %s ...\n',conf.file_startup);
