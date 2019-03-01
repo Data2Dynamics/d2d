@@ -66,7 +66,7 @@ if (fitsPerCore*conf.n_inNode>Nfit)
 end
 conf.n_calls = ceil((Nfit/conf.n_inNode)/fitsPerCore);
 conf.qu = queue;
-conf.walltime = walltime
+conf.walltime = walltime;
 
 %% writing the startup bash-script:
 fprintf('arFitLhsBwCluster.m: Writing startup file %s ...\n',conf.file_startup);

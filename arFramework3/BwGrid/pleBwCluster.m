@@ -1,4 +1,4 @@
-% collectfun = pleBwCluster([pars], [queue])
+% collectfun = pleBwCluster([pars], [queue], [walltime])
 %
 % pleBwCluster performs ple on the BwGrid by automatically
 % generating scripts (startup, moab, matlab) and calling them.
@@ -9,6 +9,9 @@
 %   queue          queue to use on the cluster. Choose between 'standard'
 %                  and 'best', or leave empty for 'bestplus'.
 %                  ['bestplus'] Default value
+%
+%   walltime       string containing walltime for jobs on cluster
+%                  ['02:00:00:00'] Default value
 %
 % The number of cores in a node is by default 5 as specified in
 % arClusterConfig.m. The number of nodes is calculated from the number of pars
@@ -54,6 +57,10 @@ if ~exist('queue','var') || isempty(queue)
     queue = 'bestplus';
 end
 
+if ~exist('walltime','var') || isempty(walltime)
+    walltime = '02:00:00:00';
+end
+
 if sum(strcmp(queue,{'standard','best','bestplus'})) ~= 1
     error('Queue specification invalid. Leave empty for bestplus or use standard/best');
 end
@@ -65,6 +72,7 @@ conf = arClusterConfig;
 
 conf.n_calls = ceil((length(pars) * 2)/conf.n_inNode);
 conf.qu = queue;
+conf.walltime = walltime;
 
 profileIDs = [pars pars; [ones(1, length(pars)) zeros(1, length(pars))]; [zeros(1, length(pars)) ones(1, length(pars))]];
 runIDs_tmp = 1:(length(pars)*2);
