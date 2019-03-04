@@ -156,6 +156,13 @@ function arReduce( m, keepTotals )
             ar.model(m).fx_par{j}   = char('0');
         end
     end
+    
+    % If nothing was done, make sure this field exists but is empty
+    % We did still check whether the dfdx was full rank, so it should be OK
+    % to use implicit methods.
+    if ~isfield( ar.model(m), 'removedStates' )
+        ar.model(m).removedStates = [];
+    end
 end
 
 % Generate replacement rules
