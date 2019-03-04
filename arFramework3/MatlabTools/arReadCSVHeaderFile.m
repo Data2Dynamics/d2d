@@ -40,7 +40,7 @@ while(~isempty(C{1}))
             dataCell{rcount,j} = C{j};
         end
     end
-    C = textscan(fid,'%s\n',1,'Delimiter','');
+    C = textscan(fid,'%s',1,'Delimiter','\n');
     rcount = rcount + 1;
 end
 arFprintf( 6, '[ OK ]\n' );
