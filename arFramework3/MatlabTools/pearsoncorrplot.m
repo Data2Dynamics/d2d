@@ -1,5 +1,7 @@
 % plot correlation of two variables x and y
-
+%
+% [pval, pval2] = pearsoncorrplot(x,y,l,s,~,sy, N)
+ 
 function [pval, pval2] = pearsoncorrplot(x,y,l,s,~,sy, N)
 
 pval = nan;
