@@ -53,8 +53,8 @@ function totalEvents = arFindInputs( verbose )
             stepLocations = {};
             % Find the event time points
             for b = 1 : length( ar.model(m).condition(a).fu )
-                step1 = findstr(ar.model(m).condition(a).fu{b}, 'step1'); %#ok
-                step2 = findstr(ar.model(m).condition(a).fu{b}, 'step2'); %#ok
+                step1 = strfind(ar.model(m).condition(a).fu{b}, 'step1');
+                step2 = strfind(ar.model(m).condition(a).fu{b}, 'step2');
 
                 for c = 1 : length( step1 )
                     ar.model(m).condition(a).fu{b}(step1(c):end);
