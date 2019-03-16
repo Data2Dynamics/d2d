@@ -1,0 +1,12 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR-DOSERESPONSE init_ligand
+t	T	"min"	"time"	0	20
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS

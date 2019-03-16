@@ -1,0 +1,25 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR
+t	T	"min"	"time"	0	100
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+kon_egfr_AB      "(no_ratio_met_egfr_151_egfr) / 1.4"
+kon_met_AB       "(no_ratio_met_egfr_151_met) / 0.04"
+
+//kon_egfr_AB      "(k_binding_mm151 / ratio_met_egfr_151_egfr) / 1.4"
+//kon_met_AB       "(k_binding_mm151 / ratio_met_egfr_151_met) / 0.04"
+
+//kd_ratio_met_egfr_151 "10^(-1)"
+//k12_egfr_cmet_ratio "10^(-1.5441)"
+
+//koff_egfr_AB      "(k_binding_mm151 / ratio_met_egfr_151_egfr) * 1.4"
+//koff_met_AB       "(k_binding_mm151 / ratio_met_egfr_151_met) * 0.04"
+

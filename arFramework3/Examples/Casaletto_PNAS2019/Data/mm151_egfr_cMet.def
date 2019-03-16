@@ -1,0 +1,15 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR-DOSERESPONSE init_ligand
+t	T	"min"	"time"	0	20
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+init_met_egfr_AB     "init_ligand"
+init_mm151_AB        "init_ligand"

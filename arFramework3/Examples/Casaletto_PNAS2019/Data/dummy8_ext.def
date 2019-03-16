@@ -1,0 +1,18 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR
+t	T	"min"	"time"	0	100
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+kd_ratio_met_egfr_151 "10^(-1)"
+k12_egfr_cmet_ratio "10^(-1.5441)"
+
+kb_egfr_AB      "(k_binding_mm151 / kd_ratio_met_egfr_151) * k12_egfr_cmet_ratio * 1.4"
+kb_met_AB       "(k_binding_mm151 / kd_ratio_met_egfr_151) * 0.04"

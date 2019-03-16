@@ -1,0 +1,21 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR-DOSERESPONSE init_mm131_AB
+t	T	"min"	"time"	0	20
+
+INPUTS
+
+OBSERVABLES
+pAkt_au     C	"au"	"conc."    1   1    "offset_jc_mm131_pakt_ID + (scale_jc_mm131_pakt_ID * pAkt)"
+
+ERRORS
+pAkt_au     "sd_pakt_jc_mm131_au_ID"
+
+CONDITIONS
+init_egfr             "(315000) * qfacs_fac"
+init_epcam            "(24045.75) * qfacs_fac"
+init_met              "(71969.5) * qfacs_fac"
+
+RANDOM
+ID         INDEPENDENT

@@ -1,0 +1,16 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR-DOSERESPONSE init_met_egfr_AB
+t	T	"min"	"time"	0	20
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+//init_egfr             "(315000) * qfacs_fac"
+init_epcam            "(24045.75) * qfacs_fac"
+init_met              "(71969.5) * qfacs_fac"

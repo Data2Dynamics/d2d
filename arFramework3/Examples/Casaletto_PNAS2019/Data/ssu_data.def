@@ -1,0 +1,15 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR-DOSERESPONSE init_metmab
+t	T	"min"	"time"	0	20
+
+INPUTS
+
+OBSERVABLES
+pAkt_au     C	"au"	"conc."    1   1    "offset_ssu_pakt + (scale_ssu_pakt * pAkt)"
+
+ERRORS
+pAkt_au     "sd_pakt_ssu_au"
+
+CONDITIONS
