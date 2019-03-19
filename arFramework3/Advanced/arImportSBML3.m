@@ -126,11 +126,10 @@ if isfield(m,'unitDefinition') && isfield(m.unitDefinition,'unit') && isfield(m.
 else
     time_unit = 'n/a';
 end
-if(~isempty(m.time_symbol))
-    fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, time_unit, tEnd);
-else
-    fprintf(fid, 't\t T\t "%s"\t time\t 0\t %i\t\n', 'n/a', tEnd);
+if isempty(m.time_symbol)
+    m.time_symbol = 't';
 end
+fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, time_unit, tEnd);
 
 comps = {};
 comp_value = [];
@@ -172,6 +171,7 @@ fprintf(fid, '\nSTATES\n');
 % for j=1:length(m.species)
 pat = cell(0); % if length of species names ==1, the species names are extended by '_state'
 rep = cell(0);
+unit = cell(0);
 
 if isfield(m,'raterule')
     raterulespecies = unique({m.raterule.variable});
@@ -187,12 +187,13 @@ for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentrat
     if length(m.species(j).id)==1 %|| strcmp(m.species(j).id,'beta')==1  % special cases or too short
         pat{end+1} =  m.species(j).id; %#ok<AGROW>
         rep{end+1} = [m.species(j).id,'_state']; %#ok<AGROW>
+        unit{end+1} = m.species(j).substanceUnits;
         m.species(j).id2 = rep{end};
-        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(rep{end}), 'n/a', ...
+        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(rep{end}), unit{end}, ...
             m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
     else  % standard case
         m.species(j).id2 = m.species(j).id;
-        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), 'n/a', ...
+        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), m.species(j).substanceUnits, ...
             m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
     end
 end
@@ -246,7 +247,6 @@ obs = cell(0); % if length of species names ==1, the species names are extended 
 obsu=cell(0);
 obsf = cell(0);
 err = cell(0);
-erru = cell(0);
 errf = cell(0);
 u = cell(0);
 uu = cell(0);
@@ -262,12 +262,8 @@ if isfield(m,'rule')
             end
             obsf{end+1} = m.rule(j).formula;
         elseif strncmp(m.rule(j).variable,'sigma',5)
-            err{end+1} = m.rule(j).variable;
-            erru{end+1} = m.rule(j).units;
-            if isempty(m.rule(j).units)
-                erru{end} = 'n/a';
-            end
-            errf{end+1} = m.rule(j).formula;
+            err{end+1} = m.rule(j).formula;
+            %errf{end+1} = m.rule(j).variable;
         else
             u{end+1} = m.rule(j).variable;
             uu{end+1} = m.rule(j).units;
@@ -276,6 +272,13 @@ if isfield(m,'rule')
             end
             uf{end+1} = m.rule(j).formula;
         end
+    end
+end
+if length(obs)~=length(err)
+    warning('Number of error parameters does not match number of observables. Error parameters are overwritten with "sigma_[Observable]".')
+    err = cell(0);
+    for i=1:length(obs)
+        err{i} = ['noiseParameter1_' obs{i}(12:end)];
     end
 end
 
@@ -527,7 +530,7 @@ fprintf(fid, '\nERRORS\n');
 
 if exist('err','var') 
     for i=1:length(err)
-        fprintf(fid, '%s\t "%s"\n', sym_check(err{i}), errf{i});
+        fprintf(fid, '%s\t "%s"\n', sym_check(obs{i}), err{i});
     end
 end
 
@@ -708,22 +711,22 @@ fclose(fid);
 % 
 % fclose(fid);
 % 
-% if ~isdir('./Models')
-%     mkdir('Models');
-% end
+if ~isdir('./Models')
+     mkdir('Models');
+ end
 % if(overwrite)
 %     movefile([new_filename '.def'],'Models','f');
-% %     system(['mv -f ',new_filename '.def Models']);
+ %     system(['mv -f ',new_filename '.def Models']);
 % else
-%     dest = ['Models',filesep,new_filename '.def'];
-%     if exist(dest,'file')==0
-%         movefile([new_filename '.def'],'Models');
-%     else
-%         fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
-%     end
-% %     system(['mv ',new_filename '.def Models']);
+     dest = ['Models',filesep,new_filename '.def'];
+     if exist(dest,'file')==0
+         movefile([new_filename '.def'],'Models');
+     else
+         fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
+     end
+     system(['mv ',new_filename '.def Models']);
 % end
-% 
+ 
 % if ~isdir('./Data')
 %     mkdir('Data');
 % end
@@ -746,13 +749,14 @@ if(~exist('Setup.m','file'))
     fid = fopen('Setup.m','w');
     fprintf(fid, 'arInit;\n');
     fprintf(fid, 'arLoadModel(''%s'');\n',new_filename);
-    fprintf(fid, 'arLoadData(''%s'');\n',[new_filename '_data']);
+    %fprintf(fid, 'arLoadData(''%s'');\n',[new_filename '_data']);
     fprintf(fid, 'arCompileAll;\n');
 else
     fprintf('Setup.m already available in the working directory.\n')
 end
 
-fprintf('Model- and data definition files created.\n');
+%fprintf('Model- and data definition files created.\n');
+fprintf('Model definition file created.\n');
 fprintf('If loading via Setup.m does not work, try to solve issues by adapting the def files by hand.\n');
 fprintf('The following issues might occur:\n')
 fprintf(' - In SBML, compartements are often used as a kind of annotation and not for considering volume factors. Then compartement (should) have the same volumes. In D2D, a reaction of compounds located in different compartements might cause an error.\n');
