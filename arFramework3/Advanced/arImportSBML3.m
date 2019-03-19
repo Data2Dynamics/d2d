@@ -16,6 +16,8 @@
 % longer symbols.
 % State- and parameter names which coincide with mathematical functions
 % in symbolic the Symbolic Toolbox are replaced.
+% All qFits are set to 0. Fitting is switched on by reading in
+% parameters_*.tsv
 %
 % Example:
 % arImportSBML('BIOMD0000000379')
@@ -567,7 +569,7 @@ for j=1:length(m.species)
                 ub = m.species(j).initialConcentration*10;
             end
             fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-                m.species(j).initialConcentration, m.species(j).constant==0, ub);
+                m.species(j).initialConcentration, 0, ub);
             specs{end+1} = m.species(j).id2;
             spec_value(end+1) = m.species(j).initialConcentration;
         elseif(m.species(j).isSetInitialAmount)
@@ -579,7 +581,7 @@ for j=1:length(m.species)
                 ub = initial_conc*10;
             end
             fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-                initial_conc, m.species(j).constant==0, ub);
+                initial_conc, 0, ub);
             specs{end+1} = m.species(j).id2;
             spec_value(end+1) = initial_conc;
         end
@@ -604,7 +606,7 @@ for j=1:length(m.parameter)
                 ub = m.parameter(j).value*10;
             end
             fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.parameter(j).id), ...
-                m.parameter(j).value, m.parameter(j).constant==0, ub);
+                m.parameter(j).value, 0, ub);
             pars{end+1} = m.parameter(j).id;
             par_value(end+1) = m.parameter(j).value;
             
