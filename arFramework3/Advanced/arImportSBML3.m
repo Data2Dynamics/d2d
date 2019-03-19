@@ -184,24 +184,19 @@ else
 end
 
 for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration]) & ~[m.species.boundaryCondition] | ([m.species.boundaryCondition] & israterule)) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
+    if isfield(m.species,'substanceUnits') && ~isempty(m.species(j).substanceUnits)
+        unit{end+1} = m.species(j).substanceUnits;
+    else
+        unit{end+1} = 'n/a';
+    end
     if length(m.species(j).id)==1 %|| strcmp(m.species(j).id,'beta')==1  % special cases or too short
         pat{end+1} =  m.species(j).id; %#ok<AGROW>
         rep{end+1} = [m.species(j).id,'_state']; %#ok<AGROW>
-        if isfield(m.species,'substanceUnits') && ~isempty(m.species(j).substanceUnits)
-            unit{end+1} = m.species(j).substanceUnits;
-        else
-            unit{end+1} = 'n/a';
-        end
         m.species(j).id2 = rep{end};
         fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(rep{end}), unit{end}, ...
             m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
     else  % standard case
         m.species(j).id2 = m.species(j).id;
-        if isfield(m.species,'substanceUnits') && ~isempty(m.species(j).substanceUnits)
-            unit{end+1} = m.species(j).substanceUnits;
-        else
-            unit{end+1} = 'n/a';
-        end
         fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), unit{j}, ...
         m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
     end
@@ -447,7 +442,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                 end
             end
             
-            tmpstr = sym(m.reaction(j).kineticLaw.math);
+            tmpstr = str2sym(m.reaction(j).kineticLaw.math);
             % repace species names if too short
             for i=1:length(rep)
                 tmpstr = mysubs(tmpstr,pat{i},rep{i});
@@ -498,7 +493,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             tmpstr = replacePowerFunction(tmpstr);
             
             % replace rules
-            tmpstr = sym(tmpstr);
+            tmpstr = str2sym(tmpstr);
             findrule = true;
             count = 0;
             while(findrule && count < 100)
@@ -730,12 +725,12 @@ if ~isdir('./Models')
 %     movefile([new_filename '.def'],'Models','f');
  %     system(['mv -f ',new_filename '.def Models']);
 % else
-     dest = ['Models',filesep,new_filename '.def'];
-     if exist(dest,'file')==0
-         movefile([new_filename '.def'],'Models');
-     else
-         fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
-     end
+%     dest = ['Models',filesep,new_filename '.def'];
+%     if exist(dest,'file')==0
+%         movefile([new_filename '.def'],'Models');
+%     else
+%         fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
+%     end
      system(['mv ',new_filename '.def Models']);
 % end
  
@@ -853,7 +848,7 @@ while(~isempty(funindex))
 end
 % disp(str)
 
-str = char(sym(str));
+str = char(str2sym(str));
 
 
 function str = replacePowerFunction(str, issym)
@@ -869,8 +864,8 @@ if(~exist('issym','var'))
 end
 
 if issym
-    str = strrep(str, 'power(', '_power('); % FIXME: use regexp instead
-    str = strrep(str, 'pow(', '_power('); % FIXME: use regexp instead
+ %   str = strrep(str, 'power(', '_power('); % FIXME: use regexp instead
+ %   str = strrep(str, 'pow(', '_power('); % FIXME: use regexp instead
 else
     C = {'a','b'};
     funstr = 'power';
