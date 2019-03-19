@@ -121,8 +121,13 @@ if(~isempty(m.notes))
 end
 
 fprintf(fid, '\nPREDICTOR\n');
+if isfield(m,'unitDefinition') && isfield(m.unitDefinition,'unit') && isfield(m.unitDefinition.unit,'kind')
+    time_unit = m.unitDefinition.unit.kind;
+else
+    time_unit = 'n/a';
+end
 if(~isempty(m.time_symbol))
-    fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, 'n/a', tEnd);
+    fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, time_unit, tEnd);
 else
     fprintf(fid, 't\t T\t "%s"\t time\t 0\t %i\t\n', 'n/a', tEnd);
 end
@@ -514,15 +519,15 @@ fprintf(fid, '\nOBSERVABLES\n');
 
 if exist('obs','var') 
     for i=1:length(obs)
-        fprintf(fid, '%s\t C\t "%s"\t conc.\t 0\t 1\t "%s"\n', sym_check(obs{i}), obsu{i}, obsf{i});
+        fprintf(fid, '%s\t C\t "%s"\t conc.\t 0\t 0\t "%s"\n', sym_check(obs{i}), obsu{i}, obsf{i});
     end
 end
 
 fprintf(fid, '\nERRORS\n');
 
 if exist('err','var') 
-    for i=1:length(obs)
-        fprintf(fid, '%s\t C\t "%s"\t conc.\t 0\t 1\t "%s"\n', sym_check(err{i}), erru{i}, errf{i});
+    for i=1:length(err)
+        fprintf(fid, '%s\t "%s"\n', sym_check(err{i}), errf{i});
     end
 end
 
@@ -627,113 +632,113 @@ fclose(fid);
 
 %% data file
 
-fid = fopen([new_filename '_data.def'], 'w');
-
-fprintf(fid, 'DESCRIPTION\n');
-if(~isempty(m.name))
-    fprintf(fid, '"data file for %s"\n', m.name);
-end
-
-fprintf(fid, '\nPREDICTOR\n');
-if(~isempty(m.time_symbol))
-    fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, 'n/a', 100);
-else
-    fprintf(fid, 't\t T\t "%s"\t time\t 0\t %i\t\n', 'n/a', 100);
-end
-
-fprintf(fid, '\nINPUTS\n');
-
-% TODO: Access parameter name list. Where to implement and how?
-% TODO: Access Units from model. 
-
-if isfield(m,'rule') && ~isempty(m.rule(1).formula) % look for observation functions
-    for j = 1:length(m.rule)
-        split_err = strsplit(m.rule(j).variable,'sigma_');
-        split_obs = strsplit(m.rule(j).variable,'observable_');
-        isobs(j) = length(split_obs) == 2;
-        iserr(j) = length(split_err) == 2;
-        if isobs(j)
-            obsname{j} = split_obs{2};
-        elseif iserr(j)
-            obsname{j} = split_err{2};
-        else
-            obsname{j} = '';
-        end
-    end
-    [~,B,C] = unique(obsname);
-    jsobs = find(isobs);
-    jserr = find(iserr);
-    
-    fprintf(fid, '\nOBSERVABLES\n');
-    for j=1:length(B)
-        idx = find((j == C) & isobs');
-        if ~isempty(idx)
-        fprintf(fid, '%s \t C\t "%s"\t "conc."\t 0 0 "%s" "%s"\n', sym_check(m.rule(idx).variable), 'n/a', ...
-            m.rule(idx).formula, m.rule(idx).name); 
-        end
-    end
-    
-    fprintf(fid, '\nERRORS\n');
-    for j=1:length(B)
-        idxobs = find((j == C) & isobs');
-        idxerr = find((j == C) & iserr');
-        if (length(idxobs) == 1) && (length(idxerr) == 1)
-            fprintf(fid, '%s\t "%s"\n', sym_check(m.rule(idxobs).variable), sym_check(m.rule(idxerr).formula));
-        else
-            warning('Double check error model functions in data.def. Something might have gone wrong.')
-        end
-    end
-elseif isfield(m.species,'id2')%old behavior
-    fprintf(fid, '\nOBSERVABLES\n');
-    for j=1:length(m.species)
-        fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.species(j).id2), 'n/a', ...
-            m.species(j).id2, m.species(j).name);
-    end
-    
-    fprintf(fid, '\nERRORS\n');
-    for j=1:length(m.species)
-        fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.species(j).id2), sym_check(m.species(j).id2));
-    end
-    warning('No real observation functions defined!')
-end
-
-fprintf(fid, '\nCONDITIONS\n');
-
-fprintf(fid, '\nPARAMETERS\n');
-
-fclose(fid);
-
-if ~isdir('./Models')
-    mkdir('Models');
-end
-if(overwrite)
-    movefile([new_filename '.def'],'Models','f');
-%     system(['mv -f ',new_filename '.def Models']);
-else
-    dest = ['Models',filesep,new_filename '.def'];
-    if exist(dest,'file')==0
-        movefile([new_filename '.def'],'Models');
-    else
-        fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
-    end
-%     system(['mv ',new_filename '.def Models']);
-end
-
-if ~isdir('./Data')
-    mkdir('Data');
-end
-if(overwrite)    
-    movefile([new_filename '_data.def'],'Data','f');
-%     system(['mv -f ',new_filename '_data.def Data']);
-else
-    dest = ['Data',filesep,new_filename '_data.def'];
-    if exist(dest,'file')==0
-        movefile([new_filename '_data.def'],'Data');
-    else
-        fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
-    end
-%     system(['mv ',new_filename '_data.def Data']);
-end
+% fid = fopen([new_filename '_data.def'], 'w');
+% 
+% fprintf(fid, 'DESCRIPTION\n');
+% if(~isempty(m.name))
+%     fprintf(fid, '"data file for %s"\n', m.name);
+% end
+% 
+% fprintf(fid, '\nPREDICTOR\n');
+% if(~isempty(m.time_symbol))
+%     fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, 'n/a', 100);
+% else
+%     fprintf(fid, 't\t T\t "%s"\t time\t 0\t %i\t\n', 'n/a', 100);
+% end
+% 
+% fprintf(fid, '\nINPUTS\n');
+% 
+% % TODO: Access parameter name list. Where to implement and how?
+% % TODO: Access Units from model. 
+% 
+% if isfield(m,'rule') && ~isempty(m.rule(1).formula) % look for observation functions
+%     for j = 1:length(m.rule)
+%         split_err = strsplit(m.rule(j).variable,'sigma_');
+%         split_obs = strsplit(m.rule(j).variable,'observable_');
+%         isobs(j) = length(split_obs) == 2;
+%         iserr(j) = length(split_err) == 2;
+%         if isobs(j)
+%             obsname{j} = split_obs{2};
+%         elseif iserr(j)
+%             obsname{j} = split_err{2};
+%         else
+%             obsname{j} = '';
+%         end
+%     end
+%     [~,B,C] = unique(obsname);
+%     jsobs = find(isobs);
+%     jserr = find(iserr);
+%     
+%     fprintf(fid, '\nOBSERVABLES\n');
+%     for j=1:length(B)
+%         idx = find((j == C) & isobs');
+%         if ~isempty(idx)
+%         fprintf(fid, '%s \t C\t "%s"\t "conc."\t 0 0 "%s" "%s"\n', sym_check(m.rule(idx).variable), 'n/a', ...
+%             m.rule(idx).formula, m.rule(idx).name); 
+%         end
+%     end
+%     
+%     fprintf(fid, '\nERRORS\n');
+%     for j=1:length(B)
+%         idxobs = find((j == C) & isobs');
+%         idxerr = find((j == C) & iserr');
+%         if (length(idxobs) == 1) && (length(idxerr) == 1)
+%             fprintf(fid, '%s\t "%s"\n', sym_check(m.rule(idxobs).variable), sym_check(m.rule(idxerr).formula));
+%         else
+%             warning('Double check error model functions in data.def. Something might have gone wrong.')
+%         end
+%     end
+% elseif isfield(m.species,'id2')%old behavior
+%     fprintf(fid, '\nOBSERVABLES\n');
+%     for j=1:length(m.species)
+%         fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.species(j).id2), 'n/a', ...
+%             m.species(j).id2, m.species(j).name);
+%     end
+%     
+%     fprintf(fid, '\nERRORS\n');
+%     for j=1:length(m.species)
+%         fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.species(j).id2), sym_check(m.species(j).id2));
+%     end
+%     warning('No real observation functions defined!')
+% end
+% 
+% fprintf(fid, '\nCONDITIONS\n');
+% 
+% fprintf(fid, '\nPARAMETERS\n');
+% 
+% fclose(fid);
+% 
+% if ~isdir('./Models')
+%     mkdir('Models');
+% end
+% if(overwrite)
+%     movefile([new_filename '.def'],'Models','f');
+% %     system(['mv -f ',new_filename '.def Models']);
+% else
+%     dest = ['Models',filesep,new_filename '.def'];
+%     if exist(dest,'file')==0
+%         movefile([new_filename '.def'],'Models');
+%     else
+%         fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
+%     end
+% %     system(['mv ',new_filename '.def Models']);
+% end
+% 
+% if ~isdir('./Data')
+%     mkdir('Data');
+% end
+% if(overwrite)    
+%     movefile([new_filename '_data.def'],'Data','f');
+% %     system(['mv -f ',new_filename '_data.def Data']);
+% else
+%     dest = ['Data',filesep,new_filename '_data.def'];
+%     if exist(dest,'file')==0
+%         movefile([new_filename '_data.def'],'Data');
+%     else
+%         fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
+%     end
+% %     system(['mv ',new_filename '_data.def Data']);
+% end
 
 % generate Setup.m
 if(~exist('Setup.m','file'))
