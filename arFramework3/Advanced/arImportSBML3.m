@@ -187,14 +187,23 @@ for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentrat
     if length(m.species(j).id)==1 %|| strcmp(m.species(j).id,'beta')==1  % special cases or too short
         pat{end+1} =  m.species(j).id; %#ok<AGROW>
         rep{end+1} = [m.species(j).id,'_state']; %#ok<AGROW>
-        unit{end+1} = m.species(j).substanceUnits;
+        if isfield(m.species,'substanceUnits') && ~isempty(m.species(j).substanceUnits)
+            unit{end+1} = m.species(j).substanceUnits;
+        else
+            unit{end+1} = 'n/a';
+        end
         m.species(j).id2 = rep{end};
         fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(rep{end}), unit{end}, ...
             m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
     else  % standard case
         m.species(j).id2 = m.species(j).id;
-        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), m.species(j).substanceUnits, ...
-            m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
+        if isfield(m.species,'substanceUnits') && ~isempty(m.species(j).substanceUnits)
+            unit{end+1} = m.species(j).substanceUnits;
+        else
+            unit{end+1} = 'n/a';
+        end
+        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), unit{j}, ...
+        m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
     end
 end
 
@@ -518,17 +527,20 @@ arWaitbar(-1);
 
 fprintf(fid, '\nDERIVED\n');
 
-fprintf(fid, '\nOBSERVABLES\n');
+%% OBSERVABLES and ERRORS 
+% just works for Benchmark SBMLs because in databases observables are not set
+% if it is a Benchmark SBML the obs and err are set in line 258 because obs/err/inputs 
+% are all set in m.rule and have to be separated by strfind
 
 if exist('obs','var') 
+    fprintf(fid, '\nOBSERVABLES\n');
     for i=1:length(obs)
         fprintf(fid, '%s\t C\t "%s"\t conc.\t 0\t 0\t "%s"\n', sym_check(obs{i}), obsu{i}, obsf{i});
     end
 end
 
-fprintf(fid, '\nERRORS\n');
-
-if exist('err','var') 
+if exist('err','var')
+    fprintf(fid, '\nERRORS\n'); 
     for i=1:length(err)
         fprintf(fid, '%s\t "%s"\n', sym_check(obs{i}), err{i});
     end
