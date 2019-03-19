@@ -554,27 +554,35 @@ fprintf(fid, '\nPARAMETERS\n');
 specs = {};
 spec_value = [];
 for j=1:length(m.species)
-    if(m.species(j).isSetInitialConcentration)
-        ub = 1000;
-        if(m.species(j).initialConcentration>ub)
-            ub = m.species(j).initialConcentration*10;
+    skip = 0;
+    for k=1:length(m.parameter)
+        if find(contains(m.parameter(k).name,['init_' m.species(j).name]))
+            skip=skip+1;
         end
-        fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-            m.species(j).initialConcentration, m.species(j).constant==0, ub);
-        specs{end+1} = m.species(j).id2;
-        spec_value(end+1) = m.species(j).initialConcentration;
-    elseif(m.species(j).isSetInitialAmount)
-        comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
-        comp_vol = m.compartment(comp_id).size;
-        initial_conc = m.species(j).initialAmount/comp_vol;
-        ub = 1000;
-        if(initial_conc>ub)
-            ub = initial_conc*10;
+    end
+    if skip==0
+        if(m.species(j).isSetInitialConcentration)
+            ub = 1000;
+            if(m.species(j).initialConcentration>ub)
+                ub = m.species(j).initialConcentration*10;
+            end
+            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
+                m.species(j).initialConcentration, m.species(j).constant==0, ub);
+            specs{end+1} = m.species(j).id2;
+            spec_value(end+1) = m.species(j).initialConcentration;
+        elseif(m.species(j).isSetInitialAmount)
+            comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
+            comp_vol = m.compartment(comp_id).size;
+            initial_conc = m.species(j).initialAmount/comp_vol;
+            ub = 1000;
+            if(initial_conc>ub)
+                ub = initial_conc*10;
+            end
+            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
+                initial_conc, m.species(j).constant==0, ub);
+            specs{end+1} = m.species(j).id2;
+            spec_value(end+1) = initial_conc;
         end
-        fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-            initial_conc, m.species(j).constant==0, ub);
-        specs{end+1} = m.species(j).id2;
-        spec_value(end+1) = initial_conc;
     end
 end
 pars = {};
