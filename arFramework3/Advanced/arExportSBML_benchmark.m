@@ -11,17 +11,13 @@
 % observation function is log-transformed in ar, the log trafo will be
 % written into SBML as well.
 
-function arExportSBML_benchmark(m, d, steadystate)
+function arExportSBML_benchmark2(m, d, steadystate)
 
 global ar
 
 c = ar.model(m).data(d).cLink;
 % simulate once for initial values
 arSimu(0,1,0)
-
-if(~exist([cd '/SBML' ], 'dir'))
-    mkdir([cd '/SBML' ])
-end
 
 copasi = true;
 
@@ -216,10 +212,10 @@ for id = 1:length(ar.model(m).data(d).p)
     M.parameter(id_tmp).notes = '';
     M.parameter(id_tmp).annotation = '';
     M.parameter(id_tmp).sboTerm = -1;
-    M.parameter(id_tmp).name = '';
+    M.parameter(id_tmp).name = ar.model(m).data(d).p{id};                       
     M.parameter(id_tmp).id = ar.model(m).data(d).p{id};
     M.parameter(id_tmp).units = '';
-    M.parameter(id_tmp).constant = 1;
+    M.parameter(id_tmp).constant = 0;
     M.parameter(id_tmp).isSetValue = 1;
     M.parameter(id_tmp).level = 2;
     M.parameter(id_tmp).version = 4;
@@ -738,7 +734,7 @@ for id = 1:length(ar.model(m).data(d).fy)
     M.rule(ixrule).annotation = '';
     M.rule(ixrule).sboTerm = -1;
     rule_tmp = ar.model(m).data(d).fy{id};
-    if(~isempty(ar.model(m).z))       
+    if(~isempty(ar.model(m).z))
         rule_tmp = subs(rule_tmp,ar.model(m).z,ar.model(m).fz');
     end
     rule_tmp = subs(rule_tmp,ar.model(m).data(d).pold,ar.model(m).data(d).fp');
@@ -747,8 +743,52 @@ for id = 1:length(ar.model(m).data(d).fy)
     if(ar.model(m).data(d).logfitting(id)==1)
         rule_tmp = ['log10(' rule_tmp ')'];
     end
+    
+    % check if ys already contain 'observable_'
+    if ~strncmp(ar.model(m).data(d).y{id}, 'observable_', length('observable_'))
+        variable_tmp = strcat('observable_', ar.model(m).data(d).y{id});
+    else
+        variable_tmp = ar.model(m).data(d).y{id};
+    end
+    
     M.rule(ixrule).formula = rule_tmp;
-    M.rule(ixrule).variable = ar.model(m).data(d).y{id};
+    M.rule(ixrule).variable = variable_tmp;
+    M.rule(ixrule).species = '';
+    M.rule(ixrule).compartment = '';
+    M.rule(ixrule).name = '';
+    M.rule(ixrule).units = '';
+    M.rule(ixrule).level = 2;
+    M.rule(ixrule).version = 4;
+end
+
+%% Errors as assignment rules
+
+for id = 1:length(ar.model(m).data(d).fystd)
+    ixrule = length(M.rule) + 1;% index of current rule
+    M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
+    M.rule(ixrule).metaid = '';
+    M.rule(ixrule).notes = '';
+    M.rule(ixrule).annotation = '';
+    M.rule(ixrule).sboTerm = -1;
+    rule_tmp = ar.model(m).data(d).fystd{id};
+    
+    rule_tmp = subs(rule_tmp,ar.model(m).data(d).pold,ar.model(m).data(d).fp');
+    
+    rule_tmp = char(rule_tmp);
+    
+    % ??
+    if(ar.model(m).data(d).logfitting(id)==1)
+        rule_tmp = ['log10(' rule_tmp ')'];
+    end
+    
+    % check if ys already contain 'observable_'
+    if ~strncmp(ar.model(m).data(d).y{id}, 'observable_', length('observable_'))
+        variable_tmp = strcat('sigma_', ar.model(m).data(d).y{id});
+    else
+        variable_tmp = strrep(ar.model(m).data(d).y{id}, 'observable_', 'sigma_');
+    end
+    M.rule(ixrule).variable = variable_tmp;
+    M.rule(ixrule).formula = rule_tmp;
     M.rule(ixrule).species = '';
     M.rule(ixrule).compartment = '';
     M.rule(ixrule).name = '';
@@ -768,10 +808,10 @@ if(a == 1)
 %     end
     
 %mine!
-    if(~exist('./Benchmark_paper/SBML', 'dir'))
-        mkdir('./Benchmark_paper/SBML')
-    end
-    OutputSBML(M, ['Benchmark_paper/SBML/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
+                    if(~exist('./Benchmark_paper/SBML', 'dir'))
+                    mkdir('./Benchmark_paper/SBML')
+                    end
+                    OutputSBML(M, ['Benchmark_paper/SBML/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
 else
     error('%s', b);
 end
