@@ -21,6 +21,6 @@ function arExportSBML2
     for i = 1:length(ar.model)   
         for j = 1:length(ar.model(i).data)
     %           Export SBML files
-            arExportSBML_benchmark2(i,j,1);       
+            arExportSBML_benchmark(i,j,1);       
         end
     end
