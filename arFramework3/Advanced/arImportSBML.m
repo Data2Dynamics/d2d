@@ -125,8 +125,15 @@ end
 fprintf(fid, '\nPREDICTOR\n');
 if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && isfield(m.unitDefinition,'unit') && ~isempty(m.unitDefinition.unit) && isfield(m.unitDefinition.unit,'kind') && ~isempty(m.unitDefinition.unit.kind)
     time_unit = m.unitDefinition.unit.kind;
-    %if (strcmp(time_unit,'s')||strcmp(time_unit,'sec')||strcmp(time_unit,'second'))
-    %    if isfield(m.unitDefinition.unit,'multiplier
+    if (strcmp(time_unit,'s')||strcmp(time_unit,'sec')||strcmp(time_unit,'second'))
+        if isfield(m.unitDefinition.unit,'multiplier')
+            if m.unitDefinition.unit.multiplier == 60
+                time_unit = 'min';
+            elseif m.unitDefinition.unit.multiplier == 3600
+                time_unit = 'h';
+            end
+        end
+    end
 else
     time_unit = 'n/a';
 end
