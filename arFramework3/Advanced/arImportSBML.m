@@ -27,7 +27,7 @@
 %  [ms, modelname] = arImportSBML('BIOMD0000000379','tend', 100, 'compartmentbyname')
 
 
-function varargout = arImportSBML3(filename, varargin)
+function varargout = arImportSBML(filename, varargin)
 %if(~exist('tEnd','var') || isempty(tEnd))
 %    tEnd = 100;
 %end

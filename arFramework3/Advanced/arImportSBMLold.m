@@ -1,4 +1,4 @@
-% varargout = arImportSBML(filename, varargin)
+% varargout = arImportSBMLold(filename, varargin)
 %
 % Import SBML model and translate to .def files
 %
@@ -25,7 +25,7 @@
 %  [ms, modelname] = arImportSBML('BIOMD0000000379','tend', 100, 'compartmentbyname')
 
 
-function varargout = arImportSBML(filename, varargin)
+function varargout = arImportSBMLold(filename, varargin)
 %if(~exist('tEnd','var') || isempty(tEnd))
 %    tEnd = 100;
 %end
