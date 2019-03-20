@@ -306,8 +306,14 @@ if isempty(m.u)
         end
     end
 else    
-    for j=1:length(m.u)
-        fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), m.u(j).units, sym_check(replacePowerFunction(m.u(j).formula)));
+    if isempty(m.u.units)
+        for j=1:length(m.u)
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), 'n/a', sym_check(replacePowerFunction(m.u(j).formula)));
+        end        
+    else
+        for j=1:length(m.u)
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), m.u(j).units, sym_check(replacePowerFunction(m.u(j).formula)));
+        end
     end
 end
 % treat boundary species as constant inputs

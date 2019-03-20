@@ -11,7 +11,7 @@
 % observation function is log-transformed in ar, the log trafo will be
 % written into SBML as well.
 
-function arExportSBML_benchmark2(m, d, steadystate)
+function arExportSBML_benchmark(m, d, steadystate)
 
 global ar
 
@@ -53,7 +53,11 @@ if(~isempty(ar.model(m).c))
         M.compartment(jc).compartmentType = '';
         M.compartment(jc).spatialDimensions = 3;
         M.compartment(jc).constant = 1;
-        M.compartment(jc).units = '';
+        if ~isempty(ar.model.cUnits)
+            M.compartment(1).units = ar.model(m).cUnits{jc,2};
+        else
+            M.compartment(1).units = '';
+        end
         M.compartment(jc).outside = '';
         M.compartment(jc).isSetSize = 1;
         M.compartment(jc).isSetVolume = 1;
@@ -95,7 +99,11 @@ else
     M.compartment(1).compartmentType = '';
     M.compartment(1).spatialDimensions = 3;
     M.compartment(1).constant = 1;
-    M.compartment(1).units = '';
+    if ~isempty(ar.model.cUnits)
+        M.compartment(1).units = ar.model(m).cUnits{1,2};
+    else
+        M.compartment(1).units = '';
+    end
     M.compartment(1).outside = '';
     M.compartment(1).isSetSize = 1;
     M.compartment(1).isSetVolume = 1;
@@ -134,7 +142,11 @@ for jx = 1:length(ar.model(m).x)
         M.species(jx).compartment = 'default';
     end
     M.species(jx).initialAmount = NaN;
-    M.species(jx).substanceUnits = '';
+    if ~isempty(ar.model(m).xUnits)
+        M.species(jx).substanceUnits = ar.model(m).xUnits{jx,2};
+    else
+        M.species(jx).substanceUnits = '';
+    end
     M.species(jx).hasOnlySubstanceUnits = 0;
     M.species(jx).boundaryCondition = 0;
     M.species(jx).charge = 0;
@@ -472,7 +484,11 @@ for ju = 1:length(ar.model(m).u)
             M.rule(ixrule).species = '';
             M.rule(ixrule).compartment = '';
             M.rule(ixrule).name = '';
-            M.rule(ixrule).units = '';
+            if ~isempty(ar.model(m).uUnits)
+                M.rule(ixrule).units = ar.model(m).uUnits{ju,2};
+            else
+                M.rule(ixrule).units = '';
+            end
             M.rule(ixrule).level = 2;
             M.rule(ixrule).version = 4;
             if ( 0 )
@@ -529,7 +545,11 @@ for ju = 1:length(ar.model(m).u)
             M.rule(ixrule).species = '';
             M.rule(ixrule).compartment = '';
             M.rule(ixrule).name = '';
-            M.rule(ixrule).units = '';
+            if ~isempty(ar.model(m).uUnits)
+                M.rule(ixrule).units = ar.model(m).uUnits{ju,2};
+            else
+                M.rule(ixrule).units = '';
+            end
             M.rule(ixrule).level = 2;
             M.rule(ixrule).version = 4;
 
@@ -551,7 +571,11 @@ for ju = 1:length(ar.model(m).u)
         M.parameter(jp).sboTerm = -1;
         M.parameter(jp).name = '';
         M.parameter(jp).id = ar.model(m).u{ju};
-        M.parameter(jp).units = '';
+        if ~isempty(ar.model(m).uUnits)
+            M.parameter(jp).units = ar.model(m).uUnits{ju,2};
+        else
+            M.parameter(jp).units = '';
+        end
         M.parameter(jp).constant = isConstant;
         M.parameter(jp).isSetValue = 1;
         M.parameter(jp).level = 2;
@@ -609,7 +633,11 @@ for ju = 1:length(ar.model(m).u)
                 else
                     M.parameter(jp).id = char(62+js);
                 end
-                M.parameter(jp).units = '';
+                if ~isempty(ar.model(m).uUnits)
+                    M.parameter(jp).units = ar.model(m).uUnits{ju,2};
+                else
+                    M.parameter(jp).units = '';
+                end
                 M.parameter(jp).constant = isConstant;
                 M.parameter(jp).isSetValue = 1;
                 
@@ -633,7 +661,11 @@ for ju = 1:length(ar.model(m).u)
             M.rule(ixrule).species = '';
             M.rule(ixrule).compartment = '';
             M.rule(ixrule).name = '';
-            M.rule(ixrule).units = '';
+            if ~isempty(ar.model(m).uUnits)
+                M.rule(ixrule).units = ar.model(m).uUnits{ju,2};
+            else
+                M.rule(ixrule).units = '';
+            end
             M.rule(ixrule).level = 2;
             M.rule(ixrule).version = 4;
             
@@ -756,7 +788,11 @@ for id = 1:length(ar.model(m).data(d).fy)
     M.rule(ixrule).species = '';
     M.rule(ixrule).compartment = '';
     M.rule(ixrule).name = '';
-    M.rule(ixrule).units = '';
+    if ~isempty(ar.model(m).data(d).yUnits)
+        M.rule(ixrule).units = ar.model(m).data(d).yUnits{id,2};
+    else
+        M.rule(ixrule).units = '';
+    end
     M.rule(ixrule).level = 2;
     M.rule(ixrule).version = 4;
 end
@@ -792,7 +828,11 @@ for id = 1:length(ar.model(m).data(d).fystd)
     M.rule(ixrule).species = '';
     M.rule(ixrule).compartment = '';
     M.rule(ixrule).name = '';
-    M.rule(ixrule).units = '';
+    if ~isempty(ar.model(m).data(d).yUnits)
+        M.rule(ixrule).units = ar.model(m).data(d).yUnits{id,2};
+    else
+        M.rule(ixrule).units = '';
+    end
     M.rule(ixrule).level = 2;
     M.rule(ixrule).version = 4;
 end
