@@ -1,21 +1,23 @@
-% arLoadDataPEtab(dataname, [m])
+% arLoadDataPEtab(datafilename, [m])
 % 
 % This function can be used to process data files in the format of PEtab.
 % 
-%   dataname  name of file.
+%   datafilename    name of file.
 % 
-%   m         model that shall be linked to. Name or ID [length(ar.model)]
+%   m               model that shall be linked to. Name or ID [length(ar.model)]
 %
 % In this data format, there is one single .tsv-file that contains all data 
 % points. This data format shall allow easier transitions between modeling 
 % tools.
 % This load-data-function utilizes a different approach than the usual data.def file: 
 % Firstly, an empty data struct is created which is subsequently appended to the ar struct.
+% 
 % See also arCreateDataStruct arAddDataStruct
+% 
 % References
 %   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
 
-function arLoadDataPEtab(dataname, m)
+function arLoadDataPEtab(datafilename, m)
 
 global ar;
 
@@ -33,9 +35,8 @@ if(exist('m','var') && ischar(m))
     end
 end
 
-
 %% Read in tsv file
-T = tdfread(dataname); % all data of the model
+T = tdfread(datafilename); % all data of the model
 fns = fieldnames(T);
 for i = 1:length(fns)
     if ischar(T.(fns{i}))
@@ -59,6 +60,7 @@ for iSim = 1:length(uniSim)
     [uniObs,~,iCObs] = unique(cellstr(Tsub.observableId));
     [uniTimes,~,iTExp] = unique(Tsub.time);
     uniObs = regexprep(uniObs,' ','');
+    Sd2d.name = char(uniSim(iSim));
     Sd2d.tExp = uniTimes;
     Sd2d.y = uniObs';
     Sd2d.yNames = uniObs';
