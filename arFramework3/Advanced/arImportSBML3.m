@@ -766,7 +766,13 @@ if(~exist('Setup.m','file'))
     fid = fopen('Setup.m','w');
     fprintf(fid, 'arInit;\n');
     fprintf(fid, 'arLoadModel(''%s'');\n',new_filename);
-    %fprintf(fid, 'arLoadData(''%s'');\n',[new_filename '_data']);
+    C = strsplit(new_filename,'_');
+    short_filename=[];
+    for i=2:length(C)
+        short_filename = [short_filename '_' C{i}];
+    end
+    fprintf(fid, 'arLoadData(''%s'');\n',['measurementData' short_filename '.tsv']);
+    fprintf(fid, 'arSetParsSBML(''%s'');\n',['parameters' short_filename '.tsv']);
     fprintf(fid, 'arCompileAll;\n');
 else
     fprintf('Setup.m already available in the working directory.\n')
