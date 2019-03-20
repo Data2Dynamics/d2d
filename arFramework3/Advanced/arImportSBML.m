@@ -135,7 +135,7 @@ if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && isfield(m.unitDe
         end
     end
 else
-    time_unit = 'n/a';
+    time_unit = 's';
 end
 if isempty(m.time_symbol)
     m.time_symbol = 't';
@@ -267,7 +267,7 @@ u = cell(0);
 uu = cell(0);
 uf = cell(0);
 
-if isfield(m,'rule')
+if isfield(m,'rule') && ~isempty(m.reaction)
     for j=1:length(m.rule)
         if strncmp(m.rule(j).variable,'observable',10)
             obs{end+1} = m.rule(j).variable;
