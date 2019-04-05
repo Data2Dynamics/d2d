@@ -1,0 +1,32 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR-DOSERESPONSE init_ligand
+t	T	"min"	"time"	0	2000
+
+INPUTS
+
+OBSERVABLES
+//pAkt_au     C	"au"	"conc."    1   1    "offset_jc_metmab_h747_pakt + (scale_jc_metmab_h747_pakt * pAkt)"
+//pAkt_au     C	"au"	"conc."    1   1    "offset_ssu_hgf_egf_combo_2 + (scale_ssu_hgf_egf_combo_2 * pAkt)"
+
+ERRORS
+//pAkt_au     "sd_pakt_jc_metmab_h747_au"
+//pAkt_au     "sd_pakt_ssu_hgf_egf_combo_2"
+
+CONDITIONS
+init_egfr             "(132434) * qfacs_fac"
+init_epcam            "(3956836) * qfacs_fac"
+init_met              "(103764) * qfacs_fac"
+
+init_HGF              "init_hgf_combo_fig9"
+init_EGF              "init_egf_combo_fig9"
+
+init_mm151_AB         "init_ligand"
+init_mm131_AB         "init_ligand"
+
+//kd_ratio_met_egfr_151 "10^(-1)"
+//k12_egfr_cmet_ratio "10^(-1.5441)"
+
+RANDOM
+//ID         INDEPENDENT

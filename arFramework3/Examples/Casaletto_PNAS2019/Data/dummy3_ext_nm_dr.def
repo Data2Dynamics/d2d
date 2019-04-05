@@ -1,0 +1,13 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR-DOSERESPONSE init_mm131_AB
+t	T	"min"	"time"	0	20
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS

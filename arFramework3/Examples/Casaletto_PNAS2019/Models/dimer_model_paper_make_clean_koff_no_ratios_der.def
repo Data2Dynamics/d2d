@@ -1,0 +1,212 @@
+DESCRIPTION
+"Dimer model"
+
+PREDICTOR
+t	T	"min"	"time"	0	20
+
+COMPARTMENTS
+cell     V	"ul"	"vol."	1
+
+STATES
+HGF               C	"nM"	"conc."	cell	1
+EGF               C	"nM"	"conc."	cell	1
+egfr              C	"nM"	"conc."	cell	1
+met               C	"nM"	"conc."	cell	1
+epcam             C	"nM"	"conc."	cell	1
+
+hgf_met           C	"nM"	"conc."	cell	1
+egf_egfr          C	"nM"	"conc."	cell	1
+
+act_egfr_dimer    C	"nM"	"conc."	cell	1
+act_met_dimer     C	"nM"	"conc."	cell	1
+
+pAkt              C	"nM"	"conc."	cell	1
+
+mm131_AB          C	"nM"	"conc."	cell	1
+mm151_AB          C	"nM"	"conc."	cell	1
+met_egfr_AB       C	"nM"	"conc."	cell	1
+no_ta_cmet_AB     C	"nM"	"conc."	cell	1
+metmab            C	"nM"	"conc."	cell	1  
+
+egfr_mm151_AB     C	"nM"	"conc."	cell	1
+
+met_no_ta_cMet_AB C	"nM"	"conc."	cell	1
+
+mm151_egfr_dimer  C	"nM"	"conc."	cell	1
+
+ligand            C	"nM"	"conc."	cell	1
+
+met_AB            C	"nM"	"conc."	cell	1
+egfr_AB           C	"nM"	"conc."	cell	1
+met_egfr_dimer_AB C	"nM"	"conc."	cell	1
+
+met_mm131_AB           C	"nM"	"conc."	cell	1
+epcam_mm131_AB         C	"nM"	"conc."	cell	1
+mm131_dimer            C	"nM"	"conc."	cell	1
+metmab_met             C	"nM"	"conc."	cell	1 
+
+INPUTS
+
+REACTIONS
+//met signaling
+HGF + met -> hgf_met                          CUSTOM      "kon_met * met * HGF"
+hgf_met -> HGF + met                          CUSTOM      "koff_met * hgf_met"
+
+hgf_met + met -> act_met_dimer                CUSTOM      "k_hgf_met_bind_cl * met * hgf_met"
+
+act_met_dimer -> met + met                    CUSTOM      "k_deg_met * act_met_dimer"
+act_met_dimer -> HGF + met + met              CUSTOM      "koff_met * act_met_dimer"
+
+//egf signaling
+EGF + egfr -> egf_egfr                        CUSTOM      "kon_egfr * egfr * EGF"
+egf_egfr -> EGF + egfr                        CUSTOM      "koff_egfr * egf_egfr"
+
+egfr + egf_egfr -> act_egfr_dimer             CUSTOM      "k_hgf_met_bind_cl * egfr * egf_egfr"
+
+act_egfr_dimer -> egfr + egfr                 CUSTOM      "k_deg_egfr * act_egfr_dimer"
+act_egfr_dimer -> EGF + egfr + egfr           CUSTOM      "koff_egfr * act_egfr_dimer"
+
+//pAkt activation
+-> pAkt                                       CUSTOM      "(k_pakt_act_hgf * act_met_dimer) + (k_pakt_act_egf * act_egfr_dimer)"
+
+//mm-151 inhibition
+mm151_AB + egfr -> egfr_mm151_AB              CUSTOM      "egfr * mm151_AB * kon_mm151_bind"
+egfr_mm151_AB -> mm151_AB + egfr              CUSTOM      "egfr_mm151_AB * koff_mm151_bind"
+
+egfr_mm151_AB + egfr -> mm151_egfr_dimer      CUSTOM      "egfr * egfr_mm151_AB * k2_mm151_bind * mm151_bool"
+
+mm151_egfr_dimer -> egfr_mm151_AB + egfr      CUSTOM      "mm151_egfr_dimer * koff_mm151_bind"
+mm151_egfr_dimer ->                           CUSTOM      "mm151_egfr_dimer * kdeg_mm151"
+
+//Met_EGFR bispecific inhibition
+met_egfr_AB + met -> met_AB                   CUSTOM      "met * met_egfr_AB * kon_met_AB"
+met_egfr_AB + egfr -> egfr_AB                 CUSTOM      "egfr * met_egfr_AB * kon_egfr_AB"
+
+egfr_AB -> met_egfr_AB + egfr                 CUSTOM      "koff_egfr_AB * egfr_AB"
+met_AB -> met_egfr_AB + met                   CUSTOM      "koff_met_AB * met_AB"
+
+met_AB + egfr -> met_egfr_dimer_AB            CUSTOM      "egfr * met_AB * k4_egfr_cmet_bind"
+egfr_AB + met -> met_egfr_dimer_AB            CUSTOM      "met * egfr_AB * k4_egfr_cmet_bind"
+
+met_egfr_dimer_AB ->                          CUSTOM      "met_egfr_dimer_AB * kdeg_met_egfr_dimer"
+met_egfr_dimer_AB -> met_AB + egfr            CUSTOM      "koff_egfr_AB * met_egfr_dimer_AB"
+met_egfr_dimer_AB -> egfr_AB + met            CUSTOM      "koff_met_AB * met_egfr_dimer_AB"
+
+//monovalent antibody inhibition
+no_ta_cmet_AB + met -> met_no_ta_cMet_AB      CUSTOM      "met * no_ta_cmet_AB * kon_no_ta"
+met_no_ta_cMet_AB -> no_ta_cmet_AB + met      CUSTOM      "koff_no_ta * met_no_ta_cMet_AB"
+
+//receptor production & degradation
+    ->   met                                  CUSTOM      "met_prod * init_met"
+    ->   egfr                                 CUSTOM      "egfr_prod * init_egfr"
+met ->                                        CUSTOM      "met_prod * met"
+egfr ->                                       CUSTOM      "egfr_prod * egfr"
+
+//mm-131 inhibition
+mm131_AB + met -> met_mm131_AB                CUSTOM      "mm131_AB * met * kon_mm131_met"
+mm131_AB + epcam -> epcam_mm131_AB            CUSTOM      "mm131_AB * epcam * kon_mm131_epcam * bool_epcam"
+
+met_mm131_AB    -> met + mm131_AB             CUSTOM      "met_mm131_AB * koff_mm131_met"
+epcam_mm131_AB  -> epcam + mm131_AB           CUSTOM      "epcam_mm131_AB * koff_mm131_epcam * bool_epcam"
+
+met_mm131_AB + epcam  -> mm131_dimer          CUSTOM      "met_mm131_AB * epcam * cl_mm131 * bool_epcam"
+epcam_mm131_AB + met  -> mm131_dimer          CUSTOM      "epcam_mm131_AB * met * cl_mm131"
+
+mm131_dimer ->                                CUSTOM      "mm131_dimer * kdeg_mm131"
+mm131_dimer  -> epcam_mm131_AB + met          CUSTOM      "mm131_dimer * koff_mm131_met * bool_epcam"
+mm131_dimer  -> met_mm131_AB + epcam          CUSTOM      "mm131_dimer * koff_mm131_epcam * bool_epcam"
+
+//MetMAb inhibition
+metmab + met -> metmab_met                    CUSTOM      "metmab * met * kon_metmab" 
+metmab_met -> metmab + met                    CUSTOM      "koff_metmab * metmab_met"
+
+DERIVED
+//free_egfr   C   "nM"   "conc." "egfr"
+//bound_egfr  C   "nM"   "conc." "egf_egfr + act_egfr_dimer + egfr_mm151_AB + mm151_egfr_dimer + egfr_AB + met_egfr_dimer_AB"
+//bound_egfr_mm151 C   "nM"   "conc." "egfr_mm151_AB + mm151_egfr_dimer"
+//bound_egfr_BsAb  C   "nM"   "conc." "egfr_AB + met_egfr_dimer_AB"
+//bound_met_BsAb   C   "nM"   "conc." "met_AB + met_egfr_dimer_AB"
+
+OBSERVABLES
+pAkt_au     C	"au"	"conc."    1   1    "offset_pakt + (scale_pakt * pAkt)"
+
+ERRORS
+pAkt_au               "sd_pakt_au"
+
+CONDITIONS
+
+//HGF Stimulation 1nm
+init_HGF              "init_hgf"
+init_EGF              "init_egf"
+
+init_egfr             "(init_egfr) * qfacs_fac"
+init_epcam            "(init_epcam) * qfacs_fac"
+init_met              "(init_met) * qfacs_fac"
+
+init_mm131_AB         "0"
+
+init_act_egfr_dimer   "0"
+init_act_met_dimer    "0"
+
+init_egfr_mm151_AB    "0"
+init_met_no_ta_cMet_AB  "0"
+init_met_egfr_dimer_AB  "0"
+
+init_pAkt "0"
+
+init_met_egfr_AB "0"
+init_ligand "0"
+init_mm151_AB "0"
+init_no_ta_cmet_AB "0"
+
+init_egf_egfr "0"
+init_egfr_AB "0"
+init_hgf_met "0"
+init_met_AB "0"
+init_mm151_egfr_dimer "0"
+
+init_met_mm131_AB       "0" 
+init_epcam_mm131_AB     "0"
+init_mm131_dimer        "0"
+
+init_metmab "0"
+init_metmab_met "0"
+
+//Kon Definitions -> no_ratio to measured Kd's ensured (kon = koff / kd) 
+kon_no_ta        "(no_ratio_no_ta_met_151) / 6"
+
+kon_mm151_bind    "no_ratio_binding_mm151 / 0.4"
+
+kon_mm131_met     "(no_ratio_met_131) / 0.2"
+kon_mm131_epcam   "(no_ratio_epcam_131) / 10"
+
+kon_egfr_AB       "(no_ratio_met_egfr_151_egfr) / 0.8"
+kon_met_AB        "(no_ratio_met_egfr_151_met) / 6"
+
+kon_metmab        "(no_ratio_metmab) / 1.2"
+
+kon_met           "(no_ratio_mm151_hgf) / 0.5"
+kon_egfr          "(no_ratio_mm151_egfr) / 10"
+
+//Koff Definitions 
+koff_no_ta         "(no_ratio_no_ta_met_151)"
+
+koff_mm151_bind    "no_ratio_binding_mm151"
+
+koff_mm131_met     "(no_ratio_met_131)"
+koff_mm131_epcam   "(no_ratio_epcam_131)"
+
+koff_egfr_AB       "(no_ratio_met_egfr_151_egfr)"
+koff_met_AB        "(no_ratio_met_egfr_151_met)"
+
+koff_metmab        "(no_ratio_metmab)"
+
+koff_met           "(no_ratio_mm151_hgf)"
+koff_egfr          "(no_ratio_mm151_egfr)"
+
+PARAMETERS
+//ar.pExternLabels   ar.pExtern    ar.qFitExtern    ar.qLog10Extern    ar.lbExtern    ar.ubExtern
+mm151_bool          1             0                0                  -1             1
+
+
+

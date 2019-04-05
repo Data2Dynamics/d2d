@@ -11,7 +11,7 @@
 % observation function is log-transformed in ar, the log trafo will be
 % written into SBML as well.
 
-function arExportSBML_benchmark(m, d, steadystate)
+function arExportSBML_benchmark2(m, d, steadystate)
 
 global ar
 
@@ -53,11 +53,7 @@ if(~isempty(ar.model(m).c))
         M.compartment(jc).compartmentType = '';
         M.compartment(jc).spatialDimensions = 3;
         M.compartment(jc).constant = 1;
-        if ~isempty(ar.model.cUnits)
-            M.compartment(1).units = ar.model(m).cUnits{jc,2};
-        else
-            M.compartment(1).units = '';
-        end
+        M.compartment(jc).units = ar.model.cUnits{jc,2};
         M.compartment(jc).outside = '';
         M.compartment(jc).isSetSize = 1;
         M.compartment(jc).isSetVolume = 1;
@@ -99,11 +95,7 @@ else
     M.compartment(1).compartmentType = '';
     M.compartment(1).spatialDimensions = 3;
     M.compartment(1).constant = 1;
-    if ~isempty(ar.model.cUnits)
-        M.compartment(1).units = ar.model(m).cUnits{1,2};
-    else
-        M.compartment(1).units = '';
-    end
+    M.compartment(1).units = ar.model.cUnits{1,2};
     M.compartment(1).outside = '';
     M.compartment(1).isSetSize = 1;
     M.compartment(1).isSetVolume = 1;
@@ -142,11 +134,7 @@ for jx = 1:length(ar.model(m).x)
         M.species(jx).compartment = 'default';
     end
     M.species(jx).initialAmount = NaN;
-    if ~isempty(ar.model(m).xUnits)
-        M.species(jx).substanceUnits = ar.model(m).xUnits{jx,2};
-    else
-        M.species(jx).substanceUnits = '';
-    end
+    M.species(jx).substanceUnits = ar.model.xUnits{jx,2};
     M.species(jx).hasOnlySubstanceUnits = 0;
     M.species(jx).boundaryCondition = 0;
     M.species(jx).charge = 0;
@@ -224,7 +212,7 @@ for id = 1:length(ar.model(m).data(d).p)
     M.parameter(id_tmp).notes = '';
     M.parameter(id_tmp).annotation = '';
     M.parameter(id_tmp).sboTerm = -1;
-    M.parameter(id_tmp).name = ar.model(m).data(d).p{id};                       
+    M.parameter(id_tmp).name = ar.model(m).data(d).p{id};                       % A parameter name geaddet
     M.parameter(id_tmp).id = ar.model(m).data(d).p{id};
     M.parameter(id_tmp).units = '';
     M.parameter(id_tmp).constant = 0;
@@ -484,11 +472,7 @@ for ju = 1:length(ar.model(m).u)
             M.rule(ixrule).species = '';
             M.rule(ixrule).compartment = '';
             M.rule(ixrule).name = '';
-            if ~isempty(ar.model(m).uUnits)
-                M.rule(ixrule).units = ar.model(m).uUnits{ju,2};
-            else
-                M.rule(ixrule).units = '';
-            end
+            M.rule(ixrule).units = ar.model(m).data(d).yUnits{ju,2};
             M.rule(ixrule).level = 2;
             M.rule(ixrule).version = 4;
             if ( 0 )
@@ -545,11 +529,7 @@ for ju = 1:length(ar.model(m).u)
             M.rule(ixrule).species = '';
             M.rule(ixrule).compartment = '';
             M.rule(ixrule).name = '';
-            if ~isempty(ar.model(m).uUnits)
-                M.rule(ixrule).units = ar.model(m).uUnits{ju,2};
-            else
-                M.rule(ixrule).units = '';
-            end
+            M.rule(ixrule).units = ar.model(m).data(d).yUnits{ju,2};
             M.rule(ixrule).level = 2;
             M.rule(ixrule).version = 4;
 
@@ -571,11 +551,7 @@ for ju = 1:length(ar.model(m).u)
         M.parameter(jp).sboTerm = -1;
         M.parameter(jp).name = '';
         M.parameter(jp).id = ar.model(m).u{ju};
-        if ~isempty(ar.model(m).uUnits)
-            M.parameter(jp).units = ar.model(m).uUnits{ju,2};
-        else
-            M.parameter(jp).units = '';
-        end
+        M.parameter(jp).units = '';
         M.parameter(jp).constant = isConstant;
         M.parameter(jp).isSetValue = 1;
         M.parameter(jp).level = 2;
@@ -633,11 +609,7 @@ for ju = 1:length(ar.model(m).u)
                 else
                     M.parameter(jp).id = char(62+js);
                 end
-                if ~isempty(ar.model(m).uUnits)
-                    M.parameter(jp).units = ar.model(m).uUnits{ju,2};
-                else
-                    M.parameter(jp).units = '';
-                end
+                M.parameter(jp).units = '';
                 M.parameter(jp).constant = isConstant;
                 M.parameter(jp).isSetValue = 1;
                 
@@ -661,11 +633,7 @@ for ju = 1:length(ar.model(m).u)
             M.rule(ixrule).species = '';
             M.rule(ixrule).compartment = '';
             M.rule(ixrule).name = '';
-            if ~isempty(ar.model(m).uUnits)
-                M.rule(ixrule).units = ar.model(m).uUnits{ju,2};
-            else
-                M.rule(ixrule).units = '';
-            end
+            M.rule(ixrule).units = ar.model(m).data(d).yUnits{ju,2};
             M.rule(ixrule).level = 2;
             M.rule(ixrule).version = 4;
             
@@ -732,7 +700,7 @@ if ( numel(M.event) > 0 )
     M.species(jx).speciesType = '';
     M.species(jx).compartment = ar.model(m).c{1};
     M.species(jx).initialAmount = NaN;
-    M.species(jx).substanceUnits = '';
+    M.species(jx).substanceUnits = ar.model.xUnits{jx,2};
     M.species(jx).hasOnlySubstanceUnits = 0;
     M.species(jx).boundaryCondition = 0;
     M.species(jx).charge = 0;
@@ -749,8 +717,11 @@ end
 %M.time_symbol = ar.model(m).t;
 
 M.unitDefinition = F.unitDefinition;
+%M.unitDefinition.unit.kind =  ar.model.tUnits{2}; %Invalid unit
 if(strcmp(ar.model(m).tUnits{2},'h'))
     M.unitDefinition(1).unit(1).multiplier = 3600;
+elseif(strcmp(ar.model(m).tUnits{2},'min'))
+    M.unitDefinition(1).unit(1).multiplier = 60;
 elseif(strcmp(ar.model(m).tUnits{2},'s') || strcmp(ar.model(m).tUnits{2},'sec'))
     M.unitDefinition(1).unit(1).multiplier = 1;
 end
@@ -788,11 +759,7 @@ for id = 1:length(ar.model(m).data(d).fy)
     M.rule(ixrule).species = '';
     M.rule(ixrule).compartment = '';
     M.rule(ixrule).name = '';
-    if ~isempty(ar.model(m).data(d).yUnits)
-        M.rule(ixrule).units = ar.model(m).data(d).yUnits{id,2};
-    else
-        M.rule(ixrule).units = '';
-    end
+    M.rule(ixrule).units = ar.model(m).data(d).yUnits{id,2};
     M.rule(ixrule).level = 2;
     M.rule(ixrule).version = 4;
 end
@@ -828,11 +795,7 @@ for id = 1:length(ar.model(m).data(d).fystd)
     M.rule(ixrule).species = '';
     M.rule(ixrule).compartment = '';
     M.rule(ixrule).name = '';
-    if ~isempty(ar.model(m).data(d).yUnits)
-        M.rule(ixrule).units = ar.model(m).data(d).yUnits{id,2};
-    else
-        M.rule(ixrule).units = '';
-    end
+    M.rule(ixrule).units = ar.model(m).data(d).yUnits{id,2};
     M.rule(ixrule).level = 2;
     M.rule(ixrule).version = 4;
 end
@@ -848,10 +811,10 @@ if(a == 1)
 %     end
     
 %mine!
-                    if(~exist('./Benchmark_paper/SBML', 'dir'))
-                    mkdir('./Benchmark_paper/SBML')
-                    end
-                    OutputSBML(M, ['Benchmark_paper/SBML/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
+    if(~exist('./SBML_export', 'dir'))
+        mkdir('./SBML_export')
+    end
+    OutputSBML(M, ['SBML_export/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
 else
     error('%s', b);
 end

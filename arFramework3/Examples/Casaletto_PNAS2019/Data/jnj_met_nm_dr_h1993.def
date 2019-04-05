@@ -1,0 +1,22 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR-DOSERESPONSE init_metmab
+t	T	"min"	"time"	0	20
+
+INPUTS
+
+OBSERVABLES
+pAkt_au                 C	"au"	"conc."    1   1    "offset_pakt + (scale_pakt * pAkt)"
+act_met_dimer_au        C	"au"	"conc."    1   1    "offset_act_met_h1993 + (scale_act_met_h1993 * act_met_dimer)"
+
+ERRORS
+pAkt_au                 "sd_pakt_au"
+act_met_dimer_au        "sd_act_met_dimer_au"
+
+CONDITIONS
+kon_metmab       "(no_ratio_metmab) / 0.04"
+
+init_egfr             "(325000) * abc_fac_h1993"
+init_epcam            "(2239206) * qfacs_fac"
+init_met              "(561000) * abc_fac_h1993"
