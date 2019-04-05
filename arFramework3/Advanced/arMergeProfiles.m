@@ -188,9 +188,11 @@ function PLEs = loadSingle( PLEs, directory, doFilterProfile, doAppendProfiles)
         fprintf( 'Found profile for %s\n', curPLE.p_labels{filled(b)} );
         
         appending = false;
-        if sum(strcmp(PLEs.donePars, curPLE.p_labels{filled(b)})) ~= 0 && doAppendProfiles
+        if isfield(PLEs, 'donePars') && sum(strcmp(PLEs.donePars, curPLE.p_labels{filled(b)})) ~= 0 && doAppendProfiles
             appending = true;
             fprintf('Combining profiles...\n')
+        else
+            PLEs.donePars = {};
         end
         PLEs.donePars{end + 1} = curPLE.p_labels{filled(b)};
         
