@@ -40,7 +40,7 @@ function [used, m] = arFindParameterUse( idx, verbose )
             end
         end
         for jd = 1 : numel( ar.model(jm).data )
-            if ( ~isempty( ar.model(jm).data(jd).pLink ) && ar.model(jm).data(jd).pLink(idx) )
+            if ( ~isempty( ar.model(jm).data(jd).pLink ) && ar.model(jm).data(jd).pLink(idx) && ~isempty(ar.model(jm).data(jd).tExp) )
                 if ( verbose )
                     fprintf( 'Used in data %d: %s\n', jd, ar.model(jm).data(jd).name );
                 end
