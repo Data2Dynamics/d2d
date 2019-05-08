@@ -44,9 +44,14 @@ while(true)
         pStep = nan(size(pLast));
         return
     else
-        feval(ar.ple.integrate_fkt, pLast+pStep);
-        chi2trial = feval(ar.ple.merit_fkt);
-        
+        try
+            feval(ar.ple.integrate_fkt, pLast+pStep);
+            chi2trial = feval(ar.ple.merit_fkt);
+        catch err
+            fprintf( 'WARNING: Forcing stepsize shrinkage due to failing simulation. Current stepsize: %e\nReason: %d\n', max(pStep), err.message );
+            % If the simulation fails in this direction, force a step shrinkage
+            chi2trial = inf;
+        end
         if(chi2trial-chi2last > dchi2*ar.ple.relchi2stepincrease(jk))
             dpNew = dpNew / stepfaktor;
             if(abs(dpNew)<ar.ple.minstepsize(jk))
