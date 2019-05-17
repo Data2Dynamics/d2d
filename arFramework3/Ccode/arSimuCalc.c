@@ -88,6 +88,7 @@ struct thread_data_x {
 
 int threadStatus[NMAXTHREADS];
 int threadAbortSignal[NMAXTHREADS];
+char errmsg_thread[256];
 
 mxArray *armodel;
 mxArray *arthread;
@@ -281,6 +282,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #endif
         
 #ifdef HAS_PTHREAD
+    if (parallel==1) {
+        /* Mark error message as not written */
+        errmsg_thread[0] = 0;
+    }
+    
     /* loop over threads parallel */
     for(ithreads=0; ithreads<nthreads; ++ithreads){
         threadStatus[ithreads] = 0;
@@ -332,6 +338,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 mexErrMsgTxt("ERROR at pthread_join");
             }
         }
+        
+        if ( errmsg_thread[0] != 0 ) {
+            printf( "The following error was reported during thread evaluation: ");
+            printf(errmsg_thread);
+        }
     }
 #else
     /* loop over threads sequential */
@@ -360,13 +371,10 @@ void thread_calc(int id) {
     int *cs = (int *) mxGetData(mxGetField(arthread, id, "cs"));
     int in;
     
-    /* printf("computing thread #%i\n", id); */
     DEBUGPRINT0( debugMode, 2, "Calling conditions\n" );
     for(in=0; in<n; ++in){
-        /* printf("computing thread #%i, task %i/%i (m=%i, c=%i)\n", id, in, n, ms[in], cs[in]); */
         x_calc(ms[in], cs[in], globalsensi, setSparse, &threadStatus[id], &threadAbortSignal[id], rootFinding, debugMode, sensitivitySubset);
     }
-    /* printf("computing thread #%i(done)\n", id); */
     
 #ifdef HAS_PTHREAD
     if(parallel==1) {pthread_exit(NULL);}
@@ -375,10 +383,14 @@ void thread_calc(int id) {
 }
 
 /* Handle CVODES errors */
-/* CAUTION: this function is NOT thread safe! */
 void errorHandler(int error_code, const char *module, const char *func, char *msg, void *eh_data)
 {
-	mexPrintf( "Error code %d in module %s and function %s:\n%s\n", error_code, module, func, msg );
+    /* Make sure that we don't output to printf if an error occurs as this function is not thread safe */
+    if ( parallel == 0 ) {
+        mexPrintf( "Error code %d in module %s and function %s:\n%s\n", error_code, module, func, msg );
+    } else {
+        snprintf( errmsg_thread, 254, "Error code %d in module %s and function %s:\n%s\n", error_code, module, func, msg );
+    }
 };
 
 /* Function which can be used for debugging purposes */
@@ -682,11 +694,8 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 
                 DEBUGPRINT0( debugMode, 4, "Setting CVODES options\n" );
                 /* Optionally enable more informative debug messages */
-                if ( debugMode > 0 )
-                {
-                    flag = CVodeSetErrHandlerFn(cvode_mem, &errorHandler, NULL);
-                    if (flag < 0) {terminate_x_calc( sim_mem, 4 ); return;}
-                }
+                flag = CVodeSetErrHandlerFn(cvode_mem, &errorHandler, NULL);
+                if (flag < 0) {terminate_x_calc( sim_mem, 4 ); return;}
                 
                 /* Number of maximal internal steps */
                 flag = CVodeSetMaxNumSteps(cvode_mem, cvodes_maxsteps);
@@ -704,13 +713,11 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                             Ith(atolV, ks+1) = 1;
                         }else if(cvodes_atol/y_max_scale[ks]<1e-8){
                             Ith(atolV, ks+1) = 1e-8;			
-                            /*printf("atolV for neq=%i is %d \n", ks+1, Ith(atolV, ks+1));*/
                         }else if(cvodes_atol/y_max_scale[ks]>1e-8 && cvodes_atol/y_max_scale[ks]<1){
                             Ith(atolV, ks+1) = cvodes_atol/y_max_scale[ks];
                         }else{
                             Ith(atolV, ks+1) = cvodes_atol;
                         }
-                        /*printf("atolV for neq=%i is %d \n", ks, Ith(atolV, ks+1));*/
                         tmp_tol *= Ith(atolV, ks+1);
                     }
                     tmp_tol = cvodes_atol / pow(tmp_tol,1/neq);  
@@ -786,18 +793,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                                 if(y_max_scale[ks]==0. || cvodes_atol/y_max_scale[ks]>1) {
                                     atolV_tmp[ks] = 1;
                                 } else if (cvodes_atol/y_max_scale[ks]<1e-8) {   
-                                    /* && Ith(atolV, ks+1)==1.e-8){*/
-                                    /*printf("atolVS for neq=%i is %d \n", ks+1, atolV_tmp[ks]);*/ /*}*/
                                     atolV_tmp[ks] = 1e-8;			  
                                 }else if(cvodes_atol/y_max_scale[ks]>1e-8 && cvodes_atol/y_max_scale[ks]<1) {
                                     atolV_tmp[ks] = cvodes_atol/y_max_scale[ks];
-                                    /*if(atolV_tmp[ks] < Ith(atolV, ks+1)){
-                                         atolV_tmp[ks] = Ith(atolV, ks+1);
-                                    }*/
                                 }else {
                                     atolV_tmp[ks] = cvodes_atol;
                                 }			  
-                                /*printf("atolV_ss for neq=%i is %f\n", ks, atolV_tmp[ks]);*/
                             }
                         }
                         flag = CVodeSensSVtolerances(cvode_mem, RCONST(cvodes_rtol), atolV_ss);
@@ -817,8 +818,7 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
             /* loop over output points      */
             /********************************/
             DEBUGPRINT0( debugMode, 4, "Starting main calculation loop\n" );
-            for (is=0; is < nout; is++) {               
-                /*mexPrintf("%f x-loop (im=%i ic=%i)\n", ts[is], im, ic);*/
+            for (is=0; is < nout; is++) {
                 DEBUGPRINT3( debugMode, 7, "%f x-loop (im=%i ic=%i)\n", ts[is], im, ic );
                 /* only integrate if no errors occured */
                 if(status[0] == 0.0) {
@@ -1016,7 +1016,6 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                 }
                 
                 for (ix=0; ix<nx; ix++) {
-                    /* printf("%f ", x0[ix]); */
                     Ith(x, ix+1) = x0[ix];
                     Ith(x_lb, ix+1) = x0[ix];
                     Ith(x_ub, ix+1) = x0[ix];
@@ -1046,9 +1045,12 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     lasttau[ilasttau] = tau;
                     ilasttau = (ilasttau+1) % 10;
                     
-                    /* printf("r1=%g, r2=%g, alpha0=%g, tau=%g\n", r1, r2, alpha0, tau); */
                     if(tau<=0) {
-                        printf("\nmodel #%i, condition #%i, run #%i at t=%f: STOP (tau=%g < 0)\n", im+1, ic+1, iruns+1, t, tau);
+                        /* Printf and mexPrintf are *not* thread safe */
+                        if ( parallel == 0 )
+                        {
+                            printf("\nmodel #%i, condition #%i, run #%i at t=%f: STOP (tau=%g < 0)\n", im+1, ic+1, iruns+1, t, tau); 
+                        }
                         break;
                     }
                     
@@ -1096,7 +1098,10 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
                     meantau /= 10;
                     
                     if(meantau < mintau) {
-                        printf("\nmodel #%i, condition #%i, run #%i at t=%f: STOP (mean(tau)=%g < %g)\n", im+1, ic+1, iruns+1, t, meantau, mintau);
+                        if ( debugMode > 0 )
+                        {
+                            printf("\nmodel #%i, condition #%i, run #%i at t=%f: STOP (mean(tau)=%g < %g)\n", im+1, ic+1, iruns+1, t, meantau, mintau);
+                        }
                         break;
                     }
                     
@@ -1121,7 +1126,6 @@ void x_calc(int im, int ic, int sensi, int setSparse, int *threadStatus, int *ab
 
     gettimeofday(&t3, NULL);
     
-    /* printf("computing model #%i, condition #%i (done)\n", im, ic); */
     /* call y_calc */
     DEBUGPRINT0( debugMode, 5, "Evaluating observations\n" );
     evaluateObservations(arcondition, im, ic, ysensi, has_tExp);
@@ -1449,10 +1453,14 @@ int equilibrate(void *cvode_mem, UserData data, N_Vector x, realtype t, double *
     return flag;
 }
 
-/* This function can be used to display errors from the threaded environment 
-   mexErrMsgTxt crashes on R2013b when called from a thread */
+/* This function is *not* thread safe */
 void thr_error( const char* msg ) {
-    printf( msg );
+    if ( parallel == 0 )
+    {
+        printf( msg );
+    } else {
+        strncpy( errmsg_thread, msg, 254 );
+    }
 }
 
 /* Event handler */
@@ -1491,7 +1499,6 @@ int handle_event( SimMemory sim_mem, int sensi_meth, int reinitSolver )
             Ith(x, state+1) = A * Ith(x, state+1) + B;
         }
    
-        /* printf("t[%d/%d]=%f  A: %f, B: %f\n", cStep, tStep, event_data->t[event_data->i], A, B); */
         /* Override sensitivity equations */
         if (sensi==1) {
             if ( sim_mem->data->sensIndices == NULL )
@@ -1771,7 +1778,7 @@ int fetch_vector( mxArray* arcondition, int ic, double **vector, const char* fie
         /* Wrong length => warn! */
         if (nPoints != desiredLength)
         {
-           printf( "Warning, mod vector has incorrect size -> overrides disabled\n" );
+           thr_error( "Warning, mod vector has incorrect size -> overrides disabled\n" );
            return -1;
         }
 
@@ -1789,7 +1796,7 @@ void terminate_x_calc( SimMemory sim_mem, double status )
     /* Something is seriously wrong */
 	if ( sim_mem == NULL )
     {
-        mexPrintf( "FATAL ERROR: Simulation memory is null upon terminate_x_calc!" );
+        thr_error( "FATAL ERROR: Simulation memory is null upon terminate_x_calc!" );
 		return;
     }
 
@@ -1801,6 +1808,9 @@ void terminate_x_calc( SimMemory sim_mem, double status )
     
     /* Free the memory that was allocated */
 	simFree( sim_mem );
+    
+    /* Mark it as nulled */
+    sim_mem = NULL;
 }
 
 /* This function initializes time point lists */
@@ -1835,8 +1845,6 @@ int init_list( mxArray* arcondition, int ic, double tstart, int* nPoints, double
 
 /* calculate derived variables */
 void z_calc(int im, int ic, int isim, mxArray *arcondition, int sensi) {
-    
-    /* printf("computing model #%i, condition #%i, derived variables\n", im, ic); */
     
   int nt, np, nx;
     int it;
@@ -1886,23 +1894,18 @@ void z_calc(int im, int ic, int isim, mxArray *arcondition, int sensi) {
     
     /* loop over output points */
     for (it=0; it < nt; it++) {
-        /* printf("%f y-loop (im=%i id=%i)\n", t[it], im, id); */
-        
         fz(t[it], nt, it, 0, 0, 0, 0, z, p, u, x, im, isim);
-	if( fine == 0 ) {
-	  dfzdx(t[it], nt, it, 0, nx, 0, 0, dzdx, z, p, u, x, im, isim);
-	}
+        if( fine == 0 ) {
+          dfzdx(t[it], nt, it, 0, nx, 0, 0, dzdx, z, p, u, x, im, isim);
+        }
         if (sensi == 1) {
             fsz(t[it], nt, it, np, sz, p, u, x, z, su, sx, im, isim);
         }
     }
-    
-    /* printf("computing model #%i, condition #%i, derived variables (done)\n", im, ic); */
 }
 
 /* calculate observations */
 void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
-    /* printf("computing model #%i, data #%i\n", im, id); */
     
     int nt, it, iy, ip, ntlink, itlink;
     int ny, np, ic;
@@ -1994,7 +1997,6 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
     
     /* loop over output points */
     for (it=0; it < nt; it++) {
-        /* printf("%f y-loop (im=%i id=%i)\n", t[it], im, id); */
         itlink = (int) tlink[it] - 1;
         
         fy(t[it], nt, it, ntlink, itlink, 0, 0, 0, 0, y, p, u, x, z, im, id);
@@ -2007,7 +2009,13 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
         for (iy=0; iy<ny; iy++) {
             if(qlogy[iy] > 0.5){
                 if(y[it + (iy*nt)]<-cvodes_atol){ 
-                    printf("WARNING, check for concentrations <= 0 in data %d and observable %d !!!\n", id+1, iy+1);
+                    /* Printf is *not* thread safe and can lead to segmentation faults */
+                    if ( parallel == 0 )
+                    {
+                        printf("WARNING, check for concentrations <= 0 in data %d and observable %d !!!\n", id+1, iy+1);
+                    } else {
+                        thr_error("WARNING, check for concentrations <= 0");
+                    }
                 }else{
                     y[it + (iy*nt)] = log10(y[it + (iy*nt)]);
                 }
@@ -2041,8 +2049,6 @@ void y_calc(int im, int id, mxArray *ardata, mxArray *arcondition, int sensi) {
         }
      
     }
-    
-    /* printf("computing model #%i, data #%i (done)\n", im, id); */
 }
 
 /* Cleaner alternative to debugPrint, but more overhead */
