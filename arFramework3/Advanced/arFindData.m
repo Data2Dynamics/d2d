@@ -216,7 +216,7 @@ function [olist, names, m] = arFindData( varargin )
                     end
                 else
                     % It is a string; Does it refer to a parameter?
-                    Q = find(strcmp(ar.pLabel, ar.model(m).fp{ID}));
+                    Q = find(strcmp(ar.pLabel, val));
                     if ~isempty(Q)
                         condList(c) = 0;
                         numval = arGetPars(ar.pLabel{Q},0);
