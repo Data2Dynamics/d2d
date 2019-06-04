@@ -86,7 +86,7 @@ For fitting, a maximum likelihood approach is used, i.e. an objective function
 \end{figure} 
 
 Depending on the application example, the transient dynamics does not start at $t=0$ but is delayed.
-This setting is accounted by a nonlinear transformation of the time-axis with a single parameter $t_\text{offset}$.
+This setting is accounted by a nonlinear transformation of the time-axis with a single parameter $t_\text{shift}$.
 The transformation is illustrated in Figure xxx.
 
 
@@ -111,7 +111,7 @@ $A_\text{sus}$ & Amplitude of the sustained response & -$2 (\max(y) - \min(y))$	
 $A_\text{trans}$ & Amplitude transient decrease & -$2 (\max(y) - \min(y))$				&  $2 (\max(y) - \min(y))$ 			   &  $0.1 \text{lb} + 0.9 \text{ub}$\\ \hline
 $p_0$ 	& data offset 												& $\min(y)$  										&  $\max(y)$ 										&  $0.5 \text{lb} + 0.5 \text{ub}$ \\
 $\sigma$ 	& approximation error 							& $(\max(y) - \min(y))/10 000$ 		&  $(\max(y) - \min(y))$ 					&  $\text{SD}(y)$	\\ \hline
-$t_\text{offset}$ & time-shift 									& -2 														& 5 															&  -1 \\ \hline
+$t_\text{shift}$ & response time									& -2 														& 5 															&  -1 \\ \hline
 \end{tabular}
 \end{tiny}
 %\end{minipage}

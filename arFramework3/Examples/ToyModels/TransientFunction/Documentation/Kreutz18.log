@@ -1,0 +1,358 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6350 64-bit) (preloaded format=pdflatex 2019.2.14)  21 MAY 2019 15:43
+entering extended mode
+**./Kreutz18.tex
+(Kreutz18.tex
+LaTeX2e <2017-04-15>
+Babel <3.10> and hyphenation patterns for 75 language(s) loaded.
+("C:\Program Files\MiKTeX 2.9\tex\latex\koma-script\scrartcl.cls"
+Document Class: scrartcl 2019/02/01 v3.26b KOMA-Script document class (article)
+
+("C:\Program Files\MiKTeX 2.9\tex\latex\koma-script\scrkbase.sty"
+Package: scrkbase 2019/02/01 v3.26b KOMA-Script package (KOMA-Script-dependent 
+basics and keyval usage)
+
+("C:\Program Files\MiKTeX 2.9\tex\latex\koma-script\scrbase.sty"
+Package: scrbase 2019/02/01 v3.26b KOMA-Script package (KOMA-Script-independent
+ basics and keyval usage)
+
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\keyval.sty"
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+("C:\Program Files\MiKTeX 2.9\tex\latex\koma-script\scrlfile.sty"
+Package: scrlfile 2019/02/01 v3.26b KOMA-Script package (loading files)
+)))
+("C:\Program Files\MiKTeX 2.9\tex\latex\koma-script\tocbasic.sty"
+Package: tocbasic 2019/02/01 v3.26b KOMA-Script package (handling toc-files)
+\scr@dte@tocline@numberwidth=\skip41
+\scr@dte@tocline@numbox=\box26
+)
+Package tocbasic Info: omitting babel extension for `toc'
+(tocbasic)             because of feature `nobabel' available
+(tocbasic)             for `toc' on input line 134.
+Class scrartcl Info: File `scrsize11pt.clo' used instead of
+(scrartcl)           file `scrsize11.clo' to setup font sizes on input line 216
+2.
+
+("C:\Program Files\MiKTeX 2.9\tex\latex\koma-script\scrsize11pt.clo"
+File: scrsize11pt.clo 2019/02/01 v3.26b KOMA-Script font size class option (11p
+t)
+)
+("C:\Program Files\MiKTeX 2.9\tex\latex\koma-script\typearea.sty"
+Package: typearea 2019/02/01 v3.26b KOMA-Script package (type area)
+\ta@bcor=\skip42
+\ta@div=\count79
+Package typearea Info: You've used standard option `pdftex'.
+(typearea)             This is correct!
+(typearea)             Internally I'm using `pagesize=pdftex'.
+(typearea)             If you'd like to set the option with \KOMAoptions,
+(typearea)             you'd have to use `pagesize=pdftex' there
+(typearea)             instead of `pdftex', too.
+Package typearea Info: You've used standard option `a4paper'.
+(typearea)             This is correct!
+(typearea)             Internally I'm using `paper=a4'.
+(typearea)             If you'd like to set the option with \KOMAoptions,
+(typearea)             you'd have to use `paper=a4' there
+(typearea)             instead of `a4paper', too.
+\ta@hblk=\skip43
+\ta@vblk=\skip44
+\ta@temp=\skip45
+\footheight=\skip46
+Package typearea Info: These are the values describing the layout:
+(typearea)             DIV  = 10
+(typearea)             BCOR = 0.0pt
+(typearea)             \paperwidth      = 597.50793pt
+(typearea)              \textwidth      = 418.25555pt
+(typearea)              DIV departure   = -6%
+(typearea)              \evensidemargin = 17.3562pt
+(typearea)              \oddsidemargin  = 17.3562pt
+(typearea)             \paperheight     = 845.04694pt
+(typearea)              \textheight     = 595.80026pt
+(typearea)              \topmargin      = -25.16531pt
+(typearea)              \headheight     = 17.0pt
+(typearea)              \headsep        = 20.40001pt
+(typearea)              \topskip        = 11.0pt
+(typearea)              \footskip       = 47.6pt
+(typearea)              \baselineskip   = 13.6pt
+(typearea)              on input line 1715.
+)
+\c@part=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\scr@dte@section@maxnumwidth=\skip47
+Class scrartcl Info: using compatibility default `runin=bysign'
+(scrartcl)           for `\section on input line 4489.
+Class scrartcl Info: using compatibility default `afterindent=bysign'
+(scrartcl)           for `\section on input line 4489.
+\scr@dte@part@maxnumwidth=\skip48
+Class scrartcl Info: using compatibility default `afterindent=false'
+(scrartcl)           for `\part on input line 4497.
+\scr@dte@subsection@maxnumwidth=\skip49
+Class scrartcl Info: using compatibility default `runin=bysign'
+(scrartcl)           for `\subsection on input line 4507.
+Class scrartcl Info: using compatibility default `afterindent=bysign'
+(scrartcl)           for `\subsection on input line 4507.
+\scr@dte@subsubsection@maxnumwidth=\skip50
+Class scrartcl Info: using compatibility default `runin=bysign'
+(scrartcl)           for `\subsubsection on input line 4517.
+Class scrartcl Info: using compatibility default `afterindent=bysign'
+(scrartcl)           for `\subsubsection on input line 4517.
+\scr@dte@paragraph@maxnumwidth=\skip51
+Class scrartcl Info: using compatibility default `runin=bysign'
+(scrartcl)           for `\paragraph on input line 4527.
+Class scrartcl Info: using compatibility default `afterindent=bysign'
+(scrartcl)           for `\paragraph on input line 4527.
+\scr@dte@subparagraph@maxnumwidth=\skip52
+Class scrartcl Info: using compatibility default `runin=bysign'
+(scrartcl)           for `\subparagraph on input line 4537.
+Class scrartcl Info: using compatibility default `afterindent=bysign'
+(scrartcl)           for `\subparagraph on input line 4537.
+\abovecaptionskip=\skip53
+\belowcaptionskip=\skip54
+\c@pti@nb@sid@b@x=\box27
+Package tocbasic Info: omitting babel extension for `lof'
+(tocbasic)             because of feature `nobabel' available
+(tocbasic)             for `lof' on input line 5781.
+\scr@dte@figure@maxnumwidth=\skip55
+\c@figure=\count86
+Package tocbasic Info: omitting babel extension for `lot'
+(tocbasic)             because of feature `nobabel' available
+(tocbasic)             for `lot' on input line 5793.
+\scr@dte@table@maxnumwidth=\skip56
+\c@table=\count87
+Class scrartcl Info: Redefining `\numberline' on input line 5957.
+\bibindent=\dimen102
+)
+("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsmath.sty"
+Package: amsmath 2016/11/05 v2.16a AMS math features
+\@mathmargin=\skip57
+
+For additional information on amsmath, use the `?' option.
+("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amstext.sty"
+Package: amstext 2000/06/29 v2.01 AMS text
+
+("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsgen.sty"
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks15
+\ex@=\dimen103
+))
+("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsbsy.sty"
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen104
+)
+("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsopn.sty"
+Package: amsopn 2016/03/08 v2.02 operator names
+)
+\inf@bad=\count88
+LaTeX Info: Redefining \frac on input line 213.
+\uproot@=\count89
+\leftroot@=\count90
+LaTeX Info: Redefining \overline on input line 375.
+\classnum@=\count91
+\DOTSCASE@=\count92
+LaTeX Info: Redefining \ldots on input line 472.
+LaTeX Info: Redefining \dots on input line 475.
+LaTeX Info: Redefining \cdots on input line 596.
+\Mathstrutbox@=\box28
+\strutbox@=\box29
+\big@size=\dimen105
+LaTeX Font Info:    Redeclaring font encoding OML on input line 712.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 713.
+\macc@depth=\count93
+\c@MaxMatrixCols=\count94
+\dotsspace@=\muskip10
+\c@parentequation=\count95
+\dspbrk@lvl=\count96
+\tag@help=\toks16
+\row@=\count97
+\column@=\count98
+\maxfields@=\count99
+\andhelp@=\toks17
+\eqnshift@=\dimen106
+\alignsep@=\dimen107
+\tagshift@=\dimen108
+\tagwidth@=\dimen109
+\totwidth@=\dimen110
+\lineht@=\dimen111
+\@envbody=\toks18
+\multlinegap=\skip58
+\multlinetaggap=\skip59
+\mathdisplay@stack=\toks19
+LaTeX Info: Redefining \[ on input line 2817.
+LaTeX Info: Redefining \] on input line 2818.
+)
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\graphics.sty"
+Package: graphics 2017/04/14 v1.1b Standard LaTeX Graphics (DPC,SPQR)
+
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\trig.sty"
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics-cfg\graphics.cfg"
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 99.
+
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics-def\pdftex.def"
+File: pdftex.def 2017/01/12 v0.06k Graphics/color for pdfTeX
+
+("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\infwarerr.sty"
+Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
+)
+("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\ltxcmds.sty"
+Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
+)
+\Gread@gobject=\count100
+))
+(Kreutz18.aux)
+\openout1 = `Kreutz18.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+ ("C:\Program Files\MiKTeX 2.9\tex\context\base\supp-pdf.mkii"
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count101
+\scratchdimen=\dimen112
+\scratchbox=\box30
+\nofMPsegments=\count102
+\nofMParguments=\count103
+\everyMPshowfont=\toks20
+\MPscratchCnt=\count104
+\MPscratchDim=\dimen113
+\MPnumerator=\count105
+\makeMPintoPDFobject=\count106
+\everyMPtoPDFconversion=\toks21
+) ("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\pdftexcmds.sty"
+Package: pdftexcmds 2017/03/19 v0.25 Utility functions of pdfTeX for LuaTeX (HO
+)
+
+("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\ifluatex.sty"
+Package: ifluatex 2016/05/16 v1.4 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+)
+("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\ifpdf.sty"
+Package: ifpdf 2017/03/15 v3.2 Provides the ifpdf switch
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)
+("C:\Program Files\MiKTeX 2.9\tex\latex\oberdiek\epstopdf-base.sty"
+Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
+
+("C:\Program Files\MiKTeX 2.9\tex\latex\oberdiek\grfext.sty"
+Package: grfext 2016/05/16 v1.2 Manage graphics extensions (HO)
+
+("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\kvdefinekeys.sty"
+Package: kvdefinekeys 2016/05/16 v1.4 Define keys (HO)
+))
+("C:\Program Files\MiKTeX 2.9\tex\latex\oberdiek\kvoptions.sty"
+Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
+
+("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\kvsetkeys.sty"
+Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
+
+("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\etexcmds.sty"
+Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+)))
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+38.
+Package grfext Info: Graphics extension search list:
+(grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 456.
+)
+
+LaTeX Warning: Citation `Lucarelli' on page 1 undefined on input line 45.
+
+[1
+
+
+{C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map}]
+
+LaTeX Warning: Reference `eq:5para' on page 2 undefined on input line 53.
+
+
+Overfull \hbox (7.41367pt too wide) in paragraph at lines 60--65
+\OT1/cmr/m/n/10.95 in-stead of \OT1/cmtt/m/n/10.95 arFit\OT1/cmr/m/n/10.95 . Th
+ere-fore, the standard-function in \OT1/cmtt/m/n/10.95 arFramework3/Advanced/ar
+Fits.m
+ []
+
+
+Overfull \hbox (163.33885pt too wide) in paragraph at lines 60--65
+\OT1/cmr/m/n/10.95 has to be re-placed by \OT1/cmtt/m/n/10.95 arFramework3/Exam
+ples/ToyModels/TransientFunction/TransientFunction[]library/arFits.m
+ []
+
+<TimeOffset_TransientFunction.png, id=16, 421.575pt x 316.0608pt>
+File: TimeOffset_TransientFunction.png Graphic file (type png)
+
+<use TimeOffset_TransientFunction.png>
+Package pdftex.def Info: TimeOffset_TransientFunction.png used on input line 83
+.
+(pdftex.def)             Requested size: 421.57396pt x 316.06003pt.
+
+Overfull \hbox (3.3184pt too wide) in paragraph at lines 83--84
+ [] 
+ []
+
+[2]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 97.
+ ("C:\Program Files\MiKTeX 2.9\tex\latex\base\omscmr.fd"
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 97.
+ [3 <./TimeOffset_TransientFunction.png (PNG copy)>] [4] (Kreutz18.aux)
+
+LaTeX Warning: There were undefined references.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 4238 strings out of 493323
+ 72462 string characters out of 3139066
+ 243362 words of memory out of 3000000
+ 7748 multiletter control sequences out of 15000+200000
+ 11568 words of font info for 42 fonts, out of 3000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 48i,11n,56p,9089b,234s stack positions out of 5000i,500n,10000p,200000b,50000s
+<C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Pr
+ogram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Program Fi
+les/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Program Files/MiKT
+eX 2.9/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Program Files/MiKTeX 2.9/fo
+nts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1
+/public/amsfonts/cm/cmmi8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/a
+msfonts/cm/cmr10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/c
+m/cmr12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr5.pf
+b><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Prog
+ram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program Files/
+MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmssbx10.pfb><C:/Program Files/MiKTeX
+ 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fon
+ts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/
+public/amsfonts/cm/cmsy8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/am
+sfonts/cm/cmti10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/c
+m/cmtt10.pfb>
+Output written on Kreutz18.pdf (4 pages, 224241 bytes).
+PDF statistics:
+ 84 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+

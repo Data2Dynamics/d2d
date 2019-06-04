@@ -1,11 +1,20 @@
-% This function fits serveral times.
+% arFitTransient
+% 
+% The major function for fitting the transient function. It calls arFit and
+% tries upward- and downward responses.
+% 
+% This function fits serveral times:
+%   - upward direction
+%   - downward direction
+%   - for LRT for testing offset=0
+%   - for LRT for testing toffset=0
 % 
 %   The signums are first set to +1. Then one ofter the other signum is set
 %   to -1 and it is checked whether the fit improves.
 % 
 %   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-%   !  Since the founds depend on the signum, this function also   !
-%   !  changes upper and lower bounds.                             !
+%   !  Since the bounds depend on the signum, this function also   !
+%   !  temporarily changes upper and lower bounds.                             !
 %   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 function arFitTransient

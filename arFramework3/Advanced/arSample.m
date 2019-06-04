@@ -72,7 +72,6 @@ elseif(length(parindex)==2)
 elseif(length(parindex)==3)
     ar.sampling.chi2s = nan(N,N,N);
 else
-    close(h);
     error('maximum of three dimensions allowed');
 end
 ar.p = pTrue;
@@ -81,7 +80,6 @@ arWaitbar(-1);
 
 
 function p = makerange(N,parindex, mode, range)
-global ar
 global ar
 
 if(mode==1)
