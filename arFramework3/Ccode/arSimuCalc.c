@@ -22,6 +22,7 @@
 
 #ifdef _WIN32
 #include <winsock.h>
+#define snprintf _snprintf
 #else
 #include <sys/time.h>
 #endif
