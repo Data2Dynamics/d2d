@@ -177,8 +177,14 @@ while(~strcmp(C{1},'INPUTS'))
     if(length(cell2mat(C{1}))<2)
         arParsingError( fid, 'STATE names need to be longer than 1');
     end
-    if(isempty(symvar(arMyStr2Sym(C{1}))))
-        arParsingError( fid, 'STATE name ''%s'' is reserved by MATLAB. Please rename!',cell2mat(C{1}));
+    try
+        if(isempty(symvar(arMyStr2Sym(C{1}))))
+            arParsingError( fid, 'STATE name ''%s'' is reserved by MATLAB. Please rename!',cell2mat(C{1}));
+        end
+    catch
+        C
+        C{1}
+        arParsingError( fid, 'Malformed input in STATE section.' );
     end
     
     ar.model(m).x(end+1) = C{1};
