@@ -887,6 +887,8 @@ global ar
 
 if(ar.config.optimizer ==1)
     fn = {'iteration','funccount','stepsize','firstorderopt','cgiterations','positivedefinite','ratio','degenerate','trustregionradius','resnorm','gradient_norm'};
+else
+    error('Behaviour that should be executed when ar.config.logfitting = 1 is not defined for the selected optimization algorithm.');
 end
 
 optimValues.gradient_norm = norm(optimValues.gradient);
