@@ -1,0 +1,50 @@
+DESCRIPTION
+"Linear chain model with 5 delay steps"
+
+PREDICTOR
+t               T   min         time	0	100
+
+COMPARTMENTS
+
+STATES
+X1         			C   "nM"      "conc."    
+X2          		C   "nM"      "conc."    
+X3          		C   "nM"      "conc."    
+X4          		C   "nM"      "conc."    
+X5          		C   "nM"      "conc."    
+Output      		C   "nM"      "conc."    
+
+INPUTS
+Input     			C   "nM"      "conc."  "k_stim * exp(-k_stimDeg * t)"
+
+REACTIONS
+ 	   	  -> 	X1 			CUSTOM "k_delay * Input"
+X1 	  	  -> 	X2 			CUSTOM "k_delay * X1"
+X2 	  	  -> 	X3 			CUSTOM "k_delay * X2"
+X3 	  	  -> 	X4 			CUSTOM "k_delay * X3"
+X4 	  	  -> 	X5 			CUSTOM "k_delay * X4"
+X5	 	  -> 	Output 		CUSTOM "k_skip * X5"
+Output    -> 				CUSTOM "k_delay * Output"
+
+DERIVED
+        
+OBSERVABLES
+Input_au   	     	C   "au"    "conc."   0   0   "Input"
+Output_au        	C   "au"    "conc."   0   0   "Output"
+
+ERRORS
+Input_au      		"sqrt((sd_Input_au * Input)^2 + sd_Input_abs_au^2)"
+Output_au     		"sqrt((sd_Output_au * Output)^2 + sd_Output_abs_au^2)"
+
+CONDITIONS
+init_X1		  		"0"
+init_X2		  		"0"
+init_X3		  		"0"
+init_X4		  		"0"
+init_X5		  		"0"
+init_Output  		"0"
+
+sd_Input_abs_au 	"0.05"
+sd_Output_abs_au 	"0.05"
+
+//k_skip 			"k_delay"

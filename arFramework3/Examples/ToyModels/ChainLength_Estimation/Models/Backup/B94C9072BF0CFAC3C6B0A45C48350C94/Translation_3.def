@@ -1,0 +1,47 @@
+DESCRIPTION
+"Translation model with 3 delay steps"
+
+PREDICTOR
+t               T   min         time	0	100
+
+COMPARTMENTS
+
+STATES
+X1         			C   "nM"      "conc."    
+X2          		C   "nM"      "conc."    
+X3          		C   "nM"      "conc."    
+Output      		C   "nM"      "conc."    
+Protein 			C 	"nM"	  "conc."
+
+INPUTS
+Input     			C   "nM"      "conc."  "k_stim * exp(-k_stimDeg * t)"
+
+REACTIONS
+ 	   	  -> 	X1 			CUSTOM "k_in * Input"
+X1 	  	  -> 	X2 			CUSTOM "k_delay * X1"
+X2 	  	  -> 	X3 			CUSTOM "k_delay * X2"
+X3	 	  -> 	Output 		CUSTOM "k_skip * X3"
+Output    -> 				CUSTOM "k_out * Output"
+
+ 		  -> 	Protein		CUSTOM "k_prod * Output"
+Protein   -> 				CUSTOM "k_deg * Protein"
+
+DERIVED
+        
+OBSERVABLES
+Input_au   	     	C   "au"    "conc."   0   0   "Input"
+Protein_au        	C   "au"    "conc."   0   0   "Protein"
+
+ERRORS
+Input_au      		"sqrt((sd_Input_au * Input)^2 + sd_Input_abs_au^2)"
+Protein_au     		"sqrt((sd_Protein_au * Protein)^2 + sd_Protein_abs_au^2)"
+
+CONDITIONS
+init_X1		  		"0"
+init_X2		  		"0"
+init_X3		  		"0"
+init_Output  		"0"
+init_Protein 		"0"
+
+sd_Input_abs_au 	"0.05"
+sd_Protein_abs_au 	"0.05"
