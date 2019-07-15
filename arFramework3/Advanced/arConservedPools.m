@@ -27,7 +27,7 @@ function arConservedPools(jm, showPools)
         wantSyms = 0;
         always = @(x)x;
     catch
-        pc = sym(ar.model.pc);
+        pc = sym(ar.model(jm).pc);
         assume( pc > 0 );
         always = @(x)condAlways(x);
         wantSyms = 1;
