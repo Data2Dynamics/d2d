@@ -1,4 +1,4 @@
-% function arPlotEquilibration( model, ss_condition, [N] )
+% function [t, x, v, z, u] = arPlotEquilibration( model, ss_condition, [N] )
 %
 % This function plots the model pre-equilibration up to the point where
 % equilibration was successful. It is primarily meant for debugging
@@ -9,7 +9,7 @@
 %   [N]             - Number of time points to show
 %
 
-function arPlotEquilibration( model, ss_condition, N )
+function [t, x, v, z, u] = arPlotEquilibration( model, ss_condition, N, tmax )
 
     if ( nargin < 2 )
         help arPlotEquilibration;
@@ -20,7 +20,11 @@ function arPlotEquilibration( model, ss_condition, N )
     oldss = arDeepCopy( ar.model(model).ss_condition(ss_condition) );
     
     tStart = ar.model(model).ss_condition(ss_condition).tstart;
-    tEnd = ar.model(model).ss_condition(ss_condition).tEq;
+    if ( nargin < 4 )
+        tEnd = ar.model(model).ss_condition(ss_condition).tEq;
+    else
+        tEnd = tmax;
+    end
     ar.model(model).ss_condition(ss_condition).tstop = tEnd;
     
     % Number of time points to show
@@ -81,16 +85,17 @@ function arPlotEquilibration( model, ss_condition, N )
     NY = ceil(nPlots/NX);
     
     figure;
-    cplot = plotGroup( model, ss_condition, 'uFineSimu', 'u', styles, NX, NY, 1 );
-    cplot = plotGroup( model, ss_condition, 'xFineSimu', 'x', styles, NX, NY, cplot );
-    cplot = plotGroup( model, ss_condition, 'zFineSimu', 'z', styles, NX, NY, cplot );
-    cplot = plotGroup( model, ss_condition, 'vFineSimu', 'v', styles, NX, NY, cplot );
+    t = ar.model(model).ss_condition(ss_condition).tFine;
+    [cplot, u] = plotGroup( model, ss_condition, 'uFineSimu', 'u', styles, NX, NY, 1 );
+    [cplot, x] = plotGroup( model, ss_condition, 'xFineSimu', 'x', styles, NX, NY, cplot );
+    [cplot, z] = plotGroup( model, ss_condition, 'zFineSimu', 'z', styles, NX, NY, cplot );
+    [cplot, v] = plotGroup( model, ss_condition, 'vFineSimu', 'v', styles, NX, NY, cplot );
     
     ar.model(model).ss_condition(ss_condition) = arDeepCopy(oldss);
     arCheckCache(1);
 end
 
-function cplot = plotGroup( model, ss_condition, field, namefield, styles, NX, NY, cplot )
+function [cplot, sims] = plotGroup( model, ss_condition, field, namefield, styles, NX, NY, cplot )
     global ar;
     
     pidx    = 1;    % Number of lines in this plot
