@@ -1,6 +1,7 @@
 # Data2Dynamics Software
 
 **Contact:** Andreas Raue - <andreas.raue@fdm.uni-freiburg.de>
+(for support issues, please use the issues and forum, thanks!)
 
 **Cite:** 
 

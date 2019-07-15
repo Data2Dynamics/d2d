@@ -123,8 +123,8 @@ if(~isempty(m.notes))
 end
 
 fprintf(fid, '\nPREDICTOR\n');
-if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && isfield(m.unitDefinition,'unit') && ~isempty(m.unitDefinition.unit) && isfield(m.unitDefinition.unit,'kind') && ~isempty(m.unitDefinition.unit.kind)
-    time_unit = m.unitDefinition.unit.kind;
+if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && isfield(m.unitDefinition(1),'unit') && ~isempty(m.unitDefinition(1).unit) && isfield(m.unitDefinition(1).unit,'kind') && ~isempty(m.unitDefinition(1).unit.kind)
+    time_unit = m.unitDefinition(1).unit.kind;
     if (strcmp(time_unit,'s')||strcmp(time_unit,'sec')||strcmp(time_unit,'second'))
         if isfield(m.unitDefinition.unit,'multiplier')
             if m.unitDefinition.unit.multiplier == 60
@@ -208,8 +208,13 @@ for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentrat
             m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
     else  % standard case
         m.species(j).id2 = m.species(j).id;
-        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), unit{j}, ...
-        m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
+        if length(unit)==length(m.species)
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), unit{j}, ...
+            m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
+        else
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), unit{1}, ...
+            m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
+        end
     end
 end
 
@@ -255,6 +260,7 @@ if(isfield(m,'initialAssignment'))
             end
         end
     end
+else m.initialAssignment = [];
 end
 
 %% READ OBSERVABLES, ERRORS, INPUTS from rule
