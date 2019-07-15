@@ -74,8 +74,12 @@ if(~isempty(ar.model(m).c))
                 if(~isnan(str2num(pvalue)))
                     M.compartment(jc).size = str2num(pvalue);
                 else
-                    M.compartment(jc).size = 1;
-                    warning('Compartment %s is a variable expression %s. This case is currently not handled. Setting volume to unity.', ar.model(m).pc{jc}, pvalue);
+                    try
+                        M.compartment(jc).size = double(subs(ar.model(m).condition(c).fp{qp}, ar.pLabel, 10.^ar.p.*ar.qLog10 + ar.p.*(1-ar.qLog10)));
+                        warning('Compartment %s is a variable expression %s. This case is currently in beta status.', ar.model(m).pc{jc}, M.compartment(jc).size);
+                    catch
+                        warning('Failure converting the variable expression %s.', ar.model(m).pc{jc}, M.compartment(jc).size);
+                    end
                 end
             else
                 pvalue = str2num(ar.model(m).pc{jc}); %#ok
