@@ -91,6 +91,12 @@ global ar
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Manual Scaling of Covariance Matrix to account for higher dimensions
 
+% Check if mc3 struct already exists, if not create it.
+if ~isfield(ar, 'mc3')
+    ar = arInitMC3Fields(ar);
+end
+
+
 if isfield(ar, 'mc3')
     if isfield(ar.mc3, 'nruns')
         nruns = ar.mc3.nruns;
