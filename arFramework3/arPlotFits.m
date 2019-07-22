@@ -46,7 +46,7 @@ chi2constrmin = min([ar.chi2s+ar.chi2sconstr ar.chi2fit+ar.chi2constr]);
 ar.ps_start_sorted = ar.ps_start(isorted,:);
 optim_krit = ar.optim_crit(isorted);
 
-dchi2 = chi2inv(0.95, 1);
+dchi2 = chi2inv(0.95, sum(ar.qFit==1));
 
 figure(1); clf;
 pos1 = get(gcf,'Position');
