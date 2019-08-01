@@ -57,10 +57,10 @@ if(~isempty(ar.model(m).c))
         M.compartment(jc).compartmentType = '';
         M.compartment(jc).spatialDimensions = 3;
         M.compartment(jc).constant = 1;
-        if ~isempty(ar.model.cUnits)
-            M.compartment(1).units = ar.model(m).cUnits{jc,2};
+        if ~isempty(ar.model(m).cUnits)
+            M.compartment(jc).units = ar.model(m).cUnits{jc,2};
         else
-            M.compartment(1).units = '';
+            M.compartment(jc).units = '';
         end
         M.compartment(jc).outside = '';
         M.compartment(jc).isSetSize = 1;
