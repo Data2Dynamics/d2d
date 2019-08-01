@@ -30,9 +30,11 @@ if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
             if size(old,1) ~= size(new,1)
                 new = new.';
             end
-            subset = logical(old~=new);
-            out = subs(in, old(subset), new(subset));
+            new = TransformNew(new);
+            %subset = logical(old~=new);
+            out = subs(in(1), old, new);
         else
+            new = TransformNew(new);
             out = subs(in, old(:), new(:), 0);
         end
     catch ME
@@ -57,4 +59,14 @@ if(~isnumeric(in) && ~isempty(old) && ~isempty(symvar(in)))
     end
 else
     out = in;
+end
+end
+function newOut = TransformNew(newIn)
+    for i = 1:length(newIn)
+       if newIn{i}(1) == '(' && newIn{i}(end) == ')'
+           newIn{i}(1) = '';
+           newIn{i}(end) = '';
+       end
+    end
+    newOut = newIn;
 end
