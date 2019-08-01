@@ -99,7 +99,7 @@ else
     M.compartment(1).compartmentType = '';
     M.compartment(1).spatialDimensions = 3;
     M.compartment(1).constant = 1;
-    if ~isempty(ar.model.cUnits)
+    if ~isempty(ar.model(m).cUnits)
         M.compartment(1).units = ar.model(m).cUnits{1,2};
     else
         M.compartment(1).units = '';
@@ -169,7 +169,7 @@ for jx = 1:length(ar.model(m).x)
         elseif(sum(qp)==0 || is_set_cond)
             qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx}); %R2013a compatible
             if(sum(qp)==1)
-                pvalue = char(sym(ar.model(m).condition(c).fp{qp}));
+                pvalue = char(arSym(ar.model(m).condition(c).fp{qp}));
                 if(~isnan(str2num(pvalue))) %#ok
                     pvalue = str2num(pvalue); %#ok
                     M.species(jx).initialConcentration = pvalue;
@@ -276,10 +276,10 @@ end
 
 %% reactions
 fv = ar.model(m).fv;
-fv = sym(fv);
-% fv = subs(fv, ar.model(m).u, ar.model(m).condition(c).fu');
-fv = subs(fv, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp');
-fv = subs(fv, ar.model(m).t, 'time');
+fv = arSym(fv);
+% fv = arSubs(fv, ar.model(m).u, ar.model(m).condition(c).fu');
+fv = arSubs(fv, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp');
+fv = arSubs(fv, ar.model(m).t, 'time');
 
 vcount = 1;
 arWaitbar(0);
@@ -368,9 +368,9 @@ for jv = 1:length(ar.model(m).fv)
         end
         
         vars = symvar(ratetemplate);
-        vars = setdiff(vars, sym(ar.model(m).x(ar.model(m).N(:,jv)<0))); %R2013a compatible
-        vars = setdiff(vars, sym(ar.model(m).condition(c).p)); %R2013a compatible
-        vars = setdiff(vars, sym(ar.model(m).u)); %R2013a compatible
+        vars = setdiff(vars, arSym(ar.model(m).x(ar.model(m).N(:,jv)<0))); %R2013a compatible
+        vars = setdiff(vars, arSym(ar.model(m).condition(c).p)); %R2013a compatible
+        vars = setdiff(vars, arSym(ar.model(m).u)); %R2013a compatible
         M.reaction(vcount).modifier = F.reaction(1).modifier;
         if(~isempty(vars))
             for jmod = 1:length(vars);
@@ -439,7 +439,7 @@ funs = cellfun(@(x) x{1}, ar.config.specialFunc,'uniformoutput',0);
 
 for ju = 1:length(ar.model(m).u)
     
-    fu = sym(ar.model(m).condition(c).fu{ju}); % current input
+    fu = arSym(ar.model(m).condition(c).fu{ju}); % current input
     
     isActive = ~(str2double(ar.model(m).condition(c).fu{ju}) == 0);
     if(contains(ar.model(m).fu{ju},'spline'))
@@ -449,10 +449,10 @@ for ju = 1:length(ar.model(m).u)
     
     if ( isActive )
         % replace p with condition specific parameters
-        fu = char(subs(fu, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp'));
+        fu = char(arSubs(fu, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp'));
         
         % replace time parameters with 'time'
-        fu = char(subs(fu, ar.model(m).t, 'time'));
+        fu = char(arSubs(fu, ar.model(m).t, 'time'));
         ixfun = cell2mat(cellfun(@(x) strfind(fu,x), funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
         if any(ixfun)
             heavisideReplacement = {
@@ -464,7 +464,7 @@ for ju = 1:length(ar.model(m).u)
             % replace functions first
             fu = replaceFunctions( fu, ar.config.specialFunc, 0 );
             % replace heavisides and log their positions
-            fu = subs(sym(strrep(fu, 'heaviside', '_potato_')), sym('_potato_'), 'heaviside');
+            fu = arSubs(arSym(strrep(fu, 'heaviside', '_potato_')), arSym('_potato_'), 'heaviside');
             [fu, args] = replaceFunctions( fu, heavisideReplacement, 0 );
 
             % Determine event triggers in here (to make sure SBML resets the solver)
@@ -767,9 +767,9 @@ for id = 1:length(ar.model(m).data(d).fy)
     M.rule(ixrule).sboTerm = -1;
     rule_tmp = ar.model(m).data(d).fy{id};
     if(~isempty(ar.model(m).z))
-        rule_tmp = subs(rule_tmp,ar.model(m).z,ar.model(m).fz');
+        rule_tmp = arSubs(rule_tmp,ar.model(m).z,ar.model(m).fz');
     end
-    rule_tmp = subs(rule_tmp,ar.model(m).data(d).pold,ar.model(m).data(d).fp');
+    rule_tmp = arSubs(rule_tmp,ar.model(m).data(d).pold,ar.model(m).data(d).fp');
     
     rule_tmp = char(rule_tmp);
     if(ar.model(m).data(d).logfitting(id)==1)
@@ -808,7 +808,7 @@ for id = 1:length(ar.model(m).data(d).fystd)
     M.rule(ixrule).sboTerm = -1;
     rule_tmp = ar.model(m).data(d).fystd{id};
     
-    rule_tmp = subs(rule_tmp,ar.model(m).data(d).pold,ar.model(m).data(d).fp');
+    rule_tmp = arSubs(rule_tmp,ar.model(m).data(d).pold,ar.model(m).data(d).fp');
     
     rule_tmp = char(rule_tmp);
     
