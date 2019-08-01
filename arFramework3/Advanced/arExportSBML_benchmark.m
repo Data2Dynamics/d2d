@@ -33,8 +33,12 @@ if (~exist('steadystate','var'))
     end
 end
 
+try
 M = TranslateSBML(which('empty.xml'));
 F = TranslateSBML(which('filled.xml'));
+catch
+    warning('error in libSBML. Probably backwards compatibility issues with old MATLAB version. Should work with 2019a')
+end
 
 M.id = ar.model(m).name;
 if(~isempty(ar.model(m).description))
