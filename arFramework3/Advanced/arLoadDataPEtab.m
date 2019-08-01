@@ -21,6 +21,14 @@ function arLoadDataPEtab(datafilename, m)
 
 global ar;
 
+if ~contains(datafilename,'.tsv')
+    if ~contains(datafilename,'.')
+        datafilename = [datafilename '.tsv'];
+    else
+        error('this file type is not supported!')
+    end
+end
+
 if(~exist('m','var') || isempty(m))
     m = length(ar.model);
 end
