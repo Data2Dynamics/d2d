@@ -44,6 +44,10 @@ for i = 1:length(fns)
     end
 end
 
+if ~isfield(T,'conditionId')
+    T.conditionId = T.conditionID;
+end
+
 for m = 1:length(ar.model)
     for j = 1:length(ar.model(m).data) 
         for i = 1:length(T.conditionId)
