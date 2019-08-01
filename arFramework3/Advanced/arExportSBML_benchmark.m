@@ -282,8 +282,8 @@ end
 fv = ar.model(m).fv;
 fv = arSym(fv);
 % fv = arSubs(fv, ar.model(m).u, ar.model(m).condition(c).fu');
-fv = arSubs(fv, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp');
-fv = arSubs(fv, ar.model(m).t, 'time');
+fv = arSubs(fv, arSym(ar.model(m).condition(c).pold), arSym(ar.model(m).condition(c).fp'));
+fv = arSubs(fv, arSym(ar.model(m).t), arSym('time'));
 
 vcount = 1;
 arWaitbar(0);
@@ -453,10 +453,10 @@ for ju = 1:length(ar.model(m).u)
     
     if ( isActive )
         % replace p with condition specific parameters
-        fu = char(arSubs(fu, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp'));
+        fu = char(arSubs(fu, arSym(ar.model(m).condition(c).pold), arSym(ar.model(m).condition(c).fp')));
         
         % replace time parameters with 'time'
-        fu = char(arSubs(fu, ar.model(m).t, 'time'));
+        fu = char(arSubs(arSym(fu), arSym(ar.model(m).t), arSym('time')));
         ixfun = cell2mat(cellfun(@(x) strfind(fu,x), funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
         if any(ixfun)
             heavisideReplacement = {
@@ -769,11 +769,11 @@ for id = 1:length(ar.model(m).data(d).fy)
     M.rule(ixrule).notes = '';
     M.rule(ixrule).annotation = '';
     M.rule(ixrule).sboTerm = -1;
-    rule_tmp = ar.model(m).data(d).fy{id};
+    rule_tmp = arSym(ar.model(m).data(d).fy{id});
     if(~isempty(ar.model(m).z))
-        rule_tmp = arSubs(rule_tmp,ar.model(m).z,ar.model(m).fz');
+        rule_tmp = arSubs(rule_tmp,arSym(ar.model(m).z),arSym(ar.model(m).fz'));
     end
-    rule_tmp = arSubs(rule_tmp,ar.model(m).data(d).pold,ar.model(m).data(d).fp');
+    rule_tmp = arSubs(rule_tmp,arSym(ar.model(m).data(d).pold),arSym(ar.model(m).data(d).fp'));
     
     rule_tmp = char(rule_tmp);
     if(ar.model(m).data(d).logfitting(id)==1)
@@ -810,9 +810,9 @@ for id = 1:length(ar.model(m).data(d).fystd)
     M.rule(ixrule).notes = '';
     M.rule(ixrule).annotation = '';
     M.rule(ixrule).sboTerm = -1;
-    rule_tmp = ar.model(m).data(d).fystd{id};
+    rule_tmp = arSym(ar.model(m).data(d).fystd{id});
     
-    rule_tmp = arSubs(rule_tmp,ar.model(m).data(d).pold,ar.model(m).data(d).fp');
+    rule_tmp = arSubs(rule_tmp,arSym(ar.model(m).data(d).pold),arSym(ar.model(m).data(d).fp'));
     
     rule_tmp = char(rule_tmp);
     
