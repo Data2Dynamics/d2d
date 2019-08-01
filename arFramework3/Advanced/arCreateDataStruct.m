@@ -31,8 +31,16 @@ fvals = varargin(2:2:end);
 D = arEmptyDataStruct(m);
 
 % fy, fystd, fu are inhereted from the model (like in arLoadData)
-D.fy = ar.model(m).fy;
-D.fystd = ar.model(m).fystd;
+if isfield(ar.model(m),'fy')
+    D.fy = ar.model(m).fy;
+else
+    D.fy = cell(0);
+end
+if isfield(ar.model(m),'fystd')
+    D.fystd = ar.model(m).fystd;
+else
+    D.fystd = cell(0);
+end
 D.fu = ar.model(m).fu;
 
 
