@@ -36,8 +36,7 @@ ar.info.initTime = now;
 arFprintf(1, 'Data 2 Dynamics Software\n');
 arFprintf(1, '(arFramework3, def-version %i, c-version %s)\n', ...
     ar.info.def_version_code, ar.info.c_version_code);
-arFprintf(1, 'Website: http://www.data2dynamics.org\n');
-arFprintf(1, 'Contact: Andreas Raue - andreas.raue@fdm.uni-freiburg.de\n');
+arFprintf(1, 'Website & bug report: http://www.data2dynamics.org\n');
 arFprintf(1, 'Copyright 2016 D2D Development Team. All rights reserved.\n\n');
 
 ar.info.gitCommitHash = arGetGitCommitHash;
