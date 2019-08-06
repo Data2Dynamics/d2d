@@ -220,6 +220,9 @@ end
 %     M.parameter(jp).value = pvalue;
 % end
 
+%paraid = ar.model(m).data.p
+%paraid = ar.model(m).p
+
 for id = 1:length(ar.model(m).data(d).p)
     %id_tmp = id+length(ar.model(m).condition(c).p);
     id_tmp = id;
@@ -248,22 +251,22 @@ for id = 1:length(ar.model(m).data(d).p)
     M.parameter(id_tmp).value = pvalue;
 end
 
-for iY = 1:length(ar.model(m).data(d).y)
-    id_tmp = length(M.parameter)+1;
-    M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
-    M.parameter(id_tmp).metaid = '';
-    M.parameter(id_tmp).notes = '';
-    M.parameter(id_tmp).annotation = '';
-    M.parameter(id_tmp).sboTerm = -1;
-    M.parameter(id_tmp).name = '';
-    M.parameter(id_tmp).id = ar.model(m).data(d).y{iY};
-    M.parameter(id_tmp).units = '';
-    M.parameter(id_tmp).constant = 0;
-    M.parameter(id_tmp).isSetValue = 1;
-    M.parameter(id_tmp).level = 2;
-    M.parameter(id_tmp).version = 4;    
-    M.parameter(id_tmp).value = 0;
-end
+% for iY = 1:length(ar.model(m).data(d).y)
+%     id_tmp = length(M.parameter)+1;
+%     M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
+%     M.parameter(id_tmp).metaid = '';
+%     M.parameter(id_tmp).notes = '';
+%     M.parameter(id_tmp).annotation = '';
+%     M.parameter(id_tmp).sboTerm = -1;
+%     M.parameter(id_tmp).name = '';
+%     M.parameter(id_tmp).id = ar.model(m).data(d).y{iY};
+%     M.parameter(id_tmp).units = '';
+%     M.parameter(id_tmp).constant = 0;
+%     M.parameter(id_tmp).isSetValue = 1;
+%     M.parameter(id_tmp).level = 2;
+%     M.parameter(id_tmp).version = 4;    
+%     M.parameter(id_tmp).value = 0;
+% end
 
 %% rules
 for jr = 1:size(Crules,1)
@@ -377,7 +380,7 @@ for jv = 1:length(ar.model(m).fv)
         vars = setdiff(vars, arSym(ar.model(m).u)); %R2013a compatible
         M.reaction(vcount).modifier = F.reaction(1).modifier;
         if(~isempty(vars))
-            for jmod = 1:length(vars);
+            for jmod = 1:length(vars)
                 M.reaction(vcount).modifier(jmod).typecode = 'SBML_MODIFIER_SPECIES_REFERENCE';
                 M.reaction(vcount).modifier(jmod).metaid = '';
                 M.reaction(vcount).modifier(jmod).notes = '';
