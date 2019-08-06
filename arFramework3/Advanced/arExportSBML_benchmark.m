@@ -231,7 +231,7 @@ for id = 1:length(ar.model(m).data(d).p)
     M.parameter(id_tmp).name = ar.model(m).data(d).p{id};                       
     M.parameter(id_tmp).id = ar.model(m).data(d).p{id};
     M.parameter(id_tmp).units = '';
-    M.parameter(id_tmp).constant = 0;
+    M.parameter(id_tmp).constant = 1;
     M.parameter(id_tmp).isSetValue = 1;
     M.parameter(id_tmp).level = 2;
     M.parameter(id_tmp).version = 4;
@@ -850,17 +850,11 @@ if(a == 1)
 %     else
 %         OutputSBML(M, ['SBML/' ar.model(m).name '_cond_' num2str(c)  '_copasi_l2v4.xml']);
 %     end
-    
 %mine!
-                    if(~exist('./Benchmark_paper/SBML', 'dir'))
-                    mkdir('./Benchmark_paper/SBML')
+                    if(~exist('./SBML_Export', 'dir'))
+                    mkdir('./SBML_Export')
                     end
-                    OutputSBML(M, ['Benchmark_paper/SBML/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
+                    OutputSBML(M, ['SBML_Export/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
 else
     error('%s', b);
 end
-
-
-
-
-
