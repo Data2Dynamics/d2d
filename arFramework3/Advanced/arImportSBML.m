@@ -100,7 +100,10 @@ end
 [~, name] = fileparts(filename);
 new_filename = strrep(name,' ','_');
 new_filename = strrep(new_filename,'-','_');
-fid = fopen([new_filename '.def'], 'w');
+if ~exist([pwd filesep 'Models'],'dir')
+    mkdir([pwd filesep 'Models'])
+end
+fid = fopen(['Models' filesep new_filename '.def'], 'w');
 
 fprintf(fid, 'DESCRIPTION\n');
 if(~isempty(m.name))
@@ -123,7 +126,7 @@ if(~isempty(m.notes))
 end
 
 fprintf(fid, '\nPREDICTOR\n');
-if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && isfield(m.unitDefinition,'unit') && ~isempty(m.unitDefinition.unit) && isfield(m.unitDefinition.unit,'kind') && ~isempty(m.unitDefinition.unit.kind)
+if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && length(m.unitDefinition)<2 && isfield(m.unitDefinition,'unit') && ~isempty(m.unitDefinition.unit) && isfield(m.unitDefinition.unit,'kind') && ~isempty(m.unitDefinition.unit.kind)
     time_unit = m.unitDefinition.unit.kind;
     if (strcmp(time_unit,'s')||strcmp(time_unit,'sec')||strcmp(time_unit,'second'))
         if isfield(m.unitDefinition.unit,'multiplier')

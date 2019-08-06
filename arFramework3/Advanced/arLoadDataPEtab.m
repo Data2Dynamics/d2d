@@ -70,6 +70,7 @@ for iSim = 1:length(uniSim)
     uniObs = regexprep(uniObs,' ','');
     Sd2d.name = char(uniSim(iSim));
     Sd2d.tExp = uniTimes;
+    Sd2d.tUnits = ar.model.tUnits;
     Sd2d.y = uniObs';
     Sd2d.yNames = uniObs';
     Sd2d.yExpRaw = nan(length(uniTimes),length(uniObs));
