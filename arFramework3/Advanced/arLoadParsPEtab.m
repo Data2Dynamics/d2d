@@ -18,8 +18,15 @@ function arLoadParsPEtab(filename)
 
 global ar
 
-T = tdfread(filename);
+if ~contains(filename,'.tsv')
+    if ~contains(filename,'.')
+        filename = [filename '.tsv'];
+    else
+        error('this file type is not supported!')
+    end
+end
 
+T = tdfread(filename);
 [BothPars, ia, ib] = intersect(ar.pLabel,cellstr(T.parameterId));
 
 T.qLog10 = nan(size(T.nominalValue));
