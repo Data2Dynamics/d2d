@@ -99,7 +99,7 @@ else
     M.compartment(1).compartmentType = '';
     M.compartment(1).spatialDimensions = 3;
     M.compartment(1).constant = 1;
-    if ~isempty(ar.model.cUnits)
+    if ~isempty(ar.model(m).cUnits)
         M.compartment(1).units = ar.model(m).cUnits{1,2};
     else
         M.compartment(1).units = '';
