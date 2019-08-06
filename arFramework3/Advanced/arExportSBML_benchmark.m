@@ -468,7 +468,7 @@ for ju = 1:length(ar.model(m).u)
             % replace functions first
             fu = replaceFunctions( fu, ar.config.specialFunc, 0 );
             % replace heavisides and log their positions
-            fu = arSubs(arSym(strrep(fu, 'heaviside', '_potato_')), arSym('_potato_'), 'heaviside');
+            fu = arSubs(arSym(strrep(fu, 'heaviside', 'potato_')), arSym('potato_'), arSym('heaviside'));
             [fu, args] = replaceFunctions( fu, heavisideReplacement, 0 );
 
             % Determine event triggers in here (to make sure SBML resets the solver)
