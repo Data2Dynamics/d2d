@@ -6,14 +6,12 @@ function y = arExportPEtab(dummy)
 
 % Not implemented yet:
 % - Measurement table: preEquilibrationConditionId,
-% observableTransformation, noiseDistribution
 % - Visualization table
-% - Parameter table: priorType, priorParameters
+% - Parameter table: priorType, priorParameters: not yet specified!
 
 global ar
 
 %% Condition and Measurment Table
-
 % Collect conditions
 condPar = {}; condVal = {}; conditionID = {};
 for imodel = 1:length(ar.model)
@@ -91,12 +89,15 @@ for imodel = 1:length(ar.model)
             noisePars_tmp = strcat(noisePars_tmp, repmat(';', [length(noisePars_tmp)-1 1]));
             noiseParameters = repmat({[noisePars_tmp{:}]}, [length(timepoints) 1]);
             
+            obsTrafos = cell(length(timepoints),1);
+            obsTrafos(:) = {'lin'}; obsTrafos(logical(ar.model(imodel).data(idata).logfitting(iy))) = {'log'};
+            
+            noiseDist = cell(length(timepoints),1);
+            noiseDist(:) = {'normal'};
+            
             measT = [measT; table(observableIDs, measurements, timepoints, ...
-                simulationConditionIDs, observableParameters, noiseParameters)];
-
+                simulationConditionIDs, observableParameters, noiseParameters, obsTrafos, noiseDist)];
         end
-        
-        
     end
 end
 
@@ -107,7 +108,8 @@ condT = [table(conditionID') condT];
 condT.Properties.VariableNames{1} = 'conditionId';
 
 measT.Properties.VariableNames = {'observableId', 'simulationConditionId', ...
-    'measurement', 'time', 'observableParameters', 'noiseParameters'};
+    'measurement', 'time', 'observableParameters', 'noiseParameters',...
+    'observableTransformation', 'noiseDistribution'};
 
 writetable(condT, 'peTAB_conditions.tsv', 'Delimiter', '\t', 'FileType', 'text')
 writetable(measT, 'peTAB_measurments.tsv', 'Delimiter', '\t', 'FileType', 'text')
@@ -141,7 +143,7 @@ parT = table(parameterID(:), parameterName(:), parameterScale(:), ...
     lowerBound(:), upperBound(:), nominalValue(:), estimate(:));
 
 parT.Properties.VariableNames = {'parameterID', 'parameterName', ...
-    'parameterScale', 'lowerBound', 'upperBound', 'nominalValue', 'estimate'};
+    'parameterScale', 'lowerBound', 'upperBound', 'nominalValue', 'estimate',};
 
 writetable(parT, 'peTAB_parameters.tsv', 'Delimiter', '\t', 'FileType', 'text')
 
