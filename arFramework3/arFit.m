@@ -78,7 +78,11 @@
 function varargout = arFit(varargin)
 
 global ar
+% this struct is used to store information of individual fits
+% a global variable is used to enable extension of the stored information
+% e.g. by using global fit in snls.m
 global fit
+fit = struct; % overwrite old fit struct
 
 if(nargin==0)
     qglobalar = true;
@@ -858,6 +862,9 @@ end
 % log fitting
 function arLogFit(ar)
 
+% this struct is used to store information of individual fits
+% a global variable is used to enable extension of the stored information
+% e.g. by using global fit in snls.m
 global fit
 
 fit.fevals = fit.fevals + 1;
@@ -887,6 +894,8 @@ global ar
 
 if(ar.config.optimizer ==1)
     fn = {'iteration','funccount','stepsize','firstorderopt','cgiterations','positivedefinite','ratio','degenerate','trustregionradius','resnorm','gradient_norm'};
+else
+    error('Behaviour that should be executed when ar.config.logfitting = 1 is not defined for the selected optimization algorithm.');
 end
 
 optimValues.gradient_norm = norm(optimValues.gradient);

@@ -1,6 +1,7 @@
 # Data2Dynamics Software
 
 **Contact:** Andreas Raue - <andreas.raue@fdm.uni-freiburg.de>
+(for support issues, please use the issues and forum, thanks!)
 
 **Cite:** 
 
@@ -34,7 +35,7 @@ Some special features:
 
 * Identification of informative experimental designs 
 
-* The software is open source and free for non-commercial usage.
+* The software is open source and free for non-commercial usage and supports parallelization
 
 A more comprehensive description of features is available [features page](https://github.com/Data2Dynamics/d2d/wiki/Features) in the [Wiki](https://github.com/Data2Dynamics/d2d/wiki/Home).
 

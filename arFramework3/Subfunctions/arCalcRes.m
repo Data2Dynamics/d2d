@@ -82,7 +82,7 @@ if isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fu
                 [tempres,temptype,tempsres] = feval( ar.config.user_residual_fun.fn{jr} );
                 
                 if length(tempres)~=size(tempsres,1)
-                    error( 'Length of residual %s (res) does not match the length of its residual sensitivities (sres)', ar.config.user_residual_fun.name(jr) );
+                    error( 'Length of residual %s (res) does not match the length of its residual sensitivities (sres)', ar.config.user_residual_fun.name{jr} );
                 end
             
                 ar.res_user.res = [ar.res_user.res, tempres];

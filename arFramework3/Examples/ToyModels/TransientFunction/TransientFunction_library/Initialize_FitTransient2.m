@@ -2,13 +2,16 @@
 % restriction, e.g. if many data points are available. Then boundfactor can
 % be set to >1.
 
-function Initialize_FitTransient2(boundfactor,ms)
+function Initialize_FitTransient2(boundfactor,ms,qPositive)
 global ar
+if ~exist('qPositive','var') || isempty(qPositive)
+    qPositive = false;  % Is the truth known to be positive?
+end
 if ~exist('boundfactor','var') || isempty(boundfactor)
     boundfactor = 1;  % standard bounds, designed for experimetnal data    
 end
 if ~exist('ms','var') || isempty(ms)
-    ms = 1:length(ar.model);  % standard bounds, designed for experimetnal data    
+    ms = 1:length(ar.model);    
 end
 
 ar.fit_transient = struct;
@@ -21,6 +24,8 @@ ar.fit_transient.indp.amp_trans = strmatch('amp_trans',ar.pLabel);
 ar.fit_transient.indp.timescale_sust = strmatch('timescale_sust',ar.pLabel);
 ar.fit_transient.indp.timescale_trans = strmatch('timescale_trans',ar.pLabel);
 ar.fit_transient.indp.sd = strmatch('sd_TF',ar.pLabel);
+ar.fit_transient.indp.dummy = strmatch('init____dummy___',ar.pLabel);
+
 
 ar.fit_transient.indp.all = [ar.fit_transient.indp.toffset,...
     ar.fit_transient.indp.amp_sust,...
@@ -74,6 +79,10 @@ for m=ms
     end
 end
 
+% dummy
+ar.qFit(ar.fit_transient.indp.dummy) = 0;
+
+
 % signums are constants and non-log:
 ar.qFit(ar.fit_transient.indp.signum) = 2;
 ar.qLog10(ar.fit_transient.indp.signum) = 0;
@@ -96,7 +105,7 @@ for m=ms
 end
 
 
-[ar.fit_transient.bounds,ar.fit_transient.boundsNeg] = DefaultLbUbTransient2;
+[ar.fit_transient.bounds,ar.fit_transient.boundsNeg] = DefaultLbUbTransient2(qPositive);
 
 ind = setdiff(ar.fit_transient.indp.all,ar.fit_transient.indp.signum);
 for i=1:length(ind)

@@ -159,7 +159,7 @@ for m=1:length(ar.model)
             checksum_cond = addToCheckSum(ar.model(m).z, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).fz, checksum_cond);
             checksum_cond = addToCheckSum(ar.model(m).data(d).fp(qdynparas), checksum_cond);
-            if isfield( ar.model(m), 'reducedForm' ) && ( ar.model(m).reducedForm == 1 )
+            if isfield( ar.model(m), 'reducedForm' ) && ~isempty( ar.model(m).reducedForm ) && ( ar.model(m).reducedForm == 1 )
                 % Store whether we express the model in totals or not
                 for jt = 1 : numel( ar.model(m).removedStates )
                     checksum_cond = addToCheckSum(ar.model(m).removedStates(jt).expressInTotal, checksum_cond);
@@ -440,7 +440,7 @@ for m=1:length(ar.model)
         checksum_cond = addToCheckSum(ar.model(m).fz, checksum_cond);
         checksum_cond = addToCheckSum(ar.model(m).fp, checksum_cond);
         
-        if isfield( ar.model(m), 'reducedForm' ) && ( ar.model(m).reducedForm == 1 )
+        if isfield( ar.model(m), 'reducedForm' ) && ~isempty( ar.model(m).reducedForm ) && ( ar.model(m).reducedForm == 1 )
             % Store whether we express the model in totals or not
             for jt = 1 : numel( ar.model(m).removedStates )
                 checksum_cond = addToCheckSum(ar.model(m).removedStates(jt).expressInTotal, checksum_cond);

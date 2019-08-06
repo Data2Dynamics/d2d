@@ -188,9 +188,11 @@ function PLEs = loadSingle( PLEs, directory, doFilterProfile, doAppendProfiles)
         fprintf( 'Found profile for %s\n', curPLE.p_labels{filled(b)} );
         
         appending = false;
-        if sum(strcmp(PLEs.donePars, curPLE.p_labels{filled(b)})) ~= 0 && doAppendProfiles
+        if isfield(PLEs, 'donePars') && sum(strcmp(PLEs.donePars, curPLE.p_labels{filled(b)})) ~= 0 && doAppendProfiles
             appending = true;
             fprintf('Combining profiles...\n')
+        else
+            PLEs.donePars = {};
         end
         PLEs.donePars{end + 1} = curPLE.p_labels{filled(b)};
         
@@ -228,12 +230,28 @@ function PLEs = copyMatrices( PLEs, curPLE, names, ID, ID_target, N, available, 
         if ~isfield( PLEs, names{j} )
             PLEs.(names{j}){ID_target} = [];
         end
-        PLEs.(names{j}){ID_target}(:, available) = curPLE.(names{j}){ID}(N,idxInCurPLE(available)) + 0;
+        try
+            PLEs.(names{j}){ID_target}(:, available) = curPLE.(names{j}){ID}(N,idxInCurPLE(available)) + 0;
+        catch
+            warning('Failed copying submatrix for %s', names{j});
+        end
     end
 end
 
-function PLEs = copyScalars( PLEs, curPLE, names, ID, ID_target )
+function PLEs = copyScalars( PLEs, curPLE, names, ID, ID_target )    
     for j = 1 : length( names )
+        % Check if the field exists; if not => create!
+        if ( ~isfield(PLEs, names{j}) )
+            PLEs.(names{j}) = curPLE.(names{j}) + 0;
+        else
+            % Check if we have too small vectors, if so append them with the struct being loaded
+            sourceSize = numel(PLEs.(names{j}));
+            targetSize = numel(curPLE.(names{j}));
+    
+            if sourceSize < targetSize
+                PLEs.(names{j})(sourceSize+1:targetSize) = curPLE.(names{j})(sourceSize+1:targetSize) + 0;
+            end
+        end    
         PLEs.(names{j})(ID_target) = curPLE.(names{j})(ID) + 0;
     end
 end

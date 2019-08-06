@@ -63,10 +63,12 @@ try
                 if(sum(qp)>0)
                     ar.model(jm).data(jd).syExpSimuFD(:,:,qp) = ar.model(jm).data(jd).yExpSimu;
                     ar.model(jm).data(jd).systdExpSimuFD(:,:,qp) = ar.model(jm).data(jd).ystdExpSimu;
-                    ar.model(jm).data(jd).sresFD(:,:,qp) = ar.model(jm).data(jd).res;
-                    if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
-                            (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
-                        ar.model(jm).data(jd).sreserrFD(:,:,qp) = ar.model(jm).data(jd).reserr;
+                    if ~isempty( ar.model(jm).data(jd).res )
+                        ar.model(jm).data(jd).sresFD(:,:,qp) = ar.model(jm).data(jd).res;
+                        if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
+                                (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
+                            ar.model(jm).data(jd).sreserrFD(:,:,qp) = ar.model(jm).data(jd).reserr;
+                        end
                     end
                 end
             end
@@ -101,12 +103,14 @@ try
                         (ar.model(jm).data(jd).yExpSimu - ar.model(jm).data(jd).syExpSimuFD(:,:,qp)) / dp;
                     ar.model(jm).data(jd).systdExpSimuFD(:,:,qp) = ...
                         (ar.model(jm).data(jd).ystdExpSimu - ar.model(jm).data(jd).systdExpSimuFD(:,:,qp)) / dp;
-                    ar.model(jm).data(jd).sresFD(:,:,qp) = ...
-                        (ar.model(jm).data(jd).res - ar.model(jm).data(jd).sresFD(:,:,qp)) / dp;
-                    if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
-                            (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
-                        ar.model(jm).data(jd).sreserrFD(:,:,qp) = ...
-                            (ar.model(jm).data(jd).reserr - ar.model(jm).data(jd).sreserrFD(:,:,qp)) / dp;
+                    if ~isempty( ar.model(jm).data(jd).res )
+                        ar.model(jm).data(jd).sresFD(:,:,qp) = ...
+                            (ar.model(jm).data(jd).res - ar.model(jm).data(jd).sresFD(:,:,qp)) / dp;
+                        if( (ar.config.useFitErrorMatrix==0 && ar.config.fiterrors==1) || ...
+                                (ar.config.useFitErrorMatrix==1 && ar.config.fiterrors_matrix(jm,jd)==1) )
+                            ar.model(jm).data(jd).sreserrFD(:,:,qp) = ...
+                                (ar.model(jm).data(jd).reserr - ar.model(jm).data(jd).sreserrFD(:,:,qp)) / dp;
+                        end
                     end
                 end
             end

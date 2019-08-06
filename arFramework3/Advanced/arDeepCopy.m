@@ -38,10 +38,10 @@ function copy = arDeepCopy(in)
         end
     else
         if ( iscell( in ) )
+            copy = cell(size(in));
             if ( ~isempty( in ) )
-                copy = cell(size(in));
                 for b = 1 : length( in )
-                        copy{b} = arDeepCopy(in{b});
+                    copy{b} = arDeepCopy(in{b});
                 end
             else
                 copy = {};

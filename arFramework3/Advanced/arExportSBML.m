@@ -35,7 +35,7 @@ Crules = {};
 M = TranslateSBML(which('empty.xml'));
 F = TranslateSBML(which('filled.xml'));
 
-M.id = ar.model(m).name;
+M.id = IDify(ar.model(m).name);
 if(~isempty(ar.model(m).description))
     M.notes = ar.model(m).description{1};
 end
@@ -72,10 +72,14 @@ if(~isempty(ar.model(m).c))
                 pvalue = ar.model(m).condition(c).fp{qp};
                 M.compartment(jc).size = str2num(pvalue); %#ok str2num also identifies brackets, in which case str2double simply returns NaN
                 if(~isnan(str2num(pvalue)))
-                    M.compartment(jc).size = pvalue;
+                    M.compartment(jc).size = str2num(pvalue);
                 else
-                    M.compartment(jc).size = 1;
-                    warning('Compartment %s is a variable expression %s. This case is currently not handled. Setting volume to unity.', ar.model(m).pc{jc}, pvalue);
+                    try
+                        M.compartment(jc).size = double(subs(ar.model(m).condition(c).fp{qp}, ar.pLabel, 10.^ar.p.*ar.qLog10 + ar.p.*(1-ar.qLog10)));
+                        warning('Compartment %s is a variable expression %s. This case is currently in beta status.', ar.model(m).pc{jc}, M.compartment(jc).size);
+                    catch
+                        warning('Failure converting the variable expression %s.', ar.model(m).pc{jc}, M.compartment(jc).size);
+                    end
                 end
             else
                 pvalue = str2num(ar.model(m).pc{jc}); %#ok
@@ -252,10 +256,10 @@ for jv = 1:length(ar.model(m).fv)
         M.reaction(vcount).isSetFast = 0;
         M.reaction(vcount).level = 2;
         M.reaction(vcount).version = 4;
-        
+                
         if(isfield(ar.model(m),'v') && ~isempty(ar.model(m).v))
             % replace spaces with underscores
-            M.reaction(vcount).id = sprintf( 'v%d_%s', jv, strrep(ar.model(m).v{jv},' ','_') );
+            M.reaction(vcount).id = sprintf( 'v%d_%s', jv, IDify(ar.model(m).v{jv}) );
         else
             M.reaction(vcount).id = sprintf('reaction%i', jv);
         end
@@ -312,13 +316,13 @@ for jv = 1:length(ar.model(m).fv)
             end
         end
         
-        vars = symvar(ratetemplate);
+        vars = setdiff(symvar(ratetemplate), sym(ar.model(m).t));
         vars = setdiff(vars, sym(ar.model(m).x(ar.model(m).N(:,jv)<0))); %R2013a compatible
         vars = setdiff(vars, sym(ar.model(m).condition(c).p)); %R2013a compatible
         vars = setdiff(vars, sym(ar.model(m).u)); %R2013a compatible
         M.reaction(vcount).modifier = F.reaction(1).modifier;
         if(~isempty(vars))
-            for jmod = 1:length(vars);
+            for jmod = 1:length(vars)
                 M.reaction(vcount).modifier(jmod).typecode = 'SBML_MODIFIER_SPECIES_REFERENCE';
                 M.reaction(vcount).modifier(jmod).metaid = '';
                 M.reaction(vcount).modifier(jmod).notes = '';
@@ -386,7 +390,7 @@ for ju = 1:length(ar.model(m).u)
     
     fu = sym(ar.model(m).condition(c).fu{ju}); % current input
     
-    isActive = ~(str2double(ar.model(m).condition(c).fu{ju}) == 0);
+    isActive = 1; %~(str2double(ar.model(m).condition(c).fu{ju}) == 0);
     if(contains(ar.model(m).fu{ju},'spline'))
         warning('Spline functions are not supported as d2d export, yet!\n')
        isActive = false; 
@@ -397,7 +401,7 @@ for ju = 1:length(ar.model(m).u)
         fu = char(subs(fu, ar.model(m).condition(c).pold, ar.model(m).condition(c).fp'));
         
         % replace time parameters with 'time'
-        fu = char(subs(fu, ar.model(m).t, 'time'));
+        % fu = char(subs(fu, ar.model(m).t, 'time'));
         ixfun = cell2mat(cellfun(@(x) strfind(fu,x), funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
         if any(ixfun)
             heavisideReplacement = {
@@ -428,7 +432,7 @@ for ju = 1:length(ar.model(m).u)
             M.rule(ixrule).species = '';
             M.rule(ixrule).compartment = '';
             M.rule(ixrule).name = '';
-            M.rule(ixrule).units = '';
+            M.rule(ixrule).units = ar.model(m).uUnits{ju,2};
             M.rule(ixrule).level = 2;
             M.rule(ixrule).version = 4;
             if ( 0 )
@@ -441,7 +445,7 @@ for ju = 1:length(ar.model(m).u)
                     M.event(ixevent).annotation = '';
                     M.event(ixevent).sboTerm = -1;
                     M.event(ixevent).name = ar.model(m).u{ju};
-                    M.event(ixevent).id = sprintf('e%d_%s_event', ixevent, ar.model(m).u{ju});
+                    M.event(ixevent).id = sprintf('e%d_%s_event', ixevent, IDify(ar.model(m).u{ju}));
                     M.event(ixevent).useValuesFromTriggerTime = 1;
                     M.event(ixevent).trigger.typecode =  'SBML_TRIGGER';
 
@@ -543,11 +547,13 @@ if ( numel(M.event) > 0 )
 end
 
 % assign time symbol
-%M.time_symbol = ar.model(m).t;
+M.time_symbol = ar.model(m).t;
 
 M.unitDefinition = F.unitDefinition;
 if(strcmp(ar.model(m).tUnits{2},'h'))
     M.unitDefinition(1).unit(1).multiplier = 3600;
+elseif(strcmp(ar.model(m).tUnits{2},'m') || strcmp(ar.model(m).tUnits{2},'min'))
+    M.unitDefinition(1).unit(1).multiplier = 60;
 elseif(strcmp(ar.model(m).tUnits{2},'s') || strcmp(ar.model(m).tUnits{2},'sec'))
     M.unitDefinition(1).unit(1).multiplier = 1;
 end
@@ -565,6 +571,9 @@ else
     error('%s', b);
 end
 
+% Convert expression to SBML compatible ID
+function str = IDify(str)
+    str = regexprep(str, '[^_|[a-zA-Z][_0-9a-ZA-Z]*]', '_');
 
 
 

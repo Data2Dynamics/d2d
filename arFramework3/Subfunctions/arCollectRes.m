@@ -72,6 +72,8 @@ sresindex = 1;
 % fit errors?
 fiterrors = ( ar.config.fiterrors == 1  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0 ) );
 
+ar.sres_size = []; % for NEB merger
+
 % data
 for jm = 1:length(ar.model)
     if(isfield(ar.model(jm), 'data'))
@@ -133,6 +135,31 @@ for jm = 1:length(ar.model)
             end
         end
     end
+    
+    %  NEB merger
+    if(isfield(ar, 'merger'))
+        if(isfield(ar.merger, 'neb'))
+            if(isfield(ar.merger.neb, 'state') && strcmp(ar.merger.neb.state,'on'))
+
+                ar.sres_size(jm) = sresindex;
+
+                if jm > 1 && jm < length(ar.model)
+                    r = ar.p(ar.merger.neb.ps_index(jm+1,:)) - ar.p(ar.merger.neb.ps_index(jm-1,:));
+                    grad = ar.sres([ar.sres_size(jm-1):ar.sres_size(jm)-1],ar.merger.neb.ps_index(jm,:));
+
+                    proj = nan(size(grad));
+                    for ig = 1: size(grad,1)
+                        proj(ig,:) = (sum(grad(ig,:) .* r)./norm(r) ).* r ./norm(r);
+                    end
+
+                    ar.sres([ar.sres_size(jm-1):ar.sres_size(jm)-1] ,ar.merger.neb.ps_index(jm,:)) ...
+                        = grad-proj;
+
+                end
+            end
+        end
+    end
+
 end
 
 % constraints

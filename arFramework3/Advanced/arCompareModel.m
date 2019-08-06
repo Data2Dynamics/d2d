@@ -122,7 +122,7 @@ end
                     if ( ~opts.absrsq )
                         if ( ~opts.relerr )
                             % Use change in chi2 as measure
-                            if( ar1.config.fiterrors==1 || sum(ar1.qFit(ar1.qError==1)==1)>0 ) 
+                            if( ar1.config.fiterrors==1 || (ar1.config.fiterrors==0 && sum(ar1.qFit(ar1.qError==1)<2)>0) ) 
                                 changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + ar1.model(m1).data(I1(c)).chi2err(b);
                             end
                             changeMatrix( a, obsIndex ) = changeMatrix( a, obsIndex ) + ar1.model(m1).data(I1(c)).chi2(b);

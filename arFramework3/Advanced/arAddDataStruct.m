@@ -1,7 +1,7 @@
-%  arAddDataStruct(D,[m])
+%   arAddDataStruct(D, [m])
 % 
 % This function adds a data struct and appends it to ar.model(m)
-% This function might serve as a replacement for arLoadData. Compiling has
+% This function might serve as a replacement or arLoadData. Compiling has
 % to be performed after adding the/all data structs.
 % 
 % 
@@ -10,7 +10,7 @@
 %           Default: m = length(ar.model) [like in arLoadData]
 % 
 
-function arAddDataStruct(D,m)
+function arAddDataStruct(D, m)
 global ar
 
 if ~exist('m','var') || isempty(m)
@@ -36,4 +36,11 @@ ar.model(m).plot(end).dLink = d;
 ar.model(m).plot(end).ny = length(ar.model(m).data(d).y);
 ar.model(m).plot(end).condition = {};
 
-end
+
+% remember the function call
+ar.setup.commands{end+1} = mfilename; % this file name
+ar.setup.arguments{end+1} = {D,m}; % 
+ar.setup.datafiles{end+1} = '';
+ar.setup.modelfiles{end+1} = '';
+
+

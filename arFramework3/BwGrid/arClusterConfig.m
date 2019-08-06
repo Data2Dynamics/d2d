@@ -34,6 +34,7 @@ conf.d2dpath = fileparts(which('arInit.m'));
 
 conf.n_inNode = 5; % default, can be overwritten (I guess that the optimal number depends on how many conditions are in the model and how many cores are available on a node)
 conf.n_calls = 10; % default, can be overwritten, coincides with the number of nodes
+conf.walltime = '01:23:00:00';
 
 conf.arg1 = '1234'; % placeholder for arguments/variables passed to the matlab file
 

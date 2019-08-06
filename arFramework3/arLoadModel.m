@@ -177,8 +177,14 @@ while(~strcmp(C{1},'INPUTS'))
     if(length(cell2mat(C{1}))<2)
         arParsingError( fid, 'STATE names need to be longer than 1');
     end
-    if(isempty(symvar(arMyStr2Sym(C{1}))))
-        arParsingError( fid, 'STATE name ''%s'' is reserved by MATLAB. Please rename!',cell2mat(C{1}));
+    try
+        if(isempty(symvar(arMyStr2Sym(C{1}))))
+            arParsingError( fid, 'STATE name ''%s'' is reserved by MATLAB. Please rename!',cell2mat(C{1}));
+        end
+    catch
+        C
+        C{1}
+        arParsingError( fid, 'Malformed input in STATE section.' );
     end
     
     ar.model(m).x(end+1) = C{1};
@@ -680,8 +686,14 @@ ar.model(m).fx_par = cell(length(ar.model(m).x),1);
 %end
 ar.model(m).Cm = C;
 ar.model(m).Cm_par = C_par;
-tmpfx = (arMyStr2Sym(ar.model(m).N).* arMyStr2Sym(C)) * arMyStr2Sym(ar.model(m).fv);
-tmpfx_par = (arMyStr2Sym(ar.model(m).N).* arMyStr2Sym(C_par)) * arMyStr2Sym(ar.model(m).fv);
+try
+    fvSym = arMyStr2Sym(ar.model(m).fv);
+catch
+    error('Invalid expression in  expression equations:\n%s\n', sprintf('%s\n', ar.model(m).fv{:}));
+end
+    
+tmpfx = (arMyStr2Sym(ar.model(m).N).* arMyStr2Sym(C)) * fvSym;
+tmpfx_par = (arMyStr2Sym(ar.model(m).N).* arMyStr2Sym(C_par)) * fvSym;
 
 for j=1:length(ar.model(m).x) % for every species j
     if ~isempty(tmpfx)
@@ -917,7 +929,11 @@ if ( strcmp(C{1},'SUBSTITUTIONS') )
     % Perform selfsubstitutions
     if ( ~isempty(fromSubs) )
         substitutions = 1;
-        toSubs = arSubsRepeated( toSubs, fromSubs, toSubs, str2double(matVer.Version) );
+        try
+            toSubs = arSubsRepeated( toSubs, fromSubs, toSubs, str2double(matVer.Version) );
+        catch
+            arParsingError( fid,  'Error parsing substitution. Check the following expression for errors:\n%s', sprintf('%s\n', toSubs{:}) );
+        end
     end
 end
 

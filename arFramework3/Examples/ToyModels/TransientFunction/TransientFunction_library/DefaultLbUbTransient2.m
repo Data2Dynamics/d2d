@@ -13,8 +13,11 @@
 % y2 = amp_sust.*(1-exp(-tt./timescale_sust));
 % y = y1+y2+offset_TF;
 
-function [bounds,boundsNegative] = DefaultLbUbTransient2
+function [bounds,boundsNegative] = DefaultLbUbTransient2(qPositive)
 global ar
+if ~exist('qPositive','var') || isempty(qPositive)
+    qPositive = false;  % Is the truth known to be positive?
+end
 
 bounds.pLabel = ar.pLabel;
 bounds.lb = ar.lb;
@@ -82,10 +85,15 @@ indOffset = ar.fit_transient.indp.offset;
 for i=1:length(indOffset)
     [t,y,D] = getData(ar.pLabel{indOffset(i)});
     bounds.lb(indOffset(i)) = nanmin(y)-0.5*D;
+%          bounds.lb(indOffset(i)) = max(0, bounds.lb(indOffset(i)));
+    
     bounds.ub(indOffset(i)) = nanmax(y);
     if(ar.qLog10(indOffset(i))==1)
         bounds.lb(indOffset(i)) = log10(bounds.lb(indOffset(i)));
         bounds.ub(indOffset(i)) = log10(bounds.ub(indOffset(i)));
+    elseif qPositive
+        bounds.lb(indOffset(i)) = max(0,bounds.lb(indOffset(i)));
+        bounds.ub(indOffset(i)) = max(0,bounds.ub(indOffset(i)));
     end
 end
 if(sum(ar.qLog10(indOffset(i)))>0)
@@ -165,8 +173,38 @@ end
 boundsNegative = bounds;
 
 if(~isempty(indOffset))
-    boundsNegative.lb(indOffset) = nanmin(y);
-    boundsNegative.ub(indOffset) = nanmax(y)+0.5*D;
+    ub_unlog = NaN(size(indOffset));
+    for i=1:length(indOffset)
+        if(ar.qLog10(indOffset(i))==1)
+            boundsNegative.lb(indOffset(i)) = log10(nanmin(y));
+            boundsNegative.ub(indOffset(i)) = log10(nanmax(y)+0.5*D);
+            ub_unlog(i) = 10.^boundsNegative.ub(indOffset(i));
+        else
+            boundsNegative.lb(indOffset(i)) = nanmin(y);
+            boundsNegative.ub(indOffset(i)) = nanmax(y)+0.5*D;
+            if qPositive
+                boundsNegative.lb(indOffset(i)) = max(0,boundsNegative.lb(indOffset(i)));
+                boundsNegative.ub(indOffset(i)) = max(0,boundsNegative.ub(indOffset(i)));
+            end
+            ub_unlog(i) = boundsNegative.ub(indOffset(i));            
+        end
+    end
+    max_ub_offset = max(ub_unlog);
+else
+    max_ub_offset = Inf;
+end
+
+ind = [ar.fit_transient.indp.amp_sust,ar.fit_transient.indp.amp_trans];
+if(~isempty(ind))
+    for i=1:length(ind)
+        if(ar.qLog10(ind(i))==0) && qPositive
+            boundsNegative.lb(ind(i)) = min(max_ub_offset,boundsNegative.lb(ind(i)));
+            boundsNegative.ub(ind(i)) = min(max_ub_offset,boundsNegative.ub(ind(i)));
+        elseif qPositive  % log
+            boundsNegative.lb(ind(i)) = max(-10,log10(min(max_ub_offset,10^boundsNegative.lb(ind(i)))));
+            boundsNegative.ub(ind(i)) = max(-10,log10(min(max_ub_offset,10^boundsNegative.ub(ind(i)))));
+        end
+    end
 end
 
 %% check:

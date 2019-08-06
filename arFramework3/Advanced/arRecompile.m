@@ -6,13 +6,14 @@
 %
 % sameParameterSettings     [true] If true, parameter info like (ar.p, ar.lb,...)
 %                           will be conserved by calling arImportPars to copy parameter infos.
-% varargin                  These arguments are handed over to arCompile
+% varargin                  These arguments are handed over to arCompileAll
+%                           In this case, the old commands are overwritten!
 %
 % Note that model properties cannot be completely taken over! Only model 
 % parameters, bounds, qFit, qLog10 etc are taken over by default using arImportPars.m
 % Alternatively set argument sameParameterSettings to false.
 %
-% see also arCompile 
+% See also arCompileAll 
 
 function arRecompile(sameParameterSettings, varargin)
 if ~exist('sameParameterSettings','var') || isempty(sameParameterSettings)
@@ -25,9 +26,14 @@ if isfield(ar,'setup')  % only available in higher verions
     arIn = arDeepCopy(ar);
     
     try
-        for i=1:length(arIn.setup.commands)
+        for i=1:length(arIn.setup.commands)                                
             if ~isempty(arIn.setup.arguments{i}) && iscell(arIn.setup.arguments{i})
-                if ~isempty(strfind(arIn.setup.commands{i},'arLoadData'))
+                oldargs = arIn.setup.arguments{i};
+                if strcmp(arIn.setup.commands{i},'arCompileAll')==1 && ~isempty(varargin)
+                    fprintf('Overwriting old arguments of arCompileAll by varargin...\n');
+                    args = varargin;
+                    oldargs = cell(0); % overwrite them
+                elseif ~isempty(strfind(arIn.setup.commands{i},'arLoadData'))
                     if isdir(arIn.setup.backup_data_folder{i}{1}) % global path exist
                         args = {'DataPath',arIn.setup.backup_data_folder{i}{1}};
                     else % use the local path
@@ -44,7 +50,7 @@ if isfield(ar,'setup')  % only available in higher verions
                 else
                     args = cell(0);
                 end
-                feval(arIn.setup.commands{i},arIn.setup.arguments{i}{:},args{:}); % function call
+                feval(arIn.setup.commands{i},oldargs{:},args{:}); % function call
             else
                 eval(arIn.setup.commands{i})  % no function call
             end

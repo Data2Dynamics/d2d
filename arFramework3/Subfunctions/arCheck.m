@@ -75,6 +75,9 @@ end
 if(exist('arFitLhsBwCluster','file') == 0)
      addpath([ar_path '/BwGrid']);
 end
+if(exist('arNEB','file') == 0)
+     addpath([ar_path '/NEB']);
+end
 
 warning('off','MATLAB:rmpath:DirNotFound')
 
