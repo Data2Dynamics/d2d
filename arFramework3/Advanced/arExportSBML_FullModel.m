@@ -1,23 +1,15 @@
-% function arExportSBML_datamodel(m, d, steadystate)
+% function arExportSBML_FullModel(m)
 %
 % formerly arExportSBML_benchmark
 %
 % export single data file of model to SBML using libSBML
 %
 % m:            model index
-% d:            data index
-% steadystate:  prequilibrate condition as in ar file
-%
-%%% Differences to arExportSBML: %%%
-% Observation functions are written out via assignment rules. If the
-% observation function is log-transformed in ar, the log trafo will be
-% written into SBML as well.
 
-function arExportSBML_datamodel(m, d, steadystate)
+function arExportSBML_FullModel(m,steadystate)
 
 global ar
 
-c = ar.model(m).data(d).cLink;
 % simulate once for initial values
 arSimu(0,1,0)
 
@@ -48,21 +40,21 @@ if(~isempty(ar.model(m).description))
 end
 
 
-[M] = GetCompartments(M,c,m);
+[M] = GetCompartments(M,m);
 
-[M,Crules] = GetSpecies(M,c,m,steadystate);
+[M,Crules] = GetSpecies(M,m);
 
-[M] = GetParameters(M,m,d);
+[M] = GetParameters(M,m);
 
 [M] = GetRules(M,Crules);
 
-[M] = GetReactions(M,F,c,m,copasi);
+[M] = GetReactions(M,F,m,copasi);
 
-[M] = GetInputs(M,F,c,m,d);
+[M] = GetInputs(M,F,m);
 
-[M] = GetObservables(M,m,d);
+[M] = GetObservables(M,m);
 
-[M] = GetErrors(M,m,d);
+[M] = GetErrors(M,m);
 
 
 arWaitbar(-1);
@@ -80,7 +72,7 @@ if(a == 1)
     if(~exist('./SBML_Export', 'dir'))
         mkdir('./SBML_Export')
     end
-    OutputSBML(M, ['SBML_Export/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
+    OutputSBML(M, ['SBML_Export/model' num2str(m) '_l2v4.xml']);
 else
     error('%s', b);
 end
@@ -91,7 +83,7 @@ end
 
 
 %% compartements
-function [M] = GetCompartments(M,c,m)
+function [M] = GetCompartments(M,m)
     global ar
     if(~isempty(ar.model(m).c))
         for jc = 1:length(ar.model(m).c)
@@ -124,17 +116,11 @@ function [M] = GetCompartments(M,c,m)
                 end
                 M.compartment(jc).size = pvalue;
             elseif(sum(qp)==0)
-                qp = ismember(ar.model(m).condition(c).pold, ar.model(m).pc{jc}); %R2013a compatible
-                if(sum(qp)==1)
-                    pvalue = ar.model(m).condition(c).fp{qp};
-                    M.compartment(jc).size = str2num(pvalue); %#ok str2num also identifies brackets, in which case str2double simply returns NaN
+                pvalue = str2num(ar.model(m).pc{jc}); %#ok
+                if(~isnan(pvalue))
+                    M.compartment(jc).size = pvalue;
                 else
-                    pvalue = str2num(ar.model(m).pc{jc}); %#ok
-                    if(~isnan(pvalue))
-                        M.compartment(jc).size = pvalue;
-                    else
-                        error('%s not found', ar.model(m).pc{jc});
-                    end
+                    error('%s not found', ar.model(m).pc{jc});
                 end
             else
                 error('%s not found', ar.model(m).pc{jc});
@@ -167,20 +153,13 @@ end
 
 
 
-function [M,Crules] = GetSpecies(M,c,m,steadystate)
+function [M,Crules] = GetSpecies(M,m)
     global ar
 
     %% species
     Crules = {};
 
-    simulated_ss = 0;
-    if ( steadystate )
-        if (isfield(ar.model(m).condition(c),'ssLink') && ~isempty( ar.model(m).condition(c).ssLink ) )
-            warning( 'Using simulated steady state values as initial condition (non-parametric)' );
-            x_ss = ar.model(m).ss_condition(ar.model(m).condition(c).ssLink).xFineSimu(end,:);
-            simulated_ss = 1;
-        end
-    end
+
     for jx = 1:length(ar.model(m).x)
         M.species(jx).typecode = 'SBML_SPECIES';
         M.species(jx).metaid = '';
@@ -217,33 +196,30 @@ function [M,Crules] = GetSpecies(M,c,m,steadystate)
 
         qp = ismember(ar.pLabel, ar.model(m).px0{jx}); %R2013a compatible
 
+        simulated_ss = 0;
+%         if ( steadystate )
+%             if (isfield(ar.model(m).condition(c),'ssLink') && ~isempty( ar.model(m).condition(c).ssLink ) )
+%                 warning( 'Using simulated steady state values as initial condition (non-parametric)' );
+%                 x_ss = ar.model(m).ss_condition(ar.model(m).condition(c).ssLink).xFineSimu(end,:);
+%                 simulated_ss = 1;
+%             end
+%         end
+        
+        
         if ( ~simulated_ss )
             % check if init parameter still exists in condition parameters
-            is_set_cond = sum(ismember(ar.model(m).condition(c).fp, ar.model(m).px0{jx}))==0;
-            if(sum(qp)==1 && ~is_set_cond)
+            if(sum(qp)==1)
                 M.species(jx).initialConcentration = 1;
                 Crules{end+1,1} = ar.model(m).x{jx}; %#ok<AGROW>
                 Crules{end,2} = ar.pLabel{qp}; %#ok<AGROW>
-            elseif(sum(qp)==0 || is_set_cond)
-                qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx}); %R2013a compatible
-                if(sum(qp)==1)
-                    pvalue = char(arSym(ar.model(m).condition(c).fp{qp}));
-                    if(~isnan(str2num(pvalue))) %#ok
-                        pvalue = str2num(pvalue); %#ok
-                        M.species(jx).initialConcentration = pvalue;
-                    else
-                        Crules{end+1,1} = ar.model(m).x{jx}; %#ok<AGROW>
-                        Crules{end,2} = pvalue; %#ok<AGROW>
-                        M.species(jx).initialConcentration = 1;
-                    end
-                else
-                    error('%s not found', ar.model(m).pc{jc});
-                end
+            elseif(sum(qp)==0)
+                M.species(jx).initialConcentration = 1;
             else
                 error('%s not found', ar.model(m).pc{jc});
             end
         else
-            M.species(jx).initialConcentration = x_ss(jx);
+            M.species(jx).initialConcentration = 1;
+            % M.species(jx).initialConcentration = x_ss(jx);
         end
     end
 end
@@ -251,40 +227,12 @@ end
 
 
 
-function [M] = GetParameters(M,m,d)
+function [M] = GetParameters(M,m)
     global ar
-    
+   
     %% parameters
-    % for jp = 1:length(ar.model(m).condition(c).p)
-    %     M.parameter(jp).typecode = 'SBML_PARAMETER';
-    %     M.parameter(jp).metaid = '';
-    %     M.parameter(jp).notes = '';
-    %     M.parameter(jp).annotation = '';
-    %     M.parameter(jp).sboTerm = -1;
-    %     M.parameter(jp).name = '';
-    %     M.parameter(jp).id = ar.model(m).condition(c).p{jp};
-    %     M.parameter(jp).units = '';
-    %     M.parameter(jp).constant = 1;
-    %     M.parameter(jp).isSetValue = 1;
-    %     M.parameter(jp).level = 2;
-    %     M.parameter(jp).version = 4;
-    %     
-    %     qp = ismember(ar.pLabel, ar.model(m).condition(c).p{jp}); %R2013a compatible
-    %     if(sum(qp)==1)
-    %         pvalue = ar.p(qp);
-    %         if(ar.qLog10(qp) == 1)
-    %             pvalue = 10^pvalue;
-    %         end
-    %     else
-    %         pvalue = 1;
-    %     end
-    %     M.parameter(jp).value = pvalue;
-    % end
 
-    %paraid = ar.model(m).data.p
-    %paraid = ar.model(m).p
-
-    for id = 1:length(ar.model(m).data(d).p)
+    for id = 1:length(ar.model(m).p)
         %id_tmp = id+length(ar.model(m).condition(c).p);
         id_tmp = id;
         M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
@@ -292,15 +240,15 @@ function [M] = GetParameters(M,m,d)
         M.parameter(id_tmp).notes = '';
         M.parameter(id_tmp).annotation = '';
         M.parameter(id_tmp).sboTerm = -1;
-        M.parameter(id_tmp).name = ar.model(m).data(d).p{id};                       
-        M.parameter(id_tmp).id = ar.model(m).data(d).p{id};
+        M.parameter(id_tmp).name = ar.model(m).p{id};                       
+        M.parameter(id_tmp).id = ar.model(m).p{id};
         M.parameter(id_tmp).units = '';
         M.parameter(id_tmp).constant = 1;
         M.parameter(id_tmp).isSetValue = 1;
         M.parameter(id_tmp).level = 2;
         M.parameter(id_tmp).version = 4;
 
-        qp = ismember(ar.pLabel, ar.model(m).data(d).p{id}); %R2013a compatible
+        qp = ismember(ar.pLabel, ar.model(m).p{id}); %R2013a compatible
         if(sum(qp)==1)
             pvalue = ar.p(qp);
             if(ar.qLog10(qp) == 1)
@@ -311,23 +259,6 @@ function [M] = GetParameters(M,m,d)
         end
         M.parameter(id_tmp).value = pvalue;
     end
-
-    % for iY = 1:length(ar.model(m).data(d).y)
-    %     id_tmp = length(M.parameter)+1;
-    %     M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
-    %     M.parameter(id_tmp).metaid = '';
-    %     M.parameter(id_tmp).notes = '';
-    %     M.parameter(id_tmp).annotation = '';
-    %     M.parameter(id_tmp).sboTerm = -1;
-    %     M.parameter(id_tmp).name = '';
-    %     M.parameter(id_tmp).id = ar.model(m).data(d).y{iY};
-    %     M.parameter(id_tmp).units = '';
-    %     M.parameter(id_tmp).constant = 0;
-    %     M.parameter(id_tmp).isSetValue = 1;
-    %     M.parameter(id_tmp).level = 2;
-    %     M.parameter(id_tmp).version = 4;    
-    %     M.parameter(id_tmp).value = 0;
-    % end
 end
 
 function [M] = GetRules(M,Crules)
@@ -350,13 +281,13 @@ end
 
 
 
-function [M] = GetReactions(M,F,c,m,copasi)
+function [M] = GetReactions(M,F,m,copasi)
     global ar
     %% reactions
     fv = ar.model(m).fv;
     fv = arSym(fv);
     % fv = arSubs(fv, ar.model(m).u, ar.model(m).condition(c).fu');
-    fv = arSubs(fv, arSym(ar.model(m).condition(c).pold), arSym(ar.model(m).condition(c).fp'));
+    %fv = arSubs(fv, arSym(ar.model(m).condition(c).pold), arSym(ar.model(m).condition(c).fp'));
     fv = arSubs(fv, arSym(ar.model(m).t), arSym('time'));
 
     vcount = 1;
@@ -447,7 +378,7 @@ function [M] = GetReactions(M,F,c,m,copasi)
 
             vars = symvar(ratetemplate);
             vars = setdiff(vars, arSym(ar.model(m).x(ar.model(m).N(:,jv)<0))); %R2013a compatible
-            vars = setdiff(vars, arSym(ar.model(m).condition(c).p)); %R2013a compatible
+            vars = setdiff(vars, arSym(ar.model(m).p)); %R2013a compatible
             vars = setdiff(vars, arSym(ar.model(m).u)); %R2013a compatible
             M.reaction(vcount).modifier = F.reaction(1).modifier;
             if(~isempty(vars))
@@ -511,7 +442,7 @@ end
 
 
 
-function [M] = GetInputs(M,F,c,m,d)
+function [M] = GetInputs(M,F,m)
     global ar
     %% Inputs
 
@@ -524,18 +455,16 @@ function [M] = GetInputs(M,F,c,m,d)
 
     for ju = 1:length(ar.model(m).u)
 
-        fu = arSym(ar.model(m).condition(c).fu{ju}); % current input
+        fu = arSym(ar.model(m).fu{ju}); 
 
-        isActive = ~(str2double(ar.model(m).condition(c).fu{ju}) == 0);
+        isActive = ~(str2double(ar.model(m).fu{ju}) == 0);
         if(contains(ar.model(m).fu{ju},'spline'))
             warning('Spline functions are not supported as d2d export, yet!\n')
             isActive = false; 
         end
 
         if ( isActive )
-            % replace p with condition specific parameters
-            fu = char(arSubs(fu, arSym(ar.model(m).condition(c).pold), arSym(ar.model(m).condition(c).fp')));
-
+            
             % replace time parameters with 'time'
             fu = char(arSubs(arSym(fu), arSym(ar.model(m).t), arSym('time')));
             ixfun = cell2mat(cellfun(@(x) strfind(fu,x), funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
@@ -640,7 +569,7 @@ function [M] = GetInputs(M,F,c,m,d)
 
             end
 
-            initValue = ar.model(m).condition(c).uFineSimu(1,ju);
+            % initValue = ar.model(m).condition(c).uFineSimu(1,ju);
             % Technically, in the SBML standard, it cannot be considered constant
             % if there is a rule that applies to it. Any value other than zero in
             % this code will fail SBML validation despite being conceptually
@@ -674,14 +603,14 @@ function [M] = GetInputs(M,F,c,m,d)
                 nr_ts = str2double(nr_ts{1});
                 fprintf('Found cubic interpolation spline with %i anchors! Proceeding with export \n',nr_ts)
                 warning('The spline will be re-fitted via a MATLAB function! The result might diverge slightly from the C function implemented in D2D and thus lead to different results when loading the SBML file! \n')
-                spline_split = strsplit(ar.model(m).condition(c).fu{ju}, ',');
+                spline_split = strsplit(ar.model(m).fu{ju}, ',');
                 spline_times = NaN(1,nr_ts);
                 for it = 1:length(spline_times)
                     spline_times(it) = str2double(spline_split{it*2});
                 end
                 par_spline = NaN(1,nr_ts);
                 nr_spline = 1;
-                for ipu = find(ismember(ar.pLabel,ar.model(m).data(d).pu))
+                for ipu = find(ismember(ar.pLabel,ar.model(m).pu))
                     if ar.qLog10(ipu)
                         par_spline(nr_spline) = 10.^(ar.p(ipu));
                     else
@@ -728,11 +657,9 @@ function [M] = GetInputs(M,F,c,m,d)
 
                     M.parameter(jp).level = 2;
                     M.parameter(jp).version = 4;
-                    if(js == 1)
-                        M.parameter(jp).value = ar.model(m).condition(c).uFineSimu(1,ju);
-                    else
-                        M.parameter(jp).value = 0;
-                    end
+
+                    M.parameter(jp).value = 0;
+
                 end
 
                 ixrule = length(M.rule) + 1;% index of current rule
@@ -847,33 +774,33 @@ end
 
 
 
-function [M] = GetObservables(M,m,d)
+function [M] = GetObservables(M,m)
     global ar
     %% Observables as assignment rules
 
-    for id = 1:length(ar.model(m).data(d).fy)
+    for id = 1:length(ar.model(m).fy)
         ixrule = length(M.rule) + 1;% index of current rule
         M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
         M.rule(ixrule).metaid = '';
         M.rule(ixrule).notes = '';
         M.rule(ixrule).annotation = '';
         M.rule(ixrule).sboTerm = -1;
-        rule_tmp = arSym(ar.model(m).data(d).fy{id});
+        rule_tmp = arSym(ar.model(m).fy{id});
         if(~isempty(ar.model(m).z))
             rule_tmp = arSubs(rule_tmp,arSym(ar.model(m).z),arSym(ar.model(m).fz'));
         end
-        rule_tmp = arSubs(rule_tmp,arSym(ar.model(m).data(d).pold),arSym(ar.model(m).data(d).fp'));
+        %rule_tmp = arSubs(rule_tmp,arSym(ar.model(m).data(d).pold),arSym(ar.model(m).data(d).fp'));
 
         rule_tmp = char(rule_tmp);
-        if(ar.model(m).data(d).logfitting(id)==1)
+        if(ar.model(m).logfitting(id)==1)
             rule_tmp = ['log10(' rule_tmp ')'];
         end
 
         % check if ys already contain 'observable_'
-        if ~strncmp(ar.model(m).data(d).y{id}, 'observable_', length('observable_'))
-            variable_tmp = strcat('observable_', ar.model(m).data(d).y{id});
+        if ~strncmp(ar.model(m).y{id}, 'observable_', length('observable_'))
+            variable_tmp = strcat('observable_', ar.model(m).y{id});
         else
-            variable_tmp = ar.model(m).data(d).y{id};
+            variable_tmp = ar.model(m).y{id};
         end
 
         M.rule(ixrule).formula = rule_tmp;
@@ -881,8 +808,8 @@ function [M] = GetObservables(M,m,d)
         M.rule(ixrule).species = '';
         M.rule(ixrule).compartment = '';
         M.rule(ixrule).name = '';
-        if ~isempty(ar.model(m).data(d).yUnits)
-            M.rule(ixrule).units = ar.model(m).data(d).yUnits{id,2};
+        if ~isempty(ar.model(m).yUnits)
+            M.rule(ixrule).units = ar.model(m).yUnits{id,2};
         else
             M.rule(ixrule).units = '';
         end
@@ -896,41 +823,41 @@ end
 
 
 
-function [M] = GetErrors(M,m,d)
+function [M] = GetErrors(M,m)
     global ar
     %% Errors as assignment rules
 
-    for id = 1:length(ar.model(m).data(d).fystd)
+    for id = 1:length(ar.model(m).fystd)
         ixrule = length(M.rule) + 1;% index of current rule
         M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
         M.rule(ixrule).metaid = '';
         M.rule(ixrule).notes = '';
         M.rule(ixrule).annotation = '';
         M.rule(ixrule).sboTerm = -1;
-        rule_tmp = arSym(ar.model(m).data(d).fystd{id});
+        rule_tmp = arSym(ar.model(m).fystd{id});
 
-        rule_tmp = arSubs(rule_tmp,arSym(ar.model(m).data(d).pold),arSym(ar.model(m).data(d).fp'));
+        %rule_tmp = arSubs(rule_tmp,arSym(ar.model(m).data(d).pold),arSym(ar.model(m).data(d).fp'));
 
         rule_tmp = char(rule_tmp);
 
         % ??
-        if(ar.model(m).data(d).logfitting(id)==1)
+        if(ar.model(m).logfitting(id)==1)
             rule_tmp = ['log10(' rule_tmp ')'];
         end
 
         % check if ys already contain 'observable_'
-        if ~strncmp(ar.model(m).data(d).y{id}, 'observable_', length('observable_'))
-            variable_tmp = strcat('sigma_', ar.model(m).data(d).y{id});
+        if ~strncmp(ar.model(m).y{id}, 'observable_', length('observable_'))
+            variable_tmp = strcat('sigma_', ar.model(m).y{id});
         else
-            variable_tmp = strrep(ar.model(m).data(d).y{id}, 'observable_', 'sigma_');
+            variable_tmp = strrep(ar.model(m).y{id}, 'observable_', 'sigma_');
         end
         M.rule(ixrule).variable = variable_tmp;
         M.rule(ixrule).formula = rule_tmp;
         M.rule(ixrule).species = '';
         M.rule(ixrule).compartment = '';
         M.rule(ixrule).name = '';
-        if ~isempty(ar.model(m).data(d).yUnits)
-            M.rule(ixrule).units = ar.model(m).data(d).yUnits{id,2};
+        if ~isempty(ar.model(m).yUnits)
+            M.rule(ixrule).units = ar.model(m).yUnits{id,2};
         else
             M.rule(ixrule).units = '';
         end
