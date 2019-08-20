@@ -66,7 +66,9 @@ for iSim = 1:length(uniSim)
     % extract important info for data struct from .tsv file
     Tsub = T(iCSim == iSim,:);
     [uniObs,~,iCObs] = unique(cellstr(Tsub.observableId));
+ 
     [uniTimes,~,iTExp] = unique(Tsub.time);
+%    [~,ia,ic] = unique([iCobs,iTExp],'rows');
     if length(unique(iTExp(iCObs==1)))<length(iTExp(iCObs==1))
         uniTimes = Tsub.time(1:sum(iCObs==1));
         iTExp = [];
@@ -86,11 +88,14 @@ for iSim = 1:length(uniSim)
     Sd2d.yExpStdRaw = nan(length(uniTimes),length(uniObs));
     for it = 1:length(uniTimes)
         for iobs = 1:length(uniObs)
-            Sd2d.yExpRaw(it,iobs) = Tsub.measurement(it == iTExp & iobs == iCObs);
-            Sd2d.yExp(it,iobs) = strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'log10')*log10(Tsub.measurement(it == iTExp & iobs == iCObs)) + strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'lin')*Tsub.measurement(it == iTExp & iobs == iCObs);
-            if isnumeric(Tsub.noiseParameters(it == iTExp & iobs == iCObs))
-                Sd2d.yExpStdRaw(it,iobs) = Tsub.noiseParameters(it == iTExp & iobs == iCObs);
-                Sd2d.yExpStd(it,iobs) = strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'log10')*log10(Tsub.noiseParameters(it == iTExp & iobs == iCObs)) + strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'lin')*Tsub.noiseParameters(it == iTExp & iobs == iCObs);
+            [iSim it  iobs]
+            if any(it==iTExp & iobs == iCObs)
+                Sd2d.yExpRaw(it,iobs) = Tsub.measurement(it == iTExp & iobs == iCObs);
+                Sd2d.yExp(it,iobs) = strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'log10')*log10(Tsub.measurement(it == iTExp & iobs == iCObs)) + strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'lin')*Tsub.measurement(it == iTExp & iobs == iCObs);
+                if isnumeric(Tsub.noiseParameters(it == iTExp & iobs == iCObs))
+                    Sd2d.yExpStdRaw(it,iobs) = Tsub.noiseParameters(it == iTExp & iobs == iCObs);
+                    Sd2d.yExpStd(it,iobs) = strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'log10')*log10(Tsub.noiseParameters(it == iTExp & iobs == iCObs)) + strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'lin')*Tsub.noiseParameters(it == iTExp & iobs == iCObs);
+                end
             end
         end
     end
@@ -109,13 +114,13 @@ for iSim = 1:length(uniSim)
     pold = {}; fp = {};
     for i = 1:length(Sd2d.y)
         for j = 1:length(ar.model)
-            newpold = ar.model(j).fp(contains(ar.model(j).p{i},'noiseParameter') & contains(ar.model(j).p,Sd2d.y{i}));
-            newPars = Tsub.noiseParameters(contains(Tsub.observableId,Sd2d.y{i}));
+            newpold = ar.model(j).fp(~cellfun('isempty',regexp(ar.model.p,['noiseParameters\d_' Sd2d.y{i} '$'])));
+         newPars = Tsub.noiseParameters(contains(Tsub.observableId,Sd2d.y{i}));
             if ~(isempty(newpold) || isnumeric(newPars) || isempty(newPars))
                 newPars = strsplit(str2mat(unique(newPars)),';');
                 pold = [pold;newpold];fp = [fp;newPars];    
             end
-            newpold = ar.model(j).fp(contains(ar.model(j).p,'observableParameter') & contains(ar.model(j).p,Sd2d.y{i}));
+            newpold = ar.model(j).fp(~cellfun('isempty',regexp(ar.model.p,['observableParameters\d_' Sd2d.y{i} '$'])));
             newPars = Tsub.observableParameters(contains(Tsub.observableId,Sd2d.y{i}));
             if ~(isempty(newpold) || isnumeric(newPars) || isempty(newPars))
                 newPars = strsplit(str2mat(unique(newPars)),';');
