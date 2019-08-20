@@ -100,8 +100,13 @@ end
 [~, name] = fileparts(filename);
 new_filename = strrep(name,' ','_');
 new_filename = strrep(new_filename,'-','_');
+<<<<<<< HEAD
+if ~exist([pwd 'Models'],'dir')
+    mkdir('Models')
+=======
 if ~exist([pwd filesep 'Models'],'dir')
     mkdir([pwd filesep 'Models'])
+>>>>>>> ecd71e6e7e8c444965e51615c9635e7af717feba
 end
 fid = fopen(['Models' filesep new_filename '.def'], 'w');
 
@@ -294,6 +299,9 @@ if isfield(m,'rule') && ~isempty(m.reaction)
             if isempty(m.rule(j).units)
                 uu{end} = 'n/a';
             end
+            if contains(m.rule(j).formula, 'piecewise')
+                m.rule(j).formula = strrep(m.rule(j).formula,'piecewise(0,','step1(t,0,');
+            end
             uf{end+1} = m.rule(j).formula;
         end
     end
@@ -314,7 +322,14 @@ if isempty(m.u)
             fprintf(fid, '%s\t C\t "%s"\t conc.\t "%s"\n', sym_check(u{i}), uu{i}, sym_check(replacePowerFunction(uf{i})));
         end
     end
+<<<<<<< HEAD
+else    
+    if contains(m.u.formula, 'piecewise')
+        m.u.formula = strrep(m.u.formula,'piecewise(0,','step1(t,0,');
+    end
+=======
 else
+>>>>>>> ecd71e6e7e8c444965e51615c9635e7af717feba
     if isempty(m.u.units)
         for j=1:length(m.u)
             fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), 'n/a', sym_check(replacePowerFunction(m.u(j).formula)));
