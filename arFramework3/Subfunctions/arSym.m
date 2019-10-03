@@ -31,7 +31,7 @@ try
         s = reshape(s,size(str)); % required e.g. for arSym(ones(0,10))
     else
         if ischar(str)
-            s = str2sym(str);
+            s = arMyStr2Sym(str);
         elseif iscell(str)
 %             try
 %                 try
