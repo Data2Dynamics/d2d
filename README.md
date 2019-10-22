@@ -5,7 +5,7 @@
 
 **Cite:** 
 
-* [Data2Dynamics: a modeling environment tailored to parameter estimation in dynamical systems.](http://bioinformatics.oxfordjournals.org/cgi/content/abstract/btv405?ijkey=YPsnNzFC4CIzy5g&keytype=ref) Raue A., et al. Bioinformatics, 31(21), 3558-3560, 2015.
+* [Data2Dynamics: a modeling environment tailored to parameter estimation in dynamical systems.](https://academic.oup.com/bioinformatics/article/31/21/3558/195191) Raue A., et al. Bioinformatics, 31(21), 3558-3560, 2015.
 
 * [Lessons Learned from Quantitative Dynamical Modeling in Systems Biology.](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0074335) Raue A., et al. PLOS ONE, 8(9), e74335, 2013.
 
