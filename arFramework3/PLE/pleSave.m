@@ -15,5 +15,9 @@ end
 
 ple = ar.ple;
 ple.fighandel_multi = [];    % remove handle to
-save([ar.config.savepath '/PLE/results.mat'], 'ple');
+try
+    save([ar.config.savepath '/PLE/results.mat'], 'ple');
+catch
+    warning('Cannot create results.mat because %s doesn''t exist', [ar.config.savepath '/PLE/results.mat']);
+end
 

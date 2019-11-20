@@ -126,7 +126,7 @@ for jm = 1:length(ar.model)
                         if ( isfield( ar.config, 'barhack' ) && ( ar.config.barhack == 1 ) )
                             if ( numel( unique( t(~isnan(t)) ) ) == 1 )
                                 t = t(~isnan(t));
-                                y = nanmean(y);
+                                y = nanmean(y(~isnan(t), :));
                                 if ( ~isempty( yExpStd ) )
                                     ystd = nanmean( yExpStd );
                                 else

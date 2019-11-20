@@ -75,6 +75,9 @@ end
 if(exist('arFitLhsBwCluster','file') == 0)
      addpath([ar_path '/BwGrid']);
 end
+if(exist('arNEB','file') == 0)
+     addpath([ar_path '/NEB']);
+end
 
 warning('off','MATLAB:rmpath:DirNotFound')
 
@@ -158,7 +161,9 @@ if(exist('plot2svg','file') == 0)
     end
 end
 if(exist('matlab2tikz','file') == 0)
-    addpath([ar_path '/ThirdParty/matlab2tikz/src'])
+    if exist([ar_path '/ThirdParty/matlab2tikz/src'],'dir')
+        addpath([ar_path '/ThirdParty/matlab2tikz/src'])
+    end
 end
 if(exist('parfor_progress','file') == 0)
     addpath([ar_path '/ThirdParty/parfor_progress'])

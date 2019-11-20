@@ -241,15 +241,27 @@ for jm = 1:length(ar.model)
                             y_new = NaN(ar.config.nFinePoints,size(y,2));
                             ystd_new = NaN(ar.config.nFinePoints,size(ystd,2));
                             [t_red, its] = unique(t);
-                            t = linspace(min(t),max(t),ar.config.nFinePoints);
+                            t = linspace(min(t),max(t),ar.config.nFinePoints)';
                             
                             for iyC = 1:size(y,2)
-                                y_red = y(its,iyC);                                
-                                y_new(:,iyC) = pchip(t_red,y_red,t);
+                                y_red = y(its,iyC);   
+                                if length(y_red)>1
+                                    y_new(:,iyC) = pchip(t_red,y_red,t);
+                                elseif length(y_red)==1
+                                    y_new(:,iyC) = y_red;
+                                else
+                                    error('arPlot2.m: This case has to be implemented properly.');
+                                end
                                 
                                 if(~isempty(ystd) && sum(isnan(ystd(its,iyC)))<length(ystd(its,iyC)) && size(ystd,2) == size(y,2))
                                     ystd_red = ystd(its,iyC);
-                                    ystd_new(:,iyC) = pchip(t_red,ystd_red,t);
+                                    if length(ystd_red)>1
+                                        ystd_new(:,iyC) = pchip(t_red,ystd_red,t);
+                                    elseif length(ystd_red)==1
+                                        ystd_new(:,iyC) = ystd_red;
+                                    else
+                                        error('arPlot2.m: This case has to be implemented properly.');
+                                    end
                                 end
                                                             
                             end

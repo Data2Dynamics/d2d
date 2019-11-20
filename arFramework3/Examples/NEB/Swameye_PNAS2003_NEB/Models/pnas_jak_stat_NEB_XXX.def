@@ -1,0 +1,75 @@
+#define offset_pSTAT offset_pSTAT_NEB_XXX 
+#define offset_tSTAT offset_tSTAT_NEB_XXX 
+#define p1 p1_NEB_XXX 
+#define p2 p2_NEB_XXX 
+#define p3 p3_NEB_XXX 
+#define p4 p4_NEB_XXX 
+#define scale_pSTAT scale_pSTAT_NEB_XXX 
+#define scale_tSTAT scale_tSTAT_NEB_XXX
+#define sd_pSTAT_au sd_pSTAT_au_NEB_XXX 
+#define sd_tSTAT_au sd_tSTAT_au_NEB_XXX 
+
+DESCRIPTION
+"JAK-STAT Model: This model is the D2D-version of the Swameye model published in PNAS in 2003. Compared to the published model, the delay is implemented via the chain-trick with 5 compartements. Error parameters for the observations are introduced (which are by default, i.e. in case of ar.config.fiterrors=0 overwritten by the exp. errors and therefore not used."
+
+PREDICTOR
+t               T   min         time	0	80
+
+COMPARTMENTS
+cyt             V   "pl"      "vol."        1.4
+nuc             V   "pl"      "vol."        0.45
+
+STATES
+STAT            C   "nM"      "conc."    cyt
+pSTAT           C   "nM"      "conc."    cyt
+pSTAT_pSTAT     C   "nM"      "conc."    cyt
+npSTAT_npSTAT   C   "nM"      "conc."    nuc
+nSTAT1          C   "nM"      "conc."    nuc
+nSTAT2          C   "nM"      "conc."    nuc
+nSTAT3          C   "nM"      "conc."    nuc
+nSTAT4          C   "nM"      "conc."    nuc
+nSTAT5          C   "nM"      "conc."    nuc
+
+INPUTS
+pEpoR           C   "au"      "conc."   "spline_pos5(t, 0.0, sp1, 5.0, sp2, 10.0, sp3, 20.0, sp4, 60.0, sp5, 0, 0.0)"
+
+REACTIONS
+STAT             ->  pSTAT            CUSTOM "p1 * pEpoR * STAT"
+pSTAT + pSTAT    ->  pSTAT_pSTAT      CUSTOM "p2 * pSTAT^2"
+pSTAT_pSTAT      ->  npSTAT_npSTAT    CUSTOM "p3 * pSTAT_pSTAT"
+
+// dissociation, delay and export 
+npSTAT_npSTAT    ->  nSTAT1 + nSTAT1  CUSTOM "p4 * npSTAT_npSTAT" // test
+nSTAT1           ->  nSTAT2           CUSTOM "p4 * nSTAT1"
+nSTAT2           ->  nSTAT3           CUSTOM "p4 * nSTAT2"
+nSTAT3           ->  nSTAT4           CUSTOM "p4 * nSTAT3"
+nSTAT4           ->  nSTAT5           CUSTOM "p4 * nSTAT4"
+nSTAT5           ->  STAT             CUSTOM "p4 * nSTAT5"
+
+DERIVED
+tSTAT           C   "nM"  "conc."    "STAT + pSTAT + 2*pSTAT_pSTAT"
+tpSTAT          C   "nM"  "conc."    "pSTAT + 2*pSTAT_pSTAT"
+        
+OBSERVABLES
+tSTAT_au        C   "au"  "conc."   1   0   "offset_tSTAT + scale_tSTAT * tSTAT"
+pSTAT_au        C   "au"  "conc."   1   0   "offset_pSTAT + scale_pSTAT * tpSTAT"
+pEpoR_au        C   "au"  "conc."   1   0   "pEpoR"
+
+ERRORS
+tSTAT_au       "sd_tSTAT_au"
+pSTAT_au       "sd_pSTAT_au"
+pEpoR_au       "sd_pEpoR_au"
+
+CONDITIONS
+init_pSTAT           "0"
+init_pSTAT_pSTAT     "0"
+init_npSTAT_npSTAT   "0"
+init_nSTAT1          "0"
+init_nSTAT2          "0"
+init_nSTAT3          "0"
+init_nSTAT4          "0"
+init_nSTAT5          "0"
+
+p2                   "p2 / init_STAT"
+scale_tSTAT          "scale_tSTAT / init_STAT"
+scale_pSTAT          "scale_pSTAT / init_STAT"

@@ -29,7 +29,11 @@ dataCell = cell(0, length(header));
 rcount = 1;
 C = textscan(fid,'%s\n',1,'Delimiter','');
 while(~isempty(C{1}))
-    C = textscan(C{1}{1},strquoted,'Delimiter',delimiter);
+    if ~isempty(C{1}{1})
+        C = textscan(C{1}{1},strquoted,'Delimiter',delimiter);
+    else
+        C{1} = C{1}{1};
+    end
     C = strrep(C{1}',',','.');
     for j=1:length(header)
         if(j>length(C))
@@ -40,7 +44,7 @@ while(~isempty(C{1}))
             dataCell{rcount,j} = C{j};
         end
     end
-    C = textscan(fid,'%s',1,'Delimiter','\n');
+    C = textscan(fid,'%s\n',1,'Delimiter','');
     rcount = rcount + 1;
 end
 arFprintf( 6, '[ OK ]\n' );

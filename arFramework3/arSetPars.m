@@ -89,24 +89,24 @@ for j=1:length(pLabel)
             ar.p(q) = p(j);
             if(nargin>4 && ~isempty(lb))
                 if(p(j) < lb(j))
-                    warning('trying to set p < lb   [%.4f < %.4f (%d: %s)]', p(j), lb(j), j, pLabel{j});
-                    ar.p(q) = lb(j);
+                    error('trying to set p < lb   [%.4f < %.4f (%d: %s)]', p(j), lb(j), j, pLabel{j});
+%                     ar.p(q) = lb(j);
                 end
             else
                 if(p(j) < ar.lb(q))
-                    warning('trying to set p < lb   [%.4f < %.4f (%d: %s)]', p(j), ar.lb(q), find(q), pLabel{j});
-                    ar.p(q) = ar.lb(q);
+                    error('trying to set p < lb   [%.4f < %.4f (%d: %s)]', p(j), ar.lb(q), find(q), pLabel{j});
+%                     ar.p(q) = ar.lb(q);
                 end
             end
             if(nargin>5 && ~isempty(ub))
                 if(p(j) > ub(j))
-                    warning('trying to set p > ub   [%.4f > %.4f (%d: %s)]', p(j), ub(j), j, pLabel{j});
-                    ar.p(q) = ub(j);
+                    error('trying to set p > ub   [%.4f > %.4f (%d: %s)]', p(j), ub(j), j, pLabel{j});
+%                     ar.p(q) = ub(j);
                 end
             else
                 if(p(j) > ar.ub(q))
-                    warning('trying to set p > ub   [%.4f > %.4f (%d: %s)]', p(j), ar.ub(q), find(q), pLabel{j});
-                    ar.p(q) = ar.ub(q);
+                    error('trying to set p > ub   [%.4f > %.4f (%d: %s)]', p(j), ar.ub(q), find(q), pLabel{j});
+%                     ar.p(q) = ar.ub(q);
                 end
             end
         end

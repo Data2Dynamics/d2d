@@ -75,7 +75,7 @@ for j=1:length(jks)
     
     ps = ar.ple.ps{jk};
     
-    dchi2 = chi2inv(1-ar.ple.alpha, ar.ple.ndof);
+    dchi2 = chi2inv(1-ar.ple.alpha_level, ar.ple.dof_point);
     
     gs1(j) = subplot(nrows, ncols,j);
     
@@ -99,7 +99,7 @@ for j=1:length(jks)
     % thresholds
     plot(xlim, [0 0]+chi2curr+dchi2, 'r--')
     xlimtmp = xlim;
-    text(xlimtmp(1), chi2curr+dchi2, sprintf(' %2i%%', (1-ar.ple.alpha)*100), 'Color', 'r', ...
+    text(xlimtmp(1), chi2curr+dchi2, sprintf(' %2i%%', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
         'HorizontalAlignment', 'left', 'VerticalAlignment', 'bottom')
     
     if(sum(~isnan(chi2s))>0)

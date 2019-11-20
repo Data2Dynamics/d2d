@@ -48,7 +48,7 @@ else
     q_select = ar.qFit==1;
 end
 
-if(sum(q_select)<6)
+if(sum(q_select)<6 && sum(q_select)>1)
     figure(1)
     plotmatrix(ps(:,q_select), 'x');
 end
@@ -99,9 +99,12 @@ else
     fprintf('did not find better fit\n');
     ar.p = pReset;
 end
+if ~isfield(ar,'fit_transient')
+    error('~isfield(ar,''fit_transient'')');
+end
 arChi2(false);
 
-if(sum(q_select)<6)
+if(sum(q_select)<6 && sum(q_select)>1)
     figure(2)
     plotmatrix(ar.ps(:,q_select), 'x');
 end

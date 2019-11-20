@@ -4,7 +4,11 @@
 % name and a function handle.
 %
 %    name           Name of the residual
-%    fn             Function handle of the residual
+%    fn             Function handle of the residual.
+%                   This function should return
+%                   res_user    - Residual
+%                   res_type    - Integer for every residual describing type
+%                   sres_user   - Sensitivities of the residual
 %    overwrite      Should an existing function handle with the same name
 %                   be overwritten?
 %
