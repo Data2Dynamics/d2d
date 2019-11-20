@@ -1,4 +1,4 @@
-function c = countElements(d, sorted)
+function [c, labels] = countElements(d, sorted)
 
 if(~exist('sorted','var'))
     sorted = false;
@@ -28,4 +28,5 @@ if nargout==0
     end
 else
     c = counts;
+    labels = ud;
 end
