@@ -13,6 +13,15 @@
 
 function arExportSBML_benchmark2(m, d, steadystate)
 
+answer = questdlg('This file is deprecated. For exporting SBML files of single conditions please use arExport_singlecondition! Do you still want to continue?', ...
+	'Problem!', ...
+	'No','Yes','No');
+% Handle response
+if(answer=='No')
+    return
+end
+
+
 global ar
 
 c = ar.model(m).data(d).cLink;

@@ -8,6 +8,15 @@
 
 function arExportSBML_FullModel(m,steadystate)
 
+answer = questdlg('This file is not yet working properly! Do you still want to continue?', ...
+	'Problem!', ...
+	'No','Yes','No');
+% Handle response
+if(answer=='No')
+    return
+end
+
+
 global ar
 
 % simulate once for initial values

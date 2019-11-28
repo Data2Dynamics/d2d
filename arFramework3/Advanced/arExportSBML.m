@@ -25,12 +25,7 @@ function arExportSBML(varargin)
 
     %Calculate chi2 value without Bessel correction
     ar.config.useFitErrorCorrection = false;
-    if(contains(pwd,'Chen'))
-        arCalcMerit
-    else
-        arFit
-        arCalcMerit
-    end
+    arCalcMerit;
 
     if FileOption == 1 % single file output
         for i = 1:length(ar.model)   
