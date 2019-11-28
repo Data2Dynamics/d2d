@@ -13,7 +13,7 @@
 % observation function is log-transformed in ar, the log trafo will be
 % written into SBML as well.
 
-function arExportSBML_datamodel(m, d, steadystate)
+function arExportSBML_singlecondition(m, d, steadystate)
 
 global ar
 
