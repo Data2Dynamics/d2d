@@ -1,45 +1,64 @@
 function y = arExportPEtab(dummy)
 % function y = arExportPEtab
 %
-% Exports data, condition and measurement details to PEtab format
+% Export data, condition and measurement details to PEtab data format
 % See also https://github.com/ICB-DCM/PEtab
 
 % Not implemented yet:
 % - Measurement table: preEquilibrationConditionId,
 % - Visualization table
 % - Parameter table: priorType, priorParameters: not yet specified!
+% - Different noise distributions
 
 global ar
 
-%% Condition and Measurment Table
-% Collect conditions
-condPar = {}; condVal = {}; conditionID = {};
+%% Write Export Directory
+if(~exist('./SBML_Export', 'dir'))
+    mkdir('./SBML_Export')
+end
+
 for imodel = 1:length(ar.model)
+    %% Condition and Measurement Table
+    % Collect conditions
+    condPar = {}; condVal = {}; conditionID = {};
     for idata = 1:length(ar.model(imodel).data)
         for icond = 1:length(ar.model(imodel).data(idata).condition)
             condPar{end+1} = ar.model(imodel).data(idata).condition(icond).parameter;
         end
+        % catch d2d fix for predictors that are not time
+        if ~(strcmp(ar.model(imodel).data(idata).t, 'time') || strcmp(ar.model(imodel).data(idata).t, 't'))
+            for it = 1:length(ar.model(imodel).data(idata).tExp)
+                condPar{end+1} = [ar.model(imodel).data(idata).t...
+                    '_' num2str(it)];
+            end
+        end
     end
-end
-peConds = unique(condPar);
-
-% Write condition and measurement tables
-measT = table;
-peCondValues = [];
-numOfConds = length(peConds);
-conditionID = {};
-
-for imodel = 1:length(ar.model)
+    peConds = unique(condPar);
+    
+    % Write condition and measurement tables
+    measT = table;
+    peCondValues = [];
+    numOfConds = length(peConds);
+    conditionID = {};
+    
     for idata = 1:length(ar.model(imodel).data)
-        
         % conditions
         condPar = {}; condVal = []; condPos = []; conditionID_tmp = '';
+        
+%         % catch d2d fix for predictors that are not time
+%         if ~(strcmp(ar.model(imodel).data(idata).t, 'time') || strcmp(ar.model(imodel).data(idata).t, 't'))
+%             for it = 1:length(ar.model(imodel).data(idata).tExp)
+%                 condPar{end+1} = [ar.model(imodel).data(idata).t...
+%                     '_' num2str(it)];
+%                 condVal = [condVal ar.model(imodel).data(idata).tExp(it)];
+%                 condPos = [condPos find(strcmp(peConds, condPar{it}))];
+%             end
+%         end
+        
         for icond = 1:length(ar.model(imodel).data(idata).condition)
-            
             condPar{end+1} = ar.model(imodel).data(idata).condition(icond).parameter;
             condVal = [condVal str2num(ar.model(imodel).data(idata).condition(icond).value)];
             condPos = [condPos find(contains(peConds, condPar{icond}))];
-            
             %conditionID_tmp = [conditionID_tmp '_' ar.model(imodel).data(idata).condition(icond).parameter ...
             %'_' ar.model(imodel).data(idata).condition(icond).value];
         end
@@ -50,26 +69,7 @@ for imodel = 1:length(ar.model)
         %conditionID{end+1} = conditionID_tmp;
         simuConditionID = ['model' num2str(imodel) '_data' num2str(idata)];
         conditionID{end+1} = simuConditionID;
-        
-        % write data
-%         observableIDs = repmat(ar.model(imodel).data(idata).y, ...
-%             [length(ar.model(imodel).data(idata).yExp) 1]);
-%         observableIDs = observableIDs(:);
-%                 
-%         measurements = ar.model(imodel).data(idata).yExp(:);
-%           
-%         timepoints = repmat(ar.model(imodel).data(idata).tExp, [size(ar.model(imodel).data(idata).yExp, 2) 1]);
-% 
-%         simulationConditionIDs = repmat(simuConditionID, [length(timepoints) 1]);
-% 
-%         obsPars_tmp = cellfun(@strsplit, ar.model(imodel).data(idata).fy, repmat({{'+','-','*','/','(',')','^',' '}}, [length(ar.model(imodel).data(idata).fy) 1]), 'UniformOutput', false);
-%         obsPars_tmp = cellfun(@intersect, obsPars_tmp, repmat({ar.pLabel},[length(ar.model(imodel).data(idata).fy) 1]), repmat({'stable'},[length(ar.model(imodel).data(idata).fy) 1]), 'UniformOutput', false);
-%         observableParameters = obsPars_tmp;
-%         
-%         noisePars_tmp = cellfun(@strsplit, ar.model(imodel).data(idata).fystd', repmat({{'+','-','*','/','(',')','^',' '}}, [length(ar.model(imodel).data(idata).fystd) 1]), 'UniformOutput', false);
-%         noisePars_tmp = cellfun(@intersect, noisePars_tmp, repmat({ar.pLabel},[length(ar.model(imodel).data(idata).fystd) 1]), repmat({'stable'},[length(ar.model(imodel).data(idata).fystd) 1]), 'UniformOutput', false);
-%         noiseParameters = noisePars_tmp;
-        
+                
         % measurements
         for iy = 1:length(ar.model(imodel).data(idata).y)
             observableIDs = repmat(ar.model(imodel).data(idata).y(iy), ...
@@ -77,6 +77,14 @@ for imodel = 1:length(ar.model)
             
             measurements = ar.model(imodel).data(idata).yExp(:, iy);
             timepoints = ar.model(imodel).data(idata).tExp;
+            
+            obsTrafos = cell(length(timepoints),1);
+            obsTrafos(:) = {'log10'};
+            
+            if ~ar.model(imodel).data(idata).logfitting(iy)
+                obsTrafos(:) = {'lin'};
+            end
+            
             simulationConditionIDs = repmat({simuConditionID}, [length(timepoints) 1]);
             
             obsPars_tmp = strsplit(ar.model(imodel).data(idata).fy{iy}, {'+','-','*','/','(',')','^',' '});
@@ -89,31 +97,30 @@ for imodel = 1:length(ar.model)
             noisePars_tmp = strcat(noisePars_tmp, repmat(';', [length(noisePars_tmp)-1 1]));
             noiseParameters = repmat({[noisePars_tmp{:}]}, [length(timepoints) 1]);
             
-            obsTrafos = cell(length(timepoints),1);
-            obsTrafos(:) = {'lin'}; obsTrafos(logical(ar.model(imodel).data(idata).logfitting(iy))) = {'log'};
-            
             noiseDist = cell(length(timepoints),1);
             noiseDist(:) = {'normal'};
             
-            measT = [measT; table(observableIDs, measurements, timepoints, ...
-                simulationConditionIDs, observableParameters, noiseParameters, obsTrafos, noiseDist)];
+            measT = [measT; table(observableIDs,simulationConditionIDs,...
+                measurements,timepoints,observableParameters, ...
+                noiseParameters, obsTrafos, noiseDist)];
         end
     end
+    
+    condT = array2table(peCondValues);
+    condT.Properties.VariableNames = peConds;
+    
+    condT = [table(conditionID'), condT];
+    condT.Properties.VariableNames{1} = 'conditionId';
+    
+    measT.Properties.VariableNames = {'observableId', 'simulationConditionId', ...
+        'measurement', 'time', 'observableParameters', 'noiseParameters',...
+        'observableTransformation', 'noiseDistribution'};
+    
+    writetable(condT, ['SBML_Export/peTABcond_model' num2str(imodel) '.tsv'],...
+        'Delimiter', '\t', 'FileType', 'text')
+    writetable(measT, ['SBML_Export/peTABmeas_model' num2str(imodel) '.tsv'],...
+        'Delimiter', '\t', 'FileType', 'text')
 end
-
-condT = array2table(peCondValues);
-condT.Properties.VariableNames = peConds;
-
-condT = [table(conditionID') condT];
-condT.Properties.VariableNames{1} = 'conditionId';
-
-measT.Properties.VariableNames = {'observableId', 'simulationConditionId', ...
-    'measurement', 'time', 'observableParameters', 'noiseParameters',...
-    'observableTransformation', 'noiseDistribution'};
-
-writetable(condT, 'peTAB_conditions.tsv', 'Delimiter', '\t', 'FileType', 'text')
-writetable(measT, 'peTAB_measurments.tsv', 'Delimiter', '\t', 'FileType', 'text')
-
 %% Parameter Table
 parameterScale_tmp = cell(1, length(ar.qLog10));
 parameterScale_tmp(:) = {'lin'};
@@ -145,6 +152,29 @@ parT = table(parameterID(:), parameterName(:), parameterScale(:), ...
 parT.Properties.VariableNames = {'parameterID', 'parameterName', ...
     'parameterScale', 'lowerBound', 'upperBound', 'nominalValue', 'estimate',};
 
-writetable(parT, 'peTAB_parameters.tsv', 'Delimiter', '\t', 'FileType', 'text')
+writetable(parT, 'SBML_Export/peTABpars_model.tsv',...
+    'Delimiter', '\t', 'FileType', 'text')
+
+%% Visualization Table
+% for imodel = 1:length(ar.model)
+%     for iplot = 1:length(ar.model(imodel).plot)
+%         for idata = 1:length(ar.model(imodel).plot(iplot).dLink)
+%             for iy = 1:length(ar.model(imodel).data(idata).y)
+%                 plotID(end+1) =
+%                 plotName(end+1) = [ar.model(imodel).data(idata).yNames{iy}, ...
+%                     '_' ar.model(imodel).plot(iplot).condition{}];
+%                 plotTypeSimulation(end+1) =
+%                 plotTypeData(end+1) =
+%                 datasetId(end+1) =
+%                 independentVariable(end+1) =
+%                 [independentVariableOffset] =
+%                 [independentVariableName] =
+%                 [legendEntry] = ar.model(imodel).plot(iplot).condition{};
+%             end
+%         end
+%     end
+% end
+%
+%writetable(visT, 'peTAB_visualization.tsv', 'Delimiter', '\t', 'FileType', 'text')
 
 end
