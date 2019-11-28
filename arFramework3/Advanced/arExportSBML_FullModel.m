@@ -569,7 +569,8 @@ function [M] = GetInputs(M,F,m)
 
             end
 
-            % initValue = ar.model(m).condition(c).uFineSimu(1,ju);
+            %initValue = ar.model(m).condition(c).uFineSimu(1,ju);
+            initValue = 0;
             % Technically, in the SBML standard, it cannot be considered constant
             % if there is a rule that applies to it. Any value other than zero in
             % this code will fail SBML validation despite being conceptually

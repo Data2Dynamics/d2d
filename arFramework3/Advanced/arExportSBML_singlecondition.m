@@ -1,4 +1,4 @@
-% function arExportSBML_datamodel(m, d, steadystate)
+% function arExportSBML_singlecondition(m, d, steadystate)
 %
 % formerly arExportSBML_benchmark
 %
