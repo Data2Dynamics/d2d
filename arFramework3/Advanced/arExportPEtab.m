@@ -24,13 +24,13 @@ for imodel = 1:length(ar.model)
         for icond = 1:length(ar.model(imodel).data(idata).condition)
             condPar{end+1} = ar.model(imodel).data(idata).condition(icond).parameter;
         end
-        % catch d2d fix for predictors that are not time
-        if ~(strcmp(ar.model(imodel).data(idata).t, 'time') || strcmp(ar.model(imodel).data(idata).t, 't'))
-            for it = 1:length(ar.model(imodel).data(idata).tExp)
-                condPar{end+1} = [ar.model(imodel).data(idata).t...
-                    '_' num2str(it)];
-            end
-        end
+%         % catch d2d fix for predictors that are not time
+%         if ~(strcmp(ar.model(imodel).data(idata).t, 'time') || strcmp(ar.model(imodel).data(idata).t, 't'))
+%             for it = 1:length(ar.model(imodel).data(idata).tExp)
+%                 condPar{end+1} = [ar.model(imodel).data(idata).t...
+%                     '_' num2str(it)];
+%             end
+%         end
     end
     peConds = unique(condPar);
     
@@ -71,49 +71,75 @@ for imodel = 1:length(ar.model)
                 
         % measurements
         for iy = 1:length(ar.model(imodel).data(idata).y)
-            observableIDs = repmat(ar.model(imodel).data(idata).y(iy), ...
+            observableId = repmat(ar.model(imodel).data(idata).y(iy), ...
                 [length(ar.model(imodel).data(idata).yExp(:,iy)) 1]);
-            
-            measurements = ar.model(imodel).data(idata).yExp(:, iy);
-            timepoints = ar.model(imodel).data(idata).tExp;
-            
-            obsTrafos = cell(length(timepoints),1);
-            obsTrafos(:) = {'log10'};
-            
-            if ~ar.model(imodel).data(idata).logfitting(iy)
-                obsTrafos(:) = {'lin'};
+            rowsToAdd = [table(observableId)];
+
+            measurement = ar.model(imodel).data(idata).yExp(:, iy);
+            time = ar.model(imodel).data(idata).tExp;
+
+            % pre-equiblibration
+            if isfield(ar, 'ss_conditions')
+                preEquilibrationId = cell(length(time),1);
+                preEquilibrationId(:) = ...
+                    {['model' num2str(imodel) '_data' ...
+                    num2str(ar.model(imodel).condition(ar.model.ss_condition.src).dLink)]};
+                rowsToAdd = [rowsToAdd, table(preEquilibrationId)];
             end
             
-            simulationConditionIDs = repmat({simuConditionID}, [length(timepoints) 1]);
+            simulationConditionId = repmat({simuConditionID}, [length(time) 1]);
+            rowsToAdd = [rowsToAdd, table(simulationConditionId)];
+
+            rowsToAdd = [rowsToAdd, table(measurement)];
+            rowsToAdd = [rowsToAdd, table(time)];
             
+            % observable parameters
             obsPars_tmp = strsplit(ar.model(imodel).data(idata).fy{iy}, {'+','-','*','/','(',')','^',' '});
             obsPars_tmp = intersect(obsPars_tmp, ar.pLabel);
             obsPars_tmp = strcat(obsPars_tmp, ';');
-            observableParameters = repmat({[obsPars_tmp{:}]}, [length(timepoints) 1]);
+            observableParameters = repmat({[obsPars_tmp{:}]}, [length(time) 1]);
+            rowsToAdd = [rowsToAdd, table(observableParameters)];
             
+            % noise parameters
             noisePars_tmp = strsplit(ar.model(imodel).data(idata).fystd{iy}, {'+','-','*','/','(',')','^',' '});
             noisePars_tmp = intersect(noisePars_tmp, ar.pLabel);
             noisePars_tmp = strcat(noisePars_tmp, repmat(';', [length(noisePars_tmp)-1 1]));
-            noiseParameters = repmat({[noisePars_tmp{:}]}, [length(timepoints) 1]);
-            
-            noiseDist = cell(length(timepoints),1);
-            noiseDist(:) = {'normal'}; % others not possible in d2d
-            
-            experimentId = cell(length(timepoints),1);
+            noiseParameters = repmat({[noisePars_tmp{:}]}, [length(time) 1]);
+            rowsToAdd = [rowsToAdd, table(noiseParameters)];
+
+            % observable trafos
+            observableTransformation = cell(length(time),1);
+            observableTransformation(:) = {'log10'};
+            if ~ar.model(imodel).data(idata).logfitting(iy)
+                observableTransformation(:) = {'lin'};
+            end
+            rowsToAdd = [rowsToAdd, table(observableTransformation)];
+
+            % noise dists
+            noiseDistribution = cell(length(time),1);
+            noiseDistribution(:) = {'normal'}; % others not possible in d2d
+            rowsToAdd = [rowsToAdd, table(noiseDistribution)];
+
+            % experiment id
+            experimentId = cell(length(time),1);
             experimentId(:) = {ar.model(imodel).data(idata).name};
+            rowsToAdd = [rowsToAdd, table(experimentId)];
 
-            indVariableId = cell(length(timepoints),1);
+            % idenpendent variable id
+            indVariableId = cell(length(time),1);
             indVariableId(:) = {'time'};
-
+            rowsToAdd = [rowsToAdd, table(indVariableId)];
+            
             % for dose response measurements:
             if isfield(ar.model(imodel).data(idata), 'response_parameter') && ...
                     ~isempty(ar.model(imodel).data(idata).response_parameter)
                 indVariableId(:) = {ar.model(imodel).data(idata).response_parameter};
             end
             
-            measT = [measT; table(observableIDs,simulationConditionIDs,...
-                measurements,timepoints,observableParameters, ...
-                noiseParameters, obsTrafos, noiseDist, experimentId, indVariableId)];
+            measT = [measT; rowsToAdd];
+%             measT = [measT; table(observableIDs,preEquilibrationId,simulationConditionIDs,...
+%                 measurements,timepoints,observableParameters, ...
+%                 noiseParameters, obsTrafos, noiseDist, experimentId, indVariableId)];
         end
     end
     
@@ -123,10 +149,10 @@ for imodel = 1:length(ar.model)
     condT = [table(conditionID'), condT];
     condT.Properties.VariableNames{1} = 'conditionId';
     
-    measT.Properties.VariableNames = {'observableId', 'simulationConditionId', ...
-        'measurement', 'time', 'observableParameters', 'noiseParameters',...
-        'observableTransformation', 'noiseDistribution', 'experimentId', ...
-        'independentVariableId'};
+%     measT.Properties.VariableNames = {'observableId', 'preEquilibrationId',...
+%         'simulationConditionId', 'measurement', 'time', ...
+%         'observableParameters', 'noiseParameters', 'observableTransformation', ...
+%         'noiseDistribution', 'experimentId', 'independentVariableId'};
     
     writetable(condT, ['SBML_Export/peTABcond_model' num2str(imodel) '.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
