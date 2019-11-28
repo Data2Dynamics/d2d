@@ -8,7 +8,6 @@ function y = arExportPEtab(dummy)
 % - Measurement table: preEquilibrationConditionId,
 % - Visualization table
 % - Parameter table: priorType, priorParameters: not yet specified!
-% - Different noise distributions
 
 global ar
 
@@ -98,11 +97,23 @@ for imodel = 1:length(ar.model)
             noiseParameters = repmat({[noisePars_tmp{:}]}, [length(timepoints) 1]);
             
             noiseDist = cell(length(timepoints),1);
-            noiseDist(:) = {'normal'};
+            noiseDist(:) = {'normal'}; % others not possible in d2d
+            
+            experimentId = cell(length(timepoints),1);
+            experimentId(:) = {ar.model(imodel).data(idata).name};
+
+            indVariableId = cell(length(timepoints),1);
+            indVariableId(:) = {'time'};
+
+            % for dose response measurements:
+            if isfield(ar.model(imodel).data(idata), 'response_parameter') && ...
+                    ~isempty(ar.model(imodel).data(idata).response_parameter)
+                indVariableId(:) = {ar.model(imodel).data(idata).response_parameter};
+            end
             
             measT = [measT; table(observableIDs,simulationConditionIDs,...
                 measurements,timepoints,observableParameters, ...
-                noiseParameters, obsTrafos, noiseDist)];
+                noiseParameters, obsTrafos, noiseDist, experimentId, indVariableId)];
         end
     end
     
@@ -114,7 +125,8 @@ for imodel = 1:length(ar.model)
     
     measT.Properties.VariableNames = {'observableId', 'simulationConditionId', ...
         'measurement', 'time', 'observableParameters', 'noiseParameters',...
-        'observableTransformation', 'noiseDistribution'};
+        'observableTransformation', 'noiseDistribution', 'experimentId', ...
+        'independentVariableId'};
     
     writetable(condT, ['SBML_Export/peTABcond_model' num2str(imodel) '.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
