@@ -12,8 +12,8 @@ function y = arExportPEtab(dummy)
 global ar
 
 %% Write Export Directory
-if(~exist('./SBML_Export', 'dir'))
-    mkdir('./SBML_Export')
+if(~exist('./PEtab', 'dir'))
+    mkdir('./PEtab')
 end
 
 for imodel = 1:length(ar.model)
@@ -76,6 +76,10 @@ for imodel = 1:length(ar.model)
             rowsToAdd = [table(observableId)];
 
             measurement = ar.model(imodel).data(idata).yExp(:, iy);
+            if ar.model(imodel).data(idata).logfitting(iy)
+                measurement = 10.^measurement;
+            end
+
             time = ar.model(imodel).data(idata).tExp;
 
             % pre-equiblibration
@@ -101,10 +105,19 @@ for imodel = 1:length(ar.model)
             rowsToAdd = [rowsToAdd, table(observableParameters)];
             
             % noise parameters
-            noisePars_tmp = strsplit(ar.model(imodel).data(idata).fystd{iy}, {'+','-','*','/','(',')','^',' '});
-            noisePars_tmp = intersect(noisePars_tmp, ar.pLabel);
-            noisePars_tmp = strcat(noisePars_tmp, repmat(';', [length(noisePars_tmp)-1 1]));
-            noiseParameters = repmat({[noisePars_tmp{:}]}, [length(time) 1]);
+            expErrors = ar.model(imodel).data(idata).yExpStd(:,iy);
+            if ar.config.fiterrors == -1
+                noiseParameters = expErrors;
+            else
+                if ar.config.fiterrors == 0 && sum(isnan(expErrors) == numel(expErrors))
+                    noiseParameters = expErrors;
+                else
+                    noisePars_tmp = strsplit(ar.model(imodel).data(idata).fystd{iy}, {'+','-','*','/','(',')','^',' '});
+                    noisePars_tmp = intersect(noisePars_tmp, ar.pLabel);
+                    noisePars_tmp = strcat(noisePars_tmp, repmat(';', [length(noisePars_tmp)-1 1]));
+                    noiseParameters = repmat({[noisePars_tmp{:}]}, [length(time) 1]);
+                end
+            end
             rowsToAdd = [rowsToAdd, table(noiseParameters)];
 
             % observable trafos
@@ -120,26 +133,23 @@ for imodel = 1:length(ar.model)
             noiseDistribution(:) = {'normal'}; % others not possible in d2d
             rowsToAdd = [rowsToAdd, table(noiseDistribution)];
 
-            % experiment id
-            experimentId = cell(length(time),1);
-            experimentId(:) = {ar.model(imodel).data(idata).name};
-            rowsToAdd = [rowsToAdd, table(experimentId)];
-
-            % idenpendent variable id
-            indVariableId = cell(length(time),1);
-            indVariableId(:) = {'time'};
-            rowsToAdd = [rowsToAdd, table(indVariableId)];
-            
-            % for dose response measurements:
-            if isfield(ar.model(imodel).data(idata), 'response_parameter') && ...
-                    ~isempty(ar.model(imodel).data(idata).response_parameter)
-                indVariableId(:) = {ar.model(imodel).data(idata).response_parameter};
-            end
+%             % experiment id
+%             experimentId = cell(length(time),1);
+%             experimentId(:) = {ar.model(imodel).data(idata).name};
+%             rowsToAdd = [rowsToAdd, table(experimentId)];
+% 
+%             % idenpendent variable id
+%             indVariableId = cell(length(time),1);
+%             indVariableId(:) = {'time'};
+%             rowsToAdd = [rowsToAdd, table(indVariableId)];
+%             
+%             % for dose response measurements:
+%             if isfield(ar.model(imodel).data(idata), 'response_parameter') && ...
+%                     ~isempty(ar.model(imodel).data(idata).response_parameter)
+%                 indVariableId(:) = {ar.model(imodel).data(idata).response_parameter};
+%             end
             
             measT = [measT; rowsToAdd];
-%             measT = [measT; table(observableIDs,preEquilibrationId,simulationConditionIDs,...
-%                 measurements,timepoints,observableParameters, ...
-%                 noiseParameters, obsTrafos, noiseDist, experimentId, indVariableId)];
         end
     end
     
@@ -148,15 +158,10 @@ for imodel = 1:length(ar.model)
     
     condT = [table(conditionID'), condT];
     condT.Properties.VariableNames{1} = 'conditionId';
-    
-%     measT.Properties.VariableNames = {'observableId', 'preEquilibrationId',...
-%         'simulationConditionId', 'measurement', 'time', ...
-%         'observableParameters', 'noiseParameters', 'observableTransformation', ...
-%         'noiseDistribution', 'experimentId', 'independentVariableId'};
-    
-    writetable(condT, ['SBML_Export/peTABcond_model' num2str(imodel) '.tsv'],...
+        
+    writetable(condT, ['PEtab/cond_model' num2str(imodel) '.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
-    writetable(measT, ['SBML_Export/peTABmeas_model' num2str(imodel) '.tsv'],...
+    writetable(measT, ['PEtab/meas_model' num2str(imodel) '.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
 end
 %% Parameter Table
@@ -190,7 +195,7 @@ parT = table(parameterID(:), parameterName(:), parameterScale(:), ...
 parT.Properties.VariableNames = {'parameterID', 'parameterName', ...
     'parameterScale', 'lowerBound', 'upperBound', 'nominalValue', 'estimate',};
 
-writetable(parT, 'SBML_Export/peTABpars_model.tsv',...
+writetable(parT, 'PEtab/pars_model.tsv',...
     'Delimiter', '\t', 'FileType', 'text')
 
 %% Visualization Table
