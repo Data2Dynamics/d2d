@@ -1,8 +1,10 @@
-function y = arExportPEtab(dummy)
-% function y = arExportPEtab
+function arExportPEtab(export_SBML)
+% arExportPEtab(export_SBML)
 %
-% Export data, condition and measurement details to PEtab data format
-% See also https://github.com/ICB-DCM/PEtab
+% Exports model, data, experimental condition and measurement details to 
+% PEtab format (https://github.com/ICB-DCM/PEtab)
+%
+%   export_SBML   export model SBML file as part of PEtab specification [true]
 
 % Not implemented yet:
 % - Measurement table: preEquilibrationConditionId,
@@ -11,11 +13,21 @@ function y = arExportPEtab(dummy)
 
 global ar
 
+if ~exist('export_SBML') || isempty(export_SBML)
+    export_SBML = true;
+end
+
 %% Write Export Directory
 if(~exist('./PEtab', 'dir'))
     mkdir('./PEtab')
 end
 
+%% Export SBML model
+if export_SBML
+    arExportSBML();
+end
+
+%% Export data, conditions & parameters
 for imodel = 1:length(ar.model)
     %% Condition and Measurement Table
     % Collect conditions

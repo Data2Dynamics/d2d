@@ -77,10 +77,13 @@ if(a == 1)
 %     end
 % mine!
 
-    if(~exist('./SBML_Export', 'dir'))
-        mkdir('./SBML_Export')
+    if(~exist('./PEtab', 'dir'))
+        mkdir('./PEtab')
     end
-    OutputSBML(M, ['SBML_Export/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
+    if(~exist('./PEtab/SBML_singleConditions', 'dir'))
+        mkdir('./PEtab/SBML_singleConditions')
+    end
+    OutputSBML(M, ['PEtab/SBML_singleConditions/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
 else
     error('%s', b);
 end
