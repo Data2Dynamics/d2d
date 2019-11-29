@@ -13,7 +13,7 @@
 % observation function is log-transformed in ar, the log trafo will be
 % written into SBML as well.
 
-function arExportSBML_singlecondition(m, d, steadystate)
+function arExportSBML_singlecondition(m, d, steadystate, name)
 
 global ar
 
@@ -83,7 +83,7 @@ if(a == 1)
     if(~exist('./PEtab/SBML_singleConditions', 'dir'))
         mkdir('./PEtab/SBML_singleConditions')
     end
-    OutputSBML(M, ['PEtab/SBML_singleConditions/model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
+    OutputSBML(M, ['PEtab/SBML_singleConditions/' name 'model' num2str(m) '_data' num2str(d) '_l2v4.xml']);
 else
     error('%s', b);
 end

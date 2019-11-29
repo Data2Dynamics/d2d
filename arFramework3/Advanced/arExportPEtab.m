@@ -1,13 +1,13 @@
-function arExportPEtab(export_SBML)
+function arExportPEtab(name, export_SBML)
 % arExportPEtab(export_SBML)
 %
 % Exports model, data, experimental condition and measurement details to 
 % PEtab format (https://github.com/ICB-DCM/PEtab)
 %
+%   name          string that will be prepended to all exported files
 %   export_SBML   export model SBML file as part of PEtab specification [true]
 
 % Not implemented yet:
-% - Measurement table: preEquilibrationConditionId,
 % - Visualization table
 % - Parameter table: priorType, priorParameters: not yet specified!
 
@@ -16,6 +16,10 @@ global ar
 if ~exist('export_SBML') || isempty(export_SBML)
     export_SBML = true;
 end
+if ~exist('name') || isempty(name)
+    name = '';
+end
+
 
 %% Write Export Directory
 if(~exist('./PEtab', 'dir'))
@@ -171,9 +175,9 @@ for imodel = 1:length(ar.model)
     condT = [table(conditionID'), condT];
     condT.Properties.VariableNames{1} = 'conditionId';
         
-    writetable(condT, ['PEtab/cond_model' num2str(imodel) '.tsv'],...
+    writetable(condT, ['PEtab/' name 'cond_model' num2str(imodel) '.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
-    writetable(measT, ['PEtab/meas_model' num2str(imodel) '.tsv'],...
+    writetable(measT, ['PEtab/' name 'meas_model' num2str(imodel) '.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
 end
 %% Parameter Table
@@ -207,7 +211,7 @@ parT = table(parameterID(:), parameterName(:), parameterScale(:), ...
 parT.Properties.VariableNames = {'parameterID', 'parameterName', ...
     'parameterScale', 'lowerBound', 'upperBound', 'nominalValue', 'estimate',};
 
-writetable(parT, 'PEtab/pars_model.tsv',...
+writetable(parT, ['PEtab/' name 'pars_model.tsv'],...
     'Delimiter', '\t', 'FileType', 'text')
 
 %% Visualization Table

@@ -6,7 +6,7 @@
 %
 % m:            model index
 
-function arExportSBML_FullModel(m,steadystate)
+function arExportSBML_FullModel(m,steadystate,name)
 
 answer = questdlg('This file is not yet working properly! Do you still want to continue?', ...
 	'Problem!', ...
@@ -81,7 +81,7 @@ if(a == 1)
     if(~exist('./PEtab', 'dir'))
         mkdir('./PEtab')
     end
-    OutputSBML(M, ['PEtab/model' num2str(m) '_l2v4.xml']);
+    OutputSBML(M, ['PEtab/' name 'model' num2str(m) '_l2v4.xml']);
 else
     error('%s', b);
 end
