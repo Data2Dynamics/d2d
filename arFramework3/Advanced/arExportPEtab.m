@@ -28,7 +28,7 @@ end
 
 %% Export SBML model
 if export_SBML
-    arExportSBML();
+    arExportSBML([],name);
 end
 
 %% Export data, conditions & parameters

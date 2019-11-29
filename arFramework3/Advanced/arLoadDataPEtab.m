@@ -1,19 +1,19 @@
 % arLoadDataPEtab(datafilename, [m])
-% 
+%
 % This function can be used to process data files in the format of PEtab.
-% 
+%
 %   datafilename    name of file.
-% 
+%
 %   m               model that shall be linked to. Name or ID [length(ar.model)]
 %
-% In this data format, there is one single .tsv-file that contains all data 
-% points. This data format shall allow easier transitions between modeling 
+% In this data format, there is one single .tsv-file that contains all data
+% points. This data format shall allow easier transitions between modeling
 % tools.
-% This load-data-function utilizes a different approach than the usual data.def file: 
+% This load-data-function utilizes a different approach than the usual data.def file:
 % Firstly, an empty data struct is created which is subsequently appended to the ar struct.
-% 
+%
 % See also arCreateDataStruct arAddDataStruct
-% 
+%
 % References
 %   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
 
@@ -65,10 +65,10 @@ for iSim = 1:length(uniSim)
     args= {};
     % extract important info for data struct from .tsv file
     Tsub = T(iCSim == iSim,:);
-    [uniObs,~,iCObs] = unique(cellstr(Tsub.observableId));
- 
+    [uniObs,~,iCObs] = unique(cellstr(Tsub.observableId),'stable');
+    
     [uniTimes,~,iTExp] = unique(Tsub.time);
-%    [~,ia,ic] = unique([iCobs,iTExp],'rows');
+    %    [~,ia,ic] = unique([iCobs,iTExp],'rows');
     if length(unique(iTExp(iCObs==1)))<length(iTExp(iCObs==1))
         uniTimes = Tsub.time(1:sum(iCObs==1));
         iTExp = [];
@@ -115,10 +115,10 @@ for iSim = 1:length(uniSim)
     for i = 1:length(Sd2d.y)
         for j = 1:length(ar.model)
             newpold = ar.model(j).fp(~cellfun('isempty',regexp(ar.model.p,['noiseParameters\d_' Sd2d.y{i} '$'])));
-         newPars = Tsub.noiseParameters(contains(Tsub.observableId,Sd2d.y{i}));
+            newPars = Tsub.noiseParameters(contains(Tsub.observableId,Sd2d.y{i}));
             if ~(isempty(newpold) || isnumeric(newPars) || isempty(newPars))
                 newPars = strsplit(str2mat(unique(newPars)),';');
-                pold = [pold;newpold];fp = [fp;newPars];    
+                pold = [pold;newpold];fp = [fp;newPars];
             end
             newpold = ar.model(j).fp(~cellfun('isempty',regexp(ar.model.p,['observableParameters\d_' Sd2d.y{i} '$'])));
             newPars = Tsub.observableParameters(contains(Tsub.observableId,Sd2d.y{i}));

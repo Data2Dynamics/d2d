@@ -17,7 +17,7 @@
 function arLoadParsPEtab(filename)
 
 global ar
-
+    
 if ~contains(filename,'.tsv')
     if ~contains(filename,'.')
         filename = [filename '.tsv'];
@@ -41,6 +41,7 @@ end
 arSetPars(ar.pLabel(ia), T.nominalValue(ib), T.estimate(ib), T.qLog10(ib), T.lowerBound(ib), T.upperBound(ib))
 
 % this is currently under development on the PEtab side.
+if isfield(T,'priorType')
 for i=1:length(BothPars)
     if ischar(T.priorType(ib(i)))
         if isnumeric(T.priorParameters)
@@ -49,4 +50,5 @@ for i=1:length(BothPars)
             arSetPrior(ia(i),T.priorType(ib(i)))
         end
     end
+end
 end
