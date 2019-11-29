@@ -618,78 +618,76 @@ for j=1:length(m.reaction)
     end
 end
 
+
+% Initial values
 specs = {};
 spec_value = [];
 flag = zeros(length(m.species),1);
+idx_assval = zeros(length(m.species),1);
+
+% flag(j) == 1 -> fprintf assignment_value of idx_assval = i;
+% flag(j) == 0 -> fprintf initial conc
+% flag(j) == NaN -> do nothing
 for j=1:length(m.species)
-    skip = 0;
     for k=1:length(m.parameter)
         if find(contains(m.parameter(k).name,['init_' m.species(j).name]))
-            skip=skip+1;
+            flag(j) = NaN;
+            continue
+        end
+        if isnan(flag(j))
+            continue
         end
     end
-    if skip==0
-        %Test ob assignment rule existiert
-        for i=1:length(m.initialAssignment)
-            if any(strcmp(m.initialAssignment(i).symbol,{m.species(j).id}))
-                
-                % initial assignments
-                flag(j) = 1; %  initial value is set here!
-                
-                assignment_value = m.initialAssignment(i).math;
-                assignment_value = subs(assignment_value, pars, par_value);
-                %assignment_value = subs(assignment_value, specs, spec_value);
-                %assignment_value = subs(assignment_value, comps, comp_value);
-                assignment_value = eval(assignment_value);
-                
-                ub = 1000;
-                if(assignment_value>ub)
-                    ub = assignment_value * 10;
-                end
-                
-                fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', ['init_' sym_check(m.initialAssignment(i).symbol)], ...
-                    assignment_value, 1, ub);
-                
-                %                 if any(strcmp(m.initialAssignment(i).symbol,{m.parameter.id}))
-                %                     ub = 1000;
-                %                     if assignment_value > ub
-                %                         ub = 10*assignment_value;
-                %                     end
-                %                     fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.initialAssignment(i).symbol), ...
-                %                         assignment_value, 1, ub);
-                %                 end
-            end
-        end
-        
-        if flag(j) == 0
-            
-            if(m.species(j).isSetInitialConcentration)
-                ub = 1000;
-                if(m.species(j).initialConcentration>ub)
-                    ub = m.species(j).initialConcentration*10;
-                end
-                fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-                    m.species(j).initialConcentration, 0, ub);
-                specs{end+1} = m.species(j).id2;
-                spec_value(end+1) = m.species(j).initialConcentration;
-            elseif(m.species(j).isSetInitialAmount)
-                comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
-                comp_vol = m.compartment(comp_id).size;
-                initial_conc = m.species(j).initialAmount/comp_vol;
-                ub = 1000;
-                if(initial_conc>ub)
-                    ub = initial_conc*10;
-                end
-                fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-                    initial_conc, 0, ub);
-                specs{end+1} = m.species(j).id2;
-                spec_value(end+1) = initial_conc;
-            end
-            %        Ende falls nein
+    for i=1:length(m.initialAssignment)
+        if any(strcmp(m.initialAssignment(i).symbol,{m.species(j).id}))
+            flag(j) = 1;
+            idx_assval(j) = i;
         end
     end
 end
 
+for j=1:length(m.species)
+    if flag(j) == 1
+        assignment_value = m.initialAssignment(idx_assval(j)).math;
+        assignment_value = subs(assignment_value, pars, par_value);
+        %assignment_value = subs(assignment_value, specs, spec_value);
+        assignment_value = subs(assignment_value, comps, comp_value);
+        assignment_value = eval(assignment_value);
+        
+        ub = 1000;
+        if(assignment_value>ub)
+            ub = assignment_value * 10;
+        end
+        
+        fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', ['init_' sym_check(m.initialAssignment(idx_assval(j)).symbol)], ...
+            assignment_value, 1, ub);
+        
+    elseif flag(j) == 0
+        
+        if(m.species(j).isSetInitialConcentration)
+            ub = 1000;
+            if(m.species(j).initialConcentration>ub)
+                ub = m.species(j).initialConcentration*10;
+            end
+            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
+                m.species(j).initialConcentration, 0, ub);
+            specs{end+1} = m.species(j).id2;
+            spec_value(end+1) = m.species(j).initialConcentration;
+        elseif(m.species(j).isSetInitialAmount)
+            comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
+            comp_vol = m.compartment(comp_id).size;
+            initial_conc = m.species(j).initialAmount/comp_vol;
+            ub = 1000;
+            if(initial_conc>ub)
+                ub = initial_conc*10;
+            end
+            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
+                initial_conc, 0, ub);
+            specs{end+1} = m.species(j).id2;
+            spec_value(end+1) = initial_conc;
+        end
+    end
+end
 
 fclose(fid);
 
