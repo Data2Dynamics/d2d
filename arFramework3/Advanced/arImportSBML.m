@@ -622,32 +622,34 @@ end
 % Initial values
 specs = {};
 spec_value = [];
-flag = zeros(length(m.species),1);
+init_status = 2+zeros(length(m.species),1);
 idx_assval = zeros(length(m.species),1);
 
+% flag(j) == 0 -> do nothing (init is parameter)
 % flag(j) == 1 -> fprintf assignment_value of idx_assval = i;
-% flag(j) == 0 -> fprintf initial conc
-% flag(j) == NaN -> do nothing
+% flag(j) == 2 -> fprintf initial conc from species field in SBML (default behavior)
+
 for j=1:length(m.species)
     for k=1:length(m.parameter)
         if find(contains(m.parameter(k).name,['init_' m.species(j).name]))
-            flag(j) = NaN;
-            continue
-        end
-        if isnan(flag(j))
+            init_status(j) = 0;
             continue
         end
     end
+    if init_status(j) == 0
+        continue
+    end
     for i=1:length(m.initialAssignment)
         if any(strcmp(m.initialAssignment(i).symbol,{m.species(j).id}))
-            flag(j) = 1;
+            init_status(j) = 1;
             idx_assval(j) = i;
+            continue
         end
     end
 end
 
 for j=1:length(m.species)
-    if flag(j) == 1
+    if init_status(j) == 1
         assignment_value = m.initialAssignment(idx_assval(j)).math;
         assignment_value = subs(assignment_value, pars, par_value);
         %assignment_value = subs(assignment_value, specs, spec_value);
@@ -662,7 +664,7 @@ for j=1:length(m.species)
         fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', ['init_' sym_check(m.initialAssignment(idx_assval(j)).symbol)], ...
             assignment_value, 1, ub);
         
-    elseif flag(j) == 0
+    elseif init_status(j) == 2
         
         if(m.species(j).isSetInitialConcentration)
             ub = 1000;
