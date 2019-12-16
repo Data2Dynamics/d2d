@@ -29,7 +29,7 @@ end
 
 
 if iscell(fit)
-    if ~isdir(folder)
+    if ~isfolder(folder)
         mkdir(folder);
     end
     
@@ -93,7 +93,7 @@ else
     y = fit.data.yExp;
     y = y(ceil(length(y)*0.7):end);
     if max(y)>yl(1)+0.7*range(yl)   
-        if isempty(h4)
+        if isempty(h4) && isfield(fit,'rmse')
             legend([h2(1)],sprintf('RTF (RMSE=%.2f)',fit.rmse),'Location','SouthEast');
         elseif ~isfield(fit.data,'ystd')
            if isfield(fit,'rmse')
@@ -109,7 +109,7 @@ else
             end
         end
     else
-        if isempty(h4)
+        if isempty(h4) && isfield(fit,'rmse')
             legend([h2(1)],sprintf('RTF (RMSE=%.2f)',fit.rmse));
         elseif ~isfield(fit.data,'ystd') 
             legend([h1(1),h2(1),h3(1)],'ODE','RTF',sprintf('Approx. error = %.2f',fit.approxErr));

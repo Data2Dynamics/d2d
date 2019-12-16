@@ -75,7 +75,7 @@ for j=1:length(jks)
     
     ps = ar.ple.ps{jk};
     
-    dchi2 = chi2inv(1-ar.ple.alpha_level, ar.ple.dof_point);
+    dchi2 = arChi2inv(1-ar.ple.alpha_level, ar.ple.dof_point);
     
     gs1(j) = subplot(nrows, ncols,j);
     

@@ -69,7 +69,7 @@ elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))
     chi2 = 2*ar.ndata_err*log(sqrt(2*pi)) + chi2;
 end
 
-dchi2 = chi2inv(1-ar.ppl.options.alpha_level, 1);
+dchi2 = arChi2inv(1-ar.ppl.options.alpha_level, 1);
 
 figure(1);
 clf;

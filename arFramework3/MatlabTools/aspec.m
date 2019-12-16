@@ -28,5 +28,5 @@ swgl = glaetten(sw, glbreite);
 %% Vertrauensintervall
 alpha = 0.05;
 v = sum(hann(2*glbreite+1).^2) / 2;
-swgl_low = swgl / v * chi2inv(alpha/2, v);
-swgl_up = swgl / v * chi2inv(1 - alpha/2, v);
+swgl_low = swgl / v * arChi2inv(alpha/2, v);
+swgl_up = swgl / v * arChi2inv(1 - alpha/2, v);

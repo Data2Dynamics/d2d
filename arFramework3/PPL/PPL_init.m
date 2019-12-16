@@ -56,7 +56,7 @@ function t = PPL_init(ppl_general_struct)
         ar.ppl.options.gamma = 1./ar.ppl.options.stepsize;
     end
     
-    ar.ppl.dchi2 = chi2inv(1-ar.ppl.options.alpha_level, 1);
+    ar.ppl.dchi2 = arChi2inv(1-ar.ppl.options.alpha_level, 1);
     ar.ppl.dchi2;
     arCalcMerit();
 

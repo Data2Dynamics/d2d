@@ -47,7 +47,7 @@ if(length(ar.sampling.ps)==1)
 elseif(length(ar.sampling.ps)==2)
     [X,Y] = meshgrid(ar.sampling.ps{1}, ar.sampling.ps{2});
     
-    dchi2 = chi2inv(0.95, 1);
+    dchi2 = arChi2inv(0.95, 1);
     Cmin = min(chi2s(:));
     
     Cmax = Cmin+dchi2*5;

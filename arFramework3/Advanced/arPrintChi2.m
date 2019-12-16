@@ -109,14 +109,14 @@ for jm=1:length(ar.model)
             res_var = sum(res.^2) / ndata;
             c(end+1) = res_var;
             if(~onesided)
-                q = chi2inv([0.05 0.95],ndata)/ndata;
+                q = arChi2inv([0.05 0.95],ndata)/ndata;
                 if(q(1)<res_var && res_var<q(2))
                     flag = '';
                 else
                     flag = '(***)';
                 end
             else
-                q = chi2inv(0.95,ndata)/ndata;
+                q = arChi2inv(0.95,ndata)/ndata;
                 if(res_var < q)
                     flag = '';
                 else

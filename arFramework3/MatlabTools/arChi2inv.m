@@ -1,12 +1,21 @@
-function inv = chi2inv (x, n)
+% inv = arChi2inv (x, n)
+% 
+%   x    confidence level
+% 
+%   n    degrees of freedom
+% 
+% This function replaces Matlab's chi2inv in order to be independent of the
+% statistics toobox.
+
+function inv = arChi2inv (x, n)
 if (nargin ~= 2)
-    error ('chi2inv: you must give two arguments');
+    error ('arChi2inv: you must give two arguments');
 end
 
 if (~isscalar (n))
     [retval, x, n] = common_size(x, n);
     if (retval > 0)
-        error ('chi2inv: x and n must be of common size or scalar');
+        error ('arChi2inv: x and n must be of common size or scalar');
     end
 end
 

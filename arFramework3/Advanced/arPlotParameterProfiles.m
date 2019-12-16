@@ -25,7 +25,7 @@ end
 
 figure(1); clf;
 
-dchi2 = chi2inv(0.95, 1);
+dchi2 = arChi2inv(0.95, 1);
 
 [nrows, ncols] = arNtoColsAndRows(length(jks));
 

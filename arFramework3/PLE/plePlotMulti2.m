@@ -78,10 +78,10 @@ end
 
 % thresholds
 if(ar.ple.plot_point)
-    plot(xlim, [0 0]+minchi2+chi2inv(1-ar.ple.alpha_level, 1), 'k--')
+    plot(xlim, [0 0]+minchi2+arChi2inv(1-ar.ple.alpha_level, 1), 'k--')
 end
 if(ar.ple.plot_simu)
-    plot(xlim, [0 0]+minchi2+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), 'k--')
+    plot(xlim, [0 0]+minchi2+arChi2inv(1-ar.ple.alpha_level, ar.ple.dof), 'k--')
 end
 
 if(count == 1)

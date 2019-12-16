@@ -22,7 +22,7 @@ end
 ar.config.optim.Algorithm = 'trust-region-reflective';
 
 % chi2 threshold
-ar.ppl.dchi2 = chi2inv(1-ar.ppl.alpha_level, ar.ppl.ndof);
+ar.ppl.dchi2 = arChi2inv(1-ar.ppl.alpha_level, ar.ppl.ndof);
 
 ar.model(m).condition(c).ppl.t = t(:);
 ar.model(m).condition(c).ppl.ix = ix(:);
@@ -215,15 +215,15 @@ end
 end
 
 
-function inv = chi2inv (x, n)
+function inv = arChi2inv (x, n)
 if (nargin ~= 2)
-    error ('chi2inv: you must give two arguments');
+    error ('arChi2inv: you must give two arguments');
 end
 
 if (~isscalar (n))
     [retval, x, n] = common_size(x, n);
     if (retval > 0)
-        error ('chi2inv: x and n must be of common size or scalar');
+        error ('arChi2inv: x and n must be of common size or scalar');
     end
 end
 

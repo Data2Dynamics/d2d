@@ -42,6 +42,7 @@ function varargout = arFit(varargin)
 
 global ar
 global fit
+fit = struct; % overwrite old fit struct
 
 if(nargin==0)
     qglobalar = true;

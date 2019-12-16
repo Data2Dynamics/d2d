@@ -73,8 +73,8 @@ ar.ple.breakonub = false(size(ar.ple.p));
 
 
 ar.ple.alpha_level = 1-alpha;
-ar.ple.dchi2 = chi2inv(1-ar.ple.alpha_level, ar.ple.dof);
-ar.ple.dchi2_point = chi2inv(1-ar.ple.alpha_level, ar.ple.dof_point);
+ar.ple.dchi2 = arChi2inv(1-ar.ple.alpha_level, ar.ple.dof);
+ar.ple.dchi2_point = arChi2inv(1-ar.ple.alpha_level, ar.ple.dof_point);
 
 % magic factors
 ar.ple.chi2_strID_ratio = 1e-1;

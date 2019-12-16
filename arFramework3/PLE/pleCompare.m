@@ -67,7 +67,7 @@ if(isfield(ples{1}, 'dchi2_point'))
         dchi2 = ples{1}.dchi2;
     end
 elseif(isfield(ples{1}, 'alpha') && isfield(ples{1}, 'ndof'))
-    dchi2 = chi2inv(1-ples{1}.alpha, ples{1}.ndof);
+    dchi2 = arChi2inv(1-ples{1}.alpha, ples{1}.ndof);
 else
     error('no information on dchi2, alpha or ndof');
 end

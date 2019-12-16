@@ -118,7 +118,7 @@ chi2s = nan(1,n);
 ps = nan(n,length(pReset));
 errors = nan(1,n);
 
-dchi2 = chi2inv(1-ar.ple.alpha_level, ar.ple.dof_point);
+dchi2 = arChi2inv(1-ar.ple.alpha_level, ar.ple.dof_point);
 rel_increase = 0.5;
 
 dp = 0.1;

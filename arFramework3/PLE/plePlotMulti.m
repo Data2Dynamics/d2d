@@ -158,23 +158,23 @@ for jk=jks
         % thresholds
         if(plot_thresholds)
             if(ar.ple.plot_point)
-                plot(xlim, [0 0]+minchi2+chi2inv(1-ar.ple.alpha_level, 1), 'r--')
+                plot(xlim, [0 0]+minchi2+arChi2inv(1-ar.ple.alpha_level, 1), 'r--')
             end
             if(ar.ple.plot_simu)
-                plot(xlim, [0 0]+minchi2+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), 'r--')
+                plot(xlim, [0 0]+minchi2+arChi2inv(1-ar.ple.alpha_level, ar.ple.dof), 'r--')
             end
             
             if(count == 1)
                 if(ar.ple.plot_point && ~ar.ple.plot_simu)
-                    text(mean(xlim), minchi2+chi2inv(1-ar.ple.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
+                    text(mean(xlim), minchi2+arChi2inv(1-ar.ple.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                         'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
                 elseif(~ar.ple.plot_point && ar.ple.plot_simu)
-                    text(mean(xlim), minchi2+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
+                    text(mean(xlim), minchi2+arChi2inv(1-ar.ple.alpha_level, ar.ple.dof), sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                         'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
                 else
-                    text(mean(xlim), minchi2+chi2inv(1-ar.ple.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
+                    text(mean(xlim), minchi2+arChi2inv(1-ar.ple.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                         'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
-                    text(mean(xlim), minchi2+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
+                    text(mean(xlim), minchi2+arChi2inv(1-ar.ple.alpha_level, ar.ple.dof), sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                         'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
                 end
             end

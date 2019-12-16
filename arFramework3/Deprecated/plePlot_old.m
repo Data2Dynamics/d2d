@@ -131,22 +131,22 @@ for jj=1:length(indices)
         
         % thresholds
         if(pleGlobals.plot_point)
-            plot(xlim, [0 0]+min(chi2s)+chi2inv(1-pleGlobals.alpha_level, 1), 'r--')
+            plot(xlim, [0 0]+min(chi2s)+arChi2inv(1-pleGlobals.alpha_level, 1), 'r--')
         end
         if(pleGlobals.plot_simu)
-            plot(xlim, [0 0]+min(chi2s)+chi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), 'r--')
+            plot(xlim, [0 0]+min(chi2s)+arChi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), 'r--')
         end
         
         if(pleGlobals.plot_point && ~pleGlobals.plot_simu)
-            text(mean(xlim), min(chi2s)+chi2inv(1-pleGlobals.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
+            text(mean(xlim), min(chi2s)+arChi2inv(1-pleGlobals.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
         elseif(~pleGlobals.plot_point && pleGlobals.plot_simu)
-            text(mean(xlim), min(chi2s)+chi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), sprintf('%2i%% (simultaneous)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
+            text(mean(xlim), min(chi2s)+arChi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), sprintf('%2i%% (simultaneous)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
         else
-            text(mean(xlim), min(chi2s)+chi2inv(1-pleGlobals.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
+            text(mean(xlim), min(chi2s)+arChi2inv(1-pleGlobals.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
-            text(mean(xlim), min(chi2s)+chi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), sprintf('%2i%% (simultaneous)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
+            text(mean(xlim), min(chi2s)+arChi2inv(1-pleGlobals.alpha_level, pleGlobals.dof), sprintf('%2i%% (simultaneous)', (1-pleGlobals.alpha_level)*100), 'Color', 'r', ...
                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
         end
             

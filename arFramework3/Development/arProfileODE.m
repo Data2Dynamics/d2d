@@ -31,7 +31,7 @@ end
 n_reopt = 1;
 % quadprog_optims = optimset('Display', 'off');
 
-dchi2 = chi2inv(0.95, 1);
+dchi2 = arChi2inv(0.95, 1);
 dchi2_increase = 0.1;
 step_factor = 1.2;
 step_factor_opt = 10;

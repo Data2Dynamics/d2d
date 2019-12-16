@@ -39,7 +39,7 @@ if(~exist('saveToFile','var'))
 end
 
 if(n < 1) %interpret n as quantil
-    quant = chi2inv(n, numel(ar.p));
+    quant = arChi2inv(n, numel(ar.p));
     maxChi2 = arGetMerit('chi2fit') + quant;
     indices = find(ar.chi2s < maxChi2);
     parameter = ar.ps(indices,:);  

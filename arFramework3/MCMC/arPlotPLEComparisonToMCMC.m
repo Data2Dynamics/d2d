@@ -192,10 +192,10 @@ for FigureNumber = 1:NumberOfFigures
         if(plot_thresholds)
 
             if(ar.ple.plot_point)
-                plot(xlim, [0 0]+minchi2+chi2inv(1-ar.ple.alpha_level, 1), 'r-')
+                plot(xlim, [0 0]+minchi2+arChi2inv(1-ar.ple.alpha_level, 1), 'r-')
             end
             if(ar.ple.plot_simu)
-                plot(xlim, [0 0]+minchi2+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), 'r-')
+                plot(xlim, [0 0]+minchi2+arChi2inv(1-ar.ple.alpha_level, ar.ple.dof), 'r-')
             end
 
 

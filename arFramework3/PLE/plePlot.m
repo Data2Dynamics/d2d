@@ -146,22 +146,22 @@ for jj=1:length(indices)
         
         % thresholds
         if(ar.ple.plot_point)
-            plot(xlim, [0 0]+min(chi2s)+chi2inv(1-ar.ple.alpha_level, 1), 'r--')
+            plot(xlim, [0 0]+min(chi2s)+arChi2inv(1-ar.ple.alpha_level, 1), 'r--')
         end
         if(ar.ple.plot_simu)
-            plot(xlim, [0 0]+min(chi2s)+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), 'r--')
+            plot(xlim, [0 0]+min(chi2s)+arChi2inv(1-ar.ple.alpha_level, ar.ple.dof), 'r--')
         end
         
         if(ar.ple.plot_point && ~ar.ple.plot_simu)
-            text(mean(xlim), min(chi2s)+chi2inv(1-ar.ple.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
+            text(mean(xlim), min(chi2s)+arChi2inv(1-ar.ple.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
         elseif(~ar.ple.plot_point && ar.ple.plot_simu)
-            text(mean(xlim), min(chi2s)+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
+            text(mean(xlim), min(chi2s)+arChi2inv(1-ar.ple.alpha_level, ar.ple.dof), sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
         else
-            text(mean(xlim), min(chi2s)+chi2inv(1-ar.ple.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
+            text(mean(xlim), min(chi2s)+arChi2inv(1-ar.ple.alpha_level, 1), sprintf('%2i%% (point-wise)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
-            text(mean(xlim), min(chi2s)+chi2inv(1-ar.ple.alpha_level, ar.ple.dof), sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
+            text(mean(xlim), min(chi2s)+arChi2inv(1-ar.ple.alpha_level, ar.ple.dof), sprintf('%2i%% (simultaneous)', (1-ar.ple.alpha_level)*100), 'Color', 'r', ...
                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
         end
             

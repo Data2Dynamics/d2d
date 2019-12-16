@@ -65,6 +65,7 @@ def_file = [fileparts(which('arInit')),filesep,'Examples',filesep,'ToyModels',fi
 copyfile(def_file,'Models');
 arLoadModel('TransientFunction_ForConditionFit2');
 fits = cell(0);
+maxTF = [];
 for m=1:length(ar.model)
     for ix=1:length(ar.model(m).x)
         for c=1:length(ar.model(m).condition)
@@ -82,13 +83,15 @@ for m=1:length(ar.model)
             fits{end}.condition.fp = ar.model(m).condition(c).fp;
             fits{end}.condition.p = ar.model(m).condition(c).p;
             fits{end}.label = sprintf('Model%i_%s_Condition%i',fits{end}.m,fits{end}.x,fits{end}.c);
+            
+            fits{end}.data.fp{4} = ['(',num2str(nanmax(fits{end}.data.tExp)),')'];  % 15.10.19, always rescale times based on tExp
         end
     end
 end
 fprintf('%i data-structs created. Start fitting now...\n',length(fits));
 ar.model = ar.model(1:(end-1)); % remove transient function
 
-
+ 
 %% Step2: Fit the transient functions to each data struct:
 ok = cell(0);
 pcatch = cell(0);
