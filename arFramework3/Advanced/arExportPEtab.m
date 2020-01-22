@@ -92,9 +92,6 @@ for imodel = 1:length(ar.model)
             rowsToAdd = [table(observableId)];
 
             measurement = ar.model(imodel).data(idata).yExpRaw(:, iy);
-            if ar.model(imodel).data(idata).logfitting(iy)
-               measurement = 10.^measurement;
-            end
 
             time = ar.model(imodel).data(idata).tExp;
 
