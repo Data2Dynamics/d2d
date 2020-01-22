@@ -181,14 +181,15 @@ parameterScale_tmp = cell(1, length(ar.qLog10));
 parameterScale_tmp(:) = {'lin'};
 parameterScale_tmp(ar.qLog10 == 1) = {'log10'};
 
+clear nominalValue_tmp
 nominalValue_tmp = ar.p;
-%nominalValue_tmp = ar.qLog10.*nominalValue_tmp + (1-ar.qLog10).*10.^nominalValue_tmp;
+nominalValue_tmp = (1-ar.qLog10).*nominalValue_tmp + ar.qLog10.*10.^nominalValue_tmp;
 
 lowerBound_tmp = ar.lb;
-%lowerBound_tmp = ar.qLog10.*lowerBound_tmp + (1-ar.qLog10).*10.^lowerBound_tmp;
+lowerBound_tmp = (1-ar.qLog10).*lowerBound_tmp + ar.qLog10.*10.^lowerBound_tmp;
 
 upperBound_tmp = ar.ub;
-%upperBound_tmp = ar.qLog10.*upperBound_tmp + (1-ar.qLog10).*10.^upperBound_tmp;
+upperBound_tmp = (1-ar.qLog10).*upperBound_tmp + ar.qLog10.*10.^upperBound_tmp;
 
 estimate_tmp = ar.qFit;
 estimate_tmp(ar.qFit == 2) = 0;
