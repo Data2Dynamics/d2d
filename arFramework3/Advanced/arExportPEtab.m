@@ -1,5 +1,5 @@
 function arExportPEtab(name, export_SBML)
-% arExportPEtab(export_SBML)
+% arExportPEtab(name, export_SBML)
 %
 % Exports model, data, experimental condition and measurement details to 
 % PEtab format (https://github.com/ICB-DCM/PEtab)
@@ -91,9 +91,9 @@ for imodel = 1:length(ar.model)
                 [length(ar.model(imodel).data(idata).yExp(:,iy)) 1]);
             rowsToAdd = [table(observableId)];
 
-            measurement = ar.model(imodel).data(idata).yExp(:, iy);
+            measurement = ar.model(imodel).data(idata).yExpRaw(:, iy);
             if ar.model(imodel).data(idata).logfitting(iy)
-                measurement = 10.^measurement;
+               measurement = 10.^measurement;
             end
 
             time = ar.model(imodel).data(idata).tExp;
@@ -121,7 +121,7 @@ for imodel = 1:length(ar.model)
             rowsToAdd = [rowsToAdd, table(observableParameters)];
             
             % noise parameters
-            expErrors = ar.model(imodel).data(idata).yExpStd(:,iy);
+            expErrors = ar.model(imodel).data(idata).yExpStdRaw(:,iy);
             if ar.config.fiterrors == -1
                 noiseParameters = expErrors;
             else
