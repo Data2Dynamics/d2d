@@ -123,10 +123,10 @@ for imodel = 1:length(ar.model)
             % noise parameters
             expErrors = ar.model(imodel).data(idata).yExpStdRaw(:,iy);
             if ar.config.fiterrors == -1
-                noiseParameters = expErrors;
+                noiseParameters = {expErrors}; % if not cell, tables with cell can't be merged
             else
                 if ar.config.fiterrors == 0 && sum(isnan(expErrors) == numel(expErrors))
-                    noiseParameters = expErrors;
+                    noiseParameters = {expErrors};
                 else
                     noisePars_tmp = strsplit(ar.model(imodel).data(idata).fystd{iy}, {'+','-','*','/','(',')','^',' '});
                     noisePars_tmp = intersect(noisePars_tmp, ar.pLabel);
@@ -164,7 +164,6 @@ for imodel = 1:length(ar.model)
 %                     ~isempty(ar.model(imodel).data(idata).response_parameter)
 %                 indVariableId(:) = {ar.model(imodel).data(idata).response_parameter};
 %             end
-            
             measT = [measT; rowsToAdd];
         end
     end
