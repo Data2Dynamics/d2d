@@ -36,7 +36,7 @@ if length(sbmlmodel) ~= 1
     error('Not exactly one .xml file found.')
 end
 
-arImportSBML([sbmlmodel.folder '/' sbmlmodel.name])
+arImportSBML([sbmlmodel.folder filesep sbmlmodel.name])
 
 arInit
 arLoadModel(strrep(sbmlmodel.name,'.xml',''))

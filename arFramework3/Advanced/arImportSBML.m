@@ -97,9 +97,13 @@ for i=1:length(m.compartment)
 end
 
 %% model file
+if ~isfolder('Models')
+     mkdir('Models');
+end
 [~, name] = fileparts(filename);
 new_filename = strrep(name,' ','_');
 new_filename = strrep(new_filename,'-','_');
+cd('Models')
 fid = fopen([new_filename '.def'], 'w');
 
 fprintf(fid, 'DESCRIPTION\n');
@@ -651,9 +655,9 @@ end
 for j=1:length(m.species)
     if init_status(j) == 1
         assignment_value = m.initialAssignment(idx_assval(j)).math;
-        assignment_value = subs(assignment_value, pars, par_value);
+        assignment_value = arSubs(arSym(assignment_value), arSym(pars), arSym(par_value));
         %assignment_value = subs(assignment_value, specs, spec_value);
-        assignment_value = subs(assignment_value, comps, comp_value);
+        assignment_value = arSubs(arSym(assignment_value), arSym(comps), arSym(comp_value));
         assignment_value = eval(assignment_value);
         
         ub = 1000;
@@ -692,6 +696,9 @@ for j=1:length(m.species)
 end
 
 fclose(fid);
+
+cd('..')
+
 
 %% data file
 
@@ -771,9 +778,7 @@ fclose(fid);
 % 
 % fclose(fid);
 % 
-if ~isdir('./Models')
-     mkdir('Models');
- end
+
 % if(overwrite)
 %     movefile([new_filename '.def'],'Models','f');
  %     system(['mv -f ',new_filename '.def Models']);
@@ -784,7 +789,6 @@ if ~isdir('./Models')
 %     else
 %         fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
 %     end
-     system(['mv ',new_filename '.def Models']);
 % end
  
 % if ~isdir('./Data')
