@@ -46,7 +46,6 @@ for im = 1:length(ar.model)
     ar.model(im).data(id).xz = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
     ar.model(im).data(id).xzType = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
     ar.model(im).data(id).xzLink = nan(sz);
-    ar.model(im).data(id).xzExpSimuType = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
     ar.model(im).data(id).xzScale = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
     for iy = 1:length(ar.model(im).data(id).fy)
 

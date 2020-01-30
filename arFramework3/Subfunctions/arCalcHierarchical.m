@@ -5,12 +5,13 @@ function arCalcHierarchical(sensi)
 %     corresponding condition structure.
 %   - Compute hierarchical scale parameters, overriding any custom values
 %     concerning these parameters.
-%   - For each data series with hierarchical scale parameter, recompute
-%     values of observables using the newly computed scale values,
-%     overriding the results of arSimu.
-%   - Do analogous things for the scales gradients and observables of
-%     sensitivities, based in sxExpSimu or szExpSimu fields in the
-%     condition structures.
+%   - For each data series with hierarchical scale parameter, use the newly
+%     computed scale value to recompute values of observables stored in the
+%     yExpSimu field, overriding the results of arSimu.
+%   - Do analogous things for the scale gradients and sensitivities of
+%     observables. Namely, compute scale gradients based on sxExpSimu or
+%     szExpSimu fields in the condition structures and subsequently
+%     recompute syExpSimu fields in the data structures.
 %
 %   The function takes sensi as an argument to expose interfece coherent
 %   with the convention of other d2d functions. However, this argument
@@ -122,5 +123,3 @@ for is = 1:length(ar.scales)
     end
 end
 % NOTE: Alternatively, we could iterate over the data instead of over the scales in the latter loop.
-
-% TODO: This function should update also yFineSimu.
