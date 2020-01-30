@@ -100,6 +100,10 @@ end
 
 fiterrors_correction_factor = ar.config.fiterrors_correction;
 
+if isfield(ar.config,'useHierarchical') && ar.config.useHierarchical
+    arCalcHierarchical(sensi)
+end
+
 for m=1:length(ar.model)
     if ( isfield( ar.model(m), 'data' ) )
         for d=1:length(ar.model(m).data)
