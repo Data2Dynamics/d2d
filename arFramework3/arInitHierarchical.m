@@ -100,7 +100,7 @@ for im = 1:length(ar.model)
         continue
       end
       % Fourth, test if xz_scale is not just a constant
-      if isSymType(xz_scale,'real') % TODO: Replace isSymType with something available in <R2019a
+      if isNumericSym(xz_scale)
         continue
       end
 
@@ -166,3 +166,10 @@ if sum(ar.type~=0)>0
     warning('Hierarchical optimization is not implemented to work with priors other than flat box yet. Setting all priors to flat box (overriding your settings).')
     ar.type(:)=0;
 end
+
+function b = isNumericSym(x)
+
+    assert(isa(x,'sym'),'Function defined only for symbolic variables.') % So we are sure that x has method char
+    y = str2double(char(x));
+    assert(numel(y)==1,'Excpected a single element.') % This should never happen, but, just in case, let's check it
+    b = ~isnan(y);
