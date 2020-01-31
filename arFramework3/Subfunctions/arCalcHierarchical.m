@@ -1,5 +1,5 @@
 function arCalcHierarchical(sensi)
-%arCalcHierarchical Do the following things:
+%arCalcHierarchical([sensi]) Do the following things:
 %   - For each data series with hierarchical scale parameter, assign
 %     respective x or z values from the xExpSimu or zExpSimu field in the
 %     corresponding condition structure.
@@ -8,19 +8,13 @@ function arCalcHierarchical(sensi)
 %   - For each data series with hierarchical scale parameter, use the newly
 %     computed scale value to recompute values of observables stored in the
 %     yExpSimu field, overriding the results of arSimu.
-%   - Do analogous things for the scale gradients and sensitivities of
-%     observables. Namely, compute scale gradients based on sxExpSimu or
-%     szExpSimu fields in the condition structures and subsequently
-%     recompute syExpSimu fields in the data structures.
+%   - If sensi is true, do analogous things for the scale gradients and
+%     sensitivities of observables. Namely, compute scale gradients based
+%     on sxExpSimu or szExpSimu fields in the condition structures and
+%     subsequently recompute syExpSimu fields in the data structures.
 %
-%   The function takes sensi as an argument to expose interfece coherent
-%   with the convention of other d2d functions. However, this argument
-%   is not used currently. The function always computes scale gradients
-%   and sensitivities of observables, regardless of the value of sensi.
-%   Put simply, if sxExpSimu or szExpSimu values are not up to date, then
-%   the resulting scale gradients and sensitivities of observables are not
-%   up to date. This is actually analogous to what happens with sxExpSimu
-%   and szExpSimu when calling arSimu with sensi set to false.
+%   sensi       logical indicating whether to calculate scale gradients   [true]
+%               and respectively update sensitivities of observables
 
 if ~exist('sensi','var') || isempty(sensi)
     sensi = 1;
@@ -61,13 +55,17 @@ for im = 1:length(ar.model)
         it = ismember(tc,td); % TODO: Test the performance of this function and possibly consider another solution
 
         ar.model(im).data(id).xzExpSimu = zeros(sum(it),length(ar.model(im).data(id).fy));
-        ar.model(im).data(id).sxzExpSimu = zeros(sum(it),length(ar.model(im).data(id).fy),length(ar.model(im).data(id).p));
+        if sensi
+            ar.model(im).data(id).sxzExpSimu = zeros(sum(it),length(ar.model(im).data(id).fy),length(ar.model(im).data(id).p));
+        end
         for iy = 1:length(ar.model(im).data(id).fy)
             if ar.model(im).data(id).useHierarchical(iy)
                 ixz = ar.model(im).data(id).xzLink(iy);
                 xzType = ar.model(im).data(id).xzType{iy};
                 ar.model(im).data(id).xzExpSimu(:,iy) = ar.model(im).condition(ic).(sprintf('%sExpSimu',xzType))(it,ixz); % TODO: Test the performance impact of sprintf
-                ar.model(im).data(id).sxzExpSimu(:,iy,ip) = ar.model(im).condition(ic).(sprintf('s%sExpSimu',xzType))(it,ixz,:);
+                if sensi
+                    ar.model(im).data(id).sxzExpSimu(:,iy,ip) = ar.model(im).condition(ic).(sprintf('s%sExpSimu',xzType))(it,ixz,:);
+                end
             end
         end
 
@@ -94,32 +92,37 @@ for is = 1:length(ar.scales)
         end
         yExp = ar.model(im).data(id).yExp(:,iy);
         xzExpSimu = ar.model(im).data(id).xzExpSimu(:,iy);
-        sxzExpSimu = squeeze(ar.model(im).data(id).sxzExpSimu(:,iy,:));
-
         num = num + sum(yExp.*xzExpSimu./(ystd.^2));
         den = den + sum(xzExpSimu.^2./(ystd.^2));
-
-        numGrad = numGrad + sum(yExp.*sxzExpSimu./(ystd.^2),1);
-        denGrad = denGrad + 2*sum(xzExpSimu.*sxzExpSimu./(ystd.^2),1);
+        if sensi
+            sxzExpSimu = squeeze(ar.model(im).data(id).sxzExpSimu(:,iy,:));
+            numGrad = numGrad + sum(yExp.*sxzExpSimu./(ystd.^2),1);
+            denGrad = denGrad + 2*sum(xzExpSimu.*sxzExpSimu./(ystd.^2),1);
+        end
     end
     ar.scales(is).scale = num/den;
-    ar.scales(is).scaleGrad = (numGrad*den - denGrad*num)/(den^2);
+    if sensi
+        ar.scales(is).scaleGrad = (numGrad*den - denGrad*num)/(den^2);
+    end
     ar.p(ar.scales(is).pLink) = ar.scales(is).scale;
 end
 
 % Update observables and their sensitivities
 for is = 1:length(ar.scales)
     scale = ar.scales(is).scale;
-    scaleGrad =  ar.scales(is).scaleGrad;
+    if sensi
+        scaleGrad =  ar.scales(is).scaleGrad;
+    end
     for il = 1:length(ar.scales(is).links)
         im = ar.scales(is).links(il).m;
         id = ar.scales(is).links(il).d;
         iy = ar.scales(is).links(il).fy;
         xzExpSimu = ar.model(im).data(id).xzExpSimu(:,iy);
-        sxzExpSimu = squeeze(ar.model(im).data(id).sxzExpSimu(:,iy,:));
-
         ar.model(im).data(id).yExpSimu(:,iy) = scale.*xzExpSimu;
-        ar.model(im).data(id).syExpSimu(:,iy,:) = scale.*sxzExpSimu + scaleGrad.*xzExpSimu;
+        if sensi
+            sxzExpSimu = squeeze(ar.model(im).data(id).sxzExpSimu(:,iy,:));
+            ar.model(im).data(id).syExpSimu(:,iy,:) = scale.*sxzExpSimu + scaleGrad.*xzExpSimu;
+        end
     end
 end
 % NOTE: Alternatively, we could iterate over the data instead of over the scales in the latter loop.
