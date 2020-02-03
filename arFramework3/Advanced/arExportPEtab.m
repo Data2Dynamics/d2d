@@ -92,8 +92,12 @@ for imodel = 1:length(ar.model)
             rowsToAdd = [table(observableId)];
 
             measurement = ar.model(imodel).data(idata).yExpRaw(:, iy);
-
             time = ar.model(imodel).data(idata).tExp;
+            
+            % skip if measurement contains only NaN
+            if sum(isnan(measurement)) == numel(measurement)
+                continue
+            end
 
             % pre-equiblibration
             if isfield(ar, 'ss_conditions')
@@ -120,10 +124,13 @@ for imodel = 1:length(ar.model)
             % noise parameters
             expErrors = ar.model(imodel).data(idata).yExpStdRaw(:,iy);
             if ar.config.fiterrors == -1
-                noiseParameters = {expErrors}; % if not cell, tables with cell can't be merged
+                if sum(isnan(expErrors)) > 0
+                    error('arExportPEtab: Cannot use ar.config.fiterrors == -1 with NaN in exp errors')
+                end
+                noiseParameters = expErrors;
             else
-                if ar.config.fiterrors == 0 && sum(isnan(expErrors) == numel(expErrors))
-                    noiseParameters = {expErrors};
+                if ar.config.fiterrors == 0 && sum(isnan(expErrors)) == 0
+                    noiseParameters = expErrors;
                 else
                     noisePars_tmp = strsplit(ar.model(imodel).data(idata).fystd{iy}, {'+','-','*','/','(',')','^',' '});
                     noisePars_tmp = intersect(noisePars_tmp, ar.pLabel);
