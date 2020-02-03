@@ -40,16 +40,16 @@ ub(pToPLE) = ar.ub(pleToP);
 qFit(pToPLE) = ar.qFit(pleToP);
 qLog10(pToPLE) = ar.qLog10(pleToP);
 
-if(~exist('savetofile','var'))
+if ~exist('savetofile','var') || isempty(savetofile)
     savetofile = false;
 end
-if(~exist('subs_para','var'))
+if ~exist('subs_para','var') || isempty(subs_para)
     subs_para = true;
 end
-if(~exist('show_hit_bound','var'))
+if ~exist('show_hit_bound','var') || isempty(show_hit_bound)
     show_hit_bound = true;
 end
-if(~exist('plot_hit_bound','var'))
+if ~exist('plot_hit_bound','var') || isempty(plot_hit_bound)
     plot_hit_bound = true;
 end
 
