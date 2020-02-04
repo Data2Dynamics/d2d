@@ -29,6 +29,10 @@ if isfield(ar,'setup')  % only available in higher verions
         for i=1:length(arIn.setup.commands)                                
             if ~isempty(arIn.setup.arguments{i}) && iscell(arIn.setup.arguments{i})
                 oldargs = arIn.setup.arguments{i};
+                if strcmp(arIn.setup.commands{i},'arCompileAll')
+                    oldargs{3} = pwd; % set source_dir in arCompileAll to pwd
+                    fprintf('Changing source_dir in arCompileAll to %s\n', pwd)
+                end
                 if strcmp(arIn.setup.commands{i},'arCompileAll')==1 && ~isempty(varargin)
                     fprintf('Overwriting old arguments of arCompileAll by varargin...\n');
                     args = varargin;
