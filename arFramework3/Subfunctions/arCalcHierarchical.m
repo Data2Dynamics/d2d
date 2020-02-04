@@ -22,13 +22,20 @@ end
 
 global ar
 
+% Check settings which are required to carry out hierarchical optimization
 assert(isfield(ar.config,'useHierarchical') && ar.config.useHierarchical, ...
     ['Hierarchical optimization is not enabled. You have not called arInitHierarchical ', ...
      'or there are no scale parameters suitable for hierarchical optimization in your observables.'])
+for is = 1:length(ar.scales)
+    assert(~ar.qLog10(ar.scales(is).pLink),sprintf('Please disable log10 scale for parameter %s when using hierarchical optimization.',ar.pLabel{ar.scales(is).pLink}))
+    assert(ar.qFit(ar.scales(is).pLink)~=1,sprintf('Please disable fitting for parameter %s when using hierarchical optimization.',ar.pLabel{ar.scales(is).pLink}))
+end
+
+% Check for features which are yet not supported along with hierarchical optimization (but possibly may be supported in the future)
 errorFitting = ( ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 );
 assert(~errorFitting,'Hierarchical optimization in combination with with error fitting is not supported yet.')
 useCustomResidual = isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fun);
-assert(~useCustomResidual,'Please choose between hierarchical optimization and custom residuals.')
+assert(~useCustomResidual,'Hierarchical optimization in combination with custom residuals is not supported yet.')
 assert(~isfield(ar,'conditionconstraints'),'Hierarchical optimization in combination with condition constraints is not supported yet.')
 assert(sum(ar.type~=0)==0,'Hierarchical optimization in combination with priors other than flat box is not supported yet.')
 assert(~isfield(ar,'random'),'Hierarchical optimization in combination with random effects is not supported yet.')
@@ -40,14 +47,10 @@ for im = 1:length(ar.model)
 end
 for im = 1:length(ar.model)
     for id = 1:length(ar.model(im).data)
-        assert(all(ar.model(im).data(id).logfitting==0),'Please disable fitting of observables in log10 scale when using hierarchical optimization.')
+        assert(all(ar.model(im).data(id).logfitting==0),'Hierarchical optimization in combination with fitting of observables in log10 scale is not supported yet.')
         useCustomResidual = isfield( ar.model(im).data(id), 'resfunction' ) && isstruct( ar.model(im).data(id).resfunction ) && ar.model(im).data(id).resfunction.active;
-        assert(~useCustomResidual,'Please choose between hierarchical optimization and custom residuals.')
+        assert(~useCustomResidual,'Hierarchical optimization in combination with custom residuals is not supported yet.')
     end
-end
-for is = 1:length(ar.scales)
-    assert(~ar.qLog10(ar.scales(is).pLink),sprintf('Please disable log10 scale for parameter %s when using hierarchical optimization.',ar.pLabel{ar.scales(is).pLink}))
-    assert(ar.qFit(ar.scales(is).pLink)~=1,sprintf('Please disable fitting for parameter %s when using hierarchical optimization.',ar.pLabel{ar.scales(is).pLink}))
 end
 
 % For each data, extract corresponding xExpSimu/zExpSimu values and their sensitivities
