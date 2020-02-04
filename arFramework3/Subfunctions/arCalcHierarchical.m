@@ -27,9 +27,20 @@ assert(isfield(ar.config,'useHierarchical') && ar.config.useHierarchical, ...
      'or there are no scale parameters suitable for hierarchical optimization in your observables.'])
 errorFitting = ( ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 );
 assert(~errorFitting,'Hierarchical optimization in combination with with error fitting is not supported yet.')
+useCustomResidual = isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fun);
+assert(~useCustomResidual,'Please choose between hierarchical optimization and custom residuals.')
+assert(~isfield(ar,'conditionconstraints'),'Hierarchical optimization in combination with condition constraints is not supported yet.')
 assert(sum(ar.type~=0)==0,'Hierarchical optimization in combination with priors other than flat box is not supported yet.')
+assert(~isfield(ar,'random'),'Hierarchical optimization in combination with random effects is not supported yet.')
+for im = 1:length(ar.model)
+    for ic = 1:length(ar.model(im).condition)
+        qssEnabled = isfield(ar.model(im).condition(ic), 'qSteadyState') && sum(ar.model(im).condition(ic).qSteadyState==1)>0;
+        assert(~qssEnabled,'Hierarchical optimization in combination with qSteadyState is not supported yet.')
+    end
+end
 for im = 1:length(ar.model)
     for id = 1:length(ar.model(im).data)
+        assert(all(ar.model(im).data(id).logfitting==0),'Please disable fitting of observables in log10 scale when using hierarchical optimization.')
         useCustomResidual = isfield( ar.model(im).data(id), 'resfunction' ) && isstruct( ar.model(im).data(id).resfunction ) && ar.model(im).data(id).resfunction.active;
         assert(~useCustomResidual,'Please choose between hierarchical optimization and custom residuals.')
     end
