@@ -220,18 +220,6 @@ else
     return
 end
 
-errorFitting = ( ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 );
-if errorFitting
-    warning('Hierarchical optimization is not implemented to work with error fitting yet. Switching off error fitting (overriding your settings).')
-    ar.config.fiterrors == 0;
-    ar.qFit(boolean(ar.qError)) = 0;
-end
-
-if sum(ar.type~=0)>0
-    warning('Hierarchical optimization is not implemented to work with priors other than flat box yet. Setting all priors to flat box (overriding your settings).')
-    ar.type(:)=0;
-end
-
 function b = isNumericSym(x)
 
     assert(isa(x,'sym'),'Function defined only for symbolic variables.') % So we are sure that x has method char
