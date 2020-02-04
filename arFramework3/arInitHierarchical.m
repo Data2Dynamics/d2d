@@ -34,19 +34,13 @@ pErrorSyms   = cellfun(@sym, ar.pLabel(boolean(ar.qError)), 'UniformOutput', fal
 % It will be convenient to have the "forbidden" syms in one array
 pForbiddenSyms = [pDynamicSyms(:)', pInitialSyms(:)', pErrorSyms(:)'];
 
-countScales = 0;
-if isfield(ar,'scales')
-  ar = rmfield(ar,'scales');
-end
+scaleSyms = {};
+xzSyms = {};
+xzTypes = {};
+scaleLinks = {};
+observableLinks = {};
 for im = 1:length(ar.model)
   for id = 1:length(ar.model(im).data)
-    sz = size(ar.model(im).data(id).fy);
-    ar.model(im).data(id).useHierarchical = false(sz);
-    ar.model(im).data(id).scaleLink = nan(sz);
-    ar.model(im).data(id).xz = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
-    ar.model(im).data(id).xzType = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
-    ar.model(im).data(id).xzLink = nan(sz);
-    ar.model(im).data(id).xzScale = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
     for iy = 1:length(ar.model(im).data(id).fy)
 
       yFormula = str2sym(ar.model(im).data(id).fy{iy});
@@ -105,45 +99,116 @@ for im = 1:length(ar.model)
       end
 
       % At this point, we know that yFormula=xz_scale*xz and have figured out
-      % both xz and xz_scale. Now, set necessary fields in the ar structure.
+      % both xz and xz_scale. So let's save the results of our inquiry.
 
-      if ~isfield(ar,'scales')
-        idx = [];
-      else
-        idx = find(strcmp(cellfun(@(e) e, {ar.scales.scaleLabel}, 'UniformOutput', false), char(xz_scale)));
+      idx = [];
+      for is = 1:length(scaleSyms)
+        if isequal(xz_scale,scaleSyms{is})
+          idx = is;
+        end
       end
       if isempty(idx)
-        countScales = countScales+1;
-        idx = countScales;
-        scaleLabel = char(xz_scale);
-        pLink = find(strcmp(scaleLabel,ar.pLabel));
-        ar.scales(idx).scaleLabel = scaleLabel;
-        ar.scales(idx).links(1).m = im;
-        ar.scales(idx).links(1).d = id;
-        ar.scales(idx).links(1).fy = iy;
-        ar.scales(idx).pLink = pLink;
-        ar.qFit(pLink) = 0;
-        ar.qLog10(pLink) = 0; % Hierarchical optimization assumes that scale parameters are considered in the plain linear scale
-        % These settings are technically not necessary but may help to avoid confusion
-        ar.p(pLink) = nan;
-        ar.lb(pLink) = 0;
-        ar.ub(pLink) = inf;
-      else
-        ar.scales(idx).links(end+1).m = im;
-        ar.scales(idx).links(end).d = id;
-        ar.scales(idx).links(end).fy = iy;
+        scaleSyms{end+1} = xz_scale;
+        idx = length(scaleSyms);
       end
-      ar.model(im).data(id).useHierarchical(iy) = true;
-      ar.model(im).data(id).scaleLink(iy) = idx;
-      ar.model(im).data(id).xz{iy} = char(xz);
-      ar.model(im).data(id).xzType{iy} = xzType;
-      ar.model(im).data(id).xzLink(iy) = find(strcmp(char(xz),ar.model(im).(xzType)));
-      ar.model(im).data(id).xzScale{iy} = char(xz_scale);
-      for ip = 1:length(ar.model(im).data(id).p_condition)
-        ar.model(im).data(id).pCondLink(ip) = find(strcmp(ar.model(im).data(id).p_condition{ip}, ar.model(im).data(id).p));
-      end
+      scaleLinks{end+1} = idx;
+      xzSyms{end+1} = xz;
+      xzTypes{end+1} = xzType;
+      observableLinks{end+1} = [im,id,iy]; % model, data, fy % NOTE: This may be error-prone since it assumes a particular order
 
     end
+  end
+end
+
+% We have figured out which yFormulas are of form xz_scale*xz as well as the
+% list of unique xz_scale parameters appearing in those yFormulas. We also
+% need to confirm that those unique xz_scale parameters does _not_ appear in
+% any yFormula which is _not_ of form xz_scale*xz. Hence the second pass below.
+
+for im = 1:length(ar.model)
+  for id = 1:length(ar.model(im).data)
+    for iy = 1:length(ar.model(im).data(id).fy)
+      if any(cellfun(@(c) all([im,id,iy]==c),observableLinks)) % We test only those formulas which are not of form xz_scale*xz
+        continue
+      end
+      yFormula = str2sym(ar.model(im).data(id).fy{iy});
+      yPars = symvar(yFormula);
+      for ip = 1:length(yPars)
+        for is = 1:length(scaleSyms)
+          if isequal(yPars(ip),scaleSyms{is}) % If so, then the scale parameter with index "is" is not suitable for hierarchical optimization - delete it from the list
+            scaleSyms{is} = [];
+          end
+        end
+      end
+    end
+  end
+end
+
+% We have figured out scale parameters (xz_scales) suitable for hierarchical
+% optimization as well as the list of observables containing those scale
+% parameters. It remains to set necessary fields in the global structure ar.
+
+for im = 1:length(ar.model)
+  for id = 1:length(ar.model(im).data)
+    sz = size(ar.model(im).data(id).fy);
+    ar.model(im).data(id).useHierarchical = false(sz);
+    ar.model(im).data(id).scaleLink = nan(sz);
+    ar.model(im).data(id).xz = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
+    ar.model(im).data(id).xzType = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
+    ar.model(im).data(id).xzLink = nan(sz);
+    ar.model(im).data(id).xzScale = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
+  end
+end
+
+countScales = 0;
+if isfield(ar,'scales')
+  ar = rmfield(ar,'scales');
+end
+for k = 1:length(observableLinks)
+  if isempty(scaleSyms{scaleLinks{k}})
+    continue
+  end
+  xz_scale = scaleSyms{scaleLinks{k}};
+  xzType = xzTypes{k};
+  xz = xzSyms{k};
+  im = observableLinks{k}(1);
+  id = observableLinks{k}(2);
+  iy = observableLinks{k}(3);
+
+  if ~isfield(ar,'scales')
+    idx = [];
+  else
+    idx = find(strcmp(cellfun(@(e) e, {ar.scales.scaleLabel}, 'UniformOutput', false), char(xz_scale)));
+  end
+  if isempty(idx)
+    countScales = countScales+1;
+    idx = countScales;
+    scaleLabel = char(xz_scale);
+    pLink = find(strcmp(scaleLabel,ar.pLabel));
+    ar.scales(idx).scaleLabel = scaleLabel;
+    ar.scales(idx).links(1).m = im;
+    ar.scales(idx).links(1).d = id;
+    ar.scales(idx).links(1).fy = iy;
+    ar.scales(idx).pLink = pLink;
+    ar.qFit(pLink) = 0;
+    ar.qLog10(pLink) = 0; % Hierarchical optimization assumes that scale parameters are considered in the plain linear scale
+    % These settings are technically not necessary but may help to avoid confusion
+    ar.p(pLink) = nan;
+    ar.lb(pLink) = 0;
+    ar.ub(pLink) = inf;
+  else
+    ar.scales(idx).links(end+1).m = im;
+    ar.scales(idx).links(end).d = id;
+    ar.scales(idx).links(end).fy = iy;
+  end
+  ar.model(im).data(id).useHierarchical(iy) = true;
+  ar.model(im).data(id).scaleLink(iy) = idx;
+  ar.model(im).data(id).xz{iy} = char(xz);
+  ar.model(im).data(id).xzType{iy} = xzType;
+  ar.model(im).data(id).xzLink(iy) = find(strcmp(char(xz),ar.model(im).(xzType)));
+  ar.model(im).data(id).xzScale{iy} = char(xz_scale);
+  for ip = 1:length(ar.model(im).data(id).p_condition)
+    ar.model(im).data(id).pCondLink(ip) = find(strcmp(ar.model(im).data(id).p_condition{ip}, ar.model(im).data(id).p));
   end
 end
 
