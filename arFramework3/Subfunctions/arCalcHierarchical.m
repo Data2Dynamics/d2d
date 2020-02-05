@@ -32,7 +32,17 @@ for is = 1:length(ar.scales)
 end
 
 % Check for features which are yet not supported along with hierarchical optimization (but possibly may be supported in the future)
-errorFitting = ( ar.config.fiterrors == 1) || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)==1)>0 );
+if ar.config.fiterrors==0
+haveNanExpStd = false;
+for im = 1:length(ar.model)
+    for id = 1:length(ar.model(im).data)
+        if any(isnan(ar.model(im).data(id).yExpStd))
+            haveNanExpStd = true;
+        end
+    end
+end
+end
+errorFitting = ( (ar.config.fiterrors==1 || (ar.config.fiterrors==0 && haveNanExpStd)) && any(ar.qFit(ar.qError==1)==1) );
 assert(~errorFitting,'Hierarchical optimization in combination with with error fitting is not supported yet.')
 useCustomResidual = isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fun);
 assert(~useCustomResidual,'Hierarchical optimization in combination with custom residuals is not supported yet.')
