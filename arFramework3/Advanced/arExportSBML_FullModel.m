@@ -812,9 +812,10 @@ function [M] = GetObservables(M,m)
         %rule_tmp = arSubs(rule_tmp,arSym(ar.model(m).data(d).pold),arSym(ar.model(m).data(d).fp'));
 
         rule_tmp = char(rule_tmp);
-        if(ar.model(m).logfitting(id)==1)
-            rule_tmp = ['log10(' rule_tmp ')'];
-        end
+        % logfitting is specfied in peTAB obs file!
+%         if(ar.model(m).logfitting(id)==1)
+%             rule_tmp = ['log10(' rule_tmp ')'];
+%         end
 
         % check if ys already contain 'observable_'
         if ~strncmp(ar.model(m).y{id}, 'observable_', length('observable_'))
@@ -860,10 +861,10 @@ function [M] = GetErrors(M,m)
 
         rule_tmp = char(rule_tmp);
 
-        % ??
-        if(ar.model(m).logfitting(id)==1)
-            rule_tmp = ['log10(' rule_tmp ')'];
-        end
+        % logfitting is specfied in peTAB obs file!
+%         if(ar.model(m).logfitting(id)==1)
+%             rule_tmp = ['log10(' rule_tmp ')'];
+%         end
 
         % check if ys already contain 'observable_'
         if ~strncmp(ar.model(m).y{id}, 'observable_', length('observable_'))
