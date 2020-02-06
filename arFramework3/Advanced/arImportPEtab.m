@@ -1,6 +1,7 @@
 % arImportPEtab(filename)
 %
 % Import Parameter estimation problem to Data2Dyanmics
+% !! arInit before arImportPEtab !!
 %
 %
 % This is required to load additional information about parameters from
