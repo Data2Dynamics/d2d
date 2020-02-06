@@ -125,7 +125,7 @@ for imodel = 1:length(ar.model)
                 
         % measurements
         for iy = 1:length(ar.model(imodel).data(idata).y)
-            observableId = repmat(strcat(ar.model(imodel).data(idata).y(iy), ar.model(imodel).data(idata).name), ...
+            observableId = repmat(strcat(ar.model(imodel).data(idata).y(iy), '_', ar.model(imodel).data(idata).name), ...
                 [length(ar.model(imodel).data(idata).yExp(:,iy)) 1]);
  
             rowsToAdd = [table(observableId)];
