@@ -38,7 +38,8 @@ if any(isnan(T.qLog10))
 end
 
 % arSetPars(pLabel, [p], [qFit], [qLog10], [lb], [ub], [type], [meanp], [stdp])
-arSetPars(ar.pLabel(ia), T.nominalValue(ib), T.estimate(ib), T.qLog10(ib), T.lowerBound(ib), T.upperBound(ib))
+fLogTrafo = @(x)(1-T.qLog10(ib)) .* x(ib) + T.qLog10(ib) .* log10(x(ib)); % apply log10 trafo if flag is set. (Values given are on lin scale)
+arSetPars(ar.pLabel(ia), fLogTrafo(T.nominalValue), T.estimate(ib), T.qLog10(ib), fLogTrafo(T.lowerBound), fLogTrafo(T.upperBound))
 
 % this is currently under development on the PEtab side.
 if isfield(T,'priorType')
