@@ -37,9 +37,15 @@ if any(isnan(T.qLog10))
     warning([T.parameterScale(isnan(T.parameterScale)) ' is not yet implemented as qLog. ar.qLog10 is set to 0.'])
 end
 
-% arSetPars(pLabel, [p], [qFit], [qLog10], [lb], [ub], [type], [meanp], [stdp])
-fLogTrafo = @(x)(1-T.qLog10(ib)) .* x(ib) + T.qLog10(ib) .* log10(x(ib)); % apply log10 trafo if flag is set. (Values given are on lin scale)
-arSetPars(ar.pLabel(ia), fLogTrafo(T.nominalValue), T.estimate(ib), T.qLog10(ib), fLogTrafo(T.lowerBound), fLogTrafo(T.upperBound))
+% apply log10 trafo if flag is set. (Values given are on lin scale)
+for i = 1:length(ib)
+    if T.qLog10(i)
+        % arSetPars(pLabel, [p], [qFit], [qLog10], [lb], [ub], [type], [meanp], [stdp])
+        arSetPars(ar.pLabel(ia(i)), log10(T.nominalValue(ib(i))), T.estimate(ib(i)), T.qLog10(ib(i)),log10(T.lowerBound(ib(i))),log10( T.upperBound(ib(i))))
+    else
+        arSetPars(ar.pLabel(ia(i)), T.nominalValue(ib(i)), T.estimate(ib(i)), T.qLog10(ib(i)),T.lowerBound(ib(i)), T.upperBound(ib(i)))
+    end
+end
 
 % this is currently under development on the PEtab side.
 if isfield(T,'priorType')

@@ -52,8 +52,8 @@ for m = 1:length(ar.model)
     for j = 1:length(ar.model(m).data) 
         for i = 1:length(T.conditionId)
             if strcmp(ar.model(m).data(j).name,T.conditionId(i))
-                for k = 3:(length(fns))
-                    if contains(ar.model(m).data(j).p,fns{k})
+                for k = 2:(length(fns))
+                    if sum(contains(ar.model(m).data(j).p,fns{k}))>0
                         ar.model(m).data(j).fp{strcmp(ar.model(m).data(j).p,fns{k})} = num2str(T.(fns{k})(i));
                     end
                 end

@@ -17,13 +17,21 @@
 % References
 %   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
 
-function arLoadDataPEtab(datafilename, m)
+function arLoadDataPEtab(datafilename, obsfilename, m)
 
 global ar;
 
 if ~contains(datafilename,'.tsv')
     if ~contains(datafilename,'.')
         datafilename = [datafilename '.tsv'];
+    else
+        error('this file type is not supported!')
+    end
+end
+
+if ~contains(obsfilename,'.tsv')
+    if ~contains(obsfilename,'.')
+        obsfilename = [obsfilename '.tsv'];
     else
         error('this file type is not supported!')
     end
@@ -44,27 +52,35 @@ if(exist('m','var') && ischar(m))
 end
 
 %% Read in tsv file
-T = tdfread(datafilename); % all data of the model
-fns = fieldnames(T);
+Tdat = tdfread(datafilename); % all data of the model
+fns = fieldnames(Tdat);
 for i = 1:length(fns)
-    if ischar(T.(fns{i}))
-        T.(fns{i}) = regexprep(string(T.(fns{i})),' ','');
+    if ischar(Tdat.(fns{i}))
+        Tdat.(fns{i}) = regexprep(string(Tdat.(fns{i})),' ','');
     end
 end
-T = struct2table(T);
-controlstr = {};
-for i =1:height(T) % find unique combination to put in one data struct afterwards
-    controlstr{i} = string(strcat(char(T.simulationConditionId(i))));%,char(T.observableParameters(i)),char(T.noiseParameters(i))));
+Tdat = struct2table(Tdat);
+
+Tobs = tdfread(obsfilename); % all data of the model
+fns = fieldnames(Tobs);
+for i = 1:length(fns)
+    if ischar(Tobs.(fns{i}))
+        Tobs.(fns{i}) = regexprep(string(Tobs.(fns{i})),' ','');
+    end
 end
-controlstr = string(controlstr);
-[uniSim,~,iCSim] = unique(controlstr);
+Tobs = struct2table(Tobs);
+
+[uniCond,~,iCCond] = unique(Tdat.simulationConditionId);
+
+%%
+
 
 %% Use condition specific experiments and distribute over data struct
-for iSim = 1:length(uniSim)
+for iCond = 1:length(uniCond)
     Sd2d = struct();
     args= {};
     % extract important info for data struct from .tsv file
-    Tsub = T(iCSim == iSim,:);
+    Tsub = Tdat(iCCond == iCond,:);
     [uniObs,~,iCObs] = unique(cellstr(Tsub.observableId),'stable');
     
     [uniTimes,~,iTExp] = unique(Tsub.time);
@@ -78,11 +94,17 @@ for iSim = 1:length(uniSim)
         iTExp = iTExp';
     end
     uniObs = regexprep(uniObs,' ','');
-    Sd2d.name = char(uniSim(iSim));
+    Sd2d.name = char(uniCond(iCond));
     Sd2d.tExp = uniTimes;
     Sd2d.tUnits = ar.model.tUnits;
     Sd2d.y = uniObs';
     Sd2d.yNames = uniObs';
+    for iObs = 1:length(uniObs)
+        idx = strcmp(Tobs.observableId,uniObs{iObs});
+        Sd2d.fy{iObs} = char(Tobs.observableFormula(idx));
+        Sd2d.yStd{iObs} = char(Tobs.noiseFormula(idx));
+        Sd2d.logfitting(iObs) = double(strcmp(Tobs.observableTransformation(idx),'log10'));
+    end
     Sd2d.yExpRaw = nan(length(uniTimes),length(uniObs));
     Sd2d.yExpStd = nan(length(uniTimes),length(uniObs));
     Sd2d.yExpStdRaw = nan(length(uniTimes),length(uniObs));
@@ -91,10 +113,10 @@ for iSim = 1:length(uniSim)
 %             [iSim it  iobs]
             if any(it==iTExp & iobs == iCObs)
                 Sd2d.yExpRaw(it,iobs) = Tsub.measurement(it == iTExp & iobs == iCObs);
-                Sd2d.yExp(it,iobs) = strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'log10')*log10(Tsub.measurement(it == iTExp & iobs == iCObs)) + strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'lin')*Tsub.measurement(it == iTExp & iobs == iCObs);
+                Sd2d.yExp(it,iobs) = Sd2d.logfitting(iobs) * log10(Tsub.measurement(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs)) *Tsub.measurement(it == iTExp & iobs == iCObs);
                 if isnumeric(Tsub.noiseParameters(it == iTExp & iobs == iCObs))
                     Sd2d.yExpStdRaw(it,iobs) = Tsub.noiseParameters(it == iTExp & iobs == iCObs);
-                    Sd2d.yExpStd(it,iobs) = strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'log10')*log10(Tsub.noiseParameters(it == iTExp & iobs == iCObs)) + strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'lin')*Tsub.noiseParameters(it == iTExp & iobs == iCObs);
+                    Sd2d.yExpStd(it,iobs) =  Sd2d.logfitting(iobs) *log10(Tsub.noiseParameters(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs))*Tsub.noiseParameters(it == iTExp & iobs == iCObs);
                 end
             end
         end
