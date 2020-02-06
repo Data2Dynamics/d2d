@@ -144,8 +144,7 @@ D.pystd = setdiff(D.pystd, D.p); %Remove dynamic variables from error model para
 if ( size( D.p, 1 ) ~= 1 )
     D.p = D.p.';
 end
-D.fp = transpose(D.p);
-
+D.fp = ar.model(m).fp;
 
 %% now replace fp which was provided as function argument:
 [~,ia,ib] = intersect(D.p,pold);

@@ -88,7 +88,7 @@ for iSim = 1:length(uniSim)
     Sd2d.yExpStdRaw = nan(length(uniTimes),length(uniObs));
     for it = 1:length(uniTimes)
         for iobs = 1:length(uniObs)
-            [iSim it  iobs]
+%             [iSim it  iobs]
             if any(it==iTExp & iobs == iCObs)
                 Sd2d.yExpRaw(it,iobs) = Tsub.measurement(it == iTExp & iobs == iCObs);
                 Sd2d.yExp(it,iobs) = strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'log10')*log10(Tsub.measurement(it == iTExp & iobs == iCObs)) + strcmp(Tsub.observableTransformation(it == iTExp & iobs == iCObs),'lin')*Tsub.measurement(it == iTExp & iobs == iCObs);
@@ -112,25 +112,26 @@ for iSim = 1:length(uniSim)
     
     % get correct substitutions of obs and error parameters
     pold = {}; fp = {};
-    for i = 1:length(Sd2d.y)
-        for j = 1:length(ar.model)
-            newpold = ar.model(j).fp(~cellfun('isempty',regexp(ar.model.p,['noiseParameters\d_' Sd2d.y{i} '$'])));
-            newPars = Tsub.noiseParameters(contains(Tsub.observableId,Sd2d.y{i}));
-            if ~(isempty(newpold) || isnumeric(newPars) || isempty(newPars))
-                newPars = strsplit(str2mat(unique(newPars)),';');
-                pold = [pold;newpold];fp = [fp;newPars];
-            end
-            newpold = ar.model(j).fp(~cellfun('isempty',regexp(ar.model.p,['observableParameters\d_' Sd2d.y{i} '$'])));
-            newPars = Tsub.observableParameters(contains(Tsub.observableId,Sd2d.y{i}));
-            if ~(isempty(newpold) || isnumeric(newPars) || isempty(newPars))
-                newPars = strsplit(str2mat(unique(newPars)),';');
-                pold = [pold;newpold];fp = [fp;newPars];
-            end
-            if length(pold) ~= length(fp)
-                error('Length of parameter names must be the same!')
-            end
-        end
-    end
+    % Deprecated: changes in PEtab
+%     for i = 1:length(Sd2d.y)
+%         for j = 1:length(ar.model)
+%             newpold = ar.model(j).fp(~cellfun('isempty',regexp(ar.model.p,['noiseParameters\d_' Sd2d.y{i} '$'])));
+%             newPars = Tsub.noiseParameters(contains(Tsub.observableId,Sd2d.y{i}));
+%             if ~(isempty(newpold) || isnumeric(newPars) || isempty(newPars))
+%                 newPars = strsplit(str2mat(unique(newPars)),';');
+%                 pold = [pold;newpold];fp = [fp;newPars];
+%             end
+%             newpold = ar.model(j).fp(~cellfun('isempty',regexp(ar.model.p,['observableParameters\d_' Sd2d.y{i} '$'])));
+%             newPars = Tsub.observableParameters(contains(Tsub.observableId,Sd2d.y{i}));
+%             if ~(isempty(newpold) || isnumeric(newPars) || isempty(newPars))
+%                 newPars = strsplit(str2mat(unique(newPars)),';');
+%                 pold = [pold;newpold];fp = [fp;newPars];
+%             end
+%             if length(pold) ~= length(fp)
+%                 error('Length of parameter names must be the same!')
+%             end
+%         end
+%     end
     
     D = arCreateDataStruct(m,pold,fp,args{:});
     arAddDataStruct(D,m)

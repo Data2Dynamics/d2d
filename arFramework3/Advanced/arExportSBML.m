@@ -28,6 +28,7 @@ function arExportSBML(FileOptionString, name)
 
     %Calculate chi2 value without Bessel correction
     ar.config.useFitErrorCorrection = false;
+    disp('Deactivating Bessel correction...')
     arCalcMerit;
 
     if FileOption == 1 % single file output
