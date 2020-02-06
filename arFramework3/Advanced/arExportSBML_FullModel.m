@@ -271,6 +271,7 @@ function [M] = GetParameters(M,m)
         if(sum(qp)==1)
             pvalue = ar.p(qp);
             if(ar.qLog10(qp) == 1)
+                
                 pvalue = 10^pvalue;
             end
         else
@@ -278,7 +279,37 @@ function [M] = GetParameters(M,m)
         end
         M.parameter(id_tmp).value = pvalue;
     end
+    
+    
+    %% Get Assignment Rules for Parameters   
+    is_not_set = cellfun(@(x,y) strcmp(x,y), ar.model(1).p, ar.model(1).fp','UniformOutput',false);
+   
+
+    
+    for jp = 1:length(ar.model(m).p)
+        if is_not_set{jp} == 0
+            fu = arSym(ar.model(m).fp{jp});
+            % replace time parameters with 'time'
+            fu = char(arSubs(arSym(fu), arSym(ar.model(m).t), arSym('time')));
+
+            ixrule = length(M.rule) + 1;% index of current rule
+            M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
+            M.rule(ixrule).metaid = '';
+            M.rule(ixrule).notes = '';
+            M.rule(ixrule).annotation = '';
+            M.rule(ixrule).sboTerm = -1;
+            M.rule(ixrule).formula = fu;
+            M.rule(ixrule).variable = ar.model(m).p{jp};
+            M.rule(ixrule).species = '';
+            M.rule(ixrule).compartment = '';
+            M.rule(ixrule).name = '';
+            M.rule(ixrule).units = '';
+            M.rule(ixrule).level = 2;
+            M.rule(ixrule).version = 4;
+        end
+    end      
 end
+
 
 function [M] = GetInitialAssignments(M,Crules)
 
