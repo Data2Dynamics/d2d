@@ -197,12 +197,13 @@ for imodel = 1:length(ar.model)
             rowsToAdd = [rowsToAdd, table(noiseParameters)];
             
             % observable trafos
-            observableTransformation = cell(length(time),1);
-            observableTransformation(:) = {'log10'};
-            if ~ar.model(imodel).data(idata).logfitting(iy)
-                observableTransformation(:) = {'lin'};
-            end
-            rowsToAdd = [rowsToAdd, table(observableTransformation)];
+            % deprecated, moved to obs file
+            %observableTransformation = cell(length(time),1);
+            %observableTransformation(:) = {'log10'};
+            %if ~ar.model(imodel).data(idata).logfitting(iy)
+            %    observableTransformation(:) = {'lin'};
+            %end
+            %rowsToAdd = [rowsToAdd, table(observableTransformation)];
 
             % noise dists
             noiseDistribution = cell(length(time),1);
