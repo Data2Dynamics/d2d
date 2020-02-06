@@ -1,8 +1,6 @@
 % arImportPEtab(filename)
 %
 % Import Parameter estimation problem to Data2Dyanmics
-% !! arInit before arImportPEtab !!
-%
 %
 % This is required to load additional information about parameters from
 % PEtab data standard
@@ -17,6 +15,11 @@
 %   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
 
 function arImportPEtab(name)
+global ar
+
+if(isempty(ar))
+    error('please initialize by arInit')
+end
 
 if ~exist('name') || isempty(name)
     name = '';
