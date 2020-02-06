@@ -103,8 +103,8 @@ end
 [~, name] = fileparts(filename);
 new_filename = strrep(name,' ','_');
 new_filename = strrep(new_filename,'-','_');
-cd('Models')
-fid = fopen([new_filename '.def'], 'w');
+%cd('Models')
+fid = fopen(['Models' filesep new_filename '.def'], 'w');
 
 fprintf(fid, 'DESCRIPTION\n');
 if(~isempty(m.name))
@@ -577,6 +577,99 @@ if ( opts.keepcompartments )
     end
 end
 
+
+% Initial values
+specs = {};
+spec_value = [];
+init_status = 2+zeros(length(m.species),1);
+idx_assval = zeros(length(m.species),1);
+
+% flag(j) == 0 -> do nothing (init is parameter)
+% flag(j) == 1 -> fprintf assignment_value of idx_assval = i;
+% flag(j) == 2 -> fprintf initial conc from species field in SBML (default behavior)
+
+for j=1:length(m.species)
+    for k=1:length(m.parameter)
+        if find(contains(m.parameter(k).name,['init_' m.species(j).name]))
+            init_status(j) = 0;
+            continue
+        end
+    end
+    if init_status(j) == 0
+        continue
+    end
+    for i=1:length(m.initialAssignment)
+        if any(strcmp(m.initialAssignment(i).symbol,{m.species(j).id}))
+            init_status(j) = 1;
+            idx_assval(j) = i;
+            continue
+        end
+    end
+end
+
+for j=1:length(m.species)
+    if init_status(j) == 1
+        assignment_value = arSym(m.initialAssignment(idx_assval(j)).math);
+%         assignment_value = arSubs(arSym(assignment_value), arSym(pars), arSym(par_value));
+        %assignment_value = subs(assignment_value, specs, spec_value);
+%         assignment_value = arSubs(arSym(assignment_value), arSym(comps), arSym(comp_value));
+%         assignment_value = eval(assignment_value);
+        
+%         ub = 1000;
+%         if(assignment_value>ub)
+%             ub = assignment_value * 10;
+%         end
+        
+        fprintf(fid, '%s\t "%s"\n', ['init_' sym_check(m.initialAssignment(idx_assval(j)).symbol)], ...
+            assignment_value);
+        
+    elseif init_status(j) == 2
+        
+        if(m.species(j).isSetInitialConcentration)
+            ub = 1000;
+            if(m.species(j).initialConcentration>ub)
+                ub = m.species(j).initialConcentration*10;
+            end
+            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
+                m.species(j).initialConcentration, 0, ub);
+            specs{end+1} = m.species(j).id2;
+            spec_value(end+1) = m.species(j).initialConcentration;
+        elseif(m.species(j).isSetInitialAmount)
+            comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
+            comp_vol = m.compartment(comp_id).size;
+            initial_conc = m.species(j).initialAmount/comp_vol;
+            ub = 1000;
+            if(initial_conc>ub)
+                ub = initial_conc*10;
+            end
+            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
+                initial_conc, 0, ub);
+            specs{end+1} = m.species(j).id2;
+            spec_value(end+1) = initial_conc;
+        end
+    end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fprintf(fid, '\nPARAMETERS\n');
 
 pars = {};
@@ -623,81 +716,9 @@ for j=1:length(m.reaction)
 end
 
 
-% Initial values
-specs = {};
-spec_value = [];
-init_status = 2+zeros(length(m.species),1);
-idx_assval = zeros(length(m.species),1);
-
-% flag(j) == 0 -> do nothing (init is parameter)
-% flag(j) == 1 -> fprintf assignment_value of idx_assval = i;
-% flag(j) == 2 -> fprintf initial conc from species field in SBML (default behavior)
-
-for j=1:length(m.species)
-    for k=1:length(m.parameter)
-        if find(contains(m.parameter(k).name,['init_' m.species(j).name]))
-            init_status(j) = 0;
-            continue
-        end
-    end
-    if init_status(j) == 0
-        continue
-    end
-    for i=1:length(m.initialAssignment)
-        if any(strcmp(m.initialAssignment(i).symbol,{m.species(j).id}))
-            init_status(j) = 1;
-            idx_assval(j) = i;
-            continue
-        end
-    end
-end
-
-for j=1:length(m.species)
-    if init_status(j) == 1
-        assignment_value = m.initialAssignment(idx_assval(j)).math;
-        assignment_value = arSubs(arSym(assignment_value), arSym(pars), arSym(par_value));
-        %assignment_value = subs(assignment_value, specs, spec_value);
-        assignment_value = arSubs(arSym(assignment_value), arSym(comps), arSym(comp_value));
-        assignment_value = eval(assignment_value);
-        
-        ub = 1000;
-        if(assignment_value>ub)
-            ub = assignment_value * 10;
-        end
-        
-        fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', ['init_' sym_check(m.initialAssignment(idx_assval(j)).symbol)], ...
-            assignment_value, 1, ub);
-        
-    elseif init_status(j) == 2
-        
-        if(m.species(j).isSetInitialConcentration)
-            ub = 1000;
-            if(m.species(j).initialConcentration>ub)
-                ub = m.species(j).initialConcentration*10;
-            end
-            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-                m.species(j).initialConcentration, 0, ub);
-            specs{end+1} = m.species(j).id2;
-            spec_value(end+1) = m.species(j).initialConcentration;
-        elseif(m.species(j).isSetInitialAmount)
-            comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
-            comp_vol = m.compartment(comp_id).size;
-            initial_conc = m.species(j).initialAmount/comp_vol;
-            ub = 1000;
-            if(initial_conc>ub)
-                ub = initial_conc*10;
-            end
-            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-                initial_conc, 0, ub);
-            specs{end+1} = m.species(j).id2;
-            spec_value(end+1) = initial_conc;
-        end
-    end
-end
-
 fclose(fid);
 
-cd('..')
+%cd('..')
 
 
 %% data file

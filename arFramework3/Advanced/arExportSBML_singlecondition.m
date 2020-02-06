@@ -54,7 +54,7 @@ end
 
 [M] = GetParameters(M,m,d);
 
-[M] = GetRules(M,Crules);
+[M] = GetInitialAssignments(M,Crules);
 
 [M] = GetReactions(M,F,c,m,copasi);
 
@@ -231,14 +231,14 @@ function [M,Crules] = GetSpecies(M,c,m,steadystate)
                 qp = ismember(ar.model(m).condition(c).pold, ar.model(m).px0{jx}); %R2013a compatible
                 if(sum(qp)==1)
                     pvalue = char(arSym(ar.model(m).condition(c).fp{qp}));
-                    if(~isnan(str2num(pvalue))) %#ok
-                        pvalue = str2num(pvalue); %#ok
-                        M.species(jx).initialConcentration = pvalue;
-                    else
+%                     if(~isnan(str2num(pvalue))) %#ok
+%                         pvalue = str2num(pvalue); %#ok
+%                         M.species(jx).initialConcentration = pvalue;
+%                     else
                         Crules{end+1,1} = ar.model(m).x{jx}; %#ok<AGROW>
                         Crules{end,2} = pvalue; %#ok<AGROW>
                         M.species(jx).initialConcentration = 1;
-                    end
+%                     end
                 else
                     error('%s not found', ar.model(m).pc{jc});
                 end
@@ -333,7 +333,7 @@ function [M] = GetParameters(M,m,d)
     % end
 end
 
-function [M] = GetRules(M,Crules)
+function [M] = GetInitialAssignments(M,Crules)
 
     %% rules (copasi)
     for jr = 1:size(Crules,1)
@@ -669,6 +669,8 @@ function [M] = GetInputs(M,F,c,m,d)
             M.parameter(jp).level = 2;
             M.parameter(jp).version = 4;
             M.parameter(jp).value = initValue;
+            
+            
         elseif(contains(ar.model(m).fu{ju},'spline_pos'))      
 
                 %Getting spline parameters and calculate spline in MATLAB

@@ -18,7 +18,21 @@ end
         if(isa(s,'double'))
             out = sym(s);
         elseif(isa(s,'char'))
-            out = evalin(symengine,s);
+            % The use of symengine for evaluating strings resulted in
+            % problematic symbolic expressions which were not properly
+            % usable for later substitions
+            % Therefore the code was reverted to the standard sym function
+            % from Matlab
+            % This works fine for Matlab version 2018b
+            try
+                out = sym(s);
+            catch
+                try
+                    out = evalin(symengine,s);
+                catch ERR
+                    error(('Failed to cast to symbolic expression'))
+                end
+            end        
         elseif(isa(s,'cell'))
             size_s = size(s);
             out = sym(zeros(size_s));
