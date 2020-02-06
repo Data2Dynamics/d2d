@@ -20,7 +20,6 @@ if ~exist('name') || isempty(name)
     name = '';
 end
 
-
 %% Write Export Directory
 if(~exist('./PEtab', 'dir'))
     mkdir('./PEtab')
@@ -32,7 +31,46 @@ if export_SBML
 end
 
 %% Export data, conditions & parameters
+threwNormWarning = 0;
 for imodel = 1:length(ar.model)
+    
+    %% Observables table
+    obsT = table;
+    obsT_tmp = table;
+    
+    for idata = 1:length(ar.model(imodel).data)
+        
+        % add data file name to obsId for purposes of unique mapping
+        obsId = cellfun(@(x,y) strcat(x,'_',y), ...
+            ar.model(imodel).data(idata).y', ...
+            repmat({ar.model(imodel).data(idata).name}, [size(ar.model(imodel).data(idata).y')]),...
+            'UniformOutput', false);
+        
+        obsName = ar.model(imodel).data(idata).yNames';
+        obsFormula = ar.model(imodel).data(idata).fy;
+        if size(obsFormula,2) > 1; obsFormula = obsFormula'; end
+
+        obsTrafo = cell(length(obsId),1);
+        obsTrafo(:) = {'lin'};
+        obsTrafo(logical(ar.model(imodel).data(idata).logfitting)) = {'log10'};
+        
+        noiseFormula = ar.model(imodel).data(idata).fystd;
+        if size(noiseFormula,2) > 1; noiseFormula = noiseFormula'; end
+        
+        noiseDistribution = cell(length(obsId),1);
+        noiseDistribution(:) = {'normal'}; % others not possible in d2d
+                
+        obsT_tmp = [obsT_tmp; table(obsId, obsName, obsFormula, obsTrafo, ...
+            noiseFormula, noiseDistribution)];
+        
+        [obsT,id,id2] = unique(obsT_tmp, 'rows');
+    end
+    obsT.Properties.VariableNames = {'observableId', 'observableName',...
+    'observableFormula', 'observableTransformation', 'noiseFormula',...
+    'noiseDistribution',};
+    writetable(obsT, ['PEtab/' name '_OBS_model' num2str(imodel) '.tsv'],...
+        'Delimiter', '\t', 'FileType', 'text')
+
     %% Condition and Measurement Table
     % Collect conditions
     condPar = {}; condVal = {}; conditionID = {};
@@ -87,11 +125,20 @@ for imodel = 1:length(ar.model)
                 
         % measurements
         for iy = 1:length(ar.model(imodel).data(idata).y)
-            observableId = repmat(ar.model(imodel).data(idata).y(iy), ...
+            observableId = repmat(strcat(ar.model(imodel).data(idata).y(iy), ar.model(imodel).data(idata).name), ...
                 [length(ar.model(imodel).data(idata).yExp(:,iy)) 1]);
+ 
             rowsToAdd = [table(observableId)];
 
             measurement = ar.model(imodel).data(idata).yExpRaw(:, iy);
+            if ar.model(imodel).data(idata).normalize(iy) == 1
+                if ~threwNormWarning
+                warning('Normalization of experimental measurements is not supported in PEtab. Measurement values in ar.model(:).data(:).yExpRaw will be normalized before export.')
+                threwNormWarning = 1;
+                end
+                measurement = measurement/max(measurement);
+            end
+            
             time = ar.model(imodel).data(idata).tExp;
             
             % skip if measurement contains only NaN
@@ -115,10 +162,14 @@ for imodel = 1:length(ar.model)
             rowsToAdd = [rowsToAdd, table(time)];
             
             % observable parameters
-            obsPars_tmp = strsplit(ar.model(imodel).data(idata).fy{iy}, {'+','-','*','/','(',')','^',' '});
-            obsPars_tmp = intersect(obsPars_tmp, ar.pLabel);
-            obsPars_tmp = strcat(obsPars_tmp, ';');
-            observableParameters = repmat({[obsPars_tmp{:}]}, [length(time) 1]);
+            % deprecated since obs formula was moved to obs tsv file &
+            % placeholder parameter replacements do not exist in current 
+            % implementation (every data file has its own observables)
+            %obsPars_tmp = strsplit(ar.model(imodel).data(idata).fy{iy}, {'+','-','*','/','(',')','^',' '});
+            %obsPars_tmp = intersect(obsPars_tmp, ar.pLabel);
+            %obsPars_tmp = strcat(obsPars_tmp, ';');
+            %observableParameters = repmat({[obsPars_tmp{:}]}, [length(time) 1]);
+            observableParameters = repmat(' ',[length(time) 1]);
             rowsToAdd = [rowsToAdd, table(observableParameters)];
             
             % noise parameters
@@ -132,14 +183,19 @@ for imodel = 1:length(ar.model)
                 if ar.config.fiterrors == 0 && sum(isnan(expErrors)) == 0
                     noiseParameters = expErrors;
                 else
-                    noisePars_tmp = strsplit(ar.model(imodel).data(idata).fystd{iy}, {'+','-','*','/','(',')','^',' '});
-                    noisePars_tmp = intersect(noisePars_tmp, ar.pLabel);
-                    noisePars_tmp = strcat(noisePars_tmp, repmat(';', [length(noisePars_tmp)-1 1]));
-                    noiseParameters = repmat({[noisePars_tmp{:}]}, [length(time) 1]);
+                    
+                    % deprecated / moved to observables tsv file. Only
+                    % print in measurement file when numeric values
+                    %noisePars_tmp = strsplit(ar.model(imodel).data(idata).fystd{iy}, {'+','-','*','/','(',')','^',' '});
+                    %noisePars_tmp = intersect(noisePars_tmp, ar.pLabel);
+                    %noisePars_tmp = strcat(noisePars_tmp, repmat(';', [length(noisePars_tmp)-1 1]));
+                    %noiseParameters = repmat({[noisePars_tmp{:}]}, [length(time) 1]);
+                    noiseParameters = repmat(' ', [length(time) 1]);
+
                 end
             end
             rowsToAdd = [rowsToAdd, table(noiseParameters)];
-
+            
             % observable trafos
             observableTransformation = cell(length(time),1);
             observableTransformation(:) = {'log10'};
@@ -178,9 +234,9 @@ for imodel = 1:length(ar.model)
     condT = [table(conditionID'), condT];
     condT.Properties.VariableNames{1} = 'conditionId';
         
-    writetable(condT, ['PEtab/' name 'cond_model' num2str(imodel) '.tsv'],...
+    writetable(condT, ['PEtab/' name '_COND_model' num2str(imodel) '.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
-    writetable(measT, ['PEtab/' name 'meas_model' num2str(imodel) '.tsv'],...
+    writetable(measT, ['PEtab/' name '_MEAS_model' num2str(imodel) '.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
 end
 %% Parameter Table
@@ -215,7 +271,7 @@ parT = table(parameterID(:), parameterName(:), parameterScale(:), ...
 parT.Properties.VariableNames = {'parameterID', 'parameterName', ...
     'parameterScale', 'lowerBound', 'upperBound', 'nominalValue', 'estimate',};
 
-writetable(parT, ['PEtab/' name 'pars_model.tsv'],...
+writetable(parT, ['PEtab/' name '_PARS_model.tsv'],...
     'Delimiter', '\t', 'FileType', 'text')
 
 %% Visualization Table
