@@ -11,8 +11,8 @@
 function arExportSBML(FileOptionString, name)
     global ar
     
-    if ~exist('FileOption') || isempty(FileOption)
-        FileOptionString = 'multi';
+    if ~exist('FileOptionString') || isempty(FileOptionString)
+        FileOptionString = 'single';
     end
     if ~exist('name') || isempty(name)
         name = 'name';

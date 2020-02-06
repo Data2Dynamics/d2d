@@ -8,15 +8,6 @@
 
 function arExportSBML_FullModel(m,steadystate,name)
 
-answer = questdlg('This file is not yet working properly! Do you still want to continue?', ...
-	'Problem!', ...
-	'No','Yes','No');
-% Handle response
-if(answer=='No')
-    return
-end
-
-
 global ar
 
 % simulate once for initial values
@@ -55,7 +46,7 @@ end
 
 [M] = GetParameters(M,m);
 
-[M] = GetRules(M,Crules);
+[M] = GetInitialAssignments(M,Crules);
 
 [M] = GetReactions(M,F,m,copasi);
 
@@ -213,22 +204,35 @@ function [M,Crules] = GetSpecies(M,m)
 %                 simulated_ss = 1;
 %             end
 %         end
-        
-        
+                qp = ismember(ar.pLabel, ar.model(m).px0{jx}); %R2013a compatible
+
         if ( ~simulated_ss )
             % check if init parameter still exists in condition parameters
-            if(sum(qp)==1)
+            is_set = sum(ismember(ar.model(m).fp, ar.model(m).px0{jx}))==0;
+            if(sum(qp)==1 && is_set==0)
                 M.species(jx).initialConcentration = 1;
                 Crules{end+1,1} = ar.model(m).x{jx}; %#ok<AGROW>
                 Crules{end,2} = ar.pLabel{qp}; %#ok<AGROW>
-            elseif(sum(qp)==0)
-                M.species(jx).initialConcentration = 1;
+            elseif(sum(qp)==0 || is_set)
+                qp = ismember(ar.model(m).p, ar.model(m).px0{jx}); %R2013a compatible
+                if(sum(qp)==1)
+                    pvalue = char(arSym(ar.model(m).fp{qp}));
+%                     if(~isnan(str2num(pvalue))) %#ok
+%                         pvalue = str2num(pvalue); %#ok
+%                         M.species(jx).initialConcentration = pvalue;
+%                     else
+                        Crules{end+1,1} = ar.model(m).x{jx}; %#ok<AGROW>
+                        Crules{end,2} = pvalue; %#ok<AGROW>
+                        M.species(jx).initialConcentration = 1;
+%                     end
+                else
+                    error('%s not found', ar.model(m).pc{jc});
+                end
             else
                 error('%s not found', ar.model(m).pc{jc});
             end
         else
-            M.species(jx).initialConcentration = 1;
-            % M.species(jx).initialConcentration = x_ss(jx);
+            M.species(jx).initialConcentration = x_ss(jx);
         end
     end
 end
@@ -240,8 +244,14 @@ function [M] = GetParameters(M,m)
     global ar
    
     %% parameters
-
-    for id = 1:length(ar.model(m).p)
+    
+    % get all parameters from all data data sources
+    allPars = [];
+    for condId = 1:length(ar.model(m).condition)
+        cPars.cond(condId).p(:) = ar.model(m).condition(condId).p;
+        allPars = union(allPars,cPars.cond(condId).p(:));
+    end    
+    for id = 1:length(allPars)
         %id_tmp = id+length(ar.model(m).condition(c).p);
         id_tmp = id;
         M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
@@ -249,15 +259,15 @@ function [M] = GetParameters(M,m)
         M.parameter(id_tmp).notes = '';
         M.parameter(id_tmp).annotation = '';
         M.parameter(id_tmp).sboTerm = -1;
-        M.parameter(id_tmp).name = ar.model(m).p{id};                       
-        M.parameter(id_tmp).id = ar.model(m).p{id};
+        M.parameter(id_tmp).name = allPars{id};                       
+        M.parameter(id_tmp).id = allPars{id};
         M.parameter(id_tmp).units = '';
         M.parameter(id_tmp).constant = 1;
         M.parameter(id_tmp).isSetValue = 1;
         M.parameter(id_tmp).level = 2;
         M.parameter(id_tmp).version = 4;
 
-        qp = ismember(ar.pLabel, ar.model(m).p{id}); %R2013a compatible
+        qp = ismember(ar.pLabel, allPars{id}); %R2013a compatible
         if(sum(qp)==1)
             pvalue = ar.p(qp);
             if(ar.qLog10(qp) == 1)
@@ -270,7 +280,7 @@ function [M] = GetParameters(M,m)
     end
 end
 
-function [M] = GetRules(M,Crules)
+function [M] = GetInitialAssignments(M,Crules)
 
     %% rules (copasi)
     for jr = 1:size(Crules,1)
