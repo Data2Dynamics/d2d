@@ -42,23 +42,28 @@ arImportSBML([sbmlmodel.folder filesep sbmlmodel.name])
 arInit
 arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
-PEdatas = dir([pe_dir name sprintf('*%s*.tsv', 'meas_')]);
-PEconds = dir([pe_dir name sprintf('*%s*.tsv', 'cond_')]);
-PEparas = dir([pe_dir name sprintf('*%s*.tsv', 'pars_')]);
+% make dir case sensitive!
+PEobs = dir([pe_dir name sprintf('*%s*.tsv', '_OBS_')]);
+PEmeas = dir([pe_dir name sprintf('*%s*.tsv', '_MEAS_')]);
+PEconds = dir([pe_dir name sprintf('*%s*.tsv', '_COND_')]);
+PEparas = dir([pe_dir name sprintf('*%s*.tsv', '_PARS_')]);
+
 
 if length(PEparas) ~= 1
     error('Not exactly one parameter specification file found.')
 end
 
-for j = 1:length(PEdatas)
-    arLoadDataPEtab([pe_dir PEdatas(j).name]);
+% ToDo: Loop over several models
+
+for m = 1:length(ar.model)
+    arLoadDataPEtab([pe_dir PEmeas.name],[pe_dir PEobs.name],m);
 end
 
-for j = 1:length(PEconds)
-    arLoadCondPEtab([pe_dir PEconds(j).name]);
-end
+arLoadCondPEtab([pe_dir PEconds.name]);
 
+% Compilation
 arCompileAll
+
 
 arLoadParsPEtab([pe_dir PEparas.name]);
 
