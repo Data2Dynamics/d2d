@@ -1,11 +1,11 @@
-% varargout = arImportSBMLold(filename, varargin)
+% varargout = arParseSBML(filename, varargin)
 %
-% Import SBML model and translate to .def files
+% Translate SBML model and to .def files
 %
 % Options which can be specified are:
 %   tEnd                - Final simulation time (default = 100)
 %   compartmentbyname   - Use compartment names as specified in the SBML rather than unique identifier (default = false)
-%   overwrite           - Overwrite def file if it exists (default = false)
+%   overwrite           - Overwrite def file if it exist (default = false)
 %   keepcompartments    - Reference compartments in reactions rather than numerical values (default = false)
 %
 % Optional Outputs:
@@ -16,16 +16,18 @@
 % longer symbols.
 % State- and parameter names which coincide with mathematical functions
 % in symbolic the Symbolic Toolbox are replaced.
+% All qFits are set to 0. Fitting is switched on by reading in
+% parameters_*.tsv
 %
 % Example:
-% arImportSBML('BIOMD0000000379')
+% arParseSBML('BIOMD0000000379')
 %
 % Example:
-%  ms = arImportSBML('BIOMD0000000379','tend',100)
-%  [ms, modelname] = arImportSBML('BIOMD0000000379','tend', 100, 'compartmentbyname')
+%  ms = arParseSBML('BIOMD0000000379','tend',100)
+%  [ms, modelname] = arParseSBML('BIOMD0000000379','tend', 100, 'compartmentbyname')
 
 
-function varargout = arImportSBMLold(filename, varargin)
+function varargout = arParseSBML(filename, varargin)
 %if(~exist('tEnd','var') || isempty(tEnd))
 %    tEnd = 100;
 %end
@@ -73,6 +75,12 @@ catch %#ok<CTCH>
 end
 
 mIn = m;
+% m.rule.variable
+if isempty(m.time_symbol)
+    m.time_symbol = 't';
+elseif regexp(m.time_symbol,'time')
+    m.time_symbol = 't';
+end
 
 m = AdaptVariableNames(m);
 m = rules2input(m);
@@ -94,10 +102,14 @@ for i=1:length(m.compartment)
 end
 
 %% model file
+if ~isfolder('Models')
+     mkdir('Models');
+end
 [~, name] = fileparts(filename);
 new_filename = strrep(name,' ','_');
 new_filename = strrep(new_filename,'-','_');
-fid = fopen([new_filename '.def'], 'w');
+%cd('Models')
+fid = fopen(['Models' filesep new_filename '.def'], 'w');
 
 fprintf(fid, 'DESCRIPTION\n');
 if(~isempty(m.name))
@@ -120,11 +132,22 @@ if(~isempty(m.notes))
 end
 
 fprintf(fid, '\nPREDICTOR\n');
-if(~isempty(m.time_symbol))
-    fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, 'n/a', tEnd);
+if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && isfield(m.unitDefinition(1),'unit') && ~isempty(m.unitDefinition(1).unit) && isfield(m.unitDefinition(1).unit,'kind') && ~isempty(m.unitDefinition(1).unit.kind)
+    time_unit = m.unitDefinition(1).unit.kind;
+    if (strcmp(time_unit,'s')||strcmp(time_unit,'sec')||strcmp(time_unit,'second'))
+        if isfield(m.unitDefinition.unit,'multiplier')
+            if m.unitDefinition.unit.multiplier == 60
+                time_unit = 'min';
+            elseif m.unitDefinition.unit.multiplier == 3600
+                time_unit = 'h';
+            end
+        end
+    end
 else
-    fprintf(fid, 't\t T\t "%s"\t time\t 0\t %i\t\n', 'n/a', tEnd);
+    time_unit = 's';
 end
+
+fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, time_unit, tEnd);
 
 comps = {};
 comp_value = [];
@@ -166,6 +189,7 @@ fprintf(fid, '\nSTATES\n');
 % for j=1:length(m.species)
 pat = cell(0); % if length of species names ==1, the species names are extended by '_state'
 rep = cell(0);
+unit = cell(0);
 
 if isfield(m,'raterule')
     raterulespecies = unique({m.raterule.variable});
@@ -178,16 +202,26 @@ else
 end
 
 for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration]) & ~[m.species.boundaryCondition] | ([m.species.boundaryCondition] & israterule)) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
+    if isfield(m.species,'substanceUnits') && ~isempty(m.species(j).substanceUnits)
+        unit{end+1} = m.species(j).substanceUnits;
+    else
+        unit{end+1} = 'n/a';
+    end
     if length(m.species(j).id)==1 %|| strcmp(m.species(j).id,'beta')==1  % special cases or too short
         pat{end+1} =  m.species(j).id; %#ok<AGROW>
         rep{end+1} = [m.species(j).id,'_state']; %#ok<AGROW>
         m.species(j).id2 = rep{end};
-        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(rep{end}), 'n/a', ...
+        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(rep{end}), unit{end}, ...
             m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
     else  % standard case
         m.species(j).id2 = m.species(j).id;
-        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), 'n/a', ...
+        if length(unit)==length(m.species)
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), unit{j}, ...
             m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
+        else
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), unit{1}, ...
+            m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
+        end
     end
 end
 
@@ -233,11 +267,67 @@ if(isfield(m,'initialAssignment'))
             end
         end
     end
+else m.initialAssignment = [];
 end
 
+%% READ OBSERVABLES, ERRORS, INPUTS from rule
+obs = cell(0); % if length of species names ==1, the species names are extended by '_state'
+obsu=cell(0);
+obsf = cell(0);
+err = cell(0);
+errf = cell(0);
+u = cell(0);
+uu = cell(0);
+uf = cell(0);
+
+if isfield(m,'rule') && ~isempty(m.reaction)
+    for j=1:length(m.rule)
+        if strncmp(m.rule(j).variable,'observable',10)
+            obs{end+1} = m.rule(j).variable;
+            obsu{end+1} = m.rule(j).units;
+            if isempty(m.rule(j).units)
+                obsu{end} = 'n/a';
+            end
+            obsf{end+1} = m.rule(j).formula;
+        elseif strncmp(m.rule(j).variable,'sigma',5)
+            err{end+1} = m.rule(j).formula;
+            %errf{end+1} = m.rule(j).variable;
+        else
+            u{end+1} = m.rule(j).variable;
+            uu{end+1} = m.rule(j).units;
+            if isempty(m.rule(j).units)
+                uu{end} = 'n/a';
+            end
+            uf{end+1} = m.rule(j).formula;
+        end
+    end
+end
+if length(obs)~=length(err)
+    warning('Number of error parameters does not match number of observables. Error parameters are overwritten with "sigma_[Observable]".')
+    err = cell(0);
+    for i=1:length(obs)
+        err{i} = ['noiseParameter1_' obs{i}(12:end)];
+    end
+end
+
+
 fprintf(fid, '\nINPUTS\n');
-for j=1:length(m.u)
-    fprintf(fid, '%s\t C\t "%s"\t conc.\t%s\n', sym_check(m.u(j).variable), m.u(j).units, sym_check(replacePowerFunction(m.u(j).formula)));
+if isempty(m.u)
+    if exist('u','var')
+        for i=1:length(u)
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t "%s"\n', sym_check(u{i}), uu{i}, sym_check(replacePowerFunction(uf{i})));
+        end
+    end
+else    
+    if isempty(m.u.units)
+        for j=1:length(m.u)
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), 'n/a', sym_check(replacePowerFunction(m.u(j).formula)));
+        end        
+    else
+        for j=1:length(m.u)
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), m.u(j).units, sym_check(replacePowerFunction(m.u(j).formula)));
+        end
+    end
 end
 % treat boundary species as constant inputs
 for j=find([m.species.boundaryCondition] & ~israterule)
@@ -382,7 +472,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                 end
             end
             
-            tmpstr = sym(m.reaction(j).kineticLaw.math);
+            tmpstr = str2sym(m.reaction(j).kineticLaw.math);
             % repace species names if too short
             for i=1:length(rep)
                 tmpstr = mysubs(tmpstr,pat{i},rep{i});
@@ -433,7 +523,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             tmpstr = replacePowerFunction(tmpstr);
             
             % replace rules
-            tmpstr = sym(tmpstr);
+            tmpstr = str2sym(tmpstr);
             findrule = true;
             count = 0;
             while(findrule && count < 100)
@@ -462,6 +552,26 @@ arWaitbar(-1);
 
 fprintf(fid, '\nDERIVED\n');
 
+%% OBSERVABLES and ERRORS 
+% just works for Benchmark SBMLs because in databases observables are not set
+% if it is a Benchmark SBML the obs and err are set in line 258 because obs/err/inputs 
+% are all set in m.rule and have to be separated by strfind
+
+if exist('obs','var') 
+    fprintf(fid, '\nOBSERVABLES\n');
+    for i=1:length(obs)
+        fprintf(fid, '%s\t C\t "%s"\t conc.\t 0\t 0\t "%s"\n', sym_check(obs{i}), obsu{i}, obsf{i});
+    end
+end
+
+if exist('err','var')
+    fprintf(fid, '\nERRORS\n'); 
+    for i=1:length(err)
+        fprintf(fid, '%s\t "%s"\n', sym_check(obs{i}), err{i});
+    end
+end
+
+
 fprintf(fid, '\nCONDITIONS\n');
 % compartments
 if ( opts.keepcompartments )
@@ -470,33 +580,101 @@ if ( opts.keepcompartments )
     end
 end
 
-fprintf(fid, '\nPARAMETERS\n');
+
+% Initial values
 specs = {};
 spec_value = [];
+init_status = 2+zeros(length(m.species),1);
+idx_assval = zeros(length(m.species),1);
+
+% flag(j) == 0 -> do nothing (init is parameter)
+% flag(j) == 1 -> fprintf assignment_value of idx_assval = i;
+% flag(j) == 2 -> fprintf initial conc from species field in SBML (default behavior)
+
 for j=1:length(m.species)
-    if(m.species(j).isSetInitialConcentration)
-        ub = 1000;
-        if(m.species(j).initialConcentration>ub)
-            ub = m.species(j).initialConcentration*10;
+    for k=1:length(m.parameter)
+        if find(contains(m.parameter(k).name,['init_' m.species(j).name]))
+            init_status(j) = 0;
+            continue
         end
-        fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-            m.species(j).initialConcentration, m.species(j).constant==0, ub);
-        specs{end+1} = m.species(j).id2;
-        spec_value(end+1) = m.species(j).initialConcentration;
-    elseif(m.species(j).isSetInitialAmount)
-        comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
-        comp_vol = m.compartment(comp_id).size;
-        initial_conc = m.species(j).initialAmount/comp_vol;
-        ub = 1000;
-        if(initial_conc>ub)
-            ub = initial_conc*10;
+    end
+    if init_status(j) == 0
+        continue
+    end
+    for i=1:length(m.initialAssignment)
+        if any(strcmp(m.initialAssignment(i).symbol,{m.species(j).id}))
+            init_status(j) = 1;
+            idx_assval(j) = i;
+            continue
         end
-        fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-            initial_conc, m.species(j).constant==0, ub);
-        specs{end+1} = m.species(j).id2;
-        spec_value(end+1) = initial_conc;
     end
 end
+
+for j=1:length(m.species)
+    if init_status(j) == 1
+        assignment_value = arSym(m.initialAssignment(idx_assval(j)).math);
+%         assignment_value = arSubs(arSym(assignment_value), arSym(pars), arSym(par_value));
+        %assignment_value = subs(assignment_value, specs, spec_value);
+%         assignment_value = arSubs(arSym(assignment_value), arSym(comps), arSym(comp_value));
+%         assignment_value = eval(assignment_value);
+        
+%         ub = 1000;
+%         if(assignment_value>ub)
+%             ub = assignment_value * 10;
+%         end
+        
+        fprintf(fid, '%s\t "%s"\n', ['init_' sym_check(m.initialAssignment(idx_assval(j)).symbol)], ...
+            assignment_value);
+        
+    elseif init_status(j) == 2
+        
+        if(m.species(j).isSetInitialConcentration)
+            ub = 1000;
+            if(m.species(j).initialConcentration>ub)
+                ub = m.species(j).initialConcentration*10;
+            end
+            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
+                m.species(j).initialConcentration, 0, ub);
+            specs{end+1} = m.species(j).id2;
+            spec_value(end+1) = m.species(j).initialConcentration;
+        elseif(m.species(j).isSetInitialAmount)
+            comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
+            comp_vol = m.compartment(comp_id).size;
+            initial_conc = m.species(j).initialAmount/comp_vol;
+            ub = 1000;
+            if(initial_conc>ub)
+                ub = initial_conc*10;
+            end
+            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
+                initial_conc, 0, ub);
+            specs{end+1} = m.species(j).id2;
+            spec_value(end+1) = initial_conc;
+        end
+    end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fprintf(fid, '\nPARAMETERS\n');
+
 pars = {};
 par_value = [];
 for j=1:length(m.parameter)
@@ -516,7 +694,7 @@ for j=1:length(m.parameter)
                 ub = m.parameter(j).value*10;
             end
             fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.parameter(j).id), ...
-                m.parameter(j).value, m.parameter(j).constant==0, ub);
+                m.parameter(j).value, 0, ub);
             pars{end+1} = m.parameter(j).id;
             par_value(end+1) = m.parameter(j).value;
             
@@ -540,135 +718,118 @@ for j=1:length(m.reaction)
     end
 end
 
-% initial assignments
-for i=1:length(m.initialAssignment)
-    assignment_value = m.initialAssignment(i).math;
-    assignment_value = subs(assignment_value, pars, par_value);
-    assignment_value = subs(assignment_value, specs, spec_value);
-    assignment_value = subs(assignment_value, comps, comp_value);
-    assignment_value = eval(assignment_value);
-    
-    if any(strcmp(m.initialAssignment(i).symbol,{m.parameter.id}))
-        ub = 1000;
-        if assignment_value > ub
-            ub = 10*assignment_value;
-        end
-        fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.initialAssignment(i).symbol), ...
-            assignment_value, 1, ub);
-    end
-end
 
 fclose(fid);
+
+%cd('..')
+
 
 %% data file
 
-fid = fopen([new_filename '_data.def'], 'w');
+% fid = fopen([new_filename '_data.def'], 'w');
+% 
+% fprintf(fid, 'DESCRIPTION\n');
+% if(~isempty(m.name))
+%     fprintf(fid, '"data file for %s"\n', m.name);
+% end
+% 
+% fprintf(fid, '\nPREDICTOR\n');
+% if(~isempty(m.time_symbol))
+%     fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, 'n/a', 100);
+% else
+%     fprintf(fid, 't\t T\t "%s"\t time\t 0\t %i\t\n', 'n/a', 100);
+% end
+% 
+% fprintf(fid, '\nINPUTS\n');
+% 
+% % TODO: Access parameter name list. Where to implement and how?
+% % TODO: Access Units from model. 
+% 
+% if isfield(m,'rule') && ~isempty(m.rule(1).formula) % look for observation functions
+%     for j = 1:length(m.rule)
+%         split_err = strsplit(m.rule(j).variable,'sigma_');
+%         split_obs = strsplit(m.rule(j).variable,'observable_');
+%         isobs(j) = length(split_obs) == 2;
+%         iserr(j) = length(split_err) == 2;
+%         if isobs(j)
+%             obsname{j} = split_obs{2};
+%         elseif iserr(j)
+%             obsname{j} = split_err{2};
+%         else
+%             obsname{j} = '';
+%         end
+%     end
+%     [~,B,C] = unique(obsname);
+%     jsobs = find(isobs);
+%     jserr = find(iserr);
+%     
+%     fprintf(fid, '\nOBSERVABLES\n');
+%     for j=1:length(B)
+%         idx = find((j == C) & isobs');
+%         if ~isempty(idx)
+%         fprintf(fid, '%s \t C\t "%s"\t "conc."\t 0 0 "%s" "%s"\n', sym_check(m.rule(idx).variable), 'n/a', ...
+%             m.rule(idx).formula, m.rule(idx).name); 
+%         end
+%     end
+%     
+%     fprintf(fid, '\nERRORS\n');
+%     for j=1:length(B)
+%         idxobs = find((j == C) & isobs');
+%         idxerr = find((j == C) & iserr');
+%         if (length(idxobs) == 1) && (length(idxerr) == 1)
+%             fprintf(fid, '%s\t "%s"\n', sym_check(m.rule(idxobs).variable), sym_check(m.rule(idxerr).formula));
+%         else
+%             warning('Double check error model functions in data.def. Something might have gone wrong.')
+%         end
+%     end
+% elseif isfield(m.species,'id2')%old behavior
+%     fprintf(fid, '\nOBSERVABLES\n');
+%     for j=1:length(m.species)
+%         fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.species(j).id2), 'n/a', ...
+%             m.species(j).id2, m.species(j).name);
+%     end
+%     
+%     fprintf(fid, '\nERRORS\n');
+%     for j=1:length(m.species)
+%         fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.species(j).id2), sym_check(m.species(j).id2));
+%     end
+%     warning('No real observation functions defined!')
+% end
+% 
+% fprintf(fid, '\nCONDITIONS\n');
+% 
+% fprintf(fid, '\nPARAMETERS\n');
+% 
+% fclose(fid);
+% 
 
-fprintf(fid, 'DESCRIPTION\n');
-if(~isempty(m.name))
-    fprintf(fid, '"data file for %s"\n', m.name);
-end
-
-fprintf(fid, '\nPREDICTOR\n');
-if(~isempty(m.time_symbol))
-    fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, 'n/a', 100);
-else
-    fprintf(fid, 't\t T\t "%s"\t time\t 0\t %i\t\n', 'n/a', 100);
-end
-
-fprintf(fid, '\nINPUTS\n');
-
-% TODO: Access parameter name list. Where to implement and how?
-% TODO: Access Units from model. 
-
-if isfield(m,'rule') && ~isempty(m.rule(1).formula) % look for observation functions
-    for j = 1:length(m.rule)
-        split_err = strsplit(m.rule(j).variable,'sigma_');
-        split_obs = strsplit(m.rule(j).variable,'observable_');
-        isobs(j) = length(split_obs) == 2;
-        iserr(j) = length(split_err) == 2;
-        if isobs(j)
-            obsname{j} = split_obs{2};
-        elseif iserr(j)
-            obsname{j} = split_err{2};
-        else
-            obsname{j} = '';
-        end
-    end
-    [~,B,C] = unique(obsname);
-    jsobs = find(isobs);
-    jserr = find(iserr);
-    
-    fprintf(fid, '\nOBSERVABLES\n');
-    for j=1:length(B)
-        idx = find((j == C) & isobs');
-        if ~isempty(idx)
-        fprintf(fid, '%s \t C\t "%s"\t "conc."\t 0 0 "%s" "%s"\n', sym_check(m.rule(idx).variable), 'n/a', ...
-            m.rule(idx).formula, m.rule(idx).name); 
-        end
-    end
-    
-    fprintf(fid, '\nERRORS\n');
-    for j=1:length(B)
-        idxobs = find((j == C) & isobs');
-        idxerr = find((j == C) & iserr');
-        if (length(idxobs) == 1) && (length(idxerr) == 1)
-            fprintf(fid, '%s\t "%s"\n', sym_check(m.rule(idxobs).variable), sym_check(m.rule(idxerr).formula));
-        else
-            warning('Double check error model functions in data.def. Something might have gone wrong.')
-        end
-    end
-elseif isfield(m.species,'id2')%old behavior
-    fprintf(fid, '\nOBSERVABLES\n');
-    for j=1:length(m.species)
-        fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.species(j).id2), 'n/a', ...
-            m.species(j).id2, m.species(j).name);
-    end
-    
-    fprintf(fid, '\nERRORS\n');
-    for j=1:length(m.species)
-        fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.species(j).id2), sym_check(m.species(j).id2));
-    end
-    warning('No real observation functions defined!')
-end
-
-fprintf(fid, '\nCONDITIONS\n');
-
-fprintf(fid, '\nPARAMETERS\n');
-
-fclose(fid);
-
-if ~isdir('./Models')
-    mkdir('Models');
-end
-if(overwrite)
-    movefile([new_filename '.def'],'Models','f');
-%     system(['mv -f ',new_filename '.def Models']);
-else
-    dest = ['Models',filesep,new_filename '.def'];
-    if exist(dest,'file')==0
-        movefile([new_filename '.def'],'Models');
-    else
-        fprintf('%s already exists. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
-    end
-%     system(['mv ',new_filename '.def Models']);
-end
-
-if ~isdir('./Data')
-    mkdir('Data');
-end
-if(overwrite)    
-    movefile([new_filename '_data.def'],'Data','f');
-%     system(['mv -f ',new_filename '_data.def Data']);
-else
-    dest = ['Data',filesep,new_filename '_data.def'];
-    if exist(dest,'file')==0
-        movefile([new_filename '_data.def'],'Data');
-    else
-        fprintf('%s already exists. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
-    end
-%     system(['mv ',new_filename '_data.def Data']);
-end
+% if(overwrite)
+%     movefile([new_filename '.def'],'Models','f');
+ %     system(['mv -f ',new_filename '.def Models']);
+% else
+%     dest = ['Models',filesep,new_filename '.def'];
+%     if exist(dest,'file')==0
+%         movefile([new_filename '.def'],'Models');
+%     else
+%         fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
+%     end
+% end
+ 
+% if ~isdir('./Data')
+%     mkdir('Data');
+% end
+% if(overwrite)    
+%     movefile([new_filename '_data.def'],'Data','f');
+% %     system(['mv -f ',new_filename '_data.def Data']);
+% else
+%     dest = ['Data',filesep,new_filename '_data.def'];
+%     if exist(dest,'file')==0
+%         movefile([new_filename '_data.def'],'Data');
+%     else
+%         fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
+%     end
+% %     system(['mv ',new_filename '_data.def Data']);
+% end
 
 % generate Setup.m
 if(~exist('Setup.m','file'))
@@ -676,13 +837,20 @@ if(~exist('Setup.m','file'))
     fid = fopen('Setup.m','w');
     fprintf(fid, 'arInit;\n');
     fprintf(fid, 'arLoadModel(''%s'');\n',new_filename);
-    fprintf(fid, 'arLoadData(''%s'');\n',[new_filename '_data']);
+    C = strsplit(new_filename,'_');
+    short_filename=[];
+    for i=2:length(C)
+        short_filename = [short_filename '_' C{i}];
+    end
+    fprintf(fid, 'arLoadData(''%s'');\n',['measurementData' short_filename '.tsv']);
+    fprintf(fid, 'arSetParsSBML(''%s'');\n',['parameters' short_filename '.tsv']);
     fprintf(fid, 'arCompileAll;\n');
 else
     fprintf('Setup.m already available in the working directory.\n')
 end
 
-fprintf('Model- and data definition files created.\n');
+%fprintf('Model- and data definition files created.\n');
+fprintf('Model definition file created.\n');
 fprintf('If loading via Setup.m does not work, try to solve issues by adapting the def files by hand.\n');
 fprintf('The following issues might occur:\n')
 fprintf(' - In SBML, compartements are often used as a kind of annotation and not for considering volume factors. Then compartement (should) have the same volumes. In D2D, a reaction of compounds located in different compartements might cause an error.\n');
@@ -767,7 +935,7 @@ while(~isempty(funindex))
 end
 % disp(str)
 
-str = char(sym(str));
+str = char(str2sym(str));
 
 
 function str = replacePowerFunction(str, issym)
@@ -783,8 +951,8 @@ if(~exist('issym','var'))
 end
 
 if issym
-    str = strrep(str, 'power(', '_power('); % FIXME: use regexp instead
-    str = strrep(str, 'pow(', '_power('); % FIXME: use regexp instead
+ %   str = strrep(str, 'power(', '_power('); % FIXME: use regexp instead
+ %   str = strrep(str, 'pow(', '_power('); % FIXME: use regexp instead
 else
     C = {'a','b'};
     funstr = 'power';
@@ -875,7 +1043,7 @@ m.rule = m.rule(is_input~=1);
 for i=1:length(m.u)
     %     m.u(i).formula = char(mysubs(sym(m.u(i).formula),'time','t')); % does
     %     not work, at least in R2014a
-    m.u(i).formula = strrep(m.u(i).formula,'TIME','t');
+    m.u(i).formula = strrep(m.u(i).formula,'TIME',m.time_symbol);
 end
 
 
@@ -1003,13 +1171,13 @@ function c = findReactionCompartment(m, j, csizes)
 % (particle flux) to d2d (concentration flux).
 
 comp_r = {};
-for jr=1:length(m.reaction(j).reactant);
+for jr=1:length(m.reaction(j).reactant)
     js = strcmp({m.species.id},m.reaction(j).reactant(jr).species);
     comp_r{jr} = m.species(js).compartment; %#ok<AGROW>
 end
 
 comp_p = {};
-for jr=1:length(m.reaction(j).product);
+for jr=1:length(m.reaction(j).product)
     js = strcmp({m.species.id},m.reaction(j).product(jr).species);
     comp_p{jr} = m.species(js).compartment; %#ok<AGROW>
 end

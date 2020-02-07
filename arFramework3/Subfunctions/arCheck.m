@@ -78,6 +78,10 @@ end
 if(exist('arNEB','file') == 0)
      addpath([ar_path '/NEB']);
 end
+if(exist('arExportPEtab','file') == 0)
+     addpath([ar_path '/ImportExport']);
+end
+
 
 warning('off','MATLAB:rmpath:DirNotFound')
 

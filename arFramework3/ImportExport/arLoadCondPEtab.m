@@ -8,14 +8,6 @@
 % the experimental conditions. This should be called before arCompile.
 % This data format shall allow easier transitions between modeling
 % tools.
-
-% Example:
-% arImportSBML(Model1.xml)
-% arLoadModel(Model1.def)
-% arLoadDataPEtab(measurements.tsv)
-% arLoadCondPEtab(expCond.tsv)
-% arCompileAll
-% arLoadParsPEtab(parameters.tsv)
 % 
 % See also arLoadDataPEtab
 %

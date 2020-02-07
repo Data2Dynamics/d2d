@@ -1,4 +1,4 @@
-% arExportModelToDaniel(whichone,m,d,prefix)
+% arExportModelToDmod(whichone,m,d,prefix)
 %
 % Function to export data to different modelling framework (dMod)
 % See: https://github.com/dkaschek/dMod
@@ -22,21 +22,22 @@
 %   prefix          Addionional prefix for the files.
 % 
 % Example (model and observables):
-% arExportModelToDaniel
+% arExportModelToDmod
 % 
 % Example (for unit calculation):
-% arExportModelToDaniel({'model','obsCalcUnits'})
+% arExportModelToDmod({'model','obsCalcUnits'})
 % 
 % Example:
-% arExportModelToDaniel('dataConditions')
+% arExportModelToDmod('dataConditions')
 % 
 % Example:
-% arExportModelToDaniel('model')
+% arExportModelToDmod('model')
 % 
 % Example:
-% arExportModelToDaniel({'model','emptyobs'})
-% 
-function filenames = arExportModelToDaniel(whichone,m,d,prefix)
+% arExportModelToDmod({'model','emptyobs'})
+%
+% See also arExportDataToDmod
+function filenames = arExportModelToDmod(whichone,m,d,prefix)
 global ar
 
 if(~exist('whichone','var') || isempty(whichone))
@@ -58,7 +59,7 @@ end
 if( iscell(whichone))
     filenames = cell(size(whichone));
     for i=1:length(whichone)
-        filenames{i} = arExportModelToDaniel(whichone{i},m,ds,prefix);
+        filenames{i} = arExportModelToDmod(whichone{i},m,ds,prefix);
     end
     
 else
