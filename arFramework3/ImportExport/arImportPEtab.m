@@ -44,7 +44,7 @@ if length(sbmlmodel) ~= 1
     error('Not exactly one .xml file found.')
 end
 
-arParseSBMLToModelDef([sbmlmodel.folder filesep sbmlmodel.name])
+arParseSBML([sbmlmodel.folder filesep sbmlmodel.name])
 arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
 % make dir case sensitive!
