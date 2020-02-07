@@ -66,7 +66,7 @@ if chi2
     b = arCompareChi2(ar1,ar2);
     cnt = cnt+b;
 end
-cnt = cnt ./ (chi2+p+X+V+Z+Y+config);
+cnt = cnt ./ (chi2+p+X+V+Z+Y+conf);
 
 if cnt<1
     pass = 0;
