@@ -52,8 +52,8 @@ PEconds = dir([pe_dir name sprintf('*%s*.tsv', '_COND_')]);
 PEparas = dir([pe_dir name sprintf('*%s*.tsv', '_PARS_')]);
 
 
-if length(PEparas) ~= 1
-    error('Not exactly one parameter specification file found.')
+if length(PEparas) > 1 || length(PEmeas) > 1 || length(PEconds) > 1 || length(PEobs) > 1
+    error('Found more than one peTAB file.')
 end
 
 % ToDo: Loop over several models
