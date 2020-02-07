@@ -35,10 +35,7 @@ pe_dir = 'PEtab/';
 sbml_dir = 'SBML_singleConditions/';
 
 counter = 0;
-sbmlmodel = dir([pe_dir '*.xml']);
-if isempty(sbmlmodel)
-    sbmlmodel = dir([pe_dir sbml_dir name '*.xml']);
-end 
+sbmlmodel = dir([pe_dir filesep name  '*.xml']);
 
 if length(sbmlmodel) ~= 1
     error('Not exactly one .xml file found.')
