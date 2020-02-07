@@ -52,9 +52,9 @@ end
 
 [M] = GetInputs(M,F,m);
 
-[M] = GetObservables(M,m);
-
-[M] = GetErrors(M,m);
+% [M] = GetObservables(M,m);
+%  
+% [M] = GetErrors(M,m);
 
 
 arWaitbar(-1);
