@@ -175,7 +175,7 @@ for imodel = 1:length(ar.model)
             % noise parameters
             expErrors = ar.model(imodel).data(idata).yExpStdRaw(:,iy);
             if ar.config.fiterrors == -1
-                if sum(isnan(expErrors)) > 0
+                if sum(isnan(expErrors(~isnan(measurement)))) > 0
                     error('arExportPEtab: Cannot use ar.config.fiterrors == -1 with NaN in exp errors')
                 end
                 noiseParameters = expErrors;
