@@ -39,7 +39,7 @@ end
 
 % apply log10 trafo if flag is set. (Values given are on lin scale)
 for i = 1:length(ib)
-    if T.qLog10(i)
+    if T.qLog10(ib(i))
         % arSetPars(pLabel, [p], [qFit], [qLog10], [lb], [ub], [type], [meanp], [stdp])
         arSetPars(ar.pLabel(ia(i)), log10(T.nominalValue(ib(i))), T.estimate(ib(i)), T.qLog10(ib(i)),log10(T.lowerBound(ib(i))),log10( T.upperBound(ib(i))))
     else
