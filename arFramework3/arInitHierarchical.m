@@ -5,14 +5,10 @@ function arInitHierarchical()
 %   The suitable observables in question are those with linear dependence on
 %   a single species or derived variable, with the linearity coefficient not
 %   being a dynamic, initial nor error parameter. The present function creates
-%   structure ar.scales which gather information concerning these coefficients
+%   structure ar.scales which gathers information concerning these coefficients
 %   and sets ar.config.useHierarchical to true. This function also augments
 %   ar.model.data structures with some necessary fields. Moreover, it overrides
-%   some user settings, namely:
-%   - Settings in the global ar structure concerning the detected
-%     scale parameters.
-%   - Settings concerning the prior type (all priors are set to flat box).
-%   - Settings concerning error fitting (it is switched off).
+%   the user settings concerning the detected scale parameters.
 
 global ar;
 
