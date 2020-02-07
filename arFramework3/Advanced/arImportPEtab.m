@@ -21,6 +21,10 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
+if isfield(ar, 'model')
+    error('Existing ar workspace detected. Please initialize by arInit for PEtab import')
+end
+
 if ~exist('name') || isempty(name)
     name = '';
 end
@@ -41,8 +45,6 @@ if length(sbmlmodel) ~= 1
 end
 
 arImportSBML([sbmlmodel.folder filesep sbmlmodel.name])
-
-arInit
 arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
 % make dir case sensitive!
