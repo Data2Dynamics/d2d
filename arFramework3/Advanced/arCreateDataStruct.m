@@ -147,6 +147,10 @@ end
 
 D.fp = transpose(D.p);
 
+% execute substitutions from ar.model.p/ar.model.fp
+[int, iA, iB] = intersect(D.fp, ar.model.p);
+D.fp(iA) = ar.model.fp(iB);
+
 %% now replace fp which was provided as function argument:
 [~,ia,ib] = intersect(D.p,pold);
 for i=1:length(ia)
