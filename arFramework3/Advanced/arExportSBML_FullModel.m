@@ -245,12 +245,16 @@ function [M] = GetParameters(M,m)
    
     %% parameters
     
-    % get all parameters from all data data sources
+    % get all parameters from all data data sources and input functions
     allPars = [];
     for condId = 1:length(ar.model(m).condition)
         cPars.cond(condId).p(:) = ar.model(m).condition(condId).p;
         allPars = union(allPars,cPars.cond(condId).p(:));
     end    
+    for inpId = 1:length(ar.model(m).u)
+       uPars.u(inpId).p(:) = ar.model(m).pu;
+       allPars = union(allPars,uPars.u(inpId).p(:));
+    end
     for id = 1:length(allPars)
         %id_tmp = id+length(ar.model(m).condition(c).p);
         id_tmp = id;
@@ -283,11 +287,20 @@ function [M] = GetParameters(M,m)
     
     %% Get Assignment Rules for Parameters   
     is_not_set = cellfun(@(x,y) strcmp(x,y), ar.model(1).p, ar.model(1).fp','UniformOutput',false);
-   
-
+    
     
     for jp = 1:length(ar.model(m).p)
-        if is_not_set{jp} == 0
+        is_init(jp) = 0;
+        for jpx0 = 1:length(ar.model(m).px0)
+           if regexp(ar.model(m).p{jp},ar.model(m).px0{jpx0})
+                is_init(jp) = 1;
+                return
+           end
+        end
+        
+        
+        
+        if is_not_set{jp} == 0 && is_init(jp) == 0
             fu = arSym(ar.model(m).fp{jp});
             % replace time parameters with 'time'
             fu = char(arSubs(arSym(fu), arSym(ar.model(m).t), arSym('time')));
@@ -634,7 +647,7 @@ function [M] = GetInputs(M,F,m)
             M.parameter(jp).notes = '';
             M.parameter(jp).annotation = '';
             M.parameter(jp).sboTerm = -1;
-            M.parameter(jp).name = '';
+            M.parameter(jp).name = ar.model(m).u{ju};
             M.parameter(jp).id = ar.model(m).u{ju};
             if ~isempty(ar.model(m).uUnits)
                 M.parameter(jp).units = ar.model(m).uUnits{ju,2};
