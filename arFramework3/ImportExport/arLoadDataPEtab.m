@@ -97,14 +97,21 @@ for iCond = 1:length(uniCond)
     Sd2d.name = char(uniCond(iCond));
     Sd2d.tExp = uniTimes;
     Sd2d.tUnits = ar.model.tUnits;
+    % observation and error functions
     Sd2d.y = uniObs';
     Sd2d.yNames = uniObs';
     for iObs = 1:length(uniObs)
         idx = strcmp(Tobs.observableId,uniObs{iObs});
         Sd2d.fy{iObs} = char(string(Tobs.observableFormula(idx)));
-        Sd2d.fystd{iObs} = char(string(Tobs.noiseFormula(idx)));
+        tmp_fystd = Tobs.noiseFormula(idx);
+        for jObs = 1:length(Tobs.observableName)
+            tmp_fystd = arSubs(sym(tmp_fystd),sym(Tobs.observableName{jObs}),sym(['(' Tobs.observableFormula{jObs} ')']));
+        end
+        Sd2d.fystd{iObs} = char(string(tmp_fystd));
         Sd2d.logfitting(iObs) = double(strcmp(Tobs.observableTransformation(idx),'log10'));
-    end
+    end 
+    
+    % experimental data
     Sd2d.yExpRaw = nan(length(uniTimes),length(uniObs));
     Sd2d.yExpStd = nan(length(uniTimes),length(uniObs));
     Sd2d.yExpStdRaw = nan(length(uniTimes),length(uniObs));
