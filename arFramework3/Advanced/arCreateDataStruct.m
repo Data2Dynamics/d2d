@@ -140,11 +140,12 @@ D.p = union(ptmp, union(D.pu, D.py)); %R2013a compatible
 varlist = cellfun(@symvar, D.fystd, 'UniformOutput', false);
 D.pystd = setdiff(vertcat(varlist{:}), union(union(union(union(ar.model(m).x, ar.model(m).u), ar.model(m).z), D.y), ar.model(m).t));
 D.pystd = setdiff(D.pystd, D.p); %Remove dynamic variables from error model parameters (like in arLoadData, it rarely occurs but might be a problem for fitting)
-    D.p = union(D.p, D.pystd); %R2013a compatible
+D.p = union(D.p, D.pystd); %R2013a compatible
 if ( size( D.p, 1 ) ~= 1 )
     D.p = D.p.';
 end
-D.fp = ar.model(m).fp;
+
+D.fp = transpose(D.p);
 
 %% now replace fp which was provided as function argument:
 [~,ia,ib] = intersect(D.p,pold);

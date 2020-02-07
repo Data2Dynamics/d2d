@@ -102,7 +102,7 @@ for iCond = 1:length(uniCond)
     for iObs = 1:length(uniObs)
         idx = strcmp(Tobs.observableId,uniObs{iObs});
         Sd2d.fy{iObs} = char(Tobs.observableFormula(idx));
-        Sd2d.yStd{iObs} = char(Tobs.noiseFormula(idx));
+        Sd2d.fystd{iObs} = char(Tobs.noiseFormula(idx));
         Sd2d.logfitting(iObs) = double(strcmp(Tobs.observableTransformation(idx),'log10'));
     end
     Sd2d.yExpRaw = nan(length(uniTimes),length(uniObs));
