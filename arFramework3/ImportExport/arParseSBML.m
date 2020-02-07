@@ -131,15 +131,20 @@ if(~isempty(m.notes))
     fprintf(fid, '"%s"\n', m.notes);
 end
 
+
 fprintf(fid, '\nPREDICTOR\n');
 if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && isfield(m.unitDefinition(1),'unit') && ~isempty(m.unitDefinition(1).unit) && isfield(m.unitDefinition(1).unit,'kind') && ~isempty(m.unitDefinition(1).unit.kind)
-    time_unit = m.unitDefinition(1).unit.kind;
-    if (strcmp(time_unit,'s')||strcmp(time_unit,'sec')||strcmp(time_unit,'second'))
-        if isfield(m.unitDefinition.unit,'multiplier')
-            if m.unitDefinition.unit.multiplier == 60
-                time_unit = 'min';
-            elseif m.unitDefinition.unit.multiplier == 3600
-                time_unit = 'h';
+    if any(strcmp({m.unitDefinition.name},'time'))
+        time_unit = m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.kind;
+        if (strcmp(time_unit,'s')||strcmp(time_unit,'sec')||strcmp(time_unit,'second'))
+            if isfield(m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit,'multiplier')
+                if m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.multiplier == 60
+                    time_unit = 'min';
+                elseif m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.multiplier == 3600
+                    time_unit = 'h';
+                elseif m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.multiplier == 86400
+                    time_unit = 'd';
+                end
             end
         end
     end
@@ -156,9 +161,18 @@ for j=1:length(m.compartment)
     if(~m.compartment(j).constant)
         error('non-constant compartments are not yet supported in D2D!');
     end
+   
+for j=1:length(m.compartment)
+    if(~m.compartment(j).constant)
+        error('non-constant compartments are not yet supported in D2D!');
+    end
     units = m.compartment(j).units;
     if isempty( units )
-        units = 'n/a';
+        if any( strcmp({m.unitDefinition.name},'volume'))
+            units = m.unitDefinition(strcmp({m.unitDefinition.name},'volume')).unit.kind;
+        else
+            units = 'n/a';
+        end
     end
     
     if ( opts.compartmentbyname )
@@ -202,10 +216,16 @@ else
 end
 
 for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration]) & ~[m.species.boundaryCondition] | ([m.species.boundaryCondition] & israterule)) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
-    if isfield(m.species,'substanceUnits') && ~isempty(m.species(j).substanceUnits)
+   if isfield(m.species,'substanceUnits') && ~isempty(m.species(j).substanceUnits)
         unit{end+1} = m.species(j).substanceUnits;
     else
-        unit{end+1} = 'n/a';
+        if isempty( unit )
+            if any( strcmp({m.unitDefinition.name},'substance'))
+                unit = {m.unitDefinition(strcmp({m.unitDefinition.name},'substance')).unit.kind};
+            else
+                unit = {'n/a'};
+            end
+        end
     end
     if length(m.species(j).id)==1 %|| strcmp(m.species(j).id,'beta')==1  % special cases or too short
         pat{end+1} =  m.species(j).id; %#ok<AGROW>
