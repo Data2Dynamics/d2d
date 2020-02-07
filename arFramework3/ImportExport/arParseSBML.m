@@ -38,11 +38,11 @@ function varargout = arParseSBML(filename, varargin)
 switches    = {  'tend', 'overwrite', 'keepcompartments', 'compartmentbyname' };
 extraArgs   = [       1,           0,                 0,                   0 ];
 descriptions = {    { 'Specified tEnd', '' }, ...
-                    { 'Overwriting def file', '' }, ...
-                    { 'Keeping symbolic compartment names', '' }, ...
-                    { 'Using compartment names', '' }, ...
-                    };
-                
+    { 'Overwriting def file', '' }, ...
+    { 'Keeping symbolic compartment names', '' }, ...
+    { 'Using compartment names', '' }, ...
+    };
+
 % Parse input arguments
 opts = argSwitch( switches, extraArgs, descriptions, 1, varargin );
 overwrite = opts.overwrite;
@@ -66,7 +66,7 @@ end
 filename = GetFullPath(filename);
 
 % remove extension
-filename = regexprep(filename,'\.(xml|sbml)$','');   
+filename = regexprep(filename,'\.(xml|sbml)$','');
 
 try
     m = TranslateSBML([filename '.xml']);
@@ -103,7 +103,7 @@ end
 
 %% model file
 if ~isfolder('Models')
-     mkdir('Models');
+    mkdir('Models');
 end
 [~, name] = fileparts(filename);
 new_filename = strrep(name,' ','_');
@@ -157,11 +157,7 @@ fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, time_unit, tEnd
 comps = {};
 comp_value = [];
 fprintf(fid, '\nCOMPARTMENTS\n');
-for j=1:length(m.compartment)
-    if(~m.compartment(j).constant)
-        error('non-constant compartments are not yet supported in D2D!');
-    end
-   
+
 for j=1:length(m.compartment)
     if(~m.compartment(j).constant)
         error('non-constant compartments are not yet supported in D2D!');
@@ -216,7 +212,7 @@ else
 end
 
 for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentration]) & ~[m.species.boundaryCondition] | ([m.species.boundaryCondition] & israterule)) % rules should not be defined as states, e.g. K_PP_norm in Huang1996 BIOMD0000000009
-   if isfield(m.species,'substanceUnits') && ~isempty(m.species(j).substanceUnits)
+    if isfield(m.species,'substanceUnits') && ~isempty(m.species(j).substanceUnits)
         unit{end+1} = m.species(j).substanceUnits;
     else
         if isempty( unit )
@@ -237,10 +233,10 @@ for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentrat
         m.species(j).id2 = m.species(j).id;
         if length(unit)==length(m.species)
             fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), unit{j}, ...
-            m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
+                m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
         else
             fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), unit{1}, ...
-            m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
+                m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
         end
     end
 end
@@ -338,11 +334,11 @@ if isempty(m.u)
             fprintf(fid, '%s\t C\t "%s"\t conc.\t "%s"\n', sym_check(u{i}), uu{i}, sym_check(replacePowerFunction(uf{i})));
         end
     end
-else    
+else
     if isempty(m.u.units)
         for j=1:length(m.u)
             fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), 'n/a', sym_check(replacePowerFunction(m.u(j).formula)));
-        end        
+        end
     else
         for j=1:length(m.u)
             fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), m.u(j).units, sym_check(replacePowerFunction(m.u(j).formula)));
@@ -572,12 +568,12 @@ arWaitbar(-1);
 
 fprintf(fid, '\nDERIVED\n');
 
-%% OBSERVABLES and ERRORS 
+%% OBSERVABLES and ERRORS
 % just works for Benchmark SBMLs because in databases observables are not set
-% if it is a Benchmark SBML the obs and err are set in line 258 because obs/err/inputs 
+% if it is a Benchmark SBML the obs and err are set in line 258 because obs/err/inputs
 % are all set in m.rule and have to be separated by strfind
 
-if exist('obs','var') 
+if exist('obs','var')
     fprintf(fid, '\nOBSERVABLES\n');
     for i=1:length(obs)
         fprintf(fid, '%s\t C\t "%s"\t conc.\t 0\t 0\t "%s"\n', sym_check(obs{i}), obsu{i}, obsf{i});
@@ -585,7 +581,7 @@ if exist('obs','var')
 end
 
 if exist('err','var')
-    fprintf(fid, '\nERRORS\n'); 
+    fprintf(fid, '\nERRORS\n');
     for i=1:length(err)
         fprintf(fid, '%s\t "%s"\n', sym_check(obs{i}), err{i});
     end
@@ -633,15 +629,15 @@ end
 for j=1:length(m.species)
     if init_status(j) == 1
         assignment_value = arSym(m.initialAssignment(idx_assval(j)).math);
-%         assignment_value = arSubs(arSym(assignment_value), arSym(pars), arSym(par_value));
+        %         assignment_value = arSubs(arSym(assignment_value), arSym(pars), arSym(par_value));
         %assignment_value = subs(assignment_value, specs, spec_value);
-%         assignment_value = arSubs(arSym(assignment_value), arSym(comps), arSym(comp_value));
-%         assignment_value = eval(assignment_value);
+        %         assignment_value = arSubs(arSym(assignment_value), arSym(comps), arSym(comp_value));
+        %         assignment_value = eval(assignment_value);
         
-%         ub = 1000;
-%         if(assignment_value>ub)
-%             ub = assignment_value * 10;
-%         end
+        %         ub = 1000;
+        %         if(assignment_value>ub)
+        %             ub = assignment_value * 10;
+        %         end
         
         fprintf(fid, '%s\t "%s"\n', ['init_' sym_check(m.initialAssignment(idx_assval(j)).symbol)], ...
             assignment_value);
@@ -747,24 +743,24 @@ fclose(fid);
 %% data file
 
 % fid = fopen([new_filename '_data.def'], 'w');
-% 
+%
 % fprintf(fid, 'DESCRIPTION\n');
 % if(~isempty(m.name))
 %     fprintf(fid, '"data file for %s"\n', m.name);
 % end
-% 
+%
 % fprintf(fid, '\nPREDICTOR\n');
 % if(~isempty(m.time_symbol))
 %     fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, 'n/a', 100);
 % else
 %     fprintf(fid, 't\t T\t "%s"\t time\t 0\t %i\t\n', 'n/a', 100);
 % end
-% 
+%
 % fprintf(fid, '\nINPUTS\n');
-% 
+%
 % % TODO: Access parameter name list. Where to implement and how?
-% % TODO: Access Units from model. 
-% 
+% % TODO: Access Units from model.
+%
 % if isfield(m,'rule') && ~isempty(m.rule(1).formula) % look for observation functions
 %     for j = 1:length(m.rule)
 %         split_err = strsplit(m.rule(j).variable,'sigma_');
@@ -782,16 +778,16 @@ fclose(fid);
 %     [~,B,C] = unique(obsname);
 %     jsobs = find(isobs);
 %     jserr = find(iserr);
-%     
+%
 %     fprintf(fid, '\nOBSERVABLES\n');
 %     for j=1:length(B)
 %         idx = find((j == C) & isobs');
 %         if ~isempty(idx)
 %         fprintf(fid, '%s \t C\t "%s"\t "conc."\t 0 0 "%s" "%s"\n', sym_check(m.rule(idx).variable), 'n/a', ...
-%             m.rule(idx).formula, m.rule(idx).name); 
+%             m.rule(idx).formula, m.rule(idx).name);
 %         end
 %     end
-%     
+%
 %     fprintf(fid, '\nERRORS\n');
 %     for j=1:length(B)
 %         idxobs = find((j == C) & isobs');
@@ -808,24 +804,24 @@ fclose(fid);
 %         fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.species(j).id2), 'n/a', ...
 %             m.species(j).id2, m.species(j).name);
 %     end
-%     
+%
 %     fprintf(fid, '\nERRORS\n');
 %     for j=1:length(m.species)
 %         fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.species(j).id2), sym_check(m.species(j).id2));
 %     end
 %     warning('No real observation functions defined!')
 % end
-% 
+%
 % fprintf(fid, '\nCONDITIONS\n');
-% 
+%
 % fprintf(fid, '\nPARAMETERS\n');
-% 
+%
 % fclose(fid);
-% 
+%
 
 % if(overwrite)
 %     movefile([new_filename '.def'],'Models','f');
- %     system(['mv -f ',new_filename '.def Models']);
+%     system(['mv -f ',new_filename '.def Models']);
 % else
 %     dest = ['Models',filesep,new_filename '.def'];
 %     if exist(dest,'file')==0
@@ -834,11 +830,11 @@ fclose(fid);
 %         fprintf('%s already exist. Either use the flag ''overwrite'' or move the files by hand.\n',dest);
 %     end
 % end
- 
+
 % if ~isdir('./Data')
 %     mkdir('Data');
 % end
-% if(overwrite)    
+% if(overwrite)
 %     movefile([new_filename '_data.def'],'Data','f');
 % %     system(['mv -f ',new_filename '_data.def Data']);
 % else
@@ -888,7 +884,6 @@ end
 if nargout > 1
     varargout{2} = new_filename;
 end
-
 
 function str = replaceFunction(str, funstr, C, funmat)
 % %% test replace functions
@@ -971,8 +966,8 @@ if(~exist('issym','var'))
 end
 
 if issym
- %   str = strrep(str, 'power(', '_power('); % FIXME: use regexp instead
- %   str = strrep(str, 'pow(', '_power('); % FIXME: use regexp instead
+    %   str = strrep(str, 'power(', '_power('); % FIXME: use regexp instead
+    %   str = strrep(str, 'pow(', '_power('); % FIXME: use regexp instead
 else
     C = {'a','b'};
     funstr = 'power';
@@ -1179,12 +1174,12 @@ if ~isempty(intersect(pat,keywords)) || err==1
 end
 
 function c = compartmentIDToName( m, reaction_comp )
-    for jc = 1 : length( m.compartment )
-        if ( strcmp( reaction_comp, m.compartment(jc).id ) )
-            c = m.compartment(jc).name;
-            return;
-        end
+for jc = 1 : length( m.compartment )
+    if ( strcmp( reaction_comp, m.compartment(jc).id ) )
+        c = m.compartment(jc).name;
+        return;
     end
+end
 
 function c = findReactionCompartment(m, j, csizes)
 % find compartment of reacting species to convert from SBML rate convention
@@ -1208,7 +1203,7 @@ if ~isempty(comp_r)
         if length(unique(csizes))==1
             warning('Reactants originate from more than one compartment. Such a model definition is in general not reasonable but does not matter in this case because all compartments have the same size.');
         else
-            error('Reactants originate from more than one compartment. Such a model definition is in general not reasonable.');            
+            error('Reactants originate from more than one compartment. Such a model definition is in general not reasonable.');
         end
     end
 end
@@ -1227,11 +1222,11 @@ end
 % c = comp_r{1};
 
 if isempty(comp_r) && ~isempty(comp_p)
-     c = comp_p{1};
+    c = comp_p{1};
 else
     c = comp_r{1};
 end
-% 
+%
 % if ~isempty(comp_r) && ~isempty(comp_p)
 %     % educt and product in the same compartment
 %     if isequal(unique(comp_r),unique(comp_p))
