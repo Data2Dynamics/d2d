@@ -1,5 +1,8 @@
 function pass = arComparePEtab(ar1,ar2,chi2,p,X,V,Z,Y,conf)
 
+if ~exist('chi2','var') || isempty(chi2)
+    chi2 = true;
+end
 if ~exist('p','var') || isempty(p)
     p = true;
 end
@@ -14,6 +17,9 @@ if ~exist('Z','var') || isempty(Z)
 end
 if ~exist('Y','var') || isempty(Y)
     Y = true;
+end
+if ~exist('conf','var') || isempty(conf)
+    conf = true;
 end
 
 cnt = 0;
