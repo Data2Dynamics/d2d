@@ -5,7 +5,8 @@
 % m:    model index
 % c:    condition index
 
-function arExportSBML(m, c)
+function arExportSBML_manual(m, c)
+warning('This function is deprecated and will be removed in future releases. Use arExportSBML instead.')
 
 global ar
 

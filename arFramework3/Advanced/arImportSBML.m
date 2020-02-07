@@ -76,6 +76,11 @@ end
 
 mIn = m;
 % m.rule.variable
+if isempty(m.time_symbol)
+    m.time_symbol = 't';
+elseif regexp(m.time_symbol,'time')
+    m.time_symbol = 't';
+end
 
 m = AdaptVariableNames(m);
 m = rules2input(m);
@@ -141,9 +146,7 @@ if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && isfield(m.unitDe
 else
     time_unit = 's';
 end
-if isempty(m.time_symbol)
-    m.time_symbol = 't';
-end
+
 fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, time_unit, tEnd);
 
 comps = {};
@@ -1040,7 +1043,7 @@ m.rule = m.rule(is_input~=1);
 for i=1:length(m.u)
     %     m.u(i).formula = char(mysubs(sym(m.u(i).formula),'time','t')); % does
     %     not work, at least in R2014a
-    m.u(i).formula = strrep(m.u(i).formula,'TIME','t');
+    m.u(i).formula = strrep(m.u(i).formula,'TIME',m.time_symbol);
 end
 
 
@@ -1168,13 +1171,13 @@ function c = findReactionCompartment(m, j, csizes)
 % (particle flux) to d2d (concentration flux).
 
 comp_r = {};
-for jr=1:length(m.reaction(j).reactant);
+for jr=1:length(m.reaction(j).reactant)
     js = strcmp({m.species.id},m.reaction(j).reactant(jr).species);
     comp_r{jr} = m.species(js).compartment; %#ok<AGROW>
 end
 
 comp_p = {};
-for jr=1:length(m.reaction(j).product);
+for jr=1:length(m.reaction(j).product)
     js = strcmp({m.species.id},m.reaction(j).product(jr).species);
     comp_p{jr} = m.species(js).compartment; %#ok<AGROW>
 end

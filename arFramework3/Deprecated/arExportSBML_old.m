@@ -8,6 +8,7 @@
 % steadystate:  prequilibrate condition as in ar file
 
 function arExportSBML_old(m, c, copasi, steadystate)
+warning('This function is deprecated and will be removed in future releases. Use arExportSBML instead.')
 
 global ar
 
