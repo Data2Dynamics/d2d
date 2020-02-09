@@ -9,6 +9,8 @@ function arInitHierarchical()
 %   and sets ar.config.useHierarchical to true. This function also augments
 %   ar.model.data structures with some necessary fields. Moreover, it overrides
 %   the user settings concerning the detected scale parameters.
+%
+%   See also ARDISABLEHIERARCHICAL
 
 global ar;
 
@@ -186,10 +188,17 @@ for k = 1:length(observableLinks)
     ar.scales(idx).links(1).d = id;
     ar.scales(idx).links(1).fy = iy;
     ar.scales(idx).pLink = pLink;
+    % Create a backup of user settings
+    ar.scales(idx).backup_user.qFit = ar.qFit(pLink);
+    ar.scales(idx).backup_user.qLog10 = ar.qLog10(pLink);
+    ar.scales(idx).backup_user.p = ar.p(pLink);
+    ar.scales(idx).backup_user.lb = ar.lb(pLink);
+    ar.scales(idx).backup_user.ub = ar.ub(pLink);
+    % Override user settings
     ar.qFit(pLink) = 0;
     ar.qLog10(pLink) = 0; % Hierarchical optimization assumes that scale parameters are considered in the plain linear scale
     % These settings are technically not necessary but may help to avoid confusion
-    ar.p(pLink) = nan;
+    ar.p(pLink) = nan; % Cf. arDisableHierarchical
     ar.lb(pLink) = 0;
     ar.ub(pLink) = inf;
   else
