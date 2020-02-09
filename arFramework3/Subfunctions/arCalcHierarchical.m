@@ -124,6 +124,7 @@ for is = 1:length(ar.scales)
             denGrad = denGrad + 2*sum(xzExpSimu.*sxzExpSimu./(ystd.^2),1);
         end
     end
+    assert(den>0,sprintf('The solution of your model corresponding to the scale %s is zero at all measurement times. Hierarchical optimization is not feasible.',ar.scales(is).scaleLabel))
     ar.scales(is).scale = num/den;
     if sensi
         ar.scales(is).scaleGrad = (numGrad*den - denGrad*num)/(den^2);
