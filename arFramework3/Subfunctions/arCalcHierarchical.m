@@ -42,8 +42,8 @@ for im = 1:length(ar.model)
     end
 end
 end
-errorFitting = ( (ar.config.fiterrors==1 || (ar.config.fiterrors==0 && haveNanExpStd)) && any(ar.qFit(ar.qError==1)==1) );
-assert(~errorFitting,'Hierarchical optimization in combination with with error fitting is not supported yet.')
+useErrorModel = (ar.config.fiterrors==1 || (ar.config.fiterrors==0 && haveNanExpStd));
+assert(~useErrorModel,'Hierarchical optimization in combination with model-based errors is not supported yet. Please use experimental errors.')
 useCustomResidual = isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fun);
 assert(~useCustomResidual,'Hierarchical optimization in combination with custom residuals is not supported yet.')
 assert(~isfield(ar,'conditionconstraints'),'Hierarchical optimization in combination with condition constraints is not supported yet.')
