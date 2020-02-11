@@ -1,13 +1,17 @@
-% adaptive step reconciling chi^2 increase
-% direct step method
+% Adaptive step reconciling chi^2 increase. Always keeps the increase of the
+% initial chi^2 value under the boundary set by relchi2stepincrease if this
+% is in accordance with minstepsize.
+%
+% This algorithm only varies the profile parameter.
 
-function [pStep, dpNew, beta, alpha] = pleInitStepDirect(jk, pLast, dpLast, lastAll)
+function [pStep, dpNew] = pleInitStepDirect(jk, pLast, dpLast, dpStep)
+% Although unsued, dpStep is can not beomitted since it is used in the other
+% step choice algorithm.
 
 global ar
 
-% mag factor
-stepfaktor = 2;
-
+%Configurations:
+stepfaktor = ar.ple.stepfaktor(jk);
 dchi2 = ar.ple.dchi2_point;
 
 chi2last = feval(ar.ple.merit_fkt);
@@ -16,12 +20,11 @@ dpNew = dpLast;
 pStep = zeros(size(pLast));
 pStep(jk) = dpNew;
 
-beta = [];
-alpha = [];
-
 q_not_jk = 1:length(pLast);
 q_not_jk = q_not_jk(:)~=jk & ar.qFit(:);
+
 while(true)
+
     q_hit_lb = pLast+pStep <= ar.lb+ar.ple.minstepsize;
     q_hit_ub = pLast+pStep >= ar.ub-ar.ple.minstepsize;
     
@@ -44,14 +47,9 @@ while(true)
         pStep = nan(size(pLast));
         return
     else
-        try
-            feval(ar.ple.integrate_fkt, pLast+pStep);
-            chi2trial = feval(ar.ple.merit_fkt);
-        catch err
-            fprintf( 'WARNING: Forcing stepsize shrinkage due to failing simulation. Current stepsize: %e\nReason: %d\n', max(pStep), err.message );
-            % If the simulation fails in this direction, force a step shrinkage
-            chi2trial = inf;
-        end
+        feval(ar.ple.integrate_fkt, pLast+pStep);
+        chi2trial = feval(ar.ple.merit_fkt);
+        
         if(chi2trial-chi2last > dchi2*ar.ple.relchi2stepincrease(jk))
             dpNew = dpNew / stepfaktor;
             if(abs(dpNew)<ar.ple.minstepsize(jk))
@@ -60,8 +58,8 @@ while(true)
                 return
             end
         else
-            if(chi2trial-chi2last < dchi2*ar.ple.relchi2stepincrease(jk) && ...
-                    chi2trial-chi2last>0)
+            if(chi2trial-chi2last <= dchi2*ar.ple.relchi2stepincrease(jk) && ...
+                    chi2trial-chi2last>=0)
                 dpNew = dpNew * stepfaktor;
                 if(abs(dpNew) > ar.ple.maxstepsize(jk))
                     dpNew = ar.ple.maxstepsize(jk) * sign(dpNew);

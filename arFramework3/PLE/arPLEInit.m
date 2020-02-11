@@ -1,17 +1,26 @@
-% arPLEInit([force], [breakon_point], [mode])
+% arPLEInit([force], [breakon_point], [mode],[autosave])
 %
 % Initialize Profile Likelihood Exploit
-%   force           exising PLEs are deleted  [true]
+%   force           existing PLEs are deleted  [true]
 %   breakon_point   calc simultaneous (false) or pointwise (true) CIs  [true]
-%   mode            direct (1) or progressive (2) step  [1]
+%   mode            Specifies step choice algorithm.
+%                       (1): Changing only profile parameters
+%                       (2): Use information of direction of previous step
+%   autosave        Indicate whether Profiles should be saved automatically
+%                       [true]
 % 
 % The profile likelihood calculation by the functions ple* was intended
 % as running independent of D2D, i.e. it was intended to be also used by
 % other tools. 
 %
+% Mode 2 proposes steps more efficiently and thus performs better in most 
+% scenarios. In cases with many local optima or poorly specified integration
+% tolerances, mode 1 may sample profiles more accurately, although not
+% sparse enough to reach the threshold quickly.
+%
 % See also: ple
 
-function arPLEInit(force, breakon_point, mode)
+function arPLEInit(force, breakon_point, mode,autosave)
 
 global ar
 if(~exist('force','var') || isempty(force))
@@ -28,11 +37,12 @@ end
 if(~exist('mode', 'var') || isempty(mode))
     mode = 1;
 end
+if(~exist('autosave', 'var') || isempty(autosave))
+    autosave= true;
+end
 if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
-
-alpha = 0.95;
 
 %     pleInit(ar.p, ar.qFit==1, ar.lb, ar.ub, ar.qLog10, @arPLEIntegrate, @arPLEMerit, ...
 %     @arPLEDiffMerit, @arPLEFit, @arPLESetOptim, ar.pLabel, 1-ar.ppl.alpha_level, force);
@@ -52,52 +62,45 @@ if ~isfield(ar,'ple') || ~isstruct(ar.ple) || force
         'attempts', 4',...
         'showCalculation', true,...
         'ylabel', '\chi^2_{PL}',...
-        'breakon_point', true,... %false',...
+        'breakon_point', true,... 
         'plot_point', true,...
-        'plot_simu', false,... %true',...
+        'plot_simu', false,... 
         'dist_thres', 0.01,...
         'grad_thres', 1,...
         'closetobound', 0.001,...
         'continuousSave', false,...
-        'allowbetteroptimum', false);
+        'allowbetteroptimum', false,...
+        'autosave',autosave,...
+        'usesensis',false);
 end
 
 
-% step sizes
-ar.ple.samplesize = 50 * ones(size(ar.ple.p));
+%Configurations for profile steps
+ar.ple.samplesize = 100 * ones(size(ar.ple.p));
 ar.ple.relchi2stepincrease = 0.1 * ones(size(ar.ple.p));
-ar.ple.maxstepsize = (ar.ub-ar.lb)./ar.ple.samplesize;
-ar.ple.minstepsize = ones(size(ar.ple.maxstepsize))*1e-3;
+ar.ple.maxstepsize = 2*(ar.ub-ar.lb)./ar.ple.samplesize;
+ar.ple.minstepsize = ones(size(ar.ple.maxstepsize))*5*1e-4;
 ar.ple.breakonlb = false(size(ar.ple.p));
 ar.ple.breakonub = false(size(ar.ple.p));
+ar.ple.stepfaktor = 1.5*ones(size(ar.ple.p)); 
 
-
-ar.ple.alpha_level = 1-alpha;
+%Chosen confidence level. alpha and chi2 need to both be set separately if they
+%are changed.
+ar.ple.alpha_level = 0.05;
 ar.ple.dchi2 = arChi2inv(1-ar.ple.alpha_level, ar.ple.dof);
 ar.ple.dchi2_point = arChi2inv(1-ar.ple.alpha_level, ar.ple.dof_point);
 
-% magic factors
-ar.ple.chi2_strID_ratio = 1e-1;
-ar.ple.svd_threshold = 1e-6; % SVD regulatization threshold (NR: chapter 15.4)
+ar.ple.chi2_strID_ratio = 1e-1; 
+%relative distance to threshold which is accepted as structurally NI
 ar.ple.optimset_tol = 1e-1;
+%absolute difference between initial point and new minimum required
+%to accept the new minimum
 
-% % labels
-% if(~exist('p_labels', 'var'))
-%     p_labels = {};
-%     for j=1:length(ar.ple.p)
-%         p_labels{j} = sprintf('p%02i', j); %#ok<AGROW>
-%     end
-% end
-% ar.ple.p_labels = p_labels;
 ar.ple.p_labels = ar.pLabel;
-
 ar.ple.conf_lb = nan(1,length(ar.ple.p));
 ar.ple.conf_ub = nan(1,length(ar.ple.p));
 ar.ple.conf_lb_point = nan(1,length(ar.ple.p));
 ar.ple.conf_ub_point = nan(1,length(ar.ple.p));
-ar.ple.conf_rel = nan(1,length(ar.ple.p));
-ar.ple.conf_rel_point = nan(1,length(ar.ple.p));
-
 ar.ple.IDstatus = nan(1,length(ar.ple.p));
 ar.ple.IDstatus_point = nan(1,length(ar.ple.p));
 ar.ple.IDlabel = {'', 'pra.nID', 'str.nID', 'single str.nID'};
@@ -143,32 +146,29 @@ end
 if(isfield(ar, 'pTrue'))
     ar.ple.p_true = ar.pTrue;
 end
+
+%Specifies Profile-Step-Choice-Algorithm
 if(mode==1)
     ar.ple.initstep_fkt = @pleInitStepDirect;
     ar.ple.mode = 1;
 elseif(mode==2)
-    ar.ple.initstep_fkt = @pleInitStep;
+    ar.ple.initstep_fkt = @pleInitStepInertia;
     ar.ple.mode = 2;
-elseif(mode==3)
-    ar.ple.initstep_fkt = @pleInitStepLinear;
-    ar.ple.mode = 3;
-elseif(mode==4)
-    ar.ple.initstep_fkt = @pleInitStepComposite;
-    ar.ple.mode = 4;
-elseif(mode==5)
-    ar.ple.initstep_fkt = @pleInitStepDirect2;
-    ar.ple.mode = 5;
 end
 
-ar.ple.savePath = [arSave '/PLE'];
+if (autosave)
+    ar.ple.savePath = [arSave '/PLE'];
+end
 ar.ple.errors = [];
 
-
-
+%Next Section defines functions with handles stored in the ple-struct.
 function arPLEIntegrate(p)
 global ar
 try
-    arCalcMerit(false, p(ar.qFit==1));
+    arCalcMerit(ar.ple.usesensis, p(ar.qFit==1));
+    %Using sensitivitites in this function is a bit more time-intensive and 
+    %makes no difference in most cases, but not using them may lead to wrongly
+    %sampled profiles in some models.
 catch exception
     if ( ~isfield( ar, 'ple_errors' ) )
         ar.ple.errors = ar.p;
@@ -296,7 +296,8 @@ try
         ar.qFit = qFitReset;
     end
     p = ar.p;
-    arPLEIntegrate(ar.p);  % Recalculate objective function, with FitErrorCorrection calculated with qFitReset
+    arPLEIntegrate(ar.p);  
+    % Recalculate objective function, with FitErrorCorrection calculated with qFitReset
 catch exception
     disp(['ERROR FIT: ' exception.message]);
     if(nargin==1)
