@@ -245,61 +245,32 @@ function [M] = GetParameters(M,m)
    
     %% parameters
     
-    % get all parameters from all data data sources and input functions
-    allPars = [];
+    % get all parameters from all data data sources and input functions and
+    % reactions
+    
+    
+    allPars = zeros(length(ar.model(m).p),1);
+    constPars = ones(length(ar.model(m).p),1);
     for condId = 1:length(ar.model(m).condition)
-        cPars.cond(condId).p(:) = ar.model(m).condition(condId).p;
-        allPars = union(allPars,cPars.cond(condId).p(:));
+        condPars = ismember(ar.model(m).p,ar.model(m).condition(condId).p);
+        allPars = condPars|allPars;
     end    
     for inpId = 1:length(ar.model(m).u)
-       uPars.u(inpId).p(:) = ar.model(m).pu;
-       allPars = union(allPars,uPars.u(inpId).p(:));
-    end
-    for id = 1:length(allPars)
-        %id_tmp = id+length(ar.model(m).condition(c).p);
-        id_tmp = id;
-        M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
-        M.parameter(id_tmp).metaid = '';
-        M.parameter(id_tmp).notes = '';
-        M.parameter(id_tmp).annotation = '';
-        M.parameter(id_tmp).sboTerm = -1;
-        M.parameter(id_tmp).name = allPars{id};                       
-        M.parameter(id_tmp).id = allPars{id};
-        M.parameter(id_tmp).units = '';
-        M.parameter(id_tmp).constant = 1;
-        M.parameter(id_tmp).isSetValue = 1;
-        M.parameter(id_tmp).level = 2;
-        M.parameter(id_tmp).version = 4;
-
-        qp = ismember(ar.pLabel, allPars{id}); %R2013a compatible
-        if(sum(qp)==1)
-            pvalue = ar.p(qp);
-            if(ar.qLog10(qp) == 1)
-                
-                pvalue = 10^pvalue;
-            end
-        else
-            pvalue = 1;
-        end
-        M.parameter(id_tmp).value = pvalue;
-    end
+       inpPars = ismember(ar.model(m).p,ar.model(m).pu);
+       allPars = inpPars|allPars;
+    end   
     
-    
-    %% Get Assignment Rules for Parameters   
-    is_not_set = cellfun(@(x,y) strcmp(x,y), ar.model(1).p, ar.model(1).fp','UniformOutput',false);
-    
-    
+    is_not_set = cellfun(@(x,y) strcmp(x,y), ar.model(m).p, ar.model(m).fp','UniformOutput',false);    
     for jp = 1:length(ar.model(m).p)
         is_init(jp) = 0;
         for jpx0 = 1:length(ar.model(m).px0)
            if regexp(ar.model(m).p{jp},ar.model(m).px0{jpx0})
                 is_init(jp) = 1;
-                return
            end
         end
         
         
-        
+
         if is_not_set{jp} == 0 && is_init(jp) == 0
             fu = arSym(ar.model(m).fp{jp});
             % replace time parameters with 'time'
@@ -319,8 +290,136 @@ function [M] = GetParameters(M,m)
             M.rule(ixrule).units = '';
             M.rule(ixrule).level = 2;
             M.rule(ixrule).version = 4;
+
+            allPars(jp) = 1;
+            constPars(jp) = 0;
         end
-    end      
+        
+        if is_init(jp) == 1
+            if regexp(ar.model(m).fp{jp},ar.model(m).p{jp}) == 1
+                allPars(jp) = 1;
+                constPars(jp) = 0;
+%                 id_tmp = length(M.parameter) + 1;
+%                 M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
+%                 M.parameter(id_tmp).metaid = '';
+%                 M.parameter(id_tmp).notes = '';
+%                 M.parameter(id_tmp).annotation = '';
+%                 M.parameter(id_tmp).sboTerm = -1;
+%                 M.parameter(id_tmp).name = ar.model(m).p{jp};                       
+%                 M.parameter(id_tmp).id = ar.model(m).p{jp};
+%                 M.parameter(id_tmp).units = '';
+%                 M.parameter(id_tmp).constant = 0;
+%                 M.parameter(id_tmp).isSetValue = 1;
+%                 M.parameter(id_tmp).level = 2;
+%                 M.parameter(id_tmp).version = 4;
+% 
+%                 qp = ismember(ar.pLabel, ar.model(m).p(jp)); %R2013a compatible
+%                 if(sum(qp)==1)
+%                     pvalue = ar.p(qp);
+%                     if(ar.qLog10(qp) == 1)
+% 
+%                         pvalue = 10^pvalue;
+%                     end
+%                 else
+%                     pvalue = 1;
+%                 end
+%                 M.parameter(id_tmp).value = pvalue;
+            end
+        end 
+        
+    end
+    
+    
+    
+    
+    for id = 1:length(allPars)
+        if allPars(id) == 1
+            %id_tmp = id+length(ar.model(m).condition(c).p);
+            id_tmp = length(M.parameter) + 1;
+            M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
+            M.parameter(id_tmp).metaid = '';
+            M.parameter(id_tmp).notes = '';
+            M.parameter(id_tmp).annotation = '';
+            M.parameter(id_tmp).sboTerm = -1;
+            M.parameter(id_tmp).name = ar.model(m).p{id};                       
+            M.parameter(id_tmp).id = ar.model(m).p{id};
+            M.parameter(id_tmp).units = '';
+            M.parameter(id_tmp).constant = constPars(id);
+            M.parameter(id_tmp).isSetValue = 1;
+            M.parameter(id_tmp).level = 2;
+            M.parameter(id_tmp).version = 4;
+
+            qp = ismember(ar.pLabel, ar.model(m).p(id)); %R2013a compatible
+            if(sum(qp)==1)
+                pvalue = ar.p(qp);
+                if(ar.qLog10(qp) == 1)
+
+                    pvalue = 10^pvalue;
+                end
+            else
+                pvalue = 1;
+            end
+            M.parameter(id_tmp).value = pvalue;
+        end
+    end
+    
+    
+    %% Add parameters which are not in ar.model(m).p but which are in ar.model(m).fp, i.e. are general parameters used for assignments etc.
+    
+    
+    additionalPars = zeros(length(ar.pLabel),1);
+%     constPars = ones(length(ar.pLabel),1);
+    for condId = 1:length(ar.model(m).condition)
+        condPars = ismember(ar.pLabel',ar.model(m).condition(condId).p) ;
+        additionalPars = condPars|additionalPars;
+    end    
+    for inpId = 1:length(ar.model(m).u)
+       inpPars = ismember(ar.pLabel',ar.model(m).pu);
+       additionalPars = inpPars|additionalPars;
+    end  
+  
+    
+    for id = 1:length(additionalPars)
+        if additionalPars(id) == 1
+            if ismember(ar.pLabel(id),ar.model(m).p) == 0
+                %id_tmp = id+length(ar.model(m).condition(c).p);
+                id_tmp = length(M.parameter) + 1;
+                M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
+                M.parameter(id_tmp).metaid = '';
+                M.parameter(id_tmp).notes = '';
+                M.parameter(id_tmp).annotation = '';
+                M.parameter(id_tmp).sboTerm = -1;
+                M.parameter(id_tmp).name = ar.pLabel{id};                       
+                M.parameter(id_tmp).id = ar.pLabel{id};
+                M.parameter(id_tmp).units = '';
+                M.parameter(id_tmp).constant = 1;
+                M.parameter(id_tmp).isSetValue = 1;
+                M.parameter(id_tmp).level = 2;
+                M.parameter(id_tmp).version = 4;
+
+                qp = ismember(ar.pLabel, ar.model(m).p(id)); %R2013a compatible
+                if(sum(qp)==1)
+                    pvalue = ar.p(qp);
+                    if(ar.qLog10(qp) == 1)
+
+                        pvalue = 10^pvalue;
+                    end
+                else
+                    pvalue = 1;
+                end
+                M.parameter(id_tmp).value = pvalue;
+            end
+        end
+    end
+    
+    
+    
+    
+    
+    
+    
+    
+ 
 end
 
 
