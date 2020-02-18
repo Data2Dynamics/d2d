@@ -25,7 +25,7 @@ if isfield(ar, 'model')
     error('Existing ar workspace detected. Please initialize by arInit for PEtab import')
 end
 
-if ~exist('name') || isempty(name)
+if ~exist('name','var') || isempty(name)
     name = '*';
 end
 
@@ -34,8 +34,10 @@ sbmlmodel = dir(['**/' name '.xml']);
 if isempty(sbmlmodel)
     error('No sbml file found! Switch your path to working directory.');
 end
-out = stringListChooser({sbmlmodel.name});
-sbmlmodel= sbmlmodel(out);                 % set sbmlmodel to chosen
+if length(sbmlmodel)>1
+    out = stringListChooser({sbmlmodel.name});
+    sbmlmodel= sbmlmodel(out);                 % set sbmlmodel to chosen
+end
 
 pe_dir = dir('**/*.tsv');
 if isempty(sbmlmodel)
