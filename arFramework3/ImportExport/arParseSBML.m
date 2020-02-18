@@ -338,12 +338,10 @@ else
     for jU=1:length(m.u)
         m.u(jU).formula = replacePiecewiseFunction(m.u(jU).formula);
     end
-    if isempty(m.u.units)
-        for j=1:length(m.u)
+    for j=1:length(m.u)
+        if isempty(m.u(j).units)
             fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), 'n/a', sym_check(replacePowerFunction(m.u(j).formula)));
-        end
-    else
-        for j=1:length(m.u)
+        else
             fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), m.u(j).units, sym_check(replacePowerFunction(m.u(j).formula)));
         end
     end
