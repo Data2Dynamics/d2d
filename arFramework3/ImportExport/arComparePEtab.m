@@ -1,5 +1,25 @@
 function pass = arComparePEtab(ar1,ar2,chi2,p,X,V,Z,Y,conf)
 
+if(nargin==0)
+    filenames = fileChooserMulti('./Results', true); 
+    if length(filenames)>2
+       error('Error: Comparison of more than two models is not supported.') 
+    end
+    for j=1:length(filenames)
+        fname = ['./Results/' filenames{j} '/workspace.mat'];
+        if(exist(fname,'file'))
+            S=load(fname);
+            if j==1
+                ar1 = S.ar;
+            elseif j==2
+                ar2 = S.ar;
+            end
+        else
+            error('Error: No workspace found in %s',fname) 
+        end    
+    end
+end
+
 if ~exist('chi2','var') || isempty(chi2)
     chi2 = true;
 end
