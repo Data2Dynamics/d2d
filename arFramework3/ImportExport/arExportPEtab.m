@@ -48,6 +48,15 @@ for imodel = 1:length(ar.model)
         
         obsName = ar.model(imodel).data(idata).yNames';
         obsFormula = ar.model(imodel).data(idata).fy;
+        
+        if ~isempty(ar.model(imodel).z)
+            for ify = 1:size(obsFormula,1)
+                symFz = arSym(obsFormula{ify});
+                symFzSubs = arSubs(symFz, arSym(ar.model(imodel).z), ...
+                    arSym(ar.model(imodel).fz'));
+                obsFormula{ify} = char(symFzSubs);
+            end
+        end
         if size(obsFormula,2) > 1; obsFormula = obsFormula'; end
 
         obsTrafo = cell(length(obsId),1);
@@ -59,7 +68,7 @@ for imodel = 1:length(ar.model)
         
         noiseDistribution = cell(length(obsId),1);
         noiseDistribution(:) = {'normal'}; % others not possible in d2d
-                
+                        
         obsT_tmp = [obsT_tmp; table(obsId, obsName, obsFormula, obsTrafo, ...
             noiseFormula, noiseDistribution)];
         
@@ -151,7 +160,7 @@ for imodel = 1:length(ar.model)
                 preEquilibrationId = cell(length(time),1);
                 preEquilibrationId(:) = ...
                     {['model' num2str(imodel) '_data' ...
-                    num2str(ar.model(imodel).condition(ar.model.ss_condition.src).dLink)]};
+                    num2str(ar.model(imodel).condition(ar.model(imodel).ss_condition.src).dLink)]};
                 rowsToAdd = [rowsToAdd, table(preEquilibrationId)];
             end
             
