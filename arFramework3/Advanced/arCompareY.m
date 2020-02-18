@@ -73,7 +73,7 @@ for m=1:size(ar1.model,2)
             if isempty(ind) 
                 if (size(ar2.model(m).data(d).y,2) == size(ar1.model(m).data(d).y,2))
                     ind = indcol(i);
-                    fprintf(['arCompareY.m: Names not consistent. Expecting ' ar2.model(m).data(d).y{indcol(i)} ' to be the same as ' ar1.model(m).data(d).y{ind} '. If not check your SBML export.']);
+                    fprintf(['arCompareY.m: Names not consistent. Expecting ' ar2.model(m).data(d).y{indcol(i)} ' to be the same as ' ar1.model(m).data(d).y{ind} '. If not check your SBML export.\n']);
                 else
                     if isempty(strmatch(ar2.model(m).data(d).y{indcol(i)},ar1.pLabel, 'exact')); %#ok
                         arFprintf(2, '%s from SBML export neither found as dynamic state nor as parameter.\n',ar2.model(m).data(d).y{indcol(i)})
