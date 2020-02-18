@@ -26,11 +26,11 @@ if isfield(ar, 'model')
 end
 
 if ~exist('name','var') || isempty(name)
-    name = '*';
+    name = '';
 end
 
 %TODO: read in multiple sbmls & save these paths in ar struct
-sbmlmodel = dir(['**/*' name '*.xml']);
+sbmlmodel = dir(['**' filesep '*' name '*.xml']);
 if isempty(sbmlmodel)
     error('No sbml file found! Switch your path to working directory.');
 end

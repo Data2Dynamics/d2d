@@ -612,7 +612,7 @@ idx_assval = zeros(length(m.species),1);
 
 for j=1:length(m.species)
     for k=1:length(m.parameter)
-        if find(contains(m.parameter(k).name,['init_' m.species(j).name]))
+        if strcmp(m.parameter(k).name,['init_' m.species(j).name])
             init_status(j) = 0;
             continue
         end
@@ -1330,7 +1330,3 @@ while(~isempty(funindex))
 
     funindex = strfind(str, funstr);
 end
-
-
-
-
