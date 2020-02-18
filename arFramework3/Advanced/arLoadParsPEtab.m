@@ -27,14 +27,19 @@ if ~contains(filename,'.tsv')
 end
 
 T = tdfread(filename);
-if isfield(T,'parameterID')
-    [BothPars, ia, ib] = intersect(ar.pLabel,cellstr(T.parameterID));
-elseif isfield(T,'parameterId')
-    [BothPars, ia, ib] = intersect(ar.pLabel,cellstr(T.parameterId));
-else
-    error('No parameter ID given.')
+try
+    T.parameterId = cellstr(T.parameterId);
+    [BothPars, ia, ib] = intersect(ar.pLabel,T.parameterId);
+catch
+    T.parameterID = cellstr(T.parameterID);
+    [BothPars, ia, ib] = intersect(ar.pLabel,T.parameterID);
 end
-    
+
+% Check not identical parameterIds (for now just sd/std to noiseParameter)
+[T,flag] = arReplaceParameterId(T);
+if flag % if parameterIds were changed
+    [BothPars, ia, ib] = intersect(ar.pLabel,T.parameterId);
+end
 
 T.qLog10 = nan(size(T.nominalValue));
 T.qLog10(contains(string(T.parameterScale),'lin')) = 0;
