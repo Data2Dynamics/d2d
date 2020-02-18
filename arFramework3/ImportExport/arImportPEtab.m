@@ -27,10 +27,12 @@ end
 
 if ~exist('name','var') || isempty(name)
     name = '';
+else
+    name = [name '*'];
 end
 
 %TODO: read in multiple sbmls & save these paths in ar struct
-sbmlmodel = dir(['**' filesep '*' name '*.xml']);
+sbmlmodel = dir(['**' filesep '*' name '.xml']);
 if isempty(sbmlmodel)
     error('No sbml file found! Switch your path to working directory.');
 end
@@ -49,10 +51,10 @@ arParseSBML([sbmlmodel.folder filesep sbmlmodel.name])
 arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
 % make dir case sensitive!
-PEobs = dir([pe_dir filesep sprintf('%s*%s*.tsv', name, 'obs')]);
-PEmeas = dir([pe_dir filesep sprintf('%s*%s*.tsv', name, 'meas')]);
-PEconds = dir([pe_dir filesep sprintf('%s*%s*.tsv', name, 'cond')]);
-PEparas = dir([pe_dir filesep sprintf('%s*%s*.tsv', name, 'par')]);
+PEobs = dir([pe_dir filesep sprintf('%s%s*.tsv', name, 'obs')]);
+PEmeas = dir([pe_dir filesep sprintf('%s%s*.tsv', name, 'meas')]);
+PEconds = dir([pe_dir filesep sprintf('%s%s*.tsv', name, 'cond')]);
+PEparas = dir([pe_dir filesep sprintf('%s%s*.tsv', name, 'par')]);
 
 if length(PEparas) > 1 || length(PEmeas) > 1 || length(PEconds) > 1 || length(PEobs) > 1
     error('Found more than one peTAB file.')
