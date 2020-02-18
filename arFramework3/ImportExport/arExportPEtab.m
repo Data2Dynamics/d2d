@@ -178,7 +178,7 @@ for imodel = 1:length(ar.model)
             %obsPars_tmp = intersect(obsPars_tmp, ar.pLabel);
             %obsPars_tmp = strcat(obsPars_tmp, ';');
             %observableParameters = repmat({[obsPars_tmp{:}]}, [length(time) 1]);
-            observableParameters = repmat(' ',[length(time) 1]);
+            observableParameters = cell([length(time) 1]);
             rowsToAdd = [rowsToAdd, table(observableParameters)];
             
             % noise parameters
@@ -199,7 +199,7 @@ for imodel = 1:length(ar.model)
                     %noisePars_tmp = intersect(noisePars_tmp, ar.pLabel);
                     %noisePars_tmp = strcat(noisePars_tmp, repmat(';', [length(noisePars_tmp)-1 1]));
                     %noiseParameters = repmat({[noisePars_tmp{:}]}, [length(time) 1]);
-                    noiseParameters = repmat(' ', [length(time) 1]);
+                    noiseParameters = cell([length(time) 1]);
 
                 end
             end
