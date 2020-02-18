@@ -1,23 +1,34 @@
 function pass = arCompareChi2(ar1,ar2)
 
-if ar1.chi2 == ar2.chi2
-    pass = 1;
-    return
+fields = {'chi2','chi2constr', 'chi2err', 'chi2fit','chi2prior', 'chi2random'};
+pass = 1;
+for i = 1:length(fields)
+    pass = pass*compareChi2s(ar1, ar2, fields{i});
 end
-pass = 0;
+end
 
-if ar1.chi2constr ~= ar2.chi2constr
-    warning('arCompareChi2.m: ar.chi2constr are different.')
+function pass = compareChi2s(ar1, ar2, field)
+
+atol = 1e-3;
+rtol = 1e-3;
+
+absComp = abs(ar1.(field) - ar2.(field));
+if abs(ar1.(field)) ~= 0
+    relComp = absComp/abs(ar1.(field));
+elseif abs(ar1.(field)) + abs(ar2.(field)) == 0
+    relComp = 0;
+else 
+    relComp = Inf;
 end
-if ar1.chi2err ~= ar2.chi2err
-    warning('arCompareChi2.m: ar.chi2err are different.')
+
+if ar1.(field) == ar2.(field)
+    pass = 1;
+elseif absComp < atol && relComp < rtol
+    fprintf(['arCompareChi2: ar.' field ' are different within tolerances. Continuing...\n'])
+    pass = 1;
+else
+    warning(['arCompareChi2.m: ar.' field ' are different.'])
+    pass = 0;
 end
-if ar1.chi2fit ~= ar2.chi2fit
-    warning('arCompareChi2.m: ar.chi2fit are different.')
-end
-if ar1.chi2prior ~= ar2.chi2prior
-    warning('arCompareChi2.m: ar.chi2prior are different.')
-end
-if ar1.chi2random ~= ar2.chi2random
-    warning('arCompareChi2.m: ar.chi2random are different.')
+
 end

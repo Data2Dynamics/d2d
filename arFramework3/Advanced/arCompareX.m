@@ -28,7 +28,13 @@ for m=1:size(ar1.model,2)
         return
     end
     for c=1:size(ar1.model(m).condition,2)
+        
+        tmax = min([max(ar1.model(m).condition(c).tFine), ...
+            max(ar2.model(m).condition(c).tFine)]);
         t = ar2.model(m).condition(c).tFine;
+        t = t(t<= tmax);
+        
+        
         indcol = find(sum(ar2.model(m).condition(c).xFineSimu~=0,1)>0);
 
         if isempty(indcol)
@@ -61,13 +67,13 @@ for m=1:size(ar1.model,2)
         close all
         dolegend = 1;
         for i=length(indcol):-1:2
-            sbmlsim = ar2.model(m).condition(c).xFineSimu(:,indcol(i));
-            if ( ~silent )
-                subplot(subx,suby,i-1)
-                set(gca,'FontSize',fs)
-                plot(t, sbmlsim,'k');
-                hold on
-            end
+            % depr
+%             if ( ~silent )
+%                 subplot(subx,suby,i-1)
+%                 set(gca,'FontSize',fs)
+%                 plot(t, sbmlsim,'k');
+%                 hold on
+%             end
 
             ind = strmatch(ar2.model(m).x{indcol(i)},ar1.model(m).x, 'exact'); %#ok
             if isempty(ind) 
@@ -83,9 +89,12 @@ for m=1:size(ar1.model,2)
             elseif(length(ind)>1)
                 warning('%s from SBML export found multiple times.\n',ar2.model(m).x{indcol(i)})
             end
-            d2dSim           = interp1(ar1.model(m).condition(c).tFine,ar1.model(m).condition(c).xFineSimu(:,ind),t);
-            d2dFilt          = bsxfun(@max, d2dSim, atol);
+            d2dSim      = interp1(ar1.model(m).condition(c).tFine,ar1.model(m).condition(c).xFineSimu(:,ind),t);
+            d2dFilt     = bsxfun(@max, d2dSim, atol);
+            
+            sbmlsim     = interp1(ar2.model(m).condition(c).tFine,ar2.model(m).condition(c).xFineSimu(:,indcol(i)),t);
             sbmlFilt    = bsxfun(@max, sbmlsim, atol);
+            
             maxDifference(end+1) = max( ( (d2dFilt - sbmlFilt) ./ (sbmlFilt) ).^2 );
 
             if ( ~silent )
