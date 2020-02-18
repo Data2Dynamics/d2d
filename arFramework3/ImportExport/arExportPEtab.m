@@ -66,6 +66,14 @@ for imodel = 1:length(ar.model)
         obsTrafo(logical(ar.model(imodel).data(idata).logfitting)) = {'log10'};
         
         noiseFormula = ar.model(imodel).data(idata).fystd;
+        
+        noiseFormulaSubs = cell(size(noiseFormula));
+        for ifystd = 1:size(noiseFormula,1)
+            noiseFormulaSymSingle = arSym(noiseFormula{ifystd});
+            noiseFormulaSubs{ifystd} = char(arSubs(noiseFormulaSymSingle, arSym(obsName), arSym(obsId)));
+        end
+        noiseFormula = noiseFormulaSubs;
+        
         if size(noiseFormula,2) > 1; noiseFormula = noiseFormula'; end
         
         noiseDistribution = cell(length(obsId),1);
