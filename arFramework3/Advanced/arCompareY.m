@@ -9,7 +9,7 @@ function pass = arCompareY(ar1,ar2, silent)
 
 % Tolerances for a pass
 rtol = 1e-3;
-atol = 1e-4;
+atol = 1e-3;
 
 if (nargin<3)
     silent = false;
