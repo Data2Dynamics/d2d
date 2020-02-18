@@ -631,6 +631,10 @@ function [M] = GetInputs(M,F,m)
             fu = char(arSubs(arSym(fu), arSym(ar.model(m).t), arSym('time')));
             ixfun = cell2mat(cellfun(@(x) strfind(fu,x), funs, 'UniformOutput',0)); % does input contain any of the special ar input functions
             if any(ixfun)
+                % because subs will be called time has to be renamed
+                fu = arSym(ar.model(m).fu{ju}); 
+                fu = char(arSubs(arSym(fu), arSym(ar.model(m).t), arSym('cabbage_')));
+
                 heavisideReplacement = {
                     %{'heaviside', 'if((%s) lt 0.0, 0.0, if((%s) gt 0.0, 1.0, 0.5))', [1, 1], 'heaviside(x)'},...
                     %{'heaviside', 'if((%s) lt 0.0, 0.0, if((%s) gt 0.0, 1.0, 0.5))', [1, 1], 'heaviside(x)'},...
@@ -648,6 +652,8 @@ function [M] = GetInputs(M,F,m)
                 for jh = 1 : numel( args.heaviside )
                     heaviside_timePoints{jh} = args.heaviside(jh).args{1};
                 end
+                
+                fu = strrep(fu, 'cabbage_', 'time');
 
                 ixrule = length(M.rule) + 1;% index of current rule
                 M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
