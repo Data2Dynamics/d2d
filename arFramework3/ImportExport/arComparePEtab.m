@@ -1,4 +1,4 @@
-function pass = arComparePEtab(ar1,ar2,chi2,p,X,V,Z,Y,conf)
+function pass = arComparePEtab(ar1,ar2,silent,chi2,p,X,V,Z,Y,conf)
 
 if(nargin==0)
     filenames = fileChooserMulti('./Results', true); 
@@ -48,28 +48,28 @@ if conf
     cnt = cnt+b;
 end
 if V
-    b = arCompareV(ar1,ar2);
+    b = arCompareV(ar1,ar2,silent);
     cnt = cnt+b;
     if ~b
         warning('arComparePEtab.m: Simulations are not the same.')
     end    
 end
 if Z
-    b = arCompareZ(ar1,ar2);
+    b = arCompareZ(ar1,ar2,silent);
     cnt = cnt+b;
     if ~b
         warning('arComparePEtab.m: Derived simulations are not the same.')
     end 
 end
 if X
-    b = arCompareX(ar1,ar2);
+    b = arCompareX(ar1,ar2,silent);
     cnt = cnt+b;
     if ~b
         warning('arComparePEtab.m: State simulations are not the same.')
     end
 end
 if Y
-    b = arCompareY(ar1,ar2);
+    b = arCompareY(ar1,ar2,silent);
     cnt = cnt+b;
     if ~b
         warning('arComparePEtab.m: Observables are not the same.')

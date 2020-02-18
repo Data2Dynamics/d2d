@@ -1,13 +1,9 @@
 
-function pass = arComparePars(ar1,ar2,silent,bounds,fitted)
-
-if exist('silent','var') && silent
-    warning('off');
-end
+function pass = arComparePars(ar1,ar2,bounds,fitted)
 
 % Tolerances for a pass
 rtol = 1e-3;
-atol = 1e-4;
+atol = 1e-3;
 
 % Sort parameters of ar2 according to pLabels in ar1
 p = nan(1,length(ar1.pLabel));
@@ -19,7 +15,7 @@ end
 
 % if not present, give warning
 if any(isnan(p))
-    warning(['arComparePars.m: Parameter ' num2str(find(isnan(p))) ' (' ar2.pLabel{isnan(p)} ') are not present in SBML model.\n'])
+    warning(['arComparePars.m: Parameter ' num2str(find(isnan(p))) ' (' ar2.pLabel{isnan(p)} ') are not present in first ar input.\n'])
 end
 
 % check correct log
