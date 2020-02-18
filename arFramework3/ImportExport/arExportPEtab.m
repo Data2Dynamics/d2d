@@ -267,7 +267,7 @@ upperBound_tmp = (1-ar.qLog10).*upperBound_tmp + ar.qLog10.*10.^upperBound_tmp;
 estimate_tmp = ar.qFit;
 estimate_tmp(ar.qFit == 2) = 0;
 
-parameterID = ar.pLabel;
+parameterId = ar.pLabel;
 parameterName = ar.pLabel;
 parameterScale = parameterScale_tmp;
 lowerBound = lowerBound_tmp;
@@ -275,10 +275,10 @@ upperBound = upperBound_tmp;
 nominalValue = nominalValue_tmp;
 estimate = estimate_tmp;
 
-parT = table(parameterID(:), parameterName(:), parameterScale(:), ...
+parT = table(parameterId(:), parameterName(:), parameterScale(:), ...
     lowerBound(:), upperBound(:), nominalValue(:), estimate(:));
 
-parT.Properties.VariableNames = {'parameterID', 'parameterName', ...
+parT.Properties.VariableNames = {'parameterId', 'parameterName', ...
     'parameterScale', 'lowerBound', 'upperBound', 'nominalValue', 'estimate',};
 
 writetable(parT, ['PEtab/' name '_PARS_model.tsv'],...
