@@ -27,7 +27,14 @@ if ~contains(filename,'.tsv')
 end
 
 T = tdfread(filename);
-[BothPars, ia, ib] = intersect(ar.pLabel,cellstr(T.parameterID));
+if isfield(T,'parameterID')
+    [BothPars, ia, ib] = intersect(ar.pLabel,cellstr(T.parameterID));
+elseif isfield(T,'parameterId')
+    [BothPars, ia, ib] = intersect(ar.pLabel,cellstr(T.parameterId));
+else
+    error('No parameter ID given.')
+end
+    
 
 T.qLog10 = nan(size(T.nominalValue));
 T.qLog10(contains(string(T.parameterScale),'lin')) = 0;

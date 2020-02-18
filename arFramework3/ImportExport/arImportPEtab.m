@@ -26,30 +26,31 @@ if isfield(ar, 'model')
 end
 
 if ~exist('name') || isempty(name)
-    name = '';
+    name = '*';
 end
 
-%TODO: make this dynamic OR save these paths in ar struct
-
-pe_dir = 'PEtab/';
-sbml_dir = 'SBML_singleConditions/';
-
-counter = 0;
-sbmlmodel = dir([pe_dir filesep name  '*.xml']);
-
-if length(sbmlmodel) ~= 1
-    error('Not exactly one .xml file found.')
+%TODO: read in multiple sbmls & save these paths in ar struct
+sbmlmodel = dir(['**/' name '.xml']);
+if isempty(sbmlmodel)
+    error('No sbml file found! Switch your path to working directory.');
 end
+out = stringListChooser({sbmlmodel.name});
+sbmlmodel= sbmlmodel(out);                 % set sbmlmodel to chosen
+
+pe_dir = dir('**/*.tsv');
+if isempty(sbmlmodel)
+    error('No tsv files found! Switch your path to working directory.');
+end
+pe_dir = pe_dir(1).folder;
 
 arParseSBML([sbmlmodel.folder filesep sbmlmodel.name])
 arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
 % make dir case sensitive!
-PEobs = dir([pe_dir name sprintf('*%s*.tsv', '_OBS_')]);
-PEmeas = dir([pe_dir name sprintf('*%s*.tsv', '_MEAS_')]);
-PEconds = dir([pe_dir name sprintf('*%s*.tsv', '_COND_')]);
-PEparas = dir([pe_dir name sprintf('*%s*.tsv', '_PARS_')]);
-
+PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'obs')]);
+PEmeas = dir([pe_dir filesep sprintf('*%s*.tsv', 'meas')]);
+PEconds = dir([pe_dir filesep sprintf('*%s*.tsv', 'cond')]);
+PEparas = dir([pe_dir filesep sprintf('*%s*.tsv', 'par')]);
 
 if length(PEparas) > 1 || length(PEmeas) > 1 || length(PEconds) > 1 || length(PEobs) > 1
     error('Found more than one peTAB file.')
@@ -58,15 +59,14 @@ end
 % ToDo: Loop over several models
 
 for m = 1:length(ar.model)
-    arLoadDataPEtab([pe_dir PEmeas.name],[pe_dir PEobs.name],m);
+    arLoadDataPEtab([pe_dir filesep PEmeas.name],[pe_dir filesep PEobs.name],m);
 end
 
-arLoadCondPEtab([pe_dir PEconds.name]);
+arLoadCondPEtab([pe_dir filesep PEconds.name]);
 
 % Compilation
 arCompileAll
 
-
-arLoadParsPEtab([pe_dir PEparas.name]);
+arLoadParsPEtab([pe_dir filesep PEparas.name]);
 
 end
