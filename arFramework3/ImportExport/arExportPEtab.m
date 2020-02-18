@@ -68,7 +68,7 @@ for imodel = 1:length(ar.model)
         noiseFormula = ar.model(imodel).data(idata).fystd;
         
         noiseFormulaSubs = cell(size(noiseFormula));
-        for ifystd = 1:size(noiseFormula,1)
+        for ifystd = 1:length(noiseFormula)
             noiseFormulaSymSingle = arSym(noiseFormula{ifystd});
             noiseFormulaSubs{ifystd} = char(arSubs(noiseFormulaSymSingle, arSym(obsName), arSym(obsId)));
         end
