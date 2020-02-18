@@ -105,7 +105,7 @@ for iCond = 1:length(uniCond)
         Sd2d.fy{iObs} = char(string(Tobs.observableFormula(idx)));
         tmp_fystd = Tobs.noiseFormula(idx);
         for jObs = 1:length(Tobs.observableName)
-            tmp_fystd = arSubs(sym(tmp_fystd),sym(Tobs.observableName{jObs}),sym(['(' Tobs.observableFormula{jObs} ')']));
+            tmp_fystd = arSubs(arSym(tmp_fystd),arSym(Tobs.observableName{jObs}),arSym(['(' Tobs.observableFormula{jObs} ')']));
         end
         Sd2d.fystd{iObs} = char(string(tmp_fystd));
         Sd2d.logfitting(iObs) = double(strcmp(Tobs.observableTransformation(idx),'log10'));
