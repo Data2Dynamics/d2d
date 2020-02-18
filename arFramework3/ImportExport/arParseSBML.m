@@ -326,15 +326,18 @@ if length(obs)~=length(err)
     end
 end
 
-
 fprintf(fid, '\nINPUTS\n');
 if isempty(m.u)
     if exist('u','var')
         for i=1:length(u)
+            uf{i} = replacePiecewiseFunction(uf{i});
             fprintf(fid, '%s\t C\t "%s"\t conc.\t "%s"\n', sym_check(u{i}), uu{i}, sym_check(replacePowerFunction(uf{i})));
         end
     end
 else
+    for jU=1:length(m.u)
+        m.u(jU).formula = replacePiecewiseFunction(m.u(jU).formula);
+    end
     if isempty(m.u.units)
         for j=1:length(m.u)
             fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), 'n/a', sym_check(replacePowerFunction(m.u(j).formula)));
@@ -1239,4 +1242,95 @@ end
 % elseif isempty(comp_r) && ~isempty(comp_p)
 %     c = comp_p{1};
 % end
+
+
+
+function str = replacePiecewiseFunction(str)
+% replace power function ('power' and 'pow')
+% str = 'k1 + power(k1*2, k2+(7*log(k3))) + 10*p3 + power(k1*2, k2+(7*log(k3))) + 10*p3';
+%
+% issym:    set to true, when used togehter with symbolic evaluation.
+% Replaces 'power' with '_power'
+
+
+
+funstr = 'piecewise';
+
+% disp(str);
+funindex = strfind(str, [funstr '(']);
+while(~isempty(funindex))
+
+    substr = str(funindex(1):end);
+
+    openindex = strfind(substr, '(');
+    closeindex = strfind(substr, ')');
+
+    mergedindex = [openindex closeindex];
+    rankingindex = [ones(size(openindex)) -ones(size(closeindex))];
+
+    [sortedmergedindex, isortedindex] = sort(mergedindex);
+    sortedrankingindex = rankingindex(isortedindex);
+
+    endfunindex = find(cumsum(sortedrankingindex)==0);
+    if(isempty(endfunindex))
+        error('bracketing error close to function %s', funstr);
+    end
+    endfunindex = sortedmergedindex(endfunindex(1));
+
+    substr = substr(openindex+1:endfunindex-1);
+    subFunStr = {'lt','leq'};
+    subFunSearchStr = {'lt(','leq('};
+    for isubFun = 1:length(subFunStr) 
+        if ~isempty(regexp(substr,subFunSearchStr{isubFun}, 'once'))
+            funindexLT = strfind(substr, ['lt' '(']);
+            substrLT = substr(funindexLT(1):end);
+            openindexLT = strfind(substrLT, '(');
+            closeindexLT = strfind(substrLT, ')');
+
+            mergedindexLT = [openindexLT closeindexLT];
+            rankingindexLT = [ones(size(openindexLT)) -ones(size(closeindexLT))];
+
+            [sortedmergedindexLT, isortedindexLT] = sort(mergedindexLT);
+            sortedrankingindexLT = rankingindexLT(isortedindexLT);
+
+            endfunindexLT = find(cumsum(sortedrankingindexLT)==0);
+            if(isempty(endfunindex))
+                error('bracketing error close to function %s', funstr);
+            end
+            endfunindexLT = sortedmergedindexLT(endfunindexLT(1));
+
+            substrLT = substrLT(openindexLT+1:endfunindexLT-1);
+            DLT = textscan(substrLT, '%s', 'Whitespace', ',');
+            heavysideArgument = char(['-(' DLT{1}{1} '-' DLT{1}{2} ')']);
+        end
+    end
+    
+    if ~isempty(heavysideArgument)
+        substr = strrep(substr,substrLT,heavysideArgument);
+    end
+    D = textscan(substr, '%s', 'Whitespace', ',');
+    D = D{1};
+    if(3~=length(D))
+        error('input output parameter mismatch');
+    end
+    
+    funtmplate = sprintf('(%s + (%s-%s) * heaviside(%s))',D{3},D{1},D{3},heavysideArgument);
+    %     disp(funtmplate)
+
+    if(funindex(1)-1>1 && funindex(1)-1+endfunindex<length(str)) % in between
+        str = [str(1:funindex(1)-1) funtmplate str(funindex(1)+endfunindex:end)];
+    elseif(funindex(1)-1>1) % at begining
+        str = [str(1:funindex(1)-1) funtmplate];
+    elseif(funindex(1)-1+endfunindex<length(str)) % at end
+        str = [funtmplate str(funindex(1)+endfunindex:end)];
+    else % whole string
+        str = funtmplate;
+    end
+    %     disp(str)
+
+    funindex = strfind(str, funstr);
+end
+
+
+
 
