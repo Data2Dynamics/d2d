@@ -213,7 +213,9 @@ for imodel = 1:length(ar.model)
 
                 end
             end
-            rowsToAdd = [rowsToAdd, table(noiseParameters)];
+            block = table(num2cell(noiseParameters));
+            block.Properties.VariableNames = {'noiseParameters'};
+            rowsToAdd = [rowsToAdd, block];
             
             % observable trafos
             % deprecated, moved to obs file
