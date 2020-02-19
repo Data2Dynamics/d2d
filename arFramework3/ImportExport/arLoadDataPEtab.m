@@ -1,4 +1,4 @@
-% arLoadDataPEtab(datafilename, [m])
+% [Tdat, Tobs] = arLoadDataPEtab(datafilename, [m])
 %
 % This function can be used to process data files in the format of PEtab.
 %
@@ -17,7 +17,7 @@
 % References
 %   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
 
-function arLoadDataPEtab(datafilename, obsfilename, m)
+function [Tdat, Tobs] = arLoadDataPEtab(datafilename, obsfilename, m)
 
 global ar;
 
@@ -69,11 +69,7 @@ for i = 1:length(fns)
     end
 end
 Tobs = struct2table(Tobs);
-
 [uniCond,~,iCCond] = unique(Tdat.simulationConditionId);
-
-%%
-
 
 %% Use condition specific experiments and distribute over data struct
 for iCond = 1:length(uniCond)

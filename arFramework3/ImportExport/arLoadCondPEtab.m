@@ -1,4 +1,4 @@
-% arLoadCondPEtab(expcondfilename)
+% Tcond = arLoadCondPEtab(expcondfilename)
 %
 % This function can be used to process experimental condition files in the format of PEtab.
 %
@@ -15,7 +15,7 @@
 %   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
 %
 
-function arLoadCondPEtab(expcondfilename)
+function Tcond = arLoadCondPEtab(expcondfilename)
 
 global ar;
 
@@ -54,4 +54,5 @@ for m = 1:length(ar.model)
     end
 end
 
+Tcond = struct2table(T);
 end

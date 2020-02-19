@@ -1,12 +1,10 @@
-% arImportPEtab(filename)
+% arImportPEtab(filename, doPreEquilibration)
 %
-% Import Parameter estimation problem to Data2Dyanmics
+% Import PEtab model and data format to Data2Dynamics. 
 %
-% This is required to load additional information about parameters from
-% PEtab data standard
-%
-% Example
-%       arImportPEtab('good_fit')
+%       name                String that must be contained in the filenames
+%                           of all files to load
+%       doPreEquilibration  Apply pre-equilibration if specified in PEtab files [true]
 %
 % See also
 %       arExportPEtab
@@ -14,7 +12,7 @@
 % References
 %   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
 
-function arImportPEtab(name)
+function arImportPEtab(name, doPreEquilibration)
 global ar
 
 if(isempty(ar))
@@ -29,6 +27,10 @@ if ~exist('name','var') || isempty(name)
     name = '';
 else
     name = [name '*'];
+end
+
+if ~exist('doPreEquilibration') || isempty(doPreEquilibration)
+    doPreEquilibration = true;
 end
 
 %TODO: read in multiple sbmls & save these paths in ar struct
@@ -61,16 +63,39 @@ if length(PEparas) > 1 || length(PEmeas) > 1 || length(PEconds) > 1 || length(PE
 end
 
 % ToDo: Loop over several models
-
+T = cell(2, length(ar.model));
 for m = 1:length(ar.model)
-    arLoadDataPEtab([pe_dir filesep PEmeas.name],[pe_dir filesep PEobs.name],m);
+    [T{m,1}, T{m,2}] = ...
+        arLoadDataPEtab([pe_dir filesep PEmeas.name],[pe_dir filesep PEobs.name],m);
 end
+Tcond = arLoadCondPEtab([pe_dir filesep PEconds.name]);
 
-arLoadCondPEtab([pe_dir filesep PEconds.name]);
 
 % Compilation
 arCompileAll
 
 arLoadParsPEtab([pe_dir filesep PEparas.name]);
+arFindInputs
 
+% pre-equilibration
+if doPreEquilibration
+    for imodel = 1:length(ar.model)
+        Tdat = T{imodel,1};
+        Tobs = T{imodel,2};
+        
+        if isfield(Tdat, 'preEquilibrationId')
+            uniqueSimConds = unique(Tdat.simulationConditionId);
+            uniquePreEqConds = unique(Tdat.preEquilibrationId);
+            
+            for ipreeqcond = 1:size(uniquePreEqConds,1)
+                preEqCond = arFindCondition(convertStringsToChars(uniquePreEqConds(ipreeqcond)));
+                simConds = [];
+                for isimcond = 1:size(uniqueSimConds,1)
+                    simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(isimcond)));
+                end
+                arSteadyState(imodel, preEqCond, simConds)
+            end
+        end
+    end
+end
 end
