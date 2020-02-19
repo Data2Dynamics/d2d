@@ -1,10 +1,11 @@
-% arImportPEtab(filename, doPreEquilibration)
+% arImportPEtab(filename, doPreEquilibration, tstart)
 %
 % Import PEtab model and data format to Data2Dynamics. 
 %
 %       name                String that must be contained in the filenames
 %                           of all files to load
 %       doPreEquilibration  Apply pre-equilibration if specified in PEtab files [true]
+%       tstart              Starting time for pre-equilibration [0]
 %
 % See also
 %       arExportPEtab
@@ -93,7 +94,7 @@ if doPreEquilibration
                 for isimcond = 1:size(uniqueSimConds,1)
                     simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(isimcond)));
                 end
-                arSteadyState(imodel, preEqCond, simConds)
+                arSteadyState(imodel, preEqCond, simConds, tstart)
             end
         end
     end
