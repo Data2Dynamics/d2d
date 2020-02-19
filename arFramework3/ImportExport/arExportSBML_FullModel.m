@@ -397,16 +397,16 @@ function [M] = GetParameters(M,m)
                 M.parameter(id_tmp).level = 2;
                 M.parameter(id_tmp).version = 4;
 
-                qp = ismember(ar.pLabel, ar.model(m).p(id)); %R2013a compatible
-                if(sum(qp)==1)
-                    pvalue = ar.p(qp);
-                    if(ar.qLog10(qp) == 1)
-
-                        pvalue = 10^pvalue;
-                    end
-                else
+%                 qp = ismember(ar.pLabel, ar.model(m).p(id)); %R2013a compatible
+%                 if(sum(qp)==1)
+%                     pvalue = ar.p(qp);
+%                     if(ar.qLog10(qp) == 1)
+% 
+%                         pvalue = 10^pvalue;
+%                     end
+%                 else
                     pvalue = 1;
-                end
+%                 end
                 M.parameter(id_tmp).value = pvalue;
             end
         end
