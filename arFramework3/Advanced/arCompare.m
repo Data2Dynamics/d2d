@@ -5,7 +5,9 @@
 %   ar1       an ar struct, e.g. the global variable "ar"
 %   ar2       another ar struct, e.g. "ar" from an workspace
 %   pattern   string or cell of strings
-%             patterns are evaluated with regexp.m
+%             pattern is either specified by specific words
+%             'Main' = {'Simu','Data','Pars','Conf','Chi2'} or 
+%             evaluated by regexp.m to search for struct fields.
 %             if pattern is provided, then only a subset of cells are
 %             evaluated. Providing patterns is reasonable because the
 %             structs often only differ by ar.fevals, ar.info, ...
@@ -28,17 +30,67 @@
 
 
 function [same,d1,d2] = arCompare(ar1,ar2,pattern,silent)
+
+% Load ar1,ar2 if not existent
+if(nargin==0)
+    filenames = fileChooserMulti('./Results', true); 
+    if length(filenames)>2
+       error('Error: Comparison of more than two models is not supported.') 
+    end
+    for j=1:length(filenames)
+        fname = ['./Results/' filenames{j} '/workspace.mat'];
+        if(exist(fname,'file'))
+            S=load(fname);
+            if j==1
+                ar1 = S.ar;
+            elseif j==2
+                ar2 = S.ar;
+            end
+        else
+            error('Error: No workspace found in %s',fname) 
+        end    
+    end
+end
+
 if(~exist('pattern','var') || isempty(pattern))
-    pattern = [];
+    pattern = 'all';
 end
 if(~exist('silent','var') || isempty(silent))
     silent = false;
 end
-
-[same,d1,d2] = structcmp2(ar1,ar2,pattern);
-
-if ~silent
-    printDifference(d1,d2);
+% Original functionality
+if strcmp(pattern,'all')
+    [same,d1,d2] = structcmp2(ar1,ar2);
+    if ~silent
+        printDifference(d1,d2);
+    end
+% Specific comparisons for checking model differences
+elseif any(strcmp(pattern,{'Main','Simu','Data','Pars','Conf','Chi2'}))
+    if strcmp(pattern,'Main')
+        pattern = {'Simu','Data','Pars','Conf','Chi2'};
+    end
+    same = 1;
+    for i=1:length(pattern)
+        if strcmp(pattern{i},'Simu')
+            same = same * arCompareX(ar1,ar2,silent);
+            same = same * arCompareZ(ar1,ar2,silent);
+            same = same * arCompareV(ar1,ar2,silent);
+        elseif strcmp(pattern{i},'Data')
+            same = same * arCompareY(ar1,ar2,silent);
+        elseif strcmp(pattern{i},'Pars')
+            same = same * arComparePars(ar1,ar2);
+        elseif strcmp(pattern{i},'Conf')
+            same = same * arCompareConf(ar1,ar2);
+        elseif strcmp(pattern{i},'Chi2')
+            same = same * arCompareChi2(ar1,ar2);
+        end
+    end
+% Specific fields in ar struct
+else
+    [same,d1,d2] = structcmp2(ar1,ar2,pattern);
+    if ~silent
+        printDifference(d1,d2);
+    end    
 end
 
 
