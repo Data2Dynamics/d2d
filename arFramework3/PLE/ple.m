@@ -178,6 +178,8 @@ ps_start = p;
 ar.ple.psinitstep{jk}(jindex,:) = zeros(size(p));
 ar.ple.merit = feval(ar.ple.merit_fkt);
 ar.ple.chi2s{jk}(jindex) = ar.ple.merit;
+ar.ple.dpLast{jk}(jindex) = 0;
+ar.ple.dpStep{jk}(jindex,:) = zeros(size(p)); 
 
 if(isfield(ar.ple,'violations'))
     ar.ple.chi2sviolations{jk}(jindex) = feval(ar.ple.violations);

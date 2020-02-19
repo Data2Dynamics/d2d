@@ -30,5 +30,7 @@ for i = jk
         ar.ple.psinit{i} = ar.ple.psinit{i}(ikeep,:);
         ar.ple.psinitstep{i} = ar.ple.psinitstep{i}(ikeep,:);
         ar.ple.gradient{i} = ar.ple.gradient{i}(ikeep,:);
+        ar.ple.dpLast{i} = ar.ple.dpLast{i}(ikeep);
+        ar.ple.dpStep{i} = ar.ple.dpStep{i}(ikeep,:);
     end
 end
