@@ -187,5 +187,5 @@ for m=1:length(ar.model)
 end
 
 if different
-    warining('The data is different! \nThis can occur because of manual normalization.');
+    warning('The data is different! \nThis can occur because of manual normalization.');
 end
