@@ -99,6 +99,11 @@ end
        
     dataFiles   = intersect( getDataNames(ar1.model(m1)), getDataNames(ar2.model(m2)) );
 
+    if isempty(dataFiles)
+        close(gcf)
+        error('No common data files were found for the choosen models!')
+    end
+    
     changeMatrix = zeros( numel(dataFiles), numel(observables) );
     totalErr     = zeros( numel(dataFiles), numel(observables) );
     if ( opts.absrsq )

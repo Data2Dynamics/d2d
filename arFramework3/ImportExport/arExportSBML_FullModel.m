@@ -6,7 +6,7 @@
 %
 % m:            model index
 
-function arExportSBML_FullModel(m,steadystate,name)
+function arExportSBML_FullModel(m,name)
 
 global ar
 
@@ -19,13 +19,13 @@ copasi = true;
 %     data = 1;
 % end
 
-if (~exist('steadystate','var'))
-    if ( isfield( ar.model(m), 'ss_condition' ) )
-        steadystate = true;
-    else
-        steadystate = false;
-    end
-end
+% if (~exist('steadystate','var'))
+%     if ( isfield( ar.model(m), 'ss_condition' ) )
+%         steadystate = true;
+%     else
+%         steadystate = false;
+%     end
+% end
 
 try
     M = TranslateSBML(which('empty.xml'));
@@ -72,7 +72,11 @@ if(a == 1)
     if(~exist('./PEtab', 'dir'))
         mkdir('./PEtab')
     end
-    OutputSBML(M, ['PEtab/' name 'model' num2str(m) '_l2v4.xml']);
+    if length(ar.model)==1
+        OutputSBML(M, ['PEtab/' 'model_' name '.xml']);
+    else
+        OutputSBML(M, ['PEtab/' 'model_' name '_' ar.model(m).name '.xml']);        
+    end
 else
     error('%s', b);
 end
@@ -411,15 +415,6 @@ function [M] = GetParameters(M,m)
             end
         end
     end
-    
-    
-    
-    
-    
-    
-    
-    
- 
 end
 
 

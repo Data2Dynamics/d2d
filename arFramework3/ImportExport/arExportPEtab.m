@@ -13,14 +13,14 @@ function arExportPEtab(name, export_SBML)
 
 global ar
 
-if ~exist('export_SBML') || isempty(export_SBML)
+if ~exist('export_SBML','var') || isempty(export_SBML)
     export_SBML = true;
 end
-if ~exist('name') || isempty(name)
-    name = '';
-else
-    name = strcat(name, '_');
-end
+      
+if ~exist('name','var') || isempty(name)
+    directory = split(pwd,filesep);
+    name = directory{end};
+end 
 
 %% Write Export Directory
 if(~exist('./PEtab', 'dir'))
@@ -29,13 +29,17 @@ end
 
 %% Export SBML model
 if export_SBML
-    arExportSBML([],name);
+    arExportSBML(name);
 end
 
 %% Export data, conditions & parameters
 threwNormWarning = 0;
 for imodel = 1:length(ar.model)
-    
+    if length(ar.model)>1
+        currentModelName = [name '_' ar.model(imodel).name];
+    else
+        currentModelName = name;
+    end
     %% Observables table
     obsT = table;
     obsT_tmp = table;
@@ -87,7 +91,7 @@ for imodel = 1:length(ar.model)
     obsT.Properties.VariableNames = {'observableId', 'observableName',...
     'observableFormula', 'observableTransformation', 'noiseFormula',...
     'noiseDistribution',};
-    writetable(obsT, ['PEtab/' name 'OBS_model' num2str(imodel) '.tsv'],...
+    writetable(obsT, ['PEtab/' 'observables_' currentModelName '.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
 
     %% Condition and Measurement Table
@@ -256,9 +260,9 @@ for imodel = 1:length(ar.model)
     condT = [table(conditionID'), condT];
     condT.Properties.VariableNames{1} = 'conditionId';
         
-    writetable(condT, ['PEtab/' name 'COND_model' num2str(imodel) '.tsv'],...
+    writetable(condT, ['PEtab/' 'experimentalCondition_' currentModelName  '.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
-    writetable(measT, ['PEtab/' name 'MEAS_model' num2str(imodel) '.tsv'],...
+    writetable(measT, ['PEtab/' 'measurementData_' currentModelName  '.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
 end
 %% Parameter Table
@@ -293,7 +297,7 @@ parT = table(parameterId(:), parameterName(:), parameterScale(:), ...
 parT.Properties.VariableNames = {'parameterId', 'parameterName', ...
     'parameterScale', 'lowerBound', 'upperBound', 'nominalValue', 'estimate',};
 
-writetable(parT, ['PEtab/' name 'PARS_model.tsv'],...
+writetable(parT, ['PEtab/' 'parameters_' name  '.tsv'],...
     'Delimiter', '\t', 'FileType', 'text')
 
 %% Visualization Table
