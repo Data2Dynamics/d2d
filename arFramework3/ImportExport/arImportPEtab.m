@@ -54,7 +54,12 @@ if length(sbmlmodel)>1
     sbmlmodel= sbmlmodel(out);                 % set sbmlmodel to chosen
 end
 
-pe_dir = dir('**/*.tsv');
+if ~exist('name','var') || isempty(name) 
+    pe_dir = dir('**/*.tsv');
+else
+    pe_dir = dir(['**/*' name '*.tsv']);
+end
+
 if isempty(sbmlmodel)
     error('No tsv files found! Switch your path to working directory.');
 end
@@ -65,10 +70,10 @@ arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
 % make dir case sensitive!
 if exist('name','var') && ~isempty(name) && ischar(name)
-        PEobs = dir([pe_dir filesep 'observalbes_' name]);
-        PEmeas = dir([pe_dir filesep 'measurementData_' name]);
-        PEconds = dir([pe_dir filesep 'experimentalCondition_' name]);
-        PEparas = dir([pe_dir filesep 'parameters_' name]);
+        PEobs = dir([pe_dir filesep 'observables_' name '.tsv']);
+        PEmeas = dir([pe_dir filesep 'measurementData_' name '.tsv']);
+        PEconds = dir([pe_dir filesep 'experimentalCondition_' name '.tsv']);
+        PEparas = dir([pe_dir filesep 'parameters_' name '.tsv']);
 else
     if ~exist('name','var') || isempty(name) || length(name)<2 || isempty(name{2})
         PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'obs')]);    
@@ -107,8 +112,9 @@ arLoadCondPEtab([pe_dir filesep PEconds.name]);
 % Compilation
 arCompileAll
 
-arLoadParsPEtab([pe_dir filesep PEparas.name]);
-arFindInputs
+arLoadParsPEtab([pe_dir filesep PEparas.name]); 
+arFindInputs % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
+arLoadParsPEtab([pe_dir filesep PEparas.name]); % get para values from parameter label
 
 % pre-equilibration
 if doPreEquilibration
@@ -131,4 +137,5 @@ if doPreEquilibration
         end
     end
 end
+    
 end

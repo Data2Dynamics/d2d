@@ -75,6 +75,7 @@ Tobs = struct2table(Tobs);
 for iCond = 1:length(uniCond)
     Sd2d = struct();
     args= {};
+    pold = {}; fp = {};
     % extract important info for data struct from .tsv file
     Tsub = Tdat(iCCond == iCond,:);
     [uniObs,~,iCObs] = unique(cellstr(Tsub.observableId),'stable');
@@ -105,25 +106,49 @@ for iCond = 1:length(uniCond)
         end
         Sd2d.fystd{iObs} = char(string(tmp_fystd));
         Sd2d.logfitting(iObs) = double(strcmp(Tobs.observableTransformation(idx),'log10'));
-    end 
+        % get cond specific parameter transformations
+        if ~isempty(char(Tsub(1,:).observableParameters))
+            poldObs = regexp(Sd2d.fy{iObs},['observableParameter\d*_' Sd2d.y{iObs}],'match');
+            pnewObs = strsplit(char(Tsub(1,:).observableParameters),';');
+            if ~isempty(poldObs)
+                pold = [pold, poldObs];
+                fp = [fp,pnewObs];
+            end
+        end
+        if isnumeric(Tsub(1,:).noiseParameters)
+            continue
+        elseif ~isempty(char(Tsub(1,:).noiseParameters))
+            poldNoise = regexp(Sd2d.fystd{iObs},['noiseParameter\d*_' Sd2d.y{iObs}],'match');
+            pnewNoise = strsplit(char(Tsub(1,:).noiseParameters),';');
+            if ~isempty(poldNoise)
+                pold = [pold, poldNoise];
+                fp = [fp,pnewNoise];
+            end
+        end
+    end
+
     
     % experimental data
+    Sd2d.yExp = nan(length(uniTimes),length(uniObs));
     Sd2d.yExpRaw = nan(length(uniTimes),length(uniObs));
     Sd2d.yExpStd = nan(length(uniTimes),length(uniObs));
     Sd2d.yExpStdRaw = nan(length(uniTimes),length(uniObs));
     for it = 1:length(uniTimes)
         for iobs = 1:length(uniObs)
-%             [iSim it  iobs]
-            if any(it==iTExp & iobs == iCObs)
+%              disp([ iCond it  iobs])
+            if sum(it==iTExp & iobs == iCObs)==1
                 Sd2d.yExpRaw(it,iobs) = Tsub.measurement(it == iTExp & iobs == iCObs);
                 Sd2d.yExp(it,iobs) = Sd2d.logfitting(iobs) * log10(Tsub.measurement(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs)) *Tsub.measurement(it == iTExp & iobs == iCObs);
                 if isnumeric(Tsub.noiseParameters(it == iTExp & iobs == iCObs))
                     Sd2d.yExpStdRaw(it,iobs) = Tsub.noiseParameters(it == iTExp & iobs == iCObs);
                     Sd2d.yExpStd(it,iobs) =  Sd2d.logfitting(iobs) *log10(Tsub.noiseParameters(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs))*Tsub.noiseParameters(it == iTExp & iobs == iCObs);
                 end
+            elseif sum(it==iTExp & iobs == iCObs)>1
+                error('Non-unique assignment for data point. Check unambiguousness of provided measurement table!')
             end
         end
     end
+    Sd2d.logfitting(iobs) = 0; % We accounted for this by transforming yExp
     % prepare info for creating data struct
     fns = fieldnames(Sd2d);
     for i = 1:length(fns)
@@ -134,29 +159,6 @@ for iCond = 1:length(uniCond)
     if rem(length(args),2)~=0
         error('arguments args has to be provided in pairs.')
     end
-    
-    % get correct substitutions of obs and error parameters
-    pold = {}; fp = {};
-    % Deprecated: changes in PEtab
-%     for i = 1:length(Sd2d.y)
-%         for j = 1:length(ar.model)
-%             newpold = ar.model(j).fp(~cellfun('isempty',regexp(ar.model.p,['noiseParameters\d_' Sd2d.y{i} '$'])));
-%             newPars = Tsub.noiseParameters(contains(Tsub.observableId,Sd2d.y{i}));
-%             if ~(isempty(newpold) || isnumeric(newPars) || isempty(newPars))
-%                 newPars = strsplit(str2mat(unique(newPars)),';');
-%                 pold = [pold;newpold];fp = [fp;newPars];
-%             end
-%             newpold = ar.model(j).fp(~cellfun('isempty',regexp(ar.model.p,['observableParameters\d_' Sd2d.y{i} '$'])));
-%             newPars = Tsub.observableParameters(contains(Tsub.observableId,Sd2d.y{i}));
-%             if ~(isempty(newpold) || isnumeric(newPars) || isempty(newPars))
-%                 newPars = strsplit(str2mat(unique(newPars)),';');
-%                 pold = [pold;newpold];fp = [fp;newPars];
-%             end
-%             if length(pold) ~= length(fp)
-%                 error('Length of parameter names must be the same!')
-%             end
-%         end
-%     end
     
     D = arCreateDataStruct(m,pold,fp,args{:});
     arAddDataStruct(D,m)

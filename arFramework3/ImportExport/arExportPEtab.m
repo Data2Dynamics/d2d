@@ -54,15 +54,19 @@ for imodel = 1:length(ar.model)
         
         obsName = ar.model(imodel).data(idata).yNames';
         obsFormula = ar.model(imodel).data(idata).fy;
-        
-        if ~isempty(ar.model(imodel).z)
-            for ify = 1:size(obsFormula,1)
+        for ify = 1:size(obsFormula,1)
+            % replace parameter substitutions
+            obsFormula{ify} = char(arSubs(arSym(obsFormula{ify}), arSym(ar.model(imodel).data(idata).pold), ...
+                    arSym(ar.model(imodel).data(idata).fp')));
+            % replace derived quantities
+            if ~isempty(ar.model(imodel).z)
                 symFz = arSym(obsFormula{ify});
                 symFzSubs = arSubs(symFz, arSym(ar.model(imodel).z), ...
                     arSym(ar.model(imodel).fz'));
                 obsFormula{ify} = char(symFzSubs);
             end
         end
+        
         if size(obsFormula,2) > 1; obsFormula = obsFormula'; end
 
         obsTrafo = cell(length(obsId),1);
@@ -70,7 +74,18 @@ for imodel = 1:length(ar.model)
         obsTrafo(logical(ar.model(imodel).data(idata).logfitting)) = {'log10'};
         
         noiseFormula = ar.model(imodel).data(idata).fystd;
-        
+        for ify = 1:size(obsFormula,1)
+            % replace parameter substitutions
+            noiseFormula{ify} = char(arSubs(arSym(noiseFormula{ify}), arSym(ar.model(imodel).data(idata).pold), ...
+                arSym(ar.model(imodel).data(idata).fp')));
+            % replace derived quantities
+            if ~isempty(ar.model(imodel).z)
+                symFz = arSym(noiseFormula{ify});
+                symFzSubs = arSubs(symFz, arSym(ar.model(imodel).z), ...
+                    arSym(ar.model(imodel).fz'));
+                noiseFormula{ify} = char(symFzSubs);
+            end
+        end
         noiseFormulaSubs = cell(size(noiseFormula));
         for ifystd = 1:length(noiseFormula)
             noiseFormulaSymSingle = arSym(noiseFormula{ifystd});
@@ -153,7 +168,7 @@ for imodel = 1:length(ar.model)
  
             rowsToAdd = [table(observableId)];
 
-            measurement = ar.model(imodel).data(idata).yExpRaw(:, iy);
+            measurement = ar.model(imodel).data(idata).yExp(:, iy);
             if ar.model(imodel).data(idata).normalize(iy) == 1
                 if ~threwNormWarning
                 warning('Normalization of experimental measurements is not supported in PEtab. Measurement values in ar.model(:).data(:).yExpRaw will be normalized before export.')
@@ -196,14 +211,14 @@ for imodel = 1:length(ar.model)
             rowsToAdd = [rowsToAdd, table(observableParameters)];
             
             % noise parameters
-            expErrors = ar.model(imodel).data(idata).yExpStdRaw(:,iy);
+            expErrors = ar.model(imodel).data(idata).yExpStd(:,iy);
             if ar.config.fiterrors == -1
                 if sum(isnan(expErrors(~isnan(measurement)))) > 0
                     error('arExportPEtab: Cannot use ar.config.fiterrors == -1 with NaN in exp errors')
                 end
                 noiseParameters = expErrors;
             else
-                if ar.config.fiterrors == 0 && sum(isnan(expErrors)) == 0
+                if ar.config.fiterrors == 0 && sum(isnan(expErrors)) ~= length(expErrors)
                     noiseParameters = expErrors;
                 else
                     
@@ -234,7 +249,16 @@ for imodel = 1:length(ar.model)
             noiseDistribution = cell(length(time),1);
             noiseDistribution(:) = {'normal'}; % others not possible in d2d
             rowsToAdd = [rowsToAdd, table(noiseDistribution)];
-
+            
+            % lin or log scale?
+            observableTransformation = cell(length(time),1);
+%             if ar.model(imodel).data(idata).logfitting(iy) == 0
+                observableTransformation(:) = {'lin'}; % others not possible in d2d
+%             elseif ar.model(imodel).data(idata).logfitting(iy) == 1
+%                 observableTransformation(:) = {'log10'}; % others not possible in d2d
+%             end
+            rowsToAdd = [rowsToAdd, table(observableTransformation)];
+            
 %             % experiment id
 %             experimentId = cell(length(time),1);
 %             experimentId(:) = {ar.model(imodel).data(idata).name};
