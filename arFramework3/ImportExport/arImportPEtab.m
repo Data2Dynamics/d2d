@@ -2,10 +2,10 @@
 %
 % Import PEtab model and data format to Data2Dynamics. 
 %
-%       name                Cell array of input functions []
-%                           {'namemodel1.xml','_OBS_model1.tsv','_COND_model1.tsv','_MEAS_model1.tsv','_PARS_model.tsv'}
-%                           if name is empty, pattern search of *.xml
-%                           *obs*.tsv *cond*.tsv *meas*.tsv *pars*.tsv is performed
+%       name                Character string of model name or
+%                           cell array of input files               []
+%                           'model1' or {'namemodel1.xml','_OBS_model1.tsv','_COND_model1.tsv','_MEAS_model1.tsv','_PARS_model.tsv'}
+%                           if name is empty, pattern search of *.xml *obs*.tsv *cond*.tsv *meas*.tsv *pars*.tsv is performed
 %       doPreEquilibration  Apply pre-equilibration if specified in PEtab files [true]
 %       tstart              Starting time for pre-equilibration [0]
 %
@@ -31,19 +31,19 @@ if isfield(ar, 'model')
 end
 if ~exist('doPreEquilibration','var') || isempty(doPreEquilibration)
     doPreEquilibration = true;
-end
-if exist('name','var') && ~iscell(name)
-    name = {name};
-end
-    
+end    
 
 %TODO: read in multiple sbmls & save these paths in ar struct
 if ~exist('name','var') || isempty(name) 
     sbmlmodel = dir(['**' filesep '*.xml']);
 else
-    sbmlmodel = dir(['**' filesep name{1}]);
-    if isempty(sbmlmodel)
-        sbmlmodel = dir(['**' filesep name{1} '.xml']);
+    if ischar(name)
+        sbmlmodel = dir(['**' filesep '*' name '.xml']);
+    else
+        sbmlmodel = dir(['**' filesep name{1}]);
+        if isempty(sbmlmodel)
+            sbmlmodel = dir(['**' filesep name{1} '.xml']);
+        end
     end
 end
 if isempty(sbmlmodel)
@@ -64,26 +64,32 @@ arParseSBML([sbmlmodel.folder filesep sbmlmodel.name])
 arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
 % make dir case sensitive!
-
-if ~exist('name','var') || isempty(name) || length(name)<2 || isempty(name{2})
-    PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'obs')]);    
+if exist('name','var') && ~isempty(name) && ischar(name)
+        PEobs = dir([pe_dir filesep 'observalbes_' name]);
+        PEmeas = dir([pe_dir filesep 'measurementData_' name]);
+        PEconds = dir([pe_dir filesep 'experimentalCondition_' name]);
+        PEparas = dir([pe_dir filesep 'parameters_' name]);
 else
-    PEobs = dir(name{2});
-end
-if ~exist('name','var') || isempty(name) || length(name)<3 || isempty(name{3})
-    PEmeas = dir([pe_dir filesep sprintf('*%s*.tsv', 'meas')]);
-else
-    PEmeas = dir(name{3});
-end
-if ~exist('name','var') || isempty(name) || length(name)<4 || isempty(name{4})
-    PEconds = dir([pe_dir filesep sprintf('*%s*.tsv', 'cond')]);
-else
-    PEconds = dir(name{4});
-end
-if ~exist('name','var') || isempty(name) || length(name)<5 || isempty(name{5})
-    PEparas = dir([pe_dir filesep sprintf('*%s*.tsv', 'par')]);
-else
-    PEparas = dir(name{5});
+    if ~exist('name','var') || isempty(name) || length(name)<2 || isempty(name{2})
+        PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'obs')]);    
+    else
+        PEobs = dir(name{2});
+    end
+    if ~exist('name','var') || isempty(name) || length(name)<3 || isempty(name{3})
+        PEmeas = dir([pe_dir filesep sprintf('*%s*.tsv', 'meas')]);
+    else
+        PEmeas = dir(name{3});
+    end
+    if ~exist('name','var') || isempty(name) || length(name)<4 || isempty(name{4})
+        PEconds = dir([pe_dir filesep sprintf('*%s*.tsv', 'cond')]);
+    else
+        PEconds = dir(name{4});
+    end
+    if ~exist('name','var') || isempty(name) || length(name)<5 || isempty(name{5})
+        PEparas = dir([pe_dir filesep sprintf('*%s*.tsv', 'par')]);
+    else
+        PEparas = dir(name{5});
+    end
 end
 
 if length(PEparas) > 1 || length(PEmeas) > 1 || length(PEconds) > 1 || length(PEobs) > 1
