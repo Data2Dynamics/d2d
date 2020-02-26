@@ -66,24 +66,24 @@ arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 % make dir case sensitive!
 
 if ~exist('name','var') || isempty(name) || length(name)<2 || isempty(name{2})
-    PEobs = dir(name{2});     
+    PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'obs')]);    
 else
-    PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'obs')]);
+    PEobs = dir(name{2});
 end
 if ~exist('name','var') || isempty(name) || length(name)<3 || isempty(name{3})
-    PEmeas = dir(name{3});
-else
     PEmeas = dir([pe_dir filesep sprintf('*%s*.tsv', 'meas')]);
+else
+    PEmeas = dir(name{3});
 end
 if ~exist('name','var') || isempty(name) || length(name)<4 || isempty(name{4})
-    PEconds = dir(name{4});
-else
     PEconds = dir([pe_dir filesep sprintf('*%s*.tsv', 'cond')]);
+else
+    PEconds = dir(name{4});
 end
 if ~exist('name','var') || isempty(name) || length(name)<5 || isempty(name{5})
-    PEparas = dir(name{5});
-else
     PEparas = dir([pe_dir filesep sprintf('*%s*.tsv', 'par')]);
+else
+    PEparas = dir(name{5});
 end
 
 if length(PEparas) > 1 || length(PEmeas) > 1 || length(PEconds) > 1 || length(PEobs) > 1
