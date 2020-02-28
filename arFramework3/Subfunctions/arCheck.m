@@ -30,8 +30,11 @@ end
 
 % add all subfolders of arFramework3 folder to MATLAB search path
 % load path of sub-directories
-if(exist('pleInit','file') == 0)
+if(exist('arPLEInit','file') == 0)
     addpath([ar_path '/PLE'])
+end
+if(exist('InitVPL','file') == 0)
+    addpath([ar_path '/VPL'])
 end
 if(exist('arHelpStruct','file') == 0)
     addpath([ar_path '/Help'])
