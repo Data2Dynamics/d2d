@@ -7,6 +7,19 @@
 %           to get data-specific parameters
 % 
 %   fp      new parameter names
+% 
+% 
+% Example:
+% D = arCreateDataStruct(1)
+% 
+% Example:
+% D = arCreateDataStruct(1,{'maxtime'},{'100'});
+% arAddDataStruct(D);
+% arCompileAll;
+% 
+% 
+% See also arCondition2NewDataStruct, arCondition2NewDataStruct2,
+% arCondition2NewDataStruct3, arFitTransientFunction2
 
 function D = arCreateDataStruct(m,pold,fp,varargin)
 global ar

@@ -9,6 +9,13 @@
 %   m       model index
 %           Default: m = length(ar.model) [like in arLoadData]
 % 
+% Example:
+% D = arCreateDataStruct(1,{'maxtime'},{'100'});
+% arAddDataStruct(D);
+% arCompileAll;
+% 
+% 
+% See also arFitTransientFunction2
 
 function arAddDataStruct(D, m)
 global ar
