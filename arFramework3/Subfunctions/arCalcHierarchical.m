@@ -107,13 +107,7 @@ for is = 1:length(ar.scales)
         im = ar.scales(is).links(il).m;
         id = ar.scales(is).links(il).d;
         iy = ar.scales(is).links(il).fy;
-        if ar.config.fiterrors == -1
-            ystd = ar.model(im).data(id).yExpStd(:,iy);
-        elseif ar.config.fiterrors == 0
-            ystd = ar.model(im).data(id).yExpStd(:,iy);
-            noSD = isnan(ystd);
-            ystd(noSD) = ar.model(im).data(id).ystdExpSimu(noSD,iy);
-        end
+        ystd = ar.model(im).data(id).yExpStd(:,iy);
         yExp = ar.model(im).data(id).yExp(:,iy);
         xzExpSimu = ar.model(im).data(id).xzExpSimu(:,iy);
         num = num + sum(yExp.*xzExpSimu./(ystd.^2));
