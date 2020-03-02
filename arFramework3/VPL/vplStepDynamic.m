@@ -1,4 +1,4 @@
-function [delz] = vplStepDynamic(z_old,chi2dif,delz,gen_struct)
+function [delz] = vplStepDynamic(z_old,chi2dif,delz,sigma,gen_struct)
 % delz = vplStepDynamic(z_old,chi2dif,delz,gen_struct)
 %
 % Chooses validation data step delz. Dynamic step size adaption by use of a
@@ -12,7 +12,6 @@ function [delz] = vplStepDynamic(z_old,chi2dif,delz,gen_struct)
 %From the higher level function: 
 pred_old          = gen_struct.temp.pred;
 delii             = gen_struct.temp.delii;
-sigma             = gen_struct.perm.general.sigma;
 %Magic factors:
 chi2dif_max       = gen_struct.temp.chi2dif_max;
 maxstepsize       = gen_struct.temp.maxstepsize;

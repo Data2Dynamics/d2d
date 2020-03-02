@@ -1,5 +1,5 @@
-function [chi2s,zs] = VPL(m,d,idpred,tpred)
-% [chi2s,zs] = VPL(m,d,idpred,tpred)
+function [chi2s,zs] = VPL
+% [chi2s,zs] = VPL
 %
 % Calculate the validation profile (or prediction profile) for a specific condition.
 % Intialize by calling InitVPL. Turn Bessel correction off before use.
@@ -7,15 +7,14 @@ function [chi2s,zs] = VPL(m,d,idpred,tpred)
 % to the previous ar-version if an error occurs (Exception: termination by
 % force).
 %
-% m:           Model index
-% d:           Data index
-% idpred:      Index of prediction of interest
-% tpred:       Prediction time of interest
-%
 % Setting ar.vpl.config.prediction = true switches the exit condition of VPL
 % to calculate the prediction profile up to a certain threshold.
 % Calculation of prediction profiles works best if sigma is of about the
 % same size as the prediction uncertainty.
+%
+% Visualize results by calling vplPlot.
+%
+% See also: InitVPL, vplPlot, vplSmooth
 
 global ar
 
@@ -26,25 +25,24 @@ if ~isfield(ar,'vpl')
     return
 end
 if ar.config.useFitErrorCorrection ~= 0
-    sprintf(['Warning: Bessel correction is turned on. \n'...
+    fprintf(['Warning: Bessel correction is turned on. \n'...
         'Recalculate global optimum and profile with ar.config.useFitErrorCorrection = 0 \n'])
     return
 end
 
 try
-%% Set up general struct to store algorithm results
-% This struct will be filled by this algorithm and saved at the end.     
+%% Set up general struct gen_struct to store algorithm results
+% This struct will be filled by this algorithm and saved at the end.
+
     maxsteps = ar.vpl.config.maxsteps;
+    m = ar.vpl.general.m;
+    d = ar.vpl.general.d;
+    idpred = ar.vpl.general.idpred;
+    tpred = ar.vpl.general.tpred;
     sigma = ar.vpl.general.sigma;
     
     % Values in the field perm will be saved later
     gen_struct=struct('perm',[],'temp',[]);
-    gen_struct.perm.general.m=m;
-    gen_struct.perm.general.d=d;
-    gen_struct.perm.general.idpred = idpred;
-    gen_struct.perm.general.tpred = tpred;
-    gen_struct.perm.general.sigma = sigma;
-    gen_struct.perm.general.chi2_norm = NaN;
     gen_struct.perm.results.chi2 = NaN(2*maxsteps+1,1);
     gen_struct.perm.results.z = NaN(2*maxsteps+1,1);
     gen_struct.perm.results.pred = NaN(2*maxsteps+1,1);
@@ -79,7 +77,8 @@ try
     arFit(true); 
     arCalcMerit(ar.vpl.config.sensi,ar.p(ar.qFit==1)); %second argument needed to suppress output
     gen_struct.temp.iddata = iddata;
-    gen_struct.perm.general.chi2_norm = arGetMerit(true);
+    chi2_norm = arGetMerit(true);
+    ar.vpl.general.chi2_norm = chi2_norm;
     pred_init = ar.model(m).data(d).yExpSimu(iddata,idpred);
     % Note that new optimal prediction may again be different from added
     % data point
@@ -159,19 +158,19 @@ try
                 pred_old = pred_new;
                 gen_struct.temp.pred = pred_old; %scalar value for use in step choice function
                 delz = feval(ar.vpl.config.step_fkt,...
-                    z_old,chi2dif,delz,gen_struct); %adaptive step choice
+                    z_old,chi2dif,delz,sigma,gen_struct); %adaptive step choice
                 z_new = z_old + delii*delz;
             end
             
             % Make the data step and fit:
-            [chi2_new,chi2dif] = vplFit(chi2_old,z_new,gen_struct);
+            [chi2_new,chi2dif] = vplFit(chi2_old,z_new,iddata,chi2_norm);
             if chi2dif <0 
                 % To avoid uncontrolled steps, switch to a mostly conservative
                 % default step size and redo the fit.
                 ar.p = p_old;
                 delz = ar.vpl.config.firststep;
                 z_new = z_old+delii*delz;                
-                [chi2_new,chi2dif] = vplFit(chi2_old,z_new,gen_struct);
+                [chi2_new,chi2dif] = vplFit(chi2_old,z_new,iddata,chi2_norm);
             end 
             
             %chi2limit is theoretical upper limit of step:
@@ -228,8 +227,9 @@ end
 disp('VPL calculation concluded without error.')
 
 %Add values from 'permanent' struct to ar:
-ar = ar_old;
 gen_struct.perm.config = ar.vpl.config;
+gen_struct.perm.general = ar.vpl.general;
+ar = ar_old;
 ar.vpl = gen_struct.perm;
 
 zs = ar.vpl.results.z;
@@ -242,14 +242,14 @@ end
 
 end
 
-function [chi2_new,chi2dif] = vplFit(chi2_old,z_new,s) 
+function [chi2_new,chi2dif] = vplFit(chi2_old,z_new,iddata,chi2_norm) 
     %Used to reduce code redundancy
     global ar
     
-    ar.model(s.perm.general.m).data(s.perm.general.d).yExp(s.temp.iddata,...
-        s.perm.general.idpred) = z_new;
+    ar.model(ar.vpl.general.m).data(ar.vpl.general.d).yExp(iddata,...
+        ar.vpl.general.idpred) = z_new;
     arFit(true);
     arCalcMerit(ar.vpl.config.sensi,ar.p(ar.qFit==1));
-    chi2_new = arGetMerit(true)-s.perm.general.chi2_norm;
+    chi2_new = arGetMerit(true)-chi2_norm;
     chi2dif = chi2_new - chi2_old;
 end

@@ -1,4 +1,4 @@
-function delz = vplStepPrevious(z_old,chi2dif,delz,gen_struct)
+function delz = vplStepPrevious(z_old,chi2dif,delz,sigma,gen_struct)
 % delz = vplStepPrevious(z_old,chi2dif,delz,gen_struct)
 %
 % Does the validation data step. Primitive version, no dynamic step size

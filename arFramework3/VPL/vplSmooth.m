@@ -9,6 +9,8 @@ function vplSmooth
 % validation profile from another local optimum, which changes the
 % generated predictions. Proposal: Fill the prediction profile from the
 % previous parameter region?
+%
+% See also: VPL
 
 global ar
 
