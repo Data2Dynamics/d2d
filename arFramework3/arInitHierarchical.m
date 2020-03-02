@@ -21,8 +21,12 @@ global ar;
 % "dynamic", "initial" or "error".
 
 % Symbolic model species and derived variables
-xSyms = cellfun(@sym, ar.model.x, 'UniformOutput', false);
-zSyms = cellfun(@sym, ar.model.z, 'UniformOutput', false);
+xSyms = cell(size(ar.model));
+zSyms = cell(size(ar.model));
+for im = 1:length(ar.model)
+  xSyms{im} = cellfun(@sym, ar.model(im).x, 'UniformOutput', false);
+  zSyms{im} = cellfun(@sym, ar.model(im).z, 'UniformOutput', false);
+end
 
 % Symbolic dynamic, initial and error parameters
 pDynamicSyms = cellfun(@sym, ar.pLabel(boolean(ar.qDynamic)), 'UniformOutput', false);
@@ -53,15 +57,15 @@ for im = 1:length(ar.model)
       % First, we check if yFormula contain exactly one xz
       xzList = {};
       for ip = 1:length(yPars)
-        for ix = 1:length(xSyms)
-          if isequal(yPars(ip),xSyms{ix})
-            xzList{end+1} = xSyms{ix};
+        for ix = 1:length(xSyms{im})
+          if isequal(yPars(ip),xSyms{im}{ix})
+            xzList{end+1} = xSyms{im}{ix};
             xzType = 'x';
           end
         end
-        for iz = 1:length(zSyms)
-          if isequal(yPars(ip),zSyms{iz})
-            xzList{end+1} = zSyms{iz};
+        for iz = 1:length(zSyms{im})
+          if isequal(yPars(ip),zSyms{im}{iz})
+            xzList{end+1} = zSyms{im}{iz};
             xzType = 'z';
           end
         end
