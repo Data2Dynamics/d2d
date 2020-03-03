@@ -2,7 +2,7 @@ function [chi2s,zs] = VPL
 % [chi2s,zs] = VPL
 %
 % Calculate the validation profile (or prediction profile) for a specific condition.
-% Intialize by calling InitVPL. Turn Bessel correction off before use.
+% Intialize by calling InitVPL. 
 % Saving the ar struct before use is recommended, although VPL should return  
 % to the previous ar-version if an error occurs (Exception: termination by
 % force).
@@ -24,11 +24,6 @@ if ~isfield(ar,'vpl')
     disp('Warning: Intitialize validation profile calculation by calling InitVPL')
     return
 end
-if ar.config.useFitErrorCorrection ~= 0
-    fprintf(['Warning: Bessel correction is turned on. \n'...
-        'Recalculate global optimum and profile with ar.config.useFitErrorCorrection = 0 \n'])
-    return
-end
 
 try
 %% Set up general struct gen_struct to store algorithm results
@@ -40,6 +35,15 @@ try
     idpred = ar.vpl.general.idpred;
     tpred = ar.vpl.general.tpred;
     sigma = ar.vpl.general.sigma;
+    
+    if (~ar.vpl.config.prediction) 
+        mode_txt = 'validation';
+    else 
+        mode_txt = 'prediction';
+    end
+    
+    fprintf(['\n Calculate %s profile for observable %s at ',...
+        'time point t = %0.4g ... \n'],mode_txt,ar.model(m).data(d).y{idpred},tpred)
     
     % Values in the field perm will be saved later
     gen_struct=struct('perm',[],'temp',[]);

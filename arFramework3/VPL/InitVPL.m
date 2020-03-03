@@ -9,7 +9,7 @@ function InitVPL(m,d,idpred,tpred,sigma,stepmode)
 % stepmode:    Defines which step choice algorithm is employed [2]
 %       -1: Basic step choice based on chi2 difference of last step
 %       -2: Adaptive step choice based on a theoretical upper chi2 limit
-%Setu
+% 
 % Initializes the struct ar.vpl for the validation profile calculation.
 % Separating this function from the main function VPL allows easy
 % manipulation of algorithm options by changing values in the new struct.
@@ -43,7 +43,7 @@ if (~exist('sigma','var')) || (isempty(sigma))
             '(ar.config.fiterrors = -1) \n','  Please specify sigma. \n']);
         return
     end
-    disp('Standard deviation sigma not specified:. Simulating...')
+    disp('Standard deviation sigma not specified: Simulating...')
     
     try
         arAddToData(m,d,idpred,tpred,0,2,1); %0 is a data point placeholder
@@ -55,13 +55,13 @@ if (~exist('sigma','var')) || (isempty(sigma))
         fprintf(['\n ERROR InitVPL: Resetting ar struct. Sigma could not be simulated. \n',...
             'Error message: %s \n Line: %s \n'],...
             exception.message, sprintf('%i, ',exception.stack.line));
-        arRemoveData(1,1,2,1); 
+        arRemoveData(m,d,2,1); 
         arLink(true);
         return
     end
     
     fprintf('\n Simulated sigma = %0.4g \n',sigma);
-    arRemoveData(1,1,2,1); %Removes data points added by arAddToData
+    arRemoveData(m,d,2,1); %Removes data points added by arAddToData
     arLink(true);
 end
 ar.vpl.general.sigma = sigma;

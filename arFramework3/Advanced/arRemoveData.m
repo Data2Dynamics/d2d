@@ -15,7 +15,7 @@ function arRemoveData(m,d,type,delayLink)
 %
 % See also: arAddToData
 
-    global ar;
+    global ar
 
     if ( nargin < 1 )
         help arRemoveData
@@ -35,6 +35,11 @@ function arRemoveData(m,d,type,delayLink)
     end
     if ( nargin < 4 )
         delayLink = 0;
+    end
+    
+    if isempty(rm_id) 
+        disp('No data to be removed were found')
+        return
     end
     
     ar.model(m).data(d).addedData(rm_id) = [];
