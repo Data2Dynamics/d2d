@@ -68,7 +68,7 @@ for im = 1:length(ar.model)
     for id = 1:length(ar.model(im).data)
 
         % This check is only for performance - continue early if no reason to stuck in this iteration
-        if all(isnan(ar.model(im).data(id).useHierarchical))
+        if ~any(ar.model(im).data(id).useHierarchical)
             continue
         end
 
