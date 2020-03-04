@@ -65,8 +65,8 @@ for im = 1:length(ar.model)
             end
         end
         if any(ar.model(im).data(id).useHierarchical)
-            useCustomResidual = isfield( ar.model(im).data(id), 'resfunction' ) && isstruct( ar.model(im).data(id).resfunction ) && ar.model(im).data(id).resfunction.active;
-            assert(~useCustomResidual,'Hierarchical optimization in combination with custom residuals is not supported yet.')
+            useDetectionLimit = isfield( ar.model(im).data(id), 'resfunction' ) && isstruct( ar.model(im).data(id).resfunction ) && ar.model(im).data(id).resfunction.active;
+            assert(~useDetectionLimit,'Hierarchical optimization in combination with detection limits is not supported yet. Please switch off detection limits for the data sets which have parameters for hierarchical optimization.')
         end
     end
 end
