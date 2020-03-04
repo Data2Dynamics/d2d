@@ -590,7 +590,6 @@ if exist('err','var')
     end
 end
 
-
 fprintf(fid, '\nCONDITIONS\n');
 % compartments
 if ( opts.keepcompartments )
@@ -601,36 +600,54 @@ end
 
 
 % Initial values
-specs = {};
-spec_value = [];
-init_status = 2+zeros(length(m.species),1);
+% Three options for initial values
+% Option 1: (initValuesOpt ==1)
+%               No initial assignment exists in SBML
+%               --> set init_spec to value in conditions
+% Option 2: (initValuesOpt ==2)
+%               Initial assignment is set and is formula
+%               --> Write in conditions section
+% Option 3: (initValuesOpt ==3)
+%               However, if initial assigment is set but is identical to parameter,
+%               which is named init_species
+%               --> ignore in conditions section, because parameter already
+%               in parameter set
+
+initValuesOpt = 1+zeros(length(m.species),1);
 idx_assval = zeros(length(m.species),1);
 
-% flag(j) == 0 -> do nothing (init is parameter)
-% flag(j) == 1 -> fprintf assignment_value of idx_assval = i;
-% flag(j) == 2 -> fprintf initial conc from species field in SBML (default behavior)
-
 for j=1:length(m.species)
-    for k=1:length(m.parameter)
-        if strcmp(m.parameter(k).name,['init_' m.species(j).name])
-            init_status(j) = 0;
-            continue
-        end
-    end
-    if init_status(j) == 0
-        continue
-    end
     for i=1:length(m.initialAssignment)
-        if any(strcmp(m.initialAssignment(i).symbol,{m.species(j).id}))
-            init_status(j) = 1;
-            idx_assval(j) = i;
-            continue
+        if strcmp(m.initialAssignment(i).symbol,m.species(j).id)
+            assign_string = m.initialAssignment(i).math;
+            if strcmp(assign_string,['init_' m.species(j).id]) == 0
+                initValuesOpt(j) = 2;
+                idx_assval(j) = i;
+            else
+                initValuesOpt(j) = 3;
+            end
         end
     end
 end
 
 for j=1:length(m.species)
-    if init_status(j) == 1
+    if initValuesOpt(j) == 1
+        if(m.species(j).isSetInitialConcentration)
+            fprintf(fid, 'init_%s\t "%g"\n', sym_check(m.species(j).id2), ...
+                m.species(j).initialConcentration);
+%             specs{end+1} = m.species(j).id2;
+%             spec_value(end+1) = m.species(j).initialConcentration;
+        elseif(m.species(j).isSetInitialAmount)
+            comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
+            comp_vol = m.compartment(comp_id).size;
+            initial_conc = m.species(j).initialAmount/comp_vol;
+            fprintf(fid, 'init_%s\t "%g"\n', sym_check(m.species(j).id2), ...
+                initial_conc);
+%             specs{end+1} = m.species(j).id2;
+%             spec_value(end+1) = initial_conc;
+        end
+        
+    elseif initValuesOpt(j) == 2
         assignment_value = arSym(m.initialAssignment(idx_assval(j)).math);
         %         assignment_value = arSubs(arSym(assignment_value), arSym(pars), arSym(par_value));
         %assignment_value = subs(assignment_value, specs, spec_value);
@@ -644,53 +661,9 @@ for j=1:length(m.species)
         
         fprintf(fid, '%s\t "%s"\n', ['init_' sym_check(m.initialAssignment(idx_assval(j)).symbol)], ...
             assignment_value);
-        
-    elseif init_status(j) == 2
-        
-        if(m.species(j).isSetInitialConcentration)
-            ub = 1000;
-            if(m.species(j).initialConcentration>ub)
-                ub = m.species(j).initialConcentration*10;
-            end
-            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-                m.species(j).initialConcentration, 0, ub);
-            specs{end+1} = m.species(j).id2;
-            spec_value(end+1) = m.species(j).initialConcentration;
-        elseif(m.species(j).isSetInitialAmount)
-            comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
-            comp_vol = m.compartment(comp_id).size;
-            initial_conc = m.species(j).initialAmount/comp_vol;
-            ub = 1000;
-            if(initial_conc>ub)
-                ub = initial_conc*10;
-            end
-            fprintf(fid, 'init_%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.species(j).id2), ...
-                initial_conc, 0, ub);
-            specs{end+1} = m.species(j).id2;
-            spec_value(end+1) = initial_conc;
-        end
     end
+        
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 fprintf(fid, '\nPARAMETERS\n');
 
