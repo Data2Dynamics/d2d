@@ -45,8 +45,9 @@ for m = 1:length(ar.model)
         for i = 1:length(T.conditionId)
             if strcmp(ar.model(m).data(j).name,T.conditionId(i))
                 for k = 2:(length(fns))
-                    if sum(contains(ar.model(m).data(j).p,fns{k}))>0
-                        ar.model(m).data(j).fp{strcmp(ar.model(m).data(j).p,fns{k})} = num2str(T.(fns{k})(i));
+                    if sum(contains(ar.model(m).data(j).fp,fns{k}))>0    % changed p to fp to catch cases in which initial value was renamed from a0 to init_A_state
+                        ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
+                            num2str(T.(fns{k})(i));
                     end
                 end
             end
