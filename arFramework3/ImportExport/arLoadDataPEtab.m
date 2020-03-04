@@ -131,10 +131,14 @@ for iCond = 1:length(uniCond)
         end
         
         % get cond specific parameter transformations
-        if ismember('observableParameters', Tobs.Properties.VariableNames)
+        if ismember('observableParameters', Tsub.Properties.VariableNames)
             if ~isempty(char(Tsub(1,:).observableParameters))
-                poldObs = regexp(Sd2d.fy{iObs},['observableParameter\d*_' Sd2d.y{iObs}],'match');
-                pnewObs = strsplit(char(Tsub(1,:).observableParameters),';');
+                poldObs = sort(regexp(Sd2d.fy{iObs},['observableParameter\d*_' Sd2d.y{iObs}],'match'));
+                if isnumeric(Tsub(1,:).observableParameters)
+                    pnewObs = num2str(Tsub(1,:).observableParameters);
+                else
+                    pnewObs = strsplit(char(Tsub(1,:).observableParameters),';');
+                end
                 if ~isempty(poldObs)
                     pold = [pold, poldObs];
                     fp = [fp,pnewObs];
@@ -146,7 +150,7 @@ for iCond = 1:length(uniCond)
             if isnumeric(Tsub(1,:).noiseParameters)
                 continue
             elseif ~isempty(char(Tsub(1,:).noiseParameters))
-                poldNoise = regexp(Sd2d.fystd{iObs},['noiseParameter\d*_' Sd2d.y{iObs}],'match');
+                poldNoise = sort(regexp(Sd2d.fystd{iObs},['noiseParameter\d*_' Sd2d.y{iObs}],'match'));
                 pnewNoise = strsplit(char(Tsub(1,:).noiseParameters),';');
                 if ~isempty(poldNoise)
                     pold = [pold, poldNoise];
