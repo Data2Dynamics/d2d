@@ -32,7 +32,7 @@ for m=1:size(ar1.model,2)
         indcol = find(sum(ar2.model(m).condition(c).zFineSimu~=0,1)>0);
 
         if isempty(indcol)
-            warning('arCompareZ.m: No Z found. Comparing Z skipped.')
+            fprintf('arCompareZ.m: No Z found. Comparing Z skipped.')
             pass = 1;
             return
         end

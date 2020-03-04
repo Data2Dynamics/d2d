@@ -12,7 +12,7 @@ arSimu(0,1,0)
 arSave('FirstImport')
 FirstImportStruct = arDeepCopy(ar);
 arExportPEtab('d2dExport')
-clearvars -except ImportStruct
+clearvars -except FirstImportStruct
 arInit
 arImportPEtab('d2dExport')
 arSimu(0,1,0)
