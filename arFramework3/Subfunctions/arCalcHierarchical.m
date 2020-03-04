@@ -36,14 +36,16 @@ if ar.config.fiterrors==0
 haveNanExpStd = false;
 for im = 1:length(ar.model)
     for id = 1:length(ar.model(im).data)
-        if any(isnan(ar.model(im).data(id).yExpStd))
-            haveNanExpStd = true;
+        for iy = 1:length(ar.model(im).data(id).fy)
+            if ar.model(im).data(id).useHierarchical(iy) && any(isnan(ar.model(im).data(id).yExpStd(:,iy)))
+                haveNanExpStd = true;
+            end
         end
     end
 end
 end
 useErrorModel = (ar.config.fiterrors==1 || (ar.config.fiterrors==0 && haveNanExpStd));
-assert(~useErrorModel,'Hierarchical optimization in combination with model-based errors is not supported yet. Please use experimental errors.')
+assert(~useErrorModel,'Hierarchical optimization in combination with model-based errors is not supported yet. Please use experimental errors for the observables which have parameters for hierarchical optimization.')
 useCustomResidual = isfield(ar.config,'user_residual_fun') && ~isempty(ar.config.user_residual_fun);
 assert(~useCustomResidual,'Hierarchical optimization in combination with custom residuals is not supported yet.')
 assert(~isfield(ar,'conditionconstraints'),'Hierarchical optimization in combination with condition constraints is not supported yet.')
@@ -57,9 +59,15 @@ for im = 1:length(ar.model)
 end
 for im = 1:length(ar.model)
     for id = 1:length(ar.model(im).data)
-        assert(all(ar.model(im).data(id).logfitting==0),'Hierarchical optimization in combination with fitting of observables in log10 scale is not supported yet.')
-        useCustomResidual = isfield( ar.model(im).data(id), 'resfunction' ) && isstruct( ar.model(im).data(id).resfunction ) && ar.model(im).data(id).resfunction.active;
-        assert(~useCustomResidual,'Hierarchical optimization in combination with custom residuals is not supported yet.')
+        for iy = 1:length(ar.model(im).data(id).fy)
+            if ar.model(im).data(id).useHierarchical(iy)
+                assert(ar.model(im).data(id).logfitting(iy)==0,'Hierarchical optimization in combination with fitting of observables in log10 scale is not supported yet. Please switch off fitting in log10 scale for the observables which have parameters for hierarchical optimization.')
+            end
+        end
+        if any(ar.model(im).data(id).useHierarchical)
+            useCustomResidual = isfield( ar.model(im).data(id), 'resfunction' ) && isstruct( ar.model(im).data(id).resfunction ) && ar.model(im).data(id).resfunction.active;
+            assert(~useCustomResidual,'Hierarchical optimization in combination with custom residuals is not supported yet.')
+        end
     end
 end
 
