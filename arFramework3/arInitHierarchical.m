@@ -81,7 +81,7 @@ for im = 1:length(ar.model)
         continue
       end
       B = simplify(yFormula - A*xz);
-      if ~isAlways(B==0) % Apparently there is an extra term besides the one containing xz.
+      if ~isAlways(B==0,'Unknown','false') % Apparently there is an extra term besides the one containing xz.
         continue
       end
       xz_scale = A;
