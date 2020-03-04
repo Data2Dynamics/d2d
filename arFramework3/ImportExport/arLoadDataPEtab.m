@@ -76,7 +76,7 @@ for k = 1:numel(ar.model.xNames)
     if length(ar.model.xNames{k}) == 1
         for i = 1:length(fn_rep)
             for j = 1:size(Tobs.(fn_rep{i}),1)
-                Tobs.(fn_rep{i})(j) = arSubs(arSym(Tobs.(fn_rep{i})(j)), ...
+                Tobs.(fn_rep{i})(j) = arSubs(str2sym(string(Tobs.(fn_rep{i})(j))), ...
                     arSym(ar.model.xNames{k}), arSym(ar.model.x{k}));
             end
         end
