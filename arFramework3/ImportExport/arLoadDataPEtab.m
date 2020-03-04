@@ -69,6 +69,19 @@ for i = 1:length(fns)
     end
 end
 Tobs = struct2table(Tobs);
+
+% replace single character state names with *_state
+fn_rep = {'observableFormula','noiseFormula'};
+for k = 1:numel(ar.model.xNames)
+    if length(ar.model.xNames{k}) == 1
+        for i = 1:length(fn_rep)
+            for j = 1:size(Tobs.(fn_rep{i}),1)
+                Tobs.(fn_rep{i})(j) = arSubs(arSym(Tobs.(fn_rep{i})(j)), ...
+                    arSym(ar.model.xNames{k}), arSym(ar.model.x{k}));
+            end
+        end
+    end
+end
 [uniCond,~,iCCond] = unique(Tdat.simulationConditionId);
 
 %% Use condition specific experiments and distribute over data struct

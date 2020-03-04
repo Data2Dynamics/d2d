@@ -657,7 +657,7 @@ for j=1:length(m.species)
         %             ub = assignment_value * 10;
         %         end
         
-        fprintf(fid, '%s\t "%s"\n', ['init_' sym_check(m.initialAssignment(idx_assval(j)).symbol)], ...
+        fprintf(fid, '%s\t "%s"\n', ['init_' sym_check(m.species(j).id2)], ...
             assignment_value);
     end
         
