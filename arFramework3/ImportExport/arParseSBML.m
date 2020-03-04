@@ -35,7 +35,7 @@ function varargout = arParseSBML(filename, varargin)
 %    overwrite = false;
 %end
 
-switches    = {  'tend', 'overwrite', 'keepcompartments', 'compartmentbyname' };
+switches    = {  'tend', 'overwrite', 'keepcompartments', 'compartmentbyname'};
 extraArgs   = [       1,           0,                 0,                   0 ];
 descriptions = {    { 'Specified tEnd', '' }, ...
     { 'Overwriting def file', '' }, ...
@@ -112,6 +112,8 @@ new_filename = strrep(new_filename,'-','_');
 fid = fopen(['Models' filesep new_filename '.def'], 'w');
 
 fprintf(fid, 'DESCRIPTION\n');
+fprintf(fid, '"IMPORTANT: Do not use this file with arLoadModel. Unexpected behavior may occur because of missing observable formulas."')
+
 if(~isempty(m.name))
     fprintf(fid, '"%s"', m.name);
     if(~isempty(m.id))
