@@ -149,7 +149,7 @@ if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && isfield(m.unitDe
         end
     end
 else
-    time_unit = 'a.u.a';
+    time_unit = 'au';
 end
 
 fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, time_unit, tEnd);
@@ -180,14 +180,14 @@ for j=1:length(m.compartment)
     end
     if(m.compartment(j).isSetSize)
         if ( opts.keepcompartments )
-            fprintf(fid, '%s\t V\t "%s"\t vol.\t \n', sym_check(compName), units);
+            fprintf(fid, '%s\t V\t "%s"\t vol.\t \n', sym_check(m.time_symbol,compName), units);
         else
-            fprintf(fid, '%s\t V\t "%s"\t vol.\t %g\n', sym_check(compName), units, m.compartment(j).size);
+            fprintf(fid, '%s\t V\t "%s"\t vol.\t %g\n', sym_check(m.time_symbol,compName), units, m.compartment(j).size);
         end
         comps{end+1} = compName;
         comp_value(end+1) = m.compartment(j).size;
     else
-        fprintf(fid, '%s\t V\t "%s"\t vol.\n', sym_check(compName), 'n/a');
+        fprintf(fid, '%s\t V\t "%s"\t vol.\n', sym_check(m.time_symbol,compName), 'n/a');
     end
 end
 
