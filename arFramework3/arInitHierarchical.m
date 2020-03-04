@@ -159,6 +159,9 @@ for im = 1:length(ar.model)
     ar.model(im).data(id).xzType = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
     ar.model(im).data(id).xzLink = nan(sz);
     ar.model(im).data(id).xzScale = cellfun(@(c) '', cell(sz), 'UniformOutput', false);
+    for ip = 1:length(ar.model(im).data(id).p_condition)
+      ar.model(im).data(id).pCondLink(ip) = find(strcmp(ar.model(im).data(id).p_condition{ip}, ar.model(im).data(id).p));
+    end
   end
 end
 
@@ -216,9 +219,6 @@ for k = 1:length(observableLinks)
   ar.model(im).data(id).xzType{iy} = xzType;
   ar.model(im).data(id).xzLink(iy) = find(strcmp(char(xz),ar.model(im).(xzType)));
   ar.model(im).data(id).xzScale{iy} = char(xz_scale);
-  for ip = 1:length(ar.model(im).data(id).p_condition)
-    ar.model(im).data(id).pCondLink(ip) = find(strcmp(ar.model(im).data(id).p_condition{ip}, ar.model(im).data(id).p));
-  end
 end
 
 if isfield(ar,'scales')
