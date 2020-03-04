@@ -227,15 +227,15 @@ for j = find(([m.species.isSetInitialAmount] | [m.species.isSetInitialConcentrat
         pat{end+1} =  m.species(j).id; %#ok<AGROW>
         rep{end+1} = [m.species(j).id,'_state']; %#ok<AGROW>
         m.species(j).id2 = rep{end};
-        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(rep{end}), unit{end}, ...
+        fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.time_symbol,rep{end}), unit{end}, ...
             m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
     else  % standard case
         m.species(j).id2 = m.species(j).id;
         if length(unit)==length(m.species)
-            fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), unit{j}, ...
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.time_symbol,m.species(j).id), unit{j}, ...
                 m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
         else
-            fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.species(j).id), unit{1}, ...
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t %s\t 1\t "%s"\n', sym_check(m.time_symbol,m.species(j).id), unit{1}, ...
                 m.compartmentIDtoD2D(m.species(j).compartment), m.species(j).name);
         end
     end
@@ -331,7 +331,7 @@ if isempty(m.u)
     if exist('u','var')
         for i=1:length(u)
             uf{i} = replacePiecewiseFunction(uf{i});
-            fprintf(fid, '%s\t C\t "%s"\t conc.\t "%s"\n', sym_check(u{i}), uu{i}, sym_check(replacePowerFunction(uf{i})));
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t "%s"\n', sym_check(m.time_symbol,u{i}), uu{i}, sym_check(m.time_symbol,replacePowerFunction(uf{i})));
         end
     end
 else
@@ -340,16 +340,16 @@ else
     end
     for j=1:length(m.u)
         if isempty(m.u(j).units)
-            fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), 'n/a', sym_check(replacePowerFunction(m.u(j).formula)));
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.time_symbol,m.u(j).variable), 'n/a', sym_check(m.time_symbol,replacePowerFunction(m.u(j).formula)));
         else
-            fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.u(j).variable), m.u(j).units, sym_check(replacePowerFunction(m.u(j).formula)));
+            fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.time_symbol,m.u(j).variable), m.u(j).units, sym_check(m.time_symbol,replacePowerFunction(m.u(j).formula)));
         end
     end
 end
 % treat boundary species as constant inputs
 for j=find([m.species.boundaryCondition] & ~israterule)
     m.species(j).id2 = m.species(j).id;
-    fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.species(j).id), 'n/a', ['init_' m.species(j).id]);
+    fprintf(fid, '%s\t C\t "%s"\t conc.\t"%s"\n', sym_check(m.time_symbol,m.species(j).id), 'n/a', ['init_' m.species(j).id]);
 end
 
 arWaitbar(0);
@@ -364,7 +364,7 @@ if isfield(m,'raterule')
         end
         prod_spec_name = char(prod_spec_name);
         
-        fprintf(fid,'\t -> %s', sym_check(prod_spec_name));
+        fprintf(fid,'\t -> %s', sym_check(m.time_symbol,prod_spec_name));
         
         tmpstr = m.raterule(j).formula;
         % repace species names if too short
@@ -405,7 +405,7 @@ if isfield(m,'raterule')
         % replace power function
         tmpstr = replacePowerFunction(tmpstr);
         
-        fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.raterule(j).name);
+        fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(m.time_symbol,tmpstr), m.raterule(j).name);
     end
 end
 
@@ -438,12 +438,12 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                     end
                     if stoichiometry > 1
                         if(stoichiometry == uint32(stoichiometry))
-                            fprintf(fid, '%i %s', stoichiometry, sym_check(react_spec_name));
+                            fprintf(fid, '%i %s', stoichiometry, sym_check(m.time_symbol,react_spec_name));
                         else
-                            fprintf(fid, '%2.2f %s', stoichiometry, sym_check(react_spec_name));
+                            fprintf(fid, '%2.2f %s', stoichiometry, sym_check(m.time_symbol,react_spec_name));
                         end
                     else
-                        fprintf(fid, '%s', sym_check(react_spec_name));
+                        fprintf(fid, '%s', sym_check(m.time_symbol,react_spec_name));
                     end
                     
                     if(jj ~= length(m.reaction(j).reactant))
@@ -475,12 +475,12 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                     end
                     if(stoichiometry~=1)
                         if(stoichiometry==uint32(stoichiometry))
-                            fprintf(fid, '%i %s', stoichiometry, sym_check(prod_spec_name));
+                            fprintf(fid, '%i %s', stoichiometry, sym_check(m.time_symbol,prod_spec_name));
                         else
-                            fprintf(fid, '%2.2f %s', stoichiometry, sym_check(prod_spec_name));
+                            fprintf(fid, '%2.2f %s', stoichiometry, sym_check(m.time_symbol,prod_spec_name));
                         end
                     else
-                        fprintf(fid, '%s', sym_check(prod_spec_name));
+                        fprintf(fid, '%s', sym_check(m.time_symbol,prod_spec_name));
                     end
                     if(jj ~= length(m.reaction(j).product))
                         fprintf(fid, ' + ');
@@ -508,7 +508,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             reaction_comp = m.compartmentIDtoD2D( reaction_comp );
             
             if ~isempty(reaction_comp) %&& sum(strcmp(reaction_comp,strsplit(char(tmpstr),'*')))==1
-                tmpstr = ['(' char(tmpstr) ')/' sym_check(reaction_comp)];
+                tmpstr = ['(' char(tmpstr) ')/' sym_check(m.time_symbol,reaction_comp)];
             end
             
             % replace compartment volumes if requested
@@ -560,7 +560,7 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             
             tmpstr = replacePowerFunction(tmpstr);
             
-            fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(tmpstr), m.reaction(j).id);
+            fprintf(fid, ' \t CUSTOM "%s" \t"%s"\n', sym_check(m.time_symbol,tmpstr), m.reaction(j).id);
         end
     end
 end   % end if dynamics specified either raterule or reaction
@@ -577,14 +577,14 @@ fprintf(fid, '\nDERIVED\n');
 if exist('obs','var')
     fprintf(fid, '\nOBSERVABLES\n');
     for i=1:length(obs)
-        fprintf(fid, '%s\t C\t "%s"\t conc.\t 0\t 0\t "%s"\n', sym_check(obs{i}), obsu{i}, obsf{i});
+        fprintf(fid, '%s\t C\t "%s"\t conc.\t 0\t 0\t "%s"\n', sym_check(m.time_symbol,obs{i}), obsu{i}, obsf{i});
     end
 end
 
 if exist('err','var')
     fprintf(fid, '\nERRORS\n');
     for i=1:length(err)
-        fprintf(fid, '%s\t "%s"\n', sym_check(obs{i}), err{i});
+        fprintf(fid, '%s\t "%s"\n', sym_check(m.time_symbol,obs{i}), err{i});
     end
 end
 
@@ -631,7 +631,7 @@ end
 for j=1:length(m.species)
     if initValuesOpt(j) == 1
         if(m.species(j).isSetInitialConcentration)
-            fprintf(fid, 'init_%s\t "%g"\n', sym_check(m.species(j).id2), ...
+            fprintf(fid, 'init_%s\t "%g"\n', sym_check(m.time_symbol,m.species(j).id2), ...
                 m.species(j).initialConcentration);
 %             specs{end+1} = m.species(j).id2;
 %             spec_value(end+1) = m.species(j).initialConcentration;
@@ -639,7 +639,7 @@ for j=1:length(m.species)
             comp_id = strcmp(m.species(1).compartment,{m.compartment.id});
             comp_vol = m.compartment(comp_id).size;
             initial_conc = m.species(j).initialAmount/comp_vol;
-            fprintf(fid, 'init_%s\t "%g"\n', sym_check(m.species(j).id2), ...
+            fprintf(fid, 'init_%s\t "%g"\n', sym_check(m.time_symbol,m.species(j).id2), ...
                 initial_conc);
 %             specs{end+1} = m.species(j).id2;
 %             spec_value(end+1) = initial_conc;
@@ -657,7 +657,7 @@ for j=1:length(m.species)
         %             ub = assignment_value * 10;
         %         end
         
-        fprintf(fid, '%s\t "%s"\n', ['init_' sym_check(m.species(j).id2)], ...
+        fprintf(fid, '%s\t "%s"\n', ['init_' sym_check(m.time_symbol,m.initialAssignment(idx_assval(j)).symbol)], ...
             assignment_value);
     end
         
@@ -683,7 +683,7 @@ for j=1:length(m.parameter)
             if(m.parameter(j).value>ub)
                 ub = m.parameter(j).value*10;
             end
-            fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.parameter(j).id), ...
+            fprintf(fid, '%s\t %g\t %i\t 0\t 0\t %g\n', sym_check(m.time_symbol,m.parameter(j).id), ...
                 m.parameter(j).value, 0, ub);
             pars{end+1} = m.parameter(j).id;
             par_value(end+1) = m.parameter(j).value;
@@ -757,7 +757,7 @@ fclose(fid);
 %     for j=1:length(B)
 %         idx = find((j == C) & isobs');
 %         if ~isempty(idx)
-%         fprintf(fid, '%s \t C\t "%s"\t "conc."\t 0 0 "%s" "%s"\n', sym_check(m.rule(idx).variable), 'n/a', ...
+%         fprintf(fid, '%s \t C\t "%s"\t "conc."\t 0 0 "%s" "%s"\n', sym_check(m.time_symbol,m.rule(idx).variable), 'n/a', ...
 %             m.rule(idx).formula, m.rule(idx).name);
 %         end
 %     end
@@ -767,7 +767,7 @@ fclose(fid);
 %         idxobs = find((j == C) & isobs');
 %         idxerr = find((j == C) & iserr');
 %         if (length(idxobs) == 1) && (length(idxerr) == 1)
-%             fprintf(fid, '%s\t "%s"\n', sym_check(m.rule(idxobs).variable), sym_check(m.rule(idxerr).formula));
+%             fprintf(fid, '%s\t "%s"\n', sym_check(m.time_symbol,m.rule(idxobs).variable), sym_check(m.time_symbol,m.rule(idxerr).formula));
 %         else
 %             warning('Double check error model functions in data.def. Something might have gone wrong.')
 %         end
@@ -775,13 +775,13 @@ fclose(fid);
 % elseif isfield(m.species,'id2')%old behavior
 %     fprintf(fid, '\nOBSERVABLES\n');
 %     for j=1:length(m.species)
-%         fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.species(j).id2), 'n/a', ...
+%         fprintf(fid, '%s_obs\t C\t "%s"\t conc.\t 0 0 "%s" "%s"\n', sym_check(m.time_symbol,m.species(j).id2), 'n/a', ...
 %             m.species(j).id2, m.species(j).name);
 %     end
 %
 %     fprintf(fid, '\nERRORS\n');
 %     for j=1:length(m.species)
-%         fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.species(j).id2), sym_check(m.species(j).id2));
+%         fprintf(fid, '%s_obs\t "sd_%s"\n', sym_check(m.time_symbol,m.species(j).id2), sym_check(m.time_symbol,m.species(j).id2));
 %     end
 %     warning('No real observation functions defined!')
 % end
@@ -1021,7 +1021,7 @@ function m = rules2input(m)
 is_input = zeros(size(m.rule));
 for r=1:length(m.rule)
     s = symvar(m.rule(r).formula);
-    if(~isempty(intersect(s,'TIME')))
+    if(~isempty(intersect(s,m.time_symbol)))
         is_input(r) = 1;
     end
 end
@@ -1029,11 +1029,11 @@ end
 m.u = m.rule(is_input==1);
 m.rule = m.rule(is_input~=1);
 
-for i=1:length(m.u)
-    %     m.u(i).formula = char(mysubs(sym(m.u(i).formula),'time','t')); % does
-    %     not work, at least in R2014a
-    m.u(i).formula = strrep(m.u(i).formula,'TIME',m.time_symbol);
-end
+% for i=1:length(m.u)
+%     %     m.u(i).formula = char(mysubs(sym(m.u(i).formula),'time','t')); % does
+%     %     not work, at least in R2014a
+%     m.u(i).formula = strrep(m.u(i).formula,'TIME',m.time_symbol);
+% end
 
 
 function m = AdaptVariableNames(m)
@@ -1042,32 +1042,32 @@ function m = AdaptVariableNames(m)
 %   function subs()
 
 for i=1:length(m.species)
-    m.species(i).id = sym_check(m.species(i).id);
-    m.species(i).compartment = sym_check(m.species(i).compartment);
+    m.species(i).id = sym_check(m.time_symbol,m.species(i).id);
+    m.species(i).compartment = sym_check(m.time_symbol,m.species(i).compartment);
 end
 
 
 for i=1:length(m.parameter)
-    m.parameter(i).id = sym_check(m.parameter(i).id);
+    m.parameter(i).id = sym_check(m.time_symbol,m.parameter(i).id);
 end
 
 for i=1:length(m.rule)
-    m.rule(i).variable = sym_check(m.rule(i).variable);
-    m.rule(i).formula = sym_check(m.rule(i).formula);
+    m.rule(i).variable = sym_check(m.time_symbol,m.rule(i).variable);
+    m.rule(i).formula = sym_check(m.time_symbol,m.rule(i).formula);
 end
 
 for i=1:length(m.reaction)
     for j=1:length(m.reaction(i).reactant)
-        m.reaction(i).reactant(j).species = sym_check(m.reaction(i).reactant(j).species);
+        m.reaction(i).reactant(j).species = sym_check(m.time_symbol,m.reaction(i).reactant(j).species);
     end
-    m.reaction(i).kineticLaw.math = sym_check( m.reaction(i).kineticLaw.math);
+    m.reaction(i).kineticLaw.math = sym_check(m.time_symbol, m.reaction(i).kineticLaw.math);
     if isfield(m.reaction(i).kineticLaw,'formula')
-        m.reaction(i).kineticLaw.formula = sym_check( m.reaction(i).kineticLaw.formula);
+        m.reaction(i).kineticLaw.formula = sym_check(m.time_symbol, m.reaction(i).kineticLaw.formula);
     end
 end
 
 
-function s = sym_check(s)
+function s = sym_check(timeSymbol,s)
 % Replacement if symbolic variable coincides with function. Without
 % replacement subs would not work.
 keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','I','E'};
@@ -1082,6 +1082,11 @@ sv = symvar(s);
 svinter = intersect(sv,keywords);
 
 for i=1:length(svinter)
+    if any(strcmp(svinter,'time')) == 1
+        for k=1:3  
+            s = regexprep(s,'time',timeSymbol,'all');
+        end
+    end
     for j=1:3
         if(length(svinter{i})>1)
             s = regexprep(s,['(^|[\W])',svinter{i},'([\W]|$)'],['$1',upper(svinter{i}),'$2'],'all');
@@ -1230,46 +1235,46 @@ funstr = 'piecewise';
 % disp(str);
 funindex = strfind(str, [funstr '(']);
 while(~isempty(funindex))
-    
+
     substr = str(funindex(1):end);
-    
+
     openindex = strfind(substr, '(');
     closeindex = strfind(substr, ')');
-    
+
     mergedindex = [openindex closeindex];
     rankingindex = [ones(size(openindex)) -ones(size(closeindex))];
-    
+
     [sortedmergedindex, isortedindex] = sort(mergedindex);
     sortedrankingindex = rankingindex(isortedindex);
-    
+
     endfunindex = find(cumsum(sortedrankingindex)==0);
     if(isempty(endfunindex))
         error('bracketing error close to function %s', funstr);
     end
     endfunindex = sortedmergedindex(endfunindex(1));
-    
+
     substr = substr(openindex+1:endfunindex-1);
     subFunStr = {'lt','leq'};
     subFunSearchStr = {'lt(','leq('};
-    for isubFun = 1:length(subFunStr)
+    for isubFun = 1:length(subFunStr) 
         if ~isempty(regexp(substr,subFunSearchStr{isubFun}, 'once'))
             funindexLT = strfind(substr, ['lt' '(']);
             substrLT = substr(funindexLT(1):end);
             openindexLT = strfind(substrLT, '(');
             closeindexLT = strfind(substrLT, ')');
-            
+
             mergedindexLT = [openindexLT closeindexLT];
             rankingindexLT = [ones(size(openindexLT)) -ones(size(closeindexLT))];
-            
+
             [sortedmergedindexLT, isortedindexLT] = sort(mergedindexLT);
             sortedrankingindexLT = rankingindexLT(isortedindexLT);
-            
+
             endfunindexLT = find(cumsum(sortedrankingindexLT)==0);
             if(isempty(endfunindex))
                 error('bracketing error close to function %s', funstr);
             end
             endfunindexLT = sortedmergedindexLT(endfunindexLT(1));
-            
+
             substrLT = substrLT(openindexLT+1:endfunindexLT-1);
             DLT = textscan(substrLT, '%s', 'Whitespace', ',');
             heavysideArgument = char(['-(' DLT{1}{1} '-' DLT{1}{2} ')']);
@@ -1287,7 +1292,7 @@ while(~isempty(funindex))
     
     funtmplate = sprintf('(%s + (%s-%s) * heaviside(%s))',D{3},D{1},D{3},heavysideArgument);
     %     disp(funtmplate)
-    
+
     if(funindex(1)-1>1 && funindex(1)-1+endfunindex<length(str)) % in between
         str = [str(1:funindex(1)-1) funtmplate str(funindex(1)+endfunindex:end)];
     elseif(funindex(1)-1>1) % at begining
@@ -1298,6 +1303,6 @@ while(~isempty(funindex))
         str = funtmplate;
     end
     %     disp(str)
-    
+
     funindex = strfind(str, funstr);
 end
