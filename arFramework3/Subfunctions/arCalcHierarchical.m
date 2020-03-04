@@ -76,19 +76,20 @@ for im = 1:length(ar.model)
         ic = ar.model(im).data(id).cLink;
         td = ar.model(im).data(id).tExp;
         tc = ar.model(im).condition(ic).tExp;
-        it = ismember(tc,td); % TODO: Test the performance of this function and possibly consider another solution
 
-        ar.model(im).data(id).xzExpSimu = zeros(sum(it),length(ar.model(im).data(id).fy));
+        ar.model(im).data(id).xzExpSimu = zeros(length(td),length(ar.model(im).data(id).fy));
         if sensi
-            ar.model(im).data(id).sxzExpSimu = zeros(sum(it),length(ar.model(im).data(id).fy),length(ar.model(im).data(id).p));
+            ar.model(im).data(id).sxzExpSimu = zeros(length(td),length(ar.model(im).data(id).fy),length(ar.model(im).data(id).p));
         end
         for iy = 1:length(ar.model(im).data(id).fy)
             if ar.model(im).data(id).useHierarchical(iy)
                 ixz = ar.model(im).data(id).xzLink(iy);
                 xzType = ar.model(im).data(id).xzType{iy};
-                ar.model(im).data(id).xzExpSimu(:,iy) = ar.model(im).condition(ic).(sprintf('%sExpSimu',xzType))(it,ixz); % TODO: Test the performance impact of sprintf
+                xzExpSimu = ar.model(im).condition(ic).(sprintf('%sExpSimu',xzType))(:,ixz); % TODO: Test the performance impact of sprintf
+                ar.model(im).data(id).xzExpSimu(:,iy) = interp1(tc,xzExpSimu,td,'nearest'); % NOTE: td should always be a subset of tc, hence the 'nearest' option
                 if sensi
-                    ar.model(im).data(id).sxzExpSimu(:,iy,ip) = ar.model(im).condition(ic).(sprintf('s%sExpSimu',xzType))(it,ixz,:);
+                    sxzExpSimu = ar.model(im).condition(ic).(sprintf('s%sExpSimu',xzType))(:,ixz,:);
+                    ar.model(im).data(id).sxzExpSimu(:,iy,ip) = interp1(tc,sxzExpSimu,td,'nearest');
                 end
             end
         end
