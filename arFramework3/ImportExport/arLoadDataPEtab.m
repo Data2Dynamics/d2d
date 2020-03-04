@@ -100,33 +100,49 @@ for iCond = 1:length(uniCond)
     for iObs = 1:length(uniObs)
         idx = strcmp(Tobs.observableId,uniObs{iObs});
         Sd2d.fy{iObs} = char(string(Tobs.observableFormula(idx)));
-        tmp_fystd = char(Tobs.noiseFormula(idx));
+        if ~isnumeric(Tobs.noiseFormula(idx))
+            tmp_fystd = char(Tobs.noiseFormula(idx));
+        else
+            tmp_fystd = Tobs.noiseFormula(idx);
+        end
         for jObs = 1:length(Tobs.observableId)
             tmp_fystd = arSubs(arSym(tmp_fystd),arSym(Tobs.observableId{jObs}),arSym(['(' Tobs.observableFormula{jObs} ')']));
         end
         Sd2d.fystd{iObs} = char(string(tmp_fystd));
-        Sd2d.logfitting(iObs) = double(strcmp(Tobs.observableTransformation(idx),'log10'));
+        
+        % obsTrafo column is optinal
+        if ismember('observableTransformation', Tobs.Properties.VariableNames)
+            Sd2d.logfitting(iObs) = double(strcmp(Tobs.observableTransformation(idx),'log10'));
+        else
+            Sd2d.logfitting(iObs) = 0;
+        end
+        
         % get cond specific parameter transformations
-        if ~isempty(char(Tsub(1,:).observableParameters))
-            poldObs = regexp(Sd2d.fy{iObs},['observableParameter\d*_' Sd2d.y{iObs}],'match');
-            pnewObs = strsplit(char(Tsub(1,:).observableParameters),';');
-            if ~isempty(poldObs)
-                pold = [pold, poldObs];
-                fp = [fp,pnewObs];
+        if ismember('observableParameters', Tobs.Properties.VariableNames)
+            if ~isempty(char(Tsub(1,:).observableParameters))
+                poldObs = regexp(Sd2d.fy{iObs},['observableParameter\d*_' Sd2d.y{iObs}],'match');
+                pnewObs = strsplit(char(Tsub(1,:).observableParameters),';');
+                if ~isempty(poldObs)
+                    pold = [pold, poldObs];
+                    fp = [fp,pnewObs];
+                end
             end
         end
-        if isnumeric(Tsub(1,:).noiseParameters)
-            continue
-        elseif ~isempty(char(Tsub(1,:).noiseParameters))
-            poldNoise = regexp(Sd2d.fystd{iObs},['noiseParameter\d*_' Sd2d.y{iObs}],'match');
-            pnewNoise = strsplit(char(Tsub(1,:).noiseParameters),';');
-            if ~isempty(poldNoise)
-                pold = [pold, poldNoise];
-                fp = [fp,pnewNoise];
+        
+        if ismember('noiseParameters', Tobs.Properties.VariableNames)
+            if isnumeric(Tsub(1,:).noiseParameters)
+                continue
+            elseif ~isempty(char(Tsub(1,:).noiseParameters))
+                poldNoise = regexp(Sd2d.fystd{iObs},['noiseParameter\d*_' Sd2d.y{iObs}],'match');
+                pnewNoise = strsplit(char(Tsub(1,:).noiseParameters),';');
+                if ~isempty(poldNoise)
+                    pold = [pold, poldNoise];
+                    fp = [fp,pnewNoise];
+                end
             end
         end
     end
-
+    
     
     % experimental data
     Sd2d.yExp = nan(length(uniTimes),length(uniObs));
@@ -135,11 +151,11 @@ for iCond = 1:length(uniCond)
     Sd2d.yExpStdRaw = nan(length(uniTimes),length(uniObs));
     for it = 1:length(uniTimes)
         for iobs = 1:length(uniObs)
-%              disp([ iCond it  iobs])
+            %              disp([ iCond it  iobs])
             if sum(it==iTExp & iobs == iCObs)==1
                 Sd2d.yExpRaw(it,iobs) = Tsub.measurement(it == iTExp & iobs == iCObs);
                 Sd2d.yExp(it,iobs) = Sd2d.logfitting(iobs) * log10(Tsub.measurement(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs)) *Tsub.measurement(it == iTExp & iobs == iCObs);
-                if isnumeric(Tsub.noiseParameters(it == iTExp & iobs == iCObs))
+                if ismember('noiseParameters', Tobs.Properties.VariableNames) && isnumeric(Tsub.noiseParameters(it == iTExp & iobs == iCObs))
                     Sd2d.yExpStdRaw(it,iobs) = Tsub.noiseParameters(it == iTExp & iobs == iCObs);
                     Sd2d.yExpStd(it,iobs) =  Sd2d.logfitting(iobs) *log10(Tsub.noiseParameters(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs))*Tsub.noiseParameters(it == iTExp & iobs == iCObs);
                 end

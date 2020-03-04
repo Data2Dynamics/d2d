@@ -135,23 +135,21 @@ end
 
 
 fprintf(fid, '\nPREDICTOR\n');
-if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && isfield(m.unitDefinition(1),'unit') && ~isempty(m.unitDefinition(1).unit) && isfield(m.unitDefinition(1).unit,'kind') && ~isempty(m.unitDefinition(1).unit.kind)
-    if any(strcmp({m.unitDefinition.name},'time'))
-        time_unit = m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.kind;
-        if (strcmp(time_unit,'s')||strcmp(time_unit,'sec')||strcmp(time_unit,'second'))
-            if isfield(m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit,'multiplier')
-                if m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.multiplier == 60
-                    time_unit = 'min';
-                elseif m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.multiplier == 3600
-                    time_unit = 'h';
-                elseif m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.multiplier == 86400
-                    time_unit = 'd';
-                end
+if isfield(m,'unitDefinition') && ~isempty(m.unitDefinition) && isfield(m.unitDefinition(1),'unit') && ~isempty(m.unitDefinition(1).unit) && isfield(m.unitDefinition(1).unit,'kind') && ~isempty(m.unitDefinition(1).unit.kind) && any(strcmp({m.unitDefinition.name},'time'))
+    time_unit = m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.kind;
+    if (strcmp(time_unit,'s')||strcmp(time_unit,'sec')||strcmp(time_unit,'second'))
+        if isfield(m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit,'multiplier')
+            if m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.multiplier == 60
+                time_unit = 'min';
+            elseif m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.multiplier == 3600
+                time_unit = 'h';
+            elseif m.unitDefinition(strcmp({m.unitDefinition.name},'time')).unit.multiplier == 86400
+                time_unit = 'd';
             end
         end
     end
 else
-    time_unit = 's';
+    time_unit = 'a.u.a';
 end
 
 fprintf(fid, '%s\t T\t "%s"\t time\t 0\t %i\t\n', m.time_symbol, time_unit, tEnd);
@@ -1259,46 +1257,46 @@ funstr = 'piecewise';
 % disp(str);
 funindex = strfind(str, [funstr '(']);
 while(~isempty(funindex))
-
+    
     substr = str(funindex(1):end);
-
+    
     openindex = strfind(substr, '(');
     closeindex = strfind(substr, ')');
-
+    
     mergedindex = [openindex closeindex];
     rankingindex = [ones(size(openindex)) -ones(size(closeindex))];
-
+    
     [sortedmergedindex, isortedindex] = sort(mergedindex);
     sortedrankingindex = rankingindex(isortedindex);
-
+    
     endfunindex = find(cumsum(sortedrankingindex)==0);
     if(isempty(endfunindex))
         error('bracketing error close to function %s', funstr);
     end
     endfunindex = sortedmergedindex(endfunindex(1));
-
+    
     substr = substr(openindex+1:endfunindex-1);
     subFunStr = {'lt','leq'};
     subFunSearchStr = {'lt(','leq('};
-    for isubFun = 1:length(subFunStr) 
+    for isubFun = 1:length(subFunStr)
         if ~isempty(regexp(substr,subFunSearchStr{isubFun}, 'once'))
             funindexLT = strfind(substr, ['lt' '(']);
             substrLT = substr(funindexLT(1):end);
             openindexLT = strfind(substrLT, '(');
             closeindexLT = strfind(substrLT, ')');
-
+            
             mergedindexLT = [openindexLT closeindexLT];
             rankingindexLT = [ones(size(openindexLT)) -ones(size(closeindexLT))];
-
+            
             [sortedmergedindexLT, isortedindexLT] = sort(mergedindexLT);
             sortedrankingindexLT = rankingindexLT(isortedindexLT);
-
+            
             endfunindexLT = find(cumsum(sortedrankingindexLT)==0);
             if(isempty(endfunindex))
                 error('bracketing error close to function %s', funstr);
             end
             endfunindexLT = sortedmergedindexLT(endfunindexLT(1));
-
+            
             substrLT = substrLT(openindexLT+1:endfunindexLT-1);
             DLT = textscan(substrLT, '%s', 'Whitespace', ',');
             heavysideArgument = char(['-(' DLT{1}{1} '-' DLT{1}{2} ')']);
@@ -1316,7 +1314,7 @@ while(~isempty(funindex))
     
     funtmplate = sprintf('(%s + (%s-%s) * heaviside(%s))',D{3},D{1},D{3},heavysideArgument);
     %     disp(funtmplate)
-
+    
     if(funindex(1)-1>1 && funindex(1)-1+endfunindex<length(str)) % in between
         str = [str(1:funindex(1)-1) funtmplate str(funindex(1)+endfunindex:end)];
     elseif(funindex(1)-1>1) % at begining
@@ -1327,6 +1325,6 @@ while(~isempty(funindex))
         str = funtmplate;
     end
     %     disp(str)
-
+    
     funindex = strfind(str, funstr);
 end
