@@ -1,16 +1,38 @@
 % options = PPL_options(varargin)
 % 
-% Set options for calculation of prediction profile likelihood. This
-% function is called by arPPL. The options are stored in ar.ppl.options
+% Set options for calculation of prediction profile likelihood. This function 
+% must be called before use of arPPL. 
+%
+% The options are stored in ar.ppl.options.
 % 
 %   varargin        pairs optionname, optionvalue
 %                   The option names are case INsensitive. 
 % 
 % The following options are available:
 % 
-%   Integration     Integrate prediction/validation confidence line over
+%   Integrate       Integrate prediction/validation confidence line over
 %                   time, or just compute profiles for specified t 
 %                   [false]
+%
+%   doPPL           integrate prediction bands with assumed error on measurements
+%                   [false]
+%                   This default means that validation confidence intervals
+%                   are calculated instead of prediction confidence
+%                   intervals. The former gives CIs wrt data with non-zero
+%                   standard deviation.
+%
+%   n_steps_profile  total steps in computation of full profile per side 
+%                    [50]
+%
+%   xstd            standard deviation of additional data point. The used
+%                   algorithm will try to set this automatically in arPPL,
+%                   but if this is not possible it will be set to
+%                   [0.1]
+%                   Note that if prediction profiles are to be calculated
+%                   the choice of xstd is crucial. Values smaller than the
+%                   width of the prediction profile are recommended (which
+%                   can only be found after the calculation has been
+%                   attempted once before).
 %
 %   gamma           correction strength for computation of integration
 %                   [1]
@@ -35,36 +57,27 @@
 %   backward        perform integration backwards in time 
 %                   [false]
 %
-%   xstd            standard deviation of additional data point. If profile
-%                   on data and ar.config.fiterrors=1, the fitted errors of
-%                   the respective data is used 
-%                   [0.1]
+%   whichT          which entry of the provided time-vector is taken as
+%                   starting point for integration (argument is the
+%                   corresponding index) [1]
 %
-%   doPPL           integrate prediction bands without assumed error on measurements
-%                   (? confidence bands and is based on prediction profiles
-%                   of Clemens paper (default is false ? validation profiles)) 
-%
-% n_steps_profile   total steps in computation of full profile per side 
-%                   [100]
-%
-% whichT            which entry of the provided time-vector is taken as
-%                   starting point for integration 
-%
-% dir               1 for only upper CI profile
+%   dir             1 for only upper CI profile
 %                   -1 for lower, 0 for both 
 %                   [default is 0]
+%                   Doesn't work in the case of ('integrate',false).
 %
-% alpha_level       Confidence level for profile 
+%   alpha_level     Confidence level for profile 
 %                   [default 0.05]
 %
 % Helge Hass, 2014 (helge.hass@fdm.uni-freiburg.de)
-% Written by Helge, tried to be documented by Clemens.
+% Written by Helge, tried to be documented by Clemens/Tim.
 % 
-% See also arPPL
+% See also: arPPL
 % 
 % Example:
-% options = PPL_options('alpha_level',.02,'tend',10)
-% ar.ppl.options
+% >> PPL_options('alpha_level',.02,'tend',10)
+% >> ar.ppl.options
+% >> arPPL
 
 function options = PPL_options(varargin)
 global ar
@@ -205,4 +218,4 @@ if expectval
   error(message('No value found for option %s', arg));
 end
 
-options = 'Did set PPL options! \n';
+options = 'Did set PPL options!';

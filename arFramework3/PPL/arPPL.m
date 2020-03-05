@@ -1,8 +1,8 @@
-% arPPL(m, c, [ix], t, [takeY], [options])
+% arPPL(m, c, [ix], t, [takeY])
 % 
 % Major function for calculating prediction bands via profile likelihood
 % for a dynamic variable or observable in a specific condition at specified
-% time points. 
+% time points. Additional time points can be appended by re-using arPPL.
 % 
 %   m   model index 
 %   c	condition or data index, depending on takeY. 
@@ -17,23 +17,27 @@
 %       if takeY==true: an observation ar.model.data.y is used for profile
 %       integration (data struct) 
 %       if takeY==false: a ar.model.condition.x is used 
-% options option struct (type PPL_options for help)
+%
+% Initialize calculation by calling options = PPL_options to use default 
+% options or specify options by calling PPL_options with name-value pairs. 
 %
 % Helge Hass, 2014 (helge.hass@fdm.uni-freiburg.de)
-% Tried to be documented by Clemens.
+% Tried to be documented by Clemens/Tim.
 % 
 % Example:
+% >> PPL_options('Integrate',false,'doPPL',true) 
+%       %Set option to calculate prediction profiles without integration
 % >> arPPL(1,1,1,10,false)
-% >> ar.ppl
+%       %Run algorithm for time t = 10
 % >> arPlotPPL(1,1,1,10,false)
+%       %Plot prediction profile for t = 10
+%
+% See also: PPL_options, arPlotPPL, arPredictionProfile
 
-function arPPL(m, c, ix, t, takeY, options) % model, condition, states of interest, 
+function arPPL(m, c, ix, t, takeY) % model, condition, states of interest, 
 
     global ar
     ar.config.optim.Jacobian = 'on';
-    if(~exist('options','var') || isempty(options))
-      options = [];
-    end
     if nargin < 2
         fprintf('Please specify the model, condition/data index, which states should be integrated \n, the time points and if an observation or internal state should be used. \n');
         return;  
@@ -50,6 +54,12 @@ function arPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
             ix = 1:length(ar.model(m).xNames);
         end
     end
+    if (~isfield(ar.ppl,'options')) || (isempty(ar.ppl.options))
+        fprintf(['\n ERROR arPPL: Please initialize calculation by calling \n',...
+            '       options = PPL_options \n',...
+            'or call PPL_options with specified name-value pairs. \n'])
+        return;
+    end      
     
     % optimizer settings (set only once)
     fittederrors=ar.config.fiterrors;
@@ -65,8 +75,6 @@ function arPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
     ppl_general_struct.takeY = takeY;
     ppl_general_struct.x_vector = ix;
     
-    confirm_options = PPL_options(options);
-    fprintf(confirm_options)
     % Initialize PPL struct, set values to NaN that are newly computed
     t = PPL_init(ppl_general_struct);
     whichT = ar.ppl.options.whichT;
@@ -86,8 +94,7 @@ function arPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         x_y = 'x';
     end
     ppl_general_struct.data_cond = data_cond;
-    ppl_general_struct.x_y = x_y;
-    
+    ppl_general_struct.x_y = x_y;  
 
     if(~ar.ppl.options.doPPL)
         ppl_vpl = 'vpl_';
@@ -95,26 +102,37 @@ function arPPL(m, c, ix, t, takeY, options) % model, condition, states of intere
         ppl_vpl = 'ppl_';
     end
     ppl_general_struct.ppl_vpl = ppl_vpl;
+    
+    % Integrated prediction bands are not directly supported! But to generate 
+    % them anyway:
+    % Alternative 1: Integrated validation bands with sufficiently small 
+    %       measurement error.
+    % Alternative 2: Prediction Profiles for several time points.
     if(ar.ppl.options.doPPL && ar.ppl.options.integrate)       
         %reset config fields 
         ar.config.fiterrors=fittederrors;
         ar.qFit(ar.qError==1)=fit_bkp;
-        error('Integration of confidence bands are not maintained and are not robust yet. Try approximating them by prediction bands with narrowing measurement error. \n')
+        error(['Integration of confidence bands are not maintained and are not robust yet.',...
+            ' Try approximating them by prediction bands with narrowing measurement error.'])
     end 
     
-    %loop over states
+    % Loop over states
     for jx = 1:length(ix)
-        arSimu(false, true, true);
+        arSimu(false, true, true); %is already done in PPL_init?
         ppl_general_struct.jx = ix(jx);
-        %try to set standard dev of data point appropriately
+        % Try to set standard deviation of data point appropriately if no
+        % value has been specified (xstd_auto = 0).
         if(ar.ppl.xstd_auto)  
             if(takeY)
                 [~,it_first] = min(abs(ar.model(m).data(c).tExp-t(whichT))); 
-                 if(~isnan(ar.model(m).data(c).yExpStd(it_first,ix(jx))))
-                     ar.ppl.options.xstd = ar.model(m).data(c).yExpStd(it_first,ix(jx));
-                 elseif(ar.config.fiterrors~= -1 && takeY && ~isnan(ar.model(m).data(c).ystdFineSimu(1,ix(jx))))
-                    ar.ppl.options.xstd = ar.model(m).data(c).ystdFineSimu(it_first,ix(jx));
-                 end
+                if(~isnan(ar.model(m).data(c).yExpStd(it_first,ix(jx))))
+                    ar.ppl.options.xstd = ar.model(m).data(c).yExpStd(it_first,ix(jx));
+                    % Takes experimental error of closest data point
+                elseif(ar.config.fiterrors~= -1 && ~isnan(ar.model(m).data(c).ystdFineSimu(1,ix(jx))))
+                    [~,it_first_fine] = min(abs(ar.model(m).data(c).tFine-t(whichT)));
+                    ar.ppl.options.xstd = ar.model(m).data(c).ystdFineSimu(it_first_fine,ix(jx));
+                    % Alternatively use simulated data error
+                end
             elseif(~takeY)
                 ar.ppl.options.xstd = max(ar.model(m).condition(c).xFineSimu(:,ix(jx)))/10;
             end

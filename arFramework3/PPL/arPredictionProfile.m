@@ -1,7 +1,24 @@
-% 
-% ppl_general_struct    PPL result struct
-% 
-% Written by Helge, tried to be documented by Clemens.
+% [xFit, ps] = arPredictionProfile(t, general_struct, save, dir, xFit)
+%
+% This function computes the validation/prediction profile for various input 
+% time points. It is called in arPPL and arIntegratePredBand.
+%
+%   t:              Vector of times where full Profile is computed
+%   general_struct: General quantities from the higher level function, like
+%                   model/data index, state index, ppl or vpl, etc.
+%   save:           Saves profiles in ar. If save is turned on, both directions
+%                   are performed
+%   dir:            Direction in which profile is calculated  
+%   xFit, ps:       Has something to do with the integration functionality
+%
+% The available documentation focused on the non-integration aspects.
+% Calculation of prediction profiles is performed by mapping the validation
+% profiles to prediction profiles by use of an existing relation.
+%
+% Written by Helge, tried to be documented by Clemens/Tim
+%
+% See also: arPPL, arIntegratePredBand
+
 function [xFit, ps] = arPredictionProfile(t, general_struct, save, dir, xFit)
 
 global ar;
@@ -14,6 +31,8 @@ if(~exist('xFit','var'))
     xFit = 1.;
     save = true;
 end
+
+% In arPPL, xFit = []  at this point
 
 %fill temporary variables
 pReset = ar.p;
@@ -37,39 +56,64 @@ for ts = 1:length(t)
     end
     %if(save)
     ts_tmp = find(ar.model(m).(data_cond)(c).ppl.ts_profile(:,jx) == t_tmp);
+    % index of the entries corresponding to time t_tmp and states jx
+    
     %Skip calculation if it already exists
     if(save && ((doPPL && ~isnan(ar.model(m).(data_cond)(c).ppl.ppl_ub_threshold_profile(ts_tmp,jx))) ...
             || (~doPPL && ~isnan(ar.model(m).(data_cond)(c).ppl.vpl_ub_threshold_profile(ts_tmp,jx)))) ...
-            && ~(ts == ar.ppl.options.whichT && ar.model(m).(data_cond)(c).ppl.([ppl_vpl 'ub_threshold_profile'])(ts_tmp, jx) ~= ar.model(m).(data_cond)(c).ppl.band.(['xs_' ppl_vpl 'upperBand'])(1, jx))) 
-        %last line to recalculate profile if starting time for integration is changed
+            )
+%            && ~(ts == ar.ppl.options.whichT && ar.model(m).(data_cond)(c).ppl.([ppl_vpl 'ub_threshold_profile'])(ts_tmp, jx) ~= ...
+%            ar.model(m).(data_cond)(c).ppl.band.(['xs_' ppl_vpl 'upperBand'])(1, jx))) 
+        % last line to recalculate profile if starting time for integration is changed
+        % But save = false for integration anyway, does the last condition
+        % matter?
         
-       fprintf('The prediction profile you want to compute for t=%d and state %d already exists. If you want to overwrite them, delete the value at ar.model.data/condition.ppl.ub_fit(_vpl) \n',t_tmp,jx)
+       fprintf(['\n The prediction profile you want to compute for t=%d and state %d already exists. \n',...
+           'If you want to overwrite them, delete the value in \n',...
+           'ar.model.data/condition.ppl.ppl/vpl_ub_threshold_profile \n'],t_tmp,jx)
 
        continue; 
     end            
    
-    %Get value of trajectory at time point
-    [~,it_first] = min(abs(ar.model(m).(data_cond)(c).tFine-t_tmp));            
+    % Add the current optimal prediction as a data point:
+    [~,it_first] = min(abs(ar.model(m).(data_cond)(c).tFine-t_tmp));
     arLink(true, t_tmp, takeY, jx, c, m, ar.model(m).(data_cond)(c).([x_y 'FineSimu'])(it_first,jx), xstd);
-    arCalcMerit(0,[],1);
+    % Calling arLink in this fashion adds the corresponding data point to the ar-struct
+    % Note that this is only approximately the best prediction due to the
+    % finite resolution of tFine.
+    arCalcMerit(0,[],1); 
+    % Recalculate objective function and simulate trajectory values at 
+    % data times (especially for new data point!)
     [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp));
     if(takeY && length(find(ar.model(m).(data_cond)(c).tExp==t_tmp))>1)
         it = it+1;               
     end
     xSim = ar.model(m).(data_cond)(c).([x_y 'ExpSimu'])(it,jx);
+    % xSim is now the exact optimal prediction (without adding a data
+    % point!, adding a data point affects the position of the optimum)
     arLink(true, t_tmp, takeY, jx, c, m, xSim, xstd);
+    % Replace the approximate optimal prediction with the exact version
     if(ar.ppl.qLog10)
         xSim = log10(xSim);
     end
-    fprintf('Calculating PPL for t=%d and state x=%i \n',t(ts),jx);
+    fprintf('Calculating PPL for t=%d and state number x=%i \n',t(ts),jx);
+    
+    % When calling this function in arPPL, save = 1. Thus, up and down
+    % directions are both performed no matter what was specified in dir. 
+    % However, save = 0 if arPredictionProfile is called from 
+    % arIntegratePredBand such that dir might have an impact in this
+    % scenario.
+    
     % go up
     if(save || dir==1)
-        [xtrial_up, xfit_up, ppl_up, vpl_up, ps_up] = ppl(general_struct, it, t_tmp, xSim, ...
-            1);    
+        % This is where the profile is actually sampled:
+        [xtrial_up, xfit_up, ppl_up, vpl_up, ps_up] = ...
+            ppl(general_struct, it, t_tmp, xSim, 1);    
                
         ar.p = pReset;  
         arCalcMerit();       
     else
+        % Why is this alternative necessary?
         xtrial_up = xSim*1.01;
         xfit_up = xSim*1.01;
         ppl_up = chi2start+0.1;
@@ -78,9 +122,9 @@ for ts = 1:length(t)
     end
     % go down 
     if(save || dir==-1)
-        [xtrial_down, xfit_down, ppl_down, vpl_down, ps_down] = ppl(general_struct, it, t_tmp, xSim, ...
-            -1);
-        % reset parameters
+        [xtrial_down, xfit_down, ppl_down, vpl_down, ps_down] = ...
+            ppl(general_struct, it, t_tmp, xSim, -1);
+        % Reset parameters
         ar.p = pReset;
     else
         xtrial_down = xSim*0.99;
@@ -91,59 +135,77 @@ for ts = 1:length(t)
         ar.p = pReset;
     end
     
-    %Reset data point
+    % Reset data point
     if(takeY)
         arLink(true,0.,true,jx, c, m,NaN);
     end
+    % Reset objective function
     arCalcMerit();
+    % This should presumably now equal chi2start again
     
+    % Join results of both directions:
     ps_tmp = [flipud(ps_down); pReset; ps_up];
-    
+    xfit_tmp = [fliplr(xfit_down) xSim xfit_up];
+        % data points for the validation profile
+    xtrial_tmp = [fliplr(xtrial_down) xSim xtrial_up];
+        % predictions for the prediction profile
+    ppl_tmp = [fliplr(ppl_down) chi2start ppl_up];
+    vpl_tmp = [fliplr(vpl_down) chi2start vpl_up];
     if(doPPL)
-        xfit_tmp = [fliplr(xfit_down) xSim xfit_up];
-        xtrial_tmp = [fliplr(xtrial_down) xSim xtrial_up];
-        ppl_tmp = [fliplr(ppl_down) chi2start ppl_up];
-        vpl_tmp = [fliplr(vpl_down) chi2start vpl_up];
         fitted_tmp = [fliplr(xfit_down) xSim xfit_up];
         merit_tmp = [fliplr(ppl_down) chi2start ppl_up];
-        q_chi2good = merit_tmp <= chi2start+ar.ppl.dchi2;
-        q_nonnan = ~isnan(merit_tmp);         
     else
-        xfit_tmp = [fliplr(xfit_down) xSim xfit_up];
-        xtrial_tmp = [fliplr(xtrial_down) xSim xtrial_up];
-        ppl_tmp = [fliplr(ppl_down) chi2start ppl_up];
-        vpl_tmp = [fliplr(vpl_down) chi2start vpl_up];
         fitted_tmp = [fliplr(xtrial_down) xSim xtrial_up];
         merit_tmp = [fliplr(vpl_down) chi2start vpl_up];
-        q_chi2good = merit_tmp <= chi2start+ar.ppl.dchi2;
-        q_nonnan = ~isnan(merit_tmp); 
-    end
+    end    
+    q_chi2good = merit_tmp <= chi2start+ar.ppl.dchi2;    
+    q_nonnan = ~isnan(merit_tmp); 
+    % Query:
+    % 1. chi2start is the objetive function value without adding a data
+    %       point
+    % 2. the objective function changes after adding a data point
+    % 3. the profile is calculated with the additional data points
+    %       objective
+    % 4. Thus: Is it considered, that the profile values are not
+    %       necessarily comparable to chi2start? (maybe by use of the
+    %       custom merit function?)    
+
 
     % calculate CI point-wise fit
     lb_tmp = min(fitted_tmp(q_chi2good));
     ub_tmp = max(fitted_tmp(q_chi2good));
     find_tmp = find(merit_tmp > chi2start+ar.ppl.dchi2);
-
+    % Check downward direction:
     if(length(vpl_down)==1 || sum(find_tmp<length(vpl_down)+1)==0 || (~save && dir==1))
+        % If downward direction has not been attempted or no downward merit 
+        % function value exceeds threshold
         lb_tmp = -Inf;             
         kind_low_tmp = -Inf;                
-        fprintf('No -95 PPL for t=%d\n',t(ts));
+        fprintf('No -95 lower bound for PPL for t=%d\n',t(ts));
+        % ...But alpha level may actually be changed. 
     else
         if(lb_tmp==min(fitted_tmp(q_nonnan)))
             warning(['Multiple likelihood values are assigned to the same model fit. ' ...
                      'check model uncertainty and fits, or set more strict integrator tolerances!'])
+            % I don't get it
         end
         kind_low_tmp = find(q_chi2good==1,1,'first');
+            % Index of lower bound
         if(length(kind_low_tmp)>1)
             kind_low_tmp = kind_low_tmp(1);
         end
+        %Interpolate between just under threshold to just above the
+        % threshold to get a good confidence bound:
         lb_tmp = interp1(merit_tmp([kind_low_tmp kind_low_tmp-1]), ...
         fitted_tmp([kind_low_tmp kind_low_tmp-1]), chi2start+ar.ppl.dchi2);
+        % This should work because there exists a value exceeding the
+        % threshold by the first if statement
     end
+    % Check upward direction:
     if(length(vpl_up)==1 || sum(find_tmp>length(vpl_down)+1)==0 || (~save && dir==-1))
         ub_tmp = Inf;
         kind_high_tmp = Inf;        
-        fprintf('No +95 PPL for t=%d\n',t(ts));
+        fprintf('No -95 lower bound for PPL for t=%d\n',t(ts));
     else
         if(ub_tmp==max(fitted_tmp(q_nonnan)))
             warning(['Multiple likelihood values are assigned to the same model fit. ' ...
@@ -173,6 +235,7 @@ for ts = 1:length(t)
             ps = ps_tmp(kind_low_tmp,:);                    
         end
     end
+    % Save results in ar-struct:
     if(save)
         ar.model(m).(data_cond)(c).ppl.xtrial_profile(ts_tmp, jx,:) = xtrial_tmp;
         ar.model(m).(data_cond)(c).ppl.xfit_profile(ts_tmp, jx,:) = xfit_tmp;
@@ -199,7 +262,7 @@ for ts = 1:length(t)
         end
     end
 end
-%write LB/UB in ar struct
+%Extend LB/UB in ar struct to have values over the fine time grid:
     if(save && ~integrate && dir==0 && length(t)>1)        
         struct_vec = {'FineUB','FineLB'};
         low_high_vec = {'ub','lb'};
@@ -211,7 +274,8 @@ end
             else
                 struct_string = ['x' struct_string];
             end            
-            %Update with
+            %Interpolate boundary values between time points to obtain
+            %boundary values on fine time grid:
             ar.model(m).(data_cond)(c).(struct_string)(1:length(ar.model(m).(data_cond)(c).tFine),jx) = ...
                 interp1(ar.model(m).(data_cond)(c).ppl.ts_profile(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)),jx),...
                 ar.model(m).(data_cond)(c).ppl.(ppl_string)(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)),jx),...
@@ -223,6 +287,10 @@ end
 
 
 function [xtrial, xfit, ppl, vpl, ps] = ppl(general_struct, it, t, xSim, direction)
+
+% Calculates the validation/prediction profile.
+% Prediction Profiles are implictly calculated by use of validation
+% profiles.
 
 global ar
 
@@ -243,6 +311,9 @@ ppl = nan(1,n);
 vpl = nan(1,n);
 ps = nan(n,length(ar.p));
 
+% These are the step sizes in which data points are changed
+% This is a fixed stepsize! => Inefficient
+% Better: See function VPL
 dx = sqrt(ar.ppl.dchi2*ar.ppl.options.rel_increase) * xstd;
 
 if(takeY)
@@ -250,7 +321,10 @@ if(takeY)
 else
     xLabel = myNameTrafo(ar.model(m).x{ix});    
 end
+
+% Start from the optimum:
 xExp = xSim;
+
 for j = 1:n
     if(toc>tcount)
         if(direction>0)
@@ -261,10 +335,12 @@ for j = 1:n
         tcount = tcount + 0.5; % update every half second
     end
     
+    % Make the step:
     xExp = xExp + direction*dx;
     arLink(true,t,takeY,ix, c,m,xExp,xstd);
     
     try
+        % Fit to new optimum
         arPPLFit;
     catch exception
         fprintf('ERROR in PPL integration (%s)\n', exception.message);
@@ -274,14 +350,16 @@ for j = 1:n
         break;
     end
     
-    xtrial(j) = xExp;    
-    arCalcMerit(0, ar.p(ar.qFit==1),1)
+    xtrial(j) = xExp; % data point (unfitted)    
+    arCalcMerit(0, ar.p(ar.qFit==1),1) %Simulate the predictions
     if(takeY)
         xSim = ar.model(m).data(c).yExpSimu(it,ix); 
     else
         xSim = ar.model(m).condition(c).xExpSimu(it,ix); 
     end
-    xfit(j) = xSim;
+    xfit(j) = xSim; % corresponding prediction (fitted)
+    
+    % Get PPL values by their relation to VPL
     if(takeY)
         ppl(j) = arGetMerit('chi2') - (xtrial(j)-xfit(j)).^2/xstd.^2;
         vpl(j) = arGetMerit('chi2');
@@ -291,14 +369,15 @@ for j = 1:n
         vpl(j) = arGetMerit('chi2') + (xtrial(j)-xfit(j)).^2/xstd.^2;
     end
     ps(j,:) = ar.p;
-    %ppl(j)
-    %xtrial(j)
+
+    % Stop if the confidence threshold is crossed:
     if((doPPL && ppl(j) > chi2start+ar.ppl.dchi2*1.2) || (~doPPL && vpl(j) > chi2start+ar.ppl.dchi2*1.2))
         break
     end
 end
 
     function arPPLFit
+        % Fit with custom merit function (why is this necessary?)
         
         [pFit, ~, ~, exitflag] = ...
             lsqnonlin(@ppl_merit_fkt, ar.p(ar.qFit==1), ar.lb(ar.qFit==1), ar.ub(ar.qFit==1), ar.config.optim);
