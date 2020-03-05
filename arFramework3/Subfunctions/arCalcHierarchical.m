@@ -37,8 +37,12 @@ haveNanExpStd = false;
 for im = 1:length(ar.model)
     for id = 1:length(ar.model(im).data)
         for iy = 1:length(ar.model(im).data(id).fy)
-            if ar.model(im).data(id).useHierarchical(iy) && any(isnan(ar.model(im).data(id).yExpStd(:,iy)))
-                haveNanExpStd = true;
+            if ar.model(im).data(id).useHierarchical(iy)
+                ystd = ar.model(im).data(id).yExpStd(:,iy);
+                yExp = ar.model(im).data(id).yExp(:,iy);
+                if any(isnan(ystd(~isnan(yExp))))
+                    haveNanExpStd = true;
+                end
             end
         end
     end
@@ -85,19 +89,22 @@ for im = 1:length(ar.model)
         td = ar.model(im).data(id).tExp;
         tc = ar.model(im).condition(ic).tExp;
 
-        ar.model(im).data(id).xzExpSimu = zeros(length(td),length(ar.model(im).data(id).fy));
+        % D2D initializes yExpSimu and syExpSimu for missing observations to NaNs
+        % and zeros, respectively. We do the same for xzExpSimu and sxzExpSimu.
+        ar.model(im).data(id).xzExpSimu = nan(length(td),length(ar.model(im).data(id).fy));
         if sensi
             ar.model(im).data(id).sxzExpSimu = zeros(length(td),length(ar.model(im).data(id).fy),length(ar.model(im).data(id).p));
         end
         for iy = 1:length(ar.model(im).data(id).fy)
             if ar.model(im).data(id).useHierarchical(iy)
+                inds = ~isnan(ar.model(im).data(id).yExp(:,iy)); % Indexes of those data entries for which there are observations
                 ixz = ar.model(im).data(id).xzLink(iy);
                 xzType = ar.model(im).data(id).xzType{iy};
                 xzExpSimu = ar.model(im).condition(ic).(sprintf('%sExpSimu',xzType))(:,ixz); % TODO: Test the performance impact of sprintf
-                ar.model(im).data(id).xzExpSimu(:,iy) = interp1(tc,xzExpSimu,td,'nearest'); % NOTE: td should always be a subset of tc, hence the 'nearest' option
+                ar.model(im).data(id).xzExpSimu(inds,iy) = interp1(tc,xzExpSimu,td(inds),'nearest'); % NOTE: td(inds) should always be a subset of tc, hence the 'nearest' option
                 if sensi
                     sxzExpSimu = ar.model(im).condition(ic).(sprintf('s%sExpSimu',xzType))(:,ixz,:);
-                    ar.model(im).data(id).sxzExpSimu(:,iy,ip) = interp1(tc,sxzExpSimu,td,'nearest');
+                    ar.model(im).data(id).sxzExpSimu(inds,iy,ip) = interp1(tc,sxzExpSimu,td(inds),'nearest');
                 end
             end
         end
@@ -119,12 +126,12 @@ for is = 1:length(ar.scales)
         ystd = ar.model(im).data(id).yExpStd(:,iy);
         yExp = ar.model(im).data(id).yExp(:,iy);
         xzExpSimu = ar.model(im).data(id).xzExpSimu(:,iy);
-        num = num + sum(yExp.*xzExpSimu./(ystd.^2));
-        den = den + sum(xzExpSimu.^2./(ystd.^2));
+        num = num + sum(yExp.*xzExpSimu./(ystd.^2),'omitnan');
+        den = den + sum(xzExpSimu.^2./(ystd.^2),'omitnan');
         if sensi
             sxzExpSimu = squeeze(ar.model(im).data(id).sxzExpSimu(:,iy,:));
-            numGrad = numGrad + sum(yExp.*sxzExpSimu./(ystd.^2),1);
-            denGrad = denGrad + 2*sum(xzExpSimu.*sxzExpSimu./(ystd.^2),1);
+            numGrad = numGrad + sum(yExp.*sxzExpSimu./(ystd.^2),1,'omitnan');
+            denGrad = denGrad + 2*sum(xzExpSimu.*sxzExpSimu./(ystd.^2),1,'omitnan');
         end
     end
     assert(den>0,sprintf('The solution of your model corresponding to the scale %s is zero at all measurement times. Hierarchical optimization is not feasible.',ar.scales(is).scaleLabel))
