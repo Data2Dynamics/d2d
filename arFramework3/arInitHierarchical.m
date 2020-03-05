@@ -223,7 +223,10 @@ end
 
 if isfield(ar,'scales')
     ar.config.useHierarchical = true;
-    disp(sprintf('Found %d scale parameters suitable for hierarchical optimization.',countScales))
+    disp(sprintf('Found %d scale parameters suitable for hierarchical optimization:',countScales))
+    for is = 1:length(ar.scales)
+        disp(sprintf('  * Parameter "%s" (occurs in %d data series)',ar.scales(is).scaleLabel,length(ar.scales(is).links)))
+    end
 else
     warning('No scale parameters found for hierarchical optimization.')
     return
