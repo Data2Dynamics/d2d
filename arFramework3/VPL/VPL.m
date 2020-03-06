@@ -10,7 +10,9 @@ function [chi2s,zs] = VPL
 % Setting ar.vpl.config.prediction = true switches the exit condition of VPL
 % to calculate the prediction profile up to a certain threshold.
 % Calculation of prediction profiles works best if sigma is of about the
-% same size as the prediction uncertainty.
+% same size as the prediction uncertainty. If prediction profiles are still
+% problematic, try setting stepmode = 1 when calling InitVPL to employ an
+% alternative profile sampling scheme.
 %
 % Visualize results by calling vplPlot.
 %
@@ -104,27 +106,27 @@ try
 %% Iteratively change data point value and fit to optimum:   
 
     for jj = 1:2 
-        %Index corresponds to upward and downward direction
+        % Index corresponds to upward and downward direction
         q_exit = 0; %initialize while loop
         
-        %Check whethter upwards direction has already been calculated and make
-        %corresponding adjustments
+        % Check whethter upwards direction has already been calculated and make
+        % corresponding adjustments
         if jj == 1            
             arWaitbar(0);
             delii = 1; 
-            %delii introduces a variable minus sign needed for
-            %quantities depending on up or down direction
+            % delii introduces a variable minus sign needed for
+            % quantities depending on up or down direction
             gen_struct.temp.delii = delii;
         else
             arWaitbar(-1);
             arWaitbar(0);
             delii = -1;
             gen_struct.temp.delii = delii;
-            %Reset parameters into global minimum
+            % Reset parameters into global minimum
             ar.p = p_init;
         end
         
-        %Iterate steps:
+        % Iterate steps:
         ii = maxsteps + 1;
         while (q_exit < ar.vpl.config.chi2max)
             
@@ -137,18 +139,18 @@ try
                     'Calculate validation profile towards lower bound');
             end
             
-            %Turn off correction based on the actual chi2 difference for
-            %the second step, for which the value of the first step was
-            %used, because delz has not been adapted for the first step
+            % Turn off correction based on the actual chi2 difference for
+            % the second step, for which the value of the first step was
+            % used, because delz has not been adapted for the first step
             if ii == maxsteps+1+2*delii
                 gen_struct.temp.correction_switch = 0;
             else
                 gen_struct.temp.correction_switch = 1;
             end
             
-            %Propose the step:
+            % Propose the step:
             if ii == maxsteps+1+delii 
-                %first (unadapted) step from starting point
+                % first (unadapted) step from starting point
                 p_old = p_init;
                 delz = ar.vpl.config.firststep; %default unadapted step
                 z_old = gen_struct.perm.results.z(maxsteps+1);
@@ -156,18 +158,29 @@ try
                 z_new = z_old+delii*delz;
                 chi2_old = 0;   
             else
-                %any other step
+                % any other step
                 z_old = z_new;
                 chi2_old = chi2_new;
                 pred_old = pred_new;
                 gen_struct.temp.pred = pred_old; %scalar value for use in step choice function
+                if (ar.vpl.config.prediction == 1) && strcmp(...
+                        func2str(ar.vpl.config.step_fkt),'vplStepPrevious')
+                    meritdif = gen_struct.perm.results.ppl(ii-delii)- ...
+                        gen_struct.perm.results.ppl(ii-2*delii);
+                    % This is an alternative algorithm to sample the prediction
+                    % profile. Use vplStepPrevious but base the step
+                    % adaption on the observed change of ppl-value.
+                else
+                    meritdif = chi2dif;
+                end
                 delz = feval(ar.vpl.config.step_fkt,...
-                    z_old,chi2dif,delz,sigma,gen_struct); %adaptive step choice
+                    z_old,meritdif,delz,sigma,gen_struct); %adaptive step choice
                 z_new = z_old + delii*delz;
             end
             
             % Make the data step and fit:
             [chi2_new,chi2dif] = vplFit(chi2_old,z_new,iddata,chi2_norm);
+            
             if chi2dif <0 
                 % To avoid uncontrolled steps, switch to a mostly conservative
                 % default step size and redo the fit.
@@ -177,13 +190,13 @@ try
                 [chi2_new,chi2dif] = vplFit(chi2_old,z_new,iddata,chi2_norm);
             end 
             
-            %chi2limit is theoretical upper limit of step:
+            % chi2limit is theoretical upper limit of step:
             chi2limit = (delii*delz/(sigma^2))*...
-                (2*(z_old-pred_old)+delii*delz);               
+                (2*(z_old-pred_old)+delii*delz);
             pred_new = ar.model(m).data(d).yExpSimu(iddata,idpred);
-            p_old = ar.p; %needed to reset the parameters if chi2dif<0
+            p_old = ar.p; % needed to reset the parameters if chi2dif<0
             
-            %Save algorithm results in struct
+            % Save algorithm results in struct
             gen_struct.perm.results.z(ii) = z_new;
             gen_struct.perm.results.chi2(ii) = chi2_new;
             gen_struct.perm.results.ps(ii,:) = ar.p;
@@ -191,15 +204,15 @@ try
             gen_struct.perm.test.chi2dif(ii) = chi2dif;
             gen_struct.perm.test.delz(ii) = delz;
             gen_struct.perm.results.pred(ii) = pred_new;
-            ppl = chi2_new-((z_new-pred_new)/sigma)^2; %alternative exit condition
+            ppl = chi2_new-((z_new-pred_new)/sigma)^2; % Alternative exit condition
             gen_struct.perm.results.ppl(ii) = ppl;
-            %Plot ppl over pred to obtain prediction profile. 
+            % Plot ppl over pred to obtain prediction profile. 
             
             if ar.vpl.config.showCalculation == true
                 fprintf('\n chi2 = %0.4g, z = %0.4g \n',chi2_new,z_new)
             end
             
-            %Stopping criteria:
+            % Stopping criteria:
             if (ii == 2*maxsteps+1) || (ii==1)
                 break
             end
@@ -230,7 +243,7 @@ end
 
 disp('VPL calculation concluded without error.')
 
-%Add values from 'permanent' struct to ar:
+% Add values from 'permanent' struct to ar:
 gen_struct.perm.config = ar.vpl.config;
 gen_struct.perm.general = ar.vpl.general;
 ar = ar_old;
@@ -247,7 +260,7 @@ end
 end
 
 function [chi2_new,chi2dif] = vplFit(chi2_old,z_new,iddata,chi2_norm) 
-    %Used to reduce code redundancy
+    % Used to reduce code redundancy
     global ar
     
     ar.model(ar.vpl.general.m).data(ar.vpl.general.d).yExp(iddata,...

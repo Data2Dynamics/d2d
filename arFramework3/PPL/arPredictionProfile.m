@@ -194,7 +194,7 @@ for ts = 1:length(t)
         if(length(kind_low_tmp)>1)
             kind_low_tmp = kind_low_tmp(1);
         end
-        %Interpolate between just under threshold to just above the
+        % Interpolate between just under threshold to just above the
         % threshold to get a good confidence bound:
         lb_tmp = interp1(merit_tmp([kind_low_tmp kind_low_tmp-1]), ...
         fitted_tmp([kind_low_tmp kind_low_tmp-1]), chi2start+ar.ppl.dchi2);
@@ -205,7 +205,7 @@ for ts = 1:length(t)
     if(length(vpl_up)==1 || sum(find_tmp>length(vpl_down)+1)==0 || (~save && dir==-1))
         ub_tmp = Inf;
         kind_high_tmp = Inf;        
-        fprintf('No -95 lower bound for PPL for t=%d\n',t(ts));
+        fprintf('No -95 upper bound for PPL for t=%d\n',t(ts));
     else
         if(ub_tmp==max(fitted_tmp(q_nonnan)))
             warning(['Multiple likelihood values are assigned to the same model fit. ' ...
@@ -262,7 +262,7 @@ for ts = 1:length(t)
         end
     end
 end
-%Extend LB/UB in ar struct to have values over the fine time grid:
+% Extend LB/UB in ar struct to have values over the fine time grid:
     if(save && ~integrate && dir==0 && length(t)>1)        
         struct_vec = {'FineUB','FineLB'};
         low_high_vec = {'ub','lb'};
@@ -274,8 +274,8 @@ end
             else
                 struct_string = ['x' struct_string];
             end            
-            %Interpolate boundary values between time points to obtain
-            %boundary values on fine time grid:
+            % Interpolate boundary values between time points to obtain
+            % boundary values on fine time grid:
             ar.model(m).(data_cond)(c).(struct_string)(1:length(ar.model(m).(data_cond)(c).tFine),jx) = ...
                 interp1(ar.model(m).(data_cond)(c).ppl.ts_profile(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)),jx),...
                 ar.model(m).(data_cond)(c).ppl.(ppl_string)(~isnan(ar.model(m).(data_cond)(c).ppl.(ppl_string)(:,jx)),jx),...
