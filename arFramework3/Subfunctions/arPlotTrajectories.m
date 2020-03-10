@@ -1,7 +1,7 @@
 % [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ncount, t, y, ystd, lb, ub, nfine_dr_plot, ...
 %     nfine_dr_method, tExp, yExp, yExpHl, yExpStd, y_ssa, y_ssa_lb, y_ssa_ub, ...
 %     plotopt, trafos, qFit, zero_break, fastPlotTmp, hys, hystds, hysss, dydt, isLast, ...
-%     ndata, chi2, titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, atol, colors)
+%     ndata, chi2, titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, atol, colors, plotOnlyData)
 % 
 % This function is called for plotting, e.g. by arPlot2 and it calles
 % arPlotTrajectory
@@ -14,11 +14,14 @@
 function [hys, hystds, hysss, nrows, ncols] = arPlotTrajectories(ccount, ncount, t, y, ystd, lb, ub, nfine_dr_plot, ...
     nfine_dr_method, tExp, yExp, yExpHl, yExpStd, y_ssa, y_ssa_lb, y_ssa_ub, ...
     plotopt, trafos, qFit, zero_break, fastPlotTmp, hys, hystds, hysss, dydt, isLast, ...
-    ndata, chi2, titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, atol, colors)
+    ndata, chi2, titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, atol, colors, plotOnlyData)
 
 
 if(~exist('colors','var') || isempty(colors))
     colors = [];
+end
+if ~exist('plotOnlyData') || isempty(plotOnlyData)
+    plotOnlyData = false;
 end
 
 % rows and cols
@@ -69,7 +72,7 @@ for jys = 1:length(iy)
             tExp, yExp, yExpHl, yExpStd, ...
             y_ssa, y_ssa_lb, y_ssa_ub, ...
             plotopt, Clines, ClinesExp, trafos{jys}, ...
-            [], [], [], dydt, qFit, zero_break, t_ppl, y_ppl_ub, y_ppl_lb);
+            [], [], [], dydt, qFit, zero_break, t_ppl, y_ppl_ub, y_ppl_lb, plotOnlyData);
         
         % save handles for fast plotting
         hys(jy) = hy;
@@ -134,7 +137,7 @@ for jys = 1:length(iy)
             tExp, yExp, yExpHl, yExpStd, ...
             y_ssa, y_ssa_lb, y_ssa_ub, ...
             plotopt, Clines, ClinesExp, trafos{jy}, ...
-            hys, hystds, hysss, dydt, qFit, []);
+            hys, hystds, hysss, dydt, qFit, [], [], [], [], plotOnlyData);
         arSpacedAxisLimits(get(hys(jy),'Parent'));
     end
 end

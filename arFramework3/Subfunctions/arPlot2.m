@@ -1,4 +1,4 @@
-% hs = arPlot2([saveToFile], [fastPlot], [silent], [evalfun], [doLegends], [dynamics], [hs])
+% hs = arPlot2([saveToFile], [fastPlot], [silent], [evalfun], [doLegends], [dynamics], [hs], plotOnlyData)
 %
 % Plot models and datasets
 %
@@ -9,6 +9,7 @@
 % doLegends     Print the legends               [true]
 % dynamics      Simulate dynamics               [true]
 % hs            Plot to custom figure handles   []
+% plotOnlyData  Plot data only                  [false]
 %
 % ar.config.fiterror     0: Data is plotted as fitted (default).
 %                       -1: Plot prediction bands as calculated by PPL.
@@ -39,7 +40,7 @@
 %
 % See also arPlotter, arPlot, arPlotY, arPlotX, arPlotV.
 
-function varargout = arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs)
+function varargout = arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs, plotOnlyData)
 
 global ar
 
@@ -47,29 +48,32 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
-if(~exist('saveToFile','var'))
+if(~exist('saveToFile','var') || isempty(saveToFile))
     saveToFile = false;
 end
-if(~exist('fastPlot','var'))
+if(~exist('fastPlot','var') || isempty(fastPlot))
     fastPlot = false;
 end
-if(~exist('silent','var'))
+if(~exist('silent','var') || isempty(silent))
     silent = false;
 end
-if(~exist('evalfun','var'))
+if(~exist('evalfun','var') || isempty(evalfun))
     evalfun = true;
 end
-if(~exist('doLegends','var'))
+if(~exist('doLegends','var') || isempty(doLegends))
     doLegends = true;
 end
-if(~exist('dynamics','var'))
+if(~exist('dynamics','var') || isempty(dynamics))
     dynamics = true;
 end
-if(~exist('hs','var'))
+if(~exist('hs','var') || isempty(hs))
 	hs = [];
 end
 if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
+end
+if ~exist('plotOnlyData') || isempty(plotOnlyData)
+    plotOnlyData = false;
 end
 
 matVer = ver('MATLAB');
@@ -344,7 +348,7 @@ for jm = 1:length(ar.model)
                             fastPlotTmp, hys, hystds, hysss, dydt, ...
                             jt==length(dr_times) && jc==jcs(end), ndata, chi2, ...
                             titles, yNames, xLabel, yLabel, fiterrors, iy, t_ppl, y_ppl_ub, y_ppl_lb, ...
-                            ar.config.atol, colors);
+                            ar.config.atol, colors, plotOnlyData);
         
                         % save handels
                         if(jd~=0)
