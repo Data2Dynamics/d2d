@@ -21,6 +21,7 @@ if size(ar1.model,2) ~= size(ar2.model,2)
     pass = 0;
     return
 end
+figure;
 for m=1:size(ar1.model,2)
     if size(ar1.model(m).data,2) ~= size(ar2.model(m).data,2)
         warning('arCompareY.m: Sizes of datas not the same. Check model import.')

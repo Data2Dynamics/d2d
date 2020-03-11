@@ -66,3 +66,6 @@ if ~exist('bounds','var') || bounds
 end
 warning('on')
 
+if pass==1
+    fprintf('Parameters of the two structs are the same.\n')
+end

@@ -162,15 +162,24 @@ D.fp = transpose(D.p);
 
 % execute substitutions from ar.model.p/ar.model.fp
 [int, iA, iB] = intersect(D.fp, ar.model.p);
-D.fp(iA) = ar.model.fp(iB);
+D.fp(iA) = ar.model.p(iB);
 
 %% now replace fp which was provided as function argument:
 [~,ia,ib] = intersect(D.p,pold);
 for i=1:length(ia)
     D.fp{ia(i)} = fp{ib(i)};
 end
-
-
+ia = find(contains(D.fy,pold));
+for i=1:length(ia)
+    for j=1:length(pold)
+        D.fy{i} = strrep(D.fy{ia(i)},pold{j},fp{j});
+    end
+end
+for i=1:length(D.fystd)
+    for j=1:length(pold)
+        D.fystd{i} = strrep(D.fystd{i},pold{j},fp{j});
+    end
+end
 
 
 %% This function creates an empty data struct

@@ -8,6 +8,7 @@ function arTestPEtabCompatibility()
 %     4 Comparing two d2d models after initial import and export-import cycle
 arInit;
 arImportPEtab;
+arSimu(0,1,0)
 arCalcMerit(false)
 arSave('FirstImport')
 FirstImportStruct = arDeepCopy(ar);
@@ -15,9 +16,12 @@ arExportPEtab('d2dExport')
 clearvars -except FirstImportStruct;
 arInit;
 arImportPEtab('d2dExport');
+arSimu(0,1,0)
 arCalcMerit(false)
 arSave('SecondImport');
 SecondImportStruct = arDeepCopy(ar);
+
+delete PEtabcheck.txt
 diary PEtabcheck.txt
 same = arCompare(FirstImportStruct,SecondImportStruct,'Main');
 if same == 1

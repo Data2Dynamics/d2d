@@ -190,7 +190,7 @@ for j=1:length(m.compartment)
             % If size exists leave it free and write compartment size in
             % Conditions, so that it can be overwritten later if set by
             % Conditions table of PEtab format
-            fprintf(fid, '%s\t V\t "%s"\t vol.\t \n', sym_check(m.time_symbol,compName), units);
+            fprintf(fid, '%s\t V\t "%s"\t vol.\t \n', sym_check(m.time_symbol,compName), units);        
         end
         comps{end+1} = compName;
         comp_value(end+1) = m.compartment(j).size;
@@ -497,7 +497,8 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                 end
             end
             
-            tmpstr = str2sym(m.reaction(j).kineticLaw.math);
+            tmpstr = strrep(m.reaction(j).kineticLaw.math,'piecewise','step1');
+            tmpstr = arSym(tmpstr);
             % repace species names if too short
             for i=1:length(rep)
                 tmpstr = mysubs(tmpstr,pat{i},rep{i});
