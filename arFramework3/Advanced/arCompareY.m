@@ -32,7 +32,7 @@ for m=1:size(ar1.model,2)
         indcol = find(sum(ar2.model(m).data(d).yExpRaw~=0,1)>0);
 
         if isempty(indcol)
-            warning('arCompareY.m: No Y found. Comparing Y skipped.')
+            fprintf('arCompareY.m: No Y found. Comparing Y skipped.')
             pass = 0;
             return
         end
@@ -62,12 +62,6 @@ for m=1:size(ar1.model,2)
         dolegend = 1;
         for i=length(indcol):-1:1
             sbmlsim = ar2.model(m).data(d).yExpRaw(:,indcol(i));
-            if ( ~silent )
-                subplot(subx,suby,i)
-                set(gca,'FontSize',fs)
-                plot(t, sbmlsim,'k');
-                hold on
-            end
 
             ind = strmatch(ar2.model(m).data(d).y{indcol(i)},ar1.model(m).data(d).y, 'exact'); %#ok
             if isempty(ind) 
@@ -81,7 +75,7 @@ for m=1:size(ar1.model,2)
                     continue
                 end
             elseif(length(ind)>1)
-                warning('%s from SBML export found multiple times.\n',ar2.model(m).data(d).y{indcol(i)})
+                fprintf('%s from SBML export found multiple times.\n',ar2.model(m).data(d).y{indcol(i)})
             end
             d2dSim           = interp1(ar1.model(m).data(d).tExp,ar1.model(m).data(d).yExpRaw(:,ind),t);
             d2dFilt          = bsxfun(@max, d2dSim, atol);
@@ -89,20 +83,18 @@ for m=1:size(ar1.model,2)
             maxDifference(end+1) = max( ( (d2dFilt - sbmlFilt) ./ (sbmlFilt) ).^2 );
 
             if ( ~silent )
+                subplot(subx,suby,i)
+                plot(t, sbmlsim,'k')
+                hold on
                 plot(t, d2dSim,'r--')
+                set(gca,'FontSize',fs)
                 if dolegend ==1
                     set(legend(ar2.info.name,ar1.info.name),'FontSize',fs,'Interpreter','none');
                     dolegend = 0; % only once
                 end
-            end
-
-            if ( ~silent )
-                xlim([0,100]);
                 title(strrep(ar2.model(m).data(d).y{indcol(i)},'_','\_'),'FontSize',fs);
+                saveas(gcf,['arCompareYm' num2str(m) 'd' num2str(d)]);
             end
-        end
-        if ( ~silent )
-            saveas(gcf,['arCompareYm' num2str(m) 'd' num2str(d)]);
         end
     end
 end
