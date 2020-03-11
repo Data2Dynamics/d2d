@@ -1,8 +1,9 @@
-% Tcond = arLoadCondPEtab(expcondfilename)
+% Tcond = arLoadCondPEtab(expcondfilename, Tarr)
 %
 % This function can be used to process experimental condition files in the format of PEtab.
 %
 %   expcondfilename    name of file.
+%   Tarr                  cell array of meas and obs tables
 %
 % In this data format, there is one .tsv-file that contains the info about
 % the experimental conditions. This should be called before arCompile.
@@ -15,7 +16,7 @@
 %   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
 %
 
-function Tcond = arLoadCondPEtab(expcondfilename)
+function Tcond = arLoadCondPEtab(expcondfilename, Tarr)
 
 global ar;
 
@@ -39,6 +40,32 @@ end
 if ~isfield(T,'conditionId')
     T.conditionId = T.conditionID;
 end
+
+% load pre-equilibration condition
+m = 1;
+Tobs = Tarr{m,1};
+Tmeas = Tarr{m,2};
+noDataPreEqConds = setdiff(cellstr(T.conditionId), {ar.model.data.name});
+for iPreEq = 1:numel(noDataPreEqConds)
+    condId = find(T.conditionId == noDataPreEqConds{iPreEq});
+    
+    Ttable = struct2table(T);
+    pold = Ttable.Properties.VariableNames(2:end);
+    fp = cellfun(@num2str,table2cell(Ttable(condId, 2:end)),...
+        'UniformOutput',false);
+        
+    args = cell(0);
+    Sd2d.name = char(Ttable.conditionId(condId));
+    fns2 = fieldnames(Sd2d);
+    for i = 1:length(fns2)
+        args(end+1) = fns2(i);
+        args{end+1} = Sd2d.(fns2{i});
+    end
+
+    D = arCreateDataStruct(m,pold,fp, args{:});
+    arAddDataStruct(D,m)
+end
+
 
 for m = 1:length(ar.model)
     for i = 1:length(T.conditionId)

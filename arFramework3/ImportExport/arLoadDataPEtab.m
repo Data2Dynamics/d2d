@@ -82,7 +82,7 @@ for k = 1:numel(ar.model.xNames)
         end
     end
 end
-[uniCond,~,iCCond] = unique(Tdat.simulationConditionId);
+[uniCond,~,iCCond] = unique([Tdat.simulationConditionId]);
 
 %% Use condition specific experiments and distribute over data struct
 idErrorPar = 1;

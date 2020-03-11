@@ -109,8 +109,8 @@ elseif sum(abs(size(D.y)-size(D.normalize)))~=0
     error('size(D.normalize)~=D.y');
 elseif length(D.tUnits)~=3
     error('length(D.tUnits)~=3');
-elseif size(D.yUnits,2)~=3
-    error('size(D.yUnits,2)~=3');
+%elseif size(D.yUnits,2)~=3
+%    error('size(D.yUnits,2)~=3');
 end
 
 

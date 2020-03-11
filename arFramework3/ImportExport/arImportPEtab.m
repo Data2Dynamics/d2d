@@ -109,7 +109,7 @@ for m = 1:length(ar.model)
     [T{m,1}, T{m,2}] = ...
         arLoadDataPEtab([pe_dir filesep PEmeas.name],[pe_dir filesep PEobs.name],m);
 end
-arLoadCondPEtab([pe_dir filesep PEconds.name]);
+arLoadCondPEtab([pe_dir filesep PEconds.name], T);
 
 % Compilation
 arCompileAll
@@ -131,11 +131,14 @@ if doPreEquilibration
             uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
             
             for ipreeqcond = 1:size(uniquePreEqConds,1)
-                preEqCond = arFindCondition(convertStringsToChars(uniquePreEqConds(ipreeqcond)));
+                preEqCond = arFindCondition(convertStringsToChars(uniquePreEqConds(ipreeqcond)), 'conservative');
                 simConds = [];
                 for isimcond = 1:size(uniqueSimConds,1)
-                    simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(isimcond)));
+                    %simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(isimcond)), 'conservative');
+                    simConds(end+1) = ...
+                        find(cellfun(@(x) ~strcmp(x, convertStringsToChars(uniquePreEqConds(ipreeqcond))), {ar.model.data.name}));
                 end
+                
                 arSteadyState(imodel, preEqCond, simConds, tstart)
             end
         end
