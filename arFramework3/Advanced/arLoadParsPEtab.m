@@ -54,7 +54,8 @@ for i = 1:length(ib)
 end
 
 % add dummy parse for noise formulas
-if exist('errorParAssignments')
+if exist('errorParAssignments') && ~isempty(errorParAssignments) ...
+        && sum(cellfun(@(x) ~isempty(x), errorParAssignments)) > 0
     for j = 1:size(errorParAssignments, 1)
         parName = errorParAssignments{j,1};
         parValue = errorParAssignments{j,2};
