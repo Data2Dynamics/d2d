@@ -48,12 +48,12 @@ Tmeas = Tarr{m,2};
 noDataPreEqConds = setdiff(cellstr(T.conditionId), {ar.model.data.name});
 for iPreEq = 1:numel(noDataPreEqConds)
     condId = find(T.conditionId == noDataPreEqConds{iPreEq});
-    
+
     Ttable = struct2table(T);
     pold = Ttable.Properties.VariableNames(2:end);
     fp = cellfun(@num2str,table2cell(Ttable(condId, 2:end)),...
         'UniformOutput',false);
-        
+
     args = cell(0);
     Sd2d.name = char(Ttable.conditionId(condId));
     fns2 = fieldnames(Sd2d);
@@ -85,6 +85,14 @@ for m = 1:length(ar.model)
                         initialVariable = ar.model(m).px0{InitialsSet};
                         InitialDataVariableIndex = strcmp(initialVariable, ar.model(m).data(j).p);
                         ar.model(m).data(j).fp{InitialDataVariableIndex} = num2str(T.(fns{k})(i));
+
+                     % Check if compartment parameter is set condition
+                     % specific
+                    elseif any(strcmp(ar.model(m).c,fns{k}))
+                        CompartmentSet = strcmp(ar.model(m).c,fns{k});
+                        CompartmentVariable = ar.model(m).pc{CompartmentSet};
+                        CompartmentDataVariableIndex = strcmp(CompartmentVariable, ar.model(m).data(j).p);
+                        ar.model(m).data(j).fp{CompartmentDataVariableIndex} = num2str(T.(fns{k})(i));
                     end
                 end
             end

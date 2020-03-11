@@ -63,9 +63,11 @@ function arPPL(m, c, ix, t, takeY) % model, condition, states of interest,
     
     % optimizer settings (set only once)
     fittederrors=ar.config.fiterrors;
-    ar.config.fiterrors=0;
     fit_bkp = ar.qFit(ar.qError==1);
-    ar.qFit(ar.qError==1)=2;
+    if ~((ar.ppl.options.integrate == 0) && (takeY == 1))       
+        ar.config.fiterrors=0;       
+        ar.qFit(ar.qError==1)=2;
+    end
     
     %fill temporary struct
     ppl_general_struct = struct;
@@ -118,7 +120,7 @@ function arPPL(m, c, ix, t, takeY) % model, condition, states of interest,
     
     % Loop over states
     for jx = 1:length(ix)
-        arSimu(false, true, true); %is already done in PPL_init?
+        arSimu(false, true, true); 
         ppl_general_struct.jx = ix(jx);
         % Try to set standard deviation of data point appropriately if no
         % value has been specified (xstd_auto = 0).

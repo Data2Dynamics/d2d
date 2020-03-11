@@ -17,7 +17,12 @@
 %
 % Written by Helge, tried to be documented by Clemens/Tim
 %
-% See also: arPPL, arIntegratePredBand
+% In a recent revision, the algorithm for calculating prediction/validation 
+% profiles was deemed as too unstable. Thus, if profiles for observables
+% (takeY = 1) are computed, calculation is outsourced to the more reliable 
+% algorithm VPL.
+%
+% See also: arPPL, arIntegratePredBand, VPL
 
 function [xFit, ps] = arPredictionProfile(t, general_struct, save, dir, xFit)
 
@@ -75,73 +80,119 @@ for ts = 1:length(t)
        continue; 
     end            
    
-    % Add the current optimal prediction as a data point:
-    [~,it_first] = min(abs(ar.model(m).(data_cond)(c).tFine-t_tmp));
-    arLink(true, t_tmp, takeY, jx, c, m, ar.model(m).(data_cond)(c).([x_y 'FineSimu'])(it_first,jx), xstd);
-    % Calling arLink in this fashion adds the corresponding data point to the ar-struct
-    % Note that this is only approximately the best prediction due to the
-    % finite resolution of tFine.
-    arCalcMerit(0,[],1); 
-    % Recalculate objective function and simulate trajectory values at 
-    % data times (especially for new data point!)
-    [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp));
-    if(takeY && length(find(ar.model(m).(data_cond)(c).tExp==t_tmp))>1)
-        it = it+1;               
-    end
-    xSim = ar.model(m).(data_cond)(c).([x_y 'ExpSimu'])(it,jx);
-    % xSim is now the exact optimal prediction (without adding a data
-    % point!, adding a data point affects the position of the optimum)
-    arLink(true, t_tmp, takeY, jx, c, m, xSim, xstd);
-    % Replace the approximate optimal prediction with the exact version
-    if(ar.ppl.qLog10)
-        xSim = log10(xSim);
-    end
-    fprintf('Calculating PPL for t=%d and state number x=%i \n',t(ts),jx);
-    
-    % When calling this function in arPPL, save = 1. Thus, up and down
-    % directions are both performed no matter what was specified in dir. 
-    % However, save = 0 if arPredictionProfile is called from 
-    % arIntegratePredBand such that dir might have an impact in this
-    % scenario.
-    
-    % go up
-    if(save || dir==1)
-        % This is where the profile is actually sampled:
-        [xtrial_up, xfit_up, ppl_up, vpl_up, ps_up] = ...
-            ppl(general_struct, it, t_tmp, xSim, 1);    
-               
-        ar.p = pReset;  
-        arCalcMerit();       
+    if (takeY == 1) && (save == 1)
+        % i.e. if profile calculation is invoked from arPPL for observables
+        % Use independent validation/prediction profile algorithm
+        % if they are used to sample prediction band instead of integration
+        % This algorithm is more reliable.
+        nsteps = ar.ppl.options.n_steps_profile;
+        if doPPL == true
+            InitVPL(m,c,jx,t_tmp,xstd,1);
+            ar.vpl.config.prediction = 1;
+            ar.vpl.config.chi2dif_max = 0.4;
+            ar.vpl.config.chi2dif_min = 0.2;
+        else
+            InitVPL(m,c,jx,t_tmp,xstd,2);
+            ar.vpl.config.chi2dif_min = 0.1;
+        end
+        ar.vpl.config.maxstepsize = 10*xstd;
+        ar.vpl.config.maxrange = xstd*10^5; 
+        ar.vpl.config.maxsteps = nsteps;
+        ar.vpl.config.showCalculation = false;
+   
+        VPL;
+        vplSmooth;
+        
+        %Independent algorithm normalized minimum to zero:
+        ar.vpl.results.ppl = ar.vpl.results.ppl + chi2start;
+        ar.vpl.results.chi2 = ar.vpl.results.chi2 + chi2start;
+        
+        %Store results in the same form as original algorithm:
+        xSim = ar.vpl.results.pred(nsteps+1);
+        
+        xtrial_up = ar.vpl.results.z((nsteps+2):end)';
+        xfit_up = ar.vpl.results.pred((nsteps+2):end)';
+        ppl_up = ar.vpl.results.ppl((nsteps+2):end)';
+        vpl_up = ar.vpl.results.chi2((nsteps+2):end)';
+        ps_up = ar.vpl.results.ps((nsteps+2):end,:);
+        
+        xtrial_down = fliplr(ar.vpl.results.z(1:nsteps)');
+        xfit_down = fliplr(ar.vpl.results.pred(1:nsteps)');
+        ppl_down = fliplr(ar.vpl.results.ppl(1:nsteps)');
+        vpl_down = fliplr(ar.vpl.results.chi2(1:nsteps)');
+        ps_down = flipud(ar.vpl.results.ps(1:nsteps,:));
     else
-        % Why is this alternative necessary?
-        xtrial_up = xSim*1.01;
-        xfit_up = xSim*1.01;
-        ppl_up = chi2start+0.1;
-        vpl_up = chi2start+0.1;
-        ps_up = ar.p;
+        % Originally implemented algorithm to calculate profile:
+        
+        % Add the current optimal prediction as a data point:
+        [~,it_first] = min(abs(ar.model(m).(data_cond)(c).tFine-t_tmp));
+        arLink(true, t_tmp, takeY, jx, c, m, ar.model(m).(data_cond)(c).([x_y 'FineSimu'])(it_first,jx), xstd);
+        % Calling arLink in this fashion adds the corresponding data point to the ar-struct
+        % Note that this is only approximately the best prediction due to the
+        % finite resolution of tFine.
+        arCalcMerit(0,[],1);
+        % Recalculate objective function and simulate trajectory values at
+        % data times (especially for new data point!)
+        [~,it] = min(abs(ar.model(m).(data_cond)(c).tExp-t_tmp));
+        if(takeY && length(find(ar.model(m).(data_cond)(c).tExp==t_tmp))>1)
+            it = it+1;
+        end
+        xSim = ar.model(m).(data_cond)(c).([x_y 'ExpSimu'])(it,jx);
+        % xSim is now the exact optimal prediction (without adding a data
+        % point!, adding a data point affects the position of the optimum)
+        arLink(true, t_tmp, takeY, jx, c, m, xSim, xstd);
+        % Replace the approximate optimal prediction with the exact version
+        if(ar.ppl.qLog10)
+            xSim = log10(xSim);
+        end
+        fprintf('Calculating PPL for t=%d and state number x=%i \n',t(ts),jx);
+        
+        % When calling this function in arPPL, save = 1. Thus, up and down
+        % directions are both performed no matter what was specified in dir.
+        % However, save = 0 if arPredictionProfile is called from
+        % arIntegratePredBand such that dir might have an impact in this
+        % scenario.
+        
+        % go up
+        if(save || dir==1)
+            % This is where the profile is actually sampled:
+            [xtrial_up, xfit_up, ppl_up, vpl_up, ps_up] = ...
+                ppl(general_struct, it, t_tmp, xSim, 1);
+            
+            ar.p = pReset;
+            arCalcMerit();
+        else
+            % Why is this alternative necessary?
+            xtrial_up = xSim*1.01;
+            xfit_up = xSim*1.01;
+            ppl_up = chi2start+0.1;
+            vpl_up = chi2start+0.1;
+            ps_up = ar.p;
+        end
+        % go down
+        if(save || dir==-1)
+            [xtrial_down, xfit_down, ppl_down, vpl_down, ps_down] = ...
+                ppl(general_struct, it, t_tmp, xSim, -1);
+            % Reset parameters
+            ar.p = pReset;
+        else
+            xtrial_down = xSim*0.99;
+            xfit_down = xSim*0.99;
+            ppl_down = chi2start+0.1;
+            vpl_down = chi2start+0.1;
+            ps_down = ar.p;
+            ar.p = pReset;
+        end
+        
+        % Reset data point
+        if(takeY)
+            arLink(true,0.,true,jx, c, m,NaN);
+        end
+        % Reset objective function
+        arCalcMerit();
+        % This should presumably now equal chi2start again
+        
     end
-    % go down 
-    if(save || dir==-1)
-        [xtrial_down, xfit_down, ppl_down, vpl_down, ps_down] = ...
-            ppl(general_struct, it, t_tmp, xSim, -1);
-        % Reset parameters
-        ar.p = pReset;
-    else
-        xtrial_down = xSim*0.99;
-        xfit_down = xSim*0.99;
-        ppl_down = chi2start+0.1;
-        vpl_down = chi2start+0.1;
-        ps_down = ar.p;
-        ar.p = pReset;
-    end
-    
-    % Reset data point
-    if(takeY)
-        arLink(true,0.,true,jx, c, m,NaN);
-    end
-    % Reset objective function
-    arCalcMerit();
-    % This should presumably now equal chi2start again
     
     % Join results of both directions:
     ps_tmp = [flipud(ps_down); pReset; ps_up];
