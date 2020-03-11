@@ -38,7 +38,7 @@ for m=1:size(ar1.model,2)
         indcol = find(sum(ar2.model(m).condition(c).xFineSimu~=0,1)>0);
 
         if isempty(indcol)
-            warning('arCompareX.m: No X found. Comparing X skipped.')
+            fprintf('arCompareX.m: No X found. Comparing X skipped.\n')
             pass = 0;
             return
         end

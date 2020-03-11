@@ -11,7 +11,7 @@ if ~(ar1.config.atol-ar2.config.atol==0)
     pass = 0;
     warning('arCompareConf.m: ar.config.atol is different.')
 end
-if max( ( (ar1.res-ar2.res) ./ ar1.res ) .^2 )<rtol
+if max( ( (ar1.res-ar2.res) ./ ar1.res ) .^2 )>rtol
     pass = 0;
     warning('arCompareConf.m: ar.res are different.')
 end
