@@ -109,7 +109,7 @@ for m = 1:length(ar.model)
     [T{m,1}, T{m,2}] = ...
         arLoadDataPEtab([pe_dir filesep PEmeas.name],[pe_dir filesep PEobs.name],m);
 end
-arLoadCondPEtab([pe_dir filesep PEconds.name], T);
+Tcond = arLoadCondPEtab([pe_dir filesep PEconds.name], T);
 
 % Compilation
 arCompileAll
@@ -138,11 +138,21 @@ if doPreEquilibration
                     simConds(end+1) = ...
                         find(cellfun(@(x) ~strcmp(x, convertStringsToChars(uniquePreEqConds(ipreeqcond))), {ar.model.data.name}));
                 end
-                
                 arSteadyState(imodel, preEqCond, simConds, tstart)
+            end
+            for isimu = 1:length(uniqueSimConds)
+                Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(isimu),:);
+                iSimuAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(isimu)), {ar.model(m).data.name}));
+                for iCol = 1:length(Tcondi.Properties.VariableNames)
+                    idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
+                    if ~isempty(idxState)
+                        arAddEvent(m,iSimuAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}))
+                        % ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
+                    end
+                end
             end
         end
     end
 end
-    
+
 end
