@@ -32,7 +32,7 @@ for m=1:size(ar1.model,2)
         indcol = find(sum(ar2.model(m).data(d).yExpRaw~=0,1)>0);
 
         if isempty(indcol)
-            fprintf('arCompareY.m: No Y found. Comparing Y skipped.')
+            fprintf('arCompareY.m: No Y found. Comparing Y skipped.\n')
             pass = 0;
             return
         end

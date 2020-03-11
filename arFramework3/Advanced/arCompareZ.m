@@ -32,7 +32,7 @@ for m=1:size(ar1.model,2)
         indcol = find(sum(ar2.model(m).condition(c).zFineSimu~=0,1)>0);
 
         if isempty(indcol)
-            fprintf('arCompareZ.m: No Z found. Comparing Z skipped.')
+            fprintf('arCompareZ.m: No Z found. Comparing Z skipped.\n')
             pass = 1;
             return
         end
@@ -67,7 +67,7 @@ for m=1:size(ar1.model,2)
             if isempty(ind) 
                 if (size(ar2.model(m).z,2) == size(ar1.model(m).z,2))
                     ind = indcol(i);
-                    fprintf(['arCompareZ.m: Names not consistent. Expecting ' ar2.model(m).z{indcol(i)} ' to be the same as ' ar1.model(m).z{ind} '. If not check your SBML export.']);
+                    fprintf(['arCompareZ.m: Names not consistent. Expecting ' ar2.model(m).z{indcol(i)} ' to be the same as ' ar1.model(m).z{ind} '. If not check your SBML export.\n']);
                 else
                     if isempty(strmatch(ar2.model(m).z{indcol(i)},ar1.pLabel, 'exact')); %#ok
                         arFprintf(2, '%s from SBML export neither found as dynamic state nor as parameter.\n',ar2.model(m).z{indcol(i)})

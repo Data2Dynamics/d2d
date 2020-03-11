@@ -15,10 +15,10 @@ arExportPEtab('d2dExport')
 clearvars -except FirstImportStruct;
 arInit;
 arImportPEtab('d2dExport');
-arCalcMerit
+arCalcMerit(false)
 arSave('SecondImport');
 SecondImportStruct = arDeepCopy(ar);
-[same, d1, d2] = arCompare(FirstImportStruct,SecondImportStruct,'Main');
+same = arCompare(FirstImportStruct,SecondImportStruct,'Main');
 if same == 1
    fprintf('The test passed! \nThe two structs after the initial import and the export-import cycle are identical!\n'); 
 else
