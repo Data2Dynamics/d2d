@@ -152,7 +152,7 @@ for iCond = 1:length(uniCond)
             end
         end
         
-        if ismember('noiseParameters', Tobs.Properties.VariableNames)
+        if ismember('noiseParameters', Tsub.Properties.VariableNames)
             if isnumeric(Tsub(1,:).noiseParameters)
                 continue
             elseif ~isempty(char(Tsub(1,:).noiseParameters))
