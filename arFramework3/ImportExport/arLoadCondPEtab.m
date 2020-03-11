@@ -1,3 +1,4 @@
+
 % Tcond = arLoadCondPEtab(expcondfilename)
 %
 % This function can be used to process experimental condition files in the format of PEtab.
@@ -58,6 +59,14 @@ for m = 1:length(ar.model)
                         initialVariable = ar.model(m).px0{InitialsSet};
                         InitialDataVariableIndex = strcmp(initialVariable, ar.model(m).data(j).p);
                         ar.model(m).data(j).fp{InitialDataVariableIndex} = num2str(T.(fns{k})(i));
+                        
+                     % Check if compartment parameter is set condition
+                     % specific
+                    elseif any(strcmp(ar.model(m).c,fns{k}))
+                        CompartmentSet = strcmp(ar.model(m).c,fns{k});
+                        CompartmentVariable = ar.model(m).pc{CompartmentSet};
+                        CompartmentDataVariableIndex = strcmp(CompartmentVariable, ar.model(m).data(j).p);
+                        ar.model(m).data(j).fp{CompartmentDataVariableIndex} = num2str(T.(fns{k})(i));
                     end
                 end
             end
