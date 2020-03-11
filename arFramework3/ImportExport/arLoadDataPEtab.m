@@ -82,7 +82,14 @@ for k = 1:numel(ar.model.xNames)
         end
     end
 end
+
+
 [uniCond,~,iCCond] = unique([Tdat.simulationConditionId]);
+[~,~,iCCond2] = unique(strcat(Tdat.simulationConditionId,num2str(Tdat.observableParameters)));
+if ~all(iCCond==iCCond2)
+    [uniCond,~,iCCond] = unique(strcat(Tdat.simulationConditionId,num2str(Tdat.observableParameters)));
+end
+
 
 %% Use condition specific experiments and distribute over data struct
 idErrorPar = 1;
