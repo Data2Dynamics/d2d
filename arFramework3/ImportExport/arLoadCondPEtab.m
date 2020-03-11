@@ -73,14 +73,17 @@ for m = 1:length(ar.model)
                 for k = 2:(length(fns))
                     % Check if parameter is replaced by condition
                     if sum(contains(ar.model(m).data(j).fp,fns{k}))>0    % changed p to fp to catch cases in which initial value was renamed from a0 to init_A_state
-                        if isnumeric(T.(fns{k})) % if condition parameter is replaced by a parameter instead of number
-                            ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
-                                num2str(T.(fns{k})(i));
-                        else
-                            ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
-                                T.(fns{k}){i};
-                        end
-                    % Check if initial state is set by condition
+                        ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
+                            num2str(T.(fns{k})(i));
+                        
+%                         if isnumeric(T.(fns{k})) % if condition parameter is replaced by a parameter instead of number
+%                             ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
+%                                 num2str(T.(fns{k})(i));
+%                         else
+%                             ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
+%                                 T.(fns{k}){i};
+%                         end
+                        % Check if initial state is set by condition
                     elseif any(strcmp(ar.model(m).xNames,fns{k}))
                         InitialsSet = strcmp(ar.model(m).xNames,fns{k});
                         if sum(InitialsSet) > 1
