@@ -106,7 +106,7 @@ end
 % ToDo: Loop over several models
 T = cell(2, length(ar.model));
 for m = 1:length(ar.model)
-    [T{m,1}, T{m,2}] = ...
+    [T{m,1}, T{m,2}, errorParAssignments] = ...
         arLoadDataPEtab([pe_dir filesep PEmeas.name],[pe_dir filesep PEobs.name],m);
 end
 arLoadCondPEtab([pe_dir filesep PEconds.name]);
@@ -114,7 +114,7 @@ arLoadCondPEtab([pe_dir filesep PEconds.name]);
 % Compilation
 arCompileAll
 
-arLoadParsPEtab([pe_dir filesep PEparas.name]); 
+arLoadParsPEtab([pe_dir filesep PEparas.name], errorParAssignments); 
 arFindInputs % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
 arLoadParsPEtab([pe_dir filesep PEparas.name]); % get para values from parameter label
 

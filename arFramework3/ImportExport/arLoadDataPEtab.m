@@ -1,4 +1,4 @@
-% [Tdat, Tobs] = arLoadDataPEtab(datafilename, [m])
+% [Tdat, Tobs, errorParAssignments] = arLoadDataPEtab(datafilename, [m])
 %
 % This function can be used to process data files in the format of PEtab.
 %
@@ -17,7 +17,7 @@
 % References
 %   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
 
-function [Tdat, Tobs] = arLoadDataPEtab(datafilename, obsfilename, m)
+function [Tdat, Tobs, errorParAssignments] = arLoadDataPEtab(datafilename, obsfilename, m)
 
 global ar;
 
@@ -85,6 +85,9 @@ end
 [uniCond,~,iCCond] = unique(Tdat.simulationConditionId);
 
 %% Use condition specific experiments and distribute over data struct
+idErrorPar = 1;
+errorParAssignments = cell(1,2);
+
 for iCond = 1:length(uniCond)
     Sd2d = struct();
     args= {};
@@ -116,7 +119,10 @@ for iCond = 1:length(uniCond)
         if ~isnumeric(Tobs.noiseFormula(idx))
             tmp_fystd = char(Tobs.noiseFormula(idx));
         else
-            tmp_fystd = Tobs.noiseFormula(idx);
+            tmp_fystd = ['noisePar_' num2str(idErrorPar)];
+            errorParAssignments{idErrorPar,1} = tmp_fystd;
+            errorParAssignments{idErrorPar,2} = Tobs.noiseFormula(idx);
+            idErrorPar = idErrorPar + 1;
         end
         for jObs = 1:length(Tobs.observableId)
             tmp_fystd = arSubs(arSym(tmp_fystd),arSym(Tobs.observableId{jObs}),arSym(['(' Tobs.observableFormula{jObs} ')']));
