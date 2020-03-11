@@ -14,7 +14,7 @@
 % References
 %   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
 
-function arLoadParsPEtab(filename, errorParAssignments)
+function arLoadParsPEtab(filename)
 
 global ar
     
@@ -50,16 +50,6 @@ for i = 1:length(ib)
         arSetPars(ar.pLabel(ia(i)), log10(T.nominalValue(ib(i))), T.estimate(ib(i)), T.qLog10(ib(i)),log10(T.lowerBound(ib(i))),log10( T.upperBound(ib(i))))
     else
         arSetPars(ar.pLabel(ia(i)), T.nominalValue(ib(i)), T.estimate(ib(i)), T.qLog10(ib(i)),T.lowerBound(ib(i)), T.upperBound(ib(i)))
-    end
-end
-
-% add dummy parse for noise formulas
-if exist('errorParAssignments') && ~isempty(errorParAssignments) ...
-        && sum(cellfun(@(x) ~isempty(x), errorParAssignments)) > 0
-    for j = 1:size(errorParAssignments, 1)
-        parName = errorParAssignments{j,1};
-        parValue = errorParAssignments{j,2};
-        arSetPars(parName, parValue, 0, 0, parValue, parValue);
     end
 end
 

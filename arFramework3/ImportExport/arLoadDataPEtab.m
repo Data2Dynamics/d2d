@@ -1,4 +1,4 @@
-% [Tdat, Tobs, errorParAssignments] = arLoadDataPEtab(datafilename, [m])
+% [Tdat, Tobs] = arLoadDataPEtab(datafilename, [m])
 %
 % This function can be used to process data files in the format of PEtab.
 %
@@ -17,7 +17,7 @@
 % References
 %   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
 
-function [Tdat, Tobs, errorParAssignments] = arLoadDataPEtab(datafilename, obsfilename, m)
+function [Tdat, Tobs] = arLoadDataPEtab(datafilename, obsfilename, m)
 
 global ar;
 
@@ -119,10 +119,7 @@ for iCond = 1:length(uniCond)
         if ~isnumeric(Tobs.noiseFormula(idx))
             tmp_fystd = char(Tobs.noiseFormula(idx));
         else
-            tmp_fystd = ['noisePar_' num2str(idErrorPar)];
-            errorParAssignments{idErrorPar,1} = tmp_fystd;
-            errorParAssignments{idErrorPar,2} = Tobs.noiseFormula(idx);
-            idErrorPar = idErrorPar + 1;
+            tmp_fystd = Tobs.noiseFormula(idx);
         end
         for jObs = 1:length(Tobs.observableId)
             tmp_fystd = arSubs(arSym(tmp_fystd),arSym(Tobs.observableId{jObs}),arSym(['(' Tobs.observableFormula{jObs} ')']));
@@ -178,9 +175,13 @@ for iCond = 1:length(uniCond)
             if sum(it==iTExp & iobs == iCObs)==1
                 Sd2d.yExpRaw(it,iobs) = Tsub.measurement(it == iTExp & iobs == iCObs);
                 Sd2d.yExp(it,iobs) = Sd2d.logfitting(iobs) * log10(Tsub.measurement(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs)) *Tsub.measurement(it == iTExp & iobs == iCObs);
-                if ismember('noiseParameters', Tobs.Properties.VariableNames) && isnumeric(Tsub.noiseParameters(it == iTExp & iobs == iCObs))
-                    Sd2d.yExpStdRaw(it,iobs) = Tsub.noiseParameters(it == iTExp & iobs == iCObs);
-                    Sd2d.yExpStd(it,iobs) =  Sd2d.logfitting(iobs) *log10(Tsub.noiseParameters(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs))*Tsub.noiseParameters(it == iTExp & iobs == iCObs);
+                if ismember('noiseParameters', Tsub.Properties.VariableNames) && ~isempty(Tsub.noiseParameters(it == iTExp & iobs == iCObs))
+                    %noiseParValues = str2num(strplit(Tsub.noiseParameters(it == iTExp & iobs == iCObs), ';'));
+                    %noisePars = 
+                    %arSubs(arSym(Sd2d.fystd{iObs})
+                  
+                  %  Sd2d.yExpStdRaw(it,iobs) = Tsub.noiseParameters(it == iTExp & iobs == iCObs);
+                  %  Sd2d.yExpStd(it,iobs) =  Sd2d.logfitting(iobs) *log10(Tsub.noiseParameters(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs))*Tsub.noiseParameters(it == iTExp & iobs == iCObs);
                 end
             elseif sum(it==iTExp & iobs == iCObs)>1
                 error('Non-unique assignment for data point. Check unambiguousness of provided measurement table!')

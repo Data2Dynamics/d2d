@@ -113,6 +113,7 @@ arLoadCondPEtab([pe_dir filesep PEconds.name]);
 
 % Compilation
 arCompileAll
+ar.config.fiterrors = 1;
 
 arLoadParsPEtab([pe_dir filesep PEparas.name], errorParAssignments); 
 arFindInputs % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
@@ -120,13 +121,14 @@ arLoadParsPEtab([pe_dir filesep PEparas.name]); % get para values from parameter
 
 % pre-equilibration
 if doPreEquilibration
+    tstart = -1e7;
     for imodel = 1:length(ar.model)
         Tdat = T{imodel,1};
         Tobs = T{imodel,2};
         
-        if isfield(Tdat, 'preEquilibrationId')
+        if isfield(table2struct(Tdat), 'preequilibrationConditionId')
             uniqueSimConds = unique(Tdat.simulationConditionId);
-            uniquePreEqConds = unique(Tdat.preEquilibrationId);
+            uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
             
             for ipreeqcond = 1:size(uniquePreEqConds,1)
                 preEqCond = arFindCondition(convertStringsToChars(uniquePreEqConds(ipreeqcond)));
