@@ -1,9 +1,9 @@
-% [Tdat, Tobs] = arLoadDataPEtab(datafilename, [m])
+% [Tdat, Tobs] = arLoadDataPEtab(datafilename, obsfilename, m)
 %
 % This function can be used to process data files in the format of PEtab.
 %
-%   datafilename    name of file.
-%
+%   datafilename    name of meas file.
+%   obsfilename     name of obs file
 %   m               model that shall be linked to. Name or ID [length(ar.model)]
 %
 % In this data format, there is one single .tsv-file that contains all data
