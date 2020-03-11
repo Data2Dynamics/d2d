@@ -130,6 +130,10 @@ if doPreEquilibration
             uniqueSimConds = unique(Tdat.simulationConditionId);
             uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
             
+            if numel(uniquePreEqConds) > 1
+                error('More than one pre-equiblibration condition currently not supported.')
+            end
+            
             for ipreeqcond = 1:size(uniquePreEqConds,1)
                 preEqCond = arFindCondition(convertStringsToChars(uniquePreEqConds(ipreeqcond)), 'conservative');
                 simConds = [];
