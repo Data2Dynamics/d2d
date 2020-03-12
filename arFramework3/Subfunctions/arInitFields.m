@@ -18,7 +18,7 @@ function ar = arInitFields(ar)
     % !!  NOTE: Every time you add or remove a field, increment this value by one.
     % !! 
     % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    arFormatVersion = 7;
+    arFormatVersion = 8;
     
     % Without arguments, just return the version number
     if ( nargin < 1 )
@@ -62,8 +62,8 @@ function ar = arInitFields(ar)
         {'ploterrors',                  0}, ...                         %   plotting options of error bars: 0=like fitted (error bar if yExpStd available, error band otherwise), 1=only error bars,  2=only error model as error band,  -1=confidence bands, -3: no errors
         {'showFitting',                 0}, ...                         %   Show the fitting process in real time
         {'showLegends',                 true}, ...                      %   Show legends in plots
-        {'useSuptitle',                 false}, ...
-        {'plotColorSet',                'matlab_default'}, ...
+        {'useSuptitle',                 false}, ...     
+        {'plotColorSet',                'matlab_default'}, ...          %   set color set for plotting. Alternatives are 'dMod' and 'd2d_legacy'
         ...                                                             % Stochastic simulation
         {'ssa_min_tau',                 1e-3}, ...                      
         {'ssa_runs',                    1}, ...
