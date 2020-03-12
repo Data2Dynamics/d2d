@@ -1,5 +1,5 @@
-% arSave(name, [withSyms])
-% 
+% arSave(name, [withSyms], [useDateString])
+%
 % arSave saves the current workspace, i.e. model struct and last ple results
 % to repository, or return base path of last arSave.
 %
@@ -8,29 +8,30 @@
 %   arSave(name, withSyms)
 %   basepath = arSave(--)
 %
-%   name      char indicating the directory name where to save the
-%             workspace - if left empty or set to 'current', current path 
-%             in ar.config.savepath is used
-%   withSyms  optional logical indicating wheter symbols in the ar struct 
-%             shall be saved or not. withSyms true needs the symbolic 
-%             toolbox. Inclusion of symbols can be memory intensive [false]
-% 
+%   name            char indicating the directory name where to save the
+%                   workspace - if left empty or set to 'current', current path
+%                   in ar.config.savepath is used
+%   withSyms        optional logical indicating wheter symbols in the ar struct
+%                   shall be saved or not. withSyms true needs the symbolic
+%                   toolbox. Inclusion of symbols can be memory intensive [false]
+%   useDateString   prepend unique datestring to results directory name [true]
+%
 %   basepath  (optional) base path of last arSave to name
-% 
+%
 % Example
-%    Load ABC model and data, compile model and save ar struct to 
-%    repository:  
+%    Load ABC model and data, compile model and save ar struct to
+%    repository:
 %    arLoadModel('ABC_model');
-%    arLoadData('ABC_data_BCobs'); 
-%    arCompileAll();  
-%    Save workspace to the current repository with path in ar.config.savepath% 
+%    arLoadData('ABC_data_BCobs');
+%    arCompileAll();
+%    Save workspace to the current repository with path in ar.config.savepath%
 %    arSave('current')
 %    Save workspace to the new repository with name 'ABC_test'
-%    arSave('ABC_test') 
-% 
+%    arSave('ABC_test')
+%
 % See also arSaveParOnly
 
-function basepath = arSave(name, withSyms)
+function basepath = arSave(name, withSyms, useDateString)
 
 global ar
 
@@ -40,12 +41,18 @@ arCheckCache(1);
 % update checkstrs:
 ar = arUpdateCheckstr(ar, true);
 
-if(~exist('withSyms','var'))
+if(~exist('withSyms','var') || isempty(withSyms))
     withSyms = false;
 end
+if ~exist('useDateString') || isempty(useDateString)
+    useDateString = true;
+end
+
+
 if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
 end
+
 
 
 if(isempty(ar.config.savepath)) % never saved before, ask for name
@@ -53,7 +60,11 @@ if(isempty(ar.config.savepath)) % never saved before, ask for name
         name = input('enter new repository name addition: ', 's');
     end
     if(~isempty(name))
-        ar.config.savepath = ['./Results/' datestr(now, 30) '_' name];
+        if useDateString
+            ar.config.savepath = ['./Results/' datestr(now, 30) '_' name];
+        else
+            ar.config.savepath = ['./Results/' name];
+        end
     else
         ar.config.savepath = ['./Results/' datestr(now, 30) '_noname'];
     end
@@ -67,7 +78,11 @@ else
     if(exist('name','var')) % saved before, but new name give
         if(~strcmpi(strtrim(name), 'current'))
             if(~isempty(name))
-                ar.config.savepath = ['./Results/' datestr(now, 30) '_' name];
+                if useDateString
+                    ar.config.savepath = ['./Results/' datestr(now, 30) '_' name];
+                else
+                    ar.config.savepath = ['./Results/' name];
+                end
             else
                 ar.config.savepath = ['./Results/' datestr(now, 30) '_noname'];
             end
