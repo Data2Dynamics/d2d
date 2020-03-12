@@ -15,7 +15,7 @@
 %     'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines', 
 %     'ResponseCurve', 'PreProcessorTest', 'State_Reduction', 'Fast_Equilibration',  
 %     'Predictor_Test', 'FieldTester', 'SteadyStateBounds', 'DataFilterTest', 
-%     'Benchmark_Simu_Test', 'Boehm_JProteomeRes2014'
+%     'Benchmark_Simu_Test', 'Boehm_JProteomeRes2014', 'PEtab_Tests'
 function doTests( varargin )
     global ar;
     global arOutputLevel;
@@ -35,11 +35,11 @@ function doTests( varargin )
                 'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines', ...
                 'ResponseCurve', 'PreProcessorTest', 'State_Reduction', 'Fast_Equilibration', ... 
                 'Predictor_Test', 'FieldTester', 'SteadyStateBounds', 'SD_Test', ...
-                'Benchmark_Simu_Test', 'Boehm_JProteomeRes2014'};
+                'Benchmark_Simu_Test', 'Boehm_JProteomeRes2014', 'PEtab_Tests'};
             
     longtests = { 'Benchmark_Simu_Test' };
     
-    dependencies = { {}, {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {'TranslateSBML'}};
+    dependencies = { {}, {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {'TranslateSBML'}, {'TranslateSBML'}};
     
     if ( nargin > 0 && strcmp( varargin{1}, 'long' ) )
         varargin = setdiff( varargin, 'long' );
