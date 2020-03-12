@@ -129,6 +129,9 @@ if doPreEquilibration
         if isfield(table2struct(Tdat), 'preequilibrationConditionId')
             uniqueSimConds = unique(Tdat.simulationConditionId);
             uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
+            if all(strcmpi(uniquePreEqConds,'nan'))
+                uniquePreEqConds = [];
+            end
             
             if numel(uniquePreEqConds) > 1
                 error('More than one pre-equiblibration condition currently not supported.')

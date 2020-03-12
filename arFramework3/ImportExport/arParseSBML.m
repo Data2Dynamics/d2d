@@ -68,7 +68,7 @@ if exist('TranslateSBML','file')~=3
 end
 
 % convert relative to absolute path
-%filename = GetFullPath(filename);
+filename = GetFullPath(filename);
 
 % remove extension
 filename = regexprep(filename,'\.(xml|sbml)$','');
