@@ -16,7 +16,7 @@ fprintf( 2, 'PASSED\n' );
 
 arFit;
 fprintf( 2, 'Testing final chi2fit ... ' );
-if ( ar.chi2fit > -63.8033 )
+if ( ar.chi2fit > -35.2314 )
     error( 'FINAL ERROR TOO LARGE' );
 else
     fprintf( 2, 'PASSED\n' );

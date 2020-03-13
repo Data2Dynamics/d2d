@@ -125,7 +125,7 @@ end
 if sum(Working) == numel(Working)
     fprintf( 2, 'PASSED\n' );
 else
-    fprintf( 2, 'Errors in test case(s) %s\n', strjoin(cases(logical(Working)),', '));
+    fprintf( 2, 'Errors in test case(s) %s\n', strjoin(cases(logical(~Working)),', '));
     error( 'FAILED');
 end
 
