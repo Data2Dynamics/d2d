@@ -72,12 +72,12 @@ for i = 1:Ncases
         SimuDiff(i) = sum(abs(simus.simulation - simus2.simulation));
         SolTable = ReadOutSolutionFile(cases{i});
         
-        chi2Solution(i) = SolTable.Value(SolTable.Variable=='chi2:');
-        llhSolution(i) = SolTable.Value(SolTable.Variable=='llh:');
+        chi2Solution(i) = str2num(SolTable.Value{strcmp(SolTable.Variable,'chi2:')});
+        llhSolution(i) = str2num(SolTable.Value{strcmp(SolTable.Variable,'llh:')});
         
-        TolChi2(i) = SolTable.Value(SolTable.Variable=='tol_chi2:');
-        TolLLH(i) = SolTable.Value(SolTable.Variable=='tol_llh:');
-        TolSimu(i) = SolTable.Value(SolTable.Variable=='tol_simulations:');
+        TolChi2(i) = str2num(SolTable.Value{strcmp(SolTable.Variable,'tol_chi2:')});
+        TolLLH(i) = str2num(SolTable.Value{strcmp(SolTable.Variable,'tol_llh:')});
+        TolSimu(i) = str2num(SolTable.Value{strcmp(SolTable.Variable,'tol_simulations:')});
         Error{i} = 'none';
         ErrorFile{i} = 'none';
         ErrorLine{i} = 'none';
@@ -132,24 +132,24 @@ end
 function solution = ReadOutSolutionFile(caseName)
 
 %% Setup the Import Options and import the data
-opts = delimitedTextImportOptions("NumVariables", 2);
-
-% Specify range and delimiter
-opts.DataLines = [1, 2; 5, Inf];
+opts = delimitedTextImportOptions;
+% 
+% % Specify range and delimiter
+% opts.DataLines = [1, 2; 5, Inf];
 opts.Delimiter = " ";
-
-% Specify column names and types
+% 
+% % Specify column names and types
 opts.VariableNames = ["Variable", "Value"];
-opts.VariableTypes = ["string", "double"];
-
-% Specify file level properties
-opts.ExtraColumnsRule = "ignore";
-opts.EmptyLineRule = "read";
-opts.LeadingDelimitersRule = "ignore";
-
-% Specify variable properties
-opts = setvaropts(opts, "Variable", "WhitespaceRule", "preserve");
-opts = setvaropts(opts, "Variable", "EmptyFieldRule", "auto");
+% opts.VariableTypes = ["string", "double"];
+% 
+% % Specify file level properties
+% opts.ExtraColumnsRule = "ignore";
+% opts.EmptyLineRule = "read";
+% opts.LeadingDelimitersRule = "ignore";
+% 
+% % Specify variable properties
+% opts = setvaropts(opts, "Variable", "WhitespaceRule", "preserve");
+% opts = setvaropts(opts, "Variable", "EmptyFieldRule", "auto");
 % Import the data
 solution = readtable(['_' caseName '_solution.yaml'], opts);
 end
