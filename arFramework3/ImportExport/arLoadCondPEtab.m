@@ -104,19 +104,19 @@ for m = 1:length(ar.model)
                         CompartmentSet = strcmp(ar.model(m).c,fns{k});
                         
                         % Check if compartment volume parameter exists
-                        % already, if not create it for all data sets
-                        if isempty(str2num(ar.model(m).pc{CompartmentSet}))
-                            CompartmentVariable = ar.model(m).pc{CompartmentSet};
-                        else
-                            CompartmentVariable = ['vol_' cell2mat(fns(k))];
-                            StandardCompartmentSize = str2num(ar.model(m).pc{CompartmentSet});
-                            ar.model(m).pc{CompartmentSet} = CompartmentVariable;
-                            ar.model(m).px(end+1) = {CompartmentVariable};
-                            for jData = 1:length(ar.model(m).data)
-                                ar.model(m).data(jData).p(end+1) = {['vol_' cell2mat(fns(k))]};
-                                ar.model(m).data(jData).fp(end+1) = {StandardCompartmentSize};
-                            end
-                        end
+                         % already, if not create it for all data sets
+                         if isempty(str2num(ar.model(m).pc{CompartmentSet}))
+                             CompartmentVariable = ar.model(m).pc{CompartmentSet};
+                         else
+                             CompartmentVariable = ['vol_' cell2mat(fns(k))];
+                             StandardCompartmentSize = str2num(ar.model(m).pc{CompartmentSet});
+                             ar.model(m).pc{CompartmentSet} = CompartmentVariable;
+                             ar.model(m).px(end+1) = {CompartmentVariable};
+                             for jData = 1:length(ar.model(m).data)
+                                 ar.model(m).data(jData).p(end+1) = {['vol_' cell2mat(fns(k))]};
+                                 ar.model(m).data(jData).fp(end+1) = {StandardCompartmentSize};
+                             end
+                         end
                         CompartmentDataVariableIndex = strcmp(CompartmentVariable, ar.model(m).data(j).p);
                         ar.model(m).data(j).fp{CompartmentDataVariableIndex} = num2str(T.(fns{k})(i));
                     end

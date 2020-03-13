@@ -206,7 +206,7 @@ for iCond = 1:length(uniCond)
             end
         end
     end
-    Sd2d.logfitting(iobs) = 0; % We accounted for this by transforming yExp
+%    Sd2d.logfitting(iobs) = 0; % We accounted for this by transforming yExp
     % prepare info for creating data struct
     fns = fieldnames(Sd2d);
     for i = 1:length(fns)
