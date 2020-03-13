@@ -45,7 +45,7 @@ end
 m = 1;
 Tobs = Tarr{m,1};
 Tmeas = Tarr{m,2};
-noDataPreEqConds = setdiff(cellstr(T.conditionId), {ar.model.data.name});
+noDataPreEqConds = setdiff(cellstr(T.conditionId), cellstr(Tobs.simulationConditionId));
 for iPreEq = 1:numel(noDataPreEqConds)
     condId = find(T.conditionId == noDataPreEqConds{iPreEq});
     
