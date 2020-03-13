@@ -52,7 +52,7 @@ end
 
 % if error parameter fitted or fixed, then useFitErrorCorrection is
 % evaluated:
-if  ar.ndata_res>0 && (ar.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0) && ar.config.useFitErrorCorrection  )
+if  ar.ndata_res>0 && (ar.config.useFitErrorCorrection  && (ar.config.fiterrors==1  || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)>0))) 
     if(ar.ndata_res -sum(ar.qError~=1 & ar.qFit==1) < sum(ar.qError~=1 & ar.qFit==1))
         ar.config.fiterrors_correction = 1;
         if(~ar.config.fiterrors_correction_warning)
@@ -63,6 +63,10 @@ if  ar.ndata_res>0 && (ar.config.fiterrors==1 || (ar.config.fiterrors==0 && sum(
         ar.config.fiterrors_correction = ar.ndata_res/(ar.ndata_res-sum(ar.qError~=1 & ar.qFit==1));
         ar.config.fiterrors_correction_warning = false;
     end
+    
+    
+    
+    
 else
     ar.config.fiterrors_correction = 1;
 end
