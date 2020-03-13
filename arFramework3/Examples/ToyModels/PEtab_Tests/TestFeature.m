@@ -8,7 +8,7 @@ cases = {'0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008',...
 % set cases for debugging
 %%
 fprintf( 2, 'TEST FOR IMPORT OF PETAB TOY MODELS\n' );
-    clear Working chi2 llh SimuDiff chi2Solution llhSolution TolChi2 TolLLH TolSimu Error ErrorFile ErrorLine
+clear Working chi2 llh SimuDiff chi2Solution llhSolution TolChi2 TolLLH TolSimu Error ErrorFile ErrorLine
 
 cases = cases';
 Ncases = numel(cases);
@@ -16,31 +16,30 @@ try
     parpool(4)
 end
 
-clear Working chi2 llh SimuDiff chi2Solution llhSolution TolChi2 TolLLH TolSimu Error ErrorFile ErrorLine
 
 for i = 1:Ncases
-
+    
     cd(cases{i})
     fprintf( 2, ['\n\nCase ' cases{i} '...\n'] );
     try
         arInit
         arImportPEtab({'_model','_observables','_measurements','_conditions','_parameters'})
         ar.config.useFitErrorCorrection = 0;
-
+        
         arSimu(true,true,true)
         arCalcMerit
         [~,scores] = arGetMerit;
-
+        
         chi2(i) = scores.chi2_res;
         llh(i) = scores.loglik/(-2);
-
+        
         % check simulations
         simus = tdfread('_simulations.tsv');
         simus = struct2table(simus);
         simus2 = simus;
-
+        
         simus2.simulation = NaN(size(simus2.simulation));
-
+        
         q = 1;
         if strcmp(cases{i},'0006')
             simus2.simulation(1) = ar.model.data(1).yExpSimu;
@@ -50,18 +49,14 @@ for i = 1:Ncases
                 myobs = simus2.observableId(q,:);
                 mycond = simus2.simulationConditionId(q,:);
                 mytime = simus2.time(q);
-
+                
                 dataid = find(ismember({ar.model.data.name}, mycond));
                 obsid = find(ismember(ar.model.data(dataid).y, myobs));
-
+                
                 timeid = ar.model.data(dataid).tExp == mytime;
-                if logical(ar.model.data(dataid).logfitting(obsid))
-                    mysimus = 10^ar.model.data(dataid).yExpSimu(timeid, obsid);
-                else
-                    mysimus = ar.model.data(dataid).yExpSimu(timeid, obsid);
-                end
-                                simus2.simulation(q:q+size(mysimus,1)-1) = mysimus;
-
+                mysimus = ar.model.data(dataid).yExpSimu(timeid, obsid);
+                simus2.simulation(q:q+size(mysimus,1)-1) = mysimus;
+                
                 qq = 1;
                 if size(mysimus,1) > 0
                     qq = size(mysimus,1);
@@ -69,14 +64,14 @@ for i = 1:Ncases
                 q = q + qq;
             end
         end
-
+        
         abs(simus.simulation - simus2.simulation);
         SimuDiff(i) = sum(abs(simus.simulation - simus2.simulation));
         SolTable = ReadOutSolutionFile(cases{i});
-
+        
         chi2Solution(i) = SolTable.Value(SolTable.Variable=='chi2:');
         llhSolution(i) = SolTable.Value(SolTable.Variable=='llh:');
-
+        
         TolChi2(i) = SolTable.Value(SolTable.Variable=='tol_chi2:');
         TolLLH(i) = SolTable.Value(SolTable.Variable=='tol_llh:');
         TolSimu(i) = SolTable.Value(SolTable.Variable=='tol_simulations:');
@@ -90,15 +85,15 @@ for i = 1:Ncases
         chi2(i) = nan;
         llh(i) = nan;
         SimuDiff(i) = nan;
-
+        
         chi2Solution(i) = nan;
         llhSolution(i) = nan;
-
+        
         TolChi2(i) = nan;
         TolLLH(i) = nan;
         TolSimu(i) = nan;
     end
-
+    
     cd ..
 end
 
@@ -110,9 +105,6 @@ ErrorLine = ErrorLine';
 chi2Solution = chi2Solution';
 llhSolution = llhSolution';
 SimuDiff = SimuDiff';
-TolSimu = TolSimu';
-TolChi2 = TolChi2';
-TolLLH = TolLLH';
 
 Chi2Diff = abs(chi2-chi2Solution);
 LLHDiff = abs(llh-llhSolution);
