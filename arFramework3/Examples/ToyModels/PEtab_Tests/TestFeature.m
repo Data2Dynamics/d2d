@@ -1,15 +1,24 @@
+%% user input
 % set silent to false for debugging
-silent = true;
-
-fprintf( 2, 'TEST FOR IMPORT OF PETAB TOY MODELS\n' );
+silent = false;
 
 cases = {'0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008',...
     '0009', '0010', '0011', '0012', '0013', '0014','0015','0016'};
+
+% set cases for debugging
+% cases = {'0001', '0002'};
+
+%%
+fprintf( 2, 'TEST FOR IMPORT OF PETAB TOY MODELS\n' );
+
+cases = cases';
 Ncases = numel(cases);
 try
     parpool(4)
 end
 
+clear Working chi2 llh SimuDiff chi2Solution llhSolution TolChi2 TolLLH TolSimu Error ErrorFile ErrorLine
+          
 for i = 1:Ncases
     cd(cases{i})
     fprintf( 2, ['\n\nCase ' cases{i} '...\n'] );
@@ -83,17 +92,26 @@ for i = 1:Ncases
     cd ..
 end
 
+chi2 = chi2';
+llh = llh';
+Error = Error';
+ErrorFile = ErrorFile';
+ErrorLine = ErrorLine';
+chi2Solution = chi2Solution';
+llhSolution = llhSolution';
+SimuDiff = SimuDiff';
+
 Chi2Diff = abs(chi2-chi2Solution);
 LLHDiff = abs(llh-llhSolution);
 
-SimuCheck = SimuDiff<TolSimu;
-Chi2Check = Chi2Diff<TolChi2;
-LLHCheck = LLHDiff<TolLLH;
+SimuCheck = (SimuDiff<TolSimu)';
+Chi2Check = (Chi2Diff<TolChi2)';
+LLHCheck = (LLHDiff<TolLLH)';
 
 Working = double(SimuCheck.*Chi2Check.*LLHCheck);
 
 if ~silent
-    Table = table(cases',Working',SimuCheck',Chi2Check',LLHCheck',SimuDiff',Chi2Diff',LLHDiff',chi2',llh',Error',ErrorFile',ErrorLine','VariableNames',{'Case','Working','Simu','Chi2','LLH','SimuDiff','Chi2Diff','LLHDiff','chi2','llh','Error','ErrorFile','ErrorLine'})
+    Table = table(cases,Working,SimuCheck,Chi2Check,LLHCheck,SimuDiff,Chi2Diff,LLHDiff,chi2,llh,Error,ErrorFile,ErrorLine)
 end
 
 if sum(Working) == numel(Working)
