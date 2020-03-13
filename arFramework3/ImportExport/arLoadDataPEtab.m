@@ -145,8 +145,15 @@ for iCond = 1:length(uniCond)
         Sd2d.fystd{iObs} = char(string(tmp_fystd));
         
         % obsTrafo column is optinal
+        ln_fitting(iObs) = false;
         if ismember('observableTransformation', Tobs.Properties.VariableNames)
             Sd2d.logfitting(iObs) = double(strcmp(Tobs.observableTransformation(idx),'log10'));
+                        
+            % check if fitting is on natural log scale
+            ln_fitting(iObs) = strcmp(Tobs.observableTransformation(idx),'log');
+            if ln_fitting(iObs)
+                Sd2d.logfitting(iObs) = 1;
+            end
         else
             Sd2d.logfitting(iObs) = 0;
         end
@@ -177,6 +184,17 @@ for iCond = 1:length(uniCond)
                     pold = [pold, poldNoise];
                     fp = [fp,pnewNoise];
                 end
+            end
+        end
+        
+        % natural log scale fitting
+        if ln_fitting(iObs)
+            conversion_factor = log10(exp(1));
+            if isSymType(tmp_fystd, 'constant')
+                            Sd2d.fystd{iObs} = strcat(char(string(tmp_fystd)),...
+                                ' * ', num2str(conversion_factor));
+            else
+                error('fitting on log-scale not possible with error model other than absolute error')
             end
         end
     end
