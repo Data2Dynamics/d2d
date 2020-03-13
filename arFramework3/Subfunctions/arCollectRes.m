@@ -40,6 +40,7 @@ ar.chi2prior = 0;
 ar.chi2random = 0;
 ar.chi2constr = 0;
 ar.chi2fit = 0;
+ar.chi2err_logdataCorrection = 0;
 
 ar.firstorderopt = nan;
 
@@ -112,6 +113,20 @@ for jm = 1:length(ar.model)
                             end
                         end
                         resindex = resindex+length(tmpreserr(:));
+                        
+                        % add correction term for fitting on log-axis due
+                        % to normalization term of log-normal distribution
+                        islogfitted = logical(ar.model(jm).data(jd).logfitting);
+                        if any(islogfitted)
+                            data = ar.model(jm).data(jd).yExp(islogfitted);
+                            data = data(~isnan(data));
+                            ar.chi2err_logdataCorrection = ar.chi2err_logdataCorrection+ sum(log(log(10)^2 * (10.^data).^2));
+                        end
+
+                    end
+                    
+                    % add correction term for logarithmic fitting
+                    if any(ar.model(jm).data(jd).logfitting)
                     end
                     
                     % collect sensitivities for fitting
@@ -641,7 +656,7 @@ if(isfield(ar.model, 'data'))
 end
 
 if fiterrors == 1
-    ar.chi2fit = ar.chi2 + ar.chi2err;
+    ar.chi2fit = ar.chi2 + ar.chi2err + ar.chi2err_logdataCorrection;
 else
     ar.chi2fit = ar.chi2;
 end

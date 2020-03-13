@@ -142,6 +142,7 @@ meritvals.lsqnonlin     = sum([ar.res,ar.constr].^2);
 meritvals.chi2_all      = ar.chi2fit + ar.chi2constr;
 meritvals.chi2_res      = sum(ar.res(ar.res_type==1).^2); % same as ar.chi2 - ar.chi2prior
 meritvals.chi2_err      = ar.chi2err;
+meritvals.chi2_err_logdataCorrection = ar.chi2err_logdataCorrection; % correction factor from log-normal distribution normalization constant
 meritvals.chi2_err_addc = sum(ar.res(ar.res_type==2).^2); % sum of error residuals
 meritvals.chi2_constr   = ar.chi2constr;
 meritvals.chi2_prior    = ar.chi2prior;
