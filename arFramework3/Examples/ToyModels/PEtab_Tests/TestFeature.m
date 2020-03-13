@@ -4,7 +4,6 @@ silent = false;
 
 cases = {'0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008',...
     '0009', '0010', '0011', '0012', '0013', '0014','0015','0016'};
-
 % set cases for debugging
 %%
 fprintf( 2, 'TEST FOR IMPORT OF PETAB TOY MODELS\n' );
@@ -54,7 +53,11 @@ for i = 1:Ncases
                 obsid = find(ismember(ar.model.data(dataid).y, myobs));
                 
                 timeid = ar.model.data(dataid).tExp == mytime;
-                mysimus = ar.model.data(dataid).yExpSimu(timeid, obsid);
+                if logical(ar.model.data(dataid).logfitting(obsid))
+                    mysimus = 10^ar.model.data(dataid).yExpSimu(timeid, obsid);
+                else
+                    mysimus = ar.model.data(dataid).yExpSimu(timeid, obsid);
+                end
                 simus2.simulation(q:q+size(mysimus,1)-1) = mysimus;
                 
                 qq = 1;
