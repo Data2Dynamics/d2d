@@ -167,8 +167,11 @@ for imodel = 1:length(ar.model)
                 [length(ar.model(imodel).data(idata).yExp(:,iy)) 1]);
  
             rowsToAdd = [table(observableId)];
-
-            measurement = ar.model(imodel).data(idata).yExp(:, iy);
+            if ar.model(imodel).data(idata).logfitting(iy)
+                measurement = 10.^(ar.model(imodel).data(idata).yExp(:, iy));
+            else
+                measurement = ar.model(imodel).data(idata).yExp(:, iy);
+            end
             if ar.model(imodel).data(idata).normalize(iy) == 1
                 if ~threwNormWarning
                 warning('Normalization of experimental measurements is not supported in PEtab. Measurement values in ar.model(:).data(:).yExpRaw will be normalized before export.')
@@ -251,13 +254,13 @@ for imodel = 1:length(ar.model)
             rowsToAdd = [rowsToAdd, table(noiseDistribution)];
             
             % lin or log scale?
-            observableTransformation = cell(length(time),1);
-%             if ar.model(imodel).data(idata).logfitting(iy) == 0
-                observableTransformation(:) = {'lin'}; % others not possible in d2d
-%             elseif ar.model(imodel).data(idata).logfitting(iy) == 1
-%                 observableTransformation(:) = {'log10'}; % others not possible in d2d
-%             end
-            rowsToAdd = [rowsToAdd, table(observableTransformation)];
+%             observableTransformation = cell(length(time),1);
+% %             if ar.model(imodel).data(idata).logfitting(iy) == 0
+%                 observableTransformation(:) = {'lin'}; % others not possible in d2d
+% %             elseif ar.model(imodel).data(idata).logfitting(iy) == 1
+% %                 observableTransformation(:) = {'log10'}; % others not possible in d2d
+% %             end
+%             rowsToAdd = [rowsToAdd, table(observableTransformation)];
             
 %             % experiment id
 %             experimentId = cell(length(time),1);
