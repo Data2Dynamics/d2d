@@ -50,8 +50,9 @@ for iPreEq = 1:numel(noDataPreEqConds)
     condId = find(T.conditionId == noDataPreEqConds{iPreEq});
     
     Ttable = struct2table(T);
-    pold = Ttable.Properties.VariableNames(2:end);
-    fp = cellfun(@num2str,table2cell(Ttable(condId, 2:end)),...
+    idx = Ttable.Properties.VariableNames(~strcmpi(Ttable.Properties.VariableNames,'conditionId') & ~strcmpi(Ttable.Properties.VariableNames,'conditionName'));
+    pold = Ttable.Properties.VariableNames(idx);
+    fp = cellfun(@num2str,table2cell(Ttable(condId, idx)),...
         'UniformOutput',false);
     
     args = cell(0);
