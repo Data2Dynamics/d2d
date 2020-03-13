@@ -105,13 +105,16 @@ ErrorLine = ErrorLine';
 chi2Solution = chi2Solution';
 llhSolution = llhSolution';
 SimuDiff = SimuDiff';
+TolSimu = TolSimu';
+TolChi2 = TolChi2';
+TolLLH = TolLLH';
 
 Chi2Diff = abs(chi2-chi2Solution);
 LLHDiff = abs(llh-llhSolution);
 
-SimuCheck = (SimuDiff<TolSimu)';
-Chi2Check = (Chi2Diff<TolChi2)';
-LLHCheck = (LLHDiff<TolLLH)';
+SimuCheck = (SimuDiff<TolSimu);
+Chi2Check = (Chi2Diff<TolChi2);
+LLHCheck = (LLHDiff<TolLLH);
 
 Working = double(SimuCheck.*Chi2Check.*LLHCheck);
 
