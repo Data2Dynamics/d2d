@@ -5,7 +5,7 @@ import petab
 import pandas as pd
 
 
-test_id = 7
+test_id = 16
 
 # problem --------------------------------------------------------------------
 
@@ -25,8 +25,8 @@ measurement_df = pd.DataFrame(data={
 observable_df = pd.DataFrame(data={
     OBSERVABLE_ID: ['obs_a', 'obs_b'],
     OBSERVABLE_FORMULA: ['A', 'B'],
-    OBSERVABLE_TRANSFORMATION: [LIN, LOG10],
-    NOISE_FORMULA: [0.5, 0.6]
+    OBSERVABLE_TRANSFORMATION: [LIN, LOG],
+    NOISE_FORMULA: [0.5, 0.7]
 }).set_index([OBSERVABLE_ID])
 
 parameter_df = pd.DataFrame(data={

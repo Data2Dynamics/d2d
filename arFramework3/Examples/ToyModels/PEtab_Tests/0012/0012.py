@@ -53,7 +53,7 @@ simulation_df = measurement_df.copy(deep=True).rename(
     columns={MEASUREMENT: SIMULATION})
 # in the model, concentrations are used, which do not depend on the
 #  compartment size, so that the species values should stay the same
-simulation_df[SIMULATION] = [analytical_a(t, 1, 0, 0.8, 0.6)
+simulation_df[SIMULATION] = [analytical_a(t, 1, 1, 0.8, 0.6)
                              for t in simulation_df[TIME]]
 
 chi2 = petab.calculate_chi2(
