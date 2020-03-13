@@ -6,10 +6,9 @@ cases = {'0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008',...
     '0009', '0010', '0011', '0012', '0013', '0014','0015','0016'};
 
 % set cases for debugging
-% cases = {'0001', '0002'};
-
 %%
 fprintf( 2, 'TEST FOR IMPORT OF PETAB TOY MODELS\n' );
+    clear Working chi2 llh SimuDiff chi2Solution llhSolution TolChi2 TolLLH TolSimu Error ErrorFile ErrorLine
 
 cases = cases';
 Ncases = numel(cases);
@@ -17,14 +16,15 @@ try
     parpool(4)
 end
 
-clear Working chi2 llh SimuDiff chi2Solution llhSolution TolChi2 TolLLH TolSimu Error ErrorFile ErrorLine
           
 for i = 1:Ncases
+
     cd(cases{i})
     fprintf( 2, ['\n\nCase ' cases{i} '...\n'] );
     try
         arInit
         arImportPEtab({'_model','_observables','_measurements','_conditions','_parameters'})
+        ar.config.useFitErrorCorrection = 0;
         
         arSimu(true,true,true)
         arCalcMerit
@@ -50,7 +50,11 @@ for i = 1:Ncases
             obsid = find(ismember(ar.model.data(dataid).y, myobs));
             
             timeid = ar.model.data(dataid).tExp == mytime;
-            mysimus = ar.model.data(dataid).yExpSimu(timeid, obsid);
+            if logical(ar.model.data(dataid).logfitting(obsid))
+                mysimus = 10^ar.model.data(dataid).yExpSimu(timeid, obsid);
+            else
+                mysimus = ar.model.data(dataid).yExpSimu(timeid, obsid);
+            end
             simus2.simulation(q:q+size(mysimus,1)-1) = mysimus;
             
             qq = 1;
@@ -104,9 +108,9 @@ SimuDiff = SimuDiff';
 Chi2Diff = abs(chi2-chi2Solution);
 LLHDiff = abs(llh-llhSolution);
 
-SimuCheck = (SimuDiff<TolSimu)';
-Chi2Check = (Chi2Diff<TolChi2)';
-LLHCheck = (LLHDiff<TolLLH)';
+SimuCheck = (SimuDiff<TolSimu');
+Chi2Check = (Chi2Diff<TolChi2');
+LLHCheck = (LLHDiff<TolLLH');
 
 Working = double(SimuCheck.*Chi2Check.*LLHCheck);
 
