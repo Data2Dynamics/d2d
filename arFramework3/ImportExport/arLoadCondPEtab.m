@@ -53,7 +53,7 @@ for iPreEq = 1:numel(noDataPreEqConds)
     pold = Ttable.Properties.VariableNames(2:end);
     fp = cellfun(@num2str,table2cell(Ttable(condId, 2:end)),...
         'UniformOutput',false);
-        
+    
     args = cell(0);
     Sd2d.name = char(Ttable.conditionId(condId));
     fns2 = fieldnames(Sd2d);
@@ -61,7 +61,7 @@ for iPreEq = 1:numel(noDataPreEqConds)
         args(end+1) = fns2(i);
         args{end+1} = Sd2d.(fns2{i});
     end
-
+    
     D = arCreateDataStruct(m,pold,fp, args{:});
     arAddDataStruct(D,m)
 end
@@ -73,8 +73,8 @@ for m = 1:length(ar.model)
                 for k = 2:(length(fns))
                     % Check if parameter is replaced by condition
                     if sum(contains(ar.model(m).data(j).fp,fns{k}))>0    % changed p to fp to catch cases in which initial value was renamed from a0 to init_A_state
-%                         ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
-%                             num2str(T.(fns{k})(i));
+                        %                         ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
+                        %                             num2str(T.(fns{k})(i));
                         
                         if isnumeric(T.(fns{k})) % if condition parameter is replaced by a parameter instead of number
                             ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
@@ -97,11 +97,25 @@ for m = 1:length(ar.model)
                             ar.model(m).data(j).fp{InitialDataVariableIndex} = char(T.(fns{k})(i));
                         end
                         
-                     % Check if compartment parameter is set condition
-                     % specific
+                        % Check if compartment parameter is set condition
+                        % specific
                     elseif any(strcmp(ar.model(m).c,fns{k}))
                         CompartmentSet = strcmp(ar.model(m).c,fns{k});
-                        CompartmentVariable = ar.model(m).pc{CompartmentSet};
+                        
+                        % Check if compartment volume parameter exists
+                        % already, if not create it for all data sets
+                        if isempty(str2num(ar.model(m).pc{CompartmentSet}))
+                            CompartmentVariable = ar.model(m).pc{CompartmentSet};
+                        else
+                            CompartmentVariable = ['vol_' cell2mat(fns(k))];
+                            StandardCompartmentSize = str2num(ar.model(m).pc{CompartmentSet});
+                            ar.model(m).pc{CompartmentSet} = CompartmentVariable;
+                            ar.model(m).px(end+1) = {CompartmentVariable};
+                            for jData = 1:length(ar.model(m).data)
+                                ar.model(m).data(jData).p(end+1) = {['vol_' cell2mat(fns(k))]};
+                                ar.model(m).data(jData).fp(end+1) = {StandardCompartmentSize};
+                            end
+                        end
                         CompartmentDataVariableIndex = strcmp(CompartmentVariable, ar.model(m).data(j).p);
                         ar.model(m).data(j).fp{CompartmentDataVariableIndex} = num2str(T.(fns{k})(i));
                     end

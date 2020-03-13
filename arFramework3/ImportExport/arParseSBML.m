@@ -48,10 +48,6 @@ opts = argSwitch( switches, extraArgs, descriptions, 1, varargin );
 
 overwrite = opts.overwrite;
 
-% Compartments need to be kept, because they can be set in Conditions table
-% in PETab format
-opts.keepcompartments = 1;
-
 % Set tEnd
 tEnd = 100;
 if ( opts.tend )
@@ -187,10 +183,7 @@ for j=1:length(m.compartment)
         if ( opts.keepcompartments )
             fprintf(fid, '%s\t V\t "%s"\t vol.\t \n', sym_check(m.time_symbol,compName), units);
         else
-            % If size exists leave it free and write compartment size in
-            % Conditions, so that it can be overwritten later if set by
-            % Conditions table of PEtab format
-            fprintf(fid, '%s\t V\t "%s"\t vol.\t \n', sym_check(m.time_symbol,compName), units);        
+            fprintf(fid, '%s\t V\t "%s"\t vol.\t %g\n', sym_check(m.time_symbol,compName), units, m.compartment(j).size);
         end
         comps{end+1} = compName;
         comp_value(end+1) = m.compartment(j).size;
