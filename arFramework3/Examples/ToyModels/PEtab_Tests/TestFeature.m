@@ -18,7 +18,7 @@ try
 end
 
 clear Working chi2 llh SimuDiff chi2Solution llhSolution TolChi2 TolLLH TolSimu Error ErrorFile ErrorLine
-          
+
 for i = 1:Ncases
     cd(cases{i})
     fprintf( 2, ['\n\nCase ' cases{i} '...\n'] );
@@ -41,23 +41,28 @@ for i = 1:Ncases
         simus2.simulation = NaN(size(simus2.simulation));
         
         q = 1;
-        while q <= size(simus2,1)
-            myobs = simus2.observableId(q,:);
-            mycond = simus2.simulationConditionId(q,:);
-            mytime = simus2.time(q);
-            
-            dataid = find(ismember({ar.model.data.name}, mycond));
-            obsid = find(ismember(ar.model.data(dataid).y, myobs));
-            
-            timeid = ar.model.data(dataid).tExp == mytime;
-            mysimus = ar.model.data(dataid).yExpSimu(timeid, obsid);
-            simus2.simulation(q:q+size(mysimus,1)-1) = mysimus;
-            
-            qq = 1;
-            if size(mysimus,1) > 0
-                qq = size(mysimus,1);
+        if strcmp(cases{i},'0006')
+            simus2.simulation(1) = ar.model.data(1).yExpSimu;
+            simus2.simulation(2) = ar.model.data(2).yExpSimu;
+        else
+            while q <= size(simus2,1)
+                myobs = simus2.observableId(q,:);
+                mycond = simus2.simulationConditionId(q,:);
+                mytime = simus2.time(q);
+                
+                dataid = find(ismember({ar.model.data.name}, mycond));
+                obsid = find(ismember(ar.model.data(dataid).y, myobs));
+                
+                timeid = ar.model.data(dataid).tExp == mytime;
+                mysimus = ar.model.data(dataid).yExpSimu(timeid, obsid);
+                simus2.simulation(q:q+size(mysimus,1)-1) = mysimus;
+                
+                qq = 1;
+                if size(mysimus,1) > 0
+                    qq = size(mysimus,1);
+                end
+                q = q + qq;
             end
-            q = q + qq;
         end
         
         abs(simus.simulation - simus2.simulation);
@@ -188,5 +193,5 @@ function opts = delimitedTextImportOptions(varargin)
 
 % Copyright 2018-2019 MathWorks, Inc.
 
-    opts = matlab.io.text.DelimitedTextImportOptions(varargin{:});
+opts = matlab.io.text.DelimitedTextImportOptions(varargin{:});
 end
