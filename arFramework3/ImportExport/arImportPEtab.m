@@ -129,7 +129,7 @@ if doPreEquilibration
         if isfield(table2struct(Tdat), 'preequilibrationConditionId')
             uniqueSimConds = unique(Tdat.simulationConditionId);
             uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
-            if all(isnan(uniquePreEqConds)
+            if all(isnan(uniquePreEqConds))
                 uniquePreEqConds = [];
             end
             
