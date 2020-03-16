@@ -1,7 +1,9 @@
+function filenames = arExportModelToDmod(whichone,m,d,prefix)
 % arExportModelToDmod(whichone,m,d,prefix)
 %
-% Function to export data to different modelling framework (dMod)
-% See: https://github.com/dkaschek/dMod
+% Export model to dMod modeling framework
+% (https://github.com/dkaschek/dMod) or ODESS analytical steady state
+% solver (http://sysbio.uni-freiburg.de/mrosen/code9_release.py)
 % 
 %   whichone    Which kind of file, character or cell of characters
 %               model       stoichometric matrix of the ODEs' righ-hand side
@@ -16,10 +18,10 @@
 %                           argument in the symmetry detection tool without
 %                           the need to specify observations
 % 
-%   m               Model index (default: 1)
-%   d               Data index  (default: 1:length(ar.model(m).data), not always required)
+%   m           Model index (default: 1)
+%   d           Data index  (default: 1:length(ar.model(m).data), not always required)
 % 
-%   prefix          Addionional prefix for the files.
+%   prefix      Addionional prefix for the files.
 % 
 % Example (model and observables):
 % arExportModelToDmod
@@ -36,8 +38,7 @@
 % Example:
 % arExportModelToDmod({'model','emptyobs'})
 %
-% See also arExportDataToDmod
-function filenames = arExportModelToDmod(whichone,m,d,prefix)
+% See also arExportDataToDaniel
 global ar
 
 if(~exist('whichone','var') || isempty(whichone))
