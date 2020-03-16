@@ -1533,7 +1533,7 @@ function condition = addPoolSubstitutions( condition, removedStates )
 
     % Substitute current state initials into total pool
     for jp = 1 : numel( removedStates )
-        totalPool = subs( removedStates(jp).totalPoolStates, condition.sym.p.', condition.sym.fp );
+        totalPool = arSubs( arSym(removedStates(jp).totalPoolStates), condition.sym.p.', condition.sym.fp );
         totalPool_str = char( totalPool );
 
         % Remove the original initial condition parameters

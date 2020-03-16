@@ -93,7 +93,7 @@ function arReduce( m, keepTotals )
         ar.model(m).fz{end+1}   = removalStruct.fp;
         
         % Substitute state variable in rate equations
-        fvtemp = arSubs( sym( ar.model(m).fv ), removalStruct.sym.p, removalStruct.sym.fp );
+        fvtemp = arSubs( arSym( ar.model(m).fv ), removalStruct.sym.p, removalStruct.sym.fp );
         fv = cell( 1, numel( fvtemp ) );
         for a = 1 : numel( fvtemp )
             fv{a} = char( fvtemp(a) );
@@ -144,8 +144,8 @@ function arReduce( m, keepTotals )
     %findNewStates(m);
       
     % Regenerate equations
-    tmpfx = (sym(ar.model(m).N).*sym(ar.model(m).Cm)) * sym(ar.model(m).fv);
-    tmpfx_par = (sym(ar.model(m).N).*sym(ar.model(m).Cm_par)) * sym(ar.model(m).fv);
+    tmpfx = (arSym(ar.model(m).N).*arSym(ar.model(m).Cm)) * arSym(ar.model(m).fv);
+    tmpfx_par = (arSym(ar.model(m).N).*arSym(ar.model(m).Cm_par)) * arSym(ar.model(m).fv);
 
     for j=1:length(ar.model(m).x) % for every species j
         if ~isempty(tmpfx)
@@ -219,11 +219,11 @@ function [removedState, removalStruct] = genReplacementRule( m, selected, always
     removalStruct.totalVariable = totalVariable;
     removalStruct.totalPoolStates = totalPoolStates;
     removalStruct.otherStates = otherStates;
-    removalStruct.sym.p = sym(p);
-    removalStruct.sym.fp = sym(fp);
-    removalStruct.sym.totalVariable = sym(totalVariable);
-    removalStruct.sym.totalPoolStates = sym(totalPoolStates);
-    removalStruct.sym.initial = sym(removalStruct.initial);
+    removalStruct.sym.p = arSym(p);
+    removalStruct.sym.fp = arSym(fp);
+    removalStruct.sym.totalVariable = arSym(totalVariable);
+    removalStruct.sym.totalPoolStates = arSym(totalPoolStates);
+    removalStruct.sym.initial = arSym(removalStruct.initial);
 end
 
 % Convert the other states from their name to their indices as preparation
