@@ -45,7 +45,8 @@ write_problem(test_id=test_id,
               parameter_df=parameter_df,
               condition_dfs=[condition_df],
               observable_dfs=[observable_df],
-              measurement_dfs=[measurement_df])
+              measurement_dfs=[measurement_df],
+              sbml_files=['conversion_modified.xml'])
 
 # solutions ------------------------------------------------------------------
 
