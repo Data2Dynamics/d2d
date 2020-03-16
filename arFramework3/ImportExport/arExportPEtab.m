@@ -1,15 +1,16 @@
 function arExportPEtab(name, export_SBML)
 % arExportPEtab(name, export_SBML)
-%
-% Exports model, data, experimental condition and measurement details to 
-% PEtab format (https://github.com/ICB-DCM/PEtab)
+% Export parameter estimation problem to PEtab standard. 
 %
 %   name          string that will be prepended to all exported files
-%   export_SBML   export model SBML file as part of PEtab specification [true]
-
-% Not implemented yet:
-% - Visualization table
-% - Parameter table: priorType, priorParameters: not yet specified!
+%   export_SBML   export model SBML file [true]
+%
+% See also
+%       arImportPEtab
+%
+% References
+%   - PEtab standard: https://petab.readthedocs.io/en/latest/
+%   - D2D Wiki: https://github.com/Data2Dynamics/d2d/wiki/Support-for-PEtab
 
 global ar
 
@@ -106,7 +107,7 @@ for imodel = 1:length(ar.model)
     obsT.Properties.VariableNames = {'observableId', 'observableName',...
     'observableFormula', 'observableTransformation', 'noiseFormula',...
     'noiseDistribution',};
-    writetable(obsT, ['PEtab/' 'observables_' currentModelName '.tsv'],...
+    writetable(obsT, ['PEtab' filesep currentModelName '_observables.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
 
     %% Condition and Measurement Table
@@ -287,9 +288,9 @@ for imodel = 1:length(ar.model)
     condT = [table(conditionID'), condT];
     condT.Properties.VariableNames{1} = 'conditionId';
         
-    writetable(condT, ['PEtab/' 'experimentalCondition_' currentModelName  '.tsv'],...
+    writetable(condT, ['PEtab' filesep currentModelName  '_conditions.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
-    writetable(measT, ['PEtab/' 'measurementData_' currentModelName  '.tsv'],...
+    writetable(measT, ['PEtab' filesep  currentModelName  '_measurements.tsv'],...
         'Delimiter', '\t', 'FileType', 'text')
 end
 %% Parameter Table
@@ -324,7 +325,7 @@ parT = table(parameterId(:), parameterName(:), parameterScale(:), ...
 parT.Properties.VariableNames = {'parameterId', 'parameterName', ...
     'parameterScale', 'lowerBound', 'upperBound', 'nominalValue', 'estimate',};
 
-writetable(parT, ['PEtab/' 'parameters_' name  '.tsv'],...
+writetable(parT, ['PEtab' filesep currentModelName '_parameters.tsv'],...
     'Delimiter', '\t', 'FileType', 'text')
 
 %% Visualization Table

@@ -741,85 +741,96 @@ arFramework3/Examples/ToyModels/PEtab_Tests/0001/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0001/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0001/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0001/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0001/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0002/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0002/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0002/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0002/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0002/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0003/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0003/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0003/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0003/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0003/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0004/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0004/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0004/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0004/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0004/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0005/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0005/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0005/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0005/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0005/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0006/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0006/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0006/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0006/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0006/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0007/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0007/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0007/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0007/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0007/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0008/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0008/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0008/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0008/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0008/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0009/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0009/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0009/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0009/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0009/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0010/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0010/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0010/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0010/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0010/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0011/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0011/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0011/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0011/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0011/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0012/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0012/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0012/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0012/Models/_model.def
-
-arFramework3/Examples/ToyModels/PEtab_Tests/0002/Compiled/
-arFramework3/Examples/ToyModels/PEtab_Tests/0002/arSimuCalc*
-arFramework3/Examples/ToyModels/PEtab_Tests/0002/Models/Backup/
-arFramework3/Examples/ToyModels/PEtab_Tests/0002/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0012/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0013/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0013/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0013/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0013/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0013/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0014/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0014/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0014/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0014/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0014/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0015/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0015/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0015/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0015/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0015/Setup.m
 
 arFramework3/Examples/ToyModels/PEtab_Tests/0016/Compiled/
 arFramework3/Examples/ToyModels/PEtab_Tests/0016/arSimuCalc*
 arFramework3/Examples/ToyModels/PEtab_Tests/0016/Models/Backup/
 arFramework3/Examples/ToyModels/PEtab_Tests/0016/Models/_model.def
+arFramework3/Examples/ToyModels/PEtab_Tests/0016/Setup.m
 
 

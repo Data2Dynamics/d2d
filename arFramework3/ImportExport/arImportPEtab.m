@@ -1,44 +1,48 @@
-% arImportPEtab(name, doPreEquilibration, tstart)
+function arImportPEtab(name, doPreEq)
+% arImportPEtab(name, doPreEq)
+% Import parameter estimation problem formulated in the PEtab standard. 
 %
-% Import PEtab model and data format to Data2Dynamics. 
+%   name     Cell array of filenames for model, observables, measurements,
+%            conditions and parameters file (in this order):
+%               arImportPEtab({'mymodel', 'myobs', 'mymeas', 'mycond', 'mypars'})
 %
-%       name                Character string of model name or
-%                           cell array of input files               []
-%                           'model1' or {'namemodel1.xml','_OBS_model1','_MEAS_model1','_COND_model1','_PARS_model'}
-%                           if name is empty, pattern search of *.xml *obs*.tsv *cond*.tsv *meas*.tsv *pars*.tsv is performed
-%       doPreEquilibration  Apply pre-equilibration if specified in PEtab files [true]
-%       tstart              Starting time for pre-equilibration [0]
+%            Alternatively, a string can be provided that together with the 
+%            keywords 'model', 'observables', 'measurements', 'conditions', 
+%            'parameters' uniquely defines a set of PEtab files by the
+%            pattern 'name*[keyword]'
+%               arImportPEtab('my')
+%
+%   doPreEq  Apply pre-equilibration if specified in PEtab files [true]
 %
 % See also
 %       arExportPEtab
 %
 % References
-%   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
-%
-% Examples:
-% arImportPEtab
-% arImportPEtab({'namemodel1_l2v4.xml','_OBS_model1.tsv'})
-% arImportPEtab({'namemodel1_l2v4.xml',[],'_PARS_model.tsv'})
-
-function arImportPEtab(name, doPreEquilibration)
+%   - PEtab standard: https://petab.readthedocs.io/en/latest/
+%   - D2D Wiki: https://github.com/Data2Dynamics/d2d/wiki/Support-for-PEtab
 global ar
 
 if(isempty(ar))
-    error('please initialize by arInit')
+    error('Please initialize by arInit')
 end
 if isfield(ar, 'model')
-    error('Existing ar workspace detected. Please initialize by arInit for PEtab import')
+    error('Please initialize by arInit')
 end
-if ~exist('doPreEquilibration','var') || isempty(doPreEquilibration)
-    doPreEquilibration = true;
+if ~exist('doPreEquilibration','var') || isempty(doPreEq)
+    doPreEq = true;
 end    
+
+% init PEtab fields
+
+
+
 
 %TODO: read in multiple sbmls & save these paths in ar struct
 if ~exist('name','var') || isempty(name) 
     sbmlmodel = dir(['**' filesep '*.xml']);
 else
     if ischar(name)
-        sbmlmodel = dir(['**' filesep '*' name '.xml']);
+        sbmlmodel = dir(['**' filesep '*' name '*.xml']);
     else
         sbmlmodel = dir(['**' filesep name{1}]);
         if isempty(sbmlmodel)
@@ -47,7 +51,7 @@ else
     end
 end
 if isempty(sbmlmodel)
-    error('No sbml file found! Switch your path to working directory.');
+    error('No SBML file found! Switch your path to working directory.');
 end
 if length(sbmlmodel)>1
     out = stringListChooser({sbmlmodel.name});
@@ -72,35 +76,35 @@ arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
 % make dir case sensitive!
 if exist('name','var') && ~isempty(name) && ischar(name)
-        PEobs = dir([pe_dir filesep 'observables_' name '.tsv']);
-        PEmeas = dir([pe_dir filesep 'measurementData_' name '.tsv']);
-        PEconds = dir([pe_dir filesep 'experimentalCondition_' name '.tsv']);
-        PEparas = dir([pe_dir filesep 'parameters_' name '.tsv']);
+        PEobs = dir([pe_dir filesep name '*observables' '.tsv']);
+        PEmeas = dir([pe_dir filesep name '*measurements' '.tsv']);
+        PEconds = dir([pe_dir filesep name '*conditions' '.tsv']);
+        PEparas = dir([pe_dir filesep name '*parameters' '.tsv']);
 else
     if ~exist('name','var') || isempty(name) || length(name)<2 || isempty(name{2})
-        PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'obs')]);    
+        PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'observables')]);    
     else
         PEobs = dir([name{2} '.tsv']);
     end
     if ~exist('name','var') || isempty(name) || length(name)<3 || isempty(name{3})
-        PEmeas = dir([pe_dir filesep sprintf('*%s*.tsv', 'meas')]);
+        PEmeas = dir([pe_dir filesep sprintf('*%s*.tsv', 'measurements')]);
     else
         PEmeas = dir([name{3} '.tsv']);
     end
     if ~exist('name','var') || isempty(name) || length(name)<4 || isempty(name{4})
-        PEconds = dir([pe_dir filesep sprintf('*%s*.tsv', 'cond')]);
+        PEconds = dir([pe_dir filesep sprintf('*%s*.tsv', 'conditions')]);
     else
         PEconds = dir([name{4} '.tsv']);
     end
     if ~exist('name','var') || isempty(name) || length(name)<5 || isempty(name{5})
-        PEparas = dir([pe_dir filesep sprintf('*%s*.tsv', 'par')]);
+        PEparas = dir([pe_dir filesep sprintf('*%s*.tsv', 'parameters')]);
     else
         PEparas = dir([name{5} '.tsv']);
     end
 end
 
 if length(PEparas) > 1 || length(PEmeas) > 1 || length(PEconds) > 1 || length(PEobs) > 1
-    error('Found more than one peTAB file.')
+    error('Found more than one peTAB file. Please provide a unique name substring or specify names of the individual files directly.')
 end
 
 % ToDo: Loop over several models
@@ -120,7 +124,7 @@ arFindInputs % might overwrite parameters due to ar.pExtern, but input times mig
 arLoadParsPEtab([pe_dir filesep PEparas.name]); % get para values from parameter label
 
 % pre-equilibration
-if doPreEquilibration
+if doPreEq
     tstart = -1e7;
     for imodel = 1:length(ar.model)
         Tdat = T{imodel,1};

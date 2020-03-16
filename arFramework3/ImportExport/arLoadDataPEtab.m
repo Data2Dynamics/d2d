@@ -1,21 +1,15 @@
 % [Tdat, Tobs] = arLoadDataPEtab(datafilename, obsfilename, m)
 %
-% This function can be used to process data files in the format of PEtab.
+% Process measurement and observable table from PEtab format.
 %
-%   datafilename    name of meas file.
-%   obsfilename     name of obs file
+%   datafilename    name of measurements file.
+%   obsfilename     name of observables file
 %   m               model that shall be linked to. Name or ID [length(ar.model)]
 %
-% In this data format, there is one single .tsv-file that contains all data
-% points. This data format shall allow easier transitions between modeling
-% tools.
 % This load-data-function utilizes a different approach than the usual data.def file:
 % Firstly, an empty data struct is created which is subsequently appended to the ar struct.
 %
-% See also arCreateDataStruct arAddDataStruct
-%
-% References
-%   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
+% See also arImportPEtab arCreateDataStruct arAddDataStruct
 
 function [Tdat, Tobs] = arLoadDataPEtab(datafilename, obsfilename, m)
 

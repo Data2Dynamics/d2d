@@ -1,6 +1,6 @@
 % varargout = arParseSBML(filename, varargin)
 %
-% Translate SBML model and to .def files
+% Parse SBML model and to .def files
 %
 % Options which can be specified are:
 %   tEnd                - Final simulation time (default = 100)

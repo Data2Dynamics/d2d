@@ -1,21 +1,11 @@
 % arLoadParsPEtab(filename)
+% 
+%   filename    name of the PEtab parameter table
 %
-% Loads parameters from filename into ar
-% 
-%   filename    is the name of the *.tsv file which will be loaded in the
-%               ar-struct
-%
-% This is required to load additional information about parameters from
-% PEtab data standard
-% 
-% Example
-%     arLoadParsPEtab('parameters_Boehm_JProteomeRes2014.tsv')
-% 
-% References
-%   - https://github.com/ICB-DCM/PEtab/blob/master/doc/documentation_data_format.md
+% See also
+%   arImportPEtab
 
 function arLoadParsPEtab(filename)
-
 global ar
     
 if ~contains(filename,'.tsv')
