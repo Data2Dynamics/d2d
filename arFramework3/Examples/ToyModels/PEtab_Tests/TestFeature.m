@@ -136,10 +136,10 @@ opts = delimitedTextImportOptions;
 % 
 % % Specify range and delimiter
 % opts.DataLines = [1, 2; 5, Inf];
-opts.Delimiter = " ";
+opts.Delimiter = ' ';
 % 
 % % Specify column names and types
-opts.VariableNames = ["Variable", "Value"];
+opts.VariableNames = {'Variable', 'Value'};
 % opts.VariableTypes = ["string", "double"];
 % 
 % % Specify file level properties
