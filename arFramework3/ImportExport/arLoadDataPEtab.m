@@ -139,6 +139,7 @@ for iCond = 1:length(uniCond)
         else
             tmp_fystd = Tobs.noiseFormula(idx);
         end
+        tmp_fystd_raw = tmp_fystd;
         for jObs = 1:length(Tobs.observableId)
             tmp_fystd = arSubs(arSym(tmp_fystd),arSym(Tobs.observableId{jObs}),arSym(['(' Tobs.observableFormula{jObs} ')']));
         end
@@ -190,15 +191,15 @@ for iCond = 1:length(uniCond)
         % natural log scale fitting
         if ln_fitting(iObs)
             conversion_factor = log10(exp(1));
-            if isSymType(tmp_fystd, 'constant')
+            if ~sum(ismember(symvar(arSym(tmp_fystd_raw)), arSym(Sd2d.y)))
                             Sd2d.fystd{iObs} = strcat(char(string(tmp_fystd)),...
                                 ' * ', num2str(conversion_factor));
+                            warning(['Active fitting on natural logarithm scale for observable ' Sd2d.y{iObs} '. Do not change ar.config.fiterrors!'])
             else
                 error('fitting on log-scale not possible with error model other than absolute error')
             end
         end
     end
-    
     
     % experimental data
     Sd2d.yExp = nan(length(uniTimes),length(uniObs));
