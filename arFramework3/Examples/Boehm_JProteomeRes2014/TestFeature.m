@@ -1,5 +1,5 @@
 function TestFeature()
-fprintf( 'INTEGRATION TEST FOR PETAB EXPORT & IMPORT (Boehm 2014)\n' );
+fprintf( 2,  'INTEGRATION TEST FOR PETAB EXPORT & IMPORT (Boehm 2014)\n' );
 
 fprintf( 'Compiling model...\n' );
 Setup_FullModel_Boehm2014
@@ -15,7 +15,7 @@ arExportPEtab
 
 fprintf( '\nImporting from PEtab format...\n' );
 arInit
-arImportPEtab('PEtab/namemodel1_l2v4')
+arImportPEtab('Boehm_JProteomeRes2014')
 arSimu(true,true,true)
 arCalcMerit
 arGetMerit
