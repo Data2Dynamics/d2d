@@ -19,7 +19,7 @@ function testFeature()
         arLoadModel('test');
         arLoadData( 'filter',   1, 'xls', true, 'RemoveConditions', cull );
         remaining = filterData( data, cull );
-        maskTable = maskTable( data );
+        maskTable = maskTableFun( data );
         pass(a) = sum(sum((remaining.'==maskTable)|isnan(maskTable))) == numel(maskTable); %#OK
     
         ar = cAr;
@@ -44,7 +44,7 @@ function remaining = filterData( data, cull )
     remaining = cell2mat(cellfun( @(x)str2num(x), remaining, 'UniformOutput', false ));
 end
 
-function maskTable = maskTable( data )
+function maskTable = maskTableFun( data )
     global ar;
     maskTable = [];
     for jd = 1 : numel( ar.model(1).data )
