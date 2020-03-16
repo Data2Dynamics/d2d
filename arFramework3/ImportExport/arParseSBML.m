@@ -1084,9 +1084,9 @@ sv = symvar(s);
 svinter = intersect(sv,keywords);
 
 for i=1:length(svinter)
-    if any(strcmp(svinter,'time')) == 1
+    if any(strcmp(svinter,'time'))
         for k=1:3  
-            s = regexprep(s,'time',timeSymbol,'all');
+            s = regexprep(s,'\<time\>',timeSymbol,'all'); % just replace whole word 'time'
         end
     end
     for j=1:3

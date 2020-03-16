@@ -76,28 +76,28 @@ arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
 % make dir case sensitive!
 if exist('name','var') && ~isempty(name) && ischar(name)
-        PEobs = dir([pe_dir filesep name '*observables' '.tsv']);
-        PEmeas = dir([pe_dir filesep name '*measurements' '.tsv']);
-        PEconds = dir([pe_dir filesep name '*conditions' '.tsv']);
-        PEparas = dir([pe_dir filesep name '*parameters' '.tsv']);
+        PEobs = dir([pe_dir filesep name '*observable*' '.tsv']);
+        PEmeas = dir([pe_dir filesep name '*measurement*' '.tsv']);
+        PEconds = dir([pe_dir filesep name '*condition*' '.tsv']);
+        PEparas = dir([pe_dir filesep name '*parameter*' '.tsv']);
 else
     if ~exist('name','var') || isempty(name) || length(name)<2 || isempty(name{2})
-        PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'observables')]);    
+        PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'observable')]);    
     else
         PEobs = dir([name{2} '.tsv']);
     end
     if ~exist('name','var') || isempty(name) || length(name)<3 || isempty(name{3})
-        PEmeas = dir([pe_dir filesep sprintf('*%s*.tsv', 'measurements')]);
+        PEmeas = dir([pe_dir filesep sprintf('*%s*.tsv', 'measurement')]);
     else
         PEmeas = dir([name{3} '.tsv']);
     end
     if ~exist('name','var') || isempty(name) || length(name)<4 || isempty(name{4})
-        PEconds = dir([pe_dir filesep sprintf('*%s*.tsv', 'conditions')]);
+        PEconds = dir([pe_dir filesep sprintf('*%s*.tsv', 'condition')]);
     else
         PEconds = dir([name{4} '.tsv']);
     end
     if ~exist('name','var') || isempty(name) || length(name)<5 || isempty(name{5})
-        PEparas = dir([pe_dir filesep sprintf('*%s*.tsv', 'parameters')]);
+        PEparas = dir([pe_dir filesep sprintf('*%s*.tsv', 'parameter')]);
     else
         PEparas = dir([name{5} '.tsv']);
     end
