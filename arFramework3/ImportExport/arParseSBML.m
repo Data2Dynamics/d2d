@@ -835,7 +835,6 @@ if(~exist('Setup.m','file'))
         short_filename = [short_filename '_' C{i}];
     end
     fprintf(fid, 'arLoadData(''%s'');\n',['measurementData' short_filename '.tsv']);
-    fprintf(fid, 'arSetParsSBML(''%s'');\n',['parameters' short_filename '.tsv']);
     fprintf(fid, 'arCompileAll;\n');
 else
     fprintf('Setup.m already available in the working directory.\n')
