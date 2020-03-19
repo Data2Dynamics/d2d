@@ -1,5 +1,5 @@
-function InitVPL(m,d,idpred,tpred,sigma,stepmode)
-% InitVPL(m,d,idpred,tpred,sigma,stepmode)
+function InitVPL(m,d,idpred,tpred,sigma,stepmode,alpha)
+% InitVPL(m,d,idpred,tpred,sigma,stepmode,alpha)
 %
 % m:           Model index
 % d:           Data index
@@ -9,6 +9,7 @@ function InitVPL(m,d,idpred,tpred,sigma,stepmode)
 % stepmode:    Defines which step choice algorithm is employed [2]
 %       -1: Basic step choice based on chi2 difference of last step
 %       -2: Adaptive step choice based on a theoretical upper chi2 limit
+% alpha:       Alpha level setting the threshold [0.05]
 % 
 % Initializes the struct ar.vpl for the validation profile calculation.
 % Separating this function from the main function VPL allows easy
@@ -36,6 +37,15 @@ end
 if (~exist('stepmode','var')) || (isempty(stepmode))
     stepmode = 2;
 end
+if (~exist('alpha','var')) || (isempty(alpha))
+    alpha = 0.05;
+elseif alpha ~= 0.05
+    fprintf(['\n The specified alpha-level deviates from  alpha = 0.05. \n',...
+        'Consider varying ar.vpl.config.chi2dif_max and ar.vpl.config.chi2dif_min',...
+        ' to adjust the step sizes \n in order to guarantee fast sampling',...
+        ' to the confidence threshold. \n']);
+end
+
 %% Simulate sigma if not specified:
 if (~exist('sigma','var')) || (isempty(sigma))
     if ar.config.fiterrors == -1
@@ -67,9 +77,10 @@ end
 ar.vpl.general.sigma = sigma;
 
 %% Technical algorithm inputs and magic factors
-ar.vpl.config.chi2dif_max = 0.2; 
+ar.vpl.config.chi2dif_max = 0.3; 
 ar.vpl.config.chi2dif_min = 0.05; % Not actual minimimal value
-ar.vpl.config.chi2max = 1.2*icdf('chi2',0.95,1); % Maximal chi2 profile value
+ar.vpl.config.alpha = alpha;
+ar.vpl.config.chi2max = 1.2*icdf('chi2',1-alpha,1); % Maximal chi2 profile value
 ar.vpl.config.maxsteps = 100; 
 ar.vpl.config.stepfactor = 1.5; % Step size adaption factor
 ar.vpl.config.maxrange = 50*sigma; % Maximal absolute range of profile in each direction

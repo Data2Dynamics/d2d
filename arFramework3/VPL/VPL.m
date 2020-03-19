@@ -252,7 +252,7 @@ ar.vpl = gen_struct.perm;
 zs = ar.vpl.results.z;
 chi2s = ar.vpl.results.chi2;
 
-if min(chi2s) < 0
+if min(chi2s) < -0.1
     fprintf('\n WARNING VPL: VPL found a better chi2 value by a decrease of %0.4g \n',...
         -min(chi2s));
 end
