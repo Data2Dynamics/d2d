@@ -1,4 +1,4 @@
-% status = arLoadLatest([pattern])
+% status = arLoadLatest([pattern],[loadOnlyParams])
 % 
 %  Loads the most recent workspace. With the regular expression "pattern"
 %  the most recent workspace which fits to the regular experession
@@ -10,6 +10,9 @@
 % 
 %     pattern          optional regular experession 
 % 
+%     loadOnlyParams    [false]     whole ar is loaded by arLoad
+%                       true        only arLoadPara is executed
+% 
 %     status           optional boolean, specifies if a workspace was found and loaded 
 %
 % Examples:
@@ -18,9 +21,12 @@
 % 
 %   arLoadLatest('PLE');
 
-function varargout = arLoadLatest(pattern)
+function varargout = arLoadLatest(pattern,loadOnlyParams)
 if ~exist('pattern','var') || isempty(pattern)
     pattern = [];
+end
+if ~exist('loadOnlyParams','var') || isempty(loadOnlyParams)
+    loadOnlyParams = false; % load whole ar in workspace
 end
 if ~exist('Results','dir')
     error('No results folder exist. arLoadLatest can only be executed in a D2D working directory.')
@@ -64,7 +70,11 @@ end
 
 if ~isempty(dates)
     [~,rf] = sort(datNum); % sorting according to date  
-    arLoad(folders{rf(end)});
+    if loadOnlyParams
+        arLoadPars(folders{rf(end)});
+    else
+        arLoad(folders{rf(end)});
+    end
     status = true;
 else
     status = false;
