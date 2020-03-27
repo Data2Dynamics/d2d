@@ -1,6 +1,6 @@
 % arPlotResiduals(saveToFile)
-% 
-% Plot residuals as quantile-quantile plot and 
+%
+% Plot residuals as quantile-quantile plot and
 % autocorrelation (res_{i} versus res_{i+1})
 %
 %   saveToFile    [false]
@@ -23,7 +23,10 @@ tmpres = [];
 for m=1:length(ar.model)
     for d=1:length(ar.model(m).data)
         for y=1:size(ar.model(m).data(d).res, 2)
-            tmpres1 = ar.model(m).data(d).res(:,y);
+            if ar.model(m).data(d).qFit(y) == 0
+                continue
+            end
+            tmpres1 = ar.model(m).data(d).res(~isnan(ar.model(m).data(d).yExp(:,y)),y);
             tmpres = [tmpres; tmpres1(~isnan(tmpres1))]; %#ok<AGROW>
         end
     end
@@ -44,10 +47,14 @@ arSubplotStyle(g);
 for m=1:length(ar.model)
     for d=1:length(ar.model(m).data)
         for y=1:size(ar.model(m).data(d).res, 2)
-            tmpres = ar.model(m).data(d).res(:,y);
-            ttmp = ar.model(m).data(d).tExp(~isnan(tmpres));
+            if ar.model(m).data(d).qFit(y) == 0
+                continue
+            end
+            tmpres = ar.model(m).data(d).res(~isnan(ar.model(m).data(d).yExp(:,y)),y);
+            ttmp = ar.model(m).data(d).tExp(~isnan(ar.model(m).data(d).yExp(:,y)));
+            ttmp = ttmp(~isnan(tmpres));
             tmpres = tmpres(~isnan(tmpres));
-			tunique = unique(ttmp); %R2013a compatible
+            tunique = unique(ttmp); %R2013a compatible
             for jt = 2:length(tunique);
                 res1 = tmpres(ttmp==tunique(jt));
                 res2 = tmpres(ttmp==tunique(jt-1));
@@ -86,10 +93,10 @@ figcolor = [1 1 1];
 ar.plot.time = now;
 
 if(isfield(ar.plot, 'fighandel_res') && ~isempty(ar.plot.fighandel_res) && ...
-    ar.plot.fighandel_res ~= 0 && ...
-    sum(ar.plot.fighandel_res==openfigs)>0 && ...
-    strcmp(get(ar.plot.fighandel_res, 'Name'), figname))
-
+        ar.plot.fighandel_res ~= 0 && ...
+        sum(ar.plot.fighandel_res==openfigs)>0 && ...
+        strcmp(get(ar.plot.fighandel_res, 'Name'), figname))
+    
     h = ar.plot.fighandel_res;
     figure(h);
 else
