@@ -64,7 +64,11 @@ for jp=1:np
     if(jp==2)
         hbar = waitbar(0, 'Please wait...');
     elseif(jp>2)
-        hbar = waitbar(jp / np, hbar, 'Please wait...');
+        if np<=100
+            hbar = waitbar(jp / np, hbar, sprintf('Please wait... (%i/%i)',jp,np));
+        elseif (ceil(jp/50)*50) == jp  % only ever 50th parameter set (otherwise it takes too much time)
+            hbar = waitbar(jp / np, hbar, sprintf('Please wait... (%i/%i done)',jp,np));
+        end
     end
     
     ar.p = ps(jp,:) + 0;
