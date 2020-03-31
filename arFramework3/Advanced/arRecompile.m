@@ -142,6 +142,7 @@ else  % setup commands are not stored/not available, e.g. because of older code 
     end
     
 end
+ar.config.savepath = arIn.config.savepath;
 
 
 % Check, wether data is the same:
