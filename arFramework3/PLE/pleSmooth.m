@@ -36,8 +36,8 @@ if(~exist('quick','var'))
 end
 if(nargin<1)
     fprintf('PLE smoothing for %i parameters ...\n', sum(ar.qFit))
-    jindex = find(ar.qFit);
-    for j=1:length(ar.ple.chi2s)
+    jindex = find(ar.qFit==1);
+    for j=1:length(jindex)
         pleSmooth(jindex(j),1)
     end
     return
