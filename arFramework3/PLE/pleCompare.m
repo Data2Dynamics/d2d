@@ -8,12 +8,18 @@
 %                      if is empty fileChooser is opened
 %    savetofile  [0]   boolean, specifies if plot with results is saved to
 %                      [ples{end}.savePath '/ple_compare']. 
+%    plotLHS     [0]   Add fits in ar.ps, ar.chi2s?
 
-function pleCompare(ples, labels, savetofile)
+function ars = pleCompare(ples, labels, savetofile, plotLHS)
+if ~exist('plotLHS','var') || isempty(plotLHS)
+    plotLHS = 0;
+end
+global ar
 
 if(nargin==0) || (isempty(ples) || isempty(labels))
     filenames = fileChooserMulti('./Results', true);
     
+    ars = {};
     ples = {};
     labels = {};
     for j=1:length(filenames)
@@ -21,6 +27,8 @@ if(nargin==0) || (isempty(ples) || isempty(labels))
         fname = ['./Results/' filenames{j} '/workspace.mat']
         if(exist(fname,'file'))
             tmpple = load(fname);
+            ars{end+1} = ar;
+            ars{end}.filename = fname;
             ples{end+1} = tmpple.ar.ple; %#ok<AGROW>
             labels{end+1} = filenames{j}; %#ok<AGROW>
         else
@@ -42,6 +50,7 @@ if(isempty(drin))
 else
     ples = ples(drin);
     labels = labels(drin);
+    ars = ars(drin);
 end
 
 
@@ -120,7 +129,8 @@ for j=1:length(pLabels)
     if(j == length(pLabels))
         subplot(nrows,ncols,j+1)
         mypos = get(gca,'Position');
-        myleg = legend(hs, strrep(labels,'_','\_'), strrep(labels,'_','\_'));
+%         myleg = legend(hs, strrep(labels,'_','\_'), strrep(labels,'_','\_'));
+        myleg = legend(hs, strrep(labels,'_','\_'));
         legpos = get(myleg,'Position');
         set(myleg,'Position',[mypos(1) mypos(2)+mypos(4)-legpos(4) legpos(3:4)])
         set(gca,'Visible','off')
