@@ -2,29 +2,47 @@
 % 
 % Compare profile likelihoods of two runs
 %
-%    ples              cell array with ple structs to compare, 
-%                      if is empty fileChooser is opened
+%    ples_or_filenames 1) ples: cell array with ple structs to compare, 
+%                      2) A list of filenames as they are returned by
+%                      fileList.m
+%                      3) if is empty fileChooser is opened
 %    labels            cell array with labels for the ples,
 %                      if is empty fileChooser is opened
 %    savetofile  [0]   boolean, specifies if plot with results is saved to
 %                      [ples{end}.savePath '/ple_compare']. 
 %    plotLHS     [0]   Add fits in ar.ps, ar.chi2s?
 
-function ars = pleCompare(ples, labels, savetofile, plotLHS)
+function ars = pleCompare(ples_or_filenames, labels, savetofile, plotLHS)
 if ~exist('plotLHS','var') || isempty(plotLHS)
     plotLHS = 0;
 end
 global ar
 
-if(nargin==0) || (isempty(ples) || isempty(labels))
-    filenames = fileChooserMulti('./Results', true);
+if nargin>0 && iscell(ples_or_filenames)
+    if sum(cellfun(@ischar,ples_or_filenames)~=1)==0
+        filenames = ples_or_filenames;
+        ples = {};
+    else
+        filenames = [];
+        ples = ples_or_filenames;
+    end
+else
+    filenames = [];
+    ples = ples_or_filenames;
+end
+    
+
+if ~isempty(filenames) || (nargin==0) || (isempty(ples) || isempty(labels))
+    if ((nargin==0) || (isempty(ples) || isempty(labels))  ) && isempty(filenames)
+        filenames = fileChooserMulti('./Results', true);
+    end
     
     ars = {};
     ples = {};
     labels = {};
     for j=1:length(filenames)
 %         fname = ['./Results/' filenames{j} '/PLE/results.mat']
-        fname = ['./Results/' filenames{j} '/workspace.mat']
+        fname = ['./Results/' filenames{j} '/workspace.mat'];
         if(exist(fname,'file'))
             tmpple = load(fname);
             ars{end+1} = ar;
@@ -34,14 +52,18 @@ if(nargin==0) || (isempty(ples) || isempty(labels))
         else
             fprintf('%s does not contains PLE\n', filenames{j});
         end
-        ples{end}.chi2 = min(cell2mat(cellfun(@min,ples{end}.chi2s, 'UniformOutput', false)));
+        if isfield(ples{end},'chi2s')
+            ples{end}.chi2 = min(cell2mat(cellfun(@min,ples{end}.chi2s, 'UniformOutput', false)));
+        end
     end
 end
 
 drin = [];
 for i=1:length(ples)
-    if(~isempty(ples{i}.ps))
-        drin = [drin,i];
+    if isfield(ples{i},'ps')
+        if(~isempty(ples{i}.ps))
+            drin = [drin,i];
+        end
     end
 end
 if(isempty(drin))
