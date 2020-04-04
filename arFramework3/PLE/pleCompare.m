@@ -28,7 +28,7 @@ if nargin>0 && iscell(ples_or_filenames)
     end
 else
     filenames = [];
-    ples = [];
+    ples = ples_or_filenames;
 end
     
 
