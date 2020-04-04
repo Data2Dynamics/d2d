@@ -35,7 +35,7 @@ if(~exist('breakon_point', 'var') || isempty(breakon_point))
     breakon_point = true;
 end
 if(~exist('mode', 'var') || isempty(mode))
-    mode = 1;
+    mode = 2;  % Before March, 20th 2020, mode=1 was default.
 end
 if(~exist('autosave', 'var') || isempty(autosave))
     autosave= true;
