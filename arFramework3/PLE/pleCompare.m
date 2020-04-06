@@ -16,6 +16,9 @@ function ars = pleCompare(ples_or_filenames, labels, savetofile, plotLHS)
 if ~exist('plotLHS','var') || isempty(plotLHS)
     plotLHS = 0;
 end
+if ~exist('savetofile','var') || isempty(savetofile)
+    savetofile = false;
+end
 global ar
 
 if nargin>0 && iscell(ples_or_filenames)
@@ -28,7 +31,9 @@ if nargin>0 && iscell(ples_or_filenames)
     end
 else
     filenames = [];
-    ples = ples_or_filenames;
+    if nargin>0
+        ples = ples_or_filenames;
+    end
 end
     
 
@@ -138,11 +143,11 @@ for j=1:length(pLabels)
     plot(xlim, [1 1], 'k--')
     hold off
     
-    xlabel(['log_{10}(' strrep(pLabels{j},'_','\_') ')'])
+    xlabel(['log_{10}(' arNameTrafo(pLabels{j}) ')'])
     ylim([-0.1 1.3]);
 
     if(mod(j-1,ncols)==0)
-        ylabel('PL')
+        ylabel('-2 PL')
     else
         ylabel('')
     end
@@ -155,6 +160,15 @@ for j=1:length(pLabels)
         myleg = legend(hs, strrep(labels,'_','\_'));
         legpos = get(myleg,'Position');
         set(myleg,'Position',[mypos(1) mypos(2)+mypos(4)-legpos(4) legpos(3:4)])
+        if length(labels)>20
+            set(myleg,'FontSize',6)
+        elseif length(labels)>12
+            set(myleg,'FontSize',7)
+        elseif length(labels)>9
+            set(myleg,'FontSize',8)
+        elseif length(labels)>6
+            set(myleg,'FontSize',9)
+        end            
         set(gca,'Visible','off')
     end
 end
@@ -173,5 +187,3 @@ if(savetofile && exist(ples{end}.savePath, 'dir'))
         system(['export LD_LIBRARY_PATH=""; ps2pdf  -dEPSCrop ' [ples{end}.savePath '/ple_compare'] '.eps '  [ples{end}.savePath '/ple_compare'] '.pdf']);
     end
 end
-
-
