@@ -3,7 +3,7 @@
 % Get parameter value by matching label to ar.pLabel
 % 
 % pLabel	name of the parameter
-% qLog10	logical to get log10 of parameter value [false]
+% qLog10	logical to get log10 of parameter value [ar.qLog10]
 %
 % p         parameter value
 %
