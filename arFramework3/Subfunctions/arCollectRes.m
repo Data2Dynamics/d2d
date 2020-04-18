@@ -665,7 +665,7 @@ if(isfield(ar.model, 'data') && ~isempty(ar.res))
     ar.res_NaN = find(isnan(ar.res));
     if(sum(ar.res_NaN)>0)
         arDebugResidual;
-        error('%i NaNs in residuals (check ar.res_NaN)', sum(isnan(ar.res)));
+        error('d2d:arCollectRes:NaN_in_res','%i NaNs in residuals (check ar.res_NaN)', sum(isnan(ar.res)));
     else
         ar = rmfield(ar,'res_NaN');
     end
@@ -689,7 +689,7 @@ if(isfield(ar.model, 'data') && ~isempty(ar.res))
             warning('ar.config.fiterrors = -1 enforces usage of exp. errors. NaN in res or sres occur if no exp. Errors are in the data. Please check.')
         end
         arDebugResidual;
-        error('NaN in derivative of residuals: %i', sum(sum(isnan(ar.sres(:,ar.qFit==1)))));
+        error('d2d:arCollectRes:NaN_in_sres','NaN in derivative of residuals: %i', sum(sum(isnan(ar.sres(:,ar.qFit==1)))));
     end
 end
 

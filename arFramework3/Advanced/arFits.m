@@ -114,9 +114,18 @@ else
 
 end
 
-arCalcMerit(true,ar.p(ar.qFit==1));
 pReset = ar.p;
-chi2Reset = arGetMerit('chi2fit') + arGetMerit('chi2constr');
+try
+    arCalcMerit(true,ar.p(ar.qFit==1));
+    chi2Reset = arGetMerit('chi2fit') + arGetMerit('chi2constr');
+catch ERR
+    if strcmp(ERR.identifier,'d2d:arCollectRes:NaN_in_res')~=1 && strcmp(ERR.identifier,'d2d:arCollectRes:NaN_in_sres')~=1
+        rethrow(ERR)
+    else % do not throw an error if NaNs are in residuals for the initial guess
+        chi2Reset = Inf;
+        warning(ERR.message)
+    end
+end
 
 if(log_fit_history)
     ar.fit_hist = [];
@@ -212,4 +221,12 @@ else
     fprintf('did not find better fit\n');
     ar.p = pReset;
 end
-arCalcMerit(true,[]);
+try
+    arCalcMerit(true,[]);
+catch ERR
+    if strcmp(ERR.identifier,'d2d:arCollectRes:NaN_in_res')~=1 && strcmp(ERR.identifier,'d2d:arCollectRes:NaN_in_sres')~=1
+        rethrow(ERR)
+    else % do not throw an error if NaNs are in residuals for the initial guess
+        warning(ERR.message)
+    end
+end
