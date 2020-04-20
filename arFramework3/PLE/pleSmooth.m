@@ -108,7 +108,7 @@ elseif(jk <= length(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}) && ar.ple.IDstat
             d = diff(chi2s(1:globminindex));
             dsort = -sort(-d);  % biggest is 1st
             [~,inddmax] = max(d);
-            if ~isempty(d)
+            if length(d) > 2 
                 if dsort(1) > dsort(2) + 5*(dsort(2)-dsort(3))  % if jump is 5x larger than last jump
                     candidateindex_down = union(candidateindex_down,inddmax(1)-1);
                 end
@@ -134,7 +134,7 @@ elseif(jk <= length(ar.ple.chi2s) && ~isempty(ar.ple.chi2s{jk}) && ar.ple.IDstat
             d = diff(chi2s(n:-1:globminindex));
             dsort = -sort(-d);  % biggest is 1st
             [~,inddmax] = max(d);
-            if ~isempty(d)
+            if length(d) > 2
                 if dsort(1) > dsort(2) + 5*(dsort(2)-dsort(3))  % if jump is 5x larger than last jump
                     candidateindex_up = union(candidateindex_up,n-inddmax(1)+1);
                 end
