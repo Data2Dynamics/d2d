@@ -42,6 +42,8 @@ double spline10(double t, double t1, double p1, double t2, double p2, double t3,
 double spline_pos10(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, int ss, double dudt);
 double monospline10(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10);
 
+double spline20(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10,double t11, double p11, double t12, double p12, double t13, double p13, double t14, double p14, double t15, double p15, double t16, double p16, double t17, double p17, double t18, double p18, double t19, double p19, double t20, double p20, int ss, double dudt);
+
 /* Implementations which store the coefficients */
 double fastspline3(double t, int ID, double **splineCache, int *idCache, double t1, double p1, double t2, double p2, double t3, double p3, int ss, double dudt);
 double fastspline_pos3(double t, int ID, double **splineCache, int *idCache, double t1, double p1, double t2, double p2, double t3, double p3, int ss, double dudt);
@@ -75,6 +77,9 @@ double Dmonospline5(double t, double t1, double p1, double t2, double p2, double
 double Dspline10(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, int ss, double dudt, int id);
 double Dspline_pos10(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, int ss, double dudt, int id);
 double Dmonospline10(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, int id);
+
+
+double Dspline20(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, double t11, double p11, double t12, double p12, double t13, double p13, double t14, double p14, double t15, double p15, double t16, double p16, double t17, double p17, double t18, double p18, double t19, double p19, double t20, double p20, int ss, double dudt, int id);
 
 /* Implementations which store the coefficients */
 double Dfastspline3(double t, int ID, double **splineCache, int *idCache, double t1, double p1, double t2, double p2, double t3, double p3, int ss, double dudt, int id);
