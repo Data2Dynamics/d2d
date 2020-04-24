@@ -97,6 +97,9 @@ ar.ple.optimset_tol = 1e-1;
 %to accept the new minimum
 
 ar.ple.p_labels = ar.pLabel;
+ar.ple.lb = ar.lb;
+ar.ple.ub = ar.ub;
+ar.ple.qLog10 = ar.qLog10;
 ar.ple.conf_lb = nan(1,length(ar.ple.p));
 ar.ple.conf_ub = nan(1,length(ar.ple.p));
 ar.ple.conf_lb_point = nan(1,length(ar.ple.p));

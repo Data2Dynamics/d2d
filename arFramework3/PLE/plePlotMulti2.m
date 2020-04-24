@@ -116,7 +116,7 @@ end
 
 
 function h = myRaiseFigure(figname)
-
+global ar
 openfigs = get(0,'Children');
 
 figcolor = [1 1 1];

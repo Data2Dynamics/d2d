@@ -126,4 +126,5 @@ else
     error('not supported variable type for resultFolder');
 end
 
+S.ar.pLabel = arReplaceOldParameterNames(S.ar.pLabel);
 ar = arImportPars(S.ar, pars_only, pattern, fixAssigned, ar, antipattern);

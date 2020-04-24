@@ -108,8 +108,8 @@ elseif(ischar(opt))
             for d=1:length(ar.model(m).data)
                 trefy = strmatch(opt,ar.model(m).data(d).y,'exact');
                 for y=1:length(trefy)
-                    ar.model(m).data(d).qFit(y) = val;
-                    disp(['qFit for observable ',ar.model(m).data(d).y{y}, 'in data set ',ar.model(m).data(d).name,' set to ',num2str(val)]);
+                    ar.model(m).data(d).qFit(trefy(y)) = val;
+                    disp(['qFit for observable ''',ar.model(m).data(d).y{trefy(y)}, ''' in data set ''',ar.model(m).data(d).name,''' set to ',num2str(val)]);
                     done = 1;
                 end
             end
@@ -123,8 +123,8 @@ elseif(ischar(opt))
                     for d=1:length(ar.model(m).data)
                         trefy = find(sum(ar.model(m).data(d).highlight,1)>0);
                         for y=1:length(trefy)
-                            ar.model(m).data(d).qFit(y) = val;
-                            disp(['qFit for observable ',ar.model(m).data(d).y{y}, 'in data set ',ar.model(m).data(d).name,' set to ',num2str(val)]);
+                            ar.model(m).data(d).qFit(trefy(y)) = val;
+                            disp(['qFit for observable ''',ar.model(m).data(d).y{trefy(y)}, ''' in data set ',ar.model(m).data(d).name,''' set to ''',num2str(val)]);
                         end
                     end
                 end

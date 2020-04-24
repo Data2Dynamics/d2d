@@ -372,6 +372,11 @@ while(~strcmp(C{1},'ERRORS'))
         arParsingError( fid, 'multiple matches for %s', cell2mat(C{1}))
     end
     
+    if length(C)<7
+        celldisp(C)
+        warning('Did you miss yunits or flags in the data def file?')
+    end
+    
     ar.model(m).data(d).y(yindex) = C{1};
     ar.model(m).data(d).yUnits(yindex,1) = C{2};
     ar.model(m).data(d).yUnits(yindex,2) = C{3};
