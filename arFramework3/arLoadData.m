@@ -763,7 +763,9 @@ if(~strcmp(extension,'none') && ( ...
         header = header(2:end);
         header = strrep(header,' ','');
         times = data(:,1);
-        data = data(:,2:end);
+	qtimesnonnan = ~isnan(times);
+	times = times(qtimesnonnan);
+        data = data(qtimesnonnan,2:end);
     
         % remove data without headers
         idxVar = [];
