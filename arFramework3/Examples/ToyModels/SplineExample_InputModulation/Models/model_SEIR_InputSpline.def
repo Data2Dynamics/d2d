@@ -1,0 +1,42 @@
+DESCRIPTION
+"SEIR model with input-modulated infection rate (corresponds to time-dependent R0)"
+
+PREDICTOR
+t	T	"days"	"time"	0	400
+
+COMPARTMENTS
+country	V	"in country"	"country"	1
+
+STATES
+Susceptibles      C	"N"	"N"	country	1	"Susceptibles"  1
+Exposed           C	"N"	"N"	country	1	"Exposed"       1
+Infectious        C	"N"	"N"	country	1	"Infectious"    1
+Removed           C	"N"	"N"	country	1	"Removed"       1
+
+
+INPUTS
+InputSpline      C   1	1  "spline10(t, 0.0, 5, 10.0, sp2, 20.0, sp3, 30.0, sp4, 40.0, sp5, 50.0, sp6, 60.0, sp7, 80.0, sp8, 150.0, sp9, 400.0, 5, 0, 0.0)"
+InputSplineEnd   C   1  1  "spline10(tLast, 0.0, 5, 10.0, sp2, 20.0, sp3, 30.0, sp4, 40.0, sp5, 50.0, sp6, 60.0, sp7, 80.0, sp8, 150.0, sp9, 400.0, 5, 0, 0.0)"
+fixSpline	 C   1	1  "step1(t, 0, tLast, 1)"
+
+REACTIONS
+Susceptibles -> Exposed        CUSTOM "b * b_time_dependence * Infectious * Susceptibles/init_Susceptibles"	"Susceptibles are infected"
+Exposed      -> Infectious     CUSTOM "rate_EI * Exposed"   					"Becoming infectious"
+Infectious   -> Removed        CUSTOM "rate_IR * Infectious"  					"Recovery or death"
+
+DERIVED
+b_time_dependence      C   "N"   "N"   "0.5*(1+(1-exp(-InputSpline))/(1+exp(-InputSpline)))*(1-fixSpline) + fixSpline*0.5*(1+(1-exp(-InputSplineEnd))/(1+exp(-InputSplineEnd)))"
+
+
+OBSERVABLES
+Germany_confirmed_cum	C	"N"	"N"	 0	0	"scale * (Infectious+Removed)"
+
+
+ERRORS
+Germany_confirmed_cum    "sigma * sqrt(1+ scale*(Infectious+Removed))"
+
+
+CONDITIONS
+init_Exposed      "0"
+init_Removed      "0"
+init_Susceptibles "82800000"
