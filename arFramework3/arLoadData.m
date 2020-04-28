@@ -747,44 +747,45 @@ if(~strcmp(extension,'none') && ( ...
         
         arFprintf( 3, '[ OK ]\nBegin reading data (xls) ...' );
         if (exist([DataPath, name '.xls'],'file'))      
-            [data, Cstr] = xlsread([DataPath, name '.xls']);
+            T = readtable([DataPath, name, '.xls'],'ReadRowNames',false);
         elseif (exist([DataPath, name '.xlsx'],'file'))      
-            [data, Cstr] = xlsread([DataPath, name '.xlsx']);
+            T = readtable([DataPath, name, '.xlsx'],'ReadRowNames',false);
         end
-        arFprintf( 3, '[ OK ]\n' );
+        arFprintf( 3, '[ OK ]\n' );        
         
-        if(length(data(1,:))>length(Cstr(1,:)))
-            data = data(:,1:length(Cstr(1,:)));
-        end
-        
+	
         warning(warntmp);
         
-        timevar = Cstr(1,1);
-        header = Cstr(1,2:end);
-        header = strrep(header,' ',''); % remove spaces which are sometimes in the column header by accident    
+        header = T.Properties.VariableNames;
+        data = T.Variables;
+	
+        timevar = header(1);
+        header = header(2:end);
+        header = strrep(header,' ','');
         times = data(:,1);
-        qtimesnonnan = ~isnan(times);
-        times = times(qtimesnonnan);
-        data = data(qtimesnonnan,2:end);
-        if(size(data,2)<length(header))
-            data = [data nan(size(data,1),length(header)-size(data,2))];
+        data = data(:,2:end);
+    
+        % remove data without headers
+        idxVar = [];
+        for i = 1:length(header)
+            if startsWith(header{i},'Var')
+                idxVar(end+1) = i;
+            end
         end
-        
-        Cstr = Cstr(2:end,2:end);
+        header(idxVar) = [];
+        data(:,idxVar) = [];
+       
         dataCell = cell(size(data));
-        for j1 = 1:size(data,1)
-            for j2 = 1:size(data,2)
-                if(isnan(data(j1,j2)))
-                    if(j1<=size(Cstr,1) && j2<=size(Cstr,2) && ~isempty(Cstr{j1,j2}))
-                        dataCell{j1,j2} = Cstr{j1,j2};
-                    else
-                        dataCell{j1,j2} = header{j2};
-                    end
+        for i = 1:size(data,1)
+            for j = 1:size(data,2)
+                if isnan(data(i,j))
+                   dataCell{i,j} = header{j};
                 else
-                    dataCell{j1,j2} = num2str(data(j1,j2));
+                    dataCell{i,j} = num2str(data(i,j));
                 end
             end
         end
+
         
     elseif(strcmp(extension,'csv'))
         arFprintf( 3, '[ OK ]\nBegin reading data (csv) ...' );
