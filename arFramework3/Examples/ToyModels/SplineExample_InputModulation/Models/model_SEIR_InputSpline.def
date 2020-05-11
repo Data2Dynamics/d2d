@@ -25,7 +25,7 @@ Exposed      -> Infectious     CUSTOM "rate_EI * Exposed"   					"Becoming infec
 Infectious   -> Removed        CUSTOM "rate_IR * Infectious"  					"Recovery or death"
 
 DERIVED
-b_time_dependence      C   "N"   "N"   "0.5*(1+(1-exp(-InputSpline))/(1+exp(-InputSpline)))*(1-fixSpline) + fixSpline*0.5*(1+(1-exp(-InputSplineEnd))/(1+exp(-InputSplineEnd)))"
+b_time_dependence      C   "N"   "N"   "exp(InputSpline)/(1+exp(InputSpline))*(1-fixSpline) + fixSpline*exp(InputSplineEnd)/(1+exp(InputSplineEnd))"
 
 
 OBSERVABLES
