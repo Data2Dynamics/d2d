@@ -87,12 +87,12 @@ for ts = 1:length(t)
         % This algorithm is more reliable.
         nsteps = ar.ppl.options.n_steps_profile;
         if doPPL == true
-            InitVPL(m,c,jx,t_tmp,xstd,1);
+            InitVPL(m,c,jx,t_tmp,xstd,1,ar.ppl.options.alpha_level);
             ar.vpl.config.prediction = 1;
             ar.vpl.config.chi2dif_max = 0.4;
             ar.vpl.config.chi2dif_min = 0.2;
         else
-            InitVPL(m,c,jx,t_tmp,xstd,2);
+            InitVPL(m,c,jx,t_tmp,xstd,2,ar.ppl.options.alpha_level);
             ar.vpl.config.chi2dif_min = 0.1;
         end
         ar.vpl.config.maxstepsize = 10*xstd;
