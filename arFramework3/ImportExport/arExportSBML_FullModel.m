@@ -52,6 +52,9 @@ end
 
 [M] = GetInputs(M,F,m);
 
+[M] = GetUnitDefinitions(M,m);
+
+
 % [M] = GetObservables(M,m);
 %  
 % [M] = GetErrors(M,m);
@@ -243,6 +246,71 @@ end
 
 
 
+function [M] = GetUnitDefinitions(M,m)
+global ar
+
+% collect all units
+allUnits = {};
+fields = {ar.model(m).xUnits, ar.model(m).uUnits, ar.model(m).cUnits};
+if ~isempty(ar.model(m).yUnits)
+    fields{end+1} = ar.model(m).yUnits;
+end
+for id = 1:length(ar.model(m).data)
+    fields{end+1} = ar.model(m).data(id).yUnits;
+end
+for jf = 1:length(fields)
+    if ~isempty(fields{jf})
+        for jfi = 1:size(fields{jf},1)
+            allUnits{end+1} = fields{jf}{jfi,2};
+        end
+    end
+end
+allUnits = unique(allUnits);
+
+for jun = 1:length(allUnits)
+    theUnit = allUnits{jun};
+    
+    if strcmp(theUnit, 'pl')
+        myname = 'pl';
+        mykind = 'litre';
+        mymultiplier = 1e-12;
+    elseif strcmp(theUnit, 'nM')
+        myname = 'nM';
+        mykind = 'mole';
+        mymultiplier = 1e-9;
+    else
+        warning(sprintf('Unknown unit %s, may be incorrectly parsed to SBML', theUnit))
+        continue
+    end
+    
+    ixrule = length(M.unitDefinition) + 1;% index of current rule
+    
+    M.unitDefinition(ixrule).typecode = 'SBML_UNIT_DEFINITION';
+    M.unitDefinition(ixrule).metaid = '';
+    M.unitDefinition(ixrule).notes = '';
+    M.unitDefinition(ixrule).annotation = '';
+    M.unitDefinition(ixrule).cvterms = [];
+    M.unitDefinition(ixrule).sboTerm = -1;
+    M.unitDefinition(ixrule).name = myname;
+    M.unitDefinition(ixrule).id = myname;
+    
+    M.unitDefinition(ixrule).unit.typecode = 'SBML_UNIT';
+    M.unitDefinition(ixrule).unit.metaid = '';
+    M.unitDefinition(ixrule).unit.notes = '';
+    M.unitDefinition(ixrule).unit.annotation = '';
+    M.unitDefinition(ixrule).unit.cvterms = [];
+    M.unitDefinition(ixrule).unit.sboTerm = -1;
+    M.unitDefinition(ixrule).unit.kind = mykind;
+    M.unitDefinition(ixrule).unit.exponent = 1;
+    M.unitDefinition(ixrule).unit.scale = 0;
+    M.unitDefinition(ixrule).unit.multiplier = mymultiplier;
+    M.unitDefinition(ixrule).unit.level = 2;
+    M.unitDefinition(ixrule).unit.version = 4;
+    
+    M.unitDefinition(ixrule).level = 2;
+    M.unitDefinition(ixrule).version = 4;
+end
+end
 
 function [M] = GetParameters(M,m)
     global ar
