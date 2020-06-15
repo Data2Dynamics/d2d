@@ -2919,7 +2919,8 @@ function str = replaceDerivative( str )
         str = strrep( str, total{jm}, fNew );
     end
     % because of compatibility with MATLAB2020a and later versions
-    if str2double(ver('MATLAB').Version) >= 9.8
+    tmp = ver('MATLAB');
+    if str2double(tmp.Version) >= 9.8
         str = strrep(str,';',',');
     end
     
