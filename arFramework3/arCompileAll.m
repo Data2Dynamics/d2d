@@ -2978,7 +2978,9 @@ function prepareBecauseOfRepeatedCompilation
     global ar
     for m=1:length(ar.model)
         for d=1:length(ar.model(m).data)
-            ar.model(m).data(d).p = ar.model(m).data(d).pold;
+            if isfield(ar.model(m).data(d),'pold')
+                ar.model(m).data(d).p = ar.model(m).data(d).pold;
+            end
         end
     end
         
