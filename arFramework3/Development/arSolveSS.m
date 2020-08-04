@@ -12,11 +12,11 @@ global ar
 
 fprintf('solving steady state condition...\n');
 
-rhs = sym(ar.model(m).fx);
+rhs = arSym(ar.model(m).fx);
 if(exist('fu','var'))
-    rhs = arSubs(rhs, ar.model(m).sym.u, sym(fu));
+    rhs = arSubs(rhs, ar.model(m).sym.u, arSym(fu));
 elseif(~isempty(ar.model(m).fu))
-    rhs = arSubs(rhs, ar.model(m).sym.u, sym(ar.model(m).fu));
+    rhs = arSubs(rhs, ar.model(m).sym.u, arSym(ar.model(m).fu));
 end
 rhs = arSubs(rhs, ar.model(m).sym.x, ar.model(m).sym.px0);
 
