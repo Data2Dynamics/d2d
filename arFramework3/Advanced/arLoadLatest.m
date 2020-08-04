@@ -29,7 +29,9 @@ if ~exist('loadOnlyParams','var') || isempty(loadOnlyParams)
     loadOnlyParams = false; % load whole ar in workspace
 end
 if ~exist('Results','dir')
-    error('No results folder exist. arLoadLatest can only be executed in a D2D working directory.')
+    warning('No results folder exist. arLoadLatest can only be executed in a D2D working directory.')
+    varargout{1} = false;
+    return
 end
 
 d = dir('Results');
