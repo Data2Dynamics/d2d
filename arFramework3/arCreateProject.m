@@ -22,8 +22,8 @@ try
             mkdir('Models');
             cd('Models');
             w = which('model_template.def');
-            if isempty(w)
-                error('model_template.def not found. Please check your path.')
+            if isempty(w)                
+                error('model_template.def not found. Please check your path and/or execute arInit first.')
             end            
             copyfile(w,'./model_template.def');
             cd ..
