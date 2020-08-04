@@ -45,8 +45,11 @@ The software was awarded twice as **best performer** in the *Dialogue for Revers
 
 ## Further topics
 
-Please read the [Wiki](https://github.com/Data2Dynamics/d2d/wiki/Home/) if you are interested in details.
+Please read our [Wiki](https://github.com/Data2Dynamics/d2d/wiki/Home/) if you are interested in details.
 
+## Installation
+
+Check out our [Wiki](https://github.com/Data2Dynamics/d2d/wiki/Installation) for installation instructions.
 
 ## Copyright notice
 Copyright © 2016 D2D development team. All rights reserved. [Copyright text and third party software license information.](https://github.com/Data2Dynamics/d2d/wiki/Copyright)
