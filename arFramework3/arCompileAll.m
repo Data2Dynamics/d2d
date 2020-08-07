@@ -828,12 +828,12 @@ condition.sym.fz = arSubs(condition.sym.fz, arMyStr2Sym(model.t), arMyStr2Sym('t
 
 % remaining initial conditions
 varlist = symvar(condition.sym.fpx0);
-condition.px0 = sym2str(varlist);
+condition.px0 = arSym2str(varlist);
 
 % remaining parameters
 varlist = union( symvar([condition.sym.fv(:); condition.sym.fu(:); condition.sym.fz(:); condition.sym.fpx0(:)]), symvar( condition.sym.C ) );
 condition.pold = condition.p;
-condition.p = setdiff(setdiff(setdiff(setdiff(setdiff(sym2str(varlist), model.x), model.u), model.z), 't'), cVars);
+condition.p = setdiff(setdiff(setdiff(setdiff(setdiff(arSym2str(varlist), model.x), model.u), model.z), 't'), cVars);
 condition.dfxdx_rowVals = [];
 condition.dfxdx_colptrs = [];  
 
@@ -1282,7 +1282,7 @@ data.sym.fystd = arSubs(data.sym.fystd, arMyStr2Sym(model.t), arMyStr2Sym('t'), 
 varlist = symvar([data.sym.fy(:); data.sym.fystd(:)]);
 data.pold = data.p;
 othervars = union(union(union(union(model.x, model.u), model.z), data.y), 't');
-data.p = setdiff( setdiff(union(sym2str(varlist), data.p_condition), othervars), cVars); %R2013a compatible
+data.p = setdiff( setdiff(union(arSym2str(varlist), data.p_condition), othervars), cVars); %R2013a compatible
 
 % Union's behaviour is different when first arg is empty. In this case, a
 % flip of the parameter vector is typically required.
@@ -2294,97 +2294,97 @@ fprintf(fid, '\n  return;\n}\n\n\n');
 function writeCcode(fid, matlab_version, cond_data, svar, ip)
     
 if(strcmp(svar,'fv'))
-    cstr = ccode2(cond_data.sym.fv(:), matlab_version);
+    cstr = arCcode(cond_data.sym.fv(:), matlab_version);
     cvar =  'data->v';
 elseif(strcmp(svar,'dvdx'))
-    cstr = ccode2(cond_data.sym.dfvdx(:), matlab_version);
+    cstr = arCcode(cond_data.sym.dfvdx(:), matlab_version);
     cvar =  'data->dvdx';
 elseif(strcmp(svar,'dvdu'))
-    cstr = ccode2(cond_data.sym.dfvdu(:), matlab_version);
+    cstr = arCcode(cond_data.sym.dfvdu(:), matlab_version);
     cvar =  'data->dvdu';
 elseif(strcmp(svar,'dvdp'))
-    cstr = ccode2(cond_data.sym.dfvdp(:), matlab_version);
+    cstr = arCcode(cond_data.sym.dfvdp(:), matlab_version);
     cvar =  'data->dvdp';
 elseif(strcmp(svar,'fx'))
-    cstr = ccode2(cond_data.sym.fx(:), matlab_version);
+    cstr = arCcode(cond_data.sym.fx(:), matlab_version);
     for j=find(cond_data.sym.fx(:)' == 0)
         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  'xdot_tmp';
 elseif(strcmp(svar,'fx0'))
-    cstr = ccode2(cond_data.sym.fpx0(:), matlab_version);
+    cstr = arCcode(cond_data.sym.fpx0(:), matlab_version);
     cvar =  'x0_tmp';
 elseif(strcmp(svar,'dfxdx'))
-    cstr = ccode2(cond_data.sym.dfxdx(:), matlab_version);
+    cstr = arCcode(cond_data.sym.dfxdx(:), matlab_version);
 %     for j=find(cond_data.sym.dfxdx(:)' == 0)
 %         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
 %     end
     cvar =  'J->data';
 elseif(strcmp(svar,'dfxdx_sparse'))
-    cstr = ccode2(cond_data.sym.dfxdx_nonzero(:), matlab_version);    
+    cstr = arCcode(cond_data.sym.dfxdx_nonzero(:), matlab_version);    
     cvar =  'J->data';
 elseif(strcmp(svar,'dfxdx_out'))
-    cstr = ccode2(cond_data.sym.dfxdx(:), matlab_version);
+    cstr = arCcode(cond_data.sym.dfxdx(:), matlab_version);
     cvar =  'J';
 elseif(strcmp(svar,'fsv1'))
-    cstr = ccode2(cond_data.sym.fsv1, matlab_version);
+    cstr = arCcode(cond_data.sym.fsv1, matlab_version);
     cvar =  'sv';
 elseif(strcmp(svar,'fsv2'))
-    cstr = ccode2(cond_data.sym.dvdp(:,ip), matlab_version);
+    cstr = arCcode(cond_data.sym.dvdp(:,ip), matlab_version);
     cvar =  '    sv';
 elseif(strcmp(svar,'fsx'))
-    cstr = ccode2(cond_data.sym.fsx, matlab_version);
+    cstr = arCcode(cond_data.sym.fsx, matlab_version);
     for j=find(cond_data.sym.fsx' == 0)
         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  'sxdot_tmp';
 elseif(strcmp(svar,'dfcdp2'))
-    cstr = ccode2(cond_data.sym.dfcdp2(:,ip), matlab_version);
+    cstr = arCcode(cond_data.sym.dfcdp2(:,ip), matlab_version);
     cvar =  'sxdot_tmp';    
 elseif(strcmp(svar,'fsx0'))
-    cstr = ccode2(cond_data.sym.fsx0(:,ip), matlab_version);
+    cstr = arCcode(cond_data.sym.fsx0(:,ip), matlab_version);
     cvar =  '    sx0_tmp';
 elseif(strcmp(svar,'fu'))
-    cstr = ccode2(cond_data.sym.fu(:), matlab_version);
+    cstr = arCcode(cond_data.sym.fu(:), matlab_version);
     cvar =  'data->u';
 elseif(strcmp(svar,'fsu'))
-    cstr = ccode2(cond_data.sym.dfudp(:), matlab_version);
+    cstr = arCcode(cond_data.sym.dfudp(:), matlab_version);
     cvar =  'data->su';
 elseif(strcmp(svar,'fz'))
-    cstr = ccode2(cond_data.sym.fz(:), matlab_version);
+    cstr = arCcode(cond_data.sym.fz(:), matlab_version);
     cvar =  'z';
 elseif(strcmp(svar,'dfzdx'))
-    cstr = ccode2(cond_data.sym.dfzdx(:), matlab_version);
+    cstr = arCcode(cond_data.sym.dfzdx(:), matlab_version);
     cvar =  '    dfzdxs';
 elseif(strcmp(svar,'fsz1'))
-    cstr = ccode2(cond_data.sym.fsz1, matlab_version);
+    cstr = arCcode(cond_data.sym.fsz1, matlab_version);
     for j=find(cond_data.sym.fsz1' == 0)
         cstr = [cstr sprintf('\n  T[%i][0] = 0.0;',j-1)]; %#ok<AGROW>
     end
     cvar =  '    sz';
 elseif(strcmp(svar,'fsz2'))
-    cstr = ccode2(cond_data.sym.fsz2(:), matlab_version);
+    cstr = arCcode(cond_data.sym.fsz2(:), matlab_version);
     cvar =  'sz';
 elseif(strcmp(svar,'fy'))
-    cstr = ccode2(cond_data.sym.fy(:), matlab_version);
+    cstr = arCcode(cond_data.sym.fy(:), matlab_version);
     cvar =  'y';
 elseif(strcmp(svar,'y_scale'))
-    cstr = ccode2(cond_data.sym.y_scale(:), matlab_version);
+    cstr = arCcode(cond_data.sym.y_scale(:), matlab_version);
     cvar =  'y_scale';
 elseif(strcmp(svar,'fystd'))
-    cstr = ccode2(cond_data.sym.fystd(:), matlab_version);
+    cstr = arCcode(cond_data.sym.fystd(:), matlab_version);
     cvar =  'ystd';
 elseif(strcmp(svar,'fsy'))
-    cstr = ccode2(cond_data.sym.fsy(:), matlab_version);
+    cstr = arCcode(cond_data.sym.fsy(:), matlab_version);
     cvar =  'sy';
 elseif(strcmp(svar,'fsystd'))
-    cstr = ccode2(cond_data.sym.fsystd(:), matlab_version);
+    cstr = arCcode(cond_data.sym.fsystd(:), matlab_version);
     cvar =  'systd';
 elseif(strcmp(svar,'dfxdp0'))
-    cstr = ccode2(cond_data.sym.dfxdp0(:), matlab_version);
+    cstr = arCcode(cond_data.sym.dfxdp0(:), matlab_version);
     cvar =  'dfxdp0';
 elseif(strcmp(svar,'dfxdp'))
-    cstr = ccode2(cond_data.sym.dfxdp(:), matlab_version);
+    cstr = arCcode(cond_data.sym.dfxdp(:), matlab_version);
     cvar =  'dfxdp';
 else
     error('unknown %s', svar);
@@ -2834,25 +2834,7 @@ function s = mySym( s, specialFunc )
         s = arMyStr2Sym(s);
     end
     
-% convert sym array to string array
-function a = sym2str(b)
-    nonzeros = logical(b~=0);
-    a = cell(size(b));
-    for j=1:length(b)
-        if ( nonzeros(j) )
-            a{j} = char(b(j));
-        else
-            a{j} = '0';
-        end
-    end
-    
-% convert sym array to string array
-function a = sym2str_old(b)
-    a = cell(size(b));
-    for j=1:length(b)
-        a{j} = char(b(j));
-    end
-    
+
 function strG = quickScan( str )
     c = 1;
     depth = 0;
@@ -2876,53 +2858,6 @@ function strG = quickScan( str )
 %
 %  D([#], name)(args) => Dname(args, %d)
 %  diff(name(args), args(#)) => Dname(args, #)
-function str = replaceDerivative( str )
-    % Pattern that matches the derivatives D([#], func)(args)
-    pattern = 'D[\(][\[](\d+)[\]][\,](\s*)(\w*)[\)][\(]';
-    
-    % Transform D([#], name)(args) => Dname(args, %d)
-    % We need to explicitly match up the brackets, since regexps can't do
-    % this reliably, we have to loop over it.
-    [tokens,startloc,endloc] = regexp( str, pattern, 'tokens' );
-    
-    % Generate replacement blocks
-    oldString = cell( 1, numel( startloc ) );
-    to = cell( 1, numel( startloc ) );
-    for i = 1 : numel( startloc )
-        call = str(startloc(i):endloc(i));
-        block = quickScan( str(endloc(i)+1:end) );
-        oldString{i} = [ call block ];
-        to{i} = sprintf( 'D%s(%s, %s)', tokens{i}{3}, block(1:end-1), tokens{i}{1} );
-    end
-    
-    % Perform the replacements
-    for i = 1 : numel( oldString )
-        str = strrep( str, oldString{i}, to{i} );
-    end
-        
-    % Pattern which matches the other derivative structure
-    pattern2 = 'diff[\(]([\w\(\)]+)[\(]([\[\]\(\)\^\/\*\+\-\.\s,\w\d]*)[\)][,](\s)([\[\]\w]*)[\)]';
-        
-    % Performs regexprep which transforms diff(name(args), args(#)) => Dname(args, #)
-    [~,~,~,total,matches]=regexp(str, pattern2);
-
-    for jm = 1 : numel(matches)
-        indep = matches{jm}{4};
-        variables = strtrim(strsplit(matches{jm}{2}, ','));
-
-        % Find which variable we're deriving w.r.t. to
-        ID = find(strcmp(variables, indep));
-
-        % Write the new string
-        fNew = sprintf( 'D%s(%s, %d)', matches{jm}{1}, matches{jm}{2}, ID );
-
-        str = strrep( str, total{jm}, fNew );
-    end
-    % because of compatibility with MATLAB2020a and later versions
-    tmp = ver('MATLAB');
-    if str2double(tmp.Version) >= 9.8
-        str = strrep(str,';',',');
-    end
     
 % Safely map derivatives to the appropriate C functions
 %   pattern replaces D([#], func)(args) to Dfunc(args, floor(#/2)) 
@@ -2985,39 +2920,6 @@ function prepareBecauseOfRepeatedCompilation
     end
         
 
-function cstr = ccode2(T, matlab_version)
-
-    % If this matrix or value is empty, do not attempt to generate C-code
-    if (numel(T) == 0)
-        cstr = '';
-        return;
-    end
-    
-    try
-        T = arMyStr2Sym( replaceDerivative( char(T) ) );
-    catch
-        char(T)
-        error('Failure attempting to replace derivatives in');
-    end
-
-    % R2015b compatibility fix
-    if(matlab_version>=8.6)
-        sym_str = sym2str(T);
-        if all(strcmp('0',sym_str))
-            cstr = char;
-        else
-            cstr = ccode(T);
-        end
-    else
-        cstr = ccode(T);
-    end
-    
-    % Fixes bug with ccode for single line syms
-    if ( length( cstr ) > 8 )
-        if ( strcmp(cstr(1:9), '  _assign') )
-            cstr = strrep( [cstr(1:end-2) ';'], '_assign(t0,', 't0=' );
-        end     
-    end
     
 function message = invalidSym( message, symvariable, names )
     if ( exist( 'names', 'var' ) )
