@@ -52,6 +52,11 @@ else
     cstr = ccode(T);
 end
 
+% R2015b compatibility fix
+if(matlab_version>=9.8)
+    cstr = regexprep(cstr,'t(\d+) =','T[$1][0] =');
+end
+
 % Fixes bug with ccode for single line syms
 if ( length( cstr ) > 8 )
     if ( strcmp(cstr(1:9), '  _assign') )
