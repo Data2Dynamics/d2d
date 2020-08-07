@@ -115,4 +115,20 @@ if str2double(tmp.Version) >= 9.8
 end
 
 
-
+function strG = quickScan( str )
+    c = 1;
+    depth = 0;
+    while ( c < numel( str ) )
+        if ( str(c) == '(' )
+            depth = depth + 1;
+        end
+        if ( str(c) == ')' )
+            depth = depth - 1;
+            if ( depth < 0 )
+                strG = str(1:c);
+                return
+            end
+        end
+        c = c + 1;
+    end
+    strG = str;
