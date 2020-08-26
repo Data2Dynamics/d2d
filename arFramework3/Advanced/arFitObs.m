@@ -28,7 +28,7 @@ end
 qFitReset = ar.qFit + 0;
 
 ar.qFit(ar.qFit==1 & ar.qDynamic==1) = 0;
-arCalcMerit(true,[]);
+% arCalcMerit(true,[]);  % I think, this is not requires => don't do it because of runtime.
 try	
 	arFit(silent);
 catch err

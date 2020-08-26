@@ -39,7 +39,9 @@
 %               like arCalcMerit(ar,sensi), but 
 %               silent = true
 %               ar.p is set to ptrial
-%               this is the only possiblity to set 'silent' to true
+%               this is one possiblity to set 'silent' to true. The other
+%               one is:
+% >> arCalcMerit(sensi,[])
 % 
 % >> arCalcMerit(sensi,ptrial,dynamics)
 % >> arCalcMerit(ar,sensi,ptrial,dynamics)
@@ -84,6 +86,8 @@ end
 if nargs>=2 && ~isempty(varargin{2})
     pTrial = varargin{2};
 	ar.p(ar.qFit==1) = pTrial + 0;
+    silent = true;
+elseif nargs==2 && isempty(varargin{2})
     silent = true;
 else
     silent = false;

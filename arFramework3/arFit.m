@@ -595,7 +595,7 @@ end
 
 ar.fit = fit;
 
-if(~silent || exitflag < 1)
+if(silent==0 || (silent==1 && exitflag < 1)) % silent=2 can entirely suppress this message
     arFitPrint;
 end
 
