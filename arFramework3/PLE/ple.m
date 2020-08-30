@@ -92,7 +92,7 @@ end
 % Specifications on what to do if there are more than 1 parameter. The
 % function ple will evaluate itself for every parameter separately.
 if(nargin<1)
-    fprintf('PLE for %i parameters ...\n', sum(ar.qFit==1))
+    arFprintf([],'PLE for %i parameters ...\n', sum(ar.qFit==1))
     jindex = find(ar.qFit);
     do_plotting = ar.ple.showCalculation;
     ar.ple.showCalculation = false;
@@ -105,7 +105,7 @@ if(nargin<1)
     ar.ple.showCalculation = do_plotting;
     return
 elseif(length(jk)>1)
-    fprintf('PLE for %i parameters ...\n', length(jk))
+    arFprintf([],'PLE for %i parameters ...\n', length(jk))
     do_plotting = ar.ple.showCalculation;
     ar.ple.showCalculation = false;
     for j=1:length(jk)
@@ -118,10 +118,10 @@ elseif(length(jk)>1)
     return
 end
 if(ar.qFit(jk)~=1)
-    fprintf('\nPLE#%i SKIPPED: parameter %s is fixed\n', jk, ar.ple.p_labels{jk});
+    arFprintf([],'\nPLE#%i SKIPPED: parameter %s is fixed\n', jk, ar.ple.p_labels{jk});
     return
 else
-    fprintf('\nPLE#%i for parameter %s\n', jk, ar.ple.p_labels{jk});
+    arFprintf([],'\nPLE#%i for parameter %s\n', jk, ar.ple.p_labels{jk});
 end
 
 % respress warning "Matrix is close to singular or badly scaled."
@@ -167,7 +167,7 @@ try
     ar.ple.ps{jk}(jindex,:) = p;
     ar.ple.gradient{jk}(jindex,:) = gradient_start;
 catch exception
-    fprintf('ERROR PLE: at initial fit (%s)\n', exception.message);
+    arFprintf([],'ERROR PLE: at initial fit (%s)\n', exception.message);
     return
 end
 % ar.ple.fit_fkt fits all but the profile parameter.
@@ -272,7 +272,7 @@ try
     end
     end
 catch exception
-    fprintf('ERROR PLE: going to upper bound (%s)\n', exception.message);
+    arFprintf([],'ERROR PLE: going to upper bound (%s)\n', exception.message);
 end
 
 arWaitbar(-1);
@@ -339,7 +339,7 @@ try
     end
     end
 catch exception
-    fprintf('ERROR PLE: going to lower bound (%s)\n', exception.message);
+    arFprintf([],'ERROR PLE: going to lower bound (%s)\n', exception.message);
 end
 
 arWaitbar(-1);
@@ -367,7 +367,7 @@ q_chi2good_point = chi2<=min(chi2)+ar.ple.dchi2_point & ~isnan(chi2);
 % Define new optimum
 if(ar.ple.merit-min(chi2) > ar.ple.optimset_tol)
     [minchi2, iminchi2] = min(chi2);
-    fprintf('PLE#%i found better optimum with chi^2 decrease of %e\n', jk, ...
+    arFprintf([],'PLE#%i found better optimum with chi^2 decrease of %e\n', jk, ...
         ar.ple.merit - minchi2);
     
     if(ar.ple.allowbetteroptimum)

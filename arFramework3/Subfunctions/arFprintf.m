@@ -33,5 +33,7 @@ if isempty( arOutputLevel )
 end
 
 if ( output_level <= arOutputLevel )
-    fprintf( varargin{:} );
+    try % try because fprintf does surprisingly sometimes cause an error if matlab is started in -batch mode (observed for R2018b under Windows)
+        fprintf( varargin{:} );
+    end
 end

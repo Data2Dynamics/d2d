@@ -204,21 +204,21 @@ for j=1:n
     end    
 end
 
-fprintf('total fitting time: %s\n', secToHMS(sum(ar.timing(~isnan(ar.timing)))));
-fprintf('mean fitting time: %s\n', secToHMS(10^mean(log10(ar.timing(~isnan(ar.timing))))));
+arFprintf([],'total fitting time: %s\n', secToHMS(sum(ar.timing(~isnan(ar.timing)))));
+arFprintf([],'mean fitting time: %s\n', secToHMS(10^mean(log10(ar.timing(~isnan(ar.timing))))));
 arWaitbar(-1);
 
 if(chi2Reset>min(ar.chi2s + ar.chi2sconstr))
     [chi2min,imin] = min(ar.chi2s + ar.chi2sconstr);
     ar.p = ar.ps(imin,:);
     if ar.config.fiterrors == -1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)==0) % if no error parameters fitted
-        fprintf('selected best fit #%i with %f (old = %f)\n', imin, 2*(ar.ndata+ar.nconstr)*log(sqrt(2*pi)) + chi2min, 2*(ar.ndata+ar.nconstr)*log(sqrt(2*pi)) + chi2Reset);
+        arFprintf([],'selected best fit #%i with %f (old = %f)\n', imin, 2*(ar.ndata+ar.nconstr)*log(sqrt(2*pi)) + chi2min, 2*(ar.ndata+ar.nconstr)*log(sqrt(2*pi)) + chi2Reset);
     else
-        fprintf('selected best fit #%i with %f (old = %f)\n', ...
+        arFprintf([],'selected best fit #%i with %f (old = %f)\n', ...
             imin, 2*ar.ndata*log(sqrt(2*pi)) + chi2min, 2*ar.ndata*log(sqrt(2*pi)) + chi2Reset);
     end
 else
-    fprintf('did not find better fit\n');
+    arFprintf([],'did not find better fit\n');
     ar.p = pReset;
 end
 try

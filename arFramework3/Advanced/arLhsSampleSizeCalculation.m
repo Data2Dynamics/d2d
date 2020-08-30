@@ -83,13 +83,13 @@ function varargout = arLhsSampleSizeCalculation
 global ar
 
 if(~isfield(ar,'chi2s') || sum( ~isnan(ar.chi2s))==0 || sum( ~isnan(ar.chi2s))<50)
-    fprintf('> arLhsSampleSizeCalculation ... stopped.\n')
-    fprintf('> Less than 50 LHS fits available.\n')
-    fprintf('> If sample size calculation is intended, a sufficient number of fits has to be executed.\n')
+    arFprintf([],'> arLhsSampleSizeCalculation ... stopped.\n')
+    arFprintf([],'> Less than 50 LHS fits available.\n')
+    arFprintf([],'> If sample size calculation is intended, a sufficient number of fits has to be executed.\n')
     if(~isfield(ar,'chi2s') || sum( ~isnan(ar.chi2s))==0)
-        fprintf('> If intended, run e.g. arFitLHS(%g) first.\n',100);
+        arFprintf([],'> If intended, run e.g. arFitLHS(%g) first.\n',100);
     else
-        fprintf('> If intended, run e.g. arFitLHS(%g,[],[],true) first.\n',100-sum(~isnan(ar.chi2s)));
+        arFprintf([],'> If intended, run e.g. arFitLHS(%g,[],[],true) first.\n',100-sum(~isnan(ar.chi2s)));
     end
     if(nargout>0)
         varargout{1} = [];
@@ -122,33 +122,33 @@ end
 
 function dat = fun_print(dat)
 disp('---------------------------------------------------------------------------------------------')
-fprintf('    N=%5i (=100%s) fits performed (%g%s exit because of optimset.MaxIter). \n',length(dat.chi2s),'%',100*sum(dat.exitflag==0)/length(dat.chi2s),'%')
-fprintf('    N=%5i (%.1f%s) without integration-error, i.e. ~isnan(chi2).\n',length(dat.chi2noNaN),100*length(dat.chi2noNaN)/length(dat.chi2s),'%')
-fprintf('    N=%5i (%.1f%s) used',length(dat.chi2used),100*length(dat.chi2used)/length(dat.chi2s),'%');
+arFprintf([],'    N=%5i (=100%s) fits performed (%g%s exit because of optimset.MaxIter). \n',length(dat.chi2s),'%',100*sum(dat.exitflag==0)/length(dat.chi2s),'%')
+arFprintf([],'    N=%5i (%.1f%s) without integration-error, i.e. ~isnan(chi2).\n',length(dat.chi2noNaN),100*length(dat.chi2noNaN)/length(dat.chi2s),'%')
+arFprintf([],'    N=%5i (%.1f%s) used',length(dat.chi2used),100*length(dat.chi2used)/length(dat.chi2s),'%');
 if(dat.pUse<1)
-    fprintf(' (after removing the worst %g%s)',100-100*dat.pUse,'%')
+    arFprintf([],' (after removing the worst %g%s)',100-100*dat.pUse,'%')
 end
-fprintf('.\n');
+arFprintf([],'.\n');
 
-fprintf('\n');
-fprintf('       Maxima observed: %g (%g jumps within sorted chi2 are larger than %g)\n',dat.D,dat.D,dat.dchi2_thresh)
-fprintf('               thereof: %i once, %i twice, %i three times, %i four times.\n',dat.f1,dat.f2,dat.f3,dat.f4)
-fprintf('\n');
-fprintf('      Estimates for the real number of maxima:\n');
+arFprintf([],'\n');
+arFprintf([],'       Maxima observed: %g (%g jumps within sorted chi2 are larger than %g)\n',dat.D,dat.D,dat.dchi2_thresh)
+arFprintf([],'               thereof: %i once, %i twice, %i three times, %i four times.\n',dat.f1,dat.f2,dat.f3,dat.f4)
+arFprintf([],'\n');
+arFprintf([],'      Estimates for the real number of maxima:\n');
 fns = {'jackknife1','jackknife2','medial','chao1','chao2','ichao','bootstrap','n_bootstrap_iterate'};
 nest = NaN(size(fns));
 for i=1:length(fns)
     nest(i) = dat.(fns{i});
-    fprintf('  %20s: %g  \t(%g%s observed)\n',fns{i},nest(i),min(100,100*dat.D/dat.(fns{i})),'%');
+    arFprintf([],'  %20s: %g  \t(%g%s observed)\n',fns{i},nest(i),min(100,100*dat.D/dat.(fns{i})),'%');
 end
 
 
 if(dat.p_bootstrap_iterate<0.9)
-    fprintf('\n   Note: A large number of optima can be erroneously suggested, \n   if optimization does not work or the fits did not converge.\n');
+    arFprintf([],'\n   Note: A large number of optima can be erroneously suggested, \n   if optimization does not work or the fits did not converge.\n');
     
-    fprintf('\n   For observing the global minimum in 90%s of cases,\n','%');
-    fprintf('   iterative bootstrap suggests a sample size of N=%g (integration-errors are accounted).\n',ceil(dat.N_bootstrap_iterate_90_NaN));
-    fprintf('   Increase the sample size by running arFitLHS(%g,[],[],true) or improve optimization.\n',ceil(dat.N_bootstrap_iterate_90_NaN-dat.Nused));
+    arFprintf([],'\n   For observing the global minimum in 90%s of cases,\n','%');
+    arFprintf([],'   iterative bootstrap suggests a sample size of N=%g (integration-errors are accounted).\n',ceil(dat.N_bootstrap_iterate_90_NaN));
+    arFprintf([],'   Increase the sample size by running arFitLHS(%g,[],[],true) or improve optimization.\n',ceil(dat.N_bootstrap_iterate_90_NaN-dat.Nused));
 end
 disp('--------------------------------------------------------------------------------------------')
 
