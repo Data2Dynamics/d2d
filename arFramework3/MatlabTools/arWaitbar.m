@@ -3,6 +3,20 @@
 
 function arWaitbar(j, n, text)
 
+persistent batchmode
+if isempty(batchmode)
+    ss = get(0, 'ScreenSize')
+    if max(ss)<2
+        batchmode = true
+    else
+        batchmode = false;
+    end
+end
+
+if batchmode 
+    return % do not show Waitbar in batch mode
+end
+
 global arWaitbarGlobal;
 global arOutputLevel;
 
