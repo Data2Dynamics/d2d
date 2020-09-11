@@ -1,5 +1,5 @@
-function filenames = arExportModelToDmod(whichone,m,d,prefix)
-% arExportModelToDmod(whichone,m,d,prefix)
+function filenames = arExportModelToDmod(whichone,m,d,prefix,replacements)
+% arExportModelToDmod(whichone,m,d,prefix,replacements)
 %
 % Export model to dMod modeling framework
 % (https://github.com/dkaschek/dMod) or ODESS analytical steady state
@@ -22,6 +22,9 @@ function filenames = arExportModelToDmod(whichone,m,d,prefix)
 %   d           Data index  (default: 1:length(ar.model(m).data), not always required)
 % 
 %   prefix      Addionional prefix for the files.
+%
+%   replacements cell array of quantities that will be replaced with zeros
+%   in reactions
 % 
 % Example (model and observables):
 % arExportModelToDmod
@@ -55,6 +58,11 @@ if(~exist('d','var') || isempty(d))
 else
     ds = d;
 end
+if(~exist('replacements','var') || isempty(replacements))
+    replacements = {''};
+elseif ischar(replacements)
+    replacements = {replacements};
+end
 
 
 if( iscell(whichone))
@@ -77,15 +85,26 @@ else
             fprintf(fid, '\n');
             
             for jv = 1:length(ar.model(m).fv)
-                fprintf(fid, '"Reaktion%i","%s"', jv, ar.model(m).fv{jv});
-                for jx = 1:length(ar.model(m).x)
-                    if(ar.model(m).N(jx,jv)~=0)
-                        fprintf(fid,',"%i"', ar.model(m).N(jx,jv));
-                    else
-                        fprintf(fid,',""');
+                
+                if isempty(replacements)
+                    reaction = ar.model(m).fv{jv};
+                else
+                    reaction = ar.model(m).fv{jv};
+                    for jr = 1:length(replacements)
+                        reaction = char(arSubs(arSym(reaction), arSym(replacements{jr}), 0));
                     end
                 end
+                if reaction ~= '0'
+                    fprintf(fid, '"Reaktion%i","%s"', jv, reaction);
+                    for jx = 1:length(ar.model(m).x)
+                        if(ar.model(m).N(jx,jv)~=0)
+                            fprintf(fid,',"%i"', ar.model(m).N(jx,jv));
+                        else
+                            fprintf(fid,',""');
+                        end
+                    end
                 fprintf(fid, '\n');
+                end
             end            
             fclose(fid);            
         
