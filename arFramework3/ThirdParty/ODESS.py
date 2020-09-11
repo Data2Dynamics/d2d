@@ -1,4 +1,4 @@
-# code11_release_4Python3
+# ODESS_4Python3_ver1.0.py
 import numpy
 import sympy
 from sympy import Matrix, simplify, expand, solve
@@ -440,7 +440,8 @@ def CountNZE(V):
             counter=counter+1
     return(counter)
     
-def Sparsify(M, level):
+def Sparsify(M, level, sparseIter):
+    oldM=M.copy()
     if(level==3):
         ncol=len(M.row(0))
         print('0 columns of '+str(ncol) +' done')
@@ -506,7 +507,12 @@ def Sparsify(M, level):
                             if(CountNZE(test)!=0 and M.rank()==Mtest.rank()):
                                 M=Mtest.copy()
                                 tobeat=CountNZE(test)
-    return(M)
+    if(oldM!=M and sparseIter<10):
+        oldM=M.copy() 
+        print("Sparsify with level", level,", Iteration ",sparseIter, " of maximal 10")
+        return(Sparsify(M,level, sparseIter=sparseIter+1))                            
+    else:
+        return(M)
     
 def ODESS(filename,
           injections=[],
@@ -793,7 +799,10 @@ def ODESS(filename,
 
 ##### Increase Sparsity of stoichiometry matrix SM
     print('Sparsify stoichiometry matrix with sparsify-level '+str(sparsifyLevel)+'!')
-    SM=(Sparsify(SM.T, level=sparsifyLevel)).T
+    newSM=(Sparsify(SM.T, level=sparsifyLevel, sparseIter=1)).T
+    if(newSM!=SM):
+        print("Sparsified!")
+        SM=newSM
     
 #### Find conserved quantities
     
