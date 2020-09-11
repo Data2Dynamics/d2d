@@ -1,6 +1,6 @@
-function varargout = arSteadyStateAnalytical(replacements, pythonsymlink)
+function varargout = arSteadyStateAnalytical(replacements, ODESSargs, pythonsymlink)
 
-% [success, steadystate, fullout] = arSteadyStateAnalytical(ptyhonsymlink, replacements)
+% [success, steadystate, fullout] = arSteadyStateAnalytical(ptyhonsymlink, ODESSargs, replacements)
 %
 % Calculates analytical steady state from compiled models using the python
 % tool ODESS [1,2]. Results are printed to the console and must be manually
@@ -9,6 +9,11 @@ function varargout = arSteadyStateAnalytical(replacements, pythonsymlink)
 %   replacements    Cell array of string of parameters that will be 
 %                   replaced with zeros before calculation of the steady
 %                   state. May be used to switch off certain inputs/stimuli 
+%   ODESSargs       Cell array of arguments passed to ODESS. Prodivide the 
+%                   first 3 arguments as strings (e.g. givenCQs = 
+%                   "'AKT+pATK=totalAKT', 'MEK+pMEK=totalMEK'"), the fourth as numeric. 
+%                   {injections,givenCQs,neglect,sparsifyLevel}
+%                   [{'','','',2}]
 %   pythonsymlink   Symlink for calling Python 3 from the terminal ['python3']
 % 
 %
@@ -42,6 +47,10 @@ end
 if(~exist('pythonsymlink','var') || isempty(pythonsymlink))
     pythonsymlink = '';
 end
+if(~exist('ODESSargs','var') || isempty(ODESSargs))
+    ODESSargs = {'','','',2};
+end
+
 
 % check python version
 pythonsymlink = 'python3';
@@ -53,19 +62,21 @@ end
 
 for imodel = 1:length(ar.model)
     % write stochiometric matrix
-    arExportModelToDmod('model',imodel,[],[],replacements);
     fprintf('Writing stochiometric matrix for model %i to %s...\n', imodel, [ar.model(imodel).name, '__model.csv'])
-    
+    arExportModelToDmod('model',imodel,[],[],replacements);
+
     % copy ODESS
     copyfile([ar.info.ar_path, filesep, 'ThirdParty', filesep, 'ODESS.py'], pwd)
     
     % write python script
     workFile = fopen('doWork_ODESS.py', 'w');
     fprintf(workFile, 'from ODESS import *\n');
-    fprintf(workFile, 'ODESS("%s",[],[],[],2,"M")', [ar.model(imodel).name, '__model.csv']);
+    fprintf(workFile, 'ODESS("%s",[%s],[%s],[%s],%i,"M")', [ar.model(imodel).name, '__model.csv'],...
+        ODESSargs{1}, ODESSargs{2}, ODESSargs{3}, ODESSargs{4});
     fclose(workFile);
     
     % do python work
+    fprintf('Calculating steady state for model %i...\n', imodel)
     [status, fullout] = system(sprintf('%s %s', pythonsymlink, 'doWork_ODESS.py'));
     try
         steadystate = regexp(fullout, 'Testing Steady State...', 'split');
