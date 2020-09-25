@@ -1346,7 +1346,7 @@ for j=1:length(ar.model(m).data(d).y)
         % log-fitting
         if(ar.model(m).data(d).logfitting(j))
             qdatapos = ar.model(m).data(d).yExp(:,j)>0;
-            nancount = length(isnan(ar.model(m).data(d).yExp(:,j)));
+            nancount = sum(isnan(ar.model(m).data(d).yExp(:,j)));
             ar.model(m).data(d).yExp(qdatapos,j) = log10(ar.model(m).data(d).yExp(qdatapos,j));
             ar.model(m).data(d).yExp(~qdatapos,j) = nan;
             if(sum(~qdatapos)==0)
