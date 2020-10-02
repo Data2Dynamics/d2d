@@ -1,9 +1,9 @@
-function varargout = arSteadyStateAnalytical(replacements, ODESSargs, pythonsymlink)
+function varargout = arSteadyStateAnalytical(replacements, AlyssaArgs, pythonsymlink)
 
-% [success, steadystate, fullout] = arSteadyStateAnalytical(ptyhonsymlink, ODESSargs, replacements)
+% [success, steadystate, fullout] = arSteadyStateAnalytical(ptyhonsymlink, AlyssaArgs, replacements)
 %
 % Calculates analytical steady state from compiled models using the python
-% tool ODESS [1,2]. Results are printed to the console and must be manually
+% tool AlyssaPetit [1,2]. Results are printed to the console and must be manually
 % copied into the CONDITIONS section of the model definition file. 
 %
 %   replacements    Cell array of string of parameters that will be 
@@ -35,7 +35,7 @@ function varargout = arSteadyStateAnalytical(replacements, ODESSargs, pythonsyml
 % Customized steady-state constraints for parameter estimation in non-
 % linear ordinary differential equation models. 
 % Frontiers in Cell and Developmental Biology 4, 2016, 41
-% [2] http://sysbio.uni-freiburg.de/mrosen/
+% [2] https://github.com/marcusrosenblatt/AlySSaPEtit
 % 
 % See also: arSteadyState
 
@@ -47,8 +47,8 @@ end
 if(~exist('pythonsymlink','var') || isempty(pythonsymlink))
     pythonsymlink = '';
 end
-if(~exist('ODESSargs','var') || isempty(ODESSargs))
-    ODESSargs = {'','','',2};
+if(~exist('ODESSargs','var') || isempty(AlyssaArgs))
+    AlyssaArgs = {'','','',2};
 end
 
 
@@ -72,7 +72,7 @@ for imodel = 1:length(ar.model)
     workFile = fopen('doWork_ODESS.py', 'w');
     fprintf(workFile, 'from ODESS import *\n');
     fprintf(workFile, 'ODESS("%s",[%s],[%s],[%s],%i,"M")', [ar.model(imodel).name, '__model.csv'],...
-        ODESSargs{1}, ODESSargs{2}, ODESSargs{3}, ODESSargs{4});
+        AlyssaArgs{1}, AlyssaArgs{2}, AlyssaArgs{3}, AlyssaArgs{4});
     fclose(workFile);
     
     % do python work
@@ -83,11 +83,11 @@ for imodel = 1:length(ar.model)
         steadystate = regexp(steadystate{2}, 'I obtained the following equations:', 'split');
         
         if ~(strtrim(steadystate{1}) == 'Solution is correct!')
-            warning('ODESS failed for model %i.\n\n', imodel)
-            fprintf('ODESS output:\n%s\n', fullout)
+            warning('AlyssaPetit failed for model %i.\n\n', imodel)
+            fprintf('AlyssaPetit output:\n%s\n', fullout)
             success = 0;
         else
-            fprintf('ODESS successfull for model %i.\n', imodel)
+            fprintf('AlyssaPetit successfull for model %i.\n', imodel)
             success = 1;
         end
         
@@ -105,8 +105,8 @@ for imodel = 1:length(ar.model)
 
         
     catch
-        warning('ODESS failed for model %i.\n\n', imodel)
-        fprintf('ODESS output:\n%s\n', fullout)
+        warning('AlyssaPetit failed for model %i.\n\n', imodel)
+        fprintf('AlyssaPetit output:\n%s\n', fullout)
         fprintf(2,'Could not calculate analytical steady state for model %i.\n\n', imodel)
         success = 0;
     end
