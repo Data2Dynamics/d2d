@@ -22,6 +22,7 @@ fid = fopen(conf.file_slurm,'w');
 fprintf(fid,'%s\n','#!/bin/sh');
 fprintf(fid,'%s\n','########## Begin Slurm header ##########');
 fprintf(fid,'%s\n',['#SBATCH --job-name=',conf.name]);
+fprintf(fid,'%s\n',['#SBATCH --partition=multi']);
 fprintf(fid,'%s\n',['#SBATCH --nodes=',num2str(conf.n_calls)]);
 fprintf(fid,'%s\n',['#SBATCH --ntasks-per-node=',num2str(conf.n_inNode)]);
 fprintf(fid,'%s\n',['#SBATCH --time=' conf.walltime]);
