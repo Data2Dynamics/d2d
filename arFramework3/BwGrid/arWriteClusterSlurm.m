@@ -21,9 +21,10 @@ fid = fopen(conf.file_slurm,'w');
 
 fprintf(fid,'%s\n','#!/bin/sh');
 fprintf(fid,'%s\n','########## Begin Slurm header ##########');
-fprintf(fid,'%s\n',['#SLURM --job-name=',conf.name]);
-fprintf(fid,'%s\n',['#SLURM -l nodes=1:ppn=16:' conf.qu]);
-fprintf(fid,'%s\n',['#SLURM --time=' conf.walltime]);
+fprintf(fid,'%s\n',['#SBATCH --job-name=',conf.name]);
+fprintf(fid,'%s\n',['#SBATCH --nodes=',num2str(conf.n_calls)]);
+fprintf(fid,'%s\n',['#SBATCH --ntasks-per-node=',num2str(conf.n_inNode)]);
+fprintf(fid,'%s\n',['#SBATCH --time=' conf.walltime]);
 % fprintf(fid,'%s\n','#SLURM --output=oe');
 % fprintf(fid,'%s\n','#SLURM --mail-type=a');
 fprintf(fid,'%s\n','########### End Slurm header ##########');
