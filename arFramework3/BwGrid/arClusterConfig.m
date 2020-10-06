@@ -23,7 +23,7 @@ checkstr = dec2hex(h)';
 checkstr = checkstr(1,1:6); % keep it short
 conf.name = [name,datum,'_',checkstr];
 
-conf.matlab_release = 'R2018a';
+conf.matlab_release = version('-release'); %'R2018a';
 
 conf.file_ar_workspace = [conf.name,'_ar.mat'];
 conf.file_matlab = ['m_',conf.name,'.m']; % prevent starting with a digit
