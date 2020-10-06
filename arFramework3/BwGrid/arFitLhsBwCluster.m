@@ -78,7 +78,7 @@ conf.walltime = walltime;
 
 %% writing the startup bash-script:
 fprintf('arFitLhsBwCluster.m: Writing startup file %s ...\n',conf.file_startup);
-arWriteClusterStartup(conf);
+arWriteClusterStartup(conf,useSlurm);
 
 %% writing the moab file:
 if useSlurm
