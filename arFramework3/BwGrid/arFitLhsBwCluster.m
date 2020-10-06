@@ -16,8 +16,13 @@
 %                  and 'best', or leave empty for 'bestplus'.
 %                  ['bestplus'] Default value
 %
-%   walltime       string containing walltime for jobs on cluster
+%   walltime       string containing walltime for jobs on clust er
 %                  ['02:00:00:00'] Default value
+% 
+%   useSlurm       [true]
+%                  In 2020, the bwClusters switched from moab queuing to
+%                  slurm. useSlurm=true will execute slurm commands. 
+%                  useSlurm=false still writes moab-based scripts.
 %
 % The number of cores in a node is by default 5 as specified in
 % arClusterConfig.m. The number of nodes is calculated from Nfit and fitsPerCore
@@ -38,9 +43,12 @@
 % 
 % See also arClusterConfig, arFitLHS
 
-function collectfun = arFitLhsBwCluster(Nfit,fitsPerCore, queue, walltime)
+function collectfun = arFitLhsBwCluster(Nfit,fitsPerCore, queue, walltime, useSlurm)
 if ~exist('fitsPerCore','var') || isempty(fitsPerCore)
     fitsPerCore = 10;
+end
+if ~exist('useSlurm','var') || isempty(useSlurm)
+    useSlurm = true;
 end
 
 if ~exist('queue','var') || isempty(queue)
@@ -73,8 +81,13 @@ fprintf('arFitLhsBwCluster.m: Writing startup file %s ...\n',conf.file_startup);
 arWriteClusterStartup(conf);
 
 %% writing the moab file:
-fprintf('arFitLhsBwCluster.m: Writing moab file %s ...\n',conf.file_moab);
-arWriteClusterMoab(conf);
+if useSlurm
+    fprintf('arFitLhsBwCluster.m: Writing slurm file %s ...\n',conf.file_moab);
+    arWriteClusterSlurm(conf);
+else
+    fprintf('arFitLhsBwCluster.m: Writing moab file %s ...\n',conf.file_moab);
+    arWriteClusterMoab(conf);
+end
 
 %% saving global ar in a workspace:
 global ar

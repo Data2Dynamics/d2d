@@ -3,18 +3,19 @@
 % 
 % arClusterConfig creates a struct containing configs and infos for writting
 % the moab file
+% 
+
 
 function conf = arClusterConfig(name)
 global ar
-
-datum = datestr(now,30);
-conf = struct;
-
 if ~exist('name','var') || ~ischar(name)
     name = '';
 else
     name = [name,'_'];
 end
+
+datum = datestr(now,30);
+conf = struct;
 
 checksum = arAddToCheckSum(randn + datestr(now, 'HHMMSSddmmyyyy')); %add datestr for unique checksums
 h = typecast(checksum.digest,'uint8');
@@ -27,7 +28,8 @@ conf.matlab_release = 'R2018a';
 conf.file_ar_workspace = [conf.name,'_ar.mat'];
 conf.file_matlab = ['m_',conf.name,'.m']; % prevent starting with a digit
 conf.file_matlab_results = ['m_',conf.name,'_results.m']; % prevent starting with a digit
-conf.file_moab = [conf.name,'.moab'];
+conf.file_moab = [conf.name,'.moab'];% either the moab file is required or slurm
+conf.file_slurm = [conf.name,'.slurm']; % either the moab file is required or slurm
 conf.file_startup = [conf.name,'.sh'];
 
 conf.d2dpath = fileparts(which('arInit.m'));
