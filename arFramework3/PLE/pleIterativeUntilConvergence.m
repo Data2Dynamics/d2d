@@ -13,7 +13,7 @@ chi2old = arGetMerit;
 
 arPLEInit
 ple(varargin{:})
-ckBestPFromPle2;
+pleBestP;
 arCalcMerit;
 chi2 = arGetMerit;
 arSave('current')
@@ -26,7 +26,7 @@ while chi2<chi2old-deltaBetter && nRestart<nRestartMax
     arFit
     arPLEInit
     ple(varargin{:})
-    ckBestPFromPle2;
+    pleBestP;
     arCalcMerit;
     chi2 = arGetMerit;
     arSave('current')
