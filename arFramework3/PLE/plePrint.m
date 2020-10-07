@@ -52,7 +52,6 @@ fprintf(fid, '|');
 fprintf(fid, numtemplate, makestr('IDflag:', numlength));
 fprintf(fid, numtemplate, makestr('LowerPL:', numlength));
 fprintf(fid, numtemplate, makestr('UpperPL:', numlength));
-fprintf(fid, numtemplate, makestr('Rel.PL:', numlength));
 if(isfield(ar.ple, 'p_true'))
     fprintf(fid, '|');
     fprintf(fid, covertemplate, makestr('?:', numlength));
@@ -79,7 +78,6 @@ for j=1:length(ar.ple.p)
         fprintf(fid, numtemplate, makestr(idflag, numlength));
         fprintf(fid, numtemplate, makestr(ar.ple.conf_lb_point(j), numlength));
         fprintf(fid, numtemplate, makestr(ar.ple.conf_ub_point(j), numlength));
-        fprintf(fid, numtemplate, makestr(ar.ple.conf_rel_point(j), numlength));
         if(isfield(ar.ple, 'p_true'))
             fprintf(fid, '|');
             coverage_flag = ' ';
@@ -111,7 +109,6 @@ if(ar.ple.plot_simu)
     fprintf(fid, numtemplate, makestr('IDflag:', numlength));
     fprintf(fid, numtemplate, makestr('LowerPL:', numlength));
     fprintf(fid, numtemplate, makestr('UpperPL:', numlength));
-    fprintf(fid, numtemplate, makestr('Rel.PL:', numlength));
     if(isfield(ar.ple, 'p_true'))
         fprintf(fid, covertemplate, makestr('?:', numlength));
     end
@@ -137,7 +134,6 @@ if(ar.ple.plot_simu)
             fprintf(fid, numtemplate, makestr(idflag, numlength));
             fprintf(fid, numtemplate, makestr(ar.ple.conf_lb(j), numlength));
             fprintf(fid, numtemplate, makestr(ar.ple.conf_ub(j), numlength));
-            fprintf(fid, numtemplate, makestr(ar.ple.conf_rel(j), numlength));
             if(isfield(ar.ple, 'p_true'))
                 coverage_flag = ' ';
                 if(ar.ple.p_true(j) <= ar.ple.conf_ub(j) && ...

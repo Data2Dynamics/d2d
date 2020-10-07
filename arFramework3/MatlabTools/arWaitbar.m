@@ -5,9 +5,9 @@ function arWaitbar(j, n, text)
 
 persistent batchmode
 if isempty(batchmode)
-    ss = get(0, 'ScreenSize')
+    ss = get(0, 'ScreenSize');
     if max(ss)<2
-        batchmode = true
+        batchmode = true;
     else
         batchmode = false;
     end

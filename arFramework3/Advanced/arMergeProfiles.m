@@ -199,7 +199,7 @@ function PLEs = loadSingle( PLEs, directory, doFilterProfile, doAppendProfiles)
         if appending
             PLEs = appendVectors(  PLEs, curPLE, {'chi2s', 'chi2sinit', 'chi2spriors', 'chi2spriorsAll', 'chi2sviolations'}, filled(b), loc(b), N );
             PLEs = appendMatrices( PLEs, curPLE, {'psinit', 'ps', 'gradient', 'psinitstep'}, filled(b), loc(b), N, available, idxInCurPLE );
-            PLEs = copyScalars(  PLEs, curPLE, {'estimatetime', 'fittime', 'timing', 'conf_lb', 'conf_ub', 'conf_lb_point', 'conf_ub_point', 'IDstatus', 'p'}, filled(b), loc(b) );
+            PLEs = copyScalars(  PLEs, curPLE, {'conf_lb', 'conf_ub', 'conf_lb_point', 'conf_ub_point', 'IDstatus', 'p'}, filled(b), loc(b) );
             PLEs = copySingle(   PLEs, curPLE, {'breakon_point', 'dchi2', 'chi2_strID_ratio', 'initstep_fkt', 'minstepsize', 'breakonlb', 'breakonub', 'maxstepsize', ...
                 'plot_point', 'plot_simu', 'dist_thres', 'grad_thres', 'dchi2_point', 'merit', 'alpha_level', 'ylabel', ...
                 'integrate_fkt', 'fit_fkt', 'setoptim_fkt', 'merit_fkt', 'optimset_tol', 'allowbetteroptimum', 'savePath', 'relchi2stepincrease'} );
@@ -207,7 +207,7 @@ function PLEs = loadSingle( PLEs, directory, doFilterProfile, doAppendProfiles)
         else
             PLEs = copyVectors(  PLEs, curPLE, {'chi2s', 'chi2sinit', 'chi2spriors', 'chi2spriorsAll', 'chi2sviolations'}, filled(b), loc(b), N );
             PLEs = copyMatrices( PLEs, curPLE, {'psinit', 'ps', 'gradient', 'psinitstep'}, filled(b), loc(b), N, available, idxInCurPLE );
-            PLEs = copyScalars(  PLEs, curPLE, {'estimatetime', 'fittime', 'timing', 'conf_lb', 'conf_ub', 'conf_lb_point', 'conf_ub_point', 'IDstatus',  'p'}, filled(b), loc(b) );
+            PLEs = copyScalars(  PLEs, curPLE, {'conf_lb', 'conf_ub', 'conf_lb_point', 'conf_ub_point', 'IDstatus',  'p'}, filled(b), loc(b) );
             PLEs = copySingle(   PLEs, curPLE, {'breakon_point', 'dchi2', 'chi2_strID_ratio', 'initstep_fkt', 'minstepsize', 'breakonlb', 'breakonub', 'maxstepsize', ...
                 'plot_point', 'plot_simu', 'dist_thres', 'grad_thres', 'dchi2_point', 'merit', 'alpha_level', 'ylabel', ...
                 'integrate_fkt', 'fit_fkt', 'setoptim_fkt', 'merit_fkt', 'optimset_tol', 'allowbetteroptimum', 'savePath', 'relchi2stepincrease'} );
