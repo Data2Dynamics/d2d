@@ -63,7 +63,7 @@ if ~exist('queue','var') || isempty(queue)
 end
 
 if ~exist('walltime','var') || isempty(walltime)
-    walltime = '02:00:00:00';
+    walltime = '12:00:00';
 end
 
 if sum(strcmp(queue,{'standard','best','bestplus'})) ~= 1
