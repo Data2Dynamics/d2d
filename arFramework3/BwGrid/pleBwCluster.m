@@ -80,6 +80,9 @@ fprintf('pleBwCluster.m: Generating bwGrid config ...\n');
 conf = arClusterConfig;
 
 conf.n_calls = ceil((length(pars) * 2)/conf.n_inNode);
+if conf.n_calls < 2
+    error('pleBwCluster.m: Must use more than one node')
+end
 conf.qu = queue;
 conf.walltime = walltime;
 
