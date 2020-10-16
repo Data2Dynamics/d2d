@@ -1,4 +1,4 @@
-% collectfun = pleBwCluster([pars], [queue], [walltime])
+% collectfun = pleBwCluster([pars], [queue], [walltime], [useSlurm])
 %
 % pleBwCluster performs ple on the BwGrid by automatically
 % generating scripts (startup, moab, matlab) and calling them.
@@ -13,6 +13,11 @@
 %   walltime       string containing walltime for jobs on cluster
 %                  ['02:00:00:00'] Default value
 %
+%   useSlurm       [true]
+%                  In 2020, the bwClusters switched from moab queuing to
+%                  slurm. useSlurm=true will execute slurm commands. 
+%                  useSlurm=false still writes moab-based scripts.
+
 % The number of cores in a node is by default 5 as specified in
 % arClusterConfig.m. The number of nodes is calculated from the number of pars
 % (and 5 cores per node).
@@ -65,6 +70,10 @@ if sum(strcmp(queue,{'standard','best','bestplus'})) ~= 1
     error('Queue specification invalid. Leave empty for bestplus or use standard/best');
 end
 
+if ~exist('useSlurm','var') || isempty(useSlurm)
+    useSlurm = true;
+end
+
 
 %% configuration
 fprintf('pleBwCluster.m: Generating bwGrid config ...\n');
@@ -84,8 +93,13 @@ fprintf('pleBwCluster.m: Writing startup file %s ...\n',conf.file_startup);
 arWriteClusterStartup(conf);
 
 %% writing the moab file:
-fprintf('pleBwCluster.m: Writing moab file %s ...\n',conf.file_moab);
-arWriteClusterMoab(conf);
+if useSlurm
+    fprintf('pleBwCluster.m: Writing slurm file %s ...\n',conf.file_moab);
+    arWriteClusterSlurm(conf);
+else
+    fprintf('pleBwCluster.m: Writing moab file %s ...\n',conf.file_moab);
+    arWriteClusterMoab(conf);
+end
 
 %% saving global ar in a workspace:
 conf.arsavepath = ar.config.savepath;
