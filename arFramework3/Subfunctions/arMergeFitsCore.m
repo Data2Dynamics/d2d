@@ -13,13 +13,15 @@ if ~isstruct(ar) || ~isstruct(ar2)
     error('Both arguments have to be structs')
 end
 if ~isfield(ar,'ps')
-    error('ar does not contain field ar.ps');
+    warning('ar does not contain field ar.ps');
+    nfit1 = 0;
+else
+    nfit1 = length(ar.chi2s);
 end
 if ~isfield(ar2,'ps')
     warning('ar2 does not contain field ar2.ps: return without appending.');
 end
 
-nfit1 = length(ar.chi2s);
 nfitBoth = nfit1 + length(ar2.chi2s);
 
 ar.chi2s((nfit1+1):nfitBoth) = ar2.chi2s;
