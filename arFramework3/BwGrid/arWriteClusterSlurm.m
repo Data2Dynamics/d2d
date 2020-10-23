@@ -41,7 +41,7 @@ fprintf(fid,'%s\n','# Go to submit directory');
 fprintf(fid,'%s\n','cd $SLURM_SUBMIT_DIR');
 fprintf(fid,'%s\n','echo Directory is `pwd`');
 fprintf(fid,'%s\n','');
-fprintf(fid,'%s\n',['module load math/matlab/',conf.matlab_release]);
+fprintf(fid,'%s\n',['module load math/matlab/R',conf.matlab_release]);
 fprintf(fid,'%s\n','');
 fprintf(fid,'%s\n','##### for-loop for parallization within a node #######');
 fprintf(fid,'%s\n',['for iInNode in {1..',num2str(conf.n_inNode),'}    ']);
