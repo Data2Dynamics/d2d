@@ -1,0 +1,34 @@
+function arLoadConfigBwCluster(cjId, jobIds, rescolfun)
+
+% arLoadConfigBwCluster(cjId, [jobIds], [rescolfun])
+%
+% Retrieve computing job ID to cluster job ID mapping and remaining 
+% config if it is lost. This function will try to load the 
+% clConfBackup file for cjId.Alternatively, corresponding jobIds and 
+% rescolfun can be specified manually.
+%
+%   cjId          computing job ID to assign jobIDs to
+%   [jobIds]      vector of cluster job IDs
+%   [rescolfun]   name of results collection function (including extension)
+%
+% See also: arHelpBwCluster
+
+global ar
+if(isempty(ar))
+    error('please initialize by arInit')
+end
+
+if ~exist('jobIds','var') || isempty(jobIds)
+    config_backup = load(sprintf('clConfBackup_%s', cjId), 'clConf');
+    ar.config.cluster = config_backup.clConf;
+else
+    rescolcheck = strsplit(rescolfun, '.');
+    if rescolcheck{2} ~= 'm'
+        error('Please include extension in rescolfun argument')
+    end
+    
+    ar.config.cluster.mapping.(cjId).jobIds = jobIds;
+    ar.config.cluster.mapping.(cjId).rescolscriptfilename = rescolfun;
+end
+fprintf('Mapping updated successfully\n')
+end
