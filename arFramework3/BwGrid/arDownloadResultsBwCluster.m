@@ -37,7 +37,7 @@ sshLoginString = [ar.config.cluster.username '@' ar.config.cluster.loginNodeUrl]
 clusterWd = ar.config.cluster.wd;
 rescolscriptfilename = ar.config.cluster.mapping.(cjId).rescolscriptfilename;
 name = ar.config.cluster.mapping.(cjId).name;
-arMatFilePath = [clusterWd, '/Results/', name, '/workspace.mat'];
+arMatFilePath = [clusterWd, '/', name, '/Results/', name, '/workspace.mat'];
 
 if ~exist('resFolderName') || isempty(resFolderName)
     resFolderName = name;
@@ -64,7 +64,7 @@ sshstring = ['SSHSOCKET=~/.ssh/' sshLoginString ' && ',...
 
 % trigger results collection
 sshstring = [sshstring, ' && ',...
-    'ssh -o ControlPath=$SSHSOCKET ' sshLoginString ' "cd ' clusterWd ' && module load math/matlab/' ar.config.cluster.matlabVersion ' && pwd && matlab -r \"' rescolscriptfilename(1:(end-2)) ';exit' '\""'];
+    'ssh -o ControlPath=$SSHSOCKET ' sshLoginString ' "cd ' clusterWd '/' name ' && module load math/matlab/' ar.config.cluster.matlabVersion ' && pwd && matlab -r \"' rescolscriptfilename(1:(end-2)) ';exit' '\""'];
 
 % download results
 sshstring = [sshstring, ' && ',...

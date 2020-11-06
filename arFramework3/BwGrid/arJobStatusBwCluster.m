@@ -27,6 +27,7 @@ if ~isfield(ar.config, 'cluster') || ~isfield(ar.config.cluster, 'mapping') || ~
 end
 
 sshLoginString = [ar.config.cluster.username '@' ar.config.cluster.loginNodeUrl];
+name = ar.config.cluster.mapping.(cjId).name;
 
 %% SSH WORK
 % retrieve mapping of cjId to corresponding cluster jobIds
@@ -43,7 +44,7 @@ slurmOutFiles = cellfun(@(x) sprintf('slurm-%i.out',x), num2cell(myjobs'), ...
 checkIfExist = strcat('if test -f \"', slurmOutFiles, '\"; then echo \"', jobIdString, ' completed\"; else echo \"', jobIdString, ' inprogress\"; fi');
 checkIfExist = strjoin(checkIfExist, '; ');
 %fprintf('%s@%s''s password:\n', ar.config.cluster.username, ar.config.cluster.loginNodeUrl)
-[status, cmdout] = system(['ssh ',sshLoginString, ' "squeue && cd ', ar.config.cluster.wd,'; ', checkIfExist, '"'], '-echo');
+[status, cmdout] = system(['ssh ',sshLoginString, ' "squeue && cd ', ar.config.cluster.wd,'/', name '; ', checkIfExist, '"'], '-echo');
 
 %% INTERPRET RESULTS
 resPos = length(regexp(cmdout, 'completed'));

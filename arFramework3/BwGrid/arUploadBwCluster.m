@@ -20,8 +20,7 @@ if ~isfield(ar.config, 'cluster')
     arUserConfigBwCluster
 end
 if ~exist('name') || isempty(name)
-    name2 = strsplit(ar.config.savepath, filesep);
-    name = [name2{end}, datestr(now,30)];
+    [~,name,~]=fileparts(pwd);
 end
 
 
@@ -31,7 +30,7 @@ confCl.arMatFileName = 'workspace.mat';
 
 confCl.arPathLoc = [confCl.arMatFileName];      % path to ar struct on local
 
-confCl.wd = ar.config.cluster.wd; % pwd on cluster
+confCl.wd = [ar.config.cluster.wd, '/', name]; % pwd on cluster
 confCl.arPathCl = [confCl.wd, '/', confCl.arMatFileName];        % path to ar struct on cluster
 
 sshLoginString = [ar.config.cluster.username '@' ar.config.cluster.loginNodeUrl];

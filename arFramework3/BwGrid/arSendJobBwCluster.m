@@ -1,19 +1,24 @@
-function jobIds = arSendJobBwCluster(name, functionString, cjId, uploadFiles)
+function jobIds = arSendJobBwCluster(cjId, functionString, name, uploadFiles)
 
-% jobIds = arSendJobBwCluster(clusterWd, name, functionString, [cjId], [uploadFiles])
+% jobIds = arSendJobBwCluster(cjId, functionString, [name], [uploadFiles])
 %
 % Send computing job (arFitLhsBwCluster or pleBwCluster) to cluster.
-%   name                Name of the results folder to load
-%   functionString      Function to execute on login node as string 
+%   cjId                identifier for computing job, (e.g. 'run01')
+%   name                folder name on cluster within ar.config.cluster.wd
+%                       [name of the current dir]
+%   functionString      function to execute on login node as string 
 %                       (e.g. 'arFitLhsBwCluster(30,5)'
-%   cjId                Identifier for computing job
-%   uploadFiles         Upload files to cluster (arUploadToBwCluster)
+%   uploadFiles         upload files to cluster (arUploadToBwCluster) [false]
 %
 % See also: arHelpBwCluster, arUserConfigBwCluster, arUploadBwCluster, 
 % arFitLhsBwCluster, pleBwCluster, arJobStatusBwCluster,
 % arDownloadResultsBwCluster, arKillJobBwCluster
 
 global ar
+if ~exist('name') || isempty(name)
+    [~,name,~]=fileparts(pwd);
+end
+
 if ~exist('cjId') || isempty(cjId)
     cjId = datestr(now,30);
 end
@@ -51,13 +56,13 @@ sshstring = ['SSHSOCKET=~/.ssh/' sshLoginString ' && ',...
     'ssh -M -f -N -o ControlPath=$SSHSOCKET ' sshLoginString];
 
 % generate and upload matlab script
-writeClusterInitFile(clusterWd, ar.config.cluster.d2dpath, name, scriptfilename, rescolscriptfilename, functionString);
+writeClusterInitFile(ar.config.cluster.d2dpath, name, scriptfilename, rescolscriptfilename, functionString);
 sshstring = [sshstring, ' && ',...
-    'scp -o ControlPath=$SSHSOCKET ', scriptfilename, ' ', sshLoginString, ':', clusterWd];
+    'scp -o ControlPath=$SSHSOCKET ', scriptfilename, ' ', sshLoginString, ':', clusterWd, '/', name];
 
 % run matlab script
 sshstring = [sshstring, ' && ',...
-    'ssh -o ControlPath=$SSHSOCKET ' sshLoginString ' "cd ' clusterWd ' && module load math/matlab/' ar.config.cluster.matlabVersion ' && pwd && matlab -r \"' scriptfilename(1:(end-2)) '\""'];
+    'ssh -o ControlPath=$SSHSOCKET ' sshLoginString ' "cd ' clusterWd '/' name ' && module load math/matlab/' ar.config.cluster.matlabVersion ' && pwd && matlab -r \"' scriptfilename(1:(end-2)) '\""'];
 
 % close ssh master connection
 sshstring = [sshstring, ' && ', ...
@@ -74,15 +79,15 @@ end
 %% Get jobIds from output
 jobIds = str2double(regexp(cmdout, '(?<=Submitted batch job )[0-9]*', 'match'));
 ar.config.cluster.mapping.(cjId).jobIds = jobIds;
+ar.config.cluster.mapping.(cjId).name = name;
 
 clConf = ar.config.cluster;
 save(sprintf('clConfBackup_%s.mat', cjId), 'clConf')
 end
 
-function writeClusterInitFile(clusterWd, d2dpath, name, scriptfilename, rescolscriptfilename, functionString)
-
+function writeClusterInitFile(d2dpath, name, scriptfilename, rescolscriptfilename, functionString)
 mcode = {
-    ['cd ',clusterWd], ...
+ %   ['cd ',clusterWd, '/', name], ...
     ['addpath(''',d2dpath,''');'], ...
     'arInit;', ...
     ['arLoad(''',name,''');'],...

@@ -36,7 +36,7 @@ if nargin == 0
     loginNodeUrl = input(sprintf('Please enter the ssh server url [return: %s, 1: bwforcluster.bwservices.uni-heidelberg.de]\n-> ', currentValsStruct.loginNodeUrl),'s');
     matlabVersion = input(sprintf('Please enter MATLAB version to use on the cluster [return: %s, 1: R2019b]\n-> ', currentValsStruct.matlabVersion),'s');
     d2dpath = input(sprintf('Please enter the absolute path to D2D on the cluster [return: %s, 1: ~/d2d/arFramework3]\n-> ', currentValsStruct.d2dpath),'s');
-    wd = input(sprintf('Please enter the working directory on the cluster [return: %s]\n-> ', currentValsStruct.wd),'s');
+    wd = input(sprintf('Please enter the working directory on the cluster [return: %s, 1: ~]\n-> ', currentValsStruct.wd),'s');
     
     if exist('username') && ~isempty(username)
         ar.config.cluster.username = username;
@@ -66,7 +66,11 @@ if nargin == 0
         end
     end
     if exist('wd') && ~isempty(wd)
-        ar.config.cluster.wd = wd;
+        if wd == '1'
+            ar.config.cluster.wd = '~';
+        else
+            ar.config.cluster.wd = wd;
+        end
     end
     
 elseif nargin == 5
