@@ -1,6 +1,6 @@
 function varargout = arSteadyStateAnalytical(replacements, AlyssaArgs, pythonsymlink)
 
-% [success, steadystate, fullout] = arSteadyStateAnalytical(ptyhonsymlink, AlyssaArgs, replacements)
+% [success, steadystate, fullout] = arSteadyStateAnalytical(replacements, AlyssaArgs, ptyhonsymlink)
 %
 % Calculates analytical steady state from compiled models using the python
 % tool AlyssaPetit [1,2]. Results are printed to the console and must be manually
@@ -9,7 +9,7 @@ function varargout = arSteadyStateAnalytical(replacements, AlyssaArgs, pythonsym
 %   replacements    Cell array of string of parameters that will be 
 %                   replaced with zeros before calculation of the steady
 %                   state. May be used to switch off certain inputs/stimuli 
-%   ODESSargs       Cell array of arguments passed to ODESS. Prodivide the 
+%   AlyssaArgs      Cell array of arguments passed to AlyssaPetit. Prodivide the 
 %                   first 3 arguments as strings (e.g. givenCQs = 
 %                   "'AKT+pATK=totalAKT', 'MEK+pMEK=totalMEK'"), the fourth as numeric. 
 %                   {injections,givenCQs,neglect,sparsifyLevel}
@@ -21,7 +21,7 @@ function varargout = arSteadyStateAnalytical(replacements, AlyssaArgs, pythonsym
 %                   found
 %   steadystate     Cell array of steady state expressions in the D2D
 %                   syntax
-%   fullout         Full output of ODESS
+%   fullout         Full output of AlyssaPetit
 %
 % Requirements:
 %   - Python 3 installation
@@ -35,7 +35,7 @@ function varargout = arSteadyStateAnalytical(replacements, AlyssaArgs, pythonsym
 % Customized steady-state constraints for parameter estimation in non-
 % linear ordinary differential equation models. 
 % Frontiers in Cell and Developmental Biology 4, 2016, 41
-% [2] https://github.com/marcusrosenblatt/AlySSaPEtit
+% [2] https://github.com/marcusrosenblatt/AlyssaPetit
 % 
 % See also: arSteadyState
 
