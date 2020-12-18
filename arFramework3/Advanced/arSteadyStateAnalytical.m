@@ -47,7 +47,7 @@ end
 if(~exist('pythonsymlink','var') || isempty(pythonsymlink))
     pythonsymlink = '';
 end
-if(~exist('ODESSargs','var') || isempty(AlyssaArgs))
+if(~exist('AlyssaArgs','var') || isempty(AlyssaArgs))
     AlyssaArgs = {'','','',2};
 end
 
@@ -113,6 +113,8 @@ for imodel = 1:length(ar.model)
     varargout{1} = success;
     varargout{2} = steadystate;
     varargout{3} = fullout; 
+    
+    save([ar.model(imodel).name, '_steadystate_fullout.mat'])
 end
 end
 
