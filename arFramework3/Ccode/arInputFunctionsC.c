@@ -508,6 +508,54 @@ double spline10(double t, double t1, double p1, double t2, double p2, double t3,
     return(uout);
 }
 
+double spline15(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, double t11, double p11, double t12, double p12, double t13, double p13, double t14, double p14, double t15, double p15, int ss, double dudt) {   
+    double uout;
+
+    double ts[15];
+    double us[15];
+
+    double b[15];
+    double c[15];
+    double d[15];
+
+    ts[0] = t1;
+    ts[1] = t2;
+    ts[2] = t3;
+    ts[3] = t4;
+    ts[4] = t5;
+    ts[5] = t6;
+    ts[6] = t7;
+    ts[7] = t8;
+    ts[8] = t9;
+    ts[9] = t10;
+    ts[10] = t11;
+    ts[11] = t12;
+    ts[12] = t13;
+    ts[13] = t14;
+    ts[14] = t15;
+
+    us[0] = p1;
+    us[1] = p2;
+    us[2] = p3;
+    us[3] = p4;
+    us[4] = p5;
+    us[5] = p6;
+    us[6] = p7;
+    us[7] = p8;
+    us[8] = p9;
+    us[9] = p10;
+    us[10] = p11;
+    us[11] = p12;
+    us[12] = p13;
+    us[13] = p14;
+    us[14] = p15;
+
+    spline(15, ss, 0, dudt, 0.0, ts, us, b, c, d);
+    uout = seval(15, t, ts, us, b, c, d);
+
+    return(uout);
+}
+
 double spline20(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, double t11, double p11, double t12, double p12, double t13, double p13, double t14, double p14, double t15, double p15, double t16, double p16, double t17, double p17, double t18, double p18, double t19, double p19, double t20, double p20, int ss, double dudt) {   
     double uout;
     
@@ -917,6 +965,56 @@ double Dspline10(double t, double t1, double p1, double t2, double p2, double t3
     spline(10, ss, 0, dudt, 0.0, ts, us, b, c, d);
     uout = seval(10, t, ts, us, b, c, d);
     
+    return(uout);
+}
+
+double Dspline15(double t, double t1, double p1, double t2, double p2, double t3, double p3, double t4, double p4, double t5, double p5, double t6, double p6, double t7, double p7, double t8, double p8, double t9, double p9, double t10, double p10, double t11, double p11, double t12, double p12, double t13, double p13, double t14, double p14, double t15, double p15, int ss, double dudt, int id) {   
+    double uout;
+
+    double ts[15];
+    double us[15];
+
+    double b[15];
+    double c[15];
+    double d[15];
+
+    ts[0] = t1;
+    ts[1] = t2;
+    ts[2] = t3;
+    ts[3] = t4;
+    ts[4] = t5;
+    ts[5] = t6;
+    ts[6] = t7;
+    ts[7] = t8;
+    ts[8] = t9;
+    ts[9] = t10;
+    ts[10] = t11;
+    ts[11] = t12;
+    ts[12] = t13;
+    ts[13] = t14;
+    ts[14] = t15;
+
+    us[0] = 0.0;
+    us[1] = 0.0;
+    us[2] = 0.0;
+    us[3] = 0.0;
+    us[4] = 0.0;
+    us[5] = 0.0;
+    us[6] = 0.0;
+    us[7] = 0.0;
+    us[8] = 0.0;
+    us[9] = 0.0;
+    us[10] = 0.0;
+    us[11] = 0.0;
+    us[12] = 0.0;
+    us[13] = 0.0;
+    us[14] = 0.0;
+
+    us[id-1] = 1.0;
+
+    spline(15, ss, 0, dudt, 0.0, ts, us, b, c, d);
+    uout = seval(15, t, ts, us, b, c, d);
+
     return(uout);
 }
 
