@@ -190,11 +190,13 @@ for imodel = 1:length(ar.model)
 
             % pre-equiblibration
             if isfield(ar, 'ss_conditions')
-                preEquilibrationId = cell(length(time),1);
-                preEquilibrationId(:) = ...
-                    {['model' num2str(imodel) '_data' ...
-                    num2str(ar.model(imodel).condition(ar.model(imodel).ss_condition.src).dLink)]};
-                rowsToAdd = [rowsToAdd, table(preEquilibrationId)];
+                for iss=1:length(ar.model(imodel).ss_conditions)
+                    preEquilibrationId = cell(length(time),1);
+                    preEquilibrationId(:) = ...
+                        {['model' num2str(imodel) '_data' ...
+                        num2str(ar.model(imodel).condition(ar.model(imodel).ss_condition(iss).src).dLink)]};
+                    rowsToAdd = [rowsToAdd, table(preEquilibrationId)];
+                end
             end
             
             simulationConditionId = repmat({simuConditionID}, [length(time) 1]);
