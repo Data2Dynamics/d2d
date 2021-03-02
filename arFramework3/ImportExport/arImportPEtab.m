@@ -52,6 +52,8 @@ else
 end
 if isempty(sbmlmodel)
     error('No SBML file found! Switch your path to working directory.');
+else
+    ar.petab.sbml = sbmlmodel;
 end
 if length(sbmlmodel)>1
     out = stringListChooser({sbmlmodel.name});
@@ -66,8 +68,10 @@ else
     pe_dir = dir(['**/*' name '*.tsv']);
 end
 
-if isempty(sbmlmodel)
+if isempty(pe_dir)
     error('No tsv files found! Switch your path to working directory.');
+else
+    ar.petab.path = pe_dir;
 end
 pe_dir = pe_dir(1).folder;
 
