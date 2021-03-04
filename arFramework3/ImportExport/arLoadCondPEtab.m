@@ -81,8 +81,12 @@ for m = 1:length(ar.model)
                             ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
                                 num2str(T.(fns{k})(i));
                         else
-                            ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
-                                char(T.(fns{k}){i});
+                            % Check if parameter has already been replaced
+                            % with the correct condition specific par
+                            if sum(ismember(arSym(ar.model(m).data(j).fp),char(T.(fns{k}){i}))) == 0
+                                ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
+                                    char(T.(fns{k}){i});
+                            end
                         end
                         % Check if initial state is set by condition
                     elseif any(strcmp(ar.model(m).xNames,fns{k}))

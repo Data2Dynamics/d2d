@@ -131,7 +131,7 @@ ar.config.fiterrors = 1;
 arLoadParsPEtab([pe_dir filesep PEparas.name]); 
 
 % model selection, save every model, remember arDC
-if exist('PEmselect','var') && ~isempty('PEmselect')
+if exist('PEmselect','var') && ~isempty(PEmselect)
     Tms = tdfread([pe_dir filesep PEmselect.name]);
     Tms_fn = fieldnames(Tms);
     Tms_size = size(Tms.name,1);

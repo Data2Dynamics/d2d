@@ -116,7 +116,17 @@ for imodel = 1:length(ar.model)
     for idata = 1:length(ar.model(imodel).data)
         for icond = 1:length(ar.model(imodel).data(idata).condition)
             condPar{end+1} = ar.model(imodel).data(idata).condition(icond).parameter;
+            
         end
+        % Check for random pars (condition specific reassignments
+        if(isfield(ar.model(imodel).data(idata), 'prand'))
+                for irands = 1:length(ar.model(imodel).data(idata).prand)
+                   prName = strcat(sprintf('%s%s', ar.model(imodel).data(idata).prand{irands}, ar.model(imodel).data(idata).fprand));
+                   randomizedPars = cellfun(@(x) ~isempty(strfind(x,prName)),ar.model(imodel).data(idata).fp);
+                   condPar = cat(2,condPar , ar.model(imodel).data(idata).pold(randomizedPars));
+                end
+        end
+        
 %         % catch d2d fix for predictors that are not time
 %         if ~(strcmp(ar.model(imodel).data(idata).t, 'time') || strcmp(ar.model(imodel).data(idata).t, 't'))
 %             for it = 1:length(ar.model(imodel).data(idata).tExp)
@@ -129,13 +139,20 @@ for imodel = 1:length(ar.model)
     
     % Write condition and measurement tables
     measT = table;
+    
     peCondValues = [];
+    condT = table;
+    
     numOfConds = length(peConds);
     conditionID = {};
     
     for idata = 1:length(ar.model(imodel).data)
         % conditions
         condPar = {}; condVal = []; condPos = []; conditionID_tmp = '';
+        
+        % Initialize row to be added to Condition Array
+        rowToAdd = zeros(1, numOfConds);
+
         
 %         % catch d2d fix for predictors that are not time
 %         if ~(strcmp(ar.model(imodel).data(idata).t, 'time') || strcmp(ar.model(imodel).data(idata).t, 't'))
@@ -151,13 +168,43 @@ for imodel = 1:length(ar.model)
             condPar{end+1} = ar.model(imodel).data(idata).condition(icond).parameter;
             condVal = [condVal str2num(ar.model(imodel).data(idata).condition(icond).value)];
             condPos = [condPos find(contains(peConds, condPar{icond}))];
+ 
+            
             %conditionID_tmp = [conditionID_tmp '_' ar.model(imodel).data(idata).condition(icond).parameter ...
             %'_' ar.model(imodel).data(idata).condition(icond).value];
+        end      
+        
+        % Check for random pars (condition specific reassignments
+        if(isfield(ar.model(imodel).data(idata), 'prand'))
+            for irands = 1:length(ar.model(imodel).data(idata).prand)
+                prName = strcat(sprintf('%s%s', ar.model(imodel).data(idata).prand{irands}, ar.model(imodel).data(idata).fprand));
+                randParsPos = cellfun(@(x) contains(x,prName),ar.model(imodel).data(idata).fp);
+                randPars = ar.model(imodel).data(idata).pold(randParsPos);
+                condPar = cat(2,condPar , randPars);
+                randParsIndivid = ar.model(imodel).data(idata).fp(randParsPos);
+                for irandPar = 1:length(randPars)
+                    condVal = [condVal randParsIndivid(irandPar)];
+                    condPos = [condPos find(contains(peConds, randPars{irandPar}))];
+                end
+            end
         end
         
-        rowToAdd = zeros(1, numOfConds);
-        rowToAdd(condPos) = condVal;
-        peCondValues(end+1,:) = rowToAdd;
+        % Alter row to insert condition values
+%         rowToAdd(condPos) = condVal;
+%         % Add ro to condition array
+%         peCondValues(end+1,:) = rowToAdd;
+        rowToAdd = table;
+        for irow = 1:length(condPos)    
+            if isnumeric(condVal{condPos == irow})
+               tb = table(condVal{condPos == irow});
+            else
+               tb = table(condVal(condPos == irow));
+            end
+            tb.Properties.VariableNames = condPar(condPos == irow);
+            rowToAdd = [rowToAdd tb];
+        end
+        condT = [condT; rowToAdd];
+        
         %conditionID{end+1} = conditionID_tmp;
         simuConditionID = ['model' num2str(imodel) '_data' num2str(idata)];
         conditionID{end+1} = simuConditionID;
@@ -284,8 +331,8 @@ for imodel = 1:length(ar.model)
         end
     end
     
-    condT = array2table(peCondValues);
-    condT.Properties.VariableNames = peConds;
+%     condT = array2table(peCondValues);
+%     condT.Properties.VariableNames = peConds;
     
     condT = [table(conditionID'), condT];
     condT.Properties.VariableNames{1} = 'conditionId';
