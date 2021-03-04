@@ -960,9 +960,12 @@ function [M] = GetInputs(M,F,m)
                     end
 
                 end
-            else
-                fprintf( 'Input %s not used in condition or is a not supported spline. Omitted from SBML file.\n', ar.model(m).uNames{ju} );            
+        else
+            fprintf( 'Input %s not used in condition or is a not supported spline. Omitted from SBML file.\n', ar.model(m).u{ju} );
+            if ~isnan(str2double(ar.model(m).fu{ju}))
+                warning('Input %s is a numeric value. Please use step1-function instead of integer in model definition to enable export to SBML format.\n', ar.model(m).u{ju} );
             end
+        end
     end
 
     %% Species and units
