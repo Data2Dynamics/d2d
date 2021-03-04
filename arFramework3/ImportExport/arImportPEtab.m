@@ -105,6 +105,11 @@ else
     else
         PEparas = dir([name{5} '.tsv']);
     end
+    if ~exist('name','var') || isempty(name) || length(name)<6 || isempty(name{6})
+        PEmselect = dir([pe_dir filesep sprintf('*%s*.tsv', 'modelselection')]);
+    else
+        PEmselect = dir([name{6} '.tsv']);
+    end
 end
 
 if length(PEparas) > 1 || length(PEmeas) > 1 || length(PEconds) > 1 || length(PEobs) > 1
@@ -124,52 +129,82 @@ arCompileAll
 ar.config.fiterrors = 1;
 
 arLoadParsPEtab([pe_dir filesep PEparas.name]); 
-arFindInputs % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
-arLoadParsPEtab([pe_dir filesep PEparas.name]); % get para values from parameter label
 
-% pre-equilibration
-if doPreEq
-    tstart = -1e7;
-    for imodel = 1:length(ar.model)
-        Tdat = T{imodel,1};
-        Tobs = T{imodel,2};
-        
-        if isfield(table2struct(Tdat), 'preequilibrationConditionId')
-            uniqueSimConds = unique(Tdat.simulationConditionId);
-            uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
-            if ~strcmp(class(uniquePreEqConds),'string')
-                if all(isnan(uniquePreEqConds))
-                    uniquePreEqConds = [];
+% model selection, save every model, remember arDC
+if exist('PEmselect','var') && ~isempty('PEmselect')
+    Tms = tdfread([pe_dir filesep PEmselect.name]);
+    Tms_fn = fieldnames(Tms);
+    Tms_size = size(Tms.name,1);
+    arDC = arDeepCopy(ar);
+else
+    Tms_size=1;
+end
+
+for ms=1:Tms_size
+    
+    if ms>1     % for multiple models in model selection, get original ar
+        ar = arDeepCopy(arDC);
+    end
+
+    arFindInputs % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
+    arLoadParsPEtab([pe_dir filesep PEparas.name]); % get para values from parameter label
+
+    if exist('Tms','var')
+        [BothPars,ia] = intersect(ar.pLabel,Tms_fn);
+        for i=1:length(BothPars)
+            if strcmp(Tms.(BothPars{i})(ms),'-')       % if Tms.(BothPars{i})(ms) == 0
+               arSetPars(BothPars(i), ar.p(ia), 0);
+            %else
+            %    arSetPars(BothPars(i), ar.p(ia)*Tms.(BothPars{i})(ms));
+            end
+        end
+    end    
+    
+    % pre-equilibration
+    if doPreEq
+        tstart = -1e7;
+        for imodel = 1:length(ar.model)
+            Tdat = T{imodel,1};
+            Tobs = T{imodel,2};
+
+            if isfield(table2struct(Tdat), 'preequilibrationConditionId')
+                uniqueSimConds = unique(Tdat.simulationConditionId);
+                uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
+                if ~strcmp(class(uniquePreEqConds),'string')
+                    if all(isnan(uniquePreEqConds))
+                        uniquePreEqConds = [];
+                    end
                 end
-            end
-            
-            if numel(uniquePreEqConds) > 1
-                error('More than one pre-equiblibration condition currently not supported.')
-            end
-            
-            for ipreeqcond = 1:size(uniquePreEqConds,1)
-                preEqCond = arFindCondition(convertStringsToChars(uniquePreEqConds(ipreeqcond)), 'conservative');
-                simConds = [];
-                for isimcond = 1:size(uniqueSimConds,1)
-                    %simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(isimcond)), 'conservative');
-                    simConds(end+1) = ...
-                        find(cellfun(@(x) ~strcmp(x, convertStringsToChars(uniquePreEqConds(ipreeqcond))), {ar.model.data.name}));
+
+                if numel(uniquePreEqConds) > 1
+                    error('More than one pre-equiblibration condition currently not supported.')
                 end
-                arSteadyState(imodel, preEqCond, simConds, tstart)
-            end
-            for isimu = 1:length(uniqueSimConds)
-                Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(isimu),:);
-                iSimuAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(isimu)), {ar.model(m).data.name}));
-                for iCol = 1:length(Tcondi.Properties.VariableNames)
-                    idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
-                    if ~isempty(idxState)
-                        arAddEvent(m,iSimuAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}))
-                        % ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
+
+                for ipreeqcond = 1:size(uniquePreEqConds,1)
+                    preEqCond = arFindCondition(convertStringsToChars(uniquePreEqConds(ipreeqcond)), 'conservative');
+                    simConds = [];
+                    for isimcond = 1:size(uniqueSimConds,1)
+                        %simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(isimcond)), 'conservative');
+                        simConds(end+1) = ...
+                            find(cellfun(@(x) ~strcmp(x, convertStringsToChars(uniquePreEqConds(ipreeqcond))), {ar.model.data.name}));
+                    end
+                    arSteadyState(imodel, preEqCond, simConds, tstart)
+                end
+                for isimu = 1:length(uniqueSimConds)
+                    Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(isimu),:);
+                    iSimuAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(isimu)), {ar.model(m).data.name}));
+                    for iCol = 1:length(Tcondi.Properties.VariableNames)
+                        idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
+                        if ~isempty(idxState)
+                            arAddEvent(m,iSimuAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}))
+                            % ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
+                        end
                     end
                 end
             end
         end
     end
+    arSave(Tms.name(ms,:))
 end
 
 end

@@ -41,6 +41,9 @@ elseif(isnumeric(workspace_name)) % workspace_name is the file-number
 elseif(ischar(workspace_name)) 
     [~,workspace_name]=fileparts(workspace_name);    % remove path
 end
+if contains(workspace_name,'*')
+    [~, workspace_name] = fileChooser('Results', 1, true,replace(workspace_name,'*',''));    
+end
 
 Stmpload = load(['./Results/' workspace_name '/workspace.mat']);
 ar = Stmpload.ar;
