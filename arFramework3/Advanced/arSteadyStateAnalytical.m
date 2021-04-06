@@ -56,7 +56,7 @@ end
 pythonsymlink = 'python3';
 [status, cmdout] = system([pythonsymlink ' --version']);
 pythonvers = regexp(cmdout, '\d*', 'Match');
-if str2num(pythonvers{3}) < 3
+if str2num(pythonvers{1}) < 3
     error('Python 3 required for ODESS (analytical calculation of steady states)')
 end
 
