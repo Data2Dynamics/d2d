@@ -569,15 +569,15 @@ for jm = 1:length(ar.model)
                 if(~fastPlotTmp)
                     hold(g, 'off');
                     
-                    title(g, arNameTrafo(ar.model(jm).u{ju}));
+                    title(g, arNameTrafo(ar.model(jm).u{ju}), 'FontSize', 10);
                     if(ju == iu(1))
                         if(plot_x_collected)
-                            legend(g, cclegendstyles, arNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
+                            legend(g, cclegendstyles, arNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]),'FontSize',9)
                         else
                             if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                                 if(~ar.model(jm).plot(jplot).doseresponse)
                                     if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                        legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition))
+                                        legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition),'FontSize',9)
                                     end
                                 else
                                     legendtmp = {};
@@ -593,7 +593,7 @@ for jm = 1:length(ar.model)
                                             ccount = ccount + 1;
                                         end
                                     end
-                                    legend(g, cclegendstyles, arNameTrafo(legendtmp))
+                                    legend(g, cclegendstyles, arNameTrafo(legendtmp),'FontSize',9)
                                 end
                             end
                         end
@@ -631,12 +631,12 @@ for jm = 1:length(ar.model)
                     hold(g, 'off');    
                     if(nu == 0 && jx == ix(1))
                         if(plot_x_collected)
-                            legend(g, cclegendstyles(cclegendstyles~=0), arNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
+                            legend(g, cclegendstyles(cclegendstyles~=0), arNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]),'FontSize',9)
                         else
                             if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                                 if(~ar.model(jm).plot(jplot).doseresponse)
                                     if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                        legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition))
+                                        legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition),'FontSize',9)
                                     end
                                 else
                                     legendtmp = {};
@@ -652,7 +652,7 @@ for jm = 1:length(ar.model)
                                             ccount = ccount + 1;
                                         end
                                     end
-                                    legend(g, cclegendstyles, arNameTrafo(legendtmp))
+                                    legend(g, cclegendstyles, arNameTrafo(legendtmp),'FontSize',9)
                                 end
                             end
                         end
@@ -660,9 +660,9 @@ for jm = 1:length(ar.model)
 
                     if(isfield(ar.model(jm), 'xNames') && ~isempty(ar.model(jm).xNames{jx}) && ...
                             ~strcmp(ar.model(jm).xNames{jx},ar.model(jm).x{jx}))
-                        title(g, [arNameTrafo(ar.model(jm).xNames{jx}) ' (' arNameTrafo(ar.model(jm).x{jx}) ')']);
+                        title(g, [arNameTrafo(ar.model(jm).xNames{jx}) ' (' arNameTrafo(ar.model(jm).x{jx}) ')'], 'FontSize', 10);
                     else
-                        title(g, arNameTrafo(ar.model(jm).x{jx}));
+                        title(g, arNameTrafo(ar.model(jm).x{jx}), 'FontSize', 10);
                     end
                     if(countx+nu == (nrows-1)*ncols + 1)
                         if(~ar.model(jm).plot(jplot).doseresponse)
@@ -697,16 +697,16 @@ for jm = 1:length(ar.model)
                 if(~fastPlotTmp)
                     hold(g, 'off');
                     
-                    title(g, arNameTrafo(ar.model(jm).z{jz}));
+                    title(g, arNameTrafo(ar.model(jm).z{jz}), 'FontSize', 10);
                     
                     if(nu == 0 && nx == 0 && jz == iz(1))
                         if(plot_x_collected)
-                            legend(g, cclegendstyles, arNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]))
+                            legend(g, cclegendstyles, arNameTrafo([ar.model(jm).u(iu) ar.model(jm).x(ix) ar.model(jm).z(iz)]),'FontSize',9)
                         else
                             if((~isempty(ar.model(jm).plot(jplot).condition) || ar.model(jm).plot(jplot).doseresponse))
                                 if(~ar.model(jm).plot(jplot).doseresponse)
                                     if(length(ar.model(jm).plot(jplot).dLink)>1)
-                                        legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition))
+                                        legend(g, cclegendstyles, arNameTrafo(ar.model(jm).plot(jplot).condition),'FontSize',9)
                                     end
                                 else
                                     legendtmp = {};
@@ -722,7 +722,7 @@ for jm = 1:length(ar.model)
                                             ccount = ccount + 1;
                                         end
                                     end
-                                    legend(g, cclegendstyles, arNameTrafo(legendtmp))
+                                    legend(g, cclegendstyles, arNameTrafo(legendtmp),'FontSize',9)
                                 end
                             end
                         end
