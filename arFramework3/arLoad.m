@@ -60,11 +60,22 @@ fprintf('workspace loaded from file %s\n', workspace_name);
 
 % Check if the mex file is in the working directory, if not try to copy it
 % from the savefolder
-fkt = which(ar.fkt);
+% Read out file ending of mex file for current os
+if ismac
+    osext = 'mexmaci64';
+elseif isunix
+    osext = 'mexa64';
+elseif ispc
+    osext = 'mexw64';
+else
+    disp('Platform not supported')
+end
+
+fkt = which([ar.fkt '.' osext]);
 
 if isempty(fkt)
-    fprintf([ar.fkt ' not found. Try to copy it from the savefolder... '])
-    files = dir([ar.config.savepath '/' ar.fkt '.*']);
+    fprintf([ar.fkt '.' osext ' not found. Try to copy it from the savefolder... '])  
+    files = dir([ar.config.savepath '/' ar.fkt '.' osext]);
     cf_succeed = 0;
     for idf = 1:length(files)
         copyfile([ar.config.savepath '/' files.name ] , pwd)
