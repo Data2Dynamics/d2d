@@ -62,6 +62,7 @@ if isfield(ar,'setup')  % only available in higher verions
         
         if sameParameterSettings
             arImportPars(arIn); % use same parameter values, lb, ub, qLog10 etc as in the existing model arIn
+            arImportConfig(arIn); % use same settings such as ar.config.fiterrors etc. as in existing arIn
         end
         
     catch ERR
@@ -131,6 +132,7 @@ else  % setup commands are not stored/not available, e.g. because of older code 
         
         if sameParameterSettings
             arImportPars(arIn); % use same parameter values, lb, ub, qLog10 etc as in the existing model arIn
+            arImportConfig(arIn); % use same settings such as fiterrors, tolerances, maxsteps etc.
         end
         
         
@@ -143,7 +145,7 @@ else  % setup commands are not stored/not available, e.g. because of older code 
     
 end
 ar.config.savepath = arIn.config.savepath;
-
+ar.config.fiterrors = arIn.config.fiterrors;
 
 % Check, wether data is the same:
 different = false;
