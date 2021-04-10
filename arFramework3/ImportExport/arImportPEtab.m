@@ -204,7 +204,9 @@ for ms=1:Tms_size
             end
         end
     end
-    arSave(Tms.name(ms,:))
+    if exist('Tms','var')
+        arSave(Tms.name(ms,:))
+    end
 end
 
 end

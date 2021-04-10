@@ -195,8 +195,8 @@ for imodel = 1:length(ar.model)
 %         peCondValues(end+1,:) = rowToAdd;
         rowToAdd = table;
         for irow = 1:length(condPos)    
-            if isnumeric(condVal{condPos == irow})
-               tb = table(condVal{condPos == irow});
+            if isnumeric(condVal(condPos == irow))
+               tb = table(condVal(condPos == irow));
             else
                tb = table(condVal(condPos == irow));
             end
