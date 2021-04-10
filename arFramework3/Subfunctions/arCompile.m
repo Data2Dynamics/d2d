@@ -68,10 +68,10 @@ end
 
 mexopt = {'-largeArrayDims'};
 if ( includeBLAS )
-    mexopt{end+1} = '-lblas';
+    mexopt{end+1} = '-lmwblas';
 end
 if ( includeLAPACK )
-    mexopt{end+1} = '-llapack';
+    mexopt{end+1} = '-lmwlapack';
 end
 if ( enableRootfinding )
     mexopt{end+1} = '-DROOT_FINDING';
