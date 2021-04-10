@@ -586,48 +586,49 @@ else
     arCompile(forcedCompile, false, false, source_dir);
 end
 
-% copy model and data backup files:
-if isfield(ar.config,'backup_modelAndData') && ar.config.backup_modelAndData
-    if ~isdir('./Models/Backup')
-        mkdir('./Models/Backup');
-    end
-    if ~isdir(['./Models/Backup/',ar.checkstr])
-        mkdir('./Models/Backup/',ar.checkstr);
-    end
-    if ~isdir('./Data/Backup')
-        mkdir('./Data/Backup');
-    end
-    if ~isdir(['./Data/Backup/',ar.checkstr])
-        mkdir('./Data/Backup/',ar.checkstr);
-    end
-    
-    ar.setup.backup_data_folder = cell(size(ar.setup.datafiles));
-    for i=1:length(ar.setup.datafiles)
-        for j=1:length(ar.setup.datafiles{i})
-            ar.setup.backup_data_folder{i}{j} = fullfile(pwd,['/Data/Backup/',ar.checkstr,'/']);% fullfile to prevent mixing of \ and /
-            ar.setup.backup_data_folder_local{i}{j} = ['./Data/Backup/',ar.checkstr,'/'];
-            [~,file,ext] = fileparts(ar.setup.datafiles{i}{j});
-            source = ar.setup.datafiles{i}{j};
-            target = [ar.setup.backup_data_folder{i}{j},file,ext];
-            if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
-                copyfile(source,target);
-            end
-        end
-    end
-    ar.setup.backup_model_folder = cell(size(ar.setup.modelfiles));
-    for i=1:length(ar.setup.modelfiles)
-        if ~isempty(ar.setup.modelfiles{i})
-            ar.setup.backup_model_folder{i} = fullfile(pwd,['/Models/Backup/',ar.checkstr,'/']);  % fullfile to prevent mixing of \ and /
-            ar.setup.backup_model_folder_local{i} = ['./Models/Backup/',ar.checkstr,'/'];
-            [~,file,ext] = fileparts(ar.setup.modelfiles{i});
-            source = ar.setup.modelfiles{i};
-            target = [ar.setup.backup_model_folder{i},file,ext];
-            if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
-                copyfile(source,target);
-            end
-        end
-    end
-end
+
+% % copy model and data backup files:
+% if isfield(ar.config,'backup_modelAndData') && ar.config.backup_modelAndData
+%     if ~isdir('./Models/tmp')
+%         mkdir('./Models/tmp');
+%     end
+%     if ~isdir(['./Models/tmp/',ar.checkstr])
+%         mkdir('./Models/tmp/',ar.checkstr);
+%     end
+%     if ~isdir('./Data/tmp')
+%         mkdir('./Data/tmp');
+%     end
+%     if ~isdir(['./Data/tmp/',ar.checkstr])
+%         mkdir('./Data/tmp/',ar.checkstr);
+%     end
+%     
+%     ar.setup.backup_data_folder = cell(size(ar.setup.datafiles));
+%     for i=1:length(ar.setup.datafiles)
+%         for j=1:length(ar.setup.datafiles{i})
+%             ar.setup.backup_data_folder{i}{j} = fullfile(pwd,['/Data/tmp/',ar.checkstr,'/']);% fullfile to prevent mixing of \ and /
+%             ar.setup.backup_data_folder_local{i}{j} = ['./Data/tmp/',ar.checkstr,'/'];
+%             [~,file,ext] = fileparts(ar.setup.datafiles{i}{j});
+%             source = ar.setup.datafiles{i}{j};
+%             target = [ar.setup.backup_data_folder{i}{j},file,ext];
+%             if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
+%                 copyfile(source,target);
+%             end
+%         end
+%     end
+%     ar.setup.backup_model_folder = cell(size(ar.setup.modelfiles));
+%     for i=1:length(ar.setup.modelfiles)
+%         if ~isempty(ar.setup.modelfiles{i})
+%             ar.setup.backup_model_folder{i} = fullfile(pwd,['/Models/tmp/',ar.checkstr,'/']);  % fullfile to prevent mixing of \ and /
+%             ar.setup.backup_model_folder_local{i} = ['./Models/tmp/',ar.checkstr,'/'];
+%             [~,file,ext] = fileparts(ar.setup.modelfiles{i});
+%             source = ar.setup.modelfiles{i};
+%             target = [ar.setup.backup_model_folder{i},file,ext];
+%             if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
+%                 copyfile(source,target);
+%             end
+%         end
+%     end
+% end
 
 
 % link
