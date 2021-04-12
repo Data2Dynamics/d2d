@@ -5,6 +5,7 @@
 #include <sundials/sundials_types.h> /* def. of type realtype */
 #include <sundials/sundials_math.h>  /* definition of ABS */
 #include <mex.h>
+#include <math.h>
 
 /* Simple rootfinding function */
 double solveSS( int debugMode, mxArray *arcondition, int im, int ic, int isim, double t, N_Vector x, void *user_data, double tol );
@@ -17,3 +18,6 @@ void invert(double* mat, mwSignedIndex workSize, double *workmem, mwSignedIndex 
 
 /* Matrix multiply for the rootfinding using BLAS */
 void mmultiply(double* invdfdx, double* f, double *result, mwSignedIndex N);
+
+void fx(double t,N_Vector x, double* f, void *user_data, int im, int isim );                                 /* Compute RHS and store in f */
+void getdfxdx(  int im, int isim, double t, N_Vector x, double* dfdx, void *user_data );                        /* Updates dvdx and stores dfxdx */
