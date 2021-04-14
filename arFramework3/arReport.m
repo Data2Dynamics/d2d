@@ -425,6 +425,7 @@ for jm=1:length(ar.model)
         lp(fid, '\\end{align*}}\n\n');
         
         if fullODEs
+            lp(fid,'\\newpage\n');
             lp(fid,'Substituting the reaction rates $v_i$ yields:\\\\ \\\\');
             lp(fid, '{\\scriptsize \\displaystyle \\centering');
                         
@@ -645,7 +646,7 @@ for jm=1:length(ar.model)
                             strrep(ar.model(jm).data(jd).y{jy}, '_', '\_'));
                         
                         strtmp = myFormulas(ar.model(jm).data(jd).fy{jy}, jm);
-                        if(isfield(ar.model(jm),'logfitting') && ar.model(jm).logfitting(jy))
+                        if(isfield(ar.model(jm).data(jd),'logfitting') && ar.model(jm).data(jd).logfitting(jy))
                             strtmp = ['\log_{10}(' strtmp ')'];
                         end
                         
@@ -1055,7 +1056,9 @@ if ~isempty(ar.ple) && isfield(ar.ple,'ps')
                 captiontext = [captiontext 'The asterisk indicate the optimal parameter values. '];
                 captiontext = [captiontext sprintf('Lower panel: The functional relations to the other parameters along the profile likelihood of %s are displayed. ', strrep(ar.ple.p_labels{j},'_','\_'))];
                 captiontext = [captiontext 'In the legend the top five parameters showing the strongest variations are given. '];
-                captiontext = [captiontext sprintf('The calculation time was %s.', secToHMS(ar.ple.timing(j)))];
+                if isfield(ar.ple,'timing')
+                    captiontext = [captiontext sprintf('The calculation time was %s.', secToHMS(ar.ple.timing(j)))];
+                end
                 lpfigure(fid, 1, [ar.ple.p_labels{j} '.pdf'], captiontext, sprintf('ple%i',count));
                 
                 lp(fid, '\n');
