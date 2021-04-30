@@ -94,7 +94,7 @@ else
                         reaction = char(arSubs(arSym(reaction), arSym(replacements{jr}), 0));
                     end
                 end
-                if reaction ~= '0'
+                if any(reaction ~= '0')
                     fprintf(fid, '"Reaktion%i","%s"', jv, reaction);
                     for jx = 1:length(ar.model(m).x)
                         if(ar.model(m).N(jx,jv)~=0)

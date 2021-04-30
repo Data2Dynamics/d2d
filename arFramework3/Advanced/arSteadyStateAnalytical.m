@@ -45,7 +45,7 @@ if(~exist('replacements','var') || isempty(replacements))
     replacements = '';
 end
 if(~exist('pythonsymlink','var') || isempty(pythonsymlink))
-    pythonsymlink = '';
+    pythonsymlink = 'python3';
 end
 if(~exist('AlyssaArgs','var') || isempty(AlyssaArgs))
     AlyssaArgs = {'','','',2};
@@ -53,10 +53,13 @@ end
 
 
 % check python version
-pythonsymlink = 'python3';
 [status, cmdout] = system([pythonsymlink ' --version']);
+if status~=0
+    pythonsymlink = 'python';
+    [~, cmdout] = system('python --version');
+end
 pythonvers = regexp(cmdout, '\d*', 'Match');
-if str2num(pythonvers{1}) < 3
+if str2double(pythonvers{1}) < 3
     error('Python 3 required for ODESS (analytical calculation of steady states)')
 end
 
