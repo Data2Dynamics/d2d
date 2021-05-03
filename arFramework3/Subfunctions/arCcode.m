@@ -110,7 +110,7 @@ for jm = 1 : numel(matches)
 end
 % because of compatibility with MATLAB2020a and later versions
 tmp = ver('MATLAB');
-if str2double(tmp.Version) >= 9.8
+if ~verLessThan('matlab', '9.8')
     str = strrep(str,';',',');
 end
 
