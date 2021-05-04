@@ -44,7 +44,7 @@ function ArgStruct=parseArgs(args,ArgStruct,varargin)
 persistent matlabver
 
 if isempty(matlabver)
-    matlabver=ver('MATLAB');
+    matlabver=arVer;
     matlabver=str2double(matlabver.Version);
 end
 

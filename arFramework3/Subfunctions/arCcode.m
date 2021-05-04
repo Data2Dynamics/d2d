@@ -2,7 +2,7 @@
 % 
 %   T                 any kind of symbolic expression
 % 
-%   matlab_version    Matlab version e.g. 9.5, use ver('MATLAB')
+%   matlab_version    Matlab version e.g. 9.5, use arVer
 % 
 %   This function generalizes matlab's ccode function and keeps the
 %   functionality indpendent of Matlab verions
@@ -16,7 +16,7 @@
 % 
 % Example:
 % T = ar.model(1).condition(1).sym.fv;
-% matVer = ver('MATLAB');
+% matVer = arVer;
 % matlab_version = str2double(matVer.Version);
 % cstr = arCcode(T, matlab_version)
 % cvar = 'fv'
@@ -109,7 +109,7 @@ for jm = 1 : numel(matches)
     str = strrep( str, total{jm}, fNew );
 end
 % because of compatibility with MATLAB2020a and later versions
-tmp = ver('MATLAB');
+tmp = arVer;
 if ~verLessThan('matlab', '9.8')
     str = strrep(str,';',',');
 end

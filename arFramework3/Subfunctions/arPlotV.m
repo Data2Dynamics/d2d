@@ -12,7 +12,7 @@
 
 function arPlotV(saveToFile, fastPlot)
 
-matVer = ver('MATLAB');
+matVer = arVer;
 
 global ar
 

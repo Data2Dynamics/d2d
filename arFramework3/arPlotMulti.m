@@ -13,7 +13,7 @@
 
 function arPlotMulti(ps, ps_weigths, saveToFile, filenameAddition)
 
-matVer = ver('MATLAB');
+matVer = arVer;
 
 global ar
 

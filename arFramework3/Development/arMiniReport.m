@@ -104,7 +104,7 @@ end
 pti = 1 - opts.keepfilenames;
 
 % Fetch MATLAB version
-matVer = ver('MATLAB');
+matVer = arVer;
 ar.config.matlabVersion = str2double(matVer.Version);
 
 savePath = [arSave '/Latex'];

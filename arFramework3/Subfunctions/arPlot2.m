@@ -76,7 +76,7 @@ if ~exist('plotOnlyData') || isempty(plotOnlyData)
     plotOnlyData = false;
 end
 
-matVer = ver('MATLAB');
+matVer = arVer;
 
 if(evalfun)
     try

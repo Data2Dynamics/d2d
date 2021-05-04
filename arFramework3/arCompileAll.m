@@ -136,7 +136,7 @@ for m=1:length(ar.model)
         end
     end
     
-    matVer = ver('MATLAB');
+    matVer = arVer;
     matlab_version = str2double(matVer.Version);    
     
     % calc model

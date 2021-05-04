@@ -97,7 +97,7 @@ else
     ar.model(m).extra_conditions = {};
 end
 
-matVer = ver('MATLAB');
+matVer = arVer;
 
 % DESCRIPTION
 [str, fid] = arTextScan(fid, '%s', 1, 'CommentStyle', ar.config.comment_string);

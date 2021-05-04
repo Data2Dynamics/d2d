@@ -1,5 +1,5 @@
 DESCRIPTION
-"DallaMan2007_MealModel_GlucoseInsulinSystem"" (DallaMan2007_MealModel_GlucoseInsulinSystem)"
+"IMPORTANT: Do not use this file with arLoadModel. Unexpected behavior may occur because of missing observable formulas.""DallaMan2007_MealModel_GlucoseInsulinSystem"" (DallaMan2007_MealModel_GlucoseInsulinSystem)"
 "SBML level 2 version 4"
 "<notes>
   <body xmlns="http://www.w3.org/1999/xhtml">
@@ -16,15 +16,14 @@ Dalla Man C, Rizza RA, Cobelli C.<em>IEEE Trans Biomed Eng.</em>2007 Oct;54(10):
     <br/>
 A simulation model of the glucose-insulin system in the postprandial state can be useful in several circumstances, including testing of glucose sensors, insulin infusion algorithms and decision support systems for diabetes. Here, we present a new simulation model in normal humans that describes the physiological events that occur after a meal, by employing the quantitative knowledge that has become available in recent years. Model parameters were set to fit the mean data of a large normal subject database that underwent a triple tracer meal protocol which provided quasi-model-independent estimates of major glucose and insulin fluxes, e.g., meal rate of appearance, endogenous glucose production, utilization of glucose, insulin secretion. By decomposing the system into subsystems, we have developed parametric models of each subsystem by using a forcing function strategy. Model results are shown in describing both a single meal and normal daily life (breakfast, lunch, dinner) in normal. The same strategy is also applied on a smaller database for extending the model to type 2 diabetes
    </p>
-  <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.<br/>
+    <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.<br/>
 For more information see the <a href="http://www.ebi.ac.uk/biomodels/legal.html" target="_blank">terms of use</a>.<br/>
-To cite BioModels Database, please use: <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
-</p>
-</body>
+To cite BioModels Database, please use: <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a></p>
+  </body>
 </notes>"
 
 PREDICTOR
-t	 T	 "n/a"	 time	 0	 100	
+t	 T	 "au"	 time	 0	 100	
 
 COMPARTMENTS
 Compartment1	 V	 "n/a"	 vol.	 1
@@ -61,21 +60,25 @@ REACTIONS
 
 DERIVED
 
+OBSERVABLES
+
+ERRORS
+
 CONDITIONS
+init_G_p	 "178"
+init_G_t	 "135"
+init_I_l	 "4.5"
+init_I_p	 "1.25"
+init_Q_sto1	 "78000"
+init_Q_gut	 "0"
+init_I_1	 "25"
+init_I_d	 "25"
+init_X_state	 "0"
+init_I_po	 "3.6"
+init_Y_state	 "0"
+init_Q_sto2	 "0"
 
 PARAMETERS
-init_G_p	 178	 1	 0	 0	 1000
-init_G_t	 135	 1	 0	 0	 1000
-init_I_l	 4.5	 1	 0	 0	 1000
-init_I_p	 1.25	 1	 0	 0	 1000
-init_Q_sto1	 78000	 1	 0	 0	 780000
-init_Q_gut	 0	 1	 0	 0	 1000
-init_I_1	 25	 1	 0	 0	 1000
-init_I_d	 25	 1	 0	 0	 1000
-init_X_state	 0	 1	 0	 0	 1000
-init_I_po	 3.6	 1	 0	 0	 1000
-init_Y_state	 0	 1	 0	 0	 1000
-init_Q_sto2	 0	 1	 0	 0	 1000
 V_G	 1.88	 0	 0	 0	 1000
 k_1	 0.065	 0	 0	 0	 1000
 k_2	 0.079	 0	 0	 0	 1000

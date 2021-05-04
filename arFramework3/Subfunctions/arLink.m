@@ -25,7 +25,7 @@
 
 function arLink(silent, tExpAdd, dataAdd, ix, id, im, newData, yStd, add_sec)
 
-matVer = ver('MATLAB');
+matVer = arVer;
 
 global ar
 

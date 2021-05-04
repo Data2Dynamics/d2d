@@ -1,0 +1,61 @@
+DESCRIPTION
+"IMPORTANT: Do not use this file with arLoadModel. Unexpected behavior may occur because of missing observable formulas.""FullModel"
+"SBML level 2 version 4"
+
+PREDICTOR
+t	 T	 "min"	 time	 0	 100	
+
+COMPARTMENTS
+cyt	 V	 "pl"	 vol.	 1.4
+nuc	 V	 "pl"	 vol.	 0.45
+
+STATES
+STAT5A	 C	 "nM"	 conc.	 cyt	 1	 "STAT5A"
+STAT5B	 C	 "nM"	 conc.	 cyt	 1	 "STAT5B"
+pApB	 C	 "nM"	 conc.	 cyt	 1	 "pApB"
+pApA	 C	 "nM"	 conc.	 cyt	 1	 "pApA"
+pBpB	 C	 "nM"	 conc.	 cyt	 1	 "pBpB"
+nucpApA	 C	 "nM"	 conc.	 nuc	 1	 "nucpApA"
+nucpApB	 C	 "nM"	 conc.	 nuc	 1	 "nucpApB"
+nucpBpB	 C	 "nM"	 conc.	 nuc	 1	 "nucpBpB"
+
+INPUTS
+BaF3_Epo	 C	 "n/a"	 conc.	"epo_level*exp(-Epo_degradation_BaF3*t)"
+
+REACTIONS
+2 STAT5A 	-> pApA 	 CUSTOM "BaF3_Epo*STAT5A^2*k_phos" 	"v1_v_0"
+STAT5A + STAT5B 	-> pApB 	 CUSTOM "BaF3_Epo*STAT5A*STAT5B*k_phos" 	"v2_v_1"
+2 STAT5B 	-> pBpB 	 CUSTOM "BaF3_Epo*STAT5B^2*k_phos" 	"v3_v_2"
+pApA 	-> nucpApA 	 CUSTOM "k_imp_homo*pApA" 	"v4_v_3"
+pApB 	-> nucpApB 	 CUSTOM "k_imp_hetero*pApB" 	"v5_v_4"
+pBpB 	-> nucpBpB 	 CUSTOM "k_imp_homo*pBpB" 	"v6_v_5"
+nucpApA 	-> 2 STAT5A 	 CUSTOM "k_exp_homo*nucpApA" 	"v7_v_6"
+nucpApB 	-> STAT5A + STAT5B 	 CUSTOM "k_exp_hetero*nucpApB" 	"v8_v_7"
+nucpBpB 	-> 2 STAT5B 	 CUSTOM "k_exp_homo*nucpBpB" 	"v9_v_8"
+
+DERIVED
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+init_STAT5A	 "207.6*ratio"
+init_STAT5B	 "207.6 - 207.6*ratio"
+init_pApB	 "0"
+init_pApA	 "0"
+init_pBpB	 "0"
+init_nucpApA	 "0"
+init_nucpApB	 "0"
+init_nucpBpB	 "0"
+
+PARAMETERS
+Epo_degradation_BaF3	 0.0269765	 0	 0	 0	 1000
+epo_level	 1	 0	 0	 0	 1000
+k_exp_hetero	 1.00097e-05	 0	 0	 0	 1000
+k_exp_homo	 0.00617238	 0	 0	 0	 1000
+k_imp_hetero	 0.0163702	 0	 0	 0	 1000
+k_imp_homo	 96807.7	 0	 0	 0	 968077
+k_phos	 15767.6	 0	 0	 0	 157676
+ratio	 1	 0	 0	 0	 1000
+BaF3_Epo	 0	 0	 0	 0	 1000

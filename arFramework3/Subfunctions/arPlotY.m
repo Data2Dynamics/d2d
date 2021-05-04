@@ -39,7 +39,7 @@
 
 function arPlotY(saveToFile, fastPlot, doLegends, varargin)
 
-matVer = ver('MATLAB');
+matVer = arVer;
 
 global ar
 

@@ -20,7 +20,7 @@ if ischar(new)
 end
 
 if(nargin<4)
-    matVer = ver('MATLAB');
+    matVer = arVer;
     matlab_version = str2double(matVer.Version);   
 end
 

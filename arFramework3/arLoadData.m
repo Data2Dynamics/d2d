@@ -550,7 +550,7 @@ end
 
 % SUBSTITUTIONS (beta)
 substitutions = 0;
-matVer = ver('MATLAB');
+matVer = arVer;
 if ( strcmp(C{1},'SUBSTITUTIONS') )
     arFprintf( 3, '[ OK ]\nReading substitutions' );
     if(str2double(matVer.Version)>=8.4)
@@ -984,7 +984,7 @@ function checkReserved(m, d)
 
 function [ar,d, fail] = setConditions(fid, ar, m, d, jplot, header, times, data, dataCell, pcond, removeEmptyObs, dpPerShoot, opts)
 
-% matVer = ver('MATLAB');
+% matVer = arVer;
 
 % normalization of columns
 fail = 0;
