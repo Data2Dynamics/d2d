@@ -66,7 +66,9 @@ else
 end
 
 % do align
+arWaitbar(0)
 for j=1:length(pos_ia_in_b)
+    arWaitbar(j, length(pos_ia_in_b))
     if(pos_ia_in_b(j)~=0)
         if(matching_dimensions==1)
             data_aligned(j,:) = data(pos_ia_in_b(j),:);
@@ -75,6 +77,7 @@ for j=1:length(pos_ia_in_b)
         end
     end
 end
+arWaitbar(-1)
 
 if(nargin==0)
     disp('Example illustrating the function:')
