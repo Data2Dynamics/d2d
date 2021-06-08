@@ -1,4 +1,4 @@
-function [c, labels] = countElements(d, sorted)
+function [c, labels] = countElements(d, sorted, groups)
 
 if(~exist('sorted','var'))
     sorted = false;
@@ -29,4 +29,14 @@ if nargout==0
 else
     c = counts;
     labels = ud;
+end
+
+if(exist('groups','var') && ~isempty(groups))
+    countsnew = zeros(1,length(groups));
+    
+    [iisa,ilocb] = ismember(groups, labels);
+    countsnew(iisa) = c(ilocb(iisa));
+    
+    c = countsnew;
+    labels = groups;
 end
