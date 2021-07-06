@@ -136,7 +136,7 @@ arWaitbar(0);
 
 global handles
 handles.stop_now = 0;
-buttonStop
+figB = buttonStop();
 
 for j=1:n
     arWaitbar(j, n);
@@ -147,9 +147,12 @@ for j=1:n
             fig.Children(3).XLim = [0 length(ar.ps)];
         end 
     end
+    if j == n
+        close(figB)
+    end
     
     if handles.stop_now==1  
-        arFprintf(1,'The fitting was stopped after %i/%i iterations manually by the user.',j-1,n);
+        arFprintf(1,'\nThe fitting was stopped after %i/%i iterations manually by the user.\n',j-1,n);
         break;
     end
     
@@ -251,8 +254,8 @@ catch ERR
 end
 
 
-function buttonStop
-
+function figButton = buttonStop()
+figButton = [];
 persistent batchmode
 if isempty(batchmode)
     ss = get(0, 'ScreenSize');
@@ -269,8 +272,8 @@ end
 
 
 % Create a figure window
-fig = uifigure;
-fig.Position = [608   258   321   118];
+figButton = uifigure;
+figButton.Position = [608   258   321   118];
 
 % Create a UI axes
 % ax = uiaxes('Parent',fig,...
@@ -278,9 +281,9 @@ fig.Position = [608   258   321   118];
 %             'Position', [104, 123, 300, 201]);   
 
 % Create a push button
-btn = uibutton(fig,'push',...
+btn = uibutton(figButton,'push',...
                'Position',[100 50 100 22],...
-               'ButtonPushedFcn', @(btn,event) stopButtonPushed(fig));
+               'ButtonPushedFcn', @(btn,event) stopButtonPushed(figButton));
 btn.Text = 'Stop fits';
 
 
