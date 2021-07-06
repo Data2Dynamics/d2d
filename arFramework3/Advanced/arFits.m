@@ -131,9 +131,28 @@ if(log_fit_history)
     ar.fit_hist = [];
 end
 
+
 arWaitbar(0);
+
+global handles
+handles.stop_now = 0;
+buttonStop
+
 for j=1:n
     arWaitbar(j, n);
+    if j > 1
+        if isfield(ar.config,'showLiveWaterfall') && ar.config.showLiveWaterfall ==1
+            arPlotChi2s
+            fig = gcf;
+            fig.Children(3).XLim = [0 length(ar.ps)];
+        end 
+    end
+    
+    if handles.stop_now==1  
+        arFprintf(1,'The fitting was stopped after %i/%i iterations manually by the user.',j-1,n);
+        break;
+    end
+    
     ar.p = ps(dop(j),:);
     if(isfield(ar.config,'useDouble') && ar.config.useDouble==1)
         ar.p(ar.iref) = ar.p(ar.iprimary);
@@ -230,3 +249,43 @@ catch ERR
         warning(ERR.message)
     end
 end
+
+
+function buttonStop
+
+persistent batchmode
+if isempty(batchmode)
+    ss = get(0, 'ScreenSize');
+    if max(ss)<2
+        batchmode = true;
+    else
+        batchmode = false;
+    end
+end
+
+if batchmode 
+    return % do not show Waitbar in batch mode
+end
+
+
+% Create a figure window
+fig = uifigure;
+fig.Position = [608   258   321   118];
+
+% Create a UI axes
+% ax = uiaxes('Parent',fig,...
+%             'Units','pixels',...
+%             'Position', [104, 123, 300, 201]);   
+
+% Create a push button
+btn = uibutton(fig,'push',...
+               'Position',[100 50 100 22],...
+               'ButtonPushedFcn', @(btn,event) stopButtonPushed(fig));
+btn.Text = 'Stop fits';
+
+
+% Create the function for the ButtonPushedFcn callback
+function stopButtonPushed(fig2)
+       global handles
+       handles.stop_now = 1;
+       close(fig2)

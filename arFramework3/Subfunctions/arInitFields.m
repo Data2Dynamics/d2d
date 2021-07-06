@@ -18,7 +18,7 @@ function ar = arInitFields(ar)
     % !!  NOTE: Every time you add or remove a field, increment this value by one.
     % !! 
     % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    arFormatVersion = 8;
+    arFormatVersion = 9;
     
     % Without arguments, just return the version number
     if ( nargin < 1 )
@@ -77,6 +77,7 @@ function ar = arInitFields(ar)
         ...                                                             % Sampling
         {'useLHS',                      false}, ...                     %   When sampling random parameters use Latin Hypercube Sampling    
         ...                                                             % Optimization options
+        {'showLiveWaterfall',           false}, ...                     %   Show waterfall plot while using arFits   
         {'useSensis',                   true}, ...                      %   Use sensitivities
         {'sensiSkip',                   false}, ...                     %   Skip sensitivities during fitting when only func is requested (speed-up for some optimizers)
         {'useJacobian',                 true}, ...                      %   Use Jacobian
@@ -183,9 +184,7 @@ function ar = arInitFields(ar)
         ar.config.optimceres.LinearSolvers = {'DENSE_QR','DENSE_NORMAL_CHOLESKY', 'CGNR', 'DENSE_SCHUR', 'SPARSE_SCHUR', 'ITERATIVE_SCHUR'};
         ar.config.optimceres.printLevel = 0;
     end
-    
-    
-    
+        
     % CVODES flags
     ar.info.arsimucalc_flags = cell(1,30);
     for j = 1:30
