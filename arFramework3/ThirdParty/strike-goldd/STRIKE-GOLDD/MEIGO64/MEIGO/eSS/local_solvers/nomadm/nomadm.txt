@@ -1,0 +1,342 @@
+			NOMADm version 3.3
+			Summary of Changes
+
+
+Version 3.3 incorporates the following changes:
+
+NEW FEATURE:
+
+--  A ranking and selection (R&S) procedure for treating stochastic
+    optimization problems has been added.  Included in this feature are
+    additional R&S user options displayed on the main screen and editable
+    via the MADS menu.  In order to edit these parameters, the new Options
+    Menu option for running a stochastic problem must be checked.  New R&S
+    run parameters are also displayed on the Results screen if the run was
+    stochastic.
+
+CODE IMPROVEMENTS AND BUG FIXES:
+
+--  The Nadaraya-Watson surrogate functions have been altered and 
+    vectorized, with some parameters being moved back into higher mads
+    functions so that other classes of surrogates could use them.  The
+    input screen has additional parameters that can be tuned.  The crude
+    one-dimensional search to optimize the sigma parameter has been replaced
+    with an efficient golden section search function.
+
+--  The Latin hypercube function was altered significantly by moving all 
+    non-MADS lines of code into the higher level "search" function.  LHS
+    is now portable to other applications.  The number of LHS points
+    specified by the user now functions exactly that way.
+
+--  A new parameter has been added to allow the pruning of the Cache in
+    the construction and recalibration of surrogates.
+
+--  All the view screens have been modified, and several minor bugs were
+    corrected.
+
+
+
+			NOMADm version 3.2
+			Summary of Changes
+
+
+Version 3.2 started as a minor update, and is still minor when compared to 3.0,
+but it has in fact undergone a number of significant changes.  More variable
+names have changed and the code has undergone a stylistic and structural
+overhaul using "m-lint".  The user interface has been completely remade so
+that, rather than use two files and access callback functions through a
+switch-case construct, every function is in the same file, with callback
+functions handled by storing and retrieving function handles.
+
+
+NEW FEATURES:
+
+--  The Search function has been modified so that surrogates may be used in
+    solving mixed variable optimization problems.  Specifically, surrogates
+    are formed using only the Cache points with the same categorical
+    variable values as the current poll center or discrete neighbor.  
+    This means that multiple surrogates are constructed -- possibly as many
+    as one for every set of discrete variable values.
+
+--  An EXTENDED SEARCH step has been added to the MADS algorithm
+    immediately preceding the EXTENDED POLL step.  This was done by
+    inserting several lines of code, including a call to the Search
+    function, inside the mvpPoll function in mads.m.  At each iteration,
+    the SEARCH type and parameters used in SEARCH are also be used in
+    EXTENDED SEARCH.  While it would not be difficult to allow the user a
+    separate EXTENDED SEARCH type (with its own parameters), allowing a
+    different EXTENDED SEARCH for each discrete neighbor point would be
+    impractical and very difficult to program.
+
+--  Use of Nadaraya-Watson based surrogates has been added as a Search
+    option with several 7 different kernel functions.  In doing so, the
+    daceSurrogate function has been renamed recalSurrogate and is now used
+    to construct both DACE and N-W surrogates, depending on the input
+    arguments.  This new function can also handle custom surrogates, in
+    which case the user need only supply a simple interface file for using
+    an already existing outside surrogate code.
+
+--  A checkbox option has been added to turn on/off the mesh size
+    termination criterion.  An error trap has been added to force the user
+    to choose at least one stopping condition.
+
+
+CODE IMPROVEMENTS AND BUG FIXES
+
+--  The input dialog box launched prior to the Search Input screen has been
+    deleted.  The two user choices from the input dialog box were moved
+    directly onto the Search input screen as popup menus, so that all
+    Search data is now input on one screen in a more convenient manner.
+
+--  Deleted all path restrictions associated with the companion software,
+    dace and cmaes.  Now, if the user wishes to use dace or cmaes within
+    NOMADm, the user must install the program and add the path where its
+    files are stored to the Matlab path.  This is done using the 
+    File -->Set Path menu choice from the Matlab command window.
+
+--  Created a new processOutput function and a closeWorkspace function to take
+    care of error trapping and bookkeeping at the end of the run.
+
+--  The optimizeSurrogate function has been modified so that it creates
+    optimizer-specific surrogate function files only once (rather than
+    recreating them at every iteration) and then deletes them after the run is
+    complete.  This increases the speed and efficiency of the surrogate
+    optimization process.
+
+--  The viewing of best feasible and least infeasible solutions has been
+    completely redone.  For each of these two solutions, the two pushbuttons
+    for viewing continuous and categorical variables, respectively, have been
+    replaced by a single pushbutton for viewing all the variables at once.
+    Pressing this "View Solution" button launches a "Solutions" figure window,
+    where both categorical and continuous variable values are shown.  If there
+    are more than ten of either variable type, "Next" and "Previous"
+    pushbuttons appear to allow the user to view the variables up to 10 at a
+    time.
+
+--  Changed the way that the number of function evaluations is computed.
+    Specifically, a new field, nfunc, was added to Cache, which is a vector
+    with each element representing the number of function evaluations performed
+    at the corresponding point.  A value of 1 was put into each element of
+    Cache.nfunc, so that the sum is the number of function evaluations.  This
+    was done for future compatibility with stochastic problems.  Stochastic
+    problems typically require multiple function evaluations (replications) at
+    each point, which is incompatible with this software because the objective
+    and constraint functions are only evaluated a trial point if it is not
+    already in the Cache.  The new field allows the user to do several function
+    evaluations at the same point outside of NOMADm and store the average as
+    the function value and the number of replications in the corresponding
+    element Cache.nfunc.
+
+--  Replaced many logical operators & and | with short-circuit logical
+    operators && and ||, respectively to increase efficiency.
+
+--  The text color of each entry in the Results Menu now matches the color of
+    its curve in the history plot.
+
+--  Corrected a bug in mads_batch.m that generated a new figure window at every
+    iteration whenever real-time filter or history plotting was turned on.
+
+--  Corrected a bug that caused an error whenever the minimum constraint
+    violation function value was set to zero.
+
+--  Removed an error flag that disallowed more than one Cache hit at a time.
+    This was done because it is possible for this to happen.  If a trial point
+    is in very close proximity to a Cache point but just outside the threshold
+    for being a Cache hit, it is added to the Cache.  Then, if a third point
+    lies between these two points, it could fall beneath the Cache Hit
+    threshold for both points simultaneously, thus yielding two Cache hits at
+    the same time.
+
+--  Corrected a bug that made the lhs function incompatible with the
+    removeRedundancy flag being turned on (the default case) whenever linear
+    constraints are degenerate or variables are unbounded.  Since lhs needs the
+    original constraints (before redundant ones are removed), the fix was to
+    turn the flag off inside the search routine and call updateOmega before
+    calling lhs.
+
+--  Corrected a bug in changeProblem, in which the Matlab path was being
+    altered in an undesirable way.  Specifically, if the user selected a
+    problem stored in the NOMADm directory, and then chose another problem in a
+    different directory, then the first directory would be deleted from the
+    path, even if it was required to run the software.  A logical variable was
+    added so that, if the selected problem was already on the Matlab path, the
+    path would not be deleted.
+
+--  Fixed a bug that prevented the user from choosing the Cancel button on the
+    DACE figure window.
+
+--  Cleaned up some major bugs in ga and added a new getPenaltyTerm function
+    that the ga function uses to compute a penalty parameter in the case of 
+    nonlinear constraints.
+
+--  Corrected minor bugs in the search, processInput, getTangentCone,
+    evalFunction, and nomadm_compile functions.
+
+
+			NOMADm Version 3.00
+			Summary of Changes
+
+
+NOMADm 3.00 has many new features, improvements, and corrections.  The code has
+been extensively rewritten to make it faster, more efficient, and more
+compatible with typical MATLAB conventions.  Documentation includes a new
+User's Guide to replace the html help file, a Contents file, and this summary
+of changes.
+
+Many variable names have changed, making existing user cache and session files
+incompatible with the new code.  Since session files are not difficult to
+quickly reproduce, no attempt has been made to transition these files.  Old
+cache files are incompatible because of a new field in the "iterate" structure,
+called pID, which is described below.  To transition an old cache with the file
+name of MyProblem_Cache.mat, the following code should work to update it:
+
+    load('MyProblem_Cache',CACHE);
+    [CACHE.iterate.pID] = deal(0);
+    save('MyProblem_Cache',Cache);
+
+
+NEW FEATURES:
+
+-- The new mesh adaptive direct search (MADS) algorithm has been added to what
+was GPS by adding a new function, madsDirections, which generates the
+appropriate POLL directions.  It can be run with or without the filter, and
+it can use a 2n or n+1 positive basis.  Most references to GPS within the code
+and documentation have been replaced with the more general MADS terminology.
+
+-- The SEARCH step options have been greatly enhanced to allow a different
+SEARCH type to be employed at various times.  The user can now specify
+parameters for each of N searches, namely, the type of search, number of
+iterations to run the search, number of points to sample, and the filename of a
+user-provided search routine.
+
+-- Initial implementation of DACE surrogates as a SEARCH option has been added.
+The DACE package comes from researchers at DTU in Denmark.  Whenever this
+SEARCH type is selected from the Search options menu, a DACE popup window is
+launched which takes various options as input.  The DACE surrogate is
+recalibrated and then optimized using either MADS, fmincon (from the Matlab
+Optimization Toolbox) or the genetic algorithm package CMA-ES (from Germany).
+The option to use MADS is not recommended because it has not been fully tested
+and is VERY slow on the simplest of problems.
+
+-- A new function, processC, was added to the package, which enables the user
+to run MADS on problems in which the Functions file is written in "C".  If the
+functions file has not already been pre-compiled, then processC combines the
+Functions file with the appropriate commands for the Matlab mex compiler,
+compiles the code for the appropriate platform, and passes the filename to the
+optimizer so that the optimizer can seamlessly process and use the executable
+file.  Since the user should also be able to do this before running NOMADm, all
+the files for processing C and FORTRAN files were removed from the file,
+nomadm_functions.m, and stored under a new parent file, nomadm_compile.m.
+
+-- A new function, removeRedunancy, co-written with Olga Brezhneva, has been
+added to handle degenerate linear constraints.  An option has been added to
+allow the user to discard redundant constraints before beginning the iteration
+(via a more expensive approach, but done only once).  If this option is not
+selected, then deletion of redundant constraints is treated as needed within
+the new function during the iteration process.
+
+-- New poll order options have been added.  The "Custom" option allows the user
+to specify a poll order in the parameter file.  "Dynamic" poll ordering changes
+at every successful iteration, moving the previous successful direction (or, in
+MADS, the direction making the closest angle) to the top of the order.  
+"Dynamic Ranked" orders all the directions according to how small an angle they
+make with the previous successful direction.  "Surrogate" order does polling in
+order of surrogate value.
+
+-- A genetic algorithm code has been added as an additional SEARCH option.
+
+-- Deterministic sampling on a coarse mesh has been added as an additional
+SEARCH option.
+
+-- A maximum mesh size parameter has been added to prevent the mesh from
+getting too coarse.
+
+-- A user option for accelerating convergence has been added.  It divides the
+mesh refinement factor in half at every unsuccessful iteration.
+
+-- A termination criterion has been added that stops if the user sets a maximum
+number of consecutive POLL failures.
+
+-- A flag option has been added to the Run menu that allows the user to run the
+optimizer one iteration at a time, allowing for a change in parameters between
+iterations.
+
+-- An option has been added to the Run menu that allow the user to seek the
+first feasible point (with respect to the constraints in the Functions file),
+rather than seek the optimizer.
+
+-- The Cache Tolerance and MVP EXTENDED POLL triggers for the objective and
+constraint violation functions may now be edited by selecting the appropriate
+MADS menu choice.
+
+-- An option has been added to do base-2 or base-10 logarithmic scaling of
+directions.
+
+-- Custom POLL directions has been added to allow user to specify the
+underlying POLL directions basis.
+
+-- Options have been added to the NOMADm Help menu to allow viewing of the GNU
+General Public License (GPL) and this summary of changes.
+
+-- The html NOMADm Help file has been replaced with a more complete pdf User's
+Guide.
+
+-- Code documentation has been updated and improved to comply with current
+MATLAB standards for using "help" and "lookfor" commands.  A "Contents.m" file
+has been added as an overview for the package.
+
+
+CODE IMPROVEMENTS AND BUG FIXES:
+
+-- The Stop Run and Resume features are now much more stable and clearly
+defined, and push buttons for both are now included.  Some capability existed
+before, but the seamless transition of variable values was not entirely
+accurate.  This has been corrected.
+
+-- The Cache has a new field .pID and a function to compute its value.  This
+field is a unique ID number corresponding to a specific set of categorical
+variable values.  This speeds up searching the Cache, and it allows
+partitioning of that part of the Cache with the same discrete variable values.
+As a consequence, this greatly improves the process for scaling directions in
+the case of mixed variables.
+
+-- Computation of scale factors was moved from the Update function to the
+updateOmega function to facilitate scaling of MVP problems.
+
+-- The actual scaling of directions was moved to from the poll function to the
+various functions that compute POLL directions, so that a bug could be
+corrected to prevent tangent cone generators from being scaled.
+
+-- Added code in the updateOmega function to scale each linear constraint by
+the infinity norm of its coefficients.
+
+-- The "Constraints change ..." options in the Problem Menu has been deleted.
+Instead, whether or not to change the linear constraints during the
+optimization of an MVP problem is determined by the number of input arguments
+(1 or 2) that the Omega file function statement has.  If a second argument
+(the current values of the categorical variables) is included, then it is
+assumed that Omega is dependent on these values; otherwise, it is assumed that
+the linear constraints never change.
+
+-- The "Search Cache before Evaluating Function" menu choice has been removed
+as a user option.  Because the Cache structure is integrated so tightly into
+the code, not selecting this option has resulted in too many unforeseen
+problems.  Therefore, this function is now always done automatically.
+
+-- Reduced the size of the processInput function by putting the error checks in
+a separate function and moving all of the Cache construction and retrieval
+logic to the createCache function.
+
+-- For problems with no nonlinear constraints, the constraint violation
+function value no longer appears in the results display window.
+
+-- The filter now displays on the bottom right of the main window to allow for
+the display of more options.
+
+-- Minor bugs in DVector, LHS, and gradDirections were corrected.
+
+-- Added two lines to getTangentCone to zero out elements that are less than
+10*eps in magnitude.
+
+-- Added an error check in gradDirections to prevent an infinite loop if
+user-provided derivatives are in error.

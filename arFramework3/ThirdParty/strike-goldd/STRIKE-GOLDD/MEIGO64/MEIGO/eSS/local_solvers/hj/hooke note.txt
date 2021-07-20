@@ -1,0 +1,5 @@
+The script hooke.m was originally created by Prof. C.T. Kelley and was downloaded for his personal web page.
+
+http://www4.ncsu.edu/~ctk/darts/hooke.m
+
+We have slightly modified the code to adapt it to the (f)SSm framework.

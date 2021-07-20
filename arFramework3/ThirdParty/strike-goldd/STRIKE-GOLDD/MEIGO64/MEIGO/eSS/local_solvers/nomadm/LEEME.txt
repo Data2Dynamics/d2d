@@ -1,0 +1,7 @@
+Realizar la llamada como
+
+[BestF,BestI,RunStats,RunSet]=mads_batch
+
+leer esto de Abramson
+
+if you would like to access this data directly, the call to mads from mads_batch.m has an output variable, called RunSet, which is a structure containing almost everything!  RunSet.bfp is a vector containing a sequential storage of the best feasible point f-values (used for plotting).  If you want to access the iterate data, you can access RunSet.iterate, which is the corresponding vector of iterates.  Each iterate is itself a structure containing fields p, x, n, f/gradf, c/gradc, h/gradh, etc., which correspond to the categorical variables, continuous variables, number of continuous variables, objective function value and gradient, gradient, constraint function values and Jacobian, and constraint violation function value and gradient, respectively.

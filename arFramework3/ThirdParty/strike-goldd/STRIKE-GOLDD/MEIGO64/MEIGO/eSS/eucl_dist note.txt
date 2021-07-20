@@ -1,0 +1,14 @@
+The script eucl_dist.m was originally created by Roland Bunschoten (see below) and was downloaded for The Mathworks -  Matlab Central - File Exchange
+
+http://www.mathworks.com/matlabcentral/fileexchange/loadCategory.do
+
+
+% Author   : Roland Bunschoten
+%            University of Amsterdam
+%            Intelligent Autonomous Systems (IAS) group
+%            Kruislaan 403  1098 SJ Amsterdam
+%            tel.(+31)20-5257524
+%            bunschot@wins.uva.nl
+
+
+Type help eucl_dist for more info

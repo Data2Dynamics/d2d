@@ -1,0 +1,10 @@
+The script fminsearchbnd.m was originally created by John D'Errico (see below) and was downloaded for The Mathworks -  Matlab Central - File Exchange
+
+http://www.mathworks.com/matlabcentral/fileexchange/loadCategory.do
+
+% Author: John D'Errico
+% E-mail: woodchips@rochester.rr.com
+% Release: 4
+% Release date: 7/23/06
+
+Type help fminsearchbnd for more info
