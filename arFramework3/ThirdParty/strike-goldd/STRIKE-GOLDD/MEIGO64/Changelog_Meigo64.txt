@@ -1,0 +1,92 @@
+﻿MEIGO64 - last revised 29 October 2019.
+---------------------------------------
+ 
+
+--> Update 29-October-2019 (AFV):
+
+- Modified 'ess_local_filters' to compute elapsed time using tic-toc instead of cputime inside local searches.
+
+
+--> Update 21-May-2018 (AFV):
+
+- Modified 'ess_kernel.m' so that it computes elapsed time using tic-toc instead of cputime.
+
+
+--> Update 21-Mar-2018 (YANNIK):
+
+- Added new test problems and local solvers.
+
+
+--> Update 20-Feb-2018 (JRB): 
+
+- Added IPOPT binaries for Linux/Win64
+
+
+--> Update 16-May-2017 (AFV):
+
+- Modified 'ess_kernel.m' so that it stores all the intermediate points in the optimizations,
+even when no local search is used. 
+
+
+--> Update 02-May-2017 (AFV):
+
+- CeSS now accepts different local methods for different threads.
+- Multistart can be performed with several local methods.
+- Changes in the way CeSS is invoked: it is now called similarly as other methods, i.e.: 
+>> MEIGO(problem,opts,'cess')
+
+
+--> Update 19-April-2017 (AFV):
+
+- eSS made robust with respect to possible crashes in local searches:
+Modified "ess_local_filters" including a try-catch in the call to "ssm_localsolver".
+
+
+--> Update 11-November-2016 (JRB/JEGEA): 
+
+- corrected printing of objf when all points are infeasible 
+- added printing fobj for x0 if x0 is supplied
+
+
+--> Update 7-November-2016 (AFV): 
+
+- Provide high quality gradients to FMINCON, calculated with AMICI using adjoint sensitivities
+(initially implemented by Daniel Weindl, September 2016).
+
+
+--> Update 20-May-2016
+
+- the parallel solver CeSS and CeVNS now use the Matlab Parallel Computing toolbox instead of jPar.
+(the use of jPar seems to be problematic in the latest Matlab versions due to changes in the JRE). 
+Before using CeSS or CeVNS, launch the workers using e.g. matlabpool open local 4 for 4 threads
+This is a contribution by Lukas Widmer (ETHZ).
+
+
+--> Update 20-May-2016
+
+Example:
+- in the Goodwin updated example, sensisitivities are now computed with AMICI 
+ (software from Hasenauer group)
+
+
+-->Previous (9-May-2016):
+
+What is new in MEIGO64:
+- new MEIGO version for Matlab 64 bit (mex64 for most local solvers, including Win and Linux)
+- includes updated mex solvers: nl2sol (for parameter estmation), misqp (for MINLP), etc.
+- nl2sol accepts high-quality gradients computed by sensitivities (see Gábor and Banga, 2015)
+
+Example:
+- the Goodwin_example folder illustrates these capabilities with an oscillator model. Sensitivities
+  are computed with odeSD (from J. Stelling group at ETHZ), but other sensitivities solvers can be used
+- this example is the same used in Gábor and Banga (2015), although no regularization here
+
+
+Julio R. Banga
+Email: julio@iim.csic.es
+
+References
+
+Gábor, A. and J. R. Banga (2015) Robust and efficient parameter estimation in dynamic 
+models of biological systems. BMC Systems Biology, 9:74
+http://bmcsystbiol.biomedcentral.com/articles/10.1186/s12918-015-0219-2

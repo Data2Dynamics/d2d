@@ -1,0 +1,9 @@
+N2FB is part of the PORT library, available at
+http://www.netlib.org/port/
+
+The entire PORT library is now available without charge for
+non-commercial use under a non-exclusive limited-use software
+agreement, see
+http://www.netlib.org/port/readme
+
+Please make sure you follow this agreement.
