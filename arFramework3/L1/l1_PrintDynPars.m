@@ -45,7 +45,7 @@ L1_pars(~isnan(del_L1)) = [];
 [found_SS,found_cells] = setdiff(ar.model(m).p,ar.model(m).fp);
 del_SS = [];
 for iSS = 1:length(found_cells)
-   tmp_regexp = fprintf('^(%s\)$',ar.model(m).p{found_cells(iSS)});
+   tmp_regexp = sprintf('^(%s\)$',ar.model(m).p{found_cells(iSS)});
    if(contains(ar.model(m).fp{found_cells(iSS)},['relto_' ar.model(m).p{found_cells(iSS)}]) || ~isempty(regexp(ar.model.fp{found_cells(iSS)},'^(\d+\)$','ONCE')) || ~isempty(regexp(ar.model.fp{found_cells(iSS)},tmp_regexp,'ONCE')))
        del_SS(end+1) = iSS;
    end
@@ -69,8 +69,8 @@ end
 
 
 for i = 1:length(found_cells)
-    L1_tmp = sym(ar.model(m).fp{found_cells(i)});
-    L1_tmp = char(subs(L1_tmp,L1_pars,L1_pars_new)); 
+    L1_tmp = arSym(ar.model(m).fp{found_cells(i)});
+    L1_tmp = char(arSubs(L1_tmp,arSym(L1_pars),arSym(L1_pars_new))); 
     fprintf('%s  "%s" \n',ar.model.p{found_cells(i)},L1_tmp); 
     saved_L1{i,1} = ar.model.p{found_cells(i)};
     saved_L1{i,2} = L1_tmp;
