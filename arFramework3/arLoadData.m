@@ -208,7 +208,6 @@ else
     end
 end
 
-
 %%
 if ( opts.resampledoseresponse )
     if ( ~isnumeric( opts.resamplingresolution_args ) || isempty( opts.resamplingresolution_args ) )
