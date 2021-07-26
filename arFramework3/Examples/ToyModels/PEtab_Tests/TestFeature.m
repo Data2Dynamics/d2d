@@ -22,7 +22,8 @@ for i = 1:Ncases
     fprintf( 2, ['\n\nCase ' cases{i} '...\n'] );
     try
         arInit
-        arImportPEtab({'_model','_observables','_measurements','_conditions','_parameters'})
+        arImportPEtab({'_model','_observables','_measurements','_conditions','_parameters'}) % tests default behavior
+%         arImportPEtab(['_' cases{i}]) % tests yaml file read
         ar.config.useFitErrorCorrection = 0;
         
         arSimu(true,true,true)

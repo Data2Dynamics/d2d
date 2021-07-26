@@ -1,13 +1,13 @@
 function arImportPEtab(name, doPreEq)
 % arImportPEtab(name, doPreEq)
-% Import parameter estimation problem formulated in the PEtab standard. 
+% Import parameter estimation problem formulated in the PEtab standard.
 %
 %   name     Cell array of filenames for model, observables, measurements,
 %            conditions and parameters file (in this order):
 %               arImportPEtab({'mymodel', 'myobs', 'mymeas', 'mycond', 'mypars'})
 %
-%            Alternatively, a string can be provided that together with the 
-%            keywords 'model', 'observables', 'measurements', 'conditions', 
+%            Alternatively, a string can be provided that together with the
+%            keywords 'model', 'observables', 'measurements', 'conditions',
 %            'parameters' uniquely defines a set of PEtab files by the
 %            pattern 'name*[keyword]'
 %               arImportPEtab('my')
@@ -30,26 +30,33 @@ if isfield(ar, 'model')
 end
 if ~exist('doPreEquilibration','var') || isempty(doPreEq)
     doPreEq = true;
-end    
-
-% init PEtab fields
-
-
-
+end
 
 %TODO: read in multiple sbmls & save these paths in ar struct
-if ~exist('name','var') || isempty(name) 
+if ~exist('name','var') || isempty(name)
     sbmlmodel = dir(['**' filesep '*.xml']);
 else
     if ischar(name)
-        sbmlmodel = dir(['**' filesep '*' name '*.xml']);
-    else
+        if ~isempty(dir([strrep(name,'.yaml','') '.yaml'])) % exists .yaml file?
+            yamlContent = arReadPEtabYaml(name);
+            fprintf('Found yaml file with name %s, which is now used!\n',name)
+            arImportPEtab({yamlContent.sbml_files, yamlContent.observable_files, yamlContent.measurement_files, yamlContent.condition_files, yamlContent.parameter_file},doPreEq)
+            return
+        else % no yaml file
+            fprintf('Did not find yaml file with name %s. Looking for other files with this identifier!\n',name)
+            sbmlmodel = dir(['**' filesep name]);
+            if isempty(sbmlmodel)
+                sbmlmodel = dir(['**' filesep name '.xml']);
+            end
+        end
+    else % no yaml file
         sbmlmodel = dir(['**' filesep name{1}]);
         if isempty(sbmlmodel)
             sbmlmodel = dir(['**' filesep name{1} '.xml']);
         end
     end
 end
+
 if isempty(sbmlmodel)
     error('No SBML file found! Switch your path to working directory.');
 else
@@ -57,10 +64,10 @@ else
 end
 if length(sbmlmodel)>1
     out = stringListChooser({sbmlmodel.name});
-    sbmlmodel= sbmlmodel(out);                 % set sbmlmodel to chosen
+    sbmlmodel= sbmlmodel(out);% set sbmlmodel to chosen
 end
 
-if ~exist('name','var') || isempty(name) 
+if ~exist('name','var') || isempty(name)
     pe_dir = dir('**/*.tsv');
 elseif ~ischar(name)
     pe_dir = dir(['**/*' name{2} '*.tsv']);
@@ -80,13 +87,13 @@ arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
 % make dir case sensitive!
 if exist('name','var') && ~isempty(name) && ischar(name)
-        PEobs = dir([pe_dir filesep name '*observable*' '.tsv']);
-        PEmeas = dir([pe_dir filesep name '*measurement*' '.tsv']);
-        PEconds = dir([pe_dir filesep name '*condition*' '.tsv']);
-        PEparas = dir([pe_dir filesep name '*parameter*' '.tsv']);
+    PEobs = dir([pe_dir filesep name '*observable*' '.tsv']);
+    PEmeas = dir([pe_dir filesep name '*measurement*' '.tsv']);
+    PEconds = dir([pe_dir filesep name '*condition*' '.tsv']);
+    PEparas = dir([pe_dir filesep name '*parameter*' '.tsv']);
 else
     if ~exist('name','var') || isempty(name) || length(name)<2 || isempty(name{2})
-        PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'observable')]);    
+        PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'observable')]);
     else
         PEobs = dir([name{2} '.tsv']);
     end
@@ -128,7 +135,7 @@ Tcond = arLoadCondPEtab([pe_dir filesep PEconds.name], T);
 arCompileAll
 ar.config.fiterrors = 1;
 
-arLoadParsPEtab([pe_dir filesep PEparas.name]); 
+arLoadParsPEtab([pe_dir filesep PEparas.name]);
 
 % model selection, save every model, remember arDC
 if exist('PEmselect','var') && ~isempty(PEmselect)
@@ -145,20 +152,20 @@ for ms=1:Tms_size
     if ms>1     % for multiple models in model selection, get original ar
         ar = arDeepCopy(arDC);
     end
-
+    
     arFindInputs % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
     arLoadParsPEtab([pe_dir filesep PEparas.name]); % get para values from parameter label
-
+    
     if exist('Tms','var')
         [BothPars,ia] = intersect(ar.pLabel,Tms_fn);
         for i=1:length(BothPars)
             if strcmp(Tms.(BothPars{i})(ms),'-')       % if Tms.(BothPars{i})(ms) == 0
-               arSetPars(BothPars(i), ar.p(ia), 0);
-            %else
-            %    arSetPars(BothPars(i), ar.p(ia)*Tms.(BothPars{i})(ms));
+                arSetPars(BothPars(i), ar.p(ia), 0);
+                %else
+                %    arSetPars(BothPars(i), ar.p(ia)*Tms.(BothPars{i})(ms));
             end
         end
-    end    
+    end
     
     % pre-equilibration
     if doPreEq
@@ -166,7 +173,7 @@ for ms=1:Tms_size
         for imodel = 1:length(ar.model)
             Tdat = T{imodel,1};
             Tobs = T{imodel,2};
-
+            
             if isfield(table2struct(Tdat), 'preequilibrationConditionId')
                 uniqueSimConds = unique(Tdat.simulationConditionId);
                 uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
@@ -175,11 +182,11 @@ for ms=1:Tms_size
                         uniquePreEqConds = [];
                     end
                 end
-
+                
                 if numel(uniquePreEqConds) > 1
                     error('More than one pre-equiblibration condition currently not supported.')
                 end
-
+                
                 for ipreeqcond = 1:size(uniquePreEqConds,1)
                     preEqCond = arFindCondition(convertStringsToChars(uniquePreEqConds(ipreeqcond)), 'conservative');
                     simConds = [];
