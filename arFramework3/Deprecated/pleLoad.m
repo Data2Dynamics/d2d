@@ -4,7 +4,7 @@ function ple = pleLoad(ar)
 
 savepath = [ar.config.savepath '/PLE'];
 
-if(exist(savepath,'dir')==7)
+if(exist(savepath,'dir')==7 && exist([savepath '/results.mat'],'file')==2)
     S = load([savepath '/results.mat']);
     if isfield(S,'pleGlobals') % old format
         ple = S.pleGlobals; %
