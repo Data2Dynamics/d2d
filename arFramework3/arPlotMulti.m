@@ -896,6 +896,8 @@ end
 function [t, v, lb, ub, zero_break] = getDataDoseResponseV(jm, jv, ds, ttime)
 global ar
 
+zero_break = [];
+
 ccount = 1;
 for jd = ds
     jc = ar.model(jm).data(jd).cLink;
