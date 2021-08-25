@@ -41,7 +41,7 @@ end
 
 % load model from mat-file
 if(~exist(ModelPath,'dir'))
-    error('folder %s does not exist',ModelPath)
+    error('folder %s does not exist. Possible reason: Did you rename the result folder by hand?',ModelPath)
 end
 if strcmp(strrep(name,' ',''),name)~=1
     name
