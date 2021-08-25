@@ -21,14 +21,17 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
-if(~exist('saveToFile','var'))
-    saveToFile = false;
-end
-if(~exist('filenameAddition','var'))
-    filenameAddition = '';
+if(~exist('ps','ps') || isempty(ps))
+    error('arPlotMulti requires at least one argument.');
 end
 if(~exist('ps_weigths','var') || isempty(ps_weigths))
     ps_weigths = ones(1,size(ps,1));
+end
+if(~exist('saveToFile','var') || isempty(saveToFile))
+    saveToFile = false;
+end
+if(~exist('filenameAddition','var') || isempty(filenameAddition))
+    filenameAddition = '';
 end
 if(~isfield(ar.config,'useFitErrorMatrix'))
     ar.config.useFitErrorMatrix = false;
