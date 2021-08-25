@@ -21,7 +21,7 @@ if(isempty(ar))
     error('please initialize by arInit')
 end
 
-if(~exist('ps','ps') || isempty(ps))
+if(~exist('ps','var') || isempty(ps))
     error('arPlotMulti requires at least one argument.');
 end
 if(~exist('ps_weigths','var') || isempty(ps_weigths))
