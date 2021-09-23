@@ -149,6 +149,13 @@ meritvals.chi2_prior    = ar.chi2prior;
 meritvals.chi2_random   = ar.chi2random;
 meritvals.chi2          = ar.chi2;
 
+npara = sum(ar.qFit==1);
+meritvals.bic           =   npara*log(ar.ndata) + meritvals.loglik;
+meritvals.aic           = 2*npara               + meritvals.loglik;
+meritvals.aicc          = meritvals.aic + (2*npara^2 + 2*npara)/...
+                                                 (ar.ndata-npara-1);  % Correction of AIC for small sample size
+
+
 if ~isempty(ar.ple) && isfield(ar.ple,'merit_fkt')    
     meritvals.ple_merit = feval(ar.ple.merit_fkt);
 else
@@ -162,7 +169,7 @@ meritvals.nconstr = ar.nconstr;
 meritvals.nprior  = ar.nprior;
 meritvals.nconstr = ar.nconstr;
 
-meritvals.npara = sum(ar.qFit==1);
+meritvals.npara = npara;
 
 meritvals.fiterrors = ar.config.fiterrors;
 meritvals.fiterrors_correction = ar.config.fiterrors_correction;
