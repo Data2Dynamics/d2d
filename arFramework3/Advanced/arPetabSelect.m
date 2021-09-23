@@ -1,10 +1,12 @@
 %% Work in Progress
+% Optional extension in different function: Write selection problem yaml with input
+
 
 function arPetabSelect(venvActPath)
 %% Parse function input
 
 
-%% Write selection problem yaml with input
+
 
 
 %% Check if petab_select is installed in system commands and give error if not yet installed
@@ -33,15 +35,34 @@ command = [initstr,...
 ' -m brute_force', ...
 ' -l 3'
 ];
-[status,cmdout] = system(command)
+[status,cmdout] = system(command);
 
+if status ~= 0
+    error(sprintf('Error while running petab_select from command line.\n Command line message:\n %s',cmdout)); %#ok<SPERR>
+end
 
 %% Import models.yaml written by petab_select script
-
+CandidateModels = arReadYaml(['output' filesep 'models.yaml']);
 
 %% Run d2d fits & calculate criterion values with d2d functions
-
-
+nModels = size(CandidateModels,2);
+for jModel = 1:nModels
+    % collect PEtab files 
+    bb = arReadYaml(CandidateModels(jModel).petab_yaml);
+    %lastfilesepPos = find(CandidateModels(jModel).petab_yaml == filesep, 1, 'last');
+    %PeTsvPath = CandidateModels(jModel).petab_yaml(1:lastfilesepPos);
+    %PeTsvPath = cellfun(@(x) [PeTsvPath,x],{bb.sbml_files, bb.observable_files, bb.measurement_files, bb.condition_files, bb.parameter_file},'UniformOutput',false);
+    
+    arInit
+    doPreEq = false;
+    
+    arImportPEtab(bb,doPreEq)
+    % Fit model 
+    arFit
+   
+    % Save criteria
+    
+end
 
 
 %% Write calibrated first iteration .yaml including criterion values
