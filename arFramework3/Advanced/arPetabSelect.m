@@ -24,7 +24,7 @@ end
 
 
 %% Run petab_select code with system commands
-SelectionProblem = arReadYaml('selection_problem.yaml');
+SelectionProblem = ReadYaml('selection_problem.yaml');
 
 % Create output folder? Currently still missing
 if ~isfolder('output')
@@ -45,14 +45,14 @@ if status ~= 0
 end
 
 %% Import models.yaml written by petab_select script
-CandidateModels = arReadYaml(['output' filesep 'models.yaml']);
+CandidateModels = ReadYaml(['output' filesep 'models.yaml']);
 
 
 %% Run d2d fits & calculate criterion values with d2d functions
 nModels = size(CandidateModels,2);
 for jModel = 1:nModels
     % collect PEtab files 
-    bb = arReadYaml(CandidateModels(jModel).petab_yaml);
+    bb = ReadYaml(CandidateModels{jModel}.petab_yaml);
     %lastfilesepPos = find(CandidateModels(jModel).petab_yaml == filesep, 1, 'last');
     %PeTsvPath = CandidateModels(jModel).petab_yaml(1:lastfilesepPos);
     %PeTsvPath = cellfun(@(x) [PeTsvPath,x],{bb.sbml_files, bb.observable_files, bb.measurement_files, bb.condition_files, bb.parameter_file},'UniformOutput',false);
