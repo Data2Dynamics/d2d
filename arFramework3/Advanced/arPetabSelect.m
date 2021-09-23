@@ -9,6 +9,11 @@ function arPetabSelect()
 
 %% Check if petab_select is installed in system commands and give error if not yet installed
 
+command = ['petab_select --help'];
+[status,~] = system(command);
+if status ~= 0
+    error(sprintf('petab_select could not be called as a system command.\nPlease make sure to install petab_select using pip install petab_select on your machine.'))
+end
 
 %% Run petab_select code with system commands
 
@@ -27,6 +32,9 @@ sprintf(append('petab_select candidates \\ \n ',  ...
 
 
 %% Run d2d fits & calculate criterion values with d2d functions
+
+
+
 
 %% Write calibrated first iteration .yaml including criterion values
 
