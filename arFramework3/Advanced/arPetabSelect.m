@@ -52,7 +52,7 @@ CandidateModels = ReadYaml(['output' filesep 'models.yaml']);
 nModels = size(CandidateModels,2);
 for jModel = 1:nModels
     % collect PEtab files 
-    bb = ReadYaml(CandidateModels{jModel}.petab_yaml);
+    %bb = ReadYaml(CandidateModels{jModel}.petab_yaml);
     %lastfilesepPos = find(CandidateModels(jModel).petab_yaml == filesep, 1, 'last');
     %PeTsvPath = CandidateModels(jModel).petab_yaml(1:lastfilesepPos);
     %PeTsvPath = cellfun(@(x) [PeTsvPath,x],{bb.sbml_files, bb.observable_files, bb.measurement_files, bb.condition_files, bb.parameter_file},'UniformOutput',false);
@@ -60,7 +60,7 @@ for jModel = 1:nModels
     arInit
     doPreEq = false;
     
-    arImportPEtab(bb,doPreEq)
+    arImportPEtab(CandidateModels{jModel}.petab_yaml,doPreEq)
     % Fit model 
     arFit
     [~, allmerits] = arGetMerit;
