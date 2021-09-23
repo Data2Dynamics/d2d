@@ -17,6 +17,10 @@ end
 
 %% Run petab_select code with system commands
 
+% Create output folder? Currently still missing
+if ~isfolder('output')
+    mkdir('output')
+end
 command = [
 append('petab_select candidates ',  ...
 ' -y selection_problem.yaml ', ...
