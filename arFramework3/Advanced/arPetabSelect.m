@@ -1,6 +1,6 @@
 %% Work in Progress
 
-function arPetabSelect()
+function arPetabSelect(venvActPath)
 %% Parse function input
 
 
@@ -8,8 +8,12 @@ function arPetabSelect()
 
 
 %% Check if petab_select is installed in system commands and give error if not yet installed
+initstr = '';
+if exist('venvActPath') && ~isempty(venvActPath)
+    initstr = sprintf('source %s; ', venvActPath);
+end
 
-command = ['petab_select --help'];
+command = [initstr, 'petab_select --help'];
 [status,~] = system(command);
 if status ~= 0
     error(sprintf('petab_select could not be called as a system command.\nPlease make sure to install petab_select using pip install petab_select on your machine.'))
@@ -21,14 +25,14 @@ end
 if ~isfolder('output')
     mkdir('output')
 end
-command = [
-append('petab_select candidates ',  ...
+command = [initstr,...
+'petab_select candidates ',  ...
 ' -y selection_problem.yaml ', ...
 ' -s output', filesep, 'state.dill',...
 ' -o output', filesep, 'models.yaml', ...
 ' -m brute_force', ...
-' -l 3')
-] ;
+' -l 3'
+];
 [status,cmdout] = system(command)
 
 
