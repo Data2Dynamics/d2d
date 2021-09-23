@@ -3,6 +3,8 @@
 % reads yaml file and outputs struct
 % array of struct is created if yaml is seperated into different parts by -
 % as delimiter
+% MUST REMOVE SUPERFLUOS - in YAML FILES
+% UPDATE OF THIS FUNCTION IS NECESSARY!!!!!!!
 
 function results = arReadYaml(filePath)
 

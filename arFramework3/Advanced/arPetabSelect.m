@@ -1,6 +1,6 @@
 %% Work in Progress
 % Optional extension in different function: Write selection problem yaml with input
-
+% Currently only one criterion supported
 
 function arPetabSelect(venvActPath)
 %% Parse function input
@@ -21,7 +21,10 @@ if status ~= 0
     error(sprintf('petab_select could not be called as a system command.\nPlease make sure to install petab_select using pip install petab_select on your machine.'))
 end
 
+
+
 %% Run petab_select code with system commands
+SelectionProblem = arReadYaml('selection_problem.yaml');
 
 % Create output folder? Currently still missing
 if ~isfolder('output')
@@ -44,6 +47,7 @@ end
 %% Import models.yaml written by petab_select script
 CandidateModels = arReadYaml(['output' filesep 'models.yaml']);
 
+
 %% Run d2d fits & calculate criterion values with d2d functions
 nModels = size(CandidateModels,2);
 for jModel = 1:nModels
@@ -59,15 +63,33 @@ for jModel = 1:nModels
     arImportPEtab(bb,doPreEq)
     % Fit model 
     arFit
-   
+    [~, allmerits] = arGetMerit;
+    
     % Save criteria
+    % ADAPT FOR MULTIPLE CRITERIA
+    switch SelectionProblem.criterion
+        case 'AICc'
+             bb(jModel).criteria = allmerits.loglik;  
+        case 'LogL'
+             bb(jModel).criteria = allmerits.loglik;  
+        otherwise
+             error('Invalid criteria for model nr%i:\n%s',jModel,CandidateModels(jModel).petab_yaml)
+    end
+    
+    
     
 end
 
-
 %% Write calibrated first iteration .yaml including criterion values
 
+
+
+
 %% use petab_select candidates -b calibrated first iteration.yaml with method (forward selection...)
+
+
+
+
 
 %% Final output 
 
