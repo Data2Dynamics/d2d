@@ -1,4 +1,5 @@
 % results = arReadYaml(filePath)
+% +++ DEPRECATED +++
 %
 % reads yaml file and outputs struct
 % array of struct is created if yaml is seperated into different parts by -

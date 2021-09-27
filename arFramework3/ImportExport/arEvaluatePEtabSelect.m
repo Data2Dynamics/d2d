@@ -1,4 +1,5 @@
 % status = arEvaluatePEtabSelect(modelSpecFile, constrFile, config)
+% +++ DEPRECATED +++
 % 
 % arEvaluatePEtabSelect calculates scores like AIC, BIC, etc for a set of
 % candidate models. 
