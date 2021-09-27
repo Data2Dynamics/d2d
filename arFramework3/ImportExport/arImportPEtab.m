@@ -2,15 +2,11 @@ function arImportPEtab(name, doPreEq)
 % arImportPEtab(name, doPreEq)
 % Import parameter estimation problem formulated in the PEtab standard.
 %
-%   name     Cell array of filenames for model, observables, measurements,
+%   name     Path to PEtab yaml file
+%
+%            Alternatively: Cell array of paths to model, observables, measurements,
 %            conditions and parameters file (in this order):
 %               arImportPEtab({'mymodel', 'myobs', 'mymeas', 'mycond', 'mypars'})
-%
-%            Alternatively, a string can be provided that together with the
-%            keywords 'model', 'observables', 'measurements', 'conditions',
-%            'parameters' uniquely defines a set of PEtab files by the
-%            pattern 'name*[keyword]'
-%               arImportPEtab('my')
 %
 %   doPreEq  Apply pre-equilibration if specified in PEtab files [true]
 %
@@ -33,107 +29,56 @@ if ~exist('doPreEquilibration','var') || isempty(doPreEq)
 end
 
 %TODO: read in multiple sbmls & save these paths in ar struct
-if ~exist('name','var') || isempty(name)
-    sbmlmodel = dir(['**' filesep '*.xml']);
-else
-    if ischar(name)
-        if ~isempty(dir([strrep(name,'.yaml','') '.yaml'])) % exists .yaml file?
-            yamlContent = arReadPEtabYaml(name);
-            fprintf('Found yaml file with name %s, which is now used!\n',name)
-            arImportPEtab({yamlContent.sbml_files, yamlContent.observable_files, yamlContent.measurement_files, yamlContent.condition_files, yamlContent.parameter_file},doPreEq)
-            return
-        else % no yaml file
-            fprintf('Did not find yaml file with name %s. Looking for other files with this identifier!\n',name)
-            sbmlmodel = dir(['**' filesep name]);
-            if isempty(sbmlmodel)
-                sbmlmodel = dir(['**' filesep name '.xml']);
-            end
-        end
-    else % no yaml file
-        sbmlmodel = dir(['**' filesep name{1}]);
-        if isempty(sbmlmodel)
-            sbmlmodel = dir(['**' filesep name{1} '.xml']);
-        end
+if ischar(name) %yaml
+    yamlDir = dir([strrep(name,'.yaml','') '.yaml']);
+    if isempty(yamlDir) % exists .yaml file?
+        error('Did not find yaml file')
     end
+    yamlContent = arReadPEtabYaml(name);
+    yamlPath = yamlDir.folder;
+    fprintf('Found yaml file with name %s\n',name)
+    arImportPEtab(cellfun(@(x) [yamlPath, filesep, x], {yamlContent.sbml_files{1}, yamlContent.observable_files{1}, yamlContent.measurement_files{1}, yamlContent.condition_files{1}, yamlContent.parameter_file{1}}, 'UniformOutput', false),doPreEq)
+    % only one sbml file or tsv file per category allowed at the moment,
+    % also check arReadPEtabYaml
+    return
+else % no yaml file
+    sbmlmodel = dir([strrep(name{1},'.xml','') '.xml']);
 end
 
 if isempty(sbmlmodel)
-    error('No SBML file found! Switch your path to working directory.');
+    error('No SBML file found!');
 else
     ar.petab.sbml = sbmlmodel;
 end
 if length(sbmlmodel)>1
-    out = stringListChooser({sbmlmodel.name});
-    sbmlmodel= sbmlmodel(out);% set sbmlmodel to chosen
+    error('Found more than one SBML model file')
+    %out = stringListChooser({sbmlmodel.name});
+    %sbmlmodel= sbmlmodel(out);% set sbmlmodel to chosen
 end
-
-if ~exist('name','var') || isempty(name)
-    pe_dir = dir('**/*.tsv');
-elseif ~ischar(name)
-    pe_dir = dir(['**/*' name{2} '*.tsv']);
-else
-    pe_dir = dir(['**/*' name '*.tsv']);
-end
-
-if isempty(pe_dir)
-    error('No tsv files found! Switch your path to working directory.');
-else
-    ar.petab.path = pe_dir;
-end
-pe_dir = pe_dir(1).folder;
 
 arParseSBML([sbmlmodel.folder filesep sbmlmodel.name])
 arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
-% make dir case sensitive!
-if exist('name','var') && ~isempty(name) && ischar(name)
-    PEobs = dir([pe_dir filesep name '*observable*' '.tsv']);
-    PEmeas = dir([pe_dir filesep name '*measurement*' '.tsv']);
-    PEconds = dir([pe_dir filesep name '*condition*' '.tsv']);
-    PEparas = dir([pe_dir filesep name '*parameter*' '.tsv']);
-else
-    if ~exist('name','var') || isempty(name) || length(name)<2 || isempty(name{2})
-        PEobs = dir([pe_dir filesep sprintf('*%s*.tsv', 'observable')]);
-    else
-        PEobs = dir([name{2} '.tsv']);
-    end
-    if ~exist('name','var') || isempty(name) || length(name)<3 || isempty(name{3})
-        PEmeas = dir([pe_dir filesep sprintf('*%s*.tsv', 'measurement')]);
-    else
-        PEmeas = dir([name{3} '.tsv']);
-    end
-    if ~exist('name','var') || isempty(name) || length(name)<4 || isempty(name{4})
-        PEconds = dir([pe_dir filesep sprintf('*%s*.tsv', 'condition')]);
-    else
-        PEconds = dir([name{4} '.tsv']);
-    end
-    if ~exist('name','var') || isempty(name) || length(name)<5 || isempty(name{5})
-        PEparas = dir([pe_dir filesep sprintf('*%s*.tsv', 'parameter')]);
-    else
-        PEparas = dir([name{5} '.tsv']);
-    end
-end
+PEobs = [strrep(name{2},'.tsv',''),'.tsv'];
+PEmeas = [strrep(name{3},'.tsv',''),'.tsv'];
+PEconds = [strrep(name{4},'.tsv',''),'.tsv'];
+PEparas = [strrep(name{5},'.tsv',''),'.tsv'];
 
-if length(PEparas) > 1 || length(PEmeas) > 1 || length(PEconds) > 1 || length(PEobs) > 1
-    error('Found more than one peTAB file. Please provide a unique name substring or specify names of the individual files directly.')
-end
-
-% ToDo: Loop over several models
 T = cell(2, length(ar.model));
 for m = 1:length(ar.model)
     [T{m,1}, T{m,2}] = ...
-        arLoadDataPEtab([pe_dir filesep PEmeas.name],[pe_dir filesep PEobs.name],m);
+        arLoadDataPEtab(PEmeas,PEobs,m);
 end
-Tcond = arLoadCondPEtab([pe_dir filesep PEconds.name], T);
+Tcond = arLoadCondPEtab(PEconds, T);
 
 % Compilation
 arCompileAll
 ar.config.fiterrors = 1;
 
-arLoadParsPEtab([pe_dir filesep PEparas.name]);
+arLoadParsPEtab(PEparas);
 
 arFindInputs % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
-arLoadParsPEtab([pe_dir filesep PEparas.name]); % get para values from parameter label
+arLoadParsPEtab(PEparas);
 
 if exist('Tms','var')
     [BothPars,ia] = intersect(ar.pLabel,Tms_fn);
