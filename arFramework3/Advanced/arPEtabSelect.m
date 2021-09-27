@@ -2,7 +2,7 @@
 % Optional extension in different function: Write selection problem yaml with input
 % Currently only one criterion supported
 
-function arPetabSelect(venvActPath, selectionProblem, method, level, initialModel, CalibYamlOut, estimationRoutine, iterationCounter)
+function arPEtabSelect(venvActPath, selectionProblem, method, level, initialModel, CalibYamlOut, estimationRoutine, iterationCounter)
 if ~exist('iterationCounter') || isempty(iterationCounter)
     iterationCounter = 1;
 end
