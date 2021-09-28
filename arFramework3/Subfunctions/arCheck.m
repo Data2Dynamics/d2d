@@ -199,6 +199,9 @@ end
 if (exist('STRSCNE', 'file') == 0)
     addpath([ar_path '/ThirdParty'])
 end
+if (exist('YAMLMatlab', 'file') == 0)
+    addpath([ar_path '/YAMLMatlab'])
+end
 
 savepath
     
