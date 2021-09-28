@@ -101,5 +101,5 @@ WriteYaml(CalibYamlOut,calibCands);
 %% Next iteration
 fprintf('arPEtabSelect: Iteration %i complete. Continuing with next iteration\n',iterationCounter)
 nextIterationYamlOut = sprintf('calibrated_it_%03i.yaml',iterationCounter+1);
-arPetabSelect(venvActPath, selectionProblem, method, level, CalibYamlOut, nextIterationYamlOut, estimationRoutine,iterationCounter+1)
+arPEtabSelect(venvActPath, selectionProblem, method, level, CalibYamlOut, nextIterationYamlOut, estimationRoutine,iterationCounter+1)
 end
