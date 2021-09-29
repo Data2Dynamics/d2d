@@ -45,13 +45,13 @@ fprintf('arPEtabSelect: Generating candidate models...\n')
 SelectionProblem = ReadYaml(yaml);
 
 syscom = [initstr,...
-'petab_select candidates ',  ...
-' -y ', yaml, ...
-' -s output', filesep, 'state.dill',...
-' -o output', filesep, 'models.yaml', ...
-' -m ', method, ...
-' -l ', num2str(limit), ...
-];
+    'petab_select candidates ',  ...
+    ' -y ', yaml, ...
+    ' -s output', filesep, 'state.dill',...
+    ' -o output', filesep, 'models.yaml', ...
+    ' -m ', method, ...
+    ' -l ', num2str(limit), ...
+    ];
 if ~isempty(initialModel)
     syscom = [syscom, ' -b ' ,initialModel];
 end
@@ -72,30 +72,56 @@ if nModels == 0
 end
 fprintf('arPEtabSelect: Calibrating candidate models...\n')
 
-for jModel = 1:nModels    
+for jModel = 1:nModels
+    % Load & compile
     arInit
     doPreEq = false;
     arImportPEtab(CandidateModels{jModel}.petab_yaml,doPreEq)
+    
+    % Import parameter settings
+    pars = fieldnames(CandidateModels{jModel}.parameters);
+    estimatedPars = {};
+    for iPar = 1:length(pars)
+        if CandidateModels{jModel}.parameters.(pars{iPar}) == 'estimate'
+            arSetPars(pars{iPar}, '',1)
+            estimatedPars{end+1} = pars{iPar};
+        else
+            arSetPars(pars{iPar}, CandidateModels{jModel}.parameters.(pars{iPar}),0,0)
+        end
+    end
+    
+    % Estimate
     estimationRoutine;
     [~, allmerits] = arGetMerit;
-            
-    % ADAPT FOR MULTIPLE CRITERIA
+    
+    % Collect criteria
     switch SelectionProblem.criterion
         case 'AIC'
-             theCriterion = allmerits.loglik;  
+            theCriterion = allmerits.aic;
+        case 'AICc'
+            theCriterion = allmerits.aicc;
+        case 'BIC'
+            theCriterion = allmerits.bic;
         case 'LogL'
-             theCriterion = allmerits.loglik;  
+            theCriterion = allmerits.loglik;
         otherwise
-             error('Invalid criteria for model %i: %s',jModel,CandidateModels{jModel}.petab_yaml)
+            error('Invalid criteria for model %i: %s',jModel,CandidateModels{jModel}.petab_yaml)
+    end
+    
+    %Write results
+    calibCands{jModel}.criteria.(SelectionProblem.criterion) = theCriterion;
+    calibCands{jModel}.model_id = CandidateModels{jModel}.model_id;
+    calibCands{jModel}.parameters = CandidateModels{jModel}.parameters;
+    calibCands{jModel}.petab_yaml = CandidateModels{jModel}.petab_yaml;
+
+    if isempty(estimatedPars)
+        calibCands{jModel}.estimated_parameters = 'null';
+    else
+        for iPar = 1:length(estimatedPars)
+            calibCands{jModel}.estimated_parameters.(estimatedPars{iPar}) = ar.p(arFindPar(estimatedPars{iPar}));
+        end
     end
 end
-
-calibCands = CandidateModels;
-for jModel = 1:nModels
-    calibCands{jModel}.criteria.(SelectionProblem.criterion) = theCriterion;
-    calibCands{jModel}.estimated_parameters = 'null';
-    % add values of estimated parameters
-end 
 WriteYaml(CalibYamlOut,calibCands);
 
 %% Next iteration
