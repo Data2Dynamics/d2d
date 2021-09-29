@@ -2,21 +2,21 @@
 % Optional extension in different function: Write selection problem yaml with input
 % Currently only one criterion supported
 
-function arPEtabSelect(venvActPath, selectionProblem, method, level, initialModel, CalibYamlOut, estimationRoutine, iterationCounter)
+function arPEtabSelect(venvActPath, yaml, method, limit, initialModel, CalibYamlOut, estimationRoutine, iterationCounter)
 if ~exist('iterationCounter') || isempty(iterationCounter)
     iterationCounter = 1;
 end
 %% Parse function input
 
 % standard settings
-if ~exist('selectionProblem') || isempty(selectionProblem)
-    selectionProblem = 'selection_problem.yaml';
+if ~exist('selectionProblem') || isempty(yaml)
+    yaml = 'selection_problem.yaml';
 end
 if ~exist('method') || isempty(method)
     method = 'brute_force';
 end
-if ~exist('level') || isempty(level)
-    level = 3;
+if ~exist('level') || isempty(limit)
+    limit = 3;
 end
 if ~exist('initialModel') || isempty(initialModel)
     initialModel = '';
@@ -42,15 +42,15 @@ end
 
 %% Call PEtab-select to generate candidate models
 fprintf('arPEtabSelect: Generating candidate models...\n')
-SelectionProblem = ReadYaml(selectionProblem);
+SelectionProblem = ReadYaml(yaml);
 
 syscom = [initstr,...
 'petab_select candidates ',  ...
-' -y ', selectionProblem, ...
+' -y ', yaml, ...
 ' -s output', filesep, 'state.dill',...
 ' -o output', filesep, 'models.yaml', ...
 ' -m ', method, ...
-' -l ', num2str(level), ...
+' -l ', num2str(limit), ...
 ];
 if ~isempty(initialModel)
     syscom = [syscom, ' -b ' ,initialModel];
@@ -86,7 +86,7 @@ for jModel = 1:nModels
         case 'LogL'
              theCriterion = allmerits.loglik;  
         otherwise
-             error('Invalid criteria for model nr%i:\n%s',jModel,CandidateModels{jModel}.petab_yaml)
+             error('Invalid criteria for model %i: %s',jModel,CandidateModels{jModel}.petab_yaml)
     end
 end
 
@@ -101,5 +101,5 @@ WriteYaml(CalibYamlOut,calibCands);
 %% Next iteration
 fprintf('arPEtabSelect: Iteration %i complete. Continuing with next iteration\n',iterationCounter)
 nextIterationYamlOut = sprintf('calibrated_it_%03i.yaml',iterationCounter+1);
-arPEtabSelect(venvActPath, selectionProblem, method, level, CalibYamlOut, nextIterationYamlOut, estimationRoutine,iterationCounter+1)
+arPEtabSelect(venvActPath, yaml, method, limit, CalibYamlOut, nextIterationYamlOut, estimationRoutine,iterationCounter+1)
 end
