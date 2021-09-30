@@ -83,15 +83,23 @@ for jModel = 1:nModels
     estimatedPars = {};
     for iPar = 1:length(pars)
         if CandidateModels{jModel}.parameters.(pars{iPar}) == 'estimate'
-            arSetPars(pars{iPar}, '',1)
+            arSetPars(pars{iPar},[],1)
             estimatedPars{end+1} = pars{iPar};
         else
-            arSetPars(pars{iPar}, CandidateModels{jModel}.parameters.(pars{iPar}),0,0)
+            parId = arFindPar(pars{iPar});
+            parValue = CandidateModels{jModel}.parameters.(pars{iPar});
+            if ar.qLog10(parId) == 1
+                arSetPars(pars{iPar},log10(parValue),0)
+            else
+                arSetPars(pars{iPar},parValue,0)
+            end
         end
     end
     
     % Estimate
-    estimationRoutine;
+    %estimationRoutine;
+    arFitLHS(10)
+    
     [~, allmerits] = arGetMerit;
     
     % Collect criteria
@@ -118,7 +126,7 @@ for jModel = 1:nModels
         calibCands{jModel}.estimated_parameters = 'null';
     else
         for iPar = 1:length(estimatedPars)
-            calibCands{jModel}.estimated_parameters.(estimatedPars{iPar}) = ar.p(arFindPar(estimatedPars{iPar}));
+            calibCands{jModel}.estimated_parameters.(estimatedPars{iPar}) = 10^ar.p(arFindPar(estimatedPars{iPar}));
         end
     end
 end
