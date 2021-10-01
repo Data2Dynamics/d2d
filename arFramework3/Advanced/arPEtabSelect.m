@@ -79,6 +79,7 @@ for jModel = 1:nModels
     arInit
     doPreEq = false;
     arImportPEtab(CandidateModels{jModel}.petab_yaml,doPreEq)
+    ar.config.useFitErrorCorrection = 0;
     
     % Import parameter settings
     pars = fieldnames(CandidateModels{jModel}.parameters);
