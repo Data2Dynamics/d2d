@@ -128,7 +128,7 @@ for jModel = 1:nModels
         calibCands{jModel}.estimated_parameters = 'null';
     else
         for iPar = 1:length(estimatedPars)
-            calibCands{jModel}.estimated_parameters.(estimatedPars{iPar}) = 10^ar.p(arFindPar(estimatedPars{iPar}));
+            calibCands{jModel}.estimated_parameters.(estimatedPars{iPar}) = 10^ar.p(arFindPar(estimatedPars{iPar}))*ar.qLog10(arFindPar(estimatedPars{iPar})) + ar.p(arFindPar(estimatedPars{iPar}))*(1-ar.qLog10(arFindPar(estimatedPars{iPar})));
         end
     end
 end
