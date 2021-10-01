@@ -28,9 +28,11 @@ if ~exist('estimationRoutine') || isempty(estimationRoutine)
     estimationRoutine = @arFit;
 end
 
-initstr = '';
 if exist('venvActPath') && ~isempty(venvActPath)
     initstr = sprintf('source %s; ', venvActPath);
+else
+    initstr = '';
+    venvActPath = '';
 end
 
 %% Check if petab_select installation
