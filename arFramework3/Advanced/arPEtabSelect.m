@@ -101,8 +101,12 @@ for jModel = 1:nModels
     
     % Estimate
     %estimationRoutine;
-    arFitLHS(10)
-    
+
+    if sum(ar.qFit) > 0
+       arFit
+       arFitLHS(10)
+    end
+    arCalcMerit
     [~, allmerits] = arGetMerit;
     
     % Collect criteria
