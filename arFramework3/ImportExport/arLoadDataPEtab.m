@@ -205,7 +205,11 @@ for iCond = 1:length(uniCond)
             %              disp([ iCond it  iobs])
             if sum(it==iTExp & iobs == iCObs)==1
                 Sd2d.yExpRaw(it,iobs) = Tsub.measurement(it == iTExp & iobs == iCObs);
-                Sd2d.yExp(it,iobs) = Sd2d.logfitting(iobs) * log10(Tsub.measurement(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs)) *Tsub.measurement(it == iTExp & iobs == iCObs);
+                if Sd2d.logfitting(iobs) == 1
+                    Sd2d.yExp(it,iobs) = log10(Tsub.measurement(it == iTExp & iobs == iCObs));
+                else
+                    Sd2d.yExp(it,iobs) = Tsub.measurement(it == iTExp & iobs == iCObs);
+                end
                 if ismember('noiseParameters', Tsub.Properties.VariableNames) && ~isempty(Tsub.noiseParameters(it == iTExp & iobs == iCObs))
                     %noiseParValues = str2num(strplit(Tsub.noiseParameters(it == iTExp & iobs == iCObs), ';'));
                     %noisePars = 
