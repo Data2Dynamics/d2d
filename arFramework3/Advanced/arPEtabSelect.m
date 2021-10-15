@@ -126,21 +126,12 @@ for jModel = 1:nModels
     [~, allmerits] = arGetMerit;
     
     % Collect criteria
-    switch SelectionProblem.criterion
-        case 'AIC'
-            theCriterion = allmerits.aic;
-        case 'AICc'
-            theCriterion = allmerits.aicc;
-        case 'BIC'
-            theCriterion = allmerits.bic;
-        case 'LogL'
-            theCriterion = allmerits.loglik;
-        otherwise
-            error('Invalid criteria for model %i: %s',jModel,CandidateModels{jModel}.petab_yaml)
-    end
-    
-    %Write results
-    calibCands{jModel}.criteria.(SelectionProblem.criterion) = theCriterion;
+    criteria.AIC = allmerits.aic;
+    criteria.AICc = allmerits.aicc;
+    criteria.BIC = allmerits.bic;
+    criteria.nllh = allmerits.loglik/(2);
+
+    calibCands{jModel}.criteria = criteria;
     calibCands{jModel}.model_id = CandidateModels{jModel}.model_id;
     calibCands{jModel}.parameters = CandidateModels{jModel}.parameters;
     calibCands{jModel}.petab_yaml = CandidateModels{jModel}.petab_yaml;
