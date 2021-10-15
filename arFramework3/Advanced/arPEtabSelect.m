@@ -69,7 +69,7 @@ CandidateModels = ReadYaml(['output' filesep 'models.yaml']);
 nModels = size(CandidateModels,2);
 
 if nModels == 0
-    fprintf('arPEtabSelect: Finished after iteration %i - no candidate models found.\n', iterationCounter-1)
+    fprintf('arPEtabSelect: Finished after iteration %i - no (more) candidate models found.\n', iterationCounter-1)
     return
 end
 fprintf('arPEtabSelect: Calibrating candidate models...\n')
@@ -82,9 +82,11 @@ for jModel = 1:nModels
     ar.config.useFitErrorCorrection = 0;
     
     % Import parameter settings
-    pars = fieldnames(CandidateModels{jModel}.parameters);
+    pars = fieldnames(CandidateModels{jModel}.parameters);    
     estimatedPars = {};
+    
     for iPar = 1:length(pars)
+        parIndex(iPar) = find(ismember(ar.pLabel,pars(iPar)));    
         if CandidateModels{jModel}.parameters.(pars{iPar}) == 'estimate'
             arSetPars(pars{iPar},[],1)
             estimatedPars{end+1} = pars{iPar};
@@ -98,6 +100,20 @@ for jModel = 1:nModels
             end
         end
     end
+    
+    % Add all estimated parameters that are not in model yaml
+    if sum(ar.qFit) > 0
+        for iModPar = 1:length(ar.qFit)
+            % If not already treated above
+            if sum(iModPar == parIndex) == 0
+                estimatedPars{end+1} = ar.pLabel{iModPar};
+            end
+        end
+    end
+    
+    
+    % Add all parameters not in par but estimated to estimated parameters
+    
     
     % Estimate
     %estimationRoutine;
