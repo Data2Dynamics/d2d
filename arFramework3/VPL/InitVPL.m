@@ -83,7 +83,6 @@ ar.vpl.config.alpha = alpha;
 ar.vpl.config.chi2max = 1.2*icdf('chi2',1-alpha,1); % Maximal chi2 profile value
 ar.vpl.config.maxsteps = 100; 
 ar.vpl.config.stepfactor = 1.5; % Step size adaption factor
-ar.vpl.config.maxrange = 50*sigma; % Maximal absolute range of profile in each direction
 ar.vpl.config.maxstepsize = 5*sigma; % Maximal absolute value of step
 ar.vpl.config.minstepsize = 5*sigma/1000; % Minimal absolute value of step
 ar.vpl.config.firststep = sigma/10; % First step from the optimum 

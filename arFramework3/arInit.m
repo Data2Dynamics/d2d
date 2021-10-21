@@ -17,6 +17,8 @@ ar_path = fileparts(which('arInit.m'));
 if(exist('arCheck','file') == 0)
     addpath([ar_path '/Subfunctions'])
 end
+% arCheck also adds paths of D2D subroutines. They have to be manually
+% added there if a new folder is created in arFramework3.
 if(~arCheck)
     return;
 end
