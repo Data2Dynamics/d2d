@@ -34,7 +34,6 @@ end
 alpha = ar.vpl.config.alpha;
 thresh = icdf('chi2',1-alpha,1);
 
-figure
 hold on
 
 h1 = plot(x,y,'LineWidth',1);

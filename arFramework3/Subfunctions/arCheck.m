@@ -39,6 +39,11 @@ end
 if(exist('InitVPL','file') == 0)
     addpath([ar_path '/VPL'])
 end
+if(exist('Init2DPL','file') == 0)
+    addpath([ar_path '/PL2D'])
+    addpath([ar_path '/PL2D/Subfunctions_autofix'])
+    addpath([ar_path '/PL2D/InterX'])
+end
 if(exist('arHelpStruct','file') == 0)
     addpath([ar_path '/Help'])
 end

@@ -216,9 +216,6 @@ try
             if (ii == 2*maxsteps+1) || (ii==1)
                 break
             end
-            if abs(z_new - gen_struct.perm.results.z(maxsteps+1)) > ar.vpl.config.maxrange
-                break
-            end
             
             if ar.vpl.config.prediction == true
                 q_exit = ppl;
@@ -234,6 +231,8 @@ catch exception
     fprintf(['\n ERROR VPL: Resetting ar struct. Temporary results are saved in ar.vpl \n',...
         'Error message: %s \n Line: %s \n'],...
         exception.message, sprintf('%i, ',exception.stack.line));
+    gen_struct.perm.config = ar.vpl.config;
+    gen_struct.perm.general = ar.vpl.general;
     ar = ar_old;
     ar.vpl = gen_struct.perm;
     return
