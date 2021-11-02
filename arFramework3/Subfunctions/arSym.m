@@ -21,10 +21,10 @@ if isempty(ver)
 end
 
 try
-    if ver < 9.4
+    if verLessThan('matlab','9.4')
         ws=warning('query','symbolic:sym:sym:DeprecateExpressions');
         warning('off','symbolic:sym:sym:DeprecateExpressions');
-        s = sym(str);
+        s = arMyStr2Sym(str);
         warning(ws.state,'symbolic:sym:sym:DeprecateExpressions');
     elseif isempty(str)
         s = sym([]);
