@@ -384,10 +384,10 @@ if isfield(m,'reaction') % specified via reactions (standard case)
                 end
             end
             
-            tmpstr = sym(m.reaction(j).kineticLaw.math);
+            tmpstr = arSym(m.reaction(j).kineticLaw.math);
             % repace species names if too short
             for i=1:length(rep)
-                tmpstr = mysubs(tmpstr,pat{i},rep{i});
+                tmpstr = armysubs(tmpstr,pat{i},rep{i});
             end
             
             % make parameters unique

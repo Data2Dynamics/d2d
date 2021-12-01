@@ -416,9 +416,12 @@ if isfield(m,'reaction') % specified via reactions (standard case)
         
         % check if reaction constists only of boundary species
         reaction_species = unique({m.reaction(j).reactant(:).species m.reaction(j).product(:).species});
-        species_id = NaN(1,length(reaction_species));
+        species_id = nan; %NaN(1,length(reaction_species));
         for js=1:length(reaction_species)
-            species_id(js) = find(strcmp(reaction_species{js},{m.species.id}));
+            idspecies = strcmp(reaction_species{js},{m.species.id});
+            if any(idspecies)
+                species_id(end) = find(strcmp(reaction_species{js},{m.species.id}));
+            end
         end
         if ~all([m.species(species_id).boundaryCondition])
             for jj=1:length(m.reaction(j).reactant)
@@ -461,7 +464,11 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             for jj=1:length(m.reaction(j).product)
                 % check if product is boundary species
                 product_id = strcmp(m.reaction(j).product(jj).species,{m.species.id});
-                isboundary = m.species(product_id).boundaryCondition;
+                if any(product_id)
+                    isboundary = m.species(product_id).boundaryCondition;
+                else
+                    isboundary = false;
+                end
                 if ~isboundary
                     prod_spec_name = sym(m.reaction(j).product(jj).species);
                     for i=1:length(rep)
@@ -834,7 +841,9 @@ if(~exist('Setup.m','file'))
     for i=2:length(C)
         short_filename = [short_filename '_' C{i}];
     end
-    fprintf(fid, 'arLoadData(''%s'');\n',['measurementData' short_filename '.tsv']);
+    if exist(['measurementData' short_filename '.tsv'],'file')
+        fprintf(fid, 'arLoadData(''%s'');\n',['measurementData' short_filename '.tsv']);
+    end
     fprintf(fid, 'arCompileAll;\n');
 else
     fprintf('Setup.m already available in the working directory.\n')
@@ -1174,7 +1183,9 @@ end
 comp_p = {};
 for jr=1:length(m.reaction(j).product)
     js = strcmp({m.species.id},m.reaction(j).product(jr).species);
-    comp_p{jr} = m.species(js).compartment; %#ok<AGROW>
+    if any(js)
+        comp_p{jr} = m.species(js).compartment; %#ok<AGROW>
+    end
 end
 
 % check educt and product compartements for consistency
