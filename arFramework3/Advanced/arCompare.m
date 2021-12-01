@@ -132,7 +132,7 @@ same = true;
 fn1 = allFields(s1);
 fn2 = allFields(s2);
 
-if(~isempty(pattern))
+if(exist('pattern','var') && ~isempty(pattern))
     if(~iscell(pattern))
         pattern = {pattern}; % enforce being a cell
     end
@@ -486,5 +486,5 @@ elseif isa(v1,'sym')
 else 
     v1
     v2
-    error('Class not yet implemented');
+    warning('Class not yet implemented');
 end

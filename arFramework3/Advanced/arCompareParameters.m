@@ -16,7 +16,7 @@
 %
 % par = arCompareParameters({'FitLHS10','FitLHS30'})
 
-function params = arCompareParameters(filenames, onlyCommons, onlyFitted)
+function params = arCompareParameters(filenames, onlyCommons, onlyFitted, onlyDynamics)
 
 if(nargin==0 || isempty(filenames))
     filenames = fileChooserMulti('./Results', true);
@@ -26,6 +26,9 @@ if(~exist('onlyCommons','var'))
 end
 if(~exist('onlyFitted','var'))
     onlyFitted = false;
+end
+if(~exist('onlyDynamics','var'))
+    onlyDynamics = false;
 end
 if(~iscell(filenames))
     filelist = fileList('./Results');
@@ -48,6 +51,13 @@ for j=1:length(filenames)
             pLabel{j} = tmp.ar.pLabel; %#ok<AGROW>
             p{j} = tmp.ar.p; %#ok<AGROW>
             qlog{j} = tmp.ar.qLog10; %#ok<AGROW>
+        end
+        if(onlyDynamics)
+            if any(contains(pLabel{j},'offset'))
+                p{j} = p{j}(contains(pLabel{j},'offset') & ~contains(pLabel{j},'scale') & ~contains(pLabel{j},'sd_') & ~contains(pLabel{j},'init'));
+                qlog{j} = qlog{j}(contains(pLabel{j},'offset') & ~contains(pLabel{j},'scale') & ~contains(pLabel{j},'sd_') & ~contains(pLabel{j},'init'));
+                pLabel{j} = pLabel{j}(contains(pLabel{j},'offset') & ~contains(pLabel{j},'scale') & ~contains(pLabel{j},'sd_') & ~contains(pLabel{j},'init'));
+            end
         end
         if(onlyCommons)
             if(~isempty(pLabelCollect))
@@ -83,7 +93,7 @@ if nargout>0
 end
 
 
-figure(1)
+figure; set(gcf,'outerposition',[0 0 500 700]) 
 for j=1:length(filenames)
     C = arLineMarkersAndColors(j, length(filenames), [], [], '-');
     h(j) = plot(ps(:,j), 1:length(pLabelCollect), C{:}); %#ok<AGROW>
@@ -101,4 +111,4 @@ xlabel('parameter value');
 set(gca, 'YTick', 1:length(pLabelCollect));
 set(gca, 'YTickLabel', arNameTrafo(pLabelCollect));
 ylim([0 length(pLabelCollect)+1])
-legend(h, strrep(filenames,'_','\_'))
+legend(h, strrep(filenames,'_','\_'),'Location','northoutside')
