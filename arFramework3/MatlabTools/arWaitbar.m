@@ -67,7 +67,7 @@ if(j==0 && nargin==1)
 	
     if(arWaitbarGlobal.hasMonitor && arWaitbarGlobal.showWindow)
         if(exist('text','var') && ~isempty(text))
-            arWaitbarGlobal.h = waitbar(0, text);
+            arWaitbarGlobal.h = waitbar(0, strrep(text, '_','\_'));
         else
             arWaitbarGlobal.h = waitbar(0, 'Please wait...');
         end
@@ -114,10 +114,10 @@ else
                 if(arWaitbarGlobal.hasMonitor && arWaitbarGlobal.showWindow)
                     arWaitbarGlobal.h = waitbar(j/n, arWaitbarGlobal.h, ...
                         sprintf('%s\n%i/%i   %2i%%   %s -> %s%s', ...
-                        text, j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext));
+                        strrep(text, '_','\_'), j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext));
                 else
                     fprintf('%s %i/%i   %2i%%   %s -> %s%s\n', ...
-                        text, j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext); 
+                        strrep(text, '_','\_'), j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext); 
                     drawnow;
                 end
             else
