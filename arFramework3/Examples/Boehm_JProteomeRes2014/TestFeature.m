@@ -15,7 +15,7 @@ arExportPEtab
 
 fprintf( '\nImporting from PEtab format...\n' );
 arInit
-arImportPEtab('Boehm_JProteomeRes2014')
+arImportPEtab({'PEtab/model_Boehm_JProteomeRes2014.xml','PEtab/Boehm_JProteomeRes2014_observables.tsv', 'PEtab/Boehm_JProteomeRes2014_measurements.tsv','PEtab/Boehm_JProteomeRes2014_conditions.tsv', 'PEtab/Boehm_JProteomeRes2014_parameters.tsv'})
 arSimu(true,true,true)
 arCalcMerit
 arGetMerit
