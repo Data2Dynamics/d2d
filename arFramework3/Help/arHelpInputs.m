@@ -20,6 +20,10 @@
 %     Provides a simple step function at the value switch_time of the independent variable (usually time).
 %   "step2(t, level1, switch_time1, level2, switch_time2, level3)" 
 %     Provides a double step function at the values switch_time1/2 of the independent variable t.
+%   "step3(t, level1, switch_time1, level2, switch_time2, level3, switch_time3, level4)" 
+%     Provides a double step function at the values switch_time1/2/3 of the independent variable t.
+%   "step4(t, level1, switch_time1, level2, switch_time2, level3, switch_time3, level4, switch_time4, level5)" 
+%     Provides a double step function at the values switch_time1/2/3/4 of the independent variable t.
 %   "smoothstep1(t, level1, switch_time, level2, smoothness)" 
 %     Provides a smooth step function at the value switch_time of the independent variable (usually time).
 %   "smoothstep2(t, level1, switch_time1, level2, switch_time2, level3, smoothness)" 

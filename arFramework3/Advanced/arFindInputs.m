@@ -55,6 +55,8 @@ function totalEvents = arFindInputs( verbose )
             for b = 1 : length( ar.model(m).condition(a).fu )
                 step1 = strfind(ar.model(m).condition(a).fu{b}, 'step1');
                 step2 = strfind(ar.model(m).condition(a).fu{b}, 'step2');
+                step3 = strfind(ar.model(m).condition(a).fu{b}, 'step3');
+                step4 = strfind(ar.model(m).condition(a).fu{b}, 'step4');
 
                 for c = 1 : length( step1 )
                     ar.model(m).condition(a).fu{b}(step1(c):end);
@@ -66,6 +68,20 @@ function totalEvents = arFindInputs( verbose )
                     stepLocations{end+1} = chk{3}; %#ok
                     stepLocations{end+1} = chk{5}; %#ok
                 end        
+                for c = 1 : length( step3 )
+                    chk = strsplit(ar.model(m).condition(a).fu{b}(step2(c):end),',');
+                    stepLocations{end+1} = chk{3}; %#ok
+                    stepLocations{end+1} = chk{5}; %#ok
+                    stepLocations{end+1} = chk{7}; %#ok
+                end        
+                for c = 1 : length( step4 )
+                    chk = strsplit(ar.model(m).condition(a).fu{b}(step2(c):end),',');
+                    stepLocations{end+1} = chk{3}; %#ok
+                    stepLocations{end+1} = chk{5}; %#ok
+                    stepLocations{end+1} = chk{7}; %#ok
+                    stepLocations{end+1} = chk{9}; %#ok
+                end        
+
             end
 
             % Transform the parameters that are defined in log space
