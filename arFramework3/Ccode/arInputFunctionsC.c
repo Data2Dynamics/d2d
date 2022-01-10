@@ -1176,6 +1176,11 @@ double Dspline25(double t, double t1, double p1, double t2, double p2, double t3
     ts[17] = t18;
     ts[18] = t19;
     ts[19] = t20;
+    ts[20] = t21;
+    ts[21] = t22;
+    ts[22] = t23;
+    ts[23] = t24;
+    ts[24] = t25;
     
     us[0] = 0.0;
     us[1] = 0.0;
@@ -1197,7 +1202,12 @@ double Dspline25(double t, double t1, double p1, double t2, double p2, double t3
     us[17] = 0.0;
     us[18] = 0.0;
     us[19] = 0.0;
-    
+    us[20] = 0.0;
+    us[21] = 0.0;
+    us[22] = 0.0;
+    us[23] = 0.0;
+    us[24] = 0.0;
+
     us[id-1] = 1.0;
     
     spline(25, ss, 0, dudt, 0.0, ts, us, b, c, d);
