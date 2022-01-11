@@ -6,11 +6,15 @@ function arPEtabSelect(venvActPath, yaml, method, limit, initialModel, CalibYaml
 if ~exist('iterationCounter') || isempty(iterationCounter)
     iterationCounter = 1;
 end
+if ~exist('petab-select', 'dir')
+    mkdir('petab-select')
+end
+
 %% Parse function input
 
 % standard settings
 if ~exist('selectionProblem') || isempty(yaml)
-    yaml = 'selection_problem.yaml';
+    yaml = 'petab_select_problem.yaml';
 end
 if ~exist('method') || isempty(method)
     method = 'brute_force';
@@ -21,8 +25,8 @@ end
 if ~exist('initialModel') || isempty(initialModel)
     initialModel = '';
 end
-if ~exist('CalibYamlOut') || isempty(CalibYamlOut)
-    CalibYamlOut = 'calibrated_it_001.yaml';
+if ~exist('CalibYamlOut') || isempty(CalibYamlOut) % think about htis
+    CalibYamlOut = 'petab-select/calibrated_it_001.yaml';
 end
 if ~exist('estimationRoutine') || isempty(estimationRoutine)
     estimationRoutine = @arFit;
@@ -50,17 +54,17 @@ syscom = [initstr,...
     'petab_select candidates ',  ...
     ' -y ', yaml, ...
     ' -s output', filesep, 'state.dill',...
-    ' -o output', filesep, 'models.yaml', ...
-    ' -m ', method, ...
+    ' -o output', filesep, 'models.yaml', ... %   ' -m ', method, ...
+    ' --relative-paths ', ...
     ' -l ', num2str(limit), ...
     ];
 if ~isempty(initialModel)
-    syscom = [syscom, ' -b ' ,initialModel];
+    syscom = [syscom, ' -b ', initialModel];
 end
 [status,cmdout] = system(syscom);
 
 if status ~= 0
-    error(sprintf('Error while running petab_select from command line.\n Command line message:\n %s',cmdout)); %#ok<SPERR>
+    error(sprintf('Error while running petab_select candidates from command line.\n Command line message:\n %s',cmdout)); %#ok<SPERR>
 end
 
 %% Process candidate models
@@ -68,7 +72,7 @@ iterationCounter %debug
 CandidateModels = ReadYaml(['output' filesep 'models.yaml']);
 nModels = size(CandidateModels,2);
 
-if nModels == 0
+if nModels < 1
     fprintf('arPEtabSelect: Finished after iteration %i - no (more) candidate models found.\n', iterationCounter-1)
     return
 end
@@ -78,7 +82,7 @@ for jModel = 1:nModels
     % Load & compile
     arInit
     doPreEq = false;
-    arImportPEtab(CandidateModels{jModel}.petab_yaml,doPreEq)
+    arImportPEtab(['output', filesep, CandidateModels{jModel}.petab_yaml],doPreEq)
     ar.config.useFitErrorCorrection = 0;
     
     % Import parameter settings
@@ -129,12 +133,18 @@ for jModel = 1:nModels
     criteria.AIC = allmerits.aic;
     criteria.AICc = allmerits.aicc;
     criteria.BIC = allmerits.bic;
-    criteria.nllh = allmerits.loglik/(2);
+    %criteria.nllh = allmerits.loglik/(2);
 
     calibCands{jModel}.criteria = criteria;
     calibCands{jModel}.model_id = CandidateModels{jModel}.model_id;
     calibCands{jModel}.parameters = CandidateModels{jModel}.parameters;
     calibCands{jModel}.petab_yaml = CandidateModels{jModel}.petab_yaml;
+    
+    calibCands{jModel}.model_subspace_id = CandidateModels{jModel}.model_subspace_id;
+    calibCands{jModel}.model_hash = CandidateModels{jModel}.model_hash;
+    calibCands{jModel}.predecessor_model_hash = CandidateModels{jModel}.predecessor_model_hash;
+    calibCands{jModel}.model_subspace_indices = CandidateModels{jModel}.model_subspace_indices;
+
 
     if isempty(estimatedPars)
         calibCands{jModel}.estimated_parameters = 'null';
@@ -146,8 +156,22 @@ for jModel = 1:nModels
 end
 WriteYaml(CalibYamlOut,calibCands);
 
+%% Find best model of current iteration
+syscom = [initstr,...
+    'petab_select best ', ...
+    ' -y ', yaml,...
+    ' -m ', CalibYamlOut,...
+    ' -o petab-select', filesep, sprintf('best_model_it_%03i.yaml',iterationCounter),... 
+    ' -s output', filesep, 'state.dill',...
+    ' --relative-paths ',...
+    ];
+[status,cmdout] = system(syscom);
+if status ~= 0
+    error(sprintf('Error while running petab_select best from command line.\n Command line message:\n %s',cmdout)); %#ok<SPERR>
+end
+
 %% Next iteration
 fprintf('arPEtabSelect: Iteration %i complete. Continuing with next iteration\n',iterationCounter)
-nextIterationYamlOut = sprintf('calibrated_it_%03i.yaml',iterationCounter+1);
+nextIterationYamlOut = ['petab-select', filesep, sprintf('calibrated_it_%03i.yaml',iterationCounter+1)];
 arPEtabSelect(venvActPath, yaml, method, limit, CalibYamlOut, nextIterationYamlOut, estimationRoutine,iterationCounter+1)
 end
