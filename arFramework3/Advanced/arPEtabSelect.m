@@ -43,7 +43,7 @@ end
 syscom = [initstr, 'petab_select --help'];
 [status,~] = system(syscom);
 if status ~= 0
-    error(sprintf('Calling petab_select from the command line failed.\nPlease check your Python environment and the PEtab-select installation.'))
+    error(sprintf('Calling petab_select from the command line failed. ...\nPlease check your Python environment and the PEtab-select installation.'))
 end
 
 %% Call PEtab-select to generate candidate models
@@ -150,7 +150,9 @@ for jModel = 1:nModels
         calibCands{jModel}.estimated_parameters = 'null';
     else
         for iPar = 1:length(estimatedPars)
-            calibCands{jModel}.estimated_parameters.(estimatedPars{iPar}) = 10^ar.p(arFindPar(estimatedPars{iPar}))*ar.qLog10(arFindPar(estimatedPars{iPar})) + ar.p(arFindPar(estimatedPars{iPar}))*(1-ar.qLog10(arFindPar(estimatedPars{iPar})));
+            calibCands{jModel}.estimated_parameters.(estimatedPars{iPar}) = ...
+                10^ar.p(arFindPar(estimatedPars{iPar}))*ar.qLog10(arFindPar(estimatedPars{iPar})) + ...
+                ar.p(arFindPar(estimatedPars{iPar}))*(1-ar.qLog10(arFindPar(estimatedPars{iPar})));
         end
     end
 end
@@ -168,6 +170,21 @@ syscom = [initstr,...
 [status,cmdout] = system(syscom);
 if status ~= 0
     error(sprintf('Error while running petab_select best from command line.\n Command line message:\n %s',cmdout)); %#ok<SPERR>
+end
+
+%% Read current and previous iteration's criterion (and stop)
+if iterationCounter > 1
+    prevIt = ReadYaml(sprintf(['petab-select',filesep,...
+        'best_model_it_%03i.yaml'],iterationCounter-1));
+    prevItCrit = prevIt.criteria.(SelectionProblem.criterion);
+    currentIt = ReadYaml(sprintf(['petab-select',filesep,...
+        'best_model_it_%03i.yaml'],iterationCounter));
+    currentItCrit = currentIt.criteria.(SelectionProblem.criterion);
+
+    if currentItCrit > prevItCrit
+        fprintf('arPEtabSelect: Finished after iteration %i - criterion worse than in iteration %i.\n', iterationCounter, iterationCounter-1)
+        return
+    end
 end
 
 %% Next iteration
