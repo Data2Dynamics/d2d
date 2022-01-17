@@ -1,3 +1,6 @@
+fprintf( 2, 'TEST FOR PETAB EXTENSION >>PETAB-SELECT<< M\n' );
+clear isOk expected actual selProblem Ncases
+
 % do all
 cases = {'0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008'};
 Ncases = numel(cases);
@@ -24,9 +27,10 @@ for i = 1:Ncases
 end
 
 if sum(isOk) == Ncases
-    fprintf('all tests passed\n')
+    fprintf( 2, 'PASSED\n' );
 else
-    error('did NOT pass all tests')
+    fprintf( 2, 'Errors in test case(s) %s\n', strjoin(cases(logical(~Working)),', '));
+    error( 'FAILED');
 end
 
 function isOk = comparePeTabYamlStruct(expected, actual, criterion)
