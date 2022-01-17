@@ -2,7 +2,7 @@
 % Optional extension in different function: Write selection problem yaml with input
 % Currently only one criterion supported
 
-function arPEtabSelect(venvActPath, yaml, method, limit, initialModel, CalibYamlOut, estimationRoutine, iterationCounter)
+function arPEtabSelect(venvActPath, yaml, method, limit, initialModel, estimationRoutine, iterationCounter)
 if ~exist('iterationCounter') || isempty(iterationCounter)
     iterationCounter = 1;
 end
@@ -25,9 +25,8 @@ end
 if ~exist('initialModel') || isempty(initialModel)
     initialModel = '';
 end
-if ~exist('CalibYamlOut') || isempty(CalibYamlOut) % think about htis
-    CalibYamlOut = 'petab-select/calibrated_it_001.yaml';
-end
+
+
 if ~exist('estimationRoutine') || isempty(estimationRoutine)
     estimationRoutine = @arFit;
 end
@@ -38,6 +37,8 @@ else
     initstr = '';
     venvActPath = '';
 end
+
+CalibYamlOut = ['petab-select', filesep, sprintf('calibrated_it_%03i.yaml',iterationCounter)];
 
 %% Check if petab_select installation
 syscom = [initstr, 'petab_select --help'];
@@ -68,7 +69,7 @@ if status ~= 0
 end
 
 %% Process candidate models
-iterationCounter %debug
+%iterationCounter %debug
 CandidateModels = ReadYaml(['output' filesep 'models.yaml']);
 nModels = size(CandidateModels,2);
 
@@ -174,11 +175,11 @@ end
 
 %% Read current and previous iteration's criterion (and stop)
 if iterationCounter > 1
-    prevIt = ReadYaml(sprintf(['petab-select',filesep,...
-        'best_model_it_%03i.yaml'],iterationCounter-1));
+    prevIt = ReadYaml(['petab-select',filesep,...
+        sprintf('best_model_it_%03i.yaml',iterationCounter-1)]);
     prevItCrit = prevIt.criteria.(SelectionProblem.criterion);
-    currentIt = ReadYaml(sprintf(['petab-select',filesep,...
-        'best_model_it_%03i.yaml'],iterationCounter));
+    currentIt = ReadYaml(['petab-select',filesep,...
+        sprintf('best_model_it_%03i.yaml',iterationCounter)]);
     currentItCrit = currentIt.criteria.(SelectionProblem.criterion);
 
     if currentItCrit > prevItCrit
@@ -189,6 +190,5 @@ end
 
 %% Next iteration
 fprintf('arPEtabSelect: Iteration %i complete. Continuing with next iteration\n',iterationCounter)
-nextIterationYamlOut = ['petab-select', filesep, sprintf('calibrated_it_%03i.yaml',iterationCounter+1)];
-arPEtabSelect(venvActPath, yaml, method, limit, CalibYamlOut, nextIterationYamlOut, estimationRoutine,iterationCounter+1)
+arPEtabSelect(venvActPath, yaml, method, limit, CalibYamlOut, estimationRoutine,iterationCounter+1)
 end
