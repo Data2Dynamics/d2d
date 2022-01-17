@@ -25,8 +25,6 @@ end
 if ~exist('initialModel') || isempty(initialModel)
     initialModel = '';
 end
-
-
 if ~exist('estimationRoutine') || isempty(estimationRoutine)
     estimationRoutine = @arFit;
 end
@@ -37,6 +35,7 @@ else
     initstr = '';
     venvActPath = '';
 end
+terminateFlag = 0;
 
 CalibYamlOut = ['petab-select', filesep, sprintf('calibrated_it_%03i.yaml',iterationCounter)];
 
@@ -75,117 +74,127 @@ nModels = size(CandidateModels,2);
 
 if nModels < 1
     fprintf('arPEtabSelect: Finished after iteration %i - no (more) candidate models found.\n', iterationCounter-1)
-    return
+    terminateFlag = 1;
 end
-fprintf('arPEtabSelect: Calibrating candidate models...\n')
-
-for jModel = 1:nModels
-    % Load & compile
-    arInit
-    doPreEq = false;
-    arImportPEtab(['output', filesep, CandidateModels{jModel}.petab_yaml],doPreEq)
-    ar.config.useFitErrorCorrection = 0;
+if terminateFlag == 0
+    fprintf('arPEtabSelect: Calibrating candidate models...\n')
     
-    % Import parameter settings
-    pars = fieldnames(CandidateModels{jModel}.parameters);    
-    estimatedPars = {};
-    
-    for iPar = 1:length(pars)
-        parIndex(iPar) = find(ismember(ar.pLabel,pars(iPar)));    
-        if CandidateModels{jModel}.parameters.(pars{iPar}) == 'estimate'
-            arSetPars(pars{iPar},[],1)
-            estimatedPars{end+1} = pars{iPar};
-        else
-            parId = arFindPar(pars{iPar});
-            parValue = CandidateModels{jModel}.parameters.(pars{iPar});
-            if ar.qLog10(parId) == 1
-                arSetPars(pars{iPar},log10(parValue),0)
+    for jModel = 1:nModels
+        % Load & compile
+        arInit
+        doPreEq = false;
+        arImportPEtab(['output', filesep, CandidateModels{jModel}.petab_yaml],doPreEq)
+        ar.config.useFitErrorCorrection = 0;
+        
+        % Import parameter settings
+        pars = fieldnames(CandidateModels{jModel}.parameters);
+        estimatedPars = {};
+        
+        for iPar = 1:length(pars)
+            parIndex(iPar) = find(ismember(ar.pLabel,pars(iPar)));
+            if CandidateModels{jModel}.parameters.(pars{iPar}) == 'estimate'
+                arSetPars(pars{iPar},[],1)
+                estimatedPars{end+1} = pars{iPar};
             else
-                arSetPars(pars{iPar},parValue,0)
+                parId = arFindPar(pars{iPar});
+                parValue = CandidateModels{jModel}.parameters.(pars{iPar});
+                if ar.qLog10(parId) == 1
+                    arSetPars(pars{iPar},log10(parValue),0)
+                else
+                    arSetPars(pars{iPar},parValue,0)
+                end
+            end
+        end
+        
+        % Add all estimated parameters that are not in model yaml
+        if sum(ar.qFit) > 0
+            for iModPar = 1:length(ar.qFit)
+                % If not already treated above
+                if sum(iModPar == parIndex) == 0
+                    estimatedPars{end+1} = ar.pLabel{iModPar};
+                end
+            end
+        end
+        
+        
+        % Add all parameters not in par but estimated to estimated parameters
+        
+        
+        % Estimate
+        %estimationRoutine;
+        
+        if sum(ar.qFit) > 0
+            arFit
+            arFitLHS(10)
+        end
+        arCalcMerit
+        [~, allmerits] = arGetMerit;
+        
+        % Collect criteria
+        criteria.AIC = allmerits.aic;
+        criteria.AICc = allmerits.aicc;
+        criteria.BIC = allmerits.bic;
+        %criteria.nllh = allmerits.loglik/(2);
+        
+        calibCands{jModel}.criteria = criteria;
+        calibCands{jModel}.model_id = CandidateModels{jModel}.model_id;
+        calibCands{jModel}.parameters = CandidateModels{jModel}.parameters;
+        calibCands{jModel}.petab_yaml = CandidateModels{jModel}.petab_yaml;
+        
+        calibCands{jModel}.model_subspace_id = CandidateModels{jModel}.model_subspace_id;
+        calibCands{jModel}.model_hash = CandidateModels{jModel}.model_hash;
+        calibCands{jModel}.predecessor_model_hash = CandidateModels{jModel}.predecessor_model_hash;
+        calibCands{jModel}.model_subspace_indices = CandidateModels{jModel}.model_subspace_indices;
+        
+        
+        if isempty(estimatedPars)
+            calibCands{jModel}.estimated_parameters = 'null';
+        else
+            for iPar = 1:length(estimatedPars)
+                calibCands{jModel}.estimated_parameters.(estimatedPars{iPar}) = ...
+                    10^ar.p(arFindPar(estimatedPars{iPar}))*ar.qLog10(arFindPar(estimatedPars{iPar})) + ...
+                    ar.p(arFindPar(estimatedPars{iPar}))*(1-ar.qLog10(arFindPar(estimatedPars{iPar})));
             end
         end
     end
+    WriteYaml(CalibYamlOut,calibCands);
     
-    % Add all estimated parameters that are not in model yaml
-    if sum(ar.qFit) > 0
-        for iModPar = 1:length(ar.qFit)
-            % If not already treated above
-            if sum(iModPar == parIndex) == 0
-                estimatedPars{end+1} = ar.pLabel{iModPar};
-            end
-        end
+    %% Find best model of current iteration
+    syscom = [initstr,...
+        'petab_select best ', ...
+        ' -y ', yaml,...
+        ' -m ', CalibYamlOut,...
+        ' -o petab-select', filesep, sprintf('best_model_it_%03i.yaml',iterationCounter),...
+        ' -s output', filesep, 'state.dill',...
+        ' --relative-paths ',...
+        ];
+    [status,cmdout] = system(syscom);
+    if status ~= 0
+        error(sprintf('Error while running petab_select best from command line.\n Command line message:\n %s',cmdout)); %#ok<SPERR>
     end
     
-    
-    % Add all parameters not in par but estimated to estimated parameters
-    
-    
-    % Estimate
-    %estimationRoutine;
-
-    if sum(ar.qFit) > 0
-       arFit
-       arFitLHS(10)
-    end
-    arCalcMerit
-    [~, allmerits] = arGetMerit;
-    
-    % Collect criteria
-    criteria.AIC = allmerits.aic;
-    criteria.AICc = allmerits.aicc;
-    criteria.BIC = allmerits.bic;
-    %criteria.nllh = allmerits.loglik/(2);
-
-    calibCands{jModel}.criteria = criteria;
-    calibCands{jModel}.model_id = CandidateModels{jModel}.model_id;
-    calibCands{jModel}.parameters = CandidateModels{jModel}.parameters;
-    calibCands{jModel}.petab_yaml = CandidateModels{jModel}.petab_yaml;
-    
-    calibCands{jModel}.model_subspace_id = CandidateModels{jModel}.model_subspace_id;
-    calibCands{jModel}.model_hash = CandidateModels{jModel}.model_hash;
-    calibCands{jModel}.predecessor_model_hash = CandidateModels{jModel}.predecessor_model_hash;
-    calibCands{jModel}.model_subspace_indices = CandidateModels{jModel}.model_subspace_indices;
-
-
-    if isempty(estimatedPars)
-        calibCands{jModel}.estimated_parameters = 'null';
-    else
-        for iPar = 1:length(estimatedPars)
-            calibCands{jModel}.estimated_parameters.(estimatedPars{iPar}) = ...
-                10^ar.p(arFindPar(estimatedPars{iPar}))*ar.qLog10(arFindPar(estimatedPars{iPar})) + ...
-                ar.p(arFindPar(estimatedPars{iPar}))*(1-ar.qLog10(arFindPar(estimatedPars{iPar})));
+    %% Read current and previous iteration's criterion (and stop)
+    if iterationCounter > 1
+        prevIt = ReadYaml(['petab-select',filesep,...
+            sprintf('best_model_it_%03i.yaml',iterationCounter-1)]);
+        prevItCrit = prevIt.criteria.(SelectionProblem.criterion);
+        currentIt = ReadYaml(['petab-select',filesep,...
+            sprintf('best_model_it_%03i.yaml',iterationCounter)]);
+        currentItCrit = currentIt.criteria.(SelectionProblem.criterion);
+        
+        if currentItCrit > prevItCrit
+            fprintf('arPEtabSelect: Finished after iteration %i - criterion worse than in iteration %i.\n', iterationCounter, iterationCounter-1)
+            terminateFlag = 1;
         end
     end
 end
-WriteYaml(CalibYamlOut,calibCands);
 
-%% Find best model of current iteration
-syscom = [initstr,...
-    'petab_select best ', ...
-    ' -y ', yaml,...
-    ' -m ', CalibYamlOut,...
-    ' -o petab-select', filesep, sprintf('best_model_it_%03i.yaml',iterationCounter),... 
-    ' -s output', filesep, 'state.dill',...
-    ' --relative-paths ',...
-    ];
-[status,cmdout] = system(syscom);
-if status ~= 0
-    error(sprintf('Error while running petab_select best from command line.\n Command line message:\n %s',cmdout)); %#ok<SPERR>
-end
-
-%% Read current and previous iteration's criterion (and stop)
-if iterationCounter > 1
-    prevIt = ReadYaml(['petab-select',filesep,...
-        sprintf('best_model_it_%03i.yaml',iterationCounter-1)]);
-    prevItCrit = prevIt.criteria.(SelectionProblem.criterion);
-    currentIt = ReadYaml(['petab-select',filesep,...
-        sprintf('best_model_it_%03i.yaml',iterationCounter)]);
-    currentItCrit = currentIt.criteria.(SelectionProblem.criterion);
-
-    if currentItCrit > prevItCrit
-        fprintf('arPEtabSelect: Finished after iteration %i - criterion worse than in iteration %i.\n', iterationCounter, iterationCounter-1)
-        return
-    end
+%% Write results yaml
+if terminateFlag == 1
+    copyfile(['petab-select',filesep,...
+        sprintf('best_model_it_%03i.yaml',iterationCounter-1)],...
+        ['petab-select',filesep,'selected_model.yaml'])
+    return
 end
 
 %% Next iteration
