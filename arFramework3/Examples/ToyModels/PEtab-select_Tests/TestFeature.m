@@ -11,7 +11,7 @@ for i = 1:Ncases
     cd(cases{i})
     system('rm -r output')
     try
-    arPEtabSelect('~/Work/Projects/P106_D2D-PEtab-select/_python_venv/bin/activate')    
+    arPEtabSelect('~/_d2d_python_venv/bin/activate')    
     
     expected = ReadYaml('expected.yaml');
     actual = ReadYaml('petab-select/selected_model.yaml');
