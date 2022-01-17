@@ -1,0 +1,19 @@
+criteria:
+  AIC: -4.705324787545205
+  NLLH: -4.352662393772603
+estimated_parameters:
+  k1: 0.2016087791049587
+  sigma_x2: 0.11716786736710016
+model_hash: 0d4eea1618e3755b97de48fa29355e75fad9575c2994c451cd20675cbe91b9deee62c0829f7235aafa3b15b19accdda89c5f94d0695bf3f1a224f4bf855679ce
+model_id: 0d4eea1618e3755b97de48fa29355e75fad9575c2994c451cd20675cbe91b9deee62c0829f7235aafa3b15b19accdda89c5f94d0695bf3f1a224f4bf855679ce
+model_subspace_id: M1_3
+model_subspace_indices:
+- 0
+- 0
+- 0
+parameters:
+  k1: estimate
+  k2: 0.1
+  k3: 0
+petab_yaml: ../0001/petab/petab_problem.yaml
+predecessor_model_hash: 185e7ce278317b505c581c59bef7bcbe3f7cac9da997d6b5388d5dcee27f901dfd8ecf60ecd3ee8ba02c8bab704ac83ee922f321faa8229e31e94bacef8ac496
