@@ -54,9 +54,9 @@ if sum(isOk) == Ncases
 else
     isOk(isnan(isOk)) = 2;
     
-    fprintf( 2, 'Correct results in test case(s) %s\n', strjoin(cases(logical(isOk(isOk==1)))));
-    fprintf( 2, 'Results not identical in test case(s) %s\n', strjoin(cases(logical(isOk(isOk==0)))));
-    fprintf( 2, 'Errors in test case(s) %s\n', strjoin(cases(logical(isOk(isOk==2)))));
+    fprintf( 2, 'Correct results in test case(s) %s\n', strjoin(cases(logical(isOk==1))));
+    fprintf( 2, 'Results not identical in test case(s) %s\n', strjoin(cases(logical(isOk==0))));
+    fprintf( 2, 'Errors in test case(s) %s\n', strjoin(cases(logical(isOk==2))));
     error( 'FAILED');
 end
 
