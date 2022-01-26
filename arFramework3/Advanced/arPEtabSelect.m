@@ -97,7 +97,7 @@ if ~isempty(initialModel)
     syscom = [syscom, ' -b ', initialModel];
 end
 if ~isempty(limit)
-    syscom = [syscom, ' -l ', limit];
+    syscom = [syscom, ' -l ', num2str(limit)];
 end
 
 [status,cmdout] = system(syscom);
