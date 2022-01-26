@@ -81,8 +81,6 @@ if ~isempty(expected.estimated_parameters)
                 isOk = 0;
             end
         end
-    else
-        isOk = 1;
     end
 end
 end
