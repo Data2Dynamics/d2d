@@ -15,7 +15,7 @@
 %     'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines', 
 %     'ResponseCurve', 'PreProcessorTest', 'State_Reduction', 'Fast_Equilibration',  
 %     'Predictor_Test', 'FieldTester', 'SteadyStateBounds', 'DataFilterTest', 
-%     'Benchmark_Simu_Test', 'Boehm_JProteomeRes2014', 'PEtab_Tests', PEtab-select_Tests
+%     'Benchmark_Simu_Test', 'Boehm_JProteomeRes2014', 'PEtab_Tests', PEtab_select_Tests
 function doTests( varargin )
     global ar;
     global arOutputLevel;
@@ -35,7 +35,7 @@ function doTests( varargin )
                 'ErrorFittingTest', 'Flux_Estimation', 'MultiCondition_Test', 'TurboSplines', ...
                 'ResponseCurve', 'PreProcessorTest', 'State_Reduction', 'Fast_Equilibration', ... 
                 'Predictor_Test', 'FieldTester', 'SteadyStateBounds', 'SD_Test', ...
-                'Benchmark_Simu_Test', 'Boehm_JProteomeRes2014', 'PEtab_Tests', 'PEtab-select_Tests'};
+                'Benchmark_Simu_Test', 'Boehm_JProteomeRes2014', 'PEtab_Tests', 'PEtab_select_Tests'};
             
     longtests = { 'Benchmark_Simu_Test' };
     
