@@ -73,10 +73,16 @@ if actual.model_subspace_id ~= expected.model_subspace_id
     isOk = 0;
 end
 
-names = fieldnames(expected.estimated_parameters);
-for ipar = 1:length(expected.estimated_parameters)
-    if round(actual.estimated_parameters.(names{ipar}), 3) ~= round(expected.estimated_parameters.(names{ipar}), 3)
-        isOk = 0;
+if ~isempty(expected.estimated_parameters) 
+    if ~isempty(actual.estimated_parameters)
+        names = fieldnames(expected.estimated_parameters);
+        for ipar = 1:length(expected.estimated_parameters)
+            if round(actual.estimated_parameters.(names{ipar}), 3) ~= round(expected.estimated_parameters.(names{ipar}), 3)
+                isOk = 0;
+            end
+        end
+    else
+        isOk = 1;
     end
 end
 end

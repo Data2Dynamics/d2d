@@ -146,9 +146,8 @@ if terminateFlag == 0
         calibCands{jModel}.predecessor_model_hash = CandidateModels{jModel}.predecessor_model_hash;
         calibCands{jModel}.model_subspace_indices = CandidateModels{jModel}.model_subspace_indices;
         
-        
         if isempty(estimatedPars)
-            calibCands{jModel}.estimated_parameters = 'null';
+            calibCands{jModel}.estimated_parameters = struct();
         else
             for iPar = 1:length(estimatedPars)
                 calibCands{jModel}.estimated_parameters.(estimatedPars{iPar}) = ...
