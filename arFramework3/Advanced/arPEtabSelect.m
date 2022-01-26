@@ -1,10 +1,41 @@
-%% Work in Progress
-% Optional extension in different function: Write selection problem yaml with input
-% Currently only one criterion supported
+% arPEtabSelect(venvActPath, yaml, limit, estimRoutine)
+%
+% Run model selection using PEtab-select (https://github.com/PEtab-dev/petab_select)
+% Requires installation of the petab_select Python3 package. arPEtabSelect
+% uses the command line interface (CLI).
+%
+%   [venvActPath]   Path to a python virtual environment (venv) activation
+%                   (https://docs.python.org/3/library/venv.html). If left
+%                   empty, the CLI will use the global python installation.
+%
+%   [yaml]          Path to the PEtab-select problem yaml-file 
+%                   [petab_select_problem.yaml]
+%
+%   [limit]         Maximum number of processed candidate models per
+%                   iteration. Cannot be used with method 'brute_force'
+%                   [3]
+%
+%   [estimRoutine]  D2D commands for parameter estimation 
+%                   ['arFit; arFitLHS(10)']
+%
+% Examples:
+%   Process selection problem in '~/test_cases/0001/petab_select_problem'
+%   with a python venv in '~/d2d_python_venv/bin/activate'. Use 0.3 as
+%   initial guess for all estimated parameters and additionally perform
+%   multi-start optimization with 20 runs:
+%
+%   arPEtabSelect('~/d2d_python_venv/bin/activate', ...
+%       '~/test_cases/0001/petab_select_problem',...
+%       3, 
+%       'ar.p(ar.qFit == 1) = 0.3; arFit; arFitLHS(20)')
+% 
+%
+% (Leave empty initialModel & iterationCtr. Those are internal arguments
+% to allow for recursive function call)
 
-function arPEtabSelect(venvActPath, yaml, method, limit, initialModel, estimationRoutine, iterationCounter)
-if ~exist('iterationCounter') || isempty(iterationCounter)
-    iterationCounter = 1;
+function arPEtabSelect(venvActPath, yaml, limit, estimRoutine, initialModel, iterationCtr)
+if ~exist('iterationCtr') || isempty(iterationCtr)
+    iterationCtr = 1;
 end
 if ~exist('petab-select', 'dir')
     mkdir('petab-select')
@@ -16,28 +47,35 @@ end
 if ~exist('selectionProblem') || isempty(yaml)
     yaml = 'petab_select_problem.yaml';
 end
-if ~exist('method') || isempty(method)
-    method = 'brute_force';
-end
-if ~exist('limit') || isempty(limit)
-    limit = 3;
-end
 if ~exist('initialModel') || isempty(initialModel)
     initialModel = '';
 end
-if ~exist('estimationRoutine') || isempty(estimationRoutine)
-    estimationRoutine = @arFit;
+if ~exist('estimRoutine') || isempty(estimRoutine)
+    estimRoutine = 'arFit; arFitLHS(10);';
 end
-
 if exist('venvActPath') && ~isempty(venvActPath)
     initstr = sprintf('source %s; ', venvActPath);
 else
     initstr = '';
     venvActPath = '';
 end
-terminateFlag = 0;
 
-CalibYamlOut = ['petab-select', filesep, sprintf('calibrated_it_%03i.yaml',iterationCounter)];
+% if method = brute_force, do not allow limit argument
+SelectionProblem = ReadYaml(yaml);
+if SelectionProblem.method == 'brute_force'
+    if ~exist('limit') || isempty(limit)
+        limit = '';
+    else
+        error('Limit argument not allowed if method = brute_force')
+    end
+else
+    if ~exist('limit') || isempty(limit)
+        limit = 3;
+    end
+end
+
+terminateFlag = 0;
+CalibYamlOut = ['petab-select', filesep, sprintf('calibrated_it_%03i.yaml',iterationCtr)];
 
 %% Check if petab_select installation
 syscom = [initstr, 'petab_select --help'];
@@ -48,19 +86,20 @@ end
 
 %% Call PEtab-select to generate candidate models
 fprintf('arPEtabSelect: Generating candidate models...\n')
-SelectionProblem = ReadYaml(yaml);
-
 syscom = [initstr,...
     'petab_select candidates ',  ...
     ' -y ', yaml, ...
     ' -s output', filesep, 'state.dill',...
-    ' -o output', filesep, 'models.yaml', ... %   ' -m ', method, ...
+    ' -o output', filesep, 'models.yaml', ...
     ' --relative-paths ', ...
-    ' -l ', num2str(limit), ...
     ];
 if ~isempty(initialModel)
     syscom = [syscom, ' -b ', initialModel];
 end
+if ~isempty(limit)
+    syscom = [syscom, ' -l ', limit];
+end
+
 [status,cmdout] = system(syscom);
 
 if status ~= 0
@@ -68,12 +107,12 @@ if status ~= 0
 end
 
 %% Process candidate models
-%iterationCounter %debug
+%iterationCtr %debug
 CandidateModels = ReadYaml(['output' filesep 'models.yaml']);
 nModels = size(CandidateModels,2);
 
 if nModels < 1
-    fprintf('arPEtabSelect: Finished after iteration %i - no (more) candidate models found.\n', iterationCounter-1)
+    fprintf('arPEtabSelect: Finished after iteration %i - no (more) candidate models found.\n', iterationCtr-1)
     terminateFlag = 1;
 end
 if terminateFlag == 0
@@ -116,16 +155,9 @@ if terminateFlag == 0
             end
         end
         
-        
-        % Add all parameters not in par but estimated to estimated parameters
-        
-        
-        % Estimate
-        %estimationRoutine;
-        
+        % Estimate        
         if sum(ar.qFit) > 0
-            arFit
-            arFitLHS(10)
+            eval(estimRoutine);
         end
         arCalcMerit
         [~, allmerits] = arGetMerit;
@@ -163,7 +195,7 @@ if terminateFlag == 0
         'petab_select best ', ...
         ' -y ', yaml,...
         ' -m ', CalibYamlOut,...
-        ' -o petab-select', filesep, sprintf('best_model_it_%03i.yaml',iterationCounter),...
+        ' -o petab-select', filesep, sprintf('best_model_it_%03i.yaml',iterationCtr),...
         ' -s output', filesep, 'state.dill',...
         ' --relative-paths ',...
         ];
@@ -173,30 +205,39 @@ if terminateFlag == 0
     end
     
     %% Read current and previous iteration's criterion (and stop)
-    if iterationCounter > 1
+    if iterationCtr > 1
         prevIt = ReadYaml(['petab-select',filesep,...
-            sprintf('best_model_it_%03i.yaml',iterationCounter-1)]);
+            sprintf('best_model_it_%03i.yaml',iterationCtr-1)]);
         prevItCrit = prevIt.criteria.(SelectionProblem.criterion);
         currentIt = ReadYaml(['petab-select',filesep,...
-            sprintf('best_model_it_%03i.yaml',iterationCounter)]);
+            sprintf('best_model_it_%03i.yaml',iterationCtr)]);
         currentItCrit = currentIt.criteria.(SelectionProblem.criterion);
         
-        if currentItCrit > prevItCrit
-            fprintf('arPEtabSelect: Finished after iteration %i - criterion worse than in iteration %i.\n', iterationCounter, iterationCounter-1)
+        if round(currentItCrit,4) > round(prevItCrit,4)
+            fprintf('arPEtabSelect: Finished after iteration %i - criterion worse than in iteration %i.\n', iterationCtr, iterationCtr-1)
             terminateFlag = 1;
         end
+    end
+    
+    if SelectionProblem.method == 'brute_force'
+        terminateFlag = 2;
     end
 end
 
 %% Write results yaml
 if terminateFlag == 1
     copyfile(['petab-select',filesep,...
-        sprintf('best_model_it_%03i.yaml',iterationCounter-1)],...
+        sprintf('best_model_it_%03i.yaml',iterationCtr-1)],...
+        ['petab-select',filesep,'selected_model.yaml'])
+    return
+elseif terminateFlag == 2
+    copyfile(['petab-select',filesep,...
+        sprintf('best_model_it_%03i.yaml',iterationCtr)],...
         ['petab-select',filesep,'selected_model.yaml'])
     return
 end
 
 %% Next iteration
-fprintf('arPEtabSelect: Iteration %i complete. Continuing with next iteration\n',iterationCounter)
-arPEtabSelect(venvActPath, yaml, method, limit, CalibYamlOut, estimationRoutine,iterationCounter+1)
+fprintf('arPEtabSelect: Iteration %i complete. Continuing with next iteration\n',iterationCtr)
+arPEtabSelect(venvActPath, yaml, limit, estimRoutine, CalibYamlOut ,iterationCtr+1)
 end
