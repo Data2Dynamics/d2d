@@ -1,4 +1,4 @@
-fprintf( 2, 'TEST FOR PETAB EXTENSION >>PETAB-SELECT<< M\n' );
+fprintf( 2, 'TEST FOR PETAB EXTENSION >>PETAB-SELECT<<\n' );
 clear isOk expected actual selProblem Ncases
 
 % do all
@@ -8,12 +8,14 @@ Ncases = numel(cases);
 isOk = NaN(Ncases,1);
 
 %% Check the python environment of system command 
-initstr = [];
-syscom = [initstr, 'petab_select --help'];
+venvActPath = [];
+syscom = [venvActPath, 'petab_select --help'];
 [status1,~] = system(syscom);
 if status1 ~= 0
-    initstr = '~/_d2d_python_venv/bin/activate';
-    syscom = [initstr, 'petab_select --help'];
+    venvActPath = '~/d2d_python_venv/bin/activate';
+    initstr = sprintf('source %s; ', venvActPath);
+
+    syscom = [initstr, ' petab_select --help'];
     [status2,~] = system(syscom);
     if status2 ~= 0
         error(sprintf('Calling petab_select from the command line failed. ...\nPlease check your Python environment and the PEtab-select installation.'))
@@ -33,7 +35,7 @@ for i = 1:Ncases
     end
    
     try
-        arPEtabSelect(initstr)
+        arPEtabSelect(venvActPath)
         
         expected = ReadYaml('expected.yaml');
         actual = ReadYaml('petab-select/selected_model.yaml');
