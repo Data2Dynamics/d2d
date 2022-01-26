@@ -62,7 +62,7 @@ end
 
 % if method = brute_force, do not allow limit argument
 SelectionProblem = ReadYaml(yaml);
-if SelectionProblem.method == 'brute_force'
+if strcmp(SelectionProblem.method,'brute_force')
     if ~exist('limit') || isempty(limit)
         limit = '';
     else
@@ -219,7 +219,7 @@ if terminateFlag == 0
         end
     end
     
-    if SelectionProblem.method == 'brute_force'
+    if strcmp(SelectionProblem.method,'brute_force')
         terminateFlag = 2;
     end
 end
