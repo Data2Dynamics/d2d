@@ -19,7 +19,7 @@ end
 if ~exist('method') || isempty(method)
     method = 'brute_force';
 end
-if ~exist('level') || isempty(limit)
+if ~exist('limit') || isempty(limit)
     limit = 3;
 end
 if ~exist('initialModel') || isempty(initialModel)
