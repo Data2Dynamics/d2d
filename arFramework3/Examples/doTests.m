@@ -39,7 +39,7 @@ function doTests( varargin )
             
     longtests = { 'Benchmark_Simu_Test' };
     
-    dependencies = { {}, {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {'TranslateSBML'}, {'TranslateSBML'}};
+    dependencies = { {}, {}, {}, {}, {}, {}, {'TranslateSBML'}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {'TranslateSBML'}, {'TranslateSBML'}, {'TranslateSBML'}};
     
     if ( nargin > 0 && strcmp( varargin{1}, 'long' ) )
         varargin = setdiff( varargin, 'long' );
