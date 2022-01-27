@@ -12,7 +12,7 @@ venvActPath = [];
 syscom = [venvActPath, 'petab_select --help'];
 [status1,~] = system(syscom);
 if status1 ~= 0
-    venvActPath = '~/d2d_python_venv/bin/activate';
+    venvActPath = '~/_d2d_python_venv/bin/activate';
     initstr = sprintf('source %s; ', venvActPath);
 
     syscom = [initstr, ' petab_select --help'];
