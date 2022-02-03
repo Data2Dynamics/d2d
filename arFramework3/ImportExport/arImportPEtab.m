@@ -37,8 +37,20 @@ if ischar(name) %yaml
     yamlContent = arReadPEtabYaml(name);
     yamlPath = yamlDir.folder;
     fprintf('Found yaml file with name %s\n',name)
-    arImportPEtab(cellfun(@(x) [yamlPath, filesep, x], {yamlContent.sbml_files{1}, yamlContent.observable_files{1}, yamlContent.measurement_files{1}, yamlContent.condition_files{1}, yamlContent.parameter_file{1}}, 'UniformOutput', false),doPreEq)
-    % only one sbml file or tsv file per category allowed at the moment,
+    
+    % check number of files per category, only one per category allowed atm
+    petabFiles = {'sbml_files', 'observable_files', 'measurement_files',...
+        'condition_files', 'parameter_file'};
+    inputArgs = {};
+    for i = 1:numel(petabFiles)
+        [out,numberOfEls] = extractFromStruct(yamlContent, petabFiles{i});
+        if numberOfEls > 1
+            error('arImportPEtab: YAML file can only refer to one file per category.')
+        end
+        inputArgs{end+1} = out;
+    end
+    
+    arImportPEtab(cellfun(@(x) [yamlPath, filesep, x], [inputArgs{:}], 'UniformOutput', false),doPreEq)
     % also check arReadPEtabYaml
     return
 else % no yaml file
@@ -136,4 +148,14 @@ if doPreEq
     end
 end
 
+end
+
+function [out,numberOfEls] = extractFromStruct(struct, field)
+    if iscell(struct.(field))
+        out = struct.(field);
+        numberOfEls = numel(out);
+    else
+        out = {struct.(field)};
+        numberOfEls = 1;
+    end
 end
