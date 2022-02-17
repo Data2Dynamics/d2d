@@ -120,6 +120,7 @@ for iCond = 1:length(uniCond)
     end
     uniObs = regexprep(uniObs,' ','');
     Sd2d.name = char(uniCond(iCond));
+    Sd2d.name = strrep(Sd2d.name,';','_');
     Sd2d.tExp = uniTimes;
     Sd2d.tUnits = ar.model.tUnits;
     % observation and error functions
