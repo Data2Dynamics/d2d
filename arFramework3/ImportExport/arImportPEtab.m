@@ -68,7 +68,7 @@ if length(sbmlmodel)>1
     %sbmlmodel= sbmlmodel(out);% set sbmlmodel to chosen
 end
 
-arParseSBML([sbmlmodel.folder filesep sbmlmodel.name])
+[~,~,eventStruct] = arParseSBML([sbmlmodel.folder filesep sbmlmodel.name]);
 arLoadModel(strrep(sbmlmodel.name,'.xml',''))
 
 PEobs = [strrep(name{2},'.tsv',''),'.tsv'];
@@ -148,6 +148,11 @@ if doPreEq
     end
 end
 
+% events
+for iev = 1:length(eventStruct)
+    arAddEvent(1, 'all', eventStruct(iev).time, ...
+        eventStruct(iev).state, 0, eventStruct(iev).value)
+end
 end
 
 function [out,numberOfEls] = extractFromStruct(struct, field)

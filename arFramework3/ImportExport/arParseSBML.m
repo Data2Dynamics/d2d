@@ -92,7 +92,7 @@ m = findRateRules(m);
 
 %% check for unsupported features
 if(isfield(m,'event') && ~isempty(m.event))
-    error('Conversion of events is not yet supported in D2D!')
+    %error('Conversion of events is not yet supported in D2D!')
 end
 csizes = NaN(size(m.compartment));
 for i=1:length(m.compartment)
@@ -717,10 +717,35 @@ for j=1:length(m.reaction)
     end
 end
 
-
 fclose(fid);
-
 %cd('..')
+
+%% read events
+eventStruct = struct;
+for iev = 1:length(m.event)
+    trigger = m.event(iev).trigger.math;
+    if ~contains(trigger, 'ge(') || ~contains(trigger, 'time')
+        error('Did not find keywords ge( or time in event trigger')
+    end
+    eventTime = extractBetween(trigger, 'ge(time,', ')');
+    eventTime = str2num(eventTime{1});
+    eventStruct(iev).time = eventTime;
+    
+    state = m.event(iev).eventAssignment.variable;
+    if ~ismember(state,{m.species.name})
+        error(sprintf('Event variable %s is not a state'), state);
+    end
+    eventStruct(iev).state = state;
+    
+    value = m.event(iev).eventAssignment.math;
+    try
+        value = str2num(value); 
+    catch
+        error(sprintf('Conversion to numeric of event assignment failed: %s', value));
+    end
+    eventStruct(iev).value = value;
+end
+% arAddEvent(model, condition, timepoints, [statename], [A], [B])
 
 
 %% data file
@@ -867,6 +892,9 @@ if nargout > 0
 end
 if nargout > 1
     varargout{2} = new_filename;
+end
+if nargout > 2
+    varargout{3} = eventStruct;
 end
 
 function str = replaceFunction(str, funstr, C, funmat)
