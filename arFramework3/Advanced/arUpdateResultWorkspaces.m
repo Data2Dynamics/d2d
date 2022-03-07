@@ -25,7 +25,16 @@ for i=1:length(file_list)
     d = dir(['Results',filesep,file_list{i}]);
     names = {d.name};
     ind = strmatch('.',names,'exact');
-    dates(i) = datenum(d(ind).date);
+    if isfield(d(ind),'datenum')
+        dates(i) = d(ind).datenum;
+    else
+        try
+            tmp = d(ind).date;
+            dates(i) = datenum(tmp(1:11),'dd-mmm-yyyy');
+        catch
+            dates(i) = datenum(d(ind).date);
+        end
+    end
     [~,rf] = sort(dates); % sorting according to date  
 end
 
