@@ -922,6 +922,7 @@ if(~strcmp(extension,'none') && ( ...
                     % Remove file which failed to provide any data
                     fprintf(2, 'local random effect #%i: no matching data (%d), removed\n', j ,d);
                     ar.model.data(d) = [];
+                    ar.model(m).plot(jplot) = [];                 
                 end
                 
             else
