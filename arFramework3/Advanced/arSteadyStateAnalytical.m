@@ -60,7 +60,7 @@ if status~=0
 end
 pythonvers = regexp(cmdout, '\d*', 'Match');
 if str2double(pythonvers{1}) < 3
-    error('Python 3 required for ODESS (analytical calculation of steady states)')
+    error('Python 3 required for AlyssaPetit (analytical calculation of steady states)')
 end
 
 for imodel = 1:length(ar.model)
@@ -68,19 +68,19 @@ for imodel = 1:length(ar.model)
     fprintf('Writing stochiometric matrix for model %i to %s...\n', imodel, [ar.model(imodel).name, '__model.csv'])
     arExportModelToDmod('model',imodel,[],[],replacements);
 
-    % copy ODESS
-    copyfile([ar.info.ar_path, filesep, 'ThirdParty', filesep, 'ODESS.py'], pwd)
+    % copy Alyssa
+    copyfile([ar.info.ar_path, filesep, 'ThirdParty', filesep, 'AlyssaPetit.py'], pwd)
     
     % write python script
-    workFile = fopen('doWork_ODESS.py', 'w');
-    fprintf(workFile, 'from ODESS import *\n');
-    fprintf(workFile, 'ODESS("%s",[%s],[%s],[%s],%i,"M")', [ar.model(imodel).name, '__model.csv'],...
+    workFile = fopen('doWork_Alyssa.py', 'w');
+    fprintf(workFile, 'from AlyssaPetit import *\n');
+    fprintf(workFile, 'Alyssa("%s",[%s],[%s],[%s],%i,"M")', [ar.model(imodel).name, '__model.csv'],...
         AlyssaArgs{1}, AlyssaArgs{2}, AlyssaArgs{3}, AlyssaArgs{4});
     fclose(workFile);
     
     % do python work
     fprintf('Calculating steady state for model %i...\n', imodel)
-    [status, fullout] = system(sprintf('%s %s', pythonsymlink, 'doWork_ODESS.py'));
+    [status, fullout] = system(sprintf('%s %s', pythonsymlink, 'doWork_Alyssa.py'));
     try
         steadystate = regexp(fullout, 'Testing Steady State...', 'split');
         steadystate = regexp(steadystate{2}, 'I obtained the following equations:', 'split');

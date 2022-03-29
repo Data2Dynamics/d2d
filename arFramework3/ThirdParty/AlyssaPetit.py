@@ -1,4 +1,6 @@
-# ODESS_4Python3_ver1.0.py
+# AlyssaPetit version 1.0
+# Use with python 3.x
+
 import numpy
 import sympy
 from sympy import Matrix, simplify, expand, solve
@@ -514,7 +516,7 @@ def Sparsify(M, level, sparseIter):
     else:
         return(M)
     
-def ODESS(filename,
+def Alyssa(filename,
           injections=[],
           givenCQs=[],
           neglect=[],
