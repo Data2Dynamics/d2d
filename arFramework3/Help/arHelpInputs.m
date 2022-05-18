@@ -29,6 +29,8 @@
 %   "smoothstep2(t, level1, switch_time1, level2, switch_time2, level3, smoothness)" 
 %     Provides a smooth double step function at the values switch_time1/2 of the independent variable t.
 %     The smoothness parameter controls the smoothness of the step. For large values, the step becomes increasingly sigmoidal.
+%
+%   *** Must use arFindInputs after compilation ***
 % 
 % BOLUS INJECTIONS
 %   "bolus(t, amount, time_point, duration)" 

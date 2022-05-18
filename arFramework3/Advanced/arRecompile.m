@@ -173,6 +173,10 @@ for m=1:length(ar.model)
             break
         end
         for d=1:length(ar.model(m).data)
+            if(sum(abs(size(ar.model(m).data(d).yExp)-size(arIn.model(m).data(d).yExp)))>0)
+                different = true;
+                break
+            end
             if max(abs(ar.model(m).data(d).yExp-arIn.model(m).data(d).yExp))>1e-10
                 different = true;
                 break;
