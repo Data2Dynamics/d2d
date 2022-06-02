@@ -80,6 +80,8 @@ arQplot('xy')
 arPlot
 
 %% Comparison
+figure % new figure to not plot in d2d Subplots
+
 [~,ia,ib] = intersect(ar.model(1).x,ar.model(2).z,'stable');
 maxdiff = [];
 maxreldiff = [];
@@ -89,7 +91,7 @@ for i=1:length(ia)
     zlog = interp1(ar.model(2).condition(1).tFine,ar.model(2).condition(1).zFineSimu(:,ib(i)),tFine);
     loglog(xlog,...
         zlog,...
-        '.')
+        '.','MarkerSize',12)
     hold on
     maxdiff(i) = max(abs(xlog-zlog));
     maxreldiff(i) = max(abs(xlog-zlog)./((xlog+zlog)/2));
@@ -97,7 +99,8 @@ for i=1:length(ia)
 end
 maxdiff
 maxreldiff
-abplot(1,0);
+myxlim = xlim;
+plot(myxlim,myxlim,'k')
 axis tight
 xlabel('standard x')
 ylabel('log(x)');
