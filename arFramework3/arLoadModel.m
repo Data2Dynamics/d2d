@@ -382,7 +382,7 @@ if(strcmp(C{1},'REACTIONS') || strcmp(C{1},'REACTIONS-AMOUNTBASED'))
         %C = arTextScan(fid, '%q %q\n', 1, 'CommentStyle', ar.config.comment_string);
         arValidateInput(C, 'REACTIONS', 'reaction rate expression' );
         str = C(1);
-        if ( ~isempty(C{2}) )
+        if ( ~isempty(C{2}) && ~isempty(C{2}{:}) ) 
             ar.model(m).v{end+1} = cell2mat(C{2});
         else
             ar.model(m).v{end+1} = sprintf('v_%d', length(ar.model(m).v) );
