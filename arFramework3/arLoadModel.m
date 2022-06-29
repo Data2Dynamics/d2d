@@ -48,7 +48,11 @@ if strcmp(strrep(name,' ',''),name)~=1
     error('File names should not contain empty spaces. Please remove it.');
 end
 if(~exist([ModelPath,  name '.def'],'file'))
-    error('model definition file %s.def does not exist in folder %s', name, ModelPath)
+    if exist([ModelPath, name],'file')
+        [~,name] = fileparts(name);
+    else
+        error('model definition file %s.def does not exist in folder %s', name, ModelPath)
+    end
 end
 
 if(~exist('m','var')) || isempty(m)
