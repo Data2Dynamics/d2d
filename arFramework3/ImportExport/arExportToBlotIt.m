@@ -35,9 +35,9 @@ for o=1:length(obs)
     filehandle(o) = fopen(file{o},'w');
     fprintf('open %s ...\n',file{o});
 %     fprintf(filehandle(o),'Index;Experiment;Condition;min;Target;Signal\n');    
-    fprintf(filehandle(o),'Experiment;Condition;time;name;value\n');    
+    fprintf(filehandle(o),'Experiment; Condition; time; name; value; ObsFun; logscale\n');    
     
-    fprintf(fid,'Experiment;Condition;time;name;value;ObsFun\n');        
+    fprintf(fid,'Experiment; Condition; time; name; value; ObsFun; logscale \n');        
 end
 anzrow = zeros(size(filehandle));
 
@@ -95,13 +95,8 @@ for m=1:length(ar.model)
                     if ~isnan(yExp{m}{c}{o}(t))
                         anzrow(o) = anzrow(o)+1;
                         row = row+1;
-                        %                     fprintf(filehandle(o),'%i;%i;%i;%.2d;%d;%d\n',row,c,dExp{m}{c}{o}(t),tExp{m}{c}{o}(t),yExp{m}{c}{o}(t),yExpStd{m}{c}{o}(t));
-%                         fprintf(filehandle(o),'%i;%i;%i;%.2d;%f\n',row,c,dExp{m}{c}{o}(t),tExp{m}{c}{o}(t),yExp{m}{c}{o}(t));
-%                         fprintf(filehandle(o),'%i;%i;%i;%.2d;%s;%f\n',row,c,dExp{m}{c}{o}(t),tExp{m}{c}{o}(t),obs{o},yExp{m}{c}{o}(t));
-                        %                     fprintf('%i;%i;%i;%.2d;%d;%d\n',row,c,dExp{m}{c}{o}(t),tExp{m}{c}{o}(t),yExp{m}{c}{o}(t),yExpStd{m}{c}{o}(t));
-                        fprintf(filehandle(o),'%i;%i;%.2d;%s;%f;%s;%f\n',fy_index(t),c,tExp{m}{c}{o}(t),obs{o},yExp{m}{c}{o}(t),fy{m}{c}{o}{t},logscale{m}{c}{o});
-
-                        fprintf(fid,'%i;%i;%.2d;%s;%f;%s;%f\n',fy_index(t),c,tExp{m}{c}{o}(t),obs{o},yExp{m}{c}{o}(t),fy{m}{c}{o}{t},logscale{m}{c}{o});
+                        fprintf(filehandle(o),'%i;%i;%.2d;%s;%f;%s;%i\n',fy_index(t),c,tExp{m}{c}{o}(t),obs{o},yExp{m}{c}{o}(t),fy{m}{c}{o}{t},logscale{m}{c}{o});
+                        fprintf(fid,'%i;%i;%.2d;"%s";%f;"%s";%f\n',fy_index(t),c,tExp{m}{c}{o}(t),obs{o},yExp{m}{c}{o}(t),fy{m}{c}{o}{t},logscale{m}{c}{o});
 
                     end
                 end
