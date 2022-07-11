@@ -657,6 +657,8 @@ for j=1:length(m.species)
     elseif initValuesOpt(j) == 2
         assignment_value = replacePowerFunction(m.initialAssignment(idx_assval(j)).math,0);
         assignment_value = arSym(assignment_value);
+        assignment_value = arSubs(assignment_value, arSym({m.species.name}), arSym(cellfun(@(x) ['init_',x], {m.species.name}, 'UniformOutput', false))); %replace state by init_state
+
         %         assignment_value = arSubs(arSym(assignment_value), arSym(pars), arSym(par_value));
         %assignment_value = subs(assignment_value, specs, spec_value);
         %         assignment_value = arSubs(arSym(assignment_value), arSym(comps), arSym(comp_value));
