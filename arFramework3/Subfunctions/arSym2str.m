@@ -11,11 +11,13 @@
 function a = arSym2str(b)
     nonzeros = logical(b~=0);
     a = cell(size(b));
-    for j=1:length(b)
-        if ( nonzeros(j) )
-            a{j} = char(b(j));
-        else
-            a{j} = '0';
+    for j=1:size(b,1)
+        for jj = 1:size(b,2)
+            if ( nonzeros(j,jj) )
+                a{j,jj} = char(b(j,jj));
+            else
+                a{j,jj} = '0';
+            end
         end
     end
 

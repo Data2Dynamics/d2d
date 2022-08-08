@@ -2816,7 +2816,20 @@ function J = myJacobian(F,x)
 
 if(~isempty(F))
     if(~isempty(x))
-        J = jacobian(F,x);
+        if verLessThan('matlab','9.12')
+            J = jacobian(F,x);
+        else
+            F1 = arSym2str(F);
+            F1 = strrep(strrep(F1,'[','bBb'),']','cCc');
+            F1 = arSym(F1);
+            x1 = arSym2str(x);
+            x1 = strrep(strrep(x1,'[','bBb'),']','cCc');
+            x1 = arSym(x1);
+            J1 = jacobian(F1,x1);
+            J1 = arSym2str(J1);
+            J1 = strrep(strrep(J1,'bBb','['),'cCc',']');
+            J = arSym(J1);
+        end
     else
         J = arMyStr2Sym(NaN(length(F),0));
     end
