@@ -63,6 +63,15 @@ if ( ~license('test', 'Optimization_Toolbox') )
     warning( 'No license found for optimization toolbox. If fitting is required, obtain a license or switch optimization method (e.g. ar.config.optimizer=3).' );
 end
 
+% check toolbox requirements
+verstr = ver;
+req_toolboxes = {'Symbolic Math Toolbox', 'Optimization Toolbox'};
+for i = 1:length(req_toolboxes)
+    if ~ismember(req_toolboxes{i}, {verstr.Name})
+        error('Missing toolbox: %s is required for using Data2Dynamics', req_toolboxes{i})
+    end
+end
+
 ar.setup = struct;  % the setup commands are stored, here.
 ar.setup.commands = cell(0);
 ar.setup.arguments = cell(0);
