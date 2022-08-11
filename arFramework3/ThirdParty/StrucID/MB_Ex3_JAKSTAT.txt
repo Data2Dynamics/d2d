@@ -1,0 +1,97 @@
+Algebraic Rules!
+c1=2.265;
+c2=1;
+
+ODEs (define the individual ODE equations - 1 per line)!
+dx1/dt = -th1*c1*u1*x1-th5*x1+th6*x2;
+dx2/dt = th5*x1-th6*x2;
+dx3/dt = th1*c1*u1*x1-th2*x3*x7;
+dx4/dt = th2*x3*x7-th3*x4;
+dx5/dt = th3*x4-th4*x5;
+dx6/dt = -th7*x3*x6/(1+th13*x13)-th7*x4*x6/(1+th13*x13)+1*th8*x7;
+dx7/dt = th7*x3*x6/(1+th13*x13)+th7*x4*x6/(1+th13*x13)-1*th8*x7;
+dx8/dt = -th9*x8*x7+c2*th10*x9;
+dx9/dt = th9*x8*x7-c2*th10*x9;
+dx10/dt = th11*x9;
+dx11/dt = -th12*c1*u1*x11;
+dx12/dt = th12*c1*u1*x11;
+dx13/dt = th14*x10/(th15+x10)-th16*x13;
+dx14/dt = th17*x9;
+
+Input variables!
+u1 = 4
+
+Measured Outputs (define the measured sensors - 1 per line)!
+y1 = x1+x3+x4
+y2 = th18*(x3+x4+x5+x12)
+y3 = th19*(x4+x5)
+y4 = th20*x7
+y5 = th21*x10
+y6 = th22*x14
+y7 = x13
+y8 = x9
+
+Parameter names and values (define all the system parameters - 1 per line, OPTIONAL - define known paramter values)!
+th1 = 
+th2 = 
+th3 = 
+th4 = 
+th5 = 
+th6 = 
+th7 = 
+th8 = 
+th9 = 
+th10 = 
+th11 = 
+th12 = 
+th13 = 
+th14 = 
+th15 = 
+th16 = 
+th17 = 
+th18 = 
+th19 = 
+th20 = 
+th21 = 
+th22 = 
+
+State names and initial values (define all the model state names - 1 per line, OPTIONAL - define known initial values)!
+x1 = 1.3
+x2 = 
+x3 = 0
+x4 = 0
+x5 = 0
+x6 = 2.8
+x7 = 0
+x8 = 1.65
+x9 = 0
+x10 = 0
+x11 = 0.34
+x12 = 0
+x13 = 0
+x14 = 0
+
+Analyse (list the unknown parameter and initial conditions which should be included into the strucutral identifiability analysis)!
+th1 
+th2 
+th3  
+th4  
+th5  
+th6  
+th7  
+th8 
+th9  
+th10 
+th11
+th12 
+th13  
+th14 
+th15 
+th16 
+th17 
+th18 
+th19 
+th20 
+th21  
+th22 
+x2

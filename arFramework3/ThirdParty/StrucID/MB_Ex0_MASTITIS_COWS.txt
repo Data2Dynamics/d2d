@@ -1,0 +1,23 @@
+Algebraic Rules!
+
+ODEs (define the individual ODE equations - 1 per line)!
+dx1/dt = th1*x1 - th2*x1*x2;
+dx2/dt = th3*x2*(1-th4*x2)+th5*x1*x2
+
+Input variables!
+
+Measured Outputs (define the measured sensors - 1 per line)!
+y1 = x1
+
+Parameter names and values (define all the system parameters - 1 per line, OPTIONAL - define known paramter values)!
+th1 = 
+th2 = 
+th3 = 
+th4 = 
+th5 = 
+
+State names and initial values (define all the model state names - 1 per line, OPTIONAL - define known initial values)!
+x1 = 
+x2 = 
+
+Analyse (if empty all states/parameters are included)!

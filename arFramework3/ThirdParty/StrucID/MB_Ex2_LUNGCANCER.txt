@@ -1,0 +1,204 @@
+Algebraic Rules!
+
+ODEs (define the individual ODE equations - 1 per line)!
+dx1/dt = -th5*x1;%1
+dx2/dt = -th6*x1*x2^th7/(th8^th7+x2^th7)+x21*th14*x3^th15/(th16^th15+x3^th15)-x9*th17*x2^th18/(th19^th18+x2^th18);%2
+dx3dt = th6*x1*x2^th7/(th8^th7+x2^th7)-x21*th14*x3^th15/(th16^th15+x3^th15)+x9*th17*x2^th18/(th19^th18+x2^th18);%3
+dx4/dt = -x5*th36*x4^th37/(th38+x4^th37)+x12*th42*x16^th43/(th44^th43+x16^th43)+x19*th51*x16^th52/(th53^th52+x16^th52);%4
+dx5/dt = x3*th9*x15^th10/(th11^th10+x15^th10)-x18*th45*x5^th46/(th47^th46+x5^th46);%5
+dx6/dt = (x16*th39*x17^th40/(th41^th40+x17^th40)-x14*th48*x6^th49/(th50^th49+x6^th49));%6
+dx7/dt = x14*th30*x8^th31/(th32^th31+x8^th31)-(x6*th12*x7)/(th13+x7);%7
+dx8/dt = (x6*th12*x7)/(th13+x7)-x14*th30*x8^th31/(th32^th31+x8^th31);%8
+dx9/dt = -th1*x9;%9
+dx10/dt = (-x9*th20*x10^th21/(th22^th21+x10^th21)-x1*th23*x1*x10^th24/(th25^th24+x10^th24)-x5*th33*x10^th34/(th35^th34+x10^th34)+th2*x11);%10
+dx11/dt = (x9*th20* x10^th21/(th22^th21+ x10^th21)+x1*th23*x1*x10^th24/(th25^th24+x10^th24)+x5*th33*x10^th34/(th35^th34+x10^th34)-th2*x11);%11
+dx12/dt = (x11*th26*x13^th27/(th28^th27+x13^th27)-th29*x12);%12
+dx13/dt = (-x11*th26*x13^th27/(th28^th27+ x13^th27)+th29*x12);%13
+dx14/dt = 0;%14
+dx15/dt = (-x3*th9*x15^th10/(th11^th10+x15^th10)+x18*th45*x5^th46/(th47^th46+x5^th46));%15
+dx16/dt = (x5*th36*x4^th37/(th38+x4^th37)-x12*th42*x16^th43/(th44^th43+x16^th43)-x19*th51*x16^th52/(th53^th52+x16^th52));%16
+dx17/dt = (-x16*th39*x17^th40/(th41^th40+x17^th40)+x14*th48*x6^th49/(th50^th49+x6^th49));%17
+dx18/dt = 0;%18
+dx19/dt = 0;%19
+dx20/dt = (-x8*th3*x20/(th4+x20)+th54*x21);%20
+dx21/dt = (x8*th3*x20/(th4+ x20)-th54*x21)%21
+
+Input variables!
+
+Measured Outputs (define the measured sensors - 1 per line)!
+% y1 = x1 % not measured in the paper
+y2 = x2
+y3 = x3
+y4 = x4
+y5 = x5
+y6 = x6
+y7 = x7
+y8 = x8
+y9 = x10
+y10 = x11
+y11 = x12
+y12 = x13
+y13 = x14
+y14 = x15
+y15 = x16
+y16 = x17
+y17 = x18
+y18 = x19
+y19 = x20
+y20 = x21
+
+Parameter names and values (define all the system parameters - 1 per line, OPTIONAL - define known paramter values)!
+th1 = 
+th2 = 
+th3 = 
+th4 = 
+th5 = 
+th6 = 
+th7 = 
+th8 = 
+th9 = 
+th10 = 
+th11 = 
+th12 = 
+th13 = 
+th14 = 
+th15 = 
+th16 = 
+th17 = 
+th18 = 
+th19 = 
+th20 = 
+th21 = 
+th22 = 
+th23 = 
+th24 = 
+th25 = 
+th26 = 
+th27 = 
+th28 = 
+th29 = 
+th30 = 
+th31 = 
+th32 = 
+th33 = 
+th34 = 
+th35 = 
+th36 = 
+th37 = 
+th38 = 
+th39 = 
+th40 = 
+th41 = 
+th42 = 
+th43 = 
+th44 = 
+th45 = 
+th46 = 
+th47 = 
+th48 = 
+th49 = 
+th50 = 
+th51 = 
+th52 = 
+th53 = 
+th54 = 
+
+State names and initial values (define all the model state names - 1 per line, OPTIONAL - define known initial values)!
+x1 =
+x2 = 
+x3 = 
+x4 = 
+x5 = 
+x6 = 
+x7 = 
+x8 = 
+x9 = 
+x10 = 
+x11 = 
+x12 = 
+x13 = 
+x14 = 
+x15 = 
+x16 = 
+x17 = 
+x18 = 
+x19 = 
+x20 = 
+x21 = 
+
+Analyse (list the unknown parameter and initial conditions which should be included into the strucutral identifiability analysis)!
+th1
+th2
+th3
+th4
+th5
+th6
+th7
+th8
+th9
+th10
+th11
+th12
+th13
+th14
+th15
+th16
+th17
+th18
+th19
+th20
+th21
+th22
+th23
+th24
+th25
+th26
+th27
+th28
+th29
+th30
+th31
+th32
+th33
+th34
+th35
+th36
+th37
+th38
+th39
+th40
+th41
+th42
+th43
+th44
+th45
+th46
+th47
+th48
+th49
+th50
+th51
+th52
+th53
+th54
+x7
+x8
+x9
+x10
+x11
+x12
+x13
+x14
+x15
+x16
+x17
+x18
+x19
+x20
+x21
+x1
+x2
+x3
+x4
+x5
+x6

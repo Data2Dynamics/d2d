@@ -98,6 +98,7 @@ end
 model_path = strcat(model_path,filesep,'Identifiability_Analysis');
 cd(model_path)
 
+
 if ~exist(ar.ia.modelname_checkstr, 'dir')
     ID = 0;
     status = mkdir(ar.ia.modelname_checkstr);
@@ -106,15 +107,15 @@ if ~exist(ar.ia.modelname_checkstr, 'dir')
     end
 end
 model_path = strcat(model_path,filesep,ar.ia.modelname_checkstr);
+mkdir(model_path)
 cd(model_path)
 
-if ~exist('result', 'dir')
-    ID = 0;
-    status = mkdir('result');
-    if status == 0
-        error('Making folder "%s" was not successful','result');
-    end
-end
+
+% defenitely not a perfect solution. But checking and only making when neede
+% did not work. No idea why. mkdir does not overwrite if already exists, so
+% should not be a problem.
+mkdir('result');
+
 
 if ~exist(strcat(ar.ia.modelname,'.m'),'file') || ~exist(strcat(ar.ia.modelname,'.mat'),'file')
     ID = 0;   

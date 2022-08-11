@@ -1,0 +1,87 @@
+Algebraic Rules (such as reaction rates)!
+
+ODEs!
+dx1/dt = -th1*x1*x2 + (-th14*x1+th15*x9)/333
+dx2/dt = -th1*x1*x2+(th13*x8)/333
+dx3/dt =  th1*x1*x2-(th11*x3)/333
+dx4/dt = th3+th2*x2-th4*x4
+dx5/dt = th6+th5*x2-th7*x5
+dx6/dt = th9+th8*x2-th10*x6
+dx7/dt = 10*th11*x3/16667-th21*x7+th1*x8*x9-th28*x7*x11
+dx8/dt = th21*x7-10*th13*x8/16667-th1*x8*x9+th26*x15
+dx9/dt =  th18*x5-th23*x9-th1*x8*x9+10*(th14*x1-th15*x9)/16667-th25*x9*x11
+dx10/dt =  th27*x4-th24*x10
+dx11/dt = -th12*x11-th16*x11-th28*x7*x11-th25*x9*x11-th19*x10*x11+th17*x13+th22*x14+th26*x15
+dx12/dt =  th16*x11+th19*x10*x11-th12*x12
+dx13/dt = th25*x9*x11-th17*x13
+dx14/dt = th20-th12*x14-th22*x14
+dx15/dt = th28*x7*x11-th26*x15
+
+Input variables!
+
+Sensors:!
+y1 = x1
+y2 = x2
+y3 = x3
+y4 = x4 % MOS
+y5 = x5 % MOS
+y6 = x6 % MOS
+y7 = x7
+y8 = x8
+y9 = x9
+y10 = x10 % MOS
+y11 = x11
+y12 = x12 % MOS
+y13 = x13
+y14 = x14
+y15 = x15
+
+Parameters + Values:!
+th1 =
+th2 =
+th3 =
+th4 =
+th5 =
+th6 =
+th7 =
+th8 =
+th9 =
+th10 =
+th11 =
+th12 =
+th13 =
+th14 =
+th15 =
+th16 =
+th17 =
+th18 =
+th19 =
+th20 =
+th21 =
+th22 =
+th23 =
+th24 =
+th25 =
+th26 =
+th27 =
+th28 =
+
+States variables!
+x1 = 
+x2 = 
+x3 = 
+x4 = 
+x5 = 
+x6 = 
+x7 =  
+x8 = 
+x9 = 
+x10 = 
+x11 = 
+x12 = 
+x13 = 
+x14 =
+x15 = 
+
+Analyse:! % if this section is empty, then ALL states/parameters are included in the analysis
+

@@ -2,7 +2,6 @@
 % this function generates the model which is neede by StrIkE-GOLDD(v3.0) toolbox for the structural identifiability
 % and observability analysis.
 
-
 function arStrikeGolddModel(m)
 
 global ar
@@ -22,12 +21,18 @@ fprintf('\n Creating the %s model ... ', model_name);
 
 % known and unknown inputs
 if isfield(ar.model,'w') && ~isempty(ar.model(m).w)
-    w = ar.model(m).w;                  % unknown inputs should be specified by the used in ar.model.w 
+    w = ar.model(m).w;                  % unknown inputs should be specified by the user in ar.model.w 
     idx = ~ismember(ar.model(m).u ,w);
-    u = ar.model(m).u(idx);             % exlude unknown inputs from known inputs
+    u = ar.model(m).u(idx);             % exclude unknown inputs from known inputs
+    ar.ia.opts.nnzDerW = 0;
+    ar.ia.opts.nnzDerU = 0;
+    fprintf('\n The number of non-zero derivatives for the input is set to zero. Change in ar.ia.opts.nnzDerW for known and in ar.ia.opts.nnzDerU for unknown input.')
 else
     w = '';
     u = ar.model(m).u;
+    fprintf('\n There is no unknown input, unknown inputs should be specified in ar.model.w before arSIAInit.')
+    ar.ia.opts.nnzDerW = 0;
+    fprintf('\n The number of non-zero derivatives of the input is set to zero. \n If needed change this in ar.ia.opts.nnzDerW to different value before running arSIA.')
 end
 
 
@@ -39,7 +44,8 @@ fx = ar.model(m).fx;       % initial condition equations
 fy = ar.model(m).fy;       % observable equations
 z = ar.model(m).z;         % derived variables
 fz = ar.model(m).fz;       % derived equations
-
+c = ar.model(m).c;         % compartment names
+pc = ar.model(m).pc        % compartment equation
 z = str2sym(z);
 fz = str2sym(fz);
 
