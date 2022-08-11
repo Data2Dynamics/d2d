@@ -53,7 +53,7 @@ else
 end
 
 % R2015b compatibility fix
-if(matlab_version>=9.8)
+if ~verLessThan('matlab','9.8')
     cstr = regexprep(cstr,'t(\d+) =','T[$1][0] =');
 end
 

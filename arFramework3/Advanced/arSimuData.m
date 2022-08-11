@@ -1,3 +1,4 @@
+
 % arSimuData([m], [jplot], [tpoints], [randomseed])
 %
 % Simulate data for current parameter settings
@@ -121,7 +122,7 @@ ar.model(m).data(d).ystdExpSimu = zeros(length(tpoints{d}), length(ar.model(m).d
 function simulate_data(m, d)
 global ar
 
-if all(size(ar.model(m).data(d).yExp) == size(ar.model(m).data(d).yExpStd))
+if ar.config.fiterrors ~= 1 && all(size(ar.model(m).data(d).yExp) == size(ar.model(m).data(d).yExpStd))
     yExpStdSimu = ar.model(m).data(d).yExpStd;
     nosd = isnan(ar.model(m).data(d).yExpStd); % don't overwrite exp. errors by the error model
     yExpStdSimu(nosd) = ar.model(m).data(d).ystdExpSimu(nosd);
