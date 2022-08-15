@@ -7,7 +7,8 @@ function model = StrucIDreadmodel(modelname)
 % sure that the ADiMAT routines are available when running the sensitivity
 % computations
 if (~exist('admDiffComplex.m','file') && ~isdeployed)
-    run('./adimat/ADiMat_startup');
+    %run('./adimat/ADiMat_startup');
+    ADiMat_startup;
 end
 
 %% 1. ENTER MODEL _ GO AND FETCH FILE TO ATTACH
