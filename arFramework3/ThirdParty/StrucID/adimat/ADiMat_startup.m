@@ -7,7 +7,8 @@ if ispc
   adimat_prefix = adimathome;
   pathsep = ';';
 else
-  adimat_prefix = fullfile(adimathome, 'share', 'adimat');
+  % adimat_prefix = fullfile(adimathome, 'share', 'adimat');
+  adimat_prefix = adimathome
   pathsep = ':';
 end
 

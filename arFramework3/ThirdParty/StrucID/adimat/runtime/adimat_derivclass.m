@@ -69,7 +69,8 @@ function r = adimat_derivclass(name)
     if ispc
       adimat_prefix = adimathome;
     else
-      adimat_prefix = [ adimathome '/share/adimat'];
+      % adimat_prefix = [ adimathome '/share/adimat'];
+      adimat_prefix = adimathome;
     end
     stackNames = { ...
         'mat_derivclass'

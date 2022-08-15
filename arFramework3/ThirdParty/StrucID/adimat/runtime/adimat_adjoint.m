@@ -33,7 +33,8 @@ function r = adimat_adjoint(name)
     if ispc
       adimat_prefix = adimathome;
     else
-      adimat_prefix = [ adimathome '/share/adimat'];
+      % adimat_prefix = [ adimathome '/share/adimat'];
+      adimat_prefix = adimathome;
     end
     paths = { [adimat_prefix '/adjointclasses/scalar']
               [adimat_prefix '/adjointclasses/default']
