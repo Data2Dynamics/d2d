@@ -13,6 +13,7 @@ model_name = ar.model(m).name;
 fprintf('\n Creating the %s model ... ', model_name);
 
 p = ar.model(m).p(:);      % all parameters
+px = ar.model(m).px(:);
 fp = ar.model(m).fp(:);    % model conditions
 x = ar.model(m).x;         % state variables
 x0 = ar.model(m).px0;      % initial condition parameters
@@ -67,7 +68,8 @@ x0 = arSubs(x0, p_cond, fp_cond, matlab_version);    % substitute model conditio
 
 
 % parameters
-pars = unique([symvar(h) symvar(f) symvar(x0) symvar(str2sym(setdiff(p, arFindPar(ar, {'sd'}, 'names'))))]);
+% pars = unique([symvar(h) symvar(f) symvar(x0) symvar(str2sym(setdiff(p, arFindPar(ar, {'sd'}, 'names'))))]);
+pars = unique([symvar(h) symvar(f)]);
 pars = setdiff(pars, symvar(str2sym(x)));
 
 h = arrayfun(@char, h, 'uniform', 0);
@@ -117,6 +119,16 @@ for entry = 1:length(pars)
     fprintf('%s = ', str2sym(pars(entry)))
     fprintf('%s\n', '')
 end
+for entry = 1:length(x0)
+    if sum(contains(ar.model(m).fy, append('init_', x(entry)))) > 0
+        if str2sym(append('init_', x(entry))) ~= str2sym(x0(entry))
+            fprintf('%s = ', str2sym(append('init_', x(entry))))
+            fprintf('%s\n', str2sym(x0(entry)))
+        else
+            fprintf('%s = \n', str2sym(append('init_', x(entry))))
+        end
+    end
+end
 % for entry = 1:length(u)
 %     fprintf('%s = \n', str2sym(fu(entry)))
 % end
@@ -124,13 +136,18 @@ end
 fprintf('\n%s\n', 'State names and initial values (define all the model state names - 1 per line, OPTIONAL - define known initial values)!')
 for entry = 1:length(x)
     fprintf('%s = ', str2sym(x(entry)))
-    fprintf('%s\n', str2sym(x0(entry)))
+    if str2sym(append('init_', x(entry))) ~= str2sym(x0(entry))
+        fprintf('%s\n', str2sym(x0(entry)))
+    else
+        fprintf('\n')
+
+    end
 end
 
 fprintf('\n%s\n', 'Analyse (list the unknown parameter and initial conditions which should be included into the strucutral identifiability analysis)!')
-for entry = 1:length(fitted_pars)
-    fprintf('%s\n', str2sym(fitted_pars(entry)))
-end
+% for entry = 1:length(fitted_pars)
+%     fprintf('%s\n', str2sym(fitted_pars(entry)))
+% end
 
 diary off
 

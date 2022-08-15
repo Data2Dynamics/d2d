@@ -1,4 +1,4 @@
-function [CorParIndex,NumberOfZeroSingularValues,GapSize,dydthAnalysisAllTraj,dudthAnalysisAllTraj] = ...
+function [CorParIndex,NumberOfZeroSingularValues,GapSize,dydthAnalysisAllTraj,dudthAnalysisAllTraj, unidentifiable_params] = ...
     StrucIDanalysis(model,TypeOfAnalysis)
 % main analysis
 % Iden = 1 system is observable/identifiable/reachable
@@ -265,8 +265,10 @@ if (NumberOfZeroSingularValues==0)
 else
     fprintf('Unidentifiable Parameters: ');
     CorParIndex=UnknownVarIndex(CorPar);
+    unidentifiable_params = strings(1, numel(CorParIndex));
     for k=1:numel(CorParIndex)
         fprintf('%s  ',varNames{CorParIndex(k)});
+        unidentifiable_params(k) = varNames{CorParIndex(k)};
     end
     fprintf('\n\n');
 end
