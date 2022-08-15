@@ -207,6 +207,15 @@ end
 if (exist('YAMLMatlab', 'file') == 0)
     addpath([ar_path '/ThirdParty/YAMLMatlab'])
 end
+if (exist('StrucID', 'file') == 0)
+    addpath([ar_path '/ThirdParty/StrucID'])
+end
+if (exist('StrucID/adimat', 'file') == 0)
+    addpath([ar_path '/ThirdParty/StrucID/adimat'])
+end
+if (exist('strike-goldd', 'file') == 0)
+    addpath([ar_path '/ThirdParty/strike-goldd'])
+end
 
 savepath
     

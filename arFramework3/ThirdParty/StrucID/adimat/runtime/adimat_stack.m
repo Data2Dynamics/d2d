@@ -53,7 +53,8 @@ function r = adimat_stack(in_name)
   if ispc
     adimat_prefix = adimathome;
   else
-    adimat_prefix = [ adimathome '/share/adimat'];
+    adimat_prefix = adimathome;
+    % adimat_prefix = [ adimathome '/share/adimat'];
   end
 
   stackNames = { ...
