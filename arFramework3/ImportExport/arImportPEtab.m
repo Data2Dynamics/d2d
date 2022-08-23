@@ -24,7 +24,7 @@ end
 if isfield(ar, 'model')
     error('Please initialize by arInit')
 end
-if ~exist('doPreEquilibration','var') || isempty(doPreEq)
+if ~exist('doPreEq','var') || isempty(doPreEq)
     doPreEq = true;
 end
 

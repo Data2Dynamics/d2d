@@ -327,7 +327,7 @@ if length(obs)~=length(err)
     end
 end
 
-fprintf(fid, '\nINPUTS\n');
+fprintf(fid, '\nINPUTS\n'); % Events are handled at the end of the function
 if isempty(m.u)
     if exist('u','var')
         for i=1:length(u)
@@ -347,6 +347,7 @@ else
         end
     end
 end
+
 % treat boundary species as constant inputs
 for j=find([m.species.boundaryCondition] & ~israterule)
     m.species(j).id2 = m.species(j).id;
@@ -724,30 +725,20 @@ fclose(fid);
 %cd('..')
 
 %% read events
-eventStruct = struct;
-for iev = 1:length(m.event)
-    trigger = m.event(iev).trigger.math;
-    if ~contains(trigger, 'ge(') || ~contains(trigger, 'time')
-        error('Did not find keywords ge( or time in event trigger')
+% Parse events as step function inputs
+if ~isempty(m.event)
+    warning('Event import is experimental.')
+    for jE = 1:length(m.event)
+        target = m.event(jE).eventAssignment.variable;
+        value = m.event(jE).eventAssignment.math;
+        trigger = m.event(jE).trigger.math;
+        time = extractBetween(trigger, 'ge(time,', ')');
+        if isempty(time); error('Error parsing events. Only events of the form ge(time,%f) are supported.'); end
+        eventStrings{jE} = sprintf("arAddEvent(1, 'all', %s, '%s', 0, %s)", time{1}, target, value);
     end
-    eventTime = extractBetween(trigger, 'ge(time,', ')');
-    eventTime = str2num(eventTime{1});
-    eventStruct(iev).time = eventTime;
-    
-    state = m.event(iev).eventAssignment.variable;
-    if ~ismember(state,{m.species.name})
-        error(sprintf('Event variable %s is not a state'), state);
-    end
-    eventStruct(iev).state = state;
-    
-    value = m.event(iev).eventAssignment.math;
-    try
-        value = str2num(value); 
-    catch
-        error(sprintf('Conversion to numeric of event assignment failed: %s', value));
-    end
-    eventStruct(iev).value = value;
 end
+
+
 % arAddEvent(model, condition, timepoints, [statename], [A], [B])
 
 
@@ -897,7 +888,7 @@ if nargout > 1
     varargout{2} = new_filename;
 end
 if nargout > 2
-    varargout{3} = eventStruct;
+    varargout{3} = eventStrings;
 end
 
 function str = replaceFunction(str, funstr, C, funmat)
