@@ -71,6 +71,8 @@ x0 = arSubs(x0, p_cond, fp_cond, matlab_version);    % substitute model conditio
 % pars = unique([symvar(h) symvar(f) symvar(x0) symvar(str2sym(setdiff(p, arFindPar(ar, {'sd'}, 'names'))))]);
 pars = unique([symvar(h) symvar(f)]);
 pars = setdiff(pars, symvar(str2sym(x)));
+pars = setdiff(pars, symvar((u)));
+
 
 h = arrayfun(@char, h, 'uniform', 0);
 f = arrayfun(@char, f, 'uniform', 0);
@@ -150,5 +152,4 @@ fprintf('\n%s\n', 'Analyse (list the unknown parameter and initial conditions wh
 % end
 
 diary off
-
 end

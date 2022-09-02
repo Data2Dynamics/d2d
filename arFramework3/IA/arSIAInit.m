@@ -201,8 +201,8 @@ ar.ia.opts.decomp_user = 0;       % when decomposing model, use submodels specif
 ar.ia.opts.maxLietime  = 100;     % max. time allowed for calculating 1 Lie derivative.
 ar.ia.opts.maxOpttime  = 30;      % max. time allowed for every optimization (if optimization-based decomposition is used).
 ar.ia.opts.maxstates   = 6;       % max. number of states in the submodels (if optimization-based decomposition is used).
-ar.ia.opts.nnzDerU     = inf;     % numbers of nonzero derivatives of the measured inputs (u); may be 'inf'
-ar.ia.opts.nnzDerW     = 1;       % numbers of nonzero derivatives of the unmeasured inputs (w); may be 'inf'
+ar.ia.opts.nnzDerU     = 0;     % numbers of nonzero derivatives of the measured inputs (u); may be 'inf'
+ar.ia.opts.nnzDerW     = 0;       % numbers of nonzero derivatives of the unmeasured inputs (w); may be 'inf'
 ar.ia.opts.nnzDerIn    = ar.ia.opts.nnzDerU; % deprecated option
 
 % AFFINE OPTIONS (to use the ORC-DF algorithm):

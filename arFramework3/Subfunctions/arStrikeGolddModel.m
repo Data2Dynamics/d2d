@@ -45,7 +45,7 @@ fy = ar.model(m).fy;       % observable equations
 z = ar.model(m).z;         % derived variables
 fz = ar.model(m).fz;       % derived equations
 c = ar.model(m).c;         % compartment names
-pc = ar.model(m).pc        % compartment equation
+pc = ar.model(m).pc;        % compartment equation
 z = str2sym(z);
 fz = str2sym(fz);
 
@@ -93,7 +93,7 @@ x0 = arSubs(x0, p_cond, fp_cond, matlab_version);    % substitute model conditio
 
 % find known initial conditions
 known_ics = cell(1,length(x0));
-known_ics(:) = {'0'};
+known_ics(:) = {'1'};
 for i = 1:length(x0)
     if isempty(symvar(x0(i)))
             known_ics(i)={'1'};
@@ -106,9 +106,10 @@ end
 pars = unique([symvar(h) symvar(f)]);
 
 pars = setdiff(pars, symvar(str2sym(x)));
+pars = setdiff(pars, symvar(u));
 
 % syms
-psyms = unique([pars symvar(u) symvar(w) symvar(str2sym(p)) symvar(str2sym(x))]);
+psyms = unique([pars symvar(u) symvar(w) symvar(str2sym(p)) symvar(str2sym(x)) symvar(x0)]);
 
 
 h = arrayfun(@char, h, 'uniform', 0);

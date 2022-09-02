@@ -262,6 +262,8 @@ end
 % store symmetries when probing a network
 if (NumberOfZeroSingularValues==0)
     fprintf('%s\n','No correlated parameters found');
+    CorParIndex=0;
+    unidentifiable_params='There are no unidentifiable parameters';
 else
     fprintf('Unidentifiable Parameters: ');
     CorParIndex=UnknownVarIndex(CorPar);
