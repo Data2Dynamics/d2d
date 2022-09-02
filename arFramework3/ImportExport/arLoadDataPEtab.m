@@ -46,6 +46,8 @@ if(exist('m','var') && ischar(m))
 end
 
 %% Read in tsv file
+datafile = split(datafilename,filesep);
+arFprintf(1, '\nloading PEtab data from file %s...', datafile{end});
 Tdat = tdfread(datafilename); % all data of the model
 fns = fieldnames(Tdat);
 for i = 1:length(fns)
@@ -55,6 +57,8 @@ for i = 1:length(fns)
 end
 Tdat = struct2table(Tdat);
 
+obsfile = split(obsfilename,filesep);
+arFprintf(1, '\nloading PEtab observables from file %s...', obsfile{end});
 Tobs = tdfread(obsfilename); % all data of the model
 fns = fieldnames(Tobs);
 for i = 1:length(fns)
@@ -100,7 +104,9 @@ end
 idErrorPar = 1;
 errorParAssignments = cell(1,2);
 
+
 for iCond = 1:length(uniCond)
+    arFprintf(1, '\nMapping PEtab condition %i/%i...', iCond, length(uniCond));
     Sd2d = struct();
     args= {};
     pold = {}; fp = {};
