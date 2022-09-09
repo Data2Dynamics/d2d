@@ -69,9 +69,11 @@ x0 = arSubs(x0, p_cond, fp_cond, matlab_version);    % substitute model conditio
 
 % parameters
 % pars = unique([symvar(h) symvar(f) symvar(x0) symvar(str2sym(setdiff(p, arFindPar(ar, {'sd'}, 'names'))))]);
-pars = unique([symvar(h) symvar(f)]);
+pars = unique([symvar(h) symvar(f) symvar(fp_cond) symvar(str2sym(fu))]);
 pars = setdiff(pars, symvar(str2sym(x)));
 pars = setdiff(pars, symvar((u)));
+pars = setdiff(pars, symvar(str2sym("t")));
+
 
 
 h = arrayfun(@char, h, 'uniform', 0);
@@ -85,6 +87,8 @@ pars = arrayfun(@char, pars, 'uniform', 0);
 fix_par = ar.pLabel(ar.qFit==0);
 fix_par_val = ar.p(ar.qFit==0);
 
+pars = setdiff(pars, fix_par);
+
 fprintf('[done]\n');
 %%
 dfile = append(modelname, '.txt');
@@ -93,10 +97,7 @@ diary(dfile)
 diary on
 
 fprintf('%s\n\n', 'Algebraic Rules!')
-for entry = 1:length(fix_par)
-    fprintf('%s = ', str2sym(fix_par(entry)))
-    fprintf('%f\n', fix_par_val(entry))
-end
+
 
 fprintf('\n%s\n', 'ODEs (define the individual ODE equations - 1 per line)!')
 for entry = 1:length(f)
@@ -121,6 +122,11 @@ for entry = 1:length(pars)
     fprintf('%s = ', str2sym(pars(entry)))
     fprintf('%s\n', '')
 end
+for entry = 1:length(fix_par)
+    fprintf('%s = ', str2sym(fix_par(entry)))
+    fprintf('%f\n', fix_par_val(entry))
+end
+
 for entry = 1:length(x0)
     if sum(contains(ar.model(m).fy, append('init_', x(entry)))) > 0
         if str2sym(append('init_', x(entry))) ~= str2sym(x0(entry))

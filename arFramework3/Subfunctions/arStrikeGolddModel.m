@@ -103,7 +103,7 @@ end
 
 % parameters
 % pars = unique([symvar(h) symvar(f) symvar(x0)]);
-pars = unique([symvar(h) symvar(f)]);
+pars = unique([symvar(h) symvar(f) symvar(fp_cond)]);
 
 pars = setdiff(pars, symvar(str2sym(x)));
 pars = setdiff(pars, symvar(u));
