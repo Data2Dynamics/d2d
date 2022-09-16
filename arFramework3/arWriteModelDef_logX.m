@@ -97,14 +97,16 @@ target = cell(0);
 for i=1:length(model.fv)
     if ~isempty(model.fv_source{i}) && ~isempty(model.fv_target{i})
         for j=1:length(model.fv_source{i})
-            fluxes{end+1} = [model.Cm{j,i},'*',model.fv{i}];
+            indj = find(strcmp(model.fv_source{i}(j),model.x));
+            fluxes{end+1} = [model.Cm{indj,i},'*',model.fv{i}];
             fluxVs{end+1} = ['v_',num2str(length(fluxes))];%model.v{i};
             source{end+1} = model.fv_source{i}(j);
             target{end+1} = cell(0);
         end
         
         for j=1:length(model.fv_target{i})
-            fluxes{end+1} = [model.Cm{j,i},'*',model.fv{i}];
+            indj = find(strcmp(model.fv_target{i}(j),model.x));
+            fluxes{end+1} = [model.Cm{indj,i},'*',model.fv{i}];
             fluxVs{end+1} = ['v_',num2str(length(fluxes))];%model.v{i};
             source{end+1} = cell(0);
             target{end+1} = model.fv_target{i}(j);
@@ -112,14 +114,16 @@ for i=1:length(model.fv)
         
     elseif ~isempty(model.fv_source{i})
         for j=1:length(model.fv_source{i})
-            fluxes{end+1} = [model.Cm{j,i},'*',model.fv{i}];
+            indj = find(strcmp(model.fv_source{i}(j),model.x));
+            fluxes{end+1} = [model.Cm{indj,i},'*',model.fv{i}];
             fluxVs{end+1} = ['v_',num2str(length(fluxes))];%model.v{i};
             source{end+1} = model.fv_source{i}(j);
             target{end+1} = cell(0);
         end
     elseif ~isempty(model.fv_target{i})
         for j=1:length(model.fv_target{i})
-            fluxes{end+1} = [model.Cm{j,i},'*',model.fv{i}];
+            indj = find(strcmp(model.fv_target{i}(j),model.x));
+            fluxes{end+1} = [model.Cm{indj,i},'*',model.fv{i}];
             fluxVs{end+1} = ['v_',num2str(length(fluxes))];%model.v{i};
             source{end+1} = cell(0);
             target{end+1} = model.fv_target{i}(j);
