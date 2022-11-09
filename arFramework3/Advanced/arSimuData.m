@@ -130,8 +130,15 @@ else
     yExpStdSimu = ar.model(m).data(d).ystdExpSimu;
 end
 
-ar.model(m).data(d).yExp = ar.model(m).data(d).yExpSimu + ...
-    randn(size(ar.model(m).data(d).yExpSimu)) .* yExpStdSimu;
+if ~any(ar.model(m).data(d).pcovLink(:))
+    ar.model(m).data(d).yExp = ar.model(m).data(d).yExpSimu + ...
+        randn(size(ar.model(m).data(d).yExpSimu)) .* yExpStdSimu;
+else % simulate with covariance structure
+    for idy = 1:length(ar.model(m).data(d).y)
+        Sigma = arCalcCovarianceMatrix(m,d,idy);
+        ar.model(m).data(d).yExp(:,idy) = mvnrnd(ar.model(m).data(d).yExpSimu(:,idy),Sigma)';
+    end
+end
 
 ar.model(m).data(d).tLim = ar.model(m).data(d).tLimExp;
 ar.model(m).data(d).tLim(2) = round(max(ar.model(m).data(d).tExp)*1.1);

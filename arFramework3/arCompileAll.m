@@ -175,6 +175,8 @@ for m=1:length(ar.model)
             checksum_data = addToCheckSum(ar.model(m).data(d).p, checksum_data);
             checksum_data = addToCheckSum(ar.model(m).data(d).fy, checksum_data);
             checksum_data = addToCheckSum(ar.model(m).data(d).fystd, checksum_data);
+            checksum_data = addToCheckSum(ar.model(m).data(d).pcov, checksum_data);
+            
             checksum_data = addToCheckSum(ar.model(m).data(d).fp, checksum_data);
             checkstr_data = getCheckStr(checksum_data);
             
@@ -1282,7 +1284,7 @@ data.sym.fy = arSubs(data.sym.fy, arMyStr2Sym(model.t), arMyStr2Sym('t'), matlab
 data.sym.fystd = arSubs(data.sym.fystd, arMyStr2Sym(model.t), arMyStr2Sym('t'), matlab_version);
 
 % remaining parameters
-varlist = symvar([data.sym.fy(:); data.sym.fystd(:)]);
+varlist = symvar([data.sym.fy(:); data.sym.fystd(:); arMyStr2Sym(data.pcov(:))]);
 data.pold = data.p;
 othervars = union(union(union(union(model.x, model.u), model.z), data.y), 't');
 data.p = setdiff( setdiff(union(arSym2str(varlist), data.p_condition), othervars), cVars); %R2013a compatible

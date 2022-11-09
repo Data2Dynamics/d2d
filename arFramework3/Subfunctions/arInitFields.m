@@ -254,6 +254,25 @@ function ar = arInitFields(ar)
         end
     end
     
+    if isfield(ar,'model')  % for backwards compatibility of the covariance estimation functionality
+        if isfield(ar.model,'data')
+            for m = 1:length(ar.model)
+                if ~isfield(ar.model(m).data,'pcovLink')
+                    for d = 1:length(ar.model(m).data)
+                        if isfield(ar.model(m).data(d),'pLink') && isfield(ar.model(m).data(d),'y')
+                            ar.model(m).data(d).pcovLink = zeros(length(ar.model(m).data(d).y), length(ar.model(m).data(d).pLink));
+                        end
+                    end
+                end
+            end
+        end
+    end
+    if isfield(ar,'p')
+       if ~isfield(ar,'qCov')
+          ar.qCov = zeros(size(ar.p));
+       end
+    end
+    
 function str = validateFields(str, fields, fieldname)
 
     for jf = 1 : size( fields, 2 )

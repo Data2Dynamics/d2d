@@ -570,6 +570,7 @@ end
 
 % determine parameters influencing the error model
 ar.qError = zeros(size(ar.pLabel));
+ar.qCov = zeros(size(ar.pLabel));
 for m = 1:length(ar.model)
     if(isfield(ar.model(m),'data'))
         for d = 1:length(ar.model(m).data)
@@ -582,6 +583,8 @@ for m = 1:length(ar.model)
                     qerr = qerr | ismember(ar.pLabel, symvar(tmp_py{ipystd}));
                 end
                 ar.qError(qerr) = 1;
+                qcov = ismember(ar.pLabel, ar.model(m).data(d).pcov);
+                ar.qCov(qcov) = 1;
             end
         end
     end
@@ -593,10 +596,12 @@ for m = 1:length(ar.model)
     ar.qFit(qvolpara) = 2;
 end
 
+qCov = logical(ar.qCov);
 ar.qLog10 = ones(size(ar.pLabel));
 ar.p = ones(size(ar.pLabel)) * -1;
 
 ar.ub = ones(size(ar.pLabel)) * +3;
+ar.ub(qCov) = log10(0.99);% >=1 on linear scale is forbidden by construction
 ar.lb = ones(size(ar.pLabel)) * -5;
 
 ar.type = zeros(size(ar.pLabel));
@@ -631,6 +636,12 @@ for m = 1:length(ar.model)
                 ar.model(m).data(d).pLink = [];
             end
             ar.model(m).data(d).pNum = 10.^ar.p(ar.model(m).data(d).pLink);
+            
+            ar.model(m).data(d).pcovLink = zeros(length(ar.model(m).data(d).pcov),length(ar.p));
+            for idcov = 1:length(ar.model(m).data(d).pcov)
+                ar.model(m).data(d).pcovLink(idcov,:) = ismember(ar.pLabel, ar.model(m).data(d).pcov(idcov)); %R2013a compatible
+            end
+            
         end
     end
 end

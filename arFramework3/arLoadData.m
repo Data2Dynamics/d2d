@@ -429,7 +429,7 @@ else
     ar.model(m).data(d).fystd = cell(0);
 end
 [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
-while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS'))
+while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS') && ~strcmp(C{1},'COVARIANCE'))
     arFprintf( 3, '.' );
     qyindex = ismember(ar.model(m).data(d).y, C{1});
     if ( qyindex == 0 )
@@ -513,6 +513,41 @@ for j=1:length(ar.model(m).data(d).fystd)
     ar.model(m).data(d).py_sep(j).pars = setdiff(ar.model(m).data(d).py_sep(j).pars, ar.model(m).pu);
 end
 
+% COVARIANCE
+ar.model(m).data(d).pcov = repmat({'0'},size(ar.model(m).data(d).y));
+
+if(strcmp(C{1},'COVARIANCE'))
+    if ~ar.model(m).data(d).doseresponse
+        [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+        while(~strcmp(C{1},'INVARIANTS') && ~strcmp(C{1},'DERIVED') && ~strcmp(C{1},'CONDITIONS') && ~strcmp(C{1},'SUBSTITUTIONS'))
+            arFprintf( 3, '.' );
+            qyindex = ismember(ar.model(m).data(d).y, C{1});
+            if ( qyindex == 0 )
+                arParsingError( fid,  'Specified covariance parameter for non existent observable %s', C{1}{1} );
+            end
+            
+            str = C{2}{1};
+            str(str==' ')='';
+            
+            ar.model(m).data(d).pcov(qyindex) = {str};
+            varlist = cellfun(@symvar, C{2}, 'UniformOutput', false);
+            
+            ar.model(m).data(d).pystd = union(ar.model(m).data(d).pystd, ar.model(m).data(d).pcov{qyindex}); % Covariance is also an error parameter
+            
+            if length(varlist) > 1 || ~strcmp(ar.model(m).data(d).pcov{qyindex},varlist{1})
+                arParsingError(fid, 'No functions for the covariance parameter allowed. Please specify only the name of the covariance parameter of the state %s.',ar.model(m).data(d).y{qyindex})
+            end
+            
+            [C, fid] = arTextScan(fid, '%s %q\n',1, 'CommentStyle', ar.config.comment_string);
+            if ( isempty( C{1} ) )
+                arParsingError( fid, 'Unexpected end of file after error model (did you forget CONDITIONS?)')
+            end
+        end
+    else
+        warning('Covariance structure for dose response data not supported. Covariance parameter in %s ignored.', [name, '.def'])
+    end
+end
+
 % DERIVED
 if(strcmp(C{1},'DERIVED'))
     arParsingError( fid, ['There is no need for a section DERIVED in data definition file! ' ...
@@ -531,6 +566,7 @@ ptmp = union(ar.model(m).px, ar.model(m).pu);
 ar.model(m).data(d).p = union(ptmp, union(ar.model(m).data(d).pu, ar.model(m).data(d).py)); %R2013a compatible
 ar.model(m).data(d).pystd = setdiff(ar.model(m).data(d).pystd, ar.model(m).data(d).p); %Remove dynamic variables from error model parameters, e.g. scaling parameters if sd propto scale*x.
 ar.model(m).data(d).p = union(ar.model(m).data(d).p, ar.model(m).data(d).pystd); %R2013a compatible
+ar.model(m).data(d).p = union(ar.model(m).data(d).p,  ar.model(m).data(d).pcov(~strcmp(ar.model(m).data(d).pcov,'0')));
 
 % Union's behaviour is different when first arg is empty. In this case, a
 % flip of the parameter vector is typically required.
@@ -976,6 +1012,9 @@ function checkReserved(m, d)
     end
     for a = 1 : length( ar.model(m).data(d).fystd )
         arCheckReservedWords( symvar(ar.model(m).data(d).fystd{a}), sprintf( 'observation standard deviation function of %s', ar.model(m).data(d).name ), ar.model(m).data(d).y{a} );
+    end
+    for a = find(~strcmp(ar.model(m).data(d).pcov,'0'))
+        arCheckReservedWords( ar.model(m).data(d).pcov(a), sprintf( 'covariance parameter of %s', ar.model(m).data(d).name ), ar.model(m).data(d).p{a} );
     end
     for a = 1 : length( ar.model(m).data(d).fp )
         arCheckReservedWords( symvar(ar.model(m).data(d).fp{a}), sprintf( 'condition parameter transformations of %s', ar.model(m).data(d).name ), ar.model(m).data(d).p{a} );

@@ -185,6 +185,18 @@ lb(ar.type==2) = lb(ar.type==2) - 1;
 ub = ub(ar.qFit==1);
 lb = lb(ar.qFit==1);
 
+if any(ar.qCov==1) && ~(ar.config.optimizer==20) && ~(ar.config.optimizer==21)
+    persistent didwarncov
+    if isempty(didwarncov)
+        didwarncov = 0;
+    else
+        didwarncov = 1;
+    end
+    if didwarncov == 0
+        warning('Covariance estimation is only working with ar.config.optimizer = 20 or 21')
+    end
+end
+
 % Make a backup of the parameters before we start
 arPush('arFit');
 
@@ -551,6 +563,38 @@ elseif(ar.config.optimizer == 19)
     jac = [];
     
 % TODO: Automatically delete the automatically generated file  called ess_report.mat
+
+% covariance with lsqnonlin
+elseif(ar.config.optimizer == 20)
+ %   fprintf( 'Estimating covariance structure.\n' );
+    if ~any(ar.qCov==1)
+       error('No covariance parameter specified.') 
+    end
+    [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
+        lsqnonlin(@merit_fkt_cov, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
+    
+% covariance with fmincon
+elseif(ar.config.optimizer == 21)
+ %   fprintf( 'Estimating covariance structure.\n' );
+    if ~any(ar.qCov==1)
+       error('No covariance parameter specified.') 
+    end
+    options = optimset('fmincon');
+    options.GradObj = 'on';
+    options.TolFun = ar.config.optim.TolFun;
+    options.TolX = ar.config.optim.TolX;
+    options.Display = ar.config.optim.Display;
+    options.MaxIter = ar.config.optim.MaxIter;
+    options.MaxFunEvals = ar.config.optim.MaxFunEvals;
+    options.OutputFcn = ar.config.optim.OutputFcn;
+    %options.CheckGradients = true;
+
+    [pFit, ~, exitflag, output, lambda, grad] = ...
+        fmincon(@merit_fkt_fmincon_cov, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
+        [],options);
+    resnorm = [] ; % merit_fkt(pFit);
+    jac = [];
+    fit.grad = grad;
 else
     error('ar.config.optimizer invalid');    
 end
@@ -841,6 +885,69 @@ try
 catch
     % workaround for particleswarm
     chi2 = rand(1)*1e23;
+end
+
+% covariance estimation with lsqnonlin
+function [res, sres] = merit_fkt_cov(pTrial)
+global ar
+
+% Only compute sensis when requested
+if ( isfield( ar.config, 'sensiSkip' ) )
+    sensiskip = ar.config.sensiSkip;
+else
+    sensiskip = false;
+end
+sensi = ar.config.useSensis;% && (~sensiskip || (nargout > 1));
+
+arCalcMerit(sensi, pTrial);
+arCalcResCov;
+arCollectResCov;
+arLogFit(ar);
+res = [ar.resCov ar.constr];
+if(nargout>1 && ar.config.useSensis)
+    sres = [];
+    if(~isempty(ar.sres))
+        sres = ar.sresCov(:, ar.qFit==1);
+    end
+    if(~isempty(ar.sconstr))
+        sres = [sres; ar.sconstr(:, ar.qFit==1)];
+    end
+end
+
+np = sum(ar.qFit==1);
+if ( numel(res) < np )
+    tres = zeros(1,np);
+    tres(1:length(res)) = res;
+    if (nargout>1 && ar.config.useSensis)
+        tsres = zeros(np);
+        tsres(1:length(res), 1:np) = sres;
+    end
+    
+    res = tres;
+    if (nargout>1 && ar.config.useSensis)
+        sres = tsres;
+    end
+end
+
+% covariance estimation with fmincon
+function [l, g] = merit_fkt_fmincon_cov(pTrial)
+global ar
+if nargout > 1
+    arCalcMerit(1, pTrial);
+    arCalcResCov(1);
+    arCollectResCov(1);
+    arLogFit(ar);
+    l = ar.chi2Cov;
+    g = ar.schi2Cov(ar.qFit==1);
+    if(~isempty(ar.sconstr))
+       l = l + sum(ar.constr.^2); 
+       g = g + 2 * ar.constr * ar.sconstr(:, ar.qFit==1);
+    end
+else
+    arCalcMerit(0, pTrial);
+    arCalcResCov(0);
+    arCollectResCov(0);
+    l = ar.chi2Cov + sum(ar.constr.^2);
 end
 
 % plot fitting

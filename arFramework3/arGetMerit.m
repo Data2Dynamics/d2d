@@ -131,6 +131,9 @@ if nargout == 1
         case 'chi2constr'
             varargout{1} = ar.chi2constr;
             return
+        case 'chi2cov'
+            varargout{1} = ar.chi2cov;
+            return
     end
 end
 
@@ -212,11 +215,22 @@ switch lower(whichone)  % case insensitive
         meritval = meritvals.chi2;
         meritLabel = '\chi^2';
         
+    case 'chi2cov'
+        meritval = ar.chi2cov;
+        meritLabel = '\chi^2_{cov}';
+        
     otherwise  % default merit used for optimization
         if ~isempty(whichone)
             error('arGetMerit.m: whichone=%s is not implemented',whichone)
         else
-            if ar.config.fiterrors == -1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)==0) % if no error parameters fitted
+            if any(ar.qCov(ar.qFit<2)==1) && (ar.config.optimizer==20 || ar.config.optimizer==21) % if any covariance is fitted
+                meritval = ar.chi2cov + 2 * ar.ndata*log(sqrt(2*pi));
+                meritLabel = '\chi^2_{cov}';
+                if(~silent)
+                    arFprintf(1, '-2*log(L) = %g, %i data points, covariance estimation on, ', ...
+                        meritval, meritvals.ndata);
+                end
+            elseif ar.config.fiterrors == -1 || (ar.config.fiterrors==0 && sum(ar.qFit(ar.qError==1)<2)==0) % if no error parameters fitted
                 meritval = meritvals.chi2_all;
                 meritLabel = '\chi^2_{total}';
                 if(~silent)
