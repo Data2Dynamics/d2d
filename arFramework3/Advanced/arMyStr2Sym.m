@@ -10,11 +10,11 @@ function out = arMyStr2Sym(s)
 
 persistent matver % keeping the value from the last call
 if isempty(matver)
-    matver = arVer;  % calling this function every time is too time-consuming
+    matver = ver('MATLAB');  % calling this function every time is too time-consuming
 end
     % The explicit cast to string is necessary for MATLAB R2017a at least,
     % otherwise double will convert the string on a char by char basis.
-    if(~verLessThan('matlab', '9.4'))
+    if(str2double(matver.Version) >= 9.1)
         if(isa(s,'double'))
             out = sym(s);
         elseif(isa(s,'char'))
