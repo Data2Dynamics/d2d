@@ -182,104 +182,108 @@ end
 
 
 % Check if this is first save after compilation, 
-if ~isfield(ar.setup,'backup_data_folder')
-    % copy files from Data/ and Models/
-    arFprintf(2,'Creating backup.')
-
-    ar.setup.backup_data_folder = cell(size(ar.setup.datafiles));
-    ar.setup.backup_model_folder = cell(size(ar.setup.modelfiles));
-
-    for i=1:length(ar.setup.datafiles)
-        for j=1:length(ar.setup.datafiles{i})
-            %             old_backup_data_folder = ar.setup.backup_data_folder{i}{j};
-            ar.setup.backup_data_folder{i}{j} = fullfile(pwd,[dataBackupDir, '/']);% fullfile to prevent mixing of \ and /
-            ar.setup.backup_data_folder_local{i}{j} = [dataBackupDir, '/'];
-            [~,file,ext] = fileparts(ar.setup.datafiles{i}{j});
-            source = ar.setup.datafiles{i}{j};
-            %             source = [old_backup_data_folder,file,ext];
-            target = [ar.setup.backup_data_folder{i}{j},file,ext];
-            if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
-                try
-                    copyfile(source,target);
-                catch
-                    arFprintf(2,'Error while copying files \n from %s\n to %s\n',source,target)
-                    error('Failed to create backup files. Turning off ar.config.backup_modelAndData might be an option.')
+if isfield(ar,'setup') % not available for old workspaces
+    if ~isfield(ar.setup,'backup_data_folder')
+        % copy files from Data/ and Models/
+        arFprintf(2,'Creating backup.')
+        
+        ar.setup.backup_data_folder = cell(size(ar.setup.datafiles));
+        ar.setup.backup_model_folder = cell(size(ar.setup.modelfiles));
+        
+        for i=1:length(ar.setup.datafiles)
+            for j=1:length(ar.setup.datafiles{i})
+                %             old_backup_data_folder = ar.setup.backup_data_folder{i}{j};
+                ar.setup.backup_data_folder{i}{j} = fullfile(pwd,[dataBackupDir, '/']);% fullfile to prevent mixing of \ and /
+                ar.setup.backup_data_folder_local{i}{j} = [dataBackupDir, '/'];
+                [~,file,ext] = fileparts(ar.setup.datafiles{i}{j});
+                source = ar.setup.datafiles{i}{j};
+                %             source = [old_backup_data_folder,file,ext];
+                target = [ar.setup.backup_data_folder{i}{j},file,ext];
+                if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
+                    try
+                        copyfile(source,target);
+                    catch
+                        arFprintf(2,'Error while copying files \n from %s\n to %s\n',source,target)
+                        error('Failed to create backup files. Turning off ar.config.backup_modelAndData might be an option.')
+                    end
                 end
-            end
-            
-        end
-    end
-    
-    for i=1:length(ar.setup.modelfiles)
-        if ~isempty(ar.setup.modelfiles{i})
-            %             old_backup_model_folder = ar.setup.backup_model_folder{i};
-            ar.setup.backup_model_folder{i} = fullfile(pwd,[modelBackupDir, '/']);% fullfile to prevent mixing of \ and /
-            ar.setup.backup_model_folder_local{i} = [modelBackupDir, '/'];
-            [~,file,ext] = fileparts(ar.setup.modelfiles{i});
-            source = ar.setup.modelfiles{i};
-            %             source = [old_backup_model_folder,file,ext];
-            target = [ar.setup.backup_model_folder{i},file,ext];
-            if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
-                try
-                    copyfile(source,target);
-                catch
-                    arFprintf(2,'Error while copying files \n from %s\n to %s\n',source,target)
-                    error('Failed to create backup files. Turning off ar.config.backup_modelAndData might be an option.')
-                end
+                
             end
         end
-    end
-    
-% If this is not first save, and ar.setup.backup_data_folder is not empty
-elseif ~isempty(ar.setup.backup_data_folder)
-    % copy files from previous workspace
-    old_backup_data_folder = ar.setup.backup_data_folder_local;
-    old_backup_model_folder = ar.setup.backup_model_folder_local;
-    
-    
-    for i=1:length(ar.setup.datafiles)
-        for j=1:length(ar.setup.datafiles{i})
-            %             old_backup_data_folder = ar.setup.backup_data_folder{i}{j};
-            ar.setup.backup_data_folder{i}{j} = fullfile(pwd,[dataBackupDir, '/']);% fullfile to prevent mixing of \ and /
-            ar.setup.backup_data_folder_local{i}{j} = [dataBackupDir, '/'];
-            [~,file,ext] = fileparts(ar.setup.datafiles{i}{j});
-            source = [old_backup_data_folder{i}{j},file,ext];
-            target = [ar.setup.backup_data_folder{i}{j},file,ext];
-            if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
-                try
-                    copyfile(source,target);
-                catch
-                    arFprintf(2,'Error while copying files \n from %s\n to %s\n',source,target)
-                    error('Failed to create backup files. Turning off ar.config.backup_modelAndData might be an option.')
+        
+        for i=1:length(ar.setup.modelfiles)
+            if ~isempty(ar.setup.modelfiles{i})
+                %             old_backup_model_folder = ar.setup.backup_model_folder{i};
+                ar.setup.backup_model_folder{i} = fullfile(pwd,[modelBackupDir, '/']);% fullfile to prevent mixing of \ and /
+                ar.setup.backup_model_folder_local{i} = [modelBackupDir, '/'];
+                [~,file,ext] = fileparts(ar.setup.modelfiles{i});
+                source = ar.setup.modelfiles{i};
+                %             source = [old_backup_model_folder,file,ext];
+                target = [ar.setup.backup_model_folder{i},file,ext];
+                if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
+                    try
+                        copyfile(source,target);
+                    catch
+                        arFprintf(2,'Error while copying files \n from %s\n to %s\n',source,target)
+                        error('Failed to create backup files. Turning off ar.config.backup_modelAndData might be an option.')
+                    end
                 end
             end
         end
-    end
-    
-    for i=1:length(ar.setup.modelfiles)
-        if ~isempty(ar.setup.modelfiles{i})
-            %             old_backup_model_folder = ar.setup.backup_model_folder{i};
-            ar.setup.backup_model_folder{i} = fullfile(pwd,[modelBackupDir, '/']);% fullfile to prevent mixing of \ and /
-            ar.setup.backup_model_folder_local{i} = [modelBackupDir, '/'];
-            [~,file,ext] = fileparts(ar.setup.modelfiles{i});
-            source = [old_backup_model_folder{i},file,ext];
-            target = [ar.setup.backup_model_folder{i},file,ext];
-            if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
-                try
-                    copyfile(source,target);
-                catch
-                    arFprintf(2,'Error while copying files \n from %s\n to %s\n',source,target)
-                    error('Failed to create backup files. Turning off ar.config.backup_modelAndData might be an option.') 
+        
+        % If this is not first save, and ar.setup.backup_data_folder is not empty
+    elseif ~isempty(ar.setup.backup_data_folder)
+        % copy files from previous workspace
+        old_backup_data_folder = ar.setup.backup_data_folder_local;
+        old_backup_model_folder = ar.setup.backup_model_folder_local;
+        
+        
+        for i=1:length(ar.setup.datafiles)
+            for j=1:length(ar.setup.datafiles{i})
+                %             old_backup_data_folder = ar.setup.backup_data_folder{i}{j};
+                ar.setup.backup_data_folder{i}{j} = fullfile(pwd,[dataBackupDir, '/']);% fullfile to prevent mixing of \ and /
+                ar.setup.backup_data_folder_local{i}{j} = [dataBackupDir, '/'];
+                [~,file,ext] = fileparts(ar.setup.datafiles{i}{j});
+                source = [old_backup_data_folder{i}{j},file,ext];
+                target = [ar.setup.backup_data_folder{i}{j},file,ext];
+                if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
+                    try
+                        [suc,mess,messID]=copyfile(source,target);
+                    catch
+                        source
+                        target
+                        mess
+                        arFprintf(2,'Error while copying files \n from %s\n to %s\n',source,target)
+                        error('Failed to create backup files. Turning off ar.config.backup_modelAndData might be an option.')
+                    end
                 end
             end
         end
+        
+        for i=1:length(ar.setup.modelfiles)
+            if ~isempty(ar.setup.modelfiles{i})
+                %             old_backup_model_folder = ar.setup.backup_model_folder{i};
+                ar.setup.backup_model_folder{i} = fullfile(pwd,[modelBackupDir, '/']);% fullfile to prevent mixing of \ and /
+                ar.setup.backup_model_folder_local{i} = [modelBackupDir, '/'];
+                [~,file,ext] = fileparts(ar.setup.modelfiles{i});
+                source = [old_backup_model_folder{i},file,ext];
+                target = [ar.setup.backup_model_folder{i},file,ext];
+                if ~isempty(source) && ~isempty(target) && strcmp(fullfile(strrep(source,pwd,'.')),fullfile(strrep(target,pwd,'.')))~=1
+                    try
+                        copyfile(source,target);
+                    catch
+                        arFprintf(2,'Error while copying files \n from %s\n to %s\n',source,target)
+                        error('Failed to create backup files. Turning off ar.config.backup_modelAndData might be an option.')
+                    end
+                end
+            end
+        end
+        
+    else
+        error('ar.setup.backup_data_folder empty. Creating backup files was not possible. Try turning off ar.config.backup_modelAndData.')
     end
-
-else
-    error('ar.setup.backup_data_folder empty. Creating backup files was not possible. Try turning off ar.config.backup_modelAndData.')
+    
 end
-
-
 
 
 
