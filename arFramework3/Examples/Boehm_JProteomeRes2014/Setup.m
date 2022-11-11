@@ -1,4 +1,6 @@
 arInit;
-arLoadModel('model_Boehm_JProteomeRes2014');
-arLoadData('measurementData_Boehm_JProteomeRes2014.tsv');
+arLoadModel('FullModel');
+arLoadData('TimeCourseData');
 arCompileAll;
+
+arLoadPars(1)
