@@ -1,5 +1,14 @@
 % arUpdateResultWorkspaces
 % 
+% arUpdateResultWorkspaces(doAutomaticRecompile)
+% 
+%   doAutomaticRecompile [0] 
+%         If ar.fkt is not found (e.g. due to compiling
+%         previously on another OS, arRecompile can be started
+%         automatically if set to 1
+%
+% 
+% 
 % This function loads all available workspaces in ./Results and saves it to
 % update information saved to the latest version. The old workspaces are
 % overwritten.
@@ -11,7 +20,10 @@
 % but the order is preserved, i.e. arLoadLatest loads the same workspaces.
 
 
-function arUpdateResultWorkspaces
+function arUpdateResultWorkspaces(doAutomaticRecompile)
+if ~exist('doAutomaticRecompile','var')
+    doAutomaticRecompile = 0;
+end
 
 global ar
 arIn = arDeepCopy(ar);
@@ -42,7 +54,7 @@ try
     for i=1:length(file_list)
         fprintf('Processing %s ...\n',file_list{rf(i)});
         if exist(['Results',filesep,file_list{rf(i)},filesep,'workspace.mat'],'file')
-            arLoad(file_list{rf(i)});
+            arLoad(file_list{rf(i)},doAutomaticRecompile);
             if ~isempty(ar.model) && isfield(ar.model(1),'sym')
                 withsyms = ~isempty(ar.model(1).sym);
             else

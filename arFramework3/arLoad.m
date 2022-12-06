@@ -1,4 +1,4 @@
-% arLoad(workspace_name)
+% arLoad(workspace_name,doAutomaticRecompile)
 % 
 % arLoad loads a model struct with latest ple results from the repository
 % 
@@ -6,6 +6,11 @@
 %                     ar.config.savepath or
 %                     an integer selected from the list displayed by 
 %                     call arLoad
+% 
+%   doAutomaticRecompile [0] 
+%         If ar.fkt is not found (e.g. due to compiling
+%         previously on another OS, arRecompile can be started
+%         automatically if set to 1
 %
 % Examples
 %    Load workspace from current/last path at ar.config.savepath
@@ -17,7 +22,11 @@
 %
 % See also arLoadLatest, arLoadData, arLoadFilename 
 
-function arLoad(workspace_name)
+function arLoad(workspace_name,doAutomaticRecompile)
+if ~exist('doAutomaticRecompile','var')
+    doAutomaticRecompile = 0;
+end
+
 if ~exist('Results','dir')
     error('No results folder exist. arLoad can only be executed in a D2D working directory.')
 end
@@ -74,7 +83,7 @@ end
 fkt = which([ar.fkt '.' osext]);
 
 if isempty(fkt)
-    fprintf([ar.fkt '.' osext ' not found. Try to copy it from the savefolder... '])  
+    fprintf([ar.fkt '.' osext ' not found. Try to copy it from the savefolder. \n'])  
     files = dir([ar.config.savepath '/' ar.fkt '.' osext]);
     cf_succeed = 0;
     for idf = 1:length(files)
@@ -83,7 +92,11 @@ if isempty(fkt)
         cf_succeed = 1;
     end
     if ~cf_succeed
-        fprintf(' NOT found. Please compile via Setup or ''arRecompile''.\n')
+        if doAutomaticRecompile
+            arRecompile
+        else
+            fprintf([ar.fkt '.' osext '  NOT found. Please compile via Setup or ''arRecompile'' or set option doAutomaticRecompile=1.\n'])
+        end
     end
 end
 
