@@ -1,12 +1,21 @@
-%function [] = arCollectResCov()
+%function [] = arCollectResCov(sensi)
 % This function creates a "covariance version" ar.resCov of the residuals 
-% array ar.res. This is done by replacing those resiudals of type 
-% ar.res_type==1 and ar.res_type==2 (see arCollectRes docu). This function  
-% is called in certain merit functions in arFit.
+% array ar.res. This is done by replacing the ordinary residuals of type 
+% ar.res_type==1 and ar.res_type==2 (see arCollectRes) by the transformed 
+% ones (see arCalcResCov). This function is called subsequent to
+% arCalcResCov in certain merit functions in arFit (optimizer 20 and 21) as
+% well as in arGetMerit (if ar.chi2cov is used).
 %
+% The following fields in the ar struct are filled by this function:
+%      ar.resCov
+%      ar.sresCov
+%      ar.chi2cov
+%      ar.chi2err_cov
+%      ar.chi2cov_fit
 %
+% see also arCalcResCov, arFit, arGetMerit, arCollectRes
 
-function [] = arCollectResCov()
+function [] = arCollectResCov(sensi)
 if ~exist('sensi','var') || isempty(sensi)
     sensi = 1;
 end
@@ -19,8 +28,9 @@ end
 if(~isfield(ar,'sresCov'))
     ar.sresCov = [];
 end
-ar.chi2Cov = 0;
-ar.chi2errCov = 0;
+ar.chi2cov = 0;
+ar.chi2err_cov = 0;
+ar.chi2cov_fit = 0;
 
 np = length(ar.p);
 
@@ -38,7 +48,7 @@ for jm = 1:length(ar.model)
     if(isfield(ar.model(jm), 'data'))
         for jd = 1:length(ar.model(jm).data)
             if(ar.model(jm).data(jd).has_yExp)
-                ar.chi2Cov = ar.chi2Cov + sum(ar.model(jm).data(jd).chi2Cov(ar.model(jm).data(jd).qFit==1));
+                ar.chi2cov = ar.chi2cov + sum(ar.model(jm).data(jd).chi2cov(ar.model(jm).data(jd).qFit==1));
                 
                 if(useMSextension && isfield(ar, 'ms_count_snips') && ~isempty(ar.model(jm).data(jd).ms_index))
                     
@@ -60,8 +70,8 @@ for jm = 1:length(ar.model)
                     resindex = resindex+length(tmpres(:));
                     
                     if( fiterrors )                        
-                        ar.chi2errCov = ar.chi2errCov + sum(ar.model(jm).data(jd).chi2errCov(ar.model(jm).data(jd).qFit==1));
-                        tmpreserr = ar.model(jm).data(jd).reserr(:,ar.model(jm).data(jd).qFit==1);
+                        ar.chi2err_cov = ar.chi2err_cov + sum(ar.model(jm).data(jd).chi2err_cov(ar.model(jm).data(jd).qFit==1));
+                        tmpreserr = ar.model(jm).data(jd).reserrCov(:,ar.model(jm).data(jd).qFit==1);
                         ar.resCov(resindex:(resindex+length(tmpreserr(:))-1)) = tmpreserr;
                         %{
                         ar.res_type(resindex:(resindex+length(tmpreserr(:))-1)) = 2;
@@ -137,6 +147,8 @@ for jm = 1:length(ar.model)
         end
     end
 end
+
+ar.chi2cov_fit = ar.chi2cov + ar.chi2err_cov;
 
 end
 

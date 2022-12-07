@@ -1,0 +1,16 @@
+DESCRIPTION
+
+PREDICTOR
+t               T   min         time	0	100
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+COVARIANCE
+B_au     "cov_B"
+C_au     "cov_C"
+        
+CONDITIONS

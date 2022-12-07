@@ -183,7 +183,9 @@ end
 
 function chi2 = arPLEMerit
 global ar
-if ar.config.fiterrors == 1 || (ar.config.fiterrors == 0 && sum(ar.qFit(ar.qError==1)<2)>0)
+if any(ar.qCov(ar.qFit<2)==1) && (ar.config.optimizer==20 || ar.config.optimizer==21) % if any covariance is fitted
+    chi2 = 2 * ar.ndata*log(sqrt(2*pi)) + arGetMerit('chi2cov_fit');
+elseif ar.config.fiterrors == 1 || (ar.config.fiterrors == 0 && sum(ar.qFit(ar.qError==1)<2)>0)
     chi2 = 2*ar.ndata*log(sqrt(2*pi)) + arGetMerit('chi2fit');
 % elseif(ar.config.useFitErrorMatrix==1 && sum(sum(ar.config.fiterrors_matrix==1))>0)
 %     chi2 = 2*ar.ndata_err*log(sqrt(2*pi)) + arGetMerit('chi2fit');

@@ -564,7 +564,7 @@ elseif(ar.config.optimizer == 19)
     
 % TODO: Automatically delete the automatically generated file  called ess_report.mat
 
-% covariance with lsqnonlin
+% covariance estimation with lsqnonlin
 elseif(ar.config.optimizer == 20)
  %   fprintf( 'Estimating covariance structure.\n' );
     if ~any(ar.qCov==1)
@@ -573,7 +573,7 @@ elseif(ar.config.optimizer == 20)
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         lsqnonlin(@merit_fkt_cov, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
     
-% covariance with fmincon
+% covariance estimation with fmincon
 elseif(ar.config.optimizer == 21)
  %   fprintf( 'Estimating covariance structure.\n' );
     if ~any(ar.qCov==1)
@@ -581,18 +581,33 @@ elseif(ar.config.optimizer == 21)
     end
     options = optimset('fmincon');
     options.GradObj = 'on';
+    options.GradConstr = 'on';
     options.TolFun = ar.config.optim.TolFun;
     options.TolX = ar.config.optim.TolX;
     options.Display = ar.config.optim.Display;
     options.MaxIter = ar.config.optim.MaxIter;
-    options.MaxFunEvals = ar.config.optim.MaxFunEvals;
     options.OutputFcn = ar.config.optim.OutputFcn;
-    %options.CheckGradients = true;
+    
+    options.Algorithm = 'interior-point';
+    % options.Algorithm = 'trust-region-reflective';
+    options.SubproblemAlgorithm = 'cg';
+    % options.Hessian = 'fin-diff-grads';
+    options.Hessian = 'user-supplied';
+    options.HessFcn = @fmincon_hessianfcn;
+    % options2.InitBarrierParam = 1e+6;
+    % options2.InitTrustRegionRadius = 1e-1;
+    
+    switch options.Algorithm
+        case 'interior-point'
+            myconfun = @confun;
+        case 'trust-region-reflective'
+            myconfun = [];
+    end
 
     [pFit, ~, exitflag, output, lambda, grad] = ...
         fmincon(@merit_fkt_fmincon_cov, ar.p(ar.qFit==1),[],[],[],[],lb,ub, ...
-        [],options);
-    resnorm = [] ; % merit_fkt(pFit);
+        myconfun,options);
+    resnorm = merit_fkt(pFit);
     jac = [];
     fit.grad = grad;
 else
@@ -900,13 +915,13 @@ end
 sensi = ar.config.useSensis;% && (~sensiskip || (nargout > 1));
 
 arCalcMerit(sensi, pTrial);
-arCalcResCov;
-arCollectResCov;
+arCalcResCov(1);
+arCollectResCov(1);
 arLogFit(ar);
 res = [ar.resCov ar.constr];
 if(nargout>1 && ar.config.useSensis)
     sres = [];
-    if(~isempty(ar.sres))
+    if(~isempty(ar.sresCov))
         sres = ar.sresCov(:, ar.qFit==1);
     end
     if(~isempty(ar.sconstr))
@@ -930,24 +945,23 @@ if ( numel(res) < np )
 end
 
 % covariance estimation with fmincon
-function [l, g] = merit_fkt_fmincon_cov(pTrial)
+function [l, g, H] = merit_fkt_fmincon_cov(pTrial)
 global ar
-if nargout > 1
-    arCalcMerit(1, pTrial);
-    arCalcResCov(1);
-    arCollectResCov(1);
-    arLogFit(ar);
-    l = ar.chi2Cov;
-    g = ar.schi2Cov(ar.qFit==1);
-    if(~isempty(ar.sconstr))
-       l = l + sum(ar.constr.^2); 
-       g = g + 2 * ar.constr * ar.sconstr(:, ar.qFit==1);
-    end
-else
-    arCalcMerit(0, pTrial);
-    arCalcResCov(0);
-    arCollectResCov(0);
-    l = ar.chi2Cov + sum(ar.constr.^2);
+arCalcMerit(ar.config.useSensis, pTrial);
+arCalcResCov(ar.config.useSensis);
+arCollectResCov(ar.config.useSensis);
+arLogFit(ar);
+l = sum(ar.resCov.^2);
+if(nargout>1)
+    g = 2*ar.resCov*ar.sresCov(:, ar.qFit==1);
+end
+if(nargout>2)
+    type3_ind = ar.type == 3;
+    type3_ind = type3_ind(ar.qFit==1);
+    type5_ind = (ar.type == 5 ) & (ar.qFit == 1);
+    
+    H = 2*ar.sresCov(:, ar.qFit==1)'*ar.sresCov(:, ar.qFit==1);
+    H(type3_ind,type3_ind) = H(type3_ind,type3_ind) .* ~eye(sum(type3_ind));
 end
 
 % plot fitting

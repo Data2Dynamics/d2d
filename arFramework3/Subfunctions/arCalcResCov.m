@@ -4,6 +4,16 @@
 %
 %       sensi   should sensitivities sres, sreserr be calculated?
 %               [sensi=1]
+%
+% The following fields in the ar struct are filled by this function:
+%      ar.model(...).data(...).resCov
+%      ar.model(...).data(...).reserrCov
+%      ar.model(...).data(...).chi2cov
+%      ar.model(...).data(...).chi2err_cov
+%      ar.model(...).data(...).sresCov
+%      ar.model(...).data(...).sreserrCov
+%
+% see also arCollectResCov, arFit, arGetMerit
 
 function [] = arCalcResCov(sensi)
 if ~exist('sensi','var') || isempty(sensi)
@@ -15,9 +25,12 @@ global ar
 for idm = 1:length(ar.model)
     if(isfield(ar.model(idm), 'data'))
         for idd = 1:length(ar.model.data)
-            [ar.model(idm).data(idd).resCov, ar.model(idm).data(idd).chi2Cov] = ...
+            
+            checkTimePoints(idm,idd);
+            
+            [ar.model(idm).data(idd).resCov, ar.model(idm).data(idd).chi2cov] = ...
                 calcResCov(idm,idd);
-            [ar.model(idm).data(idd).reserrCov, ar.model(idm).data(idd).chi2errCov] = ...
+            [ar.model(idm).data(idd).reserrCov, ar.model(idm).data(idd).chi2err_cov] = ...
                 calcReserrCov(idm,idd);
             if sensi
                 ar.model(idm).data(idd).sresCov = ...
@@ -32,7 +45,7 @@ end
 end
 
 
-function [resCov,chi2Cov] = calcResCov(idm,idd)
+function [resCov,chi2cov] = calcResCov(idm,idd)
 
 global ar
 
@@ -45,23 +58,29 @@ for idy = 1:size(res,2)
     
     resCov(:,idy) = 1./sqrt(1-phis.^2) .* (res_idy - phis .* res_idy_minusOne);
 end
-chi2Cov = sum(resCov.^2,1);
+chi2cov = sum(resCov.^2,1);
 
 end
 
-function [reserrCov, chi2errCov] = calcReserrCov(idm,idd)
+function [reserrCov, chi2err_cov] = calcReserrCov(idm,idd)
 
 global ar
 
 reserr = ar.model(idm).data(idd).reserr;% nTimes x nObs
 reserrCov = nan(size(reserr));
+chi2err_cov = ar.model(idm).data(idd).chi2err;
 for idy = 1:size(reserr,2)
     reserr_idy = reserr(:,idy);
     phis = getPhis(idm,idd,idy);
     
-    reserrCov(:,idy) = reserr_idy + log(1-phis.^2);
+    reserrCov_idy_2 = reserr_idy.^2 + log(1-phis.^2);
+    if(sum(reserrCov_idy_2(:) < 0)>0)
+        error('arCalcResCov/calcReserrCov: covariance error residual get imaginary. Increase ar.config.add_c!');
+    else 
+        reserrCov(:,idy) = sqrt(reserrCov_idy_2); %reserr_idy includes ar.config.add_c already
+        chi2err_cov(idy) = chi2err_cov(idy) + sum(log(1-phis.^2),1);
+    end
 end
-chi2errCov = sum(reserrCov.^2,1) - ar.config.add_c*sum(abs(reserrCov)>0,1);  
 
 end
 
@@ -86,7 +105,10 @@ for idy = 1:size(res,2)
     for idp = 1:length(ar.model(idm).data(idd).p)
         if idp==idpCov
             sresCov(:,idy,idp) = ...
-                (1-phis.^2).^(-1.5) .* dphis_dcov .* (phis .* res_idy - res_idy_minusOne);
+                dphis_dcov .* ( ...
+                res_idy .* phis .* (1-phis.^2).^(-1.5) - ...
+                res_idy_minusOne .* (1-phis.^2).^(-1.5) ...
+                );
         else
             sresCov(:,idy,idp) = ...
                 1./sqrt(1-phis.^2) .* (sres(:,idy,idp) - phis .* sresIdxMinusOne(:,idy,idp));
@@ -100,14 +122,18 @@ function [sreserrCov] = calcSensiReserrCov(idm,idd)
 
 global ar
 
+reserr = ar.model(idm).data(idd).reserr;% nTimes x nObs
+reserrCov = ar.model(idm).data(idd).reserrCov;% nTimes x nObs
 sreserr = ar.model(idm).data(idd).sreserr;% nTimes x nObs x nPars
 
-sreserrCov = sreserr;
+sreserrCov = (reserr./reserrCov) .* sreserr;
 for idy = 1:size(sreserr,2)
-    [phis, dphis_dcov] = getPhis(idm,idd,idy);
-    
     idpCov = find(strcmp(ar.model(idm).data(idd).p,ar.model(idm).data(idd).pcov(idy)));
-    sreserrCov(:,idy,idpCov) = -2 .* phis./(1-phis).^2 .* dphis_dcov;
+    if ~isempty(idpCov)
+        [phis, dphis_dcov] = getPhis(idm,idd,idy);
+        sreserrCov(:,idy,idpCov) = sreserrCov(:,idy,idpCov) - ...
+            1./reserrCov(:,idy) .* phis./(1-phis.^2) .* dphis_dcov;
+    end
 end
 
 end
@@ -130,7 +156,9 @@ if any(ar.model(idm).data(idd).pcovLink(idy,:))
         sdCov = ar.p(ar.model(idm).data(idd).pcovLink(idy,:)==1);
     end
 else
-    sdCov = 0;
+    phis = zeros(length(tExp),1);
+    dphis_dcov = zeros(length(tExp),1);
+    return
 end
 
 if sdCov >= 1
@@ -146,7 +174,22 @@ end
 
 phis = [0; sdCov.^abs(diff(tExp))];
 if nargout==2
-    dphis_dcov = [0; abs(diff(tExp)) .* sdCov.^(abs(diff(tExp))-1)];
+    if ar.qLog10(ar.model(idm).data(idd).pcovLink(idy,:)==1)
+        dphis_dcov = log(10) .* [0; abs(diff(tExp)) .* sdCov.^(abs(diff(tExp)))];
+    else
+        dphis_dcov = [0; abs(diff(tExp)) .* sdCov.^(abs(diff(tExp))-1)];
+    end
+end
+
+end
+
+
+function checkTimePoints(idm,idd)
+
+global ar
+
+if length(unique(ar.model(1).data(1).tExp)) ~= length(ar.model(1).data(1).tExp)
+    error('arCalcResCov: covariance error model not applicable for duplicate time points!')
 end
 
 end

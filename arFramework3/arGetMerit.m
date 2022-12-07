@@ -132,7 +132,19 @@ if nargout == 1
             varargout{1} = ar.chi2constr;
             return
         case 'chi2cov'
+            arCalcResCov(1);
+            arCollectResCov(1);
             varargout{1} = ar.chi2cov;
+            return
+        case 'chi2err_cov'
+            arCalcResCov(1);
+            arCollectResCov(1);
+            varargout{1} = ar.chi2err_cov;
+            return
+        case 'chi2cov_fit'
+            arCalcResCov(1);
+            arCollectResCov(1);
+            varargout{1} = ar.chi2cov_fit;
             return
     end
 end
@@ -151,6 +163,11 @@ meritvals.chi2_constr   = ar.chi2constr;
 meritvals.chi2_prior    = ar.chi2prior;
 meritvals.chi2_random   = ar.chi2random;
 meritvals.chi2          = ar.chi2;
+arCalcResCov(1);
+arCollectResCov(1);
+meritvals.chi2cov       = ar.chi2cov;
+meritvals.chi2err_cov    = ar.chi2err_cov;
+meritvals.chi2cov_fit    = ar.chi2cov_fit;
 
 npara = sum(ar.qFit==1);
 meritvals.bic           =   npara*log(ar.ndata) + meritvals.loglik;
@@ -216,16 +233,24 @@ switch lower(whichone)  % case insensitive
         meritLabel = '\chi^2';
         
     case 'chi2cov'
-        meritval = ar.chi2cov;
+        meritval = meritvals.chi2cov;
         meritLabel = '\chi^2_{cov}';
+        
+    case 'chi2err_cov'
+        meritval = meritvals.chi2err_cov;
+        meritLabel = '\chi^2_{errCov}';
+        
+    case 'chi2cov_fit'
+        meritval = meritvals.chi2cov_fit;
+        meritLabel = '\chi^2_{covFit}';
         
     otherwise  % default merit used for optimization
         if ~isempty(whichone)
             error('arGetMerit.m: whichone=%s is not implemented',whichone)
         else
             if any(ar.qCov(ar.qFit<2)==1) && (ar.config.optimizer==20 || ar.config.optimizer==21) % if any covariance is fitted
-                meritval = ar.chi2cov + 2 * ar.ndata*log(sqrt(2*pi));
-                meritLabel = '\chi^2_{cov}';
+                meritval = meritvals.chi2cov_fit + 2 * ar.ndata*log(sqrt(2*pi));
+                meritLabel = '\chi^2_{covFit}';
                 if(~silent)
                     arFprintf(1, '-2*log(L) = %g, %i data points, covariance estimation on, ', ...
                         meritval, meritvals.ndata);
