@@ -12,7 +12,8 @@
 %               'loglik'        the likelihood except ar.chi2constr
 %               'chi2fit'       total chi2 except ar.chi2constr
 %               'chi2_all'      the total chi2 incl. ar.chi2constr
-%               'chi2cov'       generalized
+%               'chi2cov_fit'   total chi2 except ar.chi2constr for
+%               covarianc
 % 
 %               The argument whichone can be used to keep the old
 %               terminology.

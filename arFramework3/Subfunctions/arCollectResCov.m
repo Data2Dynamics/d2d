@@ -12,6 +12,8 @@
 %      ar.chi2cov
 %      ar.chi2err_cov
 %      ar.chi2cov_fit
+% They are used in the "covariance optimizers", i.e. ar.config.optimizer=20
+% or 21.
 %
 % see also arCalcResCov, arFit, arGetMerit, arCollectRes
 

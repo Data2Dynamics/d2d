@@ -1,6 +1,22 @@
+%function [Sigma, dSigma_dp] = arCalcCovarianceMatrix(idm,idd,idy)
+% This function calculates the covariance matrix for a certain observable.
+%
+%    idm   model index in ar struct
+%    idd   data index in ar struct
+%    idy   observable index in ar struct
+%
+%    Sigma      covariance matrix
+%    dSigma_dp  gradient of covariance matrix wrt parameters (not needed)
+%               as gradient is computed differently in arCalcResCov
+%
+
 function [Sigma, dSigma_dp] = arCalcCovarianceMatrix(idm,idd,idy)
 
 global ar
+
+if length(unique(ar.model(1).data(1).tExp)) ~= length(ar.model(1).data(1).tExp)
+    error('arCalcCovarianceMatrix: covariance error model not applicable for duplicate time points!')
+end
 
 sd = ar.model(idm).data(idd).ystdExpSimu(:,idy);
 tExp = ar.model(idm).data(idd).tExp;
