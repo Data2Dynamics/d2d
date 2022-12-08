@@ -12,6 +12,7 @@
 %               'loglik'        the likelihood except ar.chi2constr
 %               'chi2fit'       total chi2 except ar.chi2constr
 %               'chi2_all'      the total chi2 incl. ar.chi2constr
+%               'chi2cov'       generalized
 % 
 %               The argument whichone can be used to keep the old
 %               terminology.
@@ -163,11 +164,13 @@ meritvals.chi2_constr   = ar.chi2constr;
 meritvals.chi2_prior    = ar.chi2prior;
 meritvals.chi2_random   = ar.chi2random;
 meritvals.chi2          = ar.chi2;
-arCalcResCov(1);
-arCollectResCov(1);
-meritvals.chi2cov       = ar.chi2cov;
-meritvals.chi2err_cov    = ar.chi2err_cov;
-meritvals.chi2cov_fit    = ar.chi2cov_fit;
+if isfield(ar,'qCov') && any(ar.qCov(ar.qFit<2)==1) && (ar.config.optimizer==20 | ar.config.optimizer==21)
+    arCalcResCov(1);
+    arCollectResCov(1);
+    meritvals.chi2cov       = ar.chi2cov;
+    meritvals.chi2err_cov    = ar.chi2err_cov;
+    meritvals.chi2cov_fit    = ar.chi2cov_fit;
+end
 
 npara = sum(ar.qFit==1);
 meritvals.bic           =   npara*log(ar.ndata) + meritvals.loglik;

@@ -178,24 +178,26 @@ if(sum(ar.qFit==1)<=0)
     error('No parameters are allowed to be fitted. Check ar.qFit.')
 end
 
+if isfield(ar,'qCov') && any(ar.qCov==1)
+    if ~(ar.config.optimizer==20) && ~(ar.config.optimizer==21)
+        persistent didwarncov
+        if isempty(didwarncov)
+            didwarncov = 0;
+        else
+            didwarncov = 1;
+        end
+        if didwarncov == 0
+            warning('Covariance estimation is only working with ar.config.optimizer = 20 or 21')
+        end
+    end
+end
+
 ub = ar.ub;
 lb = ar.lb;
 ub(ar.type==2) = ub(ar.type==2) + 1;
 lb(ar.type==2) = lb(ar.type==2) - 1;
 ub = ub(ar.qFit==1);
 lb = lb(ar.qFit==1);
-
-if any(ar.qCov==1) && ~(ar.config.optimizer==20) && ~(ar.config.optimizer==21)
-    persistent didwarncov
-    if isempty(didwarncov)
-        didwarncov = 0;
-    else
-        didwarncov = 1;
-    end
-    if didwarncov == 0
-        warning('Covariance estimation is only working with ar.config.optimizer = 20 or 21')
-    end
-end
 
 % Make a backup of the parameters before we start
 arPush('arFit');
@@ -567,8 +569,8 @@ elseif(ar.config.optimizer == 19)
 % covariance estimation with lsqnonlin
 elseif(ar.config.optimizer == 20)
  %   fprintf( 'Estimating covariance structure.\n' );
-    if ~any(ar.qCov==1)
-       error('No covariance parameter specified.') 
+    if ~isfield(ar,'qCov') || ~any(ar.qCov==1)
+       error('No covariance parameter specified. Choose other optimizer!') 
     end
     [pFit, ~, resnorm, exitflag, output, lambda, jac] = ...
         lsqnonlin(@merit_fkt_cov, ar.p(ar.qFit==1), lb, ub, ar.config.optim);
@@ -576,8 +578,8 @@ elseif(ar.config.optimizer == 20)
 % covariance estimation with fmincon
 elseif(ar.config.optimizer == 21)
  %   fprintf( 'Estimating covariance structure.\n' );
-    if ~any(ar.qCov==1)
-       error('No covariance parameter specified.') 
+    if ~isfield(ar,'qCov') || ~any(ar.qCov==1)
+       error('No covariance parameter specified. Choose other optimizer!') 
     end
     options = optimset('fmincon');
     options.GradObj = 'on';
