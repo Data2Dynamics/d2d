@@ -1,5 +1,6 @@
 %function [Sigma, dSigma_dp] = arCalcCovarianceMatrix(idm,idd,idy)
 % This function calculates the covariance matrix for a certain observable.
+% It is called in arSimuData.
 %
 %    idm   model index in ar struct
 %    idd   data index in ar struct
@@ -9,6 +10,7 @@
 %    dSigma_dp  gradient of covariance matrix wrt parameters (not needed)
 %               as gradient is computed differently in arCalcResCov
 %
+% see also arSimuData
 
 function [Sigma, dSigma_dp] = arCalcCovarianceMatrix(idm,idd,idy)
 
