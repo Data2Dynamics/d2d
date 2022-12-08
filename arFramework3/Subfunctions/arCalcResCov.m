@@ -144,6 +144,7 @@ global ar
 
 sd = ar.model(idm).data(idd).ystdExpSimu(:,idy);
 tExp = ar.model(idm).data(idd).tExp;
+yExp = ar.model(idm).data(idd).yExp(:,idy);
 
 idnan = isnan(sd);
 sd(idnan) = [];
@@ -156,8 +157,8 @@ if any(ar.model(idm).data(idd).pcovLink(idy,:))
         sdCov = ar.p(ar.model(idm).data(idd).pcovLink(idy,:)==1);
     end
 else
-    phis = zeros(length(tExp),1);
-    dphis_dcov = zeros(length(tExp),1);
+    phis = zeros(length(yExp),1);
+    dphis_dcov = zeros(length(yExp),1);
     return
 end
 
