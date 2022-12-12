@@ -155,8 +155,8 @@ copyfile(which('assurechemist.sty'), [savePath '/assurechemist.sty']);
 copyfile(which('chemist.sty'), [savePath '/chemist.sty']);
 
 % latex file
-fname = 'report.tex';
-fnamebib = 'report.aux';
+fname = 'MiniReport.tex';
+fnamebib = 'MiniReport.aux';
 fprintf('writing latex, file %s...', fname);
 fid = fopen([savePath '/' fname], 'w');
 
@@ -1556,10 +1556,10 @@ if(isunix && ~ismac)
     eval(['!pdflatex ' fname ' > log_pdflatex.txt']);
     cd('../../..');
     try
-        copyfile([savePath '/' 'report.pdf'], [savePath '/' sprintf('report_%s.pdf', datestr(now,30))])
+        copyfile([savePath '/' 'MiniReport.pdf'], [savePath '/' sprintf('report_%s.pdf', datestr(now,30))])
         fprintf('done\n');
     catch
-        fprintf('report.pdf was not written correctly\n');
+        fprintf('MiniReport.pdf was not written correctly\n');
     end
 elseif(ismac)
     fprintf('pdflatex, file %s...', fname);
@@ -1570,10 +1570,10 @@ elseif(ismac)
     eval(['!/usr/texbin/pdflatex ' fname ' > log_pdflatex.txt']);
     cd('../../..');
     try
-        copyfile([savePath '/' 'report.pdf'], [savePath '/' sprintf('report_%s.pdf', datestr(now,30))])
+        copyfile([savePath '/' 'MiniReport.pdf'], [savePath '/' sprintf('report_%s.pdf', datestr(now,30))])
         fprintf('done\n');
     catch
-        fprintf('report.pdf was not written correctly\n');
+        fprintf('MiniReport.pdf was not written correctly\n');
     end
 end
 setenv('LD_LIBRARY_PATH', library_path);
