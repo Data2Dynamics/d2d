@@ -1,4 +1,4 @@
-% Sometimes wider bounds are reasonable, i.e. less conservative
+% Sometimes broader bounds are reasonable, i.e. less conservative
 % restriction, e.g. if many data points are available. Then boundfactor can
 % be set to >1.
 
@@ -10,31 +10,32 @@ global ar
 
 ar.fit_transient = struct;
 
-ar.fit_transient.indp.toffset    = strmatch('toffset_TF',ar.pLabel);
-ar.fit_transient.indp.signum    = strmatch('signum_TF',ar.pLabel);
-ar.fit_transient.indp.offset    = strmatch('offset_TF',ar.pLabel);
-ar.fit_transient.indp.amp_sust  = strmatch('amp_sust',ar.pLabel);
-ar.fit_transient.indp.amp_trans = strmatch('amp_trans',ar.pLabel);
-ar.fit_transient.indp.timescale_sust = strmatch('timescale_sust',ar.pLabel);
-ar.fit_transient.indp.timescale_trans = strmatch('timescale_trans',ar.pLabel);
-ar.fit_transient.indp.sd = strmatch('sd_TF',ar.pLabel);
+name_patterns = struct;
+name_patterns.signum = 'signum_TF';
+name_patterns.toffset = 'toffset_TF';
+name_patterns.offset = 'offset_TF';
+name_patterns.amp_sust = 'amp_sust';
+name_patterns.amp_trans = 'amp_trans';
+name_patterns.timescale_sust = 'timescale_sust';
+name_patterns.timescale_trans = 'timescale_trans';
+name_patterns.sd = 'sd_TF';
 
-ar.fit_transient.indp.all = [ar.fit_transient.indp.amp_sust,...
-    ar.fit_transient.indp.amp_trans,...
-    ar.fit_transient.indp.offset,...
-    ar.fit_transient.indp.timescale_sust,...
-    ar.fit_transient.indp.timescale_trans,...
-    ar.fit_transient.indp.sd ,...
-    ar.fit_transient.indp.signum];
+% Find parameters of the TF in ar.pLabel
+pnamesTF = fieldnames(name_patterns);
+ar.fit_transient.pnameTF = pnamesTF;
+ar.fit_transient.indp.all = [];
+for ip=1:length(pnamesTF)
+    ar.fit_transient.indp.(pnamesTF{ip})    = strmatch(name_patterns.(pnamesTF{ip}),ar.pLabel);
+    if isempty(ar.fit_transient.indp.(pnamesTF{ip}))
+        warning('Initialize_FitTransient.m: ''%s'' not found.',pnamesTF{ip})
+    else
+        ar.fit_transient.indp.all = [ar.fit_transient.indp.(pnamesTF{ip})];
+    end
+    if length(ar.fit_transient.indp.(pnamesTF{ip})) ~= length(ar.fit_transient.indp.(pnamesTF{1}))        
+        warning('%s: The number of different parameter-types of the transient function should be equal. \nMay be detection by name does not work. Check parameter names!',pnamesTF{ip});
+    end
+end    
 
-
-if length(ar.fit_transient.indp.signum) ~= length(ar.fit_transient.indp.offset) || ...
-   length(ar.fit_transient.indp.signum) ~= length(ar.fit_transient.indp.amp_sust) || ...
-   length(ar.fit_transient.indp.signum) ~= length(ar.fit_transient.indp.amp_trans) || ...
-   length(ar.fit_transient.indp.signum) ~= length(ar.fit_transient.indp.timescale_sust) || ...
-   length(ar.fit_transient.indp.signum) ~= length(ar.fit_transient.indp.timescale_trans)
-   warning('The number of different parameter-types of the transient function should be equal. \nMay be detection by name does not work. Check parameter names!');
-end 
 
 % determine the parameter -> data relationship
 % t, yexp, ystd is required for specifying reasonable bounds
@@ -92,7 +93,6 @@ end
 
 
 [ar.fit_transient.bounds,ar.fit_transient.boundsNeg] = DefaultLbUbTransient;
-
 
 ind = ar.fit_transient.indp.all;
 for i=1:length(ind)

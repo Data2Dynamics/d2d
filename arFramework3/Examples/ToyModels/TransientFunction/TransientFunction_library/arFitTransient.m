@@ -12,7 +12,7 @@
 %   - for LRT for testing f = constant
 %   - for LRT for testing offset=0
 % 
-%   The signums are first set to +1. Then one ofter the other signum is set
+%   The signums are first set to +1. Then one of the other signum is set
 %   to -1 and it is checked whether the fit improves.
 % 
 %   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -29,8 +29,12 @@ else
     doReduction = true;
 end
 
-ar.lb = ar.fit_transient.bounds.lb;
-ar.ub = ar.fit_transient.bounds.ub;
+% ar.lb = ar.fit_transient.bounds.lb;
+% ar.ub = ar.fit_transient.bounds.ub;
+[~,ia,ib] = intersect(ar.pLabel,ar.fit_transient.bounds.lb);
+ar.lb(ia) = ar.fit_transient.bounds.lb(ib);
+[~,ia,ib] = intersect(ar.pLabel,ar.fit_transient.bounds.ub);
+ar.ub(ia) = ar.fit_transient.bounds.ub(ib);
 
 indsig = ar.fit_transient.indp.signum;
 
