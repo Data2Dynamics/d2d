@@ -299,7 +299,7 @@ for jm = 1:length(ar.model)
                             t_ppl = [];
                             y_ppl_ub = [];
                             y_ppl_lb = [];
-                        else
+                        else % time course
                             [t, y, ystd, tExp, yExp, yExpStd, lb, ub, yExpHl, dydt, ...
                                 y_ssa, y_ssa_lb, y_ssa_ub, qFit, t_ppl, y_ppl_ub, y_ppl_lb] = arGetData(jm, jd, jtype);
                             plotopt = NaN(1,size(y,2));
