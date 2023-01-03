@@ -469,16 +469,16 @@ function [M] = GetParameters(M,m)
                 M.parameter(id_tmp).level = 2;
                 M.parameter(id_tmp).version = 4;
 
-%                 qp = ismember(ar.pLabel, ar.model(m).p(id)); %R2013a compatible
-%                 if(sum(qp)==1)
-%                     pvalue = ar.p(qp);
-%                     if(ar.qLog10(qp) == 1)
-% 
-%                         pvalue = 10^pvalue;
-%                     end
-%                 else
-                    pvalue = 1;
-%                 end
+                qp = ismember(ar.pLabel, ar.model(m).p(id)); %R2013a compatible
+                if(sum(qp)==1)
+                    pvalue = ar.p(qp);
+                    if(ar.qLog10(qp) == 1)
+
+                        pvalue = 10^pvalue;
+                    end
+                else
+                    pvalue = ar.p(id);
+                end
                 M.parameter(id_tmp).value = pvalue;
             end
         end
@@ -756,7 +756,7 @@ function [M] = GetInputs(M,F,m)
                         M.event(ixevent).trigger.notes =  '';
                         M.event(ixevent).trigger.annotation =  '';
                         M.event(ixevent).trigger.sboTerm =  -1;
-                        M.event(ixevent).trigger.math = sprintf('gt(%s)',heaviside_timePoints{jh});
+                        M.event(ixevent).trigger.math = sprintf('ge(%s)',heaviside_timePoints{jh});
                         M.event(ixevent).trigger.level =  2;
                         M.event(ixevent).trigger.version =  4;
 
@@ -936,7 +936,7 @@ function [M] = GetInputs(M,F,m)
                     M.event(ixevent).trigger.annotation =  '';
                     M.event(ixevent).trigger.sboTerm =  -1;
                     %M.event(ixevent).trigger.math = sprintf('time gt(%s)',num2str(spline_times(jh)));
-                    M.event(ixevent).trigger.math = sprintf('gt(time,%i)',spline_times(jh));
+                    M.event(ixevent).trigger.math = sprintf('ge(time,%i)',spline_times(jh));
                     M.event(ixevent).trigger.level =  2;
                     M.event(ixevent).trigger.version =  4;
 

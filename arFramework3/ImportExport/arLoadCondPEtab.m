@@ -78,8 +78,10 @@ for m = 1:length(ar.model)
                         %                             num2str(T.(fns{k})(i));
                         
                         if isnumeric(T.(fns{k})) % if condition parameter is replaced by a parameter instead of number
-                            ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
-                                num2str(T.(fns{k})(i));
+                            if sum(ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k})))==length(T.(fns{k})(i)) % if not ismember, can't replace
+                                ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
+                                    num2str(T.(fns{k})(i));
+                            end
                         else
                             % Check if parameter has already been replaced
                             % with the correct condition specific par
