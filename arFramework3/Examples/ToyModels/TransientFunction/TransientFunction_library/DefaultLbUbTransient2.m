@@ -42,8 +42,8 @@ end
 ind = ar.fit_transient.indp.toffset;
 for i=1:length(ind)
     [t,y,D] = getData(ar.pLabel{ind(i)});
-    bounds.lb(ind(i)) = nanmin(t)-1;
-    bounds.ub(ind(i)) = nanmin(t)+5; % half of the time course, (after rescaling the new time axis has length=10  
+    bounds.lb(ind(i)) = nanmin(t)-2;
+    bounds.ub(ind(i)) = nanmin(t)+9; % half of the time course, (after rescaling the new time axis has length=10  
     if(ar.qLog10(ind(i))==1)
         bounds.lb(ind(i)) = log10(bounds.lb(ind(i)));
         bounds.ub(ind(i)) = log10(bounds.ub(ind(i)));        
@@ -84,7 +84,7 @@ end
 indOffset = ar.fit_transient.indp.offset;
 for i=1:length(indOffset)
     [t,y,D] = getData(ar.pLabel{indOffset(i)});
-    bounds.lb(indOffset(i)) = nanmin(y)-0.5*D;
+    bounds.lb(indOffset(i)) = nanmin(y);%-0.5*D;
 %          bounds.lb(indOffset(i)) = max(0, bounds.lb(indOffset(i)));
     
     bounds.ub(indOffset(i)) = nanmax(y);
@@ -104,12 +104,12 @@ end
 ind = ar.fit_transient.indp.timescale_sust;
 for i=1:length(ind)
     [t,y,D] = getData(ar.pLabel{ind(i)});
-    if length(t)<10
+  %  if length(t)<10
         bounds.lb(ind(i)) = (t(2)-t(1))/2;
-    else
-        bounds.lb(ind(i)) = (t(2)-t(1));
-    end
-    bounds.lb(ind(i)) = max(bounds.lb(ind),range(t)/100);
+  %  else
+  %      bounds.lb(ind(i)) = (t(2)-t(1));
+  %  end
+  %  bounds.lb(ind(i)) = max(bounds.lb(ind),range(t)/100);
     
     bounds.ub(ind(i)) = 2*range(t);
     if(ar.qLog10(ind(i))==1)

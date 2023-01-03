@@ -143,29 +143,13 @@ for i=1:length(ind)
     ar.ub(ind(i)) = ar.fit_transient.bounds.ub(ind(i));
 end
 
-ind = ar.fit_transient.indp.offset;
+ind = [ar.fit_transient.indp.offset;ar.fit_transient.indp.timescale_sust;ar.fit_transient.indp.timescale_trans];
 for i=1:length(ind)
     ar.p(ind(i)) = mean([ar.fit_transient.bounds.lb(ind(i)),ar.fit_transient.bounds.ub(ind(i))]);
 end
-ind = ar.fit_transient.indp.timescale_sust;
-for i=1:length(ind)
-    ar.p(ind(i)) = mean([ar.fit_transient.bounds.lb(ind(i)),ar.fit_transient.bounds.ub(ind(i))]);
-end
-ind = ar.fit_transient.indp.timescale_trans;
-for i=1:length(ind)
-    ar.p(ind(i)) = mean([ar.fit_transient.bounds.lb(ind(i)),ar.fit_transient.bounds.ub(ind(i))]);
-end
-ind = ar.fit_transient.indp.amp_sust;
-for i=1:length(ind)
-    ar.p(ind(i)) = 0.5*ar.fit_transient.bounds.lb(ind(i))+0.5*ar.fit_transient.bounds.ub(ind(i));  % more towards upper bound
-end
-ind = ar.fit_transient.indp.amp_trans;
-for i=1:length(ind)
-    ar.p(ind(i)) = 0.1*ar.fit_transient.bounds.lb(ind(i))+0.9*ar.fit_transient.bounds.ub(ind(i));  % more towards upper bound
-end
-ind = ar.fit_transient.indp.sd;
+ind = [ar.fit_transient.indp.sd;ar.fit_transient.indp.amp_sust;ar.fit_transient.indp.amp_trans];
 for i=1:length(ind)
     ar.p(ind(i)) = 0.1*ar.fit_transient.bounds.lb(ind(i))+0.9*ar.fit_transient.bounds.ub(ind(i));  % more towards upper bound
 end
 
-ar.p(ar.fit_transient.indp.toffset) = 0; % 
+ar.p(ar.fit_transient.indp.toffset) = max(0,ar.lb(ar.fit_transient.indp.toffset));

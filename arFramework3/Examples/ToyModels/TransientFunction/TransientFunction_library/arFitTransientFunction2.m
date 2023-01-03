@@ -37,7 +37,7 @@ else
 end
 
 if ~exist('boundfactor','var') || isempty(boundfactor)
-    boundfactor = 2;% In this setting (at least 20 data points, the following bounds are better)
+    boundfactor = 1;% In this setting (at least 20 data points, the following bounds are better)
 end
 
 % plotfolder = [plotfolder,'_boundfac',num2str(boundfactor)];
@@ -48,12 +48,24 @@ end
 
 
 %% Step 1: Create data structs from conditions:
-def_file = [fileparts(which('arInit')),filesep,'Examples',filesep,'ToyModels',filesep,'TransientFunction',filesep,'TransientFunction_library',filesep,'TransientFunction_ForConditionFit2.def'];
-copyfile(def_file,'Models');
+%def_file = [fileparts(which('arInit')),filesep,'Examples',filesep,'ToyModels',filesep,'TransientFunction',filesep,'TransientFunction_library',filesep,'TransientFunction_ForConditionFit2.def'];
+def_file = [fileparts(mfilename('fullpath')),filesep,'TransientFunction.def'];
+copyfile(def_file,'Models','f');
+
+%% Check for inf
+if any(isinf(dat.yExp))
+    dat.yExp(isinf(dat.yExp) & dat.yExp>0) = max(dat.yExp(~isinf(dat.yExp)))*2;
+    dat.yExp(isinf(dat.yExp) & dat.yExp<0) = min(dat.yExp(~isinf(dat.yExp)))*2;
+    warning('Set inf value to 2* max/min (depending on sign).')
+end
+if any(isinf(dat.yExp))
+    dat.ystd(isinf(dat.ystd)) = nan;
+    warning('Set inf measurement value to nan.')
+end
 
 global ar
 arInit
-arLoadModel('TransientFunction_ForConditionFit2');
+arLoadModel('TransientFunction');
 
 args = cell(0);
 args{end+1} = 'tExp';       args{end+1} = dat.tExp;
@@ -62,8 +74,8 @@ args{end+1} = 'yExpStd';       args{end+1} = dat.ystd; %*NaN;  % sd not used
 args{end+1} = 'yNames';          args{end+1} = ar.model.yNames;
 args{end+1} = 'y';          args{end+1} = ar.model.y;
 
-['maxt_TF = (',num2str(range(dat.tExp)),')']
-D = arCreateDataStruct(1,{'maxt_TF'},{['(',num2str(range(dat.tExp)),')']},args{:});
+maxt_TF = range(dat.tExp);
+D = arCreateDataStruct(1,{'maxt_TF'},{['(',num2str(maxt_TF),')']},args{:});
 arAddDataStruct(D);
 arCompileAll;
 
@@ -102,6 +114,16 @@ try
     res.label = dat.label;
 catch
     res.label = '';
+end
+
+res.pRescaled = ar.p; % time parameters rescaled to original time scale of the data
+ind = find(contains(ar.pLabel,{'timescale_','toffset_'}));
+for i=1:length(ind)
+    if ar.qLog10(ind(i))
+        res.pRescaled(ind(i)) = log10(maxt_TF* 10^res.pRescaled(ind(i))/10 );
+    else
+        res.pRescaled(ind(i)) = maxt_TF* res.pRescaled(ind(i))/10 ;    
+    end
 end
 
 %         ok{end+1} = struct('p',ar.p,'lb',ar.lb,'ub',ar.ub,'yExp',ar.model.data.yExp,'tExp',ar.model.data.tExp);
