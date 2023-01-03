@@ -28,7 +28,7 @@ else
     plot(fit.data.tExp,fit.data.yExp,'ko','LineWidth',2)
     else
         hold on
-        errorbar2(fit.data.tExp,fit.data.yExp,fit.data.ystd,'ko')
+        errorbar(fit.data.tExp,fit.data.yExp,fit.data.ystd,'ko')
     end
     plot(fit.tFine,fit.yFineSimu,'-','LineWidth',1,'Color',0*ones(1,3));
     set(gca,'FontSize',14,'LineWidth',2)
@@ -45,4 +45,5 @@ else
         ylim([-.1,1.1])
     end
     title(strrep(fit.label,'_','\_'));
+    saveas(gcf,sprintf('%s',folder),'png'); % saveas overwrites image
 end

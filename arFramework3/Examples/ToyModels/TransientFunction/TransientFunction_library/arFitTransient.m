@@ -29,12 +29,8 @@ else
     doReduction = true;
 end
 
-% ar.lb = ar.fit_transient.bounds.lb;
-% ar.ub = ar.fit_transient.bounds.ub;
-[~,ia,ib] = intersect(ar.pLabel,ar.fit_transient.bounds.lb);
-ar.lb(ia) = ar.fit_transient.bounds.lb(ib);
-[~,ia,ib] = intersect(ar.pLabel,ar.fit_transient.bounds.ub);
-ar.ub(ia) = ar.fit_transient.bounds.ub(ib);
+ar.lb = ar.fit_transient.bounds.lb;
+ar.ub = ar.fit_transient.bounds.ub;
 
 indsig = ar.fit_transient.indp.signum;
 

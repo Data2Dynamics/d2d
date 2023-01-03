@@ -23,7 +23,7 @@ if p2
 end
 
 %% Compile
-fprintf('Compile new Observables and Parameters.')
+fprintf('Compile new Observables and Parameters.\n')
 arInit
 ar.config.checkForNegFluxes = false;
 if exist(['Models/' biomodelname],'file') || exist(['Models/',biomodelname,'.def'],'file')
