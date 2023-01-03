@@ -1,0 +1,34 @@
+DESCRIPTION
+
+PREDICTOR
+t             T   min     time	0	1
+
+COMPARTMENTS
+
+STATES
+
+
+INPUTS
+Signal_trans  C   au   conc  "amp_trans * (1-exp(- (log10(10^(10*t/maxt_TF)+10^toffset_TF)-log10(1+10^toffset_TF)) /timescale_sust))* exp(- (log10(10^(10*t/maxt_TF)+10^toffset_TF)-log10(1+10^toffset_TF)) /(timescale_trans))"
+Signal_sus    C   au   conc  "amp_sust  *  1* (1-exp(- (log10(10^(10*t/maxt_TF)+10^toffset_TF)-log10(1+10^toffset_TF)) /(timescale_sust)))"
+
+REACTIONS
+
+DERIVED
+
+OBSERVABLES
+TransientFunction                   C 	au     conc   0    0   "offset_TF + signum_TF*Signal_sus + signum_TF*Signal_trans"
+        
+ERRORS
+TransientFunction           	"sd_TF"
+
+
+CONDITIONS
+
+
+PARAMETERS
+//name	value	qFit	dolog	lb	ub
+//offset	 0	 1	 0	 -100	 100
+//signum	 1	 0	 0	 -1	 1
+
+
