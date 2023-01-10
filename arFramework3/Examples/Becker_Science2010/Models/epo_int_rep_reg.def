@@ -1,0 +1,95 @@
+DESCRIPTION
+"Epo receptor internalization"
+
+PREDICTOR
+t               T   min     time	0	100
+
+COMPARTMENTS
+
+STATES
+Epo             C   pM      conc.	1
+EpoR            C   pM      conc.	1
+Epo_EpoR        C   pM      conc.	1
+Epo_EpoR_i      C   pM      conc.	1
+dEpo_i          C   pM      conc.	1
+dEpo_e          C   pM      conc.	1
+
+INPUTS
+
+REACTIONS
+Epo + EpoR      ->  Epo_EpoR        CUSTOM "kon / init_Epo * Epo * EpoR"
+Epo_EpoR        ->  Epo + EpoR      CUSTOM "koff * Epo_EpoR"
+                ->  EpoR            CUSTOM "kt * init_EpoR"
+EpoR            ->                  CUSTOM "kt * EpoR"
+Epo_EpoR        ->  Epo_EpoR_i      CUSTOM "ke * Epo_EpoR"
+Epo_EpoR_i      ->  EpoR + Epo        CUSTOM "kex * Epo_EpoR_i"
+Epo_EpoR_i      ->  dEpo_i          CUSTOM "kdi * Epo_EpoR_i"
+Epo_EpoR_i      ->  dEpo_e          CUSTOM "kde * Epo_EpoR_i"
+
+DERIVED
+Epo_ext         C   pM   conc.   "Epo + dEpo_e"
+Epo_int         C   pM   conc.   "Epo_EpoR_i + dEpo_i"
+
+SUBSTITUTIONS
+relto_CL2_init_Epo_dummy	"relto_CL2_init_Epo"
+relto_CL3_init_Epo_dummy	"relto_CL3_init_Epo*(1-isEq_CL2_CL3_init_Epo) + relto_CL2_init_Epo*isEq_CL2_CL3_init_Epo"
+relto_CL4_init_Epo_dummy	"relto_CL4_init_Epo*(1-isEq_CL2_CL4_init_Epo)*(1-isEq_CL3_CL4_init_Epo) + relto_CL2_init_Epo*isEq_CL2_CL4_init_Epo + relto_CL3_init_Epo*isEq_CL3_CL4_init_Epo*(1-isEq_CL2_CL4_init_Epo)"
+relto_CL5_init_Epo_dummy	"relto_CL5_init_Epo*(1-isEq_CL2_CL5_init_Epo)*(1-isEq_CL3_CL5_init_Epo)*(1-isEq_CL4_CL5_init_Epo) + relto_CL2_init_Epo*isEq_CL2_CL5_init_Epo + relto_CL3_init_Epo*isEq_CL3_CL5_init_Epo*(1-isEq_CL2_CL5_init_Epo) + relto_CL4_init_Epo*isEq_CL4_CL5_init_Epo*(1-isEq_CL2_CL5_init_Epo)*(1-isEq_CL3_CL5_init_Epo)"
+relto_CL2_init_EpoR_rel_dummy	"relto_CL2_init_EpoR_rel"
+relto_CL3_init_EpoR_rel_dummy	"relto_CL3_init_EpoR_rel*(1-isEq_CL2_CL3_init_EpoR_rel) + relto_CL2_init_EpoR_rel*isEq_CL2_CL3_init_EpoR_rel"
+relto_CL4_init_EpoR_rel_dummy	"relto_CL4_init_EpoR_rel*(1-isEq_CL2_CL4_init_EpoR_rel)*(1-isEq_CL3_CL4_init_EpoR_rel) + relto_CL2_init_EpoR_rel*isEq_CL2_CL4_init_EpoR_rel + relto_CL3_init_EpoR_rel*isEq_CL3_CL4_init_EpoR_rel*(1-isEq_CL2_CL4_init_EpoR_rel)"
+relto_CL5_init_EpoR_rel_dummy	"relto_CL5_init_EpoR_rel*(1-isEq_CL2_CL5_init_EpoR_rel)*(1-isEq_CL3_CL5_init_EpoR_rel)*(1-isEq_CL4_CL5_init_EpoR_rel) + relto_CL2_init_EpoR_rel*isEq_CL2_CL5_init_EpoR_rel + relto_CL3_init_EpoR_rel*isEq_CL3_CL5_init_EpoR_rel*(1-isEq_CL2_CL5_init_EpoR_rel) + relto_CL4_init_EpoR_rel*isEq_CL4_CL5_init_EpoR_rel*(1-isEq_CL2_CL5_init_EpoR_rel)*(1-isEq_CL3_CL5_init_EpoR_rel)"
+relto_CL2_kD_dummy	"relto_CL2_kD"
+relto_CL3_kD_dummy	"relto_CL3_kD*(1-isEq_CL2_CL3_kD) + relto_CL2_kD*isEq_CL2_CL3_kD"
+relto_CL4_kD_dummy	"relto_CL4_kD*(1-isEq_CL2_CL4_kD)*(1-isEq_CL3_CL4_kD) + relto_CL2_kD*isEq_CL2_CL4_kD + relto_CL3_kD*isEq_CL3_CL4_kD*(1-isEq_CL2_CL4_kD)"
+relto_CL5_kD_dummy	"relto_CL5_kD*(1-isEq_CL2_CL5_kD)*(1-isEq_CL3_CL5_kD)*(1-isEq_CL4_CL5_kD) + relto_CL2_kD*isEq_CL2_CL5_kD + relto_CL3_kD*isEq_CL3_CL5_kD*(1-isEq_CL2_CL5_kD) + relto_CL4_kD*isEq_CL4_CL5_kD*(1-isEq_CL2_CL5_kD)*(1-isEq_CL3_CL5_kD)"
+relto_CL2_kde_dummy	"relto_CL2_kde"
+relto_CL3_kde_dummy	"relto_CL3_kde*(1-isEq_CL2_CL3_kde) + relto_CL2_kde*isEq_CL2_CL3_kde"
+relto_CL4_kde_dummy	"relto_CL4_kde*(1-isEq_CL2_CL4_kde)*(1-isEq_CL3_CL4_kde) + relto_CL2_kde*isEq_CL2_CL4_kde + relto_CL3_kde*isEq_CL3_CL4_kde*(1-isEq_CL2_CL4_kde)"
+relto_CL5_kde_dummy	"relto_CL5_kde*(1-isEq_CL2_CL5_kde)*(1-isEq_CL3_CL5_kde)*(1-isEq_CL4_CL5_kde) + relto_CL2_kde*isEq_CL2_CL5_kde + relto_CL3_kde*isEq_CL3_CL5_kde*(1-isEq_CL2_CL5_kde) + relto_CL4_kde*isEq_CL4_CL5_kde*(1-isEq_CL2_CL5_kde)*(1-isEq_CL3_CL5_kde)"
+relto_CL2_kdi_dummy	"relto_CL2_kdi"
+relto_CL3_kdi_dummy	"relto_CL3_kdi*(1-isEq_CL2_CL3_kdi) + relto_CL2_kdi*isEq_CL2_CL3_kdi"
+relto_CL4_kdi_dummy	"relto_CL4_kdi*(1-isEq_CL2_CL4_kdi)*(1-isEq_CL3_CL4_kdi) + relto_CL2_kdi*isEq_CL2_CL4_kdi + relto_CL3_kdi*isEq_CL3_CL4_kdi*(1-isEq_CL2_CL4_kdi)"
+relto_CL5_kdi_dummy	"relto_CL5_kdi*(1-isEq_CL2_CL5_kdi)*(1-isEq_CL3_CL5_kdi)*(1-isEq_CL4_CL5_kdi) + relto_CL2_kdi*isEq_CL2_CL5_kdi + relto_CL3_kdi*isEq_CL3_CL5_kdi*(1-isEq_CL2_CL5_kdi) + relto_CL4_kdi*isEq_CL4_CL5_kdi*(1-isEq_CL2_CL5_kdi)*(1-isEq_CL3_CL5_kdi)"
+relto_CL2_ke_dummy	"relto_CL2_ke"
+relto_CL3_ke_dummy	"relto_CL3_ke*(1-isEq_CL2_CL3_ke) + relto_CL2_ke*isEq_CL2_CL3_ke"
+relto_CL4_ke_dummy	"relto_CL4_ke*(1-isEq_CL2_CL4_ke)*(1-isEq_CL3_CL4_ke) + relto_CL2_ke*isEq_CL2_CL4_ke + relto_CL3_ke*isEq_CL3_CL4_ke*(1-isEq_CL2_CL4_ke)"
+relto_CL5_ke_dummy	"relto_CL5_ke*(1-isEq_CL2_CL5_ke)*(1-isEq_CL3_CL5_ke)*(1-isEq_CL4_CL5_ke) + relto_CL2_ke*isEq_CL2_CL5_ke + relto_CL3_ke*isEq_CL3_CL5_ke*(1-isEq_CL2_CL5_ke) + relto_CL4_ke*isEq_CL4_CL5_ke*(1-isEq_CL2_CL5_ke)*(1-isEq_CL3_CL5_ke)"
+relto_CL2_kex_dummy	"relto_CL2_kex"
+relto_CL3_kex_dummy	"relto_CL3_kex*(1-isEq_CL2_CL3_kex) + relto_CL2_kex*isEq_CL2_CL3_kex"
+relto_CL4_kex_dummy	"relto_CL4_kex*(1-isEq_CL2_CL4_kex)*(1-isEq_CL3_CL4_kex) + relto_CL2_kex*isEq_CL2_CL4_kex + relto_CL3_kex*isEq_CL3_CL4_kex*(1-isEq_CL2_CL4_kex)"
+relto_CL5_kex_dummy	"relto_CL5_kex*(1-isEq_CL2_CL5_kex)*(1-isEq_CL3_CL5_kex)*(1-isEq_CL4_CL5_kex) + relto_CL2_kex*isEq_CL2_CL5_kex + relto_CL3_kex*isEq_CL3_CL5_kex*(1-isEq_CL2_CL5_kex) + relto_CL4_kex*isEq_CL4_CL5_kex*(1-isEq_CL2_CL5_kex)*(1-isEq_CL3_CL5_kex)"
+relto_CL2_koff_dummy	"relto_CL2_koff"
+relto_CL3_koff_dummy	"relto_CL3_koff*(1-isEq_CL2_CL3_koff) + relto_CL2_koff*isEq_CL2_CL3_koff"
+relto_CL4_koff_dummy	"relto_CL4_koff*(1-isEq_CL2_CL4_koff)*(1-isEq_CL3_CL4_koff) + relto_CL2_koff*isEq_CL2_CL4_koff + relto_CL3_koff*isEq_CL3_CL4_koff*(1-isEq_CL2_CL4_koff)"
+relto_CL5_koff_dummy	"relto_CL5_koff*(1-isEq_CL2_CL5_koff)*(1-isEq_CL3_CL5_koff)*(1-isEq_CL4_CL5_koff) + relto_CL2_koff*isEq_CL2_CL5_koff + relto_CL3_koff*isEq_CL3_CL5_koff*(1-isEq_CL2_CL5_koff) + relto_CL4_koff*isEq_CL4_CL5_koff*(1-isEq_CL2_CL5_koff)*(1-isEq_CL3_CL5_koff)"
+relto_CL2_kon_dummy	"relto_CL2_kon"
+relto_CL3_kon_dummy	"relto_CL3_kon*(1-isEq_CL2_CL3_kon) + relto_CL2_kon*isEq_CL2_CL3_kon"
+relto_CL4_kon_dummy	"relto_CL4_kon*(1-isEq_CL2_CL4_kon)*(1-isEq_CL3_CL4_kon) + relto_CL2_kon*isEq_CL2_CL4_kon + relto_CL3_kon*isEq_CL3_CL4_kon*(1-isEq_CL2_CL4_kon)"
+relto_CL5_kon_dummy	"relto_CL5_kon*(1-isEq_CL2_CL5_kon)*(1-isEq_CL3_CL5_kon)*(1-isEq_CL4_CL5_kon) + relto_CL2_kon*isEq_CL2_CL5_kon + relto_CL3_kon*isEq_CL3_CL5_kon*(1-isEq_CL2_CL5_kon) + relto_CL4_kon*isEq_CL4_CL5_kon*(1-isEq_CL2_CL5_kon)*(1-isEq_CL3_CL5_kon)"
+relto_CL2_kt_dummy	"relto_CL2_kt"
+relto_CL3_kt_dummy	"relto_CL3_kt*(1-isEq_CL2_CL3_kt) + relto_CL2_kt*isEq_CL2_CL3_kt"
+relto_CL4_kt_dummy	"relto_CL4_kt*(1-isEq_CL2_CL4_kt)*(1-isEq_CL3_CL4_kt) + relto_CL2_kt*isEq_CL2_CL4_kt + relto_CL3_kt*isEq_CL3_CL4_kt*(1-isEq_CL2_CL4_kt)"
+relto_CL5_kt_dummy	"relto_CL5_kt*(1-isEq_CL2_CL5_kt)*(1-isEq_CL3_CL5_kt)*(1-isEq_CL4_CL5_kt) + relto_CL2_kt*isEq_CL2_CL5_kt + relto_CL3_kt*isEq_CL3_CL5_kt*(1-isEq_CL2_CL5_kt) + relto_CL4_kt*isEq_CL4_CL5_kt*(1-isEq_CL2_CL5_kt)*(1-isEq_CL3_CL5_kt)"
+
+
+CONDITIONS
+init_Epo_EpoR       "0"
+init_Epo_EpoR_i     "0"
+init_dEpo_i         "0"
+init_dEpo_e         "0"
+
+init_Epo	"init_Epo * (1 + isCL2 * (relto_CL2_init_Epo_dummy-1) + isCL3 * (relto_CL3_init_Epo_dummy-1) + isCL4 * (relto_CL4_init_Epo_dummy-1) + isCL5 * (relto_CL5_init_Epo_dummy-1))"
+init_EpoR  "(init_Epo * (1 + isCL2 * (relto_CL2_init_Epo_dummy-1) + isCL3 * (relto_CL3_init_Epo_dummy-1) + isCL4 * (relto_CL4_init_Epo_dummy-1) + isCL5 * (relto_CL5_init_Epo_dummy-1)))*(init_EpoR_rel * (1 + isCL2 * (relto_CL2_init_EpoR_rel_dummy-1) + isCL3 * (relto_CL3_init_EpoR_rel_dummy-1) + isCL4 * (relto_CL4_init_EpoR_rel_dummy-1) + isCL5 * (relto_CL5_init_EpoR_rel_dummy-1)))"
+kD	"kD * (1 + isCL2 * (relto_CL2_kD_dummy-1) + isCL3 * (relto_CL3_kD_dummy-1) + isCL4 * (relto_CL4_kD_dummy-1) + isCL5 * (relto_CL5_kD_dummy-1))"
+kde	"kde * (1 + isCL2 * (relto_CL2_kde_dummy-1) + isCL3 * (relto_CL3_kde_dummy-1) + isCL4 * (relto_CL4_kde_dummy-1) + isCL5 * (relto_CL5_kde_dummy-1))"
+kdi	"kdi * (1 + isCL2 * (relto_CL2_kdi_dummy-1) + isCL3 * (relto_CL3_kdi_dummy-1) + isCL4 * (relto_CL4_kdi_dummy-1) + isCL5 * (relto_CL5_kdi_dummy-1))"
+ke	"ke * (1 + isCL2 * (relto_CL2_ke_dummy-1) + isCL3 * (relto_CL3_ke_dummy-1) + isCL4 * (relto_CL4_ke_dummy-1) + isCL5 * (relto_CL5_ke_dummy-1))"
+kex	"kex * (1 + isCL2 * (relto_CL2_kex_dummy-1) + isCL3 * (relto_CL3_kex_dummy-1) + isCL4 * (relto_CL4_kex_dummy-1) + isCL5 * (relto_CL5_kex_dummy-1))"
+koff	"koff * (1 + isCL2 * (relto_CL2_koff_dummy-1) + isCL3 * (relto_CL3_koff_dummy-1) + isCL4 * (relto_CL4_koff_dummy-1) + isCL5 * (relto_CL5_koff_dummy-1))"
+kon	"kon * (1 + isCL2 * (relto_CL2_kon_dummy-1) + isCL3 * (relto_CL3_kon_dummy-1) + isCL4 * (relto_CL4_kon_dummy-1) + isCL5 * (relto_CL5_kon_dummy-1))"
+kt	"kt * (1 + isCL2 * (relto_CL2_kt_dummy-1) + isCL3 * (relto_CL3_kt_dummy-1) + isCL4 * (relto_CL4_kt_dummy-1) + isCL5 * (relto_CL5_kt_dummy-1))"
+
+//init_EpoR           "init_Epo * init_EpoR_rel"
+//init_EpoR           "(init_Epo * (1 + isCL2 * (relto_CL2_init_Epo_dummy-1) + isCL3 * (relto_CL3_init_Epo_dummy-1) + isCL4 * (relto_CL4_init_Epo_dummy-1) + isCL5 * (relto_CL5_init_Epo_dummy-1))) * (init_EpoR_rel * (1 + isCL2 * (relto_CL2_init_EpoR_rel_dummy-1) + isCL3 * (relto_CL3_init_EpoR_rel_dummy-1) + isCL4 * (relto_CL4_init_EpoR_rel_dummy-1) + isCL5 * (relto_CL5_init_EpoR_rel_dummy-1)))"
+//init_EpoR           "init_EpoR_rel * (init_Epo * (1 + isCL2 * (relto_CL2_init_Epo_dummy-1) + isCL3 * (relto_CL3_init_Epo_dummy-1) + isCL4 * (relto_CL4_init_Epo_dummy-1) + isCL5 * (relto_CL5_init_Epo_dummy-1)))"

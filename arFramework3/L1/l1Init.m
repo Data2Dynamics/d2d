@@ -149,6 +149,11 @@ if sum(ar.type(jks)~=0)>0
     pnames = sprintf('%s, ',ar.pLabel(jks));
     warning('ar.type and ar.std is overwritten for the scanned parameters: %s',pnames(1:end-2));
 end
+
+if ~isfield(ar, 'L1DiffPen_activate') || isempty(ar.L1DiffPen_activate)
+    ar.L1DiffPen_activate = 0;
+end
+
 ar.type(jks) = 3;
 ar.qFit(jks) = 1;
 ar.std(jks) = Inf;

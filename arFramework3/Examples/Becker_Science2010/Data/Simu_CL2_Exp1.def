@@ -1,0 +1,33 @@
+DESCRIPTION
+"Experimenter: Verena Becker"
+"Cells: BaF3"
+"Ligand: Epo"
+"Date: 16.04.2007"
+
+PREDICTOR
+time        T   min time    0	350
+
+INPUTS
+
+OBSERVABLES
+Epo_ext_cpm     C	au  act.   0	1   "offset + scale * Epo_ext"  
+Epo_mem_cpm     C 	au  act.   0	1   "offset + scale * Epo_EpoR"        
+Epo_int_cpm     C 	au  act.   0	1   "offset + scale * Epo_int" 
+        
+ERRORS
+Epo_ext_cpm         "sd_Epo_ext"
+Epo_mem_cpm         "sd_Epo_mem"
+Epo_int_cpm         "sd_Epo_int"
+
+SUBSTITUTIONS
+relto_CL2_init_Epo_dummy	"relto_CL2_init_Epo"
+relto_CL3_init_Epo_dummy	"relto_CL3_init_Epo*(1-isEq_CL2_CL3_init_Epo) + relto_CL2_init_Epo*isEq_CL2_CL3_init_Epo"
+relto_CL4_init_Epo_dummy	"relto_CL4_init_Epo*(1-isEq_CL2_CL4_init_Epo)*(1-isEq_CL3_CL4_init_Epo) + relto_CL2_init_Epo*isEq_CL2_CL4_init_Epo + relto_CL3_init_Epo*isEq_CL3_CL4_init_Epo*(1-isEq_CL2_CL4_init_Epo)"
+relto_CL5_init_Epo_dummy	"relto_CL5_init_Epo*(1-isEq_CL2_CL5_init_Epo)*(1-isEq_CL3_CL5_init_Epo)*(1-isEq_CL4_CL5_init_Epo) + relto_CL2_init_Epo*isEq_CL2_CL5_init_Epo + relto_CL3_init_Epo*isEq_CL3_CL5_init_Epo*(1-isEq_CL2_CL5_init_Epo) + relto_CL4_init_Epo*isEq_CL4_CL5_init_Epo*(1-isEq_CL2_CL5_init_Epo)*(1-isEq_CL3_CL5_init_Epo)"
+relto_CL2_init_EpoR_rel_dummy	"relto_CL2_init_EpoR_rel"
+relto_CL3_init_EpoR_rel_dummy	"relto_CL3_init_EpoR_rel*(1-isEq_CL2_CL3_init_EpoR_rel) + relto_CL2_init_EpoR_rel*isEq_CL2_CL3_init_EpoR_rel"
+relto_CL4_init_EpoR_rel_dummy	"relto_CL4_init_EpoR_rel*(1-isEq_CL2_CL4_init_EpoR_rel)*(1-isEq_CL3_CL4_init_EpoR_rel) + relto_CL2_init_EpoR_rel*isEq_CL2_CL4_init_EpoR_rel + relto_CL3_init_EpoR_rel*isEq_CL3_CL4_init_EpoR_rel*(1-isEq_CL2_CL4_init_EpoR_rel)"
+relto_CL5_init_EpoR_rel_dummy	"relto_CL5_init_EpoR_rel*(1-isEq_CL2_CL5_init_EpoR_rel)*(1-isEq_CL3_CL5_init_EpoR_rel)*(1-isEq_CL4_CL5_init_EpoR_rel) + relto_CL2_init_EpoR_rel*isEq_CL2_CL5_init_EpoR_rel + relto_CL3_init_EpoR_rel*isEq_CL3_CL5_init_EpoR_rel*(1-isEq_CL2_CL5_init_EpoR_rel) + relto_CL4_init_EpoR_rel*isEq_CL4_CL5_init_EpoR_rel*(1-isEq_CL2_CL5_init_EpoR_rel)*(1-isEq_CL3_CL5_init_EpoR_rel)"
+
+CONDITIONS
+init_EpoR  "4 * (init_Epo * (1 + isCL2 * (relto_CL2_init_Epo_dummy-1) + isCL3 * (relto_CL3_init_Epo_dummy-1) + isCL4 * (relto_CL4_init_Epo_dummy-1) + isCL5 * (relto_CL5_init_Epo_dummy-1)))*(init_EpoR_rel * (1 + isCL2 * (relto_CL2_init_EpoR_rel_dummy-1) + isCL3 * (relto_CL3_init_EpoR_rel_dummy-1) + isCL4 * (relto_CL4_init_EpoR_rel_dummy-1) + isCL5 * (relto_CL5_init_EpoR_rel_dummy-1)))"

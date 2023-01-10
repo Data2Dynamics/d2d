@@ -1,16 +1,16 @@
 % l1Scan([jks], [linv], [gradient], [lks], [OptimizerSteps])
-% 
+%
 % The major function for performing an L1 scan.
-% 
+%
 % jks             indices of the fold-factor parameters to be investigated by L1
-%                 regularization 
-%                 [find(ar.type == 3)] is default 
-% linv            width, i.e. inverse slope of L1 penalty 
-%                 (Inf = no penalty; small values = large penalty) 
+%                 regularization
+%                 [find(ar.type == 3)] is default
+% linv            width, i.e. inverse slope of L1 penalty
+%                 (Inf = no penalty; small values = large penalty)
 %                 if provided, it overwrites ar.linv
 %                 [ar.linv] is default
-% gradient        use a small gradient on L1 penalty 
-%                 Possible values: -1, 0, 1 
+% gradient        use a small gradient on L1 penalty
+%                 Possible values: -1, 0, 1
 %                 [0] is default
 % lks             [lks = 1:length(ar.linv)]
 %                 lambda indices to be analyzed, a subset of ar.linv can be
@@ -22,7 +22,7 @@
 %                 The length of this vector controls the number of
 %                 optimization restarts which are done.
 %                 [1000 20] is default
-% 
+%
 % See also arRegularize, l1Seq
 
 function l1Scan(jks, linv, gradient, lks, OptimizerSteps)
@@ -55,9 +55,9 @@ if (exist('linv','var') && ~isempty(linv))
 end
 
 if(~exist('lks','var') || isempty(lks))
-%     linv = logspace(-4,4,49);
-%     linv = [linv Inf];
-%     linv = linv(end:-1:1);
+    %     linv = logspace(-4,4,49);
+    %     linv = [linv Inf];
+    %     linv = linv(end:-1:1);
     lks = 1:length(ar.linv);
 end
 
@@ -99,14 +99,18 @@ end
 
 counter = 0;
 
-% ps(lks(1),:) = ar.p;
-% chi2s(lks(1)) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
-% chi2fits(lks(1)) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
+if ar.L1DiffPen_activate == true
+    ar.L1DiffPen_useCustomRes = true;
+end
+
 for i = lks
     
     counter = counter + 1;
     
     ar.std(jks) = ar.linv(i) * (1 + gradient * linspace(0,.001,length(jks)));
+    if ar.L1DiffPen_activate
+        ar.L1DiffPen_linv = ar.linv(i) * (1 + gradient);
+    end
     
     switch ar.L1subtype(jks(1))
         case 1
@@ -132,47 +136,34 @@ for i = lks
             if OptimizerSteps(o) > 0
                 ar.config.optimizer = o;
                 ar.config.optim.MaxIter = OptimizerSteps(o);
-                arFit(true)
+                arFit()
             end
         end
     catch exception
         fprintf('%s\n', exception.message);
     end
+        
     ps(i,:) = ar.p;
     chi2s(i) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
     chi2fits(i) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
-    
-%     % Backward implementation
-%     j = i;
-%     if j > 1
-%         while chi2fits(j) < max(chi2fits(1:j-1))-1e-3
-%             j = j-1;
-%             ar.std(jks) = linv(j) * (1 + gradient * linspace(0,.001,length(jks)));
-%             try
-%                 ar.config.optimizer = 1;
-%                 ar.config.optim.MaxIter = 1000;
-%                 arFit(true)
-%                 ar.config.optimizer = 2;
-%                 ar.config.optim.MaxIter = 20;
-%                 arFit(true)
-%             catch exception
-%                 fprintf('%s\n', exception.message);
-%             end
-%             ps(j,:) = ar.p;
-%             chi2s(j) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
-%             chi2fits(j) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
-%             if j == 1
-%                 break
-%             end
-%         end
-%     end
-    
-    if sum(abs(ps(i,jks)) > ar.L1thresh) == 0
-        ps(i+1:end,:) = repmat(ar.p,size(ps,1)-i,1);
-        chi2s(i+1:end) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
-        chi2fits(i+1:end) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
-        break
+
+    % Calculate differences of fc parameters
+    if ar.L1DiffPen_activate && ar.L1DiffPen_useCustomRes
+        diffIds = ar.L1DiffPen_diffs;
+        ps2 = bsxfun(@minus, ps(:,diffIds(:,1)), ps(:,diffIds(:,2)));
+        jks2 = 1:size(diffIds,1);
+        
+        if (sum(abs(ps(i,jks)) > ar.L1thresh)) == 0 && (sum(abs(ps2(i,jks2)) > ar.L1thresh)) == 0
+            ps(i+1:end,:) = repmat(ar.p,size(ps,1)-i,1);
+            chi2s(i+1:end) = arGetMerit('chi2')+arGetMerit('chi2err')-arGetMerit('chi2prior');
+            chi2fits(i+1:end) = arGetMerit('chi2')./ar.config.fiterrors_correction+arGetMerit('chi2err');
+            break
+        end
     end
+end
+
+if ar.L1DiffPen_activate == true
+    ar.L1DiffPen_useCustomRes = false;
 end
 
 arWaitbar(-1);
@@ -186,8 +177,8 @@ ar.config.optim.MaxIter = maxiter;
 
 function md5hash = md5(filename)
 
-mddigest   = java.security.MessageDigest.getInstance('MD5'); 
-filestream = java.io.FileInputStream(java.io.File(filename)); 
+mddigest   = java.security.MessageDigest.getInstance('MD5');
+filestream = java.io.FileInputStream(java.io.File(filename));
 digestream = java.security.DigestInputStream(filestream,mddigest);
 
 while(digestream.read() ~= -1) end

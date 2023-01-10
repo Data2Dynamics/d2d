@@ -28,6 +28,18 @@ signifmat = ar.L1signifmat;
 
 l = arNameTrafo(ar.pLabel(jks));
 
+% Calculate differences of fc parameters
+ps2 = []; jks2 = [];
+if ar.L1DiffPen_activate
+    diffIds = ar.L1DiffPen_diffs;
+    eqParMap = ar.L1DiffPen_constrSwitches;
+    ps2 = bsxfun(@minus, ps(:,diffIds(:,1)), ps(:,diffIds(:,2)));
+    ps2(ar.L1ps_unpen(:,eqParMap) == 1) = 0; % remove diffs that are turned of by iseq from plot
+    jks2 = 1:size(diffIds,1);
+    ps2Labels = append('Diff_',ar.pLabel(diffIds(:,1)),'_',ar.pLabel(diffIds(:,2)));
+    l = [l,arNameTrafo(ps2Labels)]; %%% CUSTOM
+end
+
 if (exist('eraseStr','var') && ~isempty(eraseStr) && ischar(eraseStr))
     for i = 1:length(l)
         l{i} = erase(l{i},eraseStr);
@@ -36,8 +48,8 @@ end
 
 figure
 
-subplot(2,2,[2 4])
-im = imagesc(ps(:,jks)');
+subplot(2,5,[4 5 9 10])
+im = imagesc([ps(:,jks),ps2]');
 im_cdata = im.CData;
 delete(im)
 linvlog = -log10(linv);
@@ -64,8 +76,8 @@ hold on
 %     end
 % end
 
-rc = abs(ps(:,jks)) > ar.L1thresh;
-for i = 1:length(jks)
+rc = abs([ps(:,jks),ps2]) > ar.L1thresh;
+for i = 1:length([jks,jks2])
     begin = NaN;
     for j = 1:(length(linv)-1)
         if rc(j,i) && isnan(begin)
@@ -89,9 +101,9 @@ x = 1:size(im_cdata,1);
 % hb = barh(x(parbar>0),linvlog(parbar(parbar>0))+.5*ltick,...
 %     'FaceColor','none','BarWidth',1,'BaseValue',linvlog(1)-.5*ltick);
 
-colmax = min([5 ceil(max(max(abs(ps))))]);
+colmax = min([5 ceil(max(max(abs([ps,ps2]))))]); 
 set(gca,'CLim',[-colmax colmax])
-set(gca,'YLim',[0 length(jks)+1])
+set(gca,'YLim',[0 length([jks jks2])+1])
 plot([linvlog(final_ind) linvlog(final_ind)]+.5*ltick,get(gca,'YLim'),'k:')
 colmap = [];
 for i = 1:250
@@ -106,12 +118,12 @@ colorbar('Location','EastOutside')
 set(gca,'Pos',mypos)
 
 set(gca,'YDir','Reverse')
-set(gca,'YTick',1:length(jks),'YTickLabel',l)
+set(gca,'YTick',1:length([jks jks2]),'YTickLabel',l)
 
 xlabel('log_{10}(\lambda)')
 myxlim = get(gca,'XLim');
 
-subplot(2,2,1)
+subplot(2,5,[1 2])
 steppars = 1:length(linv)-1;
 linvlogstep = linvlog;
 chi2s_unpenstep = chi2s_unpen;
@@ -160,7 +172,7 @@ xlabel('log_{10}(\lambda)')
 
 xlim(myxlim)
 
-subplot(2,2,3)
+subplot(2,5,[6 7])
 % maxy = max(max(chi2s_unpenstep-chi2s_lam0+1,1-(signifmatstep-chi2s_unpenstep+chi2s_lam0)));
 % miny = min(min(chi2s_unpenstep-chi2s_lam0+1,1-(signifmatstep-chi2s_unpenstep+chi2s_lam0)));
 % a = semilogy(linvlogstep+.5*ltick,chi2s_unpenstep-chi2s_unpenstep(1)+1);
