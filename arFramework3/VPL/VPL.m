@@ -209,7 +209,7 @@ try
             % Plot ppl over pred to obtain prediction profile. 
             
             if ar.vpl.config.showCalculation == true
-                fprintf('\n chi2 = %0.4g, z = %0.4g \n',chi2_new,z_new)
+                fprintf('chi2 = %0.4g, z = %0.4g \n',chi2_new,z_new)
             end
             
             % Stopping criteria:
@@ -224,9 +224,12 @@ try
             end
         end
         
-    end
+    end % loop upward/downward
     arWaitbar(-1);
     
+    VCI = profile2ci(gen_struct.perm.results.z,gen_struct.perm.results.chi2,ar.vpl.config.alpha);
+    PCI = profile2ci(gen_struct.perm.results.pred,gen_struct.perm.results.ppl,ar.vpl.config.alpha);
+
 catch exception
     fprintf(['\n ERROR VPL: Resetting ar struct. Temporary results are saved in ar.vpl \n',...
         'Error message: %s \n Line: %s \n'],...
@@ -240,13 +243,19 @@ end
 
 %% Wrap up results
 
-disp('VPL calculation concluded without error.')
+disp('VPL calculation finished without error.')
 
 % Add values from 'permanent' struct to ar:
 gen_struct.perm.config = ar.vpl.config;
 gen_struct.perm.general = ar.vpl.general;
 ar = ar_old;
 ar.vpl = gen_struct.perm;
+
+ar.vpl.results.VCI = VCI;
+ar.vpl.results.PCI = PCI;
+ar.vpl.results.MLE = pred_init;
+
+ar.vpl.name = ar.model(ar.vpl.general.m).data(ar.vpl.general.d).y{ar.vpl.general.idpred};
 
 zs = ar.vpl.results.z;
 chi2s = ar.vpl.results.chi2;

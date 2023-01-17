@@ -1,4 +1,6 @@
 function vplPlot(prediction)
+% vplPlot
+% 
 % vplPlot(prediction)
 %
 % Basic visualization of the calculated validation profile.
@@ -24,35 +26,49 @@ end
 if prediction == 1
     x = ar.vpl.results.pred;
     y = ar.vpl.results.ppl;
-    ylab = 'PPL';
+    ylab = 'Prediction profile likelihood';
 else
     x = ar.vpl.results.z;
     y = ar.vpl.results.chi2;
-    ylab = 'VPL';
+    ylab = 'Validation profile likelihood';
 end
 
 alpha = ar.vpl.config.alpha;
 thresh = icdf('chi2',1-alpha,1);
 
-hold on
-
 h1 = plot(x,y,'LineWidth',1);
+hold on
 line([min(x),max(x)],[thresh,thresh],'Color','k',...
     'LineWidth',1,'LineStyle','--');
 xlim([min(x),max(x)]);
-xlabel(ar.model(ar.vpl.general.m).data(ar.vpl.general.d).y(ar.vpl.general.idpred),...
+xlabel(ar.vpl.name,...
     'Interpreter','None');
 text(mean([min(x),max(x)]),thresh,[num2str(100*(1-alpha)),'% threshold'],...
     'VerticalAlignment','Bottom','HorizontalAlignment','Center')
 
-if prediction == 2 %if both profiles should be plotted
+yl = ylim;
+if nanmin(y)>-1e-5 % try to use ylim(1)=0
+    yl(1)=0;
+    ylim(yl)
+end
+
+if prediction==0
+    h = patch([ar.vpl.results.VCI(1),ar.vpl.results.VCI(2),ar.vpl.results.VCI(2),ar.vpl.results.VCI(1)],...
+        [yl(1),yl(1),yl(2),yl(2)],zeros(1,4),'FaceColor',zeros(1,3),'EdgeColor','none','FaceAlpha',0.2);
+
+elseif prediction==1
+    h = patch([ar.vpl.results.PCI(1),ar.vpl.results.PCI(2),ar.vpl.results.PCI(2),ar.vpl.results.PCI(1)],...
+        [yl(1),yl(1),yl(2),yl(2)],zeros(1,4),'FaceColor',zeros(1,3),'EdgeColor','none','FaceAlpha',0.2);
+
+elseif prediction == 2 %if both profiles should be plotted
    h2 = plot(ar.vpl.results.pred,ar.vpl.results.ppl,'LineWidth',1);
    ylab = 'Profile Value';
    legend([h1,h2],{'VPL','PPL'});
 end
 
 ylabel(ylab);
-
+set(gca,'FontSize',12)
+grid on
 hold off
 
 end

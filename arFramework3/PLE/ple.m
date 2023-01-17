@@ -360,10 +360,6 @@ chi2 = ar.ple.chi2s{jk};
 ps = ar.ple.ps{jk};
 %These variables now contain parameters and chi2s for the whole profile
 
-q_chi2good = chi2<=min(chi2)+ar.ple.dchi2 & ~isnan(chi2);
-q_chi2good_point = chi2<=min(chi2)+ar.ple.dchi2_point & ~isnan(chi2);
-% Identifiers which points are under the threshold
-
 % Define new optimum
 if(ar.ple.merit-min(chi2) > ar.ple.optimset_tol)
     [minchi2, iminchi2] = min(chi2);
@@ -385,57 +381,17 @@ if(sum(~isnan(ar.ple.chi2s{jk})) < 3)
 else
 
     % Calculate CI simultaneous if requested.
-    
-    if(~ar.ple.breakon_point)
-        if(min(ps(q_chi2good,jk))==min(ps(~isnan(chi2),jk)))
-            ar.ple.conf_lb(jk) = -Inf;
-            % bounds are infinite if chi2 does not exceed boundary 
-        else
-            kind = find(ps(:,jk)==min(ps(q_chi2good,jk)));
-            try
-                ar.ple.conf_lb(jk) = interp1(chi2([kind kind-1]), ps([kind kind-1], jk), min(chi2)+ar.ple.dchi2);
-            % interpolate to increase accuracy of confidence interval
-            catch
-                ar.ple.conf_lb(jk) = NaN;  % e.g. isinf(chi2(kind-1))
-            end
-        end
-        if(max(ps(q_chi2good,jk))==max(ps(~isnan(chi2),jk)))
-            ar.ple.conf_ub(jk) = Inf;
-        else
-            kind = find(ps(:,jk)==max(ps(q_chi2good,jk)));
-            try
-                ar.ple.conf_ub(jk) = interp1(chi2([kind kind+1]), ps([kind kind+1], jk), min(chi2)+ar.ple.dchi2);
-            catch
-                ar.ple.conf_ub(jk) = NaN;
-            end
 
-        end
+    if(~ar.ple.breakon_point)
+        CI = profile2ci(ps(:,jk),chi2,[],[],ar.ple.dchi2);
+        ar.ple.conf_lb(jk) = CI(1);
+        ar.ple.conf_ub(jk) = CI(2);        
     end
 
     % calculate CI point-wise in every case
-
-    if(min(ps(q_chi2good_point,jk))==min(ps(~isnan(chi2),jk)))
-        ar.ple.conf_lb_point(jk) = -Inf; 
-        % bounds are infinite if chi2 does not exceed boundary 
-    else
-        kind = find(ps(:,jk)==min(ps(q_chi2good_point,jk)));
-        try
-            ar.ple.conf_lb_point(jk) = interp1(chi2([kind kind-1]), ps([kind kind-1], jk), min(chi2)+ar.ple.dchi2_point);
-            % interpolate to increase accuracy of confidence interval
-        catch
-            ar.ple.conf_lb_point(jk) = NaN;
-        end
-    end
-    if(max(ps(q_chi2good_point,jk))==max(ps(~isnan(chi2),jk)))
-        ar.ple.conf_ub_point(jk) = Inf;
-    else
-        kind = find(ps(:,jk)==max(ps(q_chi2good_point,jk)));
-        try
-            ar.ple.conf_ub_point(jk) = interp1(chi2([kind kind+1]), ps([kind kind+1], jk), min(chi2)+ar.ple.dchi2_point);
-        catch
-            ar.ple.conf_ub_point(jk) = NaN;
-        end
-    end
+    CI = profile2ci(ps(:,jk),chi2,[],[],ar.ple.dchi2_point);
+    ar.ple.conf_lb_point(jk) = CI(1);
+    ar.ple.conf_ub_point(jk) = CI(2);
 
     % check ID point-wise
     if(max(chi2(~isnan(chi2)))<(ar.ple.dchi2_point*ar.ple.chi2_strID_ratio)+min(chi2(~isnan(chi2))))
