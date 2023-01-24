@@ -53,10 +53,10 @@ else % single profile:
     plot(ps,chi2s,'k','LineWidth',2)
     set(gca,'FontSize',14)
     grid on
-    if ar.qLog10(ind)==1
-        xlabel([ar.pLabel{ind},'  [log10]'])
+    if ar.ple.qLog10(ind)==1
+        xlabel([strrep(ar.pLabel{ind},'_','\_'),'  [log10]'])
     else
-        xlabel(ar.pLabel{ind})
+        xlabel(strrep(ar.pLabel{ind},'_','\_'))
     end
     ylabel('-2 log likelihood')
     text(mean(xlim), nanmin(chi2s)+thresh,...
@@ -69,9 +69,14 @@ else % single profile:
     yl(1) = chi2min;
     ylim(yl);
     h = patch([plb,pub,pub,plb],[yl(1),yl(1),yl(2),yl(2)],zeros(1,4),'FaceColor',zeros(1,3),'EdgeColor','none','FaceAlpha',0.3);
-    plot(xl,nanmin(chi2s)+icdf('chi2',.95,1)*ones(1,2),'k--','LineWidth',2);
+    plot(xl,nanmin(chi2s)+arChi2inv(1-ar.ple.alpha_level, 1)*ones(1,2),'k--','LineWidth',2);
+    if ar.ple.qLog10(ind)
+        title(sprintf('Estimate=%g, CI=[%g, %g]',10^ar.ple.p(ind),10^ar.ple.conf_lb_point(ind),10^ar.ple.conf_ub_point(ind)))
+    else
+        title(sprintf('Estimate=%g, CI=[%g, %g]',ar.ple.p(ind),ar.ple.conf_lb_point(ind),ar.ple.conf_ub_point(ind)))
+    end
     if ~isempty(figname)
-        title(str2label(figname))
+%         title(str2label(figname))
         print([figname,'_',ar.pLabel{ind},'_PL'],'-dpng')
     end
 end
