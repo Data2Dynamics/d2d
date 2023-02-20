@@ -26,6 +26,7 @@ u = ar.model(m).u;         % input variables
 fu = ar.model(m).fu;       % input equation
 
 fitted_pars = ar.pLabel(ar.qFit==1);
+fitted_pars = strrep(fitted_pars, 'init_', '')
 
 z = str2sym(z);
 fz = str2sym(fz);
@@ -153,9 +154,9 @@ for entry = 1:length(x)
 end
 
 fprintf('\n%s\n', 'Analyse (list the unknown parameter and initial conditions which should be included into the strucutral identifiability analysis)!')
-% for entry = 1:length(fitted_pars)
-%     fprintf('%s\n', str2sym(fitted_pars(entry)))
-% end
+for entry = 1:length(fitted_pars)
+    fprintf('%s\n', str2sym(fitted_pars(entry)))
+end
 
 diary off
 end

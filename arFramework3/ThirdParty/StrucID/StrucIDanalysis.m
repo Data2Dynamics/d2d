@@ -186,7 +186,9 @@ for k=1:nTraject
         end
 
         if (nu>0) % input signals are available
-            X=StateTraj{k}(j,:); u0=uInput(timeForward(j),theta);
+            X=StateTraj{k}(j,:); 
+            u0 = uInput(timeForward(j),theta);
+            
             dfdu=admDiffComplex(@(u) xdotTemplate(timeForward(j),X,u,theta,fDyn,vAlgebra),1,u0);
             dxdth=reshape(dxdthRows{k}(j,:),nx,nth);
             dudth=dfdu'*dxdth;
