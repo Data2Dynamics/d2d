@@ -1,0 +1,32 @@
+DESCRIPTION
+"Model for conversion A -> B -> C"
+
+PREDICTOR
+t               T   min         time	0	100
+
+COMPARTMENTS
+
+STATES
+A_state     C   "nM"      "conc."    
+B_state     C   "nM"      "conc."    
+C_state     C   "nM"      "conc."    
+
+INPUTS
+
+REACTIONS
+A_state    ->  B_state      CUSTOM "p1*A_state"
+B_state    ->  C_state      CUSTOM "p2*B_state"
+
+DERIVED
+        
+OBSERVABLES
+C_au        C   "au"  "conc."   0   0   "C_state"
+B_au        C   "au"  "conc."   0   0   "B_state"
+
+ERRORS
+C_au       "1"
+B_au       "sd_B_au"
+
+CONDITIONS
+init_B_state    "0"
+init_C_state   	"0"

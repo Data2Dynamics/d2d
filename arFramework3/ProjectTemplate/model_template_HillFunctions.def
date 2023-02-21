@@ -1,0 +1,31 @@
+DESCRIPTION
+"model .def template file with three hill functions. Hill function Obs3 is implemented with a fold-parameter for comparison with KD1 of Obs1"
+
+PREDICTOR
+t	T	"min"	"time"	0	100
+
+COMPARTMENTS
+
+STATES
+
+INPUTS
+
+REACTIONS
+
+DERIVED
+        
+OBSERVABLES
+// meaning of the columns:
+// y name	yunit1	yunit2	yunit3	normal.	logploting&logfitting	obs_fun
+
+Obs1  C	  "au"	"conc."	 0	0	"offset1 + scaling1 * t^h1 / (KD1^h1 + t^h1) "
+Obs2  C	  "au"	"conc."	 0	0	"offset2 + scaling2 * t^h2 / (KD2^h2 + t^h2) "
+Obs3  C	  "au"	"conc."	 0	0	"offset3 + scaling3 * t^h3 / ((KD1*fold)^h3 + t^h3) "
+
+  
+ERRORS
+Obs1    "sd1"
+Obs2    "sd2"
+Obs3    "sd3"
+
+CONDITIONS
