@@ -11,6 +11,7 @@
 %           ode_input ODEs with an input
 %           abc       ODEs für A -> B -> C
 %           hill      Hill functions
+%           RTF       Retardet transient function
 
 function arCreateProject(model_template)
 if ~exist('model_template','var') || isempty(model_template)
@@ -28,16 +29,29 @@ switch lower(model_template)
         model_template = 'model_template_ABC.def';
     case {'hill','hillfunction'}
         model_template = 'model_template_HillFunctions.def';
+    case {'tf'}
+        model_template = 'model_template_TransientFunction.def';
+    case {'tf2'}
+        model_template = 'model_template_TransientFunction2.def';
+    case {'rtf'}
+        model_template = 'model_template_RetardedTransientFunction.def';
     otherwise
         % do nothing
 end
 
 % assignment from model template to data template:
+setup_template = 'Setup_template_default.m'; % default, might be overwritten in the following:
 switch model_template
     case 'model_template_ABC.def'
         data_template = 'data_template_ABC.def';
     case 'model_template_HillFunctions.def'
         data_template = 'data_template_HillFunctions.def';
+    case 'model_template_TransientFunction.def'
+        data_template = 'data_template_TransientFunction.def';   
+        setup_template = 'Setup_template_TransientFunction.m';
+    case 'model_template_TransientFunction2.def'
+        data_template = 'data_template_TransientFunction2.def';   
+        setup_template = 'Setup_template_TransientFunction.m';
     otherwise % choose the default template
         data_template = 'data_template.def';
 end
@@ -75,14 +89,8 @@ try
             copyfile(which(strrep(data_template,'.def','.xls')),'./data_template.xls');
             cd ..
             
-            fid = fopen('./Setup.m' , 'W');
-            
-            fprintf(fid, 'arInit;\n');
-            fprintf(fid, 'arLoadModel(''model_template'');\n');
-            fprintf(fid, 'arLoadData(''data_template'');\n');
-            fprintf(fid, 'arCompileAll;\n');
-            
-            fclose(fid);
+            copyfile(which(setup_template),'./Setup.m');
+
             edit ./Setup.m
         end
     end

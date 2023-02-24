@@ -65,6 +65,7 @@ for m=1:length(ar.model)
             ar.fit_transient.(pnames{found(i)}).t    = [ar.fit_transient.(pnames{found(i)}).t;ar.model(m).data(d).tExp];
             ar.fit_transient.(pnames{found(i)}).yexp = [ar.fit_transient.(pnames{found(i)}).yexp;ar.model(m).data(d).yExp];
             ar.fit_transient.(pnames{found(i)}).ystd = [ar.fit_transient.(pnames{found(i)}).ystd;ar.model(m).data(d).yExpStd];
+            ar.fit_transient.(pnames{found(i)}).ind_arp = found;
         end
     end
 end
@@ -75,10 +76,15 @@ end
 ar.qFit(ar.fit_transient.indp.signum) = 2;
 ar.qLog10(ar.fit_transient.indp.signum) = 0;
 
-ar.qLog10(ar.fit_transient.indp.amp_sust) = 0;
-ar.qLog10(ar.fit_transient.indp.amp_trans) = 0;
-ar.qLog10(ar.fit_transient.indp.offset) = 0;  % often, negative offsets required
-ar.qLog10(ar.fit_transient.indp.sd) = 1;
+arQlogParameters(ar.fit_transient.indp.amp_sust, 0);
+arQlogParameters(ar.fit_transient.indp.amp_trans, 0);
+arQlogParameters(ar.fit_transient.indp.offset, 0);  % often, negative offsets required
+arQlogParameters(ar.fit_transient.indp.sd, 1);
+
+% ar.qLog10(ar.fit_transient.indp.amp_sust) = 0;
+% ar.qLog10(ar.fit_transient.indp.amp_trans) = 0;
+% ar.qLog10(ar.fit_transient.indp.offset) = 0;  % often, negative offsets required
+% ar.qLog10(ar.fit_transient.indp.sd) = 1;
 
 
 for m=1:length(ar.model)

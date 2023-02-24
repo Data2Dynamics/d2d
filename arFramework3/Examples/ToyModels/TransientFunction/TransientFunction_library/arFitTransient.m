@@ -40,9 +40,11 @@ if sum(ar.p(ar.qFit==1)>ar.ub(ar.qFit==1))>0
     error('ar.p>ar.ub')
 end
 if sum(ar.p(ar.qFit==1)<ar.lb(ar.qFit==1))>0
+    arPrint(find(ar.p(ar.qFit==1)<ar.lb(ar.qFit==1)))
     error('ar.p<ar.lb')
 end
 if sum(ar.ub(ar.qFit==1)<ar.lb(ar.qFit==1))>0
+    arPrint(ar.ub(ar.qFit==1)<ar.lb(ar.qFit==1))
     error('ar.ub<ar.lb')
 end
 

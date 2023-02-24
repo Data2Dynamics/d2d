@@ -1,0 +1,34 @@
+DESCRIPTION
+
+PREDICTOR
+t               T   min     time	0	600
+
+COMPARTMENTS
+
+STATES
+
+INPUTS
+Signal_trans  C   au   conc  "isTreated*signum_TF * amp_trans*(1-exp(-t/timescale_sust))*exp(-t/(timescale_sust+timescale_trans))"
+Signal_sus    C   au   conc  "isTreated*signum_TF * amp_sust*(1-exp(-t/(timescale_sust+timescale_trans)))"
+
+REACTIONS
+
+DERIVED
+
+OBSERVABLES
+Signal_au                   C 	au     conc   0    0   "offset_TF + Signal_sus + Signal_trans"
+        
+ERRORS
+// the following error model assumes the same error for each expriment:
+Signal_au           "sd_TF"
+
+
+CONDITIONS
+
+
+PARAMETERS
+//name	value	qFit	dolog	lb	ub
+//offset	 0	 1	 0	 -100	 100
+//signum	 1	 0	 0	 -1	 1
+
+
