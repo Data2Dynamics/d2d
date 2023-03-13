@@ -12,9 +12,12 @@
 % plePrint([],1:3)
 % plePrint([],'fold')
 
-function plePrint(fid, whichParams)
+function plePrint(fid, whichParams, doUnlog)
 global ar
 
+if ~exist('fid','var') || isempty(fid)
+    fid = 1;
+end
 if ~exist('whichParams','var') || isempty(whichParams)
     whichParams = 1:length(ar.ple.p);
 elseif ischar(whichParams)
@@ -22,14 +25,15 @@ elseif ischar(whichParams)
 elseif(size(whichParams,1)>1)
         whichParams = js'; %should not be a row
 end
+if ~exist('doUnlog','var') || isempty(doUnlog)
+    doUnlog = 0;
+end
+
 if(~isfield(ar,'ple') || isempty(ar.ple))
     error('perform ple before usage');
 end
 if(isempty(ar.ple.ps))
     return
-end
-if ~exist('fid','var') || isempty(fid)
-    fid = 1;
 end
 
 
@@ -57,9 +61,8 @@ fprintf(fid, spacer);
 fprintf(fid, '    # ');
 fprintf(fid, partemplate, makestr('Parameter:', parnamelength));
 fprintf(fid, numtemplate, makestr('Value:', numlength));
-fprintf(fid, numtemplate, makestr('LowerPL:', numlength));
-fprintf(fid, numtemplate, makestr('UpperPL:', numlength));
-fprintf(fid, '|');
+fprintf(fid, [' ',numtemplate], makestr('LowerCI:', numlength));
+fprintf(fid, [numtemplate,' '], makestr('UpperCI:', numlength));
 if(isfield(ar.ple, 'p_true'))
     fprintf(fid, numtemplate, makestr('True:', numlength));
 end
@@ -82,16 +85,15 @@ for j=whichParams
     
     fprintf(fid, ' %4i ', j);
     fprintf(fid, partemplate, makestr(ar.ple.p_labels{j}, parnamelength));
-    fprintf(fid, numtemplate, makestr(ar.ple.p(j), numlength));
+    fprintf(fid, numtemplate, makestr(unlogTrsf(ar.ple.p(j),ar.ple.qLog10(j),doUnlog), numlength));
     if(isfield(ar.ple, 'p_true'))
-        fprintf(fid, numtemplate, makestr(ar.ple.p_true(j), numlength));
+        fprintf(fid, numtemplate, makestr(unlogTrsf(ar.ple.p_true(j),ar.ple.qLog10(j),doUnlog), numlength));
     end
     if(ar.qFit(j))
-        fprintf(fid, numtemplate, makestr(ar.ple.conf_lb_point(j), numlength));
-        fprintf(fid, numtemplate, makestr(ar.ple.conf_ub_point(j), numlength));
-        fprintf(fid, '|');
-        fprintf(fid, numtemplate, makestr(ar.lb(j), numlength));
-        fprintf(fid, numtemplate, makestr(ar.ub(j), numlength));
+        fprintf(fid, ['[',numtemplate], makestr(unlogTrsf(ar.ple.conf_lb_point(j),ar.ple.qLog10(j),doUnlog), numlength));
+        fprintf(fid, [numtemplate,']'], makestr(unlogTrsf(ar.ple.conf_ub_point(j),ar.ple.qLog10(j),doUnlog), numlength));
+        fprintf(fid, numtemplate, makestr(unlogTrsf(ar.lb(j),ar.ple.qLog10(j),doUnlog), numlength));
+        fprintf(fid, numtemplate, makestr(unlogTrsf(ar.ub(j),ar.ple.qLog10(j),doUnlog), numlength));
         fprintf(fid, '|');
         fprintf(fid, numtemplate, makestr(idflag, numlength));
         if(isfield(ar.ple, 'p_true'))
@@ -119,12 +121,12 @@ if(ar.ple.plot_simu)
     if(isfield(ar.ple, 'p_true'))
         fprintf(fid, numtemplate, makestr('True:', numlength));
     end
+    fprintf(fid, [' ',numtemplate], makestr('LowerCI:', numlength));
+    fprintf(fid, [numtemplate,' '], makestr('UpperCI:', numlength));
     fprintf(fid, numtemplate, makestr('Min:', numlength));
     fprintf(fid, numtemplate, makestr('Max:', numlength));
     fprintf(fid, '|');
     fprintf(fid, numtemplate, makestr('IDflag:', numlength));
-    fprintf(fid, numtemplate, makestr('LowerPL:', numlength));
-    fprintf(fid, numtemplate, makestr('UpperPL:', numlength));
     if(isfield(ar.ple, 'p_true'))
         fprintf(fid, covertemplate, makestr('?:', numlength));
     end
@@ -139,17 +141,17 @@ if(ar.ple.plot_simu)
         
         fprintf(fid, ' %4i ', j);
         fprintf(fid, partemplate, makestr(ar.ple.p_labels{j}, parnamelength));
-        fprintf(fid, numtemplate, makestr(ar.ple.p(j), numlength));
+        fprintf(fid, numtemplate, makestr(unlogTrsf(ar.ple.p(j),ar.ple.qLog10(j),doUnlog), numlength));
         if(isfield(ar.ple, 'p_true'))
-            fprintf(fid, numtemplate, makestr(ar.ple.p_true(j), numlength));
+            fprintf(fid, numtemplate, makestr(unlogTrsf(ar.ple.p_true(j),ar.ple.qLog10(j),doUnlog), numlength));
         end
         if(ar.qFit(j))
-            fprintf(fid, numtemplate, makestr(ar.lb(j), numlength));
-            fprintf(fid, numtemplate, makestr(ar.ub(j), numlength));
+            fprintf(fid, ['[',numtemplate], makestr(unlogTrsf(ar.ple.conf_lb(j),ar.ple.qLog10(j),doUnlog), numlength));
+            fprintf(fid, [numtemplate,' '], makestr(unlogTrsf(ar.ple.conf_ub(j),ar.ple.qLog10(j),doUnlog), numlength));
+            fprintf(fid, numtemplate, makestr(unlogTrsf(ar.lb(j),ar.ple.qLog10(j),doUnlog), numlength));
+            fprintf(fid, numtemplate, makestr(unlogTrsf(ar.ub(j),ar.ple.qLog10(j),doUnlog), numlength));
             fprintf(fid, '|');
             fprintf(fid, numtemplate, makestr(idflag, numlength));
-            fprintf(fid, numtemplate, makestr(ar.ple.conf_lb(j), numlength));
-            fprintf(fid, numtemplate, makestr(ar.ple.conf_ub(j), numlength));
             if(isfield(ar.ple, 'p_true'))
                 coverage_flag = ' ';
                 if(ar.ple.p_true(j) <= ar.ple.conf_ub(j) && ...
@@ -166,7 +168,10 @@ if(ar.ple.plot_simu)
     fprintf(fid, spacer);
 end
 
-
+function val = unlogTrsf(val, qLog, doUnlog)
+if doUnlog && qLog
+    val = 10.^val;
+end
 
 function strout = makestr(sthin, width)
 if(isnumeric(sthin))
