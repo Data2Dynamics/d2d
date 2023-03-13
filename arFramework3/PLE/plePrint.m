@@ -3,21 +3,35 @@
 % plePrint(fid)
 %
 % fid:     file ID     [1=Standard Output to Console]
+% whichParams   indicates which parameter values should be printed
+%          [] default: all
+%          indices   a number or vector of indices
+%          pattern   a string which is searched in p_labels as regexp
+% 
+% Examples:
+% plePrint([],1:3)
+% plePrint([],'fold')
 
-function plePrint(fid)
-
+function plePrint(fid, whichParams)
 global ar
 
+if ~exist('whichParams','var') || isempty(whichParams)
+    whichParams = 1:length(ar.ple.p);
+elseif ischar(whichParams)
+    whichParams = find(~cellfun(@isempty,regexp(ar.ple.p_labels,whichParams)));
+elseif(size(whichParams,1)>1)
+        whichParams = js'; %should not be a row
+end
 if(~isfield(ar,'ple') || isempty(ar.ple))
     error('perform ple before usage');
 end
 if(isempty(ar.ple.ps))
     return
 end
-
-if(~exist('fid', 'var'))
+if ~exist('fid','var') || isempty(fid)
     fid = 1;
 end
+
 
 if(isfield(ar.ple, 'p_true'))
     spacer = '-----------------------------------------------------------------------------------------------------------------------------------\n';
@@ -43,6 +57,9 @@ fprintf(fid, spacer);
 fprintf(fid, '    # ');
 fprintf(fid, partemplate, makestr('Parameter:', parnamelength));
 fprintf(fid, numtemplate, makestr('Value:', numlength));
+fprintf(fid, numtemplate, makestr('LowerPL:', numlength));
+fprintf(fid, numtemplate, makestr('UpperPL:', numlength));
+fprintf(fid, '|');
 if(isfield(ar.ple, 'p_true'))
     fprintf(fid, numtemplate, makestr('True:', numlength));
 end
@@ -50,8 +67,6 @@ fprintf(fid, numtemplate, makestr('Min:', numlength));
 fprintf(fid, numtemplate, makestr('Max:', numlength));
 fprintf(fid, '|');
 fprintf(fid, numtemplate, makestr('IDflag:', numlength));
-fprintf(fid, numtemplate, makestr('LowerPL:', numlength));
-fprintf(fid, numtemplate, makestr('UpperPL:', numlength));
 if(isfield(ar.ple, 'p_true'))
     fprintf(fid, '|');
     fprintf(fid, covertemplate, makestr('?:', numlength));
@@ -59,7 +74,7 @@ end
 fprintf(fid, '\n');
 
 fprintf(fid, spacer);
-for j=1:length(ar.ple.p)
+for j=whichParams
     idflag = '';
     if(ar.ple.IDstatus_point(j)>1)
         idflag = ar.ple.IDlabel{ar.ple.IDstatus_point(j)};
@@ -72,12 +87,13 @@ for j=1:length(ar.ple.p)
         fprintf(fid, numtemplate, makestr(ar.ple.p_true(j), numlength));
     end
     if(ar.qFit(j))
+        fprintf(fid, numtemplate, makestr(ar.ple.conf_lb_point(j), numlength));
+        fprintf(fid, numtemplate, makestr(ar.ple.conf_ub_point(j), numlength));
+        fprintf(fid, '|');
         fprintf(fid, numtemplate, makestr(ar.lb(j), numlength));
         fprintf(fid, numtemplate, makestr(ar.ub(j), numlength));
         fprintf(fid, '|');
         fprintf(fid, numtemplate, makestr(idflag, numlength));
-        fprintf(fid, numtemplate, makestr(ar.ple.conf_lb_point(j), numlength));
-        fprintf(fid, numtemplate, makestr(ar.ple.conf_ub_point(j), numlength));
         if(isfield(ar.ple, 'p_true'))
             fprintf(fid, '|');
             coverage_flag = ' ';
