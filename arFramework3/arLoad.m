@@ -1,4 +1,6 @@
-% arLoad(workspace_name,doAutomaticRecompile)
+% arLoad
+% arLoad(workspace_name)
+% arLoad(workspace_name,doAutomaticRecompile, sortModus)
 % 
 % arLoad loads a model struct with latest ple results from the repository
 % 
@@ -11,6 +13,11 @@
 %         If ar.fkt is not found (e.g. due to compiling
 %         previously on another OS, arRecompile can be started
 %         automatically if set to 1
+% 
+% sortModus      sorting of the workspaces (passed to fileChooser.m > fileList.m)
+%               'none' [default]
+%               'chi2'
+%               'checkstr'
 %
 % Examples
 %    Load workspace from current/last path at ar.config.savepath
@@ -20,10 +27,16 @@
 %    Load a struct from an existing folder
 %    arLoad('NameOfAnExistingResultFolder')
 %
+% arLoad([],[],'chi2')
+% arLoad([],[],'checkstr')
+%
 % See also arLoadLatest, arLoadData, arLoadFilename 
 
-function arLoad(workspace_name,doAutomaticRecompile)
-if ~exist('doAutomaticRecompile','var')
+function arLoad(workspace_name,doAutomaticRecompile,sortModus)
+if ~exist('sortModus','var') || isempty(sortModus)
+    sortModus = 'none';
+end
+if ~exist('doAutomaticRecompile','var') || isempty(doAutomaticRecompile)
     doAutomaticRecompile = 0;
 end
 
@@ -43,15 +56,15 @@ evalin('base','clear ar');
 evalin('base','global ar');  
 
 if(~exist('workspace_name', 'var') || isempty(workspace_name))
-    [~, workspace_name] = fileChooser('./Results', 1, true);
+    [~, workspace_name] = fileChooser('./Results', 1, true, [], sortModus);
 elseif(isnumeric(workspace_name)) % workspace_name is the file-number
-    [~, ~, file_list] = fileChooser('./Results', 1, -1);    
+    [~, ~, file_list] = fileChooser('./Results', 1, -1, [], sortModus);    
     workspace_name = file_list{workspace_name};
 elseif(ischar(workspace_name)) 
     [~,workspace_name]=fileparts(workspace_name);    % remove path
 end
 if contains(workspace_name,'*')
-    [~, workspace_name] = fileChooser('Results', 1, true,replace(workspace_name,'*',''));    
+    [~, workspace_name] = fileChooser('Results', 1, true, replace(workspace_name,'*',''), sortModus);    
 end
 
 Stmpload = load(['./Results/' workspace_name '/workspace.mat']);

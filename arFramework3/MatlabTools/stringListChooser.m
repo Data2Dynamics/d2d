@@ -1,5 +1,11 @@
-function out = stringListChooser(liste, default, zeigen)
-
+% sortModus      sorting of the workspaces (passed to fileList)
+%               'none' [default]
+%               'chi2'
+%               'checkstr'
+function out = stringListChooser(liste, default, zeigen,sortModus)
+if(~exist('sortModus', 'var'))
+    sortModus = 'none';
+end
 if(~exist('default', 'var'))
     default = 1;
 end
@@ -11,15 +17,18 @@ if(zeigen)
     maxlen = max(cellfun(@length,liste));
     anno = cell(1,length(liste));
     checkstr_version = cell(1,length(liste));
+    vals = cell(1,length(liste));
     for j=1:length(liste)
         % the headers are the same and should be generated at the same place where anno is generated, overwriting is no problem
         [anno{j},vals{j},header,checkstr_version{j}] = readParameterAnnotation(liste{j});  % vals contains npara, nfitted, chi2, ... and is useful when working with a breakpoint
     end        
      
+    rf = doSort(vals,sortModus);
+
     maxlen2 = max(cellfun(@length,anno));
     fprintf(['         %',sprintf('%i',maxlen),'s%s\n'],' ', header(1:min(length(header),maxlen2)));
     for j=1:length(anno)
-        fprintf(['#%3i : %-',num2str(maxlen),'s  %s\n'], j, liste{j}, anno{j});
+        fprintf(['#%3i : %-',num2str(maxlen),'s  %s\n'], rf(j), liste{rf(j)}, anno{rf(j)});
     end
     
     if sum(~cellfun(@isempty,checkstr_version))==0 || length(unique(checkstr_version))>1
@@ -45,6 +54,26 @@ else % allow zero input
     end
 end
 
+
+function rf = doSort(vals,sortModus)
+switch sortModus
+    case 'none' %
+        rf = 1:length(vals);
+    case 'chi2'
+        chi2s = NaN(size(vals));
+        for i=1:length(vals)
+            chi2s(i) = vals{i}.chi2;
+        end
+        [~,rf] = sort(-chi2s);
+    case 'checkstr'
+        checkstr = cell(size(vals));
+        for i=1:length(vals)
+            checkstr{i} = vals{i}.checkstr;
+        end
+        [~,rf] = sort(checkstr);
+    otherwise
+        error('SortModus %s unknown.',sortModus);
+end
 
 function out = numberChooser2(text, default, liste)
 
@@ -100,6 +129,7 @@ if(exist(filename_pars,'file'))
         checkstr.fitting = '';
         checkstr.fkt = '';
     end
+    vals.checkstr = sprintf('%s %s %s %s',checkstr.data,checkstr.para,checkstr.fitting,checkstr.fkt);
     
     nstrH = '   N ';
     if(isfield(S.ar,'ndata'))

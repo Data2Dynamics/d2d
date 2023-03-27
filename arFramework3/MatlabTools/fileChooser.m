@@ -1,4 +1,12 @@
-function [out, filename,file_list] = fileChooser(filepath, default, zeigen, searchpattern)
+% sortModus      sorting of the workspaces (passed to fileList)
+%               'none' [default]
+%               'chi2'
+%               'checkstr'
+
+function [out, filename,file_list] = fileChooser(filepath, default, zeigen, searchpattern,sortModus)
+if(~exist('sortModus', 'var'))
+    sortModus = 'none';
+end
 
 if(~exist('default', 'var'))
     default = 1;
@@ -21,7 +29,7 @@ else
         error('No ''Results'' folder found! Switch your path to D2D working directory.');
     end
     
-    out = stringListChooser(file_list, default, zeigen);
+    out = stringListChooser(file_list, default, zeigen, sortModus);
     if(out ~= 0)
         filename = file_list{out};
     else
