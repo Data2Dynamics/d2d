@@ -110,10 +110,10 @@ end
 
 switches = { 'dppershoot', 'removeconditions', 'removeobservables', 'splitconditions',...
     'removeemptyconds', 'expsplit', 'resampledoseresponse', 'resamplingresolution',...
-    'refinelog', 'ignoreinputs', 'detectionlimit', 'datapath'};
+    'refinelog', 'ignoreinputs', 'detectionlimit', 'datapath', 'delimiter'};
 extraArgs = [ 1, 1, 1, 1, ...
     0, 1, 0, 1, ...
-    0, 1, 1, 1 ];
+    0, 1, 1, 1, 1];
 description = { ...
     {'', 'Multiple shooting on'} ...
     {'', 'Ignoring specific conditions'} ...
@@ -126,7 +126,8 @@ description = { ...
     {'', 'Resampling on log scale'}, ...
     {'', 'Ignoring specific inputs'}, ...
     {'', 'Working with detection limit'}, ...
-    {'', 'Path to the data files'}};
+    {'', 'Path to the data files'}, ...
+    {'', 'Setting custom Delimiter for csv file'}};
     
 opts = argSwitch( switches, extraArgs, description, 1, varargin );
 if isempty(opts.datapath_args)
@@ -136,6 +137,11 @@ else
     if DataPath(end)~='/' && DataPath(end)~='\'
         DataPath = [DataPath,'/'];
     end
+end
+
+% Set Delimiter for csv files
+if ~isempty(opts.delimiter_args)
+    Delimiter = opts.delimiter_args;
 end
 
 
@@ -788,7 +794,11 @@ if(~strcmp(extension,'none') && ( ...
         
     elseif(strcmp(extension,'csv'))
         arFprintf( 3, '[ OK ]\nBegin reading data (csv) ...' );
-        [header, data, dataCell] = arReadCSVHeaderFile([DataPath, name '.csv'], ',', true);
+        if ~exist('Delimiter','var')
+            [header, data, dataCell] = arReadCSVHeaderFile([DataPath, name '.csv'], ',', true);
+        else
+            [header, data, dataCell] = arReadCSVHeaderFile([DataPath, name '.csv'], Delimiter, true);
+        end
         arFprintf( 3, '[ OK ]\n' );
         
         timevar = strtrim(header(1));
