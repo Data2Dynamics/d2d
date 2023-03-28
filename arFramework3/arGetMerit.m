@@ -1,9 +1,10 @@
 %   [meritval, meritvals, meritLabel] = arGetMerit([silent])
 %   [meritval, meritvals, meritLabel] = arGetMerit([whichone])
 % 
+%
 %   This function prints different loss/objective functions which can
-%   be used for optimization/parameter estimation. 
-% 
+%   be used for optimization/parameter estimation.
+%
 %   silent      logical or numeric         [false]
 %   whichone    string indicating which merit should be calculated  ['']
 %               '' (default)    the optimization merit is calculated
@@ -16,6 +17,7 @@
 %               The argument whichone can be used to keep the old
 %               terminology.
 % 
+%
 %   ATTENTION: arCalcMerit, arSimu, ... are NOT called automatically (only
 %   if ar.res_type is missing). To update residuals and merits this has to
 %   be done independently. 
@@ -26,7 +28,7 @@
 %                   used for parameter fitting 
 % 
 %       meritvals   different optional merits and sub-terms
-% 
+%
 %       meritLabel  name/label of meritval as it can be used for plot
 %       labels
 % 
@@ -80,9 +82,9 @@
 % >> chi2prior = arGetMerit('chi2prior')
 % chi2prior =
 %    92.8272
-% 
+%
 % See https://github.com/Data2Dynamics/d2d/wiki/Objective%20function,%20likelhood%20and%20chi-square%20in%20the%20d2d%20framework
-% 
+%
 % See also arCalcMerit, arCollectRes
 
 function varargout = arGetMerit(arg1)
@@ -249,14 +251,14 @@ end
 
 %% printing at the command line
 if(~silent)
-    arFprintf(1, '%i free parameters, ', sum(ar.qFit==1));
+    arFprintf(1, '%i free parameters', sum(ar.qFit==1));
     if(ar.chi2constr ~=0)
         arFprintf(1, ', %g violation of %i constraints', ar.chi2constr, ar.nconstr);
     end
     if(ar.chi2prior ~=0)
         arFprintf(1, ', %g violation of %i prior assumptions', ar.chi2prior, ar.nprior);
     end
-    arFprintf(1, 'data chi^2 = %g', meritvals.chi2_res);
+    arFprintf(1, ', data chi^2 = %g', meritvals.chi2_res);
 %     if(sensi)
 %         arFprintf(1, ', first order optimality criterion %g (%i)', ar.firstorderopt, -sum(qred));
 %     end

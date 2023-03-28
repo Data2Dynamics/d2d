@@ -48,9 +48,10 @@ function arDebugResidual()
     end
     
     if ( sresNaNs )
-        for jp = 1 : numel( ar.p )
+        for jp = 1 : size(ar.sres,1)
             if ( sum( isnan( ar.sres(jp,:) ) ) > 0 )
                 if sum( isnan( ar.sres(jp,:) ) ) == sum(ar.qDynamic==1)
+                    fprintf(num2str(jp));
                     fprintf( 'NaN detected in all dynamic sensitivities of specific observables.\n' );
                 else
                     fprintf( 'NaN detected in sensitivity for parameter:\n%s\n', sprintf( '%s ', ar.pLabel{isnan( ar.sres(jp, :) ) } ) );
