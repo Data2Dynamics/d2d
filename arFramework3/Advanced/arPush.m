@@ -60,7 +60,8 @@ function arPush( reset )
     end
     
     if ( ~valid )
-        disp( 'The model(s) loaded are incompatible with the stored stack. Stack invalidated.' );
+%         the following message confuses new users
+%         disp( 'The model(s) loaded are incompatible with the stored stack. Stack invalidated.' ); 
         newStack();
     end
     

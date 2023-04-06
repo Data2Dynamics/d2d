@@ -2816,7 +2816,7 @@ function J = myJacobian(F,x)
 
 if(~isempty(F))
     if(~isempty(x))
-        if verLessThan('matlab','9.12')
+        if verLessThan('matlab','9.4')
             J = jacobian(F,x);
         else
             F1 = arSym2str(F);

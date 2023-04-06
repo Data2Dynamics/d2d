@@ -1,0 +1,34 @@
+DESCRIPTION
+"SIR model"
+
+PREDICTOR
+t	T	"days"	"time"	0	20
+
+COMPARTMENTS
+utopia	V	"num"	"humans"	1
+
+STATES
+Sus     C	"num"	"humans"	utopia	1	"Susceptible" 1
+Infc	C	"num"	"humans"	utopia	1	"Infected" 1
+Rem     C	"num"	"humans"	utopia	1	"Removed" 1
+
+INPUTS
+
+REACTIONS
+Sus   ->  Infc     	CUSTOM "k_beta * Sus * Infc / N"
+Infc   ->  Rem 	    CUSTOM "k_gamma * Infc"
+
+DERIVED
+N      C	"num"	"humans"     "Sus + Infc + Rem" 
+        
+OBSERVABLES
+Infected	C	"num"	"humans"	0	0	"Infc"
+        
+ERRORS
+Infected       "sd_Infc"
+
+
+CONDITIONS
+init_Sus      "N_S"
+init_Infc     "N_I"
+init_Rem      "0"

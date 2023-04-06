@@ -37,7 +37,7 @@ notnan = find(~isnan(x));
 x = x(notnan);
 chi2 = chi2(notnan);
 
-q_chi2good = chi2<=nanmin(chi2)+deltaChi2 & ~isnan(chi2);
+q_chi2good = chi2<=min(chi2,[],'omitnan')+deltaChi2 & ~isnan(chi2);
 
 if(min(x(q_chi2good))==min(x(~isnan(chi2))))
     CI = -Inf;

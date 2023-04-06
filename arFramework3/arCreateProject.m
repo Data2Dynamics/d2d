@@ -29,6 +29,8 @@ switch lower(model_template)
         model_template = 'model_template_ABC.def';
     case {'hill','hillfunction'}
         model_template = 'model_template_HillFunctions.def';
+    case {'sir'}
+        model_template = 'model_template_SIR.def';
     case {'tf'}
         model_template = 'model_template_TransientFunction.def';
     case {'tf2'}
@@ -46,6 +48,8 @@ switch model_template
         data_template = 'data_template_ABC.def';
     case 'model_template_HillFunctions.def'
         data_template = 'data_template_HillFunctions.def';
+    case 'model_template_SIR.def'
+        data_template = 'data_template_SIR.def';
     case 'model_template_TransientFunction.def'
         data_template = 'data_template_TransientFunction.def';   
         setup_template = 'Setup_template_TransientFunction.m';
