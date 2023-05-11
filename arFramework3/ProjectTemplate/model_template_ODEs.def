@@ -12,6 +12,8 @@ Prot1	C	"nM"	"conc."	cyt	1	"Protein 1" 1
 Prot2	C	"nM"	"conc."	cyt	1	"Protein 2" 1
 
 INPUTS
+//Stim1	C	"nM"	"conc."	"k1*exp(-k2*t)"
+
 
 REACTIONS
 Prot1	->	Prot2	CUSTOM "k3 * Prot1"	"Reaction 1"
