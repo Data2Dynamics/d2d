@@ -3,7 +3,7 @@
 
 function arCheckReservedWords( strings, useLocation, offendingString )
 
-    keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','x'};
+    keywords = {'time','gamma','sin','cos','tan','beta','log','asin','atan','acos','acot','cot','theta','D','x','exp'};
     inter = intersect(strings, keywords);
     if(~isempty(inter))
         if ( nargin > 2 )
