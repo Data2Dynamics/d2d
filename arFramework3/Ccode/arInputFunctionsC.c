@@ -1,7 +1,9 @@
 #include <math.h>
+#include <float.h>
 #include "spline.c"
 #include "monotone.c"
 #include "arInputFunctionsC.h"
+
 
 /* general input functions */
 double heaviside(double t) {
@@ -214,6 +216,14 @@ double dstep2(double t, double u1, double t1, double u2, double t2, double u3, i
             return(1.0);
         else
             return(0.0);
+    }
+}
+
+double periodicsteps(double t, double t_total, double t1, double t2) {
+    if(t > t_total) {
+    	return(0.0);
+    } else {
+    	return(heaviside(-sin((2*M_PI/(t1+t2)) * t) + sin((2*M_PI/(t1+t2)) * (t - t1)) + sin((2*M_PI/(t1+t2)) * t1)-DBL_MIN*heaviside(t)));
     }
 }
 

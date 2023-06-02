@@ -57,6 +57,7 @@ function totalEvents = arFindInputs( verbose )
                 step2 = strfind(ar.model(m).condition(a).fu{b}, 'step2');
                 step3 = strfind(ar.model(m).condition(a).fu{b}, 'step3');
                 step4 = strfind(ar.model(m).condition(a).fu{b}, 'step4');
+                periodicstep = strfind(ar.model(m).condition(a).fu{b}, 'periodicstep');
 
                 for c = 1 : length( step1 )
                     ar.model(m).condition(a).fu{b}(step1(c):end);
@@ -69,19 +70,39 @@ function totalEvents = arFindInputs( verbose )
                     stepLocations{end+1} = chk{5}; %#ok
                 end        
                 for c = 1 : length( step3 )
-                    chk = strsplit(ar.model(m).condition(a).fu{b}(step2(c):end),',');
+                    chk = strsplit(ar.model(m).condition(a).fu{b}(step3(c):end),',');
                     stepLocations{end+1} = chk{3}; %#ok
                     stepLocations{end+1} = chk{5}; %#ok
                     stepLocations{end+1} = chk{7}; %#ok
                 end        
                 for c = 1 : length( step4 )
-                    chk = strsplit(ar.model(m).condition(a).fu{b}(step2(c):end),',');
+                    chk = strsplit(ar.model(m).condition(a).fu{b}(step4(c):end),',');
                     stepLocations{end+1} = chk{3}; %#ok
                     stepLocations{end+1} = chk{5}; %#ok
                     stepLocations{end+1} = chk{7}; %#ok
                     stepLocations{end+1} = chk{9}; %#ok
                 end        
-
+                for c = 1 : length ( periodicstep )
+                    chk = strsplit(ar.model(m).condition(a).fu{b}(periodicstep(c):end),{',',')'});
+                    t_total = str2double(chk{2});
+                    t_off = str2double(chk{3});
+                    t_on = str2double(chk{4});
+                    t_test=0;
+                    n_test=1;
+                    k=1;
+                    while t_test < t_total
+                        if n_test == 1
+                            stepLocations{end+1} = num2str(k*t_off + (k-1)*t_on); %#ok
+                            n_test=n_test*(-1);
+                            t_test = t_test + t_off;
+                        else
+                            stepLocations{end+1} = num2str(k*(t_off+t_on)); %#ok
+                            n_test=n_test*(-1);
+                            t_test = t_test + t_on;
+                            k=k+1;
+                        end
+                    end
+                end
             end
 
             % Transform the parameters that are defined in log space
