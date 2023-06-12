@@ -22,7 +22,7 @@ warnreset = warning;
 warning('off', 'symbolic:mupadmex:MuPADTextWarning');
 warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid')
 warning('off', 'symbolic:sym:sym:DeprecateExpressions')
-
+sympref('HeavisideAtOrigin',1);
 global ar
 
 if(isempty(ar))
@@ -69,6 +69,7 @@ end
 
 % Special function definitions
 if ( ~legacy_steps )
+    
     % Argument formats for functional replacements.
     % First indicates the function name, second indicates the function,
     % third is the argument list mapping. Note that only valid symbolic
@@ -85,6 +86,7 @@ if ( ~legacy_steps )
             {'step2',           '%s + (%s-%s) * heaviside(%s-%s) + (%s-%s)*heaviside(%s-%s)', [2, 4, 2, 1, 3, 6, 4, 1, 5], 'step2(t, level1, switch_time1, level2, switch_time2, level3)' }, ...
             {'step3',           '%s + (%s-%s) * heaviside(%s-%s) + (%s-%s)*heaviside(%s-%s) + (%s-%s)*heaviside(%s-%s)',[2, 4, 2, 1, 3, 6, 4, 1, 5, 8, 6, 1, 7], 'step3(t, level1, switch_time1, level2, switch_time2, level3, switch_time3, level4)' }, ...
             {'step4',           '%s + (%s-%s) * heaviside(%s-%s) + (%s-%s)*heaviside(%s-%s) + (%s-%s)*heaviside(%s-%s) + (%s-%s)*heaviside(%s-%s)', [2, 4, 2, 1, 3, 6, 4, 1, 5, 8, 6, 1, 7, 10, 8, 1, 9], 'step4(t, level1, switch_time1, level2, switch_time2, level3, switch_time3, level4, switch_time4, level5)' }, ...
+            {'periodicstep'     'heaviside(%s-%s) * heaviside(-sin((2*pi/(%s + %s)) * %s) + sin((2*pi/(%s + %s)) * (%s - %s)) + sin((2*pi/(%s + %s)) * %s)-1e-308*heaviside(%s))', [2,1,3,4,1,3,4,1,3,3,4,3,1], 'periodicstep(t,t_total,t_off,t_on)'}, ...
             {'bolus',           '%s * (1 / sqrt( 2 * pi * %s^2 ) ) * exp(-(%s - %s)^2 / (2*%s^2))', [2, 4, 1, 3, 4], 'bolus(t, amount, time_point, duration)' }, ...
             {'hill_ka',         '%s^%s / (%s^%s + %s^%s)', [1, 3, 2, 3, 1, 3], 'hill_ka(conc, ka, n )' }, ...
             {'hill_kd',         '%s^%s / (%s + %s^%s)', [1, 3, 2, 1, 3], 'hill_kd(conc, kd, n )' }, ...

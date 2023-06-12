@@ -25,5 +25,5 @@ arSetPars('step_size', .5, 0, 0);
 
 % Smoothness of the steps
 arSetPars('smoothness', 1.0, 0, 0);
-
-arPlot;
+arFindInputs;
+arPlot2;

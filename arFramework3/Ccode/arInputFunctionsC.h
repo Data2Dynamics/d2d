@@ -17,6 +17,8 @@ double dstep1(double t, double u1, double t1, double u2, int p_index);
 double step2(double t, double u1, double t1, double u2, double t2, double u3);
 double dstep2(double t, double u1, double t1, double u2, double t2, double u3, int p_index);
 
+double periodicsteps(double t, double t_total, double t1, double t2);
+
 /* Spline which optionally allows for caching */
 double inputspline( double t, const int n, const double ts[], const double us[]);
 double inputfastspline( double t, int ID, double **splineCache, int *idCache, const int n, const double ts[], const double us[]);

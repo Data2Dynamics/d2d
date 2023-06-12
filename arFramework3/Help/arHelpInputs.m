@@ -24,14 +24,18 @@
 %     Provides a double step function at the values switch_time1/2/3 of the independent variable t.
 %   "step4(t, level1, switch_time1, level2, switch_time2, level3, switch_time3, level4, switch_time4, level5)" 
 %     Provides a double step function at the values switch_time1/2/3/4 of the independent variable t.
+%                                                             | 0, for (k-1)*(t_off + ton) < t < k*t_off + (k-1)*t_on
+%   "periodicstep(t,t_total,t_off,t_on)" = theta(t_total-t) x |                                                        , k = 1,2,....
+%                                                             | 1, for k*t_off + (k-1)*t_on < t < k*(t_off + t_on)
+%     provides a periodic step function of the independet variable t with a period of t_off + t_on. 
 %   "smoothstep1(t, level1, switch_time, level2, smoothness)" 
 %     Provides a smooth step function at the value switch_time of the independent variable (usually time).
 %   "smoothstep2(t, level1, switch_time1, level2, switch_time2, level3, smoothness)" 
 %     Provides a smooth double step function at the values switch_time1/2 of the independent variable t.
 %     The smoothness parameter controls the smoothness of the step. For large values, the step becomes increasingly sigmoidal.
 %
-%   *** Must use arFindInputs after compilation ***
-% 
+%   *** Must use arFindInputs after compilation *** 
+%
 % BOLUS INJECTIONS
 %   "bolus(t, amount, time_point, duration)" 
 %     giving a bolus injection at value time point of the independent variable t. This corresponds to a Gaussian curve with area amount and standard deviation duration.
@@ -74,5 +78,7 @@
 %     "gif_amp_trans*(1-exp(-t/gif_timescale_sust))*exp(-t/(gif_timescale_trans)) + gif_amp_sust*(1-exp(-t/gif_timescale_sust))"
 %       The function has three parameters, two amplitudes (gif_amp_trans and gif_amp_sust) and two time scales (gif_timescale_trans 
 %       and gif_timescale_sust), that encode the transient and sustained parts.
+% 
+%   *** See also Examples/ToyModels/Input_Tests *** 
 
 help arhelpInputs
