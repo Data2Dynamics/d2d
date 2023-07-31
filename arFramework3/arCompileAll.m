@@ -2266,7 +2266,7 @@ fprintf(fid, '%s\n\n', data.constVars);
 
 % write y
 fprintf(fid, ' void fy_%s(double t, int nt, int it, int ntlink, int itlink, int ny, int nx, int nz, int iruns, double *y, double *p, double *u, double *x, double *z){\n', data.fkt);
-writeCcode(fid, matlab_version, data, 'fy');
+writeCcode(fid, matlab_version, data, 'fy',[],true);
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write ystd
@@ -2296,7 +2296,10 @@ end
 fprintf(fid, '\n  return;\n}\n\n\n');
 
 % write C code
-function writeCcode(fid, matlab_version, cond_data, svar, ip)
+function writeCcode(fid, matlab_version, cond_data, svar, ip, warnIfNaN)
+if ~exist('warnIfNaN','var') || isempty(warnIfNaN)
+    warnIfNaN = false;
+end
     
 if(strcmp(svar,'fv'))
     cstr = arCcode(cond_data.sym.fv(:), matlab_version);
@@ -2484,6 +2487,22 @@ if(~(length(cstr)==1 && isempty(cstr{1})))
 end
 
 fprintf(fid, '%s\n', cstr);
+
+%% The following did not work because matlab crashes. Maybe matlab cannot pass messages in a multi-threading mode (see web)
+% % I wanted to have a message, if y cannot be calculated (e.g. if nu in RTF is too small)
+% % I did not further try to find a solution.
+% % Workspace for playing around: 20230609T150820_tmp in E:\clemens\Projekte\d2d\2023_D2D_NAproblem_RTF
+% if(warnIfNaN)
+%     tmp = split(cstr,{'=',';'});
+%     tmp = tmp(1:2:(end-1));
+%     for i=1:length(tmp)       
+%         % works:
+% %         fprintf(fid,'\n   if(mxIsNaN(%s)){\n %s=0.0  ;\n   }',strtrim(tmp{i}),strtrim(tmp{i})); 
+%         % does not work:
+% %         fprintf(fid,'\n   if(mxIsNaN(%s)){\n      mexWarnMsgIdAndTxt("D2D:%s","NaN in %s %s");\n   }',strtrim(tmp{i}),cond_data.name,cond_data.name,svar);
+% %         fprintf(fid,'\n   if(mxIsNaN(%s)){\n      printf("D2D:%s%s");\n   }',strtrim(tmp{i}),cond_data.name,'\n');
+%     end
+% end
 
 % % debug
 % fprintf('\n\n%s\n', cstr);
