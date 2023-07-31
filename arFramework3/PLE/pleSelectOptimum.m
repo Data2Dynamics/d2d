@@ -11,6 +11,18 @@
 %       better.ifit:    the fit index which shows most improvement
 %       better.chi2better: chi2s which are better 
 %       better.atEnd:   -1 = left corner, 1 = right corner, 0 = somewhere in the middle
+% 
+% Example:
+% arLoad
+% arPLEInit
+% ple
+% while(~isempty(pleSelectOptimum))
+%     pleBestP
+%     arFit
+%     arPLEInit
+%     ple
+% end
+
 
 function better = pleSelectOptimum(jks)
 
