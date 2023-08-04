@@ -361,15 +361,18 @@ ps = ar.ple.ps{jk};
 %These variables now contain parameters and chi2s for the whole profile
 
 % Define new optimum
-if(ar.ple.merit-min(chi2) > ar.ple.optimset_tol)
+if(ar.ple.merit-min(chi2) > ar.ple.optimset_tol) % is better optimum found?
     [minchi2, iminchi2] = min(chi2);
     arFprintf([],'PLE#%i found better optimum with chi^2 decrease of %e\n', jk, ...
         ar.ple.merit - minchi2);
     
-    if(ar.ple.allowbetteroptimum)
+    if(ar.ple.allowbetteroptimum>0)
         ar.ple.merit = minchi2;
         ar.ple.p = ps(iminchi2,:);
         feval(ar.ple.setoptim_fkt, ps(iminchi2,:));
+    end
+    if(ar.ple.allowbetteroptimum==2)
+        ple
     end
 end
 
