@@ -87,7 +87,6 @@ double inputfastspline( double t, int ID, double **splineCache, int *idCache, co
 
 double interpolateLinear( double t, int n, const double time[], const double data[] )
 {
-    double *deriv2;
     double val;
     
     int max             = n-1;
@@ -120,7 +119,7 @@ double interpolateLinear( double t, int n, const double time[], const double dat
 /* Fixed coefficient cubic spline */
 double splineFixCoeffs( double t, int n, const double time[], const double data[] )
 {
-    double *deriv2;
+    const double *deriv2;
     double val;
     
     int max             = n-1;
