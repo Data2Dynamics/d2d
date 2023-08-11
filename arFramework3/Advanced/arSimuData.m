@@ -111,7 +111,8 @@ arLink(true);
 
 function assigne_new_timepoints(tpoints, m, d, new_ts)
 global ar
-ar.model(m).data(d).tExp = sort(tpoints{d}(:));
+%ar.model(m).data(d).tExp = sort(tpoints{d}(:));
+ar.model(m).data(d).tExp = tpoints{d}(:);
 ar.model(m).data(d).yExp = zeros(length(tpoints{d}), length(ar.model(m).data(d).y));
 if(new_ts)
     ar.model(m).data(d).yExpStd = NaN(length(tpoints{d}), length(ar.model(m).data(d).y));
