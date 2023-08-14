@@ -87,7 +87,8 @@ for i=1:length(setup_files)
                 if ~testmode
                     eval(sprintf('arSave(''arCompileAllSetups_%s'');',mode));
                 end
-            case 'core' % only the most improtant setup commands
+            case 'core' % only the most important setup commands
+                did_compile = false;
                 fid = fopen([name,ext], 'r');
                 while (~feof(fid))
                     %             [str, fid] = arTextScan(fid, '%s', 'Delimiter', '', 'CommentStyle', '%');
@@ -96,7 +97,6 @@ for i=1:length(setup_files)
                     
                     if ~isempty(str) && ischar(str)
                         str = strtrim(str);
-                        did_compile = false;
                         if ~isempty(str) && ischar(str)
                             if ~isempty(regexp(str,'^arInit'))
                                 fprintf(fidlog,'%s\n',str);
