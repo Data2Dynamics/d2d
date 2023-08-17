@@ -25,13 +25,17 @@
 %               specified, e.g.:
 %               arCopyBenchmarkModels('Becker')
 %               arCopyBenchmarkModels('Swa')
+%
+%               subset can also be a cell array of keywords and modelnames
+%               e.g.: {'fast10', 'new', 'Bachmann'}.
 % 
-%   target_path     Default: pwd
+%   target_path     Default: current working directory (pwd)
 % 
 % Examples
 % arCopyBenchmarkModels              % 20 default benchmark models
 % arCopyBenchmarkModels('Bachmann')  % only the Bachmann model
 % arCopyBenchmarkModels('Ra')        % only the Raia model (abbreviation Ra only fits for Raia)
+% arCopyBenchmarkModels({'fast10', "Chen"})  % 10 fastest models plus Chen_MSB2009
 % 
 % 
 % Reference:  
@@ -43,15 +47,24 @@
 % New Concepts for Evaluating the Performance of Computational Methods.
 % IFAC-PapersOnLine (2016) 49(26): 63-70.
 
-function arCopyBenchmarkModels(subset,target_path)
-if ~exist('subset','var') || isempty(subset)
-    subset = '20';
-elseif isnumeric(subset)
-    subset = num2str(subset);
-end
+function arCopyBenchmarkModels(subset, target_path)
 
 if ~exist('target_path','var') || isempty(target_path)
     target_path = pwd;
+end
+
+if ~exist('subset','var') || isempty(subset)
+    % set default
+    subset = '20';
+
+elseif iscell(subset)
+    % recursive call
+    cellfun(@(x) arCopyBenchmarkModels(x, target_path), subset);
+    return
+
+elseif isnumeric(subset)
+    % convert to string
+    subset = num2str(subset);
 end
 
 models20 = {
@@ -148,47 +161,49 @@ DoCopy(models, target_path);
 
 function DoCopy(models, target_path)
 
-source_path = [fileparts(which('arInit')),filesep,'Examples'];
+source_path = fullfile(fileparts(which('arInit')), 'Examples');
 
 for i=1:length(models)
 
     fprintf('Copying %s ...\n',models{i});
-    copyfile([source_path,filesep,models{i}],[target_path,filesep,models{i}]);
+    copyfile(fullfile(source_path, models{i}), ...
+             fullfile(target_path, models{i}));
 
     % model-specific operations which have to be done:
     switch models{i}
         case 'Becker_Science2010'
             % use only original model, not Setup_Regularization.m
-            delete([target_path,filesep,models{i},filesep,'Setup_Regularization.m']);
+            delete(fullfile(target_path, models{i}, 'Setup_Regularization.m'));
 
         case 'Boehm_JProteomeRes2014'
             % only keep Setup.m
-            delete([target_path,filesep,models{i},filesep,'Setup_FullModel_Boehm2014.m']);
+            delete(fullfile(target_path, models{i}, 'Setup_FullModel_Boehm2014.m'));
         
         case 'Merkle_JAK2STAT5_PCB2016'
             % only keep SetupFinal.m
-            delete([target_path,filesep,models{i},filesep,'SetupCFUE.m']);
-            delete([target_path,filesep,models{i},filesep,'SetupComprehensive.m']);
-            delete([target_path,filesep,models{i},filesep,'SetupH838.m']);
-            delete([target_path,filesep,models{i},filesep,'SetupSens.m']);
+            delete(fullfile(target_path, models{i}, 'SetupCFUE.m'));
+            delete(fullfile(target_path, models{i}, 'SetupComprehensive.m'));
+            delete(fullfile(target_path, models{i}, 'SetupH838.m'));
+            delete(fullfile(target_path, models{i}, 'SetupSens.m'));
         
         case 'Lucarelli_TGFb_2017'
             % just keep reduced model with genes
-            rmdir([target_path,filesep,models{i},filesep,'TGFb_ComplexModel_ModelSelection_L1'],'s');
-            rmdir([target_path,filesep,models{i},filesep,'TGFb_ComplexModel_withGenes'],'s');
-            movefile([target_path,filesep,models{i},filesep,'TGFb_ComplexModel_WithGenes_Reduced',filesep,'*'],...
-                     [target_path,filesep,models{i},filesep,'.']);
-            rmdir([target_path,filesep,models{i},filesep,'TGFb_ComplexModel_WithGenes_Reduced'],'s');
+            rmdir(fullfile(target_path, models{i}, 'TGFb_ComplexModel_ModelSelection_L1'),'s');
+            rmdir(fullfile(target_path, models{i}, 'TGFb_ComplexModel_withGenes'),'s');
+            movefile(fullfile(target_path, models{i}, 'TGFb_ComplexModel_WithGenes_Reduced', '*'), ...
+                     fullfile(target_path, models{i}));
+            rmdir(fullfile(target_path, models{i}, 'TGFb_ComplexModel_WithGenes_Reduced'),'s');
 
         case 'Sobotta_Frontiers2017'
             % just keep Setup_Core.m
-            delete([target_path,filesep,models{i},filesep,'Setup_IL6_ExpDesign.m']);
-            delete([target_path,filesep,models{i},filesep,'Setup_IL6_Full.m']);
+            delete(fullfile(target_path, models{i}, 'Setup_IL6_ExpDesign.m'));
+            delete(fullfile(target_path, models{i}, 'Setup_IL6_Full.m'));
 
         case 'Swameye_PNAS2003'
             % just keep Setup.m
-            delete([target_path,filesep,models{i},filesep,'Setup2003.m']);
+            delete(fullfile(target_path, models{i}, 'Setup2003.m'));
     end
+    
 
 end
 
