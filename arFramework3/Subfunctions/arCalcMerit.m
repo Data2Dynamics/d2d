@@ -153,7 +153,7 @@ for i = 1:nCVRestart
                             else
                                 ar.config.maxsteps = (1+.2*(i-1))*maxsteps;
                                 if(~error_printed)
-                                    arFprintf(1, 'Integration error, restarting %d / %d with 20%% increased maxsteps.\n',i-1,nCVRestart)
+                                    arFprintf(1, 'Integration error. New attempt (%d/%d) with 20%% increased maxsteps.\n', i, nCVRestart)
                                     error_printed = 1;
                                 end
                             end
@@ -161,7 +161,7 @@ for i = 1:nCVRestart
                             ar.config.atol = (1+.05*i)*atol;
                             ar.config.rtol = (1+.05*i)*rtol;
                             if(~error_printed)
-                                arFprintf(1, 'Integration error, restarting %d / %d with 5%% increased tolerances.\n',i,nCVRestart)
+                                arFprintf(1, 'Integration error. New attempt (%d/%d) with 5%% increased tolerances.\n', i, nCVRestart)
                                 error_printed = 1;
                             end
                         else
