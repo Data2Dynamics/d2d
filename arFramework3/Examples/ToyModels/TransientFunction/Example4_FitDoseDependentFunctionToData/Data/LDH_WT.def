@@ -1,0 +1,16 @@
+DESCRIPTION
+
+PREDICTOR
+time        T   min time    0	10
+
+INPUTS
+
+OBSERVABLES
+        
+ERRORS
+
+CONDITIONS
+isKO	"0"
+
+RANDOM
+
