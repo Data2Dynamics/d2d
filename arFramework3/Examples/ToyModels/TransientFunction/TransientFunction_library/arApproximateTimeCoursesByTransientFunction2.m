@@ -100,7 +100,7 @@ pcatch = cell(0);
 % load tmp fits % if specific fits should only be fitted
 %%
 for d=1:length(fits)    
-%     try
+    try
         arInit;
         arLoadModel('TransientFunction_ForConditionFit2');
 %         fits{d}.data.fp{4} = '(100)'  % for bachmann and conditions with too short tExp
@@ -156,17 +156,22 @@ for d=1:length(fits)
             plotFitTransient(fits(d),plotfolder);
         end
 
-%     catch ERR
-%         pcatch{end+1} = struct('p',ar.p,'lb',ar.lb,'ub',ar.ub);
-%         save error ok pcatch
-%     end
+    catch ERR
+        pcatch{end+1} = struct('p',ar.p,'lb',ar.lb,'ub',ar.ub);
+        save error ok pcatch
+    end
 end
+save arApproximateTimeCoursesByTransientFunction2
 arPlot
 
 
 %% calculate the approximation error from the fitted SD
 for i=1:length(fits)
-    fits{i}.approxErr = 10.^fits{i}.p(4)./range(fits{i}.data.yExp);
+    if(isfield(fits{i},''))
+        fits{i}.approxErr = 10.^fits{i}.p(4)./range(fits{i}.data.yExp);
+    else
+        fits{i}.approxErr = NaN*range(fits{i}.data.yExp);
+    end
 end
 
 
