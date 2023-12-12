@@ -61,7 +61,7 @@ function totalEvents = arFindInputs( verbose )
 
                 for c = 1 : length( step1 )
                     ar.model(m).condition(a).fu{b}(step1(c):end);
-                    chk = strsplit(ar.model(m).condition(a).fu{b}(step1(c):end),',');
+                    chk = strsplit(ar.model(m).condition(a).fu{b}(step1(c):end),',')
                     stepLocations{end+1} = chk{3}; %#ok
                 end
                 for c = 1 : length( step2 )
