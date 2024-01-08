@@ -61,9 +61,12 @@ if isempty(which('arFitTransient'))
 end
 
 %% Step 1: Create data structs from conditions:
-def_file = [fileparts(which('arInit')),filesep,'Examples',filesep,'ToyModels',filesep,'TransientFunction',filesep,'TransientFunction_library',filesep,'TransientFunction_ForConditionFit2.def'];
+def_name = 'TransientFunction_ForConditionFit2';
+def_file = [fileparts(which('arInit')),filesep,'Examples',filesep,'ToyModels',filesep,'TransientFunction',filesep,'TransientFunction_library',filesep,def_name,'.def'];
 copyfile(def_file,'Models');
-arLoadModel('TransientFunction_ForConditionFit2');
+if ~strcmp(def_name, ar.model(end).name)
+    arLoadModel('TransientFunction_ForConditionFit2');
+end
 fits = cell(0);
 maxTF = [];
 for m=1:length(ar.model)
@@ -128,8 +131,8 @@ for d=1:length(fits)
                 SDest = 10.^SDest;
             end            
             if sum(~isnan(ar.model.data.yExp))>1 && range(ar.model.data.yExp)/10<SDest  && range(ar.model.data.yExp)>1e-10
-                fprintf('Fit %i out of %i has large SD: LHS(10) started ...\n',d,length(fits));
-                arFitLHS(20)  % 10 fits should be enough for 7 parameters!
+                fprintf('Fit %i out of %i has still large SD: LHS(20) started ...\n',d,length(fits));
+                arFitLHS(20)
             end
         end
         
