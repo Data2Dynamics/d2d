@@ -20,12 +20,16 @@ end
 global arWaitbarGlobal;
 global arOutputLevel;
 
+global ar;		
 % disable waitbar window and use command line output instead
-if ~isfield(arWaitbarGlobal,'showWindow')
-    arWaitbarGlobal.showWindow = 1;
+if ( isfield( ar, 'config' ) && isfield( ar.config, 'noWaitBarWindow' ) && ar.config.noWaitBarWindow == 1 )
+    arWaitbarGlobal.showWindow = 0;
+else
+    if ~isfield(arWaitbarGlobal,'showWindow')
+        arWaitbarGlobal.showWindow = 1;
+    end
 end
 
-global ar;		
 if ( isfield( ar, 'config' ) && isfield( ar.config, 'noWaitBar' ) && ar.config.noWaitBar == 1 )		
     return;		
 end
@@ -116,7 +120,7 @@ else
                         sprintf('%s\n%i/%i   %2i%%   %s -> %s%s', ...
                         strrep(text, '_','\_'), j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext));
                 else
-                    fprintf('%s %i/%i   %2i%%   %s -> %s%s\n', ...
+                    fprintf('%s %i/%i   %2i%%  Estimated: %s -> Elapsed: %s%s\n', ...
                         strrep(text, '_','\_'), j, n, round(j/n*100), secToHMS(timeleft), secToHMS(timeelapsed), funtext); 
                     drawnow;
                 end
