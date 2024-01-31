@@ -13,17 +13,17 @@
 % 
 % see also arPlotChi2s
 
-function arWaterfallPlot
+function [fig, axis] = arWaterfallPlot
 global ar
 
+fig = figure();
 if(min(ar.chi2s)>0)
-    semilogy(1:length(ar.chi2s),sort(ar.chi2s),'.','MarkerSize',12)
+    axis = semilogy(1:length(ar.chi2s),sort(ar.chi2s),'.','MarkerSize',12);
 else
-    plot(1:length(ar.chi2s),sort(ar.chi2s),'.','MarkerSize',12)
+    axis = plot(1:length(ar.chi2s),sort(ar.chi2s),'.','MarkerSize',12);
 end    
 xlabel('Fit index [sorted]')
 ylabel('Merit after optimization')
 xlim([0,length(ar.chi2s)+1])
 title(['Waterfall plot: ',num2str(length(ar.chi2s)),' fits, ',num2str(sum(isinf(ar.chi2s))), ' failed'])
 grid on
-
