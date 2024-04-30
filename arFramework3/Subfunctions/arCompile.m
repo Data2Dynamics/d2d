@@ -520,7 +520,7 @@ if(isfield(ar.model, 'data'))
     else
         for j=1:length(objects_dat)
             if(~exist(objects_dat{j}, 'file') || forceFullCompile)
-                if(isempty(compiled_cluster_path))
+                if(isempty(compiled_cluster_path))  % the  error happens in the next line!!!
                     mex('-c',verbose{:},mexopt{:},'-outdir',['./Compiled/' c_version_code '/' mexext '/'], ...
                         includesstr{:}, [source_dir '/Compiled/' c_version_code '/' file_dat{j}]);
                 else
@@ -539,8 +539,8 @@ if(isfield(ar.model, 'data'))
     end
 end
 
-includesstr=strrep(includesstr,'"', '');
-objectsstr = unique( objectsstr, 'stable' );
+includesstr = strrep(includesstr, '"', '');
+objectsstr = unique(objectsstr, 'stable');
 
 %% compile and link main mex file
 if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
@@ -582,6 +582,7 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
         if ( chunks > 1 )
             cCfg = mex.getCompilerConfigurations('C');
             libloc = [cCfg.Location, '/VC/bin']; % Add directory containing lib.exe to the path (this could be further generalized)
+            % for me libloc does not exist. maybe this is the problem?!  -> maybe the changes below were not neccessary
 
             curEnv = getenv('path');
             if ( isempty( strfind( curEnv, libloc ) ) )
@@ -597,10 +598,18 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
             libNames = cell(1, chunks);
 
             for a = 1 : chunks
-               fprintf( 'Assembling chunk %d/%d into library\n', a, chunks );
-               libNames{a} = fullfile('Compiled', c_version_code, [ 'lib' num2str(a) '_' ar.fkt(end-31:end) '.lib' ] );
-               curChunk = cellfun(@(st)[st, ' '], objectsstr( (a-1)*chunkSize+1 : min(a*chunkSize, numel(objectsstr)) ), 'UniformOutput', false);               
-               system(['vcvars32 & lib /out:' libNames{a} ' ' [ curChunk{:} ] ] );
+                fprintf( 'Assembling chunk %d/%d into library\n', a, chunks );
+                libNames{a} = fullfile('Compiled', c_version_code, [ 'lib' num2str(a) '_' ar.fkt(end-31:end) '.lib' ] );
+                curChunk = cellfun(@(st)[st, ' '], objectsstr( (a-1)*chunkSize+1 : min(a*chunkSize, numel(objectsstr)) ), 'UniformOutput', false);              
+                [~, cmdout] = system(['vcvars32 & lib /out:' libNames{a} ' ' [ curChunk{:} ] ] );  % why always vcvars32? Shouldn't we check if 32 or 64 bit?
+                % Check if the system command produced the typical console output
+                % otherwise there might be an error
+                if(~contains(cmdout, 'Microsoft Corporation'))
+                    warning('arCompile:VisualStudioTools', ...
+                            ['Please check if Visual Studio (or Visual C++ Tools) are installed.\n' ...
+                             'Add C:\Program Files\Microsoft Visual Studio\[year]\[edition]\VC\Auxiliary\Build to PATH variables.\n' ...
+                             'See: https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170#download-and-install-the-tools .']);
+                end
             end
             fprintf( 'Linking chunks\n' );
             mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
