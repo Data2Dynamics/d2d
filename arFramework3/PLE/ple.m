@@ -1,4 +1,4 @@
-% ple([i], [samplesize], [relchi2stepincrease], [maxstepsize], [minstepsize], [breakonbounds], [doLeftRightBranch])
+% ple([i], [samplesize], [relchi2stepincrease], [maxstepsize], [minstepsize], [breakonbounds], [doLeftRightBranch],[hideWindows])
 % 
 % Profile Likelihood Exploit
 %
@@ -18,6 +18,8 @@
 %                         break regardless for the profile parameter if it
 %                         reaches the boundary.
 %   doLeftRightBranch     calculate left/right branch         [true true]
+%   hideWindows           hide windows of calculation and     [false]
+%                         wait bar
 % 
 % The profile likelihood calculation by the functions ple* was intended
 % as running independent of D2D, i.e. it was intended to be also used by
@@ -29,7 +31,7 @@
 % See also: arPLEInit, pleExtend, pleSmooth
 
 function ple(jk, samplesize, relchi2stepincrease, ...
-    maxstepsize, minstepsize, breakonlb, breakonub, doLeftRightBranch)
+    maxstepsize, minstepsize, breakonlb, breakonub, doLeftRightBranch,hideWindows)
 
 global ar
 
@@ -87,6 +89,14 @@ if(~isfield(ar.ple, 'showCalculation'))
 end
 if(~exist('doLeftRightBranch','var') || isempty(doLeftRightBranch))
     doLeftRightBranch = [true true];
+end
+
+if(~exist('hideWindows','var') || isempty(hideWindows))
+    hideWindows = false;
+end
+if hideWindows == true
+    ar.ple.showCalculation = false;
+    ar.config.noWaitBarWindow = true;
 end
 
 % Specifications on what to do if there are more than 1 parameter. The

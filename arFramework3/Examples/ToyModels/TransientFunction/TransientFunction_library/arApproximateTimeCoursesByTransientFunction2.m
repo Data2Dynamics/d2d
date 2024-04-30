@@ -61,9 +61,12 @@ if isempty(which('arFitTransient'))
 end
 
 %% Step 1: Create data structs from conditions:
-def_file = [fileparts(which('arInit')),filesep,'Examples',filesep,'ToyModels',filesep,'TransientFunction',filesep,'TransientFunction_library',filesep,'TransientFunction_ForConditionFit2.def'];
+def_name = 'TransientFunction_ForConditionFit2';
+def_file = [fileparts(which('arInit')),filesep,'Examples',filesep,'ToyModels',filesep,'TransientFunction',filesep,'TransientFunction_library',filesep,def_name,'.def'];
 copyfile(def_file,'Models');
-arLoadModel('TransientFunction_ForConditionFit2');
+if ~strcmp(def_name, ar.model(end).name)
+    arLoadModel('TransientFunction_ForConditionFit2');
+end
 fits = cell(0);
 maxTF = [];
 for m=1:length(ar.model)
@@ -100,7 +103,7 @@ pcatch = cell(0);
 % load tmp fits % if specific fits should only be fitted
 %%
 for d=1:length(fits)    
-%     try
+    try
         arInit;
         arLoadModel('TransientFunction_ForConditionFit2');
 %         fits{d}.data.fp{4} = '(100)'  % for bachmann and conditions with too short tExp
@@ -128,8 +131,8 @@ for d=1:length(fits)
                 SDest = 10.^SDest;
             end            
             if sum(~isnan(ar.model.data.yExp))>1 && range(ar.model.data.yExp)/10<SDest  && range(ar.model.data.yExp)>1e-10
-                fprintf('Fit %i out of %i has large SD: LHS(10) started ...\n',d,length(fits));
-                arFitLHS(20)  % 10 fits should be enough for 7 parameters!
+                fprintf('Fit %i out of %i has still large SD: LHS(20) started ...\n',d,length(fits));
+                arFitLHS(20)
             end
         end
         
@@ -156,17 +159,22 @@ for d=1:length(fits)
             plotFitTransient(fits(d),plotfolder);
         end
 
-%     catch ERR
-%         pcatch{end+1} = struct('p',ar.p,'lb',ar.lb,'ub',ar.ub);
-%         save error ok pcatch
-%     end
+    catch ERR
+        pcatch{end+1} = struct('p',ar.p,'lb',ar.lb,'ub',ar.ub);
+        save error ok pcatch
+    end
 end
+save arApproximateTimeCoursesByTransientFunction2
 arPlot
 
 
 %% calculate the approximation error from the fitted SD
 for i=1:length(fits)
-    fits{i}.approxErr = 10.^fits{i}.p(4)./range(fits{i}.data.yExp);
+    if(isfield(fits{i},''))
+        fits{i}.approxErr = 10.^fits{i}.p(4)./range(fits{i}.data.yExp);
+    else
+        fits{i}.approxErr = NaN*range(fits{i}.data.yExp);
+    end
 end
 
 

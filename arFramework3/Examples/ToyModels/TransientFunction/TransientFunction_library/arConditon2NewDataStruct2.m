@@ -52,7 +52,7 @@ if isempty(mtarget)
     mtarget = strmatch('TransientFunction_ForConditionFit2',{ar.model.name},'exact');
     if length(mtarget)~=1
         disp('In this implementation, the transient function has to be added to have ar.model.fy, ar.model.fystd etc ');
-        error('Model ''TransientFunction_ForConditionFit2'' not available. Please create a model structure and add ''TransientFunction'' it via arLoadModel.');
+        error('Model ''TransientFunction_ForConditionFit2'' not available. Please create a model structure and add ''TransientFunction'' to it via arLoadModel.');
     end
 end
 

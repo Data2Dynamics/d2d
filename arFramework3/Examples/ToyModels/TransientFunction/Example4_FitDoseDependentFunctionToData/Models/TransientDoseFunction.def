@@ -1,0 +1,45 @@
+DESCRIPTION
+
+PREDICTOR
+t               T   h     time	0	10
+
+COMPARTMENTS
+
+STATES
+
+INPUTS
+Signal_sus    C   au   conc  "signum_TF * amp_sus*(1-exp(-(log10(10^(10*t/maxt)+10^(toffset_TF_sus))-log10(1+10^(toffset_TF_sus)))/timescale_sus))"
+
+REACTIONS
+
+DERIVED
+
+
+OBSERVABLES
+Response                   C 	au     conc   0    0   "offset_TF + Signal_sus"
+        
+ERRORS
+// the following error model assumes the same error for each expriment:
+Response           "sd_TF"
+
+
+SUBSTITUTIONS
+
+
+CONDITIONS
+timescale_sus 	"timescale_sus*timeUnitFactor/maxt"
+toffset_TF_sus 	"toffset_TF_sus*timeUnitFactor/maxt"
+signum_TF	"1"
+timeUnitFactor	"100"
+maxt		"10" 
+amp_sus		"(Max_amp_sus*dose^(hill_amp_sus))/(KD_amp_sus^(hill_amp_sus)+dose^(hill_amp_sus))*(1-isKO) + isKO*fold_as*(Max_amp_sus*dose^(hill_amp_sus))/(KD_amp_sus^(hill_amp_sus)+dose^(hill_amp_sus))"
+timescale_sus	"(Max_timescale_sus*KD_timescale_sus^(hill_timescale_sus))/(KD_timescale_sus^(hill_timescale_sus)+dose^(hill_timescale_sus))*(1-isKO) + isKO*fold_ts*(Max_timescale_sus*KD_timescale_sus^(hill_timescale_sus))/(KD_timescale_sus^(hill_timescale_sus)+dose^(hill_timescale_sus))"
+toffset_TF_sus	"(Max_toffset_TF_sus*KD_toffset_TF_sus^(hill_toffset_TF_sus))/(KD_toffset_TF_sus^(hill_toffset_TF_sus)+dose^(hill_toffset_TF_sus))*(1-isKO) + isKO*fold_to*(Max_toffset_TF_sus*KD_toffset_TF_sus^(hill_toffset_TF_sus))/(KD_toffset_TF_sus^(hill_toffset_TF_sus)+dose^(hill_toffset_TF_sus))"
+
+
+PARAMETERS
+//name		value	qFit	dolog	lb	ub
+//offset	 0	 1	 0	 -100	 100
+//signum	 1	 0	 0	 -1	 1
+
+

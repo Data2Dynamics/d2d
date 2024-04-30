@@ -24,6 +24,13 @@ global ar
 
 if isfield(ar,'setup')  % only available in higher verions
     arIn = arDeepCopy(ar);
+
+    if(~isfield(arIn.setup,'backup_model_folder_local'))
+        error('arRecompile: ar.setup.backup_model_folder_local does not exist. Save first via arSave.')
+    end
+    if(~isfield(arIn.setup,'backup_data_folder'))
+        error('arRecompile: ar.setup.backup_data_folder does not exist. Save first via arSave.')
+    end
     
     try
         for i=1:length(arIn.setup.commands)                                

@@ -120,7 +120,11 @@ if(~exist([source_dir '/Compiled/arClusterCompiledHook.m'],'file'))
 end
 
 % enable timedebug mode, use with debug_mode = true!
-timedebug = false;
+if debug_mode
+    timedebug = true;
+else
+    timedebug = false;
+end
 
 usePool = exist('gcp','file')>0 && ~isempty(gcp('nocreate'));
 
