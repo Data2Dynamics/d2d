@@ -3,12 +3,16 @@
 %
 % Simulate data for current parameter settings
 %
-%   m           model index   
+%   m           model index
 %   jplot       plot index
-%   tpoints     vector of time points for simulation (same for all data files) 
+%   tpoints     vector of time points for simulation (same for all data files)
 %               OR struct array of vectors to specify tpoints for each data
 %               file individually  [currently used tpoints if not specified]
 %   randomseed  random seed for noise generation
+%
+%   If m is not specified, arSimuData is called recursively for all models.
+%   If jplot is not specified, arSimuData is called recursively for all plots.
+
 
 function arSimuData(m, jplot, tpoints, randomseed)
 
@@ -16,7 +20,7 @@ global ar
 
 if(isempty(ar))
     error('please initialize by arInit')
-end 
+end
 
 new_ts = true;
 
@@ -58,7 +62,7 @@ else % m index provided:
     elseif(length(jplot)>1)
         for jjplot=jplot
             arSimuData(m, jjplot, tpoints, randomseed);
-        end     
+        end
         return
     end
 end
@@ -99,7 +103,7 @@ ar.qLog10 = tmp_qLog10;
 
 
 % simulate model
-arSimu(false,false);
+arSimu(false, false, true, false);
 ar.pTrue = ar.p;
 
 % simulate data
