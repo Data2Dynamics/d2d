@@ -726,6 +726,7 @@ fclose(fid);
 
 %% read events
 % Parse events as step function inputs
+eventStrings = cell(1, length(m.event));
 if ~isempty(m.event)
     warning('Event import is experimental.')
     for jE = 1:length(m.event)

@@ -8,6 +8,8 @@ function arImportPEtab(name, doPreEq)
 %            conditions and parameters file (in this order):
 %               arImportPEtab({'mymodel', 'myobs', 'mymeas', 'mycond', 'mypars'})
 %
+%            If empty, use *.yaml file from PEtab folder (if exactly one exists)
+%
 %   doPreEq  Apply pre-equilibration if specified in PEtab files [true]
 %
 % See also
@@ -29,14 +31,29 @@ if ~exist('doPreEq','var') || isempty(doPreEq)
 end
 
 %TODO: read in multiple sbmls & save these paths in ar struct
-if ischar(name) %yaml
+
+%% Import from yaml file
+if ~exist('name', 'var') || isempty(name)
+    % find yaml file in PEtab folder
+    fprintf('Search PEtab folder for .yaml file\n')
+    yamlDir = dir(fullfile('PEtab', '*.yaml'));
+    if isempty(yamlDir)
+        error('Did not find .yaml file')
+    end
+    if length(yamlDir)>1
+        error('Found more than one .yaml file')
+    end
+    name = fullfile('PEtab', yamlDir.name);
+end
+if ischar(name)
+    % import from yaml file
     yamlDir = dir([strrep(name,'.yaml','') '.yaml']);
     if isempty(yamlDir) % exists .yaml file?
-        error('Did not find yaml file')
+        error('Did not find .yaml file')
     end
     yamlContent = arReadPEtabYaml(name);
     yamlPath = yamlDir.folder;
-    fprintf('Found yaml file with name %s\n',name)
+    fprintf('Import .yaml file with name: %s\n',name)
     
     % check number of files per category, only one per category allowed atm
     petabFiles = {'sbml_files', 'observable_files', 'measurement_files',...
@@ -52,11 +69,11 @@ if ischar(name) %yaml
     
     arImportPEtab(cellfun(@(x) [yamlPath, filesep, x], [inputArgs{:}], 'UniformOutput', false),doPreEq)
     % also check arReadPEtabYaml
-    return
-else % no yaml file
-    sbmlmodel = dir([strrep(name{1},'.xml','') '.xml']);
+    return    
 end
 
+%% Import from list of PEtab files
+sbmlmodel = dir([strrep(name{1},'.xml','') '.xml']);
 if isempty(sbmlmodel)
     error('No SBML file found!');
 else
