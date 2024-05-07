@@ -4,7 +4,7 @@ function arImportPEtab(name, doPreEq)
 %
 %   name     Path to PEtab yaml file
 %
-%            Alternatively: Cell array of paths to model, observables, measurements,
+%            Cell array of paths to model, observables, measurements,
 %            conditions and parameters file (in this order):
 %               arImportPEtab({'mymodel', 'myobs', 'mymeas', 'mycond', 'mypars'})
 %
@@ -21,10 +21,12 @@ function arImportPEtab(name, doPreEq)
 global ar
 
 if(isempty(ar))
-    error('Please initialize by arInit')
+    fprintf('No ar struct found. Initializing d2d.\n')
+    arInit();
 end
 if isfield(ar, 'model')
-    error('Please initialize by arInit')
+    fprintf('ar struct already contains a model. Re-initializing d2d.\n')
+    arInit();
 end
 if ~exist('doPreEq','var') || isempty(doPreEq)
     doPreEq = true;
@@ -69,7 +71,7 @@ if ischar(name)
     
     arImportPEtab(cellfun(@(x) [yamlPath, filesep, x], [inputArgs{:}], 'UniformOutput', false),doPreEq)
     % also check arReadPEtabYaml
-    return    
+    return
 end
 
 %% Import from list of PEtab files
@@ -173,11 +175,11 @@ end
 end
 
 function [out,numberOfEls] = extractFromStruct(struct, field)
-    if iscell(struct.(field))
-        out = struct.(field);
-        numberOfEls = numel(out);
-    else
-        out = {struct.(field)};
-        numberOfEls = 1;
-    end
+if iscell(struct.(field))
+    out = struct.(field);
+    numberOfEls = numel(out);
+else
+    out = {struct.(field)};
+    numberOfEls = 1;
+end
 end
