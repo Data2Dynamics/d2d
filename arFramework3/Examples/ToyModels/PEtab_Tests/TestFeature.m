@@ -119,6 +119,11 @@ LLHCheck = (LLHDiff<TolLLH');
 
 Working = double(SimuCheck.*Chi2Check.*LLHCheck);
 
+if ~silent
+    resultsTable = table(cases,Working,SimuCheck,Chi2Check,LLHCheck,SimuDiff,Chi2Diff,LLHDiff,chi2,llh,Error,ErrorFile,ErrorLine)
+end
+writetable(resultsTable, 'PEtab_Test_Results.csv')
+
 if sum(Working) == numel(Working)
     fprintf( 2, 'PASSED\n' );
 else
@@ -126,9 +131,6 @@ else
     error( 'FAILED');
 end
 
-if ~silent
-    Table = table(cases,Working,SimuCheck,Chi2Check,LLHCheck,SimuDiff,Chi2Diff,LLHDiff,chi2,llh,Error,ErrorFile,ErrorLine)
-end
 
 function solution = ReadOutSolutionFile(caseName)
 
