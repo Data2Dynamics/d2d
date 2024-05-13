@@ -13,6 +13,12 @@
 %
 % See also arLoadModel, arLoadData, arReset
 
+global ar
+arInitMain;
+
+
+function arInitMain()
+
 ar_path = fileparts(which('arInit.m'));
 if(exist('arCheck','file') == 0)
     addpath([ar_path '/Subfunctions'])
@@ -47,7 +53,6 @@ arCleanMemory;
 
 ar.checksum = [];
 ar.info.ar_path = ar_path;
-clear ar_path;
 
 % check for updates on github
 arCheckVersion;
@@ -85,3 +90,5 @@ ar = orderfields(ar);
 ar.info = orderfields(ar.info);
 ar.config = orderfields(ar.config);
 ar.ppl = orderfields(ar.ppl);
+
+end
