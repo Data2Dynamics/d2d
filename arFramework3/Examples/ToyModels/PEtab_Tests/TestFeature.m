@@ -11,27 +11,27 @@ clear Working chi2 llh SimuDiff chi2Solution llhSolution TolChi2 TolLLH TolSimu 
 
 cases = cases';
 Ncases = numel(cases);
-try
-    parpool(4)
-end
+% try
+%     parpool(4)
+% end
 
 
-for i = 1:Ncases
+for iTest = 1:Ncases
     
-    cd(cases{i})
-    fprintf( 2, ['\n\nCase ' cases{i} '...\n'] );
+    cd(cases{iTest})
+    fprintf( 2, ['\n\nCase ' cases{iTest} '...\n'] );
     try
         arInit
 %        arImportPEtab({'_model','_observables','_measurements','_conditions','_parameters'}) % tests default behavior
-         arImportPEtab(['_' cases{i}]) % tests yaml file read
+        arImportPEtab(['_' cases{iTest}]) % tests yaml file read
         ar.config.useFitErrorCorrection = 0;
         
         arSimu(true,true,true)
         arCalcMerit
         [~,scores] = arGetMerit;
         
-        chi2(i) = scores.chi2_res;
-        llh(i) = scores.loglik/(-2);
+        chi2(iTest) = scores.chi2_res;
+        llh(iTest) = scores.loglik/(-2);
         
         % check simulations
         simus = tdfread('_simulations.tsv');
@@ -41,7 +41,7 @@ for i = 1:Ncases
         simus2.simulation = NaN(size(simus2.simulation));
         
         q = 1;
-        if strcmp(cases{i},'0006')
+        if strcmp(cases{iTest},'0006')
             simus2.simulation(1) = ar.model.data(1).yExpSimu;
             simus2.simulation(2) = ar.model.data(2).yExpSimu;
         else
@@ -70,32 +70,32 @@ for i = 1:Ncases
         end
         
         abs(simus.simulation - simus2.simulation);
-        SimuDiff(i) = sum(abs(simus.simulation - simus2.simulation));
-        SolTable = ReadOutSolutionFile(cases{i});
+        SimuDiff(iTest) = sum(abs(simus.simulation - simus2.simulation));
+        SolTable = ReadOutSolutionFile(cases{iTest});
         
-        chi2Solution(i) = str2num(SolTable.Value{strcmp(SolTable.Variable,'chi2:')});
-        llhSolution(i) = str2num(SolTable.Value{strcmp(SolTable.Variable,'llh:')});
+        chi2Solution(iTest) = str2num(SolTable.Value{strcmp(SolTable.Variable,'chi2:')});
+        llhSolution(iTest) = str2num(SolTable.Value{strcmp(SolTable.Variable,'llh:')});
         
-        TolChi2(i) = str2num(SolTable.Value{strcmp(SolTable.Variable,'tol_chi2:')});
-        TolLLH(i) = str2num(SolTable.Value{strcmp(SolTable.Variable,'tol_llh:')});
-        TolSimu(i) = str2num(SolTable.Value{strcmp(SolTable.Variable,'tol_simulations:')});
-        Error{i} = 'none';
-        ErrorFile{i} = 'none';
-        ErrorLine{i} = 'none';
+        TolChi2(iTest) = str2num(SolTable.Value{strcmp(SolTable.Variable,'tol_chi2:')});
+        TolLLH(iTest) = str2num(SolTable.Value{strcmp(SolTable.Variable,'tol_llh:')});
+        TolSimu(iTest) = str2num(SolTable.Value{strcmp(SolTable.Variable,'tol_simulations:')});
+        Error{iTest} = 'none';
+        ErrorFile{iTest} = 'none';
+        ErrorLine{iTest} = 'none';
     catch Err
-        Error{i} = Err.message;
-        ErrorFile{i} = Err.stack.file;
-        ErrorLine{i} = Err.stack.line;
-        chi2(i) = nan;
-        llh(i) = nan;
-        SimuDiff(i) = nan;
+        Error{iTest} = Err.message;
+        ErrorFile{iTest} = Err.stack.file;
+        ErrorLine{iTest} = Err.stack.line;
+        chi2(iTest) = nan;
+        llh(iTest) = nan;
+        SimuDiff(iTest) = nan;
         
-        chi2Solution(i) = nan;
-        llhSolution(i) = nan;
+        chi2Solution(iTest) = nan;
+        llhSolution(iTest) = nan;
         
-        TolChi2(i) = nan;
-        TolLLH(i) = nan;
-        TolSimu(i) = nan;
+        TolChi2(iTest) = nan;
+        TolLLH(iTest) = nan;
+        TolSimu(iTest) = nan;
     end
     
     cd ..
@@ -119,15 +119,15 @@ LLHCheck = (LLHDiff<TolLLH');
 
 Working = double(SimuCheck.*Chi2Check.*LLHCheck);
 
-if ~silent
-    Table = table(cases,Working,SimuCheck,Chi2Check,LLHCheck,SimuDiff,Chi2Diff,LLHDiff,chi2,llh,Error,ErrorFile,ErrorLine)
-end
-
 if sum(Working) == numel(Working)
     fprintf( 2, 'PASSED\n' );
 else
     fprintf( 2, 'Errors in test case(s) %s\n', strjoin(cases(logical(~Working)),', '));
     error( 'FAILED');
+end
+
+if ~silent
+    Table = table(cases,Working,SimuCheck,Chi2Check,LLHCheck,SimuDiff,Chi2Diff,LLHDiff,chi2,llh,Error,ErrorFile,ErrorLine)
 end
 
 function solution = ReadOutSolutionFile(caseName)
