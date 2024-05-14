@@ -9,12 +9,14 @@ cases = {'0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008',...
 fprintf( 2, 'TEST FOR PETAB IMPORT & EXPORT\n' );
 clear Working chi2 llh SimuDiff chi2Solution llhSolution TolChi2 TolLLH TolSimu Error ErrorFile ErrorLine
 
-cases = cases';
+% cases = cases([10,11, 13]);
+if isrow(cases)
+    cases = cases';
+end
 Ncases = numel(cases);
-% try
-%     parpool(4)
-% end
-
+try
+    parpool(4)
+end
 
 for iTest = 1:Ncases
     
