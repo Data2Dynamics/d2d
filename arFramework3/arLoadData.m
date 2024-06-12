@@ -752,10 +752,16 @@ if(~strcmp(extension,'none') && ( ...
         warning('off','all')
         
         arFprintf( 3, '[ OK ]\nBegin reading data (xls) ...' );
-        if (exist([DataPath, name '.xls'],'file'))      
-            [data, Cstr] = xlsread([DataPath, name '.xls']);
-        elseif (exist([DataPath, name '.xlsx'],'file'))      
-            [data, Cstr] = xlsread([DataPath, name '.xlsx']);
+        if (exist([DataPath, name '.xls'],'file'))
+            dataTable = readtable([DataPath, name '.xls']);
+            data = table2array(dataTable);
+            Cstr = dataTable.Properties.VariableNames;
+            % [data, Cstr] = xlsread([DataPath, name '.xls']);
+        elseif (exist([DataPath, name '.xlsx'],'file'))    
+            dataTable = readtable([DataPath, name '.xlsx']);
+            data = table2array(dataTable);
+            Cstr = dataTable.Properties.VariableNames;  
+            % [data, Cstr] = xlsread([DataPath, name '.xlsx']);
         end
         arFprintf( 3, '[ OK ]\n' );
         
