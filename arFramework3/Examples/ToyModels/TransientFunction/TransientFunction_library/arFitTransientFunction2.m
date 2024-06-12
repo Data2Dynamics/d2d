@@ -81,7 +81,7 @@ arCompileAll;
 
 % arInit from above removes non-standard d2d subfolders from path (e.g. rtf library)
 % we have to add them back to path
-addpath(mfilename('fullpath'));
+addpath(fileparts(mfilename('fullpath')));
 
 Initialize_FitTransient2(boundfactor,[],qPositive);
 %         if D.qPositive==1
