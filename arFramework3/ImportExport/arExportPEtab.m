@@ -67,7 +67,7 @@ function IDs = writeConditionsTable(m, IDs)
     IDs.condition = arrayfun(@(d) sprintf('%s_D%d', ar.model.data(d).name, d), 1:length(ar.model(m).data), "UniformOutput", false);
     
     % collect all data-condition-specific parameter replacements
-    condT = table(ar.model(m).p, ar.model(m).fp', VariableNames={'modelP', 'modelFP'});
+    condT = table(ar.model(m).p, ar.model(m).fp', 'VariableNames', {'modelP', 'modelFP'});
     for d = 1:length(ar.model(m).data)
         is_modelP = ismember(ar.model(m).data(d).pold, ar.model(m).p);
         condT_tmp = cell2table([ar.model(m).data(d).pold(is_modelP)', ar.model(m).data(d).fp(is_modelP)]);
