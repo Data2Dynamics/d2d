@@ -181,6 +181,10 @@ for iCond = 1:length(uniCond)
         
         if ismember('noiseParameters', Tsub.Properties.VariableNames)
             if isnumeric(Tsub(1,:).noiseParameters)
+                % this is not correct!
+                % If noise parameters are numeric, they correwspond to measurement errors
+                % and havbe to be written to ar.model.data.yExpStd
+                % this has to be implemented below
                 continue
             elseif ~isempty(char(Tsub(1,:).noiseParameters))
                 poldNoise = sort(regexp(Sd2d.fystd{iObs},['noiseParameter\d*_' Sd2d.y{iObs}],'match'));

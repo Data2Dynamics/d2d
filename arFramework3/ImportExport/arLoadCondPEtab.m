@@ -73,24 +73,41 @@ for m = 1:length(ar.model)
             if strcmp(ar.model(m).data(j).name,T.conditionId(i))
                 for k = 2:(length(fns))
                     % Check if parameter is replaced by condition
-                    if sum(contains(ar.model(m).data(j).fp,fns{k}))>0    % changed p to fp to catch cases in which initial value was renamed from a0 to init_A_state
-                        %                         ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
-                        %                             num2str(T.(fns{k})(i));
-                        
-                        if isnumeric(T.(fns{k})) % if condition parameter is replaced by a parameter instead of number
+                    %% NN: here strcmp is not sufficient. fp has to evaluated by arSym.
+                    % _0002 has the problem that fp='(ao)' but p='a0'
+                    if any(ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k})))    % changed p to fp to catch cases in which initial value was renamed from a0 to init_A_state
+                    
+                        % condition parameter is replaced by a number
+                        if isnumeric(T.(fns{k})(i))
                             if sum(ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k})))==length(T.(fns{k})(i)) % if not ismember, can't replace
                                 ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
                                     num2str(T.(fns{k})(i));
                             end
+                        % condition parameter is replaced by string of a number
+                        % has to be treated separatly for technical reasons
+                        elseif ~isnan(str2double(T.(fns{k})(i)))
+                            % if any(ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))) % if not ismember, can't replace
+                            % using 'str2sym' instead of arSym fixes an error
+                            % when fp contains an equation (e.g. param_A*param_B)
+                            % instead of simply one parameter param_A
+                            % maybe this should be included in arSym directly?!
+                            % if any(ismember(cellfun(@str2sym, ar.model(m).data(j).fp), arSym(fns{k})))
+                            %     ar.model(m).data(j).fp{ismember(cellfun(@str2sym, ar.model(m).data(j).fp), arSym(fns{k}))} = ...
+                            %        char(T.(fns{k})(i));
+                            % end
+                            ar.model(m).data(j).fp{ismember(cellfun(@str2sym, ar.model(m).data(j).fp), arSym(fns{k}))} = ...
+                                char(T.(fns{k})(i));
+                        
+                        % condition parameter is replaced by an expression
                         else
-                            % Check if parameter has already been replaced
-                            % with the correct condition specific par
+                            % Check if parameter has already been replaced with the correct condition specific par
                             if sum(ismember(arSym(ar.model(m).data(j).fp),char(T.(fns{k}){i}))) == 0
                                 % here there is an error sometimes
                                 ar.model(m).data(j).fp{ismember(arSym(ar.model(m).data(j).fp), arSym(fns{k}))} = ...
                                     char(T.(fns{k}){i});
                             end
                         end
+                    
                     % Check if initial state is set by condition (via stateID in PEtab)
                     elseif any(strcmp(ar.model(m).x, fns{k})) || any(strcmp(ar.model(m).x, [fns{k} '_state']))
                         if length(fns{k}) == 1
