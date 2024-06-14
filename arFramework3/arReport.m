@@ -141,8 +141,8 @@ if(nargin>0)
     lp(fid, '\\noindent {\\bf Data2Dynamics Software -- Modeling Report}\\\\\\\\');
 end
 
-lp(fid, ['\\noindent {\\bf Website:} \\href{http://www.data2dynamics.org}' ...
-    '{\\url{http://www.data2dynamics.org}} \\\\\\\\']);
+lp(fid, ['\\noindent {\\bf Website:} \\href{https://github.com/Data2Dynamics/d2d}' ...
+    '{\\url{https://github.com/Data2Dynamics/d2d}} \\\\\\\\']);
 lp(fid, '{\\bf Key reference:}');
 lp(fid, '\\begin{itemize}');
 lp(fid, ['\\item ', ...

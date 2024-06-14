@@ -8,6 +8,8 @@
 %   n                 trajectories per parameter (0=all) [10] 
 %   show_hit_bound    show hitting boundary of parameters  [false]
 %   saveToFile        [false]
+%   plotAsRegion      plotting as region [false] 
+%                     otherwise (by default) lines are plotted
 %
 % Plot trajectories for all parameter vectors that were compatible with the
 % the confidence intervals determined by ple. pleTrajectories are plotted
@@ -16,7 +18,7 @@
 %
 % See also: ple, arPlotter
 
-function arPLETrajectories(jks, n, show_hit_bound, saveToFile)
+function arPLETrajectories(jks, n, show_hit_bound, saveToFile, plotAsRegion)
 
 global ar
 
@@ -36,8 +38,11 @@ end
 if(~exist('show_hit_bound','var') || isempty(show_hit_bound))
     show_hit_bound = false;
 end
-if(~exist('saveToFile','var'))
+if(~exist('saveToFile','var') || isempty(saveToFile))
     saveToFile = false;
+end
+if(~exist('plotAsRegion','var') || isempty(plotAsRegion))
+    plotAsRegion = false;
 end
 
 ps = [];
@@ -131,5 +136,5 @@ psnew(:,ismember(ar.pLabel, ar.ple.p_labels)) = ps(:,ismember(ar.ple.p_labels, a
 
 ar.ps_trajectories = psnew;
 ar.chi2s_trajectories = chi2s;
-arPlotMulti(psnew, weigths, saveToFile, ['_PLE' response_str])
+arPlotMulti(psnew, weigths, saveToFile, ['_PLE' response_str], plotAsRegion)
 

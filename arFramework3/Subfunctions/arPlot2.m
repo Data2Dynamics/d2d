@@ -328,7 +328,7 @@ for jm = 1:length(ar.model)
                             [trafos, yLabel] = arGetPlotYTrafo(jm, jd, jplot);
                         else
                             trafos = cell(1, numel(iy));
-                            for jy = 1 : numel(iy)
+                            for jy = 1 : max(iy)
                                 trafos{jy} = @(x) x;
                             end
                         end

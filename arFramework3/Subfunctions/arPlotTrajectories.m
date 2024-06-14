@@ -113,7 +113,9 @@ for jys = 1:length(iy)
             else
                 titstr = arNameTrafo(titles{jy});
             end
-            title(g, titstr);
+
+            fs = 6+round(length(titstr)/20);
+            title(g, titstr,'FontSize',fs);
             
             % text
             if(~isempty(yExp))

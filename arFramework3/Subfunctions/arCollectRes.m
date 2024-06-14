@@ -17,6 +17,15 @@
 %   - random                    -> ar.res , ar.type=4
 %   - ar.model.data.sres        -> ar.sres
 %   - ar.model.data.chi2        -> ar.chi2
+% 
+% Example:
+% arCollectRes(true,true)
+% ar.resinfo
+% ans = 
+%   1×518 struct array with fields:
+%     type
+%     m
+%     d
 
 
 function arCollectRes(sensi, debugres)
@@ -91,10 +100,14 @@ for jm = 1:length(ar.model)
                     ar.res_type(resindex:(resindex+length(tmpres(:))-1)) = 1;
                     
                     if ( debugres )
+                        tExp = ar.model(jm).data(jd).tExp*ones(1,sum(ar.model(jm).data(jd).qFit==1));
+                        yExp = ar.model(jm).data(jd).yExp(:,ar.model(jm).data(jd).qFit==1);
                         for jr = 1 : numel( tmpres )
                             ar.resinfo(resindex + jr - 1).type = 'data';
                             ar.resinfo(resindex + jr - 1).m = jm;
                             ar.resinfo(resindex + jr - 1).d = jd;
+                            ar.resinfo(resindex + jr - 1).t = tExp(jr);
+                            ar.resinfo(resindex + jr - 1).y = yExp(jr);
                         end
                     end
                     resindex = resindex+length(tmpres(:));
@@ -105,10 +118,14 @@ for jm = 1:length(ar.model)
                         ar.res(resindex:(resindex+length(tmpreserr(:))-1)) = tmpreserr;
                         ar.res_type(resindex:(resindex+length(tmpreserr(:))-1)) = 2;
                         if ( debugres )
+                            tExp = ar.model(jm).data(jd).tExp*ones(1,sum(ar.model(jm).data(jd).qFit==1));
+                            yExp = ar.model(jm).data(jd).yExp(:,ar.model(jm).data(jd).qFit==1);
                             for jr = 1 : numel( tmpreserr )
                                 ar.resinfo(resindex + jr - 1).type = 'error model';
                                 ar.resinfo(resindex + jr - 1).m = jm;
                                 ar.resinfo(resindex + jr - 1).d = jd;
+                                ar.resinfo(resindex + jr - 1).t = tExp(jr);
+                                ar.resinfo(resindex + jr - 1).y = yExp(jr);
                             end
                         end
                         resindex = resindex+length(tmpreserr(:));
@@ -759,13 +776,25 @@ end
 if(isfield(ar.model, 'data') && ~isempty(ar.res))
     ar.res_NaN = find(isnan(ar.res));
     if(sum(ar.res_NaN)>0)
-        arDebugResidual;
-        error('d2d:arCollectRes:NaN_in_res','%i NaNs in residuals (check ar.res_NaN)', sum(isnan(ar.res)));
+        if(isfield(ar.config,'replaceNanResBy0') && ar.config.replaceNanResBy0)
+            ar.res(ar.res_NaN) = 0;
+            ar.res_NaN = isnan(ar.res);
+            warning('NaN in residuals: replacement with 0 due to ar.config.replaceNanResBy0=1')
+        else
+            arDebugResidual;
+            error('d2d:arCollectRes:NaN_in_res','%i NaNs in residuals (check ar.res_NaN)', sum(isnan(ar.res)));
+        end
     else
         ar = rmfield(ar,'res_NaN');
     end
     
     if(sensi && ~isempty(ar.sres) && sum(sum(isnan(ar.sres(:,ar.qFit==1))))>0)
+        if(isfield(ar.config,'replaceNanResBy0') && ar.config.replaceNanResBy0)
+            ar.sres_NaN = isnan(ar.sres);
+            anzNan = sum(sum(isnan(ar.sres(:,ar.qFit==1))));
+            disp([num2str(anzNan),' NaNs in ar.sres: replacement with 0 due to ar.config.replaceNanResBy0=1'])
+            ar.sres(ar.sres_NaN) = 0;
+        else
         for jm = 1:length(ar.model)
             if(isfield(ar.model(jm), 'data'))
                 nd = length(ar.model(jm).data);
@@ -785,6 +814,7 @@ if(isfield(ar.model, 'data') && ~isempty(ar.res))
         end
         arDebugResidual;
         error('d2d:arCollectRes:NaN_in_sres','NaN in derivative of residuals: %i', sum(sum(isnan(ar.sres(:,ar.qFit==1)))));
+        end
     end
 end
 

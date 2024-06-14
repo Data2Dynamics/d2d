@@ -45,6 +45,10 @@ end
 h = myRaiseFigure(strtitle);
 set(h, 'Color', [1 1 1]);
 
+if sum(ar.qError==1)>0
+    warning('Calculating from chi2 to Likelihood does not make sense, if error parameters are fitted.')
+end
+
 count = 1;
 for jk=1:length(ar.ple.ps)
     if(~isempty(ar.ple.ps{jk}))
@@ -86,8 +90,8 @@ for jk=1:length(ar.ple.ps)
             dchi2 = ar.ple.dchi2;
         end
         
-        ylimmax = max(transformFromLog(ar.ple.chi2s{jk}))*1.1;
-        ylim([0 ylimmax]);
+        ylimmax = nanmax(transformFromLog(ar.ple.chi2s{jk}))*1.1;
+        ylim([0-eps ylimmax]);
         
         if(mod(count-1,ncols)==0)
             ylabel('\chi^2_{PL}')
@@ -111,7 +115,7 @@ function b = transformFromLog(a)
 b = exp(-0.5*a);
 
 function h = myRaiseFigure(figname)
-
+global ar
 openfigs = get(0,'Children');
 
 figcolor = [1 1 1];

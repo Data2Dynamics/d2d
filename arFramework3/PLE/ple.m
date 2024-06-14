@@ -174,6 +174,7 @@ ar.ple.psinit{jk}(jindex,:) = ar.ple.p;
 % Initial fit:
 try
     [p, gradient_start] = feval(ar.ple.fit_fkt, jk);
+    ar.ple.merit = feval(ar.ple.merit_fkt); 
     ar.ple.ps{jk}(jindex,:) = p;
     ar.ple.gradient{jk}(jindex,:) = gradient_start;
 catch exception
@@ -186,7 +187,7 @@ end
 % constrained. Use this to initialize left and right branch correctly.
 ps_start = p;
 ar.ple.psinitstep{jk}(jindex,:) = zeros(size(p));
-ar.ple.merit = feval(ar.ple.merit_fkt);
+ar.ple.merit0 = feval(ar.ple.merit_fkt); % I don't understand why this is different from ar.ple.merit calculated below
 ar.ple.chi2s{jk}(jindex) = ar.ple.merit;
 ar.ple.dpLast{jk}(jindex) = 0;
 ar.ple.dpStep{jk}(jindex,:) = zeros(size(p)); 
