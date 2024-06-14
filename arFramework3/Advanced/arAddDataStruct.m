@@ -41,7 +41,14 @@ ar.model(m).plot(end).doseresponse = ar.model(m).data(d).doseresponse;
 ar.model(m).plot(end).doseresponselog10xaxis = true;
 ar.model(m).plot(end).dLink = d;
 ar.model(m).plot(end).ny = length(ar.model(m).data(d).y);
-ar.model(m).plot(end).condition = {};
+
+% if exist(D.condition)
+%     ar.model(m).plot(end).condition = D.condition
+% else
+    ar.model(m).plot(end).condition = {};
+% end
+
+
 
 
 % remember the function call

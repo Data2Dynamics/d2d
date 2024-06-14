@@ -9,7 +9,7 @@
 %   x   x index or x name 
 %   mtarget
 %   useRealisticTimes   [true] CalculateRealisticTimeGrid is called
-%                       false: tFine statt CalculateRealisticTimeGrid
+%                       false: tFine instead of CalculateRealisticTimeGrid
 % 
 % 
 %   ar.model(m).condition(c).xExpSimu(x) is set as data.yExp

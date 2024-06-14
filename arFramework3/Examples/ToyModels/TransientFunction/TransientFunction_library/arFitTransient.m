@@ -60,7 +60,7 @@ chi2best = arGetMerit;
 % Since the functions are independent, one does not need all combis.
 for i=1:length(indsig) 
     ind_arp = ar.fit_transient.(ar.pLabel{indsig(i)}).ind_arp;
-    if sum(ar.qFit(ind_arp)==1) > 0 % some paraemters of this transient function are fitted
+    if sum(ar.qFit(ind_arp)==1) > 0 % some parameters of this transient function are fitted
         lbstart = ar.lb+0.0;
         ubstart = ar.ub+0.0;
         

@@ -171,6 +171,8 @@ if isfield( ar.config, 'no_optimization' )
         fprintf('Default options can overwrite the flag set here (type cc = mex.getCompilerConfigurations). In this case change the mexopt file (see cc.MexOpt). \n');
         fprintf('Microsoft Visual C++ 2013 Professional (C) requires the following flag: %s\n', 'COMPFLAGS=/Od');
     end
+else
+    mexopt{end+1} = 'COMPFLAGS=/O4';
 end
 
 if(~isempty(compiled_cluster_path))
