@@ -747,21 +747,35 @@ if(~strcmp(extension,'none') && ( ...
     dataFound = true;
 
     % read from file
-    if(~isempty(strfind(extension,'xls')))
+    if(contains(extension, 'xls'))
         warntmp = warning;
         warning('off','all')
         
         arFprintf( 3, '[ OK ]\nBegin reading data (xls) ...' );
-        if (exist([DataPath, name '.xls'],'file'))
-            dataTable = readtable([DataPath, name '.xls']);
-            data = table2array(dataTable);
+        try
+            [data, Cstr] = xlsread([DataPath name '.' extension]);
+        catch
+            % especially on linux and mac there can be some encoding
+            % problems that deprecated function 'xlsread' cannot handle.
+            % use 'readtable' function instead and mimic excpected output
+            % 'data' is arrays of all numeric values
+            % 'Cstr' is cell of all strings
+            dataTable = readtable([DataPath name '.' extension]);
+            textColumns = arrayfun(@(col) iscell(dataTable{:, col}), 1:width(dataTable));
             Cstr = dataTable.Properties.VariableNames;
-            % [data, Cstr] = xlsread([DataPath, name '.xls']);
-        elseif (exist([DataPath, name '.xlsx'],'file'))    
-            dataTable = readtable([DataPath, name '.xlsx']);
+            if any(textColumns)
+                % create cell array of all text cells in the excel file
+                Cstr = [Cstr; repmat({''}, size(dataTable))];
+                Cstr(2:end, textColumns) = dataTable{:, textColumns};
+                % replace all the text fields by NaN for the data array
+                for col=1:width(dataTable)
+                    if textColumns(col)
+                        colName = dataTable.Properties.VariableNames{col};
+                        dataTable.(colName) = NaN(height(dataTable), 1);
+                    end
+                end
+            end
             data = table2array(dataTable);
-            Cstr = dataTable.Properties.VariableNames;  
-            % [data, Cstr] = xlsread([DataPath, name '.xlsx']);
         end
         arFprintf( 3, '[ OK ]\n' );
         
