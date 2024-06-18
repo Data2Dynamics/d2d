@@ -52,12 +52,12 @@ end
 yLabel = cell( 1, numel(iy) );
 for jy = 1 : numel( iy )
     yunitetmp = '';
-    if(~isempty(yUnits{jy,2}))
-        yunitetmp = sprintf(' [%s]', yUnits{jy,2});
+    if(~isempty(yUnits{iy(jy),2}))
+        yunitetmp = sprintf(' [%s]', yUnits{iy(jy),2});
     end
     % Some observations may be plotted in log, but those get a special
     % legend from arGetPlotYTrafo.
-    yLabel{jy} = sprintf('%s%s', yUnits{jy,3}, yunitetmp);
+    yLabel{jy} = sprintf('%s%s', yUnits{iy(jy),3}, yunitetmp);
 end
     
 % get handels
