@@ -95,7 +95,11 @@ function IDs = writeConditionsTable(m, IDs)
     % reformat to match PEtab requirements
     finalCondTab = array2table(transpose(condT{:,:}));
     finalCondTab = [condT.Properties.VariableNames', finalCondTab];
-    finalCondTab.Properties.VariableNames = ['conditionID' finalCondTab{1,2:end}];
+    if all(qRemove)
+        finalCondTab.Properties.VariableNames = {'conditionID'};
+    else    
+        finalCondTab.Properties.VariableNames = ['conditionID' finalCondTab{1,2:end}];
+    end
     finalCondTab = finalCondTab(3:end, :);
     
     % export conditions table
@@ -202,7 +206,7 @@ for d = 1:length(ar.model(m).data)
         rowsToAdd = [table(repmat(IDs.obs{d}(iy), [length(time),1]), 'VariableNames', {'observableId'})];
         
         % convert measurements if necessary (log10, normalize)
-        if ar.model(m).data(d).logfitting(iy)
+        if ar.model(m).data(d).logplotting(iy)
             measurement = 10.^(ar.model(m).data(d).yExp(:, iy));
         else
             measurement = ar.model(m).data(d).yExp(:, iy);

@@ -223,8 +223,8 @@ function arExportSBML_FullModel(m,name)
             elseif(sum(qp)==0 || is_set)
                 qp = ismember(ar.model(m).p, ar.model(m).px0{jx}); %R2013a compatible
                 if(sum(qp)==1)
-                    % pvalue = char(arSym(ar.model(m).fp{qp}));
-                    pvalue = char(arSym(ar.model(m).p{qp}));
+                    pvalue = char(arSym(ar.model(m).fp{qp}));
+                    % pvalue = char(arSym(ar.model(m).p{qp}));
                     %                     if(~isnan(str2num(pvalue))) %#ok
                     %                         pvalue = str2num(pvalue); %#ok
                     %                         M.species(jx).initialConcentration = pvalue;
