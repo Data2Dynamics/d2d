@@ -268,11 +268,7 @@ end
 if(~fine)
     % arCalcRes_test;  % the test can be performed here or outside of arSimu
     % (see comments in arCalcRes_test.m)
-    try
-        arCalcRes(sensi)
-    catch ME
-        warning(getReport(ME, 'extended', 'hyperlinks', 'on'));
-    end
+    arCalcRes(sensi)
 
     %calculate y_scale_max
     if(ar.config.atolV)
