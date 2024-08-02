@@ -85,6 +85,16 @@ ar.setup.arguments{end+1} = cell(0); % arInit has no arguments
 ar.setup.modelfiles = {''};% model files to be read 
 ar.setup.datafiles = {''}; % data files to be read 
 
+% Get the setup file from the call stack
+callStack = dbstack;
+if length(callStack) > 2
+    % arInit was called from another function/script -> probably setup file 
+    ar.setup.setupfile = {callStack(3).file};
+elseif length(callStack) == 2
+    % arInit was called from the command line
+    ar.setup.setupfile = {''};
+end
+
 
 ar = orderfields(ar);
 ar.info = orderfields(ar.info);
