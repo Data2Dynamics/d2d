@@ -225,13 +225,11 @@ for d = 1:length(ar.model(m).data)
         end
         
         % pre-equiblibration
-        if isfield(ar, 'ss_conditions')
-            for iss=1:length(ar.model(m).ss_conditions)
-                preEquilibrationId = cell(length(time),1);
-                preEquilibrationId(:) = ...
-                    {['model' num2str(m) '_data' ...
-                    num2str(ar.model(m).condition(ar.model(m).ss_condition(iss).src).dLink)]};
-                rowsToAdd = [rowsToAdd, table(preEquilibrationId)];
+        if isfield(ar, 'ss_conditions') && ar.ss_conditions
+            for iss=1:length(ar.model(m).ss_condition)
+                ss_d = ar.model(m).condition(ar.model(m).ss_condition(iss).src).dLink;
+                preequilibrationConditionId = repmat(IDs.condition(ss_d), [length(time) 1]);
+                rowsToAdd = [rowsToAdd, table(preequilibrationConditionId)];
             end
         end
         

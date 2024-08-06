@@ -4,7 +4,7 @@ silent = false;
 
 cases = {'0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008',...
     '0009', '0010', '0011', '0012', '0013', '0014','0015','0016'};
-% set cases for debugging
+
 %%
 fprintf( 2, 'TEST FOR PETAB IMPORT & EXPORT\n' );
 clear Working chi2 llh SimuDiff chi2Solution llhSolution TolChi2 TolLLH TolSimu Error ErrorFile ErrorLine
@@ -24,7 +24,6 @@ for iTest = 1:Ncases
     fprintf( 2, ['\n\nCase ' cases{iTest} '...\n'] );
     try
         arInit
-%        arImportPEtab({'_model','_observables','_measurements','_conditions','_parameters'}) % tests default behavior
         arImportPEtab(['_' cases{iTest}]) % tests yaml file read
         ar.config.useFitErrorCorrection = 0;
         

@@ -142,23 +142,31 @@ if doPreEq
                 error('More than one pre-equiblibration condition currently not supported.')
             end
             
-            for ipreeqcond = 1:size(uniquePreEqConds,1)
-                preEqCond = arFindCondition(convertStringsToChars(uniquePreEqConds(ipreeqcond)), 'conservative');
+            for iPreEqCond = 1:size(uniquePreEqConds,1)
+                preEqCondId = convertStringsToChars(uniquePreEqConds(iPreEqCond));
+                preEqCond = arFindCondition(preEqCondId, 'conservative');
                 simConds = [];
-                for isimcond = 1:size(uniqueSimConds,1)
-                    %simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(isimcond)), 'conservative');
-                    simConds(end+1) = ...
-                        find(cellfun(@(x) ~strcmp(x, convertStringsToChars(uniquePreEqConds(ipreeqcond))), {ar.model.data.name}));
+                for iSimCond = 1:size(uniqueSimConds,1)
+                    simCondId = convertStringsToChars(uniqueSimConds(iSimCond));
+                    simCond = arFindCondition(simCondId, 'conservative');
+                    simCondDat = Tdat(Tdat.simulationConditionId==simCondId, :);
+                    if all(simCondDat.preequilibrationConditionId==preEqCondId)
+                        simConds = [simConds, simCond];
+                    end
+                    % simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(iSimCond)), 'conservative');
+                    % addSimConds = find(cellfun(@(x) ~strcmp(x, convertStringsToChars(uniquePreEqConds(iPreEqCond))), {ar.model.data.name}));
+                    % simConds = [simConds, addSimConds];
                 end
+                simConds = unique(simConds);
                 arSteadyState(imodel, preEqCond, simConds, tstart)
             end
-            for isimu = 1:length(uniqueSimConds)
-                Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(isimu),:);
-                iSimuAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(isimu)), {ar.model(m).data.name}));
+            for iSimCond = 1:length(uniqueSimConds)
+                Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(iSimCond),:);
+                iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
                 for iCol = 1:length(Tcondi.Properties.VariableNames)
                     idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
                     if ~isempty(idxState)
-                        arAddEvent(m,iSimuAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}))
+                        arAddEvent(m,iSimCondAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}))
                         % ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
                     end
                 end
