@@ -49,6 +49,15 @@ else
     dynamics = 0;
 end
 
+% Computing scale parameters hierarchically requires the data grid, i.e. fine==false.
+% So in the case of a fine grid, i.e. fine==true, we need a double pass:
+% 1) simulate the model with the data grid to figure out the scale parameters and then
+% 2) simulate the model with a fine grid, using the scale parameters resulting from the previous step.
+% Here we carry out the 1st of these steps.
+if isfield(ar.config,'useHierarchical') && ar.config.useHierarchical && fine
+    arSimu(sensi,false,dynamics)
+end
+
 % If dynamics are not forced, check whether the dynamics of the last simulation
 % were identical. If not, we have to resimulate.
 if ( ~dynamics )
