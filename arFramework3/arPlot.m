@@ -52,6 +52,9 @@ end
 if(~exist('silent','var'))
     silent = false;
 end
+if(~exist('sensi','var'))
+    sensi = false;
+end
 evalfun = true;
 % Always potentially evaluate the model. This will not hurt performance since 
 % arSimu checks against the cache. Running with false will however cause problems.
@@ -74,7 +77,7 @@ end
 
 
 if(isfield(ar.config, 'useNewPlots') && ar.config.useNewPlots)
-    hs = arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs);
+    hs = arPlot2(saveToFile, fastPlot, silent, sensi, doLegends, dynamics, hs);
     if(nargout>0)
         varargout(1) = {hs};
     end
