@@ -103,7 +103,7 @@ ar.qLog10 = tmp_qLog10;
 
 
 % simulate model
-arSimu(false, false, true, false);
+arSimu(true, false, true);
 ar.pTrue = ar.p;
 
 % simulate data
