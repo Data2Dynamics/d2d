@@ -1,11 +1,11 @@
-% hs = arPlot2([saveToFile], [fastPlot], [silent], [evalfun], [doLegends], [dynamics], [hs], plotOnlyData)
+% hs = arPlot2([saveToFile], [fastPlot], [silent], [sensi], [doLegends], [dynamics], [hs], plotOnlyData)
 %
 % Plot models and datasets
 %
 % saveToFile    Save plot to file               [false]
 % fastPlot      Do fast plotting                [false]
 % silent        Plot without printing text      [false]
-% evalfun       Evaluate function               [true]  (DEPRECATED)
+% sensi         Uses sensitivities              [false] (replace position of deprecated evalfun)
 % doLegends     Print the legends               [true]
 % dynamics      Simulate dynamics               [true]
 % hs            Plot to custom figure handles   []
@@ -25,7 +25,7 @@
 %                        1: Data uncertainty is plotted as error bar.
 %                        2: Only error bands are plotted.
 %
-% arPlot simulates the model without sensitivities and subsequently 
+% By default arPlot2 simulates the model without sensitivities and subsequently 
 % plots all the enabled observables, states/derived variables and
 % fluxes. Which conditions are plotted can be set with arPlotter. 
 %
@@ -40,7 +40,7 @@
 %
 % See also arPlotter, arPlot, arPlotY, arPlotX, arPlotV.
 
-function varargout = arPlot2(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs, plotOnlyData)
+function varargout = arPlot2(saveToFile, fastPlot, silent, sensi, doLegends, dynamics, hs, plotOnlyData)
 
 global ar
 
@@ -57,8 +57,8 @@ end
 if(~exist('silent','var') || isempty(silent))
     silent = false;
 end
-if(~exist('evalfun','var') || isempty(evalfun))
-    evalfun = true;
+if(~exist('sensi','var') || isempty(sensi))
+    sensi = false;
 end
 if(~exist('doLegends','var') || isempty(doLegends))
     doLegends = true;
@@ -78,9 +78,10 @@ end
 
 matVer = arVer;
 
+evalfun = true;
 if(evalfun)
     try
-        arSimu(false, true, dynamics);
+        arSimu(sensi, true, dynamics);
     catch err_id
         if(~silent)
             disp(err_id.message);
@@ -88,9 +89,9 @@ if(evalfun)
     end
     try
         if(silent)
-            arCalcMerit(false, [], dynamics);
+            arCalcMerit(sensi, [], dynamics);
         else
-            arCalcMerit;
+            arCalcMerit(sensi);
         end
     catch err_id
         if(~silent)

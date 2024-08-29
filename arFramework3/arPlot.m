@@ -1,11 +1,11 @@
-% hs = arPlot([saveToFile], [fastPlot], [silent], [evalfun], [doLegends], [dynamics], [hs])
+% hs = arPlot([saveToFile], [fastPlot], [silent], [sensi], [doLegends], [dynamics], [hs])
 %
 % Plot models and datasets
 %
 % saveToFile    Save plot to file               [false]
 % fastPlot      Do fast plotting                [false]
 % silent        Plot without printing text      [false]
-% evalfun       Evaluate function               [true]  (DEPRECATED)
+% sensi         Uses sensitivities              [false] (replace position of deprecated evalfun)
 % doLegends     Print the legends               [true]
 % dynamics      Simulate dynamics               [true]
 % hs            Plot to custom figure handles   []
@@ -24,7 +24,7 @@
 %                        1: Data uncertainty is plotted as error bar.
 %                        2: Only error bands are plotted.
 %
-% arPlot simulates the model without sensitivities and subsequently 
+% By default arPlot simulates the model without sensitivities and subsequently 
 % plots all the enabled observables, states/derived variables and
 % fluxes. Which conditions are plotted can be set with arPlotter. 
 %
@@ -35,7 +35,7 @@
 %
 % See also arPlotter, arPlot2, arPlotY, arPlotX, arPlotV.
 
-function varargout = arPlot(saveToFile, fastPlot, silent, evalfun, doLegends, dynamics, hs)
+function varargout = arPlot(saveToFile, fastPlot, silent, sensi, doLegends, dynamics, hs)
 
 global ar
 
@@ -87,7 +87,7 @@ end
 
 if(evalfun)
     try
-        arSimu(false, true, dynamics);
+        arSimu(sensi, true, dynamics);
     catch err_id
         if(~silent)
             disp(err_id.message);
@@ -95,9 +95,9 @@ if(evalfun)
     end
     try 
         if(silent)
-            arCalcMerit(false, ar.p(ar.qFit==1), dynamics);
+            arCalcMerit(sensi, ar.p(ar.qFit==1), dynamics);
         else
-            arCalcMerit(false);
+            arCalcMerit(sensi);
         end
     catch err_id
         if(~silent)
