@@ -91,71 +91,135 @@ function arExportSBML_FullModel(m,name)
     
     %% compartements
     function [M] = GetCompartments(M,m)
-    global ar
-    if(~isempty(ar.model(m).c))
-        for jc = 1:length(ar.model(m).c)
-            M.compartment(jc).typecode = 'SBML_COMPARTMENT';
-            M.compartment(jc).metaid = '';
-            M.compartment(jc).notes = '';
-            M.compartment(jc).annotation = '';
-            M.compartment(jc).sboTerm = -1;
-            M.compartment(jc).name = '';
-            M.compartment(jc).id = ar.model(m).c{jc};
-            M.compartment(jc).compartmentType = '';
-            M.compartment(jc).spatialDimensions = 3;
-            M.compartment(jc).constant = 1;
-            if ~isempty(ar.model(m).cUnits)
-                M.compartment(jc).units = ar.model(m).cUnits{jc,2};
-            else
-                M.compartment(jc).units = '';
-            end
-            M.compartment(jc).outside = '';
-            M.compartment(jc).isSetSize = 1;
-            M.compartment(jc).isSetVolume = 1;
-            M.compartment(jc).level = 2;
-            M.compartment(jc).version = 4;
-            
-            qp = ismember(ar.pLabel, ar.model(m).pc{jc}); %R2013a compatible
-            if(sum(qp)==1)
-                pvalue = ar.p(qp);
-                if(ar.qLog10(qp))
-                    pvalue = 10^pvalue;
-                end
-                M.compartment(jc).size = pvalue;
-            elseif(sum(qp)==0)
-                pvalue = str2num(ar.model(m).pc{jc}); %#ok
-                if(~isnan(pvalue))
-                    M.compartment(jc).size = pvalue;
+        global ar
+        if(~isempty(ar.model(m).c))
+            for jc = 1:length(ar.model(m).c)
+                M.compartment(jc).typecode = 'SBML_COMPARTMENT';
+                M.compartment(jc).metaid = '';
+                M.compartment(jc).notes = '';
+                M.compartment(jc).annotation = '';
+                M.compartment(jc).sboTerm = -1;
+                M.compartment(jc).name = '';
+                M.compartment(jc).id = ar.model(m).c{jc};
+                M.compartment(jc).compartmentType = '';
+                M.compartment(jc).spatialDimensions = 3;
+                M.compartment(jc).constant = 1;
+                if ~isempty(ar.model(m).cUnits)
+                    M.compartment(jc).units = ar.model(m).cUnits{jc,2};
                 else
-                    error('%s not found', ar.model(m).pc{jc});
+                    M.compartment(jc).units = '';
                 end
-            else
-                error('%s not found', ar.model(m).pc{jc});
+                M.compartment(jc).outside = '';
+                M.compartment(jc).isSetSize = 0;
+                M.compartment(jc).isSetVolume = 0;
+                M.compartment(jc).level = 2;
+                M.compartment(jc).version = 4;
+                M.compartment(jc).size = 1;
+                
+                % Get the size of the compartment
+                cSize = ar.model(m).pc{jc};
+                cSizeNum = str2num(cSize);
+
+                if ~isnan(cSizeNum)
+                    % Case 1: compartment size is a numeric value
+                    % -> directly set the size in the compartment definition
+                    M.compartment(jc).size = cSizeNum;
+                    M.compartment(jc).isSetSize = 1;
+                    M.compartment(jc).isSetVolume = 1;
+                else
+                    % Cases 2x: compartment size is a parameter (+ a replacement by conditions)
+                    % -> add an initial assignment rule to sbml file
+
+                    if ismember(ar.pLabel, cSize)
+                        % Case 2a: compartment size is an optimization parameter
+                        % -> replace parameter by numerical value from ar.p
+                        idx = find(strcmp(ar.pLabel, cSize));
+                        cSizeNum = ar.p(idx);
+                        if(ar.qLog10(idx))
+                            cSizeNum = 10^cSizeNum;
+                        end
+                        cSizeReplace = num2str(cSizeNum);
+
+                    else
+                        % Case 2b/c: compartment size is not an optimization parameter
+                        % -> it is only a model parameter (with replacements ind model.def or data.def files)
+                        idx = find(strcmp(ar.model(m).p, cSize));
+                        modelfp = string(arSym(ar.model(m).fp{idx}));
+                        if ~strcmp(modelfp, cSize)
+                            % Case 2b: compartment size is replaced in model condition
+                            % -> replace parameter accordingly
+                            cSizeReplace = modelfp;
+                            % cSizeReplace = cSize;
+
+                        else
+                            % Case 2c: no model-wide replacement found
+                            % -> add the parameter itself to the sbml file
+                            cSizeReplace = cSize;
+
+                            % consistency check: Is compartment size replaced in all data conditions?
+                            qDataRepl = false(1, length(ar.model(m).data));
+                            for d = 1:length(ar.model(m).data)
+                                idx = find(strcmp(ar.model(m).data(d).pold, cSize));
+                                datafp = string(arSym(ar.model(m).data(d).fp{idx}));
+                                qDataRepl(d) = ~strcmp(datafp, cSize);
+                            end
+                            if ~all(qDataRepl)
+                                warning(['Compartment size %s is not defined properly.\n' ...
+                                    'Add a numeric value, a condition in %s.def or conditions in all Data/*.def files.'], ...
+                                    cSize, ar.model(m).name);
+                            end
+                            
+                        end
+                    end
+
+                    % Add an initial assignment rule for the compartment size
+                    idxIA = length(M.initialAssignment) + 1;
+                    M.initialAssignment(idxIA).typecode = 'SBML_INITIAL_ASSIGNMENT';
+                    M.initialAssignment(idxIA).metaid = '';
+                    M.initialAssignment(idxIA).notes = '';
+                    M.initialAssignment(idxIA).annotation = '';
+                    M.initialAssignment(idxIA).sboTerm = -1;
+                    M.initialAssignment(idxIA).symbol = M.compartment(jc).id;
+
+                    % Translate the compartment size parameter to a MathML expression
+                    % if isempty(str2num(cSizeReplace))
+                    %     mathType = 'ci';
+                    % else
+                    %     mathType = 'cn';
+                    % end
+                    % mathExpr = sprintf('<%s>%s</%s>', mathType, cSizeReplace, mathType);
+                    % M.initialAssignment(idxIA).math = ...
+                    %     sprintf('<math xmlns="http://www.w3.org/1998/Math/MathML">%s</math>', mathExpr);
+
+                    M.initialAssignment(idxIA).math = char(cSizeReplace);
+                    M.initialAssignment(idxIA).level = 2;
+                    M.initialAssignment(idxIA).version = 4;
+
+                end
             end
-        end
-    else
-        M.compartment(1).typecode = 'SBML_COMPARTMENT';
-        M.compartment(1).metaid = '';
-        M.compartment(1).notes = '';
-        M.compartment(1).annotation = '';
-        M.compartment(1).sboTerm = -1;
-        M.compartment(1).name = '';
-        M.compartment(1).id = 'default';
-        M.compartment(1).compartmentType = '';
-        M.compartment(1).spatialDimensions = 3;
-        M.compartment(1).constant = 1;
-        if ~isempty(ar.model(m).cUnits)
-            M.compartment(1).units = ar.model(m).cUnits{1,2};
         else
-            M.compartment(1).units = '';
+            M.compartment(1).typecode = 'SBML_COMPARTMENT';
+            M.compartment(1).metaid = '';
+            M.compartment(1).notes = '';
+            M.compartment(1).annotation = '';
+            M.compartment(1).sboTerm = -1;
+            M.compartment(1).name = '';
+            M.compartment(1).id = 'default';
+            M.compartment(1).compartmentType = '';
+            M.compartment(1).spatialDimensions = 3;
+            M.compartment(1).constant = 1;
+            if ~isempty(ar.model(m).cUnits)
+                M.compartment(1).units = ar.model(m).cUnits{1,2};
+            else
+                M.compartment(1).units = '';
+            end
+            M.compartment(1).outside = '';
+            M.compartment(1).isSetSize = 1;
+            M.compartment(1).isSetVolume = 1;
+            M.compartment(1).level = 2;
+            M.compartment(1).version = 4;
+            M.compartment(1).size = 1;
         end
-        M.compartment(1).outside = '';
-        M.compartment(1).isSetSize = 1;
-        M.compartment(1).isSetVolume = 1;
-        M.compartment(1).level = 2;
-        M.compartment(1).version = 4;
-        M.compartment(1).size = 1;
-    end
     end
     
     
@@ -319,6 +383,9 @@ function arExportSBML_FullModel(m,name)
     
     
     %% first: check the model parameters in ar.model(m).p
+
+    % allPars = model parameters that appear in at least one condition
+    % or one input. Compartment izes are excluded.
     
     allPars = zeros(1, length(ar.model(m).p));
     constPars = ones(1, length(ar.model(m).p));
@@ -341,10 +408,12 @@ function arExportSBML_FullModel(m,name)
         end
     end
     isReplaced = logical(isReplaced);
-    
+    % if parameter is compartment size
+    isCompSize = cellfun(@(x) any(strcmp(x, ar.model(m).pc)), ar.model(m).p)';
+    allPars = allPars & ~isCompSize;  % exclude compartment sizes
     
     for jp = 1:length(ar.model(m).p)
-        if isReplaced(jp) && ~isInit(jp)
+        if isReplaced(jp) && ~isInit(jp) && ~isCompSize(jp)
     
             allPars(jp) = true;
             constPars(jp) = false;
@@ -369,7 +438,7 @@ function arExportSBML_FullModel(m,name)
             M.rule(ixrule).version = 4;
         
         elseif ~isReplaced(jp) && isInit(jp)
-    
+      
             allPars(jp) = true;
             constPars(jp) = false;
             
@@ -379,6 +448,19 @@ function arExportSBML_FullModel(m,name)
     % add parameters to model
     for id = 1:length(allPars)
         if allPars(id) == 1
+            
+            % Is there a numeric value for the model parameter in ar.p?
+            qp = strcmp(ar.model(m).p(id), ar.pLabel); %R2013a compatible
+            if any(qp)
+                % if possible: get parameter value from ar.p
+                pvalue = ar.p(qp);
+                if(ar.qLog10(qp) == 1)
+                    pvalue = 10^pvalue;
+                end
+            else
+                continue
+            end
+
             id_tmp = length(M.parameter) + 1;
             M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
             M.parameter(id_tmp).metaid = '';
@@ -390,29 +472,15 @@ function arExportSBML_FullModel(m,name)
             M.parameter(id_tmp).units = '';
             M.parameter(id_tmp).constant = constPars(id);
             M.parameter(id_tmp).isSetValue = 1;
+            M.parameter(id_tmp).value = pvalue;
             M.parameter(id_tmp).level = 2;
             M.parameter(id_tmp).version = 4;
-            
-            % set parameter value
-            pvalue = 1;  % default value
-            qp = strcmp(ar.model(m).p(id), ar.pLabel); %R2013a compatible
-            if any(qp)
-                % if possible: get parameter value from ar.p
-                pvalue = ar.p(qp);
-                if(ar.qLog10(qp) == 1)
-                    pvalue = 10^pvalue;
-                end
-            end
-            M.parameter(id_tmp).value = pvalue;
         end
     end
     
-    %% second: add parameters from ar.pLabel which are not in ar.model(m).p
-    %  they represent general parameters used for assignments etc.
-    
+    %% second: add parameters from replacements
     
     additionalPars = zeros(1, length(ar.pLabel));
-    %     constPars = ones(length(ar.pLabel),1);
     for condId = 1:length(ar.model(m).condition)
         condPars = ismember(ar.pLabel,ar.model(m).condition(condId).p) ;
         additionalPars = condPars|additionalPars;
@@ -427,22 +495,15 @@ function arExportSBML_FullModel(m,name)
     
     for id = 1:length(additionalPars)
         if additionalPars(id) == 1
-    
-            % try to find the parameter in ar.model.fp and replace the label
-            pLabel = ar.pLabel{id};
-            qp = ~cellfun(@isempty, regexp(pLabel, ar.model(m).fp));
-            if sum(qp)==1
-                pLabel = ar.model(m).p{qp};
-            end        
-    
+   
             id_tmp = length(M.parameter) + 1;
             M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
             M.parameter(id_tmp).metaid = '';
             M.parameter(id_tmp).notes = '';
             M.parameter(id_tmp).annotation = '';
             M.parameter(id_tmp).sboTerm = -1;
-            M.parameter(id_tmp).name = pLabel;
-            M.parameter(id_tmp).id = pLabel;
+            M.parameter(id_tmp).name = ar.pLabel{id};
+            M.parameter(id_tmp).id = ar.pLabel{id};
             M.parameter(id_tmp).units = '';
             M.parameter(id_tmp).constant = 1;
             M.parameter(id_tmp).isSetValue = 1;
@@ -463,16 +524,18 @@ function arExportSBML_FullModel(m,name)
     function [M] = GetInitialAssignments(M,Crules)
     
     %% rules (copasi)
+    idxStartIA = length(M.initialAssignment);
     for jr = 1:size(Crules,1)
-        M.initialAssignment(jr).typecode = 'SBML_INITIAL_ASSIGNMENT';
-        M.initialAssignment(jr).metaid = '';
-        M.initialAssignment(jr).notes = '';
-        M.initialAssignment(jr).annotation = '';
-        M.initialAssignment(jr).sboTerm = -1;
-        M.initialAssignment(jr).symbol = Crules{jr,1};
-        M.initialAssignment(jr).math = Crules{jr,2};
-        M.initialAssignment(jr).level = 2;
-        M.initialAssignment(jr).version = 4;
+        idxIA = idxStartIA + jr;
+        M.initialAssignment(idxIA).typecode = 'SBML_INITIAL_ASSIGNMENT';
+        M.initialAssignment(idxIA).metaid = '';
+        M.initialAssignment(idxIA).notes = '';
+        M.initialAssignment(idxIA).annotation = '';
+        M.initialAssignment(idxIA).sboTerm = -1;
+        M.initialAssignment(idxIA).symbol = Crules{jr,1};
+        M.initialAssignment(idxIA).math = Crules{jr,2};
+        M.initialAssignment(idxIA).level = 2;
+        M.initialAssignment(idxIA).version = 4;
     end
     
     end
