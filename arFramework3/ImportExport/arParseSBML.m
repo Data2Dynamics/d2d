@@ -159,10 +159,21 @@ comps = {};
 comp_value = [];
 fprintf(fid, '\nCOMPARTMENTS\n');
 
+% logical flags indicating if compartment size is set by initial assignment or numeric value
+compHasInitAssign = cellfun(@(id) any(strcmp({m.initialAssignment(:).symbol}, id)), {m.compartment(:).id});
+cSizeReplace = [m.compartment(:).isSetSize] & ~compHasInitAssign;
+cSizeConds = false(size(cSizeReplace));
+if opts.keepcompartments
+    % keep compartment sizes as paramters -> no numeric values
+    cSizeConds = cSizeReplace;
+    cSizeReplace(:) = false;
+end
+
 for j=1:length(m.compartment)
     if(~m.compartment(j).constant)
         error('non-constant compartments are not yet supported in D2D!');
     end
+    % units
     units = m.compartment(j).units;
     if isempty( units )
         if any( strcmp({m.unitDefinition.name},'volume'))
@@ -171,24 +182,24 @@ for j=1:length(m.compartment)
             units = 'n/a';
         end
     end
-    
-    if ( opts.compartmentbyname )
+    % name and id
+    if opts.compartmentbyname
         compName = m.compartment(j).name;
         m.compartmentIDtoD2D = @(j)compartmentIDToName(m,j);
     else
         compName = m.compartment(j).id;
         m.compartmentIDtoD2D = @(j) j;
     end
+    % write compartment definition to file
+    if cSizeReplace(j)
+        fprintf(fid, '%s\t V\t "%s"\t vol.\t %g\n', sym_check(m.time_symbol,compName), units, m.compartment(j).size);
+    else
+        fprintf(fid, '%s\t V\t "%s"\t vol.\t \n', sym_check(m.time_symbol,compName), units);
+    end
+    % deprecated code snippet (only kept for consistency with commented code below)
     if(m.compartment(j).isSetSize)
-        if ( opts.keepcompartments )
-            fprintf(fid, '%s\t V\t "%s"\t vol.\t \n', sym_check(m.time_symbol,compName), units);
-        else
-            fprintf(fid, '%s\t V\t "%s"\t vol.\t %g\n', sym_check(m.time_symbol,compName), units, m.compartment(j).size);
-        end
         comps{end+1} = compName;
         comp_value(end+1) = m.compartment(j).size;
-    else
-        fprintf(fid, '%s\t V\t "%s"\t vol.\n', sym_check(m.time_symbol,compName), 'n/a');
     end
 end
 
@@ -284,7 +295,8 @@ if(isfield(m,'initialAssignment'))
             end
         end
     end
-else m.initialAssignment = [];
+else
+    m.initialAssignment = [];
 end
 
 %% READ OBSERVABLES, ERRORS, INPUTS from rule
@@ -515,20 +527,22 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             
             % divide rates by compartment volume
             reaction_comp = findReactionCompartment(m,j, csizes);
-            reaction_comp = m.compartmentIDtoD2D( reaction_comp );
+            reaction_comp = m.compartmentIDtoD2D(reaction_comp);
             
             if ~isempty(reaction_comp) %&& sum(strcmp(reaction_comp,strsplit(char(tmpstr),'*')))==1
                 tmpstr = ['(' char(tmpstr) ')/' sym_check(m.time_symbol,reaction_comp)];
             end
             
-            % replace compartment volumes if requested
-            if (~opts.keepcompartments)
-                for jj=1:length(m.compartment)
-                    tmpstr = mysubs(tmpstr, m.compartmentIDtoD2D( m.compartment(jj).id ), num2str(m.compartment(jj).size));
-                end
-            else
-                for jj=1:length(m.compartment)
-                    tmpstr = mysubs(tmpstr, m.compartmentIDtoD2D( m.compartment(jj).id ), sprintf('vol_%s', m.compartmentIDtoD2D( m.compartment(jj).id ) ));
+            % replace compartment ID by compartment size (value or parameter)
+            for jj=1:length(m.compartment)
+                compNewID = m.compartmentIDtoD2D(m.compartment(jj).id);
+                if cSizeReplace(jj)
+                    % replace compartment ID by numerical value for compartment size
+                    compSize = num2str(m.compartment(jj).size);
+                    tmpstr = mysubs(tmpstr, compNewID, sprintf('(%s)', compSize));
+                else
+                    % replace compartment ID by compartment size parameter
+                    tmpstr = mysubs(tmpstr, compNewID, sprintf('vol_%s', compNewID));
                 end
             end
             
@@ -599,15 +613,28 @@ if exist('err','var')
 end
 
 fprintf(fid, '\nCONDITIONS\n');
-% compartments
-if ( opts.keepcompartments )
-    for j = 1 : length( m.compartment )
-        fprintf( fid, 'vol_%s   "%g"\n', m.compartmentIDtoD2D( m.compartment(j).id ), m.compartment(j).size );
+
+% write compartment sizes to conditions section
+for jj=1:length(m.compartment)
+    compNewID = m.compartmentIDtoD2D(m.compartment(jj).id);
+    if cSizeConds(jj)
+        % numeric compartment sizes (if not repalced above)
+        fprintf(fid, 'vol_%s   "%g"\n', compNewID, m.compartment(jj).size);
+
+    elseif compHasInitAssign(jj)
+        % inital assignments
+        idAssign = find(strcmp({m.initialAssignment(:).symbol}, m.compartment(jj).id));
+        strAssign = m.initialAssignment(idAssign).math;
+        strAssign = mysubs(strAssign, m.compartment(jj).id, compNewID);
+        if ~strcmp(strAssign, sprintf('vol_%s', compNewID))
+            % size is replaced by something else than the automatic d2d parameter
+            % -> write this formula, parameter or numeric value to conditions
+            fprintf(fid, 'vol_%s   "%s"\n', compNewID, strAssign);
+        end
     end
 end
 
-
-% Initial values
+% Initial values for species
 % Three options for initial values
 % Option 1: (initValuesOpt ==1)
 %               No initial assignment exists in SBML
