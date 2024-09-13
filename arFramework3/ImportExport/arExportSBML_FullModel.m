@@ -11,7 +11,11 @@ function arExportSBML_FullModel(m,name)
     global ar
     
     % simulate once for initial values
-    arSimu(0,1,0)
+    try
+        arSimu(0,1,0)
+    catch
+        arSimu(1,1,0)
+    end
     
     copasi = true;
     
@@ -26,12 +30,18 @@ function arExportSBML_FullModel(m,name)
     %         steadystate = false;
     %     end
     % end
+
+    qCondsSBMLConform = arCheckSBMLCompatibilty(m);
+    if ~qCondsSBMLConform
+        warning(['Model conditions are not independet and will be represented incorrectly in SBML. ', ...
+                 'Consider using "arRenameModelCondPars" to get independent model parameters and conditions.']);
+    end
     
     try
         M = TranslateSBML(which('empty.xml'));
         F = TranslateSBML(which('filled.xml'));
     catch
-        warning('error in libSBML. Probably backwards compatibility issues with old MATLAB version. Should work with 2019a')
+        warning('error in libSBML. Probably backwards compatibility issues with old MATLAB version. Should work with 2019a.')
     end
     
     M.id = ar.model(m).name;
@@ -180,17 +190,6 @@ function arExportSBML_FullModel(m,name)
                     M.initialAssignment(idxIA).annotation = '';
                     M.initialAssignment(idxIA).sboTerm = -1;
                     M.initialAssignment(idxIA).symbol = M.compartment(jc).id;
-
-                    % Translate the compartment size parameter to a MathML expression
-                    % if isempty(str2num(cSizeReplace))
-                    %     mathType = 'ci';
-                    % else
-                    %     mathType = 'cn';
-                    % end
-                    % mathExpr = sprintf('<%s>%s</%s>', mathType, cSizeReplace, mathType);
-                    % M.initialAssignment(idxIA).math = ...
-                    %     sprintf('<math xmlns="http://www.w3.org/1998/Math/MathML">%s</math>', mathExpr);
-
                     M.initialAssignment(idxIA).math = char(cSizeReplace);
                     M.initialAssignment(idxIA).level = 2;
                     M.initialAssignment(idxIA).version = 4;
@@ -264,9 +263,7 @@ function arExportSBML_FullModel(m,name)
         M.species(jx).isSetCharge = 0;
         M.species(jx).level = 2;
         M.species(jx).version = 4;
-        
-        qp = ismember(ar.pLabel, ar.model(m).px0{jx}); %R2013a compatible
-        
+               
         simulated_ss = 0;
         %         if ( steadystate )
         %             if (isfield(ar.model(m).condition(c),'ssLink') && ~isempty( ar.model(m).condition(c).ssLink ) )
@@ -275,10 +272,10 @@ function arExportSBML_FullModel(m,name)
         %                 simulated_ss = 1;
         %             end
         %         end
-        qp = ismember(ar.pLabel, ar.model(m).px0{jx}); %R2013a compatible
         
         if ( ~simulated_ss )
             % check if init parameter still exists in condition parameters
+            qp = ismember(ar.pLabel, ar.model(m).px0{jx}); %R2013a compatible
             is_set = sum(ismember(ar.model(m).fp, ar.model(m).px0{jx}))==0;
             if(sum(qp)==1 && is_set==0)
                 M.species(jx).initialConcentration = 1;
@@ -380,121 +377,118 @@ function arExportSBML_FullModel(m,name)
     
     function [M] = GetParameters(M,m)
     global ar
-    
-    
-    %% first: check the model parameters in ar.model(m).p
 
-    % allPars = model parameters that appear in at least one condition
-    % or one input. Compartment izes are excluded.
-    
-    allPars = zeros(1, length(ar.model(m).p));
-    constPars = ones(1, length(ar.model(m).p));
-    for condId = 1:length(ar.model(m).condition)
-        condPars = ismember(ar.model(m).p,ar.model(m).condition(condId).p)';
-        allPars = condPars | allPars;
-    end
-    % loop necessary? index unused
-    for inpId = 1:length(ar.model(m).u)
-        inpPars = ismember(ar.model(m).p, ar.model(m).pu);
-        allPars = inpPars | allPars;
-    end
-    % if parameter is an initial condition
+
+    %% first: collect available numerical values for model parameters (ar.model.p)
+
+    % logical flags for model parameters
     isInit = cellfun(@(x) any(strcmp(x, ar.model(m).px0)), ar.model(m).p)';
-    % if model parameter is replaced by other parameter
-    isReplaced = zeros(1, length(ar.model(m).p));
-    for jp=1:length(ar.model(m).p)
-        if isempty(regexp(ar.model(m).p{jp}, ar.model(m).fp{jp}, "once"))
-            isReplaced(jp) = true;
-        end
-    end
-    isReplaced = logical(isReplaced);
-    % if parameter is compartment size
-    isCompSize = cellfun(@(x) any(strcmp(x, ar.model(m).pc)), ar.model(m).p)';
-    allPars = allPars & ~isCompSize;  % exclude compartment sizes
-    
+    isReplaced = ~strcmp(ar.model.p', string(arSym(ar.model.fp)));
+    isCompSize = cellfun(@(x) any(strcmp(x, string(arSym(ar.model(m).pc)))), ar.model(m).p)';
+    % isConst = (isReplaced & ~isInit) | (isInit & ~isReplaced);
+    isConst = true(1, length(ar.model(m).p));  % all model parameters are constant (i.e. not time-dependent)
+
     for jp = 1:length(ar.model(m).p)
-        if isReplaced(jp) && ~isInit(jp) && ~isCompSize(jp)
+        % All model parameters should be defined in SBML as parameters
+        % irrespective of initAssigns or undefined values.
+
+        % compound parameters are handeled separately in "GetCompartments"
+        if isCompSize(jp)
+            continue
+        end
+
+        % Is there a numeric value for the model parameter in ar.p?
+        qp = strcmp(ar.model(m).p(jp), ar.pLabel); %R2013a compatible
+        if any(qp)
+            % get parameter value from ar.p
+            pvalue = ar.p(qp);
+            if(ar.qLog10(qp) == 1)
+                pvalue = 10^pvalue;
+            end
+            isSetValue = 1;
+            constant = double(isConst(qp));
+        else
+            % no numeric value in ar.p found
+            pvalue = NaN;
+            isSetValue = 0;
+            constant = 1;
+        end
+
+        id_tmp = length(M.parameter) + 1;
+        M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
+        M.parameter(id_tmp).metaid = '';
+        M.parameter(id_tmp).notes = '';
+        M.parameter(id_tmp).annotation = '';
+        M.parameter(id_tmp).sboTerm = -1;
+        M.parameter(id_tmp).name = ar.model(m).p{jp};
+        M.parameter(id_tmp).id = ar.model(m).p{jp};
+        M.parameter(id_tmp).units = '';
+        M.parameter(id_tmp).constant = constant;
+        M.parameter(id_tmp).isSetValue = isSetValue;
+        M.parameter(id_tmp).value = pvalue;
+        M.parameter(id_tmp).level = 2;
+        M.parameter(id_tmp).version = 4;
     
-            allPars(jp) = true;
-            constPars(jp) = false;
-    
-            fu = arSym(ar.model(m).fp{jp});
-            % replace time parameters with 'time'
-            fu = char(arSubs(arSym(fu), arSym(ar.model(m).t), arSym('time')));
+    end
+
+
+    %% second: collect replacements of model parameters
+
+    for jp = 1:length(ar.model(m).p)
+        if isReplaced(jp) && ~isCompSize(jp)
+
+            if isInit(jp)
+                % initial values for species are already defined in "GetSpecies"
+                % and written to SBML in "GetInitialAssignments".
+                % However: An init parameter can also appears as a model parameter
+                % (e.g. in a rate equation or input). Then the CONDITION
+                %   init_State  "expression"
+                % must also be applied to the parameter, not just the species.
+                if ~ismember(ar.model(m).p{jp}, union(ar.model(m).pu, ar.model(m).pv))
+                    continue
+                end
+            end
             
-            ixrule = length(M.rule) + 1;% index of current rule
-            M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
-            M.rule(ixrule).metaid = '';
-            M.rule(ixrule).notes = '';
-            M.rule(ixrule).annotation = '';
-            M.rule(ixrule).sboTerm = -1;
-            M.rule(ixrule).formula = fu;
-            M.rule(ixrule).variable = ar.model(m).p{jp};
-            M.rule(ixrule).species = '';
-            M.rule(ixrule).compartment = '';
-            M.rule(ixrule).name = '';
-            M.rule(ixrule).units = '';
-            M.rule(ixrule).level = 2;
-            M.rule(ixrule).version = 4;
-        
-        elseif ~isReplaced(jp) && isInit(jp)
-      
-            allPars(jp) = true;
-            constPars(jp) = false;
-            
+            % parameter CONDITIONS should be implemeted as initialAssignment
+            % reason: parameters in d2d are constant, CONDITIONS are applied before start of simulation
+
+            ixInitAssign = length(M.initialAssignment) + 1;% index of current rule
+            M.initialAssignment(ixInitAssign).typecode = 'SBML_INITIAL_ASSIGNMENT';
+            M.initialAssignment(ixInitAssign).metaid = '';
+            M.initialAssignment(ixInitAssign).notes = '';
+            M.initialAssignment(ixInitAssign).annotation = '';
+            M.initialAssignment(ixInitAssign).sboTerm = -1;
+            M.initialAssignment(ixInitAssign).symbol = ar.model(m).p{jp};
+            M.initialAssignment(ixInitAssign).math = ar.model(m).fp{jp};
+            M.initialAssignment(ixInitAssign).level = 2;
+            M.initialAssignment(ixInitAssign).version = 4;
+
+            % ixrule = length(M.rule) + 1;% index of current rule
+            % M.rule(ixrule).typecode = 'SBML_ASSIGNMENT_RULE';
+            % M.rule(ixrule).metaid = '';
+            % M.rule(ixrule).notes = '';
+            % M.rule(ixrule).annotation = '';
+            % M.rule(ixrule).sboTerm = -1;
+            % M.rule(ixrule).formula = ar.model(m).fp{jp};
+            % M.rule(ixrule).variable = ar.model(m).p{jp};
+            % M.rule(ixrule).species = '';
+            % M.rule(ixrule).compartment = '';
+            % M.rule(ixrule).name = '';
+            % M.rule(ixrule).units = '';
+            % M.rule(ixrule).level = 2;
+            % M.rule(ixrule).version = 4;
         end    
     end
     
-    % add parameters to model
-    for id = 1:length(allPars)
-        if allPars(id) == 1
-            
-            % Is there a numeric value for the model parameter in ar.p?
-            qp = strcmp(ar.model(m).p(id), ar.pLabel); %R2013a compatible
-            if any(qp)
-                % if possible: get parameter value from ar.p
-                pvalue = ar.p(qp);
-                if(ar.qLog10(qp) == 1)
-                    pvalue = 10^pvalue;
-                end
-            else
-                continue
-            end
-
-            id_tmp = length(M.parameter) + 1;
-            M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
-            M.parameter(id_tmp).metaid = '';
-            M.parameter(id_tmp).notes = '';
-            M.parameter(id_tmp).annotation = '';
-            M.parameter(id_tmp).sboTerm = -1;
-            M.parameter(id_tmp).name = ar.model(m).p{id};
-            M.parameter(id_tmp).id = ar.model(m).p{id};
-            M.parameter(id_tmp).units = '';
-            M.parameter(id_tmp).constant = constPars(id);
-            M.parameter(id_tmp).isSetValue = 1;
-            M.parameter(id_tmp).value = pvalue;
-            M.parameter(id_tmp).level = 2;
-            M.parameter(id_tmp).version = 4;
-        end
-    end
+    %% third: search numerical values for replacements
     
-    %% second: add parameters from replacements
+    % optimization parameters that appear in replacements (and are not model parameters)
+    replParams = cellfun(@(x) any(contains(ar.model(m).fp(isReplaced), x)), ar.pLabel);
+    replParams = replParams & ~cellfun(@(x) ismember(x, ar.model(m).p), ar.pLabel);
     
-    additionalPars = zeros(1, length(ar.pLabel));
-    for condId = 1:length(ar.model(m).condition)
-        condPars = ismember(ar.pLabel,ar.model(m).condition(condId).p) ;
-        additionalPars = condPars|additionalPars;
-    end
-    % loop necessary? index unused
-    for inpId = 1:length(ar.model(m).u)
-        inpPars = ismember(ar.pLabel',ar.model(m).pu);
-        additionalPars = inpPars|additionalPars;
-    end
-    additionalPars  = additionalPars & ~ismember(ar.pLabel,ar.model(m).p);
-    
-    
-    for id = 1:length(additionalPars)
-        if additionalPars(id) == 1
+    for jp = 1:length(ar.pLabel)
+        
+        if replParams(jp)
    
             id_tmp = length(M.parameter) + 1;
             M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
@@ -502,16 +496,16 @@ function arExportSBML_FullModel(m,name)
             M.parameter(id_tmp).notes = '';
             M.parameter(id_tmp).annotation = '';
             M.parameter(id_tmp).sboTerm = -1;
-            M.parameter(id_tmp).name = ar.pLabel{id};
-            M.parameter(id_tmp).id = ar.pLabel{id};
+            M.parameter(id_tmp).name = ar.pLabel{jp};
+            M.parameter(id_tmp).id = ar.pLabel{jp};
             M.parameter(id_tmp).units = '';
             M.parameter(id_tmp).constant = 1;
             M.parameter(id_tmp).isSetValue = 1;
             M.parameter(id_tmp).level = 2;
             M.parameter(id_tmp).version = 4;
             
-            pvalue = ar.p(id);
-            if(ar.qLog10(id) == 1)
+            pvalue = ar.p(jp);
+            if(ar.qLog10(jp) == 1)
                 pvalue = 10^pvalue;
             end
             M.parameter(id_tmp).value = pvalue;
