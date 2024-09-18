@@ -649,6 +649,18 @@ if ( isfield( ar, 'conditionconstraints' ) )
 end
 
 % populate threads
+if ar.config.useParallel
+    if ar.config.nThreads > 1
+        % keep number of threads
+        arSetParallelThreads(ar.config.nThreads, true);
+    else
+        % set threads automatically
+        arSetParallelThreads([], true);
+    end
+else
+    % set number of threads to 1
+    arSetParallelThreads(1, true);
+end
 populate_threads( 'threads', 'condition', 'nTasks');
 populate_threads( 'ss_threads', 'ss_condition', 'nssTasks');
 ar.config.nThreads = length(ar.config.threads);

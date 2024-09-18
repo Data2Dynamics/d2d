@@ -22,10 +22,10 @@ ar.config.nCore = feature('numCores');
 ar.config.nMaxThreads = 2*ar.config.nCore;
 
 % set default values
-if ~exist('silent','var')
+if ~exist('silent','var') || isempty(silent)
     silent = false;
 end
-if ~exist('n','var')
+if ~exist('n','var') || isempty(n)
     n = ar.config.nMaxThreads;
 end
 
