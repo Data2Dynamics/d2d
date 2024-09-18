@@ -584,6 +584,14 @@ ar.fkt = ['arSimuCalcFun_' ar.checkstr];
 % write arSimuCalcFunctions
 writeSimuCalcFunctions(debug_mode);
 
+% set the number of threads correctly
+if ar.config.useParallel
+    % automatically set the number of threads
+    arSetParallelThreads();
+else
+    arSetParallelThreads(1);
+end
+
 % compile
 if ~forcedCompile && exist([pwd,filesep,ar.fkt,'.',mexext],'file')
     % do nothing
@@ -637,7 +645,6 @@ end
 %         end
 %     end
 % end
-
 
 % link
 arLink;

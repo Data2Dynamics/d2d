@@ -746,7 +746,7 @@ for m = 1:length(ar.model)
             ar.config.(thread_fieldname)(ithread).ms(end+1) = int32(m-1);
             ar.config.(thread_fieldname)(ithread).cs(end+1) = int32(c-1);
             ithread = ithread + 1;
-            if(ithread>ar.config.nParallel)
+            if(ithread>ar.config.nParallel) || (ithread>ar.config.nMaxThreads)
                 ithread = 1;
             end
         end
