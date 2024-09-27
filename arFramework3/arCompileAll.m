@@ -585,6 +585,7 @@ ar.fkt = ['arSimuCalcFun_' ar.checkstr];
 writeSimuCalcFunctions(debug_mode);
 
 % set the number of threads correctly
+arLink();
 if ar.config.useParallel
     % automatically set the number of threads
     arSetParallelThreads();

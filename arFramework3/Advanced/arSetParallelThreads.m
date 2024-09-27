@@ -31,26 +31,26 @@ end
 
 if ar.config.useParallel == 0
     if ~silent
-        fprintf(1, 'parallel computing is disabled, reset requested threads to 1.\n');
-        fprintf(1, 'enable parallel computing with "ar.config.useParallel=1".\n');
+        fprintf('parallel computing is disabled, reset requested threads to 1.\n');
+        fprintf('enable parallel computing with "ar.config.useParallel=1".\n');
     end
     n = 1;
 
 else
     if ~silent
-        fprintf(1, 'requesting %i thread(s) for %i task(s) on %i core(s).\n', ...
+        fprintf('requesting %i thread(s) for %i task(s) on %i core(s).\n', ...
             n, ar.config.nTasks, ar.config.nCore);
     end
     if n > ar.config.nMaxThreads
         if ~silent
-            fprintf(1, 'request exceeds thread limit, reset requested threads to %i.\n', ...
+            fprintf('request exceeds thread limit, reset requested threads to %i.\n', ...
                 ar.config.nMaxThreads);
         end
         n = ar.config.nMaxThreads;
     end
     if n > ar.config.nTasks
         if~silent
-            fprintf(1, 'request exceeds number of tasks, reset requested threads to %i.\n', ...
+            fprintf('request exceeds number of tasks, reset requested threads to %i.\n', ...
                 ar.config.nTasks);
         end
         n = ar.config.nTasks;
