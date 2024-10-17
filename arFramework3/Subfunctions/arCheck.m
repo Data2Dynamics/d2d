@@ -1,6 +1,6 @@
 % docontinue = arCheck
 % arCheck checks the system's setup, sets Matlab paths via addpath and
-% configure sundials 
+% configure sundials
 %
 %   docontinue      true if the function is finished, false otherwise
 
@@ -9,7 +9,7 @@ docontinue = false;
 
 symbtool = ver('symbolic');
 if(~isempty(symbtool) && verLessThan('symbolic', '5.5'))
-	error('MUPAD symbolic toolbox version >= 5.5 required');
+    error('MUPAD symbolic toolbox version >= 5.5 required');
 end
 
 ar_path = fileparts(which('arInit.m'));
@@ -23,7 +23,7 @@ if ~any(strcmp(ar_path,matpath))
     warning('It seems that you specified the path to d2d using local paths, e.g. by addpath(''arFramework3''). The path is now switch to a gloabl one.')
     path_id = ~cellfun(@isempty,regexp(matpath,[arFolderName{end} '$']));
     if(~all(path_id)==0)
-        rmpath(matpath{path_id}) 
+        rmpath(matpath{path_id})
     end
     addpath(ar_path)
 end
@@ -84,16 +84,16 @@ if(exist('model_template.def','file') == 0)
     addpath([ar_path '/ProjectTemplate'])
 end
 if(exist('arFitLhsBwCluster','file') == 0)
-     addpath([ar_path '/BwGrid']);
+    addpath([ar_path '/BwGrid']);
 end
 if(exist('arNEB','file') == 0)
-     addpath([ar_path '/NEB']);
+    addpath([ar_path '/NEB']);
 end
 if(exist('arExportPEtab','file') == 0)
-     addpath([ar_path '/ImportExport']);
+    addpath([ar_path '/ImportExport']);
 end
 if(exist('model_template_HillFunctions.def','file') == 0)
-     addpath([ar_path '/ProjectTemplate']);
+    addpath([ar_path '/ProjectTemplate']);
 end
 
 
@@ -221,7 +221,7 @@ if (exist('strike-goldd', 'file') == 0)
 end
 
 savepath
-    
+
 %% CVODES
 
 % uncompress and expand CVODES
@@ -259,44 +259,32 @@ end
 
 %% check Windows libraries for pthread-win32
 if(ispc)
-%     if(exist(['.\pthreadGC2_',mexext,'.dll'],'file')==0)
+    %     if(exist(['.\pthreadGC2_',mexext,'.dll'],'file')==0)
     try
         copyfile([ar_path '\ThirdParty\pthreads-w32_2.9.1\dll\' mexext '\pthreadGC2.dll'], 'pthreadGC2.dll');
     catch ERR  % occurs (and can be ignored), if dll has been copied previously, is still loaded and therefore replacement is blocked by Windows OS
         disp(ERR.message)
     end
-%     end
-%     if(exist(['.\pthreadVC2_',mexext,'.dll'],'file')==0)
+    %     end
+    %     if(exist(['.\pthreadVC2_',mexext,'.dll'],'file')==0)
     try
         copyfile([ar_path '\ThirdParty\pthreads-w32_2.9.1\dll\' mexext '\pthreadVC2.dll'], 'pthreadVC2.dll');
     catch ERR  % occurs (and can be ignored), if dll has been copied previously, is still loaded and therefore replacement is blocked by Windows OS
         disp(ERR.message)
     end
-%     end
+    %     end
 end
 
 %% user name
 
 % check if arInitUser.m exists and create the file if necessary
 if exist('arInitUser.m','file')==0
-	fprintf(1,'\n%s\n\n','Welcome to Data 2 Dynamics Software');
-	user = '';
-	while isempty(user)
-		user = input('Please enter your full name (e.g. John Doe)\n-> ','s');
-	end
-	fid = fopen([ar_path '/arInitUser.m'],'w');
-    if(fid==-1)
-        error('could not write file %s!', [ar_path '/arInitUser.m']),
+    fprintf(1,'\n%s\n\n','Welcome to Data 2 Dynamics Software');
+    user = '';
+    while isempty(user)
+        user = input('Please enter your full name (e.g. John Doe)\n-> ','s');
     end
-	fprintf(fid,'%s\n','% initialize user settings');
-	fprintf(fid,'\n%s\n','function arInitUser');
-	fprintf(fid,'\n%s\n','global ar');
-	fprintf(fid,'\n%s%s%s','ar.config.username = ''',user,''';');
-	fprintf(fid,'\n%s%s%s','ar.config.comment_string = ''//'';');
-	fclose(fid);
-	fprintf(1,'\n%s\n','Initialization successful');
-    fprintf(1,'Please note that you can set additional default options in arInitUser.m\n' );
-    rehash path
+    arCreateInitUser(user);
 end
 
 docontinue = true;
