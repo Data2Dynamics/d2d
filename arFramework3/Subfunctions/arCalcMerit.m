@@ -118,7 +118,7 @@ qPositiveX = {ar.model(:).qPositiveX};
 allowNegativeX = 0;
 
 if(~isfield(ar.config, 'nCVRestart') || isnan(ar.config.nCVRestart))
-    nCVRestart = 10;
+    nCVRestart = 1;
 else
     nCVRestart = ar.config.nCVRestart;
 end
