@@ -31,7 +31,7 @@ function arExportSBML_FullModel(m,name)
     %     end
     % end
 
-    qCondsSBMLConform = arCheckSBMLCompatibilty(m);
+    qCondsSBMLConform = arCheckSBMLCompatibility(m);
     if ~qCondsSBMLConform
         warning(['Model conditions are not independet and will be represented incorrectly in SBML. ', ...
                  'Consider using "arRenameModelCondPars" to get independent model parameters and conditions.']);

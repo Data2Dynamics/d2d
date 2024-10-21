@@ -1,5 +1,5 @@
-function [qSBMLCompatible, pProblemCond] = arCheckSBMLCompatibilty(m)
-% ARCHECHECKSBMLCOMPATIBILTY checks if CONDITIONS in model.def are SBML compatible
+function [qSBMLCompatible, pProblemCond] = arCheckSBMLCompatibility(m)
+% ARCHECHECKSBMLCOMPATIBILITY checks if CONDITIONS in model.def are SBML compatible
 %
 % BACKGROUND:
 % CONDITIONS in model.def correspond to replacements of the original model parameters
@@ -46,7 +46,10 @@ function [qSBMLCompatible, pProblemCond] = arCheckSBMLCompatibilty(m)
 %   </listOfInitialAssignments>
 %
 %   The expression after replacements becomes: "2*x^(4)"
-%   This is because the assignment p1<-2 is also applied within the assignment p2<-p1*2 
+%   This is because the assignment p1<-2 is also applied within the assignment p2<-p1*2
+%
+%
+% SEE: arRenameModelCondPars, arExportSBML_fullmodel
 
 arguments
     m (1,1) double {mustBeInteger, mustBePositive} = 1

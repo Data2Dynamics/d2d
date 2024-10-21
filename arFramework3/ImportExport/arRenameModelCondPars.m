@@ -36,7 +36,7 @@ global ar
 
 
 % Check if model is SBML compatible
-[qSBMLCompatible, pNeedsRenaming] = arCheckSBMLCompatibilty(m);
+[qSBMLCompatible, pNeedsRenaming] = arCheckSBMLCompatibility(m);
 if qSBMLCompatible
     fprintf('Model conditions already SBML compatible. No parameters need renaming.\n')
     return
