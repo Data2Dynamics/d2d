@@ -211,13 +211,14 @@ for d = 1:length(ar.model(m).data)
         else
             measurement = ar.model(m).data(d).yExp(:, iy);
         end
-        if ar.model(m).data(d).normalize(iy) == 1
-            if ~threwNormWarning
-                warning('Normalization of experimental measurements is not supported in PEtab. Measurement values in ar.model(:).data(:).yExpRaw will be normalized before export.')
-                threwNormWarning = 1;
-            end
-            measurement = measurement/max(measurement);
-        end
+        % ar.model.yExp is already normalized, if normalization is active. Doing it again causes problems.
+        % if ar.model(m).data(d).normalize(iy) == 1
+        %     if ~threwNormWarning
+        %         warning('Normalization of experimental measurements is not supported in PEtab. Measurement values in ar.model(:).data(:).yExpRaw will be normalized before export.')
+        %         threwNormWarning = 1;
+        %     end
+        %     measurement = measurement/max(measurement);
+        % end
         
         % skip if measurement contains only NaN
         if sum(isnan(measurement)) == numel(measurement)
@@ -313,6 +314,34 @@ writetable(parT, ['PEtab' filesep IDs.name '_parameters.tsv'],...
     'Delimiter', '\t', 'FileType', 'text')
 
 end
+
+% function writeVisualisationTable(m, IDs)
+% %% Visualisation Table
+% % this is a very simple implementation, only covers the basic features like:
+% % - combining datasets
+% % - lin/log10 trafo
+% % - time-course / dose-response
+
+% % plotId, plotName, datasetId, xValues, xLabel, xScale, yValues, yLabel, yScale
+
+% global ar
+
+% for jp = 1:length(ar.model(m).plot)
+%     plotId = sprintf('M%i_Plot%i', m, jp);
+%     plotName = ar.model(m).plot(jp).name;
+
+%     dLink = ar.model(m).plot(jp).dLink;
+%     for jd = 1:length(dLink)
+%         d = dLink(jd);
+%         s
+%     end
+    
+
+% end
+
+
+
+% end
 
 
 function writeYAMLfile(IDs)
