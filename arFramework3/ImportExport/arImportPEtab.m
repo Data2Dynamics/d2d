@@ -4,9 +4,11 @@ function arImportPEtab(name, doPreEq)
 %
 %   name     Path to PEtab yaml file
 %
-%            Alternatively: Cell array of paths to model, observables, measurements,
+%            Cell array of paths to model, observables, measurements,
 %            conditions and parameters file (in this order):
 %               arImportPEtab({'mymodel', 'myobs', 'mymeas', 'mycond', 'mypars'})
+%
+%            If empty, use *.yaml file from PEtab folder (if exactly one exists)
 %
 %   doPreEq  Apply pre-equilibration if specified in PEtab files [true]
 %
@@ -19,24 +21,41 @@ function arImportPEtab(name, doPreEq)
 global ar
 
 if(isempty(ar))
-    error('Please initialize by arInit')
+    fprintf('No ar struct found. Initializing d2d.\n')
+    arInit();
 end
 if isfield(ar, 'model')
-    error('Please initialize by arInit')
+    fprintf('ar struct already contains a model. Re-initializing d2d.\n')
+    arInit();
 end
 if ~exist('doPreEq','var') || isempty(doPreEq)
     doPreEq = true;
 end
 
 %TODO: read in multiple sbmls & save these paths in ar struct
-if ischar(name) %yaml
+
+%% Import from yaml file
+if ~exist('name', 'var') || isempty(name)
+    % find yaml file in PEtab folder
+    fprintf('Search PEtab folder for .yaml file\n')
+    yamlDir = dir(fullfile('PEtab', '*.yaml'));
+    if isempty(yamlDir)
+        error('Did not find .yaml file')
+    end
+    if length(yamlDir)>1
+        error('Found more than one .yaml file')
+    end
+    name = fullfile('PEtab', yamlDir.name);
+end
+if ischar(name)
+    % import from yaml file
     yamlDir = dir([strrep(name,'.yaml','') '.yaml']);
     if isempty(yamlDir) % exists .yaml file?
-        error('Did not find yaml file')
+        error('Did not find .yaml file')
     end
     yamlContent = arReadPEtabYaml(name);
     yamlPath = yamlDir.folder;
-    fprintf('Found yaml file with name %s\n',name)
+    fprintf('Import .yaml file with name: %s\n',name)
     
     % check number of files per category, only one per category allowed atm
     petabFiles = {'sbml_files', 'observable_files', 'measurement_files',...
@@ -53,10 +72,10 @@ if ischar(name) %yaml
     arImportPEtab(cellfun(@(x) [yamlPath, filesep, x], [inputArgs{:}], 'UniformOutput', false),doPreEq)
     % also check arReadPEtabYaml
     return
-else % no yaml file
-    sbmlmodel = dir([strrep(name{1},'.xml','') '.xml']);
 end
 
+%% Import from list of PEtab files
+sbmlmodel = dir([strrep(name{1},'.xml','') '.xml']);
 if isempty(sbmlmodel)
     error('No SBML file found!');
 else
@@ -123,23 +142,31 @@ if doPreEq
                 error('More than one pre-equiblibration condition currently not supported.')
             end
             
-            for ipreeqcond = 1:size(uniquePreEqConds,1)
-                preEqCond = arFindCondition(convertStringsToChars(uniquePreEqConds(ipreeqcond)), 'conservative');
+            for iPreEqCond = 1:size(uniquePreEqConds,1)
+                preEqCondId = convertStringsToChars(uniquePreEqConds(iPreEqCond));
+                preEqCond = arFindCondition(preEqCondId, 'conservative');
                 simConds = [];
-                for isimcond = 1:size(uniqueSimConds,1)
-                    %simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(isimcond)), 'conservative');
-                    simConds(end+1) = ...
-                        find(cellfun(@(x) ~strcmp(x, convertStringsToChars(uniquePreEqConds(ipreeqcond))), {ar.model.data.name}));
+                for iSimCond = 1:size(uniqueSimConds,1)
+                    simCondId = convertStringsToChars(uniqueSimConds(iSimCond));
+                    simCond = arFindCondition(simCondId, 'conservative');
+                    simCondDat = Tdat(Tdat.simulationConditionId==simCondId, :);
+                    if all(simCondDat.preequilibrationConditionId==preEqCondId)
+                        simConds = [simConds, simCond];
+                    end
+                    % simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(iSimCond)), 'conservative');
+                    % addSimConds = find(cellfun(@(x) ~strcmp(x, convertStringsToChars(uniquePreEqConds(iPreEqCond))), {ar.model.data.name}));
+                    % simConds = [simConds, addSimConds];
                 end
+                simConds = unique(simConds);
                 arSteadyState(imodel, preEqCond, simConds, tstart)
             end
-            for isimu = 1:length(uniqueSimConds)
-                Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(isimu),:);
-                iSimuAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(isimu)), {ar.model(m).data.name}));
+            for iSimCond = 1:length(uniqueSimConds)
+                Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(iSimCond),:);
+                iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
                 for iCol = 1:length(Tcondi.Properties.VariableNames)
                     idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
                     if ~isempty(idxState)
-                        arAddEvent(m,iSimuAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}))
+                        arAddEvent(m,iSimCondAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}))
                         % ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
                     end
                 end
@@ -156,11 +183,11 @@ end
 end
 
 function [out,numberOfEls] = extractFromStruct(struct, field)
-    if iscell(struct.(field))
-        out = struct.(field);
-        numberOfEls = numel(out);
-    else
-        out = {struct.(field)};
-        numberOfEls = 1;
-    end
+if iscell(struct.(field))
+    out = struct.(field);
+    numberOfEls = numel(out);
+else
+    out = {struct.(field)};
+    numberOfEls = 1;
+end
 end

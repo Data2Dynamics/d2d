@@ -293,7 +293,7 @@ for jm=1:length(ar.model)
     lp(fid, '\\subsection{Model description}');
     lp(fid, 'The model used in this study is based on a system of Ordinary Differential Equations (ODE). These ordinary differential equations are derived by means of the law of mass-action. ' );
     lp(fid, 'The time evolution of the biochemical compounds is computed by numerically integrating these differential equations. The model contains parameters which are estimated by calibrating the model to data using a Maximum-Likelihood estimation approach. %s', eqText );
-    lp(fid, 'All analyses were performed using the \\emph{Data 2 Dynamics} software package \\cite{raue2015data2dynamics}, which is available from \\href{http://data2dynamics.org}{\\url{http://data2dynamics.org}}. ');
+    lp(fid, 'All analyses were performed using the \\emph{Data2Dynamics} software package \\cite{raue2015data2dynamics}, which is available from \\href{https://github.com/Data2Dynamics/d2d}{\\url{https://github.com/Data2Dynamics/d2d}}. ');
     if ( length( ar.model(jm).c ) > 2 )
         lp( fid, 'The model considers multiple compartments (see Table \\ref{compartments}), which are taken into account by considering the relevant compartment volumes in the flux expressions. ' );
     else

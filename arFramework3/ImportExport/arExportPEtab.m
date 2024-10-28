@@ -1,6 +1,6 @@
 function arExportPEtab(name, export_SBML)
 % arExportPEtab(name, export_SBML)
-% Export parameter estimation problem to PEtab standard. 
+% Export parameter estimation problem to PEtab standard.
 %
 %   name          string that will be prepended to all exported files
 %   export_SBML   export model SBML file [true]
@@ -17,11 +17,11 @@ global ar
 if ~exist('export_SBML','var') || isempty(export_SBML)
     export_SBML = true;
 end
-      
+
 if ~exist('name','var') || isempty(name)
     directory = split(pwd,filesep);
     name = directory{end};
-end 
+end
 
 %% Write Export Directory
 if(~exist('./PEtab', 'dir'))
@@ -33,370 +33,347 @@ if export_SBML
     arExportSBML(name);
 end
 
-%% Export data, conditions & parameters
-threwNormWarning = 0;
-for imodel = 1:length(ar.model)
-    if length(ar.model)>1
-        currentModelName = [name '_' ar.model(imodel).name];
-    else
-        currentModelName = name;
-    end
-    %% Observables table
-    obsT = table;
-    obsT_tmp = table;
-    
-    for idata = 1:length(ar.model(imodel).data)
-        
-        % add data file name to obsId for purposes of unique mapping
-        obsId = cellfun(@(x,y) strcat(x,'_',y), ...
-            ar.model(imodel).data(idata).y', ...
-            repmat({ar.model(imodel).data(idata).name}, [size(ar.model(imodel).data(idata).y')]),...
-            'UniformOutput', false);
-        
-        obsName = ar.model(imodel).data(idata).yNames';
-        obsFormula = ar.model(imodel).data(idata).fy;
-        for ify = 1:size(obsFormula,1)
-            % replace parameter substitutions
-            obsFormula{ify} = char(arSubs(arSym(obsFormula{ify}), arSym(ar.model(imodel).data(idata).pold), ...
-                    arSym(ar.model(imodel).data(idata).fp')));
-            % replace derived quantities
-            if ~isempty(ar.model(imodel).z)
-                symFz = arSym(obsFormula{ify});
-                symFzSubs = arSubs(symFz, arSym(ar.model(imodel).z), ...
-                    arSym(ar.model(imodel).fz'));
-                obsFormula{ify} = char(symFzSubs);
-            end
-        end
-        
-        if size(obsFormula,2) > 1; obsFormula = obsFormula'; end
-
-        obsTrafo = cell(length(obsId),1);
-        obsTrafo(:) = {'lin'};
-        obsTrafo(logical(ar.model(imodel).data(idata).logfitting)) = {'log10'};
-        
-        noiseFormula = ar.model(imodel).data(idata).fystd;
-        for ify = 1:size(obsFormula,1)
-            % replace parameter substitutions
-            noiseFormula{ify} = char(arSubs(arSym(noiseFormula{ify}), arSym(ar.model(imodel).data(idata).pold), ...
-                arSym(ar.model(imodel).data(idata).fp')));
-            % replace derived quantities
-            if ~isempty(ar.model(imodel).z)
-                symFz = arSym(noiseFormula{ify});
-                symFzSubs = arSubs(symFz, arSym(ar.model(imodel).z), ...
-                    arSym(ar.model(imodel).fz'));
-                noiseFormula{ify} = char(symFzSubs);
-            end
-        end
-        noiseFormulaSubs = cell(size(noiseFormula));
-        for ifystd = 1:length(noiseFormula)
-            noiseFormulaSymSingle = arSym(noiseFormula{ifystd});
-            noiseFormulaSubs{ifystd} = char(arSubs(noiseFormulaSymSingle, arSym(obsName), arSym(obsId)));
-        end
-        noiseFormula = noiseFormulaSubs;
-        
-        if size(noiseFormula,2) > 1; noiseFormula = noiseFormula'; end
-        
-        noiseDistribution = cell(length(obsId),1);
-        noiseDistribution(:) = {'normal'}; % others not possible in d2d
-                        
-        obsT_tmp = [obsT_tmp; table(obsId, obsName, obsFormula, obsTrafo, ...
-            noiseFormula, noiseDistribution)];
-        
-        [obsT,id,id2] = unique(obsT_tmp, 'rows');
-    end
-    obsT.Properties.VariableNames = {'observableId', 'observableName',...
-    'observableFormula', 'observableTransformation', 'noiseFormula',...
-    'noiseDistribution',};
-    writetable(obsT, ['PEtab' filesep currentModelName '_observables.tsv'],...
-        'Delimiter', '\t', 'FileType', 'text')
-
-    %% Condition and Measurement Table
-    % Collect conditions
-    condPar = {}; condVal = {}; conditionID = {};
-    for idata = 1:length(ar.model(imodel).data)
-        for icond = 1:length(ar.model(imodel).data(idata).condition)
-            condPar{end+1} = ar.model(imodel).data(idata).condition(icond).parameter;
-            
-        end
-        % Check for random pars (condition specific reassignments
-        if(isfield(ar.model(imodel).data(idata), 'prand'))
-                for irands = 1:length(ar.model(imodel).data(idata).prand)
-                   prName = strcat(sprintf('%s%s', ar.model(imodel).data(idata).prand{irands}, ar.model(imodel).data(idata).fprand));
-                   randomizedPars = cellfun(@(x) ~isempty(strfind(x,prName)),ar.model(imodel).data(idata).fp);
-                   condPar = cat(2,condPar , ar.model(imodel).data(idata).pold(randomizedPars));
-                end
-        end
-        
-%         % catch d2d fix for predictors that are not time
-%         if ~(strcmp(ar.model(imodel).data(idata).t, 'time') || strcmp(ar.model(imodel).data(idata).t, 't'))
-%             for it = 1:length(ar.model(imodel).data(idata).tExp)
-%                 condPar{end+1} = [ar.model(imodel).data(idata).t...
-%                     '_' num2str(it)];
-%             end
-%         end
-    end
-    peConds = unique(condPar);
-    
-    % Write condition and measurement tables
-    measT = table;
-    
-    peCondValues = [];
-    condT = table;
-    
-    numOfConds = length(peConds);
-    conditionID = {};
-    
-    for idata = 1:length(ar.model(imodel).data)
-        % conditions
-        condPar = {}; condVal = []; condPos = []; conditionID_tmp = '';
-        
-        % Initialize row to be added to Condition Array
-        rowToAdd = zeros(1, numOfConds);
-
-        
-%         % catch d2d fix for predictors that are not time
-%         if ~(strcmp(ar.model(imodel).data(idata).t, 'time') || strcmp(ar.model(imodel).data(idata).t, 't'))
-%             for it = 1:length(ar.model(imodel).data(idata).tExp)
-%                 condPar{end+1} = [ar.model(imodel).data(idata).t...
-%                     '_' num2str(it)];
-%                 condVal = [condVal ar.model(imodel).data(idata).tExp(it)];
-%                 condPos = [condPos find(strcmp(peConds, condPar{it}))];
-%             end
-%         end
-        
-        for icond = 1:length(ar.model(imodel).data(idata).condition)
-            condPar{end+1} = ar.model(imodel).data(idata).condition(icond).parameter;
-            condVal = [condVal str2num(ar.model(imodel).data(idata).condition(icond).value)];
-            condPos = [condPos find(contains(peConds, condPar{icond}))];
- 
-            
-            %conditionID_tmp = [conditionID_tmp '_' ar.model(imodel).data(idata).condition(icond).parameter ...
-            %'_' ar.model(imodel).data(idata).condition(icond).value];
-        end      
-        
-        % Check for random pars (condition specific reassignments
-        if(isfield(ar.model(imodel).data(idata), 'prand'))
-            for irands = 1:length(ar.model(imodel).data(idata).prand)
-                prName = strcat(sprintf('%s%s', ar.model(imodel).data(idata).prand{irands}, ar.model(imodel).data(idata).fprand));
-                randParsPos = cellfun(@(x) contains(x,prName),ar.model(imodel).data(idata).fp);
-                randPars = ar.model(imodel).data(idata).pold(randParsPos);
-                condPar = cat(2,condPar , randPars);
-                randParsIndivid = ar.model(imodel).data(idata).fp(randParsPos);
-                for irandPar = 1:length(randPars)
-                    condVal = [condVal randParsIndivid(irandPar)];
-                    condPos = [condPos find(contains(peConds, randPars{irandPar}))];
-                end
-            end
-        end
-        
-        % Alter row to insert condition values
-%         rowToAdd(condPos) = condVal;
-%         % Add ro to condition array
-%         peCondValues(end+1,:) = rowToAdd;
-        rowToAdd = table;
-        for irow = 1:length(condPos)    
-            if isnumeric(condVal(condPos == irow))
-               tb = table(condVal(condPos == irow));
-            else
-               tb = table(condVal(condPos == irow));
-            end
-            tb.Properties.VariableNames = condPar(condPos == irow);
-            rowToAdd = [rowToAdd tb];
-        end
-        condT = [condT; rowToAdd];
-        
-        %conditionID{end+1} = conditionID_tmp;
-        simuConditionID = ['model' num2str(imodel) '_data' num2str(idata)];
-        conditionID{end+1} = simuConditionID;
-                
-        % measurements
-        for iy = 1:length(ar.model(imodel).data(idata).y)
-            observableId = repmat(strcat(ar.model(imodel).data(idata).y(iy), '_', ar.model(imodel).data(idata).name), ...
-                [length(ar.model(imodel).data(idata).yExp(:,iy)) 1]);
- 
-            rowsToAdd = [table(observableId)];
-            if ar.model(imodel).data(idata).logfitting(iy)
-                measurement = 10.^(ar.model(imodel).data(idata).yExp(:, iy));
-            else
-                measurement = ar.model(imodel).data(idata).yExp(:, iy);
-            end
-            if ar.model(imodel).data(idata).normalize(iy) == 1
-                if ~threwNormWarning
-                warning('Normalization of experimental measurements is not supported in PEtab. Measurement values in ar.model(:).data(:).yExpRaw will be normalized before export.')
-                threwNormWarning = 1;
-                end
-                measurement = measurement/max(measurement);
-            end
-            
-            time = ar.model(imodel).data(idata).tExp;
-            
-            % skip if measurement contains only NaN
-            if sum(isnan(measurement)) == numel(measurement)
-                continue
-            end
-
-            % pre-equiblibration
-            if isfield(ar, 'ss_conditions')
-                for iss=1:length(ar.model(imodel).ss_conditions)
-                    preEquilibrationId = cell(length(time),1);
-                    preEquilibrationId(:) = ...
-                        {['model' num2str(imodel) '_data' ...
-                        num2str(ar.model(imodel).condition(ar.model(imodel).ss_condition(iss).src).dLink)]};
-                    rowsToAdd = [rowsToAdd, table(preEquilibrationId)];
-                end
-            end
-            
-            simulationConditionId = repmat({simuConditionID}, [length(time) 1]);
-            rowsToAdd = [rowsToAdd, table(simulationConditionId)];
-
-            rowsToAdd = [rowsToAdd, table(measurement)];
-            rowsToAdd = [rowsToAdd, table(time)];
-            
-            % observable parameters
-            % deprecated since obs formula was moved to obs tsv file &
-            % placeholder parameter replacements do not exist in current 
-            % implementation (every data file has its own observables)
-            %obsPars_tmp = strsplit(ar.model(imodel).data(idata).fy{iy}, {'+','-','*','/','(',')','^',' '});
-            %obsPars_tmp = intersect(obsPars_tmp, ar.pLabel);
-            %obsPars_tmp = strcat(obsPars_tmp, ';');
-            %observableParameters = repmat({[obsPars_tmp{:}]}, [length(time) 1]);
-            observableParameters = cell([length(time) 1]);
-            rowsToAdd = [rowsToAdd, table(observableParameters)];
-            
-            % noise parameters
-            expErrors = ar.model(imodel).data(idata).yExpStd(:,iy);
-            if ar.config.fiterrors == -1
-                if sum(isnan(expErrors(~isnan(measurement)))) > 0
-                    error('arExportPEtab: Cannot use ar.config.fiterrors == -1 with NaN in exp errors')
-                end
-                noiseParameters = expErrors;
-            else
-                if ar.config.fiterrors == 0 && sum(isnan(expErrors)) ~= length(expErrors)
-                    noiseParameters = expErrors;
-                else
-                    
-                    % deprecated / moved to observables tsv file. Only
-                    % print in measurement file when numeric values
-                    %noisePars_tmp = strsplit(ar.model(imodel).data(idata).fystd{iy}, {'+','-','*','/','(',')','^',' '});
-                    %noisePars_tmp = intersect(noisePars_tmp, ar.pLabel);
-                    %noisePars_tmp = strcat(noisePars_tmp, repmat(';', [length(noisePars_tmp)-1 1]));
-                    %noiseParameters = repmat({[noisePars_tmp{:}]}, [length(time) 1]);
-                    noiseParameters = cell([length(time) 1]);
-
-                end
-            end
-            block = table(num2cell(noiseParameters));
-            block.Properties.VariableNames = {'noiseParameters'};
-            rowsToAdd = [rowsToAdd, block];
-            
-            % observable trafos
-            % deprecated, moved to obs file
-            %observableTransformation = cell(length(time),1);
-            %observableTransformation(:) = {'log10'};
-            %if ~ar.model(imodel).data(idata).logfitting(iy)
-            %    observableTransformation(:) = {'lin'};
-            %end
-            %rowsToAdd = [rowsToAdd, table(observableTransformation)];
-
-            % noise dists
-            noiseDistribution = cell(length(time),1);
-            noiseDistribution(:) = {'normal'}; % others not possible in d2d
-            rowsToAdd = [rowsToAdd, table(noiseDistribution)];
-            
-            % lin or log scale?
-%             observableTransformation = cell(length(time),1);
-% %             if ar.model(imodel).data(idata).logfitting(iy) == 0
-%                 observableTransformation(:) = {'lin'}; % others not possible in d2d
-% %             elseif ar.model(imodel).data(idata).logfitting(iy) == 1
-% %                 observableTransformation(:) = {'log10'}; % others not possible in d2d
-% %             end
-%             rowsToAdd = [rowsToAdd, table(observableTransformation)];
-            
-%             % experiment id
-%             experimentId = cell(length(time),1);
-%             experimentId(:) = {ar.model(imodel).data(idata).name};
-%             rowsToAdd = [rowsToAdd, table(experimentId)];
-% 
-%             % idenpendent variable id
-%             indVariableId = cell(length(time),1);
-%             indVariableId(:) = {'time'};
-%             rowsToAdd = [rowsToAdd, table(indVariableId)];
-%             
-%             % for dose response measurements:
-%             if isfield(ar.model(imodel).data(idata), 'response_parameter') && ...
-%                     ~isempty(ar.model(imodel).data(idata).response_parameter)
-%                 indVariableId(:) = {ar.model(imodel).data(idata).response_parameter};
-%             end
-            measT = [measT; rowsToAdd];
-        end
-    end
-    
-%     condT = array2table(peCondValues);
-%     condT.Properties.VariableNames = peConds;
-    
-    condT = [table(conditionID'), condT];
-    condT.Properties.VariableNames{1} = 'conditionId';
-        
-    writetable(condT, ['PEtab' filesep currentModelName  '_conditions.tsv'],...
-        'Delimiter', '\t', 'FileType', 'text')
-    writetable(measT, ['PEtab' filesep  currentModelName  '_measurements.tsv'],...
-        'Delimiter', '\t', 'FileType', 'text')
+%% Models naming convention
+IDs = struct();
+IDs.name = name;
+if length(ar.model) > 1
+    IDs.model = cellfun(@(x) [name '_' x], {ar.model.name}, 'UniformOutput', false);
+else
+    IDs.model = {name};
 end
+
+%% Export observables, conditions, measurements
+for m = 1:length(ar.model)
+    IDs = writeConditionsTable(m, IDs);
+    IDs = writeObservablesTable(m, IDs);
+    IDs = writeMeasurementsTable(m, IDs);
+end
+
 %% Parameter Table
-parameterScale_tmp = cell(1, length(ar.qLog10));
-parameterScale_tmp(:) = {'lin'};
-parameterScale_tmp(ar.qLog10 == 1) = {'log10'};
+writeParameterTable(IDs);
 
-clear nominalValue_tmp
-nominalValue_tmp = ar.p;
-nominalValue_tmp = (1-ar.qLog10).*nominalValue_tmp + ar.qLog10.*10.^nominalValue_tmp;
+%% Write YAML file
+writeYAMLfile(IDs);
 
-lowerBound_tmp = ar.lb;
-lowerBound_tmp = (1-ar.qLog10).*lowerBound_tmp + ar.qLog10.*10.^lowerBound_tmp;
+end
 
-upperBound_tmp = ar.ub;
-upperBound_tmp = (1-ar.qLog10).*upperBound_tmp + ar.qLog10.*10.^upperBound_tmp;
 
-estimate_tmp = ar.qFit;
-estimate_tmp(ar.qFit == 2) = 0;
+function IDs = writeConditionsTable(m, IDs)
 
-parameterId = ar.pLabel;
-parameterName = ar.pLabel;
-parameterScale = parameterScale_tmp;
-lowerBound = lowerBound_tmp;
-upperBound = upperBound_tmp;
-nominalValue = nominalValue_tmp;
-estimate = estimate_tmp;
+    global ar
+    
+    % generate condition IDs:
+    % combine datafile name and condition number (needed for unique mapping)
+    IDs.condition = arrayfun(@(d) sprintf('%s_D%d', ar.model.data(d).name, d), 1:length(ar.model(m).data), "UniformOutput", false);
+    
+    % collect all data-condition-specific parameter replacements
+    condT = table(ar.model(m).p, ar.model(m).fp', 'VariableNames', {'modelP', 'modelFP'});
+    for d = 1:length(ar.model(m).data)
+        is_modelP = ismember(ar.model(m).data(d).pold, ar.model(m).p);
+        condT_tmp = cell2table([ar.model(m).data(d).pold(is_modelP)', ar.model(m).data(d).fp(is_modelP)]);
+        condT_tmp.Properties.VariableNames = {'modelP', IDs.condition{d}};
+        condT = outerjoin(condT, condT_tmp, "MergeKeys", true);
+    end
+    
+    % replace init parameters with the corresponding stateID
+    for jp = 1:size(condT, 1)
+        findInit = strcmp(condT.modelP(jp), ar.model(m).px0);
+        if any(findInit)
+            condT.modelP(jp) = ar.model(m).x(findInit);
+        end
+    end
+    
+    % remove lines where all replacements are identical to the global replacement
+    qRemove = arrayfun(@(jp) all(strcmp(condT.modelFP(jp), condT{jp, 3:end})), 1:size(condT, 1));
+    condT = condT(~qRemove, :);
+    
+    % evaluate expressions (sometimes expressions reduce) and try to remove again
+    condT = array2table(arrayfun(@(x) string(arSym(x)), condT{:,:}), "VariableNames", condT.Properties.VariableNames);
+    qRemove = arrayfun(@(jp) all(strcmp(condT.modelFP(jp), condT{jp, 3:end})), 1:size(condT, 1));
+    condT = condT(~qRemove, :);
+    
+    % reformat to match PEtab requirements
+    finalCondTab = array2table(transpose(condT{:,:}));
+    finalCondTab = [condT.Properties.VariableNames', finalCondTab];
+    if all(qRemove)
+        finalCondTab.Properties.VariableNames = {'conditionID'};
+    else    
+        finalCondTab.Properties.VariableNames = ['conditionID' finalCondTab{1,2:end}];
+    end
+    finalCondTab = finalCondTab(3:end, :);
+    
+    % export conditions table
+    writetable(finalCondTab, ['PEtab' filesep  IDs.model{m}  '_conditions.tsv'], ...
+        'Delimiter', '\t', 'FileType', 'text')
+    
+    end
 
-parT = table(parameterId(:), parameterName(:), parameterScale(:), ...
-    lowerBound(:), upperBound(:), nominalValue(:), estimate(:));
 
-parT.Properties.VariableNames = {'parameterId', 'parameterName', ...
-    'parameterScale', 'lowerBound', 'upperBound', 'nominalValue', 'estimate',};
+function IDs = writeObservablesTable(m, IDs)
 
-writetable(parT, ['PEtab' filesep currentModelName '_parameters.tsv'],...
+global ar
+
+IDs.obs = {};
+
+obsT_tmp = table;
+
+for d = 1:length(ar.model(m).data)
+    % generate observable IDs:
+    % add data file name for purposes of unique mapping
+    obsId = cellfun(@(x,y) strcat(x,'_',y), ...
+        ar.model(m).data(d).yNames', ...
+        repmat({IDs.condition{d}}, [size(ar.model(m).data(d).y')]),...
+        'UniformOutput', false);
+    IDs.obs{d} = obsId;  % collect all observable IDs for later use
+    obsName = ar.model(m).data(d).yNames';
+    
+    obsFormula = ar.model(m).data(d).fy;
+    for ify = 1:size(obsFormula,1)
+        % replace parameter substitutions
+        obsFormula{ify} = char(arSubs(arSym(obsFormula{ify}), ...
+            arSym(ar.model(m).data(d).pold), ...
+            arSym(ar.model(m).data(d).fp')));
+        % replace derived quantities
+        if ~isempty(ar.model(m).z)
+            symFz = arSym(obsFormula{ify});
+            symFzSubs = arSubs(symFz, arSym(ar.model(m).z), arSym(ar.model(m).fz'));
+            obsFormula{ify} = char(symFzSubs);
+        end
+    end
+    if size(obsFormula,2) > 1; obsFormula = obsFormula'; end
+    
+    obsTrafo = cell(length(obsId),1);
+    obsTrafo(:) = {'lin'};
+    obsTrafo(logical(ar.model(m).data(d).logfitting)) = {'log10'};
+    
+    noiseFormula = ar.model(m).data(d).fystd;
+    for ify = 1:size(obsFormula,1)
+        % replace parameter substitutions
+        noiseFormula{ify} = char(arSubs(arSym(noiseFormula{ify}), ...
+            arSym(ar.model(m).data(d).pold), ...
+            arSym(ar.model(m).data(d).fp')));
+        % replace derived quantities
+        if ~isempty(ar.model(m).z)
+            symFz = arSym(noiseFormula{ify});
+            symFzSubs = arSubs(symFz, arSym(ar.model(m).z), arSym(ar.model(m).fz'));
+            noiseFormula{ify} = char(symFzSubs);
+        end
+    end
+    noiseFormulaSubs = cell(size(noiseFormula));
+    for ifystd = 1:length(noiseFormula)
+        noiseFormulaSymSingle = arSym(noiseFormula{ifystd});
+        noiseFormulaSubs{ifystd} = char(arSubs(noiseFormulaSymSingle, arSym(obsName), arSym(obsId)));
+    end
+    noiseFormula = noiseFormulaSubs;
+    if size(noiseFormula,2) > 1; noiseFormula = noiseFormula'; end
+    
+    noiseDistribution = cell(length(obsId),1);
+    noiseDistribution(:) = {'normal'}; % others not possible in d2d
+    
+    obsT_tmp = [obsT_tmp; ...
+        table(obsId, obsName, obsFormula, obsTrafo, ...
+        noiseFormula, noiseDistribution)];
+end
+
+[obsT, ~, ~] = unique(obsT_tmp, 'rows');
+obsT.Properties.VariableNames = { ...
+    'observableId', 'observableName', ...
+    'observableFormula', 'observableTransformation', ...
+    'noiseFormula', 'noiseDistribution'};
+writetable(obsT, ['PEtab' filesep IDs.model{m} '_observables.tsv'], ...
     'Delimiter', '\t', 'FileType', 'text')
 
-%% Visualization Table
-% for imodel = 1:length(ar.model)
-%     for iplot = 1:length(ar.model(imodel).plot)
-%         for idata = 1:length(ar.model(imodel).plot(iplot).dLink)
-%             for iy = 1:length(ar.model(imodel).data(idata).y)
-%                 plotID(end+1) =
-%                 plotName(end+1) = [ar.model(imodel).data(idata).yNames{iy}, ...
-%                     '_' ar.model(imodel).plot(iplot).condition{}];
-%                 plotTypeSimulation(end+1) =
-%                 plotTypeData(end+1) =
-%                 datasetId(end+1) =
-%                 independentVariable(end+1) =
-%                 [independentVariableOffset] =
-%                 [independentVariableName] =
-%                 [legendEntry] = ar.model(imodel).plot(iplot).condition{};
-%             end
-%         end
+end
+
+
+function IDs = writeMeasurementsTable(m, IDs)
+
+global ar
+
+persistent threwNormWarning
+if isempty(threwNormWarning)
+    threwNormWarning = 0;
+end
+
+%% Measurement Table
+measT = table;
+
+for d = 1:length(ar.model(m).data)
+    for iy = 1:length(ar.model(m).data(d).y)
+        
+        % observable ID
+        time = ar.model(m).data(d).tExp;
+        rowsToAdd = [table(repmat(IDs.obs{d}(iy), [length(time),1]), 'VariableNames', {'observableId'})];
+        
+        % convert measurements if necessary (log10, normalize)
+        if ar.model(m).data(d).logplotting(iy)
+            measurement = 10.^(ar.model(m).data(d).yExp(:, iy));
+        else
+            measurement = ar.model(m).data(d).yExp(:, iy);
+        end
+        % ar.model.yExp is already normalized, if normalization is active. Doing it again causes problems.
+        % if ar.model(m).data(d).normalize(iy) == 1
+        %     if ~threwNormWarning
+        %         warning('Normalization of experimental measurements is not supported in PEtab. Measurement values in ar.model(:).data(:).yExpRaw will be normalized before export.')
+        %         threwNormWarning = 1;
+        %     end
+        %     measurement = measurement/max(measurement);
+        % end
+        
+        % skip if measurement contains only NaN
+        if sum(isnan(measurement)) == numel(measurement)
+            continue
+        end
+        
+        % pre-equiblibration
+        if isfield(ar, 'ss_conditions') && ar.ss_conditions
+            for iss=1:length(ar.model(m).ss_condition)
+                ss_d = ar.model(m).condition(ar.model(m).ss_condition(iss).src).dLink;
+                preequilibrationConditionId = repmat(IDs.condition(ss_d), [length(time) 1]);
+                rowsToAdd = [rowsToAdd, table(preequilibrationConditionId)];
+            end
+        end
+        
+        simulationConditionId = repmat(IDs.condition(d), [length(time) 1]);
+        rowsToAdd = [rowsToAdd, table(simulationConditionId)];
+        rowsToAdd = [rowsToAdd, table(measurement)];
+        rowsToAdd = [rowsToAdd, table(time)];
+        
+        % observable parameters
+        observableParameters = cell([length(time) 1]);
+        rowsToAdd = [rowsToAdd, table(observableParameters)];
+        
+        % noise parameters
+        expErrors = ar.model(m).data(d).yExpStd(:,iy);
+        if ar.config.fiterrors == -1
+            if sum(isnan(expErrors(~isnan(measurement)))) > 0
+                error('arExportPEtab: Cannot use ar.config.fiterrors == -1 with NaN in exp errors')
+            end
+            noiseParameters = expErrors;
+        else
+            if ar.config.fiterrors == 0 && sum(isnan(expErrors)) ~= length(expErrors)
+                noiseParameters = expErrors;
+            else
+                noiseParameters = cell([length(time) 1]);
+            end
+        end
+        block = table(num2cell(noiseParameters));
+        block.Properties.VariableNames = {'noiseParameters'};
+        rowsToAdd = [rowsToAdd, block];
+        
+        % noise distributions
+        noiseDistribution = cell(length(time),1);
+        noiseDistribution(:) = {'normal'}; % others not possible in d2d
+        rowsToAdd = [rowsToAdd, table(noiseDistribution)];
+        
+        % add to measurement table
+        measT = [measT; rowsToAdd];
+        
+    end
+end
+
+writetable(measT, ['PEtab' filesep  IDs.model{m}  '_measurements.tsv'],...
+    'Delimiter', '\t', 'FileType', 'text')
+
+end
+
+
+function writeParameterTable(IDs)
+%% Parameter Table (one for the whole project, i.e. for all models jointly)
+
+global ar
+
+% paramter ID and name
+parameterId = ar.pLabel;
+parameterName = ar.pLabel;
+
+% parameter flag for log10 trafo
+parameterScale = cell(1, length(ar.p));
+parameterScale(:) = {'lin'};
+parameterScale(ar.qLog10 == 1) = {'log10'};
+
+% parameter flag for fitting
+estimate = ar.qFit;
+estimate(ar.qFit == 2) = 0;
+
+% value, lower and upper bounds are on linear scale
+nominalValue = ar.p;
+lowerBound = ar.lb;
+upperBound = ar.ub;
+nominalValue(ar.qLog10 == 1) = 10.^ar.p(ar.qLog10 == 1);
+lowerBound(ar.qLog10 == 1) = 10.^ar.lb(ar.qLog10 == 1);
+upperBound(ar.qLog10 == 1) = 10.^ar.ub(ar.qLog10 == 1);
+
+% build table and write to disk
+variableNames = {'parameterId', 'parameterName', 'parameterScale', ...
+    'lowerBound', 'upperBound', 'nominalValue', 'estimate',};
+parT = table(parameterId(:), parameterName(:), parameterScale(:), ...
+    lowerBound(:), upperBound(:), nominalValue(:), estimate(:), ...
+    'VariableNames', variableNames);
+writetable(parT, ['PEtab' filesep IDs.name '_parameters.tsv'],...
+    'Delimiter', '\t', 'FileType', 'text')
+
+end
+
+% function writeVisualisationTable(m, IDs)
+% %% Visualisation Table
+% % this is a very simple implementation, only covers the basic features like:
+% % - combining datasets
+% % - lin/log10 trafo
+% % - time-course / dose-response
+
+% % plotId, plotName, datasetId, xValues, xLabel, xScale, yValues, yLabel, yScale
+
+% global ar
+
+% for jp = 1:length(ar.model(m).plot)
+%     plotId = sprintf('M%i_Plot%i', m, jp);
+%     plotName = ar.model(m).plot(jp).name;
+
+%     dLink = ar.model(m).plot(jp).dLink;
+%     for jd = 1:length(dLink)
+%         d = dLink(jd);
+%         s
 %     end
+    
+
 % end
-%
-%writetable(visT, 'peTAB_visualization.tsv', 'Delimiter', '\t', 'FileType', 'text')
+
+
+
+% end
+
+
+function writeYAMLfile(IDs)
+%% YAML File
+% one parameter table in total
+% each "ar.model" is equivalent to one PEtab "problem"
+% one SBML file for each PEtab problem
+% one obs table for each PEtab problem
+% one cond table (each condition coresp. ar.model.data) for each PEtab problem
+% one meas table for each PEtab problem
+
+global ar
+
+% content of yaml file (line by line)
+yamlLines = {};
+yamlLines{end+1} = ['format_version: 1'];
+yamlLines{end+1} = ['parameter_file: ' IDs.name '_parameters.tsv'];
+yamlLines{end+1} = ['problems:'];
+for m = 1:length(ar.model)
+    yamlLines{end+1} = ['  - sbml_files:'];
+    yamlLines{end+1} = ['    - model_' IDs.model{m} '.xml'];
+    yamlLines{end+1} = ['    observable_files:'];
+    yamlLines{end+1} = ['    - ' IDs.model{m} '_observables.tsv'];
+    yamlLines{end+1} = ['    condition_files:'];
+    yamlLines{end+1} = ['    - ' IDs.model{m} '_conditions.tsv'];
+    yamlLines{end+1} = ['    measurement_files:'];
+    yamlLines{end+1} = ['    - ' IDs.model{m} '_measurements.tsv'];
+end
+
+% write yaml file to disk
+fid = fopen(['PEtab' filesep IDs.name '.yaml'], 'w');
+fprintf(fid, strjoin(yamlLines, '\n'));
+fclose(fid);
 
 end

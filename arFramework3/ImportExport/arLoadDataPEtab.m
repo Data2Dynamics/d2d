@@ -74,8 +74,8 @@ for k = 1:numel(ar.model.xNames)
     if length(ar.model.xNames{k}) == 1
         for i = 1:length(fn_rep)
             for j = 1:size(Tobs.(fn_rep{i}),1)
-                Tobs.(fn_rep{i})(j) = arSubs(str2sym(string(Tobs.(fn_rep{i})(j))), ...
-                    arSym(ar.model.xNames{k}), arSym(ar.model.x{k}));
+                Tobs.(fn_rep{i})(j) = string(arSubs(str2sym(string(Tobs.(fn_rep{i})(j))), ...
+                    arSym(ar.model.xNames{k}), arSym(ar.model.x{k})));
             end
         end
     end
@@ -181,6 +181,10 @@ for iCond = 1:length(uniCond)
         
         if ismember('noiseParameters', Tsub.Properties.VariableNames)
             if isnumeric(Tsub(1,:).noiseParameters)
+                % this is not correct!
+                % If noise parameters are numeric, they correwspond to measurement errors
+                % and havbe to be written to ar.model.data.yExpStd
+                % this has to be implemented below
                 continue
             elseif ~isempty(char(Tsub(1,:).noiseParameters))
                 poldNoise = sort(regexp(Sd2d.fystd{iObs},['noiseParameter\d*_' Sd2d.y{iObs}],'match'));

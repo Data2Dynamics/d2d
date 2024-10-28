@@ -649,6 +649,27 @@ if ( isfield( ar, 'conditionconstraints' ) )
 end
 
 % populate threads
+% if ~isfield(ar.config, 'nThreads') || isempty(ar.config.nThreads)
+%     ar.config.nThreads = 1;
+% end
+% if ~isfield(ar.config, 'nTasks') || isempty(ar.config.nTasks)
+%     ar.config.nTasks = 1;
+% end
+
+% if ar.config.useParallel
+%     if isfield(ar.config, 'nThreads');
+%         if ar.config.nThreads > 1
+%             % keep number of threads
+%             arSetParallelThreads(ar.config.nThreads, true);
+%         else
+%             % set threads automatically
+%             arSetParallelThreads([], true);
+%         end
+%     end
+% else
+%     % set number of threads to 1
+%     arSetParallelThreads(1, true);
+% end
 populate_threads( 'threads', 'condition', 'nTasks');
 populate_threads( 'ss_threads', 'ss_condition', 'nssTasks');
 ar.config.nThreads = length(ar.config.threads);
@@ -746,7 +767,7 @@ for m = 1:length(ar.model)
             ar.config.(thread_fieldname)(ithread).ms(end+1) = int32(m-1);
             ar.config.(thread_fieldname)(ithread).cs(end+1) = int32(c-1);
             ithread = ithread + 1;
-            if(ithread>ar.config.nParallel)
+            if(ithread>ar.config.nParallel) || (ithread>ar.config.nMaxThreads)
                 ithread = 1;
             end
         end

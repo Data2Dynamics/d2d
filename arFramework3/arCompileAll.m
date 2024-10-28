@@ -120,7 +120,11 @@ if(~exist([source_dir '/Compiled/arClusterCompiledHook.m'],'file'))
 end
 
 % enable timedebug mode, use with debug_mode = true!
-timedebug = false;
+if debug_mode
+    timedebug = true;
+else
+    timedebug = false;
+end
 
 usePool = exist('gcp','file')>0 && ~isempty(gcp('nocreate'));
 
@@ -580,6 +584,15 @@ ar.fkt = ['arSimuCalcFun_' ar.checkstr];
 % write arSimuCalcFunctions
 writeSimuCalcFunctions(debug_mode);
 
+% set the number of threads correctly
+arLink();
+if ar.config.useParallel
+    % automatically set the number of threads
+    arSetParallelThreads();
+else
+    arSetParallelThreads(1);
+end
+
 % compile
 if ~forcedCompile && exist([pwd,filesep,ar.fkt,'.',mexext],'file')
     % do nothing
@@ -633,7 +646,6 @@ end
 %         end
 %     end
 % end
-
 
 % link
 arLink;

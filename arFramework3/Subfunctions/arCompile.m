@@ -541,8 +541,8 @@ if(isfield(ar.model, 'data'))
     end
 end
 
-includesstr=strrep(includesstr,'"', '');
-objectsstr = unique( objectsstr, 'stable' );
+includesstr = strrep(includesstr, '"', '');
+objectsstr = unique(objectsstr, 'stable');
 
 %% compile and link main mex file
 if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
@@ -599,10 +599,10 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
             libNames = cell(1, chunks);
 
             for a = 1 : chunks
-               fprintf( 'Assembling chunk %d/%d into library\n', a, chunks );
-               libNames{a} = fullfile('Compiled', c_version_code, [ 'lib' num2str(a) '_' ar.fkt(end-31:end) '.lib' ] );
-               curChunk = cellfun(@(st)[st, ' '], objectsstr( (a-1)*chunkSize+1 : min(a*chunkSize, numel(objectsstr)) ), 'UniformOutput', false);               
-               system(['vcvars32 & lib /out:' libNames{a} ' ' [ curChunk{:} ] ] );
+                fprintf( 'Assembling chunk %d/%d into library\n', a, chunks );
+                libNames{a} = fullfile('Compiled', c_version_code, [ 'lib' num2str(a) '_' ar.fkt(end-31:end) '.lib' ] );
+                curChunk = cellfun(@(st)[st, ' '], objectsstr( (a-1)*chunkSize+1 : min(a*chunkSize, numel(objectsstr)) ), 'UniformOutput', false);              
+                system(['vcvars32 & lib /out:' libNames{a} ' ' [ curChunk{:} ] ] );
             end
             fprintf( 'Linking chunks\n' );
             mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...

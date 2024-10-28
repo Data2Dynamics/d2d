@@ -1,6 +1,6 @@
 # Data2Dynamics Software
 
-**Contact:** Andreas Raue - <andreas.raue@fdm.uni-freiburg.de>
+**Contact:** Andreas Raue - <andreas.raue@uni-a.de>
 (for support issues, please use the issues and forum, thanks!)
 
 **Cite:** 
@@ -41,7 +41,7 @@ A more comprehensive description of features is available [features page](https:
 
 ## Awards
 
-The software was awarded twice as **best performer** in the *Dialogue for Reverse Engineering Assessments and Methods* ([DREAM](http://www.the-dream-project.org/)). 2011 in the *Estimation of Model Parameters Challenge* ([DREAM6](http://www.the-dream-project.org/challenges/dream6-estimation-model-parameters-challenge)) and 2012 in the *Network Topology and Parameter Inference Challenge* ([DREAM7](http://www.the-dream-project.org/challenges/network-topology-and-parameter-inference-challenge)). Read more about this in: Steiert B., et al. [Experimental Design for Parameter Estimation of Gene Regulatory Networks](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0040052). PLoS ONE 7(7), e40052, 2012
+The software was awarded twice as **best performer** in the *Dialogue for Reverse Engineering Assessments and Methods* ([DREAM](https://dreamchallenges.org/)). 2011 in the *Estimation of Model Parameters Challenge* ([DREAM6](https://dreamchallenges.org/dream-6-estimation-of-model-parameters-challenge/)) and 2012 in the *Network Topology and Parameter Inference Challenge* ([DREAM7](https://dreamchallenges.org/dream-7-network-topology-and-parameter-inference-challenge/)). Read more about this in: Steiert B., et al. [Experimental Design for Parameter Estimation of Gene Regulatory Networks](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0040052). PLoS ONE 7(7), e40052, 2012
 
 ## Further topics
 
