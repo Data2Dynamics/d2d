@@ -1,0 +1,46 @@
+DESCRIPTION
+"model .def file for dose-dependend RTF using only the sustained part with incoorporation of condition dependency"
+
+PREDICTOR
+t	T	h	"time"	0	10
+
+COMPARTMENTS
+
+STATES
+
+
+INPUTS
+
+
+REACTIONS
+
+DERIVED
+        
+OBSERVABLES
+Response      C 	au     conc   0    0   "A*(1-exp(-alpha*(log10(10^(t*timeUnitFactor/maxt)+10^(tau))-log10(1+10^(tau))))) + b" // only sustained part used
+       
+		
+ERRORS
+Response           "sd"
+
+SUBSTITUTIONS
+// Including condition dependency:
+M_A "(1-isKO)*M_A1 + isKO*f_M_A*M_A1" 
+K_A "(1-isKO)*K_A1 + isKO*f_K_A*K_A1"
+h_A "(1-isKO)*h_A1 + isKO*f_h_A*h_A1"
+M_alpha "(1-isKO)*M_alpha1 + isKO*f_M_alpha*M_alpha1"
+K_alpha "(1-isKO)*K_alpha1 + isKO*f_K_alpha*K_alpha1"
+h_alpha "(1-isKO)*h_alpha1 + isKO*f_h_alpha*h_alpha1"
+M_tau "(1-isKO)*M_tau1 + isKO*f_M_tau*M_tau1"
+K_tau "(1-isKO)*K_tau1 + isKO*f_K_tau*K_tau1"
+h_tau "(1-isKO)*h_tau1 + isKO*f_h_tau*h_tau1"
+timeUnitFactor_value "10"
+T   "6"
+
+CONDITIONS
+maxt "T"
+timeUnitFactor "timeUnitFactor_value"
+// Including dose dependency:
+A	"M_A*dose^h_A/(K_A^h_A+dose^h_A)"
+alpha "(M_alpha*dose^h_alpha/(K_alpha^h_alpha+dose^h_alpha))/(timeUnitFactor_value/T)"
+tau "(M_tau*(1-dose^h_tau/(K_tau^h_tau+dose^h_tau)))/(timeUnitFactor_value/T)"

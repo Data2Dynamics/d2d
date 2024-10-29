@@ -1,0 +1,35 @@
+DESCRIPTION
+"model .def file for single dose RTF using only the sustained part"
+
+
+PREDICTOR
+t	T	"min"	"time"	0	6
+
+
+COMPARTMENTS
+
+
+STATES
+
+
+INPUTS
+
+
+REACTIONS
+
+
+DERIVED
+
+
+OBSERVABLES
+Response1      C 	au     conc   0    0   "A1*(1-exp(-alpha1*(log10(10^(10*t/T)+10^(tau1))-log10(1+10^(tau1))))) + b" 
+//Response2      C 	au     conc   0    0   "A2*(1-exp(-alpha2*(log10(10^(10*t/T)+10^(tau2))-log10(1+10^(tau2))))) + b" //to include second condition
+
+  
+ERRORS
+Response1           "sd1"
+//Response2           "sd2" //to include second condition
+
+
+CONDITIONS
+T   "6"
