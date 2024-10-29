@@ -11,9 +11,8 @@ This folde contains files that exemplify the usage of the dose-dependent RTF app
 * **TimeDependent:** Script uses a single-dose RTF to model each dose separately. Only wild-type data is used.
 * **DoseDependent:** Script uses the dose-dependent RTF to model all doses together. Only wild-type data is used.
 * **ConditionDependent:** Script uses the dose-dependent RTF with condition-dependent expansion to model all doses together across wild-type and knockout data.
-* **Functions:** Additional utility functions for the model.
-
+* **Functions:** Additional functions for the model.
 
 **Cite:**
 * [A New Approximation Approach for Transient Differential Equation Models](https://www.frontiersin.org/journals/physics/articles/10.3389/fphy.2020.00070) - Kreutz C. *Front. Phys.*, 8, 70, 2020.
-* [Dynamic Modeling of Signaling Pathways When ODEs Are Not Feasible](https://) - Rachel T., et al. *Bioinformatics*.
+* [Dynamic Modeling of Signaling Pathways When ODEs Are Not Feasible](https://www.biorxiv.org/content/10.1101/2024.04.18.590024) - Rachel T., et al. submitted to *Bioinformatics*, available at biorxiv.

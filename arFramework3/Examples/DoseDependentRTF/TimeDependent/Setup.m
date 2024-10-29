@@ -8,7 +8,7 @@ model = 'RTF_TimeDependent';
 T = arSetTRange(model, datafile, 'T', 0, 'data'); % Find range of the measurement times T and write it into model def file
 
 %% Get some information about the doses from the data file
-[d,s] = xlsread(['Data/',file,'.xlsx']);
+[d,s] = xlsread(['Data/',datafile,'.xlsx']);
 s = s(1,:);
 index_dose = find(contains(s,'dose'));
 doses_len = length(unique(d(:,index_dose)));
@@ -17,7 +17,7 @@ doses_str = num2str(doses_num);
 filesDoses = {};
 for i = 1:doses_len;
     i_str = strtrim(doses_str(i,:));
-    filesDoses{i} = ['Doses/',datafile,'-Doses/',file,'-Dosis-', i_str];
+    filesDoses{i} = ['Doses/',datafile,'-Doses/',datafile,'-Dosis-', i_str];
 end
 
 %% Beginn d2d modelling
@@ -112,11 +112,11 @@ for k=1:doses_len
     arFit % fit model to data
     arPlot % plot model and data
     arPrint % print estimated parameters  
-    arSave([file,'_dose_',num2str(k)],0,0) % save the results
+    arSave([datafile,'_dose_',num2str(k)],0,0) % save the results
 
     %% Profile Likelihood Estimation (PLE)
     arPLEInit % initialize ple
     ple % perform ple
     pleSmooth % smooth likelihood profiles
-    arSave([file,'_dose_',num2str(k)],0,0) % save the results
+    arSave([datafile,'_dose_',num2str(k)],0,0) % save the results
 end
