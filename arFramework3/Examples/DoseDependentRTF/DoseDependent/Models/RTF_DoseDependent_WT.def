@@ -1,0 +1,29 @@
+DESCRIPTION
+"model .def file for dose-dependend RTF using only the sustained part"
+
+PREDICTOR
+t	T	"min"	"time"	0	6
+
+COMPARTMENTS
+
+STATES
+
+
+INPUTS
+
+
+REACTIONS
+
+DERIVED
+        
+OBSERVABLES
+Response      C 	au     conc   0    0   "b+(A1*(1-exp(-alpha1*(log10(10^(10*t/T)+10^(tau1))-log10(1+10^(tau1))))))       
+		
+ERRORS
+Response           "sd"
+
+CONDITIONS
+T   "6"
+A1	"M_A1*dose^h_A1/(K_A1^h_A1+dose^h_A1)"
+alpha1 "M_alpha1*dose^h_alpha1/(K_alpha1^h_alpha1+dose^h_alpha1)"
+tau1 "M_tau1*(1-dose^h_tau1/(K_tau1^h_tau1+dose^h_tau1))"
