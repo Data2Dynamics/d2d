@@ -19,7 +19,14 @@ global ar
 
 % get correct number of cores and max threads
 ar.config.nCore = feature('numCores');
-ar.config.nMaxThreads = 2*ar.config.nCore;
+if ~isfield(ar.config, 'nMaxThreads')
+    ar.config.nMaxThreads = 2*ar.config.nCore;
+% else:
+%     do not overwrite nMaxThreads. Reason:
+%     The value also appears as a hard-coded value in the c code.
+%     If you change nMaxThreads manually, use arCompile (arRecompile or arCompileAll)
+%     with option forcedCompile=1 to regenerate the c code.
+end
 
 % set default values
 if ~exist('silent','var') || isempty(silent)
