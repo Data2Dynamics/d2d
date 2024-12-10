@@ -110,7 +110,7 @@ ar.config.fiterrors = 1;
 
 arLoadParsPEtab(PEparas);
 
-arFindInputs % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
+arFindInputs(); % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
 arLoadParsPEtab(PEparas);
 
 if exist('Tms','var')
@@ -134,7 +134,11 @@ if doPreEq
         if isfield(table2struct(Tdat), 'preequilibrationConditionId')
             uniqueSimConds = unique(Tdat.simulationConditionId);
             uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
-            if ~strcmp(class(uniquePreEqConds),'string')
+            if isa(uniquePreEqConds, 'string')
+               if all(strcmp(uniquePreEqConds, ""))
+                   uniquePreEqConds = [];
+               end
+            else
                 if all(isnan(uniquePreEqConds))
                     uniquePreEqConds = [];
                 end
