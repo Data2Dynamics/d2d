@@ -3,8 +3,7 @@
 fprintf(2, 'TEST FOR PETAB EXTENSION >>PETAB-SELECT<<\n');
 
 nCases = 9;
-% tests = 1:nCases;
-tests = 2;  % select the test cases to run
+tests = 1:nCases;
 cases = arrayfun(@(x) sprintf('%04d', x), tests, 'UniformOutput', false);
 
 % results data structures
