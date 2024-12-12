@@ -55,7 +55,7 @@ if ischar(name)
     end
     yamlContent = arReadPEtabYaml(name);
     yamlPath = yamlDir.folder;
-    fprintf('Import .yaml file with name: %s\n',name)
+    fprintf('Import .yaml file with name: %s\n',name);
     
     % check number of files per category, only one per category allowed atm
     petabFiles = {'sbml_files', 'observable_files', 'measurement_files',...
@@ -69,7 +69,7 @@ if ischar(name)
         inputArgs{end+1} = out;
     end
     
-    arImportPEtab(cellfun(@(x) [yamlPath, filesep, x], [inputArgs{:}], 'UniformOutput', false),doPreEq)
+    arImportPEtab(cellfun(@(x) [yamlPath, filesep, x], [inputArgs{:}], 'UniformOutput', false),doPreEq);
     % also check arReadPEtabYaml
     return
 end
@@ -88,7 +88,7 @@ if length(sbmlmodel)>1
 end
 
 [~,~,eventStruct] = arParseSBML([sbmlmodel.folder filesep sbmlmodel.name]);
-arLoadModel(strrep(sbmlmodel.name,'.xml',''))
+arLoadModel(strrep(sbmlmodel.name,'.xml',''));
 
 PEobs = [strrep(name{2},'.tsv',''),'.tsv'];
 PEmeas = [strrep(name{3},'.tsv',''),'.tsv'];
@@ -158,7 +158,7 @@ if doPreEq
                     % simConds = [simConds, addSimConds];
                 end
                 simConds = unique(simConds);
-                arSteadyState(imodel, preEqCond, simConds, tstart)
+                arSteadyState(imodel, preEqCond, simConds, tstart);
             end
             for iSimCond = 1:length(uniqueSimConds)
                 Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(iSimCond),:);
@@ -166,7 +166,7 @@ if doPreEq
                 for iCol = 1:length(Tcondi.Properties.VariableNames)
                     idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
                     if ~isempty(idxState)
-                        arAddEvent(m,iSimCondAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}))
+                        arAddEvent(m,iSimCondAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}));
                         % ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
                     end
                 end
@@ -178,7 +178,7 @@ end
 % events
 for iev = 1:length(eventStruct)
     arAddEvent(1, 'all', eventStruct(iev).time, ...
-        eventStruct(iev).state, 0, eventStruct(iev).value)
+        eventStruct(iev).state, 0, eventStruct(iev).value);
 end
 end
 

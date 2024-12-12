@@ -113,7 +113,7 @@ new_filename = strrep(new_filename,'-','_');
 fid = fopen(['Models' filesep new_filename '.def'], 'w');
 
 fprintf(fid, 'DESCRIPTION\n');
-fprintf(fid, '"IMPORTANT: Do not use this file with arLoadModel. Unexpected behavior may occur because of missing observable formulas."')
+fprintf(fid, '"IMPORTANT: Do not use this file with arLoadModel. Unexpected behavior may occur because of missing observable formulas."');
 
 if(~isempty(m.name))
     fprintf(fid, '"%s"', m.name);
