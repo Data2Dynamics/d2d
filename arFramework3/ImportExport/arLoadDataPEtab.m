@@ -81,8 +81,25 @@ for k = 1:numel(ar.model.xNames)
     end
 end
 
+% handle implicit steady-state measurements ('inf' in time column)
+% replace time by finite number, add preequilibrationConditionId
+qImplicitSteadyState = Tdat.time==Inf;
+Tdat.time(qImplicitSteadyState) = 1;
+
+% check if preequilibrationConditionId is present in data table
+if ~ismember('preequilibrationConditionId', Tdat.Properties.VariableNames)
+    Tdat.preequilibrationConditionId = repmat([""],size(Tdat,1),1);
+end
+% verfiy that preequilibrationConditionId is empty for steady-state measurements
+if any(qImplicitSteadyState & ~strcmp(Tdat.preequilibrationConditionId,''))
+    warning([ ...
+        'preequilibrationConditionId should be empty for steady-state measurements specified by time=inf' ...
+        'Overriding preequilibrationConditionId by simulationConditionId.'])
+end
+Tdat.preequilibrationConditionId(qImplicitSteadyState) = Tdat.simulationConditionId(qImplicitSteadyState);
 
 
+% identify how to split the data into different conditions
 [uniCond,~,iCCond] = unique([Tdat.simulationConditionId]);
 if any(strcmp(Tdat.Properties.VariableNames,'observableParameters'))
     if ~isstring(Tdat.observableParameters)
@@ -182,7 +199,7 @@ for iCond = 1:length(uniCond)
         if ismember('noiseParameters', Tsub.Properties.VariableNames)
             if isnumeric(Tsub(1,:).noiseParameters)
                 % this is not correct!
-                % If noise parameters are numeric, they correwspond to measurement errors
+                % If noise parameters are numeric, they correspond to measurement errors
                 % and havbe to be written to ar.model.data.yExpStd
                 % this has to be implemented below
                 continue

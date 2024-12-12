@@ -44,7 +44,7 @@ end
 %% Parse function input
 
 % standard settings
-if ~exist('selectionProblem') || isempty(yaml)
+if ~exist('yaml') || isempty(yaml)
     yaml = 'petab_select_problem.yaml';
 end
 if ~exist('initialModel') || isempty(initialModel)

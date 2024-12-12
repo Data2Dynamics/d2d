@@ -90,6 +90,9 @@ end
 [~,~,eventStruct] = arParseSBML([sbmlmodel.folder filesep sbmlmodel.name]);
 arLoadModel(strrep(sbmlmodel.name,'.xml',''));
 
+% 
+ar.config.backup_modelAndData = false;
+
 PEobs = [strrep(name{2},'.tsv',''),'.tsv'];
 PEmeas = [strrep(name{3},'.tsv',''),'.tsv'];
 PEconds = [strrep(name{4},'.tsv',''),'.tsv'];
@@ -97,8 +100,7 @@ PEparas = [strrep(name{5},'.tsv',''),'.tsv'];
 
 T = cell(2, length(ar.model));
 for m = 1:length(ar.model)
-    [T{m,1}, T{m,2}] = ...
-        arLoadDataPEtab(PEmeas,PEobs,m);
+    [T{m,1}, T{m,2}] = arLoadDataPEtab(PEmeas,PEobs,m);
 end
 Tcond = arLoadCondPEtab(PEconds, T);
 
@@ -108,7 +110,7 @@ ar.config.fiterrors = 1;
 
 arLoadParsPEtab(PEparas);
 
-arFindInputs % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
+arFindInputs(); % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
 arLoadParsPEtab(PEparas);
 
 if exist('Tms','var')
@@ -132,7 +134,11 @@ if doPreEq
         if isfield(table2struct(Tdat), 'preequilibrationConditionId')
             uniqueSimConds = unique(Tdat.simulationConditionId);
             uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
-            if ~strcmp(class(uniquePreEqConds),'string')
+            if isa(uniquePreEqConds, 'string')
+               if all(strcmp(uniquePreEqConds, ""))
+                   uniquePreEqConds = [];
+               end
+            else
                 if all(isnan(uniquePreEqConds))
                     uniquePreEqConds = [];
                 end
