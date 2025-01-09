@@ -134,9 +134,9 @@ for jm = 1:length(ar.model)
                         % to normalization term of log-normal distribution
                         islogfitted = logical(ar.model(jm).data(jd).logfitting);
                         if any(islogfitted)
-                            data = ar.model(jm).data(jd).yExp(islogfitted);
-                            data = data(~isnan(data));
-                            ar.chi2err_logdataCorrection = ar.chi2err_logdataCorrection+ sum(log(log(10)^2 * (10.^data).^2));
+                            data = ar.model(jm).data(jd).yExp(:, islogfitted);
+                            data = data(~isnan(data)); 
+                            ar.chi2err_logdataCorrection = ar.chi2err_logdataCorrection + 2*sum(log(log(10)*10.^data));                          
                         end
                         
                     end
