@@ -1,0 +1,18 @@
+## Avoid tracking files that are created by execution of the examples
+
+# Ignore content of all example folders
+000[1-9]/**
+
+# Do not ignore PEtab Select files (.tsv and .yaml files)
+!000[1-9]/*.tsv
+!000[1-9]/*.yaml
+
+# Do not ignore the 'petab' subfolder
+!000[1-9]/petab/
+!000[1-9]/petab/**
+
+# Do not ignore the 'runExample.m' file
+!000[1-9]/runExample.m
+
+# Ignore the test results table
+TestResults.csv
