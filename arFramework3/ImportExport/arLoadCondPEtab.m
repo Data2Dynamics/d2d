@@ -38,7 +38,7 @@ for i = 1:length(fns)
 end
 
 if ~isfield(T,'conditionId')
-    T.conditionId = T.conditionID;
+    T.conditionId = T.conditionID; % old version of arExportPEtab used 'conditionID'
 end
 
 % load pre-equilibration condition

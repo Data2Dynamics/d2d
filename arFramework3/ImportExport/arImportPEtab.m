@@ -87,10 +87,9 @@ if length(sbmlmodel)>1
     %sbmlmodel= sbmlmodel(out);% set sbmlmodel to chosen
 end
 
-[~,~,eventStruct] = arParseSBML([sbmlmodel.folder filesep sbmlmodel.name]);
-arLoadModel(strrep(sbmlmodel.name,'.xml',''));
+[~,modelname,eventStruct] = arParseSBML([sbmlmodel.folder filesep sbmlmodel.name]);
+arLoadModel(modelname); % arLoadModel(strrep(sbmlmodel.name,'.xml','')); % arParseSBML has flag overwrite with defaule false
 
-% 
 ar.config.backup_modelAndData = false;
 
 PEobs = [strrep(name{2},'.tsv',''),'.tsv'];

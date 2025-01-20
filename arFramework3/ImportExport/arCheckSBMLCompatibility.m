@@ -12,7 +12,7 @@ function [qSBMLCompatible, pProblemCond] = arCheckSBMLCompatibility(m)
 %
 % This means that conditions should be encoded as initialAssignment rules*, but cannot
 % be translated directly in all cases. Specifically, there must not be any dependencies
-% between the conditions. This means, a parameter that is repalced must not appear in
+% between the conditions. This means, a parameter that is replaced must not appear in
 % any mathematical expression on the RHS of the replacements.
 %
 % * See arExportSBML_fullmodel.m

@@ -96,9 +96,9 @@ function IDs = writeConditionsTable(m, IDs)
     finalCondTab = array2table(transpose(condT{:,:}));
     finalCondTab = [condT.Properties.VariableNames', finalCondTab];
     if all(qRemove)
-        finalCondTab.Properties.VariableNames = {'conditionID'};
+        finalCondTab.Properties.VariableNames = {'conditionId'};
     else    
-        finalCondTab.Properties.VariableNames = ['conditionID' finalCondTab{1,2:end}];
+        finalCondTab.Properties.VariableNames = ['conditionId' finalCondTab{1,2:end}];
     end
     finalCondTab = finalCondTab(3:end, :);
     
