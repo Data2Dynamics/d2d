@@ -215,11 +215,9 @@ for iCond = 1:length(uniCond)
         
         % natural log scale fitting
         if ln_fitting(iObs)
-            conversion_factor = log10(exp(1));
             if ~sum(ismember(symvar(arSym(tmp_fystd_raw)), arSym(Sd2d.y)))
-                            Sd2d.fystd{iObs} = strcat(char(string(tmp_fystd)),...
-                                ' * ', num2str(conversion_factor));
-                            warning(['Active fitting on natural logarithm scale for observable ' Sd2d.y{iObs} '. Do not change ar.config.fiterrors!'])
+                Sd2d.fystd{iObs} = sprintf('%s / log(10)', tmp_fystd);
+                warning(['Active fitting on natural logarithm scale for observable ' Sd2d.y{iObs} '. Do not change ar.config.fiterrors!'])
             else
                 error('fitting on log-scale not possible with error model other than absolute error')
             end
@@ -254,7 +252,7 @@ for iCond = 1:length(uniCond)
             end
         end
     end
-%    Sd2d.logfitting(iobs) = 0; % We accounted for this by transforming yExp
+    
     % prepare info for creating data struct
     fns = fieldnames(Sd2d);
     for i = 1:length(fns)
