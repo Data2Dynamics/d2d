@@ -1,0 +1,15 @@
+## Avoid tracking files that are created by execution of the example
+
+# by default ignore all files in subfolders (i.e. the examples)
+./**
+
+# do not ignore the Data folder and its contents
+!Data/
+!Data/**
+
+# do not ignore the Models folder and its contents
+!Models/
+!Models/**
+
+# do not ignore the 'runExample.m' file
+!runExample.m

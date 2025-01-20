@@ -1,0 +1,19 @@
+model_subspace_id: M1_1
+model_subspace_indices:
+- 0
+- 0
+- 0
+criteria:
+  NLLH: -4.087702752023436
+  AIC: -6.175405504046871
+model_hash: M1_1-000
+model_subspace_petab_yaml: petab/petab_problem.yaml
+estimated_parameters:
+  sigma_x2: 0.12242920313036142
+iteration: 1
+model_id: M1_1-000
+parameters:
+  k1: 0.2
+  k2: 0.1
+  k3: 0
+predecessor_model_hash: virtual_initial_model-

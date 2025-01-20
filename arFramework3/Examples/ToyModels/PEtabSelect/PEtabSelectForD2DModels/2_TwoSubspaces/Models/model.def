@@ -1,0 +1,38 @@
+DESCRIPTION
+"This ODE model is a d2d version of the PEtab Select Test Case 0001."
+"It was originally created by arParseSBML."
+
+PREDICTOR
+t	 T	 "au"	 time	 0	 100	
+
+COMPARTMENTS
+default	 V	 "n/a"	 vol.	 1
+
+STATES
+x1	 C	 "n/a"	 conc.	 default	 1	 "x1"
+x2	 C	 "n/a"	 conc.	 default	 1	 "x2"
+
+INPUTS
+
+REACTIONS
+ 	-> x1 	 CUSTOM "k1" 	"R1"
+x1 	-> x2 	 CUSTOM "k2*x1" 	"R2"
+x1 + x2 	->  	 CUSTOM "k3*x1*x2" 	"R3"
+
+DERIVED
+
+OBSERVABLES
+obs_x2	C	"au"	"conc."	0	0	"x2"
+
+ERRORS
+obs_x2	"sigma_x2"
+
+CONDITIONS
+init_x1	 "0"
+init_x2	 "0"
+
+PARAMETERS
+k1	 0.2	 1	 0	 0	 1
+k2	 0.1	 1	 0	 0	 1
+k3	 0.0	 1	 0	 0	 1
+sigma_x2	 0.15	 0	 0	 1e-5	 1e3

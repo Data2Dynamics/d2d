@@ -1,0 +1,14 @@
+DESCRIPTION
+"d2d Version of PEtab Select Test Case 0001"
+"All observables, errors and parameters are already defined in the model.def file"
+
+PREDICTOR
+t	 T	 "au"	 time	 0	 100	
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
