@@ -1,34 +1,22 @@
-% load PEtab Select problem and perform model selection
+%% load PEtab Select problem and perform model selection
 arPetsSelectModel('petab_select_problem.yaml', d2dFitFunction=@fitFunction);
 
+
+% -------------------------------------------------------------------------
+%% Define custom calibration function
 function fitFunction()
 
 global ar
 
+%% Modify d2d configs:
 % deactivate Bessel correction
 ar.config.useFitErrorCorrection = 0;
 
-% % use settings similar to pyPESTO
-% ar.config.rtol = 1e-16;
-% ar.config.atol = 1e-12;
-% ar.config.maxsteps = 1e6;
-% 
-% % stricter equilibration settings
-% ar.config.eq_rtol = 1e-12;
-% ar.config.eq_tol = 1e-12;
-% ar.config.init_eq_step = 1e3;
-% 
-% % stricter optimization settings
-% ar.config.optim.MaxIter = 1e6;
-% ar.config.optim.TolX = 1e-16;
-
-% change steady state calculation start time (0 instead of -1e7)
+% change initial time of model equilibration (0 instead of -1e7)
 arClearEvents();
-arSteadyState(1, 1, 1, {}, 0);
+arSteadyState(1, 1, 1, {}, 0);  % fourth argument is initial time
 
-% perform fits
-arFit();
-arPetsFitWithSmartInitials();
-arFitLHS(10);
+%% perform multi-start fits
+arFitLHS(25);
 
 end
