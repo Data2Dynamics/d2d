@@ -11,8 +11,11 @@
 !000[1-9]/petab/
 !000[1-9]/petab/**
 
-# Do not ignore the 'runExample.m' file
+# Do not ignore the 'runExample.m' files
 !000[1-9]/runExample.m
+
+# Do not ignore the 'README.md' files
+!000[1-9]/README.md
 
 # Ignore the test results table
 TestResults.csv
