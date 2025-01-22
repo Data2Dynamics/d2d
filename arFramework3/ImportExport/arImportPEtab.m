@@ -48,10 +48,13 @@ if ~exist('name', 'var') || isempty(name)
     name = fullfile('PEtab', yamlDir.name);
 end
 if ischar(name)
-    % import from yaml file
+    % import from yaml file 
     yamlDir = dir([strrep(name,'.yaml','') '.yaml']);
     if isempty(yamlDir) % exists .yaml file?
-        error('Did not find .yaml file')
+        yamlDir = dir(fullfile('PEtab', [name,'.yaml']));
+        if isempty(yamlDir) % exists .yaml file?
+            error('Did not find .yaml file')
+        end
     end
     yamlContent = arReadPEtabYaml(name);
     yamlPath = yamlDir.folder;
