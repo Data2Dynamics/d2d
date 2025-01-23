@@ -130,6 +130,9 @@ end
 % create output directory
 [~] = mkdir(options.PetsOutputDir);
 
+% save the PEtab Select struct to file
+arPetsSave('petsSave', options.PetsOutputDir);
+
 % get the overall best model and save it to yaml file
 final_model = get_best(pets.problem, pets.problem.state.models);
 final_model.to_yaml(fullfile(options.PetsOutputDir, 'selected_model.yaml'));
