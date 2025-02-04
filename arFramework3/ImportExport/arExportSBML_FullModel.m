@@ -86,9 +86,9 @@ function arExportSBML_FullModel(m,name)
             mkdir('./PEtab')
         end
         if length(ar.model)==1
-            OutputSBML(M, ['PEtab/' 'model_' name '.xml']);
+            OutputSBML(M, ['PEtab/' name '_model.xml']);
         else
-            OutputSBML(M, ['PEtab/' 'model_' name '_' ar.model(m).name '.xml']);
+            OutputSBML(M, ['PEtab/' name '_' ar.model(m).name '_model.xml']);
         end
     else
         error('%s', b);
