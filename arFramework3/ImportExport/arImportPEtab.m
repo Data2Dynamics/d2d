@@ -51,11 +51,12 @@ if ischar(name)
     % import from yaml file 
     yamlDir = dir([strrep(name,'.yaml','') '.yaml']);
     if isempty(yamlDir) % exists .yaml file?
-        yamlDir = dir(fullfile('PEtab', [name,'.yaml']));
+        yamlDir = dir(fullfile('PEtab', [strrep(name,'.yaml','') '.yaml']));
         if isempty(yamlDir) % exists .yaml file?
             error('Did not find .yaml file')
         end
     end
+    name = fullfile('PEtab', yamlDir.name);
     yamlContent = arReadPEtabYaml(name);
     yamlPath = yamlDir.folder;
     fprintf('Import .yaml file with name: %s\n',name);
@@ -126,7 +127,7 @@ if exist('Tms','var')
     end
 end
 
-% pre-equilibration
+%% pre-equilibration
 if doPreEq
     tstart = -1e7;
     for imodel = 1:length(ar.model)
@@ -135,7 +136,9 @@ if doPreEq
         
         if isfield(table2struct(Tdat), 'preequilibrationConditionId')
             uniqueSimConds = unique(Tdat.simulationConditionId);
+            % uniqueSimConds = 
             uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
+            % uniquePreEqConds = 
             if isa(uniquePreEqConds, 'string')
                if all(strcmp(uniquePreEqConds, ""))
                    uniquePreEqConds = [];
@@ -166,11 +169,19 @@ if doPreEq
                     % simConds = [simConds, addSimConds];
                 end
                 simConds = unique(simConds);
+                % simConds
                 arSteadyState(imodel, preEqCond, simConds, tstart);
             end
             for iSimCond = 1:length(uniqueSimConds)
                 Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(iSimCond),:);
+                
+                % iSimCond auf richtige provozieren
+                %iSimCondAr = ar.model(m).data(iSimCond).cLink;
                 iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
+                iSimCondAr = ar.model(m).data(iSimCondAr).cLink;
+                % alt:
+                % iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
+
                 for iCol = 1:length(Tcondi.Properties.VariableNames)
                     idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
                     if ~isempty(idxState)
@@ -185,7 +196,7 @@ end
 
 % events
 for iev = 1:length(eventStruct)
-    arAddEvent(1, 'all', eventStruct(iev).time, ...
+    arAddEvent(1, 'all', eventStruct(iev).time, ...clce
         eventStruct(iev).state, 0, eventStruct(iev).value);
 end
 end
