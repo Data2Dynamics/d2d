@@ -53,6 +53,8 @@ for i=1:length(dtol)
             warning(ERR.message);
         elseif ~isempty(regexp(ERR.message,'NaN in derivative of residuals', 'once'))            
             warning(ERR.message);
+        elseif ~isempty(regexp(ERR.message,'CV_CONV_FAILURE', 'once'))            
+            warning(ERR.message);
         else
             rethrow(ERR);
         end
