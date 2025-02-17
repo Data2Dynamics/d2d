@@ -703,6 +703,25 @@ for j=1:length(m.species)
 
 end
 
+% Conditions for parameter
+for j=1:length(m.parameter)
+    for i=1:length(m.initialAssignment)
+        if strcmp(m.initialAssignment(i).symbol,m.parameter(j).id)
+            assign_string = m.initialAssignment(i).math;
+            % if strcmp(assign_string,['init_' m.species(j).id]) == 0
+            %     initValuesOpt(j) = 2;
+            %     idx_assval(j) = i;
+            % else
+            %     initValuesOpt(j) = 3;
+            % end
+            assignment_value = replacePowerFunction(m.initialAssignment(i).math,0);
+            assignment_value = arSym(assignment_value);
+            fprintf(fid, '%s\t "%s"\n', [sym_check(m.time_symbol,m.parameter(j).id)], ...
+            assignment_value);
+        end
+    end
+end
+
 fprintf(fid, '\nPARAMETERS\n');
 
 pars = {};
