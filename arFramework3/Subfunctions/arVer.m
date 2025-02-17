@@ -7,13 +7,17 @@ function matVer = arVer
 %
 % Return MATLAB version with fix for 2021a (9.10) which leads to unexpected
 % behaviour when converting '9.10' to double.
-
-matVer = ver('MATLAB');
+global ar
+if isfield(ar.info,'ver')
+    matVer = ar.info.ver;
+else
+    matVer = ver('MATLAB');
+    ar.info.ver = matVer;
+end
 
 versplit = strsplit(matVer.Version,'.');
 if strcmp(matVer.Version, '9.10')
     matVer.Version = '9.91';
 elseif strcmp(matVer.Version, '9.11')
     matVer.Version = '9.92';
-end
 end
