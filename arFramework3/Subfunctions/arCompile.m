@@ -581,8 +581,11 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
         includesstr{end+1} = ['-L"' ar_path '\ThirdParty\pthreads-w32_2.9.1\lib\' mexext '"'];
         includesstr{end+1} = ['-lpthreadVC2'];
         
-        if ( chunks > 1 )
-            cCfg = mex.getCompilerConfigurations('C');
+        cCfg = mex.getCompilerConfigurations('C');
+        if ( chunks > 1 && ~strcmp(cCfg.Name, 'MinGW64 Compiler (C)'))
+            % TODO: This part seems to only work for Visuak Studio
+            % compilers with a specific setup
+            
             libloc = [cCfg.Location, '/VC/bin']; % Add directory containing lib.exe to the path (this could be further generalized)
 
             curEnv = getenv('path');
@@ -609,6 +612,9 @@ if(~exist([ar.fkt '.' mexext],'file') || forceFullCompile || forceCompileLast)
                            sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
                            which('udata.c'), which('arSimuCalc.c'), objectsstr{1:64},libNames{:});
         else
+            if ( chunks > 1 && strcmp(cCfg.Name, 'MinGW64 Compiler (C)'))
+                warning('arCompile: Chunks dont work for MinGW64 Compiler (C), might not compile for large models.')
+            end
             mex(mexopt{:},verbose{:},'-output', ar.fkt, includesstr{:}, '-DHAS_PTHREAD=1', ...
                             sprintf('-DNMAXTHREADS=%i', ar.config.nMaxThreads), ...
                             which('udata.c'), which('arSimuCalc.c'), objectsstr{:});
