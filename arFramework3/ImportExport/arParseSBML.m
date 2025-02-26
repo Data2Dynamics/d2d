@@ -569,9 +569,11 @@ if isfield(m,'reaction') % specified via reactions (standard case)
             count = 0;
             while(findrule && count < 100)
                 count = count+1;
-                for jj=1:length(m.rule)
-                    tmpstr = mysubs(tmpstr, m.rule(jj).variable, ['(' m.rule(jj).formula ')']);
-                end
+                % Subtitution of input variable by formula makes not really
+                % sense. Why was this done originally in 2019? Commented out 02/2025
+                % for jj=1:length(m.rule)
+                %     tmpstr = mysubs(tmpstr, m.rule(jj).variable, ['(' m.rule(jj).formula ')']);
+                % end
                 findrule = false;
                 vars = symvar(tmpstr);
                 for jj=1:length(m.rule)
