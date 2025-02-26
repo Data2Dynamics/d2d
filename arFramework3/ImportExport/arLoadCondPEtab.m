@@ -130,7 +130,8 @@ for m = 1:length(ar.model)
                     % initial state is set by condition (via init_StateID parameter)
                     % catch that inital parameter in sbml file can be named differently from the d2d convention
                     % note: this is not the recommended way to set initial states in PEtab (use stateID instead)
-                    elseif any(strcmp(ar.model(m).px0, fns{k})) || any(strcmp(ar.model(m).px0, [fns{k} '_state']))
+                    % elseif any(strcmp(ar.model(m).px0, fns{k})) || any(strcmp(ar.model(m).px0, [fns{k} '_state']))
+                    elseif any(strcmp(ar.model(m).px0, fns{k})) || any(strcmp(ar.model(m).px0, [fns{k} '_state'])) || any(strcmp(ar.model(m).x, fns{k}))
                         if length(fns{k}) == 6
                             % all px0 have form ['init_' stateID]. If stateID in PEtab has only one character (px0 has 6 characters),
                             % d2d adds the suffix '_state'. E.g. the px0 'init_A' is replaced by 'init_A_state'
