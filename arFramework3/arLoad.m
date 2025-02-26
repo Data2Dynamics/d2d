@@ -84,7 +84,7 @@ fprintf('workspace loaded from file %s\n', workspace_name);
 % from the savefolder
 % Read out file ending of mex file for current os
 if ismac
-    osext = 'mexmaci64';
+    osext = append('mex', lower(computer()));
 elseif isunix
     osext = 'mexa64';
 elseif ispc
