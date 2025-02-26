@@ -35,12 +35,12 @@ while ~isempty(ar.IdentifiabilityTest.p_nonIdentifiable)
     ar.NI{itest}.IdentifiabilityTest = ar.IdentifiabilityTest;
     ar.NI{itest}.pLabel = ar.IdentifiabilityTest.p_nonIdentifiable{1};
     ar.NI{itest}.p_val = ar.IdentifiabilityTest.p(ar.IdentifiabilityTest.dp_order(1));
-    ar.NI{itest}.qFit = ar.p;
     ar.NI{itest}.qFit = ar.qFit;
-    ar.NI{itest}.whichP = arIdentifiablityTest_WhichP(ar.NI{itest}.pLabel,ar.NI{itest}.p_val);
+    % ar.NI{itest}.whichP = arIdentifiablityTest_WhichP(ar.NI{itest}.pLabel,ar.NI{itest}.p_val);
+    ar.NI{itest}.whichP = arIdentifiablityTest_WhichP;  %  no arguments required. This is handled internally.
 
     %% next one ...
-    itest = itest+1;    
+    itest = itest+1;
     mess = sprintf('Fix the non-identifiable parameter %s ...\n',ar.IdentifiabilityTest.p_nonIdentifiable{1});
     fprintf(mess);
     ar.NI{itest}.messages = {mess};

@@ -15,7 +15,8 @@ if isfield(ar,'random')
         
         hist(ar.p(ar.random{j}), 50);
         
-        title(strrep(ar.pLabel(ar.random{j}(1)),'_','\_'));
+        label_is = find(ar.random{j});
+        title(strrep(ar.pLabel(label_is(1)),'_','\_'));
     end
 else
     warning('No random effects defined.')
