@@ -43,14 +43,21 @@ for i = 1:length(ib)
     end
 end
 
+% Remap PEtab prior types to d2d prior types
+T.initializationPriorType = cellstr(T.initializationPriorType);  % Convert char array to cell array of strings
+petab_to_d2d = containers.Map({'parameterScaleUniform', 'normal', 'uniform', 'laplace'}, {0, 1, 2, 3});
+T.initializationPriorType = cellfun(@(x) petab_to_d2d(x), T.initializationPriorType);
+
 % this is currently under development on the PEtab side.
-if isfield(T,'priorType')
+if isfield(T,'initializationPriorType')
 for i=1:length(BothPars)
-    if ischar(T.priorType(ib(i)))
-        if isnumeric(T.priorParameters)
-            arSetPrior(ia(i),T.priorType(ib(i)),T.priorParameters(ib(i),1),T.priorParameters(ib(i),2))
+    if ~isempty(T.initializationPriorType(ib(i)))
+        if T.initializationPriorType(ib(i)) ~= 0
+            PriorParameters = str2num(T.initializationPriorParameters(ib(i),:));
+            arSetPrior(ia(i),T.initializationPriorType(ib(i),:), ...
+                PriorParameters(1), PriorParameters(2))
         else
-            arSetPrior(ia(i),T.priorType(ib(i)))
+            arSetPrior(ia(i),T.initializationPriorType(ib(i),:))
         end
     end
 end

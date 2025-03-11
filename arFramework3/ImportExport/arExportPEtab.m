@@ -304,11 +304,32 @@ nominalValue(ar.qLog10 == 1) = 10.^ar.p(ar.qLog10 == 1);
 lowerBound(ar.qLog10 == 1) = 10.^ar.lb(ar.qLog10 == 1);
 upperBound(ar.qLog10 == 1) = 10.^ar.ub(ar.qLog10 == 1);
 
+% priors
+% map d2d prior definations 0-3 to corresponding PEtab prior definations
+priorTypes = {'parameterScaleUniform', 'normal', 'uniform', 'laplace'};
+initializationPriorType = priorTypes(ar.type + 1);
+% initializationPriorParameters
+initializationPriorParameters = cell(size(ar.type));
+for i = 1:length(ar.type)
+    switch ar.type(i)
+        case 0  % No prior
+            initializationPriorParameters{i} = '';
+        case 1  % Normal
+            initializationPriorParameters{i} = sprintf('%f, %f', ar.mean(i), ar.std(i));
+        case 2  % Uniform
+            initializationPriorParameters{i} = sprintf('%f, %f', ar.lb(i), ar.ub(i));
+        case 3  % Laplace
+            initializationPriorParameters{i} = sprintf('%f, %f', ar.mean(i), ar.std(i));
+    end
+end
+
 % build table and write to disk
 variableNames = {'parameterId', 'parameterName', 'parameterScale', ...
-    'lowerBound', 'upperBound', 'nominalValue', 'estimate',};
+    'lowerBound', 'upperBound', 'nominalValue', 'estimate', ...
+    'initializationPriorType', 'initializationPriorParameters'};
 parT = table(parameterId(:), parameterName(:), parameterScale(:), ...
     lowerBound(:), upperBound(:), nominalValue(:), estimate(:), ...
+    initializationPriorType(:), initializationPriorParameters(:),...
     'VariableNames', variableNames);
 writetable(parT, ['PEtab' filesep IDs.name '_parameters.tsv'],...
     'Delimiter', '\t', 'FileType', 'text')

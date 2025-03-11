@@ -116,17 +116,6 @@ arLoadParsPEtab(PEparas);
 arFindInputs(); % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
 arLoadParsPEtab(PEparas);
 
-if exist('Tms','var')
-    [BothPars,ia] = intersect(ar.pLabel,Tms_fn);
-    for i=1:length(BothPars)
-        if strcmp(Tms.(BothPars{i})(ms),'-')       % if Tms.(BothPars{i})(ms) == 0
-            arSetPars(BothPars(i), ar.p(ia), 0);
-            %else
-            %    arSetPars(BothPars(i), ar.p(ia)*Tms.(BothPars{i})(ms));
-        end
-    end
-end
-
 %% pre-equilibration
 if doPreEq
     tstart = -1e7;

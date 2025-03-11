@@ -53,7 +53,9 @@ function arSetPrior( par, type, mean, std )
     
     for a = 1 : length( par )
         ar.type(par(a)) = type;
-        ar.mean(par(a)) = mean;
-        ar.std(par(a)) = std;
+        if ar.type(par(a)) ~= 0
+            ar.mean(par(a)) = mean;
+            ar.std(par(a)) = std;
+        end
     end
 end
