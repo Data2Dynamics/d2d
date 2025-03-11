@@ -15,4 +15,5 @@ This folde contains files that exemplify the usage of the dose-dependent RTF app
 
 **Cite:**
 * [A New Approximation Approach for Transient Differential Equation Models](https://www.frontiersin.org/journals/physics/articles/10.3389/fphy.2020.00070) - Kreutz C. *Front. Phys.*, 8, 70, 2020.
-* [Dynamic Modeling of Signaling Pathways When ODEs Are Not Feasible](https://www.biorxiv.org/content/10.1101/2024.04.18.590024) - Rachel T., et al. submitted to *Bioinformatics*, available at biorxiv.
+* [Dynamic modelling of signalling pathways when ordinary differential equations are not feasible](https://academic.oup.com/bioinformatics/article/40/12/btae683/7903280) - Rachel T., et al. *Bioinformatics*, 40, 12, 2024.
+
