@@ -60,53 +60,55 @@ end
 
 function IDs = writeConditionsTable(m, IDs)
 
-    global ar
-    
-    % generate condition IDs:
-    % combine datafile name and condition number (needed for unique mapping)
-    IDs.condition = arrayfun(@(d) sprintf('%s_D%d', ar.model.data(d).name, d), 1:length(ar.model(m).data), "UniformOutput", false);
-    
-    % collect all data-condition-specific parameter replacements
-    condT = table(ar.model(m).p, ar.model(m).fp', 'VariableNames', {'modelP', 'modelFP'});
-    for d = 1:length(ar.model(m).data)
-        is_modelP = ismember(ar.model(m).data(d).pold, ar.model(m).p);
-        condT_tmp = cell2table([ar.model(m).data(d).pold(is_modelP)', ar.model(m).data(d).fp(is_modelP)]);
-        condT_tmp.Properties.VariableNames = {'modelP', IDs.condition{d}};
-        condT = outerjoin(condT, condT_tmp, "MergeKeys", true);
+global ar
+
+% generate condition IDs:
+% combine datafile name and condition number (needed for unique mapping)
+numDigits = max(1, floor(log10(length(ar.model(m).data))) + 1);  % Ensure at least 1 digit
+IDs.condition = arrayfun(@(d) sprintf(['D%0', num2str(numDigits), 'd_%s'], d, ar.model(m).data(d).name), ...
+    1:length(ar.model(m).data), "UniformOutput", false);
+
+% collect all data-condition-specific parameter replacements
+condT = table(ar.model(m).p, ar.model(m).fp', 'VariableNames', {'modelP', 'modelFP'});
+for d = 1:length(ar.model(m).data)
+    is_modelP = ismember(ar.model(m).data(d).pold, ar.model(m).p);
+    condT_tmp = cell2table([ar.model(m).data(d).pold(is_modelP)', ar.model(m).data(d).fp(is_modelP)]);
+    condT_tmp.Properties.VariableNames = {'modelP', IDs.condition{d}};
+    condT = outerjoin(condT, condT_tmp, "MergeKeys", true);
+end
+
+% replace init parameters with the corresponding stateID
+for jp = 1:size(condT, 1)
+    findInit = strcmp(condT.modelP(jp), ar.model(m).px0);
+    if any(findInit)
+        condT.modelP(jp) = ar.model(m).x(findInit);
     end
-    
-    % replace init parameters with the corresponding stateID
-    for jp = 1:size(condT, 1)
-        findInit = strcmp(condT.modelP(jp), ar.model(m).px0);
-        if any(findInit)
-            condT.modelP(jp) = ar.model(m).x(findInit);
-        end
-    end
-    
-    % remove lines where all replacements are identical to the global replacement
-    qRemove = arrayfun(@(jp) all(strcmp(condT.modelFP(jp), condT{jp, 3:end})), 1:size(condT, 1));
-    condT = condT(~qRemove, :);
-    
-    % evaluate expressions (sometimes expressions reduce) and try to remove again
-    condT = array2table(arrayfun(@(x) string(arSym(x)), condT{:,:}), "VariableNames", condT.Properties.VariableNames);
-    qRemove = arrayfun(@(jp) all(strcmp(condT.modelFP(jp), condT{jp, 3:end})), 1:size(condT, 1));
-    condT = condT(~qRemove, :);
-    
-    % reformat to match PEtab requirements
-    finalCondTab = array2table(transpose(condT{:,:}));
-    finalCondTab = [condT.Properties.VariableNames', finalCondTab];
-    if all(qRemove)
-        finalCondTab.Properties.VariableNames = {'conditionId'};
-    else    
-        finalCondTab.Properties.VariableNames = ['conditionId' finalCondTab{1,2:end}];
-    end
-    finalCondTab = finalCondTab(3:end, :);
-    
-    % export conditions table
-    writetable(finalCondTab, ['PEtab' filesep  IDs.model{m}  '_conditions.tsv'], ...
-        'Delimiter', '\t', 'FileType', 'text')
-    
-    end
+end
+
+% remove lines where all replacements are identical to the global replacement
+qRemove = arrayfun(@(jp) all(strcmp(condT.modelFP(jp), condT{jp, 3:end})), 1:size(condT, 1));
+condT = condT(~qRemove, :);
+
+% evaluate expressions (sometimes expressions reduce) and try to remove again
+condT = array2table(arrayfun(@(x) string(arSym(x)), condT{:,:}), "VariableNames", condT.Properties.VariableNames);
+qRemove = arrayfun(@(jp) all(strcmp(condT.modelFP(jp), condT{jp, 3:end})), 1:size(condT, 1));
+condT = condT(~qRemove, :);
+
+% reformat to match PEtab requirements
+finalCondTab = array2table(transpose(condT{:,:}));
+finalCondTab = [condT.Properties.VariableNames', finalCondTab];
+if all(qRemove)
+    finalCondTab.Properties.VariableNames = {'conditionId'};
+else
+    finalCondTab.Properties.VariableNames = ['conditionId' finalCondTab{1,2:end}];
+end
+finalCondTab = finalCondTab(3:end, :);
+
+% export conditions table
+writetable(finalCondTab, ['PEtab' filesep  IDs.model{m}  '_conditions.tsv'], ...
+    'Delimiter', '\t', 'FileType', 'text')
+
+end
 
 
 function IDs = writeObservablesTable(m, IDs)
@@ -120,13 +122,14 @@ obsT_tmp = table;
 for d = 1:length(ar.model(m).data)
     % generate observable IDs:
     % add data file name for purposes of unique mapping
-    obsId = cellfun(@(x,y) strcat(x,'_',y), ...
-        ar.model(m).data(d).yNames', ...
-        repmat({IDs.condition{d}}, [size(ar.model(m).data(d).y')]),...
-        'UniformOutput', false);
+    % obsId = cellfun(@(x,y) strcat(x,'_',y), ...
+    %     ar.model(m).data(d).yNames', ...
+    %     repmat({IDs.condition{d}}, [size(ar.model(m).data(d).y')]),...
+    %     'UniformOutput', false);
+    obsId = ar.model(m).data(d).yNames';
     IDs.obs{d} = obsId;  % collect all observable IDs for later use
     obsName = ar.model(m).data(d).yNames';
-    
+
     obsFormula = ar.model(m).data(d).fy;
     for ify = 1:size(obsFormula,1)
         % replace parameter substitutions
@@ -141,11 +144,11 @@ for d = 1:length(ar.model(m).data)
         end
     end
     if size(obsFormula,2) > 1; obsFormula = obsFormula'; end
-    
+
     obsTrafo = cell(length(obsId),1);
     obsTrafo(:) = {'lin'};
     obsTrafo(logical(ar.model(m).data(d).logfitting)) = {'log10'};
-    
+
     noiseFormula = ar.model(m).data(d).fystd;
     for ify = 1:size(obsFormula,1)
         % replace parameter substitutions
@@ -166,16 +169,30 @@ for d = 1:length(ar.model(m).data)
     end
     noiseFormula = noiseFormulaSubs;
     if size(noiseFormula,2) > 1; noiseFormula = noiseFormula'; end
-    
+
     noiseDistribution = cell(length(obsId),1);
     noiseDistribution(:) = {'normal'}; % others not possible in d2d
-    
+
     obsT_tmp = [obsT_tmp; ...
         table(obsId, obsName, obsFormula, obsTrafo, ...
         noiseFormula, noiseDistribution)];
 end
 
 [obsT, ~, ~] = unique(obsT_tmp, 'rows');
+
+% nummerate obsIds that occur more than once
+[~, ~, idx] = unique(obsT.obsId, 'stable');  
+counts = accumarray(idx, 1);  
+occurrences = zeros(size(obsT.obsId));  
+for i = 1:height(obsT)
+    if counts(idx(i)) > 1
+        occurrences(i) = sum(idx(1:i) == idx(i));  
+        numDigits = floor(log10(counts(idx(i)))) + 1;  
+        obsT.obsId{i} = sprintf('%s_%0*d', obsT.obsId{i}, numDigits, occurrences(i));  
+    end
+end
+
+% write table to file
 obsT.Properties.VariableNames = { ...
     'observableId', 'observableName', ...
     'observableFormula', 'observableTransformation', ...
@@ -200,11 +217,11 @@ measT = table;
 
 for d = 1:length(ar.model(m).data)
     for iy = 1:length(ar.model(m).data(d).y)
-        
+
         % observable ID
         time = ar.model(m).data(d).tExp;
         rowsToAdd = [table(repmat(IDs.obs{d}(iy), [length(time),1]), 'VariableNames', {'observableId'})];
-        
+
         % convert measurements if necessary (log10, normalize)
         if ar.model(m).data(d).logplotting(iy)
             measurement = 10.^(ar.model(m).data(d).yExp(:, iy));
@@ -219,12 +236,12 @@ for d = 1:length(ar.model(m).data)
         %     end
         %     measurement = measurement/max(measurement);
         % end
-        
+
         % skip if measurement contains only NaN
         if sum(isnan(measurement)) == numel(measurement)
             continue
         end
-        
+
         % pre-equiblibration
         if isfield(ar, 'ss_conditions') && ar.ss_conditions
             for iss=1:length(ar.model(m).ss_condition)
@@ -233,16 +250,16 @@ for d = 1:length(ar.model(m).data)
                 rowsToAdd = [rowsToAdd, table(preequilibrationConditionId)];
             end
         end
-        
+
         simulationConditionId = repmat(IDs.condition(d), [length(time) 1]);
         rowsToAdd = [rowsToAdd, table(simulationConditionId)];
         rowsToAdd = [rowsToAdd, table(measurement)];
         rowsToAdd = [rowsToAdd, table(time)];
-        
+
         % observable parameters
         observableParameters = cell([length(time) 1]);
         rowsToAdd = [rowsToAdd, table(observableParameters)];
-        
+
         % noise parameters
         expErrors = ar.model(m).data(d).yExpStd(:,iy);
         if ar.config.fiterrors == -1
@@ -260,15 +277,15 @@ for d = 1:length(ar.model(m).data)
         block = table(num2cell(noiseParameters));
         block.Properties.VariableNames = {'noiseParameters'};
         rowsToAdd = [rowsToAdd, block];
-        
+
         % noise distributions
         noiseDistribution = cell(length(time),1);
         noiseDistribution(:) = {'normal'}; % others not possible in d2d
         rowsToAdd = [rowsToAdd, table(noiseDistribution)];
-        
+
         % add to measurement table
         measT = [measT; rowsToAdd];
-        
+
     end
 end
 
@@ -356,7 +373,7 @@ end
 %         d = dLink(jd);
 %         s
 %     end
-    
+
 
 % end
 
