@@ -42,14 +42,12 @@ else
     IDs.model = {name};
 end
 
-%% Export observables, conditions, measurements
+%% Export observables, conditions, measurements and parameter table
 for m = 1:length(ar.model)
     IDs = writeConditionsTable(m, IDs);
     IDs = writeObservablesTable(m, IDs);
     IDs = writeMeasurementsTable(m, IDs);
 end
-
-%% Parameter Table
 writeParameterTable(IDs);
 
 %% Write YAML file
@@ -105,8 +103,9 @@ end
 finalCondTab = finalCondTab(3:end, :);
 
 % export conditions table
-writetable(finalCondTab, ['PEtab' filesep  IDs.model{m}  '_conditions.tsv'], ...
-    'Delimiter', '\t', 'FileType', 'text')
+filename = ['PEtab' filesep  IDs.model{m}  '_conditions.tsv'];
+writetable(finalCondTab, filename, 'Delimiter', '\t', 'FileType', 'text')
+disp([filename, ' written for model ', num2str(m)])
 
 end
 
@@ -121,13 +120,8 @@ obsT_tmp = table;
 
 for d = 1:length(ar.model(m).data)
     % generate observable IDs:
-    % add data file name for purposes of unique mapping
-    % obsId = cellfun(@(x,y) strcat(x,'_',y), ...
-    %     ar.model(m).data(d).yNames', ...
-    %     repmat({IDs.condition{d}}, [size(ar.model(m).data(d).y')]),...
-    %     'UniformOutput', false);
     obsId = ar.model(m).data(d).yNames';
-    IDs.obs{d} = obsId;  % collect all observable IDs for later use
+    IDs.obs{d} = cell(size(ar.model(m).data(d).yNames')); % for later use
     obsName = ar.model(m).data(d).yNames';
 
     obsFormula = ar.model(m).data(d).fy;
@@ -178,17 +172,27 @@ for d = 1:length(ar.model(m).data)
         noiseFormula, noiseDistribution)];
 end
 
-[obsT, ~, ~] = unique(obsT_tmp, 'rows');
+[obsT, ind_tmpA, ind_tmpC] = unique(obsT_tmp, 'rows');
 
-% nummerate obsIds that occur more than once
-[~, ~, idx] = unique(obsT.obsId, 'stable');  
-counts = accumarray(idx, 1);  
-occurrences = zeros(size(obsT.obsId));  
+% enumerate obsIds that occur more than once
+[~, indA, indC] = unique(obsT.obsId, 'stable');
+counts = accumarray(indC, 1);
+occurrences = zeros(size(obsT.obsId));
 for i = 1:height(obsT)
-    if counts(idx(i)) > 1
-        occurrences(i) = sum(idx(1:i) == idx(i));  
-        numDigits = floor(log10(counts(idx(i)))) + 1;  
-        obsT.obsId{i} = sprintf('%s_%0*d', obsT.obsId{i}, numDigits, occurrences(i));  
+    if counts(indC(i)) > 1
+        occurrences(i) = sum(indC(1:i) == indC(i));
+        numDigits = floor(log10(counts(indC(i)))) + 1;
+        obsT.obsId{i} = sprintf('%s_%0*d', obsT.obsId{i}, numDigits, occurrences(i));
+    end
+end
+
+% Filling IDs.obs for later use in measurements
+IDsObs_renamed = obsT.obsId(ind_tmpC, :);
+count = 1;
+for d=1:length(IDs.obs)
+    for i=1:length(IDs.obs{d})
+        IDs.obs{d}{i,:} = IDsObs_renamed{count};
+        count = count+1;
     end
 end
 
@@ -197,9 +201,9 @@ obsT.Properties.VariableNames = { ...
     'observableId', 'observableName', ...
     'observableFormula', 'observableTransformation', ...
     'noiseFormula', 'noiseDistribution'};
-writetable(obsT, ['PEtab' filesep IDs.model{m} '_observables.tsv'], ...
-    'Delimiter', '\t', 'FileType', 'text')
-
+filename = ['PEtab' filesep IDs.model{m} '_observables.tsv'];
+writetable(obsT, filename, 'Delimiter', '\t', 'FileType', 'text')
+disp([filename, ' written for model ', num2str(m)])
 end
 
 
@@ -288,9 +292,9 @@ for d = 1:length(ar.model(m).data)
 
     end
 end
-
-writetable(measT, ['PEtab' filesep  IDs.model{m}  '_measurements.tsv'],...
-    'Delimiter', '\t', 'FileType', 'text')
+filename = ['PEtab' filesep  IDs.model{m}  '_measurements.tsv'];
+writetable(measT, filename, 'Delimiter', '\t', 'FileType', 'text')
+disp([filename, ' written for model ', num2str(m)])
 
 end
 
@@ -348,8 +352,9 @@ parT = table(parameterId(:), parameterName(:), parameterScale(:), ...
     lowerBound(:), upperBound(:), nominalValue(:), estimate(:), ...
     initializationPriorType(:), initializationPriorParameters(:),...
     'VariableNames', variableNames);
-writetable(parT, ['PEtab' filesep IDs.name '_parameters.tsv'],...
-    'Delimiter', '\t', 'FileType', 'text')
+filename = ['PEtab' filesep IDs.name '_parameters.tsv'];
+writetable(parT, filename, 'Delimiter', '\t', 'FileType', 'text')
+disp([filename, ' written'])
 
 end
 
@@ -410,8 +415,10 @@ for m = 1:length(ar.model)
 end
 
 % write yaml file to disk
-fid = fopen(['PEtab' filesep IDs.name '.yaml'], 'w');
+filename = ['PEtab' filesep IDs.name '.yaml'];
+fid = fopen(filename, 'w');
 fprintf(fid, strjoin(yamlLines, '\n'));
 fclose(fid);
+disp([filename, ' written'])
 
 end
