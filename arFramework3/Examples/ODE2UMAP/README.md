@@ -11,6 +11,7 @@ By using the RTF parameters as an input for UMAP, clusters of the ODE compounds 
 
 The method is applied to a published model of the NFκB signalling pathway from [Almaden et al.](https://doi.org/10.1016/j.celrep.2014.11.024) for illustration. 
 
+![ODE2UMAP](ODE2UMAP.jpg)
 ![ODE2UMAP](ODE2UMAP.pdf)
 
 **Addional Software needed:**
