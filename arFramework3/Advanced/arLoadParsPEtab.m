@@ -1,5 +1,5 @@
 % arLoadParsPEtab(filename)
-% 
+%
 %   filename    name of the PEtab parameter table
 %
 % See also
@@ -7,7 +7,7 @@
 
 function arLoadParsPEtab(filename)
 global ar
-    
+
 if ~contains(filename,'.tsv')
     if ~contains(filename,'.')
         filename = [filename '.tsv'];
@@ -43,22 +43,25 @@ for i = 1:length(ib)
     end
 end
 
-% Remap PEtab prior types to d2d prior types
-T.initializationPriorType = cellstr(T.initializationPriorType);  % Convert char array to cell array of strings
-petab_to_d2d = containers.Map({'parameterScaleUniform', 'normal', 'uniform', 'laplace'}, {0, 1, 2, 3});
-T.initializationPriorType = cellfun(@(x) petab_to_d2d(x), T.initializationPriorType);
 
-% this is currently under development on the PEtab side.
+% Priors
 if isfield(T,'initializationPriorType')
-for i=1:length(BothPars)
-    if ~isempty(T.initializationPriorType(ib(i)))
-        if T.initializationPriorType(ib(i)) ~= 0
-            PriorParameters = str2num(T.initializationPriorParameters(ib(i),:));
-            arSetPrior(ia(i),T.initializationPriorType(ib(i),:), ...
-                PriorParameters(1), PriorParameters(2))
-        else
-            arSetPrior(ia(i),T.initializationPriorType(ib(i),:))
+
+    % Remap PEtab prior types to d2d prior types
+    T.initializationPriorType = cellstr(T.initializationPriorType);  % Convert char array to cell array of strings
+    petab_to_d2d = containers.Map({'parameterScaleUniform', 'normal', 'uniform', 'laplace'}, {0, 1, 2, 3});
+    T.initializationPriorType = cellfun(@(x) petab_to_d2d(x), T.initializationPriorType);
+
+
+    for i=1:length(BothPars)
+        if ~isempty(T.initializationPriorType(ib(i)))
+            if T.initializationPriorType(ib(i)) ~= 0
+                PriorParameters = str2num(T.initializationPriorParameters(ib(i),:));
+                arSetPrior(ia(i),T.initializationPriorType(ib(i),:), ...
+                    PriorParameters(1), PriorParameters(2))
+            else
+                arSetPrior(ia(i),T.initializationPriorType(ib(i),:))
+            end
         end
     end
-end
 end

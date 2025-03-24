@@ -85,6 +85,9 @@ end
 % replace time by finite number, add preequilibrationConditionId
 qImplicitSteadyState = Tdat.time==Inf;
 Tdat.time(qImplicitSteadyState) = 1;
+if sum(qImplicitSteadyState) >= 1
+    warning("Infinite time set to 1")
+end
 
 % check if preequilibrationConditionId is present in data table
 if ~ismember('preequilibrationConditionId', Tdat.Properties.VariableNames)
@@ -113,7 +116,7 @@ if any(strcmp(Tdat.Properties.VariableNames,'observableParameters'))
         else
             [uniCond,~,iCCond] = unique(strcat(Tdat.simulationConditionId,Tdat.observableParameters));
         end
-       % [uniCond,~,iCCond] = unique(strcat(Tdat.simulationConditionId,num2str(Tdat.observableParameters)));
+        % [uniCond,~,iCCond] = unique(strcat(Tdat.simulationConditionId,num2str(Tdat.observableParameters)));
     end
 end
 
@@ -130,7 +133,7 @@ for iCond = 1:length(uniCond)
     % extract important info for data struct from .tsv file
     Tsub = Tdat(iCCond == iCond,:);
     [uniObs,~,iCObs] = unique(cellstr(Tsub.observableId),'stable');
-    
+
     [uniTimes,~,iTExp] = unique(Tsub.time);
     %    [~,ia,ic] = unique([iCobs,iTExp],'rows');
     if length(unique(iTExp(iCObs==1)))<length(iTExp(iCObs==1))
@@ -165,12 +168,12 @@ for iCond = 1:length(uniCond)
             tmp_fystd = arSubs(arSym(tmp_fystd),arSym(Tobs.observableId{jObs}),arSym(['(' Tobs.observableFormula{jObs} ')']));
         end
         Sd2d.fystd{iObs} = char(string(tmp_fystd));
-        
+
         % obsTrafo column is optinal
         ln_fitting(iObs) = false;
         if ismember('observableTransformation', Tobs.Properties.VariableNames)
             Sd2d.logfitting(iObs) = double(strcmp(Tobs.observableTransformation(idx),'log10'));
-                        
+
             % check if fitting is on natural log scale
             ln_fitting(iObs) = strcmp(Tobs.observableTransformation(idx),'log');
             if ln_fitting(iObs)
@@ -179,7 +182,7 @@ for iCond = 1:length(uniCond)
         else
             Sd2d.logfitting(iObs) = 0;
         end
-        
+
         % get cond specific parameter transformations
         if ismember('observableParameters', Tsub.Properties.VariableNames)
             if ~isempty(char(Tsub(1,:).observableParameters))
@@ -195,7 +198,7 @@ for iCond = 1:length(uniCond)
                 end
             end
         end
-        
+
         if ismember('noiseParameters', Tsub.Properties.VariableNames)
             if isnumeric(Tsub(1,:).noiseParameters)
                 % this is not correct!
@@ -212,7 +215,7 @@ for iCond = 1:length(uniCond)
                 end
             end
         end
-        
+
         % natural log scale fitting
         if ln_fitting(iObs)
             if ~sum(ismember(symvar(arSym(tmp_fystd_raw)), arSym(Sd2d.y)))
@@ -223,7 +226,7 @@ for iCond = 1:length(uniCond)
             end
         end
     end
-    
+
     % experimental data
     Sd2d.yExp = nan(length(uniTimes),length(uniObs));
     Sd2d.yExpRaw = nan(length(uniTimes),length(uniObs));
@@ -241,18 +244,18 @@ for iCond = 1:length(uniCond)
                 end
                 if ismember('noiseParameters', Tsub.Properties.VariableNames) && ~isempty(Tsub.noiseParameters(it == iTExp & iobs == iCObs))
                     %noiseParValues = str2num(strplit(Tsub.noiseParameters(it == iTExp & iobs == iCObs), ';'));
-                    %noisePars = 
+                    %noisePars =
                     %arSubs(arSym(Sd2d.fystd{iObs})
-                  
-                  %  Sd2d.yExpStdRaw(it,iobs) = Tsub.noiseParameters(it == iTExp & iobs == iCObs);
-                  %  Sd2d.yExpStd(it,iobs) =  Sd2d.logfitting(iobs) *log10(Tsub.noiseParameters(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs))*Tsub.noiseParameters(it == iTExp & iobs == iCObs);
+
+                    %  Sd2d.yExpStdRaw(it,iobs) = Tsub.noiseParameters(it == iTExp & iobs == iCObs);
+                    %  Sd2d.yExpStd(it,iobs) =  Sd2d.logfitting(iobs) *log10(Tsub.noiseParameters(it == iTExp & iobs == iCObs)) + (1 - Sd2d.logfitting(iobs))*Tsub.noiseParameters(it == iTExp & iobs == iCObs);
                 end
             elseif sum(it==iTExp & iobs == iCObs)>1
                 error('Non-unique assignment for data point. Check unambiguousness of provided measurement table!')
             end
         end
     end
-    
+
     % prepare info for creating data struct
     fns = fieldnames(Sd2d);
     for i = 1:length(fns)
@@ -263,7 +266,7 @@ for iCond = 1:length(uniCond)
     if rem(length(args),2)~=0
         error('arguments args has to be provided in pairs.')
     end
-    
+
     D = arCreateDataStruct(m,pold,fp,args{:});
     arAddDataStruct(D,m)
 end
