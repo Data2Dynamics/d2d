@@ -185,7 +185,7 @@ end
 
 % events
 for iev = 1:length(eventStruct)
-    arAddEvent(1, 'all', eventStruct(iev).time, ...clce
+    arAddEvent(1, 'all', eventStruct(iev).time, ...
         eventStruct(iev).state, 0, eventStruct(iev).value);
 end
 end

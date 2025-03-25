@@ -1,8 +1,3 @@
-
-%%
-% ToDo
-% - Ergänzungen: events, precalib
-
 function arImportPEtab(PEtabName, doPreEq, model, dataFolder, dataFilenames)
 % arImportPEtabNew(PEtabName, transformData, doPreEq, dataFilenames, model)
 %   Imports PEtab files and data files into d2d arFramework
@@ -106,14 +101,14 @@ if ~exist('modelname','var') || isempty(modelname)
     if length(sbmlmodel)>1
         error('Found more than one SBML model file');
     end
-    [~,modelname,~] = arParseSBML([sbmlmodel.folder filesep sbmlmodel.name]);
+    [~,modelname,eventStruct] = arParseSBML([sbmlmodel.folder filesep sbmlmodel.name]);
 end
 
 %% ar
 arLoadModel(modelname);
 splitedFilenames = split(dataFilenames,filesep);
 for i=1:length(dataFilenames)
-     arLoadData(char(splitedFilenames(1,i,2)),[],[],[],'DataPath',char(splitedFilenames(1,i,1)));
+    arLoadData(char(splitedFilenames(1,i,2)),[],[],[],'DataPath',char(splitedFilenames(1,i,1)));
 end
 % for i=1:length(dataFilenames)
 %     arLoadData(dataFilenames{i}.name,[],[],[],'DataPath',dataFilenames{i}.folder);
@@ -126,79 +121,100 @@ arLoadParsPEtab(PEparas);
 
 %%
 %% pre-equilibration
-% if doPreEq
-%     tstart = -1e7;
-%     for imodel = 1:length(ar.model)
-%         Tdat = T{imodel,1};
-%
-%         if isfield(table2struct(Tdat), 'preequilibrationConditionId')
-%             uniqueSimConds = unique(Tdat.simulationConditionId);
-%             % uniqueSimConds =
-%             uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
-%             % uniquePreEqConds =
-%             if isa(uniquePreEqConds, 'string')
-%                if all(strcmp(uniquePreEqConds, ""))
-%                    uniquePreEqConds = [];
-%                end
-%             else
-%                 if all(isnan(uniquePreEqConds))
-%                     uniquePreEqConds = [];
-%                 end
-%             end
-%
-%             if numel(uniquePreEqConds) > 1
-%                 error('More than one pre-equiblibration condition currently not supported.')
-%             end
-%
-%             for iPreEqCond = 1:size(uniquePreEqConds,1)
-%                 preEqCondId = convertStringsToChars(uniquePreEqConds(iPreEqCond));
-%                 preEqCond = arFindCondition(preEqCondId, 'conservative');
-%                 simConds = [];
-%                 for iSimCond = 1:size(uniqueSimConds,1)
-%                     simCondId = convertStringsToChars(uniqueSimConds(iSimCond));
-%                     simCond = arFindCondition(simCondId, 'conservative');
-%                     simCondDat = Tdat(Tdat.simulationConditionId==simCondId, :);
-%                     if all(simCondDat.preequilibrationConditionId==preEqCondId)
-%                         simConds = [simConds, simCond];
-%                     end
-%                     % simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(iSimCond)), 'conservative');
-%                     % addSimConds = find(cellfun(@(x) ~strcmp(x, convertStringsToChars(uniquePreEqConds(iPreEqCond))), {ar.model.data.name}));
-%                     % simConds = [simConds, addSimConds];
-%                 end
-%                 simConds = unique(simConds);
-%                 % simConds
-%                 arSteadyState(imodel, preEqCond, simConds, tstart);
-%             end
-%             for iSimCond = 1:length(uniqueSimConds)
-%                 Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(iSimCond),:);
-%
-%                 % iSimCond auf richtige provozieren
-%                 %iSimCondAr = ar.model(m).data(iSimCond).cLink;
-%                 iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
-%                 iSimCondAr = ar.model(m).data(iSimCondAr).cLink;
-%                 % alt:
-%                 % iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
-%
-%                 for iCol = 1:length(Tcondi.Properties.VariableNames)
-%                     idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
-%                     if ~isempty(idxState)
-%                         arAddEvent(m,iSimCondAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}));
-%                         % ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
-%                     end
-%                 end
-%             end
-%         end
-%     end
-% end
-%
-% % events
-% for iev = 1:length(eventStruct)
-%     arAddEvent(1, 'all', eventStruct(iev).time, ...clce
-%         eventStruct(iev).state, 0, eventStruct(iev).value);
-% end
-% end
+if doPreEq
+    % Process Tdat:
+    Tdat = tdfread(PEmeas); % all data of the model
+    fns = fieldnames(Tdat);
+    for i = 1:length(fns)
+        if ischar(Tdat.(fns{i}))
+            Tdat.(fns{i}) = regexprep(string(Tdat.(fns{i})),' ','');
+        end
+    end
+    Tdat = struct2table(Tdat);
+    % handle implicit steady-state measurements ('inf' in time column)
+    % replace time by finite number, add preequilibrationConditionId
+    qImplicitSteadyState = Tdat.time==Inf;
+    Tdat.time(qImplicitSteadyState) = 1;
+    % check if preequilibrationConditionId is present in data table
+    if ~ismember('preequilibrationConditionId', Tdat.Properties.VariableNames)
+        Tdat.preequilibrationConditionId = repmat([""],size(Tdat,1),1);
+    end
+    % verfiy that preequilibrationConditionId is empty for steady-state measurements
+    if any(qImplicitSteadyState & ~strcmp(Tdat.preequilibrationConditionId,''))
+        warning([ ...
+            'preequilibrationConditionId should be empty for steady-state measurements specified by time=inf' ...
+            'Overriding preequilibrationConditionId by simulationConditionId.'])
+    end
+    Tdat.preequilibrationConditionId(qImplicitSteadyState) = Tdat.simulationConditionId(qImplicitSteadyState);
 
-arSave(ar.info.name)
+    % PreEq
+    tstart = -1e7;
+    if isfield(table2struct(Tdat), 'preequilibrationConditionId')
+        uniqueSimConds = unique(Tdat.simulationConditionId);
+        % uniqueSimConds =
+        uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
+        % uniquePreEqConds =
+        if isa(uniquePreEqConds, 'string')
+            if all(strcmp(uniquePreEqConds, ""))
+                uniquePreEqConds = [];
+            end
+        else
+            if all(isnan(uniquePreEqConds))
+                uniquePreEqConds = [];
+            end
+        end
+
+        if numel(uniquePreEqConds) > 1
+            error('More than one pre-equiblibration condition currently not supported.')
+        end
+
+        for iPreEqCond = 1:size(uniquePreEqConds,1)
+            preEqCondId = convertStringsToChars(uniquePreEqConds(iPreEqCond));
+            preEqCond = arFindCondition(preEqCondId, 'conservative');
+            simConds = [];
+            for iSimCond = 1:size(uniqueSimConds,1)
+                simCondId = convertStringsToChars(uniqueSimConds(iSimCond));
+                simCond = arFindCondition(simCondId, 'conservative');
+                simCondDat = Tdat(Tdat.simulationConditionId==simCondId, :);
+                if all(simCondDat.preequilibrationConditionId==preEqCondId)
+                    simConds = [simConds, simCond];
+                end
+                % simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(iSimCond)), 'conservative');
+                % addSimConds = find(cellfun(@(x) ~strcmp(x, convertStringsToChars(uniquePreEqConds(iPreEqCond))), {ar.model.data.name}));
+                % simConds = [simConds, addSimConds];
+            end
+            simConds = unique(simConds);
+            % simConds
+            arSteadyState(imodel, preEqCond, simConds, tstart);
+        end
+        for iSimCond = 1:length(uniqueSimConds)
+            Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(iSimCond),:);
+
+            % iSimCond auf richtige provozieren
+            %iSimCondAr = ar.model(m).data(iSimCond).cLink;
+            iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
+            iSimCondAr = ar.model(m).data(iSimCondAr).cLink;
+            % alt:
+            % iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
+
+            for iCol = 1:length(Tcondi.Properties.VariableNames)
+                idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
+                if ~isempty(idxState)
+                    arAddEvent(m,iSimCondAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}));
+                    % ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
+                end
+            end
+        end
+    end
+end
+
+% events
+for iev = 1:length(eventStruct)
+    arAddEvent(1, 'all', eventStruct(iev).time, ...
+        eventStruct(iev).state, 0, eventStruct(iev).value);
+end
+
+%arSave(ar.info.name)
 
 end
 
