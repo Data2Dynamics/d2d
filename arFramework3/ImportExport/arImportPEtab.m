@@ -75,13 +75,13 @@ if ischar(PEtabName)
         if ~exist(dataFolder, 'dir')  % Check if folder does not exist
             mkdir(dataFolder);  % Create folder
         end
-        dataFilenames = arWriteDataFromPEtab(PEtabName, dataFolder);
+        dataFilenames = writeDataFromPEtab(PEtabName, dataFolder);
     elseif (exist('dataFolder','var') || ~isempty(dataFolder)) & (~exist('dataFilenames','var') || isempty(dataFilenames))
         files = dir(fullfile(dataFolder, '*.xls'));
         dataFilenames = arrayfun(@(f) f.name(1:end-4), files, 'UniformOutput', false);
     elseif (exist('dataFolder','var') || ~isempty(dataFolder)) & (exist('dataFilenames','var') || ~isempty(dataFilenames))
-        files = dir(fullfile(dataFolder, dataFilenames,[strrep(PEtabName,'.xls','') '.xls']));
-        dataFilenames = arrayfun(@(f) f.name(1:end-4), files, 'UniformOutput', false);
+        dataFilenames = fullfile(dataFolder,strrep(dataFilenames,'.xls',''));
+        dataFilenames = cellfun(@(x) dir([x, '.def']), dataFilenames, 'UniformOutput', false);
     end
 
     %%
@@ -113,8 +113,11 @@ end
 arLoadModel(modelname);
 splitedFilenames = split(dataFilenames,filesep);
 for i=1:length(dataFilenames)
-    arLoadData(char(splitedFilenames(1,i,2)),[],[],[],'DataPath',char(splitedFilenames(1,i,1)));
+     arLoadData(char(splitedFilenames(1,i,2)),[],[],[],'DataPath',char(splitedFilenames(1,i,1)));
 end
+% for i=1:length(dataFilenames)
+%     arLoadData(dataFilenames{i}.name,[],[],[],'DataPath',dataFilenames{i}.folder);
+% end
 arCompileAll;
 ar.config.fiterrors = 1;
 arLoadParsPEtab(PEparas);
@@ -194,6 +197,8 @@ arLoadParsPEtab(PEparas);
 %         eventStruct(iev).state, 0, eventStruct(iev).value);
 % end
 % end
+
+arSave(ar.info.name)
 
 end
 

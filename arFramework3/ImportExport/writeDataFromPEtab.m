@@ -1,8 +1,16 @@
-% ToDo:
-% \tC\tau\tconc.\t1\t1\t etc
-% num2str(max(time)*1.2)
+function dataFilenames = writeDataFromPEtab(yamlFile, savePath)
+% writeDataFromPEtab(yamlFile, savePath)
+%
+% This function reads the PEtab files and writes the data to excel (.xls) files and creates the corresponding .def files for each simulation condition.
+%
+% Inputs:
+%   yamlFile: string, name of the yaml file in the PEtab folder. If not specified, the function will look for a .yaml file in the PEtab folder. Multiple .yaml files are not allowed.
+%   savePath: string, path to the folder where the data files should be saved. [default: 'DataPEtab']
+%
+% Outputs:
+%   dataFilenames: cell array of strings, filenames of the data files
+%  
 
-function dataFilenames = arWriteDataFromPEtab(yamlFile, savePath)
 
 %% Filenames
 if ~exist('yamlFile','var') || isempty(yamlFile)
@@ -97,15 +105,18 @@ for i=1:length(uniqueSimConds)
     end
 
     % only the observableIDs that have uniqueSimConds{i} in their name
-    observableIdCond = unique(Tdat.observableId(contains(Tdat.observableId, uniqueSimConds{i}))); % find all occurences of uniqueSimConds{i} in observableIds
-    observableId = regexprep(observableIdCond, ['_',uniqueSimConds{i}],'');
+    %observableIdCond = unique(Tdat.observableId(contains(Tdat.observableId, uniqueSimConds{i}))); % find all occurences of uniqueSimConds{i} in observableIds
+    %observableId = regexprep(observableIdCond, ['_',uniqueSimConds{i}],'');
+    
+    % find observabeles that of simulationConditionId
+    observableId = unique(Tdat.observableId(contains(Tdat.simulationConditionId, uniqueSimConds{i})));
 
-    ind = find(contains(Tdat.observableId, uniqueSimConds{i}));
+    ind = find(contains(Tdat.simulationConditionId, uniqueSimConds{i}));
     timeUni = unique(Tdat.time(ind));
     timeMax = [timeUni, NaN(length(timeUni),1)];
     
-    for o = 1:length(observableIdCond)
-        indObs = find(Tdat.observableId == observableIdCond{o});
+    for o = 1:length(observableId)
+        indObs = intersect(find(Tdat.observableId == observableId{o}),ind); % observableID and simulationConditionId
         tObs = Tdat.time(indObs);
         
         % Compute unique values and counts
@@ -132,8 +143,8 @@ for i=1:length(uniqueSimConds)
         T.(char(observableId(o))) = NaN(length(time), 1); % Fill with NaN for now
     end
 
-    for o=1:length(observableIdCond)
-        indObs = find(Tdat.observableId == observableIdCond{o});
+    for o=1:length(observableId)
+        indObs = find(Tdat.observableId == observableId{o});
         for t = 1:length(indObs)
         % find all rows in T where T.time==Tdat.time(indObs(t))
         indT = find(T.time == Tdat.time(indObs(t)));
@@ -169,17 +180,21 @@ for i=1:length(uniqueSimConds)
 
     % Observables   
     fprintf(fid, '\nOBSERVABLES\n');
-    indObs = find(contains(Tobs.observableId, uniqueSimConds{i}));  
+    indObs = find(contains(Tobs.observableId, observableId));
     for j = 1:length(indObs)
         ind = indObs(j);
-        fprintf(fid, [Tobs.observableName{ind},'\tC\tau\tconc.\t1\t1\t','"',Tobs.observableFormula{ind},'"\n']);
+        if isfield(Tobs,'observableName')
+            fprintf(fid, [Tobs.observableId{ind},'\tC\tau\tconc.\t1\t1\t','"',Tobs.observableFormula{ind},'"\t"',Tobs.observableName{ind},'"\n']);
+        else
+            fprintf(fid, [Tobs.observableId{ind},'\tC\tau\tconc.\t1\t1\t','"',Tobs.observableFormula{ind},'"\n']);
+        end
     end
 
     % Errors
     fprintf(fid, '\nERRORS\n');
     for j = 1:length(indObs)
         ind = indObs(j);
-        fprintf(fid, [Tobs.observableName{ind},'\t','"',Tobs.noiseFormula{ind},'"\n']);
+        fprintf(fid, [Tobs.observableId{ind},'\t','"',Tobs.noiseFormula{ind},'"\n']);
     end
 
     % Conditions            

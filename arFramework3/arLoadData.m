@@ -102,6 +102,10 @@ function arLoadData(name, m, extension, removeEmptyObs, varargin)
 
 global ar
 
+% works also if .xls or .def fileaendings are used
+name = strrep(name,'.xls','');
+name = strrep(name,'.def','');
+
 arFprintf( 3, 'Parsing input arguments...\n' );
 
 if(isempty(ar))
