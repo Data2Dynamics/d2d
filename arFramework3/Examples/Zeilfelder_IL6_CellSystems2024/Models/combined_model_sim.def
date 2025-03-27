@@ -1,0 +1,339 @@
+#define BSA_LINK
+#define WB_SEPARATE
+
+DESCRIPTION
+"Model of the IL-6 and SMAD axis when modulated by APAP and DCF"
+
+PREDICTOR
+t                       T   min         time	0       200
+
+COMPARTMENTS
+cyt                     V   pl          vol.
+nuc                     V   pl          vol.
+
+STATES
+    // SMAD
+        BMPR                    C   au          conc.   cyt     1   "Total BMP receptor"
+        BMPR_delay1             C   au          conc.   cyt     1   "Cofactor activated by BMP receptor"
+        BMPR_delay2             C   au          conc.   cyt     1   "Cofactor activated by BMP receptor"
+        BMPR_delay3             C   au          conc.   cyt     1   "Cofactor activated by BMP receptor"
+        BMPR_delay4             C   au          conc.   cyt     1   "Cofactor activated by BMP receptor"
+        BMPR_delay5             C   au          conc.   cyt     1   "Cofactor activated by BMP receptor"
+        BMPR_delay6             C   au          conc.   cyt     1   "Cofactor activated by BMP receptor"
+
+        SMAD6RNA1               C   au          conc.   nuc     1   "SMAD6 inhibitor delay"
+        SMAD6RNA2               C   au          conc.   nuc     1   "SMAD6 inhibitor delay"
+        SMAD6RNA                C   au          conc.   nuc     1   "SMAD6 inhibitor mRNA"
+
+        ID3RNA                  C   au          conc.   nuc     1   "ID3 mRNA"
+
+    // IL6
+        JAK1_gp130              C   nmol/l      conc.   cyt     1   "Inactive receptor"
+        pJAK1_pgp130            C   nmol/l      conc.   cyt     1   "Total phosphorylated receptor"
+
+        // cSTAT3 and nSTAT3 are subsumed in STAT3 which is the total unphosphorylated pool. This pool is defined w.r.t. cytoplasm.
+        STAT3                   C   nmol/l      conc.   cyt     1   "Unphosphorylated STAT3"
+        cpSTAT3                 C   nmol/l      conc.   cyt     1   "Active cytoplasmic STAT3"
+        npSTAT3                 C   nmol/l      conc.   nuc     1   "Active nuclear STAT3"
+
+        nSOCS3RNA1              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+        nSOCS3RNA2              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+        nSOCS3RNA3              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+        nSOCS3RNA4              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+        nSOCS3RNA5              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+        SOCS3RNA                C   au          conc.   cyt     1   "SOCS3 mRNA"
+
+        SOCS3                   C   nmol/l      conc.   cyt     1   "SOCS3 protein"
+
+    // Interaction
+        nHAMPRNA1               C   au          conc.   nuc     0   "HAMP transcriptional delay"
+        nHAMPRNA2               C   au          conc.   nuc     0   "HAMP transcriptional delay"
+        nHAMPRNA3               C   au          conc.   nuc     0   "HAMP transcriptional delay"
+        nHAMPRNA4               C   au          conc.   nuc     0   "HAMP transcriptional delay"
+        nHAMPRNA5               C   au          conc.   nuc     0   "HAMP transcriptional delay"
+        nHAMPRNA6               C   au          conc.   nuc     0   "HAMP transcriptional delay"
+        nHAMPRNA7               C   au          conc.   nuc     0   "HAMP transcriptional delay"
+        HAMPRNA                 C   au          conc.   cyt     1   "HAMP mRNA"
+
+INPUTS
+        cycloHex                C   ng/ml   conc.   "step1(t, 0,   0,  input_cyclo)"                                                                "Cycloheximid"
+        ActD                    C   ng/ml   conc.   "0"                                                                                             "Actinomycin D"
+        IL6                     C   ng/ml   conc.   "step1(t, 0,   0,  input_il6)"                                                                  "Interleukin 6"
+        Noggin                  C   bool    conc.   "step1(t, 0, -60,  input_noggin)/500"                                                           "Noggin"
+
+        DCF                     C   mM      conc.   "step1(t,0,0,1) * 1e-3 * input_dcf"                                                             "Diclofenac"
+        APAP                    C   mM      conc.   "step1(t,0,0,1) * input_apap"                                                                   "Acetaminophen"
+        BMP                     C   ng/ml   conc.   "(bmp_basal + step1(t, 0, 0, input_bmp2))"                                                      "BMP2"
+
+        DCF_slow                C   mM      conc.   "t * t * 1e-3 * input_dcf * step1(t,0,0,1)" // Reduced from smooth1(t, 0, dcf_inh)
+        SMAD6_mRNA_loss         C   mM      conc.   "smooth1(t, 0, smoothness_mRNA_loss)"
+       
+        DCF_decay_process		C	mM			conc.	"exp(-t*k_DCF_decay)"							"DCF decay process"
+		APAP_decay_process		C	mM			conc.	"exp(-t*k_APAP_decay)"							"APAP decay process"
+
+
+        // "Effective" BMP concentration. APAP and DCF modulate BMP signaling.
+        #define BMP_available ( ( BMP * (1-Noggin) ) * (1 + k_act_DCF * DCF * DCF_decay_process) * (1 + k_act_APAP * APAP * APAP_decay_process ) )
+
+REACTIONS
+    // SMAD
+        0                       -> BMPR                   CUSTOM  "bmpr_pro * bmpr_inh"                                                                     "Receptor production"
+
+        // SMAD6 is very short lived according to the profiles, so while this is mediated by SMAD6 protein, it is not
+        // actually explicitly modelled.
+        BMPR                    -> 0                      CUSTOM  "bmpr_deg_smad * aBMPR * SMAD6"                                                           "SMAD6 mediated receptor degradation"
+
+        // Delay in transduction
+                              -> BMPR_delay1            CUSTOM  "aBMPR"                                                                          "Receptor activation"
+        BMPR_delay1           -> BMPR_delay2            CUSTOM  "bmpr_cof_delay * BMPR_delay1"                                                              "Delay from receptor to pSMAD"
+        BMPR_delay2           -> BMPR_delay3            CUSTOM  "bmpr_cof_delay * BMPR_delay2"                                                              "Delay from receptor to pSMAD"
+        BMPR_delay3           -> BMPR_delay4            CUSTOM  "bmpr_cof_delay * BMPR_delay3"                                                              "Delay from receptor to pSMAD"
+        BMPR_delay4           -> BMPR_delay5            CUSTOM  "bmpr_cof_delay * BMPR_delay4"                                                              "Delay from receptor to pSMAD"
+        BMPR_delay5           -> BMPR_delay6            CUSTOM  "bmpr_cof_delay * BMPR_delay5"                                                              "Delay from receptor to pSMAD"
+        BMPR_delay6           ->                        CUSTOM  "bmpr_cof_delay * BMPR_delay6"                                                              "Delay from receptor to pSMAD"
+
+        // Inhibition of mRNA production over time
+        #define DCF_effect_mRNA     ( 1 + DCF_mRNA_inh * DCF_slow )
+        #define indep_change_mRNA   ( 1 + k_mRNA_loss * SMAD6_mRNA_loss )
+        0                     -> SMAD6RNA1              CUSTOM  "(smadinh_basal / DCF_effect_mRNA )  * (1-ActD)"                                            "Basal production SMAD inhibitor"
+
+        // Used to have a saturation effect, but this was non identifiable.
+        0                     -> SMAD6RNA1              CUSTOM  "(smadinh_trans / ( DCF_effect_mRNA * indep_change_mRNA ) ) * pSMAD * (1-ActD)"             "Production SMAD inhibitor"
+        SMAD6RNA1             -> SMAD6RNA2              CUSTOM  "smadinh_delay  * SMAD6RNA1"                                                                "Delay SMAD inhibitor"
+        SMAD6RNA2             -> SMAD6RNA               CUSTOM  "smadinh_delay  * SMAD6RNA2"                                                                "Delay SMAD inhibitor"
+        SMAD6RNA              -> 0                      CUSTOM  "smadinhrna_deg * SMAD6RNA"                                                                 "Degradation SMAD inhibitor RNA"
+
+        0                     -> ID3RNA                 CUSTOM "ID3_pro * pSMAD"                                                                            "ID3 mRNA production"
+        ID3RNA                -> 0                      CUSTOM "ID3_deg * ID3RNA"                                                                           "ID3 mRNA degradation"
+
+    // IL6
+        // Association with SOCS3 is handled via rapid equilibrium (dissoc and assoc very large)
+                              ->  JAK1_gp130            CUSTOM  "(1-ActD) * (1-cycloHex) * receptor_pro  / ( ( 1 + dcf_receptor_pro * DCF ) * ( 1 + apap_receptor_pro * APAP ) )"     "Receptor production"
+        JAK1_gp130            ->                        CUSTOM  "receptor_deg * JAK1_gp130"                                                                                                     "Receptor degradation"
+        pJAK1_pgp130          ->                        CUSTOM  "receptor_deg * pJAK1_pgp130"                                                                                                   "Phosphorylated receptor degradation"
+
+        JAK1_gp130            ->  pJAK1_pgp130          CUSTOM  "il6_act * il6_basal * JAK1_gp130        * ( 1 + dcf_il6_basal * DCF )    * ( 1 + apap_il6_basal * APAP )"            "Basal receptor phosphorylation"
+        JAK1_gp130            ->  pJAK1_pgp130          CUSTOM  "il6_act * IL6 * JAK1_gp130"                                                                                                    "Receptor phosphorylation"
+
+        pJAK1_pgp130 + SOCS3  ->  SOCS3                 CUSTOM  "receptor_deg_socs3 * pJAK1_pgp130 * (SOCS3/(k_sat_SOCS3 + SOCS3))"                                                             "SOCS3_Bound receptor degradation"
+
+        STAT3                 ->  cpSTAT3               CUSTOM  "stat3_act  * cSTAT3 * pJAK1_pgp130 / ( 1 + apap_stat3_act * APAP )"                                                       "Phosphorylation STAT3"     
+        cpSTAT3               ->  npSTAT3               CUSTOM  "pstat3_imp * cpSTAT3 * ( 1 + dcf_pstat3_imp * DCF )"                                                                      "Import phosphorylated STAT3" 
+        npSTAT3               ->  STAT3                 CUSTOM  "stat3_dea  * npSTAT3"                                                                                                          "STAT3 dephosphorylation (cytoplasm)"
+
+        0                     ->  nSOCS3RNA1            CUSTOM  "(1-ActD) * (f_SOCS3_STAT3*(npSTAT3)^n_STAT3) * ( 1 + dcf_f_SOCS3_STAT3 * DCF )"                                           "SOCS3 transcription"
+        nSOCS3RNA1            ->  nSOCS3RNA2            CUSTOM  "(1-ActD) * socs3rna_delay * nSOCS3RNA1 / ( ( 1 + dcf_socs3rna_delay * DCF ) * ( 1 + apap_socs3rna_delay * APAP ) )"  "SOCS3 transcriptional delay"
+        nSOCS3RNA2            ->  nSOCS3RNA3            CUSTOM  "(1-ActD) * socs3rna_delay * nSOCS3RNA2 / ( ( 1 + dcf_socs3rna_delay * DCF ) * ( 1 + apap_socs3rna_delay * APAP ) )"  "SOCS3 transcriptional delay"
+        nSOCS3RNA3            ->  nSOCS3RNA4            CUSTOM  "(1-ActD) * socs3rna_delay * nSOCS3RNA3 / ( ( 1 + dcf_socs3rna_delay * DCF ) * ( 1 + apap_socs3rna_delay * APAP ) )"  "SOCS3 transcriptional delay"
+        nSOCS3RNA4            ->  nSOCS3RNA5            CUSTOM  "(1-ActD) * socs3rna_delay * nSOCS3RNA4 / ( ( 1 + dcf_socs3rna_delay * DCF ) * ( 1 + apap_socs3rna_delay * APAP ) )"  "SOCS3 transcriptional delay"
+        nSOCS3RNA5            ->  SOCS3RNA              CUSTOM	"(1-ActD) * socs3rna_delay * nSOCS3RNA5 / ( ( 1 + dcf_socs3rna_delay * DCF ) * ( 1 + apap_socs3rna_delay * APAP ) )"  "SOCS3 transcriptional delay"
+        SOCS3RNA              ->  0                     CUSTOM	"socs3rna_deg   * SOCS3RNA   / ( ( 1 + dcf_socs3rna_deg * DCF )   * ( 1 + apap_socs3rna_deg * APAP ) )"               "SOCS3 mRNA degradation"
+
+                              ->  SOCS3                 CUSTOM  "(1-cycloHex) * socs3_pro * ( SOCS3RNA / ( socs3_sat + SOCS3RNA ) ) / ( ( 1 + dcf_socs3_pro * DCF ) * ( 1 + apap_socs3_pro * APAP ) )"              "SOCS3 translation"
+        SOCS3                 ->  0                     CUSTOM	"socs3_deg * SOCS3 / ( ( 1 + dcf_socs3_deg * DCF ) * ( 1 + apap_socs3_deg * APAP ) )"                                                               "SOCS3 degradation"
+
+    // Interaction
+        #define hampdelay_mod ( (1 + apap_hamprna_delay * APAP) )
+        #define hampdeg_mod   ( (1 + apap_hamprna_deg * APAP) * (1 + dcf_hamprna_deg * DCF) )
+
+        // Three model reductions were applied to this expression.
+        // 1. Originally, the model was formulated as a saturating function.
+        //    F_reg_HAMP_nom      = basal_HAMP + f_HAMP_STAT3 * HAMP_STAT3 + f_HAMP_SMAD * HAMP_SMAD + f_HAMP_STAT3 * f_HAMP_SMAD * HAMP_STAT3 * HAMP_SMAD * omega_HAMP;
+        //    F_reg_HAMP_denom    = 1 + HAMP_STAT3 + HAMP_SMAD + HAMP_STAT3 * HAMP_SMAD * omega_HAMP;
+        //    F_reg_HAMP          = F_reg_HAMP_nom / F_reg_HAMP_denom;
+        //    F_reg_HAMP / ( F_reg_HAMP + Kp_HAMP )
+        //
+        //    but this was too complex given the data. Kp was open towards positive infinity, 
+        //    which meant that the saturation behaviour was not required to describe the data.
+        //
+        // 2. In the original model we did have a separate n_STAT3 for SOCS3 and HAMP but 
+        //    this was non-identifiable.
+        //
+        // 3. In the original model we had hill kinetics for the terms beta_STAT3 and beta_SMAD,
+        //    however, once again, the saturation turned out to be non identifiable from the data.
+        //    The resulting model is valid in the non-saturating range.
+        #define beta_STAT3 ( npSTAT3^n_STAT3 )
+        #define beta_SMAD  ( pSMAD^n_SMAD )
+
+        #define nom_HAMP   (f_HAMP_STAT3 * beta_STAT3 + f_HAMP_SMAD * beta_SMAD + omega_HAMP * f_HAMP_STAT3 * f_HAMP_SMAD * beta_STAT3 * beta_SMAD)
+        // Reduced out: #define denom_HAMP (1 + beta_STAT3 + beta_SMAD + omega_HAMP * beta_STAT3 * beta_SMAD)
+
+        // HAMP RNA pro reduced out
+        0                     ->  nHAMPRNA1             CUSTOM  "(1-ActD) * (nom_HAMP)"       "HAMP mRNA transcription"
+        nHAMPRNA1             ->  nHAMPRNA2             CUSTOM  "(1-ActD) * hamprna_delay * nHAMPRNA1 / hampdelay_mod"             "HAMP transcriptional delay"
+        nHAMPRNA2             ->  nHAMPRNA3             CUSTOM  "(1-ActD) * hamprna_delay * nHAMPRNA2 / hampdelay_mod"             "HAMP transcriptional delay"
+        nHAMPRNA3             ->  nHAMPRNA4             CUSTOM  "(1-ActD) * hamprna_delay * nHAMPRNA3 / hampdelay_mod"             "HAMP transcriptional delay"
+        nHAMPRNA4             ->  nHAMPRNA5             CUSTOM  "(1-ActD) * hamprna_delay * nHAMPRNA4 / hampdelay_mod"             "HAMP transcriptional delay"
+        nHAMPRNA5             ->  nHAMPRNA6             CUSTOM  "(1-ActD) * hamprna_delay * nHAMPRNA5 / hampdelay_mod"             "HAMP transcriptional delay"
+        nHAMPRNA6             ->  nHAMPRNA7             CUSTOM  "(1-ActD) * hamprna_delay * nHAMPRNA6 / hampdelay_mod"             "HAMP transcriptional delay"
+        nHAMPRNA7             ->  HAMPRNA               CUSTOM  "(1-ActD) * hamprna_delay * nHAMPRNA7 / hampdelay_mod"             "HAMP transcriptional delay"
+        HAMPRNA               ->  0                     CUSTOM  "hamprna_deg * HAMPRNA / hampdeg_mod"                               "HAMP mRNA degradation"
+
+DERIVED
+    // SMAD
+        // Protein followed RNA levels exactly in the model (degradation non-identifiable). Scale was non-identifiable, so set to 1.
+        SMAD6                  C   nmol/l      conc.   "SMAD6RNA"
+
+        // Activation and deactivation of the receptor is rapid. Km is non-identifiable but set to a high value to enforce BMPR > aBMPR.
+        aBMPR                  C   nmol/l      conc.  "( BMP_available / ( BMP_available + Km_BMP ) ) * BMPR"
+
+        // Deactivation of SMAD was open to positive infinity and was therefore reduced. SMAD scale is unknown and not of interest
+        // and therefore set to 1.
+        pSMAD                  C   nmol/l      conc.  "BMPR_delay6"
+
+    // IL6
+        cSTAT3          C   nmol/l      conc.   "STAT3 * ( 1 / ( K_transport + 1 ) )"
+        nSTAT3          C   nmol/l      conc.   "(vol_cyt / vol_nuc) * ( STAT3 - cSTAT3 )"
+
+        tcpSTAT3        C   nmol/l      conc.   "cpSTAT3"
+        tnpSTAT3        C   nmol/l      conc.   "npSTAT3"
+        ctSTAT3         C   nmol/l      conc.   "cSTAT3 + cpSTAT3"
+        ntSTAT3         C   nmol/l      conc.   "nSTAT3 + npSTAT3"
+        tSTAT3          C   nmol/l      conc.   "(vol_cyt * (cSTAT3 + cpSTAT3) + vol_nuc * (nSTAT3 + npSTAT3) )/(vol_cyt+vol_nuc)"
+        tpSTAT3         C   nmol/l      conc.   "(vol_cyt * cpSTAT3 + vol_nuc * npSTAT3 )/(vol_cyt+vol_nuc)"
+        tSOCS3          C   nmol/l      conc.   "SOCS3"
+        tgp130          C   nmol/l      conc.   "JAK1_gp130 + pJAK1_pgp130"
+
+OBSERVABLES
+    // SMAD
+        SMAD6_qpcr             C   au               conc.   0   1   "scale_smad6_qpcr_nExpID * SMAD6RNA"                                "SMAD6 qPCR"
+        SMAD6_qpcr_scaled      C   au               conc.   0   1   "scale_smad6_qpcr_filename_nExpID * SMAD6RNA"                       "SMAD6 qPCR"
+        ID3_qpcr_scaled        C   au               conc.   0   1   "scale_ID3_qpcr_filename_nExpID * ID3RNA + offset_ID3_qpcr"         "ID3 qPCR"
+
+        pSMAD_wb_scaled        C   au               conc.   0	0   "scale_psmad_filename_nExpID * pSMAD"                               "pSMAD wb"
+        pSMAD_DR_wb_scaled     C   au               conc.   0	0   "scale_psmad_DR_nExpID * pSMAD"                                     "pSMAD DR wb"
+
+    // IL-6
+        #ifdef BSA_LINK
+            mcyto_obs       C   ug/uL           conc.   0   0 "mcyto"
+            mnuc_obs        C   ug/uL           conc.   0   0 "mnuc"
+        #endif
+
+        binding_sites          C   -            conc.   0   0   "scale_gp130_deg * JAK1_gp130"                                                                      "Percentage IL6 binding sites"
+        gp130_abs              C   zmol/cell    conc.   0   0   "tgp130*(vol_cyt+vol_nuc)"                                                                          "gp130 total"
+        socs3_abs              C   zmol/cell    conc.   0   0   "tSOCS3*vol_cyt"                                                                                    "SOCS3 total"
+        stat3_abs              C   zmol/cell    conc.   0   0   "tSTAT3*(vol_cyt+vol_nuc)"                                                                          "total STAT3"
+        SOCS3_qpcr             C   au           conc.   0   1   "scale_socs3_qpcr_nExpID * SOCS3RNA"                                                                "SOCS3 qPCR"
+
+        pY_STAT3               C   -            conc.   0   0   "tpSTAT3 / tSTAT3"                                                                                  "Phosphorylation degree"
+
+        // Offsets were all reduced out
+        ctSTAT3_wb_scaled      C   au           conc.   0	0   "scale_tstat3_filename_nExpID * vol_cyt * ctSTAT3"                                                  "Total cytoplasmic STAT3"
+        ntSTAT3_wb_scaled      C   au           conc.   0	0   "scale_tstat3_filename_nExpID * (mcyto/mnuc) * vol_nuc * ntSTAT3"                                   "Total nuclear STAT3"
+        tSTAT3_wb_scaled       C   au           conc.   0	0   "scale_tstat3_filename_nExpID * ( vol_cyt + vol_nuc ) * ( mcyto / ( mnuc + mcyto ) ) * tSTAT3"      "Total STAT3"
+
+        cpSTAT3_wb_scaled      C   au           conc.   0	0   "scale_pstat3_filename_nExpID * vol_cyt * tcpSTAT3"                                                 "Cytoplasmic pSTAT3"
+        npSTAT3_wb_scaled      C   au           conc.   0	0   "scale_pstat3_filename_nExpID * (mcyto/mnuc) * vol_nuc * tnpSTAT3"                                  "Nuclear pSTAT3"
+        tpSTAT3_wb_scaled      C   au           conc.   0	0   "scale_pstat3_filename_nExpID * ( vol_cyt + vol_nuc ) * ( mcyto / ( mnuc + mcyto ) ) * tpSTAT3"     "Total pSTAT3"
+
+        SOCS3_qpcr_scaled      C   au           conc.   0	1   "scale_socs3_qpcr_filename_nExpID * SOCS3RNA"                                                       "SOCS3 qPCR"
+        SOCS3_noHK_qpcr_scaled C   au           conc.   0	1   "scale_socs3_decay_nExpID * SOCS3RNA + offset_socs3_decay_nExpID"                                   "Decay measurement"
+
+        cSOCS3_wb              C   au           conc.   0	0   "scale_csocs3_filename_nExpID * tSOCS3"                                                             "SOCS3"
+       
+    // Interaction
+        HAMP_qpcr_scaled       C   au           conc.   0   1   "scale_hamp_qpcr_filename_nExpID * HAMPRNA"                                                         "HAMP qPCR"
+        HAMP_noHK_qpcr_scaled  C   au           conc.   0	1   "scale_hamp_decay_nExpID * HAMPRNA + offset_hamp_decay_nExpID"                                      "Decay measurement"
+
+ERRORS
+    // SMAD
+        SMAD6_qpcr          "sd_smad6_qpcr"
+        pSMAD_wb_scaled     "sqrt( sd_pSMAD^2 + sd_rel_pSMAD^2 * pSMAD^2 ) * scale_psmad_filename_nExpID"
+        pSMAD_DR_wb_scaled  "sqrt( sd_pSMAD^2 + sd_rel_pSMAD^2 * pSMAD^2 ) * scale_psmad_DR_nExpID"
+        SMAD6_qpcr_scaled   "sd_smad6_qpcr_abs"
+        ID3_qpcr_scaled     "sd_id3_qpcr_abs"
+
+    // IL6
+        #ifdef BSA_LINK
+            mcyto_obs       	"sd_mcyto"
+            mnuc_obs            "sd_mnuc" 
+        #endif
+
+        gp130_abs           "sd_gp130_abs"
+        socs3_abs           "sd_socs3_abs"
+        stat3_abs           "sd_stat3_abs"
+        SOCS3_qpcr          "sd_socs3_qpcr"
+
+        pY_STAT3            "1"
+        binding_sites       "1"
+
+        ctSTAT3_wb_scaled	"scale_tstat3_filename_nExpID * sqrt( sd_ctSTAT3^2 + sd_rel_ctSTAT3^2 * ctSTAT3^2 )"
+        ntSTAT3_wb_scaled	"scale_tstat3_filename_nExpID * sqrt( sd_ntSTAT3^2 + sd_rel_ntSTAT3^2 * ntSTAT3^2 )"
+        tSTAT3_wb_scaled	"scale_tstat3_filename_nExpID * sqrt( sd_tSTAT3^2  + sd_rel_tSTAT3^2 *  tSTAT3^2 )"
+
+        cpSTAT3_wb_scaled	"scale_pstat3_filename_nExpID * sqrt( sd_cpSTAT3^2 + sd_rel_cpSTAT3^2 * tcpSTAT3^2 )"
+        npSTAT3_wb_scaled	"scale_pstat3_filename_nExpID * sqrt( sd_npSTAT3^2 + sd_rel_npSTAT3^2 * tnpSTAT3^2 )"
+        tpSTAT3_wb_scaled	"scale_pstat3_filename_nExpID * sqrt( sd_tpSTAT3^2 + sd_rel_tpSTAT3^2 * tpSTAT3^2 )"
+
+        cSOCS3_wb           "scale_csocs3_filename_nExpID * sqrt( sd_cSOCS3^2 + sd_rel_cSOCS3^2 * cSOCS3_wb^2 )"
+
+        SOCS3_qpcr_scaled   "sd_socs3_qpcr"
+        SOCS3_noHK_qpcr_scaled "sd_decay_SOCS3"
+
+    // Interaction
+        HAMP_qpcr_scaled    "sd_hamp_qpcr"
+        HAMP_noHK_qpcr_scaled "sd_decay_HAMP"
+
+SUBSTITUTIONS
+        vcyt                "0.6375"
+        vnuc                "0.2125"
+
+        total_STAT3         "1e3 * STAT3_total"
+
+CONDITIONS
+    vol_cyt                 "vcyt"
+    vol_nuc                 "vnuc"
+
+    // SMAD
+        bmpr_pro            "bmpr_deg_smad"
+
+        init_BMPR           "1"
+        init_BMPR_delay1    "0"
+        init_BMPR_delay2    "0"
+        init_BMPR_delay3    "0"
+        init_BMPR_delay4    "0"
+        init_BMPR_delay5    "0"
+        init_BMPR_delay6    "0"
+
+        init_SMAD6RNA1      "0"
+        init_SMAD6RNA2      "0"
+        init_SMAD6RNA       "0"
+
+        init_ID3RNA         "0"
+
+    // IL-6
+        vol_cyt                     "vcyt"
+        vol_nuc                     "vnuc"
+
+        // No initial parameters for unconserved moieities
+        init_SOCS3RNA               "1"
+        init_nSOCS3RNA1             "1"
+        init_nSOCS3RNA2             "1"
+        init_nSOCS3RNA3             "1"
+        init_nSOCS3RNA4             "1"
+        init_nSOCS3RNA5             "1"
+        init_SOCS3                  "1"
+
+        // Totals for the conserved pools
+        init_STAT3                  ".5 * total_STAT3 * (vnuc+vcyt) / vcyt" // <= Defined w.r.t. cytoplasm
+        init_cpSTAT3                "0"
+        init_npSTAT3                ".5 * total_STAT3 * (vnuc+vcyt) / vnuc"
+
+        receptor_pro                "receptor_pro"
+        init_JAK1_gp130             "receptor_pro * receptor_deg"
+        init_pJAK1_pgp130           "0"
+
+        stat3_act                   "stat3_act / receptor_pro"
+
+    // Interaction
+        init_HAMPRNA                "0"
+        init_nHAMPRNA1              "0"
+        init_nHAMPRNA2              "0"
+        init_nHAMPRNA3              "0"
+        init_nHAMPRNA4              "0"
+        init_nHAMPRNA5              "0"
+        init_nHAMPRNA6              "0"
+        init_nHAMPRNA7              "0"
+
+RANDOM
+        nExpID INDEPENDENT
