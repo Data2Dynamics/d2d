@@ -1,0 +1,20 @@
+DESCRIPTION
+"Experimenter: Anja Juenger"
+"Cells: HepG2"
+"mRNA degradation with/without DCF"
+        
+PREDICTOR
+t               T   min     time	0	500
+
+INPUTS
+ActD                    "step1(t, 0,   40,  1)"
+
+OBSERVABLES
+
+ERRORS
+        
+CONDITIONS
+HepG2 "1"
+
+RANDOM
+nExpID INDEPENDENT

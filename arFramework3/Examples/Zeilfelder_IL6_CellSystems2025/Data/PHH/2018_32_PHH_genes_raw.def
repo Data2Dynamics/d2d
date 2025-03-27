@@ -1,0 +1,16 @@
+DESCRIPTION
+"Experimenter: Anja Juenger"
+"Cells: PHH"
+"qPCR time course data"
+
+PREDICTOR
+t	T	"min"	"time"	0	500
+
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS

@@ -1,0 +1,23 @@
+DESCRIPTION
+"Steady state simulation"
+        
+PREDICTOR
+t               T   min     time	-1000 2000
+
+INPUTS
+
+OBSERVABLES
+dummy      C   au               conc.   0	0   "1"
+
+ERRORS
+dummy   "1"  
+        
+CONDITIONS
+    input_il6 "0"
+    input_dcf "0"
+    input_apap "0"
+    input_bmp2 "0"
+    input_phh "1"
+    DCF_mRNA_inh "0"
+    k_basal_loss "0"
+    is_ss "1"
