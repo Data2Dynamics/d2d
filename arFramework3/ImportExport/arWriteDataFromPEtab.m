@@ -1,5 +1,5 @@
-function dataFilenames = writeDataFromPEtab(yamlFile, savePath)
-% writeDataFromPEtab(yamlFile, savePath)
+function dataFilenames = arWriteDataFromPEtab(yamlFile, savePath)
+% arWriteDataFromPEtab(yamlFile, savePath)
 %
 % This function reads the PEtab files and writes the data to excel (.xls) files and creates the corresponding .def files for each simulation condition.
 %
@@ -76,10 +76,10 @@ Tcond = tdfread(fullfile(yamlPath,conditionFile)); % condition File
 fns = fieldnames(Tcond);
 for i = 1:length(fns)
     if ischar(Tcond.(fns{i}))
-        Tcond.(fns{i}) = regexprep(string(Tcond.(fns{i})), ' ', '');
-        if ismember(fns{i}, species)
+        Tcond.(fns{i}) = regexprep(string(Tcond.(fns{i})), ' ', ''); 
+    end
+    if ismember(fns{i}, species)
             Tcond = renameStructField(Tcond, fns{i}, ['init_', fns{i}]);
-        end
     end
 end
 
@@ -103,10 +103,6 @@ for i=1:length(uniqueSimConds)
     if exist(filenamexls, 'file')
         delete(filenamexls); % Delete the file
     end
-
-    % only the observableIDs that have uniqueSimConds{i} in their name
-    %observableIdCond = unique(Tdat.observableId(contains(Tdat.observableId, uniqueSimConds{i}))); % find all occurences of uniqueSimConds{i} in observableIds
-    %observableId = regexprep(observableIdCond, ['_',uniqueSimConds{i}],'');
     
     % find observabeles that of simulationConditionId
     observableId = unique(Tdat.observableId(contains(Tdat.simulationConditionId, uniqueSimConds{i})));
@@ -144,7 +140,8 @@ for i=1:length(uniqueSimConds)
     end
 
     for o=1:length(observableId)
-        indObs = find(Tdat.observableId == observableId{o});
+        indObs = intersect(find(Tdat.observableId == observableId{o}),ind); % observableID and simulationConditionId
+        %indObs = find(Tdat.observableId == observableId{o});
         for t = 1:length(indObs)
         % find all rows in T where T.time==Tdat.time(indObs(t))
         indT = find(T.time == Tdat.time(indObs(t)));
@@ -183,10 +180,13 @@ for i=1:length(uniqueSimConds)
     indObs = find(contains(Tobs.observableId, observableId));
     for j = 1:length(indObs)
         ind = indObs(j);
+        comparelog10 = ~strcmp(Tobs.observableTransformation(ind),"lin");
+        obsEntry = sprintf('%s\tC\tau\tconc.\t0\t    %u\t   \t"%s"', ...
+            Tobs.observableId{ind},comparelog10,Tobs.observableFormula{ind});
         if isfield(Tobs,'observableName')
-            fprintf(fid, [Tobs.observableId{ind},'\tC\tau\tconc.\t1\t1\t','"',Tobs.observableFormula{ind},'"\t"',Tobs.observableName{ind},'"\n']);
+            fprintf(fid, [obsEntry,'\t"',Tobs.observableName{ind},'"\n']);
         else
-            fprintf(fid, [Tobs.observableId{ind},'\tC\tau\tconc.\t1\t1\t','"',Tobs.observableFormula{ind},'"\n']);
+            fprintf(fid, [obsEntry,'\n']);
         end
     end
 
@@ -194,17 +194,27 @@ for i=1:length(uniqueSimConds)
     fprintf(fid, '\nERRORS\n');
     for j = 1:length(indObs)
         ind = indObs(j);
-        fprintf(fid, [Tobs.observableId{ind},'\t','"',Tobs.noiseFormula{ind},'"\n']);
+        if strcmp(Tobs.observableTransformation(ind),"log");
+            fprintf(fid, [Tobs.observableId{ind},'\t','"',Tobs.noiseFormula{ind},' / log(10)','"\n']);
+            warning(['Active fitting on natural logarithm scale for observable ',Tobs.observableId{ind},' in condition ',uniqueSimConds{i},'. Do not change ar.config.fiterrors!'])
+        else
+            fprintf(fid, [Tobs.observableId{ind},'\t','"',Tobs.noiseFormula{ind},'"\n']);
+        end
     end
 
     % Conditions            
     fprintf(fid, '\nCONDITIONS\n');
     indCond = find(contains(Tcond.conditionId, uniqueSimConds{i}));
     fns = fieldnames(Tcond);
-    for test = 2:length(fns)
-        fprintf(fid, [fns{test}, '\t', '"',num2str(Tcond.(fns{test})(indCond)),'"\n']);
+    for fieldname = 2:length(fns)
+        value = Tcond.(fns{fieldname})(indCond);
+        if ((ischar(value) || isstring(value)) && strcmpi(value,"NaN"))
+            value = str2num(value);
+        end
+        if ~(ischar(value) && isempty(value)) && ~(isnumeric(value) && isnan(value))
+            fprintf(fid, [fns{fieldname}, '\t', '"',num2str(Tcond.(fns{fieldname})(indCond)),'"\n']);
+        end
     end   
-
     fclose(fid);
 end
 

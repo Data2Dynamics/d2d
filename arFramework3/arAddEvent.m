@@ -99,6 +99,22 @@ for jC = 1 : numel( condis )
         else
             B = 0;
         end
+        %
+        if ~isnumeric(A)
+            A = str2num(A);
+        end
+        % if ~isnumeric(B)
+        %     if ~isempty(str2num(B)) 
+        %         B = str2num(B);
+        %     end
+        % end
+        % %        
+        % if isnumeric(A)
+        %     A = num2str(A);
+        % end
+        % if isnumeric(B)
+        %     B = num2str(B);
+        % end
     end
     
     manualSensitivity = 0;

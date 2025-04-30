@@ -1,4 +1,4 @@
-function arImportPEtab(name, doPreEq)
+function arImportPEtab_old(name, doPreEq)
 % arImportPEtab(name, doPreEq)
 % Import parameter estimation problem formulated in the PEtab standard.
 %
@@ -73,7 +73,7 @@ if ischar(name)
         inputArgs{end+1} = out;
     end
     
-    arImportPEtab(cellfun(@(x) [yamlPath, filesep, x], [inputArgs{:}], 'UniformOutput', false),doPreEq);
+    arImportPEtab_old(cellfun(@(x) [yamlPath, filesep, x], [inputArgs{:}], 'UniformOutput', false),doPreEq);
     % also check arReadPEtabYaml
     return
 end
@@ -142,6 +142,7 @@ if doPreEq
                 error('More than one pre-equiblibration condition currently not supported.')
             end
             
+            
             for iPreEqCond = 1:size(uniquePreEqConds,1)
                 preEqCondId = convertStringsToChars(uniquePreEqConds(iPreEqCond));
                 preEqCond = arFindCondition(preEqCondId, 'conservative');
@@ -161,21 +162,24 @@ if doPreEq
                 % simConds
                 arSteadyState(imodel, preEqCond, simConds, tstart);
             end
-            for iSimCond = 1:length(uniqueSimConds)
-                Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(iSimCond),:);
-                
-                % iSimCond auf richtige provozieren
-                %iSimCondAr = ar.model(m).data(iSimCond).cLink;
-                iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
-                iSimCondAr = ar.model(m).data(iSimCondAr).cLink;
-                % alt:
-                % iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
 
-                for iCol = 1:length(Tcondi.Properties.VariableNames)
-                    idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
-                    if ~isempty(idxState)
-                        arAddEvent(m,iSimCondAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}));
-                        % ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
+            if numel(uniquePreEqConds) > 0
+                for iSimCond = 1:length(uniqueSimConds)
+                    Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(iSimCond),:);
+                    
+                    % iSimCond auf richtige provozieren
+                    %iSimCondAr = ar.model(m).data(iSimCond).cLink;
+                    iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
+                    iSimCondAr = ar.model(m).data(iSimCondAr).cLink;
+                    % alt:
+                    % iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
+    
+                    for iCol = 1:length(Tcondi.Properties.VariableNames)
+                        idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
+                        if ~isempty(idxState)
+                            arAddEvent(m,iSimCondAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}));
+                            % ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
+                        end
                     end
                 end
             end

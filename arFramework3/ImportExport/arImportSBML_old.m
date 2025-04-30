@@ -1,4 +1,4 @@
-% varargout = arImportSBMLold(filename, varargin)
+% varargout = arImportSBML_old(filename, varargin)
 %
 % Import SBML model and translate to .def files
 %
@@ -25,7 +25,7 @@
 %  [ms, modelname] = arImportSBML('BIOMD0000000379','tend', 100, 'compartmentbyname')
 
 
-function varargout = arImportSBMLold(filename, varargin)
+function varargout = arImportSBML_old(filename, varargin)
 warning('This function is deprecated and will be removed in future releases. Use arParseSBML instead.')
 
 %if(~exist('tEnd','var') || isempty(tEnd))
