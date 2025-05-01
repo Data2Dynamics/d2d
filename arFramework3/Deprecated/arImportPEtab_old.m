@@ -1,4 +1,4 @@
-function arImportPEtab(name, doPreEq)
+function arImportPEtab_old(name, doPreEq)
 % arImportPEtab(name, doPreEq)
 % Import parameter estimation problem formulated in the PEtab standard.
 %
@@ -73,7 +73,7 @@ if ischar(name)
         inputArgs{end+1} = out;
     end
     
-    arImportPEtab(cellfun(@(x) [yamlPath, filesep, x], [inputArgs{:}], 'UniformOutput', false),doPreEq);
+    arImportPEtab_old(cellfun(@(x) [yamlPath, filesep, x], [inputArgs{:}], 'UniformOutput', false),doPreEq);
     % also check arReadPEtabYaml
     return
 end
