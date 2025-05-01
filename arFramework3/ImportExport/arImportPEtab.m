@@ -1,4 +1,4 @@
-function arImportPEtab(PEtabName, doPreEq, model, dataFolder, dataFilenames)
+function arImportPEtab(PEtabName, doPreEq, dataFolder, dataFilenames)
 % arImportPEtabNew(PEtabName, transformData, doPreEq, dataFilenames, model)
 %   Imports PEtab files and data files into d2d arFramework
 %   PEtabName:      Name of PEtab file (without extension)
@@ -60,17 +60,13 @@ if ischar(PEtabName)
         end
         inputArgs{end+1} = out;
     end
-    if ~exist('model','var')
-        model = [];
-    end
-
     %%
     if (~exist('dataFolder','var') || isempty(dataFolder)) & (~exist('dataFilenames','var') || isempty(dataFilenames))
         dataFolder = 'DataPEtab';
         if ~exist(dataFolder, 'dir')  % Check if folder does not exist
             mkdir(dataFolder);  % Create folder
         end
-        dataFilenames = writeDataFromPEtab(PEtabName, dataFolder);
+        dataFilenames = arWriteDataFromPEtab(PEtabName, dataFolder);
     elseif (exist('dataFolder','var') || ~isempty(dataFolder)) & (~exist('dataFilenames','var') || isempty(dataFilenames))
         files = dir(fullfile(dataFolder, '*.xls'));
         dataFilenames = arrayfun(@(f) f.name(1:end-4), files, 'UniformOutput', false);
@@ -81,7 +77,7 @@ if ischar(PEtabName)
 
     %%
     arImportPEtab(cellfun(@(x) [yamlPath, filesep, x], [inputArgs{:}], ...
-        'UniformOutput', false), doPreEq, model, dataFolder, dataFilenames);
+        'UniformOutput', false), doPreEq, dataFolder, dataFilenames);
     return
 end
 
@@ -91,18 +87,17 @@ PEmeas = [strrep(PEtabName{3},'.tsv',''),'.tsv'];
 PEconds = [strrep(PEtabName{4},'.tsv',''),'.tsv'];
 PEparas = [strrep(PEtabName{5},'.tsv',''),'.tsv'];
 
-if ~exist('modelname','var') || isempty(modelname)
-    sbmlmodel = dir(PEtabName{1});
-    if isempty(sbmlmodel)
-        error('No SBML file found!');
-    else
-        ar.petab.sbml = sbmlmodel;
-    end
-    if length(sbmlmodel)>1
-        error('Found more than one SBML model file');
-    end
-    [~,modelname,eventStruct] = arParseSBML([sbmlmodel.folder filesep sbmlmodel.name]);
+% model
+sbmlmodel = dir(PEtabName{1});
+if isempty(sbmlmodel)
+    error('No SBML file found!');
+else
+    ar.petab.sbml = sbmlmodel;
 end
+if length(sbmlmodel)>1
+    error('Found more than one SBML model file');
+end
+[~,modelname,eventStruct] = arParseSBML([sbmlmodel.folder filesep sbmlmodel.name]);
 
 %% ar
 arLoadModel(modelname);
@@ -110,10 +105,7 @@ splitedFilenames = split(dataFilenames,filesep);
 for i=1:length(dataFilenames)
     arLoadData(char(splitedFilenames(1,i,2)),[],[],[],'DataPath',char(splitedFilenames(1,i,1)));
 end
-% for i=1:length(dataFilenames)
-%     arLoadData(dataFilenames{i}.name,[],[],[],'DataPath',dataFilenames{i}.folder);
-% end
-arCompileAll;
+arCompileAll(1);
 ar.config.fiterrors = 1;
 arLoadParsPEtab(PEparas);
 arFindInputs(); % might overwrite parameters due to ar.pExtern, but input times might be in parameters table.
@@ -147,13 +139,26 @@ if doPreEq
     end
     Tdat.preequilibrationConditionId(qImplicitSteadyState) = Tdat.simulationConditionId(qImplicitSteadyState);
 
+    % Tcond
+    T = tdfread(PEconds);
+    fns = fieldnames(T);
+    for i = 1:length(fns)
+        if ischar(T.(fns{i}))
+            T.(fns{i}) = regexprep(string(T.(fns{i})),' ','');
+        end
+    end
+
+    if ~isfield(T,'conditionId')
+        T.conditionId = T.conditionID; % old version of arExportPEtab used 'conditionID'
+    end
+
+    Tcond = struct2table(T);
+
     % PreEq
     tstart = -1e7;
     if isfield(table2struct(Tdat), 'preequilibrationConditionId')
         uniqueSimConds = unique(Tdat.simulationConditionId);
-        % uniqueSimConds =
         uniquePreEqConds = unique(Tdat.preequilibrationConditionId);
-        % uniquePreEqConds =
         if isa(uniquePreEqConds, 'string')
             if all(strcmp(uniquePreEqConds, ""))
                 uniquePreEqConds = [];
@@ -179,29 +184,22 @@ if doPreEq
                 if all(simCondDat.preequilibrationConditionId==preEqCondId)
                     simConds = [simConds, simCond];
                 end
-                % simConds(end+1) = arFindCondition(convertStringsToChars(uniqueSimConds(iSimCond)), 'conservative');
-                % addSimConds = find(cellfun(@(x) ~strcmp(x, convertStringsToChars(uniquePreEqConds(iPreEqCond))), {ar.model.data.name}));
-                % simConds = [simConds, addSimConds];
             end
             simConds = unique(simConds);
-            % simConds
             arSteadyState(imodel, preEqCond, simConds, tstart);
         end
-        for iSimCond = 1:length(uniqueSimConds)
-            Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(iSimCond),:);
 
-            % iSimCond auf richtige provozieren
-            %iSimCondAr = ar.model(m).data(iSimCond).cLink;
-            iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
-            iSimCondAr = ar.model(m).data(iSimCondAr).cLink;
-            % alt:
-            % iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model(m).data.name}));
 
-            for iCol = 1:length(Tcondi.Properties.VariableNames)
-                idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
-                if ~isempty(idxState)
-                    arAddEvent(m,iSimCondAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}));
-                    % ar = arAddEvent([ar], model, condition, timepoints, [statename], [A], [B],  [sA], [sB])
+       if numel(uniquePreEqConds) > 0
+            for iSimCond = 1:length(uniqueSimConds)
+                Tcondi = Tcond(Tcond.conditionId == uniqueSimConds(iSimCond),:);
+                iSimCondAr = find(cellfun(@(x) strcmp(x, uniqueSimConds(iSimCond)), {ar.model.data.name}));
+                iSimCondAr = ar.model.data(iSimCondAr).cLink;
+                for iCol = 1:length(Tcondi.Properties.VariableNames)
+                    idxState = find(strcmp(Tcondi.Properties.VariableNames{iCol},ar.model.xNames));
+                    if ~isempty(idxState)
+                        arAddEvent(1,iSimCondAr,0.0001,ar.model.x{idxState}, 0, Tcondi.(ar.model.xNames{idxState}));
+                    end
                 end
             end
         end
@@ -211,7 +209,7 @@ end
 % events
 for iev = 1:length(eventStruct)
     arAddEvent(1, 'all', eventStruct(iev).time, ...
-        eventStruct(iev).state, 0, eventStruct(iev).value);
+         eventStruct(iev).state, 0, eventStruct(iev).value);
 end
 
 %arSave(ar.info.name)
