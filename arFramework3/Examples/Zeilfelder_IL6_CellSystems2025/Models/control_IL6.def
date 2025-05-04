@@ -1,0 +1,164 @@
+#define BSA_LINK
+
+DESCRIPTION
+"IL6 induced STAT3 activation with SOCS3 feedback and APP transcription."
+
+PREDICTOR
+t                       T   min         time	0       200
+
+COMPARTMENTS
+cyt                     V   pl          vol.
+nuc                     V   pl          vol.
+
+STATES
+JAK1_gp130              C   nmol/l      conc.   cyt     1   "Inactive receptor"
+pJAK1_pgp130            C   nmol/l      conc.   cyt     1   "Total phosphorylated receptor"
+
+// cSTAT3 and nSTAT3 are subsumed in STAT3 which is the total unphosphorylated pool
+// This pool is defined w.r.t. cytoplasm.
+STAT3                   C   nmol/l      conc.   cyt     1   "Unphosphorylated STAT3"
+cpSTAT3                 C   nmol/l      conc.   cyt     1   "Active cytoplasmic STAT3"
+npSTAT3                 C   nmol/l      conc.   nuc     1   "Active nuclear STAT3"
+
+nSOCS3RNA1              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+nSOCS3RNA2              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+nSOCS3RNA3              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+nSOCS3RNA4              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+nSOCS3RNA5              C   au          conc.   nuc     0   "SOCS3 transcriptional delay"
+SOCS3RNA                C   au          conc.   cyt     1   "SOCS3 mRNA"
+
+SOCS3                   C   nmol/l      conc.   cyt     1   "SOCS3 protein"
+
+INPUTS
+cycloHex                C   ng/ml   conc.   "step1(t, 0, 0, input_cyclo)"                                                       "Cycloheximid"
+ActD                    C   ng/ml   conc.   "0"                                                                                 "Actinomycin D"
+IL6                     C   ng/ml   conc.   "step1(t, 0, 0, input_il6)"                                                         "Interleukin 6"
+
+REACTIONS
+                      ->  JAK1_gp130            CUSTOM  "(1-ActD) * (1-cycloHex) * receptor_pro"                                "Receptor production"
+JAK1_gp130            ->                        CUSTOM  "receptor_deg * JAK1_gp130"                                             "Receptor degradation"
+pJAK1_pgp130          ->                        CUSTOM  "receptor_deg * pJAK1_pgp130"                                           "Phosphorylated receptor degradation"
+
+JAK1_gp130            ->  pJAK1_pgp130          CUSTOM  "il6_act * il6_basal * JAK1_gp130"                                      "Basal receptor phosphorylation"
+JAK1_gp130            ->  pJAK1_pgp130          CUSTOM  "il6_act * IL6 * JAK1_gp130"                                            "Receptor phosphorylation"
+pJAK1_pgp130 + SOCS3  ->  SOCS3                 CUSTOM  "receptor_deg_socs3 * pJAK1_pgp130 * (SOCS3/(k_sat_SOCS3 + SOCS3))"     "SOCS3 mediated receptor degradation"
+
+// Nuclear exchange of unphosphorylated STAT3 is handled via rapid equilibrium.
+STAT3                   ->  cpSTAT3             CUSTOM  "stat3_act  * cSTAT3 * pJAK1_pgp130"                                    "STAT3 phosphorylation"
+cpSTAT3                 ->  npSTAT3             CUSTOM  "pstat3_imp * cpSTAT3"                                                  "pSTAT3 import"
+npSTAT3                 ->  STAT3               CUSTOM  "stat3_dea  * npSTAT3"                                                  "STAT3 deactivation"
+
+0                     ->  nSOCS3RNA1            CUSTOM  "(1-ActD) * f_SOCS3_STAT3 * (npSTAT3^n_STAT3)"                          "SOCS3 transcription"
+nSOCS3RNA1            ->  nSOCS3RNA2            CUSTOM  "socs3rna_delay * nSOCS3RNA1"                                           "SOCS3 transcriptional delay"
+nSOCS3RNA2            ->  nSOCS3RNA3            CUSTOM  "socs3rna_delay * nSOCS3RNA2"                                           "SOCS3 transcriptional delay"
+nSOCS3RNA3            ->  nSOCS3RNA4            CUSTOM  "socs3rna_delay * nSOCS3RNA3"                                           "SOCS3 transcriptional delay"
+nSOCS3RNA4            ->  nSOCS3RNA5            CUSTOM  "socs3rna_delay * nSOCS3RNA4"                                           "SOCS3 transcriptional delay"
+nSOCS3RNA5            ->  SOCS3RNA              CUSTOM	"socs3rna_delay * nSOCS3RNA5"                                           "SOCS3 transcriptional delay"
+SOCS3RNA              ->  0                     CUSTOM	"socs3rna_deg   * SOCS3RNA"                                             "SOCS3 mRNA degradation"
+
+                      ->  SOCS3                 CUSTOM  "(1-cycloHex) * socs3_pro * SOCS3RNA / ( socs3_sat + SOCS3RNA )"        "SOCS3 production"
+SOCS3                 ->  0                     CUSTOM	"socs3_deg * SOCS3"                                                     "SOCS3 degradation"
+
+DERIVED
+// Rapid equilibrium approximation.
+cSTAT3          C   nmol/l      conc.   "STAT3*(1/(K_transport+1))"
+nSTAT3          C   nmol/l      conc.   "(vol_cyt / vol_nuc) * ( STAT3 - cSTAT3 )"
+
+tcpSTAT3        C   nmol/l      conc.   "cpSTAT3"
+tnpSTAT3        C   nmol/l      conc.   "npSTAT3"
+ctSTAT3         C   nmol/l      conc.   "cSTAT3 + cpSTAT3"
+ntSTAT3         C   nmol/l      conc.   "nSTAT3 + npSTAT3"
+tSTAT3          C   nmol/l      conc.   "(vol_cyt * (cSTAT3 + cpSTAT3) + vol_nuc * (nSTAT3 + npSTAT3) )/(vol_cyt+vol_nuc)"
+tpSTAT3         C   nmol/l      conc.   "(vol_cyt * cpSTAT3 + vol_nuc * npSTAT3 )/(vol_cyt+vol_nuc)"
+tSOCS3          C   nmol/l      conc.   "SOCS3"
+tgp130          C   nmol/l      conc.   "JAK1_gp130 + pJAK1_pgp130"
+
+OBSERVABLES
+#ifdef BSA_LINK
+    mcyto_obs       C   ug/uL           conc.   0   0 "mcyto"
+    mnuc_obs        C   ug/uL           conc.   0   0 "mnuc"
+#endif
+
+binding_sites   C   -                conc.   0  0  "scale_gp130_deg * JAK1_gp130"                                       "Percentage IL6 binding sites"
+gp130_abs       C   zmol/cell        conc.   0  0  "tgp130*(vol_cyt+vol_nuc)"                                           "gp130 total"
+socs3_abs       C   zmol/cell        conc.   0  0  "tSOCS3*vol_cyt"                                                     "SOCS3 total"
+stat3_abs       C   zmol/cell        conc.   0  0  "tSTAT3*(vol_cyt+vol_nuc)"                                           "total STAT3"
+SOCS3_qpcr      C	au               conc.   0	1  "scale_socs3_qpcr_nExpID * SOCS3RNA"                                 "SOCS3 qPCR"
+
+pY_STAT3        C   -                conc.   0  0   "tpSTAT3 / tSTAT3"                                                  "Phosphorylation Degree"
+
+// Offsets were all reduced out
+ctSTAT3_wb_scaled      C   au      conc.   0	0   "scale_tstat3_filename_nExpID * vol_cyt * ctSTAT3"                                              "Total cytoplasmic STAT3"
+ntSTAT3_wb_scaled      C   au      conc.   0	0   "scale_tstat3_filename_nExpID * (mcyto/mnuc) * vol_nuc * ntSTAT3"                               "Total nuclear STAT3"
+tSTAT3_wb_scaled       C   au      conc.   0	0   "scale_tstat3_filename_nExpID * ( vol_cyt + vol_nuc ) * ( mcyto / ( mnuc + mcyto ) ) * tSTAT3"  "Total STAT3"
+
+cpSTAT3_wb_scaled      C   au      conc.   0	0   "scale_pstat3_filename_nExpID * vol_cyt * tcpSTAT3"                                             "Cytoplasmic phosphorylated STAT3"
+npSTAT3_wb_scaled      C   au      conc.   0	0   "scale_pstat3_filename_nExpID * (mcyto/mnuc) * vol_nuc * tnpSTAT3"                              "Nuclear phosphorylated STAT3"
+tpSTAT3_wb_scaled      C   au      conc.   0	0   "scale_pstat3_filename_nExpID * ( vol_cyt + vol_nuc ) * ( mcyto / ( mnuc + mcyto ) ) * tpSTAT3" "Total phosphorylated STAT3"
+    
+SOCS3_qpcr_scaled      C   au      conc.   0	1   "scale_socs3_qpcr_filename_nExpID * SOCS3RNA"                                                   "SOCS3 qPCR"
+
+cSOCS3_wb              C   au      conc.   0	0   "scale_csocs3_filename_nExpID * tSOCS3"                                                         "Total SOCS3"
+
+ERRORS
+#ifdef BSA_LINK
+    mcyto_obs       	"sd_mcyto"
+    mnuc_obs            "sd_mnuc" 
+#endif
+
+gp130_abs           "sd_gp130_abs"
+socs3_abs           "sd_socs3_abs"
+stat3_abs           "sd_stat3_abs"
+SOCS3_qpcr          "sd_socs3_qpcr"
+
+pY_STAT3            "1"
+binding_sites       "1"
+
+ctSTAT3_wb_scaled	"scale_tstat3_filename_nExpID * sqrt( sd_ctSTAT3^2 + sd_rel_ctSTAT3^2 * ctSTAT3^2 )"
+ntSTAT3_wb_scaled	"scale_tstat3_filename_nExpID * sqrt( sd_ntSTAT3^2 + sd_rel_ntSTAT3^2 * ntSTAT3^2 )"
+tSTAT3_wb_scaled	"scale_tstat3_filename_nExpID * sqrt( sd_tSTAT3^2  + sd_rel_tSTAT3^2 *  tSTAT3^2 )"
+
+cpSTAT3_wb_scaled	"scale_pstat3_filename_nExpID * sqrt( sd_cpSTAT3^2 + sd_rel_cpSTAT3^2 * tcpSTAT3^2 )"
+npSTAT3_wb_scaled	"scale_pstat3_filename_nExpID * sqrt( sd_npSTAT3^2 + sd_rel_npSTAT3^2 * tnpSTAT3^2 )"
+tpSTAT3_wb_scaled	"scale_pstat3_filename_nExpID * sqrt( sd_tpSTAT3^2 + sd_rel_tpSTAT3^2 * tpSTAT3^2 )"
+
+cSOCS3_wb           "scale_csocs3_filename_nExpID * sqrt( sd_cSOCS3^2 + sd_rel_cSOCS3^2 * cSOCS3_wb^2 )"
+
+SOCS3_qpcr_scaled   "sd_socs3_qpcr"
+
+SUBSTITUTIONS
+vcyt                "0.6375"
+vnuc                "0.2125"
+
+total_STAT3         "1e3 * STAT3_total"
+
+CONDITIONS
+vol_cyt             "vcyt" // ((0.001*606.82)/(12.67+0.5))*12.67
+vol_nuc             "vnuc"
+
+// No initials for unconserved moieities
+init_SOCS3RNA       "0"
+init_nSOCS3RNA1     "0"
+init_nSOCS3RNA2     "0"
+init_nSOCS3RNA3     "0"
+init_nSOCS3RNA4     "0"
+init_nSOCS3RNA5     "0"
+init_SOCS3          "0"
+
+// Default inputs
+input_il6           "10"
+input_cyclo         "0"
+
+// Totals for the conserved pools
+init_STAT3          ".5 * total_STAT3 * (vnuc+vcyt) / vcyt" // <= Defined w.r.t. cytoplasm
+init_cpSTAT3        "0"
+init_npSTAT3        ".5 * total_STAT3 * (vnuc+vcyt) / vnuc" // <= This one may not be zero because of power function in transcription model.
+
+receptor_pro        "receptor_pro"
+init_JAK1_gp130     "receptor_pro * receptor_deg"
+init_pJAK1_pgp130   "0"
+
+stat3_act           "stat3_act / (receptor_pro)"
+
+RANDOM
+nExpID INDEPENDENT

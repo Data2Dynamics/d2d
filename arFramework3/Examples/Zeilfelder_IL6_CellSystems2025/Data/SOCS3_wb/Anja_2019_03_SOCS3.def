@@ -1,0 +1,14 @@
+DESCRIPTION
+"data .def file template"
+
+PREDICTOR
+t	T	"min"	"time"	0	100
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+HepG2 "1"

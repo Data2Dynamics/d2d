@@ -1,0 +1,144 @@
+#define WB_SEPARATE
+
+DESCRIPTION
+"IL6 induced STAT3 activation with SOCS3 feedback and APP transcription."
+
+PREDICTOR
+t                       T   min         time	-100       360
+
+COMPARTMENTS
+cyt                     V   pl          vol.
+nuc                     V   pl          vol.
+
+STATES
+BMPR                    C   au      conc.   cyt     1   "Total BMP receptor"
+BMPR_delay1             C   au      conc.   cyt     1   "Cofactor activated by BMP receptor"
+BMPR_delay2             C   au      conc.   cyt     1   "Cofactor activated by BMP receptor"
+BMPR_delay3             C   au      conc.   cyt     1   "Cofactor activated by BMP receptor"
+BMPR_delay4             C   au      conc.   cyt     1   "Cofactor activated by BMP receptor"
+BMPR_delay5             C   au      conc.   cyt     1   "Cofactor activated by BMP receptor"
+BMPR_delay6             C   au      conc.   cyt     1   "Cofactor activated by BMP receptor"
+
+SMAD6RNA1               C   au      conc.   nuc     1   "SMAD6 inhibitor delay"
+SMAD6RNA2               C   au      conc.   nuc     1   "SMAD6 inhibitor delay"
+SMAD6RNA                C   au      conc.   nuc     1   "SMAD6 inhibitor mRNA"
+
+ID3RNA                  C   au      conc.   nuc     1   "ID3 mRNA"
+
+#define BMP_total (bmp_basal + step1(t, 0, 0, input_bmp2))
+
+INPUTS
+ActD                    C   ng/ml       conc.   "0"                                             "Actinomycin D"
+BMP                     C   ng/ml       conc.   "BMP_total"                                     "BMP2"
+Noggin                  C   ng/ml       conc.   "step1(t,0,-60,input_noggin)/500"               "Noggin"
+DCF                     C   mM          conc.   "step1(t, 0, 0, 1) * 1e-3 * input_dcf"          "DCF"
+DCF_slow                C   mM          conc.   "t * t * 1e-3 * input_dcf * step1(t, 0, 0, 1)"	"Slow DCF effect"
+APAP                    C   mM          conc.   "step1(t, 0, 0, 1) * input_apap"                "APAP"
+SMAD6_mRNA_loss         C   mM          conc.   "smooth1(t, 0, smoothness_mRNA_loss)"           "Control SMAD6 mRNA loss"
+DCF_decay_process		C	mM			conc.	"exp(-t*k_DCF_decay)"							"DCF decay process"
+APAP_decay_process		C	mM			conc.	"exp(-t*k_APAP_decay)"							"APAP decay process"
+
+
+REACTIONS
+#define BMP_available ( ( BMP * (1-Noggin) ) * (1 + k_act_DCF * DCF * DCF_decay_process) * (1 + k_act_APAP * APAP * APAP_decay_process) )
+0                     -> BMPR                   CUSTOM  "bmpr_pro"                                                                              "BMP receptor production"
+
+// SMAD6 is very short lived according to the profiles, so while this degradation is mediated by 
+// SMAD6, it is not explicitly modelled.
+BMPR                    -> 0                    CUSTOM  "bmpr_deg_smad * aBMPR * SMAD6"                                                         "SMAD6 mediated receptor degradation"
+
+// Delay in transduction
+                      -> BMPR_delay1            CUSTOM  "aBMPR"                                                                                 "Delay in receptor signal transmission"
+BMPR_delay1           -> BMPR_delay2            CUSTOM  "bmpr_cof_delay * BMPR_delay1"                                                          "Delay in receptor signal transmission"
+BMPR_delay2           -> BMPR_delay3            CUSTOM  "bmpr_cof_delay * BMPR_delay2"                                                          "Delay in receptor signal transmission"
+BMPR_delay3           -> BMPR_delay4            CUSTOM  "bmpr_cof_delay * BMPR_delay3"                                                          "Delay in receptor signal transmission"
+BMPR_delay4           -> BMPR_delay5            CUSTOM  "bmpr_cof_delay * BMPR_delay4"                                                          "Delay in receptor signal transmission"
+BMPR_delay5           -> BMPR_delay6            CUSTOM  "bmpr_cof_delay * BMPR_delay5"                                                          "Delay in receptor signal transmission"
+BMPR_delay6           ->                        CUSTOM  "bmpr_cof_delay * BMPR_delay6"                                                          "Delay in receptor signal transmission"
+
+// Dephosphorylation is rapid (non-identifiable), so the pSMAD state was removed, and is considered directly proportional to BMPR_delay6
+//SMAD                  -> pSMAD                CUSTOM  "smad_act * BMPR_delay6 * SMAD" "SMAD activation BMP"
+//pSMAD                 -> SMAD                 CUSTOM  "smad_deact * pSMAD" "Smad deactivation"
+
+// SMAD inhibitor needs to have a basal
+// Delay length was shortened every time a non-identifiability occured with smadinhrna_deg coupled to smadinh_trans
+#define DCF_effect_mRNA     ( 1 + DCF_mRNA_inh * DCF_slow )
+#define indep_change_mRNA   ( 1 + k_mRNA_loss * SMAD6_mRNA_loss )
+0                     -> SMAD6RNA1              CUSTOM  "(smadinh_basal / DCF_effect_mRNA )  * (1-ActD)"                                        "Basal inhibitor transcription"
+
+// Used to have a saturation effect, but this was non identifiable.
+0                     -> SMAD6RNA1              CUSTOM  "(smadinh_trans / ( DCF_effect_mRNA * indep_change_mRNA ) ) * pSMAD * (1-ActD)"   "Production SMAD inhibitor"
+
+SMAD6RNA1             -> SMAD6RNA2              CUSTOM  "smadinh_delay  * SMAD6RNA1"                                                            "Delay SMAD inhibitor"
+SMAD6RNA2             -> SMAD6RNA               CUSTOM  "smadinh_delay  * SMAD6RNA2"                                                            "Delay SMAD inhibitor"
+SMAD6RNA              -> 0                      CUSTOM  "smadinhrna_deg * SMAD6RNA"                                                             "Degradation SMAD inhibitor RNA"
+
+// Protein level was reduced away.
+//                      -> SMAD6                  CUSTOM  "SMAD6RNA"                                                                            "SMAD inhibitor production"
+//SMAD6                 -> 0                      CUSTOM  "smadinh_deg * SMAD6"                                                                 "Degradation SMAD inhibitor"
+
+0                       -> ID3RNA                 CUSTOM "ID3_pro * pSMAD"                                                                      "ID3 mRNA production"
+ID3RNA                  -> 0                      CUSTOM "ID3_deg * ID3RNA"                                                                     "ID3 mRNA degradation"
+
+DERIVED
+// Scale is non-identifiable, so set to 1.
+SMAD6                  C   nmol/l      conc.   "SMAD6RNA"
+
+// Activation and deactivation of the receptor is rapid.
+aBMPR                  C   nmol/l      conc.  "( BMP_available / ( BMP_available + Km_BMP ) ) * BMPR"
+
+// Deactivation of SMAD was open to positive infinity and was therefore reduced. SMAD scale is unknown and therefore set to 1.
+// pSMAD                  C   nmol/l      conc.  "( BMPR_delay6 / ( BMPR_delay6 + Km_SMAD ) )"
+// Km was non identifiable.
+pSMAD                  C   nmol/l      conc.  "BMPR_delay6"
+
+OBSERVABLES
+SMAD6_qpcr_scaled      C   au      conc.   0    1   "scale_smad6_qpcr_filename_nExpID * SMAD6RNA"           "SMAD6 qPCR"
+ID3_qpcr_scaled        C   au      conc.   0    1   "scale_ID3_qpcr_filename_nExpID * ID3RNA + offset_ID3_qpcr"
+
+pSMAD_wb_scaled        C   au      conc.   0	0   "scale_psmad_filename_nExpID * pSMAD"
+pSMAD_DR_wb_scaled     C   au      conc.   0	0   "scale_psmad_DR_nExpID * pSMAD"
+
+ERRORS
+pSMAD_wb_scaled     "sqrt( sd_pSMAD^2 + sd_rel_pSMAD^2 * pSMAD^2 ) * scale_psmad_filename_nExpID"
+pSMAD_DR_wb_scaled  "sqrt( sd_pSMAD^2 + sd_rel_pSMAD^2 * pSMAD^2 ) * scale_psmad_DR_nExpID"
+SMAD6_qpcr_scaled   "sd_smad6_qpcr_abs"
+ID3_qpcr_scaled     "sd_id3_qpcr_abs"
+
+SUBSTITUTIONS
+vcyt                "0.6375"
+vnuc                "0.2125"
+
+CONDITIONS
+vol_cyt             "vcyt"
+vol_nuc             "vnuc"
+
+// Fix production rate of receptor (since scale is unknown)
+bmpr_pro            "bmpr_deg_smad"
+
+init_BMPR           "1"
+init_BMPR_delay1    "0"
+init_BMPR_delay2    "0"
+init_BMPR_delay3    "0"
+init_BMPR_delay4    "0"
+init_BMPR_delay5    "0"
+init_BMPR_delay6    "0"
+
+init_ID3RNA         "0"
+
+// Default inputs
+input_dcf           "0"
+input_bmp2          "0"
+input_noggin        "0"
+input_apap          "0"
+input_il6           "0"
+
+// mRNA is equilibrated
+init_SMAD6RNA1      "0"
+init_SMAD6RNA2      "0"
+init_SMAD6RNA       "0"
+
+#ifdef WB_SEPARATE
+    RANDOM
+    nExpID INDEPENDENT
+#endif

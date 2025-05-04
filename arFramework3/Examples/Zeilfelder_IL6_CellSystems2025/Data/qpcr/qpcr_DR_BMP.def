@@ -1,0 +1,17 @@
+DESCRIPTION
+"Experimenter: Anja Juenger"
+"Cells: HepG2"
+"Treatment: BMP2 Dose Response" 
+        
+PREDICTOR-DOSERESPONSE input_bmp2
+t               T   min     time	-15	360
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS 
+        
+CONDITIONS
+HepG2 "1"
+

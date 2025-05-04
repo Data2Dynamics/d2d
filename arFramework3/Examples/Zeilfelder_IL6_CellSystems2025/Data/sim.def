@@ -1,0 +1,16 @@
+DESCRIPTION
+
+PREDICTOR
+t	T	"min"	"time"	-100	400
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+input_bmp2                  "input_bmp2"
+input_il6                   "input_il6"
+input_dcf                   "input_dcf"
+input_apap                  "input_apap"
