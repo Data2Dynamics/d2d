@@ -101,9 +101,12 @@ end
 
 %% ar
 arLoadModel(modelname);
-splitedFilenames = split(dataFilenames,filesep);
+%splitedFilenames = split(dataFilenames,filesep);
+splitParts = cellfun(@(x) split(x, filesep), dataFilenames, 'UniformOutput', false);
+dataFolders = cellfun(@(x) x{1}, splitParts, 'UniformOutput', false);
+dataFilenamesSplitted  = cellfun(@(x) x{2}, splitParts, 'UniformOutput', false);
 for i=1:length(dataFilenames)
-    arLoadData(char(splitedFilenames(1,i,2)),[],[],[],'DataPath',char(splitedFilenames(1,i,1)));
+    arLoadData(char(dataFilenamesSplitted(i)),[],[],[],'DataPath',char(dataFolders(i)));
 end
 arCompileAll(1);
 ar.config.fiterrors = 1;
