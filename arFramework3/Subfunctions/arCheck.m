@@ -95,6 +95,9 @@ end
 if(exist('model_template_HillFunctions.def','file') == 0)
     addpath([ar_path '/ProjectTemplate']);
 end
+if(exist('arPetsInitModule','file') == 0)
+    addpath([ar_path '/PEtabSelect']);
+end
 
 
 warning('off','MATLAB:rmpath:DirNotFound')
