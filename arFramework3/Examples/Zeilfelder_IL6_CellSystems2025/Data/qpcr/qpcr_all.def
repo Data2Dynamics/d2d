@@ -1,0 +1,20 @@
+DESCRIPTION
+"Experimenter: Anja Juenger"
+"Cells: HepG2"
+"qPCR time course data"
+
+PREDICTOR
+t	T	"min"	"time"	0	500
+
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS
+
+CONDITIONS
+HepG2 "1"
+
+//RANDOM
+//nExpID INDEPENDENT

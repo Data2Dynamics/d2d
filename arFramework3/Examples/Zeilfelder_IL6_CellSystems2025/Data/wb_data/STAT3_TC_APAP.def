@@ -1,0 +1,16 @@
+DESCRIPTION
+"Experimenter: Anja Juenger"
+"Cells: HepG2"
+"Treatment: Time course measurements" 
+        
+PREDICTOR
+t               T   min     time	-100 360
+
+INPUTS
+
+OBSERVABLES
+
+ERRORS 
+        
+CONDITIONS
+HepG2 "1"
