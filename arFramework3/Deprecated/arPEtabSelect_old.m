@@ -1,7 +1,7 @@
-% arPEtabSelect(venvActPath, yaml, limit, estimRoutine)
+% arPEtabSelect_old(venvActPath, yaml, limit, estimRoutine)
 %
 % Run model selection using PEtab-select (https://github.com/PEtab-dev/petab_select)
-% Requires installation of the petab_select Python3 package. arPEtabSelect
+% Requires installation of the petab_select Python3 package. arPEtabSelect_old
 % uses the command line interface (CLI).
 %
 %   [venvActPath]   Path to a python virtual environment (venv) activation
@@ -24,7 +24,7 @@
 %   initial guess for all estimated parameters and additionally perform
 %   multi-start optimization with 20 runs:
 %
-%   arPEtabSelect('~/d2d_python_venv/bin/activate', ...
+%   arPEtabSelect_old('~/d2d_python_venv/bin/activate', ...
 %       '~/test_cases/0001/petab_select_problem',...
 %       3, 
 %       'ar.p(ar.qFit == 1) = 0.3; arFit; arFitLHS(20)')
@@ -33,7 +33,7 @@
 % (Leave empty initialModel & iterationCtr. Those are internal arguments
 % to allow for recursive function call)
 
-function arPEtabSelect(venvActPath, yaml, limit, estimRoutine, initialModel, iterationCtr)
+function arPEtabSelect_old(venvActPath, yaml, limit, estimRoutine, initialModel, iterationCtr)
 if ~exist('iterationCtr') || isempty(iterationCtr)
     iterationCtr = 1;
 end
@@ -85,7 +85,7 @@ if status ~= 0
 end
 
 %% Call PEtab-select to generate candidate models
-fprintf('arPEtabSelect: Generating candidate models...\n')
+fprintf('arPEtabSelect_old: Generating candidate models...\n')
 syscom = [initstr,...
     'petab_select candidates ',  ...
     ' -y ', yaml, ...
@@ -112,11 +112,11 @@ CandidateModels = ReadYaml(['output' filesep 'models.yaml']);
 nModels = size(CandidateModels,2);
 
 if nModels < 1
-    fprintf('arPEtabSelect: Finished after iteration %i - no (more) candidate models found.\n', iterationCtr-1)
+    fprintf('arPEtabSelect_old: Finished after iteration %i - no (more) candidate models found.\n', iterationCtr-1)
     terminateFlag = 1;
 end
 if terminateFlag == 0
-    fprintf('arPEtabSelect: Calibrating candidate models...\n')
+    fprintf('arPEtabSelect_old: Calibrating candidate models...\n')
     
     for jModel = 1:nModels
         % Load & compile
@@ -214,7 +214,7 @@ if terminateFlag == 0
         currentItCrit = currentIt.criteria.(SelectionProblem.criterion);
         
         if round(currentItCrit,4) > round(prevItCrit,4)
-            fprintf('arPEtabSelect: Finished after iteration %i - criterion worse than in iteration %i.\n', iterationCtr, iterationCtr-1)
+            fprintf('arPEtabSelect_old: Finished after iteration %i - criterion worse than in iteration %i.\n', iterationCtr, iterationCtr-1)
             terminateFlag = 1;
         end
     end
@@ -238,6 +238,6 @@ elseif terminateFlag == 2
 end
 
 %% Next iteration
-fprintf('arPEtabSelect: Iteration %i complete. Continuing with next iteration\n',iterationCtr)
-arPEtabSelect(venvActPath, yaml, limit, estimRoutine, CalibYamlOut ,iterationCtr+1)
+fprintf('arPEtabSelect_old: Iteration %i complete. Continuing with next iteration\n',iterationCtr)
+arPEtabSelect_old(venvActPath, yaml, limit, estimRoutine, CalibYamlOut ,iterationCtr+1)
 end
