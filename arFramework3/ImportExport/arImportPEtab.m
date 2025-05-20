@@ -158,6 +158,7 @@ if doPreEq
     Tcond = struct2table(T);
 
     % PreEq
+    imodel = 1; % only 1 model supported atm
     tstart = -1e7;
     if isfield(table2struct(Tdat), 'preequilibrationConditionId')
         uniqueSimConds = unique(Tdat.simulationConditionId);

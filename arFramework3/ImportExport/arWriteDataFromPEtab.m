@@ -198,6 +198,9 @@ for i=1:length(uniqueSimConds)
             fprintf(fid, [Tobs.observableId{ind},'\t','"',Tobs.noiseFormula{ind},' / log(10)','"\n']);
             warning(['Active fitting on natural logarithm scale for observable ',Tobs.observableId{ind},' in condition ',uniqueSimConds{i},'. Do not change ar.config.fiterrors!'])
         else
+            if isnumeric(Tobs.noiseFormula)
+                Tobs.noiseFormula = num2cell(Tobs.noiseFormula);
+            end
             fprintf(fid, [Tobs.observableId{ind},'\t','"',Tobs.noiseFormula{ind},'"\n']);
         end
     end

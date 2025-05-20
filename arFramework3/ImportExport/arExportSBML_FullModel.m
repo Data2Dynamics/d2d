@@ -386,7 +386,8 @@ function arExportSBML_FullModel(m,name)
     isReplaced = ~strcmp(ar.model.p', string(arSym(ar.model.fp)));
     isCompSize = cellfun(@(x) any(strcmp(x, string(arSym(ar.model(m).pc)))), ar.model(m).p)';
     % isConst = (isReplaced & ~isInit) | (isInit & ~isReplaced);
-    isConst = true(1, length(ar.model(m).p));  % all model parameters are constant (i.e. not time-dependent)
+    % isConst = true(1, length(ar.model(m).p));  % all model parameters are constant (i.e. not time-dependent)
+    % isConst = true(1, length(ar.pLabel)); % all model parameters are constant (i.e. not time-dependent)
 
     for jp = 1:length(ar.model(m).p)
         % All model parameters should be defined in SBML as parameters
@@ -406,13 +407,14 @@ function arExportSBML_FullModel(m,name)
                 pvalue = 10^pvalue;
             end
             isSetValue = 1;
-            constant = double(isConst(qp));
+            %constant = 1; % double(isConst(qp)); % all model parameters are constant (i.e. not time-dependent)
         else
             % no numeric value in ar.p found
             pvalue = NaN;
             isSetValue = 0;
-            constant = 1;
+            %constant = 1;
         end
+        %constant = 1
 
         id_tmp = length(M.parameter) + 1;
         M.parameter(id_tmp).typecode = 'SBML_PARAMETER';
@@ -423,7 +425,7 @@ function arExportSBML_FullModel(m,name)
         M.parameter(id_tmp).name = ar.model(m).p{jp};
         M.parameter(id_tmp).id = ar.model(m).p{jp};
         M.parameter(id_tmp).units = '';
-        M.parameter(id_tmp).constant = constant;
+        M.parameter(id_tmp).constant = 1; % constant;
         M.parameter(id_tmp).isSetValue = isSetValue;
         M.parameter(id_tmp).value = pvalue;
         M.parameter(id_tmp).level = 2;
@@ -459,7 +461,7 @@ function arExportSBML_FullModel(m,name)
             M.initialAssignment(ixInitAssign).annotation = '';
             M.initialAssignment(ixInitAssign).sboTerm = -1;
             M.initialAssignment(ixInitAssign).symbol = ar.model(m).p{jp};
-            M.initialAssignment(ixInitAssign).math = ar.model(m).fp{jp};
+            M.initialAssignment(ixInitAssign).math = eval_numeric_logs(ar.model(m).fp{jp});
             M.initialAssignment(ixInitAssign).level = 2;
             M.initialAssignment(ixInitAssign).version = 4;
 
@@ -1135,4 +1137,13 @@ function arExportSBML_FullModel(m,name)
     
     end
     
-    
+function out = eval_numeric_logs(expr_input)
+        expr_str = char(expr_input);  % Handle symbolic or string input
+        pattern = 'log\((\d+(\.\d*)?)\)';
+        [tokens, matches] = regexp(expr_str, pattern, 'tokens', 'match');
+        for i = 1:numel(matches)
+            val = log(str2double(tokens{i}{1}));
+            expr_str = strrep(expr_str, matches{i}, sprintf('%.4f', val));
+        end
+        out = expr_str;
+end
