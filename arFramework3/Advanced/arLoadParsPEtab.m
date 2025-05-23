@@ -45,22 +45,22 @@ end
 
 
 % Priors
-if isfield(T,'initializationPriorType')
+if isfield(T,'objectivePriorType')
 
     % Remap PEtab prior types to d2d prior types
-    T.initializationPriorType = cellstr(T.initializationPriorType);  % Convert char array to cell array of strings
+    T.objectivePriorType = cellstr(T.objectivePriorType);  % Convert char array to cell array of strings
     petab_to_d2d = containers.Map({'parameterScaleUniform', 'normal', 'uniform', 'laplace'}, {0, 1, 2, 3});
-    T.initializationPriorType = cellfun(@(x) petab_to_d2d(x), T.initializationPriorType);
+    T.objectivePriorType = cellfun(@(x) petab_to_d2d(x), T.objectivePriorType);
 
 
     for i=1:length(BothPars)
-        if ~isempty(T.initializationPriorType(ib(i)))
-            if T.initializationPriorType(ib(i)) ~= 0
-                PriorParameters = str2num(T.initializationPriorParameters(ib(i),:));
-                arSetPrior(ia(i),T.initializationPriorType(ib(i),:), ...
+        if ~isempty(T.objectivePriorType(ib(i)))
+            if T.objectivePriorType(ib(i)) ~= 0
+                PriorParameters = str2num(T.objectivePriorParameters(ib(i),:));
+                arSetPrior(ia(i),T.objectivePriorType(ib(i),:), ...
                     PriorParameters(1), PriorParameters(2))
             else
-                arSetPrior(ia(i),T.initializationPriorType(ib(i),:))
+                arSetPrior(ia(i),T.objectivePriorType(ib(i),:))
             end
         end
     end

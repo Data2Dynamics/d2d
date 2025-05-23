@@ -361,29 +361,29 @@ upperBound(ar.qLog10 == 1) = 10.^ar.ub(ar.qLog10 == 1);
 % priors
 % map d2d prior definations 0-3 to corresponding PEtab prior definations
 priorTypes = {'parameterScaleUniform', 'normal', 'uniform', 'laplace'};
-initializationPriorType = priorTypes(ar.type + 1);
-% initializationPriorParameters
-initializationPriorParameters = cell(size(ar.type));
+objectivePriorType = priorTypes(ar.type + 1);
+% objectivePriorParameters
+objectivePriorParameters = cell(size(ar.type));
 for i = 1:length(ar.type)
     switch ar.type(i)
         case 0  % No prior
-            initializationPriorParameters{i} = '';
+            objectivePriorParameters{i} = '';
         case 1  % Normal
-            initializationPriorParameters{i} = sprintf('[%f,%f]', ar.mean(i), ar.std(i));
+            objectivePriorParameters{i} = sprintf('[%f,%f]', ar.mean(i), ar.std(i));
         case 2  % Uniform
-            initializationPriorParameters{i} = sprintf('[%f,%f]', ar.lb(i), ar.ub(i));
+            objectivePriorParameters{i} = sprintf('[%f,%f]', ar.lb(i), ar.ub(i));
         case 3  % Laplace
-            initializationPriorParameters{i} = sprintf('[%f,%f]', ar.mean(i), ar.std(i));
+            objectivePriorParameters{i} = sprintf('[%f,%f]', ar.mean(i), ar.std(i));
     end
 end
 
 % build table and write to disk
 variableNames = {'parameterId', 'parameterName', 'parameterScale', ...
     'lowerBound', 'upperBound', 'nominalValue', 'estimate', ...
-    'initializationPriorType', 'initializationPriorParameters'};
+    'objectivePriorType', 'objectivePriorParameters'};
 parT = table(parameterId(:), parameterName(:), parameterScale(:), ...
     lowerBound(:), upperBound(:), nominalValue(:), estimate(:), ...
-    initializationPriorType(:), initializationPriorParameters(:),...
+    objectivePriorType(:), objectivePriorParameters(:),...
     'VariableNames', variableNames);
 filename = ['PEtab' filesep IDs.name '_parameters.tsv'];
 writetable(parT, filename, 'Delimiter', '\t', 'FileType', 'text')
@@ -394,7 +394,7 @@ end
 % function writeVisualisationTable(m, IDs)
 % %% Visualisation Table
 % % this is a very simple implementation, only covers the basic features like:
-% % - combining datasets
+% - combining datasets
 % % - lin/log10 trafo
 % % - time-course / dose-response
 
