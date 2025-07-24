@@ -44,8 +44,6 @@ A primary human hepatocyte model (PMM) which includes drug effects identified fr
 L1 regularization in HepG2 cells and included parameters reflecting differences between primary
 human hepatocytes and HepG2 cells. This model has the same structure as the integrative mondel (`combined_model.def`)
 
-All model equations, parameters as well as results from uncertainty analysis are detauled described in `Mathematical_modeling_documentation.pdf`. 
-
 ## Prerequisites
 The following installations are required for successful use of the scripts:
 - MATLAB (version 2019 or higher)
@@ -59,9 +57,6 @@ To simulate and generate figures, run the following scripts one after the other:
 `
 
 To specify the filename and save generated figures use: `arPaperFigures(1, 0, 0, 0, 'FigureName');` 
-
-## License
-GPL-3.0 license
 
 ## Citation
 If you use the models, data, or scripts from this repository in your research, please cite the original paper:
