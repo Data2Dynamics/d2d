@@ -874,14 +874,42 @@ function arExportSBML_FullModel(m,name)
                 spline_times(it) = str2double(spline_split{it*2});
             end
             par_spline = NaN(1,nr_ts);
-            nr_spline = 1;
-            for ipu = find(ismember(ar.pLabel,ar.model(m).pu))
-                if ar.qLog10(ipu)
-                    par_spline(nr_spline) = 10.^(ar.p(ipu));
+            for iy = 1:nr_ts
+                y_value_str = strtrim(spline_split{2*iy+1});
+                % 1. If numeric, use directly
+                y_value_num = str2double(y_value_str);
+                if ~isnan(y_value_num)
+                    par_spline(iy) = y_value_num;
                 else
-                    par_spline(nr_spline) = ar.p(ipu);
+                    % 2. If parameter in ar.pLabel, use value from ar.p
+                    idx_pLabel = find(strcmp(ar.pLabel, y_value_str), 1);
+                    if ~isempty(idx_pLabel)
+                        if ar.qLog10(idx_pLabel)
+                            par_spline(iy) = 10.^(ar.p(idx_pLabel));
+                        else
+                            par_spline(iy) = ar.p(idx_pLabel);
+                        end
+                    else
+                        % 3. If y_value_str is a parameter in ar.model.p and replaced by a numeric value in ar.model.fp
+                        idx_model_p = find(strcmp(ar.model(m).p, y_value_str), 1);
+                        if ~isempty(idx_model_p)
+                            fp_val = ar.model(m).fp{idx_model_p};
+                            fp_num = str2double(fp_val);
+                            if ~isnan(fp_num)
+                                par_spline(iy) = fp_num;
+                            else
+                                % Try to evaluate the expression if possible
+                                try
+                                    par_spline(iy) = eval(fp_val);
+                                catch
+                                    error('Could not resolve spline y-value: %s', y_value_str);
+                                end
+                            end
+                        else
+                            error('Could not resolve spline y-value: %s', y_value_str);
+                        end
+                    end
                 end
-                nr_spline = nr_spline + 1;
             end
             par_spline = log(par_spline);
             pp = csape(spline_times,par_spline,'complete'); %MATLAB solution, nearly as C
